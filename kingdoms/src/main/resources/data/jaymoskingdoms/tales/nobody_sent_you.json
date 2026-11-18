@@ -159,7 +159,7 @@
         ],
         "?mark:candle_burned": [
           "You are the one Tam Rudd calls the legs. He said you would come if you heard. He is up in my hayloft with the ladder pulled up after him, and he has not whistled in four days.",
-          "There is a black candle in the tavern window, and the word up from the osier hatch is that two names are paid for now, and not one. Tam's, and whoever it was that burned a paper. And a man in a hood has taken the end room at the tavern. Just passing through, he says.",
+          "There is a black candle in the tavern window, and the word up from the osier hatch is that two names are written now, and not one. Tam's, and whoever it was that burned a paper. And a man in a hood has taken the end room at the tavern. Just passing through, he says.",
           "I'll not have him killed in my hay, and I'll not turn him out either. That leaves me nothing to do, and I am no good at that. Will you go up?"
         ],
         "?": [
@@ -205,7 +205,7 @@
           "I have thought of four things, and I do not like one of them. Sit in the hay and hear them."
         ],
         "?mark:candle_burned": [
-          "Come up. Mind the third rung. Two candles, they said, if it was burned. Well, there is a man in a hood at the tavern, and I am told he has two names in his coat. We are a pair still, the runner and the legs.",
+          "Come up. Mind the third rung. Two candles, they said, if it was burned. Well, there is a man in a hood at the tavern, and I am told there are two names written now. We are a pair still, the runner and the legs.",
           "He has paid for the end room at the tavern until the third night, and no longer. So whatever he means to do, he means to have done it {in:nights} at the latest.",
           "I have thought of four things, and I do not like one of them. Sit in the hay and hear them."
         ],
@@ -286,7 +286,7 @@
         "?mark:runner_purse_short": [
           "The packet. The week of my ankle. It never went in the tree. Somebody was waiting on it and was not paid, and a tree has only the one man who goes to it.",
           "I have lain here four days asking what I did. Eleven years. I thought, there must be a door I missed. And it was not a door, and it was not me.",
-          "Well. I am not going to hit you. I have not the wind for it, and I need your arm more than I need to break it. But when this is done, if it is done, you will put {coins:30} in that oak with your own hand, and you will not look back."
+          "Well. I am not going to hit you. I have not the wind for it, and I need your arm more than I need to break it. What you owe for it we can speak of when this is done, if it is done."
         ],
         "?mark:runner_round_late": [
           "The week of my ankle. It went to the tree late. Somebody stood out by that oak waiting, and a tree has only the one man who goes to it.",
@@ -305,7 +305,7 @@
           "then": "plan",
           "mark": "nobody_confessed",
           "journal": {
-            "?mark:runner_purse_short": "I told Tam Rudd that the candle is lit for him because I kept the packet meant for his oak. He says I am to put {coins:30} in that tree with my own hand when this is done.",
+            "?mark:runner_purse_short": "I told Tam Rudd that the candle is lit for him because I kept the packet meant for his oak. He did not hit me. He says what I owe can wait until this is done.",
             "?mark:runner_round_late": "I told Tam Rudd that the candle is lit for him because the packet came late to his oak the week I had his bag. He says I can carry half of it.",
             "?": "I told Tam Rudd that the candle is lit for him because a stranger was seen at his oak, and I am the stranger. He says that is his doing, for showing me the tree."
           }
@@ -731,7 +731,7 @@
         },
         {
           "if": "mark:candle_burned",
-          "say": "The same voice: 'And the other one, who burns papers. You may come down as well. I have both names.'"
+          "say": "The same voice: 'And the other one, who burns papers. Yours is written too. Nobody has taken it up yet.'"
         },
         {
           "if": "!mark:candle_burned&!mark:candle_put_back",
@@ -760,7 +760,10 @@
       "goal": "Hold the hatch against the man in the hood",
       "taunt": "I am paid for the one name. Stand aside, and I'll forget that I saw you.",
       "plea": "Stop. I yield it. I'll not die for a runner. Nobody paid me for that.",
-      "mercy": "Then go, and send his paper back up the line.",
+      "mercy": {
+        "?!mark:candle_put_back&!mark:candle_burned": "Then take his paper. Here. And send it back up the line.",
+        "?": "Then go, and send his paper back up the line."
+      },
       "thanks": "It goes back with my blood on it. That closes it. They do not send twice for the same name.",
       "weak_to": [
         {
@@ -794,7 +797,10 @@
         {
           "say": "In the morning, then.",
           "then": "end:lives",
-          "journal": "The man in the hood is dead, with Tam Rudd's paper in his coat. Tam means to walk his round in the morning."
+          "journal": {
+            "?!mark:candle_put_back&!mark:candle_burned": "The man in the hood is dead. Tam Rudd's paper is still in my coat. Tam means to walk his round in the morning.",
+            "?": "The man in the hood is dead, with Tam Rudd's paper in his coat. Tam means to walk his round in the morning."
+          }
         }
       ]
     },
@@ -802,16 +808,25 @@
       "do": "talk",
       "who": "runner",
       "goal": "Go to Tam Rudd",
-      "say": [
-        "You let him go. With the paper. It goes back with his blood on it, he says, and that closes it.",
-        "I do not know that I believe him. But he had no need to say it, and he did not look to me like one who wastes words. I'll go out on the round in the morning."
-      ],
+      "say": {
+        "?!mark:candle_put_back&!mark:candle_burned": [
+          "You let him go. And you gave him the paper out of your own coat. It goes back with his blood on it, he says, and that closes it.",
+          "I do not know that I believe him. But he had no need to say it, and he did not look to me like one who wastes words. I'll go out on the round in the morning."
+        ],
+        "?": [
+          "You let him go. With the paper. It goes back with his blood on it, he says, and that closes it.",
+          "I do not know that I believe him. But he had no need to say it, and he did not look to me like one who wastes words. I'll go out on the round in the morning."
+        ]
+      },
       "replies": [
         {
           "say": "In the morning, then.",
           "then": "end:lives",
           "mark": "nobody_spared_knife",
-          "journal": "The man in the hood yielded, and I let him go with Tam Rudd's paper bloodied. He says that closes it."
+          "journal": {
+            "?!mark:candle_put_back&!mark:candle_burned": "The man in the hood yielded. I gave him Tam Rudd's paper out of my coat, and he went with it bloodied. He says that closes it.",
+            "?": "The man in the hood yielded, and I let him go with Tam Rudd's paper bloodied. He says that closes it."
+          }
         }
       ]
     },
@@ -821,11 +836,11 @@
       "to": "road",
       "when": "night",
       "goal": "After dark, walk Tam Rudd out to {place:road}",
-      "failed": "end:dead",
+      "failed": "end:dead_road",
       "journal": "I walked Tam Rudd out of the town by night, past the tavern and its window, as far as the milestone.",
       "then": "road_part",
       "within": "nights",
-      "late": "end:dead",
+      "late": "end:dead_road",
       "until": "before the third night is out"
     },
     "road_part": {
@@ -951,7 +966,10 @@
       "goal": "Stand in the way of the man in the hood",
       "taunt": "I am paid for the one name. Stand aside, and I'll forget that I saw you.",
       "plea": "Stop. I yield it. I'll not die for a runner. Nobody paid me for that.",
-      "mercy": "Then go, and send his paper back up the line.",
+      "mercy": {
+        "?!mark:candle_put_back&!mark:candle_burned": "Then take his paper. Here. And send it back up the line.",
+        "?": "Then go, and send his paper back up the line."
+      },
       "thanks": "It goes back with my blood on it. That closes it. They do not send twice for the same name.",
       "weak_to": [
         {
@@ -971,7 +989,9 @@
   "endings": {
     "lives": {
       "text": {
+        "?mark:nobody_spared_knife&!mark:candle_put_back&!mark:candle_burned": "I stood in the way of the man in the hood, and when he yielded I gave him Tam Rudd's paper out of my coat to carry back bloodied. He says that closes it. Tam went out on his round in the morning.",
         "?mark:nobody_spared_knife": "I stood in the way of the man in the hood, and when he yielded I let him go with Tam Rudd's paper bloodied. He says that closes it. Tam went out on his round in the morning.",
+        "?!mark:candle_put_back&!mark:candle_burned": "The man in the hood is dead, and Tam Rudd's paper is still in my coat. Nobody has come asking for it since. Tam went out on his round in the morning.",
         "?": "The man in the hood is dead, with Tam Rudd's paper in his coat. They do not send twice for the same name, I am told. Tam went out on his round in the morning."
       },
       "reward": {
@@ -1001,6 +1021,17 @@
         ]
       },
       "later": [
+        {
+          "days": [
+            9,
+            16
+          ],
+          "if": "mark:candle_burned",
+          "town": [
+            "Old Sallow says there is a paper lying under a stub in the split oak yet, rained on twice. Nobody has taken it up.",
+            "Nobody will say whose name is on it. They only look at {player} a moment longer than they used to."
+          ]
+        },
         {
           "days": [
             6,
@@ -1103,6 +1134,17 @@
       "later": [
         {
           "days": [
+            9,
+            16
+          ],
+          "if": "mark:candle_burned",
+          "town": [
+            "Old Sallow says there is a paper lying under a stub in the split oak yet, rained on twice. Nobody has taken it up.",
+            "Nobody will say whose name is on it. They only look at {player} a moment longer than they used to."
+          ]
+        },
+        {
+          "days": [
             6,
             12
           ],
@@ -1157,9 +1199,20 @@
       ],
       "town": [
         "No runner. My sister's letter has sat at the ford a fortnight. Eleven years, and Tam Rudd goes without a word.",
-        "The stranger at the tavern stayed out his three nights and went. He asked the taverner where a lame man would go. Very civil about it."
+        "The stranger at the tavern went in the end. He asked the taverner where a lame man would go. Very civil about it."
       ],
       "later": [
+        {
+          "days": [
+            9,
+            16
+          ],
+          "if": "mark:candle_burned",
+          "town": [
+            "Old Sallow says there is a paper lying under a stub in the split oak yet, rained on twice. Nobody has taken it up.",
+            "Nobody will say whose name is on it. They only look at {player} a moment longer than they used to."
+          ]
+        },
         {
           "days": [
             6,
@@ -1256,6 +1309,107 @@
         "His bag was on its nail, buckled, with every letter in it. Not one opened. Who is to say them over at the doors now?"
       ],
       "later": [
+        {
+          "days": [
+            9,
+            16
+          ],
+          "if": "mark:candle_burned",
+          "town": [
+            "Old Sallow says there is a paper lying under a stub in the split oak yet, rained on twice. Nobody has taken it up.",
+            "Nobody will say whose name is on it. They only look at {player} a moment longer than they used to."
+          ]
+        },
+        {
+          "days": [
+            6,
+            12
+          ],
+          "if": "hand=chandler&mark:nobody_hand_found",
+          "town": [
+            "{chandler} has sold her vats and gone to her sister's. The reeve asked her one question, they say, and she answered it.",
+            "Who do we buy our dips from now? I never thought I would miss a chandler."
+          ]
+        },
+        {
+          "days": [
+            6,
+            12
+          ],
+          "if": "hand=sexton&mark:nobody_hand_found",
+          "town": [
+            "{sexton} has given up the spade. Says he is too old for the clay. The reeve asked him one question, they say, and he answered it.",
+            "Who digs for us now? You never think about a sexton until you want one."
+          ]
+        },
+        {
+          "days": [
+            6,
+            12
+          ],
+          "if": "hand=clerk&mark:nobody_hand_found",
+          "town": [
+            "{clerk} has left the reeve's writing room. Asked one question, they say, and he answered it, and then he cleaned his pens and went.",
+            "The tithe roll is being kept by the reeve's own hand now. You can tell. Nobody can read it."
+          ]
+        },
+        {
+          "days": [
+            3,
+            6
+          ],
+          "if": "mark:nobody_named_wrong",
+          "town": [
+            "{player} went to the reeve and named an honest neighbour for lighting that candle. On what? On a look. I would bar my door to that one."
+          ]
+        },
+        {
+          "days": [
+            5,
+            9
+          ],
+          "scene": [
+            [
+              "a",
+              "They buried the runner with his bag. The cleric would not have the letters read out."
+            ],
+            [
+              "b",
+              "Did anyone know he could not read them himself?"
+            ],
+            [
+              "a",
+              "Tam? Never. Who told you that?"
+            ],
+            [
+              "b",
+              "Nobody. Nobody told me."
+            ]
+          ]
+        }
+      ]
+    },
+    "dead_road": {
+      "text": "Tam Rudd did not reach the milestone. The man in the hood was on the out road before us, slow traveller or no. The valley has no runner now, and nobody will be the one to take that candle out of the window.",
+      "marks": [
+        "nobody_tam_dead"
+      ],
+      "town": [
+        "Tam Rudd is dead. On the out road, short of the milestone, with {player} beside him. He was leaving, after eleven years, and he was not let.",
+        "His bag was on its nail in the hayloft, buckled, with every letter in it. Not one opened. Who is to say them over at the doors now?"
+      ],
+      "later": [
+        {
+          "days": [
+            9,
+            16
+          ],
+          "if": "mark:candle_burned",
+          "town": [
+            "Old Sallow says there is a paper lying under a stub in the split oak yet, rained on twice. Nobody has taken it up.",
+            "Nobody will say whose name is on it. They only look at {player} a moment longer than they used to."
+          ]
+        },
         {
           "days": [
             6,

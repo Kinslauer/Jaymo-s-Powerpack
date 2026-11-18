@@ -124,7 +124,7 @@
 			"who": "giver",
 			"say": [
 				"{taken} went to market four days ago and didn't come home. This morning there was a note pushed under my door.",
-				"It says {coins:30} at {place:oak}, three nights from now, and I'll have her back. Miss the night, it says, and she comes home the worse for every day after. I haven't got {coins:30}. I haven't got half of it."
+				"It says {coins:30} at {place:oak}, four nights from now, and I'll have her back. Miss the night, it says, and she comes home the worse for every day after. I haven't got {coins:30}. I haven't got half of it."
 			],
 			"replies": [
 				{
@@ -305,7 +305,7 @@
 						"helps": [
 							"reputation>=20"
 						],
-						"refuse": "Nobody is waiting. And if you say otherwise to {giver}, I'll ask him what you were doing under his wall in the dark.",
+						"refuse": "Nobody is waiting. And if you say otherwise to {giver}, I'll ask what you were doing under that wall in the dark.",
 						"fail": "steward_bluffs"
 					},
 					"then": "steward_breaks"
@@ -379,7 +379,7 @@
 			"say": [
 				"To the kiln. I put a light in the kiln mouth every night, so she has something to walk to if she gets loose. The coat is for the wind. Come and look, if my word's no good to you.",
 				"And since you're one for walking in the dark, here is a better use for it. From the kiln top there's smoke to be seen past {place:oak}, out in the wild, where nobody burns charcoal now. {way:camp}.",
-				"I told {giver}. He said the note wants no stirring, and to leave it be. I am not a brave man. I set her down at that ford, and all I have to show for it is a lantern."
+				"I told {giver}, and was told the note wants no stirring, and to leave it be. I am not a brave man. I set her down at that ford, and all I have to show for it is a lantern."
 			],
 			"journal": "{steward} goes out at night to set a lantern in {place:kiln} for {taken} to walk to. He did not sell her. From the kiln he has seen smoke where nobody should be burning: {way:camp}.",
 			"then": "to_camp"
@@ -387,7 +387,7 @@
 		"to_kiln": {
 			"do": "go",
 			"to": "kiln",
-			"goal": "You have lost {steward} in the dark. Look for his light at {place:kiln}",
+			"goal": "Look for {steward}'s light at {place:kiln}",
 			"within": "ransom",
 			"late": "ransom_passed",
 			"until": "before the takers' patience runs out",
@@ -407,7 +407,7 @@
 			"lines": {
 				"?betrayer=steward & mark:ap_lost_him": [
 					{
-						"say": "There is a light at the kiln after all, shut down to a crack. You have come on it late.",
+						"say": "There is a light at the kiln after all, shut down to a crack. I have come on it late.",
 						"sound": "minecraft:block.lantern.place"
 					},
 					{
@@ -432,7 +432,7 @@
 						"say": "My share. Now, before the night of the oak. I'll not wait on your word for it."
 					},
 					{
-						"say": "The lame one laughs. A share is paid when the farmer pays, he says, and not before."
+						"say": "The lame one laughs. A share is paid when the house pays, he says, and not before."
 					},
 					{
 						"who": "steward",
@@ -487,7 +487,7 @@
 			"say": [
 				"Mercy! You came up quiet. How long have you stood there? No, don't tell me. I can guess why.",
 				"It's for her. A light she can see from the hill, and bread, in case she gets loose and comes down in the dark. I set her down at the ford and let her walk the last of it. I'll keep it lit till she's home, or till I'm told there's no use.",
-				"You can see a long way from the kiln top. There's smoke past {place:oak}, out in the wild, where nobody burns charcoal now. {way:camp}. I told {giver}, and he said to leave it be. I am not a brave man. You look as if you might be."
+				"You can see a long way from the kiln top. There's smoke past {place:oak}, out in the wild, where nobody burns charcoal now. {way:camp}. I told {giver}, and was told to leave it be. I am not a brave man. You look as if you might be."
 			],
 			"replies": [
 				{
@@ -558,11 +558,18 @@
 			"do": "talk",
 			"who": "giver",
 			"goal": "Hear what came in the night",
-			"say": [
-				"They kept their day, if they kept nothing else. A carter found her on the market road at first light, set down by the ford like a parcel. Alive.",
-				"They had cut off her hair, and two fingers of her left hand. 'For the lateness,' the note said. It asked for nothing more. They've had what they wanted of us, I suppose, which was for the next farm to hear of it.",
-				"She's in the back room. She hasn't spoken yet. I don't blame you. I want to, and I can't find where to start."
-			],
+			"say": {
+				"?mark:ap_paid": [
+					"They kept their day, if they kept nothing else. A carter found her on the market road at first light, set down by the ford like a parcel. Alive.",
+					"They had cut off her hair, and two fingers of her left hand. 'For the rest,' the note said. It asked for nothing more. They had your coin and wanted as much again, and I suppose this is how the next house learns to pay in full.",
+					"She's in the back room. She hasn't spoken yet. I don't blame you. You put your own purse under that oak. I want to blame somebody, and I can't find where to start."
+				],
+				"?": [
+					"They kept their day, if they kept nothing else. A carter found her on the market road at first light, set down by the ford like a parcel. Alive.",
+					"They had cut off her hair, and two fingers of her left hand. 'For the lateness,' the note said. It asked for nothing more. They've had what they wanted of us, I suppose, which was for the next house to hear of it.",
+					"She's in the back room. She hasn't spoken yet. I don't blame you. I want to, and I can't find where to start."
+				]
+			},
 			"then": "end:day_passed"
 		},
 		"to_oak": {
@@ -689,15 +696,15 @@
 			"say": {
 				"?mark:ap_steward_broke": [
 					"She's home, then. I told you true about the camp. I want that remembered, and I know it won't be.",
-					"They said nobody would be hurt. They said {giver} would pay and get her back and I'd get a share and buy my own land, and nobody would know. Twelve years I've worked another man's ground."
+					"They said nobody would be hurt. They said {giver} would pay and get her back and I'd get a share and buy my own land, and nobody would know. Twelve years I've worked somebody else's ground."
 				],
 				"?mark:ap_steward_warned": [
 					"I knew at the wall. Nobody walks behind a man in the dark to wish him good night. I have sat out here since, waiting to see whether it would be you or them that came.",
-					"They said nobody would be hurt. They said {giver} would pay and get her back and I'd get a share and buy my own land, and nobody would know. Twelve years I've worked another man's ground."
+					"They said nobody would be hurt. They said {giver} would pay and get her back and I'd get a share and buy my own land, and nobody would know. Twelve years I've worked somebody else's ground."
 				],
 				"?": [
 					"She told you. Of course she did.",
-					"They said nobody would be hurt. They said {giver} would pay and get her back and I'd get a share and buy my own land, and nobody would know. Twelve years I've worked another man's ground."
+					"They said nobody would be hurt. They said {giver} would pay and get her back and I'd get a share and buy my own land, and nobody would know. Twelve years I've worked somebody else's ground."
 				]
 			},
 			"replies": [
@@ -832,7 +839,10 @@
 			]
 		},
 		"day_passed": {
-			"text": "The ransom day passed before anyone reached {taken}. The takers sent her home alive, short of her hair and two fingers, so that the next farm would pay on time.",
+			"text": {
+				"?mark:ap_paid": "The takers had my {coins:30} and wanted as much again. Their day passed before anyone reached {taken}, and they sent her home alive, short of her hair and two fingers, so that the next house would pay in full.",
+				"?": "The ransom day passed before anyone reached {taken}. The takers sent her home alive, short of her hair and two fingers, so that the next house would pay on time."
+			},
 			"failed": true,
 			"marks": [
 				"ap_day_passed"
@@ -850,7 +860,7 @@
 					"letter": {
 						"from": "{taken}",
 						"lines": [
-							"I am writing this with my right hand, which they left me. Father said I should not write to you. I said I would write to whom I liked.",
+							"I am writing this with my right hand, which they left me. They said at home I should not write to you. I said I would write to whom I liked.",
 							"I went to market today with a glove on. Nobody looked, and everybody looked. I sold all the eggs.",
 							"I do not know what kept you. I have decided not to need to know. The one who leads them is still up there with the next note in his pocket. If you ever go after him, I would like to hear of it."
 						]
@@ -931,7 +941,7 @@
 					"letter": {
 						"from": "{steward}",
 						"lines": [
-							"They have me breaking stone on the realm's road, a year of it, with a chain at night. It is another man's ground again. I have stopped minding whose.",
+							"They have me breaking stone on the realm's road, a year of it, with a chain at night. It is somebody else's ground again. I have stopped minding whose.",
 							"{ringleader} looked at me the whole time I spoke. I named the kiln, the camp and him, and I did not look away. It is the one thing in the business I can say that of.",
 							"I ask {giver} for nothing. I ask you to tell {taken} that I said it twice. She will know what."
 						]

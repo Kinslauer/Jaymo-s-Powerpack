@@ -495,7 +495,7 @@
       "goal": "Answer {giver}: the challenge has come",
       "within": 2,
       "late": "end:blood",
-      "until": "before the day of the challenge is past",
+      "until": "before the peeled rod goes unanswered",
       "say": [
         "It's come. Netherbeck sent a boy over at first light with a hazel rod, peeled white. That's a challenge, in the old way. Their man against ours at the stone, and whoever stands, his people say where it goes.",
         "It will be {champion} for them. We've nobody. I'd go myself, and he would kill me and be sorry about it after. Will you stand for Overbeck?"
@@ -505,6 +505,15 @@
         "mercy": "If nobody stands, some boy of theirs will pick up that rod himself."
       },
       "replies": [
+        {
+          "if": "mark:stone_charter_read",
+          "say": "Put the rod down. I had the charter read. Hear it as it's written.",
+          "then": "hear",
+          "for": [
+            "law",
+            "honour"
+          ]
+        },
         {
           "say": "I'll stand.",
           "then": "trial",
@@ -689,7 +698,7 @@
       ],
       "town": [
         "{player} fought Netherbeck's man at the boundary stone and put him on his back, and then gave him a hand up. That's how it ought to be done.",
-        "Nobody ever did find that charter. I'd still like to know what it says."
+        "Nobody ever did hear that charter read out. I'd still like to know what it says."
       ]
     },
     "champion_slain": {

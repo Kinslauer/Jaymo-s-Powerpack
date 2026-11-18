@@ -155,6 +155,7 @@
       "body": "fighter",
       "female": false,
       "at": "lane_end",
+      "if": "!mark:heir_captain_turned",
       "hours": "night",
       "health": 50,
       "damage": 6,
@@ -344,6 +345,7 @@
       },
       "replies": [
         {
+          "if": "!mark:heir_captain_turned",
           "say": "Stay up here. I'll see that the Guard look somewhere else.",
           "then": "captain",
           "journal": "I told {heir} to stay in the loft, and went to see what could be done with the captain of the King's Guard."
@@ -1437,7 +1439,10 @@
       ]
     },
     "away": {
-      "text": "{heir} went down the river on a grain barge before it was light, with {beloved} at the sweep. When the King's Guard searched Back Lane they found a farmer and a great deal of hay.",
+      "text": {
+        "?mark:heir_lied_guard": "{heir} went down the river on a grain barge before it was light, with {beloved} at the sweep. The King's Guard had passed Back Lane on my word days before, and never climbed the ladder.",
+        "?": "{heir} went down the river on a grain barge before it was light, with {beloved} at the sweep. When the King's Guard searched Back Lane they found a farmer and a great deal of hay."
+      },
       "reward": {
         "reputation": 8,
         "items": [
@@ -1450,10 +1455,16 @@
       "against": [
         "law"
       ],
-      "town": [
-        "They never found that heir. Four hundred houses. And old Wymer has had a face like a cat in a dairy ever since, and he'll not say why.",
-        "Somebody saw {player} on the river path, the night before the Guard did Back Lane. I say nothing. I only say it was a good night for a walk."
-      ],
+      "town": {
+        "?mark:heir_lied_guard": [
+          "They never found that heir. Four hundred houses. And old Wymer has had a face like a cat in a dairy ever since, and he'll not say why.",
+          "Somebody saw {player} on the river path, some nights after the Guard rode on. I say nothing. I only say it was a good night for a walk."
+        ],
+        "?": [
+          "They never found that heir. Four hundred houses. And old Wymer has had a face like a cat in a dairy ever since, and he'll not say why.",
+          "Somebody saw {player} on the river path, the night before the Guard did Back Lane. I say nothing. I only say it was a good night for a walk."
+        ]
+      },
       "later": [
         {
           "days": [

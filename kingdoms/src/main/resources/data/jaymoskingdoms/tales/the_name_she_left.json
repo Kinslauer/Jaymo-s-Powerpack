@@ -16,8 +16,8 @@
   "roll": { "fate": ["lame", "taken", "done"] },
   "cast": {
     "wren": { "name": ["Wren"], "body": "villager", "job": "fisherman", "female": true, "at": "clearing" },
-    "seeker": { "name": ["Hal Ashdown", "Ned Ashdown", "Col Ashdown"], "body": "villager", "job": "shepherd", "female": false, "at": "hut", "hours": "day" },
-    "seeker_man": { "name": ["Dunstan Pike", "Wat Kell", "Odo Marsh"], "body": "villager", "job": "none", "female": false, "at": "hut", "hours": "day" },
+    "seeker": { "name": ["Hal Ashdown", "Ned Ashdown", "Col Ashdown"], "body": "villager", "job": "shepherd", "female": false, "at": { "?mark:wren_party_down": "path_down", "?mark:wren_party_east": "ridge", "?": "hut" }, "hours": "day" },
+    "seeker_man": { "name": ["Dunstan Pike", "Wat Kell", "Odo Marsh"], "body": "villager", "job": "none", "female": false, "at": { "?mark:wren_party_down": "path_down", "?mark:wren_party_east": "ridge", "?": "hut" }, "hours": "day" },
     "father": { "name": ["Edric Ashdown"], "body": "villager", "job": "farmer", "female": false, "at": "gully", "if": "fate=lame" },
     "father_held": { "name": ["Edric Ashdown"], "body": "villager", "job": "farmer", "female": false, "at": "cut", "if": "fate=taken" },
     "chief": { "name": ["Marrow Jack", "Bess Calder", "Tam Rudd"], "body": "fighter", "at": "cut", "if": "fate=taken",
@@ -28,7 +28,9 @@
     "hut": { "at": "wild", "from": "clearing", "dist": [220, 340], "name": "the summer shepherds' hut" },
     "gully": { "at": "near", "from": "hut", "dist": [60, 110], "name": "the gully below the hut" },
     "cut": { "at": "wild", "from": "hut", "dist": [140, 220], "name": "the old quarry cut" },
-    "cairn": { "at": "near", "from": "hut", "dist": [70, 120], "name": "the cairn on the saddle" }
+    "cairn": { "at": "near", "from": "hut", "dist": [70, 120], "name": "the cairn on the saddle" },
+    "ridge": { "at": "near", "from": "hut", "dist": [110, 160], "name": "the east ridge" },
+    "path_down": { "at": "near", "from": "hut", "dist": [70, 110], "name": "the path down from the hut" }
   },
   "first": "to_clearing",
   "steps": {
@@ -36,6 +38,7 @@
     "ask": {
       "do": "talk", "who": "wren", "goal": "Speak with Wren",
       "say": {
+        "?mark:caught:road_took_her": "You came. I was not sure the letter would find you, or that you would know the hand.\nThe searchers found my trail on the coast road, so the whole valley knows now that the road never took me. He cut a stick and went up into the hills to fetch me back and put it right, as if I were a strayed ewe.\nIf I go after him I am fetched. If I do not, he is up there alone with one good knee.",
         "?mark:bride_road_lie": "You came. I was not sure the letter would find you, or that you would know the hand.\nHe never believed the road took me. He sat through the mourning and the miller's ham and then he cut a stick and went up to look for a body, because he could not find the lie and he could not swallow it either.\nHalf the valley has stopped searching. He has not. And I cannot walk into those hills and be found alive by the wrong man.",
         "?": "You came. I was not sure the letter would find you, or that you would know the hand.\nYou told them the truth of it, and they have held it against him ever since. So he cut a stick and went up into the hills to fetch me back and put it right, as if I were a strayed ewe.\nIf I go after him I am fetched. If I do not, he is up there alone with one good knee."
       },
@@ -85,7 +88,7 @@
     "seekers": {
       "do": "talk", "who": "seeker", "when": "day", "goal": "Speak with the men at the hut",
       "say": {
-        "?mark:bride_road_lie": [
+        "?mark:bride_road_lie & !mark:caught:road_took_her": [
           "Hold there. You're no shepherd, and you have been through that hut like a bailiff. I'm {seeker}. That's {seeker_man}, the miller's man. We are eleven days after my uncle, old Edric Ashdown, who came up here with a stick to look for his dead girl's bones.",
           "The road took her, they say. I helped carry the empty box. He never believed it, and now the hill has him too. So. Who are you, and who sends a stranger up here? You came up from the burners' side. I watched you."
         ],
@@ -123,12 +126,12 @@
       "then": {"?fate=lame": "to_gully", "?fate=taken": "to_cut", "?": "to_cairn"}
     },
     "seekers_wrong": {
-      "do": "talk", "who": "seeker",
+      "do": "talk", "who": "seeker", "mark": "wren_party_east",
       "say": "The east ridge. That's a day round by the burn. He'd not have gone east, there is nothing east but stone. No. A fire is a fire, and I have nothing better. {seeker_man}, get the bags.",
       "then": {"?fate=lame": "to_gully", "?fate=taken": "to_cut", "?": "to_cairn"}
     },
     "seekers_truth": {
-      "do": "talk", "who": "seeker",
+      "do": "talk", "who": "seeker", "mark": "wren_party_down",
       "say": [
         "Alive.",
         "{seeker_man}. You heard nothing. No. You heard, and you will be down the valley with it before dark, I can see your feet going already. Go, then. Tell the miller. Tell my aunt.",

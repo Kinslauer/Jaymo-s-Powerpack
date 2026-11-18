@@ -71,6 +71,7 @@
         "Brother Marten"
       ],
       "body": "fighter",
+      "female": false,
       "at": "gate",
       "hours": "night",
       "health": 70,

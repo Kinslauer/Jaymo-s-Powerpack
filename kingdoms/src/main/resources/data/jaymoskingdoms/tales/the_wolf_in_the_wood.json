@@ -625,10 +625,8 @@
         {
           "if": "mark:wolf_held",
           "say": "She's gone. Over the ridge and away north. I followed the tracks myself.",
-          "then": {
-            "?blood=killed": "end:held_away",
-            "?": "end:held"
-          },
+          "mark": "wolf_said_north",
+          "then": "end:held_away",
           "irks": [
             "honour"
           ],
@@ -671,6 +669,7 @@
       "do": "talk",
       "who": "hunter",
       "say": "I believe you believe it. But I've six men who buried that lad, and I can't send them home on a story. We go in, as we said. If she's what you say, she'll have the sense to be gone when we get there.",
+      "mark": "wolf_hunt_went",
       "then": "end:held_away"
     },
     "join_hunt": {
@@ -845,6 +844,8 @@
     },
     "held_away": {
       "text": {
+        "?mark:wolf_said_north": "{wife} holds the wolf now. I told {hunter} she had gone north over the ridge, and he called off his hunt on my word. She keeps the charcoal burner's hut at the wood's edge, and her children come on Sundays.",
+        "?mark:wolf_hunt_went": "{wife} holds the wolf now, but the hunt would not be turned. They found the hollow empty. She keeps to the wood's edge, a lean grey shape at dusk, and her children know where to leave the bread.",
         "?blood=killed": "{wife} holds the wolf now, but will not go home to the street where the dead lad's mother lives. She keeps the charcoal burner's hut at the wood's edge, and her children come on Sundays.",
         "?": "{wife} holds the wolf now, but the hunt would not be turned. They found the hollow empty. She keeps to the wood's edge, a lean grey shape at dusk, and her children know where to leave the bread."
       },

@@ -187,7 +187,7 @@
       "goal": "Go in to supper with Corin",
       "say": [
         "That's the door shut on it. Come up to the house. Boots off at the step. That's mother's rule, and she is not here to let you off it.",
-        "There'll be three bowls. They have not all three been down off that shelf since the fourth winter. I had to wash the dust out of one this morning.",
+        "There'll be three bowls. They have not all three been down off that shelf since the first winter. I had to wash the dust out of one this morning.",
         "The low strip has never once been in before the top field. I don't know what to do with the afternoon. I've forgiven nothing, mind. That's understood at my table."
       ],
       "replies": [
@@ -283,7 +283,7 @@
       ]
     },
     "missed": {
-      "text": "Corin wrote to say when his harvest was. I did not go.",
+      "text": "Corin wrote to say when his harvest was. I was not there to cut it.",
       "failed": true,
       "marks": [
         "barley_missed"

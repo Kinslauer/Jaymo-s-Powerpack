@@ -78,12 +78,12 @@
     "more_to_do": {
       "do": "talk", "who": "giver", "goal": "Ask {giver} what is still to do", "within": "raid", "late": "hold", "until": "before the dark of the moon",
       "say": {
-        "?mark:bell_bar_mended & mark:bell_archers_posted & mark:bell_girl_posted": "The bar, the roofs and the bell. I've nothing left to ask of you, and I never thought to say that to anyone. Sleep while you can. The moon is nearly gone ({left:raid}).",
-        "?mark:bell_bar_mended": "Good. That's one thing less to lie awake over. See to what's left if there's time for it ({left:raid}), or tell me you're done and I'll send for you on the night.",
-        "?mark:bell_archers_posted": "Good. That's one thing less to lie awake over. See to what's left if there's time for it ({left:raid}), or tell me you're done and I'll send for you on the night.",
-        "?mark:bell_girl_posted": "Good. That's one thing less to lie awake over. See to what's left if there's time for it ({left:raid}), or tell me you're done and I'll send for you on the night.",
+        "?mark:bell_bar_mended & mark:bell_archers_posted & mark:bell_girl_posted": "The bar, the roofs and the bell. I've nothing left to ask of you, and I never thought to say that to anyone. Sleep while you can. The moon is nearly gone. Our last quiet day is {in:raid}.",
+        "?mark:bell_bar_mended": "Good. That's one thing less to lie awake over. See to what's left if there's time for it. Our last quiet day is {in:raid}. Or tell me you're done and I'll send for you on the night.",
+        "?mark:bell_archers_posted": "Good. That's one thing less to lie awake over. See to what's left if there's time for it. Our last quiet day is {in:raid}. Or tell me you're done and I'll send for you on the night.",
+        "?mark:bell_girl_posted": "Good. That's one thing less to lie awake over. See to what's left if there's time for it. Our last quiet day is {in:raid}. Or tell me you're done and I'll send for you on the night.",
         "?": [
-          "The lamps and the fence were what I couldn't do without. The rest is what I lie awake over, and there are few enough days for it ({left:raid}). They'll come on their night whether we're ready or not.",
+          "The lamps and the fence were what I couldn't do without. The rest is what I lie awake over, and there are few enough days for it. Our last quiet day is {in:raid}. They'll come on their night whether we're ready or not.",
           "The river postern's bar is old oak, split along the grain. The three lads who can shoot have a dozen shafts between them. And {ringer}'s knees are that bad he rings sitting down. Do what you can of it, or none of it. I'll not think the worse of you."
         ]
       },
@@ -143,7 +143,7 @@
     },
     "wait_dark": { "do": "wait", "days": [9, 9], "wake": "giver", "within": "raid", "late": "eve", "until": "until the dark of the moon", "then": "eve" },
     "eve": {
-      "do": "talk", "who": "giver", "goal": "Speak with {giver}", "within": 1, "late": "hold", "until": "before the bell",
+      "do": "talk", "who": "giver", "goal": "Speak with {giver}", "within": 0, "late": "hold", "until": "before the bell",
       "say": "It's tonight. No moon, and the dogs have been uneasy since noon. When you hear the bell, come to the square and stand where the lamps are. Whatever comes down that lane, it does not reach the cellar.",
       "replies": [
         { "say": "It won't.", "then": "hold" },
@@ -206,17 +206,17 @@
       "say": {
         "?mark:bell_girl_posted & traitor=widow": [
           "Late. Yes. Thirty years I've rung that bell and it has never once been late, and you may write that down.",
-          "I went for the rope at the first shout and the rope wasn't there. Someone had looped it up over the beam, out of an old man's reach. I was still feeling about for the stool when that child {girl} went up the post like a squirrel and swung on it with her whole weight. A dozen breaths late, where it might have been fifty. You put her there. I'd not have thought of it.",
+          "I went for the rope at the first shout and the rope wasn't there. Someone had looped it up over the beam, out of an old man's reach. I was still feeling about for the stool when that child {girl}, up the post already, shook it loose and swung on it with her whole weight. A dozen breaths late, where it might have been fifty. You put her there. I'd not have thought of it.",
           "Who was by the bell post at dusk? Everyone. {widow} came for a light for her lantern and stood a while looking up. I thought she was praying. {carter} was about with that cart. {warden} went by to his door. That's the whole town, isn't it. That's no help to you."
         ],
         "?mark:bell_girl_posted & traitor=warden": [
           "Late. Yes. Thirty years I've rung that bell and it has never once been late, and you may write that down.",
-          "I went for the rope at the first shout and the rope wasn't there. Someone had looped it up over the beam, out of an old man's reach. I was still feeling about for the stool when that child {girl} went up the post like a squirrel and swung on it with her whole weight. A dozen breaths late, where it might have been fifty. You put her there. I'd not have thought of it.",
+          "I went for the rope at the first shout and the rope wasn't there. Someone had looped it up over the beam, out of an old man's reach. I was still feeling about for the stool when that child {girl}, up the post already, shook it loose and swung on it with her whole weight. A dozen breaths late, where it might have been fifty. You put her there. I'd not have thought of it.",
           "Who was by the bell post at dusk? Everyone. {warden} stopped to look the rope over, said he'd save my knees the climb this once. {widow} came for a light for her lantern. {carter} was about with that cart. That's the whole town, isn't it. That's no help to you."
         ],
         "?mark:bell_girl_posted": [
           "Late. Yes. Thirty years I've rung that bell and it has never once been late, and you may write that down.",
-          "I went for the rope at the first shout and the rope wasn't there. Someone had looped it up over the beam, out of an old man's reach. I was still feeling about for the stool when that child {girl} went up the post like a squirrel and swung on it with her whole weight. A dozen breaths late, where it might have been fifty. You put her there. I'd not have thought of it.",
+          "I went for the rope at the first shout and the rope wasn't there. Someone had looped it up over the beam, out of an old man's reach. I was still feeling about for the stool when that child {girl}, up the post already, shook it loose and swung on it with her whole weight. A dozen breaths late, where it might have been fifty. You put her there. I'd not have thought of it.",
           "Who was by the bell post at dusk? Everyone. {carter} stood his cart right under it to rest the horse, and climbed about on the load a good while. {widow} came for a light for her lantern. {warden} went by to his door. That's the whole town, isn't it. That's no help to you."
         ],
         "?traitor=widow": [

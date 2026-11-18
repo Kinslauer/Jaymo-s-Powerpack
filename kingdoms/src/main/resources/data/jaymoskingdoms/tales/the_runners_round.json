@@ -650,10 +650,7 @@
             ]
           }
         }
-      ],
-      "within": "round",
-      "late": "late_tam",
-      "until": "before the round goes stale"
+      ]
     },
     "report_short": {
       "do": "talk",
@@ -810,6 +807,7 @@
       "replies": [
         {
           "say": "I am sorry for it, Tam.",
+          "mark": "runner_round_late",
           "then": {
             "?mark:runner_kept_purse&!mark:runner_put_back": "end:kept_purse",
             "?": "end:stale"

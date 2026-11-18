@@ -241,7 +241,7 @@
       "do": "search", "at": "ford", "need": 2, "goal": "Find where the ruts go from the ford",
       "clues": [
         { "name": "Ruts in the ford mud", "item": "minecraft:clay_ball", "lore": ["All seven crossed here. The dragging wheel cut the bank away.", "On the far side they leave the road for a hill track."], "journal": "The wagons crossed the ford and left the road for a hill track on the far side.", "mark": "fair_found" },
-        { "name": "A strip of burnt canvas", "item": "minecraft:brown_wool", "lore": ["Tent cloth, scorched along one edge, caught on a thorn by the hill track.", "It tore off the last wagon as it climbed."], "journal": "A strip of tent canvas hangs on a thorn where the hill track leaves the ford.", "mark": "fair_found" },
+        { "name": "A strip of burnt canvas", "item": "minecraft:brown_wool", "if": "why=driven", "lore": ["Tent cloth, scorched along one edge, caught on a thorn by the hill track.", "It tore off the last wagon as it climbed."], "journal": "A strip of tent canvas hangs on a thorn where the hill track leaves the ford.", "mark": "fair_found" },
         { "name": "A honey cake, trodden", "item": "minecraft:cookie", "lore": ["Dropped off a tailboard and walked on by whoever came behind.", "{child} says the track goes round a pond, further on. It has seen the pond from the third wagon."], "journal": "{child} knew the hill track from the ford: it goes round a pond, on to where the fair winters.", "mark": "fair_found" }
       ],
       "mark": "fair_followed_ruts",

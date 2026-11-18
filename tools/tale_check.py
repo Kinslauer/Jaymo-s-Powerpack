@@ -30,7 +30,7 @@ STEP_FIELDS = {
     "wait": {"days", "wake", "letter"},
     "await": {"who", "noted"},
     "defend": {"at", "waves", "foes", "stars", "failed"},
-    "escort": {"who", "to", "failed"},
+    "escort": {"who", "to", "failed", "with"},
     "pack": {"at", "foes", "count", "stars"},
     "build": {"at", "blocks", "count"},
     "blast": {"at"},
@@ -716,6 +716,8 @@ def check_tale(path):
         elif do == "escort":
             check_role(c, where, step["who"], tale)
             check_place(c, where, step["to"], tale)
+            for role in step.get("with", []) if isinstance(step.get("with", []), list) else [step["with"]]:
+                check_role(c, where + ".with", role, tale)
         elif do in ("rescue", "capture"):
             # (set out by the job at its camp: bound, or armed; they're the tale's own once a captive is brought home)
             check_role(c, where, step["who"], tale)

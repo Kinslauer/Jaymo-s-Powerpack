@@ -17,7 +17,7 @@
         "?": "his_day"
       },
       "noted": {
-        "keeping_rested": "The husks upstairs were a woman and her children once, by their clothes and the small bed. I put them down while he slept, and the house is quiet now."
+        "keeping_rested": "The husks upstairs were a household once, a woman and her children by the look of them. I put them down while he slept, and the house is quiet now."
       }
     },
     "cured_asleep": {
@@ -27,7 +27,7 @@
       "journal": "I gave {giver} the cure while he slept. He never stirred.",
       "then": "unbelieved",
       "noted": {
-        "keeping_rested": "The husks upstairs were a woman and her children once, by their clothes and the small bed. I put them down while he slept, and the house is quiet now."
+        "keeping_rested": "The husks upstairs were a household once, a woman and her children by the look of them. I put them down while he slept, and the house is quiet now."
       }
     },
     "his_day": {
@@ -50,12 +50,12 @@
       "say": {
         "?mark:keeping_rested": [
           "You. You came down for me. I heard the light go and thought, well, that's the end of it. And here you are, and the cold's going out of my hands.",
-          "I went up. I had to. I thought I'd find them at the door still, the way I left them. They were lying down. Somebody had straightened them. That was you.",
-          "I couldn't do it. I had the hammer in my hand and I couldn't, so I went under the floor and lit the light instead. You did what I owed them. I'm a smith, it's all I've got worth giving. Tell me what you want and I'll make it to your measure, and I'll make it the best thing I ever made."
+          "I went up. I had to. I thought I'd find them at the door still, the way I left them. The rooms were quiet. They are at rest, all of them. That was you.",
+          "I couldn't do it. I had the hammer in my hand and I couldn't, so I went under the floor and lit the light instead. You did what I owed them. I'm a smith, it's all I've got worth giving. Tell me what you want and I'll make it to your measure."
         ],
         "?": [
           "You. You came down for me. I heard the light go and thought, well, that's the end of it. And here you are, and the cold's going out of my hands.",
-          "Don't go up with me. Those are mine, up there. My wife. The boys. I'll see to them myself, now I can lift a hammer again. I should have done it before I lay down.",
+          "Don't go up with me. Those were mine, up there. My wife. The boys. If any of them are still walking, leave them to me, now I can lift a hammer again. I should have done it before I lay down.",
           "I'm a smith. It's all I've got that's worth giving. Tell me what you want for it and I'll make it to your measure."
         ]
       },
@@ -194,7 +194,7 @@
       "say": {
         "?mark:keeping_rested": [
           "I've been sick, they tell me. Asleep under the floor of my own house, and I don't remember a day of it.",
-          "Cured me? In my sleep? Anyone could walk in here and say that. And somebody has been upstairs. They're lying down, all of them, with their hands folded.",
+          "Cured me? In my sleep? Anyone could walk in here and say that. And somebody has been upstairs. The rooms are quiet. They are at rest, all of them.",
           "If that was you, then I thank you for them. It's more than I managed. But I'll not be told tales about the other. Go on, now. Leave me with them."
         ],
         "?": [
@@ -231,7 +231,7 @@
           "letter": {
             "from": "{giver}",
             "lines": [
-              "I've put them in the ground behind the house, the three of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
+              "I've put them in the ground behind the house, all of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
               "I wanted you to know where they are, since you were the last one kind to them. If you pass this way, the forge is lit and there's a seat by it."
             ]
           }
@@ -256,7 +256,7 @@
           "letter": {
             "from": "{giver}",
             "lines": [
-              "I've put them in the ground behind the house, the three of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
+              "I've put them in the ground behind the house, all of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
               "I wanted you to know where they are, since you were the last one kind to them. If you pass this way, the forge is lit and there's a seat by it."
             ]
           }
@@ -281,7 +281,7 @@
           "letter": {
             "from": "{giver}",
             "lines": [
-              "I've put them in the ground behind the house, the three of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
+              "I've put them in the ground behind the house, all of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
               "I wanted you to know where they are, since you were the last one kind to them. If you pass this way, the forge is lit and there's a seat by it."
             ]
           }
@@ -306,7 +306,7 @@
           "letter": {
             "from": "{giver}",
             "lines": [
-              "I've put them in the ground behind the house, the three of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
+              "I've put them in the ground behind the house, all of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
               "I wanted you to know where they are, since you were the last one kind to them. If you pass this way, the forge is lit and there's a seat by it."
             ]
           }
@@ -331,7 +331,7 @@
           "letter": {
             "from": "{giver}",
             "lines": [
-              "I've put them in the ground behind the house, the three of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
+              "I've put them in the ground behind the house, all of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
               "I wanted you to know where they are, since you were the last one kind to them. If you pass this way, the forge is lit and there's a seat by it."
             ]
           }
@@ -356,7 +356,7 @@
           "letter": {
             "from": "{giver}",
             "lines": [
-              "I've put them in the ground behind the house, the three of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
+              "I've put them in the ground behind the house, all of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
               "I wanted you to know where they are, since you were the last one kind to them. If you pass this way, the forge is lit and there's a seat by it."
             ]
           }
@@ -381,7 +381,7 @@
           "letter": {
             "from": "{giver}",
             "lines": [
-              "I've put them in the ground behind the house, the three of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
+              "I've put them in the ground behind the house, all of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
               "I wanted you to know where they are, since you were the last one kind to them. If you pass this way, the forge is lit and there's a seat by it."
             ]
           }
@@ -406,7 +406,7 @@
           "letter": {
             "from": "{giver}",
             "lines": [
-              "I've put them in the ground behind the house, the three of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
+              "I've put them in the ground behind the house, all of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
               "I wanted you to know where they are, since you were the last one kind to them. If you pass this way, the forge is lit and there's a seat by it."
             ]
           }
@@ -431,7 +431,7 @@
           "letter": {
             "from": "{giver}",
             "lines": [
-              "I've put them in the ground behind the house, the three of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
+              "I've put them in the ground behind the house, all of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
               "I wanted you to know where they are, since you were the last one kind to them. If you pass this way, the forge is lit and there's a seat by it."
             ]
           }

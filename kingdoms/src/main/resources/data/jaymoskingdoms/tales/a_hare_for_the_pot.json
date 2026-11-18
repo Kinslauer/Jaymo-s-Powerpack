@@ -81,10 +81,16 @@
       "clock": {
         "court": 3
       },
-      "say": [
-        "You took my paper down. Then you have read it. {poacher} is my brother. The forester found him in {place:wood} with a hare in his coat and walked him to the reeve on a rope. The reeve has let him home on my surety until the court sits.",
-        "Forest law is not town law. The court sits {in:court}, and for a hare it takes two fingers of the bow hand. He has three little ones and no wife. I have nothing to pay you but supper."
-      ],
+      "say": {
+        "?hearts>=30": [
+          "It's you. I hoped it would be you that took it down, and I'd not have asked it of you to your face. {poacher} is my brother. The forester found him in {place:wood} with a hare in his coat and walked him to the reeve on a rope. The reeve has let him home on my surety until the court sits.",
+          "Forest law is not town law. The court sits {in:court}, and for a hare it takes two fingers of the bow hand. He has three little ones and no wife. I have nothing to pay you but supper, and you know what my suppers are."
+        ],
+        "?": [
+          "You took my paper down. Then you have read it. {poacher} is my brother. The forester found him in {place:wood} with a hare in his coat and walked him to the reeve on a rope. The reeve has let him home on my surety until the court sits.",
+          "Forest law is not town law. The court sits {in:court}, and for a hare it takes two fingers of the bow hand. He has three little ones and no wife. I have nothing to pay you but supper."
+        ]
+      },
       "replies": [
         {
           "say": "I'll see what can be done.",
@@ -303,14 +309,14 @@
           "lie": {
             "name": "lords_hare",
             "days": [
-              4,
-              9
+              12,
+              18
             ],
             "unless": "mark:hare_under_keeper",
             "reputation": 12,
             "hearts": 20,
             "town": [
-              "The forester found a fresh wire by the split oak, set the very night before {player} stood in his lodge and swore the wood was quiet.",
+              "The forester found a wire by the split oak, and reckons it was set the very night before {player} stood in his lodge and swore the wood was quiet.",
               "He says he will not take a stranger's word again. Can't say I blame him."
             ]
           },
@@ -332,8 +338,14 @@
           "then": "plead_on"
         },
         {
-          "say": "I've nothing to say for him after all.",
-          "then": "end:maimed"
+          "say": "I've nothing to say for him. He took the hare. Let the court have him.",
+          "then": "end:court",
+          "for": [
+            "law"
+          ],
+          "irks": [
+            "mercy"
+          ]
         }
       ]
     },
@@ -403,7 +415,10 @@
       "within": "court",
       "late": "end:maimed",
       "until": "before the forest court sits",
-      "say": "There is the fine, if anyone will stand it. {coins:10} to my lord's steward, and Furrow keeps his fingers and loses his right to gather so much as a stick in the wood for a year. That is the law, not my kindness.",
+      "say": {
+        "?coins>=10": "There is the fine, if anyone will stand it, and I can hear from here that you could. {coins:10} to my lord's steward, and Furrow keeps his fingers and loses his right to gather so much as a stick in the wood for a year. That is the law, not my kindness.",
+        "?": "There is the fine, if anyone will stand it. {coins:10} to my lord's steward, and Furrow keeps his fingers and loses his right to gather so much as a stick in the wood for a year. That is the law, not my kindness. You do not look to me as if you have it on you."
+      },
       "replies": [
         {
           "say": "I'll stand it.",
@@ -412,7 +427,7 @@
         },
         {
           "say": "Then the court must have him.",
-          "then": "end:maimed"
+          "then": "end:court"
         }
       ]
     }
@@ -449,8 +464,8 @@
       "later": [
         {
           "days": [
-            12,
-            24
+            6,
+            10
           ],
           "mark": "hare_under_keeper",
           "letter": {
@@ -465,7 +480,7 @@
       ]
     },
     "bought": {
-      "text": "The forester's purse is heavier and his memory is shorter. {poacher} was let out by the back of the lock-up before the court sat.",
+      "text": "The forester's purse is heavier and his memory is shorter. {poacher}'s name was struck out of the court's book before it sat.",
       "reward": {
         "hearts": 20
       },
@@ -499,7 +514,7 @@
       ]
     },
     "handed": {
-      "text": "I told the forester what was under the root. The court sat, and {poacher} will not draw a bow again. His sister shut her door when I passed.",
+      "text": "I told the forester what was under the root. The court sat, and {poacher} will not draw a bow again. His kin shut the door when I passed.",
       "reward": {
         "coins": 6,
         "hearts": -30,
@@ -537,14 +552,17 @@
         ]
       }
     },
-    "maimed": {
-      "failed": true,
-      "text": "The forest court sat, and it took two fingers of {poacher}'s bow hand, as the law has it for a hare.",
+    "court": {
+      "text": "I left {poacher} to the lord's justice. The forest court sat, and it took two fingers of his bow hand, as the law has it for a hare.",
       "reward": {
         "hearts": -15
       },
+      "marks": [
+        "hare_court"
+      ],
       "town": [
-        "They took Furrow's fingers this morning. For a hare. His sister had a paper up for days and nobody came to anything."
+        "They took Furrow's fingers this morning. For a hare. {player} stood in the forester's lodge and had nothing to say for him.",
+        "Law's law. That is what {player} said, they tell me. To a man with three children."
       ],
       "later": [
         {
@@ -553,7 +571,28 @@
             25
           ],
           "town": [
-            "Furrow can't hold a scythe properly now. The children are with his sister for good."
+            "Furrow can't hold a scythe properly now. The children are with Furrow's kin for good."
+          ]
+        }
+      ]
+    },
+    "maimed": {
+      "failed": true,
+      "text": "The forest court sat, and it took two fingers of {poacher}'s bow hand, as the law has it for a hare.",
+      "reward": {
+        "hearts": -15
+      },
+      "town": [
+        "They took Furrow's fingers this morning. For a hare. His own kin had a paper up for days and nobody came to anything."
+      ],
+      "later": [
+        {
+          "days": [
+            10,
+            25
+          ],
+          "town": [
+            "Furrow can't hold a scythe properly now. The children are with Furrow's kin for good."
           ]
         }
       ]

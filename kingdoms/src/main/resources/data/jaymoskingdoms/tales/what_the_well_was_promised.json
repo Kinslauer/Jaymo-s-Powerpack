@@ -381,7 +381,7 @@
       "to": "well",
       "when": "night",
       "goal": "Walk {debtor} to the well after dark",
-      "failed": "end:chose",
+      "failed": "end:debtor_dead",
       "then": "down_watch",
       "within": "seventh",
       "late": "end:chose",
@@ -538,7 +538,7 @@
       "to": "well",
       "when": "night",
       "goal": "Walk {debtor} to the well after dark",
-      "failed": "end:chose",
+      "failed": "end:debtor_dead",
       "then": "pay_watch",
       "within": "seventh",
       "late": "end:chose",
@@ -749,6 +749,57 @@
               "I know whose it is. I hum back, so he knows we are still here."
             ]
           }
+        },
+        {
+          "days": [
+            4,
+            8
+          ],
+          "if": "asked=more",
+          "town": [
+            "The Pasks' well came back in the night. Seven years dry, and sweet as you like by morning. Old Pask sat down in his own yard and cried.",
+            "Seven summers the Pasks carted water from Marlow's and paid for every barrel. Now theirs runs again, and nobody can say why it ever stopped."
+          ]
+        }
+      ]
+    },
+    "debtor_dead": {
+      "failed": true,
+      "text": "{debtor} died on the path to his own well, with nothing carried down. The seventh night came all the same. In the morning the cover was off the well, with its nails laid in a row along the lip, and {girl}'s bed was empty and wet through. The well is full.",
+      "reward": {
+        "hearts": -20
+      },
+      "marks": [
+        "well_chose"
+      ],
+      "town": [
+        "Marlow dead on the path to his own well, and the girl's bed wet through, and the well full to the lip. All in the one week.",
+        "Never ask a dry well for water out loud. My grandmother said it, and I laughed at her."
+      ],
+      "later": [
+        {
+          "days": [
+            10,
+            18
+          ],
+          "scene": [
+            [
+              "a",
+              "Marlow's wife says the well hums at night. A churning tune."
+            ],
+            [
+              "b",
+              "That's the wind in the shaft."
+            ],
+            [
+              "a",
+              "It hums it in a girl's voice. She says she'd know it anywhere."
+            ],
+            [
+              "b",
+              "Then don't tell me any more."
+            ]
+          ]
         },
         {
           "days": [

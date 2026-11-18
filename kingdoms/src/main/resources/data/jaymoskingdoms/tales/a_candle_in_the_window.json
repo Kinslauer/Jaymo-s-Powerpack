@@ -535,7 +535,8 @@
     "held": {
       "text": {
         "?mark:candle_chose_hold": "I am holding a paper with Tam Rudd's name on it. While it is in my coat nobody else is sent for him. I am told that the hand that holds a paper past its candle is noted.",
-        "?": "I still had the paper when its three days were out. I never chose to hold it. I only never let it go. Nobody else has been sent for Tam Rudd, and I am told that the hand that holds a paper past its candle is noted."
+        "?met:denkeeper": "I still had the paper when its three days were out. I never chose to hold it. I only never let it go. Nobody else has been sent for Tam Rudd, and I am told that the hand that holds a paper past its candle is noted.",
+        "?": "I still had the paper when its three days were out. I never chose to hold it. I only never let it go."
       },
       "reward": {
         "hearts": 6,

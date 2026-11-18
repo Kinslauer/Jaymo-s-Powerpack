@@ -916,7 +916,7 @@
           "mark": "sermon_close_long"
         },
         {
-          "say": "One thing more. Your priest wrote eleven pages for today and it broke his heart to fail you. Be kind to him when he wakes. Now eat.",
+          "say": "One thing more. Your priest meant to stand here today, and it broke his heart to fail you. Be kind to him when he wakes. Now eat.",
           "then": "close_hear",
           "mark": "sermon_spoke_for_priest"
         },
@@ -960,7 +960,7 @@
           },
           {
             "who": "baker",
-            "say": "Eleven pages. The poor old stick."
+            "say": "He'd have been at it since the thaw, knowing him. The poor old stick."
           },
           {
             "who": "tanner",

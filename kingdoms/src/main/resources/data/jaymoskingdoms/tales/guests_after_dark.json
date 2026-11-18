@@ -394,15 +394,15 @@
       "say": {
         "?dress:bloodied": [
           "Come in. You'll forgive me if I sit a little further from you than is polite. You have brought the smell of your work up my stairs.",
-          "You have been asking my servants after their health for two days. That was courteous, and roundabout. Ask me."
+          "You have been asking my servants after their health. That was courteous, and roundabout. Ask me."
         ],
         "?dress:fine": [
           "Come in, come in. A guest who has dressed to climb my stairs. You would be surprised how rare that has become.",
-          "You have been asking my servants after their health for two days. That was courteous, and roundabout. Ask me."
+          "You have been asking my servants after their health. That was courteous, and roundabout. Ask me."
         ],
         "?": [
           "Come in. Sit. Forgive the one candle. My eyes are not what they were.",
-          "You have been asking my servants after their health for two days. That was courteous, and roundabout. Ask me."
+          "You have been asking my servants after their health. That was courteous, and roundabout. Ask me."
         ]
       },
       "replies": [
@@ -618,7 +618,7 @@
       "when": "night",
       "say": [
         "There. Is it very bad? No, don't tell me. I can see it in the brother's face, and he has watched the dead walk.",
-        "My hands are smoking. I had forgotten that it hurts. You have your unmasking, and a priest to witness it, and by morning the whole valley will have it too. So. I am what the garlic was for. What happens now is in your hand and not in mine. That is new, for me."
+        "My hands are smoking. I had forgotten that it hurts. You have your unmasking, and a priest to witness it. Whether the valley has it by morning is for the two of you to say. So. I am what the garlic was for. What happens now is in your hand and not in mine. That is new, for me."
       ],
       "voices": {
         "faith": "He stands unmasked before the Warden's light. End it.",
@@ -777,7 +777,7 @@
       "do": "talk",
       "who": "giver",
       "goal": "Tell {giver} what {maid} waits on",
-      "say": "You've been up at that hall two nights. I can see it on you that you know. Tell me. What is it she's to wait on at that table?",
+      "say": "You've been up at that hall after dark. I can see it on you that you know. Tell me. What is it she's to wait on at that table?",
       "voices": {
         "honour": "That's a plain question about their own child. Answer it plain.",
         "mercy": "The truth will have that girl dragged home by the hair. Think before you say it."

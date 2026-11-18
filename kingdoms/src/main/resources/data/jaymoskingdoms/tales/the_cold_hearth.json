@@ -274,7 +274,7 @@
       "do": "vigil", "at": "fork", "when": "night", "gap": 10, "goal": "Sit the night at the fire with Cass", "mark": "ch_fire_two", "left": "escort_hall", "then": "escort_hall",
       "lines": [
         {"say": "Cass kneels at the waystone and puts her hand into the hollow under it, where the pot was.", "sound": "minecraft:block.campfire.crackle"},
-        {"who": "cass", "say": "He got this far back down with the bite in his arm. He could have lain down at the ditch. He walked half a day to put a coal where somebody would find it."},
+        {"who": "cass", "say": "He put it here on his way up, in case, with a day or two of fire still in it. He could have carried it on to the camp and lost it with the purse. He left a coal where somebody would find it."},
         {"who": "cass", "say": "Ada Wren. She kept the geese, and one of them bit the priest, and she said it had better judgment than the whole street."},
         {"who": "cass", "say": "She worked a wren on every shawl she owned, so that nobody could say they had taken hers by mistake."},
         {"say": "Cass looks across the fire for a long moment. She does not ask who walked at the old ditch, or who put them down."},

@@ -78,6 +78,8 @@ final class TaleCast {
 	static final int KEEP_WITHIN = 6, BACK_WITHIN = 24;
 	/** A cast member whose place has changed (a switched {@code at}) walks on if the new place is further than this from where they stand (blocks). */
 	static final int MOVE_ON = 10;
+	/** How far behind an escorted charge those walking {@code with} them fall before they're sent after (blocks). */
+	static final double FOLLOW_NEAR = 5.0;
 	/** People of a tale that's over leave once no player is this near, or after this long (ticks). */
 	static final double LEAVE_UNSEEN = 20.0;
 	static final int LEAVE_TICKS = 20 * 120;
@@ -365,6 +367,8 @@ final class TaleCast {
 	 */
 	static void tend(ServerLevel level, ServerPlayer player, Tales.Run run, Tale tale, JsonObject step, String kind) {
 		String who = Tale.pickString(step, "who", c -> Tales.holds(player, run, c), "");
+		// (those who walk with an escorted charge: the step is about them too)
+		List<String> with = kind.equals("escort") ? Tale.strings(step.get("with")) : List.of();
 		for (Map.Entry<String, JsonElement> e : Tale.object(tale.json, "cast").entrySet()) {
 			if (!e.getValue().isJsonObject() || run.cast.containsKey(e.getKey())) {
 				continue;
@@ -376,7 +380,7 @@ final class TaleCast {
 			}
 			// (someone who's only in some tellings isn't there in the others, unless the open step is about them)
 			String only = Tale.string(body, "if", "");
-			if (!e.getKey().equals(who) && (Tale.flag(body, "late") || !only.isEmpty() && !Tales.holds(player, run, only))) {
+			if (!e.getKey().equals(who) && (Tale.flag(body, "late") && !with.contains(e.getKey()) || !only.isEmpty() && !Tales.holds(player, run, only))) {
 				continue;
 			}
 			// (someone who keeps hours isn't there outside them)
@@ -390,6 +394,14 @@ final class TaleCast {
 			BlockPos ground = Tales.ground(level, run, tale, key);
 			if (ground != null) {
 				setOut(level, player, run, e.getKey(), body, ground);
+			}
+		}
+		Mob charge = with.isEmpty() || who.isEmpty() ? null : find(level, run.cast.get(who));
+		for (String role : with) {
+			Mob beside = find(level, run.cast.get(role));
+			if (charge != null && beside != null && !beside.closerThan(charge, FOLLOW_NEAR) && !HELD.containsKey(beside)) {
+				// (they keep up with the one being walked)
+				send(beside, charge.blockPosition());
 			}
 		}
 		for (Map.Entry<String, String> e : new ArrayList<>(run.cast.entrySet())) {

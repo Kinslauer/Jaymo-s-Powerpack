@@ -276,10 +276,10 @@
       },
       "replies": [
         { "say": "The watch will hear of this.", "if": "hand=wife", "then": "wait_after", "mark": "fm_judged", "against": ["mercy"], "journal": "{wife}'s letter went to the watch." },
-        { "say": "Take the children and go tonight. I'll say it was a fever.", "if": "hand=wife", "then": "wait_after", "mark": "fm_fled", "against": ["vengeance"], "journal": "{wife} was let go in the night with her children, and the house was told it was a fever.",
+        { "say": "Take the children and go tonight. I'll say it was a fever.", "if": "hand=wife & !mark:fm_tested", "then": "wait_after", "mark": "fm_fled", "against": ["vengeance"], "journal": "{wife} was let go in the night with her children, and the house was told it was a fever.",
           "returns": { "who": "wife", "as": "thanks", "days": [7, 12], "say": "We are two valleys over, with my cousin, and the boy laughs now. He never laughed in that house. I do not know what you are owed for it. I only know nobody else in the whole town lifted a hand. I worked this on the road. It is the only thing I know how to make.", "gift": ["minecraft:string*8", "minecraft:white_wool*4"] } },
         { "say": "You'll go before the ruler for this.", "if": "hand=son", "then": "foe_son" },
-        { "say": "{coins:20}, and it was a fever.", "if": "hand=son", "then": "wait_after", "mark": "fm_bought", "against": ["law"], "journal": "{son} paid {coins:20} from the market chest, and it was called a fever." },
+        { "say": "{coins:20}, and it was a fever.", "if": "hand=son & !mark:fm_tested", "then": "wait_after", "mark": "fm_bought", "against": ["law"], "journal": "{son} paid {coins:20} from the market chest, and it was called a fever." },
         { "say": "Say it to him yourself, at his bedside.", "then": { "?hand=son": "son_yields", "?": "wait_after" }, "journal": { "?hand=son": "{son} was told to go to his father's bedside and say it.", "?": "{wife} was told to go to {elder}'s bedside and say it." } }
       ]
     },

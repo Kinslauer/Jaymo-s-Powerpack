@@ -87,6 +87,49 @@
       "job": "none",
       "female": true,
       "at": "hamlet"
+    },
+    "walker_hobb": {
+      "name": "Old Hobb",
+      "body": "villager",
+      "job": "none",
+      "female": false,
+      "at": "hamlet",
+      "late": true
+    },
+    "walker_two": {
+      "name": ["Ibb Carter", "Wat Sallow", "Jem Rudge"],
+      "female": false,
+      "body": "villager",
+      "job": "none",
+      "at": "hamlet",
+      "late": true
+    },
+    "walker_three": {
+      "name": ["Marget Sallow", "Joan Pyke", "Cis Rudge"],
+      "female": true,
+      "body": "villager",
+      "job": "none",
+      "at": "hamlet",
+      "late": true,
+      "if": "!mark:cordon_walk_two"
+    },
+    "walker_four": {
+      "name": ["Young Dob", "Perkin Pyke", "Hal Carter"],
+      "female": false,
+      "body": "villager",
+      "job": "none",
+      "at": "hamlet",
+      "late": true,
+      "if": "mark:cordon_walk_five"
+    },
+    "walker_five": {
+      "name": ["Widow Ash", "Old Tib", "Goody Marl"],
+      "female": true,
+      "body": "villager",
+      "job": "none",
+      "at": "hamlet",
+      "late": true,
+      "if": "mark:cordon_walk_five"
     }
   },
   "places": {
@@ -429,6 +472,10 @@
         "?sentry=kin": [
           "Stand. Hands where I can see them. Nobody goes in. Captain's word.",
           "And don't tell me you've kin in there. My brother's in there. Edric. I've stood this gap every night looking at his roof, and I've not crossed either."
+        ],
+        "?coins>=15": [
+          "Stand. Hands where I can see them. Nobody goes in. Captain's word.",
+          "Mind, the captain's word doesn't keep a man in boots. And that is a full purse I can hear on you. I only say it."
         ],
         "?": [
           "Stand. Hands where I can see them. Nobody goes in. Captain's word.",
@@ -895,6 +942,13 @@
     "out_walk": {
       "do": "escort",
       "who": "sister",
+      "with": [
+        "walker_hobb",
+        "walker_two",
+        "walker_three",
+        "walker_four",
+        "walker_five"
+      ],
       "to": "stone",
       "when": "night",
       "goal": "After dark, walk {sister} and the others out to {place:stone}",
@@ -1275,7 +1329,7 @@
           "letter": {
             "from": "{healer}",
             "lines": [
-              "A flask came in on the carrier's back with no name on it. I am told it was yours, and that you stood the fence the night before you sent it.",
+              "A flask came in on the carrier's back with no name on it. I am told it was yours, and that you stood a night on that fence yourself.",
               "I gave it to Pip Tolley, who is eight. He walked out past the leech.",
               "I do not know what to make of you. I thought you should know that he lives."
             ]

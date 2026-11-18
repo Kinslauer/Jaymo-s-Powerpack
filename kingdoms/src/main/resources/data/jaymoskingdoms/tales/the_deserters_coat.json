@@ -394,10 +394,10 @@
       "to": "copse",
       "when": "night",
       "goal": "Take {deserter} out of {town} by night, as far as {place:copse}",
-      "failed": "end:taken",
+      "failed": "end:taken_road",
       "then": "patrol",
       "within": "search",
-      "late": "end:taken",
+      "late": "end:taken_road",
       "until": "before the sergeant reaches the barn"
     },
     "patrol": {
@@ -431,11 +431,11 @@
           "say": "Now. While their backs are to us."
         }
       ],
-      "left": "end:taken",
+      "left": "end:taken_road",
       "journal": "A patrol of the levy passed within a spear's length of the copse where we lay, and went on.",
       "then": "to_ford",
       "within": "search",
-      "late": "end:taken",
+      "late": "end:taken_road",
       "until": "before the sergeant reaches the barn"
     },
     "to_ford": {
@@ -444,10 +444,10 @@
       "to": "ford",
       "when": "night",
       "goal": "Bring {deserter} to {place:ford}",
-      "failed": "end:taken",
+      "failed": "end:taken_road",
       "then": "parting",
       "within": "search",
-      "late": "end:taken",
+      "late": "end:taken_road",
       "until": "before the sergeant reaches the barn"
     },
     "parting": {
@@ -583,7 +583,10 @@
       "text": "I put the notice back on its nail. A man who leaves the line has the levy to answer to, not me."
     },
     "handed": {
-      "text": "I told the sergeant where {deserter} was hidden. They brought him down the ladder with his hands tied, in the coat. The sergeant paid me out of the levy's purse, as the notice said.",
+      "text": {
+        "?mark:deserter_coat_burned": "I told the sergeant where {deserter} was hidden. They brought him down the ladder with his hands tied. The sergeant paid me out of the levy's purse, as the notice said.",
+        "?": "I told the sergeant where {deserter} was hidden. They brought him down the ladder with his hands tied, in the coat. The sergeant paid me out of the levy's purse, as the notice said."
+      },
       "reward": {
         "coins": 12,
         "hearts": -30,
@@ -760,9 +763,23 @@
         }
       ]
     },
+    "taken_road": {
+      "failed": true,
+      "text": "{deserter} never reached the ford. The levy's patrols had the road that night, and I did not get him past them.",
+      "reward": {
+        "hearts": -15
+      },
+      "town": [
+        "The Ardley lad was taken on the road by night, with {player} beside him. He had all but reached the water.",
+        "The levy has fined the whole street for the hiding of him. A fair price, the sergeant called it."
+      ]
+    },
     "taken": {
       "failed": true,
-      "text": "The sergeant came to the end of his book. They found {deserter} under the hay in the levy coat, and took him away on a rope.",
+      "text": {
+        "?mark:deserter_coat_burned": "The sergeant came to the end of his book. They found {deserter} under the hay, and took him away on a rope.",
+        "?": "The sergeant came to the end of his book. They found {deserter} under the hay in the levy coat, and took him away on a rope."
+      },
       "reward": {
         "hearts": -15
       },

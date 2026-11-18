@@ -94,11 +94,18 @@
       "clock": {
         "weighing": 5
       },
-      "say": [
-        "We don't grudge the Sun his tenth. Say that first, wherever you say the rest. A lord takes a tenth as the Sun takes it of him, and that is how the world is hung.",
-        "But by our own bushel we have carted the tenth in full, three harvests running, and by {bailiff}'s we come a fifth short every time. What's short is owed double at Candlemas. We paid it twice. We cannot pay it a third time.",
-        "I'll tell you the rest, because you'd find it anyway. There are folk here who have stopped carting all they grow. I don't ask where they keep it. You'd not either, if you had seen last winter. The barn takes the last carts and shuts its roll {in:weighing}."
-      ],
+      "say": {
+        "?hearts>=30": [
+          "We don't grudge the Sun his tenth. Say that first, wherever you say the rest. A lord takes a tenth as the Sun takes it of him, and that is how the world is hung.",
+          "But by our own bushel we have carted the tenth in full, three harvests running, and by {bailiff}'s we come a fifth short every time. What's short is owed double at Candlemas. We paid it twice. We cannot pay it a third time.",
+          "I'll tell you the rest, because it is you and I'd sooner you had it from me. There are folk here who have stopped carting all they grow. I don't ask where they keep it. You'd not either, if you had seen last winter. The barn takes the last carts and shuts its roll {in:weighing}."
+        ],
+        "?": [
+          "We don't grudge the Sun his tenth. Say that first, wherever you say the rest. A lord takes a tenth as the Sun takes it of him, and that is how the world is hung.",
+          "But by our own bushel we have carted the tenth in full, three harvests running, and by {bailiff}'s we come a fifth short every time. What's short is owed double at Candlemas. We paid it twice. We cannot pay it a third time.",
+          "I'll tell you the rest, because you'd find it anyway. There are folk here who have stopped carting all they grow. I don't ask where they keep it. You'd not either, if you had seen last winter. The barn takes the last carts and shuts its roll {in:weighing}."
+        ]
+      },
       "replies": [
         {
           "say": "I'll look at both sets of books.",
@@ -635,9 +642,9 @@
           "letter": {
             "from": "{giver}",
             "lines": [
-              "A quiet winter. Nobody fat, nobody buried. That is as good as it gets here.",
+              "A thin winter, after the steward's rods came through. Nobody fat, nobody buried. That is as good as it gets here.",
               "There is a new man at the barn who weighs heaped and calls it level, to be on the safe side.",
-              "What is under certain floors is still under them. We'll plant it in the spring."
+              "They found what they found without a word from you. We know what you said to the steward's face, and we have not forgotten it."
             ]
           }
         }

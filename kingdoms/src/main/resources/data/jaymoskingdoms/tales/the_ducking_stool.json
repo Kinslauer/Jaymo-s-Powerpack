@@ -29,7 +29,11 @@
       "body": "villager",
       "job": "farmer",
       "female": true,
-      "at": "lockup"
+      "at": {
+        "?late:eve&mark:duck_iron&!mark:duck_sank": "pond",
+        "?late:eve&mark:duck_to_water&!mark:duck_floated": "pond",
+        "?": "lockup"
+      }
     },
     "prentice": {
       "name": [
@@ -135,7 +139,8 @@
       "do": "talk",
       "who": "giver",
       "clock": {
-        "ordeal": 4
+        "ordeal": 4,
+        "eve": 3
       },
       "say": [
         "You took my paper down. Then you have cause to speak, or you mean to find one. Good. It has been on that board since I wrote it, and you are the first.",
@@ -430,12 +435,12 @@
       "say": {
         "?truth=herbwife": [
           "The flax. Oh, no. She had me sink it in the spring pool at midsummer, for bandage linen, and then old Garth's leg went bad and we were up at his steading three weeks, and I forgot it. I forgot it. It was me that forgot it.",
-          "If you say so to the examiner, it is still her flax and her knots, and she still said what she said at the well. He might call it carelessness. He might not.",
+          "If you say so to the examiner, it is still her flax and her knots, and she still said what she said at the well. The examiner might call it carelessness. Might not.",
           "There is another way. They say a witch floats. So she has to sink, and be seen to sink. Iron sewn into the hems of her shift would do it. Eight bits no bigger than beans. I have the needle. I have not the iron. Or you can let the water say what it likes. She is old. She cannot hold her breath as she once could."
         ],
         "?": [
           "You know, then. You know what did it, and who. I've kept her hearth lit every night, the way she showed me. The Hearthkeeper forgets a cold hearth.",
-          "The examiner will hear a name if you can make it stand. He is hard, but he is not deaf.",
+          "The examiner will hear a name if you can make it stand. Hard, that one, but not deaf.",
           "Or there is another way. They say a witch floats. So she has to sink, and be seen to sink. Iron sewn into the hems of her shift would do it. Eight bits no bigger than beans. I have the needle. I have not the iron. Or you can let the water say what it likes. She is old. She cannot hold her breath as she once could."
         ]
       },
@@ -468,6 +473,7 @@
         {
           "say": "Let the water judge her.",
           "then": "wait_day",
+          "mark": "duck_to_water",
           "irks": [
             "mercy"
           ],
@@ -494,11 +500,12 @@
     "wait_day": {
       "do": "wait",
       "days": [
-        1,
-        2
+        30,
+        30
       ],
       "wake": "none",
-      "journal": "The day of the ordeal came.",
+      "within": "eve",
+      "late": "ordeal",
       "then": "ordeal"
     },
     "ordeal": {
@@ -508,12 +515,18 @@
       "radius": 14,
       "gap": 11,
       "goal": "Be on the bank at {place:pond} for the ordeal",
+      "within": "ordeal",
+      "late": {
+        "?mark:duck_iron": "after_rig",
+        "?": "end:ordeal"
+      },
+      "until": "today, while there is light",
       "lines": [
         {
           "say": "Half of {town} is on the bank. The stool is run out over the deep end on its beam, and {herbwife} is tied into it in her shift. She looks very small."
         },
         {
-          "say": "The examiner reads the charge in the voice he would use for a grain tally. Then he nods to the men at the beam.",
+          "say": "The examiner reads the charge in the voice of someone reading a grain tally, and then nods to the men at the beam.",
           "sound": "minecraft:block.wooden_door.open"
         },
         {
@@ -527,7 +540,7 @@
         },
         {
           "if": "mark:duck_iron",
-          "say": "The examiner writes one word in his book. Those near enough to read it say it is 'clean'.",
+          "say": "The examiner writes one word in the book. Those near enough to read it say it is 'clean'.",
           "mark": "duck_sank"
         },
         {
@@ -541,7 +554,7 @@
         },
         {
           "if": "!mark:duck_iron",
-          "say": "He writes one word in his book. It is not 'clean'.",
+          "say": "One word goes into the book. It is not 'clean'.",
           "mark": "duck_floated"
         }
       ],
@@ -563,7 +576,7 @@
         "And yet. I have stood on that bank eleven times, and nobody sinks so quick as that. I will ask it once, because the Truth asks everything once. Did you see anything done to her clothes?"
       ],
       "voices": {
-        "honour": "He will know a lie when he hears one. It is his whole trade.",
+        "honour": "An examiner knows a lie on hearing one. It is the whole trade.",
         "mercy": "She is out and breathing. Say whatever keeps her so."
       },
       "replies": [
@@ -583,11 +596,11 @@
             "reputation": 15,
             "hearts": 30,
             "town": [
-              "They found a row of iron beans sewn in the hem of Sib Yarrow's shift when it went to the wash. The examiner has them on his table in a row.",
-              "He asked {player} straight out whether anything was done to her clothes. Straight out. And was told no."
+              "They found a row of iron beans sewn in the hem of Sib Yarrow's shift when it went to the wash. The examiner has them laid out on the table in a row.",
+              "The examiner asked {player} straight out whether anything was done to her clothes. Straight out. And was told no."
             ]
           },
-          "journal": "The examiner asked whether anything was done to her clothes. I told him nothing was."
+          "journal": "The examiner asked whether anything was done to her clothes. I said nothing was."
         },
         {
           "say": "Iron in her hems. I carried it there.",
@@ -595,7 +608,7 @@
           "for": [
             "honour"
           ],
-          "journal": "The examiner asked whether anything was done to her clothes. I told him about the iron."
+          "journal": "The examiner asked whether anything was done to her clothes. I owned to the iron."
         }
       ]
     },
@@ -626,7 +639,7 @@
       "say": {
         "?patron:hearthkeeper": "You wear her hearth, as the accused does. I'll hear you all the same. The Truth hears everyone, and weighs them after.",
         "?patron:truth": "You are sworn as I am. Then you know I cannot be kinder than what you bring me.",
-        "?": "You have been four days about it. I hope they were well spent."
+        "?": "You have taken your time about it. I hope it was well spent."
       },
       "replies": [
         {
@@ -651,8 +664,7 @@
           "who": "tanner",
           "say": "The tan yard's drain. {tanner} cut it into the spring at midsummer.",
           "proof": [
-            "mark:duck_proof_tanner",
-            "mark:duck_owned"
+            "mark:duck_proof_tanner"
           ],
           "need": 1,
           "then": "heard_tanner",
@@ -663,8 +675,7 @@
           "who": "shepherd",
           "say": "A dead ewe, put down the well by {shepherd}.",
           "proof": [
-            "mark:duck_proof_shepherd",
-            "mark:duck_owned"
+            "mark:duck_proof_shepherd"
           ],
           "need": 1,
           "then": "heard_shepherd",
@@ -686,7 +697,7 @@
       "none": {
         "say": "I have nothing that would stand.",
         "then": {
-          "?mark:duck_sank": "end:ordeal",
+          "?mark:duck_iron": "end:ordeal",
           "?": "choose"
         }
       }
@@ -749,7 +760,7 @@
         "duck_cleared_end"
       ],
       "town": [
-        "It was never a curse. The examiner wrote down that he was wrong. In ink. I'd not have thought they could.",
+        "It was never a curse. The examiner wrote it down as the court's own mistake. In ink. I'd not have thought they could.",
         "Sib Yarrow's back at her hearth. Half the ones who'd have watched her drown were at her door by Friday with a cough."
       ],
       "returns": {
@@ -783,7 +794,7 @@
       ]
     },
     "careless": {
-      "text": "I told the examiner about the flax. He called it a fault and not a craft, and would not have the pond used for it. {herbwife} cleared the spring pool with her own hands, tends the nine without fee, and has to hear the child's mother out for as long as the mother wants.",
+      "text": "I told the examiner about the flax. It was called a fault and not a craft, and the pond was not to be used for it. {herbwife} cleared the spring pool with her own hands, tends the nine without fee, and has to hear the child's mother out for as long as the mother wants.",
       "reward": {
         "coins": 8,
         "hearts": 15,
@@ -824,7 +835,7 @@
       ]
     },
     "slander": {
-      "text": "I named {named} before the examiner with nothing in my hand that would stand. He would not weigh it. {named} went home knowing who had spoken, and {herbwife} went to the water.",
+      "text": "I named {named} before the examiner with nothing in my hand that would stand. It was not weighed. {named} went home knowing who had spoken, and {herbwife} went to the water.",
       "reward": {
         "hearts": -20,
         "reputation": -10
@@ -849,7 +860,7 @@
       ]
     },
     "rigged": {
-      "text": "{herbwife} sank with iron in her hems and was drawn out alive and written down clean. The examiner asked me one question, and I gave him an answer.",
+      "text": "{herbwife} sank with iron in her hems and was drawn out alive and written down clean. The examiner asked me one question, and I gave an answer.",
       "reward": {
         "hearts": 25
       },
@@ -889,7 +900,7 @@
     },
     "ordeal": {
       "text": {
-        "?mark:duck_sank": "I told the examiner about the iron and could give him nothing better. He put {herbwife} to the water a second time with her hems cut open. She did not sink. They put out her hearth and set her on the road.",
+        "?mark:duck_iron": "I told the examiner about the iron and had nothing better to give. {herbwife} was put to the water a second time with her hems cut open. She did not sink. They put out her hearth and set her on the road.",
         "?": "I let the ordeal go ahead. {herbwife} did not sink. The examiner wrote her down guilty of the well, and they put out her hearth and set her on the road with what she could carry."
       },
       "reward": {
@@ -909,7 +920,7 @@
             16
           ],
           "town": [
-            "The low well is as foul as ever, and Sib Yarrow three weeks gone. Two more sick.",
+            "The low well is as foul as ever, and Sib Yarrow gone. Two more sick.",
             "And nobody to go to for it now. We saw to that ourselves."
           ]
         },
@@ -956,7 +967,7 @@
             16
           ],
           "town": [
-            "The low well is as foul as ever, and Sib Yarrow three weeks gone. Two more sick."
+            "The low well is as foul as ever, and Sib Yarrow gone. Two more sick."
           ]
         }
       ]

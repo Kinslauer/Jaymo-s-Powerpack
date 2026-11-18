@@ -23,7 +23,10 @@
     "hanged": {
       "name": "Tam Rudge",
       "body": "minecraft:zombie",
-      "at": "crossroads",
+      "at": {
+        "?mark:gibbet_walked_off": "heath",
+        "?": "crossroads"
+      },
       "hours": "night"
     },
     "laid": {
@@ -40,6 +43,7 @@
         "Osbert Marl"
       ],
       "body": "fighter",
+      "female": false,
       "at": "post",
       "hours": "day",
       "hand": "minecraft:iron_axe",
@@ -113,6 +117,15 @@
         260
       ],
       "name": "the crossroads gibbet"
+    },
+    "heath": {
+      "at": "near",
+      "from": "crossroads",
+      "dist": [
+        35,
+        60
+      ],
+      "name": "the heath"
     },
     "post": {
       "at": "near",
@@ -831,7 +844,8 @@
           "say": "The other speaks to him, low, and takes his arm as you would a friend who has drunk too much."
         },
         {
-          "say": "He goes with them. He does not look back at the beam."
+          "say": "He goes with them. He does not look back at the beam.",
+          "mark": "gibbet_walked_off"
         },
         {
           "say": "Later, out on the heath, a fire. It burns high and fast, and then it is out.",

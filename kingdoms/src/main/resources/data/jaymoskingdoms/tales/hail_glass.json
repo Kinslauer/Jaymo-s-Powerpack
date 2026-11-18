@@ -4,7 +4,7 @@
   "roll": { "thief": ["clerk", "traveller", "ember"] },
   "cast": {
     "traveller": { "name": ["Tavik Oun", "Isk Varn", "Sele Korrin"], "body": "villager", "job": "none", "at": "house" },
-    "clerk": { "name": ["Perrin Dow", "Aldis Wren", "Hew Tarling"], "body": "villager", "job": "librarian", "at": "house" },
+    "clerk": { "name": ["Perrin Dow", "Aldis Wren", "Hew Tarling"], "body": "villager", "job": "librarian", "female": false, "at": "house" },
     "ember": { "name": ["Kessa Brand", "Oda Harl", "Runa Sprake"], "body": "villager", "job": "toolsmith", "female": true, "at": "works" },
     "fence": { "name": ["Nan Corry", "Sib Harrow", "Jass Quillon"], "body": "villager", "job": "none", "female": true, "at": "hatch", "hours": "night" },
     "sword": { "name": ["Dunstan Roke", "Lew Garrick", "Hob Marsh"], "body": "fighter", "at": "hatch", "health": 55, "damage": 6, "armor": 6, "hand": "minecraft:iron_sword", "chest": "minecraft:leather_chestplate" }

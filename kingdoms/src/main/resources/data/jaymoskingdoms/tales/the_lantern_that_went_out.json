@@ -346,12 +346,12 @@
       "returns": { "who": "ward", "days": [10, 16], "as": "thanks", "say": "This was on the sill of the first mound one dawn, where the thieves left their coal. It is not grave goods. I asked them, in my way, and nobody minded. He used to say a keeper ought to give light and not only carry it. So.", "gift": ["minecraft:soul_lantern*1"] },
       "later": [
         { "days": [24, 36], "if": "!mark:lantern_warned_ward", "letter": { "from": "{ward}", "lines": [
-          "The first winter is done, so I am writing, as I said I would not.",
+          "The first winter is done, so I am writing.",
           "I missed two nights. One was the great snow, when I got as far as the second stone and could not find the third. One I was sick. Both mornings I went up at first light and said sorry at the door, out loud, like a fool. Nothing came down either time. I think they allow for weather. He never told me that. I think he never missed, so he never found out.",
           "The oil froze in the jar at midwinter and I carried it up inside my coat. {giver} sends a boy with bread on the worst days. I have chilblains and a cough, and the light has not been out past one dawn. Come and see it when your road allows."
         ] } },
         { "days": [24, 36], "if": "mark:lantern_warned_ward", "letter": { "from": "{ward}", "lines": [
-          "The first winter is done, so I am writing, as I said I would not.",
+          "The first winter is done, so I am writing.",
           "I missed two nights. One was the great snow, when I got as far as the second stone and could not find the third. One I was sick. Both mornings I went up at first light and said sorry at the door, out loud, like a fool. Nothing came down either time. I think they allow for weather. He never told me that. I think he never missed, so he never found out.",
           "You told me to want other things too. I have a cat now. It will not go past the foot of the hill, so we wait for each other there. It is not much of another thing, but it is not a lantern. Come and see the light when your road allows."
         ] } }

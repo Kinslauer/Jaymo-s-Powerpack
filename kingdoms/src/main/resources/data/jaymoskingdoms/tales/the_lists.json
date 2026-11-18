@@ -74,6 +74,7 @@
       "body": "fighter",
       "female": false,
       "at": "lists",
+      "if": "!mark:lists_rival_struck",
       "hours": "day",
       "health": 85,
       "damage": 8,
@@ -702,7 +703,7 @@
       "say": "Last bout. Hale and Colley, on foot, blunted steel. A man yields or is put down, and whoever kills is struck from my roll. Hale. Are you fit?",
       "replies": [
         {
-          "if": "mark:lists_took_purse",
+          "if": "mark:lists_took_purse & !mark:lists_exposed",
           "say": "Fit. And I remember what I was paid for.",
           "then": "end:threw",
           "for": [
@@ -829,7 +830,7 @@
     "threw": {
       "text": "I went down to Colley in the third exchange and stayed down, as I was paid to. Colley has the prize. {knight} has a beaten name and his debts, and I have the bookie's purse.",
       "reward": {
-        "coins": 20,
+        "coins": 10,
         "hearts": -25,
         "reputation": -6
       },

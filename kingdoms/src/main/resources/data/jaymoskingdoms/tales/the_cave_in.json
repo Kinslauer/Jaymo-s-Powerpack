@@ -20,7 +20,7 @@
       "say": [
         "The Number Two heading came down at the change of shift. Three behind it: old {hurt}, a boy of fourteen, and the new man, {quiet}. We hear tapping. Three taps, then nothing, then three.",
         "We've been at it with picks since dawn and it's wedged like a keystone. Every stone we pull, the hill sends down two more. It wants powder, set low and to the left, by someone whose hands don't shake. Mine shake. I've known {hurt} forty years.",
-        "There's no air way into that heading. The lamp-man reckons the three of them have breath till tomorrow's light, and {hurt} less, for he lay nearest the fall. After that the tapping stops."
+        "There's no air way into that heading. The lamp-man reckons the three of them have breath till tomorrow night, and {hurt} less, for he lay nearest the fall. After that the tapping stops."
       ],
       "replies": [
         { "say": "Give me the powder.", "then": "to_mine", "journal": "A heading has come down at {giver}'s mine with three men behind it. Picks only bring down more. I said I'd set the powder." },

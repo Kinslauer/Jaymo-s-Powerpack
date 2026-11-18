@@ -131,7 +131,7 @@ Every step has `do`, and may have:
 | `slay` | `target`, `count` | Kill so many (`minecraft:zombie`, `#tag`, `*monster`). |
 | `wait` | `days`, `wake`, `letter` | The tale rests `[least, most]` days. `wake`: `giver` (their **!** returns; talking to them goes on), `letter` (a runner brings `letter`: `{ "from", "lines" }`; opening it goes on), `none` (it just goes on). |
 | `defend` | `at`, `waves`, `foes`, `stars` | Hold the town through so many waves after dark. |
-| `escort` | `who`, `to` | Walk `who` to the place alive. |
+| `escort` | `who`, `to` | Walk `who` to the place alive. `"with": ["role", ...]`: others of the cast who keep up with them (set out for the walk even if they're `"late": true`; their own `if` still counts). |
 | `pack` | `at`, `foes`, `count`, `stars` | A pack waits at the place; kill them all. |
 | `build` | `at`, `blocks`, `count` | Place so many blocks (`minecraft:oak_fence`, `#minecraft:fences`) at the place. |
 | `blast` | `at` | A cave-in or a ruined wall at the place; blow it open. |
