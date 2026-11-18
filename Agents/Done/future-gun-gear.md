@@ -1,8 +1,8 @@
 ---
-status: blocked
+status: done
 task: future-gun-gear
 branch: claude/future-gun-gear
-pr: 
+pr: 1671
 mods: powers
 versions: 
 started: 2026-11-16
@@ -26,3 +26,4 @@ owns:
 
 ## Done
 What a player will see, and what wasn't tested.
+- 2026-11-18 20:12 PR #1671 is merged into master; moved to Agents/Done.
