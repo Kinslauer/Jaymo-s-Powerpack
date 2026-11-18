@@ -1,5 +1,5 @@
 ---
-status: running
+status: in-review
 task: lanterns-08-dream
 branch: claude/lanterns-08-dream
 with: Claude Code (PC)
@@ -26,3 +26,4 @@ owns:
 - Lore: "Called in a dream" (new) paragraph after "How a power comes".
 
 ## Done
+A powerless sleeper may be called: the view tilts up, a dream wakes their power next morning, a nightmare lived through (blind, phantoms, never lethal) wakes it corrupted. Compiled on the PC, CI passes; not played.
