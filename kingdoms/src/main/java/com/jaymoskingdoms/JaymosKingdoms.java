@@ -1070,6 +1070,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (Awakening picks) the Cordon, who hunt the awakened (and its courts' attachment), and awakened strangers on the road
 		Cordon.register();
 		AwakenedStrangers.register();
+		// the Wither's coming: the sky stays dark while one lives, it wrecks what was built first, and its fight
+		com.jaymoskingdoms.wither.WitherFight.register();
 		// (0.7.289) a villager's first meeting with you is a handshake (last, so every other use of a villager goes first)
 		Handshakes.registerGreetings();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {

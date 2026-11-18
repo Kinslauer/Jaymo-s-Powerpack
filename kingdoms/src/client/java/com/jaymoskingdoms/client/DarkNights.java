@@ -220,6 +220,12 @@ public final class DarkNights {
 			lastNight = 0.0F;
 			return true;
 		}
+		if (com.jaymoskingdoms.wither.WitherNight.clientOn) {
+			// a Wither lives: the sky is at its darkest, day or night, until it dies
+			lastNight = 1.0F;
+			lastMoon = 0.0F;
+			return true;
+		}
 		EnvironmentAttributeProbe probe = minecraft.gameRenderer.mainCamera().attributeProbe();
 		float sunY = Mth.cos(probe.getValue(EnvironmentAttributes.SUN_ANGLE, partialTicks) * Mth.DEG_TO_RAD);
 		float night = Mth.clamp((DAY_SUN_Y - sunY) / (DAY_SUN_Y - NIGHT_SUN_Y), 0.0F, 1.0F);
