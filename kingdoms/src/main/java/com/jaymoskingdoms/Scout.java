@@ -108,7 +108,7 @@ public final class Scout {
 			for (Holder<Structure> structure : spot.structures()) {
 				if (biome == null) {
 					int y = generator.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, ground.heights(), random) + ground.shift();
-					biome = level.getBiome(new BlockPos(x, y, z));
+					biome = level.getUncachedNoiseBiome(net.minecraft.core.QuartPos.fromBlock(x), net.minecraft.core.QuartPos.fromBlock(y), net.minecraft.core.QuartPos.fromBlock(z));
 				}
 				if (!structure.value().biomes().contains(biome)) {
 					continue;

@@ -154,10 +154,11 @@ public final class LifeStory {
 	static final int FREE_TRIES = 3, FREE_STEP = 480, FREE_WIDEN = 64;
 	/**
 	 * (2026-11-18, Andy: respawns were too close to the last death) A start in the wild or open land is never within
-	 * DEATH_APART blocks of where the player last died; with no spot that far in its own ring, the ring widens by
-	 * DEATH_WIDEN. A start that puts them inside a town, kingdom or fief (the {@code settled} spots) may stay close.
+	 * DEATH_APART blocks of where the player last died, nor further than DEATH_FAR; with no spot in its own ring, the
+	 * start falls back to the DEATH_APART-DEATH_FAR ring round the death. A start that puts them inside a town, kingdom or
+	 * fief (the {@code settled} spots) may stay close.
 	 */
-	static final int DEATH_APART = 500, DEATH_WIDEN = 1000;
+	static final int DEATH_APART = 500, DEATH_FAR = 1000;
 	/** "Let fate decide" on the power: how often the childhood's power gets the affinity anyway. */
 	static final float FATE_LEANS = 0.5F;
 	/** Every start's kit: bread; a capital's few coins; a merchant's child's purse; a caver's torches. */
@@ -2989,7 +2990,8 @@ public final class LifeStory {
 	/**
 	 * (2026-11-14) Where a setting out on {@code level} is worked out from ({@link #ORIGIN_SPREAD}): a random point round the
 	 * world's spawn, off the open sea if one of {@link #ORIGIN_TRIES} is, and never within {@link #ORIGIN_APART} of where
-	 * {@code player} last woke, nor of {@link #DEATH_APART} of where they last died. Only biome noise is read, so nothing is made
+	 * {@code player} last woke; with a last death known the point is {@link #DEATH_APART} to {@link #DEATH_FAR} from it instead
+	 * (round the spawn only when none is). Only biome noise is read, so nothing is made
 	 * or loaded to choose it.
 	 */
 	static BlockPos origin(ServerLevel level, ServerPlayer player, RandomSource random) {
@@ -3004,9 +3006,14 @@ public final class LifeStory {
 		double spread = made == null ? ORIGIN_SPREAD : Math.min(ORIGIN_SPREAD, made.reach());
 		for (int i = 0; i < ORIGIN_TRIES; i++) {
 			double angle = random.nextDouble() * Math.PI * 2.0, d = spread * Math.sqrt(random.nextDouble());
-			BlockPos at = new BlockPos(spawn.getX() + Mth.floor(Math.cos(angle) * d), spawn.getY(), spawn.getZ() + Mth.floor(Math.sin(angle) * d));
-			if (woke != null && flat(at, woke) < (double) ORIGIN_APART * ORIGIN_APART || !Pregen.inside(level, at)
-				|| died != null && flat(at, died) < (double) DEATH_APART * DEATH_APART) {
+			BlockPos from = spawn;
+			if (died != null) {
+				// with a death known, the point is DEATH_APART to DEATH_FAR from it (an even spread over that ring)
+				from = died;
+				d = Math.sqrt((double) DEATH_APART * DEATH_APART + random.nextDouble() * ((double) DEATH_FAR * DEATH_FAR - (double) DEATH_APART * DEATH_APART));
+			}
+			BlockPos at = new BlockPos(from.getX() + Mth.floor(Math.cos(angle) * d), spawn.getY(), from.getZ() + Mth.floor(Math.sin(angle) * d));
+			if (woke != null && flat(at, woke) < (double) ORIGIN_APART * ORIGIN_APART || !Pregen.inside(level, at)) {
 				continue;
 			}
 			if (!level.getUncachedNoiseBiome(net.minecraft.core.QuartPos.fromBlock(at.getX()), sea, net.minecraft.core.QuartPos.fromBlock(at.getZ()))
@@ -3119,8 +3126,9 @@ public final class LifeStory {
 
 	/**
 	 * The same; {@code settled}: the spot is inside a town, kingdom or fief (Andy's exception), so it may be near the last death.
-	 * Otherwise it is {@link #DEATH_APART} from it ({@link #awayFromDeath}), and a ring in the open (from {@link #BANISHED_MIN} out)
-	 * that has no such spot widens by {@link #DEATH_WIDEN}; a place's own small ring (a camp, a wreck) fails instead, for the wild to take over.
+	 * Otherwise it is {@link #DEATH_APART} to {@link #DEATH_FAR} from it ({@link #awayFromDeath}), and a ring in the open (from
+	 * {@link #BANISHED_MIN} out) that has no such spot takes one from the ring round the death itself; a place's own small ring
+	 * (a camp, a wreck) fails instead, for the wild to take over.
 	 */
 	private static @Nullable BlockPos spot(ServerLevel level, @Nullable Landing mate, BlockPos center, int min, int max, RandomSource random,
 		boolean settled) {
@@ -3134,7 +3142,7 @@ public final class LifeStory {
 			at = ground(level, center, max, max + FREE_WIDEN, random, ok);
 		}
 		if (at == null && !settled && DEATH != null && min >= BANISHED_MIN) {
-			at = ground(level, center, max + FREE_WIDEN, max + DEATH_WIDEN, random, ok);
+			at = ground(level, DEATH, DEATH_APART, DEATH_FAR, random, ok);
 		}
 		return at;
 	}
@@ -3145,9 +3153,9 @@ public final class LifeStory {
 			.map(net.minecraft.core.GlobalPos::pos).orElse(null);
 	}
 
-	/** Whether {@code at} is at least {@link #DEATH_APART} blocks from where the player last died (always, with no death known). */
+	/** Whether {@code at} is {@link #DEATH_APART} to {@link #DEATH_FAR} blocks from where the player last died (always, with no death known). */
 	private static boolean awayFromDeath(BlockPos at) {
-		return DEATH == null || flat(at, DEATH) >= (double) DEATH_APART * DEATH_APART;
+		return DEATH == null || flat(at, DEATH) >= (double) DEATH_APART * DEATH_APART && flat(at, DEATH) <= (double) DEATH_FAR * DEATH_FAR;
 	}
 
 	/** (0.7.417) The camp a chained mate is held by, if it still stands. */

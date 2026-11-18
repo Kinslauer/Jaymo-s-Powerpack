@@ -68,7 +68,8 @@ public final class FarLand {
 			if (y <= generator.getSeaLevel()) {
 				continue;
 			}
-			Holder<Biome> biome = level.getBiome(new BlockPos(x, y + ground.shift(), z));
+			Holder<Biome> biome = level.getUncachedNoiseBiome(net.minecraft.core.QuartPos.fromBlock(x), net.minecraft.core.QuartPos.fromBlock(y + ground.shift()),
+				net.minecraft.core.QuartPos.fromBlock(z));
 			if (biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_RIVER)) {
 				continue;
 			}
