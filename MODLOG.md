@@ -5821,3 +5821,7 @@ The menu bar's plates shrink to stay left of the look button on a narrow screen,
 
 - `UiStyle` (generated from `tools/ui_style`) gains `pill(graphics, font, x, y, label, value, color)` (a small rimmed tag, returns its width), `pillWidth`, `frame` (a thin gold frame with small diamonds at the corners and a short accent tick over the title) and `panelFramed` (the panel fill plus that frame). No screen of Powers uses them yet.
 - Built; not played.
+
+## 0.24.75 (2026-11-18): Logging in works again with Inferno's library
+
+- StrawberryLib (the library Inferno came with) asks whether a player is a spectator while the game is still making the local player, before it has a connection, and every login failed with a packet handling error. The game now answers that it doesn't know yet, and looks again a moment later.
