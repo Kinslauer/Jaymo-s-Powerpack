@@ -106,7 +106,8 @@ public final class Classes {
 	public enum PlayerClass {
 		THIEF, WARLORD, MAGE("fire", "arcane", "warding", "mending"), BRUTE, MARKSMAN,
 		SORCERER("water", "fire", "earth", "air", "lightning", "ice", "restoration", "death", "blood", "wild"), RIDER,
-		CLERIC("hearthkeeper", "anvil_father", "deep_mother", "green_huntsman", "lantern_warden", "crowned_sun", "ash_whisperer", "truth"),
+		// Andy: Clerics never pledge to the Ash Whisperer; she backs only death, blood and the evil sorceries (Warlocks keep her)
+		CLERIC("hearthkeeper", "anvil_father", "deep_mother", "green_huntsman", "lantern_warden", "crowned_sun", "truth"),
 		DRUID, MONK, PALADIN("mercy", "justice", "honour"), RANGER("undead", "raiders", "beasts", "spiders", "greenskins", "monsters"),
 		WARLOCK("hearthkeeper", "anvil_father", "deep_mother", "green_huntsman", "lantern_warden", "crowned_sun", "ash_whisperer", "truth", "reaper"),
 		TINKERER;

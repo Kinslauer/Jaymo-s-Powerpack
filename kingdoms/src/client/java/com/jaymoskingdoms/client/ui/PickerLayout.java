@@ -66,6 +66,13 @@ public final class PickerLayout {
 	/** The figure column, the list and the info panel: x and width of each, and the body's top and bottom. */
 	public int figX, figW, listX, listW, infoX, infoW, bodyTop, bodyBottom;
 	public int cols = 1;
+	/**
+	 * A row's tallest height. The life story raises it ({@link #FILL_ROW_MAX}) so its few answers fill the middle column as big
+	 * boxes, with a bigger icon box and the name and tag wrapped in full (Andy: "there shouldnt be so much unused space").
+	 */
+	public int rowMax = ROW_MAX;
+	/** The tallest a row may grow when a screen lets the list fill its column, and the biggest its icon box gets. */
+	public static final int FILL_ROW_MAX = 80, FILL_BOX_MAX = 40;
 	private int buttons, rowH, rows;
 	private int listScroll;
 	private int infoScroll, infoContentH, infoViewH;
@@ -178,7 +185,7 @@ public final class PickerLayout {
 	private void rowsFor(int n) {
 		this.rows = (n + this.cols - 1) / this.cols;
 		int avail = this.bodyBottom - this.bodyTop;
-		this.rowH = Math.clamp(avail / Math.max(1, this.rows), ROW_MIN, ROW_MAX);
+		this.rowH = Math.clamp(avail / Math.max(1, this.rows), ROW_MIN, Math.max(ROW_MIN, this.rowMax));
 		this.listScroll = Math.clamp(this.listScroll, 0, Math.max(0, this.rows - visibleRows()));
 	}
 
@@ -210,6 +217,11 @@ public final class PickerLayout {
 
 	/** The rows: icon in a rim of its colour, name, a one-line tag when the row is tall enough; the picked one has a gold rim. */
 	public void list(GuiGraphicsExtractor graphics, Font font, List<Entry> entries, int picked, int hover, int accent) {
+		list(graphics, font, entries, picked, hover, accent, false);
+	}
+
+	/** The same; with {@code crossed} the picked row's box is also struck through with a hand-drawn X ({@link #cross}). */
+	public void list(GuiGraphicsExtractor graphics, Font font, List<Entry> entries, int picked, int hover, int accent, boolean crossed) {
 		int n = entries.size();
 		rowsFor(n);
 		int cw = colW(), vis = visibleRows();
@@ -228,27 +240,86 @@ public final class PickerLayout {
 			} else {
 				rim(graphics, x, y, cw, h, 0x30FFFFFF);
 			}
-			int box = Math.min(h - 4, 18);
-			int bx = x + 3, by = y + (h - box) / 2;
+			boolean big = h > ROW_MAX;
+			int box = big ? Math.min(h - 8, FILL_BOX_MAX) : Math.min(h - 4, 18);
+			int bx = x + (big ? 5 : 3), by = y + (h - box) / 2;
 			rim(graphics, bx, by, box, box, e.locked() ? 0x40FFFFFF : e.rim());
-			if (!e.locked()) {
+			if (!e.locked() && (e.glyph() != null || !e.icon().isEmpty())) {
+				// in a big box the picture grows with it
+				float k = big ? Math.max(1.0F, (box - 6) / 16.0F) : 1.0F;
+				graphics.pose().pushMatrix();
+				graphics.pose().translate(bx + (box - 16 * k) / 2.0F, by + (box - 16 * k) / 2.0F);
+				graphics.pose().scale(k, k);
 				if (e.glyph() != null) {
-					e.glyph().paint(graphics, bx + (box - 16) / 2, by + (box - 16) / 2);
-				} else if (!e.icon().isEmpty()) {
-					graphics.item(e.icon(), bx + (box - 16) / 2, by + (box - 16) / 2);
+					e.glyph().paint(graphics, 0, 0);
+				} else {
+					graphics.item(e.icon(), 0, 0);
 				}
+				graphics.pose().popMatrix();
 			}
-			int tx = bx + box + 4, room = x + cw - 3 - tx;
+			if (crossed && isPicked) {
+				cross(graphics, bx, by, box);
+			}
+			int tx = bx + box + (big ? 7 : 4), room = x + cw - (big ? 6 : 3) - tx;
 			int nameColor = e.locked() ? Ui.HINT : isPicked ? accent : Ui.TEXT;
-			if (tagged && e.tag() != null) {
+			int tagColor = e.locked() ? 0xFF50505C : Ui.DIM;
+			List<FormattedCharSequence> nameLines = big ? font.split(e.name(), room) : List.of();
+			List<FormattedCharSequence> tagLines = big && e.tag() != null ? font.split(e.tag(), room) : List.of();
+			int textH = (nameLines.size() + tagLines.size()) * Ui.LINE + (tagLines.isEmpty() ? 0 : 2);
+			if (big && textH <= h - 6) {
+				// a big row: the name and the tag wrapped in full, centred in the row's height
+				int ty = y + (h - textH) / 2 + 1;
+				for (FormattedCharSequence l : nameLines) {
+					graphics.text(font, l, tx, ty, nameColor);
+					ty += Ui.LINE;
+				}
+				ty += 2;
+				for (FormattedCharSequence l : tagLines) {
+					graphics.text(font, l, tx, ty, tagColor);
+					ty += Ui.LINE;
+				}
+			} else if (tagged && e.tag() != null) {
 				Ui.line(graphics, font, e.name(), tx, y + 4, room, nameColor);
-				Ui.line(graphics, font, e.tag(), tx, y + 4 + Ui.LINE + 1, room, e.locked() ? 0xFF50505C : Ui.DIM);
+				Ui.line(graphics, font, e.tag(), tx, y + 4 + Ui.LINE + 1, room, tagColor);
 			} else {
 				Ui.line(graphics, font, e.name(), tx, y + (h - 8) / 2 + 1, room, nameColor);
 			}
 		}
 		if (this.rows > vis) {
 			Ui.scrollbar(graphics, this.listX + this.listW - 3, this.bodyTop, vis * this.rowH - 2, vis, this.rows, this.listScroll);
+		}
+	}
+
+	/** The hand-drawn X's ink: a quill's red, with a darker edge under each stroke. */
+	public static final int CROSS_INK = 0xFFD8322A, CROSS_EDGE = 0xFF5A0E0A;
+
+	/**
+	 * Andy's mark for a picked box: an X struck across the square {@code size} box at x, y as if by hand, two slightly wavering
+	 * strokes, the second running a little past the box's corner. The waver is fixed, so the mark doesn't shimmer.
+	 */
+	public static void cross(GuiGraphicsExtractor graphics, int x, int y, int size) {
+		int over = Math.max(1, size / 6);
+		stroke(graphics, x + 1, y, x + size - 1 + over / 2, y + size - 1 + over / 2, size, 0.0);
+		stroke(graphics, x + size - 1, y - over / 2, x - over, y + size - 1 + over, size, 1.7);
+	}
+
+	/** One stroke of the X, from (x0, y0) to (x1, y1), wavering up to a pixel off its line in bigger boxes. */
+	private static void stroke(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, int size, double phase) {
+		double dx = x1 - x0, dy = y1 - y0, len = Math.sqrt(dx * dx + dy * dy);
+		int steps = Math.max(1, (int)Math.ceil(len * 2));
+		double wave = size >= 12 ? 1.0 : 0.0;
+		// a big box gets a broader nib
+		int pen = size >= 24 ? 2 : 1;
+		int lastX = Integer.MIN_VALUE, lastY = Integer.MIN_VALUE;
+		for (int i = 0; i <= steps; i++) {
+			double t = (double)i / steps, off = wave * Math.sin(t * Math.PI * 1.6 + phase) * Math.sin(t * Math.PI);
+			int px = (int)Math.round(x0 + dx * t - dy / len * off), py = (int)Math.round(y0 + dy * t + dx / len * off);
+			if (px != lastX || py != lastY) {
+				graphics.fill(px, py + pen, px + pen, py + 2 * pen, CROSS_EDGE);
+				graphics.fill(px, py, px + pen, py + pen, CROSS_INK);
+				lastX = px;
+				lastY = py;
+			}
 		}
 	}
 
