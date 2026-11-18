@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 02:02). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 02:11). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -23,8 +23,8 @@ kanban-plugin: board
 - [ ] [[Inbox/weapon-hooks-and-breaks|weapon-hooks-and-breaks]] · pc-claude · #1713 · in-review
 - [ ] [[Inbox/fishing-fire-and-crates|fishing-fire-and-crates]] · pc-claude · #1715 · in-review
 - [ ] [[Inbox/inferno-fire|inferno-fire]] · pc-claude · #1716 · in-review
-- [ ] [[Inbox/labyrinth-builders-craft|labyrinth-builders-craft]] · pc-claude · #1714 · in-review
 - [ ] [[Inbox/wither-reincarnated-fight|wither-reincarnated-fight]] · pc-claude · #1717 · in-review
+- [ ] [[Inbox/labyrinth-builders-craft|labyrinth-builders-craft]] · pc-claude · #1714 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 
 
