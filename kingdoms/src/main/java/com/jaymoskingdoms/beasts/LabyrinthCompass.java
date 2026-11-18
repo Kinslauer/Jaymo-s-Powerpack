@@ -13,8 +13,8 @@ import net.minecraft.world.item.component.LodestoneTracker;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The labyrinth-builders' compass, built from the geared plates of one of their instruments (found in early dungeon
- * chests, {@link LabyrinthCraft#GEARED_PLATE}): a bronze compass that turns toward the nearest labyrinth
+ * The labyrinth-builders' compass, built from the geared plates of one of their instruments (found in ocean ruin and
+ * shipwreck chests, {@link LabyrinthCraft#GEARED_PLATE}): a bronze compass that turns toward the nearest labyrinth
  * ({@link Labyrinths#ALWAYS}, {@link Labyrinths#SOME}) of the world it is in. It is the game's own lodestone compass
  * (the tracker names a place and the compass needle follows it), looked up again {@link #EVERY} ticks while held in a
  * hand; where there is no labyrinth within {@link #REACH} chunks the needle spins.

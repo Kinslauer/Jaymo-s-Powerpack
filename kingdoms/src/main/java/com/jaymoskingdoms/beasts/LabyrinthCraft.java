@@ -41,7 +41,7 @@ import java.util.Set;
  * The labyrinth-builders' craft (Lore.md, "The labyrinth-builders' craft"): the forgotten hands that raised the labyrinths
  * worked bronze and fire. Registers what they left:
  * <ul>
- * <li>the <b>geared plates</b> of one of their instruments, found in early dungeon chests ({@link #EARLY_DUNGEONS}), and the {@link LabyrinthCompass} built from them;</li>
+ * <li>the <b>geared plates</b> of one of their instruments, found in ocean ruin and shipwreck chests ({@link #SEA_CHESTS}), and the {@link LabyrinthCompass} built from them;</li>
  * <li>the <b>rune gates</b> ({@link RuneGateBlock}) and the three <b>rune tablets</b> that open them, set out in a
  * labyrinth when a player first comes near ({@link LabyrinthKeep});</li>
  * <li>the <b>bombardier beetle</b>, its <b>queen</b> and their <b>glands</b> ({@link BombardierBeetle}, {@link BeetleQueen},
@@ -51,12 +51,12 @@ import java.util.Set;
  * </ul>
  */
 public final class LabyrinthCraft {
-	/** What an early dungeon chest holds of the plates: its chance, and how many. */
+	/** What a sea chest holds of the plates: its chance, and how many. */
 	static final float PLATE_CHANCE = 0.4F;
 	static final int PLATE_MIN = 1, PLATE_MAX = 2;
-	/** The early dungeon chest tables the plates turn up in. */
-	static final Set<String> EARLY_DUNGEONS = Set.of("chests/simple_dungeon", "chests/abandoned_mineshaft", "chests/desert_pyramid",
-		"chests/jungle_temple");
+	/** The chest tables the plates turn up in: what the sea took (Andy's pick, ocean ruins and shipwrecks). */
+	static final Set<String> SEA_CHESTS = Set.of("chests/underwater_ruin_small", "chests/underwater_ruin_big",
+		"chests/shipwreck_map", "chests/shipwreck_supply", "chests/shipwreck_treasure");
 	/** The warm lands where the bombardier beetles live. */
 	static final TagKey<Biome> HAS_BOMBARDIER = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_bombardier_beetle"));
 	/** Their natural spawn weight and group. */
@@ -111,7 +111,7 @@ public final class LabyrinthCraft {
 
 		LootTableEvents.MODIFY_DROPS.register((table, context, drops) -> {
 			if (table.value().getParamSet() != LootContextParamSets.CHEST || context.getRandom().nextFloat() >= PLATE_CHANCE
-				|| !EARLY_DUNGEONS.contains(table.unwrapKey().map(key -> key.identifier().getPath()).orElse(""))) {
+				|| !SEA_CHESTS.contains(table.unwrapKey().map(key -> key.identifier().getPath()).orElse(""))) {
 				return;
 			}
 			drops.add(new ItemStack(GEARED_PLATE, PLATE_MIN + context.getRandom().nextInt(PLATE_MAX - PLATE_MIN + 1)));
