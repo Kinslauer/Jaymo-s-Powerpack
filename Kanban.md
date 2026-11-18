@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 14:03). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 14:13). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -13,7 +13,6 @@ kanban-plugin: board
 - [ ] [[Inbox/rig-beetle-4-flight|rig-beetle-4-flight]] · for any · open
 - [ ] [[Inbox/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · for any · open
 - [ ] [[Inbox/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]] · for any · open
-- [ ] [[Inbox/lanterns-02-space-small|lanterns-02-space-small]] · for any · open
 - [ ] [[Inbox/lanterns-03-patrol-small|lanterns-03-patrol-small]] · for any · open
 - [ ] [[Inbox/lanterns-04-crime-word|lanterns-04-crime-word]] · for any · open
 - [ ] [[Inbox/lanterns-05-patrol-law|lanterns-05-patrol-law]] · for any · open
@@ -29,6 +28,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/rig-beetle-3-back-rig|rig-beetle-3-back-rig]] · ☀️ Apollo · claimed
+- [ ] [[Inbox/lanterns-02-space-small|lanterns-02-space-small]] · lanterns-02-space-small · claimed
 
 
 ## In review
