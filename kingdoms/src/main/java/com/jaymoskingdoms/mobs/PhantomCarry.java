@@ -8,6 +8,7 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -64,6 +65,12 @@ public final class PhantomCarry {
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(PhantomCarry::tick);
+		// a carried player who logged out comes back on the phantom (vanilla saves the ride) with no hold left: let go
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+			if (handler.player.getVehicle() instanceof Phantom) {
+				handler.player.stopRiding();
+			}
+		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			HOLDING.clear();
 			AFTER.clear();
@@ -99,6 +106,10 @@ public final class PhantomCarry {
 	}
 
 	private static void tick(MinecraftServer server) {
+		if (!AFTER.isEmpty() && server.getTickCount() % 200 == 0) {
+			long now = server.overworld().getGameTime();
+			AFTER.values().removeIf(after -> now >= after);
+		}
 		if (HOLDING.isEmpty()) {
 			return;
 		}

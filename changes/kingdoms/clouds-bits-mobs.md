@@ -1,6 +1,6 @@
 # mobs: golems hunt creepers, creepers burn, cave spiders, phantoms carry, deeper gear
 Clouds and Bits patch 5 (Bits and Balance's ideas, our own code).
-- **Golems vs creepers**: iron golems, and the town golems that fight on foot, go for creepers; a creeper a golem hits has its fuse put out and its swelling undone, so it doesn't go off (`mobs/GolemHunt`, `CreeperAccessor`).
+- **Golems vs creepers**: the town golems that fight on foot go for creepers (iron golems already did); a creeper a golem hits has its fuse put out and its swelling undone, so it doesn't go off (`mobs/GolemHunt`, `CreeperAccessor`).
 - **Creepers burn by day**: creepers join `burn_in_daylight` (shade, water, rain and a helmet protect, as for zombies). Stalkers is untouched: a creeper frozen by your stare in the sun just burns.
 - **Cave spiders underground**: a natural spider spawn below y 40 with no skylight is a cave spider 1 time in 4 (`mobs/UnderMobs`, in `NaturalSpawnerMixin`'s spawn hook).
 - **Phantoms carry you off**: a real phantom's swoop on a player in the open sky takes hold 1 time in 5 and climbs with them riding it, then lets go after 3 to 6 s or once it has lost a third of its health since taking hold. The carried player's blows on it count double and sneaking wriggles them free; fall damage is the ordinary kind. Never a player in a vehicle, downed, asleep, creative or spectator; a 20 s wait before the same phantom or player again (`mobs/PhantomCarry`, `PhantomHurtMixin`). The living nightmare's hallucinated phantoms are not entities and are left alone.

@@ -1,13 +1,10 @@
 package com.jaymoskingdoms.mobs;
 
-import com.jaymoskingdoms.mixin.MobAccessor;
 import com.jaymoskingdoms.mixin.tweaks.CreeperAccessor;
 import java.util.function.BooleanSupplier;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.golem.AbstractGolem;
-import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.monster.Creeper;
 
 /**
@@ -18,18 +15,12 @@ import net.minecraft.world.entity.monster.Creeper;
 public final class GolemHunt {
 	/** How often (1 in this many ticks) a golem looks for a creeper to go for. */
 	static final int LOOK_INTERVAL = 10;
-	/** After an iron golem's own revenge (1) and its hunt for monsters (2). */
-	static final int PRIORITY = 3;
 
 	private GolemHunt() {
 	}
 
 	public static void register() {
-		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
-			if (entity instanceof IronGolem golem) {
-				((MobAccessor)golem).jaymoskingdoms$targets().addGoal(PRIORITY, creeperGoal(golem, () -> true));
-			}
-		});
+		// iron golems already hunt creepers (VillagerHunters); here a golem's blow also puts the fuse out
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
 			if (entity instanceof Creeper creeper && source.getEntity() instanceof AbstractGolem) {
 				defuse(creeper);
