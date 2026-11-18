@@ -4,6 +4,7 @@ import com.jaymoskingdoms.Careers;
 import com.jaymoskingdoms.Classes;
 import com.jaymoskingdoms.Heritage;
 import com.jaymoskingdoms.Journal;
+import com.jaymoskingdoms.MagicMenu;
 import com.jaymoskingdoms.MenuNet;
 import com.jaymoskingdoms.Parties;
 import com.jaymoskingdoms.Patron;
@@ -44,11 +45,14 @@ public final class MenuCompat {
 	static final String POWERS = "jaymospowers";
 	/** The room Kingdoms' pages leave at the top of the screen for the character menu's strip of tabs (none without Powers). */
 	public static final int STRIP = FabricLoader.getInstance().isModLoaded(POWERS) ? 26 : 0;
+	/** The room Kingdoms' pages leave at the left of the screen for Powers' side list (0 with the bar), kept up to date from Powers. */
+	public static int SIDE;
 	static final String MENU = "com.jaymospowers.client.menu.MenuTabs";
 	/** Powers' Map page: when it opens, the settlements are asked for. */
 	static final String MAP_SCREEN = "com.jaymospowers.client.menu.MapScreen";
 	/** Where Kingdoms' tabs sit among Powers' (Character 0, Powers 10, Map 50). */
-	static final int ORDER_CLASS = 15, ORDER_SKILLS = 20, ORDER_FORMS = 22, ORDER_STORY = 25, ORDER_GROWTH = 27, ORDER_JOURNAL = 30, ORDER_FACTION = 40, ORDER_PARTY = 60;
+	static final int ORDER_CLASS = 15, ORDER_SKILLS = 20, ORDER_FORMS = 22, ORDER_STORY = 25, ORDER_GROWTH = 27, ORDER_JOURNAL = 30, ORDER_FACTION = 40, ORDER_PARTY = 60,
+		ORDER_MAGIC = 24, ORDER_VALOR = 26, ORDER_BOONS = 28, ORDER_TIER = 35, ORDER_FOLLOWERS = 62;
 	/** The pins' colour for your party. */
 	static final int PARTY_PIN = 0xFFC21A;
 
@@ -92,19 +96,93 @@ public final class MenuCompat {
 				() -> Minecraft.getInstance().gui.setScreen(new FactionScreen()), s -> s instanceof FactionScreen, s -> ((FactionScreen)s).corner());
 			tab(register, "party", ORDER_PARTY, () -> new ItemStack(Items.SHIELD), "menu.jaymoskingdoms.tab.party",
 				() -> Minecraft.getInstance().gui.setScreen(new PartyScreen()), s -> s instanceof PartyScreen, s -> ((PartyScreen)s).corner());
-			Supplier<List<Component[]>> rows = MenuCompat::characterRows;
-			menu.getMethod("characterRows", Supplier.class).invoke(null, rows);
+			tab(register, "tier", ORDER_TIER, () -> new ItemStack(Items.COMPASS), "menu.jaymoskingdoms.tab.tier",
+				() -> Minecraft.getInstance().gui.setScreen(new TierScreen(null)), s -> s instanceof TierScreen, s -> new int[] {0, 0});
+			tab(register, "valor", ORDER_VALOR, () -> new ItemStack(Items.GOLDEN_SWORD), "menu.jaymoskingdoms.tab.valor",
+				() -> Minecraft.getInstance().gui.setScreen(new ValorScreen(null)), s -> s instanceof ValorScreen, s -> new int[] {0, 0});
+			register.invoke(null, "boons", ORDER_BOONS, (Supplier<ItemStack>)() -> new ItemStack(Items.NETHER_STAR),
+				Component.translatable("menu.jaymoskingdoms.tab.boons"), (Runnable)() -> Minecraft.getInstance().gui.setScreen(new BoonScreen()),
+				(Predicate<Screen>)s -> s instanceof BoonScreen, (Function<Screen, int[]>)s -> new int[] {0, 0},
+				(BooleanSupplier)() -> Minecraft.getInstance().player != null && Patrons.of(Minecraft.getInstance().player) != null);
+			tab(register, "magic", ORDER_MAGIC, () -> new ItemStack(Items.ENCHANTED_BOOK), "menu.jaymoskingdoms.tab.magic", MenuCompat::openMagic,
+				s -> s instanceof MagicScreen || s instanceof MagicPageScreen, s -> new int[] {0, 0});
+			tab(register, "followers", ORDER_FOLLOWERS, () -> new ItemStack(Items.LEAD), "menu.jaymoskingdoms.tab.followers",
+				FollowersScreen::openAll, s -> s instanceof FollowersScreen, s -> new int[] {0, 0});
+			arrange(menu);
+			listen(menu);
 			Supplier<List<Map.Entry<Component, BlockPos>>> pins = MenuCompat::pins;
 			menu.getMethod("pins", Supplier.class).invoke(null, pins);
 		} catch (ReflectiveOperationException | LinkageError e) {
 			// an older or newer Powers without the menu: K and M still work on their own
 			return;
 		}
+		syncSide();
+		ScreenEvents.BEFORE_INIT.register((minecraft, screen, width, height) -> syncSide());
 		ScreenEvents.AFTER_INIT.register((minecraft, screen, width, height) -> {
 			if (screen.getClass().getName().equals(MAP_SCREEN)) {
 				FactionScreen.ask();
 			}
 		});
+	}
+
+	/** Sorts Kingdoms' tabs into the menu's groups and gives locked ones their hints, each call apart so an older Powers still takes the rest. */
+	private static void arrange(Class<?> menu) {
+		String[][] groups = {{"skills", "you"}, {"class", "you"}, {"growth", "you"}, {"forms", "powers"}, {"magic", "powers"}, {"valor", "powers"},
+			{"boons", "powers"}, {"story", "world"}, {"journal", "world"}, {"tier", "world"}, {"faction", "people"}, {"party", "people"}, {"followers", "people"}};
+		for (String[] g : groups) {
+			reflect(menu, "group", new Class<?>[] {String.class, String.class}, g[0], g[1]);
+		}
+		reflect(menu, "wide", new Class<?>[] {String.class}, "skills");
+		reflect(menu, "locked", new Class<?>[] {String.class, Supplier.class}, "forms",
+			(Supplier<Component>)() -> Component.translatable("menu.jaymoskingdoms.locked.forms"));
+		reflect(menu, "locked", new Class<?>[] {String.class, Supplier.class}, "boons",
+			(Supplier<Component>)() -> Component.translatable("menu.jaymoskingdoms.locked.boons"));
+	}
+
+	/**
+	 * Gives the Character page its Kingdoms rows by panel. A Powers without panels takes them as one list, as the page
+	 * always did.
+	 */
+	private static void listen(Class<?> menu) throws ReflectiveOperationException {
+		try {
+			Method panel = menu.getMethod("characterRows", String.class, Supplier.class);
+			panel.invoke(null, "level", (Supplier<List<Component[]>>)MenuCompat::levelRows);
+			panel.invoke(null, "header", (Supplier<List<Component[]>>)MenuCompat::headerRows);
+			panel.invoke(null, "attributes", (Supplier<List<Component[]>>)MenuCompat::attributeRows);
+			panel.invoke(null, "record", (Supplier<List<Component[]>>)MenuCompat::recordRows);
+		} catch (NoSuchMethodException e) {
+			Supplier<List<Component[]>> rows = MenuCompat::characterRows;
+			menu.getMethod("characterRows", Supplier.class).invoke(null, rows);
+		}
+	}
+
+	private static void reflect(Class<?> menu, String name, Class<?>[] types, Object... args) {
+		try {
+			menu.getMethod(name, types).invoke(null, args);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			// an older Powers without this: the tabs just come without it
+		}
+	}
+
+	/** The room Powers' side list takes at the left (read from Powers each time a screen opens, as it changes with {@code /menulook}). */
+	private static void syncSide() {
+		try {
+			SIDE = Class.forName(MENU).getField("SIDE").getInt(null);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			SIDE = 0;
+		}
+	}
+
+	/** Where a page {@code pageW} wide sits across a screen {@code screenW} wide, clear of Powers' side list. */
+	public static int centre(int screenW, int pageW) {
+		return Math.max(SIDE, SIDE + (screenW - SIDE - pageW) / 2);
+	}
+
+	/** The magic menu's own key: the server sends the screen back. */
+	private static void openMagic() {
+		if (Minecraft.getInstance().player != null && ClientPlayNetworking.canSend(MagicMenu.Pick.TYPE)) {
+			ClientPlayNetworking.send(new MagicMenu.Pick("key", ""));
+		}
 	}
 
 	private static void tab(Method register, String id, int order, Supplier<ItemStack> icon, String label, Runnable open, Predicate<Screen> owns,
@@ -128,6 +206,101 @@ public final class MenuCompat {
 
 	private static Component[] row(String label, Component value) {
 		return new Component[] {Component.translatable(label), value};
+	}
+
+	private static Component none() {
+		return Component.translatable("menu.jaymoskingdoms.character.none");
+	}
+
+	/** The header's one row: your character level. */
+	private static List<Component[]> levelRows() {
+		LocalPlayer player = Minecraft.getInstance().player;
+		List<Component[]> rows = new ArrayList<>();
+		if (player != null) {
+			rows.add(new Component[] {Component.translatable("menu.jaymoskingdoms.character.level_label"),
+				Component.literal(Integer.toString(com.jaymoskingdoms.Stats.characterLevel(Skills.of(player))))});
+		}
+		return rows;
+	}
+
+	/** Who you are, a line each: heritage, class (and second class), and the title renown has earned. */
+	private static List<Component[]> headerRows() {
+		LocalPlayer player = Minecraft.getInstance().player;
+		List<Component[]> rows = new ArrayList<>();
+		if (player == null) {
+			return rows;
+		}
+		Heritage.Kind heritage = Heritage.of(player);
+		if (heritage != null) {
+			rows.add(row("menu.jaymoskingdoms.character.heritage", Component.translatable("heritage.jaymoskingdoms." + heritage.key())));
+		}
+		Classes.PlayerClass cls = Classes.classOf(player);
+		if (cls != null) {
+			Component name = Component.translatable("class.jaymoskingdoms." + cls.key());
+			Classes.PlayerClass second = Classes.second(player);
+			rows.add(row("menu.jaymoskingdoms.character.class",
+				second == null ? name : Component.translatable("menu.jaymoskingdoms.character.pair", name, Component.translatable("class.jaymoskingdoms." + second.key()))));
+		}
+		Integer code = player.getAttached(Renown.TITLE);
+		Skills.Pillar pillar = code == null ? null : Renown.titlePillar(code);
+		if (pillar != null) {
+			rows.add(row("menu.jaymoskingdoms.character.renown", Component.translatable("title.jaymoskingdoms." + pillar.key() + (Renown.titleMaster(code) ? ".master" : ""))));
+		}
+		return rows;
+	}
+
+	/** The attributes (Might, Grit...) with what you have in each. */
+	private static List<Component[]> attributeRows() {
+		LocalPlayer player = Minecraft.getInstance().player;
+		List<Component[]> rows = new ArrayList<>();
+		if (player == null) {
+			return rows;
+		}
+		for (com.jaymoskingdoms.Stats.Stat stat : com.jaymoskingdoms.Stats.Stat.values()) {
+			if (com.jaymoskingdoms.Stats.shown(player, stat)) {
+				rows.add(new Component[] {Component.translatable("stat.jaymoskingdoms." + stat.key()),
+					Component.literal(Integer.toString(com.jaymoskingdoms.Stats.value(player, stat)))});
+			}
+		}
+		return rows;
+	}
+
+	/** The Record panel's Kingdoms rows: career, skills, world tier, patron, realm and what you have seen. */
+	private static List<Component[]> recordRows() {
+		LocalPlayer player = Minecraft.getInstance().player;
+		List<Component[]> rows = new ArrayList<>();
+		if (player == null) {
+			return rows;
+		}
+		Component none = none();
+		Component career = Careers.title(player);
+		rows.add(row("menu.jaymoskingdoms.character.career", career == null ? none : career));
+		Skills.Progress skills = Skills.of(player);
+		for (Skills.Pillar p : Skills.Pillar.values()) {
+			rows.add(row("skill.jaymoskingdoms." + p.key(), Component.translatable("menu.jaymoskingdoms.character.level", skills.level(p))));
+		}
+		if (WorldTiers.unlocked(player)) {
+			// (the world tiers, once one past Hearth is open to you)
+			rows.add(row("menu.jaymoskingdoms.character.tier", WorldTiers.of(player).title()));
+		}
+		Patron patron = Patrons.of(player);
+		rows.add(row("menu.jaymoskingdoms.character.patron", patron == null ? none : Component.translatable("patron.jaymoskingdoms." + patron.key)));
+		// what you have seen of the other side (Exposure), and a sleep the living nightmare haunts (LivingNightmare)
+		rows.add(row("menu.jaymoskingdoms.character.exposure", com.jaymoskingdoms.Exposure.describe(com.jaymoskingdoms.Exposure.of(player))));
+		// (the illager tongue, once you have any of it: IllagerTongue)
+		int illager = player.getAttachedOrElse(com.jaymoskingdoms.IllagerTongue.POINTS, 0);
+		if (illager > 0) {
+			rows.add(row("menu.jaymoskingdoms.character.illager_tongue", com.jaymoskingdoms.IllagerTongue.describe(illager)));
+		}
+		if (com.jaymoskingdoms.LivingNightmare.nights(player) > 0) {
+			rows.add(row("menu.jaymoskingdoms.character.sleep", Component.translatable("menu.jaymoskingdoms.character.sleep.haunted")));
+		}
+		MenuNet.Info info = FactionScreen.info;
+		if (info != null) {
+			rows.add(row("menu.jaymoskingdoms.character.realm", info.sworn()
+				? Component.translatable("menu.jaymoskingdoms.character.realm_rank", Component.translatable(info.rank()), info.name()) : none));
+		}
+		return rows;
 	}
 
 	/** The Character page's Kingdoms section. */

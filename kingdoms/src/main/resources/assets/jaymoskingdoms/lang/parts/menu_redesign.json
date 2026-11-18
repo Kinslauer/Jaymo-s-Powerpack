@@ -1,0 +1,11 @@
+{
+	"menu.jaymoskingdoms.tab.tier": "World tier",
+	"menu.jaymoskingdoms.tab.valor": "Valor",
+	"menu.jaymoskingdoms.tab.boons": "Boons",
+	"menu.jaymoskingdoms.tab.magic": "Magic",
+	"menu.jaymoskingdoms.tab.followers": "Followers",
+	"menu.jaymoskingdoms.locked.forms": "Opens when you learn a form",
+	"menu.jaymoskingdoms.locked.boons": "Opens when you have a patron",
+	"menu.jaymoskingdoms.character.level_label": "Character level",
+	"menu.jaymoskingdoms.character.pair": "%s · %s"
+}

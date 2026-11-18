@@ -62,6 +62,15 @@ public final class FollowersScreen extends Screen {
 		});
 	}
 
+	/** Opens the orders for all your followers (the menu's page for them), if the server can take orders and you have learned them. */
+	static void openAll() {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (minecraft.player != null && ClientPlayNetworking.canSend(Followers.Give.TYPE)
+			&& com.jaymoskingdoms.TreeLocks.check(minecraft.player, com.jaymoskingdoms.TreeLocks.Lock.ORDERS)) {
+			minecraft.gui.setScreen(new FollowersScreen(-1, Component.translatable("gui.jaymoskingdoms.followers.all")));
+		}
+	}
+
 	/** Opens the orders for {@code villager} (from MCA's menu, which Orders stands in for), if the server can take orders. */
 	public static void open(Entity villager) {
 		Minecraft minecraft = Minecraft.getInstance();
