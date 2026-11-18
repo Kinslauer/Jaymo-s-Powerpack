@@ -1398,6 +1398,16 @@ rifts in the air, like an Arsenal user's, and fly through them. That is how they
 *The Long Defence*. These are tears, not gates: nothing stands open after they pass, so there is still no portal to the
 demons' country beyond the Nether's own.
 
+**The lit country** (new; Infernal Expansion Redux picks, 2026-11-18; Claude's placement, for Andy to approve). Above the
+demons' Gloam, where glowstone hangs thickest from the Nether's roof, lies a canyon of pale glittering sand, and the light
+there is food. Lampflies drink it out of the stone until a lump goes dim and then dull; blind gulpers sit in the sand and
+swallow any lit thing that moves, lampfly or traveller. Where the gulpers are left alone the canyon stays bright; where
+they are hunted out the lampflies drink it dark and then starve, and the stone slowly takes its light back. The Crowned
+Sun's priests take glowstone in tribute and pay well for bright stone, nothing for dull. Ember moths, magma voles and
+blink beetles are the Nether's own animals, like the strider: nobody made them. Among the canyon's spikes stand a few
+broken frames of glowstone. Cold air comes off them and frost forms on the stone nearby, and nothing goes through. The
+wicked dead who wake down here walk toward them first; none of them is the way up.
+
 **The Hornkin.** Bull-headed raiders of the Nether, rings through their muzzles, who burst out of Nether portals
 for gold and answer to a **Hornkin Warlord** in his fort; a town can pay them off in gold. Brutes and hurlers march with them,
 and there are zombified Hornkin too.
