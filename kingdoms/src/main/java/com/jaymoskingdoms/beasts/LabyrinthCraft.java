@@ -34,15 +34,14 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * The labyrinth-builders' craft (Lore.md, "The labyrinth-builders' craft"): the forgotten hands that raised the labyrinths
  * worked bronze and fire. Registers what they left:
  * <ul>
- * <li>the <b>geared plates</b> of one of their instruments, found in the chests of the Deep Mother's drowned colonnades
- * ({@link #plates}), and the {@link LabyrinthCompass} built from them;</li>
+ * <li>the <b>geared plates</b> of one of their instruments, found in early dungeon chests ({@link #EARLY_DUNGEONS}), and the {@link LabyrinthCompass} built from them;</li>
  * <li>the <b>rune gates</b> ({@link RuneGateBlock}) and the three <b>rune tablets</b> that open them, set out in a
  * labyrinth when a player first comes near ({@link LabyrinthKeep});</li>
  * <li>the <b>bombardier beetle</b>, its <b>queen</b> and their <b>glands</b> ({@link BombardierBeetle}, {@link BeetleQueen},
@@ -52,11 +51,12 @@ import java.util.Optional;
  * </ul>
  */
 public final class LabyrinthCraft {
-	/** What a chest in a drowned colonnade holds of the plates: its chance, and how many. */
+	/** What an early dungeon chest holds of the plates: its chance, and how many. */
 	static final float PLATE_CHANCE = 0.4F;
 	static final int PLATE_MIN = 1, PLATE_MAX = 2;
-	/** A drowned colonnade is a structure or a chest table with this in its name (Moog's Ocean Structures' own ids are not fixed here). */
-	static final String COLONNADE = "colonnade";
+	/** The early dungeon chest tables the plates turn up in. */
+	static final Set<String> EARLY_DUNGEONS = Set.of("chests/simple_dungeon", "chests/abandoned_mineshaft", "chests/desert_pyramid",
+		"chests/jungle_temple");
 	/** The warm lands where the bombardier beetles live. */
 	static final TagKey<Biome> HAS_BOMBARDIER = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_bombardier_beetle"));
 	/** Their natural spawn weight and group. */
@@ -111,8 +111,7 @@ public final class LabyrinthCraft {
 
 		LootTableEvents.MODIFY_DROPS.register((table, context, drops) -> {
 			if (table.value().getParamSet() != LootContextParamSets.CHEST || context.getRandom().nextFloat() >= PLATE_CHANCE
-				|| !plates(context.getLevel(), context.getOptional(LootContextParams.ORIGIN),
-					table.unwrapKey().map(key -> key.identifier().getPath()).orElse(""))) {
+				|| !EARLY_DUNGEONS.contains(table.unwrapKey().map(key -> key.identifier().getPath()).orElse(""))) {
 				return;
 			}
 			drops.add(new ItemStack(GEARED_PLATE, PLATE_MIN + context.getRandom().nextInt(PLATE_MAX - PLATE_MIN + 1)));
@@ -130,18 +129,6 @@ public final class LabyrinthCraft {
 			output.accept(GLAND_FLAMER);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> output.insertAfter(Items.COMPASS, LABYRINTH_COMPASS));
-	}
-
-	/** Whether {@code origin} (a chest being opened) lies in a drowned colonnade. */
-	private static boolean plates(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 origin, String table) {
-		if (origin == null) {
-			return false;
-		}
-		if (table.contains(COLONNADE)) {
-			return true;
-		}
-		return level.structureManager().getStructureWithPieceAt(net.minecraft.core.BlockPos.containing(origin),
-			holder -> holder.unwrapKey().map(key -> key.identifier().getPath().contains(COLONNADE)).orElse(false)).isValid();
 	}
 
 	private static Item item(String name, Function<Item.Properties, Item> make, Item.Properties properties) {
