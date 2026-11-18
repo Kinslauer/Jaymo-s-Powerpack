@@ -2457,3 +2457,9 @@ Andy's scaling pick "feasts": a late food tier. Three feast dishes from Legend-a
 
 - Lifting, taking hold of and butchering a corpse show three drawn bars under the crosshair with a caption ("Butchering (3 pieces left)") instead of a `||||....` line, drawn by Jaymo's Powers (`HudBars`; without Powers the old kind of line shows). They still stop your swings while you hold.
 - Compiled; not played.
+
+## 0.6.49 (2026-11-18): ash pile texture fixed (#1759)
+
+- **Ash piles**: `ash_pile.png` had a broken zlib stream (no header) and an RGB colour type over RGBA data, so every client showed the missing texture. Re-encoded as a valid 16x16 RGBA PNG with the same pixels. The eight ash pile models now also set a `particle` texture.
+- Scanned every PNG under the three mods: this was the only malformed one.
+- Not built or played.
