@@ -13,7 +13,6 @@ kanban-plugin: board
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · for any · open
 - [ ] [[Inbox/harness-upkeep|harness-upkeep]] · ☀️ Apollo · open
 - [ ] [[Inbox/rig-beetle-3-back-rig|rig-beetle-3-back-rig]] · ☀️ Apollo · open
-- [ ] [[Inbox/lanterns-05-patrol-law|lanterns-05-patrol-law]] · for any · open
 - [ ] [[Inbox/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · for any · open
 
 
@@ -42,6 +41,7 @@ kanban-plugin: board
 - [ ] [[Inbox/lanterns-08-dream|lanterns-08-dream]] · lanterns-08-dream · #1769 · in-review
 - [ ] [[Inbox/lanterns-09-talk-typed|lanterns-09-talk-typed]] · lanterns-09-talk-typed · #1770 · in-review
 - [ ] [[Inbox/lanterns-04-crime-word|lanterns-04-crime-word]] · lanterns-04-crime-word · #1763 · in-review
+- [ ] [[Inbox/lanterns-05-patrol-law|lanterns-05-patrol-law]] · lanterns-05-patrol-law · #1764 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 
 
