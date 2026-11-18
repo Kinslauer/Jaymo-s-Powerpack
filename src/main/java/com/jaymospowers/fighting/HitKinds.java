@@ -63,6 +63,11 @@ public final class HitKinds {
 		if (amount <= 0.0F || !body.isAlive()) {
 			return;
 		}
+		// a hit the body shrugs off (immune, or fire on the fire-proof) must not open its guard for the next one
+		if (body.level() instanceof net.minecraft.server.level.ServerLevel level && body.isInvulnerableTo(level, source)
+			|| source.is(DamageTypeTags.IS_FIRE) && (body.fireImmune() || body.hasEffect(net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE))) {
+			return;
+		}
 		int kind = of(source).ordinal();
 		long[] landed = LANDED.computeIfAbsent(body, b -> {
 			long[] fresh = new long[Kind.values().length];
