@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: harness-barding
 branch: claude/harness-barding
 with:
-pr:
+pr: 1744
 mods: kingdoms
 versions:
 started: 2026-11-18
