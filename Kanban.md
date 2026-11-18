@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 16:49). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 16:50). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -19,8 +19,8 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · claimed
-- [ ] [[Inbox/lanterns-10-orbit|lanterns-10-orbit]] · lanterns-10-orbit · claimed
 - [ ] [[Inbox/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]] · ☀️ Apollo · claimed
+- [ ] [[Inbox/lanterns-10-orbit|lanterns-10-orbit]] · lanterns-10-orbit · #1772 · claimed
 
 
 ## In review
