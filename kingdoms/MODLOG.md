@@ -14661,3 +14661,7 @@ Andy's picks from the scaling audit (early game kept weak, late game given room 
 
 - **FrostTechLayer**: a villager's or patrolman's scouter is drawn 0.6 off the head (just past the hat layer and MCA's hair) instead of a helmet's 1.0, so it hugs the face. With Powers' smaller scouter art it no longer covers half the face.
 - Not built in the cloud (no Fabric Maven) or played; a one-constant change.
+
+## 0.9.98 (2026-11-18): Villagers stop re-pathing every tick to places they can't reach
+
+- Many of Kingdoms' errands (guards at their post, workers, pedlars, drivers and the rest) ask for a new path whenever the last walk is done. A walk to a spot they can't reach is done at once, so such a villager pathed again every tick. A camp of guards with an unreachable post held the server half a minute behind when a player came near (2026-11-16). A mob that just failed to reach a block now waits a second before trying for that same block again.

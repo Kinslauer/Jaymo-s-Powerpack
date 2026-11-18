@@ -1,2 +1,0 @@
-# Villagers stop re-pathing every tick to places they can't reach
-- Many of Kingdoms' errands (guards at their post, workers, pedlars, drivers and the rest) ask for a new path whenever the last walk is done. A walk to a spot they can't reach is done at once, so such a villager pathed again every tick. A camp of guards with an unreachable post held the server half a minute behind when a player came near (2026-11-16). A mob that just failed to reach a block now waits a second before trying for that same block again.
