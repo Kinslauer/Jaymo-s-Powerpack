@@ -5998,3 +5998,14 @@ Patch 2 of the Clouds and Bits plan (Andy's picks `bb-vslab`, `bb-mixslab`, `bb-
 
 - Changes: blood puddles, footprints and wall marks are registered with Iris (as translucent particles) when it is loaded. Before, switching a shader pack on made Iris log "Missing program minecraft:pipeline/jaymospowers_blood_decal in override list" and a burst of GL_INVALID_OPERATION errors, and the decals could fail to draw.
 - Built by CI; not played.
+
+## 0.25.14 (2026-11-18): worldgen no longer reads or writes past its chunk edge (#1761)
+
+- **Sky springs**: the flood fill that checks whether a spring's water would run out of the Aether's bottom now stops at the 3x3 chunks round the spring's chunk (past that counts as a leak, as an unloaded chunk already did), so it no longer reads terrain it may not touch. Thousands of "unsafe terrain read" warnings a day.
+- **Eden island caves**: tunnels are cut and vented only inside the 3x3 chunks round the feature's origin chunk, so blocks are no longer lost to a far chunk.
+- Not played; nothing built on this PC (CI compiles).
+
+## 0.25.15 (2026-11-18): Skitter wall climb helper no longer clashes with Kingdoms claws (#1762)
+
+- The wall-climb helper (`besideWall`, `WALL_GAP`) is now `@Unique`, so Mixin stops logging an overwrite conflict at every boot and each mod keeps its own copy.
+- Not built or played.

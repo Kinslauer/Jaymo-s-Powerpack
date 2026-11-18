@@ -15048,3 +15048,13 @@ Clouds and Bits patch 5 (Bits and Balance's ideas, our own code).
 
 - Fixes: curing someone of the Hollow's blight, and being seen getting up as one of the Hollow, moved nothing in a villager's bearings toward you. A cure now gives +20 trust, +15 respect, +10 warmth; seeing you turn gives -10 trust and -15 warmth (Andy's numbers).
 - Built by CI; not played.
+
+## 0.10.33 (2026-11-18): brood lair stays in its chunk (#1761)
+
+- **Brood lair**: the roof search for hanging egg sacs and cobwebs now skips columns outside the chunk being built (the piece's clipped bounding box), so it no longer reads neighbouring chunks during worldgen. Random rolls are unchanged, so the lair looks the same.
+- Not played; nothing built on this PC (CI compiles).
+
+## 0.10.34 (2026-11-18): Climbing claws wall helper no longer clashes with Powers Skitter (#1762)
+
+- The wall-climb helper (`besideWall`, `WALL_GAP`) is now `@Unique`, so Mixin stops logging an overwrite conflict at every boot and each mod keeps its own copy.
+- Not built or played.
