@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 11:32). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 11:33). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -32,7 +32,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/harness-creeds-and-lands|harness-creeds-and-lands]] · 🪶 Quill · #1728 · writing
 
 
 ## In review
@@ -43,6 +42,7 @@ kanban-plugin: board
 - [ ] [[Inbox/harness-helms-finishes-crests|harness-helms-finishes-crests]] · ☀️ Apollo · #1721 · in-review
 - [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · in-review
 - [ ] [[Inbox/harness-barding|harness-barding]] · ☀️ Apollo · #1744 · in-review
+- [ ] [[Inbox/harness-creeds-and-lands|harness-creeds-and-lands]] · ☀️ Apollo · #1728 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 
 
