@@ -2040,6 +2040,12 @@ is on the wall.
 
 (new) **Heirs and bridges.** A lord who holds the bridges on a realm's river holds their tolls, and a realm's heir can be promised in marriage for such rights. When an heir runs from a match, the realm's guard is sent quietly, house by house, to bring them home unharmed and unremarked (tale: The Heir in the Hayloft).
 
+(new) **The Wither's coming** (Claude's placement for the Wither: Reincarnated picks, 2026-11-18). When the Wither is raised the sky goes dark over the whole land and stays dark while it lives. At first it does not hunt the one who raised it: it tears down what people built, houses first, then walls and towers. The dead near it wake with its light in their eyes and follow it; the barrow knights, who keep their own oath, do not. Every living thing that can run, runs. This is what the Dread tier's land remembers.
+
+(new) **What fire leaves** (Claude's placement for the Inferno picks, 2026-11-18). Burnt ground is not dead ground. Where a fire has run the grass lies black until the rain heals it, and fireweed, goldenrod and wild poppies come up in the ash before anything else; the bees follow them. The charcoal burners go in after a wildfire for the charred trunks still standing, and the Ash Whisperer's people say a fire that bites is a fire nobody watched. Smiths know a metal by the colour it burns: copper burns green. Soul fire, out of the demons' country, burns blue and bites twice as deep. Now and then an oak grows on burnt ground that fire will not take, its leaves grey as iron or yellow as gold by what lies in the rock beneath it, and the Anvil-Father's miners dig where it stands.
+
+(new) **Fishing the fire** (Claude's placement for the Tide picks, 2026-11-18). In the Ash the demons' villages fish the lava lakes from the warm edges, on forged rods that will not burn, for fish that keep to the hot shallows the way fish keep to a hot spring.
+
 ## Rules for writing against this
 
 - **Nothing explains the old war.** The Warrior-born, the Maw, the future and the loss of the world are shown, never
