@@ -14988,3 +14988,30 @@ Andy, 2026-11-18: only the kingdoms that generate properly (Epic villages) are k
 
 - **Starts**: a start in the wild or open land lands 500 to 1000 blocks from where the player last died (the vanilla last-death record): the setting-out point is drawn in that ring, and an open ring with no such spot takes one from the 500-1000 ring round the death. Starts that put the player inside a town, kingdom or fief (a capital, sworn, evicted, the moon-cursed village edge, the village starts) may stay close. A camp or wreck start with no such place in range falls to the wild. While little of the world is made yet (pregeneration), a start may still fall back to the spawn.
 - Built by CI; not played.
+
+## 0.10.25 (2026-11-18): mobs: golems hunt creepers, creepers burn, cave spiders, phantoms carry, deeper gear (#1740)
+
+Clouds and Bits patch 5 (Bits and Balance's ideas, our own code).
+- **Golems vs creepers**: the town golems that fight on foot go for creepers (iron golems already did); a creeper a golem hits has its fuse put out and its swelling undone, so it doesn't go off (`mobs/GolemHunt`, `CreeperAccessor`).
+- **Creepers burn by day**: creepers join `burn_in_daylight` (shade, water, rain and a helmet protect, as for zombies). Stalkers is untouched: a creeper frozen by your stare in the sun just burns.
+- **Cave spiders underground**: a natural spider spawn below y 40 with no skylight is a cave spider 1 time in 4 (`mobs/UnderMobs`, in `NaturalSpawnerMixin`'s spawn hook).
+- **Phantoms carry you off**: a real phantom's swoop on a player in the open sky takes hold 1 time in 5 and climbs with them riding it, then lets go after 3 to 6 s or once it has lost a third of its health since taking hold. The carried player's blows on it count double and sneaking wriggles them free; fall damage is the ordinary kind. Never a player in a vehicle, downed, asleep, creative or spectator; a 20 s wait before the same phantom or player again (`mobs/PhantomCarry`, `PhantomHurtMixin`). The living nightmare's hallucinated phantoms are not entities and are left alone.
+- **Deeper monsters, older gear**: zombies, skeletons (armour and blades) and vindicators (a better blade) that spawn naturally below y 0 are dressed from the world-tier gear tables one row higher per depth band (y -1, -25, -49), and the band is kept on them, so a world tier taken later stacks on top (`MonsterGear#armDeep`).
+- Built; not played. Not done: Kingdoms' own bespoke monsters (their gear is their own), town golems that don't fight on foot.
+
+## 0.10.26 (2026-11-18): knocking and companions spared (clouds/bits patch 4) (#1740)
+
+- **Knocking**: left-click a closed door with an empty hand (sneak still breaks it) to knock twice, no damage. With MCA
+  the villager whose home (bed) is by the door, within 20 blocks, walks to it; at night only if they have 30 hearts or
+  more with you, and then they wake. With no one home, a guard in earshot comes instead (`Knocking`).
+- **Don't hit your own companions**: your blows skip the companions that follow you (sneak and they land).
+- Built; not played.
+
+## 0.10.27 (2026-11-18): sky decks - lumpy tops, daily skies, gaps, high wisps (#1740)
+
+- **Lumpy tops**: some squares of the low and high cloud decks rise in mounds of one to three extra slices; few in fair weather, many as rain gathers.
+- **A different sky each day**: each deck's height (within 12 blocks), drift speed (0.7x to 1.4x) and opacity (0.8x to 1.15x) are rolled from the day number and ease in over about a minute at dawn. The roll uses the day only, as the client has no world seed.
+- **Gaps**: fair weather leaves clear patches in the decks (a new pattern each day, crossfaded at dawn); storms close them.
+- **High wisps**: a third, faint deck at about 236 blocks, two slices, drifting 1.8x as fast, near white by day and warm at dusk. Off in low-end mode, which also has no bumps.
+- Classes: `CloudDecks` (drift is now kept per deck, so a changed pace never jumps a deck). Tuning constants are at the top of the class.
+- Built; not played.

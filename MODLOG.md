@@ -5895,3 +5895,54 @@ The menu bar's plates shrink to stay left of the look button on a narrow screen,
 - **Wakes**: a survivor left for dead on the Overworld's land (any cause but a fall, and not one carried in, captured, lair-bound or berthed) now wakes about 500 to 1000 blocks from where they fell. A boss-spared one keeps its own range, moved out to 500-800. A drowned one no longer washes up near the spot; the far ring replaces the shore search there. The Nether, the End and ceilinged worlds keep the near wake.
 - **FarLand** (`core/FarLand.java`): picks the spot without making a chunk. Up to 48 random columns in the ring are scored from the generator alone (ground height above the sea, biome not ocean or river, the lie of the land on four sides), the gentlest is taken, and only that one chunk is loaded and checked as before; the rest of the chunk is tried before a try is spent.
 - Built by CI; not played.
+
+## 0.25.2 (2026-11-18): building blocks - vertical slabs, quarter steps, mixed slabs, paired and waterlogged doors (#1740)
+
+Patch 2 of the Clouds and Bits plan (Andy's picks `bb-vslab`, `bb-mixslab`, `bb-doors`; the idea of the pack Bits and Balance, our own code and art).
+- **Vertical slabs and quarter steps**: every block the layer blocks cover (planks, logs, stems, bamboo, our sky woods, stone, bricks, sandstones...) now has a vertical slab (`<block>_vslab`) and a quarter step (`<block>_quarter`), built like the block (hardness, sound, tool, burning). A vertical slab is half a block standing on one side; the second goes on the empty half (any click that would make a double slab) and the two are the full block. A quarter step is a beam 8 by 8 px and a block long; up to four share a block, one in each corner of its cross-section (a new one goes where the cursor is; onto a block that already holds some, it goes into the free corner past the face you click), and four are the full block. Both waterlog until full and drop what they hold. Cut at the stonecutter (block into 2 vertical slabs or 4 quarter steps, a vertical slab into 2 quarter steps) and, in wood, at the saw (four blocks into 8 vertical slabs, a vertical slab into 2 quarter steps; a block or two alone would clash with the layer and plank saw recipes). Two vertical slabs or four quarter steps craft back into the block. Models, recipes and loot come from `tools/gen_building_blocks.py`; names are in `lang/parts/buildblocks.json`.
+- **Mixed slabs**: a slab put into the empty half of a different kind of slab (any vanilla or modded `SlabBlock`) makes a Mixed Slab block entity that keeps both, drawn by a block-entity renderer. Mining takes only the half you look at (at its own slab's speed, with the right tool, dropping as it would), leaving the other slab where it was; a blast or piston break drops both. The same slab on a slab is still vanilla's double slab.
+- **Paired doors**: opening or shutting a door by hand also moves its neighbour when the two are a pair (same facing, hinges on the outer sides); sneak to work one alone. It acts on `DoorBlock` itself, so vanilla's, Macaw's and Spooky Doors' doors pair alike. Doors only redstone opens (iron) are left to the redstone.
+- **Waterlogged doors, fence gates and pressure plates**: they gain vanilla's `waterlogged` property by mixin (default dry, so old worlds load as they were), hold water when placed in it or filled by a bucket, and keep it flowing.
+- **Left out**: lanterns, chains and hanging signs hanging under a top slab (every hanging block would need its own support rule and a drawn offset).
+- Built; not played. Compile-checked only.
+
+## 0.25.3 (2026-11-18): Fighting: snowballs sting, mixed-source hits, arrow pick, tipped clouds, keep XP, no one-shots (Clouds and Bits patch 6) (#1740)
+
+- **Snowballs sting** (`fighting.SnowballSting`): 1 damage and a 3 s Freezing chill; 3 damage and no chill against Nether creatures (`jaymospowers:nether_creatures` tag) and Emberborn players. Thrown rocks keep their own rules.
+- **Hits from different sources** (`fighting.HitKinds`): immunity after a hit is per kind of damage (fire, magic and bleeding, melee, projectile, explosion, everything else). A kind that hasn't landed in 10 ticks lands in full during another kind's cooldown; the same kind still waits. The cooldown is `LivingEntity.damageCooldownTime`; powers that clear `Entity.setInvulnerableTime` are unchanged.
+- **Pick your arrow** (`fighting.ArrowPick`, client `ArrowPickClient`): scrolling while a bow or crossbow is drawn steps through the arrow kinds it can fire (worn quiver first, then the pack); the pick is saved on the weapon as `jaymospowers:chosen_arrow` and drawn beside the hotbar with its count. Picking a kind in Kitchen's quiver turns the quiver to bring it up. Sneak + scroll (stances) and riding gaits keep the wheel when nothing is drawn.
+- **Tipped arrows leave a cloud** (`fighting.TippedClouds`): a 1.5-block, 3 s lingering cloud of the arrow's potion where it hits.
+- **Keep some XP** (`fighting.KeepXp`): dying with keepInventory off, you come back with 40% of your levels.
+- **No one-hit deaths from full health** (`core.wounds.NoOneShot`): a blast that would have gibbed a full-health player goes down as the downed state instead; void, /kill, beheadings, executions, totems and No Mercy are untouched.
+- Built; not played.
+
+## 0.25.4 (2026-11-18): moving about - late jumps, auto walk, pull riders off, pet-safe swings (clouds/bits patch 4) (#1740)
+
+- **Late jumps**: a jump pressed up to 4 ticks (2 in heavy armour, 15+ armour points) after walking off a ledge still
+  jumps; holding jump under a low ceiling keeps jumping instead of waiting after each bump (`client/moving/LateJumps`).
+- **Auto walk**: an unbound key ("Auto walk (toggle)") walks you forward until you press forward or back, open a
+  screen or die (`client/moving/AutoWalk`, `AutoWalkInputMixin`).
+- **Pull riders off**: sneak and right-click a mount, cart or boat to take its passengers off; never the driver, you,
+  or a carried body (`moving/PullRiders`).
+- **Don't hit your own pets**: your melee and weapon sweeps skip your own tamed animals (anything ownable that you own,
+  horses included); sneak and the blow lands (`moving/PetSafe`). Kingdoms' companions are in its own note.
+- Built; not played.
+
+## 0.25.5 (2026-11-18): screen and chat - biome names, use bar, mentions, item sharing, small touches (#1740)
+
+- **Biome name** (`client/bits/BiomeTitle`): walking into a new biome shows its name, small, in the top-left rail for 3 s, once per biome per 5 minutes (a biome must hold 1 s first, so a step over a border shows nothing). Only the biome's own name, and only a biome that has one in the language file. The lookup is the plain one at your feet, so One Dimension's bands name whichever band you stand in.
+- **Use bar** (`client/bits/UseBar`): eating, drinking, brushing, a horn, drawing a bow, loading a crossbow and winding up a trident put a thin bar under the crosshair (HUD BELOW zone, row 5, the flat charge-bar look) that fills as the use goes on; a full draw turns it white. Shield, spyglass and other holds with no end show nothing.
+- **Mentions** (`client/bits/Mentions`): a line with `@<your name>` shows the mention bold and gold and pings you. Your username, your display name (the MCA character name when you made one) and the first word of each all count (`@Aldric` finds Aldric Stone), without regard to case. Done on the receiving side on what arrives, so it works with Kingdoms' proximity chat (its per-hearer lines are game messages); plain chat pings but can't be recoloured.
+- **Item sharing** (`bits/ItemShare`, `client/bits/ItemShareClient`): Shift+T over an item in a container screen (not the creative inventory, not while typing in a text box) says it in chat with its hover tooltip: "<name> shows [item]." The client sends the slot of the open menu; the server reads its own copy of the stack, one share a second per player. With Kingdoms it goes only to players within 24 blocks, under the name each of them knows (Stranger until introduced); without Kingdoms, to everyone.
+- **Night vision** (`client/bits/mixin/NightVisionFadeMixin`): fades out evenly over its last 10 s instead of the vanilla flicker (the owl mask's dimming still caps it).
+- **Soul fire burns blue** (`bits/SoulBurn`, `client/bits/SoulFlames`): when anything sets an entity alight (a longer burn than it had), the server notes whether soul fire or a lit soul campfire was touching it; the flag is synced, and the flames on that entity, and the fire across your own view, are drawn from the soul fire sprites until they go out.
+- **Held item while riding** (`FirstPersonModelMountedHandsMixin`): with First-person Model, riding now shows vanilla's hand and your held item. Nothing in vanilla or our own code hides it, so this is the one fix that could be missing the real cause.
+- Built; not played. Not tested in game: the Shift+T share, the blue flames' sprite lookup, the riding item.
+
+## 0.25.6 (2026-11-18): World bits - ores in the stone they grow in, big coal veins, bottled cloud (#1740)
+
+- **Ores in stone**: coal, iron, copper, gold, redstone, lapis, diamond and emerald each come in andesite, diorite, granite and tuff (32 blocks, original textures laid from vanilla's own ore pixels over the stone). They are the plain ore in everything but their look: same hardness, tool tier, experience and loot table (fortune applies; silk touch gives the plain ore), they smelt and blast the same, and sit in the vanilla `*_ores` and `c:ores/*` tags, so the Tinkers smeltery melts the iron, gold and copper ones as it does the plain ore. Vanilla coal, lapis, redstone and emerald features now lay the variant wherever the stone is one of the four, and the great iron, copper and gold veins do the same. Diamond ore is still never laid (only the block exists).
+- **Big coal veins and the Nether**: large coal veins in shallow andesite and deep tuff, with now and then a coal block; Nether gold veins (the odd raw gold block) and quartz veins in the netherrack. New chunks only.
+- **Bottled cloud**: an empty glass bottle used on a Cloudbank or any aercloud, or in the air in the Cloud Sea or the high sky, gives a Bottle of Cloud. Used on a block it lays a 2x1x2 puff of soft cloud beside the face; used in mid-air while falling it lays one under your feet. Each puff block thins away after about 20 seconds.
+- Classes: `stoneores/StoneOres`, `stoneores/OreVeinFeature`, `cloudbottle/CloudBottle`, `BottleOfCloudItem`, `CloudPuffBlock`; hook in `ground/BigVeinFeature`; art, data and lang by `tools/gen_stone_ores.py`.
+- Built; not played.

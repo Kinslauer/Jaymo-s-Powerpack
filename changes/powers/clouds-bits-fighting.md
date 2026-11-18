@@ -1,8 +1,0 @@
-# Fighting: snowballs sting, mixed-source hits, arrow pick, tipped clouds, keep XP, no one-shots (Clouds and Bits patch 6)
-- **Snowballs sting** (`fighting.SnowballSting`): 1 damage and a 3 s Freezing chill; 3 damage and no chill against Nether creatures (`jaymospowers:nether_creatures` tag) and Emberborn players. Thrown rocks keep their own rules.
-- **Hits from different sources** (`fighting.HitKinds`): immunity after a hit is per kind of damage (fire, magic and bleeding, melee, projectile, explosion, everything else). A kind that hasn't landed in 10 ticks lands in full during another kind's cooldown; the same kind still waits. The cooldown is `LivingEntity.damageCooldownTime`; powers that clear `Entity.setInvulnerableTime` are unchanged.
-- **Pick your arrow** (`fighting.ArrowPick`, client `ArrowPickClient`): scrolling while a bow or crossbow is drawn steps through the arrow kinds it can fire (worn quiver first, then the pack); the pick is saved on the weapon as `jaymospowers:chosen_arrow` and drawn beside the hotbar with its count. Picking a kind in Kitchen's quiver turns the quiver to bring it up. Sneak + scroll (stances) and riding gaits keep the wheel when nothing is drawn.
-- **Tipped arrows leave a cloud** (`fighting.TippedClouds`): a 1.5-block, 3 s lingering cloud of the arrow's potion where it hits.
-- **Keep some XP** (`fighting.KeepXp`): dying with keepInventory off, you come back with 40% of your levels.
-- **No one-hit deaths from full health** (`core.wounds.NoOneShot`): a blast that would have gibbed a full-health player goes down as the downed state instead; void, /kill, beheadings, executions, totems and No Mercy are untouched.
-- Built; not played.
