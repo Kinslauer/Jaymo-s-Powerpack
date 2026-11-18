@@ -2040,6 +2040,12 @@ is on the wall.
 
 (new) **Heirs and bridges.** A lord who holds the bridges on a realm's river holds their tolls, and a realm's heir can be promised in marriage for such rights. When an heir runs from a match, the realm's guard is sent quietly, house by house, to bring them home unharmed and unremarked (tale: The Heir in the Hayloft).
 
+(new) **Town graves.** A town's dead are buried together, a mound each beside the others near the seat, with a wooden board at the head giving the name and a line about them. A hanged man laid to rest under the Warden's light, or named innocent at the assize, gets his board like anyone (tale: The Crossroads Gibbet).
+
+(new) **Thief-takers who stay.** A thief-taker who is spared, and has seen what the bill was really for, may stay on in the town and take a guard's coat (tale: The Cave-In).
+
+(new) **Leaving the valley.** After a bad year a household may shut up its house and go, and nobody hears where. The house is left as it was (tale: Short Measure).
+
 ## Rules for writing against this
 
 - **Nothing explains the old war.** The Warrior-born, the Maw, the future and the loss of the world are shown, never
