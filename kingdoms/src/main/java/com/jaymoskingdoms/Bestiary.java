@@ -54,6 +54,8 @@ public final class Bestiary extends Item {
 		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Codec.STRING)).copyOnDeath());
 	/** At most this many learned pages are kept. */
 	static final int LEARNED_MOST = 24;
+	/** Between two things learned of one kind, as kept. */
+	static final String NOTE_GAP = "\n\n";
 
 	private Bestiary(Properties properties) {
 		super(properties);
@@ -86,7 +88,10 @@ public final class Bestiary extends Item {
 		}
 	}
 
-	/** ({@link TaleWays#prepared}) A tale taught {@code player} this of the beast called {@code name}: it has a page of its own from now on. */
+	/**
+	 * ({@link TaleWays#learnt}, {@link TaleWays#prepared}) A tale taught {@code player} this of the kind of beast called
+	 * {@code name}: it has pages of its own from now on, a note to a page. Written in the book quietly: it's found there.
+	 */
 	static void learned(ServerPlayer player, String name, String note) {
 		Map<String, String> was = player.getAttachedOrElse(LEARNED, Map.of());
 		String had = was.getOrDefault(name, "");
@@ -94,11 +99,8 @@ public final class Bestiary extends Item {
 			return;
 		}
 		Map<String, String> now = new HashMap<>(was);
-		now.put(name, had.isEmpty() ? note : had + "\n\n" + note);
+		now.put(name, had.isEmpty() ? note : had + NOTE_GAP + note);
 		player.setAttached(LEARNED, Map.copyOf(now));
-		if (ITEM != null && player.getInventory().contains(new ItemStack(ITEM))) {
-			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.bestiary.noted").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
-		}
 	}
 
 	@Override
@@ -135,10 +137,12 @@ public final class Bestiary extends Item {
 			}
 			pages.add(Filterable.passThrough(page));
 		}
-		// (what tales have taught of other beasts, a page each)
+		// (what tales have taught of other beasts: a page for each thing learned, under the kind's name)
 		for (Map.Entry<String, String> e : new java.util.TreeMap<>(player.getAttachedOrElse(LEARNED, Map.of())).entrySet()) {
-			pages.add(Filterable.passThrough(Component.empty().append(Component.literal(e.getKey()).withStyle(ChatFormatting.BOLD)).append("\n\n")
-				.append(Component.literal(e.getValue()).withStyle(ChatFormatting.DARK_RED))));
+			for (String note : e.getValue().split(NOTE_GAP)) {
+				pages.add(Filterable.passThrough(Component.empty().append(Component.literal(e.getKey()).withStyle(ChatFormatting.BOLD)).append("\n\n")
+					.append(Component.literal(note).withStyle(ChatFormatting.DARK_RED))));
+			}
 		}
 		return pages;
 	}

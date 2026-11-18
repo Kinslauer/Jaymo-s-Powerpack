@@ -862,6 +862,7 @@
     "fight_pale": {
       "do": "foe",
       "who": "pale",
+      "bestiary_kind": "Blood-drinkers",
       "when": "night",
       "goal": "Put down {pale} at {place:gate}",
       "taunt": "Then you have ended the only three quiet years I ever had.",

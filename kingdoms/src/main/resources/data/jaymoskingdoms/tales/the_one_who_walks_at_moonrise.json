@@ -342,7 +342,7 @@
     },
     "wait_last": { "do": "wait", "days": [5, 8], "wake": "none", "then": "beast_fight" },
     "beast_fight": {
-      "do": "foe", "who": "beast", "goal": "Meet {sleeper} at the pond at moonrise",
+      "do": "foe", "who": "beast", "bestiary_kind": "Those who walk at the moon", "goal": "Meet {sleeper} at the pond at moonrise",
       "journal": "At moonrise I met him by the pond, as I had said I would. I was quick. In the morning it was only {sleeper} lying there, and his mother came with a blanket.",
       "weak_to": [
         { "know": "mark:moon_knows_bane", "item": "jaymoskingdoms:wolfsbane", "share": 0.75, "journal": "I carried wolfsbane to the pond, as the bestiary said. It turned its head from me twice before it sprang, and the spring was slow.", "bestiary": "It cannot abide wolfsbane. A sprig carried close turns its head and slows its spring." },

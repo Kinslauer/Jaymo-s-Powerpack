@@ -747,7 +747,7 @@
       "later": [
         {
           "days": [
-            9,
+            10,
             16
           ],
           "letter": {
@@ -805,7 +805,7 @@
       "later": [
         {
           "days": [
-            9,
+            10,
             16
           ],
           "letter": {
@@ -847,7 +847,7 @@
       "later": [
         {
           "days": [
-            8,
+            10,
             15
           ],
           "town": {
@@ -893,7 +893,7 @@
       "later": [
         {
           "days": [
-            9,
+            10,
             14
           ],
           "if": "mark:letters_wrote_back & mark:letters_know_his_hand",
@@ -918,8 +918,8 @@
         },
         {
           "days": [
-            2,
-            4
+            10,
+            14
           ],
           "if": "!mark:letters_wrote_back",
           "letter": {

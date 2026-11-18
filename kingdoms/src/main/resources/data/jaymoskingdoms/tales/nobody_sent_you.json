@@ -1023,7 +1023,7 @@
       "later": [
         {
           "days": [
-            9,
+            10,
             16
           ],
           "if": "mark:candle_burned",
@@ -1034,8 +1034,8 @@
         },
         {
           "days": [
-            6,
-            12
+            10,
+            14
           ],
           "if": "hand=chandler&mark:nobody_hand_found",
           "town": [
@@ -1045,8 +1045,8 @@
         },
         {
           "days": [
-            6,
-            12
+            10,
+            14
           ],
           "if": "hand=sexton&mark:nobody_hand_found",
           "town": [
@@ -1056,8 +1056,8 @@
         },
         {
           "days": [
-            6,
-            12
+            10,
+            14
           ],
           "if": "hand=clerk&mark:nobody_hand_found",
           "town": [
@@ -1067,8 +1067,8 @@
         },
         {
           "days": [
-            3,
-            6
+            10,
+            14
           ],
           "if": "mark:nobody_named_wrong",
           "town": [
@@ -1134,7 +1134,7 @@
       "later": [
         {
           "days": [
-            9,
+            10,
             16
           ],
           "if": "mark:candle_burned",
@@ -1145,8 +1145,8 @@
         },
         {
           "days": [
-            6,
-            12
+            10,
+            14
           ],
           "if": "hand=chandler&mark:nobody_hand_found",
           "town": [
@@ -1156,8 +1156,8 @@
         },
         {
           "days": [
-            6,
-            12
+            10,
+            14
           ],
           "if": "hand=sexton&mark:nobody_hand_found",
           "town": [
@@ -1167,8 +1167,8 @@
         },
         {
           "days": [
-            6,
-            12
+            10,
+            14
           ],
           "if": "hand=clerk&mark:nobody_hand_found",
           "town": [
@@ -1178,8 +1178,8 @@
         },
         {
           "days": [
-            3,
-            6
+            10,
+            14
           ],
           "if": "mark:nobody_named_wrong",
           "town": [
@@ -1204,7 +1204,7 @@
       "later": [
         {
           "days": [
-            9,
+            10,
             16
           ],
           "if": "mark:candle_burned",
@@ -1215,8 +1215,8 @@
         },
         {
           "days": [
-            6,
-            12
+            10,
+            14
           ],
           "if": "hand=chandler&mark:nobody_hand_found",
           "town": [
@@ -1226,8 +1226,8 @@
         },
         {
           "days": [
-            6,
-            12
+            10,
+            14
           ],
           "if": "hand=sexton&mark:nobody_hand_found",
           "town": [
@@ -1237,8 +1237,8 @@
         },
         {
           "days": [
-            6,
-            12
+            10,
+            14
           ],
           "if": "hand=clerk&mark:nobody_hand_found",
           "town": [
@@ -1248,8 +1248,8 @@
         },
         {
           "days": [
-            3,
-            6
+            10,
+            14
           ],
           "if": "mark:nobody_named_wrong",
           "town": [
@@ -1272,7 +1272,7 @@
         },
         {
           "days": [
-            8,
+            10,
             14
           ],
           "scene": [
@@ -1311,7 +1311,7 @@
       "later": [
         {
           "days": [
-            9,
+            10,
             16
           ],
           "if": "mark:candle_burned",
@@ -1322,8 +1322,8 @@
         },
         {
           "days": [
-            6,
-            12
+            10,
+            14
           ],
           "if": "hand=chandler&mark:nobody_hand_found",
           "town": [
@@ -1333,8 +1333,8 @@
         },
         {
           "days": [
-            6,
-            12
+            10,
+            14
           ],
           "if": "hand=sexton&mark:nobody_hand_found",
           "town": [
@@ -1344,8 +1344,8 @@
         },
         {
           "days": [
-            6,
-            12
+            10,
+            14
           ],
           "if": "hand=clerk&mark:nobody_hand_found",
           "town": [
@@ -1355,8 +1355,8 @@
         },
         {
           "days": [
-            3,
-            6
+            10,
+            14
           ],
           "if": "mark:nobody_named_wrong",
           "town": [
@@ -1365,8 +1365,8 @@
         },
         {
           "days": [
-            5,
-            9
+            10,
+            14
           ],
           "scene": [
             [
@@ -1401,7 +1401,7 @@
       "later": [
         {
           "days": [
-            9,
+            10,
             16
           ],
           "if": "mark:candle_burned",
@@ -1412,8 +1412,8 @@
         },
         {
           "days": [
-            6,
-            12
+            10,
+            14
           ],
           "if": "hand=chandler&mark:nobody_hand_found",
           "town": [
@@ -1423,8 +1423,8 @@
         },
         {
           "days": [
-            6,
-            12
+            10,
+            14
           ],
           "if": "hand=sexton&mark:nobody_hand_found",
           "town": [
@@ -1434,8 +1434,8 @@
         },
         {
           "days": [
-            6,
-            12
+            10,
+            14
           ],
           "if": "hand=clerk&mark:nobody_hand_found",
           "town": [
@@ -1445,8 +1445,8 @@
         },
         {
           "days": [
-            3,
-            6
+            10,
+            14
           ],
           "if": "mark:nobody_named_wrong",
           "town": [
@@ -1455,8 +1455,8 @@
         },
         {
           "days": [
-            5,
-            9
+            10,
+            14
           ],
           "scene": [
             [

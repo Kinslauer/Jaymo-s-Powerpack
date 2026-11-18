@@ -364,7 +364,7 @@
       "town": ["The sergeant's to have a stone. Died defending us, the captain says. From what, on the camp road, at night?", "Raiders at the east farms again. Six years of quiet, and now this. What changed?"],
       "returns": { "who": "fence", "days": [6, 10], "as": "thanks", "say": "I do not come up the ladder for many. Here is a thing over and above what was agreed, because you never asked what was in the bricks. It is for seeing the watch before the watch sees you. If you ever want a thing moved under potatoes, or a door to go down when the watch is behind you: the hatch behind the chandlers' row. Nobody sent you.", "gift": ["minecraft:spyglass*1", "minecraft:baked_potato*8"] },
       "later": [
-        { "days": [1, 3], "town": ["A black candle in the tavern window, and the same week the sergeant is dead at the toll stone. Defending us, was he?", "Nobody will take that candle off the sill. Would you be the one to touch it?"] },
+        { "days": [10, 14], "town": ["A black candle in the tavern window, and that same week the sergeant dead at the toll stone. Defending us, was he?", "Nobody will take that candle off the sill. Would you be the one to touch it?"] },
         { "days": [22, 34], "letter": { "from": "{sister}", "lines": [
           "They have put up the sergeant's stone. Wilf asked who he was. I said a man from the gate, and he was content with that. I was not.",
           "The Room sends a boy round with a sack of potatoes on the first of the month. I did not ask for them. I left the first on the step and it was gone by morning, and the next month there were two. So we eat them. That is how that sort keeps you. Not with a knife. With a kindness you cannot give back.",
@@ -379,7 +379,7 @@
       "town": ["They nailed the hatch behind the chandlers' row. Give it a week. That trade's like damp.", "Raiders at the east farms again. Six years of quiet, and now this. What changed?"],
       "returns": { "who": "sister", "days": [8, 12], "as": "warning", "say": "The watch stopped minding my door, as I said it would. Next morning there was a potato on the step, cut in half. You know what that means. Wilf and I are going to my cousin's, over the hills. I am not thanking you. Wilf finished the horse. He would not let me give it you. He says it is waiting for his father. Take this instead.", "gift": ["minecraft:leather*6"] },
       "later": [
-        { "days": [1, 3], "town": ["A black candle in the tavern window, and the same week the sergeant is dead at the toll stone. Defending us, was he?", "Nobody will take that candle off the sill. Would you be the one to touch it?"] },
+        { "days": [10, 14], "town": ["A black candle in the tavern window, and that same week the sergeant dead at the toll stone. Defending us, was he?", "Nobody will take that candle off the sill. Would you be the one to touch it?"] },
         { "days": [25, 40], "letter": { "from": "{sister}", "lines": [
           "We are at my cousin's, over the hills. I'll not write where. It is sheep here and not hides, and the smell is a change at least.",
           "A carter came through with word that the hatch behind the chandlers' row is open again, with a new woman keeping it. I told you that trade was like damp. He says the black candle is still on the tavern sill, and nobody will be the one to move it.",
@@ -397,7 +397,7 @@
       "town": ["{sergeant}'s gone from the gate. Eleven years, and off without a word or a pension.", "A wheat carter lost on the ford road. Honest wheat. That road's cursed, I tell you."],
       "returns": { "who": "sergeant", "days": [7, 12], "as": "recruit", "say": "I have no gate and no arrangement, and I find I cannot sit in an alehouse while carts go out to that ford. You did the sum and still would not have it. I should like to learn how that is done. I can hold a line, and I know every raider path within a day's walk." },
       "later": [
-        { "days": [1, 3], "town": ["That black candle is still burning in the tavern window, and {sergeant} is still breathing, last anyone heard. Somebody's money has not been earned yet."] },
+        { "days": [10, 14], "town": ["That black candle is still burning in the tavern window, and {sergeant} is still breathing, last anyone heard. Somebody's money has not been earned yet."] },
         { "days": [22, 34], "if": "!mark:potato_told_watch", "letter": { "from": "{sister}", "lines": [
           "{sergeant} came to my door. Himself, in a plain coat, with no gate behind him. He stood on the step and said he was the one who told the camp which night Hob crossed. He did not ask for anything. I think he wanted to be hit.",
           "I did not hit him. I shut the door. Then I opened it again and told him the boy's name is Wilf, and that he could carry that about with him. Then I shut it for good.",
@@ -416,7 +416,7 @@
       "marks": ["takes_gate_coin"],
       "town": ["A quiet season at the east farms. Somebody up there must like us.", "Another potato man gone on the ford road. Well. They know the risks, that sort."],
       "later": [
-        { "days": [1, 3], "town": ["A black candle in the tavern window since the dark night. Who is it for? Don't look at it. Looking is how you get asked."] },
+        { "days": [10, 14], "town": ["A black candle in the tavern window since the dark night. Who is it for? Don't look at it. Looking is how you get asked."] },
         { "days": [20, 32], "letter": { "from": "{sister}", "lines": [
           "A man from the gate told a man at the tannery that the sergeant has a new friend, and what the friend was paid: {coins:15}. I have had it worked out for me. It is less than Hob owed.",
           "The carters still go out to the ford. One of them lodged two doors down from me. His wife came to ask what I did, after. I told her I buy bark and I bar the door.",

@@ -340,11 +340,12 @@
     "see_porter": {
       "do": "talk",
       "who": "porter",
+      "mark": "hall_knows_water",
       "goal": "Speak with {porter} in {place:kitchen}",
       "say": [
         "You've been poking about in the midden. I saw you. I'll save you the trouble of asking.",
         "I was a boy in the Nightfall years. The cloaked things came down every valley but this one, and the plague after them, and they burned whole streets in {town} to stop it. Not one came here. Not one. Ask yourself what keeps a wolf off a flock. Another wolf, that's what. One that's particular about its sheep.",
-        "He's never had a drop off me. I said no the first night, and he bowed, and I've had my place by the fire ever since. That's all I know of him and all I want to. He receives after dark. Go and ask him to his face. He'd think the better of you for it."
+        "He's never had a drop off me. I said no the first night, and he bowed, and I've had my place by the fire ever since. That's all I know of him and all I want to. Except this: he goes round by the bridge, every time, and never over the mill race. Thirty years, and I've not once seen him step over water that runs. He receives after dark. Go and ask him to his face. He'd think the better of you for it."
       ],
       "replies": [
         {
@@ -364,7 +365,7 @@
         {
           "say": "I'll ask him to his face.",
           "then": "audience",
-          "journal": "{porter} says no cloaked thing came into this valley in the Nightfall years, because something else already hunted here. He has refused {lord} for thirty years and kept his place."
+          "journal": "{porter} says no cloaked thing came into this valley in the Nightfall years, because something else already hunted here. He has refused {lord} for thirty years and kept his place. In all that time {lord} has never once stepped over running water."
         }
       ],
       "within": "supper",
@@ -379,7 +380,7 @@
         "?mark:hall_proof_drugged": "Poppy? In the girls' posset? He asks. He's always asked. Show me that cup. Well. Thirty years I've barred that door for him and sat with my back to it. The old icehouse, behind the yews. He goes down before cocklight. If there's poppy in that cup, I've been sat against the wrong door.",
         "?": "The old icehouse, behind the yews. He goes down before cocklight and I bar the door after him. I'm telling you because you asked civil and because I'm old. I'd not stop you going down there, I haven't the arms for it now. But you'd have it to remember that I asked you not to."
       },
-      "journal": "{porter} told me where {lord} lies by day: {place:icehouse}, with the door barred from outside.",
+      "journal": "{porter} told me where {lord} lies by day: {place:icehouse}, with the door barred from outside. He says {lord} has never once stepped over running water.",
       "then": "audience",
       "within": "supper",
       "late": "end:faded",
@@ -660,6 +661,13 @@
       "thanks": "I kept the cloaked ones out of this valley for sixty years. Remember that I told you so, when they come.",
       "weak_to": [
         {
+          "know": "mark:hall_knows_water",
+          "water": true,
+          "share": 0.75,
+          "journal": "I let water run across his floor from a bucket before he came at me. He would not step through it, and fought me from one side of the room.",
+          "bestiary": "A blood-drinker will not cross water that runs. Let it run where you fight, even poured from a bucket, and it keeps to one side of it."
+        },
+        {
           "know": "mark:hall_unmasked",
           "share": 0.75,
           "journal": "The Warden's lamp was still burning on his table. He would not turn his face to it, and fought half blind.",
@@ -845,6 +853,13 @@
       "thanks": "At dusk. You'll not see me again. Bar the door when you go. The light hurts.",
       "weak_to": [
         {
+          "know": "mark:hall_knows_water",
+          "water": true,
+          "share": 0.75,
+          "journal": "I let water run across the icehouse straw from a bucket. He would not step through it, and fought me from the far wall.",
+          "bestiary": "A blood-drinker will not cross water that runs. Let it run where you fight, even poured from a bucket, and it keeps to one side of it."
+        },
+        {
           "know": "mark:hall_saw_shutters",
           "share": 0.7,
           "journal": "I knew from his nailed shutters what daylight does to him, and left the icehouse door wide open behind me. He fought with one arm across his eyes.",
@@ -904,7 +919,7 @@
         },
         {
           "days": [
-            8,
+            10,
             14
           ],
           "if": "truth=willing",
@@ -919,7 +934,7 @@
         },
         {
           "days": [
-            8,
+            10,
             14
           ],
           "if": "truth=taken",

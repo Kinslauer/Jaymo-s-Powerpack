@@ -195,11 +195,12 @@ public final class KeepingCells {
 		});
 	}
 
-	/** One of the dead fell: if it was in a sleeping smith's house, it's one of his household laid to rest. */
+	/** One of the dead fell: if it was one of a sleeping smith's household, it's laid to rest. */
 	private static void laid(ServerLevel level, LivingEntity dead) {
 		for (Villager v : new ArrayList<>(KEEPING)) {
 			BlockPos light = v.level() == level ? v.getAttached(KEPT) : null;
-			if (light != null && dead.entityTags().contains(HOUSEHOLD_TAG) && house(light).contains(dead.position())) {
+			// (one of his, wherever they fell: chased out of the door first, they're still his)
+			if (light != null && dead.entityTags().contains(HOUSEHOLD_TAG)) {
 				v.setAttached(LAID, v.getAttachedOrElse(LAID, 0) + 1);
 				rest(level, v, light, dead);
 			}

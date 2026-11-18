@@ -24,7 +24,7 @@ STEP_FIELDS = {
     "reap": {"at", "count", "crop"},
     "go": {"to", "radius"},
     "search": {"at", "clues", "need"},
-    "foe": {"who", "slain", "spared", "taunt", "plea", "mercy", "thanks", "yield_at", "spared_returns", "weak_to"},
+    "foe": {"who", "slain", "spared", "taunt", "plea", "mercy", "thanks", "yield_at", "spared_returns", "weak_to", "bestiary_kind"},
     "bring": {"who", "item", "count", "say", "not_now"},
     "slay": {"target", "count"},
     "wait": {"days", "wake", "letter"},
@@ -680,11 +680,13 @@ def check_tale(path):
                     check_text(c, f"{where}.{field}", step[field], tale)
             for i, weak in enumerate(step.get("weak_to", [])):
                 ww = f"{where}.weak_to[{i}]"
-                unknown = set(weak) - {"know", "item", "share", "journal", "bestiary"}
+                unknown = set(weak) - {"know", "item", "share", "journal", "bestiary", "water"}
                 if unknown:
                     c.err(ww, f"unknown fields {sorted(unknown)}")
-                if "know" not in weak and "item" not in weak:
-                    c.err(ww, "needs 'know' (what was learned) or 'item' (what's carried)")
+                if "know" not in weak and "item" not in weak and "water" not in weak:
+                    c.err(ww, "needs 'know' (what was learned), 'item' (what's carried) or 'water' (fought by running water)")
+                if "water" in weak and weak["water"] is not True:
+                    c.err(ww, "'water' is true or left out")
                 if "know" in weak:
                     check_condition(c, ww, weak["know"], tale)
                 if "item" in weak:
@@ -696,6 +698,8 @@ def check_tale(path):
                 for field in ("journal", "bestiary"):
                     if field in weak:
                         check_text(c, f"{ww}.{field}", weak[field], tale)
+            if "bestiary_kind" in step and not (isinstance(step["bestiary_kind"], str) and step["bestiary_kind"].strip()):
+                c.err(where, "'bestiary_kind' is the bestiary page's name")
         elif do == "await":
             # (code carries it on: KeepingCells sets a mark and calls Tales.advance)
             check_role(c, where, step["who"], tale)

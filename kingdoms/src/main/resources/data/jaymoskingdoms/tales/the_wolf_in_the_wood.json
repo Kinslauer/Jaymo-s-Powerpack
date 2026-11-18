@@ -304,9 +304,12 @@
       },
       "replies": [
         {
-          "if": "!mark:wolf_held",
+          "if": "!mark:wolf_held & !mark:wolf_priest_refused",
           "say": "There are priests with a rite for this. I'll fetch one.",
-          "then": "see_priest",
+          "then": {
+            "?cursed": "priest_no",
+            "?": "see_priest"
+          },
           "for": [
             "faith"
           ],
@@ -324,6 +327,26 @@
         {
           "say": "I'll go and speak to the hunt.",
           "then": "see_hunter"
+        }
+      ],
+      "within": "hunt",
+      "late": "end:hunted",
+      "until": "before the hunt goes into the wood"
+    },
+    "priest_no": {
+      "do": "talk",
+      "who": "priest",
+      "goal": "Ask {priest} for the rite at {place:chapel}",
+      "say": [
+        "Stop there. Not a step nearer. I keep the Truth, and the Truth will not let what you carry hide behind a civil face.",
+        "Abomination. It walks among us, and it knocks at my door for help. Whatever she is, she gets no rite that you would carry out to her. Go."
+      ],
+      "replies": [
+        {
+          "say": "Then she'll do without you.",
+          "then": "tell_wife",
+          "mark": "wolf_priest_refused",
+          "journal": "{priest} keeps the Truth. He saw what I carry and would not hear me out. There will be no rite for {wife} that I bring."
         }
       ],
       "within": "hunt",

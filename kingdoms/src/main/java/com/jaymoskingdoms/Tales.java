@@ -298,12 +298,13 @@ public final class Tales {
 			if (world.isClientSide() || hand != InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer sp) || !(entity instanceof LivingEntity who)) {
 				return InteractionResult.PASS;
 			}
-			// (something a tale wrote in a tongue you can't read, held out to a priest or a librarian)
-			if (TaleWays.reader(sp, who, sp.getMainHandItem())) {
+			// (the people of a tale you're in are spoken with by using them, a priest who asked it of you as well; anyone else
+			// keeps their own menu)
+			if (pending(sp, who) && talk(sp, who)) {
 				return InteractionResult.SUCCESS;
 			}
-			// (the people of a tale you're in are spoken with by using them; anyone else keeps their own menu)
-			return pending(sp, who) && talk(sp, who) ? InteractionResult.SUCCESS : InteractionResult.PASS;
+			// (something a tale wrote in a tongue you can't read, held out to a priest or a librarian)
+			return TaleWays.reader(sp, who, sp.getMainHandItem()) ? InteractionResult.SUCCESS : InteractionResult.PASS;
 		});
 		UseItemCallback.EVENT.register((player, world, hand) -> {
 			if (!world.isClientSide() && player instanceof ServerPlayer sp) {
@@ -370,6 +371,14 @@ public final class Tales {
 	/** The run {@code q} is the open step of, or null. */
 	static @Nullable Run runOf(ServerPlayer player, Quest q) {
 		return q.id().startsWith(QUEST) ? run(player, q.id().substring(QUEST.length())) : null;
+	}
+
+	/** Whether {@code q} can be done at this hour: true unless it's a tale's step with a {@code when} that doesn't hold now. */
+	static boolean atItsHour(ServerPlayer player, Quest q) {
+		Run run = runOf(player, q);
+		Tale tale = run == null ? null : Tale.get(run.tale);
+		JsonObject step = tale == null ? null : tale.step(run.step);
+		return step == null || TaleWays.now(player, run, step);
 	}
 
 	/** Whether {@code q} belongs to a tale. */
@@ -738,10 +747,20 @@ public final class Tales {
 
 	/** One of the tales that start {@code by} this way and suit (a giver's trade {@code job}; a player, if given), by their weights; or null. */
 	private static @Nullable Tale pick(String by, @Nullable String job, @Nullable ServerPlayer player, RandomSource random) {
+		return pick(by, job, player, random, false);
+	}
+
+	/**
+	 * A tale that starts {@code by} this way and suits {@code job}, by weight. With no player to weigh it for, a tale that
+	 * {@code needs} something (a later part of a story) is left out: it's drawn only for the player it's meant for.
+	 * {@code later}: only those.
+	 */
+	private static @Nullable Tale pick(String by, @Nullable String job, @Nullable ServerPlayer player, RandomSource random, boolean later) {
 		List<Tale> suit = new ArrayList<>();
 		int total = 0;
 		for (Tale tale : Tale.all()) {
-			if (!tale.by().equals(by) || player != null && !fits(player, tale)) {
+			boolean needs = !Tale.strings(tale.start().get("needs")).isEmpty();
+			if (!tale.by().equals(by) || player != null && !fits(player, tale) || player == null && needs || later && !needs) {
 				continue;
 			}
 			List<String> jobs = Tale.strings(tale.start().get("jobs"));
@@ -791,8 +810,13 @@ public final class Tales {
 	 * telling it. False if this tale isn't for this player (done already, or barred to them): they've nothing for them.
 	 */
 	static boolean begin(ServerLevel level, ServerPlayer player, LivingEntity giver, Faction f, Quest offer) {
-		Tale tale = Tale.get(offer.template().substring(QUEST.length()));
-		if (tale == null || !fits(player, tale)) {
+		Tale held = Tale.get(offer.template().substring(QUEST.length()));
+		// (the next part of a story this player is in comes first; then the giver's own tale, or another that suits them)
+		Tale tale = pick("giver", job(giver), player, level.getRandom(), true);
+		if (tale == null) {
+			tale = held != null && fits(player, held) ? held : pick("giver", job(giver), player, level.getRandom());
+		}
+		if (tale == null) {
 			return false;
 		}
 		start(level, player, tale, giver, f.id(), giver.blockPosition(), giver);
@@ -801,6 +825,7 @@ public final class Tales {
 
 	/** ({@link TownNotices}) A tale that starts by a notice and suits {@code poster}'s trade, for them to pin up (unless it's {@code up} already); its id, or null. */
 	static @Nullable String notice(Villager poster, Set<String> up, RandomSource random) {
+		// (drawn for nobody in particular: a notice tale that needs something is left out, see pick)
 		Tale tale = TaleCast.cast(poster) != null ? null : pick("notice", job(poster), null, random);
 		return tale == null || up.stream().anyMatch(k -> k.startsWith("town|tale." + tale.id + "|")) ? null : tale.id;
 	}
@@ -846,6 +871,7 @@ public final class Tales {
 			JsonObject step = tale == null ? null : tale.step(run.step);
 			if (step != null && Tale.string(step, "do", "").equals("await")) {
 				s.marks.add(mark);
+				TaleWays.learnt(player, mark);
 				go(player, run, step.get("then"), speaker);
 			}
 		}
@@ -871,6 +897,7 @@ public final class Tales {
 			if (!holds) {
 				s.marks.remove(mark);
 			} else if (s.marks.add(mark)) {
+				TaleWays.learnt(player, mark);
 				MutableComponent line = words(player, run, Tale.object(step, "noted"), mark);
 				if (line != null && !run.notes.contains(line.getString())) {
 					note(run, line.getString());
@@ -1114,6 +1141,7 @@ public final class Tales {
 		if (!done.isEmpty()) {
 			// (the step's own mark is set before its way on is picked, so the way on can turn on it)
 			state(player).marks.add(done);
+			TaleWays.learnt(player, done);
 		}
 		JsonElement picked = Tale.pick(then, facts(player, run));
 		String target = picked != null && picked.isJsonPrimitive() ? picked.getAsString() : "";
@@ -1151,6 +1179,7 @@ public final class Tales {
 			String mark = done ? Tale.string(step, "mark", "") : "";
 			if (!mark.isEmpty()) {
 				state(player).marks.add(mark);
+				TaleWays.learnt(player, mark);
 			}
 			// (gb-haggle) as much more as was haggled for
 			int pay = done ? Haggle.talePay(Tale.pickNumber(step, "pay", facts(player, run), 0), run.vars) : 0;
@@ -1376,7 +1405,7 @@ public final class Tales {
 			String name = o.otherName().contains("|") ? o.otherName().substring(0, o.otherName().indexOf('|')) : o.otherName();
 			goal = Component.translatable("tale.jaymoskingdoms.goal." + kind, name.isEmpty() ? o.place() : name, o.place());
 		}
-		if (o.count() > 1 && (q.kind() == Quest.SLAY || q.kind() >= Quest.PACK)) {
+		if (o.count() > 1 && (q.kind() == Quest.SLAY || q.kind() >= Quest.PACK || Tale.string(step, "do", "").equals("reap"))) {
 			goal.append(Component.literal(" (" + o.progress() + "/" + o.count() + ")"));
 		}
 		// (when it can be done, and how long is left)
@@ -1454,7 +1483,8 @@ public final class Tales {
 			return;
 		}
 		if (step.has("failed")) {
-			run.scratch.put(TaleWays.UNDONE, "1");
+			// (left undone for everyone sharing it: nobody is written up or paid for it)
+			each(player, run, r -> r.scratch.put(TaleWays.UNDONE, "1"));
 			go(player, run, step.get("failed"), null);
 			return;
 		}
@@ -1765,6 +1795,7 @@ public final class Tales {
 		if (!mark.isEmpty()) {
 			for (ServerPlayer p : sharers(player, run)) {
 				state(p).marks.add(mark);
+				TaleWays.learnt(p, mark);
 			}
 		}
 		// (who comes back is the choice's to say; and a companion who can't stand by it goes)
@@ -1978,8 +2009,8 @@ public final class Tales {
 			run.vars.remove(TaleWays.CANDLE);
 		}
 		if (run.taken && TaleWays.late(level, run, step)) {
-			// (its days ran out: the tale goes on without them)
-			run.scratch.put(TaleWays.UNDONE, "1");
+			// (its days ran out: the tale goes on without them, all of them)
+			each(player, run, r -> r.scratch.put(TaleWays.UNDONE, "1"));
 			go(player, run, step.get("late"), null);
 			return;
 		}
@@ -2076,8 +2107,14 @@ public final class Tales {
 				JsonObject clue = clues.get(index);
 				String line = Tale.string(clue, "journal", "");
 				String all = String.join(",", found);
-				// (what the clue tells is known, if they can read it)
-				TaleWays.read(player, inv.getItem(i));
+				// (what the clue tells is known, if they can read it: to everyone sharing the tale, as what it proves is)
+				String mark = Tale.string(clue, "mark", "");
+				if (TaleWays.read(player, inv.getItem(i)) && !mark.isEmpty()) {
+					for (ServerPlayer p : sharers(player, run)) {
+						state(p).marks.add(mark);
+						TaleWays.learnt(p, mark);
+					}
+				}
 				each(player, run, r -> {
 					r.scratch.put("found", all);
 					if (!line.isEmpty()) {
@@ -2251,7 +2288,10 @@ public final class Tales {
 		State s = state(player);
 		boolean failed = Tale.flag(ending, "failed");
 		MutableComponent text = words(player, run, ending, "text");
-		s.marks.addAll(Tale.strings(ending.get("marks")));
+		for (String mark : Tale.strings(ending.get("marks"))) {
+			s.marks.add(mark);
+			TaleWays.learnt(player, mark);
+		}
 		JsonObject reward = Tale.object(ending, "reward");
 		Quest q = new Quest(run.quest(), Quest.TALE, QUEST + tale.id,
 			new Quest.Giver(run.giverId() == null ? new UUID(0L, 0L) : run.giverId(), run.giverName, run.faction, false, run.job),
@@ -2390,7 +2430,10 @@ public final class Tales {
 			}
 			Quest q = Quests.quest(player, run.quest());
 			MutableComponent waiting = q != null ? null : words(player, run, step, "goal");
-			Component now = q != null ? Quests.objective(level, player, q) : waiting != null ? waiting : Component.translatable("tale.jaymoskingdoms.resting");
+			MutableComponent resting = waiting != null ? waiting : Component.translatable("tale.jaymoskingdoms.resting");
+			// (a tale at rest still has its days: how long is left)
+			Component left = q != null ? null : TaleWays.after(level, player, run, step);
+			Component now = q != null ? Quests.objective(level, player, q) : left != null ? resting.append(left) : resting;
 			List<Component> lines = new ArrayList<>();
 			for (String note : run.notes) {
 				lines.add(Component.literal(note));

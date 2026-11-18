@@ -336,7 +336,8 @@ final class TownNotices {
 
 	/**
 	 * {@code player} pulls the town notice {@code key} off a board: an errand is a quest from its poster (if they're still
-	 * about and the player's log has room), news is a piece of paper. False if it stays up.
+	 * about and the player's log has room), news is a piece of paper, and so is a tale's notice (with its tale, if it's one
+	 * for them). False if it stays up.
 	 */
 	static boolean pull(ServerLevel level, ServerPlayer player, String key) {
 		N n = notice(key);
@@ -371,10 +372,9 @@ final class TownNotices {
 			return BoardWork.take(level, player, giver, f, n.key());
 		}
 		if (n.tale() != null) {
-			// (the tale is theirs, and the paper with it)
-			if (!Tales.pulled(level, player, n.key().substring(5), giver, f)) {
-				return false;
-			}
+			// (the tale is theirs, and the paper with it; one they've had already, or that isn't for them, is only the paper:
+			// the trouble on it, in the asker's own hand)
+			Tales.pulled(level, player, n.key().substring(5), giver, f);
 			ItemStack paper = item(level, key);
 			if (!player.getInventory().add(paper)) {
 				player.drop(paper, false, net.minecraft.util.Prediction.SERVER_ONLY);

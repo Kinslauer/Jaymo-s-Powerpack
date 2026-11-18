@@ -54,6 +54,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.jspecify.annotations.Nullable;
 
@@ -81,6 +84,14 @@ final class TaleWays {
 	static final int HEARTS_PER = 5, STANDING_PER = 20, LEAN_TIMES = 3, SWAY_MOST = 15;
 	/** A threat from someone in armour, with blood on them, or known to have cut down one who yielded. */
 	static final int THREAT_ARMOUR = 10, THREAT_BLOOD = 5, THREAT_DEED = 10;
+	/** How each temper takes a threat: the timid give way, the brave and the hot-headed dig in. */
+	static final int THREAT_TIMID = 25, THREAT_GIVES = 5, THREAT_BRAVE = -25, THREAT_HOTHEAD = -15, THREAT_PROUD = -10;
+	/** How each temper takes a bribe: the greedy take it, the dutiful and the devout are put out by it. */
+	static final int BRIBE_TAKES = 30, BRIBE_MAYBE = 5, BRIBE_DUTIFUL = -15, BRIBE_DEVOUT = -20;
+	/** How each temper takes being talked round. */
+	static final int TALK_KIND = 15, TALK_CHEERFUL = 10, TALK_GLOOMY = -5, TALK_PROUD = -10, TALK_SUSPICIOUS = -15;
+	/** The odds (in a hundred) at or above which a try is said in words as likely, fair, or long: below the last, poor. */
+	static final int WORDS_LIKELY = 75, WORDS_FAIR = 50, WORDS_LONG = 25;
 	/** What the greedy and the proud ask of a bribe, as a share of its price. */
 	static final double BRIBE_GREEDY = 1.5, BRIBE_PROUD = 2.0;
 	/** What agreeing or not with a companion's belief moves their bond by. */
@@ -90,8 +101,12 @@ final class TaleWays {
 	static final float READER_TALKS = 0.5F;
 	/** What each thing known of a beast leaves of its health and its blow, and the least they can be brought to. */
 	static final double WEAK_SHARE = 0.7, WEAK_LEAST = 0.35;
+	/** A foe this near water that runs (blocks) is by the water, for what's {@code weak_to} it. */
+	static final int WATER_NEAR = 2;
 	/** A watch is kept this near its place (blocks), a line every so many seconds. */
 	static final int VIGIL_RADIUS = 12, VIGIL_GAP = 10;
+	/** How many times a watch's radius away walking off counts as leaving it. */
+	static final double VIGIL_LEFT = 3.0;
 	/** A tale's person is met once a player has stood this near; one whose hours are over goes once nobody is this near. */
 	static final double MEET_RANGE = 8.0, HOURS_GONE = 14.0;
 	/** Someone who moves to a town does so when the player is next this near its seat; what's owed later is dropped after this many days unpaid. */
@@ -108,7 +123,11 @@ final class TaleWays {
 	 * Following someone: how near is too near (blocks; half that crouched), how far is losing them, how many seconds
 	 * out of reach before they're lost, and how near their journey's end counts as arrived.
 	 */
-	static final int TAIL_NEAR = 6, TAIL_FAR = 28, TAIL_LOST = 12, TAIL_ARRIVE = 5;
+	static final int TAIL_NEAR = 6, TAIL_FAR = 28, TAIL_LOST = 12, TAIL_ARRIVE = TaleCast.KEEP_WITHIN + 1;
+	/** Seconds after they set off before standing close counts as being seen (whoever is beside them as they go isn't followed yet). */
+	static final int TAIL_GRACE = 5;
+	/** Crouched, someone can come this much of {@code near} closer before they're seen. */
+	static final double TAIL_CROUCHED = 0.5;
 	/**
 	 * A field to cut: how far it's sown round its place (blocks each way), how near the player comes before it stands
 	 * there, how far from its place a cut still counts, and the most the ground may rise or fall across it.
@@ -384,7 +403,8 @@ final class TaleWays {
 	static Component leftOn(ServerLevel level, Tales.Run run, String name, boolean said) {
 		String due = run.vars.get(BY + name);
 		if (due == null) {
-			return Component.empty();
+			// (a clock not started yet: said before the step that sets its days)
+			return Component.translatable("tale.jaymoskingdoms.in.soon");
 		}
 		long left = Tales.parse(due, 0) - Tales.day(level);
 		// ({in:<clock>} is how someone says it in a sentence: today, tomorrow, in 3 days)
@@ -458,26 +478,26 @@ final class TaleWays {
 		if (temper != null) {
 			odds += switch (how) {
 				case "threaten" -> switch (temper) {
-					case TIMID -> 25;
-					case GLOOMY, GREEDY -> 5;
-					case BRAVE -> -25;
-					case HOTHEADED -> -15;
-					case PROUD, SPITEFUL -> -10;
+					case TIMID -> THREAT_TIMID;
+					case GLOOMY, GREEDY -> THREAT_GIVES;
+					case BRAVE -> THREAT_BRAVE;
+					case HOTHEADED -> THREAT_HOTHEAD;
+					case PROUD, SPITEFUL -> THREAT_PROUD;
 					default -> 0;
 				};
 				case "bribe" -> switch (temper) {
-					case GREEDY -> 30;
-					case SPITEFUL, GLOOMY -> 5;
-					case DUTIFUL -> -15;
-					case DEVOUT -> -20;
+					case GREEDY -> BRIBE_TAKES;
+					case SPITEFUL, GLOOMY -> BRIBE_MAYBE;
+					case DUTIFUL -> BRIBE_DUTIFUL;
+					case DEVOUT -> BRIBE_DEVOUT;
 					default -> 0;
 				};
 				default -> switch (temper) {
-					case KINDHEARTED -> 15;
-					case CHEERFUL -> 10;
-					case GLOOMY -> -5;
-					case PROUD, SPITEFUL -> -10;
-					case SUSPICIOUS -> -15;
+					case KINDHEARTED -> TALK_KIND;
+					case CHEERFUL -> TALK_CHEERFUL;
+					case GLOOMY -> TALK_GLOOMY;
+					case PROUD, SPITEFUL -> TALK_PROUD;
+					case SUSPICIOUS -> TALK_SUSPICIOUS;
 					default -> 0;
 				};
 			};
@@ -487,7 +507,7 @@ final class TaleWays {
 		} else if (how.equals("threaten")) {
 			Set<String> dress = dress(player);
 			odds += (dress.contains("armoured") ? THREAT_ARMOUR : 0) + (dress.contains("bloodied") ? THREAT_BLOOD : 0)
-				+ (run.vars.containsKey("~cut_down") ? THREAT_DEED : 0);
+				+ (run.vars.containsKey("~cut_down") || cutDown(who, player) ? THREAT_DEED : 0);
 		} else {
 			odds += who instanceof Villager v ? clamp(McaCompat.heartsOf(v, player) / HEARTS_PER, SWAY_MOST) : 0;
 			odds += run.faction < 0 ? 0 : clamp(Reputation.get(player, run.faction) / STANDING_PER, SWAY_MOST);
@@ -504,7 +524,18 @@ final class TaleWays {
 
 	/** The odds in words, as they're shown beside the reply. */
 	static Component oddsWords(int odds) {
-		return Component.translatable("tale.jaymoskingdoms.odds." + (odds >= 75 ? 3 : odds >= 50 ? 2 : odds >= 25 ? 1 : 0)).withStyle(ChatFormatting.GRAY);
+		return Component.translatable("tale.jaymoskingdoms.odds." + (odds >= WORDS_LIKELY ? 3 : odds >= WORDS_FAIR ? 2 : odds >= WORDS_LONG ? 1 : 0))
+			.withStyle(ChatFormatting.GRAY);
+	}
+
+	/** Whether {@code who} saw, or has heard, that {@code player} killed someone who had yielded (in this tale or any other). */
+	private static boolean cutDown(LivingEntity who, ServerPlayer player) {
+		for (Recollections.Recollection r : Recollections.of(who, player)) {
+			if (r.type() == Recollections.Kind.CUT_DOWN) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** How a try is likely to go, in words, as it's shown beside the reply (a throw of the dice only says it's one). */
@@ -574,15 +605,23 @@ final class TaleWays {
 
 	/**
 	 * A choice is before {@code player}: one companion near who believes in something it turns on ({@code for},
-	 * {@code irks} or {@code against} on one of the step's replies) says so, in the tale's words for that belief
+	 * {@code irks} or {@code against} on one of the replies offered, or a belief the step has {@code voices} for) says so, in the tale's words for that belief
 	 * ({@code voices}) or their own. Once for each step.
 	 */
 	static void voiceBefore(ServerLevel level, ServerPlayer player, Tales.Run run, JsonObject step) {
 		if (run.scratch.putIfAbsent("voiced", "1") != null) {
 			return;
 		}
-		List<String> keys = new ArrayList<>();
-		for (JsonObject reply : Tale.objects(step.get("replies"))) {
+		// (what the replies this player is offered stand for, irk or go against; and what the tale wrote them a line for)
+		JsonObject own = Tale.object(step, "voices");
+		List<String> keys = new ArrayList<>(own.keySet());
+		List<JsonObject> replies = Tale.objects(step.get("replies"));
+		for (int n = 0; n < replies.size(); n++) {
+			JsonObject reply = replies.get(n);
+			String cond = Tale.string(reply, "if", "");
+			if (!cond.isEmpty() && !Tales.holds(player, run, cond) || reply.has("try") && run.vars.containsKey(tried(run, n))) {
+				continue;
+			}
 			keys.addAll(Tale.strings(reply.get("for")));
 			keys.addAll(Tale.strings(reply.get("irks")));
 			keys.addAll(Tale.strings(reply.get("against")));
@@ -591,7 +630,6 @@ final class TaleWays {
 		if (turns.isEmpty()) {
 			return;
 		}
-		JsonObject own = Tale.object(step, "voices");
 		for (Mob m : Bonds.companions(player, Convictions.WITNESS)) {
 			if (m.getUUID().equals(run.giverId())) {
 				// (the one whose tale it is doesn't speak up about their own choice)
@@ -694,6 +732,7 @@ final class TaleWays {
 		if (!mark.isEmpty()) {
 			for (ServerPlayer p : Tales.sharers(player, run)) {
 				Tales.state(p).marks.add(mark);
+				learnt(p, run, mark);
 			}
 		}
 		Tales.go(player, run, believed ? suspect.get("then") : suspect.get("doubted"), who);
@@ -717,8 +756,8 @@ final class TaleWays {
 		int radius = Tale.number(step, "radius", VIGIL_RADIUS);
 		int n = Tales.parse(run.scratch.getOrDefault("line", "0"), 0);
 		if (far > radius) {
-			if (n > 0 && step.has("left") && far > radius * 3.0) {
-				run.scratch.put(UNDONE, "1");
+			if (n > 0 && step.has("left") && far > radius * VIGIL_LEFT) {
+				Tales.each(player, run, r -> r.scratch.put(UNDONE, "1"));
 				Tales.go(player, run, step.get("left"), null);
 			}
 			return;
@@ -745,11 +784,20 @@ final class TaleWays {
 		LivingEntity who = role.isEmpty() ? null : Tales.entity(level, role.equals("giver") ? run.giverId() : Tales.uuid(run.cast.get(role)));
 		if (words != null && who != null) {
 			Speech.tell(level, who, player, words, Speech.WHITE);
-		} else if (words != null) {
-			// (what's seen and heard is the player's own to write: the tracker reads it, and the journal keeps it)
-			run.scratch.put("seen", words.getString());
-			Tales.note(run, words.getString());
-			Quests.sync(player, true);
+		} else if (words != null && role.isEmpty()) {
+			// (what's seen and heard is the player's own to write: the tracker reads it, and the journal keeps it, for
+			// everyone keeping the watch; a line a person would say, with that person not there, is let go)
+			String seen = words.getString();
+			for (ServerPlayer p : Tales.sharers(player, run)) {
+				Tales.Run theirs = p == player ? run : Tales.run(p, run.instance);
+				if (theirs != null) {
+					theirs.scratch.put("seen", seen);
+					if (!theirs.notes.contains(seen)) {
+						Tales.note(theirs, seen);
+					}
+					Quests.sync(p, true);
+				}
+			}
 		}
 		Identifier sound = Identifier.tryParse(Tale.string(line, "sound", ""));
 		SoundEvent heard = sound == null ? null : BuiltInRegistries.SOUND_EVENT.getOptional(sound).orElse(null);
@@ -758,7 +806,10 @@ final class TaleWays {
 		}
 		String mark = Tale.string(line, "mark", "");
 		if (!mark.isEmpty()) {
-			Tales.state(player).marks.add(mark);
+			for (ServerPlayer p : Tales.sharers(player, run)) {
+				Tales.state(p).marks.add(mark);
+				learnt(p, run, mark);
+			}
 		}
 	}
 
@@ -801,7 +852,8 @@ final class TaleWays {
 				}
 			}
 		}
-		if (Tales.parse(run.scratch.getOrDefault("cut", "0"), 0) >= Tale.number(step, "count", 8)) {
+		// (the same count, and the same default of one, as the step's quest in the log)
+		if (Tales.parse(run.scratch.getOrDefault("cut", "0"), 0) >= Tale.pickNumber(step, "count", Tales.facts(player, run), 1)) {
 			Tales.go(player, run, step.get("then"), null);
 		}
 	}
@@ -827,13 +879,20 @@ final class TaleWays {
 			if (Math.abs(pos.getX() - at.getX()) > REAP_RADIUS || Math.abs(pos.getZ() - at.getZ()) > REAP_RADIUS) {
 				continue;
 			}
+			// (the party cuts the one field: what any of them cuts counts for all)
 			int cut = Tales.parse(run.scratch.getOrDefault("cut", "0"), 0) + 1;
-			run.scratch.put("cut", Integer.toString(cut));
-			Quest q = Quests.quest(player, run.quest());
-			if (q != null) {
-				Quest.Objective o = q.objective();
-				Quests.put(player, q.withObjective(new Quest.Objective(o.target(), o.count(), Math.min(cut, o.count()), o.pos(), o.other(), o.otherName(), o.place(), o.spawned())));
-				Quests.sync(player, true);
+			for (ServerPlayer p : Tales.sharers(player, run)) {
+				Tales.Run theirs = p == player ? run : Tales.run(p, run.instance);
+				if (theirs == null) {
+					continue;
+				}
+				theirs.scratch.put("cut", Integer.toString(cut));
+				Quest q = Quests.quest(p, theirs.quest());
+				if (q != null) {
+					Quest.Objective o = q.objective();
+					Quests.put(p, q.withObjective(new Quest.Objective(o.target(), o.count(), Math.min(cut, o.count()), o.pos(), o.other(), o.otherName(), o.place(), o.spawned())));
+					Quests.sync(p, true);
+				}
 			}
 		}
 	}
@@ -858,24 +917,31 @@ final class TaleWays {
 		}
 		int near = Tale.number(step, "near", TAIL_NEAR), far = Tale.number(step, "far", TAIL_FAR);
 		double gap = Math.sqrt(mob.distanceToSqr(player));
+		// (the one nearest them of everyone following: they're lost only when the whole party has lost them)
+		double nearest = gap;
+		for (ServerPlayer p : Tales.sharers(player, run)) {
+			nearest = Math.min(nearest, Math.sqrt(mob.distanceToSqr(p)));
+		}
 		if (!run.scratch.containsKey("going")) {
-			if (gap > far) {
+			if (nearest > far) {
 				// (they don't set off until there's someone to follow them)
 				return;
 			}
-			run.scratch.put("going", "1");
+			String set = Long.toString(level.getGameTime());
+			Tales.each(player, run, r -> r.scratch.put("going", set));
 			TaleCast.send(mob, to);
 			Tales.each(player, run, r -> r.places.put("@" + role, to.asLong()));
 		}
-		if (gap < (player.isCrouching() ? near / 2.0 : near) && mob.hasLineOfSight(player)) {
-			run.scratch.put(UNDONE, "1");
+		boolean started = level.getGameTime() - Tales.parse(run.scratch.get("going"), 0) > TAIL_GRACE * 20L;
+		if (started && gap < (player.isCrouching() ? near * TAIL_CROUCHED : near) && mob.hasLineOfSight(player)) {
+			Tales.each(player, run, r -> r.scratch.put(UNDONE, "1"));
 			Tales.go(player, run, step.get("seen"), mob);
 			return;
 		}
-		if (gap > far) {
+		if (nearest > far) {
 			int lost = Tales.parse(run.scratch.getOrDefault("lost", "0"), 0) + 1;
 			if (lost >= TAIL_LOST) {
-				run.scratch.put(UNDONE, "1");
+				Tales.each(player, run, r -> r.scratch.put(UNDONE, "1"));
 				Tales.go(player, run, step.get("lost"), null);
 				return;
 			}
@@ -915,20 +981,34 @@ final class TaleWays {
 	 */
 	static void prepared(ServerPlayer player, Tales.Run run, JsonObject step, Mob foe) {
 		double share = 1.0;
+		Tale tale = Tale.get(run.tale);
 		for (JsonObject w : Tale.objects(step.get("weak_to"))) {
 			String know = Tale.string(w, "know", ""), item = Tale.string(w, "item", "");
-			if (!know.isEmpty() && !Tales.holds(player, run, know) || !item.isEmpty() && !carries(player, item)) {
+			if (!know.isEmpty() && !Tales.holds(player, run, know)) {
+				continue;
+			}
+			if (!know.isEmpty() && tale != null) {
+				// (known, so it's in the bestiary whether or not it was brought: it may have been missed as it was learned)
+				for (ServerPlayer p : Tales.sharers(player, run)) {
+					teach(p, run, tale, step, w);
+				}
+			}
+			if (!item.isEmpty() && !carries(player, item) || Tale.flag(w, "water") && !byWater(foe)) {
 				continue;
 			}
 			share *= Tale.decimal(w, "share", WEAK_SHARE);
 			MutableComponent why = Tales.words(player, run, w, "journal");
 			if (why != null) {
-				Tales.each(player, run, r -> Tales.note(r, why.getString()));
+				Tales.each(player, run, r -> {
+					if (!r.notes.contains(why.getString())) {
+						Tales.note(r, why.getString());
+					}
+				});
 			}
-			MutableComponent note = Tales.words(player, run, w, "bestiary");
-			if (note != null) {
+			if (know.isEmpty() && tale != null) {
+				// (nothing to learn it from first: what was carried into the fight taught it)
 				for (ServerPlayer p : Tales.sharers(player, run)) {
-					Bestiary.learned(p, foe.getName().getString(), note.getString());
+					teach(p, run, tale, step, w);
 				}
 			}
 		}
@@ -943,6 +1023,94 @@ final class TaleWays {
 			}
 		}
 		foe.setHealth(Math.min(foe.getHealth(), foe.getMaxHealth()));
+	}
+
+	/** Whether {@code foe} stands in water, or within {@link #WATER_NEAR} blocks of water that runs. */
+	static boolean byWater(Mob foe) {
+		if (foe.isInWater()) {
+			return true;
+		}
+		for (BlockPos p : BlockPos.betweenClosed(foe.blockPosition().offset(-WATER_NEAR, -1, -WATER_NEAR), foe.blockPosition().offset(WATER_NEAR, 1, WATER_NEAR))) {
+			FluidState fluid = foe.level().getFluidState(p);
+			if (fluid.is(FluidTags.WATER) && !fluid.isSource()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** {@code w} (one of {@code step}'s {@code weak_to}) goes in {@code player}'s bestiary, on the page of the kind of foe it's about. */
+	private static void teach(ServerPlayer player, Tales.Run run, Tale tale, JsonObject step, JsonObject w) {
+		MutableComponent note = Tales.words(player, run, w, "bestiary");
+		if (note != null) {
+			Bestiary.learned(player, kindOf(run, tale, step), note.getString());
+		}
+	}
+
+	/**
+	 * The bestiary page a foe step's notes go on: its own {@code bestiary_kind} (blood-drinkers, wolves), else the kind of
+	 * creature its foe is, else the foe's name.
+	 */
+	static String kindOf(Tales.Run run, Tale tale, JsonObject step) {
+		String own = Tale.string(step, "bestiary_kind", "");
+		if (!own.isEmpty()) {
+			return own;
+		}
+		String role = Tale.string(step, "who", "");
+		JsonObject body = role.isEmpty() ? null : tale.role(role);
+		String kind = body == null ? "" : Tale.string(body, "body", "");
+		Identifier id = kind.contains(":") ? Identifier.tryParse(kind) : null;
+		EntityType<?> type = id == null ? null : BuiltInRegistries.ENTITY_TYPE.getOptional(id).orElse(null);
+		if (type != null) {
+			return type.getDescription().getString();
+		}
+		String name = run.names.getOrDefault(role, "");
+		return name.isEmpty() ? role : name;
+	}
+
+	/**
+	 * {@code mark} has just been set for {@code player}: whatever a beast of one of their tales is weak to that it
+	 * teaches ({@code weak_to} entries whose {@code know} it is) goes in their bestiary now. Knowing is enough; carrying
+	 * the thing matters only in the fight.
+	 */
+	static void learnt(ServerPlayer player, String mark) {
+		if (mark.isEmpty()) {
+			return;
+		}
+		Tales.State s = Tales.state(player);
+		for (Tales.Run run : new ArrayList<>(s.runs)) {
+			learnt(player, run, mark);
+		}
+	}
+
+	/** {@link #learnt(ServerPlayer, String)}, for one run. */
+	static void learnt(ServerPlayer player, Tales.Run run, String mark) {
+		Tale tale = Tale.get(run.tale);
+		if (tale == null || mark.isEmpty()) {
+			return;
+		}
+		for (JsonElement e : Tale.object(tale.json, "steps").asMap().values()) {
+			if (!e.isJsonObject()) {
+				continue;
+			}
+			JsonObject step = e.getAsJsonObject();
+			for (JsonObject w : Tale.objects(step.get("weak_to"))) {
+				String know = Tale.string(w, "know", "");
+				if (names(know, mark) && Tales.holds(player, run, know)) {
+					teach(player, run, tale, step, w);
+				}
+			}
+		}
+	}
+
+	/** Whether the condition {@code know} turns on {@code mark}. */
+	private static boolean names(String know, String mark) {
+		for (String part : know.split("&")) {
+			if (part.trim().equals("mark:" + mark)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	// ---- words in a tongue you can't read -------------------------------------------------------------------------------------
@@ -1033,6 +1201,10 @@ final class TaleWays {
 			Tales.state(player).marks.add(mark);
 			if (!how.isEmpty()) {
 				Tales.state(player).marks.add(mark + how);
+			}
+			learnt(player, mark);
+			if (!how.isEmpty()) {
+				learnt(player, mark + how);
 			}
 		}
 		player.containerMenu.broadcastChanges();

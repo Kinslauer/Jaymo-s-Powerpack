@@ -1070,8 +1070,8 @@
       "later": [
         {
           "days": [
-            7,
-            10
+            10,
+            14
           ],
           "if": "mark:cordon_cured_sister",
           "letter": {
@@ -1085,8 +1085,8 @@
         },
         {
           "days": [
-            7,
-            10
+            10,
+            14
           ],
           "if": "mark:cordon_cured_boy",
           "letter": {
@@ -1100,8 +1100,8 @@
         },
         {
           "days": [
-            7,
-            10
+            10,
+            14
           ],
           "if": "mark:cordon_flask_sent",
           "letter": {
@@ -1135,8 +1135,8 @@
       "later": [
         {
           "days": [
-            7,
-            10
+            10,
+            14
           ],
           "if": "!mark:cordon_flask_sent",
           "letter": {
@@ -1150,8 +1150,8 @@
         },
         {
           "days": [
-            7,
-            10
+            10,
+            14
           ],
           "if": "mark:cordon_flask_sent",
           "letter": {
@@ -1198,8 +1198,8 @@
       "later": [
         {
           "days": [
-            3,
-            5
+            10,
+            14
           ],
           "if": "mark:cordon_sentry_squared",
           "town": [
@@ -1209,8 +1209,8 @@
         },
         {
           "days": [
-            5,
-            8
+            10,
+            14
           ],
           "if": "!mark:cordon_walk_two",
           "letter": {
@@ -1224,8 +1224,8 @@
         },
         {
           "days": [
-            5,
-            8
+            10,
+            14
           ],
           "if": "mark:cordon_walk_two",
           "letter": {
@@ -1239,8 +1239,8 @@
         },
         {
           "days": [
-            8,
-            12
+            10,
+            14
           ],
           "if": "mark:cordon_gold_given",
           "letter": {
@@ -1254,7 +1254,7 @@
         },
         {
           "days": [
-            9,
+            10,
             14
           ],
           "if": "mark:cordon_walk_two",
@@ -1298,13 +1298,13 @@
       "later": [
         {
           "days": [
-            5,
-            8
+            10,
+            14
           ],
           "scene": [
             [
               "a",
-              "You could see the smoke from the top field yesterday. That was Hatherlow."
+              "You could see the smoke from the top field the day they fired it. That was Hatherlow."
             ],
             [
               "b",
@@ -1322,8 +1322,8 @@
         },
         {
           "days": [
-            7,
-            10
+            10,
+            14
           ],
           "if": "mark:cordon_flask_sent",
           "letter": {
