@@ -15058,3 +15058,9 @@ Clouds and Bits patch 5 (Bits and Balance's ideas, our own code).
 
 - The wall-climb helper (`besideWall`, `WALL_GAP`) is now `@Unique`, so Mixin stops logging an overwrite conflict at every boot and each mod keeps its own copy.
 - Not built or played.
+
+## 0.10.35 (2026-11-18): Captains keep their temperament across restarts (#1755)
+
+- Fixes: rival captains forgot their temperament on every restart (its saved data was dropped as unknown, since nothing had loaded it yet), and players joining didn't get their farmhand family or lesson course. Both are now registered at start-up.
+- Captains whose temperament was already lost get a new one. Also registered early: legendary bosses' spent resistances.
+- Built by CI; not played.

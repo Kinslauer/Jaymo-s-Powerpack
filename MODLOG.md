@@ -6009,3 +6009,8 @@ Patch 2 of the Clouds and Bits plan (Andy's picks `bb-vslab`, `bb-mixslab`, `bb-
 
 - The wall-climb helper (`besideWall`, `WALL_GAP`) is now `@Unique`, so Mixin stops logging an overwrite conflict at every boot and each mod keeps its own copy.
 - Not built or played.
+
+## 0.25.16 (2026-11-18): Conjoined twins show for joining players (#1755)
+
+- Fixes: a player joining didn't get the conjoined twin data, or the depth of others' sunk lures, synced to their screen; both are now registered at start-up.
+- Built by CI; not played.
