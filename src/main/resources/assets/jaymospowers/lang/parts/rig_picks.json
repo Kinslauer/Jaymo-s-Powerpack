@@ -5,6 +5,10 @@
   "gui.jaymospowers.rig_menu.decoy": "Decoy",
   "gui.jaymospowers.rig_menu.field": "Storing Field",
   "gui.jaymospowers.rig_menu.bank": "Bank Shot",
+  "gui.jaymospowers.rig_menu.pullup": "Pull Up",
+  "gui.jaymospowers.rig_menu.hyper": "Hyper Thrust",
+  "gui.jaymospowers.rig_menu.meteor": "Meteor Dive",
+  "gui.jaymospowers.rig_menu.smooth": "Smooth Others",
 
   "screen.jaymospowers.rig_table": "Wrist Table",
   "gui.jaymospowers.rig_table.sub": "%1$s drones, %2$s",
