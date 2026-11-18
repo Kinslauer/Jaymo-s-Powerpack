@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: Rare Warrior-born zombies with rotted tails that turn ape under the moons; undead MCA Verdants turn giant more often
 branch: claude/project-thread-248ttc
 with: cloud thread
@@ -27,3 +27,6 @@ turn during the moons. Undead MCA Verdant should have a similar but higher chanc
 
 ## Notes
 - Lore paragraph "The Warrior-born dead" (new) added to Lore.md, awaiting Andy.
+
+## Done
+- PR #1725 merged 2026-11-18 (CI green); lore paragraph approved by Andy the same day. Compiled, not played.
