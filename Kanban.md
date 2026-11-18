@@ -4,15 +4,15 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 02:39). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 02:44). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
-- [ ] [[Inbox/harness-body-pieces|harness-body-pieces]] · for ☀️ Apollo · open
 - [ ] [[Inbox/harness-creeds-and-lands|harness-creeds-and-lands]] · for ☀️ Apollo · open
 - [ ] [[Inbox/harness-barding|harness-barding]] · for ☀️ Apollo · open
 - [ ] [[Inbox/harness-upkeep|harness-upkeep]] · for ☀️ Apollo · open
+- [ ] [[Inbox/harness-body-pieces|harness-body-pieces]] · for ☀️ Apollo · open
 
 
 ## Being built
