@@ -1,8 +1,8 @@
 package com.jaymospowers.rough;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.HudBar;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
@@ -166,7 +166,7 @@ public class HotAirBalloon extends Entity {
 			}
 			resetFallDistance();
 			if (getFirstPassenger() instanceof ServerPlayer rider && tickCount % 5 == 0) {
-				rider.sendOverlayMessage(bar());
+				bar(rider);
 			}
 			if (burn && tickCount % 30 == 0) {
 				level.playSound(null, getX(), getY() + 1.0, getZ(), BURNER, SoundSource.NEUTRAL, 0.8F, 1.0F);
@@ -184,12 +184,12 @@ public class HotAirBalloon extends Entity {
 		}
 	}
 
-	/** The fuel as a bar of blocks, the way the rider sees it. */
-	Component bar() {
-		int cells = 20, filled = Math.round((float) fuel() / MAX_FUEL * cells);
-		ChatFormatting colour = fuel() > MAX_FUEL / 2 ? ChatFormatting.GOLD : fuel() > MAX_FUEL / 5 ? ChatFormatting.YELLOW : ChatFormatting.RED;
-		return Component.literal("▉".repeat(filled)).withStyle(colour)
-			.append(Component.literal("▉".repeat(cells - filled)).withStyle(ChatFormatting.DARK_GRAY));
+	/** The fuel gauge, shown to {@code player}: gold, yellow under half, red under a fifth. */
+	void bar(Player player) {
+		if (player instanceof ServerPlayer sp) {
+			HudBar.gauge(sp, "balloon_fuel", (float) fuel() / MAX_FUEL, fuel() > MAX_FUEL / 2 ? HudBar.GOLD : fuel() > MAX_FUEL / 5 ? HudBar.YELLOW : HudBar.RED,
+				Component.translatable("bar.jaymospowers.fuel"), null);
+		}
 	}
 
 	@Override
@@ -254,18 +254,18 @@ public class HotAirBalloon extends Entity {
 		int worth = worth(held);
 		if (worth > 0 && !player.isSecondaryUseActive()) {
 			if (fuel() >= MAX_FUEL) {
-				player.sendOverlayMessage(bar());
+				bar(player);
 				return InteractionResult.SUCCESS_SERVER;
 			}
 			entityData.set(FUEL, Math.min(MAX_FUEL, fuel() + worth));
 			held.consume(1, player);
 			server.playSound(null, getX(), getY() + 1.0, getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.NEUTRAL, 0.5F, 1.4F);
-			player.sendOverlayMessage(bar());
+			bar(player);
 			return InteractionResult.SUCCESS_SERVER;
 		}
 		if (!player.isPassenger() && getPassengers().size() < 2) {
 			player.startRiding(this);
-			player.sendOverlayMessage(bar());
+			bar(player);
 			return InteractionResult.SUCCESS_SERVER;
 		}
 		return InteractionResult.PASS;

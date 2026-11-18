@@ -12,6 +12,5 @@
 	"message.jaymospowers.bonebond.full": "Your bones can take no more metal.",
 	"message.jaymospowers.bonebond.short": "Not enough boneiron in the brine for the next tier.",
 	"message.jaymospowers.bonebond.refused": "The metal would kill you. Only a body that heals fast can take it into the bone.",
-	"message.jaymospowers.bonebond.bonding": "The metal works into your bones %s",
 	"message.jaymospowers.bonebond.done": "Boneiron bonded to your bones: tier %s of %s."
 }

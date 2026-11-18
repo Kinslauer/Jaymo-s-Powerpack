@@ -117,6 +117,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.finisher.FinisherPose.register();
 		com.jaymospowers.client.finisher.FinisherClient.register();
 		com.jaymospowers.client.HeldInput.register();
+		com.jaymospowers.client.hud.HudBars.register();
 		// (0.18.12) no body in the logout panorama
 		com.jaymospowers.client.power.web.FirstPersonCompat.hideInPanoramas();
 		LockOnClient.init();

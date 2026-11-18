@@ -144,8 +144,7 @@ public final class Carry {
 	static final int RELEASE_GRACE_TICKS = 40;
 	/** (0.17.7) How long sneak + use is held on someone to lift them (ticks), and the gap between use's repeats (every 4 ticks) that still counts as held. */
 	public static final int LIFT_TICKS = 12, LIFT_GRACE = 8;
-	/** (0.17.7) The lift's bar length, and how far past reach they may slip while it fills (blocks). */
-	static final int LIFT_BAR = 8;
+	/** (0.17.7) How far past reach they may slip while the lift fills (blocks). */
 	static final double LIFT_SLACK = 0.5;
 	/**
 	 * (0.17.18) Andy: "you can lift players from way too far away. make it within 1 block". The most open air between your
@@ -685,9 +684,7 @@ public final class Carry {
 				continue;
 			}
 			if (held >= 2) {
-				int filled = Math.round(LIFT_BAR * held / (float) LIFT_TICKS);
-				player.sendOverlayMessage(Component.translatable("message.jaymospowers.carry.lift", target.getDisplayName(),
-					"|".repeat(filled) + ".".repeat(LIFT_BAR - filled)).withStyle(ChatFormatting.GRAY));
+				HudBar.hold(player, "carry_lift", held / (float) LIFT_TICKS, HudBar.GREY, Component.translatable("bar.jaymospowers.lifting", target.getDisplayName()), true);
 			}
 		}
 	}

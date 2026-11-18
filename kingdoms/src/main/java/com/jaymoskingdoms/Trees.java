@@ -696,15 +696,13 @@ public final class Trees {
 	static final int METER = 12;
 
 	/**
-	 * (0.7.510) The chop meter on the action bar: {@code done} of {@code need} chops, as filled and empty squares (never the
-	 * {@code |...} charge bar, which would hold the mouse and stop the next swing).
+	 * (0.7.510) The chop meter: {@code done} of {@code need} chops, as filled and empty squares under the crosshair
+	 * ({@link HudBars#marks}, which never holds the mouse, so the next swing still lands).
 	 */
 	private static void showChops(ServerPlayer player, int done, int need) {
 		int marks = Math.min(METER, need);
 		int filled = need <= 0 ? marks : Math.round(marks * (float)done / need);
-		Component bar = Component.literal("\u25A0".repeat(filled)).withStyle(filled >= marks ? ChatFormatting.RED : ChatFormatting.GOLD)
-			.append(Component.literal("\u25A1".repeat(marks - filled)).withStyle(ChatFormatting.DARK_GRAY));
-		player.sendOverlayMessage(bar);
+		HudBars.marks(player, "chop", filled, marks, HudBars.GOLD, null);
 	}
 
 	/** (0.7.510) Wood chips flying off the face of {@code cut} toward whoever's chopping. */

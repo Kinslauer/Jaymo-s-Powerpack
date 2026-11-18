@@ -1,7 +1,7 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.api.PowerKey;
-import com.jaymospowers.core.PickKit;
+import com.jaymospowers.core.HudBar;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.fx.MagicFx;
 import java.util.HashMap;
@@ -293,7 +293,7 @@ final class ZFighterLegendHeart {
 	}
 
 	private static void hud(ServerPlayer player, Heart heart, boolean dialed) {
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_legend_heart.heat", PickKit.gauge(heart.heat / FULL, 10),
-			Math.round(heart.heat), Math.round(DIAL[heart.dial] * 100)).withStyle(dialed ? ChatFormatting.WHITE : ChatFormatting.GREEN));
+		HudBar.gauge(player, "legend_heat", heart.heat / FULL, dialed ? HudBar.GREY : HudBar.GREEN, Component.translatable("bar.jaymospowers.heat"),
+			Component.translatable("bar.jaymospowers.legend_heat", Math.round(heart.heat), Math.round(DIAL[heart.dial] * 100)));
 	}
 }

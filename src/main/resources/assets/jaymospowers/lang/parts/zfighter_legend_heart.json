@@ -27,9 +27,7 @@
   "technique.jaymospowers.zfighter.legend.toss": "Charged Throw",
   "technique.jaymospowers.zfighter.legend.drill": "The Drill",
   "technique.jaymospowers.zfighter.legend.crack": "Ground Crack",
-  "message.jaymospowers.zfighter_legend_heart.heat": "Heat %s %s · dial %s%%",
   "message.jaymospowers.zfighter_legend_heart.low": "Not enough heat (needs %s)",
   "message.jaymospowers.zfighter_legend_heart.locked": "%s opens in %s",
-  "message.jaymospowers.zfighter_legend_heart.drill_no": "The drill takes only the ground as it lies",
-  "message.jaymospowers.zfighter_legend_heart.nuke_wind": "Winding up %s"
+  "message.jaymospowers.zfighter_legend_heart.drill_no": "The drill takes only the ground as it lies"
 }
