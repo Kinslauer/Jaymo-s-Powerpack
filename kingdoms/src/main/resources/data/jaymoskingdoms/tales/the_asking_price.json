@@ -882,8 +882,8 @@
 			"later": [
 				{
 					"days": [
-						5,
-						10
+						10,
+						15
 					],
 					"if": "mark:ap_wronged_steward",
 					"town": [
@@ -893,8 +893,8 @@
 				},
 				{
 					"days": [
-						5,
-						10
+						10,
+						15
 					],
 					"if": "mark:ap_saw_lantern",
 					"town": [
@@ -949,8 +949,8 @@
 				},
 				{
 					"days": [
-						5,
-						10
+						10,
+						15
 					],
 					"if": "mark:ap_wronged_steward",
 					"town": [
@@ -960,8 +960,8 @@
 				},
 				{
 					"days": [
-						5,
-						10
+						10,
+						15
 					],
 					"if": "mark:ap_saw_lantern",
 					"town": [
@@ -984,8 +984,8 @@
 			"later": [
 				{
 					"days": [
-						5,
-						10
+						10,
+						15
 					],
 					"if": "mark:ap_wronged_steward",
 					"town": [
@@ -995,8 +995,8 @@
 				},
 				{
 					"days": [
-						5,
-						10
+						10,
+						15
 					],
 					"if": "mark:ap_saw_lantern",
 					"town": [
@@ -1021,8 +1021,8 @@
 			"later": [
 				{
 					"days": [
-						5,
-						10
+						10,
+						15
 					],
 					"if": "mark:ap_wronged_steward",
 					"town": [
@@ -1032,8 +1032,8 @@
 				},
 				{
 					"days": [
-						5,
-						10
+						10,
+						15
 					],
 					"if": "mark:ap_saw_lantern",
 					"town": [

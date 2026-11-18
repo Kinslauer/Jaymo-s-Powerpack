@@ -887,8 +887,8 @@
       "later": [
         {
           "days": [
-            8,
-            16
+            10,
+            18
           ],
           "if": "!mark:duck_owned",
           "town": [
@@ -916,8 +916,8 @@
       "later": [
         {
           "days": [
-            8,
-            16
+            10,
+            18
           ],
           "town": [
             "The low well is as foul as ever, and Sib Yarrow gone. Two more sick.",
@@ -963,8 +963,8 @@
       "later": [
         {
           "days": [
-            8,
-            16
+            10,
+            18
           ],
           "town": [
             "The low well is as foul as ever, and Sib Yarrow gone. Two more sick."

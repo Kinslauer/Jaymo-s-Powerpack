@@ -417,21 +417,21 @@
       "reward": { "coins": 10, "reputation": 6 },
       "marks": ["fm_named_wife"],
       "town": ["They hanged the braid-woman from the hill house. Poisoner, they say. Her poor husband.", "Did you see her arm? Nobody looked at her arm."],
-      "later": [{ "days": [8, 14], "if": "mark:fm_bargain & !mark:fm_sister_named", "mark": "fm_broke_fen_bargain", "letter": { "from": "{sister}", "lines": ["I let the jar go on your word. The name first, you said, before the watch and before the house. I have it now from a drover, third hand, like everybody else in this country.", "I do not send the grey after oath-breakers. I only tell them what they are. You took a dead woman's shelf on a promise and did not keep it. The fen is shut to you. Do not come gathering here by night again."] } }]
+      "later": [{ "days": [10, 16], "if": "mark:fm_bargain & !mark:fm_sister_named", "mark": "fm_broke_fen_bargain", "letter": { "from": "{sister}", "lines": ["I let the jar go on your word. The name first, you said, before the watch and before the house. I have it now from a drover, third hand, like everybody else in this country.", "I do not send the grey after oath-breakers. I only tell them what they are. You took a dead woman's shelf on a promise and did not keep it. The fen is shut to you. Do not come gathering here by night again."] } }]
     },
     "fled": {
       "text": "{wife} took her children and went in the night. {elder} lives, and the house was told it was a fever.",
       "reward": { "coins": 8, "hearts": 6 },
       "marks": ["fm_let_wife_go"],
       "town": ["The old braid-master's wife ran off with the children and the good blankets. After all he gave her.", "A fever, the healer says. Long one. Broke, in the end."],
-      "later": [{ "days": [8, 14], "if": "mark:fm_bargain & !mark:fm_sister_named", "mark": "fm_broke_fen_bargain", "letter": { "from": "{sister}", "lines": ["I let the jar go on your word. The name first, you said, before the watch and before the house. I have it now from a drover, third hand, like everybody else in this country.", "I do not send the grey after oath-breakers. I only tell them what they are. You took a dead woman's shelf on a promise and did not keep it. The fen is shut to you. Do not come gathering here by night again."] } }]
+      "later": [{ "days": [10, 16], "if": "mark:fm_bargain & !mark:fm_sister_named", "mark": "fm_broke_fen_bargain", "letter": { "from": "{sister}", "lines": ["I let the jar go on your word. The name first, you said, before the watch and before the house. I have it now from a drover, third hand, like everybody else in this country.", "I do not send the grey after oath-breakers. I only tell them what they are. You took a dead woman's shelf on a promise and did not keep it. The fen is shut to you. Do not come gathering here by night again."] } }]
     },
     "bought": {
       "text": "{son} paid {coins:20} for it to have been a fever. {elder} mends, and his son brings him his milk every evening.",
       "reward": { "coins": 20 },
       "marks": ["fm_took_son_coin"],
       "town": ["The old braid-master's on his feet again. That son of his never leaves his side. Good lad.", "The healer's taken to calling at the hill house at milk-time. Every evening. Odd, that."],
-      "later": [{ "days": [8, 14], "if": "mark:fm_bargain & !mark:fm_sister_named", "mark": "fm_broke_fen_bargain", "letter": { "from": "{sister}", "lines": ["I let the jar go on your word. The name first, you said, before the watch and before the house. I have it now from a drover, third hand, like everybody else in this country.", "I do not send the grey after oath-breakers. I only tell them what they are. You took a dead woman's shelf on a promise and did not keep it. The fen is shut to you. Do not come gathering here by night again."] } }]
+      "later": [{ "days": [10, 16], "if": "mark:fm_bargain & !mark:fm_sister_named", "mark": "fm_broke_fen_bargain", "letter": { "from": "{sister}", "lines": ["I let the jar go on your word. The name first, you said, before the watch and before the house. I have it now from a drover, third hand, like everybody else in this country.", "I do not send the grey after oath-breakers. I only tell them what they are. You took a dead woman's shelf on a promise and did not keep it. The fen is shut to you. Do not come gathering here by night again."] } }]
     },
     "told": {
       "text": {
@@ -442,7 +442,7 @@
       "reward": { "coins": 12, "hearts": 8, "reputation": 8 },
       "marks": ["fm_house_told"],
       "town": ["Something happened up at the hill house. They're all very quiet up there now.", "The braid-master's sitting out by his door in the sun. Never once saw him do that before."],
-      "later": [{ "days": [8, 14], "if": "mark:fm_bargain & !mark:fm_sister_named", "mark": "fm_broke_fen_bargain", "letter": { "from": "{sister}", "lines": ["I let the jar go on your word. The name first, you said, before the watch and before the house. I have it now from a drover, third hand, like everybody else in this country.", "I do not send the grey after oath-breakers. I only tell them what they are. You took a dead woman's shelf on a promise and did not keep it. The fen is shut to you. Do not come gathering here by night again."] } }],
+      "later": [{ "days": [10, 16], "if": "mark:fm_bargain & !mark:fm_sister_named", "mark": "fm_broke_fen_bargain", "letter": { "from": "{sister}", "lines": ["I let the jar go on your word. The name first, you said, before the watch and before the house. I have it now from a drover, third hand, like everybody else in this country.", "I do not send the grey after oath-breakers. I only tell them what they are. You took a dead woman's shelf on a promise and did not keep it. The fen is shut to you. Do not come gathering here by night again."] } }],
       "returns": { "who": "healer", "as": "thanks", "days": [6, 10], "say": "I came to say the hill house is still standing, and everybody in it. I did not think it would be. I have kept the Hearthkeeper's hearth twenty years, and I have learned that most of what I do is watch a cup. You went into the fen instead. Take these, and keep them by you.", "gift": ["minecraft:honey_bottle*3", "minecraft:bread*4"] }
     },
     "son_slain": {
@@ -450,14 +450,14 @@
       "reward": { "coins": 10, "reputation": 4 },
       "marks": ["fm_slew_son"],
       "town": ["The braid-master's son, killed on his own father's stair. Watchman, too.", "Dice men at a burying. Bold as you like. The old man paid them, they say."],
-      "later": [{ "days": [8, 14], "if": "mark:fm_bargain & !mark:fm_sister_named", "mark": "fm_broke_fen_bargain", "letter": { "from": "{sister}", "lines": ["I let the jar go on your word. The name first, you said, before the watch and before the house. I have it now from a drover, third hand, like everybody else in this country.", "I do not send the grey after oath-breakers. I only tell them what they are. You took a dead woman's shelf on a promise and did not keep it. The fen is shut to you. Do not come gathering here by night again."] } }]
+      "later": [{ "days": [10, 16], "if": "mark:fm_bargain & !mark:fm_sister_named", "mark": "fm_broke_fen_bargain", "letter": { "from": "{sister}", "lines": ["I let the jar go on your word. The name first, you said, before the watch and before the house. I have it now from a drover, third hand, like everybody else in this country.", "I do not send the grey after oath-breakers. I only tell them what they are. You took a dead woman's shelf on a promise and did not keep it. The fen is shut to you. Do not come gathering here by night again."] } }]
     },
     "eased": {
       "text": "{elder} had his fourth measure at the new moon. He was buried inside the wall as a man who died of a wasting, and his wife keeps the house.",
       "reward": { "coins": 12, "hearts": 4 },
       "marks": ["fm_eased_elder"],
       "town": ["Old braid-master's gone. Wasting, the healer says. Peaceful, at the end.", "His widow's kept the house and the loom. Good. She works harder than he ever did."],
-      "later": [{ "days": [8, 14], "if": "mark:fm_bargain & !mark:fm_sister_named", "mark": "fm_broke_fen_bargain", "letter": { "from": "{sister}", "lines": ["I let the jar go on your word. The name first, you said, before the watch and before the house. I have it now from a drover, third hand, like everybody else in this country.", "I do not send the grey after oath-breakers. I only tell them what they are. You took a dead woman's shelf on a promise and did not keep it. The fen is shut to you. Do not come gathering here by night again."] } }],
+      "later": [{ "days": [10, 16], "if": "mark:fm_bargain & !mark:fm_sister_named", "mark": "fm_broke_fen_bargain", "letter": { "from": "{sister}", "lines": ["I let the jar go on your word. The name first, you said, before the watch and before the house. I have it now from a drover, third hand, like everybody else in this country.", "I do not send the grey after oath-breakers. I only tell them what they are. You took a dead woman's shelf on a promise and did not keep it. The fen is shut to you. Do not come gathering here by night again."] } }],
       "returns": { "who": "wife", "as": "thanks", "days": [6, 10], "say": "He went easy. He was holding my hand and he said the sea was a long way off now. I do not know what you gave him and I am not going to ask. The house is mine and the children's. This is the last braid he worked. He would want you to have it, I think. I would.", "gift": ["minecraft:string*6", "minecraft:gold_nugget*3"] }
     },
     "house": {
@@ -472,7 +472,7 @@
         "They had the witch's bowl out at the hill house, and every hand in it. I'd not have put mine in, and I have nothing to hide.",
         "The braid-master's house settled its own trouble with the door shut. The watch was never sent for. Make of that what you like."
       ],
-      "later": [{ "days": [8, 14], "if": "mark:fm_bargain & !mark:fm_sister_named", "mark": "fm_broke_fen_bargain", "letter": { "from": "{sister}", "lines": ["I let the jar go on your word. The name first, you said, before the watch and before the house. I have it now from a drover, third hand, like everybody else in this country.", "I do not send the grey after oath-breakers. I only tell them what they are. You took a dead woman's shelf on a promise and did not keep it. The fen is shut to you. Do not come gathering here by night again."] } }]
+      "later": [{ "days": [10, 16], "if": "mark:fm_bargain & !mark:fm_sister_named", "mark": "fm_broke_fen_bargain", "letter": { "from": "{sister}", "lines": ["I let the jar go on your word. The name first, you said, before the watch and before the house. I have it now from a drover, third hand, like everybody else in this country.", "I do not send the grey after oath-breakers. I only tell them what they are. You took a dead woman's shelf on a promise and did not keep it. The fen is shut to you. Do not come gathering here by night again."] } }]
     },
     "fen_paid": {
       "text": {

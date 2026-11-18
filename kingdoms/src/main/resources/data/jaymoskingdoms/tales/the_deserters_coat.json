@@ -602,8 +602,8 @@
       "later": [
         {
           "days": [
-            8,
-            16
+            10,
+            18
           ],
           "if": "why=refused",
           "scene": [
@@ -623,8 +623,8 @@
         },
         {
           "days": [
-            8,
-            16
+            10,
+            18
           ],
           "if": "why=afraid",
           "town": [

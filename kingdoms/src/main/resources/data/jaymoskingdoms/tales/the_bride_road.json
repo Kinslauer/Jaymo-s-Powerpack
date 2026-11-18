@@ -353,7 +353,7 @@
       "text": "The wedding day came and went, and {bride} had not reached the mill. {groom} took an empty door for his answer and called the match off. The Ashdowns' debt stands.",
       "marks": ["bride_road_overdue"],
       "town": ["Pell stood at his mill door till dark on the wedding day. Then he went in and banked the fire.", "Late! A bride, late. {giver} says never again to hire anybody by the look of them."],
-      "later": [{ "days": [8, 14], "letter": { "from": "{bride}", "lines": ["The day passed, and the match with it. Nobody asked me, and then nobody wanted me, all inside one week.", "I have gone to the coast. A smack called the Grey Hen has taken me on to gut and to mend. My father writes that the debt stands and that I am to blame for it.", "Thank you for being slow. I do not think you meant it for a kindness. It was the only one I was shown."] } }]
+      "later": [{ "days": [10, 16], "letter": { "from": "{bride}", "lines": ["The day passed, and the match with it. Nobody asked me, and then nobody wanted me, all inside one week.", "I have gone to the coast. A smack called the Grey Hen has taken me on to gut and to mend. My father writes that the debt stands and that I am to blame for it.", "Thank you for being slow. I do not think you meant it for a kindness. It was the only one I was shown."] } }]
     },
     "wed": {
       "text": "{bride} is wed to {groom} and lives at the mill. Nobody asked her. She is making of it what she can.",

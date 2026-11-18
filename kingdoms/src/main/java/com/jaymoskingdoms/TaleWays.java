@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,6 +28,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -111,6 +113,10 @@ final class TaleWays {
 	static final double MEET_RANGE = 8.0, HOURS_GONE = 14.0;
 	/** Someone who moves to a town does so when the player is next this near its seat; what's owed later is dropped after this many days unpaid. */
 	static final int SETTLE_NEAR = 96, LATER_KEPT = 60;
+	/** The days an ending's later things come after, and a lie's, where a tale leaves them out. */
+	static final int LATER_DAYS = 10, LIE_DAYS = 7;
+	/** What of a later thing waits apart until it can be done: a letter, a grave, someone moving away. */
+	static final List<String> WAITS = List.of("letter", "grave", "leaves");
 	/** Lines a companion has for each belief before a choice, and for agreeing and not after it. */
 	static final int VOICE_LINES = 2;
 
@@ -1129,7 +1135,6 @@ final class TaleWays {
 		}
 		JsonObject kept = new JsonObject();
 		kept.addProperty("mark", mark);
-		kept.addProperty("faction", run.faction);
 		MutableComponent told = Tales.words(player, run, spec, "told");
 		if (told != null) {
 			kept.addProperty("told", told.getString());
@@ -1307,7 +1312,16 @@ final class TaleWays {
 				JsonObject who = new JsonObject();
 				who.addProperty("name", run.names.getOrDefault(settles, ""));
 				who.add("body", body);
+				who.addProperty("as", Tale.string(l, "as", ""));
 				what.add("settles", who);
+			}
+			if (l.has("grave")) {
+				// (the words on the board at its head)
+				what.add("grave", filled(player, run, l.get("grave")));
+			}
+			UUID gone = Tale.string(l, "leaves", "").equals("giver") ? run.giverId() : null;
+			if (gone != null) {
+				what.addProperty("leaves", gone.toString());
 			}
 			if (l.has("mark")) {
 				what.addProperty("mark", Tale.string(l, "mark", ""));
@@ -1317,7 +1331,7 @@ final class TaleWays {
 				what.addProperty("still", Tale.string(l, "still", ""));
 			}
 			if (!what.isEmpty()) {
-				Tales.state(player).later.add(new Later(Tales.day(level) + Tale.between(l.get("days"), 10, level.getRandom()), run.faction, what.toString()));
+				Tales.state(player).later.add(new Later(Tales.day(level) + Tale.between(l.get("days"), LATER_DAYS, level.getRandom()), run.faction, what.toString()));
 			}
 		}
 	}
@@ -1357,10 +1371,12 @@ final class TaleWays {
 		}
 		JsonObject what = new JsonObject();
 		what.add("lie", kept);
+		// (one lie, found out on the one day, for everyone who stood by while it was told)
+		long out = Tales.day(level) + Tale.between(lie.get("days"), LIE_DAYS, level.getRandom());
 		for (ServerPlayer p : Tales.sharers(player, run)) {
 			Tales.State s = Tales.state(p);
 			s.marks.add("lie:" + name);
-			s.later.add(new Later(Tales.day(level) + Tale.between(lie.get("days"), 7, level.getRandom()), run.faction, what.toString()));
+			s.later.add(new Later(out, run.faction, what.toString()));
 		}
 	}
 
@@ -1372,7 +1388,12 @@ final class TaleWays {
 		return out;
 	}
 
-	/** What's come due of what {@code player}'s tales left for later (one thing that needs a runner at a time). */
+	/**
+	 * What's come due of what {@code player}'s tales left for later. What can be done at once is (talk, scenes, marks, a
+	 * lie found out, someone moving in); what waits on something (a letter on a runner, a grave on open ground near a
+	 * town, someone moving away on nobody watching, hearts owed by someone not about) is kept apart, each until it's
+	 * done or too old. One thing that needs a runner at a time.
+	 */
 	static void later(ServerLevel level, ServerPlayer player, Tales.State s, long today) {
 		for (Later l : new ArrayList<>(s.later)) {
 			if (today < l.day()) {
@@ -1385,37 +1406,81 @@ final class TaleWays {
 				s.later.remove(l);
 				continue;
 			}
-			boolean stale = today > l.day() + LATER_KEPT;
-			Faction f = l.faction() < 0 ? null : Factions.get(level.getServer(), l.faction());
-			JsonObject letter = Tale.object(what, "letter");
-			JsonObject settles = Tale.object(what, "settles");
-			if (!stale && !letter.isEmpty() && !TaleCast.canVisit(level, player)) {
+			if (today > l.day() + LATER_KEPT) {
+				s.later.remove(l);
 				continue;
 			}
-			if (!stale && !settles.isEmpty() && f != null && (player.level() != level || !player.blockPosition().closerThan(f.seat(), SETTLE_NEAR)
+			Faction f = l.faction() < 0 ? null : Factions.get(level.getServer(), l.faction());
+			String rest = Tale.string(what, "rest", "");
+			if (!rest.isEmpty()) {
+				if (waiting(level, player, s, l, what, f, rest, today)) {
+					return;
+				}
+				continue;
+			}
+			if (f == null && (what.has("town") || what.has("scene") || what.has("settles") || what.has("grave"))) {
+				// (a tale begun where no town was, or whose town is gone since: the town nearest the player has it, or it waits)
+				f = Tales.nearest(level.getServer(), player.blockPosition(), null, false);
+				if (f == null) {
+					continue;
+				}
+			}
+			JsonObject settles = Tale.object(what, "settles");
+			if (!settles.isEmpty() && (player.level() != level || !player.blockPosition().closerThan(f.seat(), SETTLE_NEAR)
 				|| !level.isPositionEntityTicking(f.seat()))) {
 				continue;
 			}
 			s.later.remove(l);
-			if (stale || what.has("still") && !Tales.holds(player, null, Tale.string(what, "still", ""))) {
+			if (what.has("still") && !Tales.holds(player, null, Tale.string(what, "still", ""))) {
 				continue;
 			}
+			int town = f == null ? l.faction() : f.id();
 			JsonObject lie = Tale.object(what, "lie");
 			if (!lie.isEmpty()) {
-				caught(level, player, s, f, lie);
+				caught(level, player, s, f, lie, l.day(), town);
 			}
 			if (what.has("mark")) {
-				s.marks.add(Tale.string(what, "mark", ""));
+				String mark = Tale.string(what, "mark", "");
+				s.marks.add(mark);
+				learnt(player, mark);
 			}
 			if (f != null) {
 				Overheard.townTalk(player, f.id(), literal(what.get("town")), false);
 				Overheard.owe(player, f.id(), Tale.strings(what.get("scene")));
 			}
-			if (!settles.isEmpty() && f != null) {
-				TaleCast.settle(level, Tale.object(settles, "body"), Tale.string(settles, "name", ""), f.seat());
+			if (!settles.isEmpty()) {
+				TaleCast.settle(level, Tale.object(settles, "body"), Tale.string(settles, "name", ""), f.seat(), Tale.string(settles, "as", "").equals("guard"));
 			}
-			if (!letter.isEmpty()) {
-				// (written by the tale's own hand: the run it came from is over, so its words were filled in when it ended)
+			for (String part : WAITS) {
+				if (what.has(part)) {
+					JsonObject wait = new JsonObject();
+					wait.addProperty("rest", part);
+					wait.add(part, what.get(part));
+					s.later.add(new Later(l.day(), town, wait.toString()));
+				}
+			}
+		}
+	}
+
+	/**
+	 * One thing of {@code l} still waiting ({@code rest}: a letter, a grave, someone moving away, hearts owed): done if it
+	 * can be now (and taken off), else left for another try. True if a runner was sent.
+	 */
+	private static boolean waiting(ServerLevel level, ServerPlayer player, Tales.State s, Later l, JsonObject what, @Nullable Faction f, String rest,
+		long today) {
+		if (Tale.number(what, "next", 0) > today) {
+			return false;
+		}
+		MinecraftServer server = level.getServer();
+		ServerLevel world = Factions.level(server);
+		switch (rest) {
+			case "letter" -> {
+				if (!TaleCast.canVisit(level, player)) {
+					return false;
+				}
+				JsonObject letter = Tale.object(what, "letter");
+				// (a runner who can't set out, or doesn't find them, comes again another day; it's off the list once it's in their hand)
+				Later again = again(s, l, what, today);
 				Tales.Run blank = new Tales.Run("later:" + l.day(), "", "", "", "", "", l.faction(), player.blockPosition().asLong(), -1L, false,
 					Map.of(), Map.of(), Map.of(), Map.of(), Map.of(), List.of());
 				CompoundTag tag = new CompoundTag();
@@ -1425,15 +1490,62 @@ final class TaleWays {
 				if (!tag.isEmpty()) {
 					stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
 				}
+				UUID whose = player.getUUID();
 				TaleCast.sendLetter(level, player, stack, () -> {
+					ServerPlayer now = server.getPlayerList().getPlayer(whose);
+					if (now != null) {
+						Tales.state(now).later.remove(again);
+					}
 				});
-				return;
+				return true;
 			}
+			case "grave" -> {
+				Faction town = f != null ? f : Tales.nearest(server, player.blockPosition(), null, false);
+				if (town == null || !world.isLoaded(town.seat())) {
+					// (dug while somebody is near enough the town for it to be there)
+					return false;
+				}
+				if (TaleAfter.grave(world, town, Tale.strings(what.get("grave")))) {
+					s.later.remove(l);
+				} else {
+					again(s, l, what, today);
+				}
+			}
+			case "leaves" -> {
+				UUID id = Tales.uuid(Tale.string(what, "leaves", ""));
+				if (id == null || TaleAfter.leave(world, id)) {
+					s.later.remove(l);
+				}
+			}
+			case "owed" -> {
+				// (the one lied to wasn't about when it came out: they hear of it when they're next about)
+				LivingEntity to = Tales.entity(world, Tales.uuid(Tale.string(what, "owed", "")));
+				if (to != null) {
+					s.later.remove(l);
+					Recollections.remember(to, player, Recollections.Kind.LIED, Component.empty());
+					int hearts = Tale.number(what, "hearts", 0);
+					if (hearts != 0) {
+						McaCompat.hearts(to, player, -Math.abs(hearts));
+					}
+				}
+			}
+			default -> s.later.remove(l);
 		}
+		return false;
+	}
+
+	/** {@code l} again, tried no sooner than tomorrow (in place of {@code l} on the list). */
+	private static Later again(Tales.State s, Later l, JsonObject what, long today) {
+		JsonObject next = what.deepCopy();
+		next.addProperty("next", today + 1);
+		Later again = new Later(l.day(), l.faction(), next.toString());
+		s.later.remove(l);
+		s.later.add(again);
+		return again;
 	}
 
 	/** A lie's day has come: unless something covered it, it's out. The one lied to and their town think the less of the liar. */
-	private static void caught(ServerLevel level, ServerPlayer player, Tales.State s, @Nullable Faction f, JsonObject lie) {
+	private static void caught(ServerLevel level, ServerPlayer player, Tales.State s, @Nullable Faction f, JsonObject lie, long day, int town) {
 		String unless = Tale.string(lie, "unless", "");
 		if (!unless.isEmpty() && Tales.holds(player, null, unless)) {
 			return;
@@ -1442,17 +1554,30 @@ final class TaleWays {
 		JsonObject comes = Tale.object(lie, "returns");
 		if (!comes.isEmpty()) {
 			String as = Tale.string(comes, "as", "warning");
-			boolean fighter = comes.get("body").getAsString().contains("\"fighter\"");
+			JsonObject body;
+			try {
+				body = JsonParser.parseString(Tale.string(comes, "body", "{}")).getAsJsonObject();
+			} catch (RuntimeException e) {
+				body = new JsonObject();
+			}
+			boolean fighter = Tale.string(body, "body", "villager").equals("fighter");
 			s.returns.add(new Tales.Return(Tale.string(comes, "name", ""), Tale.string(comes, "body", "{}"), Tales.day(level),
 				fighter ? as : as.equals("revenge") ? "warning" : as.equals("recruit") ? "thanks" : as, Tale.string(comes, "say", ""), Tale.strings(comes.get("gift")),
 				f == null ? -1 : f.id()));
 		}
-		LivingEntity to = Tales.entity(level, Tales.uuid(Tale.string(lie, "to", "")));
+		LivingEntity to = Tales.entity(Factions.level(level.getServer()), Tales.uuid(Tale.string(lie, "to", "")));
 		if (to != null) {
 			Recollections.remember(to, player, Recollections.Kind.LIED, Component.empty());
 			if (Tale.number(lie, "hearts", 0) != 0) {
 				McaCompat.hearts(to, player, -Math.abs(Tale.number(lie, "hearts", 0)));
 			}
+		} else if (!Tale.string(lie, "to", "").isEmpty()) {
+			// (not about just now: it's owed them, for when they are)
+			JsonObject owed = new JsonObject();
+			owed.addProperty("rest", "owed");
+			owed.addProperty("owed", Tale.string(lie, "to", ""));
+			owed.addProperty("hearts", Tale.number(lie, "hearts", 0));
+			s.later.add(new Later(day, town, owed.toString()));
 		}
 		if (f != null) {
 			if (Tale.number(lie, "reputation", 0) != 0) {

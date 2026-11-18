@@ -252,11 +252,23 @@ def check_days(c, where, days):
         c.err(where, f"days must be [least, most] whole days, got {days!r}")
 
 
+LATER_LEAST, LATER_MOST = 10, 40
+
+
+def check_long_after(c, where, cond, what):
+    """A condition asked weeks after the tale, with no run: marks, done:, dress and the like only."""
+    if "=" in cond.replace(">=", "") or "met:" in cond or "late:" in cond or "reputation" in cond or "hearts" in cond:
+        c.err(where, f"'{what}' is asked with the tale long over: marks, done:, dress, not its rolls, clocks, who was met, standing or hearts")
+
+
 def check_letter(c, where, letter, tale):
     if not isinstance(letter, dict) or "from" not in letter or "lines" not in letter:
         c.err(where, "a letter needs 'from' and 'lines'")
         return
     check_text(c, where + ".from", letter["from"], tale)
+    if "to" in letter:
+        # (who it's addressed to, written on the outside)
+        check_text(c, where + ".to", letter["to"], tale)
     check_text(c, where + ".lines", letter["lines"], tale)
     check_written(c, where, letter, tale)
 
@@ -295,6 +307,7 @@ def check_lie(c, where, lie, tale):
     check_days(c, where + ".days", lie.get("days"))
     if "unless" in lie:
         check_condition(c, where + ".unless", lie["unless"], tale)
+        check_long_after(c, where + ".unless", lie["unless"], "unless")
     if "returns" in lie:
         # (they come on the day it's out: no days of their own)
         back = lie["returns"]
@@ -314,27 +327,46 @@ def check_later(c, where, later, tale):
     if not isinstance(later, dict):
         c.err(where, "later is a list of { days, ... }")
         return
-    unknown = set(later) - {"days", "if", "still", "letter", "town", "scene", "settles", "mark"}
+    unknown = set(later) - {"days", "if", "still", "letter", "town", "scene", "settles", "as", "mark", "grave", "leaves"}
     if unknown:
         c.err(where, f"unknown fields {sorted(unknown)}")
     check_days(c, where + ".days", later.get("days"))
-    if not set(later) & {"letter", "town", "scene", "settles", "mark"}:
-        c.err(where, "brings nothing: add a letter, town, scene, settles or mark")
+    days = later.get("days")
+    if isinstance(days, list) and len(days) == 2 and not (LATER_LEAST <= days[0] and days[1] <= LATER_MOST):
+        c.err(where + ".days", f"what an ending leaves comes {LATER_LEAST} to {LATER_MOST} days on (sooner is a 'returns')")
+    if not set(later) & {"letter", "town", "scene", "settles", "mark", "grave", "leaves"}:
+        c.err(where, "brings nothing: add a letter, town, scene, settles, grave, leaves or mark")
+    if "grave" in later:
+        grave = later["grave"]
+        if not (isinstance(grave, list) and 1 <= len(grave) <= 4 and all(isinstance(g, str) and g.strip() for g in grave)):
+            c.err(where + ".grave", "a grave's board is one to four lines")
+        else:
+            check_text(c, where + ".grave", grave, tale)
+            for g in grave:
+                if "{" not in g and len(g) > 15:
+                    c.err(where + ".grave", f"a board's line is at most 15 letters: '{g}'")
+    if "leaves" in later:
+        if later["leaves"] != "giver":
+            c.err(where + ".leaves", "only 'giver' (the townsperson who asked) moves away")
+        elif tale.get("start", {}).get("by") != "giver":
+            c.err(where + ".leaves", "a tale with no asker has nobody to move away")
+    if "as" in later and (later["as"] != "guard" or "settles" not in later):
+        c.err(where + ".as", "'as': 'guard' goes with 'settles' (they settle as one of the town's guards)")
     if "if" in later:
         check_condition(c, where, later["if"], tale)
     if "still" in later:
         # (asked on its day, with the tale long over: nothing of the run is left to ask)
         check_condition(c, where, later["still"], tale)
-        if "=" in later["still"].replace(">=", "") or "met:" in later["still"] or "late:" in later["still"]:
-            c.err(where, "'still' is asked weeks after the tale: marks, done:, standing, dress, not its rolls, clocks or who was met")
+        check_long_after(c, where, later["still"], "still")
     if "letter" in later:
         check_letter(c, where + ".letter", later["letter"], tale)
     if "town" in later:
         check_text(c, where + ".town", later["town"], tale)
     if "settles" in later:
         check_role(c, where + ".settles", later["settles"], tale)
-        if tale.get("cast", {}).get(later["settles"], {}).get("body", "villager") != "villager":
-            c.err(where, "only a villager settles in a town")
+        body = tale.get("cast", {}).get(later["settles"], {}).get("body", "villager")
+        if body != "villager" and not (body == "fighter" and later.get("as") == "guard"):
+            c.err(where, "only a villager settles in a town (or a fighter, 'as': 'guard')")
     scene = later.get("scene", [])
     if "scene" in later and not (isinstance(scene, list) and 2 <= len(scene) <= 6):
         c.err(where + ".scene", "two to six lines")
@@ -387,9 +419,9 @@ def check_tale(path):
             c.err("start", "a notice start needs notice.title, notice.lines and notice.hand (whose hand it's in)")
         else:
             check_text(c, "start.notice.lines", notice["lines"], tale, extra=())
-            for line in notice["lines"] if isinstance(notice["lines"], list) else []:
-                if "{" in line:
-                    c.err("start.notice.lines", "a notice is on the board before anyone has the tale: no placeholders")
+            for line in (notice["lines"] if isinstance(notice["lines"], list) else []) + [notice["title"], notice["hand"]]:
+                if not isinstance(line, str) or "{" in line:
+                    c.err("start.notice", "a notice is on the board before anyone has the tale: plain words, no placeholders")
     if by == "book":
         book = start.get("book")
         if not isinstance(book, dict) or not {"title", "pages", "found"} <= set(book):
@@ -536,6 +568,11 @@ def check_tale(path):
                         c.err(rw, f"{field} is a list of {sorted(BELIEFS)}")
                 if "lie" in r:
                     check_lie(c, rw + ".lie", r["lie"], tale)
+                    if isinstance(r["lie"], dict) and r["lie"].get("hearts"):
+                        settled = {l.get("settles") for e in tale.get("endings", {}).values() for l in e.get("later", [])}
+                        for w in branches(step["who"]):
+                            if w != "giver" and w not in settled:
+                                c.err(rw + ".lie", f"'{w}' is gone by the time the lie is out: hearts are lost only with a townsperson (the asker), or one who settles")
                 if "journal" in r:
                     check_text(c, rw + ".journal", r["journal"], tale)
                 check_then(c, rw, r["then"], tale, edges)

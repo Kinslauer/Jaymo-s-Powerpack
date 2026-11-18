@@ -1060,8 +1060,8 @@
       "later": [
         {
           "days": [
-            8,
-            16
+            10,
+            18
           ],
           "letter": {
             "from": "{priest}",
@@ -1117,8 +1117,8 @@
       "later": [
         {
           "days": [
-            8,
-            16
+            10,
+            18
           ],
           "letter": {
             "from": "{priest}",
@@ -1191,8 +1191,8 @@
       "later": [
         {
           "days": [
-            8,
-            16
+            10,
+            18
           ],
           "town": [
             "Father's back in his pulpit and off the cider. He kept it to half an hour last week. They say {player} frightened him into it."
@@ -1233,8 +1233,8 @@
       "later": [
         {
           "days": [
-            8,
-            16
+            10,
+            18
           ],
           "scene": [
             [
@@ -1270,8 +1270,8 @@
       "later": [
         {
           "days": [
-            6,
-            12
+            10,
+            16
           ],
           "letter": {
             "from": "{priest}",

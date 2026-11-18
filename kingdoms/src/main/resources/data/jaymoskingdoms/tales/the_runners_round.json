@@ -390,7 +390,6 @@
               8
             ],
             "unless": "mark:runner_owned_soft",
-            "hearts": 25,
             "reputation": 6,
             "town": [
               "{widow} had the cleric read her boy's letter over to her. It did not say what {player} read out on her floor.",
@@ -414,7 +413,6 @@
               8
             ],
             "unless": "mark:runner_owned_soft",
-            "hearts": 25,
             "reputation": 6,
             "town": [
               "{widow} had the cleric read her boy's letter over to her. It did not say what {player} read out on her floor.",
@@ -438,7 +436,6 @@
               8
             ],
             "unless": "mark:runner_owned_soft",
-            "hearts": 25,
             "reputation": 6,
             "town": [
               "{widow} had the cleric read her boy's letter over to her. It did not say what {player} read out on her floor.",
@@ -642,7 +639,6 @@
               3,
               6
             ],
-            "hearts": 15,
             "reputation": 4,
             "town": [
               "{miller} says he paid Tam Rudd's carriage into a stranger's hand. Tam says he never saw it.",
@@ -674,7 +670,6 @@
               5,
               9
             ],
-            "hearts": 30,
             "reputation": 8,
             "town": [
               "Nothing went in the split oak this month. Old Sallow at the charcoal stacks swears it. Tam Rudd swears the bag went out full.",

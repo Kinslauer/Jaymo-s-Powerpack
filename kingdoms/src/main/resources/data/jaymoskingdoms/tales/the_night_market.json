@@ -634,8 +634,8 @@
         },
         {
           "days": [
-            8,
-            14
+            10,
+            16
           ],
           "if": "mark:market_sold_face",
           "letter": {
@@ -684,8 +684,8 @@
         },
         {
           "days": [
-            8,
-            14
+            10,
+            16
           ],
           "if": "mark:market_sold_face",
           "letter": {
@@ -719,8 +719,8 @@
       "later": [
         {
           "days": [
-            9,
-            16
+            10,
+            17
           ],
           "scene": [
             [
@@ -743,8 +743,8 @@
         },
         {
           "days": [
-            8,
-            14
+            10,
+            16
           ],
           "if": "mark:market_sold_face",
           "letter": {
@@ -791,8 +791,8 @@
         },
         {
           "days": [
-            8,
-            14
+            10,
+            16
           ],
           "if": "mark:market_sold_face",
           "letter": {

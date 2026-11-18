@@ -309,12 +309,11 @@
           "lie": {
             "name": "lords_hare",
             "days": [
-              12,
-              18
+              16,
+              22
             ],
             "unless": "mark:hare_under_keeper",
             "reputation": 12,
-            "hearts": 20,
             "town": [
               "The forester found a wire by the split oak, and reckons it was set the very night before {player} stood in his lodge and swore the wood was quiet.",
               "He says he will not take a stranger's word again. Can't say I blame him."
@@ -464,8 +463,8 @@
       "later": [
         {
           "days": [
-            6,
-            10
+            10,
+            14
           ],
           "mark": "hare_under_keeper",
           "letter": {

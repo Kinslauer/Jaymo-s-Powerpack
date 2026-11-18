@@ -190,7 +190,6 @@
               9
             ],
             "unless": "mark:candle_told_tam",
-            "hearts": 30,
             "reputation": 5,
             "town": [
               "Tam Rudd had a paper read to him by {player}, and was told it was a chandler's bill. He has had it said over by somebody else since.",

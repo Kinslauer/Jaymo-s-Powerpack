@@ -78,6 +78,8 @@ final class TaleCast {
 	static final int KEEP_WITHIN = 6, BACK_WITHIN = 24;
 	/** A cast member whose place has changed (a switched {@code at}) walks on if the new place is further than this from where they stand (blocks). */
 	static final int MOVE_ON = 10;
+	/** Someone who moves to a town is set down within this many blocks of its seat. */
+	static final int SETTLE_SPREAD = 4;
 	/** How far behind an escorted charge those walking {@code with} them fall before they're sent after (blocks). */
 	static final double FOLLOW_NEAR = 5.0;
 	/** People of a tale that's over leave once no player is this near, or after this long (ticks). */
@@ -695,10 +697,12 @@ final class TaleCast {
 	 * ({@link TaleWays#later}) Someone of a tale that's over comes to live at {@code seat}: an ordinary villager from now
 	 * on, with the name and the trade the tale gave them.
 	 */
-	static void settle(ServerLevel level, JsonObject body, String name, BlockPos seat) {
-		BlockPos at = Construction.standable(level, seat.offset(level.getRandom().nextInt(9) - 4, 0, level.getRandom().nextInt(9) - 4), 4);
+	static void settle(ServerLevel level, JsonObject body, String name, BlockPos seat, boolean guard) {
+		BlockPos at = Construction.standable(level, seat.offset(level.getRandom().nextInt(SETTLE_SPREAD * 2 + 1) - SETTLE_SPREAD, 0,
+			level.getRandom().nextInt(SETTLE_SPREAD * 2 + 1) - SETTLE_SPREAD), SETTLE_SPREAD);
 		Boolean female = body.has("female") ? Tale.flag(body, "female") : null;
-		McaCompat.talePerson(level, Vec3.atBottomCenterOf(at), profession(Tale.string(body, "job", "none")), female, name, false);
+		// (as one of the town's guards: MCA's guard, who keeps the town as its guards do)
+		McaCompat.talePerson(level, Vec3.atBottomCenterOf(at), profession(Tale.string(body, "job", "none")), female, name, guard);
 	}
 
 	private static void joined(Mob mob, ServerPlayer player) {
