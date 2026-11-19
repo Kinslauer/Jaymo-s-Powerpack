@@ -88,14 +88,20 @@ public final class Captors {
 
 	/** One who takes captives: greenskins, ogres, pirates, the camps' raiders and illagers, bandits and outlaws. */
 	static boolean sentient(Entity e) {
-		if (e instanceof Worker w && w.factionId() >= 0) {
-			Faction f = Factions.get(e.level().getServer(), w.factionId());
-			if (f != null && f.is(FactionType.BARBARIAN)) {
-				return true;
-			}
+		if (barbarian(e)) {
+			return true;
 		}
 		return e instanceof LivingEntity living && (Orcs.isOrc(living) || Goblins.isGoblin(living) || Pirates.isPirate(living))
 			|| e instanceof com.jaymoskingdoms.monsters.Ogre || e instanceof AbstractIllager || Illagers.isCampIllager(e) || Outlaws.is(e);
+	}
+
+	/** One of a barbarian camp's own people (its raiders, its chief, its camp folk). */
+	static boolean barbarian(Entity e) {
+		if (e instanceof Worker w && w.factionId() >= 0 && e.level().getServer() != null) {
+			Faction f = Factions.get(e.level().getServer(), w.factionId());
+			return f != null && f.is(FactionType.BARBARIAN);
+		}
+		return false;
 	}
 
 	/** The camp {@code by} belongs to, else the nearest standing one to {@code from} within {@link #CAPTURE_RANGE}. */
