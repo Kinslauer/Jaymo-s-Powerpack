@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes-a
 from: pc-claude
 asked: 2026-11-18
@@ -33,3 +33,4 @@ text_pass: done
 - 2026-11-18 11:32 hermes-a's last text pass stopped before finishing; handed back so it can carry on.
 - 2026-11-18 11:35 Text pass: PR #1728 harness-creeds-and-lands. Reviewed all player-visible text: heraldry-armour.json adds 9 finish names (Etched/Spiked/Gilt-Banded/Fur-Lined/Quilted/Brine-Soaked/Hide/Bronze/Lamellar %s) matching existing Blackened/Gilded pattern; message.json shortens bounty.paid and job.paid/paid_short. All text already plain and brief, no rewrites needed. Deleted lang files and removed .tag keys are old UI text whose code was also removed. No hint additions. No text changes made by me.
 - 2026-11-18 11:36 Text pass: PR #1728 harness-creeds-and-lands. Reviewed all player-visible text: heraldry-armour.json adds 9 finish names (Etched/Spiked/Gilt-Banded/Fur-Lined/Quilted/Brine-Soaked/Hide/Bronze/Lamellar %s) matching existing Blackened/Gilded pattern; message.json shortens bounty.paid and job.paid/paid_short. All text already plain and brief, no rewrites needed. Deleted lang files and removed .tag keys are old UI text whose code was also removed. No hint additions. No text changes made by me.
+- 2026-11-18 19:33 PR #1728 is merged into master; moved to Inbox/Done.

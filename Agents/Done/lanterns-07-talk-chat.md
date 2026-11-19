@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: lanterns-07-talk-chat
 branch: claude/lanterns-07-talk-chat
 with: Claude Code (PC)
@@ -26,3 +26,4 @@ owns:
 
 ## Done
 Say a line looking at a villager (or starting with their name) and they answer over their head; short replies keep it going; MCA's chat AI takes over when on. Duplex doubles follow, wait, scout, collect, mine, fetch and fight on spoken orders. Compiled on the PC, CI passes; not played.
+- 2026-11-18 19:33 PR #1767 is merged into master; moved to Agents/Done.
