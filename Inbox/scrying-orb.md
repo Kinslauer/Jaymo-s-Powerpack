@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: blocked
 for: any
 from: coordinator
 asked: 2026-11-18
@@ -47,3 +47,4 @@ text_pass:
 - 2026-11-18 18:45 scrying-orb's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-18 18:59 PC Claude skipped it (2026-11-18 evening): the cloud session's 17:03 claim may still be working unpushed. Coordinator: confirm whether it's free before anyone else starts.
 - 2026-11-18 21:28 hermes-writer's claim had no sign of work for 30 min: handed back as in-review.
+- 2026-11-18 21:37 Text pass: kingdoms/lang/parts/scrying-orb.json - sighted_shard.default_name now '%s: %d, %d, %d', so shards read 'Sighted Shard (overworld: x, y, z)' and the mark chat reads 'Marked overworld: x, y, z' (all keys and placeholders kept, no code touched). change note changes/kingdoms/claude-scrying-orb.md read and accurate against the trade/recipe data. Committed 287aad5c5 and pushed to origin/claude/scrying-orb (PR #1787). Build blocked: kingdoms compileJava fails with 24 errors in ScryingOrb.java, SightedShard.java and ScryingOrbBlockEntity.java - pre-26.3 APIs/missing imports (ChunkHolder, BlockState import, TargetKind.CODEC/STREAM_CODEC, DataComponents, ResourceLocation import, swing/drop signatures, dimension().location(), DimensionType.effects(), putUUID/getUUID, isMoving, OrbView Component arg). PR checks passed on the changed files. Hand-in as in-review is blocked until the builder fixes the code and PR checks go green.
