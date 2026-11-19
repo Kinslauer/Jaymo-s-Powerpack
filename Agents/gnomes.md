@@ -1,9 +1,9 @@
-﻿---
-status: running
+---
+status: in-review
 task: 
 branch: claude/gnomes
 with: Claude Code (PC)
-pr: 
+pr: 1865
 mods: kingdoms
 versions: 
 started: 2026-11-19
@@ -25,3 +25,4 @@ owns:
 - The gnomes come from ATi Structures (gnome_hut) and Grim Kingdoms (gnome_tower, gnome_tall_tower), both ARR: nothing of theirs copied.
 
 ## Done
+PR #1865. Players see a real gnome (our own GeckoLib model) wherever the gnome huts and towers put their named zombies. Gnomes are neutral until you trample their flowers, dig near their house or open its chests. They bone-meal their gardens, take seeds/saplings/flowers/bone meal for raw iron, an emerald or a rare diamond, and dig away from a stripped garden. Built on the Deck and PR checks pass; not played in game.
