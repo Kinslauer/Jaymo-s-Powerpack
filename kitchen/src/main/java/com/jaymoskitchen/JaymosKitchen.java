@@ -104,6 +104,7 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.farm.TiredSoil.register();
 		// (GT New Horizons picks) slow herds and crowded pens; before Familiarity, so a milked cow gives no extra bucket
 		com.jaymoskitchen.farm.Herds.register();
+		com.jaymoskitchen.farmwater.FarmWater.register();
 		com.jaymoskitchen.farm.Familiarity.register();
 		// (GT New Horizons picks) farmland only near water, seeds scratched from dry grass
 		com.jaymoskitchen.farm.DryFields.register();
