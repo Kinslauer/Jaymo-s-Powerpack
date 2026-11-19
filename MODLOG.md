@@ -6428,3 +6428,11 @@ Andy: "they need to react to feints at least. and give patrolmen ranks".
   first time you carry the traveller's journal. Once per player, one at a time, none in the first 10 seconds of a
   session. `client/hud/UiTips`, lang `parts/ui_tips.json`; `TipCard.busy()` added. Powers keep their own tips.
 - Built; not played.
+
+## 0.25.63 (2026-11-19): The last hold gives a breather; gifted folk leave the downed alone (#1831)
+
+- **The last hold** (the one health mercy) now gives 3 seconds after it catches you in which no attack lands, to get
+  away. In Andy's clip it held him on half a heart, and the stranger's next blast downed him 2.5 s later.
+- **Gifted folk** no longer throw their power at anyone downed.
+- `MobExecutions.order`: a mob may set out to execute a downed player by its own choice (Kingdoms' spiteful strangers).
+- (LastHold, GiftedAI, MobExecutions). Built; not played.
