@@ -27,14 +27,12 @@ public final class RigNet {
 	public static final int SENTRY = 10;
 	/** The Rig prosthetics: the arm's repulsor shot and the leg's thruster kick (no suit needed, just the fitted limb). */
 	public static final int LIMB_SHOT = 11, LIMB_KICK = 12;
-	/** Flight actives: pull-up warning, hyper thrust, banking, meteor dive, smooth others. */
-	public static final int PULLUP = 19, HYPER = 20, BANK = 21, METEOR = 22, SMOOTH = 23;
 	/** The most targets one missile volley marks. */
 	public static final int MAX_MARKS = 6;
 	/** (0.11.112) The Rig's gun actives ({@link RigGuns}). */
 	public static final int PALM_CHARGE = 13, GATLING = 14, RAILGUN = 15, SONIC = 16, TWIN = 17, SIEGE = 18;
 	/** The actives J cycles through, in order (the stage-2 ones only once the Mind's level has them). */
-	public static final int[] CYCLE = {HOVER, PALM, LAUNCHER, UNIBEAM, SCAN, CALL, PALM_CHARGE, GATLING, RAILGUN, SONIC, TWIN, SIEGE, PULLUP, HYPER, BANK, METEOR, SMOOTH};
+	public static final int[] CYCLE = {HOVER, PALM, LAUNCHER, UNIBEAM, SCAN, CALL, PALM_CHARGE, GATLING, RAILGUN, SONIC, TWIN, SIEGE};
 	/** The first three of {@link #CYCLE} need no level. */
 	public static final int ACTIVES = 3;
 

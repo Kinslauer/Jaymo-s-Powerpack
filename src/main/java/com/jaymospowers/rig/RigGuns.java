@@ -115,7 +115,7 @@ public final class RigGuns {
         float share = Math.min(1.0F, state.palmChargeTicks / (float)CHARGE_MAX_HOLD);
         state.palmChargeTicks = -1;
         player.removeAttached(RigMoves.MOVE);
-        RigMoves.start(player, RigMoves.PALM_CHARGE_FIRE);
+        RigMoves.start(player, RigMoves.PALM_CHARGE);
         RigActives.later(player, 2, () -> {
             Vec3 eye = player.getEyePosition();
             Vec3 look = player.getLookAngle();
@@ -242,7 +242,7 @@ public final class RigGuns {
         ServerLevel level = player.level();
         float share = Math.min(1.0F, state.railgunCharge / (float)RAIL_CHARGE_TICKS);
         state.railgunCharge = -1; player.removeAttached(RigMoves.MOVE);
-        RigMoves.start(player, RigMoves.RAILGUN_FIRE);
+        RigMoves.start(player, RigMoves.RAILGUN);
         RigActives.later(player, 1, () -> {
             Vec3 eye = player.getEyePosition(); Vec3 look = player.getLookAngle();
             LivingEntity lock = RigActives.locked(player);
