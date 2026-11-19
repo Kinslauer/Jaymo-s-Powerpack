@@ -21,7 +21,7 @@ import net.minecraft.world.phys.Vec3;
  * Drifting flotsam (Andy's Let's Do pick): now and then a ripple spot sits on a river or the sea, drifts a few blocks over
  * its five minutes and goes. A hook that lands in one pulls an odd catch instead of waiting for a fish: a purse of coin, a
  * bottle, old gear. A spot is worked out from the world's own clock, so nothing is saved; one that has given its catch
- * stays quiet until the world forgets it. The remains' token of the gone-before (a later patch) is not caught yet.
+ * stays quiet until the world forgets it. With Kingdoms, now and then a remains' token of the gone-before.
  */
 public final class Flotsam {
     /** Spots are worked out per square of this many blocks, per window of ticks; one square in this many has a spot. */
@@ -142,6 +142,8 @@ public final class Flotsam {
             Item[] gear = {Items.IRON_SWORD, Items.LEATHER_BOOTS, Items.IRON_HELMET, Items.SHEARS, Items.FISHING_ROD, Items.CHAINMAIL_BOOTS};
             stack = new ItemStack(gear[random.nextInt(gear.length)]);
             stack.setDamageValue(stack.getMaxDamage() - 1 - random.nextInt(Math.max(1, stack.getMaxDamage() / 5)));
+        } else if (roll < 89 && !(stack = remainsToken(level, hook, random)).isEmpty()) {
+            // a dead one's token (a ring, a carved spoon) naming a village near here; Kingdoms gives it
         } else if (roll < 94) {
             Item[] bits = {Items.BOWL, Items.STICK, Items.STRING, Items.BONE, Items.INK_SAC, Items.LILY_PAD};
             stack = new ItemStack(bits[random.nextInt(bits.length)]);
@@ -153,5 +155,11 @@ public final class Flotsam {
         double dx = player.getX() - hook.getX(), dy = player.getY() - hook.getY(), dz = player.getZ() - hook.getZ();
         drop.setDeltaMovement(dx * 0.1, dy * 0.1 + Math.sqrt(Math.sqrt(dx * dx + dy * dy + dz * dz)) * 0.08, dz * 0.1);
         level.addFreshEntity(drop);
+    }
+
+    /** A remains' token from Kingdoms ({@code Remains.token}), or empty without Kingdoms or with no village anywhere. */
+    private static ItemStack remainsToken(ServerLevel level, FishingHook hook, RandomSource random) {
+        return com.jaymospowers.compat.KingdomsCompat.call("Remains", "token", new Class<?>[] {ServerLevel.class, BlockPos.class, RandomSource.class},
+            ItemStack.EMPTY, level, hook.blockPosition(), random) instanceof ItemStack token ? token : ItemStack.EMPTY;
     }
 }
