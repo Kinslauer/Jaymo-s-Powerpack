@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: any
 from: coordinator
 asked: 2026-11-19
 thread: https://claude.ai/code/project/chan_01638ouFWZKwEZ1ET74kBk9B?thread=cmsg_01638ouFWZKwEZ1ET74kBk9BEaWHrE1YRTzZsQP6SD8uJi
-claimed_by: 
+claimed_by: plan-ghosts-litematica-tools
 pr: 
 suggested_owns:
   - kingdoms/src/client/java/com/jaymoskingdoms/client/PlanGhosts.java
