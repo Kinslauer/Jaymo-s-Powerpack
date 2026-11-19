@@ -50,37 +50,42 @@ child he takes as his ward is raised in its halls, and walks out of its gate int
 
 ---
 
-## Patch B: Stellarity as a band under the Nether
+## Patch B: Stellarity as the End, Enderscape as a band under the Nether
 
-**Andy:** "what if we shipped this as a layer underneath the nether, and the enderscape end is still accessible through
-the portal as a proper end dimension?"
+**Andy (first):** "what if we shipped this as a layer underneath the nether, and the enderscape end is still accessible
+through the portal as a proper end dimension?" **Then (2026-11-19):** "Can we ship stellarity as the end and
+enderscape underneath?" This plan follows the second ask. It is Andy's own exception to the no-new-realms rule, like the
+high sky and the Cloud Sea. No new portal: you dig through the Nether band's floor (One Dimension turns its bedrock to
+obsidian) and drop into it.
 
-This is Andy's own exception to the no-new-realms rule, like the high sky and the Cloud Sea. No new portal is needed:
-you dig through the Nether band's floor (One Dimension turns its bedrock to obsidian) and drop into it.
+**Licence: clear both ways.** Stellarity 6.0.1 (26.3 Fabric, Modrinth `WBiwFsvZ`) ships unchanged, which its licence
+allows in modpacks. Only a *modified* Stellarity would need kohara's permission. Enderscape is MIT, so we may build our
+band from its data and code.
 
-**What Stellarity is.** Stellarity 6.0.1 (26.3 Fabric, Modrinth `WBiwFsvZ`, no other mods needed) is a datapack in a
-jar, with no Java code. It replaces `minecraft:dimension/the_end.json`, `dimension_type/the_end.json`,
-`worldgen/noise_settings/end.json`, the four vanilla End biomes, `end_city` and `stronghold`. It adds its own biomes and
-structures, and 1,990 functions. Enderscape also replaces `the_end.json`, so today the two fight over the End.
+**How the two fit today.**
+- Stellarity is a pure datapack in a jar. It replaces `minecraft:dimension/the_end.json` (a `multi_noise` biome list of
+  its own), `dimension_type/the_end.json`, `worldgen/noise_settings/end.json`, the four vanilla End biomes, `end_city`
+  and `stronghold`.
+- Enderscape adds its biomes in code, through Fabric's `TheEndBiomes`, which only feeds the vanilla
+  `minecraft:the_end` biome source. Once Stellarity's list replaces that source, Enderscape's biomes stop generating in
+  the real End on their own, which is what Andy wants there.
 
-**How the band would work.**
-1. Add our own dimension, `jaymospowers:the_beneath`, with Stellarity's biome list and End-style noise. Then put the
-   End's own files (dimension, dimension type, noise settings) back to Enderscape's, so the real End through the portal
-   is Enderscape's.
-2. Add `jaymospowers:the_beneath` to the One Dimension order under `minecraft:the_nether`. A new dimension added to a
-   live world's order goes at the bottom anyway, which is where this one goes, but new worlds are still the safe case.
-3. Stacked helpers (Powers, Kingdoms, Kitchen) learn the new band, the same way the Cloud Sea's was added.
+**The band.**
+1. New dimension `jaymospowers:the_beneath`: an End-style dimension type and a `minecraft:the_end` biome source, so that
+   Fabric's API fills it with Enderscape's biomes. It gets its own noise settings, a copy of vanilla's End noise,
+   because Stellarity rewrites `minecraft:end`.
+2. One Dimension order: add it under `minecraft:the_nether` (`compat/OneDimensionDefaults`). For new worlds only.
+3. Stacked helpers (Powers, Kingdoms, Kitchen) learn the band, as they did for the Cloud Sea.
+4. Enderscape's sky, fog and lighting come from a Lithostitched modifier on `minecraft:the_end`. Add the same
+   attributes to our band's dimension type.
 
-**What breaks.** Stellarity's mechanics are written for `minecraft:the_end`: 12 functions run `in minecraft:the_end`,
-and 28 predicates test that dimension. Its dragon fight, exit portal, gateways, altars and void fishing would stay in
-(or look for) the real End, and would not work in the band. The biomes, terrain, structures, blocks, items and loot
-would. Before building, list exactly which features survive, using a plain 26.3 server with the files as a datapack.
+**What stays tied to the real End.** Enderscape's End-only code (its End city and gateway mixins, the dragon fight
+hooks) still acts on the real End, where Stellarity's End cities now stand. Check that pairing in a plain server before
+merging. Our relic, writ and quest hooks that name Enderscape's End structures move to Stellarity's (`end_city` and its
+own structures). Strongholds come from Stellarity too.
 
-**The blocker is the licence.** Stellarity's licence lets modpacks use it, but says that "using modified versions of
-Stellarity in modpacks" needs **kohara's explicit permission**. Moving its biomes into another dimension, and taking the
-End back from it, is a modified use. So Andy (or whoever speaks for the pack) should ask kohara on the Prismatic Shards
-Discord before this patch is built. The other choices are to ship Stellarity unchanged as the End in place of
-Enderscape, or to drop it.
+**To check before building:** that Fabric's End biome mixin feeds a second `the_end` biome source and not only the
+real End's; which Enderscape features need `Level.END`; and the biome mix in the band (small noise harness).
 
 **(new) The Beneath.** *Under the Abyss the dark ends. Dig through the demons' deepest floor and there is open air
 again: pale islands hanging over nothing, with their own frost and their own strange growth. The demons do not go
@@ -172,11 +177,10 @@ All are MIT, so ideas and art may be used with the notice kept. None needs a new
 3. **E**, soul harvest and spawners.
 4. **F**, **H**, **K** and **L**, small ports, two at a time.
 5. **G**, **I** and **J**, the larger Kingdoms work.
-6. **B**, Stellarity, after kohara answers.
+6. **B**, Stellarity as the End and Enderscape under the Nether.
 
 ## Open questions for Andy
 
-1. Stellarity: ask kohara for permission (recommended), ship it unchanged as the End instead of Enderscape, or drop it?
-2. Is the "demon king" the Master of the Ash, or someone new above the three masters?
-3. "Add to the tree" for Horse Expert: the skill tree (my reading) or the advancement tree?
-4. Do the three **(new)** lore paragraphs read right?
+1. Is the "demon king" the Master of the Ash, or someone new above the three masters?
+2. "Add to the tree" for Horse Expert: the skill tree (my reading) or the advancement tree?
+3. Do the three **(new)** lore paragraphs read right?
