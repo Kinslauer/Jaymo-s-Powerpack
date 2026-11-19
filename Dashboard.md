@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 20:20). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 20:21). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -6,7 +6,6 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 ## Waiting on you
 
 **Ready to merge** (say "merge" in the project chat):
-- [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · no PR number on the task · ready
 - [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · no PR number on the task · ready
 
 **Questions for you:**
@@ -90,7 +89,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 ## Health
 
-7 problems in the notes: [[Health]].
+6 problems in the notes: [[Health]].
 
 ## Last week
 
