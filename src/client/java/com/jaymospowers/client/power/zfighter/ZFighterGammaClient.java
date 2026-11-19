@@ -78,7 +78,8 @@ public final class ZFighterGammaClient {
 			applied = want;
 			for (SoundSource source : SoundSource.values()) {
 				if (source != SoundSource.MASTER) {
-					minecraft.getSoundManager().updateCategoryVolume(source, minecraft.options.getFinalSoundSourceVolume(source) * applied);
+					// the category's gain is applied on top of the player's sliders (SoundEngine.calculateVolume): only the dip goes here
+					minecraft.getSoundManager().updateCategoryVolume(source, applied);
 				}
 			}
 		}
