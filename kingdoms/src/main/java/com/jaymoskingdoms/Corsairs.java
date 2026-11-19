@@ -223,8 +223,8 @@ final class Corsairs implements Ship.Captaincy {
 	@Override
 	public @Nullable Input helm(ServerLevel level, Ship ship, Crew crew) {
 		long now = level.getGameTime();
-		// (0.7.437) a far ground's sea rover long out with nobody near is gone again
-		if (crew.side == Crew.Side.PIRATE && FarGrounds.stowIdle(level, ship)) {
+		// (0.7.437) a far ground's sea rover long out with nobody near is gone again (and a merchantman met at sea, SeaPassers)
+		if ((crew.side == Crew.Side.PIRATE || crew.side == Crew.Side.MERCHANT) && FarGrounds.stowIdle(level, ship)) {
 			return null;
 		}
 		Ship foe = crew.target >= 0 && level.getEntity(crew.target) instanceof Ship s && !s.isRemoved() && !s.foundering() ? s : null;
