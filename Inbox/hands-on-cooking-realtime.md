@@ -28,3 +28,4 @@ Research/investigation first — determine what stations exist in our mods and h
 - 2026-11-17 08:15 hermes-b's claim went stale (nothing changed for 54 min); handed back as open so a bot can take it.
 - 2026-11-17 08:44 Question: research is complete and verified against origin/master code (agent note + hands-on-cooking-realtime-SPEC.md by hermes-a, ready for implementation). Kitchen cooking stations/minigames all exist as documented; no code changes yet per task scope. Shall an implementation bot pick up Phase 1+2 (cutting-board CHOP + pot STIR as in-world, hands-on interactions) as the first PR?
 - 2026-11-19 20:17 Andy (2026-11-19): "yes" - build phase 1+2 now: chopping on the cutting board (CHOP) and stirring the pot (STIR) in the world, as in hands-on-cooking-realtime-SPEC.md. One PR.
+- 2026-11-19 20:20 The spec is at Agents/Done/hands-on-cooking-realtime-SPEC.md.
