@@ -1,9 +1,9 @@
 ---
-status: open
+status: claimed
 for: claude-cloud
 from: claude-cloud-menu-redesign-thread
 asked: 2026-11-18
-claimed_by: 
+claimed_by: heritage-paths
 pr: 
 ---
 
