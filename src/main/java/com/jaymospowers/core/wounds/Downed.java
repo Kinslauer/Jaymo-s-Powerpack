@@ -449,9 +449,12 @@ public final class Downed {
 				if (!(entity instanceof Player)) {
 					blowLands(level, entity, source, false);
 				}
+				// (Andy, 2026-11-19) a player's finishing blow to the head takes it off or crushes it before they die, so the
+				// death is a beheading: no reviving it, a reincarnation (Mortality)
+				boolean headGone = !burst && Dismember.playerHeadBlow(entity, source, Wounds.landed(entity, source));
 				finish(level, entity);
 				// (Andy, 2026-11-16) the killing hit takes a part off the body (a burst one has none left to take)
-				if (entity.isDeadOrDying() && !burst) {
+				if (entity.isDeadOrDying() && !burst && !headGone) {
 					Dismember.lethalBlow(entity, source, null);
 				}
 				return false;

@@ -774,6 +774,32 @@ public final class Dismember {
 		return blunt && target.getRandom().nextFloat() < guard ? part | LETHAL_BREAK : 0;
 	}
 
+	/**
+	 * Andy (2026-11-19): players "who take a decapitating or head crushing blow ... cannot be revived, and [it] forces a
+	 * reincarnation". The blow that finishes a downed player ({@code Downed}), if it lands on the head (where Wounds routed
+	 * it, else the attacker's aim, {@link #aimedPart}): a blade takes the head off as a killing blow takes a mob's
+	 * ({@link #LETHAL_HEAD_CHANCE}, a short blade's {@link #LETHAL_SHORT_HEAD_CHANCE}), a blunt weapon crushes it
+	 * ({@link #crushSkull}); the helmet may turn either ({@link #armourGuard}). Only the downed ({@link #playerHeadMayGo}),
+	 * never in creative. Headless, the death is Mortality's beheading: final, past any reviving. True if the head went.
+	 */
+	public static boolean playerHeadBlow(LivingEntity target, DamageSource source, com.jaymospowers.core.wounds.@Nullable BodyPart landed) {
+		if (!(target instanceof Player player) || player.isCreative() || player.isSpectator() || !playerHeadMayGo(target) || headless(target)
+			|| !(source.getEntity() instanceof LivingEntity attacker) || attacker == target || source.getDirectEntity() != attacker) {
+			return false;
+		}
+		int part = landed != null ? com.jaymospowers.core.wounds.Breaks.limb(landed) : aimedPart(attacker, target);
+		if (part != HEAD) {
+			return false;
+		}
+		ItemStack weapon = attacker.getMainHandItem();
+		float guard = armourGuard(target, HEAD);
+		if (blade(weapon)) {
+			float chance = shortBlade(weapon) ? LETHAL_SHORT_HEAD_CHANCE : LETHAL_HEAD_CHANCE;
+			return target.getRandom().nextFloat() < chance * guard && sever(target, HEAD, attacker);
+		}
+		return Fractures.blunt(weapon) && target.getRandom().nextFloat() < guard && crushSkull(target, attacker);
+	}
+
 	/** Does what {@link #lethalPart} picked: severs the part (a skeleton's shatters), or breaks it. True if anything happened. */
 	public static boolean lethalSever(LivingEntity target, int part, DamageSource source) {
 		LivingEntity by = source.getEntity() instanceof LivingEntity living ? living : null;
