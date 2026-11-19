@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 14:49). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 15:00). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -27,7 +27,6 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-l-carts-check|vanilla-plus-l-carts-check]] · for 💻 Odysseus · open
-- [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · open
 - [ ] [[Inbox/smoothmount-1-climb-on-off|smoothmount-1-climb-on-off]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/smoothmount-6-heave-downed|smoothmount-6-heave-downed]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · open
@@ -35,6 +34,7 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · ☀️ Apollo · claimed
 
 
 ## In review
