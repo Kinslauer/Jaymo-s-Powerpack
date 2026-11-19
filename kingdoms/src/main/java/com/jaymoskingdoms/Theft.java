@@ -98,6 +98,8 @@ public final class Theft {
 	static final int GIFT_ITEMS_PER_POINT = 8, GIFT_DAILY_CAP = 25;
 	/** Witnesses' cries are heard this far. */
 	static final double SHOUT_RANGE = 24.0;
+	/** A witness who can speak wakes the nearest sleeper of the faction this close to them (blocks) and tells them. */
+	static final double WAKE_RANGE = 16.0;
 	/** Lines a witness may cry, per kind of crime. */
 	static final int SHOUT_VARIANTS = 2;
 	/** Arson: townsfolk this close join in; they give up after this long (ticks) or if you get this far away. */
@@ -724,6 +726,9 @@ public final class Theft {
 		Reputation.change(player, f, w.rep);
 		// (0.7.109) each who saw it remembers it
 		Recollections.crime(player, seen, crime.cry);
+		if (!(witness instanceof IronGolem)) {
+			wakeAndTell(level, f, player, witness, crime.cry);
+		}
 		if (crime == Crime.ARSON) {
 			riot(level, f, player);
 		}
@@ -775,6 +780,28 @@ public final class Theft {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.cast_out", f.name()).withStyle(ChatFormatting.DARK_RED));
 		}
 		pursue(level, f, player);
+	}
+
+	/**
+	 * {@code witness} wakes the nearest of {@code f}'s sleepers within {@link #WAKE_RANGE} and tells them: they get up, come
+	 * over, and remember the crime as hearsay. So a crime at night is known to more than the one who saw it.
+	 */
+	private static void wakeAndTell(ServerLevel level, Faction f, ServerPlayer player, LivingEntity witness, String cry) {
+		LivingEntity sleeper = null;
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, witness.getBoundingBox().inflate(WAKE_RANGE),
+			x -> x.isAlive() && x.isSleeping() && Recollections.rememberer(x) && x.distanceTo(witness) <= WAKE_RANGE)) {
+			Faction law = e instanceof Folk ? null : lawAt(level, e.blockPosition());
+			boolean ours = e instanceof Folk folk ? folk.factionId() == f.id() : law != null && law.id() == f.id();
+			if (ours && (sleeper == null || e.distanceToSqr(witness) < sleeper.distanceToSqr(witness))) {
+				sleeper = e;
+			}
+		}
+		if (sleeper == null) {
+			return;
+		}
+		ChestNoise.wakeToHear(level, sleeper, player, witness.blockPosition());
+		Recollections.rememberHeard(sleeper, player, Recollections.Kind.CRIME, Component.translatable("recall.jaymoskingdoms.crime." + cry),
+			witness.getName().getString());
 	}
 
 	/** Its guards, archers and golems near {@code player} turn on them. */
