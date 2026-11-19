@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import com.jaymospowers.JaymosPowers;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -28,6 +29,8 @@ import net.fabricmc.loader.api.FabricLoader;
  * Dimension turned off on that screen, stay as they were. Our side of a stacked world is {@link Stacked}.
  */
 public final class OneDimensionDefaults {
+	/** The bands the Cloud Sea goes between in an older order ({@link #update}). */
+	static final String AETHER = "jaymospowers:aether", CLOUD_SEA = "jaymospowers:cloud_sea", OVERWORLD = "minecraft:overworld";
 	/** Top to bottom. (0.20.36, Andy) The high sky on top: the thin air at the edge of space, over the Aether's islands. */
 	static final List<String> ORDER = List.of("jaymospowers:high_sky", "jaymospowers:aether", "jaymospowers:cloud_sea", "minecraft:overworld",
 		"minecraft:the_nether");
@@ -89,7 +92,9 @@ public final class OneDimensionDefaults {
 
 	/**
 	 * A file this wrote before (its order exactly one of {@link #OLD_ORDERS}) gets today's order, for the worlds made from now
-	 * on; anything else in it, and any order someone changed, is left as it is.
+	 * on. One Dimension rewrites the file itself once it has run (plain ids, every dimension it knows added at the end), so
+	 * such a file never matches an old order: if the Aether still sits right on the Overworld there, the Cloud Sea goes in
+	 * between and the rest of the order stays as it is. Any order someone changed by hand is left alone.
 	 */
 	private static void update(Path path) {
 		try {
@@ -100,29 +105,35 @@ public final class OneDimensionDefaults {
 			JsonArray order = root.getAsJsonArray("order");
 			List<String> ids = new ArrayList<>();
 			for (JsonElement entry : order) {
-				if (!entry.isJsonObject() || !entry.getAsJsonObject().has("dimension")) {
+				String id = id(entry);
+				if (id == null) {
 					return;
 				}
-				ids.add(entry.getAsJsonObject().get("dimension").getAsString());
+				ids.add(id);
 			}
-			if (!OLD_ORDERS.contains(ids)) {
-				return;
-			}
-			// (the entries are kept as they are, so whatever One Dimension holds beside each dimension's id stays)
 			JsonArray next = new JsonArray();
-			for (String id : ORDER) {
-				JsonElement kept = null;
-				for (JsonElement entry : order) {
-					if (id.equals(entry.getAsJsonObject().get("dimension").getAsString())) {
-						kept = entry;
+			if (OLD_ORDERS.contains(ids)) {
+				// (the entries are kept as they are, so whatever One Dimension holds beside each dimension's id stays)
+				for (String id : ORDER) {
+					JsonElement kept = null;
+					for (JsonElement entry : order) {
+						if (id.equals(id(entry))) {
+							kept = entry;
+						}
+					}
+					next.add(kept != null ? kept : like(order.get(0), id));
+				}
+			} else {
+				int aether = ids.indexOf(AETHER);
+				if (ids.contains(CLOUD_SEA) || aether < 0 || aether + 1 >= ids.size() || !ids.get(aether + 1).equals(OVERWORLD)) {
+					return;
+				}
+				for (int i = 0; i < order.size(); i++) {
+					next.add(order.get(i));
+					if (i == aether) {
+						next.add(like(order.get(i), CLOUD_SEA));
 					}
 				}
-				if (kept == null) {
-					JsonObject added = new JsonObject();
-					added.addProperty("dimension", id);
-					kept = added;
-				}
-				next.add(kept);
 			}
 			root.add("order", next);
 			if (root.has("_about")) {
@@ -133,5 +144,26 @@ public final class OneDimensionDefaults {
 		} catch (IOException | RuntimeException e) {
 			JaymosPowers.LOGGER.warn("Could not update {}", path, e);
 		}
+	}
+
+	/** An order entry's dimension id: a plain id (One Dimension's own file) or {"dimension": id} (ours), else null. */
+	private static String id(JsonElement entry) {
+		if (entry.isJsonPrimitive() && entry.getAsJsonPrimitive().isString()) {
+			return entry.getAsString();
+		}
+		if (entry.isJsonObject() && entry.getAsJsonObject().has("dimension")) {
+			return entry.getAsJsonObject().get("dimension").getAsString();
+		}
+		return null;
+	}
+
+	/** A new entry for this id, written the way {@code sample} is. */
+	private static JsonElement like(JsonElement sample, String id) {
+		if (sample.isJsonPrimitive()) {
+			return new JsonPrimitive(id);
+		}
+		JsonObject added = new JsonObject();
+		added.addProperty("dimension", id);
+		return added;
 	}
 }
