@@ -60,6 +60,9 @@ ACCENTS = {
     "bodkin": [(15, 1, 1), (14, 0, 1), (11, 4, 2), (10, 5, 3)],
     "swallowtail": [(10, 1, 1), (9, 0, 2), (15, 4, 1), (15, 5, 2), (10, 2, 0), (14, 4, 0)],
     "cloth": [(10, 4, 0), (9, 5, 1), (10, 5, 0), (11, 5, 1), (9, 4, 1), (11, 4, 0)],
+    "blunt": [(10, 3, 1), (10, 4, 2), (9, 3, 2), (11, 5, 1)],
+    "spark": [(15, 1, 0), (10, 2, 0), (9, 3, 1), (11, 4, 0), (15, 5, 0)],
+    "mending": [(10, 1, 1), (9, 2, 2), (11, 4, 1), (15, 4, 0), (10, 5, 2)],
 }
 HEADS = {  # id: (colour, display name, tooltip)
     "bola": ("9A7A4A", "Bola", "Wraps and trips whoever it hits, through the bolas' own cord."),
@@ -79,6 +82,9 @@ HEADS = {  # id: (colour, display name, tooltip)
     "bodkin": ("6E7682", "Bodkin", "A narrow hardened point: bites through mail and plate, glances a little on bare flesh, and leaves a wound that doesn't bleed."),
     "swallowtail": ("C4CAD4", "Swallowtail", "A broad forked head: tears bare and padded flesh open into a bleeding cut, but mail and plate turn it."),
     "cloth": ("D8C8A0", "Cloth", "A pitch-soaked rag. Loosed beside a fire or a torch, or with a torch or flint and steel in your other hand, it flies alight and sets fire to what it hits."),
+    "blunt": ("C8B48C", "Blunt", "A padded head: it shoves what it hits hard, does little harm and never opens a cut."),
+    "spark": ("D08A50", "Spark", "Wound with copper wire: it shocks what it hits still for a moment, and the shock jumps to the nearest other foe."),
+    "mending": ("6EC060", "Mending", "Soaked in herbs: it heals whoever it hits a few hearts instead of hurting them. Used up where it lands."),
 }
 
 
@@ -128,7 +134,7 @@ def head_icon(head):
 PAL = {"#": rgb("2c2622"), "c": rgb("b0704c"), "C": rgb("d4966c"), "g": rgb("8c8c92"), "G": rgb("c8c8ce"), "w": rgb("f0f0ec"),
        "y": rgb("ecd478"), "r": rgb("b42824"), "k": rgb("3c3c42"), "n": rgb("6eaa3c"), "N": rgb("aadc64"), "i": rgb("a0a2a6"),
        "I": rgb("e2e4e6"), "b": rgb("785430"), "l": rgb("96643c"), "L": rgb("be8c56"), "s": rgb("707a88"), "S": rgb("bac4d2"),
-       "a": rgb("c8e6f0"), "p": rgb("d8d0b4"), "o": rgb("e89a48")}
+       "a": rgb("c8e6f0"), "B": rgb("78b4dc"), "p": rgb("d8d0b4"), "o": rgb("e89a48")}
 GRIDS = {
     "smoke_pot": [
         "................",
@@ -246,6 +252,74 @@ GRIDS = {
         ".....i#ii#i.....",
         ".....i.##.i.....",
         "....I......I....",
+        "................",
+        "................",
+        "................"],
+    "frost_bomb": [
+        "................",
+        ".......kk.......",
+        "......#kk#......",
+        ".....#aaaa#.....",
+        "....#awaaaaa#...",
+        "...#awwaaaaBa#..",
+        "...#awaaaaaBa#..",
+        "...#aaaaaaaBB#..",
+        "...#aaaaaaBBB#..",
+        "...#BaaaaaBBB#..",
+        "....#BBaaBBB#...",
+        ".....#BBBBB#....",
+        "......#####.....",
+        "................",
+        "................",
+        "................"],
+    "lodestone_chip": [
+        "................",
+        "................",
+        "................",
+        "......####......",
+        ".....#ssss#.....",
+        "....#sSssss#....",
+        "....#sssrrs#....",
+        "....#ssrrrs#....",
+        "....#kssrss#....",
+        ".....#kkkk#.....",
+        "......####......",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................"],
+    "throwing_card": [
+        "................",
+        "................",
+        "......#####.....",
+        "......#wwww#....",
+        "......#wrrw#....",
+        "......#wrrw#....",
+        "......#wwww#....",
+        "......#wrrw#....",
+        "......#wwww#....",
+        "......#####.....",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................"],
+    "throwing_cards": [
+        "................",
+        "...#####........",
+        "...#wwww#.##....",
+        "...#wrrw##w#....",
+        "...#wwww#ww##...",
+        "....#####wrrw#..",
+        ".....#wwww#ww#..",
+        ".....#wrrw#wr#..",
+        ".....#wwww####..",
+        "......######....",
+        "................",
+        "................",
+        "................",
         "................",
         "................",
         "................"],
@@ -372,7 +446,11 @@ THROWABLES = {
     "acid_vial": ("Acid Vial", "Splashes a pool that eats the armour of everyone in it."),
     "choking_vial": ("Choking Vial", "A vial of heavy gas: a cloud that sickens, weakens and slows whoever breathes it."),
     "caltrops": ("Caltrops", "Scatters iron spikes that cut and slow whoever steps on them."),
+    "lodestone_chip": ("Lodestone Chip", ""),
+    "throwing_card": ("Throwing Card", ""),
+    "throwing_cards": ("Deck of Throwing Cards", ""),
     "bear_trap": ("Bear Trap", "Set where it lands: it snaps shut on the first thing to step near it and holds it fast."),
+    "frost_bomb": ("Frost Bomb", "Bursts in a ring of frost: everything in it is slowed hard and starts to freeze, and the water's surface turns to ice."),
 }
 
 
@@ -457,6 +535,12 @@ def recipes():
     shapeless("head_flash", ["minecraft:glowstone_dust", "minecraft:blaze_powder", "minecraft:paper"], "head_flash", 2)
     shapeless("head_boomerang", ["minecraft:stick", "minecraft:stick", "minecraft:string"], "head_boomerang", 2)
     shapeless("head_cloth", ["#minecraft:wool", "minecraft:string", "minecraft:charcoal"], "head_cloth", 2)
+    shapeless("head_blunt", ["#minecraft:wool", "minecraft:leather", "minecraft:stick"], "head_blunt", 2)
+    shapeless("head_spark", ["minecraft:copper_ingot", "minecraft:string", "minecraft:redstone"], "head_spark", 2)
+    shapeless("head_mending", ["minecraft:fern", "minecraft:sweet_berries", "minecraft:string"], "head_mending", 2)
+    shapeless("throwing_cards", ["minecraft:paper", "minecraft:paper", "minecraft:paper", "minecraft:iron_nugget", "minecraft:iron_nugget", "minecraft:iron_nugget"], "throwing_cards", 1)
+    shapeless("lodestone_chip", ["minecraft:lodestone"], "lodestone_chip", 4)
+    shapeless("frost_bomb", ["minecraft:glass_bottle", "minecraft:gunpowder", "minecraft:snowball", "minecraft:snowball"], "frost_bomb", 1)
     shapeless("smoke_pot", ["minecraft:clay_ball", "minecraft:charcoal", "minecraft:spider_eye"], "smoke_pot", 2)
     shapeless("flash_powder", ["minecraft:glowstone_dust", "minecraft:bone_meal", "minecraft:blaze_powder"], "flash_powder", 4)
     shapeless("sneezing_powder", ["minecraft:bone_meal", "minecraft:fern", "minecraft:sugar"], "sneezing_powder", 4)
@@ -487,7 +571,8 @@ def main():
     for item, (name, tip) in THROWABLES.items():
         simple_item(item, grid_image(GRIDS[item]))
         lang["item.jaymospowers." + item] = name
-        lang["tooltip.jaymospowers.throwable." + item] = tip
+        if tip:
+            lang["tooltip.jaymospowers.throwable." + item] = tip
     for item, (strap, shine, buckle) in BELTS.items():
         simple_item(item, belt_icon(strap, shine, buckle))
     lang["item.jaymospowers.leather_thrower_belt"] = "Leather Belt of Throwables"
@@ -503,6 +588,9 @@ def main():
         lang["item." + "jaymospowers." + part] = name
     recipes()
     lang.update({
+        "tooltip.jaymospowers.lodestone_chip": "A sliver of lodestone.",
+        "tooltip.jaymospowers.lodestone_chip.how": "Click it onto a dagger, hatchet, kunai or star in your inventory: thrown, it bends toward the nearest foe ahead.",
+        "tooltip.jaymospowers.seeking_chip": "Lodestone chip: bends toward the nearest foe when thrown.",
         "tooltip.jaymospowers.head.fit": "Fit to %s plain arrows at the Fletching Station.",
         "tooltip.jaymospowers.head.spent": "Used up where it lands.",
         "tooltip.jaymospowers.head.kept": "Stays in the arrow: pick it up again.",
@@ -521,6 +609,7 @@ def main():
         "message.jaymospowers.shield.braced": "Braced ==========",
         "jei.jaymospowers.arrowhead_fitting": "Fitting an Arrowhead",
         "jei.jaymospowers.arrowhead_fitting.how": "At the Fletching Station: arrows in the first slot, the head in the second.",
+        "jei.jaymospowers.lodestone_chip": "Made from lodestone. In your inventory, click it onto a throwing weapon (a dagger, hatchet, kunai, throwing star: one chip each) to set it in; the weapon then bends toward the nearest foe ahead of it when thrown.",
         "jei.jaymospowers.thrower_belt": "Worn in the belt slot. Click throwables onto it to load it. Cycle the picked kind with one key and throw it with another (set both in Controls).",
     })
     write(os.path.join(ASSETS, "lang", "parts", "gear_picks.json"), lang)

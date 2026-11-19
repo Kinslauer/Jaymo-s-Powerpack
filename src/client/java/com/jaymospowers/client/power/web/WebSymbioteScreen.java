@@ -3,7 +3,10 @@ package com.jaymospowers.client.power.web;
 import com.jaymospowers.power.web.WebNet;
 import com.jaymospowers.power.web.WebSymbiote;
 import com.jaymospowers.power.web.WebSymbioteCollect;
+import com.jaymospowers.power.web.WebSymbioteCleanse;
 import com.jaymospowers.power.web.WebSymbioteState;
+import com.jaymospowers.power.web.WebSymbioteSteed;
+import com.jaymospowers.power.web.WebSymbioteWings;
 import com.jaymospowers.client.UiStyle;
 import com.mojang.blaze3d.platform.InputConstants;
 import java.util.Locale;
@@ -65,6 +68,13 @@ final class WebSymbioteScreen extends Screen {
 	private static final Item[] CHIP_ICONS = {Items.PLAYER_HEAD, Items.WEEPING_VINES, Items.BUNDLE};
 	private static final String[] CHIP_NAMES = {"mask", "tendrils", "collect"};
 	private static final String[] FORMS = {"skin", "suit", "armor", "bulk"};
+	/**
+	 * The extra chips along the top inside the ring, shown only while they can be used: Wings (a whole bond), Burst (the
+	 * anti strain) and Steed (on a horse). Their pick values, lang names, and the row's top (offset from the centre).
+	 */
+	private static final int[] EXTRAS = {WebSymbiote.WINGS_TOGGLE, WebSymbiote.CLEANSE, WebSymbiote.STEED_TOGGLE};
+	private static final String[] EXTRA_NAMES = {"wings", "cleanse", "steed"};
+	private static final int EXTRA_Y = -50, EXTRA_H = 11, EXTRA_GAP = 3;
 
 	private int selected = -1;
 	private boolean chosen;
@@ -170,8 +180,17 @@ final class WebSymbioteScreen extends Screen {
 				overChip = i;
 			}
 		}
+		int[][] extras = extras(player, cx, cy);
+		int overExtra = -1;
+		for (int[] extra : extras) {
+			if (UiStyle.over(mouseX, mouseY, extra[1] - 1, extra[2] - 1, extra[3] + 2, EXTRA_H + 2)) {
+				overExtra = extra[0];
+			}
+		}
 		if (overChip >= 0) {
 			selected = CHIPS[overChip];
+		} else if (overExtra >= 0) {
+			selected = overExtra;
 		} else if (WebSymbioteMindUi.overChip(mouseX, mouseY, cx, cy)) {
 			selected = WebSymbioteMindUi.PICK;
 		} else if (dx * dx + dy * dy < DEAD_ZONE * DEAD_ZONE) {
@@ -283,6 +302,18 @@ final class WebSymbioteScreen extends Screen {
 			}
 		}
 		WebSymbioteMindUi.drawChip(graphics, font, cx, cy, selected == WebSymbioteMindUi.PICK);
+		for (int[] extra : extras) {
+			boolean picked = selected == extra[0];
+			boolean lit = switch (extra[0]) {
+				case WebSymbiote.WINGS_TOGGLE -> WebSymbioteWings.out(player);
+				case WebSymbiote.STEED_TOGGLE -> WebSymbioteSteed.riding(player);
+				default -> false;
+			};
+			Component label = Component.translatable("gui.jaymospowers.web_symbiote.chip." + extraName(extra[0]));
+			graphics.fill(extra[1], extra[2], extra[1] + extra[3], extra[2] + EXTRA_H, picked ? UiStyle.ROW_HOVER : 0xFF1A1620);
+			graphics.outline(extra[1] - 1, extra[2] - 1, extra[3] + 2, EXTRA_H + 2, picked ? ACCENT : 0x60FFFFFF);
+			graphics.text(font, label, extra[1] + extra[3] / 2 - font.width(label) / 2, extra[2] + 2, lit ? ACCENT : UiStyle.TEXT);
+		}
 
 		// the middle: the pick's name, and how fed it is
 		Component name = null;
@@ -312,8 +343,44 @@ final class WebSymbioteScreen extends Screen {
 		UiStyle.line(graphics, font, status(player, state, cooldowns, now, form, top), ix + 8, iy + 17, INFO_W - 16, name != null ? UiStyle.DIM : UiStyle.HINT);
 	}
 
+	/** The extra chips that can be used now, each {pick, x, y, width}, centred as a row along the top of the ring. */
+	private int[][] extras(final LocalPlayer player, final int cx, final int cy) {
+		boolean[] shown = {WebSymbioteWings.available(player) || WebSymbioteWings.out(player), WebSymbioteCleanse.available(player),
+			WebSymbioteSteed.available(player)};
+		int[] widths = new int[EXTRAS.length];
+		int total = -EXTRA_GAP, count = 0;
+		for (int i = 0; i < EXTRAS.length; i++) {
+			if (shown[i]) {
+				widths[i] = font.width(Component.translatable("gui.jaymospowers.web_symbiote.chip." + EXTRA_NAMES[i])) + 8;
+				total += widths[i] + EXTRA_GAP;
+				count++;
+			}
+		}
+		int[][] out = new int[count][];
+		int x = cx - total / 2, n = 0;
+		for (int i = 0; i < EXTRAS.length; i++) {
+			if (shown[i]) {
+				out[n++] = new int[] {EXTRAS[i], x, cy + EXTRA_Y, widths[i]};
+				x += widths[i] + EXTRA_GAP;
+			}
+		}
+		return out;
+	}
+
+	private static String extraName(final int pick) {
+		for (int i = 0; i < EXTRAS.length; i++) {
+			if (EXTRAS[i] == pick) {
+				return EXTRA_NAMES[i];
+			}
+		}
+		return "suit";
+	}
+
 	/** The lang key of a switch chip's name, by its pick value. */
 	private static String chipName(final int pick) {
+		if (pick >= WebSymbiote.WINGS_TOGGLE) {
+			return extraName(pick);
+		}
 		for (int c = 0; c < CHIPS.length; c++) {
 			if (CHIPS[c] == pick) {
 				return CHIP_NAMES[c];
@@ -343,6 +410,21 @@ final class WebSymbioteScreen extends Screen {
 		}
 		if (selected < 0) {
 			return Component.translatable("gui.jaymospowers.web_symbiote.hint");
+		}
+		if (selected == WebSymbiote.WINGS_TOGGLE) {
+			return Component.translatable(WebSymbioteWings.out(player) ? "gui.jaymospowers.web_symbiote.wings_out"
+				: WebSymbioteWings.available(player) ? "gui.jaymospowers.web_symbiote.wings_in" : "gui.jaymospowers.web_symbiote.wings_locked");
+		}
+		if (selected == WebSymbiote.CLEANSE) {
+			long left = cooldowns.end(WebSymbioteCleanse.ABILITY) - now;
+			if (left > 0) {
+				return Component.translatable("gui.jaymospowers.web_symbiote.cooling", String.format(Locale.ROOT, "%.1f", left / 20.0));
+			}
+			return Component.translatable(state.satiety() < WebSymbioteCleanse.COST && !player.isCreative() ? "gui.jaymospowers.web_symbiote.hungry"
+				: "gui.jaymospowers.web_symbiote.cleanse_ready", WebSymbioteCleanse.COST);
+		}
+		if (selected == WebSymbiote.STEED_TOGGLE) {
+			return Component.translatable(WebSymbioteSteed.riding(player) ? "gui.jaymospowers.web_symbiote.steed_out" : "gui.jaymospowers.web_symbiote.steed_in");
 		}
 		if (selected == WebSymbiote.MASK_TOGGLE) {
 			if (!WebSymbiote.suitShown(player) || WebSymbiote.bulked(player)) {

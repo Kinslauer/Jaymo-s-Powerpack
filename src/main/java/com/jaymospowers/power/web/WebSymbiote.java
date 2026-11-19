@@ -100,6 +100,12 @@ public final class WebSymbiote {
 	 * before which it fetches on its own whenever its tendrils are out. At most once every {@code TENDRILS_TOGGLE_GAP}.
 	 */
 	public static final int COLLECT_TOGGLE = 9;
+	/**
+	 * Not abilities either: the menu's extra chips. {@link #WINGS_TOGGLE} spreads or folds the wings of a whole bond
+	 * ({@link WebSymbioteWings}), {@link #CLEANSE} is the anti strain's pale burst ({@link WebSymbioteCleanse}; its cooldown
+	 * is slot 11 of the cooldowns), {@link #STEED_TOGGLE} takes or lets go of the horse under you ({@link WebSymbioteSteed}).
+	 */
+	public static final int WINGS_TOGGLE = 10, CLEANSE = 11, STEED_TOGGLE = 12;
 	/** Cooldown of each ability after use, in ticks (toggles: after switching). */
 	public static final int[] COOLDOWN = {100, 200, 20, 160, 240, 600};
 	/** Satiety each ability costs. */
@@ -1177,6 +1183,9 @@ public final class WebSymbiote {
 		});
 		// (0.13.4) nor lets a fall kill you: it pools over your legs and takes the landing
 		WebSymbioteCushion.register();
+		WebSymbioteWings.register();
+		WebSymbioteJar.register();
+		WebSymbioteSteed.register();
 		// it never dies with you: it pours out of your body and stays near it, looking for someone new
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer player && state(player).bonded()) {
@@ -1353,7 +1362,7 @@ public final class WebSymbiote {
 
 	/** Wall Crawl is on: the server lets them hang on walls and ceilings without the flying kick. */
 	public static boolean allowsFloating(ServerPlayer player) {
-		return isToggled(player, WebSymbioteState.CRAWL);
+		return isToggled(player, WebSymbioteState.CRAWL) || WebSymbioteWings.out(player);
 	}
 
 	// ---- server ------------------------------------------------------------------------------------------------------
@@ -1627,6 +1636,10 @@ public final class WebSymbiote {
 
 		// hunger (the big body eats three times as fast)
 		int drainTicks = bulk ? Math.max(1, SATIETY_DRAIN_TICKS / ARMOR_DRAIN_MULT) : SATIETY_DRAIN_TICKS;
+		// (holding a horse, it eats for two)
+		if (WebSymbioteSteed.held(player)) {
+			drainTicks = Math.max(1, drainTicks / WebSymbioteSteed.DRAIN_MULT);
+		}
 		// (0.15.31) the cold makes it hungrier: in winter, where there are seasons
 		if (com.jaymospowers.core.Seasons.is(player, com.jaymospowers.core.Seasons.Season.WINTER)) {
 			drainTicks = Math.max(1, Math.round(drainTicks / WINTER_HUNGER));
@@ -2351,6 +2364,8 @@ public final class WebSymbiote {
 			range = NOTE_RANGE;
 		} else if (event.is(GameEvent.BLOCK_CHANGE) && level.getBlockState(BlockPos.containing(pos)).is(Blocks.BELL)) {
 			range = BELL_RANGE;
+			// (a host holding a glass bottle, close by, is stunned instead of flinching: WebSymbioteJar)
+			WebSymbioteJar.onBell(level, pos);
 		} else {
 			return;
 		}
@@ -2363,7 +2378,8 @@ public final class WebSymbiote {
 	 */
 	public static void noise(ServerLevel level, Vec3 pos, double range) {
 		for (ServerPlayer player : level.players()) {
-			if (isBonded(player) && player.isAlive() && !player.isSpectator() && player.position().distanceToSqr(pos) <= range * range) {
+			if (isBonded(player) && player.isAlive() && !player.isSpectator() && player.position().distanceToSqr(pos) <= range * range
+				&& !WebSymbioteJar.stunned(player)) {
 				Live live = live(player);
 				long now = level.getGameTime();
 				if (now >= live.noiseReadyAt) {
@@ -3858,6 +3874,22 @@ public final class WebSymbiote {
 			// still settling in (or the white one asleep): nothing it has answers yet
 			// (asleep, a corpse fed to it wakes it: Consume still answers)
 			WebSymbioteBond.refuse(player);
+			return;
+		}
+		if (isBonded(player) && WebSymbioteJar.stunned(player)) {
+			// slack from a bell: nothing answers till it comes round (the glass bottle's moment)
+			return;
+		}
+		if (ability == WINGS_TOGGLE) {
+			WebSymbioteWings.toggle(player);
+			return;
+		}
+		if (ability == CLEANSE) {
+			WebSymbioteCleanse.burst(player);
+			return;
+		}
+		if (ability == STEED_TOGGLE) {
+			WebSymbioteSteed.toggle(player);
 			return;
 		}
 		// (0.19.69) (taking it off always answers: a sulk or a lockout only stops it coming up a form)

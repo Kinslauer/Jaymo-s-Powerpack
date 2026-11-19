@@ -229,6 +229,27 @@ public final class WebBodyPose {
 				poseStack.rotateDegrees(Axis.XP, -35.0F * kick);
 				poseStack.translate(0.0F, -middle, 0.0F);
 			}
+			case WebPose.RISING_BLOW -> {
+				// thrown up and back off the blow, the body arching away
+				float up = hold(pose.p(), 0.2F, 0.6F);
+				poseStack.translate(0.0F, middle, 0.0F);
+				poseStack.rotateDegrees(Axis.XP, 25.0F * up);
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
+			case WebPose.DIVE_KICK -> {
+				// laid back, both feet driven down and ahead
+				float dive = hold(pose.p(), 0.1F, 0.9F);
+				poseStack.translate(0.0F, middle, 0.0F);
+				poseStack.rotateDegrees(Axis.XP, -55.0F * dive);
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
+			case WebPose.SPIN_STRIKE -> {
+				// a full turn about the upright, the body leaning into it
+				poseStack.rotateDegrees(Axis.YP, pose.side() * 360.0F * turn);
+				poseStack.translate(0.0F, middle, 0.0F);
+				poseStack.rotateDegrees(Axis.ZP, pose.side() * 12.0F * swell(p));
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
 			case WebPose.ROAR -> {
 				// hunched over and shuddering while it builds, then reared back as it roars, then upright again
 				float p2 = pose.p();
@@ -435,6 +456,29 @@ public final class WebBodyPose {
 				set(h.rightArm, 0.9F, 0.0F, 0.5F, kick);
 				set(h.leftArm, 0.9F, 0.0F, -0.5F, kick);
 				h.head.xRot = Mth.lerp(kick, h.head.xRot, -0.2F);
+			}
+			case WebPose.RISING_BLOW -> {
+				// the right fist driven up, the left guarding, one knee lifted
+				float up = hold(pose.p(), 0.2F, 0.6F);
+				set(h.rightArm, -3.0F, 0.0F, 0.2F, up);
+				set(h.leftArm, -1.3F, 0.4F, -0.3F, up);
+				set(h.rightLeg, -1.2F, 0.0F, 0.1F, up);
+				set(h.leftLeg, 0.2F, 0.0F, -0.1F, up);
+			}
+			case WebPose.DIVE_KICK -> {
+				// both feet together out in front, arms swept back
+				float dive = hold(pose.p(), 0.1F, 0.9F);
+				set(h.rightLeg, -1.55F, 0.0F, 0.05F, dive);
+				set(h.leftLeg, -1.55F, 0.0F, -0.05F, dive);
+				set(h.rightArm, 0.9F, 0.0F, 0.5F, dive);
+				set(h.leftArm, 0.9F, 0.0F, -0.5F, dive);
+			}
+			case WebPose.SPIN_STRIKE -> {
+				// arms flung wide, one leg out for the sweep
+				set(h.rightArm, -0.3F, 0.0F, 1.5F, e);
+				set(h.leftArm, -0.3F, 0.0F, -1.5F, e);
+				set(h.rightLeg, -1.0F, 0.0F, 0.5F, e);
+				set(h.leftLeg, 0.1F, 0.0F, -0.1F, e);
 			}
 			case WebPose.ROAR -> {
 				float p = pose.p();

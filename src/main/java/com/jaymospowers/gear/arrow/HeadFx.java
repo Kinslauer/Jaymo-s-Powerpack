@@ -74,6 +74,16 @@ public final class HeadFx {
 	public static final int CLOTH_FLAME_REACH = 3;
 	public static final float CLOTH_BURN = 8.0F;
 
+	/** Blunt: the share of a plain arrow's damage it does, and the shove (blocks/tick, flat and up) it gives what it hits. */
+	public static final double BLUNT_DAMAGE = 0.35, BLUNT_PUSH = 1.5, BLUNT_LIFT = 0.3;
+	/** Spark: how long (ticks) the shock holds a foe still, the harm it does to the foe it jumps to, and how far (blocks) it jumps. */
+	public static final int SPARK_STILL = 14;
+	public static final float SPARK_JUMP_HARM = 2.0F;
+	public static final double SPARK_JUMP_REACH = 4.0;
+	/** Mending: how much it heals (half hearts). */
+	public static final float MENDING_HEAL = 6.0F;
+	private static final int SPARK_COLOUR = 0xFFD070;
+
 	private static final String SLOWED = "jaymospowers.head_slowed", HOMING = "jaymospowers.head_homing";
 	private static final List<Homing> HOMEWARD = new ArrayList<>();
 
@@ -106,6 +116,10 @@ public final class HeadFx {
 			case DRILL -> ((ArrowPierceInvoker) arrow).jaymospowers$setPierceLevel((byte) 1);
 			case BODKIN -> arrow.addTag(Bleeding.NARROW);
 			case SWALLOWTAIL -> arrow.addTag(Bleeding.TEARS);
+			case BLUNT -> {
+				arrow.setBaseDamage(ARROW_BASE * BLUNT_DAMAGE);
+				arrow.addTag(Bleeding.NARROW);
+			}
 			case CLOTH -> {
 				if (arrow.getOwner() instanceof LivingEntity archer && flame(archer)) {
 					arrow.igniteForSeconds(100.0F);
@@ -225,6 +239,25 @@ public final class HeadFx {
 				}
 			}
 			case FLASH -> flash(level, at, owner);
+			case BLUNT -> {
+				if (living != null && living.isAlive()) {
+					Vec3 flat = new Vec3(arrow.getDeltaMovement().x, 0.0, arrow.getDeltaMovement().z).normalize();
+					living.setDeltaMovement(living.getDeltaMovement().add(flat.x * BLUNT_PUSH, BLUNT_LIFT, flat.z * BLUNT_PUSH));
+					living.syncVelocity = true;
+					level.playSound(null, at.x, at.y, at.z, SoundEvents.WOOL_HIT, SoundSource.PLAYERS, 1.2F, 0.7F);
+				}
+			}
+			case SPARK -> {
+				if (living != null && living.isAlive()) {
+					shock(level, living);
+					LivingEntity next = nearestOther(level, living, owner);
+					if (next != null) {
+						MagicFx.beam(level, living.getBoundingBox().getCenter(), next.getBoundingBox().getCenter(), 0.05F, SPARK_COLOUR, 6);
+						next.hurtServer(level, level.damageSources().magic(), SPARK_JUMP_HARM);
+						shock(level, next);
+					}
+				}
+			}
 			case CLOTH -> {
 				// (a lit one: the burning rag stays on what it struck)
 				if (arrow.isOnFire() && living != null) {
@@ -287,6 +320,35 @@ public final class HeadFx {
 		return false;
 	}
 
+	/** Holds {@code victim} still for a moment, with a crackle. */
+	private static void shock(ServerLevel level, LivingEntity victim) {
+		victim.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SPARK_STILL, 9, false, false));
+		victim.addEffect(new MobEffectInstance(MobEffects.MINING_FATIGUE, SPARK_STILL, 3, false, false));
+		if (victim instanceof Mob mob) {
+			mob.getNavigation().stop();
+		}
+		Vec3 c = victim.getBoundingBox().getCenter();
+		level.sendParticles(MagicFx.spark(SPARK_COLOUR, 0.8F), c.x, c.y, c.z, 10, victim.getBbWidth() * 0.4, victim.getBbHeight() * 0.4,
+			victim.getBbWidth() * 0.4, 0.1);
+		level.playSound(null, c.x, c.y, c.z, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.3F, 2.0F);
+	}
+
+	/** The living thing nearest {@code from} within {@link #SPARK_JUMP_REACH}, other than it, and (for a player's arrow) only a foe: never the archer, a friend, a pet or an armour stand. */
+	private static @Nullable LivingEntity nearestOther(ServerLevel level, LivingEntity from, @Nullable Entity owner) {
+		LivingEntity best = null;
+		double bestSq = Double.MAX_VALUE;
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, from.getBoundingBox().inflate(SPARK_JUMP_REACH),
+			e -> e != from && (owner instanceof net.minecraft.server.level.ServerPlayer sp ? com.jaymospowers.core.PickKit.foe(sp, e)
+				: e.isAlive() && !e.isSpectator() && e != owner && !(e instanceof net.minecraft.world.entity.decoration.ArmorStand)))) {
+			double sq = e.distanceToSqr(from);
+			if (sq <= SPARK_JUMP_REACH * SPARK_JUMP_REACH && sq < bestSq) {
+				best = e;
+				bestSq = sq;
+			}
+		}
+		return best;
+	}
+
 	private static void net(ServerLevel level, Vec3 at, @Nullable Entity owner) {
 		MagicFx.ring(level, at, (float) NET_RADIUS, ArrowHead.NET.color);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.COBWEB_PLACE, SoundSource.PLAYERS, 1.0F, 0.8F);
@@ -341,6 +403,17 @@ public final class HeadFx {
 	// ---- drill through a shield ----
 
 	private static boolean allowDamage(LivingEntity victim, DamageSource source, float amount) {
+		if (source.getDirectEntity() instanceof AbstractArrow mender && mender.entityTags().contains(ArrowHead.MENDING.tag())
+			&& victim.level() instanceof ServerLevel healing) {
+			// a mending arrow heals instead of hurting, and is used up
+			victim.heal(MENDING_HEAL);
+			Vec3 c = victim.getBoundingBox().getCenter();
+			healing.sendParticles(net.minecraft.core.particles.ParticleTypes.HAPPY_VILLAGER, c.x, c.y, c.z, 8, victim.getBbWidth() * 0.4,
+				victim.getBbHeight() * 0.4, victim.getBbWidth() * 0.4, 0.05);
+			healing.playSound(null, c.x, c.y, c.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.8F, 1.4F);
+			mender.discard();
+			return false;
+		}
 		if (source.getDirectEntity() instanceof AbstractArrow arrow && arrow.entityTags().contains(ArrowHead.DRILL.tag()) && victim.isBlocking()
 			&& victim.level() instanceof ServerLevel level) {
 			ItemStack shield = victim.getUseItem();

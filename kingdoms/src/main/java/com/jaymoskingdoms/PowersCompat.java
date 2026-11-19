@@ -2204,7 +2204,7 @@ public final class PowersCompat {
 
 	/** How a gifted villager fights (Powers' {@code Gifted.BOLD}...). */
 	public static final int BOLD = 0, STEADY = 1, WARY = 2;
-	private static java.lang.invoke.@Nullable MethodHandle giftGive, giftPower, giftCorrupted, giftUnleash, giftable;
+	private static java.lang.invoke.@Nullable MethodHandle giftGive, giftPower, giftCorrupted, giftUnleash, giftable, giftTake;
 	/** (0.7.227) A gift's ways (Powers 0.17.12): a master, open or hidden, and seen by a player. */
 	private static java.lang.invoke.@Nullable MethodHandle giftGiveWays, giftWays, giftMaster, giftRevealed, giftCloseOnes, giftOpen, giftWitnesses;
 	private static boolean lookedForGifts;
@@ -2226,6 +2226,7 @@ public final class PowersCompat {
 			giftCorrupted = lookup.findStatic(gifted, "corrupted", java.lang.invoke.MethodType.methodType(boolean.class, entity));
 			giftUnleash = lookup.findStatic(gifted, "unleash", java.lang.invoke.MethodType.methodType(boolean.class, entity, entity));
 			giftable = lookup.findStatic(gifted, "giftable", java.lang.invoke.MethodType.methodType(java.util.List.class));
+			giftTake = lookup.findStatic(gifted, "take", java.lang.invoke.MethodType.methodType(void.class, entity));
 		} catch (ReflectiveOperationException | LinkageError e) {
 			giftGive = null;
 			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no gifted villagers (older Powers?)", e);
@@ -2408,6 +2409,18 @@ public final class PowersCompat {
 			return giftGive == null ? null : (String)giftPower.invoke(entity);
 		} catch (Throwable e) {
 			return null;
+		}
+	}
+
+	/** Takes {@code entity}'s gift away (a villager drained of it, {@link GiftEaters}); nothing without Powers. */
+	public static void giftTake(net.minecraft.world.entity.Entity entity) {
+		lookForGifts();
+		try {
+			if (giftGive != null) {
+				giftTake.invoke(entity);
+			}
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Powers couldn't take a gift away", e);
 		}
 	}
 

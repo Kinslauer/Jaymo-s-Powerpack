@@ -59,6 +59,7 @@ public final class WebTricks {
 			}
 		}
 		WebPower.pose(player, trick.kind(), trick.side() < 0 ? -1 : 1);
+		WebStunts.trick(player, trick.kind());
 		double x = player.getX(), y = player.getY(), z = player.getZ();
 		switch (trick.kind()) {
 			case WebPose.HERO_LAND -> {

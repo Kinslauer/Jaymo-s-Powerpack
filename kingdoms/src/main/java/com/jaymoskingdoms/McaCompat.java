@@ -595,6 +595,11 @@ public final class McaCompat {
 		return level.addFreshEntity(v) ? v : null;
 	}
 
+	/** A grown woman villager of no job at {@code at} (the night burglar, {@link NightBurglars}): MCA's, else the game's; already in the world, or null. */
+	static @Nullable Villager woman(ServerLevel level, net.minecraft.world.phys.Vec3 at) {
+		return LOADED ? McaBridge.woman(level, at) : visitor(level, at, null, false);
+	}
+
 	/** (0.7.294) With MCA, a guard of {@code f}'s for a caravan ({@link Caravans}) at {@code at} on {@code task}, or null. */
 	static @Nullable Worker escort(ServerLevel level, Faction f, net.minecraft.core.BlockPos at, float yaw, String task, int radius) {
 		return LOADED ? McaBridge.escort(level, f, at, yaw, task, radius) : null;

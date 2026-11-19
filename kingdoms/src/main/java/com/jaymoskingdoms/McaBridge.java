@@ -958,6 +958,11 @@ final class McaBridge {
 		return make.spawn(EntitySpawnReason.EVENT);
 	}
 
+	/** {@link McaCompat#woman}: a grown woman of no job at {@code at}, already in the world. */
+	static @Nullable Villager woman(ServerLevel level, Vec3 at) {
+		return VillagerFactory.newVillager(level).withPosition(at).withAge(0).withGender(Gender.FEMALE).spawn(EntitySpawnReason.EVENT);
+	}
+
 	/** (0.7.294) {@link McaCompat#vanish}: an MCA villager out of MCA's family tree. */
 	static void forgetVillager(net.minecraft.world.entity.Entity e) {
 		if (e instanceof VillagerEntityMCA v && e.level() instanceof ServerLevel level) {

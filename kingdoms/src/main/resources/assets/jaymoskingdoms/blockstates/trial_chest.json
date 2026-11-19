@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "kind=0": {
+      "model": "jaymoskingdoms:block/trial_chest_0"
+    },
+    "kind=1": {
+      "model": "jaymoskingdoms:block/trial_chest_1"
+    },
+    "kind=2": {
+      "model": "jaymoskingdoms:block/trial_chest_2"
+    },
+    "kind=3": {
+      "model": "jaymoskingdoms:block/trial_chest_3"
+    },
+    "kind=4": {
+      "model": "jaymoskingdoms:block/trial_chest_4"
+    }
+  }
+}
