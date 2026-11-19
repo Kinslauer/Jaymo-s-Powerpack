@@ -30,6 +30,7 @@ kanban-plugin: board
 - [ ] [[Inbox/smoothmount-6-heave-downed|smoothmount-6-heave-downed]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/harness-upkeep|harness-upkeep]] · for ☀️ Apollo · open
+- [ ] [[Inbox/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
