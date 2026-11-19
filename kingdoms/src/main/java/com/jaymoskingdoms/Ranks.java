@@ -518,7 +518,7 @@ public final class Ranks {
 	}
 
 	/** A shield bearing {@code arms}. */
-	private static ItemStack shield(ServerLevel level, Outfits.Heraldry arms) {
+	static ItemStack shield(ServerLevel level, Outfits.Heraldry arms) {
 		ItemStack stack = new ItemStack(Items.SHIELD);
 		stack.set(DataComponents.BASE_COLOR, arms.field());
 		stack.set(DataComponents.BANNER_PATTERNS, Outfits.layers(level.registryAccess(), arms));
@@ -615,8 +615,10 @@ public final class Ranks {
 			} else if (!bow(code) && step(code) <= SOLDIER && m.getOffhandItem().isEmpty() && !(m.getMainHandItem().getItem() instanceof ProjectileWeaponItem)
 				&& !net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(m.getMainHandItem().getItem()).getPath().contains("double_axe")) {
 				Faction realm = realm(level, m);
-				if (realm != null) {
-					m.setItemSlot(EquipmentSlot.OFFHAND, shield(level, Outfits.heraldry(realm, level.getServer())));
+				// (a settlement's guard carries the shield it paid for, or none: GuardKit)
+				ItemStack shield = realm == null ? ItemStack.EMPTY : GuardKit.shield(m, shield(level, Outfits.heraldry(realm, level.getServer())));
+				if (!shield.isEmpty()) {
+					m.setItemSlot(EquipmentSlot.OFFHAND, shield);
 					m.setDropChance(EquipmentSlot.OFFHAND, 0.0F);
 				}
 			}

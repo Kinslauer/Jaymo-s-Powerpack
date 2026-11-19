@@ -171,6 +171,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Bearers.register();
 		// the dead's gear goes into the stores, and guards brag about the spoils they wear
 		Salvage.register();
+		GuardKit.register();
 		GraveGhost.register();
 		RoyalRemains.register();
 		Looters.register();
@@ -742,7 +743,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Loans.register();
 		Veterans.register();
 		// (medieval picks) the troop ladder, formations and the shield wall, keeps in their holders' colours, the realms' map
-		LOGGER.debug("troop attachments: {} {} {}", Ranks.RANK, Ranks.REALM, KeepColours.FLOWN);
+		LOGGER.debug("troop attachments: {} {} {} {}", Ranks.RANK, Ranks.REALM, KeepColours.FLOWN, GuardKit.KIT);
 		Ranks.register();
 		Formations.register();
 		KeepColours.register();

@@ -163,11 +163,12 @@ public final class Salvage {
 		}
 	}
 
-	/** A piece of the spoils {@code mob} has on, or null. */
+	/** A piece of an enemy's spoils {@code mob} has on, or null. */
 	private static @Nullable ItemStack worn(LivingEntity mob) {
 		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.CHEST, EquipmentSlot.HEAD, EquipmentSlot.LEGS, EquipmentSlot.FEET, EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND}) {
 			ItemStack stack = mob.getItemBySlot(slot);
-			if (!stack.isEmpty() && is(stack)) {
+			// (what came off the settlement's own dead is nothing to brag of)
+			if (!stack.isEmpty() && is(stack) && mark(stack).getBooleanOr("foe", false)) {
 				return stack;
 			}
 		}
