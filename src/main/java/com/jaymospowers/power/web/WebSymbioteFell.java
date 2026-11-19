@@ -28,10 +28,11 @@ import org.jspecify.annotations.Nullable;
 /**
  * The weapon arm against a tree: charged while looking at a log, the symbiote always forms the axe (any strain, the plain
  * black suit too: {@link WebMorph}), and each stroke that lands on the tree bites it. A tree comes down in one to three
- * blows by its size ({@link #BLOWS_ONE} and {@link #BLOWS_TWO} logs); the last one brings the whole tree down, every log
- * joined to the one struck (at most {@link #MAX_LOGS}, from it upward, the leaves left to fall by themselves) dropping
- * as it would if each were broken by hand, so claims and protection still have their say. A stack of logs that grew no
- * leaves (a cabin's wall) is only the one log. The blows count for {@link #WINDOW_TICKS} after the last one.
+ * blows by its size ({@link #BLOWS_ONE} and {@link #BLOWS_TWO} logs); the last one takes the log struck clean out and the
+ * tree above it falls the way any felled tree does (Kingdoms' {@code Trees.fellAtOnce}: it topples away from the host and
+ * breaks up where it lands). Without Kingdoms the logs above break where they stand, as if each were broken by hand. A
+ * stack of logs that grew no leaves (a cabin's wall) is only the one log. The blows count for {@link #WINDOW_TICKS} after
+ * the last one.
  */
 public final class WebSymbioteFell {
 	/** A tree of at most this many logs falls to one blow, of at most {@code BLOWS_TWO} to two, a bigger one takes three. */
@@ -94,22 +95,51 @@ public final class WebSymbioteFell {
 			return true;
 		}
 		BLOWS.remove(key);
-		fell(player, level, logs);
+		fell(player, level, hit, logs);
 		return true;
 	}
 
-	/** Every log of the tree, broken from the top down (as a player would break each: claims and protection apply). */
-	private static void fell(ServerPlayer player, ServerLevel level, List<BlockPos> logs) {
-		List<BlockPos> order = new ArrayList<>(logs);
-		order.sort((a, b) -> Integer.compare(b.getY(), a.getY()));
-		for (BlockPos log : order) {
-			if (level.getBlockState(log).is(BlockTags.LOGS)) {
-				player.gameMode.destroyBlock(log);
+	/** The log struck is taken out, and the tree above it falls (Kingdoms' toppling tree, or broken log by log without it). */
+	private static void fell(ServerPlayer player, ServerLevel level, BlockPos hit, List<BlockPos> logs) {
+		if (!level.mayInteract(player, hit)) {
+			return;
+		}
+		level.destroyBlock(hit, true, player);
+		if (logs.size() > 1 && topple(level, hit.above(), player) <= 0) {
+			// no Kingdoms (or it wouldn't take it): what stood on the cut breaks where it stands
+			List<BlockPos> order = new ArrayList<>(logs);
+			order.sort((a, b) -> Integer.compare(b.getY(), a.getY()));
+			for (BlockPos log : order) {
+				if (log.getY() > hit.getY() && level.getBlockState(log).is(BlockTags.LOGS)) {
+					player.gameMode.destroyBlock(log);
+				}
 			}
 		}
-		BlockPos first = logs.get(0);
-		level.playSound(null, first.getX() + 0.5, first.getY() + 0.5, first.getZ() + 0.5, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 2.0F, 0.5F);
-		com.jaymospowers.core.Shakes.send(player, 0.8F, Vec3.atCenterOf(first));
+		level.playSound(null, hit.getX() + 0.5, hit.getY() + 0.5, hit.getZ() + 0.5, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 2.0F, 0.5F);
+		com.jaymospowers.core.Shakes.send(player, 0.8F, Vec3.atCenterOf(hit));
+	}
+
+	private static java.lang.reflect.@Nullable Method fellAtOnce;
+	private static boolean looked;
+
+	/** Kingdoms' {@code Trees.fellAtOnce(level, log, player)}: the tree on {@code log} topples like any felled one. Logs felled, 0 if it couldn't. */
+	private static int topple(ServerLevel level, BlockPos log, ServerPlayer player) {
+		if (!looked) {
+			looked = true;
+			try {
+				fellAtOnce = Class.forName("com.jaymoskingdoms.Trees").getMethod("fellAtOnce", ServerLevel.class, BlockPos.class, ServerPlayer.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				fellAtOnce = null;
+			}
+		}
+		if (fellAtOnce == null) {
+			return 0;
+		}
+		try {
+			return (int)fellAtOnce.invoke(null, level, log, player);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return 0;
+		}
 	}
 
 	/**
