@@ -15347,3 +15347,9 @@ Hackers 'n Slashers patch 3, the town half (Andy: "you should see the blacksmith
   - New Might perk, Battle Rhythm (tier 2): Jaymo's Powers quickens your attacks a step at a time while you keep landing blows. The Shieldbearer description now lists the new shield moves.
   - Key classes: Skills.Perk.BATTLE_RHYTHM, TreeLocks.Lock.BATTLE_RHYTHM, lang part battle-rhythm.json.
 - Built; not played.
+
+## 0.10.71 (2026-11-19): birthplace page lists the heritage's strengths and weaknesses (#1820)
+
+- **Life story, "Where were you born?"**: the right panel now shows the heritage's whole kit, the same as the heritage screen: its stat bonuses as pills, then Intrinsic (its own gift), Strengths and Weaknesses (flaw, kit flaws, how folk regard it). The rows come from the heritage's own card (`Heritage.Kind#card`), for the look the figure wears, so anything later added to a heritage shows here with no more work. Before, it only said "Heritage: Tideborn".
+- `HeritageScreen.statPills` / `kitSections`: the heritage screen's sorting, moved into two helpers both screens use. `LifeStoryScreen.pickerInfo` uses them on the birthplace page.
+- Built; not played.
