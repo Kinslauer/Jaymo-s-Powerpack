@@ -221,7 +221,8 @@ final class HeritageScreen extends Screen {
 				this.pickedVariant + 1, HeritageVariants.of(kind).size() + 1) : null);
 
 		// the info panel
-		this.layout.info(graphics, this.font, info(kind, hidden), kind, mouseX, mouseY);
+		// (Andy: "all bio built info should be hidden except unlock method") the Bio-built's panel only says how it wakes
+		this.layout.info(graphics, this.font, info(kind, hidden || kind == Heritage.Kind.BIOBUILT), kind, mouseX, mouseY);
 
 		if (this.choose != null) {
 			int[] b = this.layout.button(0);
@@ -334,6 +335,11 @@ final class HeritageScreen extends Screen {
 				continue;
 			}
 			int color = rowColor(row);
+			// (Andy: "remove all z fighter info from these screens") a Z Fighter's extras are left out, a row with nothing else dropped
+			row = withoutZFighter(row);
+			if (row == null) {
+				continue;
+			}
 			boolean ownGift = key.equals("heritage.jaymoskingdoms." + kind.key() + ".gift") || key.equals("heritage.jaymoskingdoms." + kind.key() + ".gift_rimewyrm");
 			Component text = stripLabel(row);
 			if (ownGift) {
@@ -350,6 +356,24 @@ final class HeritageScreen extends Screen {
 		out.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.strengths"), Ui.GOOD, strengths));
 		out.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.weaknesses"), Ui.BAD, weaknesses));
 		return out;
+	}
+
+	/** {@code row} without its clauses about Z Fighters (cut at its semicolons, outside brackets); null if nothing else is left. */
+	private static @Nullable Component withoutZFighter(Component row) {
+		String s = row.getString();
+		if (!s.contains("Z Fighter")) {
+			return row;
+		}
+		List<String> kept = new ArrayList<>();
+		for (String clause : PickerLayout.splitTop(s, "; ", false)) {
+			if (!clause.contains("Z Fighter")) {
+				kept.add(clause);
+			}
+		}
+		if (kept.isEmpty()) {
+			return null;
+		}
+		return Component.literal(String.join("; ", kept)).withStyle(row.getStyle());
 	}
 
 	private static Component stripLabel(Component row) {

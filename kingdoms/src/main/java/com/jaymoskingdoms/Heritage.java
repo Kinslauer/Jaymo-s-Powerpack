@@ -365,6 +365,10 @@ public final class Heritage {
 			if (shunned > 0) {
 				// (0.7.490) the Beastfolk and the Hollow have a line each (their degrees repeat another blood's)
 				out.add(Component.translatable("heritage.jaymoskingdoms.shunned." + (this == BEASTFOLK || this == HOLLOW ? key() : String.valueOf(shunned))));
+			} else if (this == VERDANT) {
+				// Andy: "verdants should also have the weakness shunned, but people dont necessarily show it": folk deal with
+				// them anyway, so it's the card's line only, no worse prices or trust (Prejudice)
+				out.add(Component.translatable("heritage.jaymoskingdoms.shunned.verdant"));
 			}
 			return out;
 		}
