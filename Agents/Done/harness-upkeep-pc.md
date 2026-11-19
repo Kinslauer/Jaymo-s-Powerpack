@@ -1,9 +1,9 @@
-﻿---
-status: running
+---
+status: done
 task: harness-upkeep
 branch: claude/harness-upkeep-2
 with: Claude Code (PC)
-pr: 
+pr: 1870
 mods: kingdoms, powers
 versions: 
 started: 2026-11-19
@@ -18,3 +18,6 @@ owns:
 
 ## Notes
 - Powers already rusted the four armour slots (Andy: "nothing removes rust"): oil only keeps new rust off.
+
+## Done
+PR #1870, merged. Plate shows dents as it wears; the harness rusts; Armour Oil keeps rust off for three days; an armourer fits your plate to you (lighter, +0.5 armour each). Built on the Deck and CI; not played.

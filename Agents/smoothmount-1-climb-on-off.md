@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: smoothmount-1-climb-on-off
 branch: hermes/smoothmount-1-climb-on-off
 with: 
@@ -54,3 +54,4 @@ Created PR #1869 with:
 - Change note at changes/powers/smoothmount-1-climb-on-off.md
 - Build passes, PR checks pass
 - Not tested in game
+- 2026-11-19 16:27 No sign of work for 30 min: marked stalled (whoever ran it stopped).
