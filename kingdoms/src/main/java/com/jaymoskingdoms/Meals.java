@@ -58,7 +58,8 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  * The <b>price of a meal</b> follows the larder ({@link #index}): food short for the town's size makes it dear (and
  * the townsfolk grumble and sour), plenty makes it cheap (and they're content). A realm with a full larder sells its
- * surplus to the merchants, and one running short buys bread in out of its treasury ({@link #trade}). Nothing to be had
+ * surplus to the merchants, and one running short sends its carts out at once to buy food from a trading partner
+ * ({@link #trade}, {@link TradeRoutes#arrive}). Nothing to be had
  * at all, and they go without, and a town that keeps going without starves ({@link TownHunger}).
  * <p>
  * Each cookhouse and tavern takes on a <b>cook</b> ({@link Professions#COOK}) from the town's idle villagers. By day
@@ -93,8 +94,6 @@ public final class Meals {
 	static final int DEAR_MOOD = -1, CHEAP_MOOD = 1, TAVERN_MOOD = 1, WENT_WITHOUT_MOOD = -2;
 	/** The food trade (realms, once a day): surplus over this many times the want sold, this many items at most, this many to an emerald. */
 	static final int SURPLUS_TIMES = 3, TRADE_MOST = 32, SELL_PER_EMERALD = 8;
-	/** ...and short below half the want: bread bought in, this many loaves to an emerald. */
-	static final int BUY_PER_EMERALD = 4;
 	/** The food trade's hour (time of day). */
 	static final long TRADE_AT = 1000L;
 	/** A cook: their hours (time of day), a batch per this many ticks, how near the eatery they're at work, how far they're sought. */
@@ -796,16 +795,12 @@ public final class Meals {
 				Factions.update(server, f.id(), x -> x.withTreasury(x.treasury() + emeralds));
 			}
 			JaymosKingdoms.LOGGER.debug("{} sold {} food for {} emeralds", f.name(), sold, emeralds);
-		} else if (stock < want / 2 && f.treasury() > 0) {
-			int need = Math.min(TRADE_MOST, want - stock);
-			long cost = Math.min(f.treasury(), (need + BUY_PER_EMERALD - 1) / BUY_PER_EMERALD);
-			int bought = (int)Math.min(need, cost * BUY_PER_EMERALD);
-			int lost = Storage.put(level, f, Items.BREAD, bought);
-			long paid = (bought - lost + BUY_PER_EMERALD - 1) / BUY_PER_EMERALD;
-			if (paid > 0) {
-				Factions.update(server, f.id(), x -> x.withTreasury(Math.max(0L, x.treasury() - paid)));
-			}
-			JaymosKingdoms.LOGGER.debug("{} bought {} bread for {} emeralds", f.name(), bought - lost, paid);
+		} else if (stock < want / 2 && f.treasury() > 0
+			&& Caravans.ledger(server).caravans().values().stream().noneMatch(c -> c.home() == f.id() && !c.smuggle())) {
+			// (Andy, 2026-11-19: no food out of nowhere) it sends its carts out now to buy food from a trading partner, paid for out of
+			// its treasury when they get there (TradeRoutes#arrive): it comes in on the road, or not at all if the partner has none
+			// to spare or the carts are robbed
+			TradeRoutes.start(level, f, true);
 		}
 	}
 
