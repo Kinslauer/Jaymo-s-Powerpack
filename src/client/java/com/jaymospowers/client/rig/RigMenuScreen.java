@@ -42,12 +42,17 @@ final class RigMenuScreen extends Screen {
 	/** The entries, clockwise from the top. */
 	private static final int[] ACTIONS = {RigNet.HOVER, RigNet.PALM, RigNet.LAUNCHER, RigNet.UNIBEAM, RigNet.SCAN, RigNet.CALL, RigNet.SENTRY,
 		RigNet.FACEPLATE, RigNet.NIGHT, RigPicks.DRONES, RigPicks.MARK, RigPicks.TABLE, RigPicks.DECOY, RigPicks.FIELD, RigPicks.BANK, RigClient.JET_START,
-		RigPicks.DASH, RigPicks.BARRAGE, RigClient.SLOW_BEAT, RigPicks.FAILSAFE};
+		RigPicks.DASH, RigPicks.BARRAGE, RigClient.SLOW_BEAT, RigPicks.FAILSAFE,
+		// the back rig (RigBack)
+		com.jaymospowers.rig.RigBack.WINGSLASH, com.jaymospowers.rig.RigBack.SPEARS, com.jaymospowers.rig.RigBack.PINCER,
+		com.jaymospowers.rig.RigBack.GRAPPLE, com.jaymospowers.rig.RigBack.HORNS};
 	private static final String[] NAMES = {"hover", "palm", "launcher", "unibeam", "scan", "call", "sentry", "faceplate", "night", "drones", "mark", "table", "decoy", "field", "bank", "jet_start", "dash", "barrage",
-		"slow_beat", "failsafe"};
-	private static final int[] LEVEL = {1, 1, 1, Rig.UNIBEAM_LEVEL, Rig.SCAN_LEVEL, Rig.CALL_LEVEL, Rig.CALL_LEVEL, 1, 1, 1, 1, 1, 1, 1, 1, Rig.FLIGHT_LEVEL, 1, Rig.MAX_LEVEL, Rig.UNIBEAM_LEVEL, 1};
+		"slow_beat", "failsafe", "wingslash", "spears", "pincer", "grapple", "horns"};
+	private static final int[] LEVEL = {1, 1, 1, Rig.UNIBEAM_LEVEL, Rig.SCAN_LEVEL, Rig.CALL_LEVEL, Rig.CALL_LEVEL, 1, 1, 1, 1, 1, 1, 1, 1, Rig.FLIGHT_LEVEL, 1, Rig.MAX_LEVEL, Rig.UNIBEAM_LEVEL, 1,
+		3, 2, 3, 2, 4};
 	/** Cooldowns' full lengths (ticks), for the shading; 0 for none. */
-	private static final int[] COOLDOWN = {0, RigHud.PALM_COOLDOWN, RigHud.LAUNCHER_COOLDOWN, RigHud.UNIBEAM_COOLDOWN, RigScan.SCAN_COOLDOWN, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	private static final int[] COOLDOWN = {0, RigHud.PALM_COOLDOWN, RigHud.LAUNCHER_COOLDOWN, RigHud.UNIBEAM_COOLDOWN, RigScan.SCAN_COOLDOWN, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0};
 	private static final double SLICE = 360.0 / ACTIONS.length;
 
 	private int selected = -1;
@@ -78,6 +83,11 @@ final class RigMenuScreen extends Screen {
 			case 17 -> Items.FIRE_CHARGE;
 			case 18 -> Items.CLOCK;
 			case 19 -> Items.TOTEM_OF_UNDYING;
+			case 20 -> Items.PHANTOM_MEMBRANE;
+			case 21 -> Items.TRIDENT;
+			case 22 -> Items.LEAD;
+			case 23 -> Items.FISHING_ROD;
+			case 24 -> Items.BLAZE_ROD;
 			default -> Items.ENDER_EYE;
 		};
 	}
@@ -151,7 +161,7 @@ final class RigMenuScreen extends Screen {
 			return Component.translatable("gui.jaymospowers.rig_menu.no_core");
 		}
 		if ((action == RigNet.HOVER || action == RigNet.PALM || action == RigNet.LAUNCHER || action == RigNet.UNIBEAM || action == RigPicks.DASH
-			|| action == RigPicks.BARRAGE) && !Rig.fullSet(player)) {
+			|| action == RigPicks.BARRAGE || com.jaymospowers.rig.RigBack.is(action)) && !Rig.fullSet(player)) {
 			return Component.translatable("gui.jaymospowers.rig_menu.incomplete");
 		}
 		return null;

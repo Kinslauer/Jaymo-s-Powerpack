@@ -68,7 +68,8 @@ public final class RigMoves {
 			case PUNCH -> PUNCH_TICKS;
 			case BARRAGE -> BARRAGE_TICKS;
 			case UNIBEAM -> RigUnibeam.CHARGE_TICKS + RigUnibeam.BEAM_TICKS + UNIBEAM_SETTLE;
-			default -> 0;
+			// the back rig's (RigBack)
+			default -> RigBack.length(kind);
 		};
 	}
 
