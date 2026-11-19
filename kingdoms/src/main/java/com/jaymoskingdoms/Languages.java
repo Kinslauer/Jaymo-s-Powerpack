@@ -220,6 +220,10 @@ public final class Languages {
 	}
 
 	private static @Nullable Tongue look(ServerLevel level, Entity speaker) {
+		if (Dialects.goblin(speaker)) {
+			// (Andy, 2026-11-19: goblins speak "very broken but intelligible english", whatever land they're in: heard)
+			return null;
+		}
 		if (ZFighterFolk.is(speaker) || com.jaymoskingdoms.forms.Schools.isMaster(speaker)) {
 			// (0.7.384) so too a school master
 			// (0.7.319) Powers' Z Fighter characters speak to anyone who comes to them
@@ -424,6 +428,10 @@ public final class Languages {
 	 * gibberish in the speaker's tongue (the same line always comes out the same).
 	 */
 	public static Component heard(ServerPlayer player, Entity speaker, Component words) {
+		if (Dialects.goblin(speaker) || Dialects.goblinLine(words)) {
+			// (a goblin: broken English anyone can follow, Dialects.broken)
+			return Dialects.broken(words);
+		}
 		if (IllagerTongue.speaker(speaker)) {
 			// (an illager: their own tongue, learned bit by bit, IllagerTongue)
 			return IllagerTongue.heard(player, speaker, words);

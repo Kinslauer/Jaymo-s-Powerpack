@@ -49,6 +49,9 @@ public final class TakenAlive {
 	static final int LOOK_EVERY = 10;
 	/** How long (ticks) a downed player with no camp to be taken to is let be before they're asked about again. */
 	static final long NO_CAMP_TICKS = 200L;
+	/** A goblin taker's gloat when it claims the downed and when it has them bound (lines of each), heard this far (blocks). */
+	static final int CLAIM_LINES = 5, BIND_LINES = 5;
+	static final double SAY_RANGE = 16.0;
 
 	/** One downed and claimed: since when (game time), who binds them, how long at it, and when the black began. */
 	private static final class Claim {
@@ -108,6 +111,7 @@ public final class TakenAlive {
 		claim = new Claim(now);
 		CLAIMS.put(player.getUUID(), claim);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.taken_alive.claimed").withStyle(ChatFormatting.RED));
+		gloat(by, "claim", CLAIM_LINES);
 		return claim;
 	}
 
@@ -217,6 +221,7 @@ public final class TakenAlive {
 		}
 		// (bound: a blow to the head, and the black)
 		binder.setShiftKeyDown(false);
+		gloat(binder, "bind", BIND_LINES);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.taken_alive.bound").withStyle(ChatFormatting.DARK_RED));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.0F, 0.6F);
 		if (!PowersCompat.knockOut(level, player, OUT_TICKS)) {
@@ -226,6 +231,14 @@ public final class TakenAlive {
 		}
 		claim.darkSince = now;
 		return false;
+	}
+
+	/** A goblin taker crows over its catch, in its broken English ({@link Dialects#broken}); anyone else takes them in silence. */
+	private static void gloat(Mob by, String when, int lines) {
+		if (by.level() instanceof ServerLevel level && (Dialects.goblin(by) || Captors.goblin(by))) {
+			Speech.say(level, by, Dialects.trBrood(Dialects.GOBLIN, "speech.jaymoskingdoms.taken_alive." + when + "." + level.getRandom().nextInt(lines)),
+				Speech.YELLOW, SAY_RANGE);
+		}
 	}
 
 	/** In the black: chained in the camp, stripped as one left for dead by them is. */

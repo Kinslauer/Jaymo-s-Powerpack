@@ -18,6 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.7.20) What an MCA villager says to a player who doesn't speak their tongue ({@link Languages}) reaches them as
  * words they don't know (the same gibberish our own speech bubbles show).
  * (0.7.203) So does the line at the top of their talk menu (the menu itself offers a foreigner only gestures).
+ * A goblin's lines, to anyone, come in its broken English ({@link com.jaymoskingdoms.Dialects#broken}).
  * (0.7.67) To a masked player ({@link com.jaymoskingdoms.Identities}), the player's names are swapped for the costume's.
  */
 @Mixin(Network.class)
@@ -34,7 +35,8 @@ abstract class McaMessageMixin {
 		if (!jaymoskingdoms$garbling && payload instanceof InteractionDialogueQuestionResponse question) {
 			// (0.7.203) the line at the top of their talk menu, too
 			Entity speaker = jaymoskingdoms$talkingTo(player);
-			if (speaker != null && !Languages.understands(player, speaker)) {
+			// (Andy, 2026-11-19) and a goblin's, in its broken English (Languages.heard, Dialects.broken)
+			if (speaker != null && (com.jaymoskingdoms.Dialects.goblin(speaker) || !Languages.understands(player, speaker))) {
 				ci.cancel();
 				jaymoskingdoms$garbling = true;
 				try {
@@ -60,7 +62,7 @@ abstract class McaMessageMixin {
 		if (speaker != null && player.level() instanceof net.minecraft.server.level.ServerLevel level) {
 			com.jaymoskingdoms.Speech.overheard(level, speaker, player, message.message(), com.jaymoskingdoms.Speech.WHITE);
 		}
-		if (speaker == null || Languages.understands(player, speaker)) {
+		if (speaker == null || Languages.understands(player, speaker) && !com.jaymoskingdoms.Dialects.goblin(speaker)) {
 			if (message != original) {
 				ci.cancel();
 				jaymoskingdoms$garbling = true;

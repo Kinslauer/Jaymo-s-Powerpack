@@ -2,7 +2,10 @@ package com.jaymoskingdoms;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.PlainTextContents;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -15,6 +18,11 @@ public final class Dialects {
 	public static final String ORC = "orc", GOBLIN = "goblin";
 	/** Where the dialect keys sit in the lang file (before the brood, then the plain key). */
 	static final String PREFIX = "dialect.jaymoskingdoms.";
+	/**
+	 * A goblin's line goes to the client as this before the line's own key ({@link #broken}); the client finds the line
+	 * (in the goblin dialect where it has one) and breaks it ({@link GoblinTalk}, client {@code GoblinTalkMixin}).
+	 */
+	public static final String BROKEN = "goblin_talk.jaymoskingdoms:";
 
 	private Dialects() {
 	}
@@ -78,5 +86,43 @@ public final class Dialects {
 	public static MutableComponent trShared(@Nullable Entity speaker, String key, Object... args) {
 		String brood = of(speaker);
 		return Component.translatable(brood == null ? key : key(brood, key), args);
+	}
+
+	/** {@code e} talks like a goblin: one of a village's goblins, folk or villager, or one of a goblin tribe (never a player). */
+	public static boolean goblin(@Nullable Entity e) {
+		return e instanceof GoblinScout || e != null && !(e instanceof Player) && GOBLIN.equals(of(e));
+	}
+
+	/** A line in the goblin dialect (a goblin says it, whoever else may be heard saying it). */
+	static boolean goblinLine(Component words) {
+		return words.getContents() instanceof TranslatableContents t && t.getKey().startsWith(PREFIX + GOBLIN + ".");
+	}
+
+	/**
+	 * (Andy, 2026-11-19: goblins "should speak very broken but intelligible english") {@code words} as a goblin says
+	 * them: a line from the lang file goes as {@link #BROKEN} and its key, for the client to break in its own language
+	 * (its goblin-dialect line if there is one); plain text is broken here. The names and things put into a line are
+	 * left whole. Without the mod a player sees it broken as far as the server's English goes.
+	 */
+	public static Component broken(Component words) {
+		MutableComponent out;
+		if (words.getContents() instanceof TranslatableContents t) {
+			if (t.getKey().startsWith(BROKEN)) {
+				return words;
+			}
+			net.minecraft.locale.Language lang = net.minecraft.locale.Language.getInstance();
+			String dialect = PREFIX + GOBLIN + "." + t.getKey();
+			String plain = t.getFallback() != null ? t.getFallback() : lang.getOrDefault(lang.has(dialect) ? dialect : t.getKey());
+			out = Component.translatableWithFallback(BROKEN + t.getKey(), plain.equals(t.getKey()) ? plain : GoblinTalk.speak(plain), t.getArgs());
+		} else if (words.getContents() instanceof PlainTextContents p) {
+			out = Component.literal(GoblinTalk.speak(p.text()));
+		} else {
+			return words;
+		}
+		out.setStyle(words.getStyle());
+		for (Component sibling : words.getSiblings()) {
+			out.append(broken(sibling));
+		}
+		return out;
 	}
 }
