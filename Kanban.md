@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 02:39). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 02:41). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,11 +22,11 @@ kanban-plugin: board
 - [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
 - [ ] [[Inbox/medieval-deco-1-music|medieval-deco-1-music]] · for 💻 Odysseus · open
 - [ ] [[Inbox/medieval-deco-2-wind|medieval-deco-2-wind]] · for 💻 Odysseus · open
-- [ ] [[Inbox/medieval-deco-3-dead-in-the-wild|medieval-deco-3-dead-in-the-wild]] · for 💻 Odysseus · open
 - [ ] [[Inbox/medieval-deco-4-drinks|medieval-deco-4-drinks]] · for 💻 Odysseus · open
 - [ ] [[Inbox/medieval-deco-5-farm-water|medieval-deco-5-farm-water]] · for 💻 Odysseus · open
 - [ ] [[Inbox/medieval-deco-6-towns-sea|medieval-deco-6-towns-sea]] · for 💻 Odysseus · open
 - [ ] [[Inbox/medieval-deco-7-practice-dummy|medieval-deco-7-practice-dummy]] · for 💻 Odysseus · open
+- [ ] [[Inbox/medieval-deco-3-dead-in-the-wild|medieval-deco-3-dead-in-the-wild]] · for 💻 Odysseus · open
 
 
 ## Being built
