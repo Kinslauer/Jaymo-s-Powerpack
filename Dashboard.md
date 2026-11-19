@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 19:43). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 15:02). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -19,13 +19,13 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 ## Stuck
 
 - [[Agents/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]]: stalled, last change 2026-11-13. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/forest-fire-pack|forest-fire-pack]]: stalled, last change 2026-11-16. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/forest-fire-pack|forest-fire-pack]]: stalled, last change 2026-11-15. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hands-on-cooking-realtime|hands-on-cooking-realtime]]: stalled, last change 2026-11-17. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/harness-upkeep|harness-upkeep]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/heritage-paths|heritage-paths]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]]: stalled, last change 2026-11-18. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/scrying-orb|scrying-orb]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/sky-lands-aether-biomes|sky-lands-aether-biomes]]: stalled, last change 2026-11-16. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/scrying-orb|scrying-orb]]: stalled, last change 2026-11-18. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/sky-lands-aether-biomes|sky-lands-aether-biomes]]: stalled, last change 2026-11-15. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
@@ -35,6 +35,8 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1863 goblins speak broken English (Kingdoms, 2026-11-19)
+- [ ] #1862 Youth's wisp really disappears while it thinks (Kingdoms, 2026-11-19)
 - [ ] #1860 Goblins take the downed alive too (Kingdoms, 2026-11-19)
 - [ ] #1859 Slower NPCs, and barbarians take the downed alive (Kingdoms, 2026-11-19)
 - [ ] #1858 campfire life - camps sit, talk, sing and share a spit roast round their fire (Kingdoms, Kitchen, 2026-11-19)
@@ -93,13 +95,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1793 Alex's Mobs Continued joins the pack (Powers, Kingdoms, 2026-11-19)
 - [ ] #1792 life story: one random heritage look, no paths list (Kingdoms, 2026-11-19)
 - [ ] #1791 guards wear what their rank and their settlement's purse allow (Kingdoms, 2026-11-19)
-- [ ] #1790 steam towns in the Cloud Sea (Kingdoms, 2026-11-19)
-- [ ] #1789 Rig: flight picks, arm-form poses and gun fire poses fixed (Powers, Kingdoms, 2026-11-19)
-- …and 237 older ones.
+- …and 239 older ones.
 
 ## Health
 
-20 problems in the notes: [[Health]].
+21 problems in the notes: [[Health]].
 
 ## Last week
 
