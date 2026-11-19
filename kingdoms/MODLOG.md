@@ -15408,3 +15408,11 @@ Andy's hero add-on picks, the town and world side. Built; not played.
 - **Three minutes at most** (Andy): a place track, or the game's own song, that has played 3 minutes fades out over 5 seconds; the game's own then waits for its next song as usual.
 - **Music stays off**: if your Music slider was off when you joined, it is put back to off (and saved) once you are set down after the life story and MCA's creator (`KeptMusicSetting`). A slider that was on is left alone.
 - Compiled; not played. What turns the slider on during creation wasn't found in our code or MCA's, so this puts it back afterwards rather than stopping it.
+
+## 0.10.79 (2026-11-19): life aim shown on landing instead of a book in your pack (#1833)
+
+- The life story no longer puts a one-page "Journal" book (your life's aim) in your pack. The same page opens on screen,
+  on Minecraft's book page, once the landing's loading screen is gone (Andy: show it as they spawn, with the same
+  background). `LifeAims.Page` sends the page; client `AimPageClient` opens it after a second with no screen open.
+  The traveller's journal (M) is still given.
+- Built; not played.

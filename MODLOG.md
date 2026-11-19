@@ -6416,3 +6416,15 @@ Andy: "they need to react to feints at least. and give patrolmen ranks".
 - **NPCs feint too**: a fighter of rank 0.4 or more swings at a foe who is guarding (a player's Z Fighter guard or another NPC's), then pokes for real 10 ticks later. A player's guard raised in answer to a feint (within 12 ticks) has its parry spent: it cools down 30 ticks and costs 3 ki (`ZFighterGuard.feinted`), so the poke meets only the plain guard. A guard held up before, or not up, is not touched.
 - **Patrolman ranks**: each patrolman who lands gets a Patrol rank (Rookie, Officer, Sergeant, Inspector, Commander), stored on him (`ZFighterPatrol.RANK`, saved), picked weighted by the nearest player's world tier and what each rank needs (`RANK_TIER`); a showdown's patrolman is at least an Inspector. The rank sets his brawl rank (0.15 Rookie to 0.8 Commander), health (up to 1.8 times), armour (up to +6), how hard he punches (up to 1.6 times) and how often, and shows in his name ("Sergeant Jaco"). Player ranks are unchanged. Patrolmen already out keep their old name and count as Rookies; called officers (writs) are not ranked.
 - Built; not played. A feint is read from the arm swing alone, so a slow real blow is told apart only by whether it landed.
+
+## 0.25.62 (2026-11-19): no Animal Dictionary on first join; UI tips as you meet things (#1833)
+
+- Alex's Mobs Continued no longer hands every new player its Animal Dictionary (Andy: players shouldn't spawn with it).
+  `compat/AlexsMobsCompat` turns its `giveBookOnStartup` flag off once the server is up and as each player connects. The
+  book can still be crafted and read; players who already have one keep it.
+- **UI tutorial as tips** (Andy picked tips as you meet things over a walkthrough): the first time a part of the screen
+  shows, a tip card says what lives there: left of the hotbar (body), right of it, around the crosshair, over the hotbar,
+  top left, then how to move HUD parts (/hudmove); the character menu the first time it's open; the journal key the
+  first time you carry the traveller's journal. Once per player, one at a time, none in the first 10 seconds of a
+  session. `client/hud/UiTips`, lang `parts/ui_tips.json`; `TipCard.busy()` added. Powers keep their own tips.
+- Built; not played.
