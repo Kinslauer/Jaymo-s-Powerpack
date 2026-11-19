@@ -105,16 +105,24 @@ final class GrandSeats {
 		RandomSource random = level.getRandom();
 		Palette land = Palette.at(level, bell);
 		List<Holder.Reference<Structure>> options = suited(level, land);
-		if (options.isEmpty()) {
+		// the masons' pattern books' castles too (Andy, 2026-11-19: library castles only for a kingdom raised from nothing; {@link Library})
+		List<Library.Book> books = Library.castles(level.getServer(), land);
+		if (options.isEmpty() && books.isEmpty()) {
 			return null;
 		}
 		// the jungle's fortress first; elsewhere any of them
-		List<Holder.Reference<Structure>> order = new ArrayList<>(options);
+		List<java.util.function.Supplier<Castle.Keep>> order = new ArrayList<>();
+		for (Holder.Reference<Structure> holder : options) {
+			order.add(() -> raise(level, kingdom, bell, holder));
+		}
+		for (Library.Book b : books) {
+			order.add(() -> Library.raise(level, kingdom, bell, b));
+		}
 		if (land != Palette.JUNGLE) {
 			java.util.Collections.shuffle(order, new java.util.Random(random.nextLong()));
 		}
-		for (Holder.Reference<Structure> holder : order) {
-			Castle.Keep keep = raise(level, kingdom, bell, holder);
+		for (java.util.function.Supplier<Castle.Keep> next : order) {
+			Castle.Keep keep = next.get();
 			if (keep != null) {
 				return keep;
 			}
@@ -226,7 +234,7 @@ final class GrandSeats {
 	}
 
 	/** Clears the land where its buildings go, from the floor up: hillside, trees and snow (the castle brings its own air only in places). */
-	private static void clear(ServerLevel level, List<BoundingBox> boxes, int floor, int top) {
+	static void clear(ServerLevel level, List<BoundingBox> boxes, int floor, int top) {
 		BlockState air = Blocks.AIR.defaultBlockState();
 		BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
 		int roof = Math.min(top, floor + CLEAR_MAX);
@@ -291,7 +299,7 @@ final class GrandSeats {
 	}
 
 	/** Under every column it stands on, solid ground down to the land (no floating corners on a slope). */
-	private static void footing(ServerLevel level, BoundingBox box, int floor) {
+	static void footing(ServerLevel level, BoundingBox box, int floor) {
 		BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
 		for (int x = box.minX(); x <= box.maxX(); x++) {
 			for (int z = box.minZ(); z <= box.maxZ(); z++) {

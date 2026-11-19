@@ -15534,3 +15534,112 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - **Watcher's huts** (the small web-hung spruce hut over a spider nest, `jaymoskingdoms:nest_watch_hut`) were tried every 14 chunks (at least 4 apart) in every Overworld biome, and the silk deeps lie under most temperate inland ground, so nearly every try built one: about one hut every 220 blocks, more than any other surface structure in the pack. That is why they seemed to be the only thing generating. Now tried every 40 chunks (at least 16 apart): roughly an eighth as many, about one every 640 blocks. Other structures were never blocked by them; they were just outnumbered.
 - Only new ground changes: huts already built stay.
 - Data only (`structure_set/nest_watch_huts.json`). Built; not played.
+
+## 0.10.93 (2026-11-19): First kingdom raised in the surface town, not a Lost Cities copy under it (#1850)
+
+- In a One Dimension world the bands share their town spots, so a spot where the Overworld rolled no town could keep the Lost Cities band's village (at Y -370), and the first kingdom was raised down there while the real village stood above.
+- The capital's village search and the far Epic town search now take only towns that stand in the Overworld band; a town in another band is passed over and the search goes on to the next spot. The log says which band it was in.
+- Classes touched: `EpicTowns` (`surface`, `foundFar`), `StoryGround` (village search).
+- Built by CI; not played.
+
+## 0.10.94 (2026-11-19): Take bows and arrows from any downed foe (#1855)
+
+- Andy: "you should be able to take their bows." Standing over anyone downed (not kneeling), a tap of use takes the weapons out of both their hands, as it already did for villagers, Kingdoms folk and illagers: now bandits, skeletons, pillagers, zombies with blades and any other downed humanoid too. Not a tamed animal that belongs to someone.
+- Their arrows come with the bow: whatever is left in their quiver (or a full one for a bowman that never shot, or a skeleton or pillager whose bow flew off as it fell) comes away as real arrows. Once up again they're short of arrows as after shooting them all, and pick up or restock as before.
+- A downed foe with nothing left to take lets the tap through to whatever else uses it (pulling a stuck blade). Kneel tap (lift), kneel hold (revive), left-click executions and sneak pickpocketing are unchanged. Armour and pockets are still not taken.
+- Downed (`disarmable`, `armed`), MobAmmo (`quiver`, `emptyQuiver`). Built; not played.
+
+## 0.10.95 (2026-11-19): campfire life - camps sit, talk, sing and share a spit roast round their fire (#1858)
+
+- **Sitting at the fire** (Firesides): outside supper, a camp's band (barbarians, greenskins, pirates ashore) drift to their lit fire a few at a time, mostly by night or in the rain (up to 10; 3 by day, when builders stay at work), sit on its log benches or the ground round it for a minute or three, then get up and go about the camp. Each sits their own way (FiresidePose, on MCA's villagers): hands held out to the flames, leaning back on their hands, hunched over their knees; legs together out in front.
+- **Talk**: tales, boasts, jokes and gripes over their heads (in their own tongue, never chat), the others turning to listen and one laughing, scoffing or agreeing; rain talk in the rain; songs by night, with a fist swung in time. Some whet their blades (grindstone rasp) or throw a stick on the fire.
+- **The spit** (needs Jaymo's Kitchen; KitchenSpits): once a few are sat, one gets up to cook, puts a Kitchen spit over the fire if there isn't one, and roasts meat on it a piece at a time: from the camp's chests and barrels within 12 blocks first, else the day's catch (8 pieces). Each cooked piece is torn off and carried round: everyone at the fire gets a share (eaten from the off hand, 2 hearts back), then a player the camp lets be sat by the fire (it goes in your pack), then the captives get the scraps, and the cook eats last. Left too long it burns.
+- A stranger the camp won't let be who's seen walking up (a creeping one only within 4 blocks) brings them all to their feet; a foe, going down or being needed elsewhere gets one up at once.
+- **Supper seats fixed** (CampSuppers): its ring put the seats 3 blocks out, inside a camp's log benches, so the band walked round the fire and never sat (Andy's clip). Supper now sits them on the bench tops and open ground round the fire (Firesides.ringSeat), and anyone stuck just short of their seat sits where they are.
+- Built; not played.
+
+## 0.10.96 (2026-11-19): Slower NPCs, and barbarians take the downed alive (#1859)
+
+- **Slower NPCs** (Andy: "the npcs as a whole move WAY too quickly, slow them down drastically so players can react"): every humanoid NPC (Folk: villagers' folk, guards, barbarians, orcs, pirates, looters, assassins; the cordon's folk; MCA and vanilla villagers and traders; illagers; witches) loses 30% of its speed on top of everything else that sets it (`NpcPace.PACE`). A mob's ground speed goes with the square of that number, so they move about half as fast: a barbarian charge that outran a sprinting player is now about a walking player's pace. Monsters and animals unchanged.
+- **Taken alive** (Andy: "if you find yourself downed near barbarians they should enslave you"): a player downed within 16 blocks of a barbarian camp's people, with a camp standing to take them to, is claimed: the barbarians stop hitting them and won't execute them. After 2 s the nearest one walks over, stoops and binds them (3 s, rope sounds), they're knocked out, and in the black they're carried off and wake in that camp's chains, stripped as one left for dead by barbarians is (`Captors.take`), kept by the captive rules (`CaptiveConduct`), hauled up by a captor. Not a death: no roll, no wake used. Getting up before the binding ends it. Orcs, goblins, pirates still finish the downed (`TakenAlive`, `Captors.barbarian`, `Downed.holdsFire`, Powers executions spare list).
+- Built; not played.
+
+## 0.10.97 (2026-11-19): camp sight respects dark, height and view cone; captains introduce together (#1856)
+
+- **Sight** (Andy's clips: a warband spotted him at dusk from far below, high on a cliff, outside where they looked): `Senses.factor` now applies to the folk and the outlaws too (`Senses.sighted`: camp raiders, chiefs and archers, camp villagers, guards), which used to see a player at their whole follow range in any light. Someone more than 4 blocks above a mob's eyes is seen at half the range (`ABOVE`), and someone more than 40 degrees above where it looks counts as outside its view cone (`steeplyAbove`, x0.3), as one behind it. Footsteps within 8 blocks are still heard.
+- **Captains meet only who they've noticed**: `Captains.meet` used plain line of sight within 14 blocks; now `Senses.notices` (line of sight, and within 14 x the sight factor: light, view cone, height, sneaking).
+- **One introduction scene** (Andy: "one should introduce themselves and the others join if nearby, if they miss the scene they can do it next time you encounter"): the first captain to notice you names himself, then up to 2 more captains within 12 blocks of him who haven't met you each get their own short speaker shot right after (5 s, new `captain.join` lines in the common, orc and goblin voices), one continuous letterboxed scene. All of them stand for it and you take no harm until it ends or you strike (a blow ends it for all of them). A captain who missed it waits 3 minutes after the scene before he introduces himself (`INTRO_GAP`), and nobody starts one while you're in another film.
+- **Readable bubbles**: a bubble now shrinks by how far the words are from the camera, not the speaker's feet, so a film's camera up by the words no longer blows them up across the top of the screen (`SpeechBubbles.submit`).
+- Built; not played.
+
+## 0.10.98 (2026-11-19): Goblins take the downed alive too (#1860)
+
+- Andy: "goblins should enslave you too". Any goblin now binds a downed player and carries them off to its village's chains (or the nearest camp's): a village's goblins (already counted, since goblin villages are camp factions), its scouts (`GoblinScout.camp()`), and wild ones (`Captors.goblin`, `TakenAlive.taker`). Goblin scouts now also take captive a player they leave for dead (`Captors.sentient`, `Captors.campOf`).
+- Built; not played.
+
+## 0.10.99 (2026-11-19): Youth's wisp really disappears while it thinks (#1862)
+
+- **Youth's wisp** (`YouthWispRenderer`): gone off to think, the wisp was made invisible, but its renderer always chose
+  its own glowing render type, so it stayed drawn in the sky. An invisible wisp now uses GeckoLib's render type, which
+  draws nothing for players, so it leaves view for everyone until it flies back with the answer.
+- Built; not played on the server.
+
+## 0.11.0 (2026-11-19): goblins speak broken English (#1863)
+
+- **Goblin talk** (Andy: goblins "should speak very broken but intelligible english, unlike orcs who you really cant tell"): every line a goblin says now comes out in goblin English, to anyone, in any land. Before, goblins (mostly MCA villagers now) spoke plain MCA English, or the land's gibberish to a player who didn't know its tongue. "I am" becomes "me", "the" "da", "this" "dis", "is", "are" and "a" fall out, "-ing" loses its g, "we" is "us", "you're" is just "you", money is "shinies", and now and then a line ends on a giggle ("Hee hee.", "Yes yes."). Names and the things put into a line are left whole. The same line always comes out the same.
+- Covers their speech bubbles, MCA's talk (the chat lines and the line at the top of the talk menu), our talk cards, an approach's words, and their own goblin-dialect lines (broken further on top). The client breaks the line in its own language (MCA's lines too), so a missing key falls back to the server's broken English.
+- Goblins aren't speakers of a land tongue any more: no gibberish, no "you don't speak this" reminder, and their MCA menus offer the talk options. Orcs are unchanged: they still speak the land's tongue, so a stranger can't make them out.
+- Goblin takers (the downed taken alive) now gloat when they claim you and when they have you bound (5 lines each).
+- New: `GoblinTalk` (the word rules), `Dialects.goblin` / `Dialects.broken`, client `GoblinTalkMixin` (TranslatableContents.decompose). Changed: `Languages` (look, heard), `Speech` (privately, sayPlainly), `Menus`, `Approaches`, `McaMessageMixin`, `TakenAlive`. Lang part `goblin-talk.json`. Lore paragraph "Goblin talk" added as (new).
+- Built; not played.
+
+## 0.11.1 (2026-11-19): Gnomes: real gnomes with their own model, gardens and temper (#1865)
+
+- **Gnomes**: the "Gnome" and "Angry Gnome" zombies in player heads that ATi Structures' gnome huts and Grim Kingdoms'
+  gnome towers place are now real gnomes. Each one turns into ours where it stands (from a new structure, its spawner or
+  an old chunk), keeps its shield, and that spot is its house. A house holds at most 6, so a gnome tower's spawner
+  can't fill the woods. Our own model (`kingdoms/tools/gen_gnome.py`), not
+  copied from either mod: a tall red cap that flops back, a white beard, a big nose, a blue tunic, a stick, and a plank
+  shield on some. It has idle, walk, run, bonk, gardening, digging and hurt animations, and a high villager grumble for
+  a voice.
+- **Neutral until wronged**: walking past is fine. Stand in their flowers or farmland, break a block near their house, or
+  open one of their chests, barrels or pots, and every gnome in the house comes at you for a minute. A gnome with a
+  shield takes half of a blow from the front.
+- **Gardens**: by day each gnome now and then kneels in the beds round its house and works bone meal in, so the
+  flowers spread (up to 48 plants). Strip a garden that once grew and the gnomes dig down into the ground and leave.
+- **Gifts**: seeds, saplings, flowers or bone meal (`jaymoskingdoms:gnome_gifts`) calm a gnome that's angry at you.
+  Otherwise it trades a stone-gift: raw iron, an emerald, or now and then a diamond. Each gnome trades once every 5
+  minutes. A gnome drops bone meal and iron nuggets when killed. Spawn egg included.
+- Lore: "The gnomes" (Andy approved 2026-11-19). Classes: `beasts/Gnome`, `beasts/Gnomes`, `client/beasts/GnomeRenderer`.
+- Built; not played: the swap, gardening, anger and gifts haven't been seen in game.
+
+## 0.11.2 (2026-11-19): Guards carry you out cold to the cells (#1864)
+
+- **Cells for the out cold** (`HeldBack.gaol`, through Powers' `Mortality.GAOLS`): blacking out (or left for dead) with a kingdom's or fiefdom's guard over you where you're wanted (an outlaw, hated, at war, or fresh from striking one of its people) has its guards carry you to the cells under its seat for the usual short stay. You open your eyes in the cell. A village has no cells, so nobody there locks you up.
+- **One already in chains stays put** (`Captors.take`): a shackled captive who faints or is knocked out isn't carried off to another camp.
+- Built; not played.
+
+## 0.11.3 (2026-11-19): masons' pattern books - the building library (#1854)
+
+- **Pattern books** (Andy's 88 medieval schematic picks, `docs/BuildingLibrary-Plan.md`): one library of ready-made buildings
+  that the mason's table and the town builders both draw from. 210 books ship: Towns and Towers' village houses, temples,
+  windmill, mountain inn, watchtowers and palisade forts and Moog's Voyager Structures' cottages, hall, barn, towers, ruins and
+  walled keep (read from the installed mods in the game, never copied); and, copied with credits (`LIBRARY-CREDITS.md`,
+  `library-licences/`) by `tools/library_import.py`: Cinch's Abandoned Houses (15), Lone Houses (5), Towny and Village's
+  European town houses (12 shapes, 3 roof and facade mixes each, joined from their parts) and market well, Berezka's castle (4),
+  the Tangled castle, the Battle castle, The Lost Castle (its nine pieces joined: 116 across), Little Structures' knight
+  statue and graveyard, Sohatuy's tavern (4 woods) and castle (2), its Quark/Macaw/More Villagers blocks swapped for vanilla.
+- **The builders** draw a pattern book for a third of their houses, smithies, taverns, butchers, masons, fisheries, wells,
+  farmhouses, firewatch towers and graveyards, in their land, and kept to a style's own biome where it has one (birch woods
+  get the birch village, meadows the chalets, old-growth taiga the log halls). New buildings only the books have: a
+  **chapel**, a **windmill** and a **barn** (village and realm), only where a book suits the land. Abandoned houses go up
+  whole; a watchtower flies the realm's banner. Older projects and standing buildings keep their look.
+- **Mason's table**: designs up to 128 across (was 96) and 160,000 blocks, so both big castles fit; a **Pattern books** tab
+  beside your files lists every book with its size, land and author; Draw copies it among your designs onto a plan.
+- **Library castles** stand as the seat of a kingdom raised from nothing (with the ATi castles, by land); otherwise from
+  the mason's table (Andy).
+- **The world's own books**: files in `<world>/jaymoskingdoms_library/` (mc-mod.net, Planet Minecraft; never shipped) are
+  read at start; named as in `docs/building-library-downloads.md` they sort themselves, else `/kingdom library tag`.
+  `/kingdom library reload | list | tag <file> <kind> [land]` (operators).
+- Lore: the masons' pattern books (approved).
+- Built (compileClientJava); not played. Not checked in game: the books' look when built, the Lost Castle as a seat, the table's new tab.

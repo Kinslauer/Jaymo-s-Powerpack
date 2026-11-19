@@ -183,7 +183,16 @@ public final class SpeechBubbles {
 		Font font = Minecraft.getInstance().font;
 		poseStack.pushPose();
 		int n = bubble.rows().size();
-		float scale = SCALE * (float)Math.min(1.0, Math.sqrt(state.distanceToCameraSq) / FULL_SIZE_FROM);
+		// (2026-11-19) Andy's clip: in a captain's film, red words filled the top of the screen and ran off it. The shrink went by the
+		// speaker's feet, but a film's camera sits up by the words, a block or so from them and several from the feet; it goes by
+		// how far the words themselves are now
+		double away = Math.sqrt(state.distanceToCameraSq);
+		if (camera.pos != null) {
+			Vec3 words = new Vec3(state.x, state.y, state.z).add(bubble.attachment())
+				.add(0.0, NAME_TAG_TOP + NAME_TAG_GAP + n * (font.lineHeight + 1) * SCALE / 2.0, 0.0);
+			away = words.distanceTo(camera.pos);
+		}
+		float scale = SCALE * (float)Math.min(1.0, away / FULL_SIZE_FROM);
 		// (the bottom row's foot just above the name tag; rows are drawn from their top, down)
 		double lift = NAME_TAG_TOP + NAME_TAG_GAP + font.lineHeight * scale;
 		poseStack.translate(bubble.attachment().x, bubble.attachment().y + lift, bubble.attachment().z);

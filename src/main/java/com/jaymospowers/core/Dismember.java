@@ -828,6 +828,11 @@ public final class Dismember {
 		com.jaymospowers.core.wounds.Breaks.regrown(target, back);
 	}
 
+	/** Just {@code part} grows back, with no show of its own (the caller has its own: the symbiote's, WebSymbioteMend). */
+	public static void regrowQuietly(LivingEntity target, int part) {
+		restore(target, missing(target) & ~part);
+	}
+
 	/**
 	 * (0.15.148) Jaymo's Kingdoms (an Archer's headshot, by reflection): {@code target}'s head comes off, and instead of
 	 * flying it's nailed to the wall at {@code wall}, facing {@code yaw}. The body is left as any beheading leaves it.

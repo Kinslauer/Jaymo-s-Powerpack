@@ -111,6 +111,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Designs.register();
 		// (0.7.521) towns' trade buildings from ChoiceTheorem's Overhauled Village
 		CtovHalls.register();
+		Library.register();
 		// (0.7.488) schematic files: uploads from players' computers, the mason's table, plans given to settlements
 		LOGGER.debug("commission attachment: {}", Commissions.COMMISSIONS);
 		DesignUploads.register();
@@ -303,6 +304,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		CreeperFlight.register();
 		// 0.7.103: baby zombies weaker, endermen stand by each other (and teleport with thunder)
 		MobTweaks.register();
+		// (Andy, 2026-11-19) humanoid NPCs move at a person's pace, slow enough to answer
+		NpcPace.register();
 		VillagerHunters.register();
 		// (ahead of Theft: a refused chest or fire never reaches its record of what was opened)
 		Vows.register();
@@ -491,6 +494,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.524) left for dead by thinking killers: taken captive, gear worn or buried (Powers' death by cause)
 		Captors.register();
 		CaptiveConduct.register();
+		// (Andy, 2026-11-19) downed near barbarians: bound and taken to their camp, not finished
+		TakenAlive.register();
 		Shackles.register();
 		// (Andy, 2026-11-08) tombs and other #jaymoskingdoms:no_build_dungeons structures: no digging or building inside
 		NoBuildDungeons.register();
@@ -767,6 +772,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Remarks.register();
 		TableTalk.register();
 		CampSuppers.register();
+		// life round a camp's fire outside supper: sitting, talk, the spit
+		Firesides.register();
 		Gestures.register();
 		GroundSeats.register();
 		Loans.register();

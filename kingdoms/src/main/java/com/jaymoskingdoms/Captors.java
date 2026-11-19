@@ -65,6 +65,10 @@ public final class Captors {
 		if (by == null || !sentient(by)) {
 			return null;
 		}
+		if (StoryHard.shackled(player) && !PowersCompat.waking(player)) {
+			// (one already in chains who blacks out, a faint or a knock-out, isn't carried off to another camp: they stay put)
+			return null;
+		}
 		if (CaptiveConduct.executed(player)) {
 			// (Andy, 2026-11-14) a captive their captors put to death isn't taken again: they wake as anyone left for dead
 			return null;
@@ -88,14 +92,25 @@ public final class Captors {
 
 	/** One who takes captives: greenskins, ogres, pirates, the camps' raiders and illagers, bandits and outlaws. */
 	static boolean sentient(Entity e) {
-		if (e instanceof Worker w && w.factionId() >= 0) {
-			Faction f = Factions.get(e.level().getServer(), w.factionId());
-			if (f != null && f.is(FactionType.BARBARIAN)) {
-				return true;
-			}
+		if (barbarian(e)) {
+			return true;
 		}
-		return e instanceof LivingEntity living && (Orcs.isOrc(living) || Goblins.isGoblin(living) || Pirates.isPirate(living))
+		return e instanceof LivingEntity living && (Orcs.isOrc(living) || goblin(living) || Pirates.isPirate(living))
 			|| e instanceof com.jaymoskingdoms.monsters.Ogre || e instanceof AbstractIllager || Illagers.isCampIllager(e) || Outlaws.is(e);
+	}
+
+	/** One of a camp's own people (its raiders, its chief, its camp folk), of any camp kind: barbarian, goblin, orc, pirate, illager. */
+	static boolean barbarian(Entity e) {
+		if (e instanceof Worker w && w.factionId() >= 0 && e.level().getServer() != null) {
+			Faction f = Factions.get(e.level().getServer(), w.factionId());
+			return f != null && f.is(FactionType.BARBARIAN);
+		}
+		return false;
+	}
+
+	/** A goblin: a village's (or a wild one), or a village's scout. */
+	static boolean goblin(Entity e) {
+		return e instanceof GoblinScout || e instanceof LivingEntity living && Goblins.isGoblin(living);
 	}
 
 	/** The camp {@code by} belongs to, else the nearest standing one to {@code from} within {@link #CAPTURE_RANGE}. */
@@ -103,6 +118,8 @@ public final class Captors {
 		int id = -1;
 		if (by instanceof Worker w) {
 			id = w.factionId();
+		} else if (by instanceof GoblinScout scout) {
+			id = scout.camp();
 		}
 		Illagers.Tag tag = Illagers.tag(by);
 		if (id < 0 && tag != null) {

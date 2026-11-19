@@ -2534,3 +2534,8 @@ Added a new **Cooking Block** to the Functional creative tab. The block has iron
 - Code: `farm/ManurePileBlock` (kinds, ages, spoor), `farm/Manure` (who drops what, where). Textures, models, blockstate
   and the outline table come from `tools/gen_manure_pile.py`.
 - Built; not played.
+
+## 0.6.56 (2026-11-19): the spit can be used by camp cooks (#1858)
+
+- SpitBlockEntity.skewer and tear: something that isn't a player (Kingdoms' camp cooks round their fire) can put a piece on the spit and tear a cooked chunk off, as a player's hands do.
+- Built; not played.

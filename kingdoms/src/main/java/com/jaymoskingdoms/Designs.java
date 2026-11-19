@@ -49,9 +49,10 @@ public final class Designs {
 	static final int MAX_SIDE = Plots.MAX_SIDE, MAX_HEIGHT = 48, MAX_BLOCKS = 16000;
 	/**
 	 * (0.7.488) The largest any design may be (a {@link MasonTable} builds these): across, high, blocks. Bigger files are
-	 * refused when uploaded and left unread in the folder.
+	 * refused when uploaded and left unread in the folder. Andy (2026-11-19), of two picked castles 101 and 128 across:
+	 * "raise the limit".
 	 */
-	static final int PLAN_SIDE = 96, PLAN_HEIGHT = 128, PLAN_BLOCKS = 120000;
+	static final int PLAN_SIDE = 128, PLAN_HEIGHT = 128, PLAN_BLOCKS = 160000;
 	/**
 	 * A hold taken from its people ({@link SitePlans}): a settlement's builders put up a design copied from one this big,
 	 * across, high and blocks in all (the place stood that big, so they can build it that big).

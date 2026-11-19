@@ -1,0 +1,18 @@
+{
+  "gui.jaymoskingdoms.mason.tab_files": "Your files",
+  "gui.jaymoskingdoms.mason.tab_books": "Pattern books",
+  "gui.jaymoskingdoms.mason.folder": "Folder",
+  "gui.jaymoskingdoms.mason.no_books": "No pattern books on this world",
+  "gui.jaymoskingdoms.mason.book": "%s, by %s (%s, %s): the mason's table only",
+  "gui.jaymoskingdoms.mason.book_builders": "%s, by %s (%s, %s): builders put it up too",
+  "message.jaymoskingdoms.library.unreadable": "The pattern book %s can't be read.",
+  "message.jaymoskingdoms.library.copied": "Copied %s (by %s) from the pattern books as your design %s.",
+  "message.jaymoskingdoms.library.reloaded": "%s pattern books of this world's own, from %s.",
+  "message.jaymoskingdoms.library.none": "No files in this world's library folder (%s).",
+  "message.jaymoskingdoms.library.line": "%s: %s (%s)",
+  "message.jaymoskingdoms.library.line_unsorted": "%s: unsorted, the mason's table only (%s)",
+  "message.jaymoskingdoms.library.no_file": "No file %s in this world's library folder.",
+  "message.jaymoskingdoms.library.no_kind": "No building %s. Kinds: %s, or none.",
+  "message.jaymoskingdoms.library.no_land": "No land %s (plains, taiga, snowy, savanna, desert, badlands, jungle, swamp, cherry).",
+  "message.jaymoskingdoms.library.tagged": "%s: builders put it up as a %s (land %s)."
+}

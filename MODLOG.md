@@ -6468,3 +6468,58 @@ Andy: "they should be able to employ these techniques against players as well." 
 - **Pre-generating and exploring**: new land no longer freezes the server while TaCZ works out which loot table is being rolled. It used to search every loot table for each mob's equipment roll; it now looks the table up in a map built once per reload.
 - Classes: new optional mixin `TaczLootLookupMixin` (own config `jaymospowers.tacz.mixins.json`, skipped when TaCZ is absent). Nothing of TaCZ is copied.
 - Built by CI; not played.
+
+## 0.25.68 (2026-11-19): One Dimension stack back to the pack's order (#1852)
+
+- **New worlds** stack the high sky, the Aether, the Cloud Sea, the Overworld and the Nether, top to bottom, again. One Dimension had rewritten its config with every dimension it knew, which put the Cloud Sea and high sky under the Nether.
+- **Lost Cities** is no longer stacked (nor are the proving grounds); they are left out like the other worlds you reach another way.
+- A One Dimension config whose order differs from the pack's is put back to it on start-up and logged; the pack's order wins over hand edits, since One Dimension's own rewrite can't be told from one. Worlds that already exist are unchanged.
+- Class: `OneDimensionDefaults`.
+- Built by CI; not played.
+
+## 0.25.69 (2026-11-19): speaker shot finds a clear angle (#1856)
+
+- **Speaker shot** (Andy's clip: a camp captain's introduction came in tight on his face with a wall behind the camera, and his words filled the screen): the way round the speaker is now picked once as the film starts, the usual turn from your side if it's at least 85% clear of blocks, else the first clear of 55, 95, 140 degrees either way or straight behind, else the clearest (`UltimateCinematic.clearTurn`). From more than 10 blocks off it starts wide on the speaker instead of flying in from your shoulder through the ground between.
+- Built; not played.
+
+## 0.25.70 (2026-11-19): Blackouts wake you where you were taken (#1864)
+
+Andy (2026-11-19), of a faint's black: "a screen like this where you go unconscious should reopen your eyes enslaved or whatever else happened instead of a death roll".
+- **Taken while out cold** (`TakenOut`): a player who blacks out without dying (a faint, a knock-out, passing out while downed) with captors, a town's guards who want them, or spiders round them is taken in the black, 2 s into it. They open their eyes in chains at the camp, in the realm's cells, or wrapped in a spiders' lair, with the wake's line read on the black. Nobody like that near, and they come round where they lie as before. No death, no roll, no injury, nothing used up.
+- **No lying and coming to when alone** (`Mortality.HELP_RANGE`): a death turned away (left for dead) with no other player within 64 blocks no longer leaves you lying out of your body waiting to hold sneak to come to. The black lifts straight onto wherever you were taken (captive, cells, lair, berth, taken in, the wild). With another player that near you still lie there, so a friend can carry you or bring you round. Which deaths are final hasn't changed (the first two always wake).
+- **Whoever is round you takes you** (`Mortality.takenBy`): a wake asks whoever put you down first, then everyone within 16 blocks of the body, nearest first: captors (`CAPTORS`), then a realm's guards (new `GAOLS`, line `wake.jailed`), then spiders (`LAIRS`). Before, only the one who downed you was asked.
+- Built; not played.
+
+## 0.25.71 (2026-11-19): symbiote infection - it no longer starves itself feeding you, and warns before it leaves (#1861)
+
+- **Why it left so fast:** in a host who isn't a web slinger, the black and red symbiotes leave when their satiety drops under 45. Once they had settled in (3 minutes), they fed your hunger bar out of their own satiety every two seconds (1 point for 2 food). With a hunger bar that kept emptying (health regen, sprinting), that ran them from 70 to under 45 in about a minute, so they left with no warning at all. A symbiote that leaves you never takes you again, so it just crawled around you.
+- **Now:** in a host it can leave, it stops feeding your hunger bar at 60 satiety and whispers once that it's hungry ("Hungry. Raw meat, or we find another.", 3 lines). From there its own hunger takes about 3 minutes to reach the leave line, so you have time to feed it raw meat. Web slingers and the white (anti) symbiote are unchanged.
+- `WebSymbioteInfection` (`WARN_HUNGRY_AT`, `shareFloor`, the warning), `WebSymbiote` (the hunger bar share), lang `web_symbiote.infection.warn.1-3`.
+- Built; not played.
+
+## 0.25.72 (2026-11-19): symbiote - it cords lost limbs, eyes and parasites back, and any host gets the tendril attacks (#1861)
+
+- **It mends you:** whoever wears a symbiote (a web slinger or anyone it has taken), once it's awake in them (not
+  dormant), gets back what they've lost, one thing at a time. A lost arm or leg: black cords spill from the stump and
+  braid out into the shape of the limb over 10 seconds, then the limb is back (a wooden or iron one comes off). A lost
+  eye or both: fine cords knit into the sockets over 7 seconds, and you can see again. A parasite (Kitchen's, from
+  foul water): cords writhe over your belly for 8 seconds and it's eaten out of you. It says something as it starts
+  and when it's done. The cords are the symbiote's own colour (black, white or red).
+- **The new part is the symbiote's:** a regrown limb or eye is solid symbiote, pulsing like a heartbeat, for 2
+  minutes, then fades back to your own skin (MCA's too) over 30 seconds. Everyone sees it.
+- Not mended: a lost head (you'd be dead), scars and broken bones. A Resonance holder keeps their dark, since their
+  power stands on it.
+- **Tendril attacks without the Web power:** a symbiote host who isn't a web slinger now gets the whole tendril suite
+  on R and G (the grabs, the held seize, the brute body's throws and the latch) once the symbiote is out, instead of
+  those keys going to their own power. Web-only moves (web shield, whip, the zips, Spider-Sense) stay web-only, and the
+  red aim mark on a grab target still shows only for web slingers.
+- `WebSymbioteMend` (new), `WebSymbioteMendLayer` (client, new), `Dismember.regrowQuietly`, `Scars.remove`,
+  `WebPowerClient.routeHostKey`, `JaymosPowersClient` (key routing), `WebBrute` (no Web power check), art from
+  `tools/gen_web_mend.py`, lang `web_symbiote.mend.*`.
+- Built; not played.
+
+## 0.25.73 (2026-11-19): The minimap stops showing the Aether again (#1857)
+
+- **The minimap maps the band you're in again, not the Aether's islands over it.** Since Xaero's World Map joined the pack, the minimap draws from the World Map's tiles, and those come from the World Map's own writer. The earlier fix only covered the minimap's writer, so the World Map read each column from the top of the whole stacked world and mapped the islands (Andy, 2026-11-19). The World Map's writer and its cave-mode roof check now stop at your band's top and floor too, as the minimap's do (`client/mixin/xaero/XaeroWorldMapBandMixin`, `XaeroWorldMapCaveMixin`, both on Xaero's World Map 1.47.2). The full-screen World Map follows the same rule.
+- Tiles already saved with the Aether in them change as the World Map writes them again while you're near.
+- Built; injection points checked against the World Map jar; not played.

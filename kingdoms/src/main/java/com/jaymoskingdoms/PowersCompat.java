@@ -1368,6 +1368,8 @@ public final class PowersCompat {
 			((java.util.List<java.util.function.BiPredicate<net.minecraft.world.entity.Mob, LivingEntity>>)list).add(HeldBack::spares);
 			// (and a captive's captors keep them alive)
 			((java.util.List<java.util.function.BiPredicate<net.minecraft.world.entity.Mob, LivingEntity>>)list).add(Downed::heldCaptive);
+			// (and barbarians take the downed alive, TakenAlive)
+			((java.util.List<java.util.function.BiPredicate<net.minecraft.world.entity.Mob, LivingEntity>>)list).add(TakenAlive::spares);
 		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Powers has no executions to spare guards from (older Powers?)", e);
 		}
@@ -4040,6 +4042,25 @@ public final class PowersCompat {
 				net.minecraft.core.GlobalPos>>)list).add(captor);
 		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
 			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mortality captors (older Powers?)", e);
+		}
+	}
+
+	/**
+	 * Tells Powers ({@code Mortality.GAOLS}) who locks one out cold in their cells ({@link HeldBack#gaol}): the player and one
+	 * who might, where they wake (or null). Nothing without Powers (or an older one).
+	 */
+	@SuppressWarnings("unchecked")
+	static void tellGaols(java.util.function.BiFunction<net.minecraft.server.level.ServerPlayer, net.minecraft.world.entity.Entity,
+		net.minecraft.core.@Nullable GlobalPos> gaol) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Object list = Class.forName("com.jaymospowers.core.wounds.Mortality").getField("GAOLS").get(null);
+			((java.util.List<java.util.function.BiFunction<net.minecraft.server.level.ServerPlayer, net.minecraft.world.entity.Entity,
+				net.minecraft.core.GlobalPos>>)list).add(gaol);
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mortality gaols (older Powers?)", e);
 		}
 	}
 

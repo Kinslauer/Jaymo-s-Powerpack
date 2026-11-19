@@ -21,7 +21,11 @@ import net.minecraft.world.item.ItemStack;
  */
 public final class MasonNet {
 	/** What the screen asks for. */
-	public static final int REFRESH = 0, DRAW = 1, TAKE = 2, RETRY = 3, SUBMIT = 4, SAVE = 5, MATERIALS = 6;
+	public static final int REFRESH = 0, DRAW = 1, TAKE = 2, RETRY = 3, SUBMIT = 4, SAVE = 5;
+	/** Copy a pattern book among your designs and draw it on a plan ({@link Library}). */
+	public static final int COPY = 6;
+	/** Ask for the full material list of the plan on the table ({@code PlanMaterialsScreen}). */
+	public static final int MATERIALS = 7;
 
 	/** A design on the world: its name, size, blocks, who drew it, and whether a settlement's builders can put it up. */
 	public record Design(String name, int w, int d, int h, int blocks, String author, boolean crews) {
@@ -40,6 +44,29 @@ public final class MasonNet {
 		}
 	}
 
+	/**
+	 * A masons' pattern book ({@link Library}): its id, name, size, blocks, who drew it, its land ({@code PLAINS}...,
+	 * "" if none) and whether a settlement's builders also draw it.
+	 */
+	public record Book(String id, String name, int w, int d, int h, int blocks, String author, String land, boolean builders) {
+		static void write(FriendlyByteBuf buf, Book b) {
+			buf.writeUtf(b.id, 64);
+			buf.writeUtf(b.name, 96);
+			buf.writeVarInt(b.w);
+			buf.writeVarInt(b.d);
+			buf.writeVarInt(b.h);
+			buf.writeVarInt(b.blocks);
+			buf.writeUtf(b.author, 128);
+			buf.writeUtf(b.land, 16);
+			buf.writeBoolean(b.builders);
+		}
+
+		static Book read(FriendlyByteBuf buf) {
+			return new Book(buf.readUtf(64), buf.readUtf(96), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readUtf(128),
+				buf.readUtf(16), buf.readBoolean());
+		}
+	}
+
 	/** One material still to lay, and how many. */
 	public record Need(ItemStack item, int count) {
 	}
@@ -48,15 +75,18 @@ public final class MasonNet {
 	 * Server to client: open (or refresh) the screen of the table at {@code pos}. {@code plan}: the design in the table
 	 * ("" for none); {@code laid}/{@code total}: blocks done; {@code waiting}: the item it waits for (empty for none);
 	 * {@code blankPlans}: building plans the player carries; {@code marked}: they've two corners marked with a surveyor's
-	 * rod (so the build between can be saved); {@code note}: the last answer, to show at the bottom.
+	 * rod (so the build between can be saved); {@code note}: the last answer, to show at the bottom; {@code books}: the
+	 * masons' pattern books.
 	 */
-	public record Open(BlockPos pos, List<Design> designs, String plan, int laid, int total, boolean done, int skipped, ItemStack waiting, List<Need> needs,
+	public record Open(BlockPos pos, List<Design> designs, List<Book> books, String plan, int laid, int total, boolean done, int skipped, ItemStack waiting, List<Need> needs,
 		int blankPlans, boolean marked, Component note) implements CustomPacketPayload {
 		public static final Type<Open> TYPE = new Type<>(JaymosKingdoms.id("mason_open"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Open> CODEC = CustomPacketPayload.codec((p, buf) -> {
 			buf.writeBlockPos(p.pos);
 			buf.writeVarInt(p.designs.size());
 			p.designs.forEach(d -> Design.write(buf, d));
+			buf.writeVarInt(p.books.size());
+			p.books.forEach(b -> Book.write(buf, b));
 			buf.writeUtf(p.plan, 64);
 			buf.writeVarInt(p.laid);
 			buf.writeVarInt(p.total);
@@ -78,6 +108,11 @@ public final class MasonNet {
 			for (int i = 0; i < n; i++) {
 				designs.add(Design.read(buf));
 			}
+			int nb = buf.readVarInt();
+			List<Book> books = new ArrayList<>();
+			for (int i = 0; i < nb; i++) {
+				books.add(Book.read(buf));
+			}
 			String plan = buf.readUtf(64);
 			int laid = buf.readVarInt(), total = buf.readVarInt();
 			boolean done = buf.readBoolean();
@@ -88,7 +123,7 @@ public final class MasonNet {
 			for (int i = 0; i < m; i++) {
 				needs.add(new Need(ItemStack.OPTIONAL_STREAM_CODEC.decode(buf), buf.readVarInt()));
 			}
-			return new Open(pos, designs, plan, laid, total, done, skipped, waiting, needs, buf.readVarInt(), buf.readBoolean(),
+			return new Open(pos, designs, books, plan, laid, total, done, skipped, waiting, needs, buf.readVarInt(), buf.readBoolean(),
 				ComponentSerialization.STREAM_CODEC.decode(buf));
 		});
 

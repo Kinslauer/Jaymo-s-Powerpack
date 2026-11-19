@@ -211,6 +211,30 @@ public final class Mortality {
 	public static final List<java.util.function.BiFunction<ServerPlayer, Entity, net.minecraft.core.@Nullable GlobalPos>> CAPTORS = new ArrayList<>();
 
 	/**
+	 * Who locks one up in their cells (Kingdoms: a town's guards, where the player is an outlaw, hated, at war, or just struck
+	 * one of its people), asked with {@link #CAPTORS} for each who might have them ({@link #takenBy}). Given the player and one
+	 * who might; the first to name a place has them wake there (it locks them in itself).
+	 */
+	public static final List<java.util.function.BiFunction<ServerPlayer, Entity, net.minecraft.core.@Nullable GlobalPos>> GAOLS = new ArrayList<>();
+
+	/**
+	 * How near the body (blocks) those who might take one out cold are looked for ({@link #takenBy}), beside whoever downed them.
+	 */
+	static final double TAKE_NEAR = 16.0;
+
+	/**
+	 * Andy (2026-11-19), of the faint's black: "a screen like this where you go unconscious should reopen your eyes enslaved or
+	 * whatever else happened instead of a death roll". One left for dead with no other player this near (blocks) to carry them
+	 * or bring them round doesn't lie waiting to come to: the black lifts straight onto wherever they were taken ({@link #place}).
+	 * With someone this near they lie as before, so a friend can still carry them to safety.
+	 */
+	static final double HELP_RANGE = 64.0;
+
+	/** Where one out cold was taken, and the line they wake to ({@code message.jaymospowers.mortality.wake.<line>}). */
+	public record Taken(net.minecraft.core.GlobalPos at, String line) {
+	}
+
+	/**
 	 * (0.20.83) Who takes one left for dead in (Kingdoms: a friendly village, fiefdom or kingdom near where they fell; Andy:
 	 * "taken in by a village or nearby villagers"), asked after {@link #CAPTORS}. Given the player and whoever downed them (or
 	 * null); the first to name a place has them carried there, their wounds dressed and their breaks splinted.
@@ -936,11 +960,13 @@ public final class Mortality {
 		if (by instanceof net.minecraft.world.entity.Mob mob && mob.getTarget() == player) {
 			mob.setTarget(null);
 		}
-		// ((0.21.7) out cold where they fell until they come to by themselves, or someone brings them round)
+		// ((0.21.7) out cold where they fell until they come to by themselves, or someone brings them round; with nobody near
+		// to do either, they don't lie waiting for it: the black lifts onto wherever they were taken, HELP_RANGE)
+		boolean straight = turn != null || alone(player);
 		String fading = midTurn ? "message.jaymospowers.mortality.turning" : "message.jaymospowers.mortality.fading";
 		// (the line first: the black draws it, so the knock-out doesn't repeat it on the action bar)
 		player.setAttached(WAKE_LINE, fading);
-		Downed.knockOut(level, player, turn != null ? (midTurn ? TURN_DARK : OUT_BEFORE) + OUT_AFTER + 20 * 60 : LIE_TICKS, false, fading, false);
+		Downed.knockOut(level, player, straight ? (midTurn ? TURN_DARK : OUT_BEFORE) + OUT_AFTER + 20 * 60 : LIE_TICKS, false, fading, false);
 		if (midTurn) {
 			player.setAttached(TURN_TINT, tint);
 			level.playSound(null, player.blockPosition(), SoundEvents.ZOMBIE_VILLAGER_CONVERTED, SoundSource.PLAYERS, 0.7F, 0.5F);
@@ -953,12 +979,74 @@ public final class Mortality {
 			level.getServer().getTickCount() + (midTurn ? TURN_DARK : OUT_BEFORE), by, turn);
 		wake.midTurn = midTurn;
 		wake.since = level.getServer().getTickCount();
-		// ((0.21.7) the turned rise as they rise: nothing to carry them away from)
-		if (turn != null) {
+		// ((0.21.7) the turned rise as they rise: nothing to carry them away from; nor is there for one with nobody near)
+		if (straight) {
 			wake.chosen = true;
 			wake.moveAtChosen = wake.moveAt;
 		}
 		WAKES.put(player.getUUID(), wake);
+		if (turn == null && straight) {
+			JaymosPowers.LOGGER.info("{} has nobody near to carry them: they wake where they're taken", player.getScoreboardName());
+		}
+	}
+
+	/** Whether no other player is within {@link #HELP_RANGE} of {@code player} to carry them or bring them round. */
+	private static boolean alone(ServerPlayer player) {
+		return player.level().getEntitiesOfClass(Player.class, player.getBoundingBox().inflate(HELP_RANGE),
+			other -> other != player && other.isAlive() && !other.isSpectator() && other.distanceTo(player) <= HELP_RANGE).isEmpty();
+	}
+
+	/**
+	 * Who takes {@code player}, out cold, and where: {@code by} (whoever put them down, or null) first, then whoever else stands
+	 * within {@link #TAKE_NEAR}, nearest first. Each is asked of {@link #CAPTORS} (they wake in chains) and of {@link #GAOLS}
+	 * (they wake in the cells), and a spider of {@link #LAIRS} (wrapped in a lair). Null: nobody takes them. Whoever names a place
+	 * has already done what taking them means (their things taken, the shackles on, the cell door shut).
+	 */
+	public static @Nullable Taken takenBy(ServerPlayer player, @Nullable Entity by) {
+		List<Entity> who = new ArrayList<>();
+		if (by != null && by != player) {
+			who.add(by);
+		}
+		List<LivingEntity> near = player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(TAKE_NEAR),
+			e -> e != player && e != by && e.isAlive() && !(e instanceof Player) && !Downed.isDowned(e) && e.distanceTo(player) <= TAKE_NEAR);
+		near.sort(java.util.Comparator.comparingDouble(e -> e.distanceToSqr(player)));
+		who.addAll(near);
+		for (Entity one : who) {
+			net.minecraft.core.GlobalPos at = ask(CAPTORS, player, one, "captor");
+			if (at != null) {
+				return new Taken(at, "captured");
+			}
+			at = ask(GAOLS, player, one, "gaol");
+			if (at != null) {
+				return new Taken(at, "jailed");
+			}
+		}
+		for (Entity one : who) {
+			if (one instanceof Spider) {
+				net.minecraft.core.GlobalPos at = ask(LAIRS, player, one, "lair");
+				if (at != null) {
+					return new Taken(at, "lair");
+				}
+			}
+		}
+		return null;
+	}
+
+	/** The first of {@code takers} to name a place for {@code player} held by {@code one}, or null. */
+	private static net.minecraft.core.@Nullable GlobalPos ask(
+		List<java.util.function.BiFunction<ServerPlayer, Entity, net.minecraft.core.GlobalPos>> takers, ServerPlayer player, Entity one,
+		String what) {
+		for (java.util.function.BiFunction<ServerPlayer, Entity, net.minecraft.core.GlobalPos> taker : takers) {
+			try {
+				net.minecraft.core.GlobalPos at = taker.apply(player, one);
+				if (at != null && player.level().getServer().getLevel(at.dimension()) != null) {
+					return at;
+				}
+			} catch (RuntimeException e) {
+				JaymosPowers.LOGGER.warn("A {} failed to take {}", what, player.getScoreboardName(), e);
+			}
+		}
+		return null;
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -1086,21 +1174,15 @@ public final class Mortality {
 			wakeAt(player, level, wake.fell, wake, "risen");
 			return true;
 		}
-		// (0.20.26) taken captive by those who downed them, if they're the kind who would
-		if (wake.turn == null && wake.by != null && wake.tries == 0 && wake.far == null) {
-			for (java.util.function.BiFunction<ServerPlayer, Entity, net.minecraft.core.GlobalPos> captor : CAPTORS) {
-				net.minecraft.core.GlobalPos held;
-				try {
-					held = captor.apply(player, wake.by);
-				} catch (RuntimeException e) {
-					JaymosPowers.LOGGER.warn("A captor failed to take {}", player.getScoreboardName(), e);
-					held = null;
-				}
-				ServerLevel to = held == null ? null : server.getLevel(held.dimension());
-				if (to != null) {
-					wakeAt(player, to, held.pos(), wake, "captured");
-					return true;
-				}
+		// (0.20.26) taken captive by those who downed them, if they're the kind who would; (Andy, 2026-11-19: "reopen your
+		// eyes enslaved or whatever else happened") else by whoever stands round the body who would: captors, or a town's
+		// guards who'd lock them up
+		if (wake.turn == null && wake.tries == 0 && wake.far == null) {
+			Taken taken = takenBy(player, wake.by);
+			ServerLevel to = taken == null ? null : server.getLevel(taken.at().dimension());
+			if (to != null) {
+				wakeAt(player, to, taken.at().pos(), wake, taken.line());
+				return true;
 			}
 		}
 		// (medieval picks) or carried off wrapped to a spiders' lair

@@ -1074,7 +1074,12 @@ public final class Approaches {
 		if (a.foreign) {
 			return Component.translatable("language.jaymoskingdoms.gist", Languages.heard(player, a.mob, a.line), a.gesture);
 		}
-		return a.elaborated ? Component.translatable("talk.jaymoskingdoms.pardon.both", a.line, a.more) : a.line;
+		// (a goblin's in its broken English: Dialects.broken)
+		return a.elaborated ? Component.translatable("talk.jaymoskingdoms.pardon.both", goblin(a, a.line), goblin(a, a.more)) : goblin(a, a.line);
+	}
+
+	private static Component goblin(Approach a, Component words) {
+		return words != null && Dialects.goblin(a.mob) ? Dialects.broken(words) : words;
 	}
 
 	// ---- (0.6.2) begging their pardon --------------------------------------------------------------------------------

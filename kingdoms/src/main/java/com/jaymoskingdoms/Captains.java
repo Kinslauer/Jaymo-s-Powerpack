@@ -109,6 +109,16 @@ public final class Captains {
 	 */
 	static final boolean FILM_SAFE = true;
 	static final double FILM_WITNESSES = 20.0;
+	/**
+	 * (2026-11-19) Andy: "about 3 of them had an introduction. it should never fire off back to back like that, instead one
+	 * should introduce themselves and the others join if nearby, if they miss the scene they can do it next time you
+	 * encounter." One captain names himself; up to {@link #JOINERS} more within {@link #JOIN_RANGE} of him who haven't met
+	 * you join the same scene, each with a shot of his own after him ({@link #JOIN_TICKS}). A captain who missed it names
+	 * himself no sooner than {@link #INTRO_GAP} after the scene ends (ticks), the next time you come across him.
+	 */
+	static final double JOIN_RANGE = 12.0;
+	static final int JOINERS = 2, JOIN_TICKS = 100;
+	static final long INTRO_GAP = 3600L;
 	/** A fight with him is over this long after the last blow (ticks); further off than this, you ran. */
 	static final long FIGHT_COOLS = 200L, FIGHT_FORGOTTEN = 6000L;
 	static final double FLED_RANGE = 40.0;
@@ -448,6 +458,9 @@ public final class Captains {
 	private static final Map<UUID, Vec3> SCENE_AT = new HashMap<>();
 	/** (0.7.584) A player in a captain's first-meeting film: until when (game time) no harm comes to them. */
 	private static final Map<UUID, Long> FILMED = new HashMap<>();
+	/** (2026-11-19) A player → when their last introduction scene ended (game time), and the captains' bodies standing in it. */
+	private static final Map<UUID, Long> INTRODUCED = new HashMap<>();
+	private static final Map<UUID, List<UUID>> CAST = new HashMap<>();
 
 	/** Something to do a few ticks on (server tick count), kept in memory. */
 	private record Later(int due, Runnable what) {
@@ -479,6 +492,8 @@ public final class Captains {
 			SCENE.clear();
 			SCENE_AT.clear();
 			FILMED.clear();
+			INTRODUCED.clear();
+			CAST.clear();
 			LATER.clear();
 			FEARED.clear();
 			FEAR_READY.clear();
@@ -1327,34 +1342,110 @@ public final class Captains {
 
 	// ---- meetings ------------------------------------------------------------------------------------------------------
 
-	/** Players he sees: the first time a film and his name, after that a word about last time. */
+	/**
+	 * Players he sees: the first time a film and his name, after that a word about last time. (2026-11-19) Andy: they saw him
+	 * "from way farther than they should have realistically, it was dark and i was far above them": he only meets someone he has
+	 * really noticed ({@link Senses#notices}: the light, his view cone, how far above him they are), and names himself in a scene
+	 * of his own with the others near him ({@link #introduce}).
+	 */
 	private static void meet(ServerLevel level, Captain c, PathfinderMob mob, long now) {
+		MinecraftServer server = level.getServer();
 		for (ServerPlayer p : level.getEntitiesOfClass(ServerPlayer.class, mob.getBoundingBox().inflate(MEET_RANGE),
-			p -> p.isAlive() && !p.isSpectator() && !p.isCreative() && mob.hasLineOfSight(p))) {
+			p -> p.isAlive() && !p.isSpectator() && !p.isCreative() && Senses.notices(mob, p, MEET_RANGE))) {
 			Meeting m = c.met().get(p.getStringUUID());
 			if (m != null && now - m.when() < MEET_GAP) {
 				continue;
 			}
-			Component line;
 			if (m == null) {
-				PowersCompat.film(mob, p, PowersCompat.FILM_SPEAKER, FILM_TICKS, mob.getEyePosition(), mob, FILM_WITNESSES);
-				if (FILM_SAFE) {
-					// (0.7.584) he stops to name himself, and no one gets a free hit on the player while they read
-					FILMED.put(p.getUUID(), now + FILM_TICKS);
-					SCENE.put(mob.getUUID(), now + FILM_TICKS);
-					SCENE_AT.put(mob.getUUID(), p.getEyePosition());
-				}
-				line = Dialects.trTribe(c.tribe(), Rivals.line(level.getServer(), c, "first", mob.getRandom()), Recollections.nameTo(p, mob),
-					Component.literal(c.name()), Rivals.name(c.tribe()));
-			} else {
-				String last = "slain".equals(m.last()) && c.has(Trait.DEATHLESS) ? "raised" : m.last();
-				line = Dialects.trTribe(c.tribe(), "talk.jaymoskingdoms.captain.again." + last + "." + mob.getRandom().nextInt(LINES),
-					Recollections.nameTo(p, mob), Component.literal(c.name()));
+				introduce(level, c, mob, p, now);
+				Captain after = get(server, c.id());
+				c = after != null ? after : c;
+				continue;
 			}
+			String last = "slain".equals(m.last()) && c.has(Trait.DEATHLESS) ? "raised" : m.last();
+			Component line = Dialects.trTribe(c.tribe(), "talk.jaymoskingdoms.captain.again." + last + "." + mob.getRandom().nextInt(LINES),
+				Recollections.nameTo(p, mob), Component.literal(c.name()));
 			Speech.say(level, mob, line, Speech.RED, SAY_RANGE);
-			c = c.met(p.getUUID(), new Meeting(m == null ? 1 : m.times() + 1, m == null ? "met" : m.last(), now));
-			put(level.getServer(), c);
+			c = c.met(p.getUUID(), new Meeting(m.times() + 1, m.last(), now));
+			put(server, c);
 		}
+	}
+
+	/**
+	 * (2026-11-19) {@code mob} ({@code c}) names himself to {@code p} for the first time, with up to {@link #JOINERS} other
+	 * captains near him who haven't met them either: one scene, his shot and line first and then each of theirs in turn
+	 * ({@link #JOIN_TICKS}), all of them standing for it and the player unharmed till it ends or they strike a blow
+	 * ({@link #filmHarm}). Nothing while the player is in another film, or within {@link #INTRO_GAP} of their last
+	 * introduction: he waits for the next time (no meeting is counted).
+	 */
+	private static void introduce(ServerLevel level, Captain c, PathfinderMob mob, ServerPlayer p, long now) {
+		MinecraftServer server = level.getServer();
+		Long last = INTRODUCED.get(p.getUUID());
+		if (last != null && now < last + INTRO_GAP || filming(p) || PowersCompat.filming(p)) {
+			return;
+		}
+		List<PathfinderMob> joiners = new ArrayList<>();
+		List<PathfinderMob> near = level.getEntitiesOfClass(PathfinderMob.class, mob.getBoundingBox().inflate(JOIN_RANGE),
+			e -> e != mob && e.isAlive() && !Downed.isDowned(e));
+		near.sort(Comparator.comparingDouble(e -> e.distanceToSqr(mob)));
+		for (PathfinderMob other : near) {
+			if (joiners.size() >= JOINERS) {
+				break;
+			}
+			Captain o = of(other);
+			if (o != null && !o.fallen() && !o.id().equals(c.id()) && !o.met().containsKey(p.getStringUUID())
+				&& !SwornCaptains.sworn(server, o.id()) && !SwornCaptains.free(server, o.id())) {
+				joiners.add(other);
+			}
+		}
+		int total = FILM_TICKS + joiners.size() * JOIN_TICKS;
+		INTRODUCED.put(p.getUUID(), now + total);
+		PowersCompat.film(mob, p, PowersCompat.FILM_SPEAKER, FILM_TICKS, mob.getEyePosition(), mob, FILM_WITNESSES);
+		if (FILM_SAFE) {
+			// (0.7.584) they stop to name themselves, and no one gets a free hit on the player while they read
+			FILMED.put(p.getUUID(), now + total);
+			List<UUID> cast = new ArrayList<>();
+			for (PathfinderMob who : joiners) {
+				cast.add(who.getUUID());
+			}
+			cast.add(mob.getUUID());
+			for (UUID who : cast) {
+				SCENE.put(who, now + total);
+				SCENE_AT.put(who, p.getEyePosition());
+			}
+			CAST.put(p.getUUID(), cast);
+		}
+		Speech.say(level, mob, firstLine(server, c, mob, p), Speech.RED, SAY_RANGE);
+		put(server, c.met(p.getUUID(), new Meeting(1, "met", now)));
+		int due = server.getTickCount();
+		for (int i = 0; i < joiners.size(); i++) {
+			PathfinderMob other = joiners.get(i);
+			// (a tick before the shot before ends, so the bars stay up between them)
+			due += (i == 0 ? FILM_TICKS : JOIN_TICKS) - (i == 0 ? 1 : 0);
+			UUID playerId = p.getUUID();
+			LATER.add(new Later(due, () -> joins(level, other, playerId)));
+		}
+	}
+
+	/** (2026-11-19) {@code mob} takes his turn in a player's introduction scene, unless it's over (they struck a blow) or he's gone. */
+	private static void joins(ServerLevel level, PathfinderMob mob, UUID playerId) {
+		ServerPlayer p = level.getServer().getPlayerList().getPlayer(playerId);
+		Captain c = of(mob);
+		if (p == null || !p.isAlive() || p.level() != level || !filming(p) || !mob.isAlive() || Downed.isDowned(mob) || c == null || c.fallen()
+			|| c.met().containsKey(p.getStringUUID())) {
+			return;
+		}
+		PowersCompat.film(mob, p, PowersCompat.FILM_SPEAKER, JOIN_TICKS, mob.getEyePosition(), mob, FILM_WITNESSES);
+		Component line = Dialects.trTribe(c.tribe(), "talk.jaymoskingdoms.captain.join." + mob.getRandom().nextInt(LINES), Recollections.nameTo(p, mob),
+			Component.literal(c.name()), Rivals.name(c.tribe()));
+		Speech.say(level, mob, line, Speech.RED, SAY_RANGE);
+		put(level.getServer(), c.met(p.getUUID(), new Meeting(1, "met", level.getGameTime())));
+	}
+
+	/** {@code c}'s first line to {@code p}: his name and his band's. */
+	private static Component firstLine(MinecraftServer server, Captain c, PathfinderMob mob, ServerPlayer p) {
+		return Dialects.trTribe(c.tribe(), Rivals.line(server, c, "first", mob.getRandom()), Recollections.nameTo(p, mob),
+			Component.literal(c.name()), Rivals.name(c.tribe()));
 	}
 
 	/** (0.7.591) Whether {@code player} is in a captain's first-meeting film just now (nobody else walks up to talk then). */
@@ -1375,6 +1466,14 @@ public final class Captains {
 		if (source.getEntity() instanceof ServerPlayer striker && FILMED.remove(striker.getUUID()) != null) {
 			SCENE.remove(victim.getUUID());
 			SCENE_AT.remove(victim.getUUID());
+			// ((2026-11-19) and the rest of an introduction scene: the others don't stand there either; who hadn't had his turn waits)
+			List<UUID> cast = CAST.remove(striker.getUUID());
+			if (cast != null) {
+				for (UUID who : cast) {
+					SCENE.remove(who);
+					SCENE_AT.remove(who);
+				}
+			}
 			return true;
 		}
 		Long until = FILMED.get(victim.getUUID());

@@ -80,6 +80,18 @@ public final class UltimateCinematic {
 	 */
 	static final float SPEAKER_IN = 0.3F, SPEAKER_RISE = 0.62F;
 	static final double SPEAKER_HOLD = 3.4, SPEAKER_PUSH = 3.0, SPEAKER_TURN = 18.0, SPEAKER_WORDS_UP = 1.0, SPEAKER_BELOW_WORDS = 0.15;
+	/**
+	 * (2026-11-19) Andy's clip: a camp captain stood with a wall between him and Andy (high on the cliff above), so the shot
+	 * came in tight to his face and the words over him filled the screen. The way round him the shot is taken from is picked
+	 * once, as the film starts: the usual turn from your side if it's clear for at least {@link #SPEAKER_CLEAR} of the
+	 * distance, else the first clear of {@link #SPEAKER_TURNS} (degrees, each tried to either side), else the clearest. And
+	 * from further off than {@link #SPEAKER_FAR} blocks it doesn't fly in from your shoulder through whatever is between,
+	 * but starts wide on them ({@link #SPEAKER_WIDE}, times the hold).
+	 */
+	static final double SPEAKER_CLEAR = 0.85, SPEAKER_FAR = 10.0, SPEAKER_WIDE = 1.6;
+	static final double[] SPEAKER_TURNS = {SPEAKER_TURN, 55.0, 95.0, 140.0, 180.0};
+	/** (2026-11-19) The speaker shot's way round them (degrees), picked as it starts; NaN until then. */
+	private static double speakerTurn = Double.NaN;
 	/** The vanilla HUD hidden while your own film runs. */
 	private static final Identifier[] HIDDEN = {VanillaHudElements.CROSSHAIR, VanillaHudElements.HOTBAR, VanillaHudElements.ARMOR_BAR,
 		VanillaHudElements.HEALTH_BAR, VanillaHudElements.FOOD_BAR, VanillaHudElements.AIR_BAR, VanillaHudElements.MOUNT_HEALTH,
@@ -165,6 +177,7 @@ public final class UltimateCinematic {
 		first = play.first();
 		at = play.at();
 		side = self.getRandom().nextBoolean() ? 1.0F : -1.0F;
+		speakerTurn = Double.NaN;
 		Vec3 look = Vec3.directionFromRotation(0.0F, self.getYRot());
 		facing = look.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : look.normalize();
 		hurtBefore = self.hurtTime;
@@ -365,16 +378,20 @@ public final class UltimateCinematic {
 		Vec3 words = face.add(0.0, crown + SPEAKER_WORDS_UP, 0.0);
 		Vec3 toward = eyes.subtract(face).horizontal();
 		toward = toward.lengthSqr() < 1.0E-4 ? facing.reverse() : toward.normalize();
-		double turn = Math.toRadians(side * SPEAKER_TURN);
-		Vec3 out = new Vec3(toward.x * Math.cos(turn) - toward.z * Math.sin(turn), 0.0, toward.x * Math.sin(turn) + toward.z * Math.cos(turn));
 		// framed between the face and the words while they talk
 		Vec3 between = face.lerp(words, 0.45);
+		if (Double.isNaN(speakerTurn)) {
+			speakerTurn = clearTurn(self, toward, between, words, size);
+		}
+		Vec3 out = turned(toward, speakerTurn);
+		boolean far = eyes.distanceTo(face) > SPEAKER_FAR;
 		Vec3 pos;
 		Vec3 look;
 		if (t < SPEAKER_IN) {
 			// from over your shoulder, in to them
 			float k = smooth(t / SPEAKER_IN);
-			Vec3 shoulder = eyes.add(new Vec3(-toward.z, 0.0, toward.x).scale(side * 0.8)).add(toward.scale(1.5)).add(0.0, 0.4, 0.0);
+			Vec3 shoulder = far ? clipped(self, between, between.add(out.scale(SPEAKER_HOLD * SPEAKER_WIDE * size)))
+				: eyes.add(new Vec3(-toward.z, 0.0, toward.x).scale(side * 0.8)).add(toward.scale(1.5)).add(0.0, 0.4, 0.0);
 			Vec3 held = between.add(out.scale(SPEAKER_HOLD * size)).add(0.0, -0.1, 0.0);
 			pos = shoulder.lerp(held, k);
 			look = face.lerp(between, k);
@@ -392,6 +409,43 @@ public final class UltimateCinematic {
 			look = between.lerp(words, k);
 		}
 		return aimed(clipped(self, look, pos), look, 0.0F);
+	}
+
+	/** {@code toward} turned round the up axis by {@code degrees}. */
+	private static Vec3 turned(Vec3 toward, double degrees) {
+		double turn = Math.toRadians(degrees);
+		return new Vec3(toward.x * Math.cos(turn) - toward.z * Math.sin(turn), 0.0, toward.x * Math.sin(turn) + toward.z * Math.cos(turn));
+	}
+
+	/** (2026-11-19) The speaker shot's way round them: see {@link #SPEAKER_TURNS}. */
+	private static double clearTurn(LocalPlayer self, Vec3 toward, Vec3 between, Vec3 words, double size) {
+		double best = side * SPEAKER_TURN, bestClear = -1.0;
+		for (double turn : SPEAKER_TURNS) {
+			for (float way : new float[] {side, -side}) {
+				double degrees = way * turn;
+				Vec3 out = turned(toward, degrees);
+				// clear both where it holds while they talk and where it rises to, level with the words
+				double clear = Math.min(clearShare(self, between, between.add(out.scale(SPEAKER_HOLD * size))),
+					clearShare(self, words, words.add(out.scale(SPEAKER_PUSH * size))));
+				if (clear >= SPEAKER_CLEAR) {
+					return degrees;
+				}
+				if (clear > bestClear) {
+					bestClear = clear;
+					best = degrees;
+				}
+				if (turn >= 180.0) {
+					break;
+				}
+			}
+		}
+		return best;
+	}
+
+	/** How much of the way from {@code from} to {@code want} is clear of blocks (1: all of it). */
+	private static double clearShare(LocalPlayer self, Vec3 from, Vec3 want) {
+		double whole = want.distanceTo(from);
+		return whole < 1.0E-4 ? 1.0 : clipped(self, from, want).distanceTo(from) / Math.max(1.0E-4, whole - WALL_MARGIN);
 	}
 
 	/**
