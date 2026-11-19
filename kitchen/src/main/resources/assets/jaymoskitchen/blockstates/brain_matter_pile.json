@@ -16,6 +16,22 @@
       {
         "model": "jaymoskitchen:block/brain_matter_pile_1",
         "y": 270
+      },
+      {
+        "model": "jaymoskitchen:block/brain_matter_pile_1_turned",
+        "y": 0
+      },
+      {
+        "model": "jaymoskitchen:block/brain_matter_pile_1_turned",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/brain_matter_pile_1_turned",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/brain_matter_pile_1_turned",
+        "y": 270
       }
     ],
     "pieces=2": [
@@ -33,6 +49,22 @@
       },
       {
         "model": "jaymoskitchen:block/brain_matter_pile_2",
+        "y": 270
+      },
+      {
+        "model": "jaymoskitchen:block/brain_matter_pile_2_turned",
+        "y": 0
+      },
+      {
+        "model": "jaymoskitchen:block/brain_matter_pile_2_turned",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/brain_matter_pile_2_turned",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/brain_matter_pile_2_turned",
         "y": 270
       }
     ],
@@ -52,6 +84,22 @@
       {
         "model": "jaymoskitchen:block/brain_matter_pile_3",
         "y": 270
+      },
+      {
+        "model": "jaymoskitchen:block/brain_matter_pile_3_turned",
+        "y": 0
+      },
+      {
+        "model": "jaymoskitchen:block/brain_matter_pile_3_turned",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/brain_matter_pile_3_turned",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/brain_matter_pile_3_turned",
+        "y": 270
       }
     ],
     "pieces=4": [
@@ -69,6 +117,22 @@
       },
       {
         "model": "jaymoskitchen:block/brain_matter_pile_4",
+        "y": 270
+      },
+      {
+        "model": "jaymoskitchen:block/brain_matter_pile_4_turned",
+        "y": 0
+      },
+      {
+        "model": "jaymoskitchen:block/brain_matter_pile_4_turned",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/brain_matter_pile_4_turned",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/brain_matter_pile_4_turned",
         "y": 270
       }
     ]
