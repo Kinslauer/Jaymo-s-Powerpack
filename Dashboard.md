@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 13:50). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 13:59). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -34,6 +34,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1825 NPC fights 1: the fighter brain (tyrants, Patrolmen and gifted folk fight in the air, dodge, guard and parry) (Powers, 2026-11-19)
 - [ ] #1824 life story: leave it all to fate, and kept faces (doppelgangers) (Kingdoms, 2026-11-19)
 - [ ] #1822 Rangers read droppings (Kingdoms, Kitchen, 2026-11-19)
 - [ ] #1821 The wind no longer stops the server (Kingdoms, 2026-11-19)
@@ -93,8 +94,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1757 TaCZ out of JEI and the creative menu (Powers, 2026-11-18)
 - [ ] #1755 Conjoined twins show for joining players (Powers, Kingdoms, Kitchen, 2026-11-18)
 - [ ] #1750 picker lists show 3-4 big boxes, info text in paragraphs (Kingdoms, 2026-11-18)
-- [ ] #1747 drawn progress bars - every text bar redrawn like the execution bars (Powers, Kingdoms, Kitchen, 2026-11-18)
-- …and 208 older ones.
+- …and 209 older ones.
 
 ## Health
 
