@@ -25,6 +25,7 @@ Standing rules that bind every patch:
 
 ## The patches
 
+Andy sent all seven to the PC reviewer's queue (2026-11-19): one vault Inbox task per patch.
 Seven patches, one system each, so two can run at once without touching the same files. Suggested pairs:
 1 + 4, 2 + 5, 3 + 7, then 6.
 
@@ -33,8 +34,8 @@ Seven patches, one system each, so two can run at once without touching the same
   about 80 kbps (ffmpeg, Vorbis), keeps its `sounds.json`, `pack.mcmeta` and `pack.png`, adds a `CREDITS.txt`
   (Alexander Nakarada, creatorchords.com, CC BY 4.0; Sarisan's port, CC BY 4.0; "re-encoded at a lower bitrate"), and
   writes `Jaymo Medieval Music.zip` (~120 MB). It ships through `client/PackResourcePacks` and is on by default.
-  **Open question:** where the zip is hosted. packResourcePacks files come from CurseForge or Modrinth; ours needs a
-  home (a GitHub release asset on the repo is the likely one). Pack-page credit to Nakarada and Sarisan either way.
+  **Hosting (Andy, 2026-11-19: yes):** the zip is a GitHub release asset on this repo, and `PackResourcePacks` fetches
+  it from there. Pack-page credit to Nakarada and Sarisan.
 - **mm_places**: Kingdoms `client/music/PlaceMusic`, beside `FoeMusicClient`: inside a realm's town Townsong /
   Greenlands; taverns and the cafe Now We Feast / Celebration; illager and barbarian camps (`Camps`) Marked / Grundar;
   riding a King's Road (`Roads`) Now We Ride / The Road Home; a war or siege nearby (`Wars`) Behind the Sword / Might &
