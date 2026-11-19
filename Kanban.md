@@ -39,7 +39,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Agents/metal-hit-sparks|metal-hit-sparks]] · 💻 Odysseus · #1809 · running
 - [ ] [[Agents/powerborne-heroes|powerborne-heroes]] · 💻 Odysseus · running
 
 
