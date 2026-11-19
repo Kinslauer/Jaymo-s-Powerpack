@@ -142,9 +142,25 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 		return "heraldry_" + piece.name() + (finish.isEmpty() ? "" : "_" + finish);
 	}
 
+	/**
+	 * Models a piece names but the mod doesn't have, not drawn: a piece whose model was never made (Harness 3's tabard,
+	 * fur-lined set and others) crashed every game that saw one worn (Andy, 2026-11-19 4:02 AM). Logged once each.
+	 */
+	private static final java.util.Set<String> MISSING = new java.util.HashSet<>();
+
 	private void draw(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, String model, String texture, int color) {
-		Worn piece = this.worn.computeIfAbsent(model, name -> new Worn(MODELS.computeIfAbsent(name, n -> BbModel.load(JaymosKingdoms.MOD_ID, n)),
-			this::getParentModel, name));
+		if (MISSING.contains(model)) {
+			return;
+		}
+		Worn piece;
+		try {
+			piece = this.worn.computeIfAbsent(model, name -> new Worn(MODELS.computeIfAbsent(name, n -> BbModel.load(JaymosKingdoms.MOD_ID, n)),
+				this::getParentModel, name));
+		} catch (IllegalStateException e) {
+			MISSING.add(model);
+			JaymosKingdoms.LOGGER.warn("Heraldry piece model {} is missing; it isn't drawn", model, e);
+			return;
+		}
 		Identifier at = TEXTURES.computeIfAbsent(texture, name -> JaymosKingdoms.id("textures/entity/bb/" + name + ".png"));
 		collector.submitModel(piece, state, poseStack, RenderTypes.armorCutoutNoCull(at), lightCoords, OverlayTexture.NO_OVERLAY, color, null, state.outlineColor);
 	}
