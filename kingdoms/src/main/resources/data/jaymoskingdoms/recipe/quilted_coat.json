@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "group": "jaymoskingdoms:harness",
+  "pattern": [
+    "WSW",
+    "WWW",
+    "WWW"
+  ],
+  "key": {
+    "W": "#minecraft:wool",
+    "S": "minecraft:string"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:quilted_coat"
+  }
+}

@@ -181,6 +181,21 @@ public final class HeraldryArmour {
 		part("gorget", Harness.Slot.NECK, 1, 0.5F, 240, true, null, "gorget");
 		part("faulds_and_tassets", Harness.Slot.WAIST, 1, 0.5F, 280, true, null, "faulds_and_tassets");
 		part("rondel_spaulders", Harness.Slot.SHOULDERS, 1, 1.0F, 280, true, null, "rondel_spaulders");
+		// every place filled (Harness 6): at least three makes a smith or a tailor can make for each place. The aketon and
+		// the fur jerkin are padding and the jazerant mail (UnderArmourLayer draws them); the rest have models of their own
+		part("aketon", Harness.Slot.PADDING, 1, 0.0F, 160, false, Items.STRING, null);
+		part("fur_jerkin", Harness.Slot.PADDING, 1, 0.0F, 200, false, Items.RABBIT_HIDE, null);
+		part("jazerant", Harness.Slot.MAIL, 2, 0.0F, 260, false, Items.IRON_INGOT, null);
+		part("splinted_vambraces", Harness.Slot.ARMS, 1, 0.0F, 220, false, Items.IRON_INGOT, "splinted_vambraces");
+		part("mail_mitons", Harness.Slot.HANDS, 1, 0.0F, 200, false, Items.IRON_INGOT, "mail_mitons");
+		part("padded_cuisses", Harness.Slot.THIGHS, 1, 0.0F, 180, false, Items.STRING, "padded_cuisses");
+		part("splinted_greaves", Harness.Slot.SHINS, 1, 0.0F, 220, false, Items.IRON_INGOT, "splinted_greaves");
+		part("fur_hood", Harness.Slot.HOOD, 0, 0.0F, 0, false, null, "fur_hood");
+		part("mail_coif", Harness.Slot.HOOD, 1, 0.0F, 220, false, Items.IRON_INGOT, "mail_coif");
+		part("standard_of_mail", Harness.Slot.NECK, 1, 0.0F, 220, false, Items.IRON_INGOT, "standard_of_mail");
+		part("bevor", Harness.Slot.NECK, 1, 0.5F, 240, true, null, "bevor");
+		part("mail_skirt", Harness.Slot.WAIST, 1, 0.0F, 240, false, Items.IRON_INGOT, "mail_skirt");
+		part("leather_tassets", Harness.Slot.WAIST, 1, 0.0F, 180, false, Items.LEATHER, "leather_tassets");
 		List<Item> all = new ArrayList<>();
 		PIECES.values().forEach(p -> all.add(p.item()));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {

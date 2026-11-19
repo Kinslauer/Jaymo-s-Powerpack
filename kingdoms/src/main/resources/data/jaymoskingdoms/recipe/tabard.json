@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "group": "jaymoskingdoms:harness",
+  "pattern": [
+    "W W",
+    "WWW",
+    "W W"
+  ],
+  "key": {
+    "W": "#minecraft:wool"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:tabard"
+  }
+}

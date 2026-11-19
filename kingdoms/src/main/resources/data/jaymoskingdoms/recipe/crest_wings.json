@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "group": "jaymoskingdoms:crest",
+  "ingredients": [
+    "jaymoskingdoms:torse",
+    "minecraft:feather",
+    "minecraft:feather",
+    "minecraft:leather",
+    "minecraft:leather"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:crest_wings"
+  }
+}
