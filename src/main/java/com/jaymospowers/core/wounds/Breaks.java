@@ -74,6 +74,8 @@ import org.jspecify.annotations.Nullable;
 public final class Breaks {
 	/** (0.14.2) An unset break never heals past this fraction of its part. */
 	public static final float BROKEN_CAP = 0.25F;
+	/** A regrown limb comes back unbroken and at least this whole (a share of its part, just past {@link #BROKEN_CAP}). */
+	public static final float REGROWN_SHARE = 0.3F;
 	/** (0.14.2) The chance an arm's hand drops what it holds as the arm breaks. */
 	public static final float ARM_DROP_CHANCE = 0.25F;
 	/** (0.14.2) Per broken arm: attack damage, attack speed and digging speed lost (shares). */
@@ -681,7 +683,11 @@ public final class Breaks {
 		uncrawl(entity, crawled);
 	}
 
-	/** A severed part grown back (Dismember's regrowth): set, so it heals from where it is. */
+	/**
+	 * A severed part grown back (Dismember's regrowth: Verdant, Rubber-folk, Bio-built, a Hermit Bean, the symbiote ...):
+	 * Andy (2026-11-19) "when rubber folk regenerate limbs they need to not be broken either", so the new limb comes back
+	 * unbroken, lifted to just past {@link #REGROWN_SHARE} of its part rather than left at zero.
+	 */
 	public static void regrown(LivingEntity entity, int limbs) {
 		int mask = 0;
 		for (BodyPart part : BodyPart.values()) {
@@ -689,9 +695,35 @@ public final class Breaks {
 				mask |= bit(part);
 			}
 		}
-		if ((broken(entity) & mask) != 0) {
-			entity.setAttached(SET, set(entity) | (broken(entity) & mask));
+		int was = broken(entity) & mask;
+		if (was != 0) {
+			int left = broken(entity) & ~was;
+			if (left == 0) {
+				entity.removeAttached(BROKEN);
+			} else {
+				entity.setAttached(BROKEN, left);
+			}
+			Integer set = entity.getAttached(SET);
+			if (set != null) {
+				if ((set & left) == 0) {
+					entity.removeAttached(SET);
+				} else {
+					entity.setAttached(SET, set & left);
+				}
+			}
+			clearTags(entity, was);
+			unsplint(entity, was);
 			refresh(entity);
+		}
+		BodyPlan plan = BodyPlan.of(entity);
+		if (plan != null && plan != BodyPlan.SIMPLE) {
+			for (BodyPart part : BodyPart.values()) {
+				int index = plan.index(part);
+				float now = Wounds.fraction(entity, part);
+				if ((mask & bit(part)) != 0 && index >= 0 && now < REGROWN_SHARE) {
+					Wounds.healPart(entity, part, (REGROWN_SHARE - now) * plan.share(index) * entity.getMaxHealth(), false);
+				}
+			}
 		}
 		// (0.14.4) no stump left to bleed, nothing left festering there
 		Bleeding.regrown(entity, mask);

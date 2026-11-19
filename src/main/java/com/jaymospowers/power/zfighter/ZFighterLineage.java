@@ -162,6 +162,11 @@ public final class ZFighterLineage {
 	static final float REGEN = 1.0F;
 	/** How often a Verdant grows back one lost limb (30 s; a multiple of REGEN_EVERY). */
 	static final int REGROW_EVERY = 600;
+	/** A Verdant's open stumps spurt green blood this often (ticks) until the limb is back (Dismember#spurtStumps). */
+	static final int STUMP_SPURT_EVERY = 10;
+	/** A limb growing back: a fleshy crunch. */
+	static final net.minecraft.sounds.SoundEvent REGROW_SOUND = net.minecraft.sounds.SoundEvent.createVariableRangeEvent(
+		com.jaymospowers.JaymosPowers.id("verdant.regrow"));
 	/** Giant forms grow him by this much (scale added, by form). */
 	static final double[] GIANT_SCALE = {0.0, 0.4, 0.8, 1.3, 1.3};
 	static final float HEAL_KI = 20.0F;
@@ -233,6 +238,9 @@ public final class ZFighterLineage {
 		// a Warrior-born villager with its tail wrapped may still turn under the full moon
 		VillagerApe.init();
 		UndeadBlood.init();
+		// Andy (2026-11-19): "verdants ... should now have green blood": a Verdant Z Fighter bleeds green sap, whatever their heritage
+		com.jaymospowers.core.BladeBlood.BLOOD.add(body -> body instanceof Player player && of(player) == VERDANT
+			? com.jaymospowers.core.BladeBlood.SAP : com.jaymospowers.core.BladeBlood.NO_SAY);
 		UndeadGiant.init();
 		RaceMoves.init();
 		// (0.17.56) the lineages' extras (merging, the ki reserve, ...)
@@ -441,6 +449,10 @@ public final class ZFighterLineage {
 
 	/** A Verdant's body mends itself: health back while fed, breaks knit at once, lost limbs grow back one at a time. */
 	private static void mend(ServerPlayer player, long now) {
+		// Andy (2026-11-19): green blood spurts from the stump until the limb grows in
+		if (now % STUMP_SPURT_EVERY == 0 && player.isAlive() && player.level() instanceof net.minecraft.server.level.ServerLevel level) {
+			com.jaymospowers.core.Dismember.spurtStumps(level, player);
+		}
 		if (now % REGEN_EVERY != 0) {
 			return;
 		}
@@ -448,8 +460,10 @@ public final class ZFighterLineage {
 			player.heal(REGEN);
 		}
 		com.jaymospowers.core.Fractures.heal(player);
-		if (now % REGROW_EVERY == 0) {
-			com.jaymospowers.core.Dismember.regrow(player, false);
+		if (now % REGROW_EVERY == 0 && com.jaymospowers.core.Dismember.regrow(player, false)) {
+			// Andy (2026-11-19): "the verdant should have a fleshy crunch sound"
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), REGROW_SOUND, SoundSource.PLAYERS, 1.0F,
+				0.9F + player.getRandom().nextFloat() * 0.2F);
 		}
 	}
 

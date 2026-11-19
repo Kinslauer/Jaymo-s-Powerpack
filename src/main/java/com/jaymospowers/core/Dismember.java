@@ -1233,6 +1233,19 @@ public final class Dismember {
 		}
 	}
 
+	/**
+	 * Every stump {@code body} has that no prosthetic covers spurts once ({@link #spurt}). Andy (2026-11-19): a Verdant's
+	 * stump spurts its green blood until the limb grows back in.
+	 */
+	public static void spurtStumps(ServerLevel level, LivingEntity body) {
+		int open = missing(body) & ~Prosthetics.fitted(body);
+		for (int part : PARTS) {
+			if ((open & part) != 0) {
+				spurt(level, body, part);
+			}
+		}
+	}
+
 	private static void gore(ServerLevel level, LivingEntity target, int part) {
 		Vec3 at = stump(target, part);
 		var blood = com.jaymospowers.core.blood.BloodParticles.fleck(BladeBlood.color(target), 1.4F);
