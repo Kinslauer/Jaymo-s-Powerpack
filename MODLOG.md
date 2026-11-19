@@ -6115,3 +6115,10 @@ Built; not played in game.
 - **Orbit**: from 96 blocks above the bottom of the high sky you're in orbit, and you're told so once on getting there. A Z Fighter's cruise goes three times as fast and gets up to speed three times as quickly, carrying you far across the world below, and you come down wherever you dive. (`HighSkyClient#cruiseBoost`, `ZFighterFlightClient`)
 - Not in this patch: pods in orbit (they still fly the star map's trips).
 - Built; not played. Stacked on Lanterns 6 (#1766).
+
+## 0.25.31 (2026-11-19): Patrol as lawmen: warrants for crooked officers, arrests, a partner (#1764)
+
+- **Patrol warrant**: an officer that a realm of Jaymo's Kingdoms wants for a crime gets a Patrol warrant. Each new crime adds to it and costs a rank. A patrolman comes down for them (at most once a day, in the open) and fights them, harder for each crime on the warrant. Once they're beaten down to 2 hearts he stops: brought in, warrant served. Talking to him and choosing "I'll come quietly." serves it too. (`PatrolLaw`)
+- **Arrests**: an officer who hands a hogtied crook to a realm's ruler for its bounty has made a Patrol arrest. It counts toward rank and pays training (the realm pays the bounty). (`PatrolLaw#handedOver`, `ZFighterPatrol#countArrest`)
+- **A partner**: from Officer rank, a patrolman can be asked "I could use a partner." Your partner stays at your side, fights what's fighting you or what you hit, talks like any patrolman, and comes along on every pod trip, stepping out beside you on landing. If he falls you're told, and any patrolman can give you another. Not while you're under a Patrol warrant.
+- Built; not played.
