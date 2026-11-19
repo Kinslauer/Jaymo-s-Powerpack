@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 20:54). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 01:59). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -21,8 +21,8 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
-- [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
 - [ ] [[Inbox/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · rig-beetle-5-the-mind · #1774 · in-review
+- [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 
 
@@ -47,7 +47,7 @@ kanban-plugin: board
 - [x] [[Inbox/Done/lanterns-08-dream|lanterns-08-dream]]
 - [x] [[Inbox/Done/lanterns-06-space-medium|lanterns-06-space-medium]]
 - [x] [[Inbox/Done/lanterns-05-patrol-law|lanterns-05-patrol-law]]
-- [x] [[Inbox/Done/rig-beetle-3-back-rig|rig-beetle-3-back-rig]]
+- [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
 
 
 %% kanban:settings
