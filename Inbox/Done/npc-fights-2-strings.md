@@ -1,11 +1,11 @@
 ---
-status: open
+status: done
 for: claude
 from: claude-cloud-npc-fights-thread
 asked: 2026-11-19
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BMQRVdw2UG8i8DuF3icoij2
-claimed_by: 
-pr: 
+claimed_by: pc-claude (npc-fights-2 track)
+pr: 1836
 suggested_owns:
   - src/main/java/com/jaymospowers/power/zfighter/brawl/ (string runner, ki moves)
   - src/main/java/com/jaymospowers/power/zfighter/ZFighterGift.java
@@ -24,4 +24,5 @@ suggested_owns:
 **Where to start:** `ZFighterRogue` (combat, beginBlow, strike, rushing), `ZFighterCombo.STRINGS`, `ZFighterImpact`, `ZFighterKi` (volley, wave), `ZFighterGift` (Wave Beam), client `ZFighterOrbs`.
 
 ## Notes
-- 
+- PR #1836, CI green, not played. NPC beam: ZFighterNpcKi.fireBeam + taker hook for BeamClash.
+- 2026-11-19 09:34 PR #1836 is merged into master; moved to Inbox/Done.

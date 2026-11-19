@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: done
 for: claude
 from: claude-cloud-npc-fights-thread
 asked: 2026-11-19
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BMQRVdw2UG8i8DuF3icoij2
 claimed_by: pc-claude (npc-fights-3 track)
-pr: 
+pr: 1834
 suggested_owns:
   - src/main/java/com/jaymospowers/core/BeamClash.java
   - src/main/java/com/jaymospowers/power/zfighter/ZFighterImpact.java
@@ -25,4 +25,5 @@ suggested_owns:
 **Where to start:** `core/BeamClash` (the ServerPlayer API near lines 164, 310, 327), `ZFighterWaveBeam` (how a beam registers), `ZFighterImpact` (slam, ring), `core/Shakes`, `core/Soundscape`, `combat/ClashFx`, how other features check Kingdoms land before breaking blocks.
 
 ## Notes
-- 
+- PR #1834 built, CI green, not played.
+- 2026-11-19 09:34 PR #1834 is merged into master; moved to Inbox/Done.

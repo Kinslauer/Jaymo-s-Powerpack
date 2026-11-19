@@ -26,3 +26,4 @@ suggested_owns:
 ## Notes
 - PR #1825, CI green, not played. Travel flight is `Brawl.flyTo(Mob, Entity)` (true on arrival); package is core/brawl. See PR for gaps.
 - 2026-11-19 09:09 PR #1825 is merged into master; moved to Inbox/Done.
+- 1b: PR #1832 (feints and patrolman ranks), CI green, not played.

@@ -1,9 +1,9 @@
 ---
-status: running
+status: merged
 task: NPC fights patch 3 (F9-F13)
 branch: claude/npc-fights-3-clashes
 with: npc-fights-1b (Brawl.java feints, ZFighterPatrol ranks)
-pr: 
+pr: 1834
 mods: powers
 versions: 
 started: 2026-11-19
@@ -18,3 +18,5 @@ owns:
 
 ## Notes
 - Small edits only to Brawl.java and ZFighterPatrol.java.
+
+Done: PR #1834, CI green, not played.
