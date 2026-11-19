@@ -6562,3 +6562,8 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - **Creative mode no longer pops prosthetics off**: creative's healing (`Wounds.creativeHeal`) used to grow every severed limb back, and a limb that grows back drops its wooden, iron or Rig limb as an item. A limb that wears a prosthetic now stays as it is; bare severed limbs and the head still grow back. Chrono's rewind out of death (`Wounds.undoAll`) goes through the same heal, so it keeps them too.
 - `Dismember.regrow(target, all, keep)`: regrow that leaves the parts in `keep` missing.
 - Compile-checked; not played.
+
+## 0.25.78 (2026-11-19): Harness 6: forge the rest of the harness (#1877)
+
+- The smithing anvil (`HeraldryForging`) now forges, from steel in every finish: gorget, bevor, faulds and tassets, spaulders with rondels, and the fur-lined spaulders, arm harness, gauntlets, cuisses and greaves (a fur lining takes 2 rabbit hides when the piece is done). From iron: jazerant, mail mitons, mail coif, standard of mail, mail skirt, splinted vambraces and splinted greaves.
+- Built; not played.

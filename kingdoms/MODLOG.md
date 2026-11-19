@@ -15697,3 +15697,12 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - **Sent below from the chains**: a captive who died in a camp's chains and was weighed wicked used to land in the Nether and be dragged straight back to the stake by the shackle the same moment, which also ended their last chance ("The heat lets go of you"). Now when a weighing takes a chained player out of the world (sent below to the Nether, let into the Other World, or among the dead there), the shackle comes off quietly, with no camp hunt, and the descent goes through.
 - `StoryHard.chained` asks the new `PowersCompat.weighedAway` (Powers' `Karma.just`/`wicked`/`below` and `ZFighterAfterlife.among`) before the chain's pull. Any other trip out of the world in chains still drags them back.
 - Built; not played.
+
+## 0.11.8 (2026-11-19): Harness 6: three craftable makes for every harness place (#1877)
+
+- **13 new harness pieces**, our own models and art (`gen_heraldry_armour.py`): padding **Aketon** (quilted linen, dyeable) and **Fur Jerkin**; mail **Jazerant** (mail sewn between cloth); arms **Splinted Vambraces**; hands **Mail Mitons**; thighs **Padded Cuisses**; shins **Splinted Greaves**; hood **Fur Hood** and **Mail Coif**; neck **Standard of Mail** and **Bevor** (plate, every finish); waist **Mail Skirt** and **Leather Tassets**. `HeraldryArmour`; the aketon, fur jerkin and jazerant draw on the under-armour layer with their own sheets (`UnderArmourLayer`).
+- **Crafting-table recipes** for the cloth and leather (before, these were only bought): arming doublet, aketon, fur jerkin, quilted coat, padded cuisses, leather tassets, hood, fur hood, cloak, giornea, tabard, torse, and the plume, wings and horns crests (torse + feathers / feathers and leather / bones and leather). The realm beast crests stay the ruler's.
+- Iron and steel pieces are forged at the smithing anvil (Jaymo's Powers `HeraldryForging`), none at the grid.
+- Every place now has at least three craftable makes: padding 3, mail 3, shoulders 4, arms 3, hands 3, thighs 3, shins 3, over 3, hood 3, crest 4, neck 3, waist 3.
+- New pieces join `jaymospowers:cloth_armor` / `mail_armor` / `plate_armor`.
+- Built; not played.
