@@ -15497,3 +15497,11 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - **Oil pot**: the walls' boiling oil pot is no longer three plain boxes with cauldron textures. It's a round, bulging iron pot with a rivet band, ring handles and a pouring lip, standing on a three-legged brazier. Cold, the brazier holds grey ash; lit, the coals glow, flames lick the pot's foot and the oil bubbles.
 - Built from two 16x16 x 13-slice sprite stacks (`kingdoms/tools/sprite_stacks/`) by the new converter `tools/sprite_stack/stack2model.py` (88 and 96 cubes, one 64x64 texture each). `kingdoms/tools/gen_oil_pot.py` paints the stacks and converts them; `gen_whaling.py` no longer writes the pot's models, and the old brazier textures are gone.
 - Resources and tools only, no code. Previewed with our own renderer; not built or seen in game.
+
+## 0.10.88 (2026-11-19): heavy smoke over big fires (#1845)
+
+- **Smoke over big fires** (Andy: a burning forest threw almost no smoke): any big blaze (a wildfire, an imp's, a player's) now throws up tall dark plumes that rise, swell, pale and lean downwind as they climb; the bigger the fire, the bigger and thicker the plumes. Campfires and a few burning blocks stay as they were. Not in the Nether.
+- **Smoky air**: near a big blaze and out under the sky the fog closes in to about 36 blocks and turns smoke-brown, with the weather's other fogs (less indoors).
+- Cheap: a few columns round the camera are looked at each tick (40 in low-end mode, `/lowend`), and all plumes share one budget of about 1.2 puffs a tick (0.4 in low-end mode), so a whole forest burning stays at a few hundred puffs.
+- Classes: `client/disasters/FireSmoke` (new), `StormParticle` (SMOKE kind), `SkiesClient`, `SkiesFogMixin`.
+- Compiled; not seen in game. Sizes, colours and the haze distance are first guesses.
