@@ -1,5 +1,6 @@
 package com.jaymospowers.client;
 
+import com.jaymospowers.aether.mob.RideableAnimal;
 import com.jaymospowers.client.stamina.DodgeClient;
 import com.jaymospowers.core.MountClimb;
 import com.jaymospowers.core.MountClimb.Kind;
@@ -57,6 +58,12 @@ public final class MountClimbPose {
 	static final float REACH_X = 55.0F * Mth.DEG_TO_RAD, REACH_Z = 25.0F * Mth.DEG_TO_RAD;
 	/** A slip eases from the climb's pose into its own over this share of itself. */
 	static final float SLIP_BLEND = 0.35F;
+	/** The mount's own part in a climb: it goes down over this share of the climb, and comes back up over the last of it. */
+	static final float MOUNT_DOWN = 0.25F, MOUNT_UP = 0.8F;
+	/** A climb called off or ended early lets its mount up again over this many ticks. */
+	static final int MOUNT_EASE = 6;
+	/** A trunk lift: where the trunk's tip is when it picks the rider up (blocks in front of the mount's middle, times its scale, and above the ground), and how high above the seat the curl goes. */
+	static final float TRUNK_REACH = 1.6F, TRUNK_TIP_UP = 0.3F, TRUNK_CURL_UP = 0.9F;
 
 	private static final class Climb {
 		final Kind kind;
@@ -88,7 +95,12 @@ public final class MountClimbPose {
 	private record Seat(int mountId, Vec3 at, float yaw, Vec3 mountAt) {
 	}
 
+	/** A mount let up after its climb ended before its share did: where its pose was, and for how long it has been easing back. */
+	private record Easing(int style, int side, float from, float share, int age) {
+	}
+
 	private static final Map<Integer, Climb> CLIMBS = new HashMap<>();
+	private static final Map<Integer, Easing> EASING = new HashMap<>();
 	private static final Map<Integer, Seat> SEATS = new HashMap<>();
 	/** How fast each rider's mount was going (blocks a tick, level) when last seen under them: a gallop may mean the server leaps them off (MountLeap). */
 	private static final Map<Integer, Double> RIDE_SPEED = new HashMap<>();
@@ -116,6 +128,7 @@ public final class MountClimbPose {
 		});
 		ClientPlayNetworking.registerGlobalReceiver(MountClimb.Stop.TYPE, (p, ctx) -> {
 			Climb c = CLIMBS.remove(p.player());
+			easeUp(c);
 			ClientLevel level = Minecraft.getInstance().level;
 			Entity player = level == null ? null : level.getEntity(p.player());
 			if (c != null && p.reason() == MountClimb.SHIED && c.kind.on() && player instanceof Player who) {
@@ -137,6 +150,7 @@ public final class MountClimbPose {
 		if (level == null) {
 			CLIMBS.clear();
 			WAITING.clear();
+			EASING.clear();
 			SEATS.clear();
 			return;
 		}
@@ -148,6 +162,8 @@ public final class MountClimbPose {
 			}
 			return false;
 		});
+		EASING.replaceAll((id, e) -> new Easing(e.style, e.side, e.from, e.share, e.age + 1));
+		EASING.values().removeIf(e -> e.age > MOUNT_EASE);
 		CLIMBS.entrySet().removeIf(e -> {
 			Climb c = e.getValue();
 			c.age++;
@@ -157,7 +173,11 @@ public final class MountClimbPose {
 			}
 			if (c.kind.on()) {
 				// seated and played to its end (the server may seat them a tick or two early), or never will be: over
-				return player.isPassenger() && c.age >= c.ticks || c.age > c.ticks + SEAT_WAIT;
+				boolean over = player.isPassenger() && c.age >= c.ticks || c.age > c.ticks + SEAT_WAIT;
+				if (over && c.age < c.ticks) {
+					easeUp(c);
+				}
+				return over;
 			}
 			// a leap is over when they land (the dodge's roll takes it from there)
 			return c.age > c.ticks || c.kind == Kind.OFF_LEAP && c.age > 4 && player.onGround();
@@ -167,7 +187,7 @@ public final class MountClimbPose {
 		for (Player player : level.players()) {
 			Entity vehicle = player.getVehicle();
 			if (vehicle != null) {
-				if (MountClimb.climbable(vehicle)) {
+				if (MountClimb.climbable(vehicle) && !MountClimb.flying(vehicle)) {
 					Seat before = SEATS.get(player.getId());
 					RIDE_SPEED.put(player.getId(), before != null && before.mountId == vehicle.getId()
 						? Math.hypot(vehicle.getX() - before.mountAt.x, vehicle.getZ() - before.mountAt.z) : 0.0);
@@ -210,6 +230,42 @@ public final class MountClimbPose {
 		return c != null && !player.isPassenger() && !c.kind.carriesMomentum();
 	}
 
+	/** A climb that ends before its mount has got back up: the mount eases up from where it was. */
+	private static void easeUp(@Nullable Climb c) {
+		if (c != null && c.kind.pose > 0) {
+			float s = c.share(0.0F);
+			float amount = mountAmount(s);
+			if (amount > 0.0F) {
+				EASING.put(c.mountId, new Easing(c.kind.pose, c.kind.side, amount, s, 0));
+			}
+		}
+	}
+
+	/** How far down the mount is {@code share} of the way through a climb: 0 to 1, down early, held, up at the end. */
+	private static float mountAmount(float share) {
+		return Math.min(smooth(0.0F, MOUNT_DOWN, share), 1.0F - smooth(MOUNT_UP, 1.0F, share));
+	}
+
+	/**
+	 * What the mount with this id is doing for a climb on it this frame, for its model: {style ({@code MountClimb.POSE_*}), side
+	 * (-1 left, 1 right, 0 neither), amount (0 up to 1 fully down), share (how far through the climb, 0 to 1)}; null if
+	 * nobody is climbing on it. Read by the Aether models here and, by reflection, by Kingdoms' elephants and dragons.
+	 */
+	public static float @Nullable [] mountPose(int mountId, float partialTicks) {
+		for (Climb c : CLIMBS.values()) {
+			if (c.mountId == mountId && c.kind.pose > 0) {
+				float s = c.share(partialTicks);
+				return new float[] {c.kind.pose, c.kind.side, mountAmount(s), s};
+			}
+		}
+		Easing e = EASING.get(mountId);
+		if (e != null) {
+			float t = 1.0F - Mth.clamp((e.age + partialTicks) / MOUNT_EASE, 0.0F, 1.0F);
+			return new float[] {e.style, e.side, e.from * t, e.share};
+		}
+		return null;
+	}
+
 	/**
 	 * How far {@code player}'s body is carried from where they really are this frame (world blocks), or null if they
 	 * aren't climbing. On: from the ground up to the saddle. Off: from the seat they left down to where they stand.
@@ -231,10 +287,12 @@ public final class MountClimbPose {
 				if (mount == null) {
 					return null;
 				}
-				seat = mount.getPassengerRidingPosition(player).subtract(player.getVehicleAttachmentPoint(mount))
-					.subtract(mount.position()).add(mount.getPosition(partialTicks));
+				seat = seatOf(player, mount, partialTicks);
 			}
 			Vec3 d = seat.subtract(c.kind == Kind.ON_VAULT ? at : c.from);
+			if (c.kind == Kind.ON_TRUNK) {
+				return trunkPath(player, c, d, s).subtract(at.subtract(c.from));
+			}
 			float across, up, hump;
 			switch (c.kind) {
 				case ON_BACK -> {
@@ -259,6 +317,30 @@ public final class MountClimbPose {
 					across = smooth(0.15F, 0.85F, s);
 					up = smooth(0.2F, 0.7F, s);
 					hump = 0.05F;
+				}
+				case ON_BIG_KNEEL -> {
+					// a foot on the folded foreleg, then hauled up the flank by the harness: the height comes after the step in
+					across = smooth(0.2F, 0.85F, s);
+					up = smooth(0.25F, 0.8F, s);
+					hump = 0.1F;
+				}
+				case ON_CROUCH -> {
+					// a hop onto the low back of a crouched bird
+					across = smooth(0.1F, 0.8F, s);
+					up = smooth(0.1F, 0.7F, s);
+					hump = 0.3F;
+				}
+				case ON_WING_LEFT, ON_WING_RIGHT, ON_DRAGON_WING_LEFT, ON_DRAGON_WING_RIGHT -> {
+					// up the lowered wing like a ramp: height and distance together, no hump
+					across = smooth(0.2F, 0.9F, s);
+					up = smooth(0.15F, 0.9F, s);
+					hump = 0.05F;
+				}
+				case ON_NECK -> {
+					// up the lowered neck: a long, steady climb to the shoulders
+					across = smooth(0.1F, 0.9F, s);
+					up = smooth(0.1F, 0.9F, s);
+					hump = 0.0F;
 				}
 				default -> {
 					across = smooth(0.15F, 0.85F, s);
@@ -288,6 +370,40 @@ public final class MountClimbPose {
 		float t = Mth.clamp((s - 0.25F) / 0.55F, 0.0F, 1.0F);
 		float down = 1.0F - t * t;
 		return new Vec3(d.x * across, d.y * down, d.z * across);
+	}
+
+	/** Where {@code player}'s feet end up in {@code mount}'s saddle this frame. */
+	private static Vec3 seatOf(Player player, Entity mount, float partialTicks) {
+		if (mount instanceof RideableAnimal rideable) {
+			// these place their rider by hand (positionRider), not by the usual attachment point
+			return mount.getPosition(partialTicks).add(0.0, rideable.seatY(), 0.0);
+		}
+		return mount.getPassengerRidingPosition(player).subtract(player.getVehicleAttachmentPoint(mount))
+			.subtract(mount.position()).add(mount.getPosition(partialTicks));
+	}
+
+	/**
+	 * The path of an elephant's trunk lift, from where the rider stood ({@code d}: the way to the seat from there): first to
+	 * the trunk's tip, down in front of its head, then up in the curl (over and a little ahead of its head) and on to the
+	 * seat on its back, as a curve through three points.
+	 */
+	private static Vec3 trunkPath(Player player, Climb c, Vec3 d, float s) {
+		Entity mount = player.level().getEntity(c.mountId);
+		if (mount == null) {
+			return Vec3.ZERO;
+		}
+		float yaw = bodyYaw(mount) * Mth.DEG_TO_RAD;
+		Vec3 ahead = new Vec3(-Mth.sin(yaw), 0.0, Mth.cos(yaw));
+		float scale = mount instanceof LivingEntity living ? living.getScale() : 1.0F;
+		// the tip, relative to where the rider began (the mount may be moving a little, so from its position now)
+		Vec3 tip = mount.position().add(ahead.scale(TRUNK_REACH * scale)).add(0.0, TRUNK_TIP_UP, 0.0).subtract(c.from);
+		if (s < 0.3F) {
+			return tip.scale(smooth(0.0F, 0.3F, s));
+		}
+		float u = smooth(0.3F, 1.0F, s);
+		Vec3 curl = new Vec3(tip.x + ahead.x * 0.2, d.y + TRUNK_CURL_UP, tip.z + ahead.z * 0.2);
+		double a = (1.0 - u) * (1.0 - u), b = 2.0 * u * (1.0 - u), e = u * u;
+		return new Vec3(a * tip.x + b * curl.x + e * d.x, a * tip.y + b * curl.y + e * d.y, a * tip.z + b * curl.z + e * d.z);
 	}
 
 	/** The way a climber's body faces on the way up: from where they stood round to the mount's own. */

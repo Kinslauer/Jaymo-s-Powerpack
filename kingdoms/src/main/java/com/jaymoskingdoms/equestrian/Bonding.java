@@ -401,6 +401,13 @@ public final class Bonding {
 		return b.level(Discipline.WAR) >= KNEEL_WAR || b.level(Discipline.TRAIL) >= KNEEL_TRAIL || b.trustOf(player.getUUID()) >= KNEEL_TRUST;
 	}
 
+	/** (Server) it goes down on its knees for {@link #KNEEL_WINDOW} ticks, or till its rider is up. */
+	public static void kneel(AbstractHorse horse) {
+		long until = horse.level().getGameTime() + KNEEL_WINDOW;
+		horse.setAttached(KNEEL, until);
+		KNEELING.put(horse.getId(), until);
+	}
+
 	/** It's kneeling for {@code player} (an armoured rider it let on): down, or going down. Read by Jaymo's Powers' mount climb. */
 	public static boolean kneelingFor(AbstractHorse horse, Player player) {
 		Long until = horse.getAttached(KNEEL);
@@ -597,8 +604,7 @@ public final class Bonding {
 				return InteractionResult.FAIL;
 			}
 			if (!level.isClientSide()) {
-				horse.setAttached(KNEEL, level.getGameTime() + KNEEL_WINDOW);
-				KNEELING.put(horse.getId(), level.getGameTime() + KNEEL_WINDOW);
+				kneel(horse);
 			}
 		}
 		return InteractionResult.PASS;

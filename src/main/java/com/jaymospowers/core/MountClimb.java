@@ -1,6 +1,8 @@
 package com.jaymospowers.core;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.aether.mob.RideableAnimal;
+import com.jaymospowers.aether.mob.WingedAnimal;
 import com.jaymospowers.compat.KingdomsCompat;
 import com.jaymospowers.freerun.Freerun;
 import java.util.HashMap;
@@ -14,6 +16,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -30,6 +33,7 @@ import net.minecraft.world.entity.animal.equine.Llama;
 import net.minecraft.world.entity.animal.pig.Pig;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Climbing into the saddle instead of appearing in it (after SmoothMount, LGPL, an idea only: none of its code). Andy
@@ -59,18 +63,40 @@ public final class MountClimb {
 		/** A sprinting freerunner leapfrogs a mount's rump straight into the saddle, keeping their pace (Freerunner). */
 		ON_VAULT("player_mount_on_vault", 0.35F),
 		/** Off a galloping mount sideways with its momentum, tucking for the landing roll (the client's, like the other climbs off; see MountLeap). */
-		OFF_LEAP("player_mount_off_leap", 0.6F);
+		OFF_LEAP("player_mount_off_leap", 0.6F),
+		/** Onto a war elephant or mammoth that kneels: a foot on the folded foreleg, hauled up by the harness. */
+		ON_BIG_KNEEL("player_mount_on_big_kneel", 0.9F, POSE_KNEEL, 0),
+		/** Onto an elephant that lifts the rider in its trunk: carried up in the curl and set on its back. */
+		ON_TRUNK("player_mount_on_trunk", 1.3F, POSE_TRUNK, 0),
+		/** Onto a moa that crouches: a hop onto the low back. */
+		ON_CROUCH("player_mount_on_crouch", 0.6F, POSE_CROUCH, 0),
+		/** Up the lowered wing of a phyg or flying cow, from its left or its right (the side it lowers is the mount's own). */
+		ON_WING_LEFT("player_mount_on_wing_left", 0.8F, POSE_WING, -1),
+		ON_WING_RIGHT("player_mount_on_wing_right", 0.8F, POSE_WING, 1),
+		/** Up a dragon's lowered neck from its head. */
+		ON_NECK("player_mount_on_neck", 1.1F, POSE_NECK, 0),
+		/** Up a dragon's lowered wing, from its left or its right. */
+		ON_DRAGON_WING_LEFT("player_mount_on_dragon_wing_left", 1.1F, POSE_WING, -1),
+		ON_DRAGON_WING_RIGHT("player_mount_on_dragon_wing_right", 1.1F, POSE_WING, 1);
 
 		public final String clip;
 		public final float seconds;
+		/** What the mount does for this climb ({@code POSE_*}; 0 for the climbs that need nothing of it), and which of its sides (-1 left, 1 right, 0 neither). */
+		public final int pose, side;
 
 		Kind(String clip, float seconds) {
+			this(clip, seconds, 0, 0);
+		}
+
+		Kind(String clip, float seconds, int pose, int side) {
 			this.clip = clip;
 			this.seconds = seconds;
+			this.pose = pose;
+			this.side = side;
 		}
 
 		public boolean on() {
-			return this == ON_LEFT || this == ON_RIGHT || this == ON_BACK || this == ON_KNEEL || this == ON_PILLION || this == ON_VAULT;
+			return this == ON_LEFT || this == ON_RIGHT || this == ON_BACK || this == ON_KNEEL || this == ON_PILLION || this == ON_VAULT || this.pose > 0;
 		}
 
 		/** Kinds that don't hold the climber still: they keep moving through it, so their keys aren't held back. */
@@ -84,6 +110,12 @@ public final class MountClimb {
 		}
 	}
 
+	/** What a mount does while it is climbed ({@link Kind#pose}): kneels, curls its trunk down and up, crouches, lowers a wing, lowers its neck. */
+	public static final int POSE_KNEEL = 1, POSE_TRUNK = 2, POSE_CROUCH = 3, POSE_WING = 4, POSE_NECK = 5;
+	/** What Kingdoms' {@code Boarding.style} answers for a mount of its own: nothing special, the elephant kneels, lifts in its trunk, a dragon lowers its neck or a wing, or it is in the air (no climb). */
+	static final int STYLE_NONE = 0, STYLE_KNEEL = 1, STYLE_TRUNK = 2, STYLE_NECK = 3, STYLE_WING = 4, STYLE_AIR = -1;
+	/** A mount this much wider than a horse is climbed from further off: the reach grows by half the extra width. */
+	static final float HORSE_WIDTH = 1.4F;
 	/** Full armour (20 points) makes a climb this much longer again: cloth about 1x, full plate about 2x. */
 	static final float ARMOUR_SLOW = 1.0F;
 	/** A climb is called off if the climber strays this far from where it began, or the mount this far from them. */
@@ -168,9 +200,24 @@ public final class MountClimb {
 		});
 	}
 
-	/** Mounts that are climbed onto: horses, donkeys, mules and our breeds, and pigs. Camels kneel and llamas aren't steered. */
+	/**
+	 * Mounts that are climbed onto: horses, donkeys, mules and our breeds (war elephants and the wind dragons are
+	 * {@link AbstractHorse}s too), pigs, and the Aether's rideable animals (moa, phyg, flying cow). Camels kneel and llamas
+	 * aren't steered.
+	 */
 	public static boolean climbable(Entity mount) {
-		return mount instanceof AbstractHorse && !(mount instanceof Camel) && !(mount instanceof Llama) || mount instanceof Pig;
+		return mount instanceof AbstractHorse && !(mount instanceof Camel) && !(mount instanceof Llama) || mount instanceof Pig
+			|| mount instanceof RideableAnimal;
+	}
+
+	/** A mount that flies: the Aether's rideable animals and Kingdoms' dragons (their entity ids end in {@code _dragon}). */
+	public static boolean flier(Entity mount) {
+		return mount instanceof RideableAnimal || BuiltInRegistries.ENTITY_TYPE.getKey(mount.getType()).getPath().endsWith("_dragon");
+	}
+
+	/** A flier that is off the ground: nobody climbs onto it (they mount as before), and nobody climbs off it (they fall). */
+	public static boolean flying(Entity mount) {
+		return flier(mount) && !mount.onGround() && !mount.isInWater();
 	}
 
 	/** Whether {@code player} is partway up onto a mount (server side). */
@@ -191,6 +238,9 @@ public final class MountClimb {
 			return true;
 		}
 		Kind kind = kindOf(player, mount);
+		if (kind == null) {
+			return false;
+		}
 		int ticks = Math.max(1, Mth.ceil(seconds(kind, player) * 20.0F));
 		long now = player.level().getGameTime();
 		long shyAt = -1L;
@@ -210,13 +260,44 @@ public final class MountClimb {
 
 	/**
 	 * How {@code player} climbs on: up behind a rider already in the saddle (a hand up), onto a horse that kneels for them
-	 * (Kingdoms' kneel, which it lets an armoured rider on with), else {@link #side}.
+	 * (Kingdoms' kneel, which it lets an armoured rider on with), else {@link #side}. A mount of Kingdoms' own that boards
+	 * its riders its own way says how ({@code Boarding.style}): the war elephant kneels or lifts the rider in its trunk, a
+	 * dragon lowers its neck or a wing. The Aether's moa crouches and its winged animals lower a wing. Null: it flies,
+	 * and is ridden without a climb.
 	 */
-	static Kind kindOf(Player player, Entity mount) {
+	static @Nullable Kind kindOf(Player player, Entity mount) {
+		if (flying(mount)) {
+			return null;
+		}
+		if (mount instanceof RideableAnimal) {
+			return mount instanceof WingedAnimal ? (onLeft(player, mount) ? Kind.ON_WING_LEFT : Kind.ON_WING_RIGHT) : Kind.ON_CROUCH;
+		}
 		if (mount instanceof AbstractHorse) {
 			for (Entity rider : mount.getPassengers()) {
 				if (rider instanceof Player && rider != player) {
 					return Kind.ON_PILLION;
+				}
+			}
+			if (KingdomsCompat.call("equestrian.Boarding", "style", new Class<?>[] {AbstractHorse.class, Player.class}, STYLE_NONE,
+				mount, player) instanceof Integer style && style != STYLE_NONE) {
+				switch (style) {
+					case STYLE_KNEEL -> {
+						return Kind.ON_BIG_KNEEL;
+					}
+					case STYLE_TRUNK -> {
+						return Kind.ON_TRUNK;
+					}
+					case STYLE_NECK -> {
+						return Kind.ON_NECK;
+					}
+					case STYLE_WING -> {
+						return onLeft(player, mount) ? Kind.ON_DRAGON_WING_LEFT : Kind.ON_DRAGON_WING_RIGHT;
+					}
+					case STYLE_AIR -> {
+						return null;
+					}
+					default -> {
+					}
 				}
 			}
 			if (KingdomsCompat.call("equestrian.Bonding", "kneelingFor", new Class<?>[] {AbstractHorse.class, Player.class}, Boolean.FALSE,
@@ -248,6 +329,13 @@ public final class MountClimb {
 		return horse.isTamed() ? 0.0F : WILD_SKITTISH;
 	}
 
+	/** Whether {@code player} stands on the mount's left (or, straight behind it, nearer its left than its right). */
+	static boolean onLeft(Player player, Entity mount) {
+		float facing = mount instanceof LivingEntity living ? living.yBodyRot : mount.getYRot();
+		float toPlayer = (float)(Mth.atan2(-(player.getX() - mount.getX()), player.getZ() - mount.getZ()) * Mth.RAD_TO_DEG);
+		return Mth.wrapDegrees(toPlayer - facing) < 0.0F;
+	}
+
 	/** Which way {@code player} climbs on: from behind, or from whichever side of the mount they stand. */
 	static Kind side(Player player, Entity mount) {
 		float facing = mount instanceof LivingEntity living ? living.yBodyRot : mount.getYRot();
@@ -275,7 +363,8 @@ public final class MountClimb {
 			Entity mount = c.mount;
 			boolean vault = c.kind == Kind.ON_VAULT;
 			if (!mount.isAlive() || mount.level() != player.level() || player.isPassenger() || player.isShiftKeyDown()
-				|| !vault && player.position().distanceTo(c.from) > STRAY || player.distanceTo(mount) > (vault ? VAULT_REACH : REACH)) {
+				|| !vault && player.position().distanceTo(c.from) > STRAY
+				|| player.distanceTo(mount) > (vault ? VAULT_REACH : REACH) + Math.max(0.0F, (mount.getBbWidth() - HORSE_WIDTH) * 0.5F)) {
 				it.remove();
 				send(player, new Stop(player.getId(), CALLED_OFF));
 				continue;

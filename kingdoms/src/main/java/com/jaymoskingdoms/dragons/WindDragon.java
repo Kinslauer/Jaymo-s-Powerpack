@@ -1477,10 +1477,14 @@ public abstract class WindDragon extends AbstractHorse {
 			setDragonFlag(SITTING, false);
 			player.setYRot(this.getYRot());
 			player.setXRot(this.getXRot());
-			player.startRiding(this);
+			if (!com.jaymoskingdoms.PowersCompat.climbOn(player, this)) {
+				player.startRiding(this);
+			}
 		} else if (this.getPassengers().size() < 2 && this.getControllingPassenger() instanceof Player rider && owner(rider)) {
 			// a piggyback rider behind the owner
-			player.startRiding(this);
+			if (!com.jaymoskingdoms.PowersCompat.climbOn(player, this)) {
+				player.startRiding(this);
+			}
 		}
 		return InteractionResult.SUCCESS;
 	}

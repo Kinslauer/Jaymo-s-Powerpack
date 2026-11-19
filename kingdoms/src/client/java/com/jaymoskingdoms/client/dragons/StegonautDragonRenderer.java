@@ -51,6 +51,7 @@ final class StegonautDragonRenderer extends GeoEntityRenderer<StegonautDragon, L
 	@Override
 	public void addRenderData(StegonautDragon dragon, Void related, LivingEntityRenderState state, float partialTick) {
 		super.addRenderData(dragon, related, state, partialTick);
+		DragonBoarding.extract(dragon, state, partialTick);
 		state.addGeckolibData(LOOK, dragon.look());
 		state.addGeckolibData(SADDLED, dragon.saddled());
 		state.addGeckolibData(BREATH, Mth.lerp(partialTick, dragon.breathAnimO, dragon.breathAnim));
@@ -74,6 +75,7 @@ final class StegonautDragonRenderer extends GeoEntityRenderer<StegonautDragon, L
 	@Override
 	public void adjustModelBonesForRender(RenderPassInfo<LivingEntityRenderState> info, BoneSnapshots snapshots) {
 		super.adjustModelBonesForRender(info, snapshots);
+		DragonBoarding.apply(info, snapshots, new String[] {"neck0", "neck1", "neck2", "neck3"}, "head");
 		LivingEntityRenderState state = info.renderState();
 		float awake = 1.0F - info.getOrDefaultGeckolibData(DOZE, 0.0F);
 		float yaw = Mth.clamp(state.yRot, -LOOK_YAW, LOOK_YAW) * Mth.DEG_TO_RAD * awake;
