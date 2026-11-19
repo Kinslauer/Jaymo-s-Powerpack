@@ -1207,6 +1207,10 @@ def serverRunning = {
 		false
 	}
 }
+// Mods that say they run on both sides but break a dedicated server (client classes in their common mixins): kept out of
+// the server's mods. SWAY API's LevelRendererMixin stopped the Deck server starting (2026-11-19 7:36 AM), and
+// Interactive Foliage needs SWAY and only draws on the client.
+def notOnServer = ["sway-*.jar", "mc2-interactive-foliage-*.jar"]
 tasks.register("serverMods", Sync) {
 	onlyIf {
 		if (!serverDir.isDirectory()) {
@@ -1228,6 +1232,7 @@ tasks.register("serverMods", Sync) {
 	from dwJar
 	from localPackJars
 	into new File(serverDir, "mods")
+	exclude notOnServer
 }
 // the user's own CurseForge profile (imported from the pack zip): swap in the new Jaymo's Powers jar, the current
 // Jaymo's Kitchen jar and the local pack mods (each replacing older versions of itself). Skipped while the game is
@@ -1335,7 +1340,10 @@ tasks.register("deckMods", Tar) {
 	archiveFileName = "Deck-mods-${project.version}.tar.gz"
 	compression = Compression.GZIP
 	destinationDirectory = packDir
-	from(new File(packDir, "mods")) { into "mods" }
+	from(new File(packDir, "mods")) {
+		into "mods"
+		exclude notOnServer
+	}
 }
 tasks.register("packageModpack") {
 	group = "build"
