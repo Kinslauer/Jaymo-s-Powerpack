@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Roast whole animals on spits
 branch: claude/project-thread-kxd0tr
 with: cloud Claude, Reason Art thread "Roast whole animals on spits"
@@ -27,3 +27,4 @@ owns:
 
 ## Done
 PR #1881. Kitchen + Kingdoms compile clean; not played. Lore paragraph "The great spit" (new) awaits Andy.
+Merged 2026-11-19 (squash 6ecb325).
