@@ -6645,3 +6645,11 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 
 - **"You are Earthling."** was the Z Fighter lineage being announced, and Earthling is also a heritage, so a Z Fighter whose heritage has no line of its own (Heartlander, Stoneborn, Divine-born and the rest, who fight the Earthling way) was told they were an Earthling. Now a heritage with a line of its own reads "Your Z Fighter line: Warrior-born." and the rest read "Your blood has no Z Fighter line of its own, so you fight the Earthling way." The heritage itself was never changed by this message (`ZFighterLineage.become`).
 - Built; not played.
+
+## 0.25.87 (2026-11-19): taken-in wake-ups bind your stumps (#1890)
+
+- **Taken in by a village**: Andy woke in a village bed with both legs gone, still bleeding into it. Those who carry you in already bandaged your cuts and splinted your breaks, but a stump was never touched (a bandage can't close one). Now they bind every bleeding stump tight in linen (`Bleeding.bindStumps`), and wash out anything dirty or festering with their herbs. All in `Mortality.tendTaken`.
+- **Bound stumps show**: the stump's end and lower half are painted wrapped in linen (or a rag), on the stump's own skin (`WoundMarksLayer`), for a Minecraft day or until a wooden or iron limb is fitted over it.
+- **Other wake-ups**: carried out cold to a realm's cells, the gaolers keep you alive for judgement with rags on your cuts and stumps and your breaks splinted. Taken captive (`Mortality.tendCaptive`, Andy: "they should resusitate you, using dirty rags if you're lucky and bind you"): half the time they tie dirty rags round every cut and stump (a rag's slow heal, and it may fester; no splints), otherwise they sear a bleeding stump shut with a hot blade and leave the cuts. Kingdoms calls it each time captors haul a beaten captive up. Spiders' lairs, your own berth and the wild still see to nothing. Both the death wake and the blackout wake (`TakenOut`) do this.
+- Kingdoms' tending villagers (the bandaged tag) already stopped a stump's bleeding; the stump now shows its binding too.
+- Built; not played.

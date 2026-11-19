@@ -15785,3 +15785,9 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - Without Powers nothing is climbed: riders are seated at once as before.
 - **Freerunner** rank 1's description now also names the running vault into the saddle and the flying dismount off a mount at a canter or gallop (Jaymo's Powers does the moves).
 - Built; not played. The trunk curl and the dragons' neck and wing angles are guessed per model and haven't been seen in game.
+
+## 0.11.19 (2026-11-19): a carer speaks when you're taken in (#1890)
+
+- **Taken in**: when you come round in the village bed you were carried to (`Shelter`), the nearest of the village's folk who is awake turns to you and says you were bound up while you slept, with its own lines when a limb was lost and the stump bound. Nobody near, no word. Lines in `lang/parts/shelter.json`.
+- **Captives**: when captors haul a downed captive up (`CaptiveConduct`), including one barbarians or goblins just carried off (`TakenAlive`), they keep them from bleeding out through Powers' `Mortality.tendCaptive` (`PowersCompat.tendCaptive`): dirty rags if you're lucky, else a stump seared shut.
+- Built; not played.
