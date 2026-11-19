@@ -6556,3 +6556,9 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - Classes: `core/wet/ArmourOil` (new), `core/wet/Rust` (`OILED_UNTIL`, harness rust), `core/ArmourKind` (fitted weight),
   client `WetClient`.
 - Built; not played.
+
+## 0.25.77 (2026-11-19): creative keeps your prosthetics (#1874)
+
+- **Creative mode no longer pops prosthetics off**: creative's healing (`Wounds.creativeHeal`) used to grow every severed limb back, and a limb that grows back drops its wooden, iron or Rig limb as an item. A limb that wears a prosthetic now stays as it is; bare severed limbs and the head still grow back. Chrono's rewind out of death (`Wounds.undoAll`) goes through the same heal, so it keeps them too.
+- `Dismember.regrow(target, all, keep)`: regrow that leaves the parts in `keep` missing.
+- Compile-checked; not played.
