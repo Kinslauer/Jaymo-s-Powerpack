@@ -21,9 +21,9 @@ import org.jspecify.annotations.Nullable;
  * {@code schematics} folder (a button opens it, to drop downloaded files in), on the right the designs on the world.
  * Pick one and draw it on a blank building plan (a file of yours is sent up first); offer a world design to the
  * settlement you're in; save what you marked with a surveyor's rod. Below, what the table is building, how far it is,
- * what it waits for and the materials still to lay. The server decides everything ({@link MasonNet}). The left list's
- * second tab is the masons' pattern books (the building library): pick one and it's copied among your designs and
- * drawn on a plan, like a file of yours.
+ * what it waits for and the materials still to lay (the Materials button lists them all, {@link PlanMaterialsScreen}).
+ * The server decides everything ({@link MasonNet}). The left list's second tab is the masons' pattern books (the
+ * building library): pick one and it's copied among your designs and drawn on a plan, like a file of yours.
  */
 final class MasonScreen extends Screen {
 	static final int W = 360, PAD = 8, HEADER = 22, ROW = 12, ROWS = 8, MIN_ROWS = 3, BUTTON_H = 16, GAP = 4, ICON = 18;
@@ -60,6 +60,7 @@ final class MasonScreen extends Screen {
 				mc.gui.setScreen(new MasonScreen(payload));
 			}
 		});
+		ClientPlayNetworking.registerGlobalReceiver(MasonNet.Materials.TYPE, (payload, context) -> PlanMaterialsScreen.open(payload));
 	}
 
 	private void update(MasonNet.Open payload) {
@@ -187,11 +188,17 @@ final class MasonScreen extends Screen {
 		// the table's plan
 		int by = top() + panelH() - PAD - 12 - GAP - BUTTON_H;
 		if (!this.open.plan().isEmpty()) {
-			addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.mason.take"), b -> send(MasonNet.TAKE, "")).bounds(x, by, cw, BUTTON_H)
+			boolean retry = this.open.done() && this.open.skipped() > 0;
+			// (three to the row when there's a retry)
+			int bw = retry ? (W - 2 * PAD - 2 * GAP) / 3 : cw;
+			addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.mason.take"), b -> send(MasonNet.TAKE, "")).bounds(x, by, bw, BUTTON_H)
 				.build());
-			if (this.open.done() && this.open.skipped() > 0) {
+			// every block still needed, against what you carry
+			addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.mason.materials"), b -> send(MasonNet.MATERIALS, ""))
+				.bounds(x + bw + GAP, by, bw, BUTTON_H).build());
+			if (retry) {
 				addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.mason.retry", this.open.skipped()), b -> send(MasonNet.RETRY, ""))
-					.bounds(x + cw + GAP, by, cw, BUTTON_H).build());
+					.bounds(x + 2 * (bw + GAP), by, bw, BUTTON_H).build());
 			}
 		}
 	}
