@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 18:32). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 18:33). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -39,7 +39,7 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/plan-ghosts-litematica-tools|plan-ghosts-litematica-tools]] · plan-ghosts-litematica-tools · #1851 · in-review
-- [ ] [[Agents/claude-building-library|claude-building-library]] · 💻 Odysseus · in-review
+- [ ] [[Agents/claude-building-library|claude-building-library]] · 💻 Odysseus · #1854 · in-review
 
 
 ## Needs Andy
