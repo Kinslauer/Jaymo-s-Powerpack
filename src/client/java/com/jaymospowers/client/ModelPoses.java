@@ -32,9 +32,10 @@ public final class ModelPoses {
 	}
 
 	public static void apply(Model<?> model, Object state) {
-		BodyMotion.applyModel(model, state);
-		CrawlPose.applyModel(model, state);
-		LedgePose.applyModel(model, state);
+			BodyMotion.applyModel(model, state);
+			CrawlPose.applyModel(model, state);
+			MountClimbPose.applyModel(model, state);
+			LedgePose.applyModel(model, state);
 		com.jaymospowers.client.freerun.BarHangPose.applyModel(model, state);
 		MeditatePose.applyModel(model, state);
 		com.jaymospowers.client.wounds.TendPose.applyModel(model, state);
