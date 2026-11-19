@@ -25,6 +25,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 - [ ] #1891 Z Fighter line message no longer claims your heritage (Powers, 2026-11-19)
 - [ ] #1890 taken-in wake-ups bind your stumps (Powers, Kingdoms, 2026-11-19)
+- [ ] #1889 Regrown limbs come back unbroken, Verdant regrowth crunch (Powers, Kingdoms, 2026-11-19)
 - [ ] #1888 climbing onto and off mounts (SmoothMount-style, our own) (Powers, Kingdoms, 2026-11-19)
 - [ ] #1886 hit streak count off the action bar with Kingdoms (Powers, Kingdoms, 2026-11-19)
 - [ ] #1885 Deathless returns (for Kingdoms' Pallid) (Powers, Kingdoms, Kitchen, 2026-11-19)
@@ -82,8 +83,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1824 life story: leave it all to fate, and kept faces (doppelgangers) (Kingdoms, 2026-11-19)
 - [ ] #1822 Rangers read droppings (Kingdoms, Kitchen, 2026-11-19)
 - [ ] #1821 The wind no longer stops the server (Kingdoms, 2026-11-19)
-- [ ] #1820 birthplace page lists the heritage's strengths and weaknesses (Kingdoms, 2026-11-19)
-- …and 264 older ones.
+- …and 265 older ones.
 
 ## Health
 
