@@ -769,3 +769,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 
 - 2026-11-19 (guard wardrobe): village and haven guards stay militia/soldier, but "villagers and haven folk will more likely have powers and use those to fight to make up for the fact they have less skilled soldiers". Built: guards weighed once more, 1 in 5 (haven 1 in 3), fight openly (PR #1791).
 - 2026-11-19 (medieval music/deco thread): picked 41/49 rows (https://claude.ai/artifact/77CpKPurzSqn4YWJe7PJTv); trimmed Medieval Music zip hosted as a GitHub release asset; all 7 patches (docs/MedievalMusicDeco-Plan.md) sent to the PC reviewer's Inbox as medieval-deco-1..7.
+- 2026-11-19 (medieval music/deco thread): Andy approved the 5 lore placements (song stones, the gone-before, the headless rider, the vines by the lava seas, figureheads).
