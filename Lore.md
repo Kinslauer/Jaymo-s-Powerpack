@@ -947,6 +947,11 @@ forged.
 - **The Verdant World**: plains, moss and vines, the quiet green home the Verdant blood starts from. Its metal is amber
   bronze.
 
+**How folk take the Verdant** (new) (birthplace panel thread, 2026-11-19; Andy: "verdants should also have the weakness
+shunned, but people dont necessarily show it"). Most folk think less of Verdant blood, but few let it show. The Verdant
+are taller and stronger than everyone else from birth, so folk who would rather not deal with them do anyway, if
+reluctantly. The Verdant mostly keep among their own, but they go where they please.
+
 **The Verdant World's far country** (four-mods thread, 2026-11-11; Andy: Eden Ring "should be part of verdant
 world", no portal). Past the plains the green world turns strange. In the wet lowlands the turf is a pink mycelium and
 the trees are **balloon mushrooms**, held up by the gas in their caps; where they have stood longest they are huge and
