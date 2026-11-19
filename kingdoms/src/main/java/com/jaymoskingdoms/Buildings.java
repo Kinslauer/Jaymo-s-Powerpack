@@ -618,7 +618,8 @@ final class Buildings {
 		for (int x = 1; x <= 3; x++) {
 			s.set(x, 1, 1, Sketch.top(k.p.woodSlab()));
 		}
-		s.set(1, 1, 3, Blocks.BARREL.defaultBlockState());
+		// a fishmonger's stall keeps its catch in a fish barrel
+		s.set(1, 1, 3, k.chance(0.3) ? KitchenCompat.fishBarrel() : Blocks.BARREL.defaultBlockState());
 		k.display(s, 3, 3);
 		s.set(2, 1, 3, k.carpet);
 		if (k.chance(0.5)) {
