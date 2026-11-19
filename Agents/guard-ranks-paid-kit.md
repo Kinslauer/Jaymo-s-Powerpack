@@ -3,7 +3,7 @@ status: in-review
 task: Give guards ranks and paid-for armour
 branch: claude/project-thread-t799au
 with: cloud thread
-pr: 
+pr: 1791
 mods: kingdoms
 versions: 
 started: 2026-11-19
