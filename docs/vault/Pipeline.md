@@ -38,6 +38,7 @@ Sending a task back (`status=changes`) clears `text_pass`, so the fixes get thei
 ## Commands (each syncs before and after)
 
 ```bash
+python tools/vault_sync.py --next hermes-a           # resume your claim or take the next task, print it + the steps
 python tools/vault_sync.py --claim hermes-a          # take a task (exit 3 = none waiting), prints it
 python tools/vault_sync.py --claim hermes-fixer --fixes   # take the oldest sent-back task from anyone
 python tools/vault_sync.py --claim hermes-writer --writes   # writer: take the oldest PR waiting for its text pass
@@ -47,7 +48,14 @@ python tools/vault_sync.py --show <task>
 python tools/vault_sync.py --set <task> status=in-review pr=1234
 python tools/vault_sync.py --note <task> "text"
 python tools/vault_sync.py --send <task>             # reviewer only, after Andy says yes
+python tools/vault_sync.py --health                  # what's wrong in the live notes (also Live/Health.md)
+python tools/vault_sync.py --weekly [days]           # a review of the last 7 (or N) days
 ```
+
+**Reports the sync writes** (`tools/vault_reports.py`, after the Kanban): `Live/Dashboard.md` (what waits on Andy,
+what's stuck, merged work not played yet: Andy ticks what he's played and the next sync moves it to `Live/Played.md`),
+`Live/Health.md` (problems only, never fixed by itself: the coordinator's hourly check reads it and fixes what it can)
+and once a week `Live/Weekly/<year>-W<week>.md` (what merged, Andy's decisions, the asks still open).
 
 ## Setting it up on the PC
 
@@ -61,14 +69,19 @@ For it to ask only at `--send`, the session needs these in its permissions (Andy
 
 **Hermes:** give it a scheduled job (every 15 minutes) with this prompt:
 
-> In the Jaymo's Powerpack repo, run `python tools/vault_sync.py --claim hermes`. If it says "No task waiting", stop.
-> Otherwise it printed a task: do it, following `AGENTS.md` and `docs/vault/How agents use this vault.md` (your own
-> worktree and branch from origin/master, an agent note in `E:/Jaymo Vault Live/Agents/`, the "Before you open a PR"
-> checklist in `docs/AI-HANDBOOK.md`). If the task has review notes (it was sent back), fix every point on the same
-> branch and PR. Push, open or update the PR, then run
-> `python tools/vault_sync.py --set <task> status=in-review pr=<number>` and stop. If you need an answer from Andy,
-> run `python tools/vault_sync.py --note <task> "Question: ..."` and `python tools/vault_sync.py --set <task>
+> In the Jaymo's Powerpack repo, run `python tools/vault_sync.py --next hermes`. If it says "No task waiting", stop.
+> Otherwise it printed your task (one you'd already claimed comes first) and the numbered steps for it: follow
+> them, and `AGENTS.md` and `docs/vault/How agents use this vault.md`. Check, don't assume: prove each part works
+> with a build, a grep or a test, never invent a class or a number, and search before deciding something doesn't
+> exist; go through the ask line by line before you say it's done, and name anything you couldn't do. If the task
+> has review notes (it was sent back), fix every point on the same branch and PR. Push, open or update the PR, then
+> run `python tools/vault_sync.py --set <task> status=in-review pr=<number>` and stop. If you need an answer from
+> Andy, run `python tools/vault_sync.py --note <task> "Question: ..."` and `python tools/vault_sync.py --set <task>
 > status=blocked` instead. Never merge.
+
+(`--next` is `--claim` plus the steps: it resumes your own claimed task first, then takes the next one meant for you.
+`--next hermes-fixer` takes sent-back tasks like `--claim --fixes`, and `--next hermes-writer` is the writer's
+`--claim --writes`.)
 
 If Hermes has no scheduler, paste the same prompt whenever you want it to take the next task.
 
@@ -82,7 +95,7 @@ The modeller and the writer are specialists: they skip `for: hermes` and `for: a
 | Bot | `--claim` | Schedule | What it does |
 |---|---|---|---|
 | Default | `hermes` | as now | Keeps the tasks it already claimed (its send-backs come back to it). |
-| Builder A | `hermes-a` | every 15 min | The prompt above with `hermes` swapped for `hermes-a`. |
+| Builder A | `hermes-a` | every 15 min | The prompt above with `hermes` swapped for `hermes-a` (`--next hermes-a`). |
 | Builder B | `hermes-b` | every 15 min, 7 min after A | Same, as `hermes-b`. Two builders take two tracks at once (ParCool A and B). |
 | Fixer | `hermes-fixer --fixes` | every 15 min | Takes the oldest task the reviewer sent back, from whichever bot, so a busy or rate-limited builder doesn't hold it up. |
 | Modeller (Prometheus) | `hermes-modeller` | every 15 min | GeckoLib/Blockbench models, textures and animations, made with the art agent (`tools/art-agent`, below). Takes only tasks with `for: hermes-modeller` or `for: prometheus`. |
@@ -95,7 +108,8 @@ a third builder only once two have run for a day without hitting them.
 **Persona for every bot** (paste it in, changing the name):
 
 > You are hermes-a, a builder on Jaymo's Powerpack (Minecraft 26.3 Fabric mods). Follow `AGENTS.md`, `CLAUDE.md` and
-> `docs/vault/How agents use this vault.md`. Always work in your own git worktree on your own branch; never touch
+> `docs/vault/How agents use this vault.md`, and the `.claude/rules/*.md` whose `paths:` match the files you edit.
+> Check, don't assume (`CLAUDE.md`): prove it with a check, never invent, search before saying something's missing. Always work in your own git worktree on your own branch; never touch
 > the main checkout, never force-push, never merge. Before opening a PR, go through the "Before you open a PR"
 > checklist in `docs/AI-HANDBOOK.md` and run `python tools/pr_checks.py`. Never change versions, MODLOGs or
 > codemaps: add a change note per mod (`changes/<mod>/<branch-name>.md`).
