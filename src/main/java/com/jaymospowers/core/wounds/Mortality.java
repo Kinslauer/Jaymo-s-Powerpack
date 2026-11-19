@@ -277,6 +277,23 @@ public final class Mortality {
 	 */
 	public static final List<java.util.function.Function<ServerPlayer, java.util.Map.@Nullable Entry<Integer, Runnable>>> MID_TURNS = new ArrayList<>();
 
+	/**
+	 * Those the grave won't keep (Kingdoms: a Pallid Hollow; Andy: "he doesnt die under regular means"). Given the player as
+	 * they die, each may hand back how they come back; the first to answer has them. Asked after {@link #MID_TURNS} and before
+	 * {@link #TURNINGS}. Such a death is never final and never rolled: they lie in the black of a mid-turn death (its
+	 * vignette {@link Deathless#tint}), rise where they fell with no new injury, and no sure wake is used up. Only what ends
+	 * a mid-turn death ends them: losing their head, the void, lava, an execution by a player or a boss, or the Nether's
+	 * last chance.
+	 */
+	public static final List<java.util.function.Function<ServerPlayer, @Nullable Deathless>> DEATHLESS = new ArrayList<>();
+
+	/**
+	 * How one of the {@link #DEATHLESS} comes back: the vignette's colour (RGB), the line on the black as they go
+	 * ({@code fading}) and as they open their eyes ({@code woke}), both translation keys, and what's done as they rise.
+	 */
+	public record Deathless(int tint, String fading, String woke, Runnable back) {
+	}
+
 	/** (0.21.42) The black before one dying mid-turn rises (ticks; a turned kill's is {@link #OUT_BEFORE}). */
 	static final int TURN_DARK = 20 * 14;
 
@@ -333,6 +350,8 @@ public final class Mortality {
 		final @Nullable Runnable turn;
 		/** (0.21.42) Died mid-turn ({@link #MID_TURNS}): the longer black, its vignette, and the turned wake line. */
 		boolean midTurn;
+		/** One of the {@link #DEATHLESS} coming back: the line they wake to in place of the turned one, else null. */
+		@Nullable String ownWake;
 		int tries;
 		/** (0.21.7) Whether they've chosen to come to (the roll goes ahead), and how long they've held sneak towards it. */
 		boolean chosen;
@@ -759,6 +778,13 @@ public final class Mortality {
 			leftForDead(player, cause, sub(source, felled), by, mid.getValue(), mid.getKey());
 			return false;
 		}
+		// the grave won't keep them: they come back, whatever killed them
+		Deathless deathless = unturnable ? null : deathless(player);
+		if (deathless != null) {
+			JaymosPowers.LOGGER.info("{} fell to {} ({}): deathless, coming back", player.getScoreboardName(), cause.key(), source.getMsgId());
+			leftForDead(player, cause, sub(source, felled), by, deathless.back(), deathless.tint(), deathless.fading(), deathless.woke());
+			return false;
+		}
 		Runnable turn = unturnable || by == null ? null : turning(player, by);
 		// (0.20.83) the first deaths of a life always wake (no head, the void, or a deliberate execution aside)
 		int woken = player.getAttachedOrElse(WOKEN, 0);
@@ -801,6 +827,21 @@ public final class Mortality {
 				}
 			} catch (RuntimeException e) {
 				JaymosPowers.LOGGER.warn("A turning under way failed for {}", player.getScoreboardName(), e);
+			}
+		}
+		return null;
+	}
+
+	/** How {@code player} comes back from this death ({@link #DEATHLESS}), or null if they don't. */
+	private static @Nullable Deathless deathless(ServerPlayer player) {
+		for (java.util.function.Function<ServerPlayer, Deathless> answer : DEATHLESS) {
+			try {
+				Deathless back = answer.apply(player);
+				if (back != null) {
+					return back;
+				}
+			} catch (RuntimeException e) {
+				JaymosPowers.LOGGER.warn("A deathless return failed for {}", player.getScoreboardName(), e);
 			}
 		}
 		return null;
@@ -944,6 +985,12 @@ public final class Mortality {
 	 */
 	private static void leftForDead(ServerPlayer player, Cause cause, @Nullable String sub, @Nullable Entity by, @Nullable Runnable turn,
 		@Nullable Integer tint) {
+		leftForDead(player, cause, sub, by, turn, tint, null, null);
+	}
+
+	/** As above; {@code ownFading} and {@code ownWake} (translation keys, or null) replace a mid-turn death's two lines. */
+	private static void leftForDead(ServerPlayer player, Cause cause, @Nullable String sub, @Nullable Entity by, @Nullable Runnable turn,
+		@Nullable Integer tint, @Nullable String ownFading, @Nullable String ownWake) {
 		ServerLevel level = player.level();
 		boolean midTurn = tint != null && turn != null;
 		if (!midTurn) {
@@ -963,7 +1010,8 @@ public final class Mortality {
 		// ((0.21.7) out cold where they fell until they come to by themselves, or someone brings them round; with nobody near
 		// to do either, they don't lie waiting for it: the black lifts onto wherever they were taken, HELP_RANGE)
 		boolean straight = turn != null || alone(player);
-		String fading = midTurn ? "message.jaymospowers.mortality.turning" : "message.jaymospowers.mortality.fading";
+		String fading = midTurn && ownFading != null ? ownFading
+			: midTurn ? "message.jaymospowers.mortality.turning" : "message.jaymospowers.mortality.fading";
 		// (the line first: the black draws it, so the knock-out doesn't repeat it on the action bar)
 		player.setAttached(WAKE_LINE, fading);
 		Downed.knockOut(level, player, straight ? (midTurn ? TURN_DARK : OUT_BEFORE) + OUT_AFTER + 20 * 60 : LIE_TICKS, false, fading, false);
@@ -978,6 +1026,7 @@ public final class Mortality {
 		Wake wake = new Wake(cause, sub, level.dimension(), player.blockPosition(),
 			level.getServer().getTickCount() + (midTurn ? TURN_DARK : OUT_BEFORE), by, turn);
 		wake.midTurn = midTurn;
+		wake.ownWake = midTurn ? ownWake : null;
 		wake.since = level.getServer().getTickCount();
 		// ((0.21.7) the turned rise as they rise: nothing to carry them away from; nor is there for one with nobody near)
 		if (straight) {
@@ -1408,7 +1457,8 @@ public final class Mortality {
 			Downed.forgetQuietly(player);
 		}
 		wakeHungry(player);
-		String woke = "message.jaymospowers.mortality.wake." + (wake.midTurn ? "turned" : wake.turn != null ? "risen" : line);
+		String woke = wake.ownWake != null ? wake.ownWake
+			: "message.jaymospowers.mortality.wake." + (wake.midTurn ? "turned" : wake.turn != null ? "risen" : line);
 		player.setAttached(WAKE_LINE, woke);
 		Downed.knockOut(level, player, OUT_AFTER, false, woke, false);
 		WOKE.put(player.getUUID(), (long) level.getServer().getTickCount() + WOKE_GRACE);
