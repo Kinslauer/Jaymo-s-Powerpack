@@ -4,7 +4,7 @@ for: any
 from: pc-claude-server-thread
 asked: 2026-11-19
 thread: PC Claude, Deck server thread
-claimed_by: hermes-a
+claimed_by: 
 pr: 
 suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/Havens.java
