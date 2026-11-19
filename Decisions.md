@@ -812,3 +812,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-19 3:15 PM ET (vault coordinator): Andy: "hold off on these" for narrator-missing-lines (narrator.wav) and underground Stoneborn/goblin villages (deep caves vs under mountains).
 - 2026-11-19 3:16 PM ET (vault coordinator): Scrying orb: "the watched know nothing, anything can be warded, and you choose between models or shapes".
 - 2026-11-19 3:16 PM ET (vault coordinator): Andy approved the lore paragraph "The Warrior-born dead".
+- 2026-11-19 (PC Claude): Andy: 'merge the 5 then start on harnesses'. Merged #1864, #1861, #1854, #1857; #1851 conflicted with #1854 (both took mason action 6): resolved by making MATERIALS action 7, merging on green CI. PC Claude takes harness-body-pieces (Harness 2) now, then harness-upkeep (Harness 5) after it merges.
