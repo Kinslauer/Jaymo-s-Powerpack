@@ -356,6 +356,9 @@ public final class WebPower implements Power {
 		WebBehemoth.register();
 		WebInhabit.register();
 		WebAscension.register();
+		WebDarkSense.register();
+		WebShield.register();
+		WebBlossom.register();
 		WebDebugCommand.register();
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Swing.TYPE, (payload, ctx) -> INSTANCE.onSwing(ctx.player(), payload));
 		ServerPlayNetworking.registerGlobalReceiver(WebNet.Rope.TYPE, (payload, ctx) -> {
@@ -474,6 +477,7 @@ public final class WebPower implements Power {
 		WebTendrils.releaseAll(player, false);
 		WebSymbiote.onLost(player);
 		WebAscension.onLost(player);
+		WebBlossom.forget(player);
 	}
 
 	/** Bonded to a symbiote, the badge says so (and something worse once ascended too). */
@@ -513,6 +517,11 @@ public final class WebPower implements Power {
 		if (WebSymbioteBody.onUltimate(player, down)) {
 			return;
 		}
+		if (down && player.isShiftKeyDown() && mastered(player)) {
+			// Sneak + C: Web Blossom
+			WebBlossom.use(player);
+			return;
+		}
 		if (Power.super.ultimateAnswers(player)) {
 			WebAscension.ultimate(player, down);
 		}
@@ -521,7 +530,7 @@ public final class WebPower implements Power {
 	/** C answers once ascended, and (0.17.150) for anyone bonded to a symbiote: it feeds it ({@link WebSymbioteBody#onUltimate}). */
 	@Override
 	public boolean ultimateAnswers(Player player) {
-		return Power.super.ultimateAnswers(player) || WebSymbiote.isBonded(player);
+		return Power.super.ultimateAnswers(player) || WebSymbiote.isBonded(player) || mastered(player);
 	}
 
 	private static boolean swinging(State state) {
@@ -621,6 +630,7 @@ public final class WebPower implements Power {
 		WebTendrils.tick(player);
 		WebImpacts.tick(player);
 		WebWhip.tick(player);
+		WebBlossom.tick(player);
 		WebSlam.tick(player);
 		WebBrute.tick(player);
 		WebMorph.tick(player);
