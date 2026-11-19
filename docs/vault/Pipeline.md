@@ -122,9 +122,10 @@ model, previews it and fixes it, and exports the GeckoLib files). One-time setup
 
 > Run `python tools/vault_sync.py --claim hermes-modeller`. If it says "No task waiting", stop. Otherwise make your
 > worktree and branch as usual, then `cd tools/art-agent` and give the art agent the brief:
-> `agents-cli run "<what to make, its size in blocks, which mod (jaymospowers, jaymoskingdoms or jaymoskitchen), the
-> model and animation names>"` (add `--file <picture>` for each reference picture in the task). Look at what it made in
-> `out/previews/` and send it back with `agents-cli run` for fixes until it looks right. If Gemini is rate-limited or
+> `uv run python -m app.ask "<what to make, its size in blocks, which mod (jaymospowers, jaymoskingdoms or
+> jaymoskitchen), the model and animation names>"` (add `--file <picture>` for each reference picture in the task). It
+> prints each step and has no time limit. Look at what it made in `out/previews/` and run it again with the fixes until
+> it looks right. If Gemini is rate-limited or
 > down, call the same tools yourself: `python -m app.cli tools` lists them, `python -m app.cli <tool> <args.json>`
 > runs one. Then `python -m app.cli install <name> <mod>` copies the files into the mod, and you wire up anything else
 > the task asks for (entity, renderer, item), following `AGENTS.md` and `CLAUDE.md`. Build the mod, open the PR,
