@@ -3,7 +3,7 @@ status: in-review
 task: Truly random start after the gender page; save a dead life's character as a doppelganger preset; familiar remarks
 branch: claude/project-thread-kbijrl
 with: Claude (Reason Art project thread)
-pr: 
+pr: 1824
 mods: kingdoms
 versions: 
 started: 2026-11-19
