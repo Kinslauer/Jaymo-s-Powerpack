@@ -1,5 +1,6 @@
 package com.jaymospowers.client;
 
+import com.jaymospowers.client.stamina.DodgeClient;
 import com.jaymospowers.core.MountClimb;
 import com.jaymospowers.core.MountClimb.Kind;
 import com.jaymospowers.core.MountLeap;
@@ -89,8 +90,12 @@ public final class MountClimbPose {
 
 	private static final Map<Integer, Climb> CLIMBS = new HashMap<>();
 	private static final Map<Integer, Seat> SEATS = new HashMap<>();
-	/** How fast each rider's mount was going (blocks a tick, level) when last seen under them: a gallop makes the leap off (MountLeap). */
+	/** How fast each rider's mount was going (blocks a tick, level) when last seen under them: a gallop may mean the server leaps them off (MountLeap). */
 	private static final Map<Integer, Double> RIDE_SPEED = new HashMap<>();
+	/** A climb off held back a few ticks, waiting to hear whether the server leaps the rider (MountLeap) instead. */
+	private static final Map<Integer, Climb> WAITING = new HashMap<>();
+	/** How many ticks to wait for the server's word on a leap. */
+	static final int LEAP_WAIT = 4;
 	private static final Map<Kind, KeyframeClip> CLIPS = new EnumMap<>(Kind.class);
 
 	private MountClimbPose() {
@@ -101,6 +106,11 @@ public final class MountClimbPose {
 			ClientLevel level = Minecraft.getInstance().level;
 			Entity player = level == null ? null : level.getEntity(p.player());
 			if (player instanceof Player) {
+				WAITING.remove(p.player());
+				if (Kind.of(p.kind()) == Kind.OFF_LEAP && player == Minecraft.getInstance().player) {
+					// the server threw the roll at the end of this leap: draw that one, not an old roll of ours
+					DodgeClient.forgetRoll();
+				}
 				CLIMBS.put(p.player(), new Climb(Kind.of(p.kind()), p.mount(), Math.max(1, p.ticks()), player.position(), bodyYaw(player)));
 			}
 		});
@@ -126,9 +136,18 @@ public final class MountClimbPose {
 		ClientLevel level = minecraft.level;
 		if (level == null) {
 			CLIMBS.clear();
+			WAITING.clear();
 			SEATS.clear();
 			return;
 		}
+		WAITING.entrySet().removeIf(e -> {
+			// no word of a leap: the ordinary climb off, a few ticks late
+			if (++e.getValue().age > LEAP_WAIT) {
+				CLIMBS.putIfAbsent(e.getKey(), e.getValue());
+				return true;
+			}
+			return false;
+		});
 		CLIMBS.entrySet().removeIf(e -> {
 			Climb c = e.getValue();
 			c.age++;
@@ -141,7 +160,7 @@ public final class MountClimbPose {
 				return player.isPassenger() && c.age >= c.ticks || c.age > c.ticks + SEAT_WAIT;
 			}
 			// a leap is over when they land (the dodge's roll takes it from there)
-			return c.age > c.ticks || c.kind == Kind.OFF_LEAP && c.age > 2 && player.onGround();
+			return c.age > c.ticks || c.kind == Kind.OFF_LEAP && c.age > 4 && player.onGround();
 		});
 		SEATS.keySet().removeIf(id -> !(level.getEntity(id) instanceof Player));
 		RIDE_SPEED.keySet().removeIf(id -> !(level.getEntity(id) instanceof Player));
@@ -162,8 +181,13 @@ public final class MountClimbPose {
 			double speed = RIDE_SPEED.getOrDefault(player.getId(), 0.0);
 			RIDE_SPEED.remove(player.getId());
 			if (seat != null && player.isAlive() && !player.isSpectator() && player.position().distanceTo(seat.at) < OFF_REACH) {
-				Kind kind = MountLeap.leaps(player, speed) ? Kind.OFF_LEAP : offKind(seat, player.position());
-				CLIMBS.put(player.getId(), new Climb(kind, seat.mountId, MountClimb.seconds(kind, player) * 20.0F, seat.at, seat.yaw));
+				Kind kind = offKind(seat, player.position());
+				Climb off = new Climb(kind, seat.mountId, MountClimb.seconds(kind, player) * 20.0F, seat.at, seat.yaw);
+				if (MountLeap.leaps(player, speed)) {
+					WAITING.put(player.getId(), off);
+				} else {
+					CLIMBS.put(player.getId(), off);
+				}
 			}
 		}
 	}
@@ -210,7 +234,7 @@ public final class MountClimbPose {
 				seat = mount.getPassengerRidingPosition(player).subtract(player.getVehicleAttachmentPoint(mount))
 					.subtract(mount.position()).add(mount.getPosition(partialTicks));
 			}
-			Vec3 d = seat.subtract(c.from);
+			Vec3 d = seat.subtract(c.kind == Kind.ON_VAULT ? at : c.from);
 			float across, up, hump;
 			switch (c.kind) {
 				case ON_BACK -> {
@@ -245,7 +269,8 @@ public final class MountClimbPose {
 			// a vault rises over the rump and settles; a stirrup climb lifts a little past the seat and sits down
 			float over = Mth.sin(Mth.PI * Mth.clamp((s - 0.2F) / 0.6F, 0.0F, 1.0F)) * hump;
 			Vec3 path = new Vec3(d.x * across, d.y * up + over, d.z * across);
-			return path.subtract(at.subtract(c.from));
+			// (a vault runs on through it, so its path is from where the body really is, not from where it began)
+			return c.kind == Kind.ON_VAULT ? path : path.subtract(at.subtract(c.from));
 		}
 		if (c.kind == Kind.OFF_SLIP) {
 			// down the flank: the height goes first, the rest of the way across after

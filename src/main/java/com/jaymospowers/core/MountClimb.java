@@ -88,9 +88,9 @@ public final class MountClimb {
 	static final float ARMOUR_SLOW = 1.0F;
 	/** A climb is called off if the climber strays this far from where it began, or the mount this far from them. */
 	static final double STRAY = 0.75, REACH = 4.0;
-	/** Armour slows the vault and the leap only this much (against {@link #ARMOUR_SLOW}); a vaulter may run on this far from where it began (blocks). */
+	/** Armour slows the vault and the leap only this much (against {@link #ARMOUR_SLOW}); a vaulter, who runs on through it, is called off only this far from the mount (blocks). */
 	static final float VAULT_ARMOUR_SLOW = 0.25F;
-	static final double VAULT_STRAY = 3.0;
+	static final double VAULT_REACH = 6.0;
 	/** Behind the mount: within this many degrees of straight back. */
 	static final float BEHIND = 50.0F;
 
@@ -273,8 +273,9 @@ public final class MountClimb {
 				continue;
 			}
 			Entity mount = c.mount;
+			boolean vault = c.kind == Kind.ON_VAULT;
 			if (!mount.isAlive() || mount.level() != player.level() || player.isPassenger() || player.isShiftKeyDown()
-				|| player.position().distanceTo(c.from) > (c.kind == Kind.ON_VAULT ? VAULT_STRAY : STRAY) || player.distanceTo(mount) > REACH) {
+				|| !vault && player.position().distanceTo(c.from) > STRAY || player.distanceTo(mount) > (vault ? VAULT_REACH : REACH)) {
 				it.remove();
 				send(player, new Stop(player.getId(), CALLED_OFF));
 				continue;
@@ -327,7 +328,7 @@ public final class MountClimb {
 	}
 
 	/** To the climber and everyone who can see them. */
-	private static void send(ServerPlayer player, CustomPacketPayload payload) {
+	static void send(ServerPlayer player, CustomPacketPayload payload) {
 		ServerPlayNetworking.send(player, payload);
 		for (ServerPlayer other : PlayerLookup.tracking(player)) {
 			if (other != player) {
