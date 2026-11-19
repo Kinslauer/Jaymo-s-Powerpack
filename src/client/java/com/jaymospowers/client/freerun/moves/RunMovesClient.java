@@ -332,7 +332,8 @@ public final class RunMovesClient {
 
 	private static boolean showing() {
 		LocalPlayer player = Minecraft.getInstance().player;
-		return armed && player != null && !player.isCreative() && !player.isSpectator();
+		return player != null && !player.isCreative() && !player.isSpectator()
+			&& (armed || com.jaymospowers.client.power.web.WebPowerClient.INSTANCE.swing.slingshotShown());
 	}
 
 	private static void tickSkyDive(LocalPlayer player, boolean jumpPressed) {
@@ -536,25 +537,35 @@ public final class RunMovesClient {
 		fall = 0.0;
 	}
 
-	/** The charge, on a horse's jump bar in the XP bar's place, its orange peak drawn over it. False when there's none to draw. */
+	/** The charge (or Web's slingshot draw), on a horse's jump bar in the XP bar's place, its orange peak drawn over it. False when there's none to draw. */
 	private static boolean renderCharge(GuiGraphicsExtractor graphics) {
 		if (!showing()) {
 			return false;
 		}
+		com.jaymospowers.client.power.web.WebSwing swing = com.jaymospowers.client.power.web.WebPowerClient.INSTANCE.swing;
+		if (armed) {
+			drawJumpBar(graphics, fill(charge), peak, charge > 0);
+		} else {
+			drawJumpBar(graphics, swing.slingDrawn(), swing.slingPeak(), swing.slingDrawn() > 0.0F);
+		}
+		return true;
+	}
+
+	/** A horse's jump bar filled {@code fill} of the way, with the orange peak from {@code peak} if {@code peaked}. */
+	private static void drawJumpBar(GuiGraphicsExtractor graphics, float fill, float peak, boolean peaked) {
 		int left = (graphics.guiWidth() - 182) / 2;
 		int top = graphics.guiHeight() - 29;
 		graphics.blitSprite(RenderPipelines.GUI_TEXTURED, JUMP_BAR, left, top, 182, 5);
-		int filled = Math.round(182 * fill(charge));
+		int filled = Math.round(182 * fill);
 		if (filled > 0) {
 			graphics.blitSprite(RenderPipelines.GUI_TEXTURED, JUMP_BAR_FILL, 182, 5, 0, 0, left, top, filled, 5);
 		}
-		if (charge > 0) {
+		if (peaked) {
 			// the peak: where the full leap is (the perk keeps it in one spot; without it, it moves every charge)
 			int from = left + Math.round(182 * peak), to = Math.min(left + 181, from + Math.round(182 * ChargeJump.PEAK_WIDTH));
 			int edge = Mth.clamp(left + filled, from, to);
 			graphics.fill(from, top + 1, edge, top + 4, PEAK_FILLED);
 			graphics.fill(edge, top + 1, to, top + 4, PEAK_EMPTY);
 		}
-		return true;
 	}
 }
