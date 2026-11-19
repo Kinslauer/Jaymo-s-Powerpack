@@ -48,6 +48,7 @@ final class ZephyrusDragonRenderer extends GeoEntityRenderer<ZephyrusDragon, Liv
 	@Override
 	public void addRenderData(ZephyrusDragon dragon, Void related, LivingEntityRenderState state, float partialTick) {
 		super.addRenderData(dragon, related, state, partialTick);
+		DragonBoarding.extract(dragon, state, partialTick);
 		state.addGeckolibData(LOOK, dragon.look());
 		state.addGeckolibData(FLY, Mth.lerp(partialTick, dragon.flyAnimO, dragon.flyAnim));
 		state.addGeckolibData(CRASH, Mth.lerp(partialTick, dragon.crashAnimO, dragon.crashAnim));
@@ -65,6 +66,7 @@ final class ZephyrusDragonRenderer extends GeoEntityRenderer<ZephyrusDragon, Liv
 	@Override
 	public void adjustModelBonesForRender(RenderPassInfo<LivingEntityRenderState> info, BoneSnapshots snapshots) {
 		super.adjustModelBonesForRender(info, snapshots);
+		DragonBoarding.apply(info, snapshots, new String[] {"neck0", "neck1", "neck2"}, "head", new DragonBoarding.Wing("left_wing", 1.0F), new DragonBoarding.Wing("right_wing", -1.0F));
 		LivingEntityRenderState state = info.renderState();
 		float fly = info.getOrDefaultGeckolibData(FLY, 0.0F);
 		float crash = info.getOrDefaultGeckolibData(CRASH, 0.0F) * (1.0F - fly);

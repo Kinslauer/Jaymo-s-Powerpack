@@ -127,6 +127,86 @@ HEAVE = [
     (1.0, STAND),
 ]
 
+# onto a kneeling war elephant or mammoth: a foot up on the folded foreleg, hands to the harness, hauled up the flank, the leg swung over
+ON_BIG_KNEEL = [
+    (0.0, STAND),
+    (0.25, {"body": (10, 0, 0), "right_arm": (-140, 0, 10), "left_arm": (-130, 0, -8),
+            "right_leg": (-75, 0, 12), "left_leg": (-5, 0, -2)}),
+    (0.55, {"body": (22, 0, -4), "right_arm": (-125, 0, 8), "left_arm": (-115, 0, -6),
+            "right_leg": (-40, 0, 55), "left_leg": (-60, 0, -4)}),
+    (0.8, {"body": (12, 0, -2), "right_arm": (-65, 0, 6), "left_arm": (-60, 0, -4),
+           "right_leg": (-72, 16, 20), "left_leg": (-72, -14, -6)}),
+    (1.0, RIDE),
+]
+
+# lifted in an elephant's trunk: reaching for it, borne up with the legs dangling and the arms out for balance, set down on its back
+ON_TRUNK = [
+    (0.0, STAND),
+    (0.2, {"body": (-4, 0, 0), "right_arm": (-100, 0, 20), "left_arm": (-100, 0, -20),
+           "right_leg": (-10, 0, 3), "left_leg": (-10, 0, -3)}),
+    (0.5, {"body": (-10, 0, 0), "right_arm": (-70, 0, 45), "left_arm": (-70, 0, -45),
+           "right_leg": (-35, 0, 6), "left_leg": (-45, 0, -6)}),
+    (0.8, {"body": (-4, 0, 0), "right_arm": (-60, 0, 30), "left_arm": (-60, 0, -30),
+           "right_leg": (-60, 10, 12), "left_leg": (-62, -10, -8)}),
+    (1.0, RIDE),
+]
+
+# a moa crouches: knees bent, a hop with the legs tucked, landing astride its low back
+ON_CROUCH = [
+    (0.0, STAND),
+    (0.25, {"body": (18, 0, 0), "right_arm": (-70, 0, 12), "left_arm": (-70, 0, -12),
+            "right_leg": (-45, 0, 3), "left_leg": (-45, 0, -3)}),
+    (0.5, {"body": (8, 0, 0), "right_arm": (-90, 0, 22), "left_arm": (-90, 0, -22),
+           "right_leg": (-70, 0, 22), "left_leg": (-70, 0, -22)}),
+    (0.8, {"body": (6, 0, 0), "right_arm": (-55, 0, 8), "left_arm": (-55, 0, -8),
+           "right_leg": (-80, 16, 10), "left_leg": (-80, -16, -10)}),
+    (1.0, RIDE),
+]
+
+# up a lowered wing from the mount's left, like a ramp: arms out for balance, a step at a time, a leg swung over at the top
+ON_WING_LEFT = [
+    (0.0, STAND),
+    (0.2, {"body": (8, 0, 0), "right_arm": (-25, 0, 50), "left_arm": (-25, 0, -50),
+           "right_leg": (-5, 0, 2), "left_leg": (-38, 0, -4)}),
+    (0.45, {"body": (14, 0, -3), "right_arm": (-15, 0, 65), "left_arm": (-15, 0, -65),
+            "right_leg": (-40, 0, 4), "left_leg": (8, 0, -2)}),
+    (0.7, {"body": (16, 0, -4), "right_arm": (-60, 0, 30), "left_arm": (-60, 0, -30),
+           "right_leg": (-50, 0, 40), "left_leg": (-45, 0, -4)}),
+    (0.88, {"body": (8, 0, -2), "right_arm": (-50, 0, 10), "left_arm": (-48, 0, -8),
+            "right_leg": (-75, 16, 16), "left_leg": (-72, -14, -6)}),
+    (1.0, RIDE),
+]
+
+# up a dragon's lowered neck from its head: hands forward on the scales, leaning in, shuffling up one knee at a time, then astride
+ON_NECK = [
+    (0.0, STAND),
+    (0.2, {"body": (20, 0, 0), "right_arm": (-110, 0, 10), "left_arm": (-110, 0, -10),
+           "right_leg": (-50, 0, 6), "left_leg": (-10, 0, -3)}),
+    (0.45, {"body": (26, 0, 0), "right_arm": (-125, 0, 14), "left_arm": (-95, 0, -14),
+            "right_leg": (-20, 0, 10), "left_leg": (-60, 0, -8)}),
+    (0.7, {"body": (20, 0, 0), "right_arm": (-100, 0, 12), "left_arm": (-120, 0, -12),
+           "right_leg": (-62, 4, 18), "left_leg": (-35, 0, -10)}),
+    (0.88, {"body": (10, 0, 0), "right_arm": (-60, 0, 6), "left_arm": (-60, 0, -6),
+            "right_leg": (-78, 16, 12), "left_leg": (-76, -14, -6)}),
+    (1.0, RIDE),
+]
+
+# up a dragon's lowered wing from the left: a long scramble up the leathery ramp on hands and feet, arms out when it sways, then over onto the back
+ON_DRAGON_WING_LEFT = [
+    (0.0, STAND),
+    (0.15, {"body": (16, 0, 0), "right_arm": (-60, 0, 30), "left_arm": (-60, 0, -30),
+            "right_leg": (-3, 0, 2), "left_leg": (-45, 0, -4)}),
+    (0.4, {"body": (24, 0, -4), "right_arm": (-100, 0, 20), "left_arm": (-70, 0, -35),
+           "right_leg": (-45, 0, 3), "left_leg": (-12, 0, -3)}),
+    (0.65, {"body": (26, 0, -4), "right_arm": (-85, 0, 30), "left_arm": (-105, 0, -20),
+            "right_leg": (-20, 0, 6), "left_leg": (-55, 0, -6)}),
+    (0.85, {"body": (14, 0, -2), "right_arm": (-60, 0, 14), "left_arm": (-60, 0, -10),
+            "right_leg": (-60, 10, 42), "left_leg": (-52, 0, -4)}),
+    (0.93, {"body": (8, 0, 0), "right_arm": (-45, 0, 8), "left_arm": (-45, 0, -6),
+            "right_leg": (-78, 16, 14), "left_leg": (-76, -14, -6)}),
+    (1.0, RIDE),
+]
+
 CLIPS = {
     "on_left": ON_LEFT,
     "on_right": [(t, mirror(p)) for t, p in ON_LEFT],
@@ -137,6 +217,14 @@ CLIPS = {
     "on_pillion": ON_PILLION,
     "off_slip": OFF_SLIP,
     "heave": HEAVE,
+    "on_big_kneel": ON_BIG_KNEEL,
+    "on_trunk": ON_TRUNK,
+    "on_crouch": ON_CROUCH,
+    "on_wing_left": ON_WING_LEFT,
+    "on_wing_right": [(t, mirror(p)) for t, p in ON_WING_LEFT],
+    "on_neck": ON_NECK,
+    "on_dragon_wing_left": ON_DRAGON_WING_LEFT,
+    "on_dragon_wing_right": [(t, mirror(p)) for t, p in ON_DRAGON_WING_LEFT],
 }
 
 

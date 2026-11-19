@@ -271,6 +271,10 @@ final class MoaModel extends AetherAnimalModel {
 		float flyAmount = Mth.clamp(state.flapSpeed, 0.0F, 1.0F);
 		this.walkAnimation.applyWalk(state.walkAnimationPos, Mth.clamp(state.walkAnimationSpeed - flyAmount, 0.0F, 1.0F), 2.0F, 2.5F);
 		this.flyAnimation.applyWalk(state.ageInTicks, flyAmount, WING_BEAT, 1.0F);
+		// being climbed onto, it crouches (the sitting pose it has; lowered over the climb's first part)
+		if (state.climb > 0.0F) {
+			this.sitAnimation.applyWalk(0.0F, state.climb, 1.0F, 1.0F);
+		}
 		this.moa_saddle.visible = state.saddled;
 		this.saddlebag.visible = state.bagged;
 	}

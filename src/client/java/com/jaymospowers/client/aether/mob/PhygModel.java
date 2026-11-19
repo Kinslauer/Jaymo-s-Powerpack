@@ -134,6 +134,7 @@ final class PhygModel extends AetherAnimalModel {
 		float beat = Mth.sin(state.flap) * open * WING_BEAT;
 		this.wing_left.zRot -= beat;
 		this.wing_right.zRot += beat;
+		lowerWing(this.wing_left, this.wing_right, state);
 		this.saddle.visible = state.saddled;
 	}
 }

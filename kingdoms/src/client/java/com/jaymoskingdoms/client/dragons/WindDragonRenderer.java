@@ -38,6 +38,8 @@ final class WindDragonRenderer<M extends EntityModel<WindDragonRenderer.State>> 
 		float actionAge;
 		/** (0.7.531) A blow's flinch, 1 as it lands and easing to 0 over half a second. */
 		float hurt;
+		/** Someone climbing onto it: how far it lowers its neck (0 to 1). Powers' mount climb, by {@code PowersClimbClient}. */
+		float neckDown;
 	}
 
 	private final String species;
@@ -107,6 +109,8 @@ final class WindDragonRenderer<M extends EntityModel<WindDragonRenderer.State>> 
 		state.saddled = dragon.saddled();
 		state.action = dragon.actionSeen;
 		state.actionAge = dragon.actionAge + partialTicks;
+		com.jaymoskingdoms.client.PowersClimbClient.Pose boarding = com.jaymoskingdoms.client.PowersClimbClient.on(dragon.getId(), partialTicks);
+		state.neckDown = boarding != null && boarding.style() == com.jaymoskingdoms.client.PowersClimbClient.NECK ? boarding.amount() : 0.0F;
 		state.hurt = dragon.hurtTime > 0 ? Math.max(0.0F, (dragon.hurtTime - partialTicks) / 10.0F) : 0.0F;
 	}
 
