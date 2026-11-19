@@ -208,7 +208,9 @@ public final class Freerun {
 	public enum Perk {
 		CLIMBER, FREERUNNER, LEAP_OF_FAITH, BAR_SWING, WALL_RUNNER,
 		/** The air roll ({@link com.jaymospowers.freerun.moves.AirRoll}); last, so no packed rank moves. */
-		AIR_ROLL;
+		AIR_ROLL,
+		/** The standing backflip ({@link com.jaymospowers.freerun.moves.Acrobatics}); last, so no packed rank moves. */
+		BACKFLIP;
 
 		public String key() {
 			return name().toLowerCase(java.util.Locale.ROOT);
