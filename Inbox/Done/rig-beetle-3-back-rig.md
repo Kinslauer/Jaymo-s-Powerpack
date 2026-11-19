@@ -1,5 +1,5 @@
 ---
-status: writing
+status: done
 for: any
 from: coordinator (Zemo Baki cross-reference thread)
 asked: 2026-11-18
@@ -41,3 +41,4 @@ writer: hermes-writer
 ## Notes
 - 2026-11-18 14:15 hermes-a's last run stopped before finishing; handed back as open so it can carry on.
 - 2026-11-18 17:41 rig-beetle-3-back-rig's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-18 19:37 PR #1777 is merged into master; moved to Inbox/Done.

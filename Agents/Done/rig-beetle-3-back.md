@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: rig-beetle-3-back-rig
 branch: claude/rig-beetle-3-back
 with: Claude Code (PC)
@@ -26,3 +26,4 @@ owns:
 
 ## Done
 Wing vanes spread in full flight; Wing Slash, Spear Legs, Pincers (grab/throw), Grapple Claw and Horn Lightning are Rig menu entries. Compiled on the PC, CI passes; not played.
+- 2026-11-18 19:37 PR #1777 is merged into master; moved to Agents/Done.

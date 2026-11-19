@@ -1,11 +1,11 @@
 ---
-status: stalled
+status: running
 task: scrying-orb
 branch: claude/scrying-orb
-with: 
-pr: 
+with:
+pr:
 mods: kingdoms
-versions: 
+versions:
 started: 2026-11-18
 owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/Scrying.java
@@ -36,6 +36,8 @@ Complementary (block models in a block entity renderer, no second camera).
 - Andy (Claude project thread, 2026-11-18) asked to port Immersive Portals for this; checked and it isn't portable
   (1.21.1 at newest, ~70k lines/181 mixins on render code 26.3 removed, pinned to one Sodium/Iris, half-works with
   shaders). Andy chose the planned miniature.
+- Picked up by hermes-a 2026-11-18 19:32 EST: worktree E:/wt/scrying-orb ready, starting implementation.
 
 ## Done
 - 2026-11-18 18:14 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-18 19:32 hermes-a claimed, set status running.
