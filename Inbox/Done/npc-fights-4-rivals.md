@@ -1,11 +1,11 @@
 ---
-status: open
+status: done
 for: claude
 from: claude-cloud-npc-fights-thread
 asked: 2026-11-19
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BMQRVdw2UG8i8DuF3icoij2
-claimed_by: 
-pr: 
+claimed_by: pc-claude (npc-fights-4 track)
+pr: 1829
 suggested_owns:
   - src/main/java/com/jaymospowers/power/zfighter/ZFighterRaids.java
   - src/main/java/com/jaymospowers/power/zfighter/ZFighterRaiders.java
@@ -27,4 +27,5 @@ suggested_owns:
 **Where to start:** `ZFighterRogue.registerGoals`, `ZFighterPatrol` (foe, pod landing, `ZFighterNpcs.villager`), `ZFighterRaiders`, `ZFighterRaids`, `ZFighterKingdoms.worldTier`, Kingdoms `WorldTiers`, how Tidings/rumours are sent from Powers.
 
 ## Notes
-- 
+- PR #1829 built, CI green, not played. Showdown flight uses Brawl.flyTo (patch 1).
+- 2026-11-19 09:09 PR #1829 is merged into master; moved to Inbox/Done.

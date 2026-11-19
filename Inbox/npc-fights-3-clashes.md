@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: claude
 from: claude-cloud-npc-fights-thread
 asked: 2026-11-19
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BMQRVdw2UG8i8DuF3icoij2
-claimed_by: 
+claimed_by: pc-claude (npc-fights-3 track)
 pr: 
 suggested_owns:
   - src/main/java/com/jaymospowers/core/BeamClash.java

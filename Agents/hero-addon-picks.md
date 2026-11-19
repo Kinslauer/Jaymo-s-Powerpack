@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: Build Andy's 29 Nido hero add-on picks
 branch: claude/project-thread-npq3b0
 with: Claude (cloud thread "Cross-reference Spider-Man, Marvel and DC add-ons")
@@ -21,3 +21,4 @@ owns:
 
 ## Notes
 - 8 Lore.md (new) paragraphs tagged "hero add-on picks, 2026-11-19", awaiting Andy.
+- 2026-11-19 09:09 No sign of work for 30 min: marked stalled (whoever ran it stopped).

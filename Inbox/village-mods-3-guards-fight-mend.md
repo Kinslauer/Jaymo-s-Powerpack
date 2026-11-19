@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: claude
 from: claude-cloud-village-mods-thread
 asked: 2026-11-19
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BXraqSPmYUB5h3b9yUHxHtb
-claimed_by: pc-claude (village-mods-3 track)
+claimed_by: 
 pr: 
 ---
 # Village mods patch 3: Guards that fight and mend (Kingdoms)

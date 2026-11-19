@@ -1,11 +1,11 @@
 ---
-status: open
+status: done
 for: claude
 from: claude-cloud-npc-fights-thread
 asked: 2026-11-19
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BMQRVdw2UG8i8DuF3icoij2
-claimed_by: 
-pr: 
+claimed_by: pc-claude (npc-fights-1 track)
+pr: 1825
 suggested_owns:
   - src/main/java/com/jaymospowers/power/zfighter/brawl/
   - src/main/java/com/jaymospowers/core/gifted/GiftedAI.java
@@ -24,4 +24,5 @@ suggested_owns:
 **Runs alongside:** npc-fights-4-rivals (only targeting/spawning; small overlap in `ZFighterRogue.registerGoals` and `ZFighterPatrol#foe`). Patches 2 and 3 wait for this one to merge.
 
 ## Notes
-- 
+- PR #1825, CI green, not played. Travel flight is `Brawl.flyTo(Mob, Entity)` (true on arrival); package is core/brawl. See PR for gaps.
+- 2026-11-19 09:09 PR #1825 is merged into master; moved to Inbox/Done.
