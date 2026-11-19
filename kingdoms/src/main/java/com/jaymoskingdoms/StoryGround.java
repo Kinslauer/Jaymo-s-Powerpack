@@ -412,6 +412,11 @@ public final class StoryGround {
 		private static @Nullable BlockPos started(ServerLevel level, Spot spot) {
 			LevelChunk chunk = level.getChunkSource().getChunkNow(spot.chunk().x(), spot.chunk().z());
 			StructureStart start = chunk == null ? null : level.structureManager().getStartForStructure(spot.structure(), chunk);
+			if (start != null && start.isValid() && !EpicTowns.surface(level, start)) {
+				JaymosKingdoms.LOGGER.info("The capital's village at chunk {} is in {}, not the Overworld: passed over", spot.chunk(),
+					Stacked.realm(level, start.getBoundingBox().getCenter().getY()).identifier());
+				return null;
+			}
 			return start != null && start.isValid() ? spot.placement().getLocatePos(start.getChunkPos()) : null;
 		}
 	}
