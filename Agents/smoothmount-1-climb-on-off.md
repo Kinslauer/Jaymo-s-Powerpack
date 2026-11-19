@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: smoothmount-1-climb-on-off
 branch: hermes/smoothmount-1-climb-on-off
 with: 
@@ -44,3 +44,4 @@ owns:
 - New class e.g. client/MountClimbPose; clips in geckolib/animations/entity/player_mount_*.animation.json
 
 ## Done
+- 2026-11-19 21:36 No sign of work for 30 min: marked stalled (whoever ran it stopped).
