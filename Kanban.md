@@ -35,8 +35,8 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/smoothmount-1-climb-on-off|smoothmount-1-climb-on-off]] · ☀️ Apollo · claimed
-- [ ] [[Inbox/harness-body-pieces|harness-body-pieces]] · harness-body-pieces · claimed
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · ☀️ Apollo · #1787 · changes · fixing review notes
+- [ ] [[Inbox/harness-body-pieces|harness-body-pieces]] · harness-body-pieces · claimed
 
 
 ## In review
