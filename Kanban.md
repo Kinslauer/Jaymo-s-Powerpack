@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 22:27). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 22:31). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -45,9 +45,9 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/heritage-paths|heritage-paths]] · 🪶 Quill · #1853 · writing
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · ☀️ Apollo · #1787 · changes · fixing review notes
 - [ ] [[Inbox/smoothmount-6-heave-downed|smoothmount-6-heave-downed]] · 🍇 Bacchus · claimed
-- [ ] [[Inbox/heritage-paths|heritage-paths]] · 🪶 Quill · #1853 · writing
 
 
 ## In review
