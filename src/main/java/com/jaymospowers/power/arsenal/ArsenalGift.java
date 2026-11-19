@@ -120,6 +120,12 @@ public final class ArsenalGift implements GiftKit {
 		return ArsenalPower.ID;
 	}
 
+	/** The fighter brain's trails, dashes and vanishes in this power's colour (a blade-bright steel). */
+	@Override
+	public int color() {
+		return 0xC0C8D0;
+	}
+
 	@Override
 	public List<Move> moves() {
 		return List.of(

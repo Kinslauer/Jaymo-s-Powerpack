@@ -58,6 +58,12 @@ final class CryoGift implements GiftKit {
 		return CryoPower.ID;
 	}
 
+	/** The fighter brain's trails, dashes and vanishes in this power's colour (frost). */
+	@Override
+	public int color() {
+		return 0xBFE6FF;
+	}
+
 	@Override
 	public List<Move> moves() {
 		return List.of(
