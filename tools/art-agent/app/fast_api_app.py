@@ -30,7 +30,14 @@ allow_origins = (
     os.getenv("ALLOW_ORIGINS", "").split(",") if os.getenv("ALLOW_ORIGINS") else None
 )
 # Traces go to Google Cloud only on the Gemini platform; with an AI Studio key there is no project to send them to
-otel_to_cloud = not os.getenv("GEMINI_API_KEY")
+otel_to_cloud = bool(os.getenv("GOOGLE_CLOUD_PROJECT")) and not os.getenv(
+    "GEMINI_API_KEY"
+)
+if not os.getenv("GEMINI_API_KEY") and not os.getenv("GOOGLE_CLOUD_PROJECT"):
+    raise SystemExit(
+        "No Gemini key: set the GEMINI_API_KEY environment variable (then open a new terminal), "
+        "or put GEMINI_API_KEY=... in tools/art-agent/.env"
+    )
 
 AGENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
