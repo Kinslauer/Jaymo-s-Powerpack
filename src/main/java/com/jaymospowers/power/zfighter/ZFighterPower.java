@@ -480,6 +480,8 @@ public final class ZFighterPower implements Power {
 		ZFighterBattle.init();
 		ZFighterCombo.init();
 		ZFighterImpact.init();
+		ZFighterStrings.init();
+		ZFighterNpcKi.init();
 		// (0.17.45) lock-on, poise, rushes, grab and throw, the dodge, ki weapons
 		ZFighterCombat.init();
 		// (0.17.46) drill beam, ring of orbs, triangle cannon, rising dome, ki rain, nova sphere, rage scream, afterimage
