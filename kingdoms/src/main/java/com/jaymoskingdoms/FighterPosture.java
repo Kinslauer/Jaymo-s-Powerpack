@@ -120,6 +120,13 @@ public final class FighterPosture {
 		}
 	}
 
+	/** (gv_kick) A guard's kick on {@code mob} ({@link Shoves#kick}) wears its stance by {@code amount}, as a parry does. */
+	static void kicked(ServerLevel level, Mob mob, float amount) {
+		if (applies(mob)) {
+			wear(level, mob, amount);
+		}
+	}
+
 	private static void wear(ServerLevel level, Mob mob, float amount) {
 		if (amount <= 0.0F) {
 			return;

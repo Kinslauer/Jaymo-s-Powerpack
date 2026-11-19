@@ -106,12 +106,17 @@ public final class Whetting {
 					if (!step(level, v, job, t, now)) {
 						end(v);
 					}
-				} else if (t >= FROM && t < TO && random.nextFloat() < START_CHANCE && Routines.idle(v) && !Rulers.is(v)) {
+				} else if (t >= FROM && t < TO && random.nextFloat() < START_CHANCE && Routines.idle(v) && !Rulers.is(v) && !SmithMending.working(v)) {
 					start(level, v, folk, now);
 				}
 			}
 		}
 		JOBS.values().removeIf(j -> now - j.started > TRAVEL_TICKS + GRIND_MIN + GRIND_MORE + 200);
+	}
+
+	/** {@code smith} is at the grindstone with a guard's blade just now (so {@link SmithMending} leaves them be). */
+	static boolean working(Villager smith) {
+		return JOBS.containsKey(smith.getUUID());
 	}
 
 	/** A weaponsmith, an armourer or a toolsmith. */
