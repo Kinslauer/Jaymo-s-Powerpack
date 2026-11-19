@@ -1,0 +1,94 @@
+{
+  "variants": {
+    "facing=north,carving=lion": {
+      "model": "jaymoskingdoms:block/cherry_figurehead_lion"
+    },
+    "facing=north,carving=gull": {
+      "model": "jaymoskingdoms:block/cherry_figurehead_gull"
+    },
+    "facing=north,carving=stag": {
+      "model": "jaymoskingdoms:block/cherry_figurehead_stag"
+    },
+    "facing=north,carving=whale": {
+      "model": "jaymoskingdoms:block/cherry_figurehead_whale"
+    },
+    "facing=north,carving=serpent": {
+      "model": "jaymoskingdoms:block/cherry_figurehead_serpent"
+    },
+    "facing=north,carving=maiden": {
+      "model": "jaymoskingdoms:block/cherry_figurehead_maiden"
+    },
+    "facing=east,carving=lion": {
+      "model": "jaymoskingdoms:block/cherry_figurehead_lion",
+      "y": 90
+    },
+    "facing=east,carving=gull": {
+      "model": "jaymoskingdoms:block/cherry_figurehead_gull",
+      "y": 90
+    },
+    "facing=east,carving=stag": {
+      "model": "jaymoskingdoms:block/cherry_figurehead_stag",
+      "y": 90
+    },
+    "facing=east,carving=whale": {
+      "model": "jaymoskingdoms:block/cherry_figurehead_whale",
+      "y": 90
+    },
+    "facing=east,carving=serpent": {
+      "model": "jaymoskingdoms:block/cherry_figurehead_serpent",
+      "y": 90
+    },
+    "facing=east,carving=maiden": {
+      "model": "jaymoskingdoms:block/cherry_figurehead_maiden",
+      "y": 90
+    },
+    "facing=south,carving=lion": {
+      "model": "jaymoskingdoms:block/cherry_figurehead_lion",
+      "y": 180
+    },
+    "facing=south,carving=gull": {
+      "model": "jaymoskingdoms:block/cherry_figurehead_gull",
+      "y": 180
+    },
+    "facing=south,carving=stag": {
+      "model": "jaymoskingdoms:block/cherry_figurehead_stag",
+      "y": 180
+    },
+    "facing=south,carving=whale": {
+      "model": "jaymoskingdoms:block/cherry_figurehead_whale",
+      "y": 180
+    },
+    "facing=south,carving=serpent": {
+      "model": "jaymoskingdoms:block/cherry_figurehead_serpent",
+      "y": 180
+    },
+    "facing=south,carving=maiden": {
+      "model": "jaymoskingdoms:block/cherry_figurehead_maiden",
+      "y": 180
+    },
+    "facing=west,carving=lion": {
+      "model": "jaymoskingdoms:block/cherry_figurehead_lion",
+      "y": 270
+    },
+    "facing=west,carving=gull": {
+      "model": "jaymoskingdoms:block/cherry_figurehead_gull",
+      "y": 270
+    },
+    "facing=west,carving=stag": {
+      "model": "jaymoskingdoms:block/cherry_figurehead_stag",
+      "y": 270
+    },
+    "facing=west,carving=whale": {
+      "model": "jaymoskingdoms:block/cherry_figurehead_whale",
+      "y": 270
+    },
+    "facing=west,carving=serpent": {
+      "model": "jaymoskingdoms:block/cherry_figurehead_serpent",
+      "y": 270
+    },
+    "facing=west,carving=maiden": {
+      "model": "jaymoskingdoms:block/cherry_figurehead_maiden",
+      "y": 270
+    }
+  }
+}

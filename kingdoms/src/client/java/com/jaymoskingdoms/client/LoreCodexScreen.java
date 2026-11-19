@@ -26,7 +26,7 @@ final class LoreCodexScreen extends Screen {
 	private Button prev, next;
 
 	LoreCodexScreen(LoreCodex.Open open) {
-		super(Component.translatable("item.jaymoskingdoms.lore_codex"));
+		super(open.title());
 		this.entries = open.entries();
 		for (int i = 0; i < this.entries.size(); i++) {
 			if (this.entries.get(i).id().equals(lastBook)) {
