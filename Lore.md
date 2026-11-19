@@ -2331,6 +2331,8 @@ Kingdoms' assassins and thieves have a few more tricks (watching unseen, slippin
 remark), and anyone can throw a **lasso**. Great kills are kept on **trophy stands**, and each great foe is heard
 before it is seen.
 
+**The camp horn** (new) (camp alarm thread, 2026-11-19; Andy: "if anyone in the area is attacked they should run back and alert the camp with a horn. then everyone is on alert and patrols and defends until safe"; the rest Claude's placement). Every barbarian camp, goblin village and orc war camp keeps a goat horn by its fire. Whoever is set on at the camp's edge does not stand and die: they run for the fire, and whoever reaches it blows the call. At the horn every blade in the camp turns out, the brave among the builders too, and the rest gather at the fire. They walk the palisade until nothing hostile is left on their ground, and only then does someone say it's quiet.
+
 **Fighting together** (Claude's placement for the pawn picks, patch 1, 2026-11-12, Andy approved 2026-11-17). Nobody
 in the realms fights alone if they can help it, and nobody fights the same way. Everyone who takes up arms has a
 **leaning**, a first habit and a second: going for the biggest foe, for the archers, for the wounded, guarding a
