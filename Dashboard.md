@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 17:41). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 17:53). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -19,12 +19,13 @@ Nothing stuck.
 
 ## On the board
 
-34 waiting for a bot, 2 being built, 0 in review: see [[Kanban]].
+32 waiting for a bot, 4 being built, 1 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1885 Deathless returns (for Kingdoms' Pallid) (Powers, Kingdoms, Kitchen, 2026-11-19)
 - [ ] #1883 Any hide stands in for rabbit hide (Powers, Kingdoms, Kitchen, 2026-11-19)
 - [ ] #1882 JEI shows how to forge the metal harness pieces (Powers, 2026-11-19)
 - [ ] #1881 camp cooks roast whole beasts on the great spit and stand to the side (Kingdoms, Kitchen, 2026-11-19)
@@ -84,8 +85,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1815 edges and sparks - blades dull, grindstones, sparks that catch, armour that rings (Powers, Kingdoms, 2026-11-19)
 - [ ] #1814 Hackers 'n Slashers 4: a shove for everyone, and weapon kinds' on-hit effects (Powers, 2026-11-19)
 - [ ] #1813 crits - riposte kinds, crit cue, camera punch, heavy crit ring, combat attributes (Powers, 2026-11-19)
-- [ ] #1812 Stealth and posture: cover, backstabs, a fighter's stance (Kingdoms, 2026-11-19)
-- …and 258 older ones.
+- …and 259 older ones.
 
 ## Health
 
