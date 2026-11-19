@@ -1,5 +1,5 @@
 ---
-status: ready
+status: done
 for: claude
 from: claude-cloud-medieval-music-thread
 asked: 2026-11-19
@@ -48,3 +48,4 @@ thread: cmsg_01638ouFWZKwEZ1ET74kBk9BDvxv3Xuvj7a4gmHTqtzmQ6
 - 2026-11-19 02:25 Round 2 done, head ccef415f1, CI green: Powers HoodedCloakLayer now leans/flaps with Kingdoms' world wind via KingdomsCompat.capeInWind (calls Kingdoms WindCloth.cape, sheltered = 1/4); hover-sway hunk removed; Powers change note rewritten. Not played.
 - 2026-11-19 02:26 Review (head ccef415): pass. The world's wind now moves things: anyone airborne drifts downwind (less if bulky, none behind a wall), dropped items roll in a gale, arrows bend a little, ships in a cove catch less wind, a wind rush and whistle sound outdoors, and banners, the harness cape and the hooded cloak lean and flutter with it. The Hermes hover-sway hunk and its wrong note are gone. Not tested in game; the lean direction on banners and cloaks is from the model maths, not seen. Carried-weight scaling has no weight system to read, so only body size scales drift.
 - 2026-11-19 02:26 Reviewed; Andy allowed sending it to the coordinator.
+- 2026-11-19 09:04 PR #1798 is merged into master; moved to Inbox/Done.

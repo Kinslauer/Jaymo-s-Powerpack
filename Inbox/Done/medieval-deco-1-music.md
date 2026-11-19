@@ -1,5 +1,5 @@
 ---
-status: ready
+status: done
 for: claude
 from: claude-cloud-medieval-music-thread
 asked: 2026-11-19
@@ -48,3 +48,4 @@ thread: cmsg_01638ouFWZKwEZ1ET74kBk9BDvxv3Xuvj7a4gmHTqtzmQ6
 - 2026-11-18 22:24 PC Claude: review fix pushed, new head 889d20d (a track that ends on its own now counts as ended, via SoundManager.isActive after a 40-tick grace). Builds green.
 - 2026-11-18 22:28 Review (head 889d20d): pass. Each place (towns, taverns, camps, roads, wars, festival squares) plays its own medieval track, and a tavern bard plays a lute; the ended-track bug is fixed with SoundManager.isActive. Not tested in game. Needs Andy: upload release medieval-music-v1 (Jaymo.Medieval.Music.zip + .sha1, from tools/music_trim.py) and the CurseForge credit line. Nit: the 40-tick start grace in PlaceMusic is a bare number, not a constant.
 - 2026-11-18 22:28 Reviewed; Andy allowed sending it to the coordinator.
+- 2026-11-19 09:04 PR #1795 is merged into master; moved to Inbox/Done.
