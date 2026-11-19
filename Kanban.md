@@ -4,19 +4,18 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 19:33). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 19:37). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · open
 - [ ] [[Inbox/harness-upkeep|harness-upkeep]] · ☀️ Apollo · open
-- [ ] [[Inbox/scrying-orb|scrying-orb]] · for any · open
 
 
 ## Being built
 
-- [ ] [[Inbox/rig-beetle-3-back-rig|rig-beetle-3-back-rig]] · 🪶 Quill · #1777 · writing
+- [ ] [[Inbox/scrying-orb|scrying-orb]] · ☀️ Apollo · claimed
 
 
 ## In review
@@ -48,6 +47,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/rig-beetle-3-back-rig|rig-beetle-3-back-rig]]
 - [x] [[Inbox/Done/lanterns-07-talk-chat|lanterns-07-talk-chat]]
 - [x] [[Inbox/Done/harness-creeds-and-lands|harness-creeds-and-lands]]
 - [x] [[Inbox/Done/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]]
@@ -55,7 +55,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/lanterns-03-patrol-small|lanterns-03-patrol-small]]
 - [x] [[Inbox/Done/lanterns-02-space-small|lanterns-02-space-small]]
 - [x] [[Inbox/Done/lanterns-01-crime-small|lanterns-01-crime-small]]
-- [x] [[Inbox/Done/rig-beetle-1-arm-forms|rig-beetle-1-arm-forms]]
 
 
 %% kanban:settings
