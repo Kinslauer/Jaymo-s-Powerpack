@@ -100,7 +100,8 @@ public final class RigMoves {
 			case SONIC -> SONIC_TICKS;
 			case TWIN -> TWIN_TICKS;
 			case SIEGE -> SIEGE_TICKS;
-			default -> 0;
+			// the back rig's (RigBack)
+			default -> RigBack.length(kind);
 		};
 	}
 

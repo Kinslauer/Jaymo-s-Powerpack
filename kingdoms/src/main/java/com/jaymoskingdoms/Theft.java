@@ -307,6 +307,15 @@ public final class Theft {
 		return until(player, faction) > player.level().getGameTime();
 	}
 
+	/** (For Jaymo's Powers' Patrol) When the last of {@code player}'s wanted times runs out (0: never wanted); a new crime moves it on. */
+	public static long wantedUntil(ServerPlayer player) {
+		long last = 0L;
+		for (long until : player.getAttachedOrElse(WANTED, Map.of()).values()) {
+			last = Math.max(last, until);
+		}
+		return last;
+	}
+
 	/** {@code player} is an outlaw in {@code faction} (a heavy crime, seen, not yet forgotten). */
 	public static boolean outlaw(ServerPlayer player, int faction) {
 		long until = until(player, faction);

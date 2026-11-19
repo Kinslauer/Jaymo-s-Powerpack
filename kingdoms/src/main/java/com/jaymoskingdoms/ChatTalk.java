@@ -39,6 +39,8 @@ final class ChatTalk {
 	static final double ANSWER_RANGE = 12.0;
 	/** How many lines each answer has. */
 	static final int LINES = 3;
+	/** How far round them a villager looks for family to name (blocks). */
+	static final double FAMILY_RANGE = 48.0;
 
 	/** What a line is about, by the words in it (first match wins). */
 	enum Topic {
@@ -46,6 +48,10 @@ final class ChatTalk {
 		THANKS("thanks", "thank you", "cheers"),
 		NAME("your name", "who are you", "who're you"),
 		MOOD("how are you", "how're you", "how goes", "you well", "you alright"),
+		FAMILY("family", "wife", "husband", "children", "kids", "parents", "mother", "father", "brother", "sister", "married"),
+		CRIME("crime", "crimes", "thief", "thieves", "theft", "stolen", "murder", "outlaw", "wanted", "trouble"),
+		DIRECTIONS("where is", "which way", "directions", "how do i get", "nearest town", "road"),
+		WEATHER("weather", "rain", "storm", "sunny", "cold today"),
 		WORK("your work", "your job", "what do you do", "work", "job"),
 		TRADE("trade", "buy", "sell", "wares", "price"),
 		REALM("realm", "king", "queen", "ruler", "lord", "where am i", "this place", "village", "town"),
@@ -205,6 +211,25 @@ final class ChatTalk {
 					.map(key -> key.identifier().getPath()).orElse("none"));
 				return Component.translatable(k + "work." + random.nextInt(LINES), job);
 			}
+			case FAMILY -> {
+				return family(v, name, random);
+			}
+			case CRIME -> {
+				for (Recollections.Recollection r : Recollections.of(v, player)) {
+					if (r.kind().equals(Recollections.Kind.CRIME.key())) {
+						return Component.translatable(k + "crime.you." + (cold ? "cold" : "warm") + "." + random.nextInt(LINES), name);
+					}
+				}
+				Component said = cold ? null : Suspicion.gossip(v, player, random);
+				return said != null ? said : Component.translatable(k + "crime.none." + random.nextInt(LINES));
+			}
+			case DIRECTIONS -> {
+				return directions(v, random);
+			}
+			case WEATHER -> {
+				String w = v.level().isThundering() ? "storm" : v.level().isRaining() ? "rain" : v.level().isBrightOutside() ? "fair" : "night";
+				return Component.translatable(k + "weather." + w + "." + random.nextInt(LINES));
+			}
 			case REALM -> {
 				Faction f = Bearings.realm(v);
 				return f == null ? Component.translatable(k + "realm_none." + random.nextInt(LINES))
@@ -214,6 +239,37 @@ final class ChatTalk {
 			}
 		}
 		return Component.translatable(k + topic.name().toLowerCase(Locale.ROOT) + "." + (cold ? "cold" : "warm") + "." + random.nextInt(LINES), name);
+	}
+
+	/** Who of {@code v}'s family is about (MCA's family tree), or that they've none here. */
+	private static Component family(Villager v, Component name, RandomSource random) {
+		List<String> kin = new ArrayList<>();
+		for (Villager o : v.level().getEntitiesOfClass(Villager.class, v.getBoundingBox().inflate(FAMILY_RANGE), o -> o != v && o.isAlive())) {
+			if (kin.size() < 3 && McaCompat.kin(v, o) != McaCompat.STRANGERS) {
+				kin.add(o.getName().getString());
+			}
+		}
+		return kin.isEmpty() ? Component.translatable("talk.jaymoskingdoms.chat.family.none." + random.nextInt(LINES), name)
+			: Component.translatable("talk.jaymoskingdoms.chat.family.some." + random.nextInt(LINES), String.join(", ", kin));
+	}
+
+	/** The way to the nearest other town or realm, roughly ({@link Rumours#words}). */
+	private static Component directions(Villager v, RandomSource random) {
+		if (!(v.level() instanceof ServerLevel level)) {
+			return heardWhat(random);
+		}
+		Faction here = Bearings.realm(v);
+		Faction best = null;
+		for (Faction f : Factions.all(level.getServer())) {
+			if (f.fallen() || here != null && f.id() == here.id() || f.type() == FactionType.BARBARIAN) {
+				continue;
+			}
+			if (best == null || f.seat().distSqr(v.blockPosition()) < best.seat().distSqr(v.blockPosition())) {
+				best = f;
+			}
+		}
+		return best == null ? Component.translatable("talk.jaymoskingdoms.chat.directions.none." + random.nextInt(LINES))
+			: Component.translatable("talk.jaymoskingdoms.chat.directions.town." + random.nextInt(LINES), best.name(), Rumours.words(v.position(), best.seat()));
 	}
 
 	/** Talk they don't follow. */

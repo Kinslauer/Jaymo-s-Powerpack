@@ -57,6 +57,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.frost.IceCaves.place();
 		// (0.15.147) the inventory's tab to the powers screen
 		PowerInventoryTab.init();
+		DreamView.init();
 		// Powers' training on the experience meter (Kingdoms' SkillMeter)
 		com.jaymospowers.client.hud.MeterFeed.init();
 		com.jaymospowers.client.hud.TipCard.init();
