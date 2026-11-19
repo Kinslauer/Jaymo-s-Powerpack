@@ -2548,3 +2548,8 @@ Added a new **Cooking Block** to the Functional creative tab. The block has iron
 - **Crushed skulls** (`Gibs.skullCrushed`, called by Jaymo's Powers): pieces of skull and jaw (`Gib.SKULL`) and lumps of brain (`Gib.BRAIN`) fly a little way, a puff of white bone dust, and **Brain Matter** (new block + item, `BrainMatterBlock`) lands under the head: small pale pebbles with white chips of skull, 1-4 to a block, rotting away like offal. Bodies with no blood leave only the bone, machines nothing.
 - Art and models from `kitchen/tools/gen_gut_piles.py`.
 - Built; not played.
+
+## 0.6.58 (2026-11-19): gut piles, intestines and brain matter lie at eight facings
+
+- Andy: "the drops should randomly rotate orientation like item frames". Gut piles, Intestines and Brain Matter now lie at one of eight facings (45 degree steps), picked at random by where they lie, not four: each pile size has an eighth-turned copy of its model (`*_turned.json`, every element rotated 45 degrees about the block's middle) beside the quarter turns. Written by `kitchen/tools/gen_gut_piles.py`.
+- Not played.
