@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 03:32). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 03:33). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -35,7 +35,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/medieval-music-release|medieval-music-release]] · pc-claude-reviewer · claimed
 
 
 ## In review
