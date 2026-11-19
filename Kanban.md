@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 13:04). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 13:06). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -35,6 +35,7 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Agents/hero-addon-picks|hero-addon-picks]] · 💻 Odysseus · running
 
 
 ## In review
