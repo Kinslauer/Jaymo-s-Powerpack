@@ -6225,3 +6225,8 @@ Built; not played in game.
 - Now and then a ripple spot (fishing ripples on the water) sits on a river or the sea, drifts a few blocks over five minutes and goes. A hook that lands in one and is reeled in pulls an odd catch instead of a fish: a purse of coin (Kingdoms' money, emeralds without it), a bottle, old worn gear, bits and pieces, now and then a name tag, nautilus shell or saddle. Each spot gives one catch. A long cast reaches farther ones.
 - `fishing/Flotsam` (worked out from the world's clock, nothing saved; hooked in `FishingHookMixin#onRetrieve`). The remains' token of the gone-before isn't in the catches yet (patch 3).
 - Built by CI only; not played.
+
+## 0.25.45 (2026-11-19): the hooded cloak leans in the world's wind (#1798)
+
+- **Hooded cloak** (`HoodedCloakLayer`, `KingdomsCompat.capeInWind`): with Jaymo's Kingdoms loaded, the hooded cloak streams out and lifts to the side with the world's wind (Kingdoms' wind and its way as the client has it), and its hem flutters, gently, a quarter as much behind a wall. Without Kingdoms nothing changes.
+- Built; not played.
