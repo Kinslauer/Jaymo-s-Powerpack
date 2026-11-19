@@ -1,5 +1,9 @@
 {
 	"message.jaymospowers.smithing.gilding_noble": "Plate is gilded only for royals and lords.",
 	"message.jaymospowers.smithing.gilding_gold": "Gilding takes %s gold ingots.",
-	"message.jaymospowers.smithing.fur_lining": "A fur lining takes %s rabbit hides."
+	"message.jaymospowers.smithing.fur_lining": "A fur lining takes %s hides or pelts.",
+	"jei.jaymospowers.harness_forging": "Smithing Anvil: Harness",
+	"jei.jaymospowers.harness_forging.how": "Heat %s %s ingots at the hearth, then %s blows on the Smithing Anvil.",
+	"jei.jaymospowers.harness_forging.gilded": "Gilded only for royals and lords.",
+	"jei.jaymospowers.harness_forging.hard": "Steel needs an iron Smithing Anvil and a steel hammer."
 }

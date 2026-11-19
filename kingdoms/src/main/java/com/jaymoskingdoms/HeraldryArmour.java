@@ -97,6 +97,10 @@ public final class HeraldryArmour {
 		ArmorMaterials.makeDefense(SABATON_ARMOUR, COAT_ARMOUR, COAT_ARMOUR, HELM_ARMOUR, COAT_ARMOUR), PLATE_ENCHANT, SoundEvents.ARMOR_EQUIP_IRON,
 		COAT_TOUGHNESS, 0.0F, net.minecraft.tags.ItemTags.REPAIRS_IRON_ARMOR, ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosKingdoms.id("heraldry_plate")));
 
+	/** Any hide or pelt (c:hides: rabbit hide, Kitchen's hides and furs, beast pelts). */
+	static final net.minecraft.tags.TagKey<Item> HIDES = net.minecraft.tags.TagKey.create(Registries.ITEM,
+		net.minecraft.resources.Identifier.fromNamespaceAndPath("c", "hides"));
+
 	/** Every piece by name (its item id), in the order they were registered. */
 	public static final Map<String, Piece> PIECES = new LinkedHashMap<>();
 	private static final Map<Item, Piece> BY_ITEM = new java.util.HashMap<>();
@@ -234,7 +238,9 @@ public final class HeraldryArmour {
 			.component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("item.jaymoskingdoms.harness." + slot.key()))));
 		if (durability > 0) {
 			properties = properties.durability(durability);
-			properties = mend != null ? properties.repairable(mend) : properties.repairable(Armory.STEEL_INGOTS);
+			// (a piece mended with rabbit hide takes any hide: Andy, "everything that requires rabbit pelts should also take hides")
+			properties = mend == Items.RABBIT_HIDE ? properties.repairable(HIDES) : mend != null ? properties.repairable(mend)
+				: properties.repairable(Armory.STEEL_INGOTS);
 		}
 		Item item = Registry.register(BuiltInRegistries.ITEM, key, new Harness.Part(properties));
 		put(new Piece(name, item, slot, armour, toughness, plate, model == null ? "" : "heraldry_" + model, null, 1.0F, 0.0F));

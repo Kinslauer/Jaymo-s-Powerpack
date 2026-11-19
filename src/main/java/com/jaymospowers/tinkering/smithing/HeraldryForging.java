@@ -7,9 +7,11 @@ import java.util.function.Predicate;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -42,8 +44,9 @@ public final class HeraldryForging {
 	private static final String[] MAIL = {"mail_haubergeon", "mail_spaulders", "brigandine_spaulders", "jazerant", "mail_mitons", "mail_coif",
 		"standard_of_mail", "mail_skirt", "splinted_vambraces", "splinted_greaves"};
 	private static final int[] MAIL_INGOTS = {6, 3, 3, 5, 2, 3, 2, 3, 2, 2};
-	/** The rabbit hides a fur-lined piece takes from the smith when it is done (its lining). */
+	/** The hides a fur-lined piece takes from the smith when it is done (its lining): any of c:hides, rabbit hide or another. */
 	static final int FUR_HIDES = 2;
+	public static final TagKey<Item> HIDES = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "hides"));
 	private static final String FUR_LINED = "fur_lined_";
 	private static final String[] FINISHES = {"bright", "blackened", "gilded"};
 	private static final String PREFIX = "heraldry/";
@@ -57,11 +60,11 @@ public final class HeraldryForging {
 
 	static void register() {
 		Forging.PROVIDERS.add(HeraldryForging::options);
-		Forging.CHECKS.add((smith, anvil, option) -> furLined(option) && count(smith.getInventory(), Items.RABBIT_HIDE) < FUR_HIDES
+		Forging.CHECKS.add((smith, anvil, option) -> furLined(option) && count(smith.getInventory(), s -> s.is(HIDES)) < FUR_HIDES
 			? Component.translatable("message.jaymospowers.smithing.fur_lining", FUR_HIDES) : null);
 		Forging.FINISHES.add((smith, anvil, option, result) -> {
 			if (furLined(option) && !smith.getAbilities().instabuild) {
-				take(smith.getInventory(), Items.RABBIT_HIDE, FUR_HIDES);
+				take(smith.getInventory(), s -> s.is(HIDES), FUR_HIDES);
 			}
 		});
 		Forging.CHECKS.add((smith, anvil, option) -> {
@@ -71,12 +74,12 @@ public final class HeraldryForging {
 			if (!noble.test(smith)) {
 				return Component.translatable("message.jaymospowers.smithing.gilding_noble");
 			}
-			return count(smith.getInventory(), Items.GOLD_INGOT) < GILD_GOLD
+			return count(smith.getInventory(), s -> s.is(Items.GOLD_INGOT)) < GILD_GOLD
 				? Component.translatable("message.jaymospowers.smithing.gilding_gold", GILD_GOLD) : null;
 		});
 		Forging.FINISHES.add((smith, anvil, option, result) -> {
 			if (gilded(option) && !smith.getAbilities().instabuild) {
-				take(smith.getInventory(), Items.GOLD_INGOT, GILD_GOLD);
+				take(smith.getInventory(), s -> s.is(Items.GOLD_INGOT), GILD_GOLD);
 			}
 		});
 	}
@@ -85,25 +88,44 @@ public final class HeraldryForging {
 		return option.id().startsWith(PREFIX) && option.id().endsWith("/" + GILDED);
 	}
 
+	/** What else {@code option} takes from the smith when it is done, each the choices for it: hides for a fur lining, gold for gilding (for JEI). */
+	public static List<List<ItemStack>> extras(Forging.Option option) {
+		List<List<ItemStack>> out = new ArrayList<>();
+		if (furLined(option)) {
+			List<ItemStack> hides = new ArrayList<>();
+			BuiltInRegistries.ITEM.getTagOrEmpty(HIDES).forEach(item -> hides.add(new ItemStack(item, FUR_HIDES)));
+			out.add(hides.isEmpty() ? List.of(new ItemStack(Items.RABBIT_HIDE, FUR_HIDES)) : hides);
+		}
+		if (gilded(option)) {
+			out.add(List.of(new ItemStack(Items.GOLD_INGOT, GILD_GOLD)));
+		}
+		return out;
+	}
+
+	/** Whether {@code option} is gilded (done only for a royal or a lord). */
+	public static boolean gildedOption(Forging.Option option) {
+		return gilded(option);
+	}
+
 	private static boolean furLined(Forging.Option option) {
 		return option.id().startsWith(PREFIX + FUR_LINED);
 	}
 
-	private static int count(Inventory inventory, Item item) {
+	private static int count(Inventory inventory, Predicate<ItemStack> item) {
 		int n = 0;
 		for (int i = 0; i < inventory.getContainerSize(); i++) {
 			ItemStack stack = inventory.getItem(i);
-			if (stack.is(item)) {
+			if (item.test(stack)) {
 				n += stack.getCount();
 			}
 		}
 		return n;
 	}
 
-	private static void take(Inventory inventory, Item item, int count) {
+	private static void take(Inventory inventory, Predicate<ItemStack> item, int count) {
 		for (int i = 0; i < inventory.getContainerSize() && count > 0; i++) {
 			ItemStack stack = inventory.getItem(i);
-			if (stack.is(item)) {
+			if (item.test(stack)) {
 				int taken = Math.min(count, stack.getCount());
 				stack.shrink(taken);
 				count -= taken;
@@ -111,7 +133,11 @@ public final class HeraldryForging {
 		}
 	}
 
-	private static List<Forging.Option> options() {
+	/**
+	 * Everything the anvil forges of the harness (JEI's Smithing Anvil page reads it too: it builds the list fresh, so it
+	 * never fills {@link Forging#all}'s cache early).
+	 */
+	public static List<Forging.Option> options() {
 		List<Forging.Option> out = new ArrayList<>();
 		DataComponentType<String> finish = finishComponent();
 		for (int i = 0; i < PLATE.length; i++) {

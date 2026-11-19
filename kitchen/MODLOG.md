@@ -2563,3 +2563,17 @@ Added a new **Cooking Block** to the Functional creative tab. The block has iron
 - Kingdoms' camp cooks use it all through `SpitBlockEntity.skewerWhole`, `tear(ServerLevel, Entity)`, `full` and `CorpseEntity.dressForSpit` / `spitWholeable` / `dressedWhole`.
 - The roasting piece was passed as the item's outline colour; now pieces draw with none.
 - Built (Gradle compile); not played. The 3D shank and steak are new models nobody has looked at in game.
+
+## 0.6.60 (2026-11-19): Any hide stands in for rabbit hide (#1883)
+
+- A loom lining takes any hide or pelt (`c:hides`) as it takes rabbit hide; the furs keep their own warmer linings (`Lining`).
+- Built; not played.
+
+## 0.6.61 (2026-11-19): Thirst can be switched off for some players (#1885)
+
+- `Thirst.setUnthirsting`: another mod (Kingdoms, for its Pallid Hollow) names players who never thirst; their water stays full.
+- Built; not played.
+
+## 0.6.62 (2026-11-19): Bodies can be cut up where they lie (#1887)
+
+- A beast's body can be cut up where it lies by someone who isn't a player (`CorpseEntity.butcherWhereLies`). Jaymo's Kingdoms' town hunters use it to carry their kills home as cuts, the same cuts a butcher block gets.

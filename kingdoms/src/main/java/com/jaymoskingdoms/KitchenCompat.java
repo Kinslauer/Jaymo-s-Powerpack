@@ -322,6 +322,13 @@ public final class KitchenCompat {
 		} catch (ReflectiveOperationException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for Iron Stomach to drink dirty water (needs 0.5.80): {}", e.toString());
 		}
+		// a Pallid never thirsts (PallidHollows)
+		try {
+			Class.forName("com.jaymoskitchen.climate.Thirst").getMethod("setUnthirsting", java.util.function.Predicate.class)
+				.invoke(null, (java.util.function.Predicate<net.minecraft.world.entity.player.Player>) PallidHollows::is);
+		} catch (ReflectiveOperationException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for the Pallid's thirst to stay off: {}", e.toString());
+		}
 	}
 
 	/**
@@ -661,6 +668,29 @@ public final class KitchenCompat {
 	/** Skinned and gutted where it lies (its skin and offal drop beside it). False if it can't go on the spit whole. */
 	static boolean dressForSpit(Entity corpse) {
 		return spitMethods() && Boolean.TRUE.equals(call(DRESS_FOR_SPIT, corpse));
+	}
+
+	private static @Nullable Method BUTCHER_HERE;
+	private static boolean butcherLooked;
+
+	/**
+	 * Kitchen's {@code CorpseEntity.butcherWhereLies}: a beast's body cut up where it lies (a town hunter's kill), gone,
+	 * and its cuts returned. Empty if it can't be (not a beast fit to butcher, or a Kitchen too old for it).
+	 */
+	@SuppressWarnings("unchecked")
+	static java.util.List<net.minecraft.world.item.ItemStack> butcherWhereLies(Entity corpse) {
+		if (!butcherLooked) {
+			butcherLooked = true;
+			if (CORPSE != null) {
+				try {
+					BUTCHER_HERE = CORPSE.getMethod("butcherWhereLies");
+				} catch (ReflectiveOperationException e) {
+					JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for town hunters to cut up their kills: {}", e.toString());
+				}
+			}
+		}
+		return call(BUTCHER_HERE, corpse) instanceof java.util.List<?> list ? (java.util.List<net.minecraft.world.item.ItemStack>) list
+			: java.util.List.of();
 	}
 
 	/** Who's carrying this corpse, if anyone. */

@@ -1053,6 +1053,21 @@ public class CorpseEntity extends Entity {
 		return Hanging.hangable(this) && butcherStage != Hanging.BLEEDING && butcherStage <= Hanging.SKINNED && hook == null;
 	}
 
+	/**
+	 * Cut up where it lies by someone who isn't a player (Jaymo's Kingdoms: a town's hunter, after working at it a while):
+	 * the body is gone, and everything a butcher block would get out of it ({@link #butcheredDrops}) is returned for them
+	 * to carry home. Empty, and the body left be, if it isn't a beast fit to butcher ({@link #isButcherable}).
+	 */
+	public List<ItemStack> butcherWhereLies() {
+		if (!(level() instanceof ServerLevel level) || isRemoved() || !isButcherable() || carrier() != null) {
+			return List.of();
+		}
+		List<ItemStack> cuts = butcheredDrops();
+		play(level, SoundEvents.SLIME_SQUISH, 0.7F);
+		discard();
+		return cuts;
+	}
+
 	/** Skinned and gutted, and nothing cut off it yet: ready to go on the great spit whole. */
 	public boolean dressedWhole() {
 		return Hanging.hangable(this) && butcherStage == Hanging.SKINNED && gutted;

@@ -513,6 +513,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (2026-11-14) and townsfolk who see one risen Hollow react to it, once each (and its attachment)
 		LOGGER.debug("hollow sighting attachment: {}", HollowSighting.RISEN);
 		HollowSighting.register();
+		LOGGER.debug("pallid seen attachment: {}", PallidHollows.SEEN);
+		PallidHollows.register();
 		// the Skeleton Lord's curse: the only way to rise a skeleton (and its attachment)
 		LOGGER.debug("skeleton curse attachment: {}", SkeletonCurse.CURSED);
 		SkeletonCurse.register();
@@ -616,6 +618,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.wild.SpiderKinds.register();
 		// (0.7.97) every spider small (More Babies' sizes) and hunting with Yuka-style steering on Stormie's climbing
 		com.jaymoskingdoms.wild.SpiderMinds.register();
+		// small spiders squashed underfoot, bigger ones by a landing jump, and any of them dead to one blow
+		com.jaymoskingdoms.wild.SpiderSquash.register();
 		// medieval picks: one a spider killed (or who died among spiders underground) wakes webbed up in their lair
 		com.jaymoskingdoms.wild.SpiderLairs.register();
 		// medieval picks: the old age's peoples (their ruined cities, sleeping rulers, temples and descendants)
@@ -776,6 +780,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		CampSuppers.register();
 		// life round a camp's fire outside supper: sitting, talk, the spit
 		Firesides.register();
+		Hunters.register();
+		TownHunger.register();
 		Gestures.register();
 		GroundSeats.register();
 		Loans.register();

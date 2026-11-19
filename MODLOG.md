@@ -6590,3 +6590,24 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - **Silence at once.** Every sound is cut the moment you die for good (not eased out over half a second), the downed heartbeat and the other black-screen cues too; only the death screen's button clicks are heard (`BlackoutHush`).
 - **No world after Respawn on the way down.** One sent below by their weight is knocked out again on the tick they're back on their feet, not up to a second later (`Karma`), so the camp that killed them doesn't show in between.
 - Built; not played.
+
+## 0.25.81 (2026-11-19): JEI shows how to forge the metal harness pieces (#1882)
+
+- New JEI page **Smithing Anvil: Harness** (`HarnessForgingJei`): every plate and mail harness piece the Smithing Anvil forges (`HeraldryForging`), with the ingots to heat, the rabbit hides a fur lining takes or the gold for gilding, and the blows. Before, these pieces showed no recipe in JEI at all, so they looked unmakeable.
+- Built; not played.
+
+## 0.25.82 (2026-11-19): Any hide stands in for rabbit hide (#1883)
+
+- New shared tag `c:hides` (rabbit hide, Kitchen hide, raw hide, wolf/wild/bear fur, beast pelt, Naturalist bear fur). Fur-lined harness forging (`HeraldryForging`) takes any 2 of them; JEI shows the choices.
+- Built; not played.
+
+## 0.25.83 (2026-11-19): Deathless returns (for Kingdoms' Pallid) (#1885)
+
+- `Mortality.DEATHLESS` and `Mortality.Deathless`: other mods can name players the grave won't keep. Such a death is never rolled or final; it takes a mid-turn death's long black with the mod's own vignette and two lines, they rise where they fell with no injury, and no sure wake is used up. Only what ends a mid-turn death ends them (head, void, lava, an execution by a player or a boss, the Nether's last chance).
+- Built; not played.
+
+## 0.25.84 (2026-11-19): hit streak count off the action bar with Kingdoms (#1886)
+
+- The "Streak 3", "Streak 4"... line over the hotbar no longer shows on every blow when Jaymo's Kingdoms is there: its "x3 Good" chain counter by the crosshair already counts the same blows, and the line pushed sprain and other messages off the action bar. "Streak 8!" (and 16) for the quick kill still shows, with its sound.
+- combat/HitStreak#KINGDOMS_COUNTS.
+- Built; not played.

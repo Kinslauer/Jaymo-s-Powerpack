@@ -476,15 +476,15 @@ final class Retinue {
 			case TYRANT, WARLORD -> Reputation.change(p, f, FAVOUR);
 			case PURIST -> {
 				Reputation.change(p, f, FAVOUR);
-				give(p, new ItemStack(Items.BREAD, PURIST_BREAD));
+				give(p, Storage.loaded(level, f) ? Storage.take(level, f, Storage::isFood, PURIST_BREAD) : ItemStack.EMPTY);
 			}
 			case NOBLE -> {
 				if (Reputation.get(p, f.id()) >= NOBLE_FRIEND) {
-					give(p, new ItemStack(Items.BREAD, NOBLE_BREAD));
+					give(p, Storage.loaded(level, f) ? Storage.take(level, f, Storage::isFood, NOBLE_BREAD) : ItemStack.EMPTY);
 				}
 			}
 			case REVELER -> {
-				give(p, level.getRandom().nextBoolean() ? new ItemStack(Items.COOKIE, 3) : new ItemStack(Items.HONEY_BOTTLE));
+				give(p, Storage.loaded(level, f) ? Storage.take(level, f, Storage::isFood, 3) : ItemStack.EMPTY);
 				level.playSound(null, king.blockPosition(), SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.NEUTRAL, 1.0F, 1.2F);
 				level.sendParticles(ParticleTypes.NOTE, king.getX(), king.getY() + 2.3, king.getZ(), 3, 0.4, 0.2, 0.4, 1.0);
 			}
@@ -500,7 +500,7 @@ final class Retinue {
 	}
 
 	private static void give(ServerPlayer p, ItemStack gift) {
-		if (!p.getInventory().add(gift)) {
+		if (!gift.isEmpty() && !p.getInventory().add(gift)) {
 			p.drop(gift, false, Prediction.SERVER_ONLY);
 		}
 	}

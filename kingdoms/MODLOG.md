@@ -15733,3 +15733,44 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - Everyone near sees the cook rip each piece off (Kitchen's tearing).
 - The day's meat that turns up for a camp with empty stores is unchanged for now; camp hunters bringing in real kills is the next change (Andy: "everyone should have to do this or some way of getting food").
 - Built (Gradle compile); not played.
+
+## 0.11.13 (2026-11-19): Any hide stands in for rabbit hide (#1883)
+
+- The Fur Jerkin and Fur Hood recipes take any hide or pelt (`c:hides`), and the Fur Jerkin is mended with any of them (`HeraldryArmour`).
+- Built; not played.
+
+## 0.11.14 (2026-11-19): Pallid Hollows are deathless (#1885)
+
+- **Death won't keep a Pallid** (Andy: like a deathless ranger, "he doesnt die under regular means"). A Pallid player's death is never rolled and never final: they lie in a long grey black where they fell ("the grave turns you away again") and get up there, whole, with no new injury and no sure wake used up. They still go down like anyone. Only losing your head, the void, lava, an execution by a player or a boss, or the Nether's last chance ends them, and then it's the Reincarnate as for anyone (`PallidHollows`, through Powers' new `Mortality.DEATHLESS`).
+- **No hunger, thirst or blood**: a Pallid's food bar and Kitchen water stay full; they can still eat for the taste (Kitchen's meals are still what mends the body, as for the Divine-born). A Pallid body, player or villager, bleeds nothing, like the bone and spirit Hollow.
+- **Folk who keep seeing the same Pallid**: every villager and townsperson counts the days they've seen a Pallid and the deaths and returns they watched (kept on them). Seen often, or once they've seen one die or come back, they say something over their head in the way of their temperament (all 12, 3 lines each for "seen again", "came back" and "came back yet again", plus children's): the kindhearted are glad, the timid and children run (until they've seen it 3 times), the spiteful jeer, the greedy wonder what it's worth, the devout first call it wrong and later a sign. A return they watch moves MCA hearts by temperament and goes into what they remember (`Recollections.Kind.SAW_DEATHLESS`), so they bring it up and pass it on. A full mask hides it.
+- The Pallid's trait line now says so (`variant.jaymoskingdoms.hollow_base.trait`); new lang part `pallid.json`.
+- Built; not played.
+
+## 0.11.15 (2026-11-19): spiders squash underfoot, die to one blow, and NPCs can hit them (#1886)
+
+- **Squashed underfoot**: a small spider (no taller than half a block: the usual half-size spider, cave spiders, spiny spiders, spiderlings, young ones) dies when anyone walks over it: a player, one of the folk, or a beast of some size (a cow, a horse). Monsters don't squash their own.
+- **Jump and land**: a bigger spider (a netcaster, a mother, a tarantula, a spider at the game's own size) is squashed by a jump that lands on it; small ones too. The brood queen is fought as before.
+- **Blows**: a small spider dies to any one blow, a bare punch included, from a player or anyone else. A bigger one takes at most 2 blows, and a bigger special kind (a tarantula, a netcaster, a mother) at most 5; a harder blow can do it in fewer.
+- Squashed spiders die crushed, so Kitchen bursts them into a few loose legs and no body.
+- **NPCs hit small spiders**: a barbarian's (or any fighter's) slow wind-up let a small spider skitter out of reach before the blow fell. Against one the blow now comes down at once and still finds it a block past the reach.
+- wild/SpiderSquash (tiers, walk-over tick, landing, one blow), mixin/wild/SpiderBlowMixin (hurtServer) and SpiderLandingMixin (causeFallDamage), MobCombat#small/slack.
+- Built; not played.
+
+## 0.11.16 (2026-11-19): Building plans: wrong-block colours, layer view, full material list (#1851)
+
+- **Coloured ghosts**: a laid plan's ghosts now show what's wrong as well as what's missing. A block not yet in is its pale blue ghost as before; a wrong block where one should go is tinted red; a block standing inside the plan's box where the design has nothing (air or a structure void) is tinted orange. Right blocks show nothing. The orange check looks within 24 blocks of you (the ghosts still show to 48) so a big plan costs about the same to draw (`PlanGhosts`).
+- **Layer view**: holding a laid plan, Plan layer up/down (numpad 8 and 2, rebindable, under "Jaymo's Building") or Ctrl + scroll shows one layer at a time: up from all layers is the bottom layer, and stepping past either end shows them all again. The action bar shows "Layer 4 of 12". Only the held plan's ghosts are thinned; it's your own view, nobody else's. Ctrl + scroll is left to the forms belt while you're in a stance (`PlanLayerScrollMixin`).
+- **Full material list**: use a written plan in the air, or press the mason's table's new Materials button, for every block the plan still needs (not just the table's top 8), how many you carry and how many you're short, short first. The list scrolls. It counts the way the build does: the second half of a door or bed comes with the first, spare dirt counts for grass and paths, and blocks already in place where the plan is laid aren't counted (`MasonTable.sendMaterials`, `MasonNet.Materials`, `PlanMaterialsScreen`). Using a plan in the air used to show the how-to line; that line is now at the bottom of the list.
+- Our own versions of Litematica's ideas; no Litematica code or art.
+- Built; not played.
+
+## 0.11.17 (2026-11-19): No food out of nowhere: camp hunters, hungry camps, starving towns (#1887)
+
+- Camps no longer get a daily catch of meat from nothing. Camps and towns both hunt and gather (`Hunters`). When a camp has less meat than it has mouths, or a town less food than it wants, one of them goes out by day, and now and then someone goes on their own anyway. Any of a camp's band can go, and so can any free grown townsfolk (not the ruler, guards, cooks, visitors, or anyone at work or at a meal). Hunters go after real game out in the wilds (tag `jaymoskingdoms:camp_game`: deer, boar, sheep, pigs, cattle, goats, fowl, rabbits), never where a realm's law holds, on a homestead, or a beast on a lead or named. They creep up crouched, run it down when it bolts, and strike it. A camp hunter carries the body home to the fire, where the cook skins it and roasts it whole on the great spit. A town hunter cuts the body up where it fell and carries the cuts to the storehouse. Without Kitchen they gather the meat where it fell. Gatherers pick ripe sweet berries (the bush grows again) and wild mushrooms, an armful at a time, never on a homestead. Everything goes into the communal chest: the camp's chests by the fire, or the town's storehouse. A camp that has hunted everything round it says so and goes hungry.
+- Rangers treat hunters as they treat players. A camp's or town's hunter's wild kills are tallied the same way, and one who kills too much in a day is a poacher. A ranger who sees one within 32 blocks, or comes out of the trees after one near a player, runs them down and hogties them. A camp's outlaw is taken to the nearest realm's court and never seen again. A townsman is brought before it and let go, and their own realm pays the court a 5-emerald fine.
+- Camp suppers come out of the larder: one bite each, the leader first. Anyone who gets nothing sits with the rest, goes without and is weak for a day or until they next eat. A poisoned supper only sickens those who had something in their bowl.
+- Towns starve when the storehouse is bare. Each meal a villager goes to and can't get is counted. After a day without they are weak. After two days they are slow too, and every meal missed after that costs 2 hearts, the way hunger hurts a player: never below half their health on Easy, never below half a heart on Normal, and on Hard it kills them. One meal clears it. Starving townsfolk say so.
+- Village fishermen only catch fish with open water within 10 blocks of their barrel. They cast into it, and you see the splash.
+- Kings' gifts of bread to their people and to favoured players (noble, purist, reveler, and the reveler's feast) come out of the realm's storehouse. A bare storehouse means no gift.
+- A realm short of food no longer gets bread from nothing for treasury coin. It sends its trade carts out at once to buy food from a trading partner. When the carts arrive, the partner's spare food is loaded on top of the usual return load, as much as the realm's purse can pay for, and it's paid for in the settling. The food comes home on the road. If the partner has none to spare or the carts are robbed, none comes. Towns' trade carts now bring hides home as well as sending them.

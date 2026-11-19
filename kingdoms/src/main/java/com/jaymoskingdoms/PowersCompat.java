@@ -1481,7 +1481,9 @@ public final class PowersCompat {
 					case ENDBORN -> ender;
 					case DIVINE -> gold;
 					case VERDANT -> sap;
-					case HOLLOW -> BLOODLESS_HOLLOW.contains(variant) ? noBlood : variant == HeritageVariants.Variant.ZOMBIE ? rotten : noSay;
+					// (the Pallid, the first look, has no blood either: PallidHollows)
+					case HOLLOW -> variant == null || BLOODLESS_HOLLOW.contains(variant) ? noBlood
+						: variant == HeritageVariants.Variant.ZOMBIE ? rotten : noSay;
 					default -> noSay;
 				};
 			});
@@ -1490,7 +1492,7 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.645) The Hollow with no blood in them: bones and spirits. A Zombie Hollow (and the first look) still bleeds. */
+	/** (0.7.645) The Hollow with no blood in them: bones and spirits (and the Pallid, the first look). A Zombie Hollow still bleeds. */
 	static final java.util.Set<HeritageVariants.Variant> BLOODLESS_HOLLOW = java.util.EnumSet.of(HeritageVariants.Variant.SKELETON,
 		HeritageVariants.Variant.WRAITH, HeritageVariants.Variant.REAPER);
 
@@ -4203,6 +4205,38 @@ public final class PowersCompat {
 			((java.util.List<java.util.function.Function<net.minecraft.server.level.ServerPlayer, java.util.Map.Entry<Integer, Runnable>>>)list).add(mid);
 		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
 			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mortality mid-turns (older Powers?)", e);
+		}
+	}
+
+	/**
+	 * Hands Powers' death by cause those the grave won't keep ({@link PallidHollows}): given a dying player, {@code back}
+	 * answers what's done as they get up again (null: they die as anyone does); {@code tint} is the black's vignette (RGB) and
+	 * {@code fading} and {@code woke} its two lines (translation keys). Nothing without Powers (or an older one).
+	 */
+	@SuppressWarnings("unchecked")
+	static void tellDeathless(java.util.function.Function<net.minecraft.server.level.ServerPlayer, @Nullable Runnable> back, int tint,
+		String fading, String woke) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Class<?> mortality = Class.forName("com.jaymospowers.core.wounds.Mortality");
+			java.lang.reflect.Constructor<?> deathless = Class.forName("com.jaymospowers.core.wounds.Mortality$Deathless")
+				.getConstructor(int.class, String.class, String.class, Runnable.class);
+			Object list = mortality.getField("DEATHLESS").get(null);
+			((java.util.List<java.util.function.Function<net.minecraft.server.level.ServerPlayer, Object>>)list).add(player -> {
+				Runnable then = back.apply(player);
+				if (then == null) {
+					return null;
+				}
+				try {
+					return deathless.newInstance(tint, fading, woke, then);
+				} catch (ReflectiveOperationException e) {
+					throw new IllegalStateException(e);
+				}
+			});
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' deathless returns (older Powers?)", e);
 		}
 	}
 
