@@ -144,7 +144,7 @@ final class PackResourcePacks {
 		// MUSIC_TAG, its SHA-1 from the .sha1 file beside it (empty sha1 here); kept on, "jaymospowers-medieval-music-off"
 		// in config/ keeps it off. Sits at the bottom of the file packs, and our small warped forest pack just above it
 		// (MUSIC_GAPS, put in place when this one is switched on).
-		new Pack("Jaymo Medieval Music", MUSIC_MARKER, "Jaymo Medieval Music", "Jaymo Medieval Music.zip", MUSIC_URL,
+		new Pack("Jaymo Medieval Music", PackResourcePacks.MUSIC_MARKER, "Jaymo Medieval Music", "Jaymo Medieval Music.zip", PackResourcePacks.MUSIC_URL,
 			"", false, BASE, true));
 
 	static final String MUSIC_MARKER = "jaymospowers-medieval-music";
