@@ -114,7 +114,7 @@ final class NightTrouble {
 		EVIDENCE = Registry.register(BuiltInRegistries.ITEM, key, new Item(new Item.Properties().setId(key).stacksTo(16).rarity(Rarity.UNCOMMON)));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> output.accept(EVIDENCE));
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
-			if (!GANGS.isEmpty() && server.getTickCount() % 10 == 0) {
+			if (!GANGS.isEmpty() && Factions.level(server).getGameTime() % 10 == 0) {
 				tick(Factions.level(server));
 			}
 		});

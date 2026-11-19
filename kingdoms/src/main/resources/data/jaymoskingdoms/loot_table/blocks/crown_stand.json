@@ -15,6 +15,114 @@
           "name": "jaymoskingdoms:crown_stand"
         }
       ]
+    },
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "jaymoskingdoms:crown_stand",
+          "properties": {
+            "s0": "true"
+          }
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskingdoms:sky_shard_step"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "jaymoskingdoms:crown_stand",
+          "properties": {
+            "s1": "true"
+          }
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskingdoms:sky_shard_lode"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "jaymoskingdoms:crown_stand",
+          "properties": {
+            "s2": "true"
+          }
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskingdoms:sky_shard_cold"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "jaymoskingdoms:crown_stand",
+          "properties": {
+            "s3": "true"
+          }
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskingdoms:sky_shard_night"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "jaymoskingdoms:crown_stand",
+          "properties": {
+            "s4": "true"
+          }
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskingdoms:sky_shard_breath"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "jaymoskingdoms:crown_stand",
+          "properties": {
+            "s5": "true"
+          }
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskingdoms:sky_shard_heart"
+        }
+      ]
     }
   ]
 }

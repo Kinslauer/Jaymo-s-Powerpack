@@ -105,7 +105,7 @@ public final class SignalBrazier extends Block {
 		BRAZIER_ITEM = Registry.register(BuiltInRegistries.ITEM, itemKey, new BlockItem(BRAZIER, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix()));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.accept(BRAZIER_ITEM));
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
-			if (!CALLED.isEmpty() && server.getTickCount() % 10 == 0) {
+			if (!CALLED.isEmpty() && Factions.level(server).getGameTime() % 10 == 0) {
 				come(server);
 			}
 		});
@@ -172,7 +172,7 @@ public final class SignalBrazier extends Block {
 		if (!(e instanceof Villager v) || !v.isAlive() || v.isBaby() || Downed.isDowned(v)) {
 			return false;
 		}
-		if (v instanceof VillagerEntityMCA mca && Learners.hired(mca) && Followers.takesOrders(v, lord)) {
+		if (McaCompat.LOADED && v instanceof VillagerEntityMCA mca && Learners.hired(mca) && Followers.takesOrders(v, lord)) {
 			return true;
 		}
 		return SwornCaptains.takesOrders(lord, v) || RivalParties.hiredBy(v, lord);
