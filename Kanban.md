@@ -29,6 +29,7 @@ kanban-plugin: board
 - [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
 - [ ] [[Inbox/smoothmount-6-heave-downed|smoothmount-6-heave-downed]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · open
+- [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
@@ -45,7 +46,6 @@ kanban-plugin: board
 ## Needs Andy
 
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · ready
-- [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🍇 Bacchus · blocked
 - [ ] [[Inbox/harness-body-pieces|harness-body-pieces]] · ☀️ Apollo · blocked
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 🍇 Bacchus · blocked
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · ☀️ Apollo · #1787 · blocked
