@@ -15576,3 +15576,10 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 
 - Andy: "goblins should enslave you too". Any goblin now binds a downed player and carries them off to its village's chains (or the nearest camp's): a village's goblins (already counted, since goblin villages are camp factions), its scouts (`GoblinScout.camp()`), and wild ones (`Captors.goblin`, `TakenAlive.taker`). Goblin scouts now also take captive a player they leave for dead (`Captors.sentient`, `Captors.campOf`).
 - Built; not played.
+
+## 0.10.99 (2026-11-19): Youth's wisp really disappears while it thinks (#1862)
+
+- **Youth's wisp** (`YouthWispRenderer`): gone off to think, the wisp was made invisible, but its renderer always chose
+  its own glowing render type, so it stayed drawn in the sky. An invisible wisp now uses GeckoLib's render type, which
+  draws nothing for players, so it leaves view for everyone until it flies back with the answer.
+- Built; not played on the server.
