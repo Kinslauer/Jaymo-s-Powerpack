@@ -91,7 +91,7 @@ same acts. The story says what was done, never what it means: that still comes f
 
 **The proving grounds** (new; proving-grounds PR, Andy's pick from the Kageborne gap check). The old peoples didn't fight a patron's champion in the temple. The offering, with emeralds beside it (their money, the price of the patron's attention), opened the way to the patron's **proving ground**, a bare floor of stone in a dark of its own, and the light carried the one who made it there, with any companions standing by. Each test has a ground of its own, swept clean after. Nobody dies on a proving ground: whoever falls is held there by the light, out of the fight, to watch the rest to the end, and then carried back to where they stood. The test is lost if all of them fall. The patrons still keep the grounds, and the old altars still open the way.
 
-**The song stones** (new) (medieval music and deco thread, 2026-11-19). Every capital keeps a stone in its square where the realm's firsts are cut: the
+**The song stones** (Andy approved, 2026-11-19; medieval music and deco thread). Every capital keeps a stone in its square where the realm's firsts are cut: the
 first to slay each great foe, the first to found a realm, the first to reach a far world. Nobody reads it out; the
 bards sing what is on it, and villagers name the names when they talk of the age of songs.
 
@@ -809,7 +809,7 @@ you."
 
 **The smith's household** (Andy approved, 2026-11-18; Claude's placement for the story-quest picks). The husks upstairs in an old home were the smith's wife and children. He could not put them down himself, which is why he went under the floor instead. Whoever lays them to rest while he sleeps has done what he owed them, and he knows it when he wakes (tale: The Keeping).
 
-**The gone-before** (new) (medieval music and deco thread, 2026-11-19). The Retaking did not start with you. Since the long defence, folk have gone out
+**The gone-before** (Andy approved, 2026-11-19; medieval music and deco thread). The Retaking did not start with you. Since the long defence, folk have gone out
 to take the wild back, and most of them never came home. Their bones lie where they fell: at a cliff's foot, frozen in
 a snowy wood, tangled in jungle vines, face down in a river, pinned under dripstone, webbed in a cave, and under the
 Aether's islands, where the cloud let fall those who stopped being just. They still have what they carried, a miner
@@ -817,7 +817,7 @@ his pick, a hunter her bow. Some went down together and lie around the last fire
 few lines, and those lines point somewhere. Villagers leave them be; a priest of the Truth will give one rites if asked,
 and some villages still wait for one of their own to come back. Not all of them lie quiet.
 
-**The headless rider** (new) (medieval music and deco thread, 2026-11-19). On foggy nights a rider with no head keeps the roads that pass the graveyards. He
+**The headless rider** (Andy approved, 2026-11-19; medieval music and deco thread). On foggy nights a rider with no head keeps the roads that pass the graveyards. He
 was a knight once, beheaded on that road and buried without his head, and he rides it looking for it, taking the
 heads of those he catches out. Carry his own head back to his grave by day and he lies down for good. Folk along those
 roads do not travel in fog.
@@ -1495,7 +1495,7 @@ Nether's netherrack, which the piglins leave alone because it is not gold. It is
 smiths melt it with steel for manyullyn, with gold and slime for queen's slime, with copper and amethyst for hepatizon.
 Nobody made it; it is simply in the rock.
 
-**The vines by the lava seas** (new) (medieval music and deco thread, 2026-11-19). Crimson and warped vines grow along the Nether's lava shores
+**The vines by the lava seas** (Andy approved, 2026-11-19; medieval music and deco thread). Crimson and warped vines grow along the Nether's lava shores
 and bear dark grapes. The demons' country presses them into a black wine it prizes above gold. A bottle carried up to
 the Overworld fetches a lord's price, and nobody asks where it came from.
 
@@ -1904,7 +1904,7 @@ under that edge, so no smith on the home continent has ever made one, and whoeve
 
 **Sky pirates** (Andy approved, 2026-11-15; medieval picks). When the steam towns first put balloon ships in the air, some were taken, and their takers stayed up there. Sky pirates keep a cove on a high peak, circle what they've marked, and come down on caravans, ships and towns with broadsides and powder kegs. A ship whose helmsman falls drifts on the wind and sinks. Rich realms keep a patrol airship of their own, lent by the steam towns, that fires a signal over a war band and blows a horn; the orc and barbarian bands beat war drums as they come.
 
-**Figureheads** (new) (medieval music and deco thread, 2026-11-19). Every realm carves its own figurehead for its ships' prows, in the realm's own
+**Figureheads** (Andy approved, 2026-11-19; medieval music and deco thread). Every realm carves its own figurehead for its ships' prows, in the realm's own
 wood, so a sailor knows whose ship it is before he can see her flag. Pirates carve whatever they like.
 
 ## The wild
