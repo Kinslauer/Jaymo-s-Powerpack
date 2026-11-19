@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 08:47). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 08:57). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -36,6 +36,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Agents/metal-hit-sparks|metal-hit-sparks]] · 💻 Odysseus · #1809 · running
+- [ ] [[Agents/powerborne-heroes|powerborne-heroes]] · 💻 Odysseus · running
 
 
 ## In review
