@@ -28,4 +28,4 @@ owns:
 
 ## Done
 - 210 pattern books, builders draw a third of their buildings from them, chapel/windmill/barn new, table 128 across + Pattern books tab. Built; not played.
-- 2026-11-19 15:14 PR #1854 is merged into master; moved to Agents/Done.
+- 2026-11-19 20:26 PR #1854 is merged into master; moved to Agents/Done.
