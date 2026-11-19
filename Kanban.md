@@ -25,7 +25,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/medieval-deco-4-drinks|medieval-deco-4-drinks]] · pc-claude-deco-4 · claimed
 - [ ] [[Inbox/medieval-deco-5-farm-water|medieval-deco-5-farm-water]] · pc-claude-deco-5 · claimed
 - [ ] [[Inbox/medieval-deco-3-dead-in-the-wild|medieval-deco-3-dead-in-the-wild]] · pc-claude-deco-3 · claimed
 - [ ] [[Inbox/medieval-deco-1-music|medieval-deco-1-music]] · pc-claude-deco-1 · #1795 · claimed
@@ -34,6 +33,7 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/medieval-deco-2-wind|medieval-deco-2-wind]] · pc-claude-deco-2 · #1798 · in-review
+- [ ] [[Inbox/medieval-deco-4-drinks|medieval-deco-4-drinks]] · pc-claude-deco-4 · #1797 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 - [ ] [[Agents/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · 💻 Odysseus · #1774 · in-review
 
