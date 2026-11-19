@@ -32,6 +32,7 @@ kanban-plugin: board
 - [ ] [[Inbox/harness-upkeep|harness-upkeep]] · for ☀️ Apollo · open
 - [ ] [[Inbox/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/forest-fire-pack|forest-fire-pack]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/zfighter-aura-rework|zfighter-aura-rework]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
