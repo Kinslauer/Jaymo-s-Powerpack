@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 16:57). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 21:58). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -23,6 +23,7 @@ Nothing stuck.
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1876 Captives who die and are weighed leave their chains (Kingdoms, 2026-11-19)
 - [ ] #1874 creative keeps your prosthetics (Powers, 2026-11-19)
 - [ ] #1870 Harness 5: armour oil, and the harness rusts (Powers, Kingdoms, 2026-11-19)
 - [ ] #1868 Harness 2: wider makes of cuirass, the coat of plates, gorget, tassets, rondels and the tabard of arms (Kingdoms, 2026-11-19)
@@ -82,12 +83,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1804 charge jump and Web slingshot on a horse's jump bar, orange peak (Powers, Kingdoms, 2026-11-19)
 - [ ] #1803 towns and the sea - figureheads, trade signs, song stones, the journey book (Kingdoms, 2026-11-19)
 - [ ] #1802 the dead in the wild: remains, last camps, ruin traps, the headless rider (Kingdoms, 2026-11-19)
-- [ ] #1801 practice dummy: kinds and coloured numbers (Powers, 2026-11-19)
-- …and 248 older ones.
+- …and 249 older ones.
 
 ## Health
 
-Nothing wrong: [[Health]].
+2 problems in the notes: [[Health]].
 
 ## Last week
 
