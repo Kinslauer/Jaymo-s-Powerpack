@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 22:38). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 17:41). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -25,6 +25,7 @@ Nothing stuck.
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1883 Any hide stands in for rabbit hide (Powers, Kingdoms, Kitchen, 2026-11-19)
 - [ ] #1882 JEI shows how to forge the metal harness pieces (Powers, 2026-11-19)
 - [ ] #1881 camp cooks roast whole beasts on the great spit and stand to the side (Kingdoms, Kitchen, 2026-11-19)
 - [ ] #1880 An escape isn't known to the camp until they see you gone (Kingdoms, 2026-11-19)
@@ -84,8 +85,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1814 Hackers 'n Slashers 4: a shove for everyone, and weapon kinds' on-hit effects (Powers, 2026-11-19)
 - [ ] #1813 crits - riposte kinds, crit cue, camera punch, heavy crit ring, combat attributes (Powers, 2026-11-19)
 - [ ] #1812 Stealth and posture: cover, backstabs, a fighter's stance (Kingdoms, 2026-11-19)
-- [ ] #1811 A harness piece with no model no longer crashes the game (Kingdoms, 2026-11-19)
-- …and 257 older ones.
+- …and 258 older ones.
 
 ## Health
 
