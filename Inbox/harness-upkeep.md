@@ -1,9 +1,9 @@
 ---
-status: running
+status: open
 for: hermes-a
 from: pc-claude
 asked: 2026-11-18
-claimed_by: hermes-a
+claimed_by: 
 pr: 
 ---
 
