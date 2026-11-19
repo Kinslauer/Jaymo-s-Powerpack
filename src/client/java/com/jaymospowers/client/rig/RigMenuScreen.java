@@ -2,6 +2,7 @@ package com.jaymospowers.client.rig;
 
 import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.rig.Rig;
+import com.jaymospowers.rig.RigForms;
 import com.jaymospowers.rig.RigHelm;
 import com.jaymospowers.rig.RigNet;
 import com.jaymospowers.rig.RigPicks;
@@ -40,15 +41,26 @@ final class RigMenuScreen extends Screen {
 	private static final int INFO_H = 30;
 
 	/** The entries, clockwise from the top. */
-		private static final int[] ACTIONS = {RigNet.HOVER, RigNet.PALM, RigNet.LAUNCHER, RigNet.UNIBEAM, RigNet.SCAN, RigNet.CALL, RigNet.SENTRY,
-			RigNet.FACEPLATE, RigNet.NIGHT, RigPicks.DRONES, RigPicks.MARK, RigPicks.TABLE, RigPicks.DECOY, RigPicks.FIELD, RigPicks.BANK, RigClient.JET_START,
-			RigPicks.DASH, RigPicks.BARRAGE, RigClient.SLOW_BEAT, RigPicks.FAILSAFE, RigPicks.PULLUP, RigPicks.HYPER, RigPicks.BANK_TURN, RigPicks.METEOR, RigPicks.SMOOTH};
-		private static final String[] NAMES = {"hover", "palm", "launcher", "unibeam", "scan", "call", "sentry", "faceplate", "night", "drones", "mark", "table", "decoy", "field", "bank", "jet_start", "dash", "barrage",
-			"slow_beat", "failsafe", "pullup", "hyper", "bank", "meteor", "smooth"};
-		private static final int[] LEVEL = {1, 1, 1, Rig.UNIBEAM_LEVEL, Rig.SCAN_LEVEL, Rig.CALL_LEVEL, Rig.CALL_LEVEL, 1, 1, 1, 1, 1, 1, 1, 1, Rig.FLIGHT_LEVEL, 1, Rig.MAX_LEVEL, Rig.UNIBEAM_LEVEL, 1, Rig.FLIGHT_LEVEL, Rig.FLIGHT_LEVEL, Rig.FLIGHT_LEVEL, Rig.FLIGHT_LEVEL, Rig.FLIGHT_LEVEL};
-		/** Cooldowns' full lengths (ticks), for the shading; 0 for none. */
-		private static final int[] COOLDOWN = {0, RigHud.PALM_COOLDOWN, RigHud.LAUNCHER_COOLDOWN, RigHud.UNIBEAM_COOLDOWN, RigScan.SCAN_COOLDOWN, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-		private static final double SLICE = 360.0 / ACTIONS.length;
+	private static final int[] ACTIONS = {RigNet.HOVER, RigNet.PALM, RigNet.LAUNCHER, RigNet.UNIBEAM, RigNet.SCAN, RigNet.CALL, RigNet.SENTRY,
+		RigNet.FACEPLATE, RigNet.NIGHT, RigPicks.DRONES, RigPicks.MARK, RigPicks.TABLE, RigPicks.DECOY, RigPicks.FIELD, RigPicks.BANK, RigClient.JET_START,
+		RigPicks.DASH, RigPicks.BARRAGE, RigClient.SLOW_BEAT, RigPicks.FAILSAFE, RigPicks.AF_BLADE, RigPicks.AF_MACE, RigPicks.AF_PILE,
+		RigPicks.AF_DRILL, RigPicks.AF_LANCE, RigPicks.AF_LASH, RigPicks.AF_MIMIC,
+		// the back rig (RigBack)
+		com.jaymospowers.rig.RigBack.WINGSLASH, com.jaymospowers.rig.RigBack.SPEARS, com.jaymospowers.rig.RigBack.PINCER,
+		com.jaymospowers.rig.RigBack.GRAPPLE, com.jaymospowers.rig.RigBack.HORNS,
+		// flight actives
+		RigPicks.PULLUP, RigPicks.HYPER, RigPicks.BANK_TURN, RigPicks.METEOR, RigPicks.SMOOTH};
+	private static final String[] NAMES = {"hover", "palm", "launcher", "unibeam", "scan", "call", "sentry", "faceplate", "night", "drones", "mark", "table", "decoy", "field", "bank", "jet_start", "dash", "barrage",
+		"slow_beat", "failsafe", "blade", "mace", "pile", "drill", "lance", "lash", "mimic", "wingslash", "spears", "pincer", "grapple", "horns", "pullup", "hyper", "bank", "meteor", "smooth"};
+	private static final int[] LEVEL = {1, 1, 1, Rig.UNIBEAM_LEVEL, Rig.SCAN_LEVEL, Rig.CALL_LEVEL, Rig.CALL_LEVEL, 1, 1, 1, 1, 1, 1, 1, 1, Rig.FLIGHT_LEVEL, 1, Rig.MAX_LEVEL, Rig.UNIBEAM_LEVEL, 1,
+		RigForms.BLADE_LEVEL, RigForms.MACE_LEVEL, RigForms.PILE_LEVEL, RigForms.DRILL_LEVEL, RigForms.LANCE_LEVEL, RigForms.LASH_LEVEL, RigForms.MIMIC_LEVEL,
+		3, 2, 3, 2, 4,
+		Rig.FLIGHT_LEVEL, Rig.FLIGHT_LEVEL, Rig.FLIGHT_LEVEL, Rig.FLIGHT_LEVEL, Rig.FLIGHT_LEVEL};
+	/** Cooldowns' full lengths (ticks), for the shading; 0 for none. */
+	private static final int[] COOLDOWN = {0, RigHud.PALM_COOLDOWN, RigHud.LAUNCHER_COOLDOWN, RigHud.UNIBEAM_COOLDOWN, RigScan.SCAN_COOLDOWN, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		RigForms.BLADE_COOLDOWN, RigForms.MACE_COOLDOWN, RigForms.PILE_COOLDOWN, RigForms.DRILL_COOLDOWN, RigForms.LANCE_COOLDOWN, RigForms.LASH_COOLDOWN, RigForms.MIMIC_COOLDOWN,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	private static final double SLICE = 360.0 / ACTIONS.length;
 
 	private int selected = -1;
 	private boolean chosen;
@@ -58,34 +70,46 @@ final class RigMenuScreen extends Screen {
 	}
 
 	private static Item icon(int i) {
-			return switch (i) {
-				case 0 -> Items.FEATHER;
-				case 1 -> Items.GLOWSTONE_DUST;
-				case 2 -> Items.FIREWORK_ROCKET;
-				case 3 -> Items.BEACON;
-				case 4 -> Items.SPYGLASS;
-				case 5 -> Items.ARMOR_STAND;
-				case 6 -> Items.SHIELD;
-				case 7 -> Rig.HELM != null ? Rig.HELM : Items.IRON_HELMET;
-				case 9 -> Items.COPPER_INGOT;
-				case 10 -> Items.COMPASS;
-				case 11 -> Items.CLOCK;
-				case 12 -> Items.PLAYER_HEAD;
-				case 13 -> Items.GOLD_INGOT;
-				case 14 -> Items.ARROW;
-				case 15 -> Items.ELYTRA;
-				case 16 -> Items.BLAZE_POWDER;
-				case 17 -> Items.FIRE_CHARGE;
-				case 18 -> Items.CLOCK;
-				case 19 -> Items.TOTEM_OF_UNDYING;
-				case 20 -> Items.REDSTONE;
-				case 21 -> Items.NETHER_STAR;
-				case 22 -> Items.FEATHER;
-				case 23 -> Items.FIRE_CHARGE;
-				case 24 -> Items.CLOCK;
-				default -> Items.ENDER_EYE;
-			};
-		}
+		return switch (i) {
+			case 0 -> Items.FEATHER;
+			case 1 -> Items.GLOWSTONE_DUST;
+			case 2 -> Items.FIREWORK_ROCKET;
+			case 3 -> Items.BEACON;
+			case 4 -> Items.SPYGLASS;
+			case 5 -> Items.ARMOR_STAND;
+			case 6 -> Items.SHIELD;
+			case 7 -> Rig.HELM != null ? Rig.HELM : Items.IRON_HELMET;
+			case 9 -> Items.COPPER_INGOT;
+			case 10 -> Items.COMPASS;
+			case 11 -> Items.CLOCK;
+			case 12 -> Items.PLAYER_HEAD;
+			case 13 -> Items.GOLD_INGOT;
+			case 14 -> Items.ARROW;
+			case 15 -> Items.ELYTRA;
+			case 16 -> Items.BLAZE_POWDER;
+			case 17 -> Items.FIRE_CHARGE;
+			case 18 -> Items.CLOCK;
+			case 19 -> Items.TOTEM_OF_UNDYING;
+			case 20 -> Items.IRON_SWORD;
+			case 21 -> Items.IRON_AXE;
+			case 22 -> Items.IRON_PICKAXE;
+			case 23 -> Items.BLAZE_ROD;
+			case 24 -> Items.TRIDENT;
+			case 25 -> Items.FISHING_ROD;
+			case 26 -> Items.BOOK;
+			case 27 -> Items.PHANTOM_MEMBRANE;
+			case 28 -> Items.TRIDENT;
+			case 29 -> Items.LEAD;
+			case 30 -> Items.FISHING_ROD;
+			case 31 -> Items.BLAZE_ROD;
+			case 32 -> Items.REDSTONE;
+			case 33 -> Items.NETHER_STAR;
+			case 34 -> Items.FEATHER;
+			case 35 -> Items.FIRE_CHARGE;
+			case 36 -> Items.CLOCK;
+			default -> Items.ENDER_EYE;
+		};
+	}
 
 	@Override
 	public boolean isPauseScreen() {
@@ -156,7 +180,7 @@ final class RigMenuScreen extends Screen {
 				return Component.translatable("gui.jaymospowers.rig_menu.no_core");
 			}
 			if ((action == RigNet.HOVER || action == RigNet.PALM || action == RigNet.LAUNCHER || action == RigNet.UNIBEAM || action == RigPicks.DASH
-				|| action == RigPicks.BARRAGE || action == RigPicks.PULLUP || action == RigPicks.HYPER || action == RigPicks.BANK_TURN
+				|| action == RigPicks.BARRAGE || com.jaymospowers.rig.RigBack.is(action) || action == RigPicks.PULLUP || action == RigPicks.HYPER || action == RigPicks.BANK_TURN
 				|| action == RigPicks.METEOR || action == RigPicks.SMOOTH) && !Rig.fullSet(player)) {
 				return Component.translatable("gui.jaymospowers.rig_menu.incomplete");
 			}

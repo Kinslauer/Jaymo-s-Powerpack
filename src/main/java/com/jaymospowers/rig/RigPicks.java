@@ -28,36 +28,42 @@ public final class RigPicks {
 	public static final int DRONES = 20, MARK = 21, TABLE = 22, DECOY = 23, FIELD = 24, BANK = 25;
 	/** The thruster dash and the artillery barrage ({@link RigStrikes}). */
 	public static final int DASH = 26, BARRAGE = 27;
+	/** The arm forms ({@link RigForms}). */
+	public static final int AF_BLADE = 29, AF_MACE = 30, AF_PILE = 31, AF_DRILL = 32, AF_LANCE = 33, AF_LASH = 34,
+		AF_MIMIC = 35;
 	/** The failsafe's switch ({@link RigCall}): works with the suit parked too. */
 	public static final int FAILSAFE = 28;
 	/** (0.12.x) Flight actives: pull-up, hyper thrust, banking, meteor dive, smooth others. */
-	public static final int PULLUP = 29, HYPER = 30, BANK_TURN = 31, METEOR = 32, SMOOTH = 33;
+	public static final int PULLUP = 36, HYPER = 37, BANK_TURN = 38, METEOR = 39, SMOOTH = 40;
 
 	private RigPicks() {
 	}
 
 	/** Called from {@code Rig.init}. */
-		public static void init() {
-			RigTable.init();
-			RigStudy.init();
-			RigDrones.init();
-			RigDecoy.init();
-			RigField.init();
-			RigBank.init();
-			RigStrikes.init();
-			RigDive.init();
-			ServerTickEvents.END_SERVER_TICK.register(server -> {
-				for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-					RigDrones.tick(player);
-					RigField.tick(player);
-					RigStrikes.tick(player);
-				}
-			});
-		}
+	public static void init() {
+		RigTable.init();
+		RigStudy.init();
+		RigDrones.init();
+		RigDecoy.init();
+		RigField.init();
+		RigBank.init();
+		RigStrikes.init();
+		RigDive.init();
+		RigForms.init();
+		RigBack.init();
+		ServerTickEvents.END_SERVER_TICK.register(server -> {
+			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+				RigDrones.tick(player);
+				RigField.tick(player);
+				RigStrikes.tick(player);
+				RigBack.tick(player);
+			}
+		});
+	}
 
 	/** Whether {@code action} is one of these. */
 	public static boolean is(int action) {
-		return action >= FIRST && action <= SMOOTH;
+		return action >= FIRST && action <= AF_MIMIC || RigBack.is(action);
 	}
 
 	/** A Rig menu entry from the client. */
@@ -82,11 +88,8 @@ public final class RigPicks {
 			case BANK -> RigBank.toggle(player);
 			case DASH -> RigStrikes.dash(player);
 			case BARRAGE -> RigStrikes.barrage(player);
-			case PULLUP -> RigActives.pullUp(player);
-			case HYPER -> RigActives.hyperThrust(player);
-			case BANK_TURN -> RigActives.toggleBanking(player);
-			case METEOR -> RigDive.meteorDive(player);
-			case SMOOTH -> RigActives.toggleSmoothOthers(player);
+			case AF_BLADE, AF_MACE, AF_PILE, AF_DRILL, AF_LANCE, AF_LASH, AF_MIMIC -> RigForms.use(player, action);
+			case RigBack.WINGSLASH, RigBack.SPEARS, RigBack.PINCER, RigBack.GRAPPLE, RigBack.HORNS -> RigBack.use(player, action);
 			default -> {
 			}
 		}

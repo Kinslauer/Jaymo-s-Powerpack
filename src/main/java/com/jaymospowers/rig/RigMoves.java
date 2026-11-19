@@ -29,16 +29,26 @@ public final class RigMoves {
 	public static final int TAKEOFF = 6, SCAN = 7, CALL = 8, TABLE = 9;
 	/** The take-off's crouch (ticks before the thrusters fire) and its whole length; the gestures' lengths. */
 	/** A thruster dash, a bare-fisted punch with the Arms, and the artillery barrage. */
-		public static final int DASH = 10, PUNCH = 11, BARRAGE = 12;
-		/** Flight actives: pull-up warning, hyper thrust, banking, meteor dive, smooth others. */
-		public static final int PULLUP = 13, HYPER = 14, BANK = 15, METEOR = 16, SMOOTH = 17;
-		/** Their lengths (ticks); the dash's wind-up before the burst, and the barrage's before the pods empty. */
-		public static final int DASH_TICKS = 12, DASH_FIRE = 2, PUNCH_TICKS = 8, BARRAGE_TICKS = 34, BARRAGE_FIRE = 8;
-		public static final int TAKEOFF_CROUCH = 4, TAKEOFF_TICKS = 12, SCAN_TICKS = 18, CALL_TICKS = 70, TABLE_TICKS = 30;
-		/** Flight actives lengths. */
-		public static final int PULLUP_TICKS = 1, HYPER_TICKS = 1, BANK_TICKS = 1, METEOR_TICKS = 40, SMOOTH_TICKS = 1;
-		/** {@link #THRUST} values. */
-		public static final int THRUST_NONE = 0, THRUST_HOVER = 1, THRUST_FLIGHT = 2;
+	public static final int DASH = 10, PUNCH = 11, BARRAGE = 12;
+	/** Arm forms (blade, mace, pile, drill, lance, lash, mimic). */
+	public static final int ARM_BLADE = 13, ARM_MACE = 14, ARM_PILE = 15, ARM_DRILL = 16, ARM_LANCE = 17, ARM_LASH = 18,
+		ARM_MIMIC = 19;
+	/** Their lengths (ticks); the wind-up before the effect fires. */
+	public static final int ARM_BLADE_TICKS = 10, ARM_BLADE_FIRE = 2;
+	public static final int ARM_MACE_TICKS = 10, ARM_MACE_FIRE = 2;
+	public static final int ARM_PILE_TICKS = 8, ARM_PILE_FIRE = 2;
+	public static final int ARM_DRILL_TICKS = 40, ARM_DRILL_FIRE = 0;
+	public static final int ARM_LANCE_TICKS = 10, ARM_LANCE_FIRE = 2;
+	public static final int ARM_LASH_TICKS = 10, ARM_LASH_FIRE = 2;
+	public static final int ARM_MIMIC_TICKS = 10, ARM_MIMIC_FIRE = 2;
+	public static final int DASH_TICKS = 12, DASH_FIRE = 2, PUNCH_TICKS = 8, BARRAGE_TICKS = 34, BARRAGE_FIRE = 8;
+	public static final int TAKEOFF_CROUCH = 4, TAKEOFF_TICKS = 12, SCAN_TICKS = 18, CALL_TICKS = 70, TABLE_TICKS = 30;
+	/** Flight actives: pull-up warning, hyper thrust, banking, meteor dive, smooth others. */
+	public static final int PULLUP = 20, HYPER = 21, BANK = 22, METEOR = 23, SMOOTH = 24;
+	/** Flight actives lengths. */
+	public static final int PULLUP_TICKS = 1, HYPER_TICKS = 1, BANK_TICKS = 1, METEOR_TICKS = 40, SMOOTH_TICKS = 1;
+	/** {@link #THRUST} values. */
+	public static final int THRUST_NONE = 0, THRUST_HOVER = 1, THRUST_FLIGHT = 2;
 	/** How long a palm blast's and a launch's poses play (ticks); the Unibeam's is its charge and beam and the let-down. */
 	public static final int PALM_TICKS = 13, LAUNCHER_TICKS = 17, UNIBEAM_SETTLE = 8;
 	/** The wind-up: ticks from the key to the palm blast's shot, and to the launcher's missiles leaving. */
@@ -58,28 +68,36 @@ public final class RigMoves {
 	}
 
 	/** How long a move's pose plays (ticks). */
-		public static int length(int kind) {
-			return switch (kind) {
-				case PALM -> PALM_TICKS;
-				case LAUNCHER -> LAUNCHER_TICKS;
-				case KNEE -> KNEE_TICKS;
-				case KICK -> KICK_TICKS;
-				case TAKEOFF -> TAKEOFF_TICKS;
-				case SCAN -> SCAN_TICKS;
-				case CALL -> CALL_TICKS;
-				case TABLE -> TABLE_TICKS;
-				case DASH -> DASH_TICKS;
-				case PUNCH -> PUNCH_TICKS;
-				case BARRAGE -> BARRAGE_TICKS;
-				case PULLUP -> PULLUP_TICKS;
-				case HYPER -> HYPER_TICKS;
-				case BANK -> BANK_TICKS;
-				case METEOR -> METEOR_TICKS;
-				case SMOOTH -> SMOOTH_TICKS;
-				case UNIBEAM -> RigUnibeam.CHARGE_TICKS + RigUnibeam.BEAM_TICKS + UNIBEAM_SETTLE;
-				default -> 0;
-			};
-		}
+	public static int length(int kind) {
+		return switch (kind) {
+			case PALM -> PALM_TICKS;
+			case LAUNCHER -> LAUNCHER_TICKS;
+			case KNEE -> KNEE_TICKS;
+			case KICK -> KICK_TICKS;
+			case TAKEOFF -> TAKEOFF_TICKS;
+			case SCAN -> SCAN_TICKS;
+			case CALL -> CALL_TICKS;
+			case TABLE -> TABLE_TICKS;
+			case DASH -> DASH_TICKS;
+			case PUNCH -> PUNCH_TICKS;
+			case BARRAGE -> BARRAGE_TICKS;
+			case ARM_BLADE -> ARM_BLADE_TICKS;
+			case ARM_MACE -> ARM_MACE_TICKS;
+			case ARM_PILE -> ARM_PILE_TICKS;
+			case ARM_DRILL -> ARM_DRILL_TICKS;
+			case ARM_LANCE -> ARM_LANCE_TICKS;
+			case ARM_LASH -> ARM_LASH_TICKS;
+			case ARM_MIMIC -> ARM_MIMIC_TICKS;
+			case PULLUP -> PULLUP_TICKS;
+			case HYPER -> HYPER_TICKS;
+			case BANK -> BANK_TICKS;
+			case METEOR -> METEOR_TICKS;
+			case SMOOTH -> SMOOTH_TICKS;
+			case UNIBEAM -> RigUnibeam.CHARGE_TICKS + RigUnibeam.BEAM_TICKS + UNIBEAM_SETTLE;
+			// the back rig's (RigBack)
+			default -> RigBack.length(kind);
+		};
+	}
 
 	public static @Nullable Move get(Player player) {
 		return player.getAttached(MOVE);

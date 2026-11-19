@@ -9,9 +9,9 @@ Start here. Agents: read this note, then [[How agents use this vault]], then [[B
 
 | Mod | Version | File |
 |---|---|---|
-| Jaymo's Powers (and the pack) | **0.25.11** | `gradle.properties` |
-| Jaymo's Kingdoms | **0.10.31** | `kingdoms/gradle.properties` |
-| Jaymo's Kitchen | **0.6.48** | `kitchen/gradle.properties` |
+| Jaymo's Powers (and the pack) | **0.25.26** | `gradle.properties` |
+| Jaymo's Kingdoms | **0.10.45** | `kingdoms/gradle.properties` |
+| Jaymo's Kitchen | **0.6.51** | `kitchen/gradle.properties` |
 
 Minecraft 26.3, Fabric, JDK 25. The Release workflow keeps this table, the versions and the MODLOGs up to date after
 each merge; PRs add a change note instead (`changes/README.md`) and never take version numbers.

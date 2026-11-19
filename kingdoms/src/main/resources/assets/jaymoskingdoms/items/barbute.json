@@ -1,0 +1,62 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:component",
+    "component": "jaymoskingdoms:finish",
+    "cases": [
+      {
+        "when": "blackened",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/barbute_blackened"
+        }
+      },
+      {
+        "when": "gilded",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/barbute_gilded"
+        }
+      },
+      {
+        "when": "russeted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/barbute_russeted"
+        }
+      },
+      {
+        "when": "blued",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/barbute_blued"
+        }
+      },
+      {
+        "when": "painted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/barbute_painted"
+        }
+      },
+      {
+        "when": "etched",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/barbute_etched"
+        }
+      },
+      {
+        "when": "rusted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/barbute_rusted"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "jaymoskingdoms:item/barbute"
+    }
+  }
+}

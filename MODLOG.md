@@ -5988,3 +5988,106 @@ Patch 2 of the Clouds and Bits plan (Andy's picks `bb-vslab`, `bb-mixslab`, `bb-
 
 - `NullGoalMixin` (on `Mob.serverAiStep`): if a goal selector's tick throws the NullPointerException from a null goal, that creature's goals skip the tick and a warning naming the creature type is logged once. Any other exception still propagates.
 - Not built or played; CI compiles.
+
+## 0.25.12 (2026-11-18): TaCZ out of JEI and the creative menu (#1757)
+
+- Changes: nothing of TaCZ shows in JEI (no items, no painting, no gun smith table pages, no recipes) or in the creative menu (none of its tabs, none of its items in other tabs or the search). Its guns stay in the game for the future's gunners (`TaczGuns.hideModern`, `TaczHiddenJei`).
+- Built by CI; not played.
+
+## 0.25.13 (2026-11-18): Blood decals draw under Iris shaders (#1760)
+
+- Changes: blood puddles, footprints and wall marks are registered with Iris (as translucent particles) when it is loaded. Before, switching a shader pack on made Iris log "Missing program minecraft:pipeline/jaymospowers_blood_decal in override list" and a burst of GL_INVALID_OPERATION errors, and the decals could fail to draw.
+- Built by CI; not played.
+
+## 0.25.14 (2026-11-18): worldgen no longer reads or writes past its chunk edge (#1761)
+
+- **Sky springs**: the flood fill that checks whether a spring's water would run out of the Aether's bottom now stops at the 3x3 chunks round the spring's chunk (past that counts as a leak, as an unloaded chunk already did), so it no longer reads terrain it may not touch. Thousands of "unsafe terrain read" warnings a day.
+- **Eden island caves**: tunnels are cut and vented only inside the 3x3 chunks round the feature's origin chunk, so blocks are no longer lost to a far chunk.
+- Not played; nothing built on this PC (CI compiles).
+
+## 0.25.15 (2026-11-18): Skitter wall climb helper no longer clashes with Kingdoms claws (#1762)
+
+- The wall-climb helper (`besideWall`, `WALL_GAP`) is now `@Unique`, so Mixin stops logging an overwrite conflict at every boot and each mod keeps its own copy.
+- Not built or played.
+
+## 0.25.16 (2026-11-18): Conjoined twins show for joining players (#1755)
+
+- Fixes: a player joining didn't get the conjoined twin data, or the depth of others' sunk lures, synced to their screen; both are now registered at start-up.
+- Built by CI; not played.
+
+## 0.25.17 (2026-11-18): Chunky picks up again after a restart (#1752)
+
+- Fixes: after every restart the world pre-generation came back stuck (0 chunks a second) until it was paused and continued by hand. `ChunkyCompat` now uses Chunky's API instead of its commands: it is still paused while a player is on and continued once nobody is, but a continue now waits until the paused task has finished stopping (it used to be lost when the pause was slow to drain). With nobody on, a watchdog pauses and continues a task that has run a minute without a progress event, up to three times in a row.
+- Built by CI; checked on the next restart.
+
+## 0.25.18 (2026-11-18): Oversized drops split into full stacks (#1768)
+
+- Fixes: a dropped stack bigger than its item's stack size (Droppable Villager Trades can drop up to 320 of a dead villager's trade at once, 152 bricks on the Deck) couldn't be saved and was lost when its chunk unloaded. Such a drop is now split into full stacks as it lands (`OversizedDropMixin`).
+- Built by CI; not played.
+
+## 0.25.19 (2026-11-18): Teleports no longer lost on a ride that already ended (#1775)
+
+- Fixes: a player whose game still thought they were riding something the server had already let go of ignored every teleport and rubber-banded back until they died (Jungxxv, 12:36 PM on the 18th). When the same far teleport is sent again while they still ride, they now get off the stale ride first (a single teleport of a ride with its rider, through an End gateway say, is left alone), and the ride is logged so the cause can be found (`StuckRideTeleportMixin`).
+- Built by CI; not played.
+
+## 0.25.20 (2026-11-19): Rig arm forms (#1746)
+
+A Rig wearer gains seven new arm forms in the Rig menu (Sneak + J), each a Frostborn Rig tech plate that slides, locks and folds into a weapon on the wearer's arm:
+
+- **Arm blade** (`af-blade`): the forearm plates slide forward into a blade for close fighting. Costs charge, Mind level 1.
+- **Mace arm smash** (`af-mace`): the arm swells into a heavy mace and smashes the ground in a shockwave. Costs charge, Mind level 2.
+- **Pile bunker** (`af-pile`): a spike punches out of the forearm at point blank, with huge knockback and a crack in the block behind. Costs charge, Mind level 1.
+- **Drill breaker** (`af-drill`): the arm becomes a drill and tears forward through soft stone. Costs charge, Mind level 3.
+- **Thruster lance** (`af-lance`): a lance forms, the thrusters fire, and the first foe hit is carried along and pinned. Costs charge, Mind level 2.
+- **Energy lash** (`af-lash`): an energy whip off the wrist, cracking at range and pulling small mobs toward you. Costs charge, Mind level 1.
+- **Weapon mimic** (`af-mimic`): copies a studied creature's weapon for 30 seconds. Costs charge, Mind level 4.
+
+New classes: `RigForms` (server, actives and state), `RigFormsClient` (client poses).
+Hooked into: `RigPicks` (menu entries), `RigMenuScreen` (menu tiles, icons, levels, cooldowns), `RigMoves` (move kinds), `RigPose` (arm form poses).
+
+Built; not played in game.
+
+## 0.25.21 (2026-11-19): Rig patch 6: cloak, tech override and nova (#1776)
+
+- **Active camouflage**: the suit goes see-through for a time, mobs notice you later, and the first hit out of cloak lands harder. Costs charge and needs the whole Rig set; the Mind calls cloak on and off, and the ambush.
+- **Tech override**: a visor beam that freezes nearby golems for a moment, opens iron doors and trapdoors you look at, and stutters androids and mechs. Costs charge.
+- **Nova**: a panic button — every charge spent, everything near thrown back, and any grab broken.
+- New Mind lines for cloak on/off, ambush, nova and override, in each personality's voice, plus a cooldown warning for the nova.
+- Built with gradle; not played in game yet.
+
+## 0.25.22 (2026-11-19): Space: the star map's atlas, and the ringed giant in the night sky (#1753)
+
+- **Atlas**: the star map remembers what you found on each world. A world you've come down on wears a small gold pin on the map, and its card says how many times you've landed there, where you last did, and where your bed is if your respawn point is on that world. Mission progress was already on the card. Kept on the player through death. (`ZFighterAtlas`, `ZFighterStarMapScreen`)
+- **The ringed giant**: once the Verdant World's chart is read, what shows in the Overworld's night sky is its blue giant, brighter and bigger, with a faint leaning ring out of each side. It used to be a small green dot. The giant already had its ring on the star map and in the Verdant sky. (`SkyPlanets`)
+- Built; not played.
+
+## 0.25.23 (2026-11-19): Patrol: relief runs and your Patrol file (#1754)
+
+- **Relief runs**: officers of any rank can ask a patrolman "Any relief work?". He sends them to bring 6 dried limphium leaves (the Verdant World's keeping herb) to any town's healer. Use a cleric with the leaves in your main hand to hand them over: 6 silver, 150 TP for a Z Fighter. One run at a time, and runs don't run out. (`ZFighterPatrolRelief`)
+- **Your Patrol file**: "Reporting in." now answers with your file: rank, arrests on warrant, skip writs drawn and relief runs done. (`ZFighterPatrol#menu`)
+- Built; not played.
+
+## 0.25.24 (2026-11-19): Duplex doubles take spoken orders (#1767)
+
+- **Orders by voice**: as Duplex, say an order aloud (or "doubles, ..." first) and your doubles within 32 blocks do it. *follow* (come, heel); *wait* (stay, hold), where they stand; *scout*: one runs 20 blocks the way you face and comes back with how many foes it saw; *collect* (gather, pick up): they pick up the drops near and bring them to you; *mine* (dig): one digs out the open block you look at, then up to 8 more of the same touching it, never anything you couldn't break yourself or harder than stone-and-ore; *fetch <thing>* (bring, get): one fetches a stack with that in its name from a chest or barrel within 16 blocks, or the first stack of the container you look at; *fight* (attack): all go for what you look at, or the nearest foe. Anything a double holds drops if it pops. (`DoubleOrders`, `XenoDouble`)
+- Built; not played.
+
+## 0.25.25 (2026-11-19): acrobatics - standing backflip, dodge-key mid-air tricks (#1778)
+
+- **Standing backflip** (new Kingdoms perk Backflip): on the ground with only Back held, the dodge key (Left Alt) throws a backflip instead of the back roll: a high hop backwards (0.52 up, 0.24 back), arms swung up, heels over head, landing on your feet facing the same way. It is a dodge (the roll's evasion window and cooldown, `Dodge.dodgeBy`), costs 5 feathers. Plain Alt still rolls back; Sneak + Alt is still the zoom.
+- **Mid-air tricks**: the dodge key in the air throws a trick (for show, no push), picked at random from the family the movement keys choose and never the one just thrown: forward/none = front flip, tornado spin, toe touch (rank 2: double front, corkscrew); back = back flip, swan (rank 2: full-twisting layout, double back); strafe = cartwheel, side flip (rank 2: butterfly twist). Freerunner rank 1 (or the web power) opens the plain ones and 2 a jump; rank 2 the harder ones and 3 a jump. A trick goes only if it can finish before the ground (the client works out the fall); otherwise the press is the landing roll's as before. Each next trick can start once the last is 75% through. 2 feathers (3 for rank-2 tricks), Stealth experience.
+- Shield vault and the Weapon Forms flip still come first in the air. Move hint "Alt: trick" shows while a trick fits. The falling poses step aside while any flip or trick plays; a trick cut short by landing stops drawing.
+- `freerun/moves/Acrobatics`, `client/freerun/moves/AcrobaticsClient`, `RunMoves` asks 15-16, `Freerun.Perk.BACKFLIP`, `WebPose` kinds 19-27 drawn in `WebBodyPose`.
+- Built; not played.
+
+## 0.25.26 (2026-11-19): Rig: the back rig (wings, wing slash, spear legs, pincers, grapple, horn lightning) (#1777)
+
+- **Wings**: two vanes fold flat down the Core's back and spread wide in full flight, beating a little as you fly with a quiet buzz, and fold away again in hover or on the ground. (`RigBackClient`)
+- New Rig menu entries, each needing the whole set and costing charge:
+  - **Wing Slash** (Mind level 3, 60 charge): the dash with the vanes out as blades. It cuts everything you pass, each once, instead of ramming the first thing.
+  - **Spear Legs** (level 2, 50): four jointed legs stab out of the back in a ring and back in. Everything within 3.5 blocks is run through and lifted.
+  - **Pincers** (level 3, 40): two arms over the shoulders seize the creature in front of you (up to 60 health) and hold it before you for up to 5 seconds. Pick it again to throw it along your look.
+  - **Grapple Claw** (level 2, 25): a claw on a line, up to 24 blocks. At a wall it pulls you there; at a creature it pulls it to you.
+  - **Horn Lightning** (level 4, 90): lightning leaps from the helm to the nearest foe and on to up to four, half again as strong in the rain, and overcharges the Core.
+- Metal art: `tools/gen_rig.py` `back()` writes `textures/entity/rig/back.png` and its glow. (`RigBack`)
+- Built; not played.

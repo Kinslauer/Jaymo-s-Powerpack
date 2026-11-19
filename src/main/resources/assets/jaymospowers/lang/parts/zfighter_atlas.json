@@ -1,0 +1,5 @@
+{
+  "screen.jaymospowers.zfighter_space.atlas_landed": "Landed %1$s times, last near %2$s, %3$s",
+  "screen.jaymospowers.zfighter_space.atlas_landed_once": "Landed once, near %1$s, %2$s",
+  "screen.jaymospowers.zfighter_space.atlas_bed": "Your bed: %1$s, %2$s"
+}
