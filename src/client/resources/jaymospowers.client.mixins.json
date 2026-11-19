@@ -4,6 +4,9 @@
 	"compatibilityLevel": "JAVA_25",
 	"client": [
 		"PlayerInfoNoConnectionMixin",
+		"ReasonTitleMixin",
+		"ReasonSplashMixin",
+		"ReasonLogoMixin",
 		"DreamCameraMixin",
 		"StuckRideTeleportMixin",
 		"ArrowPickScrollMixin",
