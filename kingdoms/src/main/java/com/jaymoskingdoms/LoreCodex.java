@@ -76,11 +76,17 @@ public final class LoreCodex extends Item {
 	}
 
 	/** Server → player: open the codex with these books. */
-	public record Open(List<Entry> entries) implements CustomPacketPayload {
+	public record Open(Component title, List<Entry> entries) implements CustomPacketPayload {
 		public static final Type<Open> TYPE = new Type<>(JaymosKingdoms.id("lore_codex_open"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Open> CODEC = CustomPacketPayload.codec(Open::write, Open::read);
 
+		/** The codex itself, under its own title. */
+		public Open(List<Entry> entries) {
+			this(Component.translatable("item.jaymoskingdoms.lore_codex"), entries);
+		}
+
 		private void write(RegistryFriendlyByteBuf buf) {
+			ComponentSerialization.STREAM_CODEC.encode(buf, this.title);
 			buf.writeVarInt(this.entries.size());
 			for (Entry e : this.entries) {
 				buf.writeUtf(e.id());
@@ -93,6 +99,7 @@ public final class LoreCodex extends Item {
 		}
 
 		private static Open read(RegistryFriendlyByteBuf buf) {
+			Component title = ComponentSerialization.STREAM_CODEC.decode(buf);
 			int n = buf.readVarInt();
 			List<Entry> entries = new ArrayList<>();
 			for (int i = 0; i < n; i++) {
@@ -105,7 +112,7 @@ public final class LoreCodex extends Item {
 				}
 				entries.add(new Entry(id, title, pages));
 			}
-			return new Open(entries);
+			return new Open(title, entries);
 		}
 
 		@Override

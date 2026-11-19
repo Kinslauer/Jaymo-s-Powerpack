@@ -185,6 +185,6 @@ public final class Firsts {
 		if (books.isEmpty()) {
 			books = List.of(new LoreCodex.Entry("firsts_none", Component.translatable(title), List.of(Component.translatable("firsts.jaymoskingdoms.none"))));
 		}
-		ServerPlayNetworking.send(player, new LoreCodex.Open(books));
+		ServerPlayNetworking.send(player, new LoreCodex.Open(Component.translatable(title), books));
 	}
 }
