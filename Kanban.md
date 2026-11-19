@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 15:42). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 15:50). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -39,7 +39,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/smoothmount-1-climb-on-off|smoothmount-1-climb-on-off]] · ☀️ Apollo · claimed
-- [ ] [[Inbox/harness-body-pieces|harness-body-pieces]] · harness-body-pieces · claimed
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · #1853 · changes · fixing review notes
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · ☀️ Apollo · #1787 · changes · fixing review notes
 
@@ -47,6 +46,7 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/plan-ghosts-litematica-tools|plan-ghosts-litematica-tools]] · plan-ghosts-litematica-tools · #1851 · in-review
+- [ ] [[Inbox/harness-body-pieces|harness-body-pieces]] · harness-body-pieces · #1868 · in-review
 
 
 ## Needs Andy
