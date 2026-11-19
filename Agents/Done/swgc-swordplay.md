@@ -37,6 +37,4 @@ first pass. Patches 2-6 not started.
   in `ArmedPose`, Darktide swat; Kingdoms `forms/SpecialCuts` (wheel_cut, figure_eight, hurled_blade), bridge methods in
   `PowersCompat`, blade school arts + `ART_STANDING`. Flip lift gated by `Dodge.flipLift`. Compiled, not played.
 - 2026-11-12: patch 3 pushed (same PR): Powers `combat/BladeStyle`; Kingdoms `forms/Styles`, hooks in `Duels`, `SchooledGuards`, `FormsClient` belt HUD, lang part `style.json`.
-- 2026-11-12: patch 4a pushed: Powers `combat/TwoBlades`, `client/combat/AttentionPose`, dual stance + crossed guard; Kingdoms Mill Charge in `forms/SpecialCuts`, tag `form_staves`, `Levelled`. Twinblade not built yet.
-- 2026-11-12: Twinblade pushed (`armory/Twinblade`, items twinblade + twinblade_schematic, `tools/gen_twinblade.py`). Patch 4 complete. Next: patch 5 (cut marks healed by bandages, own swing/clash sounds).
-- 2026-11-12 04:29 PR #1341 is merged into master; moved to Agents/Done.
+- 2026-11-16 07:08 PR #1341 is merged into master; moved to Agents/Done.

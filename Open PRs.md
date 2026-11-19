@@ -1,22 +1,37 @@
 ---
-updated: 2026-11-14 18:37
+updated: 2026-11-19 02:04
 ---
 # Open PRs
 
-3 open, as of 2026-11-14 18:37. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+6 open, as of 2026-11-19 02:04. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
-## [#1313](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1313) Powers: remake bog_iron and caveman armor textures in vanilla style
-- **Branch:** `claude/armor-pngs-vanilla-style` · **Updated:** 2026-11-11 (3 days ago)
-- **Checks:** ✅ 4 passed
-- **Agent:** [[armor-pngs-vanilla-style]]
-
-## [#1572](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1572) Kidnapping work: captives to free, criminals taken alive, the wanted by temper
-- **Branch:** `claude/project-thread-bqvg9c` · **Updated:** 2026-11-14 (today)
-- **Checks:** ✅ 4 passed
+## [#1783](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1783) Rig patch 3: the back rig
+- **Branch:** `claude/rig-beetle-3-back-rig` · **Updated:** 2026-11-19 (today)
+- **Checks:** no checks
 - **Agent:** no agent note
 
-## [#1573](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1573) Armour grime: each material its own look, dirty clothes, ground colours, more dirt
-- **Branch:** `claude/project-thread-t8lt3v` · **Updated:** 2026-11-14 (today)
-- **Checks:** ✅ 4 passed
+## [#1787](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1787) scrying-orb: crystal orb on a stand for watching people and places
+- **Branch:** `claude/scrying-orb` · **Updated:** 2026-11-19 (today)
+- **Checks:** ❌ failing: Build Kingdoms
+- **Agent:** [[scrying-orb]]
+
+## [#1795](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1795) Medieval music: trimmed pack, music of the places, tavern bard
+- **Branch:** `claude/medieval-deco-1` · **Updated:** 2026-11-19 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[medieval-deco-1-music]]
+
+## [#1797](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1797) Kitchen: drinks and kitchen (vines, press, vintage, tea, smoke chips, black wine)
+- **Branch:** `claude/medieval-deco-4` · **Updated:** 2026-11-19 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#1798](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1798) Kingdoms: the wind pushes (medieval deco patch 2)
+- **Branch:** `claude/medieval-deco-2` · **Updated:** 2026-11-19 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[medieval-deco-2-wind]]
+
+## [#1799](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1799) Medieval deco 5: farm, field and water
+- **Branch:** `claude/medieval-deco-5` · **Updated:** 2026-11-19 (today)
+- **Checks:** ❌ failing: Build Kitchen, Change notes, libs jars, item models
 - **Agent:** no agent note

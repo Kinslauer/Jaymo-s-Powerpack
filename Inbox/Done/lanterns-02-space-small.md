@@ -1,0 +1,36 @@
+---
+status: done
+for: any
+from: coordinator (Buder's Lanterns cross-reference thread)
+asked: 2026-11-18
+thread: https://claude.ai/code/project/chan_01638ouFWZKwEZ1ET74kBk9B?thread=cmsg_01638ouFWZKwEZ1ET74kBk9BGTKiCKJUyKUDb58Nbrp2r7
+claimed_by: lanterns-02-space-small
+pr: 1753
+size: S
+suggested_owns:
+  - src/client/java/com/jaymospowers/client/power/zfighter/ZFighterStarMapScreen.java
+  - src/client/java/com/jaymospowers/client/power/zfighter/ZFighterSpaceArt.java
+  - src/client/java/com/jaymospowers/client/power/zfighter/sky/SkyPlanets.java
+  - changes/powers/<branch>.md
+---
+# Lanterns patch 2 (S, Powers): Space: atlas pins and a ringed planet
+
+**Andy's words:** "done. add it to the vault for pickup later, in order of build size" (after ticking these rows on the Buder's Lanterns pick list).
+
+**What's wanted:**
+
+- **Atlas of what you've found** (`sp-atlas`): The star map remembers what you found on each world: your bases, missions, where you landed. _Our side:_ `ZFighterStarMapScreen`, pins per world kept on the player.
+- **A ringed planet** (`sp-rings`): One of the far worlds gets rings, on the star map and in its night sky. _Our side:_ `ZFighterSpaceArt` + `SkyPlanets`; pick the world that fits Lore.md.
+
+**Where to start:** ZFighterStarMapScreen, ZFighterSpaceArt, SkyPlanets, FarWorld.
+
+## Shared rules for every lanterns patch
+- Source: Andy's picks (2026-11-18, 21 of 24) from **Buder's Lanterns** (CurseForge 1732134, ButterJaffa/BuDeR), mostly what the dev shows in his YouTube video https://www.youtube.com/watch?v=-Ib5PEGylyo (ch. 9 Improved Villagers, ch. 10 "GTA 6 Inspired Systems"). **All Rights Reserved, Forge 1.20.1: ideas only.** Own code, names and vanilla-style art; no Green Lantern/Oa/Corps names. Pick list: https://claude.ai/artifact/XDacSJMhawm2wZkLXtCjK7 (db `picks/andy`).
+- Patches are numbered **smallest build first** (Andy: "in order of build size"): 1-3 small, 4-7 medium, 8-10 large.
+- What we already have and must build on, not redo: Kingdoms `Theft` (witnesses, light/medium/heavy, guards + golems, outlaw, per-faction `WANTED`), `Approaches` (accuse: confess/fine/bribe/lie), `Bounties`, `Crooks`, `Suspicion` (named rumours, guard watch), `Recollections` (`rememberHeard` hearsay counts half), `Bearings`, `Speech`. Powers: `ZFighterPatrol` (ranks, warrants per world), `ZFighterSpaceMissions`, `PatrolWrit`, `ZFighterPodTrip`/`ZFighterFlightScreen`/`ZFighterStarMapScreen`/`ZFighterSpaceArt`, `SkyPlanets`, `HighSkyClient`, `Lens`/`LensClient`, `XenoDouble`.
+- Standing rules: no new dimensions or portals unless Andy says so for that thing; pods stay rare with no recipe; no screen text stating lore; effects through MagicFx/Fx only; tuning as `static final` at the top.
+- Lore first: read `Lore.md`; anything new gets a `(new)` paragraph, quoted in full to Andy for approval.
+- One PR per patch with `changes/<mod>/<branch>.md`; never touch `version=`, MODLOGs or codemap. Andy tests by merging. Run 2 patches at a time.
+
+## Notes
+- 2026-11-18 19:07 PR #1753 is merged into master; moved to Inbox/Done.

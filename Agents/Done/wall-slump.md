@@ -18,6 +18,8 @@ owns:
   - src/main/java/com/jaymospowers/core/wounds/DownedLie.java (wall, propSpot, prop, PROPPED)
   - src/main/java/com/jaymospowers/core/Carry.java (prop on let-go)
   - src/client/java/com/jaymospowers/client/mixin/ProneCameraMixin.java (WallSit eye)
+  - src/client/java/com/jaymospowers/client/wounds/WallSitArms.java
+  - src/client/java/com/jaymospowers/client/CrawlPose.java (lay pins the sit's limbs, bendArms)
 ---
 # Wall slump
 

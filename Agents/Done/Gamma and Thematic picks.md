@@ -24,5 +24,5 @@ owns:
 - The page's Save never reached the db; picks known from Andy's screenshots only.
 
 ## Done
-- 2026-11-12 04:03 No sign of work for 30 min: marked stalled (whoever ran it stopped).
-- 2026-11-12 12:30 PM (Claude, PC): not stalled. The whole stack merged: #1346 big suit, #1350 aliens, #1351 Z Fighter and elemental, #1355 Rig and gear, #1364 Kingdoms and world. The 04:03 stall mark was UTC, the same minute #1346 merged.
+- 2026-11-16 07:08 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-16 07:09 PR #1346 is merged into master; moved to Agents/Done.
