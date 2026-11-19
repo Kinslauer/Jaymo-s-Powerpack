@@ -302,6 +302,11 @@ def packMods = [
 	[dep: "curse.maven:customchunks-1727847:9101536", cf: [1727847, 9101536], dev: false],
 	[dep: "curse.maven:planeshift-1714620:9083764", cf: [1714620, 9083764], dev: false],
 	[dep: "curse.maven:codxlib-1633207:8893340", cf: [1633207, 8893340], dev: false],
+	// Alex's Mobs Continued (Codx.io's port of Alexthe668's Alex's Mobs; LGPL-3.0 in its jar, shipped unchanged; needs
+	// Fabric API and CodxLib above): ~90 lively animals, seagulls, orcas, cachalots, giant squid, seals and deep-sea fish
+	// among them. Andy (2026-11-19): "their animals seem to be the most interactive", all of them, duplicates of
+	// Naturalist/Cube/ours kept as other breeds. Not Citadel or the old port taken out in 0.8.107 (black slabs under Iris).
+	[dep: "curse.maven:alexs-mobs-continued-1635121:9490821", cf: [1635121, 9490821], dev: false],
 	// Voice (0.17.157; Kingdoms' ProximityChat does typed chat). Simple Voice Chat (all rights reserved, henkelmax; downloaded
 	// by id, never copied or taken apart): proximity voice, push-to-talk or voice activation (V opens its menu). Client
 	// and server; the server listens on UDP 24454, so the Deck's playit tunnel needs a UDP tunnel to it (deck/README.md).
@@ -884,7 +889,7 @@ def packShaderPacks = [
 // sodium-2MZWfUts: Modrinth's Sodium 0.9.3 beta 4 (ImmersiveVFX's test, 2026-11-10); its name didn't match
 // "sodium-fabric-0.9.3", so it stayed after the test ended and Iris 1.11.7 refused to start the game
 def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-", "alexs-mobs-", "citadel-", "sodium-fabric-0.9.3", "sodium-2MZWfUts"]
-// the same, by Fabric mod id, for mods whose CurseForge file names we don't know: Alex's Mobs and Citadel (0.8.107,
+// the same, by Fabric mod id, for mods whose CurseForge file names we don't know: Citadel (0.8.107, with the old Alex's Mobs port;
 // their models drew black slabs and streaks across the screen with Iris shaders), Distant Horizons (0.9.6, taken out
 // at Andy's request; a new world on the Deck's server had hung at startup with it), Camera Utils (0.10.57, Shoulder
 // Surfing Reloaded won't load beside it), Combat Roll (0.15.16: it left the pack in 0.15.5 for our own feathers and
@@ -897,7 +902,7 @@ def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-",
 // think the new grass and punchy are lagging the game"; punchy_expressions comes inside Punchy! Moves);
 // Ragdollified and Ragdollified Reactions (out until its whole set can go in, see the pack list);
 // VO: Better Dogs and Dasik Library (its wolves stopped the server, see the pack list)
-def removedIdsFromProfile = ["alexsmobs", "citadel", "distanthorizons", "camerautils", "combat_roll", "ctov", "immersivevfx", "immersivefx", "streamsreflowing",
+def removedIdsFromProfile = ["citadel", "distanthorizons", "camerautils", "combat_roll", "ctov", "immersivevfx", "immersivefx", "streamsreflowing",
 	"grassiergrass", "punchy", "punchy_moves", "punchy_expressions", "ragdollified", "ragdollifiedreactions",
 	"vanilla-outsider-better-dogs", "dasik-library", "scalablelux"]
 // a jar's fabric.mod.json (null if it isn't a Fabric mod): the profile's CurseForge file names differ from the pack's
