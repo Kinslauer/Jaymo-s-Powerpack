@@ -99,7 +99,7 @@ public final class LoreCodex extends Item {
 		}
 
 		private static Open read(RegistryFriendlyByteBuf buf) {
-			Component title = ComponentSerialization.STREAM_CODEC.decode(buf);
+			Component heading = ComponentSerialization.STREAM_CODEC.decode(buf);
 			int n = buf.readVarInt();
 			List<Entry> entries = new ArrayList<>();
 			for (int i = 0; i < n; i++) {
@@ -112,7 +112,7 @@ public final class LoreCodex extends Item {
 				}
 				entries.add(new Entry(id, title, pages));
 			}
-			return new Open(title, entries);
+			return new Open(heading, entries);
 		}
 
 		@Override
