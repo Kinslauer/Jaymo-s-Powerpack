@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 16:39). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 16:40). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -48,7 +48,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · ☀️ Apollo · #1787 · changes · fixing review notes
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · claimed
-- [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · claimed
 
 
 ## In review
@@ -63,6 +62,7 @@ kanban-plugin: board
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
 - [ ] [[Inbox/class-trees-plan|class-trees-plan]] · for 💻 Odysseus · blocked
+- [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · blocked
 
 
 ## Done
