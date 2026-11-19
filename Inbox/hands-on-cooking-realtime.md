@@ -1,10 +1,10 @@
 ---
-status: blocked
+status: open
 for: hermes
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-16)
 asked: 2026-11-16
 thread: 1572081014958858340
-claimed_by: hermes-b
+claimed_by: 
 pr:
 suggested_owns: []
 ---
