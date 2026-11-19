@@ -1,0 +1,12 @@
+{
+  "dialogue.chat.jaymoskingdoms.druid_opening.0": "This is old wood, and I keep it. If one of yours dies for good, bring their body here before ten days are out. Lay it at my feet and the wood will lend them a new one.",
+  "dialogue.chat.jaymoskingdoms.druid_opening.1": "Softly. The grove is listening. I stand here so the dead for good have somewhere to come back to: carry the body under these trees in time, and I'll ask the wood for another.",
+  "dialogue.chat.jaymoskingdoms.druid_opening.2": "You've found my grove. I'm only its keeper. A body brought to me within ten days of a death for good gets up again, in whatever blood the wood chooses.",
+  "dialogue.chat.jaymoskingdoms.druid_opening.3": "I've stood in these trees longer than the village down the way has had a name. The wood gives new bodies to the dead, if someone cares enough to carry the old one here.",
+  "dialogue.chat.jaymoskingdoms.druid_opening.wordless": "The druid touches the nearest trunk, then the ground at their feet, and waits to see if you understand.",
+  "dialogue.chat.jaymoskingdoms.druid_wants": "And if your road takes you through other woods, bring me something my grove has never grown: %s.",
+  "dialogue.chat.jaymoskingdoms.name_druid": "Names are for people who move about. The wood calls me nothing. You can call me %s.",
+  "speech.jaymoskingdoms.druid.thanks.0": "%s! It's been years since I held one. Let's give it a place.",
+  "speech.jaymoskingdoms.druid.thanks.1": "You carried that all this way for an old hermit's grove? Thank you. It'll take root.",
+  "speech.jaymoskingdoms.druid.thanks.2": "Oh, that's a good one. The wood will remember who brought it here."
+}
