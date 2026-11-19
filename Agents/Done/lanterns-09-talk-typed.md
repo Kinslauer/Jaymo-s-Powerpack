@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: lanterns-09-talk-typed
 branch: claude/lanterns-09-talk-typed
 with: Claude Code (PC)
@@ -26,3 +26,4 @@ owns:
 
 ## Done
 "Ask something..." on a villager's Town business opens a talk card with a typing box; they answer by topic in their own way, with three follow-up questions in a side panel. Compiled on the PC, CI passes; not played.
+- 2026-11-18 20:05 PR #1770 is merged into master; moved to Agents/Done.

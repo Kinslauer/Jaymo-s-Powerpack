@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: lanterns-05-patrol-law
 branch: claude/lanterns-05-patrol-law
 with: Claude Code (PC)
@@ -28,3 +28,4 @@ owns:
 
 ## Done
 Crooked officers get a Patrol warrant (a rank lost per crime, a patrolman sent to bring them in). Handing a hogtied crook to a ruler counts as an arrest. From Officer, a partner patrolman follows, fights beside you and rides along. CI passes; not played.
+- 2026-11-18 20:05 PR #1764 is merged into master; moved to Agents/Done.

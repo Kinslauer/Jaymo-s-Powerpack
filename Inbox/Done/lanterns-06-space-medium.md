@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: any
 from: coordinator (Buder's Lanterns cross-reference thread)
 asked: 2026-11-18
@@ -33,3 +33,4 @@ suggested_owns:
 
 ## Notes
 - 2026-11-18 19:44 Andy approved the ki-crossing numbers as they are (50,000 power, 80% ki) and the Hollow lore.
+- 2026-11-18 20:05 PR #1766 is merged into master; moved to Inbox/Done.
