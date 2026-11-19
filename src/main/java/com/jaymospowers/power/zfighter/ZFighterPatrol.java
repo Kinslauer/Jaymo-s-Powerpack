@@ -2,6 +2,7 @@ package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.KingdomsMoney;
+import com.jaymospowers.core.brawl.Brawl;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.gifted.Gifted;
 import com.jaymospowers.power.zfighter.pod.PodEntity;
@@ -113,6 +114,8 @@ public final class ZFighterPatrol {
 	/** How far he goes for a foe, how far he roams from his pod, how hard his fists land and how often. */
 	static final double FIGHT_RANGE = 24.0, ROAM = 22.0, REACH = 2.6;
 	static final float PUNCH = 7.0F;
+	/** His rank for the fighter brain, before the world tier. */
+	static final float BRAWL_RANK = 0.35F;
 	static final int PUNCH_EVERY = 16, ROAM_EVERY = 240, THINK_EVERY = 10;
 	/** The power level he wants to see before he offers to take you on. */
 	public static final int RECRUIT_POWER = 1500;
@@ -572,8 +575,12 @@ public final class ZFighterPatrol {
 	static void fight(ServerLevel level, PathfinderMob man, LivingEntity foe, float damage) {
 		man.setTarget(foe);
 		man.getLookControl().setLookAt(foe, 30.0F, 30.0F);
+		// the fighter brain ({@link Brawl}): he flies at a foe in the air, dashes, dodges, guards (his rank is his Patrol's, before the world tier)
+		Brawl.tick(level, man, foe, Brawl.Profile.gifted(BRAWL_RANK, man), man.distanceTo(foe) <= REACH, false);
 		if (man.distanceTo(foe) > REACH) {
-			man.getNavigation().moveTo(foe, 1.0);
+			if (!Brawl.flying(man)) {
+				man.getNavigation().moveTo(foe, 1.0);
+			}
 		} else {
 			man.getNavigation().stop();
 			if (man.tickCount % PUNCH_EVERY < THINK_EVERY) {

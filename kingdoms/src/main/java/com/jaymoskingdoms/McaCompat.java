@@ -181,6 +181,23 @@ public final class McaCompat {
 		}
 	}
 
+	/** {@link McaBridge#fateLook}; false without MCA. */
+	static boolean fateLook(ServerPlayer player, int gender, Heritage.@Nullable Kind kind) {
+		return LOADED && McaBridge.fateLook(player, gender, kind);
+	}
+
+	/** {@link McaBridge#faceOf}; null without MCA. */
+	static net.minecraft.nbt.@Nullable CompoundTag faceOf(ServerPlayer player) {
+		return LOADED ? McaBridge.faceOf(player) : null;
+	}
+
+	/** {@link McaBridge#wearFace}; nothing without MCA. */
+	static void wearFace(ServerPlayer player, net.minecraft.nbt.CompoundTag face) {
+		if (LOADED) {
+			McaBridge.wearFace(player, face);
+		}
+	}
+
 	/** {@link McaBridge#ownFace}; nothing without MCA. */
 	static void ownFace(Villager villager) {
 		if (LOADED) {

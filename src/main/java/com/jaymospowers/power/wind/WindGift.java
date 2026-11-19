@@ -88,6 +88,8 @@ final class WindGift implements GiftKit {
 	static final int LANDING_TICKS = 60;
 	/** On anyone this kit has lifted off the ground (so a flight cut short by unloading is ended when they're back). */
 	static final String ALOFT = "jaymospowers_wind_aloft";
+	/** Wind's colour for the fighter brain's trails and vanish. */
+	static final int WIND_COLOR = 0xCFEFF5;
 
 	/** A flight: where to (null to hover where they are), how high (world y), until when (game time), and a foe to watch. */
 	private record Flight(@Nullable Vec3 dest, double height, long until, @Nullable LivingEntity foe) {
@@ -103,6 +105,44 @@ final class WindGift implements GiftKit {
 	@Override
 	public Identifier power() {
 		return WindPower.ID;
+	}
+
+	/** (fighter brain) Wind flies for players: its folk fight from the air, riding gusts. */
+	@Override
+	public boolean flies() {
+		return true;
+	}
+
+	@Override
+	public int color() {
+		return WIND_COLOR;
+	}
+
+	/** Their own flights (soar, wing, a hover) keep the steering while they last. */
+	@Override
+	public boolean flyingBy(PathfinderMob mob) {
+		return mob.entityTags().contains(ALOFT);
+	}
+
+	/** Soaring and taking wing are Wind's own ways up: pointless while the brain already has them in the air. */
+	@Override
+	public boolean groundOnly(Move move) {
+		return "soar".equals(move.name()) || "wing".equals(move.name());
+	}
+
+	@Override
+	public void trail(ServerLevel level, PathfinderMob mob, Vec3 at) {
+		level.sendParticles(ParticleTypes.SMALL_GUST, at.x, at.y - 0.3, at.z, 1, 0.2, 0.1, 0.2, 0.0);
+		level.sendParticles(MagicFx.wisp(WIND_COLOR, 0.9F), at.x, at.y - 0.2, at.z, 2, 0.2, 0.2, 0.2, 0.02);
+	}
+
+	/** A vanish is a gust: a ring of wind where they stood, a gust where they come in. */
+	@Override
+	public void vanishFx(ServerLevel level, PathfinderMob mob, Vec3 from, Vec3 to) {
+		MagicFx.ring(level, from.add(0.0, 0.8, 0.0), 1.4F, WIND_COLOR);
+		level.sendParticles(ParticleTypes.GUST_EMITTER_SMALL, from.x, from.y + 0.5, from.z, 1, 0.0, 0.0, 0.0, 0.0);
+		level.sendParticles(ParticleTypes.GUST_EMITTER_SMALL, to.x, to.y + 0.5, to.z, 1, 0.0, 0.0, 0.0, 0.0);
+		level.playSound(null, to.x, to.y, to.z, SoundEvents.BREEZE_JUMP, SoundSource.NEUTRAL, 1.0F, 1.6F);
 	}
 
 	@Override

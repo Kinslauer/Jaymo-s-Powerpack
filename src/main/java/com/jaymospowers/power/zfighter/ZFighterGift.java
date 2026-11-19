@@ -61,6 +61,17 @@ final class ZFighterGift implements GiftKit {
 		return ZFighterPower.ID;
 	}
 
+	/** (fighter brain) Z Fighters fly on ki: their folk fight from the air, with the same blasts. */
+	@Override
+	public boolean flies() {
+		return true;
+	}
+
+	@Override
+	public int color() {
+		return BLAST_COLOR;
+	}
+
 	@Override
 	public List<Move> moves() {
 		return List.of(

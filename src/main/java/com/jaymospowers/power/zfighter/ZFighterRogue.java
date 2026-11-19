@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.brawl.Brawl;
 import com.jaymospowers.core.fx.MagicFx;
 import java.util.HashMap;
 import java.util.Map;
@@ -110,6 +111,10 @@ public class ZFighterRogue extends Monster {
 	static final double BOSS_SEEN = 96.0;
 	static final int TYRANT_COLOR = 0xFFC830;
 	static final int CHAMPION_COLOR = 0x8FD3FF;
+	/** His rank for the fighter brain ({@link Brawl}), before the world tier: a tyrant, one of a raider band, a champion. */
+	static final Brawl.Profile TYRANT_BRAWL = Brawl.Profile.ki(0.85F, TYRANT_COLOR);
+	static final Brawl.Profile RAIDER_BRAWL = Brawl.Profile.ki(0.6F, TYRANT_COLOR);
+	static final Brawl.Profile CHAMPION_BRAWL = Brawl.Profile.ki(0.15F, CHAMPION_COLOR);
 
 	private static final EntityDataAccessor<Integer> DATA_KIND = SynchedEntityData.defineId(ZFighterRogue.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> DATA_FORM = SynchedEntityData.defineId(ZFighterRogue.class, EntityDataSerializers.INT);
@@ -260,11 +265,19 @@ public class ZFighterRogue extends Monster {
 			}
 			// he flies up to foes above him, and won't fall to his death
 			boolean above = target != null && target.getY() > this.getY() + 2.5;
-			this.setNoGravity(above);
-			if (above) {
+			boolean brawling = Brawl.flying(this);
+			this.setNoGravity(above || brawling);
+			if (above && !brawling) {
 				this.setDeltaMovement(this.getDeltaMovement().multiply(1.0, 0.0, 1.0).add(0.0, 0.25, 0.0));
 			}
 			this.resetFallDistance();
+		}
+		// the fighter brain: flight round a foe in the air, dashes and sidesteps, the vanish dodge, guard and parry
+		Brawl.tick(level, this, target, tyrant ? TYRANT_BRAWL : raider() ? RAIDER_BRAWL : CHAMPION_BRAWL, this.string != null,
+			this.rushUntil >= 0L || ZFighterHighSky.airborne(this));
+		if (Brawl.takeVanish(this)) {
+			// he blinked behind whoever struck: the next string starts at once
+			this.restUntil = level.getGameTime();
 		}
 		if (rushing(level)) {
 			return;
@@ -284,7 +297,7 @@ public class ZFighterRogue extends Monster {
 			blast(level, target, tyrant);
 		}
 		if (--this.blastIn <= 0 && this.string == null && distance > 4.0 && distance < BLAST_RANGE && this.hasLineOfSight(target)) {
-			this.blastIn = BLAST_EVERY + this.random.nextInt(30);
+			this.blastIn = Brawl.tempo(this, BLAST_EVERY + this.random.nextInt(30));
 			this.volleyLeft = BLAST_VOLLEY;
 		}
 		if (--this.stepIn <= 0 && distance > STEP_FAR && distance < BLAST_RANGE) {
@@ -308,7 +321,7 @@ public class ZFighterRogue extends Monster {
 		if (gap > LUNGE_GAP) {
 			// it got away: the string's over
 			endString();
-			this.restUntil = now + REST_TICKS[kind()] / 2;
+			this.restUntil = now + Brawl.tempo(this, REST_TICKS[kind()]) / 2;
 			return;
 		}
 		this.getLookControl().setLookAt(target, 30.0F, 30.0F);
@@ -329,7 +342,7 @@ public class ZFighterRogue extends Monster {
 		if (age >= this.blowLength && this.string != null) {
 			if (this.blow >= this.string.length - 1) {
 				endString();
-				this.restUntil = now + REST_TICKS[kind()];
+				this.restUntil = now + Brawl.tempo(this, REST_TICKS[kind()]);
 			} else {
 				beginBlow(level, this.blow + 1);
 			}

@@ -934,6 +934,23 @@ public final class LifeStory {
 	}
 
 	/**
+	 * Player → server: {@link Live} for a story left wholly to fate. Andy: "after choosing gender and skipping, to TRULY
+	 * randomize, everything else. then you start. nothing else is told or chosen." Every answer was drawn on the client;
+	 * here MCA's look and name are drawn too ({@link McaCompat#fateLook}), its creator is never shown, and the road is
+	 * fate's, as a skipped story's is.
+	 */
+	public record Fated(Live live) implements CustomPacketPayload {
+		public static final Type<Fated> TYPE = new Type<>(JaymosKingdoms.id("story_fated"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Fated> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> Live.CODEC.encode(buf, p.live), buf -> new Fated(Live.CODEC.decode(buf)));
+
+		@Override
+		public Type<Fated> type() {
+			return TYPE;
+		}
+	}
+
+	/**
 	 * (0.7.356) Player → server: the road, told after MCA's creator ({@link #roadOwed}). {@code road}: the answer's index;
 	 * {@code roadRealm}: the realm named for a banished or sworn start (-1: none); {@code look}: the look of a heritage the
 	 * road makes you (the afterlife's); {@code tone}: (0.7.474) a half-orc's skin on the greenskin road's slider
@@ -992,6 +1009,24 @@ public final class LifeStory {
 			live(player, payload.live());
 			if (untold && roadOwed(player)) {
 				player.setAttached(SKIPPED, true);
+			}
+		});
+		PayloadTypeRegistry.serverboundPlay().register(Fated.TYPE, Fated.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Fated.TYPE, (payload, context) -> {
+			ServerPlayer player = context.player();
+			if (!untold(player)) {
+				return;
+			}
+			live(player, payload.live());
+			if (of(player) == null) {
+				return;
+			}
+			if (roadOwed(player)) {
+				player.setAttached(SKIPPED, true);
+			}
+			// MCA's creator is never shown: its look and name are drawn here, and it counts as done
+			if (McaCompat.destinyPending(player)) {
+				McaCompat.fateLook(player, payload.live().gender(), Heritage.of(player));
 			}
 		});
 		PayloadTypeRegistry.serverboundPlay().register(Road.TYPE, Road.CODEC);
@@ -3378,6 +3413,8 @@ public final class LifeStory {
 		if (!canReincarnate(player)) {
 			return false;
 		}
+		// the old life's face, offered to keep as a doppelganger and marked for those who knew it, before anything is unmade
+		Doppelgangers.lifeEnds(player);
 		Skills.refresh(player);
 		// the old life's companions live on, lost (docs/Pawn-Plan.md H3); before MCA forgets who they followed
 		Masterless.forsaken(player);

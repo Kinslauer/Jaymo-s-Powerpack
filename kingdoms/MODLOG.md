@@ -15372,3 +15372,10 @@ Hackers 'n Slashers patch 3, the town half (Andy: "you should see the blacksmith
   shows its trail alone, at the best tracker's reach and age, and a Ranger earns track experience now and then.
   `TrailReading.register` hands Kitchen's `ManurePileBlock` the reader test and the trail by reflection.
 - Built; not played.
+
+## 0.10.75 (2026-11-19): life story: leave it all to fate, and kept faces (doppelgangers) (#1824)
+
+- **Leave it all to fate**: the skip-the-story ask (after the gender page) has a third button. Every answer past the gender is drawn at random (blood, upbringing, childhood, youth, calling, faith, the class's first pick, ideal/bond/flaw), the start is "Let fate decide", and with MCA the look and name are drawn on the server like a new villager's (skin kept in the blood's range) and MCA's creator never opens. The screen shuts and you start. Flaws and the hard-road switches stay off. (`LifeStoryScreen.leaveAllToFate`, `LifeStory.Fated`, `McaBridge.fateLook`, client `McaCreatorDrop`)
+- **Kept faces**: when a life ends for good (the reincarnation that resets everything), the new life story opens with "<name> is gone. Keep the face?". Keeping saves a character preset on your computer with that life's MCA look and name and its story picks. On a later life, the skip ask offers "Wear a kept face: <name>", which skips the story with those picks and puts the face on before MCA's creator opens (everything can still be changed there). Loading the preset from the creator's Presets page works too. (`Doppelgangers`, `CharacterPresets.fromOffer/lastFace`, `McaBridge.faceOf/wearFace`)
+- **"You look familiar"**: every MCA villager who remembered the old life keeps its face when it forgets you. The first time someone wearing that face talks to them, there's an even chance they say so in a speech bubble (6 lines, e.g. "Have we met? ...No. No, we can't have."), once, and never more. (`Doppelgangers.spoken`, `McaBridge.forget`)
+- Built; not played. Not checked in game: MCA's open creator refreshing to a face loaded from its Presets page.

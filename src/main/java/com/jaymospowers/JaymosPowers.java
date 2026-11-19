@@ -128,6 +128,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.GiantReach.init();
 		// (0.17.3) gifted villagers: powers held by those who aren't players (who awakens is Kingdoms')
 		com.jaymospowers.core.gifted.GiftedAI.init();
+		// the fighter brain every powered NPC runs: flight, dashes, vanish dodge, guard and parry
+		com.jaymospowers.core.brawl.Brawl.init();
 		// each power registers itself (and its items, entities, packets) from its own package
 		WindPower.init();
 		ArsenalPower.init();
