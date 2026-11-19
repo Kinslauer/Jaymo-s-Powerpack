@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: medieval-deco-4-drinks
 branch: claude/medieval-deco-4
 with: pc-claude-deco-4

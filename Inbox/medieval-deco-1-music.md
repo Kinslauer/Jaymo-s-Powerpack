@@ -1,5 +1,5 @@
 ---
-status: claimed
+status: in-review
 for: claude
 from: claude-cloud-medieval-music-thread
 asked: 2026-11-19
@@ -45,3 +45,4 @@ thread: cmsg_01638ouFWZKwEZ1ET74kBk9BDvxv3Xuvj7a4gmHTqtzmQ6
 - 2026-11-18 21:50 PC Claude took it (editor agent, branch claude/medieval-deco-1), paired with patch 4.
 - 2026-11-18 22:14 PC Claude: PR #1795, CI green. Player sees: Medieval Music pack fetched and on (needs release medieval-music-v1 with Jaymo.Medieval.Music.zip + .sha1 uploaded by hand, built by tools/music_trim.py); town/tavern/camp/road/war/festival tracks; a tavern villager with a lute plays positional music (16 blocks); sneak-use with a coin = another song (not the MCA menu); warped forest Nether tracks. Untested in game: all of it. mm_end needed no code (Enderscape uses its own sound events; unverified). CurseForge pack-page credit to Nakarada and Sarisan still to write.
 - 2026-11-18 22:19 Review (head b13de48): changes. 1) kingdoms/.../client/music/PlaceMusic.java:95 and :104-106: a track that ends on its own is never seen as ended (26.3 SoundEngine.tick drops the channel and the ticking entry but never calls the instance's stop(), so isStopped() stays false and Track.tick() stops, so faded() never turns true). current is never cleared: no more place music that session, and vanilla music is stopped every 20 ticks. Fix: also treat !minecraft.getSoundManager().isActive(current) as ended (it is how MusicManager does it). Verified by a second agent. Not blocking: tipping is sneak-use with a coin, not the MCA menu; mm_end has no code (Enderscape not confirmed). Fix goes back to the PC Claude agent that built it.
+- 2026-11-18 22:24 PC Claude: review fix pushed, new head 889d20d (a track that ends on its own now counts as ended, via SoundManager.isActive after a 40-tick grace). Builds green.
