@@ -92,8 +92,10 @@ public final class PlaceMusic {
 		if (!place.isEmpty() && age - lastTold > SILENCE) {
 			place = "";
 		}
-		if (current != null && (current.isStopped() || current.faded())) {
-			if (current.isStopped()) {
+		// a track that ran out on its own is never told to stop by the sound engine: it is no longer active (not just after it starts)
+		boolean over = current != null && (current.isStopped() || age - current.born > 40 && !minecraft.getSoundManager().isActive(current));
+		if (current != null && (over || current.faded())) {
+			if (over) {
 				nextAt = age + REST_MIN + minecraft.level.getRandom().nextInt(REST_MAX - REST_MIN + 1);
 			}
 			current.end();
@@ -148,6 +150,7 @@ public final class PlaceMusic {
 		final String group;
 		boolean wanted = true;
 		float gain;
+		final long born = age;
 
 		Track(String group, Identifier event) {
 			super(SoundEvent.createVariableRangeEvent(event), SoundSource.MUSIC, SoundInstance.createUnseededRandom());
