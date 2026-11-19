@@ -3,7 +3,7 @@ status: done
 task: Sparks when a hit lands on metal (Hackers 'n Slashers, ideas only) + pick list of its other features
 branch: claude/project-thread-oh3p97
 with: cloud thread "Add metal-hit sparks from Hackers n Slashers"
-pr: 1809
+pr: 1809 (merged)
 mods: powers
 versions: 
 started: 2026-11-19

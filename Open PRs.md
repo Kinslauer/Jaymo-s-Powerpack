@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-19 03:41
+updated: 2026-11-19 04:03
 ---
 # Open PRs
 
-3 open, as of 2026-11-19 03:41. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+3 open, as of 2026-11-19 04:03. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1783](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1783) Rig patch 3: the back rig
@@ -16,7 +16,7 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ❌ failing: Build Kingdoms
 - **Agent:** [[scrying-orb]]
 
-## [#1808](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1808) Kingdoms: wall and siege cannons load all five shot types; Explosive Shell takes 3 TNT
-- **Branch:** `claude/project-thread-xi635y` · **Updated:** 2026-11-19 (today)
+## [#1809](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1809) Sparks off hits that land on metal (armour, metal bodies, metal blocks, arrows)
+- **Branch:** `claude/project-thread-oh3p97` · **Updated:** 2026-11-19 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
