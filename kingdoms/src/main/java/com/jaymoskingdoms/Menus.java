@@ -59,7 +59,9 @@ final class Menus {
 			});
 		}
 		OPEN.put(player.getUUID(), new Open(speaker.getId(), actions));
-		ServerPlayNetworking.send(player, new TalkNet.Ask(speaker.getId(), title, words, labels, enabled));
+		// (a goblin says it in its broken English: Dialects.broken)
+		ServerPlayNetworking.send(player, new TalkNet.Ask(speaker.getId(), title, Dialects.goblin(speaker) ? Dialects.broken(words) : words,
+			labels, enabled));
 	}
 
 	/** An answer to one of these menus; false when it was not. */

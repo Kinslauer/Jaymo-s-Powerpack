@@ -54,6 +54,8 @@ public final class Speech {
 	 * anyone else, and a player without the mod gets a line of chat.
 	 */
 	public static void privately(Entity speaker, ServerPlayer player, Component words, int color) {
+		// (a goblin's words in its broken English: Dialects.broken)
+		words = Dialects.goblin(speaker) || Dialects.goblinLine(words) ? Dialects.broken(words) : words;
 		if (ServerPlayNetworking.canSend(player, Said.TYPE)) {
 			ServerPlayNetworking.send(player, new Said(speaker.getId(), words, color));
 		} else {
@@ -89,10 +91,12 @@ public final class Speech {
 		if (speaker instanceof IronGolem) {
 			return;
 		}
+		// (plain, but a goblin's still broken: Dialects.broken)
+		Component plain = Dialects.goblin(speaker) || Dialects.goblinLine(words) ? Dialects.broken(words) : words;
 		if (ServerPlayNetworking.canSend(player, Said.TYPE)) {
-			ServerPlayNetworking.send(player, new Said(speaker.getId(), words, color));
+			ServerPlayNetworking.send(player, new Said(speaker.getId(), plain, color));
 		} else {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.says", speaker.getDisplayName(), words).withColor(color));
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.says", speaker.getDisplayName(), plain).withColor(color));
 		}
 		overheard(level, speaker, player, words, color);
 	}
