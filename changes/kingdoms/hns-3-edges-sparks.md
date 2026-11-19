@@ -1,3 +1,0 @@
-# smiths sharpen the guards' blades
-Hackers 'n Slashers patch 3, the town half (Andy: "you should see the blacksmith sharpening its guards' blades"). With Jaymo's Powers' blades wearing dull (its `Edge`), `Whetting`: in the working day an idle weaponsmith, armourer or toolsmith takes notice of a town guard (MCA villager) within 24 blocks whose blade is dull, walks to a grindstone (their workstation, or one within 8 blocks of it), and is seen working it for 6 to 10 seconds: the guard's blade in their hand, sparks off the wheel, the grinding sound, swings. The guard's edge is then keen. One smith per guard at a time. Without Powers nothing dulls and nothing happens.
-- Not played; compiles in CI.

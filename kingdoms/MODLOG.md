@@ -15330,3 +15330,8 @@ Not tested in game.
 - **Crit powers and cues** (with Jaymo's Powers' new attributes, if it is there; nothing changes without it): the Sneak Attack perk's bonus, a Thief's sneak burst, a hidden-blade assassination and the new backstab are multiplied by `jaymospowers:sneak_attack_power`; an Archer's headshot by `headshot_power`. The hidden blade raises the sneak attack power by 25% while it is out. Sneak attacks, backstabs, assassinations and headshots play Powers' crit cue (sound, flash, camera punch).
 - New: `FighterPosture`, `CritPower`; `Senses#backstabbed`, `Commandments#forbids`, `PowersCompat#critCue`.
 - Built by CI; not played.
+
+## 0.10.69 (2026-11-19): smiths sharpen the guards' blades (#1815)
+
+Hackers 'n Slashers patch 3, the town half (Andy: "you should see the blacksmith sharpening its guards' blades"). With Jaymo's Powers' blades wearing dull (its `Edge`), `Whetting`: in the working day an idle weaponsmith, armourer or toolsmith takes notice of a town guard (MCA villager) within 24 blocks whose blade is dull, walks to a grindstone (their workstation, or one within 8 blocks of it), and is seen working it for 6 to 10 seconds: the guard's blade in their hand, sparks off the wheel, the grinding sound, swings. The guard's edge is then keen. One smith per guard at a time. Without Powers nothing dulls and nothing happens.
+- Not played; compiles in CI.

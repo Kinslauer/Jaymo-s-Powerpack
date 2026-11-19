@@ -1,7 +1,0 @@
-# edges and sparks - blades dull, grindstones, sparks that catch, armour that rings
-Hackers 'n Slashers patch 3 (ideas only; our own code, sounds and names).
-- **Edges (`combat/Edge`)**: a sword, axe or spear (not wood) keeps a dullness in its custom data. Flesh takes a little off, metal armour or a metal body a lot, a metal block or bare stone a good deal. A dull blade does up to 35% less damage (nothing lost until it is worn). Use a grindstone with the blade in hand (not sneaking: that is the Kingdoms marks screen) to take 75 off a use, with sparks and the grinding sound. Tooltip line "Edge: keen / worn / dull / blunt". Mobs' blades wear the same way (`EdgeLivingMixin`).
-- **Steel on stone**: a hard weapon or tool started on stone, deepslate, tuff, basalt or nether ore now and then throws 3 dull sparks (5, and likelier, off an ore or deepslate) with a dry chip sound.
-- **Sparks that catch**: a shower of 14 sparks or more (a clash, a parry, a heavy blow on plate) may light dry grass, ferns, dead bushes, hay, cobweb or gunpowder lying on the ground. Never in rain, never with fire spread off. Chance 12% at 14 sparks, +4% per spark, at most 50%.
-- **Armour sounds**: plate rings, mail rasps and padding thuds when a blade lands (picked by `ArmourKind`, i.e. the plate_armor/mail_armor/cloth_armor tags); synthesised by `tools/gen_blade_sounds.py` (`hit_sounds()`), 11 new ogg files, `lang/parts/edges.json`.
-- Not played; compiles in CI.
