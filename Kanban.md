@@ -26,6 +26,7 @@ kanban-plugin: board
 - [ ] [[Inbox/medieval-deco-4-drinks|medieval-deco-4-drinks]] · for 💻 Odysseus · open
 - [ ] [[Inbox/medieval-deco-5-farm-water|medieval-deco-5-farm-water]] · for 💻 Odysseus · open
 - [ ] [[Inbox/medieval-deco-6-towns-sea|medieval-deco-6-towns-sea]] · for 💻 Odysseus · open
+- [ ] [[Inbox/medieval-deco-7-practice-dummy|medieval-deco-7-practice-dummy]] · for 💻 Odysseus · open
 
 
 ## Being built
