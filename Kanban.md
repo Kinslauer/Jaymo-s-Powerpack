@@ -38,6 +38,7 @@ kanban-plugin: board
 - [ ] [[Inbox/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-gaps-4-forms|zfighter-gaps-4-forms]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-gaps-5-training|zfighter-gaps-5-training]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
