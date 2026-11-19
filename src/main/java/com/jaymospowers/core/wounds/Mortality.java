@@ -4,6 +4,8 @@ import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.armory.Lodged;
 import com.jaymospowers.core.Carry;
 import com.jaymospowers.core.Dismember;
+import com.jaymospowers.core.FarLand;
+import com.jaymospowers.core.HudBar;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.zfighter.ZFighterAfterlife;
 import com.jaymospowers.power.zfighter.ZFighterRealism;
@@ -96,15 +98,22 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Mortality {
 	// ---- tuning ----
-	/** How far (blocks) from where they fell a survivor wakes: most causes, and one a boss spared. */
+	/**
+	 * How far (blocks) from where they fell a survivor wakes on the Overworld's land (Andy, 2026-11-18: respawns were too close
+	 * to the last death): picked with {@link FarLand}, never nearer. One a boss spared keeps its own range, moved out to the same floor.
+	 */
+	static final int FAR_MIN = 500, FAR_MAX = 1000;
+	static final int SPARED_MIN = 500, SPARED_MAX = 800;
+	/** The near wake (blocks) for a realm {@link #afar} doesn't cover (the Nether, the End, a ceilinged world), looked for in loaded ground. */
 	static final int NEAR_MIN = 40, NEAR_MAX = 120;
-	static final int SPARED_MIN = 300, SPARED_MAX = 800;
-	/** How far a drowned one may wash up (blocks), looked for in loaded ground. */
+	/** How far a drowned one may wash up (blocks) in those realms, looked for in loaded ground. */
 	static final int SHORE_MAX = 160;
 	/** No town this near (blocks: no villager) a waking spot. */
 	static final double TOWN_CLEAR = 48.0;
 	/** Tries at a spot in loaded ground, then far spots loaded for it, before they simply wake where they fell. */
 	static final int NEAR_TRIES = 24, FAR_TRIES = 4;
+	/** Other columns of the far chunk tried, once it is loaded, before a try is spent. */
+	static final int CHUNK_TRIES = 12;
 	/** How long they lie out cold before they are moved (ticks), and after waking where they're put. */
 	static final int OUT_BEFORE = 60, OUT_AFTER = 100;
 	/** The share of their health a survivor wakes with. */
@@ -135,8 +144,8 @@ public final class Mortality {
 	 * they fell until they hold sneak this long (ticks) to come to by themselves (the wake roll), or someone brings them round.
 	 */
 	static final int COME_TO_TICKS = 40;
-	/** (0.21.7) How long the body lies before the wake roll once they've chosen to come to (ticks), and the bar's length. */
-	static final int COME_TO_AFTER = 20, COME_TO_BAR = 12;
+	/** (0.21.7) How long the body lies before the wake roll once they've chosen to come to (ticks). */
+	static final int COME_TO_AFTER = 20;
 	/** (0.21.7) How long one left for dead is held out cold at most while lying (ticks): long enough never to end by itself. */
 	static final int LIE_TICKS = 20 * 60 * 60 * 24;
 	/** (0.21.7) No hostile this near (blocks) the body: safe enough to bring one left for dead round. */
@@ -458,10 +467,11 @@ public final class Mortality {
 			return;
 		}
 		if (!dark && (holding ? wake.held % 2 == 0 : now % 20 == 0)) {
-			int filled = Math.round(COME_TO_BAR * wake.held / (float) COME_TO_TICKS);
-			String bar = "|".repeat(filled) + ".".repeat(COME_TO_BAR - filled);
 			player.sendOverlayMessage(Component.translatable(carried ? "message.jaymospowers.mortality.come_to_carried"
-				: "message.jaymospowers.mortality.come_to", bar).withStyle(holding ? ChatFormatting.YELLOW : ChatFormatting.GRAY));
+				: "message.jaymospowers.mortality.come_to").withStyle(holding ? ChatFormatting.YELLOW : ChatFormatting.GRAY));
+			if (wake.held > 0) {
+				HudBar.hold(player, "come_to", wake.held / (float) COME_TO_TICKS, HudBar.YELLOW, Component.translatable("bar.jaymospowers.come_to"), true);
+			}
 		}
 	}
 
@@ -1147,7 +1157,7 @@ public final class Mortality {
 		if (wake.cause == Cause.FALL) {
 			// (they wake where they landed)
 			at = wake.fell;
-		} else if (wake.far == null && wake.loading == null) {
+		} else if (wake.far == null && wake.loading == null && !afar(level, wake.fell)) {
 			at = wake.cause == Cause.DROWNING ? shore(level, wake.fell, random) : null;
 			for (int i = 0; at == null && wake.cause != Cause.BOSS && i < NEAR_TRIES; i++) {
 				at = near(level, wake.fell, NEAR_MIN, NEAR_MAX, random, true);
@@ -1159,16 +1169,25 @@ public final class Mortality {
 			}
 			if (wake.far != null) {
 				at = ground(level, wake.far.getX(), wake.far.getZ(), true);
+				// (a pond or a hut on the one column: the rest of the chunk is loaded too)
+				for (int i = 0; at == null && i < CHUNK_TRIES; i++) {
+					at = ground(level, (wake.far.getX() & ~15) + random.nextInt(16), (wake.far.getZ() & ~15) + random.nextInt(16), true);
+				}
 				level.getChunkSource().removeTicketWithRadius(WAKING, ChunkPos.containing(wake.far), 0);
 				wake.far = null;
 				wake.loading = null;
 			}
 			if (at == null && wake.tries++ < FAR_TRIES) {
-				int min = wake.cause == Cause.BOSS ? SPARED_MIN : NEAR_MIN;
-				int max = wake.cause == Cause.BOSS ? SPARED_MAX : NEAR_MAX;
-				double angle = random.nextDouble() * Math.PI * 2.0;
-				double r = min + random.nextDouble() * (max - min);
-				BlockPos far = BlockPos.containing(wake.fell.getX() + Math.cos(angle) * r, wake.fell.getY(), wake.fell.getZ() + Math.sin(angle) * r);
+				boolean afar = afar(level, wake.fell);
+				int min = wake.cause == Cause.BOSS ? SPARED_MIN : afar ? FAR_MIN : NEAR_MIN;
+				int max = wake.cause == Cause.BOSS ? SPARED_MAX : afar ? FAR_MAX : NEAR_MAX;
+				// (dry, gentle land the generator would make, read without making a chunk; else a blind point on the ring)
+				BlockPos far = afar ? FarLand.pick(level, wake.fell, min, max, random) : null;
+				if (far == null) {
+					double angle = random.nextDouble() * Math.PI * 2.0;
+					double r = min + random.nextDouble() * (max - min);
+					far = BlockPos.containing(wake.fell.getX() + Math.cos(angle) * r, wake.fell.getY(), wake.fell.getZ() + Math.sin(angle) * r);
+				}
 				if (level.getWorldBorder().isWithinBounds(far)) {
 					wake.far = far;
 					wake.loading = level.getChunkSource().addTicketAndLoadWithRadius(WAKING, ChunkPos.containing(far), 0);
@@ -1184,6 +1203,11 @@ public final class Mortality {
 		}
 		wakeAt(player, level, at, wake, wake.cause.key());
 		return true;
+	}
+
+	/** Whether a wake from {@code fell} goes far ({@link #FAR_MIN}): the Overworld's own land, in a stacked world the Overworld's band. */
+	private static boolean afar(ServerLevel level, BlockPos fell) {
+		return !level.dimensionType().hasCeiling() && com.jaymospowers.compat.Stacked.realm(level, fell.getY()) == net.minecraft.world.level.Level.OVERWORLD;
 	}
 
 	/** A dry spot within {@code min} to {@code max} blocks of {@code from} in ground already loaded, or null. */

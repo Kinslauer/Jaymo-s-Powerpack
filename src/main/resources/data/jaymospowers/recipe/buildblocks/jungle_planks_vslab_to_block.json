@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:jungle_planks_vslab",
+    "jaymospowers:jungle_planks_vslab"
+  ],
+  "result": {
+    "id": "minecraft:jungle_planks"
+  }
+}

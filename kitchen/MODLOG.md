@@ -2428,3 +2428,47 @@ Andy's scaling pick "feasts": a late food tier. Three feast dishes from Legend-a
 - **Sandwiches on the board**: sneak and put bread, fillings and bread on a cutting board in order, then cut it with the knife; the sandwich is as filling as its layers.
 - **New stations, all by hand**: Brewing Keg (a cask's drinks in one sitting), Tea Kettle (over a lit fire; new Cup of Tea from herbs) and Sushi Mat (rice rolls and the like), poured and rolled like dough. New recipes for each.
 - **Andy's rulings on the above** (what these change wins over the lines before): a step recipe uses nothing up when it starts; each ingredient goes in with **a right-click holding it**, and the wrong ingredient is a mistake; the **sear marker is a bar in the world** above the pan, for everyone near; a **sandwich's cut is timed** like a chop, and a missed cut gives a squashed sandwich. Fixed: the last step of a step recipe, and serving a grill, oven or roast, could crash the server.
+
+## 0.6.43 (2026-11-18): shared screen style: pills and the gold frame (#1722)
+
+- `KitchenUi` (generated from `tools/ui_style`) gains `pill`, `pillWidth`, `frame` and `panelFramed`, the same as the other mods' copies. No Kitchen screen uses them yet.
+- Built; not played.
+
+## 0.6.44 (2026-11-18): hide_armour tag: mailed and studded leather count as leather (#1729)
+
+- `HideTraits.isLeather` also takes pieces in the new `jaymoskitchen:hide_armour` tag (optional entries for Jaymo's Powers' mailed and studded leather), so their hide traits and soak wear work as on leather armour.
+- Built; not played.
+
+## 0.6.45 (2026-11-18): Studded leather as one warm piece (#1730)
+
+- Body heat counts a full set of Jaymo's Powers' studded leather (`jaymospowers:studded_armor`, all four slots) as one warm piece, for the cold and the heat alike. Harness layers are not counted on this side. Built; not played.
+
+## 0.6.46 (2026-11-18): bodies that die flat start lying
+
+- Andy: "the death ragdoll when enemies and players are prone or crawling should keep them in that position". A mob's pose is already DYING when its corpse is made, so the old crawling/sleeping check never fired and crawlers popped up to standing. The pose a body dies in is now noted as `die` begins (`LivingEntityMixin`, `Corpses.noteDying`), and a body that died crawling, asleep, gliding or down on its belly from a leg shot starts lying (a leg-shot crawler face down) and doesn't keel over.
+- Built; not played.
+
+## 0.6.47 (2026-11-18): Animals stop re-pathing to food they cannot reach (#1741)
+
+- Fixes: an animal by dropped food it couldn't reach (behind a fence, across water) worked out a new path to it every tick for ten seconds, a large share of the server's freezes on fresh land. It now tries once a second, and leaves the food when there is no way to it (`EatGroundFoodGoal`).
+- Built by CI; not played.
+
+## 0.6.48 (2026-11-18): drawn progress bars - corpse lifting and butchering (#1747)
+
+- Lifting, taking hold of and butchering a corpse show three drawn bars under the crosshair with a caption ("Butchering (3 pieces left)") instead of a `||||....` line, drawn by Jaymo's Powers (`HudBars`; without Powers the old kind of line shows). They still stop your swings while you hold.
+- Compiled; not played.
+
+## 0.6.49 (2026-11-18): ash pile texture fixed (#1759)
+
+- **Ash piles**: `ash_pile.png` had a broken zlib stream (no header) and an RGB colour type over RGBA data, so every client showed the missing texture. Re-encoded as a valid 16x16 RGBA PNG with the same pixels. The eight ash pile models now also set a `particle` texture.
+- Scanned every PNG under the three mods: this was the only malformed one.
+- Not built or played.
+
+## 0.6.50 (2026-11-18): Placed slabs remembered across restarts (#1755)
+
+- Fixes: the slabs a player placed in a chunk were forgotten when the chunk loaded before the class did (dropped as unknown data). The attachment is now registered at start-up.
+- Built by CI; not played.
+
+## 0.6.51 (2026-11-18): Add Cooking Block (#1687)
+
+Added a new **Cooking Block** to the Functional creative tab. The block has iron-like properties (metal sound, hardness 5.0, resistance 6.0) and uses a single cube_all texture for both block and item models.

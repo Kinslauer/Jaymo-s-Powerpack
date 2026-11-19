@@ -1,11 +1,12 @@
 package com.jaymospowers.client.combat;
 
+import com.jaymospowers.client.hud.HudBars;
 import com.jaymospowers.combat.ShieldBang;
+import com.jaymospowers.core.HudBar;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -15,8 +16,7 @@ import net.minecraft.world.phys.Vec3;
  * {@code HeldInput} keeps every other swing off it), and letting go steps you in and throws the bash.
  */
 public final class ShieldBangClient {
-	/** The bar's length (characters), and how hard the step in is at no charge and full (blocks a tick). */
-	static final int BAR = 12;
+	/** How hard the step in is at no charge and full (blocks a tick). */
 	static final double STEP_MIN = 0.25, STEP_MAX = 0.6;
 
 	private static boolean holding;
@@ -55,8 +55,7 @@ public final class ShieldBangClient {
 				ClientPlayNetworking.send(new ShieldBang.Bash(true));
 			}
 			if (held >= ShieldBang.BASH_MIN) {
-				int filled = Math.round(BAR * Math.min(1.0F, charge()));
-				player.sendOverlayMessage(Component.literal("|".repeat(filled) + ".".repeat(BAR - filled)));
+				HudBars.show("shield_bash", HudBar.style(HudBar.HOLD, HudBar.GREY, 0, true), Math.min(1.0F, charge()), null, null);
 			}
 			return;
 		}
@@ -68,7 +67,7 @@ public final class ShieldBangClient {
 			return;
 		}
 		ClientPlayNetworking.send(new ShieldBang.Bash(false));
-		player.sendOverlayMessage(Component.empty());
+		HudBars.clear("shield_bash");
 		if (player.onGround() && !player.isPassenger()) {
 			double step = STEP_MIN + (STEP_MAX - STEP_MIN) * Math.min(1.0F, charge());
 			Vec3 look = Vec3.directionFromRotation(0.0F, player.getYRot());

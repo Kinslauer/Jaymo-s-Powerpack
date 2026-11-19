@@ -20,6 +20,22 @@
     "jaymospowers:deepslate_small_gold_ore",
     "jaymospowers:small_silver_ore",
     "jaymospowers:deepslate_small_silver_ore",
-    "jaymospowers:deepslate_boneiron_ore"
+    "jaymospowers:deepslate_boneiron_ore",
+    "jaymospowers:andesite_gold_ore",
+    "jaymospowers:diorite_gold_ore",
+    "jaymospowers:granite_gold_ore",
+    "jaymospowers:tuff_gold_ore",
+    "jaymospowers:andesite_redstone_ore",
+    "jaymospowers:diorite_redstone_ore",
+    "jaymospowers:granite_redstone_ore",
+    "jaymospowers:tuff_redstone_ore",
+    "jaymospowers:andesite_diamond_ore",
+    "jaymospowers:diorite_diamond_ore",
+    "jaymospowers:granite_diamond_ore",
+    "jaymospowers:tuff_diamond_ore",
+    "jaymospowers:andesite_emerald_ore",
+    "jaymospowers:diorite_emerald_ore",
+    "jaymospowers:granite_emerald_ore",
+    "jaymospowers:tuff_emerald_ore"
   ]
 }

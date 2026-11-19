@@ -33,5 +33,15 @@
   "story.jaymoskingdoms.turn.blizzard.short": "The cold stopped biting.",
   "story.jaymoskingdoms.turn.fate": "Nothing, yet",
   "story.jaymoskingdoms.turn.fate.tale": "Nothing strange has happened to you, yet. Fate will decide.",
-  "story.jaymoskingdoms.turn.fate.short": "Nothing, yet."
+  "story.jaymoskingdoms.turn.fate.short": "Nothing, yet.",
+  "story.jaymoskingdoms.turn.bite.tag": "a pale bite",
+  "story.jaymoskingdoms.turn.weapon.tag": "a hand reached",
+  "story.jaymoskingdoms.turn.fall.tag": "landed like a feather",
+  "story.jaymoskingdoms.turn.storm.tag": "lifted by the wind",
+  "story.jaymoskingdoms.turn.clock.tag": "a watch run backwards",
+  "story.jaymoskingdoms.turn.bell.tag": "a bell unheard",
+  "story.jaymoskingdoms.turn.sea.tag": "a night adrift",
+  "story.jaymoskingdoms.turn.fists.tag": "a fight you should lose",
+  "story.jaymoskingdoms.turn.smoke.tag": "smoke like air",
+  "story.jaymoskingdoms.turn.blizzard.tag": "the cold stopped biting"
 }

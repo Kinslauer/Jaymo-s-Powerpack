@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:polished_diorite_vslab",
+    "jaymospowers:polished_diorite_vslab"
+  ],
+  "result": {
+    "id": "minecraft:polished_diorite"
+  }
+}

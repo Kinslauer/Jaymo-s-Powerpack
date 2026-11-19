@@ -162,9 +162,8 @@ final class Captures {
 		int need = blade ? CUT_TICKS : UNTIE_TICKS;
 		if (done < need) {
 			CUTTING.put(p.getUUID(), new Cutting(c.body(), c.start(), now));
-			int bar = 10, filled = (int)Math.min(bar, bar * done / need);
-			p.sendOverlayMessage(Component.translatable(blade ? "captive.jaymoskingdoms.cutting" : "captive.jaymoskingdoms.untying", body.getDisplayName(),
-				"|".repeat(filled) + ".".repeat(bar - filled)).withStyle(ChatFormatting.GRAY));
+			HudBars.hold(p, "captive", done / (float) need, HudBars.GREY,
+				Component.translatable(blade ? "bar.jaymoskingdoms.cutting" : "bar.jaymoskingdoms.untying", body.getDisplayName()), true);
 			if (done % 8 == 0) {
 				server.playSound(null, body.getX(), body.getY(), body.getZ(), blade ? SoundEvents.SHEEP_SHEAR : SoundEvents.LEAD_TIED, SoundSource.PLAYERS, 0.6F, 1.2F);
 			}

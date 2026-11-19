@@ -948,7 +948,8 @@ public final class Bounties {
 		Currency money = Currencies.of(level.getServer(), court);
 		// ((0.7.625) less a Bane's cut)
 		Currencies.Pay coins = BaneCut.cut(player, Currencies.payEmeralds(money, emeralds));
-		Currencies.give(player, coins);
+		// (held in the H menu's Rewards page until claimed)
+		Rewards.hold(player, Rewards.BOUNTY, court.name(), coins.stacks(), false);
 		Reputation.change(player, court, Math.max(REP_MIN, emeralds / REP_PER));
 		Speech.tell(level, ruler, player, Component.translatable("talk.jaymoskingdoms.bounty." + how + "." + level.getRandom().nextInt(3),
 			Component.literal(b.name()), Currencies.amount(coins)), Speech.GOLD);

@@ -600,10 +600,12 @@ public final class ZFighterPower implements Power {
 			endFlight(player, live);
 		}
 		ZFighterCombo.stop(player);
+		ZFighterLegendHeart.downed(player);
 	}
 
 	@Override
 	public void onLost(ServerPlayer player) {
+		ZFighterLegendHeart.forget(player);
 		Live live = LIVE.remove(player.getUUID());
 		if (live != null && live.flying) {
 			live.flying = false;
@@ -843,6 +845,11 @@ public final class ZFighterPower implements Power {
 		// (Awakening pick) a Rubber-folk's or a Verdant's sprint + R: the stretching grab
 		if (down && key == PowerKey.ABILITY_1 && player.isSprinting() && !player.isShiftKeyDown() && ZFighterReel.stretchy(player)
 			&& ZFighterReel.reel(player)) {
+			return;
+		}
+		// a legendary form's heart moves, on sprint or sneak with the four keys (ZFighterLegendHeart)
+		if (ZFighterLegendHeart.key(player, live, key, down)) {
+			sync(player, live, maxKi(player));
 			return;
 		}
 		switch (key) {
@@ -1756,6 +1763,7 @@ public final class ZFighterPower implements Power {
 	/** Forgets the live state (a death: the next life starts with no ki, on the ground, not Super). */
 	static void forget(ServerPlayer player) {
 		LIVE.remove(player.getUUID());
+		ZFighterLegendHeart.forget(player);
 	}
 
 	public static ZFighterState state(Player player) {

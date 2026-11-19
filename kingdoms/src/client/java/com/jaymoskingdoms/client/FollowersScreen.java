@@ -27,7 +27,8 @@ import org.jspecify.annotations.Nullable;
  * follow, charge, set on my mark, break ranks. A ranked recruit's rank shows by their name ({@link Ranks}).
  */
 public final class FollowersScreen extends Screen {
-	private static final int W = 176, ROW = 20, TOP = 24, GAP = 8;
+	/** The page is the roster's shape ({@link RosterLayout}): the list left, then the orders and the formation's in two columns. */
+	private static final int COL_W = 104, ROW = 20, HEADING = 24, GAP = 6;
 	/** The buttons, top to bottom. */
 	private static final int[] ORDERS = {Followers.FOLLOW, Followers.FIGHT, Followers.HOLD, Followers.STAND, Followers.PATROL, Followers.CLEAR, Followers.FREE};
 	/** The formation's buttons, top to bottom. */
@@ -60,6 +61,15 @@ public final class FollowersScreen extends Screen {
 				}
 			}
 		});
+	}
+
+	/** Opens the orders for all your followers (the menu's page for them), if the server can take orders and you have learned them. */
+	static void openAll() {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (minecraft.player != null && ClientPlayNetworking.canSend(Followers.Give.TYPE)
+			&& com.jaymoskingdoms.TreeLocks.check(minecraft.player, com.jaymoskingdoms.TreeLocks.Lock.ORDERS)) {
+			minecraft.gui.setScreen(new FollowersScreen(-1, Component.translatable("gui.jaymoskingdoms.followers.all")));
+		}
 	}
 
 	/** Opens the orders for {@code villager} (from MCA's menu, which Orders stands in for), if the server can take orders. */
@@ -102,46 +112,76 @@ public final class FollowersScreen extends Screen {
 	}
 
 	private int height0() {
-		return TOP + Math.max(ORDERS.length, FORMATION.length) * ROW + 8;
+		return RosterLayout.HEAD + 6 + HEADING + Math.max(ORDERS.length, FORMATION.length) * ROW + 12;
 	}
 
 	private int width0() {
-		return W * 2 + GAP;
+		return RosterLayout.PAD * 2 + RosterLayout.LIST_W + RosterLayout.GAP + COL_W * 2 + GAP + 16;
+	}
+
+	private int left0() {
+		return MenuCompat.centre(this.width, width0());
+	}
+
+	private int top0() {
+		return Math.max(4 + MenuCompat.STRIP, (this.height - height0()) / 2);
+	}
+
+	/** The first column's left edge: orders; the second (formation) sits {@code COL_W + GAP} right of it. */
+	private int col0() {
+		return RosterLayout.detailX(left0()) + 8;
+	}
+
+	private int bodyTop() {
+		return RosterLayout.bodyY(top0()) + HEADING + 4;
 	}
 
 	@Override
 	protected void init() {
-		int x = (this.width - width0()) / 2, y = (this.height - height0()) / 2 + TOP;
+		int x = col0(), y = bodyTop();
 		for (int i = 0; i < ORDERS.length; i++) {
 			int kind = ORDERS[i];
 			addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.followers.order." + kind), b -> {
 				ClientPlayNetworking.send(new Followers.Give(this.target, kind));
 				onClose();
-			}).bounds(x + 8, y + i * ROW, W - 16, 18)
+			}).bounds(x, y + i * ROW, COL_W, 18)
 				.tooltip(Ui.tipOf(Component.translatable("gui.jaymoskingdoms.followers.order." + kind + ".desc"))).build());
 		}
 		if (!ClientPlayNetworking.canSend(Formations.Give.TYPE)) {
 			return;
 		}
-		int fx = x + W + GAP;
+		int fx = x + COL_W + GAP;
 		for (int i = 0; i < FORMATION.length; i++) {
 			int kind = FORMATION[i];
 			addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.formation." + kind), b -> {
 				ClientPlayNetworking.send(new Formations.Give(kind, this.target));
 				onClose();
-			}).bounds(fx + 8, y + i * ROW, W - 16, 18)
+			}).bounds(fx, y + i * ROW, COL_W, 18)
 				.tooltip(Ui.tipOf(Component.translatable("gui.jaymoskingdoms.formation." + kind + ".desc"))).build());
 		}
 	}
 
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
-		int x = (this.width - width0()) / 2, y = (this.height - height0()) / 2;
-		Ui.panel(graphics, x, y, W, height0(), Ui.GOLD);
-		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.followers.for", this.who), x + 10, y + 8, W - 20, Ui.TEXT);
+		int x = left0(), y = top0(), w = width0();
+		RosterLayout.frame(graphics, this.font, x, y, w, height0(), this.title, null);
+		RosterLayout.wells(graphics, x, y, w, height0() - RosterLayout.HEAD - 6 - 8);
+		// the list: who the orders are for, with how far they are
+		int lx = RosterLayout.listX(x), ly = RosterLayout.bodyY(y) + 3;
+		RosterLayout.row(graphics, lx, ly, 0, true, Ui.over(mouseX, mouseY, lx, ly, RosterLayout.LIST_W, RosterLayout.ROW - 2));
+		Ui.line(graphics, this.font, this.who, lx + 6, ly + 3, RosterLayout.LIST_W - 12, Ui.TEXT);
+		Entity them = this.target < 0 || this.minecraft.level == null ? null : this.minecraft.level.getEntity(this.target);
+		if (them != null && this.minecraft.player != null) {
+			Ui.pill(graphics, this.font, lx + 6, ly + 12, Component.translatable("gui.jaymoskingdoms.followers.away").getString(),
+				Math.round(them.distanceTo(this.minecraft.player)) + " m", Ui.GOLD);
+		} else if (this.target < 0) {
+			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.followers.in_earshot"), lx + 6, ly + 13, RosterLayout.LIST_W - 12, Ui.DIM);
+		}
+		// the orders and the formation, under their headings
+		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.followers.for", this.who), col0(), RosterLayout.bodyY(y) + 4, COL_W * 2 + GAP, Ui.GOLD);
+		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.followers.orders"), col0(), bodyTop() - 10, COL_W, Ui.DIM);
 		if (ClientPlayNetworking.canSend(Formations.Give.TYPE)) {
-			Ui.panel(graphics, x + W + GAP, y, W, height0(), Ui.GOLD);
-			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.formation.title"), x + W + GAP + 10, y + 8, W - 20, Ui.TEXT);
+			Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.formation.title"), col0() + COL_W + GAP, bodyTop() - 10, COL_W, Ui.DIM);
 		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}

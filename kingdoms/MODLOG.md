@@ -14886,3 +14886,243 @@ findings fixed. Built (full build and the tale checker pass: 79 files, 0 problem
 - **Four moves, each shown first**: a beam (a thin violet line that locks, then a beam that kills anyone in its line of sight, blocked by any solid block); a charge (red tell, then a rush: a raised shield or guard stops it and stuns it for four seconds, a guard raised just then for seven; anyone else is hurt and thrown); a rain of skulls (it climbs, marks spots on the ground with sigils, then skulls fall with big fiery blasts); and blue skulls, which a swing at one close in front of you sends back at the Wither for 45 damage.
 - **The dead rise to it**: zombies, skeletons and draugr within 40 blocks (never barrow knights) follow it and guard it, a cold light round their eyes, and go for anyone near it.
 - Built, not played. The new look and sounds are still to come.
+
+## 0.10.11 (2026-11-18): menu redesign: papers, the party and orders as rosters, the belt as a combination (#1722)
+
+- **Papers**: a card of parchment in a gold frame saying who you are on paper: heritage, class (and second), the realm you are sworn to with your rank and standing as pills, the title renown has earned you and your level. Open it from "Show my papers" on the Character page's Record panel. Sneak-use another player with an empty hand to show them yours: their screen opens on it (or a chat line if a screen is open), you see "You show your papers to ...", and the same pair waits 5 seconds before showing again. The server builds each card from what it holds (`Papers`, `PapersScreen`; `Papers.Card`, `Papers.Show`). No new item: the forged papers (`ForgedPapers`) are the crooks' trade and stay apart.
+- **Party and orders as rosters**: both pages take one shape (`RosterLayout`): a list down the left, a detail panel on the right. The Party lists each member with their health bar; the detail shows who you point at or picked (health, food, leader as pills, and where they are), then the players near you to invite, and the leave / fight buttons below. The orders page lists who the orders are for (the villager you look at, or everyone of yours near, with how far they are) and puts the seven orders and the formation's ten in two columns with their hover cards as before. State, kills and upkeep are not tracked for followers, so they are not shown.
+- **Five-Art Belt as a combination**: the forms you know down the left, each with an ADD chip (into the picked slot, then the pick moves on) or, once on the belt, a REMOVE chip; the five slots in the middle, each with the form's cooldown and hunger as pills (an empty slot says what to do). The Spells tab keeps its list across the page. Same packets (`Forms.Assign`); the gold frame is the pickers'.
+- **Title cards**: a heritage chosen, a realm sworn to (`/pledge`) and a rival tribe's chief felled (`Captains`, the felling player) send a title and a line under it (`Fanfare.title`). With Jaymo's Powers they are drawn as its title cards; without, as vanilla's title.
+- Classes: `Papers`, `PapersScreen`, `RosterLayout`, `PartyScreen`, `FollowersScreen`, `BeltScreen`, `MenuCompat`, `Fanfare`, `Heritage`, `KingdomCommands`, `Captains`, lang part `cards.json`.
+- Built; not played.
+
+## 0.10.12 (2026-11-18): Kingdoms' pages in the grouped H menu, new pages, Character panels (#1722)
+
+- With Jaymo's Powers loaded, Kingdoms' tabs sit in the menu's groups: You (Skills, Growth, Class in creative), Powers (Forms and Spells, Magic, Valor, Boons), World (Story, Journal and Quests, World tier), People (Faction, Party, Followers). Forms and Spells and Boons show greyed with a hint until you learn a form or have a patron.
+- New pages: World tier, Valor, Boons, Magic (the magic key's screen) and Followers (the orders for all). Their own keys still work.
+- The Character page takes Kingdoms' rows by panel: heritage, class (and second class) and renown title for the header, the character level, your attributes (Might, Grit...) and the rest (career, skills, tier, patron, realm...) in the Record.
+- Pages leave room for Powers' side list (`MenuCompat.SIDE`, `MenuCompat.centre`) and the skill web keeps the bar. An older Powers without the menu changes still works (each reflective call is its own try).
+- Classes: `MenuCompat`, `FollowersScreen.openAll`, `JournalScreen`, `PartyScreen`, `GrowthScreen`, `FactionScreen`, `RetakingScreen`, `TierScreen`, `ValorScreen`, `BoonScreen`, `BeltScreen`, lang part `menu_redesign.json`.
+- The Class page shows for anyone with a class (it was creative only), so a calling's first pick can be changed there for its fee.
+- Built; not played.
+
+## 0.10.13 (2026-11-18): menu pages: attribute effects and Redistribute, Daily task, Titles, Rewards, mana on the Character page (#1722)
+
+- **Attributes tab** (K): each attribute row shows a framed + button and, under it, what its points do now (for example "+12% damage"), read from the same formulas that put them on you. Shift-click puts in 5 points (it was 10). A new Redistribute button takes every spent point back for a fee (120 emeralds' worth, paid in the coin of the land, pressed twice to confirm); the server checks the fee and does the refund.
+- **Daily task** (World group): one small task a day, picked from what is already counted: blows struck at living things, blocks walked, hostile monsters defeated. A progress bar, the time to the next task, a streak of days claimed in a row (and your best), and a Claim button that pays coin, more for a longer streak up to 7 days. Skipping a day costs nothing: there is a new task, and the streak starts again at one on your next claim.
+- **Titles** (You group): the titles you have earned (a skill pillar's from level 5, each job you have worked at its rank, and a finished aim's) in a list; press one to wear it under your name and in the tab list. "As earned" keeps the old behaviour (your alignment and best job), "No title" shows none. Saved and kept through death.
+- **Rewards** (Notices group): pay that used to drop straight into your pack now waits here until you claim it, one at a time or all at once, and never expires. Held: a bounty's pay, a job's wages, and what a rescue brings home (the family's purse, the realm's bounty, a guard's gift, the kin's thanks). Everything else still pays at once.
+- **Character page**: a mana bar for the attuned among the vitals.
+- Classes: `Stats` (Redistribute, shift step), `DailyTasks`, `TitleChoice`, `Rewards`, `Renown`/`Careers` (the worn title), `Bounties`/`Careers`/`Deeds` (held pay), `SkillScreen`, `DailyTaskScreen`, `TitlesScreen`, `RewardsScreen`, `MenuCompat`, lang parts `daily_task`, `title_choice`, `rewards`, `stats_redistribute`.
+- Built; not played.
+
+`/rewards` opens the Rewards page without the H menu, and the held-reward message says so.
+
+## 0.10.14 (2026-11-18): menu redesign: the picker screens (heritage, class, patrons, life story) (#1722)
+
+- **One layout for every picker**: you on the left (the figure, as the choice pointed at or picked would make you, with a soft glow behind and a shadow under the feet), a compact two-column list of the choices in the middle (icon, name, a one-line tag), and a big info panel on the right (icon, name, tag, pills, the story, then Intrinsic, Strengths, Weaknesses, Look and Paths). The button under the figure names the choice ("Become a Stoneborn", "Become a Thief"). Small windows get one list column and a narrower figure; a long list shrinks its rows and scrolls with the wheel; the info panel scrolls with the wheel and a thin bar. Nothing is cut: long lines slide.
+- **Heritage screen**: free points and bonuses and the look count are pills; the gift is Intrinsic, kit gifts Strengths, flaws and the shunning Weaknesses; the picked look is told under Look; Paths lists the looks a heritage is born in and the blood each leans toward. The look button and right-click-back are kept, earned heritages still show as "???".
+- **Class screen**: the figure wears the class's gear; Intrinsic is what it is good with, Strengths the gear; Paths lists its options (press one to pick it: a Mage's first spell, a Sorcerer's element, a Paladin's oath, a Ranger's foe, a patron) and the crossroads its tree grows into.
+- **Specialization** (server): a player who already holds a class can change what they picked with it (a Mage's spell, a Sorcerer's element, a Paladin's oath, a Ranger's foe) for 250 silver, and a day (24000 ticks) must pass between changes (`Classes.RESPEC_SILVER`, `RESPEC_WAIT_TICKS`). Levels, points, perks and known spells are kept. A Cleric's or Warlock's patron stays the Patrons' own. The class screen shows the cost and the wait; open it with a decided class (`new ClassScreen(false, true)`) to change a pick; the H menu's Class page now shows for anyone with a class.
+- **Patron screen**: the eight patrons in the list; offerings, deeds, who it is cool to, marks and trials as sections; your favour and tier as pills; the four blessings as Paths.
+- **Life story**: the question pages (and the gender page) use the layout; the road's carousel, the realm pages and the story page keep their shape in the new gold frame.
+- **Tags**: a one-line `.tag` for every heritage, class, patron and story answer, in the matching lang parts; shared labels in `picker.json`.
+- Built; not played.
+
+## 0.10.15 (2026-11-18): Story choices: big boxes with a hand-drawn X, no Ash Whisperer clerics (#1724)
+
+- The life story's answers fill the middle column as big boxes (rows grow up to 80 px, `PickerLayout.rowMax`), with a bigger icon box and the name and tag wrapped in full instead of sliding. Heritage, class and patron screens keep their compact rows.
+- The picked answer's box is struck through with a hand-drawn red X (`PickerLayout.cross`), on every question page and the gender page. The flaws and the ideal/bond/flaw picks on the last page draw the same box and X in place of "[x]" text.
+- Clerics can no longer pledge to the Ash Whisperer (Andy: she backs only death, blood and evil sorceries; Warlocks keep her). A Cleric's pick on the story's last page is headed "Pick the patron you serve:", not "element".
+- Compiled; not played.
+
+## 0.10.16 (2026-11-18): A newcomer isn't given a random name before they pick theirs
+
+- A player with no character name is given one from MCA's name lists, but that happened as soon as they joined, before MCA's creator had opened. Their first join line and the creator showed a random name (Andy's "Yu-Fang" before he chose "Jek"). A random name is now given only once the creator is behind them, to those who left the name as their username.
+
+## 0.10.17 (2026-11-18): Daylight no longer stays as dark as the night before
+
+- **DarkNights**: the lightmap is worked out again every client tick, as vanilla does. BadOptimizations (added with the Sensible MC picks) caches it and only works it out again when the sky light factor changes, and that factor holds still from morning to dusk. A lightmap worked out mid-change (after sleeping, `/time set day` or joining, read between the old tick's night and the new tick's day) then stayed all day: the open sky as dark as the night it came from, while torches and lanterns lit as normal. It also never saw the Moon rise or set. The rest of BadOptimizations is left as it is.
+- Compile-checked in the cloud (Kingdoms compileClientJava); not played.
+
+## 0.10.18 (2026-11-18): rangers and ship crews in light armour; smiths' orders for mail (#1730)
+
+- **Rangers**: the Green Huntsman's rangers wear studded leather (cap and brigandine); a seasoned one (30%, and always the one sent after a poacher) wears a mailed cap and jack. Never diamond or netherite.
+- **Ship crews**: a pirate captain wears a full mailed leather set, a sea captain a mailed cap and jack, and about half the deckhands a studded jerkin (`LightLeather`). Without Jaymo's Powers they keep their leather.
+- **Careers**: with Powers loaded, a town's smith orders sometimes ask for mail sheets, or one to three mailed jacks.
+- Built; not played.
+- **Sidesteps follow the armour**: fighting folk never sidestep a player's blow while wearing a piece of plate (armour outside `#jaymoskingdoms:light_armor`), the same as a player's backstep. The Huntsman's rangers and ship crewmen (MCA villagers) now sidestep too, 12% of blows, when they wear only leather or mail. Mailed and studded leather join `light_armor`, so Thieves' and Marksmen's light-armour bonus counts them.
+
+## 0.10.19 (2026-11-18): illager names, mutant zombie toned down
+
+- **Illager names** (Andy: "the pillagers dont have names for each other, we should create a pool of 80 or so"): 80 names (`IllagerTalk.NAMES`, replacing the made-up start+end pairs); every illager gets one as it loads, one no other illager within 48 blocks already has. Their fellows call them by it ("I've got Vorik, cover me!") and their deaths name them (`mixin.IllagerNameMixin` on `Entity.getTypeName`, server side). The name over their head still waits until they tell you (Introductions), and a name tag still wins. Illagers named before keep their old name.
+- **Mutant zombie** (Andy: "many pillagers should have been able to take one"): it gets back up from death once instead of three times (`MutantRampage.LIVES`, set through the mod's own synced data by reflection) and has 25 less health (125, `HEALTH_CUT`): about 156 health to beat in all, down from about 262. Its slams hit much harder instead (Jaymo's Powers crushing blows).
+- Built; not played (Mutant Monsters isn't in the dev runtime).
+
+## 0.10.20 (2026-11-18): Carried in only to a real village (#1733)
+
+- Fixes: "Someone found you and carried you in" could leave you outdoors by a lone castle's bounty board. Now only a village (a bell, an Epic town, or a town its builders put up, with homes round it) carries you in, to a free bed indoors; the nearest one that has one is tried, and with none you wake as you would have.
+
+## 0.10.21 (2026-11-18): New kingdoms rise in real towns again (#1735)
+
+- Fixes: since the 15th every kingdom raised from nothing came out as a lone castle (Ardenmoor, Gwynshire, Eldwold), because its town was only ever tried on one spot and the river and sea checks threw it out. The town is now looked for over the ground round it, nearest first, as villages are.
+
+## 0.10.22 (2026-11-18): predators at home and on the hunt - big cats in the jungles, bears in the woods, every predator stalks like a wolf
+
+- **Homes** (`wild/PredatorRanges`, Andy: "tigers in jungle w other big cats, bears forests"): each predator loses the spawns its own mod gave it and spawns only in its home biome tag. Naturalist's big cats (`jaymoskingdoms:has_big_cats`): the jungles and the mangroves, so the jungle holds tigers, the sparse jungle leopards, the bamboo jungle white tigers and the mangroves black panthers (Naturalist picks the coat by biome); no more tigers in deserts, badlands, snowy plains, cherry groves or mountains. Lions on the savannas in prides of 2-4 (`has_lion`), Cube Animals' snow leopards on the groves, snowy slopes and peaks (`has_snow_leopard`), brown bears (Naturalist's, Bear Minimum's) in the taiga, windswept forest, meadows and groves (`has_brown_bear`, off the frozen peaks and ice spikes), black bears (Naturalist's, Bear Minimum's, Cube Animals') in the forests and plain taiga (`has_black_bear`). Cube Animals' **lynx** now spawns in the tundra (snowy plains, snowy taiga), the forests and the taiga (`has_lynx`) and its **caracal** on the savannas, deserts and badlands (`has_caracal`); Cube Animals never spawned either in the wild, so Kingdoms gives them ground spawn rules (Andy: "spawn them too"). The beast talk and the hunt quests (`Encounters`) name the same homes.
+- **They stalk you** (`wild/WolfStalkers`, Andy: "they should stalk you the way wolves do"): coyotes, polar bears, Naturalist's tigers, lions, brown and black bears, Cube Animals' snow leopards, caracals, tigers and black bears and Bear Minimum's bears (`jaymoskingdoms:stalkers` entity tag) hunt a player as the wild wolves do: by scent and the wind, shadowing you from cover, freezing when looked at, then the rush. On the game's wolves' hours: at night, in mist, or when you're hurt; never on a full belly (`FedPredators`), asleep, tamed (by the game's taming or Cube Animals' own), leashed or as a cub. The lynx doesn't stalk: it hunts rabbits and leaves people alone until it's hurt. Their own search for quarry no longer sends them straight at a player they'd stalk (`mixin/wild/PredatorTargetMixin`): they still go straight in at someone who walks right up on them (4 blocks), hurts or angers them, or comes near their cubs. A big cat or bear breaks cover with its own call instead of the wolf's growl. The wolves keep their rules as they were.
+- **The stealth eye** (`Senses`, Andy: "not activating your stealth eye until your stealth is sufficient or a perk on tree"): a beast stalking you (wolves too) stays off the awareness eye until you reach Stealth 15 or learn **Sixth Sense** (new Stealth perk on the Shadows page, under Shadowed, 1 point, Stealth 5); then the eye fills as it creeps in. Once it rushes you the eye opens red as for any attacker.
+- Left as they were: the grizzly (its own warn-roar-charge territory), crocodiles and the other reptiles (their own water ambush), foxes.
+- Built; not played. Spawn changes take effect in chunks generated after the update (and animals that respawn).
+
+## 0.10.23 (2026-11-18): only Epic towns are crowned: no kingdom seated on a lone castle (#1739)
+
+Andy, 2026-11-18: only the kingdoms that generate properly (Epic villages) are kingdoms; a single castle is a fief or a part of a kingdom.
+- **No castle kingdoms**: `KingdomEvents.foundTown`, the capital job (`StoryGround`), a bell in an Epic town with no building fit for a king (`KingdomEvents.tryFound`) and a Grim seat compound (`SeatCompounds.found`) no longer fall back to `found(CITADEL)`. A compound is a fiefdom of the kingdom near, else a village.
+- **Looking further out**: where no Epic town can be raised at the spot (`EpicTowns.found`, now tried once per spot), `EpicTowns.foundFar` takes the nearest town world generation makes within 6 village spacings (`Scout`, no chunk made, nearest first), makes its land in the background (a ticket, never the server thread) and founds the kingdom in its buildings (`foundIn`). A town with no seat, held by another faction or not made in 1200 ticks is passed over for the next. `EpicTowns.seek` does the same in the background (every second, up to 10 minutes) for a castle town with no kingdom to swear to.
+- **The first capital**: its Epic village is kept trying for 6000 ticks (was 1800, which the 11-17 world outran and fell to a castle), logging why each wait (`StoryGround.waitOn`); a village with no fit building sends the job to look for another town. With none left (or 6000 ticks), the world goes on without a realm until a player reaches an Epic town's bell.
+- Left as they were: operator `/kingdom found`, the Deck's keep and its deed, a player's paid `Crowns.found`, `GreatWars` and `Crowns` promoting a fief.
+- Built by CI only; not played.
+
+## 0.10.24 (2026-11-18): new-life starts land 500 to 1000 blocks from the last death (#1738)
+
+- **Starts**: a start in the wild or open land lands 500 to 1000 blocks from where the player last died (the vanilla last-death record): the setting-out point is drawn in that ring, and an open ring with no such spot takes one from the 500-1000 ring round the death. Starts that put the player inside a town, kingdom or fief (a capital, sworn, evicted, the moon-cursed village edge, the village starts) may stay close. A camp or wreck start with no such place in range falls to the wild. While little of the world is made yet (pregeneration), a start may still fall back to the spawn.
+- Built by CI; not played.
+
+## 0.10.25 (2026-11-18): mobs: golems hunt creepers, creepers burn, cave spiders, phantoms carry, deeper gear (#1740)
+
+Clouds and Bits patch 5 (Bits and Balance's ideas, our own code).
+- **Golems vs creepers**: the town golems that fight on foot go for creepers (iron golems already did); a creeper a golem hits has its fuse put out and its swelling undone, so it doesn't go off (`mobs/GolemHunt`, `CreeperAccessor`).
+- **Creepers burn by day**: creepers join `burn_in_daylight` (shade, water, rain and a helmet protect, as for zombies). Stalkers is untouched: a creeper frozen by your stare in the sun just burns.
+- **Cave spiders underground**: a natural spider spawn below y 40 with no skylight is a cave spider 1 time in 4 (`mobs/UnderMobs`, in `NaturalSpawnerMixin`'s spawn hook).
+- **Phantoms carry you off**: a real phantom's swoop on a player in the open sky takes hold 1 time in 5 and climbs with them riding it, then lets go after 3 to 6 s or once it has lost a third of its health since taking hold. The carried player's blows on it count double and sneaking wriggles them free; fall damage is the ordinary kind. Never a player in a vehicle, downed, asleep, creative or spectator; a 20 s wait before the same phantom or player again (`mobs/PhantomCarry`, `PhantomHurtMixin`). The living nightmare's hallucinated phantoms are not entities and are left alone.
+- **Deeper monsters, older gear**: zombies, skeletons (armour and blades) and vindicators (a better blade) that spawn naturally below y 0 are dressed from the world-tier gear tables one row higher per depth band (y -1, -25, -49), and the band is kept on them, so a world tier taken later stacks on top (`MonsterGear#armDeep`).
+- Built; not played. Not done: Kingdoms' own bespoke monsters (their gear is their own), town golems that don't fight on foot.
+
+## 0.10.26 (2026-11-18): knocking and companions spared (clouds/bits patch 4) (#1740)
+
+- **Knocking**: left-click a closed door with an empty hand (sneak still breaks it) to knock twice, no damage. With MCA
+  the villager whose home (bed) is by the door, within 20 blocks, walks to it; at night only if they have 30 hearts or
+  more with you, and then they wake. With no one home, a guard in earshot comes instead (`Knocking`).
+- **Don't hit your own companions**: your blows skip the companions that follow you (sneak and they land).
+- Built; not played.
+
+## 0.10.27 (2026-11-18): sky decks - lumpy tops, daily skies, gaps, high wisps (#1740)
+
+- **Lumpy tops**: some squares of the low and high cloud decks rise in mounds of one to three extra slices; few in fair weather, many as rain gathers.
+- **A different sky each day**: each deck's height (within 12 blocks), drift speed (0.7x to 1.4x) and opacity (0.8x to 1.15x) are rolled from the day number and ease in over about a minute at dawn. The roll uses the day only, as the client has no world seed.
+- **Gaps**: fair weather leaves clear patches in the decks (a new pattern each day, crossfaded at dawn); storms close them.
+- **High wisps**: a third, faint deck at about 236 blocks, two slices, drifting 1.8x as fast, near white by day and warm at dusk. Off in low-end mode, which also has no bumps.
+- Classes: `CloudDecks` (drift is now kept per deck, so a changed pace never jumps a deck). Tuning constants are at the top of the class.
+- Built; not played.
+
+## 0.10.28 (2026-11-18): written oath and pact - the Lawgiver's rulebook becomes the Book of Vows
+
+- **Book of Vows** (Andy, 2026-11-18: the Awakening's "Rule writer" was meant as how Paladin oaths and Warlock pacts work; he picked "Written oath and pact"). A Paladin or Warlock gets one on swearing (one who swore before gets theirs on joining; a lost one is a book and quill and a gold nugget). Use it to read and write; sneak and use it to enact the rule picked in it.
+- **Terms**: the oath's or patron's own terms are written in and fixed. Up to four more may be sworn from any term a vow knows (`Vows` holds you to them like the rest). Striking out a term you swore breaks it: the oath breaks, or the patron collects.
+- **Rules**: one rule line, and one more for each sworn term (five at most). A rule is a sentence: who (I, my allies near me, the foes near me, the one I look at, everyone near me), what is true of them (the oath or patron decides: Mercy mends, quickens, hardens, slows, lights up; Justice lights up, slows, weakens, takes powers, blinds; Honour strengthens, hardens, quickens, weakens, lights up; each patron its own four or five), strength 1 + a step every 5 class levels (to 5), and 5 to 60 s. Enacting costs grace (Paladin) or credit with the patron (Warlock): 150 most, 1 a second back (2 with none running); one rule at a time, three from class level 20. A broken oath, or a patron withholding over an unpaid debt, enacts nothing; a broken oath or a lost class ends what runs. "Have no powers" puts Jaymo's Powers' ruled tag on whom it's about.
+- Classes: `VowBook` (new), `VowBookScreen` (new); `Vows` (sworn terms bind), `Paladins`/`Warlocks` (book on swearing, cleared on unmaking). Lang part `vow_book.json`.
+- Built; not played.
+
+## 0.10.29 (2026-11-18): drawn progress bars - text bars redrawn like the execution bars (#1747)
+
+- Every text bar on the action bar is now drawn by Jaymo's Powers in the execution bars' look (`HudBars` sends it; without Powers the old kind of line shows): pickpocketing, cutting or untying captives, lasso tying and struggling, tome charge, Illager study, Brute rite stitching and the trial's stone heave are holds under the crosshair with a short caption; the Vow Book's grace/credit, the hunger curse and night forms' time are gauges over the hotbar; the tree chop meter and stake pulls are drawn squares; a Will clash is one gold-against-red bar under the crosshair.
+- Goblin disguise suspicion now fills the awareness eye over the crosshair (Andy: "The eye should fill"), new `Senses.Suspicion` payload; the old "Suspicion" pips are gone.
+- The Vow Book's ink gauge no longer stops your swings (its `|...` text used to).
+- Compiled; not played.
+
+## 0.10.30 (2026-11-18): Zombies no longer crash the server when they give up vanilla door-breaking (#1748)
+
+- Zombies spawned able to break doors (Hard) lose vanilla's door breaker when they load, not from inside the Pound goal's `canUse`. Removing a goal there changed the goal set while the goal selector was walking it, and a NullPointerException stopped the server (a zombie, 2026-11-18).
+- `DoorPounding`: `loaded()` calls `setCanBreakDoors(false)` before `paths()`; `Pound.canUse()` no longer does.
+- Not built or played; CI compiles.
+
+## 0.10.31 (2026-11-18): picker lists show 3-4 big boxes, info text in paragraphs (#1750)
+
+- **Picker lists** (heritage, class, patron, life story): the middle column shows three or four big boxes at a time (three on short windows) and scrolls with the wheel for the rest, so each box has room for its name and tag in full. Short lists still fill the column.
+- **Info panel text**: long text (class and option descriptions, heritage gifts) is broken at its sentences into short paragraphs, and an over-long sentence is broken again at its semicolons. Lines get a pixel more space, paragraphs get a gap, and sections with several lines are bulleted.
+- `PickerLayout` (`BOXES_SHOWN`, `PARA_SPLIT`, `PARA_SENTENCES`, `LEADING`, `PARA_GAP`).
+- Built; not played.
+
+## 0.10.32 (2026-11-18): Curing blight and seeing someone turn change how villagers see you (#1758)
+
+- Fixes: curing someone of the Hollow's blight, and being seen getting up as one of the Hollow, moved nothing in a villager's bearings toward you. A cure now gives +20 trust, +15 respect, +10 warmth; seeing you turn gives -10 trust and -15 warmth (Andy's numbers).
+- Built by CI; not played.
+
+## 0.10.33 (2026-11-18): brood lair stays in its chunk (#1761)
+
+- **Brood lair**: the roof search for hanging egg sacs and cobwebs now skips columns outside the chunk being built (the piece's clipped bounding box), so it no longer reads neighbouring chunks during worldgen. Random rolls are unchanged, so the lair looks the same.
+- Not played; nothing built on this PC (CI compiles).
+
+## 0.10.34 (2026-11-18): Climbing claws wall helper no longer clashes with Powers Skitter (#1762)
+
+- The wall-climb helper (`besideWall`, `WALL_GAP`) is now `@Unique`, so Mixin stops logging an overwrite conflict at every boot and each mod keeps its own copy.
+- Not built or played.
+
+## 0.10.35 (2026-11-18): Captains keep their temperament across restarts (#1755)
+
+- Fixes: rival captains forgot their temperament on every restart (its saved data was dropped as unknown, since nothing had loaded it yet), and players joining didn't get their farmhand family or lesson course. Both are now registered at start-up.
+- Captains whose temperament was already lost get a new one. Also registered early: legendary bosses' spent resistances.
+- Built by CI; not played.
+
+## 0.10.36 (2026-11-18): Tree locks block crafting alongside The Graveyard (#1756)
+
+The crafting lock on trade stations and the saw now hooks the slot pickup check that every slot has and applies to crafting result slots, so it works with or without The Graveyard.
+
+## 0.10.37 (2026-11-18): holy books - each patron's sigil on its book; a stored book is no broken commandment (#1771)
+
+- **Holy book looks**: every patron's book of commandments is now the vanilla book with that patron's sigil set in a sunken square on the cover, lying on the cover's tilt (upright as you hold the book) (the anvil, the hearth flame, the waves, the antlers, the lantern, the crowned sun, the hooded ember, the Truth's cross), and its lore book is the written book with the same sigil. Old books of commandments take the new look the next time they are in an inventory; old lore books keep the plain look. Sigils are drawn from the shrine glyphs by `tools/gen_holy_books.py`, as a 32x32 overlay on the vanilla texture (twice the book's detail so the tilted sigil still reads; no vanilla pixels copied).
+- **Keeping the book**: the Truth's "Do not throw away My book" used to break the moment the book was dropped. Now it breaks only if the dropped book is lost (burnt, despawned, fallen into the void). Putting it in a chest, dropping it for a friend or into a hopper, or picking it up again is fine (`Commandments`, `LoreBooks`).
+- Built by the PR checks; not played.
+
+## 0.10.38 (2026-11-18): Harness 1: new helms, finishes and crests (#1721)
+
+## What the player will see
+- Six new helms: Great Helm (flat-topped pot helm with eye slits and breaths, fixed face), Barbute (deep helm with T/Y face opening, open face), Burgonet (open helm with peak, comb, hinged cheek plates, visored), Spangenhelm (riveted segments with nose bar and mail curtain, fixed face), Lobster-tail Pot (round skull with sliding nose bar and laminated neck tail, visored), Grotesque Visor (armet with sculpted beast/grinning face visor, visored)
+- Five new plate finishes available at the smith's anvil: Russeted (red-brown), Heat-blued (dark blue), Painted (realm colours), Etched and Gilt (engraved gilt bands, for honoured knights), Rusted (weaker until scoured at a grindstone)
+- Five new crest beasts: Griffin, Bear, Wolf, Raven, Hound (join the existing eight)
+- New Plume crest: feathers in the realm's colour instead of a beast
+
+## Cause
+The Harness Pattern Book (Andy's 2026-11-18 ticks) specified these new helms, finishes, and crests. They were missing from `HeraldryArmour.java`, `HeraldryWear.java`, and the generator `kingdoms/tools/gen_heraldry_armour.py`.
+
+## Changes
+- Added 6 new helms to `HeraldryArmour.HELMS` and `register()` with appropriate Face, sight, and crestRise values
+- Added 5 new finish constants (RUSSETED, BLUED, PAINTED, ETCHED, RUSTED) to `HeraldryArmour` and corresponding palettes to the generator's `FINISHES`
+- Added 5 new crest beasts + plume to `HeraldryArmour.BEASTS`, `CRESTS`, and the generator with new build functions
+- Updated `HeraldryWear.finish()` to distribute the 7 finishes (bright + 6 variants) across realms
+- Ran `gen_heraldry_armour.py` to generate models, textures, icons, item models, recipes, and lang entries for all new pieces in all finishes
+- Added lang entries for new finishes and item names
+
+## Not tested in game
+- Visual appearance of all new helms in each of the 7 finishes
+- Visual appearance of new crest beasts and plume on different helms
+- Realm knight generation with new helm/finish combinations
+- Rusted finish weakening and grindstone scouring (grindstone interaction not yet implemented)
+- Player crafting/dyeing of new pieces
+
+## 0.10.39 (2026-11-19): Harness 4: matching barding and caparisons (#1744)
+
+Chain and plate barding now come in three finishes: bright, blackened and gilded, matching your heraldry armour. Blackened or gilded barding shows its finish in the item name. There is also a new caparison: a cloth cover worn over barding, dyeable in your realm's colours with banner patterns, with its own slot on the tack screen under the banner. Horses wear barding in its finish, with the caparison rendered over it.
+
+Not tested in game.
+
+## 0.10.40 (2026-11-19): Crime: sleepers woken, suspects watched (#1751)
+
+- **Sleepers woken and told**: when someone who can speak sees a crime, they wake the nearest sleeper of their village or realm (within 16 blocks), who gets up, comes over to hear it and remembers it as hearsay. A crime at night is now known to more than the one who saw it. Golems can't tell anyone. (`Theft#wakeAndTell`, `ChestNoise#wakeToHear`)
+- **Being watched**: a guard who saw or heard of your crime in the last 3 days, while you aren't wanted for it, now watches you like a suspected vampire or werewolf: turns to look, says a wary word now and then. The nearest free one follows you at a distance (closes in past 8 blocks, stops inside 5). With no such guard about, a golem of the realm whose people suspect you follows instead. Vampire and werewolf suspects are followed the same way now. (`Suspicion#wary`)
+- Compile-checked by CI; not played.
+
+## 0.10.41 (2026-11-19): Crime: word that travels (runners, hushing, gossip, the road) (#1763)
+
+- **The witness runs to tell**: a crime seen with no guard or golem among the witnesses, and none within earshot of the cry (24 blocks), isn't known to the law yet. The witness shouts that they're fetching the guard and runs for the nearest one within 64 blocks. Only when they get there does the realm hear of it: reputation, wanted, bounty and the hunt. Kill them, bind them or hush them first and it never comes out. If no guard is that near, the cry counts at once, as before. Word gets there anyway after a minute if they can't. (`CrimeWord#run`, `Theft#lawKnows`)
+- **Hush the witness**: catch up with a runner and they stop to hear you out. *Plead* (more likely the warmer they are to you; costs a little trust either way), *pay them off* (3/8/20 emeralds' worth in the realm's coin by the crime's weight; costs trust and respect and counts as a bribe), or *stare them down* (only a weaker witness, better with Stare Down; costs warmth). Fail and they run on.
+- **House to house**: those who saw it, and whoever the runner told, pass it on to up to 2 more of the town over the next day, three tellings deep. Hearsay counts half and makes folk wary rather than hostile. Heard crimes now come up in gossip ("Word is X is guilty of..."). (`CrimeWord#spread`, `Recollections#gossipLine`)
+- **Down the road**: news of a heavy crime travels the King's Roads to each realm linked to the one you wronged, a day per 600 blocks between them (at least one day). There you lose 15 reputation and their people will ask about it. (`CrimeWord#road`)
+- Runners, tales and road news aren't saved over a restart.
+- Built; not played. Stacked on Lanterns 1 (#1751).
+
+## 0.10.42 (2026-11-19): Talking to villagers through chat (#1767)
+
+- **Talk through chat**: say a line aloud while looking at a villager within 8 blocks, or start it with their first name (12 blocks), and they turn to you and answer over their head a moment later. Short replies keep it going for 30 seconds. They answer hello, goodbye and thanks, how they are, their name, their work, whose realm this is, trade, news (their real gossip and suspicions), and what they remember of you. Cold, wary or scornful villagers answer shortly and keep their news to themselves. Anything else gets a "Hm? I didn't follow that." When MCA's own chat AI is switched on (`/mca chatAI`), it answers instead and this keeps quiet. (`ChatTalk`, from `ProximityChat`)
+- Built; not played.

@@ -46,10 +46,9 @@ public final class HeraldryArmour {
 	static final int PLATE_DURABILITY = 30, HELM_ARMOUR = 2, CUIRASS_ARMOUR = 5, SABATON_ARMOUR = 1, PLATE_ENCHANT = 10;
 	static final float PLATE_TOUGHNESS = 1.0F, PLATE_KNOCKBACK = 0.05F;
 	/** The finishes a plate piece can have besides bright (no component). */
-		public static final String BLACKENED = "blackened", GILDED = "gilded";
-		/** Creed/land variant finishes. */
-		public static final String ETCHED = "etched", SPIKED = "spiked", GILT_BANDED = "gilt_banded", FUR_LINED = "fur_lined",
-			QUILTED = "quilted", BRINE_SOAKED = "brine_soaked", HIDE = "hide", BRONZE = "bronze", LAMELLAR = "lamellar";
+		public static final String BLACKENED = "blackened", GILDED = "gilded", RUSSETED = "russeted", BLUED = "blued", PAINTED = "painted", ETCHED = "etched", RUSTED = "rusted",
+			SPIKED = "spiked", GILT_BANDED = "gilt_banded", FUR_LINED = "fur_lined", QUILTED = "quilted", BRINE_SOAKED = "brine_soaked",
+			HIDE = "hide", BRONZE = "bronze", LAMELLAR = "lamellar";
 	/** A plate piece's finish ({@link #BLACKENED} or {@link #GILDED}; bright has none). */
 	public static final DataComponentType<String> FINISH = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosKingdoms.id("finish"),
 		DataComponentType.<String>builder().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
@@ -80,28 +79,33 @@ public final class HeraldryArmour {
 	private static final Map<Item, Piece> BY_ITEM = new java.util.HashMap<>();
 	/** The eight helms, the eight crest beasts and the three makes of spaulders, by name. */
 		public static final List<String> HELMS = List.of("frogmouth_helm", "houndskull_bascinet", "armet", "close_helm", "savoyard_helm", "sallet",
-			"kettle_hat", "morion", "veiled_helm", "barbute");
+			"kettle_hat", "morion", "great_helm", "barbute", "burgonet", "spangenhelm", "lobster_tail", "grotesque_visor", "veiled_helm");
 		public static final List<String> BEASTS = List.of("crest_dragon", "crest_lion", "crest_stag", "crest_boar", "crest_eagle", "crest_pegasus",
-			"crest_unicorn", "crest_snake");
+			"crest_unicorn", "crest_snake", "crest_griffin", "crest_bear", "crest_wolf", "crest_raven", "crest_hound");
 		public static final List<String> SPAULDERS = List.of("plate_spaulders", "mail_spaulders", "brigandine_spaulders", "spiked_spaulders", "gilt_banded_spaulders", "fur_lined_spaulders");
 
 	private HeraldryArmour() {
 	}
 
 	static void register() {
-		// the helms: face, sight (the share of the screen's height left to see through), and how far (model pixels) a crest
-		// is lifted over its place on a plain helmet to stand on this one's crown
-		helm("frogmouth_helm", Face.FIXED, 0.2F, 0.0F);
-		helm("houndskull_bascinet", Face.VISORED, 0.24F, 2.0F);
-		helm("armet", Face.VISORED, 0.26F, 0.9F);
-		helm("close_helm", Face.VISORED, 0.26F, 1.0F);
-		helm("savoyard_helm", Face.VISORED, 0.3F, 1.0F);
-		helm("sallet", Face.VISORED, 0.34F, 0.5F);
-		helm("kettle_hat", Face.OPEN, 1.0F, 0.6F);
-		helm("morion", Face.OPEN, 1.0F, 2.5F);
-				helm("veiled_helm", Face.VISORED, 0.3F, 1.5F);
-				helm("barbute", Face.OPEN, 1.0F, 0.8F);
-				worn("plate_cuirass", ArmorType.CHESTPLATE);
+			// the helms: face, sight (the share of the screen's height left to see through), and how far (model pixels) a crest
+			// is lifted over its place on a plain helmet to stand on this one's crown
+			helm("frogmouth_helm", Face.FIXED, 0.2F, 0.0F);
+			helm("houndskull_bascinet", Face.VISORED, 0.24F, 2.0F);
+			helm("armet", Face.VISORED, 0.26F, 0.9F);
+			helm("close_helm", Face.VISORED, 0.26F, 1.0F);
+			helm("savoyard_helm", Face.VISORED, 0.3F, 1.0F);
+			helm("sallet", Face.VISORED, 0.34F, 0.5F);
+			helm("kettle_hat", Face.OPEN, 1.0F, 0.6F);
+			helm("morion", Face.OPEN, 1.0F, 2.5F);
+			helm("great_helm", Face.FIXED, 0.15F, 0.0F);
+			helm("barbute", Face.OPEN, 0.85F, 0.5F);
+			helm("burgonet", Face.VISORED, 0.3F, 1.2F);
+			helm("spangenhelm", Face.FIXED, 0.4F, 0.3F);
+			helm("lobster_tail", Face.VISORED, 0.25F, 1.5F);
+			helm("grotesque_visor", Face.VISORED, 0.2F, 1.8F);
+			helm("veiled_helm", Face.VISORED, 0.3F, 1.5F);
+			worn("plate_cuirass", ArmorType.CHESTPLATE);
 		worn("plate_sabatons", ArmorType.BOOTS);
 		// the harness: slot, armour, toughness, durability, what mends it
 		part("arming_doublet", Harness.Slot.PADDING, 1, 0.0F, 160, false, Items.LEATHER, null);
@@ -140,8 +144,6 @@ public final class HeraldryArmour {
 				part("fur_lined_gauntlets", Harness.Slot.HANDS, 1, 0.0F, 240, true, null, "fur_lined_gauntlets");
 				part("fur_lined_cuisses", Harness.Slot.THIGHS, 2, 1.0F, 340, true, null, "fur_lined_cuisses");
 				part("fur_lined_greaves", Harness.Slot.SHINS, 1, 0.5F, 300, true, null, "fur_lined_greaves");
-				helm("veiled_helm", Face.VISORED, 0.3F, 1.5F);
-				helm("barbute", Face.OPEN, 1.0F, 0.8F);
 				part("quilted_coat", Harness.Slot.MAIL, 2, 0.0F, 220, false, Items.IRON_INGOT, "quilted_coat");
 				worn("quilted_cotton_armor", ArmorType.CHESTPLATE);
 				worn("hide_armor", ArmorType.CHESTPLATE);

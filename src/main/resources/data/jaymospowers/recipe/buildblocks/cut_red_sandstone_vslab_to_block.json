@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:cut_red_sandstone_vslab",
+    "jaymospowers:cut_red_sandstone_vslab"
+  ],
+  "result": {
+    "id": "minecraft:cut_red_sandstone"
+  }
+}

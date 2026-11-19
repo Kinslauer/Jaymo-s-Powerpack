@@ -295,6 +295,7 @@ final class KingdomCommands {
 		}
 		Factions.update(server, k.id(), f -> f.withMember(player.getUUID(), new Faction.Member(Rank.PEASANT.ordinal(), 0)));
 		KingdomEvents.announce(server, Component.translatable("message.jaymoskingdoms.pledged", player.getDisplayName(), k.name()).withStyle(ChatFormatting.GOLD));
+		Fanfare.title(player, Component.literal(k.name()), Component.translatable("message.jaymoskingdoms.pledged.title"));
 		return 1;
 	}
 

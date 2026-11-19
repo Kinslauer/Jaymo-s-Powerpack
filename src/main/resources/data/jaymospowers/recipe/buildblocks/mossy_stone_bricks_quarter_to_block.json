@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:mossy_stone_bricks_quarter",
+    "jaymospowers:mossy_stone_bricks_quarter",
+    "jaymospowers:mossy_stone_bricks_quarter",
+    "jaymospowers:mossy_stone_bricks_quarter"
+  ],
+  "result": {
+    "id": "minecraft:mossy_stone_bricks"
+  }
+}

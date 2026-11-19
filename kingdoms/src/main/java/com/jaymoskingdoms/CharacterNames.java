@@ -75,8 +75,10 @@ public final class CharacterNames {
 
 	/** Brings {@code player}'s synced name in line with MCA's and what they wear, and everyone's tab list with it. */
 	private static void refresh(ServerPlayer player) {
-		if (picked(player) == null && McaCompat.LOADED && player.level() != null) {
-			// (0.7.160) no name of their own but their username: they get one from MCA's lists (renamed in its editor as usual)
+		if (picked(player) == null && McaCompat.LOADED && player.level() != null && !McaCompat.destinyPending(player)) {
+			// (0.7.160) no name of their own but their username: they get one from MCA's lists (renamed in its editor as usual).
+			// Not while MCA's creator is still to come: a newcomer went by a random name, in the join line too, before they'd
+			// had the chance to pick theirs (Andy, 2026-11-18: "I chose the name Jek, why did it auto switch?")
 			String given = player.getAttached(GIVEN);
 			if (given == null) {
 				given = McaBridge.randomName(player);

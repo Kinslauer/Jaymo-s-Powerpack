@@ -2,6 +2,7 @@ package com.jaymoskingdoms.nightforms;
 
 import com.jaymoskingdoms.BossBars;
 import com.jaymoskingdoms.BloodGrab;
+import com.jaymoskingdoms.HudBars;
 import com.jaymoskingdoms.NightGifts;
 import com.jaymoskingdoms.VampirePlayers;
 import com.mojang.serialization.Codec;
@@ -29,7 +30,6 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
@@ -185,12 +185,6 @@ public final class NightForms {
 		p.getFoodData().setFoodLevel(Math.max(0, blood(p) - by));
 	}
 
-	/** A bar of ten cells, {@code =} where it is full and {@code -} where it is not. */
-	static MutableComponent bar(int value, int of, ChatFormatting colour) {
-		final int cells = 10;
-		int full = Math.max(0, Math.min(cells, Math.round(value * cells / (float)of)));
-		return Component.literal("=".repeat(full)).withStyle(colour).append(Component.literal("-".repeat(cells - full)).withStyle(ChatFormatting.DARK_GRAY));
-	}
 
 	/** A light red mist at {@code at}. */
 	static void bloodMist(ServerLevel level, Vec3 at, float size, int count) {
@@ -251,13 +245,13 @@ public final class NightForms {
 	}
 
 	/** The shape's own bar: how much of it is left. */
-	static @Nullable MutableComponent bar(ServerPlayer p) {
+	static void bar(ServerPlayer p) {
 		Active a = ACTIVE.get(p.getUUID());
 		if (a == null) {
-			return null;
+			return;
 		}
 		long left = Math.max(0L, a.end - p.level().getGameTime());
-		return bar((int)left, (int)(a.end - a.start), ChatFormatting.DARK_RED);
+		HudBars.gauge(p, "night_form", left / (float) Math.max(1L, a.end - a.start), HudBars.DARK_RED, Component.translatable("bar.jaymoskingdoms.night_form"), null);
 	}
 
 	// ---- the menu ----
@@ -511,10 +505,7 @@ public final class NightForms {
 			}
 			tickForm(p, a, age);
 			if (age % 5 == 0) {
-				MutableComponent text = bar(p);
-				if (text != null) {
-					p.sendOverlayMessage(text);
-				}
+				bar(p);
 			}
 		}
 		if (!SWARMS.isEmpty() && server.overworld() != null) {

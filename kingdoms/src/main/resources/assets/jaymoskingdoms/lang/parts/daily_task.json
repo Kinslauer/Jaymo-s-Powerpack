@@ -1,0 +1,17 @@
+{
+	"menu.jaymoskingdoms.tab.daily": "Daily task",
+	"gui.jaymoskingdoms.daily.waiting": "Today's task is on its way. Walk about a little and it will be here.",
+	"gui.jaymoskingdoms.daily.task.strike": "Strike %s blows at living things",
+	"gui.jaymoskingdoms.daily.task.walk": "Walk %s blocks",
+	"gui.jaymoskingdoms.daily.task.slay": "Defeat %s hostile monsters",
+	"gui.jaymoskingdoms.daily.progress": "%s / %s",
+	"gui.jaymoskingdoms.daily.reset": "A new task in %s:%s",
+	"gui.jaymoskingdoms.daily.streak": "Streak: %s days in a row (best %s)",
+	"gui.jaymoskingdoms.daily.pays": "A claim pays %s. A longer streak pays more, up to %s days.",
+	"gui.jaymoskingdoms.daily.claimed": "Claimed. A new task comes tomorrow.",
+	"gui.jaymoskingdoms.daily.ready": "Done. Claim your pay.",
+	"gui.jaymoskingdoms.daily.open": "Not done yet. There is no hurry.",
+	"gui.jaymoskingdoms.daily.claim": "Claim",
+	"message.jaymoskingdoms.daily.done": "Today's task is done. Claim it on the menu.",
+	"message.jaymoskingdoms.daily.claimed": "Daily task claimed: %s (streak %s)."
+}

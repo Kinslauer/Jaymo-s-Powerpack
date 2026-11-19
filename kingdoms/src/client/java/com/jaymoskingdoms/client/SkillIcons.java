@@ -114,6 +114,7 @@ final class SkillIcons {
 		put(Skills.Perk.SHADOWED, Items.INK_SAC);
 		put(Skills.Perk.QUIET_STEP, Items.FEATHER);
 		put(Skills.Perk.SLIP_THE_NET, Items.COBWEB);
+		put(Skills.Perk.SIXTH_SENSE, Items.ENDER_EYE);
 		put(Skills.Perk.SNEAK_ATTACK, Items.IRON_SWORD);
 		put(Skills.Perk.ASSASSINATE, Items.WITHER_SKELETON_SKULL);
 		put(Skills.Perk.STEADY_HANDS, Items.SHEARS);

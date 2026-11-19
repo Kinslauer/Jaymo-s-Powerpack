@@ -3,16 +3,19 @@ package com.jaymoskitchen.tanning;
 import com.jaymoskitchen.JaymosKitchen;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
@@ -178,7 +181,10 @@ public final class HideTraits {
 		}
 	}
 
+	/** Armour made of a leather piece (Jaymo's Powers' mailed and studded leather), by optional tag entries. */
+	static final TagKey<Item> HIDE_ARMOUR = TagKey.create(Registries.ITEM, JaymosKitchen.id("hide_armour"));
+
 	static boolean isLeather(ItemStack piece) {
-		return piece.is(Items.LEATHER_HELMET) || piece.is(Items.LEATHER_CHESTPLATE) || piece.is(Items.LEATHER_LEGGINGS) || piece.is(Items.LEATHER_BOOTS);
+		return piece.is(HIDE_ARMOUR) ||piece.is(Items.LEATHER_HELMET) || piece.is(Items.LEATHER_CHESTPLATE) || piece.is(Items.LEATHER_LEGGINGS) || piece.is(Items.LEATHER_BOOTS);
 	}
 }

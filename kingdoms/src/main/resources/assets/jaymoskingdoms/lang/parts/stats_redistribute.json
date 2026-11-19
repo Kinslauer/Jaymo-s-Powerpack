@@ -1,0 +1,7 @@
+{
+	"gui.jaymoskingdoms.stats.redistribute": "Redistribute points (%s)",
+	"gui.jaymoskingdoms.stats.redistribute.confirm": "Press again to take every point back",
+	"message.jaymoskingdoms.stats.redistribute.done": "Your points are yours to spend again: %s waiting.",
+	"message.jaymoskingdoms.stats.redistribute.poor": "Taking your points back costs %s.",
+	"menu.jaymoskingdoms.character.mana": "Mana"
+}

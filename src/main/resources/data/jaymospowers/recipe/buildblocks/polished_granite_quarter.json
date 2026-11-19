@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "minecraft:polished_granite",
+  "result": {
+    "id": "jaymospowers:polished_granite_quarter",
+    "count": 4
+  }
+}

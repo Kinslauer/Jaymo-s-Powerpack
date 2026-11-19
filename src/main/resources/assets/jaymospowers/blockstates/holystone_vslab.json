@@ -1,0 +1,25 @@
+{
+  "variants": {
+    "double=false,facing=north": {
+      "model": "jaymospowers:block/buildblocks/holystone_vslab"
+    },
+    "double=false,facing=east": {
+      "model": "jaymospowers:block/buildblocks/holystone_vslab",
+      "y": 90,
+      "uvlock": true
+    },
+    "double=false,facing=south": {
+      "model": "jaymospowers:block/buildblocks/holystone_vslab",
+      "y": 180,
+      "uvlock": true
+    },
+    "double=false,facing=west": {
+      "model": "jaymospowers:block/buildblocks/holystone_vslab",
+      "y": 270,
+      "uvlock": true
+    },
+    "double=true": {
+      "model": "jaymospowers:block/aether/holystone"
+    }
+  }
+}

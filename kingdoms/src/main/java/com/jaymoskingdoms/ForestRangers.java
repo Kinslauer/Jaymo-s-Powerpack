@@ -71,6 +71,8 @@ public final class ForestRangers {
 	static final float MEET_CHANCE = 0.15F;
 	/** How far off a ranger turns up, how near another ranger may already be, and how long one stays (blocks, ticks). */
 	static final int MEET_DISTANCE = 24, CROWD = 96;
+	/** The share of rangers who are seasoned, in a mailed jack and cap rather than studded leather. */
+	static final float SEASONED_RANGER = 0.3F;
 	static final long STAY_TICKS = 12000L;
 	/** Hunting: how far it looks for quarry, how close it shoots from, ticks between shots, a shot's speed and how many beasts in its sight it leaves alone. */
 	static final double QUARRY_RANGE = 20.0, SHOT_RANGE = 14.0;
@@ -213,9 +215,13 @@ public final class ForestRangers {
 		}
 		v.addTag(TAG);
 		v.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
-		v.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.LEATHER_CHESTPLATE));
+		// the Huntsman's rangers go in leather: studded for most, a mailed jack for a seasoned one (a poacher's hunter is always seasoned)
+		String set = poacher || random.nextFloat() < SEASONED_RANGER ? LightLeather.MAILED : LightLeather.STUDDED;
+		v.setItemSlot(EquipmentSlot.CHEST, LightLeather.piece(set, EquipmentSlot.CHEST, new ItemStack(Items.LEATHER_CHESTPLATE)));
+		v.setItemSlot(EquipmentSlot.HEAD, LightLeather.piece(set, EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET)));
 		v.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
 		v.setDropChance(EquipmentSlot.CHEST, 0.0F);
+		v.setDropChance(EquipmentSlot.HEAD, 0.0F);
 		Ranger r = new Ranger(level.getGameTime());
 		if (poacher) {
 			r.poacher = player.getUUID();

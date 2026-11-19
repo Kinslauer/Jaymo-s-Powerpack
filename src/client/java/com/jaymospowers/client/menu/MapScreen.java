@@ -60,7 +60,7 @@ public class MapScreen extends Screen {
 	}
 
 	private int left() {
-		return (this.width - W) / 2;
+		return MenuTabs.centreX(this.width, W);
 	}
 
 	private int top() {

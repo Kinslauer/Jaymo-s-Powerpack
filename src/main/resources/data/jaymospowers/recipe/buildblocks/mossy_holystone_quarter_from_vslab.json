@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:mossy_holystone_vslab",
+  "result": {
+    "id": "jaymospowers:mossy_holystone_quarter",
+    "count": 2
+  }
+}

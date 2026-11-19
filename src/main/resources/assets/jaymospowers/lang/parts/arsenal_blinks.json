@@ -1,0 +1,13 @@
+{
+	"power.jaymospowers.arsenal.key.mode.corrupted": "Pocket Dimension: a rift opens in front of you; walk into it to reach your own room to build in (inside, it leads back out where you left). Press again to close it. Friends who walk in after you follow. Sprint + %5$s: Vanish, a burst of blinding smoke (everyone within 5 blocks is blinded and loses you) and you blink a few steps back through a rift, unseen for 5 s",
+	"power.jaymospowers.arsenal.key.mode.corrupted.name": "Pocket Dimension",
+	"power.jaymospowers.arsenal.key.special.corrupted": "Cannon Battery: hold %7$s and cannons push out of rifts behind you, one more the longer you hold (up to 10); they follow your crosshair and all fire when you let go. Sprint + %7$s: Sky Drop, you and a foe within 6 blocks go 14 blocks straight up through rifts; you let go and blink home while it falls (not under a roof)",
+	"power.jaymospowers.arsenal.key.special.corrupted.name": "Cannon Battery",
+	"power.jaymospowers.arsenal.key.ultimate.ascended_corrupted": "Hundred Blades: rifts rain weapons where you aim. Sneak + %6$s: Flicker, for 2 s you blink through rifts from foe to foe round you, five blows a second, untouchable throughout. From the last rank of training, sprint + %6$s: hold to spread a Rift Seal round you (9 to 20 blocks), let go to close it. Nobody can leave it and nobody inside but you has their powers; it drains you every second. %6$s again lets it go",
+	"power.jaymospowers.arsenal.key.ultimate.ascended_corrupted.name": "Hundred Blades",
+	"message.jaymospowers.arsenal.blink_wait": "The rift won't open yet: %ss",
+	"message.jaymospowers.arsenal.blink_no_foe": "No foe there",
+	"message.jaymospowers.arsenal.blink_no_room": "No room beside it to step to",
+	"message.jaymospowers.arsenal.blink_no_sky": "No open sky above to drop it from",
+	"message.jaymospowers.arsenal.blink_too_much": "No rift will take that one"
+}

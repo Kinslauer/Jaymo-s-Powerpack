@@ -1,6 +1,7 @@
 package com.jaymospowers.power.darktide;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.HudBar;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.PickKit;
 import com.jaymospowers.core.Shakes;
@@ -61,7 +62,6 @@ final class DarktidePicks {
 	static final double STRIKE_REACH = 3.0;
 	static final float STRIKE_DAMAGE = 7.0F;
 	static final int STRIKE_COOLDOWN = 80, STRIKE_AGE = 4;
-	static final int GAUGE_WIDTH = 20;
 
 	private record Jabs(long next, int left) {
 	}
@@ -225,7 +225,7 @@ final class DarktidePicks {
 		}
 		GAUGE.put(id, gauge);
 		if (BEAMING.contains(id) || gauge < BEAM_GAUGE && now % 10 == 0) {
-			player.sendOverlayMessage(Component.literal("Water " + PickKit.gauge(gauge / BEAM_GAUGE, GAUGE_WIDTH)).withStyle(ChatFormatting.AQUA));
+			HudBar.gauge(player, "darktide_water", gauge / BEAM_GAUGE, HudBar.AQUA, Component.translatable("bar.jaymospowers.water"), null);
 		}
 	}
 

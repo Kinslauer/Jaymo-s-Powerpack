@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:blackstone_vslab",
+  "result": {
+    "id": "jaymospowers:blackstone_quarter",
+    "count": 2
+  }
+}

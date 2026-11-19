@@ -1,14 +1,17 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.ClassForks;
 import com.jaymoskingdoms.ClassPerks;
+import com.jaymoskingdoms.ClassTrees;
 import com.jaymoskingdoms.Classes;
 import com.jaymoskingdoms.Classes.PlayerClass;
+import com.jaymoskingdoms.client.ui.FlatButton;
+import com.jaymoskingdoms.client.ui.PickerLayout;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import com.jaymoskingdoms.client.ui.FlatButton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -21,25 +24,30 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.6.0) The class screen ({@link Classes}). (0.7.40) Restyled like the creative H screen: every class down the left
- * (its signature gear and name), and on the right the one you point at or picked: what it's good with
- * ({@link ClassPerks#card}) as striped rows, the gear it's good with ({@link Classes#gear}), a Mage's or a Sorcerer's
- * first spell or element to pick, and a box at the bottom with the class (or the hovered spell) in full. Pressing a
- * class picks it; Choose seals it. Opened by the server the first time a player comes into a world (then it can't be
- * shut without picking) and when a Writ of Rebirth is read.
+ * The class screen ({@link Classes}) in the picker layout ({@link PickerLayout}): you on the left in the gear of the class
+ * pointed at (or picked), a compact list of every class (its signature gear, name and a one-line tag), and a big info
+ * panel: what it's good with (Intrinsic, Strengths), what it costs to change the pick later (Specialization) and, as Paths,
+ * the options it picks (a Mage's first spell, a Sorcerer's element, a Paladin's oath...; press one to pick it) and the
+ * crossroads its tree grows into. Pressing a class picks it; the button under the figure seals it. Opened by the server the
+ * first time a player comes into a world (then it can't be shut without picking) and when a Writ of Rebirth is read.
+ * A player who already holds their class and opens it again ({@code switching}) can change what they picked with it, for
+ * silver and after a wait ({@link Classes#RESPEC_SILVER}); a creative player switches class freely.
  */
 final class ClassScreen extends Screen {
-	/** The first class showing down the list (the list scrolls with the wheel). */
-	private int scroll;
-	static final int MAX_W = 420, MAX_H = 266, LIST_W = 118, LIST_ROW = 20, HEADER = 34, STAT_ROW = 13, CHIP_H = 14, FOOTER = 24, DETAIL_MIN_LINES = 4;
+	/** What each class grows into at its crossroads: the tree nodes ({@code classtree.jaymoskingdoms.<id>}). */
+	private static final java.util.Map<PlayerClass, List<String>> FORKS = java.util.Map.of(
+		PlayerClass.THIEF, List.of(ClassForks.ASSASSIN, ClassForks.ACROBAT),
+		PlayerClass.MAGE, List.of(ClassForks.EVOKER, ClassForks.WARDER),
+		PlayerClass.RANGER, List.of(ClassForks.HUNTER, ClassForks.BEASTS));
 
 	private final boolean forced;
-	/** The class pressed, and (for a Mage or a Sorcerer) the option pressed under it. */
+	/** The class pressed, and (for a class with options) the option pressed under it. */
 	private @Nullable PlayerClass picked;
 	private int option = -1;
-	private @Nullable Button choose;
+	private @Nullable Button choose, none, later;
+	private final PickerLayout layout = new PickerLayout();
 	/** Each class's gear, made once for the screen. */
-	private final java.util.Map<PlayerClass, List<ItemStack>> kits = new java.util.EnumMap<>(PlayerClass.class);
+	private final java.util.Map<String, List<ItemStack>> kits = new java.util.HashMap<>();
 
 	/** The class a master is teaching as a second class (the screen shows that one only), or null. */
 	private final @Nullable PlayerClass teaching;
@@ -54,8 +62,8 @@ final class ClassScreen extends Screen {
 	}
 
 	/**
-	 * {@code switching}: a creative player's class tab on the H menu (docs/Classes-Plan.md: "Creative players can switch
-	 * on the H powers screen too"): open with a class already chosen, and Choose swaps it, the screen staying up.
+	 * {@code switching}: a class tab on the H menu: open with a class already chosen. A creative player's Choose swaps it, the
+	 * screen staying up; anyone else's can only change the option picked with the class they hold.
 	 */
 	ClassScreen(boolean forced, boolean switching) {
 		this(forced, 0, switching);
@@ -67,11 +75,22 @@ final class ClassScreen extends Screen {
 		this.switching = switching;
 		this.teaching = second > 0 && second <= PlayerClass.values().length ? PlayerClass.values()[second - 1] : null;
 		this.picked = this.teaching;
+		Minecraft minecraft = Minecraft.getInstance();
+		if (switching && minecraft.player != null && !minecraft.player.isCreative() && Classes.classOf(minecraft.player) != null) {
+			this.picked = Classes.classOf(minecraft.player);
+			this.option = this.picked.options.indexOf(Classes.of(minecraft.player).option());
+		}
+	}
+
+	/** Whether this is a player changing what they picked with the class they hold. */
+	private boolean respec() {
+		Minecraft minecraft = Minecraft.getInstance();
+		return this.switching && minecraft.player != null && !minecraft.player.isCreative() && Classes.classOf(minecraft.player) != null;
 	}
 
 	/** The panel's top-left corner, for the H menu's tabs. */
 	int[] corner() {
-		return new int[] {left(), top()};
+		return new int[] {this.layout.figX, MenuCompat.STRIP};
 	}
 
 	/** Whether the screen is done: a class chosen (not while a master teaches a second, nor while a creative player is switching). */
@@ -79,9 +98,9 @@ final class ClassScreen extends Screen {
 		return this.teaching == null && !this.switching && minecraft.player != null && Classes.decided(minecraft.player);
 	}
 
-	/** (0.7.45) After Choose, how long the class may take to come back before the screen is put up again (ms). */
+	/** After Choose, how long the class may take to come back before the screen is put up again (ms). */
 	static final long CHOOSE_GRACE_MS = 3000L;
-	/** (0.7.45) The server asked for a class that can't be put off: the screen comes back whenever it's shut. */
+	/** The server asked for a class that can't be put off: the screen comes back whenever it's shut. */
 	private static boolean owed;
 	private static long quietUntil;
 
@@ -90,7 +109,7 @@ final class ClassScreen extends Screen {
 			owed |= payload.forced();
 			context.client().gui.setScreen(new ClassScreen(payload.forced(), payload.second()));
 		});
-		// (0.7.45) Andy: "force character creation on spawn": nothing else (another mod's screen, a pause) puts it away
+		// nothing else (another mod's screen, a pause) puts character creation away
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			if (!owed || minecraft.player == null) {
 				return;
@@ -114,47 +133,12 @@ final class ClassScreen extends Screen {
 		return !this.forced;
 	}
 
-	private int panelW() {
-		return Math.min(MAX_W, this.width - 12);
+	private boolean noneButton() {
+		return this.teaching == null && !this.switching;
 	}
 
-	private int panelH() {
-		return Math.min(MAX_H, this.height - 8 - MenuCompat.STRIP);
-	}
-
-	private int left() {
-		return (this.width - panelW()) / 2;
-	}
-
-	private int top() {
-		return Math.max(4 + MenuCompat.STRIP, (this.height - panelH()) / 2);
-	}
-
-	private int paneX() {
-		return left() + LIST_W;
-	}
-
-	private int paneW() {
-		return panelW() - LIST_W;
-	}
-
-	private int rowY(int index) {
-		return top() + HEADER + (index - this.scroll) * LIST_ROW;
-	}
-
-	/** How many classes fit down the list, and the most it can scroll. */
-	private int fits() {
-		return Math.max(1, (panelH() - HEADER - 4) / LIST_ROW);
-	}
-
-	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-		if (mouseX < left() + LIST_W) {
-			int most = Math.max(0, PlayerClass.values().length - fits());
-			this.scroll = Math.max(0, Math.min(most, this.scroll - (int) Math.signum(scrollY)));
-			return true;
-		}
-		return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+	private int buttonCount() {
+		return 1 + (this.forced ? 0 : 1) + (noneButton() ? 1 : 0);
 	}
 
 	@Override
@@ -164,24 +148,9 @@ final class ClassScreen extends Screen {
 			onClose();
 			return;
 		}
-		int y = top() + panelH() - FOOTER + 4;
-		int right = paneX() + paneW() - 6;
-		if (!this.forced) {
-			addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.class.later"), b -> onClose()).bounds(right - 56, y, 56, 16).build());
-			right -= 60;
-		}
-		if (this.teaching == null && !this.switching) {
-			// (class trees, Andy's page note) start with no class yet, and learn one later from a teacher
-			var none = FlatButton.builder(Component.translatable("gui.jaymoskingdoms.class.none"), b -> {
-				ClientPlayNetworking.send(new Classes.Choose(Classes.NONE_CHOICE, -1, false));
-				quietUntil = System.currentTimeMillis() + CHOOSE_GRACE_MS;
-				onClose();
-			}).bounds(right - 90, y, 90, 16).build();
-			none.setTooltip(Ui.tipOf(Component.translatable("gui.jaymoskingdoms.class.none.tip")));
-			addRenderableWidget(none);
-			right -= 94;
-		}
-		this.choose = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.class.choose"), b -> {
+		this.layout.fit(this.width, this.height, MenuCompat.STRIP, buttonCount());
+		int[] b = this.layout.button(0);
+		this.choose = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.class.choose"), x -> {
 			if (this.picked != null) {
 				ClientPlayNetworking.send(new Classes.Choose(this.picked.ordinal(), this.option, this.teaching != null));
 				quietUntil = System.currentTimeMillis() + CHOOSE_GRACE_MS;
@@ -189,55 +158,31 @@ final class ClassScreen extends Screen {
 					onClose();
 				}
 			}
-		}).bounds(right - 110, y, 110, 16).build());
+		}).bounds(b[0], b[1], b[2], b[3]).build());
+		int at = 1;
+		if (noneButton()) {
+			int[] n = this.layout.button(at++);
+			// start with no class yet, and learn one later from a teacher
+			this.none = FlatButton.builder(Component.translatable("gui.jaymoskingdoms.class.none"), x -> {
+				ClientPlayNetworking.send(new Classes.Choose(Classes.NONE_CHOICE, -1, false));
+				quietUntil = System.currentTimeMillis() + CHOOSE_GRACE_MS;
+				onClose();
+			}).bounds(n[0], n[1], n[2], n[3]).build();
+			this.none.setTooltip(Ui.tipOf(Component.translatable("gui.jaymoskingdoms.class.none.tip")));
+			addRenderableWidget(this.none);
+		}
+		if (!this.forced) {
+			int[] l = this.layout.button(at);
+			this.later = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.class.later"), x -> onClose())
+				.bounds(l[0], l[1], l[2], l[3]).build());
+		}
+		this.layout.reveal(PlayerClass.values().length, this.picked == null ? 0 : this.picked.ordinal());
 	}
 
 	private @Nullable PlayerClass rowAt(int mouseX, int mouseY) {
 		PlayerClass[] all = PlayerClass.values();
-		for (int i = this.scroll; i < all.length; i++) {
-			int ry = rowY(i);
-			if (ry + LIST_ROW > top() + panelH() - 4) {
-				break;
-			}
-			if (Ui.over(mouseX, mouseY, left() + 4, ry, LIST_W - 8, LIST_ROW - 2)) {
-				return all[i];
-			}
-		}
-		return null;
-	}
-
-	/** The class the right-hand pane shows: the one pointed at, else the one picked, else the first. */
-	private PlayerClass viewed(int mouseX, int mouseY) {
-		PlayerClass hover = rowAt(mouseX, mouseY);
-		return hover != null ? hover : this.picked != null ? this.picked : PlayerClass.values()[0];
-	}
-
-	/** Where the option chips sit, as {x, y, w} each (only for the picked class, when it has options). */
-	private List<int[]> chips() {
-		List<int[]> out = new ArrayList<>();
-		if (this.picked == null || this.picked.options.isEmpty()) {
-			return out;
-		}
-		int x0 = paneX() + 9, x = x0, y = optionsY() + 12, right = paneX() + paneW() - 9;
-		for (String option : this.picked.options) {
-			int w = this.font.width(Component.translatable("class.jaymoskingdoms.option." + option)) + 12;
-			if (x + w > right && x > x0) {
-				x = x0;
-				y += CHIP_H + 3;
-			}
-			out.add(new int[] {x, y, w});
-			x += w + 4;
-		}
-		return out;
-	}
-
-	/** Where the stat rows end and the gear row and options begin. */
-	private int gearY(PlayerClass cls) {
-		return top() + HEADER + ClassPerks.card(cls).size() * STAT_ROW + 4;
-	}
-
-	private int optionsY() {
-		return this.picked == null ? 0 : gearY(this.picked) + 24;
+		int i = this.layout.rowAt(all.length, mouseX, mouseY);
+		return i < 0 ? null : all[i];
 	}
 
 	@Override
@@ -245,7 +190,8 @@ final class ClassScreen extends Screen {
 		int mx = (int)event.x(), my = (int)event.y();
 		PlayerClass row = rowAt(mx, my);
 		if (row != null) {
-			if (this.teaching != null && row != this.teaching) {
+			// a second class taught by a master, or the class you hold while you change its pick, can't be swapped for another
+			if (this.teaching != null && row != this.teaching || respec() && row != this.picked) {
 				return true;
 			}
 			if (row != this.picked) {
@@ -255,26 +201,54 @@ final class ClassScreen extends Screen {
 			click();
 			return true;
 		}
-		List<int[]> chips = chips();
-		for (int i = 0; i < chips.size(); i++) {
-			int[] c = chips.get(i);
-			if (Ui.over(mx, my, c[0], c[1], c[2], CHIP_H)) {
-				this.option = i;
-				click();
-				return true;
-			}
+		int path = this.layout.pathAt(mx, my);
+		if (path >= 0 && this.picked != null && path < this.picked.options.size()) {
+			this.option = path;
+			click();
+			return true;
 		}
 		return super.mouseClicked(event, doubleClick);
+	}
+
+	@Override
+	public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+		if (this.layout.scrolled(mouseX, mouseY, scrollY, PlayerClass.values().length)) {
+			return true;
+		}
+		return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
 	}
 
 	private void click() {
 		this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 	}
 
+	private List<ItemStack> kit(PlayerClass cls, String option) {
+		return this.kits.computeIfAbsent(cls.key() + "/" + option, k -> Classes.gear(cls, option));
+	}
+
+	private List<ItemStack> kit(PlayerClass cls) {
+		return kit(cls, cls.options.isEmpty() ? "" : cls.options.getFirst());
+	}
+
+	private ItemStack icon(PlayerClass cls) {
+		List<ItemStack> kit = kit(cls);
+		return kit.isEmpty() ? ItemStack.EMPTY : kit.getFirst();
+	}
+
+	private static int colour(PlayerClass cls) {
+		return 0xFF000000 | ClassTrees.colour(cls);
+	}
+
+	/** Ticks until the pick may be changed again, per this client's synced copy. */
+	private long respecWait() {
+		Minecraft minecraft = Minecraft.getInstance();
+		return minecraft.player == null || minecraft.level == null ? 0L : Classes.respecWait(minecraft.player, minecraft.level.getGameTime());
+	}
+
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		Minecraft minecraft = Minecraft.getInstance();
-		// (Andy, 2026-11-17) a first-class Cleric serves the patron their story raised them to; a second class picks freely
+		// a first-class Cleric serves the patron their story raised them to; a second class picks freely
 		if (this.picked != null && this.teaching == null && minecraft.player != null) {
 			String raised = Classes.clericPatron(minecraft.player, this.picked);
 			if (raised != null) {
@@ -285,129 +259,125 @@ final class ClassScreen extends Screen {
 			onClose();
 			return;
 		}
-		int x = left(), y = top(), w = panelW(), h = panelH();
-		Ui.panel(graphics, x, y, w, h, Ui.GOLD);
-		list(graphics, mouseX, mouseY);
-		PlayerClass cls = viewed(mouseX, mouseY);
-		int px = paneX(), pw = paneW();
-
-		// the header: its signature gear, its name, and whether it's yours yet
-		List<ItemStack> kit = kit(cls);
-		if (!kit.isEmpty() && !kit.getFirst().isEmpty()) {
-			graphics.item(kit.getFirst(), px + 8, y + 8);
-		}
-		Ui.line(graphics, this.font, Component.translatable("class.jaymoskingdoms." + cls.key()), px + 28, y + 7, pw - 36, cls == this.picked ? Ui.GOLD : Ui.TEXT);
-		Component sub = cls == this.picked ? Component.translatable("gui.jaymoskingdoms.class.picked")
-			: Component.translatable("gui.jaymoskingdoms.class.press");
-		Ui.line(graphics, this.font, sub, px + 28, y + 18, pw - 36, Ui.DIM);
-		Ui.rule(graphics, px + 6, px + pw - 6, y + HEADER - 4);
-
-		// what it's good with, a row each
-		List<Component> stats = ClassPerks.card(cls);
-		for (int i = 0; i < stats.size(); i++) {
-			int ry = y + HEADER + i * STAT_ROW;
-			Ui.row(graphics, px + 6, ry, px + pw - 6, ry + STAT_ROW - 1, i, false);
-			Ui.line(graphics, this.font, stats.get(i), px + 10, ry + 2, pw - 20, Ui.TEXT);
-		}
-		// the gear it's good with, as a row of icons
-		int gy = gearY(cls);
-		Component goodWith = Component.translatable("gui.jaymoskingdoms.class.gear");
-		graphics.text(this.font, goodWith, px + 9, gy + 5, Ui.DIM);
-		int gx = px + 9 + this.font.width(goodWith) + 6;
-		ItemStack hoveredStack = ItemStack.EMPTY;
-		for (ItemStack stack : kit) {
-			if (stack.isEmpty() || gx + 18 > px + pw - 6) {
-				continue;
-			}
-			Ui.well(graphics, gx - 1, gy, 18, 18);
-			graphics.item(stack, gx, gy + 1);
-			if (Ui.over(mouseX, mouseY, gx, gy + 1, 16, 16)) {
-				hoveredStack = stack;
-			}
-			gx += 19;
-		}
-
-		// the first spell or element, for the class picked
-		String hoveredOption = null;
-		int detailTop = gy + 24;
-		if (cls == this.picked && !cls.options.isEmpty()) {
-			int oy = optionsY();
-			graphics.text(this.font, Component.translatable("gui.jaymoskingdoms.class.pick",
-				Component.translatable("gui.jaymoskingdoms.class.pick." + cls.key())), px + 9, oy, Ui.DIM);
-			List<int[]> chips = chips();
-			for (int i = 0; i < chips.size(); i++) {
-				int[] c = chips.get(i);
-				boolean hover = Ui.over(mouseX, mouseY, c[0], c[1], c[2], CHIP_H);
-				boolean chosen = i == this.option;
-				graphics.fill(c[0], c[1], c[0] + c[2], c[1] + CHIP_H, hover ? Ui.ROW_HOVER : chosen ? Ui.ROW_PICKED : Ui.CHIP);
-				graphics.fill(c[0], c[1] + CHIP_H - 1, c[0] + c[2], c[1] + CHIP_H, chosen ? Ui.GOLD : Ui.ROW);
-				graphics.centeredText(this.font, Component.translatable("class.jaymoskingdoms.option." + cls.options.get(i)), c[0] + c[2] / 2, c[1] + 3,
-					chosen ? Ui.GOLD : Ui.TEXT);
-				if (hover) {
-					hoveredOption = cls.options.get(i);
-				}
-				detailTop = Math.max(detailTop, c[1] + CHIP_H + 4);
-			}
-		}
-
-		// the detail box: the class (or the hovered spell) in full
-		int footer = y + h - FOOTER;
-		int lines = Math.max(DETAIL_MIN_LINES, (footer - detailTop - 6) / Ui.LINE);
-		List<Component> text = new ArrayList<>();
-		Component name;
-		if (hoveredOption != null) {
-			name = Component.translatable("class.jaymoskingdoms.option." + hoveredOption);
-			text.add(Component.translatable("class.jaymoskingdoms.option." + hoveredOption + ".desc"));
-		} else {
-			name = Component.translatable("class.jaymoskingdoms." + cls.key());
-			text.add(Component.translatable("class.jaymoskingdoms." + cls.key() + ".desc"));
-			if (this.picked == null) {
-				text.add(Component.translatable("gui.jaymoskingdoms.class.lead").withColor(Ui.HINT));
-			}
-		}
-		Ui.detail(graphics, this.font, px, Math.min(detailTop, footer - DETAIL_MIN_LINES * Ui.LINE - 8), pw, lines, name, Ui.GOLD, text);
-
-		if (this.choose != null) {
-			this.choose.setMessage(this.picked == null ? Component.translatable("gui.jaymoskingdoms.class.choose")
-				: Component.translatable("gui.jaymoskingdoms.class.confirm", Component.translatable("class.jaymoskingdoms." + this.picked.key())));
-			this.choose.active = this.picked != null && (this.picked.options.isEmpty() || this.option >= 0);
-		}
-		super.extractRenderState(graphics, mouseX, mouseY, a);
-		if (!hoveredStack.isEmpty()) {
-			graphics.setTooltipForNextFrame(this.font, hoveredStack, mouseX, mouseY);
-		}
-	}
-
-	private List<ItemStack> kit(PlayerClass cls) {
-		return this.kits.computeIfAbsent(cls, c -> Classes.gear(c, c.options.isEmpty() ? "" : c.options.getFirst()));
-	}
-
-	/** Every class down the left, the picked one marked. */
-	private void list(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-		int x = left(), y = top();
-		Ui.line(graphics, this.font, this.title, x + 9, y + 8, LIST_W - 12, Ui.GOLD);
-		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.class.sub"), x + 8, y + 19, LIST_W - 12, Ui.DIM);
-		graphics.fill(x + LIST_W - 1, y + 4, x + LIST_W, y + panelH() - 4, Ui.ROW);
+		this.layout.fit(this.width, this.height, MenuCompat.STRIP, buttonCount());
 		PlayerClass[] all = PlayerClass.values();
 		PlayerClass hover = rowAt(mouseX, mouseY);
-		for (int i = this.scroll; i < all.length; i++) {
-			PlayerClass cls = all[i];
-			int ry = rowY(i);
-			if (ry + LIST_ROW > y + panelH() - 4) {
-				break;
-			}
-			boolean picked = cls == this.picked;
-			graphics.fill(x + 4, ry, x + LIST_W - 4, ry + LIST_ROW - 2,
-				picked ? Ui.ROW_PICKED : cls == hover ? Ui.ROW_HOVER : i % 2 == 0 ? Ui.ROW_ALT : 0x0CFFFFFF);
-			if (picked) {
-				graphics.fill(x + 4, ry, x + 6, ry + LIST_ROW - 2, Ui.GOLD);
-			}
-			List<ItemStack> kit = kit(cls);
-			if (!kit.isEmpty() && !kit.getFirst().isEmpty()) {
-				graphics.item(kit.getFirst(), x + 8, ry + 1);
-			}
-			Ui.line(graphics, this.font, Component.translatable("class.jaymoskingdoms." + cls.key()), x + 27, ry + 5, LIST_W - 34,
-				picked ? Ui.GOLD : cls == hover ? Ui.TEXT : Ui.DIM);
+		PlayerClass cls = hover != null ? hover : this.picked != null ? this.picked : all[0];
+		this.layout.header(graphics, this.font, this.title, Component.translatable("gui.jaymoskingdoms.class.sub"), Ui.GOLD);
+
+		List<PickerLayout.Entry> entries = new ArrayList<>();
+		for (PlayerClass c : all) {
+			entries.add(new PickerLayout.Entry(icon(c), null, Component.translatable("class.jaymoskingdoms." + c.key()),
+				PickerLayout.tag("class.jaymoskingdoms." + c.key() + ".tag"), colour(c), false));
 		}
+		this.layout.list(graphics, this.font, entries, this.picked == null ? -1 : this.picked.ordinal(), hover == null ? -1 : hover.ordinal(), Ui.GOLD);
+
+		// the figure, in the gear of the class (and the option) shown
+		String shownOption = cls == this.picked && this.option >= 0 && this.option < cls.options.size() ? cls.options.get(this.option) : cls.options.isEmpty() ? "" : cls.options.getFirst();
+		this.layout.backdrop(graphics, colour(cls), StoryFigure.SCALE);
+		int[] box = this.layout.figureBox();
+		if (minecraft.player != null) {
+			StoryFigure.drawAs(graphics, minecraft.player, null, 0, StoryFigure.classScene(kit(cls, shownOption)), box[0], box[1], box[2], box[3]);
+		}
+		this.layout.caption(graphics, this.font, Component.translatable("gui.jaymoskingdoms.picker.as", Component.translatable("class.jaymoskingdoms." + cls.key())), null);
+
+		this.layout.info(graphics, this.font, info(cls, shownOption), cls.key() + "/" + (cls == this.picked), mouseX, mouseY);
+
+		if (this.choose != null) {
+			int[] b = this.layout.button(0);
+			this.choose.setPosition(b[0], b[1]);
+			this.choose.setWidth(b[2]);
+			boolean respec = respec();
+			this.choose.setMessage(this.picked == null ? Component.translatable("gui.jaymoskingdoms.class.choose")
+				: respec ? Component.translatable("gui.jaymoskingdoms.picker.change", this.option >= 0
+					? Component.translatable("class.jaymoskingdoms.option." + this.picked.options.get(this.option)) : Component.translatable("class.jaymoskingdoms." + this.picked.key()))
+				: Component.translatable("gui.jaymoskingdoms.picker.become", PickerLayout.withArticle(Component.translatable("class.jaymoskingdoms." + this.picked.key()).getString())));
+			this.choose.active = this.picked != null && (this.picked.options.isEmpty() || this.option >= 0);
+			if (respec) {
+				Classes.Chosen mine = Classes.of(minecraft.player);
+				this.choose.active = this.option >= 0 && Classes.respecable(this.picked) && !this.picked.options.get(this.option).equals(mine.option()) && respecWait() == 0L;
+			}
+		}
+		int at = 1;
+		if (this.none != null) {
+			int[] n = this.layout.button(at++);
+			this.none.setPosition(n[0], n[1]);
+			this.none.setWidth(n[2]);
+		}
+		if (this.later != null) {
+			int[] l = this.layout.button(at);
+			this.later.setPosition(l[0], l[1]);
+			this.later.setWidth(l[2]);
+		}
+		super.extractRenderState(graphics, mouseX, mouseY, a);
+	}
+
+	/** The info panel for {@code cls}, its option {@code shown} under the figure. */
+	private PickerLayout.Info info(PlayerClass cls, String shown) {
+		boolean isPicked = cls == this.picked;
+		List<Component> story = new ArrayList<>();
+		story.add(Component.translatable("class.jaymoskingdoms." + cls.key() + ".desc"));
+		if (this.picked == null) {
+			story.add(Component.translatable("gui.jaymoskingdoms.class.lead").withColor(Ui.HINT));
+		}
+		List<PickerLayout.Pill> pills = new ArrayList<>();
+		if (!cls.options.isEmpty()) {
+			pills.add(new PickerLayout.Pill(Component.translatable("gui.jaymoskingdoms.picker.options").getString(), String.valueOf(cls.options.size()), Ui.GOLD));
+		}
+		pills.add(new PickerLayout.Pill(Component.translatable("gui.jaymoskingdoms.picker.second").getString(), Math.round(Classes.SECOND_SHARE * 100) + "%", Ui.DIM));
+		if (isPicked) {
+			pills.add(new PickerLayout.Pill(Component.translatable("gui.jaymoskingdoms.class.picked").getString(), "", Ui.GOOD));
+		}
+
+		List<PickerLayout.Section> sections = new ArrayList<>();
+		sections.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.intrinsic"), Ui.GOLD, ClassPerks.card(cls)));
+		List<ItemStack> kit = kit(cls);
+		net.minecraft.network.chat.MutableComponent goodWith = Component.empty();
+		for (ItemStack stack : kit) {
+			if (!stack.isEmpty()) {
+				if (!goodWith.getString().isEmpty()) {
+					goodWith.append(", ");
+				}
+				goodWith.append(stack.getHoverName());
+			}
+		}
+		sections.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.class.gear"), Ui.GOOD, List.of(goodWith)));
+		if (!cls.options.isEmpty()) {
+			List<Component> spec = new ArrayList<>();
+			if (Classes.respecable(cls)) {
+				spec.add(Component.translatable("gui.jaymoskingdoms.picker.spec.cost", Classes.RESPEC_SILVER, Classes.RESPEC_WAIT_TICKS / 1200L));
+				long wait = respec() && isPicked ? respecWait() : 0L;
+				if (wait > 0L) {
+					spec.add(Component.translatable("gui.jaymoskingdoms.picker.spec.wait", (wait + 1199L) / 1200L).withColor(Ui.BAD));
+				}
+			} else {
+				spec.add(Component.translatable("gui.jaymoskingdoms.picker.spec.patron"));
+			}
+			sections.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.spec"), Ui.GOLD, spec));
+		}
+		// the option under the figure, in full
+		if (isPicked && !shown.isEmpty()) {
+			sections.add(new PickerLayout.Section(Component.translatable("class.jaymoskingdoms.option." + shown), Ui.TEXT,
+				List.of(Component.translatable("class.jaymoskingdoms.option." + shown + ".desc"))));
+		}
+
+		// the paths: the options it picks (pressable on the picked class), then the crossroads its tree grows into
+		List<PickerLayout.Path> paths = new ArrayList<>();
+		for (int i = 0; i < cls.options.size(); i++) {
+			List<ItemStack> icons = new ArrayList<>();
+			for (ItemStack stack : kit(cls, cls.options.get(i))) {
+				if (!stack.isEmpty() && icons.size() < 3) {
+					icons.add(stack);
+				}
+			}
+			paths.add(new PickerLayout.Path(icons, Component.translatable("class.jaymoskingdoms.option." + cls.options.get(i)), isPicked ? i : -1));
+		}
+		for (String fork : FORKS.getOrDefault(cls, List.of())) {
+			paths.add(new PickerLayout.Path(List.of(icon(cls)), Component.translatable("classtree.jaymoskingdoms." + fork), -1));
+		}
+		Component note = cls.options.isEmpty() ? Component.translatable("gui.jaymoskingdoms.picker.paths_class", Component.translatable("class.jaymoskingdoms." + cls.key()))
+			: Component.translatable(isPicked ? "gui.jaymoskingdoms.picker.paths_pick" : "gui.jaymoskingdoms.picker.paths_press");
+		return new PickerLayout.Info(icon(cls), null, Component.translatable("class.jaymoskingdoms." + cls.key()), PickerLayout.tag("class.jaymoskingdoms." + cls.key() + ".tag"),
+			colour(cls), pills, story, sections, note, paths, isPicked ? this.option : -1);
 	}
 }

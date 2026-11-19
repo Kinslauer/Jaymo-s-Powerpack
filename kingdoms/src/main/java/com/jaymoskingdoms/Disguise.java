@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -198,7 +198,9 @@ public final class Disguise {
 	/** {@code village} sees through {@code player}'s mask: {@code crier} raises the cry, and every goblin in earshot comes for them. */
 	static void expose(ServerLevel level, ServerPlayer player, Faction village, @Nullable LivingEntity crier, String why) {
 		EXPOSED.computeIfAbsent(player.getUUID(), k -> new HashMap<>()).put(village.id(), level.getGameTime() + EXPOSED_TICKS);
-		SUSPICION.remove(player.getUUID());
+		if (SUSPICION.remove(player.getUUID()) != null) {
+			show(player, 0.0F);
+		}
 		if (crier != null) {
 			Speech.say(level, crier, Component.translatable("message.jaymoskingdoms.goblin.cry." + why), Speech.RED, CRY_RANGE);
 			level.playSound(null, crier.getX(), crier.getY(), crier.getZ(), SoundEvents.PIGLIN_ANGRY, SoundSource.HOSTILE, 1.5F, 1.6F);
@@ -226,12 +228,14 @@ public final class Disguise {
 				if (village == null) {
 					INSIDE.remove(id);
 				}
-				calm(player, SUSPICION.containsKey(id) && village == null);
+				calm(player);
 				continue;
 			}
 			if (was == null || was != village.id()) {
 				INSIDE.put(id, village.id());
-				SUSPICION.remove(id);
+				if (SUSPICION.remove(id) != null) {
+					show(player, 0.0F);
+				}
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.goblin.welcome", village.name()).withStyle(ChatFormatting.DARK_GREEN));
 			}
 			float rise = 0.0F;
@@ -251,7 +255,7 @@ public final class Disguise {
 			}
 			float now = SUSPICION.getOrDefault(id, 0.0F);
 			if (rise <= 0.0F) {
-				calm(player, now > 0.0F);
+				calm(player);
 				continue;
 			}
 			now = Math.min(MAX_SUSPICION, now + rise);
@@ -270,7 +274,7 @@ public final class Disguise {
 	}
 
 	/** Suspicion cools (and the meter goes once it's gone). */
-	private static void calm(ServerPlayer player, boolean showing) {
+	private static void calm(ServerPlayer player) {
 		UUID id = player.getUUID();
 		Float was = SUSPICION.get(id);
 		if (was == null) {
@@ -279,22 +283,16 @@ public final class Disguise {
 		float now = was - CALM_FALL;
 		if (now <= 0.0F) {
 			SUSPICION.remove(id);
-			if (showing) {
-				player.sendOverlayMessage(Component.empty());
-			}
+			show(player, 0.0F);
 			return;
 		}
 		SUSPICION.put(id, now);
 		show(player, now);
 	}
 
-	/** The meter over the hotbar: ten pips, yellow to red. */
+	/** Andy: "The eye should fill". Suspicion fills the awareness eye over the crosshair ({@link Senses.Suspicion}). */
 	private static void show(ServerPlayer player, float suspicion) {
-		int pips = Math.round(suspicion / MAX_SUSPICION * 10.0F);
-		MutableComponent bar = Component.translatable("message.jaymoskingdoms.goblin.suspicion").withStyle(ChatFormatting.GOLD).append(" ");
-		bar.append(Component.literal("■".repeat(pips)).withStyle(pips >= 7 ? ChatFormatting.RED : ChatFormatting.YELLOW));
-		bar.append(Component.literal("■".repeat(10 - pips)).withStyle(ChatFormatting.DARK_GRAY));
-		player.sendOverlayMessage(bar);
+		ServerPlayNetworking.send(player, new Senses.Suspicion(Math.round(suspicion / MAX_SUSPICION * Senses.FILL_STEPS)));
 	}
 
 	/** A disguised player talks to a goblin (right click): it grunts something back. */

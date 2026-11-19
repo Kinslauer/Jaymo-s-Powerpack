@@ -6,6 +6,7 @@ import com.jaymospowers.api.Power;
 import com.jaymospowers.core.Crawl;
 import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.HoldProgress;
+import com.jaymospowers.core.HudBar;
 import com.jaymospowers.core.Powers;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
@@ -173,13 +174,13 @@ public final class Downed {
 	 * (0.18.84) Andy: "Players see a black screen and can mash to wake faster." Andy (2026-11-13): presses count from the
 	 * first, and it takes "closer to 3-5". Each press of sneak while knocked out takes an even share off what's left, so a
 	 * knock-out of up to {@link #MASH_SHORT} ticks takes {@link #MASH_LEAST} presses, up to {@link #MASH_LONG} one more,
-	 * and anything longer {@link #MASH_MOST}. The bar ({@link #MASH_BAR} long) measures the whole knock-out, so it moves
+	 * and anything longer {@link #MASH_MOST}. The bar measures the whole knock-out, so it moves
 	 * from the first press and as time passes. Not for a scene's black (a death turned away, a turning, the descent below:
 	 * {@code Mortality.WAKE_LINE}), which runs its own time.
 	 */
-	public static final int MASH_LEAST = 3, MASH_MOST = 5, MASH_SHORT = 300, MASH_LONG = 1200, MASH_BAR = 12;
-	/** How often a downed player is reminded they can give up (ticks), and the give-up bar's length. */
-	static final int HINT_TICKS = 20, GIVE_UP_BAR = 12;
+	public static final int MASH_LEAST = 3, MASH_MOST = 5, MASH_SHORT = 300, MASH_LONG = 1200;
+	/** How often a downed player is reminded they can give up (ticks). */
+	static final int HINT_TICKS = 20;
 	/** (0.7.93) A revive: how long use is held to get them up (ticks), and how long before the bar shows (a tap is Kingdoms' disarm). */
 	public static final int REVIVE_TICKS = 60, TAP_TICKS = 4;
 	/**
@@ -193,8 +194,6 @@ public final class Downed {
 	/** How far past your reach you may lean while reviving, and how often your hands work at it (a swing, a sound). */
 	static final double REVIVE_SLACK = 0.5;
 	static final int REVIVE_WORK_TICKS = 15;
-	/** The revive bar's length. */
-	static final int REVIVE_BAR = 12;
 
 	/** The scoreboard tag on everyone downed (what Kingdoms reads: it never compiles against Powers). */
 	public static final String DOWNED_TAG = "jaymospowers_downed";
@@ -252,6 +251,8 @@ public final class Downed {
 	static final Identifier FIRST = JaymosPowers.id("downed_first");
 	/** Going down is the last say on a death (every other mod's save comes first), and on a right-click on the downed. */
 	static final Identifier LAST = JaymosPowers.id("downed_last");
+	/** After Downed's verdict: a player dying flat is marked to lie ({@link DownedLie#markPlayer}). */
+	static final Identifier LIE_PHASE = JaymosPowers.id("downed_lie");
 
 	/** (0.20.67) The death event's phase Downed decides in (others that must see its verdict order after it). */
 	public static Identifier lastPhase() {
@@ -370,6 +371,9 @@ public final class Downed {
 				// (a mob, fire, a fall, the void: they die as anyone would, body and all; no second downing)
 				// ((0.20.26) what downed them is the cause the death is rolled on, Mortality)
 				Mortality.felled(entity, FELLED_BY.get(entity));
+				// (Andy, 2026-11-18: a downed pillager burning to death "pops into the air when it dies because it defaults back
+				// to standing") whatever ends them, the body starts lying where and how they lay
+				DownedLie.markBody(entity);
 				forget(entity);
 				return true;
 			}
@@ -415,9 +419,29 @@ public final class Downed {
 			UndeadFortitude.downed(entity, source);
 			return false;
 		});
+		// (Andy, 2026-11-18) a player who dies lying flat (crawling, crippled, under a low ceiling; the downed are marked as
+		// they're finished) starts their body lying too: after every save, so only a death that goes through is marked
+		ServerLivingEntityEvents.ALLOW_DEATH.addPhaseOrdering(LAST, LIE_PHASE);
+		ServerLivingEntityEvents.ALLOW_DEATH.register(LIE_PHASE, (entity, source, amount) -> {
+			if (entity instanceof Player player && entity.level() instanceof ServerLevel) {
+				DownedLie.markPlayer(player);
+			}
+			return true;
+		});
+		// (and a mark their body didn't use isn't kept for their next death)
+		net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> DownedLie.clearBody(newPlayer));
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
-			if (isDowned(entity) && !FINISHING.contains(entity) && amount >= KILL_BLOW && attack(source) && !outCold(entity)
+			// (Andy, 2026-11-18) a crushing blow (a mutant's slam) on the downed: "theres just simply no place else for that
+			// force to go, so obviously they get gibbed"; knocked out cold or not
+			boolean crushed = isDowned(entity) && com.jaymospowers.core.BlastGore.crushedNow(entity);
+			if (isDowned(entity) && !FINISHING.contains(entity) && amount >= KILL_BLOW && attack(source) && (!outCold(entity) || crushed)
 				&& !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && entity.level() instanceof ServerLevel level) {
+				boolean burst = crushed && com.jaymospowers.core.BlastGore.gibs(entity, source, amount);
+				if (burst && Dismember.rubber(entity) && com.jaymospowers.core.BlastGore.tearLimbs(entity, source)) {
+					// (Rubber-folk: every limb gone but the head kept; they stay down to mend, as from a blast)
+					Dismember.split(entity);
+					return false;
+				}
 				// (0.18.5) three hearts or more on the downed: that's the end of them
 				FELLED_BY.put(entity, source);
 				// (the blow still lands with its thud; the death cry is its own)
@@ -425,8 +449,8 @@ public final class Downed {
 					blowLands(level, entity, source, false);
 				}
 				finish(level, entity);
-				// (Andy, 2026-11-16) the killing hit takes a part off the body
-				if (entity.isDeadOrDying()) {
+				// (Andy, 2026-11-16) the killing hit takes a part off the body (a burst one has none left to take)
+				if (entity.isDeadOrDying() && !burst) {
 					Dismember.lethalBlow(entity, source, null);
 				}
 				return false;
@@ -1335,9 +1359,8 @@ public final class Downed {
 				player.setAttached(KNOCKED, until << 1 | (knocked & 1L));
 			}
 			if (press || now % HINT_TICKS == 0) {
-				int filled = MASH_BAR - Math.round(MASH_BAR * Math.min(1.0F, (until - now) / (float) length));
-				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.knocked_mash",
-					"|".repeat(filled) + ".".repeat(MASH_BAR - filled)).withStyle(ChatFormatting.DARK_PURPLE));
+				HudBar.hold(player, "knocked", 1.0F - Math.min(1.0F, (until - now) / (float) length), HudBar.PURPLE,
+					Component.translatable("bar.jaymospowers.knocked"), true);
 			}
 			return;
 		}
@@ -1360,16 +1383,17 @@ public final class Downed {
 			return;
 		}
 		if (sneaking ? held % 2 == 0 : now % HINT_TICKS == 0) {
-			int filled = Math.round(GIVE_UP_BAR * held / (float) GIVE_UP_TICKS);
-			String bar = "|".repeat(filled) + ".".repeat(GIVE_UP_BAR - filled);
 			// (0.18.68) why they can't get up: the part at red, or being carried or in the water
 			BodyPart blocking = blocksRise(player);
-			Component message = out ? Component.translatable("message.jaymospowers.downed.give_up_out", bar)
+			Component message = out ? Component.translatable("message.jaymospowers.downed.give_up_out")
 				// (Andy, 2026-11-14) cut in two, nothing will get them up: only the drag and the bleed-out
-				: Dismember.halved(player) ? Component.translatable("message.jaymospowers.downed.give_up_halved", bar)
-				: blocking != null ? Component.translatable(feet(player, "message.jaymospowers.downed.give_up_hurt"), blocking.displayName(), bar)
-				: Component.translatable("message.jaymospowers.downed.give_up", bar);
+				: Dismember.halved(player) ? Component.translatable("message.jaymospowers.downed.give_up_halved")
+				: blocking != null ? Component.translatable(feet(player, "message.jaymospowers.downed.give_up_hurt"), blocking.displayName())
+				: Component.translatable("message.jaymospowers.downed.give_up");
 			player.sendOverlayMessage(message.copy().withStyle(sneaking ? ChatFormatting.RED : ChatFormatting.GRAY));
+			if (held > 0) {
+				HudBar.hold(player, "give_up", held / (float) GIVE_UP_TICKS, HudBar.DARK_RED, Component.translatable("bar.jaymospowers.give_up"), true);
+			}
 		}
 	}
 
@@ -1432,9 +1456,7 @@ public final class Downed {
 		}
 		if (r.ticks < r.length) {
 			if (r.ticks % 2 == 0) {
-				int filled = Math.round(GIVE_UP_BAR * r.ticks / (float) r.length);
-				player.sendOverlayMessage(Component.translatable(feet(player, "message.jaymospowers.downed.rising"), "|".repeat(filled) + ".".repeat(GIVE_UP_BAR - filled))
-					.withStyle(ChatFormatting.YELLOW));
+				HudBar.hold(player, "rising", r.ticks / (float) r.length, HudBar.YELLOW, Component.translatable(feet(player, "bar.jaymospowers.rising")), true);
 			}
 			return;
 		}
@@ -1694,9 +1716,7 @@ public final class Downed {
 			}
 			if (r.ticks < need) {
 				if (r.ticks % 2 == 0) {
-					int filled = Math.round(REVIVE_BAR * r.ticks / (float) need);
-					String bar = "|".repeat(filled) + ".".repeat(REVIVE_BAR - filled);
-					player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.reviving", body.getDisplayName(), bar).withStyle(ChatFormatting.GRAY));
+					HudBar.hold(player, "reviving", r.ticks / (float) need, HudBar.GREY, Component.translatable("bar.jaymospowers.reviving", body.getDisplayName()), true);
 				}
 				continue;
 			}

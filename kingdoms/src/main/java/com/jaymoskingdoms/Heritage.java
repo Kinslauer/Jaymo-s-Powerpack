@@ -546,6 +546,7 @@ public final class Heritage {
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.8F, 1.0F);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.heritage.chosen", Component.translatable("heritage.jaymoskingdoms." + kind.key()))
 			.withStyle(ChatFormatting.GOLD));
+		Fanfare.title(player, Component.translatable("heritage.jaymoskingdoms." + kind.key()), Component.translatable("message.jaymoskingdoms.heritage.title"));
 	}
 
 	/** Takes {@code player}'s heritage away (and asks again). */

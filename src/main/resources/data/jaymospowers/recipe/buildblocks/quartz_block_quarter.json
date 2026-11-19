@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "minecraft:quartz_block",
+  "result": {
+    "id": "jaymospowers:quartz_block_quarter",
+    "count": 4
+  }
+}
