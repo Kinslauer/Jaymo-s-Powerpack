@@ -62,6 +62,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.combat.ShieldBang.init();
 		// sparks off meeting steel, shards off wooden shields, and the shields that break
 		com.jaymospowers.combat.ClashFx.init();
+		// sparks off a blow, a strike or an arrow that lands on metal armour, a metal body or a metal block
+		com.jaymospowers.combat.MetalHits.init();
 		// every magic effect's type: beam, blast, ring, orb, sigil, mote, miasma
 		com.jaymospowers.core.fx.MagicFx.init();
 		com.jaymospowers.combat.ShieldShatter.init();
