@@ -1,0 +1,6 @@
+# charge jump on a horse's jump bar, orange peak
+- **Charge jump** works like a horse's jump now. Stand still holding Sneak and the XP bar turns into the horse jump bar (the level number hides with it). Hold Jump to fill it, let go to leap at the charge it shows; a short tap is a plain jump.
+- **Orange peak**: a stretch of the bar is orange. Letting go inside it gives the full leap (about twice a jump); anywhere else tops out at 70% of the extra height, building up to that short of the peak. With the Charge Jump perk the peak always sits at 70-85% of the bar; without it, it lands somewhere new on every charge.
+- **Everyone** can charge jump again; the perk no longer locks it (no "not learned" refusal).
+- The old pale veil over the Feathers row is gone. Tuning in `ChargeJump` (PEAK_WIDTH, PEAK_SKILLED, PEAK_RANDOM_MIN/MAX, MISS_SHARE); `RunMovesClient` draws the bar, `ChargeJumpMixin` holds the plain jump back while Jump fills it.
+- Built (compileClientJava); not played.

@@ -24,9 +24,11 @@ import com.jaymospowers.stamina.Feathers;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
-import net.minecraft.client.DeltaTracker;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
@@ -39,8 +41,9 @@ import net.minecraft.world.phys.Vec3;
  * <ul>
  * <li>Long jump: a Sneak <i>tap</i> (at most {@link #TAP_HOLD_TICKS}) right around a jump out of a fast run. A held Sneak
  * stays the slide's, two taps the zoom's, and the air flip's wait for its tap is called off.</li>
- * <li>Charge jump: Sneak held still on the ground for {@link ChargeJump#START_TICKS} first, and never when that press
- * came right after a tap (the zoom's double tap); Web keeps its own.</li>
+ * <li>Charge jump: Sneak held still on the ground for {@link ChargeJump#START_TICKS} first (and never when that press
+ * came right after a tap, the zoom's double tap) puts a horse's jump bar in place of the XP bar; then Jump is held to fill
+ * it and let go to leap ({@code ChargeJumpMixin} keeps the plain jump off meanwhile). Web keeps its own.</li>
  * <li>Sky dive: Jump in a long fall, and only if a moment later you're still plainly falling (nothing else took it).</li>
  * <li>Safety tap: {@code DodgeClient} asks {@link #safetyTap} before rolling.</li>
  * <li>Swim burst: a fresh press of Sprint while swimming surges you along your look ({@link SwimBurst}).</li>
@@ -55,12 +58,13 @@ public final class RunMovesClient {
 	static final int TAP_HOLD_TICKS = 3, DOUBLE_TAP_TICKS = 6;
 	/** A fall this long (blocks) counts as a landing the safety tap is for. */
 	static final double SAFETY_FALL = 2.5;
-	/** The charge bar over the Feathers row: its colour (ARGB). */
-	static final int CHARGE_COLOUR = 0x70FFFFFF;
+	/** The charge bar's orange peak (ARGB): still to fill, and filled. */
+	static final int PEAK_EMPTY = 0xFFB85A12, PEAK_FILLED = 0xFFFFA530;
+	/** Vanilla's horse jump bar. */
+	private static final Identifier JUMP_BAR = Identifier.withDefaultNamespace("hud/jump_bar_background"),
+		JUMP_BAR_FILL = Identifier.withDefaultNamespace("hud/jump_bar_progress");
 
 	private static boolean sneakWas, jumpWas, sprintWas, wasOnGround;
-	/** Ticks of a charge jump's wind-up held without the perk (Andy's skill-tree locks), for the refusal at the jump. */
-	private static int lockedWind;
 	/** Client tick of the last jump out of a sprint, and whether this run of air's leap and air roll are spent. */
 	private static long sprintJumpAt = Long.MIN_VALUE / 2;
 	private static boolean leapt, airRolled;
@@ -73,8 +77,10 @@ public final class RunMovesClient {
 	private static long jumpedAt = Long.MIN_VALUE / 2;
 	private static boolean longJumped;
 	private static int keepSprint;
-	/** The charge so far (ticks), shown on the Feathers row. */
+	/** Sneak is held still on the ground: the jump bar is up and Jump charges it. The charge so far (ticks), and where its orange peak starts. */
+	private static boolean armed;
 	private static int charge;
+	private static float peak;
 	/** A trick flip waiting to be asked for at this tick, and which. */
 	private static long trickAt = -1L;
 	private static int trickKind;
@@ -105,7 +111,17 @@ public final class RunMovesClient {
 			}
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(RunMovesClient::tick);
-		HudElementRegistry.attachElementAfter(JaymosPowers.id("feathers"), JaymosPowers.id("charge_jump"), RunMovesClient::renderCharge);
+		// the charge jump's bar takes the XP bar's place, as a horse's does
+		HudElementRegistry.replaceElement(VanillaHudElements.INFO_BAR, old -> (graphics, delta) -> {
+			if (!renderCharge(graphics)) {
+				old.extractRenderState(graphics, delta);
+			}
+		});
+		HudElementRegistry.replaceElement(VanillaHudElements.EXPERIENCE_LEVEL, old -> (graphics, delta) -> {
+			if (!showing()) {
+				old.extractRenderState(graphics, delta);
+			}
+		});
 	}
 
 	private static void tick(Minecraft minecraft) {
@@ -160,7 +176,7 @@ public final class RunMovesClient {
 					player.setSprinting(true);
 				}
 			}
-			tickCharge(player, sneak, onGround);
+			tickCharge(player, now, sneak, jump, onGround);
 			tickSkyDive(player, jumpPressed);
 			tickSwim(player, now, sprintPressed, jumpPressed);
 			tickFastSwim(player, now);
@@ -193,20 +209,6 @@ public final class RunMovesClient {
 
 	/** Just left the ground on a jump: a charged leap, a long jump (tap just before), or a chance at a trick flip. */
 	private static void tickJumped(LocalPlayer player, long now) {
-		if (charge >= ChargeJump.MIN_TICKS && ChargeJump.allowed(player) && Feathers.canSpend(player, ChargeJump.COST_MIN)) {
-			Vec3 v = player.getDeltaMovement();
-			double up = ChargeJump.up(charge, v.y);
-			if (TraceurBoots.wears(player)) up += TraceurBoots.CHARGE_JUMP_BONUS;
-			player.setDeltaMovement(v.x, up, v.z);
-			send(RunMoves.CHARGE_JUMP, charge);
-			charge = 0;
-			return;
-		}
-		charge = 0;
-		if (lockedWind >= ChargeJump.MIN_TICKS) {
-			com.jaymospowers.core.TreeLocks.refuse(player, com.jaymospowers.core.TreeLocks.CHARGE_JUMP);
-		}
-		lockedWind = 0;
 		boolean tapped = now - pressedAt <= LongJump.TAP_BEFORE && (sneakHeld == 0 ? releasedAt - pressedAt <= TAP_HOLD_TICKS : sneakHeld <= TAP_HOLD_TICKS);
 		if (tapped && longJump(player)) {
 			return;
@@ -281,23 +283,56 @@ public final class RunMovesClient {
 		return true;
 	}
 
-	/** Standing still with Sneak held: wind up. Moving, a power's body, water, or letting go loses it. */
-	private static void tickCharge(LocalPlayer player, boolean sneak, boolean onGround) {
+	/**
+	 * Standing still with Sneak held: the jump bar is up. Holding Jump fills it, letting go leaps at what it shows. Moving,
+	 * a power's body, water, or letting go of Sneak loses the charge (and a Jump still held then is a plain jump).
+	 */
+	private static void tickCharge(LocalPlayer player, long now, boolean sneak, boolean jump, boolean onGround) {
 		Input input = player.input.keyPresses;
-		boolean body = onGround && sneak && !doubleTap && !input.forward() && !input.backward() && !input.left() && !input.right()
-			&& player.getDeltaMovement().horizontalDistance() < ChargeJump.MOVE_CANCEL && !player.isInWater();
-		boolean still = body && ChargeJump.allowed(player);
-		// (Andy's skill-tree locks) a wind-up that only the lock stops: a jump out of it is told Charge Jump isn't learned
-		lockedWind = body && !ChargeJump.learned(player) && sneakHeld > ChargeJump.START_TICKS ? lockedWind + 1 : onGround ? 0 : lockedWind;
-		if (!still) {
-			if (onGround) {
-				charge = 0;
-			}
+		armed = onGround && sneak && !doubleTap && sneakHeld > ChargeJump.START_TICKS && !input.forward() && !input.backward()
+			&& !input.left() && !input.right() && player.getDeltaMovement().horizontalDistance() < ChargeJump.MOVE_CANCEL
+			&& !player.isInWater() && ChargeJump.allowed(player);
+		if (!armed) {
+			charge = 0;
 			return;
 		}
-		if (sneakHeld > ChargeJump.START_TICKS) {
+		if (jump) {
+			if (charge == 0) {
+				peak = ChargeJump.peak(player, player.getRandom());
+			}
 			charge = Math.min(ChargeJump.FULL_TICKS, charge + 1);
+			return;
 		}
+		if (charge == 0) {
+			return;
+		}
+		// let go of Jump: leap at the charge the bar shows (a short one is a plain jump)
+		int ticks = charge;
+		charge = 0;
+		player.jumpFromGround();
+		jumpedAt = now;
+		sprintJumpAt = Long.MIN_VALUE / 2;
+		if (ticks >= ChargeJump.MIN_TICKS && Feathers.canSpend(player, ChargeJump.COST_MIN)) {
+			Vec3 v = player.getDeltaMovement();
+			double up = ChargeJump.up(ChargeJump.share(fill(ticks), peak), v.y);
+			if (TraceurBoots.wears(player)) up += TraceurBoots.CHARGE_JUMP_BONUS;
+			player.setDeltaMovement(v.x, up, v.z);
+			send(RunMoves.CHARGE_JUMP, ticks);
+		}
+	}
+
+	/** Whether Jump is filling the charge bar now, so it mustn't jump yet ({@code ChargeJumpMixin}). */
+	public static boolean holdingCharge(LocalPlayer player) {
+		return armed && player.onGround() && Minecraft.getInstance().options.keyJump.isDown();
+	}
+
+	private static float fill(int ticks) {
+		return Math.min(1.0F, ticks / (float)ChargeJump.FULL_TICKS);
+	}
+
+	private static boolean showing() {
+		LocalPlayer player = Minecraft.getInstance().player;
+		return armed && player != null && !player.isCreative() && !player.isSpectator();
 	}
 
 	private static void tickSkyDive(LocalPlayer player, boolean jumpPressed) {
@@ -496,24 +531,30 @@ public final class RunMovesClient {
 		sneakWas = jumpWas = sprintWas = wasOnGround = breaching = leapt = airRolled = false;
 		sprintJumpAt = Long.MIN_VALUE / 2;
 		sneakHeld = charge = skyCheck = hideTicks = keepSprint = 0;
-		skyDiving = longJumped = doubleTap = false;
+		skyDiving = longJumped = doubleTap = armed = false;
 		trickAt = -1L;
 		fall = 0.0;
 	}
 
-	/** The charge, as a pale veil filling the Feathers row from the right. */
-	private static void renderCharge(GuiGraphicsExtractor graphics, DeltaTracker delta) {
-		Minecraft minecraft = Minecraft.getInstance();
-		LocalPlayer player = minecraft.player;
-		if (player == null || charge <= 0 || player.isCreative() || player.isSpectator()) {
-			return;
+	/** The charge, on a horse's jump bar in the XP bar's place, its orange peak drawn over it. False when there's none to draw. */
+	private static boolean renderCharge(GuiGraphicsExtractor graphics) {
+		if (!showing()) {
+			return false;
 		}
-		int right = graphics.guiWidth() / 2 + 91;
-		int y = graphics.guiHeight() - 49;
-		int width = Math.round(80 * Math.min(1.0F, charge / (float)ChargeJump.FULL_TICKS));
-		graphics.fill(right - width, y, right, y + 9, CHARGE_COLOUR);
-		if (charge >= ChargeJump.FULL_TICKS) {
-			graphics.fill(right - 80, y + 9, right, y + 10, 0xC0FFFFFF);
+		int left = (graphics.guiWidth() - 182) / 2;
+		int top = graphics.guiHeight() - 29;
+		graphics.blitSprite(RenderPipelines.GUI_TEXTURED, JUMP_BAR, left, top, 182, 5);
+		int filled = Math.round(182 * fill(charge));
+		if (filled > 0) {
+			graphics.blitSprite(RenderPipelines.GUI_TEXTURED, JUMP_BAR_FILL, 182, 5, 0, 0, left, top, filled, 5);
 		}
+		if (charge > 0) {
+			// the peak: where the full leap is (the perk keeps it in one spot; without it, it moves every charge)
+			int from = left + Math.round(182 * peak), to = Math.min(left + 181, from + Math.round(182 * ChargeJump.PEAK_WIDTH));
+			int edge = Mth.clamp(left + filled, from, to);
+			graphics.fill(from, top + 1, edge, top + 4, PEAK_FILLED);
+			graphics.fill(edge, top + 1, to, top + 4, PEAK_EMPTY);
+		}
+		return true;
 	}
 }
