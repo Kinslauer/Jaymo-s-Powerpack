@@ -62,7 +62,8 @@ public final class DelightHome {
 	public static SoundEvent SKILLET_SIZZLE, SKILLET_ADD_FOOD, SKILLET_ATTACK_STRONG, SKILLET_ATTACK_WEAK;
 
 	public static StoveBlock STOVE;
-	public static BasketBlock WOODEN_BASKET, BAMBOO_BASKET;
+		public static Block COOKING_BLOCK;
+		public static BasketBlock WOODEN_BASKET, BAMBOO_BASKET;
 	public static final List<CabinetBlock> CABINETS = new ArrayList<>();
 	public static BlockEntityType<StoveBlockEntity> STOVE_ENTITY;
 	public static BlockEntityType<CabinetBlockEntity> CABINET_ENTITY;
@@ -93,19 +94,24 @@ public final class DelightHome {
 		});
 
 		// the stove
-		STOVE = block("stove", StoveBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.BRICKS)
-			.lightLevel(state -> state.getValue(StoveBlock.LIT) ? STOVE_LIGHT : 0));
-		STOVE_ENTITY = blockEntity("stove", new BlockEntityType<>(StoveBlockEntity::new, Set.of(STOVE)));
-		item("stove", STOVE, new Item.Properties(), FUNCTIONAL, 0);
+				STOVE = block("stove", StoveBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.BRICKS)
+					.lightLevel(state -> state.getValue(StoveBlock.LIT) ? STOVE_LIGHT : 0));
+				STOVE_ENTITY = blockEntity("stove", new BlockEntityType<>(StoveBlockEntity::new, Set.of(STOVE)));
+				item("stove", STOVE, new Item.Properties(), FUNCTIONAL, 0);
 
-		// baskets
-		WOODEN_BASKET = block("wooden_basket", BasketBlock::new, BlockBehaviour.Properties.of().strength(1.5F).sound(SoundType.WOOD).noOcclusion());
-		BAMBOO_BASKET = block("bamboo_basket", BasketBlock::new, BlockBehaviour.Properties.of().strength(1.5F).sound(SoundType.BAMBOO_WOOD).noOcclusion());
-		BASKET_ENTITY = blockEntity("basket", new BlockEntityType<>(BasketBlockEntity::new, Set.of(WOODEN_BASKET, BAMBOO_BASKET)));
-		item("wooden_basket", WOODEN_BASKET, new Item.Properties(), FUNCTIONAL, WOODEN_FUEL);
-		item("bamboo_basket", BAMBOO_BASKET, new Item.Properties(), FUNCTIONAL, WOODEN_FUEL);
+				// cooking block
+				COOKING_BLOCK = block("cooking_block", Block::new, BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+					.strength(5.0F, 6.0F).sound(SoundType.METAL));
+				item("cooking_block", COOKING_BLOCK, new Item.Properties(), FUNCTIONAL, 0);
 
-		// cabinets
+				// baskets
+				WOODEN_BASKET = block("wooden_basket", BasketBlock::new, BlockBehaviour.Properties.of().strength(1.5F).sound(SoundType.WOOD).noOcclusion());
+				BAMBOO_BASKET = block("bamboo_basket", BasketBlock::new, BlockBehaviour.Properties.of().strength(1.5F).sound(SoundType.BAMBOO_WOOD).noOcclusion());
+				BASKET_ENTITY = blockEntity("basket", new BlockEntityType<>(BasketBlockEntity::new, Set.of(WOODEN_BASKET, BAMBOO_BASKET)));
+				item("wooden_basket", WOODEN_BASKET, new Item.Properties(), FUNCTIONAL, WOODEN_FUEL);
+				item("bamboo_basket", BAMBOO_BASKET, new Item.Properties(), FUNCTIONAL, WOODEN_FUEL);
+
+			// cabinets
 		for (String wood : WOODS) {
 			BlockBehaviour.Properties properties = BlockBehaviour.Properties.ofFullCopy(Blocks.BARREL);
 			boolean nether = wood.equals("crimson") || wood.equals("warped");

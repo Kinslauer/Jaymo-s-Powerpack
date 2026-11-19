@@ -28,6 +28,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -43,6 +44,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.TamableAnimal;
@@ -216,8 +218,11 @@ public final class Commandments {
 			}
 			return InteractionResult.PASS;
 		});
-		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
-			if (entity instanceof ItemEntity item && item.getOwner() instanceof ServerPlayer sp) {
+		// A book counts as thrown away only once it is lost: burnt, despawned, fallen into the void. Picked up again (by
+		// anyone, or a hopper) or kept in a chest it doesn't; a picked-up item is emptied before it is removed.
+		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
+			if (entity instanceof ItemEntity item && entity.getRemovalReason() != null && entity.getRemovalReason().shouldDestroy()
+				&& !item.getItem().isEmpty() && item.getOwner() instanceof ServerPlayer sp) {
 				thrown(sp, item.getItem());
 			}
 		});
@@ -514,7 +519,7 @@ public final class Commandments {
 		act(sp, "wildfire");
 	}
 
-	/** A patron's book of commandments or its lore book, thrown away. */
+	/** A patron's book of commandments or its lore book, thrown away and lost. */
 	private static void thrown(ServerPlayer sp, ItemStack stack) {
 		Patron mine = Patrons.of(sp);
 		if (mine == null) {
@@ -708,7 +713,13 @@ public final class Commandments {
 		CompoundTag tag = new CompoundTag();
 		tag.putString(KEY, p.key);
 		stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+		stack.set(DataComponents.ITEM_MODEL, model(p));
 		return stack;
+	}
+
+	/** The look of {@code p}'s book of commandments: the book with its sigil on the cover (tools/gen_holy_books.py). */
+	static Identifier model(Patron p) {
+		return JaymosKingdoms.id("holy_book_" + p.key);
 	}
 
 	/** The patron of a book of commandments (null: not one, or blank). */
@@ -749,6 +760,15 @@ public final class Commandments {
 	static final class Book extends Item {
 		Book(Properties properties) {
 			super(properties);
+		}
+
+		/** A book made before each patron's had its own look takes it on. */
+		@Override
+		public void inventoryTick(ItemStack stack, ServerLevel level, Entity owner, @Nullable EquipmentSlot slot) {
+			Patron p = patronOf(stack);
+			if (p != null && !stack.has(DataComponents.ITEM_MODEL)) {
+				stack.set(DataComponents.ITEM_MODEL, model(p));
+			}
 		}
 
 		@Override

@@ -241,6 +241,7 @@ public final class ZFighterPatrol {
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> output.accept(LICENSE));
 		ServerTickEvents.END_SERVER_TICK.register(ZFighterPatrol::tick);
 		ServerLivingEntityEvents.AFTER_DEATH.register(ZFighterPatrol::afterDeath);
+		ZFighterPatrolRelief.init();
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			FLIERS.clear();
 			PURSUITS.clear();
@@ -676,8 +677,12 @@ public final class ZFighterPatrol {
 			}));
 			options.add(ZFighterNpcs.Option.of("talk.jaymospowers.patrol.opt.writ", officerRank(player) >= WRIT_RANK,
 				() -> com.jaymospowers.power.zfighter.farworld.PatrolWrit.ask(player, man, back)));
+			options.add(ZFighterNpcs.Option.of("talk.jaymospowers.patrol.opt.relief", true, () -> ZFighterPatrolRelief.ask(player, man, back)));
+			// your Patrol file: rank, arrests on warrant, skip writs drawn, relief runs done
 			options.add(ZFighterNpcs.Option.of("talk.jaymospowers.patrol.opt.report", true, () -> ZFighterNpcs.ask(player, man,
-				Component.translatable("talk.jaymospowers.patrol.report", rankName(rank(player, member.arrests())), member.arrests()),
+				Component.translatable("talk.jaymospowers.patrol.file", rankName(rank(player, member.arrests())), member.arrests(),
+					Integer.bitCount(player.getAttachedOrElse(com.jaymospowers.power.zfighter.farworld.PatrolWrit.ISSUED, 0)),
+					ZFighterPatrolRelief.of(player).done()),
 				List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)))));
 		}
 		ZFighterNpcs.ask(player, man, words, options);

@@ -309,7 +309,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.zfighter.ZFighterPower", "power.zfighter.ZFighterTraining", "power.zfighter.ZFighterGrowth", "power.zfighter.ZFighterLineage", "power.zfighter.ApeRage", "power.zfighter.ApeSmash", "power.zfighter.ApeGrab", "power.zfighter.VillagerApe", "power.zfighter.UndeadBlood", "power.zfighter.UndeadGiant","power.zfighter.RaceMoves", "power.zfighter.FrostBeam", "power.zfighter.ZFighterGuard", "power.zfighter.ZFighterCombo", "power.zfighter.ZFighterStretchCombo", "power.zfighter.ZFighterDisc", "power.zfighter.ZFighterWaveBeam", "power.zfighter.ZFighterHands",
 			"power.zfighter.ZFighterTeleport",
 			"power.zfighter.ZFighterAerialCharge",
-			"power.zfighter.ZFighterBranchForms", "power.zfighter.ZFighterEgo", "power.zfighter.ZFighterAndroid", "power.zfighter.ZFighterFrostForms",
+			"power.zfighter.ZFighterPatrolRelief", "power.zfighter.ZFighterBranchForms", "power.zfighter.ZFighterEgo", "power.zfighter.ZFighterAndroid", "power.zfighter.ZFighterFrostForms",
 			"power.zfighter.ZFighterSites", "power.zfighter.ZFighterFusion", "power.zfighter.ZFighterMasters", "power.zfighter.ZFighterRaids", "power.zfighter.ZFighterTournaments", "power.zfighter.ZFighterCorruption",
 			"power.zfighter.ZFighterAura", "power.zfighter.ZFighterSlots", "power.zfighter.ZFighterKiWeapon","power.zfighter.ZFighterGrab", "power.zfighter.ZFighterSidestep",
 			"power.zfighter.ZFighterFusionItems", "power.zfighter.ZFighterFiveFusion", "power.zfighter.ZFighterMasterFusion", "power.zfighter.ZFighterFalseSuper", "power.zfighter.ZFighterGoldenApe", "power.zfighter.ZFighterGod", "power.zfighter.ZFighterGodRitual", "power.zfighter.ZFighterInstinct", "power.zfighter.ZFighterLegendary",
