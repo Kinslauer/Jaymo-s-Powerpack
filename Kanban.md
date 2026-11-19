@@ -16,7 +16,7 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/rig-beetle-3-back-rig|rig-beetle-3-back-rig]] · 🍇 Bacchus · claimed
+- [ ] [[Inbox/rig-beetle-3-back-rig|rig-beetle-3-back-rig]] · 🍇 Bacchus · #1777 · claimed
 
 
 ## In review
