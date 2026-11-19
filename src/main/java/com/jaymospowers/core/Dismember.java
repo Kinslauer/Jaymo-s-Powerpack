@@ -703,6 +703,8 @@ public final class Dismember {
 	public static final float LETHAL_BLUNT_SEVER = 0.05F;
 	/** Set on {@link #lethalPart}'s answer: break the part, don't sever it. */
 	public static final int LETHAL_BREAK = 1 << 8;
+	/** Set on {@link #lethalPart}'s answer (with {@link #HEAD}): crush the skull ({@link #crushSkull}). */
+	public static final int LETHAL_CRUSH = 1 << 9;
 	/** A lethal hit already rolled on this body this tick (game time): its death's later hooks don't roll it again. */
 	private static final Map<LivingEntity, Long> LETHAL_ROLLED = new java.util.WeakHashMap<>();
 
@@ -756,6 +758,11 @@ public final class Dismember {
 		ItemStack weapon = attacker.getMainHandItem();
 		boolean cut = cutting != null && cutting.target == target || blade(weapon);
 		boolean blunt = !cut && (weapon.isEmpty() || Fractures.blunt(weapon));
+		// (Andy, 2026-11-19) "maces and blunt weapons should crush skulls upon a blow that connects on [the head] and kills":
+		// a mace's, hammer's or club's killing blow to the head crushes it, unless the helmet turns it
+		if (part == HEAD && !cut && Fractures.blunt(weapon) && target.getRandom().nextFloat() < armourGuard(target, HEAD)) {
+			return HEAD | LETHAL_CRUSH;
+		}
 		// (Andy, 2026-11-18) a crushing blow (a mutant's slam) tears off what it lands on far more often than a club
 		float chance = BlastGore.crushedNow(target) ? BlastGore.CRUSH_SEVER : blunt ? LETHAL_BLUNT_SEVER : shortBlade(weapon) ? (part == HEAD ? LETHAL_SHORT_HEAD_CHANCE : LETHAL_SHORT_LIMB_CHANCE)
 			: part == HEAD ? LETHAL_HEAD_CHANCE : LETHAL_LIMB_CHANCE;
@@ -767,6 +774,32 @@ public final class Dismember {
 		return blunt && target.getRandom().nextFloat() < guard ? part | LETHAL_BREAK : 0;
 	}
 
+	/**
+	 * Andy (2026-11-19): players "who take a decapitating or head crushing blow ... cannot be revived, and [it] forces a
+	 * reincarnation". The blow that finishes a downed player ({@code Downed}), if it lands on the head (where Wounds routed
+	 * it, else the attacker's aim, {@link #aimedPart}): a blade takes the head off as a killing blow takes a mob's
+	 * ({@link #LETHAL_HEAD_CHANCE}, a short blade's {@link #LETHAL_SHORT_HEAD_CHANCE}), a blunt weapon crushes it
+	 * ({@link #crushSkull}); the helmet may turn either ({@link #armourGuard}). Only the downed ({@link #playerHeadMayGo}),
+	 * never in creative. Headless, the death is Mortality's beheading: final, past any reviving. True if the head went.
+	 */
+	public static boolean playerHeadBlow(LivingEntity target, DamageSource source, com.jaymospowers.core.wounds.@Nullable BodyPart landed) {
+		if (!(target instanceof Player player) || player.isCreative() || player.isSpectator() || !playerHeadMayGo(target) || headless(target)
+			|| !(source.getEntity() instanceof LivingEntity attacker) || attacker == target || source.getDirectEntity() != attacker) {
+			return false;
+		}
+		int part = landed != null ? com.jaymospowers.core.wounds.Breaks.limb(landed) : aimedPart(attacker, target);
+		if (part != HEAD) {
+			return false;
+		}
+		ItemStack weapon = attacker.getMainHandItem();
+		float guard = armourGuard(target, HEAD);
+		if (blade(weapon)) {
+			float chance = shortBlade(weapon) ? LETHAL_SHORT_HEAD_CHANCE : LETHAL_HEAD_CHANCE;
+			return target.getRandom().nextFloat() < chance * guard && sever(target, HEAD, attacker);
+		}
+		return Fractures.blunt(weapon) && target.getRandom().nextFloat() < guard && crushSkull(target, attacker);
+	}
+
 	/** Does what {@link #lethalPart} picked: severs the part (a skeleton's shatters), or breaks it. True if anything happened. */
 	public static boolean lethalSever(LivingEntity target, int part, DamageSource source) {
 		LivingEntity by = source.getEntity() instanceof LivingEntity living ? living : null;
@@ -774,6 +807,10 @@ public final class Dismember {
 			return false;
 		}
 		boolean bones = target.getType().builtInRegistryHolder().is(EntityTypeTags.SKELETONS);
+		if ((part & LETHAL_CRUSH) != 0) {
+			// (a skeleton's skull shatters as its bones always have)
+			return bones ? shatter(target, HEAD, by) : crushSkull(target, by);
+		}
 		if ((part & LETHAL_BREAK) != 0) {
 			part &= ~LETHAL_BREAK;
 			// (a skeleton's bones break as Fractures breaks them: they shatter)
@@ -857,6 +894,38 @@ public final class Dismember {
 	 */
 	public static boolean shatter(LivingEntity target, int part, @Nullable LivingEntity by) {
 		return lose(target, part, by, true, null, false);
+	}
+
+	/**
+	 * Andy (2026-11-19): "maces and blunt weapons should crush skulls upon a blow that connects on [the head] and kills.
+	 * crushing should leave white debris and smaller offal like pebbles called brain matter". The killing blow of a blunt
+	 * weapon on {@code target}'s head ({@link #lethalPart}) caves it in: the head is gone as a severed one is, but nothing
+	 * flies off whole. A crack and a burst of white bone and blood, and Jaymo's Kitchen throws pieces of skull and jaw and
+	 * lumps of brain and leaves brain matter on the ground ({@link com.jaymospowers.power.web.KitchenCompat#skullCrushed}). The helmet falls. True if it
+	 * went.
+	 */
+	public static boolean crushSkull(LivingEntity target, @Nullable LivingEntity by) {
+		if (!(target.level() instanceof ServerLevel level) || headless(target) || !playerHeadMayGo(target)) {
+			return false;
+		}
+		Vec3 at = stump(target, HEAD);
+		target.setAttached(MISSING, missing(target) | HEAD);
+		target.addTag(tag(HEAD));
+		Fractures.crack(level, target, HEAD);
+		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), at.x, at.y, at.z, 30,
+			0.2, 0.2, 0.2, 0.3);
+		if (BladeBlood.bleeds(target)) {
+			gore(level, target, HEAD);
+		}
+		com.jaymospowers.power.web.KitchenCompat.skullCrushed(target, at);
+		ItemStack helmet = target.getItemBySlot(EquipmentSlot.HEAD);
+		if (!helmet.isEmpty()) {
+			target.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
+			drop(level, target, helmet);
+		}
+		track(target);
+		// (only ever a killing blow's: the death goes on as it was, so no staggering about headless)
+		return true;
 	}
 
 	/**

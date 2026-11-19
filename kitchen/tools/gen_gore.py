@@ -1,5 +1,6 @@
 """The insides of a body blown apart or eaten (corpse/Gibs, client GibRenderer) as a Blockbench model:
-tools/bbmodels/gore-pieces.bbmodel, six groups laid out side by side (organ, guts, ribs, spine, bone, tatters), each
+tools/bbmodels/gore-pieces.bbmodel, groups laid out in rows (organ, guts, ribs, spine, bone, tatters; then the variants: heart,
+liver, lung, kidney, brain matter, skull; long gut rope, gut loop, gut heap, jaw), each
 about its own middle, with one painted 64x64 texture. The soft pieces (organ, guts) are painted in greys because the
 game tints them with the body's own blood colour; bone is painted as it is; the tatters' swatch is plain cloth, used
 only when the game can't cut the scrap from the body's own skin (their top and bottom faces are mapped flat over the
@@ -21,6 +22,7 @@ SIZE = 64
 ORGAN = [(236, 236, 236), (204, 204, 204), (166, 166, 166), (124, 124, 124), (92, 92, 92)]
 GUT = [(255, 255, 255), (236, 236, 236), (208, 208, 208), (172, 172, 172), (140, 140, 140)]
 BONE = [(252, 251, 237), (230, 226, 207), (197, 192, 165), (160, 154, 128), (122, 116, 96)]
+BRAIN = [(236, 204, 202), (220, 182, 182), (196, 154, 158), (166, 124, 130), (132, 94, 102)]
 CLOTH = [(156, 138, 110), (139, 122, 96), (116, 100, 78), (92, 78, 60), (70, 58, 44)]
 BLOOD = [(125, 31, 32), (90, 20, 22)]
 MARROW = [(120, 44, 40), (88, 28, 28)]
@@ -60,14 +62,19 @@ def paint(sheet, at, w, h, look, face):
                 colour = palette[min(len(palette) - 1, k + 2)]
             elif style == 'bone' and rng.random() < 0.07:
                 colour = rng.choice(BLOOD)
+            elif style == 'brain' and rng.random() < 0.3:
+                # a brain's folds: darker crevices
+                colour = palette[min(len(palette) - 1, k + 2)]
+            elif style == 'brain' and rng.random() < 0.05:
+                colour = rng.choice(BLOOD)
             elif style == 'marrow':
                 colour = rng.choice(MARROW)
             sheet.img.putpixel((at[0] + i, at[1] + j), colour + (255,))
 
 
 class Piece:
-    def __init__(self, name, x):
-        self.name, self.x, self.cubes = name, x, []
+    def __init__(self, name, x, z=0):
+        self.name, self.x, self.z, self.cubes = name, x, z, []
 
     def cube(self, lo, size, rot=(0, 0, 0), look=None, name=None, faces=None):
         hi = [lo[i] + size[i] for i in range(3)]
@@ -168,6 +175,122 @@ def tatters():
     return p
 
 
+# ---- the variants (Andy, 2026-11-19: "there should be more entrail variations"), in rows behind the first six ----
+
+def rope(p, path, thick, lift=0.8):
+    """A rope of gut along {@code path}, each length a little long so it has no gaps at its bends."""
+    for a, b in zip(path, path[1:]):
+        a, b = (a[0], a[1] + lift, a[2]), (b[0], b[1] + lift, b[2])
+        d = [(b[i] - a[i]) / math.dist(a, b) * 0.4 for i in range(3)]
+        p.rod([a[i] - d[i] for i in range(3)], [b[i] + d[i] for i in range(3)], thick, (GUT, 'gut'))
+
+
+def heart():
+    p = Piece('heart', -30, 14)
+    look = (ORGAN, 'organ')
+    p.cube((-1.5, 0, -1.4), (3, 3.2, 2.8), (0, 10, 0), look)
+    p.cube((-1.0, 0.1, 1.2), (2, 2, 1.6), (0, 10, 0), look)
+    p.cube((-0.5, 0.3, 2.6), (1, 1.2, 1), (0, 10, 0), look)
+    # the great vessels, cut short
+    p.cube((-1.0, 3.0, -0.9), (0.9, 1.2, 0.9), (0, 0, 8), (GUT, 'plain'))
+    p.cube((0.3, 2.9, -0.4), (0.8, 1.0, 0.8), (0, 0, -10), (GUT, 'plain'))
+    return p
+
+
+def liver():
+    p = Piece('liver', -18, 14)
+    look = (ORGAN, 'organ')
+    p.cube((-2.6, 0, -1.6), (3.6, 1.6, 3.2), (0, 6, 0), look)
+    p.cube((0.8, 0, -1.2), (2.4, 1.2, 2.4), (0, -14, 0), look)
+    p.cube((-3.4, 0, -0.8), (1.2, 1.0, 1.8), (0, 10, 0), look)
+    p.cube((0.2, 0.9, 0.9), (0.9, 0.8, 1.1), (0, 20, 0), (GUT, 'plain'))
+    return p
+
+
+def lung():
+    p = Piece('lung', -6, 14)
+    look = (GUT, 'organ')
+    p.cube((-2.4, 0, -2.2), (2.2, 1.8, 4.4), (0, 8, 0), look)
+    p.cube((0.3, 0, -1.8), (2.0, 1.6, 3.8), (0, -8, 0), look)
+    p.cube((-0.4, 0.5, -3.6), (0.8, 0.8, 1.8), (0, 0, 0), (GUT, 'gut'))
+    return p
+
+
+def kidney():
+    p = Piece('kidney', 6, 14)
+    look = (ORGAN, 'organ')
+    for side, turn in ((-1.6, 12), (1.0, -18)):
+        p.cube((side - 0.6, 0, -1.3), (1.3, 1.1, 2.6), (0, turn, 0), look)
+        p.cube((side + 0.4, 0.05, -0.5), (0.7, 0.9, 1.0), (0, turn, 0), (GUT, 'plain'))
+    return p
+
+
+def brain():
+    """Brain matter: little pale lumps like pebbles, with chips of skull among them (painted, never tinted)."""
+    p = Piece('brain', 18, 14)
+    look = (BRAIN, 'brain')
+    for x, z, s, turn in ((-1.8, -1.2, 1.5, 10), (0.6, -1.8, 1.1, -20), (1.4, 0.6, 1.3, 30), (-0.8, 1.2, 0.9, -5),
+                          (-2.6, 0.8, 0.8, 40), (2.4, -0.6, 0.7, 15)):
+        p.cube((x - s / 2, 0, z - s / 2), (s, s * 0.7, s), (0, turn, 0), look)
+    for x, z, turn in ((0.2, 0.2, 25), (-2.0, -2.6, -30)):
+        p.cube((x, 0, z), (0.7, 0.3, 0.5), (0, turn, 0), (BONE, 'bone'))
+    return p
+
+
+def skull():
+    """A piece of a crushed skull: a curved plate of bone, bloodied inside, with a jagged edge."""
+    p = Piece('skull', 30, 14)
+    look = (BONE, 'bone')
+    p.cube((-1.4, 1.4, -1.6), (2.8, 0.6, 3.2), (0, 0, 0), look, faces={'down': (BLOOD, 'plain')})
+    p.cube((-2.5, 0.3, -1.4), (1.4, 0.6, 2.8), (0, 0, -40), look, faces={'down': (BLOOD, 'plain')})
+    p.cube((1.1, 0.3, -1.4), (1.4, 0.6, 2.8), (0, 0, 40), look, faces={'down': (BLOOD, 'plain')})
+    p.cube((-0.6, 1.5, 1.4), (1.0, 0.5, 0.8), (0, 25, 0), look)
+    p.cube((0.2, 1.5, -2.3), (0.9, 0.5, 0.9), (0, -20, 0), look)
+    return p
+
+
+def guts_rope():
+    """A long rope of gut, trailing loose."""
+    p = Piece('guts_rope', -30, 28)
+    path = [(-7 + i * 1.75, 0.15 * math.sin(i), 1.3 * math.sin(i * 0.9)) for i in range(9)]
+    rope(p, path, 1.4)
+    return p
+
+
+def guts_loop():
+    """A loop of gut that came out whole, its ends trailing."""
+    p = Piece('guts_loop', -12, 28)
+    path = [(-5.5, 0, -0.5), (-3.5, 0.1, -2.6), (-0.5, 0.2, -3.4), (2.5, 0.1, -2.6), (4.0, 0, -0.4), (2.6, 0.2, 1.8),
+            (-0.4, 0.4, 2.4), (-2.8, 0.2, 1.4), (-1.6, 0.6, -0.8), (1.2, 0.5, -0.6), (3.0, 0.2, 3.6), (5.5, 0, 4.2)]
+    rope(p, path, 1.5)
+    return p
+
+
+def guts_skein():
+    """A heap of gut, folded back and forth on itself."""
+    p = Piece('guts_skein', 8, 28)
+    path = []
+    for row in range(5):
+        z = -3 + row * 1.5
+        xs = (-3.5, 3.5) if row % 2 == 0 else (3.5, -3.5)
+        y = 0.35 * (row % 3)
+        path += [(xs[0], y, z), (xs[0] * 0.2, y + 0.3, z + 0.3), (xs[1], y, z)]
+    rope(p, path, 1.3)
+    return p
+
+
+def jaw():
+    """A broken jaw with its teeth."""
+    p = Piece('jaw', 26, 28)
+    look = (BONE, 'bone')
+    p.cube((-1.5, 0, -2.2), (3.0, 0.9, 0.9), (0, 0, 0), look)
+    p.rod((-1.4, 0.45, -1.9), (-2.6, 0.45, 1.4), 0.9, look)
+    p.rod((1.4, 0.45, -1.9), (2.2, 0.45, 0.6), 0.9, look, faces={'south': (MARROW, 'marrow')})
+    for x in (-1.1, -0.4, 0.3, 1.0):
+        p.cube((x, 0.9, -2.1), (0.45, 0.5, 0.45), (0, 0, 0), (BONE[:2], 'plain'))
+    return p
+
+
 FACES = {'north': (0, 1), 'south': (0, 1), 'east': (2, 1), 'west': (2, 1), 'up': (0, 2), 'down': (0, 2)}
 
 
@@ -180,7 +303,9 @@ def build():
             k = 1 + ((i + j) % 2) + rng.choice((0, 0, 1))
             colour = rng.choice(BLOOD) if (i - SWATCH[0]) + (SWATCH[3] - 1 - j) < 3 or rng.random() < 0.06 else CLOTH[min(4, k)]
             sheet.img.putpixel((i, j), colour + (255,))
-    for piece in (organ(), guts(), ribs(), spine(), bone(), tatters()):
+    # (the first six as they always were, so their paint stays the same; the variants after them)
+    for piece in (organ(), guts(), ribs(), spine(), bone(), tatters(), heart(), liver(), lung(), kidney(), brain(), skull(),
+                  guts_rope(), guts_loop(), guts_skein(), jaw()):
         # its bounds as it lies, turns and all, so the group sits about its middle
         corners = []
         for c in piece.cubes:
@@ -192,7 +317,7 @@ def build():
         lo = [min(p[i] for p in corners) for i in range(3)]
         hi = [max(p[i] for p in corners) for i in range(3)]
         # lifted so it stands on the ground in Blockbench, moved along x to its own place
-        move = (piece.x - (lo[0] + hi[0]) / 2, -lo[1], -(lo[2] + hi[2]) / 2)
+        move = (piece.x - (lo[0] + hi[0]) / 2, -lo[1], piece.z - (lo[2] + hi[2]) / 2)
         children = []
         for c in piece.cubes:
             f = [round(c['lo'][i] + move[i], 4) for i in range(3)]
@@ -224,7 +349,7 @@ def build():
                        'uuid': uid()}
             elements.append(element)
             children.append(element['uuid'])
-        origin = [piece.x, round((hi[1] - lo[1]) / 2, 4), 0]
+        origin = [piece.x, round((hi[1] - lo[1]) / 2, 4), piece.z]
         outliner.append({'name': piece.name, 'origin': origin, 'rotation': [0, 0, 0], 'color': 0, 'uuid': uid(), 'export': True,
                          'isOpen': False, 'locked': False, 'visibility': True, 'autouv': 0, 'children': children})
     data = io.BytesIO()

@@ -271,6 +271,37 @@ public final class KitchenCompat {
 		return true;
 	}
 
+	private static java.lang.reflect.@Nullable Method skullCrushedMethod;
+	private static boolean skullCrushedLooked;
+
+	/**
+	 * A blunt killing blow crushed {@code body}'s head at {@code head} ({@code Dismember#crushSkull}): Kitchen throws pieces
+	 * of skull and lumps of brain and leaves brain matter on the ground ({@code Gibs.skullCrushed}, by reflection, so an older
+	 * Kitchen without it is fine). True if it did.
+	 */
+	public static boolean skullCrushed(net.minecraft.world.entity.LivingEntity body, net.minecraft.world.phys.Vec3 head) {
+		if (!LOADED) {
+			return false;
+		}
+		if (!skullCrushedLooked) {
+			skullCrushedLooked = true;
+			try {
+				skullCrushedMethod = Class.forName("com.jaymoskitchen.corpse.Gibs").getMethod("skullCrushed",
+					net.minecraft.world.entity.LivingEntity.class, net.minecraft.world.phys.Vec3.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				skullCrushedMethod = null;
+			}
+		}
+		if (skullCrushedMethod == null) {
+			return false;
+		}
+		try {
+			return (boolean) skullCrushedMethod.invoke(null, body, head);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
 	/** (0.14.4) Wounds: how drunk a player is (Kitchen's {@code Drunk} points), 0 without Kitchen. */
 	public static int drunk(Player player) {
 		return LOADED ? Kitchen.drunk(player) : 0;

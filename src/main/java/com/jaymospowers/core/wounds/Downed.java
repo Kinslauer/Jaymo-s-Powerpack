@@ -409,7 +409,8 @@ public final class Downed {
 			}
 			// (Andy, 2026-11-16) a hit that would have killed a humanoid takes a part off; a head (half the time) ends them
 			int lethal = Dismember.lethalPart(entity, source, Wounds.landed(entity, source));
-			if (lethal == Dismember.HEAD) {
+			// (a head taken off or crushed in ends them)
+			if ((lethal & ~Dismember.LETHAL_CRUSH) == Dismember.HEAD) {
 				Dismember.lethalSever(entity, lethal, source);
 				return true;
 			}
@@ -448,9 +449,12 @@ public final class Downed {
 				if (!(entity instanceof Player)) {
 					blowLands(level, entity, source, false);
 				}
+				// (Andy, 2026-11-19) a player's finishing blow to the head takes it off or crushes it before they die, so the
+				// death is a beheading: no reviving it, a reincarnation (Mortality)
+				boolean headGone = !burst && Dismember.playerHeadBlow(entity, source, Wounds.landed(entity, source));
 				finish(level, entity);
 				// (Andy, 2026-11-16) the killing hit takes a part off the body (a burst one has none left to take)
-				if (entity.isDeadOrDying() && !burst) {
+				if (entity.isDeadOrDying() && !burst && !headGone) {
 					Dismember.lethalBlow(entity, source, null);
 				}
 				return false;

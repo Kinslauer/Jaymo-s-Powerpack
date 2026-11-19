@@ -1,0 +1,7 @@
+# entrail variety, intestines on the ground, crushed skulls
+- **Why intestines never showed**: a body blown apart threw its gut ropes only as short coils that tumbled and sank away in 20-45 s (and looked much like an organ), while its entrails landed on the ground only ever as gut piles (offal). Now a blast's entrails land as **Intestines** piles and gut piles in turn (two pieces or more give both), and a body a predator ate leaves one or the other.
+- **Intestines** (new block + item, `Butchery.INTESTINES_PILE`): ropes of gut lying in 1-4 coils, set down, taken back, smelled by scavengers and rotting away as a gut pile does (an `OffalPileBlock`); raw meat, wolf food.
+- **More entrail looks** (`tools/bbmodels/gore-pieces.bbmodel`, from `kitchen/tools/gen_gore.py`): an organ is now a lump, a heart, a liver, a lung or a pair of kidneys, and a gut piece a coil, a long trailing rope, a loop or a heap folded on itself. Each thrown piece picks one by its id (`GibRenderer.GORE_BONES`).
+- **Crushed skulls** (`Gibs.skullCrushed`, called by Jaymo's Powers): pieces of skull and jaw (`Gib.SKULL`) and lumps of brain (`Gib.BRAIN`) fly a little way, a puff of white bone dust, and **Brain Matter** (new block + item, `BrainMatterBlock`) lands under the head: small pale pebbles with white chips of skull, 1-4 to a block, rotting away like offal. Bodies with no blood leave only the bone, machines nothing.
+- Art and models from `kitchen/tools/gen_gut_piles.py`.
+- Built; not played.

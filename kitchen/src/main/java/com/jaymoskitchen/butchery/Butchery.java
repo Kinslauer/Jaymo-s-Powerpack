@@ -58,6 +58,9 @@ public final class Butchery {
 	/** Andy: "Yes i do" (gutting). What comes out of a carcass gutted on the hook ({@code corpse/Hanging}), raw and cooked. */
 	public static Item OFFAL, COOKED_OFFAL;
 	public static Block OFFAL_PILE;
+	/** (Andy, 2026-11-19) Gut ropes lying on the ground (from a body blown apart), and the brain matter of a crushed skull. */
+	public static Item INTESTINES, BRAIN_MATTER;
+	public static Block INTESTINES_PILE, BRAIN_MATTER_PILE;
 	public static Item BLOOD_MEAL, RAW_BLOOD_SAUSAGE, BLOOD_SAUSAGE, LEATHER_SCRAPS, SUPPLE_LEATHER, HARNESS_LEATHER, HARDENED_LEATHER;
 	public static Block HIDE_RUG;
 
@@ -93,6 +96,18 @@ public final class Butchery {
 			.setId(pileKey)));
 		OFFAL = item("offal", properties -> new BlockItem(OFFAL_PILE, properties), new Item.Properties().food(food(2, 0.1F)));
 		COOKED_OFFAL = item("cooked_offal", Item::new, new Item.Properties().food(food(5, 0.6F)));
+		// (Andy, 2026-11-19: "intestines and offal should fall from gibs") a heap of gut rope, set down as a gut pile is
+		ResourceKey<Block> gutKey = ResourceKey.create(Registries.BLOCK, JaymosKitchen.id("intestines_pile"));
+		INTESTINES_PILE = Registry.register(BuiltInRegistries.BLOCK, gutKey, new OffalPileBlock(BlockBehaviour.Properties.of()
+			.mapColor(MapColor.COLOR_PINK).instabreak().sound(SoundType.SLIME_BLOCK).noCollision().noOcclusion().randomTicks()
+			.setId(gutKey)));
+		INTESTINES = item("intestines", properties -> new BlockItem(INTESTINES_PILE, properties), new Item.Properties().food(food(2, 0.1F)));
+		// ("crushing should leave white debris and smaller offal like pebbles called brain matter")
+		ResourceKey<Block> brainKey = ResourceKey.create(Registries.BLOCK, JaymosKitchen.id("brain_matter_pile"));
+		BRAIN_MATTER_PILE = Registry.register(BuiltInRegistries.BLOCK, brainKey, new BrainMatterBlock(BlockBehaviour.Properties.of()
+			.mapColor(MapColor.TERRACOTTA_WHITE).instabreak().sound(SoundType.SLIME_BLOCK).noCollision().noOcclusion().randomTicks()
+			.setId(brainKey)));
+		BRAIN_MATTER = item("brain_matter", properties -> new BlockItem(BRAIN_MATTER_PILE, properties), new Item.Properties());
 		SUPPLE_LEATHER = item("supple_leather", Item::new, new Item.Properties());
 		HARNESS_LEATHER = item("harness_leather", Item::new, new Item.Properties());
 		HARDENED_LEATHER = item("hardened_leather", Item::new, new Item.Properties());
@@ -123,9 +138,10 @@ public final class Butchery {
 			output.accept(new ItemStack(BLOOD_SAUSAGE));
 			output.accept(new ItemStack(OFFAL));
 			output.accept(new ItemStack(COOKED_OFFAL));
+			output.accept(new ItemStack(INTESTINES));
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
-			for (Item item : List.of(BLOOD_MEAL, LEATHER_SCRAPS, SUPPLE_LEATHER, HARNESS_LEATHER, HARDENED_LEATHER)) {
+			for (Item item : List.of(BLOOD_MEAL, LEATHER_SCRAPS, SUPPLE_LEATHER, HARNESS_LEATHER, HARDENED_LEATHER, BRAIN_MATTER)) {
 				output.accept(new ItemStack(item));
 			}
 		});
