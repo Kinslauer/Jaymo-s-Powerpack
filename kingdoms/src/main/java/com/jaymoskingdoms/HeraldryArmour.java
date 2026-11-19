@@ -38,6 +38,9 @@ import org.jspecify.annotations.Nullable;
  * <li>Every plate piece comes bright, blackened or gilded ({@link #FINISH}, chosen at the smith's anvil; gilded is for
  * royals and lords, {@link HeraldryWear}).</li>
  * <li>A helm with a visor can have it raised ({@link Visors}).</li>
+ * <li>The wider makes: the fluted cuirass and the rounded breastplate beside the plain one, the coat of plates (cloth in
+ * the realm's colour over riveted plates), the gorget at the neck, faulds and tassets at the waist, spaulders with
+ * rondels, and the tabard in a realm's arms ({@link #ARMS}).</li>
  * </ul>
  * All of it is drawn from baked models by the client's {@code HeraldryLayer}.
  */
@@ -56,6 +59,20 @@ public final class HeraldryArmour {
 	public static final DataComponentType<Boolean> VISOR_UP = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosKingdoms.id("visor_up"),
 		DataComponentType.<Boolean>builder().persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build());
 
+	/**
+	 * A realm's arms on a heraldic tabard, front and back: which of the realm ordinaries ({@code Outfits.ORDINARIES}, by
+	 * index) laid in the {@code charge} colour (rgb) over the tabard's own dye, the field.
+	 */
+	public record Arms(int ordinary, int charge) {
+		static final Codec<Arms> CODEC = com.mojang.serialization.codecs.RecordCodecBuilder.create(i -> i.group(
+			Codec.INT.fieldOf("ordinary").forGetter(Arms::ordinary), Codec.INT.fieldOf("charge").forGetter(Arms::charge)).apply(i, Arms::new));
+		static final net.minecraft.network.codec.StreamCodec<io.netty.buffer.ByteBuf, Arms> STREAM_CODEC = net.minecraft.network.codec.StreamCodec.composite(
+			ByteBufCodecs.VAR_INT, Arms::ordinary, ByteBufCodecs.INT, Arms::charge, Arms::new);
+	}
+
+	public static final DataComponentType<Arms> ARMS = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosKingdoms.id("arms"),
+		DataComponentType.<Arms>builder().persistent(Arms.CODEC).networkSynchronized(Arms.STREAM_CODEC).build());
+
 	/** How a helm covers the face: not at all, with a visor that lifts, or with a plate that doesn't. */
 	public enum Face {
 		OPEN, VISORED, FIXED
@@ -73,6 +90,12 @@ public final class HeraldryArmour {
 	static final ArmorMaterial PLATE = new ArmorMaterial(PLATE_DURABILITY,
 		ArmorMaterials.makeDefense(SABATON_ARMOUR, CUIRASS_ARMOUR, CUIRASS_ARMOUR, HELM_ARMOUR, CUIRASS_ARMOUR), PLATE_ENCHANT, SoundEvents.ARMOR_EQUIP_IRON,
 		PLATE_TOUGHNESS, PLATE_KNOCKBACK, Armory.STEEL_INGOTS, ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosKingdoms.id("heraldry_plate")));
+	/** The coat of plates: plates riveted inside a cloth coat, a little weaker than a cuirass, mended with iron. */
+	static final int COAT_DURABILITY = 22, COAT_ARMOUR = 4;
+	static final float COAT_TOUGHNESS = 0.5F;
+	static final ArmorMaterial COAT = new ArmorMaterial(COAT_DURABILITY,
+		ArmorMaterials.makeDefense(SABATON_ARMOUR, COAT_ARMOUR, COAT_ARMOUR, HELM_ARMOUR, COAT_ARMOUR), PLATE_ENCHANT, SoundEvents.ARMOR_EQUIP_IRON,
+		COAT_TOUGHNESS, 0.0F, net.minecraft.tags.ItemTags.REPAIRS_IRON_ARMOR, ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosKingdoms.id("heraldry_plate")));
 
 	/** Every piece by name (its item id), in the order they were registered. */
 	public static final Map<String, Piece> PIECES = new LinkedHashMap<>();
@@ -151,7 +174,14 @@ public final class HeraldryArmour {
 				worn("hide_armor", ArmorType.CHESTPLATE);
 				worn("bronze_armor", ArmorType.CHESTPLATE);
 				worn("laced_lamellar", ArmorType.CHESTPLATE);
-				List<Item> all = new ArrayList<>();
+		// the wider makes (Harness 2): two more cuirasses, the coat of plates, the gorget, faulds and tassets, rondels
+		worn("fluted_cuirass", ArmorType.CHESTPLATE);
+		worn("rounded_breastplate", ArmorType.CHESTPLATE);
+		coat("coat_of_plates");
+		part("gorget", Harness.Slot.NECK, 1, 0.5F, 240, true, null, "gorget");
+		part("faulds_and_tassets", Harness.Slot.WAIST, 1, 0.5F, 280, true, null, "faulds_and_tassets");
+		part("rondel_spaulders", Harness.Slot.SHOULDERS, 1, 1.0F, 280, true, null, "rondel_spaulders");
+		List<Item> all = new ArrayList<>();
 		PIECES.values().forEach(p -> all.add(p.item()));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
 			Item after = Items.NETHERITE_BOOTS;
@@ -173,6 +203,13 @@ public final class HeraldryArmour {
 		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id(name));
 		Item item = Registry.register(BuiltInRegistries.ITEM, key, new Item(new Item.Properties().setId(key).humanoidArmor(PLATE, type)));
 		put(new Piece(name, item, null, 0, 0.0F, true, "heraldry_" + name, null, 1.0F, 0.0F));
+	}
+
+	/** The coat of plates: worn in the chestplate slot, cloth outside (dyed like the doublet, so no finish), plates within. */
+	private static void coat(String name) {
+		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id(name));
+		Item item = Registry.register(BuiltInRegistries.ITEM, key, new Item(new Item.Properties().setId(key).humanoidArmor(COAT, ArmorType.CHESTPLATE)));
+		put(new Piece(name, item, null, 0, 0.0F, false, "heraldry_" + name, null, 1.0F, 0.0F));
 	}
 
 	/** A piece for a {@link Harness} slot; {@code mend} is what repairs it (null: steel for plate, nothing for cloth). */

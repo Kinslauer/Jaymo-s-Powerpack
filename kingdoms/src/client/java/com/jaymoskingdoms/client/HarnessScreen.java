@@ -13,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 /**
  * The harness screen ({@link HarnessMenu}): the wearer in the middle; helmet, chestplate, leggings and boots down the
  * left with the hood, the over-garment, cuisses and greaves beside them; the crest, spaulders, arm harness and gauntlets
- * down the right with the mail and padding beside those. A bare place shows the first letter of its name, faintly,
+ * down the right with the gorget, mail, padding and tassets beside those. A bare place shows the first letter of its name, faintly,
  * and says what it is under the mouse. Drawn like the H screen: a dark panel with a gold stripe, sunken slots.
  */
 public class HarnessScreen extends AbstractContainerScreen<HarnessMenu> {

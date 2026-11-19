@@ -41,8 +41,11 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Kings and lords</b> wear their realm's crest beast over the crown, its torse in the realm's colour, and gilded
  * spaulders. The beast comes from the realm as its arms do. A player who takes a crown is given theirs.</li>
  * <li><b>Gilded plate</b> is for royals and lords: anyone else who puts a gilded piece on has it come off again.</li>
- * <li><b>Tailors</b> (shepherds) sell the arming doublet, hood and cloak, and in a realm the giornea and the torse;
- * a kingdom's armourer sells the crests anyone may wear, the horns and the wings.</li>
+ * <li><b>Tailors</b> (shepherds) sell the arming doublet, hood and cloak, and in a realm the giornea, the torse and
+ * the tabard in the realm's arms; a realm's armourer sells the coat of plates in its colour, and a kingdom's the crests
+ * anyone may wear, the horns and the wings.</li>
+ * <li>Each realm's knights wear its own make of cuirass (plain, fluted or rounded) where creed and land don't choose
+ * one, a gorget, faulds and tassets, and some realms put rondels on their plate spaulders.</li>
  * <li><b>Torn cloth</b>: a bandit leader and his men go in torn hoods and cloaks, and the Banished start with both.</li>
  * </ul>
  */
@@ -54,6 +57,10 @@ public final class HeraldryWear {
 	static final float BANDIT_CLOAK_SHARE = 0.5F;
 	/** Prices (emeralds): the tailor's cloth, and the armourer's crests. */
 	static final int DOUBLET_PRICE = 4, HOOD_PRICE = 3, CLOAK_PRICE = 6, GIORNEA_PRICE = 9, TORSE_PRICE = 5, CREST_PRICE = 14;
+	/** Prices (emeralds): a realm tailor's tabard in its arms, and a realm armourer's coat of plates (cheaper than plate). */
+	static final int TABARD_PRICE = 8, COAT_PRICE = 16;
+	/** The makes of cuirass a realm's knights may wear, one to a realm. */
+	static final List<String> CUIRASSES = List.of("plate_cuirass", "fluted_cuirass", "rounded_breastplate");
 	static final int USES = 3, XP = 5;
 	static final float PRICE_MULT = 0.05F;
 	/** The lands whose realms field knights in the harness (the others keep their own land's gear). */
@@ -137,6 +144,23 @@ public final class HeraldryWear {
 	private static ItemStack dyed(ItemStack stack, int rgb) {
 		stack.set(DataComponents.DYED_COLOR, new DyedItemColor(rgb));
 		return stack;
+	}
+
+	/** A heraldic tabard in {@code f}'s realm's arms: dyed its field, its ordinary laid front and back in the charge's colour. */
+	static ItemStack tabard(@Nullable MinecraftServer server, Faction f) {
+		return withArms(dyed(HeraldryArmour.stack("tabard"), Outfits.rgb(Outfits.heraldry(f, server).field())), server, f);
+	}
+
+	/** {@code tabard} (already dyed) with {@code f}'s realm's ordinary laid on it in the charge's colour. */
+	static ItemStack withArms(ItemStack tabard, @Nullable MinecraftServer server, Faction f) {
+		Outfits.Heraldry arms = Outfits.heraldry(f, server);
+		tabard.set(HeraldryArmour.ARMS, new HeraldryArmour.Arms(arms.ordinary(), Outfits.rgb(arms.charge())));
+		return tabard;
+	}
+
+	/** The coat of plates in {@code f}'s realm's colour, as its armourers sell it. */
+	static ItemStack coatOfPlates(@Nullable MinecraftServer server, Faction f) {
+		return dyed(HeraldryArmour.stack("coat_of_plates"), Outfits.rgb(Outfits.heraldry(f, server).field()));
 	}
 
 	// ---- knights -------------------------------------------------------------------------------------------------------
@@ -247,7 +271,7 @@ public final class HeraldryWear {
 		/** The cuirass name for {@code f}'s knights based on creed and climate. */
 		private static String cuirassName(Faction f, Climate climate, @Nullable MinecraftServer server) {
 			if (server == null) {
-				return "plate_cuirass";
+				return realmCuirass(f);
 			}
 			GreatWars.Creed creed = GreatWars.creed(server, f);
 			// Creed-specific cuirasses
@@ -276,7 +300,18 @@ public final class HeraldryWear {
 			if (climate == Climate.BADLANDS) {
 				return "bronze_armor";
 			}
-			return "plate_cuirass";
+			return realmCuirass(f);
+		}
+
+		/** The make of cuirass {@code f}'s realm's own armourers beat out for its knights: plain, fluted or rounded. */
+		private static String realmCuirass(Faction f) {
+			return pick(CUIRASSES, hash(realm(f)) >>> 40);
+		}
+
+		/** The realm's make of spaulders; a realm in plain plate spaulders may add rondels to them. */
+		private static String realmSpaulders(Faction f) {
+			String make = pick(HeraldryArmour.SPAULDERS, hash(realm(f)) >>> 16);
+			return make.equals("plate_spaulders") && (hash(realm(f)) >>> 48 & 1L) == 0L ? "rondel_spaulders" : make;
 		}
 
 	/** The harness under and round a knight of {@code f}'s plate. */
@@ -303,14 +338,16 @@ public final class HeraldryWear {
 				HeraldryArmour.stack(armHarnessName, effectiveFinish),
 				HeraldryArmour.stack(gauntletsName, effectiveFinish),
 				HeraldryArmour.stack(cuissesName, effectiveFinish),
-				HeraldryArmour.stack(greavesName, effectiveFinish)
+				HeraldryArmour.stack(greavesName, effectiveFinish),
+				HeraldryArmour.stack("gorget", effectiveFinish),
+				HeraldryArmour.stack("faulds_and_tassets", effectiveFinish)
 			);
 		}
 	
 		/** The spaulders name for {@code f}'s knights based on creed and climate. */
 		private static String spauldersName(Faction f, Climate climate, @Nullable MinecraftServer server) {
 			if (server == null) {
-				return pick(HeraldryArmour.SPAULDERS, hash(realm(f)) >>> 16);
+				return realmSpaulders(f);
 			}
 			GreatWars.Creed creed = GreatWars.creed(server, f);
 			if (creed == GreatWars.Creed.CONQUEST) {
@@ -322,7 +359,7 @@ public final class HeraldryWear {
 			if (climate == Climate.SNOWY) {
 				return "fur_lined_spaulders";
 			}
-			return pick(HeraldryArmour.SPAULDERS, hash(realm(f)) >>> 16);
+			return realmSpaulders(f);
 		}
 	
 		/** The arm harness name for {@code f}'s knights based on creed and climate. */
@@ -417,7 +454,7 @@ public final class HeraldryWear {
 				Harness.dress(mob, 
 					crest(server, faction), 
 					HeraldryArmour.stack("gilt_banded_spaulders", HeraldryArmour.GILT_BANDED),
-					HeraldryArmour.stack("tabard")
+					tabard(server, faction)
 				);
 				Capes.ensure(mob, faction, true);
 			} else {
@@ -627,15 +664,22 @@ public final class HeraldryWear {
 			if (f.type().isRealm()) {
 				offer(offers, "giornea", GIORNEA_PRICE);
 				offer(offers, "torse", TORSE_PRICE);
+				offer(offers, tabard(level.getServer(), f), TABARD_PRICE);
 			}
-		} else if (job.equals("armorer") && f.type() == FactionType.KINGDOM) {
-			offer(offers, "crest_horns", CREST_PRICE);
-			offer(offers, "crest_wings", CREST_PRICE);
+		} else if (job.equals("armorer") && f.type().isRealm()) {
+			offer(offers, coatOfPlates(level.getServer(), f), COAT_PRICE);
+			if (f.type() == FactionType.KINGDOM) {
+				offer(offers, "crest_horns", CREST_PRICE);
+				offer(offers, "crest_wings", CREST_PRICE);
+			}
 		}
 	}
 
 	private static void offer(MerchantOffers offers, String name, int price) {
-		ItemStack stack = HeraldryArmour.stack(name);
+		offer(offers, HeraldryArmour.stack(name), price);
+	}
+
+	private static void offer(MerchantOffers offers, ItemStack stack, int price) {
 		if (!stack.isEmpty() && offers.stream().noneMatch(o -> o.getResult().is(stack.getItem()))) {
 			offers.add(new MerchantOffer(new ItemCost(Items.EMERALD, price), stack, USES, XP, PRICE_MULT));
 		}

@@ -1,0 +1,118 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:component",
+    "component": "jaymoskingdoms:finish",
+    "cases": [
+      {
+        "when": "blackened",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/oath_sleeves_blackened"
+        }
+      },
+      {
+        "when": "gilded",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/oath_sleeves_gilded"
+        }
+      },
+      {
+        "when": "spiked",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/oath_sleeves_spiked"
+        }
+      },
+      {
+        "when": "gilt_banded",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/oath_sleeves_gilt_banded"
+        }
+      },
+      {
+        "when": "fur_lined",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/oath_sleeves_fur_lined"
+        }
+      },
+      {
+        "when": "quilted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/oath_sleeves_quilted"
+        }
+      },
+      {
+        "when": "brine_soaked",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/oath_sleeves_brine_soaked"
+        }
+      },
+      {
+        "when": "hide",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/oath_sleeves_hide"
+        }
+      },
+      {
+        "when": "bronze",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/oath_sleeves_bronze"
+        }
+      },
+      {
+        "when": "lamellar",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/oath_sleeves_lamellar"
+        }
+      },
+      {
+        "when": "russeted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/oath_sleeves_russeted"
+        }
+      },
+      {
+        "when": "blued",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/oath_sleeves_blued"
+        }
+      },
+      {
+        "when": "painted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/oath_sleeves_painted"
+        }
+      },
+      {
+        "when": "etched",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/oath_sleeves_etched"
+        }
+      },
+      {
+        "when": "rusted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/oath_sleeves_rusted"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "jaymoskingdoms:item/oath_sleeves"
+    }
+  }
+}
