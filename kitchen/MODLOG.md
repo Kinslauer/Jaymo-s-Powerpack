@@ -2563,3 +2563,8 @@ Added a new **Cooking Block** to the Functional creative tab. The block has iron
 - Kingdoms' camp cooks use it all through `SpitBlockEntity.skewerWhole`, `tear(ServerLevel, Entity)`, `full` and `CorpseEntity.dressForSpit` / `spitWholeable` / `dressedWhole`.
 - The roasting piece was passed as the item's outline colour; now pieces draw with none.
 - Built (Gradle compile); not played. The 3D shank and steak are new models nobody has looked at in game.
+
+## 0.6.60 (2026-11-19): Any hide stands in for rabbit hide (#1883)
+
+- A loom lining takes any hide or pelt (`c:hides`) as it takes rabbit hide; the furs keep their own warmer linings (`Lining`).
+- Built; not played.

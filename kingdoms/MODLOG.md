@@ -15733,3 +15733,8 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - Everyone near sees the cook rip each piece off (Kitchen's tearing).
 - The day's meat that turns up for a camp with empty stores is unchanged for now; camp hunters bringing in real kills is the next change (Andy: "everyone should have to do this or some way of getting food").
 - Built (Gradle compile); not played.
+
+## 0.11.13 (2026-11-19): Any hide stands in for rabbit hide (#1883)
+
+- The Fur Jerkin and Fur Hood recipes take any hide or pelt (`c:hides`), and the Fur Jerkin is mended with any of them (`HeraldryArmour`).
+- Built; not played.

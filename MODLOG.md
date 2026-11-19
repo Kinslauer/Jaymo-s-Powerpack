@@ -6595,3 +6595,8 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 
 - New JEI page **Smithing Anvil: Harness** (`HarnessForgingJei`): every plate and mail harness piece the Smithing Anvil forges (`HeraldryForging`), with the ingots to heat, the rabbit hides a fur lining takes or the gold for gilding, and the blows. Before, these pieces showed no recipe in JEI at all, so they looked unmakeable.
 - Built; not played.
+
+## 0.25.82 (2026-11-19): Any hide stands in for rabbit hide (#1883)
+
+- New shared tag `c:hides` (rabbit hide, Kitchen hide, raw hide, wolf/wild/bear fur, beast pelt, Naturalist bear fur). Fur-lined harness forging (`HeraldryForging`) takes any 2 of them; JEI shows the choices.
+- Built; not played.
