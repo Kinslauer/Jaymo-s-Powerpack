@@ -559,8 +559,10 @@ public final class Wounds {
 	 * {@link Downed}'s own tick).
 	 */
 	static void creativeHeal(ServerPlayer player) {
-		if (Dismember.missing(player) != 0) {
-			Dismember.regrow(player, true);
+		// a limb wearing a prosthetic stays as it is: creative never pops a fitted wooden, iron or Rig limb off
+		int fitted = com.jaymospowers.core.Prosthetics.fitted(player);
+		if ((Dismember.missing(player) & ~fitted) != 0) {
+			Dismember.regrow(player, true, fitted);
 		}
 		Tripped.clear(player);
 		if (player.getAttached(PARTS) != null || Breaks.broken(player) != 0 || Bleeding.bleeding(player) != 0
