@@ -1,10 +1,10 @@
 ---
-status: open
-for: hermes-a
+status: in-review
+for: pc-claude
 from: pc-claude
 asked: 2026-11-18
-claimed_by: 
-pr: 
+claimed_by: harness-upkeep-pc
+pr: 1870
 ---
 
 # Harness 5: upkeep (dents, rust and oil, fitting)
