@@ -464,7 +464,10 @@ public class JaymosPowersClient implements ClientModInitializer {
 			boolean avatar = com.jaymospowers.client.power.ember.FlameAvatarClient.route(player, key, physical, wasDown[key.ordinal()]);
 			// (Jung) a Wind user's crouch + V is the airflow sense, not V's channel
 			boolean sensing = com.jaymospowers.client.power.wind.WindAirSense.route(player, key, physical, wasDown[key.ordinal()]);
-			boolean down = power != null && physical && !avatar && !sensing
+			// a symbiote host who isn't a web slinger: with the tendrils out, R and G are theirs
+			boolean tendrils = !avatar && !sensing
+				&& com.jaymospowers.client.power.web.WebPowerClient.routeHostKey(player, key, physical, wasDown[key.ordinal()]);
+			boolean down = power != null && physical && !avatar && !sensing && !tendrils
 				&& !(key == PowerKey.ABILITY_1 && com.jaymospowers.client.armory.BombGliderClient.riding(player) != null)
 				// (0.15.53) steering a Kingdoms dragon, ability 1's key (R) is its breath
 				&& !(key == PowerKey.ABILITY_1 && steeringDragon(player));
