@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 13:44). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 14:13). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -22,6 +22,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/forest-fire-pack|forest-fire-pack]]: stalled, last change 2026-11-15. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hands-on-cooking-realtime|hands-on-cooking-realtime]]: stalled, last change 2026-11-17. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/harness-upkeep|harness-upkeep]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/heritage-paths|heritage-paths]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]]: stalled, last change 2026-11-18. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/scrying-orb|scrying-orb]]: stalled, last change 2026-11-18. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/sky-lands-aether-biomes|sky-lands-aether-biomes]]: stalled, last change 2026-11-15. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
@@ -34,6 +35,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1855 Take bows and arrows from any downed foe (Kingdoms, 2026-11-19)
 - [ ] #1852 One Dimension stack back to the pack's order (Powers, 2026-11-19)
 - [ ] #1850 First kingdom raised in the surface town, not a Lost Cities copy under it (Kingdoms, 2026-11-19)
 - [ ] #1849 Watcher's huts much rarer (Kingdoms, 2026-11-19)
@@ -93,12 +95,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1780 narrator voice lines from Google Cloud Text-to-Speech (Kingdoms, 2026-11-19)
 - [ ] #1778 acrobatics - standing backflip, dodge-key mid-air tricks (Powers, Kingdoms, 2026-11-19)
 - [ ] #1777 Rig: the back rig (wings, wing slash, spear legs, pincers, grapple, horn lightning) (Powers, 2026-11-19)
-- [ ] #1776 Rig patch 6: cloak, tech override and nova (Powers, 2026-11-19)
-- …and 232 older ones.
+- …and 233 older ones.
 
 ## Health
 
-19 problems in the notes: [[Health]].
+20 problems in the notes: [[Health]].
 
 ## Last week
 
