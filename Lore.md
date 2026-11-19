@@ -307,17 +307,17 @@ farmhand like anyone else, and the street doesn't know whose face is under it.
 - **The everyday gifted** (the open ones, and the hidden ones when no one is looking): a Darktide washes out a fire with
   dark water, a Wind blows one out, a Cryo smothers it in frost, freezes the water trough, and keeps the larder and the
   house cold, so food keeps longer near a Cryo's home and the house is cool in a hot land.
-- **Trouble in the night** (new) (hero add-on picks, 2026-11-19; Claude's placement). A town keeps a **watch horn**. Whoever blows it at night is told, by a
+- **Trouble in the night** (hero add-on picks, Claude's placement, Andy approved 2026-11-19). A town keeps a **watch horn**. Whoever blows it at night is told, by a
   frightened neighbour, where the trouble is: a house being broken into, someone set on in the street. Stop the crooks
   before they run and what they drop is evidence the guards pay for. Sometimes the trouble comes to you: a **cat
   burglar**, a quiet one of the Ash Whisperer's people, lifts a single gem from a strongbox and runs the rooftops. Catch
   her three times and she stops running and asks for work.
-- **The signal brazier** (new) (hero add-on picks, 2026-11-19; Claude's placement). Sworn companions and hired fighters agree a fire with whoever pays them. A signal
+- **The signal brazier** (hero add-on picks, Claude's placement, Andy approved 2026-11-19). Sworn companions and hired fighters agree a fire with whoever pays them. A signal
   brazier lit on a height at night is seen for miles, and the nearest of them comes to it.
-- **The trials master** (new) (hero add-on picks, 2026-11-19; Claude's placement). An old vigilante who outlived his rivals now tests the young ones. He leaves five
+- **The trials master** (hero add-on picks, Claude's placement, Andy approved 2026-11-19). An old vigilante who outlived his rivals now tests the young ones. He leaves five
   chests across the land, each holding a trial: a timed run, a target range, a wave of foes, a fall to live through, a
   quiet theft. Whoever opens all five finds him waiting, and he fights them himself. He never says why.
-- **The gift-eater** (new) (hero add-on picks, 2026-11-19; Claude's placement). One villain captain has a power nobody else has: he drinks the gifts of the gifted
+- **The gift-eater** (hero add-on picks, Claude's placement, Andy approved 2026-11-19). One villain captain has a power nobody else has: he drinks the gifts of the gifted
   he beats and uses them as his own, a little weaker. He never comes to a fight empty: he has always eaten at least one
   gift first, and it may be from someone you have met. Kill him and what he took goes nowhere.
 
@@ -334,7 +334,7 @@ a phantom's membrane and sugar on the infusion altar. In someone with no power i
 body that swims like a dolphin and can leap once more in the air. A body with a gift in it rejects the draught and is
 only sick.
 
-**The small draught and the great draught** (new) (hero add-on picks, 2026-11-19; Claude's placement). The alchemists also steep two draughts that change a body's size
+**The small draught and the great draught** (hero add-on picks, Claude's placement, Andy approved 2026-11-19). The alchemists also steep two draughts that change a body's size
 for a while: the **small draught** (red) shrinks the drinker to half, light enough to slip through a gap and jump high
 for the size, and the **great draught** (blue) swells them to half again, heavy-handed, long in reach and slow. Both
 wear off. Mothers keep the red one well away from children.
@@ -636,7 +636,7 @@ a man's height and more, grey holystone banded in moss-green, cut with gold rune
 old stones still have. They have no will of their own; they go for whoever the Giant is after, more of them the worse
 it is hurt, and when it falls they go to pieces with it. Nobody has seen one walk without a Giant near.
 
-**The Sky Crown** (new) (hero add-on picks, 2026-11-19; Claude's placement). Whoever ruled the Aether before it was left untended wore a crown, and it broke when the
+**The Sky Crown** (hero add-on picks, Claude's placement, Andy approved 2026-11-19). Whoever ruled the Aether before it was left untended wore a crown, and it broke when the
 remnants fell. Six shards of it came down far apart: one in a monolith's broken heart, one in the sentry ruins, one
 carried into a Nether fortress, one taken up to an End city, one sunk into the deep dark and one in the hold of a
 sunken ship. Each shard set in a crown stand gives a little of what the Aether was (a lighter step, a pull like
@@ -1672,7 +1672,7 @@ hundred years. All the others (Ambrose, Thessaly, Varro and the Quiet One) were 
   anti wearing the shape of the knight's cloak he wore in life. Any strain does this for any host. The big suit still
   swallows the shape while it is up.
 
-  **The deepest bond** (new) (hero add-on picks, 2026-11-19; Claude's placement). A host the symbiote has wholly taken in can be given wings: two great spans
+  **The deepest bond** (hero add-on picks, Claude's placement, Andy approved 2026-11-19). A host the symbiote has wholly taken in can be given wings: two great spans
   of goo, red as raw meat between black ribs, wider than a house, spread from the back and folded away again. They
   carry a host down a long way and can beat to climb. Any strain grows them; the anti's are the same red. **Bells and
   jars.** A bell rung close leaves a symbiote stunned and slack, and a host who has not bonded deep can pour it off
@@ -2125,7 +2125,7 @@ ploughs are drawn by horses and oxen.
 **Butchery.** A kill is a body, and a body is dressed at the butcher's block (as the Green Huntsman would have
 it) or dragged home by rope.
 
-**Sketches and hot dishes** (new) (hero add-on picks, 2026-11-19; Claude's placement). The post pays for a good sketch: a monster of legend, a gifted one in a
+**Sketches and hot dishes** (hero add-on picks, Claude's placement, Andy approved 2026-11-19). The post pays for a good sketch: a monster of legend, a gifted one in a
 fight, a ship on fire. The better the thing drawn, the more it pays, and the tidings that follow carry the sketcher's
 name. A baker or tavern keeper who has more orders than hands pays someone quick to run hot dishes to doors before
 they go cold.
