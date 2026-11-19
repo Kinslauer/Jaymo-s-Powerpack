@@ -177,3 +177,6 @@ Each starts with a small class-key move; the tree has the rest.
 - Warlord and Brute: mirrored trees, discipline against fury. Rider: its own equestrian tree.
 - Builds must cost something: the trees are bigger than the points, and the crossroads make picks exclusive.
 - The Tinkerer's tier steps 5/10/15/20 are good for now.
+
+## Notes
+- 2026-11-19 20:22 Parked (not for a bot): waits on Andy fleshing out the Monk/Paladin/Cleric/Druid/Warlock trees. Raised; don't raise again.
