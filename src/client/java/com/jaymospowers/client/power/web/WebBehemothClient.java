@@ -60,6 +60,11 @@ public final class WebBehemothClient {
 	/** The suit over any mob's own model: black goo with veins, a texture that reads the same on any UV layout. */
 	private static final Identifier GOO = JaymosPowers.id("textures/entity/web_symbiote_goo.png");
 
+	/** The horse the symbiote holds (WebSymbioteSteed): glossy, in the strain's colour, over its own model. */
+	private static final Identifier STEED_TEXTURE = JaymosPowers.id("textures/entity/web_symbiote_steed.png");
+	/** On a held horse's render state: the strain that holds it. */
+	public static final RenderStateDataKey<com.jaymospowers.power.web.WebSymbioteStrain> STEED = RenderStateDataKey.create(() -> "jaymospowers:web_steed");
+
 	/** On a ridden mob's render state: its back tendrils (WebTendrilLayer.submitOnMob). */
 	public static final RenderStateDataKey<WebSymbioteClient.Tendrils> MOB_TENDRILS = RenderStateDataKey.create(() -> "jaymospowers:web_mob_tendrils");
 
@@ -85,6 +90,8 @@ public final class WebBehemothClient {
 		boolean inhabited = com.jaymospowers.power.web.WebInhabit.isHost(entity);
 		state.setData(HOST, behemoth ? Boolean.TRUE : null);
 		state.setData(INHABITED, inhabited ? Boolean.TRUE : null);
+		Integer steed = entity.getAttached(com.jaymospowers.power.web.WebSymbioteSteed.STEED);
+		state.setData(STEED, steed == null ? null : com.jaymospowers.power.web.WebSymbioteStrain.of(steed));
 		if ((behemoth || inhabited) && entity instanceof LivingEntity host && host.isAlive()) {
 			state.setData(MOB_TENDRILS, tendrils(host, behemoth || com.jaymospowers.power.web.WebInhabit.lashing(host)));
 		} else {
@@ -163,6 +170,10 @@ public final class WebBehemothClient {
 			}
 			if (state.getData(INHABITED) != null) {
 				renderColoredCutoutModel(this.getParentModel(), WebStrainLook.texture(GOO, state), poseStack, collector, lightCoords, state, -1, 1);
+			}
+			com.jaymospowers.power.web.WebSymbioteStrain steed = state.getData(STEED);
+			if (steed != null) {
+				renderColoredCutoutModel(this.getParentModel(), WebStrainLook.texture(STEED_TEXTURE, steed), poseStack, collector, lightCoords, state, -1, 1);
 			}
 			WebSymbioteClient.Tendrils tendrils = state.getData(MOB_TENDRILS);
 			if (tendrils != null) {
