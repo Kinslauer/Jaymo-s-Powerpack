@@ -1,0 +1,18 @@
+{
+  "ui_tip.jaymospowers.body.title": "Your body",
+  "ui_tip.jaymospowers.body": "Left of your hotbar: your stomach, your stance, your wounds and your body heat. Sneak and scroll to change stance. %1$s opens the full picture.",
+  "ui_tip.jaymospowers.right.title": "Right of your hotbar",
+  "ui_tip.jaymospowers.right": "Your power, the beast you ride and anything you have running show here.",
+  "ui_tip.jaymospowers.crosshair.title": "Around your crosshair",
+  "ui_tip.jaymospowers.crosshair": "Charge bars and the eye that says you've been seen sit above it. Guard, finishers and work bars sit under it. Combos and readings sit to its right.",
+  "ui_tip.jaymospowers.focus.title": "Over your hotbar",
+  "ui_tip.jaymospowers.focus": "Struggles, your forms belt and what spirits say show here, just above the hotbar.",
+  "ui_tip.jaymospowers.rail.title": "Top left",
+  "ui_tip.jaymospowers.rail": "Under the map: your power, kin you can sense, your party and what your keys do right now.",
+  "ui_tip.jaymospowers.move.title": "Move it",
+  "ui_tip.jaymospowers.move": "Something in the way? Type /hudmove to drag any part of the HUD. Right-click a part to put it back.",
+  "ui_tip.jaymospowers.menu.title": "Character menu",
+  "ui_tip.jaymospowers.menu": "Every page is grouped under You, Powers, World, People and Notices. Missed tips wait under Notices.",
+  "ui_tip.jaymospowers.journal.title": "Your journal",
+  "ui_tip.jaymospowers.journal": "Press %1$s to open it: your quests, the places you know and the people you've met."
+}
