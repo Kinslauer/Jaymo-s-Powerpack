@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 20:36). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 20:37). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -31,8 +31,8 @@ kanban-plugin: board
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/harness-upkeep|harness-upkeep]] · for ☀️ Apollo · open
 - [ ] [[Inbox/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/forest-fire-pack|forest-fire-pack]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-aura-rework|zfighter-aura-rework]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/forest-fire-pack|forest-fire-pack]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
