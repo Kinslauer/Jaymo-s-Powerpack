@@ -4825,4 +4825,30 @@ public final class PowersCompat {
 			}
 		}
 	}
+
+	/** Powers' {@code CritCue.cue(ServerLevel, Vec3)}: a short sharp sound and a white flash at a special hit. */
+	private static java.lang.invoke.@Nullable MethodHandle critCue;
+	private static boolean lookedForCritCue;
+
+	/** A crit cue at {@code at}. Nothing at all without Jaymo's Powers, or if its CritCue isn't there or doesn't take these. */
+	public static void critCue(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at) {
+		if (!lookedForCritCue) {
+			lookedForCritCue = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					critCue = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.combat.CritCue"), "cue",
+						java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerLevel.class, net.minecraft.world.phys.Vec3.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					critCue = null;
+				}
+			}
+		}
+		if (critCue != null) {
+			try {
+				critCue.invoke(level, at);
+			} catch (Throwable e) {
+				critCue = null;
+			}
+		}
+	}
 }
