@@ -47,6 +47,8 @@ public class JaymosPowers implements ModInitializer {
 		// (0.15.5) feathers (stamina) and the dodge, in place of Combat Roll
 		com.jaymospowers.stamina.Feathers.init();
 		com.jaymospowers.stamina.Dodge.init();
+		// (pb-jump) a second jump in the air for every power
+		com.jaymospowers.core.jump.PowerJump.init();
 		// the Divine-born's feather sense, Alight and hover (after the dodge: a dodge misses first)
 		com.jaymospowers.divine.DivineSense.init();
 		com.jaymospowers.core.Meditate.init();
