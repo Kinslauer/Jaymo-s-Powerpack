@@ -30,8 +30,10 @@ import net.minecraft.world.phys.AABB;
  * spider, a spiny spider, a spiderling or a young one) is squashed by anyone who walks over it.</li>
  * <li><b>Bigger</b> ({@link Tier#JUMP}: a netcaster, a mother, a tarantula, a spider at the game's own size) is squashed
  * by a jump that lands on it (a fall of at least {@link #JUMP_FALL}). Small ones are too.</li>
- * <li>Either dies to any one blow someone lands on it, a punch included ({@link #dealt}), from a player or anyone else
- * (a barbarian's blade, a guard's spear, an arrow).</li>
+ * <li>Blows ({@link #dealt}), a punch included, from a player or anyone else (a barbarian's blade, a guard's spear, an
+ * arrow): a small one dies to one ({@link #SMALL_BLOWS}); Andy: "the bigger ones can take more than one hit, the special
+ * kinds like the tarantula take 5": a bigger one takes at most {@link #BIG_BLOWS}, and a bigger special kind (a tarantula,
+ * a netcaster, a mother) at most {@link #SPECIAL_BLOWS}. A harder blow than that share still takes its own toll.</li>
  * </ul>
  * The brood queen and anything as big ({@link #JUMP_HEIGHT}, {@link #JUMP_WIDTH}, {@link #MAX_HEALTH}) is fought as
  * before. Whoever squashes must stand on real feet: a player or one of the folk, or a beast of some size (a cow, a horse),
@@ -43,9 +45,10 @@ public final class SpiderSquash {
 	// Tuning
 	/** A spider this tall or shorter (blocks) is squashed underfoot; this wide or narrower too. */
 	static final float WALK_HEIGHT = 0.5F, WALK_WIDTH = 1.0F;
-	/** A spider this tall or shorter (blocks), this wide or narrower, and frailer than this, is squashed by a landing jump
-	 * and dies to one blow. */
+	/** A spider this tall or shorter (blocks), this wide or narrower, and frailer than this, is squashed by a landing jump. */
 	static final float JUMP_HEIGHT = 1.0F, JUMP_WIDTH = 1.5F, MAX_HEALTH = 60.0F;
+	/** Blows that kill, at most: a small spider, a bigger one, a bigger special kind (tarantula, netcaster, mother). */
+	static final int SMALL_BLOWS = 1, BIG_BLOWS = 2, SPECIAL_BLOWS = 5;
 	/** A landing squashes from a fall this long (blocks; a jump from flat ground falls about 1.25). */
 	static final double JUMP_FALL = 0.5;
 	/** Walking over: the walker's middle must be over the spider (its footprint widened by this, blocks), and moving at
@@ -105,17 +108,36 @@ public final class SpiderSquash {
 		return h <= JUMP_HEIGHT && w <= JUMP_WIDTH && body.getMaxHealth() < MAX_HEALTH ? Tier.JUMP : Tier.NONE;
 	}
 
-	/** Whether {@code body} is a spider small enough to squash, and so to die to one blow. */
+	/** Whether {@code body} is a spider small enough to squash (and to die to a few blows). */
 	public static boolean squashable(LivingEntity body) {
 		return tier(body) != Tier.NONE;
 	}
 
-	/** (From {@code mixin/wild/SpiderBlowMixin}) Any blow someone lands on a squashable spider kills it. */
+	/**
+	 * (From {@code mixin/wild/SpiderBlowMixin}) A blow someone lands on a squashable spider takes at least its share of
+	 * the spider's whole health ({@link #blows}): a small one dies to it.
+	 */
 	public static float dealt(LivingEntity self, DamageSource source, float amount) {
-		if (amount <= 0.0F || !(source.getEntity() instanceof LivingEntity by) || spiderKind(by) || !squashable(self)) {
+		if (amount <= 0.0F || !(source.getEntity() instanceof LivingEntity by) || spiderKind(by)) {
 			return amount;
 		}
-		return Math.max(amount, lethal(self));
+		int blows = blows(self);
+		if (blows <= 0) {
+			return amount;
+		}
+		return Math.max(amount, blows == 1 ? lethal(self) : self.getMaxHealth() / blows + 0.01F);
+	}
+
+	/** How many blows kill {@code body} at most, or 0 if it isn't a spider that dies to blows. */
+	static int blows(LivingEntity body) {
+		return switch (tier(body)) {
+			case NONE -> 0;
+			case WALK -> SMALL_BLOWS;
+			case JUMP -> body instanceof Tarantula || switch (SpiderKinds.of(body)) {
+				case MOTHER, NETCASTER -> true;
+				default -> false;
+			} ? SPECIAL_BLOWS : BIG_BLOWS;
+		};
 	}
 
 	/** (From {@code mixin/wild/SpiderLandingMixin}) {@code lander} came down from a fall of {@code fall} blocks: it squashes every spider under its feet. */
