@@ -15226,3 +15226,13 @@ Not tested in game.
 
 - **Talking to a villager**: the cutscene camera no longer sits at the villager's eyes (which put it inside a head and filled the screen with a face). While the villager speaks it frames their face over your shoulder; while you speak it pulls back behind you to show you both. Walls pull the camera in, and with no room behind you it swaps to the other shoulder or a side-on view of the two of you (`DialogueCinematic.view`).
 - Built; not played.
+
+## 0.10.57 (2026-11-19): open sea full of life - higher water caps out at sea, ships met on a crossing (#1793)
+
+- **Why the ocean felt empty**: the water caps cut on 2026-11-07 ("too many mobs spawning at once in the water") held every player to 3 water creatures (squid, dolphins, sharks, great whales all share it) and 6 fish in all, with at most 2 to a spawn, everywhere. And every ship (pirates, navies, merchantmen, whalers, smacks) sails from a harbour or cove and stays near it, so a crossing met none.
+- **Open sea caps**: those low caps now hold along coasts, rivers and lakes only. Open sea chunks (`SeaLife.openSea`, `Offshore.far` 0.4+, cached per chunk) have 8 water creatures and 16 fish per player, up to 4 to a spawn (`MonsterCapMixin`, `WaterClusterMixin`, new `SeaCapsMixin` + `SeaCapsGlobalMixin`).
+- **Great whales** spawn twice as often in deep ocean (`Whaling.WEIGHT` 2 -> 4).
+- **Ships met at sea** (`SeaPassers`): out at sea with no other ship within 192 blocks, every 30 s there's a 15% chance a ship heaves into sight 96-128 blocks off, out of sight range: a sea rover from the nearest pirate cove (the far-grounds rover, `FarGrounds.rover`, now callable from any spot) or a merchantman of the nearest harbour bound for another realm's (hail and trade as usual). Both are stowed once long out with nobody near.
+- `Navies.shipLost` only clears a harbour's merchantman when it was that one.
+- Built; not played. Mixin targets checked against the 26.3 jar with javap; no dev server boot.
+- **Wind on show** (Andy's sea-life pick): the wind that fills ships' sails (`Winds`) now carries smoke (campfires, fires, torches, chimneys), dust and falling leaves along with it under open sky, harder the stronger it blows; under a roof or canopy they rise and fall as before (`WindDriftMixin`, client). In a fresh wind or harder, white crests break on the sea round you, blown downwind (`WindSigns`). Rain already slanted with the wind. Banners are left as they are.
