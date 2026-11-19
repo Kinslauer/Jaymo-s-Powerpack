@@ -1,13 +1,9 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 20:36). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 15:52). Don't edit. -->
 # Vault health
 
 Problems in the live notes, found on every sync. Nothing here is fixed by itself: whoever reads it (the coordinator's hourly check, a bot, Andy) fixes the note, and the line goes away on the next sync. `python tools/vault_sync.py --health` prints the same list.
 
-**3 problems.**
-
-## Statuses the pipeline doesn't know
-
-- [[Agents/harness-body-pieces|harness-body-pieces]]: `status: (none)` (known: blocked, done, in-review, merged, ready, running, sent, stalled)
+**2 problems.**
 
 ## Stalled agent notes
 
