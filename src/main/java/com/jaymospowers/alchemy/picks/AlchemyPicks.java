@@ -2,7 +2,7 @@ package com.jaymospowers.alchemy.picks;
 
 /**
  * The alchemist's picks: skin draughts ({@link SkinDraughts}), the dampening brew ({@link Dampening}), the Draught of
- * Release ({@link GivingUp}), the Draught of Mettle ({@link MettleDraught}) and the two pacts ({@link Pacts}). Each registers its own items, research and events here.
+ * Release ({@link GivingUp}), the Draught of Mettle ({@link MettleDraught}), the size draughts ({@link SizeDraughts}) and the two pacts ({@link Pacts}). Each registers its own items, research and events here.
  * Their lang keys are all in {@code lang/parts/alchemy_picks.json}.
  */
 public final class AlchemyPicks {
@@ -22,6 +22,7 @@ public final class AlchemyPicks {
 		Dampening.init();
 		GivingUp.init();
 		MettleDraught.init();
+		SizeDraughts.init();
 		Pacts.init();
 	}
 }

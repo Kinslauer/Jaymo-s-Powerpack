@@ -38,6 +38,7 @@ import net.minecraft.world.phys.Vec3;
  * <li>Running into a wall holding forward, you run straight up it (the client drives it: {@code ChronoSpeedClient}).
  * Since 0.11.40 for as long as you hold forward, with no sideways drift, a hop onto the top, and the body turned onto
  * the wall, legs running, the way Gravity's wall walk stands on it ({@link #WALL_RUN}, drawn by {@code GravityWalkPose}).</li>
+ * <li>(Run up the air) In top gear, holding Jump in the air takes up to {@link #AIR_STRIDES} more strides up on nothing, like invisible steps, once each time you touch the ground (the client drives it: {@code ChronoSpeedClient}).</li>
  * <li>Sprinting, water holds you up: you run across it (see {@code ChronoWaterRunMixin}), leaving a wake ({@link #wake}).</li>
  * <li>(0.11.40) Holding Shift you walk at your normal speed (no Speed V, no sneaking slowdown): fine control.</li>
  * <li>V again, facing a wall: you vibrate through it, up to {@link #PHASE_DEPTH} blocks thick, to the first space you
@@ -59,6 +60,9 @@ public final class ChronoSpeed {
 	public static final double WALL_TOP_UP = 0.42, WALL_TOP_IN = 0.3;
 	/** How fast the legs pump on a wall run (walk animation per tick). */
 	public static final float WALL_STRIDE = 1.3F;
+	/** Running up the air (top gear, Jump held): how many strides a ground touch gives, each one's upward kick (blocks a tick), and the least ticks between strides. */
+	public static final int AIR_STRIDES = 5, AIR_GAP = 3;
+	public static final double AIR_KICK = 0.42;
 	/** Phasing: how thick a wall you can pass through, how far ahead the wall may start, and the gap between phases. */
 	static final int PHASE_DEPTH = 4;
 	static final double PHASE_REACH = 1.5;
