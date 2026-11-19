@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 21:39). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 16:54). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -9,6 +9,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Inbox/class-trees-plan|class-trees-plan]] · 2026-11-19 20:22 Parked (not for a bot): waits on Andy fleshing out the Monk/Paladin/Cleric/Druid/Warlock trees. Raised; don't raise again.
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 - [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
+- [[Inbox/wither-model|wither-model]] · 2026-11-19 16:39 Previews ready for your look on the Wither model. Rebuilt to your hulking direction (Andy 2026-11-19 3:41 PM): broad shoulder bar, centre skul…
 
 ## Stuck
 
@@ -16,12 +17,13 @@ Nothing stuck.
 
 ## On the board
 
-34 waiting for a bot, 3 being built, 2 in review: see [[Kanban]].
+33 waiting for a bot, 3 being built, 2 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1874 creative keeps your prosthetics (Powers, 2026-11-19)
 - [ ] #1870 Harness 5: armour oil, and the harness rusts (Powers, Kingdoms, 2026-11-19)
 - [ ] #1868 Harness 2: wider makes of cuirass, the coat of plates, gorget, tassets, rondels and the tabard of arms (Kingdoms, 2026-11-19)
 - [ ] #1867 symbiote - a takeover no longer freezes a host who isn't a web slinger, and a blob that left you runs away (Powers, 2026-11-19)
@@ -81,12 +83,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1803 towns and the sea - figureheads, trade signs, song stones, the journey book (Kingdoms, 2026-11-19)
 - [ ] #1802 the dead in the wild: remains, last camps, ruin traps, the headless rider (Kingdoms, 2026-11-19)
 - [ ] #1801 practice dummy: kinds and coloured numbers (Powers, 2026-11-19)
-- [ ] #1799 drifting flotsam: ripple spots on rivers and the sea (Powers, Kingdoms, Kitchen, 2026-11-19)
-- …and 247 older ones.
+- …and 248 older ones.
 
 ## Health
 
-2 problems in the notes: [[Health]].
+Nothing wrong: [[Health]].
 
 ## Last week
 
