@@ -972,6 +972,12 @@ final class LifeStoryScreen extends Screen {
 		net.minecraft.resources.Identifier g = glyph;
 		name = Component.translatable(story(s.question.key() + "." + a.key()));
 		tag = PickerLayout.tag("story.jaymoskingdoms." + s.question.key() + "." + a.key() + ".tag");
+		if (s.question == Question.BORN && a.heritage() == Heritage.Kind.BIOBUILT) {
+			// Andy: "all bio built info should be hidden except unlock method"
+			sections.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.hint"), Ui.DIM,
+				List.of(Component.translatable("heritage.jaymoskingdoms.biobuilt.hint"))));
+			return new PickerLayout.Info(icon, g == null ? null : (gr, x, y) -> drawGlyph(gr, g, x, y), name, tag, ACCENT, List.of(), story, sections, null, paths, -1);
+		}
 		// the option's short line; its whole tale is told on the last page
 		Component line = shortLine(s.question, a);
 		if (line != null) {
