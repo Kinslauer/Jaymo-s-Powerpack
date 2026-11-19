@@ -29,7 +29,8 @@ load_dotenv()
 allow_origins = (
     os.getenv("ALLOW_ORIGINS", "").split(",") if os.getenv("ALLOW_ORIGINS") else None
 )
-otel_to_cloud = True
+# Traces go to Google Cloud only on the Gemini platform; with an AI Studio key there is no project to send them to
+otel_to_cloud = not os.getenv("GEMINI_API_KEY")
 
 AGENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

@@ -15,8 +15,28 @@ Blender headless for anything Blockbench can't do.
 | `export_geckolib` | `geo.json`, `animation.json` and texture via `tools/bbmodel_geckolib.py` into `out/assets/<mod>/` |
 | `run_blender` | a bpy script in headless Blender; files and `render.png` land in `out/blender/<name>/` |
 
-Code: `app/agent.py` (the agent and its instructions), `app/artkit.py` (the tools, usable without the agent).
+Code: `app/agent.py` (the agent and its instructions), `app/artkit.py` (the tools), `app/cli.py` (the tools without Gemini).
 Everything it writes goes to `out/` (git-ignored); copy what you keep into the mod's resources.
+
+## As Prometheus's artist
+
+Prometheus (the `hermes-modeller` bot) hands its art to this agent; its scheduled prompt is in
+`docs/vault/Pipeline.md`. Without Gemini, the same tools run from the command line:
+
+```sh
+python -m app.cli tools                       # the tools and their arguments
+python -m app.cli paint_texture args.json     # any tool, arguments from a JSON file (or a JSON string)
+python -m app.cli install <name> <mod>        # copy the exported files into the mod's resources (--overwrite to replace)
+```
+
+## On Andy's PC (once, for Prometheus)
+
+1. Install uv: `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`, then open a new terminal.
+2. `uv tool install "google-agents-cli~=1.15.0"`, then in `tools/art-agent`: `agents-cli install`.
+3. The Gemini key as a Windows user environment variable `GEMINI_API_KEY` (Settings, System, About, Advanced system
+   settings, Environment Variables). No `.env` needed: with the key set, the agent uses Google AI Studio.
+4. For Blender work: install Blender and set `BLENDER_BIN` to its `blender.exe`.
+5. Check: `agents-cli run "Paint a 16x16 item texture of a copper key"`.
 
 ## In a cloud thread
 
