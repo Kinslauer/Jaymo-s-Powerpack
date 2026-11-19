@@ -14,9 +14,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -29,6 +32,13 @@ import org.jspecify.annotations.Nullable;
  * of it, "Master" of their power: masters likelier the higher the world tier), calls them out (a speech bubble), and
  * fights them, by hand and with the power. Hurt to {@link #YIELD_AT} of their health, they yield, say so, and go on their
  * way; so do they when their quarry is gone or after {@link #FIGHT_TICKS}. Without MCA, a plain villager.
+ * <p>
+ * Andy (2026-11-19, beamed down by one a few minutes into a new life: "way too strong to encounter that early ... tune that
+ * fighter WAY down"): none come for a player who hasn't lived {@link #LIVED_FIRST} in this life yet; no masters in the
+ * Hearth tier; they walk up and call out before they fight, and square up for {@link #SQUARE_UP} first (their power's
+ * moves need a target, so nothing is thrown before the call); their blows on a player land at {@link #HARM} of their
+ * strength for the player's world tier, never more than {@link #MOST} of the player's health in one; and a quarry who goes
+ * down has lost: the stranger says so and leaves them be.
  */
 public final class AwakenedStrangers {
 	// ---- tuning ----
@@ -39,7 +49,17 @@ public final class AwakenedStrangers {
 	/** How far off they arrive (blocks). */
 	static final int ARRIVE_MIN = 22, ARRIVE_MAX = 34;
 	/** The chance they're a master of it, and how much likelier each world tier. */
-	static final float MASTER_CHANCE = 0.15F, MASTER_PER_TIER = 0.1F;
+	static final float MASTER_CHANCE = 0.0F, MASTER_PER_TIER = 0.1F;
+	/** How long a player must have lived in this life before any stranger comes for them (ticks: two days). */
+	static final int LIVED_FIRST = 48000;
+	/** How long after calling out they square up before the first blow or move (ticks). */
+	static final int SQUARE_UP = 40;
+	/**
+	 * By the player's world tier (Hearth, Borderlands, Wildlands, Dread, Legend): the share of a stranger's harm that lands
+	 * on a player, and the most of the player's full health one blow or move may take.
+	 */
+	static final float[] HARM = {0.35F, 0.6F, 0.8F, 1.0F, 1.0F};
+	static final float[] MOST = {0.2F, 0.3F, 0.45F, 1.0F, 1.0F};
 	/** How long a fight may go on (ticks), the share of health they yield at, and how long they take to go once done. */
 	static final int FIGHT_TICKS = 6000, LEAVE_TICKS = 300;
 	static final float YIELD_AT = 0.25F;
@@ -59,6 +79,7 @@ public final class AwakenedStrangers {
 		final UUID quarry;
 		final long since;
 		boolean called;
+		long calledAt;
 		long leaveAt;
 
 		Stranger(UUID quarry, long since) {
@@ -92,7 +113,8 @@ public final class AwakenedStrangers {
 		long now = overworld.getGameTime();
 		for (ServerPlayer player : overworld.players()) {
 			if ((now + player.getId() * 7L) % LOOK_EVERY != 0 || !player.isAlive() || player.isCreative() || player.isSpectator()
-				|| PowersCompat.power(player) == null) {
+				|| PowersCompat.power(player) == null
+				|| player.getStats().getValue(net.minecraft.stats.Stats.CUSTOM.get(net.minecraft.stats.Stats.TIME_SINCE_DEATH)) < LIVED_FIRST) {
 				continue;
 			}
 			Long last = LAST.get(player.getUUID());
@@ -166,8 +188,9 @@ public final class AwakenedStrangers {
 		}
 		ServerPlayer quarry = level.getServer().getPlayerList().getPlayer(s.quarry);
 		RandomSource random = level.getRandom();
-		if (quarry == null || quarry.level() != level || !quarry.isAlive() || quarry.distanceTo(mob) > 64.0 || now - s.since > FIGHT_TICKS) {
-			if (quarry != null && !quarry.isAlive() && s.called) {
+		boolean beaten = quarry != null && Downed.isDowned(quarry);
+		if (quarry == null || quarry.level() != level || !quarry.isAlive() || beaten || quarry.distanceTo(mob) > 64.0 || now - s.since > FIGHT_TICKS) {
+			if (quarry != null && (!quarry.isAlive() || beaten) && s.called) {
 				Speech.say(level, mob, Component.translatable("speech.jaymoskingdoms.stranger.won." + random.nextInt(WIN_LINES)), Speech.GOLD, 24.0);
 			}
 			leave(mob, s, now);
@@ -180,7 +203,18 @@ public final class AwakenedStrangers {
 		}
 		if (!s.called && mob.distanceTo(quarry) <= CALL_RANGE) {
 			s.called = true;
+			s.calledAt = now;
 			Speech.sayTo(level, mob, quarry, Component.translatable("speech.jaymoskingdoms.stranger.call." + random.nextInt(CALL_LINES)), Speech.GOLD);
+		}
+		if (!s.called || now - s.calledAt < SQUARE_UP) {
+			// (walking up, then squaring up: no target yet, so their power throws nothing before the call and the beat after it)
+			mob.getLookControl().setLookAt(quarry, 30.0F, 30.0F);
+			if (s.called) {
+				mob.getNavigation().stop();
+			} else {
+				mob.getNavigation().moveTo(quarry, 0.9);
+			}
+			return true;
 		}
 		// set on them: their power's moves go at their target (Powers' gifted folk), and they close in for blows
 		mob.setTarget(quarry);
@@ -211,6 +245,18 @@ public final class AwakenedStrangers {
 		mob.getNavigation().stop();
 		Vec3 away = mob.position().add((mob.getRandom().nextDouble() - 0.5) * 60.0, 0.0, (mob.getRandom().nextDouble() - 0.5) * 60.0);
 		mob.getNavigation().moveTo(away.x, away.y, away.z, 0.8);
+	}
+
+	/**
+	 * A stranger's blow or move on a player, from the hurt chain ({@code LivingEntityHurtMixin}, last): {@link #HARM} of it
+	 * for the player's world tier, and never more than {@link #MOST} of their full health.
+	 */
+	public static float dealt(LivingEntity target, DamageSource source, float amount) {
+		if (amount <= 0.0F || !(target instanceof Player player) || !is(source.getEntity())) {
+			return amount;
+		}
+		int tier = Math.clamp(WorldTiers.of(player).ordinal(), 0, HARM.length - 1);
+		return Math.min(amount * HARM[tier], player.getMaxHealth() * MOST[tier]);
 	}
 
 	/** Whether {@code mob} is an awakened stranger. */

@@ -404,7 +404,9 @@ public final class GiftedAI {
 	}
 
 	private static boolean fightable(PathfinderMob mob, @Nullable LivingEntity foe) {
-		if (foe == null || foe == mob || !foe.isAlive() || foe.isRemoved() || foe.level() != mob.level() || mob.distanceTo(foe) > MASTER_RANGE) {
+		// (Andy, 2026-11-19) the downed are out of the fight: no power thrown at them
+		if (foe == null || foe == mob || !foe.isAlive() || foe.isRemoved() || foe.level() != mob.level() || mob.distanceTo(foe) > MASTER_RANGE
+			|| foe.entityTags().contains(DOWNED)) {
 			return false;
 		}
 		return !(foe instanceof Player player) || !player.isCreative() && !player.isSpectator();
