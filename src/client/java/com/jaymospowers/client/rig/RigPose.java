@@ -7,6 +7,8 @@ import static com.jaymospowers.client.rig.RigBeats.LINEAR;
 import static com.jaymospowers.client.rig.RigBeats.OUT;
 import static com.jaymospowers.client.rig.RigBeats.SINE;
 
+import com.jaymospowers.client.rig.RigFormsClient;
+
 import com.jaymospowers.rig.Rig;
 import com.jaymospowers.rig.RigFrame;
 import com.jaymospowers.rig.RigMoves;
@@ -23,6 +25,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * (0.11.107) How a Rig pilot moves, on everyone's screen (from the synced {@link RigMoves}). Soul Industries (the Fisk's
@@ -46,11 +49,11 @@ public final class RigPose {
 
 	/**
 	 * {@code kind}: a {@link RigMoves} kind or 0; {@code t}: ticks into it; {@code hover}: 0-1; {@code flight}: 0-1;
-	 * {@code recoil}: how hard this frame's shots rock the wearer (1: the standard frame); {@code still}: 1 standing, 0 at a
+	 * {@code bank}: banking roll (-1 to 1); {@code recoil}: how hard this frame's shots rock the wearer (1: the standard frame); {@code still}: 1 standing, 0 at a
 	 * walk (a move's stance only takes the legs of someone standing).
 	 */
-	public record Pose(int kind, float t, float hover, float flight, float time, float recoil, float still) {
-	}
+		public record Pose(int kind, float t, float hover, float flight, float bank, float time, float recoil, float still) {
+		}
 
 	/** Moving at least this fast (blocks/tick) in full flight, Wind's cruise lean takes the body. */
 	static final double CRUISE_SPEED = 0.25;
@@ -83,10 +86,12 @@ public final class RigPose {
 	static final float KNEE_DOWN = 3.0F, KNEE_UP_AT = 17.0F, KNEE_DROP = 6.0F, KNEE_LEAN = 0.55F, KNEE_HEAD = 0.25F;
 	static final float KNEE_FRONT = -1.2F, KNEE_BACK = 1.1F, KNEE_FIST = -0.5F, KNEE_FLUNG = 0.7F, KNEE_FLUNG_OUT = 0.4F;
 	/** A Rig leg's kick: ticks to raise, when it lowers, and the leg's swing. */
-	static final float KICK_RAISE = 2.0F, KICK_LOWER_AT = 7.0F, KICK_LEG = -1.35F;
-	/** The kick's wind-up (the leg drawn back) and the chest leaning away from it; the landing's nod as the head catches up. */
-	static final float KICK_CHAMBER = 0.45F, KICK_LEAN = 0.18F, KNEE_NOD = 0.2F;
-	/** Take-off: the crouch's drop and lean, the knees, the arms swept back; then the arch as the thrusters fire, the arms thrown out, and the head. */
+		static final float KICK_RAISE = 2.0F, KICK_LOWER_AT = 7.0F, KICK_LEG = -1.35F;
+		/** The kick's wind-up (the leg drawn back) and the chest leaning away from it; the landing's nod as the head catches up. */
+		static final float KICK_CHAMBER = 0.45F, KICK_LEAN = 0.18F, KNEE_NOD = 0.2F;
+		/** (0.12.x) Banking: max roll angle (radians), how fast it eases in/out. */
+		static final float BANK_MAX_ROLL = 0.6F, BANK_EASE = 0.15F;
+		/** Take-off: the crouch's drop and lean, the knees, the arms swept back; then the arch as the thrusters fire, the arms thrown out, and the head. */
 	static final float TAKEOFF_DROP = 2.6F, TAKEOFF_LEAN = 0.32F, TAKEOFF_KNEES = 0.55F, TAKEOFF_ARMS_BACK = 0.7F, TAKEOFF_ARCH = 0.14F, TAKEOFF_ARMS_OUT = 0.55F,
 		TAKEOFF_HEAD = 0.2F;
 	/** Scan: the off arm up to the helm (up, in across the body, out from the side), the head dipped and tilted to it. */
@@ -140,35 +145,58 @@ public final class RigPose {
 	}
 
 	/** From the avatar renderer's extractRenderState (RigSuitAvatarRendererMixin). */
-	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
-		Minecraft minecraft = Minecraft.getInstance();
-		if (!(entity instanceof Player player) || minecraft.level == null || player.isSleeping() || player.isPassenger()
-			|| !Rig.wearsAny(player) && RigMoves.get(player) == null) {
-			state.setData(KEY, null);
-			if (entity != null) {
-				HOVER.remove(entity.getId());
+		public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
+			Minecraft minecraft = Minecraft.getInstance();
+			if (!(entity instanceof Player player) || minecraft.level == null || player.isSleeping() || player.isPassenger()
+				|| !Rig.wearsAny(player) && RigMoves.get(player) == null) {
+				state.setData(KEY, null);
+				if (entity != null) {
+					HOVER.remove(entity.getId());
+				}
+				return;
 			}
-			return;
-		}
-		float now = minecraft.level.getGameTime() + partialTicks;
-		int kind = 0;
-		float t = 0.0F;
-		RigMoves.Move move = RigMoves.get(player);
-		if (move != null) {
-			t = now - move.start();
-			if (t >= 0.0F && t < RigMoves.length(move.kind())) {
-				kind = move.kind();
+			float now = minecraft.level.getGameTime() + partialTicks;
+			int kind = 0;
+			float t = 0.0F;
+			RigMoves.Move move = RigMoves.get(player);
+			if (move != null) {
+				t = now - move.start();
+				if (t >= 0.0F && t < RigMoves.length(move.kind())) {
+					kind = move.kind();
+				}
 			}
+			int thrust = RigMoves.thrust(player);
+			// hovering, or held still in full flight: the steadying pose; cruising, the flight's
+			boolean steady = thrust == RigMoves.THRUST_HOVER || thrust == RigMoves.THRUST_FLIGHT && !cruising(player);
+			float hover = hover(player, steady && !player.onGround(), now);
+			float flight = thrust == RigMoves.THRUST_FLIGHT ? WindPose.amount(player, partialTicks) : 0.0F;
+			// banking roll
+			float bank = 0.0F;
+			if (RigClient.banking() && thrust == RigMoves.THRUST_FLIGHT) {
+				double dx = player.getX() - player.xo, dz = player.getZ() - player.zo;
+				double speed = Math.sqrt(dx * dx + dz * dz);
+				float targetBank = 0.0F;
+				if (speed > 0.05) {
+					// calculate turn rate from velocity change
+					Vec3 vel = player.getDeltaMovement();
+					Vec3 look = player.getLookAngle().multiply(1.0, 0.0, 1.0);
+					if (look.lengthSqr() > 1.0E-4) {
+						Vec3 right = look.cross(new Vec3(0.0, 1.0, 0.0)).normalize();
+						double sideVel = vel.multiply(1.0, 0.0, 1.0).dot(right);
+						targetBank = (float)Mth.clamp(sideVel * 10.0, -1.0, 1.0);
+					}
+				}
+				// ease the bank
+				float[] track = HOVER.computeIfAbsent(player.getId() + 1000000, k -> new float[] {0.0F, now});
+				float dt = Mth.clamp(now - track[1], 0.0F, 5.0F);
+				track[1] = now;
+				track[0] += (targetBank - track[0]) * BANK_EASE * dt;
+				bank = track[0];
+			}
+			float recoil = Rig.frame(player) == RigFrame.SIEGE ? SIEGE_RECOIL : 1.0F;
+			float still = player.onGround() ? 1.0F - Mth.clamp(state.walkAnimationSpeed / STILL_PACE, 0.0F, 1.0F) : 1.0F;
+			state.setData(KEY, kind == 0 && hover <= 0.001F && flight <= 0.001F && Math.abs(bank) < 0.001F ? null : new Pose(kind, t, hover, flight, bank, now, recoil, still));
 		}
-		int thrust = RigMoves.thrust(player);
-		// hovering, or held still in full flight: the steadying pose; cruising, the flight's
-		boolean steady = thrust == RigMoves.THRUST_HOVER || thrust == RigMoves.THRUST_FLIGHT && !cruising(player);
-		float hover = hover(player, steady && !player.onGround(), now);
-		float flight = thrust == RigMoves.THRUST_FLIGHT ? WindPose.amount(player, partialTicks) : 0.0F;
-		float recoil = Rig.frame(player) == RigFrame.SIEGE ? SIEGE_RECOIL : 1.0F;
-		float still = player.onGround() ? 1.0F - Mth.clamp(state.walkAnimationSpeed / STILL_PACE, 0.0F, 1.0F) : 1.0F;
-		state.setData(KEY, kind == 0 && hover <= 0.001F && flight <= 0.001F ? null : new Pose(kind, t, hover, flight, now, recoil, still));
-	}
 
 	/** The hover pose's amount, easing toward {@code on} as time passes. */
 	private static float hover(Player player, boolean on, float now) {
@@ -193,16 +221,21 @@ public final class RigPose {
 	}
 
 	/** After a humanoid model animates (the suit drawn over the body takes it too). */
-	public static void applyModel(Model<?> model, Object state) {
-		if (!(state instanceof AvatarRenderState avatar) || !(model instanceof HumanoidModel<?> h)) {
-			return;
-		}
-		Pose pose = avatar.getData(KEY);
-		if (pose == null) {
-			return;
-		}
-		float time = pose.time();
-		if (pose.hover() > 0.001F) {
+		public static void applyModel(Model<?> model, Object state) {
+			if (!(state instanceof AvatarRenderState avatar) || !(model instanceof HumanoidModel<?> h)) {
+				return;
+			}
+			Pose pose = avatar.getData(KEY);
+			if (pose == null) {
+				return;
+			}
+			// banking roll: roll the whole body
+			if (Math.abs(pose.bank()) > 0.001F) {
+				h.body.zRot = Mth.lerp(pose.bank(), h.body.zRot, pose.bank() * BANK_MAX_ROLL);
+				h.head.zRot = Mth.lerp(pose.bank(), h.head.zRot, pose.bank() * BANK_MAX_ROLL * 0.5F);
+			}
+			float time = pose.time();
+			if (pose.hover() > 0.001F) {
 			float sway = Mth.sin(time * 0.12F) * HOVER_SWAY;
 			set(h.rightArm, HOVER_ARM_FORWARD + sway, 0.0F, HOVER_ARM_OUT, pose.hover());
 			set(h.leftArm, HOVER_ARM_FORWARD - sway, 0.0F, -HOVER_ARM_OUT, pose.hover());
@@ -356,6 +389,9 @@ public final class RigPose {
 				spread(h, BARRAGE_SPREAD * amount * still);
 				h.head.xRot -= (BARRAGE_LEAN + BARRAGE_CHIN) * watch;
 			}
+			case RigMoves.ARM_BLADE, RigMoves.ARM_MACE, RigMoves.ARM_PILE, RigMoves.ARM_DRILL,
+				RigMoves.ARM_LANCE, RigMoves.ARM_LASH, RigMoves.ARM_MIMIC ->
+				RigFormsClient.applyForm(model, pose.kind(), t, recoil, still);
 			default -> {
 			}
 		}

@@ -15068,3 +15068,110 @@ Clouds and Bits patch 5 (Bits and Balance's ideas, our own code).
 ## 0.10.36 (2026-11-18): Tree locks block crafting alongside The Graveyard (#1756)
 
 The crafting lock on trade stations and the saw now hooks the slot pickup check that every slot has and applies to crafting result slots, so it works with or without The Graveyard.
+
+## 0.10.37 (2026-11-18): holy books - each patron's sigil on its book; a stored book is no broken commandment (#1771)
+
+- **Holy book looks**: every patron's book of commandments is now the vanilla book with that patron's sigil set in a sunken square on the cover, lying on the cover's tilt (upright as you hold the book) (the anvil, the hearth flame, the waves, the antlers, the lantern, the crowned sun, the hooded ember, the Truth's cross), and its lore book is the written book with the same sigil. Old books of commandments take the new look the next time they are in an inventory; old lore books keep the plain look. Sigils are drawn from the shrine glyphs by `tools/gen_holy_books.py`, as a 32x32 overlay on the vanilla texture (twice the book's detail so the tilted sigil still reads; no vanilla pixels copied).
+- **Keeping the book**: the Truth's "Do not throw away My book" used to break the moment the book was dropped. Now it breaks only if the dropped book is lost (burnt, despawned, fallen into the void). Putting it in a chest, dropping it for a friend or into a hopper, or picking it up again is fine (`Commandments`, `LoreBooks`).
+- Built by the PR checks; not played.
+
+## 0.10.38 (2026-11-18): Harness 1: new helms, finishes and crests (#1721)
+
+## What the player will see
+- Six new helms: Great Helm (flat-topped pot helm with eye slits and breaths, fixed face), Barbute (deep helm with T/Y face opening, open face), Burgonet (open helm with peak, comb, hinged cheek plates, visored), Spangenhelm (riveted segments with nose bar and mail curtain, fixed face), Lobster-tail Pot (round skull with sliding nose bar and laminated neck tail, visored), Grotesque Visor (armet with sculpted beast/grinning face visor, visored)
+- Five new plate finishes available at the smith's anvil: Russeted (red-brown), Heat-blued (dark blue), Painted (realm colours), Etched and Gilt (engraved gilt bands, for honoured knights), Rusted (weaker until scoured at a grindstone)
+- Five new crest beasts: Griffin, Bear, Wolf, Raven, Hound (join the existing eight)
+- New Plume crest: feathers in the realm's colour instead of a beast
+
+## Cause
+The Harness Pattern Book (Andy's 2026-11-18 ticks) specified these new helms, finishes, and crests. They were missing from `HeraldryArmour.java`, `HeraldryWear.java`, and the generator `kingdoms/tools/gen_heraldry_armour.py`.
+
+## Changes
+- Added 6 new helms to `HeraldryArmour.HELMS` and `register()` with appropriate Face, sight, and crestRise values
+- Added 5 new finish constants (RUSSETED, BLUED, PAINTED, ETCHED, RUSTED) to `HeraldryArmour` and corresponding palettes to the generator's `FINISHES`
+- Added 5 new crest beasts + plume to `HeraldryArmour.BEASTS`, `CRESTS`, and the generator with new build functions
+- Updated `HeraldryWear.finish()` to distribute the 7 finishes (bright + 6 variants) across realms
+- Ran `gen_heraldry_armour.py` to generate models, textures, icons, item models, recipes, and lang entries for all new pieces in all finishes
+- Added lang entries for new finishes and item names
+
+## Not tested in game
+- Visual appearance of all new helms in each of the 7 finishes
+- Visual appearance of new crest beasts and plume on different helms
+- Realm knight generation with new helm/finish combinations
+- Rusted finish weakening and grindstone scouring (grindstone interaction not yet implemented)
+- Player crafting/dyeing of new pieces
+
+## 0.10.39 (2026-11-19): Harness 4: matching barding and caparisons (#1744)
+
+Chain and plate barding now come in three finishes: bright, blackened and gilded, matching your heraldry armour. Blackened or gilded barding shows its finish in the item name. There is also a new caparison: a cloth cover worn over barding, dyeable in your realm's colours with banner patterns, with its own slot on the tack screen under the banner. Horses wear barding in its finish, with the caparison rendered over it.
+
+Not tested in game.
+
+## 0.10.40 (2026-11-19): Crime: sleepers woken, suspects watched (#1751)
+
+- **Sleepers woken and told**: when someone who can speak sees a crime, they wake the nearest sleeper of their village or realm (within 16 blocks), who gets up, comes over to hear it and remembers it as hearsay. A crime at night is now known to more than the one who saw it. Golems can't tell anyone. (`Theft#wakeAndTell`, `ChestNoise#wakeToHear`)
+- **Being watched**: a guard who saw or heard of your crime in the last 3 days, while you aren't wanted for it, now watches you like a suspected vampire or werewolf: turns to look, says a wary word now and then. The nearest free one follows you at a distance (closes in past 8 blocks, stops inside 5). With no such guard about, a golem of the realm whose people suspect you follows instead. Vampire and werewolf suspects are followed the same way now. (`Suspicion#wary`)
+- Compile-checked by CI; not played.
+
+## 0.10.41 (2026-11-19): Crime: word that travels (runners, hushing, gossip, the road) (#1763)
+
+- **The witness runs to tell**: a crime seen with no guard or golem among the witnesses, and none within earshot of the cry (24 blocks), isn't known to the law yet. The witness shouts that they're fetching the guard and runs for the nearest one within 64 blocks. Only when they get there does the realm hear of it: reputation, wanted, bounty and the hunt. Kill them, bind them or hush them first and it never comes out. If no guard is that near, the cry counts at once, as before. Word gets there anyway after a minute if they can't. (`CrimeWord#run`, `Theft#lawKnows`)
+- **Hush the witness**: catch up with a runner and they stop to hear you out. *Plead* (more likely the warmer they are to you; costs a little trust either way), *pay them off* (3/8/20 emeralds' worth in the realm's coin by the crime's weight; costs trust and respect and counts as a bribe), or *stare them down* (only a weaker witness, better with Stare Down; costs warmth). Fail and they run on.
+- **House to house**: those who saw it, and whoever the runner told, pass it on to up to 2 more of the town over the next day, three tellings deep. Hearsay counts half and makes folk wary rather than hostile. Heard crimes now come up in gossip ("Word is X is guilty of..."). (`CrimeWord#spread`, `Recollections#gossipLine`)
+- **Down the road**: news of a heavy crime travels the King's Roads to each realm linked to the one you wronged, a day per 600 blocks between them (at least one day). There you lose 15 reputation and their people will ask about it. (`CrimeWord#road`)
+- Runners, tales and road news aren't saved over a restart.
+- Built; not played. Stacked on Lanterns 1 (#1751).
+
+## 0.10.42 (2026-11-19): Talking to villagers through chat (#1767)
+
+- **Talk through chat**: say a line aloud while looking at a villager within 8 blocks, or start it with their first name (12 blocks), and they turn to you and answer over their head a moment later. Short replies keep it going for 30 seconds. They answer hello, goodbye and thanks, how they are, their name, their work, whose realm this is, trade, news (their real gossip and suspicions), and what they remember of you. Cold, wary or scornful villagers answer shortly and keep their news to themselves. Anything else gets a "Hm? I didn't follow that." When MCA's own chat AI is switched on (`/mca chatAI`), it answers instead and this keeps quiet. (`ChatTalk`, from `ProximityChat`)
+- Built; not played.
+
+## 0.10.43 (2026-11-19): Harness 3: creeds and other lands (#1728)
+
+Knights now wear gear matching their realm's creed and land: etched plate for faith and coin realms, gilt-banded for the King's Guard, spiked black plate for Conquest, fur-lined in snowy lands, quilted coats in the desert, brine-soaked mail in the jungle, hide and bronze in the savanna and badlands, and laced lamellar in the cherry blossom realms. Armor names carry the finish: Etched, Spiked, Gilt-Banded, Fur-Lined, Quilted, Brine-Soaked, Hide, Bronze, Lamellar. New helms include the veiled helm and barbute.
+
+Not tested in game.
+
+## 0.10.44 (2026-11-19): Backflip perk, Freerunner mid-air tricks text (#1778)
+
+- New Freerunning perk **Backflip** (Stealth, level 5, needs Freerunner, ring 3 beside Slide): the standing backflip off the dodge key with Back held (Jaymo's Powers' Acrobatics).
+- Freerunner's description now covers the dodge key's mid-air tricks (rank 1 plain ones, rank 2 the harder ones). Two new loading hints (205, 206).
+- Built; not played.
+
+## 0.10.45 (2026-11-19): repo cleanup: stray javac argument file removed (#1779)
+
+- Removes `kingdoms/src/javac.20261104_084443.args`, an argument file a crashed javac run left on 4 Nov. Nothing in the
+  build reads it; no game change.
+- Same PR (repo only, no mod change): root `genSources.log` and javac args, 12 committed `__pycache__` files, two old
+  Sora's dagger drafts in tools/blockbench, and the finished docs AGENT_BRIEF_0.2, Kingdoms-Plan-0.3 and Plan-0.7.
+
+## 0.10.46 (2026-11-19): narrator voice lines from Google Cloud Text-to-Speech (#1780)
+
+- **The narrator's missing lines can now be voiced by a Google voice**: `tools/voices/google_voices.py` reads the same
+  lang keys as `make_voices.py` and writes the same `.ogg` clips and sounds.json entries, spoken by a Google US English
+  man (Chirp 3 HD "Charon" by default; `--audition` makes samples of nine voices to pick from). It makes only clips that
+  don't exist yet, so the lines the narrator already reads keep his voice; `--redo` remakes them all. The key comes from
+  the `GOOGLE_TTS_API_KEY` environment variable and is never stored. Clips it makes are listed in `google_clips.txt`.
+- **The faith page can be voiced**: its question, its line underneath and each faith's tale are read once their clips
+  exist (they were always silent). So are the retold birthplaces (a Frostborn foundling's born-on-Hail tale).
+- A story line with no clip is no longer registered or listed in sounds.json (38 tales were listed with no file).
+- `make_voices.py --sounds` no longer wipes Kingdoms' other sounds: it only adds, changes or drops voice-line entries
+  (it used to write a sounds.json holding nothing but voices).
+- Built; no clips made yet (waiting for the Google key); not played.
+
+## 0.10.47 (2026-11-19): Talking to villagers through chat (#1770)
+
+- **Talk through chat**: say a line aloud while looking at a villager within 8 blocks, or start it with their first name (12 blocks), and they turn to you and answer over their head a moment later. Short replies keep it going for 30 seconds. They answer hello, goodbye and thanks, how they are, their name, their work, whose realm this is, trade, news (their real gossip and suspicions), and what they remember of you. Cold, wary or scornful villagers answer shortly and keep their news to themselves. Anything else gets a "Hm? I didn't follow that." When MCA's own chat AI is switched on (`/mca chatAI`), it answers instead and this keeps quiet. (`ChatTalk`, from `ProximityChat`)
+- Built; not played.
+
+## 0.10.48 (2026-11-19): Ask a villager anything, with suggested follow-ups (#1770)
+
+- **Ask something...**: a new choice in a villager's "Town business" talk opens a talk card with a box to type in. Ask in your own words and they answer in their own way, by how they bear toward you: their name, work and family (the kin of theirs about), whose land it is, the way to the nearest other town (roughly how far and which way), news and gossip, crime (whether they've heard of yours), the weather, how they are, what they make of you, trade. Anything they don't follow gets a "Hm?". Nothing goes online. (`AskTopics`, `ChatTalk`)
+- **Follow-ups**: beside each answer, a "You could ask" panel holds three questions that fit it, to click instead of typing (in the list when the screen is narrow). "That's all." ends it. (`TalkScreen`)
+- Built; not played. Stacked on Lanterns 7 (#1767), whose chat matcher this grows (family, crime, directions, weather).
+
+## 0.10.49 (2026-11-19): Galactic Patrol hooks: wanted time and arrests (#1764)
+
+- With Jaymo's Powers: the Galactic Patrol reads when a player's wanted times run out (`Theft#wantedUntil`) to write Patrol warrants, and a crook handed over for its bounty counts as a Patrol officer's arrest (`Captures#handedOver`, `PowersCompat#patrolHandedOver`).
+- Built; not played.

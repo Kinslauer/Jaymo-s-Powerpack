@@ -151,7 +151,7 @@ public final class ZFighterPatrol {
 
 	/** (0.19.1) Why a patrolman came down: there is always a reason. NONE is only an older save's, and he goes home. */
 	public enum Cause {
-		NONE, PURSUIT, RECRUIT;
+		NONE, PURSUIT, RECRUIT, ARREST, PARTNER;
 
 		static Cause of(String name) {
 			for (Cause c : values()) {
@@ -240,7 +240,9 @@ public final class ZFighterPatrol {
 		LICENSE = Registry.register(BuiltInRegistries.ITEM, key, new LicenseItem(new Item.Properties().setId(key).stacksTo(1).rarity(Rarity.RARE)));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> output.accept(LICENSE));
 		ServerTickEvents.END_SERVER_TICK.register(ZFighterPatrol::tick);
+		ServerTickEvents.END_SERVER_TICK.register(PatrolLaw::tick);
 		ServerLivingEntityEvents.AFTER_DEATH.register(ZFighterPatrol::afterDeath);
+		ZFighterPatrolRelief.init();
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			FLIERS.clear();
 			PURSUITS.clear();
@@ -509,6 +511,14 @@ public final class ZFighterPatrol {
 			}
 			return;
 		}
+		// the Patrol as lawmen (PatrolLaw): one come for a crooked officer, or an officer's partner
+		if (visit.cause() == Cause.ARREST && PatrolLaw.arrest(level, man, visit)) {
+			return;
+		}
+		if (visit.cause() == Cause.PARTNER) {
+			PatrolLaw.partnerStep(level, man, visit);
+			return;
+		}
 		LivingEntity foe = null;
 		@Nullable ServerPlayer recruit = null;
 		if (visit.cause() == Cause.PURSUIT) {
@@ -535,22 +545,7 @@ public final class ZFighterPatrol {
 			foe = foe(level, man, visit.cause() == Cause.RECRUIT ? SIDE_FIGHT : FIGHT_RANGE);
 		}
 		if (foe != null) {
-			man.setTarget(foe);
-			man.getLookControl().setLookAt(foe, 30.0F, 30.0F);
-			if (man.distanceTo(foe) > REACH) {
-				man.getNavigation().moveTo(foe, 1.0);
-			} else {
-				man.getNavigation().stop();
-				if (man.tickCount % PUNCH_EVERY < THINK_EVERY) {
-					man.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
-					DamageSource source = level.damageSources().mobAttack(man);
-					if (foe.hurtServer(level, source, PUNCH)) {
-						Vec3 push = foe.position().subtract(man.position()).multiply(1.0, 0.0, 1.0).normalize().scale(0.6);
-						foe.push(push.x, 0.25, push.z);
-						level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.NEUTRAL, 0.8F, 0.9F);
-					}
-				}
-			}
+			fight(level, man, foe, PUNCH);
 			return;
 		}
 		man.setTarget(null);
@@ -570,6 +565,26 @@ public final class ZFighterPatrol {
 			double x = pod.x + (random.nextDouble() * 2.0 - 1.0) * ROAM, z = pod.z + (random.nextDouble() * 2.0 - 1.0) * ROAM;
 			int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Mth.floor(x), Mth.floor(z));
 			man.getNavigation().moveTo(x, y, z, 0.6);
+		}
+	}
+
+	/** He closes on {@code foe} and, in reach, strikes for {@code damage} every {@link #PUNCH_EVERY} ticks. */
+	static void fight(ServerLevel level, PathfinderMob man, LivingEntity foe, float damage) {
+		man.setTarget(foe);
+		man.getLookControl().setLookAt(foe, 30.0F, 30.0F);
+		if (man.distanceTo(foe) > REACH) {
+			man.getNavigation().moveTo(foe, 1.0);
+		} else {
+			man.getNavigation().stop();
+			if (man.tickCount % PUNCH_EVERY < THINK_EVERY) {
+				man.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+				DamageSource source = level.damageSources().mobAttack(man);
+				if (foe.hurtServer(level, source, damage)) {
+					Vec3 push = foe.position().subtract(man.position()).multiply(1.0, 0.0, 1.0).normalize().scale(0.6);
+					foe.push(push.x, 0.25, push.z);
+					level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.NEUTRAL, 0.8F, 0.9F);
+				}
+			}
 		}
 	}
 
@@ -676,8 +691,24 @@ public final class ZFighterPatrol {
 			}));
 			options.add(ZFighterNpcs.Option.of("talk.jaymospowers.patrol.opt.writ", officerRank(player) >= WRIT_RANK,
 				() -> com.jaymospowers.power.zfighter.farworld.PatrolWrit.ask(player, man, back)));
+			if (PatrolLaw.warrant(player).crimes() > 0) {
+				options.add(ZFighterNpcs.Option.of("talk.jaymospowers.patrol.opt.quietly", true, () -> {
+					PatrolLaw.served(player, man, true);
+					ZFighterNpcs.ask(player, man, Component.translatable("talk.jaymospowers.patrol.quietly"), List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)));
+				}));
+			}
+			boolean partnered = player.getAttached(PatrolLaw.PARTNER) != null;
+			options.add(ZFighterNpcs.Option.of("talk.jaymospowers.patrol.opt.partner", !partnered && officerRank(player) >= PatrolLaw.PARTNER_RANK
+				&& PatrolLaw.warrant(player).crimes() <= 0, () -> {
+				PatrolLaw.givePartner(player);
+				ZFighterNpcs.ask(player, man, Component.translatable("talk.jaymospowers.patrol.partnered"), List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)));
+			}));
+			options.add(ZFighterNpcs.Option.of("talk.jaymospowers.patrol.opt.relief", true, () -> ZFighterPatrolRelief.ask(player, man, back)));
+			// your Patrol file: rank, arrests on warrant, skip writs drawn, relief runs done
 			options.add(ZFighterNpcs.Option.of("talk.jaymospowers.patrol.opt.report", true, () -> ZFighterNpcs.ask(player, man,
-				Component.translatable("talk.jaymospowers.patrol.report", rankName(rank(player, member.arrests())), member.arrests()),
+				Component.translatable("talk.jaymospowers.patrol.file", rankName(rank(player, member.arrests())), member.arrests(),
+					Integer.bitCount(player.getAttachedOrElse(com.jaymospowers.power.zfighter.farworld.PatrolWrit.ISSUED, 0)),
+					ZFighterPatrolRelief.of(player).done()),
 				List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)))));
 		}
 		ZFighterNpcs.ask(player, man, words, options);
@@ -766,6 +797,7 @@ public final class ZFighterPatrol {
 
 	/** Down on a far world ({@code ZFighterSpace.arrived}): a licensed officer may find a warrant out there. */
 	static void arrived(ServerPlayer player, ZFighterSpace.@Nullable Dest dest) {
+		PatrolLaw.arrived(player);
 		if (dest == null || !licensed(player)) {
 			return;
 		}
@@ -864,6 +896,7 @@ public final class ZFighterPatrol {
 
 	/** A criminal down: his officer is paid and the arrest counted. */
 	private static void afterDeath(LivingEntity dead, DamageSource source) {
+		PatrolLaw.fell(dead);
 		if (!dead.entityTags().contains(WANTED_TAG) || !(dead.level() instanceof ServerLevel level)) {
 			return;
 		}
@@ -881,17 +914,32 @@ public final class ZFighterPatrol {
 		if (owner == null || owner.level() != level) {
 			return;
 		}
+		countArrest(owner, dead.getDisplayName(), true);
+	}
+
+	/**
+	 * {@code owner} made an arrest ({@code name}): counted toward their rank, with training; {@code pay}: the Patrol's bounty
+	 * too (an arrest for a realm is paid by the realm). A new rank is announced.
+	 */
+	static void countArrest(ServerPlayer owner, Component name, boolean pay) {
+		ServerLevel level = owner.level();
 		Member member = owner.getAttachedOrElse(MEMBER, new Member(0, 0L));
 		int was = rank(owner, member.arrests());
 		Member now = new Member(member.arrests() + 1, member.fuelled());
 		owner.setAttached(MEMBER, now);
-		ZFighterSagas.paySilver(owner, bounty(was)); // (0.20.0) the bounty is silver coins
+		if (pay) {
+			ZFighterSagas.paySilver(owner, bounty(was)); // (0.20.0) the bounty is silver coins
+		}
 		int tp = (int)Math.round(BOUNTY_TP * (1.0 + RANK_PAYS * was));
 		if (Powers.has(owner, ZFighterPower.INSTANCE)) {
 			ZFighterTraining.grant(owner, tp);
 		}
-		owner.sendSystemMessage(Component.translatable("message.jaymospowers.patrol.arrest", dead.getDisplayName(), KingdomsMoney.text(owner, KingdomsMoney.worth(bounty(was))), now.arrests())
-			.withStyle(ChatFormatting.AQUA));
+		if (pay) {
+			owner.sendSystemMessage(Component.translatable("message.jaymospowers.patrol.arrest", name, KingdomsMoney.text(owner, KingdomsMoney.worth(bounty(was))), now.arrests())
+				.withStyle(ChatFormatting.AQUA));
+		} else {
+			owner.sendSystemMessage(Component.translatable("message.jaymospowers.patrol.arrest_handed", name, now.arrests()).withStyle(ChatFormatting.AQUA));
+		}
 		int rank = rank(owner, now.arrests());
 		if (rank(now.arrests()) > rank(member.arrests()) && rank <= was) {
 			// (0.18.54) the arrests are enough for the next rank; the deeds are not

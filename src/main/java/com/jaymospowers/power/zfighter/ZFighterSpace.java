@@ -302,6 +302,7 @@ public final class ZFighterSpace {
 	public static void open(ServerPlayer player, PodEntity pod) {
 		Level level = player.level();
 		OPENED.put(player.getUUID(), new Opened(pod.getUUID(), level.getGameTime()));
+		ZFighterAtlas.noteBed(player);
 		ServerPlayNetworking.send(player, new Open(pod.fuel(), PodFuel.effective(pod), readCharts(player)));
 		level.playSound(null, pod.getX(), pod.getY() + 1.0, pod.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.NEUTRAL, 0.6F, 1.6F);
 	}
@@ -317,6 +318,26 @@ public final class ZFighterSpace {
 	}
 
 	/** What a trip to {@code index} (or Home) burns from {@code from}. */
+	/** The worlds out past the Hollow (the black hole beyond the outer orbits): a trip between them and the rest skirts it. */
+	public static boolean pastHollow(int index) {
+		return index == GLACIA || index == VERDANT || index == GIANT;
+	}
+
+	/** A trip from world {@code from} to world {@code to} (indices; {@link #HOME_INDEX} for home) passes the Hollow and is dragged off course. */
+	public static boolean skirtsHollow(int from, int to) {
+		return pastHollow(from) != pastHollow(to);
+	}
+
+	/** The index of the far world {@code level} is, or {@link #HOME_INDEX}. */
+	public static int indexOf(ResourceKey<Level> level) {
+		for (int i = 0; i < DESTS.length; i++) {
+			if (DESTS[i].level() == level) {
+				return i;
+			}
+		}
+		return HOME_INDEX;
+	}
+
 	public static int cost(int index, ResourceKey<Level> from) {
 		if (index == GIANT && from == DESTS[VERDANT].level()) {
 			return GIANT_HOP_COST;
@@ -616,6 +637,9 @@ public final class ZFighterSpace {
 		NEXT_LAUNCH.put(player.getUUID(), player.level().getGameTime() + COOLDOWN_TICKS);
 		ZFighterSpaceMissions.arrived(player);
 		ZFighterPatrol.arrived(player, dest);
+		if (dest != null) {
+			ZFighterAtlas.landed(player, dest);
+		}
 	}
 
 	// ---------------------------------------------------------------- the landing pad

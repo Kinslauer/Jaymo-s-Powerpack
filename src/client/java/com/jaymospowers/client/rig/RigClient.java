@@ -70,8 +70,8 @@ public final class RigClient {
 	/** The active J uses (one of {@link RigNet#CYCLE}). */
 	static int selected = RigNet.PALM;
 	/** The server's last word. */
-	static RigNet.Status status = RigNet.Status.NONE;
-	private static int hoverTicks;
+		static RigNet.Status status = RigNet.Status.NONE;
+		private static int hoverTicks;
 	private static Vec3 flightVelocity = Vec3.ZERO;
 	private static boolean rigWasDown, rigShift, rigHeldDone;
 	private static int rigHeld;
@@ -120,12 +120,32 @@ public final class RigClient {
 	}
 
 	/** The creatures marked for the missile volley now (entity ids). */
-	static List<Integer> marks() {
-		return MARKS;
-	}
+		static List<Integer> marks() {
+			return MARKS;
+		}
 
-	/** The locked target, if it's loaded here. */
-	static @Nullable LivingEntity locked(LocalPlayer player) {
+		/** Whether the pull-up warning is active. */
+		static boolean pullup() {
+			return status.pullup();
+		}
+
+		/** Whether hyper thrust is active. */
+		static boolean hyper() {
+			return status.hyper();
+		}
+
+		/** Whether banking is active. */
+		static boolean banking() {
+			return status.banking();
+		}
+
+		/** Whether smooth others is active. */
+		static boolean smoothOthers() {
+			return status.smoothOthers();
+		}
+
+		/** The locked target, if it's loaded here. */
+		static @Nullable LivingEntity locked(LocalPlayer player) {
 		if (status.lock() < 0) {
 			return null;
 		}
@@ -139,14 +159,15 @@ public final class RigClient {
 	}
 
 	/** Whether {@code active} is in the J cycle at this level. */
-	static boolean available(int active, int level) {
-		return switch (active) {
-			case RigNet.SCAN -> level >= Rig.SCAN_LEVEL;
-			case RigNet.CALL -> level >= Rig.CALL_LEVEL;
-			case RigNet.UNIBEAM -> level >= Rig.UNIBEAM_LEVEL;
-			default -> true;
-		};
-	}
+		static boolean available(int active, int level) {
+			return switch (active) {
+				case RigNet.SCAN -> level >= Rig.SCAN_LEVEL;
+				case RigNet.CALL -> level >= Rig.CALL_LEVEL;
+				case RigNet.UNIBEAM -> level >= Rig.UNIBEAM_LEVEL;
+				case RigNet.PULLUP, RigNet.HYPER, RigNet.BANK, RigNet.METEOR, RigNet.SMOOTH -> level >= Rig.FLIGHT_LEVEL;
+				default -> true;
+			};
+		}
 
 	/** (0.11.110) The radial menu's pick: an active becomes J's and is used now; a switch just flips. */
 	static void pick(int action) {
@@ -451,46 +472,47 @@ public final class RigClient {
 	}
 
 	/** Full flight: where you look, with some weight to it; let go and it slows to a hold. */
-	private static void flight(Minecraft minecraft, LocalPlayer player) {
-		hoverTicks++;
-		float air = Rig.frame(player).airSpeed;
-		Vec3 look = player.getLookAngle();
-		Vec3 want = Vec3.ZERO;
-		if (minecraft.options.keyUp.isDown()) {
-			want = look.scale(FLIGHT_SPEED * air * (minecraft.options.keySprint.isDown() ? FLIGHT_SPRINT : 1.0));
-		} else if (minecraft.options.keyDown.isDown()) {
-			want = look.scale(-FLIGHT_SPEED * air * 0.35);
+		private static void flight(Minecraft minecraft, LocalPlayer player) {
+			hoverTicks++;
+			float air = Rig.frame(player).airSpeed;
+			boolean hyper = RigFlightFeel.hyper;
+			Vec3 look = player.getLookAngle();
+			Vec3 want = Vec3.ZERO;
+			if (minecraft.options.keyUp.isDown()) {
+				want = look.scale(FLIGHT_SPEED * air * (minecraft.options.keySprint.isDown() ? FLIGHT_SPRINT : 1.0) * (hyper ? RigFlightFeel.HYPER_SPEED : 1.0));
+			} else if (minecraft.options.keyDown.isDown()) {
+				want = look.scale(-FLIGHT_SPEED * air * 0.35);
+			}
+			double yaw = Math.toRadians(player.getYRot());
+			Vec3 right = new Vec3(-Math.cos(yaw), 0.0, -Math.sin(yaw));
+			if (minecraft.options.keyRight.isDown()) {
+				want = want.add(right.scale(FLIGHT_STRAFE * (hyper ? RigFlightFeel.HYPER_SPEED : 1.0)));
+			}
+			if (minecraft.options.keyLeft.isDown()) {
+				want = want.add(right.scale(-FLIGHT_STRAFE * (hyper ? RigFlightFeel.HYPER_SPEED : 1.0)));
+			}
+			if (minecraft.options.keyJump.isDown()) {
+				want = want.add(0.0, FLIGHT_CLIMB * (hyper ? RigFlightFeel.HYPER_SPEED : 1.0), 0.0);
+			} else if (minecraft.options.keyShift.isDown()) {
+				want = want.add(0.0, -FLIGHT_CLIMB * (hyper ? RigFlightFeel.HYPER_SPEED : 1.0), 0.0);
+			} else if (want.lengthSqr() < 1.0E-4) {
+				want = new Vec3(0.0, Math.sin(hoverTicks * 0.15) * HOVER_BOB, 0.0);
+			}
+			// the Mind's autopilot, until a movement key takes the controls back
+			Vec3 pilot = RigPilotClient.want(minecraft, player, FLIGHT_SPEED * air * FLIGHT_SPRINT);
+			if (pilot != null) {
+				want = pilot;
+			}
+			// walls and floors stop you (the server hurts a hard stop)
+			Vec3 actual = player.getDeltaMovement();
+			if (player.horizontalCollision) {
+				flightVelocity = new Vec3(actual.x, flightVelocity.y, actual.z);
+			}
+			if (player.verticalCollision) {
+				flightVelocity = new Vec3(flightVelocity.x, 0.0, flightVelocity.z);
+			}
+			flightVelocity = flightVelocity.lerp(want, hyper ? RigFlightFeel.HYPER_ACCEL : FLIGHT_ACCEL);
+			player.setDeltaMovement(flightVelocity);
+			player.resetFallDistance();
 		}
-		double yaw = Math.toRadians(player.getYRot());
-		Vec3 right = new Vec3(-Math.cos(yaw), 0.0, -Math.sin(yaw));
-		if (minecraft.options.keyRight.isDown()) {
-			want = want.add(right.scale(FLIGHT_STRAFE));
-		}
-		if (minecraft.options.keyLeft.isDown()) {
-			want = want.add(right.scale(-FLIGHT_STRAFE));
-		}
-		if (minecraft.options.keyJump.isDown()) {
-			want = want.add(0.0, FLIGHT_CLIMB, 0.0);
-		} else if (minecraft.options.keyShift.isDown()) {
-			want = want.add(0.0, -FLIGHT_CLIMB, 0.0);
-		} else if (want.lengthSqr() < 1.0E-4) {
-			want = new Vec3(0.0, Math.sin(hoverTicks * 0.15) * HOVER_BOB, 0.0);
-		}
-		// the Mind's autopilot, until a movement key takes the controls back
-		Vec3 pilot = RigPilotClient.want(minecraft, player, FLIGHT_SPEED * air * FLIGHT_SPRINT);
-		if (pilot != null) {
-			want = pilot;
-		}
-		// walls and floors stop you (the server hurts a hard stop)
-		Vec3 actual = player.getDeltaMovement();
-		if (player.horizontalCollision) {
-			flightVelocity = new Vec3(actual.x, flightVelocity.y, actual.z);
-		}
-		if (player.verticalCollision) {
-			flightVelocity = new Vec3(flightVelocity.x, 0.0, flightVelocity.z);
-		}
-		flightVelocity = flightVelocity.lerp(want, FLIGHT_ACCEL);
-		player.setDeltaMovement(flightVelocity);
-		player.resetFallDistance();
 	}
-}

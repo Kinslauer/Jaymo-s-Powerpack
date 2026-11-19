@@ -102,16 +102,27 @@ public final class RigActives {
 	static final double FLAME_LENGTH = 0.45, FLAME_STRETCH = 2.2, FLAME_FLICKER = 0.15;
 	static final float FLAME_WIDTH = 0.07F;
 	/** The crack as full flight breaks into sprint speed: the horizontal speed it comes at (b/t, times the frame's air speed), its ring, its shake, and the least ticks between two. */
-	static final double SONIC_SPEED = 0.95;
-	static final float CRACK_RING = 2.6F, CRACK_SHAKE = 1.1F;
-	static final int CRACK_GAP = 60;
-	/** The Core empty in the air: how long the slow sink lasts (ticks), how many coughs the thrusters give, how far apart, and each one's kick up. */
-	static final int SPUTTER_TICKS = 90, SPUTTERS = 4, SPUTTER_EVERY = 12;
-	static final double SPUTTER_KICK = 0.12;
+		static final double SONIC_SPEED = 0.95;
+		static final float CRACK_RING = 2.6F, CRACK_SHAKE = 1.1F;
+		static final int CRACK_GAP = 60;
+		/** The Core empty in the air: how long the slow sink lasts (ticks), how many coughs the thrusters give, how far apart, and each one's kick up. */
+		static final int SPUTTER_TICKS = 90, SPUTTERS = 4, SPUTTER_EVERY = 12;
+		static final double SPUTTER_KICK = 0.12;
+		/** (0.12.x) Pull-up: time-to-impact threshold (ticks), charge cost, cooldown. */
+		static final int PULLUP_TTI = 60, PULLUP_COST = 30, PULLUP_COOLDOWN = 100;
+		/** (0.12.x) Hyper thrust: extra speed multiplier, charge cost per tick, cooldown. */
+		static final double HYPER_SPEED = 2.0, HYPER_DRAIN = 8.0;
+		static final int HYPER_COST = 15, HYPER_COOLDOWN = 120;
+		/** (0.12.x) Banking: max roll angle (radians), eased by speed share. */
+		static final float BANK_MAX_ROLL = 0.6F;
+		/** (0.12.x) Meteor dive: charge cost, cooldown, upward speed, downward speed, impact radius. */
+		static final int METEOR_COST = 200, METEOR_COOLDOWN = 300;
+		static final double METEOR_UP = 1.5, METEOR_DOWN = 2.5, METEOR_RADIUS = 4.0;
+		/** (0.12.x) Smooth others: client-only toggle, no server cost. */
 
 	/** The Mind's level as a damage factor: 1 + {@link #DAMAGE_PER_LEVEL} per level above the first. */
 	static float levelDamage(Player player) {
-		return 1.0F + DAMAGE_PER_LEVEL * (Rig.level(player) - 1);
+	return 1.0F + DAMAGE_PER_LEVEL * (Rig.level(player) - 1);
 	}
 
 	private static final Map<UUID, State> STATES = new HashMap<>();
@@ -122,31 +133,59 @@ public final class RigActives {
 		int hoverTicks;
 		int palmCooldown;
 		int launcherCooldown;
-		/** The last status sent, to send a change at once. */
+	/** The last status sent, to send a change at once. */
 		boolean sentHovering;
 		boolean wasWearing;
-		/** (0.11.87) Full flight (only while hovering). */
+	/** (0.11.87) Full flight (only while hovering). */
 		boolean flying;
 		boolean sentFlying;
-		/** The locked target's entity id, -1 for none. */
+	/** The locked target's entity id, -1 for none. */
 		int lock = -1;
 		int sentLock = -1;
 		int scanCooldown;
-		/** Game time a hover starts by itself (the takeover save's catch), 0: none. */
+	/** Game time a hover starts by itself (the takeover save's catch), 0: none. */
 		long hoverAt;
-		/** Full flight's last position and horizontal speed (b/t), for crashes. */
+	/** Full flight's last position and horizontal speed (b/t), for crashes. */
 		@Nullable Vec3 lastPos;
 		double lastSpeed;
-		/** (0.11.107) Ticks into the Unibeam (-1: none), and its cooldown. */
+	/** (0.11.107) Ticks into the Unibeam (-1: none), and its cooldown. */
 		int unibeam = -1;
 		int unibeamCooldown;
-		/** Game time the Core's overcharge (a lightning strike's) ends; 0 or past: none. */
+	/** Game time the Core's overcharge (a lightning strike's) ends; 0 or past: none. */
 		long overUntil;
-		/** Game time the next sonic crack may come. */
+	/** Game time the next sonic crack may come. */
 		long crackAt;
-		/** The jets' last position and facing, for flames that swing with the steering. */
+	/** The jets' last position and facing, for flames that swing with the steering. */
 		@Nullable Vec3 jetPos;
 		float jetYaw;
+		// ---- gun actives (0.11.112) ----
+	/** Palm charge: ticks held (0..CHARGE_MAX_HOLD), -1: not charging. */
+		int palmChargeTicks = -1;
+	/** Gatling: whether firing, heat (0..GATLING_MAX_HEAT), spin-up ticks, cooldown. */
+		boolean gatlingFiring = false;
+		int gatlingHeat = 0;
+		int gatlingSpinTicks = 0;
+		int gatlingCooldown = 0;
+	/** Railgun: charge ticks (0..RAIL_CHARGE_TICKS), -1: not charging; cooldown. */
+		int railgunCharge = -1;
+		int railgunCooldown = 0;
+	/** Sonic cannon: whether firing, ticks held, cooldown. */
+		boolean sonicFiring = false;
+		int sonicTicks = 0;
+		int sonicCooldown = 0;
+	/** Twin beam: ticks into charge/beam (-1: none), cooldown. */
+		int twinBeam = -1;
+		int twinCooldown = 0;
+	/** Siege mode: active, shells fired, shell cooldown, mode cooldown. */
+		boolean siegeActive = false;
+		int siegeShellsFired = 0;
+		int siegeShellCooldown = 0;
+		int siegeCooldown = 0;
+		/** Flight actives: pull-up warning, hyper thrust, banking, smooth others. */
+		boolean pullup;
+		boolean hyper;
+		boolean banking;
+		boolean smoothOthers;
 	}
 
 	/** Something that happens a few ticks after its key: a shot at the end of its wind-up, a lift-off after its crouch. */
@@ -168,8 +207,8 @@ public final class RigActives {
 
 	static void init() {
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-			STATES.remove(handler.player.getUUID());
-			RigMind.forget(handler.player.getUUID());
+	STATES.remove(handler.player.getUUID());
+	RigMind.forget(handler.player.getUUID());
 		});
 	}
 
@@ -191,7 +230,7 @@ public final class RigActives {
 	static @Nullable LivingEntity locked(ServerPlayer player) {
 		State state = STATES.get(player.getUUID());
 		if (state == null || state.lock < 0) {
-			return null;
+	return null;
 		}
 		return player.level().getEntity(state.lock) instanceof LivingEntity living && living.isAlive() ? living : null;
 	}
@@ -199,7 +238,7 @@ public final class RigActives {
 	/** Whether the worn Core's Mind has reached {@code level}; if not, says so. */
 	static boolean needs(ServerPlayer player, int level) {
 		if (Rig.level(player) >= level) {
-			return true;
+	return true;
 		}
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig.needs_level", level));
 		return false;
@@ -208,90 +247,101 @@ public final class RigActives {
 	/** A Rig key from the client. */
 	static void use(ServerPlayer player, int action) {
 		if (player.isSpectator()) {
-			return;
+	return;
 		}
 		if (action == RigNet.CALL) {
-			// calling works with nothing worn: the parked suit comes back
-			RigCall.use(player);
-			return;
+	// calling works with nothing worn: the parked suit comes back
+	RigCall.use(player);
+	return;
 		}
 		if (action == RigNet.SENTRY) {
-			RigSentry.use(player);
-			return;
+	RigSentry.use(player);
+	return;
 		}
 		if (RigPicks.is(action)) {
-			RigPicks.use(player, action);
-			return;
+	RigPicks.use(player, action);
+	return;
 		}
 		if (action == RigNet.LIMB_SHOT || action == RigNet.LIMB_KICK) {
-			// a Rig prosthetic needs no suit
-			RigLimbs.use(player, action);
-			return;
+	// a Rig prosthetic needs no suit
+	RigLimbs.use(player, action);
+	return;
 		}
 		if (!Rig.wearsAny(player)) {
-			return;
+	return;
 		}
 		if (action == RigNet.FACEPLATE) {
-			RigHelm.toggleFace(player);
-			return;
+	RigHelm.toggleFace(player);
+	return;
 		}
 		if (action == RigNet.NIGHT) {
-			RigHelm.toggleNight(player);
-			return;
+	RigHelm.toggleNight(player);
+	return;
 		}
 		if (action == RigNet.REPORT) {
-			RigMind.report(player);
-			return;
+	RigMind.report(player);
+	return;
 		}
 		State state = state(player);
 		if (action == RigNet.SCAN) {
-			// the Helm's eyes and the Core's Mind are enough
-			if (Rig.wears(player, Rig.Piece.HELM) && !Rig.core(player).isEmpty()) {
+	// the Helm's eyes and the Core's Mind are enough
+	if (Rig.wears(player, Rig.Piece.HELM) && !Rig.core(player).isEmpty()) {
 				if (needs(player, Rig.SCAN_LEVEL)) {
 					RigScan.scan(player, state);
 				}
-			} else {
+	} else {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig.needs_helm_core"));
-			}
-			sendStatus(player, state);
-			return;
+	}
+	sendStatus(player, state);
+	return;
 		}
 		if (!Rig.fullSet(player)) {
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig.incomplete"));
-			return;
-		}
-		switch (action) {
-			case RigNet.HOVER -> toggleHover(player, state);
-			case RigNet.PALM -> palm(player, state);
-			case RigNet.LAUNCHER -> launch(player, state);
-			case RigNet.FLIGHT -> toggleFlight(player, state);
-			case RigNet.UNIBEAM -> RigUnibeam.use(player, state);
-			default -> {
-			}
-		}
-		sendStatus(player, state);
+					player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig.incomplete"));
+					return;
+				}
+				switch (action) {
+					case RigNet.HOVER -> toggleHover(player, state);
+					case RigNet.PALM -> palm(player, state);
+					case RigNet.LAUNCHER -> launch(player, state);
+					case RigNet.FLIGHT -> toggleFlight(player, state);
+					case RigNet.UNIBEAM -> RigUnibeam.use(player, state);
+					case RigNet.PALM_CHARGE -> RigGuns.palmCharge(player, state);
+					case RigNet.GATLING -> RigGuns.gatling(player, state);
+					case RigNet.RAILGUN -> RigGuns.railgun(player, state);
+					case RigNet.SONIC -> RigGuns.sonic(player, state);
+					case RigNet.TWIN -> RigGuns.twinBeam(player, state);
+					case RigNet.SIEGE -> RigGuns.siegeMode(player, state);
+					case RigNet.PULLUP -> pullUp(player);
+					case RigNet.HYPER -> hyperThrust(player);
+					case RigNet.BANK -> toggleBanking(player);
+					case RigNet.METEOR -> RigDive.meteorDive(player);
+					case RigNet.SMOOTH -> toggleSmoothOthers(player);
+					default -> {
+					}
+				}
+				sendStatus(player, state);
 	}
 
 	/** (0.11.87) The Lock packet: lock on to {@code id}, or let go (-1). */
 	static void lock(ServerPlayer player, int id) {
 		if (player.isSpectator() || !Rig.wears(player, Rig.Piece.HELM) || Rig.core(player).isEmpty()) {
-			return;
+	return;
 		}
 		State state = state(player);
 		if (id < 0) {
-			if (state.lock >= 0) {
+	if (state.lock >= 0) {
 				state.lock = -1;
 				RigMind.say(player, "unlock", 0.8F);
-			}
-			sendStatus(player, state);
-			return;
+	}
+	sendStatus(player, state);
+	return;
 		}
 		if (!needs(player, Rig.LOCK_LEVEL)) {
-			return;
+	return;
 		}
 		if (!(player.level().getEntity(id) instanceof LivingEntity target) || !target.isAlive() || target == player || target.isSpectator()
-			|| target.distanceTo(player) > LOCK_RANGE * 1.25 || !player.hasLineOfSight(target)) {
-			return;
+	|| target.distanceTo(player) > LOCK_RANGE * 1.25 || !player.hasLineOfSight(target)) {
+	return;
 		}
 		state.lock = id;
 		RigMind.sayAlways(player, "lock", 1.6F, target.getDisplayName());
@@ -306,15 +356,15 @@ public final class RigActives {
 	/** Every tick: drop a lock that's dead, gone, too far, or with no Helm to hold it. */
 	private static void tickLock(ServerPlayer player, State state) {
 		if (state.lock < 0) {
-			return;
+	return;
 		}
 		Entity target = player.level().getEntity(state.lock);
 		if (!Rig.wears(player, Rig.Piece.HELM) || Rig.core(player).isEmpty() || !(target instanceof LivingEntity living) || !living.isAlive()
-			|| living.distanceTo(player) > LOCK_KEEP) {
-			state.lock = -1;
-			if (target instanceof LivingEntity living && !living.isAlive()) {
+	|| living.distanceTo(player) > LOCK_KEEP) {
+	state.lock = -1;
+	if (target instanceof LivingEntity living && !living.isAlive()) {
 				RigMind.say(player, "lock_down", 1.2F);
-			}
+	}
 		}
 	}
 
@@ -322,25 +372,25 @@ public final class RigActives {
 
 	private static void toggleHover(ServerPlayer player, State state) {
 		if (state.hovering) {
-			stopHover(player, state);
-			return;
+	stopHover(player, state);
+	return;
 		}
 		if (Rig.charge(player) < HOVER_MIN && !player.isCreative()) {
-			RigMind.empty(player);
-			return;
+	RigMind.empty(player);
+	return;
 		}
 		if (com.jaymospowers.core.FlightRoll.powerFlying(player)) {
-			// already flying on a power: the thrusters stay out of its way
-			return;
+	// already flying on a power: the thrusters stay out of its way
+	return;
 		}
 		state.hovering = true;
 		state.hoverTicks = 0;
 		state.jetPos = null;
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.6F, 1.6F);
 		if (player.onGround() && player.level() instanceof ServerLevel level) {
-			// off the ground in a burst: a crouch first (the client holds the lift for it), then the ground takes the blast
-			RigMoves.start(player, RigMoves.TAKEOFF);
-			later(player, RigMoves.TAKEOFF_CROUCH, () -> liftOff(level, player, LAUNCH_RING, LAUNCH_SHAKE));
+	// off the ground in a burst: a crouch first (the client holds the lift for it), then the ground takes the blast
+	RigMoves.start(player, RigMoves.TAKEOFF);
+	later(player, RigMoves.TAKEOFF_CROUCH, () -> liftOff(level, player, LAUNCH_RING, LAUNCH_SHAKE));
 		}
 	}
 
@@ -363,42 +413,42 @@ public final class RigActives {
 	/** (0.11.87) Double-tap Jump while hovering: full flight on, or back to hover. */
 	private static void toggleFlight(ServerPlayer player, State state) {
 		if (!state.hovering) {
-			return;
+	return;
 		}
 		if (state.flying) {
-			state.flying = false;
-			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.4F, 1.4F);
-			return;
+	state.flying = false;
+	player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.4F, 1.4F);
+	return;
 		}
 		if (!needs(player, Rig.FLIGHT_LEVEL)) {
-			return;
+	return;
 		}
 		state.flying = true;
 		state.lastPos = null;
 		// a tuck in the air, then the thrusters open up
 		RigMoves.start(player, RigMoves.TAKEOFF);
 		if (player.level() instanceof ServerLevel level) {
-			later(player, RigMoves.TAKEOFF_CROUCH, () -> liftOff(level, player, FLIGHT_RING, FLIGHT_SHAKE));
+	later(player, RigMoves.TAKEOFF_CROUCH, () -> liftOff(level, player, FLIGHT_RING, FLIGHT_SHAKE));
 		}
 	}
 
 	private static void tickHover(ServerPlayer player, State state) {
 		state.hoverTicks++;
 		if (!Rig.fullSet(player) || player.isFallFlying() || com.jaymospowers.core.FlightRoll.powerFlying(player)) {
-			stopHover(player, state);
-			return;
+	stopHover(player, state);
+	return;
 		}
 		if (state.flying && Rig.level(player) < Rig.FLIGHT_LEVEL) {
-			state.flying = false;
+	state.flying = false;
 		}
 		if (state.flying) {
-			tickFlight(player, state);
+	tickFlight(player, state);
 		}
 		if (state.hoverTicks % HOVER_DRAIN_EVERY == 0) {
-			int base = state.flying ? FLIGHT_COST : HOVER_COST;
-			int cost = Rig.augment(player) == Rig.Augment.WIND ? Math.max(1, Math.round(base * WIND_HOVER_SHARE)) : base;
-			cost = Math.max(1, Math.round(cost * Rig.frame(player).hoverDrain));
-			if (!Rig.spend(player, cost)) {
+	int base = state.flying ? FLIGHT_COST : HOVER_COST;
+	int cost = Rig.augment(player) == Rig.Augment.WIND ? Math.max(1, Math.round(base * WIND_HOVER_SHARE)) : base;
+	cost = Math.max(1, Math.round(cost * Rig.frame(player).hoverDrain));
+	if (!Rig.spend(player, cost)) {
 				boolean airborne = !player.onGround();
 				stopHover(player, state);
 				RigMind.empty(player);
@@ -406,16 +456,16 @@ public final class RigActives {
 					sputter(player);
 				}
 				return;
-			}
+	}
 		}
 		if (player.onGround() && state.hoverTicks > HOVER_LAND_AFTER) {
-			stopHover(player, state);
-			return;
+	stopHover(player, state);
+	return;
 		}
 		// a held, slow descent at most: no fall damage builds up
 		player.resetFallDistance();
 		if (state.hoverTicks % 2 == 0 && player.level() instanceof ServerLevel level) {
-			jets(level, player, state);
+	jets(level, player, state);
 		}
 	}
 
@@ -427,7 +477,7 @@ public final class RigActives {
 		player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, SPUTTER_TICKS, 0, false, false, false));
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig.power_low"));
 		for (int i = 0; i < SPUTTERS; i++) {
-			later(player, 4 + i * SPUTTER_EVERY + player.getRandom().nextInt(4), () -> {
+	later(player, 4 + i * SPUTTER_EVERY + player.getRandom().nextInt(4), () -> {
 				if (player.onGround() || !(player.level() instanceof ServerLevel level)) {
 					return;
 				}
@@ -437,7 +487,7 @@ public final class RigActives {
 				level.playSound(null, feet.x, feet.y, feet.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.5F, 0.6F + player.getRandom().nextFloat() * 0.3F);
 				player.push(0.0, SPUTTER_KICK, 0.0);
 				player.syncVelocity = true;
-			});
+	});
 		}
 	}
 
@@ -456,55 +506,55 @@ public final class RigActives {
 		float turn = state.jetPos == null ? 0.0F : Mth.clamp(Mth.wrapDegrees(player.getYRot() - state.jetYaw), -30.0F, 30.0F);
 		state.jetPos = feet;
 		state.jetYaw = player.getYRot();
-		Vec3 kick = new Vec3(0.0, -FLAME_DOWN, 0.0).add(heading.scale(-FLAME_TRAIL)).add(right.scale(-turn * FLAME_SWING));
+	Vec3 kick = new Vec3(0.0, -FLAME_DOWN, 0.0).add(heading.scale(-FLAME_TRAIL)).add(right.scale(-turn * FLAME_SWING));
 		for (int side = -1; side <= 1; side += 2) {
-			Vec3 boot = feet.add(right.scale(side * BOOT_SPREAD)).add(0.0, -0.05, 0.0);
-			level.sendParticles(MagicFx.mote(FLAME_COLOR, flying ? 1.3F : 1.0F), boot.x, boot.y, boot.z, 0, kick.x, kick.y, kick.z, 1.0);
-			level.sendParticles(MagicFx.spark(FLAME_HOT, 0.6F), boot.x, boot.y - 0.1, boot.z, 0, kick.x * 0.7, kick.y * 0.7, kick.z * 0.7, 1.0);
-			Vec3 palm = flying ? feet.add(right.scale(side * 0.35)).add(back.scale(0.3)).add(0.0, 0.75, 0.0)
+	Vec3 boot = feet.add(right.scale(side * BOOT_SPREAD)).add(0.0, -0.05, 0.0);
+	level.sendParticles(MagicFx.mote(FLAME_COLOR, flying ? 1.3F : 1.0F), boot.x, boot.y, boot.z, 0, kick.x, kick.y, kick.z, 1.0);
+	level.sendParticles(MagicFx.spark(FLAME_HOT, 0.6F), boot.x, boot.y - 0.1, boot.z, 0, kick.x * 0.7, kick.y * 0.7, kick.z * 0.7, 1.0);
+	Vec3 palm = flying ? feet.add(right.scale(side * 0.35)).add(back.scale(0.3)).add(0.0, 0.75, 0.0)
 				: feet.add(right.scale(side * PALM_SPREAD)).add(0.0, 0.7, 0.0);
-			Vec3 wash = flying ? back.scale(0.12) : new Vec3(0.0, -0.12, 0.0);
-			level.sendParticles(MagicFx.mote(RigForgeBlock.FX_COLOR, 0.6F), palm.x, palm.y, palm.z, 0, wash.x, wash.y, wash.z, 1.0);
+	Vec3 wash = flying ? back.scale(0.12) : new Vec3(0.0, -0.12, 0.0);
+	level.sendParticles(MagicFx.mote(RigForgeBlock.FX_COLOR, 0.6F), palm.x, palm.y, palm.z, 0, wash.x, wash.y, wash.z, 1.0);
 		}
 		level.sendParticles(MagicFx.miasma(0x303236, 0.8F), feet.x, feet.y - 0.3, feet.z, 1, 0.1, 0.05, 0.1, 0.01);
 		// the flames themselves: a short tongue under each boot hovering, stretched out behind with the throttle in flight
 		double speed = heading.length() / 2.0;
-		double length = FLAME_LENGTH + (flying ? speed * FLAME_STRETCH : 0.0) + player.getRandom().nextDouble() * FLAME_FLICKER;
+	double length = FLAME_LENGTH + (flying ? speed * FLAME_STRETCH : 0.0) + player.getRandom().nextDouble() * FLAME_FLICKER;
 		Vec3 along = kick.normalize();
 		for (int side = -1; side <= 1; side += 2) {
-			Vec3 boot = feet.add(right.scale(side * BOOT_SPREAD)).add(0.0, -0.05, 0.0);
-			MagicFx.beam(level, boot, boot.add(along.scale(length)), FLAME_WIDTH, FLAME_COLOR, 3);
-			MagicFx.beam(level, boot, boot.add(along.scale(length * 0.45)), FLAME_WIDTH * 0.5F, FLAME_HOT, 3);
+	Vec3 boot = feet.add(right.scale(side * BOOT_SPREAD)).add(0.0, -0.05, 0.0);
+	MagicFx.beam(level, boot, boot.add(along.scale(length)), FLAME_WIDTH, FLAME_COLOR, 3);
+	MagicFx.beam(level, boot, boot.add(along.scale(length * 0.45)), FLAME_WIDTH * 0.5F, FLAME_HOT, 3);
 		}
 	}
 
 	/** Full flight's own costs: hunger, and a crash when a wall stops you short. */
 	private static void tickFlight(ServerPlayer player, State state) {
 		if (!player.isCreative()) {
-			player.causeFoodExhaustion(FLIGHT_EXHAUSTION);
+	player.causeFoodExhaustion(FLIGHT_EXHAUSTION);
 		}
 		Vec3 pos = player.position();
 		double speed = state.lastPos == null ? 0.0 : pos.subtract(state.lastPos).horizontalDistance();
 		if (state.lastPos != null && player.horizontalCollision && state.lastSpeed - speed > CRASH_DROP && !player.isCreative()) {
-			double lost = state.lastSpeed - speed;
-			ServerLevel level = player.level();
-			player.hurtServer(level, level.damageSources().flyIntoWall(), (float)(lost * lost * CRASH_DAMAGE));
-			com.jaymospowers.core.Shakes.send(player, (float)(lost * 6.0));
-			state.flying = false;
+	double lost = state.lastSpeed - speed;
+	ServerLevel level = player.level();
+	player.hurtServer(level, level.damageSources().flyIntoWall(), (float)(lost * lost * CRASH_DAMAGE));
+	com.jaymospowers.core.Shakes.send(player, (float)(lost * 6.0));
+	state.flying = false;
 		}
 		// breaking into sprint speed cracks the air, for everyone near
-		double sonic = SONIC_SPEED * Rig.frame(player).airSpeed;
+	double sonic = SONIC_SPEED * Rig.frame(player).airSpeed;
 		if (state.lastPos != null && speed >= sonic && state.lastSpeed < sonic && player.level().getGameTime() >= state.crackAt) {
-			state.crackAt = player.level().getGameTime() + CRACK_GAP;
-			ServerLevel level = player.level();
-			Vec3 at = player.position().add(0.0, 0.9, 0.0);
-			MagicFx.ring(level, at, player.getLookAngle(), CRACK_RING, 0xF2F6FF, 8);
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.7F, 1.7F);
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.TRIDENT_THUNDER.value(), SoundSource.PLAYERS, 0.35F, 1.9F);
-			com.jaymospowers.core.Shakes.around(level, at, 24.0, CRACK_SHAKE);
-			if (player.getY() >= RigFinish.SKY_HEIGHT) {
+	state.crackAt = player.level().getGameTime() + CRACK_GAP;
+	ServerLevel level = player.level();
+	Vec3 at = player.position().add(0.0, 0.9, 0.0);
+	MagicFx.ring(level, at, player.getLookAngle(), CRACK_RING, 0xF2F6FF, 8);
+	level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.7F, 1.7F);
+	level.playSound(null, at.x, at.y, at.z, SoundEvents.TRIDENT_THUNDER.value(), SoundSource.PLAYERS, 0.35F, 1.9F);
+	com.jaymospowers.core.Shakes.around(level, at, 24.0, CRACK_SHAKE);
+	if (player.getY() >= RigFinish.SKY_HEIGHT) {
 				RigFinish.earn(player, RigFinish.SKYBREAKER);
-			}
+	}
 		}
 		state.lastPos = pos;
 		state.lastSpeed = speed;
@@ -514,14 +564,14 @@ public final class RigActives {
 
 	private static void palm(ServerPlayer player, State state) {
 		if (state.palmCooldown > 0) {
-			return;
+	return;
 		}
 		boolean over = overcharged(player, state);
 		if (!over && !Rig.spend(player, PALM_COST)) {
-			RigMind.empty(player);
-			return;
+	RigMind.empty(player);
+	return;
 		}
-		state.palmCooldown = over ? (int)(PALM_COOLDOWN * OVER_COOLDOWN_SHARE) : PALM_COOLDOWN;
+	state.palmCooldown = over ? (int)(PALM_COOLDOWN * OVER_COOLDOWN_SHARE) : PALM_COOLDOWN;
 		RigMoves.start(player, RigMoves.PALM);
 		// the arm comes up first; the shot leaves at the end of the wind-up
 		later(player, RigMoves.PALM_FIRE, () -> firePalm(player, over));
@@ -529,30 +579,30 @@ public final class RigActives {
 
 	private static void firePalm(ServerPlayer player, boolean over) {
 		if (!Rig.fullSet(player)) {
-			return;
+	return;
 		}
 		ServerLevel level = player.level();
 		Rig.Augment augment = Rig.augment(player);
-		double range = PALM_RANGE * (augment == Rig.Augment.XENOFORM ? XENO_RANGE : 1.0);
+	double range = PALM_RANGE * (augment == Rig.Augment.XENOFORM ? XENO_RANGE : 1.0);
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getLookAngle();
 		LivingEntity lock = locked(player);
 		if (lock != null) {
-			// (0.11.87) the lock bends the beam on to it, when it's roughly ahead and in sight
-			Vec3 to = lock.getBoundingBox().getCenter().subtract(eye);
-			if (to.length() <= range && to.normalize().dot(look) > PALM_LOCK_DOT && player.hasLineOfSight(lock)) {
+	// (0.11.87) the lock bends the beam on to it, when it's roughly ahead and in sight
+	Vec3 to = lock.getBoundingBox().getCenter().subtract(eye);
+	if (to.length() <= range && to.normalize().dot(look) > PALM_LOCK_DOT && player.hasLineOfSight(lock)) {
 				look = to.normalize();
-			}
+	}
 		}
 		Vec3 end = eye.add(look.scale(range));
 		BlockHitResult block = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
 		if (block.getType() != HitResult.Type.MISS) {
-			end = block.getLocation();
+	end = block.getLocation();
 		}
 		EntityHitResult hit = ProjectileUtil.getEntityHitResult(player, eye, end, player.getBoundingBox().expandTowards(end.subtract(eye)).inflate(1.0),
-			e -> e instanceof LivingEntity && e.isAlive() && !e.isSpectator() && e != player, eye.distanceToSqr(end));
+	e -> e instanceof LivingEntity && e.isAlive() && !e.isSpectator() && e != player, eye.distanceToSqr(end));
 		if (hit != null) {
-			end = hit.getLocation();
+	end = hit.getLocation();
 		}
 		// the beam: from the right palm, out along the look
 		Vec3 from = eye.add(look.scale(0.6)).add(0.0, -0.35, 0.0);
@@ -561,24 +611,24 @@ public final class RigActives {
 		MagicFx.beam(level, from, from.add(dir.scale(length)), over ? 0.16F : 0.08F, over ? OVER_COLOR : RigForgeBlock.FX_COLOR, 5);
 		MagicFx.blast(level, end, over ? 0.9F : 0.5F, over ? OVER_COLOR : RigForgeBlock.FX_COLOR);
 		// the kick, on the wearer's own screen
-		com.jaymospowers.core.Shakes.send(player, PALM_SHAKE * (over ? 1.5F : 1.0F), end);
+	com.jaymospowers.core.Shakes.send(player, PALM_SHAKE * (over ? 1.5F : 1.0F), end);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.8F, 1.9F);
 		if (hit != null && hit.getEntity() instanceof LivingEntity target) {
-			DamageSource source = level.damageSources().playerAttack(player);
-			float damage = PALM_DAMAGE * levelDamage(player) * Rig.frame(player).shotDamage * (over ? OVER_DAMAGE : 1.0F);
-			target.hurtServer(level, source, damage);
-			double knock = PALM_KNOCKBACK * (augment == Rig.Augment.RESONANCE ? RESONANCE_KNOCKBACK : 1.0);
-			target.knockback(knock, -look.x, -look.z, source, damage);
-			target.syncVelocity = true;
-			if (augment == Rig.Augment.WEB) {
+	DamageSource source = level.damageSources().playerAttack(player);
+	float damage = PALM_DAMAGE * levelDamage(player) * Rig.frame(player).shotDamage * (over ? OVER_DAMAGE : 1.0F);
+	target.hurtServer(level, source, damage);
+	double knock = PALM_KNOCKBACK * (augment == Rig.Augment.RESONANCE ? RESONANCE_KNOCKBACK : 1.0);
+	target.knockback(knock, -look.x, -look.z, source, damage);
+	target.syncVelocity = true;
+	if (augment == Rig.Augment.WEB) {
 				target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, WEB_SLOW_TICKS, WEB_SLOW_LEVEL), player);
 				level.sendParticles(ParticleTypes.WHITE_SMOKE, end.x, end.y, end.z, 6, 0.3, 0.3, 0.3, 0.01);
-			} else if (augment == Rig.Augment.SMOKE) {
+	} else if (augment == Rig.Augment.SMOKE) {
 				target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, SMOKE_BLIND_TICKS, 0), player);
 				level.sendParticles(ParticleTypes.LARGE_SMOKE, end.x, end.y, end.z, 8, 0.3, 0.3, 0.3, 0.01);
-			}
+	}
 		} else if (hit == null && block.getType() != HitResult.Type.MISS) {
-			RigBank.palm(player, block.getLocation(), block.getDirection(), PALM_DAMAGE * levelDamage(player) * Rig.frame(player).shotDamage * (over ? OVER_DAMAGE : 1.0F), RigForgeBlock.FX_COLOR);
+	RigBank.palm(player, block.getLocation(), block.getDirection(), PALM_DAMAGE * levelDamage(player) * Rig.frame(player).shotDamage * (over ? OVER_DAMAGE : 1.0F), RigForgeBlock.FX_COLOR);
 		}
 	}
 
@@ -586,14 +636,14 @@ public final class RigActives {
 
 	private static void launch(ServerPlayer player, State state) {
 		if (state.launcherCooldown > 0) {
-			return;
+	return;
 		}
 		boolean over = overcharged(player, state);
 		if (!over && !Rig.spend(player, LAUNCHER_COST)) {
-			RigMind.empty(player);
-			return;
+	RigMind.empty(player);
+	return;
 		}
-		state.launcherCooldown = over ? (int)(LAUNCHER_COOLDOWN * OVER_COOLDOWN_SHARE) : LAUNCHER_COOLDOWN;
+	state.launcherCooldown = over ? (int)(LAUNCHER_COOLDOWN * OVER_COOLDOWN_SHARE) : LAUNCHER_COOLDOWN;
 		RigMoves.start(player, RigMoves.LAUNCHER);
 		ServerLevel level = player.level();
 		RigFrame frame = Rig.frame(player);
@@ -601,13 +651,13 @@ public final class RigActives {
 		float burst = burstSize(frame, over);
 		// the pods rise first; the missiles leave once they are up
 		later(player, RigMoves.LAUNCHER_FIRE, () -> {
-			Vec3 look = player.getLookAngle();
-			Vec3 right = right(look);
-			Vec3 shoulder = player.getEyePosition().add(0.0, 0.25, 0.0);
-			// with no lock, each missile takes a tagged target of its own
-			LivingEntity lock = locked(player);
-			List<LivingEntity> tagged = lock == null ? RigStrikes.tagged(player) : List.of();
-			for (int i = 0; i < count; i++) {
+	Vec3 look = player.getLookAngle();
+	Vec3 right = right(look);
+	Vec3 shoulder = player.getEyePosition().add(0.0, 0.25, 0.0);
+	// with no lock, each missile takes a tagged target of its own
+	LivingEntity lock = locked(player);
+	List<LivingEntity> tagged = lock == null ? RigStrikes.tagged(player) : List.of();
+	for (int i = 0; i < count; i++) {
 				// alternate shoulders, a touch of spread
 				double side = (i % 2 == 0 ? 0.45 : -0.45) * (1 + i / 2);
 				Vec3 start = shoulder.add(right.scale(side)).add(look.scale(0.4));
@@ -615,9 +665,9 @@ public final class RigActives {
 					level.getRandom().nextGaussian() * MISSILE_SPREAD).normalize().scale(MISSILE_SPEED);
 				MISSILES_IN_FLIGHT.add(new Missile(level, player, new Vec3[] {start}, new Vec3[] {velocity}, new int[1],
 					lock != null ? lock : RigStrikes.target(tagged, i), burst));
-			}
-			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS, 1.0F, 0.7F);
-			com.jaymospowers.core.Shakes.send(player, LAUNCHER_SHAKE);
+	}
+	level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS, 1.0F, 0.7F);
+	com.jaymospowers.core.Shakes.send(player, LAUNCHER_SHAKE);
 		});
 	}
 
@@ -629,7 +679,7 @@ public final class RigActives {
 
 	/** How big this frame's missiles burst (the Siege shoulder gun's are bigger; so are an overcharge's). */
 	private static float burstSize(RigFrame frame, boolean over) {
-		return (MISSILE_BURST + (frame == RigFrame.SIEGE ? RigFrame.GUN_BURST : 0.0F)) * (over ? OVER_BURST : 1.0F);
+	return (MISSILE_BURST + (frame == RigFrame.SIEGE ? RigFrame.GUN_BURST : 0.0F)) * (over ? OVER_BURST : 1.0F);
 	}
 
 	/**
@@ -639,48 +689,48 @@ public final class RigActives {
 	 */
 	static void volley(ServerPlayer player, List<Integer> ids) {
 		if (player.isSpectator() || !Rig.fullSet(player) || !needs(player, Rig.LOCK_LEVEL)) {
-			return;
+	return;
 		}
 		State state = state(player);
 		if (state.launcherCooldown > 0) {
-			return;
+	return;
 		}
 		List<LivingEntity> marks = new ArrayList<>();
 		for (int id : ids) {
-			if (marks.size() < RigNet.MAX_MARKS && player.level().getEntity(id) instanceof LivingEntity target && target.isAlive() && target != player
+	if (marks.size() < RigNet.MAX_MARKS && player.level().getEntity(id) instanceof LivingEntity target && target.isAlive() && target != player
 				&& !target.isSpectator() && target.distanceTo(player) <= LOCK_RANGE * 1.25 && !marks.contains(target)) {
 				marks.add(target);
-			}
+	}
 		}
 		if (marks.isEmpty()) {
-			launch(player, state);
-			sendStatus(player, state);
-			return;
+	launch(player, state);
+	sendStatus(player, state);
+	return;
 		}
 		boolean over = overcharged(player, state);
 		int extra = marks.size() - 1;
-		if (!over && !Rig.spend(player, LAUNCHER_COST + VOLLEY_EXTRA_COST * extra)) {
-			RigMind.empty(player);
-			return;
+	if (!over && !Rig.spend(player, LAUNCHER_COST + VOLLEY_EXTRA_COST * extra)) {
+	RigMind.empty(player);
+	return;
 		}
-		state.launcherCooldown = (int)((LAUNCHER_COOLDOWN + VOLLEY_EXTRA_COOLDOWN * extra) * (over ? OVER_COOLDOWN_SHARE : 1.0));
+	state.launcherCooldown = (int)((LAUNCHER_COOLDOWN + VOLLEY_EXTRA_COOLDOWN * extra) * (over ? OVER_COOLDOWN_SHARE : 1.0));
 		RigMoves.start(player, RigMoves.LAUNCHER);
 		ServerLevel level = player.level();
 		float burst = burstSize(Rig.frame(player), over);
 		later(player, RigMoves.LAUNCHER_FIRE, () -> {
-			Vec3 look = player.getLookAngle();
-			Vec3 right = right(look);
-			Vec3 shoulder = player.getEyePosition().add(0.0, 0.25, 0.0);
-			for (int i = 0; i < marks.size(); i++) {
+	Vec3 look = player.getLookAngle();
+	Vec3 right = right(look);
+	Vec3 shoulder = player.getEyePosition().add(0.0, 0.25, 0.0);
+	for (int i = 0; i < marks.size(); i++) {
 				// the pods spit them out in a fan (alternating sides, rising), and they turn in on their marks
 				double side = (i % 2 == 0 ? 1 : -1) * (0.45 + 0.2 * (i / 2));
 				Vec3 start = shoulder.add(right.scale(side)).add(look.scale(0.4));
 				Vec3 fan = right.scale(Math.signum(side) * VOLLEY_SPREAD * (1 + i / 2)).add(0.0, VOLLEY_SPREAD * 0.8, 0.0);
 				Vec3 velocity = look.add(fan).normalize().scale(MISSILE_SPEED);
 				MISSILES_IN_FLIGHT.add(new Missile(level, player, new Vec3[] {start}, new Vec3[] {velocity}, new int[1], marks.get(i), burst));
-			}
-			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS, 1.0F, 0.6F);
-			com.jaymospowers.core.Shakes.send(player, LAUNCHER_SHAKE);
+	}
+	level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.PLAYERS, 1.0F, 0.6F);
+	com.jaymospowers.core.Shakes.send(player, LAUNCHER_SHAKE);
 		});
 		sendStatus(player, state);
 	}
@@ -706,46 +756,46 @@ public final class RigActives {
 
 	static void tickMissiles(MinecraftServer server) {
 		for (int i = 0; i < DEFERRED.size(); i++) {
-			Deferred deferred = DEFERRED.get(i);
-			if (deferred.player().isRemoved() || !deferred.player().isAlive()) {
+	Deferred deferred = DEFERRED.get(i);
+	if (deferred.player().isRemoved() || !deferred.player().isAlive()) {
 				DEFERRED.remove(i--);
-			} else if (deferred.player().level().getGameTime() >= deferred.at()) {
+	} else if (deferred.player().level().getGameTime() >= deferred.at()) {
 				DEFERRED.remove(i--);
 				deferred.run().run();
-			}
+	}
 		}
 		for (Iterator<Missile> it = MISSILES_IN_FLIGHT.iterator(); it.hasNext();) {
-			Missile missile = it.next();
-			ServerLevel level = missile.level();
-			if (++missile.age()[0] > MISSILE_LIFE) {
+	Missile missile = it.next();
+	ServerLevel level = missile.level();
+	if (++missile.age()[0] > MISSILE_LIFE) {
 				it.remove();
 				continue;
-			}
-			Vec3 from = missile.at()[0];
-			Entity target = missile.target();
-			if (target != null && target.isAlive() && target.level() == level) {
+	}
+	Vec3 from = missile.at()[0];
+	Entity target = missile.target();
+	if (target != null && target.isAlive() && target.level() == level) {
 				// (0.11.87) homing on the lock
 				Vec3 want = target.getBoundingBox().getCenter().subtract(from).normalize().scale(MISSILE_SPEED);
 				missile.velocity()[0] = missile.velocity()[0].lerp(want, MISSILE_HOMING).normalize().scale(MISSILE_SPEED);
-			}
-			Vec3 to = from.add(missile.velocity()[0]);
-			if (!Loaded.made(level, net.minecraft.core.BlockPos.containing(to))) {
+	}
+	Vec3 to = from.add(missile.velocity()[0]);
+	if (!Loaded.made(level, net.minecraft.core.BlockPos.containing(to))) {
 				it.remove();
 				continue;
-			}
-			BlockHitResult block = level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY, missile.owner()));
-			Vec3 end = block.getType() == HitResult.Type.MISS ? to : block.getLocation();
-			EntityHitResult hit = ProjectileUtil.getEntityHitResult(level, missile.owner(), from, end,
+	}
+	BlockHitResult block = level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY, missile.owner()));
+	Vec3 end = block.getType() == HitResult.Type.MISS ? to : block.getLocation();
+	EntityHitResult hit = ProjectileUtil.getEntityHitResult(level, missile.owner(), from, end,
 				new AABB(from, end).inflate(0.5), e -> e.isAlive() && !e.isSpectator() && e.isPickable() && e != missile.owner(), 0.3F);
-			if (hit != null || block.getType() != HitResult.Type.MISS) {
+	if (hit != null || block.getType() != HitResult.Type.MISS) {
 				Vec3 at = hit != null ? hit.getLocation() : end;
 				burst(level, missile.owner(), at, missile.burst());
 				it.remove();
 				continue;
-			}
-			missile.at()[0] = to;
-			level.sendParticles(MagicFx.miasma(0x55585E, 0.7F), to.x, to.y, to.z, 2, 0.03, 0.03, 0.03, 0.0);
-			level.sendParticles(MagicFx.mote(FLAME_COLOR, 0.7F), from.x, from.y, from.z, 1, 0.0, 0.0, 0.0, 0.0);
+	}
+	missile.at()[0] = to;
+	level.sendParticles(MagicFx.miasma(0x55585E, 0.7F), to.x, to.y, to.z, 2, 0.03, 0.03, 0.03, 0.0);
+	level.sendParticles(MagicFx.mote(FLAME_COLOR, 0.7F), from.x, from.y, from.z, 1, 0.0, 0.0, 0.0, 0.0);
 		}
 	}
 
@@ -757,67 +807,126 @@ public final class RigActives {
 	// ---- per tick -----------------------------------------------------------------------------------------------------
 
 	static void tick(ServerPlayer player, boolean wearing) {
-		State state = STATES.get(player.getUUID());
-		if (state == null) {
-			if (!wearing) {
-				return;
-			}
-			state = state(player);
-		}
-		if (state.palmCooldown > 0) {
-			state.palmCooldown--;
-		}
-		if (state.launcherCooldown > 0) {
-			state.launcherCooldown--;
-		}
-		if (state.scanCooldown > 0) {
-			state.scanCooldown--;
-		}
-		if (state.unibeamCooldown > 0) {
-			state.unibeamCooldown--;
-		}
-		RigUnibeam.tick(player, state);
-		tickLock(player, state);
-		if (state.hoverAt != 0 && player.level().getGameTime() >= state.hoverAt) {
-			state.hoverAt = 0;
-			if (wearing && !state.hovering && !player.onGround() && Rig.fullSet(player)) {
-				toggleHover(player, state);
-			}
-		}
-		if (state.hovering) {
-			if (!wearing) {
-				stopHover(player, state);
-			} else {
-				tickHover(player, state);
-			}
-		}
-		if (wearing && (player.tickCount % STATUS_EVERY == 0 || state.sentHovering != state.hovering || state.sentFlying != state.flying
-			|| state.sentLock != state.lock)) {
-			sendStatus(player, state);
-		}
-		if (!wearing && state.wasWearing) {
-			// the last piece came off: clear the HUD's state
-			state.hovering = false;
-			state.flying = false;
-			state.lock = -1;
-			state.unibeam = -1;
-			state.overUntil = 0L;
-			sendStatus(player, state);
-		}
-		state.wasWearing = wearing;
-		RigMoves.tick(player, !wearing || !state.hovering ? RigMoves.THRUST_NONE : state.flying ? RigMoves.THRUST_FLIGHT : RigMoves.THRUST_HOVER);
+	State state = STATES.get(player.getUUID());
+	if (state == null) {
+				if (!wearing) {
+					return;
+				}
+				state = state(player);
 	}
+	if (state.palmCooldown > 0) {
+				state.palmCooldown--;
+	}
+	if (state.launcherCooldown > 0) {
+				state.launcherCooldown--;
+	}
+	if (state.scanCooldown > 0) {
+				state.scanCooldown--;
+	}
+	if (state.unibeamCooldown > 0) {
+				state.unibeamCooldown--;
+	}
+	RigUnibeam.tick(player, state);
+	// Gun actives (0.11.112)
+	RigGuns.tickPalmCharge(player, state);
+	RigGuns.tickGatling(player, state);
+	RigGuns.tickRailgun(player, state);
+	RigGuns.tickSonic(player, state);
+	RigGuns.tickTwinBeam(player, state);
+	RigGuns.tickSiegeMode(player, state);
+	tickLock(player, state);
+	if (state.hoverAt != 0 && player.level().getGameTime() >= state.hoverAt) {
+				state.hoverAt = 0;
+				if (wearing && !state.hovering && !player.onGround() && Rig.fullSet(player)) {
+					toggleHover(player, state);
+				}
+	}
+	if (state.hovering) {
+				if (!wearing) {
+					stopHover(player, state);
+				} else {
+					tickHover(player, state);
+				}
+	}
+	if (wearing && (player.tickCount % STATUS_EVERY == 0 || state.sentHovering != state.hovering || state.sentFlying != state.flying
+				|| state.sentLock != state.lock)) {
+				sendStatus(player, state);
+	}
+	if (!wearing && state.wasWearing) {
+				// the last piece came off: clear the HUD's state
+				state.hovering = false;
+				state.flying = false;
+				state.lock = -1;
+				state.unibeam = -1;
+				state.overUntil = 0L;
+				sendStatus(player, state);
+	}
+	state.wasWearing = wearing;
+	RigMoves.tick(player, !wearing || !state.hovering ? RigMoves.THRUST_NONE : state.flying ? RigMoves.THRUST_FLIGHT : RigMoves.THRUST_HOVER);
+		}
 
 	static void sendStatus(ServerPlayer player, State state) {
-		state.sentHovering = state.hovering;
-		state.sentFlying = state.flying;
-		state.sentLock = state.lock;
-		ServerPlayNetworking.send(player, new RigNet.Status(state.hovering, state.hovering && state.flying, RigMind.warnings(player), state.palmCooldown,
-			state.launcherCooldown, state.scanCooldown, state.lock, RigTakeover.secondsLeft(player), state.unibeamCooldown,
-			(int)Math.max(0L, state.overUntil - player.level().getGameTime())));
-	}
+			state.sentHovering = state.hovering;
+			state.sentFlying = state.flying;
+			state.sentLock = state.lock;
+			ServerPlayNetworking.send(player, new RigNet.Status(state.hovering, state.hovering && state.flying, RigMind.warnings(player), state.palmCooldown,
+				state.launcherCooldown, state.scanCooldown, state.lock, RigTakeover.secondsLeft(player), state.unibeamCooldown,
+				(int)Math.max(0L, state.overUntil - player.level().getGameTime()), state.pullup, state.hyper, state.banking, state.smoothOthers));
+		}
 
 	static State stateOf(ServerPlayer player) {
-		return state(player);
+			return state(player);
+		}
+
+		// ---- flight actives ----------------------------------------------------------------------------------------------
+
+		/** (0.12.x) Pull-up: toggles the time-to-impact warning on the Helm and the Mind's shout. */
+		static void pullUp(ServerPlayer player) {
+			if (!Rig.fullSet(player) || !Rig.spend(player, PULLUP_COST)) {
+				RigMind.empty(player);
+				return;
+			}
+			State state = state(player);
+			state.pullup = !state.pullup;
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.6F, state.pullup ? 1.4F : 1.0F);
+			if (state.pullup) {
+				RigMind.sayAlways(player, "pullup", 1.4F);
+			}
+			sendStatus(player, state);
+		}
+
+		/** (0.12.x) Hyper thrust: a burst of speed while in full flight, double-tap sprint. */
+		static void hyperThrust(ServerPlayer player) {
+			if (!Rig.fullSet(player) || !RigActives.flying(player) || !Rig.spend(player, HYPER_COST)) {
+				RigMind.empty(player);
+				return;
+			}
+			State state = state(player);
+			state.hyper = !state.hyper;
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 0.8F, state.hyper ? 1.6F : 1.2F);
+			if (state.hyper) {
+				RigMind.sayAlways(player, "hyper", 1.6F);
+			}
+			sendStatus(player, state);
+		}
+
+		/** (0.12.x) Banking: toggles smooth roll into turns for everyone to see. */
+		static void toggleBanking(ServerPlayer player) {
+			if (!Rig.fullSet(player) || !Rig.spend(player, 10)) {
+				RigMind.empty(player);
+				return;
+			}
+			State state = state(player);
+			state.banking = !state.banking;
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.6F, state.banking ? 1.2F : 1.0F);
+			sendStatus(player, state);
+		}
+
+		/** (0.12.x) Smooth others: client-only toggle for smoothing other players' flight. */
+		static void toggleSmoothOthers(ServerPlayer player) {
+			State state = state(player);
+			state.smoothOthers = !state.smoothOthers;
+			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.6F, state.smoothOthers ? 1.2F : 1.0F);
+			sendStatus(player, state);
+		}
 	}
-}

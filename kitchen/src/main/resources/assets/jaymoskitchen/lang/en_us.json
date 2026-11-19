@@ -996,6 +996,8 @@
 	"message.jaymoskitchen.spit.raw": "Still raw.",
 	"message.jaymoskitchen.spit.done": "Cooked through.",
 	"message.jaymoskitchen.spit.burnt": "Burnt to a crisp.",
+	"item.jaymoskitchen.cooking_block": "Cooking Block",
+	"block.jaymoskitchen.cooking_block": "Cooking Block",
 	"entity.jaymoskitchen.rat": "Rat",
 	"item.jaymoskitchen.rat_spawn_egg": "Rat Spawn Egg",
 	"block.jaymoskitchen.snap_trap": "Snap Trap",

@@ -44,7 +44,7 @@ public final class WebTricks {
 	}
 
 	private static void trick(ServerPlayer player, Trick trick) {
-		if (!WebPose.trick(trick.kind()) || !player.isAlive() || player.isSpectator() || player.isPassenger()
+		if (!WebPose.trick(trick.kind()) || WebPose.acro(trick.kind()) || !player.isAlive() || player.isSpectator() || player.isPassenger()
 			|| !Powers.has(player, WebPower.INSTANCE)) {
 			return;
 		}
