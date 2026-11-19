@@ -11,6 +11,15 @@ kanban-plugin: board
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · open
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/village-mods-1-illager-names|village-mods-1-illager-names]] · for 💻 Odysseus · open
+- [ ] [[Inbox/village-mods-2-blast-mending|village-mods-2-blast-mending]] · for 💻 Odysseus · open
+- [ ] [[Inbox/village-mods-3-guards-fight-mend|village-mods-3-guards-fight-mend]] · for 💻 Odysseus · open
+- [ ] [[Inbox/village-mods-4-board-work|village-mods-4-board-work]] · for 💻 Odysseus · open
+- [ ] [[Inbox/village-mods-5-town-life-hats|village-mods-5-town-life-hats]] · for 💻 Odysseus · open
+- [ ] [[Inbox/village-mods-6-small-structures|village-mods-6-small-structures]] · for 💻 Odysseus · open
+- [ ] [[Inbox/village-mods-7-ctov-tidal-towns|village-mods-7-ctov-tidal-towns]] · for 💻 Odysseus · open
+- [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · for 💻 Odysseus · open
+- [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
 
 
 ## Being built
