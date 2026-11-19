@@ -9,7 +9,6 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Inbox/class-trees-plan|class-trees-plan]] · 2026-11-19 20:22 Parked (not for a bot): waits on Andy fleshing out the Monk/Paladin/Cleric/Druid/Warlock trees. Raised; don't raise again.
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 - [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
-- [[Inbox/wither-model|wither-model]] · 2026-11-19 20:41 Andy (2026-11-19 3:41 PM ET), not happy at all: "it should look more hulking like the large suit and broader shoulders for the heads to sit on…
 
 ## Stuck
 
@@ -17,7 +16,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-25 waiting for a bot, 4 being built, 1 in review: see [[Kanban]].
+26 waiting for a bot, 4 being built, 1 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
