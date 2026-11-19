@@ -1649,7 +1649,8 @@ public final class WebSymbiote {
 			next = next.withSatiety(next.satiety() - 1);
 		}
 		// (0.15.147) its satiety is yours too: fed, it keeps your hunger bar up (and so your hearts), like food
-		if (!player.isCreative() && !dormant && player.tickCount % SHARE_TICKS == 0 && next.satiety() > SHARE_FLOOR
+		// (in a host it leaves when hungry, never down into its warning: WebSymbioteInfection.shareFloor)
+		if (!player.isCreative() && !dormant && player.tickCount % SHARE_TICKS == 0 && next.satiety() > WebSymbioteInfection.shareFloor(player, SHARE_FLOOR)
 			&& player.getFoodData().getFoodLevel() < SHARE_FULL) {
 			next = next.withSatiety(next.satiety() - 1);
 			player.getFoodData().eat(SHARE_FOOD, SHARE_SATURATION);
