@@ -3,7 +3,7 @@ status: running
 task: smoothmount-1-climb-on-off
 branch: hermes/smoothmount-1-climb-on-off
 with: 
-pr: 
+pr: 1869
 mods: Powers
 versions: 
 started: 2026-11-19
@@ -22,15 +22,15 @@ owns:
 **Task:** Implement SmoothMount patch 1 - climb on (left/right/behind), climb off (forward/back), camera glide, armour-weight scaling, server-side hold. New class `MountClimbPose`, GeckoLib animation clips, client + small server hold.
 
 ## Plan
-- [ ] Study existing CrawlPose and KeyframeClip usage in Powers client
-- [ ] Study EmfCompat.hold for pausing Fresh Animations
-- [ ] Create MountClimbPose class with climb-on (3 variants), climb-off (2 variants), camera glide
-- [ ] Create GeckoLib animation JSON files for each clip
-- [ ] Implement armour-weight scaling (cloth ~1x, full plate ~2x)
-- [ ] Implement server-side hold: ride starts only when climb ends, interruptible by hit
-- [ ] Ensure other players see the climb animations
-- [ ] Test build and create change note
-- [ ] Open PR
+- [x] Study existing CrawlPose and KeyframeClip usage in Powers client
+- [x] Study EmfCompat.hold for pausing Fresh Animations
+- [x] Create MountClimbPose class with climb-on (3 variants), climb-off (2 variants), camera glide
+- [x] Create GeckoLib animation JSON files for each clip
+- [x] Implement armour-weight scaling (cloth ~1x, full plate ~2x)
+- [x] Implement server-side hold: ride starts only when climb ends, interruptible by hit
+- [x] Ensure other players see the climb animations
+- [x] Test build and create change note
+- [x] Open PR
 
 ## Notes
 - Andy ticked all 14 rows on SmoothMount pick page; full plan at /mnt/project-files/smoothmount/Climbing-Plan.md (cloud)
@@ -44,3 +44,13 @@ owns:
 - New class e.g. client/MountClimbPose; clips in geckolib/animations/entity/player_mount_*.animation.json
 
 ## Done
+Created PR #1869 with:
+- MountClimbPose class handling climb-on (left/right/behind), climb-off (forward/back), camera glide
+- 5 GeckoLib animation files
+- MountClimbCameraMixin for first-person camera easing
+- MountClimbPackets for C2S/S2C networking
+- MountClimbHandler for server-side broadcast to tracking players
+- Integration with PoseTakeover and EmfCompat for Fresh Animations pausing
+- Change note at changes/powers/smoothmount-1-climb-on-off.md
+- Build passes, PR checks pass
+- Not tested in game
