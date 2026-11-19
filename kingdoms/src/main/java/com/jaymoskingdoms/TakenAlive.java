@@ -23,8 +23,9 @@ import org.jspecify.annotations.Nullable;
 /**
  * Taken alive. Andy (2026-11-19): "if you find yourself downed near barbarians they should enslave you".
  * <p>
- * A player down within {@link #NEAR} of a barbarian camp's people ({@link Captors#barbarian}: its raiders, its chief, its
- * camp folk) is theirs to take, so long as a camp stands to take them to ({@link Captors#campOf}). From then the camp's
+ * A player down within {@link #NEAR} of a camp's people ({@link #taker}: its raiders, its chief, its camp folk; every camp
+ * kind is a barbarian faction, so goblin villages, orc war camps, pirate coves and illager camps take captives too) or of
+ * a goblin anywhere (Andy: "goblins should enslave you too") is theirs to take, so long as a camp stands to take them to ({@link Captors#campOf}). From then the camp's
  * people leave them lying: they don't take them for a target and their blows don't land ({@link Downed#holdsFire}), and
  * Powers' executions pass them over ({@link #spares}). After {@link #BIND_DELAY} the nearest of them walks over, stoops and
  * binds them ({@link #BIND_TICKS}), and they're knocked out cold; in the black ({@link #DARK_TICKS}) they're carried off
@@ -33,11 +34,10 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * Not a death: no death roll, no wake used up. One who gets up before they're bound (brought round, or rising by
  * themselves) is fair game again, and one already in chains, lying left for dead, or put to death by their captors
- * ({@link CaptiveConduct#doomed}) is left to what already handles them. Only barbarians: orcs, goblins, pirates and the like
- * still finish the downed, and still take one they leave for dead.
+ * ({@link CaptiveConduct#doomed}) is left to what already handles them. Outlaws, ogres and monsters still finish the downed.
  */
 public final class TakenAlive {
-	/** How near (blocks) a barbarian must be to the downed player to claim them. */
+	/** How near (blocks) a taker must be to the downed player to claim them. */
 	static final double NEAR = 16.0;
 	/** How far (blocks) the one who comes to bind them may be. */
 	static final double BIND_RANGE = 32.0, BIND_REACH = 1.8;
@@ -82,7 +82,7 @@ public final class TakenAlive {
 	 * (claimed now if not yet). Asked by {@link Downed#holdsFire} (targets and blows) and Powers' executions.
 	 */
 	public static boolean spares(Mob mob, net.minecraft.world.entity.LivingEntity body) {
-		return body instanceof ServerPlayer player && Captors.barbarian(mob) && claim(player, mob) != null;
+		return body instanceof ServerPlayer player && taker(mob) && claim(player, mob) != null;
 	}
 
 	/** {@code player}'s claim, made now by {@code by}'s camp (or the nearest) if they can be taken; null if they can't. */
@@ -120,7 +120,16 @@ public final class TakenAlive {
 	/** Barbarians on their feet who could come for {@code player}: alive, thinking, not downed, on the same ground. */
 	private static boolean able(Mob m, ServerPlayer player) {
 		return m.isAlive() && !m.isNoAi() && !m.isBaby() && !m.isPassenger() && !Downed.isDowned(m) && m.level() == player.level()
-			&& Captors.barbarian(m);
+			&& taker(m);
+	}
+
+	/**
+	 * One who takes the downed alive: a camp's people ({@link Captors#barbarian}: every camp kind rides on the barbarian
+	 * factions, so goblin villages, orc war camps, pirate coves and illager camps too), and (Andy, 2026-11-19: "goblins
+	 * should enslave you too") any goblin, a village's scout or one run wild, who takes them to its village or the nearest camp.
+	 */
+	static boolean taker(Mob m) {
+		return Captors.barbarian(m) || Captors.goblin(m);
 	}
 
 	private static void tick(MinecraftServer server) {
