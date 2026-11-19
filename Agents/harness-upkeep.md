@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: harness-upkeep
 branch: claude/harness-upkeep
 with: 
@@ -29,3 +29,4 @@ owns:
 - Source: Harness Pattern Book artifact, rows wr-dents, wr-rust, wr-fitting
 
 ## Done
+- 2026-11-18 21:42 No sign of work for 30 min: marked stalled (whoever ran it stopped).
