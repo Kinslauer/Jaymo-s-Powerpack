@@ -3850,5 +3850,1157 @@
 		"sounds": [
 			"jaymoskingdoms:war_drum"
 		]
+	},
+	"voice.villager.charon.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_greet_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_greet_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_greet_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_greet_4"
+			}
+		]
+	},
+	"voice.villager.charon.yes": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_yes_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_yes_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_yes_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_yes_4"
+			}
+		]
+	},
+	"voice.villager.charon.no": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_no_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_no_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_no_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_no_4"
+			}
+		]
+	},
+	"voice.villager.charon.angry": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_angry_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_angry_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_angry_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_angry_4"
+			}
+		]
+	},
+	"voice.villager.iapetus.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/iapetus_greet_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/iapetus_greet_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/iapetus_greet_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/iapetus_greet_4"
+			}
+		]
+	},
+	"voice.villager.iapetus.yes": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/iapetus_yes_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/iapetus_yes_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/iapetus_yes_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/iapetus_yes_4"
+			}
+		]
+	},
+	"voice.villager.iapetus.no": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/iapetus_no_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/iapetus_no_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/iapetus_no_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/iapetus_no_4"
+			}
+		]
+	},
+	"voice.villager.iapetus.angry": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/iapetus_angry_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/iapetus_angry_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/iapetus_angry_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/iapetus_angry_4"
+			}
+		]
+	},
+	"voice.villager.wavenet_d.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_greet_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_greet_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_greet_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_greet_4"
+			}
+		]
+	},
+	"voice.villager.wavenet_d.yes": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_yes_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_yes_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_yes_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_yes_4"
+			}
+		]
+	},
+	"voice.villager.wavenet_d.no": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_no_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_no_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_no_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_no_4"
+			}
+		]
+	},
+	"voice.villager.wavenet_d.angry": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_angry_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_angry_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_angry_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_angry_4"
+			}
+		]
+	},
+	"voice.villager.neural2_d.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_d_greet_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_d_greet_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_d_greet_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_d_greet_4"
+			}
+		]
+	},
+	"voice.villager.neural2_d.yes": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_d_yes_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_d_yes_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_d_yes_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_d_yes_4"
+			}
+		]
+	},
+	"voice.villager.neural2_d.no": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_d_no_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_d_no_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_d_no_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_d_no_4"
+			}
+		]
+	},
+	"voice.villager.neural2_d.angry": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_d_angry_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_d_angry_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_d_angry_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_d_angry_4"
+			}
+		]
+	},
+	"voice.villager.neural2_j.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_j_greet_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_j_greet_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_j_greet_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_j_greet_4"
+			}
+		]
+	},
+	"voice.villager.neural2_j.yes": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_j_yes_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_j_yes_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_j_yes_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_j_yes_4"
+			}
+		]
+	},
+	"voice.villager.neural2_j.no": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_j_no_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_j_no_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_j_no_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_j_no_4"
+			}
+		]
+	},
+	"voice.villager.neural2_j.angry": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_j_angry_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_j_angry_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_j_angry_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/neural2_j_angry_4"
+			}
+		]
+	},
+	"voice.villager.studio_q.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/studio_q_greet_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/studio_q_greet_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/studio_q_greet_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/studio_q_greet_4"
+			}
+		]
+	},
+	"voice.villager.studio_q.yes": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/studio_q_yes_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/studio_q_yes_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/studio_q_yes_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/studio_q_yes_4"
+			}
+		]
+	},
+	"voice.villager.studio_q.no": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/studio_q_no_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/studio_q_no_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/studio_q_no_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/studio_q_no_4"
+			}
+		]
+	},
+	"voice.villager.studio_q.angry": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/studio_q_angry_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/studio_q_angry_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/studio_q_angry_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/studio_q_angry_4"
+			}
+		]
+	},
+	"voice.villager.kore.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/kore_greet_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/kore_greet_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/kore_greet_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/kore_greet_4"
+			}
+		]
+	},
+	"voice.villager.kore.yes": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/kore_yes_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/kore_yes_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/kore_yes_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/kore_yes_4"
+			}
+		]
+	},
+	"voice.villager.kore.no": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/kore_no_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/kore_no_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/kore_no_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/kore_no_4"
+			}
+		]
+	},
+	"voice.villager.kore.angry": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/kore_angry_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/kore_angry_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/kore_angry_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/kore_angry_4"
+			}
+		]
+	},
+	"voice.villager.leda.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/leda_greet_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/leda_greet_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/leda_greet_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/leda_greet_4"
+			}
+		]
+	},
+	"voice.villager.leda.yes": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/leda_yes_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/leda_yes_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/leda_yes_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/leda_yes_4"
+			}
+		]
+	},
+	"voice.villager.leda.no": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/leda_no_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/leda_no_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/leda_no_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/leda_no_4"
+			}
+		]
+	},
+	"voice.villager.leda.angry": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/leda_angry_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/leda_angry_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/leda_angry_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/leda_angry_4"
+			}
+		]
+	},
+	"voice.villager.despina.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/despina_greet_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/despina_greet_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/despina_greet_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/despina_greet_4"
+			}
+		]
+	},
+	"voice.villager.despina.yes": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/despina_yes_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/despina_yes_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/despina_yes_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/despina_yes_4"
+			}
+		]
+	},
+	"voice.villager.despina.no": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/despina_no_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/despina_no_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/despina_no_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/despina_no_4"
+			}
+		]
+	},
+	"voice.villager.despina.angry": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/despina_angry_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/despina_angry_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/despina_angry_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/despina_angry_4"
+			}
+		]
+	},
+	"voice.villager.sulafat.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/sulafat_greet_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/sulafat_greet_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/sulafat_greet_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/sulafat_greet_4"
+			}
+		]
+	},
+	"voice.villager.sulafat.yes": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/sulafat_yes_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/sulafat_yes_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/sulafat_yes_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/sulafat_yes_4"
+			}
+		]
+	},
+	"voice.villager.sulafat.no": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/sulafat_no_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/sulafat_no_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/sulafat_no_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/sulafat_no_4"
+			}
+		]
+	},
+	"voice.villager.sulafat.angry": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/sulafat_angry_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/sulafat_angry_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/sulafat_angry_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/sulafat_angry_4"
+			}
+		]
+	},
+	"voice.villager.gacrux.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/gacrux_greet_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/gacrux_greet_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/gacrux_greet_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/gacrux_greet_4"
+			}
+		]
+	},
+	"voice.villager.gacrux.yes": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/gacrux_yes_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/gacrux_yes_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/gacrux_yes_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/gacrux_yes_4"
+			}
+		]
+	},
+	"voice.villager.gacrux.no": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/gacrux_no_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/gacrux_no_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/gacrux_no_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/gacrux_no_4"
+			}
+		]
+	},
+	"voice.villager.gacrux.angry": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/gacrux_angry_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/gacrux_angry_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/gacrux_angry_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/gacrux_angry_4"
+			}
+		]
+	},
+	"voice.villager.vindemiatrix.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/vindemiatrix_greet_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/vindemiatrix_greet_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/vindemiatrix_greet_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/vindemiatrix_greet_4"
+			}
+		]
+	},
+	"voice.villager.vindemiatrix.yes": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/vindemiatrix_yes_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/vindemiatrix_yes_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/vindemiatrix_yes_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/vindemiatrix_yes_4"
+			}
+		]
+	},
+	"voice.villager.vindemiatrix.no": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/vindemiatrix_no_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/vindemiatrix_no_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/vindemiatrix_no_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/vindemiatrix_no_4"
+			}
+		]
+	},
+	"voice.villager.vindemiatrix.angry": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/vindemiatrix_angry_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/vindemiatrix_angry_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/vindemiatrix_angry_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/vindemiatrix_angry_4"
+			}
+		]
+	},
+	"voice.villager.algenib.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_greet_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_greet_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_greet_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_greet_4"
+			}
+		]
+	},
+	"voice.villager.algenib.yes": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_yes_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_yes_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_yes_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_yes_4"
+			}
+		]
+	},
+	"voice.villager.algenib.no": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_no_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_no_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_no_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_no_4"
+			}
+		]
+	},
+	"voice.villager.algenib.angry": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_angry_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_angry_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_angry_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_angry_4"
+			}
+		]
+	},
+	"voice.villager.algenib_old.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_old_greet_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_old_greet_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_old_greet_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_old_greet_4"
+			}
+		]
+	},
+	"voice.villager.algenib_old.yes": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_old_yes_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_old_yes_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_old_yes_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_old_yes_4"
+			}
+		]
+	},
+	"voice.villager.algenib_old.no": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_old_no_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_old_no_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_old_no_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_old_no_4"
+			}
+		]
+	},
+	"voice.villager.algenib_old.angry": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_old_angry_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_old_angry_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_old_angry_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/algenib_old_angry_4"
+			}
+		]
+	},
+	"voice.villager.sadaltager_old.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/sadaltager_old_greet_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/sadaltager_old_greet_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/sadaltager_old_greet_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/sadaltager_old_greet_4"
+			}
+		]
+	},
+	"voice.villager.sadaltager_old.yes": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/sadaltager_old_yes_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/sadaltager_old_yes_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/sadaltager_old_yes_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/sadaltager_old_yes_4"
+			}
+		]
+	},
+	"voice.villager.sadaltager_old.no": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/sadaltager_old_no_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/sadaltager_old_no_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/sadaltager_old_no_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/sadaltager_old_no_4"
+			}
+		]
+	},
+	"voice.villager.sadaltager_old.angry": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/sadaltager_old_angry_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/sadaltager_old_angry_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/sadaltager_old_angry_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/sadaltager_old_angry_4"
+			}
+		]
+	},
+	"voice.villager.enceladus_old.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/enceladus_old_greet_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/enceladus_old_greet_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/enceladus_old_greet_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/enceladus_old_greet_4"
+			}
+		]
+	},
+	"voice.villager.enceladus_old.yes": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/enceladus_old_yes_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/enceladus_old_yes_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/enceladus_old_yes_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/enceladus_old_yes_4"
+			}
+		]
+	},
+	"voice.villager.enceladus_old.no": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/enceladus_old_no_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/enceladus_old_no_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/enceladus_old_no_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/enceladus_old_no_4"
+			}
+		]
+	},
+	"voice.villager.enceladus_old.angry": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/enceladus_old_angry_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/enceladus_old_angry_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/enceladus_old_angry_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/enceladus_old_angry_4"
+			}
+		]
+	},
+	"voice.villager.charon_old.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_old_greet_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_old_greet_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_old_greet_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_old_greet_4"
+			}
+		]
+	},
+	"voice.villager.charon_old.yes": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_old_yes_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_old_yes_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_old_yes_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_old_yes_4"
+			}
+		]
+	},
+	"voice.villager.charon_old.no": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_old_no_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_old_no_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_old_no_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_old_no_4"
+			}
+		]
+	},
+	"voice.villager.charon_old.angry": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_old_angry_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_old_angry_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_old_angry_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/charon_old_angry_4"
+			}
+		]
+	},
+	"voice.villager.wavenet_d_old.greet": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_old_greet_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_old_greet_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_old_greet_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_old_greet_4"
+			}
+		]
+	},
+	"voice.villager.wavenet_d_old.yes": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_old_yes_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_old_yes_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_old_yes_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_old_yes_4"
+			}
+		]
+	},
+	"voice.villager.wavenet_d_old.no": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_old_no_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_old_no_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_old_no_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_old_no_4"
+			}
+		]
+	},
+	"voice.villager.wavenet_d_old.angry": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_old_angry_1"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_old_angry_2"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_old_angry_3"
+			},
+			{
+				"name": "jaymoskingdoms:voice/villager/wavenet_d_old_angry_4"
+			}
+		]
 	}
 }
