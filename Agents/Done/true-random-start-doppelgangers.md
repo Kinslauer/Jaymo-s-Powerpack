@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Truly random start after the gender page; save a dead life's character as a doppelganger preset; familiar remarks
 branch: claude/project-thread-kbijrl
 with: Claude (Reason Art project thread)
@@ -18,3 +18,6 @@ owns:
 
 ## Done
 Skip ask has "Leave it all to fate" and (with a kept face) "Wear a kept face". Third-death reincarnation offers "Keep the face?". Villagers who knew the face may remark once. Built (kingdoms `gradlew build`), not played. Lore paragraph "Doppelgangers" (new) awaiting Andy.
+
+## Notes
+- 2026-11-19 13:50 PR #1824 is merged into master; moved to Agents/Done.
