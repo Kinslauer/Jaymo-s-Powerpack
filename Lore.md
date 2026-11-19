@@ -1766,6 +1766,8 @@ three scouts ranging outside its ring: small even for goblins, hooded, a pack on
 see further than the village does. A scout that spots prey stops and cackles, and the village comes for what it saw; a
 traveller in a goblin mask is laughed past. With its village gone a scout runs wild and has nobody to call.
 
+**Goblin talk** (Andy approved, 2026-11-19; goblin speech thread; Andy: goblins "should speak very broken but intelligible english, unlike orcs who you really cant tell"; the rest Claude's placement). Goblins never kept a tongue of their own. They live off other people's goods, so they live off other people's words too: every goblin picks up the traders' common speech from the folk it robs and sells to, and mangles it the same way wherever it was hatched. "Me" for I, "da" for the, no little words, everything shiny is shinies. Anyone can follow a goblin, which is half of why nobody trusts one: it will tell you to your face what it means to take. Orcs are the other way: their war camps talk only among themselves, in the land's own speech chewed past knowing, and a stranger hears noise.
+
 **Heritage looks.** Each heritage has three looks of its own, and bloods marry and mix; a child can lean toward a
 remnant blood. Body size follows blood: the Stoneborn tallest and widest, the Sylvan smallest.
 
@@ -1783,6 +1785,34 @@ terror that falls on the ladder of Knowledge wakes a little more of what a peopl
 see further into the night, the Dawnborn draw more from the sun. The cursed bloods grow the same way, by feeding and by
 moons: a new vampire's strength comes only once the blood has bound them, and a new wolf's beast grows strong over the
 moons it runs.
+
+**The paths of the blood** (Andy approved, 2026-11-19; heritage paths thread; Andy's picks 2026-11-18). What a blood wakes into
+depends on how its child lives. Nobody chooses: a Stoneborn who spends their days deep in the rock wakes as a delver,
+one who stands in the shield line wakes as a shield. The first road a life takes is the one its blood follows to the
+end, and the others close quietly behind it. The old folk say the blood remembers the parent's road, so a child is
+quick to find it, but no child is made to walk it. A path never fades for being left alone; it only stops deepening.
+Each of its five steps wakes as one of the ladder's kings or terrors falls, the same as the rest of the blood's gifts.
+
+**The Heartlanders' paths** (Andy approved, 2026-11-19). The **Hearthkeeper** is named for the god whose hearth Heartlanders keep: one who
+makes one place their home, farms it and sleeps under its roof finds its fields grow for them, and its people trust
+them sooner. In the end that town's guards come at the ring of their bell, wherever the fight is. The **Wayfarer** walks
+the roads between towns until the roads seem to carry them: they tire less on the way, their horses go further, and in
+the end they always know the way home. The **Borrowed Blood** is the Heartlanders' oldest habit made flesh. A people who
+keep the tally of every other blood take, slowly, a small gift from the blood they live among most, and in the end from
+a second.
+
+**The Stoneborn's paths** (Andy approved, 2026-11-19). The **Deepdelver** goes down: the deeper they mine, the faster the rock gives, and the
+ores in it begin to glint for them alone, as if the Anvil-Father had left the seams lit. In the end loose stone parts
+at a touch. The **Mountain's Shield** takes blows and stands; in the end nothing moves them while they crouch behind
+their shield. The **Lanternkeeper** lights the dark places and keeps them lit: their torches and lanterns burn longer,
+the dead keep back from the lantern in their hand, and in the end its light burns them.
+
+**The Tideborn's paths** (Andy approved, 2026-11-19). The **Reefwalker** swims and dives until the sea is their country: they hold their
+breath long and swim fast, and in the end they breathe water. Dry land still wears them down. The **Saltblood** sails
+and fishes. A haven's own folk may fish their own waters, and the Deep Mother lends her fish to those who keep her sea,
+so they come keen to a Saltblood's bait; a ship with a Saltblood aboard runs faster, and in the end a squall calms round
+her. The **Deep Mother's Voice** keeps her shrines and her offerings. The drowned and the sea's guardians come to know
+her own and let them be, unless struck; in the end her voice raises a surge of tide that throws foes back.
 
 
 ## Why the peoples don't like each other
@@ -2115,6 +2145,8 @@ nobody's enemy, but strike one and the whole grove comes at you with horns and h
 and you are welcome at the fire, and a night there mends you and brings you luck.
 
 **The silk deeps** (Andy approved, 2026-11-15; medieval picks). Under the old hills some caves have gone to the spiders: silk over the walls, shed skins underfoot, egg sacs hung like fruit, the stone itself dark with them. At the deepest lies a **brood queen**, a spider grown huge on the cave's life, sleeping on her egg; strike the egg and she wakes. Above, a web-hung hut where someone once watched the nest keeps a map down. Spiders that take a living thing alive carry it home wrapped, which is how the dead sometimes wake there. Deep below the nests the **netcasters** hunt with thrown silk, and in the crimson and warped woods of the Nether a small spined spider bursts into web.
+
+**The gnomes** (Andy approved, 2026-11-19; Andy, 2026-11-19: give the gnomes of the forest huts and towers a real body, "2 draft it"; the rest Claude's placement for him to approve). The gnomes are the ground's own small folk, older than any realm: knee-high, white-bearded, red-capped, slow on open ground and quick under it. Like the bores they are what deep stone becomes when ki has soaked into it for long enough. Unlike the bores, they keep house. A gnome family digs in under the roots of an old tree or stacks a crooked cobble tower in the deep woods, and keeps three things: a **garden**, a **store** and a **hoard**. The garden is moss, flowers and mushrooms round a composter, and the gnomes work bone meal into it every day, so the oldest houses stand in the thickest bloom in the forest. The hoard is whatever they have brought up from below (iron, emerald, now and then a diamond), and they never spend it. Folk call them angry for the way they meet a stranger: a gnome sees every boot that lands in its beds and every hand that touches its store, and when it does, the whole house comes out with shields and sticks. Keep to the path and they only grumble and watch you go. A traveller who brings them what grows (seeds, saplings, flowers, bone meal) is let in to trade, and the gnomes give stone-gifts from the deep for what they can't grow themselves. A house whose garden is stripped bare goes quiet: the gnomes go down into the ground and don't come back, and the beds go wild. No faith claims them, but the Anvil-Father's miners leave a crust of bread at a new shaft, because the gnomes found the seams first.
 
 ## Daily life
 
