@@ -150,7 +150,8 @@ public final class WindPush {
 		}
 		ServerLevel level = server.overworld();
 		for (Entity e : level.getAllEntities()) {
-			if (e instanceof Player || e.isPassenger() || e.isInWater() || e.isNoGravity() && !(e instanceof ItemEntity)) {
+			// (the level's entity list can hold an empty slot while land loads: a null here stopped the server, 2026-11-19 8:11 AM)
+			if (e == null || e instanceof Player || e.isPassenger() || e.isInWater() || e.isNoGravity() && !(e instanceof ItemEntity)) {
 				continue;
 			}
 			if (e instanceof ItemEntity item) {
