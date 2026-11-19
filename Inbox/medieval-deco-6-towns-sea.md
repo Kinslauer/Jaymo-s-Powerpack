@@ -31,3 +31,4 @@ thread: cmsg_01638ouFWZKwEZ1ET74kBk9BDvxv3Xuvj7a4gmHTqtzmQ6
 
 ## Notes
 - 2026-11-19 02:41 Andy approved the lore paragraphs 2026-11-19 02:40 UTC; no lore hold on merging.
+- 2026-11-18 22:26 PC Claude took it (editor agent, branch claude/medieval-deco-6).
