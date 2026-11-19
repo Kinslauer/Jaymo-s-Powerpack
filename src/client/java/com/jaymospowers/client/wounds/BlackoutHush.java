@@ -1,6 +1,7 @@
 package com.jaymospowers.client.wounds;
 
 import com.jaymospowers.core.wounds.Downed;
+import com.jaymospowers.core.wounds.Mortality;
 import java.util.Set;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
@@ -20,8 +21,8 @@ import net.minecraft.sounds.SoundSource;
  * menu clicks (the death screen's buttons), the master category, and the black's own cues ({@link #CUES}): the heartbeat
  * while down or swooning, the breath as they wake, and a turning's groan.
  * <p>
- * Death is the exception (Andy, 2026-11-19: "only hearing nothing and the long wait for the respawn screen"): the moment
- * you die it's silent at once, not eased into, and the black's own cues are hushed with the rest; only the menu clicks
+ * A death that ends the character ({@link Mortality#FINAL}) is the exception (Andy, 2026-11-19: "only hearing nothing and
+ * the long wait for the respawn screen", "the cut to black is only for a final death"): the moment you die it's silent at once, not eased into, and the black's own cues are hushed with the rest; only the menu clicks
  * (the death screen's buttons) and the master category are left.
  * <p>
  * Works beside Sound Physics Remastered: it only scales each source's gain, so its reverb and muffling fade with it.
@@ -40,7 +41,7 @@ public final class BlackoutHush {
 
 	/** How far to silent the game is now (0-1), and what the playing sounds were last worked out for. */
 	private static float hush, refreshed;
-	/** Whether you are dead just now (the death screen up, or dying): silent at once, cues and all. */
+	/** Whether you have died for good just now (the death screen up, or dying): silent at once, cues and all. */
 	private static boolean dead;
 
 	private BlackoutHush() {
@@ -65,7 +66,7 @@ public final class BlackoutHush {
 
 	private static void tick(Minecraft minecraft) {
 		boolean wasDead = dead;
-		dead = minecraft.player != null && minecraft.level != null
+		dead = minecraft.player != null && minecraft.level != null && Mortality.isFinal(minecraft.player)
 			&& (minecraft.gui.screen() instanceof DeathScreen || minecraft.player.isDeadOrDying());
 		float target = target(minecraft);
 		hush = dead ? 1.0F : target > hush ? Math.min(target, hush + QUIET_STEP) : Math.max(target, hush - RETURN_STEP);

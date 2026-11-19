@@ -1,5 +1,7 @@
 package com.jaymospowers.client.mixin;
 
+import com.jaymospowers.core.wounds.Mortality;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -16,8 +18,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * and what's on it (the cause, the buttons) comes slowly up out of the black over {@link #FADE_TICKS}.
  * <p>
  * Andy (2026-11-19): "deaths like this should cut straight to black ... only hearing nothing and the long wait for the
- * respawn screen". The screen stays all black and silent ({@code BlackoutHush}) for {@link #HOLD_TICKS} first, its buttons
- * not yet there to be clicked, and only then comes up.
+ * respawn screen", then "the cut to black is only for a final death". For a death that ends the character
+ * ({@link Mortality#FINAL}) the screen stays all black and silent ({@code BlackoutHush}) for {@link #HOLD_TICKS} first, its
+ * buttons not yet there to be clicked, and only then comes up. Any other death comes up as before.
  */
 // (after the other death-screen mixins, so its black is drawn over what they add: nothing shows through the hold)
 @Mixin(value = DeathScreen.class, priority = 1100)
@@ -45,7 +48,7 @@ abstract class DeathScreenBlackMixin {
 
 	@Inject(method = "extractRenderState", at = @At("TAIL"))
 	private void jaymospowers$fadeIn(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-		float left = 1.0F - Math.clamp((jaymospowers$age - HOLD_TICKS + delta) / FADE_TICKS, 0.0F, 1.0F);
+		float left = 1.0F - Math.clamp((jaymospowers$age - jaymospowers$hold() + delta) / FADE_TICKS, 0.0F, 1.0F);
 		if (left > 0.0F) {
 			graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), Math.round(left * 255.0F) << 24);
 		}
@@ -53,8 +56,15 @@ abstract class DeathScreenBlackMixin {
 
 	@Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
 	private void jaymospowers$holdClicks(MouseButtonEvent event, boolean doubleClick, CallbackInfoReturnable<Boolean> cir) {
-		if (jaymospowers$age < HOLD_TICKS) {
+		if (jaymospowers$age < jaymospowers$hold()) {
 			cir.setReturnValue(false);
 		}
+	}
+
+	/** How long this death screen is only black: {@link #HOLD_TICKS} for a final death, none for any other. */
+	@Unique
+	private static int jaymospowers$hold() {
+		Minecraft minecraft = Minecraft.getInstance();
+		return minecraft.player != null && Mortality.isFinal(minecraft.player) ? HOLD_TICKS : 0;
 	}
 }

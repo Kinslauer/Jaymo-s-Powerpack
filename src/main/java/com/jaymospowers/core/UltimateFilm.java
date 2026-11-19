@@ -67,8 +67,6 @@ public final class UltimateFilm {
 	 * read through ({@link #SPEAKER}); moves still ask for their own lengths.
 	 */
 	public static final int MIN_TICKS = 10, MAX_TICKS = 200;
-	/** Whether a film still plays to one who has just died ({@link #afterDeath}). Off: a death cuts straight to black. */
-	static final boolean PLAY_AFTER_DEATH = false;
 
 	private static final List<Later> LATER = new ArrayList<>();
 
@@ -241,16 +239,8 @@ public final class UltimateFilm {
 	 * (0.18.106) A film for {@code dead}, who has just died: their camera on {@code at} (and {@code target}) for
 	 * {@code ticks}, with the death screen held back until it ends (or they skip it). Kingdoms' captains use it for the
 	 * killer's moment over the body.
-	 * <p>
-	 * Not played any more: Andy (2026-11-19), of a captain's scene over his body, "deaths like this should cut straight to
-	 * black. i shouldnt see the enemies despawned. only hearing nothing and the long wait for the respawn screen". A death
-	 * goes to black at once ({@code DeathScreenBlackMixin}); what the killer does (a captain's promotion) still happens in
-	 * the world. Kept so Kingdoms' call to it still resolves.
 	 */
 	public static void afterDeath(ServerPlayer dead, int shot, int ticks, Vec3 at, @Nullable Entity target) {
-		if (!PLAY_AFTER_DEATH) {
-			return;
-		}
 		int length = Math.clamp(ticks, MIN_TICKS, MAX_TICKS);
 		ServerPlayNetworking.send(dead, new Play(dead.getId(), shot, length, at, target == null ? -1 : target.getId(), false, true));
 		shown(dead, length);
