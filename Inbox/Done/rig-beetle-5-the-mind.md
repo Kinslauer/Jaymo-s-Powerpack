@@ -1,11 +1,11 @@
 ---
-status: in-review
+status: done
 for: any
 from: coordinator (Zemo Baki cross-reference thread)
 asked: 2026-11-18
 thread: https://claude.ai/code/project/chan_01638ouFWZKwEZ1ET74kBk9B?thread=cmsg_01638ouFWZKwEZ1ET74kBk9BX7wxqnAirwqSZbVfgHyi5g
 claimed_by: rig-beetle-5-the-mind
-pr: 1774
+pr: 1773
 suggested_owns:
   - src/main/java/com/jaymospowers/rig/RigTalk.java (new)
   - src/main/java/com/jaymospowers/rig/RigPilot.java (new)
@@ -45,3 +45,4 @@ suggested_owns:
 - 2026-11-18 17:09 Question for Andy: md-voice needs a voice source you're happy with (VoiceStudio's default is non-commercial). Which voice? Everything else is in PR #1773.
 - 2026-11-18 19:44 Andy is working on the voices (Google TTS, #1780); md-voice waits on that.
 - 2026-11-18 21:42 Review: pr: 1774 was a closed duplicate (CONFLICTING, never merged); the work landed as PR #1773, merged 2026-11-18. Pointed pr: at 1773 so the sync files it as done. md-voice still waits on Andy's voices (#1780).
+- 2026-11-18 21:43 PR #1773 is merged into master; moved to Inbox/Done.
