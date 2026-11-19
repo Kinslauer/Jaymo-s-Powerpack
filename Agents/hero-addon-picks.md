@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: Build Andy's 29 Nido hero add-on picks
 branch: claude/project-thread-npq3b0
 with: Claude (cloud thread "Cross-reference Spider-Man, Marvel and DC add-ons")
-pr: 
+pr: 1827
 mods: powers, kingdoms
 versions: 
 started: 2026-11-19
@@ -21,3 +21,6 @@ owns:
 
 ## Notes
 - 8 Lore.md (new) paragraphs tagged "hero add-on picks, 2026-11-19", awaiting Andy.
+
+## Done
+All 29 picks built in PR #1827 (Powers + Kingdoms change notes). Compiled, reviewed, fixed; nothing played in game. Lore approved.
