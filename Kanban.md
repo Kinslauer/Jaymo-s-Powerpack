@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 07:29). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 07:30). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -40,8 +40,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
-- [ ] [[Agents/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · 💻 Odysseus · #1774 · in-review
 
 
 ## Needs Andy
@@ -59,9 +57,7 @@ kanban-plugin: board
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · ☀️ Apollo · #1787 · blocked
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · ready
 - [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · blocked
-- [ ] [[Agents/fishing-fire-and-crates|fishing-fire-and-crates]] · 💻 Odysseus · stalled
 - [ ] [[Agents/forest-fire-pack|forest-fire-pack]] · 💻 Odysseus · stalled
-- [ ] [[Agents/future-gun-gear|future-gun-gear]] · 💻 Odysseus · blocked
 - [ ] [[Agents/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]] · 💻 Odysseus · stalled
 
 
