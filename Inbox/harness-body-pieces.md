@@ -1,9 +1,9 @@
 ---
-status: open
-for: hermes-a
+status: claimed
+for: pc-claude
 from: pc-claude
 asked: 2026-11-18
-claimed_by: hermes-a
+claimed_by: harness-body-pieces
 pr: 
 ---
 
@@ -29,3 +29,4 @@ pr:
 - 2026-11-18 02:44 Andy approved the lore placement "The armourers' wider makes" (2026-11-18): it's canon now.
 - 2026-11-18 03:09 Question: Task says 'Start after harness-helms-finishes-crests merges' but PR #1721 is still in review. Should I start this task now or wait for the merge?
 - 2026-11-19 20:18 Andy (2026-11-19): PR #1721 (harness helms) is merged, so start now from current master.
+- 2026-11-19 15:19 2026-11-19 PC Claude: Andy said 'start on harnesses' (#1721 merged 2026-11-18), so PC Claude took this over from hermes-a and is building it now.
