@@ -73,6 +73,11 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
  */
 public final class WorldTiers {
 	/** How near a player a hostile has to come to take their tier (blocks), and how often that's looked for (ticks). */
+	/**
+	 * (Andy, 2026-11-19: "keep this as a rule global within hearth") In the Hearth tier no single hit on a player (a blow,
+	 * a shot, a blast: anything that strikes them) takes more than this share of their full health ({@link #hearthHit}).
+	 */
+	static final float HEARTH_MOST_HIT = 0.2F;
 	static final double TIER_RANGE = 40.0;
 	static final int SCAN_TICKS = 20;
 	/** A tiered hostile with no player of its tier within {@link #TIER_RANGE} for this long (ticks) falls to the tier of the nearest player. */
@@ -335,6 +340,20 @@ public final class WorldTiers {
 			}
 			drops.addAll(extra);
 		});
+	}
+
+	/**
+	 * A hit on {@code player} as it lands ({@code HearthHitMixin}, before armour): in Hearth no more than
+	 * {@link #HEARTH_MOST_HIT} of their full health. Falls, fire, drowning, hunger and the like aren't hits; nor is anything
+	 * that ignores invulnerability (the void, /kill), and the downed are past it (a finishing blow is a finishing blow).
+	 */
+	public static float hearthHit(Player player, net.minecraft.world.damagesource.DamageSource source, float amount) {
+		if (amount <= 0.0F || of(player) != Tier.HEARTH || source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)
+			|| Downed.isDowned(player) || source.getEntity() == null && source.getDirectEntity() == null
+			&& !source.is(net.minecraft.tags.DamageTypeTags.IS_EXPLOSION)) {
+			return amount;
+		}
+		return Math.min(amount, player.getMaxHealth() * HEARTH_MOST_HIT);
 	}
 
 	public static Tier of(Player player) {
