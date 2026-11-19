@@ -234,6 +234,54 @@ ON_DRAGON_WING_LEFT = [
     (1.0, RIDE),
 ]
 
+# up into a cart, wagon, rickshaw, cab or coach: the right foot on the step, a hand on the rail, pulled up and turned onto the bench
+STEP_UP = [
+    (0.0, STAND),
+    (0.25, {"body": (14, 0, 0), "right_arm": (-95, 0, 10), "left_arm": (-20, 0, -4),
+            "right_leg": (-65, 0, 8), "left_leg": (6, 0, -2)}),
+    (0.55, {"body": (22, 0, 0), "right_arm": (-110, 0, 8), "left_arm": (-80, 0, -6),
+            "right_leg": (-45, 0, 6), "left_leg": (-70, 0, -4)}),
+    (0.8, {"body": (10, 0, 0), "right_arm": (-60, 0, 4), "left_arm": (-50, 0, -4),
+           "right_leg": (-75, 12, 14), "left_leg": (-78, -12, -6)}),
+    (1.0, RIDE),
+]
+
+# down from one: hands on the edge of the bench, the near foot reaching for the road, the other brought down after it
+STEP_DOWN = [
+    (0.0, RIDE),
+    (0.25, {"body": (14, 0, 0), "right_arm": (-80, 0, 8), "left_arm": (-70, 0, -8),
+            "right_leg": (-60, 6, 10), "left_leg": (-70, -10, -6)}),
+    (0.55, {"body": (16, 0, 0), "right_arm": (-60, 0, 6), "left_arm": (-55, 0, -6),
+            "right_leg": (-35, 0, 6), "left_leg": (-55, -6, -4)}),
+    (0.85, {"body": (8, 0, 0), "right_arm": (-15, 0, 4), "left_arm": (-15, 0, -4),
+            "right_leg": (-8, 0, 2), "left_leg": (-18, 0, -2)}),
+    (1.0, STAND),
+]
+
+# into a boat: a leg over the side, arms out for balance, the boat rocking under the first foot, down onto the thwart
+STEP_IN = [
+    (0.0, STAND),
+    (0.25, {"body": (10, 0, -4), "right_arm": (-40, 0, 45), "left_arm": (-40, 0, -40),
+            "right_leg": (-75, 0, 22), "left_leg": (4, 0, -2)}),
+    (0.55, {"body": (16, 0, 0), "right_arm": (-55, 0, 50), "left_arm": (-55, 0, -50),
+            "right_leg": (-30, 0, 12), "left_leg": (-70, 0, -14)}),
+    (0.8, {"body": (12, 0, 0), "right_arm": (-70, 0, 25), "left_arm": (-70, 0, -25),
+           "right_leg": (-78, 14, 10), "left_leg": (-80, -14, -8)}),
+    (1.0, RIDE),
+]
+
+# out of a boat: up with the arms out for balance, a leg over the side, onto the bank
+STEP_OUT = [
+    (0.0, RIDE),
+    (0.3, {"body": (12, 0, 0), "right_arm": (-60, 0, 40), "left_arm": (-60, 0, -40),
+           "right_leg": (-70, 0, 16), "left_leg": (-72, 0, -10)}),
+    (0.6, {"body": (14, 0, 0), "right_arm": (-45, 0, 45), "left_arm": (-45, 0, -42),
+           "right_leg": (-65, 0, 25), "left_leg": (-30, 0, -6)}),
+    (0.85, {"body": (8, 0, 0), "right_arm": (-30, 0, 30), "left_arm": (-30, 0, -28),
+            "right_leg": (-14, 0, 6), "left_leg": (-22, 0, -2)}),
+    (1.0, STAND),
+]
+
 CLIPS = {
     "on_left": ON_LEFT,
     "on_right": [(t, mirror(p)) for t, p in ON_LEFT],
@@ -254,6 +302,10 @@ CLIPS = {
     "on_neck": ON_NECK,
     "on_dragon_wing_left": ON_DRAGON_WING_LEFT,
     "on_dragon_wing_right": [(t, mirror(p)) for t, p in ON_DRAGON_WING_LEFT],
+    "step_up": STEP_UP,
+    "step_down": STEP_DOWN,
+    "step_in": STEP_IN,
+    "step_out": STEP_OUT,
 }
 
 

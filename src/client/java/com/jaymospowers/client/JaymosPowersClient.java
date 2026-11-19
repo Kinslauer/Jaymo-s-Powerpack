@@ -277,6 +277,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		JeiCheats.init();
 		EmfCompat.init();
 		MountClimbPose.init();
+		SeatSteps.init();
 		com.jaymospowers.client.armory.TaczFirstPerson.init();
 		com.jaymospowers.client.armory.GunLaserClient.init();
 		com.jaymospowers.client.armory.GunHandling.init();

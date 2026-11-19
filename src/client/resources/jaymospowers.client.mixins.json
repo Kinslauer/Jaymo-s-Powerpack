@@ -90,6 +90,8 @@
 		"ProneCameraMixin",
 		"MountClimbCameraMixin",
 		"MountClimbInputMixin",
+		"MountClimbMobRendererMixin",
+		"MountClimbModelFeatureRendererMixin",
 		"MountClimbRendererMixin",
 		"HeadCamMixin",
 		"GiantCameraMixin",
