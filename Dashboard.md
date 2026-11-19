@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 18:22). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 15:15). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -14,17 +14,19 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Inbox/harness-body-pieces|harness-body-pieces]] · 2026-11-18 03:09 Question: Task says 'Start after harness-helms-finishes-crests merges' but PR #1721 is still in review. Should I start this task now or wait f…
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-18 21:42 Question: tools/voices/refs/narrator.wav is missing on this PC (E:/Origins Mod/tools/voices/refs/ doesn't exist). Without the narrator's refer…
 - [[Inbox/scrying-orb|scrying-orb]] · 2026-11-18 21:37 Text pass: kingdoms/lang/parts/scrying-orb.json - sighted_shard.default_name now '%s: %d, %d, %d', so shards read 'Sighted Shard (overworld: x…
+- [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · 2026-11-19 15:02 Question: Where exactly is 'down there' for the underground Stoneborn holds and goblin villages? The layer stack is now: high sky, Aether, Clo…
 - [[Inbox/wither-model|wither-model]] · 2026-11-18 5:27 PM hermes-modeller: previews ready for Andy's look. kingdoms/art/wither.bbmodel is valid JSON and bakes cleanly (7 bones, 58 quads, idle animat…
 
 ## Stuck
 
 - [[Agents/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]]: stalled, last change 2026-11-13. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/forest-fire-pack|forest-fire-pack]]: stalled, last change 2026-11-16. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/forest-fire-pack|forest-fire-pack]]: stalled, last change 2026-11-15. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hands-on-cooking-realtime|hands-on-cooking-realtime]]: stalled, last change 2026-11-17. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/harness-upkeep|harness-upkeep]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/heritage-paths|heritage-paths]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]]: stalled, last change 2026-11-18. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/scrying-orb|scrying-orb]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/sky-lands-aether-biomes|sky-lands-aether-biomes]]: stalled, last change 2026-11-16. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/scrying-orb|scrying-orb]]: stalled, last change 2026-11-18. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/sky-lands-aether-biomes|sky-lands-aether-biomes]]: stalled, last change 2026-11-15. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
@@ -34,6 +36,18 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1865 Gnomes: real gnomes with their own model, gardens and temper (Kingdoms, 2026-11-19)
+- [ ] #1864 Blackouts wake you where you were taken (Powers, Kingdoms, 2026-11-19)
+- [ ] #1863 goblins speak broken English (Kingdoms, 2026-11-19)
+- [ ] #1862 Youth's wisp really disappears while it thinks (Kingdoms, 2026-11-19)
+- [ ] #1861 symbiote infection - it no longer starves itself feeding you, and warns before it leaves (Powers, 2026-11-19)
+- [ ] #1860 Goblins take the downed alive too (Kingdoms, 2026-11-19)
+- [ ] #1859 Slower NPCs, and barbarians take the downed alive (Kingdoms, 2026-11-19)
+- [ ] #1858 campfire life - camps sit, talk, sing and share a spit roast round their fire (Kingdoms, Kitchen, 2026-11-19)
+- [ ] #1857 The minimap stops showing the Aether again (Powers, 2026-11-19)
+- [ ] #1856 speaker shot finds a clear angle (Powers, Kingdoms, 2026-11-19)
+- [ ] #1855 Take bows and arrows from any downed foe (Kingdoms, 2026-11-19)
+- [ ] #1854 masons' pattern books - the building library (Kingdoms, 2026-11-19)
 - [ ] #1852 One Dimension stack back to the pack's order (Powers, 2026-11-19)
 - [ ] #1850 First kingdom raised in the surface town, not a Lost Cities copy under it (Kingdoms, 2026-11-19)
 - [ ] #1849 Watcher's huts much rarer (Kingdoms, 2026-11-19)
@@ -82,23 +96,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1798 the hooded cloak leans in the world's wind (Powers, Kingdoms, 2026-11-19)
 - [ ] #1797 drinks and kitchen - vines, press, vintage, tea, smoke chips, black wine (Kitchen, 2026-11-19)
 - [ ] #1796 Vanilla+ mods join the pack (Powers, 2026-11-19)
-- [ ] #1795 Medieval Music pack, trimmed and on by default (Powers, Kingdoms, 2026-11-19)
-- [ ] #1794 villager talk camera faces the villager (Kingdoms, 2026-11-19)
-- [ ] #1793 Alex's Mobs Continued joins the pack (Powers, Kingdoms, 2026-11-19)
-- [ ] #1792 life story: one random heritage look, no paths list (Kingdoms, 2026-11-19)
-- [ ] #1791 guards wear what their rank and their settlement's purse allow (Kingdoms, 2026-11-19)
-- [ ] #1790 steam towns in the Cloud Sea (Kingdoms, 2026-11-19)
-- [ ] #1789 Rig: flight picks, arm-form poses and gun fire poses fixed (Powers, Kingdoms, 2026-11-19)
-- [ ] #1782 the Rig's Mind speaks aloud (Powers, Kingdoms, 2026-11-19)
-- [ ] #1780 narrator voice lines from Google Cloud Text-to-Speech (Kingdoms, 2026-11-19)
-- [ ] #1778 acrobatics - standing backflip, dodge-key mid-air tricks (Powers, Kingdoms, 2026-11-19)
-- [ ] #1777 Rig: the back rig (wings, wing slash, spear legs, pincers, grapple, horn lightning) (Powers, 2026-11-19)
-- [ ] #1776 Rig patch 6: cloak, tech override and nova (Powers, 2026-11-19)
-- …and 232 older ones.
+- …and 244 older ones.
 
 ## Health
 
-19 problems in the notes: [[Health]].
+20 problems in the notes: [[Health]].
 
 ## Last week
 
