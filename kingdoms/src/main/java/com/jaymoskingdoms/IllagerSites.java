@@ -954,6 +954,9 @@ final class IllagerSites {
 		"goblins", new String[][] {{"Copper", "Rust", "Mole", "Deep", "Grub", "Tin"}, {"diggers", "burrow", "shaft", "warren", "delvers"}});
 
 	private static String name(MinecraftServer server, String dweller, RandomSource random) {
+		if ("illagers".equals(dweller)) {
+			return IllagerHolds.freshName(server, random);
+		}
 		String[][] parts = NAMES.get(dweller);
 		if (parts == null) {
 			return Camps.name(server, random);

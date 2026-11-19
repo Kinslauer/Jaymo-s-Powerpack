@@ -21,6 +21,9 @@ public final class SharedPools {
 	/** The sets whose spacing the shared ones keep. */
 	static final Identifier VILLAGES = Identifier.withDefaultNamespace("villages"), OUTPOSTS = Identifier.withDefaultNamespace("pillager_outposts");
 
+	/** Overhauled Village's namespace. */
+	static final String CTOV = "ctov";
+
 	/** A set that keeps its own placement: the villages on the islands of Mohknee's crossing stand at exact places ({@code IslandStructure}'s only_at). */
 	static final Identifier OWN_PLACES = JaymosKingdoms.id("crossing_isle_villages");
 
@@ -51,7 +54,15 @@ public final class SharedPools {
 	 */
 	static boolean outpost(Holder<Structure> s) {
 		String path = s.unwrapKey().map(k -> k.identifier().getPath().toLowerCase(Locale.ROOT)).orElse("");
-		return path.contains("outpost");
+		return path.contains("outpost") || s.unwrapKey().map(k -> ctovOutpost(k.identifier())).orElse(false);
+	}
+
+	/**
+	 * (village mods 1) One of Overhauled Village's pillager outposts (its ids, in its own namespace, name an outpost): pooled with
+	 * the other outposts, and a hold of the illagers ({@link IllagerTongue#theirs}). Inert while that mod is absent.
+	 */
+	static boolean ctovOutpost(Identifier id) {
+		return id.getNamespace().equals(CTOV) && id.getPath().toLowerCase(Locale.ROOT).contains("outpost");
 	}
 
 	/** {@code sets} with every set made only of structures {@code which} accepts merged into one, at {@code lead}'s spacing (else the first's). */

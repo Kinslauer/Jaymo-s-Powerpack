@@ -192,6 +192,10 @@ final class ChatTalk {
 				if (said == null) {
 					said = Recollections.gossipLine(v, player, random);
 				}
+				if (said == null && !cold && v.level() instanceof net.minecraft.server.level.ServerLevel here) {
+					// (village mods 1) the nearest illager hold or camp, by name and bearing
+					said = IllagerHolds.hint(here, v, new net.minecraft.core.BlockPos[1]);
+				}
 				if (said != null && !cold) {
 					return said;
 				}
