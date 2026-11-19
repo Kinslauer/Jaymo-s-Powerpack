@@ -23,6 +23,8 @@ import org.jspecify.annotations.Nullable;
  * faster as it gets going and slow again near the end, and the world ahead growing until it fills the right side. Under it, where
  * you are going and how long is left. After a first trip, Space (or a click) skips it. It closes itself when the pod drops
  * into the landing (the pod you ride changes) or the world changes under it, or a little after its time runs out.
+ * A trip that skirts the Hollow ({@link ZFighterSpace#skirtsHollow}) shows it passing overhead, the stars round it pushed out as
+ * their light bends; a crossing on ki ({@code KiVoyage}) shows the fighter's own light in place of the pod.
  */
 public class ZFighterFlightScreen extends Screen {
 	/** Ticks after its time the screen gives up waiting for the landing. */
@@ -33,6 +35,8 @@ public class ZFighterFlightScreen extends Screen {
 	private static final float RAMP = 0.2F;
 	/** (0.18.56) The share of the world's growth (0 to 1) at which a Starlit Lens starts showing the zones. */
 	private static final float LENS_FROM = 0.45F;
+	/** The Hollow on screen: its size (share of the height), its height on screen, and how far out it bends the stars (radii). */
+	private static final float HOLLOW_SIZE = 0.06F, HOLLOW_Y = 0.24F, HOLLOW_BEND = 6.0F;
 
 	private final int to;
 	private final int ticks;
@@ -40,6 +44,9 @@ public class ZFighterFlightScreen extends Screen {
 	private final int from;
 	/** (0.18.56) A Starlit Lens on the pod's mast: the world ahead is shown with its mission zones. */
 	private final boolean lens;
+	/** Flown on ki, not in a pod; and whether the trip passes the Hollow. */
+	private final boolean ki, hollow;
+	private net.minecraft.world.level.@Nullable Level startLevel;
 	private int age;
 	private boolean skipped;
 	private @Nullable Entity vehicle;
@@ -47,9 +54,11 @@ public class ZFighterFlightScreen extends Screen {
 	private float travelled;
 	private final ItemStack pod = new ItemStack(ZFighterSpace.POD_ITEM);
 
-	public ZFighterFlightScreen(int to, int ticks, boolean skippable, int from, boolean lens) {
+	public ZFighterFlightScreen(int to, int ticks, boolean skippable, int from, boolean lens, boolean ki) {
 		super(Component.translatable("screen.jaymospowers.zfighter_flight"));
 		this.lens = lens;
+		this.ki = ki;
+		this.hollow = !ki && ZFighterSpace.skirtsHollow(from, to);
 		this.to = to;
 		this.ticks = Math.max(1, ticks);
 		this.skippable = skippable;
@@ -68,7 +77,7 @@ public class ZFighterFlightScreen extends Screen {
 			}
 			// (0.18.53) the world flown to (or from, on the way home) shines brighter in the night sky for a while
 			com.jaymospowers.client.power.zfighter.sky.SkyPlanets.glow(payload.to() == ZFighterSpace.HOME_INDEX ? from : payload.to());
-			ctx.client().gui.setScreen(new ZFighterFlightScreen(payload.to(), payload.ticks(), payload.skippable(), from, payload.lens()));
+			ctx.client().gui.setScreen(new ZFighterFlightScreen(payload.to(), payload.ticks(), payload.skippable(), from, payload.lens(), payload.ki()));
 		});
 	}
 
@@ -76,6 +85,9 @@ public class ZFighterFlightScreen extends Screen {
 	protected void init() {
 		if (this.vehicle == null && this.minecraft.player != null) {
 			this.vehicle = this.minecraft.player.getVehicle();
+		}
+		if (this.startLevel == null && this.minecraft.player != null) {
+			this.startLevel = this.minecraft.player.level();
 		}
 	}
 
@@ -95,7 +107,9 @@ public class ZFighterFlightScreen extends Screen {
 		this.travelled += speed(progress()) * 6.0F;
 		LocalPlayer player = this.minecraft.player;
 		Entity now = player == null ? null : player.getVehicle();
-		boolean landed = this.age > 5 && now != null && now != this.vehicle;
+		boolean landed = this.age > 5 && now != null && now != this.vehicle
+			// on ki there is no pod: down when the world under you changes
+			|| this.ki && player != null && player.level() != this.startLevel;
 		if (player == null || landed || this.age > this.ticks + GRACE_TICKS) {
 			this.onClose();
 		}
@@ -132,7 +146,11 @@ public class ZFighterFlightScreen extends Screen {
 		int w = this.width, h = this.height;
 		float p = Mth.clamp((this.age + a) / this.ticks, 0.0F, 1.0F);
 		float fast = speed(p);
-		stars(graphics, w, h, fast, a);
+		float hx = w * (1.2F - 1.4F * p), hy = h * HOLLOW_Y, hr = Math.max(4.0F, h * HOLLOW_SIZE);
+		stars(graphics, w, h, fast, a, hx, hy, hr);
+		if (this.hollow) {
+			ZFighterSpaceArt.hollow(graphics, hx, hy, hr, (this.age + a) / 20.0F);
+		}
 		// the world left behind, sliding off to the left and shrinking
 		float leave = ease(p / 0.45F);
 		float fromR = h * (0.42F - 0.22F * leave);
@@ -152,14 +170,24 @@ public class ZFighterFlightScreen extends Screen {
 		float bob = (float)Math.sin((this.age + a) * 0.25F) * 2.0F;
 		float podX = w * (0.38F + 0.08F * ease(p)), podY = h * 0.5F + bob;
 		trail(graphics, podX, podY, fast, a);
-		graphics.pose().pushMatrix();
-		graphics.pose().translate(podX - 24.0F, podY - 24.0F);
-		graphics.pose().scale(3.0F, 3.0F);
-		graphics.item(this.pod, 0, 0);
-		graphics.pose().popMatrix();
+		if (this.ki) {
+			// their own light: a bright core in a ki glow
+			ZFighterSpaceArt.disc(graphics, podX, podY + 6.0F, 14.0F, 0x40A0D0FF);
+			ZFighterSpaceArt.disc(graphics, podX, podY + 6.0F, 9.0F, 0x90C0E8FF);
+			ZFighterSpaceArt.disc(graphics, podX, podY + 6.0F, 5.0F, 0xFFFFFFFF);
+		} else {
+			graphics.pose().pushMatrix();
+			graphics.pose().translate(podX - 24.0F, podY - 24.0F);
+			graphics.pose().scale(3.0F, 3.0F);
+			graphics.item(this.pod, 0, 0);
+			graphics.pose().popMatrix();
+		}
 		// where to and how long
 		Component name = Component.translatable("space.jaymospowers.dest." + (this.to == ZFighterSpace.HOME_INDEX ? "home" : ZFighterSpace.DESTS[this.to].key()));
 		UiStyle.lineCentred(graphics, this.font, Component.translatable("screen.jaymospowers.zfighter_flight.to", name), w / 2, 18, w - 20, 0xFFFFD866);
+		if (this.hollow) {
+			UiStyle.lineCentred(graphics, this.font, Component.translatable("screen.jaymospowers.zfighter_flight.hollow"), w / 2, 30, w - 20, UiStyle.DIM);
+		}
 		int barW = Math.min(240, w - 40);
 		UiStyle.bar(graphics, (w - barW) / 2, h - 30, barW, 4, p, 0xFF9FB8FF);
 		int left = Math.max(0, (this.ticks - this.age + 19) / 20);
@@ -202,8 +230,11 @@ public class ZFighterFlightScreen extends Screen {
 		}
 	}
 
-	/** Stars streaming right to left in layers (nearer layers faster and longer), streaks when going fast. */
-	private void stars(GuiGraphicsExtractor graphics, int w, int h, float fast, float a) {
+	/**
+	 * Stars streaming right to left in layers (nearer layers faster and longer), streaks when going fast. Past the Hollow (at
+	 * {@code hx}, {@code hy}, radius {@code hr}) each star near it shows pushed outward, its light bent round, and none show inside it.
+	 */
+	private void stars(GuiGraphicsExtractor graphics, int w, int h, float fast, float a, float hx, float hy, float hr) {
 		float moved = this.travelled + fast * 6.0F * a;
 		for (int k = 0; k < STARS; k++) {
 			int layer = k % LAYERS;
@@ -212,9 +243,22 @@ public class ZFighterFlightScreen extends Screen {
 			int sy = ZFighterSpaceArt.hash(k, 12, 5) % Math.max(1, h);
 			float x = sx - moved * depth;
 			x = ((x % (w + 60)) + (w + 60)) % (w + 60) - 30;
+			float y = sy;
+			if (this.hollow) {
+				float dx = x - hx, dy = y - hy;
+				float d = (float)Math.sqrt(dx * dx + dy * dy);
+				if (d < hr * 1.2F) {
+					continue;
+				}
+				if (d < hr * HOLLOW_BEND) {
+					float bent = d + hr * hr * 2.0F / d;
+					x = hx + dx * bent / d;
+					y = hy + dy * bent / d;
+				}
+			}
 			int length = Math.max(1, Math.round(fast * depth * 5.0F));
 			int colour = layer == 2 ? 0xFFFFFFFF : layer == 1 ? 0xC0C8D8FF : 0x80A0A8C0;
-			graphics.fill(Math.round(x), sy, Math.round(x) + length, sy + 1, colour);
+			graphics.fill(Math.round(x), Math.round(y), Math.round(x) + length, Math.round(y) + 1, colour);
 		}
 	}
 
@@ -226,7 +270,8 @@ public class ZFighterFlightScreen extends Screen {
 			float back = 14.0F + k * (2.0F + fast * 1.6F);
 			int jitter = ZFighterSpaceArt.hash(k, (int)tick, 9) % 7 - 3;
 			int size = Math.max(1, 6 - k / 4);
-			int colour = k < 4 ? 0xFFFFF0A0 : k < 10 ? 0xE0FFB040 : k < 18 ? 0xA0FF6020 : 0x50A0A0A0;
+			int colour = this.ki ? (k < 4 ? 0xFFFFFFFF : k < 10 ? 0xE0C0E8FF : k < 18 ? 0xA080B8FF : 0x506080C0)
+				: k < 4 ? 0xFFFFF0A0 : k < 10 ? 0xE0FFB040 : k < 18 ? 0xA0FF6020 : 0x50A0A0A0;
 			int fx = Math.round(x - back), fy = Math.round(y + 6 + jitter * (k / 6.0F) * 0.6F);
 			graphics.fill(fx - size / 2, fy - size / 2, fx + (size + 1) / 2, fy + (size + 1) / 2, colour);
 		}
