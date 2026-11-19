@@ -44,14 +44,4 @@ owns:
 - New class e.g. client/MountClimbPose; clips in geckolib/animations/entity/player_mount_*.animation.json
 
 ## Done
-Created PR #1869 with:
-- MountClimbPose class handling climb-on (left/right/behind), climb-off (forward/back), camera glide
-- 5 GeckoLib animation files
-- MountClimbCameraMixin for first-person camera easing
-- MountClimbPackets for C2S/S2C networking
-- MountClimbHandler for server-side broadcast to tracking players
-- Integration with PoseTakeover and EmfCompat for Fresh Animations pausing
-- Change note at changes/powers/smoothmount-1-climb-on-off.md
-- Build passes, PR checks pass
-- Not tested in game
-- 2026-11-19 16:27 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-19 21:36 No sign of work for 30 min: marked stalled (whoever ran it stopped).
