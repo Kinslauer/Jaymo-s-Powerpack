@@ -992,6 +992,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Corsairs.register();
 		Navies.register();
 		Fishers.register();
+		SeaPassers.register();
 		SeaTrade.register();
 		Whalers.register();
 		// the harbours' yards: ships built block by block by their shipwrights (and their attachments)
