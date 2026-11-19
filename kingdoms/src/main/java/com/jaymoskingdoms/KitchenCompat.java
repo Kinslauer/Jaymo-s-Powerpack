@@ -611,6 +611,58 @@ public final class KitchenCompat {
 		return call(SOURCE_TYPE, corpse) instanceof net.minecraft.world.entity.EntityType<?> type ? type : null;
 	}
 
+	/** Kitchen's {@code CorpseEntity.spitWholeable}, {@code dressedWhole} and {@code dressForSpit}, looked up the first time. */
+	private static @Nullable Method SPIT_WHOLEABLE, DRESSED_WHOLE, DRESS_FOR_SPIT;
+	private static boolean spitLooked;
+
+	private static boolean spitMethods() {
+		if (!spitLooked) {
+			spitLooked = true;
+			if (CORPSE != null) {
+				try {
+					SPIT_WHOLEABLE = CORPSE.getMethod("spitWholeable");
+					DRESSED_WHOLE = CORPSE.getMethod("dressedWhole");
+					DRESS_FOR_SPIT = CORPSE.getMethod("dressForSpit");
+				} catch (ReflectiveOperationException e) {
+					JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for camp cooks to roast a whole beast: {}", e.toString());
+					SPIT_WHOLEABLE = null;
+				}
+			}
+		}
+		return SPIT_WHOLEABLE != null && DRESSED_WHOLE != null && DRESS_FOR_SPIT != null;
+	}
+
+	/**
+	 * A beast's body near {@code at} (within {@code range} blocks) that could go on the great spit whole, lying loose and
+	 * not carried: the nearest, or null (always without a Kitchen that has the great spit).
+	 */
+	static @Nullable Entity spitCarcassNear(net.minecraft.server.level.ServerLevel level, Vec3 at, double range) {
+		if (!spitMethods()) {
+			return null;
+		}
+		Entity best = null;
+		double bestD = Double.MAX_VALUE;
+		for (Entity e : level.getEntities((Entity) null, new net.minecraft.world.phys.AABB(at, at).inflate(range, 6.0, range),
+			e -> CORPSE.isInstance(e) && carrier(e) == null && Boolean.TRUE.equals(call(SPIT_WHOLEABLE, e)))) {
+			double d = e.position().distanceToSqr(at);
+			if (d < bestD) {
+				best = e;
+				bestD = d;
+			}
+		}
+		return best;
+	}
+
+	/** Skinned and gutted, ready for the great spit. */
+	static boolean dressedWhole(Entity corpse) {
+		return spitMethods() && Boolean.TRUE.equals(call(DRESSED_WHOLE, corpse));
+	}
+
+	/** Skinned and gutted where it lies (its skin and offal drop beside it). False if it can't go on the spit whole. */
+	static boolean dressForSpit(Entity corpse) {
+		return spitMethods() && Boolean.TRUE.equals(call(DRESS_FOR_SPIT, corpse));
+	}
+
 	/** Who's carrying this corpse, if anyone. */
 	static @Nullable Entity carrier(Entity corpse) {
 		return call(CARRIER, corpse) instanceof Entity e ? e : null;

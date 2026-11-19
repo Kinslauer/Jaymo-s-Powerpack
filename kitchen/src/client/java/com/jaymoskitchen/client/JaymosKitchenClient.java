@@ -162,6 +162,7 @@ public class JaymosKitchenClient implements ClientModInitializer {
 			net.minecraft.client.multiplayer.ClientLevel level = net.minecraft.client.Minecraft.getInstance().level;
 			if (level != null) {
 				com.jaymoskitchen.client.spit.SpitBlockEntityRenderer.ripAt(payload.pos(), level.getGameTime());
+				com.jaymoskitchen.client.spit.TearPose.start(payload.by(), payload.pos(), level.getGameTime());
 			}
 		});
 		}
