@@ -1861,7 +1861,7 @@ and noise hard to bear. Folk above call them things that crawled out of a hole, 
 **Hollow and the living.** The grave's cold stays in them and the living know them on sight. A Hollow is what a dead
 man's wound makes of you, and no village is easy with the proof of that standing at the well.
 
-**The Pallid, whom the grave turns away** (new; Claude's placement for Andy's deathless Pallid, 2026-11-19). The Pallid
+**The Pallid, whom the grave turns away** (Andy approved, 2026-11-19; Claude's placement for Andy's deathless Pallid). The Pallid
 are the Hollow's first look: those any of the dead cut down who came back grey, a cold glow in the veins and nothing more of
 the grave than that. They are the ones it will not keep. A Pallid who dies lies cold where they fell for a while, then gets
 up there again, whole: no new wound, no fever, nothing taken. There is no blood in them to spill, and they never hunger or
