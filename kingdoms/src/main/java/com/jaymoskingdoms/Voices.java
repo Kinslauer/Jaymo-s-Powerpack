@@ -94,12 +94,10 @@ public final class Voices {
 	static List<String> voiced() {
 		List<String> out = new ArrayList<>(SPIRIT_LINES);
 		for (LifeStory.Question q : LifeStory.Question.values()) {
-			// (gb-faith) the faith page has no clips yet: its title and line are read in silence (its tales are checked below)
-			if (q != LifeStory.Question.FAITH) {
-				out.add("story.jaymoskingdoms." + q.key() + ".title");
-			}
+			// (the faith page is voiced like the rest once its clips are made: register() skips a line with no clip)
+			out.add("story.jaymoskingdoms." + q.key() + ".title");
 			// (0.7.360) a question's title and the line under it are read apart (the line only if the page waits)
-			if (q != LifeStory.Question.ROAD && q != LifeStory.Question.FAITH) {
+			if (q != LifeStory.Question.ROAD) {
 				out.add("story.jaymoskingdoms." + q.key() + ".sub");
 			}
 			for (LifeStory.Answer a : q.answers()) {
@@ -124,7 +122,16 @@ public final class Voices {
 		for (Heritage.Kind kind : Heritage.Kind.values()) {
 			String as = "story.jaymoskingdoms.as." + kind.key() + ".";
 			for (LifeStory.Question q : LifeStory.Question.values()) {
-				if (q == LifeStory.Question.BORN || q == LifeStory.Question.ROAD) {
+				if (q == LifeStory.Question.BORN) {
+					// who raised you can retell where you were born (LifeStoryScreen.story): as.<heritage>.from_<raised>.born.<answer>.tale
+					for (LifeStory.Answer raised : LifeStory.Question.RAISED.answers()) {
+						for (LifeStory.Answer a : q.answers()) {
+							out.add(as + "from_" + raised.key() + ".born." + a.key() + ".tale");
+						}
+					}
+					continue;
+				}
+				if (q == LifeStory.Question.ROAD) {
 					continue;
 				}
 				out.add(as + q.key() + ".title");
@@ -140,8 +147,9 @@ public final class Voices {
 	public static void register() {
 		for (String key : voiced()) {
 			String path = soundPath(key);
-			// (0.7.490) an answer's tale not yet recorded (born.den, raised.pack) is read in silence, not registered without a clip
-			if (key.startsWith("story.jaymoskingdoms.") && key.endsWith(".tale") && !hasNarratorClip(path)) {
+			// (0.7.490) a story line not yet recorded (born.den, raised.pack, the faith page) is read in silence, not registered
+			// without a clip
+			if (key.startsWith("story.jaymoskingdoms.") && !hasNarratorClip(path)) {
 				continue;
 			}
 			Identifier id = Identifier.fromNamespaceAndPath(JaymosKingdoms.MOD_ID, path);
