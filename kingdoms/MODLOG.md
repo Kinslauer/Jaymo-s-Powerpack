@@ -15478,3 +15478,11 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - **Performance**: While Chunky makes land with nobody near, every new village's villagers wait in MCA's swap queue for their land to load. The check (`McaSpawnQueueMixin`) no longer counts the whole queue each tick, and after a look that finds none ready it waits a few ticks before looking again. None is lost. Once a village's land loads, its swap can come some seconds later while a big backlog is queued.
 - Moose: Cube's moose type (`Moose.cowType`) is looked up once instead of on every entity load.
 - Built by CI; not played.
+
+## 0.10.85 (2026-11-19): Village mods 2: blast mending (#1842)
+
+- **Builders mend blast holes**: a blast that breaks blocks on a settlement's land (a creeper's, a ghast's, anything that isn't a player's or a siege's) is noted by the settlement's builders. By day one builder of each crew (`Upkeep`'s hand) puts each block back, taking it from the storehouse; no block in the storehouse, no mending. Chests, signs and other blocks that hold things are never noted.
+- **Only monster damage**: a blast a player caused stays, unless the town pays (2 from its treasury per block, and only while it has it). A blast a siege caused is not noted: `SiegeScars` and the war chest's masons keep sieges.
+- **Craters heal in the wild**: a blast away from any settlement marks the soft ground it took (dirt, grass, podzol, mud; never stone or ore). From `Weathering`'s step the land puts back dirt (from the bottom up, onto firm ground), then grass (only beside grass, under open sky, in a land with rain), then sprouts (a flower already growing within 4 blocks, else short grass), a day for each stage, quicker in rain. Bone meal on a healing cell carries it a stage on at once; a fresh blast on the spot starts it over; left alone it heals by itself.
+- Classes: `BlastMend`, `Craters`, `Upkeep` (three small hooks), `Weathering` (one line), `ServerExplosionMixin`.
+- Built; not played.
