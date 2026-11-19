@@ -46,7 +46,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · ☀️ Apollo · #1787 · changes · fixing review notes
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · changes · fixing review notes
-- [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🍇 Bacchus · claimed
 - [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · claimed
 
 
@@ -61,6 +60,7 @@ kanban-plugin: board
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
 - [ ] [[Inbox/class-trees-plan|class-trees-plan]] · for 💻 Odysseus · blocked
 - [ ] [[Inbox/plan-ghosts-litematica-tools|plan-ghosts-litematica-tools]] · plan-ghosts-litematica-tools · #1851 · sent
+- [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🍇 Bacchus · blocked
 
 
 ## Done
