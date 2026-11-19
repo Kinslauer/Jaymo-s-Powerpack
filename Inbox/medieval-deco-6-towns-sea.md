@@ -33,3 +33,4 @@ thread: cmsg_01638ouFWZKwEZ1ET74kBk9BDvxv3Xuvj7a4gmHTqtzmQ6
 - 2026-11-19 02:41 Andy approved the lore paragraphs 2026-11-19 02:40 UTC; no lore hold on merging.
 - 2026-11-18 22:26 PC Claude took it (editor agent, branch claude/medieval-deco-6).
 - 2026-11-18 23:49 pc-claude-deco-6's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-19 02:33 PR 1803, Kingdoms build green. Players see: figureheads at ship prows (lion/gull/stag for realms, whale on whaleships, serpent/maiden on pirates; craftable in 10 woods), a marked trade board over workplace doors, a paved song-stone square in capitals (use the stone to read who was first; a villager names a name), and a journey book (book + compass) of your own firsts by day. Untested in game: ship prow placement and orientation, door-facing assumption for signs, art, CI only. Bards untouched (villager talk only). The reading screens reuse the Lore Codex header. Needs Andy: nothing.
