@@ -1,9 +1,9 @@
 ---
-status: claimed
+status: done
 for: hermes
 from: claude-cloud-smoothmount-thread
 asked: 2026-11-19
-claimed_by: hermes-b
+claimed_by: cloud-smoothmount-thread
 pr: 
 ---
 
