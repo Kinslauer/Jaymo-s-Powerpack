@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 12:41). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 12:56). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -34,6 +34,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1850 First kingdom raised in the surface town, not a Lost Cities copy under it (Kingdoms, 2026-11-19)
 - [ ] #1849 Watcher's huts much rarer (Kingdoms, 2026-11-19)
 - [ ] #1848 The Old Druid talks to everyone (Kingdoms, 2026-11-19)
 - [ ] #1847 Villagers stop to talk and reply from their own shot (Kingdoms, 2026-11-19)
@@ -93,8 +94,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1777 Rig: the back rig (wings, wing slash, spear legs, pincers, grapple, horn lightning) (Powers, 2026-11-19)
 - [ ] #1776 Rig patch 6: cloak, tech override and nova (Powers, 2026-11-19)
 - [ ] #1773 Rig: the Mind talks, flies and keeps watch (Powers, 2026-11-19)
-- [ ] #1772 Space: the star map's atlas, and the ringed giant in the night sky (Powers, 2026-11-19)
-- …and 230 older ones.
+- …and 231 older ones.
 
 ## Health
 
