@@ -278,7 +278,9 @@ public final class Captains {
 		 * (Andy) Raised from a death nothing else comes back from, by corrupted magic or a necromancer: no fear left in
 		 * him, tougher and harder-hitting ({@link #DEATHLESS_HEALTH}, {@link #DEATHLESS_DAMAGE}). Never rolled; only the raised have it.
 		 */
-		DEATHLESS(Sort.STRENGTH);
+		DEATHLESS(Sort.STRENGTH),
+		/** One captain in the world drinks the gifts of the gifted he beats and fights with them: {@link GiftEaters}. Never rolled. */
+		GIFT_EATER(Sort.STRENGTH);
 
 		final Sort sort;
 
@@ -519,6 +521,7 @@ public final class Captains {
 		});
 		ServerLivingEntityEvents.AFTER_DEATH.register(Captains::died);
 		CaptainWays.register();
+		GiftEaters.register();
 		CaptainSchemes.register();
 		CaptainGround.register();
 		Ladders.register();
@@ -631,7 +634,7 @@ public final class Captains {
 		for (int n = 0; n < 40 && (strengths > 0 || flaws > 0); n++) {
 			Trait t = Trait.values()[random.nextInt(Trait.values().length)];
 			boolean strong = t.sort == Sort.STRENGTH;
-			if (t == Trait.DEATHLESS || t.sort == Sort.MOVE || (strong ? strengths : flaws) <= 0 || picked.contains(t) || picked.stream().anyMatch(t::clashes)) {
+			if (t == Trait.DEATHLESS || t == Trait.GIFT_EATER || t.sort == Sort.MOVE || (strong ? strengths : flaws) <= 0 || picked.contains(t) || picked.stream().anyMatch(t::clashes)) {
 				continue;
 			}
 			picked.add(t);
@@ -653,7 +656,7 @@ public final class Captains {
 	static @Nullable Trait newStrength(Captain c, RandomSource random) {
 		List<Trait> have = traits(c), open = new ArrayList<>();
 		for (Trait t : Trait.values()) {
-			if (t.sort == Sort.STRENGTH && t != Trait.DEATHLESS && !have.contains(t) && have.stream().noneMatch(t::clashes)) {
+			if (t.sort == Sort.STRENGTH && t != Trait.DEATHLESS && t != Trait.GIFT_EATER && !have.contains(t) && have.stream().noneMatch(t::clashes)) {
 				open.add(t);
 			}
 		}
@@ -691,6 +694,7 @@ public final class Captains {
 		returns(level);
 		days(level);
 		seats(level);
+		GiftEaters.pick(level);
 		// ((0.7.617, Rivals patch 2) bodyguards, plants)
 		CaptainSchemes.tick(level);
 		// ((0.7.618, Rivals patch 3) the ground they hold: tolls, robbed caravans)
@@ -1177,6 +1181,7 @@ public final class Captains {
 			call(level, mob, target);
 			return true;
 		}
+		GiftEaters.step(level, mob, target);
 		// ((0.7.617) a bodyguard keeps by his boss)
 		CaptainSchemes.step(level, mob, c, target);
 		if (CaptainWays.step(level, mob, c, target)) {
