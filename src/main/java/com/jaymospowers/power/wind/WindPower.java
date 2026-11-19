@@ -130,6 +130,7 @@ public final class WindPower implements Power {
 		SorasLineage.register();
 		SorasBladeChild.register();
 		SorasBladeDisplay.register();
+		SorasStone.register();
 		WindStaff.register();
 		WindStaffSurge.register();
 		WindDagger.register();
@@ -162,6 +163,7 @@ public final class WindPower implements Power {
 			WindStorm.forget(handler.player);
 			WindWeather.forget(handler.player);
 			WindFall.forget(handler.player);
+			StormNet.forget(handler.player);
 		});
 	}
 
@@ -542,6 +544,7 @@ public final class WindPower implements Power {
 		blowShieldAway(player, level);
 		WindJet.tick(player);
 		WindBolts.tick(player);
+		StormNet.tick(player);
 		boolean statusDirty = !s.synced;
 		s.synced = true;
 		for (int i = 0; i < s.cooldowns.length; i++) {
