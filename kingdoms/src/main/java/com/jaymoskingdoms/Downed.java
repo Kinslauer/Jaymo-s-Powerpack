@@ -276,6 +276,10 @@ public final class Downed {
 		if (heldCaptive(mob, player)) {
 			return true;
 		}
+		if (AwakenedStrangers.finishing(mob, player)) {
+			// (a spiteful awakened stranger who beat them, finishing it)
+			return false;
+		}
 		if (mob instanceof IronGolem) {
 			return !(mob instanceof ClockworkGolem clockwork && clockwork.rogue());
 		}

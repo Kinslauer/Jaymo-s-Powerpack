@@ -205,6 +205,20 @@ public final class MobExecutions {
 		return BY_VICTIM.containsKey(player.getUUID());
 	}
 
+	/**
+	 * {@code mob} sets out to execute downed {@code player} now, by its own choice (Kingdoms: a spiteful or hotheaded
+	 * awakened stranger who has beaten them): no grace and no {@link #SPARE}, but it must be {@link #fit}. Plain JDK and
+	 * vanilla types, so Kingdoms can call it by reflection. True if it set out.
+	 */
+	public static boolean order(Mob mob, ServerPlayer player) {
+		if (!Downed.isDowned(player) || !player.isAlive() || player.isCreative() || player.isSpectator() || BY_VICTIM.containsKey(player.getUUID())
+			|| BY_MOB.containsKey(mob) || !fit(mob) || mob.level() != player.level() || Finishers.busy(mob)) {
+			return false;
+		}
+		claim(new Execution(player.getUUID(), null, mob, moveOf(mob), mob.level().getGameTime()));
+		return true;
+	}
+
 	/** (0.20.50) The mob coming to execute {@code player}, or standing over them; null if none. */
 	public static @Nullable Mob executioner(ServerPlayer player) {
 		Execution e = BY_VICTIM.get(player.getUUID());
