@@ -466,7 +466,6 @@ def packMods = [
 	// Horse Expert (MPL-2.0, Fuzs; needs Puzzles Lib and Forge Config API Port above): a horse's real speed, jump and health.
 	[dep: "maven.modrinth:horse-expert:qUjLS9C5", cf: [666942, 9088683]],
 	// Incendium (Stardust Labs licence, packs allowed): Nether biomes, structures, weapons and mobs, beside our demon-realm biomes.
-	[dep: "maven.modrinth:incendium:D4vWUd23", cf: [591388, 9147441]],
 	// qraftyfied: STRUCTURES (CC BY-NC 4.0, free pack): built structures to explore across the Overworld.
 	[dep: "maven.modrinth:qraftyfied:cpRes8NL", cf: [1005868, 8916149]],
 	// VillagersTradingPlus (GPL-3.0): the trading library VillagersPlus needs (packModsNoCf).
