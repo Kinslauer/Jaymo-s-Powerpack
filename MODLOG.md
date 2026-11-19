@@ -6122,3 +6122,23 @@ Built; not played in game.
 - **Arrests**: an officer who hands a hogtied crook to a realm's ruler for its bounty has made a Patrol arrest. It counts toward rank and pays training (the realm pays the bounty). (`PatrolLaw#handedOver`, `ZFighterPatrol#countArrest`)
 - **A partner**: from Officer rank, a patrolman can be asked "I could use a partner." Your partner stays at your side, fights what's fighting you or what you hit, talks like any patrolman, and comes along on every pod trip, stepping out beside you on landing. If he falls you're told, and any patrolman can give you another. Not while you're under a Patrol warrant.
 - Built; not played.
+
+## 0.25.32 (2026-11-19): Space: the star map's atlas, and the ringed giant in the night sky (#1766)
+
+- **Atlas**: the star map remembers what you found on each world. A world you've come down on wears a small gold pin on the map, and its card says how many times you've landed there, where you last did, and where your bed is if your respawn point is on that world. Mission progress was already on the card. Kept on the player through death. (`ZFighterAtlas`, `ZFighterStarMapScreen`)
+- **The ringed giant**: once the Verdant World's chart is read, what shows in the Overworld's night sky is its blue giant, brighter and bigger, with a faint leaning ring out of each side. It used to be a small green dot. The giant already had its ring on the star map and in the Verdant sky. (`SkyPlanets`)
+- Built; not played.
+
+## 0.25.33 (2026-11-19): Space: the Hollow, and crossing to the Moon on your own ki (#1766)
+
+- **The Hollow**: a black hole past the outer orbits, drawn on the star map in the corner across from the Maw (a dark disc with a thin bright rim and a slow burning disc). Hover to name it. No pod flies to it. Trips to or from the worlds past it (Glacia, the Verdant World and its giant) skirt it: its pull drags the pod off course and the flight runs about a third longer. The flight screen shows it passing overhead, with the starlight round it bent outward. (`ZFighterSpace#skirtsHollow`, `ZFighterSpaceArt#hollow`, `ZFighterFlightScreen`)
+- **Ki crossing**: a Z Fighter of 50,000 power or more who is flying, climbs 64 blocks past the top of the world and looks straight up for 3 seconds crosses to the Pale Moon on their own ki, burning 80% of it. The flight shows with their light in place of the pod, and they come down beside the Moon's pad. From the Moon the same way back brings them down where they left from. Only the Moon is near enough; every other world still needs a pod. Nothing hurts them on the way. (`KiVoyage`)
+- Built; not played. The power gate and ki cost are tuning constants for Andy to set (`KiVoyage.POWER_GATE`, `KI_SHARE`).
+
+## 0.25.34 (2026-11-19): Called in a dream: a power wakes through a dream or a nightmare (#1769)
+
+- **The call**: a survival player with no power yet who falls fast asleep has a 35% chance a night of being called. Their view tilts up off the pillow over a few seconds, and then:
+  - **A dream** (most calls): a soft gold light gathers at the edges of their sight with motes rising through it. The power wakes with them in the morning.
+  - **A nightmare** (3 in 10): they start up out of bed into the dark (blind past a few blocks, the edges of the screen closing in black with a red heartbeat), and phantoms come at them out of it, more as it goes on, up to five. Live through a minute and the power wakes then and there, corrupted. A blow that would take them to 2 hearts or below wakes them instead, gasping and with nothing; a nightmare never kills. Its phantoms vanish when it ends.
+- Built where they sleep, with no dream dimension (Andy's pick: a dream arena). Kingdoms' night camera, when it's running, keeps the view, and the tilt stays out of its way. (`DreamCall`, `DreamView`, `DreamCameraMixin`)
+- Built; not played.
