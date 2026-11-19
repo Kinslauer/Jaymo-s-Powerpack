@@ -3,6 +3,7 @@ package com.jaymospowers.client.costume;
 import com.jaymospowers.client.WornPose;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.HiddenArmor;
+import com.jaymospowers.client.power.wind.WindHoverSway;
 import com.jaymospowers.costume.Costume;
 import com.jaymospowers.costume.HoodedCloak;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -198,7 +199,22 @@ public final class HoodedCloakLayer {
 				hem.xRot += ClothCape.REL_PITCH[1];
 				hem.zRot += ClothCape.REL_ROLL[1];
 			}
-			hem.xRot += HEM_LIFT * pace + HEM_FLUTTER * pace * Mth.sin(stride * 2.0F + 1.2F) + IDLE * Mth.sin(state.ageInTicks * 0.09F + 1.2F);
+			hem.xRot += HEM_LIFT * pace + HEM_FLUTTER * pace * Mth.sin(stride * 2.0F + 1.2F) + IDLE * Mth.sin(state.ageInTicks * 0.09F + 1.2F);// Apply wind hover sway to cloak (gw_cloth): lean with wind direction/strength
+float swayAmount = 0.0F;
+float swayPitch = 0.0F;
+float swayRoll = 0.0F;
+if (state.getData(WindHoverSway.KEY) instanceof WindHoverSway.Sway sway) {
+    swayAmount = sway.amount();
+    swayPitch = sway.pitch();
+    swayRoll = sway.roll();
+}
+if (swayAmount > 0.0F) {
+    rightMantle.zRot += swayRoll * swayAmount;
+    leftMantle.zRot -= swayRoll * swayAmount;
+    back.xRot += swayPitch * swayAmount;
+    collar.xRot += swayPitch * swayAmount;
+}
+
 		}
 	}
 
