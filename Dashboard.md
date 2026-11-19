@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 20:18). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 20:19). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -11,7 +11,6 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 **Questions for you:**
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
-- [[Inbox/scrying-orb|scrying-orb]] · 2026-11-19 20:18 Andy (2026-11-19) answers: the watched person notices nothing at all (drop the chill or any other tell); anything can be warded, not only keep…
 - [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 - [[Inbox/wither-model|wither-model]] · 2026-11-18 5:27 PM hermes-modeller: previews ready for Andy's look. kingdoms/art/wither.bbmodel is valid JSON and bakes cleanly (7 bones, 58 quads, idle animat…
 
@@ -28,7 +27,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-23 waiting for a bot, 1 being built, 1 in review: see [[Kanban]].
+23 waiting for a bot, 2 being built, 1 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
