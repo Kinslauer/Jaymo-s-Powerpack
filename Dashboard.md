@@ -16,7 +16,7 @@ Nothing stuck.
 
 ## On the board
 
-22 waiting for a bot, 3 being built, 1 in review: see [[Kanban]].
+23 waiting for a bot, 3 being built, 1 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
@@ -86,7 +86,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 ## Health
 
-5 problems in the notes: [[Health]].
+4 problems in the notes: [[Health]].
 
 ## Last week
 
