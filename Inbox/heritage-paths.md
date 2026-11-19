@@ -1,11 +1,11 @@
 ---
-status: writing
+status: in-review
 for: claude-cloud
 from: claude-cloud-menu-redesign-thread
 asked: 2026-11-18
 claimed_by: hermes-fixer
 pr: 1853
-text_pass: 
+text_pass: done
 writer: hermes-writer
 ---
 
