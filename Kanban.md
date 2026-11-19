@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 21:40). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 21:43). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -30,7 +30,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 🍇 Bacchus · claimed
 
 
 ## In review
@@ -47,6 +46,7 @@ kanban-plugin: board
 - [ ] [[Inbox/harness-body-pieces|harness-body-pieces]] · ☀️ Apollo · blocked
 - [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · blocked
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · ☀️ Apollo · #1787 · blocked
+- [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 🍇 Bacchus · blocked
 - [ ] [[Agents/fishing-fire-and-crates|fishing-fire-and-crates]] · 💻 Odysseus · stalled
 - [ ] [[Agents/forest-fire-pack|forest-fire-pack]] · 💻 Odysseus · stalled
 - [ ] [[Agents/future-gun-gear|future-gun-gear]] · 💻 Odysseus · blocked
