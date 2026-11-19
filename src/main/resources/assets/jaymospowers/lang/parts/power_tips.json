@@ -1,0 +1,22 @@
+{
+  "tip.jaymospowers.arsenal.title": "Pocket Arsenal",
+  "tip.jaymospowers.arsenal": "Sneak + %1$s marks a place. Hold Sneak + %2$s for the places menu.\nHold %3$s: Blade Storm. Hold the cannon key: a battery of cannons.",
+  "tip.jaymospowers.chrono.title": "Chronokinesis",
+  "tip.jaymospowers.chrono": "Downed, press %1$s within 3 seconds to rewind to your feet.\nSneak + %5$s once ascended: Time Stop.\nHold attack bare-fisted during Overclock for a flurry.",
+  "tip.jaymospowers.cryo.title": "Cryokinesis",
+  "tip.jaymospowers.cryo": "%1$s toggles the Ice Slide: W pushes off, Sprint is faster, S brakes.\nSprint + %3$s throws an Ice Javelin that flies straight.",
+  "tip.jaymospowers.darktide.title": "Darktide",
+  "tip.jaymospowers.darktide": "Hold right click to guard; raise it just as a blow lands to parry.\nHold %1$s to charge a Dark Strike, let go to strike.",
+  "tip.jaymospowers.gravity.title": "Gravity",
+  "tip.jaymospowers.gravity": "Hold %1$s to Lift. Right click chokes then slams; left click pushes.\nTap %4$s to force kneel, hold it for a Gravity Wave.\nHold %3$s: ride a slab of rock.",
+  "tip.jaymospowers.resonance.title": "Resonance",
+  "tip.jaymospowers.resonance": "Hold %2$s at a block to hum it apart.\nHold %4$s instead of tapping it: Quiet, no sound at all.\nAscended, in the dark, Sneak + %3$s: Sky Sight.",
+  "tip.jaymospowers.smoke.title": "Smoke",
+  "tip.jaymospowers.smoke": "%1$s turns your legs to smoke: Sprint to cruise, S to brake.\nShift in Vapour Form, fully mastered: all smoke.\nSneak + the skill key: Smoke Step into your own cloud.",
+  "tip.jaymospowers.web.title": "Web Slinger",
+  "tip.jaymospowers.web": "Sneak + %5$s with every ability: Web Blossom, leap and web every foe in sight.\nThe attack key (%7$s) whirls a single line.\n%8$s with Webbed Fists in hand raises the web shield: three hits, no knockback.",
+  "tip.jaymospowers.wind.title": "Wind Control",
+  "tip.jaymospowers.wind": "Stormbound: hold %7$s under rain to draw charge from the sky; %8$s hurls a hammer (sneak switches the throw).\n%9$s calls a bound weapon back (sneak: bind); %10$s clashes two together.\n%11$s then jump: storm landing. Sneak + %12$s marks a road home.",
+  "tip.jaymospowers.xenoform.title": "Xeno-Band",
+  "tip.jaymospowers.xenoform": "Hold %6$s and scroll to turn the dial, let go to slam the band.\nAs an alien, hold %6$s to turn back.\nScan a creature (hold) to teach the band its alien."
+}
