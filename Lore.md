@@ -307,6 +307,19 @@ farmhand like anyone else, and the street doesn't know whose face is under it.
 - **The everyday gifted** (the open ones, and the hidden ones when no one is looking): a Darktide washes out a fire with
   dark water, a Wind blows one out, a Cryo smothers it in frost, freezes the water trough, and keeps the larder and the
   house cold, so food keeps longer near a Cryo's home and the house is cool in a hot land.
+- **Trouble in the night** (new) (hero add-on picks, 2026-11-19; Claude's placement). A town keeps a **watch horn**. Whoever blows it at night is told, by a
+  frightened neighbour, where the trouble is: a house being broken into, someone set on in the street. Stop the crooks
+  before they run and what they drop is evidence the guards pay for. Sometimes the trouble comes to you: a **cat
+  burglar**, a quiet one of the Ash Whisperer's people, lifts a single gem from a strongbox and runs the rooftops. Catch
+  her three times and she stops running and asks for work.
+- **The signal brazier** (new) (hero add-on picks, 2026-11-19; Claude's placement). Sworn companions and hired fighters agree a fire with whoever pays them. A signal
+  brazier lit on a height at night is seen for miles, and the nearest of them comes to it.
+- **The trials master** (new) (hero add-on picks, 2026-11-19; Claude's placement). An old vigilante who outlived his rivals now tests the young ones. He leaves five
+  chests across the land, each holding a trial: a timed run, a target range, a wave of foes, a fall to live through, a
+  quiet theft. Whoever opens all five finds him waiting, and he fights them himself. He never says why.
+- **The gift-eater** (new) (hero add-on picks, 2026-11-19; Claude's placement). One villain captain has a power nobody else has: he drinks the gifts of the gifted
+  he beats and uses them as his own, a little weaker. He never comes to a fight empty: he has always eaten at least one
+  gift first, and it may be from someone you have met. Kill him and what he took goes nowhere.
 
 **Patterns and plated costumes** (Claude's placement, Powerborne picks, Andy approved 2026-11-19). The tailor sews from patterns: folded paper scraps marked in chalk
 with a cut, a mask or a cape. The old tailors passed theirs down and lost many, and they turn up in buried chests,
@@ -320,6 +333,11 @@ mail, and where real armour is worn the plate is only for show. A costume can be
 a phantom's membrane and sugar on the infusion altar. In someone with no power it lends a long while of a quick, light
 body that swims like a dolphin and can leap once more in the air. A body with a gift in it rejects the draught and is
 only sick.
+
+**The small draught and the great draught** (new) (hero add-on picks, 2026-11-19; Claude's placement). The alchemists also steep two draughts that change a body's size
+for a while: the **small draught** (red) shrinks the drinker to half, light enough to slip through a gap and jump high
+for the size, and the **great draught** (blue) swells them to half again, heavy-handed, long in reach and slow. Both
+wear off. Mothers keep the red one well away from children.
 
 **The classes.** The nine classes are trades, each taught by the people who live by it: the **Thief** learns from
 the Ash Whisperer's quick-handed faithful, the **Warlord** in Conquest realms' war camps, the **Mage** from court
@@ -617,6 +635,13 @@ has someone to fight, broken blocks of its pillar get up out of the ground round
 a man's height and more, grey holystone banded in moss-green, cut with gold runes that are the same hum folk say the
 old stones still have. They have no will of their own; they go for whoever the Giant is after, more of them the worse
 it is hurt, and when it falls they go to pieces with it. Nobody has seen one walk without a Giant near.
+
+**The Sky Crown** (new) (hero add-on picks, 2026-11-19; Claude's placement). Whoever ruled the Aether before it was left untended wore a crown, and it broke when the
+remnants fell. Six shards of it came down far apart: one in a monolith's broken heart, one in the sentry ruins, one
+carried into a Nether fortress, one taken up to an End city, one sunk into the deep dark and one in the hold of a
+sunken ship. Each shard set in a crown stand gives a little of what the Aether was (a lighter step, a pull like
+lodestone, a ward against cold, eyes for the dark, breath under water, a quick heart). All six together make the crown
+whole again. Nobody below knows what it is; the priests call the shards cursed glass.
 
 What folk believe about the sky (village talk, not proven):
 
@@ -1637,6 +1662,17 @@ hundred years. All the others (Ambrose, Thessaly, Varro and the Quiet One) were 
   anti wearing the shape of the knight's cloak he wore in life. Any strain does this for any host. The big suit still
   swallows the shape while it is up.
 
+  **The deepest bond** (new) (hero add-on picks, 2026-11-19; Claude's placement). A host the symbiote has wholly taken in can be given wings: two great spans
+  of goo, red as raw meat between black ribs, wider than a house, spread from the back and folded away again. They
+  carry a host down a long way and can beat to climb. Any strain grows them; the anti's are the same red. **Bells and
+  jars.** A bell rung close leaves a symbiote stunned and slack, and a host who has not bonded deep can pour it off
+  into a glass jar while it is weak. It goes, but it hates it, and it says so: it trusts that host less after, and it
+  remembers who held the jar. **The anti's burst.** The anti can throw out a pale wash of itself that the black one
+  cannot bear: it tears a symbiote off whatever it rides, sends a loose one crawling away, and burns a symbiote's seed
+  out of the blood. **A ridden horse.** A bonded host can let the symbiote reach down into the horse under them. The
+  horse goes glossy black, needs no saddle, leaps like a deer and lands from any height, and the symbiote eats for two
+  while it holds it.
+
 **Mana spirits in the world.** A spirit fights beside you as arms of aura. Yours wakes on a brush with death
 (about one in eighteen), and its waking leaves you sick for days. It can be released at a cost, and no new one comes.
 Attuned folk (court wizards, hermits) have spirits you can see and fight.
@@ -2078,6 +2114,11 @@ ploughs are drawn by horses and oxen.
 
 **Butchery.** A kill is a body, and a body is dressed at the butcher's block (as the Green Huntsman would have
 it) or dragged home by rope.
+
+**Sketches and hot dishes** (new) (hero add-on picks, 2026-11-19; Claude's placement). The post pays for a good sketch: a monster of legend, a gifted one in a
+fight, a ship on fire. The better the thing drawn, the more it pays, and the tidings that follow carry the sketcher's
+name. A baker or tavern keeper who has more orders than hands pays someone quick to run hot dishes to doors before
+they go cold.
 
 **Making things.** Iron tools are forged, not crafted in a grid: parts are cast and put together at the Tool
 Station and the smeltery. Stone and flint come first (knapped hatchets, loose rocks), then bronze and iron, then the
