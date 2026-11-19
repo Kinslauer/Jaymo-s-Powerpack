@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Rename the modpack to Reason
 branch: claude/project-thread-mn08l9
 with: cloud Claude (Reason Art project)
@@ -21,3 +21,6 @@ owns:
 Blocky stone REASON logo over vanilla's title textures (JAVA EDITION strip blanked), caption fixed to "what's yours",
 window title "Reason", CurseForge manifest + Prism/packwiz pack named Reason. Compile-checked; not played.
 Only Andy can rename the CurseForge listing/project page and his own instance folder.
+
+## Notes
+- 2026-11-19 17:08 PR #1872 is merged into master; moved to Agents/Done.

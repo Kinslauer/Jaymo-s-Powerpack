@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: 
 branch: claude/project-thread-6uzt34
 with: Claude (cloud, Reason Art project)
@@ -19,3 +19,4 @@ owns:
 
 ## Notes
 - 13 new pieces, grid recipes for cloth/leather, forge routes for iron/steel. PR #1877. Lore paragraph "Something for every buckle" (new) awaiting Andy.
+- 2026-11-19 17:08 PR #1877 is merged into master; moved to Agents/Done.
