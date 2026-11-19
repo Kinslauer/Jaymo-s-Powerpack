@@ -6,6 +6,7 @@ cube face gets its own patch of one texture atlas holding the colours of the vox
 python3 -I tools/sprite_stack/stack2model.py <stack.png> <out dir> <namespace:block/name> [--slices N] [--pitch P]
 
 Slice orientation: the top of each slice is north (-z), its left is west (-x), as seen from above.
+--model-dir / --texture-dir send the .json / .png straight into a mod's assets.
 Writes into <out dir>: <name>.json (vanilla block model, faces use #variables as 26.3 needs), <name>.png (texture),
 <name>.bbmodel (to hand-tidy in Blockbench) and <name>_preview.png (four turns, drawn by mesh_to_cubes/bbrender.py).
 """
@@ -142,6 +143,13 @@ def r(v):
 	return round(v, 4)
 
 
+def edge(face, fr, to):
+	"""The block side a face lies flat on, or None."""
+	on = {"down": fr[1] == 0, "up": to[1] == 16, "north": fr[2] == 0, "south": to[2] == 16,
+		  "west": fr[0] == 0, "east": to[0] == 16}
+	return face if on[face] else None
+
+
 def centred(bb):
 	"""A copy moved so the block's middle sits on the origin, where bbrender turns the model."""
 	bb = json.loads(json.dumps(bb))
@@ -151,7 +159,8 @@ def centred(bb):
 	return bb
 
 
-def convert(stack, out_dir, model_id, slices=None, pitch=1.0):
+def convert(stack, out_dir, model_id, slices=None, pitch=1.0, model_dir=None, texture_dir=None):
+	"""model_dir / texture_dir put the .json / .png straight into a mod's assets (default: out_dir)."""
 	occ, col = load_stack(stack, slices)
 	if not occ.any():
 		sys.exit("no solid pixels in " + stack)
@@ -162,8 +171,10 @@ def convert(stack, out_dir, model_id, slices=None, pitch=1.0):
 	for (bi, f, w, h, tex), (px, py) in zip(faces, pos):
 		atlas[py:py + h, px:px + w] = tex
 	name = model_id.split("/")[-1]
-	os.makedirs(out_dir, exist_ok=True)
-	png = os.path.join(out_dir, name + ".png")
+	model_dir, texture_dir = model_dir or out_dir, texture_dir or out_dir
+	for d in (out_dir, model_dir, texture_dir):
+		os.makedirs(d, exist_ok=True)
+	png = os.path.join(texture_dir, name + ".png")
 	Image.fromarray(atlas, "RGBA").save(png)
 
 	# centre the footprint on the block, ground slice at y = 0
@@ -183,6 +194,9 @@ def convert(stack, out_dir, model_id, slices=None, pitch=1.0):
 		fs, bfs = {}, {}
 		for f, (px, py, w, h) in by_box[bi].items():
 			fs[f] = {"uv": [r(px * k), r(py * k), r((px + w) * k), r((py + h) * k)], "texture": "#0"}
+			side = edge(f, fr, to)
+			if side:
+				fs[f]["cullface"] = side  # lies on the block's own side: hidden when a solid block is there
 			bfs[f] = {"uv": [px, py, px + w, py + h], "texture": 0}
 		for f in FACES:
 			bfs.setdefault(f, {"uv": [0, 0, 0, 0], "texture": None})
@@ -192,7 +206,7 @@ def convert(stack, out_dir, model_id, slices=None, pitch=1.0):
 
 	tex_id = model_id
 	model = {"parent": "minecraft:block/block", "textures": {"0": tex_id, "particle": tex_id}, "elements": elements}
-	with open(os.path.join(out_dir, name + ".json"), "w") as fh:
+	with open(os.path.join(model_dir, name + ".json"), "w") as fh:
 		json.dump(model, fh, indent="\t")
 
 	buf = io.BytesIO()
@@ -218,8 +232,10 @@ def main():
 	ap.add_argument("model_id", help="texture/model id, e.g. jaymoskingdoms:block/oil_pot")
 	ap.add_argument("--slices", type=int, help="slice count (default: strip width / height, square slices)")
 	ap.add_argument("--pitch", type=float, default=1.0, help="model units per voxel (1 = one pixel of a 16px block)")
+	ap.add_argument("--model-dir", help="write the .json here instead (e.g. a mod's models/block)")
+	ap.add_argument("--texture-dir", help="write the .png here instead (e.g. a mod's textures/block)")
 	a = ap.parse_args()
-	print(json.dumps(convert(a.stack, a.out_dir, a.model_id, a.slices, a.pitch)))
+	print(json.dumps(convert(a.stack, a.out_dir, a.model_id, a.slices, a.pitch, a.model_dir, a.texture_dir)))
 
 
 if __name__ == "__main__":

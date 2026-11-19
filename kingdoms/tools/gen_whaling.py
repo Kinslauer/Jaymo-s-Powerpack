@@ -10,8 +10,8 @@
 - (stage 2) textures/block/tryworks_front.png and tryworks_front_on.png: the tryworks' brick firebox, cold and burning;
   and its blockstate, block models (bricks below, an iron try-pot on top, vanilla's cauldron textures) and item JSON.
 - (whale oil's uses) textures/block/oil_lamp.png and oil_lamp_lit.png (brass, glass chimney, chain) with the oil lamp's
-  standing and hanging models; textures/block/oil_pot_brazier.png and _lit.png with the boiling oil pot's model; item
-  sprites oil_lamp, firebomb, powder_firebomb.
+  standing and hanging models; the boiling oil pot's blockstate and item JSON (its models and textures come from
+  sprite stacks: tools/gen_oil_pot.py); item sprites oil_lamp, firebomb, powder_firebomb.
 
 Seeded, so every run draws the same pixels. Run from kingdoms/: python3 -I tools/gen_whaling.py"""
 import json
@@ -368,20 +368,6 @@ def oil_lamp_texture(lit):
     return img
 
 
-def oil_pot_brazier(lit):
-    """16x16 iron brazier side: dark iron with a row of slots, glowing when lit."""
-    rnd = random.Random(31)
-    img = Image.new("RGBA", (16, 16), (0, 0, 0, 255))
-    px = img.load()
-    for y in range(16):
-        for x in range(16):
-            c = shade(IRON, rnd.uniform(0.8, 1.05))
-            if 6 <= y <= 10 and x % 3 == 1:
-                c = (255, 150, 40) if lit and y > 7 else (255, 210, 90) if lit else IRON_DARK
-            px[x, y] = clamp(c) + (255,)
-    return img
-
-
 def box(frm, to, faces_map):
     return {"from": frm, "to": to, "faces": faces_map}
 
@@ -426,28 +412,6 @@ def oil_lamp_json():
 
 
 def oil_pot_json():
-    all6 = ("north", "south", "east", "west", "up", "down")
-    for lit in (False, True):
-        suffix = "_lit" if lit else ""
-        write_json(os.path.join(ASSETS, "models", "block", "oil_pot" + suffix + ".json"), {
-            "parent": "minecraft:block/block",
-            "textures": {
-                "particle": "minecraft:block/cauldron_side",
-                "brazier": "jaymoskingdoms:block/oil_pot_brazier" + suffix,
-                "pot": "minecraft:block/cauldron_side",
-                "inside": "minecraft:block/cauldron_inner",
-                "iron": "minecraft:block/iron_block",
-            },
-            "elements": [
-                box([3, 0, 3], [13, 3, 13], {f: {"uv": [3, 5, 13, 8] if f not in ("up", "down") else [3, 3, 13, 13], "texture": "#brazier",
-                                                  **({"cullface": "down"} if f == "down" else {})} for f in all6}),
-                box([2, 3, 2], [14, 12, 14], {**{f: {"uv": [2, 4, 14, 13], "texture": "#pot"} for f in ("north", "south", "east", "west")},
-                                               "up": {"uv": [2, 2, 14, 14], "texture": "#inside"},
-                                               "down": {"uv": [2, 2, 14, 14], "texture": "#pot"}}),
-                box([6, 9, 0], [10, 11, 2], {f: {"uv": [6, 6, 10, 8] if f not in ("east", "west") else [0, 6, 2, 8], "texture": "#iron"}
-                                             for f in all6}),
-            ],
-        })
     variants = {}
     for facing, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
         for lit in (False, True):
@@ -542,8 +506,6 @@ def main():
     tryworks_json()
     oil_lamp_texture(False).save(os.path.join(block, "oil_lamp.png"))
     oil_lamp_texture(True).save(os.path.join(block, "oil_lamp_lit.png"))
-    oil_pot_brazier(False).save(os.path.join(block, "oil_pot_brazier.png"))
-    oil_pot_brazier(True).save(os.path.join(block, "oil_pot_brazier_lit.png"))
     oil_lamp_json()
     oil_pot_json()
     items = os.path.join(ASSETS, "textures", "item")
