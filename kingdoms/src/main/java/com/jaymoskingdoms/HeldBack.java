@@ -86,6 +86,9 @@ final class HeldBack {
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(HeldBack::tick);
+		// (Andy, 2026-11-19: "reopen your eyes enslaved or whatever else happened") out cold where its guards want them, a
+		// realm's guards carry them to the cells, and they open their eyes there
+		PowersCompat.tellGaols(HeldBack::gaol);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			ASSAULTS.clear();
 			STRUCK.clear();
@@ -269,20 +272,9 @@ final class HeldBack {
 		guard.getLookControl().setLookAt(player, 30.0F, 30.0F);
 		if (f.type().isRealm() && !Busts.jailed(player)) {
 			// (Andy: "if they have a jail, you go there") a kingdom or fiefdom keeps cells under its seat (Busts'): a short stay
-			Underworld.Den d = Underworld.den(level.getServer(), f.id());
-			BlockPos cell = Speakeasy.cell(level, f, d == null ? null : d.cell().orElse(null));
-			if (d != null) {
-				Underworld.putCell(level.getServer(), d, cell);
-			}
-			Speakeasy.cellDoor(level, cell);
-			long now = level.getGameTime();
-			player.setAttached(Busts.JAILED, new Busts.Jail(f.id(), cell, now + JAIL_TICKS));
-			Speech.say(level, guard, Component.translatable("held_back.jaymoskingdoms.cells." + level.getRandom().nextInt(LINES)), Speech.RED, SPEECH);
+			BlockPos cell = lockUp(level, player, f, guard);
 			Vec3 c = Vec3.atBottomCenterOf(cell);
 			player.teleportTo(level, c.x, c.y, c.z, Set.of(), player.getYRot(), 0.0F, false);
-			level.playSound(null, c.x, c.y, c.z, SoundEvents.IRON_DOOR_CLOSE, SoundSource.NEUTRAL, 1.0F, 0.7F);
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.held_back.jailed", f.name(), JAIL_TICKS / 1200L)
-				.withStyle(ChatFormatting.GOLD));
 			return;
 		}
 		long fine = Money.worth(FINE);
@@ -293,6 +285,53 @@ final class HeldBack {
 		level.playSound(null, guard.getX(), guard.getY(), guard.getZ(), paid ? SoundEvents.VILLAGER_YES : SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 1.0F, 0.9F);
 		player.sendSystemMessage((paid ? Component.translatable("message.jaymoskingdoms.held_back.fined", f.name(), Money.text(f, fine))
 			: Component.translatable("message.jaymoskingdoms.held_back.warned", f.name())).withStyle(ChatFormatting.GOLD));
+	}
+
+	/**
+	 * {@code f}'s cells under its seat, made ready, and {@code player} put down for {@link #JAIL_TICKS} in them: the guard says
+	 * so, the door shuts, and they're told. Returns the cell; the caller puts them in it.
+	 */
+	private static BlockPos lockUp(ServerLevel level, ServerPlayer player, Faction f, Mob guard) {
+		Underworld.Den d = Underworld.den(level.getServer(), f.id());
+		BlockPos cell = Speakeasy.cell(level, f, d == null ? null : d.cell().orElse(null));
+		if (d != null) {
+			Underworld.putCell(level.getServer(), d, cell);
+		}
+		Speakeasy.cellDoor(level, cell);
+		long now = level.getGameTime();
+		player.setAttached(Busts.JAILED, new Busts.Jail(f.id(), cell, now + JAIL_TICKS));
+		Speech.say(level, guard, Component.translatable("held_back.jaymoskingdoms.cells." + level.getRandom().nextInt(LINES)), Speech.RED, SPEECH);
+		Vec3 c = Vec3.atBottomCenterOf(cell);
+		level.playSound(null, c.x, c.y, c.z, SoundEvents.IRON_DOOR_CLOSE, SoundSource.NEUTRAL, 1.0F, 0.7F);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.held_back.jailed", f.name(), JAIL_TICKS / 1200L)
+			.withStyle(ChatFormatting.GOLD));
+		return cell;
+	}
+
+	/**
+	 * (From Powers' {@code Mortality.GAOLS}) {@code player} lies out cold (fainted, knocked out, or left for dead) and {@code by}
+	 * stands over them: if {@code by} is one of a kingdom's or fiefdom's guards (or sworn) and the player is wanted there (an
+	 * outlaw, hated, at war with it, or fresh from striking one of its people), the guards carry them to its cells and this is
+	 * the cell; they open their eyes in it. Null otherwise (a village has no cells: nobody is locked up).
+	 */
+	static net.minecraft.core.@Nullable GlobalPos gaol(ServerPlayer player, net.minecraft.world.entity.@Nullable Entity by) {
+		if (!(by instanceof Mob guard) || !guard.isAlive() || !(Downed.isGuard(guard) || HavenGrowth.sworn(guard))
+			|| !(player.level() instanceof ServerLevel level) || level != Factions.level(level.getServer()) || Busts.jailed(player)) {
+			return null;
+		}
+		Faction f = realmOf(level, guard);
+		if (f == null || !f.type().isRealm()) {
+			return null;
+		}
+		long[] blow = ASSAULTS.get(player.getUUID());
+		boolean struck = blow != null && blow[0] == f.id() && level.getGameTime() <= blow[1];
+		if (!struck && !serious(level, guard, player)) {
+			return null;
+		}
+		ASSAULTS.remove(player.getUUID());
+		BlockPos cell = lockUp(level, player, f, guard);
+		JaymosKingdoms.LOGGER.info("{} was carried out cold to {}'s cells", player.getScoreboardName(), f.name());
+		return net.minecraft.core.GlobalPos.of(level.dimension(), cell);
 	}
 
 	// ---- no catapults ------------------------------------------------------------------------------------------------
