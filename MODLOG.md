@@ -6640,3 +6640,8 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - **Lifting them off**: stand by the horse with empty hands and sneak + right-click it to take the body down into your arms, as a lift from the ground does. If they wear too much armour for you to lift, they're set down beside the horse instead.
 - A relog or restart ends it, with the body left down where the horse was. Carrying someone dragged, or any carry that isn't a downed body, still lets go as before when you right-click a horse.
 - Built; not played. Every clip and every mount pose angle is a first guess that hasn't been seen in game.
+
+## 0.25.86 (2026-11-19): Z Fighter line message no longer claims your heritage (#1891)
+
+- **"You are Earthling."** was the Z Fighter lineage being announced, and Earthling is also a heritage, so a Z Fighter whose heritage has no line of its own (Heartlander, Stoneborn, Divine-born and the rest, who fight the Earthling way) was told they were an Earthling. Now a heritage with a line of its own reads "Your Z Fighter line: Warrior-born." and the rest read "Your blood has no Z Fighter line of its own, so you fight the Earthling way." The heritage itself was never changed by this message (`ZFighterLineage.become`).
+- Built; not played.

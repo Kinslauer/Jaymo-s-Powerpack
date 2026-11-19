@@ -1,3 +1,0 @@
-# Z Fighter line message no longer claims your heritage
-- **"You are Earthling."** was the Z Fighter lineage being announced, and Earthling is also a heritage, so a Z Fighter whose heritage has no line of its own (Heartlander, Stoneborn, Divine-born and the rest, who fight the Earthling way) was told they were an Earthling. Now a heritage with a line of its own reads "Your Z Fighter line: Warrior-born." and the rest read "Your blood has no Z Fighter line of its own, so you fight the Earthling way." The heritage itself was never changed by this message (`ZFighterLineage.become`).
-- Built; not played.
