@@ -47,16 +47,20 @@ final class RigMenuScreen extends Screen {
 		RigPicks.AF_DRILL, RigPicks.AF_LANCE, RigPicks.AF_LASH, RigPicks.AF_MIMIC,
 		// the back rig (RigBack)
 		com.jaymospowers.rig.RigBack.WINGSLASH, com.jaymospowers.rig.RigBack.SPEARS, com.jaymospowers.rig.RigBack.PINCER,
-		com.jaymospowers.rig.RigBack.GRAPPLE, com.jaymospowers.rig.RigBack.HORNS};
+		com.jaymospowers.rig.RigBack.GRAPPLE, com.jaymospowers.rig.RigBack.HORNS,
+		// the guns (RigGuns)
+		RigNet.PALM_CHARGE, RigNet.GATLING, RigNet.RAILGUN, RigNet.SONIC, RigNet.TWIN, RigNet.SIEGE};
 	private static final String[] NAMES = {"hover", "palm", "launcher", "unibeam", "scan", "call", "sentry", "faceplate", "night", "drones", "mark", "table", "decoy", "field", "bank", "jet_start", "dash", "barrage",
-		"slow_beat", "failsafe", "blade", "mace", "pile", "drill", "lance", "lash", "mimic", "wingslash", "spears", "pincer", "grapple", "horns"};
+		"slow_beat", "failsafe", "blade", "mace", "pile", "drill", "lance", "lash", "mimic", "wingslash", "spears", "pincer", "grapple", "horns",
+		"palm_charge", "gatling", "railgun", "sonic", "twin", "siege"};
 	private static final int[] LEVEL = {1, 1, 1, Rig.UNIBEAM_LEVEL, Rig.SCAN_LEVEL, Rig.CALL_LEVEL, Rig.CALL_LEVEL, 1, 1, 1, 1, 1, 1, 1, 1, Rig.FLIGHT_LEVEL, 1, Rig.MAX_LEVEL, Rig.UNIBEAM_LEVEL, 1,
 		RigForms.BLADE_LEVEL, RigForms.MACE_LEVEL, RigForms.PILE_LEVEL, RigForms.DRILL_LEVEL, RigForms.LANCE_LEVEL, RigForms.LASH_LEVEL, RigForms.MIMIC_LEVEL,
-		3, 2, 3, 2, 4};
+		3, 2, 3, 2, 4,
+		Rig.LOCK_LEVEL, Rig.SCAN_LEVEL, Rig.UNIBEAM_LEVEL, Rig.UNIBEAM_LEVEL, Rig.MAX_LEVEL, Rig.MAX_LEVEL};
 	/** Cooldowns' full lengths (ticks), for the shading; 0 for none. */
 	private static final int[] COOLDOWN = {0, RigHud.PALM_COOLDOWN, RigHud.LAUNCHER_COOLDOWN, RigHud.UNIBEAM_COOLDOWN, RigScan.SCAN_COOLDOWN, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		RigForms.BLADE_COOLDOWN, RigForms.MACE_COOLDOWN, RigForms.PILE_COOLDOWN, RigForms.DRILL_COOLDOWN, RigForms.LANCE_COOLDOWN, RigForms.LASH_COOLDOWN, RigForms.MIMIC_COOLDOWN,
-		0, 0, 0, 0, 0};
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	private static final double SLICE = 360.0 / ACTIONS.length;
 
 	private int selected = -1;
@@ -99,6 +103,12 @@ final class RigMenuScreen extends Screen {
 			case 29 -> Items.LEAD;
 			case 30 -> Items.FISHING_ROD;
 			case 31 -> Items.BLAZE_ROD;
+			case 32 -> Items.REDSTONE;
+			case 33 -> Items.IRON_INGOT;
+			case 34 -> Items.DIAMOND;
+			case 35 -> Items.NOTE_BLOCK;
+			case 36 -> Items.NETHER_STAR;
+			case 37 -> Items.OBSIDIAN;
 			default -> Items.ENDER_EYE;
 		};
 	}
