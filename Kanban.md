@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 13:41). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 13:42). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -44,7 +44,7 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Agents/true-random-start-doppelgangers|true-random-start-doppelgangers]] · 💻 Odysseus · in-review
+- [ ] [[Agents/true-random-start-doppelgangers|true-random-start-doppelgangers]] · 💻 Odysseus · #1824 · in-review
 
 
 ## Needs Andy
