@@ -6,6 +6,7 @@
 		"PlayerInfoNoConnectionMixin",
 		"ReasonTitleMixin",
 		"ReasonSplashMixin",
+		"ReasonLogoMixin",
 		"DreamCameraMixin",
 		"StuckRideTeleportMixin",
 		"ArrowPickScrollMixin",
