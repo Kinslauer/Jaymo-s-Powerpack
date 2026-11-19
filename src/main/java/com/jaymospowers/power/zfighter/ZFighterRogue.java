@@ -257,8 +257,8 @@ public class ZFighterRogue extends Monster {
 				level.sendParticles(MagicFx.wisp(form() >= 2 ? 0xFFF080 : TYRANT_COLOR, 1.5F), this.getX(), this.getY() + 1.0, this.getZ(), 3,
 					0.4, 0.8, 0.4, 0.0);
 			}
-			if (form() < 2 && this.getHealth() < this.getMaxHealth() * 0.5F) {
-				// Super 2 at half health: a roar, a flash, faster and harder
+			if (form() < 2 && this.getHealth() < this.getMaxHealth() * 0.5F && com.jaymospowers.core.brawl.PowerUp.ready(this)) {
+				// Super 2 at half health, once he has built up to it (he backs off and flares first): a roar, a flash, faster and harder
 				this.entityData.set(DATA_FORM, 2);
 				this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.42);
 				this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(TYRANT_DAMAGE * 1.4);
