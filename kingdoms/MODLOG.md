@@ -15243,3 +15243,8 @@ Not tested in game.
 - **Festival**: on a realm's festival day its square plays Celebration and Bonfire, louder within 10 blocks of the seat.
 - **Bard** (`Bards`): in a standing tavern with a player near, one villager takes a lute (Nightfall's) and plays Bonfire, Now We Feast, Celebration or Tam Lin as a positional streamed sound (`bard.*`, attenuation 16 blocks: heard at 16, silent at 40), then rests. Sneak and use on the bard with a coin in your purse and they stop and play another. One bard per tavern.
 - Built (CI); not played.
+
+## 0.10.59 (2026-11-19): fish barrels in fisheries and market stalls (#1799)
+
+- A fishery keeps its catch in Kitchen's fish barrel, and about one village market stall in three has one for its barrel (`KitchenCompat#fishBarrel`, looked up by id; a plain barrel without Kitchen).
+- Built by CI only; not played.
