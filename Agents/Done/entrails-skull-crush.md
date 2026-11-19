@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: entrail variety, intestines from gibs, blunt weapons crush skulls
 branch: claude/project-thread-t83v6r
 with: Claude (cloud thread "Add entrail variety and skull crushing")
@@ -34,3 +34,4 @@ maces and blunt weapons crush skulls on a killing blow to the head, leaving whit
 
 ## Done
 - Kitchen: 9 new gore looks, Intestines + Brain Matter piles, Gibs.skullCrushed. Powers: Dismember.crushSkull. Both compile; not played, no runServer boot.
+- 2026-11-19 20:36 PR #1866 is merged into master; moved to Agents/Done.
