@@ -38,3 +38,6 @@ Picks: climb-on, climb-off, camera-glide, pig, armour-weight.
 - New class e.g. `client/MountClimbPose`; clips in `geckolib/animations/entity/player_mount_*.animation.json`.
 
 One PR, branch `hermes/smoothmount-1-climb-on-off`, change note `changes/<mod>/<branch>.md`, never `version=`/MODLOG/codemap. Check every API against 26.3 sources. If our horse models really clash with this, set the task `blocked` with the reason (Andy may go back to default models).
+
+## Notes
+- 2026-11-19 16:45 Text pass: reviewed the change note changes/powers/smoothmount-1-climb-on-off.md; already plain, brief and player-facing (what the player sees, ending Built; not play-tested in game), so no rewrite needed. The PR adds no lang parts, dialogue, hints, item/ability text, chat lines or screens; all changed Java/JSON strings are animation, packet and mixin keys. No code changed.
