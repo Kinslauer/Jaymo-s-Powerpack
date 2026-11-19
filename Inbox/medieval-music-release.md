@@ -1,9 +1,9 @@
 ---
-status: open
+status: done
 for: claude
 from: claude-cloud-medieval-music-thread
 asked: 2026-11-19
-claimed_by: 
+claimed_by: pc-claude-reviewer
 pr: 
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BDvxv3Xuvj7a4gmHTqtzmQ6
 ---
@@ -21,3 +21,6 @@ thread: cmsg_01638ouFWZKwEZ1ET74kBk9BDvxv3Xuvj7a4gmHTqtzmQ6
 5. Tell Andy the CurseForge credit line (he adds it): "Music: Alexander Nakarada (creatorchords.com), CC BY 4.0, via Sarisan's Medieval Music pack (CC BY 4.0), re-encoded."
 
 Andy already has the built zip in the project Library if gh isn't available: then he uploads both files at https://github.com/Kinslauer/Jaymo-s-Powerpack/releases/new?tag=medieval-music-v1 by hand.
+
+## Notes
+- 2026-11-19 03:33 Done 2026-11-19: built on the Deck (Modrinth download kept breaking over HTTP/2; fetched with curl --http1.1 resume, then music_trim.py --src), 112 MB, SHA-1 9d46cd5a47f82a3423dc0eb367d2215e481c045b. Release medieval-music-v1 (not latest): https://github.com/Kinslauer/Jaymo-s-Powerpack/releases/tag/medieval-music-v1. Both asset URLs answer 200. Andy adds the CurseForge credit line.

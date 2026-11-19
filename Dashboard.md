@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 02:43). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 09:03). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -7,12 +7,6 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 **Ready to merge** (say "merge" in the project chat):
 - [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · no PR number on the task · ready
-- [[Inbox/medieval-deco-1-music|medieval-deco-1-music]] · PR #1795 · ready
-- [[Inbox/medieval-deco-2-wind|medieval-deco-2-wind]] · PR #1798 · ready
-- [[Inbox/medieval-deco-3-dead-in-the-wild|medieval-deco-3-dead-in-the-wild]] · PR #1802 · ready
-- [[Inbox/medieval-deco-4-drinks|medieval-deco-4-drinks]] · PR #1797 · ready
-- [[Inbox/medieval-deco-5-farm-water|medieval-deco-5-farm-water]] · PR #1799 · ready
-- [[Inbox/medieval-deco-7-practice-dummy|medieval-deco-7-practice-dummy]] · PR #1801 · ready
 - [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · no PR number on the task · ready
 
 **Questions for you:**
@@ -25,22 +19,34 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 ## Stuck
 
 - [[Agents/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]]: stalled, last change 2026-11-13. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/forest-fire-pack|forest-fire-pack]]: stalled, last change 2026-11-15. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/forest-fire-pack|forest-fire-pack]]: stalled, last change 2026-11-16. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hands-on-cooking-realtime|hands-on-cooking-realtime]]: stalled, last change 2026-11-17. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/harness-upkeep|harness-upkeep]]: stalled, last change 2026-11-18. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/harness-upkeep|harness-upkeep]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]]: stalled, last change 2026-11-18. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/scrying-orb|scrying-orb]]: stalled, last change 2026-11-18. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/sky-lands-aether-biomes|sky-lands-aether-biomes]]: stalled, last change 2026-11-15. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/scrying-orb|scrying-orb]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/sky-lands-aether-biomes|sky-lands-aether-biomes]]: stalled, last change 2026-11-16. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-23 waiting for a bot, 0 being built, 1 in review: see [[Kanban]].
+27 waiting for a bot, 0 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1810 NPC sea ships pay for their powder and shot (Kingdoms, 2026-11-19)
+- [ ] #1808 Cannon shot types for wall and siege guns, Explosive Shell costs TNT (Kingdoms, 2026-11-19)
+- [ ] #1807 flotsam can bring up a dead one's token (Powers, Kitchen, 2026-11-19)
+- [ ] #1806 harsh lands - spawns and starts follow the climate map (Kingdoms, 2026-11-19)
+- [ ] #1804 charge jump and Web slingshot on a horse's jump bar, orange peak (Powers, Kingdoms, 2026-11-19)
+- [ ] #1803 towns and the sea - figureheads, trade signs, song stones, the journey book (Kingdoms, 2026-11-19)
+- [ ] #1802 the dead in the wild: remains, last camps, ruin traps, the headless rider (Kingdoms, 2026-11-19)
+- [ ] #1801 practice dummy: kinds and coloured numbers (Powers, 2026-11-19)
+- [ ] #1799 drifting flotsam: ripple spots on rivers and the sea (Powers, Kingdoms, Kitchen, 2026-11-19)
+- [ ] #1798 the hooded cloak leans in the world's wind (Powers, Kingdoms, 2026-11-19)
+- [ ] #1797 drinks and kitchen - vines, press, vintage, tea, smoke chips, black wine (Kitchen, 2026-11-19)
 - [ ] #1796 Vanilla+ mods join the pack (Powers, 2026-11-19)
+- [ ] #1795 Medieval Music pack, trimmed and on by default (Powers, Kingdoms, 2026-11-19)
 - [ ] #1794 villager talk camera faces the villager (Kingdoms, 2026-11-19)
 - [ ] #1793 Alex's Mobs Continued joins the pack (Powers, Kingdoms, 2026-11-19)
 - [ ] #1792 life story: one random heritage look, no paths list (Kingdoms, 2026-11-19)
@@ -88,23 +94,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1712 NPC shooters lean round corners (Kingdoms, 2026-11-18)
 - [ ] #1711 Youth flies off to think, and comes back with the answer (Kingdoms, 2026-11-18)
 - [ ] #1710 lean on the legs (Kingdoms, 2026-11-18)
-- [ ] #1697 temperament idles come and go (Powers, 2026-11-17)
-- [ ] #1694 blood stays drawn on MCA bodies (Powers, 2026-11-17)
-- [ ] #1692 Youth thinks out loud, "youth, look!" (Kingdoms, 2026-11-17)
-- [ ] #1677 fainting warns you first (Powers, Kitchen, 2026-11-17)
-- [ ] #1654 Ash piles fixed (Kitchen, 2026-11-16)
-- [ ] #1650 Youth the wood-wisp: more idle behaviors (Kingdoms, 2026-11-16)
-- [ ] #1649 letterbox cutscene and POV swap on NPC dialogue (Kingdoms, 2026-11-16)
-- [ ] #1644 Soften pixel shadows' edges (Kingdoms, 2026-11-16)
-- [ ] #1643 faith page shows the faith's champion (Kingdoms, 2026-11-16)
-- [ ] #1642 burnt corpses leave ash piles (Kitchen, 2026-11-16)
-- [ ] #1637 Seat compounds: castle seats generated whole with their first town (Kingdoms, 2026-11-16)
-- [ ] #1634 speakeasy hatch fixed: everyone can climb out (Kingdoms, 2026-11-16)
-- …and 184 older ones.
+- …and 196 older ones.
 
 ## Health
 
-19 problems in the notes: [[Health]].
+21 problems in the notes: [[Health]].
 
 ## Last week
 
