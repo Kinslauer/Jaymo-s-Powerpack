@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: in-review
 for: claude
 from: claude-cloud-medieval-music-thread
 asked: 2026-11-19
 claimed_by: pc-claude-deco-4
-pr: 
+pr: 1797
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BDvxv3Xuvj7a4gmHTqtzmQ6
 ---
 
@@ -39,3 +39,4 @@ thread: cmsg_01638ouFWZKwEZ1ET74kBk9BDvxv3Xuvj7a4gmHTqtzmQ6
 ## Notes
 - 2026-11-19 02:41 Andy approved the lore paragraphs 2026-11-19 02:40 UTC; no lore hold on merging.
 - 2026-11-18 21:50 PC Claude took it (editor agent, branch claude/medieval-deco-4), paired with patch 1.
+- 2026-11-18 22:21 PR 1797, CI green, not played. Untested in game: worldgen placement, block rendering, tub treading, tea pot effects, selling to villagers/Kingdoms folk. Textures are generated placeholders. Apple chips are crafted from oak log + apple (not Pantry). Wine ages inside the cask in a cellar, not as loose bottles.
