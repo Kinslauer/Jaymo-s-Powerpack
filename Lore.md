@@ -128,7 +128,7 @@ can **ascend** into a truer form of itself; one that is bent the wrong way can b
 up both. Folk call a villager whose power wakes **gifted** (about one in eighty), and the gifted fight with their own
 kit.
 
-**Called in a dream** (new; Lanterns patch 8, Andy's Buder's Lanterns pick). Sometimes a sleeping power does not wait for
+**Called in a dream** (Andy approved, 2026-11-18; Lanterns patch 8, Andy's Buder's Lanterns pick). Sometimes a sleeping power does not wait for
 days of hard living: it comes up through its holder while they sleep, from the one well, and they dream it. Most who are
 called dream of a quiet light that knows their name, and wake in the morning with the power in them. But the well runs close
 to the other side, and some calls come up through its dark instead: the sleeper starts up into a night with no edges, and
@@ -870,7 +870,7 @@ lifts and to keep stores off the ground. It is a craft of theirs, not a power, a
 Aether's gravitite or with those who bend weight by ki. Their builders also work the far country's growth into boards:
 balloon mushroom, pulse tree and brain tree each give a full joiner's set.
 
-**The Hollow** (new; Lanterns patch 6, Andy's Buder's Lanterns pick). Out past the last orbits, across the sky from the
+**The Hollow** (Andy approved, 2026-11-18; Lanterns patch 6, Andy's Buder's Lanterns pick). Out past the last orbits, across the sky from the
 Maw, a sun burned out long ago and fell in on itself. What is left is a hole in the dark with a thin rim of bent light and a
 slow wheel of burning stuff going round it: nothing that goes in comes out, so no pod is ever pointed at it. Crews bound
 for Glacia or the Verdant World pass wide of it and still lose time to its pull, and say the stars slide aside as it goes
@@ -923,12 +923,12 @@ warrants. They come down for fighters whose power level gets talked about "out t
 with a pod, full tanks and a license: Rookie, then up the ranks by arrests. Patrolmen are named people (Jaco, Irilla,
 Bordo and the rest), and their Commanders (Vael, Orrin, Teska, Brandt) answer a skip writ.
 
-**Relief runs** (new; Lanterns patch 3, Andy's Buder's Lanterns pick). Not all the Patrol's work is fighting. The Overworld's
+**Relief runs** (Andy approved, 2026-11-18; Lanterns patch 3, Andy's Buder's Lanterns pick). Not all the Patrol's work is fighting. The Overworld's
 healers have come to trust the Verdant World's limphium, and the dried leaf keeps on a long flight, so patrolmen send their
 officers down with it: six leaves to whichever town's healer is short. The Patrol keeps a file on every officer (rank,
 arrests on warrant, skip writs drawn, relief runs carried), and a patrolman will read it out if asked.
 
-**The Patrol's own law** (new; Lanterns patch 5, Andy's Buder's Lanterns pick, "the buddy cop crime dynamic"). An officer
+**The Patrol's own law** (Andy approved, 2026-11-18; Lanterns patch 5, Andy's Buder's Lanterns pick, "the buddy cop crime dynamic"). An officer
 the realms want for a crime has broken the license: the Patrol writes a warrant of its own, strips a rank for every crime on
 it, and sends a patrolman down to bring them in, by fists if it must. A crook an officer hands to a realm's ruler counts as
 an arrest. Officers are given a partner once they make Officer: a patrolman who works beside them, rides in their pod and

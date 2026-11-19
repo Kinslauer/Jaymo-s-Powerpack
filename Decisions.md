@@ -761,3 +761,6 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-18 (Andy, Claude project thread, agent scrying-orb): asked to port Immersive Portals (Apache-2.0) for the scrying orb; it isn't portable to 26.3 (newest is 1.21.1, ~70k lines and 181 mixins on render code 26.3 removed, locked to one Sodium/Iris version, only roughly works with shaders). Andy chose "Build the miniature" as planned in Inbox/scrying-orb.
 - 2026-11-18 (Andy): add the stuck-ride guard (a far teleport repeated while the client still rides drops the stale ride; PR 1775).
 - 2026-11-18 (Andy): Rig patch 5 ships as PR #1773 (the fuller build); #1774 closed.
+- 2026-11-18: Lore approved: "Relief runs", "The Patrol's own law", "The Hollow", "Called in a dream" (Lanterns 3, 5, 6, 8). (Andy, PC session)
+- 2026-11-18: Ki crossing to the Moon (Lanterns 6) keeps its numbers: 50,000 power, 80% of max ki. (Andy, PC session)
+- 2026-11-18: Andy is doing the voices himself (Google TTS tool, #1780); the Rig Mind's spoken lines (rig-5 md-voice) wait on that. (Andy, PC session)
