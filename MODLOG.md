@@ -6066,3 +6066,8 @@ Built; not played in game.
 - **Relief runs**: officers of any rank can ask a patrolman "Any relief work?". He sends them to bring 6 dried limphium leaves (the Verdant World's keeping herb) to any town's healer. Use a cleric with the leaves in your main hand to hand them over: 6 silver, 150 TP for a Z Fighter. One run at a time, and runs don't run out. (`ZFighterPatrolRelief`)
 - **Your Patrol file**: "Reporting in." now answers with your file: rank, arrests on warrant, skip writs drawn and relief runs done. (`ZFighterPatrol#menu`)
 - Built; not played.
+
+## 0.25.24 (2026-11-19): Duplex doubles take spoken orders (#1767)
+
+- **Orders by voice**: as Duplex, say an order aloud (or "doubles, ..." first) and your doubles within 32 blocks do it. *follow* (come, heel); *wait* (stay, hold), where they stand; *scout*: one runs 20 blocks the way you face and comes back with how many foes it saw; *collect* (gather, pick up): they pick up the drops near and bring them to you; *mine* (dig): one digs out the open block you look at, then up to 8 more of the same touching it, never anything you couldn't break yourself or harder than stone-and-ore; *fetch <thing>* (bring, get): one fetches a stack with that in its name from a chest or barrel within 16 blocks, or the first stack of the container you look at; *fight* (attack): all go for what you look at, or the nearest foe. Anything a double holds drops if it pops. (`DoubleOrders`, `XenoDouble`)
+- Built; not played.

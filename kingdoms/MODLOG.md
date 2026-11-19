@@ -15121,3 +15121,8 @@ Not tested in game.
 - **Down the road**: news of a heavy crime travels the King's Roads to each realm linked to the one you wronged, a day per 600 blocks between them (at least one day). There you lose 15 reputation and their people will ask about it. (`CrimeWord#road`)
 - Runners, tales and road news aren't saved over a restart.
 - Built; not played. Stacked on Lanterns 1 (#1751).
+
+## 0.10.42 (2026-11-19): Talking to villagers through chat (#1767)
+
+- **Talk through chat**: say a line aloud while looking at a villager within 8 blocks, or start it with their first name (12 blocks), and they turn to you and answer over their head a moment later. Short replies keep it going for 30 seconds. They answer hello, goodbye and thanks, how they are, their name, their work, whose realm this is, trade, news (their real gossip and suspicions), and what they remember of you. Cold, wary or scornful villagers answer shortly and keep their news to themselves. Anything else gets a "Hm? I didn't follow that." When MCA's own chat AI is switched on (`/mca chatAI`), it answers instead and this keeps quiet. (`ChatTalk`, from `ProximityChat`)
+- Built; not played.
