@@ -1,8 +1,0 @@
-# A second jump in the air for every power
-
-- Press Jump once more in the air (a few ticks after leaving the ground) and every power gives one extra jump, once for each time off the ground; the ground, water, lava, a ladder, a mount or flying give it back. It costs a little hunger, and the fall is counted from the top of the jump, so fall damage still applies.
-- Each power kicks off something of its own: Pocket Arsenal opens a small rift under the feet with a mountain's peak standing up out of it (the highest jump of all); Chronokinesis kicks off a speed remnant of himself left in the air and is thrown forward; Wind Control pushes off a gust; Emberborn (power or not) a burst of fire; Web a spring off a puff of web; Gravity lightens himself for a moment; Smoke a puff of smoke; Cryo a thin ice plate; Darktide a splash of dark water; Resonance a pulse of sound; Xenoform a pad of the band's light; Z Fighter a ki burst.
-- Anyone in a power's flight (Wind, Smoke, Z Fighter, Xenoform's fliers, Gravity's rock flight), on a web line or on an Arsenal ride keeps what they have. Web's wall jump, cling and charged jump are unchanged.
-- With a cloud in a bottle, its jump takes the first press and the power's the next: one each, never both on a press.
-- Key classes: `core/jump/PowerJump` (kinds, packet, server effects), `client/jump/PowerJumpClient` (the kick, lift and push per kind, `mortal(...)` for the no-power draught's jump), `ArtifactBaublesClient.cloudJump`.
-- Built; not played. The Draught of Mettle's jump (`MettleJump`, Track 1) is not in this branch: once merged, replace its tick body with one call, `PowerJumpClient.mortal(MettleDraught::active)` (kicks straight up at 0.5, as it did), so it shares this system.

@@ -1,8 +1,0 @@
-# Deeds, the crater spider, the Xeno-Band vessel and the Draught of Mettle
-
-- A powerless survival player who is already set to awaken a power (handed down, a calling's, or their affinity's) can wake it early by one deed that fits it, and only that power: Wind survives a lightning strike, Gravity survives a long fall, Cryokinesis is frozen through a night, Darktide nearly drowns at night, Smoke breathes a big fire's smoke, Chrono keeps a clock in hand through a night awake, Pocket Arsenal makes a kill carrying five kinds of weapon, Z Fighter beats a hardy monster bare-handed while badly hurt. Resonance (the Tuning Fork while blind) and Xenoform (the band) keep the ways they already had. No line says what the deed was. Class: `core/AwakeningDeeds`.
-- A cave spider shut in glass (glass or panes on four sides and below, open top) and fed a lump of meteoric iron becomes a crater spider (named, marked by a tag). Its bite wakes a Web-leaning player; anyone else is poisoned and sickened. Class: `power/web/CraterSpider`.
-- The Mad Tinkerer has an aside about the filings on his bench that hints at it.
-- The Xeno-Band already keeps its learned aliens, reforge, modules, skills and look on the item when it is torn off a downed wearer or given up with the Draught of Release, and gives them to its next wearer (`XenoBands`, `XenoBandItem`). Nothing changed.
-- Draught of Mettle: a rare Infusion (research "Mettle") for people with no power: 8 minutes of Speed, Jump Boost II, Dolphin's Grace, slower hunger and one extra jump in the air (`alchemy/picks/MettleDraught`, client `client/alchemy/MettleJump`). Someone with a power only gets nausea.
-- Built; not played.
