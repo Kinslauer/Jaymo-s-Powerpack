@@ -236,6 +236,14 @@ public final class StoryHard {
 			// (nothing in the camp harms a captive while they're bound and keep their place, CaptiveConduct)
 			player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 40, 4, false, false));
 		}
+		if (player.level() != level && PowersCompat.weighedAway(player)) {
+			// (Andy, 2026-11-19: "the game clearly meant for me to go to the nether here but nothing happened") a captive who
+			// died in chains and was weighed is gone from the camp: sent below or let into the Other World, the chain doesn't
+			// drag them back from it. Quietly, as for one put to death: no camp hunts the dead.
+			release(player);
+			JaymosKingdoms.LOGGER.info("{} was weighed and taken from {}'s chains", player.getScoreboardName(), shackle.camp());
+			return;
+		}
 		Vec3 anchor = Vec3.atBottomCenterOf(shackle.at());
 		if (player.level() != level || player.position().distanceToSqr(anchor) > CHAIN_REACH * CHAIN_REACH) {
 			player.teleportTo(level, anchor.x, anchor.y, anchor.z, Set.<net.minecraft.world.entity.Relative>of(), player.getYRot(), player.getXRot(), false);
