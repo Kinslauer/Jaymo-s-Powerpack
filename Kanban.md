@@ -4,12 +4,16 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 13:06). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 13:33). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · open
+- [ ] [[Inbox/npc-fights-1-brawler|npc-fights-1-brawler]] · for 💻 Odysseus · open
+- [ ] [[Inbox/npc-fights-2-strings|npc-fights-2-strings]] · for 💻 Odysseus · open
+- [ ] [[Inbox/npc-fights-3-clashes|npc-fights-3-clashes]] · for 💻 Odysseus · open
+- [ ] [[Inbox/npc-fights-4-rivals|npc-fights-4-rivals]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-a-incendium-castle-start|vanilla-plus-a-incendium-castle-start]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-b-stellarity-end-enderscape-band|vanilla-plus-b-stellarity-end-enderscape-band]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-c-back-slot|vanilla-plus-c-back-slot]] · for 💻 Odysseus · open
@@ -24,7 +28,6 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-l-carts-check|vanilla-plus-l-carts-check]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-1-illager-names|village-mods-1-illager-names]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-2-blast-mending|village-mods-2-blast-mending]] · for 💻 Odysseus · open
-- [ ] [[Inbox/village-mods-3-guards-fight-mend|village-mods-3-guards-fight-mend]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-4-board-work|village-mods-4-board-work]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-5-town-life-hats|village-mods-5-town-life-hats]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-6-small-structures|village-mods-6-small-structures]] · for 💻 Odysseus · open
@@ -35,6 +38,7 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/village-mods-3-guards-fight-mend|village-mods-3-guards-fight-mend]] · pc-claude (village-mods-3 track) · claimed
 - [ ] [[Agents/hero-addon-picks|hero-addon-picks]] · 💻 Odysseus · running
 
 

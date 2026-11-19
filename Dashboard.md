@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 12:30). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 13:33). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -28,12 +28,16 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-23 waiting for a bot, 0 being built, 0 in review: see [[Kanban]].
+26 waiting for a bot, 1 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1822 Rangers read droppings (Kingdoms, Kitchen, 2026-11-19)
+- [ ] #1821 The wind no longer stops the server (Kingdoms, 2026-11-19)
+- [ ] #1820 birthplace page lists the heritage's strengths and weaknesses (Kingdoms, 2026-11-19)
+- [ ] #1819 Earth & Water's chunk scan skipped where it can find nothing (Powers, 2026-11-19)
 - [ ] #1816 Powerborne Heroes picks - deeds, storm, Web, second jump, costumes, Divine-born, Smoke banish, Ember, fusion, shields (Powers, Kingdoms, 2026-11-19)
 - [ ] #1815 edges and sparks - blades dull, grindstones, sparks that catch, armour that rings (Powers, Kingdoms, 2026-11-19)
 - [ ] #1814 Hackers 'n Slashers 4: a shove for everyone, and weapon kinds' on-hit effects (Powers, 2026-11-19)
@@ -90,11 +94,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1750 picker lists show 3-4 big boxes, info text in paragraphs (Kingdoms, 2026-11-18)
 - [ ] #1747 drawn progress bars - every text bar redrawn like the execution bars (Powers, Kingdoms, Kitchen, 2026-11-18)
 - [ ] #1743 Server stops waiting on land that is not made yet (Powers, 2026-11-18)
-- [ ] #1741 Animals stop re-pathing to food they cannot reach (Kitchen, 2026-11-18)
-- [ ] #1740 building blocks - vertical slabs, quarter steps, mixed slabs, paired and waterlogged doors (Powers, Kingdoms, 2026-11-18)
-- [ ] #1739 only Epic towns are crowned: no kingdom seated on a lone castle (Kingdoms, 2026-11-18)
-- [ ] #1738 survivors wake 500-1000 blocks from where they fell (Powers, Kingdoms, 2026-11-18)
-- …and 203 older ones.
+- …and 207 older ones.
 
 ## Health
 
