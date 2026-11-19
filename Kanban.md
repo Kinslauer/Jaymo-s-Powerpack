@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 02:33). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 02:35). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -35,11 +35,11 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/medieval-deco-6-towns-sea|medieval-deco-6-towns-sea]] · pc-claude-deco-6 · #1803 · claimed
 
 
 ## In review
 
-- [ ] [[Inbox/medieval-deco-6-towns-sea|medieval-deco-6-towns-sea]] · for 💻 Odysseus · #1803 · in-review
 
 
 ## Needs Andy
