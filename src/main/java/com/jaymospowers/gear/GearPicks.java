@@ -62,6 +62,7 @@ public final class GearPicks {
 		IRON_BELT = belt("iron_thrower_belt", IRON_SLOTS, Rarity.COMMON);
 		STEEL_BELT = belt("steel_thrower_belt", STEEL_SLOTS, Rarity.UNCOMMON);
 		Throwables.register();
+		SeekingChip.init();
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
 			HEADS.values().forEach(output::accept);
@@ -79,6 +80,8 @@ public final class GearPicks {
 			output.accept(new ItemStack(Throwables.CHOKING_VIAL));
 			output.accept(new ItemStack(Throwables.CALTROPS));
 			output.accept(new ItemStack(Throwables.BEAR_TRAP));
+			output.accept(new ItemStack(Throwables.FROST_BOMB));
+			output.accept(new ItemStack(SeekingChip.ITEM));
 		});
 		GearNet.init();
 		GroundFx.init();
