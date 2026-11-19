@@ -160,7 +160,10 @@ public final class RigClient {
 			selected = action;
 		}
 		send(action);
-	}
+		if (com.jaymospowers.rig.RigBack.is(action) && action != com.jaymospowers.rig.RigBack.BK_WINGS) {
+			RigBackClient.note(action, com.jaymospowers.rig.RigMoves.length(action));
+		}
+		}
 
 	private static void send(int action) {
 		ClientPlayNetworking.send(new RigNet.Use(action));
@@ -260,6 +263,7 @@ public final class RigClient {
 		RigScanClient.tick(minecraft, player);
 		RigFlightFeel.tick(minecraft, player);
 		RigImpact.tick(minecraft, player);
+		RigBackClient.tick(minecraft);
 	}
 
 	/** The Rig key: a tap uses the active (Sneak: picks the next), a hold locks on. With nothing worn, it calls a parked suit. */

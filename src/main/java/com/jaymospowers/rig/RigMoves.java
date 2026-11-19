@@ -28,8 +28,10 @@ public final class RigMoves {
 	 */
 	public static final int TAKEOFF = 6, SCAN = 7, CALL = 8, TABLE = 9;
 	/** The take-off's crouch (ticks before the thrusters fire) and its whole length; the gestures' lengths. */
-	/** A thruster dash, a bare-fisted punch with the Arms, and the artillery barrage. */
-	public static final int DASH = 10, PUNCH = 11, BARRAGE = 12;
+		/** A thruster dash, a bare-fisted punch with the Arms, and the artillery barrage. */
+		public static final int DASH = 10, PUNCH = 11, BARRAGE = 12;
+		/** The back rig: a wing-slash dash, the spear legs, the pincer grab, the grapple claw, the helm's lightning. */
+		public static final int WINGSLASH = 13, SPEAR = 14, PINCER = 15, GRAPPLE = 16, LIGHTNING = 17;
 	/** Their lengths (ticks); the dash's wind-up before the burst, and the barrage's before the pods empty. */
 	public static final int DASH_TICKS = 12, DASH_FIRE = 2, PUNCH_TICKS = 8, BARRAGE_TICKS = 34, BARRAGE_FIRE = 8;
 	public static final int TAKEOFF_CROUCH = 4, TAKEOFF_TICKS = 12, SCAN_TICKS = 18, CALL_TICKS = 70, TABLE_TICKS = 30;
@@ -66,9 +68,12 @@ public final class RigMoves {
 			case TABLE -> TABLE_TICKS;
 			case DASH -> DASH_TICKS;
 			case PUNCH -> PUNCH_TICKS;
-			case BARRAGE -> BARRAGE_TICKS;
-			case UNIBEAM -> RigUnibeam.CHARGE_TICKS + RigUnibeam.BEAM_TICKS + UNIBEAM_SETTLE;
-			default -> 0;
+						case BARRAGE -> BARRAGE_TICKS;
+						case WINGSLASH -> DASH_TICKS;
+						case SPEAR, PINCER -> 10;
+						case GRAPPLE, LIGHTNING -> 14;
+						case UNIBEAM -> RigUnibeam.CHARGE_TICKS + RigUnibeam.BEAM_TICKS + UNIBEAM_SETTLE;
+						default -> 0;
 		};
 	}
 

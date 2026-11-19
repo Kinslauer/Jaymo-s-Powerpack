@@ -2,6 +2,7 @@ package com.jaymospowers.client.rig;
 
 import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.rig.Rig;
+import com.jaymospowers.rig.RigBack;
 import com.jaymospowers.rig.RigHelm;
 import com.jaymospowers.rig.RigNet;
 import com.jaymospowers.rig.RigPicks;
@@ -40,14 +41,15 @@ final class RigMenuScreen extends Screen {
 	private static final int INFO_H = 30;
 
 	/** The entries, clockwise from the top. */
-	private static final int[] ACTIONS = {RigNet.HOVER, RigNet.PALM, RigNet.LAUNCHER, RigNet.UNIBEAM, RigNet.SCAN, RigNet.CALL, RigNet.SENTRY,
-		RigNet.FACEPLATE, RigNet.NIGHT, RigPicks.DRONES, RigPicks.MARK, RigPicks.TABLE, RigPicks.DECOY, RigPicks.FIELD, RigPicks.BANK, RigClient.JET_START,
-		RigPicks.DASH, RigPicks.BARRAGE, RigClient.SLOW_BEAT, RigPicks.FAILSAFE};
+		private static final int[] ACTIONS = {RigNet.HOVER, RigNet.PALM, RigNet.LAUNCHER, RigNet.UNIBEAM, RigNet.SCAN, RigNet.CALL, RigNet.SENTRY,
+			RigNet.FACEPLATE, RigNet.NIGHT, RigPicks.DRONES, RigPicks.MARK, RigPicks.TABLE, RigPicks.DECOY, RigPicks.FIELD, RigPicks.BANK, RigClient.JET_START,
+			RigPicks.DASH, RigPicks.BARRAGE, RigClient.SLOW_BEAT, RigPicks.FAILSAFE, RigBack.BK_WINGS, RigBack.BK_WINGSLASH, RigBack.BK_LEGS, RigBack.BK_PINCER,
+			RigBack.BK_GRAPPLE, RigBack.BK_HORNS};
 	private static final String[] NAMES = {"hover", "palm", "launcher", "unibeam", "scan", "call", "sentry", "faceplate", "night", "drones", "mark", "table", "decoy", "field", "bank", "jet_start", "dash", "barrage",
-		"slow_beat", "failsafe"};
-	private static final int[] LEVEL = {1, 1, 1, Rig.UNIBEAM_LEVEL, Rig.SCAN_LEVEL, Rig.CALL_LEVEL, Rig.CALL_LEVEL, 1, 1, 1, 1, 1, 1, 1, 1, Rig.FLIGHT_LEVEL, 1, Rig.MAX_LEVEL, Rig.UNIBEAM_LEVEL, 1};
+		"slow_beat", "failsafe", "wings", "wing_slash", "spear_legs", "pincer", "grapple", "horns"};
+	private static final int[] LEVEL = {1, 1, 1, Rig.UNIBEAM_LEVEL, Rig.SCAN_LEVEL, Rig.CALL_LEVEL, Rig.CALL_LEVEL, 1, 1, 1, 1, 1, 1, 1, 1, Rig.FLIGHT_LEVEL, 1, Rig.MAX_LEVEL, Rig.UNIBEAM_LEVEL, 1, Rig.FLIGHT_LEVEL, 1, 1, 2, 1, Rig.UNIBEAM_LEVEL};
 	/** Cooldowns' full lengths (ticks), for the shading; 0 for none. */
-	private static final int[] COOLDOWN = {0, RigHud.PALM_COOLDOWN, RigHud.LAUNCHER_COOLDOWN, RigHud.UNIBEAM_COOLDOWN, RigScan.SCAN_COOLDOWN, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	private static final int[] COOLDOWN = {0, RigHud.PALM_COOLDOWN, RigHud.LAUNCHER_COOLDOWN, RigHud.UNIBEAM_COOLDOWN, RigScan.SCAN_COOLDOWN, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	private static final double SLICE = 360.0 / ACTIONS.length;
 
 	private int selected = -1;
@@ -78,6 +80,12 @@ final class RigMenuScreen extends Screen {
 			case 17 -> Items.FIRE_CHARGE;
 			case 18 -> Items.CLOCK;
 			case 19 -> Items.TOTEM_OF_UNDYING;
+			case 20 -> Items.ELYTRA;
+			case 21 -> Items.IRON_SWORD;
+			case 22 -> Items.TRIDENT;
+			case 23 -> Items.SHEARS;
+			case 24 -> Items.FISHING_ROD;
+			case 25 -> Items.END_ROD;
 			default -> Items.ENDER_EYE;
 		};
 	}
@@ -154,6 +162,13 @@ final class RigMenuScreen extends Screen {
 			|| action == RigPicks.BARRAGE) && !Rig.fullSet(player)) {
 			return Component.translatable("gui.jaymospowers.rig_menu.incomplete");
 		}
+		if ((action == RigBack.BK_WINGS || action == RigBack.BK_WINGSLASH || action == RigBack.BK_LEGS || action == RigBack.BK_PINCER
+			|| action == RigBack.BK_GRAPPLE) && !Rig.fullSet(player)) {
+			return Component.translatable("gui.jaymospowers.rig_menu.incomplete");
+		}
+		if (action == RigBack.BK_HORNS && (!helm || !core)) {
+			return Component.translatable("gui.jaymospowers.rig_menu.no_helm_core");
+		}
 		return null;
 	}
 
@@ -165,6 +180,7 @@ final class RigMenuScreen extends Screen {
 			case RigNet.LAUNCHER -> status.launcherCooldown();
 			case RigNet.UNIBEAM -> status.unibeamCooldown();
 			case RigNet.SCAN -> status.scanCooldown();
+			case RigBack.BK_WINGS, RigBack.BK_WINGSLASH, RigBack.BK_LEGS, RigBack.BK_PINCER, RigBack.BK_GRAPPLE, RigBack.BK_HORNS -> 0;
 			default -> 0;
 		};
 	}
@@ -178,6 +194,8 @@ final class RigMenuScreen extends Screen {
 			case RigClient.JET_START -> RigFlightFeel.jetStart();
 			case RigClient.SLOW_BEAT -> RigImpact.slowBeat();
 			case RigPicks.FAILSAFE -> com.jaymospowers.rig.RigCall.failsafeOn(player);
+			case RigBack.BK_WINGS -> RigClient.status.flying();
+			case RigBack.BK_WINGSLASH, RigBack.BK_LEGS, RigBack.BK_PINCER, RigBack.BK_GRAPPLE, RigBack.BK_HORNS -> RigBackClient.out(ACTIONS[i]);
 			default -> false;
 		};
 	}

@@ -103,5 +103,11 @@
   "message.jaymospowers.rig_picks.decoy.kind_lure": "Decoy: one image that draws every enemy.",
   "message.jaymospowers.rig_picks.decoy.kind_trio": "Decoy: three images that copy you.",
   "message.jaymospowers.rig_picks.bank.on": "Bank shot on.",
-  "message.jaymospowers.rig_picks.bank.off": "Bank shot off."
+  "message.jaymospowers.rig_picks.bank.off": "Bank shot off.",
+  "gui.jaymospowers.rig_menu.wings": "Wings",
+  "gui.jaymospowers.rig_menu.wing_slash": "Wing Slash",
+  "gui.jaymospowers.rig_menu.spear_legs": "Spear Legs",
+  "gui.jaymospowers.rig_menu.pincer": "Pincer",
+  "gui.jaymospowers.rig_menu.grapple": "Grapple Claw",
+  "gui.jaymospowers.rig_menu.horns": "Chain Lightning"
 }

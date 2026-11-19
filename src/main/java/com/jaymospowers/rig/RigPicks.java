@@ -38,6 +38,7 @@ public final class RigPicks {
 		RigField.init();
 		RigBank.init();
 		RigStrikes.init();
+		RigBack.init();
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 				RigDrones.tick(player);
@@ -49,7 +50,7 @@ public final class RigPicks {
 
 	/** Whether {@code action} is one of these. */
 	public static boolean is(int action) {
-		return action >= FIRST && action <= FAILSAFE;
+		return action >= FIRST && action <= RigBack.BK_HORNS;
 	}
 
 	/** A Rig menu entry from the client. */
@@ -74,6 +75,8 @@ public final class RigPicks {
 			case BANK -> RigBank.toggle(player);
 			case DASH -> RigStrikes.dash(player);
 			case BARRAGE -> RigStrikes.barrage(player);
+			case RigBack.BK_WINGS, RigBack.BK_WINGSLASH, RigBack.BK_LEGS, RigBack.BK_PINCER, RigBack.BK_GRAPPLE,
+			RigBack.BK_HORNS -> RigBack.use(player, action);
 			default -> {
 			}
 		}

@@ -1,0 +1,3 @@
+# Rig patch 3: the back rig
+
+Six new back-rig actives for Rig wearers, each an entry in the Rig menu (Sneak + J) with a charge cost and a Mind level gate: folding wings that spread out for full flight and fold back in hover or on landing, a wing-slash dash that cuts everything it passes instead of stopping at the first foe, spear legs that burst from the back plate and impale everything in a ring, a pincer that seizes one creature and holds it in front of you (press again to throw it), a grapple claw that zips you to a wall or yanks a lighter enemy to you, and chain lightning from the helm (Mind 4) that arcs to up to four targets, hits harder in rain, and overcharges the Core. All Frostborn Rig tech: plates slide, lock and fold, nothing grown or alive.

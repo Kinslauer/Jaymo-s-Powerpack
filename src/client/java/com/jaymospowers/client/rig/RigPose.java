@@ -9,6 +9,7 @@ import static com.jaymospowers.client.rig.RigBeats.SINE;
 
 import com.jaymospowers.rig.Rig;
 import com.jaymospowers.rig.RigFrame;
+import com.jaymospowers.rig.RigBack;
 import com.jaymospowers.rig.RigMoves;
 import com.jaymospowers.rig.RigUnibeam;
 import java.util.HashMap;
@@ -51,6 +52,8 @@ public final class RigPose {
 	 */
 	public record Pose(int kind, float t, float hover, float flight, float time, float recoil, float still) {
 	}
+	/** The back rig's wings: spread in full flight and for a wing-slash, folded back in hover or on landing. */
+	private static float wingAmount;
 
 	/** Moving at least this fast (blocks/tick) in full flight, Wind's cruise lean takes the body. */
 	static final double CRUISE_SPEED = 0.25;
@@ -355,11 +358,63 @@ public final class RigPose {
 				set(h.leftArm, BARRAGE_ARM_BACK, 0.0F, -BARRAGE_ARM_OUT, amount);
 				spread(h, BARRAGE_SPREAD * amount * still);
 				h.head.xRot -= (BARRAGE_LEAN + BARRAGE_CHIN) * watch;
-			}
-			default -> {
-			}
-		}
-	}
+				}
+				case RigMoves.WINGSLASH -> {
+					// the dash with the wings out as blades: coil, then lunge flat behind the head
+					float fire = RigMoves.DASH_FIRE;
+					float coil = RigBeats.at(t, 0.0F, 0.0F, LINEAR, fire, 1.0F, OUT, fire + 2.0F, 0.0F, IN);
+					float lunge = RigBeats.at(t, fire, 0.0F, LINEAR, fire + 2.0F, 1.0F, BACK, RigMoves.DASH_TICKS - 4.0F, 1.0F, LINEAR, RigMoves.DASH_TICKS, 0.0F, SINE);
+					float amount = Math.max(coil, Math.min(lunge, 1.0F));
+					crouch(h, DASH_DROP * coil, DASH_COIL * coil + DASH_LEAN * lunge);
+					set(h.rightArm, DASH_ARMS_BACK, 0.0F, DASH_ARMS_OUT, amount);
+					set(h.leftArm, DASH_ARMS_BACK, 0.0F, -DASH_ARMS_OUT, amount);
+					brace(front, rear, side, DASH_TRAIL * lunge);
+					h.head.xRot -= DASH_LEAN * 0.8F * lunge;
+				}
+				case RigMoves.SPEAR -> {
+					// the spear legs stab out in a ring and draw back
+					float amount = RigBeats.at(t, 0.0F, 0.0F, LINEAR, 2.0F, 1.0F, BACK, 6.0F, 1.0F, LINEAR, 10.0F, 0.0F, SINE);
+					crouch(h, 1.5F * amount, 0.2F * amount);
+					set(h.rightLeg, 0.4F, 0.0F, 0.1F, amount);
+					set(h.leftLeg, 0.4F, 0.0F, -0.1F, amount);
+					h.body.xRot += 0.25F * amount;
+				}
+				case RigMoves.PINCER -> {
+					// the pincer arms close over the shoulders and hold what they seized
+					float amount = RigBeats.at(t, 0.0F, 0.0F, LINEAR, 2.0F, 1.0F, BACK, 8.0F, 1.0F, LINEAR, 10.0F, 0.0F, SINE);
+					set(h.rightArm, -0.9F, 0.0F, 0.4F, amount);
+					set(h.leftArm, -0.9F, 0.0F, -0.4F, amount);
+					h.body.xRot += 0.15F * amount;
+				}
+				case RigMoves.GRAPPLE -> {
+					// the grapple line hauls: lean back into it, arms braced
+					float amount = RigBeats.at(t, 0.0F, 0.0F, LINEAR, 3.0F, 1.0F, BACK, 11.0F, 1.0F, LINEAR, 14.0F, 0.0F, SINE);
+					crouch(h, 1.0F * amount, -0.2F * amount);
+					set(h.rightArm, 0.3F, 0.0F, 0.5F, amount);
+					set(h.leftArm, 0.3F, 0.0F, -0.5F, amount);
+				}
+				case RigMoves.LIGHTNING -> {
+					// the helm's horns arc: arms raised, head up
+					float amount = RigBeats.at(t, 0.0F, 0.0F, LINEAR, 3.0F, 1.0F, BACK, 11.0F, 1.0F, LINEAR, 14.0F, 0.0F, SINE);
+					set(h.rightArm, -1.1F, 0.0F, -0.2F, amount);
+					set(h.leftArm, -1.1F, 0.0F, 0.2F, amount);
+					h.head.xRot -= 0.2F * amount;
+				}
+				default -> {
+				}
+				}
+				// the back rig's wings: spread in full flight and for a wing-slash, folded back in hover or on landing
+				boolean wingsOut = pose.kind() == RigMoves.WINGSLASH || RigClient.status.flying();
+				wingAmount = Mth.lerp(0.2F, wingAmount, wingsOut ? 1.0F : 0.0F);
+				if (wingAmount > 0.05F && h.body.hasChild("wing_r") && h.body.hasChild("wing_l")) {
+					ModelPart right = h.body.getChild("wing_r");
+					ModelPart left = h.body.getChild("wing_l");
+					float spread = -0.85F * wingAmount;
+					float beat = pose.kind() == RigMoves.WINGSLASH ? Mth.sin(pose.time() * 0.6F) * 0.25F * wingAmount : 0.0F;
+					right.xRot = Mth.lerp(0.3F, right.xRot, spread - beat);
+					left.xRot = Mth.lerp(0.3F, left.xRot, spread + beat);
+				}
+				}
 
 	/** A blow's shape: nothing before 0, up to 1 by {@code rise} (fast, slowing), back to nothing by {@code end}. */
 	private static float pulse(float t, float rise, float end) {
