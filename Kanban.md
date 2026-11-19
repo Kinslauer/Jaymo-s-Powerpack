@@ -48,6 +48,7 @@ kanban-plugin: board
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · ☀️ Apollo · #1787 · changes · fixing review notes
 - [ ] [[Inbox/smoothmount-6-heave-downed|smoothmount-6-heave-downed]] · 🍇 Bacchus · claimed
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · 🪶 Quill · #1853 · writing
+- [ ] [[Agents/great-spit|great-spit]] · 💻 Odysseus · running
 
 
 ## In review
