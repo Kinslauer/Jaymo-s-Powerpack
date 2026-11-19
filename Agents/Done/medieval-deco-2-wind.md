@@ -11,4 +11,4 @@ Files I own: kingdoms `sailing/WindPush.java`, `client/disasters/WindFeel.java`,
 `JaymosKingdomsClient`. Done, CI green. Not done: cloak/banner lean.
 
 ## Notes
-- 2026-11-19 09:04 PR #1798 is merged into master; moved to Agents/Done.
+- 2026-11-19 18:22 PR #1798 is merged into master; moved to Agents/Done.
