@@ -242,6 +242,7 @@ public final class ZFighterPatrol {
 		ServerTickEvents.END_SERVER_TICK.register(ZFighterPatrol::tick);
 		ServerTickEvents.END_SERVER_TICK.register(PatrolLaw::tick);
 		ServerLivingEntityEvents.AFTER_DEATH.register(ZFighterPatrol::afterDeath);
+		ZFighterPatrolRelief.init();
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			FLIERS.clear();
 			PURSUITS.clear();
@@ -702,8 +703,12 @@ public final class ZFighterPatrol {
 				PatrolLaw.givePartner(player);
 				ZFighterNpcs.ask(player, man, Component.translatable("talk.jaymospowers.patrol.partnered"), List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)));
 			}));
+			options.add(ZFighterNpcs.Option.of("talk.jaymospowers.patrol.opt.relief", true, () -> ZFighterPatrolRelief.ask(player, man, back)));
+			// your Patrol file: rank, arrests on warrant, skip writs drawn, relief runs done
 			options.add(ZFighterNpcs.Option.of("talk.jaymospowers.patrol.opt.report", true, () -> ZFighterNpcs.ask(player, man,
-				Component.translatable("talk.jaymospowers.patrol.report", rankName(rank(player, member.arrests())), member.arrests()),
+				Component.translatable("talk.jaymospowers.patrol.file", rankName(rank(player, member.arrests())), member.arrests(),
+					Integer.bitCount(player.getAttachedOrElse(com.jaymospowers.power.zfighter.farworld.PatrolWrit.ISSUED, 0)),
+					ZFighterPatrolRelief.of(player).done()),
 				List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)))));
 		}
 		ZFighterNpcs.ask(player, man, words, options);
