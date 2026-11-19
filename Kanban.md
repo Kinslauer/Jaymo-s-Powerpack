@@ -37,9 +37,9 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · #1853 · changes · fixing review notes
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · ☀️ Apollo · #1787 · changes · fixing review notes
 - [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · claimed
+- [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · claimed
 
 
 ## In review
