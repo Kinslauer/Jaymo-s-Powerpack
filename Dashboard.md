@@ -34,6 +34,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1816 Powerborne Heroes picks - deeds, storm, Web, second jump, costumes, Divine-born, Smoke banish, Ember, fusion, shields (Powers, Kingdoms, 2026-11-19)
 - [ ] #1815 edges and sparks - blades dull, grindstones, sparks that catch, armour that rings (Powers, Kingdoms, 2026-11-19)
 - [ ] #1814 Hackers 'n Slashers 4: a shove for everyone, and weapon kinds' on-hit effects (Powers, 2026-11-19)
 - [ ] #1813 crits - riposte kinds, crit cue, camera punch, heavy crit ring, combat attributes (Powers, 2026-11-19)
@@ -93,8 +94,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1740 building blocks - vertical slabs, quarter steps, mixed slabs, paired and waterlogged doors (Powers, Kingdoms, 2026-11-18)
 - [ ] #1739 only Epic towns are crowned: no kingdom seated on a lone castle (Kingdoms, 2026-11-18)
 - [ ] #1738 survivors wake 500-1000 blocks from where they fell (Powers, Kingdoms, 2026-11-18)
-- [ ] #1730 light armour: the world wears it (Powers, Kingdoms, Kitchen, 2026-11-18)
-- …and 202 older ones.
+- …and 203 older ones.
 
 ## Health
 
