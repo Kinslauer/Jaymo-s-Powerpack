@@ -68,8 +68,10 @@ Every building keeps its source, author and licence in the library index, and th
   castles' files are bigger than it.
 - A second tab on the table's file list, "Pattern books": every library building (in the pack, shipped, and the world's),
   with its land, size and author. Picking one makes it a plan like any upload.
-- Library castles (mc-mod.net: the small castles, the castle base, the two big ones; Berezka's, Battle Castles) also
-  stand as a **castle town's castle** where its land has no Grim or ATi castle near. Open question 2.
+- Library castles (mc-mod.net: the small castles, the castle base, the two big ones; Berezka's, Battle Castles) are
+  built by a realm's builders **only when they raise a castle from nothing**: founding a new kingdom, or rebuilding
+  after a raid left no castle standing. There they join the Grim and ATi castles as choices for the land (grand
+  seats). Any other castle comes from the mason's table. (Andy, 2026-11-19.)
 
 ### 5. Credits and lore
 - Credits on the pack page and in `LIBRARY-CREDITS.md`; the world-only builds' authors listed in the mason's table only.
@@ -89,6 +91,5 @@ in the wild are drawn into them, and builders put them up again whole, with a fi
 1. **World-only files**: Andy downloads them (mc-mod.net and Planet Minecraft gate their downloads behind ad pages and
    block the cloud). Recommended: download into `C:\Users\toopo\Downloads\building-library\`; the PC reviewer copies them
    into the server world's `jaymoskingdoms_library/` with the next pbdr.
-2. **Castles from the library**: let builders put up library castles as castle-town castles (up to 128 across), or
-   keep them mason's-table only. Recommended: castle towns, where the land has no Grim or ATi castle.
+2. ~~Castles from the library~~: decided, see patch 4 (only when building a castle from nothing, else the table).
 3. **The Lost Castle** if it ends up over 128 across: nine designs, or limit 136. Recommended: nine designs.
