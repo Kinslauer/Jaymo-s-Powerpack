@@ -24,11 +24,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BannerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -47,10 +49,14 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>What it keeps is cheap: only blocks that changed, and their old state, caught as they change ({@code ChronoMendMixin}
  * on {@code Level.setBlock}). A Chrono with the ability keeps a rolling log of the changes round them for the last 30 s
- * ({@link #WATCH}); a mark keeps the first old state of each block that changes inside it. Blocks with their own data
- * (signs, banners, heads, spawners) get it back. <b>Containers get their block back empty</b>: nothing that was inside is
+ * ({@link #WATCH}); a mark keeps the first old state of each block that changes inside it. Only purely decorative block
+ * data (signs, banners, heads) gets put back; <b>every other block with contents or a keeper (chests, furnaces, hives,
+ * lecterns, campfires, bookshelves, pots, jukeboxes, spawners) comes back plain and empty</b>: nothing that was inside is
  * restored (what spilled out when it broke stays where it fell), and entities (mobs, items, projectiles) are never
- * restored, so nothing can be duplicated. The restore sets blocks without block updates or drops.
+ * restored, so nothing can be duplicated. <b>What a player did by hand is not undone</b>: a block a player broke, placed
+ * or used an item on inside the space (or the 30 s log) is left as it now is, so mining a wall and rewinding keeps the
+ * ore and gives no second copy of it. Explosions, fire, mobs, pistons and powers' terrain damage are put back. The
+ * restore sets blocks without block updates or drops.
  */
 public final class ChronoMend {
 	// ---- tuning ----
@@ -78,11 +84,12 @@ public final class ChronoMend {
 	private static final int SET = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE | Block.UPDATE_SUPPRESS_DROPS;
 	private static final String TABLE = "chrono_mend";
 
-	/** A block as it was: its state, and its block entity's data if it is one worth keeping (never a container's). */
+	/** A block as it was: its state, and its block entity's data if it is purely decorative (a sign, banner or head). */
 	record Saved(BlockState state, @Nullable CompoundTag data) {
 	}
 
-	private record Entry(long tick, long pos, Saved saved) {
+	/** {@code saved} is null for a block a player changed by hand: it is not put back. */
+	private record Entry(long tick, long pos, ResourceKey<Level> dim, @Nullable Saved saved) {
 	}
 
 	/** A Chrono's rolling log of changes near them. */
@@ -98,6 +105,8 @@ public final class ChronoMend {
 		final BlockPos centre;
 		final long at;
 		final Map<Long, Saved> changed = new HashMap<>();
+		/** Blocks a player changed by hand since the mark: never put back. */
+		final java.util.Set<Long> hand = new java.util.HashSet<>();
 
 		Mark(ResourceKey<Level> dim, BlockPos centre, long at) {
 			this.dim = dim;
@@ -130,6 +139,8 @@ public final class ChronoMend {
 	private static final Map<UUID, Run> RUNS = new HashMap<>();
 	/** True while a turn-back sets blocks, so they are not logged as changes. */
 	private static boolean restoring;
+	/** Above 0 while a player's own break, placing or item use is running: the blocks it changes are theirs. */
+	private static int handDepth;
 
 	private ChronoMend() {
 	}
@@ -185,11 +196,12 @@ public final class ChronoMend {
 			say(player, "hungry");
 			return;
 		}
-		Map<Long, Saved> back = now - mark.at < FRESH_TICKS ? lately(player, mark, now) : mark.changed;
+		boolean recent = now - mark.at < FRESH_TICKS;
+		Map<Long, Saved> back = recent ? lately(player, mark, now) : mark.changed;
 		List<Map.Entry<Long, Saved>> blocks = new ArrayList<>();
 		for (Map.Entry<Long, Saved> e : back.entrySet()) {
 			BlockPos pos = BlockPos.of(e.getKey());
-			if (level.hasChunkAt(pos) && level.getBlockState(pos) != e.getValue().state()) {
+			if (level.hasChunkAt(pos) && (recent || !mark.hand.contains(e.getKey())) && level.getBlockState(pos) != e.getValue().state()) {
 				blocks.add(e);
 			}
 		}
@@ -230,15 +242,26 @@ public final class ChronoMend {
 		if (watch == null) {
 			return back;
 		}
+		java.util.Set<Long> hand = new java.util.HashSet<>();
 		for (Entry e : watch.log) {
-			if (now - e.tick() <= FRESH_TICKS && mark.covers(BlockPos.of(e.pos()))) {
-				back.putIfAbsent(e.pos(), e.saved());
+			if (now - e.tick() <= FRESH_TICKS && e.dim().equals(mark.dim) && mark.covers(BlockPos.of(e.pos()))) {
+				if (e.saved() == null) {
+					hand.add(e.pos());
+				} else {
+					back.putIfAbsent(e.pos(), e.saved());
+				}
 			}
 		}
+		back.keySet().removeAll(hand);
 		return back;
 	}
 
 	// ---------------------------------------------------------------- catching changes
+
+	/** Called around a player's own break, placing or item use: what changes inside it is by hand. */
+	public static void byHand(boolean start) {
+		handDepth = start ? handDepth + 1 : Math.max(0, handDepth - 1);
+	}
 
 	/** Called before every block set on a level ({@code ChronoMendMixin}): notes the old block for whoever is keeping watch. */
 	public static void changed(Level level, BlockPos pos, BlockState now) {
@@ -251,16 +274,21 @@ public final class ChronoMend {
 			return;
 		}
 		Saved saved = null;
+		boolean hand = handDepth > 0;
 		long gameTime = server.getGameTime();
 		for (Watch watch : WATCHES.values()) {
 			if (watch.dim == server.dimension() && Math.abs(pos.getX() - watch.at.getX()) <= WATCH && Math.abs(pos.getY() - watch.at.getY()) <= WATCH
 				&& Math.abs(pos.getZ() - watch.at.getZ()) <= WATCH && watch.log.size() < LOG_MAX) {
-				saved = saved == null ? save(server, pos, old) : saved;
-				watch.log.addLast(new Entry(gameTime, pos.asLong(), saved));
+				if (!hand) {
+					saved = saved == null ? save(server, pos, old) : saved;
+				}
+				watch.log.addLast(new Entry(gameTime, pos.asLong(), server.dimension(), hand ? null : saved));
 			}
 		}
 		for (Mark mark : MARKS.values()) {
-			if (mark.dim == server.dimension() && mark.covers(pos) && mark.changed.size() < DIFF_MAX && !mark.changed.containsKey(pos.asLong())) {
+			if (hand && mark.dim == server.dimension() && mark.covers(pos)) {
+				mark.hand.add(pos.asLong());
+			} else if (mark.dim == server.dimension() && mark.covers(pos) && mark.changed.size() < DIFF_MAX && !mark.changed.containsKey(pos.asLong())) {
 				saved = saved == null ? save(server, pos, old) : saved;
 				mark.changed.put(pos.asLong(), saved);
 			}
@@ -270,7 +298,7 @@ public final class ChronoMend {
 	private static Saved save(ServerLevel level, BlockPos pos, BlockState state) {
 		CompoundTag data = null;
 		BlockEntity entity = level.getBlockEntity(pos);
-		if (entity != null && !(entity instanceof Container)) {
+		if (entity != null && (entity instanceof SignBlockEntity || entity instanceof BannerBlockEntity || entity instanceof SkullBlockEntity)) {
 			data = entity.saveWithFullMetadata(level.registryAccess());
 		}
 		return new Saved(state, data);

@@ -333,12 +333,13 @@ public final class HeadFx {
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.3F, 2.0F);
 	}
 
-	/** The living thing nearest {@code from} within {@link #SPARK_JUMP_REACH}, other than it, the archer and armour stands. */
+	/** The living thing nearest {@code from} within {@link #SPARK_JUMP_REACH}, other than it, and (for a player's arrow) only a foe: never the archer, a friend, a pet or an armour stand. */
 	private static @Nullable LivingEntity nearestOther(ServerLevel level, LivingEntity from, @Nullable Entity owner) {
 		LivingEntity best = null;
 		double bestSq = Double.MAX_VALUE;
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, from.getBoundingBox().inflate(SPARK_JUMP_REACH),
-			e -> e.isAlive() && !e.isSpectator() && e != from && e != owner && !(e instanceof net.minecraft.world.entity.decoration.ArmorStand))) {
+			e -> e != from && (owner instanceof net.minecraft.server.level.ServerPlayer sp ? com.jaymospowers.core.PickKit.foe(sp, e)
+				: e.isAlive() && !e.isSpectator() && e != owner && !(e instanceof net.minecraft.world.entity.decoration.ArmorStand)))) {
 			double sq = e.distanceToSqr(from);
 			if (sq <= SPARK_JUMP_REACH * SPARK_JUMP_REACH && sq < bestSq) {
 				best = e;
