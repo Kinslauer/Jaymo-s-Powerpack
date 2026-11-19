@@ -100,6 +100,7 @@ public final class RigMind {
 
 	static void forget(UUID player) {
 		STATES.remove(player);
+		RigVoice.forget(player);
 	}
 
 	/** The warnings standing for this player now (the last look), as {@link RigNet} bits. */
@@ -267,7 +268,10 @@ public final class RigMind {
 		}
 		state.lastLine = now;
 		player.sendOverlayMessage(line(personality, key, args));
-		ping(player, pitch);
+		// (said aloud where the line has a clip; the chime otherwise)
+		if (!RigVoice.speak(player, personality, key)) {
+			ping(player, pitch);
+		}
 	}
 
 	/** (0.11.87) A line in the Mind's voice on the action bar, now, whatever was said last. */
@@ -278,7 +282,9 @@ public final class RigMind {
 		}
 		STATES.computeIfAbsent(player.getUUID(), u -> new State()).lastLine = player.level().getGameTime();
 		player.sendOverlayMessage(line(personality, key, args));
-		ping(player, pitch);
+		if (!RigVoice.speak(player, personality, key)) {
+			ping(player, pitch);
+		}
 	}
 
 	/** (0.11.87) A longer line in the Mind's voice, in chat (scan results, level-ups). */
@@ -286,6 +292,7 @@ public final class RigMind {
 		String personality = personality(core);
 		if (personality != null) {
 			player.sendSystemMessage(line(personality, key, args));
+			RigVoice.speak(player, personality, key);
 		}
 	}
 

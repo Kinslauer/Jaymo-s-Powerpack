@@ -129,6 +129,8 @@ public final class HeraldryArmour {
 		}
 		part("crest_horns", Harness.Slot.CREST, 0, 0.0F, 0, false, null, "crest_horns");
 				part("crest_wings", Harness.Slot.CREST, 0, 0.0F, 0, false, null, "crest_wings");
+				// (the plume came with its art, name and dye recipe but was never registered, and the recipe stopped the server loading)
+				part("crest_plume", Harness.Slot.CREST, 0, 0.0F, 0, false, null, "crest_plume");
 				// creed variants
 				worn("faith_cuirass", ArmorType.CHESTPLATE);
 				part("oath_sleeves", Harness.Slot.ARMS, 1, 0.0F, 240, true, null, "oath_sleeves");

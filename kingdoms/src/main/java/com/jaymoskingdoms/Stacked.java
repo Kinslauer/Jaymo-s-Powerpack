@@ -131,13 +131,20 @@ public final class Stacked {
 		}
 	}
 
-	/** The stack's bands as last read: the server they were read for, the Overworld band's lowest height, the Aether band's. */
+	/** The stack's bands as last read: the server they were read for, the Overworld band's lowest height, the Cloud Sea's, the Aether's. */
 	private static MinecraftServer bandsOf;
-	private static int overworldFrom, aetherFrom;
+	private static int overworldFrom, cloudFrom, aetherFrom;
+
+	/** Jaymo's Powers' Cloud Sea: the band of open sky and cloud between the Overworld and the Aether (the steam towns' home). */
+	public static final ResourceKey<Level> CLOUD_SEA = ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION,
+		net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", "cloud_sea"));
+	/** {@link #band}'s answer for the Cloud Sea. */
+	public static final int CLOUD = 2;
 
 	/**
-	 * Which band of the world the factions live in holds height {@code y}: 1 the Aether's, 0 the Overworld's, -1 the
-	 * Nether's. Always 0 in a world that isn't stacked. What stands in different bands has no road between it.
+	 * Which band of the world the factions live in holds height {@code y}: 1 the Aether's, {@link #CLOUD} the Cloud Sea's,
+	 * 0 the Overworld's, -1 the Nether's. Always 0 in a world that isn't stacked. What stands in different bands has no road
+	 * between it.
 	 */
 	public static int band(MinecraftServer server, int y) {
 		if (server != bandsOf) {
@@ -145,9 +152,31 @@ public final class Stacked {
 			ResourceKey<Level> aether = ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION,
 				net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", "aether"));
 			aetherFrom = joined(server, aether) ? minY(server, aether) : Integer.MAX_VALUE;
+			cloudFrom = joined(server, CLOUD_SEA) ? minY(server, CLOUD_SEA) : Integer.MAX_VALUE;
 			overworldFrom = joined(server, Level.NETHER) ? minY(server, Level.OVERWORLD) : Integer.MIN_VALUE;
 		}
-		return y >= aetherFrom ? 1 : y < overworldFrom ? -1 : 0;
+		return y >= aetherFrom ? 1 : y >= cloudFrom ? CLOUD : y < overworldFrom ? -1 : 0;
+	}
+
+	/**
+	 * The height of the first open block over the top of this column (as {@link Level#getHeight} answers it), counting only
+	 * the band that holds {@code y} when that band is the Cloud Sea: over the clouds an Aether island may hang, and the
+	 * level's own heightmap would answer with the island's top. Anywhere else the level's own answer.
+	 */
+	public static int top(ServerLevel level, net.minecraft.world.level.levelgen.Heightmap.Types type, int x, int z, int y) {
+		MinecraftServer server = level.getServer();
+		if (band(server, y) != CLOUD) {
+			return level.getHeight(type, x, z);
+		}
+		int low = minY(server, CLOUD_SEA), high = maxY(server, CLOUD_SEA);
+		BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos(x, high, z);
+		for (int h = high; h >= low; h--) {
+			at.setY(h);
+			if (type.isOpaque().test(level.getBlockState(at))) {
+				return h + 1;
+			}
+		}
+		return low;
 	}
 
 	/** Whether this realm is a band of the stacked Overworld (so you reach it by walking, digging or flying, not a jump). */

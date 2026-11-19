@@ -6091,3 +6091,97 @@ Built; not played in game.
   - **Horn Lightning** (level 4, 90): lightning leaps from the helm to the nearest foe and on to up to four, half again as strong in the rain, and overcharges the Core.
 - Metal art: `tools/gen_rig.py` `back()` writes `textures/entity/rig/back.png` and its glow. (`RigBack`)
 - Built; not played.
+
+## 0.25.27 (2026-11-19): Duplex doubles take spoken orders (#1770)
+
+- **Orders by voice**: as Duplex, say an order aloud (or "doubles, ..." first) and your doubles within 32 blocks do it. *follow* (come, heel); *wait* (stay, hold), where they stand; *scout*: one runs 20 blocks the way you face and comes back with how many foes it saw; *collect* (gather, pick up): they pick up the drops near and bring them to you; *mine* (dig): one digs out the open block you look at, then up to 8 more of the same touching it, never anything you couldn't break yourself or harder than stone-and-ore; *fetch <thing>* (bring, get): one fetches a stack with that in its name from a chest or barrel within 16 blocks, or the first stack of the container you look at; *fight* (attack): all go for what you look at, or the nearest foe. Anything a double holds drops if it pops. (`DoubleOrders`, `XenoDouble`)
+- Built; not played.
+
+## 0.25.28 (2026-11-19): Space: the star map's atlas, and the ringed giant in the night sky (#1772)
+
+- **Atlas**: the star map remembers what you found on each world. A world you've come down on wears a small gold pin on the map, and its card says how many times you've landed there, where you last did, and where your bed is if your respawn point is on that world. Mission progress was already on the card. Kept on the player through death. (`ZFighterAtlas`, `ZFighterStarMapScreen`)
+- **The ringed giant**: once the Verdant World's chart is read, what shows in the Overworld's night sky is its blue giant, brighter and bigger, with a faint leaning ring out of each side. It used to be a small green dot. The giant already had its ring on the star map and in the Verdant sky. (`SkyPlanets`)
+- Built; not played.
+
+## 0.25.29 (2026-11-19): Space: the Hollow, and crossing to the Moon on your own ki (#1772)
+
+- **The Hollow**: a black hole past the outer orbits, drawn on the star map in the corner across from the Maw (a dark disc with a thin bright rim and a slow burning disc). Hover to name it. No pod flies to it. Trips to or from the worlds past it (Glacia, the Verdant World and its giant) skirt it: its pull drags the pod off course and the flight runs about a third longer. The flight screen shows it passing overhead, with the starlight round it bent outward. (`ZFighterSpace#skirtsHollow`, `ZFighterSpaceArt#hollow`, `ZFighterFlightScreen`)
+- **Ki crossing**: a Z Fighter of 50,000 power or more who is flying, climbs 64 blocks past the top of the world and looks straight up for 3 seconds crosses to the Pale Moon on their own ki, burning 80% of it. The flight shows with their light in place of the pod, and they come down beside the Moon's pad. From the Moon the same way back brings them down where they left from. Only the Moon is near enough; every other world still needs a pod. Nothing hurts them on the way. (`KiVoyage`)
+- Built; not played. The power gate and ki cost are tuning constants for Andy to set (`KiVoyage.POWER_GATE`, `KI_SHARE`).
+
+## 0.25.30 (2026-11-19): The high sky as near space, and orbit (#1772)
+
+- **The look**: the higher you climb the high sky, the farther below the planet lies and the more of its curve shows (up to two and a half times as far down at the top). The sun up there is hard and white, a tight glare with two thin spikes of light across it, no soft glow. (`HighSkyClient`)
+- **Orbit**: from 96 blocks above the bottom of the high sky you're in orbit, and you're told so once on getting there. A Z Fighter's cruise goes three times as fast and gets up to speed three times as quickly, carrying you far across the world below, and you come down wherever you dive. (`HighSkyClient#cruiseBoost`, `ZFighterFlightClient`)
+- Not in this patch: pods in orbit (they still fly the star map's trips).
+- Built; not played. Stacked on Lanterns 6 (#1766).
+
+## 0.25.31 (2026-11-19): Patrol as lawmen: warrants for crooked officers, arrests, a partner (#1764)
+
+- **Patrol warrant**: an officer that a realm of Jaymo's Kingdoms wants for a crime gets a Patrol warrant. Each new crime adds to it and costs a rank. A patrolman comes down for them (at most once a day, in the open) and fights them, harder for each crime on the warrant. Once they're beaten down to 2 hearts he stops: brought in, warrant served. Talking to him and choosing "I'll come quietly." serves it too. (`PatrolLaw`)
+- **Arrests**: an officer who hands a hogtied crook to a realm's ruler for its bounty has made a Patrol arrest. It counts toward rank and pays training (the realm pays the bounty). (`PatrolLaw#handedOver`, `ZFighterPatrol#countArrest`)
+- **A partner**: from Officer rank, a patrolman can be asked "I could use a partner." Your partner stays at your side, fights what's fighting you or what you hit, talks like any patrolman, and comes along on every pod trip, stepping out beside you on landing. If he falls you're told, and any patrolman can give you another. Not while you're under a Patrol warrant.
+- Built; not played.
+
+## 0.25.32 (2026-11-19): Space: the star map's atlas, and the ringed giant in the night sky (#1766)
+
+- **Atlas**: the star map remembers what you found on each world. A world you've come down on wears a small gold pin on the map, and its card says how many times you've landed there, where you last did, and where your bed is if your respawn point is on that world. Mission progress was already on the card. Kept on the player through death. (`ZFighterAtlas`, `ZFighterStarMapScreen`)
+- **The ringed giant**: once the Verdant World's chart is read, what shows in the Overworld's night sky is its blue giant, brighter and bigger, with a faint leaning ring out of each side. It used to be a small green dot. The giant already had its ring on the star map and in the Verdant sky. (`SkyPlanets`)
+- Built; not played.
+
+## 0.25.33 (2026-11-19): Space: the Hollow, and crossing to the Moon on your own ki (#1766)
+
+- **The Hollow**: a black hole past the outer orbits, drawn on the star map in the corner across from the Maw (a dark disc with a thin bright rim and a slow burning disc). Hover to name it. No pod flies to it. Trips to or from the worlds past it (Glacia, the Verdant World and its giant) skirt it: its pull drags the pod off course and the flight runs about a third longer. The flight screen shows it passing overhead, with the starlight round it bent outward. (`ZFighterSpace#skirtsHollow`, `ZFighterSpaceArt#hollow`, `ZFighterFlightScreen`)
+- **Ki crossing**: a Z Fighter of 50,000 power or more who is flying, climbs 64 blocks past the top of the world and looks straight up for 3 seconds crosses to the Pale Moon on their own ki, burning 80% of it. The flight shows with their light in place of the pod, and they come down beside the Moon's pad. From the Moon the same way back brings them down where they left from. Only the Moon is near enough; every other world still needs a pod. Nothing hurts them on the way. (`KiVoyage`)
+- Built; not played. The power gate and ki cost are tuning constants for Andy to set (`KiVoyage.POWER_GATE`, `KI_SHARE`).
+
+## 0.25.34 (2026-11-19): Called in a dream: a power wakes through a dream or a nightmare (#1769)
+
+- **The call**: a survival player with no power yet who falls fast asleep has a 35% chance a night of being called. Their view tilts up off the pillow over a few seconds, and then:
+  - **A dream** (most calls): a soft gold light gathers at the edges of their sight with motes rising through it. The power wakes with them in the morning.
+  - **A nightmare** (3 in 10): they start up out of bed into the dark (blind past a few blocks, the edges of the screen closing in black with a red heartbeat), and phantoms come at them out of it, more as it goes on, up to five. Live through a minute and the power wakes then and there, corrupted. A blow that would take them to 2 hearts or below wakes them instead, gasping and with nothing; a nightmare never kills. Its phantoms vanish when it ends.
+- Built where they sleep, with no dream dimension (Andy's pick: a dream arena). Kingdoms' night camera, when it's running, keeps the view, and the tilt stays out of its way. (`DreamCall`, `DreamView`, `DreamCameraMixin`)
+- Built; not played.
+
+## 0.25.35 (2026-11-19): Rig patch 2: guns that unfold (#1749)
+
+A Rig wearer gets six new gun actives, each a Rig menu entry with charge cost, poses and sounds:
+
+- **Palm blast held charge**: Tap for quick bolts, hold to charge a big blast. The limb glows while charging. (Mind level 2)
+- **Gatling arm**: Spin up, pour bolts while held, overheat if held too long; vents hiss to cool. Heat bar on the HUD. (Mind level 3)
+- **Railgun**: Charge, then release an instant line through everything; it scorches the ground along the line. (Mind level 4)
+- **Sonic cannon**: Hold to blast a cone of sound that throws creatures back and stuns them. Resonance users caught in it hear it louder. (Mind level 4)
+- **Twin beam**: Both arms become cannons and fire one wide beam together. Braced wide stance. (Mind level 5, Unibeam variant)
+- **Siege mode**: Plant your feet; an artillery cannon unfolds from your back, rooted in place, firing shells where you look until you fold it away. (Mind level 5, Siege frame only)
+
+Each one needs the whole Rig set and Core charge. Built; not played.
+
+## 0.25.36 (2026-11-19): Rig patch 4: pull-up, hyper thrust, banking turns, meteor dive (#1765)
+
+- **Pull up**: diving at the ground, the visor flashes and shows time to impact, and the Mind shouts a warning; the one-knee landing catches what it can.
+- **Hyper thrust**: a last gear past full flight - double-tap sprint while flying for a short, costly burst of speed.
+- **Banking turns**: the suit rolls into turns and levels back out, smooth for everyone watching.
+- **Meteor dive**: rocket straight up, then crash down where you look - a ring and a big shake, no block damage.
+- **Other flyers**: other Rig pilots' flight is smoothed on your screen so they never jitter.
+- All five are Rig menu entries (Sneak + J), from Mind level 5 in the whole set, each costing Core charge.
+
+Built; not played in game.
+
+## 0.25.37 (2026-11-19): Rig: the Mind talks, flies and keeps watch (#1773)
+
+- **Talk to the Mind**: say a line that starts with one of its commands (or "mind ..." for anything) and the Mind catches it, so nobody else hears, and answers you in chat in its own personality. "light up" (the helm's lamps: night sight for a minute, 20 charge), "dig me out" (clears the soft blocks pinning you, 40 charge), "report", "scan" (level 3), "where am I", "how do I make <thing>" (what goes into it), "fly me to the village / home", "stop". It never explains the world, only what it can do. (`RigTalk`)
+- **Autopilot**: in full flight, "fly me to the village" (the nearest meeting bell within 256 blocks) or "home" (your bed) and the Mind flies you there, cruising high and coming down near the spot, for 2 charge a second. Any movement key takes the controls back. (`RigPilot`, `RigPilotClient`)
+- **Threat calls**: the visor's target card adds the Mind's one-word verdict to hostile or calm, in its voice ("ignore, for now", "kill it", "melt it" for anything twice your health or heavily armoured). (`RigHelmView`)
+- **Evacuate**: in the whole set at Mind level 3, a hit that leaves the plates at 15% of their life or less with the Core at 10% or less throws you up and clear (slow fall after). The suit slumps where you stood (parked; the call key brings it back, and it doesn't guard), and the Forge mends it. At most every 2 minutes. (`RigEvac`)
+- **Fights while you're down**: downed in the whole set at Mind level 4, the Mind fires the palm at what last hurt you, or the nearest foe, every 1.5 seconds while the charge lasts. (`RigEvac`)
+- **Combat log and vitals**: while blows are flying, the Helm's HUD folds out the last three given and taken and your body's state: the worst-hurt part from Wounds and any broken bones. It folds away 10 seconds after the last. (`RigLog`, `RigLogClient`)
+- Not yet: the spoken Mind (`md-voice`) waits on a voice source Andy is happy with; every line already has its own key to voice.
+- Built; not played.
+
+## 0.25.38 (2026-11-19): the Rig's Mind speaks aloud (#1782)
+
+- **The Rig's Mind says its lines out loud**, heard only by the wearer, and each personality has its own Google voice:
+  loyal (Fenrir), dry (Algieba) and grim (Orus). 138 lines are spoken: warnings, cloak, nova, override, level-ups, calls,
+  its answers when you talk to it, and the rest. The lines with a number or a name in them (the charge report, a lock and a scan with its counts) are still
+  text with the chime. While one line is still playing, the next one only shows on screen (`RigVoice`, `RigMind`).
+- Made with `tools/voices/google_voices.py --rig`. Built; not played.

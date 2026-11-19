@@ -2943,5 +2943,971 @@
 				"name": "jaymospowers:rough/burner"
 			}
 		]
+	},
+	"voice.rig.dry.ambush": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_ambush"
+			}
+		]
+	},
+	"voice.rig.dry.behind": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_behind"
+			}
+		]
+	},
+	"voice.rig.dry.call": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_call"
+			}
+		]
+	},
+	"voice.rig.dry.cloak_off": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_cloak_off"
+			}
+		]
+	},
+	"voice.rig.dry.cloak_on": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_cloak_on"
+			}
+		]
+	},
+	"voice.rig.dry.empty": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_empty"
+			}
+		]
+	},
+	"voice.rig.dry.explosion": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_explosion"
+			}
+		]
+	},
+	"voice.rig.dry.lava": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_lava"
+			}
+		]
+	},
+	"voice.rig.dry.level.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_level_2"
+			}
+		]
+	},
+	"voice.rig.dry.level.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_level_3"
+			}
+		]
+	},
+	"voice.rig.dry.level.4": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_level_4"
+			}
+		]
+	},
+	"voice.rig.dry.level.5": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_level_5"
+			}
+		]
+	},
+	"voice.rig.dry.lock_down": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_lock_down"
+			}
+		]
+	},
+	"voice.rig.dry.low_charge": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_low_charge"
+			}
+		]
+	},
+	"voice.rig.dry.low_health": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_low_health"
+			}
+		]
+	},
+	"voice.rig.dry.night_on": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_night_on"
+			}
+		]
+	},
+	"voice.rig.dry.nova": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_nova"
+			}
+		]
+	},
+	"voice.rig.dry.override": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_override"
+			}
+		]
+	},
+	"voice.rig.dry.park": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_park"
+			}
+		]
+	},
+	"voice.rig.dry.pincer_none": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_pincer_none"
+			}
+		]
+	},
+	"voice.rig.dry.projectile": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_projectile"
+			}
+		]
+	},
+	"voice.rig.dry.scan_none": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_scan_none"
+			}
+		]
+	},
+	"voice.rig.dry.struck": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_struck"
+			}
+		]
+	},
+	"voice.rig.dry.takeover": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_takeover"
+			}
+		]
+	},
+	"voice.rig.dry.unibeam": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_unibeam"
+			}
+		]
+	},
+	"voice.rig.dry.unlock": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_unlock"
+			}
+		]
+	},
+	"voice.rig.dry.void": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_void"
+			}
+		]
+	},
+	"voice.rig.dry.wake": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_wake"
+			}
+		]
+	},
+	"voice.rig.grim.ambush": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_ambush"
+			}
+		]
+	},
+	"voice.rig.grim.behind": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_behind"
+			}
+		]
+	},
+	"voice.rig.grim.call": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_call"
+			}
+		]
+	},
+	"voice.rig.grim.cloak_off": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_cloak_off"
+			}
+		]
+	},
+	"voice.rig.grim.cloak_on": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_cloak_on"
+			}
+		]
+	},
+	"voice.rig.grim.empty": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_empty"
+			}
+		]
+	},
+	"voice.rig.grim.explosion": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_explosion"
+			}
+		]
+	},
+	"voice.rig.grim.lava": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_lava"
+			}
+		]
+	},
+	"voice.rig.grim.level.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_level_2"
+			}
+		]
+	},
+	"voice.rig.grim.level.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_level_3"
+			}
+		]
+	},
+	"voice.rig.grim.level.4": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_level_4"
+			}
+		]
+	},
+	"voice.rig.grim.level.5": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_level_5"
+			}
+		]
+	},
+	"voice.rig.grim.lock_down": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_lock_down"
+			}
+		]
+	},
+	"voice.rig.grim.low_charge": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_low_charge"
+			}
+		]
+	},
+	"voice.rig.grim.low_health": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_low_health"
+			}
+		]
+	},
+	"voice.rig.grim.night_on": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_night_on"
+			}
+		]
+	},
+	"voice.rig.grim.nova": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_nova"
+			}
+		]
+	},
+	"voice.rig.grim.override": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_override"
+			}
+		]
+	},
+	"voice.rig.grim.park": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_park"
+			}
+		]
+	},
+	"voice.rig.grim.pincer_none": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_pincer_none"
+			}
+		]
+	},
+	"voice.rig.grim.projectile": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_projectile"
+			}
+		]
+	},
+	"voice.rig.grim.scan_none": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_scan_none"
+			}
+		]
+	},
+	"voice.rig.grim.struck": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_struck"
+			}
+		]
+	},
+	"voice.rig.grim.takeover": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_takeover"
+			}
+		]
+	},
+	"voice.rig.grim.unibeam": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_unibeam"
+			}
+		]
+	},
+	"voice.rig.grim.unlock": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_unlock"
+			}
+		]
+	},
+	"voice.rig.grim.void": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_void"
+			}
+		]
+	},
+	"voice.rig.grim.wake": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_wake"
+			}
+		]
+	},
+	"voice.rig.loyal.ambush": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_ambush"
+			}
+		]
+	},
+	"voice.rig.loyal.behind": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_behind"
+			}
+		]
+	},
+	"voice.rig.loyal.call": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_call"
+			}
+		]
+	},
+	"voice.rig.loyal.cloak_off": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_cloak_off"
+			}
+		]
+	},
+	"voice.rig.loyal.cloak_on": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_cloak_on"
+			}
+		]
+	},
+	"voice.rig.loyal.empty": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_empty"
+			}
+		]
+	},
+	"voice.rig.loyal.explosion": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_explosion"
+			}
+		]
+	},
+	"voice.rig.loyal.lava": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_lava"
+			}
+		]
+	},
+	"voice.rig.loyal.level.2": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_level_2"
+			}
+		]
+	},
+	"voice.rig.loyal.level.3": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_level_3"
+			}
+		]
+	},
+	"voice.rig.loyal.level.4": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_level_4"
+			}
+		]
+	},
+	"voice.rig.loyal.level.5": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_level_5"
+			}
+		]
+	},
+	"voice.rig.loyal.lock_down": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_lock_down"
+			}
+		]
+	},
+	"voice.rig.loyal.low_charge": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_low_charge"
+			}
+		]
+	},
+	"voice.rig.loyal.low_health": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_low_health"
+			}
+		]
+	},
+	"voice.rig.loyal.night_on": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_night_on"
+			}
+		]
+	},
+	"voice.rig.loyal.nova": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_nova"
+			}
+		]
+	},
+	"voice.rig.loyal.override": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_override"
+			}
+		]
+	},
+	"voice.rig.loyal.park": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_park"
+			}
+		]
+	},
+	"voice.rig.loyal.pincer_none": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_pincer_none"
+			}
+		]
+	},
+	"voice.rig.loyal.projectile": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_projectile"
+			}
+		]
+	},
+	"voice.rig.loyal.scan_none": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_scan_none"
+			}
+		]
+	},
+	"voice.rig.loyal.struck": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_struck"
+			}
+		]
+	},
+	"voice.rig.loyal.takeover": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_takeover"
+			}
+		]
+	},
+	"voice.rig.loyal.unibeam": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_unibeam"
+			}
+		]
+	},
+	"voice.rig.loyal.unlock": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_unlock"
+			}
+		]
+	},
+	"voice.rig.loyal.void": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_void"
+			}
+		]
+	},
+	"voice.rig.loyal.wake": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_wake"
+			}
+		]
+	},
+	"voice.rig.dry.downed": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_downed"
+			}
+		]
+	},
+	"voice.rig.dry.evac": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_evac"
+			}
+		]
+	},
+	"voice.rig.dry.hyper": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_hyper"
+			}
+		]
+	},
+	"voice.rig.dry.meteor": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_meteor"
+			}
+		]
+	},
+	"voice.rig.dry.pilot.airborne": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_pilot_airborne"
+			}
+		]
+	},
+	"voice.rig.dry.pilot.empty": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_pilot_empty"
+			}
+		]
+	},
+	"voice.rig.dry.pilot.here": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_pilot_here"
+			}
+		]
+	},
+	"voice.rig.dry.pilot.none": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_pilot_none"
+			}
+		]
+	},
+	"voice.rig.dry.pilot.stop": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_pilot_stop"
+			}
+		]
+	},
+	"voice.rig.dry.pullup": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_pullup"
+			}
+		]
+	},
+	"voice.rig.dry.talk.dig": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_talk_dig"
+			}
+		]
+	},
+	"voice.rig.dry.talk.dig_none": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_talk_dig_none"
+			}
+		]
+	},
+	"voice.rig.dry.talk.light": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_talk_light"
+			}
+		]
+	},
+	"voice.rig.dry.talk.no_charge": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_talk_no_charge"
+			}
+		]
+	},
+	"voice.rig.dry.talk.unknown": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_talk_unknown"
+			}
+		]
+	},
+	"voice.rig.dry.verdict.ignore": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_verdict_ignore"
+			}
+		]
+	},
+	"voice.rig.dry.verdict.kill": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_verdict_kill"
+			}
+		]
+	},
+	"voice.rig.dry.verdict.melt": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/dry_verdict_melt"
+			}
+		]
+	},
+	"voice.rig.grim.downed": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_downed"
+			}
+		]
+	},
+	"voice.rig.grim.evac": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_evac"
+			}
+		]
+	},
+	"voice.rig.grim.hyper": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_hyper"
+			}
+		]
+	},
+	"voice.rig.grim.meteor": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_meteor"
+			}
+		]
+	},
+	"voice.rig.grim.pilot.airborne": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_pilot_airborne"
+			}
+		]
+	},
+	"voice.rig.grim.pilot.empty": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_pilot_empty"
+			}
+		]
+	},
+	"voice.rig.grim.pilot.here": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_pilot_here"
+			}
+		]
+	},
+	"voice.rig.grim.pilot.none": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_pilot_none"
+			}
+		]
+	},
+	"voice.rig.grim.pilot.stop": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_pilot_stop"
+			}
+		]
+	},
+	"voice.rig.grim.pullup": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_pullup"
+			}
+		]
+	},
+	"voice.rig.grim.talk.dig": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_talk_dig"
+			}
+		]
+	},
+	"voice.rig.grim.talk.dig_none": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_talk_dig_none"
+			}
+		]
+	},
+	"voice.rig.grim.talk.light": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_talk_light"
+			}
+		]
+	},
+	"voice.rig.grim.talk.no_charge": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_talk_no_charge"
+			}
+		]
+	},
+	"voice.rig.grim.talk.unknown": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_talk_unknown"
+			}
+		]
+	},
+	"voice.rig.grim.verdict.ignore": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_verdict_ignore"
+			}
+		]
+	},
+	"voice.rig.grim.verdict.kill": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_verdict_kill"
+			}
+		]
+	},
+	"voice.rig.grim.verdict.melt": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/grim_verdict_melt"
+			}
+		]
+	},
+	"voice.rig.loyal.downed": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_downed"
+			}
+		]
+	},
+	"voice.rig.loyal.evac": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_evac"
+			}
+		]
+	},
+	"voice.rig.loyal.hyper": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_hyper"
+			}
+		]
+	},
+	"voice.rig.loyal.meteor": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_meteor"
+			}
+		]
+	},
+	"voice.rig.loyal.pilot.airborne": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_pilot_airborne"
+			}
+		]
+	},
+	"voice.rig.loyal.pilot.empty": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_pilot_empty"
+			}
+		]
+	},
+	"voice.rig.loyal.pilot.here": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_pilot_here"
+			}
+		]
+	},
+	"voice.rig.loyal.pilot.none": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_pilot_none"
+			}
+		]
+	},
+	"voice.rig.loyal.pilot.stop": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_pilot_stop"
+			}
+		]
+	},
+	"voice.rig.loyal.pullup": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_pullup"
+			}
+		]
+	},
+	"voice.rig.loyal.talk.dig": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_talk_dig"
+			}
+		]
+	},
+	"voice.rig.loyal.talk.dig_none": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_talk_dig_none"
+			}
+		]
+	},
+	"voice.rig.loyal.talk.light": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_talk_light"
+			}
+		]
+	},
+	"voice.rig.loyal.talk.no_charge": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_talk_no_charge"
+			}
+		]
+	},
+	"voice.rig.loyal.talk.unknown": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_talk_unknown"
+			}
+		]
+	},
+	"voice.rig.loyal.verdict.ignore": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_verdict_ignore"
+			}
+		]
+	},
+	"voice.rig.loyal.verdict.kill": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_verdict_kill"
+			}
+		]
+	},
+	"voice.rig.loyal.verdict.melt": {
+		"sounds": [
+			{
+				"name": "jaymospowers:voice/rig/loyal_verdict_melt"
+			}
+		]
 	}
 }

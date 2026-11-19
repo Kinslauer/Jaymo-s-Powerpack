@@ -71,5 +71,6 @@ public final class TalkNet {
 	static void register() {
 		PayloadTypeRegistry.clientboundPlay().register(Ask.TYPE, Ask.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Answer.TYPE, Answer.CODEC);
+		AskTopics.register();
 	}
 }

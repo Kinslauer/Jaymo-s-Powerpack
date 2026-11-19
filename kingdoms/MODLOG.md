@@ -15159,3 +15159,41 @@ Not tested in game.
 - `make_voices.py --sounds` no longer wipes Kingdoms' other sounds: it only adds, changes or drops voice-line entries
   (it used to write a sounds.json holding nothing but voices).
 - Built; no clips made yet (waiting for the Google key); not played.
+
+## 0.10.47 (2026-11-19): Talking to villagers through chat (#1770)
+
+- **Talk through chat**: say a line aloud while looking at a villager within 8 blocks, or start it with their first name (12 blocks), and they turn to you and answer over their head a moment later. Short replies keep it going for 30 seconds. They answer hello, goodbye and thanks, how they are, their name, their work, whose realm this is, trade, news (their real gossip and suspicions), and what they remember of you. Cold, wary or scornful villagers answer shortly and keep their news to themselves. Anything else gets a "Hm? I didn't follow that." When MCA's own chat AI is switched on (`/mca chatAI`), it answers instead and this keeps quiet. (`ChatTalk`, from `ProximityChat`)
+- Built; not played.
+
+## 0.10.48 (2026-11-19): Ask a villager anything, with suggested follow-ups (#1770)
+
+- **Ask something...**: a new choice in a villager's "Town business" talk opens a talk card with a box to type in. Ask in your own words and they answer in their own way, by how they bear toward you: their name, work and family (the kin of theirs about), whose land it is, the way to the nearest other town (roughly how far and which way), news and gossip, crime (whether they've heard of yours), the weather, how they are, what they make of you, trade. Anything they don't follow gets a "Hm?". Nothing goes online. (`AskTopics`, `ChatTalk`)
+- **Follow-ups**: beside each answer, a "You could ask" panel holds three questions that fit it, to click instead of typing (in the list when the screen is narrow). "That's all." ends it. (`TalkScreen`)
+- Built; not played. Stacked on Lanterns 7 (#1767), whose chat matcher this grows (family, crime, directions, weather).
+
+## 0.10.49 (2026-11-19): Galactic Patrol hooks: wanted time and arrests (#1764)
+
+- With Jaymo's Powers: the Galactic Patrol reads when a player's wanted times run out (`Theft#wantedUntil`) to write Patrol warrants, and a crook handed over for its bounty counts as a Patrol officer's arrest (`Captures#handedOver`, `PowersCompat#patrolHandedOver`).
+- Built; not played.
+
+## 0.10.50 (2026-11-19): The crest plume is a real item (#1788)
+
+- Fixes: the server would not start: the plume crest's dye recipe named an item that was never registered. The plume is now registered with the other crests.
+- Built by CI; checked by starting the Deck server.
+
+## 0.10.51 (2026-11-19): MCA villagers speak in Google voices (#1782)
+
+- **Villagers say their hellos, yeses, noes and angry shouts in real words now**: in place of MCA's own clips, each
+  villager speaks in one of 18 Google voices (12 men, 5 of them older and rougher, and 6 women), and keeps that voice
+  every time. Each voice has four ways
+  of saying each line ("Hello there.", "Aye, that I can.", "I'd rather not.", "Leave me be!"...). Only a little of the
+  villager's own voice pitch is kept, so the voices don't turn squeaky. Laughs, cries, screams, coughs and snores are still
+  MCA's. Someone who doesn't speak the villager's tongue still hears it in that tongue, or a grunt, as before
+  (`Voices.villager`, `Languages.voice`).
+- Made with `tools/voices/google_voices.py --villagers`. Built; not played.
+
+## 0.10.52 (2026-11-19): steam towns in the Cloud Sea (#1790)
+
+- **Steam towns move up into the Cloud Sea** (Andy: "i completely intended for these to be steampunk towns in the cloud sea, please remove them from the overworld"). They no longer rise on the ground. A new one rises only in a stacked world with the Cloud Sea band, over a player of Borderlands tier, on a stone-brick deck 20 blocks over the overcast's middle: a few cracked and mossy bricks, cloud banked up underneath it (up to 24 deep, down onto the overcast), an iron rail round its 40-block rim, streets of polished andesite and cobble (no gravel), never where any Aether island hangs within 72 blocks. Everything else about a steam town (houses, workshops, boiler house, windmill, coke yard, airfield, airship, trades) is as before. A world that isn't stacked raises none; steam towns already standing on the ground in an older world are left where they are.
+- **The Cloud Sea is its own band for settlements**: `Stacked.band` answers `Stacked.CLOUD` (2) there instead of counting it as the Overworld's, so ground realms and the cloud towns share no roads, raids, claims or caravans. New `Stacked.top`: a column's top within the Cloud Sea, so the steam airships (`SteamAirships` landing and look-ahead) cruise over the clouds and never climb onto an Aether island on the way.
+- Compiled (compileJava + compileClientJava); not played or generated in a world.
