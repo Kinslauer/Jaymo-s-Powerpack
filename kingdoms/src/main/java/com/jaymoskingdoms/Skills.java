@@ -425,7 +425,9 @@ public final class Skills {
 		SIXTH_SENSE(Pillar.STEALTH, 1, 1, 5, 9, 1, SHADOWED),
 		// the standing backflip (Jaymo's Powers' Acrobatics): the dodge key with Back held alone flips you over backwards in place
 		// of the back roll. On Freerunning under Freerunner; last, so no ordinal moves
-		BACKFLIP(Pillar.STEALTH, 1, 1, 5, 5, 1, FREERUNNER);
+		BACKFLIP(Pillar.STEALTH, 1, 1, 5, 5, 1, FREERUNNER),
+		// Might: the battle rhythm (Jaymo's Powers' BattleRhythm), attacks quickening a step at a time while you keep fighting. Last, so no ordinal moves
+		BATTLE_RHYTHM(Pillar.STRENGTH, 1, 1, 3, 2, 1);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;
