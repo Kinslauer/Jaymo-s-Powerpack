@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 22:04). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 22:05). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -45,8 +45,8 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/heritage-paths|heritage-paths]] · 🪶 Quill · #1853 · writing
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · ☀️ Apollo · #1787 · changes · fixing review notes
+- [ ] [[Inbox/heritage-paths|heritage-paths]] · 🪶 Quill · #1853 · writing
 - [ ] [[Inbox/smoothmount-6-heave-downed|smoothmount-6-heave-downed]] · 🍇 Bacchus · claimed
 
 
@@ -68,6 +68,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/harness-body-pieces|harness-body-pieces]]
 - [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
 - [x] [[Inbox/Done/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]]
 - [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
@@ -75,7 +76,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
 - [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
 - [x] [[Inbox/Done/wither-reincarnated-fight|wither-reincarnated-fight]]
-- [x] [[Inbox/Done/weapon-hooks-and-breaks|weapon-hooks-and-breaks]]
 
 
 %% kanban:settings

@@ -3,7 +3,7 @@ status: done
 task: Rename the modpack to Reason
 branch: claude/project-thread-mn08l9
 with: cloud Claude (Reason Art project)
-pr: 1872
+pr: 1872 (merged 2026-11-19)
 mods: powers
 versions: 
 started: 2026-11-19
@@ -18,7 +18,7 @@ owns:
 **Task:** Andy: title of the modpack and the title screen become "Reason", with the yellow caption "what's yours".
 
 ## Done
-Blocky stone REASON logo over vanilla's title textures (JAVA EDITION strip blanked), caption fixed to "what's yours",
+Ivy-grown deep stone REASON logo with a warrior and red-eyed mob shadows behind (ReasonLogoMixin, 256x80), caption fixed to "what's yours",
 window title "Reason", CurseForge manifest + Prism/packwiz pack named Reason. Compile-checked; not played.
 Only Andy can rename the CurseForge listing/project page and his own instance folder.
 
