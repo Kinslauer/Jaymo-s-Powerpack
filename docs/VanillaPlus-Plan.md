@@ -119,7 +119,7 @@ Back Weapon Slot (MIT, 1.20.1) is the idea only. This is our own code on our own
 **Andy:** "add to the tree." Horse Expert shows a mount's speed, jump, health and storage while you wear its Monocle
 (the monocle is the gate; its client config also has `mustBeTamed` and `requiresSneaking`).
 
-Andy confirmed (2026-11-19) that "the tree" is the K skill tree, where the Horseman skill already lives there (`Skills.HORSEMAN`, rank 1 the
+Andy confirmed (2026-11-19) that "the tree" is the K skill tree, where the Horseman skill already lives (`Skills.HORSEMAN`, rank 1 the
 horse whistle, rank 2 tricks). So:
 - **Horseman rank 1** reads a mount's stats with no monocle needed. This is a compat mixin on
   `AttributeOverlayHandler.getInspectableEntity`: when the monocle check fails, it asks `Skills` instead.
