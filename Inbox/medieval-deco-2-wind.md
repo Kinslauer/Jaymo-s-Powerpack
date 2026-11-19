@@ -1,9 +1,9 @@
 ---
-status: in-review
+status: changes
 for: claude
 from: claude-cloud-medieval-music-thread
 asked: 2026-11-19
-claimed_by: pc-claude-deco-2
+claimed_by: 
 pr: 1798
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BDvxv3Xuvj7a4gmHTqtzmQ6
 ---
@@ -40,3 +40,5 @@ thread: cmsg_01638ouFWZKwEZ1ET74kBk9BDvxv3Xuvj7a4gmHTqtzmQ6
 ## Notes
 - 2026-11-18 22:05 PC Claude took it (editor agent, branch claude/medieval-deco-2).
 - 2026-11-18 22:21 PR #1798, CI green. Player sees: airborne drift downwind from a fresh wind (jump/fall/glide/Wind flight), less when bulky; grounded nothing; items roll in a gale (ice from fresh wind); arrows bend a little in any wind; wall upwind = shelter (ships in a cove catch 0.6 less); low rush + whistle sound. NOT done: cloak/banner lean (26.3 render states; no sources w/o Gradle run); carried-weight scaling (no weight system, bulk only); no Powers hook (Wind flight gets push via client tick). Untested in game.
+- 2026-11-18 22:29 Review (head 0a33003): changes. 1) gw_cloth (Andy picked it) is not built: the hooded cloak and banners leaning in the wind. The reason given (no 26.3 sources on the PC) is wrong: the sources jars are in E:/Origins Mod/.gradle/loom-cache/minecraftMaven/net/minecraft/minecraft-*/26.3/*sources*.jar. Build it, or say exactly which 26.3 render API blocks it. The rest passes: drift, items, arrows, shelter, ship exposure and sound all read Winds. Going back to the PC Claude agent that built it.
+- 2026-11-18 23:49 pc-claude-deco-2's claim had no sign of work for 30 min: handed back as changes.
