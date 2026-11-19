@@ -2885,6 +2885,20 @@
 			}
 		]
 	},
+	"armed.crit": {
+		"subtitle": "subtitles.jaymospowers.armed.crit",
+		"sounds": [
+			{
+				"name": "jaymospowers:blade/crit_1"
+			},
+			{
+				"name": "jaymospowers:blade/crit_2"
+			},
+			{
+				"name": "jaymospowers:blade/crit_3"
+			}
+		]
+	},
 	"armed.clash": {
 		"subtitle": "subtitles.jaymospowers.armed.clash",
 		"sounds": [

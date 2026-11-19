@@ -26,6 +26,8 @@
 		"BlowsLivingMixin",
 		"EdgeLivingMixin",
 		"BlowsPlayerMixin",
+		"PlayerCritMixin",
+		"PlayerCritAttributesMixin",
 		"ArmourWearMobMixin",
 		"ArmourWearEnchantMixin",
 		"ArmourWearRepairMixin",

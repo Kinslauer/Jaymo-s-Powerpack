@@ -15321,3 +15321,12 @@ Not tested in game.
 
 - Fixes: seeing anyone wear a Harness 3 piece whose model was never made (the tabard, the fur-lined set, gilt-banded and spiked spaulders, oath sleeves, the quilted coat) crashed the game. Such a piece is now simply not drawn, with one log line naming it, until its model is made.
 - Built by CI; not played.
+
+## 0.10.68 (2026-11-19): Stealth and posture: cover, backstabs, a fighter's stance (#1812)
+
+- **Cover**: standing in tall grass, ferns, a bush or leaves makes mobs notice you from a fifth less far; sprinting gives you away (a quarter farther); a mob you hurt in the last ten seconds sees you half again as far. (Rain already hid you a little.) The Stalker Ranger keeps its far stronger hiding.
+- **Backstab**: anyone's melee blow on a hostile mob's back, while it is not after you, hits a quarter harder, with a small crit flash (and Jaymo's Powers' crit cue if it has one). Not with the Sneak Attack perk (its bigger bonus is unchanged), not for a Thief (their burst is unchanged), not on bosses, and none at all for a player sworn to a patron whose law forbids sneak attacks (the Crowned Sun). It adds no commandment break.
+- **Posture**: armed fighters that aren't bosses (guards, knights, raiders, the armed dead, piglins) hold a stance. Blows caught on shields or guards, a parry, and plain melee blows wear it; when it breaks the fighter sags with its head down and reels for a moment, its guard knocked aside and unable to parry, so the next blow lands. It comes back if left alone. No bar: the sagging stance and a ring tell you.
+- **Crit powers and cues** (with Jaymo's Powers' new attributes, if it is there; nothing changes without it): the Sneak Attack perk's bonus, a Thief's sneak burst, a hidden-blade assassination and the new backstab are multiplied by `jaymospowers:sneak_attack_power`; an Archer's headshot by `headshot_power`. The hidden blade raises the sneak attack power by 25% while it is out. Sneak attacks, backstabs, assassinations and headshots play Powers' crit cue (sound, flash, camera punch).
+- New: `FighterPosture`, `CritPower`; `Senses#backstabbed`, `Commandments#forbids`, `PowersCompat#critCue`.
+- Built by CI; not played.

@@ -509,6 +509,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		BossBars.register();
 		// 0.7.492: a boss's posture: worn by blows, broken to a kneel and a riposte
 		BossPosture.register();
+		FighterPosture.register();
+		CritPower.register();
 		BossTurns.register();
 		BeastLairs.register();
 		// 0.7.492: knowledge: the boss ladder that opens anvils, smithing, enchanting, the higher arts and the End

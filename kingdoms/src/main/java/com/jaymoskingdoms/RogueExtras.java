@@ -346,7 +346,7 @@ public final class RogueExtras {
 	}
 
 	/** In grass or leaves: grass, ferns or a bush at the feet or the eyes, or leaves against them. */
-	private static boolean inCover(ServerPlayer player) {
+	static boolean inCover(ServerPlayer player) {
 		ServerLevel level = player.level();
 		BlockPos feet = player.blockPosition();
 		if (grassy(level.getBlockState(feet)) || grassy(level.getBlockState(BlockPos.containing(player.getEyePosition())))) {

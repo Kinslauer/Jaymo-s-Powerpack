@@ -6264,3 +6264,19 @@ Built; not played in game.
 - `combat/MetalHits` (tuning at the top), `ArrowSparkMixin`, tags `jaymospowers:metal_bodies` (entity) and
   `jaymospowers:metal_blocks`. Uses ClashFx's sparks and BladeSounds' clash.
 - Compiled; not played.
+
+## 0.25.50 (2026-11-19): crits - riposte kinds, crit cue, camera punch, heavy crit ring, combat attributes (#1813)
+
+Andy's Hackers 'n Slashers picks (All Rights Reserved: ideas only; code, sounds and look are ours).
+- **Riposte by weapon** (`Guard#riposte`): a great weapon staggers and slows, a one-handed blade opens a bleed, a knife or dagger lands a quick second hit, a polearm shoves the foe back.
+- **Crit cue** (`combat/CritCue`): every riposte, perfect parry and jumping crit rings a short synthesised sound (`blade/crit_1..3`, `tools/gen_blade_sounds.py`) and a small white flash. `CritCue.cue(level, at)` is public for Kingdoms.
+- **Camera punch**: landing a cue shakes your own screen; `/critpunch off` turns it off.
+- **Heavy crit**: a jumping crit with a great weapon, warhammer or mace throws a ring (MagicFx) and knocks back those near the foe.
+- **Attributes** `riposte_power`, `sneak_attack_power`, `headshot_power`, `parry_recharge` (multipliers, base 1). Guard reads riposte power and parry recharge (a shorter lockout after a missed raise). Raised by existing gear only: rapier, daggers/knives, recurve bow held; Brawler's Belt (riposte) and Swiftfoot Ring (parry recharge) worn.
+- Compiles in CI; not played.
+
+## 0.25.51 (2026-11-19): Hackers 'n Slashers 4: a shove for everyone, and weapon kinds' on-hit effects (#1814)
+
+- **Shove** (new key, default backslash, rebindable under Jaymo's Powers): with a weapon in your main hand it is a pommel strike, with an empty off hand a shoulder shove. You lunge half a step; whatever is in front of you within 2.4 blocks is thrown back, reels for 14 ticks, and has a raised shield or weapon guard knocked aside (a pommel also does 1.5 damage). Costs 2 feathers, 24 ticks apart; a raised shield keeps its own bang and bash. Classes `combat/Shove`, `client/combat/ShoveClient`.
+- **Weapon procs** (`tinkering/WeaponProcs`, beside `TraitEffects`): small chances per blow by weapon kind (`WeaponKind`): an axe cleaves into the next foe beside the one struck (25%, half damage), a mace or hammer dazes (20%, 1.5 s stun), a spear pierces the foe behind (25%, 60% damage), a sickle swipes twice (20%, half damage). One effect per blow, 12 ticks apart, never from an effect's own damage, and a forged tool with Sweeping, Area or Piercing keeps its trait instead.
+- Idea from Hackers 'n Slashers (All Rights Reserved); our own code and effects. Compiled in CI; not played.
