@@ -39,3 +39,4 @@ thread: cmsg_01638ouFWZKwEZ1ET74kBk9BDvxv3Xuvj7a4gmHTqtzmQ6
 
 ## Notes
 - 2026-11-18 22:05 PC Claude took it (editor agent, branch claude/medieval-deco-2).
+- 2026-11-18 22:21 PR #1798, CI green. Player sees: airborne drift downwind from a fresh wind (jump/fall/glide/Wind flight), less when bulky; grounded nothing; items roll in a gale (ice from fresh wind); arrows bend a little in any wind; wall upwind = shelter (ships in a cove catch 0.6 less); low rush + whistle sound. NOT done: cloak/banner lean (26.3 render states; no sources w/o Gradle run); carried-weight scaling (no weight system, bulk only); no Powers hook (Wind flight gets push via client tick). Untested in game.
