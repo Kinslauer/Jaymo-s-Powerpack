@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 18:11). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 18:22). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -55,14 +55,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
-- [x] [[Inbox/Done/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]]
-- [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
-- [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
-- [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
-- [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
-- [x] [[Inbox/Done/wither-reincarnated-fight|wither-reincarnated-fight]]
-- [x] [[Inbox/Done/weapon-hooks-and-breaks|weapon-hooks-and-breaks]]
+- [x] [[Inbox/Done/village-mods-3-guards-fight-mend|village-mods-3-guards-fight-mend]]
+- [x] [[Inbox/Done/village-mods-2-blast-mending|village-mods-2-blast-mending]]
+- [x] [[Inbox/Done/village-mods-1-illager-names|village-mods-1-illager-names]]
+- [x] [[Inbox/Done/npc-fights-4-rivals|npc-fights-4-rivals]]
+- [x] [[Inbox/Done/npc-fights-3-clashes|npc-fights-3-clashes]]
+- [x] [[Inbox/Done/npc-fights-2-strings|npc-fights-2-strings]]
+- [x] [[Inbox/Done/npc-fights-1-brawler|npc-fights-1-brawler]]
+- [x] [[Inbox/Done/medieval-deco-6-towns-sea|medieval-deco-6-towns-sea]]
 
 
 %% kanban:settings
