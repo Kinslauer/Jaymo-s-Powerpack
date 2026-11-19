@@ -39,3 +39,4 @@ Both entries are in Decisions.md (2026-11-19, 11:55 AM and 12:30 PM).
 
 ## Notes
 - Background: on the 2026-11-19 world the first kingdom (Selhollow) was raised in the Lost Cities layer's plains village at Y -370. Fixed by #1850 (only surface Epic towns are crowned) and #1852 (stack order; Lost Cities left out). A new world started at 1:06 PM on Powers 0.25.68 / Kingdoms 0.10.93.
+- 2026-11-19 15:02 Question: Where exactly is 'down there' for the underground Stoneborn holds and goblin villages? The layer stack is now: high sky, Aether, Cloud Sea, Overworld, Nether (Lost Cities removed). The likely candidates are: (1) Overworld deep caves / deepslate layer (Y -64 to 0), or (2) under mountains in the Overworld. Which should it be?
