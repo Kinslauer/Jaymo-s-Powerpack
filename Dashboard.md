@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 14:13). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 14:39). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -35,6 +35,10 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1860 Goblins take the downed alive too (Kingdoms, 2026-11-19)
+- [ ] #1859 Slower NPCs, and barbarians take the downed alive (Kingdoms, 2026-11-19)
+- [ ] #1858 campfire life - camps sit, talk, sing and share a spit roast round their fire (Kingdoms, Kitchen, 2026-11-19)
+- [ ] #1856 speaker shot finds a clear angle (Powers, Kingdoms, 2026-11-19)
 - [ ] #1855 Take bows and arrows from any downed foe (Kingdoms, 2026-11-19)
 - [ ] #1852 One Dimension stack back to the pack's order (Powers, 2026-11-19)
 - [ ] #1850 First kingdom raised in the surface town, not a Lost Cities copy under it (Kingdoms, 2026-11-19)
@@ -91,11 +95,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1791 guards wear what their rank and their settlement's purse allow (Kingdoms, 2026-11-19)
 - [ ] #1790 steam towns in the Cloud Sea (Kingdoms, 2026-11-19)
 - [ ] #1789 Rig: flight picks, arm-form poses and gun fire poses fixed (Powers, Kingdoms, 2026-11-19)
-- [ ] #1782 the Rig's Mind speaks aloud (Powers, Kingdoms, 2026-11-19)
-- [ ] #1780 narrator voice lines from Google Cloud Text-to-Speech (Kingdoms, 2026-11-19)
-- [ ] #1778 acrobatics - standing backflip, dodge-key mid-air tricks (Powers, Kingdoms, 2026-11-19)
-- [ ] #1777 Rig: the back rig (wings, wing slash, spear legs, pincers, grapple, horn lightning) (Powers, 2026-11-19)
-- …and 233 older ones.
+- …and 237 older ones.
 
 ## Health
 
