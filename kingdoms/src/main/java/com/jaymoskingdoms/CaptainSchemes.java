@@ -225,7 +225,8 @@ public final class CaptainSchemes {
 			return;
 		}
 		LivingEntity his = Rulers.target(b);
-		if (target == null && his != null && his.isAlive()) {
+		if (target == null && his != null && his.isAlive() && mob.canAttack(his)) {
+			// (Andy, 2026-11-19) not a captive his boss is still staring at: they'd take it up, shout and be let go each second
 			mob.setTarget(his);
 			Speech.say(level, mob, Dialects.tr(mob, "talk.jaymoskingdoms.captain.schemes.guard." + mob.getRandom().nextInt(LINES), Component.literal(boss.name())),
 				Speech.RED, Captains.SAY_RANGE);
