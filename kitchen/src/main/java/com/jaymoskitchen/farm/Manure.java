@@ -12,10 +12,12 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -27,11 +29,13 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders;
@@ -39,7 +43,8 @@ import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntPr
 /**
  * (Better With Mods' dung and fertilizer, MIT; our own code and art.) Farm animals that have been fed or bred (BWM only
  * had fed wolves; we widen it to the {@code jaymoskitchen:manure_makers} tag) now and then leave a pile of manure, at
- * most one each per day, and only while someone is nearby to see it. Manure on the ground draws a few flies. It goes in
+ * most one each per day, and only while someone is nearby to see it. It lands on a dung heap at the animal's feet
+ * ({@link ManurePileBlock}), which grows with each pile. Manure on the ground draws a few flies. It goes in
  * the composter, tans leather in place of bark ({@code jaymoskitchen:tanning_agents}), and with bone meal makes
  * fertilizer, which turns farmland into fertile farmland ({@link FertileFarmlandBlock}).
  */
@@ -62,6 +67,8 @@ public final class Manure {
 	/** Each growth step of a crop on fertile farmland has 1 in this many chances to use it up (back to farmland). */
 	static final int SPENT_ODDS = 150;
 
+	/** Jaymo's Powers' nitre bed, by id so Kitchen works without Powers. */
+	private static final Identifier NITRE_BED = Identifier.fromNamespaceAndPath("jaymospowers", "nitre_bed");
 	/** Fed but never yet made a pile. */
 	private static final long FED = Long.MIN_VALUE / 2;
 	/**
@@ -71,6 +78,7 @@ public final class Manure {
 		builder -> builder.persistent(Codec.LONG));
 
 	public static Item MANURE;
+	public static ManurePileBlock MANURE_PILE;
 	public static Item FERTILIZER;
 	public static FertileFarmlandBlock FERTILE_FARMLAND;
 
@@ -78,7 +86,12 @@ public final class Manure {
 	}
 
 	public static void register() {
-		MANURE = item("manure", Item::new, new Item.Properties().compostable(ContextIntProviders.COMPOSTABLE_MEDIUM));
+		// manure is set down on the ground as a dung heap (ManurePileBlock), like offal and loose rocks; it keeps its item name
+		ResourceKey<Block> heap = ResourceKey.create(Registries.BLOCK, JaymosKitchen.id("manure_pile"));
+		MANURE_PILE = Registry.register(BuiltInRegistries.BLOCK, heap, new ManurePileBlock(BlockBehaviour.Properties.of()
+			.mapColor(MapColor.TERRACOTTA_BROWN).instabreak().sound(SoundType.MUD).noCollision().noOcclusion().setId(heap)));
+		MANURE = item("manure", properties -> new BlockItem(MANURE_PILE, properties),
+			new Item.Properties().compostable(ContextIntProviders.COMPOSTABLE_MEDIUM));
 		FERTILIZER = item("fertilizer", FertilizerItem::new, new Item.Properties());
 		ResourceKey<Block> farmland = ResourceKey.create(Registries.BLOCK, JaymosKitchen.id("fertile_farmland"));
 		FERTILE_FARMLAND = Registry.register(BuiltInRegistries.BLOCK, farmland, new FertileFarmlandBlock(
@@ -153,17 +166,30 @@ public final class Manure {
 					continue;
 				}
 				animal.setAttached(MANURE_TIME, time);
-				ItemEntity pile = animal.spawnAtLocation(level, new ItemStack(MANURE));
-				if (pile != null) {
-					pile.setPickUpDelay(40);
-				}
+				drop(level, animal);
 				level.playSound(null, animal.getX(), animal.getY(), animal.getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.NEUTRAL,
 					0.5F, 0.6F + level.getRandom().nextFloat() * 0.2F);
 			}
 		}
 	}
 
-	/** A faint fly or two over manure lying on the ground near a player. */
+	/**
+	 * The animal's pile: on the dung heap at its feet (a new one, or one more pat on the heap there), so a pen or barn
+	 * heaps up where the animals stand. On a nitre bed, in water, or where there's no room it falls as a loose item
+	 * instead (a nitre bed works droppings on top of it in by itself).
+	 */
+	private static void drop(ServerLevel level, Animal animal) {
+		BlockPos feet = animal.blockPosition();
+		boolean nitreBed = BuiltInRegistries.BLOCK.getKey(level.getBlockState(feet.below()).getBlock()).equals(NITRE_BED);
+		if (nitreBed || !MANURE_PILE.addPat(level, feet)) {
+			ItemEntity pile = animal.spawnAtLocation(level, new ItemStack(MANURE));
+			if (pile != null) {
+				pile.setPickUpDelay(40);
+			}
+		}
+	}
+
+	/** A faint fly or two over manure lying on the ground near a player (heaps draw their own, ManurePileBlock). */
 	private static void flies(ServerLevel level) {
 		Set<ItemEntity> seen = Collections.newSetFromMap(new IdentityHashMap<>());
 		for (ServerPlayer player : level.players()) {

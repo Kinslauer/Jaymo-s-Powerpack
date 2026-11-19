@@ -1,0 +1,140 @@
+{
+  "variants": {
+    "pats=1": [
+      {
+        "model": "jaymoskitchen:block/manure_pile_1"
+      },
+      {
+        "model": "jaymoskitchen:block/manure_pile_1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/manure_pile_1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/manure_pile_1",
+        "y": 270
+      }
+    ],
+    "pats=2": [
+      {
+        "model": "jaymoskitchen:block/manure_pile_2"
+      },
+      {
+        "model": "jaymoskitchen:block/manure_pile_2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/manure_pile_2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/manure_pile_2",
+        "y": 270
+      }
+    ],
+    "pats=3": [
+      {
+        "model": "jaymoskitchen:block/manure_pile_3"
+      },
+      {
+        "model": "jaymoskitchen:block/manure_pile_3",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/manure_pile_3",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/manure_pile_3",
+        "y": 270
+      }
+    ],
+    "pats=4": [
+      {
+        "model": "jaymoskitchen:block/manure_pile_4"
+      },
+      {
+        "model": "jaymoskitchen:block/manure_pile_4",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/manure_pile_4",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/manure_pile_4",
+        "y": 270
+      }
+    ],
+    "pats=5": [
+      {
+        "model": "jaymoskitchen:block/manure_pile_5"
+      },
+      {
+        "model": "jaymoskitchen:block/manure_pile_5",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/manure_pile_5",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/manure_pile_5",
+        "y": 270
+      }
+    ],
+    "pats=6": [
+      {
+        "model": "jaymoskitchen:block/manure_pile_6"
+      },
+      {
+        "model": "jaymoskitchen:block/manure_pile_6",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/manure_pile_6",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/manure_pile_6",
+        "y": 270
+      }
+    ],
+    "pats=7": [
+      {
+        "model": "jaymoskitchen:block/manure_pile_7"
+      },
+      {
+        "model": "jaymoskitchen:block/manure_pile_7",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/manure_pile_7",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/manure_pile_7",
+        "y": 270
+      }
+    ],
+    "pats=8": [
+      {
+        "model": "jaymoskitchen:block/manure_pile_8"
+      },
+      {
+        "model": "jaymoskitchen:block/manure_pile_8",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/manure_pile_8",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/manure_pile_8",
+        "y": 270
+      }
+    ]
+  }
+}
