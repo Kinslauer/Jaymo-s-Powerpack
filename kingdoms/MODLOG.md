@@ -15444,3 +15444,18 @@ Andy's hero add-on picks, the town and world side. Built; not played.
 
 - The wind no longer loads chunks on the server thread to see whether something is under cover, and only moves mobs and items where the world is ticking: two 22 s stalls while land was being generated, with nobody on (`WindPush`: the shelter ray counts as cover where a chunk isn't loaded; entities outside entity-ticking range are skipped).
 - Built by CI; not played.
+
+## 0.10.82 (2026-11-19): Village mods 1: the illagers' names (#1839)
+
+- **Camp names in their tongue**: new illager camps, and the illager sites that seat a camp, are named from the tongue's own sounds ("Vrakthul"), not English words. Camps already standing keep their names.
+- **Every hold named**: pillager outposts, woodland mansions, Illager Structures places and Overhauled Village's outposts (any `ctov` structure with "outpost" in its id; inert while that mod is absent, and they join the shared outpost pool) get a name the first time someone stands in them, kept in a saved map of structure start to name.
+- **Rank by size**: the entering message gives a lookout, warband camp, host or war seat, in illager words (the word itself until you have learned it).
+- **Scrawl until learned**: a camp's or hold's name reads clearly only if you know that word of the tongue; otherwise it is a scrawl.
+- **Standard at the gate**: new illager camps raise a tall standard (dark-oak pole, black and grey cloth, a carved board); sneak with an empty hand to read its camp, rank and warlord. Drawn from vanilla textures (no new art).
+- **Warlord titles**: the camp's warlord has his own name, "Grekath of Vrakthul", on his boss bar and name tag (reaped ones too).
+- **Muster rolls**: reading an illager ledger also gives a muster page: the nearest camp, its size, its warlord and the town it is mustering against.
+- **Villagers point the way**: now and then a villager's rumour or news names the nearest illager hold or camp and roughly which way.
+- **Waymarks**: rare carved waymarks stand beside dirt-path roads 70 to 260 blocks from a known hold; sneak with an empty hand to read the nearest hold's name, distance and bearing.
+- **Reaped hosts named**: villagers speaking of the horn may name the nearest fallen camp.
+- Classes: `IllagerHolds`, `IllagerMarks`, `IllagerCamps`, `IllagerSites`, `Illagers`, `IllagerTongue`, `SharedPools`, `KingdomEvents`, `Rumours`, `ChatTalk`, `ReapedHost`, `Approaches`.
+- Built; not played. Not done: no illager warlord bounty exists yet, so the title is on the boss bar, name tag, standard and muster only.
