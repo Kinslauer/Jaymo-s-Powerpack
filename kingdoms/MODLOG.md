@@ -15145,3 +15145,33 @@ Not tested in game.
   build reads it; no game change.
 - Same PR (repo only, no mod change): root `genSources.log` and javac args, 12 committed `__pycache__` files, two old
   Sora's dagger drafts in tools/blockbench, and the finished docs AGENT_BRIEF_0.2, Kingdoms-Plan-0.3 and Plan-0.7.
+
+## 0.10.46 (2026-11-19): narrator voice lines from Google Cloud Text-to-Speech (#1780)
+
+- **The narrator's missing lines can now be voiced by a Google voice**: `tools/voices/google_voices.py` reads the same
+  lang keys as `make_voices.py` and writes the same `.ogg` clips and sounds.json entries, spoken by a Google US English
+  man (Chirp 3 HD "Charon" by default; `--audition` makes samples of nine voices to pick from). It makes only clips that
+  don't exist yet, so the lines the narrator already reads keep his voice; `--redo` remakes them all. The key comes from
+  the `GOOGLE_TTS_API_KEY` environment variable and is never stored. Clips it makes are listed in `google_clips.txt`.
+- **The faith page can be voiced**: its question, its line underneath and each faith's tale are read once their clips
+  exist (they were always silent). So are the retold birthplaces (a Frostborn foundling's born-on-Hail tale).
+- A story line with no clip is no longer registered or listed in sounds.json (38 tales were listed with no file).
+- `make_voices.py --sounds` no longer wipes Kingdoms' other sounds: it only adds, changes or drops voice-line entries
+  (it used to write a sounds.json holding nothing but voices).
+- Built; no clips made yet (waiting for the Google key); not played.
+
+## 0.10.47 (2026-11-19): Talking to villagers through chat (#1770)
+
+- **Talk through chat**: say a line aloud while looking at a villager within 8 blocks, or start it with their first name (12 blocks), and they turn to you and answer over their head a moment later. Short replies keep it going for 30 seconds. They answer hello, goodbye and thanks, how they are, their name, their work, whose realm this is, trade, news (their real gossip and suspicions), and what they remember of you. Cold, wary or scornful villagers answer shortly and keep their news to themselves. Anything else gets a "Hm? I didn't follow that." When MCA's own chat AI is switched on (`/mca chatAI`), it answers instead and this keeps quiet. (`ChatTalk`, from `ProximityChat`)
+- Built; not played.
+
+## 0.10.48 (2026-11-19): Ask a villager anything, with suggested follow-ups (#1770)
+
+- **Ask something...**: a new choice in a villager's "Town business" talk opens a talk card with a box to type in. Ask in your own words and they answer in their own way, by how they bear toward you: their name, work and family (the kin of theirs about), whose land it is, the way to the nearest other town (roughly how far and which way), news and gossip, crime (whether they've heard of yours), the weather, how they are, what they make of you, trade. Anything they don't follow gets a "Hm?". Nothing goes online. (`AskTopics`, `ChatTalk`)
+- **Follow-ups**: beside each answer, a "You could ask" panel holds three questions that fit it, to click instead of typing (in the list when the screen is narrow). "That's all." ends it. (`TalkScreen`)
+- Built; not played. Stacked on Lanterns 7 (#1767), whose chat matcher this grows (family, crime, directions, weather).
+
+## 0.10.49 (2026-11-19): Galactic Patrol hooks: wanted time and arrests (#1764)
+
+- With Jaymo's Powers: the Galactic Patrol reads when a player's wanted times run out (`Theft#wantedUntil`) to write Patrol warrants, and a crook handed over for its bounty counts as a Patrol officer's arrest (`Captures#handedOver`, `PowersCompat#patrolHandedOver`).
+- Built; not played.
