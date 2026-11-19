@@ -74,7 +74,8 @@ import org.jspecify.annotations.Nullable;
  * you marked with a surveyor's rod as a design, offers a design to the settlement you're in ({@link Commissions}), and
  * shows the table's progress and the materials still needed.</li>
  * <li>Use the plan on the ground to lay the building out there (its lowest north-west corner on the block in front of
- * the face you clicked); sneak and use it to turn it a quarter. While you hold it, its outline shows in sparks.
+ * the face you clicked); sneak and use it to turn it a quarter. While you hold it, its outline shows in sparks. Use it in
+ * the air (or the table's Materials button) for its full material list against what you carry ({@link #sendMaterials}).
  * (0.7.488) A laid plan stays standing as see-through ghost blocks everyone near can see ({@link PlanSites}): fill them
  * by hand, like a ship's build kit, and once 90% of its blocks are in it's built.</li>
  * <li>Use the plan on the table and it builds it, bottom up, a block at a time, from the chests, barrels and the like
@@ -280,6 +281,14 @@ public final class MasonTable {
 		if (player.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(pos)) > SCREEN_REACH * SCREEN_REACH || !(level.getBlockEntity(pos) instanceof Entity table)) {
 			return;
 		}
+		if (act.action() == MasonNet.MATERIALS) {
+			// (its own screen: the table's isn't sent again over it)
+			Laid laid = Laid.of(table.plan);
+			if (laid != null) {
+				sendMaterials(player, laid, pos);
+			}
+			return;
+		}
 		String name = act.name().toLowerCase(java.util.Locale.ROOT);
 		Component note = captured(() -> {
 			switch (act.action()) {
@@ -336,7 +345,8 @@ public final class MasonTable {
 			if (player.isShiftKeyDown()) {
 				turn(sp, stack, laid);
 			} else {
-				sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.plan.how").withStyle(ChatFormatting.GRAY));
+				// its full material list (the screen tells how to lay it, too)
+				sendMaterials(sp, laid, null);
 			}
 			return InteractionResult.SUCCESS;
 		}
@@ -394,6 +404,66 @@ public final class MasonTable {
 				: Component.translatable("item.jaymoskingdoms.building_plan.laid", laid.anchor().toShortString(), laid.rotation().ordinal() * 90)
 					.withStyle(ChatFormatting.DARK_GRAY));
 		}
+	}
+
+	/** The site of the laid plan {@code stack} (for the client's layer view); null if it's blank or not laid. */
+	public static @Nullable UUID laidSite(ItemStack stack) {
+		Laid laid = stack.is(PLAN) ? Laid.of(stack) : null;
+		return laid == null || laid.anchor() == null ? null : laid.site();
+	}
+
+	/**
+	 * Sends {@code player} plan {@code laid}'s full material list: every block it still needs (what's already in place where
+	 * it's laid isn't counted), how many they carry and how many they're short, short first. Counted as the build counts:
+	 * the second half of a door or bed comes with the first, and dirt does for grass and paths. {@code table}: the table
+	 * it's in, if it is.
+	 */
+	static void sendMaterials(ServerPlayer player, Laid laid, @Nullable BlockPos table) {
+		ServerLevel level = player.level();
+		Blueprint bp = Designs.blueprint(level.getServer(), laid.design());
+		boolean here = laid.anchor() != null && laid.dimension().equals(level.dimension().identifier().toString());
+		Map<Item, Integer> need = new HashMap<>();
+		if (bp != null) {
+			for (Blueprint.Placement pl : bp.blocks()) {
+				BlockState state = pl.state().rotate(laid.rotation());
+				Item item = cost(state);
+				if (item == null || secondHalf(state)) {
+					continue;
+				}
+				if (here) {
+					BlockPos at = laid.anchor().offset(Planner.turn(bp, pl.offset(), laid.rotation()));
+					if (com.jaymoskingdoms.Loaded.made(level, at) && PlanSites.matches(level.getBlockState(at), state)) {
+						continue;
+					}
+				}
+				need.merge(item, 1, Integer::sum);
+			}
+		}
+		Map<Item, Integer> carried = new HashMap<>();
+		for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+			ItemStack s = player.getInventory().getItem(i);
+			if (!s.isEmpty()) {
+				carried.merge(s.getItem(), s.getCount(), Integer::sum);
+			}
+		}
+		// dirt not wanted as dirt goes to the grass and paths
+		int spareDirt = Math.max(0, carried.getOrDefault(Items.DIRT, 0) - need.getOrDefault(Items.DIRT, 0));
+		List<MasonNet.Mat> mats = new ArrayList<>();
+		for (Map.Entry<Item, Integer> e : need.entrySet()) {
+			int n = e.getValue();
+			int have = Math.min(n, carried.getOrDefault(e.getKey(), 0));
+			if (SOIL.contains(e.getKey()) && have < n) {
+				int dirt = Math.min(spareDirt, n - have);
+				have += dirt;
+				spareDirt -= dirt;
+			}
+			mats.add(new MasonNet.Mat(new ItemStack(e.getKey()), n, have));
+		}
+		mats.sort(Comparator.comparingInt(MasonNet.Mat::shortBy).reversed().thenComparing(Comparator.comparingInt(MasonNet.Mat::need).reversed()));
+		if (mats.size() > MasonNet.MAX_MATS) {
+			mats = mats.subList(0, MasonNet.MAX_MATS);
+		}
+		ServerPlayNetworking.send(player, new MasonNet.Materials(laid.design(), java.util.Optional.ofNullable(table), here, mats));
 	}
 
 	/** Sparks round the plans players hold that are laid out near them. */

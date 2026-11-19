@@ -1,0 +1,17 @@
+{
+  "key.category.jaymoskingdoms.building": "Jaymo's Building",
+  "key.jaymoskingdoms.plan_layer_up": "Plan layer up",
+  "key.jaymoskingdoms.plan_layer_down": "Plan layer down",
+  "message.jaymoskingdoms.plan_layer.one": "Layer %s of %s",
+  "message.jaymoskingdoms.plan_layer.all": "All %s layers",
+  "gui.jaymoskingdoms.mason.materials": "Materials",
+  "gui.jaymoskingdoms.plan_materials.title": "Materials: %s",
+  "gui.jaymoskingdoms.plan_materials.block": "Block",
+  "gui.jaymoskingdoms.plan_materials.need": "Need",
+  "gui.jaymoskingdoms.plan_materials.have": "Carried",
+  "gui.jaymoskingdoms.plan_materials.short": "Short",
+  "gui.jaymoskingdoms.plan_materials.none": "Every block is in place.",
+  "gui.jaymoskingdoms.plan_materials.total": "%s blocks still to place, %s more than you carry",
+  "gui.jaymoskingdoms.plan_materials.laid": "Blocks already in place aren't counted. Dirt counts for grass and paths.",
+  "gui.jaymoskingdoms.plan_materials.back": "Back to the table"
+}
