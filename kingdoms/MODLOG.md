@@ -15276,3 +15276,8 @@ Not tested in game.
 - **Song stones**: a capital (kingdom) builds a small paved square with a song stone in it (`song_stone` building, `SongStoneBlock`). `Firsts` keeps who was first, in the world, to fell each great foe (`Trophies.foeKind`), to found a realm (`Crowns.found`) and to reach a far world (a check every 5 s). Using the stone opens what is cut on it (the Lore Codex screen, a book for each theme); a villager standing by names one of the names. Villager talk only: bards are not touched (Bards.java is patch 1's).
 - **Journey book**: a book (book + compass) that keeps your own firsts and the day each happened, a book for each theme (great foes, realms, far worlds). Private: it lives on the player, nothing is said or given when a first is written.
 - Built; not played.
+
+## 0.10.63 (2026-11-19): Charge Jump perk text: steady orange peak (#1804)
+
+- The Charge Jump perk's description now says what it does with Powers' new jump bar: anyone can charge a jump, and the perk keeps the bar's orange peak in the same spot every time.
+- Lang only; not played.
