@@ -35,3 +35,6 @@ thread: cmsg_01638ouFWZKwEZ1ET74kBk9BDvxv3Xuvj7a4gmHTqtzmQ6
 - Compile check against the 26.3 jars; every Minecraft API checked against 26.3 sources.
 - `python3 tools/pr_checks.py` passes.
 - Lore: the `(new)` paragraphs for the vines by the lava seas are in Lore.md, quoted to Andy 2026-11-19 and **awaiting his OK**. Don't merge before he approves; if a paragraph changes, quote the new full text to him in the thread.
+
+## Notes
+- 2026-11-19 02:41 Andy approved the lore paragraphs 2026-11-19 02:40 UTC; no lore hold on merging.
