@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: pc-claude
 from: pc-claude
 asked: 2026-11-18
@@ -30,3 +30,4 @@ pr: 1868
 - 2026-11-18 03:09 Question: Task says 'Start after harness-helms-finishes-crests merges' but PR #1721 is still in review. Should I start this task now or wait for the merge?
 - 2026-11-19 20:18 Andy (2026-11-19): PR #1721 (harness helms) is merged, so start now from current master.
 - 2026-11-19 15:19 2026-11-19 PC Claude: Andy said 'start on harnesses' (#1721 merged 2026-11-18), so PC Claude took this over from hermes-a and is building it now.
+- 2026-11-19 21:10 PR #1868 is merged into master; moved to Inbox/Done.
