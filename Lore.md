@@ -811,6 +811,16 @@ always the demons' to keep. Somewhere down there a way up stands lit, and a cold
 it alive and the life is theirs again; die down there and it is over. It is offered once in a life. Nobody living knows
 their own weight. The Judge will say how the book sits if a visitor asks him, and never in numbers.
 
+**Doppelgangers** (new) (doppelganger thread, 2026-11-19; Andy: "at the end of a life before reincarnation, prompt the
+player to save their character as a preset... explained as a doppleganger. some you met in the past life may comment
+that you look familiar, and will not elaborate"; the rest Claude's placement, awaiting Andy). The book weighs a life,
+not a face, and some faces are slow to let go. Most who are born again come back looking like nobody anyone has met,
+but now and then a face that has lived comes back on someone new: a doppelganger. They are not the one who wore it first.
+They carry nothing of that life, no memories, no debts, no friends, though they may answer to the same name and never
+know why it came to them. Those who knew the old face feel it before they know why. Some look twice, and a few say so,
+once, and then will not speak of it again: in a land where shapeshifters steal faces and changelings borrow them, nobody
+wants to be the one who said a dead face walked back in. Nobody tells the doppelganger whose face it is.
+
 **The nights at the grave** (models thread; Andy, 2026-11-12: "the lore is good"). The weighing is
 not at once. For three nights after a settlement buries one of its own, the dead stand over their own mound from dusk to
 dawn, pale blue and see-through, a hand off the ground: waiting to be called. They harm nobody and nothing touches them.
