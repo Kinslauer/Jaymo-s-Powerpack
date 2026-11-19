@@ -11,8 +11,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 **Questions for you:**
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
-- [[Inbox/scrying-orb|scrying-orb]] · 2026-11-18 21:37 Text pass: kingdoms/lang/parts/scrying-orb.json - sighted_shard.default_name now '%s: %d, %d, %d', so shards read 'Sighted Shard (overworld: x…
-- [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · 2026-11-19 15:02 Question: Where exactly is 'down there' for the underground Stoneborn holds and goblin villages? The layer stack is now: high sky, Aether, Clo…
+- [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 - [[Inbox/wither-model|wither-model]] · 2026-11-18 5:27 PM hermes-modeller: previews ready for Andy's look. kingdoms/art/wither.bbmodel is valid JSON and bakes cleanly (7 bones, 58 quads, idle animat…
 
 ## Stuck
