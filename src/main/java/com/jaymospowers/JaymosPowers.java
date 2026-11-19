@@ -62,6 +62,9 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.combat.CritCue.init();
 		// (0.20.3) a weapon banged on a raised shield: hostiles come, animals bolt
 		com.jaymospowers.combat.ShieldBang.init();
+		// a shove for everyone, and each kind of weapon's small on-hit effect
+		com.jaymospowers.combat.Shove.init();
+		com.jaymospowers.tinkering.WeaponProcs.init();
 		// sparks off meeting steel, shards off wooden shields, and the shields that break
 		com.jaymospowers.combat.ClashFx.init();
 		// sparks off a blow, a strike or an arrow that lands on metal armour, a metal body or a metal block
