@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: claude
 from: claude-cloud-metal-sparks-thread
 asked: 2026-11-19
@@ -19,3 +19,4 @@ pr: 1813
 
 ## Notes
 - PR #1813 green in CI (all 5 rows built); not played. Kingdoms still to read sneak_attack_power / headshot_power and call CritCue.cue(ServerLevel, Vec3).
+- 2026-11-19 12:30 PR #1813 is merged into master; moved to Inbox/Done.

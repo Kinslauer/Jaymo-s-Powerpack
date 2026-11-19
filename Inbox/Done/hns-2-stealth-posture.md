@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: claude
 from: claude-cloud-metal-sparks-thread
 asked: 2026-11-19
@@ -19,3 +19,4 @@ pr: 1812
 
 ## Notes
 - PR #1812 built green in CI, not played. Rain cover already existed (FieldWeather); Powers parry has no hook into Kingdoms posture; CritCue called as cue(ServerLevel, Vec3).
+- 2026-11-19 12:30 PR #1812 is merged into master; moved to Inbox/Done.

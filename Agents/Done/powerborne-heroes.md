@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: Build Andy's 34 Powerborne Heroes picks
 branch: claude/project-thread-bncprk
 with: Claude (cloud)
@@ -25,3 +25,4 @@ owns:
 ## Done
 All 34 picks built in PR #1816 (8 tracks + review fixes). Compiled (root build, kingdoms compileClientJava), pr_checks pass, not played. 9 (new) Lore.md paragraphs await Andy.
 - 2026-11-19 09:46 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-19 12:30 PR #1816 is merged into master; moved to Agents/Done.
