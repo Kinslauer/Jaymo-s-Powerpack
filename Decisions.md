@@ -803,3 +803,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-19 1:11 PM ET (thread "Find medieval building schematics online"): Andy: library castles are only built by town builders when they have to rebuild from nothing after a raid or when founding a new kingdom; otherwise from the mason's table.
 - 2026-11-19 1:12 PM ET (thread "Find medieval building schematics online"): Andy approved the lore paragraph "The masons' pattern books".
 - 2026-11-19 (PC Claude, gnome models): Andy picked option 2 for the gnomes (the 'Gnome'/'Angry Gnome'/'the gnome' baby zombies that ATi Structures' gnome_hut and Grim Kingdoms' gnome towers place): Kingdoms swaps them on spawn for its own GeckoLib gnome mob with its own model, sounds, drops and behaviour, and Claude drafts the lore. Lore paragraph 'The gnomes' added as (new), waiting on his yes.
+
+- 2026-11-19 (goblin speech thread): Andy: "the goblins also dont seem to have their own language, they should speak very broken but intelligible english, unlike orcs who you really cant tell". Goblins now speak broken English (GoblinTalk) to everyone in any land; orcs keep the land tongue.
