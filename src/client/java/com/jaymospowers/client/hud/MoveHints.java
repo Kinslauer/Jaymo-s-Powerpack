@@ -121,6 +121,10 @@ public final class MoveHints {
 			}
 		} else if (LadderMoves.climbing(player)) {
 			list.add(new Hint(options.keyShift, "hold_on"));
+		} else if (!player.onGround() && com.jaymospowers.client.stamina.DodgeClient.key() != null
+			&& com.jaymospowers.client.freerun.moves.AcrobaticsClient.ready(player)) {
+			// Acrobatics: time in the air for a trick off the dodge key
+			list.add(new Hint(com.jaymospowers.client.stamina.DodgeClient.key(), "trick"));
 		}
 		return list.size() > MAX_LINES ? list.subList(0, MAX_LINES) : list;
 	}
