@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: "[[plan-ghosts-litematica-tools]]"
 branch: claude/plan-ghosts-litematica-tools
 with: 
-pr: 
+pr: 1851
 mods: kingdoms
 versions: 
 started: 2026-11-19
@@ -26,7 +26,7 @@ owns:
 layer at a time while holding the plan, and a full material list against your inventory.
 
 ## Plan
-- Ghost colours (PlanSites sends air spots, PlanGhosts colours wrong/extra)
+- Ghost colours (PlanGhosts works out the box's empty spots itself: designs don't keep air, so no packet change)
 - Layer view (client keybind + scroll while holding the plan, action bar)
 - Full material list (server computes with build substitutes, MasonScreen scrolling list)
 
@@ -34,3 +34,7 @@ layer at a time while holding the plan, and a full material list against your in
 - Builds on the Deck or CI, not the PC (Andy's PC runs only the game).
 
 ## Done
+Laid plans' ghosts colour missing (blue), wrong (red) and extra (orange) blocks; holding a laid plan, numpad 8/2 or
+Ctrl+scroll shows one layer at a time ("Layer 4 of 12"); a plan used in the air, or the table's Materials button, lists
+every block still needed against what you carry, short first. Change note: changes/kingdoms/plan-ghosts-litematica-tools.md.
+CI built all three mods; not played or run in a dev client.
