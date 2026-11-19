@@ -6544,3 +6544,15 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - Andy: "maces and blunt weapons should crush skulls upon a blow that connects on [the head] and kills". A killing blow from a mace, hammer, club, flail or any other blunt weapon (`Fractures.blunt`) that lands on a humanoid's head crushes it (`Dismember.crushSkull`, `LETHAL_CRUSH`), unless the helmet turns it (`armourGuard`, the same roll a severing gets). The head is gone as a severed one is, but nothing flies off whole: a crack, a burst of white bone and blood, the helmet falls, and Jaymo's Kitchen throws pieces of skull and lumps of brain and leaves Brain Matter on the ground (`KitchenCompat.skullCrushed`). A skeleton's skull shatters as before. Bare fists don't crush.
 - **Players** (Andy: "it should certainly happen to players who take a decapitating or head crushing blow, that just means they cannot be revived, and forces a reincarnation"): the blow that finishes a downed player, if it lands on the head, takes it off (a blade, the same chances as a mob's killing blow) or crushes it (a blunt weapon), helmet permitting (`Dismember.playerHeadBlow`, from `Downed`). It happens before the death, so Mortality counts it a beheading: final, no revive, a reincarnation. Still only ever the downed, never a player on their feet, never in creative.
 - Built; not played.
+
+## 0.25.76 (2026-11-19): Harness 5: armour oil, and the harness rusts (#1870)
+
+- **Armour Oil**: a glass bottle and a fat (porkchop, cod, salmon, or Kingdoms' whale oil or Kitchen's cooking oil).
+  Use it to oil all the iron armour you're wearing, including Kingdoms' harness pieces. Oiled armour gathers no new
+  rust for three days, and its tooltip says "Oiled". Eight uses a flask. It takes no rust off: nothing does.
+- **The harness rusts**: Kingdoms' harness pieces rust like armour in the four slots, worn wet or lying in water.
+- **Fitted armour is lighter**: a piece a Kingdoms armourer fitted to you counts three quarters of its weight in your
+  load.
+- Classes: `core/wet/ArmourOil` (new), `core/wet/Rust` (`OILED_UNTIL`, harness rust), `core/ArmourKind` (fitted weight),
+  client `WetClient`.
+- Built; not played.
