@@ -84,7 +84,8 @@ public final class RigImpact {
 		}
 		float share = !on ? 1.0F : since < DUCK_HOLD_MS ? DUCK_SHARE : Mth.lerp((since - DUCK_HOLD_MS) / (float)DUCK_SWELL_MS, DUCK_SHARE, 1.0F);
 		for (SoundSource source : DUCKED) {
-			minecraft.getSoundManager().updateCategoryVolume(source, minecraft.options.getSoundSourceVolume(source) * share);
+			// the category's gain is applied on top of the player's slider (SoundEngine.calculateVolume): only the share goes here
+			minecraft.getSoundManager().updateCategoryVolume(source, share);
 		}
 		ducked = on;
 	}
