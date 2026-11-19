@@ -6177,3 +6177,11 @@ Built; not played in game.
 - **Combat log and vitals**: while blows are flying, the Helm's HUD folds out the last three given and taken and your body's state: the worst-hurt part from Wounds and any broken bones. It folds away 10 seconds after the last. (`RigLog`, `RigLogClient`)
 - Not yet: the spoken Mind (`md-voice`) waits on a voice source Andy is happy with; every line already has its own key to voice.
 - Built; not played.
+
+## 0.25.38 (2026-11-19): the Rig's Mind speaks aloud (#1782)
+
+- **The Rig's Mind says its lines out loud**, heard only by the wearer, and each personality has its own Google voice:
+  loyal (Fenrir), dry (Algieba) and grim (Orus). 138 lines are spoken: warnings, cloak, nova, override, level-ups, calls,
+  its answers when you talk to it, and the rest. The lines with a number or a name in them (the charge report, a lock and a scan with its counts) are still
+  text with the chime. While one line is still playing, the next one only shows on screen (`RigVoice`, `RigMind`).
+- Made with `tools/voices/google_voices.py --rig`. Built; not played.
