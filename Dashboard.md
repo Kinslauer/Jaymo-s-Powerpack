@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 21:37). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 22:31). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -9,6 +9,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Inbox/class-trees-plan|class-trees-plan]] · 2026-11-19 20:22 Parked (not for a bot): waits on Andy fleshing out the Monk/Paladin/Cleric/Druid/Warlock trees. Raised; don't raise again.
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 - [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
+- [[Inbox/wither-model|wither-model]] · 2026-11-19 16:39 Previews ready for your look on the Wither model. Rebuilt to your hulking direction (Andy 2026-11-19 3:41 PM): broad shoulder bar, centre skul…
 
 ## Stuck
 
@@ -16,12 +17,21 @@ Nothing stuck.
 
 ## On the board
 
-34 waiting for a bot, 3 being built, 2 in review: see [[Kanban]].
+33 waiting for a bot, 3 being built, 2 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1881 camp cooks roast whole beasts on the great spit and stand to the side (Kingdoms, Kitchen, 2026-11-19)
+- [ ] #1880 An escape isn't known to the camp until they see you gone (Kingdoms, 2026-11-19)
+- [ ] #1879 Captors take the harness too (Kingdoms, 2026-11-19)
+- [ ] #1878 final deaths cut straight to black (Powers, 2026-11-19)
+- [ ] #1877 Harness 6: forge the rest of the harness (Powers, Kingdoms, 2026-11-19)
+- [ ] #1876 Captives who die and are weighed leave their chains (Kingdoms, 2026-11-19)
+- [ ] #1875 Harness fits MCA bodies; captors calm down around a captive (Kingdoms, 2026-11-19)
+- [ ] #1874 creative keeps your prosthetics (Powers, 2026-11-19)
+- [ ] #1872 Reason: the pack's new name on the title screen (Powers, 2026-11-19)
 - [ ] #1870 Harness 5: armour oil, and the harness rusts (Powers, Kingdoms, 2026-11-19)
 - [ ] #1868 Harness 2: wider makes of cuirass, the coat of plates, gorget, tassets, rondels and the tabard of arms (Kingdoms, 2026-11-19)
 - [ ] #1867 symbiote - a takeover no longer freezes a host who isn't a web slinger, and a blob that left you runs away (Powers, 2026-11-19)
@@ -73,20 +83,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1812 Stealth and posture: cover, backstabs, a fighter's stance (Kingdoms, 2026-11-19)
 - [ ] #1811 A harness piece with no model no longer crashes the game (Kingdoms, 2026-11-19)
 - [ ] #1810 NPC sea ships pay for their powder and shot (Kingdoms, 2026-11-19)
-- [ ] #1809 metal-hit sparks - blows, strikes and arrows on metal (Powers, 2026-11-19)
-- [ ] #1808 Cannon shot types for wall and siege guns, Explosive Shell costs TNT (Kingdoms, 2026-11-19)
-- [ ] #1807 flotsam can bring up a dead one's token (Powers, Kitchen, 2026-11-19)
-- [ ] #1806 harsh lands - spawns and starts follow the climate map (Kingdoms, 2026-11-19)
-- [ ] #1804 charge jump and Web slingshot on a horse's jump bar, orange peak (Powers, Kingdoms, 2026-11-19)
-- [ ] #1803 towns and the sea - figureheads, trade signs, song stones, the journey book (Kingdoms, 2026-11-19)
-- [ ] #1802 the dead in the wild: remains, last camps, ruin traps, the headless rider (Kingdoms, 2026-11-19)
-- [ ] #1801 practice dummy: kinds and coloured numbers (Powers, 2026-11-19)
-- [ ] #1799 drifting flotsam: ripple spots on rivers and the sea (Powers, Kingdoms, Kitchen, 2026-11-19)
-- …and 247 older ones.
+- …and 256 older ones.
 
 ## Health
 
-Nothing wrong: [[Health]].
+2 problems in the notes: [[Health]].
 
 ## Last week
 

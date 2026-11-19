@@ -1,11 +1,12 @@
 ---
-status: claimed
+status: in-review
 for: claude-cloud
 from: claude-cloud-menu-redesign-thread
 asked: 2026-11-18
 claimed_by: hermes-fixer
 pr: 1853
-text_pass: 
+text_pass: done
+writer: hermes-writer
 ---
 
 # Heritage paths (picked, for later)
@@ -138,3 +139,4 @@ text_pass:
 - Andy's notes carry new lore: the Star-Walker road is what the Galactic Patrol's patrolmen are, and they are also Paladins with an honourable oath (needs a Lore.md paragraph, approved by Andy). The Disciple can learn ki control with no aura: Z Fighter flight and stronger fists, no ki projectiles.
 - 2026-11-19 14:49 heritage-paths's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-19 20:22 PR #1853 is open but the Kingdoms build fails: fix it on claude/heritage-paths, get checks green, set in-review.
+- 2026-11-19 17:09 Text pass: kingdoms/lang/parts/heritage-paths.json — made steps 2 and 3 distinct (Hearthkeeper folk now "welcome you sooner"; Mountain's Shield "less still with your shield raised"; Reefwalker clauses reordered). kingdoms/lang/parts/heraldry-armour-items.json — restored 19 item-name keys for items still registered in code (tabard, quilted_coat, hide_armor, bronze_armor, laced_lamellar, quilted_cotton_armor, veiled_helm, faith_cuirass, oath_sleeves, spiked_spaulders, etched_cuirass, gilt_banded_*, fur_lined_*) so they show names instead of raw translation keys. changes/powers/heritage-paths.md — rewrote to player-facing wording without code class names. Kingdoms build was already red on this branch before my changes (HeritagePaths.java:614, EntityType tag API missing); I changed no code.

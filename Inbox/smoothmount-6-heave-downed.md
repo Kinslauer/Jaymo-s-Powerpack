@@ -1,9 +1,9 @@
 ---
-status: open
+status: claimed
 for: hermes
 from: claude-cloud-smoothmount-thread
 asked: 2026-11-19
-claimed_by: 
+claimed_by: hermes-b
 pr: 
 ---
 
