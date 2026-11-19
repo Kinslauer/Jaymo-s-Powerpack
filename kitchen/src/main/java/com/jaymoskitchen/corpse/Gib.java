@@ -21,6 +21,8 @@ import net.minecraft.world.level.storage.ValueOutput;
 public class Gib extends SpiderLeg {
 	/** What it is: a chunk of the body's own model, or one of its insides. */
 	public static final int CHUNK = 0, ORGAN = 1, GUTS = 2, RIBS = 3, SPINE = 4, BONE = 5, TATTERS = 6;
+	/** A crushed head's ({@link Gibs#skullCrushed}): a lump of brain matter, a piece of the skull or jaw. */
+	public static final int BRAIN = 7, SKULL = 8;
 
 	private static final EntityDataAccessor<Byte> PIECE = SynchedEntityData.defineId(Gib.class, EntityDataSerializers.BYTE);
 	private static final EntityDataAccessor<Integer> TINT = SynchedEntityData.defineId(Gib.class, EntityDataSerializers.INT);

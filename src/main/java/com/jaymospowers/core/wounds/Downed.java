@@ -409,7 +409,8 @@ public final class Downed {
 			}
 			// (Andy, 2026-11-16) a hit that would have killed a humanoid takes a part off; a head (half the time) ends them
 			int lethal = Dismember.lethalPart(entity, source, Wounds.landed(entity, source));
-			if (lethal == Dismember.HEAD) {
+			// (a head taken off or crushed in ends them)
+			if ((lethal & ~Dismember.LETHAL_CRUSH) == Dismember.HEAD) {
 				Dismember.lethalSever(entity, lethal, source);
 				return true;
 			}

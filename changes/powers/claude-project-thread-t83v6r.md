@@ -1,0 +1,4 @@
+# maces and blunt weapons crush skulls
+- Andy: "maces and blunt weapons should crush skulls upon a blow that connects on [the head] and kills". A killing blow from a mace, hammer, club, flail or any other blunt weapon (`Fractures.blunt`) that lands on a humanoid's head crushes it (`Dismember.crushSkull`, `LETHAL_CRUSH`), unless the helmet turns it (`armourGuard`, the same roll a severing gets). The head is gone as a severed one is, but nothing flies off whole: a crack, a burst of white bone and blood, the helmet falls, and Jaymo's Kitchen throws pieces of skull and lumps of brain and leaves Brain Matter on the ground (`KitchenCompat.skullCrushed`). A skeleton's skull shatters as before. Bare fists don't crush.
+- Same rules as the other killing-blow severs: mobs and villagers, not players.
+- Built; not played.
