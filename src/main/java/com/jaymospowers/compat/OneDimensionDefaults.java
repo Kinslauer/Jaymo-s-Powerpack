@@ -114,13 +114,14 @@ public final class OneDimensionDefaults {
 			JsonArray next = new JsonArray();
 			for (String id : ORDER) {
 				int at = ids.indexOf(id);
-				next.add(at >= 0 ? order.get(at) : like(order.get(0), id));
+				next.add(at >= 0 ? order.get(at) : order.isEmpty() ? new JsonPrimitive(id) : like(order.get(0), id));
 			}
 			Set<String> out = new LinkedHashSet<>();
 			if (root.has("left_out") && root.get("left_out").isJsonArray()) {
 				for (JsonElement e : root.getAsJsonArray("left_out")) {
-					if (e.isJsonPrimitive()) {
-						out.add(e.getAsString());
+					String left = id(e);
+					if (left != null) {
+						out.add(left);
 					}
 				}
 			}
