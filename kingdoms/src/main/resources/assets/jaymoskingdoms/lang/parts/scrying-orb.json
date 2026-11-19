@@ -6,7 +6,7 @@
   "item.jaymoskingdoms.sighted_shard.of": "Sighted Shard (%s)",
   "item.jaymoskingdoms.sighted_shard.marked": "Marked %s",
   "item.jaymoskingdoms.sighted_shard.cleared": "Sight cleared",
-  "item.jaymoskingdoms.sighted_shard.default_name": "%s %d %d %d",
+  "item.jaymoskingdoms.sighted_shard.default_name": "%s: %d, %d, %d",
   "gui.jaymoskingdoms.scry.title": "Scrying: %s",
   "message.jaymoskingdoms.scrying_orb.no_focus": "You need a lock of hair or a sighted shard",
   "message.jaymoskingdoms.scrying_orb.not_attuned": "You must be attuned to use the scrying orb",
