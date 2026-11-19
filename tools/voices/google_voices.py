@@ -51,8 +51,16 @@ MADE = os.path.join(mv.HERE, "google_clips.txt")
 # the Rig's Mind, and women's voices of the same kind join them for the villagers.
 # Each villager keeps one voice (Voices.villager picks it from the villager's id; the lists must match Voices'
 # VILLAGER_MEN and VILLAGER_WOMEN). A voice's id is its Google name without "en-US-" and "Chirp3-HD-", lower case.
+# Andy, on the older narrator samples: "they can pass as mca voices, but not our narrator". "+old" is a voice made older
+# by `older` (with OLDER's settings), "algenib_old" in its id.
 VILLAGER_MEN = ["en-US-Chirp3-HD-Charon", "en-US-Chirp3-HD-Iapetus", "en-US-Wavenet-D", "en-US-Neural2-D",
-                "en-US-Neural2-J", "en-US-Studio-Q"]
+                "en-US-Neural2-J", "en-US-Studio-Q", "en-US-Chirp3-HD-Algenib", "en-US-Chirp3-HD-Algenib+old",
+                "en-US-Chirp3-HD-Sadaltager+old", "en-US-Chirp3-HD-Enceladus+old", "en-US-Chirp3-HD-Charon+old",
+                "en-US-Wavenet-D+old"]
+# An old voice: Google's own pitch and speaking rate (where the voice takes them), then `older`'s lowering in semitones,
+# slowing, and how much rattle and shake.
+OLDER = {"en-US-Chirp3-HD-Charon": dict(semis=-3.0),
+         "en-US-Wavenet-D": dict(api={"pitch": -5.0, "speakingRate": 0.85}, semis=0.0, slow=1.0)}
 VILLAGER_WOMEN = ["en-US-Chirp3-HD-Kore", "en-US-Chirp3-HD-Leda", "en-US-Chirp3-HD-Despina", "en-US-Chirp3-HD-Sulafat",
                   "en-US-Chirp3-HD-Gacrux", "en-US-Chirp3-HD-Vindemiatrix"]
 # What a villager says in words for MCA's spoken sounds (Languages.voice): one of these at random each time.
@@ -69,12 +77,14 @@ RIG_PREFIX = "rig.jaymospowers.mind."
 
 
 def synthesize(key, voice, text):
-    """`text` spoken by the Google voice `voice`: (mono float samples, rate)."""
+    """`text` spoken by the Google voice `voice` (made older if it ends in "+old"): (mono float samples, rate)."""
     import numpy as np
     import soundfile as sf
+    voice, _, fx = voice.partition("+")
+    settings = dict(OLDER.get(voice, {})) if fx == "old" else {}
     body = {"input": {"text": text},
             "voice": {"languageCode": "-".join(voice.split("-")[:2]), "name": voice},
-            "audioConfig": {"audioEncoding": "LINEAR16"}}
+            "audioConfig": {"audioEncoding": "LINEAR16", **settings.pop("api", {})}}
     req = urllib.request.Request(API, data=json.dumps(body).encode("utf-8"), method="POST",
                                  headers={"Content-Type": "application/json", "X-Goog-Api-Key": key})
     try:
@@ -83,7 +93,25 @@ def synthesize(key, voice, text):
     except urllib.error.HTTPError as e:
         sys.exit(f"Google said {e.code}: {e.read().decode('utf-8', 'replace')[:500]}")
     wav, rate = sf.read(io.BytesIO(audio), dtype="float32")
-    return np.asarray(wav), rate
+    wav = np.asarray(wav)
+    return (older(wav, rate, **settings) if fx == "old" else wav), rate
+
+
+def older(wav, rate, semis=-2.5, slow=1.12, rasp=0.10, shake=0.05):
+    """An older man: lower by `semis` (played slower, then WSOLA back to length), `slow` times as slow at that pitch, an
+    old man's shake (~5.5 Hz) and a rattle (~28 Hz), breath under the words, a duller top and soft saturation."""
+    import numpy as np
+    f = 2 ** (semis / 12)
+    low = np.interp(np.arange(int(wav.size / f)) * f, np.arange(wav.size), wav).astype(np.float32)
+    wav = mv.tsm(low, f * slow)
+    t = np.arange(wav.size, dtype=np.float32) / rate
+    n = int(rate * 0.02)
+    env = np.convolve(np.abs(wav), np.ones(n) / n, mode="same")
+    wav = wav * (1 + shake * np.sin(2 * np.pi * 5.5 * t)) * (1 + rasp * np.sin(2 * np.pi * 28 * t))
+    breath = mv.band(np.random.default_rng(1).standard_normal(wav.size).astype(np.float32), rate, 1500, 6000)
+    wav = wav + breath * env * 0.35
+    wav = 0.8 * wav + 0.2 * mv.band(wav, rate, 0, 2500)
+    return np.tanh(1.6 * wav / (float(np.max(np.abs(wav))) or 1.0)) / np.tanh(1.6)
 
 
 def write_ogg(path, wav, rate):
@@ -117,7 +145,7 @@ def audition(key):
 
 def short(voice):
     """en-US-Chirp3-HD-Charon -> charon, en-US-Wavenet-D -> wavenet_d (the id in sound names and file names)."""
-    return voice.replace("en-US-", "").replace("Chirp3-HD-", "").replace("-", "_").lower()
+    return voice.replace("en-US-", "").replace("Chirp3-HD-", "").replace("-", "_").replace("+", "_").lower()
 
 
 def save_sounds(assets, entries):

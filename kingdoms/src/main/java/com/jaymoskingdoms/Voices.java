@@ -84,7 +84,9 @@ public final class Voices {
 	 * --villagers} makes {@code voice.villager.<voice>.<line>}, a few lines each; its lists must match these. MCA's laughs,
 	 * cries and screams stay its own.
 	 */
-	static final List<String> VILLAGER_MEN = List.of("charon", "iapetus", "wavenet_d", "neural2_d", "neural2_j", "studio_q");
+	static final List<String> VILLAGER_MEN = List.of("charon", "iapetus", "wavenet_d", "neural2_d", "neural2_j", "studio_q",
+		// (Andy, on the older-sounding narrator samples: "they can pass as mca voices")
+		"algenib", "algenib_old", "sadaltager_old", "enceladus_old", "charon_old", "wavenet_d_old");
 	static final List<String> VILLAGER_WOMEN = List.of("kore", "leda", "despina", "sulafat", "gacrux", "vindemiatrix");
 	static final List<String> VILLAGER_LINES = List.of("greet", "yes", "no", "angry");
 
