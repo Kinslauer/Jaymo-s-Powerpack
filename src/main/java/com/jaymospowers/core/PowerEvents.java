@@ -17,6 +17,7 @@ public final class PowerEvents {
 
 	public static void register() {
 		PowerPayloads.register();
+		MountClimb.register();
 		ServerPlayNetworking.registerGlobalReceiver(PowerPayloads.KeyInput.TYPE, (payload, ctx) -> {
 			PowerKey key = PowerKey.byIndex(payload.key());
 			// (0.14.1) a downed player's powers are out of reach (a key let go still goes through), bar any the power keeps live

@@ -61,6 +61,8 @@
 		"CarryPacketListenerMixin",
 		"CarryPlayerMixin",
 		"PerchRidingMixin",
+		"MountClimbHorseMixin",
+		"MountClimbPigMixin",
 		"RockSnowballMixin",
 		"CostumeNameMixin",
 		"CostumeTabListMixin",
