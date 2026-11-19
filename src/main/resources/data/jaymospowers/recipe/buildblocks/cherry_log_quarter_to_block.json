@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:cherry_log_quarter",
+    "jaymospowers:cherry_log_quarter",
+    "jaymospowers:cherry_log_quarter",
+    "jaymospowers:cherry_log_quarter"
+  ],
+  "result": {
+    "id": "minecraft:cherry_log"
+  }
+}

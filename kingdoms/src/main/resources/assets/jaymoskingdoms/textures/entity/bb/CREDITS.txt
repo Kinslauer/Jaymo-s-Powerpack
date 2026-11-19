@@ -177,3 +177,7 @@ zombie_knight.png (bbmodels/zombie_knight.json): the barrow knight
 cryptbound_revenant.png (bbmodels/cryptbound_revenant.json): the cryptbound revenant
   "Cryptbound Revenant" by yair (@yairtalmy2111), https://blockbenchworkshop.com/model/yair/cryptbound-revenant,
   CC BY 4.0 (tools/bbmodels/cryptbound-revenant.bbmodel). Changes: baked to our loader's format, drawn at 0.62.
+
+bombardier_beetle.png (bbmodels/bombardier_beetle.json): the bombardier beetle
+  The crystal beetle above, remodelled: its crystals taken off and its shell repainted rust and blue-black
+  (kingdoms/tools/gen_labyrinth_craft.py). "Crystal Beetle" by yair (@yairtalmy2111), CC BY 4.0.

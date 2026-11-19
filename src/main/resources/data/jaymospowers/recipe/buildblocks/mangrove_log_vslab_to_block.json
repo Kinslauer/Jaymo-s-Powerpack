@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:mangrove_log_vslab",
+    "jaymospowers:mangrove_log_vslab"
+  ],
+  "result": {
+    "id": "minecraft:mangrove_log"
+  }
+}

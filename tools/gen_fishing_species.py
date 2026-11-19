@@ -147,6 +147,23 @@ SPECIES = [
     dict(id="jellyfish", name="Jellyfish", fillet="jelly", len=0.3,
          shape=dict(kind="jelly"),
          pal=dict(back=0xd6c6ee, flank=0xc8b6e6, belly=0xb8a4dc, fin=0xe6dcf6, pattern="rings", pc=0x9a6ac8)),
+    # cave pools: pale and blind (no eye to paint: it is the colour of the flank)
+    dict(id="cavefish", name="Cavefish", fillet="white", len=0.08,
+         shape=dict(kind="fish", L=7, H=3, W=2, Lh=2.5, Hh=2.5, Ls=1.5, Hs=1.5, Lt=2, Ht=3, Hd=1.5, Ld=2, dpos=0.4),
+         pal=dict(back=0xe6cfc8, flank=0xf2e2dc, belly=0xfaf2ee, fin=0xf0dcd6, pattern="smooth", pc=0xe6cfc8, eye=0xf2e2dc)),
+    dict(id="olm", name="Olm", fillet="white", len=0.25,
+         shape=dict(kind="eel", segs=5, Lseg=3.5, H=2, W=2, Lh=3),
+         pal=dict(back=0xe8c8c0, flank=0xf0d6cc, belly=0xf8e6de, fin=0xd8606a, pattern="smooth", pc=0xe8c8c0, eye=0xf0d6cc)),
+    # the Ash's lava lakes: warm-edge fish, after the real fish of hot springs
+    dict(id="ash_molly", name="Ash Molly", fillet="white", len=0.06,
+         shape=dict(kind="fish", L=6, H=3.5, W=2, Lh=2, Hh=3, Ls=1.5, Hs=2, Lt=2, Ht=3.5, Hd=2, Ld=3, dpos=0.3),
+         pal=dict(back=0x3a2018, flank=0xb8541c, belly=0xf0b040, fin=0xe8641c, pattern="spots", pc=0xf0b040, eye=0xffe070)),
+    dict(id="cinder_pupfish", name="Cinder Pupfish", fillet="white", len=0.04,
+         shape=dict(kind="fish", L=4, H=3.5, W=2.5, Lh=1.5, Hh=3, Ls=1, Hs=2, Lt=1.5, Ht=3.5, Hd=1.5, Ld=2.5, dpos=0.3),
+         pal=dict(back=0x40281c, flank=0xd8781c, belly=0xf8d070, fin=0xf0501c, pattern="bars", pc=0x40281c, eye=0xffe070)),
+    dict(id="ember_tilapia", name="Ember Tilapia", fillet="white", len=0.28,
+         shape=dict(kind="fish", L=8, H=5, W=2.5, Lh=3, Hh=4, Ls=2, Hs=3, Lt=2.5, Ht=5, Hd=3, Ld=6, dpos=0.15),
+         pal=dict(back=0x2a1812, flank=0x9a3a18, belly=0xe8903a, fin=0xd8501c, pattern="scales", pc=0xc86a24, eye=0xffe070)),
 ]
 
 
@@ -856,6 +873,7 @@ def main():
         f.write(",\n".join("\t\tMap.entry(\"%s\", new Size(%s, %s, %s))" % (sid, fmt(w), fmt(h), fmt(s)) for sid, w, h, s in sizes))
         f.write(");\n}\n")
 
+    crates()
     blocks(lang)
     write_json(os.path.join(ASSETS, "lang/parts/fishing_species.json"), dict(sorted(lang.items())))
     print("species:", len(SPECIES), "raw items:", len(raw_all))
@@ -864,6 +882,25 @@ def main():
 # --------------------------------------------------------------------------------------------------------------------
 # The new tackle's blocks and items: rod pod, crab pot, keepnet, trophy plaque; ice auger, journal, shark jaw
 # --------------------------------------------------------------------------------------------------------------------
+
+def crates():
+    """The four fishing crates' icons: a wet wooden crate with a band the colour of the water it came out of."""
+    bands = {"river": 0x4a7ab0, "sea": 0x2a8a8a, "swamp": 0x5a7a30, "lava": 0xe8601c}
+    for name, band in bands.items():
+        def paint(x, y, band=band):
+            if not (1 <= x <= 14 and 3 <= y <= 14):
+                return None
+            edge = x in (1, 14) or y in (3, 14)
+            base = shade((122, 88, 52, 255), 0.62 if edge else 0.8 + 0.2 * ((x * 3 + y * 5) % 5) / 4)
+            if y in (8, 9):
+                return shade(hexc(band), 1.0 if y == 8 else 0.8)
+            if x in (3, 12) and y in (4, 5, 12, 13):
+                return (170, 170, 176, 255)
+            return base
+        img = tex(name + "_crate", 16, 16, paint)
+        img.save(os.path.join(ASSETS, "textures/item", name + "_crate.png"))
+        item_model(name + "_crate")
+
 
 def tex(name, w, h, fn):
     img = Image.new("RGBA", (w, h), (0, 0, 0, 0))

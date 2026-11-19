@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:dark_oak_planks_quarter",
+    "jaymospowers:dark_oak_planks_quarter",
+    "jaymospowers:dark_oak_planks_quarter",
+    "jaymospowers:dark_oak_planks_quarter"
+  ],
+  "result": {
+    "id": "minecraft:dark_oak_planks"
+  }
+}

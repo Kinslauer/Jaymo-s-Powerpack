@@ -248,6 +248,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		GameScreen.register();
 		RecallScreen.register();
 		RenegeScreen.register();
+		VowBookScreen.register();
 		ChalkClient.register();
 		ResearchScreen.register();
 		MimicBenchScreen.register();
@@ -256,6 +257,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		CastOutMap.register();
 		// 0.6.6: lunar events' colours
 		MoonClient.register();
+		// the Wither's night: the sky stays dark while one lives
+		WitherNightClient.register();
 		HordeDaysClient.register();
 		// the real night sky: the HYG catalog's stars and the 88 constellation figures,
 		// drawn as camera-centred sky geometry at night (never replaces the vanilla sky renderer)

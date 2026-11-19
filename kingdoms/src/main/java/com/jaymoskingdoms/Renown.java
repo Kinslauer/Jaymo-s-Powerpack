@@ -94,7 +94,8 @@ public final class Renown {
 
 	/** Puts {@code player}'s alignment over their head (for everyone who sees them). */
 	static void update(ServerPlayer player) {
-		int code = title(Skills.of(player));
+		// (the one they wear: TitleChoice)
+		int code = TitleChoice.renownCode(player);
 		Integer now = player.getAttached(TITLE);
 		if (code == 0) {
 			if (now != null) {

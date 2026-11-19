@@ -1,6 +1,7 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.HudBar;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.fx.MagicFx;
@@ -18,7 +19,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -92,8 +92,7 @@ public final class ZFighterBracers {
 		}
 		Bar bar = BARS.computeIfAbsent(player.getUUID(), id -> new Bar());
 		bar.soaked = Math.min(SOAK_CAP, bar.soaked + amount);
-		int filled = Mth.clamp(Math.round(bar.soaked / SOAK_CAP * 10.0F), 0, 10);
-		player.sendOverlayMessage(Component.literal("[" + "=".repeat(filled) + "-".repeat(10 - filled) + "]").withStyle(ChatFormatting.GOLD));
+		HudBar.gauge(player, "bracers", bar.soaked / SOAK_CAP, HudBar.GOLD, Component.translatable("bar.jaymospowers.soaked"), null);
 	}
 
 	/** The guard came down: what it soaked pays out as a boost. */

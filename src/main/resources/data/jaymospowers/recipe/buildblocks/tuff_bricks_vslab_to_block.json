@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:tuff_bricks_vslab",
+    "jaymospowers:tuff_bricks_vslab"
+  ],
+  "result": {
+    "id": "minecraft:tuff_bricks"
+  }
+}

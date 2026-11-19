@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:undershale_vslab",
+  "result": {
+    "id": "jaymospowers:undershale_quarter",
+    "count": 2
+  }
+}

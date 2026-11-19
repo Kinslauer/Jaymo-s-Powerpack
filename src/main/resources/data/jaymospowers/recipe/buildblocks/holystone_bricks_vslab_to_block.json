@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:holystone_bricks_vslab",
+    "jaymospowers:holystone_bricks_vslab"
+  ],
+  "result": {
+    "id": "jaymospowers:holystone_bricks"
+  }
+}

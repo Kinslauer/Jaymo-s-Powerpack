@@ -61,6 +61,13 @@ public final class StoryGround {
 	static final int TICKET_RADIUS = 10;
 	/** How often a waiting job tries again, and how long before it settles for less (a citadel, the wild). */
 	static final int TRY_EVERY = 20, GIVE_UP_TICKS = 1800;
+	/**
+	 * How long the capital's Epic town is kept trying (ticks) before another is looked for: 1800 was too short for the
+	 * wide land round its bell to load (the 2026-11-17 world gave up and raised a castle). Only an Epic town is crowned.
+	 */
+	static final int EPIC_GIVE_UP_TICKS = 6000;
+	/** How long the capital waits (ticks) for a kingdom in an Epic town further out ({@link EpicTowns#foundFar}) before it goes without one. */
+	static final int FAR_GIVE_UP_TICKS = 6000;
 	/** The bell searched for round a village's middle. */
 	static final int BELL_SEARCH = 96;
 	/**
@@ -120,6 +127,9 @@ public final class StoryGround {
 		@Nullable VillageSearch search;
 		/** The mainland the capital's citadel is looked for round, and its spot there (null: not chosen yet). */
 		@Nullable BlockPos citadelNear, citadel;
+		/** The capital's Epic town has no building fit for a king (so another is looked for), and the last reason it was waited on. */
+		boolean townUnfit;
+		@Nullable String waitingOn;
 		/** Beyond {@link #TICKET_RADIUS}: how far the land round {@link #landAt} is being loaded so far ({@link #step}). */
 		int land;
 		@Nullable ChunkPos landAt;
@@ -165,6 +175,9 @@ public final class StoryGround {
 		}
 	}
 
+	/** The first capital's job ended with no realm made: it is not asked for again this session ({@link #capital}). */
+	static boolean noRealm;
+
 	private StoryGround() {
 	}
 
@@ -178,6 +191,7 @@ public final class StoryGround {
 				capital.search.cancel();
 			}
 			capital = null;
+			noRealm = false;
 			HARBOURS.clear();
 			ROADWAYS.clear();
 			AHEAD.clear();
@@ -219,7 +233,7 @@ public final class StoryGround {
 	 * {@code waiting} is held safe meanwhile. With a realm standing already, {@code then} runs at once.
 	 */
 	static void capital(MinecraftServer server, @Nullable ServerPlayer waiting, @Nullable Runnable then) {
-		if (!realmless(server)) {
+		if (!realmless(server) || noRealm) {
 			if (then != null) {
 				then.run();
 			}
@@ -236,11 +250,16 @@ public final class StoryGround {
 				// (0.7.243) with no village near, the citadel is started at the first try, not after waiting out the village's
 				// time; a village that never takes it settles for a citadel by it, made the same way
 				BlockPos village = search.found;
-				if (village != null && job().citadelNear == null && l.getGameTime() < job().giveUpAt) {
+				if (village != null && job().citadelNear == null && !job().townUnfit && l.getGameTime() < job().giveUpAt) {
 					return foundInVillage(l, village);
 				}
 				return citadelWhenLoaded(l, job());
-			}, l -> citadel(l, job().at));
+			}, l -> {
+				// (once its land is held the far search has had its time: raising one more town on land not yet made is not tried)
+				if (job().citadelNear == null) {
+					citadel(l, job().at);
+				}
+			});
 			job.search = search;
 			capital = job;
 		}
@@ -421,7 +440,7 @@ public final class StoryGround {
 		if (search.found != null) {
 			job.at = search.found;
 		}
-		job.giveUpAt = level.getGameTime() + GIVE_UP_TICKS;
+		job.giveUpAt = level.getGameTime() + (search.found != null ? EPIC_GIVE_UP_TICKS : GIVE_UP_TICKS);
 		JaymosKingdoms.LOGGER.info("No realm yet for a life story: raising a capital {} ({} of {} places looked at in {} ms)",
 			search.found != null ? "in the village at " + search.found : "at spawn", search.next, search.spots.size(),
 			(System.nanoTime() - search.startedAt) / 1_000_000L);
@@ -436,7 +455,7 @@ public final class StoryGround {
 		// the bell is looked for in made land only (isPositionEntityTicking, like hasChunksAt, is true of chunks only
 		// scheduled: see Loaded)
 		if (!level.isPositionEntityTicking(village) || !loaded(level, village, BELL_SEARCH / 16 + 1)) {
-			return false;
+			return waitOn("its land is not loaded yet");
 		}
 		// the search found the village's chunk at y 0: the bell is looked for round its ground, or a town on high land (a
 		// savanna plateau at y 108) has its bell out of reach of a search that measures height too, and is never found
@@ -447,11 +466,11 @@ public final class StoryGround {
 		poi.ensureLoadedAndValid(level, village, BELL_SEARCH);
 		Optional<BlockPos> bell = poi.findClosest(holder -> holder.is(PoiTypes.MEETING), village, BELL_SEARCH, PoiManager.Occupancy.ANY);
 		if (bell.isEmpty()) {
-			return false;
+			return waitOn("no bell found within " + BELL_SEARCH + " blocks of it yet");
 		}
 		Seats.Found found = Seats.structureAt(level, bell.get(), Seats::epic);
 		if (found.status() != Seats.Status.FOUND || found.start() == null) {
-			return false;
+			return waitOn("its Epic town is not found at the bell yet (" + found.status() + ")");
 		}
 		// the land round the bell made first, as for a citadel ({@link #CITADEL_RADIUS}): the town takes its buildings, and if
 		// it won't, a castle is raised beside it, its site looked for up to 183 blocks off; the job's ticket is moved to the
@@ -461,16 +480,29 @@ public final class StoryGround {
 			job().at = b;
 			job().radius = CITADEL_RADIUS;
 			// (the wider land takes longer: the village keeps its full time from here)
-			job().giveUpAt = Math.max(job().giveUpAt, level.getGameTime() + GIVE_UP_TICKS);
-			return false;
+			job().giveUpAt = Math.max(job().giveUpAt, level.getGameTime() + EPIC_GIVE_UP_TICKS);
+			return waitOn("making the wider land round its bell ready");
 		}
 		if (!loaded(level, b, CITADEL_RADIUS)) {
-			return false;
+			return waitOn("the wider land round its bell is still loading");
 		}
 		if (KingdomEvents.foundIn(level, b, found.start()) == null) {
-			KingdomEvents.found(level, b, Castle.Kind.CITADEL);
+			// no lone castle beside it: another Epic town is looked for instead (citadelWhenLoaded)
+			JaymosKingdoms.LOGGER.info("The capital's village at {} has no building fit for a king; looking for another Epic town", b);
+			job().townUnfit = true;
+			return false;
 		}
 		return true;
+	}
+
+	/** The capital's village isn't founded yet: false, saying why the first time and whenever the reason changes. */
+	private static boolean waitOn(String why) {
+		Job job = job();
+		if (!why.equals(job.waitingOn)) {
+			job.waitingOn = why;
+			JaymosKingdoms.LOGGER.info("The capital's village at {} is not founded yet: {}", job.at, why);
+		}
+		return false;
 	}
 
 	/**
@@ -494,8 +526,8 @@ public final class StoryGround {
 		if (!realmless(level.getServer())) {
 			return true;
 		}
-		job.giveUpAt = Long.MAX_VALUE;
 		if (job.citadelNear == null) {
+			job.giveUpAt = Long.MAX_VALUE;
 			job.citadelNear = mainland(level, job.at);
 			job.at = job.citadelNear;
 			job.radius = SPOT_RADIUS;
@@ -513,7 +545,20 @@ public final class StoryGround {
 		if (!loaded(level, job.citadel, CITADEL_RADIUS)) {
 			return false;
 		}
-		return KingdomEvents.foundTown(level, job.citadel) != null || !realmless(level.getServer());
+		// an Epic town raised there, else the nearest one further out, a try at a time; never a castle. Waited for till
+		// FAR_GIVE_UP_TICKS, or till none is left to look at, then the world goes on without a realm (the first bell a player
+		// reaches in an Epic town founds one: KingdomEvents#tryFound)
+		if (KingdomEvents.foundTown(level, job.citadel) != null || !realmless(level.getServer())) {
+			return true;
+		}
+		if (job.giveUpAt == Long.MAX_VALUE) {
+			job.giveUpAt = level.getGameTime() + FAR_GIVE_UP_TICKS;
+		}
+		if (!EpicTowns.farLeft(level, job.citadel)) {
+			JaymosKingdoms.LOGGER.warn("No Epic town to raise a first kingdom in near {}: going on without a realm", job.citadel);
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -538,7 +583,7 @@ public final class StoryGround {
 		return ground != null ? ground : level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, near);
 	}
 
-	/** A kingdom on open ground near {@code near} (no village would do): an Epic town raised there, else its castle. */
+	/** A kingdom on open ground near {@code near} (no village would do): an Epic town raised there, else the nearest one further out (never a castle). */
 	private static @Nullable Faction citadel(ServerLevel level, BlockPos near) {
 		if (!realmless(level.getServer())) {
 			return null;
@@ -668,6 +713,10 @@ public final class StoryGround {
 	static void milestone(ServerPlayer player, BlockPos spawn, Runnable then, Runnable fallback) {
 		MinecraftServer server = player.level().getServer();
 		if (realmless(server)) {
+			if (noRealm) {
+				fallback.run();
+				return;
+			}
 			capital(server, player, () -> milestone(player, spawn, then, fallback));
 			return;
 		}
@@ -700,7 +749,7 @@ public final class StoryGround {
 		ROADWAYS.put(id, job);
 	}
 
-	/** A second kingdom (its town, else its castle) a few hundred blocks from the first town's seat (so a road can join them). */
+	/** A second kingdom (its Epic town) a few hundred blocks from the first town's seat (so a road can join them). */
 	private static void secondTown(ServerLevel level, BlockPos spawn) {
 		List<Faction> towns = Roads.towns(level.getServer());
 		BlockPos from = towns.isEmpty() ? spawn : towns.getFirst().seat();
@@ -996,6 +1045,7 @@ public final class StoryGround {
 		if (capital != null && step(level, capital, "message.jaymoskingdoms.story.making.realm")) {
 			Job done = capital;
 			capital = null;
+			noRealm = realmless(server);
 			done.then.forEach(Runnable::run);
 		}
 		for (UUID id : List.copyOf(HARBOURS.keySet())) {

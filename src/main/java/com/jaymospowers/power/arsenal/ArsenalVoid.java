@@ -278,8 +278,8 @@ public final class ArsenalVoid {
 				player.resetFallDistance();
 				level.playSound(null, from.x, from.y, from.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.0F, 0.8F);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.0F, 0.8F);
-				level.sendParticles(MagicFx.VOID, from.x, from.y + 1.0, from.z, 40, 0.3, 0.8, 0.3, 0.6);
-				level.sendParticles(MagicFx.VOID, player.getX(), player.getY() + 1.0, player.getZ(), 30, 0.3, 0.8, 0.3, 0.05);
+				// through a rift pair, as his own blinks go (ArsenalBlinks)
+				ArsenalBlinks.rifts(level, player, from, player.position(), isVoid(player));
 				return true;
 			}
 		}

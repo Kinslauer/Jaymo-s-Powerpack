@@ -707,17 +707,30 @@ public final class Freerun {
 
 	/** The ticks {@code player}'s grip lasts on a wall (Climber's rank, 0 for anyone), before they start to slip. */
 	public static int grip(Player player) {
-		return GRIP_TICKS[Mth.clamp(perk(player, Perk.CLIMBER), 0, GRIP_TICKS.length - 1)];
+		int ticks = GRIP_TICKS[Mth.clamp(perk(player, Perk.CLIMBER), 0, GRIP_TICKS.length - 1)];
+		return ticks == UNLIMITED_GRIP ? ticks : Math.round(ticks * com.jaymospowers.core.ArmourEase.plateEase(player, com.jaymospowers.core.ArmourEase.PLATE_CLIMB));
 	}
 
 	/** {@code player}'s climbing speed up a wall (blocks/tick), by Climber's rank (0 for anyone), and their Agility. */
 	public static double climbSpeed(Player player) {
-		return CLIMB_SPEED[Mth.clamp(perk(player, Perk.CLIMBER), 0, CLIMB_SPEED.length - 1)] * com.jaymospowers.core.Agility.factor(player);
+		return CLIMB_SPEED[Mth.clamp(perk(player, Perk.CLIMBER), 0, CLIMB_SPEED.length - 1)] * com.jaymospowers.core.Agility.factor(player)
+			* com.jaymospowers.core.ArmourEase.plateEase(player, com.jaymospowers.core.ArmourEase.PLATE_CLIMB);
 	}
 
 	/** Tells Kingdoms a move was made (it gives the Stealth experience, at most so often). */
 	static void moved(ServerPlayer player) {
 		player.addTag(XP_TAG);
+	}
+
+	/** A hook drags a clinging player off the wall: the grip is gone, and that wall can't be caught again till they land. False if they weren't clinging. */
+	public static boolean dragOff(ServerPlayer player) {
+		Integer move = player.getAttached(MOVE);
+		if (move == null || move / 8 != CLING) {
+			return false;
+		}
+		KICKED.merge(player.getUUID(), 1 << (move % 8 - 1), (a, b) -> a | b);
+		stop(player);
+		return true;
 	}
 
 	private static void stop(ServerPlayer player) {

@@ -3,11 +3,15 @@
 	"package": "com.jaymospowers.client.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
+		"PlayerInfoNoConnectionMixin",
+		"StuckRideTeleportMixin",
+		"ArrowPickScrollMixin",
 		"BrokenLegSprintMixin",
 		"HitStopModelFeatureRendererMixin",
 		"DarkPanelsTextureMixin",
 		"DarkPanelsTextMixin",
 		"FaintInputMixin",
+		"AutoWalkInputMixin",
 		"WetCoatTintMixin",
 		"TakeoverFacingMixin",
 		"TakeoverFacingHeadMixin",
@@ -124,7 +128,8 @@
 		"FangGauntletsAvatarRendererMixin",
 		"FangGauntletsFirstPersonMixin",
 		"FangGauntletsItemInHandLayerMixin",
-		"FangGauntletsModelFeatureRendererMixin"
+		"FangGauntletsModelFeatureRendererMixin",
+		"TitleCardMixin"
 	],
 	"injectors": { "defaultRequire": 1 }
 }

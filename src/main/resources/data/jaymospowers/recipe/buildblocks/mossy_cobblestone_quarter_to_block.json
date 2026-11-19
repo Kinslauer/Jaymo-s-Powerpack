@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:mossy_cobblestone_quarter",
+    "jaymospowers:mossy_cobblestone_quarter",
+    "jaymospowers:mossy_cobblestone_quarter",
+    "jaymospowers:mossy_cobblestone_quarter"
+  ],
+  "result": {
+    "id": "minecraft:mossy_cobblestone"
+  }
+}

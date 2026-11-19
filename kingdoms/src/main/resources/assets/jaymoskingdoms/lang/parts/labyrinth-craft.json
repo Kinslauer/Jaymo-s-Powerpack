@@ -1,0 +1,15 @@
+{
+	"item.jaymoskingdoms.geared_plate": "Geared Plate",
+	"item.jaymoskingdoms.beetle_gland": "Bombardier Gland",
+	"item.jaymoskingdoms.rune_tablet_anthu": "Tablet of Anthu",
+	"item.jaymoskingdoms.rune_tablet_kesh": "Tablet of Kesh",
+	"item.jaymoskingdoms.rune_tablet_orrim": "Tablet of Orrim",
+	"item.jaymoskingdoms.labyrinth_compass": "Labyrinth Compass",
+	"item.jaymoskingdoms.afterblow": "The Afterblow",
+	"item.jaymoskingdoms.gland_flamer": "Gland Flamer",
+	"block.jaymoskingdoms.rune_gate": "Rune Gate",
+	"entity.jaymoskingdoms.bombardier_beetle": "Bombardier Beetle",
+	"entity.jaymoskingdoms.beetle_queen": "Beetle Queen",
+	"entity.jaymoskingdoms.brazier_mimic": "Living Brazier",
+	"message.jaymoskingdoms.rune_gate.empty": "%s sockets still empty"
+}

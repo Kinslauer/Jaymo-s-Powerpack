@@ -1,0 +1,74 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:skyroot_planks_quarter",
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": 0,
+              "add": false
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 1,
+              "add": true,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:skyroot_planks_quarter",
+                "state": {
+                  "low_neg": "true"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 1,
+              "add": true,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:skyroot_planks_quarter",
+                "state": {
+                  "low_pos": "true"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 1,
+              "add": true,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:skyroot_planks_quarter",
+                "state": {
+                  "high_neg": "true"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 1,
+              "add": true,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jaymospowers:skyroot_planks_quarter",
+                "state": {
+                  "high_pos": "true"
+                }
+              }
+            },
+            {
+              "type": "minecraft:explosion_decay"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymospowers:blocks/skyroot_planks_quarter"
+}

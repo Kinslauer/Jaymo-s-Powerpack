@@ -1,0 +1,14 @@
+{
+	"hud.jaymospowers.zfighter_scouter.kind.player": "Fighter",
+	"hud.jaymospowers.zfighter_scouter.kind.foe": "Foe",
+	"hud.jaymospowers.zfighter_scouter.kind.beast": "Beast",
+	"hud.jaymospowers.zfighter_scouter.kind.folk": "Folk",
+	"screen.jaymospowers.colour.title": "Pick a colour",
+	"screen.jaymospowers.colour.presets": "Presets",
+	"screen.jaymospowers.colour.recent": "Lately",
+	"screen.jaymospowers.colour.hex": "Hex",
+	"screen.jaymospowers.colour.old_new": "Old / new",
+	"screen.jaymospowers.colour.apply": "Apply",
+	"screen.jaymospowers.colour.reset": "Reset",
+	"screen.jaymospowers.colour.cancel": "Cancel"
+}

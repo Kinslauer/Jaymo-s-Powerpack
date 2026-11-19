@@ -1,0 +1,15 @@
+{
+  "type": "jaymospowers:light_armour_crafting",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:leather_chestplate",
+    "jaymospowers:mail_sheet",
+    "jaymospowers:mail_sheet",
+    "jaymospowers:mail_sheet",
+    "jaymospowers:mail_sheet",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "jaymospowers:mailed_jack"
+  }
+}

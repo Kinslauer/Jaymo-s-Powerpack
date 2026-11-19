@@ -111,10 +111,13 @@ public final class Warlocks {
 			Patrons.swear(player, patron, Patrons.FAVOUR_DEVOUT, Patrons.today(player.level().getServer()));
 		}
 		player.removeAttached(PACT);
+		// (the written pact) the book it's kept in
+		VowBook.give(player);
 	}
 
 	static void unmake(ServerPlayer player) {
 		player.removeAttached(PACT);
+		VowBook.unmake(player);
 	}
 
 	static Pact pact(ServerPlayer player) {

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:stone_quarter",
+    "jaymospowers:stone_quarter",
+    "jaymospowers:stone_quarter",
+    "jaymospowers:stone_quarter"
+  ],
+  "result": {
+    "id": "minecraft:stone"
+  }
+}

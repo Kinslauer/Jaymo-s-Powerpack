@@ -73,11 +73,6 @@ import org.jspecify.annotations.Nullable;
  * ({@code power/blindness/Blind#forkAwakens}).</li>
  * <li>Xenoform: put on a Xeno-Band from a broken fallen star ({@code power/xenoform}). Awakens at once, and it is the
  * only way: fate never hands Xenoform out and it can't be an affinity ({@code Power.fated}).</li>
- * <li>Reactor Heart (Awakening picks): live through a blast that hurts for {@link #REACTOR_BLAST}+. A day off, once a day; in
- * the ruined future (Chrono's Future) it awakens at once.</li>
- * <li>Blinker (Awakening picks): land {@link #BLINKS_NEEDED} ender pearls (an End-born, {@link #BLINKS_END_BORN}). Awakens at
- * once.</li>
- * <li>Lawgiver (Awakening picks): lay a book you wrote and signed yourself on a lectern. A day off, once a day.</li>
  * </ul>
  */
 public final class Callings {
@@ -96,14 +91,9 @@ public final class Callings {
 	public static final AttachmentType<Integer> FIST_KILLS = AttachmentRegistry.create(JaymosPowers.id("fist_kills"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath());
 
-	/** (Awakening picks) Ender pearls a powerless player has landed (for the Blinker). Saved, kept through death. */
+	/** Ender pearls a powerless player had landed (the retired Blinker's calling). Still registered so old saves load; {@link RetiredPowers} drops it. */
 	public static final AttachmentType<Integer> BLINKS = AttachmentRegistry.create(JaymosPowers.id("blinks"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath());
-	/** Reactor Heart: the least harm a blast must do; Blinker: pearls to land (an End-born's fewer). */
-	public static final float REACTOR_BLAST = 6.0F;
-	public static final int BLINKS_NEEDED = 16, BLINKS_END_BORN = 8;
-	/** Kingdoms' tag on an End-born. */
-	static final String END_BORN_TAG = "jaymoskingdoms_heritage_endborn";
 
 	/** One Minecraft day of the wait (20 minutes). */
 	public static final int DAY = 24000;
@@ -140,9 +130,6 @@ public final class Callings {
 	/** (0.14.0) Cryokinesis: seconds in a row spent freezing, and the day it last counted. */
 	private static final Map<UUID, Integer> IN_COLD = new HashMap<>();
 	private static final Map<UUID, Long> COLD_DAY = new HashMap<>();
-	/** (Awakening picks) Reactor Heart and Lawgiver: the day each last counted. */
-	private static final Map<UUID, Long> BLAST_DAY = new HashMap<>();
-	private static final Map<UUID, Long> LECTERN_DAY = new HashMap<>();
 	/**
 	 * (Awakening pick) The brink: a powerless player left at {@link #BRINK_HEALTH} or less by a blow lives through it, and
 	 * whatever sleeps in them stirs. Once a day it takes {@link #DAY} off the wait, never past {@link #BRINK_FLOOR} (it
@@ -194,20 +181,6 @@ public final class Callings {
 			if (!(entity instanceof ServerPlayer player) || !player.isAlive()) {
 				return;
 			}
-			if (source.is(DamageTypeTags.IS_EXPLOSION) && damageTaken >= REACTOR_BLAST && Powers.of(player) == null) {
-				// (Awakening picks) a blast lived through: the Reactor Heart; in the ruined future, at once
-				boolean future = player.level().dimension() == com.jaymospowers.power.chrono.future.Future.FUTURE;
-				if (future || once(BLAST_DAY, player)) {
-					call(player, "reactor", future ? Integer.MAX_VALUE : DAY);
-				}
-			} else if (source.is(DamageTypes.ENDER_PEARL) && Powers.of(player) == null) {
-				// (Awakening picks) a pearl landed: the Blinker
-				int blinks = player.getAttachedOrElse(BLINKS, 0) + 1;
-				player.setAttached(BLINKS, blinks);
-				if (blinks >= (player.entityTags().contains(END_BORN_TAG) ? BLINKS_END_BORN : BLINKS_NEEDED)) {
-					call(player, "blinker", Integer.MAX_VALUE);
-				}
-			}
 			if (damageTaken > 0.0F && player.getHealth() <= BRINK_HEALTH && Powers.of(player) == null) {
 				brink(player);
 			}
@@ -224,13 +197,6 @@ public final class Callings {
 				&& level.isCloseToVillage(hit.getBlockPos(), 2) && once(BELL_DAY, server)) {
 				call(server, "resonance", DAY);
 			}
-			if (player instanceof ServerPlayer server && world instanceof ServerLevel level && level.getBlockState(hit.getBlockPos()).is(Blocks.LECTERN)
-				&& Powers.of(player) == null && player.getItemInHand(hand).has(DataComponents.WRITTEN_BOOK_CONTENT)
-				&& player.getItemInHand(hand).get(DataComponents.WRITTEN_BOOK_CONTENT).author().equals(player.getGameProfile().name())
-				&& once(LECTERN_DAY, server)) {
-				// (Awakening picks) a book of your own laws laid open: the Lawgiver
-				call(server, "rules", DAY);
-			}
 			return InteractionResult.PASS;
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player.getUUID()));
@@ -244,8 +210,6 @@ public final class Callings {
 			SMOKE_DAY.clear();
 			IN_COLD.clear();
 			COLD_DAY.clear();
-			BLAST_DAY.clear();
-			LECTERN_DAY.clear();
 			BRINK_DAY.clear();
 		});
 	}

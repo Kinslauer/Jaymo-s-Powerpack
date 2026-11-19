@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:granite_quarter",
+    "jaymospowers:granite_quarter",
+    "jaymospowers:granite_quarter",
+    "jaymospowers:granite_quarter"
+  ],
+  "result": {
+    "id": "minecraft:granite"
+  }
+}

@@ -63,6 +63,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Voices.register();
 		// the attachments (registered as their classes load)
 		LOGGER.debug("kingdom attachments: {} {} {}", Factions.ALL, Factions.KEEPS, Reputation.REPUTATION);
+		// (saved or synced, but held by classes nothing loads before a world or a joining player needs them: captains' tempers
+		// were dropped as unknown on every restart, and joining clients didn't know the farmhand family or lesson course)
+		LOGGER.debug("late attachments: {} {} {} {}", Rivals.TEMPERS, FarmhandHome.FARMHAND_FAMILY, Lessons.COURSE, Legendary.SPENT);
 		KingdomEvents.register();
 		// barbarian camps, their raiders and raids (and their attachment)
 		LOGGER.debug("camp attachment: {}", Camps.CAMPS);
@@ -200,6 +203,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Retinue.register();
 		Audiences.register();
 		Doorways.register();
+		Knocking.register();
 		// (0.7.138) with MCA, rulers are the town's own villagers
 		LOGGER.debug("reign attachment: {}", Rulers.REIGNS);
 		// (0.7.175) a ruler's or guard's standing, shown on MCA's screen (synced: registered on both sides)
@@ -279,12 +283,17 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.56: monsters see farther (Farsighted Mobs) and creepers stalk you (Stalker Creepers), both remade
 		Farsight.register();
 		Stalkers.register();
+		// Clouds and Bits mobs: golems hunt creepers, phantoms carry players off
+		com.jaymoskingdoms.mobs.GolemHunt.register();
+		com.jaymoskingdoms.mobs.PhantomCarry.register();
 		CreeperFlight.register();
 		// 0.7.103: baby zombies weaker, endermen stand by each other (and teleport with thunder)
 		MobTweaks.register();
 		VillagerHunters.register();
 		// (ahead of Theft: a refused chest or fire never reaches its record of what was opened)
 		Vows.register();
+		// (the Awakening's rule writer, as Andy meant it) Paladin oaths and Warlock pacts written in a book of vows
+		VowBook.register();
 		Theft.register();
 		ForestRangers.register();
 		Retaliation.register();
@@ -579,6 +588,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		TurnedVillagers.register();
 		LOGGER.debug("marked and turned attachments: {} {}", MarkedMonsters.MARKS, TurnedVillagers.TRADE);
 		com.jaymoskingdoms.wild.WolfStalkers.register();
+		com.jaymoskingdoms.wild.PredatorRanges.register();
 		com.jaymoskingdoms.wild.Thinning.register();
 		// 0.5.14: horses and wagons: mounted guards and archers for prosperous realms, a wealthy king's carriage, and the
 		// fiefdoms' caravans to their kingdoms (and their attachment)
@@ -674,6 +684,12 @@ public final class JaymosKingdoms implements ModInitializer {
 		JournalLog.register();
 		// 0.7.649: what Jaymo's Powers' character menu asks for (the Faction tab, the Map tab's settlements)
 		MenuNet.register();
+		// the H menu's daily task, titles you wear and rewards held until claimed
+		LOGGER.debug("daily task, worn title and held reward attachments: {} {} {}", DailyTasks.STATE, TitleChoice.WORN, Rewards.HELD);
+		DailyTasks.register();
+		TitleChoice.register();
+		Rewards.register();
+		Papers.register();
 		// 0.7.55: tailors change your clothes for a fee (MCA's editor, clothing page only)
 		Tailors.register();
 		// 0.5.39: the townsfolk come over to you: questions, quests, requests, bargains, news
@@ -1073,6 +1089,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (Awakening picks) the Cordon, who hunt the awakened (and its courts' attachment), and awakened strangers on the road
 		Cordon.register();
 		AwakenedStrangers.register();
+		// the Wither's coming: the sky stays dark while one lives, it wrecks what was built first, and its fight
+		com.jaymoskingdoms.wither.WitherFight.register();
 		// (0.7.289) a villager's first meeting with you is a handshake (last, so every other use of a villager goes first)
 		Handshakes.registerGreetings();
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> {

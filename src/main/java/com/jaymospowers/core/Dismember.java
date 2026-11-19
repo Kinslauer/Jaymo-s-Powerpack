@@ -756,7 +756,8 @@ public final class Dismember {
 		ItemStack weapon = attacker.getMainHandItem();
 		boolean cut = cutting != null && cutting.target == target || blade(weapon);
 		boolean blunt = !cut && (weapon.isEmpty() || Fractures.blunt(weapon));
-		float chance = blunt ? LETHAL_BLUNT_SEVER : shortBlade(weapon) ? (part == HEAD ? LETHAL_SHORT_HEAD_CHANCE : LETHAL_SHORT_LIMB_CHANCE)
+		// (Andy, 2026-11-18) a crushing blow (a mutant's slam) tears off what it lands on far more often than a club
+		float chance = BlastGore.crushedNow(target) ? BlastGore.CRUSH_SEVER : blunt ? LETHAL_BLUNT_SEVER : shortBlade(weapon) ? (part == HEAD ? LETHAL_SHORT_HEAD_CHANCE : LETHAL_SHORT_LIMB_CHANCE)
 			: part == HEAD ? LETHAL_HEAD_CHANCE : LETHAL_LIMB_CHANCE;
 		float guard = armourGuard(target, part);
 		if (target.getRandom().nextFloat() < chance * guard) {

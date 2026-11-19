@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:mossy_holystone_quarter",
+    "jaymospowers:mossy_holystone_quarter",
+    "jaymospowers:mossy_holystone_quarter",
+    "jaymospowers:mossy_holystone_quarter"
+  ],
+  "result": {
+    "id": "jaymospowers:mossy_holystone"
+  }
+}

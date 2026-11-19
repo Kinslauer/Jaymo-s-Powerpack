@@ -3,6 +3,7 @@ package com.jaymospowers.core.wounds;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.HoldProgress;
+import com.jaymospowers.core.HudBar;
 import com.jaymospowers.power.web.KitchenCompat;
 import com.jaymospowers.power.zfighter.ZFighterAndroid;
 import io.netty.buffer.ByteBuf;
@@ -106,8 +107,8 @@ public final class Treatment {
 	public static final float SELF_PITCH = 60.0F;
 	/** (0.14.4) Either of you moving this far (blocks) spoils the treatment; how far past reach you may lean. */
 	public static final double MOVE_LIMIT = 0.5, REACH_SLACK = 0.5;
-	/** (0.14.4) How often your hands are seen at work (ticks), and the bar's length. */
-	static final int WORK_TICKS = 15, BAR = 12;
+	/** (0.14.4) How often your hands are seen at work (ticks). */
+	static final int WORK_TICKS = 15;
 	/** (0.14.4) The custom-data key a red-hot blade carries (the game time it was heated). */
 	public static final String HEATED_KEY = "jaymospowers:heated";
 	/** (0.18.45) Told of every treatment a player finishes on someone else. Jaymo's Kingdoms adds one (by reflection): a villager remembers who dressed their wounds. */
@@ -804,10 +805,8 @@ public final class Treatment {
 			}
 			if (s.ticks < s.need) {
 				if (s.ticks % 2 == 0) {
-					int filled = Math.round(BAR * s.ticks / (float) s.need);
-					String bar = "|".repeat(filled) + ".".repeat(BAR - filled);
-					player.sendOverlayMessage(Component.translatable("message.jaymospowers.wounds.treating_bar", Component.translatable(s.remedy.key()), bar)
-						.withStyle(ChatFormatting.GRAY));
+					HudBar.hold(player, "treating", s.ticks / (float) s.need, HudBar.GREY,
+						Component.translatable("bar.jaymospowers.treating", Component.translatable(s.remedy.key())), true);
 				}
 				continue;
 			}

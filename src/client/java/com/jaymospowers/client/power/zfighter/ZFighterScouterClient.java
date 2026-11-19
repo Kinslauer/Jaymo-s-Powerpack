@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.zfighter;
 
+import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.client.hud.HudStyle;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.power.zfighter.ZFighterScouter;
@@ -41,6 +42,8 @@ public final class ZFighterScouterClient {
 	/** The glitch after an overload, and how often its digits are scrambled (ticks). */
 	static final int GLITCH_TICKS = 40;
 	static final int SCRAMBLE_EVERY = 2;
+	/** The reading panel's height: the name, the kind and number, the bar of the number against the scouter's cap. */
+	static final int PANEL_H = 34;
 	private static final String GLITCH_CHARS = "0123456789#%&?!@$";
 
 	private static int lookId = -1;
@@ -50,6 +53,7 @@ public final class ZFighterScouterClient {
 	private static int readFlags;
 	private static long readAt = Long.MIN_VALUE / 2;
 	private static String readName = "";
+	private static String readKind = "";
 	private static long glitchUntil = Long.MIN_VALUE / 2;
 
 	private ZFighterScouterClient() {
@@ -68,6 +72,7 @@ public final class ZFighterScouterClient {
 			readAt = now;
 			Entity entity = minecraft.level.getEntity(payload.id());
 			readName = entity == null ? "" : entity.getDisplayName().getString();
+			readKind = kind(entity);
 			if ((readFlags & ZFighterSensesNet.OVERLOADED) != 0) {
 				glitchUntil = now + GLITCH_TICKS;
 			}
@@ -79,6 +84,13 @@ public final class ZFighterScouterClient {
 			readId = -1;
 			glitchUntil = Long.MIN_VALUE / 2;
 		});
+	}
+
+	/** What sort of thing it is, for the panel's tag: a fighter (a player), a foe, a beast or a folk (anything else living). */
+	private static String kind(Entity entity) {
+		String key = entity instanceof net.minecraft.world.entity.player.Player ? "player" : entity instanceof net.minecraft.world.entity.monster.Enemy ? "foe"
+			: entity instanceof net.minecraft.world.entity.animal.Animal ? "beast" : entity instanceof LivingEntity ? "folk" : "";
+		return key.isEmpty() ? "" : Component.translatable("hud.jaymospowers.zfighter_scouter.kind." + key).getString();
 	}
 
 	private static boolean wearing(LocalPlayer player) {
@@ -135,7 +147,7 @@ public final class ZFighterScouterClient {
 		Font font = minecraft.font;
 		int cx = graphics.guiWidth() / 2;
 		int cy = graphics.guiHeight() / 2;
-		String name = readName.isEmpty() ? "?" : com.jaymospowers.client.UiStyle.cut(font, readName, 90);
+		String name = readName.isEmpty() ? "?" : UiStyle.cut(font, readName, 90);
 		String number;
 		int color = 0xFF7CFFB0;
 		if (glitching) {
@@ -152,13 +164,15 @@ public final class ZFighterScouterClient {
 			number = Integer.toString(readLevel);
 		}
 		String line = Component.translatable("hud.jaymospowers.zfighter_scouter.level", number).getString();
-		int w = Math.max(font.width(name), font.width(line)) + 8;
+		String kind = glitching || readKind.isEmpty() ? "" : readKind;
+		int kindW = kind.isEmpty() ? 0 : UiStyle.pillWidth(font, kind, "") + 3;
+		int w = Math.max(Math.max(font.width(name), font.width(line) + kindW), 78) + 8;
 		// (HUD rework) power-level panel: INSPECT zone, row 30
-		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.INSPECT, "jaymospowers:zfighter_scouter", 30, w, 22);
+		int[] at = com.jaymospowers.client.hud.HudZones.place(com.jaymospowers.client.hud.HudZones.INSPECT, "jaymospowers:zfighter_scouter", 30, w, PANEL_H);
 		if (at == null) {
 			return;
 		}
-		ZFighterHudLayout.zonedAt(ZFighterHudLayout.Piece.SCOUTER, at[0], at[1], w, 22, graphics.guiWidth(), graphics.guiHeight());
+		ZFighterHudLayout.zonedAt(ZFighterHudLayout.Piece.SCOUTER, at[0], at[1], w, PANEL_H, graphics.guiWidth(), graphics.guiHeight());
 		int x = at[0];
 		int y = at[1];
 		if (glitching) {
@@ -170,10 +184,15 @@ public final class ZFighterScouterClient {
 			}
 		}
 		ZFighterHudLayout.begin(graphics, ZFighterHudLayout.Piece.SCOUTER, player);
-		graphics.fill(x, y, x + w, y + 22, 0xA0001810);
-		graphics.outline(x, y, w, 22, glitching ? 0xC0FF4A3A : 0xC07CFFB0);
+		graphics.fill(x, y, x + w, y + PANEL_H, 0xA0001810);
+		graphics.outline(x, y, w, PANEL_H, glitching ? 0xC0FF4A3A : 0xC07CFFB0);
 		graphics.text(font, glitching ? scramble(now + 7, name.length()) : name, x + 4, y + 3, 0xFFE8FFF0);
-		graphics.text(font, line, x + 4, y + 12, color);
+		graphics.text(font, line, x + 4, y + 14, color);
+		if (!kind.isEmpty()) {
+			UiStyle.pill(graphics, font, x + w - kindW - 1, y + 12, kind, "", color);
+		}
+		boolean unread = glitching || (readFlags & ZFighterSensesNet.HIDDEN) != 0 || readLevel < 0;
+		HudStyle.bar(graphics, x + 4, y + PANEL_H - 7, w - 8, HudStyle.BAR_H, unread ? 0.0F : readLevel / (float)ZFighterScouter.CAP, color);
 		ZFighterHudLayout.end(graphics);
 	}
 

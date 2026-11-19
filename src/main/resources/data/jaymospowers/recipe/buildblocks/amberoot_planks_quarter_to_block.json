@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:amberoot_planks_quarter",
+    "jaymospowers:amberoot_planks_quarter",
+    "jaymospowers:amberoot_planks_quarter",
+    "jaymospowers:amberoot_planks_quarter"
+  ],
+  "result": {
+    "id": "jaymospowers:amberoot_planks"
+  }
+}

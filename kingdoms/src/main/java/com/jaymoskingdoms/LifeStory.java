@@ -152,6 +152,13 @@ public final class LifeStory {
 	 * free spot to wake near a start's place, one is looked for up to FREE_WIDEN blocks further out.
 	 */
 	static final int FREE_TRIES = 3, FREE_STEP = 480, FREE_WIDEN = 64;
+	/**
+	 * (2026-11-18, Andy: respawns were too close to the last death) A start in the wild or open land is never within
+	 * DEATH_APART blocks of where the player last died, nor further than DEATH_FAR; with no spot in its own ring, the
+	 * start falls back to the DEATH_APART-DEATH_FAR ring round the death. A start that puts them inside a town, kingdom or
+	 * fief (the {@code settled} spots) may stay close.
+	 */
+	static final int DEATH_APART = 500, DEATH_FAR = 1000;
 	/** "Let fate decide" on the power: how often the childhood's power gets the affinity anyway. */
 	static final float FATE_LEANS = 0.5F;
 	/** Every start's kit: bread; a capital's few coins; a merchant's child's purse; a caver's torches. */
@@ -724,6 +731,8 @@ public final class LifeStory {
 	 * the start looks past their places. Empty otherwise, and in single player.
 	 */
 	private static java.util.Map<String, Born> OTHERS = java.util.Map.of();
+	/** While a road is set out on ({@link #arrive}): where the player last died, which the wild keeps {@link #DEATH_APART} from; null otherwise. */
+	private static @Nullable BlockPos DEATH;
 	/**
 	 * Andy, 2026-11-13 ("NONE of the starts should be up there except divine born"): while a road is set out on
 	 * ({@link #arrive}), whether it must keep off the Aether (its own world, or the top band of a One Dimension world). True for
@@ -1111,7 +1120,7 @@ public final class LifeStory {
 		}
 		// (0.7.228) a new world has no realm till someone walks up to a bell: one is raised first, so every page has realms to name
 		MinecraftServer server = player.level().getServer();
-		if (StoryGround.realmless(server)) {
+		if (StoryGround.realmless(server) && !StoryGround.noRealm) {
 			StoryGround.capital(server, player, () -> {
 				if (!player.isRemoved() && owed(player)) {
 					ask(player, forced);
@@ -1514,6 +1523,7 @@ public final class LifeStory {
 		Start landed;
 		// (Tiv) everyone else's start, so this one looks past their places
 		OTHERS = others(player);
+		DEATH = lastDeath(player);
 		GROUNDED = bornAs != Heritage.Kind.DIVINE && start != Start.AFTERLIFE;
 		Faction asked = null;
 		boolean skyRealm = false;
@@ -1541,6 +1551,7 @@ public final class LifeStory {
 			StartPerks.landed(player, landed);
 		} finally {
 			OTHERS = java.util.Map.of();
+			DEATH = null;
 			GROUNDED = false;
 		}
 		if (asked != null && landed == start && roadRealm != null) {
@@ -1735,7 +1746,7 @@ public final class LifeStory {
 				Faction city = capital(server, random, f -> freePlace(level, f.seat()));
 				if (city != null) {
 					place = city.seat();
-					to = spot(level, mate, city.seat(), CITY_MIN, CITY_MAX, random);
+					to = spot(level, mate, city.seat(), CITY_MIN, CITY_MAX, random, true);
 				}
 			}
 			case BANISHED -> {
@@ -1757,7 +1768,7 @@ public final class LifeStory {
 			case SWORN -> {
 				if (named != null) {
 					place = named.seat();
-					to = spot(level, mate, named.seat(), CITY_MIN, CITY_MAX, random);
+					to = spot(level, mate, named.seat(), CITY_MIN, CITY_MAX, random, true);
 					if (to != null) {
 						atLeast(player, named, SWORN_REPUTATION);
 						if (Factions.of(server, player.getUUID()) == null) {
@@ -1945,7 +1956,7 @@ public final class LifeStory {
 				// (0.7.412) the capital road for the named realm, with a fuller purse and no bed; its watch moves them on at night
 				if (named != null) {
 					place = named.seat();
-					to = spot(level, mate, named.seat(), CITY_MIN, CITY_MAX, random);
+					to = spot(level, mate, named.seat(), CITY_MIN, CITY_MAX, random, true);
 					if (to != null) {
 						StoryHard.evict(player, named);
 					}
@@ -2002,7 +2013,7 @@ public final class LifeStory {
 			case MOON_CURSED -> {
 				// (0.7.417) the wild, or the edge of a village if one stands near (with a mate, beside them)
 				BlockPos village = mate == null && random.nextBoolean() ? Scout.nearest(level, StructureTags.VILLAGE, spawn, STRUCTURE_SEARCH) : null;
-				to = village != null ? spot(level, null, village, MOON_CURSED_VILLAGE_MIN, MOON_CURSED_VILLAGE_MAX, random) : null;
+				to = village != null ? spot(level, null, village, MOON_CURSED_VILLAGE_MIN, MOON_CURSED_VILLAGE_MAX, random, true) : null;
 				if (to == null) {
 					to = spot(level, mate, spawn, WILD_MIN, WILD_MAX, random);
 				}
@@ -2512,7 +2523,7 @@ public final class LifeStory {
 		int[] made = {NEW_CHUNKS};
 		for (BlockPos column : columns) {
 			int x = column.getX(), z = column.getZ();
-			if (!freeSpot(level, column) || !reach(level, x, z, made)) {
+			if (!freeSpot(level, column) || !awayFromDeath(column) || !reach(level, x, z, made)) {
 				continue;
 			}
 			int top = Math.min(CAVE_MAX_Y, level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 12);
@@ -2979,10 +2990,13 @@ public final class LifeStory {
 	/**
 	 * (2026-11-14) Where a setting out on {@code level} is worked out from ({@link #ORIGIN_SPREAD}): a random point round the
 	 * world's spawn, off the open sea if one of {@link #ORIGIN_TRIES} is, and never within {@link #ORIGIN_APART} of where
-	 * {@code player} last woke. Only biome noise is read, so nothing is made or loaded to choose it.
+	 * {@code player} last woke; with a last death known the point is {@link #DEATH_APART} to {@link #DEATH_FAR} from it instead
+	 * (round the spawn only when none is). Only biome noise is read, so nothing is made
+	 * or loaded to choose it.
 	 */
 	static BlockPos origin(ServerLevel level, ServerPlayer player, RandomSource random) {
 		BlockPos spawn = level.getRespawnData().pos();
+		BlockPos died = lastDeath(player);
 		Born past = level.getServer().overworld().getAttachedOrElse(BORN, java.util.Map.of()).get(player.getUUID().toString());
 		BlockPos woke = past != null && past.dimension.equals(level.dimension().identifier().toString()) ? BlockPos.of(past.wake) : null;
 		int sea = net.minecraft.core.QuartPos.fromBlock(level.getSeaLevel());
@@ -2992,7 +3006,13 @@ public final class LifeStory {
 		double spread = made == null ? ORIGIN_SPREAD : Math.min(ORIGIN_SPREAD, made.reach());
 		for (int i = 0; i < ORIGIN_TRIES; i++) {
 			double angle = random.nextDouble() * Math.PI * 2.0, d = spread * Math.sqrt(random.nextDouble());
-			BlockPos at = new BlockPos(spawn.getX() + Mth.floor(Math.cos(angle) * d), spawn.getY(), spawn.getZ() + Mth.floor(Math.sin(angle) * d));
+			BlockPos from = spawn;
+			if (died != null) {
+				// with a death known, the point is DEATH_APART to DEATH_FAR from it (an even spread over that ring)
+				from = died;
+				d = Math.sqrt((double) DEATH_APART * DEATH_APART + random.nextDouble() * ((double) DEATH_FAR * DEATH_FAR - (double) DEATH_APART * DEATH_APART));
+			}
+			BlockPos at = new BlockPos(from.getX() + Mth.floor(Math.cos(angle) * d), spawn.getY(), from.getZ() + Mth.floor(Math.sin(angle) * d));
 			if (woke != null && flat(at, woke) < (double) ORIGIN_APART * ORIGIN_APART || !Pregen.inside(level, at)) {
 				continue;
 			}
@@ -3101,12 +3121,41 @@ public final class LifeStory {
 	 * spot that near, up to {@link #FREE_WIDEN} blocks further out (from the same few new chunks).
 	 */
 	private static @Nullable BlockPos spot(ServerLevel level, @Nullable Landing mate, BlockPos center, int min, int max, RandomSource random) {
+		return spot(level, mate, center, min, max, random, false);
+	}
+
+	/**
+	 * The same; {@code settled}: the spot is inside a town, kingdom or fief (Andy's exception), so it may be near the last death.
+	 * Otherwise it is {@link #DEATH_APART} to {@link #DEATH_FAR} from it ({@link #awayFromDeath}), and a ring in the open (from
+	 * {@link #BANISHED_MIN} out) that has no such spot takes one from the ring round the death itself; a place's own small ring
+	 * (a camp, a wreck) fails instead, for the wild to take over.
+	 */
+	private static @Nullable BlockPos spot(ServerLevel level, @Nullable Landing mate, BlockPos center, int min, int max, RandomSource random,
+		boolean settled) {
 		BlockPos by = mate == null ? null : beside(level, mate.pos, random);
 		if (by != null) {
 			return by;
 		}
-		BlockPos at = ground(level, center, min, max, random, p -> freeSpot(level, p));
-		return at != null ? at : ground(level, center, max, max + FREE_WIDEN, random, p -> freeSpot(level, p));
+		java.util.function.Predicate<BlockPos> ok = p -> freeSpot(level, p) && (settled || awayFromDeath(p));
+		BlockPos at = ground(level, center, min, max, random, ok);
+		if (at == null) {
+			at = ground(level, center, max, max + FREE_WIDEN, random, ok);
+		}
+		if (at == null && !settled && DEATH != null && min >= BANISHED_MIN) {
+			at = ground(level, DEATH, DEATH_APART, DEATH_FAR, random, ok);
+		}
+		return at;
+	}
+
+	/** Where {@code player} last died in the Overworld (the vanilla record, kept through the new life), or null: nowhere known. */
+	private static @Nullable BlockPos lastDeath(ServerPlayer player) {
+		return player.getLastDeathLocation().filter(d -> d.dimension().equals(player.level().getServer().overworld().dimension()))
+			.map(net.minecraft.core.GlobalPos::pos).orElse(null);
+	}
+
+	/** Whether {@code at} is {@link #DEATH_APART} to {@link #DEATH_FAR} blocks from where the player last died (always, with no death known). */
+	private static boolean awayFromDeath(BlockPos at) {
+		return DEATH == null || flat(at, DEATH) >= (double) DEATH_APART * DEATH_APART && flat(at, DEATH) <= (double) DEATH_FAR * DEATH_FAR;
 	}
 
 	/** (0.7.417) The camp a chained mate is held by, if it still stands. */

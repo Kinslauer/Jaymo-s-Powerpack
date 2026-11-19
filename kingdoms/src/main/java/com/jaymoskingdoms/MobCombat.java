@@ -93,6 +93,12 @@ public final class MobCombat {
 	/** The sidestep's push (blocks a tick, sideways), a little back, and up; and the wait before another (ticks). */
 	static final double DODGE_SIDE = 0.55, DODGE_BACK = 0.2, DODGE_UP = 0.22;
 	static final int DODGE_COOLDOWN = 60;
+	/**
+	 * The sidestep for the MCA villagers who fight in leather (the Huntsman's rangers, ship crews): their chance. Anyone,
+	 * folk or villager, wearing a piece of plate (armour outside {@code #jaymoskingdoms:light_armor}) never sidesteps,
+	 * as a player in plate can't slip a blow stepping back.
+	 */
+	static final float DODGE_LIGHT_VILLAGER = 0.12F;
 
 	/**
 	 * (0.7.267) Attack tells: as a swing begins, a glint at the mob's weapon, white for a blow you can parry, red for a
@@ -664,34 +670,59 @@ public final class MobCombat {
 		}
 	}
 
-	/** The sidestep: fighting folk may dodge a player's blow. */
+	/** The sidestep: fighting folk, and rangers and crewmen in leather or mail, may dodge a player's blow. */
 	private static boolean allowDamage(LivingEntity entity, DamageSource source, float amount) {
-		if (!(entity instanceof Folk folk) || !folk.combatant() || !(entity.level() instanceof ServerLevel level)) {
+		if (!(entity instanceof Mob mob) || !(entity.level() instanceof ServerLevel level)) {
+			return true;
+		}
+		Folk folk = mob instanceof Folk f && f.combatant() ? f : null;
+		boolean villager = folk == null && !(mob instanceof Folk) && (mob.entityTags().contains(ForestRangers.TAG) || Crewmen.tagged(mob));
+		if (folk == null && !villager) {
 			return true;
 		}
 		if (!(source.getEntity() instanceof Player player) || source.getDirectEntity() != player || source.isCreativePlayer()) {
 			return true;
 		}
-		if (!folk.onGround() || folk.isPassenger() || swinging(folk) || folk.hurtTime > 0) {
+		if (!mob.onGround() || mob.isPassenger() || swinging(mob) || mob.hurtTime > 0 || !light(mob)) {
 			return true;
 		}
 		long now = level.getGameTime();
-		Long last = DODGED.get(folk);
+		Long last = DODGED.get(mob);
 		if (last != null && now - last < DODGE_COOLDOWN) {
 			return true;
 		}
-		if (folk.getRandom().nextFloat() >= dodgeChance(folk)) {
+		if (mob.getRandom().nextFloat() >= (folk != null ? dodgeChance(folk) : DODGE_LIGHT_VILLAGER)) {
 			return true;
 		}
-		DODGED.put(folk, now);
-		Vec3 away = new Vec3(folk.getX() - player.getX(), 0.0, folk.getZ() - player.getZ());
-		away = away.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, folk.getYRot()).reverse() : away.normalize();
-		Vec3 side = new Vec3(-away.z, 0.0, away.x).scale(folk.getRandom().nextBoolean() ? 1.0 : -1.0);
-		folk.setDeltaMovement(side.scale(DODGE_SIDE).add(away.scale(DODGE_BACK)).add(0.0, DODGE_UP, 0.0));
-		folk.syncVelocity = true;
-		folk.getLookControl().setLookAt(player, 30.0F, 30.0F);
-		level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.NEUTRAL, 1.0F, 1.2F);
-		level.sendParticles(ParticleTypes.POOF, folk.getX(), folk.getY() + 0.1, folk.getZ(), 6, 0.3, 0.05, 0.3, 0.02);
+		DODGED.put(mob, now);
+		Vec3 away = new Vec3(mob.getX() - player.getX(), 0.0, mob.getZ() - player.getZ());
+		away = away.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, mob.getYRot()).reverse() : away.normalize();
+		Vec3 side = new Vec3(-away.z, 0.0, away.x).scale(mob.getRandom().nextBoolean() ? 1.0 : -1.0);
+		mob.setDeltaMovement(side.scale(DODGE_SIDE).add(away.scale(DODGE_BACK)).add(0.0, DODGE_UP, 0.0));
+		mob.syncVelocity = true;
+		mob.getLookControl().setLookAt(player, 30.0F, 30.0F);
+		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.NEUTRAL, 1.0F, 1.2F);
+		level.sendParticles(ParticleTypes.POOF, mob.getX(), mob.getY() + 0.1, mob.getZ(), 6, 0.3, 0.05, 0.3, 0.02);
+		return false;
+	}
+
+	/** Whether {@code body} wears no plate: every armour piece it has on (helmet, chest, legs, boots) is in {@code #jaymoskingdoms:light_armor}. */
+	static boolean light(LivingEntity body) {
+		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
+			ItemStack piece = body.getItemBySlot(slot);
+			if (!piece.isEmpty() && !piece.is(ClassPerks.LIGHT_ARMOR) && armoured(piece)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private static boolean armoured(ItemStack piece) {
+		for (ItemAttributeModifiers.Entry e : piece.getOrDefault(net.minecraft.core.component.DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY).modifiers()) {
+			if (e.attribute().is(Attributes.ARMOR) && e.modifier().amount() > 0.0) {
+				return true;
+			}
+		}
 		return false;
 	}
 

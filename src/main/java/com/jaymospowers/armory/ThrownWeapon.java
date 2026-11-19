@@ -176,6 +176,9 @@ public class ThrownWeapon extends AbstractArrow implements ItemSupplier {
 				}
 			}
 		}
+		if (hurt && Ranged.breaksOnHit(this.getPickupItemStackOrigin(), this.random)) {
+			this.playSound(SoundEvents.ITEM_BREAK.value(), 0.8F, 1.0F);
+		}
 		// (0.18.118) a dagger that leaves a zombie standing stays in it (Lodged)
 		if (hurt && entity instanceof LivingEntity living && Lodged.thrownIn(living, this.getPickupItemStackOrigin())) {
 			this.playSound(SoundEvents.TRIDENT_HIT, 0.8F, 0.9F);

@@ -46,7 +46,7 @@ public final class HeraldryArmour {
 	static final int PLATE_DURABILITY = 30, HELM_ARMOUR = 2, CUIRASS_ARMOUR = 5, SABATON_ARMOUR = 1, PLATE_ENCHANT = 10;
 	static final float PLATE_TOUGHNESS = 1.0F, PLATE_KNOCKBACK = 0.05F;
 	/** The finishes a plate piece can have besides bright (no component). */
-	public static final String BLACKENED = "blackened", GILDED = "gilded";
+		public static final String BLACKENED = "blackened", GILDED = "gilded", RUSSETED = "russeted", BLUED = "blued", PAINTED = "painted", ETCHED = "etched", RUSTED = "rusted";
 	/** A plate piece's finish ({@link #BLACKENED} or {@link #GILDED}; bright has none). */
 	public static final DataComponentType<String> FINISH = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosKingdoms.id("finish"),
 		DataComponentType.<String>builder().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
@@ -76,27 +76,33 @@ public final class HeraldryArmour {
 	public static final Map<String, Piece> PIECES = new LinkedHashMap<>();
 	private static final Map<Item, Piece> BY_ITEM = new java.util.HashMap<>();
 	/** The eight helms, the eight crest beasts and the three makes of spaulders, by name. */
-	public static final List<String> HELMS = List.of("frogmouth_helm", "houndskull_bascinet", "armet", "close_helm", "savoyard_helm", "sallet",
-		"kettle_hat", "morion");
-	public static final List<String> BEASTS = List.of("crest_dragon", "crest_lion", "crest_stag", "crest_boar", "crest_eagle", "crest_pegasus",
-		"crest_unicorn", "crest_snake");
-	public static final List<String> SPAULDERS = List.of("plate_spaulders", "mail_spaulders", "brigandine_spaulders");
+		public static final List<String> HELMS = List.of("frogmouth_helm", "houndskull_bascinet", "armet", "close_helm", "savoyard_helm", "sallet",
+			"kettle_hat", "morion", "great_helm", "barbute", "burgonet", "spangenhelm", "lobster_tail", "grotesque_visor");
+		public static final List<String> BEASTS = List.of("crest_dragon", "crest_lion", "crest_stag", "crest_boar", "crest_eagle", "crest_pegasus",
+			"crest_unicorn", "crest_snake", "crest_griffin", "crest_bear", "crest_wolf", "crest_raven", "crest_hound");
+		public static final List<String> SPAULDERS = List.of("plate_spaulders", "mail_spaulders", "brigandine_spaulders");
 
 	private HeraldryArmour() {
 	}
 
 	static void register() {
-		// the helms: face, sight (the share of the screen's height left to see through), and how far (model pixels) a crest
-		// is lifted over its place on a plain helmet to stand on this one's crown
-		helm("frogmouth_helm", Face.FIXED, 0.2F, 0.0F);
-		helm("houndskull_bascinet", Face.VISORED, 0.24F, 2.0F);
-		helm("armet", Face.VISORED, 0.26F, 0.9F);
-		helm("close_helm", Face.VISORED, 0.26F, 1.0F);
-		helm("savoyard_helm", Face.VISORED, 0.3F, 1.0F);
-		helm("sallet", Face.VISORED, 0.34F, 0.5F);
-		helm("kettle_hat", Face.OPEN, 1.0F, 0.6F);
-		helm("morion", Face.OPEN, 1.0F, 2.5F);
-		worn("plate_cuirass", ArmorType.CHESTPLATE);
+			// the helms: face, sight (the share of the screen's height left to see through), and how far (model pixels) a crest
+			// is lifted over its place on a plain helmet to stand on this one's crown
+			helm("frogmouth_helm", Face.FIXED, 0.2F, 0.0F);
+			helm("houndskull_bascinet", Face.VISORED, 0.24F, 2.0F);
+			helm("armet", Face.VISORED, 0.26F, 0.9F);
+			helm("close_helm", Face.VISORED, 0.26F, 1.0F);
+			helm("savoyard_helm", Face.VISORED, 0.3F, 1.0F);
+			helm("sallet", Face.VISORED, 0.34F, 0.5F);
+			helm("kettle_hat", Face.OPEN, 1.0F, 0.6F);
+			helm("morion", Face.OPEN, 1.0F, 2.5F);
+			helm("great_helm", Face.FIXED, 0.15F, 0.0F);
+			helm("barbute", Face.OPEN, 0.85F, 0.5F);
+			helm("burgonet", Face.VISORED, 0.3F, 1.2F);
+			helm("spangenhelm", Face.FIXED, 0.4F, 0.3F);
+			helm("lobster_tail", Face.VISORED, 0.25F, 1.5F);
+			helm("grotesque_visor", Face.VISORED, 0.2F, 1.8F);
+			worn("plate_cuirass", ArmorType.CHESTPLATE);
 		worn("plate_sabatons", ArmorType.BOOTS);
 		// the harness: slot, armour, toughness, durability, what mends it
 		part("arming_doublet", Harness.Slot.PADDING, 1, 0.0F, 160, false, Items.LEATHER, null);

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:blasting",
+  "category": "blocks",
+  "cookingtime": 100,
+  "experience": 1.0,
+  "group": "emerald",
+  "ingredient": [
+    "jaymospowers:andesite_emerald_ore",
+    "jaymospowers:diorite_emerald_ore",
+    "jaymospowers:granite_emerald_ore",
+    "jaymospowers:tuff_emerald_ore"
+  ],
+  "result": {
+    "id": "minecraft:emerald"
+  }
+}

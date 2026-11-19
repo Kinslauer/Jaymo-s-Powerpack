@@ -5753,3 +5753,321 @@ Andy's picks from the scaling audit (pick page rows; early game kept weak, late 
 - After the row check of patch 4: Darktide possession works (the body was swept away as it was made), sprint + Z opens the soul menu only for the corrupted with shadows held, risen shadows always have room to sink back; speedsters' tunnels and Chrono's phase recover after a death, holding jump at a wall in gear 5 runs up it instead of tunnelling, static arcs only to enemies, and speed healing follows the wheel's gear as before.
 - **Andy's rulings on the above** (what these change wins over the lines before): Gravity's planets are free to throw; boneiron **plating is done at the Tool Forge** (a piece of armour and a plate), not by clicking a plate onto armour; a speedster running into a wall always runs up it, and the **tunnel needs Sneak** held as you sprint at the wall in gear 5; a run **starts in gear 3**; Darktide kills bank their shadow corrupted or not; **riding a risen shadow is left out** until it can be done with full control; every boss can leave a **second relic** of any kind one time in four; **Ability Power also widens area moves** (+0.2% a point); new **Speed Prism** (use it to step the colour of your speed lightning, kept through death) and **Energy Bar** (quick food, more filling for a speedster); **every power has its own hand-written trial ladder** (16 trials each, most of them feats of that power alone, such as holding 3 creatures in one Gravity Well or swinging 500 blocks without touching the ground; a holder of the old shared ladder keeps the few trials both have and gets the rest new, mastery already earned stays); a new hook `Bleeding.harm` for Jaymo's Kingdoms (a Blood Sorcerer's Hide halves their own bleeding).
 - Built; not played.
+
+## 0.24.66 (2026-11-18): Hooks, mace stagger, thrown axes break
+
+Andy's four weapon picks from the Knight Armor list, in our own code. A scythe, bill or gutting hook drags a foe off a wall it is climbing (a Freerun cling, a ladder or vine) and reaches round a raised shield, so half of the blow gets through. Every mace blow slows what it hits for a moment. A thrown Tinkering throwing axe may break on a hit (about one in seven): the broken axe can't be thrown until it is mended at an anvil with three iron nuggets.
+
+## 0.24.67 (2026-11-18): fishing the fire, crates on the line, cave-pool fish
+
+- **Lava fishing**: a Tinkering fishing rod whose limb and hook are both forged of something that takes the heat (seared stone, blackstone, cinder bronze, blaze rod, cobalt, manyullyn, hepatizon, steel, queen slime, fire dragon bone) floats its hook on lava and fishes it. Any other rod's hook burns up in lava (the rod is not hurt). The rod's tooltip says when it is heat-proof. `LavaFishing`, `LavaFish`; the hook mixin keeps a hook on lava and runs the bites there.
+- **Lava fish** (Nether lava, along the shore only): ash molly (a schooling grazer), cinder pupfish (tiny, solitary) and ember tilapia (bigger, hunts the small ones and is fed for a while after), after the real fish of hot springs. They are fireproof, drift along the warm edge, turn back to the shore when they stray more than 6 blocks from it, and a heat-proof hook draws only them (water fish never come to a hook in lava). They can be put back into lava. Raw and cooked food and spawn eggs for each.
+- **Crates on the line**: about 3 in 100 landed fish bring a wet crate up with them (luck raises it), River, Sea, Swamp or Lava by the water the line was in. Use one to open it for that water's loot (`data/jaymospowers/loot_table/gameplay/crate_<water>.json`: bait and lures, nuggets, shells, swamp muck, blaze powder, quartz, rarely ancient debris).
+- **Cave-pool fish**: the cavefish and the olm, pale and blind, live only in dark pools at least 30 blocks under sea level. Slow and light: half as keen to bite as a surface fish at its keenest, weak fighters, worm bait.
+- Art by `tools/gen_fishing_species.py` (five new species, four crates). Left for a second PR: wet fishers' torn notes in the Fisher's Journal, and the tackle bench.
+- Built; not played.
+
+## 0.24.68 (2026-11-18): Inferno joins the pack (fire that bites back)
+
+- **Inferno** (MoriyaShiine, all rights reserved; shipped as the untouched jar, with its library **StrawberryLib**, both credited on the pack page): charred logs that break into charcoal, green copper fire, blue soul fire, burning mobs that spread fire, torches as weapons, the fire overlay lower on screen and smoke that thickens near big fires.
+- `core/InfernoPreset` writes `config/inferno.json` once per install with Inferno's defaults but `scorchedEarth` off (burnt grass stays grass; no Shining Oak). Never touches a file a player already changed after that.
+- Compatible with the taiga Regrowth log mixin: a charred log is not in `#minecraft:logs`, so a burnt taiga log still scorches its soil. Inferno's torch hit and the Vampires' torch burn both ignite the same target without stacking (Inferno also uses the torch up).
+- Built; not played.
+
+## 0.24.69 (2026-11-18): fishing: torn notes and the tackle bench
+
+- **Tackle bench** (string over three planks): put a rod, a hook, a line and a float on it and take the rod back fitted. The fittings stay on the rod (its tooltip lists them) until you fit others over them. A **barbed hook** keeps a fish on (it takes line back at half the rate while you play it); a **braided line** (3 string) breaks at 1.3 times the strain; a **weighted line** (string and 2 copper nuggets) sinks the hook 1.6 times as fast as a lure sinks, bait and lures alike, on any rod; a **float** is any dye and is colour only: a bead of that dye drawn over the bobber. Barbed hooks are forged at the Smithing Anvil from iron, 4 to the ingot. `FishTackle`, `TackleBenchBlock`, `TackleBenchMenu`; client `TackleBenchScreen`.
+- **Torn notes**: the wet fishers' scraps. About 3 in 10 crates and 1 in 4 shipwreck chests hold one; each hints where one rare fish bites (cavefish, olm, ember tilapia, cinder pupfish). Use it to read it: it is copied into the Fisher's Journal and used up, and the fish's page (a `*` marks it on the list while the fish is still unknown) shows the hint. Hints only, no chat text, kept through death with the rest of the journal. `TornNote`, `FishLog.noted`; client `JournalScreen`.
+- Art by `tools/gen_tackle.py`.
+- Built; not played.
+
+## 0.24.70 (2026-11-18): Knight Armor and Weapons, weapons forged
+
+- **Knight Armor and Weapons** (Pete MC Mods, all rights reserved) joins the pack as its own jar, untouched, for its weapons only. A datapack (`data/knightarmorweapons/recipe`) switches off its grid recipes for the long sword (and its blade and handle), the spiked mace, the hand scythe and the throwing axe, and the Smithing Anvil forges them instead (`KnightArmorForging`), from iron, with the usual blueprints and grades: long sword 6 ingots, mace 6, scythe 3, throwing axe 2.
+- Its knight armour is turned off, because Jaymo's Kingdoms' heraldry harness is the pack's knight armour: the four grid recipes are disabled and the anvil does not forge it. The mod has no loot, trades or mob gear for it in data; the pieces still show in its creative tab (that is in the mod's code).
+- The broken throwing axe is still mended in the grid with three iron nuggets.
+- Built; not played.
+
+## 0.24.71 (2026-11-18): menu redesign: title cards, dread vignette, scouter card, colour picker (#1722)
+
+- **Title cards** (`TitleCard`, beside the tip card): every title the game sends (a milestone's big title and the line under it, a heritage chosen, a realm sworn to, a rival chief felled, a command's `/title`) is drawn as one centred card instead of vanilla's big text: a thin plate with gold rules, the title at double size, one line under it, fading in and out on the packet's own timings. It waits while your own ultimate film runs or the HUD is hidden, and shows after. A mixin on `Hud` (`TitleCardMixin`) hands the title, subtitle, timings and clear to it.
+- **Dread vignette** (`DreadVignette`): the edges of the screen darken when a hostile with at least 80 max health and 4 times yours is within 40 blocks (a great foe, an ogre, a boss), stronger as it nears (full at 10 blocks), easing in and out. Hidden while a film hides the HUD.
+- **Scouter reading** (Z Fighter): the readout is now a small card: the name, a tag for what kind of thing it is (Fighter, Foe, Beast, Folk), the power level, and a bar of the number against the scouter's cap. It reads any living thing, as before: a fighter's level from his ki and training, anyone else's from max health x 10 plus attack damage x 50 (`ZFighterScouter.HEALTH_WEIGHT`, `ATTACK_WEIGHT`).
+- **Colour picker** (`ColourPickerScreen`): preset swatches, the colours picked lately, a hue strip (light to dark down it), a hex box, the old colour beside the new, Apply, Reset and Cancel, and a live try-on as you pick. The Z Fighter technique maker has a "+" swatch after its eight colours that opens it, so a made technique can be any colour.
+- **Character page link**: `MenuTabs.characterLink(label, action)` puts a link on the Record panel (Kingdoms' "Show my papers").
+- Classes: `TitleCard`, `TitleCardMixin`, `DreadVignette`, `ColourPickerScreen`, `ZFighterScouterClient`, `ZFighterCreatorScreen`, `MenuTabs`, `CharacterScreen` (link only), lang part `cards.json`.
+- Built; not played.
+
+## 0.24.72 (2026-11-18): the H menu holds everything: inventory, dropdown bar or side list, new Character page (#1722)
+
+- **Inventory is a page**: the survival inventory is the first page of the menu (E opens it as before). The menu is drawn over it and clicks on the menu go to the menu. On any page, E or Esc closes the menu; Q no longer turns pages (it drops items). The wheel over the bar still turns pages; H opens the page you had open last. Creative's inventory stays vanilla.
+- **Dropdown bar** (default): one plate per group (You, Powers, World, People, Notices; an empty group is left out) with a small arrow; hover or click opens its list of pages (icon and name), the open page's name sits after the plates. A page not open to you yet shows greyed with a hint on hover (Backpack: wear one).
+- **Side list**: a slim column down the left with every page and small group headings, scrolling with the wheel. Switch with the button on the bar or list, or `/menulook bar|side` (kept in `config/jaymospowers-menulook.properties`). Pages leave room for it (`MenuTabs.SIDE`; `MenuTabs.ROOM` is 0 with the list). Full-width pages (Kingdoms' skill web) keep the bar.
+- **Everything**: new pages Inventory, Baubles, Backpack, Sound browser besides Character, Powers, Trials and Map. Their own keys still work.
+- **Character page** in the Codex shape: status header (level, who you are, XP bar), you in a tall box with armour, hands, amulet and belt down the sides, a soft glow behind and a shadow under the feet, name and heritage under; beside it power (mastery bar, fate), vitals (health, hunger, stamina, armour, experience), Attributes and Resistances side by side, and a Record (mobs felled, deaths, days played, plus Kingdoms' rows). The body scrolls when the window is small.
+- Classes: `MenuTabs` (groups, `group`, `locked`, `wide`, `characterRows(panel, rows)`, look file, `/menulook`, E closes), new `MenuBar` (draws and clicks both looks), `CharacterScreen`, `PowerScreen`/`MapScreen`/`TrialsScreen` (clear of the side list), lang `menu.json`.
+- Built; not played.
+
+The menu bar's plates shrink to stay left of the look button on a narrow screen, and the bar closes when you leave a world. A long title card line shrinks to fit its plate.
+
+## 0.24.73 (2026-11-18): the H menu's Notices page, and ki and mana on the Character page (#1722)
+
+- **Notices page** (Notices group): the last 50 notices, newest first, each with the time it came, wrapped in full and scrolled with the wheel. It keeps what the server said in chat or over the hotbar (rewards, level ups, Jaymo's Kingdoms' word and tidings) and every tip card, so a line you missed can be read again. Kept on your client only, and cleared when you leave the world.
+- **Character page vitals**: a Z Fighter's ki now has a bar beside health, hunger and stamina, and Jaymo's Kingdoms adds a mana bar for the attuned (`MenuTabs.bars`, by reflection). The panel grows a row when there are more than six.
+- Classes: `NoticeLog`, `NoticesScreen`, `MenuTabs` (`bars`, the Notices tab), `CharacterScreen`, `TipCard`, lang `menu.json`.
+- Built; not played.
+
+## 0.24.74 (2026-11-18): shared screen style: pills and the gold frame (#1722)
+
+- `UiStyle` (generated from `tools/ui_style`) gains `pill(graphics, font, x, y, label, value, color)` (a small rimmed tag, returns its width), `pillWidth`, `frame` (a thin gold frame with small diamonds at the corners and a short accent tick over the title) and `panelFramed` (the panel fill plus that frame). No screen of Powers uses them yet.
+- Built; not played.
+
+## 0.24.75 (2026-11-18): Logging in works again with Inferno's library
+
+- StrawberryLib (the library Inferno came with) asks whether a player is a spectator while the game is still making the local player, before it has a connection, and every login failed with a packet handling error. The game now answers that it doesn't know yet, and looks again a moment later.
+
+## 0.24.76 (2026-11-18): Warrior-born dead: rotted tails, the ape under the moons, undead Verdant giants
+
+- **Warrior-born zombies** (Andy: "rare warrior born zombies with the same decrepit rotting tails, that have a chance to
+  turn during the moons"): 3% of the Overworld's zombies, husks and zombie villagers rise Warrior-born, rolled once when
+  each first loads (`UndeadBlood`). Three in four still have a tail; the rest a stump. An MCA villager who was
+  Warrior-born keeps it when they turn (the game copies their tags onto the zombie). They drag the future's rotted,
+  mangled tails (`FutureDeadLooks`, 16 conditions, no new art), a root stump when theirs was cut.
+- One with its tail turns into the wild Great Ape as a Warrior-born villager does (`VillagerApe`, 10% once a night out
+  under the sky), on full moons and also on Jaymo's Kingdoms' Blood Moons. Its ape fur is greyed. Bringing it down and
+  cutting its tail off works the same, and leaves it a stump for good.
+- **Undead Verdant giants** (Andy: "Undead MCA Verdant should have a similar but higher chance to turn giant"): a turned
+  MCA villager of Verdant blood, out under a full or Blood Moon, has a 25% chance a night to swell over 4 seconds to a
+  Verdant Titan's size (`UndeadGiant`): +60 health, +6 attack, steadier, pushes trees over, still hunting as a zombie. It
+  shrinks back at dawn, out of the moonlight for 10 seconds, or after 5 minutes.
+- Compiled; not played.
+
+## 0.24.77 (2026-11-18): Mailed and studded leather, and what mail is good at (#1729)
+
+- **Mailed leather** (Mailed Cap, Jack, Chausses, Boots): a leather piece laced with Mail Sheets (2/4/3/2) and string, shapeless at the crafting table. Armour 2/7/5/2 with 1 toughness, durability between iron and diamond. Counts as mail and padding both: a blow does the lesser of the two shares against it.
+- **Studded leather** (Studded Cap, Brigandine, Leggings, Boots): a leather piece hammered with iron nuggets (3/6/5/2) and any hammer, at the crafting table. Armour 1/4/3/1 with 0.5 toughness, durability twice leather's. Padding, but a cut does 0.95 of its damage against it instead of 1.15.
+- Both are dyeable (dyed leather under undyed mail links or iron studs), keep the leather piece's dye, name, enchantments, hide stamp and wear (as a share of the new durability), are mended at an anvil with Mail Rings or iron nuggets (or leather), and the boots walk on powder snow. Neither uses the smithing table.
+- `LightArmour`, `LightArmourRecipe` (`jaymospowers:light_armour_crafting`), `LightArmourSnowMixin`, `ArmourKind.padded` and `STUDDED_TAG`, `WeaponKind.Blow.against(armour, piece)`; art and data from `tools/gen_light_armour.py`.
+- **Arrows**: a plain arrow does 0.75 of its damage against mail (`Blows.ARROW_VS_MAIL`); bodkins, swallowtails and war darts keep their own shares, and tridents and thrown blades are unchanged.
+- **Nimble**: only plate slows movement now, scaled by the plate share of the four armour slots (`ArmourEase.plateShare`): in a full suit the climbing grip (and a Climber's climb speed) is 30% less, a freerun vault 20% slower and the swimming stroke 20% weaker. Padding and mail cost nothing; a Climber's unlimited grip stays unlimited.
+- **Slowness**: each mail piece worn shortens a newly added Slowness by 10% (a full set, 40%). A full mail set sprinting while slowed needed no change: vanilla 26.3 never stops a sprint for Slowness.
+- **Quiet**: the distance mobs notice you at is scaled by armour, per slot share: padding x0.9, mail x1.0, plate x1.15 (bare slots x1.0); it multiplies with Hiding, Rigs and Darktide.
+- New `core/ArmourEase` holds the numbers; mixins `LightArmourSlowMixin`, `LightArmourQuietMixin`, `LightArmourSwimMixin`. Built; not played.
+
+## 0.24.78 (2026-11-18): light armour: the world wears it (#1730)
+
+- **Mobs**: Armored Foes' natural and raider equipment tables now hand out mailed and studded leather sets (new `mailed_leather_armor` and `studded_leather_armor` tables, one entry each beside chainmail's). A mob in the full mailed set runs 15% faster while it has a target (`LightFoes`, checked once a second, only for a mob in a mailed jack).
+- **Brutes**: bastion piglin brutes sometimes spawn in a full studded set (30%, two in five of those enchanted); a brute in the full studded set doesn't zombify (`PiglinStuddedMixin`).
+- **Armourers**: a village armourer sells Mail Rings and Mail Sheets (level 2), and at level 3 buys a Mailed Jack or Mailed Chausses for emeralds.
+- Built; not played.
+
+## 0.24.79 (2026-11-18): Light armour full-set boons: backstep, weathered, mixed harness (#1730)
+
+- **Backstep**: a backward dodge (more than 120 degrees from where you face, which includes the default hop back when you hold no direction) slips blows only in light armour: every worn piece padding, mail or none, counting Kingdoms' harness layers. Any plate piece (copper, iron, gold, diamond, netherite, anything plate) turns the slip off for backward hops only; sideways and forward hops are as before. Darktide's own evasions and the landing roll don't use this slip and are unchanged. In a full mailed leather set the backward slip also knocks an arrow aside (it flies back at 0.4 speed, no damage) with a chain rattle after the usual dodge sound, then rests 15 s; each Projectile Protection level on the worn pieces takes 0.5 s off, at least 5 s. `Dodge` remembers each hop's direction from the Start payload, server side.
+- **Weathered**: a full studded leather set shortens burning by 40% (`Entity.igniteForTicks`) and slows freezing by 40% (a rise in frozen ticks: powder snow, the Freezing effect, a power's chill; fractions rounded by chance, thawing untouched). Each Fire Protection level (burning) or Frost Walker level (freezing) worn adds 10%, at most 60%. No immunity. Kitchen's body heat counts the full set as one warm piece (it reads the `jaymospowers:studded_armor` tag, nothing needed from Powers).
+- **Full sets with harness**: `ArmourEase.fullSet(body, set, layer)`: head and feet must be the set's own pieces (not broken); the chest counts if it is the set's piece or a harness layer of the set's kind (mail for mailed, padding for studded) is worn under it, so a hauberk under a surcoat makes a mailed chest; the legs count the same way with a layer over the leggings. Only plain arrows are knocked aside, not tridents or thrown blades. In Kitchen's cold the studded set counts as one warm piece; the 40% slower freezing applies to Powers' frost and vanilla powder snow.
+- Built; not played.
+
+## 0.24.80 (2026-11-18): Tinkered and metal fishing rods cast again (#1731)
+
+- Fixes: casting a metal or tinkered fishing rod threw nothing (the server looked the bobber up by a name 26.3 doesn't use).
+
+## 0.24.81 (2026-11-18): crushing blows - slams throw, tear and burst the downed; prone deaths lie
+
+- **Crushing blows** (Andy: "the slams and any attack of that magnitude should dismember more often and knockback especially if the enemy is downed... so obviously they get gibbed"): a slam's shockwave (the mutant zombie's and the Hulk Hammer's, damage type tag `jaymospowers:crushing`), any blow of 9+ by hand or body from something 3x the target's bulk or more (mutants, golems, ravagers), and any blow of 18+ from anyone.
+  - On someone **downed** it always bursts them (Stoneborn excepted), knocked out cold or not. Rubber-folk lose every limb and stay down to mend, as from a blast.
+  - Killing or downing someone standing, it bursts them 35% of the time; else the part it lands on comes off 50% of the time (a club's is 5%).
+  - Lived through, it takes an arm or a leg 35% of the time (a second now and then) and throws the body 1-1.5 blocks a tick across and up, less as it resists knockback. The throw is set after the tick's moves so a mutant's own weak shockwave nudge can't soften it.
+  - Code: `core/BlastGore` (crushing, crushedNow, throws), `Downed` (crushed downed bodies), `Dismember.lethalPart` (CRUSH_SEVER).
+- **Prone deaths** (Andy: a burning pillager on the ground "pops into the air when it dies because it defaults back to standing"): anyone downed who dies of anything else (fire, a fall, a mob) is now marked to lie as they lay, as a finished one already was. Players dying flat (downed, crawling, crippled, under a low ceiling) are marked too: face up if they'd rolled onto their back, else face down. `DownedLie.markPlayer`, `Downed.LIE_PHASE`; an unused mark is cleared on respawn.
+- Built; not played.
+
+## 0.24.82 (2026-11-18): Daylight under the Aether again (#1732)
+
+- Fixes: the Overworld stayed dark by day wherever the Aether lies overhead. ScalableLux is out of the pack (and removed from the CurseForge profile): it replaced the light engine that gives each stacked layer its own sky. Ground lit while it was in stays dark until the world is relit or started anew.
+
+## 0.25.0 (2026-11-18): Jaymo's Powers 0.25 (#1737)
+
+- A new minor version at Andy's call (2026-11-18): the 0.25 line starts with daylight back under the Aether, rescues only into real villages, kingdoms and fiefs, and metal and tinkered rods casting again.
+
+## 0.25.1 (2026-11-18): survivors wake 500-1000 blocks from where they fell (#1738)
+
+- **Wakes**: a survivor left for dead on the Overworld's land (any cause but a fall, and not one carried in, captured, lair-bound or berthed) now wakes about 500 to 1000 blocks from where they fell. A boss-spared one keeps its own range, moved out to 500-800. A drowned one no longer washes up near the spot; the far ring replaces the shore search there. The Nether, the End and ceilinged worlds keep the near wake.
+- **FarLand** (`core/FarLand.java`): picks the spot without making a chunk. Up to 48 random columns in the ring are scored from the generator alone (ground height above the sea, biome not ocean or river, the lie of the land on four sides), the gentlest is taken, and only that one chunk is loaded and checked as before; the rest of the chunk is tried before a try is spent.
+- Built by CI; not played.
+
+## 0.25.2 (2026-11-18): building blocks - vertical slabs, quarter steps, mixed slabs, paired and waterlogged doors (#1740)
+
+Patch 2 of the Clouds and Bits plan (Andy's picks `bb-vslab`, `bb-mixslab`, `bb-doors`; the idea of the pack Bits and Balance, our own code and art).
+- **Vertical slabs and quarter steps**: every block the layer blocks cover (planks, logs, stems, bamboo, our sky woods, stone, bricks, sandstones...) now has a vertical slab (`<block>_vslab`) and a quarter step (`<block>_quarter`), built like the block (hardness, sound, tool, burning). A vertical slab is half a block standing on one side; the second goes on the empty half (any click that would make a double slab) and the two are the full block. A quarter step is a beam 8 by 8 px and a block long; up to four share a block, one in each corner of its cross-section (a new one goes where the cursor is; onto a block that already holds some, it goes into the free corner past the face you click), and four are the full block. Both waterlog until full and drop what they hold. Cut at the stonecutter (block into 2 vertical slabs or 4 quarter steps, a vertical slab into 2 quarter steps) and, in wood, at the saw (four blocks into 8 vertical slabs, a vertical slab into 2 quarter steps; a block or two alone would clash with the layer and plank saw recipes). Two vertical slabs or four quarter steps craft back into the block. Models, recipes and loot come from `tools/gen_building_blocks.py`; names are in `lang/parts/buildblocks.json`.
+- **Mixed slabs**: a slab put into the empty half of a different kind of slab (any vanilla or modded `SlabBlock`) makes a Mixed Slab block entity that keeps both, drawn by a block-entity renderer. Mining takes only the half you look at (at its own slab's speed, with the right tool, dropping as it would), leaving the other slab where it was; a blast or piston break drops both. The same slab on a slab is still vanilla's double slab.
+- **Paired doors**: opening or shutting a door by hand also moves its neighbour when the two are a pair (same facing, hinges on the outer sides); sneak to work one alone. It acts on `DoorBlock` itself, so vanilla's, Macaw's and Spooky Doors' doors pair alike. Doors only redstone opens (iron) are left to the redstone.
+- **Waterlogged doors, fence gates and pressure plates**: they gain vanilla's `waterlogged` property by mixin (default dry, so old worlds load as they were), hold water when placed in it or filled by a bucket, and keep it flowing.
+- **Left out**: lanterns, chains and hanging signs hanging under a top slab (every hanging block would need its own support rule and a drawn offset).
+- Built; not played. Compile-checked only.
+
+## 0.25.3 (2026-11-18): Fighting: snowballs sting, mixed-source hits, arrow pick, tipped clouds, keep XP, no one-shots (Clouds and Bits patch 6) (#1740)
+
+- **Snowballs sting** (`fighting.SnowballSting`): 1 damage and a 3 s Freezing chill; 3 damage and no chill against Nether creatures (`jaymospowers:nether_creatures` tag) and Emberborn players. Thrown rocks keep their own rules.
+- **Hits from different sources** (`fighting.HitKinds`): immunity after a hit is per kind of damage (fire, magic and bleeding, melee, projectile, explosion, everything else). A kind that hasn't landed in 10 ticks lands in full during another kind's cooldown; the same kind still waits. The cooldown is `LivingEntity.damageCooldownTime`; powers that clear `Entity.setInvulnerableTime` are unchanged.
+- **Pick your arrow** (`fighting.ArrowPick`, client `ArrowPickClient`): scrolling while a bow or crossbow is drawn steps through the arrow kinds it can fire (worn quiver first, then the pack); the pick is saved on the weapon as `jaymospowers:chosen_arrow` and drawn beside the hotbar with its count. Picking a kind in Kitchen's quiver turns the quiver to bring it up. Sneak + scroll (stances) and riding gaits keep the wheel when nothing is drawn.
+- **Tipped arrows leave a cloud** (`fighting.TippedClouds`): a 1.5-block, 3 s lingering cloud of the arrow's potion where it hits.
+- **Keep some XP** (`fighting.KeepXp`): dying with keepInventory off, you come back with 40% of your levels.
+- **No one-hit deaths from full health** (`core.wounds.NoOneShot`): a blast that would have gibbed a full-health player goes down as the downed state instead; void, /kill, beheadings, executions, totems and No Mercy are untouched.
+- Built; not played.
+
+## 0.25.4 (2026-11-18): moving about - late jumps, auto walk, pull riders off, pet-safe swings (clouds/bits patch 4) (#1740)
+
+- **Late jumps**: a jump pressed up to 4 ticks (2 in heavy armour, 15+ armour points) after walking off a ledge still
+  jumps; holding jump under a low ceiling keeps jumping instead of waiting after each bump (`client/moving/LateJumps`).
+- **Auto walk**: an unbound key ("Auto walk (toggle)") walks you forward until you press forward or back, open a
+  screen or die (`client/moving/AutoWalk`, `AutoWalkInputMixin`).
+- **Pull riders off**: sneak and right-click a mount, cart or boat to take its passengers off; never the driver, you,
+  or a carried body (`moving/PullRiders`).
+- **Don't hit your own pets**: your melee and weapon sweeps skip your own tamed animals (anything ownable that you own,
+  horses included); sneak and the blow lands (`moving/PetSafe`). Kingdoms' companions are in its own note.
+- Built; not played.
+
+## 0.25.5 (2026-11-18): screen and chat - biome names, use bar, mentions, item sharing, small touches (#1740)
+
+- **Biome name** (`client/bits/BiomeTitle`): walking into a new biome shows its name, small, in the top-left rail for 3 s, once per biome per 5 minutes (a biome must hold 1 s first, so a step over a border shows nothing). Only the biome's own name, and only a biome that has one in the language file. The lookup is the plain one at your feet, so One Dimension's bands name whichever band you stand in.
+- **Use bar** (`client/bits/UseBar`): eating, drinking, brushing, a horn, drawing a bow, loading a crossbow and winding up a trident put a thin bar under the crosshair (HUD BELOW zone, row 5, the flat charge-bar look) that fills as the use goes on; a full draw turns it white. Shield, spyglass and other holds with no end show nothing.
+- **Mentions** (`client/bits/Mentions`): a line with `@<your name>` shows the mention bold and gold and pings you. Your username, your display name (the MCA character name when you made one) and the first word of each all count (`@Aldric` finds Aldric Stone), without regard to case. Done on the receiving side on what arrives, so it works with Kingdoms' proximity chat (its per-hearer lines are game messages); plain chat pings but can't be recoloured.
+- **Item sharing** (`bits/ItemShare`, `client/bits/ItemShareClient`): Shift+T over an item in a container screen (not the creative inventory, not while typing in a text box) says it in chat with its hover tooltip: "<name> shows [item]." The client sends the slot of the open menu; the server reads its own copy of the stack, one share a second per player. With Kingdoms it goes only to players within 24 blocks, under the name each of them knows (Stranger until introduced); without Kingdoms, to everyone.
+- **Night vision** (`client/bits/mixin/NightVisionFadeMixin`): fades out evenly over its last 10 s instead of the vanilla flicker (the owl mask's dimming still caps it).
+- **Soul fire burns blue** (`bits/SoulBurn`, `client/bits/SoulFlames`): when anything sets an entity alight (a longer burn than it had), the server notes whether soul fire or a lit soul campfire was touching it; the flag is synced, and the flames on that entity, and the fire across your own view, are drawn from the soul fire sprites until they go out.
+- **Held item while riding** (`FirstPersonModelMountedHandsMixin`): with First-person Model, riding now shows vanilla's hand and your held item. Nothing in vanilla or our own code hides it, so this is the one fix that could be missing the real cause.
+- Built; not played. Not tested in game: the Shift+T share, the blue flames' sprite lookup, the riding item.
+
+## 0.25.6 (2026-11-18): World bits - ores in the stone they grow in, big coal veins, bottled cloud (#1740)
+
+- **Ores in stone**: coal, iron, copper, gold, redstone, lapis, diamond and emerald each come in andesite, diorite, granite and tuff (32 blocks, original textures laid from vanilla's own ore pixels over the stone). They are the plain ore in everything but their look: same hardness, tool tier, experience and loot table (fortune applies; silk touch gives the plain ore), they smelt and blast the same, and sit in the vanilla `*_ores` and `c:ores/*` tags, so the Tinkers smeltery melts the iron, gold and copper ones as it does the plain ore. Vanilla coal, lapis, redstone and emerald features now lay the variant wherever the stone is one of the four, and the great iron, copper and gold veins do the same. Diamond ore is still never laid (only the block exists).
+- **Big coal veins and the Nether**: large coal veins in shallow andesite and deep tuff, with now and then a coal block; Nether gold veins (the odd raw gold block) and quartz veins in the netherrack. New chunks only.
+- **Bottled cloud**: an empty glass bottle used on a Cloudbank or any aercloud, or in the air in the Cloud Sea or the high sky, gives a Bottle of Cloud. Used on a block it lays a 2x1x2 puff of soft cloud beside the face; used in mid-air while falling it lays one under your feet. Each puff block thins away after about 20 seconds.
+- Classes: `stoneores/StoneOres`, `stoneores/OreVeinFeature`, `cloudbottle/CloudBottle`, `BottleOfCloudItem`, `CloudPuffBlock`; hook in `ground/BigVeinFeature`; art, data and lang by `tools/gen_stone_ores.py`.
+- Built; not played.
+
+## 0.25.7 (2026-11-18): freeze CPU hot spots: structure spawns, Unloaded Activity, Earth & Water (#1742)
+
+- Three server-thread hot spots seen in the 2026-11-18 freeze profiles (22, 31 and 41 s on the Steam Deck, fresh land) are cut, with the same results as before.
+- **Structure spawns**: "is this block inside a piece of that structure" (`StructureManager.structureHasPieceAt`, asked on every natural spawn attempt for structures with per-piece spawn overrides) walked every piece of large structures such as Epic towns, 150 samples. A start with 16 or more pieces now answers from an index of its pieces per chunk column (`PieceIndex`, `StructurePieceAtMixin`, `StructureStartPieceIndexMixin`).
+- **Unloaded Activity**: its per-chunk, per-group position lists (water freezing, oxidizing, grass growing) were searched with `contains` on every block change, 158 samples. They now answer from a hash set kept in step with the list (`IndexedPositions`, `UnloadedActivityPositionsMixin`). Skipped when the mod isn't there.
+- **Earth & Water**: its scan of all 16 x 16 x height blocks of each newly loaded chunk is skipped for a chunk whose section palettes hold no block of that mod, 110 to 204 samples (`EarthWaterChunkScanMixin`). Chunks that have one are scanned as before. Skipped when the mod isn't there.
+- New mixin config `jaymospowers.freeze.mixins.json`. Not built or played; CI compiles.
+
+## 0.25.8 (2026-11-18): Server stops waiting on land that is not made yet (#1743)
+
+- Fixes: the Deck server froze for 22, 31 and 41 s (2026-11-18 10:54, 11:00 and 11:05 AM; the last dropped a player) with the server thread waiting in `getChunkBlocking` for chunks that were only scheduled. By profile samples inside that wait: Immersive Snow Reloaded setting snow beside an unloaded chunk (about 560, the largest), Advanced Chimneys' block search (about 110), the running-water freeze check and ice floes of our Dynamic Waters port (about 130, mostly under the snow).
+- Immersive Snow Reloaded's `Logic.processChunk` runs only when its chunk and all eight around it are made and loaded (`SnowProcessChunkMixin`, skipped without the mod). A chunk at the edge of loaded land waits until its neighbours are in (it may get its snow up to 10 minutes later).
+- ForgeEndertech's `GameWorld.isBlockLoaded`, which Advanced Chimneys' searches ask before stepping onto a block, now answers true only for a made and loaded chunk (`WorldLoadedMixin`, skipped without the mod).
+- Dynamic Waters port: `higherWaterBeside` and the ice floe spawner ask `Loaded.made` instead of `hasChunkAt`.
+- Still in the profiles: MCA villagers' point-of-interest and bed checks (about 50 samples inside the wait).
+- Not played; the port is compiled by the pack build.
+
+## 0.25.9 (2026-11-18): Reactor Heart, Blinker and Lawgiver folded into other kits
+
+- Andy (2026-11-18): the three Awakening powers were never meant as powers of their own. They're gone as powers (no calling, no trial ladder, not fated). A player who still holds one is moved on joining, as a fresh awakening: a Reactor Heart wakes as a Z Fighter, a Blinker with the Pocket Arsenal, a Lawgiver to a power fate picks (`RetiredPowers`).
+- **The heart in the Legendary Z Fighter** (`ZFighterLegendHeart`, `ZFighterLegendMoves`, `ZFighterLegendNuke`): in a legendary form, the rage is a heat gauge (running, landing from 3+ blocks, and above all being hurt fill it; mastering the step slows it) and the surge comes when it's full, no longer on a timer. Out of the form it stops filling and cools 1 a second. Moves in a legendary form, on foot for the sprint ones: Sprint + R Cone Burst; Sneak + R tap turns the dial (25/50/100% of the heat); Sprint + G Blast Dash; Sneak + G Recoil; Sprint + V Shell Beam (empty hand) or Charged Throw (an item in hand); Sprint + B (hold) the Drill; Sneak + B Ground Crack. Legend 1: heat, dial, Cone Burst, Dash, Recoil; Legend 2 the rest; ascended in Legend 3, full heat and Sneak held for 5 s winds up the Nuke (let go sooner: the ordinary surge). In a legendary form those combos replace sprint-charging ki (R), sprint/sneak quick technique (G), sprint Ki Blast (V) and sprint/sneak Flash Step (B); plain keys are unchanged.
+- **The blinks in the Void Arsenal** (`ArsenalBlinks`, `ArsenalBlinkRenderer`): a corrupted Arsenal has Sprint + R Blink (12 blocks, half a second untouchable), Sprint + B Blink Strike (behind a foe 18 off), Sprint + Z Vanish, Sprint + X Sky Drop, and ascended Sneak + C Flicker. Every blink, and the void's own heavy-hit blink, opens a real rift at each end, drawn like his other rifts (the End's starfield while the void has him), tearing open from a slit and closing again; no particle trails.
+- "Have no powers" from a Paladin's or Warlock's written rule (Jaymo's Kingdoms) still seals powers (`RuledMute`).
+- Built; not played.
+
+## 0.25.10 (2026-11-18): drawn progress bars - every text bar redrawn like the execution bars (#1747)
+
+- Andy: "I do not like these text based loading bars. The executions and tree chopping are the best". Every `||||....`, `[====----]` and block-character bar on the action bar is now drawn (`core/HudBar` sends it, `client/hud/HudBars` draws it):
+  - **Holds** (reviving, giving up, getting up, out cold, struggling, eating to rise, coming to, treating, washing a rag, lifting someone, shield bash, Locust leap, Nadir's phase/Surfacing/Event Horizon, bonding, Legend nuke wind): three framed bars under the crosshair (under the execution bars, BELOW row 21), each filling in turn and brightening when full, a short caption under them ("Reviving Steve", "Lifting Steve"). The "[...] keep holding" text is gone.
+  - **Gauges** (eye beam heat, bracer soak, fury, Legend Heart heat, Ember heat, Darktide water, Resonance shriek, balloon fuel): one bar in five segments over the hotbar (FOCUS row 5), label at the left, number at the right.
+  - **Rig field**: one mark per blow kept, like the tree chop meter.
+- Holds that used to stop your swings still do: the bar carries that (`HeldInput.bar`) instead of the client spotting `|||` text. Gauges never stop swings.
+- Downed and come-to hints still show their line on the action bar, without the bar in it; the bar shows once you've started holding.
+- Kingdoms and Kitchen send their bars here through Fabric Loader's object share (`jaymos:hud_bar`).
+- `PickKit.gauge` removed (nothing used it any more).
+- Compiled (all three mods); not played.
+
+## 0.25.11 (2026-11-18): A null goal no longer stops the server (#1748)
+
+- `NullGoalMixin` (on `Mob.serverAiStep`): if a goal selector's tick throws the NullPointerException from a null goal, that creature's goals skip the tick and a warning naming the creature type is logged once. Any other exception still propagates.
+- Not built or played; CI compiles.
+
+## 0.25.12 (2026-11-18): TaCZ out of JEI and the creative menu (#1757)
+
+- Changes: nothing of TaCZ shows in JEI (no items, no painting, no gun smith table pages, no recipes) or in the creative menu (none of its tabs, none of its items in other tabs or the search). Its guns stay in the game for the future's gunners (`TaczGuns.hideModern`, `TaczHiddenJei`).
+- Built by CI; not played.
+
+## 0.25.13 (2026-11-18): Blood decals draw under Iris shaders (#1760)
+
+- Changes: blood puddles, footprints and wall marks are registered with Iris (as translucent particles) when it is loaded. Before, switching a shader pack on made Iris log "Missing program minecraft:pipeline/jaymospowers_blood_decal in override list" and a burst of GL_INVALID_OPERATION errors, and the decals could fail to draw.
+- Built by CI; not played.
+
+## 0.25.14 (2026-11-18): worldgen no longer reads or writes past its chunk edge (#1761)
+
+- **Sky springs**: the flood fill that checks whether a spring's water would run out of the Aether's bottom now stops at the 3x3 chunks round the spring's chunk (past that counts as a leak, as an unloaded chunk already did), so it no longer reads terrain it may not touch. Thousands of "unsafe terrain read" warnings a day.
+- **Eden island caves**: tunnels are cut and vented only inside the 3x3 chunks round the feature's origin chunk, so blocks are no longer lost to a far chunk.
+- Not played; nothing built on this PC (CI compiles).
+
+## 0.25.15 (2026-11-18): Skitter wall climb helper no longer clashes with Kingdoms claws (#1762)
+
+- The wall-climb helper (`besideWall`, `WALL_GAP`) is now `@Unique`, so Mixin stops logging an overwrite conflict at every boot and each mod keeps its own copy.
+- Not built or played.
+
+## 0.25.16 (2026-11-18): Conjoined twins show for joining players (#1755)
+
+- Fixes: a player joining didn't get the conjoined twin data, or the depth of others' sunk lures, synced to their screen; both are now registered at start-up.
+- Built by CI; not played.
+
+## 0.25.17 (2026-11-18): Chunky picks up again after a restart (#1752)
+
+- Fixes: after every restart the world pre-generation came back stuck (0 chunks a second) until it was paused and continued by hand. `ChunkyCompat` now uses Chunky's API instead of its commands: it is still paused while a player is on and continued once nobody is, but a continue now waits until the paused task has finished stopping (it used to be lost when the pause was slow to drain). With nobody on, a watchdog pauses and continues a task that has run a minute without a progress event, up to three times in a row.
+- Built by CI; checked on the next restart.
+
+## 0.25.18 (2026-11-18): Oversized drops split into full stacks (#1768)
+
+- Fixes: a dropped stack bigger than its item's stack size (Droppable Villager Trades can drop up to 320 of a dead villager's trade at once, 152 bricks on the Deck) couldn't be saved and was lost when its chunk unloaded. Such a drop is now split into full stacks as it lands (`OversizedDropMixin`).
+- Built by CI; not played.
+
+## 0.25.19 (2026-11-18): Teleports no longer lost on a ride that already ended (#1775)
+
+- Fixes: a player whose game still thought they were riding something the server had already let go of ignored every teleport and rubber-banded back until they died (Jungxxv, 12:36 PM on the 18th). When the same far teleport is sent again while they still ride, they now get off the stale ride first (a single teleport of a ride with its rider, through an End gateway say, is left alone), and the ride is logged so the cause can be found (`StuckRideTeleportMixin`).
+- Built by CI; not played.
+
+## 0.25.20 (2026-11-19): Rig arm forms (#1746)
+
+A Rig wearer gains seven new arm forms in the Rig menu (Sneak + J), each a Frostborn Rig tech plate that slides, locks and folds into a weapon on the wearer's arm:
+
+- **Arm blade** (`af-blade`): the forearm plates slide forward into a blade for close fighting. Costs charge, Mind level 1.
+- **Mace arm smash** (`af-mace`): the arm swells into a heavy mace and smashes the ground in a shockwave. Costs charge, Mind level 2.
+- **Pile bunker** (`af-pile`): a spike punches out of the forearm at point blank, with huge knockback and a crack in the block behind. Costs charge, Mind level 1.
+- **Drill breaker** (`af-drill`): the arm becomes a drill and tears forward through soft stone. Costs charge, Mind level 3.
+- **Thruster lance** (`af-lance`): a lance forms, the thrusters fire, and the first foe hit is carried along and pinned. Costs charge, Mind level 2.
+- **Energy lash** (`af-lash`): an energy whip off the wrist, cracking at range and pulling small mobs toward you. Costs charge, Mind level 1.
+- **Weapon mimic** (`af-mimic`): copies a studied creature's weapon for 30 seconds. Costs charge, Mind level 4.
+
+New classes: `RigForms` (server, actives and state), `RigFormsClient` (client poses).
+Hooked into: `RigPicks` (menu entries), `RigMenuScreen` (menu tiles, icons, levels, cooldowns), `RigMoves` (move kinds), `RigPose` (arm form poses).
+
+Built; not played in game.
+
+## 0.25.21 (2026-11-19): Rig patch 6: cloak, tech override and nova (#1776)
+
+- **Active camouflage**: the suit goes see-through for a time, mobs notice you later, and the first hit out of cloak lands harder. Costs charge and needs the whole Rig set; the Mind calls cloak on and off, and the ambush.
+- **Tech override**: a visor beam that freezes nearby golems for a moment, opens iron doors and trapdoors you look at, and stutters androids and mechs. Costs charge.
+- **Nova**: a panic button — every charge spent, everything near thrown back, and any grab broken.
+- New Mind lines for cloak on/off, ambush, nova and override, in each personality's voice, plus a cooldown warning for the nova.
+- Built with gradle; not played in game yet.
+
+## 0.25.22 (2026-11-19): Space: the star map's atlas, and the ringed giant in the night sky (#1753)
+
+- **Atlas**: the star map remembers what you found on each world. A world you've come down on wears a small gold pin on the map, and its card says how many times you've landed there, where you last did, and where your bed is if your respawn point is on that world. Mission progress was already on the card. Kept on the player through death. (`ZFighterAtlas`, `ZFighterStarMapScreen`)
+- **The ringed giant**: once the Verdant World's chart is read, what shows in the Overworld's night sky is its blue giant, brighter and bigger, with a faint leaning ring out of each side. It used to be a small green dot. The giant already had its ring on the star map and in the Verdant sky. (`SkyPlanets`)
+- Built; not played.
+
+## 0.25.23 (2026-11-19): Patrol: relief runs and your Patrol file (#1754)
+
+- **Relief runs**: officers of any rank can ask a patrolman "Any relief work?". He sends them to bring 6 dried limphium leaves (the Verdant World's keeping herb) to any town's healer. Use a cleric with the leaves in your main hand to hand them over: 6 silver, 150 TP for a Z Fighter. One run at a time, and runs don't run out. (`ZFighterPatrolRelief`)
+- **Your Patrol file**: "Reporting in." now answers with your file: rank, arrests on warrant, skip writs drawn and relief runs done. (`ZFighterPatrol#menu`)
+- Built; not played.
+
+## 0.25.24 (2026-11-19): Duplex doubles take spoken orders (#1767)
+
+- **Orders by voice**: as Duplex, say an order aloud (or "doubles, ..." first) and your doubles within 32 blocks do it. *follow* (come, heel); *wait* (stay, hold), where they stand; *scout*: one runs 20 blocks the way you face and comes back with how many foes it saw; *collect* (gather, pick up): they pick up the drops near and bring them to you; *mine* (dig): one digs out the open block you look at, then up to 8 more of the same touching it, never anything you couldn't break yourself or harder than stone-and-ore; *fetch <thing>* (bring, get): one fetches a stack with that in its name from a chest or barrel within 16 blocks, or the first stack of the container you look at; *fight* (attack): all go for what you look at, or the nearest foe. Anything a double holds drops if it pops. (`DoubleOrders`, `XenoDouble`)
+- Built; not played.

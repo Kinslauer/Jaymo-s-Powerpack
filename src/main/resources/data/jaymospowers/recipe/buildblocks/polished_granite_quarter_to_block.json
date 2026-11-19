@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:polished_granite_quarter",
+    "jaymospowers:polished_granite_quarter",
+    "jaymospowers:polished_granite_quarter",
+    "jaymospowers:polished_granite_quarter"
+  ],
+  "result": {
+    "id": "minecraft:polished_granite"
+  }
+}

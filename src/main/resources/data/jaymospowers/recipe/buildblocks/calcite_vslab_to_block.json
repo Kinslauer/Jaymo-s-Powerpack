@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:calcite_vslab",
+    "jaymospowers:calcite_vslab"
+  ],
+  "result": {
+    "id": "minecraft:calcite"
+  }
+}

@@ -2,7 +2,7 @@ package com.jaymospowers.bonebond;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.compat.KingdomsCompat;
-import com.jaymospowers.core.PickKit;
+import com.jaymospowers.core.HudBar;
 import com.jaymospowers.core.fx.MagicFx;
 import com.mojang.serialization.Codec;
 import java.util.HashMap;
@@ -191,8 +191,7 @@ public final class Boneiron {
 			player.hurtServer(level, level.damageSources().magic(), BOND_HARM);
 			MagicFx.orb(level, player.position().add(0.0, 0.6, 0.0), 0.8F, COLOR, 10);
 			level.playSound(null, pos, SoundEvents.BONE_BLOCK_BREAK, SoundSource.PLAYERS, 0.8F, 0.6F);
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.bonebond.bonding", PickKit.gauge(t / (float)BOND_TICKS, 10))
-				.withStyle(ChatFormatting.WHITE));
+			HudBar.hold(player, "bonebond", t / (float)BOND_TICKS, HudBar.GREY, Component.translatable("bar.jaymospowers.bonding"), false);
 		}
 		if (t >= BOND_TICKS) {
 			BONDING.remove(player.getUUID());

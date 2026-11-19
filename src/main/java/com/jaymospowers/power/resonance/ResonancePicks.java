@@ -2,6 +2,7 @@ package com.jaymospowers.power.resonance;
 
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.AbilityPower;
+import com.jaymospowers.core.HudBar;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.PickKit;
 import com.jaymospowers.core.Powers;
@@ -43,7 +44,6 @@ final class ResonancePicks {
 	static final int FULL_TICKS = 60, MIN_TICKS = 8, SHRIEK_COOLDOWN = 120;
 	static final double REACH_MIN = 6.0, REACH_MAX = 18.0, CONE_DEGREES = 38.0, KNOCK_MIN = 0.6, KNOCK_MAX = 2.0;
 	static final float DAMAGE_MIN = 2.0F, DAMAGE_MAX = 11.0F;
-	static final int GAUGE_WIDTH = 20;
 	/** Lifting Cry: the lift (blocks/tick), ticks of slow fall after, cooldown. */
 	static final double LIFT_SPEED = 1.0;
 	static final int LIFT_SLOW_FALL = 80, LIFT_COOLDOWN = 160;
@@ -252,7 +252,7 @@ final class ResonancePicks {
 		Long since = SHRIEKING.get(player.getUUID());
 		if (since != null) {
 			float s = Mth.clamp((now - since) / (float)FULL_TICKS, 0.0F, 1.0F);
-			player.sendOverlayMessage(Component.literal("Shriek " + PickKit.gauge(s, GAUGE_WIDTH)).withStyle(ChatFormatting.LIGHT_PURPLE));
+			HudBar.gauge(player, "shriek", s, HudBar.PURPLE, Component.translatable("bar.jaymospowers.shriek"), null);
 			if ((now - since) % 6 == 0) {
 				level.sendParticles(MagicFx.rune(VOICE, 0.8F), player.getX(), player.getY() + 1.2, player.getZ(), 1, 0.5, 0.5, 0.5, 0.0);
 			}

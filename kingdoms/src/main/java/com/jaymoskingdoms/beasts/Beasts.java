@@ -79,6 +79,8 @@ public final class Beasts {
 			Minotaur.createAttributes());
 		// it keeps the great dungeons under the Overworld
 		Labyrinths.register();
+		// what the labyrinth-builders left: rune gates, the compass, bombardier beetles, living braziers, the Afterblow
+		LabyrinthCraft.register();
 		PIGLIN_KING = type("piglin_king", EntityType.Builder.of(PiglinKing::new, MobCategory.MONSTER).sized(1.4F, 3.5F).fireImmune().clientTrackingRange(10),
 			PiglinKing.createAttributes());
 		REDSTONE_GOLEM = type("redstone_golem", EntityType.Builder.of(RedstoneGolem::new, MobCategory.MONSTER).sized(2.0F, 3.6F).clientTrackingRange(10),

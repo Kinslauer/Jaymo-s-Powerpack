@@ -17,17 +17,24 @@ import org.jspecify.annotations.Nullable;
  * at a training post or a dummy; the belt can be changed anywhere now.
  * <ul>
  * <li>Along the top, a tab for each weapon family you know a form of.</li>
- * <li>On the left, the belt's {@value Forms#BELT_SLOTS} slots. Click one to pick it; click the picked one again to empty it.</li>
- * <li>On the right, the forms you know of the tab's family, {@link #LIST_ROWS} at a time; the wheel scrolls them. Click one
- * to put it in the picked slot, and the pick moves on to the next slot.</li>
+ * <li>On the left, the forms you know of the tab's family, {@link #LIST_ROWS} at a time; the wheel scrolls them. Each has an
+ * ADD chip (it goes in the picked slot, and the pick moves on to the next) or, once on the belt, a REMOVE chip.</li>
+ * <li>In the middle, the belt's {@value Forms#BELT_SLOTS} slots, each with the form's cooldown and hunger as pills. Click one
+ * to pick it; click the picked one again to empty it.</li>
  * <li>A last tab, Spells, once Spell Engine gives you any: the spells of your spell book, weapon and gear, to read (point at
  * one for what it does); they are bound at the Spell Binding Table as before.</li>
  * </ul>
  * Only what is on the belt shows on the skill bar and in the stance ({@link Forms#barForms}).
  */
 public final class BeltScreen extends Screen {
-	static final int WIDTH = 330, HEIGHT = 196, PAD = 8, HEAD = 22, TAB_H = 16, TAB_GAP = 3, ROW = 20, BUTTON_H = 17, LIST_ROWS = 6;
-	static final int SLOT_W = 140;
+	static final int WIDTH = 340, HEIGHT = 214, PAD = 8, HEAD = 22, TAB_H = 16, TAB_GAP = 3, ROW = 20, BUTTON_H = 17, LIST_ROWS = 6;
+	/** The forms list on the left, the belt's slots in the middle (a slot is {@link #SLOT_ROW} tall: its button, then its pills). */
+	static final int LIST_W = 158, SLOT_ROW = 28;
+	/** The ADD / REMOVE chip at the end of a form's row. */
+	static final int CHIP_W = 48;
+	/** How the pills read a form: its cooldown in seconds (20 ticks), and the hunger it costs. */
+	static final float TICKS_PER_SECOND = 20.0F;
+	static final int PILL_COOLDOWN = 0xFF6AA8FF, PILL_HUNGER = 0xFFC8872A;
 
 	private Forms.@Nullable Family tab;
 	private int picked, scroll;
@@ -44,7 +51,7 @@ public final class BeltScreen extends Screen {
 	}
 
 	private int left() {
-		return (this.width - WIDTH) / 2;
+		return com.jaymoskingdoms.client.MenuCompat.centre(this.width, WIDTH);
 	}
 
 	private int top() {
@@ -86,11 +93,20 @@ public final class BeltScreen extends Screen {
 	}
 
 	private int listX() {
-		return left() + PAD + SLOT_W + PAD;
+		return left() + PAD;
 	}
 
+	/** The forms list's width: all of the page for the spells, which have no belt beside them. */
 	private int listW() {
-		return WIDTH - PAD - (listX() - left()) - 8;
+		return this.spells ? WIDTH - 2 * PAD - 8 : LIST_W;
+	}
+
+	private int slotX() {
+		return listX() + LIST_W + PAD + 4;
+	}
+
+	private int slotW() {
+		return WIDTH - PAD - (slotX() - left()) - 8;
 	}
 
 	private int bodyY() {
@@ -135,7 +151,7 @@ public final class BeltScreen extends Screen {
 				rebuildWidgets();
 			}).bounds(x + families.size() * (tabW + TAB_GAP), y, tabW, TAB_H).build()).accent(this.spells ? Ui.GOLD : Ui.DIM);
 		}
-		for (int i = 0; i < Forms.BELT_SLOTS; i++) {
+		for (int i = 0; i < (this.spells ? 0 : Forms.BELT_SLOTS); i++) {
 			int slot = i;
 			Forms.Form form = Forms.get(book.belt().get(i));
 			Component label = form == null ? Component.translatable("gui.jaymoskingdoms.belt.bare", i + 1)
@@ -146,20 +162,22 @@ public final class BeltScreen extends Screen {
 				}
 				this.picked = slot;
 				rebuildWidgets();
-			}).bounds(x, bodyY() + i * ROW, SLOT_W, BUTTON_H).build()).accent(i == this.picked ? Ui.GOLD : Ui.DIM);
+			}).bounds(slotX(), bodyY() + i * SLOT_ROW, slotW(), BUTTON_H).build()).accent(i == this.picked ? Ui.GOLD : Ui.DIM);
 		}
 		List<Forms.Form> listed = this.spells ? List.of() : listed(book);
 		this.scroll = Math.max(0, Math.min(this.scroll, (this.spells ? spellRows.size() : listed.size()) - LIST_ROWS));
-		int listW = listW();
 		for (int i = 0; i < LIST_ROWS && this.scroll + i < listed.size(); i++) {
 			Forms.Form form = listed.get(this.scroll + i);
-			boolean worn = book.belt().contains(form.id());
-			addRenderableWidget(FlatButton.builder(Component.translatable(worn ? "gui.jaymoskingdoms.belt.worn" : "gui.jaymoskingdoms.belt.form", form.name(),
-				book.rank(form.id())), b -> {
+			int on = book.belt().indexOf(form.id());
+			addRenderableWidget(FlatButton.builder(Component.translatable(on >= 0 ? "gui.jaymoskingdoms.belt.remove" : "gui.jaymoskingdoms.belt.add"), b -> {
+				if (on >= 0) {
+					assign(on, "");
+				} else {
 					assign(this.picked, form.id());
 					this.picked = (this.picked + 1) % Forms.BELT_SLOTS;
-					rebuildWidgets();
-				}).bounds(listX(), bodyY() + i * ROW, listW, BUTTON_H).build()).accent(worn ? Ui.GOLD : Ui.DIM);
+				}
+				rebuildWidgets();
+			}).bounds(listX() + listW() - CHIP_W - 1, bodyY() + i * ROW, CHIP_W, BUTTON_H).build()).accent(on >= 0 ? Ui.GOLD : Ui.DIM);
 		}
 		addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.belt.done"), b -> onClose())
 			.bounds(left() + WIDTH - PAD - 60, top() + HEIGHT - 22, 60, 16).build());
@@ -201,8 +219,8 @@ public final class BeltScreen extends Screen {
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left(), y = top();
-		Ui.panel(graphics, x, y, WIDTH, HEIGHT, Ui.GOLD);
-		Ui.line(graphics, this.font, this.title, x + 9, y + 8, WIDTH - 18, Ui.GOLD);
+		Ui.panelFramed(graphics, x, y, WIDTH, HEIGHT, Ui.GOLD);
+		Ui.line(graphics, this.font, this.title, x + 14, y + 8, WIDTH - 28, Ui.GOLD);
 		Forms.Book book = book();
 		List<Component> tip = null;
 		if (book != null && this.spells) {
@@ -223,11 +241,33 @@ public final class BeltScreen extends Screen {
 				Ui.scrollbar(graphics, x + WIDTH - PAD - 4, bodyY(), LIST_ROWS * ROW - 3, LIST_ROWS, rows.size(), this.scroll);
 			}
 		} else if (book != null) {
-			int size = listed(book).size();
+			List<Forms.Form> listed = listed(book);
+			int size = listed.size();
+			for (int i = 0; i < LIST_ROWS && this.scroll + i < size; i++) {
+				Forms.Form form = listed.get(this.scroll + i);
+				int ry = bodyY() + i * ROW;
+				boolean over = Ui.over(mouseX, mouseY, listX(), ry, LIST_W - CHIP_W - 2, BUTTON_H);
+				Ui.row(graphics, listX(), ry, listX() + LIST_W - CHIP_W - 2, ry + BUTTON_H, this.scroll + i, over);
+				Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.belt.form", form.name(), book.rank(form.id())), listX() + 4, ry + 5,
+					LIST_W - CHIP_W - 10, book.belt().contains(form.id()) ? Ui.GOLD : Ui.TEXT);
+			}
+			// each slot's form, its cooldown and hunger as pills, or what the empty slot is for
+			for (int i = 0; i < Forms.BELT_SLOTS; i++) {
+				Forms.Form form = Forms.get(book.belt().get(i));
+				int py = bodyY() + i * SLOT_ROW + BUTTON_H + 1;
+				if (form == null) {
+					Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.belt.empty_slot"), slotX() + 2, py + 2, slotW() - 4, Ui.DIM);
+					continue;
+				}
+				int px = slotX() + 2;
+				px += Ui.pill(graphics, this.font, px, py, Component.translatable("gui.jaymoskingdoms.belt.cooldown").getString(),
+					String.format("%.1fs", form.cooldown() / TICKS_PER_SECOND), PILL_COOLDOWN) + 3;
+				Ui.pill(graphics, this.font, px, py, Component.translatable("gui.jaymoskingdoms.belt.hunger").getString(), String.format("%.1f", form.hunger()), PILL_HUNGER);
+			}
 			if (book.known().isEmpty()) {
 				Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.belt.none"), x + PAD, bodyY() + 4, WIDTH - 2 * PAD, Ui.DIM);
 			} else if (size > LIST_ROWS) {
-				Ui.scrollbar(graphics, x + WIDTH - PAD - 4, bodyY(), LIST_ROWS * ROW - 3, LIST_ROWS, size, this.scroll);
+				Ui.scrollbar(graphics, listX() + LIST_W + 2, bodyY(), LIST_ROWS * ROW - 3, LIST_ROWS, size, this.scroll);
 			}
 		}
 		Ui.line(graphics, this.font, Component.translatable(this.spells ? "gui.jaymoskingdoms.belt.spells.hint" : "gui.jaymoskingdoms.belt.hint"), x + PAD, y + HEIGHT - 18, WIDTH - 2 * PAD - 68, Ui.DIM);

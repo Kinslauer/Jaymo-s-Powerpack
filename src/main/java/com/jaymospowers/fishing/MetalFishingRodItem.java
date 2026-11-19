@@ -1,7 +1,6 @@
 package com.jaymospowers.fishing;
 
 import com.jaymospowers.JaymosPowers;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -50,10 +49,7 @@ public class MetalFishingRodItem extends Item {
                 || FishingReal.fight(serverPlayer).fighting()) {
             return InteractionResult.SUCCESS;
         }
-        net.minecraft.world.entity.EntityType<? extends FishingHook> hookType =
-                (net.minecraft.world.entity.EntityType<? extends FishingHook>) BuiltInRegistries.ENTITY_TYPE
-                        .get(net.minecraft.resources.Identifier.withDefaultNamespace("fishing_hook")).orElseThrow().value();
-        FishingHook hook = new FishingHook(hookType, serverLevel);
+        FishingHook hook = new FishingHook(net.minecraft.world.entity.EntityTypes.FISHING_BOBBER, serverLevel);
         hook.setOwner(player);
         player.fishing = hook;
         hook.setPos(player.getX(), player.getEyeY() - 0.1D, player.getZ());

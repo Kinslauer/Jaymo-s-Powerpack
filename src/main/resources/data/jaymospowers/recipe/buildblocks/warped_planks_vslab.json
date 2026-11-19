@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:saw",
+    "minecraft:warped_planks",
+    "minecraft:warped_planks",
+    "minecraft:warped_planks",
+    "minecraft:warped_planks"
+  ],
+  "result": {
+    "id": "jaymospowers:warped_planks_vslab",
+    "count": 8
+  }
+}

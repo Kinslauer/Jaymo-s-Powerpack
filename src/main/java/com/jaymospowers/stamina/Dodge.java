@@ -3,8 +3,11 @@ package com.jaymospowers.stamina;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.combat.Armed;
 import com.jaymospowers.compat.KingdomsCompat;
+import com.jaymospowers.core.ArmourEase;
+import com.jaymospowers.core.ArmourKind;
 import com.jaymospowers.core.Ledge;
 import com.jaymospowers.core.wounds.Breaks;
+import com.jaymospowers.tinkering.smithing.LightArmour;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +23,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -29,9 +33,13 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -56,6 +64,11 @@ public final class Dodge {
 	public static final int COOLDOWN = 10;
 	/** Ticks from the start in which a blow or projectile misses. */
 	public static final int EVADE_TICKS = 5;
+	/** A hop is backward when it points more than 120 degrees from where the dodger faces (cosine of that angle). */
+	static final double BACKWARD_COS = -0.5;
+	/** A full mailed-leather set's backward evade knocks an arrow aside at this share of its speed, then rests this long (ticks), less each Projectile Protection level worn by this much, and never less than the minimum. */
+	static final double KNOCK_SPEED = 0.4;
+	static final int KNOCK_REST = 20 * 15, KNOCK_PROTECTION = 10, KNOCK_REST_MIN = 20 * 5;
 	/** Hunger (exhaustion; 4 is a hunger point) per dodge. */
 	public static final float EXHAUSTION = 0.4F;
 	/** The server lets a dodge through this many ticks early (client and server clocks differ a little). */
@@ -147,6 +160,10 @@ public final class Dodge {
 		void dodged(ServerPlayer player, Vec3 direction);
 	}
 
+	/** Server: whether each player's last dodge hopped backward (from the Start payload's direction against where they faced). */
+	private static final Map<UUID, Boolean> BACKWARD = new HashMap<>();
+	/** Server: game time each player's mailed backstep may knock an arrow aside again. */
+	private static final Map<UUID, Long> KNOCK_READY = new HashMap<>();
 	private static final List<Listener> LISTENERS = new ArrayList<>();
 	/** Server: game time of each player's last dodge. */
 	private static final Map<UUID, Long> LAST = new HashMap<>();
@@ -160,7 +177,11 @@ public final class Dodge {
 		PayloadTypeRegistry.serverboundPlay().register(Flip.TYPE, Flip.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Flip.TYPE, (payload, ctx) -> flip(ctx.player(), payload));
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer player && evades(player, source)));
-		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> LAST.remove(handler.player.getUUID()));
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			LAST.remove(handler.player.getUUID());
+			BACKWARD.remove(handler.player.getUUID());
+			KNOCK_READY.remove(handler.player.getUUID());
+		});
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(server -> {
 			if (server.getTickCount() % STRETCHY_EVERY != 0) {
 				return;
@@ -179,7 +200,11 @@ public final class Dodge {
 				}
 			}
 		});
-		ServerLifecycleEvents.SERVER_STOPPING.register(server -> LAST.clear());
+		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+			LAST.clear();
+			BACKWARD.clear();
+			KNOCK_READY.clear();
+		});
 	}
 
 	/** Tells {@code listener} of every dodge from now on. */
@@ -232,6 +257,7 @@ public final class Dodge {
 			return;
 		}
 		LAST.put(player.getUUID(), now);
+		BACKWARD.put(player.getUUID(), false);
 		player.causeFoodExhaustion(EXHAUSTION);
 		Vec3 dir = new Vec3(flip.x(), 0.0, flip.z());
 		dir = dir.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, player.getYRot()) : dir.normalize();
@@ -258,6 +284,7 @@ public final class Dodge {
 		player.causeFoodExhaustion(EXHAUSTION);
 		Vec3 dir = new Vec3(start.x(), 0.0, start.z());
 		dir = dir.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, player.getYRot()).reverse() : dir.normalize();
+		BACKWARD.put(player.getUUID(), dir.dot(Vec3.directionFromRotation(0.0F, player.getYRot())) < BACKWARD_COS);
 		player.setAttached(ROLLING, new Rolling(now, (float)dir.x, (float)dir.z, false));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.PLAYERS, 0.7F, 1.4F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WOOL_STEP, SoundSource.PLAYERS, 0.6F, 0.8F);
@@ -300,9 +327,36 @@ public final class Dodge {
 		if (!(source.getDirectEntity() instanceof Projectile) && !(source.getDirectEntity() instanceof LivingEntity)) {
 			return false;
 		}
+		boolean backward = Boolean.TRUE.equals(BACKWARD.get(player.getUUID()));
+		if (backward && !ArmourEase.light(player)) {
+			// a backward slip needs light feet: any plate and the blow lands
+			return false;
+		}
 		ServerLevel level = player.level();
+		if (backward && source.is(DamageTypes.ARROW) && source.getDirectEntity() instanceof AbstractArrow arrow && ready(player) && ArmourEase.fullSet(player, LightArmour.MAILED, ArmourKind.MAIL)) {
+			arrow.setDeltaMovement(arrow.getDeltaMovement().scale(-KNOCK_SPEED));
+			KNOCK_READY.put(player.getUUID(), level.getGameTime() + rest(player));
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.CHAIN_HIT, SoundSource.PLAYERS, 0.8F, 1.2F);
+		}
 		level.sendParticles(ParticleTypes.SWEEP_ATTACK, player.getX(), player.getY() + 1.0, player.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_WEAK, SoundSource.PLAYERS, 0.6F, 1.6F);
 		return true;
+	}
+
+	private static boolean ready(ServerPlayer player) {
+		Long at = KNOCK_READY.get(player.getUUID());
+		return at == null || player.level().getGameTime() >= at;
+	}
+
+	/** Ticks a mailed backstep's knock-aside rests: {@link #KNOCK_REST}, less {@link #KNOCK_PROTECTION} per Projectile Protection level on the four worn pieces, at least {@link #KNOCK_REST_MIN}. */
+	private static int rest(ServerPlayer player) {
+		int levels = 0;
+		var enchantments = player.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).get(Enchantments.PROJECTILE_PROTECTION);
+		if (enchantments.isPresent()) {
+			for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
+				levels += player.getItemBySlot(slot).getEnchantments().getLevel(enchantments.get());
+			}
+		}
+		return Math.max(KNOCK_REST_MIN, KNOCK_REST - KNOCK_PROTECTION * levels);
 	}
 }

@@ -58,6 +58,7 @@ import org.jspecify.annotations.Nullable;
  * undead (Andy, 2026-11-17: "thou shall not kill"). One who kills on purpose falls: the Truth lets them go, and their
  * class becomes the Death Sorcerer's ({@link Classes#replace}).</li>
  * </ul>
+ * Terms a Paladin or Warlock swore of their own in their book of vows ({@link VowBook}) bind them the same way.
  * Crimes a Justice oath can't stop before the act (trespass, poaching, dealing...) still break it when done, as before
  * ({@link Paladins#crime}).
  */
@@ -145,6 +146,15 @@ public final class Vows {
 		}
 		if (warlock && PACTS.getOrDefault(patron, Set.of()).contains(term)) {
 			return new Vow(patron, Kind.PACT);
+		}
+		// (the written oath and pact) a term sworn in the book binds as the vow's own do
+		if (VowBook.swore(player, term)) {
+			if (Paladins.keeping(player)) {
+				return new Vow(Paladins.oath(player), Kind.OATH);
+			}
+			if (warlock) {
+				return new Vow(patron, Kind.PACT);
+			}
 		}
 		return null;
 	}

@@ -1,0 +1,7 @@
+{
+	"required": true,
+	"package": "com.jaymospowers.bits.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": ["EntityIgniteMixin"],
+	"injectors": { "defaultRequire": 1 }
+}

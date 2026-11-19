@@ -23,6 +23,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -75,6 +76,8 @@ public final class Blows {
 	static final float DULL = 0.9F;
 	/** Armour that lets this many times the damage through has failed (a crunch); this share or less, it turned the blow (a clank). */
 	static final float BITES = 1.2F, TURNED = 0.8F;
+	/** An arrow whose head has no way of its own with armour does this share of its damage against mail. */
+	static final float ARROW_VS_MAIL = 0.75F;
 	// ================================================================================================================
 
 	/**
@@ -173,7 +176,7 @@ public final class Blows {
 		measured = null;
 		if (source.getDirectEntity() instanceof AbstractArrow missile) {
 			return damage <= 0.0F || source.is(DamageTypeTags.BYPASSES_ARMOR) ? damage
-				: damage * missile(missile, ArmourKind.worn(victim, struck(victim, source)));
+				: damage * missile(missile, source.is(DamageTypes.ARROW), ArmourKind.worn(victim, struck(victim, source)));
 		}
 		if (damage <= 0.0F || !(victim.level() instanceof ServerLevel level) || !(source.getDirectEntity() instanceof LivingEntity attacker)
 			|| source.getEntity() != attacker || attacker == victim) {
@@ -194,6 +197,8 @@ public final class Blows {
 		BodyPart part = plan == null ? null : LockOnRegions.aimedPart(victim, plan, source);
 		EquipmentSlot slot = slot(part);
 		List<ArmourKind> layers = new ArrayList<>();
+		// the worn piece beside each layer (a mailed or studded piece meets a blow its own way); harness layers have none
+		List<ItemStack> pieces = new ArrayList<>();
 		String place = place(part);
 		List<ArmourKind> limb = place.equals("torso") ? List.of() : ArmourKind.layers(victim, place);
 		if (place.equals("arms") && !limb.isEmpty()) {
@@ -201,16 +206,28 @@ public final class Blows {
 			layers.addAll(limb);
 		} else {
 			layers.addAll(place.equals("legs") ? limb : List.of());
+			while (pieces.size() < layers.size()) {
+				pieces.add(ItemStack.EMPTY);
+			}
 			layers.add(ArmourKind.worn(victim, slot));
+			pieces.add(victim.getItemBySlot(slot));
 			if (slot == EquipmentSlot.CHEST) {
 				layers.addAll(ArmourKind.layers(victim, "torso"));
 			}
 		}
-		layers.removeIf(k -> k == ArmourKind.NONE);
+		while (pieces.size() < layers.size()) {
+			pieces.add(ItemStack.EMPTY);
+		}
+		for (int i = layers.size() - 1; i >= 0; i--) {
+			if (layers.get(i) == ArmourKind.NONE) {
+				layers.remove(i);
+				pieces.remove(i);
+			}
+		}
 		ArmourKind armour = layers.isEmpty() ? ArmourKind.NONE : layers.get(0);
-		float factor = kind.against(armour);
+		float factor = layers.isEmpty() ? kind.against(armour) : kind.against(armour, pieces.get(0));
 		for (int i = 1; i < layers.size(); i++) {
-			float under = kind.against(layers.get(i));
+			float under = kind.against(layers.get(i), pieces.get(i));
 			if (under < factor) {
 				factor += (under - factor) * UNDER_SOAK;
 			}
@@ -223,13 +240,15 @@ public final class Blows {
 
 	/**
 	 * The share of its damage an arrow or a thrown weapon does against {@code armour}: an arrowhead's own way with it (a
-	 * bodkin, a swallowtail: {@link HeadFx#againstArmour}), a war dart's thrust, and 1 for the rest.
+	 * bodkin, a swallowtail: {@link HeadFx#againstArmour}), a war dart's thrust, {@link #ARROW_VS_MAIL} for a plain arrow
+	 * meeting mail, and 1 for the rest (a trident, a thrown blade).
 	 */
-	private static float missile(AbstractArrow missile, ArmourKind armour) {
+	private static float missile(AbstractArrow missile, boolean arrow, ArmourKind armour) {
 		if (missile instanceof ItemSupplier thrown && thrown.getItem().is(WarArms.WAR_DART)) {
 			return WeaponKind.Blow.THRUST.against(armour);
 		}
-		return HeadFx.againstArmour(missile, armour);
+		float head = HeadFx.againstArmour(missile, armour);
+		return arrow && armour == ArmourKind.MAIL && head == 1.0F ? ARROW_VS_MAIL : head;
 	}
 
 	/** The armour slot over where this blow lands: the lock-on's region when the striker aims through one, else the chest. */

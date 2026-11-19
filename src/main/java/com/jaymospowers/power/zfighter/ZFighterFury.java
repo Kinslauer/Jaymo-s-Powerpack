@@ -1,13 +1,12 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
-import com.jaymospowers.core.PickKit;
+import com.jaymospowers.core.HudBar;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.fx.MagicFx;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -121,8 +120,7 @@ final class ZFighterFury {
 			f.applied = f.fury;
 		}
 		if (f.fury > 0.0F && now % 10 == 0) {
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter.fury", PickKit.gauge(f.fury, 10))
-				.withStyle(f.fury >= 1.0F ? ChatFormatting.RED : ChatFormatting.GOLD));
+			HudBar.gauge(player, "fury", f.fury, f.fury >= 1.0F ? HudBar.RED : HudBar.GOLD, Component.translatable("bar.jaymospowers.fury"), null);
 		}
 		if (f.fury >= 1.0F && now % 4 == 0) {
 			level.sendParticles(MagicFx.wisp(FURY_COLOR, 1.2F), player.getX(), player.getY() + player.getBbHeight() * 0.5, player.getZ(), 2,

@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:saw",
+    "minecraft:cherry_log",
+    "minecraft:cherry_log",
+    "minecraft:cherry_log",
+    "minecraft:cherry_log"
+  ],
+  "result": {
+    "id": "jaymospowers:cherry_log_vslab",
+    "count": 8
+  }
+}

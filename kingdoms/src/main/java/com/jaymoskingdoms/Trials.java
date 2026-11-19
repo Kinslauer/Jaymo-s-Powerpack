@@ -432,7 +432,7 @@ public final class Trials {
 				if (t.lifted % 10 == 0) {
 					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.STONE_HIT, SoundSource.PLAYERS, 0.8F, 0.6F);
 				}
-				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.trial.lift", bar(t.lifted, LIFT_TICKS)));
+				HudBars.hold(player, "trial_lift", t.lifted / (float) LIFT_TICKS, HudBars.GOLD, Component.translatable("bar.jaymoskingdoms.heave"), true);
 			}
 			if (t.lifted >= LIFT_TICKS) {
 				// lifted: now the brawl
@@ -450,10 +450,6 @@ public final class Trials {
 		return guard.getHealth() <= guard.getMaxHealth() * BRAWL_DOWN ? "won" : null;
 	}
 
-	private static Component bar(int have, int of) {
-		int filled = Math.round(10.0F * have / of);
-		return Component.literal("|".repeat(filled)).withStyle(ChatFormatting.GOLD).append(Component.literal("|".repeat(10 - filled)).withStyle(ChatFormatting.DARK_GRAY));
-	}
 
 	/** Nobody dies of a trial; the brawl's fists only; a pit champion's blows don't land on anyone but his challenger. */
 	private static boolean allowDamage(LivingEntity victim, DamageSource source, float amount) {

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:greatroot_log_quarter",
+    "jaymospowers:greatroot_log_quarter",
+    "jaymospowers:greatroot_log_quarter",
+    "jaymospowers:greatroot_log_quarter"
+  ],
+  "result": {
+    "id": "jaymospowers:greatroot_log"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:undershale_bricks_quarter",
+    "jaymospowers:undershale_bricks_quarter",
+    "jaymospowers:undershale_bricks_quarter",
+    "jaymospowers:undershale_bricks_quarter"
+  ],
+  "result": {
+    "id": "jaymospowers:undershale_bricks"
+  }
+}

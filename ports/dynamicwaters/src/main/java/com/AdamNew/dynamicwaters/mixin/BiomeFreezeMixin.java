@@ -2,6 +2,7 @@ package com.AdamNew.dynamicwaters.mixin;
 
 import com.AdamNew.dynamicwaters.Config;
 import com.AdamNew.dynamicwaters.HydrologyManager;
+import com.AdamNew.dynamicwaters.Loaded;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -80,7 +81,7 @@ public class BiomeFreezeMixin {
         for (Direction d : Direction.Plane.HORIZONTAL) {
             for (int k = 1; k <= 2; k++) {
                 at.set(pos.getX() + d.getStepX() * k, pos.getY() + 1, pos.getZ() + d.getStepZ() * k);
-                if (!level.hasChunkAt(at)) break;
+                if (!Loaded.made(level, at)) break;
                 if (level.getFluidState(at).is(FluidTags.WATER)) return true;
             }
         }

@@ -1,0 +1,25 @@
+{
+  "variants": {
+    "double=false,facing=north": {
+      "model": "jaymospowers:block/buildblocks/granite_vslab"
+    },
+    "double=false,facing=east": {
+      "model": "jaymospowers:block/buildblocks/granite_vslab",
+      "y": 90,
+      "uvlock": true
+    },
+    "double=false,facing=south": {
+      "model": "jaymospowers:block/buildblocks/granite_vslab",
+      "y": 180,
+      "uvlock": true
+    },
+    "double=false,facing=west": {
+      "model": "jaymospowers:block/buildblocks/granite_vslab",
+      "y": 270,
+      "uvlock": true
+    },
+    "double=true": {
+      "model": "minecraft:block/granite"
+    }
+  }
+}

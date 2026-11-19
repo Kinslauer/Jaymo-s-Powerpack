@@ -85,8 +85,6 @@ public final class Pickpocket {
 	static final long EMPTY_TICKS = 24000L, TRY_TICKS = 20L;
 	/** From what a mark carries, take this share of a stack (at least one). */
 	static final float CARRIED_SHARE = 0.5F;
-	/** The progress bar's length. */
-	static final int BAR = 12;
 
 	/** (0.7.498) The little purse in a pocket holds this many copper bits' worth (least, most), twice that on a guard or a merchant. */
 	static final int PURSE_MIN_BITS = 4, PURSE_MAX_BITS = 30, RICH_FACTOR = 2;
@@ -347,10 +345,8 @@ public final class Pickpocket {
 				end(player, mark, now);
 				pick(player, level, mark, now);
 			} else if ((now - lift.start) % 2 == 0) {
-				int filled = Math.round(BAR * (now - lift.start) / (float)(lift.until - lift.start));
-				String bar = "|".repeat(filled) + ".".repeat(BAR - filled);
-				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.pickpocket.lifting", mark.getDisplayName(), bar)
-					.withStyle(ChatFormatting.GRAY));
+				HudBars.hold(player, "pickpocket", (now - lift.start) / (float)(lift.until - lift.start), HudBars.GREY,
+					Component.translatable("bar.jaymoskingdoms.pickpocket", mark.getDisplayName()), true);
 			}
 		}
 	}

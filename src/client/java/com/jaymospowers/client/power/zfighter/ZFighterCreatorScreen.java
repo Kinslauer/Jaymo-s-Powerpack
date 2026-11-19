@@ -1,5 +1,6 @@
 package com.jaymospowers.client.power.zfighter;
 
+import com.jaymospowers.client.ColourPickerScreen;
 import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.power.zfighter.ZFighterCreator;
 import com.jaymospowers.power.zfighter.ZFighterNet;
@@ -39,6 +40,8 @@ public class ZFighterCreatorScreen extends Screen {
 	private static String name = "";
 	private static int shape;
 	private static int color;
+	/** The colour from the shared picker, used when {@link #color} is one past the presets. */
+	private static int custom = ZFighterCreator.COLORS[0];
 	private static int power = 1;
 
 	private final Screen previous;
@@ -103,11 +106,18 @@ public class ZFighterCreatorScreen extends Screen {
 			swatches.add(addRenderableWidget(FlatButton.builder(Component.empty(), b -> color = pick)
 				.bounds(fx + i * (SWATCH + 2), y + 98, SWATCH, SWATCH).build()));
 		}
+		// one more swatch past the presets: any colour, from the shared picker
+		swatches.add(addRenderableWidget(FlatButton.builder(Component.empty(), b -> {
+			this.minecraft.gui.setScreen(new ColourPickerScreen(this, current(), c -> custom = c, c -> {
+				custom = c;
+				color = ZFighterCreator.COLORS.length;
+			}));
+		}).bounds(fx + ZFighterCreator.COLORS.length * (SWATCH + 2), y + 98, SWATCH, SWATCH).build()));
 		addRenderableWidget(FlatButton.builder(Component.literal("-"), b -> power = Math.max(1, power - 1)).bounds(fx, y + 116, 14, 14).build());
 		addRenderableWidget(FlatButton.builder(Component.literal("+"), b -> power = Math.min(ZFighterCreator.POWER_MAX, power + 1))
 			.bounds(fx + 54, y + 116, 14, 14).build());
 		createButton = addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.zfighter_creator.create"), b -> {
-			ClientPlayNetworking.send(new ZFighterCreator.Make(charged, name, shape, ZFighterCreator.COLORS[color], power));
+			ClientPlayNetworking.send(new ZFighterCreator.Make(charged, name, shape, current(), power));
 			name = "";
 			nameBox.setValue("");
 		}).bounds(x + w - 62, y + 116, 54, 14).build());
@@ -121,6 +131,11 @@ public class ZFighterCreatorScreen extends Screen {
 			forgetButtons.add(addRenderableWidget(FlatButton.builder(Component.translatable("screen.jaymospowers.zfighter_creator.forget"),
 				b -> ClientPlayNetworking.send(new ZFighterCreator.Forget(index))).bounds(x + w - 56, ry - 2, 48, 12).build()));
 		}
+	}
+
+	/** The colour picked: a preset's, or the custom one. */
+	private static int current() {
+		return color < ZFighterCreator.COLORS.length ? ZFighterCreator.COLORS[color] : custom;
 	}
 
 	/** The made technique's place shown on list row {@code row}: the three quick ones, then the three charged. */
@@ -173,7 +188,8 @@ public class ZFighterCreatorScreen extends Screen {
 		line(graphics, Component.translatable("screen.jaymospowers.zfighter_creator.color"), x + 8, y + 101, fx - x - 12, COLOR_DIM);
 		for (int i = 0; i < swatches.size(); i++) {
 			Button swatch = swatches.get(i);
-			swatch.setMessage(Component.literal(i == color ? "◆" : "■").withColor(0xFF000000 | ZFighterCreator.COLORS[i]));
+			swatch.setMessage(Component.literal(i == color ? "◆" : i == ZFighterCreator.COLORS.length ? "+" : "■")
+				.withColor(0xFF000000 | (i < ZFighterCreator.COLORS.length ? ZFighterCreator.COLORS[i] : custom)));
 		}
 		line(graphics, Component.translatable("screen.jaymospowers.zfighter_creator.power"), x + 8, y + 119, fx - x - 12, COLOR_DIM);
 		graphics.centeredText(this.font, Component.literal(power + "/" + ZFighterCreator.POWER_MAX), fx + 34, y + 119, COLOR_GOLD);
