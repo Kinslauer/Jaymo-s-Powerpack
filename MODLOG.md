@@ -6468,3 +6468,11 @@ Andy: "they should be able to employ these techniques against players as well." 
 - **Pre-generating and exploring**: new land no longer freezes the server while TaCZ works out which loot table is being rolled. It used to search every loot table for each mob's equipment roll; it now looks the table up in a map built once per reload.
 - Classes: new optional mixin `TaczLootLookupMixin` (own config `jaymospowers.tacz.mixins.json`, skipped when TaCZ is absent). Nothing of TaCZ is copied.
 - Built by CI; not played.
+
+## 0.25.68 (2026-11-19): One Dimension stack back to the pack's order (#1852)
+
+- **New worlds** stack the high sky, the Aether, the Cloud Sea, the Overworld and the Nether, top to bottom, again. One Dimension had rewritten its config with every dimension it knew, which put the Cloud Sea and high sky under the Nether.
+- **Lost Cities** is no longer stacked (nor are the proving grounds); they are left out like the other worlds you reach another way.
+- A One Dimension config whose order differs from the pack's is put back to it on start-up and logged; the pack's order wins over hand edits, since One Dimension's own rewrite can't be told from one. Worlds that already exist are unchanged.
+- Class: `OneDimensionDefaults`.
+- Built by CI; not played.
