@@ -302,11 +302,12 @@ def packMods = [
 	[dep: "curse.maven:customchunks-1727847:9101536", cf: [1727847, 9101536], dev: false],
 	[dep: "curse.maven:planeshift-1714620:9083764", cf: [1714620, 9083764], dev: false],
 	[dep: "curse.maven:codxlib-1633207:8893340", cf: [1633207, 8893340], dev: false],
-	// Alex's Mobs Continued (Codx.io's port of Alexthe668's Alex's Mobs; LGPL-3.0 in its jar, shipped unchanged; needs
+	// Alex's Mobs Continued 2.2.4 (Codx.io's port of Alexthe668's Alex's Mobs; 2.3.0 needs Fabric Loader 0.20, the pack has 0.19.5;
+	// LGPL-3.0 in its jar, shipped unchanged; needs
 	// Fabric API and CodxLib above): ~90 lively animals, seagulls, orcas, cachalots, giant squid, seals and deep-sea fish
 	// among them. Andy (2026-11-19): "their animals seem to be the most interactive", all of them, duplicates of
 	// Naturalist/Cube/ours kept as other breeds. Not Citadel or the old port taken out in 0.8.107 (black slabs under Iris).
-	[dep: "curse.maven:alexs-mobs-continued-1635121:9490821", cf: [1635121, 9490821], dev: false],
+	[dep: "curse.maven:alexs-mobs-continued-1635121:9256210", cf: [1635121, 9256210], dev: false],
 	// Voice (0.17.157; Kingdoms' ProximityChat does typed chat). Simple Voice Chat (all rights reserved, henkelmax; downloaded
 	// by id, never copied or taken apart): proximity voice, push-to-talk or voice activation (V opens its menu). Client
 	// and server; the server listens on UDP 24454, so the Deck's playit tunnel needs a UDP tunnel to it (deck/README.md).
