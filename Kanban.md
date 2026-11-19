@@ -1,7 +1,5 @@
 ---
-
 kanban-plugin: board
-
 ---
 
 <!-- Written by tools/vault_sync.py on every sync (2026-11-19 10:33). Don't edit. -->
