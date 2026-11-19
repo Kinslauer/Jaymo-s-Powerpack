@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 02:32). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 02:33). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -31,7 +31,6 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-l-carts-check|vanilla-plus-l-carts-check]] · for 💻 Odysseus · open
-- [ ] [[Inbox/medieval-deco-6-towns-sea|medieval-deco-6-towns-sea]] · for 💻 Odysseus · open
 
 
 ## Being built
@@ -40,6 +39,7 @@ kanban-plugin: board
 
 ## In review
 
+- [ ] [[Inbox/medieval-deco-6-towns-sea|medieval-deco-6-towns-sea]] · for 💻 Odysseus · #1803 · in-review
 
 
 ## Needs Andy
