@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 22:13). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 22:15). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -20,7 +20,6 @@ kanban-plugin: board
 - [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
 - [ ] [[Inbox/medieval-deco-7-practice-dummy|medieval-deco-7-practice-dummy]] · for 💻 Odysseus · open
-- [ ] [[Inbox/medieval-deco-3-dead-in-the-wild|medieval-deco-3-dead-in-the-wild]] · for 💻 Odysseus · open
 - [ ] [[Inbox/medieval-deco-6-towns-sea|medieval-deco-6-towns-sea]] · for 💻 Odysseus · open
 
 
@@ -29,6 +28,7 @@ kanban-plugin: board
 - [ ] [[Inbox/medieval-deco-4-drinks|medieval-deco-4-drinks]] · pc-claude-deco-4 · claimed
 - [ ] [[Inbox/medieval-deco-2-wind|medieval-deco-2-wind]] · pc-claude-deco-2 · claimed
 - [ ] [[Inbox/medieval-deco-5-farm-water|medieval-deco-5-farm-water]] · pc-claude-deco-5 · claimed
+- [ ] [[Inbox/medieval-deco-3-dead-in-the-wild|medieval-deco-3-dead-in-the-wild]] · pc-claude-deco-3 · claimed
 
 
 ## In review
