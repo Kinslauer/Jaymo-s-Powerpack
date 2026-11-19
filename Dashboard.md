@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 08:23). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 08:44). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -28,12 +28,15 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-23 waiting for a bot, 1 being built, 0 in review: see [[Kanban]].
+23 waiting for a bot, 0 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1808 Cannon shot types for wall and siege guns, Explosive Shell costs TNT (Kingdoms, 2026-11-19)
+- [ ] #1807 flotsam can bring up a dead one's token (Powers, Kitchen, 2026-11-19)
+- [ ] #1806 harsh lands - spawns and starts follow the climate map (Kingdoms, 2026-11-19)
 - [ ] #1804 charge jump and Web slingshot on a horse's jump bar, orange peak (Powers, Kingdoms, 2026-11-19)
 - [ ] #1803 towns and the sea - figureheads, trade signs, song stones, the journey book (Kingdoms, 2026-11-19)
 - [ ] #1802 the dead in the wild: remains, last camps, ruin traps, the headless rider (Kingdoms, 2026-11-19)
@@ -91,14 +94,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1711 Youth flies off to think, and comes back with the answer (Kingdoms, 2026-11-18)
 - [ ] #1710 lean on the legs (Kingdoms, 2026-11-18)
 - [ ] #1697 temperament idles come and go (Powers, 2026-11-17)
-- [ ] #1694 blood stays drawn on MCA bodies (Powers, 2026-11-17)
-- [ ] #1692 Youth thinks out loud, "youth, look!" (Kingdoms, 2026-11-17)
-- [ ] #1677 fainting warns you first (Powers, Kitchen, 2026-11-17)
-- …and 192 older ones.
+- …and 195 older ones.
 
 ## Health
 
-19 problems in the notes: [[Health]].
+21 problems in the notes: [[Health]].
 
 ## Last week
 
