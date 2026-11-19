@@ -76,7 +76,10 @@ public final class DodgeRollPose {
 		long start;
 		float x, z;
 		boolean flip;
-		if (player == Minecraft.getInstance().player && DodgeClient.rollStart != Long.MIN_VALUE) {
+		Dodge.Rolling synced = player.getAttached(Dodge.ROLLING);
+		// (a roll the server threw for us, as a leap off a mount ends in, is a later one than our last own roll)
+		if (player == Minecraft.getInstance().player && DodgeClient.rollStart != Long.MIN_VALUE
+			&& (synced == null || synced.start() <= DodgeClient.rollStart + Dodge.ROLL_TICKS)) {
 			// our own roll: drawn the moment we hop, not when the server's copy comes back
 			start = DodgeClient.rollStart;
 			x = DodgeClient.rollX;

@@ -127,6 +127,33 @@ HEAVE = [
     (1.0, STAND),
 ]
 
+# a running vault (Freerunner): hands slapped flat on the rump at a run, the legs swung up and parted over it, down into the seat
+ON_VAULT = [
+    (0.0, {"body": (18, 0, 0), "right_arm": (-70, 0, 6), "left_arm": (20, 0, -6),
+           "right_leg": (-35, 0, 3), "left_leg": (30, 0, -3)}),
+    (0.25, {"body": (42, 0, 0), "right_arm": (-125, 0, 10), "left_arm": (-125, 0, -10),
+            "right_leg": (-25, 0, 20), "left_leg": (-30, 0, -20)}),
+    (0.5, {"body": (30, 0, 0), "right_arm": (-95, 0, 14), "left_arm": (-95, 0, -14),
+           "right_leg": (-55, 8, 62), "left_leg": (-55, -8, -62)}),
+    (0.8, {"body": (12, 0, 0), "right_arm": (-55, 0, 6), "left_arm": (-55, 0, -6),
+           "right_leg": (-78, 16, 20), "left_leg": (-78, -16, -20)}),
+    (1.0, RIDE),
+]
+
+# the flying dismount: a shove off the saddle, arms flung wide and legs trailing in the air, then drawn into the tuck the
+# dodge's roll begins from (its LEG_TUCK, ARM_TUCK and BODY_CURL in DodgeRollPose), so the landing takes over unseen
+OFF_LEAP = [
+    (0.0, RIDE),
+    (0.2, {"body": (18, 0, 0), "right_arm": (-70, 0, 20), "left_arm": (-70, 0, -20),
+           "right_leg": (-50, 6, 25), "left_leg": (-50, -6, -25)}),
+    (0.5, {"body": (8, 0, 0), "right_arm": (-35, 0, 55), "left_arm": (-35, 0, -55),
+           "right_leg": (-20, 0, 18), "left_leg": (-8, 0, -18)}),
+    (0.8, {"body": (22, 0, 0), "right_arm": (-62, 0, -14), "left_arm": (-62, 0, 14),
+           "right_leg": (-80, 0, 3), "left_leg": (-80, 0, -3)}),
+    (1.0, {"body": (26, 0, 0), "right_arm": (-69, 0, -14), "left_arm": (-69, 0, 14),
+           "right_leg": (-92, 0, 3), "left_leg": (-92, 0, -3)}),
+]
+
 CLIPS = {
     "on_left": ON_LEFT,
     "on_right": [(t, mirror(p)) for t, p in ON_LEFT],
@@ -137,6 +164,8 @@ CLIPS = {
     "on_pillion": ON_PILLION,
     "off_slip": OFF_SLIP,
     "heave": HEAVE,
+    "on_vault": ON_VAULT,
+    "off_leap": OFF_LEAP,
 }
 
 
