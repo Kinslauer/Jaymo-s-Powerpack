@@ -323,7 +323,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.smoke.SmokePower", "power.smoke.SmokeJet", "power.smoke.SmokeVapour", "power.smoke.SmokeSight", "power.smoke.SmokeSmog", "power.smoke.SmokeAshStorm", "power.smoke.SmokeMoves",
 			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.FastRun", "freerun.Slide", "freerun.moves.RunMoves", "freerun.moves.SkyDive", "freerun.moves.FastSwim", "freerun.moves.Hiding", "stamina.Feathers", "stamina.Dodge", "boxing.Boxing", "boxing.BoxingEvades", "boxing.BoxingTraining", "rig.RigWrecks", "rig.RigSentry", "rig.RigCall", "rig.RigFinish", "rig.RigMoves", "rig.RigHelm", "rig.RigStudy", "backpack.Backpack", "baubles.Baubles", "baubles.Bonds", "baubles.Fairies", "young.Younglings", "armory.Lodged", "armory.Lash", "armory.FlintlockDraw", "armory.GunBlast", "armory.HammerSlam", "armory.KnifeGuard", "aether.structure.OutpostTracker", "aether.dungeon.RuinBoss", "fishing.FishingReal",
 			"water.Dives", "core.MagicMoves", "core.DreamCall", "core.RetiredPowers", "core.trials.PowerTrials", "bonebond.Boneiron",
-			"bits.SoulBurn", "alchemy.picks.SkinDraughts", "alchemy.picks.GivingUp", "alchemy.picks.Pacts",
+			"bits.SoulBurn", "alchemy.picks.SkinDraughts", "alchemy.picks.GivingUp", "alchemy.picks.MettleDraught", "alchemy.picks.Pacts",
 			"alchemy.Flux", "alchemy.Corruption", "alchemy.Knowledge", "alchemy.codex.Scans", "alchemy.flux.Cures", "alchemy.cauldron.CauldronBrewing", "alchemy.healing.HealingBrews", "alchemy.LabEscape", "ground.ThrownRocks",
 		};
 		for (String holder : holders) {

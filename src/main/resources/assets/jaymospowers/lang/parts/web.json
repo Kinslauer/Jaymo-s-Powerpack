@@ -878,5 +878,6 @@
 	"message.jaymospowers.web_symbiote.say.red.execute_tendril.1": "Pull! PULL!",
 	"message.jaymospowers.web_symbiote.say.red.execute_tendril.2": "Squeeze until it pops!",
 	"message.jaymospowers.web_symbiote.say.red.execute_tendril.3": "More arms. More. MORE.",
-	"message.jaymospowers.web_up.nothing": "Nothing up there to hang them from"
+	"message.jaymospowers.web_up.nothing": "Nothing up there to hang them from",
+	"entity.jaymospowers.crater_spider": "Crater Spider"
 }
