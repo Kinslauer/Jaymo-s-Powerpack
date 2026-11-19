@@ -85,7 +85,8 @@ public final class RigMoves {
 			case ARM_LASH -> ARM_LASH_TICKS;
 			case ARM_MIMIC -> ARM_MIMIC_TICKS;
 			case UNIBEAM -> RigUnibeam.CHARGE_TICKS + RigUnibeam.BEAM_TICKS + UNIBEAM_SETTLE;
-			default -> 0;
+			// the back rig's (RigBack)
+			default -> RigBack.length(kind);
 		};
 	}
 

@@ -422,7 +422,10 @@ public final class Skills {
 		AIR_COMBO(Pillar.STRENGTH, 1, 1, 2, 1, 2),
 		// Shadows: a beast stalking you shows on the awareness eye (Senses#feelsStalkers; Stealth 15 does it without). Last,
 		// so no ordinal moves
-		SIXTH_SENSE(Pillar.STEALTH, 1, 1, 5, 9, 1, SHADOWED);
+		SIXTH_SENSE(Pillar.STEALTH, 1, 1, 5, 9, 1, SHADOWED),
+		// the standing backflip (Jaymo's Powers' Acrobatics): the dodge key with Back held alone flips you over backwards in place
+		// of the back roll. On Freerunning under Freerunner; last, so no ordinal moves
+		BACKFLIP(Pillar.STEALTH, 1, 1, 5, 5, 1, FREERUNNER);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;
