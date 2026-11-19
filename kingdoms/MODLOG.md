@@ -15774,3 +15774,14 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - Village fishermen only catch fish with open water within 10 blocks of their barrel. They cast into it, and you see the splash.
 - Kings' gifts of bread to their people and to favoured players (noble, purist, reveler, and the reveler's feast) come out of the realm's storehouse. A bare storehouse means no gift.
 - A realm short of food no longer gets bread from nothing for treasury coin. It sends its trade carts out at once to buy food from a trading partner. When the carts arrive, the partner's spare food is loaded on top of the usual return load, as much as the realm's purse can pay for, and it's paid for in the settling. The food comes home on the road. If the partner has none to spare or the carts are robbed, none comes. Towns' trade carts now bring hides home as well as sending them.
+
+## 0.11.18 (2026-11-19): mounts kneel, lift and lower for their riders (#1888)
+
+- **The kneeling horse, seen**: when a horse kneels for an armoured rider it now really drops: forelegs folded, hind legs tucked, body lowered, head bowed, the saddle going down with it. It rises as soon as the rider is seated. The kneel lasts 60 ticks (it was 30) to cover the whole climb.
+- **Skittish horses**: how likely a horse is to shy from someone climbing on (with Jaymo's Powers) comes from its trust in that rider and its temper: untrusted, hot-tempered horses most, a horse that trusts the rider 70 or more almost never (a hot-tempered one a little, still).
+- **A second rider** climbing up behind the first now climbs (with Jaymo's Powers) and is aimed at the second seat.
+- **War elephants and mammoths** (with Jaymo's Powers): stand at its head and it curls its trunk down, takes you up in it and sets you on its back; anywhere else along its flank, or in heavy armour (20 armour or more), it kneels and you step up its folded foreleg. The kneel is the horses' kneel, now drawn on the elephant too (it sat lowered under the saddle before with its legs still standing, for an armoured rider).
+- **Wind dragons** (with Jaymo's Powers): a tamed dragon you ride lowers its neck for someone at its head, and (Notus, Boreas, Zephyrus, Aetherion) both wings for someone at its side or rump; you climb up. The wingless kinds (Atroxiia, Stegonaut, Varasuchus) and the Kintsugi ones (Eurus, Ignivorus) lower the neck at the head and are climbed from the side like a horse otherwise. One in the air is boarded as before.
+- Without Powers nothing is climbed: riders are seated at once as before.
+- **Freerunner** rank 1's description now also names the running vault into the saddle and the flying dismount off a mount at a canter or gallop (Jaymo's Powers does the moves).
+- Built; not played. The trunk curl and the dragons' neck and wing angles are guessed per model and haven't been seen in game.
