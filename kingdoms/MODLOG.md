@@ -15746,3 +15746,13 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - **Folk who keep seeing the same Pallid**: every villager and townsperson counts the days they've seen a Pallid and the deaths and returns they watched (kept on them). Seen often, or once they've seen one die or come back, they say something over their head in the way of their temperament (all 12, 3 lines each for "seen again", "came back" and "came back yet again", plus children's): the kindhearted are glad, the timid and children run (until they've seen it 3 times), the spiteful jeer, the greedy wonder what it's worth, the devout first call it wrong and later a sign. A return they watch moves MCA hearts by temperament and goes into what they remember (`Recollections.Kind.SAW_DEATHLESS`), so they bring it up and pass it on. A full mask hides it.
 - The Pallid's trait line now says so (`variant.jaymoskingdoms.hollow_base.trait`); new lang part `pallid.json`.
 - Built; not played.
+
+## 0.11.15 (2026-11-19): spiders squash underfoot, die to one blow, and NPCs can hit them (#1886)
+
+- **Squashed underfoot**: a small spider (no taller than half a block: the usual half-size spider, cave spiders, spiny spiders, spiderlings, young ones) dies when anyone walks over it: a player, one of the folk, or a beast of some size (a cow, a horse). Monsters don't squash their own.
+- **Jump and land**: a bigger spider (a netcaster, a mother, a tarantula, a spider at the game's own size) is squashed by a jump that lands on it; small ones too. The brood queen is fought as before.
+- **Blows**: a small spider dies to any one blow, a bare punch included, from a player or anyone else. A bigger one takes at most 2 blows, and a bigger special kind (a tarantula, a netcaster, a mother) at most 5; a harder blow can do it in fewer.
+- Squashed spiders die crushed, so Kitchen bursts them into a few loose legs and no body.
+- **NPCs hit small spiders**: a barbarian's (or any fighter's) slow wind-up let a small spider skitter out of reach before the blow fell. Against one the blow now comes down at once and still finds it a block past the reach.
+- wild/SpiderSquash (tiers, walk-over tick, landing, one blow), mixin/wild/SpiderBlowMixin (hurtServer) and SpiderLandingMixin (causeFallDamage), MobCombat#small/slack.
+- Built; not played.

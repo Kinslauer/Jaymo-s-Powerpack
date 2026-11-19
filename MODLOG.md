@@ -6605,3 +6605,9 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 
 - `Mortality.DEATHLESS` and `Mortality.Deathless`: other mods can name players the grave won't keep. Such a death is never rolled or final; it takes a mid-turn death's long black with the mod's own vignette and two lines, they rise where they fell with no injury, and no sure wake is used up. Only what ends a mid-turn death ends them (head, void, lava, an execution by a player or a boss, the Nether's last chance).
 - Built; not played.
+
+## 0.25.84 (2026-11-19): hit streak count off the action bar with Kingdoms (#1886)
+
+- The "Streak 3", "Streak 4"... line over the hotbar no longer shows on every blow when Jaymo's Kingdoms is there: its "x3 Good" chain counter by the crosshair already counts the same blows, and the line pushed sprain and other messages off the action bar. "Streak 8!" (and 16) for the quick kill still shows, with its sound.
+- combat/HitStreak#KINGDOMS_COUNTS.
+- Built; not played.
