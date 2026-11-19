@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 19:03). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 19:07). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -25,19 +25,14 @@ kanban-plugin: board
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
 - [ ] [[Inbox/harness-creeds-and-lands|harness-creeds-and-lands]] · ☀️ Apollo · #1728 · in-review
 - [ ] [[Inbox/rig-beetle-2-guns|rig-beetle-2-guns]] · ☀️ Apollo · #1749 · in-review
-- [ ] [[Inbox/lanterns-01-crime-small|lanterns-01-crime-small]] · lanterns-01-crime-small · #1751 · in-review
-- [ ] [[Inbox/lanterns-02-space-small|lanterns-02-space-small]] · lanterns-02-space-small · #1753 · in-review
-- [ ] [[Inbox/lanterns-03-patrol-small|lanterns-03-patrol-small]] · lanterns-03-patrol-small · #1754 · in-review
 - [ ] [[Inbox/lanterns-06-space-medium|lanterns-06-space-medium]] · lanterns-06-space-medium · #1766 · in-review
 - [ ] [[Inbox/lanterns-07-talk-chat|lanterns-07-talk-chat]] · lanterns-07-talk-chat · #1767 · in-review
 - [ ] [[Inbox/rig-beetle-4-flight|rig-beetle-4-flight]] · ☀️ Apollo · #1765 · in-review
 - [ ] [[Inbox/lanterns-08-dream|lanterns-08-dream]] · lanterns-08-dream · #1769 · in-review
 - [ ] [[Inbox/lanterns-09-talk-typed|lanterns-09-talk-typed]] · lanterns-09-talk-typed · #1770 · in-review
-- [ ] [[Inbox/lanterns-04-crime-word|lanterns-04-crime-word]] · lanterns-04-crime-word · #1763 · in-review
 - [ ] [[Inbox/lanterns-05-patrol-law|lanterns-05-patrol-law]] · lanterns-05-patrol-law · #1764 · in-review
 - [ ] [[Inbox/lanterns-10-orbit|lanterns-10-orbit]] · lanterns-10-orbit · #1772 · in-review
 - [ ] [[Inbox/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · rig-beetle-5-the-mind · #1774 · in-review
-- [ ] [[Inbox/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]] · ☀️ Apollo · #1776 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 
 
@@ -49,19 +44,20 @@ kanban-plugin: board
 - [ ] [[Agents/fishing-fire-and-crates|fishing-fire-and-crates]] · 💻 Odysseus · stalled
 - [ ] [[Agents/forest-fire-pack|forest-fire-pack]] · 💻 Odysseus · stalled
 - [ ] [[Agents/future-gun-gear|future-gun-gear]] · 💻 Odysseus · blocked
+- [ ] [[Agents/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]] · 💻 Odysseus · stalled
 
 
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]]
+- [x] [[Inbox/Done/lanterns-04-crime-word|lanterns-04-crime-word]]
+- [x] [[Inbox/Done/lanterns-03-patrol-small|lanterns-03-patrol-small]]
+- [x] [[Inbox/Done/lanterns-02-space-small|lanterns-02-space-small]]
+- [x] [[Inbox/Done/lanterns-01-crime-small|lanterns-01-crime-small]]
 - [x] [[Inbox/Done/rig-beetle-1-arm-forms|rig-beetle-1-arm-forms]]
 - [x] [[Inbox/Done/harness-helms-finishes-crests|harness-helms-finishes-crests]]
 - [x] [[Inbox/Done/harness-barding|harness-barding]]
-- [x] [[Inbox/Done/wither-reincarnated-fight|wither-reincarnated-fight]]
-- [x] [[Inbox/Done/weapon-hooks-and-breaks|weapon-hooks-and-breaks]]
-- [x] [[Inbox/Done/labyrinth-builders-craft|labyrinth-builders-craft]]
-- [x] [[Inbox/Done/inferno-fire|inferno-fire]]
-- [x] [[Inbox/Done/fishing-fire-and-crates|fishing-fire-and-crates]]
 
 
 %% kanban:settings
