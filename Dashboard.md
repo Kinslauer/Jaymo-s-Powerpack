@@ -5,6 +5,9 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## Waiting on you
 
+**Ready to merge** (say "merge" in the project chat):
+- [[Inbox/plan-ghosts-litematica-tools|plan-ghosts-litematica-tools]] · PR #1851 · ready
+
 **Questions for you:**
 - [[Inbox/class-trees-plan|class-trees-plan]] · 2026-11-19 20:22 Parked (not for a bot): waits on Andy fleshing out the Monk/Paladin/Cleric/Druid/Warlock trees. Raised; don't raise again.
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
@@ -17,7 +20,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-33 waiting for a bot, 2 being built, 1 in review: see [[Kanban]].
+33 waiting for a bot, 2 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
