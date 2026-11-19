@@ -4,12 +4,16 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 13:35). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 13:50). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · open
+- [ ] [[Inbox/npc-fights-1-brawler|npc-fights-1-brawler]] · for 💻 Odysseus · open
+- [ ] [[Inbox/npc-fights-2-strings|npc-fights-2-strings]] · for 💻 Odysseus · open
+- [ ] [[Inbox/npc-fights-3-clashes|npc-fights-3-clashes]] · for 💻 Odysseus · open
+- [ ] [[Inbox/npc-fights-4-rivals|npc-fights-4-rivals]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-a-incendium-castle-start|vanilla-plus-a-incendium-castle-start]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-b-stellarity-end-enderscape-band|vanilla-plus-b-stellarity-end-enderscape-band]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-c-back-slot|vanilla-plus-c-back-slot]] · for 💻 Odysseus · open
@@ -30,10 +34,6 @@ kanban-plugin: board
 - [ ] [[Inbox/village-mods-7-ctov-tidal-towns|village-mods-7-ctov-tidal-towns]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
-- [ ] [[Inbox/npc-fights-1-brawler|npc-fights-1-brawler]] · for 💻 Odysseus · open
-- [ ] [[Inbox/npc-fights-2-strings|npc-fights-2-strings]] · for 💻 Odysseus · open
-- [ ] [[Inbox/npc-fights-3-clashes|npc-fights-3-clashes]] · for 💻 Odysseus · open
-- [ ] [[Inbox/npc-fights-4-rivals|npc-fights-4-rivals]] · for 💻 Odysseus · open
 
 
 ## Being built
