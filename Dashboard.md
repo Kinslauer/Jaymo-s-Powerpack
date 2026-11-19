@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 22:31). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 22:34). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -13,11 +13,11 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## Stuck
 
-Nothing stuck.
+- [[Agents/wither-model|wither-model]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-33 waiting for a bot, 3 being built, 2 in review: see [[Kanban]].
+33 waiting for a bot, 2 being built, 3 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
@@ -87,7 +87,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 ## Health
 
-2 problems in the notes: [[Health]].
+1 problem in the notes: [[Health]].
 
 ## Last week
 
