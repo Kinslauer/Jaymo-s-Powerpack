@@ -1,9 +1,9 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 18:32). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 18:33). Don't edit. -->
 # Vault health
 
 Problems in the live notes, found on every sync. Nothing here is fixed by itself: whoever reads it (the coordinator's hourly check, a bot, Andy) fixes the note, and the line goes away on the next sync. `python tools/vault_sync.py --health` prints the same list.
 
-**22 problems.**
+**21 problems.**
 
 ## Statuses the pipeline doesn't know
 
@@ -15,14 +15,6 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 - [[Agents/story-x-mark|story-x-mark]]: `status: (none)` (known: blocked, done, in-review, merged, ready, running, sent, stalled)
 - [[Agents/zfighter-aura-rework|zfighter-aura-rework]]: `status: in-progress` (known: blocked, done, in-review, merged, ready, running, sent, stalled)
 
-## Missing PR numbers
-
-- [[Agents/claude-building-library|claude-building-library]]: in review with no `pr:`.
-- [[Agents/epic-fight-animation-research|epic-fight-animation-research]]: in review with no `pr:`.
-- [[Agents/realistic-water-trial|realistic-water-trial]]: in review with no `pr:`.
-- [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]]: `ready` with no `pr:`.
-- [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]]: `ready` with no `pr:`.
-
 ## Stalled agent notes
 
 - [[Agents/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]]: stalled, last change 2026-11-13. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
@@ -32,6 +24,13 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 - [[Agents/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]]: stalled, last change 2026-11-18. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/scrying-orb|scrying-orb]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/sky-lands-aether-biomes|sky-lands-aether-biomes]]: stalled, last change 2026-11-16. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+
+## Missing PR numbers
+
+- [[Agents/epic-fight-animation-research|epic-fight-animation-research]]: in review with no `pr:`.
+- [[Agents/realistic-water-trial|realistic-water-trial]]: in review with no `pr:`.
+- [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]]: `ready` with no `pr:`.
+- [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]]: `ready` with no `pr:`.
 
 ## Tasks for nobody
 
