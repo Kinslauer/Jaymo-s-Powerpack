@@ -22,6 +22,7 @@ Nothing stuck.
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1867 symbiote - a takeover no longer freezes a host who isn't a web slinger, and a blob that left you runs away (Powers, 2026-11-19)
 - [ ] #1865 Gnomes: real gnomes with their own model, gardens and temper (Kingdoms, 2026-11-19)
 - [ ] #1864 Blackouts wake you where you were taken (Powers, Kingdoms, 2026-11-19)
 - [ ] #1863 goblins speak broken English (Kingdoms, 2026-11-19)
@@ -81,8 +82,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1799 drifting flotsam: ripple spots on rivers and the sea (Powers, Kingdoms, Kitchen, 2026-11-19)
 - [ ] #1798 the hooded cloak leans in the world's wind (Powers, Kingdoms, 2026-11-19)
 - [ ] #1797 drinks and kitchen - vines, press, vintage, tea, smoke chips, black wine (Kitchen, 2026-11-19)
-- [ ] #1796 Vanilla+ mods join the pack (Powers, 2026-11-19)
-- …and 244 older ones.
+- …and 245 older ones.
 
 ## Health
 
