@@ -65,6 +65,10 @@ public final class Captors {
 		if (by == null || !sentient(by)) {
 			return null;
 		}
+		if (StoryHard.shackled(player) && !PowersCompat.waking(player)) {
+			// (one already in chains who blacks out, a faint or a knock-out, isn't carried off to another camp: they stay put)
+			return null;
+		}
 		if (CaptiveConduct.executed(player)) {
 			// (Andy, 2026-11-14) a captive their captors put to death isn't taken again: they wake as anyone left for dead
 			return null;

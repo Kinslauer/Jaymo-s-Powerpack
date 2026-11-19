@@ -184,6 +184,8 @@ public final class Wounds {
 		HealStruggle.register();
 		// (0.20.26) death by cause: final, or left for dead with an injury that fits (after the downed state, which it follows)
 		Mortality.register();
+		// (Andy, 2026-11-19) blacked out with captors, guards or spiders round: they open their eyes where they were taken
+		TakenOut.register();
 		// Andy's picks E3 and E5: a minute for a reviver before a final death, and Limbo beside Reincarnate
 		Revival.register();
 		Limbo.register();
