@@ -15379,3 +15379,12 @@ Hackers 'n Slashers patch 3, the town half (Andy: "you should see the blacksmith
 - **Kept faces**: when a life ends for good (the reincarnation that resets everything), the new life story opens with "<name> is gone. Keep the face?". Keeping saves a character preset on your computer with that life's MCA look and name and its story picks. On a later life, the skip ask offers "Wear a kept face: <name>", which skips the story with those picks and puts the face on before MCA's creator opens (everything can still be changed there). Loading the preset from the creator's Presets page works too. (`Doppelgangers`, `CharacterPresets.fromOffer/lastFace`, `McaBridge.faceOf/wearFace`)
 - **"You look familiar"**: every MCA villager who remembered the old life keeps its face when it forgets you. The first time someone wearing that face talks to them, there's an even chance they say so in a speech bubble (6 lines, e.g. "Have we met? ...No. No, we can't have."), once, and never more. (`Doppelgangers.spoken`, `McaBridge.forget`)
 - Built; not played. Not checked in game: MCA's open creator refreshing to a face loaded from its Presets page.
+
+## 0.10.76 (2026-11-19): heritage panels: no Z Fighter lines, no semicolons, Verdant shunned, hidden Bio-built (#1826)
+
+- **Heritage and birthplace panels** (heritage screen, life story's "Where were you born?"): a heritage's Z Fighter extras are left out (`HeritageScreen.withoutZFighter`). The Bio-built's panel only says how it wakes, on both screens.
+- **Semicolons**: a picker panel's text starts a new paragraph at each semicolon (outside brackets), and the semicolon is no longer drawn (`PickerLayout.paragraphs`).
+- **Shunned lines** name no blood any more: they said "Sylvan blood" on the Emberborn, Frostborn and every other heritage of that degree (and "Warrior-born", "Stoneborn", "Tideborn" on theirs); now "your blood" / "your kind".
+- **Verdant**: a new weakness on their card, "Shunned, quietly": folk think less of them but deal with them anyway. Card line only; prices and trust are unchanged.
+- **Birthplace lines**: each birthplace's short line is alliterative now (Andy's own for the city of scholars), so it no longer repeats the title.
+- Built; not played.
