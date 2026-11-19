@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 13:59). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 09:38). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -19,21 +19,31 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 ## Stuck
 
 - [[Agents/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]]: stalled, last change 2026-11-13. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/forest-fire-pack|forest-fire-pack]]: stalled, last change 2026-11-16. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/forest-fire-pack|forest-fire-pack]]: stalled, last change 2026-11-15. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hands-on-cooking-realtime|hands-on-cooking-realtime]]: stalled, last change 2026-11-17. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/harness-upkeep|harness-upkeep]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]]: stalled, last change 2026-11-18. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/scrying-orb|scrying-orb]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/sky-lands-aether-biomes|sky-lands-aether-biomes]]: stalled, last change 2026-11-16. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/scrying-orb|scrying-orb]]: stalled, last change 2026-11-18. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/sky-lands-aether-biomes|sky-lands-aether-biomes]]: stalled, last change 2026-11-15. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-26 waiting for a bot, 1 being built, 0 in review: see [[Kanban]].
+23 waiting for a bot, 0 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1836 NPC fights 2: strings, chases and ki for tyrants, Patrolmen and Z Fighter gifted folk (Powers, 2026-11-19)
+- [ ] #1834 NPC fights 3: trading blows, beam struggles, impact, soft blocks, power-ups (Powers, 2026-11-19)
+- [ ] #1833 no Animal Dictionary on first join; UI tips as you meet things (Powers, Kingdoms, 2026-11-19)
+- [ ] #1832 NPC fights 1b: feints and Patrol ranks (Powers, 2026-11-19)
+- [ ] #1831 The last hold gives a breather; gifted folk leave the downed alone (Powers, Kingdoms, 2026-11-19)
+- [ ] #1830 Sounds no longer stay quieter after the Rig's dip or Z Fighter deafness (Powers, Kingdoms, 2026-11-19)
+- [ ] #1829 NPC fights 4: tyrants vs the Patrol (sworn foes, showdowns) (Powers, 2026-11-19)
+- [ ] #1828 Shifting Wares no longer crashes the server on VillagersPlus professions (Powers, 2026-11-19)
+- [ ] #1827 hero add-on picks - web, symbiote, gear, Chrono, Cryo, size draughts (Powers, Kingdoms, 2026-11-19)
+- [ ] #1826 heritage panels: no Z Fighter lines, no semicolons, Verdant shunned, hidden Bio-built (Kingdoms, 2026-11-19)
 - [ ] #1825 NPC fights 1: the fighter brain (tyrants, Patrolmen and gifted folk fight in the air, dodge, guard and parry) (Powers, 2026-11-19)
 - [ ] #1824 life story: leave it all to fate, and kept faces (doppelgangers) (Kingdoms, 2026-11-19)
 - [ ] #1822 Rangers read droppings (Kingdoms, Kitchen, 2026-11-19)
@@ -84,21 +94,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1753 Space: the star map's atlas, and the ringed giant in the night sky (Powers, 2026-11-19)
 - [ ] #1751 Crime: sleepers woken, suspects watched (Kingdoms, 2026-11-19)
 - [ ] #1749 Rig patch 2: guns that unfold (Powers, 2026-11-19)
-- [ ] #1746 Rig arm forms (Powers, 2026-11-19)
-- [ ] #1775 Teleports no longer lost on a ride that already ended (Powers, 2026-11-18)
-- [ ] #1771 holy books - each patron's sigil on its book; a stored book is no broken commandment (Kingdoms, 2026-11-18)
-- [ ] #1768 Oversized drops split into full stacks (Powers, 2026-11-18)
-- [ ] #1761 worldgen no longer reads or writes past its chunk edge (Powers, Kingdoms, 2026-11-18)
-- [ ] #1760 Blood decals draw under Iris shaders (Powers, 2026-11-18)
-- [ ] #1758 Curing blight and seeing someone turn change how villagers see you (Kingdoms, 2026-11-18)
-- [ ] #1757 TaCZ out of JEI and the creative menu (Powers, 2026-11-18)
-- [ ] #1755 Conjoined twins show for joining players (Powers, Kingdoms, Kitchen, 2026-11-18)
-- [ ] #1750 picker lists show 3-4 big boxes, info text in paragraphs (Kingdoms, 2026-11-18)
-- …and 209 older ones.
+- …and 219 older ones.
 
 ## Health
 
-21 problems in the notes: [[Health]].
+19 problems in the notes: [[Health]].
 
 ## Last week
 
