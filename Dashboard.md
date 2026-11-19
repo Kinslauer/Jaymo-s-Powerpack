@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 07:21). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 12:30). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -19,22 +19,25 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 ## Stuck
 
 - [[Agents/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]]: stalled, last change 2026-11-13. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/forest-fire-pack|forest-fire-pack]]: stalled, last change 2026-11-15. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/forest-fire-pack|forest-fire-pack]]: stalled, last change 2026-11-16. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hands-on-cooking-realtime|hands-on-cooking-realtime]]: stalled, last change 2026-11-17. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/harness-upkeep|harness-upkeep]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/powerborne-heroes|powerborne-heroes]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]]: stalled, last change 2026-11-18. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/scrying-orb|scrying-orb]]: stalled, last change 2026-11-18. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/sky-lands-aether-biomes|sky-lands-aether-biomes]]: stalled, last change 2026-11-15. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/scrying-orb|scrying-orb]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/sky-lands-aether-biomes|sky-lands-aether-biomes]]: stalled, last change 2026-11-16. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-23 waiting for a bot, 0 being built, 4 in review: see [[Kanban]].
+23 waiting for a bot, 0 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1815 edges and sparks - blades dull, grindstones, sparks that catch, armour that rings (Powers, Kingdoms, 2026-11-19)
+- [ ] #1814 Hackers 'n Slashers 4: a shove for everyone, and weapon kinds' on-hit effects (Powers, 2026-11-19)
+- [ ] #1813 crits - riposte kinds, crit cue, camera punch, heavy crit ring, combat attributes (Powers, 2026-11-19)
+- [ ] #1812 Stealth and posture: cover, backstabs, a fighter's stance (Kingdoms, 2026-11-19)
 - [ ] #1811 A harness piece with no model no longer crashes the game (Kingdoms, 2026-11-19)
 - [ ] #1810 NPC sea ships pay for their powder and shot (Kingdoms, 2026-11-19)
 - [ ] #1809 metal-hit sparks - blows, strikes and arrows on metal (Powers, 2026-11-19)
@@ -91,15 +94,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1739 only Epic towns are crowned: no kingdom seated on a lone castle (Kingdoms, 2026-11-18)
 - [ ] #1738 survivors wake 500-1000 blocks from where they fell (Powers, Kingdoms, 2026-11-18)
 - [ ] #1730 light armour: the world wears it (Powers, Kingdoms, Kitchen, 2026-11-18)
-- [ ] #1729 Mailed and studded leather, and what mail is good at (Powers, Kitchen, 2026-11-18)
-- [ ] #1724 Story choices: big boxes with a hand-drawn X, no Ash Whisperer clerics (Kingdoms, 2026-11-18)
-- [ ] #1722 menu redesign: title cards, dread vignette, scouter card, colour picker (Powers, Kingdoms, Kitchen, 2026-11-18)
-- [ ] #1712 NPC shooters lean round corners (Kingdoms, 2026-11-18)
-- …and 198 older ones.
+- …and 202 older ones.
 
 ## Health
 
-20 problems in the notes: [[Health]].
+21 problems in the notes: [[Health]].
 
 ## Last week
 
