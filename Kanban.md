@@ -35,6 +35,7 @@ kanban-plugin: board
 - [ ] [[Inbox/zfighter-aura-rework|zfighter-aura-rework]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-gaps-1-stats|zfighter-gaps-1-stats]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-gaps-2-power|zfighter-gaps-2-power]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
