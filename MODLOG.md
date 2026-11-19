@@ -6199,3 +6199,10 @@ Built; not played in game.
 - Its mod id `alexsmobs` leaves `removedIdsFromProfile`, so Build Modpack no longer moves it out. Citadel and the old port's jars still go.
 - The old port (0.8.82) left in 0.8.107 because its models drew black slabs and streaks with Iris shaders. This is a different port, but worth a look with shaders on.
 - Not played.
+
+## 0.25.41 (2026-11-19): Vanilla+ mods join the pack (#1796)
+
+- From Andy's Vanilla+ list, shipped unchanged: **Break Free** (keep breaking a block when you switch items), **Shared Advancements** (advancements count for your team or everyone), **Horse Expert** (a horse's real speed, jump and health), **VillagersPlus** with its library VillagersTradingPlus (new villager jobs, trades and workstations), **MasterCutter** (500+ stonecutter recipes, woodcutting and un-crafting), **Vanilla Fireflies**, **qraftyfied: Structures** and **Vanilla Constructs** (100+ small vanilla-style features).
+- Break Free, VillagersPlus, MasterCutter, Vanilla Fireflies and Vanilla Constructs have no CurseForge file, so they're in `packModsNoCf` (server, profile and dev game, not the CurseForge import zip).
+- `checkPackMods` passes (488 mods, loader 0.19.5). Not played: the overlaps with MCA villagers, the Saw recipes and Effectual's fireflies haven't been looked at in game.
+- Incendium is held back for its own patch: its Nether file lists its biomes outright, so Fabric's biome API (which adds our Gloam, Ash and Abyss) would have nothing to add them to and the demons' country would stop generating.
