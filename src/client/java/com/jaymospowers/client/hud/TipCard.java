@@ -58,6 +58,11 @@ public final class TipCard {
 		}
 	}
 
+	/** Whether a card is up or waiting. */
+	public static boolean busy() {
+		return showing != null || !WAITING.isEmpty();
+	}
+
 	private static void draw(GuiGraphicsExtractor graphics, DeltaTracker delta) {
 		Minecraft minecraft = Minecraft.getInstance();
 		long now = Util.getMillis();

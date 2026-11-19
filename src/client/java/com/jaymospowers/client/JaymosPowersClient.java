@@ -62,6 +62,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.hud.MeterFeed.init();
 		com.jaymospowers.client.hud.TipCard.init();
 		com.jaymospowers.client.hud.PowerTips.init();
+		// the UI tutorial: a card the first time each part of the screen shows
+		com.jaymospowers.client.hud.UiTips.init();
 		com.jaymospowers.client.hud.TitleCard.init();
 		com.jaymospowers.client.hud.DreadVignette.init();
 		com.jaymospowers.client.hud.MoveHints.init();
