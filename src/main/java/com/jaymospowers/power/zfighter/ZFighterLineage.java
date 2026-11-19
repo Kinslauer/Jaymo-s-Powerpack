@@ -479,7 +479,10 @@ public final class ZFighterLineage {
 
 	private static void become(ServerPlayer player, int lineage) {
 		player.setAttached(LINEAGE, lineage);
-		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_lineage",
+		// Earthling is also a heritage: one whose heritage has no line of its own fights the Earthling way, but isn't told
+		// "You are Earthling."
+		boolean ownLine = race(player) == lineage;
+		player.sendSystemMessage(Component.translatable(ownLine ? "message.jaymospowers.zfighter_lineage" : "message.jaymospowers.zfighter_lineage_common",
 			Component.translatable("lineage.jaymospowers.zfighter." + KEYS[lineage])).withStyle(ChatFormatting.GOLD));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 0.8F,
 			1.0F);
