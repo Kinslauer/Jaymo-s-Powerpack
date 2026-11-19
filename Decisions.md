@@ -766,3 +766,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-18: Andy is doing the voices himself (Google TTS tool, #1780); the Rig Mind's spoken lines (rig-5 md-voice) wait on that. (Andy, PC session)
 
 - 2026-11-19 (guard ranks thread): basic guard fallback is leather and mail, every guard wears the harness over it; recruits get stock kit only and wear what the player gives them; dead guards' and enemies' gear is salvaged to stores and worn as spoils (some brag). Andy sorts what wears what on https://claude.ai/artifact/U52b4G6NHiZ8NuV1drJmo5.
+
+- 2026-11-19 (guard wardrobe): village and haven guards stay militia/soldier, but "villagers and haven folk will more likely have powers and use those to fight to make up for the fact they have less skilled soldiers". Built: guards weighed once more, 1 in 5 (haven 1 in 3), fight openly (PR #1791).
