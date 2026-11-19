@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 16:48). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 16:52). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -47,13 +47,13 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · ☀️ Apollo · #1787 · changes · fixing review notes
+- [ ] [[Inbox/heritage-paths|heritage-paths]] · 🪶 Quill · #1853 · writing
 
 
 ## In review
 
 - [ ] [[Inbox/plan-ghosts-litematica-tools|plan-ghosts-litematica-tools]] · plan-ghosts-litematica-tools · #1851 · in-review
 - [ ] [[Inbox/smoothmount-1-climb-on-off|smoothmount-1-climb-on-off]] · ☀️ Apollo · #1869 · in-review
-- [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · in-review
 - [ ] [[Agents/reason-title|reason-title]] · 💻 Odysseus · #1872 · in-review
 
 
