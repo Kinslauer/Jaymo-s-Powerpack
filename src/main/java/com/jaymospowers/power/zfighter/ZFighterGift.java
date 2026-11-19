@@ -16,6 +16,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -37,6 +38,9 @@ final class ZFighterGift implements GiftKit {
 	static final int FLURRY_BLOWS = 5, FLURRY_COOLDOWN = 120;
 	static final float FLURRY_DAMAGE = 1.5F;
 	/** The palm: its reach, damage, throw (horizontal, up) and cooldown. */
+	/** The string move, the short beam, the seeking volley and the charged blast: reach and cooldowns (ticks), and a gifted villager's blow when they have no attack attribute. */
+	static final double STRING_RANGE = 3.0, GIFT_FISTS = 6.0;
+	static final int STRING_COOLDOWN = 140, BEAM_COOLDOWN = 400, VOLLEY_COOLDOWN = 220, CHARGE_COOLDOWN = 350;
 	static final double PALM_RANGE = 3.0, PALM_THROW = 1.4, PALM_LIFT = 0.3;
 	static final float PALM_DAMAGE = 3.0F;
 	static final int PALM_COOLDOWN = 100;
@@ -85,6 +89,10 @@ final class ZFighterGift implements GiftKit {
 	@Override
 	public List<Move> moves() {
 		return List.of(
+			Move.of("string", Kind.CLOSE, STRING_COOLDOWN, 0.0, STRING_RANGE, ZFighterGift::string),
+			Move.of("beam", Kind.STRIKE, BEAM_COOLDOWN, 6.0, 20.0, ZFighterGift::beam),
+			Move.of("seeking volley", Kind.STRIKE, VOLLEY_COOLDOWN, 4.0, 22.0, ZFighterGift::volley),
+			Move.of("charged blast", Kind.STRIKE, CHARGE_COOLDOWN, 8.0, 22.0, ZFighterGift::charge),
 			Move.of("palm", Kind.CLOSE, PALM_COOLDOWN, 0.0, PALM_RANGE, ZFighterGift::palm),
 			Move.of("flurry", Kind.CLOSE, FLURRY_COOLDOWN, 0.0, FLURRY_RANGE, ZFighterGift::flurry),
 			Move.of("blast", Kind.STRIKE, BLAST_COOLDOWN, 2.0, BLAST_RANGE, ZFighterGift::blast),
@@ -129,6 +137,27 @@ final class ZFighterGift implements GiftKit {
 		// separate blows would be soaked up by the invulnerable frames, so they land together
 		foe.hurtServer(level, level.damageSources().mobAttack(caster), FLURRY_DAMAGE * FLURRY_BLOWS);
 		return true;
+	}
+
+	/** (NPC fights 2) The shared strings and ki attacks ({@link ZFighterStrings}, {@link ZFighterNpcKi}): a blow string, a short beam, a seeking volley, a charged blast. */
+	private static double fists(PathfinderMob mob) {
+		return mob.getAttributes().hasAttribute(Attributes.ATTACK_DAMAGE) ? mob.getAttributeValue(Attributes.ATTACK_DAMAGE) : GIFT_FISTS;
+	}
+
+	private static boolean string(ServerLevel level, PathfinderMob caster, LivingEntity foe, Gifted.Gift gift) {
+		return !ZFighterStrings.busy(caster) && ZFighterStrings.start(level, caster, foe, ZFighterStrings.Cfg.gifted(fists(caster), BLAST_COLOR));
+	}
+
+	private static boolean beam(ServerLevel level, PathfinderMob caster, LivingEntity foe, Gifted.Gift gift) {
+		return !ZFighterStrings.busy(caster) && ZFighterNpcKi.fireBeam(level, caster, foe, fists(caster), WAVE_COLOR);
+	}
+
+	private static boolean volley(ServerLevel level, PathfinderMob caster, LivingEntity foe, Gifted.Gift gift) {
+		return !ZFighterStrings.busy(caster) && ZFighterNpcKi.volley(level, caster, foe, fists(caster), BLAST_COLOR);
+	}
+
+	private static boolean charge(ServerLevel level, PathfinderMob caster, LivingEntity foe, Gifted.Gift gift) {
+		return !ZFighterStrings.busy(caster) && ZFighterNpcKi.charge(level, caster, foe, fists(caster), WAVE_COLOR);
 	}
 
 	private static boolean palm(ServerLevel level, PathfinderMob caster, LivingEntity foe, Gifted.Gift gift) {

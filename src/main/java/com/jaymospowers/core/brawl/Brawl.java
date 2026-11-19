@@ -313,6 +313,12 @@ public final class Brawl {
 		return BeamClash.clashing(mob) || PowerUp.holding(mob);
 	}
 
+	/** Whether {@code mob}'s power flies (the brain can take it up after a foe in the air). */
+	public static boolean flier(Mob mob) {
+		State s = STATES.get(mob);
+		return s != null && s.profile.flies();
+	}
+
 	/** {@code mob}'s rank (0 to 1), or 0 if it isn't fighting. */
 	public static float rank(Mob mob) {
 		State s = STATES.get(mob);

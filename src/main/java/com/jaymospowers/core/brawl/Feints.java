@@ -55,7 +55,8 @@ public final class Feints {
 	static final int PUNISH_DELAY = 1;
 	// ---- the feints they throw ----
 	/** From this rank they feint; the chance each check (times rank), the checks' spacing, the gap between feints (ticks). */
-	static final float FEINT_RANK = 0.4F, FEINT_CHANCE = 0.3F;
+	public static final float FEINT_RANK = 0.4F;
+	static final float FEINT_CHANCE = 0.3F;
 	static final int FEINT_CHECK = 4, FEINT_GAP = 90, FEINT_JITTER = 60;
 	static final double FEINT_REACH = 3.5;
 	/** The real poke follows after this many ticks, for this share of their blow. */
@@ -199,6 +200,17 @@ public final class Feints {
 		t.foe = foe;
 		mob.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.HOSTILE, 0.6F, 1.3F);
+		if (foe instanceof ServerPlayer player) {
+			ZFighterGuard.feinted(player);
+		}
+	}
+
+	/** A swing at {@code foe} that lands nothing, to bait its guard or parry (a string's feint blow throws it): a player's Z Fighter guard is baited too. */
+	public static void feintAt(Mob mob, LivingEntity foe) {
+		mob.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+		if (mob.level() instanceof ServerLevel level) {
+			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.HOSTILE, 0.6F, 1.3F);
+		}
 		if (foe instanceof ServerPlayer player) {
 			ZFighterGuard.feinted(player);
 		}
