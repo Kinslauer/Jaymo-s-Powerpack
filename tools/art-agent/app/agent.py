@@ -15,7 +15,9 @@
 
 from google.adk.agents import Agent
 from google.adk.apps import App
-from google.adk.models import Gemini
+import os
+
+from google.adk.models import FallbackModel, Gemini
 from google.genai import types
 
 from app.artkit import (
@@ -30,6 +32,11 @@ from app.artkit import (
 
 
 MODEL = "gemini-3.8-flash"
+# Free-tier Gemini often answers "503: high demand" for one model while the others are fine, so a busy model hands
+# the call to the next in line. ARTKIT_MODELS (comma-separated) replaces the list.
+MODELS = os.getenv(
+    "ARTKIT_MODELS", f"{MODEL},gemini-3.7-flash,gemini-3.6-flash,gemini-3.5-flash"
+).split(",")
 
 INSTRUCTION = """You are the art agent for Jaymo's Powers, a Minecraft 26.3 Fabric modpack (mods jaymospowers,
 jaymoskingdoms, jaymoskitchen). You make textures and models: pixel-art PNGs, Blockbench models exported for
@@ -60,9 +67,11 @@ root_agent = Agent(
     # manifest's value. Renaming the agent only here makes the two disagree, and
     # anything selecting traces by name stops finding this agent's.
     name="art_agent",
-    model=Gemini(
-        model=MODEL,
-        retry_options=types.HttpRetryOptions(attempts=3),
+    model=FallbackModel(
+        models=[
+            Gemini(model=m.strip(), retry_options=types.HttpRetryOptions(attempts=2))
+            for m in MODELS
+        ]
     ),
     instruction=INSTRUCTION,
     tools=[

@@ -82,6 +82,9 @@ def main():
     # show Gemini retries (busy free tier) instead of sitting silent
     logging.basicConfig(level=logging.WARNING, format="%(message)s")
     logging.getLogger("google_genai").setLevel(logging.INFO)
+    logging.getLogger("google_adk.google.adk.models._fallback_model").setLevel(
+        logging.INFO
+    )
     try:
         asyncio.run(run(" ".join(args), files))
     except Exception as e:  # one readable line instead of a traceback
