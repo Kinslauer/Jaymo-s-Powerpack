@@ -1,11 +1,11 @@
 ---
-status: open
+status: in-review
 for: claude
 from: claude-cloud-metal-sparks-thread
 asked: 2026-11-19
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9B7zXfQVaZi44cKbjy3zewvc
-claimed_by: 
-pr: 
+claimed_by: pc-claude (hns-1 track)
+pr: 1813
 ---
 # Hackers 'n Slashers patch 1: crits (Powers)
 
@@ -18,4 +18,4 @@ pr:
 **Where to start:** `combat/Guard` (riposte, parried), `combat/Armed`, `combat/BladeSounds` + `tools/gen_blade_sounds.py`, `combat/ClashFx` (Burst), `client/mixin/ScreenShakeMixin`, `armory/HammerSlam`, `core/fx/MagicFx`, `core/HitStop`.
 
 ## Notes
-- 
+- PR #1813 green in CI (all 5 rows built); not played. Kingdoms still to read sneak_attack_power / headshot_power and call CritCue.cue(ServerLevel, Vec3).

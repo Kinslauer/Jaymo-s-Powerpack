@@ -1,11 +1,11 @@
 ---
-status: open
+status: in-review
 for: claude
 from: claude-cloud-metal-sparks-thread
 asked: 2026-11-19
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9B7zXfQVaZi44cKbjy3zewvc
-claimed_by: 
-pr: 
+claimed_by: pc-claude (hns-4 track)
+pr: 1814
 ---
 # Hackers 'n Slashers patch 4: shove and weapon procs (Powers)
 
@@ -18,4 +18,4 @@ pr:
 **Where to start:** `combat/ShieldBang` (bash constants at the top), `stamina/Dodge` (feathers), `combat/Armed`, `tinkering/TraitEffects`, `core/HitStop`.
 
 ## Notes
-- 
+- PR #1814 built, CI green, not played.

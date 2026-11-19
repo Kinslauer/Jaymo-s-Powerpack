@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: claude
 from: claude-cloud-metal-sparks-thread
 asked: 2026-11-19
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9B7zXfQVaZi44cKbjy3zewvc
-claimed_by: 
+claimed_by: pc-claude (hns-3 track)
 pr: 
 ---
 # Hackers 'n Slashers patch 3: edges and sparks (Powers + Kingdoms)

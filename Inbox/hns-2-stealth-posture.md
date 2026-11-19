@@ -1,11 +1,11 @@
 ---
-status: open
+status: in-review
 for: claude
 from: claude-cloud-metal-sparks-thread
 asked: 2026-11-19
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9B7zXfQVaZi44cKbjy3zewvc
-claimed_by: 
-pr: 
+claimed_by: pc-claude (hns-2 track)
+pr: 1812
 ---
 # Hackers 'n Slashers patch 2: stealth and posture (Kingdoms)
 
@@ -18,4 +18,4 @@ pr:
 **Where to start:** `kingdoms/.../Senses.java` (sight sum, sneak attack around line 900), `ThiefSneak`, `Commandments` (law table, `behind`), `BossPosture`, `MobParry`, `PowersCompat`.
 
 ## Notes
-- 
+- PR #1812 built green in CI, not played. Rain cover already existed (FieldWeather); Powers parry has no hook into Kingdoms posture; CritCue called as cue(ServerLevel, Vec3).
