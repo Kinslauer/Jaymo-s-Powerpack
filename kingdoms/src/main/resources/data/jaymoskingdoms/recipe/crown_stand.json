@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "GAG",
+    " S ",
+    "SSS"
+  ],
+  "key": {
+    "G": "minecraft:gold_ingot",
+    "A": "minecraft:amethyst_shard",
+    "S": "minecraft:stone_bricks"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:crown_stand"
+  }
+}

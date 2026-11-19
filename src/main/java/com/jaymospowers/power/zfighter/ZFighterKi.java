@@ -131,6 +131,8 @@ public final class ZFighterKi {
 	static final float WAVE_DAMAGE_MAX = 18.0F;
 	static final double WAVE_RANGE = 40.0;
 	static final double WAVE_RADIUS_MIN = 0.8;
+	/** The charged wave's recoil (blocks/tick) from a tap to a full charge, the share of it that lifts him when aimed down, and the aim (sine of the angle below level, 50 degrees) that counts as down. */
+	static final double RECOIL_MIN = 0.25, RECOIL_MAX = 0.9, RECOIL_LIFT = 0.8, RECOIL_DOWN_SIN = 0.766;
 	static final double WAVE_RADIUS_MAX = 1.8;
 	static final float WAVE_BLAST_MIN = 1.0F;
 	static final float WAVE_BLAST_MAX = 3.0F;
@@ -1160,6 +1162,23 @@ public final class ZFighterKi {
 		return player.getEyePosition().add(look.scale(player.getBbWidth())).add(0.0, -0.3 * player.getScale(), 0.0);
 	}
 
+	/**
+	 * The big charged wave kicks back (the only beam that does): the shot pushes him back opposite the aim, harder with charge;
+	 * aimed steeply at the ground it lifts him instead. Fall damage still applies on landing.
+	 */
+	private static void recoil(ServerPlayer player, Vec3 look, float charge, int style) {
+		if (style == NEEDLE) {
+			return;
+		}
+		double push = Mth.lerp(charge, RECOIL_MIN, RECOIL_MAX);
+		if (look.y < -RECOIL_DOWN_SIN) {
+			player.setDeltaMovement(player.getDeltaMovement().add(0.0, push * RECOIL_LIFT, 0.0));
+		} else {
+			player.setDeltaMovement(player.getDeltaMovement().add(-look.x * push, Math.max(0.0, -look.y * push) + 0.05, -look.z * push));
+		}
+		player.syncVelocity = true;
+	}
+
 	private static void fireWave(ServerPlayer player, ZFighterPower.Live live, float charge) {
 		ServerLevel level = player.level();
 		Vec3 look = LockOn.aim(player);
@@ -1196,6 +1215,7 @@ public final class ZFighterKi {
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0F, 1.6F);
 			}
 		}
+		recoil(player, look, charge, sig.style());
 		// (0.19.60) the hands drive forward out of the cup (ZFighterFiringPose) with a shout
 		ZFighterHands.shout(player);
 		com.jaymospowers.core.Shakes.send(player, 0.5F + 0.9F * charge, from);

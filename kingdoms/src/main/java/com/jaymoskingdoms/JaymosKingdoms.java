@@ -360,6 +360,13 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.126: crooks among the villagers (theft, muggings, arson, pickpockets, scams) and their attachments
 		LOGGER.debug("crook attachments: {} {} {}", Crooks.CROOK, Crooks.NOTORIETY, Crooks.HOME);
 		Crooks.register();
+		NightTrouble.register();
+		NightBurglars.register();
+		SignalBrazier.register();
+		Sketches.register();
+		HotRuns.register();
+		SkyCrown.register();
+		VigilanteTrials.register();
 		// 0.7.126: the guards arrest crooks and march them to the ruler for judgment
 		Arrests.register();
 		// 0.7.211: the underworld: Pmeh and Shash bricks, speakeasies, dice, busts and the cells (their attachments)

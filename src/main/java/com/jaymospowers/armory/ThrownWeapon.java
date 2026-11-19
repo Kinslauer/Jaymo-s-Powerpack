@@ -134,6 +134,9 @@ public class ThrownWeapon extends AbstractArrow implements ItemSupplier {
 		if (this.comesBack && !this.level().isClientSide() && this.flyHome()) {
 			return;
 		}
+		if (!this.level().isClientSide() && !this.comesBack) {
+			com.jaymospowers.gear.SeekingChip.steer(this);
+		}
 		super.tick();
 	}
 
