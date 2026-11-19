@@ -69,6 +69,7 @@ final class SkillIcons {
 		put(Skills.Perk.BAR_SWING, Items.IRON_BARS);
 		put(Skills.Perk.WALL_RUNNER, Items.STONE_BRICK_WALL);
 		put(Skills.Perk.AIR_ROLL, Items.RABBIT_FOOT);
+		put(Skills.Perk.BACKFLIP, Items.GOLDEN_BOOTS);
 		put(Skills.Perk.SLIDE, Items.LEATHER_LEGGINGS);
 		put(Skills.Perk.LONG_JUMP, Items.RABBIT_HIDE);
 		put(Skills.Perk.CHARGE_JUMP, Items.SLIME_BALL);

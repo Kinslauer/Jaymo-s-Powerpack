@@ -267,6 +267,25 @@ public final class Dodge {
 		}
 	}
 
+	/**
+	 * A move that is a dodge by another body (Acrobatics' standing backflip): off cooldown, it starts the dodge's evasion
+	 * window and cooldown and tells the listeners, as {@link #start} does, but leaves the roll's pose and costs to the caller.
+	 * False (and nothing done) while a dodge is cooling down.
+	 */
+	public static boolean dodgeBy(ServerPlayer player, Vec3 direction) {
+		long now = player.level().getGameTime();
+		Long last = LAST.get(player.getUUID());
+		if (last != null && now - last < COOLDOWN - COOLDOWN_SLACK) {
+			return false;
+		}
+		LAST.put(player.getUUID(), now);
+		player.causeFoodExhaustion(EXHAUSTION);
+		for (Listener listener : LISTENERS) {
+			listener.dodged(player, direction);
+		}
+		return true;
+	}
+
 	/** Whether {@code player} is in a dodge's first ticks. */
 	public static boolean evading(ServerPlayer player) {
 		Long last = LAST.get(player.getUUID());

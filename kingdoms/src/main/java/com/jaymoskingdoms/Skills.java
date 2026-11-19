@@ -419,7 +419,10 @@ public final class Skills {
 		BAT_WINGS(Pillar.STEALTH, 1, 1, 3, 21, 2),
 		// Might: the air combo's launcher (Jaymo's Powers' AirCombo), a sneaking blow that throws a foe up for those whose power
 		// follows it into the air; the juggle and slam come after it. Last, so no ordinal moves
-		AIR_COMBO(Pillar.STRENGTH, 1, 1, 2, 1, 2);
+		AIR_COMBO(Pillar.STRENGTH, 1, 1, 2, 1, 2),
+		// the standing backflip (Jaymo's Powers' Acrobatics): the dodge key with Back held alone flips you over backwards in place
+		// of the back roll. On Freerunning under Freerunner; last, so no ordinal moves
+		BACKFLIP(Pillar.STEALTH, 1, 1, 5, 5, 1, FREERUNNER);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;

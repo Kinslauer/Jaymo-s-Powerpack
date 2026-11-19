@@ -68,6 +68,10 @@ public final class WebBodyPose {
 		net.minecraft.client.Minecraft minecraft = net.minecraft.client.Minecraft.getInstance();
 		boolean ownView = entity == minecraft.player && minecraft.options.getCameraType().isFirstPerson();
 		boolean show = p >= 0.0F && p < 1.0F && !(ownView && WebPose.trick(pose.kind()));
+		if (show && WebPose.acro(pose.kind()) && entity.onGround() && p > (pose.kind() == WebPose.STAND_BACKFLIP ? 0.3F : 0.15F)) {
+			// Acrobatics: down on the feet before it was done, the body stops turning there and then
+			show = false;
+		}
 		state.setData(KEY, show ? new Pose(pose.kind(), pose.side(), p, time) : null);
 	}
 
@@ -245,6 +249,66 @@ public final class WebBodyPose {
 				poseStack.rotateDegrees(Axis.ZP, shudder);
 				poseStack.translate(0.0F, -middle, 0.0F);
 			}
+			case WebPose.STAND_BACKFLIP -> {
+				// Acrobatics: a lean back off the arm swing, then heels over head about the middle, out of it onto the feet
+				float flip = ease((p - 0.12F) / 0.72F);
+				float lean = ease(p / 0.12F) * (1.0F - ease((p - 0.12F) / 0.2F));
+				poseStack.translate(0.0F, middle, 0.0F);
+				poseStack.rotateDegrees(Axis.XP, 360.0F * flip + 12.0F * lean);
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
+			case WebPose.SIDE_FLIP -> {
+				// a tucked side flip: over sideways with no hands, knees in
+				poseStack.translate(0.0F, middle + 0.25F * swell(p), 0.0F);
+				poseStack.rotateDegrees(Axis.ZP, pose.side() * 360.0F * ease(p / 0.85F));
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
+			case WebPose.AIR_SPIN -> {
+				// a tornado spin: a full turn about the upright, leaning into it
+				poseStack.rotateDegrees(Axis.YP, pose.side() * 360.0F * turn);
+				poseStack.translate(0.0F, middle, 0.0F);
+				poseStack.rotateDegrees(Axis.ZP, pose.side() * 10.0F * swell(p));
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
+			case WebPose.TOE_TOUCH -> {
+				// a toe touch: piked forward a little as the legs come up
+				poseStack.translate(0.0F, middle, 0.0F);
+				poseStack.rotateDegrees(Axis.XP, -18.0F * swell(p));
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
+			case WebPose.SWAN -> {
+				// a swan: arched back, chest to the sky, held and let go
+				poseStack.translate(0.0F, middle, 0.0F);
+				poseStack.rotateDegrees(Axis.XP, 28.0F * hold(p, 0.25F, 0.7F));
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
+			case WebPose.LAYOUT_TWIST -> {
+				// a straight back flip with a full twist along the body on the way round
+				poseStack.translate(0.0F, middle + 0.2F * swell(p), 0.0F);
+				poseStack.rotateDegrees(Axis.XP, 360.0F * ease(p / 0.88F));
+				poseStack.rotateDegrees(Axis.YP, pose.side() * 360.0F * ease((p - 0.2F) / 0.55F));
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
+			case WebPose.DOUBLE_FRONT -> {
+				// tucked tight, over forwards twice
+				poseStack.translate(0.0F, middle + 0.3F * swell(p), 0.0F);
+				poseStack.rotateDegrees(Axis.XP, -720.0F * ease(p / 0.88F));
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
+			case WebPose.DOUBLE_BACK -> {
+				// tucked tight, over backwards twice
+				poseStack.translate(0.0F, middle + 0.3F * swell(p), 0.0F);
+				poseStack.rotateDegrees(Axis.XP, 720.0F * ease(p / 0.88F));
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
+			case WebPose.BUTTERFLY -> {
+				// a butterfly twist: laid out near flat, face down, spun a full turn about the upright
+				float lay = Mth.sin(Mth.clamp(p, 0.0F, 1.0F) * Mth.PI);
+				poseStack.rotateDegrees(Axis.YP, pose.side() * 360.0F * turn);
+				poseStack.translate(0.0F, middle, 0.0F);
+				poseStack.rotateDegrees(Axis.XP, -75.0F * lay);
+				poseStack.translate(0.0F, -middle, 0.0F);
+			}
 			case WebPose.RAGDOLL -> {
 				// flat on the back, a little twitch to it
 				float fall = Math.min(1.0F, p * 6.0F);
@@ -403,6 +467,65 @@ public final class WebBodyPose {
 				set(h.rightLeg, 0.0F, 0.0F, 0.35F, burst);
 				set(h.leftLeg, 0.0F, 0.0F, -0.35F, burst);
 				h.head.xRot = Mth.lerp(burst, h.head.xRot, -0.6F);
+			}
+			case WebPose.STAND_BACKFLIP -> {
+				// arms swung up overhead to throw it, then knees to chest over the top, opening out to land
+				float p = pose.p();
+				float up = ease(p / 0.12F) * (1.0F - ease((p - 0.3F) / 0.15F));
+				float tuck = ease((p - 0.28F) / 0.15F) * (1.0F - ease((p - 0.7F) / 0.15F));
+				set(h.rightArm, -2.8F, 0.0F, 0.2F, up);
+				set(h.leftArm, -2.8F, 0.0F, -0.2F, up);
+				set(h.rightLeg, -1.8F, 0.0F, 0.1F, tuck);
+				set(h.leftLeg, -1.8F, 0.0F, -0.1F, tuck);
+				set(h.rightArm, -1.5F, -0.3F, 0.2F, tuck);
+				set(h.leftArm, -1.5F, 0.3F, -0.2F, tuck);
+				h.head.xRot = Mth.lerp(tuck, h.head.xRot, 0.5F);
+			}
+			case WebPose.SIDE_FLIP, WebPose.DOUBLE_FRONT, WebPose.DOUBLE_BACK -> {
+				// knees to chest, arms hugging them
+				set(h.rightLeg, -1.9F, 0.0F, 0.1F, e);
+				set(h.leftLeg, -1.9F, 0.0F, -0.1F, e);
+				set(h.rightArm, -1.6F, -0.3F, 0.2F, e);
+				set(h.leftArm, -1.6F, 0.3F, -0.2F, e);
+				h.head.xRot = Mth.lerp(e, h.head.xRot, 0.6F);
+			}
+			case WebPose.AIR_SPIN -> {
+				// one knee drawn up, the other leg straight, arms wrapped across the chest
+				set(h.rightLeg, -1.4F, 0.0F, 0.1F, e);
+				set(h.leftLeg, 0.1F, 0.0F, -0.05F, e);
+				set(h.rightArm, -1.3F, -0.9F, 0.0F, e);
+				set(h.leftArm, -1.3F, 0.9F, 0.0F, e);
+			}
+			case WebPose.TOE_TOUCH -> {
+				// legs straddled out level, hands reaching for the toes
+				set(h.rightLeg, -1.45F, 0.0F, 0.9F, e);
+				set(h.leftLeg, -1.45F, 0.0F, -0.9F, e);
+				set(h.rightArm, -1.5F, 0.0F, 0.75F, e);
+				set(h.leftArm, -1.5F, 0.0F, -0.75F, e);
+				h.head.xRot = Mth.lerp(e, h.head.xRot, 0.35F);
+			}
+			case WebPose.SWAN -> {
+				// arms spread wide like wings, legs together and bent back at the knee, head back
+				float arch = hold(pose.p(), 0.25F, 0.7F);
+				set(h.rightArm, 0.3F, 0.0F, 1.6F, arch);
+				set(h.leftArm, 0.3F, 0.0F, -1.6F, arch);
+				set(h.rightLeg, 0.45F, 0.0F, 0.02F, arch);
+				set(h.leftLeg, 0.45F, 0.0F, -0.02F, arch);
+				h.head.xRot = Mth.lerp(arch, h.head.xRot, -0.5F);
+			}
+			case WebPose.LAYOUT_TWIST -> {
+				// straight as a board: arms crossed tight on the chest, legs together, so the twist goes fast
+				set(h.rightArm, -1.3F, -0.9F, 0.0F, e);
+				set(h.leftArm, -1.3F, 0.9F, 0.0F, e);
+				set(h.rightLeg, 0.05F, 0.0F, 0.02F, e);
+				set(h.leftLeg, 0.05F, 0.0F, -0.02F, e);
+			}
+			case WebPose.BUTTERFLY -> {
+				// arms flung out wide, legs scissored apart behind
+				set(h.rightArm, -0.2F, 0.0F, 1.4F, e);
+				set(h.leftArm, -0.2F, 0.0F, -1.4F, e);
+				set(h.rightLeg, 0.7F, 0.0F, 0.15F, e);
+				set(h.leftLeg, -0.5F, 0.0F, -0.15F, e);
 			}
 			case WebPose.RAGDOLL -> {
 				float t = pose.time();
