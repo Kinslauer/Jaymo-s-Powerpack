@@ -66,6 +66,10 @@ public final class EmberCrash {
 
 	public static void init() {
 		ServerTickEvents.END_SERVER_TICK.register(EmberCrash::tick);
+		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			READY.remove(handler.player.getUUID());
+			ABSORB.remove(handler.player.getUUID());
+		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			RUNS.clear();
 			READY.clear();

@@ -430,6 +430,11 @@ final class StormHammer {
 		}
 	}
 
+	/** The player left: their chosen throw is forgotten too. */
+	static void disconnected(ServerPlayer player) {
+		MODE.remove(player.getUUID());
+	}
+
 	static void forget(ServerPlayer player) {
 		Hold h = HOLDS.remove(player.getUUID());
 		if (h != null && (h.spinning || h.flying)) {

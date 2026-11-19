@@ -237,6 +237,10 @@ public class ThrownWeapon extends AbstractArrow implements ItemSupplier {
 
 	@Override
 	public void playerTouch(Player player) {
+		if (player.getVehicle() == this) {
+			// a rider (the Ride throw) does not pick up the weapon carrying them
+			return;
+		}
 		if (this.ownedBy(player) || this.getOwner() == null) {
 			super.playerTouch(player);
 		}

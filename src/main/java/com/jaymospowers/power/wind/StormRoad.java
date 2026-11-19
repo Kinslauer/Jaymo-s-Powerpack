@@ -30,6 +30,8 @@ final class StormRoad {
 	private static final int SLOT = 6;
 	/** Ticks of the wind-up you can see, the cooldown after a call, hunger. */
 	static final int WINDUP = 60, COOLDOWN = 6000;
+	/** The cooldown left after the player stops a call themselves (a call that fails for a world reason is refunded). */
+	static final int STOP_COOLDOWN = 600;
 	static final float EXHAUSTION = 6.0F;
 	static final int MIN_FOOD = 6;
 	/** How high the column stands (blocks), and how far over the mark a safe footing is looked for. */
@@ -106,11 +108,11 @@ final class StormRoad {
 		long now = level.getGameTime();
 		Mark mark = player.getAttached(MARK);
 		if (mark == null || !mark.dimension.equals(level.dimension().identifier().toString())) {
-			cancel(player);
+			cancel(player, 0);
 			return;
 		}
 		if (player.isShiftKeyDown() && w.until - now < WINDUP - 10) {
-			cancel(player);
+			cancel(player, STOP_COOLDOWN);
 			StormNet.say(player, "road_stopped");
 			return;
 		}
@@ -118,7 +120,6 @@ final class StormRoad {
 		Vec3 v = player.getDeltaMovement();
 		player.setDeltaMovement(0.0, Math.max(v.y, 0.0) + 0.03, 0.0);
 		player.syncVelocity = true;
-		player.resetFallDistance();
 		double progress = 1.0 - (w.until - now) / (double)WINDUP;
 		if (now % 3 == 0) {
 			Vec3 foot = player.position();
@@ -140,6 +141,9 @@ final class StormRoad {
 			PickKit.spend(TABLE, player, SLOT, 0);
 			StormNet.say(player, "road_underground");
 			return;
+		}
+		if (!level.hasChunkAt(mark.pos)) {
+			level.getChunkAt(mark.pos);
 		}
 		Vec3 dest = null;
 		for (int up = 0; up <= SEARCH_UP && dest == null; up++) {
@@ -168,14 +172,14 @@ final class StormRoad {
 		Shakes.around(level, dest, 20.0, 0.8F);
 	}
 
-	private static void cancel(ServerPlayer player) {
+	private static void cancel(ServerPlayer player, int cooldown) {
 		WINDUPS.remove(player.getUUID());
-		PickKit.spend(TABLE, player, SLOT, 0);
+		PickKit.spend(TABLE, player, SLOT, cooldown);
 	}
 
 	static void forget(ServerPlayer player) {
 		if (WINDUPS.remove(player.getUUID()) != null) {
-			PickKit.spend(TABLE, player, SLOT, 0);
+			PickKit.spend(TABLE, player, SLOT, STOP_COOLDOWN);
 		}
 	}
 }

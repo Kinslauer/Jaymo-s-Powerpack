@@ -11,7 +11,18 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -53,15 +64,20 @@ public final class ZFighterMasterFusion {
 	static final float BONUS = 0.08F;
 	/** How often (ticks) the held master is carried along to the player. */
 	static final int CARRY_EVERY = 2;
-	static final String HELD_TAG = "jaymospowers_held_master";
+	private static final double GROUND_SEARCH = 48.0;
+	public static final String HELD_TAG = "jaymospowers_held_master";
 
 	/** A master called to the dance: who, and when the dance ends. */
 	private record Waiting(UUID master, long at) {
 	}
 
 	/** A master held out of the world for a fusion: who is carrying him. */
-	private record Held(UUID leader) {
+	private record Held(UUID leader, ResourceKey<Level> level, Vec3 origin) {
 	}
+
+	/** A master just put down: kept unhurtable, with a slow fall, until he stands (or the grace runs out). */
+	private static final int GRACE_TICKS = 200;
+	private static final Map<UUID, Long> GRACE = new HashMap<>();
 
 	private static final Map<UUID, Waiting> WAITING = new HashMap<>();
 	private static final Map<UUID, Held> HELD = new HashMap<>();
@@ -74,6 +90,7 @@ public final class ZFighterMasterFusion {
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			WAITING.clear();
 			HELD.clear();
+			GRACE.clear();
 		});
 		// a master still held from before a crash or a stop is set free as soon as he loads
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
@@ -134,6 +151,18 @@ public final class ZFighterMasterFusion {
 
 	private static void tick(MinecraftServer server) {
 		long now = server.overworld().getGameTime();
+		if (!GRACE.isEmpty()) {
+			for (Iterator<Map.Entry<UUID, Long>> it = GRACE.entrySet().iterator(); it.hasNext(); ) {
+				Map.Entry<UUID, Long> entry = it.next();
+				Entity down = find(server, entry.getKey(), null);
+				if (down == null || down.isRemoved()) {
+					it.remove();
+				} else if (down.onGround() || down.isInWater() || now >= entry.getValue()) {
+					it.remove();
+					down.setPermanentlyInvulnerable(false);
+				}
+			}
+		}
 		for (Iterator<Map.Entry<UUID, Waiting>> it = WAITING.entrySet().iterator(); it.hasNext(); ) {
 			Map.Entry<UUID, Waiting> entry = it.next();
 			if (now < entry.getValue().at()) {
@@ -159,6 +188,7 @@ public final class ZFighterMasterFusion {
 				it.remove();
 				if (master != null) {
 					free(master);
+					setDown(master, entry.getValue(), leader);
 				}
 				continue;
 			}
@@ -214,7 +244,7 @@ public final class ZFighterMasterFusion {
 
 	/** Hidden, silent, unhurtable, unthinking, with no body to bump into: carried along. */
 	static void hold(LivingEntity master, ServerPlayer leader) {
-		HELD.put(master.getUUID(), new Held(leader.getUUID()));
+		HELD.put(master.getUUID(), new Held(leader.getUUID(), master.level().dimension(), master.position()));
 		master.addTag(HELD_TAG);
 		master.setInvisible(true);
 		master.setSilent(true);
@@ -241,20 +271,76 @@ public final class ZFighterMasterFusion {
 		}
 	}
 
-	/** The fusion ended: the master is set down beside the player (or where he is, if the player is gone) and restored. */
+	/** The fusion ended: the master is set down on safe ground beside the player (or where he was before the fusion) and restored. */
 	static void release(MinecraftServer server, UUID masterId, ServerPlayer leader) {
-		HELD.remove(masterId);
+		Held held = HELD.remove(masterId);
 		Entity master = find(server, masterId, leader);
 		if (master == null) {
 			return;
 		}
 		free(master);
+		setDown(master, held, leader);
 		if (leader != null) {
-			Vec3 side = leader.getLookAngle().multiply(1.0, 0.0, 1.0).normalize().cross(new Vec3(0.0, 1.0, 0.0));
-			master.teleportTo(leader.level(), leader.getX() + side.x * 1.5, leader.getY(), leader.getZ() + side.z * 1.5, Set.of(), leader.getYRot() + 180.0F,
-				0.0F, false);
 			leader.level().sendParticles(MagicFx.LIGHT, true, false, master.getX(), master.getY() + 1.0, master.getZ(), 30, 0.4, 0.8, 0.4, 0.1);
 			leader.level().playSound(null, master.getX(), master.getY(), master.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.NEUTRAL, 1.0F, 0.9F);
 		}
+	}
+
+	/**
+	 * Puts a freed master on solid ground: beside the leader, or under the leader, or where the master stood before the fusion. He is
+	 * unhurtable with a slow fall until he lands.
+	 */
+	private static void setDown(Entity master, Held held, ServerPlayer leader) {
+		ServerLevel level = leader != null ? leader.level() : master.level() instanceof ServerLevel here ? here : null;
+		if (level == null) {
+			return;
+		}
+		Vec3 around = leader != null ? leader.position() : master.position();
+		Vec3 spot = null;
+		if (leader != null) {
+			Vec3 side = leader.getLookAngle().multiply(1.0, 0.0, 1.0).normalize().cross(new Vec3(0.0, 1.0, 0.0));
+			spot = ground(level, master, around.add(side.x * 1.5, 0.0, side.z * 1.5));
+		}
+		if (spot == null) {
+			spot = ground(level, master, around);
+		}
+		float yaw = leader != null ? leader.getYRot() + 180.0F : master.getYRot();
+		if (spot != null) {
+			master.teleportTo(level, spot.x, spot.y, spot.z, Set.of(), yaw, 0.0F, false);
+		} else if (held != null) {
+			ServerLevel home = level.getServer().getLevel(held.level());
+			if (home != null) {
+				master.teleportTo(home, held.origin().x, held.origin().y, held.origin().z, Set.of(), yaw, 0.0F, false);
+			}
+		}
+		if (master instanceof LivingEntity living) {
+			living.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, GRACE_TICKS, 0, false, false));
+		}
+		master.setPermanentlyInvulnerable(true);
+		GRACE.put(master.getUUID(), level.getServer().overworld().getGameTime() + GRACE_TICKS);
+	}
+
+	/** Solid, dry ground below {@code from} (within {@link #GROUND_SEARCH} blocks) with room for the master, or null. */
+	private static Vec3 ground(ServerLevel level, Entity master, Vec3 from) {
+		BlockPos column = BlockPos.containing(from);
+		if (!level.hasChunkAt(column)) {
+			return null;
+		}
+		Vec3 top = new Vec3(from.x, from.y + 0.5, from.z);
+		Vec3 bottom = new Vec3(from.x, Math.max(level.getMinY(), from.y - GROUND_SEARCH), from.z);
+		BlockHitResult hit = level.clip(new ClipContext(top, bottom, ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY, master));
+		if (hit.getType() != HitResult.Type.BLOCK) {
+			return null;
+		}
+		BlockState floor = level.getBlockState(hit.getBlockPos());
+		if (floor.getFluidState().is(FluidTags.LAVA) || floor.is(Blocks.MAGMA_BLOCK) || floor.is(Blocks.FIRE) || floor.is(Blocks.CAMPFIRE)) {
+			return null;
+		}
+		Vec3 at = new Vec3(from.x, hit.getLocation().y, from.z);
+		if (!level.noCollision(master, master.getDimensions(master.getPose()).makeBoundingBox(at))
+			|| level.getFluidState(BlockPos.containing(at)).is(FluidTags.LAVA)) {
+			return null;
+		}
+		return at;
 	}
 }

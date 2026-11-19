@@ -16,7 +16,7 @@
   "tip.jaymospowers.web.title": "Web Slinger",
   "tip.jaymospowers.web": "Sneak + %5$s with every ability: Web Blossom, leap and web every foe in sight.\nThe attack key (%7$s) whirls a single line.\n%8$s with Webbed Fists in hand raises the web shield: three hits, no knockback.",
   "tip.jaymospowers.wind.title": "Wind Control",
-  "tip.jaymospowers.wind": "Stormbound: hold %7$s under rain to draw charge from the sky; %8$s hurls a hammer (sneak switches the throw).\n%9$s calls a bound weapon back (sneak: bind); %10$s clashes two together.\n%11$s then jump: storm landing. Sneak + %12$s marks a road home.",
+  "tip.jaymospowers.wind": "Stormbound: hold %7$s under rain to draw charge from the sky; %8$s hurls a hammer (sneak switches the throw).\n%9$s calls a bound weapon back (sneak: bind); %10$s clashes two together.\n%11$s then jump: storm landing. Sneak + %12$s marks a road home.\nAny of these that read unbound: set a key for it in Controls.",
   "tip.jaymospowers.xenoform.title": "Xeno-Band",
   "tip.jaymospowers.xenoform": "Hold %6$s and scroll to turn the dial, let go to slam the band.\nAs an alien, hold %6$s to turn back.\nScan a creature (hold) to teach the band its alien."
 }

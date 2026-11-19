@@ -24,8 +24,9 @@ import net.minecraft.world.item.Items;
 final class WindStormClient {
 	private static final int CHIP = 20;
 	private static final int STORM_COLOR = 0xB070FF, GLOW = 0x8FB4FF;
-	private static final int[] DEFAULTS = {InputConstants.KEY_MINUS, InputConstants.KEY_EQUALS, InputConstants.KEY_HOME, InputConstants.KEY_PAGEUP,
-		InputConstants.KEY_PAGEDOWN, InputConstants.KEY_INSERT};
+	/** Minus and Equals are free in every mod here; Home, Page Up/Down and Insert clash with Kingdoms keys, so the rest start unbound. */
+	private static final int[] DEFAULTS = {InputConstants.KEY_MINUS, InputConstants.KEY_EQUALS, InputConstants.UNKNOWN.getValue(),
+		InputConstants.UNKNOWN.getValue(), InputConstants.UNKNOWN.getValue(), InputConstants.UNKNOWN.getValue()};
 	private static final String[] NAMES = {"draw", "hurl", "recall", "twin", "landing", "road"};
 	/** Draw and Hurl are held; the rest are taps. */
 	private static final boolean[] HELD = {true, true, false, false, false, false};

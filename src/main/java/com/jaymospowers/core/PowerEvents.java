@@ -52,7 +52,6 @@ public final class PowerEvents {
 		Callings.register();
 		AwakeningDeeds.register();
 		com.jaymospowers.power.web.CraterSpider.register();
-		AwakeningDeeds.register();
 		OneHolder.register();
 		ServerTickEvents.END_SERVER_TICK.register(Powers::tick);
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> PowerCommand.register(dispatcher));

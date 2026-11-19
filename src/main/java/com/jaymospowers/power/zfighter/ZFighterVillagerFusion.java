@@ -154,7 +154,8 @@ public final class ZFighterVillagerFusion {
 	/** The nearest grown villager within range that is not a master and not already held. */
 	private static Villager nearest(ServerPlayer player) {
 		List<Villager> villagers = player.level().getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(RANGE),
-			e -> e.isAlive() && !e.isBaby() && !e.entityTags().contains(ZFighterMasters.TAG) && !ZFighterMasterFusion.held(e.getUUID()));
+			e -> e.isAlive() && !e.isBaby() && !e.entityTags().contains(ZFighterMasters.TAG) && !ZFighterMasterFusion.held(e.getUUID())
+				&& e.getAttached(com.jaymospowers.power.smoke.SmokeBanish.UNTIL) == null);
 		Villager best = null;
 		for (Villager villager : villagers) {
 			if (best == null || villager.distanceToSqr(player) < best.distanceToSqr(player)) {

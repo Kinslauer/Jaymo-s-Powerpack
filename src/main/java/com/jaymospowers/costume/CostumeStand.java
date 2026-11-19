@@ -29,6 +29,10 @@ public final class CostumeStand {
 				|| !player.getMainHandItem().isEmpty()) {
 				return InteractionResult.PASS;
 			}
+			if (Costume.worn(player) == null && stand.getAttached(Costume.STAND) == null) {
+				// nothing to swap: the stand is an ordinary armour stand (poses, armour)
+				return InteractionResult.PASS;
+			}
 			if (player instanceof ServerPlayer server && !swap(server, stand)) {
 				return InteractionResult.FAIL;
 			}

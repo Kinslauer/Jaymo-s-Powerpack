@@ -189,6 +189,7 @@ public final class SorasStone {
 		if (!frame.survives()) {
 			return null;
 		}
+		((com.jaymospowers.power.wind.mixin.ItemFrameAccess) frame).jaymospowers$setFixed(true);
 		frame.setItem(blade, false);
 		frame.addTag(TAG);
 		frame.setInvisible(true);

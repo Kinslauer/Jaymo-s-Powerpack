@@ -54,4 +54,13 @@
   - Rising uppercut: jump + attack with the shield up launches you up and lifts the mobs within 2.5 blocks in front (a hit, a stun, then they drop). Other players are only lifted a little. A weapon-and-shield bang no longer fires while jump is held.
   - Battle rhythm: landing melee blows without a break quickens your attacks 4% a step up to 5 steps; stop for 4 seconds and a step fades every 1.5 seconds. It is a Kingdoms skill-tree perk (Might, tier 2), read through Powers' TreeLocks.
   - Key classes: gear/shield/ShieldMoves, mortal/BattleRhythm, core/TreeLocks; Kingdoms Skills.Perk.BATTLE_RHYTHM and TreeLocks.Lock.BATTLE_RHYTHM.
+- Fixes after review:
+  - Soras' Stone's frame is fixed (an ItemFrame accessor mixin), so breaking the blackstone never drops the blade.
+  - A fusion's held master or villager is put down on safe ground (not lava or the void; else where he stood before), unhurtable with a slow fall until he lands.
+  - Smoke Banish skips held masters and unhurtable creatures, forgets banished mobs that are discarded, and a villager fusion skips banished villagers.
+  - Riding the Storm Hammer no longer ends at once (a rider does not pick up the weapon carrying them).
+  - The Storm keys Recall, Twin, Landing and Road start unbound (Home, Page Up/Down, Insert clashed with Kingdoms keys); the tip says to set them in Controls.
+  - The Divine shell can build (a transient absorption ceiling for the Divine-born) and does not refill a golden apple's absorption.
+  - The server checks the jump kind a client sends; Storm Road no longer cancels fall damage in its wind-up, stopping it by hand costs 30 s of cooldown, and it loads the destination chunk; costume stand swap passes through when neither side has a costume.
+  - Per-player maps are cleared on disconnect (Ember Crash, Storm fall/throw, Z-Fighter reins); the Awakening deeds register once.
 - Built; not played.

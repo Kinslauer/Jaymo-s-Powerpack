@@ -164,6 +164,7 @@ public final class WindPower implements Power {
 			WindWeather.forget(handler.player);
 			WindFall.forget(handler.player);
 			StormNet.forget(handler.player);
+			StormNet.disconnected(handler.player);
 		});
 	}
 

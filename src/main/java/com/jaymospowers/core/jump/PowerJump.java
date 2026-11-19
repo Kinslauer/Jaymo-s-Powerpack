@@ -110,7 +110,7 @@ public final class PowerJump {
 
 	private static void jump(ServerPlayer player, byte kind) {
 		if (kind <= NONE || kind > MORTAL || player.isSpectator() || player.onGround() || !(player.level() instanceof ServerLevel level)
-			|| !SPENT.add(player.getUUID())) {
+			|| (kind == MORTAL ? !com.jaymospowers.alchemy.picks.MettleDraught.active(player) : kindOf(player) != kind) || !SPENT.add(player.getUUID())) {
 			return;
 		}
 		player.resetFallDistance();

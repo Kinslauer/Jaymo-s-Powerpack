@@ -167,6 +167,12 @@ public final class StormNet {
 		return flags;
 	}
 
+	/** The player left: the per-player memory that outlives a mode going off goes too. */
+	static void disconnected(ServerPlayer player) {
+		HARD_FALL.remove(player.getUUID());
+		StormHammer.disconnected(player);
+	}
+
 	/** The mode went off, the power went, or the player left: everything the storm held lets go. */
 	static void forget(ServerPlayer player) {
 		StormDraw.forget(player);

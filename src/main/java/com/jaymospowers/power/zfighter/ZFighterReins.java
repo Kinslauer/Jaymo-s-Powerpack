@@ -35,6 +35,10 @@ public final class ZFighterReins {
 	}
 
 	static void init() {
+		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			ASKS.remove(handler.player.getUUID());
+			LAST_PASS.remove(handler.player.getUUID());
+		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			ASKS.clear();
 			LAST_PASS.clear();

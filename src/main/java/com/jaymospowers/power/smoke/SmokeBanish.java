@@ -57,7 +57,7 @@ public final class SmokeBanish {
 	static final int GREY = 0x6B6B72;
 
 	/** When the banishment ends (game time), on the banished creature. Saved with it. */
-	private static final AttachmentType<Long> UNTIL = AttachmentRegistry.create(JaymosPowers.id("smoke_banished_until"),
+	public static final AttachmentType<Long> UNTIL = AttachmentRegistry.create(JaymosPowers.id("smoke_banished_until"),
 		builder -> builder.persistent(Codec.LONG));
 	/** What it was before (bit 0 invisible, 1 no AI, 2 silent, 3 no gravity), on the banished creature. Saved with it. */
 	private static final AttachmentType<Integer> WAS = AttachmentRegistry.create(JaymosPowers.id("smoke_banished_was"),
@@ -75,6 +75,12 @@ public final class SmokeBanish {
 			Long until = entity.getAttached(UNTIL);
 			if (until != null) {
 				BANISHED.put(entity.getUUID(), until);
+			}
+		});
+		// a banished mob that is discarded (despawned, killed) is forgotten; one that only unloads keeps its time
+		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
+			if (entity.getRemovalReason() != null && !entity.getRemovalReason().shouldSave()) {
+				BANISHED.remove(entity.getUUID());
 			}
 		});
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
@@ -107,6 +113,11 @@ public final class SmokeBanish {
 		return entity instanceof EnderDragon || entity instanceof WitherBoss || entity instanceof Warden || entity.getMaxHealth() >= BOSS_HEALTH;
 	}
 
+	/** A master held out of the world for a fusion, or anything unhurtable: not for the knot. */
+	private static boolean unbanishable(Entity entity) {
+		return entity.isInvulnerable() || entity.entityTags().contains(com.jaymospowers.power.zfighter.ZFighterMasterFusion.HELD_TAG);
+	}
+
 	/** Banishes the creature {@code player} aims at (sneak + B). */
 	static void cast(ServerPlayer player) {
 		ServerLevel level = player.level();
@@ -120,12 +131,12 @@ public final class SmokeBanish {
 		Vec3 look = player.getViewVector(1.0F);
 		EntityHitResult aimed = ProjectileUtil.getEntityHitResult(player, eye, eye.add(look.scale(RANGE)),
 			player.getBoundingBox().expandTowards(look.scale(RANGE)).inflate(1.0),
-			e -> e instanceof Mob mob && mob.isAlive() && !BANISHED.containsKey(e.getUUID()), RANGE * RANGE);
+			e -> e instanceof Mob mob && mob.isAlive() && !BANISHED.containsKey(e.getUUID()) && !unbanishable(e), RANGE * RANGE);
 		if (aimed == null || !(aimed.getEntity() instanceof Mob target)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.smoke_banish_nothing").withStyle(ChatFormatting.GRAY));
 			return;
 		}
-		if (boss(target) || target instanceof net.minecraft.world.entity.TamableAnimal pet && pet.isTame()) {
+		if (boss(target) || unbanishable(target) || target instanceof net.minecraft.world.entity.TamableAnimal pet && pet.isTame()) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.smoke_banish_too_strong").withStyle(ChatFormatting.GRAY));
 			return;
 		}
