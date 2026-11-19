@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "catch=0": {
+      "model": "jaymoskitchen:block/fish_barrel_0"
+    },
+    "catch=1": {
+      "model": "jaymoskitchen:block/fish_barrel_1"
+    },
+    "catch=2": {
+      "model": "jaymoskitchen:block/fish_barrel_2"
+    }
+  }
+}

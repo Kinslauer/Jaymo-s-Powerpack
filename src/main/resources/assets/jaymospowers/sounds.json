@@ -2669,6 +2669,59 @@
 			}
 		]
 	},
+	"armed.hit.plate": {
+		"subtitle": "subtitles.jaymospowers.armed.hit.plate",
+		"sounds": [
+			{
+				"name": "jaymospowers:blade/armour_ring_1"
+			},
+			{
+				"name": "jaymospowers:blade/armour_ring_2"
+			},
+			{
+				"name": "jaymospowers:blade/armour_ring_3"
+			}
+		]
+	},
+	"armed.hit.mail": {
+		"subtitle": "subtitles.jaymospowers.armed.hit.mail",
+		"sounds": [
+			{
+				"name": "jaymospowers:blade/armour_rasp_1"
+			},
+			{
+				"name": "jaymospowers:blade/armour_rasp_2"
+			},
+			{
+				"name": "jaymospowers:blade/armour_rasp_3"
+			}
+		]
+	},
+	"armed.hit.padding": {
+		"subtitle": "subtitles.jaymospowers.armed.hit.padding",
+		"sounds": [
+			{
+				"name": "jaymospowers:blade/armour_thud_1"
+			},
+			{
+				"name": "jaymospowers:blade/armour_thud_2"
+			},
+			{
+				"name": "jaymospowers:blade/armour_thud_3"
+			}
+		]
+	},
+	"armed.hit.stone": {
+		"subtitle": "subtitles.jaymospowers.armed.hit.stone",
+		"sounds": [
+			{
+				"name": "jaymospowers:blade/stone_chip_1"
+			},
+			{
+				"name": "jaymospowers:blade/stone_chip_2"
+			}
+		]
+	},
 	"guard.parry": {
 		"sounds": [
 			{
@@ -2829,6 +2882,20 @@
 			},
 			{
 				"name": "jaymospowers:blade/swing_heavy_5"
+			}
+		]
+	},
+	"armed.crit": {
+		"subtitle": "subtitles.jaymospowers.armed.crit",
+		"sounds": [
+			{
+				"name": "jaymospowers:blade/crit_1"
+			},
+			{
+				"name": "jaymospowers:blade/crit_2"
+			},
+			{
+				"name": "jaymospowers:blade/crit_3"
 			}
 		]
 	},

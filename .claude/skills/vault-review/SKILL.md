@@ -18,7 +18,11 @@ All task changes go through `python tools/vault_sync.py` (it syncs before and af
    2. `gh pr view <pr> --json number,title,body,headRefName,headRefOid,mergeable,statusCheckRollup` and
       `gh pr diff <pr>`. If a note already says `Review (head <first 7 of headRefOid>)`, this head was reviewed: skip it.
    3. Review it:
-      - Does it do what Andy asked, all of it, the way he asked? Anything missing is a change request.
+      - Does it do what Andy asked, all of it, the way he asked? Go through the task's ask line by line against
+        the diff; anything missing, cut down or swapped for something easier is a change request.
+      - Check, don't assume (`CLAUDE.md`): a claim in the PR body ("handles X", "nothing else uses Y", "tested")
+        counts only once you've checked it in the code. Before you say something is missing, search for it by
+        every likely name; never ask for a class or API you haven't seen exists.
       - `CLAUDE.md` rules and the "Before you open a PR" checklist in `docs/AI-HANDBOOK.md`: a change note
         (`changes/<mod>/<branch>.md`) for each mod changed and no edits to `version=`, MODLOGs or `docs/codemap/`
         (send back an old-style PR with "run `py -3 tools/change_note.py convert`"), lang in its own `lang/parts/` file, tuning numbers as constants, optional mods only through compat
@@ -38,4 +42,5 @@ All task changes go through `python tools/vault_sync.py` (it syncs before and af
         which puts the card in the Kanban's **Needs Andy** lane (a Claude thread's own note in `Agents/` goes there
         too once its `status:` is `ready`). Then have YOUTH (Hermes's Discord bot) post the PR in Andy's Discord,
         forum **parthenon**, post **PR Merges**: the link, what a player will see, what wasn't tested, the verdict.
-3. Finish with one line per task you looked at: task, PR, verdict.
+3. Finish with one line per task you looked at: task, PR, verdict. Then glance at `Live/Health.md`: if it lists a
+   problem in a task you reviewed (a missing `pr:`, a status the pipeline doesn't know), fix it with `--set`.

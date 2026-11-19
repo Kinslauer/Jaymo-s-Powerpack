@@ -82,6 +82,7 @@ public final class ShieldBangClient {
 	/** Whether the attack key is the bang's right now (a shield up, a weapon out), not a swing's. */
 	public static boolean holdsAttack(Minecraft minecraft) {
 		LocalPlayer player = minecraft.player;
-		return player != null && !player.isShiftKeyDown() && ShieldBang.ready(player);
+		// jump + attack is the shield's rising uppercut, not a bang
+		return player != null && !player.isShiftKeyDown() && !minecraft.options.keyJump.isDown() && ShieldBang.ready(player);
 	}
 }

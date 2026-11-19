@@ -169,6 +169,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.132: townsfolk bury their dead in a graveyard (burn the enemy's), and mourn; looters and the poor rob the dead
 		LOGGER.debug("grave attachment: {}", Bearers.GRAVES);
 		Bearers.register();
+		// the dead's gear goes into the stores, and guards brag about the spoils they wear
+		Salvage.register();
+		GuardKit.register();
 		GraveGhost.register();
 		RoyalRemains.register();
 		Looters.register();
@@ -235,6 +238,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Emigrants.register();
 		// 0.7.299: meals cooked at home or bought at a cookhouse or tavern, and visitors for the day
 		Meals.register();
+		// smiths sharpen the guards' dull blades at a grindstone
+		Whetting.register();
 		Visitors.register();
 		// 0.7.483: every settlement keeps a butcher and a healer
 		TownTrades.register();
@@ -389,6 +394,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("world tier attachments: {} {} {} {} {}", WorldTiers.TIER, WorldTiers.PROGRESS, WorldTiers.CHANGED, WorldTiers.MOB_TIER,
 			WorldTiers.FLOOR);
 		WorldTiers.register();
+		HarshLands.register();
 		// Hostile Mobs Improve Over Time's levels follow the world tier, not play time
 		HostileMobsTiers.register();
 		// (0.7.386) star-touched foes on Jaymo's Powers' far worlds (its attachment)
@@ -410,6 +416,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.films.BossIntros.register();
 		// great foes' themes (stems mixed on the player's own side) and the trophy stand
 		com.jaymoskingdoms.music.FoeThemes.register();
+		// the music of the places (Medieval Music pack tracks, played on the player's own side) and a tavern's bard
+		PlaceThemes.register();
+		Bards.register();
 		com.jaymoskingdoms.trophies.Trophies.register();
 		// (0.7.426) Havens patch 2: the ogre outposts and holds, bog iron, crippling blows
 		OgreHolds.register();
@@ -437,6 +446,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Tails.register();
 		GreenskinLife.register();
 		FrostPrison.register();
+		SorcererJump.register();
 		FrostTech.register();
 		LOGGER.debug("heritage attachments: {} {} {}", Heritage.HERITAGE, FrostPrison.LAST, FrostTech.FITTED);
 		// (0.7.262, Andy's NOEA picks) the Divine-born, the Bio-built (its forms), the Rubber-folk and the held heritage key
@@ -500,6 +510,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		BossBars.register();
 		// 0.7.492: a boss's posture: worn by blows, broken to a kneel and a riposte
 		BossPosture.register();
+		FighterPosture.register();
+		CritPower.register();
 		BossTurns.register();
 		BeastLairs.register();
 		// 0.7.492: knowledge: the boss ladder that opens anvils, smithing, enchanting, the higher arts and the End
@@ -518,6 +530,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Sandbags.register();
 		// carpentry (after Better With Mods): timber trim, benches and tables, wattle panels
 		com.jaymoskingdoms.carpentry.Carpentry.register();
+		// trade signs over a town's workplaces, the firsts the song stones cut and the journey book that keeps yours
+		TradeSigns.register();
+		Firsts.register();
 		// the blossom land's building blocks: shoji, tatami, plaster, lacquer, lanterns, thatch, the ward rope
 		com.jaymoskingdoms.blossomland.BlossomBlocks.register();
 		// 0.7.440: props: scarecrow, gravestone, lamp post, candle stand, plushies, planters
@@ -740,7 +755,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Loans.register();
 		Veterans.register();
 		// (medieval picks) the troop ladder, formations and the shield wall, keeps in their holders' colours, the realms' map
-		LOGGER.debug("troop attachments: {} {} {}", Ranks.RANK, Ranks.REALM, KeepColours.FLOWN);
+		LOGGER.debug("troop attachments: {} {} {} {}", Ranks.RANK, Ranks.REALM, KeepColours.FLOWN, GuardKit.KIT);
 		Ranks.register();
 		Formations.register();
 		KeepColours.register();
@@ -989,6 +1004,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Corsairs.register();
 		Navies.register();
 		Fishers.register();
+		SeaPassers.register();
 		SeaTrade.register();
 		Whalers.register();
 		// the harbours' yards: ships built block by block by their shipwrights (and their attachments)
@@ -1039,6 +1055,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		NewSpells.register();
 		com.jaymoskingdoms.traps.Traps.register();
 		DeathRites.register();
+		// the gone-before: remains in the wild, their last camps, the ruins' traps, the headless rider
+		Remains.register();
 		com.jaymoskingdoms.creatures.Creatures.register();
 		Necropolis.register();
 		Presence.register();

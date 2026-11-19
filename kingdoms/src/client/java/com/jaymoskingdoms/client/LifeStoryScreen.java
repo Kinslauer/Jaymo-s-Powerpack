@@ -128,6 +128,8 @@ final class LifeStoryScreen extends Screen {
 		 * page here.
 		 */
 		boolean explicit;
+		/** The look drawn at random for each heritage the story has shown, kept till a choice rules it out ({@link #rolledLook}). */
+		final java.util.Map<Heritage.Kind, Integer> rolls = new java.util.EnumMap<>(Heritage.Kind.class);
 
 		Draft() {
 			Arrays.fill(this.answers, -1);
@@ -639,7 +641,41 @@ final class LifeStoryScreen extends Screen {
 		if (kind == null) {
 			return 0;
 		}
-		return draft.look >= 0 ? draft.look : LifeStory.lookFor(kind, picked(Question.CHILDHOOD));
+		return draft.look >= 0 ? draft.look : rolledLook(kind, picked(Question.CHILDHOOD), true);
+	}
+
+	/**
+	 * Andy: "all heritage paths should no longer be shown on this screen, instead randomize the one shown on the side. and
+	 * change it as selections allow". The look of {@code kind} the story gives: one drawn at random from those
+	 * {@code childhood} allows (the looks it leans to, else every look), kept while it stays allowed. {@code keep}: whether
+	 * a new draw is kept (not for an answer only pointed at).
+	 */
+	private static int rolledLook(Heritage.Kind kind, @Nullable Answer childhood, boolean keep) {
+		List<Integer> allowed = new ArrayList<>();
+		if (childhood != null) {
+			for (String key : childhood.looks()) {
+				HeritageVariants.Variant v = HeritageVariants.Variant.byKey(key);
+				if (v != null && v.heritage == kind && !allowed.contains(v.index())) {
+					allowed.add(v.index());
+				}
+			}
+		}
+		if (allowed.isEmpty()) {
+			for (int i = 0; i <= HeritageVariants.of(kind).size(); i++) {
+				allowed.add(i);
+			}
+		}
+		Integer had = draft.rolls.get(kind);
+		if (had != null && allowed.contains(had)) {
+			return had;
+		}
+		if (!keep) {
+			// pointed at only: the same one each frame, the kept draw untouched
+			return allowed.get(Math.floorMod(had == null ? 0 : had, allowed.size()));
+		}
+		int drawn = allowed.get(new java.util.Random().nextInt(allowed.size()));
+		draft.rolls.put(kind, drawn);
+		return drawn;
 	}
 
 	// ---- layout ------------------------------------------------------------------------------------------------------
@@ -866,24 +902,32 @@ final class LifeStoryScreen extends Screen {
 			story.add(line);
 		}
 		List<Component> gives = gives(s.question, a, false);
-		sections.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.strengths"), Ui.GOOD, gives));
-		if (!open(a)) {
-			sections.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.weaknesses"), Ui.BAD, List.of(reason(a))));
-		}
-		// the paths: a birthplace's blood and the looks it can take, a trade's class and what it picks
-		if (a.heritage() != null) {
+		List<PickerLayout.Pill> pills = new ArrayList<>();
+		if (s.question == Question.BORN && a.heritage() != null) {
+			// Andy: "this place should display all heritage strengths and weaknesses": the heritage's whole kit, from its card as the
+			// heritage screen sorts it (so what's added to a heritage shows here too), for the look the figure wears
 			Heritage.Kind kind = a.heritage();
-			for (int i = 0; i <= HeritageVariants.of(kind).size(); i++) {
-				List<ItemStack> icons = new ArrayList<>();
-				icons.add(new ItemStack(kind.icon));
-				HeritageVariants.Variant v = HeritageVariants.at(kind, i);
-				if (v != null && v.hybrid() != null) {
-					icons.add(new ItemStack(v.hybrid().icon));
+			int look = draft.look >= 0 && kind == heritage() ? draft.look : rolledLook(kind, picked(Question.CHILDHOOD), true);
+			pills.addAll(HeritageScreen.statPills(kind));
+			for (PickerLayout.Section kit : HeritageScreen.kitSections(kind, HeritageVariants.at(kind, look))) {
+				List<Component> lines = new ArrayList<>();
+				if (kit.color() == Ui.GOOD) {
+					lines.addAll(gives);
 				}
-				paths.add(new PickerLayout.Path(icons, HeritageVariants.title(kind, i), -1));
+				lines.addAll(kit.lines());
+				if (kit.color() == Ui.BAD && !open(a)) {
+					lines.add(reason(a));
+				}
+				sections.add(new PickerLayout.Section(kit.label(), kit.color(), lines));
 			}
-			note = Component.translatable("gui.jaymoskingdoms.picker.paths_looks", Component.translatable("heritage.jaymoskingdoms." + kind.key()));
-		} else if (a.cls() != null && !a.cls().options.isEmpty()) {
+		} else {
+			sections.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.strengths"), Ui.GOOD, gives));
+			if (!open(a)) {
+				sections.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.weaknesses"), Ui.BAD, List.of(reason(a))));
+			}
+		}
+		// the paths: a trade's class and what it picks (a birthplace's looks aren't listed: the figure wears one drawn at random)
+		if (a.cls() != null && !a.cls().options.isEmpty()) {
 			Classes.PlayerClass cls = a.cls();
 			for (String option : cls.options) {
 				List<ItemStack> icons = new ArrayList<>();
@@ -896,7 +940,7 @@ final class LifeStoryScreen extends Screen {
 			}
 			note = Component.translatable("gui.jaymoskingdoms.picker.paths_options", Component.translatable("class.jaymoskingdoms." + cls.key()));
 		}
-		return new PickerLayout.Info(icon, g == null ? null : (gr, x, y) -> drawGlyph(gr, g, x, y), name, tag, ACCENT, List.of(), story, sections, note, paths, -1);
+		return new PickerLayout.Info(icon, g == null ? null : (gr, x, y) -> drawGlyph(gr, g, x, y), name, tag, ACCENT, pills, story, sections, note, paths, -1);
 	}
 
 	/**
@@ -2835,9 +2879,9 @@ final class LifeStoryScreen extends Screen {
 				icon = new ItemStack(here.icon());
 				if (s.question == Question.BORN && here.heritage() != null) {
 					kind = here.heritage();
-					look = LifeStory.lookFor(kind, picked(Question.CHILDHOOD));
+					look = draft.look >= 0 && kind == heritage() ? draft.look : rolledLook(kind, picked(Question.CHILDHOOD), true);
 				} else if (s.question == Question.CHILDHOOD && kind != null && draft.look < 0) {
-					look = LifeStory.lookFor(kind, here);
+					look = rolledLook(kind, here, here == picked(Question.CHILDHOOD));
 				}
 			}
 		}

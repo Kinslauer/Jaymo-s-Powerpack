@@ -161,7 +161,7 @@ final class JobHalls {
 		s.set(0, 2, 5, k.pane);
 		s.set(6, 2, 5, k.pane);
 		s.gable(0, 6, 3, 8, 4, k.roofStairs, k.roofSlab, p.planks());
-		s.set(5, 1, 7, Blocks.BARREL.defaultBlockState());
+		s.set(5, 1, 7, KitchenCompat.fishBarrel());
 		s.set(1, 1, 7, Buildings.Sketch.facing(Blocks.CHEST, Direction.NORTH));
 		s.set(3, 3, 7, Buildings.Sketch.facing(Blocks.WALL_TORCH, Direction.NORTH));
 		if (k.chance(0.5)) {

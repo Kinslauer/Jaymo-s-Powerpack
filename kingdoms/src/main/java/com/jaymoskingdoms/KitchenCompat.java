@@ -399,6 +399,13 @@ public final class KitchenCompat {
 		return rice == net.minecraft.world.level.block.Blocks.AIR ? null : rice;
 	}
 
+	/** Kitchen's fish barrel for a fishery or a market stall, or a plain barrel without Kitchen. */
+	static net.minecraft.world.level.block.state.BlockState fishBarrel() {
+		net.minecraft.world.level.block.Block barrel = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(
+			net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymoskitchen", "fish_barrel"));
+		return (barrel == net.minecraft.world.level.block.Blocks.AIR ? net.minecraft.world.level.block.Blocks.BARREL : barrel).defaultBlockState();
+	}
+
 	/** Kitchen is here, and new enough. */
 	static boolean loaded() {
 		return CORPSE != null;

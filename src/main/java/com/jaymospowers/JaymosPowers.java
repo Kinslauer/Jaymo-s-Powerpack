@@ -47,8 +47,15 @@ public class JaymosPowers implements ModInitializer {
 		// (0.15.5) feathers (stamina) and the dodge, in place of Combat Roll
 		com.jaymospowers.stamina.Feathers.init();
 		com.jaymospowers.stamina.Dodge.init();
+		// (pb-jump) a second jump in the air for every power
+		com.jaymospowers.core.jump.PowerJump.init();
 		// the Divine-born's feather sense, Alight and hover (after the dodge: a dodge misses first)
 		com.jaymospowers.divine.DivineSense.init();
+		// (pb-shell, pb-ward) the Divine-born's golden shell and healing ward
+		com.jaymospowers.divine.DivineShell.init();
+		// (pb-darkcorrupt) hits, kills and full darkness feed a corruption meter that has begun
+		com.jaymospowers.core.DarkFeed.init();
+		com.jaymospowers.divine.DivineWard.init();
 		com.jaymospowers.core.Meditate.init();
 		com.jaymospowers.core.Sitting.init();
 		// (0.19.29) training gear and the Mastery ranks
@@ -58,10 +65,19 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.LockOn.init();
 		// (0.17.67) the guard and the parry, for everyone
 		com.jaymospowers.combat.Guard.init();
+		com.jaymospowers.combat.CombatAttrs.init();
+		com.jaymospowers.combat.CritCue.init();
 		// (0.20.3) a weapon banged on a raised shield: hostiles come, animals bolt
 		com.jaymospowers.combat.ShieldBang.init();
+		// a shove for everyone, and each kind of weapon's small on-hit effect
+		com.jaymospowers.combat.Shove.init();
+		com.jaymospowers.tinkering.WeaponProcs.init();
 		// sparks off meeting steel, shards off wooden shields, and the shields that break
 		com.jaymospowers.combat.ClashFx.init();
+		// sparks off a blow, a strike or an arrow that lands on metal armour, a metal body or a metal block
+		com.jaymospowers.combat.MetalHits.init();
+		// blades keep an edge: dulled by use, put right at a grindstone
+		com.jaymospowers.combat.Edge.init();
 		// every magic effect's type: beam, blast, ring, orb, sigil, mote, miasma
 		com.jaymospowers.core.fx.MagicFx.init();
 		com.jaymospowers.combat.ShieldShatter.init();
@@ -144,6 +160,9 @@ public class JaymosPowers implements ModInitializer {
 		// fire users: the fight gauge, soak and return, the fire kit's gaps
 		com.jaymospowers.power.ember.RunningHot.init();
 		com.jaymospowers.power.ember.EmberSoak.init();
+		// (pb-firecrash, pb-cook) the Emberborn's rise and crash, and cooking in the hands
+		com.jaymospowers.power.ember.EmberCrash.init();
+		com.jaymospowers.power.ember.EmberCook.init();
 		com.jaymospowers.power.ember.FireKit.init();
 		// weapons from the Stone Age to the pirates (after Age of Weapons), not a power
 		com.jaymospowers.armory.Armory.init();
@@ -294,10 +313,10 @@ public class JaymosPowers implements ModInitializer {
 			"power.chrono.ChronoEchoes", "power.chrono.ChronoDirectives", "power.chrono.ChronoSpeed", "power.chrono.ChronoGears", "power.chrono.ChronoPhase", "power.chrono.ChronoSlowTime", "power.chrono.ChronoMeters", "power.chrono.ChronoMomentum", "power.chrono.ChronoTunnel", "power.chrono.SpeedPrism","power.chrono.ChronoMemory", "power.chrono.ChronoFlow", "power.chrono.ChronoWindDay", "power.chrono.future.Future", "power.chrono.future.FutureGuns", "power.chrono.future.FutureRuins", "power.chrono.future.FutureOmenPilots", "power.chrono.ChronoRoad", "core.PowerRoads", "power.wind.WindKick",
 			"power.gravity.GravityPower", "power.gravity.GravityRocks", "power.gravity.GravityRockOrders", "power.gravity.GravityForward", "power.gravity.GravityWalk", "power.gravity.GravityOverturn",
 			"power.web.WebAscension", "power.web.WebCounter", "power.web.WebMorph", "power.web.WebBehemoth", "power.web.WebInhabit", "power.web.WebSlam", "power.web.WebBrute", "power.web.WebBridges", "power.web.WebPower", "power.web.WebSymbiote", "power.web.WebSymbioteBond", "power.web.WebSymbioteCushion", "power.web.WebTendrils", "power.web.WebHeldGrab", "power.web.WebFury", "power.web.WebLatch", "power.web.WebPuddle", "power.web.WebExecutions",
-			"power.web.WebWallRun", "power.web.WebParkour", "power.web.WebStrength", "power.web.WebShooters", "power.web.WebSymbioteStrains", "power.web.WebSymbioteCollect", "power.web.WebSymbioteBody",
+			"power.web.WebWallRun", "power.web.WebParkour", "power.web.WebStrength", "power.web.WebDarkSense", "power.web.WebShield", "power.web.WebShooters", "power.web.WebSymbioteStrains", "power.web.WebSymbioteCollect", "power.web.WebSymbioteBody",
 			"power.web.WebSymbioteMind",
 			"power.web.WebGrudges", "power.web.WebMeeting", "power.web.Webbed",
-			"power.wind.WindModes", "power.wind.WindPower", "power.wind.SorasLineage", "power.wind.WindStorm", "power.wind.WindTempest",
+			"power.wind.WindModes", "power.wind.WindPower", "power.wind.StormRecall", "power.wind.StormRoad", "power.wind.SorasStone", "power.wind.SorasLineage", "power.wind.WindStorm", "power.wind.WindTempest",
 			"power.wind.WindCyclone", "power.wind.WindJet", "power.wind.aether.WindAether",
 			"power.resonance.ResonancePower", "power.resonance.ResonanceHush", "power.resonance.ResonanceSight",
 			"power.darktide.DarktideState", "power.darktide.DarktideSouls",
@@ -305,7 +324,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.xenoform.XenoformState", "power.xenoform.XenoBands", "power.xenoform.StarReaders", "power.xenoform.BandUpgrades", "power.xenoform.BandForge", "power.xenoform.RivalHunter", "power.xenoform.BandStyle", "power.xenoform.nadir.NadirRules", "power.xenoform.nadir.NadirStash",
 			"power.xenoform.forms.BulwarkFury",
 			"power.xenoform.forms.FuseStore",
-			"power.ember.RunningHot", "power.ember.EmberSoak",
+			"power.ember.RunningHot", "power.ember.EmberSoak", "power.smoke.SmokeBanish",
 			"power.xenoform.XenoMinds",
 			"power.zfighter.ZFighterPower", "power.zfighter.ZFighterTraining", "power.zfighter.ZFighterGrowth", "power.zfighter.ZFighterLineage", "power.zfighter.ApeRage", "power.zfighter.ApeSmash", "power.zfighter.ApeGrab", "power.zfighter.VillagerApe", "power.zfighter.UndeadBlood", "power.zfighter.UndeadGiant","power.zfighter.RaceMoves", "power.zfighter.FrostBeam", "power.zfighter.ZFighterGuard", "power.zfighter.ZFighterCombo", "power.zfighter.ZFighterStretchCombo", "power.zfighter.ZFighterDisc", "power.zfighter.ZFighterWaveBeam", "power.zfighter.ZFighterHands",
 			"power.zfighter.ZFighterTeleport",
@@ -313,7 +332,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.zfighter.ZFighterPatrolRelief", "power.zfighter.ZFighterBranchForms", "power.zfighter.ZFighterEgo", "power.zfighter.ZFighterAndroid", "power.zfighter.ZFighterFrostForms",
 			"power.zfighter.ZFighterSites", "power.zfighter.ZFighterFusion", "power.zfighter.ZFighterMasters", "power.zfighter.ZFighterRaids", "power.zfighter.ZFighterTournaments", "power.zfighter.ZFighterCorruption",
 			"power.zfighter.ZFighterAura", "power.zfighter.ZFighterSlots", "power.zfighter.ZFighterKiWeapon","power.zfighter.ZFighterGrab", "power.zfighter.ZFighterSidestep",
-			"power.zfighter.ZFighterFusionItems", "power.zfighter.ZFighterFiveFusion", "power.zfighter.ZFighterMasterFusion", "power.zfighter.ZFighterFalseSuper", "power.zfighter.ZFighterGoldenApe", "power.zfighter.ZFighterGod", "power.zfighter.ZFighterGodRitual", "power.zfighter.ZFighterInstinct", "power.zfighter.ZFighterLegendary",
+			"power.zfighter.ZFighterFusionItems", "power.zfighter.ZFighterPartner", "power.zfighter.ZFighterFiveFusion", "power.zfighter.ZFighterMasterFusion", "power.zfighter.ZFighterFalseSuper", "power.zfighter.ZFighterGoldenApe", "power.zfighter.ZFighterGod", "power.zfighter.ZFighterGodRitual", "power.zfighter.ZFighterInstinct", "power.zfighter.ZFighterLegendary",
 			"power.zfighter.ZFighterEarthlingRace", "power.zfighter.ZFighterVerdantMerge", "power.zfighter.ZFighterFrostReserve", "power.zfighter.ZFighterWarriorComeback", "power.zfighter.ZFighterSonicSway", "power.zfighter.ZFighterSelfDestruct", "power.zfighter.ZFighterCreator",
 			"power.zfighter.ZFighterLookout", "power.zfighter.PatrolLaw", "power.zfighter.ZFighterWishExtras", "power.zfighter.ZFighterSagas", "power.zfighter.ZFighterSideQuests", "power.zfighter.ZFighterEscorts", "power.zfighter.ZFighterAfterlife", "power.zfighter.ZFighterDemonRealm",
 			"power.zfighter.pod.PodWrecks", "power.zfighter.sky.Charts", "power.zfighter.farworld.FarWorlds", "power.zfighter.farworld.PatrolWrit",
@@ -323,7 +342,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.smoke.SmokePower", "power.smoke.SmokeJet", "power.smoke.SmokeVapour", "power.smoke.SmokeSight", "power.smoke.SmokeSmog", "power.smoke.SmokeAshStorm", "power.smoke.SmokeMoves",
 			"enchanting.Enchanting", "costume.Costume", "freerun.Freerun", "freerun.FastRun", "freerun.Slide", "freerun.moves.RunMoves", "freerun.moves.SkyDive", "freerun.moves.FastSwim", "freerun.moves.Hiding", "stamina.Feathers", "stamina.Dodge", "boxing.Boxing", "boxing.BoxingEvades", "boxing.BoxingTraining", "rig.RigWrecks", "rig.RigSentry", "rig.RigCall", "rig.RigFinish", "rig.RigMoves", "rig.RigHelm", "rig.RigStudy", "backpack.Backpack", "baubles.Baubles", "baubles.Bonds", "baubles.Fairies", "young.Younglings", "armory.Lodged", "armory.Lash", "armory.FlintlockDraw", "armory.GunBlast", "armory.HammerSlam", "armory.KnifeGuard", "aether.structure.OutpostTracker", "aether.dungeon.RuinBoss", "fishing.FishingReal",
 			"water.Dives", "core.MagicMoves", "core.DreamCall", "core.RetiredPowers", "core.trials.PowerTrials", "bonebond.Boneiron",
-			"bits.SoulBurn", "alchemy.picks.SkinDraughts", "alchemy.picks.GivingUp", "alchemy.picks.Pacts",
+			"bits.SoulBurn", "alchemy.picks.SkinDraughts", "alchemy.picks.GivingUp", "alchemy.picks.MettleDraught", "alchemy.picks.Pacts",
 			"alchemy.Flux", "alchemy.Corruption", "alchemy.Knowledge", "alchemy.codex.Scans", "alchemy.flux.Cures", "alchemy.cauldron.CauldronBrewing", "alchemy.healing.HealingBrews", "alchemy.LabEscape", "ground.ThrownRocks",
 		};
 		for (String holder : holders) {

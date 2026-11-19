@@ -54,7 +54,18 @@ import org.jspecify.annotations.Nullable;
  * The server runs it; the line (a {@link WebLine#YANK} line on that hand) shows everyone, and the arm follows it.
  */
 public final class WebWhip {
-	public static final int OVERHEAD = 0, SEESAW = 1, LASSO = 2;
+	public static final int OVERHEAD = 0, SEESAW = 1, LASSO = 2, SPIN = 3;
+	/**
+	 * What a {@link Hold} asks for: {@code WHIRL} (Sneak, both webs on a creature) swings it round you; {@code SLAM} (the
+	 * same with Jump held) is the overhead or seesaw slam instead; {@code ONE_LINE} (a punch, one web on a creature)
+	 * whirls it on that single line for as long as it is held, and letting go flings it.
+	 */
+	public static final int WHIRL = 0, SLAM = 1, ONE_LINE = 2;
+	/** The one-line whirl: radians a tick round you, how far out and how high it swings, the longest it holds, and the fling. */
+	static final double SPIN_STEP = 0.5, SPIN_RADIUS = 3.2, SPIN_UP = 1.0;
+	static final int SPIN_MAX_TICKS = 100, SPIN_HIT_GAP = 8;
+	static final float SPIN_DAMAGE = 4.0F, FLING_DAMAGE = 6.0F;
+	static final double SPIN_PUSH = 1.0, SPIN_LIFT = 0.45, FLING_SPEED = 1.9, FLING_LIFT = 0.25;
 	/** How far a whip reaches (blocks, times the symbiote's reach), and the slack the server allows the client's aim. */
 	public static final double RANGE = 16.0;
 	static final double RANGE_SLACK = 2.0;
@@ -102,9 +113,10 @@ public final class WebWhip {
 
 	/** Client → server: whip what's under the crosshair with that hand's web. */
 	/** Client → server: Sneak pressed (true) or let go (false) with both swing webs near each other. */
-	public record Hold(boolean down) implements CustomPacketPayload {
+	public record Hold(boolean down, int mode) implements CustomPacketPayload {
 		public static final Type<Hold> TYPE = new Type<>(JaymosPowers.id("web_whip_hold"));
-		public static final StreamCodec<ByteBuf, Hold> CODEC = ByteBufCodecs.BOOL.map(Hold::new, Hold::down).cast();
+		public static final StreamCodec<ByteBuf, Hold> CODEC = StreamCodec.composite(
+			ByteBufCodecs.BOOL, Hold::down, ByteBufCodecs.VAR_INT, Hold::mode, Hold::new);
 
 		@Override
 		public Type<Hold> type() {
@@ -134,6 +146,10 @@ public final class WebWhip {
 		final boolean hover;
 		final boolean hadNoGravity;
 		int tick;
+		/** The one-line whirl: when each creature it swept was last hit (by id), so a pass hits once. */
+		final Map<Integer, Integer> swept = new HashMap<>();
+		/** The one-line whirl: where round you (radians) it is now. */
+		double angle;
 
 		Whip(int target, int hand, int kind, long start, Vec3 from, boolean hadGravity, boolean hover, boolean hadNoGravity) {
 			this.target = target;
@@ -161,7 +177,7 @@ public final class WebWhip {
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(Hold.TYPE, Hold.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Taken.TYPE, Taken.CODEC);
-		ServerPlayNetworking.registerGlobalReceiver(Hold.TYPE, (payload, ctx) -> hold(ctx.player(), payload.down()));
+		ServerPlayNetworking.registerGlobalReceiver(Hold.TYPE, (payload, ctx) -> hold(ctx.player(), payload.down(), payload.mode()));
 	}
 
 	// ---- aiming (both sides) ----------------------------------------------------------------------------------------
@@ -205,7 +221,18 @@ public final class WebWhip {
 	 * Sneak pressed with both swing webs out: if they're on the same creature (not one small enough to reel) or the
 	 * same bit of terrain, the whip starts, or the pry. Let go: a pry not yet torn loose is off, its cracks lingering.
 	 */
-	private static void hold(ServerPlayer player, boolean down) {
+	private static void hold(ServerPlayer player, boolean down, int mode) {
+		if (mode == ONE_LINE) {
+			if (down) {
+				beginOneLine(player);
+			} else {
+				Whip whip = WHIPS.get(player.getUUID());
+				if (whip != null && whip.kind == SPIN) {
+					fling(player, whip, player.level().getEntity(whip.target));
+				}
+			}
+			return;
+		}
 		if (!down) {
 			Pry pry = PRIES.get(player.getUUID());
 			if (pry != null) {
@@ -241,7 +268,7 @@ public final class WebWhip {
 			}
 			WebPower.handOverSwings(player);
 			ServerPlayNetworking.send(player, new Taken());
-			begin(player, WebNet.MAIN, target, now);
+			begin(player, WebNet.MAIN, target, now, mode == SLAM);
 			return;
 		}
 		// on terrain: the webs start prying a chunk of it loose
@@ -271,14 +298,15 @@ public final class WebWhip {
 	}
 
 	/**
-	 * Both webs on it: the whip. In midair it's always the lasso (and you hang there); on the ground the seesaw only for
-	 * a creature, else the overhead.
+	 * Both webs on it: the whip. A creature is whirled round you (the lasso, on the ground or, hanging in place, in
+	 * midair) unless {@code slam} (Jump held, or a chunk of ground): then in midair it's still the lasso, and on the
+	 * ground the seesaw (only for a creature) or the overhead.
 	 */
-	private static void begin(ServerPlayer player, int hand, Entity target, long now) {
+	private static void begin(ServerPlayer player, int hand, Entity target, long now, boolean slam) {
 		ServerLevel level = player.level();
 		boolean midair = !player.onGround() && !player.isInWater() && !player.onClimbable();
 		int kind;
-		if (midair) {
+		if (midair || !slam && target instanceof LivingEntity && !com.jaymospowers.power.gravity.GravityPower.isCorpse(target)) {
 			kind = LASSO;
 		} else if (target instanceof LivingEntity && !com.jaymospowers.power.gravity.GravityPower.isCorpse(target)) {
 			kind = level.getRandom().nextBoolean() ? SEESAW : OVERHEAD;
@@ -297,6 +325,100 @@ public final class WebWhip {
 		player.setAttached(WebPower.line(WebNet.OFF), new WebLine(WebLine.YANK, target.getBoundingBox().getCenter(), target.getId()));
 		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 1.0F, 1.3F);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.PLAYERS, 0.8F, 1.0F);
+	}
+
+	/**
+	 * A punch with a single web on a creature (the other hand's out, or empty): it's whirled round you on that one line
+	 * for as long as the punch is held, knocking down whatever it sweeps; let go and it's flung ({@link #fling}).
+	 */
+	private static void beginOneLine(ServerPlayer player) {
+		if (!player.isAlive() || player.isSpectator() || !Powers.has(player, WebPower.INSTANCE) || WHIPS.containsKey(player.getUUID())
+			|| PRIES.containsKey(player.getUUID())) {
+			return;
+		}
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		if (now < READY.getOrDefault(player.getUUID(), 0L)) {
+			return;
+		}
+		WebLine main = player.getAttached(WebPower.line(WebNet.MAIN));
+		WebLine off = player.getAttached(WebPower.line(WebNet.OFF));
+		if (main != null == (off != null)) {
+			return;
+		}
+		int hand = main != null ? WebNet.MAIN : WebNet.OFF;
+		WebLine line = main != null ? main : off;
+		if (line.kind() != WebLine.SWING || line.entityId() < 0) {
+			return;
+		}
+		Entity target = level.getEntity(line.entityId());
+		if (!whippable(player, target)) {
+			return;
+		}
+		WebPower.handOverSwings(player);
+		ServerPlayNetworking.send(player, new Taken());
+		Whip whip = new Whip(target.getId(), hand, SPIN, now, target.position(), !target.isNoGravity(), false, player.isNoGravity());
+		Vec3 away = target.position().subtract(player.position());
+		whip.angle = Math.atan2(away.z, away.x);
+		target.setNoGravity(true);
+		WHIPS.put(player.getUUID(), whip);
+		player.setAttached(WebPower.line(hand), new WebLine(WebLine.YANK, target.getBoundingBox().getCenter(), target.getId()));
+		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.PLAYERS, 1.0F, 1.3F);
+		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.PLAYERS, 0.8F, 1.0F);
+	}
+
+	/** One tick of the one-line whirl: it goes on round you, sweeping down whoever it meets. */
+	private static void tickSpin(ServerPlayer player, Whip whip, Entity target) {
+		ServerLevel level = player.level();
+		int t = ++whip.tick;
+		whip.angle += SPIN_STEP;
+		Vec3 point = player.position().add(Math.cos(whip.angle) * SPIN_RADIUS, SPIN_UP + target.getBbHeight() * 0.5, Math.sin(whip.angle) * SPIN_RADIUS);
+		steer(player, target, point);
+		if (t % 7 == 0) {
+			swing(player, target);
+		}
+		for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(0.6),
+			e -> e != player && e != target && e.isAlive() && !e.isSpectator() && !(e instanceof net.minecraft.world.entity.TamableAnimal pet && pet.isOwnedBy(player)))) {
+			Integer last = whip.swept.get(other.getId());
+			if (last != null && t - last < SPIN_HIT_GAP) {
+				continue;
+			}
+			whip.swept.put(other.getId(), t);
+			other.hurtServer(level, level.damageSources().playerAttack(player), SPIN_DAMAGE);
+			Vec3 out = other.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
+			out = out.lengthSqr() < 1.0E-4 ? Vec3.ZERO : out.normalize().scale(SPIN_PUSH);
+			Vec3 push = out.add(0.0, SPIN_LIFT, 0.0);
+			other.setDeltaMovement(push);
+			other.needsSync = true;
+			other.syncVelocity = true;
+			if (other instanceof ServerPlayer struck) {
+				ServerPlayNetworking.send(struck, new WebNet.Nudge(push));
+			}
+			level.playSound(null, other.getX(), other.getY(), other.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.0F, 0.8F);
+		}
+		if (t >= SPIN_MAX_TICKS) {
+			fling(player, whip, target);
+		}
+	}
+
+	/** Let go of the one-line whirl: the creature flies off along the way it was going round, and takes the fling's hurt. */
+	private static void fling(ServerPlayer player, Whip whip, @Nullable Entity target) {
+		if (target != null && target.isAlive()) {
+			Vec3 v = new Vec3(-Math.sin(whip.angle) * FLING_SPEED, FLING_LIFT, Math.cos(whip.angle) * FLING_SPEED);
+			end(player, whip, target);
+			target.setDeltaMovement(v);
+			target.needsSync = true;
+			target.syncVelocity = true;
+			if (target instanceof ServerPlayer flung) {
+				ServerPlayNetworking.send(flung, new WebNet.Nudge(v));
+			}
+			if (target instanceof LivingEntity living) {
+				living.hurtServer(player.level(), player.level().damageSources().playerAttack(player), FLING_DAMAGE);
+			}
+			player.level().playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.TRIDENT_THROW.value(), SoundSource.PLAYERS, 1.0F, 0.7F);
+			return;
+		}
+		end(player, whip, target);
 	}
 
 	/** Held still in the air by the spin. */
@@ -346,7 +468,7 @@ public final class WebWhip {
 		}
 		chunk.script(true, false);
 		// torn loose on both webs: straight into the whip
-		begin(player, pry.hand(), chunk, level.getGameTime());
+		begin(player, pry.hand(), chunk, level.getGameTime(), true);
 	}
 
 	/** The pry's off: the cracks fade (and the web stays off the wall). */
@@ -382,6 +504,10 @@ public final class WebWhip {
 		if (target == null || !target.isAlive() || !player.isAlive() || player.isSpectator()
 			|| target.distanceToSqr(player) > Mth.square(RANGE * WebSymbiote.reachScale(player) * 2.0)) {
 			end(player, whip, target);
+			return;
+		}
+		if (whip.kind == SPIN) {
+			tickSpin(player, whip, target);
 			return;
 		}
 		int t = ++whip.tick;

@@ -1,0 +1,10 @@
+{
+	"music.nether.warped_forest": {
+		"replace": true,
+		"sounds": [
+			{"name": "music/skaga", "stream": true, "volume": 0.5},
+			{"name": "music/until_the_end", "stream": true, "volume": 0.5},
+			{"name": "music/leaving_for_valhalla", "stream": true, "volume": 0.5}
+		]
+	}
+}

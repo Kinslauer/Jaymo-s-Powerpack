@@ -209,17 +209,17 @@ public class CostumeScreen extends Screen {
 	}
 
 	private void cycleCut(int by) {
-		design = design.withCut(CostumeSets.step(this.minecraft.player, CostumeDesign.Cut.values(), design.cut(), by, c -> c.power));
+		design = design.withCut(CostumeSets.step(this.minecraft.player, CostumeDesign.Cut.values(), design.cut(), by));
 		labels();
 	}
 
 	private void cycleMask(int by) {
-		design = design.withMask(CostumeSets.step(this.minecraft.player, CostumeDesign.Mask.values(), design.mask(), by, m -> m.power));
+		design = design.withMask(CostumeSets.step(this.minecraft.player, CostumeDesign.Mask.values(), design.mask(), by));
 		labels();
 	}
 
 	private void cycleCape(int by) {
-		design = design.withCape(CostumeSets.step(this.minecraft.player, CostumeDesign.Cape.values(), design.cape(), by, c -> c.power));
+		design = design.withCape(CostumeSets.step(this.minecraft.player, CostumeDesign.Cape.values(), design.cape(), by));
 		labels();
 	}
 

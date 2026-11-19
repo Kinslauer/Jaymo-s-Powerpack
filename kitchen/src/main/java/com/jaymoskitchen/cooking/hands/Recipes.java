@@ -70,6 +70,7 @@ final class Recipes {
 			case MEAD -> Step.HONEY_BOTTLE;
 			case BERRY_WINE -> Step.SWEET_BERRIES;
 			case GRAPE_WINE -> Step.GRAPES;
+			case BLACK_WINE -> Step.BLACK_GRAPES;
 		};
 	}
 

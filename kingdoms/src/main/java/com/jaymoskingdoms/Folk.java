@@ -436,6 +436,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		// and the sets its faith, its trade or its camp's country puts on it (FrontierWear)
 		FrontierWear.folk(this, faction, climate);
 		HeraldryWear.folk(this, faction, climate);
+		// and a guard's or archer's kit, as their settlement can pay for it (GuardKit)
+		GuardKit.folk(this, faction, climate);
 		// (gb-capes) a ruler's or knight's cape, over whatever chest piece they ended up in
 		Capes.ensure(this, faction);
 		this.outfit = Outfits.VERSION;
@@ -446,6 +448,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			this.setDropChance(slot, 0.0F);
 		}
 		FrontierWear.raider(this, faction, climate);
+		GuardKit.raider(this, faction, climate);
 	}
 
 	@Override
@@ -765,6 +768,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		KnightsCompat.dress(this, faction, climate);
 		FrontierWear.folk(this, faction, climate);
 		HeraldryWear.folk(this, faction, climate);
+		GuardKit.folk(this, faction, climate);
 		Capes.ensure(this, faction);
 		if (!this.combatant() || this.role() == BARBARIAN || this.role() == CHIEF || Orcs.isOrc(this)) {
 			this.setItemSlot(EquipmentSlot.MAINHAND, hand);
@@ -773,6 +777,7 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			this.setDropChance(slot, 0.0F);
 		}
 		FrontierWear.raider(this, faction, climate);
+		GuardKit.raider(this, faction, climate);
 	}
 
 	@Override

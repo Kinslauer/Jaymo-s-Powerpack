@@ -15202,3 +15202,164 @@ Not tested in game.
 
 - `Graves` registered its buried-graves attachment under `jaymoskingdoms:graves`, the same id as `Bearers`' grave list, so the server logged a duplicate type registration on every boot. It is now `jaymoskingdoms:buried_graves`. Buried graves saved under the old key are not read back.
 - Not built here (CI compiles); not played.
+
+## 0.10.54 (2026-11-19): guards wear what their rank and their settlement's purse allow (#1791)
+
+- **Paid kit** (`GuardKit`): a settlement's guards and archers (our folk and MCA's) are kitted from Andy's wardrobe list: each piece by rank (militia, soldier, knight, veteran, leader; archers and gunners apart), land and kind of settlement, with his notes as rules (barbute for Coin realms, spangenhelm for Old Blood in the cold, great helm for Chivalry leaders, grotesque visor for Conquest, frog-mouth helm never on the field, one helm shape per realm and rank, plate cuirass only where there's iron, etched cuirass for a kingdom's honoured knights but not Coin's, Paladin sets only in Faith and Chivalry realms, brine-soaked quilted cotton in the jungle, hide in the savanna and swamp). Templar plate now goes to soldiers and up (not militia) of Truth and Crowned Sun realms, Armory sets only to veterans and leaders of their lands, settler gear to village and haven guards.
+- Every piece is paid for, best first: a salvaged piece in the stores that's as good, the piece itself from the stores, its materials there (iron or steel, copper, leather, wool), or emeralds from the treasury (40 kept back, as for horses). What can't be paid for is skipped for the next piece down. The floor is leather and mail: mail if paid for, the levy's leather free. Every guard wears the harness: a quilted coat at least, a tabard in the realm's colours (not gunners), and what their rank can buy. Blades go iron, copper, then stone; a shield costs an ingot or 2 emeralds.
+- The kit is kept on the guard (`guard_kit` attachment), paid once; once a day a guard near a player is looked over and better is bought if there's money, the old piece going back to the stores. A gunner who stops being one hands his kit back.
+- **Gifted village guards** (`GiftedFolk`, Andy: "villagers and haven folk will more likely have powers and use those to fight to make up for the fact they have less skilled soldiers"): a village's guards and archers (they rise no higher than soldier) are weighed once more for a power, 1 in 5 (a haven's 1 in 3), and fight with it openly, never warily.
+- Camp raiders: torn hoods (half), torn cloaks (a quarter), horned crests on a third of helmed raiders, hide armour in the savanna and swamp.
+- A Paladin whose oath is broken can't keep oath sleeves on until it's atoned for.
+- Recruits keep only their stock kit and what they're given (they hold things in their MCA inventory); bearers salvage the dead's gear into the stores, marked, and guards brag about pieces off an enemy.
+- Outfits version 4: every folk guard is kitted again (and charged) on load.
+- Built; not played.
+
+## 0.10.55 (2026-11-19): life story: one random heritage look, no paths list (#1792)
+
+- **Where were you born?** The info panel no longer lists every look (path) a heritage can take. The figure on the left wears one look of that heritage drawn at random, and that is the look you get.
+- The draw is kept per heritage while it stays allowed: a childhood answer that leans to one of the heritage's looks (e.g. swimming -> Abyssal for Tideborn) narrows it to that look; one with no lean keeps the draw. Picking a look yourself on the story page still wins. Only pointing at a childhood answer previews its look without changing your draw. (`LifeStoryScreen.rolledLook`, `Draft.rolls`)
+- Before, a childhood with no lean always gave the heritage's first look.
+- Built (compileClientJava); not played.
+
+## 0.10.56 (2026-11-19): villager talk camera faces the villager (#1794)
+
+- **Talking to a villager**: the cutscene camera no longer sits at the villager's eyes (which put it inside a head and filled the screen with a face). While the villager speaks it frames their face over your shoulder; while you speak it pulls back behind you to show you both. Walls pull the camera in, and with no room behind you it swaps to the other shoulder or a side-on view of the two of you (`DialogueCinematic.view`).
+- Built; not played.
+
+## 0.10.57 (2026-11-19): open sea full of life - higher water caps out at sea, ships met on a crossing (#1793)
+
+- **Why the ocean felt empty**: the water caps cut on 2026-11-07 ("too many mobs spawning at once in the water") held every player to 3 water creatures (squid, dolphins, sharks, great whales all share it) and 6 fish in all, with at most 2 to a spawn, everywhere. And every ship (pirates, navies, merchantmen, whalers, smacks) sails from a harbour or cove and stays near it, so a crossing met none.
+- **Open sea caps**: those low caps now hold along coasts, rivers and lakes only. Open sea chunks (`SeaLife.openSea`, `Offshore.far` 0.4+, cached per chunk) have 8 water creatures and 16 fish per player, up to 4 to a spawn (`MonsterCapMixin`, `WaterClusterMixin`, new `SeaCapsMixin` + `SeaCapsGlobalMixin`).
+- **Great whales** spawn twice as often in deep ocean (`Whaling.WEIGHT` 2 -> 4).
+- **Ships met at sea** (`SeaPassers`): out at sea with no other ship within 192 blocks, every 30 s there's a 15% chance a ship heaves into sight 96-128 blocks off, out of sight range: a sea rover from the nearest pirate cove (the far-grounds rover, `FarGrounds.rover`, now callable from any spot) or a merchantman of the nearest harbour bound for another realm's (hail and trade as usual). Both are stowed once long out with nobody near.
+- `Navies.shipLost` only clears a harbour's merchantman when it was that one.
+- Built; not played. Mixin targets checked against the 26.3 jar with javap; no dev server boot.
+- **Wind on show** (Andy's sea-life pick): the wind that fills ships' sails (`Winds`) now carries smoke (campfires, fires, torches, chimneys), dust and falling leaves along with it under open sky, harder the stronger it blows; under a roof or canopy they rise and fall as before (`WindDriftMixin`, client). In a fresh wind or harder, white crests break on the sea round you, blown downwind (`WindSigns`). Rain already slanted with the wind. Banners are left as they are.
+
+## 0.10.58 (2026-11-19): Music of the places, and a tavern's bard (#1795)
+
+- **Places**: with the Medieval Music pack on, where you stand has its tune (`PlaceThemes` on the server says which place, `client/music/PlaceMusic` plays it as Music-slider music, resting a while between tracks, fading in and out): a realm's town plays Townsong or Greenlands; a tavern or the cafe, Now We Feast or Celebration; an illager camp, Marked; any other camp, Grundar; riding a King's Road, Now We Ride or The Road Home; near a realm at war, Behind the Sword or Might & Magic. Great foes' themes and letterboxed scenes' music win and this fades under them. With the pack off the sound events (`place_music.*` in sounds.json, pointing at the pack's own files) resolve to nothing, nothing is played, and the game's own music goes on.
+- **Festival**: on a realm's festival day its square plays Celebration and Bonfire, louder within 10 blocks of the seat.
+- **Bard** (`Bards`): in a standing tavern with a player near, one villager takes a lute (Nightfall's) and plays Bonfire, Now We Feast, Celebration or Tam Lin as a positional streamed sound (`bard.*`, attenuation 16 blocks: heard at 16, silent at 40), then rests. Sneak and use on the bard with a coin in your purse and they stop and play another. One bard per tavern.
+- Built (CI); not played.
+
+## 0.10.59 (2026-11-19): fish barrels in fisheries and market stalls (#1799)
+
+- A fishery keeps its catch in Kitchen's fish barrel, and about one village market stall in three has one for its barrel (`KitchenCompat#fishBarrel`, looked up by id; a plain barrel without Kitchen).
+- Built by CI only; not played.
+
+## 0.10.60 (2026-11-19): the wind pushes - drift in the air, rolling items, arrows, shelter, sound (#1798)
+
+- **Wind push** (`sailing/WindPush`, `client/disasters/WindFeel`; ported in spirit from Global Wind, MIT, notice in `ports/globalwind/`): the world's wind (`Storms` through `Winds`) now moves things. Grounded creatures feel nothing; anyone airborne (a jump, a fall, an elytra glide, the Wind power's flight) drifts a little downwind from a fresh wind up, less the bulkier they are (by body size, so Stoneborn drift less than Sylvans). Creative and spectators aren't pushed. Each client moves its own player; the server moves mobs and items.
+- **Items** roll downwind in a gale, and on ice from a lighter wind. **Arrows and thrown shafts** bend a little in any wind (the old gale rule made gradual, same strength at the top).
+- **Shelter**: a short ray (8 blocks) upwind from head height; a solid block, glass included, means shelter, so standing behind a wall you feel nothing, and a ship lying in a cove catches less (`Ship`'s sail push and her drawn sails).
+- **Sound** (`client/disasters/WindSounds`): a low rush that follows the wind's strength, a thin whistle in a hard wind, quieter in shelter and indoors.
+- **Cloth** (`client/disasters/WindCloth`, `BannerWindMixin`, `BannerFlagWindMixin`, `HeraldryLayer`): banners' flags swing out downwind and the harness cloak's cape streams back, to the side and flutters, gently, by the wind's strength and way as the client has it; a quarter as much behind a wall. No weight system exists, so only bulk scales the drift.
+- Built by CI; not played.
+
+## 0.10.61 (2026-11-19): the dead in the wild: remains, last camps, ruin traps, the headless rider (#1802)
+
+- **Remains**: the gone-before lie where they fell, about one per six chunks in the wild and never in a village: frozen in snow, tangled in jungle, drowned in rivers, pinned under dripstone, at cliff feet, sun-dried in desert and badlands, webbed in caves, under sky islands' edges (Aether biomes), in soul sand valleys and on the End island. `RemainsBlock` (three poses, our own bone model, a texture per place), seeded by `RemainsFeature`. Break one with an empty hand to search it (`loot_table/remains/<kind>`: a miner's pick and ore, a hunter's bow and arrows, a sailor's lead and line, armour worn or broken, tinker parts where Powers is loaded); silk touch lifts it whole.
+- **Surprises**: about one in eight is a trap (an arrow from the ground, gravel from overhead, cave spiders in the ribs); searched at night, one may rise as a barrow knight. About one in five holds a written scrap (2 to 4 lines in the dead one's voice) pointing at a real mineshaft, ruin, buried room or monolith already made nearby; it files into the Lore Codex.
+- **Rites**: a shovel buries them under a grave mound, as does the rite of keeping (`DeathRites`); that yields the token and scrap and a little experience, never the gear. About one in four wears a ring or a carved spoon naming a home village (`Remains.token(level, near, random)` is public, so other code, such as a fishing catch, can hand one out). Show it to one of that village's people for emeralds and standing. Leaving them costs nothing.
+- **Last camps** (`LastCamp`): two sealed rooms in stone and deepslate (a square one and a long one), each with a dead fire, three to five remains round it and a barrel of stores.
+- **Ruin traps** (`RuinTraps`, `WeakFloorBlock`): the first time a player nears a ruined tower or fort of ours, Grim Kingdoms', ATi's or Structory's it gets an arrow slit on a pressure plate, a rotten floor over a pit, or a door that bars behind whoever steps on its plate; never near a standing settlement's watch.
+- **The headless rider** (`HeadlessRider`): on mist mornings an undead knight on a skeleton horse rides roads that pass a graveyard, chases, and beheads the downed (through Powers). Boss bar while he rides; he leaves when the mist thins. He drops his head; carried by day to the road's graveyard headstone, he is laid to rest for that road, with a reward.
+- Art and data by `kingdoms/tools/gen_remains.py`; lang in `lang/parts/remains.json`. Kitchen unchanged (the pack's own bone textures, not Kitchen's animal bones).
+- Built; not played. Untested in game: every kind's placement rate and suitability, the rider's steering of its horse, trap placement in real structures, tinker part loot with Powers.
+
+## 0.10.62 (2026-11-19): towns and the sea - figureheads, trade signs, song stones, the journey book (#1803)
+
+- **Figureheads**: a figurehead block in each of ten woods (`sailing/Figureheads`, `FigureheadBlock`; our own boxy carvings on vanilla planks textures; craft it from planks and a stick). Every ship a crew lays gets one at her prow, in her own wood: a realm's ships wear a lion, gull or stag (picked by the realm's flag colour, so a realm's navy, merchant and fishing ships match), a whaleship a whale, a pirate (dark oak) ship a serpent or a maiden.
+- **Trade signs**: the town builders set a board with the trade's mark (anvil, chisel, loaf, mug, needle, scales, cleaver, fish, horseshoe, bow, sword) into the wall over the first door of a smithy, mason, cookhouse, tavern, infirmary, market, butcher, fishery, stable, hunting lodge, training hall or barracks (`TradeSigns`, hooked in `Blueprint.register`, so CTOV and Dungeons and Taverns buildings get them too). It faces the way the door does. No item; it is only seen on town buildings.
+- **Song stones**: a capital (kingdom) builds a small paved square with a song stone in it (`song_stone` building, `SongStoneBlock`). `Firsts` keeps who was first, in the world, to fell each great foe (`Trophies.foeKind`), to found a realm (`Crowns.found`) and to reach a far world (a check every 5 s). Using the stone opens what is cut on it (the Lore Codex screen, a book for each theme); a villager standing by names one of the names. Villager talk only: bards are not touched (Bards.java is patch 1's).
+- **Journey book**: a book (book + compass) that keeps your own firsts and the day each happened, a book for each theme (great foes, realms, far worlds). Private: it lives on the player, nothing is said or given when a first is written.
+- Built; not played.
+
+## 0.10.63 (2026-11-19): Charge Jump perk text: steady orange peak (#1804)
+
+- The Charge Jump perk's description now says what it does with Powers' new jump bar: anyone can charge a jump, and the perk keeps the bar's orange peak in the same spot every time.
+- Lang only; not played.
+
+## 0.10.64 (2026-11-19): harsh lands - spawns and starts follow the climate map (#1806)
+
+- Andy: "spawns should follow the global map, the story starts should take that into effect too. starting you in the more temperate area and increasing difficulty as you go hotter or [colder]."
+- **The harsh lands** (`HarshLands`): the land's steps out from the temperate middle, read from the climate map's own temperature (the number the biomes were picked by, biome noise only): temperate 0, cold or warm 1, frozen or hot 2, the far pole or the deep equator 3. Overworld only (and its band of a One Dimension world); Mohknee is mild.
+- **Harder foes**: a hostile takes the world tier of the player near it plus its land's steps, up to Legend (`WorldTiers` scan and fall-back): more health, armour, damage and speed, the tier's gear (`MonsterGear`), spoils, experience and marked-monster odds (`MarkedMonsters` roll). A Hearth player meets Borderlands foes in the taiga and savanna, Wildlands ones in the snows and deserts, Dread ones at the pole. A monster keeps the steps of the land it was first met in (`jaymoskingdoms:harsh_land_steps`), so one that follows you home stays as hard.
+- **More of them**: a chunk's monster cap follows its steps, 0.5 / 0.6 / 0.75 / 0.9 of vanilla's (temperate keeps Andy's 0.5 cut) through `HarshCapsMixin` (player-near cap) and `HarshCapsGlobalMixin` (world-wide cap as the harshest land's), the same way the open sea's water caps work.
+- **Temperate starts** (`LifeStory`): every setting out's random point is drawn in the temperate lands (up to 32 points, biome noise only; dry land past them only if none is), and the start's place and wake spot keep to them: a village, wreck, camp, capital, harbour, milestone or wild spot past them is looked past like a taken one. A last death out in the harsh lands no longer holds the new life 500-1,000 blocks from it: it sets out round the spawn instead. Left in their own climate on purpose, searched from the temperate point so the nearest edge of it: Snowed in (the peaks), a realm the player named (Banished, Sworn, the cells), and a cold- or heat-land heritage taken in by its own people's village (Family farmhand past the farmhouse) or cast out of its haven.
+- What spawns where already followed the map (biomes, `wild.PredatorRanges`); unchanged. The world's own spawn search is vanilla's (it ignores temperature): every start sets out from its own temperate point anyway.
+- Built; not played, no server run.
+
+## 0.10.65 (2026-11-19): Cannon shot types for wall and siege guns, Explosive Shell costs TNT (#1808)
+
+- **Explosive Shell** recipe is now a Round Shot and **3 TNT** (was 3 gunpowder). Andy: "they should require 3 tnt instead of 3 gunpowder."
+- **Wall cannons and siege field guns load all five shot types** (Andy: "these should work for the ship cannons too. they can also make and fire explosive shells, but these are expensive"). The gunner picks the shot for his foe:
+  - **Grape** at a foe within 15 blocks, always at two or more foes standing together. It spreads where its short flight ends.
+  - **Explosive Shell** at a knot of three or more foes, or a great beast (80+ max health). The realm pays 40 from its treasury for each one, and only fires shells while it holds at least 1,040, so shells never push it toward selling its guns. A realm that can't pay loads heavy or round shot instead.
+  - **Chain** at a mounted foe, most of the time, to cut down the rider and his mount.
+  - **Heavy** at a big or well-armoured foe (40+ max health or 10+ armour). A siege gun also loads it about a third of the time to batter.
+  - **Round** otherwise, as before.
+- Each kind flies, hits, bursts, shoves and craters as it does from a ship's gun, and the barrel is laid for that kind's flight. Round shot keeps the old field-gun pit. A wall gun still never craters its own realm's land or buildings. The ball in flight is drawn as its item, and a shell's fuse sputters.
+- Classes: `Cannon` (`pick`, `knot`, `payForShell`, `SHELL_COST`), `Cannonball` (`fire(..., ShotKind)`, synced kind).
+- Built; not played.
+
+## 0.10.66 (2026-11-19): NPC sea ships pay for their powder and shot (#1810)
+
+- Andy said "yes" to making NPC sea ships pay for their ammo the way airships do. **Every sea ship sailed by her own crew now carries a magazine**: gunpowder and a count of each of the five shot types. Each round a gunner loads spends 1 powder and 1 shot. He loads the type he wants if she has it, otherwise round, heavy, chain or grape, whichever is left. He never falls back to a shell he didn't ask for. With no powder, or no shot of any kind, her guns stay empty.
+- **Stock at launch** (ships saved before this are stocked the first time they load): a warship carries 36 powder, 18 round, 7 heavy, 5 chain, 5 grape and 2 shells. A pirate carries 28 powder, 14 round, 5 heavy, 4 chain, 4 grape and 1 shell. A merchantman, whaler or fishing smack carries 8 powder, 6 round and 2 grape.
+- **Topping up**: within 80 blocks of home and with no ship to fight, she is topped up once a minute.
+  - A realm's ship is paid for from its treasury: powder 2, round 2, heavy 5, chain 4, grape 3. A shell costs 40, and is bought only while the realm holds at least 1,040, the same rule as its wall guns.
+  - A pirate takes what she needs from her cove's storage. Her cove makes a shell from 3 TNT, or from 15 gunpowder if it holds at least 23, plus a round shot.
+  - Pirate coves now cast 2 round shot a day so their ships don't run dry.
+- Airships are unchanged and still load from their hold's chests.
+- Classes: new `ShipMagazine`; `Crew.magazine` (saved); `Corsairs.gunnery`; `PirateCoves.DAY_SHOT`.
+- Built; not played.
+
+## 0.10.67 (2026-11-19): A harness piece with no model no longer crashes the game (#1811)
+
+- Fixes: seeing anyone wear a Harness 3 piece whose model was never made (the tabard, the fur-lined set, gilt-banded and spiked spaulders, oath sleeves, the quilted coat) crashed the game. Such a piece is now simply not drawn, with one log line naming it, until its model is made.
+- Built by CI; not played.
+
+## 0.10.68 (2026-11-19): Stealth and posture: cover, backstabs, a fighter's stance (#1812)
+
+- **Cover**: standing in tall grass, ferns, a bush or leaves makes mobs notice you from a fifth less far; sprinting gives you away (a quarter farther); a mob you hurt in the last ten seconds sees you half again as far. (Rain already hid you a little.) The Stalker Ranger keeps its far stronger hiding.
+- **Backstab**: anyone's melee blow on a hostile mob's back, while it is not after you, hits a quarter harder, with a small crit flash (and Jaymo's Powers' crit cue if it has one). Not with the Sneak Attack perk (its bigger bonus is unchanged), not for a Thief (their burst is unchanged), not on bosses, and none at all for a player sworn to a patron whose law forbids sneak attacks (the Crowned Sun). It adds no commandment break.
+- **Posture**: armed fighters that aren't bosses (guards, knights, raiders, the armed dead, piglins) hold a stance. Blows caught on shields or guards, a parry, and plain melee blows wear it; when it breaks the fighter sags with its head down and reels for a moment, its guard knocked aside and unable to parry, so the next blow lands. It comes back if left alone. No bar: the sagging stance and a ring tell you.
+- **Crit powers and cues** (with Jaymo's Powers' new attributes, if it is there; nothing changes without it): the Sneak Attack perk's bonus, a Thief's sneak burst, a hidden-blade assassination and the new backstab are multiplied by `jaymospowers:sneak_attack_power`; an Archer's headshot by `headshot_power`. The hidden blade raises the sneak attack power by 25% while it is out. Sneak attacks, backstabs, assassinations and headshots play Powers' crit cue (sound, flash, camera punch).
+- New: `FighterPosture`, `CritPower`; `Senses#backstabbed`, `Commandments#forbids`, `PowersCompat#critCue`.
+- Built by CI; not played.
+
+## 0.10.69 (2026-11-19): smiths sharpen the guards' blades (#1815)
+
+Hackers 'n Slashers patch 3, the town half (Andy: "you should see the blacksmith sharpening its guards' blades"). With Jaymo's Powers' blades wearing dull (its `Edge`), `Whetting`: in the working day an idle weaponsmith, armourer or toolsmith takes notice of a town guard (MCA villager) within 24 blocks whose blade is dull, walks to a grindstone (their workstation, or one within 8 blocks of it), and is seen working it for 6 to 10 seconds: the guard's blade in their hand, sparks off the wheel, the grinding sound, swings. The guard's edge is then keen. One smith per guard at a time. Without Powers nothing dulls and nothing happens.
+- Not played; compiles in CI.
+
+## 0.10.70 (2026-11-19): Powerborne Heroes picks - sorcerer second jump, Ember and Divine-born sprint moves, Battle Rhythm perk (#1816)
+
+- **Sorcerers of fire, lightning and wind jump again in the air**
+  - A Fire, Lightning or Wind (air) Sorcerer gets one more jump in the air: a burst of fire, a crack of lightning, or a gust under the feet. Once per time off the ground, a little hunger, and fall damage still counts from the top of the jump.
+  - With a power of Jaymo's Powers (which has its own second jump) or a cloud in a bottle, those answer the press first and the Sorcerer's jump waits.
+- **Heritage key, sprinting: Divine-born ward and Emberborn rise and crash**
+  - Sprinting and pressing the heritage key now asks Jaymo's Powers for the Divine-born's healing ward (also for one who stayed at the Judge) or the Emberborn's rise and crash. Without Powers, or when Powers declines, the key does what it did. `Heritage#gift`, `PowersCompat#sprintMove`.
+- **Battle Rhythm perk**
+  - New Might perk, Battle Rhythm (tier 2): Jaymo's Powers quickens your attacks a step at a time while you keep landing blows. The Shieldbearer description now lists the new shield moves.
+  - Key classes: Skills.Perk.BATTLE_RHYTHM, TreeLocks.Lock.BATTLE_RHYTHM, lang part battle-rhythm.json.
+- Built; not played.
+
+## 0.10.71 (2026-11-19): birthplace page lists the heritage's strengths and weaknesses (#1820)
+
+- **Life story, "Where were you born?"**: the right panel now shows the heritage's whole kit, the same as the heritage screen: its stat bonuses as pills, then Intrinsic (its own gift), Strengths and Weaknesses (flaw, kit flaws, how folk regard it). The rows come from the heritage's own card (`Heritage.Kind#card`), for the look the figure wears, so anything later added to a heritage shows here with no more work. Before, it only said "Heritage: Tideborn".
+- `HeritageScreen.statPills` / `kitSections`: the heritage screen's sorting, moved into two helpers both screens use. `LifeStoryScreen.pickerInfo` uses them on the birthplace page.
+- Built; not played.
+
+## 0.10.72 (2026-11-19): The wind no longer stops the server (#1821)
+
+- Fixes: the server crashed while land was being generated (an empty slot in the world's entity list reached the wind's push). Such a slot is now skipped (`WindPush`).
+- Built by CI; not played.
+
+## 0.10.73 (2026-11-19): The wind no longer stops the server (for real) (#1823)
+
+- Fixes: the server crashed while land was being generated: the wind's push walked the world's list of creatures and items while its own shelter check could load a chunk and add to that list. It now walks a copy (`WindPush`).
+- Built by CI; checked on the Deck under pre-generation.

@@ -88,6 +88,7 @@ public abstract class FishingHookMixin {
             cir.cancel();
         } else if (owner instanceof net.minecraft.server.level.ServerPlayer player) {
             com.jaymospowers.fishing.FishBite.clear(player);
+            com.jaymospowers.fishing.Flotsam.pull(player, hook);
         }
     }
 
