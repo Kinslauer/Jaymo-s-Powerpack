@@ -45,7 +45,6 @@ kanban-plugin: board
 
 ## Needs Andy
 
-- [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🍇 Bacchus · blocked
 - [ ] [[Inbox/harness-body-pieces|harness-body-pieces]] · ☀️ Apollo · blocked
 - [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · blocked
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · ☀️ Apollo · #1787 · blocked
