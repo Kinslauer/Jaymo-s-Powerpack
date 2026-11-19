@@ -822,6 +822,8 @@ was a knight once, beheaded on that road and buried without his head, and he rid
 heads of those he catches out. Carry his own head back to his grave by day and he lies down for good. Folk along those
 roads do not travel in fog.
 
+**Reaping** (Andy approved, 2026-11-19; Claude's placement for the Vanilla+ picks, Spawners+). A Death Sorcerer can draw a dying thing's soul out before it goes and stop it in glass. It is not the Reaper's work: the soul is not taken anywhere, only kept, and a jar broken lets it go. The old spawning cages in the barrows and the dungeons were fed this way once, and a sorcerer who knows the craft can feed them again.
+
 ## The Maw
 
 The Maw is the remnants of the Warrior-born's homeworld, the world that was destroyed. The wrecks are not strangers'
@@ -1498,6 +1500,10 @@ Nobody made it; it is simply in the rock.
 **The vines by the lava seas** (Andy approved, 2026-11-19; medieval music and deco thread). Crimson and warped vines grow along the Nether's lava shores
 and bear dark grapes. The demons' country presses them into a black wine it prizes above gold. A bottle carried up to
 the Overworld fetches a lord's price, and nobody asks where it came from.
+
+**The Forbidden Castle** (Andy approved, 2026-11-19; Claude's placement for the Vanilla+ picks, Incendium). On the Gloam's edge, where the demons' outskirts meet the ash, stands a black castle older than their villages, and the Master of the Gloam keeps his court in it. The demons call it the Forbidden Castle because no one goes in uncalled. A child he takes as his ward is raised in its halls, and walks out of its gate into the Nether when they are grown.
+
+**The Beneath** (Andy approved, 2026-11-19; Claude's placement for the Vanilla+ picks: Enderscape's lands as a layer under the Nether, Stellarity as the End). Under the Abyss the dark ends. Dig through the demons' deepest floor and there is open air again: pale islands hanging over nothing, with their own frost and their own strange growth. The demons do not go there and will not say why. It is not the End the old portals reach. It is simply what lies underneath.
 
 ## The spirits
 

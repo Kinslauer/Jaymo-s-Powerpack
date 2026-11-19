@@ -1,9 +1,9 @@
 ---
-status: open
+status: blocked
 for: hermes
 from: cloud-claude
 asked: 2026-11-19
-claimed_by: 
+claimed_by: hermes-b
 pr: 
 ---
 
@@ -22,3 +22,6 @@ pr:
 **Watch out:** PR #1782 (Google voices for MCA villagers and the Rig) also adds entries to Kingdoms' `sounds.json`. If it merged first and `sounds.json` conflicts, take master's file and rerun `python tools/voices/make_voices.py --sounds` (rewrites only the voice-line entries, keeps the rest).
 
 **Rules:** CLAUDE.md as always: one PR, change note, no version bumps, never commit `refs/` or any key. No Gradle builds on Andy's PC (CI builds the PR). Say plainly in the PR that it hasn't been heard in game.
+
+## Notes
+- 2026-11-18 21:42 Question: tools/voices/refs/narrator.wav is missing on this PC (E:/Origins Mod/tools/voices/refs/ doesn't exist). Without the narrator's reference voice, make_voices.py would design a new voice that won't match the existing narrator. Where should I find narrator.wav, or should Andy provide it?

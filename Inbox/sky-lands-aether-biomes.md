@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: ready
 for: hermes
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-12)
 asked: 2026-11-12
@@ -66,3 +66,5 @@ Powers already has 16 Aether biomes across 4 climate zones (Highfields, Magnetic
 
 No code changes yet — research only, as the task states.
 - 2026-11-15 20:03 hermes-writer's claim had no sign of work for 30 min: handed back as in-review.
+- 2026-11-18 21:43 Review (research, no PR): pass. Covers Sky Lands' 6 sky biomes, the Abyss dimension, its mechanics and five adaptation angles against our 16 Aether biomes. GPL-3.0 and Forge-only: ideas only, any adaptation is our own Fabric code and art. Not checked: the in-game look of their biomes.
+- 2026-11-18 21:43 Reviewed; Andy allowed sending it to the coordinator.
