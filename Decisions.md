@@ -818,3 +818,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-19 3:41 PM ET (vault coordinator): Wither model sent back: hulking like the large suit, broad shoulders, side heads as pauldrons, four ribcage-like arms.
 - 2026-11-19 (PC Claude): Andy: 'merge all the harness stuff when complete'. Merged #1868 (Harness 2); Harness 5 (upkeep) gets merged by PC Claude once its checks pass.
 - 2026-11-19 (PC Claude): Harness 5 (upkeep) merged as #1870 on Andy's 'merge all the harness stuff when complete'. All five harness tasks are now merged.
+- 2026-11-19 (cloud Claude, Reason Art): Andy: the modpack and its title screen are now called "Reason", with the yellow caption "what's yours" in place of random splashes.
