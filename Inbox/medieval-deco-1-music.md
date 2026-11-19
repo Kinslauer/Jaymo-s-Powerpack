@@ -43,3 +43,4 @@ thread: cmsg_01638ouFWZKwEZ1ET74kBk9BDvxv3Xuvj7a4gmHTqtzmQ6
 
 ## Notes
 - 2026-11-18 21:50 PC Claude took it (editor agent, branch claude/medieval-deco-1), paired with patch 4.
+- 2026-11-18 22:14 PC Claude: PR #1795, CI green. Player sees: Medieval Music pack fetched and on (needs release medieval-music-v1 with Jaymo.Medieval.Music.zip + .sha1 uploaded by hand, built by tools/music_trim.py); town/tavern/camp/road/war/festival tracks; a tavern villager with a lute plays positional music (16 blocks); sneak-use with a coin = another song (not the MCA menu); warped forest Nether tracks. Untested in game: all of it. mm_end needed no code (Enderscape uses its own sound events; unverified). CurseForge pack-page credit to Nakarada and Sarisan still to write.
