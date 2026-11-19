@@ -3,7 +3,7 @@ status: running
 task: "[[heritage-paths]]"
 branch: claude/heritage-paths
 with: 
-pr: 
+pr: 1853
 mods: kingdoms
 versions: 
 started: 2026-11-19
@@ -11,6 +11,10 @@ owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/HeritagePaths.java (new)
   - kingdoms/src/main/resources/assets/jaymoskingdoms/lang/parts/heritage-paths.json (new)
   - changes/kingdoms/heritage-paths.md
+  - changes/powers/heritage-paths.md
+  - hooks (a few lines each): AlarmBells, Bearings, HeritageKits, JaymosKingdoms, Lanterns, Lineage, Patrons, TideFishing, Torches, equestrian/Equestrian, mixin/BlockItemMixin, sailing/SeaEvents, sailing/Ship, client/HeritageScreen, client/MenuCompat
+  - Powers: fishing/FishBites, fishing/RodPodEntity, compat/KingdomsCompat
+  - Lore.md: four (new) paragraphs after "The blood wakes with the ladder"
 ---
 # Heritage paths: core + Stoneborn, Heartlander, Tideborn
 

@@ -1784,6 +1784,34 @@ see further into the night, the Dawnborn draw more from the sun. The cursed bloo
 moons: a new vampire's strength comes only once the blood has bound them, and a new wolf's beast grows strong over the
 moons it runs.
 
+**The paths of the blood** (Andy approved, 2026-11-19; heritage paths thread; Andy's picks 2026-11-18). What a blood wakes into
+depends on how its child lives. Nobody chooses: a Stoneborn who spends their days deep in the rock wakes as a delver,
+one who stands in the shield line wakes as a shield. The first road a life takes is the one its blood follows to the
+end, and the others close quietly behind it. The old folk say the blood remembers the parent's road, so a child is
+quick to find it, but no child is made to walk it. A path never fades for being left alone; it only stops deepening.
+Each of its five steps wakes as one of the ladder's kings or terrors falls, the same as the rest of the blood's gifts.
+
+**The Heartlanders' paths** (Andy approved, 2026-11-19). The **Hearthkeeper** is named for the god whose hearth Heartlanders keep: one who
+makes one place their home, farms it and sleeps under its roof finds its fields grow for them, and its people trust
+them sooner. In the end that town's guards come at the ring of their bell, wherever the fight is. The **Wayfarer** walks
+the roads between towns until the roads seem to carry them: they tire less on the way, their horses go further, and in
+the end they always know the way home. The **Borrowed Blood** is the Heartlanders' oldest habit made flesh. A people who
+keep the tally of every other blood take, slowly, a small gift from the blood they live among most, and in the end from
+a second.
+
+**The Stoneborn's paths** (Andy approved, 2026-11-19). The **Deepdelver** goes down: the deeper they mine, the faster the rock gives, and the
+ores in it begin to glint for them alone, as if the Anvil-Father had left the seams lit. In the end loose stone parts
+at a touch. The **Mountain's Shield** takes blows and stands; in the end nothing moves them while they crouch behind
+their shield. The **Lanternkeeper** lights the dark places and keeps them lit: their torches and lanterns burn longer,
+the dead keep back from the lantern in their hand, and in the end its light burns them.
+
+**The Tideborn's paths** (Andy approved, 2026-11-19). The **Reefwalker** swims and dives until the sea is their country: they hold their
+breath long and swim fast, and in the end they breathe water. Dry land still wears them down. The **Saltblood** sails
+and fishes. A haven's own folk may fish their own waters, and the Deep Mother lends her fish to those who keep her sea,
+so they come keen to a Saltblood's bait; a ship with a Saltblood aboard runs faster, and in the end a squall calms round
+her. The **Deep Mother's Voice** keeps her shrines and her offerings. The drowned and the sea's guardians come to know
+her own and let them be, unless struck; in the end her voice raises a surge of tide that throws foes back.
+
 
 ## Why the peoples don't like each other
 
