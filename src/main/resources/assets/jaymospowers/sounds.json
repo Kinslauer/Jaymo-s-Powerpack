@@ -3976,5 +3976,19 @@
 				"name": "jaymospowers:voice/rig/loyal_verdict_melt"
 			}
 		]
+	},
+	"verdant.regrow": {
+		"subtitle": "subtitles.jaymospowers.verdant.regrow",
+		"sounds": [
+			{
+				"name": "jaymospowers:verdant/regrow_1"
+			},
+			{
+				"name": "jaymospowers:verdant/regrow_2"
+			},
+			{
+				"name": "jaymospowers:verdant/regrow_3"
+			}
+		]
 	}
 }

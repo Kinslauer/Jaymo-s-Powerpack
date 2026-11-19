@@ -7,5 +7,6 @@
   "options.jaymospowers.blood.tooltip": "How much blood you see: drops thrown by hits, how long pools and stains stay, and how many stains are shown at once. Off shows no blood or gore at all. Others can still track the trails and stains.",
   "subtitles.jaymospowers.blood.squelch": "Footsteps squelch in blood",
   "subtitles.jaymospowers.blood.hit": "Wet hit",
-  "subtitles.jaymospowers.blood.burst": "Body bursts"
+  "subtitles.jaymospowers.blood.burst": "Body bursts",
+  "subtitles.jaymospowers.verdant.regrow": "Limb crunches back"
 }

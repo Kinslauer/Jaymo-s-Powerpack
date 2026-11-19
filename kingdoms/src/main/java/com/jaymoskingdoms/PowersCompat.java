@@ -1449,7 +1449,7 @@ public final class PowersCompat {
 	/**
 	 * (Kingdoms 0.7.645, Powers 0.21.49) Andy: "make sure stoneborn and certain hollow don't bleed, and any other relevant race.
 	 * (emberborn should have the magma blood)". A heritage's own blood, for Powers' {@code BladeBlood.BLOOD}: no blood in a
-	 * Stoneborn, the bone-and-spirit Hollow ({@link #BLOODLESS_HOLLOW}) or a Bio-built; an Emberborn's runs as magma.
+	 * Stoneborn or the bone-and-spirit Hollow ({@link #BLOODLESS_HOLLOW}); an Emberborn's runs as magma, a Bio-built's green.
 	 * (0.7.646) Andy: "the emberborn should have the same type of cooling magma blood that the cubes have, and so should the
 	 * magmavein stoneborn. all zombies should get the rotten blood, and the rest of the blood changes are good to go too":
 	 * a Magmavein Stoneborn bleeds magma too, a Zombie Hollow rotten blood, an Endborn ender-purple, a Divine gold, a
@@ -1476,7 +1476,8 @@ public final class PowersCompat {
 				return switch (kind) {
 					// (0.7.646) Andy: "the magmavein stoneborn" bleeds the magma cubes' cooling magma; the other Stoneborn none
 					case STONEBORN -> variant == HeritageVariants.Variant.MAGMAVEIN ? magma : noBlood;
-					case BIOBUILT -> noBlood;
+					// Andy (2026-11-19): "verdants and bio built should now have green blood"
+					case BIOBUILT -> sap;
 					case EMBERBORN -> magma;
 					case ENDBORN -> ender;
 					case DIVINE -> gold;
