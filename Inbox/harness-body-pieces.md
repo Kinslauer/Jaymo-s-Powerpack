@@ -1,9 +1,9 @@
 ---
-status: blocked
-for: hermes-a
+status: claimed
+for: pc-claude
 from: pc-claude
 asked: 2026-11-18
-claimed_by: hermes-a
+claimed_by: harness-body-pieces
 pr: 
 ---
 
