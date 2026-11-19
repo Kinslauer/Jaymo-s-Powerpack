@@ -2331,6 +2331,8 @@ Kingdoms' assassins and thieves have a few more tricks (watching unseen, slippin
 remark), and anyone can throw a **lasso**. Great kills are kept on **trophy stands**, and each great foe is heard
 before it is seen.
 
+**The camp horn** (camp alarm thread, 2026-11-19, Andy approved 2026-11-19; Andy: "if anyone in the area is attacked they should run back and alert the camp with a horn. then everyone is on alert and patrols and defends until safe"; the rest Claude's placement). Every barbarian camp, goblin village and orc war camp keeps a goat horn by its fire. Whoever is set on at the camp's edge does not stand and die: they run for the fire, and whoever reaches it blows the call. At the horn every blade in the camp turns out, the brave among the builders too, and the rest gather at the fire. They walk the palisade until nothing hostile is left on their ground, and only then does someone say it's quiet.
+
 **Fighting together** (Claude's placement for the pawn picks, patch 1, 2026-11-12, Andy approved 2026-11-17). Nobody
 in the realms fights alone if they can help it, and nobody fights the same way. Everyone who takes up arms has a
 **leaning**, a first habit and a second: going for the biggest foe, for the archers, for the wounded, guarding a
@@ -2490,6 +2492,8 @@ and vinegar clean off. Thin ice crusts the still lakes of the cold lands.
 **What the old druids teach** (Andy approved, 2026-11-15; under "The body kept and the body given"). The old druids keep the rite of the new body to themselves, but not from
 their own: one who carries the sprig and sits with a hermit in his grove is told it, as the wood once told him. The
 new body keeps what its owner leaned to: a power that would have woken in the old life wakes in the new one, in time.
+
+**What an old druid asks of a stranger** (new, Claude's placement 2026-11-19, for Andy to approve; under "What the old druids teach"). The rite's words stay with the druids, but what the grove is for is no secret: any traveller who speaks to an old druid is told that a body brought under old wood within ten days, laid at the keeper's feet, gets a new life. A hermit who never leaves the grove misses the other woods, and each asks for one growing thing their own trees have never borne (a cherry or pale oak sapling, a mangrove propagule, an azalea); brought one, they plant it in the grove and remember who carried it. Not every old druid keeps to the open grove: some have taken a lone cabin or farmstead deep in the woods, left by whoever built it, and live under its roof among the trees.
 
 **Seven sworn callings** (Claude's placement for the fifth edition picks, patch 11, 2026-11-13, Andy approved
 2026-11-17). Beside the old callings the settled folk keep seven more, sworn rather than born: the Cleric and the
