@@ -15472,3 +15472,9 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - **Witches go after villagers** (`WitchRaids`): every witch now also targets villagers she can see and throws the game's own potions at them; a villager hurt by a witch turns every guard within 32 blocks on her.
 - **Golem pathing** (`GolemPathing`): iron golems and town golems path around water (double the usual cost), step up ledges of a block and a quarter, bob up in water with the swimming goal instead of walking the riverbed, and heave themselves up and over a bank when it stops them.
 - Lang in `village-guards.json`. Built; not played. Not done: the guard's kick and sidearm have no new animation (the swing only), the sidearm sword can drop if the guard dies drawing it, and the cleric splash heals any living thing in it.
+
+## 0.10.84 (2026-11-19): MCA's village swap rests while its land isn't loaded (#1841)
+
+- **Performance**: While Chunky makes land with nobody near, every new village's villagers wait in MCA's swap queue for their land to load. The check (`McaSpawnQueueMixin`) no longer counts the whole queue each tick, and after a look that finds none ready it waits a few ticks before looking again. None is lost. Once a village's land loads, its swap can come some seconds later while a big backlog is queued.
+- Moose: Cube's moose type (`Moose.cowType`) is looked up once instead of on every entity load.
+- Built by CI; not played.
