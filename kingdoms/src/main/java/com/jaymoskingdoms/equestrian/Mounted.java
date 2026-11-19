@@ -121,9 +121,9 @@ public final class Mounted {
 		Vec3 seat = horse instanceof WarElephant ? vanilla : vanilla.add(0.0, SEAT_LIFT * scale, 0.0);
 		// (a kneeling horse carries its saddle down with it)
 		seat = seat.subtract(0.0, Bonding.KNEEL_DROP * scale * Bonding.kneelAmount(horse, horse.level().getGameTime()), 0.0);
-		// the second seat is the one the next passenger would take, too, so a rider climbing on is aimed at it
+		// the second seat is the one the next passenger would take, too, so a player climbing on is aimed at it
 		int index = horse.getPassengers().indexOf(passenger);
-		if (index != 1 && !(index < 0 && horse.getPassengers().size() == 1)) {
+		if (index != 1 && !(index < 0 && passenger instanceof Player && horse.getPassengers().size() == 1)) {
 			return seat;
 		}
 		return seat.add(new Vec3(0.0, -PILLION_DROP * scale, -PILLION_BACK * scale).yRot(-horse.getYRot() * Mth.DEG_TO_RAD));

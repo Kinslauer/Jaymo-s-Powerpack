@@ -95,6 +95,8 @@ public final class Bonding {
 	/** A rider wearing this much armour can only climb onto a horse that kneels for them (it knows how, or trusts them this much). */
 	public static final int KNEEL_ARMOUR = 20;
 	public static final float KNEEL_TRUST = 80.0F;
+	/** A horse kneeling for a rider gets up again if no player is this near (blocks): the climb was given up. */
+	static final double KNEEL_WAIT_REACH = 4.0;
 	/**
 	 * A kneel lasts this long (ticks): long enough for the horse to go down ({@code KNEEL_DOWN}), for the longest armoured
 	 * climb Jaymo's Powers plays (a step-across of 0.6 s, twice that in full plate: 24 ticks), and to rise again
@@ -820,8 +822,8 @@ public final class Bonding {
 					if (!horse.isAlive()) {
 						return true;
 					}
-					if (horse.isVehicle()) {
-						// the rider is up: it rises
+					if (horse.isVehicle() || level.getNearestPlayer(horse, KNEEL_WAIT_REACH) == null) {
+						// the rider is up (or nobody is left to climb on): it rises
 						horse.setAttached(KNEEL, Math.min(entry.getValue(), now + KNEEL_RISE));
 						return true;
 					}
