@@ -18,3 +18,4 @@ owns:
 
 ## Done
 Cover, backstab (none for patrons forbidding sneak_attack), fighter stance. CI green, not played.
+Follow-up: crit powers, crit cues and hidden-blade lift (CritPower.java, owned) added to the same PR.
