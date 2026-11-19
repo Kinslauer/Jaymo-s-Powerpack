@@ -1,26 +1,29 @@
 ---
-status: in-review
+status: done
 for: any
 from: coordinator (Buder's Lanterns cross-reference thread)
 asked: 2026-11-18
 thread: https://claude.ai/code/project/chan_01638ouFWZKwEZ1ET74kBk9B?thread=cmsg_01638ouFWZKwEZ1ET74kBk9BGTKiCKJUyKUDb58Nbrp2r7
-claimed_by: lanterns-08-dream
-pr: 1769
-size: L
+claimed_by: lanterns-05-patrol-law
+pr: 1764
+size: M
 suggested_owns:
-  - src/main/java/com/jaymospowers/core/DreamCall.java (new)
-  - src/client/java/com/jaymospowers/client/DreamView.java (new)
+  - src/main/java/com/jaymospowers/power/zfighter/PatrolLaw.java (new)
+  - src/main/java/com/jaymospowers/power/zfighter/ZFighterPatrol.java (hook lines)
   - changes/powers/<branch>.md
+  - changes/kingdoms/<branch>.md
 ---
-# Lanterns patch 8 (L, Powers + Kingdoms): Called in a dream: awakening through a dream or nightmare
+# Lanterns patch 5 (M, Powers + Kingdoms): Patrol as lawmen: warrants, arrests, a partner
 
 **Andy's words:** "done. add it to the vault for pickup later, in order of build size" (after ticking these rows on the Buder's Lanterns pick list).
 
 **What's wanted:**
 
-- **Called in a dream** (`ot-dream`): A power finds you while you sleep. _Our side:_ **Andy's note:** "there should be a chance for the view to pan up as you are sleeping indicating the dream, and it takes you into a grue like realm, it is dark during a nightmare, and you awaken a corrupted power if you survive, and a dream is peaceful, and you awaken your power the next day". Kingdoms' `NightCam` already lifts the camera off the pillow at night; start there.
+- **Patrol warrant for crooked members** (`pt-warrant`): A Patrol member who commits crimes gets a Patrol warrant: patrolmen land to bring them in, the warrant grows with each crime, and they lose rank. _Our side:_ `ZFighterPatrol` (pursue, ranks) reading Kingdoms' `Theft.WANTED` through a compat hook.
+- **Patrol members make arrests** (`pt-arrest`): A Patrol member can stop crimes they see, hogtie the crook and hand them to the town's guards for Patrol rank and the bounty. _Our side:_ `Crooks` + `Captures` + `Bounties`, credited to Patrol rank.
+- **A partner patrolman** (`pt-partner`): At a set rank the Patrol gives you a partner: a Z Fighter villager who flies with you, talks and backs you up. The buddy-cop idea. _Our side:_ An MCA patrolman from `ZFighterPatrol`, led through `Followers`.
 
-**Where to start:** NightCam / Timelapse (Kingdoms), power awakening (gifted villagers, life story), corrupted variants. **Ask Andy first:** the "grue like realm" would be a new realm, which the standing rule forbids unless he asks for it. He did ask here, so confirm: a real dream dimension (his exception, like Cloud Sea), or a dream arena built where you sleep (dark world, fog, nothing else loaded). Also needs a Lore.md `(new)` paragraph (who sends the dream, why a nightmare corrupts) quoted to Andy.
+**Where to start:** ZFighterPatrol, Crooks, Captures, Bounties, Followers. Andy (video): "being a lantern, you're basically a galactic cop ... I want to add the buddy cop crime dynamic".
 
 ## Shared rules for every lanterns patch
 - Source: Andy's picks (2026-11-18, 21 of 24) from **Buder's Lanterns** (CurseForge 1732134, ButterJaffa/BuDeR), mostly what the dev shows in his YouTube video https://www.youtube.com/watch?v=-Ib5PEGylyo (ch. 9 Improved Villagers, ch. 10 "GTA 6 Inspired Systems"). **All Rights Reserved, Forge 1.20.1: ideas only.** Own code, names and vanilla-style art; no Green Lantern/Oa/Corps names. Pick list: https://claude.ai/artifact/XDacSJMhawm2wZkLXtCjK7 (db `picks/andy`).
@@ -31,4 +34,6 @@ suggested_owns:
 - One PR per patch with `changes/<mod>/<branch>.md`; never touch `version=`, MODLOGs or codemap. Andy tests by merging. Run 2 patches at a time.
 
 ## Notes
-- 
+- 2026-11-18 20:42 lanterns-05-patrol-law's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-18 16:48 Back to in-review: PR #1764 was up and green; the stale sweep caught it during a long build.
+- 2026-11-19 01:59 PR #1764 is merged into master; moved to Inbox/Done.

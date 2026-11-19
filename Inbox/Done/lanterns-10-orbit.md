@@ -1,27 +1,26 @@
 ---
-status: in-review
+status: done
 for: any
 from: coordinator (Buder's Lanterns cross-reference thread)
 asked: 2026-11-18
 thread: https://claude.ai/code/project/chan_01638ouFWZKwEZ1ET74kBk9B?thread=cmsg_01638ouFWZKwEZ1ET74kBk9BGTKiCKJUyKUDb58Nbrp2r7
-claimed_by: lanterns-06-space-medium
-pr: 1766
-size: M
+claimed_by: lanterns-10-orbit
+pr: 1772
+size: L
 suggested_owns:
-  - src/main/java/com/jaymospowers/power/zfighter/ZFighterPodTrip.java (hook lines)
-  - src/client/java/com/jaymospowers/client/power/zfighter/ZFighterFlightScreen.java
+  - src/client/java/com/jaymospowers/client/power/zfighter/sky/HighSkyClient.java
+  - src/main/java/com/jaymospowers/power/zfighter/Orbit.java (new)
   - changes/powers/<branch>.md
 ---
-# Lanterns patch 6 (M, Powers): Space: a black hole, flying to a world on ki
+# Lanterns patch 10 (L, Powers): Orbit above a world: the high sky made into near space
 
 **Andy's words:** "done. add it to the vault for pickup later, in order of build size" (after ticking these rows on the Buder's Lanterns pick list).
 
 **What's wanted:**
 
-- **A black hole out past the worlds** (`sp-hole`): A black hole on the star map that a pod can't fly through; trips near it bend off course, and the flight screen bends the light. _Our side:_ `Lens`/`LensClient` art on `ZFighterFlightScreen`; a far-world mission hook.
-- **Fly to a world on your own ki** (`sp-ki`): At a very high power level a Z Fighter can fly to a near world without a pod, burning a lot of ki. Pods stay rare for everyone else. _Our side:_ `ZFighterPodTrip` run without the pod; set the power gate with Andy.
+- **Orbit above a world** (`sp-orbit`): Fly up past the high sky and the world curves away below you; flying fast in orbit carries you far across the map, and you come down wherever you dive. _Our side:_ **Andy's note:** "this is what i want the high sky to look like". So this reworks `HighSkyClient`'s look first (curved world below, space above, the sun hard and bright), then the fast-travel orbit for Z Fighter flight and pods.
 
-**Where to start:** ZFighterPodTrip, ZFighterFlightScreen, Lens, ZFighterPowerLevel.
+**Where to start:** HighSkyClient, SkyPlanets, ZFighterFlightClient, ZFighterPodTrip. Their screenshots: media.forgecdn.net/attachments/2023/152/01-orbital-flight-png.png and 08-ringed-planet-png.png (look only).
 
 ## Shared rules for every lanterns patch
 - Source: Andy's picks (2026-11-18, 21 of 24) from **Buder's Lanterns** (CurseForge 1732134, ButterJaffa/BuDeR), mostly what the dev shows in his YouTube video https://www.youtube.com/watch?v=-Ib5PEGylyo (ch. 9 Improved Villagers, ch. 10 "GTA 6 Inspired Systems"). **All Rights Reserved, Forge 1.20.1: ideas only.** Own code, names and vanilla-style art; no Green Lantern/Oa/Corps names. Pick list: https://claude.ai/artifact/XDacSJMhawm2wZkLXtCjK7 (db `picks/andy`).
@@ -32,4 +31,4 @@ suggested_owns:
 - One PR per patch with `changes/<mod>/<branch>.md`; never touch `version=`, MODLOGs or codemap. Andy tests by merging. Run 2 patches at a time.
 
 ## Notes
-- 2026-11-18 19:44 Andy approved the ki-crossing numbers as they are (50,000 power, 80% ki) and the Hollow lore.
+- 2026-11-19 01:59 PR #1772 is merged into master; moved to Inbox/Done.

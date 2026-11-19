@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: rig-beetle-4-flight
 branch: claude/rig-beetle-4-flight
 with:
@@ -46,3 +46,4 @@ Added five new flight actives to the Rig menu (Sneak + J), gated by Mind level 5
 5. **Other flyers look smooth** (`fl-smooth`): Client toggle to smooth other Rig pilots' flight poses
 
 PR #1765 created. Compiles and passes PR checks. Not tested in multiplayer for smooth-others behavior, not tested meteor dive impact effects at scale, not tested pull-up timing with various fall heights.
+- 2026-11-19 01:59 PR #1765 is merged into master; moved to Agents/Done.

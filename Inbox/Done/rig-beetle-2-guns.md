@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: any
 from: coordinator (Zemo Baki cross-reference thread)
 asked: 2026-11-18
@@ -40,3 +40,4 @@ text_pass: done
 
 ## Notes
 - 2026-11-18 13:49 Text pass: player-facing rewrite of changes/powers/rig-beetle-2-guns.md (dropped internal ability IDs gn-* and code names BeamScars, RigMoves/RigPose, MagicFx); rig.json gun menu names (Palm Charge, Gatling Arm, Railgun, Sonic Cannon, Twin Beam, Siege Mode) and all message keys referenced by the new Java code verified, no changes needed there; no code changed.
+- 2026-11-19 01:59 PR #1749 is merged into master; moved to Inbox/Done.
