@@ -216,6 +216,12 @@ public class JaymosPowersClient implements ClientModInitializer {
 			net.minecraft.network.chat.Component.literal("Jaymo's Powers: Excalibur colours and leaves"),
 			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.NORMAL);
 		ExcaliburLook.init();
+		// the Medieval Music pack empties the warped forest's music: this gives it three Nether tracks of the pack's. Not on by
+		// default: PackResourcePacks puts it just above the music pack when that is switched on (it points at that pack's files)
+		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("medieval_music_gaps"),
+			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
+			net.minecraft.network.chat.Component.literal("Jaymo's Powers: warped forest music"),
+			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.NORMAL);
 		// (0.19.63) bushy leaves (tools/bushy_leaves.py: every vanilla leaf block also draws two crossed planes reaching past
 		// it) and grass and snow lips leaning over open ledges (tools/grass_edges.py); on by default, switched off in
 		// Resource Packs. Our own take on Recrafted's bushy leaves and overlays (nothing copied).
