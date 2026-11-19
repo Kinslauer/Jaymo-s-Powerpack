@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 20:17). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 20:18). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -47,11 +47,11 @@ kanban-plugin: board
 ## Needs Andy
 
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · ready
-- [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 🍇 Bacchus · blocked
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · ☀️ Apollo · #1787 · blocked
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · ready
 - [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · blocked
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · ☀️ Apollo · blocked
+- [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
 - [ ] [[Agents/forest-fire-pack|forest-fire-pack]] · 💻 Odysseus · stalled
 - [ ] [[Agents/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]] · 💻 Odysseus · stalled
 
