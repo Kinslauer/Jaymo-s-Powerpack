@@ -58,14 +58,22 @@ public final class WoundMarksLayer {
 	static final int SCORCH_CORE = 0x1C1714, SCORCH_RIM = 0x6B3A22, SCORCH_OLD = 0xA8665A;
 	/** A healed stump's scar, and the seam it closed along. */
 	static final int SCAR = 0xD19A8C, SEAM = 0x8E5A50;
+	/**
+	 * A bound stump's binding ({@code Bleeding.bindStumps}): clean linen, or a rag, with the darker line where each turn
+	 * of it overlaps the last.
+	 */
+	static final int LINEN = 0xE4DCC6, LINEN_TURN = 0xB8AE96, RAG = 0x9A8A6C, RAG_TURN = 0x6E6150;
+	/** How far up a stump's sides its binding goes (rows of the limb's 12, from the end). */
+	static final int BINDING_ROWS = 6;
 	/** Lasting scars: a burn's shine, frostbitten grey and dead black-blue, a lightning fern, hollows, an empty socket. */
 	static final int BURN_SHINE = 0xE2A79C, FROST_GREY = 0x6E7480, FROST_DEAD = 0x2E3440, FERN = 0xB0574C, HOLLOW = 0x4A342E, SOCKET = 0x1E1412;
 
 	/** What a body's marks look like this frame: the marks, their stages, and the body's blood colour. */
-	record Marked(List<WoundMarks.Mark> marks, int[] stages, int blood, int stubs, int raw, int gashes, int seed, int scars) {
+	record Marked(List<WoundMarks.Mark> marks, int[] stages, int blood, int stubs, int raw, int gashes, int seed, int scars, int bound, int rags) {
 		String key() {
 			StringBuilder b = new StringBuilder();
-			b.append('c').append(this.scars).append('s').append(this.stubs).append('r').append(this.raw).append('g').append(this.gashes).append('x').append(this.seed).append('|');
+			b.append('c').append(this.scars).append('s').append(this.stubs).append('b').append(this.bound).append('t').append(this.rags)
+				.append('r').append(this.raw).append('g').append(this.gashes).append('x').append(this.seed).append('|');
 			for (int i = 0; i < this.marks.size(); i++) {
 				b.append(Long.toHexString(this.marks.get(i).shape())).append(':').append(this.stages[i]).append(',');
 			}
@@ -101,12 +109,22 @@ public final class WoundMarksLayer {
 			state.setData(KEY, null);
 			return;
 		}
-		int raw = 0;
+		int raw = 0, bound = 0, rags = 0;
 		int bleeding = Bleeding.bleeding(entity);
 		for (int part : Dismember.PARTS) {
 			BodyPart lost = (stubs & part) != 0 ? Breaks.part(part) : null;
 			if (lost != null && (bleeding & 1 << lost.ordinal()) != 0) {
 				raw |= part;
+			}
+		}
+		// (Andy, 2026-11-19) a stump someone bound: its binding shows on the end (the server keeps a gone part's wrap only then)
+		for (BodyPart part : BodyPart.values()) {
+			int limb = Breaks.limb(part);
+			if ((stubs & limb) != 0 && limb != Dismember.HEAD && (wrapped & 1 << part.ordinal()) != 0) {
+				bound |= limb;
+				if ((wrapped >>> Bleeding.RAG_SHIFT & 1 << part.ordinal()) != 0) {
+					rags |= limb;
+				}
 			}
 		}
 		long now = entity.level().getGameTime();
@@ -116,7 +134,8 @@ public final class WoundMarksLayer {
 			stages[i] = Mth.clamp(STAGES - (int) (marks.get(i).age(now) * STAGES), 1, STAGES);
 		}
 		int blood = BladeBlood.color(entity);
-		state.setData(KEY, new Marked(marks, stages, blood == BladeBlood.NO_BLOOD ? CHIPPED : blood, stubs, raw, gashes, entity.getId() * 31, scars));
+		state.setData(KEY, new Marked(marks, stages, blood == BladeBlood.NO_BLOOD ? CHIPPED : blood, stubs, raw, gashes, entity.getId() * 31, scars,
+			bound, rags));
 	}
 
 	/** The scars that show, as bits by {@link Scars.Kind#ordinal()} (weak lungs are inside, and don't). */
@@ -211,6 +230,9 @@ public final class WoundMarksLayer {
 				for (int part : Dismember.PARTS) {
 					if ((marked.stubs() & part) != 0) {
 						painter.stump(part, (marked.raw() & part) != 0, marked.blood());
+						if ((marked.bound() & part) != 0) {
+							painter.binding(part, (marked.rags() & part) != 0);
+						}
 					}
 				}
 			}
@@ -471,6 +493,45 @@ public final class WoundMarksLayer {
 			for (int py = rim[1] * this.unit; py < (rim[1] + rim[3]) * this.unit; py++) {
 				for (int px = rim[0] * this.unit; px < (rim[0] + rim[2]) * this.unit; px++) {
 					this.dot(px, py, raw ? scale(blood, 0.8F) : SCAR, raw ? 0.7F : 0.35F, rim);
+				}
+			}
+		}
+
+		/**
+		 * A bound stump ({@code part}, a {@link Dismember} bit): its end and the last {@link #BINDING_ROWS} rows of each side
+		 * wrapped in linen or a {@code rag}, a darker line at every other row where the turns overlap.
+		 */
+		void binding(int part, boolean rag) {
+			int x, y;
+			switch (part) {
+				case Dismember.RIGHT_ARM -> {
+					x = 40; y = 16;
+				}
+				case Dismember.LEFT_ARM -> {
+					x = this.old ? 40 : 32; y = this.old ? 16 : 48;
+				}
+				case Dismember.RIGHT_LEG -> {
+					x = 0; y = 16;
+				}
+				case Dismember.LEFT_LEG -> {
+					x = this.old ? 0 : 16; y = this.old ? 16 : 48;
+				}
+				default -> {
+					return;
+				}
+			}
+			int cloth = rag ? RAG : LINEN, turn = rag ? RAG_TURN : LINEN_TURN;
+			int[] end = {x + 8, y, 4, 4};
+			for (int py = end[1] * this.unit; py < (end[1] + end[3]) * this.unit; py++) {
+				for (int px = end[0] * this.unit; px < (end[0] + end[2]) * this.unit; px++) {
+					this.dot(px, py, cloth, 0.95F, end);
+				}
+			}
+			int[] sides = {x, y + 4 + 12 - BINDING_ROWS, 16, BINDING_ROWS};
+			for (int py = sides[1] * this.unit; py < (sides[1] + sides[3]) * this.unit; py++) {
+				boolean overlap = (py / this.unit - sides[1]) % 2 == 1 && py % this.unit == this.unit - 1;
+				for (int px = sides[0] * this.unit; px < (sides[0] + sides[2]) * this.unit; px++) {
+					this.dot(px, py, overlap ? turn : cloth, 0.95F, sides);
 				}
 			}
 		}

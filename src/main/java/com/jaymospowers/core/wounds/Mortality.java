@@ -1447,10 +1447,7 @@ public final class Mortality {
 				injure(player, wake.cause, wake.sub);
 			}
 			player.setAttached(SURVIVOR, true);
-			if ("sheltered".equals(line)) {
-				// (0.20.83) those who took them in bound their wounds and splinted what was broken
-				Treatment.tendAll(player, false);
-			}
+			tendTaken(player, line);
 		}
 		// (out cold a while more, wherever they are now: then they come round, still hurt)
 		if (Downed.isDowned(player)) {
@@ -1469,6 +1466,43 @@ public final class Mortality {
 				wake.turn.run();
 			} catch (RuntimeException e) {
 				JaymosPowers.LOGGER.warn("{} couldn't be turned", player.getScoreboardName(), e);
+			}
+		}
+	}
+
+	/**
+	 * What those who carried {@code player} off out cold saw to before they woke ({@code line}: where they were taken).
+	 * Andy (2026-11-19, woken in a village bed with both legs gone and bleeding into it: "these good people took me in and im
+	 * bleeding all over they bed ... i should have been bandaged no?"):
+	 * <ul>
+	 * <li>Taken in ({@code sheltered}): their cuts bandaged in clean linen, their breaks splinted, their stumps bound tight
+	 * ({@link Bleeding#bindStumps}), and anything dirty or festering washed out with the herbs.</li>
+	 * <li>Locked in a realm's cells ({@code jailed}): the gaolers keep a prisoner alive for judgement, roughly: rags on the
+	 * cuts and stumps, the breaks splinted.</li>
+	 * <li>Taken captive ({@code captured}): a slave is worth more alive, so captors bind a bleeding stump with a rag. No
+	 * more than that.</li>
+	 * </ul>
+	 * Spiders' lairs, a berth of their own and the wild see to nothing: nobody tended them there.
+	 */
+	static void tendTaken(ServerPlayer player, String line) {
+		switch (line) {
+			case "sheltered" -> {
+				Treatment.tendAll(player, false);
+				Bleeding.bindStumps(player, false);
+				int foul = Bleeding.festering(player) | Bleeding.dirty(player);
+				for (BodyPart part : BodyPart.values()) {
+					if ((foul & Breaks.bit(part)) != 0) {
+						Bleeding.clean(player, part);
+					}
+				}
+			}
+			case "jailed" -> {
+				Treatment.tendAll(player, true);
+				Bleeding.bindStumps(player, true);
+			}
+			case "captured" -> Bleeding.bindStumps(player, true);
+			default -> {
+				// (nobody saw to them)
 			}
 		}
 	}
