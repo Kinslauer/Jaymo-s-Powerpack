@@ -114,9 +114,9 @@ public class GrapeVineBlock extends VegetationBlock {
 	}
 
 	/** Bunches a picking gives from this vine as it stands. */
-	public static int yield(BlockState state) {
-		int bunches = state.getValue(PRUNED) ? FULL_YIELD : Math.max(1, FULL_YIELD - state.getValue(NEGLECT));
-		return state.getValue(NETTED) ? bunches + NET_BONUS : bunches;
+	public static int bunches(BlockState state) {
+		int count = state.getValue(PRUNED) ? FULL_YIELD : Math.max(1, FULL_YIELD - state.getValue(NEGLECT));
+		return state.getValue(NETTED) ? count + NET_BONUS : count;
 	}
 
 	// --- being tended ---
@@ -153,7 +153,7 @@ public class GrapeVineBlock extends VegetationBlock {
 		if (state.getValue(AGE) < RIPE) {
 			return InteractionResult.PASS;
 		}
-		popResource(level, pos, new ItemStack(grapes(), yield(state)));
+		popResource(level, pos, new ItemStack(grapes(), bunches(state)));
 		int neglect = state.getValue(PRUNED) ? 0 : Math.min(MAX_NEGLECT, state.getValue(NEGLECT) + 1);
 		level.setBlock(pos, state.setValue(AGE, REGROW_AGE).setValue(PRUNED, false).setValue(NEGLECT, neglect), Block.UPDATE_CLIENTS);
 		level.playSound(null, pos, SoundEvents.SWEET_BERRY_BUSH_PICK_BERRIES, SoundSource.BLOCKS, 1.0F, 0.8F + level.getRandom().nextFloat() * 0.4F);
