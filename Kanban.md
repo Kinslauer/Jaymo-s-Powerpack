@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 09:11). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 09:35). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -31,12 +31,10 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-l-carts-check|vanilla-plus-l-carts-check]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-3-guards-fight-mend|village-mods-3-guards-fight-mend]] · for 💻 Odysseus · open
-- [ ] [[Inbox/npc-fights-2-strings|npc-fights-2-strings]] · for 💻 Odysseus · open
 
 
 ## Being built
 
-- [ ] [[Inbox/npc-fights-3-clashes|npc-fights-3-clashes]] · pc-claude (npc-fights-3 track) · claimed
 
 
 ## In review
@@ -59,14 +57,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/npc-fights-4-rivals|npc-fights-4-rivals]]
+- [x] [[Inbox/Done/npc-fights-3-clashes|npc-fights-3-clashes]]
+- [x] [[Inbox/Done/npc-fights-2-strings|npc-fights-2-strings]]
 - [x] [[Inbox/Done/npc-fights-1-brawler|npc-fights-1-brawler]]
+- [x] [[Inbox/Done/npc-fights-4-rivals|npc-fights-4-rivals]]
 - [x] [[Inbox/Done/hns-4-shove-procs|hns-4-shove-procs]]
 - [x] [[Inbox/Done/hns-3-edges-sparks|hns-3-edges-sparks]]
 - [x] [[Inbox/Done/hns-2-stealth-posture|hns-2-stealth-posture]]
 - [x] [[Inbox/Done/hns-1-crits|hns-1-crits]]
-- [x] [[Inbox/Done/medieval-deco-7-practice-dummy|medieval-deco-7-practice-dummy]]
-- [x] [[Inbox/Done/medieval-deco-6-towns-sea|medieval-deco-6-towns-sea]]
 
 
 %% kanban:settings
