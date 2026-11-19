@@ -4,13 +4,13 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 19:45). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 00:49). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
-- [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · open
 - [ ] [[Inbox/harness-upkeep|harness-upkeep]] · ☀️ Apollo · open
+- [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · open
 
 
 ## Being built
@@ -21,15 +21,15 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
-- [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
-- [ ] [[Inbox/rig-beetle-2-guns|rig-beetle-2-guns]] · ☀️ Apollo · #1749 · in-review
-- [ ] [[Inbox/rig-beetle-4-flight|rig-beetle-4-flight]] · ☀️ Apollo · #1765 · in-review
+- [ ] [[Inbox/lanterns-05-patrol-law|lanterns-05-patrol-law]] · lanterns-05-patrol-law · #1764 · in-review
+- [ ] [[Inbox/lanterns-06-space-medium|lanterns-06-space-medium]] · lanterns-06-space-medium · #1766 · in-review
 - [ ] [[Inbox/lanterns-08-dream|lanterns-08-dream]] · lanterns-08-dream · #1769 · in-review
 - [ ] [[Inbox/lanterns-09-talk-typed|lanterns-09-talk-typed]] · lanterns-09-talk-typed · #1770 · in-review
-- [ ] [[Inbox/lanterns-05-patrol-law|lanterns-05-patrol-law]] · lanterns-05-patrol-law · #1764 · in-review
 - [ ] [[Inbox/lanterns-10-orbit|lanterns-10-orbit]] · lanterns-10-orbit · #1772 · in-review
-- [ ] [[Inbox/lanterns-06-space-medium|lanterns-06-space-medium]] · lanterns-06-space-medium · #1766 · in-review
+- [ ] [[Inbox/rig-beetle-2-guns|rig-beetle-2-guns]] · ☀️ Apollo · #1749 · in-review
+- [ ] [[Inbox/rig-beetle-4-flight|rig-beetle-4-flight]] · ☀️ Apollo · #1765 · in-review
 - [ ] [[Inbox/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · rig-beetle-5-the-mind · #1774 · in-review
+- [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 
 
@@ -47,14 +47,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/rig-beetle-3-back-rig|rig-beetle-3-back-rig]]
-- [x] [[Inbox/Done/lanterns-07-talk-chat|lanterns-07-talk-chat]]
-- [x] [[Inbox/Done/harness-creeds-and-lands|harness-creeds-and-lands]]
-- [x] [[Inbox/Done/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]]
-- [x] [[Inbox/Done/lanterns-04-crime-word|lanterns-04-crime-word]]
-- [x] [[Inbox/Done/lanterns-03-patrol-small|lanterns-03-patrol-small]]
-- [x] [[Inbox/Done/lanterns-02-space-small|lanterns-02-space-small]]
-- [x] [[Inbox/Done/lanterns-01-crime-small|lanterns-01-crime-small]]
+- [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
+- [x] [[Inbox/Done/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]]
+- [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
+- [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
+- [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
+- [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
+- [x] [[Inbox/Done/wither-reincarnated-fight|wither-reincarnated-fight]]
+- [x] [[Inbox/Done/weapon-hooks-and-breaks|weapon-hooks-and-breaks]]
 
 
 %% kanban:settings
