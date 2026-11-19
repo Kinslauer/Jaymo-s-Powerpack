@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: any
 from: pc-claude-server-thread
 asked: 2026-11-19
 thread: PC Claude, Deck server thread
-claimed_by: 
+claimed_by: hermes-a
 pr: 
 suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/Havens.java
