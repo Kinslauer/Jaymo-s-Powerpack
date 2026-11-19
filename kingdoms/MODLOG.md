@@ -15388,3 +15388,54 @@ Hackers 'n Slashers patch 3, the town half (Andy: "you should see the blacksmith
 - **Verdant**: a new weakness on their card, "Shunned, quietly": folk think less of them but deal with them anyway. Card line only; prices and trust are unchanged.
 - **Birthplace lines**: each birthplace's short line is alliterative now (Andy's own for the city of scholars), so it no longer repeats the title.
 - Built; not played.
+
+## 0.10.77 (2026-11-19): hero add-on picks - night trouble, burglar, signal brazier, gift-eater, sketches, hot food, trials, Sky Crown (#1827)
+
+Andy's hero add-on picks, the town and world side. Built; not played.
+- **Trouble in the night**: blow a goat horn in a town at night and a frightened neighbour calls out which way the trouble is, a break-in or a street robbery. Beat the crooks before they run and any guard pays emeralds and the town's regard for the evidence they drop.
+- **The night burglar**: now and then a quiet young woman lifts one gem from an unlocked chest of yours and runs the rooftops. Catch her three times and she asks for work.
+- **Signal Brazier**: light it at night under open sky with flint and steel and 2 levels; a smoke column rises and your nearest hired or sworn companion comes.
+- **The gift-eater**: one rival captain in each world drinks the gifts of the gifted he beats and fights with them, a little weaker. He has always eaten at least one before you meet him, often from a villager you know. Kill him and what he took is gone.
+- **Sketches**: a Sketchbook (paper and charcoal) draws whatever you look at; bosses, monsters of legend, gifted fighters and burning ships pay most at a pigeon roost, and the news names you. Ordinary creatures pay once per kind a day.
+- **Hot dishes**: a cook's Town business screen offers 1 to 5 hot dishes to run to villagers within 4 minutes (about 3 emeralds for five; cold ones pay nothing; one run a quarter day).
+- **Five trials**: five trial chests far from spawn (a timed run, a target range, a wave of foes, a fall, a quiet theft); finish all five and a masked old fighter duels you for a relic.
+- **The Sky Crown**: six pieces of cursed glass in a fallen Giant's heart, the sentry ruins, a Nether fortress, an End city, the deep dark and a sunken ship each give a small gift while carried; set all six in a Crown Stand for the Sky Crown, which gives all six. A broken stand drops its shards; sneak with an empty hand to take one back.
+- **Survival perk Stubborn** (read by Powers): once a day a killing blow downs you and you mend fast for 40 seconds.
+
+## 0.10.78 (2026-11-19): Music: comes now and then like the game's own, and stays off after the creator if it was off (#1830)
+
+- **Now and then**: the music of the places (`client/music/PlaceMusic`) no longer plays almost all the time. After a track ends, or fades as you leave its place, the next waits as long as the game waits between its own songs: 10 to 20 minutes, capped by the Music Frequency option (Frequent: 10 minutes, Constant: 5 seconds). Walking from one place into another no longer starts a fresh track at once, none starts while the game's own song is playing, and the first one after joining waits 5 seconds like the game's.
+- **Three minutes at most** (Andy): a place track, or the game's own song, that has played 3 minutes fades out over 5 seconds; the game's own then waits for its next song as usual.
+- **Music stays off**: if your Music slider was off when you joined, it is put back to off (and saved) once you are set down after the life story and MCA's creator (`KeptMusicSetting`). A slider that was on is left alone.
+- Compiled; not played. What turns the slider on during creation wasn't found in our code or MCA's, so this puts it back afterwards rather than stopping it.
+
+## 0.10.79 (2026-11-19): life aim shown on landing instead of a book in your pack (#1833)
+
+- The life story no longer puts a one-page "Journal" book (your life's aim) in your pack. The same page opens on screen,
+  on Minecraft's book page, once the landing's loading screen is gone (Andy: show it as they spawn, with the same
+  background). `LifeAims.Page` sends the page; client `AimPageClient` opens it after a second with no screen open.
+  The traveller's journal (M) is still given.
+- Built; not played.
+
+## 0.10.80 (2026-11-19): Awakened strangers: later, introduced, persistent; Hearth hit cap (#1831)
+
+- Andy's clip: a Z Fighter stranger beamed him from about 20 blocks two and a half minutes into a new life, before it
+  had said a word.
+- **Not early**: no stranger comes for a player who hasn't lived two in-game days in this life. No masters in Hearth
+  (10% a tier from Borderlands).
+- **Introduced first**: they walk up and give their name (it shows over them from then on), call you out 3 s later, and
+  square up 2 s before any blow or power move.
+- **Persistent**: walk away (64 blocks) or never strike back in the 5 minutes and they say they'll be back; the same
+  stranger (kept as they were) comes again half a day later and greets you as someone they've met. One mid-meeting when
+  the world closes comes back soon after.
+- **Sleep**: lie down and they wait outside (the nearest open-sky spot round the bed), then say how many hours they
+  waited when you get up, and square up again.
+- **Once you're down, by their nature**: the kind, cheerful, devout, dutiful and brave kneel and get you up, call it a
+  good fight, and half of them come back for another two days later; the spiteful (and the hotheaded half the time) finish
+  you (Powers' execution); the rest say they've won and walk off.
+- **Softer by tier**: a stranger's harm on a player lands at 35% in Hearth, 60% Borderlands, 80% Wildlands, full from
+  Dread, at most 20% / 30% / 45% of full health a hit in those tiers.
+- **Hearth rule** (Andy: "keep this as a rule global within hearth"): in the Hearth tier no single hit on a player (a
+  blow, shot or blast; not falls, fire or drowning) takes more than 20% of their full health. Not on the downed.
+- Not from the harsh-lands tiers: strangers were never tiered as hostiles.
+- (AwakenedStrangers, WorldTiers.hearthHit, HearthHitMixin, Downed.holdsFire, PowersCompat.orderExecution). Built; not played.

@@ -3132,6 +3132,32 @@ public final class PowersCompat {
 	private static java.lang.invoke.@Nullable MethodHandle carried;
 	private static boolean carriedLooked;
 
+	private static java.lang.invoke.@Nullable MethodHandle executeOrder;
+	private static boolean executeLooked;
+
+	/**
+	 * {@code mob} sets out to execute downed {@code player} (Powers' {@code MobExecutions.order}: the walk over, the film,
+	 * the blow); false if it can't, or without Powers.
+	 */
+	public static boolean orderExecution(net.minecraft.world.entity.Mob mob, net.minecraft.server.level.ServerPlayer player) {
+		if (!executeLooked) {
+			executeLooked = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					executeOrder = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wounds.MobExecutions"),
+						"order", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Mob.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' MobExecutions.order (older Powers?)", e);
+				}
+			}
+		}
+		try {
+			return executeOrder != null && (boolean)executeOrder.invoke(mob, player);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** Someone is carrying {@code entity} in their arms or dragging it (Powers' {@code Carry.isCarried}); false without Powers. */
 	public static boolean isCarried(net.minecraft.world.entity.Entity entity) {
 		if (!carriedLooked) {

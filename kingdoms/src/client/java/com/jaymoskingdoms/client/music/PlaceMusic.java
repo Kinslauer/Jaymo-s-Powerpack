@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.client.sounds.MusicManager;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
@@ -19,9 +20,14 @@ import org.jspecify.annotations.Nullable;
 /**
  * The music of the places, from the Medieval Music pack's tracks ({@code sounds/music/*.ogg} in the pack, reached
  * through {@code place_music.<track>} in sounds.json). The server says which place you are in ({@link PlaceThemes}); each
- * place has its own tracks ({@link #TRACKS}). A track plays through, then the place rests {@link #REST_MIN} to
- * {@link #REST_MAX} ticks and plays another; leaving the place (or the server saying nothing for {@link #SILENCE} ticks)
- * fades it out over {@link #FADE_OUT} ticks.
+ * place has its own tracks ({@link #TRACKS}). Like the game's own music, a track comes now and then, not all the time:
+ * after one ends (played through, or faded out as you left its place) the next waits as long as the game would wait
+ * between songs ({@link #rest}: 10 to 20 minutes, shorter on the Music Frequency option's Frequent and Constant), and
+ * none starts while the game's own music is playing. Leaving the place (or the server saying nothing for
+ * {@link #SILENCE} ticks) fades a track out over {@link #FADE_OUT} ticks.
+ * <p>Andy: music fades out after 3 minutes if it would play longer. A place track, and the game's own song, that has
+ * played {@link #LONGEST} ticks fades out over {@link #LONGEST_FADE} ticks (the game's own is then stopped, which starts
+ * its usual wait for the next song).</p>
  * <ul>
  * <li>Only when the pack's file is there: without the pack the sound events resolve to nothing, so nothing is played,
  * and the game's own music is left alone.</li>
@@ -34,8 +40,12 @@ import org.jspecify.annotations.Nullable;
  */
 public final class PlaceMusic {
 	static final int FADE_IN = 80, FADE_OUT = 60, DUCK_EVERY = 20, SILENCE = PlaceThemes.REPEAT_TICKS * 2 + 20;
-	/** The rest between one track and the next (ticks), after the first. */
-	static final int REST_MIN = 600, REST_MAX = 2400;
+	/** The rest between one track and the next (ticks): the game's own between songs (Musics.GAME), capped by the Music Frequency option. */
+	static final int REST_MIN = 12000, REST_MAX = 24000;
+	/** The rest on the Music Frequency option's Constant (ticks), and the first track's wait after joining (both as the game's own music). */
+	static final int REST_CONSTANT = 100, FIRST_WAIT = 100;
+	/** The longest any track plays before it fades out (ticks; 3 minutes), and that fade (ticks). */
+	static final int LONGEST = 3600, LONGEST_FADE = 100;
 	/** Loudness of a track, and the festival's (and its fire's) share of it. */
 	static final float VOLUME = 1.0F, FESTIVAL = 1.2F, FIRE_LOUDER = 1.6F;
 
@@ -56,6 +66,10 @@ public final class PlaceMusic {
 	private static long age;
 	private static long nextAt;
 	private static @Nullable Track current;
+	/** The game's own song now playing (its language key), since when, and whether its fade has the Music category turned down. */
+	private static @Nullable String gameSong;
+	private static long gameSongSince;
+	private static boolean gameSongFading;
 	private static String lastTrack = "";
 
 	private PlaceMusic() {
@@ -76,6 +90,12 @@ public final class PlaceMusic {
 		}
 		current = null;
 		place = "";
+		nextAt = age + FIRST_WAIT;
+		if (gameSongFading) {
+			Minecraft.getInstance().getSoundManager().updateCategoryVolume(SoundSource.MUSIC, 1.0F);
+			gameSongFading = false;
+		}
+		gameSong = null;
 	}
 
 	private static void tick(Minecraft minecraft) {
@@ -89,21 +109,22 @@ public final class PlaceMusic {
 			return;
 		}
 		age++;
+		capGameSong(minecraft);
 		if (!place.isEmpty() && age - lastTold > SILENCE) {
 			place = "";
 		}
 		// a track that ran out on its own is never told to stop by the sound engine: it is no longer active (not just after it starts)
 		boolean over = current != null && (current.isStopped() || age - current.born > 40 && !minecraft.getSoundManager().isActive(current));
 		if (current != null && (over || current.faded())) {
-			if (over) {
-				nextAt = age + REST_MIN + minecraft.level.getRandom().nextInt(REST_MAX - REST_MIN + 1);
-			}
+			nextAt = age + rest(minecraft);
 			current.end();
 			current = null;
 		}
 		if (current != null) {
 			// a track of another place that is still sounding as you leave it fades out; the place's own runs on
-			current.wanted = group(place).equals(current.group) && !FoeMusicClient.sounding() && SceneMusic.cover() <= 0.0F;
+			current.wanted = group(place).equals(current.group) && !FoeMusicClient.sounding() && SceneMusic.cover() <= 0.0F
+				&& age - current.born < LONGEST;
+			current.fadeTicks = age - current.born < LONGEST ? FADE_OUT : LONGEST_FADE;
 			if (age % DUCK_EVERY == 0 && minecraft.getMusicManager() != null) {
 				minecraft.getMusicManager().stopPlaying();
 			}
@@ -113,7 +134,52 @@ public final class PlaceMusic {
 		if (tracks == null || age < nextAt || FoeMusicClient.sounding() || SceneMusic.cover() > 0.0F) {
 			return;
 		}
+		if (minecraft.getMusicManager() != null && minecraft.getMusicManager().getCurrentMusicTranslationKey() != null) {
+			// the game's own song is on: this one waits its turn, as if that song had been ours
+			nextAt = age + rest(minecraft);
+			return;
+		}
 		start(minecraft, tracks);
+	}
+
+	/** The game's own song fades out after {@link #LONGEST} ticks, then stops (its music manager then waits as usual). */
+	private static void capGameSong(Minecraft minecraft) {
+		MusicManager music = minecraft.getMusicManager();
+		String song = music == null ? null : music.getCurrentMusicTranslationKey();
+		if (song == null || !song.equals(gameSong)) {
+			if (gameSongFading) {
+				minecraft.getSoundManager().updateCategoryVolume(SoundSource.MUSIC, 1.0F);
+				gameSongFading = false;
+			}
+			gameSong = song;
+			gameSongSince = age;
+			return;
+		}
+		long over = age - gameSongSince - LONGEST;
+		if (over < 0) {
+			return;
+		}
+		float gain = 1.0F - over / (float)LONGEST_FADE;
+		if (gain <= 0.0F) {
+			music.stopPlaying();
+			minecraft.getSoundManager().updateCategoryVolume(SoundSource.MUSIC, 1.0F);
+			gameSongFading = false;
+			gameSong = null;
+			return;
+		}
+		minecraft.getSoundManager().updateCategoryVolume(SoundSource.MUSIC, gain * gain);
+		gameSongFading = true;
+	}
+
+	/** How long to rest before the next track (ticks): what the game waits between its own songs on the Music Frequency option. */
+	private static int rest(Minecraft minecraft) {
+		MusicManager.MusicFrequency frequency = minecraft.options.musicFrequency().get();
+		if (frequency == MusicManager.MusicFrequency.CONSTANT) {
+			return REST_CONSTANT;
+		}
+		int cap = frequency == MusicManager.MusicFrequency.FREQUENT ? 10 * 1200 : 20 * 1200;
+		int min = Math.min(REST_MIN, cap), max = Math.min(REST_MAX, cap);
+		return min + minecraft.level.getRandom().nextInt(max - min + 1);
 	}
 
 	/** The festival's square and its fire share their tracks. */
@@ -149,6 +215,7 @@ public final class PlaceMusic {
 	private static final class Track extends AbstractTickableSoundInstance {
 		final String group;
 		boolean wanted = true;
+		int fadeTicks = FADE_OUT;
 		float gain;
 		final long born = age;
 
@@ -175,7 +242,7 @@ public final class PlaceMusic {
 
 		@Override
 		public void tick() {
-			this.gain = Mth.clamp(this.gain + (this.wanted ? 1.0F / FADE_IN : -1.0F / FADE_OUT), 0.0F, 1.0F);
+			this.gain = Mth.clamp(this.gain + (this.wanted ? 1.0F / FADE_IN : -1.0F / this.fadeTicks), 0.0F, 1.0F);
 			this.volume = Math.max(0.0001F, loudness() * this.gain * this.gain);
 		}
 	}

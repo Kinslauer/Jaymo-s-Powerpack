@@ -6386,3 +6386,53 @@ Andy: "i like the way these npcs fight, can our powered npcs be similar?" and "t
 - **Rumour**: players within 160 blocks of the tyrant get a letter line ("Word", through Jaymo's Kingdoms' post, roost or not) of two fighters in the sky. No screen text.
 - Classes: `ZFighterPatrol` (`Cause.SHOWDOWN`, `showdown`, `foe`), `ZFighterRogue.registerGoals`, `ZFighterRaiders`, `ZFighterRaids`, `ZFighterInvasions`, `ZFighterKingdoms.word`.
 - Built; not played.
+
+## 0.25.58 (2026-11-19): hero add-on picks - web, symbiote, gear, Chrono, Cryo, size draughts (#1827)
+
+Andy's 29 picks from three Bedrock hero add-ons (ideas only, our own names and art). Built; not played.
+- **Web Slinger**: let go of a low, fast swing over water and you skim across it on your feet for about four seconds (a bar shows the time; Jump hops off, Sneak sinks). After letting go of a swing, click in the air for a rising blow that throws the foe up, click mid-trick for a spinning strike, or Sneak + click for a two-footed dive kick that slams the ground where you land. Flips, strikes and long runs without touching the ground count toward the web's mastery, more for a chain of different tricks. A web slinger can carry people (players, villagers, illagers, zombies and the like, up to player size) at their side through every swing; villagers can be snatched mid-air.
+- **Symbiote**: at full bond, the radial menu's Wings chip spreads huge red-and-black bat wings: glide, and Jump in the air beats them for a climb (4 flaps, each costing satiety). Ring a bell close by while holding a glass bottle (bond under 70) and the symbiote goes slack; pour it into a Jarred Symbiote. It hates this, says why, trusts you less and remembers who held the jar; use the jar to let it back in. The white strain gets a Pale Burst chip that tears other symbiotes off hosts and mobs and sends loose ones fleeing. Riding a horse, the Steed chip lets the symbiote into it: glossy black, no saddle needed, deer-like leaps, no fall damage, and the symbiote eats for two. Charge the weapon arm while looking at a log and every strain forms an axe: one to three blows by the tree's size, and the last one cuts the log it hits clean out so the tree topples over like any felled tree.
+- **Gear for everyone**: lodestone chips (4 from a lodestone) clicked onto a throwing weapon make it bend toward the nearest foe ahead. Frost bomb for the belt: a 4-block ring of frost that slows and chills and freezes the water's surface. Three arrowheads: Blunt (shoves hard, never bleeds), Spark (shocks the target still and jumps to a nearby foe), Mending (heals whoever it hits). A deck of throwing cards throws three at a time, each card cutting, burning, poisoning or bursting at random.
+- **Fighting**: Sneak + right-click a hostile person-sized mob to hold it in front of you for 3 seconds while you hit it. The Z Fighter's Ki Wave kicks you back when fired, harder with charge, and lifts you if fired at the ground. Kingdoms' new Survival perk Stubborn: once a day a killing blow downs you instead, mending fast for 40 seconds before you get up; struck again while down, you die.
+- **Chrono**: with every ability learned, Sneak + R marks a 25-block space and Sneak + R again puts it back as it was in a golden wave (walls, burnt houses, blast holes, anything fire, mobs or explosions did; blocks a player broke or placed by hand stay as they are, and chests, hives and the like come back empty). A mark younger than 30 seconds turns it back to how it was 30 seconds ago. At top Overclock speed, holding Jump runs you up the air about 5-6 blocks, and use with an empty hand and no static charge throws a thunderbolt in your Speed Prism's colour.
+- **Cryo**: Frost Breath turns lava into obsidian (still) or basalt (flowing).
+- **Alchemy**: the red Small Draught halves your size for 4 minutes (fits one-block gaps, high jump, softer hits); the blue Great Draught grows you half again (long reach, heavy blows, slower).
+
+## 0.25.59 (2026-11-19): Shifting Wares no longer crashes the server on VillagersPlus professions (#1828)
+
+- **Fix**: Shifting Wares' daily trade reroll crashed the server tick (NoSuchElementException in `SlotRerollSource.FromSet`) for a villager whose profession names a trade set that isn't registered. VillagersPlus' miner, alchemist, oceanographer, occultist and horticulturist name `villagersplus:<job>/level_1..5`, which its jar never defines. Such a villager now keeps its trades and restocks them the vanilla way instead of rerolling; professions whose sets exist reroll as before.
+- Class: `mixin/shiftingwares/TradeShufflerMixin` (compat mixin, `@Pseudo`, skipped when Shifting Wares isn't there).
+- Built by CI; not played.
+
+## 0.25.60 (2026-11-19): Sounds no longer stay quieter after the Rig's dip or Z Fighter deafness (#1830)
+
+- The Rig's big-shot dip (`RigImpact`) and Z Fighter deafness (`ZFighterGammaClient`) gave each sound category its slider volume as an extra gain, which 26.3 multiplies by the slider again, so music, blocks, mobs and the rest stayed quieter (slider squared) until a restart. They now pass only the dip itself.
+- Compiled; not played.
+
+## 0.25.61 (2026-11-19): NPC fights 1b: feints and Patrol ranks (#1832)
+
+Andy: "they need to react to feints at least. and give patrolmen ranks".
+- **Feints, both ways** (`core/brawl/Feints`, a swing note in a mixin on `LivingEntity#swing`): every arm swing, a player's or an NPC's, that does no damage a few ticks later is a whiff, and each brawler (tyrants, raiders, Patrolmen, every power's gifted folk) it was aimed at reacts by rank. A low-rank one bites: it flinches into a short guard, and when that drops it is open for a moment (no guard, no dodge, 1.5 times the damage), so the real blow that follows lands hard. A high-rank one reads it (10 to 85 percent of the time by rank): it sidesteps or, from mid rank, blinks away, and punishes the whiff with a counter.
+- **NPCs feint too**: a fighter of rank 0.4 or more swings at a foe who is guarding (a player's Z Fighter guard or another NPC's), then pokes for real 10 ticks later. A player's guard raised in answer to a feint (within 12 ticks) has its parry spent: it cools down 30 ticks and costs 3 ki (`ZFighterGuard.feinted`), so the poke meets only the plain guard. A guard held up before, or not up, is not touched.
+- **Patrolman ranks**: each patrolman who lands gets a Patrol rank (Rookie, Officer, Sergeant, Inspector, Commander), stored on him (`ZFighterPatrol.RANK`, saved), picked weighted by the nearest player's world tier and what each rank needs (`RANK_TIER`); a showdown's patrolman is at least an Inspector. The rank sets his brawl rank (0.15 Rookie to 0.8 Commander), health (up to 1.8 times), armour (up to +6), how hard he punches (up to 1.6 times) and how often, and shows in his name ("Sergeant Jaco"). Player ranks are unchanged. Patrolmen already out keep their old name and count as Rookies; called officers (writs) are not ranked.
+- Built; not played. A feint is read from the arm swing alone, so a slow real blow is told apart only by whether it landed.
+
+## 0.25.62 (2026-11-19): no Animal Dictionary on first join; UI tips as you meet things (#1833)
+
+- Alex's Mobs Continued no longer hands every new player its Animal Dictionary (Andy: players shouldn't spawn with it).
+  `compat/AlexsMobsCompat` turns its `giveBookOnStartup` flag off once the server is up and as each player connects. The
+  book can still be crafted and read; players who already have one keep it.
+- **UI tutorial as tips** (Andy picked tips as you meet things over a walkthrough): the first time a part of the screen
+  shows, a tip card says what lives there: left of the hotbar (body), right of it, around the crosshair, over the hotbar,
+  top left, then how to move HUD parts (/hudmove); the character menu the first time it's open; the journal key the
+  first time you carry the traveller's journal. Once per player, one at a time, none in the first 10 seconds of a
+  session. `client/hud/UiTips`, lang `parts/ui_tips.json`; `TipCard.busy()` added. Powers keep their own tips.
+- Built; not played.
+
+## 0.25.63 (2026-11-19): The last hold gives a breather; gifted folk leave the downed alone (#1831)
+
+- **The last hold** (the one health mercy) now gives 3 seconds after it catches you in which no attack lands, to get
+  away. In Andy's clip it held him on half a heart, and the stranger's next blast downed him 2.5 s later.
+- **Gifted folk** no longer throw their power at anyone downed.
+- `MobExecutions.order`: a mob may set out to execute a downed player by its own choice (Kingdoms' spiteful strangers).
+- (LastHold, GiftedAI, MobExecutions). Built; not played.

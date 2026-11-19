@@ -14,6 +14,12 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
@@ -21,10 +27,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.Filterable;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Prediction;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -35,9 +39,7 @@ import net.minecraft.world.entity.monster.cubemob.Slime;
 import net.minecraft.world.entity.monster.spider.Spider;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ItemContainerContents;
-import net.minecraft.world.item.component.WrittenBookContent;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AbstractBedBlock;
@@ -45,7 +47,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.418) A life's aim. Every road of the life story ({@link Start}; fate is one of them once it has chosen) gives its
- * traveller one aim, a plain thing to set out to do, written on a one-page Journal in their kit (no lore, only what they
+ * traveller one aim, a plain thing to set out to do, shown on a book's page as they land (no lore, only what they
  * mean to do). The aim is measured by something that already exists (captives freed, merchant orders, a wolf grown, a
  * bed in a realm's capital, ...); the table is {@link #AIMS}, one row a road.
  *
@@ -122,7 +124,7 @@ public final class LifeAims {
 	record Aim(Kind kind, int goal, Stats.Stat perk) {
 	}
 
-	/** Every road's aim, in one table. Lang: {@code aim.jaymoskingdoms.<road>.page} (the Journal) and {@code .title}. */
+	/** Every road's aim, in one table. Lang: {@code aim.jaymoskingdoms.<road>.page} (the page shown on landing) and {@code .title}. */
 	static final Map<Start, Aim> AIMS = new EnumMap<>(Start.class);
 
 	static {
@@ -257,6 +259,7 @@ public final class LifeAims {
 		JaymosKingdoms.LOGGER.debug("life aim attachments: {} {}", LIFE_AIM, RoadDeeds.DONE);
 		ServerTickEvents.END_SERVER_TICK.register(LifeAims::tick);
 		ServerLivingEntityEvents.AFTER_DEATH.register(LifeAims::died);
+		PayloadTypeRegistry.clientboundPlay().register(Page.TYPE, Page.CODEC);
 	}
 
 	/** The /kingdom story reset: no aim any more. */
@@ -267,8 +270,8 @@ public final class LifeAims {
 	// ---- the start -----------------------------------------------------------------------------------------------------
 
 	/**
-	 * (From {@link LifeStory}, once {@code player} has landed on {@code road}) Gives them their aim and a one-page Journal
-	 * of it. {@code named}: the realm the road names, if it does.
+	 * (From {@link LifeStory}, once {@code player} has landed on {@code road}) Gives them their aim and shows it
+	 * on a book's page. {@code named}: the realm the road names, if it does.
 	 */
 	static void begin(ServerPlayer player, Start road, @Nullable Faction named) {
 		if (AIMS.get(road) == null) {
@@ -282,10 +285,21 @@ public final class LifeAims {
 		// (no realm to win a name with: the page asks for ten days instead)
 		boolean fallback = aimOf(life).kind() != AIMS.get(road).kind();
 		String page = fallback ? "aim.jaymoskingdoms.page.alt" : "aim.jaymoskingdoms." + life.aim() + ".page";
-		ItemStack book = new ItemStack(Items.WRITTEN_BOOK);
-		List<Filterable<Component>> pages = List.of(Filterable.passThrough(Component.translatable(page)));
-		book.set(DataComponents.WRITTEN_BOOK_CONTENT, new WrittenBookContent(Filterable.passThrough("Journal"), player.getGameProfile().name(), 0, pages, true));
-		player.getInventory().placeItemBackInInventory(book, Prediction.SERVER_ONLY);
+		// Andy (2026-11-19): no book in the pack any more; the page opens on screen as they land, on a book's page
+		if (ServerPlayNetworking.canSend(player, Page.TYPE)) {
+			ServerPlayNetworking.send(player, new Page(page));
+		}
+	}
+
+	/** Server to player: open the aim's page (a lang key) on a book's page once the landing's screens are gone. */
+	public record Page(String key) implements CustomPacketPayload {
+		public static final Type<Page> TYPE = new Type<>(JaymosKingdoms.id("aim_page"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Page> CODEC = StreamCodec.composite(ByteBufCodecs.STRING_UTF8, Page::key, Page::new);
+
+		@Override
+		public Type<Page> type() {
+			return TYPE;
+		}
 	}
 
 	/** The realm (id) the aim is about: the one the road names, the den's for the hideout, else whoever holds the land they woke on; -1 for none. */
