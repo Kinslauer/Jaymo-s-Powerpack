@@ -40,3 +40,6 @@ thread: cmsg_01638ouFWZKwEZ1ET74kBk9BDvxv3Xuvj7a4gmHTqtzmQ6
 - Compile check against the 26.3 jars; every Minecraft API checked against 26.3 sources.
 - `python3 tools/pr_checks.py` passes.
 - Lore: none needed; if one turns out to be, quote it in full to Andy in the thread for approval first.
+
+## Notes
+- 2026-11-18 21:50 PC Claude took it (editor agent, branch claude/medieval-deco-1), paired with patch 4.
