@@ -2,8 +2,8 @@ package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.FrostTech;
 import com.jaymoskingdoms.JaymosKingdoms;
-import com.jaymoskingdoms.McaCompat;
 import com.mojang.blaze3d.vertex.PoseStack;
+import java.util.function.Supplier;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.fabricmc.loader.api.FabricLoader;
@@ -14,6 +14,7 @@ import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -24,7 +25,6 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
-import org.jspecify.annotations.Nullable;
 
 /**
  * What a villager wears of the Frostborn's work ({@link FrostTech}), for everyone to see: a scouter over one eye, a made
@@ -32,8 +32,8 @@ import org.jspecify.annotations.Nullable;
  * wooden and iron limb sheets, the same box). The scouter is Jaymo's Powers' own, drawn from its armour sheet on a box just off the head (so
  * a resource pack that repaints the scouter repaints these too; without Powers there is no scouter to draw). A made
  * limb is plating of our own ({@code tools/gen_frost_tech.py}, in the scouter's greys and green light) drawn over the
- * arm or leg, just proud of the sleeve, with its lamps unlit by the dark. Both follow the body the way the Beastfolk's
- * parts do ({@link BeastParts}: on MCA's own posed body when MCA draws it). The scouter is hidden under a helmet or a
+ * arm or leg, just proud of the sleeve, with its lamps unlit by the dark. Both are worn models ({@link WornModel}), so they
+ * take the body's pose as it is drawn, a ragdoll's or a downed body's too. The scouter is hidden under a helmet or a
  * hood, a limb under a costume, and nothing is drawn on the invisible.
  */
 public final class FrostTechLayer {
@@ -50,8 +50,6 @@ public final class FrostTechLayer {
 	private static final Identifier IRON = Identifier.fromNamespaceAndPath("jaymospowers", "textures/entity/wounds/iron_limb.png");
 	private static final Identifier LIMB_GLOW = JaymosKingdoms.id("textures/entity/frost_tech/limb_glow.png");
 	private static final boolean POWERS = FabricLoader.getInstance().isModLoaded("jaymospowers");
-
-	private static @Nullable ModelPart scouter, rightArm, leftArm, leg;
 
 	private FrostTechLayer() {
 	}
@@ -75,30 +73,105 @@ public final class FrostTechLayer {
 		state.setData(KEY, worn == 0 ? null : worn | FrostTech.kinds(entity) << 8);
 	}
 
-	private static ModelPart box(float x, float y, float z, float w, float h, float d, float inflate, int sheetW, int sheetH) {
+	/**
+	 * The humanoid's bones (posed from the wearer each frame, WornModel), with boxes on the head for the scouter, or on the
+	 * four limbs for the plating.
+	 */
+	private static ModelPart bones(boolean head, float inflate, int sheetW, int sheetH) {
+		CubeDeformation off = new CubeDeformation(inflate);
 		MeshDefinition mesh = new MeshDefinition();
-		mesh.getRoot().addOrReplaceChild("part", CubeListBuilder.create().texOffs(0, 0).addBox(x, y, z, w, h, d, new CubeDeformation(inflate)), PartPose.ZERO);
+		PartDefinition root = mesh.getRoot();
+		root.addOrReplaceChild("head", head ? CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, off) : CubeListBuilder.create(),
+			PartPose.ZERO).addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
+		root.addOrReplaceChild("body", CubeListBuilder.create(), PartPose.ZERO);
+		// each in its bone's own space, as the humanoid model's boxes are
+		root.addOrReplaceChild("right_arm", limb(!head, -3.0F, -2.0F, off), PartPose.offset(-5.0F, 2.0F, 0.0F));
+		root.addOrReplaceChild("left_arm", limb(!head, -1.0F, -2.0F, off), PartPose.offset(5.0F, 2.0F, 0.0F));
+		root.addOrReplaceChild("right_leg", limb(!head, -2.0F, 0.0F, off), PartPose.offset(-1.9F, 12.0F, 0.0F));
+		root.addOrReplaceChild("left_leg", limb(!head, -2.0F, 0.0F, off), PartPose.offset(1.9F, 12.0F, 0.0F));
 		return LayerDefinition.create(mesh, sheetW, sheetH).bakeRoot();
 	}
 
-	// each in its bone's own space, as the humanoid model's boxes are
-	private static ModelPart scouter() {
-		return scouter != null ? scouter : (scouter = box(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, SCOUTER_INFLATE, 64, 32));
+	private static CubeListBuilder limb(boolean box, float x, float y, CubeDeformation off) {
+		return box ? CubeListBuilder.create().texOffs(0, 0).addBox(x, y, -2.0F, 4.0F, 12.0F, 4.0F, off) : CubeListBuilder.create();
 	}
 
-	private static ModelPart rightArm() {
-		return rightArm != null ? rightArm : (rightArm = box(-3.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, LIMB_INFLATE, 16, 16));
+	/**
+	 * Right after a model is posed to be drawn, after every other pose and hide (FrostTechModelFeatureRendererMixin): a
+	 * stand-in limb is drawn where its own limb is gone. Jaymo's Powers' lost-limb hide (and its stump) and Kitchen's
+	 * butchered corpse hide the parts by name, these with them; the fitted limbs are put back. A severed piece (only one
+	 * part drawn) is left as Powers made it.
+	 */
+	public static void reshow(Object model, Object state) {
+		if (model instanceof Limbs limbs && state instanceof HumanoidRenderState humanoid) {
+			limbs.show(humanoid);
+		}
 	}
 
-	private static ModelPart leftArm() {
-		return leftArm != null ? leftArm : (leftArm = box(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, LIMB_INFLATE, 16, 16));
+	/**
+	 * The scouter, or one make's limbs: worn models (WornModel), so drawn in the body's own pose at the moment it is drawn,
+	 * the ragdoll's, the downed body's and any other laid over it then. They were boxes drawn on the bones as the layers
+	 * ran, before those poses: a dead or downed villager's fitted leg stood up on its own while the body lay (Andy,
+	 * 2026-11-19).
+	 */
+	private static final class Scouter extends WornModel {
+		Scouter(Supplier<HumanoidModel<?>> wearer) {
+			super(bones(true, SCOUTER_INFLATE, 64, 32), wearer);
+		}
+
+		@Override
+		public void setupAnim(HumanoidRenderState state) {
+			super.setupAnim(state);
+			this.hat.visible = false;
+			this.body.visible = false;
+		}
 	}
 
-	private static ModelPart leg() {
-		return leg != null ? leg : (leg = box(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, LIMB_INFLATE, 16, 16));
+	/** One make's limbs ({@link FrostTech#WOOD}, IRON or MADE): the limbs of that make show, the rest don't. */
+	private static final class Limbs extends WornModel {
+		private final int make;
+		/** Each limb's length as the wearer's own (Powers' stump shortens a lost one's after). */
+		private final float[] length = new float[4];
+
+		Limbs(Supplier<HumanoidModel<?>> wearer, int make) {
+			super(bones(false, LIMB_INFLATE, 16, 16), wearer);
+			this.make = make;
+		}
+
+		@Override
+		public void setupAnim(HumanoidRenderState state) {
+			super.setupAnim(state);
+			this.head.visible = false;
+			this.body.visible = false;
+			ModelPart[] limbs = limbs();
+			for (int i = 0; i < limbs.length; i++) {
+				this.length[i] = limbs[i].yScale;
+			}
+			show(state);
+		}
+
+		/** The limbs of this make shown, at the wearer's own length. (Not asked whether the wearer's limb shows: a lost limb's is hidden, and this stands in for it.) */
+		void show(HumanoidRenderState state) {
+			Integer data = state.getData(KEY);
+			int kinds = data == null ? 0 : data >> 8;
+			ModelPart[] limbs = limbs();
+			for (int i = 0; i < limbs.length; i++) {
+				limbs[i].visible = (kinds >> 2 * i & 3) == this.make;
+				limbs[i].yScale = this.length[i];
+			}
+		}
+
+		private ModelPart[] limbs() {
+			return new ModelPart[] {this.rightArm, this.leftArm, this.rightLeg, this.leftLeg};
+		}
 	}
 
 	static final class Layer<S extends HumanoidRenderState> extends RenderLayer<S, HumanoidModel<S>> {
+		private final Scouter scouter = new Scouter(this::getParentModel);
+		private final Limbs wood = new Limbs(this::getParentModel, FrostTech.WOOD);
+		private final Limbs iron = new Limbs(this::getParentModel, FrostTech.IRON);
+		private final Limbs made = new Limbs(this::getParentModel, FrostTech.MADE);
+
 		Layer(RenderLayerParent<S, HumanoidModel<S>> renderer) {
 			super(renderer);
 		}
@@ -110,43 +183,34 @@ public final class FrostTechLayer {
 				return;
 			}
 			int worn = data & 0xFF, kinds = data >> 8;
-			HumanoidModel<S> model = this.getParentModel();
-			HumanoidModel<?> posed = model;
-			if (McaCompat.LOADED) {
-				// on MCA's skin body, in the pose MCA gives it (the Beastfolk's parts and the marks do the same)
-				HumanoidModel<?> mca = McaLookModels.marks(model);
-				if (mca != null) {
-					posed = mca;
-				}
-			}
-			if (POWERS && (worn & FrostTech.SCOUTER_BIT) != 0 && posed.head.visible && state.headEquipment.isEmpty() && !PowersCover.head(state)) {
-				poseStack.pushPose();
-				posed.head.translateAndRotate(poseStack);
-				collector.order(1).submitModelPart(scouter(), poseStack, RenderTypes.entityCutout(SCOUTER), lightCoords, OverlayTexture.NO_OVERLAY, null, -1);
-				poseStack.popPose();
+			if (POWERS && (worn & FrostTech.SCOUTER_BIT) != 0 && state.headEquipment.isEmpty() && !PowersCover.head(state)) {
+				collector.order(1).submitModel(this.scouter, state, poseStack, RenderTypes.entityCutout(SCOUTER), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
+					state.outlineColor);
 			}
 			if ((worn & FrostTech.LIMBS) == 0 || PowersCover.body(state)) {
 				return;
 			}
-			limb(poseStack, collector, lightCoords, posed.rightArm, rightArm(), kinds & 3);
-			limb(poseStack, collector, lightCoords, posed.leftArm, leftArm(), kinds >> 2 & 3);
-			limb(poseStack, collector, lightCoords, posed.rightLeg, leg(), kinds >> 4 & 3);
-			limb(poseStack, collector, lightCoords, posed.leftLeg, leg(), kinds >> 6 & 3);
-		}
-
-		/** One limb's stand-in, of its make. (Not asked whether the bone shows: a lost limb's is hidden, and this stands in for it.) */
-		private static void limb(PoseStack poseStack, SubmitNodeCollector collector, int light, ModelPart bone, ModelPart plating, int make) {
-			if (make == FrostTech.NONE) {
-				return;
+			boolean[] has = new boolean[4];
+			for (int i = 0; i < 4; i++) {
+				int make = kinds >> 2 * i & 3;
+				if (make != FrostTech.NONE) {
+					has[make] = true;
+				}
 			}
-			Identifier sheet = make == FrostTech.WOOD ? WOOD : make == FrostTech.IRON ? IRON : LIMB;
-			poseStack.pushPose();
-			bone.translateAndRotate(poseStack);
-			collector.order(1).submitModelPart(plating, poseStack, RenderTypes.entityCutout(sheet), light, OverlayTexture.NO_OVERLAY, null, -1);
-			if (make == FrostTech.MADE) {
-				collector.order(2).submitModelPart(plating, poseStack, RenderTypes.eyes(LIMB_GLOW), light, OverlayTexture.NO_OVERLAY, null, -1);
+			if (has[FrostTech.WOOD]) {
+				collector.order(1).submitModel(this.wood, state, poseStack, RenderTypes.entityCutout(WOOD), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
+					state.outlineColor);
 			}
-			poseStack.popPose();
+			if (has[FrostTech.IRON]) {
+				collector.order(1).submitModel(this.iron, state, poseStack, RenderTypes.entityCutout(IRON), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
+					state.outlineColor);
+			}
+			if (has[FrostTech.MADE]) {
+				collector.order(1).submitModel(this.made, state, poseStack, RenderTypes.entityCutout(LIMB), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
+					state.outlineColor);
+				collector.order(2).submitModel(this.made, state, poseStack, RenderTypes.eyes(LIMB_GLOW), lightCoords, OverlayTexture.NO_OVERLAY, -1, null,
+					state.outlineColor);
+			}
 		}
 	}
 }
