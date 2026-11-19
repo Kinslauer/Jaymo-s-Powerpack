@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 04:41). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 04:46). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -35,7 +35,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/hns-3-edges-sparks|hns-3-edges-sparks]] · pc-claude (hns-3 track) · claimed
 
 
 ## In review
@@ -43,6 +42,7 @@ kanban-plugin: board
 - [ ] [[Inbox/hns-2-stealth-posture|hns-2-stealth-posture]] · pc-claude (hns-2 track) · #1812 · in-review
 - [ ] [[Inbox/hns-1-crits|hns-1-crits]] · pc-claude (hns-1 track) · #1813 · in-review
 - [ ] [[Inbox/hns-4-shove-procs|hns-4-shove-procs]] · pc-claude (hns-4 track) · #1814 · in-review
+- [ ] [[Inbox/hns-3-edges-sparks|hns-3-edges-sparks]] · pc-claude (hns-3 track) · #1815 · in-review
 
 
 ## Needs Andy
