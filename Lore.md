@@ -1015,6 +1015,13 @@ reads "Home: —" and "We do not write that one down any more." It never names t
 home is gone (*The Maw*). Act III's other milestones are a fallen star broken open, a pod flown, the Maw set foot in,
 and a far world freed or conquered, all before the Skeleton Lord.
 
+**Old enemies** (new; Claude's placement for Andy's NPC fight picks, 2026-11-19). The tyrants who land on kingdoms by
+night are Warrior-born, the same blood as the raider bands the Galactic Patrol chases from world to world, and the
+Patrol has a warrant out on every one of them. A tyrant who sees a patrolman goes for him before anyone else, and a
+patrolman near a raided town hunts the tyrant first. Once a world is strong enough to be talked about "out there",
+the Patrol sends officers after the raider bands themselves, and when one finds a tyrant their fight fills the sky:
+both trained in the same art, flying, trading blows and beams until one of them falls.
+
 ## Fallen stars
 
 **Stars that fall.** Now and then a star comes down near the towns and leaves a crater; star metal lies only in
