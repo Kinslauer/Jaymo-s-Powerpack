@@ -479,7 +479,7 @@ public final class Fleet {
 
 	/** Her blocks in the order she's built (see {@link Slip}). */
 	private static List<Part> building(ServerLevel level, Rig rig, Look look) {
-		List<Part> parts = new ArrayList<>(ShipFittings.fit(parts(level, rig, look)));
+		List<Part> parts = new ArrayList<>(Figureheads.fit(ShipFittings.fit(parts(level, rig, look)), rig, look));
 		parts.sort(java.util.Comparator.<Part>comparingInt(p -> p.state().getBlock() instanceof HelmBlock ? 1 : 0)
 			.thenComparingInt(p -> p.at().getY())
 			.thenComparingInt(p -> Math.abs(p.at().getZ()))

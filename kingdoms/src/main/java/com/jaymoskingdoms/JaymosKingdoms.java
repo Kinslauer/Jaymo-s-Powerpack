@@ -521,6 +521,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Sandbags.register();
 		// carpentry (after Better With Mods): timber trim, benches and tables, wattle panels
 		com.jaymoskingdoms.carpentry.Carpentry.register();
+		// trade signs over a town's workplaces, the firsts the song stones cut and the journey book that keeps yours
+		TradeSigns.register();
+		Firsts.register();
 		// the blossom land's building blocks: shoji, tatami, plaster, lacquer, lanterns, thatch, the ward rope
 		com.jaymoskingdoms.blossomland.BlossomBlocks.register();
 		// 0.7.440: props: scarecrow, gravestone, lamp post, candle stand, plushies, planters
