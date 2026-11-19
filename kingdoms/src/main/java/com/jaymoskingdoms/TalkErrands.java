@@ -59,8 +59,9 @@ public final class TalkErrands {
 			Component.translatable("talk.jaymoskingdoms.errands.courier"),
 			Component.translatable("talk.jaymoskingdoms.errands.ledger"),
 			Component.translatable("talk.jaymoskingdoms.errands.ask_something"),
+			Component.translatable("talk.jaymoskingdoms.errands.hot"),
 			Component.translatable("talk.jaymoskingdoms.errands.leave"));
-		List<Boolean> enabled = List.of(lord, atWar, true, true, true, holding, TownLedger.keeps(speaker), AskTopics.canAsk(speaker), true);
+		List<Boolean> enabled = List.of(lord, atWar, true, true, true, holding, TownLedger.keeps(speaker), AskTopics.canAsk(speaker), speaker instanceof Villager cook && HotRuns.cooks(cook), true);
 		ZFighterFolk.ask(player, speaker, Component.translatable("talk.jaymoskingdoms.errands.ask"), options, enabled, pick -> {
 			switch (pick) {
 				case 0 -> run(player, "kingdom festival");
@@ -74,6 +75,11 @@ public final class TalkErrands {
 				case 5 -> couriers(player, speaker);
 				case 6 -> TownLedger.give(player, speaker);
 				case 7 -> AskTopics.open(player, speaker);
+				case 8 -> {
+					if (speaker instanceof Villager cook) {
+						HotRuns.offer(player, cook);
+					}
+				}
 				default -> {
 				}
 			}
