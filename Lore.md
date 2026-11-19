@@ -811,9 +811,9 @@ always the demons' to keep. Somewhere down there a way up stands lit, and a cold
 it alive and the life is theirs again; die down there and it is over. It is offered once in a life. Nobody living knows
 their own weight. The Judge will say how the book sits if a visitor asks him, and never in numbers.
 
-**Doppelgangers** (new) (doppelganger thread, 2026-11-19; Andy: "at the end of a life before reincarnation, prompt the
+**Doppelgangers** (doppelganger thread, 2026-11-19; Andy approved 2026-11-19; Andy: "at the end of a life before reincarnation, prompt the
 player to save their character as a preset... explained as a doppleganger. some you met in the past life may comment
-that you look familiar, and will not elaborate"; the rest Claude's placement, awaiting Andy). The book weighs a life,
+that you look familiar, and will not elaborate"; the rest Claude's placement). The book weighs a life,
 not a face, and some faces are slow to let go. Most who are born again come back looking like nobody anyone has met,
 but now and then a face that has lived comes back on someone new: a doppelganger. They are not the one who wore it first.
 They carry nothing of that life, no memories, no debts, no friends, though they may answer to the same name and never
