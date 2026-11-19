@@ -20,7 +20,7 @@ suggested_owns:
 
 **What's wanted** (plan "Patch 4", rows F14 F15): tyrants and raider-band men target patrolmen first (tag `jaymospowers.patrolman`), and patrolmen pick a tyrant/raider over any other `Enemy` within ~48 (F14); from a late world tier (check `WorldTiers` for which one is late-game; constant), when a raider band lands or a tyrant raid starts, a chance (~35%, constant) that a Patrol pod lands 40-80 blocks off with one named patrolman who flies to the tyrant and fights him, leaves once the tyrant falls; a rumour/Tidings line for nearby players, no screen text stating lore (F15). A player can join either side.
 
-**Lore:** the "Old enemies" paragraph is already in Lore.md as `(new)` (Far worlds, after "The Raider's Tally"); Andy is asked to approve it in the thread. Quote it in full if you ask him about it.
+**Lore:** the "Old enemies" paragraph is already in Lore.md as `(new)` (Far worlds, after "The Raider's Tally"); Andy approved it on 2026-11-19.
 
 **Runs alongside:** npc-fights-1-brawler (small overlap in `ZFighterRogue.registerGoals` and `ZFighterPatrol#foe`: keep your edits to those spots).
 
