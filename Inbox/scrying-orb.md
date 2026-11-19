@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: changes
 for: any
 from: coordinator
 asked: 2026-11-18
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9B9itiE9SZUhU3wrwbx6xdLi
-claimed_by: hermes-a
+claimed_by: 
 pr: 1787
 suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/Scrying.java
@@ -50,3 +50,4 @@ text_pass:
 - 2026-11-18 21:37 Text pass: kingdoms/lang/parts/scrying-orb.json - sighted_shard.default_name now '%s: %d, %d, %d', so shards read 'Sighted Shard (overworld: x, y, z)' and the mark chat reads 'Marked overworld: x, y, z' (all keys and placeholders kept, no code touched). change note changes/kingdoms/claude-scrying-orb.md read and accurate against the trade/recipe data. Committed 287aad5c5 and pushed to origin/claude/scrying-orb (PR #1787). Build blocked: kingdoms compileJava fails with 24 errors in ScryingOrb.java, SightedShard.java and ScryingOrbBlockEntity.java - pre-26.3 APIs/missing imports (ChunkHolder, BlockState import, TargetKind.CODEC/STREAM_CODEC, DataComponents, ResourceLocation import, swing/drop signatures, dimension().location(), DimensionType.effects(), putUUID/getUUID, isMoving, OrbView Component arg). PR checks passed on the changed files. Hand-in as in-review is blocked until the builder fixes the code and PR checks go green.
 - 2026-11-19 20:18 Andy (2026-11-19) answers: the watched person notices nothing at all (drop the chill or any other tell); anything can be warded, not only keeps/towers; the builder picks mote figures or tiny models. Next: fix the 24 kingdoms compileJava errors (list in the 21:37 note) against 26.3 sources, make the answers above true, push to claude/scrying-orb, get checks green, set in-review.
 - 2026-11-19 20:22 PR #1787 is closed (not merged); branch claude/scrying-orb still has the work. After fixing, reopen #1787 or open a new PR and set pr: to it.
+- 2026-11-19 18:42 hermes-a's claim had no sign of work for 30 min: handed back as changes.
