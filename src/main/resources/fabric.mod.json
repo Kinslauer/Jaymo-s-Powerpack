@@ -47,6 +47,7 @@
 		{ "config": "jaymospowers.tnm.client.mixins.json", "environment": "client" },
 		{ "config": "jaymospowers.shouldersurfing.client.mixins.json", "environment": "client" },
 		{ "config": "jaymospowers.respawnrecap.client.mixins.json", "environment": "client" },
+		"jaymospowers.tacz.mixins.json",
 		{ "config": "jaymospowers.tacz.client.mixins.json", "environment": "client" },
 		{ "config": "jaymospowers.ldl.client.mixins.json", "environment": "client" },
 		{ "config": "jaymospowers.weaponmaster.client.mixins.json", "environment": "client" },
