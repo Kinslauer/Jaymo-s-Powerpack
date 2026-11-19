@@ -180,6 +180,15 @@ final class CtovHalls {
 
 	/** (0.7.629) As {@link #convert(String, CompoundTag)}, up to {@code maxSide} across. */
 	static @Nullable Blueprint convert(String entry, CompoundTag tag, int maxSide) {
+		return convert(entry, tag, maxSide, MAX_HEIGHT, Designs.MAX_BLOCKS, false);
+	}
+
+	/**
+	 * As {@link #convert(String, CompoundTag)}, within {@code maxSide} across, {@code maxHeight} high and {@code maxBlocks}
+	 * blocks; {@code anyEntrance}: kept even if its street entrance is high above its lowest layer (the pattern books'
+	 * castles and plans, {@link Library}).
+	 */
+	static @Nullable Blueprint convert(String entry, CompoundTag tag, int maxSide, int maxHeight, int maxBlocks, boolean anyEntrance) {
 		ListTag palette = tag.getList("palette").orElseGet(() -> tag.getListOrEmpty("palettes").getListOrEmpty(0));
 		List<BlockState> states = new ArrayList<>();
 		for (int i = 0; i < palette.size(); i++) {
@@ -219,7 +228,7 @@ final class CtovHalls {
 			raw.add(new Blueprint.Placement(at, state));
 			minY = Math.min(minY, at.getY());
 		}
-		if (raw.isEmpty() || entranceY - minY > MAX_ENTRANCE_Y) {
+		if (raw.isEmpty() || !anyEntrance && entranceY - minY > MAX_ENTRANCE_Y) {
 			return null;
 		}
 		Rotation turn = switch (front == null ? "north" : front) {
@@ -244,7 +253,7 @@ final class CtovHalls {
 			trimmed.add(new Blueprint.Placement(pl.offset().offset(-minX, 0, -minZ), pl.state()));
 		}
 		int width = maxX - minX + 1, depth = maxZ - minZ + 1, height = maxY + 1;
-		if (width > maxSide || depth > maxSide || height > MAX_HEIGHT || trimmed.size() > Designs.MAX_BLOCKS) {
+		if (width > maxSide || depth > maxSide || height > maxHeight || trimmed.size() > maxBlocks) {
 			return null;
 		}
 		return new Blueprint(entry, width, depth, height, List.copyOf(trimmed));
@@ -261,7 +270,7 @@ final class CtovHalls {
 	}
 
 	/** The block a jigsaw becomes ({@code final_state}, its properties left as the block's own); air if unknown. */
-	private static BlockState finalState(String text) {
+	static BlockState finalState(String text) {
 		int bracket = text.indexOf('[');
 		String name = bracket >= 0 ? text.substring(0, bracket) : text;
 		Identifier id = Identifier.tryParse(name.trim());

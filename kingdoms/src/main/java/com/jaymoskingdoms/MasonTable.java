@@ -287,6 +287,7 @@ public final class MasonTable {
 				case MasonNet.TAKE -> table.takeOut(player);
 				case MasonNet.RETRY -> table.retry(player);
 				case MasonNet.SUBMIT -> Commissions.submit(player, name);
+				case MasonNet.COPY -> Library.copy(player, name);
 				case MasonNet.SAVE -> {
 					Surveyor.Selection sel = Surveyor.selection(player);
 					if (sel == null || sel.a() == null || sel.b() == null) {
@@ -588,7 +589,7 @@ public final class MasonTable {
 				}
 			}
 			Surveyor.Selection sel = Surveyor.selection(player);
-			ServerPlayNetworking.send(player, new MasonNet.Open(this.worldPosition, designs, laid == null ? "" : laid.design(), this.index,
+			ServerPlayNetworking.send(player, new MasonNet.Open(this.worldPosition, designs, Library.list(server), laid == null ? "" : laid.design(), this.index,
 				ops == null ? 0 : ops.size(), this.done, this.skipped, this.waitingFor == null ? ItemStack.EMPTY : new ItemStack(this.waitingFor), needs, blank,
 				sel != null && sel.a() != null && sel.b() != null, note));
 		}

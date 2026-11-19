@@ -192,7 +192,7 @@ final class DntBuildings {
 	}
 
 	/** A ruin built whole: no cobwebs, leaves, vines or weeds; suspicious gravel and sand as plain. */
-	private static Blueprint tidy(Blueprint bp) {
+	static Blueprint tidy(Blueprint bp) {
 		List<Blueprint.Placement> out = new ArrayList<>(bp.blocks().size());
 		for (Blueprint.Placement pl : bp.blocks()) {
 			BlockState s = pl.state();

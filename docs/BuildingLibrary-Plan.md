@@ -20,6 +20,19 @@ and the town builders' planner (a settlement builds it when it needs that kind o
 
 Every building keeps its source, author and licence in the library index, and the mason's table shows the author.
 
+## Status (2026-11-19)
+
+Built in one PR on `claude/project-thread-wkd1gp` (Kingdoms change note `changes/kingdoms/building-library.md`):
+`Library` (index, builders' tagger, world folder, commands, castles, pattern books), `tools/library_import.py` (210 books:
+the shipped files, the in-pack entries and the world-file names, written to `kingdoms/src/main/resources/jaymoskingdoms/library.json`),
+the mason's table at 128 across with its "Pattern books" tab, and `docs/building-library-downloads.md`. Differences from the
+plan below: the index is one resource file (`jaymoskingdoms/library.json`), not `data/jaymoskingdoms/library/*.json`;
+Sohatuy's vertical slabs became full blocks (a bottom slab would leave half-height walls); The Lost Castle joined comes to
+116 x 46 x 116 (115,639 blocks), so it ships whole and open question 3 needs no answer; an outpost's banners take the realm's
+colour, but its iron bars and chains stay (they can't be told apart from windows and lanterns in the file). Library castles
+stand where a castle is raised from nothing (`Castle.build`'s grand seat); there is no step yet where a raided kingdom
+rebuilds a lost castle, so that part of Andy's rule waits for one.
+
 ## Patches
 
 ### 1. The library and the builders (Kingdoms)
@@ -92,4 +105,4 @@ in the wild are drawn into them, and builders put them up again whole, with a fi
    block the cloud). Recommended: download into `C:\Users\toopo\Downloads\building-library\`; the PC reviewer copies them
    into the server world's `jaymoskingdoms_library/` with the next pbdr.
 2. ~~Castles from the library~~: decided, see patch 4 (only when building a castle from nothing, else the table).
-3. **The Lost Castle** if it ends up over 128 across: nine designs, or limit 136. Recommended: nine designs.
+3. ~~The Lost Castle over 128 across~~: joined it is 116 across, so it ships whole.
