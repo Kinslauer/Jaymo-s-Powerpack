@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 16:18). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 16:19). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -29,7 +29,6 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-l-carts-check|vanilla-plus-l-carts-check]] · for 💻 Odysseus · open
 - [ ] [[Inbox/smoothmount-6-heave-downed|smoothmount-6-heave-downed]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/harness-upkeep|harness-upkeep]] · for ☀️ Apollo · open
 - [ ] [[Inbox/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-aura-rework|zfighter-aura-rework]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/forest-fire-pack|forest-fire-pack]] · for 🪽 any Hermes bot · open
@@ -56,6 +55,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/plan-ghosts-litematica-tools|plan-ghosts-litematica-tools]] · plan-ghosts-litematica-tools · #1851 · in-review
 - [ ] [[Inbox/smoothmount-1-climb-on-off|smoothmount-1-climb-on-off]] · ☀️ Apollo · #1869 · in-review
+- [ ] [[Inbox/harness-upkeep|harness-upkeep]] · harness-upkeep-pc · #1870 · in-review
 
 
 ## Needs Andy
