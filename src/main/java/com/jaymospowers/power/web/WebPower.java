@@ -347,6 +347,9 @@ public final class WebPower implements Power {
 			WebSlam.forget(handler.player);
 			WebBrute.forget(handler.player);
 			WebSymbioteCollect.forget(handler.player);
+			WebSymbioteWings.forget(handler.player);
+			WebSymbioteJar.forget(handler.player);
+			WebSymbioteSteed.forget(handler.player);
 			SWUNG.remove(handler.player.getUUID());
 		});
 		WebSymbiote.register();
@@ -618,7 +621,7 @@ public final class WebPower implements Power {
 
 	@Override
 	public boolean skipsMovementCheck(ServerPlayer player) {
-		return inGrace(player) || WebSkim.skimming(player) || WebAirStrikes.diving(player);
+		return inGrace(player) || WebSkim.skimming(player) || WebAirStrikes.diving(player) || WebSymbioteWings.out(player);
 	}
 
 	@Override

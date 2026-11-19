@@ -209,7 +209,7 @@ public final class WebInhabit {
 	}
 
 	/** Not good enough: it spits the mob out (reeling, but alive) and drops off to look again. */
-	private static void reject(ServerLevel level, Mob host) {
+	static void reject(ServerLevel level, Mob host) {
 		WebSymbioteStrain strain = WebSymbioteStrains.of(host);
 		host.removeAttached(HOST);
 		host.removeAttached(WebSymbioteStrains.KIND);

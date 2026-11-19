@@ -104,6 +104,12 @@ public final class WebPowerClient implements PowerClient {
 				net.minecraft.world.entity.LivingEntity aimed = com.jaymospowers.power.web.WebMorph.aim(player);
 				boolean block = hit != null && hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK
 					&& (aimed == null || hit.getLocation().distanceToSqr(player.getEyePosition()) < aimed.distanceToSqr(player.getEyePosition()));
+				if (block && !player.isShiftKeyDown() && hit instanceof net.minecraft.world.phys.BlockHitResult blockHit
+					&& player.level().getBlockState(blockHit.getBlockPos()).is(net.minecraft.tags.BlockTags.LOGS)
+					&& hit.getLocation().distanceToSqr(player.getEyePosition()) <= com.jaymospowers.power.web.WebMorph.REACH * com.jaymospowers.power.web.WebMorph.REACH) {
+					// a tree under the crosshair: the arm forms its axe on it (sneak to still mine the log by hand)
+					block = false;
+				}
 				if (!block && clicks > 0 && !morphHeld) {
 					// pressed: it gathers into the arm while held, and strikes when let go (see below)
 					morphHeld = true;
