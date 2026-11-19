@@ -15106,3 +15106,9 @@ The Harness Pattern Book (Andy's 2026-11-18 ticks) specified these new helms, fi
 Chain and plate barding now come in three finishes: bright, blackened and gilded, matching your heraldry armour. Blackened or gilded barding shows its finish in the item name. There is also a new caparison: a cloth cover worn over barding, dyeable in your realm's colours with banner patterns, with its own slot on the tack screen under the banner. Horses wear barding in its finish, with the caparison rendered over it.
 
 Not tested in game.
+
+## 0.10.40 (2026-11-19): Crime: sleepers woken, suspects watched (#1751)
+
+- **Sleepers woken and told**: when someone who can speak sees a crime, they wake the nearest sleeper of their village or realm (within 16 blocks), who gets up, comes over to hear it and remembers it as hearsay. A crime at night is now known to more than the one who saw it. Golems can't tell anyone. (`Theft#wakeAndTell`, `ChestNoise#wakeToHear`)
+- **Being watched**: a guard who saw or heard of your crime in the last 3 days, while you aren't wanted for it, now watches you like a suspected vampire or werewolf: turns to look, says a wary word now and then. The nearest free one follows you at a distance (closes in past 8 blocks, stops inside 5). With no such guard about, a golem of the realm whose people suspect you follows instead. Vampire and werewolf suspects are followed the same way now. (`Suspicion#wary`)
+- Compile-checked by CI; not played.
