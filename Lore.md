@@ -782,7 +782,7 @@ Overworld in the old age, before they were stopped. A powerful Frostborn Z Fight
 cannot go home, cannot cross back to the dark they came from, and cannot die out. They stand in the Stormborn Tomb
 still, in horned helm, mail and fur, and they never leave it.
 
-**The Warrior-born dead** (new) (warrior-born zombies thread, 2026-11-18; Andy: "there should be rare warrior born
+**The Warrior-born dead** (Andy approved, 2026-11-19) (warrior-born zombies thread, 2026-11-18; Andy: "there should be rare warrior born
 zombies with the same decrepit rotting tails, that have a chance to turn during the moons. Undead MCA Verdant should
 have a similar but higher chance to turn giant"; the rest Claude's placement, approved by Andy 2026-11-18). Not every raider who died on the
 Overworld in the old age lies in the Stormborn Tomb. A few went into common ground and rise with the old dead, rare among
@@ -1766,7 +1766,7 @@ three scouts ranging outside its ring: small even for goblins, hooded, a pack on
 see further than the village does. A scout that spots prey stops and cackles, and the village comes for what it saw; a
 traveller in a goblin mask is laughed past. With its village gone a scout runs wild and has nobody to call.
 
-**Goblin talk** (new; goblin speech thread, 2026-11-19; Andy: goblins "should speak very broken but intelligible english, unlike orcs who you really cant tell"; the rest Claude's placement). Goblins never kept a tongue of their own. They live off other people's goods, so they live off other people's words too: every goblin picks up the traders' common speech from the folk it robs and sells to, and mangles it the same way wherever it was hatched. "Me" for I, "da" for the, no little words, everything shiny is shinies. Anyone can follow a goblin, which is half of why nobody trusts one: it will tell you to your face what it means to take. Orcs are the other way: their war camps talk only among themselves, in the land's own speech chewed past knowing, and a stranger hears noise.
+**Goblin talk** (Andy approved, 2026-11-19; goblin speech thread; Andy: goblins "should speak very broken but intelligible english, unlike orcs who you really cant tell"; the rest Claude's placement). Goblins never kept a tongue of their own. They live off other people's goods, so they live off other people's words too: every goblin picks up the traders' common speech from the folk it robs and sells to, and mangles it the same way wherever it was hatched. "Me" for I, "da" for the, no little words, everything shiny is shinies. Anyone can follow a goblin, which is half of why nobody trusts one: it will tell you to your face what it means to take. Orcs are the other way: their war camps talk only among themselves, in the land's own speech chewed past knowing, and a stranger hears noise.
 
 **Heritage looks.** Each heritage has three looks of its own, and bloods marry and mix; a child can lean toward a
 remnant blood. Body size follows blood: the Stoneborn tallest and widest, the Sylvan smallest.

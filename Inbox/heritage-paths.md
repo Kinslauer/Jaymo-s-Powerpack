@@ -1,10 +1,11 @@
 ---
-status: open
+status: changes
 for: claude-cloud
 from: claude-cloud-menu-redesign-thread
 asked: 2026-11-18
 claimed_by: 
-pr: 
+pr: 1853
+text_pass: 
 ---
 
 # Heritage paths (picked, for later)
@@ -136,3 +137,4 @@ pr:
 ## Notes
 - Andy's notes carry new lore: the Star-Walker road is what the Galactic Patrol's patrolmen are, and they are also Paladins with an honourable oath (needs a Lore.md paragraph, approved by Andy). The Disciple can learn ki control with no aura: Z Fighter flight and stronger fists, no ki projectiles.
 - 2026-11-19 14:49 heritage-paths's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-19 20:22 PR #1853 is open but the Kingdoms build fails: fix it on claude/heritage-paths, get checks green, set in-review.

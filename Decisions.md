@@ -807,3 +807,10 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-19 (goblin speech thread): Andy: "the goblins also dont seem to have their own language, they should speak very broken but intelligible english, unlike orcs who you really cant tell". Goblins now speak broken English (GoblinTalk) to everyone in any land; orcs keep the land tongue.
 - 2026-11-19 (PC Claude, gnome models): Andy approved the lore paragraph 'The gnomes' and the behaviour list (zombies named Gnome swap to our gnome; neutral until you trample its garden, dig near its house or open its chests; gnomes bone-meal their garden; gifts of seeds/saplings/flowers/bone meal calm them and get ore/emerald/rare diamond with a cooldown; a stripped garden makes them dig away).
 - 2026-11-19: Andy: "it should certainly happen to players who take a decapitating or head crushing blow, that just means they cannot be revived, and forces a reincarnation" (downed players only, fits the 2026-11-06 downed-only beheading rule). PR #1866.
+- 2026-11-19 3:13 PM ET (goblin speech thread): Andy approved the lore paragraph "Goblin talk".
+- 2026-11-19 3:15 PM ET (vault coordinator): Hands-on cooking: Andy "yes", a bot builds phase 1+2 (chop on the cutting board, stir the pot, in the world).
+- 2026-11-19 3:15 PM ET (vault coordinator): Harness body pieces start now; #1721 (harness helms) is merged.
+- 2026-11-19 3:15 PM ET (vault coordinator): Andy: "hold off on these" for narrator-missing-lines (narrator.wav) and underground Stoneborn/goblin villages (deep caves vs under mountains).
+- 2026-11-19 3:16 PM ET (vault coordinator): Scrying orb: "the watched know nothing, anything can be warded, and you choose between models or shapes".
+- 2026-11-19 3:16 PM ET (vault coordinator): Andy approved the lore paragraph "The Warrior-born dead".
+- 2026-11-19 (PC Claude): Andy: 'merge the 5 then start on harnesses'. Merged #1864, #1861, #1854, #1857; #1851 conflicted with #1854 (both took mason action 6): resolved by making MATERIALS action 7, merging on green CI. PC Claude takes harness-body-pieces (Harness 2) now, then harness-upkeep (Harness 5) after it merges.

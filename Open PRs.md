@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-19 14:48
+updated: 2026-11-19 15:14
 ---
 # Open PRs
 
-6 open, as of 2026-11-19 14:48. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+3 open, as of 2026-11-19 15:14. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1851](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1851) Building plans: wrong-block colours, layer view, full material list (Kingdoms)
@@ -16,22 +16,7 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ❌ failing: Build Kingdoms
 - **Agent:** [[heritage-paths]]
 
-## [#1854](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1854) Masons' pattern books: the building library, and the mason's table to 128 across
-- **Branch:** `claude/project-thread-wkd1gp` · **Updated:** 2026-11-19 (today)
+## [#1866](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1866) Entrail variety, intestines from gibs, blunt weapons crush skulls
+- **Branch:** `claude/project-thread-t83v6r` · **Updated:** 2026-11-19 (today)
 - **Checks:** ✅ 5 passed
-- **Agent:** [[claude-building-library]]
-
-## [#1857](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1857) The minimap stops showing the Aether again
-- **Branch:** `claude/project-thread-v4qb14` · **Updated:** 2026-11-19 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** no agent note
-
-## [#1861](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1861) Symbiote infection: stop starving itself feeding you, warn before it leaves
-- **Branch:** `claude/project-thread-wc6o6s` · **Updated:** 2026-11-19 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** no agent note
-
-## [#1863](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1863) Goblins speak broken English
-- **Branch:** `claude/project-thread-j60dnm` · **Updated:** 2026-11-19 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** no agent note
+- **Agent:** [[entrails-skull-crush]]

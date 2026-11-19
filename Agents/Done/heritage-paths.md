@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: "[[heritage-paths]]"
 branch: claude/heritage-paths
 with: 
@@ -34,4 +34,6 @@ Stoneborn, Heartlander and Tideborn paths. Lore paragraphs drafted as (new) and 
 - Builds on CI (Andy's PC runs only the game).
 
 ## Done
-- 2026-11-19 14:11 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-19 20:15 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+
+- 2026-11-19 20:30 Vault coordinator: the run stopped with PR #1853 failing the Kingdoms build; task set to changes for a fixer.

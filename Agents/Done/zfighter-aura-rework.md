@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: done
 task: zfighter-aura-rework
 branch: claude/zfighter-aura-rework
 with:
@@ -20,3 +20,5 @@ owns:
 
 - Gap checklist: https://claude.ai/artifact/1wDFM6YiRDNnqTKwHPauDb (89 rows; asked Andy which non-aura rows to build).
 - Aura: flame shell + white core, rising embers, lightning from the second form, ground cracks while charging (GroundCracks), dust ring, transformation burst. Ideas only (DMZ is GPL-3.0, ours ARR).
+
+- 2026-11-19 20:30 Vault coordinator: the run stopped with nothing pushed; the aura part is now Inbox task zfighter-aura-rework.

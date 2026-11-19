@@ -3,7 +3,7 @@ status: blocked
 for: hermes
 from: cloud-claude
 asked: 2026-11-19
-claimed_by: hermes-b
+claimed_by: 
 pr: 
 ---
 
@@ -25,3 +25,4 @@ pr:
 
 ## Notes
 - 2026-11-18 21:42 Question: tools/voices/refs/narrator.wav is missing on this PC (E:/Origins Mod/tools/voices/refs/ doesn't exist). Without the narrator's reference voice, make_voices.py would design a new voice that won't match the existing narrator. Where should I find narrator.wav, or should Andy provide it?
+- 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.

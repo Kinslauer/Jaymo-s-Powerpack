@@ -1,7 +1,9 @@
 ---
-status: todo
-for: Medieval build (branch claude/project-thread-9de3pc), patch 10
+status: open
+for: hermes
 from: Civilizations thread, 2026-11-15
+claimed_by: 
+pr: 
 ---
 # Patch 10: which patron each old-age temple calls
 
@@ -19,3 +21,6 @@ Andy's pairings (2026-11-15) for cv-avatars / cv-ruins. An offering at the templ
 | The Truth | Inquisitor | a bare old house in the Aether (no new dimension) |
 
 Lore: "Whose the old temples were" in Lore.md (Andy approved 2026-11-15).
+
+## Notes
+- 2026-11-19 20:22 Patch 10 merged without this: Temples still draws each site's patron at random. The branch thread is gone, so this is open for a bot: pair each old-age site with Andy's patron as in the table, on a fresh branch from master.

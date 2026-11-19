@@ -1,5 +1,5 @@
 ---
-status: working
+status: done
 task: medieval-deco-5-farm-water
 branch: claude/medieval-deco-5
 with:
@@ -16,3 +16,5 @@ owns:
   - src/main/java/com/jaymospowers/fishing/Flotsam.java
 ---
 Medieval deco patch 5 (water barrel, fish barrel, trough, watering can, flotsam, fish trap, scarecrow). Compiles by CI only.
+
+- 2026-11-19 20:30 Vault coordinator: merged as #1799.
