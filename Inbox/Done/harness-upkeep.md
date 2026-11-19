@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: pc-claude
 from: pc-claude
 asked: 2026-11-18
@@ -26,3 +26,4 @@ pr: 1870
 - 2026-11-18 02:45 Andy approved the lore placement "The armourers' wider makes" (2026-11-18): it's canon now.
 - 2026-11-18 19:34 hermes-a's last run stopped before finishing; handed back as open so it can carry on.
 - 2026-11-19 20:21 hermes-a's run stopped (status was 'running'); open again.
+- 2026-11-19 16:20 PR #1870 is merged into master; moved to Inbox/Done.
