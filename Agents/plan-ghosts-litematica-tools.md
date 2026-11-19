@@ -15,6 +15,10 @@ owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/MasonNet.java
   - kingdoms/src/main/resources/assets/jaymoskingdoms/lang (building-plan lines only)
   - changes/kingdoms/plan-ghosts-litematica-tools.md
+  - kingdoms/src/client/java/com/jaymoskingdoms/client/PlanMaterialsScreen.java (new)
+  - kingdoms/src/client/java/com/jaymoskingdoms/client/mixin/PlanLayerScrollMixin.java (new)
+  - kingdoms/src/client/resources/jaymoskingdoms.combat.client.mixins.json (one line)
+  - kingdoms/src/main/resources/assets/jaymoskingdoms/lang/parts/plan-tools.json (new)
 ---
 # Building plans: wrong-block colours, layer view, full material list
 
