@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 17:14). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 17:15). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -28,6 +28,7 @@ kanban-plugin: board
 - [ ] [[Inbox/village-mods-7-ctov-tidal-towns|village-mods-7-ctov-tidal-towns]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
+- [ ] [[Inbox/plan-ghosts-litematica-tools|plan-ghosts-litematica-tools]] · for any · open
 
 
 ## Being built
