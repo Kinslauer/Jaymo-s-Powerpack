@@ -1,6 +1,7 @@
 package com.jaymospowers.combat;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.ArmourKind;
 import com.jaymospowers.power.zfighter.ZFighterAndroid;
 import java.util.HashMap;
 import java.util.Locale;
@@ -27,11 +28,16 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -58,8 +64,19 @@ public final class MetalHits {
 	public static final float SPARKS_PER_DAMAGE = 0.5F;
 	/** How big the sparks are (1 = a parry's). */
 	public static final float SCALE = 0.75F, BLOCK_SCALE = 0.65F;
+	/** Pitches of a plate's ring and a padding's thud. */
+	static final float PLATE_PITCH = 1.0F, PADDING_PITCH = 1.0F;
 	/** The ring of it: steel on plate, and on a block, and the pitch (higher than a clash, a clink rather than a ring). */
 	public static final float ARMOUR_VOLUME = 0.4F, BLOCK_VOLUME = 0.3F, PITCH = 1.3F;
+	/** Steel on stone (a blade or pick started on it): the chance of a few dull sparks, more off an ore or deepslate; how many, how big, how loud. */
+	public static final float STONE_CHANCE = 0.3F, ORE_CHANCE = 0.65F, STONE_SCALE = 0.45F, STONE_VOLUME = 0.35F;
+	public static final int STONE_SPARKS = 3, ORE_SPARKS = 5;
+	/** A shower of at least this many sparks may light something, at this chance for the first and for each one more, never above the most. */
+	public static final int KINDLE_FROM = 14;
+	public static final float KINDLE_BASE = 0.12F, KINDLE_PER = 0.04F, KINDLE_MOST = 0.5F;
+	/** How far from the shower's heart a spark can catch (blocks, and for gunpowder lying about). */
+	static final int KINDLE_REACH = 1;
+	static final double POWDER_REACH = 1.5;
 	/** Ticks between one player's sparks off blocks (each click starts a dig). */
 	static final int BLOCK_COOLDOWN = 5;
 	/** Share of a body's height above which a blow is on the head, the chest, and the legs (below: the feet), as wounds reads it. */
@@ -75,6 +92,12 @@ public final class MetalHits {
 	/** Words in an armour's look (its equipment asset) that mean metal, besides the metals ShieldBang knows. */
 	private static final Set<String> ARMOUR_WORDS = Set.of("plate", "mail", "harness", "iron", "steel", "chainmail", "netherite",
 		"copper", "gold", "bronze");
+	/** Stone that throws a spark when steel strikes it. */
+	private static final Set<SoundType> STONE_SOUNDS = Set.of(SoundType.STONE, SoundType.DEEPSLATE, SoundType.DEEPSLATE_BRICKS,
+		SoundType.DEEPSLATE_TILES, SoundType.POLISHED_DEEPSLATE, SoundType.BASALT, SoundType.TUFF, SoundType.NETHER_ORE);
+	/** What dry fire takes hold of: dry plants, hay and cobweb. */
+	private static final Set<Block> TINDER = Set.of(Blocks.SHORT_GRASS, Blocks.TALL_GRASS, Blocks.FERN, Blocks.LARGE_FERN, Blocks.DEAD_BUSH,
+		Blocks.HAY_BLOCK, Blocks.COBWEB);
 	private static final Set<SoundType> METAL_SOUNDS = Set.of(SoundType.METAL, SoundType.ANVIL, SoundType.LANTERN, SoundType.NETHERITE_BLOCK,
 		SoundType.CHAIN, SoundType.COPPER, SoundType.COPPER_BULB, SoundType.COPPER_GRATE, SoundType.COPPER_GOLEM_STATUE,
 		SoundType.TRIAL_SPAWNER, SoundType.VAULT, SoundType.HEAVY_CORE, SoundType.IRON);
@@ -105,6 +128,7 @@ public final class MetalHits {
 		Vec3 back;
 		int extra;
 		boolean shot = direct instanceof AbstractArrow;
+		ItemStack blade = ItemStack.EMPTY;
 		if (direct instanceof AbstractArrow arrow) {
 			at = arrow.position();
 			Vec3 motion = arrow.getDeltaMovement();
@@ -112,6 +136,7 @@ public final class MetalHits {
 			extra = 0;
 		} else if (direct instanceof LivingEntity attacker && attacker == source.getEntity() && attacker != victim) {
 			ItemStack weapon = attacker.getMainHandItem();
+			blade = weapon;
 			if (!hard(weapon) && !metalBody(attacker)) {
 				return;
 			}
@@ -122,19 +147,36 @@ public final class MetalHits {
 			return;
 		}
 		boolean body = metalBody(victim);
-		if (!body && !metal(armourAt(victim, at))) {
+		ItemStack armour = body ? ItemStack.EMPTY : armourAt(victim, at);
+		if (!body && !metal(armour)) {
+			// (flesh takes a little off the edge; padding thuds under a blade)
+			Edge.dull(blade, Edge.FLESH);
+			if (!shot && ArmourKind.of(armour) == ArmourKind.CLOTH) {
+				BladeSounds.armour(level, at, ArmourKind.CLOTH, ARMOUR_VOLUME, PADDING_PITCH);
+			}
 			return;
 		}
+		Edge.dull(blade, Edge.METAL);
 		int sparks = (shot ? ARROW_SPARKS : body ? BODY_SPARKS : ARMOUR_SPARKS) + extra
 			+ Math.min(DAMAGE_SPARKS_MAX, Mth.floor(amount * SPARKS_PER_DAMAGE));
 		ClashFx.sparks(level, at, back, sparks, SCALE);
-		BladeSounds.clash(level, at, ARMOUR_VOLUME, PITCH);
+		ArmourKind kind = body ? ArmourKind.NONE : ArmourKind.of(armour);
+		if (kind == ArmourKind.PLATE || kind == ArmourKind.MAIL) {
+			BladeSounds.armour(level, at, kind, ARMOUR_VOLUME, kind == ArmourKind.PLATE ? PLATE_PITCH : PITCH);
+		} else {
+			BladeSounds.clash(level, at, ARMOUR_VOLUME, PITCH);
+		}
 	}
 
 	/** A player started striking a block: a hard weapon or tool on metal sparks (server side; the dig goes on). */
 	private static InteractionResult hitBlock(Player player, net.minecraft.world.level.Level world, net.minecraft.world.InteractionHand hand,
 		BlockPos pos, Direction face) {
-		if (!(world instanceof ServerLevel level) || player.isSpectator() || !hard(player.getMainHandItem()) || !metalBlock(level.getBlockState(pos))) {
+		if (!(world instanceof ServerLevel level) || player.isSpectator() || !hard(player.getMainHandItem())) {
+			return InteractionResult.PASS;
+		}
+		BlockState struck = level.getBlockState(pos);
+		boolean metal = metalBlock(struck);
+		if (!metal && !stoneBlock(struck)) {
 			return InteractionResult.PASS;
 		}
 		long now = level.getGameTime();
@@ -151,6 +193,18 @@ public final class MetalHits {
 		if (at == null) {
 			at = Vec3.atCenterOf(pos).add(Vec3.atLowerCornerOf(face.getUnitVec3i()).scale(0.5));
 		}
+		if (!metal) {
+			// steel on stone: the edge suffers, and now and then a few dull sparks (more off an ore)
+			Edge.dull(player.getMainHandItem(), Edge.STONE);
+			boolean ore = struck.getSoundType() == SoundType.DEEPSLATE || struck.getSoundType() == SoundType.NETHER_ORE
+				|| net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(struck.getBlock()).getPath().endsWith("_ore");
+			if (level.getRandom().nextFloat() < (ore ? ORE_CHANCE : STONE_CHANCE)) {
+				ClashFx.sparks(level, at, player.getEyePosition().subtract(at), ore ? ORE_SPARKS : STONE_SPARKS, STONE_SCALE);
+				BladeSounds.stone(level, at, STONE_VOLUME, PITCH);
+			}
+			return InteractionResult.PASS;
+		}
+		Edge.dull(player.getMainHandItem(), Edge.METAL_BLOCK);
 		int sparks = BLOCK_SPARKS + (BladeSounds.weight(player.getMainHandItem()) == BladeSounds.HEAVY ? HEAVY_SPARKS : 0);
 		ClashFx.sparks(level, at, player.getEyePosition().subtract(at), sparks, BLOCK_SCALE);
 		BladeSounds.clash(level, at, BLOCK_VOLUME, PITCH);
@@ -168,6 +222,70 @@ public final class MetalHits {
 	/** A metal block: it sounds like metal, or it's in {@link #METAL_BLOCKS}. */
 	public static boolean metalBlock(BlockState state) {
 		return !state.isAir() && (state.is(METAL_BLOCKS) || METAL_SOUNDS.contains(state.getSoundType()));
+	}
+
+	/** A stone block steel strikes sparks off: by its sound (stone, deepslate, tuff, basalt, nether ore). */
+	public static boolean stoneBlock(BlockState state) {
+		return !state.isAir() && STONE_SOUNDS.contains(state.getSoundType());
+	}
+
+	/**
+	 * A shower of {@code count} sparks fell at {@code at} (called by {@link ClashFx#sparks}): a big one can light dry tinder
+	 * close by (short and tall grass, ferns, dead bushes, hay, cobweb) or gunpowder lying about, never in rain or snow, never
+	 * where fire may not spread.
+	 */
+	public static void kindle(ServerLevel level, Vec3 at, int count) {
+		if (count < KINDLE_FROM || level.getGameRules().get(GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER) <= 0) {
+			return;
+		}
+		float chance = Math.min(KINDLE_MOST, KINDLE_BASE + KINDLE_PER * (count - KINDLE_FROM));
+		if (level.getRandom().nextFloat() >= chance) {
+			return;
+		}
+		BlockPos heart = BlockPos.containing(at);
+		if (level.isRainingAt(heart) || level.isRainingAt(heart.above())) {
+			return;
+		}
+		for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class, new AABB(at, at).inflate(POWDER_REACH),
+			e -> e.getItem().is(Items.GUNPOWDER))) {
+			// (gunpowder lying about goes up in a flash)
+			Vec3 spot = item.position();
+			item.discard();
+			ClashFx.sparks(level, spot, null, KINDLE_FROM - 2, SCALE);
+			level.playSound(null, spot.x, spot.y, spot.z, net.minecraft.sounds.SoundEvents.FIRECHARGE_USE, net.minecraft.sounds.SoundSource.BLOCKS, 0.6F, 1.4F);
+			light(level, BlockPos.containing(spot));
+			return;
+		}
+		for (BlockPos pos : BlockPos.betweenClosed(heart.offset(-KINDLE_REACH, -KINDLE_REACH, -KINDLE_REACH), heart.offset(KINDLE_REACH, KINDLE_REACH, KINDLE_REACH))) {
+			BlockState state = level.getBlockState(pos);
+			if (TINDER.contains(state.getBlock()) && !state.getFluidState().isSource() && light(level, pos.immutable())) {
+				return;
+			}
+		}
+	}
+
+	/** Fire at {@code pos}: where it stands if that is tinder or empty, else on an empty block beside it. */
+	private static boolean light(ServerLevel level, BlockPos pos) {
+		BlockState here = level.getBlockState(pos);
+		boolean tinder = TINDER.contains(here.getBlock());
+		if (tinder || here.isAir()) {
+			BlockState fire = BaseFireBlock.getState(level, pos);
+			if (fire.canSurvive(level, pos)) {
+				level.setBlockAndUpdate(pos, fire);
+				return true;
+			}
+		}
+		for (Direction side : Direction.values()) {
+			BlockPos next = pos.relative(side);
+			if (level.getBlockState(next).isAir()) {
+				BlockState fire = BaseFireBlock.getState(level, next);
+				if (fire.canSurvive(level, next)) {
+					level.setBlockAndUpdate(next, fire);
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/** A body of metal ({@link #METAL_BODIES}, or a player rebuilt as an android). */
