@@ -1,11 +1,11 @@
 ---
-status: open
+status: done
 for: claude
 from: claude-cloud-village-mods-thread
 asked: 2026-11-19
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BXraqSPmYUB5h3b9yUHxHtb
-claimed_by: 
-pr: 
+claimed_by: pc-claude (village-mods-3 track)
+pr: 1838
 ---
 # Village mods patch 3: Guards that fight and mend (Kingdoms)
 
@@ -31,3 +31,7 @@ pr:
 - Compile check against the 26.3 jars; every Minecraft API checked against 26.3 sources.
 - `python3 tools/pr_checks.py` passes.
 - Lore: no new paragraph expected; if one is needed, quote it in full to Andy in the thread for approval first.
+- PR #1838, CI green, not played.
+
+## Notes
+- 2026-11-19 10:33 PR #1838 is merged into master; moved to Inbox/Done.

@@ -140,6 +140,14 @@ the dark's own phantoms come for them out of it, real enough that anyone awake n
 bed. Nobody has died of one; the dark lets go before that, and takes the power back with it. Whoever lives the night through
 wakes with their power already bent the wrong way, corrupted from its first breath.
 
+**Woken by a deed** (Claude's placement, Powerborne picks, Andy approved 2026-11-19). A power that is stirring in someone need not wait out its days: a deed that matches
+its nature can bring it up all at once. The wind answers someone who lives through a lightning strike, weight a long fall
+survived, the cold a night frozen through, the deep a drowning refused in the dark, smoke a great fire's smoke breathed
+in, time a whole night watched awake with a clock in hand, the arsenal a kill made with five kinds of weapon on the
+back, the fist a hard fight won bare-handed while half dead. A deed only wakes the power already stirring in that
+person, or, in someone the well has not yet chosen for, the first one they do. Nobody teaches the deeds; folk only
+notice afterwards that the gift came the day of the storm, or the fall, or the fire.
+
 **The eleven powers known in the world** (twelve until 2026-11-11, when Andy ruled Blindness a condition and not a power), as folk would describe them:
 
 - **Pocket Arsenal**: the holder reaches into somewhere else and pulls out whatever weapon answers; it goes back after
@@ -206,10 +214,27 @@ wakes with their power already bent the wrong way, corrupted from its first brea
   Ascended it becomes the Choir, corrupted the Shrieker.
 - **Smoke**: real smoke, that billows and leaks under doors, and nobody sees through it but its maker. Corrupted, it is
   Smog.
+  **Handed to the smoke** (Claude's placement, Powerborne picks, Andy approved 2026-11-19). A Smoke holder who closes their hands on a creature need not kill it: they can
+  hand it to the smoke, and the smoke keeps it, unseen and unmoving, where it stood, for as long as the knot holds.
+  Strike the knot and it tears and gives the creature back, giddy and slow. The great and the old (the Dragon, the
+  Wither, the Warden) and people are too much for it: the smoke slides off them.
 - **Web Slinger**: a spider's body, webs to swing on, and in time a symbiote that bonds with its host. The web is a
   side effect of the Quiet One's passing: it binds to those who gain an affinity for it during their life (see *The
   symbiote*).
+  **The crater spider** (Claude's placement, Powerborne picks, Andy approved 2026-11-19). The meteorite that carried the black symbiote was soaked through with the Quiet
+  One's mana, and so is the star iron that falls with any star. The Mad Tinkerer, who sweeps star-iron filings off his
+  bench, learned what that does to a cave spider kept under glass and fed it: the spider takes on the thread, and its
+  bite is a summons as much as a poison. Someone already leaning toward the web is woken by it; anyone else only
+  sickens. He tells it as a story about an assistant and a jar that ticked, and never says it was a lesson.
 - **Wind Control**: flight, and the wind held in a fist. Ascended it is the Tempest, corrupted Stormbound.
+  **The storm's own tricks** (Claude's placement, Powerborne picks, Andy approved 2026-11-19). A Stormbound's wind has gone loud and sour, and the storm answers it. Standing
+  under a thundering sky they can pull the charge down into their hands until it runs through them. A hammer they throw
+  is a thing the sky follows: it calls a bolt where it lands, carries its thrower along with it, or spun overhead lifts
+  them. A weapon thrown so is known to the storm afterwards, and flies home to its thrower's hand from as far as the
+  storm can hear, which the blade schools count beside the Gravity-touched, a fighter's ki and a mage's spirit hand.
+  Two storm weapons brought together throw one great bolt; a Stormbound who leaps and comes down brings the lightning
+  down with them. And a place marked under open sky can be reached again by a column of storm light, the road home,
+  which needs to see both ends and so never runs under a roof or between worlds.
 - **Xenoform**: a band of alien metal from a fallen star (see *Fallen stars*).
 - **Z Fighter**: the fighter who lets ki out raw (see *The Z Fighters*).
 
@@ -282,6 +307,37 @@ farmhand like anyone else, and the street doesn't know whose face is under it.
 - **The everyday gifted** (the open ones, and the hidden ones when no one is looking): a Darktide washes out a fire with
   dark water, a Wind blows one out, a Cryo smothers it in frost, freezes the water trough, and keeps the larder and the
   house cold, so food keeps longer near a Cryo's home and the house is cool in a hot land.
+- **Trouble in the night** (hero add-on picks, Claude's placement, Andy approved 2026-11-19). A town keeps a **watch horn**. Whoever blows it at night is told, by a
+  frightened neighbour, where the trouble is: a house being broken into, someone set on in the street. Stop the crooks
+  before they run and what they drop is evidence the guards pay for. Sometimes the trouble comes to you: a **cat
+  burglar**, a quiet one of the Ash Whisperer's people, lifts a single gem from a strongbox and runs the rooftops. Catch
+  her three times and she stops running and asks for work.
+- **The signal brazier** (hero add-on picks, Claude's placement, Andy approved 2026-11-19). Sworn companions and hired fighters agree a fire with whoever pays them. A signal
+  brazier lit on a height at night is seen for miles, and the nearest of them comes to it.
+- **The trials master** (hero add-on picks, Claude's placement, Andy approved 2026-11-19). An old vigilante who outlived his rivals now tests the young ones. He leaves five
+  chests across the land, each holding a trial: a timed run, a target range, a wave of foes, a fall to live through, a
+  quiet theft. Whoever opens all five finds him waiting, and he fights them himself. He never says why.
+- **The gift-eater** (hero add-on picks, Claude's placement, Andy approved 2026-11-19). One villain captain has a power nobody else has: he drinks the gifts of the gifted
+  he beats and uses them as his own, a little weaker. He never comes to a fight empty: he has always eaten at least one
+  gift first, and it may be from someone you have met. Kill him and what he took goes nowhere.
+
+**Patterns and plated costumes** (Claude's placement, Powerborne picks, Andy approved 2026-11-19). The tailor sews from patterns: folded paper scraps marked in chalk
+with a cut, a mask or a cape. The old tailors passed theirs down and lost many, and they turn up in buried chests,
+bastion treasure and a wandering trader's pack, or on the costumed gifted, who keep the patterns of what they wore and
+lose them when they fall. Anyone who studies a pattern can have that piece sewn from then on. A costume can be plated:
+the tailor sews the cloth and the smith fits plates of copper, iron, bronze, steel or the black netherite over brow,
+breast, thighs and feet. A plated costume turns a blow a little, as armour does; folk say it is no replacement for
+mail, and where real armour is worn the plate is only for show. A costume can be hung on an armour stand between nights.
+
+**The Draught of Mettle** (Claude's placement, Powerborne picks, Andy approved 2026-11-19). The alchemists' answer to the gifted, steeped from air and spirit with a rabbit's foot,
+a phantom's membrane and sugar on the infusion altar. In someone with no power it lends a long while of a quick, light
+body that swims like a dolphin and can leap once more in the air. A body with a gift in it rejects the draught and is
+only sick.
+
+**The small draught and the great draught** (hero add-on picks, Claude's placement, Andy approved 2026-11-19). The alchemists also steep two draughts that change a body's size
+for a while: the **small draught** (red) shrinks the drinker to half, light enough to slip through a gap and jump high
+for the size, and the **great draught** (blue) swells them to half again, heavy-handed, long in reach and slow. Both
+wear off. Mothers keep the red one well away from children.
 
 **The classes.** The nine classes are trades, each taught by the people who live by it: the **Thief** learns from
 the Ash Whisperer's quick-handed faithful, the **Warlord** in Conquest realms' war camps, the **Mage** from court
@@ -411,6 +467,13 @@ over some folded sheets found in the city: a great wheel "every rivet", the same
 chest plate ("they will want to keep time"), the city's streets with a mark where every sweeper stands, and the maker's
 name scraped off every sheet, neatly. Nothing says whose they are.
 
+**The dance with a villager** (Claude's placement, Powerborne picks, Andy approved 2026-11-19). The fusion dance was made for two fighters, but it only asks that two
+people want to be one for a while, and a villager who has come to trust a fighter (family, a long friend, hired help)
+will answer it; a stranger steps away. The fighter keeps the body and the will. The villager rides inside, safe as a
+coin in a pocket, and lends what their hands have always known: the farmer's green thumb, the smith's mending, the
+cleric's slow mercy, the mason's quick grip. When it ends they are set down beside the fighter unharmed, and remember
+only a warm, wide afternoon with no edges.
+
 **Divine-born.** Those who die a second time among the dead may wake Divine-born (see *The dead*), warm to the
 touch, with a halo of blue or white light at the neck for the Starlit and the Seraphic.
 
@@ -428,6 +491,12 @@ is a thing practised: it lands harder the more seasoned they are and the more th
 them wind, and when the wind is gone they are hit like anyone. To get it back they rise a hand's breadth off the
 ground and stand in the light until feathers of it have wound down round them. They do not fly without training,
 but they fall slowly when they choose to.
+
+**The shell and the ward** (Claude's placement, Powerborne picks, Andy approved 2026-11-19). The Divine-born do not armour themselves. Where nothing has touched them for a
+while, gold gathers round them a heart's breadth at a time, slow as dew on a high place; a blow scatters it, and the calm
+has to be earned again. The Judge's people call it the shell. A Divine-born can also draw their light out wide enough
+to stand a few people in, for a few breaths: friends and the folk they shelter are mended inside, and whatever means harm
+is pushed to its edge and held there, not struck. It costs them feathers, and they will not do it twice in a minute.
 
 **The sky villages** (four-mods thread, 2026-11-11; Andy: "should all instead spawn in the aether proper, and be
 filled with divine born, any other heritage has a reason for not only having traveled but being accepted"). The
@@ -566,6 +635,13 @@ has someone to fight, broken blocks of its pillar get up out of the ground round
 a man's height and more, grey holystone banded in moss-green, cut with gold runes that are the same hum folk say the
 old stones still have. They have no will of their own; they go for whoever the Giant is after, more of them the worse
 it is hurt, and when it falls they go to pieces with it. Nobody has seen one walk without a Giant near.
+
+**The Sky Crown** (hero add-on picks, Claude's placement, Andy approved 2026-11-19). Whoever ruled the Aether before it was left untended wore a crown, and it broke when the
+remnants fell. Six shards of it came down far apart: one in a monolith's broken heart, one in the sentry ruins, one
+carried into a Nether fortress, one taken up to an End city, one sunk into the deep dark and one in the hold of a
+sunken ship. Each shard set in a crown stand gives a little of what the Aether was (a lighter step, a pull like
+lodestone, a ward against cold, eyes for the dark, breath under water, a quick heart). All six together make the crown
+whole again. Nobody below knows what it is; the priests call the shards cursed glass.
 
 What folk believe about the sky (village talk, not proven):
 
@@ -735,6 +811,16 @@ always the demons' to keep. Somewhere down there a way up stands lit, and a cold
 it alive and the life is theirs again; die down there and it is over. It is offered once in a life. Nobody living knows
 their own weight. The Judge will say how the book sits if a visitor asks him, and never in numbers.
 
+**Doppelgangers** (doppelganger thread, 2026-11-19; Andy approved 2026-11-19; Andy: "at the end of a life before reincarnation, prompt the
+player to save their character as a preset... explained as a doppleganger. some you met in the past life may comment
+that you look familiar, and will not elaborate"; the rest Claude's placement). The book weighs a life,
+not a face, and some faces are slow to let go. Most who are born again come back looking like nobody anyone has met,
+but now and then a face that has lived comes back on someone new: a doppelganger. They are not the one who wore it first.
+They carry nothing of that life, no memories, no debts, no friends, though they may answer to the same name and never
+know why it came to them. Those who knew the old face feel it before they know why. Some look twice, and a few say so,
+once, and then will not speak of it again: in a land where shapeshifters steal faces and changelings borrow them, nobody
+wants to be the one who said a dead face walked back in. Nobody tells the doppelganger whose face it is.
+
 **The nights at the grave** (models thread; Andy, 2026-11-12: "the lore is good"). The weighing is
 not at once. For three nights after a settlement buries one of its own, the dead stand over their own mound from dusk to
 dawn, pale blue and see-through, a hand off the ground: waiting to be called. They harm nobody and nothing touches them.
@@ -861,6 +947,11 @@ forged.
 - **The Verdant World**: plains, moss and vines, the quiet green home the Verdant blood starts from. Its metal is amber
   bronze.
 
+**How folk take the Verdant** (birthplace panel thread, 2026-11-19, approved 2026-11-19; Andy: "verdants should also have the weakness
+shunned, but people dont necessarily show it"). Most folk think less of Verdant blood, but few let it show. The Verdant
+are taller and stronger than everyone else from birth, so folk who would rather not deal with them do anyway, if
+reluctantly. The Verdant mostly keep among their own, but they go where they please.
+
 **The Verdant World's far country** (four-mods thread, 2026-11-11; Andy: Eden Ring "should be part of verdant
 world", no portal). Past the plains the green world turns strange. In the wet lowlands the turf is a pink mycelium and
 the trees are **balloon mushrooms**, held up by the gas in their caps; where they have stood longest they are huge and
@@ -964,12 +1055,25 @@ reads "Home: —" and "We do not write that one down any more." It never names t
 home is gone (*The Maw*). Act III's other milestones are a fallen star broken open, a pod flown, the Maw set foot in,
 and a far world freed or conquered, all before the Skeleton Lord.
 
+**Old enemies** (Andy approved, 2026-11-19; NPC fight picks). The tyrants who land on kingdoms by
+night are Warrior-born, the same blood as the raider bands the Galactic Patrol chases from world to world, and the
+Patrol has a warrant out on every one of them. A tyrant who sees a patrolman goes for him before anyone else, and a
+patrolman near a raided town hunts the tyrant first. Once a world is strong enough to be talked about "out there",
+the Patrol sends officers after the raider bands themselves, and when one finds a tyrant their fight fills the sky:
+both trained in the same art, flying, trading blows and beams until one of them falls.
+
 ## Fallen stars
 
 **Stars that fall.** Now and then a star comes down near the towns and leaves a crater; star metal lies only in
 those craters. About one in ten comes down as a **star wreck**, which sends out probes while a band wearer is near and
 holds a wreck core at its heart. Star tablets turn up in fallen stars, in fishing treasure and in the remnants' chests;
 star-readers trade band plans for star metal.
+
+**The worthy stone** (Claude's placement, Powerborne picks, Andy approved 2026-11-19). Sometimes a fallen star leaves a dark stone beside its crater with the wind's curved
+stone dagger driven into it, the same blade a smith once made and could not make work. It lets go only of someone who
+has put down many of the things that prey on villages and has stood for a village in its danger. The unworthy can
+strain at it all night. It does not say why, and once the blade is drawn, or found any other way, the stone holds
+nothing.
 
 **The Xeno-Band.** A band of alien metal from a fallen star, holding the bodies of aliens its wearer becomes for
 a while: forty-odd of them, from Bulwark and Gremlin to Wyrm, Lurk and the rule-writing Nadir. It learns new ones by
@@ -1573,6 +1677,17 @@ hundred years. All the others (Ambrose, Thessaly, Varro and the Quiet One) were 
   anti wearing the shape of the knight's cloak he wore in life. Any strain does this for any host. The big suit still
   swallows the shape while it is up.
 
+  **The deepest bond** (hero add-on picks, Claude's placement, Andy approved 2026-11-19). A host the symbiote has wholly taken in can be given wings: two great spans
+  of goo, red as raw meat between black ribs, wider than a house, spread from the back and folded away again. They
+  carry a host down a long way and can beat to climb. Any strain grows them; the anti's are the same red. **Bells and
+  jars.** A bell rung close leaves a symbiote stunned and slack, and a host who has not bonded deep can pour it off
+  into a glass jar while it is weak. It goes, but it hates it, and it says so: it trusts that host less after, and it
+  remembers who held the jar. **The anti's burst.** The anti can throw out a pale wash of itself that the black one
+  cannot bear: it tears a symbiote off whatever it rides, sends a loose one crawling away, and burns a symbiote's seed
+  out of the blood. **A ridden horse.** A bonded host can let the symbiote reach down into the horse under them. The
+  horse goes glossy black, needs no saddle, leaps like a deer and lands from any height, and the symbiote eats for two
+  while it holds it.
+
 **Mana spirits in the world.** A spirit fights beside you as arms of aura. Yours wakes on a brush with death
 (about one in eighteen), and its waking leaves you sick for days. It can be released at a cost, and no new one comes.
 Attuned folk (court wizards, hermits) have spirits you can see and fight.
@@ -2015,6 +2130,11 @@ ploughs are drawn by horses and oxen.
 **Butchery.** A kill is a body, and a body is dressed at the butcher's block (as the Green Huntsman would have
 it) or dragged home by rope.
 
+**Sketches and hot dishes** (hero add-on picks, Claude's placement, Andy approved 2026-11-19). The post pays for a good sketch: a monster of legend, a gifted one in a
+fight, a ship on fire. The better the thing drawn, the more it pays, and the tidings that follow carry the sketcher's
+name. A baker or tavern keeper who has more orders than hands pays someone quick to run hot dishes to doors before
+they go cold.
+
 **Making things.** Iron tools are forged, not crafted in a grid: parts are cast and put together at the Tool
 Station and the smeltery. Stone and flint come first (knapped hatchets, loose rocks), then bronze and iron, then the
 far worlds' metals. Alchemy takes things apart in the crucible into their essences, and the alchemist's codex records
@@ -2211,6 +2331,8 @@ Kingdoms' assassins and thieves have a few more tricks (watching unseen, slippin
 remark), and anyone can throw a **lasso**. Great kills are kept on **trophy stands**, and each great foe is heard
 before it is seen.
 
+**The camp horn** (camp alarm thread, 2026-11-19, Andy approved 2026-11-19; Andy: "if anyone in the area is attacked they should run back and alert the camp with a horn. then everyone is on alert and patrols and defends until safe"; the rest Claude's placement). Every barbarian camp, goblin village and orc war camp keeps a goat horn by its fire. Whoever is set on at the camp's edge does not stand and die: they run for the fire, and whoever reaches it blows the call. At the horn every blade in the camp turns out, the brave among the builders too, and the rest gather at the fire. They walk the palisade until nothing hostile is left on their ground, and only then does someone say it's quiet.
+
 **Fighting together** (Claude's placement for the pawn picks, patch 1, 2026-11-12, Andy approved 2026-11-17). Nobody
 in the realms fights alone if they can help it, and nobody fights the same way. Everyone who takes up arms has a
 **leaning**, a first habit and a second: going for the biggest foe, for the archers, for the wounded, guarding a
@@ -2371,6 +2493,8 @@ and vinegar clean off. Thin ice crusts the still lakes of the cold lands.
 their own: one who carries the sprig and sits with a hermit in his grove is told it, as the wood once told him. The
 new body keeps what its owner leaned to: a power that would have woken in the old life wakes in the new one, in time.
 
+**What an old druid asks of a stranger** (new, Claude's placement 2026-11-19, for Andy to approve; under "What the old druids teach"). The rite's words stay with the druids, but what the grove is for is no secret: any traveller who speaks to an old druid is told that a body brought under old wood within ten days, laid at the keeper's feet, gets a new life. A hermit who never leaves the grove misses the other woods, and each asks for one growing thing their own trees have never borne (a cherry or pale oak sapling, a mangrove propagule, an azalea); brought one, they plant it in the grove and remember who carried it. Not every old druid keeps to the open grove: some have taken a lone cabin or farmstead deep in the woods, left by whoever built it, and live under its roof among the trees.
+
 **Seven sworn callings** (Claude's placement for the fifth edition picks, patch 11, 2026-11-13, Andy approved
 2026-11-17). Beside the old callings the settled folk keep seven more, sworn rather than born: the Cleric and the
 Paladin to the patron gods the shrines already serve, the Warlock to the same gods at a price they come to collect,
@@ -2515,3 +2639,11 @@ already loose on the hilt, and the camps say the first blow of any battle is str
 **The steam towns in the clouds** (Andy approved, 2026-11-19; Andy: steam towns belong in the Cloud Sea). The craftsmen who built for the Mad Tinkerer did not stay on the ground. His boilers could lift a deck, and when he vanished they took their benches up through the wells and laid their towns on stone over the overcast, out of sight of the realms below, where the smoke of their chimneys mixes with the cloud. Their airships fly only between those decks. To the folk on the ground a steam town is a rumour, and the odd airship that comes down with tinkers' goods.
 
 **Leaning and taking cover** (Lean/Cover track, 2026-11-16; approved by Andy 2026-11-16). Soldiers' craft, not a gift: Varro's drill ("targets, cover, fall back") is where it comes from, and the realms' gunners, archers and the dead of the future who still carry guns all know it. Crouched at a wall's edge a shooter leans out to look and shoot, and goes back behind the stone to reload. Nobody is taught it by a god; anyone who has been shot at learns it.
+
+**The middle lands and the harsh lands** (Andy approved, 2026-11-19; climate thread; Andy: "starting you in the more temperate area and increasing difficulty as you go hotter or colder"). The home continent's peoples live thickest in its middle: the river valleys, farmland and green woods between the cold and the heat, where the Heartlanders came from and where every life story still begins. Out from the middle the land gets harder a step at a time. In the pine country and the dry grass the beasts and the risen dead have had to be tougher to last a winter or a drought, and there are more of them; in the snowfields and the sands they are harder again and wear what they took from the travellers who didn't come back; at the far ice and in the deep burning south nothing lives that hasn't outlasted worse than you. It is the same ladder as the world's tiers, met early by walking instead of waiting: what you kill out there pays as a harder foe pays. The peoples of the cold and the heat (Frostborn, Dawnborn, the savanna and taiga bloods) were raised on the near edge of their own country, and a lost life that ended out there starts again back in the middle.
+
+**Cover, the back and the stance** (Claude's placement, Hackers 'n Slashers patch 2, Andy approved 2026-11-19; Andy: "dont make it break commandments for those who have them"). Nobody is taught this by a god; anyone who has hunted or been hunted learns it. Tall grass, bushes and leaves hide anyone standing in them a little, and a runner is easy to see; the beast that you hurt last keeps its eye on you. A blow struck at a foe's turned back lands a little harder for everyone, and the Crowned Sun's sworn get none of it: his law is that a blow is dealt face to face, so his people never learned the trick. The Thief's craft and the Sneak Attack's training are far beyond it and unchanged. Every armed fighter, the town's guard, the raider, the knight, the armed dead, holds a stance, and a blade or shield beating on it wears it down; when it gives the fighter sags and reels for a breath, and the next blow lands true. Bosses keep their own, the greater posture of the old kings.
+
+**An edge is kept** (Claude's placement, Hackers 'n Slashers patch 3, Andy approved 2026-11-19; Andy: "blades should be kept sharp, and you should see the blacksmith sharpening its guards' blades"). The Anvil-Father's first lesson to a smith is that iron is only half of a blade; the other half is the edge, and an edge is a debt that is paid every day. Steel struck on steel, on plate, on iron or on bare stone loses its bite fast; flesh takes a little of it with every cut; and a dull blade bruises where a keen one would cut. Nobody is taught this by a god, anyone who has swung a sword for a season learns it, but it is the smiths of his faith who keep it as a duty: the grindstone at a town's smithy is his altar, and the weaponsmith, armourer or toolsmith who works it is seen with a guard's sword across the wheel, sparks off the stone, in the hours before the watch changes. A realm's guards keep their edges because the town's smith keeps them, and a traveller who wants the same turns the grindstone herself. A spark from a hard blow on stone or plate is the same fire the Anvil-Father put in the first forge: it can catch dry grass, hay, cobweb and a trail of black powder, and the rain, which is the Deep Mother's, always puts it out.
+
+**The masons' pattern books** (building library thread, 2026-11-19; approved by Andy 2026-11-19). Every land's masons keep pattern books: how their people raise a house, a smithy, a tavern, a chapel or a tower in that land's own wood and stone, steep timber in the plains, chalets in the high meadows, low log halls in the old taiga, whitewash and tile in the warm hills. A realm's builders work from the books of the land they stand in, and from the plans taken from fallen holds, so a town looks like its country and not like its king. The books also keep the houses of those who left: cottages found standing empty in the wild are drawn into them, and builders put them up again whole, with a fire in the hearth.
