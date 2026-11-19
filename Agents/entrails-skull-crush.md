@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: entrail variety, intestines from gibs, blunt weapons crush skulls
 branch: claude/project-thread-t83v6r
 with: Claude (cloud thread "Add entrail variety and skull crushing")
