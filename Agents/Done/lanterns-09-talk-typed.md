@@ -26,4 +26,4 @@ owns:
 
 ## Done
 "Ask something..." on a villager's Town business opens a talk card with a typing box; they answer by topic in their own way, with three follow-up questions in a side panel. Compiled on the PC, CI passes; not played.
-- 2026-11-18 20:05 PR #1770 is merged into master; moved to Agents/Done.
+- 2026-11-19 01:59 PR #1770 is merged into master; moved to Agents/Done.

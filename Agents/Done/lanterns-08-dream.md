@@ -27,4 +27,4 @@ owns:
 
 ## Done
 A powerless sleeper may be called: the view tilts up, a dream wakes their power next morning, a nightmare lived through (blind, phantoms, never lethal) wakes it corrupted. Compiled on the PC, CI passes; not played.
-- 2026-11-18 20:05 PR #1769 is merged into master; moved to Agents/Done.
+- 2026-11-19 01:59 PR #1769 is merged into master; moved to Agents/Done.

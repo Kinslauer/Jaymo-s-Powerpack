@@ -33,4 +33,4 @@ suggested_owns:
 
 ## Notes
 - 2026-11-18 19:44 Andy approved the ki-crossing numbers as they are (50,000 power, 80% ki) and the Hollow lore.
-- 2026-11-18 20:05 PR #1766 is merged into master; moved to Inbox/Done.
+- 2026-11-19 01:59 PR #1766 is merged into master; moved to Inbox/Done.

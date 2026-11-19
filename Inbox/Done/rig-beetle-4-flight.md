@@ -39,4 +39,4 @@ text_pass: done
 
 ## Notes
 - 2026-11-18 16:13 Text pass: added rig_menu pullup/hyper/meteor/smooth names and hud pullup/hyper/bank/meteor/smooth chips, view.pullup visor label, and mind pullup/hyper/meteor lines for all three personalities (rig.json, rig_picks.json); new changes/powers/rig-beetle-4-flight.md change note. No code changes.
-- 2026-11-18 20:24 PR #1765 is merged into master; moved to Inbox/Done.
+- 2026-11-19 01:59 PR #1765 is merged into master; moved to Inbox/Done.

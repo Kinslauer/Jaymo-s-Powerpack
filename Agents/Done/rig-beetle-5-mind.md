@@ -28,4 +28,4 @@ owns:
 
 ## Done
 The Mind answers chat commands privately (light, dig out, report, scan, where, recipes, autopilot), flies you to a village or home, adds threat verdicts on the visor, throws you clear when the suit breaks, fires while you're downed, and logs blows with vitals on the HUD. Voice waits on Andy. Compiled on the PC, CI passes; not played.
-- 2026-11-18 20:31 PR #1773 is merged into master; moved to Agents/Done.
+- 2026-11-19 01:59 PR #1773 is merged into master; moved to Agents/Done.

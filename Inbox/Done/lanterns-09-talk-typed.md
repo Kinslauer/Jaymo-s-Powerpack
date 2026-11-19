@@ -33,4 +33,4 @@ suggested_owns:
 - One PR per patch with `changes/<mod>/<branch>.md`; never touch `version=`, MODLOGs or codemap. Andy tests by merging. Run 2 patches at a time.
 
 ## Notes
-- 2026-11-18 20:05 PR #1770 is merged into master; moved to Inbox/Done.
+- 2026-11-19 01:59 PR #1770 is merged into master; moved to Inbox/Done.

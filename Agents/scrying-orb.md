@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: stalled
 task: scrying-orb
 branch: claude/scrying-orb
 with:
@@ -41,4 +41,4 @@ Complementary (block models in a block entity renderer, no second camera).
 ## Done
 - 2026-11-18 18:14 No sign of work for 30 min: marked stalled (whoever ran it stopped).
 - 2026-11-18 19:32 hermes-a claimed, set status running.
-- 2026-11-18 20:37 PR #1787 created, build passed, set status in-review.
+- 2026-11-19 01:59 No sign of work for 30 min: marked stalled (whoever ran it stopped).

@@ -28,4 +28,4 @@ owns:
 
 ## Done
 The Hollow sits on the star map; trips past it run long and the flight screen bends the stars round it. A 50,000-power Z Fighter can fly past the top of the world and cross to the Pale Moon and back on ki. Compiled on the PC, CI passes; not played.
-- 2026-11-18 20:05 PR #1766 is merged into master; moved to Agents/Done.
+- 2026-11-19 01:59 PR #1766 is merged into master; moved to Agents/Done.
