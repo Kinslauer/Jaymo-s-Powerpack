@@ -3,6 +3,8 @@
 	"package": "com.jaymospowers.power.web.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
+		"WebCobwebMixin",
+		"WebCobwebTearMixin",
 		"WebFoodPropertiesMixin",
 		"WebHostZombieMixin",
 		"WebLivingEntityMixin",

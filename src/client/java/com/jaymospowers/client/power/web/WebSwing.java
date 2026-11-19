@@ -476,22 +476,51 @@ public final class WebSwing {
 		return com.jaymospowers.power.web.WebWhip.whippable(player, on) && !WebAnchors.reelable(on);
 	}
 
-	/** Sneak last tick, and whether this Sneak press went to the whip (so letting go tells the server). */
-	private boolean whipSneakWas, whipHeld;
+	/**
+	 * Exactly one web out, stuck to a creature that can be whirled: a punch there is the one-line whirl (see
+	 * {@link com.jaymospowers.power.web.WebWhip#ONE_LINE}).
+	 */
+	private boolean oneLineReady(LocalPlayer player) {
+		Strand a = strands[WebNet.MAIN], b = strands[WebNet.OFF];
+		if (a.attached == b.attached) {
+			return false;
+		}
+		Strand one = a.attached ? a : b;
+		return one.travel <= 0 && one.entityId >= 0 && com.jaymospowers.power.web.WebWhip.whippable(player, player.level().getEntity(one.entityId));
+	}
 
-	/** Sneak pressed with both webs on one thing: the whip (or the pry) starts; let go and a pry not yet loose is off. */
+	/** Sneak and the attack key last tick, and whether each press went to the whip (so letting go tells the server). */
+	private boolean whipSneakWas, whipHeld, punchWas, punchHeld;
+
+	/**
+	 * Sneak pressed with both webs on one thing: the whip (or the pry) starts (Jump held too: the slam, not the whirl);
+	 * let go and a pry not yet loose is off. A punch with one web on a creature whirls it on that line until let go.
+	 */
 	private boolean tickWhipSneak(LocalPlayer player) {
 		boolean sneak = player.input.keyPresses.shift();
 		boolean pressed = sneak && !whipSneakWas;
 		whipSneakWas = sneak;
+		boolean punch = Minecraft.getInstance().options.keyAttack.isDown() && Minecraft.getInstance().gui.screen() == null;
+		boolean punched = punch && !punchWas;
+		punchWas = punch;
+		if (punchHeld && !punch) {
+			punchHeld = false;
+			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebWhip.Hold(false, com.jaymospowers.power.web.WebWhip.ONE_LINE));
+		}
+		if (punched && oneLineReady(player)) {
+			punchHeld = true;
+			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebWhip.Hold(true, com.jaymospowers.power.web.WebWhip.ONE_LINE));
+			return true;
+		}
 		if (whipHeld && !sneak) {
 			whipHeld = false;
-			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebWhip.Hold(false));
+			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebWhip.Hold(false, com.jaymospowers.power.web.WebWhip.WHIRL));
 			return false;
 		}
 		if (pressed && whipReady(player)) {
 			whipHeld = true;
-			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebWhip.Hold(true));
+			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebWhip.Hold(true, player.input.keyPresses.jump()
+				? com.jaymospowers.power.web.WebWhip.SLAM : com.jaymospowers.power.web.WebWhip.WHIRL));
 			return true;
 		}
 		return false;

@@ -20,6 +20,7 @@ abstract class WebAvatarRendererMixin {
 		com.jaymospowers.client.power.web.WebPuddlePose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.power.web.WebSymbioteClient.extract(entity, state);
 		com.jaymospowers.client.power.web.WebShootersClient.extract(entity, state);
+		com.jaymospowers.client.power.web.WebShieldClient.extract(entity, state);
 	}
 
 	/** First person: the suit's sleeve over your own hand (see WebSymbioteHand), and web shooters (WebShootersClient). */
@@ -31,6 +32,9 @@ abstract class WebAvatarRendererMixin {
 			((AvatarRenderer<?>)(Object)this).getModel());
 		// and a web shooter on its wrist
 		com.jaymospowers.client.power.web.WebShootersClient.firstPersonHand(poseStack, collector, lightCoords, arm,
+			((AvatarRenderer<?>)(Object)this).getModel());
+		// and the web shield on its forearm
+		com.jaymospowers.client.power.web.WebShieldClient.firstPersonHand(poseStack, collector, lightCoords, arm,
 			((AvatarRenderer<?>)(Object)this).getModel());
 	}
 }
