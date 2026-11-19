@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 02:04). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 02:09). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -24,7 +24,6 @@ kanban-plugin: board
 - [ ] [[Inbox/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · rig-beetle-5-the-mind · #1774 · in-review
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
-- [ ] [[Agents/guard-ranks-paid-kit|guard-ranks-paid-kit]] · 💻 Odysseus · #1791 · in-review
 
 
 ## Needs Andy
