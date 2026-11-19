@@ -181,6 +181,11 @@ public final class RigActives {
 		int siegeShellsFired = 0;
 		int siegeShellCooldown = 0;
 		int siegeCooldown = 0;
+		/** Flight actives: pull-up warning, hyper thrust, banking, smooth others. */
+		boolean pullup;
+		boolean hyper;
+		boolean banking;
+		boolean smoothOthers;
 	}
 
 	/** Something that happens a few ticks after its key: a shot at the end of its wind-up, a lift-off after its crouch. */
