@@ -86,7 +86,7 @@ public final class CritCue {
 	}
 
 	/** A jumping crit by {@code player} on {@code victim}: the cue, and the heavy ring if the weapon is heavy. */
-	static void crit(ServerPlayer player, LivingEntity victim) {
+	public static void crit(ServerPlayer player, LivingEntity victim) {
 		ServerLevel level = player.level();
 		cue(level, victim.getBoundingBox().getCenter(), player);
 		if (heavy(player.getMainHandItem())) {
