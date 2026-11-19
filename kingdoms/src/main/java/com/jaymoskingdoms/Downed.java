@@ -146,7 +146,11 @@ public final class Downed {
 		});
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
 			// (sneak + use on the downed is Powers' lift; a plain hold is its revive, which only watches, so the disarm still comes first)
-			if (!(entity instanceof Mob body) || !isDowned(body) || player.isSpectator() || player.isShiftKeyDown() || !ours(body)) {
+			if (!(entity instanceof Mob body) || !isDowned(body) || player.isSpectator() || player.isShiftKeyDown() || !disarmable(body)) {
+				return InteractionResult.PASS;
+			}
+			if (!world.isClientSide() && !ours(body) && !armed(body)) {
+				// (anyone else with nothing left to take: the tap is free for whatever else would take it, a blade stuck in them)
 				return InteractionResult.PASS;
 			}
 			// (taken here, so a downed villager's screen doesn't open, and neither hand gets at their pockets)
@@ -242,6 +246,20 @@ public final class Downed {
 	private static boolean ours(LivingEntity body) {
 		// (and a downed illager: IllagerTalk counts it disarmed once its hands are empty)
 		return body instanceof Villager || body.entityTags().contains(DOWNABLE_TAG) || IllagerTongue.speaker(body);
+	}
+
+	/**
+	 * Andy (2026-11-19): "you should be able to take their bows". Anyone downed can have their weapons taken, not only our
+	 * own folk ({@link #ours}): a bandit, a skeleton, a pillager, a zombie with a blade, anything that goes down with
+	 * something in its hands or arrows at its back. Not one that belongs to someone (a tamed animal).
+	 */
+	private static boolean disarmable(Mob body) {
+		return ours(body) || !(body instanceof net.minecraft.world.entity.OwnableEntity owned && owned.getOwner() != null);
+	}
+
+	/** Whether {@code body} still has anything to take: something in either hand, or arrows ({@link MobAmmo#quiver}). */
+	private static boolean armed(Mob body) {
+		return !body.getMainHandItem().isEmpty() || !body.getOffhandItem().isEmpty() || MobAmmo.quiver(body) > 0;
 	}
 
 	/** Someone of the settlement is tending {@code body} just now ({@link FieldMedics} leaves them to it). */
@@ -500,9 +518,14 @@ public final class Downed {
 		return horse instanceof AbstractHorse h && WAITING.containsKey(h);
 	}
 
-	/** {@code player} takes the weapons out of a downed guard's hands (and nothing else). */
-	private static void disarm(Player player, LivingEntity body) {
+	/**
+	 * {@code player} takes the weapons out of a downed one's hands, and the arrows it carries (Andy, 2026-11-19: "you
+	 * should be able to take their bows"), and nothing else.
+	 */
+	private static void disarm(Player player, Mob body) {
 		boolean took = false;
+		// (counted before the hands are emptied: a bow in hand means a quiver at their back)
+		int arrows = MobAmmo.emptyQuiver(body);
 		if (IllagerTongue.speaker(body) && !body.getMainHandItem().isEmpty()) {
 			body.addTag(IllagerTalk.ARMED_TAG);
 		}
@@ -517,6 +540,14 @@ public final class Downed {
 			body.setItemSlot(slot, ItemStack.EMPTY);
 			if (!player.getInventory().add(held) && !held.isEmpty()) {
 				player.drop(held, false, net.minecraft.util.Prediction.SERVER_ONLY);
+			}
+			took = true;
+		}
+		for (int left = arrows; left > 0;) {
+			ItemStack quiver = new ItemStack(net.minecraft.world.item.Items.ARROW, Math.min(left, 64));
+			left -= quiver.getCount();
+			if (!player.getInventory().add(quiver) && !quiver.isEmpty()) {
+				player.drop(quiver, false, net.minecraft.util.Prediction.SERVER_ONLY);
 			}
 			took = true;
 		}
