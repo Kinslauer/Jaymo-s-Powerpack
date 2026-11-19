@@ -15358,3 +15358,8 @@ Hackers 'n Slashers patch 3, the town half (Andy: "you should see the blacksmith
 
 - Fixes: the server crashed while land was being generated (an empty slot in the world's entity list reached the wind's push). Such a slot is now skipped (`WindPush`).
 - Built by CI; not played.
+
+## 0.10.73 (2026-11-19): The wind no longer stops the server (for real) (#1823)
+
+- Fixes: the server crashed while land was being generated: the wind's push walked the world's list of creatures and items while its own shelter check could load a chunk and add to that list. It now walks a copy (`WindPush`).
+- Built by CI; checked on the Deck under pre-generation.
