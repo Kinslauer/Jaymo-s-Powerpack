@@ -13,7 +13,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## Stuck
 
-- [[Agents/wither-model|wither-model]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+Nothing stuck.
 
 ## On the board
 
@@ -87,7 +87,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 ## Health
 
-1 problem in the notes: [[Health]].
+Nothing wrong: [[Health]].
 
 ## Last week
 
