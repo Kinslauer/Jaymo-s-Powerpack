@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 08:16). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 08:23). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -34,6 +34,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1804 charge jump and Web slingshot on a horse's jump bar, orange peak (Powers, Kingdoms, 2026-11-19)
 - [ ] #1803 towns and the sea - figureheads, trade signs, song stones, the journey book (Kingdoms, 2026-11-19)
 - [ ] #1802 the dead in the wild: remains, last camps, ruin traps, the headless rider (Kingdoms, 2026-11-19)
 - [ ] #1801 practice dummy: kinds and coloured numbers (Powers, 2026-11-19)
@@ -93,8 +94,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1694 blood stays drawn on MCA bodies (Powers, 2026-11-17)
 - [ ] #1692 Youth thinks out loud, "youth, look!" (Kingdoms, 2026-11-17)
 - [ ] #1677 fainting warns you first (Powers, Kitchen, 2026-11-17)
-- [ ] #1654 Ash piles fixed (Kitchen, 2026-11-16)
-- …and 191 older ones.
+- …and 192 older ones.
 
 ## Health
 
