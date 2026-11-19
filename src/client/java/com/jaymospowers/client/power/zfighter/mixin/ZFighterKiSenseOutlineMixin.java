@@ -17,6 +17,9 @@ abstract class ZFighterKiSenseOutlineMixin {
 		at = @At("TAIL"))
 	private void jaymospowers$kiSense(Entity entity, EntityRenderState state, float partialTicks, CallbackInfo ci) {
 		int color = ZFighterKiSenseClient.color(entity);
+		if (color == 0) {
+			color = com.jaymospowers.client.power.zfighter.ZFighterPartnerClient.color(entity);
+		}
 		if (color != 0) {
 			state.outlineColor = 0xFF000000 | color;
 		}

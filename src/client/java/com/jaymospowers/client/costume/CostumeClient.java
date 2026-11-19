@@ -8,6 +8,7 @@ import com.jaymospowers.costume.Costume;
 import com.jaymospowers.costume.CostumeDesign;
 import com.jaymospowers.costume.CostumeKit;
 import com.jaymospowers.costume.CostumeNet;
+import com.jaymospowers.costume.CostumePlates;
 import com.jaymospowers.costume.CostumeTailoring;
 import com.jaymospowers.costume.SecretIdentity;
 import com.jaymospowers.power.web.WebSymbiote;
@@ -295,6 +296,13 @@ public final class CostumeClient {
 			}
 			// (0.17.60) the suit editor's pieces
 			kit(models, design, slim, poseStack, collector, lightCoords, state);
+			// the metal plates, over everything on that part
+			for (CostumePlates.Slot slot : CostumePlates.Slot.values()) {
+				CostumePlates.Metal metal = design.kit().plates().at(slot);
+				if (metal != CostumePlates.Metal.NONE) {
+					renderColoredCutoutModel(models.plate(slot), CostumeModels.PLATE_TEXTURE, poseStack, collector, lightCoords, state, metal.colour, 4);
+				}
+			}
 		}
 
 		/** (0.17.60) Gloves, boots, belt, helmet and fins, each once per colour it uses (primary, secondary, trim). */

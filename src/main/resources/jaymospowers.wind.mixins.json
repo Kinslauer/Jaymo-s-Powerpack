@@ -4,6 +4,7 @@
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
 		"CreeperAccess",
+		"ItemFrameAccess",
 		"SorasBreakMixin",
 		"WindFallMixin",
 		"WindPlayerAttackMixin"

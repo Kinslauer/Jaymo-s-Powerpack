@@ -39,6 +39,8 @@ public final class GiftedCostume {
 	static final float HERO_CAPE = 0.5F, VILLAIN_CAPE = 0.4F;
 	/** Each kit piece (gloves, boots, belt) on this share of costumes. */
 	static final float KIT_PIECE = 0.5F;
+	/** Each of the cut, mask and cape is one of the pattern pieces (locked in the designer, dropped as a pattern) this often. */
+	static final float PATTERN_PIECE = 0.3F;
 
 	/** The names the folk give them, by power: a vigilante's, then a villain's. */
 	private static final Map<String, String[][]> NAMES = Map.of(
@@ -136,6 +138,9 @@ public final class GiftedCostume {
 				: List.of(CostumeDesign.Cut.BODYSUIT, CostumeDesign.Cut.ARMOURED, CostumeDesign.Cut.COAT));
 		}
 		CostumeDesign.Cut cut = cuts.get(random.nextInt(cuts.size()));
+		if (random.nextFloat() < PATTERN_PIECE) {
+			cut = patterned(CostumeDesign.Cut.values(), random, cut, false);
+		}
 
 		List<CostumeDesign.Mask> masks = new ArrayList<>();
 		for (CostumeDesign.Mask mask : CostumeDesign.Mask.values()) {
@@ -144,6 +149,10 @@ public final class GiftedCostume {
 			}
 		}
 		CostumeDesign.Mask mask = masks.get(random.nextInt(masks.size()));
+		if (random.nextFloat() < PATTERN_PIECE) {
+			// (only the ones that hide the face: they are costumed to keep their gift secret)
+			mask = patterned(CostumeDesign.Mask.values(), random, mask, true);
+		}
 
 		DyeColor primary, secondary;
 		if (villain) {
@@ -171,6 +180,10 @@ public final class GiftedCostume {
 			}
 		}
 
+		if (cape != CostumeDesign.Cape.NONE && random.nextFloat() < PATTERN_PIECE) {
+			cape = patterned(CostumeDesign.Cape.values(), random, cape, false);
+		}
+
 		CostumeKit kit = CostumeKit.NONE;
 		if (random.nextFloat() < KIT_PIECE) {
 			kit = kit.withGloves(random.nextBoolean() ? CostumeKit.Gloves.GLOVES : CostumeKit.Gloves.GAUNTLETS);
@@ -182,6 +195,17 @@ public final class GiftedCostume {
 			kit = kit.withBelt(CostumeKit.Belt.BELT);
 		}
 		return new CostumeDesign(name, cut, primary, secondary, mask, cape, "", kit);
+	}
+
+	/** One of {@code values}' pattern pieces (a face-hiding one if {@code hidesFace}), or {@code plain} if there is none. */
+	private static <E extends Enum<E> & com.jaymospowers.costume.CostumeSets.Piece> E patterned(E[] values, RandomSource random, E plain, boolean hidesFace) {
+		List<E> options = new ArrayList<>();
+		for (E value : values) {
+			if (value.pattern() && (!hidesFace || ((CostumeDesign.Mask)(Object)value).hidesFace)) {
+				options.add(value);
+			}
+		}
+		return options.isEmpty() ? plain : options.get(random.nextInt(options.size()));
 	}
 
 	private static String pick(String[] from, RandomSource random) {

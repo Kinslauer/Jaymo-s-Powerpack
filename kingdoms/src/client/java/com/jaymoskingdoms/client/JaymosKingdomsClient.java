@@ -204,6 +204,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		WerewolfKey.register();
 		PaceKey.register();
 		FrostPrisonKey.register();
+		SorcererJumpClient.register();
 		LeanClient.register();
 		NightGiftsClient.register();
 		BloodVision.register();

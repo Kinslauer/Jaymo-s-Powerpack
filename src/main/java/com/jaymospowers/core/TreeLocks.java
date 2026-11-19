@@ -16,7 +16,7 @@ public final class TreeLocks {
 		TRICK_JUMP = "trick_jump", SWIM_BURST = "swim_burst", BREACH = "breach", SHIELD_VAULT = "shield_vault",
 		PARAGLIDER = "paraglider", BALLOON = "balloon", AIM_PARTS = "aim_parts", SHIELD_THROW = "shield_throw",
 		SHIELD_MOVES = "shield_moves", SWAT = "swat", TWO_BLADES = "two_blades", THROWER = "thrower", SWEEP_KICK = "sweep_kick",
-		AIR_COMBO = "air_combo",
+		AIR_COMBO = "air_combo", BATTLE_RHYTHM = "battle_rhythm",
 		SECOND_WIND = "second_wind", BATTLE_CRY = "battle_cry", BOXING = "boxing", HAUL_BOUND = "haul_bound", MEDITATE = "meditate",
 		BLOOD = "blood", ANGLER = "angler", ALCHEMIST = "alchemist";
 

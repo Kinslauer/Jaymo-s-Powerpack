@@ -173,6 +173,7 @@ public final class WebStrength {
 		remove(player, Attributes.FALL_DAMAGE_MULTIPLIER, FALL_ID);
 		FISTS_UNTIL.remove(player.getUUID());
 		player.removeAttached(FISTS);
+		WebShield.forget(player);
 	}
 
 	private static void modifier(Player player, Holder<Attribute> attribute, Identifier id, double amount, AttributeModifier.Operation operation) {
@@ -292,6 +293,7 @@ public final class WebStrength {
 					it.remove();
 					if (player != null) {
 						player.removeAttached(FISTS);
+						WebShield.end(player, false);
 						player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_fists_off").withStyle(net.minecraft.ChatFormatting.GRAY));
 					}
 				} else if (clock % 5 == 0) {

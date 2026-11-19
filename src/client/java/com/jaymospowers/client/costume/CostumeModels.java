@@ -3,6 +3,7 @@ package com.jaymospowers.client.costume;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.costume.CostumeDesign;
 import com.jaymospowers.costume.CostumeKit;
+import com.jaymospowers.costume.CostumePlates;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Locale;
@@ -46,6 +47,8 @@ public final class CostumeModels {
 	static final int SHORT_CAPE = 11, LONG_CAPE = 20, TATTERED_CAPE = 19;
 	/** (0.11.78) Wind's gale cloak (its tails reach past the knees) and Darktide's tide cape. */
 	static final int GALE_CAPE = 22, TIDE_CAPE = 20;
+	/** The trailing pattern cape, which sweeps the ground behind (the scalloped one is the long cape's length). */
+	static final int TRAILING_CAPE = 26;
 	/**
 	 * (0.14.3) The assassin's robe: its coat tails hang from the waist (pixels) this far down, one pixel thick, standing
 	 * this far (pixels) clear of the suit's front and back, and swing out with the legs (this much of the leg's swing);
@@ -290,6 +293,8 @@ public final class CostumeModels {
 		private final Map<CostumeDesign.Mask, Worn> masks = new EnumMap<>(CostumeDesign.Mask.class);
 		private final Map<CostumeDesign.Cape, Worn> capes = new EnumMap<>(CostumeDesign.Cape.class);
 		final Worn emblem;
+		/** The metal plates (CostumePlates), one model per slot; drawn tinted in the metal's colour. */
+		private final Map<CostumePlates.Slot, Worn> plates = new EnumMap<>(CostumePlates.Slot.class);
 		/** (0.17.60) The suit editor's pieces, by {@link CostumeModels#kitKey} (gloves also by arm width). */
 		private final Map<String, Worn> kit = new HashMap<>();
 
@@ -309,6 +314,9 @@ public final class CostumeModels {
 				}
 			}
 			this.emblem = new Worn(CostumeModels.emblem().bakeRoot(), false, wearer);
+			for (CostumePlates.Slot slot : CostumePlates.Slot.values()) {
+				this.plates.put(slot, new Worn(CostumeModels.plate(slot).bakeRoot(), false, wearer));
+			}
 			for (CostumeKit.Gloves gloves : CostumeKit.Gloves.values()) {
 				if (gloves != CostumeKit.Gloves.NONE) {
 					this.kit.put(kitKey(gloves, false), new Worn(CostumeModels.gloves(gloves, false).bakeRoot(), false, wearer));
@@ -335,6 +343,10 @@ public final class CostumeModels {
 					this.kit.put(kitKey(fins), new Worn(CostumeModels.fins(fins).bakeRoot(), false, wearer));
 				}
 			}
+		}
+
+		Worn plate(CostumePlates.Slot slot) {
+			return this.plates.get(slot);
 		}
 
 		/** (0.17.60) A kit piece's model, by its {@link CostumeModels#kitKey}. */
@@ -468,7 +480,7 @@ public final class CostumeModels {
 		MeshDefinition mesh = bones();
 		PartDefinition head = mesh.getRoot().getChild("head");
 		float grow = switch (mask) {
-			case HOOD, ASH_VEIL, PEAKED_HOOD -> HOOD_GROW;
+			case HOOD, ASH_VEIL, PEAKED_HOOD, COWL -> HOOD_GROW;
 			case HELMET -> HELMET_GROW;
 			default -> MASK_GROW;
 		};
@@ -502,6 +514,7 @@ public final class CostumeModels {
 			case TATTERED -> TATTERED_CAPE;
 			case GALE -> GALE_CAPE;
 			case TIDE -> TIDE_CAPE;
+			case TRAILING -> TRAILING_CAPE;
 			default -> LONG_CAPE;
 		};
 		// (hinged strips, so it hangs as cloth: ClothCape)
@@ -668,6 +681,38 @@ public final class CostumeModels {
 			}
 		}
 		return LayerDefinition.create(mesh, 64, 32);
+	}
+
+	// ---- metal plates (CostumePlates; tools/gen_costume_patterns.py paints the one texture, tinted per metal) ------------
+
+	/** How far a plate stands off the body: over the suit and the kit's pieces, under nothing. */
+	static final float PLATE_GROW_HEAD = 1.15F, PLATE_GROW_CHEST = 0.55F, PLATE_GROW_LEGS = 0.55F, PLATE_GROW_FEET = 0.58F;
+	/** The plate texture, one greyscale metal sheet tinted with the metal's colour. */
+	static final Identifier PLATE_TEXTURE = JaymosPowers.id("textures/entity/costume/plate/plate.png");
+
+	/** A plate: a brow-and-crown cap, a breastplate, thigh guards or sabatons, on the bones they cover. */
+	static LayerDefinition plate(CostumePlates.Slot slot) {
+		MeshDefinition mesh = bones();
+		PartDefinition root = mesh.getRoot();
+		switch (slot) {
+			case HEAD -> root.getChild("head").addOrReplaceChild("plate", CubeListBuilder.create().texOffs(0, 0)
+				.addBox(-4.0F, -8.0F, -4.0F, 8.0F, 3.0F, 8.0F, new CubeDeformation(PLATE_GROW_HEAD)), PartPose.ZERO);
+			case CHEST -> root.getChild("body").addOrReplaceChild("plate", CubeListBuilder.create().texOffs(0, 0)
+				.addBox(-4.0F, 0.0F, -2.0F, 8.0F, 6.0F, 4.0F, new CubeDeformation(PLATE_GROW_CHEST)), PartPose.ZERO);
+			case LEGS -> {
+				root.getChild("right_leg").addOrReplaceChild("plate", CubeListBuilder.create().texOffs(0, 0)
+					.addBox(-2.0F, 0.0F, -2.0F, 4.0F, 5.0F, 4.0F, new CubeDeformation(PLATE_GROW_LEGS)), PartPose.ZERO);
+				root.getChild("left_leg").addOrReplaceChild("plate", CubeListBuilder.create().texOffs(24, 0)
+					.addBox(-2.0F, 0.0F, -2.0F, 4.0F, 5.0F, 4.0F, new CubeDeformation(PLATE_GROW_LEGS)), PartPose.ZERO);
+			}
+			case FEET -> {
+				root.getChild("right_leg").addOrReplaceChild("plate", CubeListBuilder.create().texOffs(0, 0)
+					.addBox(-2.0F, 9.0F, -2.0F, 4.0F, 3.0F, 4.0F, new CubeDeformation(PLATE_GROW_FEET)), PartPose.ZERO);
+				root.getChild("left_leg").addOrReplaceChild("plate", CubeListBuilder.create().texOffs(24, 0)
+					.addBox(-2.0F, 9.0F, -2.0F, 4.0F, 3.0F, 4.0F, new CubeDeformation(PLATE_GROW_FEET)), PartPose.ZERO);
+			}
+		}
+		return LayerDefinition.create(mesh, 64, 64);
 	}
 
 	private static final Map<String, Identifier> TEXTURES = new HashMap<>();

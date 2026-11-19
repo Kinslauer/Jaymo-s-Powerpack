@@ -446,6 +446,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Tails.register();
 		GreenskinLife.register();
 		FrostPrison.register();
+		SorcererJump.register();
 		FrostTech.register();
 		LOGGER.debug("heritage attachments: {} {} {}", Heritage.HERITAGE, FrostPrison.LAST, FrostTech.FITTED);
 		// (0.7.262, Andy's NOEA picks) the Divine-born, the Bio-built (its forms), the Rubber-folk and the held heritage key

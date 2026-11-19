@@ -260,6 +260,7 @@ public final class Powers {
 			}
 			Affinity.tick(player);
 			Callings.tick(player);
+			AwakeningDeeds.tick(player);
 			if (of(player) != null) {
 				continue;
 			}

@@ -392,11 +392,16 @@ public final class Callings {
 
 	/** Burning blocks and lit campfires within {@link #SMOKE_REACH} blocks of {@code center} (stops counting at enough). */
 	private static int fires(ServerLevel level, BlockPos center) {
+		return fires(level, center, SMOKE_FIRES);
+	}
+
+	/** The same count, stopping at {@code cap} (the awakening deeds ask for a bigger fire). */
+	static int fires(ServerLevel level, BlockPos center, int cap) {
 		int found = 0;
 		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-SMOKE_REACH, -2, -SMOKE_REACH), center.offset(SMOKE_REACH, SMOKE_REACH, SMOKE_REACH))) {
 			BlockState state = level.getBlockState(pos);
 			if (state.is(BlockTags.FIRE) || state.is(BlockTags.CAMPFIRES) && state.getValueOrElse(CampfireBlock.LIT, false)) {
-				if (++found >= SMOKE_FIRES) {
+				if (++found >= cap) {
 					return found;
 				}
 			}

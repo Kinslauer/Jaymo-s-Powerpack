@@ -642,11 +642,35 @@ def padded_suit(part, face, x, y, w, h, rng):
     return P
 
 
+def striped(part, face, x, y, w, h, rng):
+    """Pattern cut: a bodysuit with bold secondary stripes down the sides and arms."""
+    if face in ("top", "bottom"):
+        return P
+    if face in ("left", "right") or (face in ("front", "back") and x in (0, w - 1)) or (is_arm(part) and face != "top" and x % 4 == 1):
+        return S
+    return P
+
+
+def harlequin(part, face, x, y, w, h, rng):
+    """Pattern cut: diamonds of the two colours."""
+    return S if ((x + y) // 2) % 2 == 0 else (P, -20)
+
+
+def scaled(part, face, x, y, w, h, rng):
+    """Pattern cut: rows of overlapping scales, the lower edge of each in the secondary."""
+    row = y // 3
+    shift = 2 if row % 2 else 0
+    if (x + shift) % 4 == 3 or y % 3 == 2:
+        return (S, -25)
+    return P
+
+
 CUTS = {"bodysuit": bodysuit, "armoured": armoured, "robes": robes, "coat": coat, "ragged": ragged,
         "webbed": webbed, "windswept": windswept, "dense": dense, "clockwork": clockwork, "bandolier": bandolier,
         "resonant": resonant, "tidal": tidal, "ash_wraps": ash_wraps, "gi": gi, "carapace": carapace,
         "assassin": assassin, "wrap_gi": wrap_gi, "sleeveless_gi": sleeveless_gi, "weighted_gi": weighted_gi,
-        "battle_armour": battle_armour, "padded_suit": padded_suit}
+        "battle_armour": battle_armour, "padded_suit": padded_suit,
+        "striped": striped, "harlequin": harlequin, "scaled": scaled}
 
 
 def suits():
@@ -981,7 +1005,88 @@ def peaked_brim(part, face, x, y, w, h, rng):
     return S if y == h - 1 else P
 
 
-MASKS = {"half_mask": half_mask, "full_mask": full_mask, "hood": hood, "helmet": helmet, "goggles": goggles,
+def domino(face, x, y):
+    """Pattern mask: a narrow band over the eyes with two eye holes, tied at the back."""
+    if face == "front":
+        if (x, y) in EYES:
+            return None
+        return (S if y in (3, 5) and 1 <= x <= 6 else P) if 3 <= y <= 5 and 0 <= x <= 7 else None
+    if face in ("left", "right", "back") and y == 4:
+        return P
+    return None
+
+
+def masquerade(face, x, y):
+    """Pattern mask: an ornate eye mask, its upper edge swept up at the corners and trimmed."""
+    if face == "front":
+        if (x, y) in EYES:
+            return None
+        if y == 2 and x in (0, 7):
+            return S
+        if y == 3 and (x in (0, 3, 4, 7)):
+            return S
+        if 3 <= y <= 5:
+            return S if (y == 5 or x in (0, 7)) else P
+        return None
+    if face in ("left", "right", "back") and y in (3, 4):
+        return P
+    return None
+
+
+def scarf(face, x, y):
+    """Pattern mask: a scarf over the nose and mouth, a knot and tail at the back."""
+    if face in ("top", "bottom"):
+        return None
+    if face == "front":
+        return (S if y == 4 else P) if y >= 4 else None
+    if face in ("left", "right") and y >= 4:
+        return P
+    if face == "back" and y >= 4:
+        return S if x in (3, 4) else P
+    return None
+
+
+def cowl(face, x, y):
+    """Pattern mask: a close cowl over the head, falling to the neck, the face open."""
+    if face == "bottom":
+        return None
+    if face == "front":
+        if y <= 1 or x in (0, 7):
+            return P if y != 1 else S
+        return None
+    if face in ("left", "right") and y >= 6:
+        return S
+    return P
+
+
+def skull(face, x, y):
+    """Pattern mask: a full mask painted as a skull, teeth along the jaw."""
+    if face == "bottom":
+        return None
+    if face == "front":
+        if (x, y) in {(1, 3), (2, 3), (1, 4), (2, 4), (5, 3), (6, 3), (5, 4), (6, 4)}:
+            return (S, -80)
+        if (x, y) in {(3, 5), (4, 5)}:
+            return (S, -60)
+        if y == 6 and x % 2 == 0:
+            return (S, -40)
+        return S if y >= 6 else (P, 20)
+    return P
+
+
+def visored(face, x, y):
+    """Pattern mask: a smooth full mask with a single wide visor slit."""
+    if face == "bottom":
+        return None
+    if face == "front" and y in (3, 4) and 1 <= x <= 6:
+        return (S, -20)
+    if face == "front" and y == 7 and x in (3, 4):
+        return S
+    return P
+
+
+MASKS = {"domino": domino, "masquerade": masquerade, "scarf": scarf, "cowl": cowl, "skull": skull, "visored": visored,
+         "half_mask": half_mask, "full_mask": full_mask, "hood": hood, "helmet": helmet, "goggles": goggles,
          "web_mask": web_mask, "ash_veil": ash_veil, "headband": headband,
          "peaked_hood": peaked_hood}
 
@@ -1019,10 +1124,11 @@ def masks():
 # One box (10 wide, `length` long, 1 deep) at 0,0 in a 64x32 texture: its north face is the outside (primary, with a
 # secondary trim along the hem), its south face the lining (secondary).
 
-CAPES = {"short": 11, "long": 20, "tattered": 19, "gale": 22, "tide": 20}
+CAPES = {"short": 11, "long": 20, "tattered": 19, "gale": 22, "tide": 20, "scalloped": 20, "trailing": 26}
 # (0.11.78) Wind's gale cloak: the hem split into three tails, the middle longest, swept with gusts; Darktide's tide
 # cape: a wavy hem and waves breaking up its lower half. How many rows each column loses:
-SHAPED = {"gale": [0, 1, 2, 8, 1, 0, 8, 2, 1, 0], "tide": [1, 2, 3, 2, 1, 0, 1, 2, 3, 2]}
+SHAPED = {"gale": [0, 1, 2, 8, 1, 0, 8, 2, 1, 0], "tide": [1, 2, 3, 2, 1, 0, 1, 2, 3, 2],
+          "scalloped": [2, 0, 2, 0, 2, 0, 2, 0, 2, 0], "trailing": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
 
 
 def capes():
@@ -1188,6 +1294,61 @@ def json_files():
                    "condition": {"type": "minecraft:survives_explosion"}}]})
 
 
+def plate_texture():
+    """The metal plate sheet (64x64, greyscale; tinted per metal in code): brushed metal in 8-pixel tiles, each with a
+    bevelled edge and a rivet in the corners. Every plate box (CostumeModels.plate) reads its faces from it."""
+    im = Image.new("RGBA", (64, 64), (0, 0, 0, 255))
+    rng = random.Random("plate")
+    for y in range(64):
+        for x in range(64):
+            tx, ty = x % 8, y % 8
+            v = 205 + rng.randint(-6, 6) + (4 if y % 2 else 0)
+            if tx == 0 or ty == 0:
+                v += 22          # lit edge
+            if tx == 7 or ty == 7:
+                v -= 52          # shadowed edge
+            if (tx, ty) in ((1, 1), (6, 1), (1, 6), (6, 6)):
+                v = 245          # rivet
+            elif (tx, ty) in ((2, 2), (7, 2), (2, 7), (7, 7)) and tx != 7 or (tx, ty) in ((7, 2), (7, 7)):
+                v -= 30          # its shadow
+            im.putpixel((x, y), (max(0, min(255, v)),) * 3 + (255,))
+    save(im, os.path.join(COSTUME, "plate", "plate.png"))
+
+
+def pattern_item():
+    """The Costume Pattern's item texture: a folded paper pattern with chalk lines and a tailor's pin."""
+    im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    rng = random.Random("costume_pattern")
+    outline = (74, 58, 40, 255)
+    for y in range(2, 14):
+        for x in range(3, 13):
+            edge = x in (3, 12) or y in (2, 13)
+            if edge:
+                im.putpixel((x, y), outline)
+                continue
+            shade = 226 + rng.randint(-8, 8)
+            im.putpixel((x, y), (shade, shade - 14, shade - 52, 255))
+    # the fold: a diagonal crease across the lower right corner
+    for k in range(4):
+        im.putpixel((12 - k, 9 + k), (186, 168, 128, 255))
+    im.putpixel((11, 12), (206, 188, 146, 255))
+    # chalk lines: a sleeve curve, a seam and a hem
+    chalk = (250, 250, 244, 255)
+    for x in range(5, 11):
+        im.putpixel((x, 5 + (1 if 6 <= x <= 8 else 0)), chalk)
+    for y in range(7, 12):
+        im.putpixel((7, y), chalk)
+    for x in range(5, 10):
+        im.putpixel((x, 11), chalk)
+    # a pin
+    im.putpixel((10, 7), (214, 70, 70, 255))
+    im.putpixel((9, 8), (200, 200, 205, 255))
+    save(im, os.path.join(ASSETS, "textures", "item", "costume_pattern.png"))
+    write(os.path.join(ASSETS, "models", "item", "costume_pattern.json"), {
+        "parent": "minecraft:item/generated", "textures": {"layer0": NS + ":item/costume_pattern"}})
+    write(os.path.join(ASSETS, "items", "costume_pattern.json"), {"model": {"type": "minecraft:model", "model": NS + ":item/costume_pattern"}})
+
+
 if __name__ == "__main__":
     suits()
     kit()
@@ -1195,4 +1356,6 @@ if __name__ == "__main__":
     capes()
     table_textures()
     item_textures()
+    plate_texture()
+    pattern_item()
     json_files()
