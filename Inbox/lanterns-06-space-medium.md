@@ -32,4 +32,4 @@ suggested_owns:
 - One PR per patch with `changes/<mod>/<branch>.md`; never touch `version=`, MODLOGs or codemap. Andy tests by merging. Run 2 patches at a time.
 
 ## Notes
-- 
+- 2026-11-18 19:44 Andy approved the ki-crossing numbers as they are (50,000 power, 80% ki) and the Hollow lore.
