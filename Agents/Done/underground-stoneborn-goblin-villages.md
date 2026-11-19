@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: underground-stoneborn-goblin-villages
 branch: claude/underground-stoneborn-goblin-villages
 with: 
@@ -34,3 +34,5 @@ owns:
 
 ## Done
 - 2026-11-19 15:36 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+
+- 2026-11-19 21:40 Vault coordinator: Andy put this task on hold; run closed.

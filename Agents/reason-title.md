@@ -3,7 +3,7 @@ status: in-review
 task: Rename the modpack to Reason
 branch: claude/project-thread-mn08l9
 with: cloud Claude (Reason Art project)
-pr: 
+pr: 1872
 mods: powers
 versions: 
 started: 2026-11-19
