@@ -248,6 +248,8 @@ public class JaymosPowers implements ModInitializer {
 		// (0.17.188) Friends & Foes' totems work from the charm slot
 		com.jaymospowers.compat.FriendsAndFoesCompat.init();
 		com.jaymospowers.compat.ChunkyCompat.init();
+		// Alex's Mobs' Animal Dictionary isn't handed out on first join
+		com.jaymospowers.compat.AlexsMobsCompat.init();
 		// (RPG Series) Spell Engine's spell books, scrolls and quivers work worn in bauble slots
 		com.jaymospowers.compat.SpellEngineCompat.init();
 		// (0.20.30) One Dimension's default stack: the Aether over the Overworld over the Nether (compat.Stacked)
