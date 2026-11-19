@@ -60,6 +60,12 @@ final class DarktideGift implements GiftKit {
 		return DarktidePower.ID;
 	}
 
+	/** The fighter brain's trails, dashes and vanishes in this power's colour (tide-blue shadow). */
+	@Override
+	public int color() {
+		return 0x4A5FA8;
+	}
+
 	@Override
 	public List<Move> moves() {
 		return List.of(
