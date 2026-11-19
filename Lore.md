@@ -539,7 +539,7 @@ It is the Aether's own weather, the same soft cloud its islands trail, gathered 
 ever seen the islands, and why the things that fall come out of a clear sky "from nowhere". The cloud is soft to walk
 into and too deep to push up through. Here and there a **well** stands open in it, a shaft of blue: the geese go up by
 the wells, and the sky folk's skiffs keep away from them. To the sky folk the overcast is the floor of the world, and
-whoever slips off an island's edge is most often found sitting on it. Nothing lives in the Cloud Sea.
+whoever slips off an island's edge is most often found sitting on it. Nothing lives in the Cloud Sea but the steam towns.
 
 **Bottled cloud** (Andy approved, 2026-11-18; Clouds and Bits picks, Claude's placement). The sky folk say the overcast can be
 carried. A bottle held open in the Cloud Sea, or pressed into any soft cloud, fills with a little of it, and poured out it
@@ -2481,5 +2481,7 @@ already loose on the hilt, and the camps say the first blow of any battle is str
 **Sails, windsocks and the little boilers** (Andy approved, 2026-11-15; GT New Horizons picks, patch 8). Millers sew their own sails (hemp, wool, leather, and paper only as a stopgap) and read the wind, the same wind Aeolus keeps, off a striped windsock by the mill. The small steam boiler came out of the Mad Tinkerer's workshops; the craftsmen who worked there kept the trick when he vanished, and all of them warn: never fill a boiler that has boiled dry over the fire.
 
 **The steam towns** (Andy approved, 2026-11-15; GT New Horizons picks, patch 9). When the Mad Tinkerer vanished, the craftsmen who had built for him kept together and went on building steam from memory. Their towns are smoky places of brick, iron and creosoted timber, the only ones where a tinker or an engineer can still be found at the bench. They never had his drawings, so they could not build his pods; instead they hung railed decks under bags of wool with a boiler aboard, and each town keeps one such airship on its mast, flying travellers between the towns on the wind.
+
+**The steam towns in the clouds** (Andy approved, 2026-11-19; Andy: steam towns belong in the Cloud Sea). The craftsmen who built for the Mad Tinkerer did not stay on the ground. His boilers could lift a deck, and when he vanished they took their benches up through the wells and laid their towns on stone over the overcast, out of sight of the realms below, where the smoke of their chimneys mixes with the cloud. Their airships fly only between those decks. To the folk on the ground a steam town is a rumour, and the odd airship that comes down with tinkers' goods.
 
 **Leaning and taking cover** (Lean/Cover track, 2026-11-16; approved by Andy 2026-11-16). Soldiers' craft, not a gift: Varro's drill ("targets, cover, fall back") is where it comes from, and the realms' gunners, archers and the dead of the future who still carry guns all know it. Crouched at a wall's edge a shooter leans out to look and shoot, and goes back behind the stone to reload. Nobody is taught it by a god; anyone who has been shot at learns it.
