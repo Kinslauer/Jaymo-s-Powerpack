@@ -40,14 +40,47 @@ public record DialogueCue(int villager, @Nullable Speaker speaker) implements Cu
 		return TYPE;
 	}
 
-	static void register() {
-		PayloadTypeRegistry.clientboundPlay().register(TYPE, CODEC);
+	/**
+	 * Client to server: the talk with {@code villager} is over (their reply has been said and read, or the menu was left
+	 * with nothing said): they may go back to their work ({@link Conversations}).
+	 */
+	public record Done(int villager) implements CustomPacketPayload {
+		public static final Type<Done> TYPE = new Type<>(JaymosKingdoms.id("dialogue_done"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Done> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeInt(p.villager), buf -> new Done(buf.readInt()));
+
+		@Override
+		public Type<Done> type() {
+			return TYPE;
+		}
 	}
 
-	/** Tell {@code player}'s client that {@code villager}'s turn is {@code speaker}. */
+	static void register() {
+		PayloadTypeRegistry.clientboundPlay().register(TYPE, CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(Done.TYPE, Done.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Done.TYPE, (payload, context) -> Conversations.done(context.player(), payload.villager()));
+		Conversations.register();
+	}
+
+	/** Tell {@code player}'s client that {@code villager}'s turn is {@code speaker}; the talk holds them both still till it's over. */
 	public static void cue(ServerPlayer player, Entity villager, Speaker speaker) {
 		if (villager != null && ServerPlayNetworking.canSend(player, TYPE)) {
+			Conversations.begin(player, villager, true);
 			ServerPlayNetworking.send(player, new DialogueCue(villager.getId(), speaker));
+		}
+	}
+
+	/** {@code player} opened {@code villager}'s talk menu: the talk (and its hold) begins. */
+	public static void begin(ServerPlayer player, Entity villager) {
+		if (villager != null && ServerPlayNetworking.canSend(player, TYPE)) {
+			Conversations.begin(player, villager, false);
+		}
+	}
+
+	/** The talk with {@code villager} was broken off here: end {@code player}'s cutscene. */
+	static void end(ServerPlayer player, Entity villager) {
+		if (ServerPlayNetworking.canSend(player, TYPE)) {
+			ServerPlayNetworking.send(player, new DialogueCue(villager.getId(), null));
 		}
 	}
 }

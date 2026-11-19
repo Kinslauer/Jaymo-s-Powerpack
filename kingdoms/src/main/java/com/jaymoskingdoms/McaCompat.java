@@ -59,6 +59,11 @@ public final class McaCompat {
 	private McaCompat() {
 	}
 
+	/** Whether MCA's talk menu on {@code entity} is open for {@code player} (false without MCA). */
+	static boolean interactingWith(net.minecraft.world.entity.Entity entity, ServerPlayer player) {
+		return LOADED && McaBridge.interactingWith(entity, player);
+	}
+
 	/**
 	 * (0.7.87) A player's MCA look as it's saved ({@code McaPlayerSizeMixin}): (0.7.290) its Size and Width are kept to
 	 * their heritage's body ({@link BodySizes}).
