@@ -46,7 +46,9 @@ async def probe(names, timeout_s=20):
             return False
 
     ok = await asyncio.gather(*(one(m) for m in names))
-    return [m for m, k in zip(names, ok) if k], [m for m, k in zip(names, ok) if not k]
+    return [m for m, k in zip(names, ok, strict=True) if k], [
+        m for m, k in zip(names, ok, strict=True) if not k
+    ]
 
 
 async def run(brief, files):
