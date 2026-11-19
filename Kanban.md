@@ -22,6 +22,7 @@ kanban-plugin: board
 - [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
 - [ ] [[Inbox/medieval-deco-1-music|medieval-deco-1-music]] · for 💻 Odysseus · open
 - [ ] [[Inbox/medieval-deco-2-wind|medieval-deco-2-wind]] · for 💻 Odysseus · open
+- [ ] [[Inbox/medieval-deco-3-dead-in-the-wild|medieval-deco-3-dead-in-the-wild]] · for 💻 Odysseus · open
 
 
 ## Being built
