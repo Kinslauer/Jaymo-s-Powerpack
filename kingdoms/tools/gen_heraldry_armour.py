@@ -1027,8 +1027,8 @@ def laced_lamellar(b):
 	"""Laced lamellar: the blossom lands' folded lamellar extended for knights."""
 	bones(b, "body")
 	o = "armorBody"
-	# lamellar lames overlapping downwards
-	lame = b.lame
+	# lamellar lames overlapping downwards (b.lame is a whole cube's faces, so its east face is the one painter)
+	lame = b.lame["east"]
 	b.cube(o, (-4.4, 14.8, -2.7), (4.4, 23.6, 2.7), "brig", faces_paint={**P, "south": lame})
 	b.cube(o, (-3.7, 17.4, -3.5), (3.7, 22.8, -2.7), "brig", faces_paint={**P_ALL, "north": keel})
 	b.cube(o, (-4.2, 14.2, -3.2), (4.2, 17.8, -2.6), "brig", faces_paint={**P_ALL, "north": keel})

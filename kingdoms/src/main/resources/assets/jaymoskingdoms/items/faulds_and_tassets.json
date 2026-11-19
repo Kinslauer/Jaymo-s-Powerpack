@@ -1,0 +1,118 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:component",
+    "component": "jaymoskingdoms:finish",
+    "cases": [
+      {
+        "when": "blackened",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/faulds_and_tassets_blackened"
+        }
+      },
+      {
+        "when": "gilded",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/faulds_and_tassets_gilded"
+        }
+      },
+      {
+        "when": "spiked",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/faulds_and_tassets_spiked"
+        }
+      },
+      {
+        "when": "gilt_banded",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/faulds_and_tassets_gilt_banded"
+        }
+      },
+      {
+        "when": "fur_lined",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/faulds_and_tassets_fur_lined"
+        }
+      },
+      {
+        "when": "quilted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/faulds_and_tassets_quilted"
+        }
+      },
+      {
+        "when": "brine_soaked",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/faulds_and_tassets_brine_soaked"
+        }
+      },
+      {
+        "when": "hide",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/faulds_and_tassets_hide"
+        }
+      },
+      {
+        "when": "bronze",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/faulds_and_tassets_bronze"
+        }
+      },
+      {
+        "when": "lamellar",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/faulds_and_tassets_lamellar"
+        }
+      },
+      {
+        "when": "russeted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/faulds_and_tassets_russeted"
+        }
+      },
+      {
+        "when": "blued",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/faulds_and_tassets_blued"
+        }
+      },
+      {
+        "when": "painted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/faulds_and_tassets_painted"
+        }
+      },
+      {
+        "when": "etched",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/faulds_and_tassets_etched"
+        }
+      },
+      {
+        "when": "rusted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/faulds_and_tassets_rusted"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "jaymoskingdoms:item/faulds_and_tassets"
+    }
+  }
+}
