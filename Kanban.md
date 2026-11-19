@@ -30,6 +30,7 @@ kanban-plugin: board
 - [ ] [[Inbox/medieval-deco-1-music|medieval-deco-1-music]] · pc-claude-deco-1 · claimed
 - [ ] [[Inbox/medieval-deco-4-drinks|medieval-deco-4-drinks]] · pc-claude-deco-4 · claimed
 - [ ] [[Inbox/medieval-deco-2-wind|medieval-deco-2-wind]] · pc-claude-deco-2 · claimed
+- [ ] [[Inbox/medieval-deco-5-farm-water|medieval-deco-5-farm-water]] · pc-claude-deco-5 · claimed
 
 
 ## In review
