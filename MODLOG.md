@@ -6397,3 +6397,9 @@ Andy's 29 picks from three Bedrock hero add-ons (ideas only, our own names and a
 - **Chrono**: with every ability learned, Sneak + R marks a 25-block space and Sneak + R again puts it back as it was in a golden wave (walls, burnt houses, blast holes, anything fire, mobs or explosions did; blocks a player broke or placed by hand stay as they are, and chests, hives and the like come back empty). A mark younger than 30 seconds turns it back to how it was 30 seconds ago. At top Overclock speed, holding Jump runs you up the air about 5-6 blocks, and use with an empty hand and no static charge throws a thunderbolt in your Speed Prism's colour.
 - **Cryo**: Frost Breath turns lava into obsidian (still) or basalt (flowing).
 - **Alchemy**: the red Small Draught halves your size for 4 minutes (fits one-block gaps, high jump, softer hits); the blue Great Draught grows you half again (long reach, heavy blows, slower).
+
+## 0.25.59 (2026-11-19): Shifting Wares no longer crashes the server on VillagersPlus professions (#1828)
+
+- **Fix**: Shifting Wares' daily trade reroll crashed the server tick (NoSuchElementException in `SlotRerollSource.FromSet`) for a villager whose profession names a trade set that isn't registered. VillagersPlus' miner, alchemist, oceanographer, occultist and horticulturist name `villagersplus:<job>/level_1..5`, which its jar never defines. Such a villager now keeps its trades and restocks them the vanilla way instead of rerolling; professions whose sets exist reroll as before.
+- Class: `mixin/shiftingwares/TradeShufflerMixin` (compat mixin, `@Pseudo`, skipped when Shifting Wares isn't there).
+- Built by CI; not played.
