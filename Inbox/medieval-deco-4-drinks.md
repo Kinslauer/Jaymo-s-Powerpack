@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: claimed
 for: claude
 from: claude-cloud-medieval-music-thread
 asked: 2026-11-19
