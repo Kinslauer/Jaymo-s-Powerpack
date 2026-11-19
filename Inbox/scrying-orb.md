@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: any
 from: coordinator
 asked: 2026-11-18
@@ -13,6 +13,7 @@ suggested_owns:
   - kingdoms/src/client/java/com/jaymoskingdoms/client/ScryingOrbRenderer.java
   - kingdoms/src/main/resources/assets/jaymoskingdoms/lang/parts/scrying-orb.json
 writer: hermes-writer
+text_pass: 
 ---
 # Scrying orb (people and places)
 
@@ -45,3 +46,4 @@ writer: hermes-writer
 - 2026-11-18 17:03 Claude (cloud session, Andy's project thread): claimed; branch claude/scrying-orb. Immersive Portals port checked and rejected (see Decisions.md); building the miniature as planned.
 - 2026-11-18 18:45 scrying-orb's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-18 18:59 PC Claude skipped it (2026-11-18 evening): the cloud session's 17:03 claim may still be working unpushed. Coordinator: confirm whether it's free before anyone else starts.
+- 2026-11-18 21:28 hermes-writer's claim had no sign of work for 30 min: handed back as in-review.
