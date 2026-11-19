@@ -393,20 +393,23 @@ public final class Karma {
 		if (!DESCENTS.isEmpty()) {
 			descents(server);
 		}
-		if (server.getTickCount() % 20 != 0) {
-			return;
-		}
+		boolean second = server.getTickCount() % 20 == 0;
 		for (ServerPlayer player : new ArrayList<>(server.getPlayerList().getPlayers())) {
 			String fate = player.getAttached(FATE);
 			if (fate == null || !player.isAlive() || Mortality.isFinal(player)) {
 				continue;
 			}
-			switch (fate) {
-				case F_WICKED -> {
-					if (!DESCENTS.containsKey(player.getUUID())) {
-						begin(server, player);
-					}
+			if (F_WICKED.equals(fate)) {
+				// (the tick they're back on their feet, not up to a second later: Andy saw the camp that killed him in between)
+				if (!DESCENTS.containsKey(player.getUUID())) {
+					begin(server, player);
 				}
+				continue;
+			}
+			if (!second) {
+				continue;
+			}
+			switch (fate) {
 				case F_BELOW -> below(server, player);
 				case F_JUST -> {
 					if (ZFighterAfterlife.among(player)) {
