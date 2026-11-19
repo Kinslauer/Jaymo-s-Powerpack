@@ -1,9 +1,9 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 13:41). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 13:42). Don't edit. -->
 # Vault health
 
 Problems in the live notes, found on every sync. Nothing here is fixed by itself: whoever reads it (the coordinator's hourly check, a bot, Andy) fixes the note, and the line goes away on the next sync. `python tools/vault_sync.py --health` prints the same list.
 
-**22 problems.**
+**21 problems.**
 
 ## Statuses the pipeline doesn't know
 
@@ -29,7 +29,6 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 
 - [[Agents/epic-fight-animation-research|epic-fight-animation-research]]: in review with no `pr:`.
 - [[Agents/realistic-water-trial|realistic-water-trial]]: in review with no `pr:`.
-- [[Agents/true-random-start-doppelgangers|true-random-start-doppelgangers]]: in review with no `pr:`.
 - [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]]: `ready` with no `pr:`.
 - [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]]: `ready` with no `pr:`.
 
