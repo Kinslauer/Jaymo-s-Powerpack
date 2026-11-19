@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 15:18). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 15:19). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -36,6 +36,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/smoothmount-1-climb-on-off|smoothmount-1-climb-on-off]] · ☀️ Apollo · claimed
 - [ ] [[Inbox/harness-body-pieces|harness-body-pieces]] · harness-body-pieces · claimed
+- [ ] [[Inbox/scrying-orb|scrying-orb]] · ☀️ Apollo · #1787 · changes · fixing review notes
 
 
 ## In review
@@ -47,7 +48,6 @@ kanban-plugin: board
 ## Needs Andy
 
 - [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · blocked
-- [ ] [[Inbox/scrying-orb|scrying-orb]] · ☀️ Apollo · #1787 · blocked
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · ready
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · ready
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
