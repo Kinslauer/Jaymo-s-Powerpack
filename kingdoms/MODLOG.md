@@ -15756,3 +15756,11 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - **NPCs hit small spiders**: a barbarian's (or any fighter's) slow wind-up let a small spider skitter out of reach before the blow fell. Against one the blow now comes down at once and still finds it a block past the reach.
 - wild/SpiderSquash (tiers, walk-over tick, landing, one blow), mixin/wild/SpiderBlowMixin (hurtServer) and SpiderLandingMixin (causeFallDamage), MobCombat#small/slack.
 - Built; not played.
+
+## 0.11.16 (2026-11-19): Building plans: wrong-block colours, layer view, full material list (#1851)
+
+- **Coloured ghosts**: a laid plan's ghosts now show what's wrong as well as what's missing. A block not yet in is its pale blue ghost as before; a wrong block where one should go is tinted red; a block standing inside the plan's box where the design has nothing (air or a structure void) is tinted orange. Right blocks show nothing. The orange check looks within 24 blocks of you (the ghosts still show to 48) so a big plan costs about the same to draw (`PlanGhosts`).
+- **Layer view**: holding a laid plan, Plan layer up/down (numpad 8 and 2, rebindable, under "Jaymo's Building") or Ctrl + scroll shows one layer at a time: up from all layers is the bottom layer, and stepping past either end shows them all again. The action bar shows "Layer 4 of 12". Only the held plan's ghosts are thinned; it's your own view, nobody else's. Ctrl + scroll is left to the forms belt while you're in a stance (`PlanLayerScrollMixin`).
+- **Full material list**: use a written plan in the air, or press the mason's table's new Materials button, for every block the plan still needs (not just the table's top 8), how many you carry and how many you're short, short first. The list scrolls. It counts the way the build does: the second half of a door or bed comes with the first, spare dirt counts for grass and paths, and blocks already in place where the plan is laid aren't counted (`MasonTable.sendMaterials`, `MasonNet.Materials`, `PlanMaterialsScreen`). Using a plan in the air used to show the how-to line; that line is now at the bottom of the list.
+- Our own versions of Litematica's ideas; no Litematica code or art.
+- Built; not played.
