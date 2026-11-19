@@ -3,7 +3,7 @@ status: stalled
 task: Build Andy's 29 Nido hero add-on picks
 branch: claude/project-thread-npq3b0
 with: Claude (cloud thread "Cross-reference Spider-Man, Marvel and DC add-ons")
-pr: 
+pr: 1827
 mods: powers, kingdoms
 versions: 
 started: 2026-11-19
