@@ -363,6 +363,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		NightTrouble.register();
 		NightBurglars.register();
 		SignalBrazier.register();
+		Sketches.register();
+		HotRuns.register();
+		SkyCrown.register();
+		VigilanteTrials.register();
 		// 0.7.126: the guards arrest crooks and march them to the ruler for judgment
 		Arrests.register();
 		// 0.7.211: the underworld: Pmeh and Shash bricks, speakeasies, dice, busts and the cells (their attachments)

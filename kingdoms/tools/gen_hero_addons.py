@@ -149,3 +149,179 @@ def main():
 
 
 main()
+
+
+# ---- Kingdoms track 2: sketchbook and sketch, the six sky shards, the sky crown and its stand, the five trial chests ----
+
+def item_def(name, model=None):
+    put(ASSETS + "/items/%s.json" % name, {"model": {"type": "minecraft:model", "model": model or "jaymoskingdoms:item/" + name}})
+
+
+def flat_item(name, img):
+    img.save(ASSETS + "/textures/item/%s.png" % name)
+    put(ASSETS + "/models/item/%s.json" % name, {"parent": "minecraft:item/generated", "textures": {"layer0": "jaymoskingdoms:item/" + name}})
+    item_def(name)
+
+
+def sketchbook_icon():
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    px = img.load()
+    cover, spine, page, edge = (92, 66, 44, 255), (66, 46, 30, 255), (226, 210, 170, 255), (40, 28, 20, 255)
+    for y in range(2, 14):
+        for x in range(3, 13):
+            px[x, y] = cover
+        px[3, y] = spine
+        px[4, y] = spine
+    for x in range(3, 13):
+        px[x, 2], px[x, 13] = edge, edge
+    for y in range(2, 14):
+        px[12, y] = edge
+    for y in range(4, 11):
+        px[11, y] = page
+    for (x, y) in [(6, 5), (7, 6), (8, 7), (9, 8), (8, 9), (7, 9), (6, 10)]:
+        px[x, y] = (24, 20, 18, 255)
+    flat_item("sketchbook", img)
+
+
+def sketch_icon():
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    px = img.load()
+    paper, edge, ink = (230, 214, 174, 255), (120, 96, 66, 255), (30, 26, 24, 255)
+    for y in range(2, 15):
+        for x in range(2, 14):
+            px[x, y] = paper
+    for x in range(2, 14):
+        px[x, 2], px[x, 14] = edge, edge
+    for y in range(2, 15):
+        px[2, y], px[13, y] = edge, edge
+    for (x, y) in [(4, 11), (5, 10), (6, 9), (7, 8), (8, 7), (9, 6), (10, 5), (11, 6), (11, 8), (10, 9), (9, 10), (7, 11), (5, 12)]:
+        px[x, y] = ink
+    flat_item("sketch", img)
+
+
+SHARD_TINTS = {"step": (190, 230, 255), "lode": (170, 170, 190), "cold": (150, 210, 240), "night": (120, 90, 200), "breath": (80, 190, 210),
+               "heart": (230, 110, 120)}
+
+
+def shard_icon(kind):
+    r, g, b = SHARD_TINTS[kind]
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    px = img.load()
+    for y in range(2, 14):
+        half = (y - 2) // 2 if y < 8 else (13 - y) // 2 + 1
+        for x in range(8 - half - 1, 8 + half + 1):
+            shade = 1.15 if x < 8 else 0.8
+            px[x, y] = (min(255, int(r * shade)), min(255, int(g * shade)), min(255, int(b * shade)), 235)
+    for y in range(2, 14):
+        for x in range(16):
+            if px[x, y][3] and (x == 0 or px[x - 1, y][3] == 0):
+                px[x, y] = (255, 255, 255, 255)
+    flat_item("sky_shard_" + kind, img)
+
+
+def crown_icon():
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    px = img.load()
+    gold, dark = (240, 200, 70, 255), (170, 130, 40, 255)
+    for x in range(2, 14):
+        for y in range(9, 13):
+            px[x, y] = gold if y < 12 else dark
+    for x in (2, 5, 8, 11, 13):
+        for y in range(5, 9):
+            px[x, y] = gold
+    for (x, y), k in zip([(3, 10), (6, 10), (9, 10), (12, 10), (7, 6), (10, 7)], ("step", "lode", "cold", "night", "breath", "heart")):
+        r, g, b = SHARD_TINTS[k]
+        px[x, y] = (r, g, b, 255)
+    flat_item("sky_crown", img)
+
+
+def stand_textures():
+    stone = Image.new("RGB", (16, 16))
+    px = stone.load()
+    for y in range(16):
+        for x in range(16):
+            n = (x * 7 + y * 13) % 5
+            px[x, y] = (128 + n * 4, 130 + n * 4, 136 + n * 4)
+            if y % 8 == 7 or (x + (4 if y >= 8 else 0)) % 8 == 7:
+                px[x, y] = (96, 98, 104)
+    stone.save(ASSETS + "/textures/block/crown_stand.png")
+    glass = Image.new("RGBA", (16, 16), (200, 230, 255, 220))
+    px = glass.load()
+    for y in range(16):
+        for x in range(16):
+            if (x + y) % 5 == 0:
+                px[x, y] = (255, 255, 255, 240)
+    glass.save(ASSETS + "/textures/block/crown_shard.png")
+
+
+def cube(lo, hi, tex):
+    return {"from": lo, "to": hi, "faces": {f: {"texture": tex} for f in ("north", "south", "east", "west", "up", "down")}}
+
+
+def stand_models():
+    base = {"textures": {"stand": "jaymoskingdoms:block/crown_stand", "particle": "jaymoskingdoms:block/crown_stand"}, "elements": [
+        cube([3, 0, 3], [13, 2, 13], "#stand"), cube([6, 2, 6], [10, 9, 10], "#stand"), cube([3, 9, 3], [13, 11, 13], "#stand")]}
+    put(ASSETS + "/models/block/crown_stand.json", base)
+    slots = [(3.5, 3.5), (6.5, 3.5), (9.5, 3.5), (3.5, 9.5), (6.5, 9.5), (9.5, 9.5)]
+    mp = [{"apply": {"model": "jaymoskingdoms:block/crown_stand"}}]
+    for i, (x, z) in enumerate(slots):
+        put(ASSETS + "/models/block/crown_stand_s%d.json" % i, {"textures": {"shard": "jaymoskingdoms:block/crown_shard"},
+            "elements": [cube([x, 11, z], [x + 3, 15, z + 3], "#shard")]})
+        mp.append({"when": {"s%d" % i: "true"}, "apply": {"model": "jaymoskingdoms:block/crown_stand_s%d" % i}})
+    put(ASSETS + "/blockstates/crown_stand.json", {"multipart": mp})
+    item_def("crown_stand", "jaymoskingdoms:block/crown_stand")
+
+
+GLYPHS = {
+    0: [(4, 11), (5, 10), (6, 9), (7, 8), (8, 7), (9, 6), (10, 5), (11, 4), (11, 5), (11, 6), (10, 6), (9, 6)],
+    1: [(7, 7), (8, 7), (7, 8), (8, 8), (6, 6), (9, 6), (6, 9), (9, 9), (5, 5), (10, 5), (5, 10), (10, 10)],
+    2: [(5, 4), (5, 5), (5, 6), (5, 7), (5, 8), (10, 4), (10, 5), (10, 6), (10, 7), (10, 8), (6, 9), (7, 10), (8, 10), (9, 9)],
+    3: [(8, 3), (8, 4), (8, 5), (8, 6), (8, 7), (8, 8), (7, 8), (9, 8), (6, 7), (10, 7), (8, 11), (8, 12)],
+    4: [(5, 6), (6, 6), (7, 6), (9, 6), (10, 6), (11, 6), (4, 7), (12, 7), (5, 8), (6, 9), (10, 9), (11, 8), (7, 10), (9, 10)],
+}
+
+
+def trial_chest(kind):
+    img = Image.new("RGB", (16, 16))
+    px = img.load()
+    for y in range(16):
+        for x in range(16):
+            n = (x * 5 + y * 11) % 6
+            px[x, y] = (84 + n * 3, 86 + n * 3, 94 + n * 3)
+            if x in (0, 15) or y in (0, 15):
+                px[x, y] = (46, 48, 56)
+            elif x in (1, 14) or y in (1, 14):
+                px[x, y] = (150, 120, 60)
+    for (x, y) in GLYPHS[kind]:
+        px[x, y] = (236, 208, 120)
+    img.save(ASSETS + "/textures/block/trial_chest_%d.png" % kind)
+    put(ASSETS + "/models/block/trial_chest_%d.json" % kind, {"parent": "minecraft:block/cube_all", "textures": {"all": "jaymoskingdoms:block/trial_chest_%d" % kind}})
+
+
+def track2():
+    sketchbook_icon()
+    sketch_icon()
+    for kind in SHARD_TINTS:
+        shard_icon(kind)
+    crown_icon()
+    stand_textures()
+    stand_models()
+    for k in range(5):
+        trial_chest(k)
+    put(ASSETS + "/blockstates/trial_chest.json", {"variants": {"kind=%d" % k: {"model": "jaymoskingdoms:block/trial_chest_%d" % k} for k in range(5)}})
+    item_def("trial_chest", "jaymoskingdoms:block/trial_chest_0")
+    put(DATA + "/loot_table/blocks/crown_stand.json", {
+        "type": "minecraft:block", "random_sequence": "jaymoskingdoms:blocks/crown_stand",
+        "pools": [{"rolls": 1, "conditions": [{"condition": "minecraft:survives_explosion"}],
+                   "entries": [{"type": "minecraft:item", "name": "jaymoskingdoms:crown_stand"}]}]})
+    put(DATA + "/recipe/crown_stand.json", {
+        "type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["GAG", " S ", "SSS"],
+        "key": {"G": "minecraft:gold_ingot", "A": "minecraft:amethyst_shard", "S": "minecraft:stone_bricks"},
+        "result": {"count": 1, "id": "jaymoskingdoms:crown_stand"}})
+    put(DATA + "/recipe/sketchbook.json", {
+        "type": "minecraft:crafting_shapeless", "category": "misc",
+        "ingredients": ["minecraft:paper", "minecraft:paper", "minecraft:paper", "minecraft:charcoal"],
+        "result": {"count": 1, "id": "jaymoskingdoms:sketchbook"}})
+
+
+track2()
