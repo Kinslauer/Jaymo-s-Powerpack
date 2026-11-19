@@ -873,4 +873,16 @@ public final class McaCompat {
 			McaBridge.launchDestiny(player);
 		}
 	}
+
+	/** MCA's own villager chat AI is switched on (an op's {@code /mca chatAI}): it answers chat, and {@link ChatTalk} keeps quiet. */
+	static boolean chatAI() {
+		return LOADED && McaConfig.chatAI();
+	}
+
+	/** Kept apart so MCA's config class is only loaded when MCA is. */
+	private static final class McaConfig {
+		static boolean chatAI() {
+			return net.conczin.mca.Config.getInstance().enableVillagerChatAI;
+		}
+	}
 }
