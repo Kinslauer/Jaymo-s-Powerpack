@@ -50,3 +50,4 @@ thread: cmsg_01638ouFWZKwEZ1ET74kBk9BDvxv3Xuvj7a4gmHTqtzmQ6
 - 2026-11-19 02:40 Andy approved the lore paragraphs 2026-11-19 02:40 UTC; no lore hold on merging.
 - 2026-11-18 22:15 PC Claude took it (editor agent, branch claude/medieval-deco-3).
 - 2026-11-18 23:49 pc-claude-deco-3's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-19 02:24 PR #1802, CI green. Player sees: bones in the wild by place (empty-hand break searches: gear, scrap, token, traps; shovel buries), sealed last camps, ruin traps, headless rider on mist mornings. Not tested in game: placement rates, rider steering its horse, trap placement in real structures, Aether-namespace placement. Kitchen unchanged. Remains.token(level, near, random) is public for patch 5.
