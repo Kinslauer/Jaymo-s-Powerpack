@@ -85,6 +85,10 @@ import org.jspecify.annotations.Nullable;
  * flight or mid-jump, and fly off with them like anything else they carry ({@link #windCarries}). On the ground, sneak +
  * right-click on a villager stays what it was (trades, quests, pickpocketing).
  * <p>
+ * A web slinger carries anyone person-sized ({@link #webCarries}: villagers, illagers, witches, piglins, zombies, skeletons, and
+ * players as ever) held at the side ({@link #SHOULDER}) through every swing, leap and landing, and takes a villager with a
+ * click as it sweeps by in the air ({@link #webSnatches}). Right-click puts them down, sneak + right-click throws them, as ever.
+ * <p>
  * Single blocks can be carried too, held in front in both arms ({@link #BLOCK}, see {@link CarryBlock}).
  * <p>
  * So can a severed head or limb ({@link SeveredPart}), dangling from one hand ({@link #PART}): right-click it with an
@@ -289,6 +293,8 @@ public final class Carry {
 		@Nullable Vec3 propAt;
 		/** Only a Wind user could pick this up (a villager): if they stop being one, it's dropped. */
 		final boolean windOnly;
+		/** Only a web slinger could pick this up (a villager, a zombie...): if they stop being one, it's dropped. */
+		boolean webOnly;
 		/** (0.19.55) Dragging: where the dragged one's shoulders and hips are on the ground (null until the first step). */
 		@Nullable Vec3 dragShoulders, dragHips;
 		/** Not a player but a mob dragging someone ({@link #npcDrag}); null for a player's carry. */
@@ -371,7 +377,7 @@ public final class Carry {
 		UseEntityCallback.EVENT.register(Carry::onUseEntity);
 		UseEntityCallback.EVENT.addPhaseOrdering(WIND_GRAB_PHASE, Event.DEFAULT_PHASE);
 		UseEntityCallback.EVENT.register(WIND_GRAB_PHASE, (player, level, hand, target, hit) ->
-			windCarries(player, target) ? onUseEntity(player, level, hand, target, hit) : InteractionResult.PASS);
+			snatches(player, target) ? onUseEntity(player, level, hand, target, hit) : InteractionResult.PASS);
 		// a carried player's hands are held: no attacking, using, building or breaking
 		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> isCarried(player) ? InteractionResult.FAIL : InteractionResult.PASS);
 		AttackBlockCallback.EVENT.register((player, level, hand, pos, direction) -> isCarried(player) ? InteractionResult.FAIL : InteractionResult.PASS);
@@ -516,7 +522,7 @@ public final class Carry {
 			return false;
 		}
 		return canBeCarried(entity) || GravityWeight.lightens(player) && player.getMainHandItem().isEmpty() && GravityWeight.liftable(entity)
-			|| windCarries(player, entity);
+			|| windCarries(player, entity) || webCarries(player, entity);
 	}
 
 	/** A villager: vanilla's, a wandering trader, MCA's, or a Kingdoms settlement's folk. Carried as a person. */
@@ -537,6 +543,32 @@ public final class Carry {
 		return Powers.of(player) == WindPower.INSTANCE && (!player.onGround() || flying(player))
 			&& isVillager(entity) && entity.isAlive() && entity instanceof LivingEntity living && !living.isSleeping()
 			&& living.getPose() == Pose.STANDING;
+	}
+
+	/**
+	 * A web slinger carries anyone a person's size: a villager (vanilla, MCA, Kingdoms folk), an illager, a witch, a piglin,
+	 * a zombie or a skeleton. Players are carried by anyone already. The grown villagers stay a trade or a quest on the
+	 * ground (see {@link #webSnatches}).
+	 */
+	public static boolean webCarries(Player player, Entity entity) {
+		return Powers.of(player) == WebPower.INSTANCE && entity instanceof Mob mob && mob.isAlive() && !mob.isSleeping() && !tooBig(mob)
+			&& (isVillager(mob) || mob instanceof net.minecraft.world.entity.monster.illager.AbstractIllager
+				|| mob instanceof net.minecraft.world.entity.monster.Witch || mob instanceof net.minecraft.world.entity.monster.piglin.AbstractPiglin
+				|| mob instanceof net.minecraft.world.entity.monster.zombie.Zombie || mob instanceof net.minecraft.world.entity.monster.skeleton.AbstractSkeleton);
+	}
+
+	/**
+	 * A web slinger off the ground (mid-swing, mid-leap) takes a villager with a click as it sweeps by, the way a Wind user
+	 * does ({@link #windCarries}); on the ground sneak + use on a villager stays what it was.
+	 */
+	public static boolean webSnatches(Player player, Entity entity) {
+		return !player.onGround() && isVillager(entity) && webCarries(player, entity) && entity instanceof LivingEntity living
+			&& living.getPose() == Pose.STANDING;
+	}
+
+	/** Taken with a click rather than a hold: a Wind user's villager, or a web slinger's. */
+	static boolean snatches(Player player, Entity entity) {
+		return windCarries(player, entity) || webSnatches(player, entity);
 	}
 
 	/** Whether this carrier is up in Wind flight (it changes which holds can be rolled). */
@@ -616,11 +648,11 @@ public final class Carry {
 		if (isCarried(target) || isCarrying(target) || target.isPassenger() || target.isVehicle()) {
 			return InteractionResult.PASS;
 		}
-		if (!(target instanceof SeveredPart) && !windCarries(player, target) && liftGap(player, target) > LIFT_GAP) {
+		if (!(target instanceof SeveredPart) && !snatches(player, target) && liftGap(player, target) > LIFT_GAP) {
 			// (0.17.18) too far off to lift: step in close first
 			return InteractionResult.PASS;
 		}
-		if (target instanceof LivingEntity body && Downed.isDowned(body) && !windCarries(player, target)) {
+		if (target instanceof LivingEntity body && Downed.isDowned(body) && !snatches(player, target)) {
 			// (Andy, 2026-11-14) someone downed is lifted from a kneel at their side, with a tap of use ({@link #liftDowned});
 			// a sneak and a hold standing over them no longer does it
 			return InteractionResult.PASS;
@@ -635,8 +667,8 @@ public final class Carry {
 				// small stay free to carry)
 				return InteractionResult.FAIL;
 			}
-			if (target instanceof SeveredPart || windCarries(player, target)) {
-				// a head or a limb is light, and a Wind user snatches someone up on the fly
+			if (target instanceof SeveredPart || snatches(player, target)) {
+				// a head or a limb is light, and a Wind user or a web slinger snatches someone up on the fly
 				pickUp(carrier, target);
 			} else {
 				// (0.17.7) everyone and everything else is lifted with a hold (see lifts)
@@ -735,7 +767,7 @@ public final class Carry {
 	 */
 	public static int overloaded(Player carrier, Entity target) {
 		if (!(target instanceof LivingEntity body) || target instanceof SeveredPart || CarryBlock.is(target) || GravityWeight.lightens(carrier)
-			|| windCarries(carrier, target)) {
+			|| snatches(carrier, target)) {
 			return 0;
 		}
 		return armourWeight(body) - FREE_ARMOUR - ARMOUR_PER_BRAWN * KitchenCompat.brawn(carrier);
@@ -896,9 +928,13 @@ public final class Carry {
 		boolean block = CarryBlock.is(target);
 		boolean part = target instanceof SeveredPart;
 		boolean overhead = light && !block && !part && GravityWeight.overhead(target);
-		int hold = part ? PART : block ? BLOCK : overhead ? OVERHEAD : carrier.getRandom().nextInt(flying ? FLIGHT_HOLDS : FOOT_HOLDS);
-		Entry entry = new Entry(carrier.getUUID(), target, hold, flying, carrier.position(), !block && !canBeCarried(target) && !windCarries(carrier, target),
-			!block && !canBeCarried(target) && windCarries(carrier, target));
+		// a web slinger holds whoever it is at its side the whole way, swinging or not (see webHold)
+		int hold = part ? PART : block ? BLOCK : overhead ? OVERHEAD : Powers.of(carrier) == WebPower.INSTANCE ? SHOULDER
+			: carrier.getRandom().nextInt(flying ? FLIGHT_HOLDS : FOOT_HOLDS);
+		boolean outside = !block && !canBeCarried(target);
+		Entry entry = new Entry(carrier.getUUID(), target, hold, flying, carrier.position(), outside && !windCarries(carrier, target) && !webCarries(carrier, target),
+			outside && windCarries(carrier, target));
+		entry.webOnly = outside && !windCarries(carrier, target) && webCarries(carrier, target);
 		CARRIES.put(carrier.getUUID(), entry);
 		carrier.setAttached(CARRYING, new Carrying(target.getId(), hold));
 		target.setAttached(CARRIED_BY, carrier.getId());
@@ -1190,7 +1226,8 @@ public final class Carry {
 			return;
 		}
 		if (!carrier.isAlive() || carrier.isSpectator() || carrier.isSleeping() || carrier.isPassenger()
-			|| entry.gravityOnly && !GravityWeight.lightens(carrier) || entry.windOnly && Powers.of(carrier) != WindPower.INSTANCE) {
+			|| entry.gravityOnly && !GravityWeight.lightens(carrier) || entry.windOnly && Powers.of(carrier) != WindPower.INSTANCE
+			|| entry.webOnly && Powers.of(carrier) != WebPower.INSTANCE) {
 			end(carrier, entry, Let.DROP);
 			return;
 		}
@@ -1247,7 +1284,7 @@ public final class Carry {
 		}
 		// take off and every hold is open (a new roll); land with a flight-only hold and it shifts to one for walking
 		boolean flying = flying(carrier);
-		if (flying != entry.flying && entry.hold != OVERHEAD && entry.hold != BLOCK && entry.hold != PART) {
+		if (flying != entry.flying && entry.hold != OVERHEAD && entry.hold != BLOCK && entry.hold != PART && !webHold(carrier, entry)) {
 			entry.flying = flying;
 			if (flying) {
 				entry.hold = carrier.getRandom().nextInt(FLIGHT_HOLDS);
@@ -1257,6 +1294,11 @@ public final class Carry {
 			carrier.setAttached(CARRYING, new Carrying(carried.getId(), entry.hold));
 			carrier.level().playSound(null, here.x, here.y, here.z, SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS, 0.5F, 1.1F);
 		}
+	}
+
+	/** A web slinger's carry keeps its one hold (at the side) through every leap, swing and landing. */
+	private static boolean webHold(ServerPlayer carrier, Entry entry) {
+		return entry.hold == SHOULDER && Powers.of(carrier) == WebPower.INSTANCE;
 	}
 
 	// ---- mobs dragging the downed (Jaymo's Kingdoms, by reflection)

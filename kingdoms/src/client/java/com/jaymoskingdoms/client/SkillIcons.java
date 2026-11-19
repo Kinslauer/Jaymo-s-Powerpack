@@ -125,6 +125,7 @@ final class SkillIcons {
 		put(Skills.Perk.PLAGUE_DOCTOR, Items.FERMENTED_SPIDER_EYE);
 		put(Skills.Perk.LIFESAVER, Items.GOLDEN_APPLE);
 		put(Skills.Perk.SELF_REVIVE, Items.GOLDEN_APPLE);
+		put(Skills.Perk.STUBBORN, Items.TOTEM_OF_UNDYING);
 		put(Skills.Perk.MAKE_DO, Items.CRAFTING_TABLE);
 		put(Skills.Perk.DREAD_PRESENCE, Items.SKELETON_SKULL);
 		put(Skills.Perk.GROUNDED, Items.ANVIL);

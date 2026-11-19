@@ -318,6 +318,10 @@ public final class WebSwing {
 	}
 
 	/** Any web stuck right now. */
+	WebTrickClient tricks() {
+		return tricks;
+	}
+
 	boolean attached() {
 		return strands[WebNet.MAIN].attached || strands[WebNet.OFF].attached;
 	}
@@ -591,7 +595,14 @@ public final class WebSwing {
 			tickPull(player);
 			return;
 		}
-		if (com.jaymospowers.power.web.WebSymbiote.bulked(player) && tickSlam(player)) {
+		if (WebSymbioteWingsClient.flying(player) && !attached()) {
+			// the symbiote's wings are out: they glide and flap (WebSymbioteWingsClient), in place of the web wings and the slam
+			foldWings();
+			if (chargeTicks > 0 || chargeSent) {
+				endCharge();
+			}
+			WebSymbioteWingsClient.tick(player);
+		} else if (com.jaymospowers.power.web.WebSymbiote.bulked(player) && tickSlam(player)) {
 			// the big body in the air: Jump held is its overhead slam
 			foldWings();
 			if (chargeTicks > 0 || chargeSent) {
@@ -617,7 +628,7 @@ public final class WebSwing {
 		}
 		if (attached()) {
 			tickSwing(player);
-		} else if (flying && wingsTicks == 0) {
+		} else if (flying && wingsTicks == 0 && !WebSymbioteWingsClient.flying(player)) {
 			tickFlight(player);
 		}
 		tickApexHang(player);

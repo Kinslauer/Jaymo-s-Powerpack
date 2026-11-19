@@ -1,5 +1,9 @@
 package com.jaymospowers.armory;
 
+import com.jaymospowers.gear.SeekingChip;
+import java.util.function.Consumer;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -7,12 +11,17 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
 /**
@@ -70,6 +79,24 @@ public class ThrowingWeaponItem extends Item {
 		}
 		player.startUsingItem(hand);
 		return InteractionResult.CONSUME;
+	}
+
+	/** A lodestone chip clicked onto it in the inventory is set in it (a seeking blade: {@link SeekingChip}). */
+	@Override
+	public boolean overrideOtherStackedOnMe(ItemStack self, ItemStack other, Slot slot, ClickAction action, Player player, SlotAccess carried) {
+		if (action == ClickAction.PRIMARY && SeekingChip.chip(other) && slot.allowModification(player) && SeekingChip.set(self, other)) {
+			player.playSound(net.minecraft.sounds.SoundEvents.SMITHING_TABLE_USE, 0.6F, 1.6F);
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	@SuppressWarnings("deprecation")
+	public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag flag) {
+		if (SeekingChip.seeking(stack)) {
+			builder.accept(Component.translatable("tooltip.jaymospowers.seeking_chip").withStyle(ChatFormatting.AQUA));
+		}
 	}
 
 	@Override

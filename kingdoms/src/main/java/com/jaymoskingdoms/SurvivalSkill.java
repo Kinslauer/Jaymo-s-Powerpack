@@ -235,6 +235,14 @@ public final class SurvivalSkill {
 			if (now % 10L != 0L) {
 				continue;
 			}
+			boolean stubborn = p.rank(Skills.Perk.STUBBORN) > 0;
+			if (stubborn != player.entityTags().contains(Skills.STUBBORN_TAG)) {
+				if (stubborn) {
+					player.addTag(Skills.STUBBORN_TAG);
+				} else {
+					player.removeTag(Skills.STUBBORN_TAG);
+				}
+			}
 			if (p.rank(Skills.Perk.IRON_STOMACH) > 0 && player.hasEffect(MobEffects.HUNGER)) {
 				player.removeEffect(MobEffects.HUNGER);
 			}

@@ -14,7 +14,6 @@
   "effect.jaymospowers.dampened": "Dampened",
   "effect.jaymospowers.cinder_pact": "Cinder Pact",
   "effect.jaymospowers.hollow_pact": "Hollow Pact",
-
   "skin.jaymospowers.stone": "Stone Skin",
   "skin.jaymospowers.iron": "Iron Skin",
   "skin.jaymospowers.glass": "Glass Skin",
@@ -31,9 +30,7 @@
   "message.jaymospowers.skin.nothing": "Nothing there takes hold.",
   "message.jaymospowers.skin.taken": "%s",
   "message.jaymospowers.skin.gone": "The skin lets go.",
-
   "message.jaymospowers.dampened": "Your power is shut away.",
-
   "message.jaymospowers.release.none": "You hold no power.",
   "message.jaymospowers.release.blood": "It will not take.",
   "message.jaymospowers.release.pact": "It will not take.",
@@ -41,14 +38,12 @@
   "message.jaymospowers.release.again": "Drink again to be sure.",
   "message.jaymospowers.release.done": "It is gone.",
   "message.jaymospowers.release.has": "You hold a power already.",
-
   "message.jaymospowers.pact.cinder": "Cinder Pact.",
   "message.jaymospowers.pact.hollow": "Hollow Pact.",
   "message.jaymospowers.pact.hollow_ask": "Let it in?",
   "message.jaymospowers.pact.whisper.1": "...there is room...",
   "message.jaymospowers.pact.whisper.2": "The door was never shut.",
   "message.jaymospowers.pact.whisper.3": "Quiet, between.",
-
   "talk.jaymospowers.pact.ask": "Ask about a bargain",
   "talk.jaymospowers.pact.offer": "You carry something bent. I can bend it once more. Slower, harder to kill, and everything you touch catches light. Fire will not hurt you. Water will. You keep it for life.",
   "talk.jaymospowers.pact.go_on": "Go on",
@@ -56,11 +51,18 @@
   "talk.jaymospowers.pact.take": "Take it",
   "talk.jaymospowers.pact.no": "Not now",
   "talk.jaymospowers.pact.done": "Good. Mind the rain.",
-
   "research.jaymospowers.skins": "Skins",
   "research.jaymospowers.skins.text": "Earth, metal and crystal, bottled. Drunk, the draught waits a few seconds for something to touch. Touch stone, iron, glass, ice, wood, slime, honey, sponge, obsidian, sand, wool or a bell, and for a few minutes you wear its skin, with what it gives and what it costs.",
   "research.jaymospowers.dampening": "Dampening",
   "research.jaymospowers.dampening.text": "Mind and salt with a little shadow. The draught shuts a power away for a few minutes: its keys do nothing and what it does on its own goes still. It always wears off, and it takes nothing for good. Eight arrows set round a draught make dampening arrows (shorter on whoever they hit), and a draught with gunpowder makes a splash potion. Great foes shrug most of it off.",
   "research.jaymospowers.release": "Release",
-  "research.jaymospowers.release.text": "Spirit, arcana and mind, drawn to a point on the altar. A person who drinks this twice, slowly, gives their power up for good. The power is left in a sealed phial for someone without one (a Xeno-Band is left as it is). Blood-born powers and a bonded symbiote will not part from their holder, and nor will anyone bound by a pact."
+  "research.jaymospowers.release.text": "Spirit, arcana and mind, drawn to a point on the altar. A person who drinks this twice, slowly, gives their power up for good. The power is left in a sealed phial for someone without one (a Xeno-Band is left as it is). Blood-born powers and a bonded symbiote will not part from their holder, and nor will anyone bound by a pact.",
+  "item.jaymospowers.small_draught": "Small Draught",
+  "item.jaymospowers.great_draught": "Great Draught",
+  "research.jaymospowers.shrinking": "Shrinking",
+  "research.jaymospowers.shrinking.text": "Air and water drawn thin with salt, a spider's eye, sugar and an amethyst shard. Drunk, it shrinks you to half your size for a few minutes: you slip through a one-block gap and jump high for your size, but you hit softer. It wears off.",
+  "research.jaymospowers.growing": "Growing",
+  "research.jaymospowers.growing.text": "Earth and spirit steeped in water and salt, with a bone, a slime ball and iron. Drunk, it swells you to half again your size for a few minutes: longer in reach, heavier in the blow, slower on your feet. It wears off.",
+  "message.jaymospowers.size_draught.small_off": "You are your own size again.",
+  "message.jaymospowers.size_draught.great_off": "You are your own size again."
 }

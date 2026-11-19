@@ -10,6 +10,7 @@
 		"WebLivingEntityMixin",
 		"WebPuddleDimensionsMixin",
 		"WebServerLevelMixin",
+		"WebSkimMixin",
 		"WebbedLivingEntityMixin",
 		"WebbedMilkMixin",
 		"WebbedWebBlockMixin"
