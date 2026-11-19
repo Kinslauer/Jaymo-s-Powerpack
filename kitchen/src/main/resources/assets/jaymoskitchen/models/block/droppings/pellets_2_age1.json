@@ -1,0 +1,7 @@
+{
+  "parent": "jaymoskitchen:block/droppings/pellets_2",
+  "textures": {
+    "all": "jaymoskitchen:block/droppings/pellets_1",
+    "particle": "jaymoskitchen:block/droppings/pellets_1"
+  }
+}
