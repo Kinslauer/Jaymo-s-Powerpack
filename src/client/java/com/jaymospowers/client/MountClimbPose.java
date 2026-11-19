@@ -17,6 +17,7 @@ import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.Entity;
@@ -65,6 +66,8 @@ public final class MountClimbPose {
 		final Vec3 from;
 		final float fromYaw;
 		int age;
+		/** Seen on the client alone (SeatSteps): where {@link #from} lies against the mount, so the start of the path moves with it. */
+		@Nullable Vec3 rel;
 		/** A slip off a shying mount: the body's offset when it began, and the climb it came from and how far along. */
 		Vec3 start = Vec3.ZERO;
 		@Nullable Kind prev;
@@ -80,6 +83,12 @@ public final class MountClimbPose {
 
 		float share(float partialTicks) {
 			return Mth.clamp((this.age + partialTicks) / this.ticks, 0.0F, 1.0F);
+		}
+
+		/** Where the path starts this frame: {@link #from}, carried along by the mount if this climb follows it. */
+		Vec3 start(Entity who, float partialTicks) {
+			Entity mount = this.rel == null ? null : who.level().getEntity(this.mountId);
+			return mount == null ? this.from : mount.getPosition(partialTicks).add(this.rel);
 		}
 	}
 
@@ -170,9 +179,37 @@ public final class MountClimbPose {
 
 	/** Off over the rump if vanilla set them down behind the mount, else down its side. */
 	private static Kind offKind(Seat seat, Vec3 landed) {
-		double dx = landed.x - seat.mountAt.x, dz = landed.z - seat.mountAt.z;
+		return offKind(seat.mountAt, seat.yaw, landed);
+	}
+
+	/** Off over the rump if {@code landed} is behind a mount at {@code mountAt} facing {@code yaw}, else down its side. */
+	static Kind offKind(Vec3 mountAt, float yaw, Vec3 landed) {
+		double dx = landed.x - mountAt.x, dz = landed.z - mountAt.z;
 		float to = (float)(Mth.atan2(-dx, dz) * Mth.RAD_TO_DEG);
-		return Math.abs(Mth.wrapDegrees(to - seat.yaw)) > 130.0F ? Kind.OFF_BACK : Kind.OFF_FORWARD;
+		return Math.abs(Mth.wrapDegrees(to - yaw)) > 130.0F ? Kind.OFF_BACK : Kind.OFF_FORWARD;
+	}
+
+	/** Whether {@code who} is partway through a climb already. */
+	static boolean playing(int who) {
+		return CLIMBS.containsKey(who);
+	}
+
+	/**
+	 * A climb the server didn't send (SeatSteps: stepping into a cart or boat, and the villagers and guards who mount and
+	 * dismount on their own): {@code who} was seen at {@code from}, facing {@code fromYaw}, before the seat took them. The
+	 * path's start rides with the mount, which doesn't stand still for them as a player's does.
+	 */
+	static void play(LivingEntity who, Kind kind, int mountId, Vec3 from, float fromYaw) {
+		Climb c = new Climb(kind, mountId, Math.max(1.0F, MountClimb.seconds(kind, who) * 20.0F), from, fromYaw);
+		Entity mount = who.level().getEntity(mountId);
+		if (mount != null) {
+			c.rel = from.subtract(mount.position());
+		}
+		CLIMBS.put(who.getId(), c);
+	}
+
+	static float yawOf(Entity entity) {
+		return bodyYaw(entity);
 	}
 
 	private static float bodyYaw(Entity entity) {
@@ -195,9 +232,10 @@ public final class MountClimbPose {
 		return c == null ? null : offset(player, c, partialTicks);
 	}
 
-	private static @Nullable Vec3 offset(Player player, Climb c, float partialTicks) {
+	private static @Nullable Vec3 offset(Entity player, Climb c, float partialTicks) {
 		float s = c.share(partialTicks);
 		Vec3 at = player.getPosition(partialTicks);
+		Vec3 from = c.start(player, partialTicks);
 		if (c.kind.on()) {
 			// where they end up: the seat the mount offers (the second seat, for a pillion climb: Kingdoms places it for a
 			// rider not yet aboard), or, once they're seated, simply where they are, so the path runs on to its end
@@ -210,7 +248,7 @@ public final class MountClimbPose {
 				seat = mount.getPassengerRidingPosition(player).subtract(player.getVehicleAttachmentPoint(mount))
 					.subtract(mount.position()).add(mount.getPosition(partialTicks));
 			}
-			Vec3 d = seat.subtract(c.from);
+			Vec3 d = seat.subtract(from);
 			float across, up, hump;
 			switch (c.kind) {
 				case ON_BACK -> {
@@ -230,6 +268,18 @@ public final class MountClimbPose {
 					up = smooth(0.0F, 0.75F, s);
 					hump = 0.45F;
 				}
+				case STEP_UP -> {
+					// a foot on the step and a pull up the rail: up first, then across onto the bench
+					across = smooth(0.2F, 0.85F, s);
+					up = smooth(0.1F, 0.65F, s);
+					hump = 0.12F;
+				}
+				case STEP_IN -> {
+					// over the gunwale, high at the middle, and down into the boat
+					across = smooth(0.2F, 0.8F, s);
+					up = smooth(0.25F, 0.7F, s);
+					hump = 0.2F;
+				}
 				case ON_KNEEL -> {
 					// a low step across onto the lowered saddle
 					across = smooth(0.15F, 0.85F, s);
@@ -245,7 +295,7 @@ public final class MountClimbPose {
 			// a vault rises over the rump and settles; a stirrup climb lifts a little past the seat and sits down
 			float over = Mth.sin(Mth.PI * Mth.clamp((s - 0.2F) / 0.6F, 0.0F, 1.0F)) * hump;
 			Vec3 path = new Vec3(d.x * across, d.y * up + over, d.z * across);
-			return path.subtract(at.subtract(c.from));
+			return path.subtract(at.subtract(from));
 		}
 		if (c.kind == Kind.OFF_SLIP) {
 			// down the flank: the height goes first, the rest of the way across after
@@ -257,7 +307,7 @@ public final class MountClimbPose {
 			// the body really is in the air, flung by the server: nothing to carry
 			return Vec3.ZERO;
 		}
-		Vec3 d = c.from.subtract(at);
+		Vec3 d = from.subtract(at);
 		float across = 1.0F - smooth(0.2F, 0.85F, s);
 		// down from the saddle like a drop: slow off the seat, quick to the ground
 		float t = Mth.clamp((s - 0.25F) / 0.55F, 0.0F, 1.0F);
@@ -266,7 +316,7 @@ public final class MountClimbPose {
 	}
 
 	/** The way a climber's body faces on the way up: from where they stood round to the mount's own. */
-	private static float onYaw(Climb c, float s, Player player, float fallback) {
+	private static float onYaw(Climb c, float s, Entity player, float fallback) {
 		Entity mount = player.level().getEntity(c.mountId);
 		return Mth.rotLerp(smooth(0.1F, 0.8F, s), c.fromYaw, mount == null ? fallback : bodyYaw(mount));
 	}
@@ -323,8 +373,26 @@ public final class MountClimbPose {
 		state.setData(KEY, new State(c.kind, s, offset, c.prev, c.prevShare));
 	}
 
+	/** From the living-entity renderer, for whoever isn't a player (a villager or guard mounting, dismounting): as {@link #extract}. */
+	public static void extractMob(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
+		if (entity instanceof Player) {
+			return;
+		}
+		state.setData(KEY, null);
+		Climb c = CLIMBS.get(entity.getId());
+		Vec3 offset = c == null ? null : offset(entity, c, partialTicks);
+		if (offset == null) {
+			return;
+		}
+		float s = c.share(partialTicks);
+		float yaw = c.kind.on() ? onYaw(c, s, entity, state.bodyRot) : Mth.rotLerp(smooth(0.2F, 0.9F, s), c.fromYaw, state.bodyRot);
+		state.yRot = Mth.wrapDegrees(state.yRot + state.bodyRot - yaw);
+		state.bodyRot = yaw;
+		state.setData(KEY, new State(c.kind, s, offset, null, 0.0F));
+	}
+
 	/** From the player renderer's rotations: the body carried along its path (in world space, under the body's turn). */
-	public static void rotate(AvatarRenderState state, PoseStack poseStack, float bodyRot) {
+	public static void rotate(LivingEntityRenderState state, PoseStack poseStack, float bodyRot) {
 		State climb = state.getData(KEY);
 		if (climb == null) {
 			return;
@@ -337,7 +405,7 @@ public final class MountClimbPose {
 
 	/** The clip's limbs, over vanilla's walk (ModelPoses). The head is left to look where the player looks. */
 	public static void applyModel(Model<?> model, Object renderState) {
-		if (!(model instanceof HumanoidModel<?> h) || !(renderState instanceof AvatarRenderState state)) {
+		if (!(model instanceof HumanoidModel<?> h) || !(renderState instanceof LivingEntityRenderState state)) {
 			return;
 		}
 		State climb = state.getData(KEY);

@@ -59,7 +59,15 @@ public final class MountClimb {
 		/** A sprinting freerunner leapfrogs a mount's rump straight into the saddle, keeping their pace (Freerunner). */
 		ON_VAULT("player_mount_on_vault", 0.35F),
 		/** Off a galloping mount sideways with its momentum, tucking for the landing roll (the client's, like the other climbs off; see MountLeap). */
-		OFF_LEAP("player_mount_off_leap", 0.6F);
+		OFF_LEAP("player_mount_off_leap", 0.6F),
+		/** Up into a cart, wagon, rickshaw, cab or coach: a foot on the step, a hand on the rail, pulled up onto the bench (client only, see SeatSteps). */
+		STEP_UP("player_mount_step_up", 0.45F),
+		/** Down from one of those: hands on the edge, a foot down to the road. */
+		STEP_DOWN("player_mount_step_down", 0.4F),
+		/** Into a boat: a leg over the side, arms out for balance, down onto the thwart. */
+		STEP_IN("player_mount_step_in", 0.5F),
+		/** Out of a boat: up, arms out, a leg over the side onto the bank. */
+		STEP_OUT("player_mount_step_out", 0.45F);
 
 		public final String clip;
 		public final float seconds;
@@ -70,7 +78,8 @@ public final class MountClimb {
 		}
 
 		public boolean on() {
-			return this == ON_LEFT || this == ON_RIGHT || this == ON_BACK || this == ON_KNEEL || this == ON_PILLION || this == ON_VAULT;
+			return this == ON_LEFT || this == ON_RIGHT || this == ON_BACK || this == ON_KNEEL || this == ON_PILLION || this == ON_VAULT
+				|| this == STEP_UP || this == STEP_IN;
 		}
 
 		/** Kinds that don't hold the climber still: they keep moving through it, so their keys aren't held back. */
@@ -250,8 +259,13 @@ public final class MountClimb {
 
 	/** Which way {@code player} climbs on: from behind, or from whichever side of the mount they stand. */
 	static Kind side(Player player, Entity mount) {
+		return side(player.position(), mount);
+	}
+
+	/** Which way someone standing at {@code at} climbs onto {@code mount}: from behind, or from whichever side of it they stand. */
+	public static Kind side(Vec3 at, Entity mount) {
 		float facing = mount instanceof LivingEntity living ? living.yBodyRot : mount.getYRot();
-		double dx = player.getX() - mount.getX(), dz = player.getZ() - mount.getZ();
+		double dx = at.x - mount.getX(), dz = at.z - mount.getZ();
 		// the way from the mount to the player, as a yaw (0 faces +z, like the mount's own)
 		float toPlayer = (float)(Mth.atan2(-dx, dz) * Mth.RAD_TO_DEG);
 		float off = Mth.wrapDegrees(toPlayer - facing);
