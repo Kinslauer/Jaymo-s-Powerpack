@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 21:58). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 21:59). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -23,7 +23,9 @@ Nothing stuck.
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1877 Harness 6: forge the rest of the harness (Powers, Kingdoms, 2026-11-19)
 - [ ] #1876 Captives who die and are weighed leave their chains (Kingdoms, 2026-11-19)
+- [ ] #1875 Harness fits MCA bodies; captors calm down around a captive (Kingdoms, 2026-11-19)
 - [ ] #1874 creative keeps your prosthetics (Powers, 2026-11-19)
 - [ ] #1870 Harness 5: armour oil, and the harness rusts (Powers, Kingdoms, 2026-11-19)
 - [ ] #1868 Harness 2: wider makes of cuirass, the coat of plates, gorget, tassets, rondels and the tabard of arms (Kingdoms, 2026-11-19)
@@ -81,9 +83,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1807 flotsam can bring up a dead one's token (Powers, Kitchen, 2026-11-19)
 - [ ] #1806 harsh lands - spawns and starts follow the climate map (Kingdoms, 2026-11-19)
 - [ ] #1804 charge jump and Web slingshot on a horse's jump bar, orange peak (Powers, Kingdoms, 2026-11-19)
-- [ ] #1803 towns and the sea - figureheads, trade signs, song stones, the journey book (Kingdoms, 2026-11-19)
-- [ ] #1802 the dead in the wild: remains, last camps, ruin traps, the headless rider (Kingdoms, 2026-11-19)
-- …and 249 older ones.
+- …and 251 older ones.
 
 ## Health
 
