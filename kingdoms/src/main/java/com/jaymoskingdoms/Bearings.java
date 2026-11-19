@@ -261,6 +261,8 @@ public final class Bearings {
 		if (trust == 0 && respect == 0 && warmth == 0) {
 			return;
 		}
+		// (a Hearthkeeper's own neighbours trust them sooner)
+		trust = HeritagePaths.trust(who, id, trust);
 		int[] c = tempered(who, trust, respect, warmth);
 		long day = today(who);
 		Recollections.bear(who, id, name, b -> {

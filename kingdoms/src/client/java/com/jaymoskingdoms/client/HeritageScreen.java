@@ -290,6 +290,17 @@ final class HeritageScreen extends Screen {
 			lookLines.add(Component.translatable("gui.jaymoskingdoms.heritage.variants", looks, names));
 		}
 		sections.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.look"), Ui.TEXT, lookLines));
+		// how each of its heritage paths opens (HeritagePaths)
+		List<Component> howLines = new ArrayList<>();
+		for (com.jaymoskingdoms.HeritagePaths.Path p : com.jaymoskingdoms.HeritagePaths.Path.values()) {
+			if (p.blood == kind) {
+				howLines.add(Component.translatable("gui.jaymoskingdoms.path.how_row", Component.translatable("path.jaymoskingdoms." + p.key()),
+					Component.translatable("path.jaymoskingdoms." + p.key() + ".deeds")));
+			}
+		}
+		if (!howLines.isEmpty()) {
+			sections.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.path.how"), Ui.TEXT, howLines));
+		}
 
 		// the paths: the looks it can be born in, and the blood a look leans toward
 		for (int i = 0; i < looks; i++) {
@@ -301,8 +312,30 @@ final class HeritageScreen extends Screen {
 			}
 			paths.add(new PickerLayout.Path(icons, HeritageVariants.title(kind, i), -1));
 		}
+		// and the heritage paths its deeds open: five steps each, lit as they wake (HeritagePaths)
+		paths.addAll(heritagePaths(kind));
 		return new PickerLayout.Info(new ItemStack(kind.icon), null, name(kind), tag, kind == this.picked ? ACCENT : rim(kind), pills, story, sections,
 			Component.translatable("gui.jaymoskingdoms.picker.paths_heritage", name(kind)), paths, -1);
+	}
+
+	/** {@code kind}'s heritage paths as picker rows: five step icons (lit as they wake) and the path's name with how far you are on it. */
+	static List<PickerLayout.Path> heritagePaths(Heritage.Kind kind) {
+		List<PickerLayout.Path> rows = new ArrayList<>();
+		net.minecraft.client.player.LocalPlayer player = net.minecraft.client.Minecraft.getInstance().player;
+		for (com.jaymoskingdoms.HeritagePaths.Path p : com.jaymoskingdoms.HeritagePaths.Path.values()) {
+			if (p.blood != kind) {
+				continue;
+			}
+			int steps = player == null ? 0 : com.jaymoskingdoms.HeritagePaths.stepsShown(player, p);
+			List<ItemStack> icons = new ArrayList<>();
+			for (int i = 0; i < 5; i++) {
+				icons.add(new ItemStack(i < steps ? p.icon : net.minecraft.world.item.Items.GRAY_DYE));
+			}
+			Component name = Component.translatable("path.jaymoskingdoms." + p.key());
+			rows.add(new PickerLayout.Path(icons, player == null ? name : Component.translatable("gui.jaymoskingdoms.path.row", name,
+				com.jaymoskingdoms.HeritagePaths.status(player, p)), -1));
+		}
+		return rows;
 	}
 
 	/** A card row without its leading "Gift: " or "Flaw: " (the section already says which). */

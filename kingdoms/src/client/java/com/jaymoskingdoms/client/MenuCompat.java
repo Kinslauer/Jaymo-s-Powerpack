@@ -304,6 +304,12 @@ public final class MenuCompat {
 		Component none = none();
 		Component career = Careers.title(player);
 		rows.add(row("menu.jaymoskingdoms.character.career", career == null ? none : career));
+		// the heritage paths open to your blood, and how far you are on each (HeritagePaths)
+		for (com.jaymoskingdoms.HeritagePaths.Path p : com.jaymoskingdoms.HeritagePaths.Path.values()) {
+			if (com.jaymoskingdoms.HeritagePaths.ofBlood(player, p)) {
+				rows.add(new Component[] {Component.translatable("path.jaymoskingdoms." + p.key()), com.jaymoskingdoms.HeritagePaths.status(player, p)});
+			}
+		}
 		Skills.Progress skills = Skills.of(player);
 		for (Skills.Pillar p : Skills.Pillar.values()) {
 			rows.add(row("skill.jaymoskingdoms." + p.key(), Component.translatable("menu.jaymoskingdoms.character.level", skills.level(p))));

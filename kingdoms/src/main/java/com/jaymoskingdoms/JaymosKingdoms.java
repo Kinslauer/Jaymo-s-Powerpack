@@ -476,6 +476,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.214: heritage variants, three looks to every heritage (and its attachment)
 		LOGGER.debug("heritage variant attachment: {}", HeritageVariants.VARIANT);
 		HeritageVariants.register();
+		// (Andy's heritage paths picks) what a blood grows into as you live it
+		HeritagePaths.register();
 		// (0.7.486) sea-blooded Tideborn whose heads or backs are their own shape wear no helmet or chestplate
 		SeaBodies.register();
 		// 0.7.216: the life story, a newcomer's heritage, class, power and start told as their past (and its attachment)

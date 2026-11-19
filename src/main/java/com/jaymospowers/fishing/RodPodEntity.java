@@ -221,7 +221,7 @@ public class RodPodEntity extends BlockEntity {
 				continue;
 			}
 			Tackle.Rod kind = Tackle.rodOf(rod);
-			FishBites.Line line = new FishBites.Line(pod.key(i), server, at, kind, onHook, false, kind.bottom());
+			FishBites.Line line = new FishBites.Line(pod.key(i), server, at, kind, onHook, false, kind.bottom(), 1.0F);
 			switch (FishBites.step(line)) {
 				case NIBBLE -> server.playSound(null, pos, SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.BLOCKS, 0.4F, 1.2F);
 				case TAKEN -> {
