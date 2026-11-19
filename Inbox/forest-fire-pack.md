@@ -35,3 +35,4 @@ Files it expects to touch:
   - kingdoms/build.gradle (dev runtime only)
 
 One PR, branch hermes/forest-fire-pack, change notes changes/<mod>/<branch>.md, never version=/MODLOG/codemap. Check APIs against 26.3.
+- 2026-11-19 20:36 Andy (2026-11-19): Fall Hall is approved by its author (PaleoTech), so build it too: Andy asked for it "integrated as one of the kingdom's castles" (https://www.curseforge.com/minecraft/worlds/fall-hall-paleotech, CF file 9313294, 26.3, a Java world folder with no datapacks/templates). Credit PaleoTech in the pack credits. See Agents/forest-fire-and-fall-hall.md and Kingdoms GrandSeats / Castle.site for how castles are placed.
