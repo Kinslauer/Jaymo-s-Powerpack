@@ -15126,3 +15126,9 @@ Not tested in game.
 
 - **Talk through chat**: say a line aloud while looking at a villager within 8 blocks, or start it with their first name (12 blocks), and they turn to you and answer over their head a moment later. Short replies keep it going for 30 seconds. They answer hello, goodbye and thanks, how they are, their name, their work, whose realm this is, trade, news (their real gossip and suspicions), and what they remember of you. Cold, wary or scornful villagers answer shortly and keep their news to themselves. Anything else gets a "Hm? I didn't follow that." When MCA's own chat AI is switched on (`/mca chatAI`), it answers instead and this keeps quiet. (`ChatTalk`, from `ProximityChat`)
 - Built; not played.
+
+## 0.10.43 (2026-11-19): Harness 3: creeds and other lands (#1728)
+
+Knights now wear gear matching their realm's creed and land: etched plate for faith and coin realms, gilt-banded for the King's Guard, spiked black plate for Conquest, fur-lined in snowy lands, quilted coats in the desert, brine-soaked mail in the jungle, hide and bronze in the savanna and badlands, and laced lamellar in the cherry blossom realms. Armor names carry the finish: Etched, Spiked, Gilt-Banded, Fur-Lined, Quilted, Brine-Soaked, Hide, Bronze, Lamellar. New helms include the veiled helm and barbute.
+
+Not tested in game.
