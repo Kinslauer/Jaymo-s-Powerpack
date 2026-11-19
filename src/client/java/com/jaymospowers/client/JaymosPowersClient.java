@@ -123,6 +123,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.web.FirstPersonCompat.hideInPanoramas();
 		LockOnClient.init();
 		com.jaymospowers.client.combat.GuardClient.init();
+		com.jaymospowers.client.combat.CritPunchClient.init();
 		com.jaymospowers.client.combat.IncomingBlowsClient.init();
 		com.jaymospowers.client.combat.TellGlintParticle.register(); // (0.20.4)
 		com.jaymospowers.client.tundra.SnowMote.register();

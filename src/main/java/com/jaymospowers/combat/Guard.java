@@ -138,6 +138,14 @@ public final class Guard {
 	public static final double PARRY_SHOVE = 0.45;
 	public static final float PARRY_RIPOSTE = 1.25F;
 	/**
+	 * A riposte lands by the weapon in hand (Hackers 'n Slashers' idea, ours): a great weapon staggers and slows ({@code RIPOSTE_STAGGER},
+	 * {@code RIPOSTE_SLOW} ticks), a one-handed blade cuts deeper (a bleed), a knife lands a second hit {@code KNIFE_ECHO_TICKS} later for
+	 * {@code KNIFE_ECHO_SHARE} of the blow, a polearm shoves {@code POLE_SHOVE} back.
+	 */
+	public static final int RIPOSTE_STAGGER = 24, RIPOSTE_SLOW = 40, KNIFE_ECHO_TICKS = 4;
+	public static final float KNIFE_ECHO_SHARE = 0.6F;
+	public static final double POLE_SHOVE = 0.9;
+	/**
 	 * (0.17.67) An attacker carrying this tag while its blow lands can't be parried, only blocked or dodged (Kingdoms puts
 	 * it on a fighter's heavy blows, the ones its red glint warns of).
 	 */
@@ -209,6 +217,11 @@ public final class Guard {
 	private record Riposte(UUID target, long until, float factor) {
 	}
 
+	/** A knife's second hit owed: by whom, on whom, when, how hard. */
+	private record Echo(UUID attacker, UUID victim, long at, float damage) {
+	}
+
+	private static final List<Echo> ECHOES = new java.util.ArrayList<>();
 	private static final Map<UUID, Raise> RAISES = new HashMap<>();
 	private static final Map<UUID, Riposte> RIPOSTES = new HashMap<>();
 
@@ -229,6 +242,7 @@ public final class Guard {
 		// (a sneaking join or parting of a Twinblade comes before a raised guard)
 		com.jaymospowers.armory.Twinblade.init();
 		UseItemCallback.EVENT.register(Guard::use);
+		ServerTickEvents.END_SERVER_TICK.register(Guard::echoes);
 		Swat.init();
 		ShieldCraft.init();
 		BladeStyle.init();
@@ -361,7 +375,7 @@ public final class Guard {
 	private static Raise raise(ServerPlayer player) {
 		Raise raise = RAISES.computeIfAbsent(player.getUUID(), id -> new Raise());
 		long now = player.level().getGameTime();
-		raise.eager = now - raise.start < EAGER_TICKS && !raise.parried;
+		raise.eager = now - raise.start < EAGER_TICKS / CombatAttrs.of(player, CombatAttrs.PARRY_RECHARGE) && !raise.parried;
 		raise.start = now;
 		raise.parried = false;
 		raise.up = true;
@@ -505,6 +519,12 @@ public final class Guard {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), PARRY_SOUND, SoundSource.PLAYERS, perfect ? 1.0F : 0.8F, (perfect ? 1.1F : 0.95F) + (player.getRandom().nextFloat() - 0.5F) * 0.1F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 0.35F, perfect ? 1.5F : 1.2F);
 		cue(player, attacker, perfect);
+		if (perfect) {
+			Vec3 eye = player.getEyePosition();
+			Vec3 toward = from.subtract(eye);
+			toward = toward.lengthSqr() > 1.0E-4 ? toward.normalize() : player.getLookAngle();
+			CritCue.cue(level, eye.add(toward.scale(0.7)).add(0.0, -0.3, 0.0), null);
+		}
 		// ((0.21.20) turned to the next blow coming; a chain of parries makes the riposte harder, Crowds)
 		float chain = Crowds.counter(player, attacker);
 		Shakes.send(player, perfect ? 1.2F : 0.6F, from);
@@ -588,6 +608,59 @@ public final class Guard {
 		level.sendParticles(ParticleTypes.ENCHANTED_HIT, at.x, at.y, at.z, 16, 0.3, 0.4, 0.3, 0.4);
 		level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 12, 0.3, 0.4, 0.3, 0.5);
 		level.playSound(null, victim.getX(), victim.getY(), victim.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1.0F, 0.8F);
-		return damage * owed.factor();
+		CritCue.cue(level, at, player);
+		riposteKind(level, player, victim, damage);
+		return damage * owed.factor() * (float) CombatAttrs.of(player, CombatAttrs.RIPOSTE_POWER);
+	}
+
+	/** What the weapon in {@code player}'s hand adds to a riposte (see {@link #RIPOSTE_STAGGER}). */
+	private static void riposteKind(ServerLevel level, ServerPlayer player, LivingEntity victim, float damage) {
+		ItemStack weapon = player.getMainHandItem();
+		Armed.Kind kind = Armed.kind(weapon);
+		if (kind == null) {
+			return;
+		}
+		if (isKnife(weapon)) {
+			ECHOES.add(new Echo(player.getUUID(), victim.getUUID(), level.getGameTime() + KNIFE_ECHO_TICKS, damage * KNIFE_ECHO_SHARE));
+		} else if (kind == Armed.Kind.TWO_HAND) {
+			stagger(victim, RIPOSTE_STAGGER);
+			if (!Stances.immovable(victim)) {
+				victim.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, RIPOSTE_SLOW, 1, false, false));
+			}
+		} else if (kind == Armed.Kind.POLE) {
+			Vec3 away = victim.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
+			if (away.lengthSqr() > 1.0E-4 && !Stances.immovable(victim)) {
+				away = away.normalize().scale(POLE_SHOVE);
+				victim.push(away.x, 0.2, away.z);
+				victim.needsSync = true;
+			}
+		} else {
+			com.jaymospowers.core.wounds.Bleeding.open(victim, com.jaymospowers.core.wounds.BodyPart.BODY, false);
+		}
+	}
+
+	/** A knife or dagger, ours or WeaponMod's. */
+	private static boolean isKnife(ItemStack weapon) {
+		String path = BuiltInRegistries.ITEM.getKey(weapon.getItem()).getPath();
+		return KnifeGuard.isKnife(weapon.getItem()) || path.endsWith("_dagger") || path.equals("dagger");
+	}
+
+	/** The second hits knives owe, once their moment comes. */
+	private static void echoes(net.minecraft.server.MinecraftServer server) {
+		if (ECHOES.isEmpty()) {
+			return;
+		}
+		for (Echo echo : List.copyOf(ECHOES)) {
+			ServerPlayer player = server.getPlayerList().getPlayer(echo.attacker());
+			if (player == null) {
+				ECHOES.remove(echo);
+			} else if (player.level().getGameTime() >= echo.at()) {
+				ECHOES.remove(echo);
+				if (player.level().getEntity(echo.victim()) instanceof LivingEntity victim && victim.isAlive()) {
+					victim.setInvulnerableTime(0);
+					victim.hurtServer(player.level(), player.damageSources().playerAttack(player), echo.damage());
+				}
+			}
+		}
 	}
 }
