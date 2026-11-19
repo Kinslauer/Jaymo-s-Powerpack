@@ -3,8 +3,8 @@ package com.jaymospowers.client.costume;
 import com.jaymospowers.client.WornPose;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.HiddenArmor;
-import com.jaymospowers.client.power.wind.WindHoverSway;
 import com.jaymospowers.costume.Costume;
+import com.jaymospowers.compat.KingdomsCompat;
 import com.jaymospowers.costume.HoodedCloak;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
@@ -57,6 +57,9 @@ public final class HoodedCloakLayer {
 	static final float BARE_COLLAR_X = 0.82F, BARE_COLLAR_Z = 0.8F, BARE_MANTLE = 0.8F, BARE_BACK_Z = -0.9F;
 	// ================================================================================================================
 
+	/** The world wind's lean on the collar (a share of the back's), and how fast the hem flutters in it (radians a tick). */
+	static final float COLLAR_SHARE = 0.5F, WIND_FLAP_SPEED = 0.45F;
+	static final RenderStateDataKey<float[]> WIND = RenderStateDataKey.create(() -> "jaymospowers:hooded_cloak_wind");
 	static final int TEX_W = 64, TEX_H = 64;
 	/** On a player's render state: null for no cloak, else the cloak texture to draw (per hood). */
 	static final RenderStateDataKey<Identifier> KEY = RenderStateDataKey.create(() -> "jaymospowers:hooded_cloak");
@@ -108,6 +111,7 @@ public final class HoodedCloakLayer {
 		}
 		boolean down = HoodedCloak.down(player);
 		state.setData(KEY, texture);
+		state.setData(WIND, KingdomsCompat.capeInWind(entity));
 		state.showCape = false;
 		if (down) {
 			state.headEquipment = ItemStack.EMPTY;
@@ -199,22 +203,16 @@ public final class HoodedCloakLayer {
 				hem.xRot += ClothCape.REL_PITCH[1];
 				hem.zRot += ClothCape.REL_ROLL[1];
 			}
-			hem.xRot += HEM_LIFT * pace + HEM_FLUTTER * pace * Mth.sin(stride * 2.0F + 1.2F) + IDLE * Mth.sin(state.ageInTicks * 0.09F + 1.2F);// Apply wind hover sway to cloak (gw_cloth): lean with wind direction/strength
-float swayAmount = 0.0F;
-float swayPitch = 0.0F;
-float swayRoll = 0.0F;
-if (state.getData(WindHoverSway.KEY) instanceof WindHoverSway.Sway sway) {
-    swayAmount = sway.amount();
-    swayPitch = sway.pitch();
-    swayRoll = sway.roll();
-}
-if (swayAmount > 0.0F) {
-    rightMantle.zRot += swayRoll * swayAmount;
-    leftMantle.zRot -= swayRoll * swayAmount;
-    back.xRot += swayPitch * swayAmount;
-    collar.xRot += swayPitch * swayAmount;
-}
-
+			hem.xRot += HEM_LIFT * pace + HEM_FLUTTER * pace * Mth.sin(stride * 2.0F + 1.2F) + IDLE * Mth.sin(state.ageInTicks * 0.09F + 1.2F);
+			// the world's wind (Kingdoms): the back streams out and the mantles lift to the side, and the hem flutters
+			float[] wind = state.getData(WIND);
+			if (wind != null) {
+				back.xRot += wind[0];
+				collar.xRot += wind[0] * COLLAR_SHARE;
+				rightMantle.zRot += wind[1];
+				leftMantle.zRot += wind[1];
+				hem.xRot += wind[2] * Mth.sin(state.ageInTicks * WIND_FLAP_SPEED);
+			}
 		}
 	}
 

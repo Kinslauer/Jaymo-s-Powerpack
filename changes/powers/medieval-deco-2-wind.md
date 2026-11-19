@@ -1,7 +1,3 @@
-# Hooded cloak and banners leaning in the wind
-
-- **Cloak lean**: the archer hood and other hooded cloaks now lean and flap with the wind's way and strength when the player is hovering/gliding
-- **Banner lean**: banners placed by wind-power users lean into the wind
-- Check: sailing ships' sails lean with wind direction as expected
-
-Built; not played yet.
+# the hooded cloak leans in the world's wind
+- **Hooded cloak** (`HoodedCloakLayer`, `KingdomsCompat.capeInWind`): with Jaymo's Kingdoms loaded, the hooded cloak streams out and lifts to the side with the world's wind (Kingdoms' wind and its way as the client has it), and its hem flutters, gently, a quarter as much behind a wall. Without Kingdoms nothing changes.
+- Built; not played.

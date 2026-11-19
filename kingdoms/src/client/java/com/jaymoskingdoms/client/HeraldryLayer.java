@@ -133,16 +133,7 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 		if (piece == null || !piece.model().endsWith("cloak")) {
 			return null;
 		}
-		float blow = WindCloth.blow(entity.level(), entity.getX(), entity.getY(), entity.getZ(), entity);
-		if (blow <= 0.0F) {
-			return null;
-		}
-		float yaw = entity.yBodyRot * Mth.DEG_TO_RAD;
-		// the wearer's forward is (-sin, cos); their right is (-cos, -sin)
-		double back = -(WindCloth.windX() * -Mth.sin(yaw) + WindCloth.windZ() * Mth.cos(yaw));
-		double right = WindCloth.windX() * -Mth.cos(yaw) + WindCloth.windZ() * -Mth.sin(yaw);
-		float lean = (float)(back >= 0.0 ? back : back * WindCloth.CLOAK_FRONT) * WindCloth.CLOAK_LEAN * blow;
-		return new float[] {lean, (float)right * WindCloth.CLOAK_SIDE * blow, WindCloth.CLOAK_FLAP * blow};
+		return WindCloth.cape(entity);
 	}
 
 	/** A piece's texture: its own name's, and for plate its finish's. */

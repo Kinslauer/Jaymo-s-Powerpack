@@ -45,6 +45,23 @@ public final class WindCloth {
 		return sheltered ? b * SHELTERED : b;
 	}
 
+	/**
+	 * What the wind does to a cape on {@code wearer}'s back: {streams back, to the side, flutters} in radians (the back
+	 * and side as angles about the wearer's body, positive back and to their right); null when the air is still.
+	 */
+	public static float @Nullable [] cape(Entity wearer) {
+		float blow = blow(wearer.level(), wearer.getX(), wearer.getY(), wearer.getZ(), wearer);
+		if (blow <= 0.0F) {
+			return null;
+		}
+		float yaw = (wearer instanceof net.minecraft.world.entity.LivingEntity living ? living.yBodyRot : wearer.getYRot()) * Mth.DEG_TO_RAD;
+		// the wearer's forward is (-sin, cos); their right is (-cos, -sin)
+		double back = -(windX() * -Mth.sin(yaw) + windZ() * Mth.cos(yaw));
+		double right = windX() * -Mth.cos(yaw) + windZ() * -Mth.sin(yaw);
+		float lean = (float)(back >= 0.0 ? back : back * CLOAK_FRONT) * CLOAK_LEAN * blow;
+		return new float[] {lean, (float)right * CLOAK_SIDE * blow, CLOAK_FLAP * blow};
+	}
+
 	/** The wind's way along (x, z), a unit long. */
 	public static double windX() {
 		return Math.cos(Storms.clientWindAngle);
