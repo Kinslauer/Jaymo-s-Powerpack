@@ -16,6 +16,7 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/rig-beetle-3-back-rig|rig-beetle-3-back-rig]] · 🪶 Quill · #1777 · writing
 
 
 ## In review
@@ -32,7 +33,6 @@ kanban-plugin: board
 - [ ] [[Inbox/lanterns-05-patrol-law|lanterns-05-patrol-law]] · lanterns-05-patrol-law · #1764 · in-review
 - [ ] [[Inbox/lanterns-10-orbit|lanterns-10-orbit]] · lanterns-10-orbit · #1772 · in-review
 - [ ] [[Inbox/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · rig-beetle-5-the-mind · #1774 · in-review
-- [ ] [[Inbox/rig-beetle-3-back-rig|rig-beetle-3-back-rig]] · 🍇 Bacchus · #1777 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 
 
