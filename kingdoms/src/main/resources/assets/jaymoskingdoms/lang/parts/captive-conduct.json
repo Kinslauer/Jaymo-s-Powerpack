@@ -13,5 +13,9 @@
   "message.jaymoskingdoms.captive.warned": "%s Once more and they'll kill you.",
   "message.jaymoskingdoms.captive.doomed": "%s They've had enough of you. This time they mean to kill you.",
   "message.jaymoskingdoms.captive.beaten": "They've beaten the fight out of you. Keep your place.",
-  "message.jaymoskingdoms.captive.hauled": "A captor hauls you back to your feet."
+  "message.jaymoskingdoms.captive.hauled": "A captor hauls you back to your feet.",
+  "speech.jaymoskingdoms.hard.loose.0": "The captive's loose! After them!",
+  "speech.jaymoskingdoms.hard.loose.1": "Empty chain! Who was watching that one?",
+  "speech.jaymoskingdoms.hard.loose.2": "One of ours has run! Up, all of you!",
+  "speech.jaymoskingdoms.hard.loose.3": "There! The runaway, there! Bring them back!"
 }

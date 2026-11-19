@@ -67,6 +67,12 @@ public final class StoryHard {
 	static final int SHACKLE_LEVEL = 2, CHAIN_PICKS = 2;
 	/** Slipping the shackle: how long perfectly still and sneaking at night it takes (ticks), checked this often. */
 	static final int SLIP_TICKS = 100, SLIP_CHECK = 5;
+	/**
+	 * Got loose: how often the camp looks (ticks), how far one of its people sees the runaway (blocks), how near the empty
+	 * chain one has to come to see it (blocks), and how many shouts there are to pick from.
+	 */
+	static final int LOOSE_CHECK = 20, LOOSE_LINES = 4;
+	static final double LOOSE_SIGHT = 32.0, EMPTY_CHAIN_SIGHT = 12.0;
 	/** Sentenced: the days to serve, the fine for each day left (silver coins), the cell door's lock, and the picks they have. */
 	static final int SENTENCE_DAYS = 2, FINE_PER_DAY = 3, CELL_LEVEL = 3, CELL_PICKS = 1;
 	static final long DAY_TICKS = 24000L;
@@ -108,6 +114,11 @@ public final class StoryHard {
 	/** Player → ticks spent perfectly still and sneaking at night; where they stood at the last look. */
 	private static final Map<UUID, Integer> SLIPPING = new HashMap<>();
 	private static final Map<UUID, Vec3> STOOD = new HashMap<>();
+	/** Who got loose and the camp hasn't missed yet: where they were chained, which camp, and when it stops caring (server tick). */
+	private static final Map<UUID, Loose> LOOSE = new HashMap<>();
+
+	private record Loose(BlockPos at, int camp, long until) {
+	}
 	/** Player → ticks about at night (evicted); the last look's position; whether the watch has warned them. */
 	private static final Map<UUID, Integer> LOITERING = new HashMap<>();
 	private static final Map<UUID, Vec3> LOITER_AT = new HashMap<>();
@@ -165,6 +176,7 @@ public final class StoryHard {
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			SLIPPING.clear();
 			STOOD.clear();
+			LOOSE.clear();
 			LOITERING.clear();
 			LOITER_AT.clear();
 			WARNED.clear();
@@ -195,6 +207,9 @@ public final class StoryHard {
 			Shackle shackle = player.getAttached(SHACKLE);
 			if (shackle != null) {
 				chained(server, level, player, shackle, now);
+			}
+			if (!LOOSE.isEmpty() && now % LOOSE_CHECK == 0L) {
+				loose(server, level, player);
 			}
 			Integer realm = player.getAttached(EVICTED);
 			if (realm != null && now % EVICT_CHECK == 0) {
@@ -272,7 +287,11 @@ public final class StoryHard {
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.hard.chains.slipping", held * 100 / SLIP_TICKS).withStyle(ChatFormatting.GRAY));
 	}
 
-	/** The shackle comes off ({@code how}: "picked", "slipped", (0.7.584) "cut" or "broken", {@link Shackles}): the camp hunts them from now, for the day. */
+	/**
+	 * The shackle comes off ({@code how}: "picked", "slipped", (0.7.584) "cut" or "broken", {@link Shackles}). (Andy,
+	 * 2026-11-19: "the camp shouldnt be instantly alerted until they see you gone") the camp hunts them for the day only once
+	 * one of its people sees them loose or sees the empty chain ({@link #loose}).
+	 */
 	static void free(ServerPlayer player, String how) {
 		Shackle shackle = player.getAttached(SHACKLE);
 		if (shackle == null) {
@@ -285,8 +304,51 @@ public final class StoryHard {
 		ServerLevel level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.CHAIN_BREAK, SoundSource.PLAYERS, 1.0F, 0.9F);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hard.chains." + how).withStyle(ChatFormatting.GREEN));
+		LOOSE.put(player.getUUID(), new Loose(shackle.at(), shackle.camp(), level.getServer().getTickCount() + LifeStory.HUNT_TICKS));
+	}
+
+	/** One who got loose, while the camp hasn't missed them: one of its people who sees them, or the empty chain, raises the cry. */
+	private static void loose(MinecraftServer server, ServerLevel level, ServerPlayer player) {
+		Loose loose = LOOSE.get(player.getUUID());
+		if (loose == null) {
+			return;
+		}
+		if (server.getTickCount() >= loose.until() || player.hasAttached(SHACKLE)) {
+			// (the day is out and nobody missed them, or they're in chains again)
+			LOOSE.remove(player.getUUID());
+			return;
+		}
+		if (!player.isAlive() || player.isSpectator()) {
+			return;
+		}
+		Folk saw = null;
+		if (player.level() == level) {
+			for (Folk folk : level.getEntitiesOfClass(Folk.class, player.getBoundingBox().inflate(LOOSE_SIGHT))) {
+				if (folk.isAlive() && folk.factionId() == loose.camp() && Exposure.sees(folk, player, LOOSE_SIGHT)) {
+					saw = folk;
+					break;
+				}
+			}
+		}
+		if (saw == null) {
+			Vec3 chain = Vec3.atCenterOf(loose.at());
+			for (Folk folk : level.getEntitiesOfClass(Folk.class, new net.minecraft.world.phys.AABB(loose.at()).inflate(EMPTY_CHAIN_SIGHT))) {
+				if (folk.isAlive() && folk.factionId() == loose.camp() && folk.getEyePosition().distanceToSqr(chain) <= EMPTY_CHAIN_SIGHT * EMPTY_CHAIN_SIGHT
+					&& level.clip(new net.minecraft.world.level.ClipContext(folk.getEyePosition(), chain, net.minecraft.world.level.ClipContext.Block.VISUAL,
+						net.minecraft.world.level.ClipContext.Fluid.NONE, folk)).getType() == net.minecraft.world.phys.HitResult.Type.MISS) {
+					saw = folk;
+					break;
+				}
+			}
+		}
+		if (saw == null) {
+			return;
+		}
+		LOOSE.remove(player.getUUID());
+		LifeStory.startHunt(server, player, loose.camp());
+		Speech.say(level, saw, Dialects.trShared(saw, "speech.jaymoskingdoms.hard.loose." + level.getRandom().nextInt(LOOSE_LINES)), Speech.RED, LOOSE_SIGHT);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.hard.chains.hunted").withStyle(ChatFormatting.GRAY));
-		LifeStory.startHunt(level.getServer(), player, shackle.camp());
+		JaymosKingdoms.LOGGER.info("{}'s escape was seen by camp {}", player.getScoreboardName(), loose.camp());
 	}
 
 	/** The shackle comes off quietly, with no hunt: a captive their captors killed ({@link CaptiveConduct#executed}). */
