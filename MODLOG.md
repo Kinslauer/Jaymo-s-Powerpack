@@ -6356,3 +6356,8 @@ Hackers 'n Slashers patch 3 (ideas only; our own code, sounds and names).
   - The server checks the jump kind a client sends; Storm Road no longer cancels fall damage in its wind-up, stopping it by hand costs 30 s of cooldown, and it loads the destination chunk; costume stand swap passes through when neither side has a costume.
   - Per-player maps are cleared on disconnect (Ember Crash, Storm fall/throw, Z-Fighter reins); the Awakening deeds register once.
 - Built; not played.
+
+## 0.25.54 (2026-11-19): Server starts again: SWAY and Interactive Foliage stay on players' games (#1817)
+
+- Fixes: the server would not start after Interactive Foliage and SWAY joined the pack: SWAY carries client-only drawing code the server doesn't have. Both are now left out of the server's mods; players keep them (they add no blocks, items or network messages, so joining is unaffected).
+- Built by CI; checked by starting the Deck server.
