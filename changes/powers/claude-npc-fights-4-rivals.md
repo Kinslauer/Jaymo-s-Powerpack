@@ -1,0 +1,6 @@
+# NPC fights 4: tyrants vs the Patrol (sworn foes, showdowns)
+- **Sworn foes**: a tyrant, or one of a raider band's men, now goes for a Galactic Patrolman before anyone else he could fight (before players, golems and villagers). A patrolman picks a tyrant or raider within 48 blocks over any other monster (a recruiter keeps to what is at hand). Players can stand with either side: the tyrant already fights them, and a patrolman is an ordinary villager.
+- **Showdowns**: from world tier 3 (Dread) with a player within 160 blocks, a landing raider band, a tyrant raid or a siege's tyrant has a 35% chance that, 20 seconds later, a Patrol pod comes down 40 to 80 blocks off with one officer. He flies at the tyrant (the tyrant flies to meet him, both through the shared fighter brain's travel flight), then they fight with the same moves. When the tyrant falls or goes, the officer lingers half a minute and leaves in his pod. If the officer falls, the tyrant goes on as before.
+- **Rumour**: players within 160 blocks of the tyrant get a letter line ("Word", through Jaymo's Kingdoms' post, roost or not) of two fighters in the sky. No screen text.
+- Classes: `ZFighterPatrol` (`Cause.SHOWDOWN`, `showdown`, `foe`), `ZFighterRogue.registerGoals`, `ZFighterRaiders`, `ZFighterRaids`, `ZFighterInvasions`, `ZFighterKingdoms.word`.
+- Built; not played.

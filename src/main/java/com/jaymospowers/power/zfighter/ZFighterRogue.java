@@ -175,9 +175,12 @@ public class ZFighterRogue extends Monster {
 		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
 		this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
 		// only a tyrant picks his own foes: the people of the kingdom, its golems, everyone
-		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true, (target, level) -> tyrant()));
-		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true, (target, level) -> tyrant()));
-		this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true, (target, level) -> tyrant()));
+		// sworn foes: a tyrant, or one of a raider band's men, goes for a Galactic Patrolman before anyone else
+		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, LivingEntity.class, true,
+			(target, level) -> (tyrant() || raider()) && ZFighterPatrol.patrolman(target)));
+		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Player.class, true, (target, level) -> tyrant()));
+		this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, IronGolem.class, true, (target, level) -> tyrant()));
+		this.targetSelector.addGoal(5, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true, (target, level) -> tyrant()));
 	}
 
 	/** (0.20.36) One of a raider band's men (on the ground by a town, or up in the high sky), not a tournament champion. */
