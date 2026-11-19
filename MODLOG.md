@@ -6403,3 +6403,8 @@ Andy's 29 picks from three Bedrock hero add-ons (ideas only, our own names and a
 - **Fix**: Shifting Wares' daily trade reroll crashed the server tick (NoSuchElementException in `SlotRerollSource.FromSet`) for a villager whose profession names a trade set that isn't registered. VillagersPlus' miner, alchemist, oceanographer, occultist and horticulturist name `villagersplus:<job>/level_1..5`, which its jar never defines. Such a villager now keeps its trades and restocks them the vanilla way instead of rerolling; professions whose sets exist reroll as before.
 - Class: `mixin/shiftingwares/TradeShufflerMixin` (compat mixin, `@Pseudo`, skipped when Shifting Wares isn't there).
 - Built by CI; not played.
+
+## 0.25.60 (2026-11-19): Sounds no longer stay quieter after the Rig's dip or Z Fighter deafness (#1830)
+
+- The Rig's big-shot dip (`RigImpact`) and Z Fighter deafness (`ZFighterGammaClient`) gave each sound category its slider volume as an extra gain, which 26.3 multiplies by the slider again, so music, blocks, mobs and the rest stayed quieter (slider squared) until a restart. They now pass only the dip itself.
+- Compiled; not played.

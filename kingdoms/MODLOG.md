@@ -15401,3 +15401,10 @@ Andy's hero add-on picks, the town and world side. Built; not played.
 - **Five trials**: five trial chests far from spawn (a timed run, a target range, a wave of foes, a fall, a quiet theft); finish all five and a masked old fighter duels you for a relic.
 - **The Sky Crown**: six pieces of cursed glass in a fallen Giant's heart, the sentry ruins, a Nether fortress, an End city, the deep dark and a sunken ship each give a small gift while carried; set all six in a Crown Stand for the Sky Crown, which gives all six. A broken stand drops its shards; sneak with an empty hand to take one back.
 - **Survival perk Stubborn** (read by Powers): once a day a killing blow downs you and you mend fast for 40 seconds.
+
+## 0.10.78 (2026-11-19): Music: comes now and then like the game's own, and stays off after the creator if it was off (#1830)
+
+- **Now and then**: the music of the places (`client/music/PlaceMusic`) no longer plays almost all the time. After a track ends, or fades as you leave its place, the next waits as long as the game waits between its own songs: 10 to 20 minutes, capped by the Music Frequency option (Frequent: 10 minutes, Constant: 5 seconds). Walking from one place into another no longer starts a fresh track at once, none starts while the game's own song is playing, and the first one after joining waits 5 seconds like the game's.
+- **Three minutes at most** (Andy): a place track, or the game's own song, that has played 3 minutes fades out over 5 seconds; the game's own then waits for its next song as usual.
+- **Music stays off**: if your Music slider was off when you joined, it is put back to off (and saved) once you are set down after the life story and MCA's creator (`KeptMusicSetting`). A slider that was on is left alone.
+- Compiled; not played. What turns the slider on during creation wasn't found in our code or MCA's, so this puts it back afterwards rather than stopping it.
