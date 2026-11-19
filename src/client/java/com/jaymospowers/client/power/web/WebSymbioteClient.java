@@ -535,6 +535,7 @@ public final class WebSymbioteClient {
 				helper.register(new WebTendrilLayer(avatar));
 				helper.register(new WebMouthLayer(avatar));
 				helper.register(new WebSpikeLayer(avatar));
+				helper.register(new WebSymbioteMendLayer(avatar));
 				helper.register(new WebMorphLayer(avatar));
 				helper.register(new WebSymbioteWingsLayer(avatar));
 				helper.register(new WebSuitWrapLayer(avatar));

@@ -1629,6 +1629,7 @@ public final class WebSymbiote {
 		// settling in after the first bond (dormant), fighting you for the suit, a bare face (WebSymbioteBond)
 		WebSymbioteBond.tick(player, now);
 		WebSymbioteCushion.tick(player, now);
+		WebSymbioteMend.tick(player, now);
 		boolean dormant = WebSymbioteBond.dormant(player);
 		WebSymbioteState next = state;
 		boolean armor = state.has(WebSymbioteState.ARMOR) || state.has(WebSymbioteState.BULK);

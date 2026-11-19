@@ -354,6 +354,7 @@ public final class WebPower implements Power {
 		});
 		WebSymbiote.register();
 		WebSymbioteInfection.register();
+		WebSymbioteMend.register();
 		WebCracks.register();
 		WebMorph.register();
 		WebSymbioteBlob.init();
