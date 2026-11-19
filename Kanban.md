@@ -11,7 +11,6 @@ kanban-plugin: board
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · open
 - [ ] [[Inbox/medieval-deco-3-dead-in-the-wild|medieval-deco-3-dead-in-the-wild]] · for 💻 Odysseus · open
-- [ ] [[Inbox/medieval-deco-5-farm-water|medieval-deco-5-farm-water]] · for 💻 Odysseus · open
 - [ ] [[Inbox/medieval-deco-6-towns-sea|medieval-deco-6-towns-sea]] · for 💻 Odysseus · open
 - [ ] [[Inbox/medieval-deco-7-practice-dummy|medieval-deco-7-practice-dummy]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-1-illager-names|village-mods-1-illager-names]] · for 💻 Odysseus · open
