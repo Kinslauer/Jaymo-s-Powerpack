@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: running
 task: wither-model
 branch: claude/wither-model
 with: 
