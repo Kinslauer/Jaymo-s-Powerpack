@@ -66,8 +66,8 @@ public final class Sketches {
 	static final int BOSS = 60, LEGEND = 40, GIFTED = 30, SHIP = 20, MONSTER = 5, BEAST = 2, OTHER = 1;
 	/** A repeat subject is worth this share (a divisor). */
 	static final int REPEAT_DIVISOR = 4;
-	/** What a point of worth pays (thousandths of an emerald), and the least a post pays. */
-	static final long MILLI_PER_WORTH = 125L, LEAST_MILLI = 250L;
+	/** What a point of worth pays (thousandths of an emerald). */
+	static final long MILLI_PER_WORTH = 125L;
 	/** From this worth up, the sale is great news (the Tidings), not only a line on the town boards. */
 	static final int GREAT_AT = GIFTED;
 	/** How long after a blow (ticks) something still counts as in a fight. */
@@ -77,6 +77,10 @@ public final class Sketches {
 
 	/** A sketcher's drawn subjects (their ids), saved. */
 	static final AttachmentType<List<String>> DRAWN = AttachmentRegistry.create(JaymosKingdoms.id("sketch_drawn"),
+		builder -> builder.persistent(Codec.STRING.listOf()));
+
+	/** The kinds of ordinary subject a sketcher has drawn today, as "entity type;day", saved. */
+	static final AttachmentType<List<String>> DAILY = AttachmentRegistry.create(JaymosKingdoms.id("sketch_daily"),
 		builder -> builder.persistent(Codec.STRING.listOf()));
 
 	public static Item BOOK, SKETCH;
@@ -210,6 +214,19 @@ public final class Sketches {
 			player.setAttached(DRAWN, List.copyOf(drawn));
 		}
 		int worth = Math.max(1, again ? worth(subject) / REPEAT_DIVISOR : worth(subject));
+		if (worth(subject) <= MONSTER) {
+			// (an ordinary subject pays for the first sketch of its kind each in-game day, and nothing after)
+			long today = player.level().getGameTime() / 24000L;
+			String kind = BuiltInRegistries.ENTITY_TYPE.getKey(subject.getType()) + ";" + today;
+			List<String> daily = new ArrayList<>(player.getAttachedOrElse(DAILY, List.of()));
+			daily.removeIf(entry -> !entry.endsWith(";" + today));
+			if (daily.contains(kind)) {
+				worth = 0;
+			} else {
+				daily.add(kind);
+			}
+			player.setAttached(DAILY, List.copyOf(daily));
+		}
 		ItemStack stack = new ItemStack(SKETCH);
 		CompoundTag tag = new CompoundTag();
 		tag.putInt("worth", worth);
@@ -240,7 +257,12 @@ public final class Sketches {
 	static InteractionResult sell(ServerLevel level, BlockPos pos, ServerPlayer player, ItemStack stack) {
 		CompoundTag tag = stack.get(DataComponents.CUSTOM_DATA).copyTag();
 		int worth = tag.getIntOr("worth", 1);
-		long milli = Math.max(LEAST_MILLI, worth * MILLI_PER_WORTH);
+		if (worth <= 0) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.sketch.stale"));
+			stack.shrink(1);
+			return InteractionResult.SUCCESS;
+		}
+		long milli = worth * MILLI_PER_WORTH;
 		Currencies.Pay pay = Currencies.pay(Currencies.at(level, pos), milli);
 		Currencies.give(player, pay);
 		Component by = Component.literal(tag.getStringOr("by", Post.nameOf(player).getString()));

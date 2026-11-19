@@ -149,8 +149,12 @@ public final class WindPush {
 			return;
 		}
 		ServerLevel level = server.overworld();
-		for (Entity e : level.getAllEntities()) {
-			if (e instanceof Player || e.isPassenger() || e.isInWater() || e.isNoGravity() && !(e instanceof ItemEntity)) {
+		// a copy: the shelter test reads blocks, which can load a chunk and add its entities to the level's list while it is
+		// walked (a null, then an index out of bounds, stopped the server, 2026-11-19 8:11, 8:15 and 8:25 AM)
+		java.util.List<Entity> all = new java.util.ArrayList<>();
+		level.getAllEntities().forEach(all::add);
+		for (Entity e : all) {
+			if (e == null || e.isRemoved() || e instanceof Player || e.isPassenger() || e.isInWater() || e.isNoGravity() && !(e instanceof ItemEntity)) {
 				continue;
 			}
 			if (e instanceof ItemEntity item) {

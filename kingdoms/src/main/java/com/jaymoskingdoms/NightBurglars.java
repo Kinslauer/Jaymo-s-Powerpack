@@ -139,7 +139,7 @@ final class NightBurglars {
 				}
 			}
 		}
-		if (ACTIVE.isEmpty() || server.getTickCount() % 10 != 0) {
+		if (ACTIVE.isEmpty() || now % 10 != 0) {
 			return;
 		}
 		for (Iterator<Burglary> it = ACTIVE.values().iterator(); it.hasNext();) {
@@ -338,7 +338,7 @@ final class NightBurglars {
 		v.setPersistenceRequired();
 		// (for hire as any drifter is: a coin in hand, {@link Drifters})
 		v.setAttached(Drifters.DRIFTER, Long.MAX_VALUE / 2);
-		if (v instanceof net.conczin.mca.entity.VillagerEntityMCA mca) {
+		if (McaCompat.LOADED && v instanceof net.conczin.mca.entity.VillagerEntityMCA mca) {
 			Drifters.weaken(mca);
 		}
 		Speech.tell(level, v, player, Component.translatable("speech.jaymoskingdoms.burglar.work." + level.getRandom().nextInt(LINES), Veterans.price(v)), Speech.WHITE);

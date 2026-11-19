@@ -15347,3 +15347,28 @@ Hackers 'n Slashers patch 3, the town half (Andy: "you should see the blacksmith
   - New Might perk, Battle Rhythm (tier 2): Jaymo's Powers quickens your attacks a step at a time while you keep landing blows. The Shieldbearer description now lists the new shield moves.
   - Key classes: Skills.Perk.BATTLE_RHYTHM, TreeLocks.Lock.BATTLE_RHYTHM, lang part battle-rhythm.json.
 - Built; not played.
+
+## 0.10.71 (2026-11-19): birthplace page lists the heritage's strengths and weaknesses (#1820)
+
+- **Life story, "Where were you born?"**: the right panel now shows the heritage's whole kit, the same as the heritage screen: its stat bonuses as pills, then Intrinsic (its own gift), Strengths and Weaknesses (flaw, kit flaws, how folk regard it). The rows come from the heritage's own card (`Heritage.Kind#card`), for the look the figure wears, so anything later added to a heritage shows here with no more work. Before, it only said "Heritage: Tideborn".
+- `HeritageScreen.statPills` / `kitSections`: the heritage screen's sorting, moved into two helpers both screens use. `LifeStoryScreen.pickerInfo` uses them on the birthplace page.
+- Built; not played.
+
+## 0.10.72 (2026-11-19): The wind no longer stops the server (#1821)
+
+- Fixes: the server crashed while land was being generated (an empty slot in the world's entity list reached the wind's push). Such a slot is now skipped (`WindPush`).
+- Built by CI; not played.
+
+## 0.10.73 (2026-11-19): The wind no longer stops the server (for real) (#1823)
+
+- Fixes: the server crashed while land was being generated: the wind's push walked the world's list of creatures and items while its own shelter check could load a chunk and add to that list. It now walks a copy (`WindPush`).
+- Built by CI; checked on the Deck under pre-generation.
+
+## 0.10.74 (2026-11-19): Rangers read droppings (#1822)
+
+- Andy: "can different land animals drop different piles? so rangers have a new way to track?"
+- With Jaymo's Kitchen, a Ranger, or anyone with Read the Ground, can sneak and right-click droppings with nothing in
+  either hand to read them. Kitchen says what left them and how old they are. If the animal is still about, Kingdoms
+  shows its trail alone, at the best tracker's reach and age, and a Ranger earns track experience now and then.
+  `TrailReading.register` hands Kitchen's `ManurePileBlock` the reader test and the trail by reflection.
+- Built; not played.

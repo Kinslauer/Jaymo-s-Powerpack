@@ -141,6 +141,18 @@ public final class SkyCrown {
 				return InteractionResult.SUCCESS;
 			}
 			int set = count(state);
+			if (set < 6 && sp.isShiftKeyDown() && set > 0) {
+				// (sneaking with an empty hand takes a set shard back: the stand keeps no order, so the highest slot)
+				int last = 5;
+				while (!state.getValue(SET[last])) {
+					last--;
+				}
+				server.setBlock(pos, state.setValue(SET[last], false), 3);
+				sp.getInventory().placeItemBackInInventory(new ItemStack(SHARDS[last]), net.minecraft.util.Prediction.SERVER_ONLY);
+				server.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_BREAK, SoundSource.BLOCKS, 1.0F, 0.8F);
+				sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.crown.set", set - 1));
+				return InteractionResult.SUCCESS;
+			}
 			if (set < 6) {
 				sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.crown.set", set));
 				return InteractionResult.SUCCESS;

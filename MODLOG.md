@@ -6361,3 +6361,8 @@ Hackers 'n Slashers patch 3 (ideas only; our own code, sounds and names).
 
 - Fixes: the server would not start after Interactive Foliage and SWAY joined the pack: SWAY carries client-only drawing code the server doesn't have. Both are now left out of the server's mods; players keep them (they add no blocks, items or network messages, so joining is unaffected).
 - Built by CI; checked by starting the Deck server.
+
+## 0.25.55 (2026-11-19): Earth & Water's chunk scan skipped where it can find nothing (#1819)
+
+- Fixes: the earlier speed-up for Earth & Water's per-chunk scan checked for any of its blocks, and its common ones are in most chunks, so the scan still ran almost everywhere (216 samples of a 37 s freeze on a new world). It now looks only for the five blocks the scan ticks.
+- Built by CI; not played.

@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
@@ -114,6 +115,11 @@ public final class VigilanteTrials {
 	static final AttachmentType<List<String>> SITES = AttachmentRegistry.create(JaymosKingdoms.id("trials_sites"),
 		b -> b.persistent(Codec.STRING.listOf()));
 
+	/** Whether this player has been handed the range's bow and arrows. Saved. */
+	static final AttachmentType<Boolean> RANGE_GIVEN = AttachmentRegistry.create(JaymosKingdoms.id("trials_range_given"), b -> b.persistent(Codec.BOOL));
+	/** Put on every foe, guard and master a trial spawns, so any left in the world from before is gone on load. */
+	static final String TAG = "jaymoskingdoms_trial";
+
 	public static Block CHEST;
 	public static Item CHEST_ITEM;
 
@@ -146,6 +152,11 @@ public final class VigilanteTrials {
 	private static final Map<UUID, ServerBossEvent> BARS = new HashMap<>();
 
 	private VigilanteTrials() {
+	}
+
+	/** Whether {@code id} is a foe, guard or master of a trial under way. */
+	private static boolean live(UUID id) {
+		return MASTERS.containsValue(id) || RUNS.values().stream().anyMatch(r -> r.foes.contains(id) || id.equals(r.guard));
 	}
 
 	/** A trial chest: its kind in its blockstate. */
@@ -193,6 +204,25 @@ public final class VigilanteTrials {
 					won(level, entity, e.getKey());
 					break;
 				}
+			}
+		});
+		// (a trial under way when the server stops is taken down, so nothing of it is left in the world)
+		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+			ServerLevel level = Factions.level(server);
+			for (Run run : RUNS.values()) {
+				clean(level, run, server.getPlayerList().getPlayer(run.who));
+			}
+			for (UUID id : MASTERS.values()) {
+				Entity master = level.getEntity(id);
+				if (master != null) {
+					master.discard();
+				}
+			}
+		});
+		// (a trial's foe, guard or master left in the world from before is gone)
+		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
+			if (entity.entityTags().contains(TAG) && !live(entity.getUUID())) {
+				entity.discard();
 			}
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
@@ -350,20 +380,28 @@ public final class VigilanteTrials {
 					double angle = (i + random.nextDouble() * 0.6) * Math.PI * 2.0 / TARGETS, r = TARGET_NEAR + random.nextDouble() * (TARGET_FAR - TARGET_NEAR);
 					BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, c.offset((int)(Math.cos(angle) * r), 0, (int)(Math.sin(angle) * r)));
 					at = at.above();
-					level.setBlock(at, Blocks.TARGET.defaultBlockState(), 3);
-					run.blocks.add(at);
+					if (level.getBlockState(at).isAir()) {
+						level.setBlock(at, Blocks.TARGET.defaultBlockState(), 3);
+						run.blocks.add(at);
+					}
 				}
-				int arrows = 0;
-				boolean bow = false;
-				for (ItemStack s : player.getInventory().getNonEquipmentItems()) {
-					arrows += s.is(Items.ARROW) ? s.getCount() : 0;
-					bow |= s.is(Items.BOW);
+				if (run.blocks.size() < TARGETS) {
+					return false;
 				}
-				if (!bow) {
-					give(player, new ItemStack(Items.BOW));
-				}
-				if (arrows < RANGE_ARROWS) {
-					give(player, new ItemStack(Items.ARROW, RANGE_ARROWS - arrows));
+				if (!player.getAttachedOrElse(RANGE_GIVEN, false)) {
+					player.setAttached(RANGE_GIVEN, true);
+					int arrows = 0;
+					boolean bow = false;
+					for (ItemStack s : player.getInventory().getNonEquipmentItems()) {
+						arrows += s.is(Items.ARROW) ? s.getCount() : 0;
+						bow |= s.is(Items.BOW);
+					}
+					if (!bow) {
+						give(player, new ItemStack(Items.BOW));
+					}
+					if (arrows < RANGE_ARROWS) {
+						give(player, new ItemStack(Items.ARROW, RANGE_ARROWS - arrows));
+					}
 				}
 			}
 			case 2 -> {
@@ -375,6 +413,7 @@ public final class VigilanteTrials {
 					Mob mob = type.spawn(level, at, EntitySpawnReason.EVENT);
 					if (mob != null) {
 						mob.setPersistenceRequired();
+						mob.addTag(TAG);
 						mob.setTarget(player);
 						run.foes.add(mob.getUUID());
 					}
@@ -392,8 +431,10 @@ public final class VigilanteTrials {
 				for (int dx = -2; dx <= 2; dx++) {
 					for (int dz = -2; dz <= 2; dz++) {
 						BlockPos at = new BlockPos(c.getX() + dx, run.platformY, c.getZ() + dz);
-						level.setBlock(at, Blocks.STONE_BRICKS.defaultBlockState(), 3);
-						run.blocks.add(at);
+						if (level.getBlockState(at).isAir()) {
+							level.setBlock(at, Blocks.STONE_BRICKS.defaultBlockState(), 3);
+							run.blocks.add(at);
+						}
 					}
 				}
 				player.teleportTo(level, c.getX() + 0.5, run.platformY + 1.0, c.getZ() + 0.5, java.util.Set.of(), player.getYRot(), 0.0F, false);
@@ -429,7 +470,7 @@ public final class VigilanteTrials {
 			BlockPos foot = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
 			Direction way = Direction.from2DDataValue(random.nextInt(4));
 			BlockPos head = foot.relative(way), box = foot.relative(way.getClockWise(), 4);
-			if (!level.getFluidState(foot.below()).isEmpty() || !level.getBlockState(head).isAir() || !level.getBlockState(box).isAir()) {
+			if (!level.getFluidState(foot.below()).isEmpty() || !level.getBlockState(foot).isAir() || !level.getBlockState(head).isAir() || !level.getBlockState(box).isAir()) {
 				continue;
 			}
 			level.setBlock(foot, bed().setValue(BedBlock.FACING, way).setValue(BedBlock.PART, BedPart.FOOT), 3);
@@ -444,6 +485,7 @@ public final class VigilanteTrials {
 				return false;
 			}
 			guard.setCustomName(Component.translatable("entity.jaymoskingdoms.trial_guard"));
+			guard.addTag(TAG);
 			guard.setNoAi(true);
 			guard.setPersistenceRequired();
 			guard.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
@@ -598,6 +640,7 @@ public final class VigilanteTrials {
 		master.setCustomName(Component.translatable("entity.jaymoskingdoms.trials_master"));
 		master.setCustomNameVisible(true);
 		master.setPersistenceRequired();
+		master.addTag(TAG);
 		boost(master, Attributes.MAX_HEALTH, MASTER_HEALTH, AttributeModifier.Operation.ADD_VALUE);
 		boost(master, Attributes.ATTACK_DAMAGE, MASTER_DAMAGE, AttributeModifier.Operation.ADD_VALUE);
 		boost(master, Attributes.ARMOR, MASTER_ARMOUR, AttributeModifier.Operation.ADD_VALUE);

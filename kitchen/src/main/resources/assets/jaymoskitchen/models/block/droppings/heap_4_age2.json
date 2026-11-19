@@ -1,0 +1,7 @@
+{
+  "parent": "jaymoskitchen:block/droppings/heap_4",
+  "textures": {
+    "all": "jaymoskitchen:block/droppings/heap_2",
+    "particle": "jaymoskitchen:block/droppings/heap_2"
+  }
+}

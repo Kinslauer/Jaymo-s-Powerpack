@@ -2,6 +2,9 @@ package com.jaymoskingdoms;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.mojang.serialization.Codec;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.ChatFormatting;
@@ -29,17 +32,25 @@ import net.minecraft.world.phys.AABB;
  * dishes to doors before they go cold. "Hot dishes" on a cook's Town business screen ({@link TalkErrands}) hands you
  * {@link #LEAST} to {@link #MOST} covered dishes, each marked hot and addressed to a different villager of the
  * neighbourhood (named on the dish). Hold a dish and use it on the villager it's for within {@link #HOT_TICKS} ticks:
- * it pays {@link #HOT_MILLI} thousandths of an emerald, a quarter more for each other dish in the same run. Once cold
- * it pays only {@link #COLD_MILLI}. You can take one run at a time. The dishes can't be eaten.
+ * it pays {@link #HOT_MILLI} thousandths of an emerald, a tenth more for each other dish in the same run (a five-dish
+ * run is about three emeralds). Once cold it pays nothing. Every run has an id on its dishes; a player's next run waits
+ * until the last run's dishes have expired and a quarter of an in-game day ({@link #COOLDOWN}) has passed, and a dish of
+ * any other run pays nothing. The dishes can't be eaten.
  */
 public final class HotRuns {
 	/** How many dishes a run is, how far from the cook its doors are (blocks), and how long a dish stays hot (ticks). */
 	static final int LEAST = 1, MOST = 5;
 	static final double DOORS = 48.0;
 	static final long HOT_TICKS = 4800L;
-	/** A hot and a cold dish's pay (thousandths of an emerald), and the share more each other dish in a run adds. */
-	static final long HOT_MILLI = 600L, COLD_MILLI = 100L;
-	static final double BUNDLE_BONUS = 0.25;
+	/** A hot dish's pay (thousandths of an emerald; a cold one pays nothing), and the share more each other dish in a run adds. */
+	static final long HOT_MILLI = 450L;
+	static final double BUNDLE_BONUS = 0.1;
+	/** How long (ticks) after a run before the same player can take another: a quarter of an in-game day. */
+	static final long COOLDOWN = 6000L;
+	/** The id of a player's current run, when its dishes expire, and when they may take the next run. Saved. */
+	static final AttachmentType<String> RUN_ID = AttachmentRegistry.create(JaymosKingdoms.id("hot_run_id"), b -> b.persistent(Codec.STRING));
+	static final AttachmentType<Long> RUN_UNTIL = AttachmentRegistry.create(JaymosKingdoms.id("hot_run_until"), b -> b.persistent(Codec.LONG));
+	static final AttachmentType<Long> NEXT_RUN = AttachmentRegistry.create(JaymosKingdoms.id("hot_next_run"), b -> b.persistent(Codec.LONG));
 	/** How often (ticks) carried dishes are checked for cooling. */
 	static final int EVERY = 40;
 	static final String HOT = "jaymos_hot_dish";
@@ -108,6 +119,11 @@ public final class HotRuns {
 			player.sendSystemMessage(Component.translatable("talk.jaymoskingdoms.hot.busy", cook.getName()));
 			return;
 		}
+		long now = level.getGameTime();
+		if (now < player.getAttachedOrElse(RUN_UNTIL, 0L) || now < player.getAttachedOrElse(NEXT_RUN, 0L)) {
+			player.sendSystemMessage(Component.translatable("talk.jaymoskingdoms.hot.rest", cook.getName()));
+			return;
+		}
 		List<Villager> doors = new ArrayList<>(level.getEntitiesOfClass(Villager.class, new AABB(cook.blockPosition()).inflate(DOORS),
 			v -> v != cook && v.isAlive() && !v.isBaby()));
 		doors.removeIf(v -> v.getName().getString().isEmpty());
@@ -118,6 +134,10 @@ public final class HotRuns {
 		RandomSource random = level.getRandom();
 		java.util.Collections.shuffle(doors, new java.util.Random(random.nextLong()));
 		int count = Math.min(doors.size(), LEAST + random.nextInt(MOST - LEAST + 1));
+		String run = Long.toHexString(random.nextLong());
+		player.setAttached(RUN_ID, run);
+		player.setAttached(RUN_UNTIL, now + HOT_TICKS);
+		player.setAttached(NEXT_RUN, now + COOLDOWN);
 		for (int i = 0; i < count; i++) {
 			Villager to = doors.get(i);
 			ItemStack stack = new ItemStack(DISHES.get(random.nextInt(DISHES.size())));
@@ -129,6 +149,7 @@ public final class HotRuns {
 			tag.putString("to_name", to.getName().getString());
 			tag.putLong("born", level.getGameTime());
 			tag.putInt("size", count);
+			tag.putString("run", run);
 			stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
 			describe(stack, true);
 			player.getInventory().placeItemBackInInventory(stack, net.minecraft.util.Prediction.SERVER_ONLY);
@@ -170,14 +191,18 @@ public final class HotRuns {
 	// ---- the door ----------------------------------------------------------------------------------------------------
 
 	private static void deliver(ServerLevel level, ServerPlayer player, Villager to, ItemStack dish, CompoundTag tag) {
-		boolean hot = !tag.getBooleanOr("cold", false) && level.getGameTime() - tag.getLongOr("born", 0L) <= HOT_TICKS;
-		int size = Math.max(1, tag.getIntOr("size", 1));
-		long milli = hot ? Math.round(HOT_MILLI * (1.0 + BUNDLE_BONUS * (size - 1))) : COLD_MILLI;
-		Currencies.Pay pay = Currencies.pay(Currencies.at(level, to.blockPosition()), milli);
-		Currencies.give(player, pay);
+		boolean hot = !tag.getBooleanOr("cold", false) && level.getGameTime() - tag.getLongOr("born", 0L) <= HOT_TICKS
+			&& tag.getStringOr("run", "").equals(player.getAttachedOrElse(RUN_ID, ""));
 		dish.shrink(1);
 		level.playSound(null, to.blockPosition(), SoundEvents.VILLAGER_CELEBRATE, SoundSource.NEUTRAL, 0.8F, 1.0F);
-		player.sendOverlayMessage(Component.translatable(hot ? "message.jaymoskingdoms.hot.thanks" : "message.jaymoskingdoms.hot.grumble", to.getName(),
-			Currencies.amount(pay)));
+		if (!hot) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.hot.grumble", to.getName()));
+			return;
+		}
+		int size = Math.max(1, tag.getIntOr("size", 1));
+		long milli = Math.round(HOT_MILLI * (1.0 + BUNDLE_BONUS * (size - 1)));
+		Currencies.Pay pay = Currencies.pay(Currencies.at(level, to.blockPosition()), milli);
+		Currencies.give(player, pay);
+		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.hot.thanks", to.getName(), Currencies.amount(pay)));
 	}
 }

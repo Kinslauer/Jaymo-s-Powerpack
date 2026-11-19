@@ -268,40 +268,10 @@ final class HeritageScreen extends Screen {
 		}
 		int looks = HeritageVariants.of(kind).size() + 1;
 		HeritageVariants.Variant look = HeritageVariants.at(kind, kind == this.picked ? this.pickedVariant : 0);
-		if (kind.freePoints > 0) {
-			pills.add(new PickerLayout.Pill(Component.translatable("gui.jaymoskingdoms.picker.free").getString(), "+" + kind.freePoints * Stats.GIFT_STEP, Ui.GOLD));
-		}
-		for (Stats.Stat stat : Stats.Stat.values()) {
-			int n = kind.bonus(stat);
-			if (n > 0) {
-				pills.add(new PickerLayout.Pill(Component.translatable("stat.jaymoskingdoms." + stat.key()).getString(), "+" + n * Stats.GIFT_STEP, Ui.GOLD));
-			}
-		}
+		pills.addAll(statPills(kind));
 		pills.add(new PickerLayout.Pill(Component.translatable("gui.jaymoskingdoms.picker.looks").getString(), String.valueOf(looks), Ui.DIM));
 
-		// the card's rows by what they are: the gift is its own, kit gifts are strengths, flaws and the shunning weaknesses, the rest intrinsic
-		List<Component> intrinsic = new ArrayList<>(), strengths = new ArrayList<>(), weaknesses = new ArrayList<>();
-		for (Component row : kind.card(look)) {
-			String key = row.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t ? t.getKey() : "";
-			if (key.endsWith(".free") || key.endsWith(".bonus")) {
-				continue;
-			}
-			int color = rowColor(row);
-			boolean ownGift = key.equals("heritage.jaymoskingdoms." + kind.key() + ".gift") || key.equals("heritage.jaymoskingdoms." + kind.key() + ".gift_rimewyrm");
-			Component text = stripLabel(row);
-			if (ownGift) {
-				intrinsic.add(text);
-			} else if (color == Ui.BAD || key.contains(".shunned.")) {
-				weaknesses.add(color == Ui.BAD ? text : row);
-			} else if (color == Ui.GOOD) {
-				strengths.add(text);
-			} else {
-				intrinsic.add(text);
-			}
-		}
-		sections.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.intrinsic"), Ui.GOLD, intrinsic));
-		sections.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.strengths"), Ui.GOOD, strengths));
-		sections.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.weaknesses"), Ui.BAD, weaknesses));
+		sections.addAll(kitSections(kind, look));
 		// the look: the picked one's own, else every look's name
 		List<Component> lookLines = new ArrayList<>();
 		if (kind == this.picked) {
@@ -335,6 +305,53 @@ final class HeritageScreen extends Screen {
 	}
 
 	/** A card row without its leading "Gift: " or "Flaw: " (the section already says which). */
+	/** {@code kind}'s free points and stat bonuses, a pill each (also the life story's birthplace page, {@link LifeStoryScreen}). */
+	static List<PickerLayout.Pill> statPills(Heritage.Kind kind) {
+		List<PickerLayout.Pill> pills = new ArrayList<>();
+		if (kind.freePoints > 0) {
+			pills.add(new PickerLayout.Pill(Component.translatable("gui.jaymoskingdoms.picker.free").getString(), "+" + kind.freePoints * Stats.GIFT_STEP, Ui.GOLD));
+		}
+		for (Stats.Stat stat : Stats.Stat.values()) {
+			int n = kind.bonus(stat);
+			if (n > 0) {
+				pills.add(new PickerLayout.Pill(Component.translatable("stat.jaymoskingdoms." + stat.key()).getString(), "+" + n * Stats.GIFT_STEP, Ui.GOLD));
+			}
+		}
+		return pills;
+	}
+
+	/**
+	 * {@code kind}'s whole kit as the panel's Intrinsic, Strengths and Weaknesses, sorted from its card ({@link Heritage.Kind#card}),
+	 * so a gift or flaw added to the heritage shows here and on the life story's birthplace page without more work.
+	 */
+	static List<PickerLayout.Section> kitSections(Heritage.Kind kind, HeritageVariants.@Nullable Variant look) {
+		List<PickerLayout.Section> out = new ArrayList<>();
+		// the card's rows by what they are: the gift is its own, kit gifts are strengths, flaws and the shunning weaknesses, the rest intrinsic
+		List<Component> intrinsic = new ArrayList<>(), strengths = new ArrayList<>(), weaknesses = new ArrayList<>();
+		for (Component row : kind.card(look)) {
+			String key = row.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t ? t.getKey() : "";
+			if (key.endsWith(".free") || key.endsWith(".bonus")) {
+				continue;
+			}
+			int color = rowColor(row);
+			boolean ownGift = key.equals("heritage.jaymoskingdoms." + kind.key() + ".gift") || key.equals("heritage.jaymoskingdoms." + kind.key() + ".gift_rimewyrm");
+			Component text = stripLabel(row);
+			if (ownGift) {
+				intrinsic.add(text);
+			} else if (color == Ui.BAD || key.contains(".shunned.")) {
+				weaknesses.add(color == Ui.BAD ? text : row);
+			} else if (color == Ui.GOOD) {
+				strengths.add(text);
+			} else {
+				intrinsic.add(text);
+			}
+		}
+		out.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.intrinsic"), Ui.GOLD, intrinsic));
+		out.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.strengths"), Ui.GOOD, strengths));
+		out.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.weaknesses"), Ui.BAD, weaknesses));
+		return out;
+	}
+
 	private static Component stripLabel(Component row) {
 		String s = row.getString();
 		for (String label : new String[] {"Gift: ", "Flaw: "}) {
