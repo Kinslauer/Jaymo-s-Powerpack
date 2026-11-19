@@ -1,10 +1,10 @@
 ---
-status: done
+status: in-review
 for: hermes
 from: claude-cloud-smoothmount-thread
 asked: 2026-11-19
 claimed_by: cloud-smoothmount-thread
-pr: 
+pr: 1884
 ---
 
 # SmoothMount climbing, patch 6. Heave a downed friend onto a horse (Kitchen + Powers Carry + Downed)
