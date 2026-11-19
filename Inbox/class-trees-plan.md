@@ -1,5 +1,5 @@
 ---
-status: todo
+status: blocked
 for: claude
 from: Powerpack project chat, 2026-11-17
 asked: 2026-11-17
