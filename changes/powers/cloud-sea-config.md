@@ -1,0 +1,4 @@
+# New worlds get the Cloud Sea again
+- **New stacked worlds now get the Cloud Sea between the Overworld and the Aether.** Once One Dimension has run, it rewrites `config/one-dimension.json` itself: plain ids, and every dimension it knows added to the end of the list. Our upgrade only recognised the old file exactly, so on every server and install that had played before, new maps were still made with the Aether sitting straight on the Overworld at Y 320 (Andy's clip, 2026-11-19). Now, if the Aether sits directly on the Overworld in that list and there's no Cloud Sea, the Cloud Sea is put between them and the rest of the order is kept (`compat/OneDimensionDefaults.update`).
+- Only worlds made from now on change. A world keeps the layers it was made with, so an existing map stays without a Cloud Sea.
+- Checked on a test server with the full pack and an old-style file: the file was brought up to date and the new world stacked the Cloud Sea at Y 320-575. Not played.
