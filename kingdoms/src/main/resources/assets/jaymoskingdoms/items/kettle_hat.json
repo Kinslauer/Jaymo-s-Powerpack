@@ -17,6 +17,41 @@
           "type": "minecraft:model",
           "model": "jaymoskingdoms:item/kettle_hat_gilded"
         }
+      },
+      {
+        "when": "russeted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/kettle_hat_russeted"
+        }
+      },
+      {
+        "when": "blued",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/kettle_hat_blued"
+        }
+      },
+      {
+        "when": "painted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/kettle_hat_painted"
+        }
+      },
+      {
+        "when": "etched",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/kettle_hat_etched"
+        }
+      },
+      {
+        "when": "rusted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/kettle_hat_rusted"
+        }
       }
     ],
     "fallback": {

@@ -7,6 +7,12 @@
   "item.jaymoskingdoms.sallet": "Sallet and Bevor",
   "item.jaymoskingdoms.kettle_hat": "Kettle Hat",
   "item.jaymoskingdoms.morion": "Morion",
+  "item.jaymoskingdoms.great_helm": "Great Helm",
+  "item.jaymoskingdoms.barbute": "Barbute",
+  "item.jaymoskingdoms.burgonet": "Burgonet",
+  "item.jaymoskingdoms.spangenhelm": "Spangenhelm",
+  "item.jaymoskingdoms.lobster_tail": "Lobster-tail Pot",
+  "item.jaymoskingdoms.grotesque_visor": "Grotesque Visor",
   "item.jaymoskingdoms.plate_cuirass": "Plate Cuirass",
   "item.jaymoskingdoms.plate_spaulders": "Plate Spaulders",
   "item.jaymoskingdoms.mail_spaulders": "Mail Spaulders",
@@ -32,6 +38,12 @@
   "item.jaymoskingdoms.crest_pegasus": "Pegasus Crest",
   "item.jaymoskingdoms.crest_unicorn": "Unicorn Crest",
   "item.jaymoskingdoms.crest_snake": "Serpent Crest",
+  "item.jaymoskingdoms.crest_griffin": "Griffin Crest",
+  "item.jaymoskingdoms.crest_bear": "Bear Crest",
+  "item.jaymoskingdoms.crest_wolf": "Wolf Crest",
+  "item.jaymoskingdoms.crest_raven": "Raven Crest",
+  "item.jaymoskingdoms.crest_hound": "Hound Crest",
   "item.jaymoskingdoms.crest_horns": "Crest of Horns",
-  "item.jaymoskingdoms.crest_wings": "Crest of Wings"
+  "item.jaymoskingdoms.crest_wings": "Crest of Wings",
+  "item.jaymoskingdoms.crest_plume": "Crest of Plumes"
 }

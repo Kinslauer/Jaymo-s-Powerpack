@@ -17,6 +17,41 @@
           "type": "minecraft:model",
           "model": "jaymoskingdoms:item/sallet_gilded"
         }
+      },
+      {
+        "when": "russeted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/sallet_russeted"
+        }
+      },
+      {
+        "when": "blued",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/sallet_blued"
+        }
+      },
+      {
+        "when": "painted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/sallet_painted"
+        }
+      },
+      {
+        "when": "etched",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/sallet_etched"
+        }
+      },
+      {
+        "when": "rusted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/sallet_rusted"
+        }
       }
     ],
     "fallback": {
