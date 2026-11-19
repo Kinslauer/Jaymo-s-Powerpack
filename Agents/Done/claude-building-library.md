@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Medieval building library (Andy's 88 schematic picks)
 branch: claude/project-thread-wkd1gp
 with: cloud thread "Find medieval building schematics online"
@@ -28,3 +28,4 @@ owns:
 
 ## Done
 - 210 pattern books, builders draw a third of their buildings from them, chapel/windmill/barn new, table 128 across + Pattern books tab. Built; not played.
+- 2026-11-19 20:26 PR #1854 is merged into master; moved to Agents/Done.
