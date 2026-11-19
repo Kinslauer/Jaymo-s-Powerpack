@@ -532,7 +532,7 @@ public final class Comrades {
 
 	/** Left to what they're doing. */
 	static boolean busy(Mob m) {
-		if (FieldMedics.busy(m) || Downed.helping(m) || Arrests.busy(m) || Grapples.busy(m) || Grapples.held(m) || Scavengers.busy(m) || Loans.working(m)) {
+		if (FieldMedics.busy(m) || Downed.helping(m) || Arrests.busy(m) || Grapples.busy(m) || Grapples.held(m) || Scavengers.busy(m) || Loans.working(m) || CampHunters.busy(m)) {
 			return true;
 		}
 		Followers.Order order = m instanceof Villager v ? v.getAttached(Followers.ORDER) : null;

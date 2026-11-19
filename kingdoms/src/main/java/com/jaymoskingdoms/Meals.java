@@ -59,7 +59,7 @@ import org.jspecify.annotations.Nullable;
  * The <b>price of a meal</b> follows the larder ({@link #index}): food short for the town's size makes it dear (and
  * the townsfolk grumble and sour), plenty makes it cheap (and they're content). A realm with a full larder sells its
  * surplus to the merchants, and one running short buys bread in out of its treasury ({@link #trade}). Nothing to be had
- * at all, and they go without.
+ * at all, and they go without, and a town that keeps going without starves ({@link TownHunger}).
  * <p>
  * Each cookhouse and tavern takes on a <b>cook</b> ({@link Professions#COOK}) from the town's idle villagers. By day
  * the cook works there turning the storehouse's raw food into dishes (bread, baked potatoes, cooked meat, soups and
@@ -278,6 +278,7 @@ public final class Meals {
 				if (Festivals.going(v)) {
 					// (a festival's table feeds them)
 					FED.put(v.getUUID(), day * 2 + slot);
+					TownHunger.ate(v);
 					continue;
 				}
 				FED.put(v.getUUID(), day * 2 + slot);
@@ -343,8 +344,10 @@ public final class Meals {
 			if (!serve(level, f, v, m)) {
 				say(level, v, "none", random);
 				McaCompat.cheer(v, WENT_WITHOUT_MOOD);
+				TownHunger.wentWithout(level, v);
 				return false;
 			}
+			TownHunger.ate(v);
 		}
 		v.getNavigation().stop();
 		v.getLookControl().setLookAt(m.at.getX() + 0.5, m.at.getY() + 0.5, m.at.getZ() + 0.5);

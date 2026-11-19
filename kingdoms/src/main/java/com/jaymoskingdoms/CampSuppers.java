@@ -41,7 +41,10 @@ import net.minecraft.world.phys.Vec3;
  * A band's supper (docs/Pawn-Plan.md row D4, foe side, Andy's note: "enemy bands do the same in their camps, so you can
  * ambush, poison or confront them"). At dusk ({@link #FROM} to {@link #TO}) a camp's band, with a player anywhere
  * within {@link #WATCHED} to see it, gathers in a ring at its fire (lit, or built if the camp has none, {@link #fire}),
- * sits ({@link GroundSeats}) and eats.
+ * sits ({@link GroundSeats}) and eats: each a bite of what's in the camp's larder ({@link CampLarder}), whatever they've
+ * hunted or taken, and nothing that isn't there. Whoever finds nothing left sits with the rest and goes without, and is
+ * weak with hunger ({@link CampLarder#hungry}) till they next eat; a camp whose larder stays bare sends its hunters out
+ * ({@link CampHunters}).
  * <ul>
  * <li><b>Ambush</b>: while they eat they're slow to look up: a sneaking player farther than {@link #UNWARY} isn't
  * noticed, and the first blow on one who hadn't seen you lands {@link #AMBUSH} times as hard; the rest scramble up
@@ -81,6 +84,8 @@ public final class CampSuppers {
 		final int camp;
 		final BlockPos fire;
 		final List<Mob> eaters = new ArrayList<>();
+		/** What each eater has in their bowl; those without go hungry. */
+		final Map<Mob, ItemStack> dish = new IdentityHashMap<>();
 		final long day;
 		int ticks;
 		boolean sickened;
@@ -191,6 +196,22 @@ public final class CampSuppers {
 			DONE.put(id, day);
 			return;
 		}
+		// a bite each out of the larder, the leader first; the rest go without
+		s.eaters.sort((a, b) -> Boolean.compare(BandLeaders.isLeader(b), BandLeaders.isLeader(a)));
+		Mob without = null;
+		for (Mob m : s.eaters) {
+			ItemStack food = CampLarder.take(level, fire, CampLarder::food);
+			if (food.isEmpty()) {
+				CampLarder.hungry(m);
+				without = m;
+			} else {
+				s.dish.put(m, food);
+				CampLarder.fed(m);
+			}
+		}
+		if (without != null) {
+			Callouts.say(without, s.dish.isEmpty() ? "supper.none" : "supper.short", null, true);
+		}
 		SUPPERS.put(id, s);
 	}
 
@@ -253,10 +274,11 @@ public final class CampSuppers {
 				m.setShiftKeyDown(true);
 			}
 			m.getLookControl().setLookAt(s.fire.getX() + 0.5, s.fire.getY() + 0.5, s.fire.getZ() + 0.5);
-			if ((s.ticks + i * 7) % BITE < EVERY) {
+			ItemStack dish = s.dish.get(m);
+			if (dish != null && (s.ticks + i * 7) % BITE < EVERY) {
 				m.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 				level.playSound(null, m.blockPosition(), SoundEvents.GENERIC_EAT.value(), SoundSource.HOSTILE, 0.5F, 0.9F + m.getRandom().nextFloat() * 0.2F);
-				level.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, Items.COOKED_MUTTON), m.getX(), m.getEyeY() - 0.1, m.getZ(), 4, 0.1, 0.1, 0.1, 0.05);
+				level.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, dish.getItem()), m.getX(), m.getEyeY() - 0.1, m.getZ(), 4, 0.1, 0.1, 0.1, 0.05);
 			}
 		}
 		if (s.ticks % 40 == 0 && !level.getBlockState(s.fire).is(net.minecraft.tags.BlockTags.CAMPFIRES)) {
@@ -265,6 +287,10 @@ public final class CampSuppers {
 		if (poisoned && !s.sickened && s.ticks >= BITE * 2) {
 			s.sickened = true;
 			for (Mob m : s.eaters) {
+				if (!s.dish.containsKey(m)) {
+					// (nothing in their bowl, nothing to poison them)
+					continue;
+				}
 				m.addEffect(new MobEffectInstance(MobEffects.POISON, POISON, 1));
 				m.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, WEAK, 1));
 				m.addEffect(new MobEffectInstance(MobEffects.NAUSEA, HEAVES, 0));
