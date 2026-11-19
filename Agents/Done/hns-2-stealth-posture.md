@@ -1,5 +1,5 @@
 ---
-status: done
+status: merged
 task: hns-2 stealth and posture
 branch: claude/hns-2-stealth-posture
 with: hns-1 (Powers)

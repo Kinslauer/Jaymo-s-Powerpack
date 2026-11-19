@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: claude
 from: claude-cloud-metal-sparks-thread
 asked: 2026-11-19
@@ -19,3 +19,4 @@ pr: 1814
 
 ## Notes
 - PR #1814 built, CI green, not played.
+- 2026-11-19 07:30 PR #1814 is merged into master; moved to Inbox/Done.

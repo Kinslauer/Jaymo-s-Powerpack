@@ -1,5 +1,5 @@
 ---
-status: done
+status: merged
 task: Hackers 'n Slashers patch 4 (shove, weapon procs)
 branch: claude/hns-4-shove-procs
 with: 

@@ -1,5 +1,5 @@
 ---
-status: done
+status: merged
 task: Hackers 'n Slashers patch 1 (crits)
 branch: claude/hns-1-crits
 with: hns-2 (kingdoms)

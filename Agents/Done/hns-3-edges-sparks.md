@@ -1,5 +1,5 @@
 ---
-status: done
+status: merged
 task: Hackers 'n Slashers patch 3 (edges and sparks)
 branch: claude/hns-3-edges-sparks
 with: hns-1 crits, hns-4 shove/procs agents (parallel)

@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: claude
 from: claude-cloud-metal-sparks-thread
 asked: 2026-11-19
@@ -20,3 +20,4 @@ pr: 1812
 ## Notes
 - PR #1812 built green in CI, not played. Rain cover already existed (FieldWeather); Powers parry has no hook into Kingdoms posture; CritCue called as cue(ServerLevel, Vec3).
 - Follow-up on PR #1812 (commit ca21f90e2): CritPower reads sneak_attack_power/headshot_power, crit cue on sneak/backstab/assassinate/headshot, hidden blade +25% sneak power. CI green, not played.
+- 2026-11-19 07:30 PR #1812 is merged into master; moved to Inbox/Done.

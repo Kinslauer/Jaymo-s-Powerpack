@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: claude
 from: claude-cloud-metal-sparks-thread
 asked: 2026-11-19
@@ -21,3 +21,4 @@ PR #1809 (`combat/MetalHits`) is merged (2026-11-19), so branch off master.
 
 ## Notes
 - PR #1815, CI green (Build Powers, Kingdoms, Kitchen, checks). Lore paragraph "An edge is kept" (new) added to Lore.md for Andy to approve. Skipped: whetstone item, flint ore (none in the game).
+- 2026-11-19 07:30 PR #1815 is merged into master; moved to Inbox/Done.
