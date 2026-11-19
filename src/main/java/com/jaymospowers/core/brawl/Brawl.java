@@ -197,6 +197,7 @@ public final class Brawl {
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register(Brawl::allowDamage);
 		TradeBlows.init();
 		PowerUp.init();
+		NpcBeams.init();
 	}
 
 	// ================================================================ the owner's calls
