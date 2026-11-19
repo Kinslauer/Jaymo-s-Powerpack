@@ -2493,6 +2493,8 @@ and vinegar clean off. Thin ice crusts the still lakes of the cold lands.
 their own: one who carries the sprig and sits with a hermit in his grove is told it, as the wood once told him. The
 new body keeps what its owner leaned to: a power that would have woken in the old life wakes in the new one, in time.
 
+**What an old druid asks of a stranger** (new, Claude's placement 2026-11-19, for Andy to approve; under "What the old druids teach"). The rite's words stay with the druids, but what the grove is for is no secret: any traveller who speaks to an old druid is told that a body brought under old wood within ten days, laid at the keeper's feet, gets a new life. A hermit who never leaves the grove misses the other woods, and each asks for one growing thing their own trees have never borne (a cherry or pale oak sapling, a mangrove propagule, an azalea); brought one, they plant it in the grove and remember who carried it.
+
 **Seven sworn callings** (Claude's placement for the fifth edition picks, patch 11, 2026-11-13, Andy approved
 2026-11-17). Beside the old callings the settled folk keep seven more, sworn rather than born: the Cleric and the
 Paladin to the patron gods the shrines already serve, the Warlock to the same gods at a price they come to collect,
