@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 16:30). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 12:04). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -19,12 +19,12 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 ## Stuck
 
 - [[Agents/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]]: stalled, last change 2026-11-13. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/forest-fire-pack|forest-fire-pack]]: stalled, last change 2026-11-16. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/forest-fire-pack|forest-fire-pack]]: stalled, last change 2026-11-15. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hands-on-cooking-realtime|hands-on-cooking-realtime]]: stalled, last change 2026-11-17. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/harness-upkeep|harness-upkeep]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]]: stalled, last change 2026-11-18. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/scrying-orb|scrying-orb]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/sky-lands-aether-biomes|sky-lands-aether-biomes]]: stalled, last change 2026-11-16. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/scrying-orb|scrying-orb]]: stalled, last change 2026-11-18. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/sky-lands-aether-biomes|sky-lands-aether-biomes]]: stalled, last change 2026-11-15. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
@@ -34,6 +34,8 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1849 Watcher's huts much rarer (Kingdoms, 2026-11-19)
+- [ ] #1848 The Old Druid talks to everyone (Kingdoms, 2026-11-19)
 - [ ] #1847 Villagers stop to talk and reply from their own shot (Kingdoms, 2026-11-19)
 - [ ] #1846 camps sound the alarm with a horn (Kingdoms, 2026-11-19)
 - [ ] #1843 loading screen hints wipe in and out (Kingdoms, 2026-11-19)
@@ -92,9 +94,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1776 Rig patch 6: cloak, tech override and nova (Powers, 2026-11-19)
 - [ ] #1773 Rig: the Mind talks, flies and keeps watch (Powers, 2026-11-19)
 - [ ] #1772 Space: the star map's atlas, and the ringed giant in the night sky (Powers, 2026-11-19)
-- [ ] #1770 Duplex doubles take spoken orders (Powers, Kingdoms, 2026-11-19)
-- [ ] #1769 Called in a dream: a power wakes through a dream or a nightmare (Powers, 2026-11-19)
-- …and 228 older ones.
+- …and 230 older ones.
 
 ## Health
 
