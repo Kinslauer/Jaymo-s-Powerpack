@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: harness-body-pieces
 branch: claude/harness-body-pieces
 with: Claude Code (PC)
