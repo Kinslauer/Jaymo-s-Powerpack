@@ -116,6 +116,12 @@ final class Upkeep {
 		}
 	}
 
+	/** (village mods 2) What a builder of settlement {@code id} puts at {@code at}: weathering undone, or a blast's hole filled (null: nothing to do). */
+	private static @Nullable BlockState fix(ServerLevel level, int id, BlockPos at) {
+		BlockState undone = Weathering.undone(level.getBlockState(at));
+		return undone != null ? undone : BlastMend.fix(level, id, at);
+	}
+
 	/** Whether {@code b} is the crew's upkeep hand just now. */
 	private static boolean hand(ServerLevel level, Faction f, Worker b, int waiting) {
 		long now = level.getGameTime();
@@ -154,7 +160,7 @@ final class Upkeep {
 		}
 		long now = level.getGameTime();
 		Job job = JOBS.computeIfAbsent(b.getUUID(), u -> new Job());
-		if (job.target != null && Weathering.undone(level.getBlockState(job.target)) == null) {
+		if (job.target != null && fix(level, f.id(), job.target) == null) {
 			// someone else saw to it (or it's gone)
 			remove(level, f.id(), job.target);
 			job.target = null;
@@ -178,12 +184,13 @@ final class Upkeep {
 		job.actAt = now + ACT_TICKS + level.getRandom().nextInt(ACT_JITTER);
 		b.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		BlockState was = level.getBlockState(target);
-		BlockState fixed = Weathering.undone(was);
+		BlockState fixed = fix(level, f.id(), target);
 		if (fixed != null) {
 			level.setBlock(target, fixed, Block.UPDATE_ALL);
+			BlastMend.mended(level, f.id(), target);
 			SoundType sound = (fixed.isAir() ? was : fixed).getSoundType();
 			level.playSound(null, target, sound.getPlaceSound(), SoundSource.BLOCKS, (sound.getVolume() + 1.0F) / 2.0F, sound.getPitch() * 0.8F);
-			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, was), target.getX() + 0.5, target.getY() + 0.5, target.getZ() + 0.5, 6,
+			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, was.isAir() ? fixed : was), target.getX() + 0.5, target.getY() + 0.5, target.getZ() + 0.5, 6,
 				0.25, 0.25, 0.25, 0.05);
 		}
 		remove(level, f.id(), target);
@@ -200,7 +207,7 @@ final class Upkeep {
 			if (!com.jaymoskingdoms.Loaded.made(level, p)) {
 				continue;
 			}
-			if (Weathering.undone(level.getBlockState(p)) == null) {
+			if (fix(level, id, p) == null) {
 				remove(level, id, p);
 				continue;
 			}
