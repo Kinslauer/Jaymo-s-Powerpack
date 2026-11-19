@@ -132,7 +132,7 @@ public class SpitBlock extends BaseEntityBlock {
 	}
 
 	/** What the roast yields: for a carcass, what butchering would get out of it; otherwise the cooked counterpart. */
-	private static java.util.List<ItemStack> cookedProduct(ItemStack stack, ServerLevel server) {
+	static java.util.List<ItemStack> cookedProduct(ItemStack stack, ServerLevel server) {
 		if (stack.is(Corpses.CORPSE_ITEM)) {
 			CorpseData data = stack.get(Corpses.CORPSE_DATA);
 			if (data != null) {
@@ -168,7 +168,7 @@ public class SpitBlock extends BaseEntityBlock {
 	}
 
 	/** How many tears this roast yields: a whole carcass more than a single piece. */
-	private static int chunksFor(ItemStack stack) {
+	static int chunksFor(ItemStack stack) {
 		return stack.is(Corpses.CORPSE_ITEM) ? SpitBlockEntity.CHUNKS_PER_ANIMAL : SpitBlockEntity.CHUNKS_PER_PIECE;
 	}
 

@@ -735,6 +735,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Remarks.register();
 		TableTalk.register();
 		CampSuppers.register();
+		// life round a camp's fire outside supper: sitting, talk, the spit
+		Firesides.register();
 		Gestures.register();
 		GroundSeats.register();
 		Loans.register();
