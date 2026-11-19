@@ -3,7 +3,7 @@ status: in-review
 task: Medieval building library (Andy's 88 schematic picks)
 branch: claude/project-thread-wkd1gp
 with: cloud thread "Find medieval building schematics online"
-pr: 
+pr: 1854
 mods: kingdoms
 versions: 
 started: 2026-11-19
