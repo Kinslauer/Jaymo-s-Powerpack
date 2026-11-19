@@ -100,6 +100,13 @@ public final class Senses {
 	static final double VIEW_COS = 0.5, BEHIND = 0.3, BEHIND_CLOSE = 2.0;
 	/** A mob with darkvision sees in the dark as in this much light (0 dark, 1 full light). */
 	static final double DARKVISION_LIGHT = 0.6;
+	/**
+	 * (2026-11-19) Andy's clips: a camp's warband saw him from far below at dusk, high on a cliff and outside where they were
+	 * looking. Someone more than {@link #ABOVE_FROM} blocks above a mob's eyes is seen at {@link #ABOVE} of the range (nobody
+	 * scans the cliffs over their heads), and one steeper than {@link #UP_LIMIT} degrees over its look counts as outside its
+	 * view cone, as one behind it ({@link #BEHIND}). Not within {@link #BEHIND_CLOSE}.
+	 */
+	static final double ABOVE_FROM = 4.0, ABOVE = 0.5, UP_LIMIT = 40.0;
 	/** A player walking about (moving, not sneaking) this near (blocks) is heard, whatever the light or where the mob looks. */
 	static final double HEARD = 8.0;
 	/** Creatures of the night and the dark, that see in it: {@code jaymoskingdoms:darkvision}. */
@@ -306,6 +313,15 @@ public final class Senses {
 		SNEAKING_PAST.remove(id);
 	}
 
+	/**
+	 * (2026-11-19) Whose sight of a player follows the light, the way they look and the height ({@link #factor}): every mob that
+	 * {@link #sensing senses}, and the folk too (a camp's raiders and archers, a realm's guards) and the outlaws among the
+	 * villagers ({@link Outlaws#is}). Andy: the camp folk saw him from as far as their follow range in the dark, from far below.
+	 */
+	static boolean sighted(Mob mob) {
+		return sensing(mob) || mob instanceof Folk || Outlaws.is(mob);
+	}
+
 	/** A mob that senses (sight, the gauge, unaware blows): hostile or neutral, bosses too, not one of the kingdoms' own folk. */
 	static boolean sensing(Mob mob) {
 		return (mob instanceof Enemy || mob instanceof NeutralMob) && !(mob instanceof Folk);
@@ -349,14 +365,44 @@ public final class Senses {
 		return view.dot(to.scale(1.0 / len)) >= (looker instanceof Mob mob && boss(mob) ? BOSS_VIEW_COS : VIEW_COS);
 	}
 
+	/** (2026-11-19) {@code player} is more than {@link #UP_LIMIT} degrees above where {@code looker} looks (straight up is 90). */
+	static boolean steeplyAbove(LivingEntity looker, LivingEntity player) {
+		Vec3 to = player.getEyePosition().subtract(looker.getEyePosition());
+		double flat = to.horizontalDistance();
+		if (to.y <= 0.0) {
+			return false;
+		}
+		// (its own look up or down: a mob's pitch is negative looking up)
+		double up = Math.toDegrees(Math.atan2(to.y, Math.max(flat, 1.0E-4))) + looker.getXRot();
+		return up > UP_LIMIT;
+	}
+
 	/**
 	 * What a mob's range for noticing {@code player} is multiplied by, on top of vanilla's (see the class comment). 1 for a
 	 * creative or spectator player, or anything that isn't a hostile or neutral mob. A boss's never drops below {@link #BOSS_SIGHT_MIN}.
 	 */
 	public static double factor(LivingEntity self, ServerLevel level, Entity looking) {
-		if (!(self instanceof ServerPlayer player) || !(looking instanceof Mob looker) || touched(player) || !sensing(looker) || locked(looker, player)) {
+		if (!(self instanceof ServerPlayer player) || !(looking instanceof Mob looker) || touched(player) || !sighted(looker) || locked(looker, player)) {
 			return 1.0;
 		}
+		return sight(player, level, looker);
+	}
+
+	/**
+	 * (2026-11-19) Whether {@code looker} notices {@code player} within {@code range} blocks: in its line of sight and near enough
+	 * for the light, where it looks, how high above it they are and the rest of {@link #factor} (a captain naming himself only
+	 * once he's really seen you, {@code Captains.meet}). Creative and spectator players are never noticed this way.
+	 */
+	public static boolean notices(Mob looker, ServerPlayer player, double range) {
+		if (touched(player) || !looker.hasLineOfSight(player)) {
+			return false;
+		}
+		double f = locked(looker, player) ? 1.0 : sight(player, (ServerLevel) looker.level(), looker);
+		return player.distanceTo(looker) <= range * f;
+	}
+
+	/** {@link #factor} for a player and a mob it applies to. */
+	private static double sight(ServerPlayer player, ServerLevel level, Mob looker) {
 		BlockPos eyes = BlockPos.containing(player.getEyePosition());
 		double light = level.getMaxLocalRawBrightness(eyes) / 15.0;
 		// the creatures of the dark see in it
@@ -384,8 +430,15 @@ public final class Senses {
 		if (looker.getLastHurtByMob() == player && looker.tickCount - looker.getLastHurtByMobTimestamp() < REVENGE_TICKS) {
 			f *= REVENGE;
 		}
-		if (player.distanceTo(looker) > BEHIND_CLOSE && !inCone(looker, player)) {
-			f *= BEHIND;
+		if (player.distanceTo(looker) > BEHIND_CLOSE) {
+			// (2026-11-19) well above it, and steeply up out of its sight, as if behind it
+			double rise = player.getEyeY() - looker.getEyeY();
+			if (!inCone(looker, player) || steeplyAbove(looker, player)) {
+				f *= BEHIND;
+			}
+			if (rise > ABOVE_FROM) {
+				f *= ABOVE;
+			}
 		}
 		f *= Identities.hoodSight(player);
 		if (player.isOnFire() || player.hasEffect(MobEffects.GLOWING)) {
