@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.Classes;
+import com.jaymoskingdoms.Doppelgangers;
 import com.jaymoskingdoms.Flaws;
 import com.jaymoskingdoms.GreenskinLife;
 import com.jaymoskingdoms.Heritage;
@@ -75,8 +76,8 @@ final class LifeStoryScreen extends Screen {
 	 * the page has stood this long (ms) unanswered. The road's page is only ever its title.
 	 */
 	static final long SUB_DELAY_MS = 10_000L;
-	/** (0.7.275) The skip-the-story ask: its box's size. */
-	static final int ASK_W = 240, ASK_H = 96;
+	/** (0.7.275) The skip-the-story ask: its box's size, and the height its words may take (the buttons go under them). */
+	static final int ASK_W = 240, ASK_H = 140, ASK_TEXT_H = 70;
 	/** (0.7.282) The figure of you at the foot of the left side ({@link StoryFigure}): its most height, and the least room it's drawn in. */
 	static final int FIGURE_H = 96, FIGURE_MIN_H = 48;
 	/**
@@ -164,6 +165,10 @@ final class LifeStoryScreen extends Screen {
 	private int scroll, contentH, viewH;
 	/** (0.7.275) Whether "On second thought..." is asking if they'd skip the story. */
 	private boolean asking;
+	/** The ask's leave-it-all-to-fate and wear-a-kept-face buttons, and the kept-face ask's two ({@link Doppelgangers}). */
+	private @Nullable Button fateAll, pastFace, keepFace, dropFace;
+	/** The life that just ended, offered to keep as a doppelganger preset (null: none, or answered). */
+	private static Doppelgangers.@Nullable Offer offered;
 
 	/** The story owed (the screen comes back whenever it's shut), the realms there are to name, and the answers so far. */
 	private static boolean owed;
@@ -199,6 +204,7 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	static void register() {
+		ClientPlayNetworking.registerGlobalReceiver(Doppelgangers.Offer.TYPE, (payload, context) -> offered = payload);
 		ClientPlayNetworking.registerGlobalReceiver(LifeStory.Open.TYPE, (payload, context) -> {
 			owed |= payload.forced();
 			realms = payload.realms();
@@ -250,6 +256,7 @@ final class LifeStoryScreen extends Screen {
 			shutRoads = List.of();
 			draft = new Draft();
 			creatorScreen = null;
+			offered = null;
 			presetAt = -1;
 			narrated = null;
 			toRead.clear();
@@ -788,23 +795,92 @@ final class LifeStoryScreen extends Screen {
 			CreatorTab.build(this.width, this.height, this.font, this::addRenderableWidget, this::rebuildWidgets, null);
 		}
 		int ax = (this.width - ASK_W) / 2, ay = top() + (panelH() - ASK_H) / 2;
-		this.skipYes = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.story.skip.yes"), b -> {
-			draft.explicit = true;
-			randomize(false);
-			if (draft.sparks[0] == 0 && draft.sparks[1] == 0 && draft.sparks[2] == 0 && !draft.sparksTouched) {
-				Arrays.fill(draft.sparks, 1);
-			}
-			this.asking = false;
-			// (with MCA's creator to come, the rows are a tab of it: this screen steps aside)
-			if (tabbed()) {
-				hush();
-				onClose();
-				return;
-			}
-			this.scroll = 0;
-		}).bounds(ax + 10, ay + ASK_H - 24, ASK_W / 2 - 14, 16).build());
+		this.skipYes = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.story.skip.yes"), b -> skipStory(null)).bounds(ax + 10, ay + ASK_H - 24, ASK_W / 2 - 14, 16).build());
 		this.skipNo = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.story.skip.no"), b -> this.asking = false)
 			.bounds(ax + ASK_W / 2 + 4, ay + ASK_H - 24, ASK_W / 2 - 14, 16).build());
+		// Andy: "add another option to the origin story, after choosing gender and skipping, to TRULY randomize, everything
+		// else. then you start. nothing else is told or chosen."
+		this.fateAll = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.story.fate_all"), b -> {
+			this.asking = false;
+			leaveAllToFate();
+		}).bounds(ax + 10, ay + ASK_TEXT_H + 4, ASK_W - 20, 16).build());
+		this.fateAll.setTooltip(Ui.tipOf(Component.translatable("gui.jaymoskingdoms.story.fate_all.desc")));
+		// a face kept from a life that ended: skipped as ever, with that face and that life's picks on the creator
+		CharacterPresets.Preset face = CharacterPresets.lastFace();
+		this.pastFace = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.story.past_face", face == null ? "" : face.name), b -> {
+			CharacterPresets.Preset kept = CharacterPresets.lastFace();
+			if (kept != null) {
+				skipStory(kept);
+			}
+		}).bounds(ax + 10, ay + ASK_TEXT_H + 24, ASK_W - 20, 16).build());
+		this.pastFace.setTooltip(Ui.tipOf(Component.translatable("gui.jaymoskingdoms.story.past_face.desc")));
+		this.keepFace = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.doppel.keep"), b -> keepFace(true))
+			.bounds(ax + 10, ay + ASK_H - 24, ASK_W / 2 - 14, 16).build());
+		this.dropFace = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.doppel.drop"), b -> keepFace(false))
+			.bounds(ax + ASK_W / 2 + 4, ay + ASK_H - 24, ASK_W / 2 - 14, 16).build());
+	}
+
+	/**
+	 * The story skipped (its "Skip the story"): every row drawn at random, or set from {@code preset} (a kept face's, with
+	 * that face put on), for the character creator to change.
+	 */
+	private void skipStory(CharacterPresets.@Nullable Preset preset) {
+		draft.explicit = true;
+		randomize(false);
+		if (draft.sparks[0] == 0 && draft.sparks[1] == 0 && draft.sparks[2] == 0 && !draft.sparksTouched) {
+			Arrays.fill(draft.sparks, 1);
+		}
+		if (preset != null) {
+			presetAt = CharacterPresets.all().indexOf(preset);
+			presetTyped = preset.name;
+			apply(preset);
+		}
+		this.asking = false;
+		// (with MCA's creator to come, the rows are a tab of it: this screen steps aside)
+		if (tabbed()) {
+			hush();
+			onClose();
+			return;
+		}
+		this.scroll = 0;
+	}
+
+	/**
+	 * Andy: "TRULY randomize, everything else. then you start. nothing else is told or chosen." Past the gender, every
+	 * answer is drawn (blood, upbringing, childhood, youth, calling, faith, the class's first pick, the ideal, bond and
+	 * flaw), the start is fate's, and with MCA the look and name are drawn on the server and its creator never opens.
+	 * Nothing is shown: the screen shuts at once and the story is lived.
+	 */
+	private void leaveAllToFate() {
+		draft.explicit = false;
+		randomize(true);
+		java.util.Random random = new java.util.Random();
+		for (int i = 0; i < draft.sparks.length; i++) {
+			draft.sparks[i] = 1 + random.nextInt(3);
+		}
+		draft.sparksTouched = true;
+		settle();
+		if (McaCompat.LOADED) {
+			McaCreatorDrop.drop();
+		}
+		ClientPlayNetworking.send(new LifeStory.Fated(life(draft.gender)));
+		quietUntil = System.currentTimeMillis() + LIVE_GRACE_MS;
+		hush();
+		onClose();
+	}
+
+	/** The kept-face ask answered: the life that ended is saved as a preset (a doppelganger's), or let go. */
+	private void keepFace(boolean keep) {
+		Doppelgangers.Offer offer = offered;
+		offered = null;
+		if (keep && offer != null) {
+			CharacterPresets.Preset p = CharacterPresets.fromOffer(offer);
+			if (CharacterPresets.save(p)) {
+				presetAt = CharacterPresets.all().indexOf(p);
+				presetTyped = p.name;
+			}
+		}
+		rebuildWidgets();
 	}
 
 	/** The footer buttons where the other pages have them (under the right pane, and the skip button under the left). */
@@ -1173,7 +1249,7 @@ final class LifeStoryScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-		if (this.asking) {
+		if (modal()) {
 			// (only the ask's buttons answer while it's up)
 			return super.mouseClicked(event, doubleClick);
 		}
@@ -1300,7 +1376,7 @@ final class LifeStoryScreen extends Screen {
 
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-		if (this.asking) {
+		if (modal()) {
 			return true;
 		}
 		// (0.7.356) the wheel turns the carousel
@@ -1321,7 +1397,7 @@ final class LifeStoryScreen extends Screen {
 	@Override
 	public boolean keyPressed(KeyEvent event) {
 		// (0.7.356) left and right (or A and D) turn the carousel
-		if (!this.asking && carousel(step())) {
+		if (!modal() && carousel(step())) {
 			int key = event.key();
 			if (key == InputConstants.KEY_LEFT || key == InputConstants.KEY_A) {
 				turn(-1);
@@ -1450,8 +1526,12 @@ final class LifeStoryScreen extends Screen {
 			// (Andy: "gender should be before you can select skip the story")
 			this.skip.visible = (s.question != null || s.gender) && !roadOnly() && (!McaCompat.LOADED || draft.gender >= 0);
 		}
-		if (this.asking) {
-			ask(graphics);
+		if (modal()) {
+			if (offered != null) {
+				keepAsk(graphics);
+			} else {
+				ask(graphics);
+			}
 			for (Button b : new Button[] {this.next, this.back, this.look, this.heritageButton, this.classButton, this.later, this.skip}) {
 				if (b != null) {
 					b.visible = false;
@@ -1466,9 +1546,20 @@ final class LifeStoryScreen extends Screen {
 				}
 			}
 		}
+		boolean asked = this.asking && offered == null;
 		if (this.skipYes != null && this.skipNo != null) {
-			this.skipYes.visible = this.asking;
-			this.skipNo.visible = this.asking;
+			this.skipYes.visible = asked;
+			this.skipNo.visible = asked;
+		}
+		if (this.fateAll != null) {
+			this.fateAll.visible = asked;
+		}
+		if (this.pastFace != null) {
+			this.pastFace.visible = asked && CharacterPresets.lastFace() != null && ClientPlayNetworking.canSend(Doppelgangers.Wear.TYPE);
+		}
+		if (this.keepFace != null && this.dropFace != null) {
+			this.keepFace.visible = offered != null;
+			this.dropFace.visible = offered != null;
 		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}
@@ -1794,6 +1885,35 @@ final class LifeStoryScreen extends Screen {
 					: Component.translatable("gui.jaymoskingdoms.story.no_realms");
 	}
 
+	/** Whether an ask is up over the page (the skip-the-story ask, or the kept-face one), so only its buttons answer. */
+	private boolean modal() {
+		return this.asking || offered != null;
+	}
+
+	/**
+	 * The kept-face ask, over the dimmed page, as a new life's story opens: the life that ended ({@code offered}), and whether
+	 * its face is saved as a preset to wear again, as a doppelganger.
+	 */
+	private void keepAsk(GuiGraphicsExtractor graphics) {
+		Doppelgangers.Offer offer = offered;
+		if (offer == null) {
+			return;
+		}
+		graphics.fill(0, 0, this.width, this.height, 0xC0000000);
+		int x = (this.width - ASK_W) / 2, y = top() + (panelH() - ASK_H) / 2;
+		Ui.panel(graphics, x, y, ASK_W, ASK_H, ACCENT);
+		String name = CharacterPresets.faceName(offer);
+		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.doppel.ask", name), x + 10, y + 8, ASK_W - 20, ACCENT);
+		int ty = y + 24;
+		for (FormattedCharSequence line : this.font.split(Component.translatable("gui.jaymoskingdoms.doppel.desc", name), ASK_W - 20)) {
+			if (ty + Ui.LINE > y + ASK_H - 28) {
+				break;
+			}
+			graphics.text(this.font, line, x + 10, ty, Ui.TEXT);
+			ty += Ui.LINE;
+		}
+	}
+
 	/** (0.7.275) The skip-the-story ask, over the dimmed page: the question, what skipping does, and the yes and no under it. */
 	private void ask(GuiGraphicsExtractor graphics) {
 		if (pickerPage(step())) {
@@ -1806,7 +1926,7 @@ final class LifeStoryScreen extends Screen {
 		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.story.skip.ask"), x + 10, y + 8, ASK_W - 20, ACCENT);
 		int ty = y + 24;
 		for (FormattedCharSequence line : this.font.split(Component.translatable("gui.jaymoskingdoms.creator.skip.desc"), ASK_W - 20)) {
-			if (ty + Ui.LINE > y + ASK_H - 26) {
+			if (ty + Ui.LINE > y + ASK_TEXT_H) {
 				break;
 			}
 			graphics.text(this.font, line, x + 10, ty, Ui.TEXT);
@@ -2270,6 +2390,12 @@ final class LifeStoryScreen extends Screen {
 		p.flaws = draft.flaws;
 		p.switches = draft.switches;
 		p.sparks = draft.sparks.clone();
+		// (a kept face saved over keeps its face)
+		CharacterPresets.Preset old = CharacterPresets.named(p.name);
+		if (old != null) {
+			p.face = old.face;
+			p.mca = old.mca;
+		}
 		if (CharacterPresets.save(p)) {
 			presetAt = CharacterPresets.all().indexOf(p);
 		}
@@ -2356,6 +2482,10 @@ final class LifeStoryScreen extends Screen {
 		draft.sparksTouched = true;
 		draft.raisedRealm = realmNamed(p.raisedRealm == null ? "" : p.raisedRealm);
 		settle();
+		// (Doppelgangers) a kept face is put on with its picks; any other preset takes a face worn off again
+		if (ClientPlayNetworking.canSend(Doppelgangers.Wear.TYPE)) {
+			ClientPlayNetworking.send(new Doppelgangers.Wear(p.face == null ? "" : p.face, CharacterPresets.look(p)));
+		}
 	}
 
 	// ---- a harder life (0.7.420) --------------------------------------------------------------------------------------
