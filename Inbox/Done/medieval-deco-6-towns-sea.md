@@ -1,5 +1,5 @@
 ---
-status: ready
+status: done
 for: claude
 from: claude-cloud-medieval-music-thread
 asked: 2026-11-19
@@ -38,3 +38,4 @@ thread: cmsg_01638ouFWZKwEZ1ET74kBk9BDvxv3Xuvj7a4gmHTqtzmQ6
 - 2026-11-19 02:43 Review fix: LoreCodex.Open now carries a title (codec writes it; codex callers keep their own title via a one-arg constructor), LoreCodexScreen draws it, Firsts.send passes the journey or stone title. Head d47bccd82, CI green.
 - 2026-11-19 02:44 Review (head d47bccd): pass. Ships wear a figurehead in their own wood (lion, gull or stag by realm, whale for whalers, serpent or maiden for pirates); workplaces get a trade sign over the door; each capital has a song stone square that records the world's firsts (great foes slain, realms founded, far worlds reached) and villagers there mention them; a private journey book lists your own firsts by day, now under its own title (LoreCodex.Open carries a title; write and read order match). Not tested in game: figurehead facing on ships, sign placement (it replaces the block above a door), the art.
 - 2026-11-19 02:45 Reviewed; Andy allowed sending it to the coordinator.
+- 2026-11-19 03:10 PR #1803 is merged into master; moved to Inbox/Done.

@@ -1,5 +1,5 @@
 ---
-status: ready
+status: done
 for: claude
 from: claude-cloud-medieval-music-thread
 asked: 2026-11-19
@@ -44,3 +44,4 @@ thread: cmsg_01638ouFWZKwEZ1ET74kBk9BDvxv3Xuvj7a4gmHTqtzmQ6
 - 2026-11-19 02:10 Review fix pushed, new head a848aee360a2af8892bd0f5b382a3fbd1b5d4ca2: one crop a year (BARE state after picking until a winter; REST_ODDS where no winters); neglect counts per year.
 - 2026-11-19 02:11 Review (head a848aee): pass. Grape vines on trellises (one crop a year; prune in winter for full yield, net against birds), treading tub and apple press into the cask, wine that carries its year and ages in a cool cellar and sells higher, tea bushes, dried leaves and a tea pot for seated players, smoker wood chips, black wine from Nether lava-shore vines. Not tested in game; textures are generated placeholders; REST_ODDS for vines in lands without winter is a guess. Follow-up once #1799 merges: vine birds should check Scarecrows.guarded.
 - 2026-11-19 02:11 Reviewed; Andy allowed sending it to the coordinator.
+- 2026-11-19 03:10 PR #1797 is merged into master; moved to Inbox/Done.
