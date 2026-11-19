@@ -72,7 +72,7 @@ public final class PlaceMusic {
 
 	private static void hush() {
 		if (current != null) {
-			current.stop();
+			current.end();
 		}
 		current = null;
 		place = "";
@@ -96,7 +96,7 @@ public final class PlaceMusic {
 			if (current.isStopped()) {
 				nextAt = age + REST_MIN + minecraft.level.getRandom().nextInt(REST_MAX - REST_MIN + 1);
 			}
-			current.stop();
+			current.end();
 			current = null;
 		}
 		if (current != null) {
@@ -155,6 +155,10 @@ public final class PlaceMusic {
 			this.volume = 0.0001F;
 			this.relative = true;
 			this.attenuation = SoundInstance.Attenuation.NONE;
+		}
+
+		void end() {
+			this.stop();
 		}
 
 		boolean faded() {
