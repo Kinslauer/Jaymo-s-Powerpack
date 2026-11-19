@@ -134,7 +134,7 @@ public final class AlarmBells {
 
 	private static void falseAlarm(ServerLevel level, ServerPlayer player, Faction f, long now) {
 		String key = player.getUUID() + "|" + f.id();
-		long day = level.getDayTime() / 24000L;
+		long day = level.getGameTime() / 24000L;
 		long[] rings = FALSE_RINGS.computeIfAbsent(key, k -> new long[] {day, 0L});
 		if (rings[0] != day) {
 			rings[0] = day;

@@ -57,7 +57,7 @@ public final class ClericHeals {
 		if (now % EVERY != 0) {
 			return;
 		}
-		long day = level.getDayTime() / 24000L;
+		long day = level.getGameTime() / 24000L;
 		for (Faction f : Factions.all(server)) {
 			if (f.fallen() || f.type() == FactionType.BARBARIAN || !level.isPositionEntityTicking(f.seat())) {
 				continue;

@@ -96,7 +96,7 @@ public final class RaidBeasts {
 
 	private static long lost(ServerLevel level, Faction town) {
 		long[] l = LOST.get(town.id());
-		return l == null || l[0] != level.getDayTime() / 24000L ? 0L : l[1];
+		return l == null || l[0] != level.getGameTime() / 24000L ? 0L : l[1];
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -135,7 +135,7 @@ public final class RaidBeasts {
 		if (town == null) {
 			return;
 		}
-		long day = level.getDayTime() / 24000L;
+		long day = level.getGameTime() / 24000L;
 		long[] l = LOST.computeIfAbsent(town.id(), id -> new long[] {day, 0L});
 		if (l[0] != day) {
 			l[0] = day;
