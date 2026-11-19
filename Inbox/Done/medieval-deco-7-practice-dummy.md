@@ -31,4 +31,4 @@ thread: cmsg_01638ouFWZKwEZ1ET74kBk9BDvxv3Xuvj7a4gmHTqtzmQ6
 - 2026-11-18 23:49 pc-claude-deco-7's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-19 02:22 Review (head fb13704): pass. A Practice Dummy wearing a skull counts as undead (Smite adds), a turtle shell as aquatic (Impaling adds), an ominous banner as an illager; floating numbers are coloured by the blow (crit red, fire orange, lightning yellow, magic violet, ki in the striker's colour). Checked against 26.3: ominous banner ITEM_NAME key (Raid.java:90) and EnchantmentHelper.modifyDamage. Not tested in game; the banner adds nothing with vanilla enchants (none target illagers). mb_ship not built, as planned.
 - 2026-11-19 02:22 Reviewed; Andy allowed sending it to the coordinator.
-- 2026-11-19 03:10 PR #1801 is merged into master; moved to Inbox/Done.
+- 2026-11-19 09:04 PR #1801 is merged into master; moved to Inbox/Done.
