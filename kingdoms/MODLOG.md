@@ -15513,3 +15513,11 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - **On alert**: every fighter of the camp (and its brave) goes for the nearest foe on the camp's ground: anyone who struck one of the camp, and any monster that walks in. With no foe in sight they patrol, each walking to a fresh spot round the palisade every 8 s. Builders and the timid stop work and keep to the fire.
 - **Standing down**: once no foe has been on the ground for 30 s (and the alert has lasted at least 45 s), someone says it's quiet and the camp goes back to its day. Fights inside a camp (orc brawls) never sound it; illager camps and pirate coves keep their own ways.
 - New class `CampAlarm` (tuning at its top), lang part `camp-alarm.json`. Compiled with Gradle; not played in game.
+
+## 0.10.90 (2026-11-19): Villagers stop to talk and reply from their own shot (#1847)
+
+- **Talking to a villager is a cutscene start to finish** (Andy's clip: after a Chat pick the villager walked off mid-sentence and the camera came straight back). From the moment their talk menu opens they stand still, turned to you, and stay that way until the talk is over, not only while the menu is up.
+- **The reply gets its shot**: MCA shuts its menu as soon as a chat, joke or story is picked. Now the letterbox plays on: your line on camera for two seconds, then the villager's reply from their eyes for as long as their words are over their head (2 to 12 seconds). Only then does the camera come back and they go back to their work.
+- As in every cutscene: you are held in place and can't be hurt while it runs. It breaks off if either of you is hurt, you end up more than 10 blocks apart, or either of you falls out of play. Leaving the menu with nothing said ends it at once, as before.
+- `Conversations` (server hold), `DialogueCinematic` (reply phase), `DialogueCue.Done` (client tells the server the talk is over), `McaTalkHoldMixin` (menu opening starts it).
+- Built; not played.
