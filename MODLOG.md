@@ -6206,3 +6206,9 @@ Built; not played in game.
 - Break Free, VillagersPlus, MasterCutter, Vanilla Fireflies and Vanilla Constructs have no CurseForge file, so they're in `packModsNoCf` (server, profile and dev game, not the CurseForge import zip).
 - `checkPackMods` passes (488 mods, loader 0.19.5). Not played: the overlaps with MCA villagers, the Saw recipes and Effectual's fireflies haven't been looked at in game.
 - Incendium is held back for its own patch: its Nether file lists its biomes outright, so Fabric's biome API (which adds our Gloam, Ash and Abyss) would have nothing to add them to and the demons' country would stop generating.
+
+## 0.25.42 (2026-11-19): practice dummy: kinds and coloured numbers (#1801)
+
+- **Kinds**: a Practice Dummy wearing a skeleton, wither skeleton or zombie skull counts as undead (Smite bites), a turtle shell as aquatic (Impaling bites), an ominous banner as an illager. The numbers it shows include the extra.
+- **Coloured numbers**: floating damage numbers take a colour from the blow: crits red, fire orange, lightning yellow, magic violet, ki in the striker's ki colour; plain blows keep the white, gold and red size colours.
+- Medieval Buildings is not added (no 26.3 build yet). Built; not played.
