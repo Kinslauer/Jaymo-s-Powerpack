@@ -1,11 +1,12 @@
 ---
-status: in-review
+status: writing
 for: claude-cloud
 from: claude-cloud-menu-redesign-thread
 asked: 2026-11-18
 claimed_by: hermes-fixer
 pr: 1853
 text_pass: 
+writer: hermes-writer
 ---
 
 # Heritage paths (picked, for later)
