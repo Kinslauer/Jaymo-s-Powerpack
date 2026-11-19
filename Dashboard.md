@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 20:14). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 15:15). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -20,13 +20,13 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 ## Stuck
 
 - [[Agents/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]]: stalled, last change 2026-11-13. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/forest-fire-pack|forest-fire-pack]]: stalled, last change 2026-11-16. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/forest-fire-pack|forest-fire-pack]]: stalled, last change 2026-11-15. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hands-on-cooking-realtime|hands-on-cooking-realtime]]: stalled, last change 2026-11-17. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/harness-upkeep|harness-upkeep]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/heritage-paths|heritage-paths]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]]: stalled, last change 2026-11-18. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/scrying-orb|scrying-orb]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/sky-lands-aether-biomes|sky-lands-aether-biomes]]: stalled, last change 2026-11-16. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/scrying-orb|scrying-orb]]: stalled, last change 2026-11-18. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/sky-lands-aether-biomes|sky-lands-aether-biomes]]: stalled, last change 2026-11-15. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
@@ -44,6 +44,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1860 Goblins take the downed alive too (Kingdoms, 2026-11-19)
 - [ ] #1859 Slower NPCs, and barbarians take the downed alive (Kingdoms, 2026-11-19)
 - [ ] #1858 campfire life - camps sit, talk, sing and share a spit roast round their fire (Kingdoms, Kitchen, 2026-11-19)
+- [ ] #1857 The minimap stops showing the Aether again (Powers, 2026-11-19)
 - [ ] #1856 speaker shot finds a clear angle (Powers, Kingdoms, 2026-11-19)
 - [ ] #1855 Take bows and arrows from any downed foe (Kingdoms, 2026-11-19)
 - [ ] #1854 masons' pattern books - the building library (Kingdoms, 2026-11-19)
@@ -95,12 +96,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1798 the hooded cloak leans in the world's wind (Powers, Kingdoms, 2026-11-19)
 - [ ] #1797 drinks and kitchen - vines, press, vintage, tea, smoke chips, black wine (Kitchen, 2026-11-19)
 - [ ] #1796 Vanilla+ mods join the pack (Powers, 2026-11-19)
-- [ ] #1795 Medieval Music pack, trimmed and on by default (Powers, Kingdoms, 2026-11-19)
-- …and 243 older ones.
+- …and 244 older ones.
 
 ## Health
 
-22 problems in the notes: [[Health]].
+20 problems in the notes: [[Health]].
 
 ## Last week
 
