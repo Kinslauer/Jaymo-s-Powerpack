@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 20:36). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 20:38). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -9,7 +9,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Inbox/class-trees-plan|class-trees-plan]] · 2026-11-19 20:22 Parked (not for a bot): waits on Andy fleshing out the Monk/Paladin/Cleric/Druid/Warlock trees. Raised; don't raise again.
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 - [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
-- [[Inbox/wither-model|wither-model]] · 2026-11-18 5:27 PM hermes-modeller: previews ready for Andy's look. kingdoms/art/wither.bbmodel is valid JSON and bakes cleanly (7 bones, 58 quads, idle animat…
+- [[Inbox/wither-model|wither-model]] · 2026-11-19 20:38 Raised to Andy 2026-11-19 3:40 PM ET with wither-rest.png (vault coordinator: the skulls read as one lumpy block on a column; no clear shoulde…
 
 ## Stuck
 
