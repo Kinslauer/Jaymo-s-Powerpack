@@ -2495,3 +2495,8 @@ Added a new **Cooking Block** to the Functional creative tab. The block has iron
 - **Scarecrow** (hay and sticks; set a carved pumpkin on its head, sneak with an empty hand to take it back): rabbits won't raid carrots within 8 blocks of it (`RaidGardenGoalMixin`) and crop eaters (`#jaymoskitchen:crop_eaters`, rabbits and rats) nearby run from it. Hook for the vine birds and the Practice Dummy: `Scarecrows.guarded(level, cropPos)`, `Scarecrows.addGuard(...)` and `Scarecrows.scare(level, at)`.
 - Classes: `farmwater/` (`FarmWater`, `WaterBarrelBlock`, `FishBarrelBlock`/`Entity`, `TroughBlock`, `Troughs`, `WateringCanItem`, `FishTrapBlock`/`Entity`, `WaterStock`, `ScarecrowBlock`, `Scarecrows`), `compat/TideCompat`. Art: `tools/gen_farm_water.py` (own textures, the rest vanilla block textures).
 - Not built: fish barrels in Kingdoms' fishers' huts and market stalls. Built by CI only; not played.
+
+## 0.6.54 (2026-11-19): scarecrows keep the birds off the vines (#1807)
+
+- **Vine birds**: a scarecrow wearing a carved pumpkin (`Scarecrows.guarded`) now keeps the birds off ripe grape vines within its reach, as it already kept rabbits off the crops. A net still works anywhere.
+- Built by CI; not played.

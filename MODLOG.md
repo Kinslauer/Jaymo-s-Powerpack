@@ -6244,3 +6244,8 @@ Built; not played in game.
 
 - **Pack**: added Interactive Foliage 2.2.1 and its library SWAY API 2.4.5 (both official 26.3 Fabric builds, shipped unchanged). Grass, flowers, crops and other plants lean away from players, mobs and dropped items and spring back. Works with Sodium, Iris and shaders. Its settings (radius, strength) are on its Mod Menu screen.
 - Their declared needs (Fabric API 0.161+, loader 0.19.5+, Minecraft 26.3, Java 25) checked by hand against the pack; not built or played.
+
+## 0.25.48 (2026-11-19): flotsam can bring up a dead one's token (#1807)
+
+- **Flotsam**: with Jaymo's Kingdoms loaded, about one odd catch in twenty-five from a ripple spot is a dead one's token (a ring or a carved spoon naming a village near there, `Remains.token` through `KingdomsCompat`). Without Kingdoms, or with no village in the world, it is one of the odd bits as before.
+- Built by CI; not played.
