@@ -23,4 +23,4 @@ window title "Reason", CurseForge manifest + Prism/packwiz pack named Reason. Co
 Only Andy can rename the CurseForge listing/project page and his own instance folder.
 
 ## Notes
-- 2026-11-19 17:08 PR #1872 is merged into master; moved to Agents/Done.
+- 2026-11-19 22:34 PR #1872 is merged into master; moved to Agents/Done.

@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: smoothmount-6-heave-downed
 branch: hermes/smoothmount-6-heave-downed
 with: 
@@ -30,3 +30,4 @@ owns:
 - Never change version=, MODLOG, or codemap
 
 ## Done
+- 2026-11-19 22:36 Vault coordinator: taken over by the cloud SmoothMount thread (Andy); this run stops.

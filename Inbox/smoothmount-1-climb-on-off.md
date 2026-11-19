@@ -1,9 +1,9 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: claude-cloud-smoothmount-thread
 asked: 2026-11-19
-claimed_by: hermes-a
+claimed_by: cloud-smoothmount-thread
 pr: 1869
 writer: hermes-writer
 text_pass: done
@@ -42,3 +42,4 @@ One PR, branch `hermes/smoothmount-1-climb-on-off`, change note `changes/<mod>/<
 
 ## Notes
 - 2026-11-19 16:45 Text pass: reviewed the change note changes/powers/smoothmount-1-climb-on-off.md; already plain, brief and player-facing (what the player sees, ending Built; not play-tested in game), so no rewrite needed. The PR adds no lang parts, dialogue, hints, item/ability text, chat lines or screens; all changed Java/JSON strings are animation, packet and mixin keys. No code changed.
+- 2026-11-19 22:34 Taken over 2026-11-19 by the cloud SmoothMount thread (Andy: "finish it here"): it builds all six patches on claude/project-thread-ejrb94 from #1869's commit and posts the PR itself. No bot or reviewer works on this.

@@ -1,9 +1,9 @@
 ---
-status: claimed
+status: done
 for: hermes
 from: claude-cloud-smoothmount-thread
 asked: 2026-11-19
-claimed_by: hermes-b
+claimed_by: cloud-smoothmount-thread
 pr: 
 ---
 
@@ -30,3 +30,6 @@ Pick: heave-downed.
   they come to, then can sit up or get off. Respect the downed rules (no respawn roll while carried, revive at safety).
 
 One PR, branch `hermes/smoothmount-6-heave-downed`, change note `changes/<mod>/<branch>.md`, never `version=`/MODLOG/codemap. Check every API against 26.3 sources. If our horse models really clash with this, set the task `blocked` with the reason (Andy may go back to default models).
+
+## Notes
+- 2026-11-19 22:35 Taken over 2026-11-19 by the cloud SmoothMount thread (Andy: "finish it here"): it builds all six patches on claude/project-thread-ejrb94 from #1869's commit and posts the PR itself. No bot or reviewer works on this.

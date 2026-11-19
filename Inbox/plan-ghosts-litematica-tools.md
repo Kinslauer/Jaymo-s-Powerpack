@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: sent
 for: any
 from: coordinator
 asked: 2026-11-19
@@ -52,3 +52,5 @@ SchematicFiles, Designs. `MasonTable` around line 580 builds today's top-8 needs
 - Check every 26.3 render/keybind API against the sources. Build `kingdoms/` to prove it compiles.
 - Andy tests by merging, so don't ask him to test an unmerged build.
 - 2026-11-19 20:39 Review (head 82b21c6, vault coordinator, reviewer away): code passes - all three asks built (red/orange/blue ghosts, layer view on numpad 8/2 or Ctrl+scroll with action-bar 'Layer N of M', full scrolling material list with dirt and door/bed halves counted). Build Kingdoms green; Build Powers failed on a Gradle download error before compiling (this PR touches only Kingdoms), so the failed job was re-run. Sent to Andy once checks are green.
+- 2026-11-19 22:37 Review (head e3b5238): pass. Code unchanged since the 82b21c6 review (only CI re-run commits). Build Kingdoms/Kitchen and change-note checks green; Build Powers keeps failing on Maven downloads (error_prone_annotations, cadixdev at/lorenz/bombe not found) on this branch only - Powers builds green on other PRs and this PR touches only Kingdoms. Sent to Andy with that caveat.
+- 2026-11-19 22:37 Reviewed; Andy allowed sending it to the coordinator.

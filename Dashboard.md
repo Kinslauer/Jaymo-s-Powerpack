@@ -1,9 +1,12 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 22:31). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 22:37). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
 
 ## Waiting on you
+
+**Ready to merge** (say "merge" in the project chat):
+- [[Inbox/plan-ghosts-litematica-tools|plan-ghosts-litematica-tools]] · PR #1851 · sent
 
 **Questions for you:**
 - [[Inbox/class-trees-plan|class-trees-plan]] · 2026-11-19 20:22 Parked (not for a bot): waits on Andy fleshing out the Monk/Paladin/Cleric/Druid/Warlock trees. Raised; don't raise again.
@@ -13,16 +16,17 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## Stuck
 
-Nothing stuck.
+- [[Agents/wither-model|wither-model]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-33 waiting for a bot, 3 being built, 2 in review: see [[Kanban]].
+33 waiting for a bot, 2 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1882 JEI shows how to forge the metal harness pieces (Powers, 2026-11-19)
 - [ ] #1881 camp cooks roast whole beasts on the great spit and stand to the side (Kingdoms, Kitchen, 2026-11-19)
 - [ ] #1880 An escape isn't known to the camp until they see you gone (Kingdoms, 2026-11-19)
 - [ ] #1879 Captors take the harness too (Kingdoms, 2026-11-19)
@@ -82,12 +86,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1813 crits - riposte kinds, crit cue, camera punch, heavy crit ring, combat attributes (Powers, 2026-11-19)
 - [ ] #1812 Stealth and posture: cover, backstabs, a fighter's stance (Kingdoms, 2026-11-19)
 - [ ] #1811 A harness piece with no model no longer crashes the game (Kingdoms, 2026-11-19)
-- [ ] #1810 NPC sea ships pay for their powder and shot (Kingdoms, 2026-11-19)
-- …and 256 older ones.
+- …and 257 older ones.
 
 ## Health
 
-Nothing wrong: [[Health]].
+1 problem in the notes: [[Health]].
 
 ## Last week
 
