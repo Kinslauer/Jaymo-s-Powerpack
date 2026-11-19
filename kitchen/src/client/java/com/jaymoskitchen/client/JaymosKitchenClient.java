@@ -55,6 +55,7 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		com.jaymoskitchen.client.climate.DryVeins.register();
 		com.jaymoskitchen.client.climate.ParasiteHud.register();
 		com.jaymoskitchen.client.herb.PmehTooltip.register();
+		com.jaymoskitchen.client.vintner.VintageTooltip.register();
 		// (0.5.1) ragdolls: the bodies the server (or this client, for its own limp player) simulates, drawn here
 		com.jaymoskitchen.client.ragdoll.ClientRagdolls.register();
 		// (0.5.45) a dragged body follows the hand this client draws
