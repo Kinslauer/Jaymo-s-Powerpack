@@ -175,6 +175,8 @@ public final class Brawl {
 		boolean vanished;
 		// guard
 		long guardStart = -1L, guardUntil, guardAt, parryAt, checkAt;
+		// a bitten feint leaves them open from here to there ({@link Feints})
+		long openFrom, openUntil;
 		int blows;
 		long counterAt;
 		@Nullable LivingEntity counterFoe;
@@ -187,6 +189,8 @@ public final class Brawl {
 
 	/** From the mod's init: the damage hooks and the per-tick step. */
 	public static void init() {
+		// (before the vanish dodge, so a blow it cancels still counts as having landed)
+		Feints.init();
 		ServerTickEvents.END_SERVER_TICK.register(Brawl::step);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> STATES.clear());
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register(Brawl::allowDamage);
@@ -233,6 +237,7 @@ public final class Brawl {
 		if (s.rank >= MIN_RANK) {
 			decideGround(level, mob, s, foe, now);
 			decideGuard(level, mob, s, foe, now);
+			Feints.throwFeint(level, mob, foe, s.rank, s.engaged || now < s.drivenUntil, now);
 		}
 	}
 
@@ -317,6 +322,59 @@ public final class Brawl {
 		}
 		s.vanished = false;
 		return true;
+	}
+
+	// ================================================================ for Feints (the same package)
+
+	/** The brawlers within {@code range} of {@code who} that the brain ticked lately, with their ranks. */
+	static Map<Mob, Float> brawlersNear(LivingEntity who, double range, long now) {
+		Map<Mob, Float> found = new java.util.HashMap<>();
+		for (Map.Entry<Mob, State> e : STATES.entrySet()) {
+			Mob mob = e.getKey();
+			State s = e.getValue();
+			if (mob != null && mob != who && s.rank >= MIN_RANK && now - s.seen <= STALE && mob.isAlive() && mob.level() == who.level()
+				&& mob.distanceToSqr(who) <= range * range) {
+				found.put(mob, s.rank);
+			}
+		}
+		return found;
+	}
+
+	/** {@code mob} flinches into a guard of {@code guardTicks}, then is open for {@code openTicks} (a feint bit). */
+	static void flinch(Mob mob, long now, int guardTicks, int openTicks) {
+		State s = STATES.get(mob);
+		if (s == null) {
+			return;
+		}
+		raise(mob, s, now);
+		s.guardUntil = now + guardTicks;
+		s.openFrom = now + guardTicks;
+		s.openUntil = s.openFrom + openTicks;
+		s.guardAt = s.openUntil;
+	}
+
+	/** A quick sidestep for {@code mob}, a few ticks, either way. */
+	static void sidestep(Mob mob, long now) {
+		State s = STATES.get(mob);
+		if (s != null) {
+			s.strafeDir = mob.getRandom().nextBoolean() ? 1 : -1;
+			s.strafeUntil = now + STRAFE_MIN_TICKS;
+		}
+	}
+
+	/** {@code mob} blinks behind {@code attacker} now, if its dodge is ready. */
+	static boolean vanishNow(ServerLevel level, Mob mob, LivingEntity attacker, long now) {
+		State s = STATES.get(mob);
+		return s != null && now >= s.vanishAt && vanish(level, mob, s, attacker, now);
+	}
+
+	/** {@code mob}'s counter on {@code foe} lands at game time {@code at} (as after a parry). */
+	static void counterAt(Mob mob, LivingEntity foe, long at) {
+		State s = STATES.get(mob);
+		if (s != null) {
+			s.counterFoe = foe;
+			s.counterAt = at;
+		}
 	}
 
 	// ================================================================ rank
@@ -652,7 +710,7 @@ public final class Brawl {
 			return true;
 		}
 		long now = level.getGameTime();
-		if (now - s.seen > STALE || now < s.vanishAt || now < s.drivenUntil) {
+		if (now - s.seen > STALE || now < s.vanishAt || now < s.drivenUntil || now >= s.openFrom && now < s.openUntil) {
 			return true;
 		}
 		// only a blow, blast or beam from someone: never a fall, fire, the void or a command
@@ -740,6 +798,10 @@ public final class Brawl {
 			return damage;
 		}
 		long now = level.getGameTime();
+		if (now >= s.openFrom && now < s.openUntil) {
+			// caught open by a bitten feint: no guard, and the blow lands harder
+			return damage * Feints.OPEN_BONUS;
+		}
 		if (s.guardStart < 0L && now >= s.guardAt && now >= s.drivenUntil && !s.engaged && mob.getRandom().nextFloat() < SNAP_MAX * s.rank) {
 			// a guard snapped up as the blow lands: a fresh one, so a parry
 			raise(mob, s, now);
