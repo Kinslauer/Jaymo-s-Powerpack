@@ -4,6 +4,7 @@
 	"compatibilityLevel": "JAVA_25",
 	"client": [
 		"PlayerInfoNoConnectionMixin",
+		"DreamCameraMixin",
 		"StuckRideTeleportMixin",
 		"ArrowPickScrollMixin",
 		"BrokenLegSprintMixin",
