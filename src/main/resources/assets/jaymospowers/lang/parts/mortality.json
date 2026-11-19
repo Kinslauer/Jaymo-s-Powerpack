@@ -53,6 +53,8 @@
 	"message.jaymospowers.mortality.wake.sheltered": "You wake to low voices and the smell of herbs. Someone found you and carried you in.",
 	"message.jaymospowers.mortality.wake.berth": "You wake in your own berth, the deck creaking and the sea moving under you. You don't remember coming aboard.",
 	"message.jaymospowers.mortality.wake.captured": "You wake in chains. Your things are gone.",
+	"message.jaymospowers.mortality.captive_rags": "Someone has tied filthy rags round your wounds. They want you alive.",
+	"message.jaymospowers.mortality.captive_seared": "They seared the stump shut with a hot blade. They want you alive.",
 	"message.jaymospowers.mortality.wake.jailed": "You wake on cold stone behind a barred door. The guards brought you in while you were out.",
 	"message.jaymospowers.mortality.wake.lair": "You wake bound tight in silk, in the dark. Something above you is moving.",
 	"message.jaymospowers.mortality.wake.risen": "You wake cold. Nothing hurts. Your heart isn't beating.",

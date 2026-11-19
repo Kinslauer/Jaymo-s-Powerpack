@@ -4306,6 +4306,59 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Looked up once: Powers' {@code Mortality.tendCaptive}, or null without Powers (or an older one). */
+	private static java.lang.invoke.@Nullable MethodHandle tendCaptive;
+	private static boolean tendCaptiveLooked;
+
+	/**
+	 * Captors keep {@code player} from bleeding out as they haul them up (Powers' {@code Mortality.tendCaptive}: dirty rags if
+	 * they're lucky, else a stump seared shut). Nothing without Powers.
+	 */
+	public static void tendCaptive(net.minecraft.server.level.ServerPlayer player) {
+		if (!tendCaptiveLooked) {
+			tendCaptiveLooked = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					tendCaptive = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wounds.Mortality"),
+						"tendCaptive", java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mortality.tendCaptive (older Powers?)", e);
+				}
+			}
+		}
+		if (tendCaptive != null) {
+			try {
+				tendCaptive.invoke(player);
+			} catch (Throwable e) {
+				JaymosKingdoms.LOGGER.warn("Captors couldn't tend {}", player.getScoreboardName(), e);
+			}
+		}
+	}
+
+	/** Looked up once: Powers' {@code Prosthetics.fitted}, or null without Powers (or an older one). */
+	private static java.lang.invoke.@Nullable MethodHandle fittedLimbs;
+	private static boolean fittedLimbsLooked;
+
+	/** The lost limbs {@code entity} has a wooden or iron one fitted on (Powers' {@code Prosthetics.fitted}, Dismember bits); 0 without Powers. */
+	public static int fittedLimbs(net.minecraft.world.entity.Entity entity) {
+		if (!fittedLimbsLooked) {
+			fittedLimbsLooked = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					fittedLimbs = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.Prosthetics"),
+						"fitted", java.lang.invoke.MethodType.methodType(int.class, net.minecraft.world.entity.Entity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Prosthetics.fitted (older Powers?)", e);
+				}
+			}
+		}
+		try {
+			return fittedLimbs == null ? 0 : (int)fittedLimbs.invoke(entity);
+		} catch (Throwable e) {
+			return 0;
+		}
+	}
+
 	/** (0.7.462) Sets every break {@code entity} has (Powers' {@code Wounds.mendAll}); false if there was none, or without Powers. */
 	public static boolean setBones(net.minecraft.world.entity.LivingEntity entity) {
 		lookForHealing();
