@@ -1,5 +1,6 @@
 package com.jaymoskitchen.corpse;
 
+import com.jaymoskitchen.HudBars;
 import com.jaymoskitchen.Loaded;
 import com.jaymoskitchen.compat.RagdollifiedCompat;
 import com.jaymoskitchen.horse.CartEntity;
@@ -222,8 +223,6 @@ public class CorpseEntity extends Entity {
 	 * still counts as the same hold.
 	 */
 	public static final int LIFT_TICKS = 12, USE_REPEAT = 4, HOLD_GRACE = 8;
-	/** (0.5.31) The lift's and the cutting's bar length. */
-	private static final int BAR = 8;
 	/**
 	 * (0.5.31) Andy: "for those larger animals that can't be picked up, they are butchered instead with a knife on the spot,
 	 * and the meat/ hide etc, slowly gathered". A big carcass ({@link #tooBigToLift}) is cut up where it lies with a
@@ -2115,8 +2114,10 @@ public class CorpseEntity extends Entity {
 			}
 			return drags ? drag(level, player) : carry(level, player);
 		}
-		player.sendOverlayMessage(Component.translatable(drags ? "message.jaymoskitchen.corpse.taking_hold" : "message.jaymoskitchen.corpse.lifting",
-			bar(held, LIFT_TICKS)));
+		if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
+			HudBars.hold(sp, "corpse_lift", held / (float) LIFT_TICKS, HudBars.GREY,
+				Component.translatable(drags ? "bar.jaymoskitchen.taking_hold" : "bar.jaymoskitchen.lifting"), true);
+		}
 		return InteractionResult.SUCCESS_SERVER;
 	}
 
@@ -2314,7 +2315,7 @@ public class CorpseEntity extends Entity {
 			level.playSound(null, getX(), getY(), getZ(), SoundEvents.AXE_STRIP.value(), SoundSource.NEUTRAL, 0.35F, 1.3F + random.nextFloat() * 0.3F);
 		}
 		if (cutWork < CUT_TICKS) {
-			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.cutting", bar(cutWork, CUT_TICKS), piecesLeft()));
+			butchering(player, cutWork);
 			return InteractionResult.SUCCESS_SERVER;
 		}
 		cutWork = 0;
@@ -2332,7 +2333,7 @@ public class CorpseEntity extends Entity {
 			spawnAtLocation(level, piece, 0.4F);
 		}
 		if (piecesLeft() > 0) {
-			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.cutting", bar(0, CUT_TICKS), piecesLeft()));
+			butchering(player, 0);
 			return InteractionResult.SUCCESS_SERVER;
 		}
 		// bare: a few bones, and the rest is left to the crows
@@ -2371,9 +2372,11 @@ public class CorpseEntity extends Entity {
 		return left;
 	}
 
-	private static String bar(long done, int of) {
-		int filled = Math.clamp(Math.round(BAR * done / (float) of), 0, BAR);
-		return "|".repeat(filled) + ".".repeat(BAR - filled);
+	/** The butchering bar, and how many pieces are left. */
+	private void butchering(Player player, long work) {
+		if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
+			HudBars.hold(sp, "butcher", work / (float) CUT_TICKS, HudBars.RED, Component.translatable("bar.jaymoskitchen.butchering", piecesLeft()), true);
+		}
 	}
 
 	/**

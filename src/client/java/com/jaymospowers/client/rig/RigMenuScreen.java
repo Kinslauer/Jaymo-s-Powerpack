@@ -2,6 +2,7 @@ package com.jaymospowers.client.rig;
 
 import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.rig.Rig;
+import com.jaymospowers.rig.RigForms;
 import com.jaymospowers.rig.RigHelm;
 import com.jaymospowers.rig.RigNet;
 import com.jaymospowers.rig.RigPicks;
@@ -41,16 +42,20 @@ final class RigMenuScreen extends Screen {
 
 	/** The entries, clockwise from the top. */
 	private static final int[] ACTIONS = {RigNet.HOVER, RigNet.PALM, RigNet.LAUNCHER, RigNet.UNIBEAM, RigNet.SCAN, RigNet.CALL, RigNet.SENTRY,
-	RigNet.FACEPLATE, RigNet.NIGHT, RigPicks.DRONES, RigPicks.MARK, RigPicks.TABLE, RigPicks.DECOY, RigPicks.FIELD, RigPicks.BANK, RigClient.JET_START,
-	RigPicks.DASH, RigPicks.BARRAGE, RigClient.SLOW_BEAT, RigPicks.FAILSAFE,
-	RigNet.PALM_CHARGE, RigNet.GATLING, RigNet.RAILGUN, RigNet.SONIC, RigNet.TWIN, RigNet.SIEGE};
+		RigNet.FACEPLATE, RigNet.NIGHT, RigPicks.DRONES, RigPicks.MARK, RigPicks.TABLE, RigPicks.DECOY, RigPicks.FIELD, RigPicks.BANK, RigClient.JET_START,
+		RigPicks.DASH, RigPicks.BARRAGE, RigClient.SLOW_BEAT, RigPicks.FAILSAFE, RigPicks.AF_BLADE, RigPicks.AF_MACE, RigPicks.AF_PILE,
+		RigPicks.AF_DRILL, RigPicks.AF_LANCE, RigPicks.AF_LASH, RigPicks.AF_MIMIC,
+		RigNet.PALM_CHARGE, RigNet.GATLING, RigNet.RAILGUN, RigNet.SONIC, RigNet.TWIN, RigNet.SIEGE};
 	private static final String[] NAMES = {"hover", "palm", "launcher", "unibeam", "scan", "call", "sentry", "faceplate", "night", "drones", "mark", "table", "decoy", "field", "bank", "jet_start", "dash", "barrage",
-	"slow_beat", "failsafe", "palm_charge", "gatling", "railgun", "sonic", "twin", "siege"};
+		"slow_beat", "failsafe", "blade", "mace", "pile", "drill", "lance", "lash", "mimic",
+		"palm_charge", "gatling", "railgun", "sonic", "twin", "siege"};
 	private static final int[] LEVEL = {1, 1, 1, Rig.UNIBEAM_LEVEL, Rig.SCAN_LEVEL, Rig.CALL_LEVEL, Rig.CALL_LEVEL, 1, 1, 1, 1, 1, 1, 1, 1, Rig.FLIGHT_LEVEL, 1, Rig.MAX_LEVEL, Rig.UNIBEAM_LEVEL, 1,
-	Rig.LOCK_LEVEL, Rig.SCAN_LEVEL, Rig.UNIBEAM_LEVEL, Rig.UNIBEAM_LEVEL, Rig.MAX_LEVEL, Rig.MAX_LEVEL};
+		RigForms.BLADE_LEVEL, RigForms.MACE_LEVEL, RigForms.PILE_LEVEL, RigForms.DRILL_LEVEL, RigForms.LANCE_LEVEL, RigForms.LASH_LEVEL, RigForms.MIMIC_LEVEL,
+		Rig.LOCK_LEVEL, Rig.SCAN_LEVEL, Rig.UNIBEAM_LEVEL, Rig.UNIBEAM_LEVEL, Rig.MAX_LEVEL, Rig.MAX_LEVEL};
 	/** Cooldowns' full lengths (ticks), for the shading; 0 for none. */
 	private static final int[] COOLDOWN = {0, RigHud.PALM_COOLDOWN, RigHud.LAUNCHER_COOLDOWN, RigHud.UNIBEAM_COOLDOWN, RigScan.SCAN_COOLDOWN, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0};
+		RigForms.BLADE_COOLDOWN, RigForms.MACE_COOLDOWN, RigForms.PILE_COOLDOWN, RigForms.DRILL_COOLDOWN, RigForms.LANCE_COOLDOWN, RigForms.LASH_COOLDOWN, RigForms.MIMIC_COOLDOWN,
+		0, 0, 0, 0, 0, 0};
 	private static final double SLICE = 360.0 / ACTIONS.length;
 
 	private int selected = -1;
@@ -61,35 +66,42 @@ final class RigMenuScreen extends Screen {
 	}
 
 	private static Item icon(int i) {
-	return switch (i) {
-				case 0 -> Items.FEATHER;
-				case 1 -> Items.GLOWSTONE_DUST;
-				case 2 -> Items.FIREWORK_ROCKET;
-				case 3 -> Items.BEACON;
-				case 4 -> Items.SPYGLASS;
-				case 5 -> Items.ARMOR_STAND;
-				case 6 -> Items.SHIELD;
-				case 7 -> Rig.HELM != null ? Rig.HELM : Items.IRON_HELMET;
-				case 9 -> Items.COPPER_INGOT;
-				case 10 -> Items.COMPASS;
-				case 11 -> Items.CLOCK;
-				case 12 -> Items.PLAYER_HEAD;
-				case 13 -> Items.GOLD_INGOT;
-				case 14 -> Items.ARROW;
-				case 15 -> Items.ELYTRA;
-				case 16 -> Items.BLAZE_POWDER;
-				case 17 -> Items.FIRE_CHARGE;
-				case 18 -> Items.CLOCK;
-				case 19 -> Items.TOTEM_OF_UNDYING;
-				case 20 -> Items.REDSTONE;
-				case 21 -> Items.IRON_INGOT;
-				case 22 -> Items.DIAMOND;
-				case 23 -> Items.NOTE_BLOCK;
-				case 24 -> Items.NETHER_STAR;
-				case 25 -> Items.OBSIDIAN;
-				default -> Items.ENDER_EYE;
-	};
-		}
+		return switch (i) {
+			case 0 -> Items.FEATHER;
+			case 1 -> Items.GLOWSTONE_DUST;
+			case 2 -> Items.FIREWORK_ROCKET;
+			case 3 -> Items.BEACON;
+			case 4 -> Items.SPYGLASS;
+			case 5 -> Items.ARMOR_STAND;
+			case 6 -> Items.SHIELD;
+			case 7 -> Rig.HELM != null ? Rig.HELM : Items.IRON_HELMET;
+			case 9 -> Items.COPPER_INGOT;
+			case 10 -> Items.COMPASS;
+			case 11 -> Items.CLOCK;
+			case 12 -> Items.PLAYER_HEAD;
+			case 13 -> Items.GOLD_INGOT;
+			case 14 -> Items.ARROW;
+			case 15 -> Items.ELYTRA;
+			case 16 -> Items.BLAZE_POWDER;
+			case 17 -> Items.FIRE_CHARGE;
+			case 18 -> Items.CLOCK;
+			case 19 -> Items.TOTEM_OF_UNDYING;
+			case 20 -> Items.IRON_SWORD;
+			case 21 -> Items.IRON_AXE;
+			case 22 -> Items.IRON_PICKAXE;
+			case 23 -> Items.BLAZE_ROD;
+			case 24 -> Items.TRIDENT;
+			case 25 -> Items.FISHING_ROD;
+			case 26 -> Items.BOOK;
+			case 27 -> Items.REDSTONE;
+			case 28 -> Items.IRON_INGOT;
+			case 29 -> Items.DIAMOND;
+			case 30 -> Items.NOTE_BLOCK;
+			case 31 -> Items.NETHER_STAR;
+			case 32 -> Items.OBSIDIAN;
+			default -> Items.ENDER_EYE;
+		};
+	}
 
 	@Override
 	public boolean isPauseScreen() {
@@ -106,19 +118,19 @@ final class RigMenuScreen extends Screen {
 		// let go of the key: use what's picked (polled, in case the release went elsewhere)
 		InputConstants.Key key = KeyMappingHelper.getBoundKeyOf(RigClient.rigKey());
 		if (key.getType() == InputConstants.Type.KEYBOARD && !InputConstants.isKeyDown(key.getValue())) {
-	choose();
+			choose();
 		}
 		LocalPlayer player = minecraft.player;
 		if (player == null || !player.isAlive() || !Rig.wearsAny(player)) {
-	onClose();
+			onClose();
 		}
 	}
 
 	@Override
 	public boolean keyReleased(final KeyEvent event) {
 		if (RigClient.rigKey().matches(event)) {
-	choose();
-	return true;
+			choose();
+			return true;
 		}
 		return super.keyReleased(event);
 	}
@@ -131,64 +143,63 @@ final class RigMenuScreen extends Screen {
 
 	private void choose() {
 		if (chosen) {
-	return;
+			return;
 		}
 		chosen = true;
 		LocalPlayer player = minecraft.player;
 		if (selected >= 0 && player != null && blocker(player, selected) == null) {
-	RigClient.pick(ACTIONS[selected]);
+			RigClient.pick(ACTIONS[selected]);
 		}
 		onClose();
 	}
 
 	/** Why this entry can't be used now, or null if it can. */
 	private static Component blocker(LocalPlayer player, int i) {
-	int level = Rig.level(player);
-	if (level < LEVEL[i]) {
-				return Component.translatable("gui.jaymospowers.rig_menu.level", LEVEL[i]);
-	}
-	int action = ACTIONS[i];
-	boolean helm = Rig.wears(player, Rig.Piece.HELM);
-	boolean core = !Rig.core(player).isEmpty();
-	if (action == RigNet.FACEPLATE && !helm) {
-				return Component.translatable("gui.jaymospowers.rig_menu.no_helm");
-	}
-	if ((action == RigNet.NIGHT || action == RigNet.SCAN) && (!helm || !core)) {
-				return Component.translatable("gui.jaymospowers.rig_menu.no_helm_core");
-	}
-	if ((action == RigNet.CALL || action == RigNet.SENTRY || action == RigPicks.DRONES || action == RigPicks.DECOY || action == RigPicks.FIELD) && !core) {
-				return Component.translatable("gui.jaymospowers.rig_menu.no_core");
-	}
-	if ((action == RigNet.HOVER || action == RigNet.PALM || action == RigNet.LAUNCHER || action == RigNet.UNIBEAM || action == RigPicks.DASH
-				|| action == RigPicks.BARRAGE || action == RigNet.PALM_CHARGE || action == RigNet.GATLING || action == RigNet.RAILGUN
-				|| action == RigNet.SONIC || action == RigNet.TWIN || action == RigNet.SIEGE) && !Rig.fullSet(player)) {
-				return Component.translatable("gui.jaymospowers.rig_menu.incomplete");
-	}
-	return null;
+		int level = Rig.level(player);
+		if (level < LEVEL[i]) {
+			return Component.translatable("gui.jaymospowers.rig_menu.level", LEVEL[i]);
 		}
+		int action = ACTIONS[i];
+		boolean helm = Rig.wears(player, Rig.Piece.HELM);
+		boolean core = !Rig.core(player).isEmpty();
+		if (action == RigNet.FACEPLATE && !helm) {
+			return Component.translatable("gui.jaymospowers.rig_menu.no_helm");
+		}
+		if ((action == RigNet.NIGHT || action == RigNet.SCAN) && (!helm || !core)) {
+			return Component.translatable("gui.jaymospowers.rig_menu.no_helm_core");
+		}
+		if ((action == RigNet.CALL || action == RigNet.SENTRY || action == RigPicks.DRONES || action == RigPicks.DECOY || action == RigPicks.FIELD) && !core) {
+			return Component.translatable("gui.jaymospowers.rig_menu.no_core");
+		}
+		if ((action == RigNet.HOVER || action == RigNet.PALM || action == RigNet.LAUNCHER || action == RigNet.UNIBEAM || action == RigPicks.DASH
+			|| action == RigPicks.BARRAGE) && !Rig.fullSet(player)) {
+			return Component.translatable("gui.jaymospowers.rig_menu.incomplete");
+		}
+		return null;
+	}
 
 	/** Ticks left on this entry's cooldown. */
 	private static int left(int i) {
 		RigNet.Status status = RigClient.status;
 		return switch (ACTIONS[i]) {
-	case RigNet.PALM -> status.palmCooldown();
-	case RigNet.LAUNCHER -> status.launcherCooldown();
-	case RigNet.UNIBEAM -> status.unibeamCooldown();
-	case RigNet.SCAN -> status.scanCooldown();
-	default -> 0;
+			case RigNet.PALM -> status.palmCooldown();
+			case RigNet.LAUNCHER -> status.launcherCooldown();
+			case RigNet.UNIBEAM -> status.unibeamCooldown();
+			case RigNet.SCAN -> status.scanCooldown();
+			default -> 0;
 		};
 	}
 
 	/** Whether this entry is switched on (hovering, the faceplate up, night vision on). */
 	private static boolean on(LocalPlayer player, int i) {
 		return switch (ACTIONS[i]) {
-	case RigNet.HOVER -> RigClient.status.hovering();
-	case RigNet.FACEPLATE -> RigHelm.faceUp(player);
-	case RigNet.NIGHT -> RigHelm.night(player);
-	case RigClient.JET_START -> RigFlightFeel.jetStart();
-	case RigClient.SLOW_BEAT -> RigImpact.slowBeat();
-	case RigPicks.FAILSAFE -> com.jaymospowers.rig.RigCall.failsafeOn(player);
-	default -> false;
+			case RigNet.HOVER -> RigClient.status.hovering();
+			case RigNet.FACEPLATE -> RigHelm.faceUp(player);
+			case RigNet.NIGHT -> RigHelm.night(player);
+			case RigClient.JET_START -> RigFlightFeel.jetStart();
+			case RigClient.SLOW_BEAT -> RigImpact.slowBeat();
+			case RigPicks.FAILSAFE -> com.jaymospowers.rig.RigCall.failsafeOn(player);
+			default -> false;
 		};
 	}
 
@@ -196,24 +207,24 @@ final class RigMenuScreen extends Screen {
 	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 		LocalPlayer player = minecraft.player;
 		if (player == null) {
-	return;
+			return;
 		}
 		int room = height - INFO_H - 8;
-	tile = Math.max(16, Math.min(TILE, (int)(Math.min(RADIUS, room / 2 - 19) * 0.4) - 1));
+		tile = Math.max(16, Math.min(TILE, (int)(Math.min(RADIUS, room / 2 - 19) * 0.4) - 1));
 		radius = Math.max(DEAD_ZONE + tile, Math.min(RADIUS, room / 2 - tile / 2 - 6));
 		int cx = width / 2;
 		int cy = height / 2;
 		int dx = mouseX - cx;
 		int dy = mouseY - cy;
 		int before = selected;
-	if (dx * dx + dy * dy < DEAD_ZONE * DEAD_ZONE) {
-	selected = -1;
+		if (dx * dx + dy * dy < DEAD_ZONE * DEAD_ZONE) {
+			selected = -1;
 		} else {
-	double angle = Math.toDegrees(Math.atan2(dy, dx)) + 90.0;
-	selected = Math.floorMod((int)Math.round(angle / SLICE), ACTIONS.length);
+			double angle = Math.toDegrees(Math.atan2(dy, dx)) + 90.0;
+			selected = Math.floorMod((int)Math.round(angle / SLICE), ACTIONS.length);
 		}
 		if (selected != before && selected >= 0) {
-	player.level().playLocalSound(player.getX(), player.getEyeY(), player.getZ(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.PLAYERS,
+			player.level().playLocalSound(player.getX(), player.getEyeY(), player.getZ(), SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.PLAYERS,
 				0.15F, 1.6F + selected * 0.04F, false);
 		}
 
@@ -221,43 +232,43 @@ final class RigMenuScreen extends Screen {
 		int outer = radius + tile / 2 + 6;
 		UiStyle.wheel(graphics, cx, cy, radius, tile);
 		if (selected >= 0) {
-	double t = Math.atan2(dy, dx);
-	UiStyle.wheelPointer(graphics, cx, cy, radius, tile, t, ACCENT);
+			double t = Math.atan2(dy, dx);
+			UiStyle.wheelPointer(graphics, cx, cy, radius, tile, t, ACCENT);
 		}
 
 		for (int i = 0; i < ACTIONS.length; i++) {
-	double t = Math.toRadians(i * SLICE - 90.0);
-	int x = cx + (int)Math.round(Math.cos(t) * radius) - tile / 2;
-	int y = cy + (int)Math.round(Math.sin(t) * radius) - tile / 2;
-	int left = left(i);
-	boolean blocked = blocker(player, i) != null;
-	boolean picked = i == selected;
-	boolean jKey = ACTIONS[i] == RigClient.selected;
-	UiStyle.wheelTile(graphics, x, y, tile, i, picked, picked ? ACCENT : jKey ? 0xA05FE6FF : left <= 0 && !blocked ? 0x60FFFFFF : UiStyle.ROW_ALT);
-	graphics.item(new ItemStack(icon(i)), x + (tile - 16) / 2, y + (tile - 16) / 2);
-	if (left > 0 && COOLDOWN[i] > 0) {
+			double t = Math.toRadians(i * SLICE - 90.0);
+			int x = cx + (int)Math.round(Math.cos(t) * radius) - tile / 2;
+			int y = cy + (int)Math.round(Math.sin(t) * radius) - tile / 2;
+			int left = left(i);
+			boolean blocked = blocker(player, i) != null;
+			boolean picked = i == selected;
+			boolean jKey = ACTIONS[i] == RigClient.selected;
+			UiStyle.wheelTile(graphics, x, y, tile, i, picked, picked ? ACCENT : jKey ? 0xA05FE6FF : left <= 0 && !blocked ? 0x60FFFFFF : UiStyle.ROW_ALT);
+			graphics.item(new ItemStack(icon(i)), x + (tile - 16) / 2, y + (tile - 16) / 2);
+			if (left > 0 && COOLDOWN[i] > 0) {
 				int shade = (int)Math.ceil((tile - 2) * Math.min(1.0, left / (double)COOLDOWN[i]));
 				graphics.fill(x + 1, y + 1 + (tile - 2) - shade, x + tile - 1, y + tile - 1, 0xB0000000);
 				String seconds = left >= 200 ? Integer.toString((left + 19) / 20) : String.format(Locale.ROOT, "%.1f", left / 20.0);
 				graphics.text(font, seconds, x + tile / 2 - font.width(seconds) / 2, y + tile / 2 - 4, 0xFFFFFFFF);
-	}
-	if (Rig.level(player) < LEVEL[i]) {
+			}
+			if (Rig.level(player) < LEVEL[i]) {
 				// not yet: nearly black, with the Mind level it waits for
 				graphics.fill(x + 1, y + 1, x + tile - 1, y + tile - 1, 0xD8000000);
 				String need = "Lv" + LEVEL[i];
 				graphics.text(font, need, x + tile / 2 - font.width(need) / 2, y + tile / 2 - 4, 0xFF70A0B0);
-	} else if (blocked) {
+			} else if (blocked) {
 				graphics.fill(x + 1, y + 1, x + tile - 1, y + tile - 1, 0x90000000);
-	}
-	if (on(player, i)) {
+			}
+			if (on(player, i)) {
 				graphics.fill(x + 2, y + tile - 3, x + tile - 2, y + tile - 1, ACCENT);
-	}
+			}
 		}
 
 		// the middle: the pick's name; under the ring, what it does or what's stopping it
 		Component name = selected >= 0 ? Component.translatable("gui.jaymospowers.rig_menu." + NAMES[selected]) : null;
 		if (name != null) {
-	UiStyle.lineCentred(graphics, font, name, cx, cy - 4, 2 * DEAD_ZONE + 20, UiStyle.TEXT);
+			UiStyle.lineCentred(graphics, font, name, cx, cy - 4, 2 * DEAD_ZONE + 20, UiStyle.TEXT);
 		}
 		int ix = cx - INFO_W / 2;
 		int iy = Math.min(cy + outer + 4, height - 4 - INFO_H);
@@ -268,19 +279,19 @@ final class RigMenuScreen extends Screen {
 
 	private Component status(LocalPlayer player) {
 		if (selected < 0) {
-	return Component.translatable("gui.jaymospowers.rig_menu.hint");
+			return Component.translatable("gui.jaymospowers.rig_menu.hint");
 		}
 		Component blocker = blocker(player, selected);
 		if (blocker != null) {
-	return blocker;
+			return blocker;
 		}
 		int left = left(selected);
 		if (left > 0) {
-	return Component.translatable("gui.jaymospowers.rig_menu.cooling", String.format(Locale.ROOT, "%.1f", left / 20.0));
+			return Component.translatable("gui.jaymospowers.rig_menu.cooling", String.format(Locale.ROOT, "%.1f", left / 20.0));
 		}
 		if (ACTIONS[selected] == RigNet.FACEPLATE || ACTIONS[selected] == RigNet.NIGHT || ACTIONS[selected] == RigNet.HOVER || ACTIONS[selected] == RigClient.JET_START
-	|| ACTIONS[selected] == RigClient.SLOW_BEAT || ACTIONS[selected] == RigPicks.FAILSAFE) {
-	return Component.translatable(on(player, selected) ? "gui.jaymospowers.rig_menu.on" : "gui.jaymospowers.rig_menu.off");
+			|| ACTIONS[selected] == RigClient.SLOW_BEAT || ACTIONS[selected] == RigPicks.FAILSAFE) {
+			return Component.translatable(on(player, selected) ? "gui.jaymospowers.rig_menu.on" : "gui.jaymospowers.rig_menu.off");
 		}
 		return Component.translatable("gui.jaymospowers.rig_menu.ready");
 	}

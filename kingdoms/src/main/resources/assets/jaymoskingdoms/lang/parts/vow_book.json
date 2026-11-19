@@ -7,8 +7,6 @@
 	"message.jaymoskingdoms.vow_book.no_one": "Look at the one the rule is about",
 	"message.jaymoskingdoms.vow_book.enacted": "So it is: %s",
 	"message.jaymoskingdoms.vow_book.repealed": "Your rules are repealed",
-	"message.jaymoskingdoms.vow_book.ink.grace": "Grace %s %s · rules %s/%s",
-	"message.jaymoskingdoms.vow_book.ink.credit": "Credit %s %s · rules %s/%s",
 	"message.jaymoskingdoms.paladin.why.struck": "a sworn term struck out",
 	"vow.jaymoskingdoms.sentence": "%s %s (strength %s, %s s)",
 	"vow.jaymoskingdoms.who.self": "I",

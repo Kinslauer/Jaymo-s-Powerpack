@@ -625,6 +625,10 @@ public final class Recollections {
 				if (k != null && k.tellable && !r.heard() && !forgotten(r, day) && Math.abs(k.weight) >= TELL_WEIGHT) {
 					said.add(Component.translatable("recall.jaymoskingdoms.about." + r.kind() + "." + random.nextInt(ABOUT_REMARKS),
 						e.getValue().name(), r.detail()));
+				} else if (k == Kind.CRIME && r.heard() && !forgotten(r, day)) {
+					// (CrimeWord) a crime they only heard of goes round as hearsay
+					said.add(Component.translatable("recall.jaymoskingdoms.about_heard.crime." + random.nextInt(ABOUT_REMARKS),
+						e.getValue().name(), r.detail(), r.from()));
 				}
 			}
 		}

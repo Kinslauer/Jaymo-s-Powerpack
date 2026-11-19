@@ -1,9 +1,11 @@
 package com.jaymoskingdoms.client.equestrian;
 
+import com.jaymoskingdoms.HeraldryArmour;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.equestrian.Breed;
 import com.jaymoskingdoms.equestrian.Equestrian;
 import com.jaymoskingdoms.equestrian.Equine;
+import com.jaymoskingdoms.equestrian.Tackroom;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +31,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.minecraft.world.item.equipment.Equippable;
+import net.minecraft.world.level.block.entity.BannerPatternLayers;
+import net.minecraft.world.item.DyeColor;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -51,6 +55,8 @@ public final class BreedHorseRenderer extends AbstractHorseRenderer<AbstractHors
 		String build = HorseLooks.FALLBACK_BUILD;
 		@Nullable Identifier armor;
 		int armorColor = -1;
+		/** The barding's finish (bright, blackened, gilded). */
+		String armorFinish = "";
 		/** The model's own saddle (for a vanilla saddle), and its headstall and reins (any saddle, unless it wears a bridle). */
 		boolean vanillaSaddle, headstall;
 		/** (0.5.56) A bat horse: its wings, off the ground, climbing. */
@@ -59,6 +65,9 @@ public final class BreedHorseRenderer extends AbstractHorseRenderer<AbstractHors
 		float fade = 1.0F, headDip;
 		/** (0.7.445) Its own offset in ticks, so a grazing herd doesn't shuffle its feet all at once. */
 		float phase;
+		/** (0.7.322) Caparison: cloth cover over barding, in realm colour. */
+		@Nullable DyeColor caparisonColor;
+		@Nullable BannerPatternLayers caparisonPatterns;
 	}
 
 	/** (0.7.305) In the saddle in first person: it starts to fade once you look this far down (degrees), and is this faint looking straight down. */
@@ -90,10 +99,17 @@ public final class BreedHorseRenderer extends AbstractHorseRenderer<AbstractHors
 		ItemStack armor = state.bodyArmorItem;
 		Equippable equippable = armor.isEmpty() ? null : armor.get(DataComponents.EQUIPPABLE);
 		Identifier asset = equippable == null ? null : equippable.assetId().map(k -> k.identifier()).orElse(null);
-		state.armor = asset == null ? null : armorFor(asset, state.build);
+		// Barding finish (bright, blackened, gilded)
+		state.armorFinish = armor.isEmpty() ? "" : Tackroom.finish(armor);
+		state.armor = asset == null ? null : armorFor(asset, state.build, state.armorFinish);
 		state.armorColor = asset != null && asset.equals(EquipmentAssets.LEATHER.identifier())
 			? ARGB.opaque(DyedItemColor.getOrDefault(armor, DyedItemColor.LEATHER_COLOR)) : -1;
+		// Caparison (cloth cover over barding, in realm colour with banner patterns)
 		TackLayer.Look look = state.getData(TackLayer.LOOK);
+		if (look != null && look.banner() != null) {
+			state.caparisonColor = look.banner();
+			state.caparisonPatterns = look.patterns();
+	}
 		boolean saddled = !state.saddle.isEmpty();
 		state.vanillaSaddle = saddled && (look == null || look.saddle() == 0);
 		state.headstall = saddled && (look == null || !look.bridle());
@@ -109,23 +125,28 @@ public final class BreedHorseRenderer extends AbstractHorseRenderer<AbstractHors
 		if (mine) {
 			float pitch = minecraft.player.getViewXRot(partialTicks);
 			state.fade = 1.0F - (1.0F - FADE_MIN) * Mth.clamp((pitch - FADE_FROM) / (90.0F - FADE_FROM), 0.0F, 1.0F);
-		}
+	}
 		if (e != null && e.breed() == Breed.NIGHTMARE && (int) (state.ageInTicks / NIGHTMARE_FLICKER_TICKS) % 2 == 1) {
 			state.coat = NIGHTMARE_FLICKER;
-		}
+	}
 	}
 
-	private static Identifier armorTexture(Identifier asset, String build) {
-		return JaymosKingdoms.id("textures/entity/breed_horse/armor/" + asset.getNamespace() + "/" + asset.getPath() + "/" + build + ".png");
+	private static Identifier armorTexture(Identifier asset, String build, String finish) {
+		String path = "textures/entity/breed_horse/armor/" + asset.getNamespace() + "/" + asset.getPath();
+		if (!finish.isEmpty()) {
+			path += "_" + finish;
+	}
+		path += "/" + build + ".png";
+		return JaymosKingdoms.id(path);
 	}
 
 	/** The overlay drawn for an equipment asset on a build: ours if we've drawn one, else iron's. */
-	private static Identifier armorFor(Identifier asset, String build) {
-		return ARMOR.computeIfAbsent(asset + "|" + build, k -> {
-			Identifier texture = armorTexture(asset, build);
+	private static Identifier armorFor(Identifier asset, String build, String finish) {
+		return ARMOR.computeIfAbsent(asset + "|" + build + "|" + finish, k -> {
+			Identifier texture = armorTexture(asset, build, finish);
 			return Minecraft.getInstance().getResourceManager().getResource(texture).isPresent() ? texture
-				: armorTexture(EquipmentAssets.IRON.identifier(), build);
-		});
+				: armorTexture(EquipmentAssets.IRON.identifier(), build, "");
+	});
 	}
 
 	@Override
@@ -137,7 +158,7 @@ public final class BreedHorseRenderer extends AbstractHorseRenderer<AbstractHors
 	protected @Nullable RenderType getRenderType(State state, boolean bodyVisible, boolean forceTransparent, boolean glowing) {
 		if (state.fade < 1.0F && bodyVisible && !forceTransparent) {
 			return RenderTypes.entityTranslucent(this.getTextureLocation(state));
-		}
+	}
 		return super.getRenderType(state, bodyVisible, forceTransparent, glowing);
 	}
 
@@ -159,7 +180,7 @@ public final class BreedHorseRenderer extends AbstractHorseRenderer<AbstractHors
 	protected void scale(State state, PoseStack poseStack) {
 		if (state.isBaby) {
 			poseStack.scale(FOAL_SCALE, FOAL_SCALE, FOAL_SCALE);
-		}
+	}
 		super.scale(state, poseStack);
 	}
 
@@ -177,6 +198,12 @@ public final class BreedHorseRenderer extends AbstractHorseRenderer<AbstractHors
 			if (state.armor != null && !state.isInvisible) {
 				layer(this.model, state.armor, poseStack, collector, lightCoords, state, state.armorColor, 1);
 			}
-		}
+			// Caparison over barding
+			if (state.caparisonColor != null && state.armor != null && !state.isInvisible) {
+				Identifier caparisonTexture = JaymosKingdoms.id("textures/entity/breed_horse/caparison/" + state.build + ".png");
+				int color = state.caparisonColor.getTextureDiffuseColor();
+				layer(this.model, caparisonTexture, poseStack, collector, lightCoords, state, ARGB.opaque(color), 2);
+			}
 	}
-}
+	}
+	}

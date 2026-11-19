@@ -6,6 +6,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -18,6 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(LivingEntity.class)
 abstract class ClimbingClawsMixin {
 	/** How near a wall has to be to hold on to it, in blocks. */
+	@Unique
 	private static final double WALL_GAP = 0.08;
 
 	@Inject(method = "onClimbable", at = @At("HEAD"), cancellable = true)
@@ -29,6 +31,7 @@ abstract class ClimbingClawsMixin {
 		}
 	}
 
+	@Unique
 	private static boolean besideWall(Player player) {
 		AABB box = player.getBoundingBox();
 		AABB around = new AABB(box.minX - WALL_GAP, box.minY + 0.1, box.minZ - WALL_GAP, box.maxX + WALL_GAP, box.maxY - 0.1, box.maxZ + WALL_GAP);

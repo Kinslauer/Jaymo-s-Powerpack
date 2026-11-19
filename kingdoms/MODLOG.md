@@ -15023,3 +15023,112 @@ Clouds and Bits patch 5 (Bits and Balance's ideas, our own code).
 - **Rules**: one rule line, and one more for each sworn term (five at most). A rule is a sentence: who (I, my allies near me, the foes near me, the one I look at, everyone near me), what is true of them (the oath or patron decides: Mercy mends, quickens, hardens, slows, lights up; Justice lights up, slows, weakens, takes powers, blinds; Honour strengthens, hardens, quickens, weakens, lights up; each patron its own four or five), strength 1 + a step every 5 class levels (to 5), and 5 to 60 s. Enacting costs grace (Paladin) or credit with the patron (Warlock): 150 most, 1 a second back (2 with none running); one rule at a time, three from class level 20. A broken oath, or a patron withholding over an unpaid debt, enacts nothing; a broken oath or a lost class ends what runs. "Have no powers" puts Jaymo's Powers' ruled tag on whom it's about.
 - Classes: `VowBook` (new), `VowBookScreen` (new); `Vows` (sworn terms bind), `Paladins`/`Warlocks` (book on swearing, cleared on unmaking). Lang part `vow_book.json`.
 - Built; not played.
+
+## 0.10.29 (2026-11-18): drawn progress bars - text bars redrawn like the execution bars (#1747)
+
+- Every text bar on the action bar is now drawn by Jaymo's Powers in the execution bars' look (`HudBars` sends it; without Powers the old kind of line shows): pickpocketing, cutting or untying captives, lasso tying and struggling, tome charge, Illager study, Brute rite stitching and the trial's stone heave are holds under the crosshair with a short caption; the Vow Book's grace/credit, the hunger curse and night forms' time are gauges over the hotbar; the tree chop meter and stake pulls are drawn squares; a Will clash is one gold-against-red bar under the crosshair.
+- Goblin disguise suspicion now fills the awareness eye over the crosshair (Andy: "The eye should fill"), new `Senses.Suspicion` payload; the old "Suspicion" pips are gone.
+- The Vow Book's ink gauge no longer stops your swings (its `|...` text used to).
+- Compiled; not played.
+
+## 0.10.30 (2026-11-18): Zombies no longer crash the server when they give up vanilla door-breaking (#1748)
+
+- Zombies spawned able to break doors (Hard) lose vanilla's door breaker when they load, not from inside the Pound goal's `canUse`. Removing a goal there changed the goal set while the goal selector was walking it, and a NullPointerException stopped the server (a zombie, 2026-11-18).
+- `DoorPounding`: `loaded()` calls `setCanBreakDoors(false)` before `paths()`; `Pound.canUse()` no longer does.
+- Not built or played; CI compiles.
+
+## 0.10.31 (2026-11-18): picker lists show 3-4 big boxes, info text in paragraphs (#1750)
+
+- **Picker lists** (heritage, class, patron, life story): the middle column shows three or four big boxes at a time (three on short windows) and scrolls with the wheel for the rest, so each box has room for its name and tag in full. Short lists still fill the column.
+- **Info panel text**: long text (class and option descriptions, heritage gifts) is broken at its sentences into short paragraphs, and an over-long sentence is broken again at its semicolons. Lines get a pixel more space, paragraphs get a gap, and sections with several lines are bulleted.
+- `PickerLayout` (`BOXES_SHOWN`, `PARA_SPLIT`, `PARA_SENTENCES`, `LEADING`, `PARA_GAP`).
+- Built; not played.
+
+## 0.10.32 (2026-11-18): Curing blight and seeing someone turn change how villagers see you (#1758)
+
+- Fixes: curing someone of the Hollow's blight, and being seen getting up as one of the Hollow, moved nothing in a villager's bearings toward you. A cure now gives +20 trust, +15 respect, +10 warmth; seeing you turn gives -10 trust and -15 warmth (Andy's numbers).
+- Built by CI; not played.
+
+## 0.10.33 (2026-11-18): brood lair stays in its chunk (#1761)
+
+- **Brood lair**: the roof search for hanging egg sacs and cobwebs now skips columns outside the chunk being built (the piece's clipped bounding box), so it no longer reads neighbouring chunks during worldgen. Random rolls are unchanged, so the lair looks the same.
+- Not played; nothing built on this PC (CI compiles).
+
+## 0.10.34 (2026-11-18): Climbing claws wall helper no longer clashes with Powers Skitter (#1762)
+
+- The wall-climb helper (`besideWall`, `WALL_GAP`) is now `@Unique`, so Mixin stops logging an overwrite conflict at every boot and each mod keeps its own copy.
+- Not built or played.
+
+## 0.10.35 (2026-11-18): Captains keep their temperament across restarts (#1755)
+
+- Fixes: rival captains forgot their temperament on every restart (its saved data was dropped as unknown, since nothing had loaded it yet), and players joining didn't get their farmhand family or lesson course. Both are now registered at start-up.
+- Captains whose temperament was already lost get a new one. Also registered early: legendary bosses' spent resistances.
+- Built by CI; not played.
+
+## 0.10.36 (2026-11-18): Tree locks block crafting alongside The Graveyard (#1756)
+
+The crafting lock on trade stations and the saw now hooks the slot pickup check that every slot has and applies to crafting result slots, so it works with or without The Graveyard.
+
+## 0.10.37 (2026-11-18): holy books - each patron's sigil on its book; a stored book is no broken commandment (#1771)
+
+- **Holy book looks**: every patron's book of commandments is now the vanilla book with that patron's sigil set in a sunken square on the cover, lying on the cover's tilt (upright as you hold the book) (the anvil, the hearth flame, the waves, the antlers, the lantern, the crowned sun, the hooded ember, the Truth's cross), and its lore book is the written book with the same sigil. Old books of commandments take the new look the next time they are in an inventory; old lore books keep the plain look. Sigils are drawn from the shrine glyphs by `tools/gen_holy_books.py`, as a 32x32 overlay on the vanilla texture (twice the book's detail so the tilted sigil still reads; no vanilla pixels copied).
+- **Keeping the book**: the Truth's "Do not throw away My book" used to break the moment the book was dropped. Now it breaks only if the dropped book is lost (burnt, despawned, fallen into the void). Putting it in a chest, dropping it for a friend or into a hopper, or picking it up again is fine (`Commandments`, `LoreBooks`).
+- Built by the PR checks; not played.
+
+## 0.10.38 (2026-11-18): Harness 1: new helms, finishes and crests (#1721)
+
+## What the player will see
+- Six new helms: Great Helm (flat-topped pot helm with eye slits and breaths, fixed face), Barbute (deep helm with T/Y face opening, open face), Burgonet (open helm with peak, comb, hinged cheek plates, visored), Spangenhelm (riveted segments with nose bar and mail curtain, fixed face), Lobster-tail Pot (round skull with sliding nose bar and laminated neck tail, visored), Grotesque Visor (armet with sculpted beast/grinning face visor, visored)
+- Five new plate finishes available at the smith's anvil: Russeted (red-brown), Heat-blued (dark blue), Painted (realm colours), Etched and Gilt (engraved gilt bands, for honoured knights), Rusted (weaker until scoured at a grindstone)
+- Five new crest beasts: Griffin, Bear, Wolf, Raven, Hound (join the existing eight)
+- New Plume crest: feathers in the realm's colour instead of a beast
+
+## Cause
+The Harness Pattern Book (Andy's 2026-11-18 ticks) specified these new helms, finishes, and crests. They were missing from `HeraldryArmour.java`, `HeraldryWear.java`, and the generator `kingdoms/tools/gen_heraldry_armour.py`.
+
+## Changes
+- Added 6 new helms to `HeraldryArmour.HELMS` and `register()` with appropriate Face, sight, and crestRise values
+- Added 5 new finish constants (RUSSETED, BLUED, PAINTED, ETCHED, RUSTED) to `HeraldryArmour` and corresponding palettes to the generator's `FINISHES`
+- Added 5 new crest beasts + plume to `HeraldryArmour.BEASTS`, `CRESTS`, and the generator with new build functions
+- Updated `HeraldryWear.finish()` to distribute the 7 finishes (bright + 6 variants) across realms
+- Ran `gen_heraldry_armour.py` to generate models, textures, icons, item models, recipes, and lang entries for all new pieces in all finishes
+- Added lang entries for new finishes and item names
+
+## Not tested in game
+- Visual appearance of all new helms in each of the 7 finishes
+- Visual appearance of new crest beasts and plume on different helms
+- Realm knight generation with new helm/finish combinations
+- Rusted finish weakening and grindstone scouring (grindstone interaction not yet implemented)
+- Player crafting/dyeing of new pieces
+
+## 0.10.39 (2026-11-19): Harness 4: matching barding and caparisons (#1744)
+
+Chain and plate barding now come in three finishes: bright, blackened and gilded, matching your heraldry armour. Blackened or gilded barding shows its finish in the item name. There is also a new caparison: a cloth cover worn over barding, dyeable in your realm's colours with banner patterns, with its own slot on the tack screen under the banner. Horses wear barding in its finish, with the caparison rendered over it.
+
+Not tested in game.
+
+## 0.10.40 (2026-11-19): Crime: sleepers woken, suspects watched (#1751)
+
+- **Sleepers woken and told**: when someone who can speak sees a crime, they wake the nearest sleeper of their village or realm (within 16 blocks), who gets up, comes over to hear it and remembers it as hearsay. A crime at night is now known to more than the one who saw it. Golems can't tell anyone. (`Theft#wakeAndTell`, `ChestNoise#wakeToHear`)
+- **Being watched**: a guard who saw or heard of your crime in the last 3 days, while you aren't wanted for it, now watches you like a suspected vampire or werewolf: turns to look, says a wary word now and then. The nearest free one follows you at a distance (closes in past 8 blocks, stops inside 5). With no such guard about, a golem of the realm whose people suspect you follows instead. Vampire and werewolf suspects are followed the same way now. (`Suspicion#wary`)
+- Compile-checked by CI; not played.
+
+## 0.10.41 (2026-11-19): Crime: word that travels (runners, hushing, gossip, the road) (#1763)
+
+- **The witness runs to tell**: a crime seen with no guard or golem among the witnesses, and none within earshot of the cry (24 blocks), isn't known to the law yet. The witness shouts that they're fetching the guard and runs for the nearest one within 64 blocks. Only when they get there does the realm hear of it: reputation, wanted, bounty and the hunt. Kill them, bind them or hush them first and it never comes out. If no guard is that near, the cry counts at once, as before. Word gets there anyway after a minute if they can't. (`CrimeWord#run`, `Theft#lawKnows`)
+- **Hush the witness**: catch up with a runner and they stop to hear you out. *Plead* (more likely the warmer they are to you; costs a little trust either way), *pay them off* (3/8/20 emeralds' worth in the realm's coin by the crime's weight; costs trust and respect and counts as a bribe), or *stare them down* (only a weaker witness, better with Stare Down; costs warmth). Fail and they run on.
+- **House to house**: those who saw it, and whoever the runner told, pass it on to up to 2 more of the town over the next day, three tellings deep. Hearsay counts half and makes folk wary rather than hostile. Heard crimes now come up in gossip ("Word is X is guilty of..."). (`CrimeWord#spread`, `Recollections#gossipLine`)
+- **Down the road**: news of a heavy crime travels the King's Roads to each realm linked to the one you wronged, a day per 600 blocks between them (at least one day). There you lose 15 reputation and their people will ask about it. (`CrimeWord#road`)
+- Runners, tales and road news aren't saved over a restart.
+- Built; not played. Stacked on Lanterns 1 (#1751).
+
+## 0.10.42 (2026-11-19): Talking to villagers through chat (#1767)
+
+- **Talk through chat**: say a line aloud while looking at a villager within 8 blocks, or start it with their first name (12 blocks), and they turn to you and answer over their head a moment later. Short replies keep it going for 30 seconds. They answer hello, goodbye and thanks, how they are, their name, their work, whose realm this is, trade, news (their real gossip and suspicions), and what they remember of you. Cold, wary or scornful villagers answer shortly and keep their news to themselves. Anything else gets a "Hm? I didn't follow that." When MCA's own chat AI is switched on (`/mca chatAI`), it answers instead and this keeps quiet. (`ChatTalk`, from `ProximityChat`)
+- Built; not played.
+
+## 0.10.43 (2026-11-19): Harness 3: creeds and other lands (#1728)
+
+Knights now wear gear matching their realm's creed and land: etched plate for faith and coin realms, gilt-banded for the King's Guard, spiked black plate for Conquest, fur-lined in snowy lands, quilted coats in the desert, brine-soaked mail in the jungle, hide and bronze in the savanna and badlands, and laced lamellar in the cherry blossom realms. Armor names carry the finish: Etched, Spiked, Gilt-Banded, Fur-Lined, Quilted, Brine-Soaked, Hide, Bronze, Lamellar. New helms include the veiled helm and barbute.
+
+Not tested in game.

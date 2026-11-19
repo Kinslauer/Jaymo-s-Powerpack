@@ -16,15 +16,6 @@ import net.minecraft.server.level.ServerPlayer;
  * <li>{@link #FIELD} the storing field ({@link RigField}).</li>
  * <li>{@link #BANK} bank shot ({@link RigBank}).</li>
  * </ul>
- * <p>(0.11.112) The Rig's gun actives ({@link RigGuns}): each a Rig menu entry with charge cost, poses and sounds.
- * <ul>
- * <li>{@link #PALM_CHARGE} held palm blast charge.</li>
- * <li>{@link #GATLING} gatling arm with heat.</li>
- * <li>{@link #RAILGUN} railgun line shot.</li>
- * <li>{@link #SONIC} sonic cannon cone.</li>
- * <li>{@link #TWIN} twin beam (Unibeam variant).</li>
- * <li>{@link #SIEGE} siege mode artillery.</li>
- * </ul>
  * These actions share {@link RigNet.Use} with the Rig's own, numbered from {@link #FIRST}.
  */
 public final class RigPicks {
@@ -32,10 +23,11 @@ public final class RigPicks {
 	public static final int DRONES = 20, MARK = 21, TABLE = 22, DECOY = 23, FIELD = 24, BANK = 25;
 	/** The thruster dash and the artillery barrage ({@link RigStrikes}). */
 	public static final int DASH = 26, BARRAGE = 27;
+	/** The arm forms ({@link RigForms}). */
+	public static final int AF_BLADE = 29, AF_MACE = 30, AF_PILE = 31, AF_DRILL = 32, AF_LANCE = 33, AF_LASH = 34,
+		AF_MIMIC = 35;
 	/** The failsafe's switch ({@link RigCall}): works with the suit parked too. */
 	public static final int FAILSAFE = 28;
-	/** The Rig's gun actives ({@link RigGuns}). */
-	public static final int PALM_CHARGE = 29, GATLING = 30, RAILGUN = 31, SONIC = 32, TWIN = 33, SIEGE = 34;
 
 	private RigPicks() {
 	}
@@ -49,50 +41,46 @@ public final class RigPicks {
 		RigField.init();
 		RigBank.init();
 		RigStrikes.init();
+		RigForms.init();
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
-	for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 				RigDrones.tick(player);
 				RigField.tick(player);
 				RigStrikes.tick(player);
-	}
+			}
 		});
 	}
 
 	/** Whether {@code action} is one of these. */
 	public static boolean is(int action) {
-	return action >= FIRST && action <= SIEGE;
-		}
+		return action >= FIRST && action <= AF_MIMIC;
+	}
 
 	/** A Rig menu entry from the client. */
 	public static void use(ServerPlayer player, int action) {
-	if (player.isSpectator()) {
-				return;
-	}
-	if (action == FAILSAFE) {
-				RigCall.toggleFailsafe(player);
-				return;
-	}
-	if (!Rig.wearsAny(player)) {
-				player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_picks.needs_rig").withStyle(ChatFormatting.GRAY));
-				return;
-	}
-	switch (action) {
-				case DRONES -> RigDrones.use(player);
-				case MARK -> RigDrones.mark(player);
-				case TABLE -> RigTable.show(player, true);
-				case DECOY -> RigDecoy.use(player);
-				case FIELD -> RigField.use(player);
-				case BANK -> RigBank.toggle(player);
-				case DASH -> RigStrikes.dash(player);
-				case BARRAGE -> RigStrikes.barrage(player);
-				case PALM_CHARGE -> RigGuns.palmCharge(player, RigActives.stateOf(player));
-				case GATLING -> RigGuns.gatling(player, RigActives.stateOf(player));
-				case RAILGUN -> RigGuns.railgun(player, RigActives.stateOf(player));
-				case SONIC -> RigGuns.sonic(player, RigActives.stateOf(player));
-				case TWIN -> RigGuns.twinBeam(player, RigActives.stateOf(player));
-				case SIEGE -> RigGuns.siegeMode(player, RigActives.stateOf(player));
-				default -> {
-				}
-	}
+		if (player.isSpectator()) {
+			return;
 		}
+		if (action == FAILSAFE) {
+			RigCall.toggleFailsafe(player);
+			return;
+		}
+		if (!Rig.wearsAny(player)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_picks.needs_rig").withStyle(ChatFormatting.GRAY));
+			return;
+		}
+		switch (action) {
+			case DRONES -> RigDrones.use(player);
+			case MARK -> RigDrones.mark(player);
+			case TABLE -> RigTable.show(player, true);
+			case DECOY -> RigDecoy.use(player);
+			case FIELD -> RigField.use(player);
+			case BANK -> RigBank.toggle(player);
+			case DASH -> RigStrikes.dash(player);
+			case BARRAGE -> RigStrikes.barrage(player);
+			case AF_BLADE, AF_MACE, AF_PILE, AF_DRILL, AF_LANCE, AF_LASH, AF_MIMIC -> RigForms.use(player, action);
+			default -> {
+			}
+		}
+	}
 }

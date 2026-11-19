@@ -339,7 +339,7 @@ public final class Approaches {
 		SUSPECTS.computeIfAbsent(Identities.suspectId(player, faction), k -> new HashMap<>()).put(faction, now);
 	}
 
-	private static boolean suspected(ServerPlayer player, int faction, long now) {
+	static boolean suspected(ServerPlayer player, int faction, long now) {
 		Map<Integer, Long> mine = SUSPECTS.get(Identities.suspectId(player, faction));
 		Long at = mine == null ? null : mine.get(faction);
 		return at != null && now - at < SUSPECT_TICKS;
@@ -574,7 +574,7 @@ public final class Approaches {
 		if (!mob.isAlive() || mob.isSleeping() || mob.isPassenger() || mob.isVehicle() || mob.getTarget() != null || mob.isNoAi()
 			// (0.7.591) nor someone down, carried off or in chains
 			|| PowersCompat.outOfPlay(mob) || Captives.bound(mob)
-			|| Theft.rioting(mob) || Quests.listening(mob) || talking(mob) || Rickshaws.onDuty(mob) || Handshakes.engaged(mob)
+			|| Theft.rioting(mob) || CrimeWord.running(mob) || Quests.listening(mob) || talking(mob) || Rickshaws.onDuty(mob) || Handshakes.engaged(mob)
 			// (0.7.141) a wind dragon in disguise keeps its own counsel
 			|| mob.getAttached(com.jaymoskingdoms.dragons.Disguises.DISGUISE) != null) {
 			return false;

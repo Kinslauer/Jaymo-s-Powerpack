@@ -7,6 +7,8 @@ import static com.jaymospowers.client.rig.RigBeats.LINEAR;
 import static com.jaymospowers.client.rig.RigBeats.OUT;
 import static com.jaymospowers.client.rig.RigBeats.SINE;
 
+import com.jaymospowers.client.rig.RigFormsClient;
+
 import com.jaymospowers.rig.Rig;
 import com.jaymospowers.rig.RigFrame;
 import com.jaymospowers.rig.RigMoves;
@@ -356,6 +358,9 @@ public final class RigPose {
 				spread(h, BARRAGE_SPREAD * amount * still);
 				h.head.xRot -= (BARRAGE_LEAN + BARRAGE_CHIN) * watch;
 			}
+			case RigMoves.ARM_BLADE, RigMoves.ARM_MACE, RigMoves.ARM_PILE, RigMoves.ARM_DRILL,
+				RigMoves.ARM_LANCE, RigMoves.ARM_LASH, RigMoves.ARM_MIMIC ->
+				RigFormsClient.applyForm(model, pose.kind(), t, recoil, still);
 			default -> {
 			}
 		}

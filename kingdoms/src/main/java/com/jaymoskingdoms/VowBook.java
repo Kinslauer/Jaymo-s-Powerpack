@@ -638,14 +638,9 @@ public final class VowBook {
 				apply(level, player, run);
 			}
 			if (!live.running.isEmpty() || live.ink < INK_MOST && player.getMainHandItem().is(ITEM)) {
-				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.vow_book.ink." + inkKind(cls), gauge(live.ink / INK_MOST),
-					Math.round(live.ink), live.running.size(), atOnce(player)).withStyle(ChatFormatting.GOLD));
+				HudBars.gauge(player, "vow_ink", live.ink / INK_MOST, HudBars.GOLD, Component.translatable("bar.jaymoskingdoms.ink." + inkKind(cls)),
+					Component.translatable("bar.jaymoskingdoms.ink_rules", Math.round(live.ink), live.running.size(), atOnce(player)));
 			}
 		}
-	}
-
-	private static String gauge(float share) {
-		int full = Math.round(Math.max(0.0F, Math.min(1.0F, share)) * 10);
-		return "|".repeat(full) + ".".repeat(10 - full);
 	}
 }

@@ -297,9 +297,7 @@ public final class BruteRite {
 				level.sendParticles(Fx.rune(GLOW, 1.0F), heart.x, heart.y, heart.z, 2, 0.6, 0.9, 0.6, 0.05);
 			}
 			if (maker instanceof ServerPlayer sp && rite.left % 10 == 0) {
-				int filled = (RITE_TICKS - rite.left) * 12 / RITE_TICKS;
-				sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.stitch.working", "=".repeat(filled) + "-".repeat(12 - filled))
-					.withStyle(ChatFormatting.DARK_RED));
+				HudBars.hold(sp, "stitch", (RITE_TICKS - rite.left) / (float) RITE_TICKS, HudBars.DARK_RED, Component.translatable("bar.jaymoskingdoms.stitching"), false);
 			}
 			if (rite.left <= 0) {
 				it.remove();

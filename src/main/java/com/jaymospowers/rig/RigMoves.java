@@ -30,11 +30,19 @@ public final class RigMoves {
 	/** The take-off's crouch (ticks before the thrusters fire) and its whole length; the gestures' lengths. */
 	/** A thruster dash, a bare-fisted punch with the Arms, and the artillery barrage. */
 	public static final int DASH = 10, PUNCH = 11, BARRAGE = 12;
+	/** Arm forms (blade, mace, pile, drill, lance, lash, mimic). */
+	public static final int ARM_BLADE = 13, ARM_MACE = 14, ARM_PILE = 15, ARM_DRILL = 16, ARM_LANCE = 17, ARM_LASH = 18,
+		ARM_MIMIC = 19;
 	/** The Rig's gun actives ({@link RigGuns}): palm charge, gatling, railgun, sonic, twin beam, siege mode. */
-	public static final int PALM_CHARGE = 13, GATLING = 14, RAILGUN = 15, SONIC = 16, TWIN = 17, SIEGE = 18;
-	/** Their lengths (ticks); the dash's wind-up before the burst, and the barrage's before the pods empty. */
-	public static final int DASH_TICKS = 12, DASH_FIRE = 2, PUNCH_TICKS = 8, BARRAGE_TICKS = 34, BARRAGE_FIRE = 8;
-	public static final int TAKEOFF_CROUCH = 4, TAKEOFF_TICKS = 12, SCAN_TICKS = 18, CALL_TICKS = 70, TABLE_TICKS = 30;
+	public static final int PALM_CHARGE = 20, GATLING = 21, RAILGUN = 22, SONIC = 23, TWIN = 24, SIEGE = 25;
+	/** Their lengths (ticks); the wind-up before the effect fires. */
+	public static final int ARM_BLADE_TICKS = 10, ARM_BLADE_FIRE = 2;
+	public static final int ARM_MACE_TICKS = 10, ARM_MACE_FIRE = 2;
+	public static final int ARM_PILE_TICKS = 8, ARM_PILE_FIRE = 2;
+	public static final int ARM_DRILL_TICKS = 40, ARM_DRILL_FIRE = 0;
+	public static final int ARM_LANCE_TICKS = 10, ARM_LANCE_FIRE = 2;
+	public static final int ARM_LASH_TICKS = 10, ARM_LASH_FIRE = 2;
+	public static final int ARM_MIMIC_TICKS = 10, ARM_MIMIC_FIRE = 2;
 	/** Gun active lengths (ticks). */
 	public static final int PALM_CHARGE_TICKS = 18, PALM_CHARGE_FIRE = 2;
 	public static final int GATLING_TICKS = 60, GATLING_FIRE = 10;
@@ -42,6 +50,8 @@ public final class RigMoves {
 	public static final int SONIC_TICKS = 65, SONIC_FIRE = 5;
 	public static final int TWIN_TICKS = 30, TWIN_CHARGE_TICKS = 10, TWIN_BEAM_TICKS = 14, TWIN_SETTLE = 6;
 	public static final int SIEGE_TICKS = 40, SIEGE_FIRE = 8;
+	public static final int DASH_TICKS = 12, DASH_FIRE = 2, PUNCH_TICKS = 8, BARRAGE_TICKS = 34, BARRAGE_FIRE = 8;
+	public static final int TAKEOFF_CROUCH = 4, TAKEOFF_TICKS = 12, SCAN_TICKS = 18, CALL_TICKS = 70, TABLE_TICKS = 30;
 	/** {@link #THRUST} values. */
 	public static final int THRUST_NONE = 0, THRUST_HOVER = 1, THRUST_FLIGHT = 2;
 	/** How long a palm blast's and a launch's poses play (ticks); the Unibeam's is its charge and beam and the let-down. */
@@ -50,8 +60,8 @@ public final class RigMoves {
 	public static final int PALM_FIRE = 2, LAUNCHER_FIRE = 3;
 
 	public record Move(int kind, long start) {
-	public static final StreamCodec<ByteBuf, Move> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, Move::kind, ByteBufCodecs.VAR_LONG,
-	Move::start, Move::new);
+		public static final StreamCodec<ByteBuf, Move> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.VAR_INT, Move::kind, ByteBufCodecs.VAR_LONG,
+			Move::start, Move::new);
 	}
 
 	public static final AttachmentType<Move> MOVE = AttachmentRegistry.create(JaymosPowers.id("rig_move"),
@@ -64,28 +74,35 @@ public final class RigMoves {
 
 	/** How long a move's pose plays (ticks). */
 	public static int length(int kind) {
-	return switch (kind) {
-				case PALM -> PALM_TICKS;
-				case LAUNCHER -> LAUNCHER_TICKS;
-				case KNEE -> KNEE_TICKS;
-				case KICK -> KICK_TICKS;
-				case TAKEOFF -> TAKEOFF_TICKS;
-				case SCAN -> SCAN_TICKS;
-				case CALL -> CALL_TICKS;
-				case TABLE -> TABLE_TICKS;
-				case DASH -> DASH_TICKS;
-				case PUNCH -> PUNCH_TICKS;
-				case BARRAGE -> BARRAGE_TICKS;
-				case UNIBEAM -> RigUnibeam.CHARGE_TICKS + RigUnibeam.BEAM_TICKS + UNIBEAM_SETTLE;
-				case PALM_CHARGE -> PALM_CHARGE_TICKS;
-				case GATLING -> GATLING_TICKS;
-				case RAILGUN -> RAILGUN_TICKS;
-				case SONIC -> SONIC_TICKS;
-				case TWIN -> TWIN_TICKS;
-				case SIEGE -> SIEGE_TICKS;
-				default -> 0;
-	};
-		}
+		return switch (kind) {
+			case PALM -> PALM_TICKS;
+			case LAUNCHER -> LAUNCHER_TICKS;
+			case KNEE -> KNEE_TICKS;
+			case KICK -> KICK_TICKS;
+			case TAKEOFF -> TAKEOFF_TICKS;
+			case SCAN -> SCAN_TICKS;
+			case CALL -> CALL_TICKS;
+			case TABLE -> TABLE_TICKS;
+			case DASH -> DASH_TICKS;
+			case PUNCH -> PUNCH_TICKS;
+			case BARRAGE -> BARRAGE_TICKS;
+			case ARM_BLADE -> ARM_BLADE_TICKS;
+			case ARM_MACE -> ARM_MACE_TICKS;
+			case ARM_PILE -> ARM_PILE_TICKS;
+			case ARM_DRILL -> ARM_DRILL_TICKS;
+			case ARM_LANCE -> ARM_LANCE_TICKS;
+			case ARM_LASH -> ARM_LASH_TICKS;
+			case ARM_MIMIC -> ARM_MIMIC_TICKS;
+			case UNIBEAM -> RigUnibeam.CHARGE_TICKS + RigUnibeam.BEAM_TICKS + UNIBEAM_SETTLE;
+			case PALM_CHARGE -> PALM_CHARGE_TICKS;
+			case GATLING -> GATLING_TICKS;
+			case RAILGUN -> RAILGUN_TICKS;
+			case SONIC -> SONIC_TICKS;
+			case TWIN -> TWIN_TICKS;
+			case SIEGE -> SIEGE_TICKS;
+			default -> 0;
+		};
+	}
 
 	public static @Nullable Move get(Player player) {
 		return player.getAttached(MOVE);
@@ -104,14 +121,14 @@ public final class RigMoves {
 	static void tick(ServerPlayer player, int thrust) {
 		Move move = player.getAttached(MOVE);
 		if (move != null && player.level().getGameTime() - move.start() > length(move.kind())) {
-	player.removeAttached(MOVE);
+			player.removeAttached(MOVE);
 		}
 		if (thrust == THRUST_NONE) {
-	if (player.getAttached(THRUST) != null) {
+			if (player.getAttached(THRUST) != null) {
 				player.removeAttached(THRUST);
-	}
+			}
 		} else if (thrust(player) != thrust) {
-	player.setAttached(THRUST, thrust);
+			player.setAttached(THRUST, thrust);
 		}
 	}
 }

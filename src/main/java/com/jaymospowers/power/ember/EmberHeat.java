@@ -1,12 +1,11 @@
 package com.jaymospowers.power.ember;
 
-import com.jaymospowers.core.PickKit;
+import com.jaymospowers.core.HudBar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -72,9 +71,8 @@ public final class EmberHeat {
 	}
 
 	private static void show(ServerPlayer player, Gauge g) {
-		Component line = Component.translatable("message.jaymospowers.ember_heat", PickKit.gauge(Math.min(g.heat, FULL) / FULL, 10),
-			Math.round((factor(player) - 1.0F) * 100.0F));
-		player.sendOverlayMessage(line.copy().withStyle(g.heat > FULL ? ChatFormatting.YELLOW : ChatFormatting.GOLD));
+		HudBar.gauge(player, "ember_heat", Math.min(g.heat, FULL) / FULL, g.heat > FULL ? HudBar.YELLOW : HudBar.GOLD, Component.translatable("bar.jaymospowers.heat"),
+			Component.translatable("bar.jaymospowers.ember_bonus", Math.round((factor(player) - 1.0F) * 100.0F)));
 	}
 
 	private static void tick(MinecraftServer server) {

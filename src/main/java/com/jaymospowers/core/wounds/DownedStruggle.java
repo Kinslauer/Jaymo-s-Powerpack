@@ -3,6 +3,7 @@ package com.jaymospowers.core.wounds;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.compat.SpookyDoorsCompat;
 import com.jaymospowers.core.Carry;
+import com.jaymospowers.core.HudBar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -57,8 +58,6 @@ public final class DownedStruggle {
 	static final int GRACE_TICKS = 8;
 	/** A struggle left this long (ticks) is forgotten: the next one starts from nothing. */
 	public static final int FORGET_TICKS = 200;
-	/** The struggle's bar length. */
-	static final int BAR = 12;
 	/** In bed: ticks between mends, what each mends (health points), and the share of a part rest mends it to. */
 	public static final int REST_INTERVAL = 40;
 	public static final float REST_HEAL = 1.0F;
@@ -166,9 +165,7 @@ public final class DownedStruggle {
 				0.6F + level.getRandom().nextFloat() * 0.3F);
 		}
 		if (done < 1.0F) {
-			int filled = Math.round(BAR * done);
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.struggle", "|".repeat(filled) + ".".repeat(BAR - filled))
-				.withStyle(ChatFormatting.YELLOW));
+			HudBar.hold(player, "struggle", done, HudBar.YELLOW, Component.translatable("bar.jaymospowers.struggle"), true);
 			return InteractionResult.SUCCESS_SERVER;
 		}
 		STRUGGLES.remove(player.getUUID());

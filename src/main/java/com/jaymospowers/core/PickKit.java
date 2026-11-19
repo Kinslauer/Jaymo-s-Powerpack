@@ -82,10 +82,4 @@ public final class PickKit {
 	public static AABB around(Vec3 at, double radius) {
 		return new AABB(at, at).inflate(radius);
 	}
-
-	/** A gauge for the action bar: {@code [=====-----]}. */
-	public static String gauge(float fraction, int width) {
-		int full = Math.max(0, Math.min(width, Math.round(fraction * width)));
-		return "[" + "=".repeat(full) + "-".repeat(width - full) + "]";
-	}
 }

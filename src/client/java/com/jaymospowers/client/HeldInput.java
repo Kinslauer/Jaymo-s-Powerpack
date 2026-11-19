@@ -17,7 +17,8 @@ import net.minecraft.network.chat.Component;
  *
  * <p>A charge bar is the action-bar line every hold draws ({@code "|".repeat(filled) + ".".repeat(rest)}: pickpocketing,
  * lifting someone, treating wounds, reviving, finishers, butchering a corpse, Nadir's beacon), so new holds are covered
- * without telling this class about them. Holds timed on the client join through {@link #locksAttack} (the execution's
+ * without telling this class about them. Holds are now drawn instead ({@code core.HudBar}): one sent with {@code locks}
+ * counts as such a line ({@link #bar}). Holds timed on the client join through {@link #locksAttack} (the execution's
  * sneak + left-click, {@link FinisherClient#holdsAttack}).
  */
 public final class HeldInput {
@@ -54,6 +55,12 @@ public final class HeldInput {
 		} else {
 			barAt = Integer.MIN_VALUE / 2;
 		}
+	}
+
+	/** A drawn hold that has the hands came ({@code hud.HudBars}): it keeps the hold going, as a text bar did. */
+	public static void bar() {
+		barAt = ticks;
+		locked = true;
 	}
 
 	static boolean isBar(String text) {
