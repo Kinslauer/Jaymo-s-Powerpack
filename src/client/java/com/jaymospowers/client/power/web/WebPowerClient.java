@@ -29,7 +29,7 @@ import org.jspecify.annotations.Nullable;
 public final class WebPowerClient implements PowerClient {
 	public static final WebPowerClient INSTANCE = new WebPowerClient();
 
-	final WebSwing swing = new WebSwing();
+	public final WebSwing swing = new WebSwing();
 	private final WebWallRunClient wallRun = new WebWallRunClient();
 	private final WebParkourClient parkour = new WebParkourClient();
 	/** What the swing key would stick to right now, for the reticle (refreshed every other tick). */

@@ -213,6 +213,8 @@ public final class WebSwing {
 	// slingshot
 	boolean slinging;
 	float slingDraw;
+	/** Where this draw's orange peak starts on the jump bar (as the charge jump's: steady with the Charge Jump perk, random without). */
+	private float slingPeak;
 	private Vec3 braced = Vec3.ZERO;
 	private boolean slingJumpHeld;
 	/** Ticks Jump has been held while on a web (0 = not held). */
@@ -278,6 +280,20 @@ public final class WebSwing {
 
 	private static LocalPlayer player() {
 		return Minecraft.getInstance().player;
+	}
+
+	/** Braced in the slingshot: the jump bar takes the XP bar's place ({@code RunMovesClient}). */
+	public boolean slingshotShown() {
+		return slinging;
+	}
+
+	/** How far the slingshot is drawn (0-1), and where its orange peak starts. */
+	public float slingDrawn() {
+		return slingDraw;
+	}
+
+	public float slingPeak() {
+		return slingPeak;
 	}
 
 	/** Both webs stuck: the slingshot is possible. */
@@ -859,6 +875,9 @@ public final class WebSwing {
 		}
 		boolean jump = input.jump();
 		if (jump) {
+			if (slingDraw == 0.0F) {
+				slingPeak = com.jaymospowers.freerun.moves.ChargeJump.peak(player, player.getRandom());
+			}
 			slingJumpHeld = true;
 			float before = slingDraw;
 			slingDraw = Math.min(1.0F, slingDraw + 1.0F / SLING_DRAW_TICKS);
@@ -945,7 +964,8 @@ public final class WebSwing {
 	private void fireSling(LocalPlayer player, Vec3 forward) {
 		endStrain();
 		Vec3 dir = forward.scale(1.0 - SLING_AIM).add(player.getLookAngle().scale(SLING_AIM)).normalize();
-		double speed = SLING_MIN_SPEED + (SLING_MAX_SPEED - SLING_MIN_SPEED) * slingDraw;
+		// let go in the jump bar's orange peak for the full launch; anywhere else falls short (as the charge jump does)
+		double speed = SLING_MIN_SPEED + (SLING_MAX_SPEED - SLING_MIN_SPEED) * com.jaymospowers.freerun.moves.ChargeJump.share(slingDraw, slingPeak);
 		for (Strand strand : strands) {
 			if (strand.attached) {
 				strand.attached = false;
