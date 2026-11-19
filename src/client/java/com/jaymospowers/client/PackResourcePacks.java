@@ -138,7 +138,21 @@ final class PackResourcePacks {
 		// "KSPACK" (MIT): the textures Tiered Shields (ks-shields, build.gradle) draws its shields with. 26.3-1.
 		new Pack("Tiered Shields' textures", "jaymospowers-kspack-v1", "KSPACK", "KSPACK_26.3-1.zip",
 			"https://cdn.modrinth.com/data/1NDTwAcs/versions/4gUjKYHi/KSPACK_26.3-1.zip",
-			"ab93778ed41546c8bccd46d518e83a745531235e", false));
+			"ab93778ed41546c8bccd46d518e83a745531235e", false),
+		// "Jaymo Medieval Music": Alexander Nakarada's Medieval Music (CC BY 4.0), in Sarisan's 26.3 pack (CC BY 4.0), re-encoded at
+		// a lower bitrate by tools/music_trim.py with credit (CREDITS.txt inside). Fetched from this repo's release
+		// MUSIC_TAG, its SHA-1 from the .sha1 file beside it (empty sha1 here); kept on, "jaymospowers-medieval-music-off"
+		// in config/ keeps it off. Sits at the bottom of the file packs, and our small warped forest pack just above it
+		// (MUSIC_GAPS, put in place when this one is switched on).
+		new Pack("Jaymo Medieval Music", MUSIC_MARKER, "Jaymo Medieval Music", "Jaymo Medieval Music.zip", MUSIC_URL,
+			"", false, BASE, true));
+
+	static final String MUSIC_MARKER = "jaymospowers-medieval-music";
+	/** The release the music zip is an asset of, and the asset names GitHub gives it (spaces become dots). */
+	static final String MUSIC_TAG = "medieval-music-v1";
+	static final String MUSIC_URL = "https://github.com/Kinslauer/Jaymo-s-Powerpack/releases/download/" + MUSIC_TAG + "/Jaymo.Medieval.Music.zip";
+	/** Our own built-in pack that gives the warped forest music (the music pack empties its list); needs the music pack's files. */
+	static final String MUSIC_GAPS = "medieval_music_gaps";
 
 	/**
 	 * File name prefixes of packs that left the pack: switched off at launch if found on. "Fluid & Foolish" held only
@@ -232,6 +246,9 @@ final class PackResourcePacks {
 				});
 			}
 		}
+		if (MUSIC_MARKER.equals(pack.marker())) {
+			placeMusicGaps(minecraft, id);
+		}
 		minecraft.options.loadSelectedResourcePacks(minecraft.getResourcePackRepository());
 		minecraft.options.save();
 		minecraft.reloadResourcePacks();
@@ -243,6 +260,18 @@ final class PackResourcePacks {
 		} catch (IOException e) {
 			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't write {}", marker, e);
 		}
+	}
+
+	/** Puts our warped forest music pack just above the music pack {@code musicId}, so it draws over it. */
+	private static void placeMusicGaps(Minecraft minecraft, String musicId) {
+		String gaps = minecraft.getResourcePackRepository().getAvailableIds().stream()
+			.filter(id -> id.contains(com.jaymospowers.JaymosPowers.MOD_ID) && id.endsWith(MUSIC_GAPS)).findFirst().orElse(null);
+		if (gaps == null) {
+			return;
+		}
+		List<String> selected = minecraft.options.resourcePacks;
+		selected.remove(gaps);
+		selected.add(selected.indexOf(musicId) + 1, gaps);
 	}
 
 	/**
@@ -277,8 +306,9 @@ final class PackResourcePacks {
 				Files.copy(new DigestInputStream(in, sha1), part, StandardCopyOption.REPLACE_EXISTING);
 			}
 			String got = HexFormat.of().formatHex(sha1.digest());
-			if (!got.equals(pack.sha1())) {
-				com.jaymospowers.JaymosPowers.LOGGER.warn("Downloaded {} but its SHA-1 is {}, not {}; not using it", pack.file(), got, pack.sha1());
+			String expected = pack.sha1().isEmpty() ? sidecarSha1(pack) : pack.sha1();
+			if (!got.equals(expected)) {
+				com.jaymospowers.JaymosPowers.LOGGER.warn("Downloaded {} but its SHA-1 is {}, not {}; not using it", pack.file(), got, expected);
 				Files.deleteIfExists(part);
 				return null;
 			}
@@ -292,6 +322,16 @@ final class PackResourcePacks {
 			} catch (IOException ignored) {
 			}
 			return null;
+		}
+	}
+
+	/** A pack with no fixed SHA-1 (a file of ours on a release) says its own, in the file beside it: the url plus ".sha1". */
+	private static @Nullable String sidecarSha1(Pack pack) throws IOException {
+		URLConnection connection = URI.create(pack.url() + ".sha1").toURL().openConnection();
+		connection.setConnectTimeout(15_000);
+		connection.setReadTimeout(30_000);
+		try (InputStream in = connection.getInputStream()) {
+			return new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8).trim().toLowerCase(java.util.Locale.ROOT);
 		}
 	}
 

@@ -39,6 +39,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// great foes' themes, and the trophy stand's item
 		com.jaymoskingdoms.client.music.FoeMusicClient.register();
 		com.jaymoskingdoms.client.music.SceneMusic.register();
+		com.jaymoskingdoms.client.music.PlaceMusic.register();
 		com.jaymoskingdoms.client.trophies.TrophyStandRenderer.register();
 		EntityRenderers.register(JaymosKingdoms.FOLK, FolkRenderer::new);
 		// (Andy, 2026-11-06) what is beyond this player's tier, off JEI and the recipe book
