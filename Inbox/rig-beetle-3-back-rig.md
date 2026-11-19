@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: writing
 for: any
 from: coordinator (Zemo Baki cross-reference thread)
 asked: 2026-11-18
@@ -11,6 +11,7 @@ suggested_owns:
   - src/client/java/com/jaymospowers/client/rig/RigBackClient.java (new)
   - tools/gen_rig.py (back plates only) + regenerated RigSuitMesh
   - changes/powers/<branch>.md
+writer: hermes-writer
 ---
 # Rig patch 3: the back rig
 

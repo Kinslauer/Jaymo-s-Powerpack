@@ -1,5 +1,5 @@
 ---
-status: running
+status: in-review
 task: rig-beetle-3-back-rig
 branch: claude/rig-beetle-3-back
 with: Claude Code (PC)
@@ -25,3 +25,4 @@ owns:
 - Not done: the grapple doesn't use WebHeft's rope weight (a straight pull), and the wings don't add lift in turns.
 
 ## Done
+Wing vanes spread in full flight; Wing Slash, Spear Legs, Pincers (grab/throw), Grapple Claw and Horn Lightning are Rig menu entries. Compiled on the PC, CI passes; not played.
