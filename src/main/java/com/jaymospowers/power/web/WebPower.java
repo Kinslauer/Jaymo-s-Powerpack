@@ -322,6 +322,7 @@ public final class WebPower implements Power {
 		WebNet.register();
 		WebCut.register();
 		WebTricks.register();
+		WebAirStrikes.register();
 		WebWhip.register();
 		WebSlam.register();
 		WebBrute.register();
@@ -477,6 +478,8 @@ public final class WebPower implements Power {
 		WebTendrils.releaseAll(player, false);
 		WebSymbiote.onLost(player);
 		WebAscension.onLost(player);
+		WebSkim.forget(player);
+		WebAirStrikes.forget(player);
 		WebBlossom.forget(player);
 	}
 
@@ -610,12 +613,12 @@ public final class WebPower implements Power {
 
 	@Override
 	public boolean allowsFloating(ServerPlayer player) {
-		return inGrace(player) || WebSymbiote.allowsFloating(player) || WebParkour.clinging(player);
+		return inGrace(player) || WebSymbiote.allowsFloating(player) || WebParkour.clinging(player) || WebSkim.skimming(player);
 	}
 
 	@Override
 	public boolean skipsMovementCheck(ServerPlayer player) {
-		return inGrace(player);
+		return inGrace(player) || WebSkim.skimming(player) || WebAirStrikes.diving(player);
 	}
 
 	@Override
@@ -635,6 +638,10 @@ public final class WebPower implements Power {
 		WebBrute.tick(player);
 		WebMorph.tick(player);
 		WebAscension.tick(player, state != null && swinging(state));
+		boolean swingingNow = state != null && swinging(state);
+		WebAirStrikes.tick(player, swingingNow);
+		WebStunts.tick(player, swingingNow);
+		WebSkim.tick(player);
 		WebPose pose = player.getAttached(POSE);
 		if (pose != null && player.level().getGameTime() - pose.start() >= pose.ticks()) {
 			player.removeAttached(POSE);

@@ -71,6 +71,10 @@ public final class WebPowerClient implements PowerClient {
 				}
 				return true;
 			}
+			if (clicks > 0 && isActive(player) && WebAirStrikesClient.onAttack(player, INSTANCE.swing, INSTANCE.swing.tricks())) {
+				// let go of a swing and still in the air: the click is a rising blow, a spinning strike or a dive kick
+				return true;
+			}
 			com.jaymospowers.power.web.WebTendrils.Grips grips = player.getAttached(com.jaymospowers.power.web.WebTendrils.GRIPS);
 			if (grips != null && com.jaymospowers.power.web.WebTendrilCombos.active(player)) {
 				// mid-combo: the click is swallowed
@@ -195,6 +199,7 @@ public final class WebPowerClient implements PowerClient {
 		});
 		PowerClients.register(WebPower.ID, INSTANCE);
 		WebSymbioteClient.init();
+		WebSkimClient.init();
 		WebBehemothClient.init();
 		EntityRenderers.register(com.jaymospowers.power.web.WebSymbioteBlob.TYPE, WebBlobRenderer::new);
 		EntityRenderers.register(WebPower.WEB_BALL, context -> new ThrownItemRenderer<>(context, 0.85F, false));
@@ -532,6 +537,7 @@ public final class WebPowerClient implements PowerClient {
 		int height = graphics.guiHeight();
 		WebSymbioteClient.renderHud(graphics, player);
 		WebFuryClient.renderHud(graphics, player);
+		WebSkimClient.renderHud(graphics, player);
 		WebSenseBolts.renderHud(graphics, player);
 		// the ascended ability (Web Strike) joins the end of the row once you have it
 		boolean ascended = com.jaymospowers.core.Fate.isAscended(player);

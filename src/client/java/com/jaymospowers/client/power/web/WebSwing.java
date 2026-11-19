@@ -318,6 +318,10 @@ public final class WebSwing {
 	}
 
 	/** Any web stuck right now. */
+	WebTrickClient tricks() {
+		return tricks;
+	}
+
 	boolean attached() {
 		return strands[WebNet.MAIN].attached || strands[WebNet.OFF].attached;
 	}
