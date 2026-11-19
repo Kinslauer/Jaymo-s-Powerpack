@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 12:31). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 13:04). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -57,14 +57,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/hns-4-shove-procs|hns-4-shove-procs]]
-- [x] [[Inbox/Done/hns-3-edges-sparks|hns-3-edges-sparks]]
-- [x] [[Inbox/Done/hns-2-stealth-posture|hns-2-stealth-posture]]
-- [x] [[Inbox/Done/hns-1-crits|hns-1-crits]]
-- [x] [[Inbox/Done/medieval-deco-7-practice-dummy|medieval-deco-7-practice-dummy]]
-- [x] [[Inbox/Done/medieval-deco-6-towns-sea|medieval-deco-6-towns-sea]]
-- [x] [[Inbox/Done/medieval-deco-5-farm-water|medieval-deco-5-farm-water]]
-- [x] [[Inbox/Done/medieval-deco-4-drinks|medieval-deco-4-drinks]]
+- [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
+- [x] [[Inbox/Done/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]]
+- [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
+- [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
+- [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
+- [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
+- [x] [[Inbox/Done/wither-reincarnated-fight|wither-reincarnated-fight]]
+- [x] [[Inbox/Done/weapon-hooks-and-breaks|weapon-hooks-and-breaks]]
 
 
 %% kanban:settings
