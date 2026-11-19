@@ -517,6 +517,10 @@ public class JaymosPowersClient implements ClientModInitializer {
 		if (client != null && !minecraft.isPaused()) {
 			client.tick(minecraft, player);
 		}
+		if (!minecraft.isPaused()) {
+			// a symbiote in someone who isn't a web slinger still drives, hangs and crawls them (a web slinger's ticks above)
+			com.jaymospowers.client.power.web.WebPowerClient.hostTick(minecraft, player);
+		}
 		// (0.11.87) the Rig's hover and full flight, before the roll too
 		com.jaymospowers.client.rig.RigClient.motion(minecraft, player);
 		if (!minecraft.isPaused()) {

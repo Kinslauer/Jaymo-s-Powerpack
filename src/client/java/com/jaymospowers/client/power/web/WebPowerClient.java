@@ -517,6 +517,19 @@ public final class WebPowerClient implements PowerClient {
 		}
 	}
 
+	/**
+	 * Each tick for a symbiote host who isn't a web slinger (whose own power's ticks run instead of {@link #tick}): the
+	 * symbiote's side of it still runs, or a takeover locks their keys and never steers them nor counts down, and they
+	 * stand frozen till it's over. The red mark on what the tendrils would grab too.
+	 */
+	public static void hostTick(Minecraft minecraft, LocalPlayer player) {
+		if (isActive(player) || !com.jaymospowers.power.web.WebSymbiote.isBonded(player)) {
+			return;
+		}
+		INSTANCE.grabAim = com.jaymospowers.power.web.WebSymbiote.tendrilKeys(player) ? grabTarget(player) : null;
+		WebSymbioteClient.tick(minecraft, player, INSTANCE.swing);
+	}
+
 	// ---- HUD --------------------------------------------------------------------------------------------------------
 
 	private static final int RETICLE_LIVE = 0xFFFFFFFF;
@@ -525,6 +538,27 @@ public final class WebPowerClient implements PowerClient {
 	private static final int RETICLE_ATTACHED = 0xFFE0303A;
 	/** A creature, player or corpse an R/G web would stick to. */
 	private static final int RETICLE_TARGET = 0xFFFFD040;
+
+	/** Something the tendrils can take: the crosshair goes red. */
+	private static void grabMark(GuiGraphicsExtractor graphics, int cx, int cy) {
+		graphics.fill(cx - 5, cy, cx + 6, cy + 1, 0xFFE02020);
+		graphics.fill(cx, cy - 5, cx + 1, cy + 6, 0xFFE02020);
+		graphics.outline(cx - 3, cy - 3, 7, 7, 0xC0E02020);
+	}
+
+	/**
+	 * The HUD for a symbiote host who isn't a web slinger ({@link #hostTick}): a takeover's dark and its struggle bar,
+	 * the fight for the suit, and the red mark on what the tendrils would grab.
+	 */
+	public static void hostHud(GuiGraphicsExtractor graphics, LocalPlayer player) {
+		if (isActive(player) || !com.jaymospowers.power.web.WebSymbiote.isBonded(player)) {
+			return;
+		}
+		if (INSTANCE.grabAim != null) {
+			grabMark(graphics, graphics.guiWidth() / 2, graphics.guiHeight() / 2);
+		}
+		WebSymbioteClient.renderHud(graphics, player);
+	}
 
 	@Override
 	public void renderHud(GuiGraphicsExtractor graphics, DeltaTracker delta, LocalPlayer player) {
@@ -563,10 +597,7 @@ public final class WebPowerClient implements PowerClient {
 			}
 		}
 		if (grabAim != null) {
-			// something the tendrils can take: the crosshair goes red
-			graphics.fill(cx - 5, cy, cx + 6, cy + 1, 0xFFE02020);
-			graphics.fill(cx, cy - 5, cx + 1, cy + 6, 0xFFE02020);
-			graphics.outline(cx - 3, cy - 3, 7, 7, 0xC0E02020);
+			grabMark(graphics, cx, cy);
 		}
 
 		// cooldown chips right of the hotbar (same corner and style as Wind Control's)

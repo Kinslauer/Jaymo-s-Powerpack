@@ -52,6 +52,8 @@ final class PowerHud {
 			return;
 		}
 		swallowed(graphics, delta, minecraft, player);
+		// a symbiote in someone who isn't a web slinger: its takeover dark, struggle bar and grab mark
+		com.jaymospowers.client.power.web.WebPowerClient.hostHud(graphics, player);
 		Power power = Powers.of(player);
 		if (power == null) {
 			return;
