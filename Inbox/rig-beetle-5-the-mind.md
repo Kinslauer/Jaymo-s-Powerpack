@@ -44,3 +44,4 @@ suggested_owns:
 - 2026-11-18 16:55 PC Claude took it on branch claude/rig-beetle-5-mind (an older E:/wt/rig-beetle-5-the-mind worktree was left from a stalled run, no commits; left untouched).
 - 2026-11-18 17:09 Question for Andy: md-voice needs a voice source you're happy with (VoiceStudio's default is non-commercial). Which voice? Everything else is in PR #1773.
 - 2026-11-18 19:44 Andy is working on the voices (Google TTS, #1780); md-voice waits on that.
+- 2026-11-18 21:42 Review: pr: 1774 was a closed duplicate (CONFLICTING, never merged); the work landed as PR #1773, merged 2026-11-18. Pointed pr: at 1773 so the sync files it as done. md-voice still waits on Andy's voices (#1780).
