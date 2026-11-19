@@ -109,6 +109,11 @@ final class McaBridge {
 		return villager instanceof VillagerEntityMCA;
 	}
 
+	/** {@link McaCompat#interactingWith}. */
+	static boolean interactingWith(net.minecraft.world.entity.Entity entity, ServerPlayer player) {
+		return entity instanceof VillagerEntityMCA m && m.getInteractions().getInteractingPlayer().filter(p -> p == player).isPresent();
+	}
+
 	// ---- borrowed faces (BorrowedFaces, Doubles) -----------------------------------------------------------------------
 
 	/** What of an MCA look is the face and body someone is known by (with every gene, saved as {@code Gene...}). */
