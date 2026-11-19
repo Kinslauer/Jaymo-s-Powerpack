@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: writing
 for: any
 from: coordinator
 asked: 2026-11-18
@@ -12,6 +12,7 @@ suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/SightedShard.java
   - kingdoms/src/client/java/com/jaymoskingdoms/client/ScryingOrbRenderer.java
   - kingdoms/src/main/resources/assets/jaymoskingdoms/lang/parts/scrying-orb.json
+writer: hermes-writer
 ---
 # Scrying orb (people and places)
 
