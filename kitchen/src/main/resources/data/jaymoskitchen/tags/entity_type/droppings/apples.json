@@ -1,0 +1,20 @@
+{
+	"replace": false,
+	"values": [
+		"minecraft:horse",
+		"minecraft:donkey",
+		"minecraft:mule",
+		{
+			"id": "jaymoskingdoms:war_elephant",
+			"required": false
+		},
+		{
+			"id": "naturalist:zebra",
+			"required": false
+		},
+		{
+			"id": "naturalist:elephant",
+			"required": false
+		}
+	]
+}

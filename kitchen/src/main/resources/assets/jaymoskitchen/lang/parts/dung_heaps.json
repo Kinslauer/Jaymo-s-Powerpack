@@ -1,3 +1,15 @@
 {
-	"block.jaymoskitchen.manure_pile": "Dung Heap"
+	"block.jaymoskitchen.manure_pile": "Droppings",
+	"message.jaymoskitchen.spoor": "%s, %s",
+	"message.jaymoskitchen.spoor.of": "%s droppings",
+	"message.jaymoskitchen.spoor.heap": "A dung heap",
+	"message.jaymoskitchen.spoor.pats": "Cattle pats",
+	"message.jaymoskitchen.spoor.apples": "Horse apples",
+	"message.jaymoskitchen.spoor.pellets": "Pellets of deer, sheep or goat",
+	"message.jaymoskitchen.spoor.logs": "Swine droppings",
+	"message.jaymoskitchen.spoor.bird": "Bird droppings",
+	"message.jaymoskitchen.spoor.scat": "A hunter's scat, full of fur and bone",
+	"message.jaymoskitchen.spoor.age.0": "fresh",
+	"message.jaymoskitchen.spoor.age.1": "crusted over, some hours old",
+	"message.jaymoskitchen.spoor.age.2": "dried out, a day or more old"
 }

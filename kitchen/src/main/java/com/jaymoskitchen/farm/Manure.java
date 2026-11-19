@@ -3,9 +3,12 @@ package com.jaymoskitchen.farm;
 import com.jaymoskitchen.JaymosKitchen;
 import com.mojang.serialization.Codec;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.function.Function;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
@@ -26,7 +29,10 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.BlockItem;
@@ -39,6 +45,7 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders;
+import org.jspecify.annotations.Nullable;
 
 /**
  * (Better With Mods' dung and fertilizer, MIT; our own code and art.) Farm animals that have been fed or bred (BWM only
@@ -55,6 +62,22 @@ public final class Manure {
 	static final int MANURE_TICKS = 18000;
 	/** At most one pile per animal in this many ticks (an in-game day). */
 	static final long DAY_TICKS = 24000L;
+	/** Unfed animals, wild or not: average ticks between droppings (30 minutes), and at most one in this many days. */
+	static final int WILD_TICKS = 36000;
+	static final long WILD_DAYS = 3;
+	/** The droppings each kind of animal leaves (data/jaymoskitchen/tags/entity_type/droppings/*.json). */
+	static final Map<ManurePileBlock.Kind, TagKey<EntityType<?>>> DROPPINGS = new EnumMap<>(ManurePileBlock.Kind.class);
+
+	static {
+		for (ManurePileBlock.Kind kind : ManurePileBlock.Kind.values()) {
+			if (kind != ManurePileBlock.Kind.HEAP) {
+				DROPPINGS.put(kind, TagKey.create(Registries.ENTITY_TYPE, JaymosKitchen.id("droppings/" + kind.getSerializedName())));
+			}
+		}
+	}
+
+	/** When an unfed animal last left droppings (in memory only: a restart forgets it). */
+	private static final Map<Entity, Long> WILD_LAST = new WeakHashMap<>();
 	/** How often animals are looked over, and how near a player they have to be (blocks). */
 	static final int CHECK_EVERY = 100;
 	static final double RANGE = 48.0;
@@ -144,48 +167,73 @@ public final class Manure {
 		}
 	}
 
-	/** Each fed adult near a player: now and then, a pile (once a day at most). Animals in love count as fed. */
+	/**
+	 * Each grown animal near a player: now and then, its droppings. A fed one (or one in love) leaves them once a day at
+	 * most; any other, wild or not, once in {@link #WILD_DAYS} days at most, and only on open ground.
+	 */
 	private static void animals(ServerLevel level) {
-		Set<Animal> seen = Collections.newSetFromMap(new IdentityHashMap<>());
+		Set<Mob> seen = Collections.newSetFromMap(new IdentityHashMap<>());
 		long time = level.getGameTime();
-		float chance = (float) CHECK_EVERY / MANURE_TICKS;
+		float fedChance = (float) CHECK_EVERY / MANURE_TICKS, wildChance = (float) CHECK_EVERY / WILD_TICKS;
 		for (ServerPlayer player : level.players()) {
 			if (player.isSpectator()) {
 				continue;
 			}
-			for (Animal animal : level.getEntitiesOfClass(Animal.class, player.getBoundingBox().inflate(RANGE),
-				a -> a.isAlive() && a.is(MANURE_MAKERS))) {
-				if (!seen.add(animal)) {
+			for (Mob animal : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(RANGE),
+				a -> a.isAlive() && !a.isBaby() && kindOf(a) != null)) {
+				if (!seen.add(animal) || animal instanceof TamableAnimal pet && pet.isTame()) {
 					continue;
 				}
-				if (animal.isInLove()) {
-					fed(animal);
+				if (animal instanceof Animal beast && beast.isInLove() && animal.is(MANURE_MAKERS)) {
+					fed(beast);
 				}
-				Long last = animal.getAttached(MANURE_TIME);
-				if (last == null || animal.isBaby() || time - last < DAY_TICKS || level.getRandom().nextFloat() >= chance) {
-					continue;
+				Long fedLast = animal.is(MANURE_MAKERS) ? animal.getAttached(MANURE_TIME) : null;
+				if (fedLast != null) {
+					if (time - fedLast < DAY_TICKS || level.getRandom().nextFloat() >= fedChance) {
+						continue;
+					}
+					animal.setAttached(MANURE_TIME, time);
+					drop(level, animal, true);
+				} else {
+					Long last = WILD_LAST.get(animal);
+					if (last != null && time - last < DAY_TICKS * WILD_DAYS && time >= last || !animal.onGround()
+						|| level.getRandom().nextFloat() >= wildChance) {
+						continue;
+					}
+					WILD_LAST.put(animal, time);
+					drop(level, animal, false);
 				}
-				animal.setAttached(MANURE_TIME, time);
-				drop(level, animal);
 				level.playSound(null, animal.getX(), animal.getY(), animal.getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.NEUTRAL,
 					0.5F, 0.6F + level.getRandom().nextFloat() * 0.2F);
 			}
 		}
 	}
 
+	/** Which droppings {@code animal} leaves (by the jaymoskitchen:droppings/* tags), or null if none. */
+	static ManurePileBlock.@Nullable Kind kindOf(Entity animal) {
+		for (Map.Entry<ManurePileBlock.Kind, TagKey<EntityType<?>>> kind : DROPPINGS.entrySet()) {
+			if (animal.is(kind.getValue())) {
+				return kind.getKey();
+			}
+		}
+		return null;
+	}
+
 	/**
-	 * The animal's pile: on the dung heap at its feet (a new one, or one more pat on the heap there), so a pen or barn
-	 * heaps up where the animals stand. On a nitre bed, in water, or where there's no room it falls as a loose item
-	 * instead (a nitre bed works droppings on top of it in by itself).
+	 * The animal's droppings, at its feet (new ones, or one more pat on what's there), so a pen or barn heaps up where the
+	 * animals stand. A fed animal's fall as a loose item where there's no room, in water or on a nitre bed (a nitre bed
+	 * works droppings on top of it in by itself); a wild one's are just lost there.
 	 */
-	private static void drop(ServerLevel level, Animal animal) {
+	private static void drop(ServerLevel level, Mob animal, boolean fed) {
 		BlockPos feet = animal.blockPosition();
 		boolean nitreBed = BuiltInRegistries.BLOCK.getKey(level.getBlockState(feet.below()).getBlock()).equals(NITRE_BED);
-		if (nitreBed || !MANURE_PILE.addPat(level, feet)) {
-			ItemEntity pile = animal.spawnAtLocation(level, new ItemStack(MANURE));
-			if (pile != null) {
-				pile.setPickUpDelay(40);
-			}
+		ManurePileBlock.Kind kind = kindOf(animal);
+		if (!nitreBed && kind != null && MANURE_PILE.addPat(level, feet, kind, animal) || !fed) {
+			return;
+		}
+		ItemEntity pile = animal.spawnAtLocation(level, new ItemStack(MANURE));
+		if (pile != null) {
+			pile.setPickUpDelay(40);
 		}
 	}
 
