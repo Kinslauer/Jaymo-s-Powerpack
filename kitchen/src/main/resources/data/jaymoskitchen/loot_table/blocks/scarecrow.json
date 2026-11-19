@@ -1,0 +1,40 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskitchen:scarecrow"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:carved_pumpkin",
+          "condition": {
+            "type": "minecraft:match_block",
+            "blocks": "jaymoskitchen:scarecrow",
+            "state": {
+              "pumpkin": "true"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

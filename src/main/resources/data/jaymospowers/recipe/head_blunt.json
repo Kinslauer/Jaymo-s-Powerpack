@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "#minecraft:wool",
+    "minecraft:leather",
+    "minecraft:stick"
+  ],
+  "result": {
+    "id": "jaymospowers:head_blunt",
+    "count": 2
+  }
+}

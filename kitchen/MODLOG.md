@@ -2472,3 +2472,65 @@ Andy's scaling pick "feasts": a late food tier. Three feast dishes from Legend-a
 ## 0.6.51 (2026-11-18): Add Cooking Block (#1687)
 
 Added a new **Cooking Block** to the Functional creative tab. The block has iron-like properties (metal sound, hardness 5.0, resistance 6.0) and uses a single cube_all texture for both block and item models.
+
+## 0.6.52 (2026-11-19): drinks and kitchen - vines, press, vintage, tea, smoke chips, black wine (#1797)
+
+- **Grape vines**: a vine on a trellis (Grape Vine; crafted from grapes and two sticks), wild ones on the edges of plains, savanna and flower forests. Prune it with shears in winter and it bears three bunches; a vine bears one crop a year (after picking it stays bare until it has been through a winter), and one left unpruned bears one fewer each year, down to one. Ripe bunches in the open are stripped by birds now and then; a net (string) keeps them off and adds a bunch. Pick with an empty hand.
+- **Treading tub and apple press**: load grapes (or crimson and warped grapes) into the tub and jump in it, or apples into the press and turn the screw with an empty hand; draw the juice into glass bottles. Three bottles of juice fill a cask on their own. Our grapes make Grape Wine alongside Pantry's.
+- **Vintage**: wine drawn from a cask carries the year it was made. Left in a cask in a cool cellar (`Freshness#cellar`) it improves each in-game year, up to five. Sneak and use a bottle on a villager, wandering trader or (with Kingdoms) its folk and Hornkin to sell it; older wine pays up to 3.5 times as much (`KingdomsMoney`).
+- **Tea**: tea bushes in jungles, cherry groves and windswept hills; they grow in rain and shade. Fresh leaves dry on the drying rack, only with the sun on them, into Dried Tea Leaves, which the tea kettle brews like any tea herb. A tea pot on a table, filled with cups of tea, serves everyone sitting on a cushion nearby with a short calm and a little warmth.
+- **Smoke chips**: oak, birch, cherry, apple and dark oak wood chips (crafted from logs). One from your pockets goes on the coals when the smoker's minigame ends well: each keeps the food a different time (oak 5x, birch 4x, cherry 5x, apple 4x, dark oak 7x; plain smoke 4x) and fills a little more.
+- **Black wine**: crimson and warped vines grow along the Nether's lava shores and only near lava; their grapes make juice and Black Wine, which sells for a lord's price.
+- JEI: a Tub and Press page, a Cask page, tea leaves on the Drying Rack page, and notes on the vines, tea bush, pot and wood chips.
+- Classes: `vintner/Vintner`, `GrapeVineBlock`, `TeaBushBlock`, `JuiceBlock`, `JuiceEntity`, `TeaPotBlock`, `Juice`, `Vintage`, `WineTrade`, `Chip`; `CaskEntity`, `Brew`, `Brewing`, `Curing`, `Kitchen#award`, `Hides#dried`, `DryingRackEntity`, `MillJei`.
+- Built; not played.
+
+## 0.6.53 (2026-11-19): farm, field and water: barrels, trough, watering can, fish trap, scarecrow (#1799)
+
+- **Water barrel**: a glass bottle takes a level as clean water (Thirst), a bucket takes the lot, a water bucket or bottle tips water in, a waterskin or watering can fills from it, and an empty hand drinks a sip. Rain under the open sky refills it, slowly.
+- **Fish barrel**: a barrel (barrel and two salt); fish kept in it age at half speed (counted when it's opened, like a cold cellar), and its top shows none, a few or a good many fish.
+- **Feeding trough** (planks; hay, wheat, seeds or carrots in it): farm animals within 8 blocks come to it, eat, heal and stay fed for 5 minutes; a fed adult may fall in love. Bites slowly use it up; empty, they graze as before. A fed sheep leaves the grass alone (`EatBlockGoalMixin`), so a fed herd crops the ground less.
+- **Watering can** (5 iron ingots, 16 waterings, filled at water or a water barrel): on a crop on a dry day it gives the crop and the ones touching it a few more chances to grow, as random ticks (so season and slow farms still count), and wets the farmland. Never needed.
+- **Fish trap** (sticks and string; set in water, baited with Fish Bait or offal): fills over a day, emptied with an empty hand. What it holds comes from the water's stock (`WaterStock`): per chunk, set by how much water is round the trap, drawn down by every catch and recovering a fish every ~3 minutes, so a trap in a puddle, or in water already trapped out, comes up near empty. Setting and emptying one counts as fishing to the Tideborn (`TideCompat` into Kingdoms' `TideFishing`).
+- **Scarecrow** (hay and sticks; set a carved pumpkin on its head, sneak with an empty hand to take it back): rabbits won't raid carrots within 8 blocks of it (`RaidGardenGoalMixin`) and crop eaters (`#jaymoskitchen:crop_eaters`, rabbits and rats) nearby run from it. Hook for the vine birds and the Practice Dummy: `Scarecrows.guarded(level, cropPos)`, `Scarecrows.addGuard(...)` and `Scarecrows.scare(level, at)`.
+- Classes: `farmwater/` (`FarmWater`, `WaterBarrelBlock`, `FishBarrelBlock`/`Entity`, `TroughBlock`, `Troughs`, `WateringCanItem`, `FishTrapBlock`/`Entity`, `WaterStock`, `ScarecrowBlock`, `Scarecrows`), `compat/TideCompat`. Art: `tools/gen_farm_water.py` (own textures, the rest vanilla block textures).
+- Not built: fish barrels in Kingdoms' fishers' huts and market stalls. Built by CI only; not played.
+
+## 0.6.54 (2026-11-19): scarecrows keep the birds off the vines (#1807)
+
+- **Vine birds**: a scarecrow wearing a carved pumpkin (`Scarecrows.guarded`) now keeps the birds off ripe grape vines within its reach, as it already kept rabbits off the crops. A net still works anywhere.
+- Built by CI; not played.
+
+## 0.6.55 (2026-11-19): Droppings: dung lands on the ground, piles up, and differs by animal (#1822)
+
+- Andy: "the dung should drop on ground and be visible and pile high like offal and rocks do", then "can different land
+  animals drop different piles? so rangers have a new way to track?"
+- **Droppings on the ground**: an animal's manure lands as droppings at its feet. If droppings are already there, the new
+  pat goes on top. Up to 8 pats fit in a block: they spread out first, then heap up.
+- **Each animal leaves its own kind**, shaped like the real thing:
+  - cow pats: cows, mooshrooms, musk oxen
+  - horse apples: horses, donkeys, mules, war elephants
+  - pellets: sheep, goats, rabbits, llamas, camels, armadillos, moose, serow, shrine deer, great goats
+  - lumpy logs: pigs, hoglins, wild boar
+  - bird splashes with white caps: chickens, cranes
+  - twisted scat full of fur and bone: wolves, foxes, cats, ocelots, polar bears, pandas, coyotes, feral wolves,
+    raccoon dogs
+
+  Kingdoms beasts and other mods' deer and boar go by tag (`jaymoskitchen:droppings/*`). Manure set down by hand is a
+  plain dung heap.
+- **They age**: fresh droppings crust over within minutes and dry out over most of a day, turning paler each time. Flies
+  hang over fresh droppings, fewer once they're crusted, and none once they're dry. Dry droppings under the open sky
+  weather away a pat at a time, while a heap under a roof keeps.
+- **Wild animals leave them too**: any grown animal near a player now and then leaves droppings on open ground, at most
+  once every three days. Tamed pets don't. Fed or bred farm animals still go once a day. A fed animal's manure drops
+  loose where there's no room or on a nitre bed, which works it in by itself.
+- **Reading spoor** (with Jaymo's Kingdoms): a Ranger, or anyone with Read the Ground, can sneak and right-click
+  droppings with nothing in either hand. The hint line says what left them ("Deer droppings", or by their look after a
+  restart) and how old they are. If the animal that left them is still about, its trail shows to them, as far and as old
+  as the best tracker reads. Rangers earn class experience for it now and then. Anyone else takes a pat as usual.
+- Manure in hand sets down a dung heap or adds to whatever droppings are there. Sneak to put it beside them instead.
+  Right click takes one pat back, a punch drops one manure a pat, you can walk through them, and they pop off if the
+  ground under them goes. Scavengers leave them alone. Composting, tanning, fertilizer and nitre beds work as before.
+- Code: `farm/ManurePileBlock` (kinds, ages, spoor), `farm/Manure` (who drops what, where). Textures, models, blockstate
+  and the outline table come from `tools/gen_manure_pile.py`.
+- Built; not played.

@@ -69,6 +69,12 @@ public final class Crew {
 	public final Map<UUID, List<ItemStack>> plunder = new HashMap<>();
 	/** When she was launched (game time). */
 	public long born;
+	/**
+	 * (2026-11-19) A sea ship's magazine: her powder ({@code "powder"}) and each kind of shot she carries (by
+	 * {@link ShotKind#getSerializedName}), spent a charge at a time as her guns are loaded ({@code ShipMagazine}). Null until
+	 * she's first stocked (a ship saved before she had one is stocked as new). An airship's is her hold's chests instead.
+	 */
+	public @Nullable Map<String, Integer> magazine;
 
 	/** Not saved: what she's doing now, its target, the next waypoint, how long she's been stuck, when each gun's loaded. */
 	public String mode = "patrol";
@@ -136,7 +142,8 @@ public final class Crew {
 	}
 
 	private record Saved(String side, int faction, String name, Optional<UUID> captain, BlockPos home, Optional<BlockPos> bound, int boundFor,
-		String quest, long hold, Map<String, String> gunners, Map<String, List<ItemStack>> plunder, long born, String mode, String flag) {
+		String quest, long hold, Map<String, String> gunners, Map<String, List<ItemStack>> plunder, long born, String mode, String flag,
+		Optional<Map<String, Integer>> magazine) {
 	}
 
 	public static final Codec<Crew> CODEC = RecordCodecBuilder.<Saved>create(i -> i.group(
@@ -153,7 +160,8 @@ public final class Crew {
 			Codec.unboundedMap(Codec.STRING, ItemStack.OPTIONAL_CODEC.listOf()).optionalFieldOf("plunder", Map.of()).forGetter(Saved::plunder),
 			Codec.LONG.optionalFieldOf("born", 0L).forGetter(Saved::born),
 			Codec.STRING.optionalFieldOf("mode", "patrol").forGetter(Saved::mode),
-			Codec.STRING.optionalFieldOf("flag", "").forGetter(Saved::flag))
+			Codec.STRING.optionalFieldOf("flag", "").forGetter(Saved::flag),
+			Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("magazine").forGetter(Saved::magazine))
 		.apply(i, Saved::new)).xmap(Crew::of, Crew::saved);
 
 	private static Crew of(Saved s) {
@@ -178,6 +186,7 @@ public final class Crew {
 		c.born = s.born();
 		c.mode = s.mode();
 		c.flag = s.flag();
+		c.magazine = s.magazine().map(HashMap::new).orElse(null);
 		return c;
 	}
 
@@ -187,6 +196,7 @@ public final class Crew {
 		Map<String, List<ItemStack>> loot = new HashMap<>();
 		this.plunder.forEach((k, v) -> loot.put(k.toString(), List.copyOf(v)));
 		return new Saved(this.side.id(), this.faction, this.name, Optional.ofNullable(this.captain), this.home, Optional.ofNullable(this.bound),
-			this.boundFor, this.quest, this.hold, guns, loot, this.born, this.mode, this.flag);
+			this.boundFor, this.quest, this.hold, guns, loot, this.born, this.mode, this.flag,
+			Optional.ofNullable(this.magazine == null ? null : Map.copyOf(this.magazine)));
 	}
 }

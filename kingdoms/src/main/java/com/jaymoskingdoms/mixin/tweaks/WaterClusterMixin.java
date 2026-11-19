@@ -1,8 +1,10 @@
 package com.jaymoskingdoms.mixin.tweaks;
 
+import com.jaymoskingdoms.seas.SeaLife;
 import com.jaymoskingdoms.whaling.GreatWhale;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.NaturalSpawner;
@@ -19,6 +21,8 @@ import org.spongepowered.asm.mixin.injection.At;
 abstract class WaterClusterMixin {
 	/** At most this many water mobs come in one natural spawn. */
 	private static final int WATER_CLUSTER = 2;
+	/** Out on the open sea ({@link SeaLife#openSea}), schools and pods come this many at most. */
+	private static final int OPEN_CLUSTER = 4;
 
 	@WrapOperation(method = "spawnCategoryForPosition(Lnet/minecraft/world/entity/MobCategory;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/chunk/ChunkAccess;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/NaturalSpawner$SpawnPredicate;Lnet/minecraft/world/level/NaturalSpawner$AfterSpawnCallback;)V",
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Mob;getMaxSpawnClusterSize()I"))
@@ -30,6 +34,10 @@ abstract class WaterClusterMixin {
 		MobCategory c = mob.getType().getCategory();
 		boolean water = c == MobCategory.WATER_AMBIENT || c == MobCategory.WATER_CREATURE || c == MobCategory.UNDERGROUND_WATER_CREATURE
 			|| c == MobCategory.AXOLOTLS;
-		return water ? Math.min(size, WATER_CLUSTER) : size;
+		if (!water) {
+			return size;
+		}
+		boolean open = mob.level() instanceof ServerLevel level && SeaLife.openSea(level, mob.chunkPosition());
+		return Math.min(size, open ? OPEN_CLUSTER : WATER_CLUSTER);
 	}
 }

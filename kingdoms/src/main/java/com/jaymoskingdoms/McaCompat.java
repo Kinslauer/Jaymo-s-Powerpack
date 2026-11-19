@@ -186,6 +186,23 @@ public final class McaCompat {
 		}
 	}
 
+	/** {@link McaBridge#fateLook}; false without MCA. */
+	static boolean fateLook(ServerPlayer player, int gender, Heritage.@Nullable Kind kind) {
+		return LOADED && McaBridge.fateLook(player, gender, kind);
+	}
+
+	/** {@link McaBridge#faceOf}; null without MCA. */
+	static net.minecraft.nbt.@Nullable CompoundTag faceOf(ServerPlayer player) {
+		return LOADED ? McaBridge.faceOf(player) : null;
+	}
+
+	/** {@link McaBridge#wearFace}; nothing without MCA. */
+	static void wearFace(ServerPlayer player, net.minecraft.nbt.CompoundTag face) {
+		if (LOADED) {
+			McaBridge.wearFace(player, face);
+		}
+	}
+
 	/** {@link McaBridge#ownFace}; nothing without MCA. */
 	static void ownFace(Villager villager) {
 		if (LOADED) {
@@ -581,6 +598,11 @@ public final class McaCompat {
 			v.setAge(-24000);
 		}
 		return level.addFreshEntity(v) ? v : null;
+	}
+
+	/** A grown woman villager of no job at {@code at} (the night burglar, {@link NightBurglars}): MCA's, else the game's; already in the world, or null. */
+	static @Nullable Villager woman(ServerLevel level, net.minecraft.world.phys.Vec3 at) {
+		return LOADED ? McaBridge.woman(level, at) : visitor(level, at, null, false);
 	}
 
 	/** (0.7.294) With MCA, a guard of {@code f}'s for a caravan ({@link Caravans}) at {@code at} on {@code task}, or null. */

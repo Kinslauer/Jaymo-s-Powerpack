@@ -12,8 +12,8 @@
 	"power.jaymospowers.web.key.ability_4.early.name": "Webline",
 	"power.jaymospowers.web.key.ability_4.name": "Yank / Web Lead",
 	"power.jaymospowers.web.ascended": "Spider-Sense",
-	"power.jaymospowers.web.key.ultimate": "Web Strike: zip to what you aim at and kick it",
-	"power.jaymospowers.web.key.ultimate.name": "Web Strike",
+	"power.jaymospowers.web.key.ultimate": "Web Strike once ascended: zip to what you aim at and kick it. Sneak + C with every ability: Web Blossom, leap and web every foe in sight (uses shooter web)",
+	"power.jaymospowers.web.key.ultimate.name": "Web Strike / Blossom",
 	"item.jaymospowers.web_ball": "Web Ball",
 	"entity.jaymospowers.web_ball": "Web Shot",
 	"block.jaymospowers.web_symbiote_goo": "Black Ooze",
@@ -878,5 +878,9 @@
 	"message.jaymospowers.web_symbiote.say.red.execute_tendril.1": "Pull! PULL!",
 	"message.jaymospowers.web_symbiote.say.red.execute_tendril.2": "Squeeze until it pops!",
 	"message.jaymospowers.web_symbiote.say.red.execute_tendril.3": "More arms. More. MORE.",
-	"message.jaymospowers.web_up.nothing": "Nothing up there to hang them from"
+	"message.jaymospowers.web_up.nothing": "Nothing up there to hang them from",
+	"message.jaymospowers.web_stunt.chain": "Stunt chain: %s",
+	"message.jaymospowers.web_stunt.run": "%s blocks without touching down",
+	"hud.jaymospowers.web_skim": "Skimming",
+	"entity.jaymospowers.crater_spider": "Crater Spider"
 }

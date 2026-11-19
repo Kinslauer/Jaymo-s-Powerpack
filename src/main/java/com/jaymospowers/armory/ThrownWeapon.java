@@ -46,6 +46,8 @@ public class ThrownWeapon extends AbstractArrow implements ItemSupplier {
 	private float hurled = -1.0F;
 	private boolean comesBack;
 	private int flown;
+	/** A weapon that lies where it fell for good: no despawn timer (a storm hammer a Wind user will call back). */
+	private boolean lasting;
 
 	public ThrownWeapon(EntityType<? extends ThrownWeapon> type, Level level) {
 		super(type, level);
@@ -132,6 +134,9 @@ public class ThrownWeapon extends AbstractArrow implements ItemSupplier {
 		if (this.comesBack && !this.level().isClientSide() && this.flyHome()) {
 			return;
 		}
+		if (!this.level().isClientSide() && !this.comesBack) {
+			com.jaymospowers.gear.SeekingChip.steer(this);
+		}
 		super.tick();
 	}
 
@@ -191,6 +196,28 @@ public class ThrownWeapon extends AbstractArrow implements ItemSupplier {
 		}
 	}
 
+	/** It never despawns: it lies where it fell until someone picks it up or calls it home. */
+	public void lasting() {
+		this.lasting = true;
+	}
+
+	/** It is stuck in the ground or a block. */
+	public boolean lying() {
+		return this.isInGround();
+	}
+
+	/** It has struck a creature (and strikes nothing more). */
+	public boolean struck() {
+		return this.dealtDamage;
+	}
+
+	@Override
+	protected void tickDespawn() {
+		if (!this.lasting) {
+			super.tickDespawn();
+		}
+	}
+
 	/** (0.18.118) It strikes nothing more: a blade left standing in a body (Lodged), a spear that glanced off (SpellThrows). */
 	public void spent() {
 		this.dealtDamage = true;
@@ -213,6 +240,10 @@ public class ThrownWeapon extends AbstractArrow implements ItemSupplier {
 
 	@Override
 	public void playerTouch(Player player) {
+		if (player.getVehicle() == this) {
+			// a rider (the Ride throw) does not pick up the weapon carrying them
+			return;
+		}
 		if (this.ownedBy(player) || this.getOwner() == null) {
 			super.playerTouch(player);
 		}
@@ -229,6 +260,7 @@ public class ThrownWeapon extends AbstractArrow implements ItemSupplier {
 		this.dealtDamage = input.getBooleanOr("DealtDamage", false);
 		this.hurled = input.getFloatOr("Hurled", -1.0F);
 		this.comesBack = input.getBooleanOr("ComesBack", false);
+		this.lasting = input.getBooleanOr("Lasting", false);
 		this.entityData.set(DATA_ITEM, this.getPickupItemStackOrigin().copyWithCount(1));
 	}
 
@@ -238,5 +270,6 @@ public class ThrownWeapon extends AbstractArrow implements ItemSupplier {
 		output.putBoolean("DealtDamage", this.dealtDamage);
 		output.putFloat("Hurled", this.hurled);
 		output.putBoolean("ComesBack", this.comesBack);
+		output.putBoolean("Lasting", this.lasting);
 	}
 }

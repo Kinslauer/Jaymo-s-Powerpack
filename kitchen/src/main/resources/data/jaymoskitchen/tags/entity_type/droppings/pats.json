@@ -1,0 +1,19 @@
+{
+	"replace": false,
+	"values": [
+		"minecraft:cow",
+		"minecraft:mooshroom",
+		{
+			"id": "jaymoskingdoms:muskox",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:bison",
+			"required": false
+		},
+		{
+			"id": "naturalist:bison",
+			"required": false
+		}
+	]
+}

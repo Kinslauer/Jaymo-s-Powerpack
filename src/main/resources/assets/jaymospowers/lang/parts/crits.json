@@ -1,0 +1,9 @@
+{
+	"subtitles.jaymospowers.armed.crit": "Sharp hit",
+	"attribute.name.jaymospowers.riposte_power": "Riposte Power",
+	"attribute.name.jaymospowers.sneak_attack_power": "Sneak Attack Power",
+	"attribute.name.jaymospowers.headshot_power": "Headshot Power",
+	"attribute.name.jaymospowers.parry_recharge": "Parry Recharge",
+	"message.jaymospowers.critpunch.on": "Crit camera punch is on. Turn it off with /critpunch off.",
+	"message.jaymospowers.critpunch.off": "Crit camera punch is off. Turn it on with /critpunch on."
+}

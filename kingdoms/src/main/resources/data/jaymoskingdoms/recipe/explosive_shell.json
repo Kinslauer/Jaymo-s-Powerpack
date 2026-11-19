@@ -3,9 +3,9 @@
   "category": "misc",
   "ingredients": [
     "jaymoskingdoms:round_shot",
-    "minecraft:gunpowder",
-    "minecraft:gunpowder",
-    "minecraft:gunpowder"
+    "minecraft:tnt",
+    "minecraft:tnt",
+    "minecraft:tnt"
   ],
   "result": {
     "id": "jaymoskingdoms:explosive_shell",

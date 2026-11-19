@@ -1007,7 +1007,7 @@ public final class Approaches {
 				}
 				if (said == null) {
 					// the horn nobody was blowing (the Reaper's host), never more than a hint
-					said = ReapedHost.gossip(level);
+					said = ReapedHost.gossip(level, a.mob.blockPosition());
 				}
 				if (said == null && level.getRandom().nextFloat() < Sightings.GOSSIP_CHANCE) {
 					said = Sightings.gossip(level, a.mob);

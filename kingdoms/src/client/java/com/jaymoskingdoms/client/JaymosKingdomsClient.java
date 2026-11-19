@@ -39,6 +39,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// great foes' themes, and the trophy stand's item
 		com.jaymoskingdoms.client.music.FoeMusicClient.register();
 		com.jaymoskingdoms.client.music.SceneMusic.register();
+		com.jaymoskingdoms.client.music.PlaceMusic.register();
 		com.jaymoskingdoms.client.trophies.TrophyStandRenderer.register();
 		EntityRenderers.register(JaymosKingdoms.FOLK, FolkRenderer::new);
 		// (Andy, 2026-11-06) what is beyond this player's tier, off JEI and the recipe book
@@ -143,6 +144,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		PartyClient.register();
 		// 0.5.50: the traveller's journal on M
 		JournalClient.register();
+		AimPageClient.register();
 		// 0.7.649: Kingdoms' tabs on Jaymo's Powers' character menu (H), when Powers is loaded
 		MenuCompat.register();
 		// (0.7.490) Hordes, Orc war journals: the Lore Codex screen
@@ -161,6 +163,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		SignInScreen.register();
 		// 0.7.238: black over the world from the story until MCA's creator
 		StoryCurtain.register();
+		KeptMusicSetting.register();
 		LineageScreen.register();
 		// (0.7.519) an envoy's offer, and the sovereign's desk
 		EnvoyScreen.register();
@@ -203,6 +206,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		WerewolfKey.register();
 		PaceKey.register();
 		FrostPrisonKey.register();
+		SorcererJumpClient.register();
 		LeanClient.register();
 		NightGiftsClient.register();
 		BloodVision.register();
@@ -341,6 +345,9 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.disasters.LastBellClient.register();
 		// downpours, morning mist, sand winds, auroras and livelier fire
 		com.jaymoskingdoms.client.disasters.SkiesClient.register();
+		com.jaymoskingdoms.client.disasters.WindSigns.register();
+		com.jaymoskingdoms.client.disasters.WindFeel.register();
+		com.jaymoskingdoms.client.disasters.WindSounds.register();
 		com.jaymoskingdoms.client.disasters.SunShade.register();
 		// layered clouds instead of the game's single sheet
 		com.jaymoskingdoms.client.disasters.CloudDecks.register();

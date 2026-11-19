@@ -4,6 +4,7 @@ import com.jaymospowers.client.UiStyle;
 import com.jaymospowers.costume.Costume;
 import com.jaymospowers.costume.CostumeDesign;
 import com.jaymospowers.costume.CostumeKit;
+import com.jaymospowers.costume.CostumePlates;
 import com.jaymospowers.costume.CostumeSets;
 import com.jaymospowers.client.ui.FlatButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -47,6 +48,8 @@ public class SuitEditorScreen extends Screen {
 	private static float yaw = 20.0F;
 	private boolean dragging;
 	private Button cut, mask, cape, gloves, boots, belt, helm, fins, follow;
+	/** The four plate buttons (head, chest, legs, feet): click to step through the metals. */
+	private final Button[] plates = new Button[CostumePlates.Slot.values().length];
 
 	SuitEditorScreen(CostumeScreen back) {
 		super(Component.translatable("screen.jaymospowers.suit.title"));
@@ -107,6 +110,12 @@ public class SuitEditorScreen extends Screen {
 		this.belt = row(mx, y, 5, () -> step(Slot.BELT, 1));
 		this.helm = row(mx, y, 6, () -> step(Slot.HELM, 1));
 		this.fins = row(mx, y, 7, () -> step(Slot.FINS, 1));
+		for (CostumePlates.Slot slot : CostumePlates.Slot.values()) {
+			// two to a row, under the fins
+			int half = MIDDLE_W / 2 - 1;
+			this.plates[slot.ordinal()] = addRenderableWidget(FlatButton.builder(Component.empty(), b -> stepPlate(slot, 1))
+				.bounds(mx + slot.ordinal() % 2 * (half + 2), y + (8 + slot.ordinal() / 2) * BUTTON_PITCH, half, BUTTON_H).build());
+		}
 		this.follow = addRenderableWidget(FlatButton.builder(Component.empty(), b -> {
 			CostumeKit kit = design().kit();
 			set(design().withKit(kit.followsSecondary() ? kit.withTrim(design().secondary()) : kit.withTrim(null)));
@@ -133,15 +142,21 @@ public class SuitEditorScreen extends Screen {
 		CostumeKit kit = design.kit();
 		LocalPlayer player = this.minecraft.player;
 		switch (slot) {
-			case CUT -> set(design.withCut(CostumeSets.step(player, CostumeDesign.Cut.values(), design.cut(), by, c -> c.power)));
-			case MASK -> set(design.withMask(CostumeSets.step(player, CostumeDesign.Mask.values(), design.mask(), by, m -> m.power)));
-			case CAPE -> set(design.withCape(CostumeSets.step(player, CostumeDesign.Cape.values(), design.cape(), by, c -> c.power)));
+			case CUT -> set(design.withCut(CostumeSets.step(player, CostumeDesign.Cut.values(), design.cut(), by)));
+			case MASK -> set(design.withMask(CostumeSets.step(player, CostumeDesign.Mask.values(), design.mask(), by)));
+			case CAPE -> set(design.withCape(CostumeSets.step(player, CostumeDesign.Cape.values(), design.cape(), by)));
 			case GLOVES -> set(design.withKit(kit.withGloves(next(CostumeKit.Gloves.values(), kit.gloves(), by))));
 			case BOOTS -> set(design.withKit(kit.withBoots(next(CostumeKit.Boots.values(), kit.boots(), by))));
 			case BELT -> set(design.withKit(kit.withBelt(next(CostumeKit.Belt.values(), kit.belt(), by))));
 			case HELM -> set(design.withKit(kit.withHelm(next(CostumeKit.Helm.values(), kit.helm(), by))));
 			case FINS -> set(design.withKit(kit.withFins(next(CostumeKit.Fins.values(), kit.fins(), by))));
 		}
+	}
+
+	private void stepPlate(CostumePlates.Slot slot, int by) {
+		CostumeDesign design = design();
+		CostumePlates plates = design.kit().plates();
+		set(design.withKit(design.kit().withPlates(plates.with(slot, next(CostumePlates.Metal.values(), plates.at(slot), by)))));
 	}
 
 	private static <E extends Enum<E>> E next(E[] values, E now, int by) {
@@ -162,6 +177,10 @@ public class SuitEditorScreen extends Screen {
 		this.belt.setMessage(label("belt", "costume.jaymospowers.belt." + k.belt().getSerializedName()));
 		this.helm.setMessage(label("helm", "costume.jaymospowers.helm." + k.helm().getSerializedName()));
 		this.fins.setMessage(label("fins", "costume.jaymospowers.fins." + k.fins().getSerializedName()));
+		for (CostumePlates.Slot slot : CostumePlates.Slot.values()) {
+			this.plates[slot.ordinal()].setMessage(Component.translatable("screen.jaymospowers.suit.plate." + slot.getSerializedName(),
+				Component.translatable("costume.jaymospowers.metal." + k.plates().at(slot).getSerializedName())));
+		}
 		this.follow.setMessage(Component.translatable(k.followsSecondary() ? "screen.jaymospowers.suit.trim_follows" : "screen.jaymospowers.suit.trim_own"));
 	}
 
@@ -198,6 +217,12 @@ public class SuitEditorScreen extends Screen {
 			for (int i = 0; i < buttons.length; i++) {
 				if (buttons[i].isMouseOver(mouseX, mouseY)) {
 					step(Slot.values()[i], -1);
+					return true;
+				}
+			}
+			for (CostumePlates.Slot slot : CostumePlates.Slot.values()) {
+				if (this.plates[slot.ordinal()].isMouseOver(mouseX, mouseY)) {
+					stepPlate(slot, -1);
 					return true;
 				}
 			}
@@ -274,11 +299,18 @@ public class SuitEditorScreen extends Screen {
 		UiStyle.header(graphics, this.font, x, y, W, new ItemStack(Costume.TABLE), this.title,
 			Component.translatable("screen.jaymospowers.suit.sub"), ACCENT, 0);
 		preview(graphics, player);
-		UiStyle.line(graphics, this.font, Component.translatable("screen.jaymospowers.suit.hint"), middleX(), contentY() + 2 + 8 * BUTTON_PITCH,
+		UiStyle.line(graphics, this.font, Component.translatable("screen.jaymospowers.suit.hint"), middleX(), contentY() + 2 + 10 * BUTTON_PITCH,
 			MIDDLE_W, UiStyle.HINT);
 		colours(graphics, mouseX, mouseY);
 		marks(graphics, mouseX, mouseY);
 		super.extractRenderState(graphics, mouseX, mouseY, a);
+		for (Button plate : this.plates) {
+			if (plate.isMouseOver(mouseX, mouseY)) {
+				// what the plates give while worn (not counting a slot where real armour is on)
+				UiStyle.tip(graphics, this.font, Component.translatable("screen.jaymospowers.suit.plate_armour",
+					com.jaymospowers.costume.CostumePlating.points(player, design())), mouseX, mouseY);
+			}
+		}
 		Button[] buttons = {this.cut, this.mask, this.cape};
 		String[] powers = {design().cut().power, design().mask().power, design().cape().power};
 		for (int i = 0; i < buttons.length; i++) {

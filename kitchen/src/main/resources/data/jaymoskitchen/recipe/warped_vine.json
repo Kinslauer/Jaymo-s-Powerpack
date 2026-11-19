@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskitchen:warped_grapes",
+    "minecraft:stick",
+    "minecraft:stick"
+  ],
+  "result": {
+    "id": "jaymoskitchen:warped_vine"
+  }
+}

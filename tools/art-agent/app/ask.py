@@ -26,12 +26,52 @@ def _short(v, n=160):
     return s if len(s) <= n else s[:n] + "..."
 
 
+async def probe(names, timeout_s=20):
+    """Splits the models into those that answer a tiny request within timeout_s and those that don't."""
+    from google import genai
+    from google.genai import types
+
+    client = genai.Client(
+        http_options=types.HttpOptions(
+            timeout=timeout_s * 1000,
+            retry_options=types.HttpRetryOptions(attempts=1),
+        )
+    )
+
+    async def one(m):
+        try:
+            await client.aio.models.generate_content(model=m, contents="say hi")
+            return True
+        except Exception:
+            return False
+
+    ok = await asyncio.gather(*(one(m) for m in names))
+    return [m for m, k in zip(names, ok, strict=True) if k], [
+        m for m, k in zip(names, ok, strict=True) if not k
+    ]
+
+
 async def run(brief, files):
     from google.adk.runners import InMemoryRunner
     from google.genai import types
 
-    from app.agent import root_agent
+    from app.agent import MODELS, make_model, root_agent
 
+    # Busy free-tier models can take a minute just to say no, on every call. Ask each one "say hi" first and put
+    # the ones that answer at the front, so the agent's many calls don't each wait out the busy ones.
+    print("[0s] checking which Gemini models answer...", flush=True)
+    ready, busy = await probe(MODELS)
+    if not ready:
+        print(
+            "[0s] every model is busy right now; trying anyway in the usual order",
+            flush=True,
+        )
+    else:
+        print(
+            f"[0s] using {ready[0]}" + (f" (busy: {', '.join(busy)})" if busy else ""),
+            flush=True,
+        )
+    root_agent.model = make_model(ready + busy)
     runner = InMemoryRunner(agent=root_agent, app_name="app")
     session = await runner.session_service.create_session(app_name="app", user_id="ask")
     parts = [types.Part.from_text(text=brief)]

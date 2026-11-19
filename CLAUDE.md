@@ -2,8 +2,8 @@
 
 Minecraft 26.3 Fabric mods for the user's friends' modpack. **Read `docs/HANDOFF.md` first**: what each folder is,
 how to build, hard-won 26.3 API facts, the user's preferences, and what to do next.
-- **Project vault** (`docs/vault/`, Obsidian): read `docs/vault/Home.md` first (versions, open PRs, what's next), then
-  follow `docs/vault/How agents use this vault.md`. Live notes go in the live folder `E:/Jaymo Vault Live/` (outside git;
+- **Project vault** (`docs/vault/`, Obsidian): read `docs/vault/Home.md` first (versions, guides) and `Live/Dashboard.md`
+  (what waits on Andy, what's stuck), then follow `docs/vault/How agents use this vault.md`. Live notes go in the live folder `E:/Jaymo Vault Live/` (outside git;
   it shows in the vault as `Live/`), never in your worktree: make your agent note in `E:/Jaymo Vault Live/Agents/` from
   `Templates/Agent.md` (branch, PR, files you
   own) when you start, update it when you finish, never edit a file another running agent owns, and append each of the
@@ -16,9 +16,10 @@ how to build, hard-won 26.3 API facts, the user's preferences, and what to do ne
 - Finding code: grep `docs/codemap/<powers|kingdoms|kitchen>.md` first (one line per class: path, what it does, main
   methods), then open only what you need. Don't commit it: the Release workflow regenerates it after each merge
   (run `python3 tools/codemap.py` locally if you want your new classes in it, then `git checkout origin/master -- docs/codemap`).
-- Kingdoms lang is split into `kingdoms/src/main/resources/assets/jaymoskingdoms/lang/parts/*.json`, merged at build
-  (there is no source `en_us.json`). Put a new feature's keys in its own part. A branch that still has the old
-  single file: on the merge conflict keep its en_us.json, then run `python3 tools/lang_split.py` (moves its keys into parts).
+- **Rules for particular files** are in `.claude/rules/*.md`: each loads (in Claude Code) when you work on the files its
+  `paths:` lists: Kingdoms lang parts, a power's package, magic and ki effects, the symbiote, GeckoLib mobs, Blockbench
+  animation. Other assistants: read every rule whose `paths:` match the files you're about to edit.
+- Words Andy uses for things (and what they're called in the code) are in `docs/vault/Context/Glossary.md`.
 - **PRs never touch `version=`, the MODLOGs or `docs/codemap/`.** Each PR adds a change note per mod it changes,
   `changes/<powers|kingdoms|kitchen>/<branch-name>.md`: a `# <title>` line, then the text a MODLOG entry has (no
   version). After the merge the Release workflow (`tools/release.py`) bumps the version, appends the MODLOG entry and
@@ -29,8 +30,6 @@ how to build, hard-won 26.3 API facts, the user's preferences, and what to do ne
   Read it before planning, place the new thing in it (who made it, where it lives, whose people or faith), and reshape
   anything that doesn't fit, or ask Andy. Add the placement to Lore.md as a `(new)` paragraph for him to approve.
 - Check every Minecraft API against the 26.3 sources (`./gradlew genSources`) before using it.
-- Keep each power in its own package and `lang/parts/<power>.json`; list every class that holds an attachment in
-  `JaymosPowers.registerAttachments()`.
 - Every mod change ships a change note (the version is bumped for you at merge). Don't write version numbers in code
   comments (`(0.21.62)`): say what the code does; `git blame` finds the PR. Leave the old ones as they are.
   Never commit `Serverfiles/` (it holds a secret).
@@ -39,8 +38,6 @@ how to build, hard-won 26.3 API facts, the user's preferences, and what to do ne
 - Default keys: R/G/V/B = abilities 1-4, C = ultimate, Z = mode, H = menu, ' = costume mask. "G+B" means G, then B (e.g. Crush
   released inside your own Gravity Well).
 - Tuning numbers live in `static final` constants at the top of each class; change balance there.
-- Magic and ki effects are typed (`docs/MagicFx.md`): beam, blast, ring, orb, sigil, wave, stroke, pool, mote, miasma, spark, rune, through `MagicFx`
-  (Kingdoms: `Fx`). Never recoloured redstone dust or firework flashes; vary only colour, size and time.
 - Optional mods (Kitchen, WeaponMod) only through a compat class that checks they're loaded (`KitchenCompat`).
   Don't copy other mods' code or art unless their license allows it.
 - **Living things follow three rules** (Andy, 2026-11-12, from Klei_Wright's tundra; `docs/Tundra-Plan.md`). Every animal
@@ -48,8 +45,6 @@ how to build, hard-won 26.3 API facts, the user's preferences, and what to do ne
   **feedback loops** (it changes its surroundings, and those changes come back on it: lichen eats its rock and runs out,
   grazers follow the food, a fed predator stops hunting), **stewardship** (a player who looks after it is rewarded;
   nobody is punished for leaving it alone). Not another mob with a new coat.
-- The symbiote never feeds on anything living: kill, grab with tendrils, carry as a corpse, then feed. Every
-  autonomous symbiote action affects the player's screen.
 - Big patches run as parallel agent tracks, one per power, so they don't edit the same files; 2 at a time, since
   4 at once hit usage limits.
 - Workflows: read-only scan stages use the `scanner` agent (Haiku 5.5); edit stages use the `editor` agent
@@ -60,6 +55,21 @@ how to build, hard-won 26.3 API facts, the user's preferences, and what to do ne
   environment variable; a network secret breaks it because Gemini rejects the Bearer header the proxy adds). Use only its
   text/code tools (`ask_gemini`, `gemini_code_review`, `gemini_challenge`, `gemini_analyze_codebase`) as an extra verifier;
   its answers are advice to check against the code. Media, agent and OpenRouter tools are denied in `.claude/settings.json`.
+
+## Check, don't assume (every agent, every task)
+
+From imisic/claude-obsidian-vault's verification rule (MIT), Andy's pick 2026-11-19. It goes with Andy's ruling
+that no part of an ask is left out, cut down or swapped for something easier without saying so.
+
+1. **Prove "done" with a check, not a feeling.** A build, a grep, a test, a lookup in the codemap or the MODLOG: a
+   check can't be imagined, an impression can. Before you say a task is finished, go through the ask (the pick list,
+   the task note, Andy's words) line by line against what you built.
+2. **Never invent.** No class, method, file, number, mod, PR or ruling you haven't seen. If something is unknown, say
+   it's unknown; an empty section is better than a made-up one.
+3. **Never claim something is missing without searching.** "There's no such class", "nothing handles that", "Andy
+   never asked for it" must come from a real search by every likely name (the codemap, grep, Decisions.md, the task's
+   notes), not from memory or one try. Saying "missing" too early is the most common mistake, more than inventing.
+4. When you couldn't check something (no game run, a file you can't reach), say what you didn't check.
 
 ## Coding guidelines (every agent, every task)
 

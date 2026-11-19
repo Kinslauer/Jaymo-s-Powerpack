@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "P P",
+    "PPP"
+  ],
+  "key": {
+    "P": "#minecraft:planks"
+  },
+  "result": {
+    "id": "jaymoskitchen:treading_tub"
+  }
+}

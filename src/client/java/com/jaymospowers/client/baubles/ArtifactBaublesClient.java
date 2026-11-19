@@ -25,9 +25,20 @@ public final class ArtifactBaublesClient {
 	static final double SINK = 0.03;
 
 	private static boolean spent, wasJump, floating;
+	/** The tick the cloud's jump was made in (see {@link #cloudJump}). */
+	private static int cloudTick = -1;
 	private static float air = FLOAT_TICKS;
 
 	private ArtifactBaublesClient() {
+	}
+
+	/**
+	 * Whether the cloud in a bottle takes this press of Jump: it is worn and not yet used, or just made its jump this tick.
+	 * A power's second jump ({@code PowerJumpClient}) waits for the next press, so a bauble's jump and a power's stack to
+	 * one each and never go off together.
+	 */
+	public static boolean cloudJump(LocalPlayer player) {
+		return cloudTick == player.tickCount || !spent && ArtifactEffects.wears(player, ArtifactBaubles.CLOUD_IN_A_BOTTLE);
 	}
 
 	public static void init() {
@@ -52,6 +63,7 @@ public final class ArtifactBaublesClient {
 			air = Math.min(FLOAT_TICKS, air + (float) FLOAT_TICKS / FLOAT_REFILL);
 		} else if (free && pressed && !spent && ArtifactEffects.wears(player, ArtifactBaubles.CLOUD_IN_A_BOTTLE)) {
 			spent = true;
+			cloudTick = player.tickCount;
 			double yaw = Math.toRadians(player.getYRot());
 			double dx = -Math.sin(yaw) * player.zza + Math.cos(yaw) * player.xxa;
 			double dz = Math.cos(yaw) * player.zza + Math.sin(yaw) * player.xxa;

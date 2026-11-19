@@ -249,6 +249,9 @@ public class TownGolem extends AbstractGolem implements GeoEntity {
 	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
+		// better pathing: round water, up ledges, and out of the water over a bank
+		this.goalSelector.addGoal(1, new GolemPathing.ClimbOut(this));
+		GolemPathing.improve(this);
 		this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0, true) {
 			@Override
 			public boolean canUse() {

@@ -210,14 +210,19 @@ final class FarGrounds {
 
 	/** A sea rover heaves into sight off {@code ship}, out where nobody sees her come, and makes for her (null: no room, or no pirates in the world). */
 	static @Nullable Ship rover(ServerLevel level, Ship ship, int far, RandomSource random) {
-		Faction camp = cove(level, ship.blockPosition(), Corsairs.playersAboard(level, ship));
+		return rover(level, ship.position(), Corsairs.playersAboard(level, ship), far, random);
+	}
+
+	/** A sea rover heaves into sight off {@code off} (out of sight of {@code players}) and makes for it. */
+	static @Nullable Ship rover(ServerLevel level, Vec3 off, List<ServerPlayer> players, int far, RandomSource random) {
+		Faction camp = cove(level, BlockPos.containing(off), players);
 		if (camp == null) {
 			return null;
 		}
 		for (int tries = 0; tries < 6; tries++) {
 			float angle = random.nextFloat() * Mth.TWO_PI;
 			double d = Mth.nextDouble(random, ROVER_MIN, ROVER_MAX);
-			BlockPos column = BlockPos.containing(ship.getX() + Mth.cos(angle) * d, ship.getY(), ship.getZ() + Mth.sin(angle) * d);
+			BlockPos column = BlockPos.containing(off.x + Mth.cos(angle) * d, off.y, off.z + Mth.sin(angle) * d);
 			BlockPos water = Fleet.openSea(level, column, 16, 3, random);
 			if (water == null || Raids.playerNear(level, water, ROVER_HIDE)) {
 				continue;
@@ -228,7 +233,7 @@ final class FarGrounds {
 			Crew crew = new Crew(Crew.Side.PIRATE, camp.id(), Pirates.pirateShip(random), water);
 			Fleet.Look look = new Fleet.Look(Blocks.DARK_OAK_PLANKS, Blocks.DARK_OAK_FENCE, Blocks.DARK_OAK_LOG,
 				Blocks.WOOL.pick(net.minecraft.world.item.DyeColor.BLACK), Blocks.WOOL.pick(net.minecraft.world.item.DyeColor.WHITE));
-			float yaw = (float) (Mth.atan2(ship.getZ() - water.getZ(), ship.getX() - water.getX()) * Mth.RAD_TO_DEG) - 90.0F;
+			float yaw = (float) (Mth.atan2(off.z - water.getZ(), off.x - water.getX()) * Mth.RAD_TO_DEG) - 90.0F;
 			Ship rover = Corsairs.launch(level, rig, look, water, Direction.fromYRot(yaw), crew, camp,
 				new Corsairs.Complement(Pirates.CAPTAIN, Pirates.GUNNER, Pirates.DECKHAND,
 					galleon ? PirateCoves.BRIG_HANDS : PirateCoves.SLOOP_HANDS, PirateCoves.BOYS));
@@ -238,7 +243,7 @@ final class FarGrounds {
 			Map<String, Long> all = new HashMap<>(level.getAttachedOrElse(ROVERS, Map.of()));
 			all.put(rover.getUUID().toString(), level.getGameTime());
 			level.setAttached(ROVERS, Map.copyOf(all));
-			JaymosKingdoms.LOGGER.info("A sea rover {} ({}, out of {}) heaves into sight of the whaler at {}", crew.name, rig.id(), camp.name(),
+			JaymosKingdoms.LOGGER.info("A sea rover {} ({}, out of {}) heaves into sight at {}", crew.name, rig.id(), camp.name(),
 				water.toShortString());
 			return rover;
 		}
@@ -299,6 +304,14 @@ final class FarGrounds {
 	/** {@code ship} is one of the far grounds' rovers. */
 	static boolean rover(ServerLevel level, Ship ship) {
 		return Factions.level(level.getServer()).getAttachedOrElse(ROVERS, Map.of()).containsKey(ship.getUUID().toString());
+	}
+
+	/** {@code ship} put out at sea away from any harbour (a rover, or a merchantman met at sea): stowed once long out with nobody near. */
+	static void outAtSea(ServerLevel level, Ship ship) {
+		ServerLevel home = Factions.level(level.getServer());
+		Map<String, Long> all = new HashMap<>(home.getAttachedOrElse(ROVERS, Map.of()));
+		all.put(ship.getUUID().toString(), level.getGameTime());
+		home.setAttached(ROVERS, Map.copyOf(all));
 	}
 
 	/** A rover went down: forgotten (her camp's own ship is still its own). */

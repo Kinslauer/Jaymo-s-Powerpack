@@ -34,6 +34,8 @@ final class StoryHoldScreen extends Screen {
 	 */
 	private static final int HINTS = 206, HINT_W = 320;
 	private static final long HINT_MS = 7000L;
+	/** Andy: "load screen hints should animate a wipe in and out". Each wipe (left to right) takes this long (ms). */
+	private static final long WIPE_MS = 450L;
 
 	/** What the server holds this client for (a lang key), or "" for nothing. */
 	private static String holding = "";
@@ -274,11 +276,33 @@ final class StoryHoldScreen extends Screen {
 			this.hint = dealHint();
 		}
 		int hint = this.hint;
-		int ty = cy - 6;
-		for (FormattedCharSequence line : this.font.split(Component.translatable("gui.jaymoskingdoms.story.hint." + hint),
-			Math.min(HINT_W, this.width - 32))) {
-			graphics.text(this.font, line, cx - this.font.width(line) / 2, ty, Ui.TEXT);
-			ty += Ui.LINE;
+		java.util.List<FormattedCharSequence> lines = this.font.split(
+			Component.translatable("gui.jaymoskingdoms.story.hint." + hint), Math.min(HINT_W, this.width - 32));
+		int textW = 0;
+		for (FormattedCharSequence line : lines) {
+			textW = Math.max(textW, this.font.width(line));
+		}
+		int top = cy - 6, ty = top, left = cx - textW / 2 - 2, right = cx + textW / 2 + 2;
+		// the hint wipes in from the left as it's dealt and off to the right before the next one
+		long into = (now - this.opened) % HINT_MS;
+		int clipL = left, clipR = right, edge = -1;
+		if (into < WIPE_MS) {
+			clipR = edge = left + (int)((right - left) * ease(into / (double)WIPE_MS));
+		} else if (into > HINT_MS - WIPE_MS) {
+			clipL = edge = left + (int)((right - left) * ease((into - (HINT_MS - WIPE_MS)) / (double)WIPE_MS));
+		}
+		int bottom = top + lines.size() * Ui.LINE;
+		if (clipR > clipL) {
+			graphics.enableScissor(clipL, top - 1, clipR, bottom + 1);
+			for (FormattedCharSequence line : lines) {
+				graphics.text(this.font, line, cx - this.font.width(line) / 2, ty, Ui.TEXT);
+				ty += Ui.LINE;
+			}
+			graphics.disableScissor();
+		}
+		ty = bottom;
+		if (edge >= 0) {
+			graphics.fill(edge, top - 1, edge + 1, bottom, Ui.GOLD);
 		}
 		// a bar that sweeps back and forth: something's happening, not how much is left
 		int x0 = cx - BAR_W / 2, y0 = ty + 8;
@@ -288,5 +312,10 @@ final class StoryHoldScreen extends Screen {
 		int seg = BAR_W / 4, sx = x0 + (int)((BAR_W - seg) * phase);
 		graphics.fill(sx, y0, sx + seg, y0 + BAR_H, Ui.GOLD);
 		super.extractRenderState(graphics, mouseX, mouseY, a);
+	}
+
+	/** Smoothstep: the wipe starts and ends gently. */
+	private static double ease(double t) {
+		return t * t * (3.0 - 2.0 * t);
 	}
 }

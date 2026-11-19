@@ -9,6 +9,10 @@ It has two kinds of notes:
   worktree's copy. That way the [[Board]] shows an agent the moment it starts, and Andy has one place to look.
   - `Live/Agents/`: one note per agent. Finished ones move to `Live/Agents/Done/`.
   - `Live/Decisions.md`: the decision log ([[Decisions]]).
+  - `Live/Dashboard.md`, `Live/Health.md`, `Live/Weekly/`: written by every sync (`tools/vault_reports.py`), never
+    by hand. The Dashboard shows what waits on Andy, what's stuck and merged work not played yet (Andy ticks what
+    he's played; the ticks go to `Live/Played.md`). Health lists problems in the notes and never fixes them: whoever
+    reads it fixes the note. Weekly has one summary per week.
   - `Live/Open PRs.md`: every open PR ([[Open PRs]]), written by `tools/vault_prs.py`. It refreshes by itself
     when a Claude session starts and after any vault edit (hooks in `.claude/settings.json`, at most once a minute);
     other assistants run `python tools/vault_prs.py` after opening or merging a PR.
@@ -70,8 +74,11 @@ Every agent, Hermes included, works only in **its own git worktree** on its own 
 ## When you start
 
 0. Sync the live folder (`python tools/vault_sync.py`; Claude Code's hook does it for you), then check `Live/Inbox/`
-   for a task meant for you (see above).
-1. Read [[Home]] (versions, open PRs, what's next), then `CLAUDE.md`.
+   for a task meant for you (see above). Bots: `python tools/vault_sync.py --next <your name>` does the sync, the
+   claim (your own claimed task first) and prints the steps for it in one go.
+1. Read [[Home]] (versions, guides) and [[Dashboard]] (what waits on Andy, what's stuck), then `CLAUDE.md`, the
+   `.claude/rules/*.md` whose `paths:` match the files you'll edit, and [[Glossary]] when Andy's words for something
+   don't match a name in the code.
 2. Read every note in `E:/Jaymo Vault Live/Agents/` whose `status` is `running`, `in-review` or
    `blocked`. Their `owns:` lists are the files they're editing. **Don't edit a file another agent owns.** If you
    need one, ask Andy (or that agent's session) first.

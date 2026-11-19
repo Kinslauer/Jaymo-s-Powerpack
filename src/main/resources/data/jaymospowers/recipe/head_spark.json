@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:copper_ingot",
+    "minecraft:string",
+    "minecraft:redstone"
+  ],
+  "result": {
+    "id": "jaymospowers:head_spark",
+    "count": 2
+  }
+}

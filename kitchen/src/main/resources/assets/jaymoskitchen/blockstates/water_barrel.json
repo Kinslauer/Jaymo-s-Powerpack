@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "level=0": {
+      "model": "jaymoskitchen:block/water_barrel_0"
+    },
+    "level=1": {
+      "model": "jaymoskitchen:block/water_barrel_1"
+    },
+    "level=2": {
+      "model": "jaymoskitchen:block/water_barrel_2"
+    },
+    "level=3": {
+      "model": "jaymoskitchen:block/water_barrel_3"
+    }
+  }
+}

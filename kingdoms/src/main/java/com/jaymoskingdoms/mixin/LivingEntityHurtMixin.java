@@ -33,6 +33,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
  * save against blasts ({@link com.jaymoskingdoms.Saves#dealt}). Then a held or sleeping body's crit ({@link com.jaymoskingdoms.HeldFast}),
  * a reckless blow, a Thief's sneak attack, a poisoned blade, and a foe caught unawares freezing ({@link com.jaymoskingdoms.Surprise}).
  * (Class trees) After the class perks, the class trees' own ({@link com.jaymoskingdoms.TreePerks#dealt}).
+ * Last of all, an awakened stranger's harm on a player, held down by the player's tier ({@link com.jaymoskingdoms.AwakenedStrangers#dealt}).
  */
 @Mixin(LivingEntity.class)
 abstract class LivingEntityHurtMixin {
@@ -52,6 +53,7 @@ abstract class LivingEntityHurtMixin {
 		// (and Watched, the gaze built from hiding, spends itself on the blow: RogueGambits)
 		// (pawn picks) a companion who knows the kind hits it harder (FoeLore); (last of all, a feat's say and a path's)
 		// (and the Reaper: the dead near by, its wings, its shroud)
-		return com.jaymoskingdoms.Reaper.dealt(self, source, com.jaymoskingdoms.Paths.dealt(self, source, com.jaymoskingdoms.Feats.dealt(self, source, com.jaymoskingdoms.CampSuppers.dealt(self, source, com.jaymoskingdoms.FoeLore.dealt(self, source, com.jaymoskingdoms.SettlerKit.dealt(self, source, com.jaymoskingdoms.RogueGambits.dealt(self, source, com.jaymoskingdoms.BossPosture.dealt(self, source, com.jaymoskingdoms.SwornCaptains.guarded(self, source, com.jaymoskingdoms.Captains.dealt(self, source, ValorFolk.spar(self, source, VillagerHunters.dealt(self, source, Groups.dealt(self, source, stabbed != dealt ? stabbed : Senses.dealt(self, source, dealt))))))))))))));
+		// (and an awakened stranger's on a player, held down by the player's tier: AwakenedStrangers)
+		return com.jaymoskingdoms.AwakenedStrangers.dealt(self, source, com.jaymoskingdoms.Reaper.dealt(self, source, com.jaymoskingdoms.Paths.dealt(self, source, com.jaymoskingdoms.Feats.dealt(self, source, com.jaymoskingdoms.CampSuppers.dealt(self, source, com.jaymoskingdoms.FoeLore.dealt(self, source, com.jaymoskingdoms.SettlerKit.dealt(self, source, com.jaymoskingdoms.RogueGambits.dealt(self, source, com.jaymoskingdoms.BossPosture.dealt(self, source, com.jaymoskingdoms.SwornCaptains.guarded(self, source, com.jaymoskingdoms.Captains.dealt(self, source, ValorFolk.spar(self, source, VillagerHunters.dealt(self, source, Groups.dealt(self, source, stabbed != dealt ? stabbed : Senses.dealt(self, source, dealt)))))))))))))));
 	}
 }

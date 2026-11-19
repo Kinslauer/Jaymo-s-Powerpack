@@ -213,6 +213,8 @@ public final class WebSwing {
 	// slingshot
 	boolean slinging;
 	float slingDraw;
+	/** Where this draw's orange peak starts on the jump bar (as the charge jump's: steady with the Charge Jump perk, random without). */
+	private float slingPeak;
 	private Vec3 braced = Vec3.ZERO;
 	private boolean slingJumpHeld;
 	/** Ticks Jump has been held while on a web (0 = not held). */
@@ -280,6 +282,20 @@ public final class WebSwing {
 		return Minecraft.getInstance().player;
 	}
 
+	/** Braced in the slingshot: the jump bar takes the XP bar's place ({@code RunMovesClient}). */
+	public boolean slingshotShown() {
+		return slinging;
+	}
+
+	/** How far the slingshot is drawn (0-1), and where its orange peak starts. */
+	public float slingDrawn() {
+		return slingDraw;
+	}
+
+	public float slingPeak() {
+		return slingPeak;
+	}
+
 	/** Both webs stuck: the slingshot is possible. */
 	boolean bothAttached() {
 		return strands[WebNet.MAIN].attached && strands[WebNet.OFF].attached;
@@ -302,6 +318,10 @@ public final class WebSwing {
 	}
 
 	/** Any web stuck right now. */
+	WebTrickClient tricks() {
+		return tricks;
+	}
+
 	boolean attached() {
 		return strands[WebNet.MAIN].attached || strands[WebNet.OFF].attached;
 	}
@@ -460,22 +480,51 @@ public final class WebSwing {
 		return com.jaymospowers.power.web.WebWhip.whippable(player, on) && !WebAnchors.reelable(on);
 	}
 
-	/** Sneak last tick, and whether this Sneak press went to the whip (so letting go tells the server). */
-	private boolean whipSneakWas, whipHeld;
+	/**
+	 * Exactly one web out, stuck to a creature that can be whirled: a punch there is the one-line whirl (see
+	 * {@link com.jaymospowers.power.web.WebWhip#ONE_LINE}).
+	 */
+	private boolean oneLineReady(LocalPlayer player) {
+		Strand a = strands[WebNet.MAIN], b = strands[WebNet.OFF];
+		if (a.attached == b.attached) {
+			return false;
+		}
+		Strand one = a.attached ? a : b;
+		return one.travel <= 0 && one.entityId >= 0 && com.jaymospowers.power.web.WebWhip.whippable(player, player.level().getEntity(one.entityId));
+	}
 
-	/** Sneak pressed with both webs on one thing: the whip (or the pry) starts; let go and a pry not yet loose is off. */
+	/** Sneak and the attack key last tick, and whether each press went to the whip (so letting go tells the server). */
+	private boolean whipSneakWas, whipHeld, punchWas, punchHeld;
+
+	/**
+	 * Sneak pressed with both webs on one thing: the whip (or the pry) starts (Jump held too: the slam, not the whirl);
+	 * let go and a pry not yet loose is off. A punch with one web on a creature whirls it on that line until let go.
+	 */
 	private boolean tickWhipSneak(LocalPlayer player) {
 		boolean sneak = player.input.keyPresses.shift();
 		boolean pressed = sneak && !whipSneakWas;
 		whipSneakWas = sneak;
+		boolean punch = Minecraft.getInstance().options.keyAttack.isDown() && Minecraft.getInstance().gui.screen() == null;
+		boolean punched = punch && !punchWas;
+		punchWas = punch;
+		if (punchHeld && !punch) {
+			punchHeld = false;
+			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebWhip.Hold(false, com.jaymospowers.power.web.WebWhip.ONE_LINE));
+		}
+		if (punched && oneLineReady(player)) {
+			punchHeld = true;
+			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebWhip.Hold(true, com.jaymospowers.power.web.WebWhip.ONE_LINE));
+			return true;
+		}
 		if (whipHeld && !sneak) {
 			whipHeld = false;
-			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebWhip.Hold(false));
+			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebWhip.Hold(false, com.jaymospowers.power.web.WebWhip.WHIRL));
 			return false;
 		}
 		if (pressed && whipReady(player)) {
 			whipHeld = true;
-			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebWhip.Hold(true));
+			ClientPlayNetworking.send(new com.jaymospowers.power.web.WebWhip.Hold(true, player.input.keyPresses.jump()
+				? com.jaymospowers.power.web.WebWhip.SLAM : com.jaymospowers.power.web.WebWhip.WHIRL));
 			return true;
 		}
 		return false;
@@ -546,7 +595,14 @@ public final class WebSwing {
 			tickPull(player);
 			return;
 		}
-		if (com.jaymospowers.power.web.WebSymbiote.bulked(player) && tickSlam(player)) {
+		if (WebSymbioteWingsClient.flying(player) && !attached()) {
+			// the symbiote's wings are out: they glide and flap (WebSymbioteWingsClient), in place of the web wings and the slam
+			foldWings();
+			if (chargeTicks > 0 || chargeSent) {
+				endCharge();
+			}
+			WebSymbioteWingsClient.tick(player);
+		} else if (com.jaymospowers.power.web.WebSymbiote.bulked(player) && tickSlam(player)) {
 			// the big body in the air: Jump held is its overhead slam
 			foldWings();
 			if (chargeTicks > 0 || chargeSent) {
@@ -572,7 +628,7 @@ public final class WebSwing {
 		}
 		if (attached()) {
 			tickSwing(player);
-		} else if (flying && wingsTicks == 0) {
+		} else if (flying && wingsTicks == 0 && !WebSymbioteWingsClient.flying(player)) {
 			tickFlight(player);
 		}
 		tickApexHang(player);
@@ -859,6 +915,9 @@ public final class WebSwing {
 		}
 		boolean jump = input.jump();
 		if (jump) {
+			if (slingDraw == 0.0F) {
+				slingPeak = com.jaymospowers.freerun.moves.ChargeJump.peak(player, player.getRandom());
+			}
 			slingJumpHeld = true;
 			float before = slingDraw;
 			slingDraw = Math.min(1.0F, slingDraw + 1.0F / SLING_DRAW_TICKS);
@@ -945,7 +1004,8 @@ public final class WebSwing {
 	private void fireSling(LocalPlayer player, Vec3 forward) {
 		endStrain();
 		Vec3 dir = forward.scale(1.0 - SLING_AIM).add(player.getLookAngle().scale(SLING_AIM)).normalize();
-		double speed = SLING_MIN_SPEED + (SLING_MAX_SPEED - SLING_MIN_SPEED) * slingDraw;
+		// let go in the jump bar's orange peak for the full launch; anywhere else falls short (as the charge jump does)
+		double speed = SLING_MIN_SPEED + (SLING_MAX_SPEED - SLING_MIN_SPEED) * com.jaymospowers.freerun.moves.ChargeJump.share(slingDraw, slingPeak);
 		for (Strand strand : strands) {
 			if (strand.attached) {
 				strand.attached = false;

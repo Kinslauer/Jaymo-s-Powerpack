@@ -12,3 +12,8 @@ files you own, never edit a file another running agent owns, and append each of 
 "Two agents on one PR" section. Run `python tools/vault_sync.py` when you start and after you change a live note
 (it syncs the live folder with the `vault-live` branch), and check `E:/Jaymo Vault Live/Inbox/` for tasks the
 coordinator posted for you. The pick-up and review loop, with the exact commands, is in `docs/vault/Pipeline.md`.
+
+Before editing, read every `.claude/rules/*.md` whose `paths:` list matches the files you'll touch (Claude Code loads
+them by itself; you have to open them). Andy's words for things, and their names in the code, are in
+`docs/vault/Context/Glossary.md`. What waits on Andy and what's stuck is on `Live/Dashboard.md`; problems in the live
+notes are on `Live/Health.md`.

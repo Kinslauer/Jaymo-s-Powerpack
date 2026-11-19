@@ -434,7 +434,7 @@ public final class CaptainWays {
 		if (Captains.has(by, Trait.HATES_FIRE_MAGES) && fireMage(by, victim)) {
 			out *= FIRE_MAGE;
 		}
-		return out;
+		return GiftEaters.gives(by, source, out);
 	}
 
 	/** {@code by} stands before {@code self}, within his shield's half. */

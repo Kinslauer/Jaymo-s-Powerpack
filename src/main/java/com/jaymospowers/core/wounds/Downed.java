@@ -831,6 +831,10 @@ public final class Downed {
 			GIVING_UP.remove(player.getUUID());
 			RISES.remove(player.getUUID());
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.down").withStyle(ChatFormatting.RED));
+			if (source != null && !keepHealth) {
+				// a lethal blow downed them: the Stubborn perk's fast-mending window
+				Stubborn.downed(player, level);
+			}
 		}
 		level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.PLAYER_BIG_FALL, SoundSource.NEUTRAL, 0.9F, 0.8F);
 	}

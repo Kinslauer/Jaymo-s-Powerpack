@@ -1,0 +1,8 @@
+{
+  "parent": "jaymoskitchen:block/droppings/bird_8",
+  "textures": {
+    "all": "jaymoskitchen:block/droppings/bird_2",
+    "particle": "jaymoskitchen:block/droppings/bird_2",
+    "cap": "jaymoskitchen:block/droppings/bird_cap_2"
+  }
+}

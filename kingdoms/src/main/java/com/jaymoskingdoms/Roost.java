@@ -22,6 +22,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -118,6 +119,15 @@ public final class Roost extends Block {
 			server.playSound(null, pos, SoundEvents.PARROT_FLY, SoundSource.BLOCKS, 0.6F, 1.3F);
 			player.sendOverlayMessage(Component.translatable(open(server, pos) ? "roost.jaymoskingdoms.placed" : "roost.jaymoskingdoms.covered"));
 		}
+	}
+
+	/** A Sketch used on the roost (the town's post) is sold ({@link Sketches}). */
+	@Override
+	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+		if (Sketches.isSketch(stack) && level instanceof ServerLevel server && player instanceof ServerPlayer sp) {
+			return Sketches.sell(server, pos, sp, stack);
+		}
+		return InteractionResult.TRY_WITH_EMPTY_HAND;
 	}
 
 	/** Whose it is, and whether the birds can find it. */

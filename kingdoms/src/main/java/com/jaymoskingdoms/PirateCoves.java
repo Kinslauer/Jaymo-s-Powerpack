@@ -89,6 +89,8 @@ final class PirateCoves {
 	static final int START_GOLD = 8, START_EMERALDS = 6, START_GUNPOWDER = 12, START_SHOT = 12, START_RUM = 4;
 	/** What it takes in each day (smuggling, wrecking). */
 	static final int DAY_GOLD = 2, DAY_EMERALDS = 1, DAY_GUNPOWDER = 2, DAY_FISH = 4;
+	/** (2026-11-19) The round shot its smith casts each day, for its ship's magazine ({@code ShipMagazine}). */
+	static final int DAY_SHOT = 2;
 	/** Its ship: lost, another is built after this long (ticks: two days); her captain ashore after this long missing. */
 	static final long REBUILD_TICKS = 48000L, MISSING_TICKS = 20 * 180;
 	/** She's never launched with a player this near her mooring. */
@@ -554,6 +556,7 @@ final class PirateCoves {
 			Storage.put(level, camp, Items.GOLD_NUGGET, DAY_GOLD * 9 * days);
 			Storage.put(level, camp, Currencies.GOLD_DINAR, DAY_EMERALDS * days);
 			Storage.put(level, camp, Items.GUNPOWDER, DAY_GUNPOWDER * days);
+			Storage.put(level, camp, com.jaymoskingdoms.sailing.Sailing.ROUND_SHOT, DAY_SHOT * days);
 			Storage.put(level, camp, Items.COOKED_COD, DAY_FISH * days);
 			Storage.put(level, camp, Items.DARK_OAK_PLANKS, DAY_PLANKS * days);
 		}

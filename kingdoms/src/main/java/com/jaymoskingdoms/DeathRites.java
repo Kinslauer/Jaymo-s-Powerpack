@@ -31,7 +31,7 @@ public final class DeathRites {
 	static boolean cast(String spell, ServerLevel level, Player player, float power) {
 		return switch (spell) {
 			case "calling_back" -> CallingBack.cast(level, player);
-			case "keeping" -> BodyKeeping.cast(level, player);
+			case "keeping" -> player instanceof net.minecraft.server.level.ServerPlayer sp && Remains.rite(level, sp) | BodyKeeping.cast(level, player);
 			case "rebirth" -> Rebirths.cast(level, player);
 			default -> false;
 		};

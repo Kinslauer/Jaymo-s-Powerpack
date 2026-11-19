@@ -2,6 +2,7 @@ package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.KingdomsMoney;
+import com.jaymospowers.core.brawl.Brawl;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.gifted.Gifted;
 import com.jaymospowers.power.zfighter.pod.PodEntity;
@@ -103,6 +104,18 @@ public final class ZFighterPatrol {
 	static final float PURSUIT_CHANCE = 0.6F;
 	static final int PURSUIT_DELAY = 600, PURSUIT_STAY = 14000, PURSUIT_LINGER = 1200;
 	static final double PURSUIT_RANGE = 96.0;
+	/**
+	 * Showdowns (NPC fights 4): the Patrol sends an officer after a tyrant. From world tier {@link #SHOWDOWN_TIER} (Dread) with a player
+	 * within {@link #SHOWDOWN_NEAR} of him, a landed band or raid has this chance ({@link #SHOWDOWN_CHANCE}) of a pod {@link #SHOWDOWN_DELAY}
+	 * ticks later, {@link #SHOWDOWN_MIN} to {@link #SHOWDOWN_MAX} blocks off him. The officer flies at the tyrant while farther than
+	 * {@link #SHOWDOWN_FLY} blocks (the tyrant flies to meet him within {@link #SHOWDOWN_MEET}), stays at most {@link #SHOWDOWN_STAY}
+	 * ticks and, the tyrant down or gone, lingers {@link #SHOWDOWN_LINGER}. Tyrants and raiders are his foes first within {@link #RIVAL_RANGE}.
+	 */
+	static final int SHOWDOWN_TIER = 3, SHOWDOWN_DELAY = 400, SHOWDOWN_MIN = 40, SHOWDOWN_MAX = 80, SHOWDOWN_STAY = 12000, SHOWDOWN_LINGER = 600;
+	static final float SHOWDOWN_CHANCE = 0.35F;
+	static final double SHOWDOWN_NEAR = 160.0, SHOWDOWN_FLY = 12.0, SHOWDOWN_MEET = 64.0, RIVAL_RANGE = 48.0;
+	/** How many ways the rumour of a showdown is told. */
+	static final int SHOWDOWN_LINES = 3;
 	/** (0.19.1) Recruiting: how long he stays at most, how long after the answer he leaves, the wait before a refusal is asked
 	 * again (ticks), how near he walks to them, and how far off they may get before he gives up. */
 	static final int RECRUIT_STAY = 6000, ANSWERED_STAY = 300;
@@ -113,7 +126,20 @@ public final class ZFighterPatrol {
 	/** How far he goes for a foe, how far he roams from his pod, how hard his fists land and how often. */
 	static final double FIGHT_RANGE = 24.0, ROAM = 22.0, REACH = 2.6;
 	static final float PUNCH = 7.0F;
-	static final int PUNCH_EVERY = 16, ROAM_EVERY = 240, THINK_EVERY = 10;
+	/**
+	 * (NPC fights 1b) A patrolman's own rank (an index into {@link #RANKS}: Rookie to Commander), picked when he lands. By rank: his rank for
+	 * the fighter brain ({@code Brawl}, before the world tier; a Commander is about a tyrant's), his health and armour, how hard he
+	 * hits, and how likely each rank is to be sent ({@link #RANK_WEIGHT}, more so the higher the world tier is above what it needs).
+	 */
+	static final float[] BRAWL_RANKS = {0.15F, 0.3F, 0.45F, 0.6F, 0.8F};
+	static final double[] HEALTH_BY_RANK = {1.0, 1.15, 1.3, 1.5, 1.8}, ARMOR_BY_RANK = {0.0, 1.0, 2.0, 4.0, 6.0};
+	static final float[] PUNCH_BY_RANK = {1.0F, 1.1F, 1.25F, 1.4F, 1.6F};
+	static final int[] RANK_WEIGHT = {6, 4, 3, 2, 1};
+	/** The lowest rank a showdown's patrolman holds (Inspector). */
+	static final int SHOWDOWN_RANK = 3;
+	static final int ROAM_EVERY = 240, THINK_EVERY = 10;
+	/** His ki's colour (the Patrol's gold). */
+	static final int PATROL_KI_COLOR = 0xFFC830;
 	/** The power level he wants to see before he offers to take you on. */
 	public static final int RECRUIT_POWER = 1500;
 	/** The fuel a patrolman gives an officer once a visit (blaze powder: two fuel each). */
@@ -151,7 +177,7 @@ public final class ZFighterPatrol {
 
 	/** (0.19.1) Why a patrolman came down: there is always a reason. NONE is only an older save's, and he goes home. */
 	public enum Cause {
-		NONE, PURSUIT, RECRUIT, ARREST, PARTNER;
+		NONE, PURSUIT, RECRUIT, ARREST, PARTNER, SHOWDOWN;
 
 		static Cause of(String name) {
 			for (Cause c : values()) {
@@ -188,6 +214,9 @@ public final class ZFighterPatrol {
 	/** The travel stories a patrolman has told (bits). */
 	public static final AttachmentType<Integer> TOLD = AttachmentRegistry.create(JaymosPowers.id("patrol_told"),
 		builder -> builder.persistent(Codec.INT));
+	/** (NPC fights 1b) On a patrolman: his rank, an index into {@link #RANKS} (none: a Rookie). */
+	public static final AttachmentType<Integer> RANK = AttachmentRegistry.create(JaymosPowers.id("patrol_rank"),
+		builder -> builder.persistent(Codec.INT).syncWith(net.minecraft.network.codec.ByteBufCodecs.INT, net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate.all()));
 	public static final AttachmentType<Member> MEMBER = AttachmentRegistry.create(JaymosPowers.id("patrol_member"),
 		builder -> builder.persistent(Member.CODEC).copyOnDeath());
 	/** (0.19.1) No longer used: patrolmen stopped coming on a timer. Kept registered so older saves load cleanly. */
@@ -204,6 +233,18 @@ public final class ZFighterPatrol {
 	}
 
 	private static final List<Pursuit> PURSUITS = new ArrayList<>();
+
+	/** A showdown on its way: where the tyrant is, who he is (his id, or the band whose chief he is), and when the pod starts down. */
+	private record Showdown(ServerLevel level, BlockPos near, @Nullable UUID tyrant, @Nullable UUID band, long at) {
+	}
+
+	private static final List<Showdown> SHOWDOWNS = new ArrayList<>();
+
+	/** A fighter flying at his rival until he is there ({@link Brawl#flyTo} wants a call every few ticks, more often than the patrol thinks). */
+	private record Trip(Mob mob, UUID rival) {
+	}
+
+	private static final List<Trip> TRIPS = new ArrayList<>();
 
 	/** A warrant out: whose, the criminal, his world, and when it was written. */
 	private record Warrant(UUID owner, UUID criminal, ResourceKey<Level> level, int planet) {
@@ -246,6 +287,8 @@ public final class ZFighterPatrol {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			FLIERS.clear();
 			PURSUITS.clear();
+				SHOWDOWNS.clear();
+				TRIPS.clear();
 			WARRANTS.clear();
 			NEXT_WARRANT.clear();
 		});
@@ -287,6 +330,39 @@ public final class ZFighterPatrol {
 		return rank;
 	}
 
+	/** {@code man}'s own rank (0: Rookie). */
+	static int manRank(LivingEntity man) {
+		return Mth.clamp(man.getAttachedOrElse(RANK, 0), 0, RANKS.length - 1);
+	}
+
+	/**
+	 * The rank a patrolman who lands near {@code at} holds: weighted toward the ranks the nearest player's world tier opens
+	 * ({@link #RANK_TIER}), more so the higher the tier is above what a rank needs; never below {@code min}.
+	 */
+	static int pickRank(ServerLevel level, Vec3 at, int min) {
+		Player near = level.getNearestPlayer(at.x, at.y, at.z, 256.0, false);
+		int tier = near == null ? 0 : Math.max(0, ZFighterKingdoms.worldTier(near));
+		int[] weight = new int[RANKS.length];
+		int total = 0;
+		for (int r = min; r < RANKS.length; r++) {
+			if (r == 0 || RANK_TIER[r] <= tier) {
+				weight[r] = RANK_WEIGHT[r] * (1 + Math.max(0, tier - RANK_TIER[r]));
+				total += weight[r];
+			}
+		}
+		if (total == 0) {
+			return min;
+		}
+		int roll = level.getRandom().nextInt(total);
+		for (int r = min; r < RANKS.length; r++) {
+			roll -= weight[r];
+			if (roll < 0) {
+				return r;
+			}
+		}
+		return min;
+	}
+
 	static Component rankName(int rank) {
 		return Component.translatable("patrol.jaymospowers.rank." + rank);
 	}
@@ -296,6 +372,9 @@ public final class ZFighterPatrol {
 	private static void tick(MinecraftServer server) {
 		if (!FLIERS.isEmpty()) {
 			fliers();
+		}
+		if (!TRIPS.isEmpty()) {
+			trips();
 		}
 		long ticks = server.getTickCount();
 		if (ticks % THINK_EVERY == 0) {
@@ -310,6 +389,9 @@ public final class ZFighterPatrol {
 		}
 		if (ticks % 20 == 0 && !PURSUITS.isEmpty()) {
 			pursuits(server);
+		}
+		if (ticks % 20 == 0 && !SHOWDOWNS.isEmpty()) {
+			showdowns();
 		}
 		if (ticks % 600 == 0) {
 			recruiters(server);
@@ -336,6 +418,73 @@ public final class ZFighterPatrol {
 				arrive(p.level(), p.where(), p.level().getRandom().nextInt(NAMES), Cause.PURSUIT, p.band(), PURSUIT_STAY);
 			}
 		}
+	}
+
+	/**
+	 * A tyrant is down ({@code tyrant}'s id, or the raider band {@code band} whose chief he is) at {@code near}: from a late world tier
+	 * the Patrol may send an officer after him, a pod coming down a little later.
+	 */
+	static void showdown(ServerLevel level, BlockPos near, @Nullable UUID tyrant, @Nullable UUID band) {
+		if (!ZFighterNpcs.villagers() || !ZFighterKingdoms.present() || level.getRandom().nextFloat() >= SHOWDOWN_CHANCE
+			|| level.getNearestPlayer(near.getX(), near.getY(), near.getZ(), SHOWDOWN_NEAR,
+				p -> !p.isSpectator() && ZFighterKingdoms.worldTier((Player)p) >= SHOWDOWN_TIER) == null) {
+			return;
+		}
+		SHOWDOWNS.add(new Showdown(level, near, tyrant, band, level.getGameTime() + SHOWDOWN_DELAY));
+	}
+
+	/** Showdowns whose time has come: if the tyrant still stands, a pod comes down off him and the players near hear a rumour. */
+	private static void showdowns() {
+		for (Iterator<Showdown> it = SHOWDOWNS.iterator(); it.hasNext();) {
+			Showdown s = it.next();
+			if (s.level().getGameTime() < s.at()) {
+				continue;
+			}
+			it.remove();
+			LivingEntity tyrant = null;
+			if (s.tyrant() != null && s.level().getEntity(s.tyrant()) instanceof LivingEntity e && e.isAlive()) {
+				tyrant = e;
+			} else if (s.band() != null) {
+				for (LivingEntity r : ZFighterRaiders.raiders(s.band())) {
+					if (tyrant == null || r instanceof ZFighterRogue rogue && rogue.tyrant()) {
+						tyrant = r;
+					}
+				}
+			}
+			if (tyrant == null) {
+				continue;
+			}
+			ServerLevel level = s.level();
+			if (arrive(level, tyrant.blockPosition(), level.getRandom().nextInt(NAMES), Cause.SHOWDOWN, tyrant.getUUID(), SHOWDOWN_STAY, SHOWDOWN_MIN, SHOWDOWN_MAX, false)) {
+				String line = "news.jaymospowers.showdown." + level.getRandom().nextInt(SHOWDOWN_LINES);
+				for (ServerPlayer player : level.players()) {
+					if (player.distanceToSqr(tyrant) <= SHOWDOWN_NEAR * SHOWDOWN_NEAR) {
+						ZFighterKingdoms.word(player, Component.translatable(line));
+					}
+				}
+			}
+		}
+	}
+
+	/** Every tick: the fighters on their way to a rival fly on, and are let go once they have arrived (or the rival is gone). */
+	private static void trips() {
+		for (Iterator<Trip> it = TRIPS.iterator(); it.hasNext();) {
+			Trip t = it.next();
+			if (t.mob().isRemoved() || !t.mob().isAlive() || !(t.mob().level() instanceof ServerLevel level)
+				|| !(level.getEntity(t.rival()) instanceof LivingEntity rival) || !rival.isAlive() || Brawl.flyTo(t.mob(), rival)) {
+				it.remove();
+			}
+		}
+	}
+
+	/** {@code mob} flies at {@code rival} until he is there. */
+	private static void flyAt(Mob mob, LivingEntity rival) {
+		for (Trip t : TRIPS) {
+			if (t.mob() == mob) {
+				return;
+			}
+		}
+		TRIPS.add(new Trip(mob, rival.getUUID()));
 	}
 
 	/** (0.19.1) Now and then, by day: a strong fighter out under the sky whom the Patrol has heard of gets a recruiter. */
@@ -374,9 +523,14 @@ public final class ZFighterPatrol {
 
 	/** A patrolman's pod starts down over open ground by {@code seat}, for {@code cause}; true if a spot was found. */
 	static boolean arrive(ServerLevel level, BlockPos seat, int name, Cause cause, UUID target, int stay) {
+		return arrive(level, seat, name, cause, target, stay, LAND_MIN, LAND_MAX, true);
+	}
+
+	/** The same, landing {@code min} to {@code max} blocks off {@code seat}, on a landing yard's pad only if {@code yard}. */
+	static boolean arrive(ServerLevel level, BlockPos seat, int name, Cause cause, UUID target, int stay, int min, int max, boolean yard) {
 		RandomSource random = level.getRandom();
 		// (0.18.54) a landing yard within reach: down on a free pad, and the town named for it
-		BlockPos pad = ZFighterYard.freePad(level, seat);
+		BlockPos pad = yard ? ZFighterYard.freePad(level, seat) : null;
 		if (pad != null) {
 			land(level, pad, name, f -> {
 				stepOut((ServerLevel)f.pod.level(), f, cause, target, stay);
@@ -387,7 +541,7 @@ public final class ZFighterPatrol {
 		}
 		for (int tries = 0; tries < 12; tries++) {
 			double angle = random.nextDouble() * Math.PI * 2.0;
-			double distance = LAND_MIN + random.nextDouble() * (LAND_MAX - LAND_MIN);
+			double distance = min + random.nextDouble() * (max - min);
 			int x = seat.getX() + (int)Math.round(Math.cos(angle) * distance), z = seat.getZ() + (int)Math.round(Math.sin(angle) * distance);
 			level.getChunk(x >> 4, z >> 4);
 			BlockPos ground = ZFighterSpace.surface(level, x, z);
@@ -476,6 +630,19 @@ public final class ZFighterPatrol {
 		}
 		man.setAttached(VISIT, new Visit(ground, level.getGameTime() + stay, cause, java.util.Optional.of(target)));
 		Gifted.give(man, "zfighter", Gifted.BOLD, true, true);
+		// (NPC fights 1b) his rank: stored on him, shown in his name, and what he's made of; a showdown's officer is at least an Inspector
+		int rank = pickRank(level, feet, cause == Cause.SHOWDOWN ? SHOWDOWN_RANK : 0);
+		man.setAttached(RANK, rank);
+		man.setCustomName(Component.translatable("entity.jaymospowers.patrol_ranked", rankName(rank), Component.translatable("entity.jaymospowers.patrol_name." + f.name)));
+		var health = man.getAttribute(Attributes.MAX_HEALTH);
+		if (health != null) {
+			health.setBaseValue(health.getBaseValue() * HEALTH_BY_RANK[rank]);
+			man.setHealth(man.getMaxHealth());
+		}
+		var armour = man.getAttribute(Attributes.ARMOR);
+		if (armour != null) {
+			armour.setBaseValue(armour.getBaseValue() + ARMOR_BY_RANK[rank]);
+		}
 	}
 
 	/** Every half second: each patrolman fights what is near, roams, or, his stay over, goes home. */
@@ -541,6 +708,28 @@ public final class ZFighterPatrol {
 				man.setAttached(VISIT, visit.leaving(now + ANSWERED_STAY));
 			}
 		}
+		if (visit.cause() == Cause.SHOWDOWN) {
+			// the tyrant he came for: he flies at him until he is near, the tyrant flying to meet him; once the tyrant has fallen or gone he lingers and leaves
+			UUID id = visit.target().orElse(null);
+			LivingEntity tyrant = id != null && level.getEntity(id) instanceof LivingEntity e && e.isAlive() ? e : null;
+			if (tyrant == null) {
+				if (visit.leave() > now + SHOWDOWN_LINGER) {
+					man.setAttached(VISIT, visit.leaving(now + SHOWDOWN_LINGER));
+				}
+			} else {
+				foe = tyrant;
+				double apart = man.distanceTo(tyrant);
+				if (apart > SHOWDOWN_FLY) {
+					man.setTarget(tyrant);
+					flyAt(man, tyrant);
+					if (apart < SHOWDOWN_MEET && tyrant instanceof Mob rogue) {
+						rogue.setTarget(man);
+						flyAt(rogue, man);
+					}
+					return;
+				}
+			}
+		}
 		if (foe == null) {
 			foe = foe(level, man, visit.cause() == Cause.RECRUIT ? SIDE_FIGHT : FIGHT_RANGE);
 		}
@@ -568,24 +757,31 @@ public final class ZFighterPatrol {
 		}
 	}
 
-	/** He closes on {@code foe} and, in reach, strikes for {@code damage} every {@link #PUNCH_EVERY} ticks. */
+	/**
+	 * He closes on {@code foe} and fights it: strings of blows of {@code damage} (his punch, by rank) with a finisher that throws it, a rush
+	 * after it and a follow-up ({@link ZFighterStrings}), and a beam, a seeking volley or a charged blast at range ({@link ZFighterNpcKi}). The
+	 * old single punch every 16 ticks is gone.
+	 */
 	static void fight(ServerLevel level, PathfinderMob man, LivingEntity foe, float damage) {
 		man.setTarget(foe);
 		man.getLookControl().setLookAt(foe, 30.0F, 30.0F);
+		// the fighter brain ({@link Brawl}): he flies at a foe in the air, dashes, dodges, guards (his rank is his Patrol's, before the world tier)
+		Brawl.tick(level, man, foe, Brawl.Profile.gifted(BRAWL_RANKS[manRank(man)], man), ZFighterStrings.engaged(man) || man.distanceTo(foe) <= REACH,
+			ZFighterStrings.rushing(man));
+		int rank = manRank(man);
+		double fists = damage * PUNCH_BY_RANK[rank];
+		if (ZFighterStrings.rushing(man)) {
+			return;
+		}
 		if (man.distanceTo(foe) > REACH) {
-			man.getNavigation().moveTo(foe, 1.0);
+			if (!Brawl.flying(man) && !ZFighterStrings.engaged(man)) {
+				man.getNavigation().moveTo(foe, 1.0);
+			}
 		} else {
 			man.getNavigation().stop();
-			if (man.tickCount % PUNCH_EVERY < THINK_EVERY) {
-				man.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
-				DamageSource source = level.damageSources().mobAttack(man);
-				if (foe.hurtServer(level, source, damage)) {
-					Vec3 push = foe.position().subtract(man.position()).multiply(1.0, 0.0, 1.0).normalize().scale(0.6);
-					foe.push(push.x, 0.25, push.z);
-					level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.NEUTRAL, 0.8F, 0.9F);
-				}
-			}
 		}
+		ZFighterStrings.engage(level, man, foe, ZFighterStrings.Cfg.patrol(fists, rank));
+		ZFighterNpcKi.decide(level, man, foe, fists, PATROL_KI_COLOR);
 	}
 
 	/** The nearest of {@code from} within {@code range} of him, or null. */
@@ -606,6 +802,20 @@ public final class ZFighterPatrol {
 	private static @Nullable LivingEntity foe(ServerLevel level, PathfinderMob man, double range) {
 		LivingEntity best = null;
 		double bestD = Double.MAX_VALUE;
+		// his sworn foes first: a tyrant or one of a raider band's men within RIVAL_RANGE (a recruiter keeps to what is at hand)
+		if (range > SIDE_FIGHT) {
+			for (ZFighterRogue e : level.getEntitiesOfClass(ZFighterRogue.class, man.getBoundingBox().inflate(Math.max(range, RIVAL_RANGE)),
+				e -> e.isAlive() && (e.tyrant() || e.raider()))) {
+				double d = man.distanceToSqr(e);
+				if (d < bestD) {
+					bestD = d;
+					best = e;
+				}
+			}
+			if (best != null) {
+				return best;
+			}
+		}
 		AABB box = man.getBoundingBox().inflate(range);
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box, e -> e.isAlive() && e instanceof Enemy && !(e instanceof Player))) {
 			double d = man.distanceToSqr(e);

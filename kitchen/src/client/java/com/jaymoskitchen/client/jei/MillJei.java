@@ -32,7 +32,8 @@ import net.minecraft.world.item.Items;
  */
 public final class MillJei implements IModPlugin {
 	static final IRecipeType<SimpleCategory.Recipe> GRINDING = type("grinding"), CHOPPING = type("chopping"), PRESSING = type("pressing"),
-		DRYING = type("drying"), FORAGING = type("foraging"), WIND = type("wind"), STEAM = type("steam"), POWER_BUILD = type("power_build");
+		DRYING = type("drying"), FORAGING = type("foraging"), WIND = type("wind"), STEAM = type("steam"), POWER_BUILD = type("power_build"),
+		JUICING = type("juicing"), WINEMAKING = type("winemaking");
 
 	private static IRecipeType<SimpleCategory.Recipe> type(String id) {
 		return IRecipeType.create(JaymosKitchen.MOD_ID, id, SimpleCategory.Recipe.class);
@@ -55,7 +56,10 @@ public final class MillJei implements IModPlugin {
 			// (GT New Horizons picks, patch 8) sails and the windsock, the boiler's fuel and water, and how each is built
 			new SimpleCategory(gui, WIND, title("wind"), Power.WINDMILL_ITEM, 2),
 			new SimpleCategory(gui, STEAM, title("steam"), Steam.COPPER_BOILER, 2),
-			new SimpleCategory(gui, POWER_BUILD, title("power_build"), Power.GEARBOX, 3));
+			new SimpleCategory(gui, POWER_BUILD, title("power_build"), Power.GEARBOX, 3),
+			// the treading tub and the apple press, and the cask that turns their juice into wine
+			new SimpleCategory(gui, JUICING, title("juicing"), com.jaymoskitchen.vintner.Vintner.TREADING_TUB_ITEM, 1),
+			new SimpleCategory(gui, WINEMAKING, title("winemaking"), com.jaymoskitchen.brewing.Brewing.CASK, 2));
 	}
 
 	@Override
@@ -69,6 +73,8 @@ public final class MillJei implements IModPlugin {
 			registration.addCraftingStation(type, Mill.MACHINES.get(kind));
 		}
 		registration.addCraftingStation(DRYING, com.jaymoskitchen.tanning.Hides.DRYING_RACK);
+		registration.addCraftingStation(JUICING, com.jaymoskitchen.vintner.Vintner.TREADING_TUB_ITEM, com.jaymoskitchen.vintner.Vintner.APPLE_PRESS_ITEM);
+		registration.addCraftingStation(WINEMAKING, com.jaymoskitchen.brewing.Brewing.CASK);
 		for (ItemStack hoe : hoes()) {
 			registration.addCraftingStation(FORAGING, hoe);
 		}
@@ -114,7 +120,12 @@ public final class MillJei implements IModPlugin {
 			drying.add(new SimpleCategory.Recipe(List.of(List.of(stack)), List.of(com.jaymoskitchen.tanning.Hides.dried(stack)),
 				List.of(note("drying.time", com.jaymoskitchen.tanning.Hides.DRY_TICKS / 1200))));
 		}
+		// tea leaves dry in the sun into the kettle's tea herb
+		ItemStack leaves = new ItemStack(com.jaymoskitchen.vintner.Vintner.TEA_LEAVES);
+		drying.add(new SimpleCategory.Recipe(List.of(List.of(leaves)), List.of(com.jaymoskitchen.tanning.Hides.dried(leaves)),
+			List.of(note("drying.sun"))));
 		SimpleCategory.addRecipes(registration, DRYING, drying);
+		vintnerPages(registration);
 		// (GT New Horizons picks) seeds a hoe scratches from grass too far from water for farmland, land by land
 		List<ItemStack> hoes = hoes();
 		List<SimpleCategory.Recipe> foraging = new ArrayList<>();
@@ -156,6 +167,51 @@ public final class MillJei implements IModPlugin {
 		registration.addIngredientInfo(Items.BLAST_FURNACE, note("soot"));
 		registration.addIngredientInfo(Items.BONE_MEAL, note("tired_fields"));
 		registration.addIngredientInfo(com.jaymoskitchen.delight.DelightFarm.ORGANIC_COMPOST, note("tired_fields"));
+	}
+
+	/**
+	 * The tub and the press (fruit to juice), the cask (juice or fruit and water to wine, which keeps in a cool cellar), and a
+	 * page each for the vines, the tea bush, the pot and the wood chips.
+	 */
+	private static void vintnerPages(IRecipeRegistration registration) {
+		List<SimpleCategory.Recipe> juicing = new ArrayList<>(), winemaking = new ArrayList<>();
+		for (com.jaymoskitchen.vintner.Juice juice : com.jaymoskitchen.vintner.Juice.values()) {
+			List<ItemStack> fruit = new ArrayList<>();
+			for (Item item : BuiltInRegistries.ITEM) {
+				ItemStack stack = new ItemStack(item);
+				if (juice.takes(stack)) {
+					fruit.add(stack.copyWithCount(com.jaymoskitchen.vintner.JuiceEntity.PER_BOTTLE));
+				}
+			}
+			juicing.add(new SimpleCategory.Recipe(List.of(fruit, List.of(new ItemStack(Items.GLASS_BOTTLE))), List.of(new ItemStack(juice.bottle())),
+				List.of(note(juice.tub ? "juicing.tub" : "juicing.press"))));
+			ItemStack bottles = new ItemStack(juice.bottle(), com.jaymoskitchen.brewing.CaskEntity.BASE_PER_BATCH);
+			winemaking.add(new SimpleCategory.Recipe(List.of(List.of(bottles)), List.of(new ItemStack(com.jaymoskitchen.brewing.Brewing.drink(juice.brew))),
+				List.of(note("winemaking.juice"), note("winemaking.cellar"))));
+		}
+		SimpleCategory.addRecipes(registration, JUICING, juicing);
+		for (com.jaymoskitchen.brewing.Brew brew : List.of(com.jaymoskitchen.brewing.Brew.GRAPE_WINE, com.jaymoskitchen.brewing.Brew.BLACK_WINE)) {
+			List<ItemStack> grapes = new ArrayList<>();
+			for (Item item : BuiltInRegistries.ITEM) {
+				ItemStack stack = new ItemStack(item);
+				if (com.jaymoskitchen.brewing.Brewing.baseOf(stack) == brew) {
+					grapes.add(stack.copyWithCount(com.jaymoskitchen.brewing.CaskEntity.BASE_PER_BATCH));
+				}
+			}
+			winemaking.add(new SimpleCategory.Recipe(List.of(grapes, List.of(new ItemStack(Items.WATER_BUCKET))),
+				List.of(new ItemStack(com.jaymoskitchen.brewing.Brewing.drink(brew))), List.of(note("winemaking.grapes"), note("winemaking.cellar"))));
+		}
+		SimpleCategory.addRecipes(registration, WINEMAKING, winemaking);
+		for (Item vine : List.of(com.jaymoskitchen.vintner.Vintner.GRAPE_VINE_ITEM, com.jaymoskitchen.vintner.Vintner.CRIMSON_VINE_ITEM,
+			com.jaymoskitchen.vintner.Vintner.WARPED_VINE_ITEM)) {
+			registration.addIngredientInfo(vine, note(vine == com.jaymoskitchen.vintner.Vintner.GRAPE_VINE_ITEM ? "vine" : "nether_vine"));
+		}
+		registration.addIngredientInfo(com.jaymoskitchen.vintner.Vintner.TEA_BUSH_ITEM, note("tea_bush"));
+		registration.addIngredientInfo(com.jaymoskitchen.vintner.Vintner.DRIED_TEA_LEAVES, note("tea_kettle"));
+		registration.addIngredientInfo(com.jaymoskitchen.vintner.Vintner.TEA_POT_ITEM, note("tea_pot"));
+		for (com.jaymoskitchen.vintner.Chip chip : com.jaymoskitchen.vintner.Chip.values()) {
+			registration.addIngredientInfo(chip.item(), note("wood_chip", chip.keeps, chip.fill));
+		}
 	}
 
 	/**

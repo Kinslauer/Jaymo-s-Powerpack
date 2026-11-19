@@ -98,6 +98,7 @@ public final class Sailing {
 			output.insertAfter(GALLEY_KIT, SHIP_PLANS);
 			output.insertAfter(SHIP_PLANS, BOMB_HATCH_ITEM);
 		});
+		Figureheads.register();
 		ShipNet.register();
 	}
 

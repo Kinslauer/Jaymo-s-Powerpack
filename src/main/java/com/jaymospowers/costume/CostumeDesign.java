@@ -42,7 +42,7 @@ public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor sec
 	 * (its id's path) that adds it to the table. New ones only ever go at the end (saved designs keep their names, and
 	 * the network sends the ordinal).
 	 */
-	public enum Cut implements StringRepresentable {
+	public enum Cut implements CostumeSets.Piece {
 		BODYSUIT, ARMOURED, ROBES, COAT, RAGGED,
 		WEBBED("web"), WINDSWEPT("wind"), DENSE("gravity"), CLOCKWORK("chrono"), BANDOLIER("arsenal"), RESONANT("resonance"),
 		TIDAL("darktide"), ASH_WRAPS("smoke"), GI("zfighter"), CARAPACE("xenoform"),
@@ -51,13 +51,17 @@ public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor sec
 		// (0.17.60) Z Fighter's gi and armour patterns
 		WRAP_GI("zfighter"), SLEEVELESS_GI("zfighter"), WEIGHTED_GI("zfighter"), BATTLE_ARMOUR("zfighter"), PADDED_SUIT("zfighter"),
 		// (0.17.169) anyone's: eanncrod's Thief Armor (its own model, CostumeModels.thief); looks only, no bonus
-		THIEF;
+		THIEF,
+		// pattern pieces: locked until the player has used a Costume Pattern for them (CostumePatterns)
+		STRIPED(true), HARLEQUIN(true), SCALED(true);
 
 		public static final Codec<Cut> CODEC = StringRepresentable.fromEnum(Cut::values);
 		public static final StreamCodec<ByteBuf, Cut> STREAM_CODEC = CostumeDesign.byOrdinal(values());
 
 		/** The power whose set this is (its id's path), or null for anyone's. */
 		public final @Nullable String power;
+		/** Whether it is a pattern piece: locked until the player has learned it from a Costume Pattern. */
+		public final boolean pattern;
 
 		Cut() {
 			this(null);
@@ -65,6 +69,27 @@ public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor sec
 
 		Cut(@Nullable String power) {
 			this.power = power;
+			this.pattern = false;
+		}
+
+		Cut(boolean pattern) {
+			this.power = null;
+			this.pattern = pattern;
+		}
+
+		@Override
+		public String kind() {
+			return "cut";
+		}
+
+		@Override
+		public boolean pattern() {
+			return this.pattern;
+		}
+
+		@Override
+		public @Nullable String power() {
+			return this.power;
 		}
 
 		@Override
@@ -74,14 +99,17 @@ public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor sec
 	}
 
 	/** What covers the head. {@link #hidesFace} is what a later "masked" (secret identity) check reads. */
-	public enum Mask implements StringRepresentable {
+	public enum Mask implements CostumeSets.Piece {
 		NONE(false), HALF_MASK(false), FULL_MASK(true), HOOD(false), HELMET(true), GOGGLES(false),
 		// (0.11.78) power sets
 		WEB_MASK(true, "web"), ASH_VEIL(true, "smoke"), HEADBAND(false, "zfighter"),
 		// (0.14.3) anyone's: a deep hood with a peak over the brow; like the plain hood it leaves the face showing
 		PEAKED_HOOD(false),
 		// (0.17.169) anyone's: the Thief Armor's deep hood, falling to the neck; a hood like the peaked one (no bonus)
-		THIEF_HOOD(false);
+		THIEF_HOOD(false),
+		// pattern pieces: locked until the player has used a Costume Pattern for them (CostumePatterns). The cowl is a hood.
+		DOMINO(false, null, true), MASQUERADE(false, null, true), SCARF(false, null, true), COWL(false, null, true), SKULL(true, null, true),
+		VISORED(true, null, true);
 
 		public static final Codec<Mask> CODEC = StringRepresentable.fromEnum(Mask::values);
 		public static final StreamCodec<ByteBuf, Mask> STREAM_CODEC = CostumeDesign.byOrdinal(values());
@@ -92,21 +120,43 @@ public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor sec
 		 * range) and Kingdoms' stealth reads it.
 		 */
 		public boolean isHood() {
-			return this == HOOD || this == PEAKED_HOOD || this == THIEF_HOOD;
+			return this == HOOD || this == PEAKED_HOOD || this == THIEF_HOOD || this == COWL;
 		}
 
 		/** Whether it hides who you are (the whole face is covered). */
 		public final boolean hidesFace;
 		/** The power whose set this is (its id's path), or null for anyone's. */
 		public final @Nullable String power;
+		/** Whether it is a pattern piece: locked until the player has learned it from a Costume Pattern. */
+		public final boolean pattern;
 
 		Mask(boolean hidesFace) {
-			this(hidesFace, null);
+			this(hidesFace, null, false);
 		}
 
 		Mask(boolean hidesFace, @Nullable String power) {
+			this(hidesFace, power, false);
+		}
+
+		Mask(boolean hidesFace, @Nullable String power, boolean pattern) {
 			this.hidesFace = hidesFace;
 			this.power = power;
+			this.pattern = pattern;
+		}
+
+		@Override
+		public String kind() {
+			return "mask";
+		}
+
+		@Override
+		public boolean pattern() {
+			return this.pattern;
+		}
+
+		@Override
+		public @Nullable String power() {
+			return this.power;
 		}
 
 		@Override
@@ -116,16 +166,20 @@ public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor sec
 	}
 
 	/** The cape, if any. */
-	public enum Cape implements StringRepresentable {
+	public enum Cape implements CostumeSets.Piece {
 		NONE, SHORT, LONG, TATTERED,
 		// (0.11.78) power sets
-		GALE("wind"), TIDE("darktide");
+		GALE("wind"), TIDE("darktide"),
+		// pattern pieces: locked until the player has used a Costume Pattern for them (CostumePatterns)
+		SCALLOPED(true), TRAILING(true);
 
 		public static final Codec<Cape> CODEC = StringRepresentable.fromEnum(Cape::values);
 		public static final StreamCodec<ByteBuf, Cape> STREAM_CODEC = CostumeDesign.byOrdinal(values());
 
 		/** The power whose set this is (its id's path), or null for anyone's. */
 		public final @Nullable String power;
+		/** Whether it is a pattern piece: locked until the player has learned it from a Costume Pattern. */
+		public final boolean pattern;
 
 		Cape() {
 			this(null);
@@ -133,6 +187,27 @@ public record CostumeDesign(String name, Cut cut, DyeColor primary, DyeColor sec
 
 		Cape(@Nullable String power) {
 			this.power = power;
+			this.pattern = false;
+		}
+
+		Cape(boolean pattern) {
+			this.power = null;
+			this.pattern = pattern;
+		}
+
+		@Override
+		public String kind() {
+			return "cape";
+		}
+
+		@Override
+		public boolean pattern() {
+			return this.pattern;
+		}
+
+		@Override
+		public @Nullable String power() {
+			return this.power;
 		}
 
 		@Override

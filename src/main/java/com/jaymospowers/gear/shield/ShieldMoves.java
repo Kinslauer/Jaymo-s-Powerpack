@@ -44,6 +44,11 @@ import org.jspecify.annotations.Nullable;
  * front, ricochets to up to {@link #HOPS} of them and comes back. A round shield throws best.</li>
  * <li><b>Slam</b> (sneak + attack, shield up): brought down on the ground, it stuns and launches everyone round you.</li>
  * <li><b>Charge</b> (sprint, shield up): a short rush behind the shield that knocks aside whoever it meets.</li>
+ * <li><b>Slam from the air</b> (sneak + attack, shield up, off the ground): you drive down, and the slam lands on impact, wider and
+ * harder the farther you fell ({@link #AIR_SLAM_PER_BLOCK}, capped).</li>
+ * <li><b>Rising uppercut</b> (jump + attack, shield up, not sneaking): you launch up carrying the foes within {@link #RISE_REACH} in
+ * front of you, then they drop. Players are only lifted a little ({@link #RISE_PLAYER_UP}).</li>
+ * <li><b>Ride the shield down</b> (shield up, looking steeply down as you land): the shield takes {@link #FALL_SHARE} of the fall.</li>
  * <li><b>Brace</b> (stand still, shield up, {@link #BRACE_TICKS}): nothing from the front moves you; arrows are turned back, and a
  * blow lands for {@link #BRACE_MELEE_SHARE} of its weight.</li>
  * </ul>
@@ -59,6 +64,17 @@ public final class ShieldMoves {
 	public static final double SLAM_RADIUS = 3.5, SLAM_OUT = 0.9, SLAM_UP = 0.7;
 	public static final float SLAM_DAMAGE = 3.0F;
 	public static final int SLAM_STUN = 40, SLAM_COOLDOWN = 60, SLAM_FEATHERS = 3, SLAM_WEAR = 2;
+	/** Slam from the air: extra harm and reach per block fallen, the most extra of each, the dive's speed, how long it may last (ticks). */
+	public static final float AIR_SLAM_PER_BLOCK = 0.5F, AIR_SLAM_MAX = 10.0F;
+	public static final double AIR_SLAM_WIDE_PER_BLOCK = 0.12, AIR_SLAM_WIDE_MAX = 2.5, AIR_DIVE_SPEED = -1.8;
+	public static final int AIR_DIVE_TICKS = 80, AIR_SLAM_MIN_FALL = 2;
+	/** Rising uppercut: reach in front (blocks), the lift of you and of foes, a player's lift, harm, stun, the wait, feathers, shield wear. */
+	public static final double RISE_REACH = 2.5, RISE_UP = 0.9, RISE_FOE_UP = 1.0, RISE_PLAYER_UP = 0.35, RISE_FRONT_DOT = 0.3;
+	public static final float RISE_DAMAGE = 2.0F;
+	public static final int RISE_STUN = 25, RISE_COOLDOWN = 70, RISE_FEATHERS = 3, RISE_WEAR = 1, RISE_GROUND_GRACE = 6;
+	/** Ride the shield down: the pitch past which you look steeply down, the share of the fall the shield takes, the least it ever leaves, wear per point taken. */
+	public static final float FALL_PITCH = 60.0F, FALL_SHARE = 0.5F, FALL_FLOOR = 3.0F;
+	public static final int FALL_WEAR_PER = 2;
 	/** Charge: ticks it lasts, reach in front (blocks), harm, stun, the shove, the wait, feathers. */
 	public static final int CHARGE_TICKS = 12, CHARGE_COOLDOWN = 80, CHARGE_FEATHERS = 4, CHARGE_STUN = 20;
 	public static final double CHARGE_REACH = 1.7, CHARGE_SHOVE = 1.0, CHARGE_LIFT = 0.3;
@@ -73,13 +89,15 @@ public final class ShieldMoves {
 	private static final Identifier BRACE_ID = Identifier.fromNamespaceAndPath("jaymospowers", "shield_brace");
 
 	/** What kind of move the client asks for. */
-	public static final int THROW = 0, SLAM = 1, CHARGE = 2;
+	public static final int THROW = 0, SLAM = 1, CHARGE = 2, RISE = 3;
 
 	private static final class State {
 		Vec3 last = Vec3.ZERO;
 		int still;
 		boolean braced;
-		long throwReady, slamReady, chargeReady, chargeEnd;
+		long throwReady, slamReady, chargeReady, chargeEnd, riseReady, groundTick, diveEnd;
+		double peakY;
+		boolean diving;
 		final Set<UUID> charged = new HashSet<>();
 	}
 
@@ -133,7 +151,17 @@ public final class ShieldMoves {
 			case SLAM -> {
 				if (now >= state.slamReady && Feathers.spend(player, SLAM_FEATHERS)) {
 					state.slamReady = now + SLAM_COOLDOWN;
-					slam(player);
+					if (airborne(player)) {
+						dive(player, state, now);
+					} else {
+						slam(player, 0.0);
+					}
+				}
+			}
+			case RISE -> {
+				if (now >= state.riseReady && (player.onGround() || now - state.groundTick <= RISE_GROUND_GRACE) && Feathers.spend(player, RISE_FEATHERS)) {
+					state.riseReady = now + RISE_COOLDOWN;
+					rise(player);
 				}
 			}
 			case CHARGE -> {
@@ -288,27 +316,76 @@ public final class ShieldMoves {
 
 	// ---- slam ----
 
-	private static void slam(ServerPlayer player) {
+	private static boolean airborne(ServerPlayer player) {
+		return !player.onGround() && !player.isInWater() && !player.isFallFlying() && !player.isPassenger() && !player.getAbilities().flying;
+	}
+
+	/** Started in the air: drive down; the slam lands in {@link #tick}. */
+	private static void dive(ServerPlayer player, State state, long now) {
+		state.diving = true;
+		state.diveEnd = now + AIR_DIVE_TICKS;
+		Vec3 v = player.getDeltaMovement();
+		player.setDeltaMovement(v.x * 0.3, Math.min(v.y, AIR_DIVE_SPEED), v.z * 0.3);
+		player.syncVelocity = true;
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.0F, 0.5F);
+	}
+
+	/** The slam, harder and wider by {@code fall} blocks fallen (0 for the ground slam). */
+	private static void slam(ServerPlayer player, double fall) {
+		float extra = (float) Math.min(AIR_SLAM_MAX, Math.max(0.0, fall - AIR_SLAM_MIN_FALL) * AIR_SLAM_PER_BLOCK);
+		double radius = SLAM_RADIUS + Math.min(AIR_SLAM_WIDE_MAX, Math.max(0.0, fall - AIR_SLAM_MIN_FALL) * AIR_SLAM_WIDE_PER_BLOCK);
 		ServerLevel level = player.level();
 		Vec3 at = player.position();
 		player.swing(player.getUsedItemHand(), SwingAnimation.DEFAULT, true);
 		player.getUseItem().hurtWithoutBreaking(SLAM_WEAR, player);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 1.0F, 0.7F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 1.4F, 0.5F);
-		MagicFx.ring(level, at.add(0.0, 0.1, 0.0), (float) SLAM_RADIUS, 0xC8B070);
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(SLAM_RADIUS, 1.5, SLAM_RADIUS),
+		MagicFx.ring(level, at.add(0.0, 0.1, 0.0), (float) radius, 0xC8B070);
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius, 1.5, radius),
 			e -> e != player && e.isAlive() && !e.isSpectator() && !player.isAlliedTo(e))) {
 			Vec3 away = e.position().subtract(at);
 			Vec3 flat = new Vec3(away.x, 0.0, away.z);
-			if (flat.length() > SLAM_RADIUS) {
+			if (flat.length() > radius) {
 				continue;
 			}
 			flat = flat.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, player.getYRot()) : flat.normalize();
-			e.hurtServer(level, level.damageSources().playerAttack(player), SLAM_DAMAGE);
+			e.hurtServer(level, level.damageSources().playerAttack(player), SLAM_DAMAGE + extra);
 			DarktideStatus.stun(e, SLAM_STUN);
 			e.setDeltaMovement(flat.x * SLAM_OUT, SLAM_UP, flat.z * SLAM_OUT);
 			e.syncVelocity = true;
 		}
+	}
+
+	// ---- rising uppercut ----
+
+	private static void rise(ServerPlayer player) {
+		ServerLevel level = player.level();
+		Vec3 look = Vec3.directionFromRotation(0.0F, player.getYRot());
+		Vec3 front = player.position().add(look.scale(RISE_REACH * 0.5));
+		player.swing(player.getUsedItemHand(), SwingAnimation.DEFAULT, true);
+		player.getUseItem().hurtWithoutBreaking(RISE_WEAR, player);
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(front, front).inflate(RISE_REACH * 0.6, 1.2, RISE_REACH * 0.6),
+			e -> e != player && e.isAlive() && !e.isSpectator() && !player.isAlliedTo(e)
+				&& !(e instanceof net.minecraft.world.entity.TamableAnimal pet && pet.isOwnedBy(player)))) {
+			Vec3 to = e.position().subtract(player.position());
+			Vec3 flat = new Vec3(to.x, 0.0, to.z);
+			if (flat.length() > RISE_REACH || flat.lengthSqr() > 1.0E-4 && flat.normalize().dot(look) < RISE_FRONT_DOT) {
+				continue;
+			}
+			boolean human = e instanceof ServerPlayer;
+			if (!human) {
+				e.hurtServer(level, level.damageSources().playerAttack(player), RISE_DAMAGE);
+				DarktideStatus.stun(e, RISE_STUN);
+			}
+			e.setDeltaMovement(e.getDeltaMovement().x, human ? RISE_PLAYER_UP : RISE_FOE_UP, e.getDeltaMovement().z);
+			e.syncVelocity = true;
+		}
+		Vec3 v = player.getDeltaMovement();
+		player.setDeltaMovement(v.x, RISE_UP, v.z);
+		player.syncVelocity = true;
+		Vec3 at = player.position();
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 1.2F, 0.9F);
+		MagicFx.blast(level, at.add(look.scale(1.0)).add(0.0, 0.8, 0.0), 0.9F, 0xC8B070);
 	}
 
 	// ---- per tick: charge and brace ----
@@ -321,6 +398,20 @@ public final class ShieldMoves {
 		Vec3 moved = pos.subtract(state.last).multiply(1.0, 0.0, 1.0);
 		state.last = pos;
 		boolean up = shieldUp(player);
+		if (state.diving) {
+			if (player.onGround()) {
+				state.diving = false;
+				slam(player, state.peakY - pos.y);
+			} else if (now > state.diveEnd || player.isInWater() || player.isFallFlying()) {
+				state.diving = false;
+			}
+		}
+		if (player.onGround()) {
+			state.groundTick = now;
+			state.peakY = pos.y;
+		} else {
+			state.peakY = Math.max(state.peakY, pos.y);
+		}
 		if (up && now < state.chargeEnd) {
 			ram(player, state, level);
 		}
@@ -370,6 +461,24 @@ public final class ShieldMoves {
 	private static boolean allowDamage(LivingEntity victim, DamageSource source, float amount) {
 		if (redealing || !(victim instanceof ServerPlayer player) || !(player.level() instanceof ServerLevel level)) {
 			return true;
+		}
+		if (source.is(net.minecraft.tags.DamageTypeTags.IS_FALL) && amount > FALL_FLOOR && player.getXRot() > FALL_PITCH && shieldUp(player)
+			&& com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.SHIELD_MOVES)) {
+			// ridden down on the shield: it takes its share of the fall, and never leaves less than a short fall's worth
+			float lands = Math.max(amount * (1.0F - FALL_SHARE), FALL_FLOOR);
+			player.getUseItem().hurtWithoutBreaking(Math.max(1, (int) ((amount - lands) * FALL_WEAR_PER)), player);
+			Vec3 at = player.position();
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 1.2F, 0.5F);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.5F, 0.6F);
+			level.sendParticles(net.minecraft.core.particles.ParticleTypes.POOF, at.x, at.y + 0.1, at.z, 14, 0.8, 0.05, 0.8, 0.04);
+			com.jaymospowers.core.Shakes.felt(player, at, 6.0, 1.2F, com.jaymospowers.core.Shakes.ticksFor(1.2F));
+			redealing = true;
+			try {
+				player.hurtServer(level, source, lands);
+			} finally {
+				redealing = false;
+			}
+			return false;
 		}
 		State state = STATES.get(player.getUUID());
 		if (state == null || !state.braced || !shieldUp(player)) {
