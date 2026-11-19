@@ -71,6 +71,47 @@ public class SpitBlockEntity extends BlockEntity {
 		return doneness;
 	}
 
+	/**
+	 * Someone who isn't a player (Kingdoms' camp cooks) puts one of {@code raw} on the spit: true if it went on (the spit
+	 * was bare and it's roastable). {@code raw} is shrunk by one.
+	 */
+	public boolean skewer(ItemStack raw) {
+		if (raw.isEmpty() || !raw.is(ROASTABLE) || !items.get(0).isEmpty()) {
+			return false;
+		}
+		items.set(0, raw.copyWithCount(1));
+		chunks = SpitBlock.chunksFor(raw);
+		raw.shrink(1);
+		doneness = 0.0F;
+		markUpdated();
+		return true;
+	}
+
+	/**
+	 * Someone who isn't a player tears a cooked chunk off, as a player's empty hand does: one cooked piece, the last tear
+	 * clearing the spit. A burnt roast is thrown out (nothing comes off); a raw one gives nothing.
+	 */
+	public ItemStack tear(ServerLevel level) {
+		ItemStack stack = items.get(0);
+		if (stack.isEmpty() || doneness < COOKED) {
+			return ItemStack.EMPTY;
+		}
+		if (doneness >= BURNT || chunks <= 0) {
+			items.set(0, ItemStack.EMPTY);
+			doneness = 0.0F;
+			markUpdated();
+			return ItemStack.EMPTY;
+		}
+		ItemStack chunk = SpitBlock.cookedProduct(stack, level).get(0).copyWithCount(1);
+		chunks -= 1;
+		doneness = Mth.clamp(doneness - CHUNK, 0.0F, BURNT);
+		if (chunks <= 0) {
+			items.set(0, ItemStack.EMPTY);
+		}
+		markUpdated();
+		return chunk;
+	}
+
 	public static void serverTick(Level level, BlockPos pos, BlockState state, SpitBlockEntity be) {
 		if (!com.jaymoskitchen.cooking.spit.SpitBlock.heat(level.getBlockState(pos.below()))) {
 			return;

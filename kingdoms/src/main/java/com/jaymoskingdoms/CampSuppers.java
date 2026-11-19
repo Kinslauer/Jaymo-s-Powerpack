@@ -59,8 +59,6 @@ public final class CampSuppers {
 	static final int FROM = 12000, TO = 13800;
 	/** A camp with a player this near (blocks) sits down to supper; its band is everyone of it this near its fire. */
 	static final double WATCHED = 96.0, BAND = 32.0;
-	/** The ring they sit in (blocks from the fire). */
-	static final double RING = 3.0;
 	/** While eating a sneaking player farther than this isn't noticed (blocks); openly this near and they stand (blocks). */
 	static final double UNWARY = 4.0, CONFRONT = 12.0;
 	/** Poisoning seen by any of them this near (blocks); within this of the fire it's their food (blocks). */
@@ -243,12 +241,10 @@ public final class CampSuppers {
 				GroundSeats.standUp(m);
 				continue;
 			}
-			double a = Math.PI * 2.0 * i / s.eaters.size();
-			Vec3 seat = Vec3.atBottomCenterOf(s.fire).add(Math.cos(a) * RING, 0.0, Math.sin(a) * RING);
-			if (!GroundSeats.sitting(m) && m.position().distanceToSqr(seat) > 1.5 * 1.5) {
-				if (m.getNavigation().isDone()) {
-					m.getNavigation().moveTo(seat.x, seat.y, seat.z, 0.5);
-				}
+			// (a camp's log benches are where a plain ring put them: inside the wood, so nobody ever got to sit. Firesides
+			// finds the seats round the fire, the bench tops first)
+			Vec3 seat = Firesides.ringSeat(level, s.fire, i, s.eaters.size());
+			if (!GroundSeats.sitting(m) && !Firesides.reach(m, seat, s.fire)) {
 				continue;
 			}
 			if (!GroundSeats.sitting(m) && !GroundSeats.sitDown(m, Vec3.atBottomCenterOf(s.fire))) {
