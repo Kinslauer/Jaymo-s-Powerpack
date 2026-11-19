@@ -1,4 +1,0 @@
-# The minimap stops showing the Aether again
-- **The minimap maps the band you're in again, not the Aether's islands over it.** Since Xaero's World Map joined the pack, the minimap draws from the World Map's tiles, and those come from the World Map's own writer. The earlier fix only covered the minimap's writer, so the World Map read each column from the top of the whole stacked world and mapped the islands (Andy, 2026-11-19). The World Map's writer and its cave-mode roof check now stop at your band's top and floor too, as the minimap's do (`client/mixin/xaero/XaeroWorldMapBandMixin`, `XaeroWorldMapCaveMixin`, both on Xaero's World Map 1.47.2). The full-screen World Map follows the same rule.
-- Tiles already saved with the Aether in them change as the World Map writes them again while you're near.
-- Built; injection points checked against the World Map jar; not played.
