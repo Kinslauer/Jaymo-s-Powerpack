@@ -21,14 +21,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * set of each of its profession's levels, and calls Optional.get on that set. VillagersPlus professions (miner,
  * alchemist, oceanographer, occultist, horticulturist) name a set per level (villagersplus:miner/level_1 ...) that its jar
  * never defines, so the get threw and crashed the server tick (the Deck, 2026-11-19, an MCA villager). A villager whose
- * profession names a set that isn't registered is now left as it is: no layout is built and the reroll does nothing, so
- * its offers are neither changed nor emptied (an empty layout would have removed them all). Professions whose sets all
- * exist reroll as before. Skipped when the mod isn't there.
+ * profession names a set that isn't registered (for a level it has reached) gets no layout, and instead of the reroll
+ * its offers are restocked the vanilla way: Shifting Wares hides the offers from vanilla's restock and leaves the reroll
+ * as the only refill, so skipping it alone would leave those trades used up for good. Its offers are never changed or
+ * emptied (an empty layout would have removed them all). Professions whose sets all exist reroll as before. Skipped
+ * when the mod isn't there.
  */
 @Pseudo
 @Mixin(targets = "fr.estecka.shiftingwares.TradeShuffler", remap = false)
 abstract class TradeShufflerMixin {
 	@Shadow @Final private List<?> tradeLayout;
+	@Shadow @Final private net.minecraft.world.item.trading.MerchantOffers offers;
 
 	@WrapOperation(method = "<init>", require = 0,
 		at = @At(value = "INVOKE", target = "Lfr/estecka/shiftingwares/SlotRerollSource;CreateTradeLayout(Lnet/minecraft/world/entity/npc/villager/Villager;)Ljava/util/List;"))
@@ -39,16 +42,21 @@ abstract class TradeShufflerMixin {
 	@Inject(method = "Reroll", at = @At("HEAD"), cancellable = true, require = 0)
 	private void jaymospowers$nothingToReroll(CallbackInfo ci) {
 		if (tradeLayout == null) {
+			// (what vanilla's restock and catch-up do for each offer)
+			for (net.minecraft.world.item.trading.MerchantOffer offer : offers) {
+				offer.resetUses();
+			}
 			ci.cancel();
 		}
 	}
 
-	/** Every level of the villager's profession names a set that is in the registry (the check Shifting Wares skips). */
+	/** Every level the villager has reached names a set that is in the registry (the check Shifting Wares skips; it only reads those levels). */
 	private static boolean hasAllSets(Villager villager) {
 		VillagerProfession profession = villager.getVillagerData().profession().value();
 		Registry<TradeSet> sets = villager.registryAccess().lookupOrThrow(Registries.TRADE_SET);
+		int reached = villager.getVillagerData().level();
 		for (int level : profession.tradeSetsByLevel().keySet()) {
-			if (sets.getOptional(profession.getTrades(level)).isEmpty()) {
+			if (level <= reached && sets.getOptional(profession.getTrades(level)).isEmpty()) {
 				return false;
 			}
 		}
