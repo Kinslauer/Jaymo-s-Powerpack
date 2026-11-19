@@ -6653,3 +6653,10 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - **Other wake-ups**: carried out cold to a realm's cells, the gaolers keep you alive for judgement with rags on your cuts and stumps and your breaks splinted. Taken captive (`Mortality.tendCaptive`, Andy: "they should resusitate you, using dirty rags if you're lucky and bind you"): half the time they tie dirty rags round every cut and stump (a rag's slow heal, and it may fester; no splints), otherwise they sear a bleeding stump shut with a hot blade and leave the cuts. Kingdoms calls it each time captors haul a beaten captive up. Spiders' lairs, your own berth and the wild still see to nothing. Both the death wake and the blackout wake (`TakenOut`) do this.
 - Kingdoms' tending villagers (the bandaged tag) already stopped a stump's bleeding; the stump now shows its binding too.
 - Built; not played.
+
+## 0.25.88 (2026-11-19): Regrown limbs come back unbroken, Verdant regrowth crunch (#1889)
+
+- **Regrowth heals the break**: a limb that grows back (Verdant, Rubber-folk, Bio-built, Hermit Bean, the symbiote, Slipfin/Brinecrown) is no longer still broken. Its break, set mark, splint and broken tag go, and the limb comes back at 30% of its part instead of 0 (`Breaks.regrown`, `REGROWN_SHARE`). Creative healing still skips prosthetic limbs.
+- **Verdant regrowth**: a Verdant's open stumps (no prosthetic) spurt green blood every half second until the limb grows back (`Dismember.spurtStumps`, `ZFighterLineage.STUMP_SPURT_EVERY`), and the regrowth plays a fleshy crunch (new sound `verdant/regrow_1..3`, made by `tools/gen_regrow_sounds.py`).
+- **Green Verdant blood**: a Verdant Z Fighter bleeds green sap whatever their heritage (Verdant heritage already did).
+- Built; not played or listened to in game.
