@@ -55,10 +55,12 @@ public class GrapeVineBlock extends VegetationBlock {
 	/** Ripe: the last stage. */
 	public static final int RIPE = 3;
 	/** What a vine drops back to after picking (it fruits again on the same wood). */
-	public static final int REGROW_AGE = 1;
+	public static final int REGROW_AGE = 0;
 	public static final int MAX_NEGLECT = 3;
 	public static final BooleanProperty PRUNED = BooleanProperty.create("pruned");
 	public static final BooleanProperty NETTED = BooleanProperty.create("netted");
+	/** Picked this year: the vine stays bare until it has been through a winter (it fruits on last year's wood). */
+	public static final BooleanProperty BARE = BooleanProperty.create("bare");
 	public static final IntegerProperty NEGLECT = IntegerProperty.create("neglect", 0, MAX_NEGLECT);
 
 	/** Bunches a pruned vine bears, and what a net adds. */
@@ -67,6 +69,8 @@ public class GrapeVineBlock extends VegetationBlock {
 	private static final int GROW_ODDS = 12, GROW_LIGHT = 9;
 	/** Chance a random tick of a ripe, unnetted vine under the open sky lets the birds at it (1 in this). */
 	private static final int BIRD_ODDS = 8;
+	/** Lands without winters (and the Nether): a bare vine rests for 1 in this many random ticks instead. */
+	private static final int REST_ODDS = 600;
 	/** How far from lava the Nether vines still grow. */
 	private static final int LAVA_REACH = 3;
 	private static final VoxelShape SHAPE = Block.box(1.0D, 0.0D, 1.0D, 15.0D, 16.0D, 15.0D);
@@ -77,12 +81,12 @@ public class GrapeVineBlock extends VegetationBlock {
 		super(properties);
 		this.kind = kind;
 		// worldgen places the default state: a wild vine, ripe (planting one starts it young, see getStateForPlacement)
-		registerDefaultState(stateDefinition.any().setValue(AGE, RIPE).setValue(PRUNED, false).setValue(NETTED, false).setValue(NEGLECT, 0));
+		registerDefaultState(stateDefinition.any().setValue(AGE, RIPE).setValue(PRUNED, false).setValue(NETTED, false).setValue(BARE, false).setValue(NEGLECT, 0));
 	}
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-		builder.add(AGE, PRUNED, NETTED, NEGLECT);
+		builder.add(AGE, PRUNED, NETTED, BARE, NEGLECT);
 	}
 
 	@Override
@@ -150,12 +154,12 @@ public class GrapeVineBlock extends VegetationBlock {
 
 	@Override
 	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-		if (state.getValue(AGE) < RIPE) {
+		if (state.getValue(AGE) < RIPE || state.getValue(BARE)) {
 			return InteractionResult.PASS;
 		}
 		popResource(level, pos, new ItemStack(grapes(), bunches(state)));
 		int neglect = state.getValue(PRUNED) ? 0 : Math.min(MAX_NEGLECT, state.getValue(NEGLECT) + 1);
-		level.setBlock(pos, state.setValue(AGE, REGROW_AGE).setValue(PRUNED, false).setValue(NEGLECT, neglect), Block.UPDATE_CLIENTS);
+		level.setBlock(pos, state.setValue(AGE, REGROW_AGE).setValue(BARE, true).setValue(PRUNED, false).setValue(NEGLECT, neglect), Block.UPDATE_CLIENTS);
 		level.playSound(null, pos, SoundEvents.SWEET_BERRY_BUSH_PICK_BERRIES, SoundSource.BLOCKS, 1.0F, 0.8F + level.getRandom().nextFloat() * 0.4F);
 		return InteractionResult.SUCCESS;
 	}
@@ -170,6 +174,13 @@ public class GrapeVineBlock extends VegetationBlock {
 	@Override
 	protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
 		if (!level.hasChunksAt(pos.offset(-1, -1, -1), pos.offset(1, 1, 1))) {
+			return;
+		}
+		if (state.getValue(BARE)) {
+			boolean winters = !kind.nether() && Seasons.temperate(level.getBiome(pos).value().getBaseTemperature());
+			if (winters ? Seasons.of(level) == Season.WINTER : random.nextInt(REST_ODDS) == 0) {
+				level.setBlock(pos, state.setValue(BARE, false), Block.UPDATE_CLIENTS);
+			}
 			return;
 		}
 		int age = state.getValue(AGE);
