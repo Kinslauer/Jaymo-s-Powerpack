@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 00:30). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 00:46). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -39,12 +39,12 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/medieval-deco-2-wind|medieval-deco-2-wind]] · for 💻 Odysseus · #1798 · changes · fixing review notes
 
 
 ## In review
 
 - [ ] [[Inbox/medieval-deco-4-drinks|medieval-deco-4-drinks]] · pc-claude-deco-4 · #1797 · in-review
+- [ ] [[Inbox/medieval-deco-2-wind|medieval-deco-2-wind]] · for 💻 Odysseus · #1798 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 - [ ] [[Agents/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · 💻 Odysseus · #1774 · in-review
 
