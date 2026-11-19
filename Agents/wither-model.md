@@ -1,5 +1,5 @@
 ---
-status: blocked
+status: running
 task: wither-model
 branch: claude/wither-model
 with: 

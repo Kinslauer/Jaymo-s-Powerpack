@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 20:41). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 21:33). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -12,16 +12,19 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## Stuck
 
+- [[Agents/smoothmount-1-climb-on-off|smoothmount-1-climb-on-off]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-26 waiting for a bot, 4 being built, 1 in review: see [[Kanban]].
+34 waiting for a bot, 3 being built, 2 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1870 Harness 5: armour oil, and the harness rusts (Powers, Kingdoms, 2026-11-19)
+- [ ] #1868 Harness 2: wider makes of cuirass, the coat of plates, gorget, tassets, rondels and the tabard of arms (Kingdoms, 2026-11-19)
 - [ ] #1867 symbiote - a takeover no longer freezes a host who isn't a web slinger, and a blob that left you runs away (Powers, 2026-11-19)
 - [ ] #1865 Gnomes: real gnomes with their own model, gardens and temper (Kingdoms, 2026-11-19)
 - [ ] #1864 Blackouts wake you where you were taken (Powers, Kingdoms, 2026-11-19)
@@ -80,13 +83,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1802 the dead in the wild: remains, last camps, ruin traps, the headless rider (Kingdoms, 2026-11-19)
 - [ ] #1801 practice dummy: kinds and coloured numbers (Powers, 2026-11-19)
 - [ ] #1799 drifting flotsam: ripple spots on rivers and the sea (Powers, Kingdoms, Kitchen, 2026-11-19)
-- [ ] #1798 the hooded cloak leans in the world's wind (Powers, Kingdoms, 2026-11-19)
-- [ ] #1797 drinks and kitchen - vines, press, vintage, tea, smoke chips, black wine (Kitchen, 2026-11-19)
-- …and 245 older ones.
+- …and 247 older ones.
 
 ## Health
 
-3 problems in the notes: [[Health]].
+5 problems in the notes: [[Health]].
 
 ## Last week
 

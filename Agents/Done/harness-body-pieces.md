@@ -1,9 +1,9 @@
-﻿---
-status: running
+---
+status: done
 task: harness-body-pieces
 branch: claude/harness-body-pieces
 with: Claude Code (PC)
-pr: 
+pr: 1868
 mods: kingdoms
 versions: 
 started: 2026-11-19
@@ -26,3 +26,5 @@ owns:
 ## Notes
 
 ## Done
+PR #1868. Knights wear their realm's cuirass make (plain, fluted or rounded), a gorget, faulds and tassets, and some realms add rondels. Poorer realms' guards wear the coat of plates, which realm armourers sell. Tabards show the realm's arms, and realm tailors sell them. Two new harness places, Neck and Waist. Also fixed the art generator, so Harness 3's creed and land pieces finally have models. Built on the Deck and PR checks pass; not played.
+- 2026-11-19 21:10 PR #1868 is merged into master; moved to Agents/Done.
