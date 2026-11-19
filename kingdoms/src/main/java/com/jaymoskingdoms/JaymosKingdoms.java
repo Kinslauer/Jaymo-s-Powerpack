@@ -939,6 +939,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("vampire attachments: {} {} {}", Vampires.VAMPIRE, Vampires.BITTEN, Vampires.ELDER);
 		Vampires.register();
 		VampireAlarm.register();
+		// a camp struck sends a runner to its fire to blow the horn, then patrols and defends until it's safe
+		CampAlarm.register();
 		Stakes.register();
 		// 0.7.0: lycanthropy: the cursed change under the full moon (their attachments)
 		LOGGER.debug("lycan attachments: {} {}", Lycans.CURSE, Lycans.FORCED);
