@@ -8,6 +8,7 @@ Writes mono .ogg files into src/main/resources/assets/jaymospowers/sounds/blade/
   swing_heavy_1..5    a great weapon's: low, slow, with weight behind it
   clash_1..6          steel on steel: a hard tick and a short bright ring of clashing partials
   draw_1..3           a blade leaving its scabbard: a rising scrape that ends on a faint ring
+  crit_1..3           a special hit (riposte, perfect parry, crit): a sharp snap and one high, short, bright ring
 Re-run to change them; the seeds keep every file the same from run to run.
 """
 import os
@@ -101,6 +102,19 @@ def draw(rng):
     return scrape + ring
 
 
+def crit(rng, base):
+    """The cue for a special hit: a hard snap of noise and one high ring that stops quickly, so it cuts through a fight."""
+    seconds = 0.30
+    n = int(seconds * RATE)
+    t = np.arange(n) / RATE
+    ring = np.zeros(n)
+    for ratio, level in ((1.0, 1.0), (2.01, 0.5), (3.97, 0.25)):
+        ring += np.sin(2 * np.pi * base * ratio * t + rng.random() * 6.28) * np.exp(-(14.0 + 8.0 * ratio) * t) * level
+    snap = band(rng.standard_normal(n), 3000, 14000) * np.exp(-140.0 * t) * 1.8
+    sweep = np.sin(2 * np.pi * (base * 0.5 + base * 3.0 * np.exp(-60.0 * t)) * t) * np.exp(-50.0 * t) * 0.6
+    return (ring * 0.8 + snap + sweep) * np.minimum(1.0, np.arange(n) / 20.0)
+
+
 def main():
     rng = np.random.default_rng(1341)
     for i in range(1, 6):
@@ -111,6 +125,10 @@ def main():
         save("clash_%d" % i, clash(rng, 1500 + 900 * rng.random()))
     for i in range(1, 4):
         save("draw_%d" % i, draw(rng))
+    # (its own generator, so adding it moved none of the files above)
+    crit_rng = np.random.default_rng(2611)
+    for i in range(1, 4):
+        save("crit_%d" % i, crit(crit_rng, 2600 + 700 * crit_rng.random()))
 
 
 if __name__ == "__main__":
