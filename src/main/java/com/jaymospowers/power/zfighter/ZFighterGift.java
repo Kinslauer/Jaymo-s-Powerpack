@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.BeamClash;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.UltimateFilm;
 import com.jaymospowers.core.gifted.GiftKit;
@@ -50,6 +51,15 @@ final class ZFighterGift implements GiftKit {
 	static final double WAVE_LENGTH = 28.0, WAVE_WIDTH = 1.6, WAVE_THROW = 1.2;
 	static final float WAVE_DAMAGE = 9.0F;
 	static final int WAVE_SLOW_TICKS = 60, WAVE_FILM = 50;
+	/**
+	 * (NPC fights 3) The wave is held out for this many ticks (longer while it struggles with another beam) and hits the line
+	 * every {@link #WAVE_PULSE} ticks for a share of {@link #WAVE_DAMAGE}; it meets other beams head-on ({@link BeamClash#npcBeam}):
+	 * its struggle power is {@link #WAVE_POWER} plus {@link #WAVE_POWER_RANK} times the rank of whoever throws it.
+	 */
+	static final int WAVE_HOLD = 24, WAVE_PULSE = 10;
+	static final float WAVE_POWER = 1.0F, WAVE_POWER_RANK = 0.8F;
+	/** Waves cut short by a struggle's end. */
+	private static final java.util.Map<PathfinderMob, Boolean> WAVE_OFF = new java.util.WeakHashMap<>();
 	/** (0.19.60) How long it gathers in their hands before it fires (ticks). */
 	static final int WAVE_GATHER = 16;
 	/** Everyday: their shadowboxing, how many punches at a time and how far from them. */
@@ -160,6 +170,8 @@ final class ZFighterGift implements GiftKit {
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.ANVIL_LAND, SoundSource.NEUTRAL, 0.4F, 1.8F);
 		foe.hurtServer(level, level.damageSources().mobAttack(caster), PALM_DAMAGE);
 		push(foe, away.normalize().scale(PALM_THROW), PALM_LIFT);
+		// (NPC fights 3) the throw ends in a slam like a finisher's: dust, cracks, soft blocks broken
+		ZFighterImpact.launched(foe, caster, 0.0F);
 		return true;
 	}
 
@@ -233,23 +245,47 @@ final class ZFighterGift implements GiftKit {
 		Vec3 end = from.add(dir.scale(WAVE_LENGTH));
 		ZFighterHands.thrust(caster, ZFighterHands.BOTH, ZFighterHands.PUSH);
 		ZFighterHands.shout(caster);
-		// the beam: a thick blue coil from the hands to its end, bursting where it stops (no block is touched)
-		line(level, from, end, WAVE_COLOR, 3.0F, 2.0);
-		MagicFx.burst(level, end.x, end.y, end.z, WAVE_COLOR, 1.5F, 24, 0.4, 0.4, 0.4);
-		level.sendParticles(MagicFx.LIGHT, end.x, end.y, end.z, 10, 0.2, 0.2, 0.2, 0.15);
 		level.playSound(null, caster.getX(), caster.getY(), caster.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.NEUTRAL, 1.5F, 1.2F);
 		level.playSound(null, caster.getX(), caster.getY(), caster.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.NEUTRAL, 1.2F, 1.8F);
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(from, end).inflate(WAVE_WIDTH),
-			e -> e != caster && e.isAlive() && (e == foe || e instanceof Enemy))) {
-			Vec3 rel = e.getBoundingBox().getCenter().subtract(from);
-			double along = rel.dot(dir);
-			if (along < 0.0 || along > WAVE_LENGTH || rel.subtract(dir.scale(along)).length() > WAVE_WIDTH) {
-				continue;
-			}
-			e.hurtServer(level, level.damageSources().mobAttack(caster), WAVE_DAMAGE);
-			e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, WAVE_SLOW_TICKS, 1), caster);
-			push(e, dir.horizontal().scale(WAVE_THROW), 0.2);
-		}
+		// (NPC fights 3) the beam is held out: it can lock with another beam (a player's or another fighter's), and hits in pulses
+		WAVE_OFF.remove(caster);
+		held(level, caster, foe, from, dir, 0);
 		return true;
+	}
+
+	/** One tick of the held wave (the {@code tick}th): reported to {@link BeamClash}, drawn up to the knot if it struggles, and hitting the line on a pulse. */
+	private static void held(ServerLevel level, PathfinderMob caster, LivingEntity foe, Vec3 from, Vec3 dir, int tick) {
+		if (!caster.isAlive() || WAVE_OFF.containsKey(caster) || tick > WAVE_HOLD && !BeamClash.clashing(caster)) {
+			return;
+		}
+		float rank = com.jaymospowers.core.brawl.Brawl.rank(caster);
+		BeamClash.npcBeam(caster, from, dir, WAVE_LENGTH, WAVE_POWER + WAVE_POWER_RANK * rank, rank, BeamClash.KIND_KI, m -> WAVE_OFF.put((PathfinderMob)m, Boolean.TRUE));
+		double length = BeamClash.clampNpc(caster, from, WAVE_LENGTH);
+		Vec3 end = from.add(dir.scale(length));
+		// the beam: a thick blue coil from the hands to its end, bursting where it stops (no block is touched)
+		if (tick % 2 == 0) {
+			line(level, from, end, WAVE_COLOR, 3.0F, 2.0);
+		}
+		if (tick % WAVE_PULSE == 0) {
+			MagicFx.burst(level, end.x, end.y, end.z, WAVE_COLOR, 1.5F, 24, 0.4, 0.4, 0.4);
+			level.sendParticles(MagicFx.LIGHT, end.x, end.y, end.z, 10, 0.2, 0.2, 0.2, 0.15);
+		}
+		if (tick > 0 && tick % WAVE_PULSE == 0 && tick <= WAVE_HOLD) {
+			int pulses = WAVE_HOLD / WAVE_PULSE;
+			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(from, end).inflate(WAVE_WIDTH),
+				e -> e != caster && e.isAlive() && (e == foe || e instanceof Enemy))) {
+				Vec3 rel = e.getBoundingBox().getCenter().subtract(from);
+				double along = rel.dot(dir);
+				if (along < 0.0 || along > length || rel.subtract(dir.scale(along)).length() > WAVE_WIDTH) {
+					continue;
+				}
+				e.hurtServer(level, level.damageSources().mobAttack(caster), WAVE_DAMAGE / pulses);
+				e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, WAVE_SLOW_TICKS, 1), caster);
+				push(e, dir.horizontal().scale(WAVE_THROW / pulses), 0.1);
+			}
+		}
+		if (tick < WAVE_HOLD + BeamClash.MAX_TICKS) {
+			ZFighterHands.later(caster, 1, () -> held(level, caster, foe, from, dir, tick + 1));
+		}
 	}
 }

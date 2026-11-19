@@ -1,6 +1,7 @@
 package com.jaymospowers.core.brawl;
 
 import com.jaymospowers.combat.ClashFx;
+import com.jaymospowers.core.BeamClash;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.gifted.Gifted;
 import com.jaymospowers.core.gifted.GiftKit;
@@ -194,6 +195,9 @@ public final class Brawl {
 		ServerTickEvents.END_SERVER_TICK.register(Brawl::step);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> STATES.clear());
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register(Brawl::allowDamage);
+		TradeBlows.init();
+		PowerUp.init();
+		NpcBeams.init();
 	}
 
 	// ================================================================ the owner's calls
@@ -220,7 +224,7 @@ public final class Brawl {
 			s.drivenUntil = now + 2;
 		}
 		if (now >= s.rankAt) {
-			s.rank = rankOf(level, mob, profile.base());
+			s.rank = Mth.clamp(rankOf(level, mob, profile.base()) + PowerUp.boost(mob), 0.0F, 1.0F);
 			s.rankAt = now + RANK_EVERY;
 		}
 		if (foe == null || !foe.isAlive() || foe.isRemoved() || foe.level() != mob.level()) {
@@ -231,6 +235,7 @@ public final class Brawl {
 			return;
 		}
 		s.foe = foe;
+		PowerUp.watch(level, mob, profile, foe);
 		if (profile.flies() && s.mode != Mode.TRAVEL && !kitFlying(mob, profile)) {
 			decideFlight(level, mob, s, foe, now);
 		}
@@ -295,7 +300,18 @@ public final class Brawl {
 	/** Whether the brain has {@code mob} in the air just now. */
 	public static boolean flying(Mob mob) {
 		State s = STATES.get(mob);
-		return s != null && s.mode != Mode.NONE;
+		return s != null && s.mode != Mode.NONE || PowerUp.holding(mob);
+	}
+
+	/** Whether the brain is running a fight for {@code mob} (it has been ticked lately). */
+	public static boolean fighting(Mob mob) {
+		State s = STATES.get(mob);
+		return s != null && mob.level().getGameTime() - s.seen <= STALE;
+	}
+
+	/** Whether something else has {@code mob}'s body just now (a beam struggle, a power-up): the brain doesn't move it. */
+	private static boolean held(Mob mob) {
+		return BeamClash.clashing(mob) || PowerUp.holding(mob);
 	}
 
 	/** Whether {@code mob}'s power flies (the brain can take it up after a foe in the air). */
@@ -458,7 +474,7 @@ public final class Brawl {
 	// ================================================================ dash and strafe decisions
 
 	private static void decideGround(ServerLevel level, Mob mob, State s, LivingEntity foe, long now) {
-		if (s.mode != Mode.NONE || now < s.decideAt || s.engaged || now < s.drivenUntil || !mob.onGround() || mob.isPassenger()) {
+		if (s.mode != Mode.NONE || held(mob) || now < s.decideAt || s.engaged || now < s.drivenUntil || !mob.onGround() || mob.isPassenger()) {
 			return;
 		}
 		s.decideAt = now + DECIDE_EVERY;
@@ -550,6 +566,13 @@ public final class Brawl {
 				continue;
 			}
 			counter(level, mob, s, now);
+			if (held(mob)) {
+				if (s.mode != Mode.NONE) {
+					mob.setNoGravity(true);
+					mob.resetFallDistance();
+				}
+				continue;
+			}
 			if (s.mode != Mode.NONE && now >= s.drivenUntil && !kitFlying(mob, s.profile)) {
 				fly(level, mob, s, now);
 			} else if (s.mode != Mode.NONE) {
@@ -716,7 +739,7 @@ public final class Brawl {
 			return true;
 		}
 		long now = level.getGameTime();
-		if (now - s.seen > STALE || now < s.vanishAt || now < s.drivenUntil || now >= s.openFrom && now < s.openUntil) {
+		if (now - s.seen > STALE || now < s.vanishAt || now < s.drivenUntil || held(mob) || now >= s.openFrom && now < s.openUntil) {
 			return true;
 		}
 		// only a blow, blast or beam from someone: never a fall, fire, the void or a command
