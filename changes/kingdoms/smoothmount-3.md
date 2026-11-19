@@ -1,5 +1,0 @@
-# smoothmount 3 - elephants lift and kneel, dragons lower neck and wings
-- **War elephants and mammoths** (with Jaymo's Powers): stand at its head and it curls its trunk down, takes you up in it and sets you on its back; anywhere else along its flank, or in heavy armour (20 armour or more), it kneels and you step up its folded foreleg. The kneel is the horses' kneel, now drawn on the elephant too (it sat lowered under the saddle before with its legs still standing, for an armoured rider).
-- **Wind dragons** (with Jaymo's Powers): a tamed dragon you ride lowers its neck for someone at its head, and (Notus, Boreas, Zephyrus, Aetherion) both wings for someone at its side or rump; you climb up. The wingless kinds (Atroxiia, Stegonaut, Varasuchus) and the Kintsugi ones (Eurus, Ignivorus) lower the neck at the head and are climbed from the side like a horse otherwise. One in the air is boarded as before.
-- Without Powers nothing is climbed: riders are seated at once as before.
-- Built; not played. The trunk curl, the dragons' neck and wings (angles guessed per model) have not been seen in game.
