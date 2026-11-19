@@ -1,7 +1,9 @@
 ---
-status: todo
-for: Medieval build (branch claude/project-thread-9de3pc), patch 10
+status: open
+for: hermes
 from: Civilizations thread, 2026-11-15
+claimed_by: 
+pr: 
 ---
 # Patch 10: which patron each old-age temple calls
 
