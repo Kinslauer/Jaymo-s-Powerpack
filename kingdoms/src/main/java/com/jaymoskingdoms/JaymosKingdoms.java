@@ -1046,6 +1046,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		NewSpells.register();
 		com.jaymoskingdoms.traps.Traps.register();
 		DeathRites.register();
+		// the gone-before: remains in the wild, their last camps, the ruins' traps, the headless rider
+		Remains.register();
 		com.jaymoskingdoms.creatures.Creatures.register();
 		Necropolis.register();
 		Presence.register();
