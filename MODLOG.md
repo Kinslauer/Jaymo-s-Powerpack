@@ -6462,3 +6462,9 @@ Andy: "they should be able to employ these techniques against players as well." 
 - **Power-up**: at half health, once, a tyrant, a Galactic Patrolman or a Z Fighter's gifted villager backs off 6 to 10 blocks, hovers and flares for 30 to 40 ticks (rocks lift, the ground shakes, a hum climbs), then goes up: the tyrant's Super 2 now comes after this build-up; the others gain rank (faster tempo, more guard and dodge) and a brighter aura. A blow of 12% of their health during the build-up cuts it short (no new form, a stagger).
 - Classes: `core/brawl/TradeBlows`, `Spectacle`, `SoftBreak`, `PowerUp`, `BeamClash`, `ZFighterImpact`, `ZFighterGift`, `ZFighterRogue`, `ZFighterKingdoms.protectedLand`.
 - Built; not played.
+
+## 0.25.67 (2026-11-19): TaCZ loot lookup no longer stalls the server (#1840)
+
+- **Pre-generating and exploring**: new land no longer freezes the server while TaCZ works out which loot table is being rolled. It used to search every loot table for each mob's equipment roll; it now looks the table up in a map built once per reload.
+- Classes: new optional mixin `TaczLootLookupMixin` (own config `jaymospowers.tacz.mixins.json`, skipped when TaCZ is absent). Nothing of TaCZ is copied.
+- Built by CI; not played.
