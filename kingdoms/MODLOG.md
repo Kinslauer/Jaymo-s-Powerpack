@@ -15175,3 +15175,8 @@ Not tested in game.
 
 - With Jaymo's Powers: the Galactic Patrol reads when a player's wanted times run out (`Theft#wantedUntil`) to write Patrol warrants, and a crook handed over for its bounty counts as a Patrol officer's arrest (`Captures#handedOver`, `PowersCompat#patrolHandedOver`).
 - Built; not played.
+
+## 0.10.50 (2026-11-19): The crest plume is a real item (#1788)
+
+- Fixes: the server would not start: the plume crest's dye recipe named an item that was never registered. The plume is now registered with the other crests.
+- Built by CI; checked by starting the Deck server.

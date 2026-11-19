@@ -6155,3 +6155,25 @@ A Rig wearer gets six new gun actives, each a Rig menu entry with charge cost, p
 - **Siege mode**: Plant your feet; an artillery cannon unfolds from your back, rooted in place, firing shells where you look until you fold it away. (Mind level 5, Siege frame only)
 
 Each one needs the whole Rig set and Core charge. Built; not played.
+
+## 0.25.36 (2026-11-19): Rig patch 4: pull-up, hyper thrust, banking turns, meteor dive (#1765)
+
+- **Pull up**: diving at the ground, the visor flashes and shows time to impact, and the Mind shouts a warning; the one-knee landing catches what it can.
+- **Hyper thrust**: a last gear past full flight - double-tap sprint while flying for a short, costly burst of speed.
+- **Banking turns**: the suit rolls into turns and levels back out, smooth for everyone watching.
+- **Meteor dive**: rocket straight up, then crash down where you look - a ring and a big shake, no block damage.
+- **Other flyers**: other Rig pilots' flight is smoothed on your screen so they never jitter.
+- All five are Rig menu entries (Sneak + J), from Mind level 5 in the whole set, each costing Core charge.
+
+Built; not played in game.
+
+## 0.25.37 (2026-11-19): Rig: the Mind talks, flies and keeps watch (#1773)
+
+- **Talk to the Mind**: say a line that starts with one of its commands (or "mind ..." for anything) and the Mind catches it, so nobody else hears, and answers you in chat in its own personality. "light up" (the helm's lamps: night sight for a minute, 20 charge), "dig me out" (clears the soft blocks pinning you, 40 charge), "report", "scan" (level 3), "where am I", "how do I make <thing>" (what goes into it), "fly me to the village / home", "stop". It never explains the world, only what it can do. (`RigTalk`)
+- **Autopilot**: in full flight, "fly me to the village" (the nearest meeting bell within 256 blocks) or "home" (your bed) and the Mind flies you there, cruising high and coming down near the spot, for 2 charge a second. Any movement key takes the controls back. (`RigPilot`, `RigPilotClient`)
+- **Threat calls**: the visor's target card adds the Mind's one-word verdict to hostile or calm, in its voice ("ignore, for now", "kill it", "melt it" for anything twice your health or heavily armoured). (`RigHelmView`)
+- **Evacuate**: in the whole set at Mind level 3, a hit that leaves the plates at 15% of their life or less with the Core at 10% or less throws you up and clear (slow fall after). The suit slumps where you stood (parked; the call key brings it back, and it doesn't guard), and the Forge mends it. At most every 2 minutes. (`RigEvac`)
+- **Fights while you're down**: downed in the whole set at Mind level 4, the Mind fires the palm at what last hurt you, or the nearest foe, every 1.5 seconds while the charge lasts. (`RigEvac`)
+- **Combat log and vitals**: while blows are flying, the Helm's HUD folds out the last three given and taken and your body's state: the worst-hurt part from Wounds and any broken bones. It folds away 10 seconds after the last. (`RigLog`, `RigLogClient`)
+- Not yet: the spoken Mind (`md-voice`) waits on a voice source Andy is happy with; every line already has its own key to voice.
+- Built; not played.

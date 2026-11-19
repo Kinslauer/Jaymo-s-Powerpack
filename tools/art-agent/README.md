@@ -36,7 +36,8 @@ python -m app.cli install <name> <mod>        # copy the exported files into the
 3. The Gemini key as a Windows user environment variable `GEMINI_API_KEY` (Settings, System, About, Advanced system
    settings, Environment Variables). No `.env` needed: with the key set, the agent uses Google AI Studio.
 4. For Blender work: install Blender and set `BLENDER_BIN` to its `blender.exe`.
-5. Check: `agents-cli run "Paint a 16x16 item texture of a copper key"`.
+5. Check: `uv run python -m app.ask "Paint a 16x16 item texture of a copper key"`. (`agents-cli run` works too, but
+   gives up when Gemini is silent for 2 minutes.) The key can also go in `tools/art-agent/.env` as `GEMINI_API_KEY=...`.
 
 ## In a cloud thread
 
@@ -45,7 +46,7 @@ Bearer header breaks Google API keys).
 
 ```sh
 cd tools/art-agent && sh setup_cloud.sh      # agents CLI, packages, Blender 5.3 + software OpenGL, .env
-agents-cli run "Paint a 16x16 item texture of a copper key with a green patina"
+uv run python -m app.ask "Paint a 16x16 item texture of a copper key with a green patina"   # prints each step, no time limit
 agents-cli playground                         # chat with it in a browser (local machine)
 ```
 

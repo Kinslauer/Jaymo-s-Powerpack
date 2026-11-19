@@ -52,6 +52,10 @@ public final class RigMoves {
 	public static final int SIEGE_TICKS = 40, SIEGE_FIRE = 8;
 	public static final int DASH_TICKS = 12, DASH_FIRE = 2, PUNCH_TICKS = 8, BARRAGE_TICKS = 34, BARRAGE_FIRE = 8;
 	public static final int TAKEOFF_CROUCH = 4, TAKEOFF_TICKS = 12, SCAN_TICKS = 18, CALL_TICKS = 70, TABLE_TICKS = 30;
+	/** Flight actives: pull-up warning, hyper thrust, banking, meteor dive, smooth others. */
+	public static final int PULLUP = 46, HYPER = 47, BANK = 48, METEOR = 49, SMOOTH = 50;
+	/** Flight actives lengths. */
+	public static final int PULLUP_TICKS = 1, HYPER_TICKS = 1, BANK_TICKS = 1, METEOR_TICKS = 40, SMOOTH_TICKS = 1;
 	/** {@link #THRUST} values. */
 	public static final int THRUST_NONE = 0, THRUST_HOVER = 1, THRUST_FLIGHT = 2;
 	/** How long a palm blast's and a launch's poses play (ticks); the Unibeam's is its charge and beam and the let-down. */
@@ -93,6 +97,11 @@ public final class RigMoves {
 			case ARM_LANCE -> ARM_LANCE_TICKS;
 			case ARM_LASH -> ARM_LASH_TICKS;
 			case ARM_MIMIC -> ARM_MIMIC_TICKS;
+			case PULLUP -> PULLUP_TICKS;
+			case HYPER -> HYPER_TICKS;
+			case BANK -> BANK_TICKS;
+			case METEOR -> METEOR_TICKS;
+			case SMOOTH -> SMOOTH_TICKS;
 			case UNIBEAM -> RigUnibeam.CHARGE_TICKS + RigUnibeam.BEAM_TICKS + UNIBEAM_SETTLE;
 			case PALM_CHARGE -> PALM_CHARGE_TICKS;
 			case GATLING -> GATLING_TICKS;

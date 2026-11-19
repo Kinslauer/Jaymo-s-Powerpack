@@ -17,4 +17,4 @@ if [ -n "$GEMINI_API_KEY" ]; then
 else
   echo "GEMINI_API_KEY is not set: the tools work, but the agent can't think until it is."
 fi
-echo 'Ready. Try: agents-cli run "Paint a 16x16 texture of a copper key"'
+echo 'Ready. Try: uv run python -m app.ask "Paint a 16x16 texture of a copper key"'
