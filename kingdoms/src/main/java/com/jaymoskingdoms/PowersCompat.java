@@ -350,6 +350,36 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code MountClimb.begin(Player, Entity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle climbOn;
+	private static boolean lookedForClimb;
+
+	/**
+	 * A second rider climbing up behind the first: Jaymo's Powers plays the climb and seats them at its end. True if it took
+	 * the ride over (the caller mustn't start it); false without Powers, or for a mount it doesn't climb.
+	 */
+	public static boolean climbOn(Player player, net.minecraft.world.entity.Entity mount) {
+		if (!lookedForClimb) {
+			lookedForClimb = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					climbOn = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.MountClimb"),
+						"begin", java.lang.invoke.MethodType.methodType(boolean.class, Player.class, net.minecraft.world.entity.Entity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' mount climb", e);
+				}
+			}
+		}
+		if (climbOn == null) {
+			return false;
+		}
+		try {
+			return (boolean)climbOn.invoke(player, mount);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** (Andy, 2026-11-01) Powers' {@code ZFighterFakeMoon.shines(ServerLevel, Entity)}. */
 	private static java.lang.invoke.@Nullable MethodHandle falseMoon;
 	private static boolean lookedForMoon;

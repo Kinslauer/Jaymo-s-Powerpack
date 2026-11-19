@@ -14,5 +14,6 @@ abstract class CarryModelFeatureRendererMixin {
 		shift = At.Shift.AFTER))
 	private void jaymospowers$carryLimbs(ModelFeatureRenderer.Submit<?> submit, CallbackInfo ci) {
 		CarryPose.applyModel(submit.model(), submit.state());
+		com.jaymospowers.client.SlingPose.applyModel(submit.model(), submit.state());
 	}
 }
