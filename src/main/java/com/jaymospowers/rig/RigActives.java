@@ -311,11 +311,6 @@ public final class RigActives {
 					case RigNet.SONIC -> RigGuns.sonic(player, state);
 					case RigNet.TWIN -> RigGuns.twinBeam(player, state);
 					case RigNet.SIEGE -> RigGuns.siegeMode(player, state);
-					case RigNet.PULLUP -> pullUp(player);
-					case RigNet.HYPER -> hyperThrust(player);
-					case RigNet.BANK -> toggleBanking(player);
-					case RigNet.METEOR -> RigDive.meteorDive(player);
-					case RigNet.SMOOTH -> toggleSmoothOthers(player);
 					default -> {
 					}
 				}

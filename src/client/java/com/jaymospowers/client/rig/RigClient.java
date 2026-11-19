@@ -164,7 +164,7 @@ public final class RigClient {
 				case RigNet.SCAN -> level >= Rig.SCAN_LEVEL;
 				case RigNet.CALL -> level >= Rig.CALL_LEVEL;
 				case RigNet.UNIBEAM -> level >= Rig.UNIBEAM_LEVEL;
-				case RigNet.PULLUP, RigNet.HYPER, RigNet.BANK, RigNet.METEOR, RigNet.SMOOTH -> level >= Rig.FLIGHT_LEVEL;
+				case com.jaymospowers.rig.RigPicks.PULLUP, com.jaymospowers.rig.RigPicks.HYPER, com.jaymospowers.rig.RigPicks.BANK_TURN, com.jaymospowers.rig.RigPicks.METEOR, com.jaymospowers.rig.RigPicks.SMOOTH -> level >= Rig.FLIGHT_LEVEL;
 				default -> true;
 			};
 		}

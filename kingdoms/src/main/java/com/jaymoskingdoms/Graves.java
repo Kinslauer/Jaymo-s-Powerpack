@@ -62,7 +62,7 @@ public final class Graves {
 			CompoundTag.CODEC.fieldOf("body").forGetter(Grave::body)).apply(i, Grave::new));
 	}
 
-	private static final AttachmentType<List<Grave>> BURIED = AttachmentRegistry.create(JaymosKingdoms.id("graves"),
+	private static final AttachmentType<List<Grave>> BURIED = AttachmentRegistry.create(JaymosKingdoms.id("buried_graves"),
 		b -> b.persistent(Grave.CODEC.listOf()));
 
 	private Graves() {

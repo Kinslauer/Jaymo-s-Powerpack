@@ -200,7 +200,7 @@ final class RigHud {
 								case 3 -> lit = false; // meteor is a one-shot
 								case 4 -> lit = RigClient.smoothOthers();
 							}
-							String key = powerless ? "" : RigClient.selected == RigNet.PULLUP + i ? keyName(RigClient.rigKey().getTranslatedKeyMessage()) : "";
+							String key = powerless ? "" : RigClient.selected == com.jaymospowers.rig.RigPicks.PULLUP + i ? keyName(RigClient.rigKey().getTranslatedKeyMessage()) : "";
 							cell(graphics, font, cx, row, cell, key, Component.translatable(FLIGHT_KEYS[i]).getString(), lit, false, 0, 1);
 							cx += cell;
 						}
