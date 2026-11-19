@@ -69,6 +69,14 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 	 */
 	private static final int STEP_EVERY = 110, STEP_TICKS = 18;
 	private static final float STEP_REACH = 28.0F * DEG, STEP_BEND = 50.0F * DEG;
+	/**
+	 * Kneeling for an armoured rider ({@code Bonding.kneelAmount}): the whole horse sits this many px lower, the head
+	 * bows this much, the forelegs fold (the thigh a little forward, the cannon back along the ground) and the hind legs
+	 * tuck under (the thigh forward, the hock back).
+	 */
+	private static final float KNEEL_DROP_PX = (float)(com.jaymoskingdoms.equestrian.Bonding.KNEEL_DROP * 16.0), KNEEL_HEAD = 18.0F * DEG;
+	private static final float KNEEL_FORE_UPPER = -15.0F * DEG, KNEEL_FORE_LOWER = 105.0F * DEG;
+	private static final float KNEEL_HIND_UPPER = -50.0F * DEG, KNEEL_HIND_LOWER = 95.0F * DEG;
 	/** The build the tack is hung on (every build has the same bones in the same places). */
 	static final String TACK_BUILD = "palfrey";
 
@@ -332,6 +340,8 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 			// taller horse reaches down as far as the old one did)
 			float headX = (HEAD_TILT + pitch) * rest + (HEAD_TILT_REARED + pitch) * stand + HEAD_TILT_GRAZING * graze;
 			headX += HEAD_DIP * state.headDip * rest;
+			// kneeling, it bows its head a little
+			headX += KNEEL_HEAD * state.kneel * rest;
 			float headY = (4.0F - LIFT) * rest + (-6.0F - LIFT) * stand + 11.0F * graze - NECK * Mth.cos(headX);
 			float headZ = -10.0F * rest + -1.0F * stand + -10.0F * graze - NECK * Mth.sin(headX);
 			float headYaw = yaw * (rest + stand);
@@ -454,7 +464,25 @@ class BreedHorseModel extends EntityModel<BreedHorseRenderer.State> {
 				part.visible = !barded;
 			}
 			this.reinLeft.visible = this.reinRight.visible = state.headstall && ridden;
+			this.kneel(state.kneel);
 			this.wings(state, walked, ticks, stand);
+		}
+
+		/** Kneeling, {@code k} of the way down (0-1): the horse lowered, its legs folded under it. */
+		private void kneel(float k) {
+			this.group.y = this.group.getInitialPose().y() + KNEEL_DROP_PX * k;
+			if (k <= 0.0F) {
+				return;
+			}
+			ModelPart[][] legs = {{this.leg1A, this.leg1B, this.leg1C}, {this.leg2A, this.leg2B, this.leg2C}, {this.leg3A, this.leg3B, this.leg3C},
+				{this.leg4A, this.leg4B, this.leg4C}};
+			for (int i = 0; i < legs.length; i++) {
+				boolean fore = i >= 2;
+				ModelPart[] l = legs[i];
+				float upper = Mth.lerp(k, l[0].xRot, fore ? KNEEL_FORE_UPPER : KNEEL_HIND_UPPER);
+				float lower = Mth.lerp(k, l[1].xRot, fore ? KNEEL_FORE_LOWER : KNEEL_HIND_LOWER);
+				leg(l[0], l[1], l[2], upper, lower, upper, upper, 0.0F);
+			}
 		}
 
 		/** The bat horse's wings: folded along its sides on the ground, spread in the air, beating while it climbs. */

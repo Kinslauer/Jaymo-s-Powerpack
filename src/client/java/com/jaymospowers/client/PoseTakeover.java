@@ -211,6 +211,6 @@ public final class PoseTakeover {
 			|| s.getData(com.jaymospowers.client.power.zfighter.ZFighterSwayPose.KEY) != null
 			|| s.getData(ArsenalArmPose.KEY) != null || s.getData(ArsenalArmPose.AIM_KEY) != null
 			|| s.getData(ArsenalArmPose.DRAW_KEY) != null
-			|| s.getData(MountClimbPose.KEY) != null;
+			|| s.getData(MountClimbPose.KEY) != null || s.getData(MountClimbPose.REACH) != null;
 	}
 }
