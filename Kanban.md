@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 15:17). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 15:18). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -30,12 +30,12 @@ kanban-plugin: board
 - [ ] [[Inbox/smoothmount-6-heave-downed|smoothmount-6-heave-downed]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · open
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/harness-body-pieces|harness-body-pieces]] · ☀️ Apollo · open
 
 
 ## Being built
 
 - [ ] [[Inbox/smoothmount-1-climb-on-off|smoothmount-1-climb-on-off]] · ☀️ Apollo · claimed
+- [ ] [[Inbox/harness-body-pieces|harness-body-pieces]] · harness-body-pieces · claimed
 
 
 ## In review
@@ -46,7 +46,6 @@ kanban-plugin: board
 
 ## Needs Andy
 
-- [ ] [[Inbox/harness-body-pieces|harness-body-pieces]] · ☀️ Apollo · blocked
 - [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · blocked
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · ☀️ Apollo · #1787 · blocked
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 🍇 Bacchus · blocked
