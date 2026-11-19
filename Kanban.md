@@ -42,6 +42,7 @@ kanban-plugin: board
 - [ ] [[Inbox/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-gaps-8-raids|zfighter-gaps-8-raids]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
