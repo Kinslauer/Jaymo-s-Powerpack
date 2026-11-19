@@ -164,6 +164,9 @@ public final class Hides {
 		if (stack.is(com.jaymoskitchen.herb.PmehFarming.FRESH_PMEH)) {
 			return com.jaymoskitchen.herb.PmehFarming.dried(stack);
 		}
+		if (stack.is(com.jaymoskitchen.vintner.Vintner.TEA_LEAVES)) {
+			return new ItemStack(com.jaymoskitchen.vintner.Vintner.DRIED_TEA_LEAVES);
+		}
 		// (Hardrock picks) raw meat, fish and fruit dry into jerky and dried fruit, which keep
 		if (com.jaymoskitchen.fresh.Curing.takes("dried", stack)) {
 			ItemStack food = stack.copy();

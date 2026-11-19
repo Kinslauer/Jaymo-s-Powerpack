@@ -55,6 +55,10 @@ public class DryingRackEntity extends BlockEntity {
 		if (stack.isEmpty() || Hides.dried(stack) == null || level.isRainingAt(pos.above())) {
 			return;
 		}
+		// tea leaves dry only with the sun on them
+		if (stack.is(com.jaymoskitchen.vintner.Vintner.TEA_LEAVES) && !com.jaymoskitchen.vintner.Vintner.sunny(level, pos)) {
+			return;
+		}
 		rack.left--;
 		if (rack.left % 20 == 0) {
 			rack.setChanged();

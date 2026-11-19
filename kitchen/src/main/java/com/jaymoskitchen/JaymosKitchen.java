@@ -73,6 +73,8 @@ public class JaymosKitchen implements ModInitializer {
 		// echoes for the layered sounds
 		com.jaymoskitchen.sound.Soundscape.register();
 		Mill.register();
+		// grapes and the vintner's things first: the brews are made from them
+		com.jaymoskitchen.vintner.Vintner.register();
 		com.jaymoskitchen.brewing.Brewing.register();
 		com.jaymoskitchen.kitchen.KitchenBlocks.register();
 		com.jaymoskitchen.cooking.spit.SpitBlock.register();
