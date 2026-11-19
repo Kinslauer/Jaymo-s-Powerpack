@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 02:01). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 02:04). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -41,14 +41,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/rig-beetle-4-flight|rig-beetle-4-flight]]
+- [x] [[Inbox/Done/rig-beetle-2-guns|rig-beetle-2-guns]]
+- [x] [[Inbox/Done/lanterns-10-orbit|lanterns-10-orbit]]
+- [x] [[Inbox/Done/lanterns-09-talk-typed|lanterns-09-talk-typed]]
+- [x] [[Inbox/Done/lanterns-08-dream|lanterns-08-dream]]
+- [x] [[Inbox/Done/lanterns-06-space-medium|lanterns-06-space-medium]]
+- [x] [[Inbox/Done/lanterns-05-patrol-law|lanterns-05-patrol-law]]
 - [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
-- [x] [[Inbox/Done/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]]
-- [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
-- [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
-- [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
-- [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
-- [x] [[Inbox/Done/wither-reincarnated-fight|wither-reincarnated-fight]]
-- [x] [[Inbox/Done/weapon-hooks-and-breaks|weapon-hooks-and-breaks]]
 
 
 %% kanban:settings
