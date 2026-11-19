@@ -5,6 +5,7 @@
 	"client": [
 		"PlayerInfoNoConnectionMixin",
 		"DreamCameraMixin",
+		"StuckRideTeleportMixin",
 		"ArrowPickScrollMixin",
 		"BrokenLegSprintMixin",
 		"HitStopModelFeatureRendererMixin",

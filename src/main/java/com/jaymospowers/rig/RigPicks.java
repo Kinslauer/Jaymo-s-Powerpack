@@ -23,6 +23,9 @@ public final class RigPicks {
 	public static final int DRONES = 20, MARK = 21, TABLE = 22, DECOY = 23, FIELD = 24, BANK = 25;
 	/** The thruster dash and the artillery barrage ({@link RigStrikes}). */
 	public static final int DASH = 26, BARRAGE = 27;
+	/** The arm forms ({@link RigForms}). */
+	public static final int AF_BLADE = 29, AF_MACE = 30, AF_PILE = 31, AF_DRILL = 32, AF_LANCE = 33, AF_LASH = 34,
+		AF_MIMIC = 35;
 	/** The failsafe's switch ({@link RigCall}): works with the suit parked too. */
 	public static final int FAILSAFE = 28;
 
@@ -38,6 +41,7 @@ public final class RigPicks {
 		RigField.init();
 		RigBank.init();
 		RigStrikes.init();
+		RigForms.init();
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 				RigDrones.tick(player);
@@ -49,7 +53,7 @@ public final class RigPicks {
 
 	/** Whether {@code action} is one of these. */
 	public static boolean is(int action) {
-		return action >= FIRST && action <= FAILSAFE;
+		return action >= FIRST && action <= AF_MIMIC;
 	}
 
 	/** A Rig menu entry from the client. */
@@ -74,6 +78,7 @@ public final class RigPicks {
 			case BANK -> RigBank.toggle(player);
 			case DASH -> RigStrikes.dash(player);
 			case BARRAGE -> RigStrikes.barrage(player);
+			case AF_BLADE, AF_MACE, AF_PILE, AF_DRILL, AF_LANCE, AF_LASH, AF_MIMIC -> RigForms.use(player, action);
 			default -> {
 			}
 		}

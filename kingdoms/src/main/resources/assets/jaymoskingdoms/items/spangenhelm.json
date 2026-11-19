@@ -1,0 +1,62 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:component",
+    "component": "jaymoskingdoms:finish",
+    "cases": [
+      {
+        "when": "blackened",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/spangenhelm_blackened"
+        }
+      },
+      {
+        "when": "gilded",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/spangenhelm_gilded"
+        }
+      },
+      {
+        "when": "russeted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/spangenhelm_russeted"
+        }
+      },
+      {
+        "when": "blued",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/spangenhelm_blued"
+        }
+      },
+      {
+        "when": "painted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/spangenhelm_painted"
+        }
+      },
+      {
+        "when": "etched",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/spangenhelm_etched"
+        }
+      },
+      {
+        "when": "rusted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/spangenhelm_rusted"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "jaymoskingdoms:item/spangenhelm"
+    }
+  }
+}

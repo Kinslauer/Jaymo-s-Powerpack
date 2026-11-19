@@ -1,6 +1,7 @@
 package com.jaymospowers.client.power.zfighter;
 
 import com.jaymospowers.client.UiStyle;
+import com.jaymospowers.power.zfighter.ZFighterAtlas;
 import com.jaymospowers.power.zfighter.ZFighterSpace;
 import com.jaymospowers.power.zfighter.ZFighterSpaceMissions;
 import com.jaymospowers.power.zfighter.fuel.PodFuel;
@@ -25,6 +26,8 @@ import org.jspecify.annotations.Nullable;
  * (0.18.53) Only Home and the worlds whose star charts the pilot has read are on the map ({@link #read}); the server refuses the rest.
  * The blue giant sits on the Verdant World's orbit with the Verdant World going round it (its moon), on the map whenever the
  * Verdant World is.
+ * The atlas ({@link ZFighterAtlas}): a world you've come down on wears a small gold pin on the map, and its card says how often
+ * you've landed there, where you last did, and where your bed is if your respawn point is there.
  */
 public class ZFighterStarMapScreen extends Screen {
 	private static final int MAP = 200;
@@ -306,6 +309,12 @@ public class ZFighterStarMapScreen extends Screen {
 			} else if (index == hover) {
 				ZFighterSpaceArt.ring(graphics, p[0], p[1], p[2] + 3.0F, 0xA0FFFFFF, 1);
 			}
+			if (ZFighterAtlas.of(player, index) != null) {
+				// the atlas: you've been down there
+				int px = Math.round(p[0] + p[2]), py = Math.round(p[1] - p[2]) - 2;
+				graphics.fill(px, py, px + 2, py + 2, GOLD);
+				graphics.fill(px, py + 2, px + 1, py + 4, GOLD);
+			}
 			if (isHere(player, index)) {
 				// you are here: a small marker over the world
 				int tx = Math.round(p[0]), ty = Math.round(p[1] - p[2] - 7);
@@ -352,6 +361,19 @@ public class ZFighterStarMapScreen extends Screen {
 		if (planet >= 0) {
 			UiStyle.line(graphics, this.font, status(index, data), x + 2, ty, w - 6, GOLD);
 			ty += 11;
+		}
+		ZFighterAtlas.Pin pin = index == ZFighterSpace.HOME_INDEX ? null : ZFighterAtlas.of(player, index);
+		if (pin != null) {
+			UiStyle.line(graphics, this.font, pin.landings() == 1
+				? Component.translatable("screen.jaymospowers.zfighter_space.atlas_landed_once", pin.landed().getX(), pin.landed().getZ())
+				: Component.translatable("screen.jaymospowers.zfighter_space.atlas_landed", pin.landings(), pin.landed().getX(), pin.landed().getZ()),
+				x + 2, ty, w - 6, UiStyle.DIM);
+			ty += 10;
+			if (pin.bed().isPresent()) {
+				UiStyle.line(graphics, this.font, Component.translatable("screen.jaymospowers.zfighter_space.atlas_bed", pin.bed().get().getX(), pin.bed().get().getZ()),
+					x + 2, ty, w - 6, UiStyle.DIM);
+				ty += 10;
+			}
 		}
 		List<Component> titles = ZFighterSpaceMissions.titles(player);
 		if (!titles.isEmpty() && index == ZFighterSpace.HOME_INDEX) {
