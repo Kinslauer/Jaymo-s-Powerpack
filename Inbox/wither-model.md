@@ -1,5 +1,5 @@
 ---
-status: claimed
+status: blocked
 for: prometheus
 from: pc-claude
 asked: 2026-11-18
