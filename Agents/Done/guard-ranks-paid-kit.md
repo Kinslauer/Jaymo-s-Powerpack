@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Give guards ranks and paid-for armour
 branch: claude/project-thread-t799au
 with: cloud thread
@@ -24,3 +24,4 @@ owns:
 
 ## Done
 Built (compiles); not played.
+- 2026-11-19 02:12 PR #1791 is merged into master; moved to Agents/Done.
