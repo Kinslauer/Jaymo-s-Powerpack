@@ -184,12 +184,36 @@ public enum ArmourKind {
 	 */
 	public static float load(LivingEntity body) {
 		boolean soaked = com.jaymospowers.core.wet.Wet.soaked(body);
-		float load = weight(of(body.getItemBySlot(EquipmentSlot.HEAD)), soaked) * HEAD_SHARE + weight(of(body.getItemBySlot(EquipmentSlot.CHEST)), soaked) * CHEST_SHARE
-			+ weight(of(body.getItemBySlot(EquipmentSlot.LEGS)), soaked) * LEGS_SHARE + weight(of(body.getItemBySlot(EquipmentSlot.FEET)), soaked) * FEET_SHARE;
+		float load = slot(body, EquipmentSlot.HEAD, soaked) * HEAD_SHARE + slot(body, EquipmentSlot.CHEST, soaked) * CHEST_SHARE
+			+ slot(body, EquipmentSlot.LEGS, soaked) * LEGS_SHARE + slot(body, EquipmentSlot.FEET, soaked) * FEET_SHARE;
 		for (ItemStack piece : harness.apply(body, "all")) {
-			load += weight(kind(piece), soaked) * HARNESS_SHARE;
+			load += weight(kind(piece), soaked) * HARNESS_SHARE * fit(piece, body);
 		}
 		return Math.min(MAX_LOAD, load);
+	}
+
+	private static float slot(LivingEntity body, EquipmentSlot slot, boolean soaked) {
+		ItemStack piece = body.getItemBySlot(slot);
+		return weight(of(piece), soaked) * fit(piece, body);
+	}
+
+	/**
+	 * (Harness 5) A piece an armourer fitted to {@code body} (Jaymo's Kingdoms' {@code jaymoskingdoms:fitted}, the
+	 * wearer's UUID) sits lighter on them: its weight times {@link #FITTED}. On anyone else it weighs what it always did.
+	 */
+	static final float FITTED = 0.75F;
+	private static net.minecraft.core.component.@org.jspecify.annotations.Nullable DataComponentType<?> fittedType;
+	private static boolean fittedLooked;
+
+	private static float fit(ItemStack piece, LivingEntity body) {
+		if (piece.isEmpty()) {
+			return 1.0F;
+		}
+		if (!fittedLooked) {
+			fittedLooked = true;
+			fittedType = BuiltInRegistries.DATA_COMPONENT_TYPE.getValue(net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymoskingdoms", "fitted"));
+		}
+		return fittedType != null && body.getUUID().equals(piece.get(fittedType)) ? FITTED : 1.0F;
 	}
 
 	/** Soaked padding holds its weight again in water ({@code Wet}). */

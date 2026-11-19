@@ -149,6 +149,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Harness.register();
 		Visors.register();
 		HeraldryWear.register();
+		// an armourer fits a harness to its wearer
+		Fitting.register();
 		// knitted wool clothes: light armour that keeps the cold off an Emberborn
 		WoolClothes.register();
 		// qiviut, the muskox's underwool, and the clothes knitted from it

@@ -1443,8 +1443,43 @@ def main(argv):
 			bake(model, scratch, tex)
 			subprocess.run([sys.executable, "-I", os.path.join(ROOT, "tools", "bbmodel_preview.py"), scratch, tex, os.path.join(preview, tex + ".png")],
 				check=True, capture_output=True)
+	dents()
 	print("heraldry armour:", len(NAMES), "pieces")
 
 
+# ---- dents and scratches (Harness 5): plate shows its wear ----------------------------------------------------------
+
+# each stage, and the share of the plate's pixels dented by it (the heavier stage keeps the lighter one's dents)
+DENT_STAGES = ((1, 0.04), (2, 0.10))
+DENT, DENT_LIP = (66, 68, 74), (198, 202, 208)
+
+
+def dents():
+	"""For each plate piece, a sheet of dents and scratches for each stage of wear, drawn over the piece (in any finish) as
+	it loses its durability (HeraldryLayer). Only the plate is dented: the pixels that change between the bright and
+	the blackened sheet (straps, cloth and rivets stay as they are). A dent is a dark pit with a bright lip under it."""
+	import random
+	bb = os.path.join(ASSETS, "textures", "entity", "bb")
+	for name in PLATE:
+		bright = Image.open(os.path.join(bb, "heraldry_%s.png" % name)).convert("RGBA")
+		dark = Image.open(os.path.join(bb, "heraldry_%s_blackened.png" % name)).convert("RGBA")
+		w, h = bright.size
+		metal = {(x, y) for y in range(h) for x in range(w)
+			if bright.getpixel((x, y))[3] and bright.getpixel((x, y))[:3] != dark.getpixel((x, y))[:3]}
+		order = sorted(metal)
+		random.Random(name).shuffle(order)
+		for stage, share in DENT_STAGES:
+			img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+			pits = set(order[:int(len(order) * share)])
+			for x, y in pits:
+				put(img, x, y, DENT)
+				if (x, y + 1) in metal and (x, y + 1) not in pits:
+					put(img, x, y + 1, DENT_LIP)
+			entity_texture(img, "heraldry_%s_dents%d" % (name, stage))
+
+
 if __name__ == "__main__":
-	main(sys.argv[1:])
+	if "--dents" in sys.argv:
+		dents()
+	else:
+		main(sys.argv[1:])

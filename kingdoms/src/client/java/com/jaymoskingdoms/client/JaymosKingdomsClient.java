@@ -187,6 +187,15 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		LoanScreen.register();
 		ClassKeys.register();
 		MagicKeys.register();
+		// whom a harness piece was fitted to (Fitting)
+		net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
+			java.util.UUID to = stack.get(com.jaymoskingdoms.Fitting.FITTED);
+			net.minecraft.client.player.LocalPlayer me = net.minecraft.client.Minecraft.getInstance().player;
+			if (to != null) {
+				lines.add(net.minecraft.network.chat.Component.translatable(me != null && me.getUUID().equals(to) ? "tooltip.jaymoskingdoms.fitted.you"
+					: "tooltip.jaymoskingdoms.fitted.other").withStyle(net.minecraft.ChatFormatting.GRAY));
+			}
+		});
 		FamiliarClient.register();
 		CombatArtKey.register();
 		// (0.7.381) Weapon Forms: the belt strip, the chain counter, the belt screen

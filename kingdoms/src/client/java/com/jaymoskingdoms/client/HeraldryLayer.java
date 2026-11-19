@@ -61,6 +61,8 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 	static final int TORSE_UNDYED = 0xB02E26;
 	/** How many ordinaries a tabard's arms can show (the generator's ORDINARIES, one sheet each: heraldry_tabard_arms_N). */
 	static final int ORDINARIES = 18;
+	/** The share of a plate piece's durability gone when it shows dents, and when it shows many. */
+	static final float DENTED = 0.5F, BATTERED = 0.8F;
 	private static final String TORSE = "heraldry_torse";
 
 	/** The models, each read once, and the textures by name. */
@@ -103,6 +105,7 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 				Integer undyed = UNDYED.get(piece.name());
 				draw(poseStack, collector, lightCoords, state, piece.model(), texture(piece, stack),
 					undyed == null ? -1 : ARGB.opaque(DyedItemColor.getOrDefault(stack, undyed)));
+				dents(poseStack, collector, lightCoords, state, piece, stack);
 			}
 		}
 		List<ItemStack> harness = state.getData(HARNESS);
@@ -125,12 +128,28 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 				Integer undyed = UNDYED.get(piece.name());
 				draw(poseStack, collector, lightCoords, state, piece.model(), texture(piece, stack),
 					undyed == null ? -1 : ARGB.opaque(DyedItemColor.getOrDefault(stack, undyed)));
+				dents(poseStack, collector, lightCoords, state, piece, stack);
 				// a tabard in a realm's arms: its ordinary laid over the field, front and back, in the charge's colour
 				HeraldryArmour.Arms arms = stack.get(HeraldryArmour.ARMS);
 				if (arms != null && arms.ordinary() >= 0 && arms.ordinary() < ORDINARIES) {
 					draw(poseStack, collector, lightCoords, state, piece.model(), "heraldry_tabard_arms_" + arms.ordinary(), ARGB.opaque(arms.charge()));
 				}
 			}
+		}
+	}
+
+	/**
+	 * (Harness 5) Plate shows its wear: past {@link #DENTED} of its durability gone it is dented and scratched, past
+	 * {@link #BATTERED} badly (the generator's {@code heraldry_PIECE_dents1} and {@code _dents2}, over any finish).
+	 */
+	private void dents(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, HeraldryArmour.Piece piece, ItemStack stack) {
+		if (!piece.plate() || !stack.isDamageableItem() || stack.getMaxDamage() <= 0) {
+			return;
+		}
+		float worn = stack.getDamageValue() / (float)stack.getMaxDamage();
+		int stage = worn >= BATTERED ? 2 : worn >= DENTED ? 1 : 0;
+		if (stage > 0) {
+			draw(poseStack, collector, lightCoords, state, piece.model(), "heraldry_" + piece.name() + "_dents" + stage, -1);
 		}
 	}
 
