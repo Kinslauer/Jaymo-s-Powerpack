@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 08:44). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 09:03). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -28,12 +28,13 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-23 waiting for a bot, 0 being built, 0 in review: see [[Kanban]].
+27 waiting for a bot, 0 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1810 NPC sea ships pay for their powder and shot (Kingdoms, 2026-11-19)
 - [ ] #1808 Cannon shot types for wall and siege guns, Explosive Shell costs TNT (Kingdoms, 2026-11-19)
 - [ ] #1807 flotsam can bring up a dead one's token (Powers, Kitchen, 2026-11-19)
 - [ ] #1806 harsh lands - spawns and starts follow the climate map (Kingdoms, 2026-11-19)
@@ -93,8 +94,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1712 NPC shooters lean round corners (Kingdoms, 2026-11-18)
 - [ ] #1711 Youth flies off to think, and comes back with the answer (Kingdoms, 2026-11-18)
 - [ ] #1710 lean on the legs (Kingdoms, 2026-11-18)
-- [ ] #1697 temperament idles come and go (Powers, 2026-11-17)
-- …and 195 older ones.
+- …and 196 older ones.
 
 ## Health
 
