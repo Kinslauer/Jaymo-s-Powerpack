@@ -105,6 +105,8 @@ final class Buildings {
 			dnt(FactionType.VILLAGE, "farmhouse", 1, 16);
 			dnt(FactionType.VILLAGE, "sawmill", 1, 20);
 		}
+		// the buildings only the masons' pattern books have: the chapel, the windmill and the barn ({@link Library})
+		Library.registerOwn();
 		// the song stone, where a capital's firsts are cut ({@link Firsts})
 		realm(FactionType.KINGDOM, "song_stone", Buildings::songStone, 1, 18);
 		// (0.7.518) the Truth's great temple, only the capital of a Faith-creed realm ({@link Planner#eligible})

@@ -111,6 +111,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Designs.register();
 		// (0.7.521) towns' trade buildings from ChoiceTheorem's Overhauled Village
 		CtovHalls.register();
+		Library.register();
 		// (0.7.488) schematic files: uploads from players' computers, the mason's table, plans given to settlements
 		LOGGER.debug("commission attachment: {}", Commissions.COMMISSIONS);
 		DesignUploads.register();
