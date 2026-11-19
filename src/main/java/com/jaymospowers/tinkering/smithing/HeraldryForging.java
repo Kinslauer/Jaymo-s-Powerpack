@@ -85,6 +85,23 @@ public final class HeraldryForging {
 		return option.id().startsWith(PREFIX) && option.id().endsWith("/" + GILDED);
 	}
 
+	/** What else {@code option} takes from the smith when it is done: rabbit hides for a fur lining, gold for gilding (for JEI). */
+	public static List<ItemStack> extras(Forging.Option option) {
+		List<ItemStack> out = new ArrayList<>();
+		if (furLined(option)) {
+			out.add(new ItemStack(Items.RABBIT_HIDE, FUR_HIDES));
+		}
+		if (gilded(option)) {
+			out.add(new ItemStack(Items.GOLD_INGOT, GILD_GOLD));
+		}
+		return out;
+	}
+
+	/** Whether {@code option} is gilded (done only for a royal or a lord). */
+	public static boolean gildedOption(Forging.Option option) {
+		return gilded(option);
+	}
+
 	private static boolean furLined(Forging.Option option) {
 		return option.id().startsWith(PREFIX + FUR_LINED);
 	}
@@ -111,7 +128,11 @@ public final class HeraldryForging {
 		}
 	}
 
-	private static List<Forging.Option> options() {
+	/**
+	 * Everything the anvil forges of the harness (JEI's Smithing Anvil page reads it too: it builds the list fresh, so it
+	 * never fills {@link Forging#all}'s cache early).
+	 */
+	public static List<Forging.Option> options() {
 		List<Forging.Option> out = new ArrayList<>();
 		DataComponentType<String> finish = finishComponent();
 		for (int i = 0; i < PLATE.length; i++) {
