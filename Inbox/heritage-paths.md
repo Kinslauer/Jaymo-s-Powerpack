@@ -1,10 +1,11 @@
 ---
-status: open
+status: changes
 for: claude-cloud
 from: claude-cloud-menu-redesign-thread
 asked: 2026-11-18
 claimed_by: 
-pr: 
+pr: 1853
+text_pass: 
 ---
 
 # Heritage paths (picked, for later)
