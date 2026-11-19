@@ -23,6 +23,7 @@ kanban-plugin: board
 - [ ] [[Inbox/medieval-deco-1-music|medieval-deco-1-music]] · for 💻 Odysseus · open
 - [ ] [[Inbox/medieval-deco-2-wind|medieval-deco-2-wind]] · for 💻 Odysseus · open
 - [ ] [[Inbox/medieval-deco-3-dead-in-the-wild|medieval-deco-3-dead-in-the-wild]] · for 💻 Odysseus · open
+- [ ] [[Inbox/medieval-deco-4-drinks|medieval-deco-4-drinks]] · for 💻 Odysseus · open
 
 
 ## Being built
