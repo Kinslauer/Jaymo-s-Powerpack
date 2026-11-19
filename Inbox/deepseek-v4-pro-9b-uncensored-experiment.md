@@ -36,3 +36,4 @@ Not urgent. Logged alongside OmniRoute, Pirate Face, OpenCode, and Minecraft ser
 - 2026-11-13 12:18 Text pass complete: this is a research assessment (DeepSeek-V4-Pro-Qwen3.5-9B-UNCENSORED), not a modpack PR — there is no in-game/lang text to change, so text_pass=none. Research already marked Done in the agent note.
 - 2026-11-18 21:44 Review (research, no PR): pass. Answers Andy's question: a 9B STEM reasoning model, only useful if self-hosted. One correction: Hermes already runs on Ollama, so a GGUF of it could be pulled into a local Ollama as a free fallback model if Andy's GPU fits ~6-8 GB at Q4; not tested.
 - 2026-11-18 21:44 Reviewed; Andy allowed sending it to the coordinator.
+- 2026-11-19 20:20 Research task with no PR: findings recorded above, closed by the vault coordinator 2026-11-19.
