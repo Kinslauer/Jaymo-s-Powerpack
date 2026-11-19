@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-19 14:38
+updated: 2026-11-19 14:48
 ---
 # Open PRs
 
-4 open, as of 2026-11-19 14:38. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+6 open, as of 2026-11-19 14:48. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1851](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1851) Building plans: wrong-block colours, layer view, full material list (Kingdoms)
@@ -23,5 +23,15 @@ Andy merges only on "merge", one at a time.
 
 ## [#1857](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1857) The minimap stops showing the Aether again
 - **Branch:** `claude/project-thread-v4qb14` · **Updated:** 2026-11-19 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#1861](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1861) Symbiote infection: stop starving itself feeding you, warn before it leaves
+- **Branch:** `claude/project-thread-wc6o6s` · **Updated:** 2026-11-19 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#1863](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1863) Goblins speak broken English
+- **Branch:** `claude/project-thread-j60dnm` · **Updated:** 2026-11-19 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
