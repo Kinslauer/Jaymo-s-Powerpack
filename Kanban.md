@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 19:08). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 19:33). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -23,10 +23,8 @@ kanban-plugin: board
 
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
-- [ ] [[Inbox/harness-creeds-and-lands|harness-creeds-and-lands]] · ☀️ Apollo · #1728 · in-review
 - [ ] [[Inbox/rig-beetle-2-guns|rig-beetle-2-guns]] · ☀️ Apollo · #1749 · in-review
 - [ ] [[Inbox/lanterns-06-space-medium|lanterns-06-space-medium]] · lanterns-06-space-medium · #1766 · in-review
-- [ ] [[Inbox/lanterns-07-talk-chat|lanterns-07-talk-chat]] · lanterns-07-talk-chat · #1767 · in-review
 - [ ] [[Inbox/rig-beetle-4-flight|rig-beetle-4-flight]] · ☀️ Apollo · #1765 · in-review
 - [ ] [[Inbox/lanterns-08-dream|lanterns-08-dream]] · lanterns-08-dream · #1769 · in-review
 - [ ] [[Inbox/lanterns-09-talk-typed|lanterns-09-talk-typed]] · lanterns-09-talk-typed · #1770 · in-review
@@ -50,14 +48,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/lanterns-07-talk-chat|lanterns-07-talk-chat]]
+- [x] [[Inbox/Done/harness-creeds-and-lands|harness-creeds-and-lands]]
 - [x] [[Inbox/Done/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]]
 - [x] [[Inbox/Done/lanterns-04-crime-word|lanterns-04-crime-word]]
 - [x] [[Inbox/Done/lanterns-03-patrol-small|lanterns-03-patrol-small]]
 - [x] [[Inbox/Done/lanterns-02-space-small|lanterns-02-space-small]]
 - [x] [[Inbox/Done/lanterns-01-crime-small|lanterns-01-crime-small]]
 - [x] [[Inbox/Done/rig-beetle-1-arm-forms|rig-beetle-1-arm-forms]]
-- [x] [[Inbox/Done/harness-helms-finishes-crests|harness-helms-finishes-crests]]
-- [x] [[Inbox/Done/harness-barding|harness-barding]]
 
 
 %% kanban:settings
