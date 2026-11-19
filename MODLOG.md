@@ -6378,3 +6378,11 @@ Andy: "i like the way these npcs fight, can our powered npcs be similar?" and "t
 - **Guard and parry**: they raise crossed arms (drawn on a rogue fighter) against an attacker in front, taking half the damage; a blow in the first moments is parried with `ClashFx` sparks, the attacker thrown back and staggered, and a counter a beat later. The guard breaks after a few blows so nobody turtles. Players' own guards already work on any attacker.
 - **Tempo**: gifted folk think every 10 ticks down to 5, and rogues rest and volley up to twice as often, as rank grows.
 - Not played; compiles in CI. Not done: the vanish afterimage is a `MagicFx` silhouette, not a translucent model copy; guard arms are drawn only on rogue fighters (Patrolmen and gifted villagers show sparks and sounds); Patrolmen have one fixed rank rather than rising with arrests; a player's bare-handed swing alone doesn't raise a guard (their string, or trading blows, does).
+
+## 0.25.57 (2026-11-19): NPC fights 4: tyrants vs the Patrol (sworn foes, showdowns) (#1829)
+
+- **Sworn foes**: a tyrant, or one of a raider band's men, now goes for a Galactic Patrolman before anyone else he could fight (before players, golems and villagers). A patrolman picks a tyrant or raider within 48 blocks over any other monster (a recruiter keeps to what is at hand). Players can stand with either side: the tyrant already fights them, and a patrolman is an ordinary villager.
+- **Showdowns**: from world tier 3 (Dread) with a player within 160 blocks, a landing raider band, a tyrant raid or a siege's tyrant has a 35% chance that, 20 seconds later, a Patrol pod comes down 40 to 80 blocks off with one officer. He flies at the tyrant (the tyrant flies to meet him, both through the shared fighter brain's travel flight), then they fight with the same moves. When the tyrant falls or goes, the officer lingers half a minute and leaves in his pod. If the officer falls, the tyrant goes on as before.
+- **Rumour**: players within 160 blocks of the tyrant get a letter line ("Word", through Jaymo's Kingdoms' post, roost or not) of two fighters in the sky. No screen text.
+- Classes: `ZFighterPatrol` (`Cause.SHOWDOWN`, `showdown`, `foe`), `ZFighterRogue.registerGoals`, `ZFighterRaiders`, `ZFighterRaids`, `ZFighterInvasions`, `ZFighterKingdoms.word`.
+- Built; not played.
