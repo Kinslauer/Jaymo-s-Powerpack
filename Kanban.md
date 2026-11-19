@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 17:56). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 18:02). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -45,7 +45,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · changes · fixing review notes
-- [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · claimed
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · ☀️ Apollo · #1787 · claimed
 
 
@@ -61,6 +60,7 @@ kanban-plugin: board
 - [ ] [[Inbox/class-trees-plan|class-trees-plan]] · for 💻 Odysseus · blocked
 - [ ] [[Inbox/plan-ghosts-litematica-tools|plan-ghosts-litematica-tools]] · plan-ghosts-litematica-tools · #1851 · sent
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🍇 Bacchus · blocked
+- [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · blocked
 
 
 ## Done
