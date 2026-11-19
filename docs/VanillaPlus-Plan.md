@@ -31,22 +31,22 @@ at (-0.3, 0) and volcanic_deltas at (-0.625, 0), so our Ash takes the cold, dry 
 shares with the small noise harness (see cloud-sea memory), and check that each demon layer still covers a fair share.
 
 **The start.** Incendium's **Forbidden Castle** (`incendium:forbidden_castle`) generates only in `incendium:ash_barrens`
-(tag `incendium:structure/has_castle`), and our heartland is literally called the Ash. So:
-- Append `jaymospowers:demon_ash` to `incendium:structure/has_castle`. That adds a tag value; nothing in Incendium's
+(tag `incendium:structure/has_castle`). The demon king is the master the demon start already puts you beside (Andy,
+2026-11-19: "The master that emberborn spawn next to for their nether start"). That is the **Master of the Gloam**,
+because `ZFighterStarts.demon` looks for the Gloam first. So:
+- Append `jaymospowers:demon_gloam` to `incendium:structure/has_castle`. That adds a tag value; nothing in Incendium's
   files is changed.
-- `ZFighterStarts.demon` looks for the nearest castle with `ChunkGenerator.findNearestMapStructure`, with a small radius
-  (Andy's log showed long chunk-generation waits on wide searches). It falls back to today's demon hall when no castle
-  is found.
-- The start puts you in the castle's throne hall, and the **Master of the Ash** stands there as the "demon king" (an
-  MCA villager, like the other demon masters). The WARD and the old portal nearby stay as they are. On a castle another
-  player already started in, the start passes it over, as it does for halls.
+- `ZFighterStarts.demon` looks for the nearest castle in the Gloam with `ChunkGenerator.findNearestMapStructure`, with a
+  small radius (Andy's log showed long chunk-generation waits on wide searches). It falls back to today's demon hall
+  when no castle is found.
+- The start puts you in the castle's throne hall, beside the Master of the Gloam (`ZFighterDemonRealm.master`, an MCA
+  villager as now). The WARD and the old portal nearby stay as they are. On a castle another player already started in,
+  the start passes it over, as it does for halls.
 
-I read "our demon king" as the Master of the Ash, who rules the heartland. If Andy meant a new figure above the three
-masters, that changes the lore paragraph below.
-
-**(new) The Forbidden Castle.** *In the heart of the Ash stands a black castle older than the demons' villages, and the
-Master of the Ash keeps his court in it. The demons call it the Forbidden Castle because no one goes in uncalled. A
-child he takes as his ward is raised in its halls, and walks out of its gate into the Nether when they are grown.*
+**(new) The Forbidden Castle.** *On the Gloam's edge, where the demons' outskirts meet the ash, stands a black castle
+older than their villages, and the Master of the Gloam keeps his court in it. The demons call it the Forbidden Castle
+because no one goes in uncalled. A child he takes as his ward is raised in its halls, and walks out of its gate into
+the Nether when they are grown.*
 
 ---
 
@@ -119,15 +119,13 @@ Back Weapon Slot (MIT, 1.20.1) is the idea only. This is our own code on our own
 **Andy:** "add to the tree." Horse Expert shows a mount's speed, jump, health and storage while you wear its Monocle
 (the monocle is the gate; its client config also has `mustBeTamed` and `requiresSneaking`).
 
-I read "the tree" as the K skill tree, because the Horseman skill already lives there (`Skills.HORSEMAN`, rank 1 the
+Andy confirmed (2026-11-19) that "the tree" is the K skill tree, where the Horseman skill already lives there (`Skills.HORSEMAN`, rank 1 the
 horse whistle, rank 2 tricks). So:
 - **Horseman rank 1** reads a mount's stats with no monocle needed. This is a compat mixin on
   `AttributeOverlayHandler.getInspectableEntity`: when the monocle check fails, it asks `Skills` instead.
 - The monocle still works for anyone, so nobody loses it.
 - A line on the Horseman tile says so.
 
-If Andy meant the advancement tree (the Jaymo's Powerpack tab), the change is one advancement for the first time you read
-a horse, instead of the skill gate.
 
 ---
 
@@ -181,6 +179,4 @@ All are MIT, so ideas and art may be used with the notice kept. None needs a new
 
 ## Open questions for Andy
 
-1. Is the "demon king" the Master of the Ash, or someone new above the three masters?
-2. "Add to the tree" for Horse Expert: the skill tree (my reading) or the advancement tree?
-3. Do the three **(new)** lore paragraphs read right?
+1. Do the three **(new)** lore paragraphs read right?
