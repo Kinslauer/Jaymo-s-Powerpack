@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.mixin.tweaks;
 
+import com.jaymoskingdoms.HarshLands;
 import com.jaymoskingdoms.seas.SeaLife;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.minecraft.world.entity.MobCategory;
@@ -20,6 +21,10 @@ import org.spongepowered.asm.mixin.injection.At;
  * <p>Andy (2026-11-19), across an ocean: "only saw dolphins". Those caps now hold along coasts, rivers and lakes; open sea
  * chunks ({@link SeaLife#openSea}, asked through {@code SeaCapsMixin}) have {@link #OPEN_WATER_AMBIENT} and
  * {@link #OPEN_WATER_CREATURE} instead, so a voyage meets whales, sharks, dolphins and schools of fish.
+ *
+ * <p>Andy (2026-11-19): spawns follow the climate map. The monster cap above holds in the temperate lands; a chunk of the
+ * harsh lands ({@link HarshLands}, asked through {@code HarshCapsMixin}) keeps {@link HarshLands#MONSTER_SHARE} of vanilla's
+ * by its steps, so the cold and the heat grow thicker with monsters the further out they lie.
  */
 @Mixin(MobCategory.class)
 abstract class MonsterCapMixin {
@@ -34,7 +39,9 @@ abstract class MonsterCapMixin {
 	private int jaymoskingdoms$fewerMonsters(int cap) {
 		Object self = this;
 		if (self == MobCategory.MONSTER) {
-			return Math.max(1, Math.round(cap * MONSTER_SHARE));
+			// (2026-11-19) the harsh lands keep more of it, by their steps (HarshLands, asked through HarshCapsMixin)
+			int steps = HarshLands.asking();
+			return Math.max(1, Math.round(cap * (steps > 0 ? HarshLands.MONSTER_SHARE[steps] : MONSTER_SHARE)));
 		}
 		if (self == MobCategory.WATER_AMBIENT) {
 			return SeaLife.askingOpen() ? OPEN_WATER_AMBIENT : Math.min(cap, WATER_AMBIENT);
