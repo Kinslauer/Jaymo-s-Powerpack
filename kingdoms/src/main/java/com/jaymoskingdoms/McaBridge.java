@@ -1405,6 +1405,38 @@ final class McaBridge {
 	}
 
 	/**
+	 * (2026-11-19) Andy, of an old druid ({@link Groves}) by a lake: "what is she doing here? she wont tell me anything".
+	 * MCA's menu opening on one: who she is and what her grove is for (a body laid at her feet, the dead for good given a
+	 * new one), and, until you've brought it today, the one thing she wants ({@link Groves#want}); on to the main menu,
+	 * never MCA's stranger's welcome or a wary villager's cold word. You know her by her title from then. A Druid never
+	 * gets here: speaking to her, they're told the rite ({@link Rebirths#use}). True if so.
+	 */
+	static boolean druidOpening(LivingEntity mob, ServerPlayer player) {
+		if (!(mob instanceof VillagerEntityMCA villager) || !Groves.is(villager) || Introductions.wary(player, villager)) {
+			return false;
+		}
+		var main = net.conczin.mca.resources.Dialogues.getInstance().getQuestion("main");
+		if (main == null) {
+			return false;
+		}
+		Component line;
+		if (Languages.understands(player, villager)) {
+			line = Component.translatable("dialogue.chat.jaymoskingdoms.druid_opening." + villager.getRandom().nextInt(Groves.OPENINGS));
+			if (!Groves.givenToday(player, villager)) {
+				line = line.copy().append(" ").append(Component.translatable("dialogue.chat.jaymoskingdoms.druid_wants",
+					new net.minecraft.world.item.ItemStack(Groves.want(villager)).getHoverName()));
+			}
+		} else {
+			line = Component.translatable("dialogue.chat.jaymoskingdoms.druid_opening.wordless");
+		}
+		met(villager, player);
+		Introductions.learn(player, villager);
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueQuestionResponse(line, false), player);
+		return true;
+	}
+
+	/**
 	 * (0.7.597) Andy: "this villager talked to me then acted this way when i introduced myself, the interactions should be
 	 * consistent". MCA's menu opening on {@code villager} ("root") when they're {@linkplain Introductions#wary wary} of
 	 * you (they mind your blood, their people think ill of you, or they remember you coldly): the same cold word they'd
