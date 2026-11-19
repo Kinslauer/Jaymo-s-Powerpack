@@ -28,7 +28,6 @@ kanban-plugin: board
 - [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
 - [ ] [[Inbox/smoothmount-6-heave-downed|smoothmount-6-heave-downed]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · open
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/harness-upkeep|harness-upkeep]] · for ☀️ Apollo · open
 
@@ -38,6 +37,7 @@ kanban-plugin: board
 - [ ] [[Inbox/smoothmount-1-climb-on-off|smoothmount-1-climb-on-off]] · ☀️ Apollo · claimed
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · ☀️ Apollo · #1787 · changes · fixing review notes
 - [ ] [[Inbox/harness-body-pieces|harness-body-pieces]] · harness-body-pieces · claimed
+- [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · #1853 · changes · fixing review notes
 
 
 ## In review
