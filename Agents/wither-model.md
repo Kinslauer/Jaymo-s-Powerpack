@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: wither-model
 branch: claude/wither-model
 with: 
@@ -37,3 +37,4 @@ owns:
 ## Done
 Spec document rewritten (docs/Wither-Model-Spec.md). Valid editable model (kingdoms/art/wither.bbmodel) plus texture (kingdoms/art/wither.png) committed to the claude/wither-model branch. Preview renders posted for Andy's approval; vault status blocked awaiting his answer.
 - 2026-11-19 22:34 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-19 23:11 No sign of work for 30 min: marked stalled (whoever ran it stopped).
