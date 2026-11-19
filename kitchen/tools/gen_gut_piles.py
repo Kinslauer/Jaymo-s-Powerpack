@@ -174,8 +174,19 @@ def brain_model(n):
 
 
 def blockstate(name):
-    return {'variants': {f'pieces={n}': [{'model': f'jaymoskitchen:block/{name}_{n}', 'y': y} for y in (0, 90, 180, 270)]
-                         for n in range(1, 5)}}
+    """Andy (2026-11-19): "the drops should randomly rotate orientation like item frames": eight facings, a quarter turn
+    of the plain model or of its eighth-turned copy ({@link #turned}), picked at random by where the pile lies."""
+    return {'variants': {f'pieces={n}': [{'model': f'jaymoskitchen:block/{name}_{n}{turn}', 'y': y}
+                                         for turn in ('', '_turned') for y in (0, 90, 180, 270)] for n in range(1, 5)}}
+
+
+def turned(model):
+    """The model turned an eighth about the block's middle (every element rotated 45 degrees about y)."""
+    out = json.loads(json.dumps(model))
+    for e in out['elements']:
+        assert 'rotation' not in e, 'an element already turned'
+        e['rotation'] = {'origin': [8, 0, 8], 'axis': 'y', 'angle': 45}
+    return out
 
 
 def loot(block, item):
@@ -198,3 +209,9 @@ if __name__ == '__main__':
         write(ASSETS, f'models/item/{item}.json', {'parent': 'minecraft:item/generated', 'textures': {'layer0': f'jaymoskitchen:item/{item}'}})
         write(ASSETS, f'items/{item}.json', {'model': {'type': 'minecraft:model', 'model': f'jaymoskitchen:item/{item}'}})
         write(DATA, f'loot_table/blocks/{block}.json', loot(block, item))
+    # the gut pile's models are drawn by hand: only their turned copies and blockstate are written here
+    for block in ('offal_pile', 'intestines_pile', 'brain_matter_pile'):
+        for n in range(1, 5):
+            with open(os.path.join(ASSETS, 'models', 'block', f'{block}_{n}.json')) as f:
+                write(ASSETS, f'models/block/{block}_{n}_turned.json', turned(json.load(f)))
+        write(ASSETS, f'blockstates/{block}.json', blockstate(block))
