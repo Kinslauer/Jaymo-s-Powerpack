@@ -40,11 +40,21 @@ public final class MountClimbPose {
 	/** A finished climb onto a mount holds its last frame this many ticks, waiting for the server to seat the player. */
 	static final int SEAT_WAIT = 10;
 
-	/** What the model needs this frame: the clip, how far through it, the body carried by {@code offset} (world blocks). */
-	public record State(Kind kind, float share, Vec3 offset) {
+	/**
+	 * What the model needs this frame: the clip, how far through it, the body carried by {@code offset} (world blocks). A
+	 * slip off a mount that shied starts from the pose the climb had reached ({@code prev} at {@code prevShare}) and eases
+	 * into its own.
+	 */
+	public record State(Kind kind, float share, Vec3 offset, @Nullable Kind prev, float prevShare) {
 	}
 
 	public static final RenderStateDataKey<State> KEY = RenderStateDataKey.create(() -> "jaymospowers:mount_climb");
+	/** The rider in the saddle reaching a hand back to someone climbing up behind them: how far the arm is out, 0 to 1. */
+	public static final RenderStateDataKey<Float> REACH = RenderStateDataKey.create(() -> "jaymospowers:mount_climb_reach");
+	/** The arm that reaches back (vanilla's right arm: xRot back and down, zRot out). */
+	static final float REACH_X = 55.0F * Mth.DEG_TO_RAD, REACH_Z = 25.0F * Mth.DEG_TO_RAD;
+	/** A slip eases from the climb's pose into its own over this share of itself. */
+	static final float SLIP_BLEND = 0.35F;
 
 	private static final class Climb {
 		final Kind kind;
@@ -54,6 +64,10 @@ public final class MountClimbPose {
 		final Vec3 from;
 		final float fromYaw;
 		int age;
+		/** A slip off a shying mount: the body's offset when it began, and the climb it came from and how far along. */
+		Vec3 start = Vec3.ZERO;
+		@Nullable Kind prev;
+		float prevShare;
 
 		Climb(Kind kind, int mountId, float ticks, Vec3 from, float fromYaw) {
 			this.kind = kind;
@@ -87,7 +101,21 @@ public final class MountClimbPose {
 				CLIMBS.put(p.player(), new Climb(Kind.of(p.kind()), p.mount(), Math.max(1, p.ticks()), player.position(), bodyYaw(player)));
 			}
 		});
-		ClientPlayNetworking.registerGlobalReceiver(MountClimb.Stop.TYPE, (p, ctx) -> CLIMBS.remove(p.player()));
+		ClientPlayNetworking.registerGlobalReceiver(MountClimb.Stop.TYPE, (p, ctx) -> {
+			Climb c = CLIMBS.remove(p.player());
+			ClientLevel level = Minecraft.getInstance().level;
+			Entity player = level == null ? null : level.getEntity(p.player());
+			if (c != null && p.reason() == MountClimb.SHIED && c.kind.on() && player instanceof Player who) {
+				// the mount shied: down the flank from wherever the climb had got to, not a snap back
+				float s = c.share(0.0F);
+				Vec3 at = offset(who, c, 0.0F);
+				Climb slip = new Climb(Kind.OFF_SLIP, c.mountId, Math.max(1.0F, Kind.OFF_SLIP.seconds * 20.0F), who.position(), onYaw(c, s, who, bodyYaw(who)));
+				slip.start = at == null ? Vec3.ZERO : at;
+				slip.prev = c.kind;
+				slip.prevShare = s;
+				CLIMBS.put(p.player(), slip);
+			}
+		});
 		ClientTickEvents.END_CLIENT_TICK.register(MountClimbPose::tick);
 	}
 
@@ -106,8 +134,8 @@ public final class MountClimbPose {
 				return true;
 			}
 			if (c.kind.on()) {
-				// seated (or never will be): the climb is over
-				return player.isPassenger() || c.age > c.ticks + SEAT_WAIT;
+				// seated and played to its end (the server may seat them a tick or two early), or never will be: over
+				return player.isPassenger() && c.age >= c.ticks || c.age > c.ticks + SEAT_WAIT;
 			}
 			return c.age > c.ticks;
 		});
@@ -153,24 +181,60 @@ public final class MountClimbPose {
 	 */
 	public static @Nullable Vec3 offset(Player player, float partialTicks) {
 		Climb c = CLIMBS.get(player.getId());
-		if (c == null) {
-			return null;
-		}
+		return c == null ? null : offset(player, c, partialTicks);
+	}
+
+	private static @Nullable Vec3 offset(Player player, Climb c, float partialTicks) {
 		float s = c.share(partialTicks);
 		Vec3 at = player.getPosition(partialTicks);
 		if (c.kind.on()) {
-			Entity mount = player.level().getEntity(c.mountId);
-			if (mount == null || player.isPassenger()) {
-				return null;
+			// where they end up: the seat the mount offers (the second seat, for a pillion climb: Kingdoms places it for a
+			// rider not yet aboard), or, once they're seated, simply where they are, so the path runs on to its end
+			Vec3 seat = at;
+			if (!player.isPassenger()) {
+				Entity mount = player.level().getEntity(c.mountId);
+				if (mount == null) {
+					return null;
+				}
+				seat = mount.getPassengerRidingPosition(player).subtract(player.getVehicleAttachmentPoint(mount))
+					.subtract(mount.position()).add(mount.getPosition(partialTicks));
 			}
-			Vec3 seat = mount.getPassengerRidingPosition(player).subtract(player.getVehicleAttachmentPoint(mount))
-				.subtract(mount.position()).add(mount.getPosition(partialTicks));
-			Vec3 d = seat.subtract(at);
-			float across = smooth(c.kind == Kind.ON_BACK ? 0.05F : 0.15F, 0.85F, s);
-			float up = smooth(c.kind == Kind.ON_BACK ? 0.1F : 0.2F, 0.7F, s);
+			Vec3 d = seat.subtract(c.from);
+			float across, up, hump;
+			switch (c.kind) {
+				case ON_BACK -> {
+					across = smooth(0.05F, 0.85F, s);
+					up = smooth(0.1F, 0.7F, s);
+					hump = 0.25F;
+				}
+				case ON_PILLION -> {
+					// pulled up by the hand: lifted early, over the rump
+					across = smooth(0.1F, 0.8F, s);
+					up = smooth(0.1F, 0.65F, s);
+					hump = 0.2F;
+				}
+				case ON_KNEEL -> {
+					// a low step across onto the lowered saddle
+					across = smooth(0.15F, 0.85F, s);
+					up = smooth(0.2F, 0.7F, s);
+					hump = 0.05F;
+				}
+				default -> {
+					across = smooth(0.15F, 0.85F, s);
+					up = smooth(0.2F, 0.7F, s);
+					hump = 0.1F;
+				}
+			}
 			// a vault rises over the rump and settles; a stirrup climb lifts a little past the seat and sits down
-			float over = Mth.sin(Mth.PI * Mth.clamp((s - 0.2F) / 0.6F, 0.0F, 1.0F)) * (c.kind == Kind.ON_BACK ? 0.25F : 0.1F);
-			return new Vec3(d.x * across, d.y * up + over, d.z * across);
+			float over = Mth.sin(Mth.PI * Mth.clamp((s - 0.2F) / 0.6F, 0.0F, 1.0F)) * hump;
+			Vec3 path = new Vec3(d.x * across, d.y * up + over, d.z * across);
+			return path.subtract(at.subtract(c.from));
+		}
+		if (c.kind == Kind.OFF_SLIP) {
+			// down the flank: the height goes first, the rest of the way across after
+			float down = 1.0F - smooth(0.0F, 0.6F, s);
+			float across = 1.0F - smooth(0.0F, 0.9F, s);
+			return new Vec3(c.start.x * across, c.start.y * down, c.start.z * across);
 		}
 		Vec3 d = c.from.subtract(at);
 		float across = 1.0F - smooth(0.2F, 0.85F, s);
@@ -178,6 +242,28 @@ public final class MountClimbPose {
 		float t = Mth.clamp((s - 0.25F) / 0.55F, 0.0F, 1.0F);
 		float down = 1.0F - t * t;
 		return new Vec3(d.x * across, d.y * down, d.z * across);
+	}
+
+	/** The way a climber's body faces on the way up: from where they stood round to the mount's own. */
+	private static float onYaw(Climb c, float s, Player player, float fallback) {
+		Entity mount = player.level().getEntity(c.mountId);
+		return Mth.rotLerp(smooth(0.1F, 0.8F, s), c.fromYaw, mount == null ? fallback : bodyYaw(mount));
+	}
+
+	/** The seated first rider's hand reaching back to a pillion climber, as an arm weight (0-1); null if there's no one to reach for. */
+	private static @Nullable Float reach(Player player, float partialTicks) {
+		Entity vehicle = player.getVehicle();
+		if (vehicle == null || vehicle.getFirstPassenger() != player) {
+			return null;
+		}
+		for (Climb c : CLIMBS.values()) {
+			if (c.kind == Kind.ON_PILLION && c.mountId == vehicle.getId()) {
+				float s = c.share(partialTicks);
+				float w = Math.min(smooth(0.0F, 0.2F, s), 1.0F - smooth(0.8F, 1.0F, s));
+				return w > 0.0F ? w : null;
+			}
+		}
+		return null;
 	}
 
 	/** First person, climbing: the eye carried with the body (added to the camera), or null. */
@@ -193,9 +279,11 @@ public final class MountClimbPose {
 	/** From the player renderer: the climb onto the render state, and the body turned to face the mount's way. */
 	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
 		state.setData(KEY, null);
+		state.setData(REACH, null);
 		if (!(entity instanceof Player player)) {
 			return;
 		}
+		state.setData(REACH, reach(player, partialTicks));
 		Climb c = CLIMBS.get(player.getId());
 		Vec3 offset = c == null ? null : offset(player, partialTicks);
 		if (offset == null) {
@@ -204,16 +292,14 @@ public final class MountClimbPose {
 		float s = c.share(partialTicks);
 		float yaw;
 		if (c.kind.on()) {
-			Entity mount = player.level().getEntity(c.mountId);
-			float mountYaw = mount == null ? state.bodyRot : bodyYaw(mount);
-			yaw = Mth.rotLerp(smooth(0.1F, 0.8F, s), c.fromYaw, mountYaw);
+			yaw = onYaw(c, s, player, state.bodyRot);
 		} else {
 			yaw = Mth.rotLerp(smooth(0.2F, 0.9F, s), c.fromYaw, state.bodyRot);
 		}
 		// the head keeps looking where it did
 		state.yRot = Mth.wrapDegrees(state.yRot + state.bodyRot - yaw);
 		state.bodyRot = yaw;
-		state.setData(KEY, new State(c.kind, s, offset));
+		state.setData(KEY, new State(c.kind, s, offset, c.prev, c.prevShare));
 	}
 
 	/** From the player renderer's rotations: the body carried along its path (in world space, under the body's turn). */
@@ -235,22 +321,39 @@ public final class MountClimbPose {
 		}
 		State climb = state.getData(KEY);
 		KeyframeClip clip = climb == null ? null : clip(climb.kind);
-		if (clip == null) {
+		if (clip != null) {
+			KeyframeClip from = climb.prev == null ? null : clip(climb.prev);
+			float blend = from == null ? 1.0F : smooth(0.0F, SLIP_BLEND, climb.share);
+			pose(h.body, clip, from, "body", climb, blend);
+			pose(h.rightArm, clip, from, "right_arm", climb, blend);
+			pose(h.leftArm, clip, from, "left_arm", climb, blend);
+			pose(h.rightLeg, clip, from, "right_leg", climb, blend);
+			pose(h.leftLeg, clip, from, "left_leg", climb, blend);
 			return;
 		}
-		pose(h.body, clip, "body", climb.share);
-		pose(h.rightArm, clip, "right_arm", climb.share);
-		pose(h.leftArm, clip, "left_arm", climb.share);
-		pose(h.rightLeg, clip, "right_leg", climb.share);
-		pose(h.leftLeg, clip, "left_leg", climb.share);
+		Float reach = state.getData(REACH);
+		if (reach != null) {
+			// a hand back for the one climbing up behind
+			h.rightArm.xRot = Mth.lerp(reach, h.rightArm.xRot, REACH_X);
+			h.rightArm.yRot = Mth.lerp(reach, h.rightArm.yRot, 0.0F);
+			h.rightArm.zRot = Mth.lerp(reach, h.rightArm.zRot, REACH_Z);
+		}
 	}
 
-	private static void pose(ModelPart part, KeyframeClip clip, String bone, float share) {
-		if (clip.has(bone)) {
-			part.xRot = clip.partX(bone, share);
-			part.yRot = clip.partY(bone, share);
-			part.zRot = clip.partZ(bone, share);
+	/** One bone: the clip's pose, eased in from {@code from}'s pose (where a slip began) by {@code blend}. */
+	private static void pose(ModelPart part, KeyframeClip clip, @Nullable KeyframeClip from, String bone, State climb, float blend) {
+		if (!clip.has(bone)) {
+			return;
 		}
+		float x = clip.partX(bone, climb.share), y = clip.partY(bone, climb.share), z = clip.partZ(bone, climb.share);
+		if (from != null && from.has(bone)) {
+			x = Mth.lerp(blend, from.partX(bone, climb.prevShare), x);
+			y = Mth.lerp(blend, from.partY(bone, climb.prevShare), y);
+			z = Mth.lerp(blend, from.partZ(bone, climb.prevShare), z);
+		}
+		part.xRot = x;
+		part.yRot = y;
+		part.zRot = z;
 	}
 
 	private static @Nullable KeyframeClip clip(Kind kind) {

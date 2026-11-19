@@ -1,11 +1,13 @@
 package com.jaymospowers.core;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.compat.KingdomsCompat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
@@ -16,6 +18,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -45,7 +48,13 @@ public final class MountClimb {
 		ON_RIGHT("player_mount_on_right", 0.7F),
 		ON_BACK("player_mount_on_back", 0.5F),
 		OFF_FORWARD("player_mount_off_forward", 0.55F),
-		OFF_BACK("player_mount_off_back", 0.5F);
+		OFF_BACK("player_mount_off_back", 0.5F),
+		/** Onto a horse that kneels for an armoured rider (Kingdoms): a low step across. */
+		ON_KNEEL("player_mount_on_kneel", 0.6F),
+		/** Up behind a rider already in the saddle, who reaches back a hand. */
+		ON_PILLION("player_mount_on_pillion", 0.7F),
+		/** Off the way back down when the mount shied, from wherever the climb had got to (the client's, not the server's). */
+		OFF_SLIP("player_mount_off_slip", 0.4F);
 
 		public final String clip;
 		public final float seconds;
@@ -56,7 +65,7 @@ public final class MountClimb {
 		}
 
 		public boolean on() {
-			return this == ON_LEFT || this == ON_RIGHT || this == ON_BACK;
+			return this == ON_LEFT || this == ON_RIGHT || this == ON_BACK || this == ON_KNEEL || this == ON_PILLION;
 		}
 
 		public static Kind of(int i) {
@@ -72,8 +81,23 @@ public final class MountClimb {
 	/** Behind the mount: within this many degrees of straight back. */
 	static final float BEHIND = 50.0F;
 
-	private record Climb(Entity mount, Kind kind, long end, Vec3 from) {
+	/** The mount shies from a climber (when it does) this far through the climb: from and to, as shares of it. */
+	static final float SHY_FROM = 0.35F, SHY_TO = 0.65F;
+	/** How far a shy takes the mount sideways (blocks a tick at the start: about two thirds of a block in all), and its little hop. */
+	static final double SHY_STEP = 0.3, SHY_HOP = 0.1;
+	/** A mount that has shied doesn't again for this many ticks, so the next try goes through. */
+	static final long SETTLED_TICKS = 200L;
+	/** Without Kingdoms' bond to read, an untamed horse shies from a climber this often; a tamed one never. */
+	static final float WILD_SKITTISH = 0.35F;
+	/** Why a climb ended early ({@link Stop}): something called it off, or the mount shied. */
+	public static final byte CALLED_OFF = 0, SHIED = 1;
+
+	/** {@code shyAt} is the game time the mount shies (negative: it doesn't). */
+	private record Climb(Entity mount, Kind kind, long end, Vec3 from, long shyAt) {
 	}
+
+	/** Mounts that have shied, by id: until when they're settled again. */
+	private static final Map<UUID, Long> SETTLED = new HashMap<>();
 
 	private static final Map<UUID, Climb> CLIMBS = new HashMap<>();
 
@@ -98,11 +122,15 @@ public final class MountClimb {
 		}
 	}
 
-	/** Server to client: {@code player}'s climb was called off. */
-	public record Stop(int player) implements CustomPacketPayload {
+	/** Server to client: {@code player}'s climb was called off, for {@code reason} ({@link #CALLED_OFF}, {@link #SHIED}). */
+	public record Stop(int player, byte reason) implements CustomPacketPayload {
 		public static final Type<Stop> TYPE = new Type<>(JaymosPowers.id("mount_climb_stop"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Stop> CODEC = CustomPacketPayload.codec(
-			(p, buf) -> buf.writeVarInt(p.player), buf -> new Stop(buf.readVarInt()));
+			(p, buf) -> {
+				buf.writeVarInt(p.player);
+				buf.writeByte(p.reason);
+			},
+			buf -> new Stop(buf.readVarInt(), buf.readByte()));
 
 		@Override
 		public Type<Stop> type() {
@@ -120,6 +148,10 @@ public final class MountClimb {
 			}
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> CLIMBS.remove(handler.player.getUUID()));
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			CLIMBS.clear();
+			SETTLED.clear();
+		});
 	}
 
 	/** Mounts that are climbed onto: horses, donkeys, mules and our breeds, and pigs. Camels kneel and llamas aren't steered. */
@@ -144,9 +176,15 @@ public final class MountClimb {
 		if (CLIMBS.containsKey(player.getUUID())) {
 			return true;
 		}
-		Kind kind = side(player, mount);
+		Kind kind = kindOf(player, mount);
 		int ticks = Math.max(1, Mth.ceil(seconds(kind, player) * 20.0F));
-		CLIMBS.put(player.getUUID(), new Climb(mount, kind, player.level().getGameTime() + ticks, player.position()));
+		long now = player.level().getGameTime();
+		long shyAt = -1L;
+		if ((kind == Kind.ON_LEFT || kind == Kind.ON_RIGHT || kind == Kind.ON_BACK) && SETTLED.getOrDefault(mount.getUUID(), 0L) <= now
+			&& player.getRandom().nextFloat() < skittish(player, mount)) {
+			shyAt = now + Math.max(1, Math.round(ticks * Mth.lerp(player.getRandom().nextFloat(), SHY_FROM, SHY_TO)));
+		}
+		CLIMBS.put(player.getUUID(), new Climb(mount, kind, now + ticks, player.position(), shyAt));
 		send(server, new Start(player.getId(), mount.getId(), (byte)kind.ordinal(), (short)ticks));
 		return true;
 	}
@@ -154,6 +192,40 @@ public final class MountClimb {
 	/** How long {@code kind} takes {@code rider}: longer the more armour they wear (seconds). */
 	public static float seconds(Kind kind, LivingEntity rider) {
 		return kind.seconds * (1.0F + ARMOUR_SLOW * Math.min(rider.getArmorValue(), 20) / 20.0F);
+	}
+
+	/**
+	 * How {@code player} climbs on: up behind a rider already in the saddle (a hand up), onto a horse that kneels for them
+	 * (Kingdoms' kneel, which it lets an armoured rider on with), else {@link #side}.
+	 */
+	static Kind kindOf(Player player, Entity mount) {
+		if (mount instanceof AbstractHorse) {
+			for (Entity rider : mount.getPassengers()) {
+				if (rider instanceof Player && rider != player) {
+					return Kind.ON_PILLION;
+				}
+			}
+			if (KingdomsCompat.call("equestrian.Bonding", "kneelingFor", new Class<?>[] {AbstractHorse.class, Player.class}, Boolean.FALSE,
+				mount, player) == Boolean.TRUE) {
+				return Kind.ON_KNEEL;
+			}
+		}
+		return side(player, mount);
+	}
+
+	/**
+	 * How likely {@code mount} is to shy from {@code player} climbing on, 0 to 1. Pigs never. Our horses by Kingdoms'
+	 * bond (trust and temper); without it, an untamed horse {@link #WILD_SKITTISH} and a tamed one never.
+	 */
+	static float skittish(Player player, Entity mount) {
+		if (!(mount instanceof AbstractHorse horse)) {
+			return 0.0F;
+		}
+		Object chance = KingdomsCompat.call("equestrian.Bonding", "skittish", new Class<?>[] {AbstractHorse.class, Player.class}, null, horse, player);
+		if (chance instanceof Float f && f >= 0.0F) {
+			return f;
+		}
+		return horse.isTamed() ? 0.0F : WILD_SKITTISH;
 	}
 
 	/** Which way {@code player} climbs on: from behind, or from whichever side of the mount they stand. */
@@ -184,7 +256,14 @@ public final class MountClimb {
 			if (!mount.isAlive() || mount.level() != player.level() || player.isPassenger() || player.isShiftKeyDown()
 				|| player.position().distanceTo(c.from) > STRAY || player.distanceTo(mount) > REACH) {
 				it.remove();
-				send(player, new Stop(player.getId()));
+				send(player, new Stop(player.getId(), CALLED_OFF));
+				continue;
+			}
+			long now = player.level().getGameTime();
+			if (c.shyAt >= 0L && now >= c.shyAt) {
+				it.remove();
+				shy(mount, player, now);
+				send(player, new Stop(player.getId(), SHIED));
 				continue;
 			}
 			// the mount stands still for it
@@ -201,15 +280,29 @@ public final class MountClimb {
 					player.setXRot(mount.getXRot());
 				}
 				if (!player.startRiding(mount)) {
-					send(player, new Stop(player.getId()));
+					send(player, new Stop(player.getId(), CALLED_OFF));
 				}
 			}
 		}
 	}
 
+	/** {@code mount} takes a step sideways, away from {@code player}'s side of it, with a snort. */
+	private static void shy(Entity mount, ServerPlayer player, long now) {
+		SETTLED.values().removeIf(until -> until < now);
+		SETTLED.put(mount.getUUID(), now + SETTLED_TICKS);
+		float facing = (mount instanceof LivingEntity living ? living.yBodyRot : mount.getYRot()) * Mth.DEG_TO_RAD;
+		// the mount's right hand (yaw grows turning right: facing +z, its right is -x)
+		double rx = -Mth.cos(facing), rz = -Mth.sin(facing);
+		double side = (player.getX() - mount.getX()) * rx + (player.getZ() - mount.getZ()) * rz;
+		double away = side > 0.0 ? -1.0 : 1.0;
+		Vec3 v = mount.getDeltaMovement();
+		mount.setDeltaMovement(rx * away * SHY_STEP, mount.onGround() ? SHY_HOP : v.y, rz * away * SHY_STEP);
+		mount.playSound(SoundEvents.HORSE_BREATHE, 1.0F, 1.1F + mount.getRandom().nextFloat() * 0.3F);
+	}
+
 	private static void stop(ServerPlayer player) {
 		if (CLIMBS.remove(player.getUUID()) != null) {
-			send(player, new Stop(player.getId()));
+			send(player, new Stop(player.getId(), CALLED_OFF));
 		}
 	}
 

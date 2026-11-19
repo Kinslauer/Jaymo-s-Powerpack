@@ -119,7 +119,11 @@ public final class Mounted {
 	public static Vec3 seat(AbstractHorse horse, Entity passenger, Vec3 vanilla, float scale) {
 		// (0.7.322) our horses stand taller than vanilla's (BreedHorseModel.LIFT, 3 px), so every seat is that much higher
 		Vec3 seat = horse instanceof WarElephant ? vanilla : vanilla.add(0.0, SEAT_LIFT * scale, 0.0);
-		if (horse.getPassengers().indexOf(passenger) != 1) {
+		// (a kneeling horse carries its saddle down with it)
+		seat = seat.subtract(0.0, Bonding.KNEEL_DROP * scale * Bonding.kneelAmount(horse, horse.level().getGameTime()), 0.0);
+		// the second seat is the one the next passenger would take, too, so a rider climbing on is aimed at it
+		int index = horse.getPassengers().indexOf(passenger);
+		if (index != 1 && !(index < 0 && horse.getPassengers().size() == 1)) {
 			return seat;
 		}
 		return seat.add(new Vec3(0.0, -PILLION_DROP * scale, -PILLION_BACK * scale).yRot(-horse.getYRot() * Mth.DEG_TO_RAD));

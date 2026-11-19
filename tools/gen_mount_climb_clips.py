@@ -80,6 +80,39 @@ OFF_BACK = [
     (1.0, STAND),
 ]
 
+# onto a kneeling horse (armoured rider): low and short, a hand on the saddle, one leg lifted across, a settle into the seat
+ON_KNEEL = [
+    (0.0, STAND),
+    (0.3, {"body": (14, 0, 0), "right_arm": (-70, 0, 10), "left_arm": (-65, 0, -8),
+           "right_leg": (-55, 0, 24), "left_leg": (-8, 0, -2)}),
+    (0.65, {"body": (10, 0, -2), "right_arm": (-55, 0, 6), "left_arm": (-50, 0, -4),
+            "right_leg": (-72, 12, 18), "left_leg": (-40, -6, -4)}),
+    (1.0, RIDE),
+]
+
+# up behind the rider in the saddle: both hands taken and pulled up, a foot hitched, the leg swung over, a settle
+ON_PILLION = [
+    (0.0, STAND),
+    (0.25, {"body": (8, 0, 0), "right_arm": (-160, 0, 8), "left_arm": (-150, 0, -10),
+            "right_leg": (-45, 0, 12), "left_leg": (-5, 0, -2)}),
+    (0.55, {"body": (-8, 0, 0), "right_arm": (-140, 0, 6), "left_arm": (-120, 0, -6),
+            "right_leg": (-85, 14, 40), "left_leg": (-60, -6, -6)}),
+    (0.8, {"body": (4, 0, 0), "right_arm": (-80, 0, 4), "left_arm": (-70, 0, -4),
+           "right_leg": (-82, 18, 12), "left_leg": (-78, -18, -6)}),
+    (1.0, RIDE),
+]
+
+# the horse shied: from wherever the climb had got to (the game blends in the pose it was in), arms out, down the flank to a stagger
+OFF_SLIP = [
+    (0.0, {"body": (18, 0, 4), "right_arm": (-100, 0, 14), "left_arm": (-95, 0, -14),
+           "right_leg": (-40, 0, 30), "left_leg": (-40, 0, -10)}),
+    (0.4, {"body": (24, 0, 8), "right_arm": (-60, 0, 40), "left_arm": (-70, 0, -35),
+           "right_leg": (-20, 0, 12), "left_leg": (-25, 0, -4)}),
+    (0.75, {"body": (14, 0, 0), "right_arm": (-25, 0, 24), "left_arm": (-30, 0, -22),
+            "right_leg": (-14, 0, 4), "left_leg": (-14, 0, -4)}),
+    (1.0, STAND),
+]
+
 # heaving a downed friend over a horse's back (Sling): from a hold in the arms, a crouch under the weight, then up and
 # over in one push with the arms thrown high and the back arched, and a settle back to standing
 HEAVE = [
@@ -100,6 +133,9 @@ CLIPS = {
     "on_back": ON_BACK,
     "off_forward": OFF_FORWARD,
     "off_back": OFF_BACK,
+    "on_kneel": ON_KNEEL,
+    "on_pillion": ON_PILLION,
+    "off_slip": OFF_SLIP,
     "heave": HEAVE,
 }
 
