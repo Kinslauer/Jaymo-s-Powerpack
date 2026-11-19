@@ -4,14 +4,12 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 09:35). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 10:33). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · open
-- [ ] [[Inbox/village-mods-1-illager-names|village-mods-1-illager-names]] · for 💻 Odysseus · open
-- [ ] [[Inbox/village-mods-2-blast-mending|village-mods-2-blast-mending]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-4-board-work|village-mods-4-board-work]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-5-town-life-hats|village-mods-5-town-life-hats]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-6-small-structures|village-mods-6-small-structures]] · for 💻 Odysseus · open
@@ -30,7 +28,6 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-l-carts-check|vanilla-plus-l-carts-check]] · for 💻 Odysseus · open
-- [ ] [[Inbox/village-mods-3-guards-fight-mend|village-mods-3-guards-fight-mend]] · for 💻 Odysseus · open
 
 
 ## Being built
@@ -57,14 +54,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/village-mods-3-guards-fight-mend|village-mods-3-guards-fight-mend]]
+- [x] [[Inbox/Done/village-mods-2-blast-mending|village-mods-2-blast-mending]]
+- [x] [[Inbox/Done/village-mods-1-illager-names|village-mods-1-illager-names]]
 - [x] [[Inbox/Done/npc-fights-3-clashes|npc-fights-3-clashes]]
 - [x] [[Inbox/Done/npc-fights-2-strings|npc-fights-2-strings]]
 - [x] [[Inbox/Done/npc-fights-1-brawler|npc-fights-1-brawler]]
 - [x] [[Inbox/Done/npc-fights-4-rivals|npc-fights-4-rivals]]
 - [x] [[Inbox/Done/hns-4-shove-procs|hns-4-shove-procs]]
-- [x] [[Inbox/Done/hns-3-edges-sparks|hns-3-edges-sparks]]
-- [x] [[Inbox/Done/hns-2-stealth-posture|hns-2-stealth-posture]]
-- [x] [[Inbox/Done/hns-1-crits|hns-1-crits]]
 
 
 %% kanban:settings
