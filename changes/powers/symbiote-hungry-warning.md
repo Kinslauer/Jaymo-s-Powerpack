@@ -1,5 +1,0 @@
-# symbiote infection - it no longer starves itself feeding you, and warns before it leaves
-- **Why it left so fast:** in a host who isn't a web slinger, the black and red symbiotes leave when their satiety drops under 45. Once they had settled in (3 minutes), they fed your hunger bar out of their own satiety every two seconds (1 point for 2 food). With a hunger bar that kept emptying (health regen, sprinting), that ran them from 70 to under 45 in about a minute, so they left with no warning at all. A symbiote that leaves you never takes you again, so it just crawled around you.
-- **Now:** in a host it can leave, it stops feeding your hunger bar at 60 satiety and whispers once that it's hungry ("Hungry. Raw meat, or we find another.", 3 lines). From there its own hunger takes about 3 minutes to reach the leave line, so you have time to feed it raw meat. Web slingers and the white (anti) symbiote are unchanged.
-- `WebSymbioteInfection` (`WARN_HUNGRY_AT`, `shareFloor`, the warning), `WebSymbiote` (the hunger bar share), lang `web_symbiote.infection.warn.1-3`.
-- Built; not played.
