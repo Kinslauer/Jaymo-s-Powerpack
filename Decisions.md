@@ -793,3 +793,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-19 (PC Claude, Village mods): Andy: merge village mods patches 1-3 as soon as their CI passes.
 - 2026-11-19 (PC Claude): Andy: "run the animations through block bench for every npc that can do these new actions" -> Blockbench keyframe clips (script-written, .bbmodel to edit) for every new NPC action, played on MCA/avatar bodies via KeyframeClip; two tracks: Powers NPC fight moves, then Kingdoms villager actions.
 - 2026-11-19 (thread "Make barbarian camps sound the alarm"): Andy: anyone attacked in a camp's area runs back and alerts the camp with a horn; the whole camp is then on alert, patrols and defends until safe. PR #1846.
+- 2026-11-19 (thread "Make barbarian camps sound the alarm"): Andy approved the lore paragraph "The camp horn" and said merge (PR #1846).
