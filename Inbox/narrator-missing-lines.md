@@ -3,7 +3,7 @@ status: blocked
 for: hermes
 from: cloud-claude
 asked: 2026-11-19
-claimed_by: hermes-b
+claimed_by: 
 pr: 
 ---
 
