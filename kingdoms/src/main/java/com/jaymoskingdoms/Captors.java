@@ -143,7 +143,7 @@ public final class Captors {
 		return best;
 	}
 
-	/** Everything {@code player} carries is taken: some worn by {@code by} and the camp's people, the rest buried about the camp. */
+	/** Everything {@code player} carries and wears (the harness too) is taken: some worn by {@code by} and the camp's people, the rest buried about the camp. */
 	private static void strip(ServerPlayer player, Entity by, Faction camp, ServerLevel level, RandomSource random) {
 		Inventory inventory = player.getInventory();
 		List<ItemStack> taken = new ArrayList<>();
@@ -154,6 +154,13 @@ public final class Captors {
 				inventory.setItem(i, ItemStack.EMPTY);
 			}
 		}
+		// (Andy, 2026-11-19: "the harness should be gone yes") the harness comes off too, and goes where the rest goes
+		for (ItemStack piece : Harness.worn(player)) {
+			if (!piece.isEmpty()) {
+				taken.add(piece.copy());
+			}
+		}
+		Harness.clear(player);
 		if (taken.isEmpty()) {
 			return;
 		}
