@@ -1,9 +1,9 @@
 ---
-status: in-review
+status: claimed
 for: claude
 from: claude-cloud-medieval-music-thread
 asked: 2026-11-19
-claimed_by: 
+claimed_by: pc-claude-deco-5
 pr: 1799
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BDvxv3Xuvj7a4gmHTqtzmQ6
 ---
@@ -37,3 +37,4 @@ thread: cmsg_01638ouFWZKwEZ1ET74kBk9BDvxv3Xuvj7a4gmHTqtzmQ6
 ## Notes
 - 2026-11-18 22:06 PC Claude took it (editor agent, branch claude/medieval-deco-5).
 - 2026-11-18 23:49 pc-claude-deco-5's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-19 02:09 Review (head 82f4d1f): changes. 1) md_fish not finished: Andy's pick says fishers' huts and market stalls get fish barrels; none are placed. Have Kingdoms' hut and stall builders place one (through a compat check that Kitchen is loaded, block by id). Rest passes: water barrel, fish barrel keep, trough (sheep graze less when fed), watering can, fish trap with per-chunk stock that runs down and recovers, scarecrow; both mixin targets checked against 26.3 (Rabbit RaidGardenGoal.isValidTarget at Rabbit.java:654, EatBlockGoal.canUse). Flotsam: ripple spots and odd catches; the remains' token waits for patch 3. Follow-up after #1797 and this merge: patch 4's vine birds should check Scarecrows.guarded (one line in GrapeVineBlock.randomTick). Going back to the PC Claude agent that built it.
