@@ -98,9 +98,18 @@ public final class WindPush {
 			r.when = now;
 			Vec3 from = new Vec3(e.getX(), e.getY() + height, e.getZ());
 			Vec3 to = from.subtract(way(level).scale(SHELTER_RAY));
-			r.sheltered = level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, e)).getType() != HitResult.Type.MISS;
+			// a ray into a chunk that isn't loaded would load it on the server thread (a 22 s stall while land was being
+			// generated, 2026-11-19 9:50 AM): there it counts as cover, so nothing at the edge is pushed
+			r.sheltered = !loaded(level, from, to)
+				|| level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, e)).getType() != HitResult.Type.MISS;
 		}
 		return r.sheltered;
+	}
+
+	/** Whether every chunk the ray from {@code a} to {@code b} can cross is loaded. */
+	private static boolean loaded(Level level, Vec3 a, Vec3 b) {
+		return level.hasChunksAt(Mth.floor(Math.min(a.x, b.x)), Mth.floor(Math.min(a.z, b.z)), Mth.floor(Math.max(a.x, b.x)),
+			Mth.floor(Math.max(a.z, b.z)));
 	}
 
 	/** {@link #sheltered} for a place (a banner on its pole), on the client: the same ray, kept for a few ticks. */
@@ -114,8 +123,8 @@ public final class WindPush {
 			r.when = now;
 			Vec3 from = Vec3.atCenterOf(pos);
 			Vec3 to = from.subtract(way(level).scale(SHELTER_RAY));
-			r.sheltered = level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty()))
-				.getType() != HitResult.Type.MISS;
+			r.sheltered = !loaded(level, from, to) || level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE,
+				CollisionContext.empty())).getType() != HitResult.Type.MISS;
 		}
 		return r.sheltered;
 	}
@@ -154,7 +163,9 @@ public final class WindPush {
 		java.util.List<Entity> all = new java.util.ArrayList<>();
 		level.getAllEntities().forEach(all::add);
 		for (Entity e : all) {
-			if (e == null || e.isRemoved() || e instanceof Player || e.isPassenger() || e.isInWater() || e.isNoGravity() && !(e instanceof ItemEntity)) {
+			// (only where entities tick: the rest of the loaded list, at the edge of what's loaded or being generated, doesn't move)
+			if (e == null || e.isRemoved() || e instanceof Player || e.isPassenger() || e.isInWater() || e.isNoGravity() && !(e instanceof ItemEntity)
+				|| !level.isPositionEntityTicking(e.blockPosition())) {
 				continue;
 			}
 			if (e instanceof ItemEntity item) {
