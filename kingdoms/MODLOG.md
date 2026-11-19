@@ -15159,3 +15159,14 @@ Not tested in game.
 - `make_voices.py --sounds` no longer wipes Kingdoms' other sounds: it only adds, changes or drops voice-line entries
   (it used to write a sounds.json holding nothing but voices).
 - Built; no clips made yet (waiting for the Google key); not played.
+
+## 0.10.47 (2026-11-19): Talking to villagers through chat (#1770)
+
+- **Talk through chat**: say a line aloud while looking at a villager within 8 blocks, or start it with their first name (12 blocks), and they turn to you and answer over their head a moment later. Short replies keep it going for 30 seconds. They answer hello, goodbye and thanks, how they are, their name, their work, whose realm this is, trade, news (their real gossip and suspicions), and what they remember of you. Cold, wary or scornful villagers answer shortly and keep their news to themselves. Anything else gets a "Hm? I didn't follow that." When MCA's own chat AI is switched on (`/mca chatAI`), it answers instead and this keeps quiet. (`ChatTalk`, from `ProximityChat`)
+- Built; not played.
+
+## 0.10.48 (2026-11-19): Ask a villager anything, with suggested follow-ups (#1770)
+
+- **Ask something...**: a new choice in a villager's "Town business" talk opens a talk card with a box to type in. Ask in your own words and they answer in their own way, by how they bear toward you: their name, work and family (the kin of theirs about), whose land it is, the way to the nearest other town (roughly how far and which way), news and gossip, crime (whether they've heard of yours), the weather, how they are, what they make of you, trade. Anything they don't follow gets a "Hm?". Nothing goes online. (`AskTopics`, `ChatTalk`)
+- **Follow-ups**: beside each answer, a "You could ask" panel holds three questions that fit it, to click instead of typing (in the list when the screen is narrow). "That's all." ends it. (`TalkScreen`)
+- Built; not played. Stacked on Lanterns 7 (#1767), whose chat matcher this grows (family, crime, directions, weather).
