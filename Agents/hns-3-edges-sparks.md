@@ -1,9 +1,9 @@
 ---
-status: running
+status: done
 task: Hackers 'n Slashers patch 3 (edges and sparks)
 branch: claude/hns-3-edges-sparks
 with: hns-1 crits, hns-4 shove/procs agents (parallel)
-pr: 
+pr: 1815
 mods: powers, kingdoms
 versions: 
 started: 2026-11-19
