@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 12:26). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 12:41). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -32,11 +32,11 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/plan-ghosts-litematica-tools|plan-ghosts-litematica-tools]] · plan-ghosts-litematica-tools · claimed
 
 
 ## In review
 
+- [ ] [[Inbox/plan-ghosts-litematica-tools|plan-ghosts-litematica-tools]] · plan-ghosts-litematica-tools · #1851 · in-review
 
 
 ## Needs Andy
