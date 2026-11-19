@@ -255,8 +255,17 @@ public final class ReapedHost {
 
 	/** Now and then, a villager's word on the host (never what it is). */
 	static @Nullable Component gossip(ServerLevel level) {
+		return gossip(level, null);
+	}
+
+	/** The same, and from {@code near} the host may be named for the nearest fallen illager camp (its name in the villager's mouth). */
+	static @Nullable Component gossip(ServerLevel level, @Nullable BlockPos near) {
 		if (!ZombieHordes.begun(level.getServer()) || level.getRandom().nextFloat() >= GOSSIP_CHANCE) {
 			return null;
+		}
+		Faction fallen = near == null ? null : IllagerHolds.nearestFallen(level.getServer(), near);
+		if (fallen != null && level.getRandom().nextBoolean()) {
+			return Component.translatable("talk.jaymoskingdoms.gossip.reaped_named." + level.getRandom().nextInt(IllagerHolds.FALLEN_LINES), fallen.name());
 		}
 		return Component.translatable("talk.jaymoskingdoms.gossip.reaped." + level.getRandom().nextInt(GOSSIP_LINES));
 	}
