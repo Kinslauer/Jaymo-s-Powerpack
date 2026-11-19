@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 23:36). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 23:37). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -50,7 +50,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/smoothmount-6-heave-downed|smoothmount-6-heave-downed]] · cloud-smoothmount-thread · #1884 · in-review
 
 
 ## Needs Andy
