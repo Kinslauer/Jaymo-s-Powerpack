@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: in-review
 for: pc-claude
 from: pc-claude
 asked: 2026-11-18
 claimed_by: harness-body-pieces
-pr: 
+pr: 1868
 ---
 
 # Harness 2: new body pieces and two new places
