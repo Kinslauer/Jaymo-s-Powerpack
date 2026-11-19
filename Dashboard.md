@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 16:08). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 16:23). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -34,6 +34,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1846 camps sound the alarm with a horn (Kingdoms, 2026-11-19)
 - [ ] #1843 loading screen hints wipe in and out (Kingdoms, 2026-11-19)
 - [ ] #1842 Village mods 2: blast mending (Kingdoms, 2026-11-19)
 - [ ] #1841 MCA's village swap rests while its land isn't loaded (Kingdoms, 2026-11-19)
@@ -93,12 +94,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1770 Duplex doubles take spoken orders (Powers, Kingdoms, 2026-11-19)
 - [ ] #1769 Called in a dream: a power wakes through a dream or a nightmare (Powers, 2026-11-19)
 - [ ] #1767 Duplex doubles take spoken orders (Powers, Kingdoms, 2026-11-19)
-- [ ] #1766 Space: the star map's atlas, and the ringed giant in the night sky (Powers, 2026-11-19)
-- …and 226 older ones.
+- …and 227 older ones.
 
 ## Health
 
-21 problems in the notes: [[Health]].
+19 problems in the notes: [[Health]].
 
 ## Last week
 
