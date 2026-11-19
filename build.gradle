@@ -460,6 +460,16 @@ def packMods = [
 	// spiked mace, hand scythe and throwing axe. A datapack switches off its grid recipes (its armour stays off: Kingdoms'
 	// heraldry harness is the pack's knight armour) and the Smithing Anvil forges the weapons instead (KnightArmorForging). Client and server. 1.1.1 for 26.3. Needs Fabric API.
 	[dep: "maven.modrinth:knight-armor-and-weapons:WqwhtagO", cf: [1563034, 9620320]],
+	// From Andy's Vanilla+ list (2026-11-19 pick list), shipped unchanged:
+	// Shared Advancements (MIT, server side): advancements count for your team or every player.
+	[dep: "maven.modrinth:shared-advancements:cbhS9PTE", cf: [831959, 8942452]],
+	// Horse Expert (MPL-2.0, Fuzs; needs Puzzles Lib and Forge Config API Port above): a horse's real speed, jump and health.
+	[dep: "maven.modrinth:horse-expert:qUjLS9C5", cf: [666942, 9088683]],
+	// Incendium (Stardust Labs licence, packs allowed): Nether biomes, structures, weapons and mobs, beside our demon-realm biomes.
+	// qraftyfied: STRUCTURES (CC BY-NC 4.0, free pack): built structures to explore across the Overworld.
+	[dep: "maven.modrinth:qraftyfied:cpRes8NL", cf: [1005868, 8916149]],
+	// VillagersTradingPlus (GPL-3.0): the trading library VillagersPlus needs (packModsNoCf).
+	[dep: "maven.modrinth:villagerstradingplus:uut3GStm", cf: [1635301, 9346754]],
 ]
 // on Modrinth, but CurseForge has no file matching the version we use (checked 2026-11-04), so the CurseForge manifest
 // can't list them: they're in modpack/mods (server, hand-made profile) and the dev game, but not in the CurseForge import
@@ -712,6 +722,17 @@ def packModsNoCf = [
 	[dep: "maven.modrinth:polymorph_plus:1Q5h8wvM", cf: null],
 	// Chat Heads (MPL-2.0, dzwdz): player heads beside chat lines. Client-only. 1.3.2 for 26.3.
 	[dep: "maven.modrinth:chat-heads:i3gcElvQ", cf: null],
+	// From Andy's Vanilla+ list (2026-11-19), shipped unchanged; no CurseForge file found for these:
+	// Break Free (Unlicense, client): keep breaking a block when you switch items.
+	[dep: "maven.modrinth:breakfree:WUBobDKx", cf: null],
+	// VillagersPlus (GPL-3.0): new villager jobs, trades and workstations (needs VillagersTradingPlus, packMods).
+	[dep: "maven.modrinth:villagersplus:6TiiJgHL", cf: null],
+	// MasterCutter (CC BY-ND 4.0): 500+ stonecutter recipes, woodcutting and un-crafting, beside our Saw.
+	[dep: "maven.modrinth:mastercutter:iKLtSp2g", cf: null],
+	// Vanilla Fireflies (CC BY 4.0): fireflies at night, beside Effectual's.
+	[dep: "maven.modrinth:vanilla-fireflies:f9FE4diA", cf: null],
+	// Vanilla Constructs (all rights reserved; shipped unchanged from Modrinth): 100+ small vanilla-style features.
+	[dep: "maven.modrinth:vanilla-constructs:il0WctcM", cf: null],
 ]
 // on Modrinth only and needed by every client, so the CurseForge import zip carries the jar itself (overrides/mods), and
 // the server, modpack/mods and your profile get it like any pack mod. Not loaded in the dev game (too heavy).
