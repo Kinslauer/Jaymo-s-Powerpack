@@ -262,9 +262,10 @@ public final class Downed {
 	 * once they've done it too often: {@link CaptiveConduct#doomed});</li>
 	 * <li>a settlement's people ({@link HeldBack#townsperson}): every grown villager (MCA's guards and rulers too), the
 	 * realms' guards and archers, the sworn, and the settled factions' folk;</li>
-	 * <li>iron golems, and clockwork golems but a dungeon's rogue one.</li>
+	 * <li>iron golems, and clockwork golems but a dungeon's rogue one;</li>
+	 * <li>(Andy, 2026-11-19) a barbarian camp's people, who take a downed player alive to their camp ({@link TakenAlive}).</li>
 	 * </ul>
-	 * Not those who hunt: monsters, illagers, a camp's people (raiders, pirates, greenskins, ogres), outlaws (looters,
+	 * Not those who hunt: monsters, illagers, a camp's other people (pirates, greenskins, ogres), outlaws (looters,
 	 * assassins, the masked: {@link Outlaws#is}) and a vampire at night. They don't take a downed player for a target
 	 * ({@code ThrallTargetMixin}, {@code McaGuardFoesMixin}) and their blows don't land ({@link #register}). Powers'
 	 * execution is still for a hothead alone, by the town's law ({@link HeldBack#spares}). Server side.
@@ -273,7 +274,7 @@ public final class Downed {
 		if (!(attacker instanceof Mob mob) || !(body instanceof ServerPlayer player) || !isDowned(player)) {
 			return false;
 		}
-		if (heldCaptive(mob, player)) {
+		if (heldCaptive(mob, player) || TakenAlive.spares(mob, player)) {
 			return true;
 		}
 		if (mob instanceof IronGolem) {
