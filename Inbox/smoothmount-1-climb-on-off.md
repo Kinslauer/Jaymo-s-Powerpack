@@ -1,9 +1,9 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: claude-cloud-smoothmount-thread
 asked: 2026-11-19
-claimed_by: hermes-a
+claimed_by: cloud-smoothmount-thread
 pr: 1869
 writer: hermes-writer
 text_pass: done
