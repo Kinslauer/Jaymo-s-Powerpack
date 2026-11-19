@@ -54,6 +54,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/plan-ghosts-litematica-tools|plan-ghosts-litematica-tools]] · plan-ghosts-litematica-tools · #1851 · in-review
 - [ ] [[Inbox/smoothmount-1-climb-on-off|smoothmount-1-climb-on-off]] · ☀️ Apollo · #1869 · in-review
+- [ ] [[Agents/Deaths cut to black|Deaths cut to black]] · 💻 Odysseus · #1878 · in-review
 - [ ] [[Agents/reason-title|reason-title]] · 💻 Odysseus · #1872 · in-review
 
 
