@@ -15363,3 +15363,12 @@ Hackers 'n Slashers patch 3, the town half (Andy: "you should see the blacksmith
 
 - Fixes: the server crashed while land was being generated: the wind's push walked the world's list of creatures and items while its own shelter check could load a chunk and add to that list. It now walks a copy (`WindPush`).
 - Built by CI; checked on the Deck under pre-generation.
+
+## 0.10.74 (2026-11-19): Rangers read droppings (#1822)
+
+- Andy: "can different land animals drop different piles? so rangers have a new way to track?"
+- With Jaymo's Kitchen, a Ranger, or anyone with Read the Ground, can sneak and right-click droppings with nothing in
+  either hand to read them. Kitchen says what left them and how old they are. If the animal is still about, Kingdoms
+  shows its trail alone, at the best tracker's reach and age, and a Ranger earns track experience now and then.
+  `TrailReading.register` hands Kitchen's `ManurePileBlock` the reader test and the trail by reflection.
+- Built; not played.
