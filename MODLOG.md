@@ -6096,3 +6096,22 @@ Built; not played in game.
 
 - **Orders by voice**: as Duplex, say an order aloud (or "doubles, ..." first) and your doubles within 32 blocks do it. *follow* (come, heel); *wait* (stay, hold), where they stand; *scout*: one runs 20 blocks the way you face and comes back with how many foes it saw; *collect* (gather, pick up): they pick up the drops near and bring them to you; *mine* (dig): one digs out the open block you look at, then up to 8 more of the same touching it, never anything you couldn't break yourself or harder than stone-and-ore; *fetch <thing>* (bring, get): one fetches a stack with that in its name from a chest or barrel within 16 blocks, or the first stack of the container you look at; *fight* (attack): all go for what you look at, or the nearest foe. Anything a double holds drops if it pops. (`DoubleOrders`, `XenoDouble`)
 - Built; not played.
+
+## 0.25.28 (2026-11-19): Space: the star map's atlas, and the ringed giant in the night sky (#1772)
+
+- **Atlas**: the star map remembers what you found on each world. A world you've come down on wears a small gold pin on the map, and its card says how many times you've landed there, where you last did, and where your bed is if your respawn point is on that world. Mission progress was already on the card. Kept on the player through death. (`ZFighterAtlas`, `ZFighterStarMapScreen`)
+- **The ringed giant**: once the Verdant World's chart is read, what shows in the Overworld's night sky is its blue giant, brighter and bigger, with a faint leaning ring out of each side. It used to be a small green dot. The giant already had its ring on the star map and in the Verdant sky. (`SkyPlanets`)
+- Built; not played.
+
+## 0.25.29 (2026-11-19): Space: the Hollow, and crossing to the Moon on your own ki (#1772)
+
+- **The Hollow**: a black hole past the outer orbits, drawn on the star map in the corner across from the Maw (a dark disc with a thin bright rim and a slow burning disc). Hover to name it. No pod flies to it. Trips to or from the worlds past it (Glacia, the Verdant World and its giant) skirt it: its pull drags the pod off course and the flight runs about a third longer. The flight screen shows it passing overhead, with the starlight round it bent outward. (`ZFighterSpace#skirtsHollow`, `ZFighterSpaceArt#hollow`, `ZFighterFlightScreen`)
+- **Ki crossing**: a Z Fighter of 50,000 power or more who is flying, climbs 64 blocks past the top of the world and looks straight up for 3 seconds crosses to the Pale Moon on their own ki, burning 80% of it. The flight shows with their light in place of the pod, and they come down beside the Moon's pad. From the Moon the same way back brings them down where they left from. Only the Moon is near enough; every other world still needs a pod. Nothing hurts them on the way. (`KiVoyage`)
+- Built; not played. The power gate and ki cost are tuning constants for Andy to set (`KiVoyage.POWER_GATE`, `KI_SHARE`).
+
+## 0.25.30 (2026-11-19): The high sky as near space, and orbit (#1772)
+
+- **The look**: the higher you climb the high sky, the farther below the planet lies and the more of its curve shows (up to two and a half times as far down at the top). The sun up there is hard and white, a tight glare with two thin spikes of light across it, no soft glow. (`HighSkyClient`)
+- **Orbit**: from 96 blocks above the bottom of the high sky you're in orbit, and you're told so once on getting there. A Z Fighter's cruise goes three times as fast and gets up to speed three times as quickly, carrying you far across the world below, and you come down wherever you dive. (`HighSkyClient#cruiseBoost`, `ZFighterFlightClient`)
+- Not in this patch: pods in orbit (they still fly the star map's trips).
+- Built; not played. Stacked on Lanterns 6 (#1766).
