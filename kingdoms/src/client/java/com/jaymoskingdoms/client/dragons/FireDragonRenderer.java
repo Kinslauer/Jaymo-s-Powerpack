@@ -53,6 +53,7 @@ final class FireDragonRenderer<T extends WindDragon & GeoEntity> extends GeoEnti
 	@Override
 	public void addRenderData(T dragon, Void related, LivingEntityRenderState state, float partialTick) {
 		super.addRenderData(dragon, related, state, partialTick);
+		DragonBoarding.extract(dragon, state, partialTick);
 		state.addGeckolibData(LOOK, dragon.look());
 		state.addGeckolibData(FLY, Mth.lerp(partialTick, dragon.flyAnimO, dragon.flyAnim));
 		state.addGeckolibData(BREATH, Mth.lerp(partialTick, dragon.breathAnimO, dragon.breathAnim));
@@ -68,6 +69,7 @@ final class FireDragonRenderer<T extends WindDragon & GeoEntity> extends GeoEnti
 	@Override
 	public void adjustModelBonesForRender(RenderPassInfo<LivingEntityRenderState> info, BoneSnapshots snapshots) {
 		super.adjustModelBonesForRender(info, snapshots);
+		DragonBoarding.apply(info, snapshots, new String[] {"cuello1", "cuello2"}, "HEAD", new DragonBoarding.Wing("leftAla", 1.0F), new DragonBoarding.Wing("righAla", -1.0F));
 		LivingEntityRenderState state = info.renderState();
 		float fly = info.getOrDefaultGeckolibData(FLY, 0.0F);
 		float breath = info.getOrDefaultGeckolibData(BREATH, 0.0F);

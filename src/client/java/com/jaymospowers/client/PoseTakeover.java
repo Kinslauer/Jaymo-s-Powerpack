@@ -63,7 +63,8 @@ public final class PoseTakeover {
 		return com.jaymospowers.client.wounds.DownedPose.down(s) || s.getData(FreefallPose.KEY) != null || com.jaymospowers.client.wounds.TrippedPose.tripped(s)
 			|| s.getData(CarryPose.HELD_KEY) != null || s.getData(CarryPose.THROWN_KEY) != null
 			|| s.getData(WebRagdoll.KEY) != null || s.getData(com.jaymospowers.client.power.web.WebHeldGrabPose.KEY) != null
-			|| com.jaymospowers.client.pets.PetPoses.posed(s) || com.jaymospowers.client.combat.AttentionPose.on(s);
+			|| com.jaymospowers.client.pets.PetPoses.posed(s) || com.jaymospowers.client.combat.AttentionPose.on(s)
+			|| s.getData(MountClimbPose.KEY) != null;
 	}
 
 	public static void beginDraw(LivingEntityRenderState state) {
@@ -210,6 +211,7 @@ public final class PoseTakeover {
 			|| s.getData(com.jaymospowers.client.power.zfighter.ZFighterDiscPose.KEY) != null
 			|| s.getData(com.jaymospowers.client.power.zfighter.ZFighterSwayPose.KEY) != null
 			|| s.getData(ArsenalArmPose.KEY) != null || s.getData(ArsenalArmPose.AIM_KEY) != null
-			|| s.getData(ArsenalArmPose.DRAW_KEY) != null;
+			|| s.getData(ArsenalArmPose.DRAW_KEY) != null
+			|| s.getData(MountClimbPose.KEY) != null || s.getData(MountClimbPose.REACH) != null;
 	}
 }

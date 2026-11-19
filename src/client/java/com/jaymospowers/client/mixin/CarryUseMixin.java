@@ -62,6 +62,13 @@ abstract class CarryUseMixin {
 			ci.cancel();
 			return;
 		}
+		Carry.Carrying carrying = this.player.getAttached(Carry.CARRYING);
+		if (carrying != null && this.hitResult instanceof net.minecraft.world.phys.EntityHitResult aimed
+			&& com.jaymospowers.core.Sling.slingable(aimed.getEntity())
+			&& com.jaymospowers.core.Sling.heavable(this.player.level().getEntity(carrying.target()), carrying.hold())) {
+			// a downed one carried, at a horse: the use goes through to the horse and heaves them over its back (Sling), no letting go
+			return;
+		}
 		ClientPlayNetworking.send(new Carry.Release(this.player.isShiftKeyDown()));
 		this.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, false);
 		this.rightClickDelay = RELEASE_DELAY;
