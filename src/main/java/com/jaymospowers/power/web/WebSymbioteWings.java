@@ -80,10 +80,10 @@ public final class WebSymbioteWings {
 		return WebSymbiote.isBonded(player) && WebSymbiote.state(player).has(WebSymbioteState.WINGS);
 	}
 
-	/** The bond is whole (or lent to you) and it isn't settling in: it can give you wings. */
+	/** The bond is whole and it isn't settling in: it can give you wings. */
 	public static boolean available(Player player) {
 		return WebSymbiote.isBonded(player) && !WebSymbioteBond.dormant(player)
-			&& (player.isCreative() || WebSymbiote.empowered(player) || WebSymbiote.state(player).bond() >= WebSymbiote.BOND_MAX);
+			&& (player.isCreative() || WebSymbiote.state(player).bond() >= WebSymbiote.BOND_MAX);
 	}
 
 	/** The radial menu's Wings chip: spread them, or fold them. */

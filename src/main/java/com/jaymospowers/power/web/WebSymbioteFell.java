@@ -124,6 +124,8 @@ public final class WebSymbioteFell {
 		logs.add(origin);
 		queue.add(origin);
 		boolean leafy = false;
+		// only the trunk's own wood, so a cabin of another log leaning on a tree stays up
+		net.minecraft.world.level.block.Block trunk = level.getBlockState(origin).getBlock();
 		while (!queue.isEmpty() && logs.size() < MAX_LOGS) {
 			BlockPos at = queue.poll();
 			for (Direction direction : Direction.values()) {
@@ -137,7 +139,8 @@ public final class WebSymbioteFell {
 					for (int dz = -1; dz <= 1; dz++) {
 						BlockPos next = at.offset(dx, dy, dz);
 						if (Math.abs(next.getX() - origin.getX()) > RADIUS || Math.abs(next.getZ() - origin.getZ()) > RADIUS
-							|| logs.size() >= MAX_LOGS || !seen.add(next.immutable()) || !level.getBlockState(next).is(BlockTags.LOGS)) {
+							|| logs.size() >= MAX_LOGS || !seen.add(next.immutable()) || !level.getBlockState(next).is(BlockTags.LOGS)
+							|| !level.getBlockState(next).is(trunk)) {
 							continue;
 						}
 						logs.add(next.immutable());

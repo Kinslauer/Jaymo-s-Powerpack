@@ -56,12 +56,27 @@ public final class WebSymbioteSteed {
 	private record Held(UUID horse, boolean saddled, long offSince) {
 	}
 
+	/** Marks the saddle the symbiote grew, so it can be taken back even if the hold was lost. */
+	private static final String GOO_SADDLE = "jaymospowers_goo_saddle";
+
+	private static boolean gooSaddle(AbstractHorse horse) {
+		net.minecraft.world.item.component.CustomData data = horse.getItemBySlot(EquipmentSlot.SADDLE).get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+		return data != null && data.copyTag().getBooleanOr(GOO_SADDLE, false);
+	}
+
 	private static final Map<UUID, Held> HELD = new ConcurrentHashMap<>();
 
 	private WebSymbioteSteed() {
 	}
 
 	static void register() {
+		// A horse let go while it was out of reach (another dimension, an unloaded chunk) is cleaned when it next loads:
+		// the hold itself isn't saved, so a horse with no hold but a goo saddle on loses the saddle.
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
+			if (entity instanceof AbstractHorse horse && !horse.hasAttached(STEED) && gooSaddle(horse)) {
+				horse.setItemSlot(EquipmentSlot.SADDLE, ItemStack.EMPTY);
+			}
+		});
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			if (!HELD.isEmpty()) {
 				for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -106,7 +121,11 @@ public final class WebSymbioteSteed {
 		}
 		boolean ours = !horse.isSaddled();
 		if (ours) {
-			horse.setItemSlot(EquipmentSlot.SADDLE, new ItemStack(Items.SADDLE));
+			ItemStack goo = new ItemStack(Items.SADDLE);
+			net.minecraft.nbt.CompoundTag mark = new net.minecraft.nbt.CompoundTag();
+			mark.putBoolean(GOO_SADDLE, true);
+			goo.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(mark));
+			horse.setItemSlot(EquipmentSlot.SADDLE, goo);
 			horse.setDropChance(EquipmentSlot.SADDLE, 0.0F);
 		}
 		modify(horse, JUMP_ID, Attributes.JUMP_STRENGTH, JUMP_BONUS);
@@ -134,9 +153,14 @@ public final class WebSymbioteSteed {
 		if (held == null) {
 			return;
 		}
-		ServerLevel level = player.level();
-		Entity entity = level.getEntity(held.horse());
-		if (entity instanceof AbstractHorse horse) {
+		Entity entity = null;
+		for (ServerLevel any : player.level().getServer().getAllLevels()) {
+			entity = any.getEntity(held.horse());
+			if (entity != null) {
+				break;
+			}
+		}
+		if (entity instanceof AbstractHorse horse && horse.level() instanceof ServerLevel level) {
 			horse.removeAttached(STEED);
 			AttributeInstance jump = horse.getAttribute(Attributes.JUMP_STRENGTH);
 			if (jump != null) {

@@ -71,10 +71,6 @@ public final class WebPowerClient implements PowerClient {
 				}
 				return true;
 			}
-			if (clicks > 0 && isActive(player) && WebAirStrikesClient.onAttack(player, INSTANCE.swing, INSTANCE.swing.tricks())) {
-				// let go of a swing and still in the air: the click is a rising blow, a spinning strike or a dive kick
-				return true;
-			}
 			com.jaymospowers.power.web.WebTendrils.Grips grips = player.getAttached(com.jaymospowers.power.web.WebTendrils.GRIPS);
 			if (grips != null && com.jaymospowers.power.web.WebTendrilCombos.active(player)) {
 				// mid-combo: the click is swallowed
@@ -94,6 +90,10 @@ public final class WebPowerClient implements PowerClient {
 			}
 			if (clicks > 0 && holdsChunk(player, WebNet.MAIN)) {
 				ClientPlayNetworking.send(new com.jaymospowers.power.web.WebTendrils.Smash(WebNet.MAIN));
+				return true;
+			}
+			if (clicks > 0 && isActive(player) && WebAirStrikesClient.onAttack(player, INSTANCE.swing, INSTANCE.swing.tricks())) {
+				// (after the tendrils' own clicks) let go of a swing and still in the air: the click is a rising blow, a spinning strike or a dive kick
 				return true;
 			}
 			// (a Verdant's or Frost-born's race move is sneak + left hold here: RaceHoldClient.secondary)

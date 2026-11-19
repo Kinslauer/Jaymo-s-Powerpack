@@ -90,6 +90,7 @@ public final class WebSkim {
 					live.slow = 0;
 					live.dry = 0;
 					player.setAttached(SKIM, new Skim(now + SKIM_TICKS, SKIM_TICKS));
+					player.resetFallDistance(); // the water held you up: the fall onto it doesn't count
 					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_SPLASH_HIGH_SPEED, SoundSource.PLAYERS, 0.8F, 1.3F);
 					level.sendParticles(ParticleTypes.SPLASH, player.getX(), player.getY(), player.getZ(), 20, 0.4, 0.1, 0.4, 0.2);
 				}

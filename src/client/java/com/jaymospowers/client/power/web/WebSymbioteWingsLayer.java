@@ -52,8 +52,8 @@ final class WebSymbioteWingsLayer extends RenderLayer<AvatarRenderState, PlayerM
 		new Vec3(4, 12, 6.5), new Vec3(3, 12, 4)};
 	private static final int E = 0, W = 1, F1 = 2, F2 = 3, F3 = 4, F4 = 5, B = 6;
 
-	/** Each entity's spread now, and the nanotime it was last moved at. */
-	private static final Map<Integer, float[]> SPREADS = new HashMap<>();
+	/** Each entity's spread now (a float's bits) and the nanotime it was last moved at. */
+	private static final Map<Integer, long[]> SPREADS = new HashMap<>();
 
 	WebSymbioteWingsLayer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
 		super(renderer);
@@ -64,26 +64,27 @@ final class WebSymbioteWingsLayer extends RenderLayer<AvatarRenderState, PlayerM
 		boolean out = entity instanceof Player player && WebSymbioteWings.out(player);
 		int id = entity.getId();
 		long now = System.nanoTime();
-		float[] spread = SPREADS.get(id);
+		long[] spread = SPREADS.get(id);
 		if (spread == null) {
 			if (!out) {
 				state.setData(SPREAD, null);
 				state.setData(FLAP, null);
 				return;
 			}
-			spread = new float[] {0.0F, now};
+			spread = new long[] {0L, now};
 			SPREADS.put(id, spread);
 		}
 		float dt = Mth.clamp((now - spread[1]) / 1.0E9F * 20.0F, 0.0F, 3.0F);
 		spread[1] = now;
-		spread[0] = Mth.clamp(spread[0] + (out ? dt : -dt) / SPREAD_TICKS, 0.0F, 1.0F);
-		if (spread[0] <= 0.0F && !out) {
+		float open = Mth.clamp(Float.intBitsToFloat((int) spread[0]) + (out ? dt : -dt) / SPREAD_TICKS, 0.0F, 1.0F);
+		spread[0] = Float.floatToIntBits(open);
+		if (open <= 0.0F && !out) {
 			SPREADS.remove(id);
 			state.setData(SPREAD, null);
 			state.setData(FLAP, null);
 			return;
 		}
-		state.setData(SPREAD, spread[0]);
+		state.setData(SPREAD, open);
 		Long flapped = entity.getAttached(WebSymbioteWings.FLAPPED);
 		float partial = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		float age = flapped == null ? -1.0F : entity.level().getGameTime() + partial - flapped;
