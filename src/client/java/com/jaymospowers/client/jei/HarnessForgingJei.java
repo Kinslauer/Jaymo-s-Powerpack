@@ -53,9 +53,7 @@ public final class HarnessForgingJei implements IModPlugin {
 			}
 			List<List<ItemStack>> inputs = new ArrayList<>();
 			inputs.add(List.of(ingots));
-			for (ItemStack extra : HeraldryForging.extras(option)) {
-				inputs.add(List.of(extra));
-			}
+			inputs.addAll(HeraldryForging.extras(option));
 			List<Component> notes = new ArrayList<>();
 			notes.add(Component.translatable("jei.jaymospowers.harness_forging.how", option.ingots(), option.metal().displayName(), option.hits()));
 			if (HeraldryForging.gildedOption(option)) {
