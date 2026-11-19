@@ -384,6 +384,8 @@ public final class CaptiveConduct {
 			return false;
 		}
 		captor.setShiftKeyDown(false);
+		// (Andy, 2026-11-19: "they should resusitate you, using dirty rags if you're lucky and bind you")
+		PowersCompat.tendCaptive(player);
 		player.addTag(Downed.REVIVE_TAG);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.CHAIN_HIT, SoundSource.PLAYERS, 0.8F, 0.8F);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.captive.hauled").withStyle(ChatFormatting.GRAY));

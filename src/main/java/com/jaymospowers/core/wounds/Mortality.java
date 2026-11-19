@@ -1479,8 +1479,7 @@ public final class Mortality {
 	 * ({@link Bleeding#bindStumps}), and anything dirty or festering washed out with the herbs.</li>
 	 * <li>Locked in a realm's cells ({@code jailed}): the gaolers keep a prisoner alive for judgement, roughly: rags on the
 	 * cuts and stumps, the breaks splinted.</li>
-	 * <li>Taken captive ({@code captured}): a slave is worth more alive, so captors bind a bleeding stump with a rag. No
-	 * more than that.</li>
+	 * <li>Taken captive ({@code captured}): a slave is worth more alive ({@link #tendCaptive}).</li>
 	 * </ul>
 	 * Spiders' lairs, a berth of their own and the wild see to nothing: nobody tended them there.
 	 */
@@ -1500,10 +1499,54 @@ public final class Mortality {
 				Treatment.tendAll(player, true);
 				Bleeding.bindStumps(player, true);
 			}
-			case "captured" -> Bleeding.bindStumps(player, true);
+			case "captured" -> tendCaptive(player);
 			default -> {
 				// (nobody saw to them)
 			}
+		}
+	}
+
+	/** The chance captors bother with rags ({@link #tendCaptive}); else a stump is seared shut and the cuts left. */
+	public static final float CAPTIVE_RAGS = 0.5F;
+
+	/**
+	 * Captors keep a captive from bleeding out (Andy, 2026-11-19: "they should resusitate you, using dirty rags if you're
+	 * lucky and bind you"). Lucky ({@link #CAPTIVE_RAGS}): dirty rags tied round every cut and stump (a rag's slow heal, and
+	 * it may fester), no splints. Unlucky: a bleeding stump is seared shut with a hot blade (a cautery's burn) and the cuts
+	 * are left to close by themselves. Kingdoms calls it as its captors haul a beaten captive up ({@code CaptiveConduct}).
+	 */
+	public static void tendCaptive(ServerPlayer player) {
+		if (!(player.level() instanceof net.minecraft.server.level.ServerLevel level)) {
+			return;
+		}
+		int open = Bleeding.bleeding(player);
+		if (open == 0) {
+			return;
+		}
+		if (player.getRandom().nextFloat() < CAPTIVE_RAGS) {
+			BodyPlan plan = BodyPlan.of(player);
+			for (int i = 0; plan != null && i < plan.size(); i++) {
+				BodyPart part = plan.part(i);
+				if (!Breaks.missing(player, part) && Treatment.helps(Treatment.Remedy.RAG, player, part)) {
+					Bleeding.stop(player, part, false);
+					Bleeding.dress(player, part, Treatment.RAG_HEAL, Treatment.BANDAGE_TICKS, true);
+				}
+			}
+			Bleeding.bindStumps(player, true);
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.mortality.captive_rags").withStyle(ChatFormatting.GRAY));
+			return;
+		}
+		boolean seared = false;
+		for (BodyPart part : BodyPart.values()) {
+			if ((open & Breaks.bit(part)) != 0 && Breaks.missing(player, part) && Bleeding.stop(player, part, true)) {
+				Wounds.hurtPart(player, part, Treatment.CAUTERY_BURN, null);
+				seared = true;
+			}
+		}
+		if (seared) {
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 1.0F, 0.8F);
+			level.sendParticles(net.minecraft.core.particles.ParticleTypes.SMOKE, player.getX(), player.getY() + 0.5, player.getZ(), 10, 0.2, 0.2, 0.2, 0.01);
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.mortality.captive_seared").withStyle(ChatFormatting.RED));
 		}
 	}
 
