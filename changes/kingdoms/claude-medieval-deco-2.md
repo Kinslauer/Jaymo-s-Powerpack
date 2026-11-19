@@ -3,5 +3,5 @@
 - **Items** roll downwind in a gale, and on ice from a lighter wind. **Arrows and thrown shafts** bend a little in any wind (the old gale rule made gradual, same strength at the top).
 - **Shelter**: a short ray (8 blocks) upwind from head height; a solid block, glass included, means shelter, so standing behind a wall you feel nothing, and a ship lying in a cove catches less (`Ship`'s sail push and her drawn sails).
 - **Sound** (`client/disasters/WindSounds`): a low rush that follows the wind's strength, a thin whistle in a hard wind, quieter in shelter and indoors.
-- Not done: the hooded cloak and banners leaning in the wind (needs 26.3 render-state work). No weight system exists, so only bulk scales the drift.
+- **Cloth** (`client/disasters/WindCloth`, `BannerWindMixin`, `BannerFlagWindMixin`, `HeraldryLayer`): banners' flags swing out downwind and the harness cloak's cape streams back, to the side and flutters, gently, by the wind's strength and way as the client has it; a quarter as much behind a wall. No weight system exists, so only bulk scales the drift.
 - Built by CI; not played.

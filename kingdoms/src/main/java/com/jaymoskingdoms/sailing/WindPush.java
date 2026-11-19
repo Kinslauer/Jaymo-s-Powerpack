@@ -16,6 +16,7 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
 
 /**
  * The wind moves things. Ported in spirit from Global Wind (Depixelation, MIT: its entity and living-entity mixins let
@@ -59,6 +60,9 @@ public final class WindPush {
 
 	private static final Map<Entity, Reading> SERVER = new WeakHashMap<>();
 	private static final Map<Entity, Reading> CLIENT = new WeakHashMap<>();
+	/** The client's readings for places, and how many it keeps. */
+	private static final Map<Long, Reading> SPOTS = new java.util.HashMap<>();
+	static final int SPOTS_MOST = 512;
 
 	private WindPush() {
 	}
@@ -95,6 +99,23 @@ public final class WindPush {
 			Vec3 from = new Vec3(e.getX(), e.getY() + height, e.getZ());
 			Vec3 to = from.subtract(way(level).scale(SHELTER_RAY));
 			r.sheltered = level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, e)).getType() != HitResult.Type.MISS;
+		}
+		return r.sheltered;
+	}
+
+	/** {@link #sheltered} for a place (a banner on its pole), on the client: the same ray, kept for a few ticks. */
+	public static boolean shelteredAt(Level level, BlockPos pos) {
+		if (SPOTS.size() > SPOTS_MOST) {
+			SPOTS.clear();
+		}
+		Reading r = SPOTS.computeIfAbsent(pos.asLong(), k -> new Reading());
+		long now = level.getGameTime();
+		if (now - r.when >= SHELTER_KEEP || now < r.when) {
+			r.when = now;
+			Vec3 from = Vec3.atCenterOf(pos);
+			Vec3 to = from.subtract(way(level).scale(SHELTER_RAY));
+			r.sheltered = level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty()))
+				.getType() != HitResult.Type.MISS;
 		}
 		return r.sheltered;
 	}
