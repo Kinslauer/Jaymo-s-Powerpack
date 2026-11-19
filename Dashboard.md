@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 23:37). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 23:39). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -23,6 +23,7 @@ Nothing stuck.
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1891 Z Fighter line message no longer claims your heritage (Powers, 2026-11-19)
 - [ ] #1888 climbing onto and off mounts (SmoothMount-style, our own) (Powers, Kingdoms, 2026-11-19)
 - [ ] #1886 hit streak count off the action bar with Kingdoms (Powers, Kingdoms, 2026-11-19)
 - [ ] #1885 Deathless returns (for Kingdoms' Pallid) (Powers, Kingdoms, Kitchen, 2026-11-19)
@@ -82,12 +83,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1821 The wind no longer stops the server (Kingdoms, 2026-11-19)
 - [ ] #1820 birthplace page lists the heritage's strengths and weaknesses (Kingdoms, 2026-11-19)
 - [ ] #1819 Earth & Water's chunk scan skipped where it can find nothing (Powers, 2026-11-19)
-- [ ] #1816 Powerborne Heroes picks - deeds, storm, Web, second jump, costumes, Divine-born, Smoke banish, Ember, fusion, shields (Powers, Kingdoms, 2026-11-19)
-- …and 262 older ones.
+- …and 263 older ones.
 
 ## Health
 
-Nothing wrong: [[Health]].
+2 problems in the notes: [[Health]].
 
 ## Last week
 
