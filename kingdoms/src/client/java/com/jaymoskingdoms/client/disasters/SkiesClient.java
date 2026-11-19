@@ -34,7 +34,8 @@ import net.minecraft.world.phys.Vec3;
  * in swamps and by rivers, more of it in autumn and less in summer; none in dry lands or in the rain.</li>
  * <li><b>Sand winds</b>: on a windy day streams of sand run low over open sand, well short of a sandstorm.</li>
  * <li><b>Auroras</b>: two clear nights in three, green and violet curtains hang in the northern sky over cold lands.</li>
- * <li><b>Livelier fire</b>: fire near you licks taller and throws sparks, and a lit campfire spits one now and then.</li>
+ * <li><b>Livelier fire</b>: fire near you licks taller and throws sparks, and a lit campfire spits one now and then.
+ * A big blaze throws up tall plumes of smoke and fills the air round it ({@link FireSmoke}).</li>
  * <li><b>The Nether's air</b>: ash drifts over the wastes, which had none, and embers rise off every lava lake.</li>
  * <li><b>Shore foam</b>: flecks of white where water meets land, only while no shader pack is drawing the world
  * (Complementary draws its own water).</li>
@@ -97,7 +98,10 @@ public final class SkiesClient {
 	}
 
 	public static void register() {
-		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> downpour = mist = aurora = glow = 0.0F);
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+			downpour = mist = aurora = glow = 0.0F;
+			FireSmoke.clear();
+		});
 		ClientTickEvents.END_CLIENT_TICK.register(SkiesClient::tick);
 	}
 
@@ -110,6 +114,7 @@ public final class SkiesClient {
 		Vec3 eye = minecraft.gameRenderer.mainCamera().position();
 		RandomSource random = level.getRandom();
 		fire(level, eye, random);
+		FireSmoke.tick(minecraft, level, eye, random);
 		if (clock % SHADER_CHECK == 1) {
 			shaders = com.jaymoskingdoms.client.DarkNights.shaderPackOn();
 		}
