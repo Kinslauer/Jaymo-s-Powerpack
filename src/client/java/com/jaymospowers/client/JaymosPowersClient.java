@@ -280,6 +280,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.armory.TaczGuns.trimDefaultPack();
 		CrawlTaps.init();
 		com.jaymospowers.client.moving.LateJumps.init();
+		com.jaymospowers.client.jump.PowerJumpClient.init();
 		com.jaymospowers.client.moving.AutoWalk.init();
 		StanceScroll.init();
 		ProneTransition.init();
