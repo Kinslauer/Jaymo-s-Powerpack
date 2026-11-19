@@ -15534,3 +15534,10 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - **Watcher's huts** (the small web-hung spruce hut over a spider nest, `jaymoskingdoms:nest_watch_hut`) were tried every 14 chunks (at least 4 apart) in every Overworld biome, and the silk deeps lie under most temperate inland ground, so nearly every try built one: about one hut every 220 blocks, more than any other surface structure in the pack. That is why they seemed to be the only thing generating. Now tried every 40 chunks (at least 16 apart): roughly an eighth as many, about one every 640 blocks. Other structures were never blocked by them; they were just outnumbered.
 - Only new ground changes: huts already built stay.
 - Data only (`structure_set/nest_watch_huts.json`). Built; not played.
+
+## 0.10.93 (2026-11-19): First kingdom raised in the surface town, not a Lost Cities copy under it (#1850)
+
+- In a One Dimension world the bands share their town spots, so a spot where the Overworld rolled no town could keep the Lost Cities band's village (at Y -370), and the first kingdom was raised down there while the real village stood above.
+- The capital's village search and the far Epic town search now take only towns that stand in the Overworld band; a town in another band is passed over and the search goes on to the next spot. The log says which band it was in.
+- Classes touched: `EpicTowns` (`surface`, `foundFar`), `StoryGround` (village search).
+- Built by CI; not played.
