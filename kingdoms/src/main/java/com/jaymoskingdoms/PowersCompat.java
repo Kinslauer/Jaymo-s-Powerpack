@@ -4825,4 +4825,47 @@ public final class PowersCompat {
 			}
 		}
 	}
+
+	/** Powers' {@code CritCue.cue(ServerLevel, Vec3, ServerPlayer)} (it also punches the attacker's camera) and {@code cue(ServerLevel, Vec3)}. */
+	private static java.lang.invoke.@Nullable MethodHandle critCue, critCuePunch;
+	private static boolean lookedForCritCue;
+
+	/** A crit cue at {@code at}. Nothing at all without Jaymo's Powers, or if its CritCue isn't there or doesn't take these. */
+	public static void critCue(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at) {
+		critCue(level, at, null);
+	}
+
+	/** A crit cue at {@code at} that also punches {@code attacker}'s camera, when there is one and Powers has it; else the plain cue. */
+	public static void critCue(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at,
+		net.minecraft.server.level.@Nullable ServerPlayer attacker) {
+		if (!lookedForCritCue) {
+			lookedForCritCue = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					Class<?> cue = Class.forName("com.jaymospowers.combat.CritCue");
+					critCue = java.lang.invoke.MethodHandles.publicLookup().findStatic(cue, "cue",
+						java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerLevel.class, net.minecraft.world.phys.Vec3.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					critCue = null;
+				}
+				try {
+					Class<?> cue = Class.forName("com.jaymospowers.combat.CritCue");
+					critCuePunch = java.lang.invoke.MethodHandles.publicLookup().findStatic(cue, "cue",
+						java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerLevel.class, net.minecraft.world.phys.Vec3.class,
+							net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					critCuePunch = null;
+				}
+			}
+		}
+		try {
+			if (attacker != null && critCuePunch != null) {
+				critCuePunch.invoke(level, at, attacker);
+			} else if (critCue != null) {
+				critCue.invoke(level, at);
+			}
+		} catch (Throwable e) {
+			// a cue is only a flourish: any mismatch is silent
+		}
+	}
 }

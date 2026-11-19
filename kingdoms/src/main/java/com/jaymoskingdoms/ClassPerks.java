@@ -582,7 +582,9 @@ public final class ClassPerks {
 				double hitY = arrow.getY() + arrow.getBbHeight() * 0.5;
 				boolean head = hitY >= target.getEyeY() - HEADSHOT_BELOW_EYES;
 				if (head) {
-					amount *= ARCHER_HEADSHOT;
+					// (hs_attrs) Jaymo's Powers' headshot power (a recurve bow) multiplies it
+					amount *= ARCHER_HEADSHOT * CritPower.headshot(sp);
+					PowersCompat.critCue(sp.level(), new net.minecraft.world.phys.Vec3(arrow.getX(), hitY, arrow.getZ()), sp);
 				}
 				pin(sp, target, arrow, amount, head, hitY);
 			} else if (cls == PlayerClass.MARKSMAN && arrow.getWeaponItem() != null && arrow.getWeaponItem().getItem() instanceof net.minecraft.world.item.CrossbowItem) {

@@ -399,6 +399,7 @@ public final class HiddenBlade {
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.TRIDENT_HIT, SoundSource.PLAYERS, 1.0F, 0.6F);
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1.0F, 0.5F);
 			level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY(0.6), target.getZ(), 16, 0.25, 0.3, 0.25, 0.25);
+			PowersCompat.critCue(level, target.position().add(0.0, target.getBbHeight() * 0.6, 0.0), sp);
 		}
 		if (assassin) {
 			sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.hidden_blade.assassinate").withStyle(ChatFormatting.DARK_RED));
@@ -409,7 +410,8 @@ public final class HiddenBlade {
 			sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.hidden_blade.stab").withStyle(ChatFormatting.DARK_RED));
 		}
 		// (the crippled and the assassin's bonus are one and the same: they don't stack; either one on a boss is capped)
-		return Senses.unawareBlow(target, amount, amount * CRIPPLED_STAB);
+		// (hs_attrs) an assassination takes Jaymo's Powers' sneak attack power too (the blade itself lifts it while out)
+		return Senses.unawareBlow(target, amount, amount * CRIPPLED_STAB * (assassin ? CritPower.sneak(sp) : 1.0F));
 	}
 
 	// ---- the leap ------------------------------------------------------------------------------------------------------
