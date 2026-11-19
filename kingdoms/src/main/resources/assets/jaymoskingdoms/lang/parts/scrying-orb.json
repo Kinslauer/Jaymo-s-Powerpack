@@ -1,0 +1,14 @@
+{
+  "block.jaymoskingdoms.scrying_orb": "Scrying Orb",
+  "item.jaymoskingdoms.scrying_orb": "Scrying Orb",
+  "item.jaymoskingdoms.lock_of_hair.of": "Lock of %s's Hair",
+  "item.jaymoskingdoms.sighted_shard": "Sighted Shard",
+  "item.jaymoskingdoms.sighted_shard.of": "Sighted Shard (%s)",
+  "item.jaymoskingdoms.sighted_shard.marked": "Marked %s",
+  "item.jaymoskingdoms.sighted_shard.cleared": "Sight cleared",
+  "item.jaymoskingdoms.sighted_shard.default_name": "%s %d %d %d",
+  "gui.jaymoskingdoms.scry.title": "Scrying: %s",
+  "message.jaymoskingdoms.scrying_orb.no_focus": "You need a lock of hair or a sighted shard",
+  "message.jaymoskingdoms.scrying_orb.not_attuned": "You must be attuned to use the scrying orb",
+  "message.jaymoskingdoms.scrying_orb.no_orb_nearby": "No idle scrying orb within reach"
+}

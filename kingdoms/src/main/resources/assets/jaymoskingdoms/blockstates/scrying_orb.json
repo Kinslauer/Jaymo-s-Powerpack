@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "active=false": { "model": "jaymoskingdoms:block/scrying_orb" },
+    "active=true": { "model": "jaymoskingdoms:block/scrying_orb" }
+  }
+}
