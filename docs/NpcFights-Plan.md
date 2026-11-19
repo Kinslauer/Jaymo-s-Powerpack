@@ -134,9 +134,9 @@ A shared brain every powered NPC runs, so tyrants, patrolmen and gifted folk fig
   who flies to the tyrant and fights him. Tidings/rumour line for nearby players (no screen text stating lore; see
   `lore-delivery`). The patrolman leaves in his pod once the tyrant falls; if the patrolman falls, the tyrant goes on as
   today. A player can join either side.
-- **Lore**: add the paragraph below to Lore.md as `(new)`; Andy approves it in the thread.
+- **Lore**: the paragraph below is in Lore.md (Andy approved 2026-11-19).
 
-## Lore placement (new, for Andy to approve)
+## Lore placement (Andy approved 2026-11-19)
 > **Old enemies** (new; Claude's placement for Andy's NPC fight picks, 2026-11-19). The tyrants who land on kingdoms by
 > night are Warrior-born, the same blood as the raider bands the Galactic Patrol chases from world to world, and the
 > Patrol has a warrant out on every one of them. A tyrant who sees a patrolman goes for him before anyone else, and a
