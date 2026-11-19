@@ -2,6 +2,7 @@ package com.jaymospowers.core;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.compat.KingdomsCompat;
+import com.jaymospowers.freerun.Freerun;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -54,7 +55,11 @@ public final class MountClimb {
 		/** Up behind a rider already in the saddle, who reaches back a hand. */
 		ON_PILLION("player_mount_on_pillion", 0.7F),
 		/** Off the way back down when the mount shied, from wherever the climb had got to (the client's, not the server's). */
-		OFF_SLIP("player_mount_off_slip", 0.4F);
+		OFF_SLIP("player_mount_off_slip", 0.4F),
+		/** A sprinting freerunner leapfrogs a mount's rump straight into the saddle, keeping their pace (Freerunner). */
+		ON_VAULT("player_mount_on_vault", 0.35F),
+		/** Off a galloping mount sideways with its momentum, tucking for the landing roll (the client's, like the other climbs off; see MountLeap). */
+		OFF_LEAP("player_mount_off_leap", 0.6F);
 
 		public final String clip;
 		public final float seconds;
@@ -65,7 +70,12 @@ public final class MountClimb {
 		}
 
 		public boolean on() {
-			return this == ON_LEFT || this == ON_RIGHT || this == ON_BACK || this == ON_KNEEL || this == ON_PILLION;
+			return this == ON_LEFT || this == ON_RIGHT || this == ON_BACK || this == ON_KNEEL || this == ON_PILLION || this == ON_VAULT;
+		}
+
+		/** Kinds that don't hold the climber still: they keep moving through it, so their keys aren't held back. */
+		public boolean carriesMomentum() {
+			return this == ON_VAULT || this == OFF_LEAP;
 		}
 
 		public static Kind of(int i) {
@@ -78,6 +88,9 @@ public final class MountClimb {
 	static final float ARMOUR_SLOW = 1.0F;
 	/** A climb is called off if the climber strays this far from where it began, or the mount this far from them. */
 	static final double STRAY = 0.75, REACH = 4.0;
+	/** Armour slows the vault and the leap only this much (against {@link #ARMOUR_SLOW}); a vaulter may run on this far from where it began (blocks). */
+	static final float VAULT_ARMOUR_SLOW = 0.25F;
+	static final double VAULT_STRAY = 3.0;
 	/** Behind the mount: within this many degrees of straight back. */
 	static final float BEHIND = 50.0F;
 
@@ -142,6 +155,7 @@ public final class MountClimb {
 		PayloadTypeRegistry.clientboundPlay().register(Start.TYPE, Start.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Stop.TYPE, Stop.CODEC);
 		ServerTickEvents.END_SERVER_TICK.register(MountClimb::tick);
+		MountLeap.register();
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (entity instanceof ServerPlayer player && damageTaken > 0.0F && CLIMBS.containsKey(player.getUUID())) {
 				stop(player);
@@ -191,7 +205,7 @@ public final class MountClimb {
 
 	/** How long {@code kind} takes {@code rider}: longer the more armour they wear (seconds). */
 	public static float seconds(Kind kind, LivingEntity rider) {
-		return kind.seconds * (1.0F + ARMOUR_SLOW * Math.min(rider.getArmorValue(), 20) / 20.0F);
+		return kind.seconds * (1.0F + (kind.carriesMomentum() ? VAULT_ARMOUR_SLOW : ARMOUR_SLOW) * Math.min(rider.getArmorValue(), 20) / 20.0F);
 	}
 
 	/**
@@ -210,7 +224,13 @@ public final class MountClimb {
 				return Kind.ON_KNEEL;
 			}
 		}
-		return side(player, mount);
+		Kind side = side(player, mount);
+		return side == Kind.ON_BACK && vaulting(player) ? Kind.ON_VAULT : side;
+	}
+
+	/** Whether {@code player} sprints at the mount's rump on the ground with Freerunner learnt (Kingdoms): they vault it rather than climb. */
+	static boolean vaulting(Player player) {
+		return player.isSprinting() && player.onGround() && Freerun.rank(player, Freerun.Perk.FREERUNNER) >= 1;
 	}
 
 	/**
@@ -254,7 +274,7 @@ public final class MountClimb {
 			}
 			Entity mount = c.mount;
 			if (!mount.isAlive() || mount.level() != player.level() || player.isPassenger() || player.isShiftKeyDown()
-				|| player.position().distanceTo(c.from) > STRAY || player.distanceTo(mount) > REACH) {
+				|| player.position().distanceTo(c.from) > (c.kind == Kind.ON_VAULT ? VAULT_STRAY : STRAY) || player.distanceTo(mount) > REACH) {
 				it.remove();
 				send(player, new Stop(player.getId(), CALLED_OFF));
 				continue;

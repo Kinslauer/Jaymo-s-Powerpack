@@ -2,6 +2,7 @@ package com.jaymospowers.client;
 
 import com.jaymospowers.core.MountClimb;
 import com.jaymospowers.core.MountClimb.Kind;
+import com.jaymospowers.core.MountLeap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import java.util.EnumMap;
@@ -88,6 +89,8 @@ public final class MountClimbPose {
 
 	private static final Map<Integer, Climb> CLIMBS = new HashMap<>();
 	private static final Map<Integer, Seat> SEATS = new HashMap<>();
+	/** How fast each rider's mount was going (blocks a tick, level) when last seen under them: a gallop makes the leap off (MountLeap). */
+	private static final Map<Integer, Double> RIDE_SPEED = new HashMap<>();
 	private static final Map<Kind, KeyframeClip> CLIPS = new EnumMap<>(Kind.class);
 
 	private MountClimbPose() {
@@ -137,13 +140,18 @@ public final class MountClimbPose {
 				// seated and played to its end (the server may seat them a tick or two early), or never will be: over
 				return player.isPassenger() && c.age >= c.ticks || c.age > c.ticks + SEAT_WAIT;
 			}
-			return c.age > c.ticks;
+			// a leap is over when they land (the dodge's roll takes it from there)
+			return c.age > c.ticks || c.kind == Kind.OFF_LEAP && c.age > 2 && player.onGround();
 		});
 		SEATS.keySet().removeIf(id -> !(level.getEntity(id) instanceof Player));
+		RIDE_SPEED.keySet().removeIf(id -> !(level.getEntity(id) instanceof Player));
 		for (Player player : level.players()) {
 			Entity vehicle = player.getVehicle();
 			if (vehicle != null) {
 				if (MountClimb.climbable(vehicle)) {
+					Seat before = SEATS.get(player.getId());
+					RIDE_SPEED.put(player.getId(), before != null && before.mountId == vehicle.getId()
+						? Math.hypot(vehicle.getX() - before.mountAt.x, vehicle.getZ() - before.mountAt.z) : 0.0);
 					SEATS.put(player.getId(), new Seat(vehicle.getId(), player.position(), bodyYaw(vehicle), vehicle.position()));
 				} else {
 					SEATS.remove(player.getId());
@@ -151,8 +159,10 @@ public final class MountClimbPose {
 				continue;
 			}
 			Seat seat = SEATS.remove(player.getId());
+			double speed = RIDE_SPEED.getOrDefault(player.getId(), 0.0);
+			RIDE_SPEED.remove(player.getId());
 			if (seat != null && player.isAlive() && !player.isSpectator() && player.position().distanceTo(seat.at) < OFF_REACH) {
-				Kind kind = offKind(seat, player.position());
+				Kind kind = MountLeap.leaps(player, speed) ? Kind.OFF_LEAP : offKind(seat, player.position());
 				CLIMBS.put(player.getId(), new Climb(kind, seat.mountId, MountClimb.seconds(kind, player) * 20.0F, seat.at, seat.yaw));
 			}
 		}
@@ -172,7 +182,8 @@ public final class MountClimbPose {
 	/** Whether the local player is partway through a climb: their keys are held still (MountClimbInputMixin). */
 	public static boolean climbingLocal() {
 		Player player = Minecraft.getInstance().player;
-		return player != null && !player.isPassenger() && CLIMBS.containsKey(player.getId());
+		Climb c = player == null ? null : CLIMBS.get(player.getId());
+		return c != null && !player.isPassenger() && !c.kind.carriesMomentum();
 	}
 
 	/**
@@ -213,6 +224,12 @@ public final class MountClimbPose {
 					up = smooth(0.1F, 0.65F, s);
 					hump = 0.2F;
 				}
+				case ON_VAULT -> {
+					// carried on at the pace they ran in (quickest at the start, easing into the saddle), over the rump in an arc
+					across = 1.0F - (1.0F - smooth(0.0F, 0.9F, s)) * (1.0F - smooth(0.0F, 0.9F, s));
+					up = smooth(0.0F, 0.75F, s);
+					hump = 0.45F;
+				}
 				case ON_KNEEL -> {
 					// a low step across onto the lowered saddle
 					across = smooth(0.15F, 0.85F, s);
@@ -235,6 +252,10 @@ public final class MountClimbPose {
 			float down = 1.0F - smooth(0.0F, 0.6F, s);
 			float across = 1.0F - smooth(0.0F, 0.9F, s);
 			return new Vec3(c.start.x * across, c.start.y * down, c.start.z * across);
+		}
+		if (c.kind == Kind.OFF_LEAP) {
+			// the body really is in the air, flung by the server: nothing to carry
+			return Vec3.ZERO;
 		}
 		Vec3 d = c.from.subtract(at);
 		float across = 1.0F - smooth(0.2F, 0.85F, s);
