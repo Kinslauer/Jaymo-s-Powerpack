@@ -23,8 +23,9 @@ public class JaymosPowers implements ModInitializer {
 	public void onInitialize() {
 		PowerEvents.register();
 		com.jaymospowers.core.BlockCluster.register();
-		com.jaymospowers.core.Carry.init();
+		// (the sling's use on a horse comes before Carry's, which would otherwise lift a horse a Gravity user can carry)
 		com.jaymospowers.core.Sling.init();
+		com.jaymospowers.core.Carry.init();
 		com.jaymospowers.core.Perch.init();
 		com.jaymospowers.core.Kneel.init();
 		com.jaymospowers.core.Crawl.init();
