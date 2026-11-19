@@ -26,13 +26,16 @@ import net.minecraft.world.phys.Vec3;
  * The gnomes ({@link Gnome}): their entity, and the gnomes of the other mods' houses made ours. ATi Structures' gnome huts
  * and Grim Kingdoms' gnome towers (both All Rights Reserved; nothing of theirs is used) place zombies named "Gnome",
  * "Angry Gnome" or "the gnome". Each one that comes into the world, from a structure, its spawner or a saved chunk, is
- * turned into one of ours where it stood, keeping its shield, and that spot is its house.
+ * turned into one of ours where it stood, keeping its shield, and that spot is its house (up to {@link #HOUSE_MAX} to a
+ * house; past that the zombie is only taken away).
  * <p>
  * Here too is what wrongs a house besides a blow: breaking a block inside it, or opening one of its chests, barrels or
  * pots.
  */
 public final class Gnomes {
 	public static EntityType<Gnome> GNOME;
+	/** The most gnomes a house holds: a gnome tower's spawner counts only zombies, so it would never stop making ours. */
+	static final int HOUSE_MAX = 6;
 
 	/** Structure gnomes taken out as they loaded, to be put back as ours at the end of the tick. */
 	private record Swap(ServerLevel level, Vec3 pos, float yRot, boolean shield) {
@@ -57,6 +60,9 @@ public final class Gnomes {
 				return;
 			}
 			for (Swap s : List.copyOf(SWAPS)) {
+				if (Gnome.house(s.level(), s.pos()).size() >= HOUSE_MAX) {
+					continue;
+				}
 				Gnome g = GNOME.create(s.level(), EntitySpawnReason.CONVERSION);
 				if (g != null) {
 					g.snapTo(s.pos().x, s.pos().y, s.pos().z, s.yRot(), 0.0F);

@@ -1,7 +1,8 @@
 # Gnomes: real gnomes with their own model, gardens and temper
 - **Gnomes**: the "Gnome" and "Angry Gnome" zombies in player heads that ATi Structures' gnome huts and Grim Kingdoms'
   gnome towers place are now real gnomes. Each one turns into ours where it stands (from a new structure, its spawner or
-  an old chunk), keeps its shield, and that spot is its house. Our own model (`kingdoms/tools/gen_gnome.py`), not
+  an old chunk), keeps its shield, and that spot is its house. A house holds at most 6, so a gnome tower's spawner
+  can't fill the woods. Our own model (`kingdoms/tools/gen_gnome.py`), not
   copied from either mod: a tall red cap that flops back, a white beard, a big nose, a blue tunic, a stick, and a plank
   shield on some. It has idle, walk, run, bonk, gardening, digging and hurt animations, and a high villager grumble for
   a voice.
