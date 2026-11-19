@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: lanterns-01-crime-small
 branch: claude/lanterns-01-crime-small
 with: Claude Code (PC)
@@ -28,3 +28,4 @@ owns:
 
 ## Done
 Guards and villagers who see a crime wake the nearest sleeper of their faction, who comes over and remembers it as hearsay. Guards who know of a recent crime you aren't wanted for watch you, and one follows at a distance (a golem does it if no guard is near). CI build passes; not played.
+- 2026-11-18 19:07 PR #1751 is merged into master; moved to Agents/Done.

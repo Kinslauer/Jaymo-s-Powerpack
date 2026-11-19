@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: any
 from: coordinator (Buder's Lanterns cross-reference thread)
 asked: 2026-11-18
@@ -32,4 +32,4 @@ suggested_owns:
 - One PR per patch with `changes/<mod>/<branch>.md`; never touch `version=`, MODLOGs or codemap. Andy tests by merging. Run 2 patches at a time.
 
 ## Notes
-- 
+- 2026-11-18 19:07 PR #1754 is merged into master; moved to Inbox/Done.

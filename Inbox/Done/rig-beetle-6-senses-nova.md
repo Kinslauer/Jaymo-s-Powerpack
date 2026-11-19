@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: any
 from: coordinator (Zemo Baki cross-reference thread)
 asked: 2026-11-18
@@ -40,3 +40,4 @@ text_pass: done
 
 ## Notes
 - 2026-11-18 18:45 Text pass: rig.json — added message.jaymospowers.rig.nova_cooldown ("Nova on cooldown: %ss") and RigMind say keys cloak_on, cloak_off, ambush, nova, override for the loyal, dry and grim personalities (no code changed); added changes/powers/rig-beetle-6-senses-nova.md. Pushed branch claude/rig-beetle-6-senses-nova-text; no PR opened.
+- 2026-11-18 19:07 PR #1776 is merged into master; moved to Inbox/Done.

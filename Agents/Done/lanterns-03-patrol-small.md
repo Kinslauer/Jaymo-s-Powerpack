@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: lanterns-03-patrol-small
 branch: claude/lanterns-03-patrol-small
 with: Claude Code (PC)
@@ -24,3 +24,4 @@ owns:
 
 ## Done
 Patrolmen give relief runs (6 dried limphium leaves to any town's cleric, for silver and TP). "Reporting in" reads out your Patrol file. Compiled on the PC, CI passes; not played.
+- 2026-11-18 19:07 PR #1754 is merged into master; moved to Agents/Done.
