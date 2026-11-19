@@ -61,7 +61,7 @@ import org.jspecify.annotations.Nullable;
  * in their own tongue), never chat.</li>
  * <li><b>The spit</b> (with Jaymo's Kitchen, {@link KitchenSpits}): one of them gets up to cook, puts a spit over the
  * fire if there isn't one, and roasts meat on it a few pieces at a time, from the camp's own larder ({@link CampLarder}: its
- * chests and barrels round the fire, and what its hunters, {@link CampHunters}, set down by it), and nothing else: a camp
+ * chests and barrels round the fire, and what its hunters, {@link Hunters}, set down by it), and nothing else: a camp
  * whose larder is bare goes hungry. Each piece cooked is torn off and carried round:
  * everyone at the fire gets a share, then a player the camp lets be who's sat with them, then the captives get the
  * scraps, and the cook eats last. Left too long, it burns.</li>

@@ -23,5 +23,15 @@
 	"spirits.jaymoskingdoms.starving.0": "I can't remember the last time I ate.",
 	"spirits.jaymoskingdoms.starving.1": "My legs won't hold me much longer.",
 	"spirits.jaymoskingdoms.starving.2": "Please. Anything. Even scraps.",
-	"spirits.jaymoskingdoms.starving.3": "The little ones are crying from hunger."
+	"spirits.jaymoskingdoms.starving.3": "The little ones are crying from hunger.",
+	"comrades.jaymoskingdoms.forage.out.0": "I'll see what's growing out there.",
+	"comrades.jaymoskingdoms.forage.out.1": "Berries should be ripe by now.",
+	"comrades.jaymoskingdoms.forage.out.2": "I'm off to pick what I can find.",
+	"comrades.jaymoskingdoms.forage.back.0": "Berries and mushrooms. Better than nothing.",
+	"comrades.jaymoskingdoms.forage.back.1": "Here's what I found.",
+	"comrades.jaymoskingdoms.forage.back.2": "A good armful today.",
+	"speech.jaymoskingdoms.ranger.folk_caught": "That's the last beast you take from this wood. You're coming with me, %s.",
+	"message.jaymoskingdoms.ranger.folk_taken": "%1$s carries %2$s off trussed to %3$s for poaching. They won't be back.",
+	"message.jaymoskingdoms.ranger.folk_fined": "%1$s brings %2$s before %3$s for poaching. Their realm pays the fine.",
+	"message.jaymoskingdoms.ranger.folk_let_off": "%1$s cuts %2$s loose with a warning: there's no court near to take a poacher to."
 }

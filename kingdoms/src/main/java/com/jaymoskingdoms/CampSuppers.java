@@ -44,7 +44,7 @@ import net.minecraft.world.phys.Vec3;
  * sits ({@link GroundSeats}) and eats: each a bite of what's in the camp's larder ({@link CampLarder}), whatever they've
  * hunted or taken, and nothing that isn't there. Whoever finds nothing left sits with the rest and goes without, and is
  * weak with hunger ({@link CampLarder#hungry}) till they next eat; a camp whose larder stays bare sends its hunters out
- * ({@link CampHunters}).
+ * ({@link Hunters}).
  * <ul>
  * <li><b>Ambush</b>: while they eat they're slow to look up: a sneaking player farther than {@link #UNWARY} isn't
  * noticed, and the first blow on one who hadn't seen you lands {@link #AMBUSH} times as hard; the rest scramble up
