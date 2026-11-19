@@ -925,6 +925,7 @@ public final class Senses {
 		if (sp.level() instanceof ServerLevel level) {
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 0.8F, 0.8F);
 			level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY(0.6), target.getZ(), 10, 0.25, 0.3, 0.25, 0.2);
+			PowersCompat.critCue(level, target.position().add(0.0, target.getBbHeight() * 0.6, 0.0), sp);
 		}
 		sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.senses.sneak_attack").withStyle(ChatFormatting.GRAY));
 		Skills.sneakAttack(sp, now);
@@ -947,7 +948,8 @@ public final class Senses {
 		if (rank <= 0 || !fromRear(target, sp) || cooling(target, source)) {
 			return 0.0F;
 		}
-		return SNEAK_ATTACK_RANK_MULT[Math.min(rank, SNEAK_ATTACK_RANK_MULT.length) - 1];
+		// Jaymo's Powers' sneak attack power (a held dagger, the hidden blade) multiplies it
+		return SNEAK_ATTACK_RANK_MULT[Math.min(rank, SNEAK_ATTACK_RANK_MULT.length) - 1] * CritPower.sneak(sp);
 	}
 
 	/**
@@ -968,8 +970,9 @@ public final class Senses {
 			Vec3 at = mob.position().add(0.0, mob.getBbHeight() * 0.6, 0.0);
 			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 0.5F, 1.0F);
 			level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 5, 0.2, 0.25, 0.2, 0.2);
-			PowersCompat.critCue(level, at);
+			PowersCompat.critCue(level, at, sp);
 		}
-		return amount * BACKSTAB_MULT;
+		// (hs_attrs) the sneak attack power scales the bonus part: a dagger backstabs harder
+		return amount * (1.0F + (BACKSTAB_MULT - 1.0F) * CritPower.sneak(sp));
 	}
 }
