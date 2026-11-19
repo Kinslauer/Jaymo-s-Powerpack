@@ -204,7 +204,7 @@ public final class ClashFx {
 	}
 
 	/** A weapon of wood or bare stick (a wooden sword, a club, a staff): no sparks off it. */
-	private static boolean woodenWeapon(ItemStack stack) {
+	static boolean woodenWeapon(ItemStack stack) {
 		String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().toLowerCase(Locale.ROOT);
 		for (String word : path.split("[_./]")) {
 			if (word.equals("wooden") || word.equals("wood") || word.equals("club") || word.equals("staff") || word.equals("stick")
