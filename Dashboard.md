@@ -10,7 +10,6 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · no PR number on the task · ready
 
 **Questions for you:**
-- [[Inbox/harness-body-pieces|harness-body-pieces]] · 2026-11-18 03:09 Question: Task says 'Start after harness-helms-finishes-crests merges' but PR #1721 is still in review. Should I start this task now or wait f…
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-18 21:42 Question: tools/voices/refs/narrator.wav is missing on this PC (E:/Origins Mod/tools/voices/refs/ doesn't exist). Without the narrator's refer…
 - [[Inbox/scrying-orb|scrying-orb]] · 2026-11-18 21:37 Text pass: kingdoms/lang/parts/scrying-orb.json - sighted_shard.default_name now '%s: %d, %d, %d', so shards read 'Sighted Shard (overworld: x…
 - [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · 2026-11-19 15:02 Question: Where exactly is 'down there' for the underground Stoneborn holds and goblin villages? The layer stack is now: high sky, Aether, Clo…
@@ -29,7 +28,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-22 waiting for a bot, 1 being built, 1 in review: see [[Kanban]].
+23 waiting for a bot, 1 being built, 1 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
