@@ -27,6 +27,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
+import com.jaymoskingdoms.sailing.ShotKind;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -35,6 +36,12 @@ import org.jspecify.annotations.Nullable;
  * cannon swings round to his foe, raises its barrel for the distance and fires a {@link Cannonball} every so often,
  * from {@link #NEAREST} to {@link #FURTHEST} blocks (a foe closer than that gets his arrows). It doesn't move, nor block
  * anyone; players can break it with {@link #HEALTH} worth of blows. Should its kingdom grow poor, it's sold off.
+ * <p>
+ * Andy (2026-11-19): "these should work for the ship cannons too. they can also make and fire explosive shells, but these
+ * are expensive." It loads the ship guns' five kinds of shot ({@link ShotKind}, {@link #pick}): grape at a foe close in or
+ * a knot of them, chain at a rider, heavy shot at a big or well-armoured foe (and often, from a siege gun, to batter),
+ * round shot otherwise; and an explosive shell at a crowd or a great beast, but only while its realm is rich, the shell
+ * paid for out of the treasury ({@link #SHELL_COST}).
  */
 public final class Cannon extends Entity {
 	/** It fires at a foe from this far to this far (blocks). */
@@ -62,6 +69,16 @@ public final class Cannon extends Entity {
 	static final byte FIRED = 60;
 	/** How long the barrel's kick lasts (ticks). (0.7.490) The gun runs back fast and is hauled up again slowly. */
 	public static final int RECOIL_TICKS = 16;
+	/** (2026-11-19) What an explosive shell costs its realm's treasury (its three TNT and its ball), and how rich the realm
+	 * must be over that to fire one ({@link Muskets#ARM_TREASURY}, so shells never bring it near selling its guns). */
+	static final long SHELL_COST = 40L;
+	/** Grape is loaded only for a foe this near (blocks); a knot is this many foes within {@link #KNOT} blocks of the mark. */
+	static final double GRAPE_REACH = 15.0, KNOT = 3.5;
+	static final int KNOT_GRAPE = 2, KNOT_SHELL = 3;
+	/** A foe this heavy (max health) or this well armoured gets heavy shot; this heavy, a shell if the realm can pay. */
+	static final float HEAVY_HEALTH = 40.0F, HEAVY_ARMOUR = 10.0F, SHELL_HEALTH = 80.0F;
+	/** How often a siege gun with nothing better loads heavy shot to batter. */
+	static final float SIEGE_HEAVY = 0.35F;
 
 	public static EntityType<Cannon> TYPE;
 
@@ -75,6 +92,8 @@ public final class Cannon extends Entity {
 	/** A war party's field gun ({@link SiegeTrain}): pushed by its crew, worked by the first of them, never saved. Null for a kingdom's own. */
 	@Nullable Haul haul;
 	private @Nullable LivingEntity mark;
+	/** (2026-11-19) The shot it has loaded for its next round, or null while it hasn't picked one. Never saved. */
+	private @Nullable ShotKind loaded;
 
 	/** Client side: ticks since it last fired, and its barrel's pitch last tick. */
 	public int sinceFired = RECOIL_TICKS;
@@ -222,18 +241,67 @@ public final class Cannon extends Entity {
 		if (flat < NEAREST || flat > FURTHEST) {
 			return;
 		}
+		// (2026-11-19) the shot for this foe: grape loaded for one who has since drawn off is drawn and the gun loaded
+		// afresh (a shell, paid for, stays in)
+		if (this.loaded == null || this.loaded == ShotKind.GRAPE && flat > GRAPE_REACH) {
+			this.loaded = this.pick(level, gunner, foe, flat);
+		}
+		ShotKind kind = this.loaded;
 		// swing round to the foe, the barrel raised for the distance
 		float want = (float) (Mth.atan2(-dx, dz) * Mth.RAD_TO_DEG);
 		float turn = Mth.clamp(Mth.wrapDegrees(want - this.getYRot()), -TRAVERSE, TRAVERSE);
 		this.setYRot(this.getYRot() + turn);
-		float pitch = Mth.clamp(elevation(flat, aimAt.y - pivot.y), MIN_PITCH, MAX_PITCH);
+		float pitch = Mth.clamp(elevation(flat, aimAt.y - pivot.y, Cannonball.SPEED * kind.speed, Cannonball.GRAVITY * kind.gravity), MIN_PITCH, MAX_PITCH);
 		float lift = Mth.clamp(pitch - this.barrelPitch(), -TRAVERSE, TRAVERSE);
 		this.entityData.set(PITCH, this.barrelPitch() + lift);
 		if (now >= this.next && Math.abs(Mth.wrapDegrees(want - this.getYRot())) < ON_MARK && Math.abs(pitch - this.barrelPitch()) < ON_MARK
 			&& gunner.getSensing().hasLineOfSight(foe)) {
 			this.next = now + RELOAD + level.getRandom().nextInt(JITTER);
-			this.fire(level, gunner, pivot, flat);
+			this.fire(level, gunner, pivot, flat, kind);
+			this.loaded = null;
 		}
+	}
+
+	/**
+	 * (2026-11-19) The shot its gunner loads for {@code foe}, {@code flat} blocks off. A shell is paid for here, out of its
+	 * realm's treasury; with too little there, the gun takes heavy or round shot instead.
+	 */
+	private ShotKind pick(ServerLevel level, PathfinderMob gunner, LivingEntity foe, double flat) {
+		float roll = level.getRandom().nextFloat();
+		int knot = this.knot(level, gunner, foe);
+		if (flat <= GRAPE_REACH && (knot >= KNOT_GRAPE || roll < 0.5F)) {
+			return ShotKind.GRAPE;
+		}
+		boolean big = foe.getMaxHealth() >= SHELL_HEALTH;
+		if ((knot >= KNOT_SHELL || big) && this.payForShell(level)) {
+			return ShotKind.SHELL;
+		}
+		if (foe.isPassenger() && roll < 0.6F) {
+			// chain scythes through a rider and his mount
+			return ShotKind.CHAIN;
+		}
+		if (big || foe.getMaxHealth() >= HEAVY_HEALTH || foe.getArmorValue() >= HEAVY_ARMOUR || this.haul != null && roll < SIEGE_HEAVY) {
+			return ShotKind.HEAVY;
+		}
+		return ShotKind.ROUND;
+	}
+
+	/** How many of the gunner's foes stand within {@link #KNOT} blocks of {@code foe}, counting it. */
+	private int knot(ServerLevel level, PathfinderMob gunner, LivingEntity foe) {
+		return level.getEntitiesOfClass(LivingEntity.class, foe.getBoundingBox().inflate(KNOT),
+			e -> e == foe || e.isAlive() && !e.isSpectator()
+				&& (e instanceof net.minecraft.world.entity.monster.Enemy || e instanceof Player || e.getType() == foe.getType())
+				&& (this.haul != null ? SiegeTrain.harms(gunner, e) : Javelins.harms(gunner, e))).size();
+	}
+
+	/** Its realm pays {@link #SHELL_COST} for a shell, if it's rich enough to; whether it did. */
+	private boolean payForShell(ServerLevel level) {
+		Faction f = Factions.get(level.getServer(), this.faction);
+		if (!Muskets.afford(f, Muskets.ARM_TREASURY + SHELL_COST)) {
+			return false;
+		}
+		Factions.update(level.getServer(), f.id(), x -> x.withTreasury(Math.max(0L, x.treasury() - SHELL_COST)));
+		return true;
 	}
 
 	/** At rest: the barrel lowered back to level. */
@@ -244,9 +312,11 @@ public final class Cannon extends Entity {
 		}
 	}
 
-	/** The barrel's elevation (degrees) that lands a ball {@code flat} blocks off and {@code up} blocks higher: the low arc, or 45 if out of reach. */
-	static float elevation(double flat, double up) {
-		double v = Cannonball.SPEED, g = Cannonball.GRAVITY;
+	/**
+	 * The barrel's elevation (degrees) that lands a shot leaving at {@code v} and falling {@code g} (blocks per tick, per
+	 * tick) {@code flat} blocks off and {@code up} blocks higher: the low arc, or 45 if out of reach.
+	 */
+	static float elevation(double flat, double up, double v, double g) {
 		double root = v * v * v * v - g * (g * flat * flat + 2.0 * up * v * v);
 		if (root < 0.0) {
 			return 45.0F;
@@ -259,12 +329,12 @@ public final class Cannon extends Entity {
 		return Vec3.directionFromRotation(-this.barrelPitch(), this.getYRot());
 	}
 
-	private void fire(ServerLevel level, PathfinderMob gunner, Vec3 pivot, double flat) {
+	private void fire(ServerLevel level, PathfinderMob gunner, Vec3 pivot, double flat, ShotKind kind) {
 		Vec3 dir = this.barrel();
 		double stray = SPREAD * flat / Cannonball.SPEED;
 		dir = dir.add(level.getRandom().triangle(0.0, stray), level.getRandom().triangle(0.0, stray * 0.5), level.getRandom().triangle(0.0, stray)).normalize();
 		Vec3 muzzle = pivot.add(dir.scale(MUZZLE));
-		Cannonball.fire(level, gunner, muzzle, dir);
+		Cannonball.fire(level, gunner, muzzle, dir, kind);
 		// the report rings the ears of those standing near
 		Deafened.blast(level, muzzle, Deafened.BLAST);
 		level.sendParticles(ParticleTypes.EXPLOSION, muzzle.x, muzzle.y, muzzle.z, 1, 0.0, 0.0, 0.0, 0.0);
