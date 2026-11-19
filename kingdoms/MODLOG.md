@@ -15335,3 +15335,15 @@ Not tested in game.
 
 Hackers 'n Slashers patch 3, the town half (Andy: "you should see the blacksmith sharpening its guards' blades"). With Jaymo's Powers' blades wearing dull (its `Edge`), `Whetting`: in the working day an idle weaponsmith, armourer or toolsmith takes notice of a town guard (MCA villager) within 24 blocks whose blade is dull, walks to a grindstone (their workstation, or one within 8 blocks of it), and is seen working it for 6 to 10 seconds: the guard's blade in their hand, sparks off the wheel, the grinding sound, swings. The guard's edge is then keen. One smith per guard at a time. Without Powers nothing dulls and nothing happens.
 - Not played; compiles in CI.
+
+## 0.10.70 (2026-11-19): Powerborne Heroes picks - sorcerer second jump, Ember and Divine-born sprint moves, Battle Rhythm perk (#1816)
+
+- **Sorcerers of fire, lightning and wind jump again in the air**
+  - A Fire, Lightning or Wind (air) Sorcerer gets one more jump in the air: a burst of fire, a crack of lightning, or a gust under the feet. Once per time off the ground, a little hunger, and fall damage still counts from the top of the jump.
+  - With a power of Jaymo's Powers (which has its own second jump) or a cloud in a bottle, those answer the press first and the Sorcerer's jump waits.
+- **Heritage key, sprinting: Divine-born ward and Emberborn rise and crash**
+  - Sprinting and pressing the heritage key now asks Jaymo's Powers for the Divine-born's healing ward (also for one who stayed at the Judge) or the Emberborn's rise and crash. Without Powers, or when Powers declines, the key does what it did. `Heritage#gift`, `PowersCompat#sprintMove`.
+- **Battle Rhythm perk**
+  - New Might perk, Battle Rhythm (tier 2): Jaymo's Powers quickens your attacks a step at a time while you keep landing blows. The Shieldbearer description now lists the new shield moves.
+  - Key classes: Skills.Perk.BATTLE_RHYTHM, TreeLocks.Lock.BATTLE_RHYTHM, lang part battle-rhythm.json.
+- Built; not played.
