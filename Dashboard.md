@@ -17,7 +17,7 @@ Nothing stuck.
 
 ## On the board
 
-24 waiting for a bot, 4 being built, 1 in review: see [[Kanban]].
+25 waiting for a bot, 4 being built, 1 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
