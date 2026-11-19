@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "#jaymospowers:armour_oil_fats"
+  ],
+  "result": {
+    "id": "jaymospowers:armour_oil",
+    "count": 1
+  }
+}

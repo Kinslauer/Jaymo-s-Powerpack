@@ -206,6 +206,11 @@ public final class Harness {
 		refresh(wearer);
 	}
 
+	/** The harness's pieces were changed where they lie (fitted, oiled): saved and sent to every client again. */
+	static void resync(LivingEntity wearer) {
+		put(wearer, new ArrayList<>(worn(wearer)));
+	}
+
 	/** Takes everything off {@code wearer} (nothing is dropped). */
 	public static void clear(LivingEntity wearer) {
 		put(wearer, NONE);
@@ -294,6 +299,7 @@ public final class Harness {
 			modifier(wearer, Attributes.ARMOR, slot, piece == null ? 0.0 : piece.armour());
 			modifier(wearer, Attributes.ARMOR_TOUGHNESS, slot, piece == null ? 0.0 : piece.toughness());
 		}
+		Fitting.bonus(wearer);
 	}
 
 	private static void modifier(LivingEntity wearer, Holder<Attribute> attribute, Slot slot, double amount) {
@@ -347,6 +353,8 @@ public final class Harness {
 
 	/** Pieces that no longer fit how {@code player} is dressed (spaulders without a chest piece, a crest without a helm) or that they may not wear come off into the inventory. */
 	private static void check(ServerPlayer player) {
+		// (a fitted helm, cuirass or sabatons put on or taken off in the inventory counts here)
+		Fitting.bonus(player);
 		List<ItemStack> worn = worn(player);
 		if (worn == NONE) {
 			return;

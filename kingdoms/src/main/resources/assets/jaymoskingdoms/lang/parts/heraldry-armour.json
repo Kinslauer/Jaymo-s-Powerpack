@@ -44,5 +44,10 @@
 	"harness.jaymoskingdoms.slot.crest": "Crest",
 	"harness.jaymoskingdoms.slot.neck": "Neck",
 	"harness.jaymoskingdoms.slot.waist": "Waist",
-	"message.jaymoskingdoms.gilded_refused": "Gilded plate is for royals and lords."
+	"message.jaymoskingdoms.gilded_refused": "Gilded plate is for royals and lords.",
+	"message.jaymoskingdoms.fitting.fitted": "The armourer fits %s pieces of your plate to you for %s emeralds. They sit lighter and guard better, on you and nobody else.",
+	"message.jaymoskingdoms.fitting.short": "The armourer wants %s emeralds a piece.",
+	"message.jaymoskingdoms.fitting.nothing": "The armourer looks you over. Nothing you're wearing needs fitting.",
+	"tooltip.jaymoskingdoms.fitted.you": "Fitted to you",
+	"tooltip.jaymoskingdoms.fitted.other": "Fitted to someone else"
 }
