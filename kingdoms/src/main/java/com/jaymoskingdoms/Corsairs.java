@@ -670,6 +670,10 @@ final class Corsairs implements Ship.Captaincy {
 		if (crew.gunners.isEmpty()) {
 			return;
 		}
+		if (!SkyShips.sky(crew)) {
+			// (2026-11-19) a sea ship's magazine made up in home waters (ShipMagazine)
+			ShipMagazine.resupply(level, ship, crew, foe, now);
+		}
 		boolean monkey = false;
 		Map<UUID, LivingEntity> aboard = new java.util.HashMap<>();
 		for (LivingEntity e : ship.crewAboard()) {
@@ -696,8 +700,10 @@ final class Corsairs implements Ship.Captaincy {
 				} else if (now >= ready) {
 					crew.loading.remove(gun);
 					ShotKind kind = this.pick(level, ship, crew, foe);
-					// (an airship's guns load from her hold: powder and shot spent, and none left, none fired)
-					if (SkyShips.sky(crew) && (kind = SkyShips.charge(ship, kind)) == null) {
+					// (an airship's guns load from her hold, (2026-11-19) a sea ship's from her magazine: powder and
+					// shot spent, and none left, none fired)
+					kind = SkyShips.sky(crew) ? SkyShips.charge(ship, kind) : ShipMagazine.charge(crew, kind);
+					if (kind == null) {
 						continue;
 					}
 					ship.loadGun(gun, kind);

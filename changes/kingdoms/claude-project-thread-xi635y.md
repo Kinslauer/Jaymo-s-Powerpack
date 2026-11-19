@@ -1,11 +1,10 @@
-# Cannon shot types for wall and siege guns, Explosive Shell costs TNT
-- **Explosive Shell** recipe is now a Round Shot and **3 TNT** (was 3 gunpowder). Andy: "they should require 3 tnt instead of 3 gunpowder."
-- **Wall cannons and siege field guns load all five shot types** (Andy: "these should work for the ship cannons too. they can also make and fire explosive shells, but these are expensive"). The gunner picks the shot for his foe:
-  - **Grape** at a foe within 15 blocks, always at two or more foes standing together. It spreads where its short flight ends.
-  - **Explosive Shell** at a knot of three or more foes, or a great beast (80+ max health). The realm pays 40 from its treasury for each one, and only fires shells while it holds at least 1,040, so shells never push it toward selling its guns. A realm that can't pay loads heavy or round shot instead.
-  - **Chain** at a mounted foe, most of the time, to cut down the rider and his mount.
-  - **Heavy** at a big or well-armoured foe (40+ max health or 10+ armour). A siege gun also loads it about a third of the time to batter.
-  - **Round** otherwise, as before.
-- Each kind flies, hits, bursts, shoves and craters as it does from a ship's gun, and the barrel is laid for that kind's flight. Round shot keeps the old field-gun pit. A wall gun still never craters its own realm's land or buildings. The ball in flight is drawn as its item, and a shell's fuse sputters.
-- Classes: `Cannon` (`pick`, `knot`, `payForShell`, `SHELL_COST`), `Cannonball` (`fire(..., ShotKind)`, synced kind).
+# NPC sea ships pay for their powder and shot
+- Andy said "yes" to making NPC sea ships pay for their ammo the way airships do. **Every sea ship sailed by her own crew now carries a magazine**: gunpowder and a count of each of the five shot types. Each round a gunner loads spends 1 powder and 1 shot. He loads the type he wants if she has it, otherwise round, heavy, chain or grape, whichever is left. He never falls back to a shell he didn't ask for. With no powder, or no shot of any kind, her guns stay empty.
+- **Stock at launch** (ships saved before this are stocked the first time they load): a warship carries 36 powder, 18 round, 7 heavy, 5 chain, 5 grape and 2 shells. A pirate carries 28 powder, 14 round, 5 heavy, 4 chain, 4 grape and 1 shell. A merchantman, whaler or fishing smack carries 8 powder, 6 round and 2 grape.
+- **Topping up**: within 80 blocks of home and with no ship to fight, she is topped up once a minute.
+  - A realm's ship is paid for from its treasury: powder 2, round 2, heavy 5, chain 4, grape 3. A shell costs 40, and is bought only while the realm holds at least 1,040, the same rule as its wall guns.
+  - A pirate takes what she needs from her cove's storage. Her cove makes a shell from 3 TNT, or from 15 gunpowder if it has more than 23, plus a round shot.
+  - Pirate coves now cast 2 round shot a day so their ships don't run dry.
+- Airships are unchanged and still load from their hold's chests.
+- Classes: new `ShipMagazine`; `Crew.magazine` (saved); `Corsairs.gunnery`; `PirateCoves.DAY_SHOT`.
 - Built; not played.
