@@ -15571,3 +15571,8 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - **One introduction scene** (Andy: "one should introduce themselves and the others join if nearby, if they miss the scene they can do it next time you encounter"): the first captain to notice you names himself, then up to 2 more captains within 12 blocks of him who haven't met you each get their own short speaker shot right after (5 s, new `captain.join` lines in the common, orc and goblin voices), one continuous letterboxed scene. All of them stand for it and you take no harm until it ends or you strike (a blow ends it for all of them). A captain who missed it waits 3 minutes after the scene before he introduces himself (`INTRO_GAP`), and nobody starts one while you're in another film.
 - **Readable bubbles**: a bubble now shrinks by how far the words are from the camera, not the speaker's feet, so a film's camera up by the words no longer blows them up across the top of the screen (`SpeechBubbles.submit`).
 - Built; not played.
+
+## 0.10.98 (2026-11-19): Goblins take the downed alive too (#1860)
+
+- Andy: "goblins should enslave you too". Any goblin now binds a downed player and carries them off to its village's chains (or the nearest camp's): a village's goblins (already counted, since goblin villages are camp factions), its scouts (`GoblinScout.camp()`), and wild ones (`Captors.goblin`, `TakenAlive.taker`). Goblin scouts now also take captive a player they leave for dead (`Captors.sentient`, `Captors.campOf`).
+- Built; not played.
