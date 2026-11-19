@@ -52,6 +52,9 @@ final class RigHelmView {
 		static final int CELL = 4, FIGURE_EDGE = 44;
 		/** The target's health bar: width in pixels. */
 		static final int HEALTH_WIDTH = 34;
+		/** The Mind's verdict on a hostile: "melt it" from this many times the wearer's health, or this much armour; else "kill it". */
+		static final float MELT_HEALTH = 2.0F;
+		static final int MELT_ARMOR = 10;
 		/** The target's card: its gap from the bracket, a line's height, the widest its text runs (pixels) and its backing. */
 		static final int CARD_GAP = 6, CARD_LINE = 9, CARD_MAX = 90, CARD_BACK = 0x70081018;
 		/** The overcharge frame's colour. */
@@ -234,7 +237,14 @@ final class RigHelmView {
 			lines.add(held.getHoverName());
 		}
 		boolean hostile = entity instanceof Enemy || entity instanceof Mob mob && mob.getTarget() != null;
-		lines.add(Component.translatable(hostile ? "rig.jaymospowers.view.hostile" : "rig.jaymospowers.view.calm"));
+		Component standing = Component.translatable(hostile ? "rig.jaymospowers.view.hostile" : "rig.jaymospowers.view.calm");
+		// the Mind's verdict, in its own words
+		String mind = com.jaymospowers.rig.Rig.core(player).get(com.jaymospowers.rig.Rig.MIND);
+		if (mind != null) {
+			String verdict = !hostile ? "ignore" : entity.getMaxHealth() >= player.getMaxHealth() * MELT_HEALTH || entity.getArmorValue() >= MELT_ARMOR ? "melt" : "kill";
+			standing = standing.copy().append(" · ").append(Component.translatable("rig.jaymospowers.mind." + mind + ".verdict." + verdict));
+		}
+		lines.add(standing);
 		boolean tagged = RigScanClient.color(entity) != 0;
 		if (tagged) {
 			lines.add(Component.translatable("rig.jaymospowers.view.tagged"));

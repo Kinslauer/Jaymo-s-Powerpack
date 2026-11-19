@@ -100,6 +100,9 @@ public final class RigClient {
 			takeoverThreat = payload.threat();
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(RigClient::tick);
+		// the Mind's autopilot and the visor's combat log
+		RigPilotClient.init();
+		RigLogClient.init();
 		// (0.11.104) the worn suit, drawn and assembled
 		RigSuit.init();
 		// the Forge's hologram
@@ -494,6 +497,11 @@ public final class RigClient {
 				want = want.add(0.0, -FLIGHT_CLIMB * (hyper ? RigFlightFeel.HYPER_SPEED : 1.0), 0.0);
 			} else if (want.lengthSqr() < 1.0E-4) {
 				want = new Vec3(0.0, Math.sin(hoverTicks * 0.15) * HOVER_BOB, 0.0);
+			}
+			// the Mind's autopilot, until a movement key takes the controls back
+			Vec3 pilot = RigPilotClient.want(minecraft, player, FLIGHT_SPEED * air * FLIGHT_SPRINT);
+			if (pilot != null) {
+				want = pilot;
 			}
 			// walls and floors stop you (the server hurts a hard stop)
 			Vec3 actual = player.getDeltaMovement();
