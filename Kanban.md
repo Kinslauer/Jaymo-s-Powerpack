@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 22:24). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 22:27). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -54,7 +54,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/plan-ghosts-litematica-tools|plan-ghosts-litematica-tools]] · plan-ghosts-litematica-tools · #1851 · in-review
 - [ ] [[Inbox/smoothmount-1-climb-on-off|smoothmount-1-climb-on-off]] · ☀️ Apollo · #1869 · in-review
-- [ ] [[Agents/great-spit|great-spit]] · 💻 Odysseus · #1881 · in-review
 
 
 ## Needs Andy
