@@ -30,7 +30,7 @@ public final class WineTrade {
 
 	static void register() {
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
-			if (hand != InteractionHand.MAIN_HAND || player.isSpectator() || !player.isShiftKeyDown() || !entity.getType().is(BUYERS)) {
+			if (hand != InteractionHand.MAIN_HAND || player.isSpectator() || !player.isShiftKeyDown() || !entity.is(BUYERS)) {
 				return InteractionResult.PASS;
 			}
 			ItemStack held = player.getMainHandItem();
