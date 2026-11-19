@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: underground-stoneborn-goblin-villages
 branch: claude/underground-stoneborn-goblin-villages
 with: 
@@ -33,3 +33,4 @@ owns:
 - HeritageVariants.ARACHNID currently only Land.DARK; Land.DEEP exists
 
 ## Done
+- 2026-11-19 15:36 No sign of work for 30 min: marked stalled (whoever ran it stopped).
