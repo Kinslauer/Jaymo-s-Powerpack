@@ -19,7 +19,8 @@ import net.minecraft.world.entity.npc.villager.Villager;
  * ({@link ZFighterFolk#ask}) of what can be done there: call a festival (a lord or ruler of the realm), march with your
  * realm's war party, mark a plot where you stand, choose what goes up on your plot (a second screen of the buildings),
  * give up your plot, and have something carried (what's in your hand, to whom: a second screen of the players about,
- * by the names they go by), and (Andy, 2026-11-14) read the town's ledger ({@link TownLedger}). Each does what its
+ * by the names they go by), and (Andy, 2026-11-14) read the town's ledger ({@link TownLedger}), and ask them anything
+ * ({@link AskTopics}). Each does what its
  * old command did, with the same rules and the same words back. Answers
  * that can't be had here are greyed.
  */
@@ -57,8 +58,9 @@ public final class TalkErrands {
 			Component.translatable("talk.jaymoskingdoms.errands.plot_clear"),
 			Component.translatable("talk.jaymoskingdoms.errands.courier"),
 			Component.translatable("talk.jaymoskingdoms.errands.ledger"),
+			Component.translatable("talk.jaymoskingdoms.errands.ask_something"),
 			Component.translatable("talk.jaymoskingdoms.errands.leave"));
-		List<Boolean> enabled = List.of(lord, atWar, true, true, true, holding, TownLedger.keeps(speaker), true);
+		List<Boolean> enabled = List.of(lord, atWar, true, true, true, holding, TownLedger.keeps(speaker), AskTopics.canAsk(speaker), true);
 		ZFighterFolk.ask(player, speaker, Component.translatable("talk.jaymoskingdoms.errands.ask"), options, enabled, pick -> {
 			switch (pick) {
 				case 0 -> run(player, "kingdom festival");
@@ -71,6 +73,7 @@ public final class TalkErrands {
 				case 4 -> Plots.clear(player);
 				case 5 -> couriers(player, speaker);
 				case 6 -> TownLedger.give(player, speaker);
+				case 7 -> AskTopics.open(player, speaker);
 				default -> {
 				}
 			}
