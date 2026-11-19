@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 16:34). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 16:37). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -47,7 +47,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · ☀️ Apollo · #1787 · changes · fixing review notes
-- [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · claimed
 - [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · claimed
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · claimed
 
@@ -69,8 +68,8 @@ kanban-plugin: board
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/harness-upkeep|harness-upkeep]]
 - [x] [[Inbox/Done/harness-body-pieces|harness-body-pieces]]
+- [x] [[Inbox/Done/harness-upkeep|harness-upkeep]]
 - [x] [[Inbox/Done/medieval-deco-7-practice-dummy|medieval-deco-7-practice-dummy]]
 - [x] [[Inbox/Done/medieval-deco-5-farm-water|medieval-deco-5-farm-water]]
 - [x] [[Inbox/Done/medieval-deco-4-drinks|medieval-deco-4-drinks]]
