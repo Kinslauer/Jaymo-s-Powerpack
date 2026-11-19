@@ -1861,6 +1861,19 @@ and noise hard to bear. Folk above call them things that crawled out of a hole, 
 **Hollow and the living.** The grave's cold stays in them and the living know them on sight. A Hollow is what a dead
 man's wound makes of you, and no village is easy with the proof of that standing at the well.
 
+**The Pallid, whom the grave turns away** (new; Claude's placement for Andy's deathless Pallid, 2026-11-19). The Pallid
+are the Hollow's first look: those any of the dead cut down who came back grey, a cold glow in the veins and nothing more of
+the grave than that. They are the ones it will not keep. A Pallid who dies lies cold where they fell for a while, then gets
+up there again, whole: no new wound, no fever, nothing taken. There is no blood in them to spill, and they never hunger or
+thirst, though they eat for the taste of what they remember, and a meal still knits a Pallid's body as it knits anyone's.
+Only what leaves nothing to get up ends one: the head taken, the fall into the void, the molten rock, the Nether's
+last chance spent, or a deliberate execution at the hands of another wanderer like them or of a great power (a dragon, a king, the
+Wither). Then the grave has them as it has anyone, and they are born again through the story. Townsfolk keep count. A Pallid
+seen once is a Hollow; seen dying and getting up again, day after day, they become a fixture of the place, talked of at the
+well and met by each in their own way: the kind leave a bowl out, the timid run until they no longer do, the devout call it
+wrong and then, after enough times, a sign, the spiteful wait for the next fall, and the greedy wonder what the trick would
+fetch.
+
 **Divine-born and the wicked**, and, quietly, Divine-born and everyone else. They are warm to the touch and quick to
 mend, and the wicked know them for what they are; ordinary folk are never quite sure which side of that line they
 stand on.
