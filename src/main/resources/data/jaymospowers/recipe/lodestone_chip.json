@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:lodestone"
+  ],
+  "result": {
+    "id": "jaymospowers:lodestone_chip",
+    "count": 4
+  }
+}

@@ -3,6 +3,7 @@ package com.jaymospowers.gear.belt;
 import com.jaymospowers.armory.ThrowingWeaponItem;
 import com.jaymospowers.armory.ThrownWeapon;
 import com.jaymospowers.core.fx.MagicFx;
+import com.jaymospowers.frost.Freezing;
 import com.jaymospowers.core.wounds.Bleeding;
 import com.jaymospowers.core.wounds.BodyPart;
 import com.jaymospowers.gear.GearPicks;
@@ -12,7 +13,9 @@ import com.jaymospowers.gear.arrow.HeadFx;
 import java.util.function.Consumer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -22,6 +25,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -34,6 +39,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -62,10 +69,13 @@ public final class Throwables {
 	public static final float DART_HARM = 1.0F;
 	/** Caltrops scattered by one throw. */
 	public static final int CALTROPS_SCATTERED = 6;
+	/** Frost bomb: the ring's reach (blocks), how long it slows hard (ticks) and by how much (slowness level), and how long the Freezing it starts lasts (ticks). */
+	public static final double FROST_RADIUS = 4.0;
+	public static final int FROST_SLOW_TICKS = 100, FROST_SLOW_LEVEL = 3, FROST_FREEZE_TICKS = 160;
 	/** Entity tag of a knife thrown from the belt (it opens a cut). */
 	public static final String KNIFE_TAG = "jaymospowers.belt_knife";
 
-	public static Item SMOKE_POT, FLASH_POWDER, SNEEZING_POWDER, BLEEDING_DART, ACID_VIAL, CHOKING_VIAL, CALTROPS, BEAR_TRAP;
+	public static Item SMOKE_POT, FLASH_POWDER, SNEEZING_POWDER, BLEEDING_DART, ACID_VIAL, CHOKING_VIAL, CALTROPS, BEAR_TRAP, FROST_BOMB;
 
 	private static final EquipmentSlot[] ARMOUR = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 
@@ -113,6 +123,7 @@ public final class Throwables {
 		CHOKING_VIAL = item("choking_vial", 8);
 		CALTROPS = item("caltrops", 16);
 		BEAR_TRAP = item("bear_trap", 4);
+		FROST_BOMB = item("frost_bomb", 8);
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((victim, source, baseDamage, damageTaken, blocked) -> {
 			if (damageTaken > 0.0F && !blocked && source.getDirectEntity() != null && source.getDirectEntity().entityTags().contains(KNIFE_TAG)) {
 				Bleeding.open(victim, BodyPart.BODY, false);
@@ -178,6 +189,10 @@ public final class Throwables {
 			GroundFx.caltrops(level, at, owner, CALTROPS_SCATTERED);
 		} else if (kind == BEAR_TRAP) {
 			GroundFx.bearTrap(level, at, owner);
+		} else if (kind == com.jaymospowers.gear.ThrowingCards.CARD) {
+			com.jaymospowers.gear.ThrowingCards.hit(level, owner, hit);
+		} else if (kind == FROST_BOMB) {
+			frost(level, at, owner);
 		} else {
 			return false;
 		}
@@ -192,6 +207,37 @@ public final class Throwables {
 		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, box, e -> e.isAlive() && !e.isSpectator() && e != owner)) {
 			if (victim.position().distanceTo(at) <= POWDER_RADIUS + 0.5) {
 				GroundFx.sneeze(level, victim);
+			}
+		}
+	}
+
+	/** A ring of frost: everything in it slowed hard and set freezing, the water surfaces in it frosted over. */
+	private static void frost(ServerLevel level, Vec3 at, @Nullable Entity owner) {
+		MagicFx.ring(level, at, (float) FROST_RADIUS, 0xBFE8FF);
+		MagicFx.blast(level, at, 2.2F, 0xDFF4FF);
+		level.sendParticles(ParticleTypes.SNOWFLAKE, at.x, at.y + 0.6, at.z, 60, FROST_RADIUS * 0.45, 0.6, FROST_RADIUS * 0.45, 0.04);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.GLASS_BREAK, SoundSource.PLAYERS, 0.9F, 1.5F);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.POWDER_SNOW_PLACE, SoundSource.PLAYERS, 1.0F, 0.8F);
+		AABB box = new AABB(at, at).inflate(FROST_RADIUS);
+		for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, box, e -> e.isAlive() && !e.isSpectator() && e != owner)) {
+			if (victim.position().distanceTo(at) > FROST_RADIUS + 0.4 || Freezing.immune(victim)) {
+				continue;
+			}
+			victim.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, FROST_SLOW_TICKS, FROST_SLOW_LEVEL), owner);
+			victim.addEffect(new MobEffectInstance(Freezing.FREEZING, FROST_FREEZE_TICKS, 0, false, true), owner);
+		}
+		BlockPos centre = BlockPos.containing(at);
+		int reach = (int) Math.ceil(FROST_RADIUS);
+		for (BlockPos pos : BlockPos.betweenClosed(centre.offset(-reach, -2, -reach), centre.offset(reach, 2, reach))) {
+			double dx = pos.getX() + 0.5 - at.x, dz = pos.getZ() + 0.5 - at.z;
+			if (dx * dx + dz * dz > FROST_RADIUS * FROST_RADIUS) {
+				continue;
+			}
+			// (the surface only: a water source with air over it, which melts back like the frost walker's ice)
+			BlockState state = level.getBlockState(pos);
+			if (state.is(Blocks.WATER) && state.getFluidState().isSource() && level.getBlockState(pos.above()).isAir()) {
+				level.setBlockAndUpdate(pos, Blocks.FROSTED_ICE.defaultBlockState());
+				level.scheduleTick(pos.immutable(), Blocks.FROSTED_ICE, 60 + level.getRandom().nextInt(60));
 			}
 		}
 	}
