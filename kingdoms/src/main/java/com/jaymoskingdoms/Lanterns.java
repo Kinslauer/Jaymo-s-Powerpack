@@ -199,6 +199,16 @@ public final class Lanterns {
 		set(server, pos, server.getGameTime() + left, filled);
 	}
 
+	/** (Heritage paths, the Lanternkeeper) the lantern at {@code pos} burns {@code factor} times as long on what fuel it has left. */
+	static void stretch(ServerLevel level, BlockPos pos, float factor) {
+		List<Long> entry = level.getChunkAt(pos).getAttachedOrElse(FUEL, Map.of()).get(String.valueOf(pos.asLong()));
+		if (entry == null || entry.size() != 2) {
+			return;
+		}
+		long now = level.getGameTime(), left = Math.max(0L, entry.get(0) - now);
+		set(level, pos, now + (long)(left * factor), entry.get(1));
+	}
+
 	/** A lantern broken (by hand, blast or piston) drops with the fuel it had left. */
 	private static void keepFuel(Holder<LootTable> table, LootContext context, List<ItemStack> drops) {
 		if (!Blocks.LANTERN.getLootTable().equals(table.unwrapKey()) || !(context.getLevel() instanceof ServerLevel level)) {

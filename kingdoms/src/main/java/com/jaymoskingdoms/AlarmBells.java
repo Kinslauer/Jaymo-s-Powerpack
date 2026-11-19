@@ -78,9 +78,25 @@ public final class AlarmBells {
 			falseAlarm(level, player, f, now);
 			return;
 		}
+		int answered = answer(level, bell, CALL_REACH, foe, m -> true);
+		if (answered > 0) {
+			Fx.ring(level, at.add(0.0, 1.0, 0.0), 2.0F, 0xE8C050);
+			for (ServerPlayer p : level.players()) {
+				if (p.distanceToSqr(at) <= HEARD * HEARD) {
+					p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.bell.answered", f.name()));
+				}
+			}
+		}
+	}
+
+	/**
+	 * The guards within {@code reach} of {@code at} that {@code whose} allows turn on {@code foe} (each on the monster
+	 * nearest it, if null) and go to it. How many answered.
+	 */
+	static int answer(ServerLevel level, BlockPos at, double reach, @Nullable LivingEntity foe, java.util.function.Predicate<Mob> whose) {
 		int answered = 0;
-		List<Mob> guards = level.getEntitiesOfClass(Mob.class, new net.minecraft.world.phys.AABB(bell).inflate(CALL_REACH), m -> m.isAlive() && Downed.isGuard(m)
-			&& !Downed.isDowned(m));
+		List<Mob> guards = level.getEntitiesOfClass(Mob.class, new net.minecraft.world.phys.AABB(at).inflate(reach), m -> m.isAlive() && Downed.isGuard(m)
+			&& !Downed.isDowned(m) && whose.test(m));
 		for (Mob guard : guards) {
 			LivingEntity target = foe != null ? foe : nearestFoe(level, guard);
 			if (target == null) {
@@ -94,14 +110,7 @@ public final class AlarmBells {
 			}
 			answered++;
 		}
-		if (answered > 0) {
-			Fx.ring(level, at.add(0.0, 1.0, 0.0), 2.0F, 0xE8C050);
-			for (ServerPlayer p : level.players()) {
-				if (p.distanceToSqr(at) <= HEARD * HEARD) {
-					p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.bell.answered", f.name()));
-				}
-			}
-		}
+		return answered;
 	}
 
 	/** The monster nearest the bell within {@link #HOSTILE_NEAR}, or null. */

@@ -940,6 +940,8 @@ public final class HeritageKits {
 				fx(p, MobEffects.DOLPHINS_GRACE, TIDAL_SECONDS, 0);
 				fx(p, MobEffects.WATER_BREATHING, TIDAL_SECONDS, 0);
 				burst(p, ParticleTypes.BUBBLE_POP, 30);
+				// (the Deep Mother's Voice, at its end: a surge of tide)
+				HeritagePaths.tidalBreath(p, level);
 				sound(p, SoundEvents.AMETHYST_BLOCK_RESONATE, 0.8F, 1.6F);
 			}
 			case ROOT_SNARE -> {

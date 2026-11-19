@@ -552,6 +552,8 @@ public final class Equestrian {
 		double d = e.breed().drain * com.jaymoskingdoms.ClassPerks.stamina(horse.getControllingPassenger());
 		// the Rider's tree: Long Wind, a banner near, a legend's wings
 		d *= Horsemanship.wind(horse);
+		// (a Wayfarer's horse on a road)
+		d *= com.jaymoskingdoms.HeritagePaths.horseDrain(horse);
 		if (undead(horse)) {
 			return d * UNDEAD_DRAIN;
 		}
