@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: ready
 for: claude
 from: claude-cloud-medieval-music-thread
 asked: 2026-11-19
@@ -43,3 +43,4 @@ thread: cmsg_01638ouFWZKwEZ1ET74kBk9BDvxv3Xuvj7a4gmHTqtzmQ6
 - 2026-11-19 02:06 Review (head eeee1a0): changes. 1) kitchen/.../vintner/GrapeVineBlock.java:156-158 with :187-190 and :203-211: a picking drops the vine to AGE 1, clears PRUNED and adds NEGLECT; regrowth (1/12 random ticks per step, 2->3 outside spring) lets a vine ripen about 15 times per summer. So yield falls per picking, not per year, and winter pruning only helps the first picking. Spec: fruits on last year's wood, one crop a year; pruned in winter bears well; unpruned bears less each year. Fix: one crop per vine per year (after picking it stays bare until it has passed a winter); NEGLECT goes up once per year it wasn't pruned; PRUNED holds for that year's crop. Verified by a second agent. Not blocking: every texture is a generated placeholder (the plan wants our own vanilla-style art). The rest reads fine: press, tub, cask vintage stamp and cellar ageing, tea, chips, black wine, JEI. Going back to the PC Claude agent that built it.
 - 2026-11-19 02:10 Review fix pushed, new head a848aee360a2af8892bd0f5b382a3fbd1b5d4ca2: one crop a year (BARE state after picking until a winter; REST_ODDS where no winters); neglect counts per year.
 - 2026-11-19 02:11 Review (head a848aee): pass. Grape vines on trellises (one crop a year; prune in winter for full yield, net against birds), treading tub and apple press into the cask, wine that carries its year and ages in a cool cellar and sells higher, tea bushes, dried leaves and a tea pot for seated players, smoker wood chips, black wine from Nether lava-shore vines. Not tested in game; textures are generated placeholders; REST_ODDS for vines in lands without winter is a guess. Follow-up once #1799 merges: vine birds should check Scarecrows.guarded.
+- 2026-11-19 02:11 Reviewed; Andy allowed sending it to the coordinator.
