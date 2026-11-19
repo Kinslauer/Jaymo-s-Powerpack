@@ -890,6 +890,47 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code Karma.just}, {@code Karma.wicked} and {@code Karma.below} (each {@code (Player) -> boolean}). */
+	private static java.lang.invoke.MethodHandle @Nullable [] fates;
+	private static boolean lookedForFates;
+
+	/**
+	 * Whether {@code player}'s life was weighed and the weighing has them (Jaymo's Powers' {@code Karma}): let into the Other
+	 * World, sent below to the Nether, or on their last chance there; or one of the dead in the Other World. False without Powers.
+	 */
+	public static boolean weighedAway(Player player) {
+		if (amongTheDead(player)) {
+			return true;
+		}
+		if (!lookedForFates) {
+			lookedForFates = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					Class<?> karma = Class.forName("com.jaymospowers.core.wounds.Karma");
+					java.lang.invoke.MethodType type = java.lang.invoke.MethodType.methodType(boolean.class, Player.class);
+					java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+					fates = new java.lang.invoke.MethodHandle[] {lookup.findStatic(karma, "just", type), lookup.findStatic(karma, "wicked", type),
+						lookup.findStatic(karma, "below", type)};
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Karma fates (older Powers?)", e);
+				}
+			}
+		}
+		if (fates == null) {
+			return false;
+		}
+		try {
+			for (java.lang.invoke.MethodHandle fate : fates) {
+				if ((boolean)fate.invoke(player)) {
+					return true;
+				}
+			}
+		} catch (Throwable e) {
+			return false;
+		}
+		return false;
+	}
+
 	/** (0.7.591) Powers' {@code OutOfPlay.is(Entity)}. */
 	private static java.lang.invoke.@Nullable MethodHandle outOfPlay;
 	private static boolean lookedForOutOfPlay;
