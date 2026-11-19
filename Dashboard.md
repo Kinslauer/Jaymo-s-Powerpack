@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 09:03). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 09:46). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -22,19 +22,22 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/forest-fire-pack|forest-fire-pack]]: stalled, last change 2026-11-16. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hands-on-cooking-realtime|hands-on-cooking-realtime]]: stalled, last change 2026-11-17. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/harness-upkeep|harness-upkeep]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/powerborne-heroes|powerborne-heroes]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]]: stalled, last change 2026-11-18. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/scrying-orb|scrying-orb]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/sky-lands-aether-biomes|sky-lands-aether-biomes]]: stalled, last change 2026-11-16. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-27 waiting for a bot, 0 being built, 0 in review: see [[Kanban]].
+23 waiting for a bot, 0 being built, 4 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1811 A harness piece with no model no longer crashes the game (Kingdoms, 2026-11-19)
 - [ ] #1810 NPC sea ships pay for their powder and shot (Kingdoms, 2026-11-19)
+- [ ] #1809 metal-hit sparks - blows, strikes and arrows on metal (Powers, 2026-11-19)
 - [ ] #1808 Cannon shot types for wall and siege guns, Explosive Shell costs TNT (Kingdoms, 2026-11-19)
 - [ ] #1807 flotsam can bring up a dead one's token (Powers, Kitchen, 2026-11-19)
 - [ ] #1806 harsh lands - spawns and starts follow the climate map (Kingdoms, 2026-11-19)
@@ -92,13 +95,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1724 Story choices: big boxes with a hand-drawn X, no Ash Whisperer clerics (Kingdoms, 2026-11-18)
 - [ ] #1722 menu redesign: title cards, dread vignette, scouter card, colour picker (Powers, Kingdoms, Kitchen, 2026-11-18)
 - [ ] #1712 NPC shooters lean round corners (Kingdoms, 2026-11-18)
-- [ ] #1711 Youth flies off to think, and comes back with the answer (Kingdoms, 2026-11-18)
-- [ ] #1710 lean on the legs (Kingdoms, 2026-11-18)
-- …and 196 older ones.
+- …and 198 older ones.
 
 ## Health
 
-21 problems in the notes: [[Health]].
+22 problems in the notes: [[Health]].
 
 ## Last week
 
