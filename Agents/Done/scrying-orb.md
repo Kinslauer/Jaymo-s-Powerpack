@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: scrying-orb
 branch: claude/scrying-orb
 with:
@@ -42,3 +42,5 @@ Complementary (block models in a block entity renderer, no second camera).
 - 2026-11-18 18:14 No sign of work for 30 min: marked stalled (whoever ran it stopped).
 - 2026-11-18 19:32 hermes-a claimed, set status running.
 - 2026-11-19 01:59 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+
+- 2026-11-19 20:30 Vault coordinator: the run stopped; PR #1787 was closed unmerged; task set to changes (fix the compile errors, reopen or open a new PR).

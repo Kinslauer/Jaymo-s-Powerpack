@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: sky-lands-aether-biomes
 branch:
 with:
@@ -83,3 +83,5 @@ owns:
 
 *Compiled 2026-11-15; ready for Andy's review.*
 - 2026-11-16 01:06 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+
+- 2026-11-19 20:30 Vault coordinator: research finished (findings in the Inbox task); closed.
