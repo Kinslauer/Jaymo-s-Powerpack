@@ -46,6 +46,10 @@ import org.jspecify.annotations.Nullable;
  * <li>(0.7.227) <b>Hidden gifts</b> ({@link #open}): most keep it to a minimum and hide it from their family and friends
  * ({@link #close}); by their temperament some don't care who sees ("who is going to stop them?"), masters more often.</li>
  * <li>(0.7.227) Resonance's calling: living through a Warden's sonic boom.</li>
+ * <li><b>Village and haven guards</b> ({@link #guardGift}): Andy: "villagers and haven folk will more likely have powers
+ * and use those to fight to make up for the fact they have less skilled soldiers". A grown guard or archer of a village
+ * is weighed once more, one in {@link #VILLAGE_GUARD_ODDS} awakening (a haven's, one in {@link #HAVEN_GUARD_ODDS}), and
+ * a gifted guard fights with it in the open, never warily.</li>
  * </ul>
  * Nothing without Jaymo's Powers (no one awakens).
  */
@@ -83,6 +87,9 @@ public final class GiftedFolk {
 	static final String STARS_ROLLED = "jaymoskingdoms_stars_rolled";
 	/** Tagged once a gift's ways are weighed (master, open), for the gifted of a world from before them. */
 	static final String WAYS_ROLLED = "jaymoskingdoms_gift_ways";
+	/** A village's guards awaken one in this many, a haven's one in this many (a realm's trained soldiers don't need it); tagged once weighed. */
+	static final int VILLAGE_GUARD_ODDS = 5, HAVEN_GUARD_ODDS = 3;
+	static final String GUARD_ROLLED = "jaymoskingdoms_guard_gift_rolled";
 
 	private GiftedFolk() {
 	}
@@ -221,8 +228,17 @@ public final class GiftedFolk {
 
 	/** {@code mob} awakens to {@code power}: the moment of it, seen by those round them. */
 	static boolean awaken(ServerLevel level, PathfinderMob mob, String power) {
+		return awaken(level, mob, power, false);
+	}
+
+	/** As {@link #awaken(ServerLevel, PathfinderMob, String)}; a {@code guard} fights with it openly, and never warily. */
+	private static boolean awaken(ServerLevel level, PathfinderMob mob, String power, boolean guard) {
 		boolean master = level.getRandom().nextInt(MASTER_ODDS) == 0;
-		if (!PowersCompat.give(mob, power, style(mob), master, open(mob, master, level.getRandom()))) {
+		int style = style(mob);
+		if (guard && style == PowersCompat.WARY) {
+			style = PowersCompat.STEADY;
+		}
+		if (!PowersCompat.give(mob, power, style, master, guard || open(mob, master, level.getRandom()))) {
 			return false;
 		}
 		mob.addTag(ROLLED);
@@ -292,6 +308,7 @@ public final class GiftedFolk {
 		if (!mob.isBaby() && !mob.entityTags().contains(ROLLED)) {
 			cameOfAge(level, mob);
 		}
+		guardGift(level, mob);
 		if (!mob.entityTags().contains(WAYS_ROLLED) && PowersCompat.gift(mob) != null) {
 			boolean master = level.getRandom().nextInt(MASTER_ODDS) == 0;
 			if (PowersCompat.giftWays(mob, master, open(mob, master, level.getRandom()))) {
@@ -305,6 +322,22 @@ public final class GiftedFolk {
 		}
 		// the costumed: vigilantes and villains, out after dark
 		CostumedFolk.step(level, mob);
+	}
+
+	/** A grown guard or archer of a village or haven, ungifted, is weighed once for a power to guard it with. */
+	private static void guardGift(ServerLevel level, PathfinderMob mob) {
+		if (mob.isBaby() || mob.entityTags().contains(GUARD_ROLLED) || !McaCompat.isMca(mob) || PowersCompat.gift(mob) != null) {
+			return;
+		}
+		Faction f = GuardKit.serves(mob);
+		if (f == null || f.type() != FactionType.VILLAGE) {
+			return;
+		}
+		mob.addTag(GUARD_ROLLED);
+		int odds = Havens.is(level.getServer(), f) ? HAVEN_GUARD_ODDS : VILLAGE_GUARD_ODDS;
+		if (level.getRandom().nextInt(odds) == 0) {
+			awaken(level, mob, pick(mob, null, level.getRandom()), true);
+		}
 	}
 
 	/** (0.7.384) A grown MCA villager is weighed once for stargazing: about one in {@link #STARGAZER_ODDS} watches the sky and sells star charts. */

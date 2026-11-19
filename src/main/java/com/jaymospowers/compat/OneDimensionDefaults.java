@@ -5,13 +5,16 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import com.jaymospowers.JaymosPowers;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import net.fabricmc.loader.api.FabricLoader;
 
 /**
@@ -24,23 +27,19 @@ import net.fabricmc.loader.api.FabricLoader;
  * <p>
  * One Dimension reads {@code config/one-dimension.json} when a world is made (the create-world screen starts from it; a
  * dedicated server takes it as it is) and writes its own defaults if the file isn't there. So this writes ours first, once:
- * a file that is already there (One Dimension's, or one someone edited) is left alone. Worlds made before, or with One
+ * a file that is already there is brought back to this stack by {@link #update}. Worlds made before, or with One
  * Dimension turned off on that screen, stay as they were. Our side of a stacked world is {@link Stacked}.
  */
 public final class OneDimensionDefaults {
 	/** Top to bottom. (0.20.36, Andy) The high sky on top: the thin air at the edge of space, over the Aether's islands. */
 	static final List<String> ORDER = List.of("jaymospowers:high_sky", "jaymospowers:aether", "jaymospowers:cloud_sea", "minecraft:overworld",
 		"minecraft:the_nether");
-	/** The stacks this wrote before: a file still holding exactly one of these orders is ours, unedited, and is brought up to date. */
-	static final List<List<String>> OLD_ORDERS = List.of(
-		List.of("jaymospowers:aether", "minecraft:overworld", "minecraft:the_nether"),
-		List.of("jaymospowers:high_sky", "jaymospowers:aether", "minecraft:overworld", "minecraft:the_nether"));
 	private static final String ABOUT = "Jaymo's Powers' defaults: the high sky over the Aether over the Cloud Sea over the Overworld over the Nether."
 		+ " Each world keeps the order it was made with; changing this file never changes a world that exists.";
-	/** Not stacked: reached as before. */
+	/** Not stacked: reached as before (Lost Cities is dropped from the stack; the proving grounds are reached by teleport). */
 	static final List<String> LEFT_OUT = List.of("minecraft:the_end", "jaymospowers:future", "jaymospowers:moon", "jaymospowers:verdant_world", "jaymospowers:giant_ring",
 		"jaymospowers:rustfall", "jaymospowers:cinder", "jaymospowers:glacia", "jaymospowers:maw", "jaymospowers:time_chamber",
-		"jaymospowers:arsenal_pocket");
+		"jaymospowers:arsenal_pocket", "lostcities:lostcity", "jaymoskingdoms:proving_grounds");
 
 	private OneDimensionDefaults() {
 	}
@@ -88,8 +87,10 @@ public final class OneDimensionDefaults {
 	}
 
 	/**
-	 * A file this wrote before (its order exactly one of {@link #OLD_ORDERS}) gets today's order, for the worlds made from now
-	 * on; anything else in it, and any order someone changed, is left as it is.
+	 * One Dimension rewrites the file itself once it has run (plain ids, every dimension it knows added to the order), so a
+	 * hand-edited order can't be told apart from One Dimension's own rewrite. The pack's order therefore wins: a file whose
+	 * order isn't exactly {@link #ORDER} gets the five ORDER ids on top in ORDER's order (each entry kept as it is), every
+	 * other id moved to {@code left_out} (deduped, after what was there). Used for new worlds only.
 	 */
 	private static void update(Path path) {
 		try {
@@ -100,38 +101,66 @@ public final class OneDimensionDefaults {
 			JsonArray order = root.getAsJsonArray("order");
 			List<String> ids = new ArrayList<>();
 			for (JsonElement entry : order) {
-				if (!entry.isJsonObject() || !entry.getAsJsonObject().has("dimension")) {
+				String id = id(entry);
+				if (id == null) {
 					return;
 				}
-				ids.add(entry.getAsJsonObject().get("dimension").getAsString());
+				ids.add(id);
 			}
-			if (!OLD_ORDERS.contains(ids)) {
+			if (ids.isEmpty() || ids.equals(ORDER)) {
 				return;
 			}
 			// (the entries are kept as they are, so whatever One Dimension holds beside each dimension's id stays)
 			JsonArray next = new JsonArray();
 			for (String id : ORDER) {
-				JsonElement kept = null;
-				for (JsonElement entry : order) {
-					if (id.equals(entry.getAsJsonObject().get("dimension").getAsString())) {
-						kept = entry;
+				int at = ids.indexOf(id);
+				next.add(at >= 0 ? order.get(at) : order.isEmpty() ? new JsonPrimitive(id) : like(order.get(0), id));
+			}
+			Set<String> out = new LinkedHashSet<>();
+			if (root.has("left_out") && root.get("left_out").isJsonArray()) {
+				for (JsonElement e : root.getAsJsonArray("left_out")) {
+					String left = id(e);
+					if (left != null) {
+						out.add(left);
 					}
 				}
-				if (kept == null) {
-					JsonObject added = new JsonObject();
-					added.addProperty("dimension", id);
-					kept = added;
-				}
-				next.add(kept);
 			}
+			out.addAll(ids);
+			out.addAll(LEFT_OUT);
+			out.removeAll(ORDER);
+			JsonArray leftOut = new JsonArray();
+			out.forEach(leftOut::add);
 			root.add("order", next);
+			root.add("left_out", leftOut);
 			if (root.has("_about")) {
 				root.addProperty("_about", ABOUT);
 			}
 			Files.writeString(path, new GsonBuilder().setPrettyPrinting().create().toJson(root), StandardCharsets.UTF_8);
-			JaymosPowers.LOGGER.info("Brought the One Dimension stack in {} up to date: high sky, Aether, Cloud Sea, Overworld, Nether (new worlds only)", path);
+			JaymosPowers.LOGGER.info("Put the One Dimension stack in {} back to the pack's (high sky, Aether, Cloud Sea, Overworld, Nether); was {}, left out now {} (new worlds only)",
+				path, ids, out);
 		} catch (IOException | RuntimeException e) {
 			JaymosPowers.LOGGER.warn("Could not update {}", path, e);
 		}
+	}
+
+	/** An order entry's dimension id: a plain id (One Dimension's own file) or {"dimension": id} (ours), else null. */
+	private static String id(JsonElement entry) {
+		if (entry.isJsonPrimitive() && entry.getAsJsonPrimitive().isString()) {
+			return entry.getAsString();
+		}
+		if (entry.isJsonObject() && entry.getAsJsonObject().has("dimension")) {
+			return entry.getAsJsonObject().get("dimension").getAsString();
+		}
+		return null;
+	}
+
+	/** A new entry for this id, written the way {@code sample} is. */
+	private static JsonElement like(JsonElement sample, String id) {
+		if (sample.isJsonPrimitive()) {
+			return new JsonPrimitive(id);
+		}
+		JsonObject added = new JsonObject();
+		added.addProperty("dimension", id);
+		return added;
 	}
 }

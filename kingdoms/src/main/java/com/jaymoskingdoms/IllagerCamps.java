@@ -76,10 +76,6 @@ final class IllagerCamps {
 	/** A warlord missing (his camp loaded, him nowhere) this long (ticks) is replaced: he was taken by something that isn't death. */
 	static final long RESEAT_TICKS = 20 * 120;
 
-	private static final String[] NAME_FIRST = {"Grim", "Raven", "Ash", "Gallow", "Thorn", "Black", "Vex", "Dusk", "Mire", "Gloom", "Hollow",
-		"Wither", "Crow", "Sorrow", "Iron", "Rook"};
-	private static final String[] NAME_SECOND = {"hold", "watch", "moor", "fall", "gate", "fen", "crag", "reach", "wood", "spire", "mark",
-		"hollow"};
 	private static final DyeColor[] COLOURS = {DyeColor.GRAY, DyeColor.BLACK, DyeColor.LIGHT_GRAY, DyeColor.WHITE};
 
 	/** (0.7.490) Camp id → game time it last raised a building. */
@@ -125,6 +121,7 @@ final class IllagerCamps {
 		Storage.put(level, stocked, Items.BREAD, START_BREAD);
 		Storage.put(level, stocked, Items.EMERALD, START_EMERALDS);
 		Camps.takeSides(server, id, KIND);
+		IllagerMarks.raiseStandard(level, fire, gate);
 		Illagers.crown(level, Factions.get(server, id), layout.warlordSpot());
 		// a sentry on the watchtower, the rest about the fire
 		Illagers.spawn(level, Factions.get(server, id), Illagers.PILLAGER, layout.sentry(), layout.sentry(), 2, false);
@@ -146,15 +143,9 @@ final class IllagerCamps {
 		return Factions.get(server, id);
 	}
 
+	/** A new camp's name, in the illagers' own tongue ({@link IllagerHolds#freshName}). */
 	private static String name(MinecraftServer server, RandomSource random) {
-		String name = "";
-		for (int tries = 0; tries < 20; tries++) {
-			name = NAME_FIRST[random.nextInt(NAME_FIRST.length)] + NAME_SECOND[random.nextInt(NAME_SECOND.length)];
-			if (Factions.byName(server, name) == null) {
-				return name;
-			}
-		}
-		return name + Factions.nextId(server);
+		return IllagerHolds.freshName(server, random);
 	}
 
 	/** Open ground on the camp's floor near its fire (not on a bench or in a tent), for one of its people to stand. */

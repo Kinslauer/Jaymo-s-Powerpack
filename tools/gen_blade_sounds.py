@@ -8,6 +8,11 @@ Writes mono .ogg files into src/main/resources/assets/jaymospowers/sounds/blade/
   swing_heavy_1..5    a great weapon's: low, slow, with weight behind it
   clash_1..6          steel on steel: a hard tick and a short bright ring of clashing partials
   draw_1..3           a blade leaving its scabbard: a rising scrape that ends on a faint ring
+  armour_ring_1..3    a blow on plate: a hard tick and a low, slow-dying ring (hit_sounds)
+  armour_rasp_1..3    a blow on mail: a rasp of rings shifting on each other, a faint jingle
+  armour_thud_1..3    a blow on leather and padding: a dull low thump with a little slap
+  stone_chip_1..2     steel on stone: a short dry tick and a grit of chips
+  crit_1..3           a special hit (riposte, perfect parry, crit): a sharp snap and one high, short, bright ring
 Re-run to change them; the seeds keep every file the same from run to run.
 """
 import os
@@ -101,6 +106,19 @@ def draw(rng):
     return scrape + ring
 
 
+def crit(rng, base):
+    """The cue for a special hit: a hard snap of noise and one high ring that stops quickly, so it cuts through a fight."""
+    seconds = 0.30
+    n = int(seconds * RATE)
+    t = np.arange(n) / RATE
+    ring = np.zeros(n)
+    for ratio, level in ((1.0, 1.0), (2.01, 0.5), (3.97, 0.25)):
+        ring += np.sin(2 * np.pi * base * ratio * t + rng.random() * 6.28) * np.exp(-(14.0 + 8.0 * ratio) * t) * level
+    snap = band(rng.standard_normal(n), 3000, 14000) * np.exp(-140.0 * t) * 1.8
+    sweep = np.sin(2 * np.pi * (base * 0.5 + base * 3.0 * np.exp(-60.0 * t)) * t) * np.exp(-50.0 * t) * 0.6
+    return (ring * 0.8 + snap + sweep) * np.minimum(1.0, np.arange(n) / 20.0)
+
+
 def main():
     rng = np.random.default_rng(1341)
     for i in range(1, 6):
@@ -111,7 +129,75 @@ def main():
         save("clash_%d" % i, clash(rng, 1500 + 900 * rng.random()))
     for i in range(1, 4):
         save("draw_%d" % i, draw(rng))
+    # (its own generator, so adding it moved none of the files above)
+    crit_rng = np.random.default_rng(2611)
+    for i in range(1, 4):
+        save("crit_%d" % i, crit(crit_rng, 2600 + 700 * crit_rng.random()))
+
+
+def armour_ring(rng):
+    """A blow on plate: a hard tick, then a low ring of a big, thick plate (lower and slower to die than a clash)."""
+    n = int(0.5 * RATE)
+    t = np.arange(n) / RATE
+    f0 = 520 + 260 * rng.random()
+    out = np.zeros(n)
+    for k, ratio in enumerate((1.0, 2.32, 4.18, 6.7)):
+        out += np.sin(2 * np.pi * f0 * ratio * t + rng.random() * 6.28) * np.exp(-(7.0 + 6.0 * k) * t) * (1.0 / (1 + k * 0.8))
+    tick = band(rng.standard_normal(n), 1800, 7000) * np.exp(-110.0 * t) * 1.4
+    thump = np.sin(2 * np.pi * 110 * t) * np.exp(-40.0 * t) * 0.8
+    return (out + tick + thump) * np.minimum(1.0, np.arange(n) / 25.0)
+
+
+def armour_rasp(rng):
+    """A blow on mail: a cluster of tiny, bright rings knocking on each other, a rasp more than a ring."""
+    n = int(0.32 * RATE)
+    t = np.arange(n) / RATE
+    out = np.zeros(n)
+    for _ in range(28):
+        at = int(rng.random() ** 1.6 * 0.14 * RATE)
+        f = 3200 + 4200 * rng.random()
+        length = n - at
+        tt = np.arange(length) / RATE
+        out[at:] += np.sin(2 * np.pi * f * tt + rng.random() * 6.28) * np.exp(-(160.0 + 120.0 * rng.random()) * tt) * (0.3 + 0.7 * rng.random())
+    rasp = band(rng.standard_normal(n), 2500, 9000) * np.exp(-30.0 * t) * 0.5
+    low = np.sin(2 * np.pi * 150 * t) * np.exp(-50.0 * t) * 0.35
+    return out * 0.35 + rasp + low
+
+
+def armour_thud(rng):
+    """A blow on leather or padding: a low thump that dies at once, with a soft slap of cloth on top."""
+    n = int(0.22 * RATE)
+    t = np.arange(n) / RATE
+    f = 85 + 60 * rng.random()
+    body = np.sin(2 * np.pi * (f + 60 * np.exp(-30.0 * t)) * t) * np.exp(-24.0 * t)
+    slap = band(rng.standard_normal(n), 300, 2200) * np.exp(-60.0 * t) * 0.7
+    return (body + slap) * np.minimum(1.0, np.arange(n) / 20.0)
+
+
+def stone_chip(rng):
+    """Steel on stone: a short dry tick, a grit of chips falling, no ring at all."""
+    n = int(0.24 * RATE)
+    t = np.arange(n) / RATE
+    tick = band(rng.standard_normal(n), 1200, 6500) * np.exp(-150.0 * t) * 1.5
+    grit = np.zeros(n)
+    for _ in range(6):
+        at = int((0.02 + 0.16 * rng.random()) * RATE)
+        grit[at:] += band(rng.standard_normal(n - at), 2000, 8000) * np.exp(-np.arange(n - at) / RATE * 220.0) * 0.35
+    knock = np.sin(2 * np.pi * (230 + 90 * rng.random()) * t) * np.exp(-60.0 * t) * 0.5
+    return tick + grit + knock
+
+
+def hit_sounds():
+    """Blows on armour and stone (Hackers 'n Slashers patch 3); a rng of its own, so the files above never change."""
+    rng = np.random.default_rng(2241)
+    for i in range(1, 4):
+        save("armour_ring_%d" % i, armour_ring(rng))
+        save("armour_rasp_%d" % i, armour_rasp(rng))
+        save("armour_thud_%d" % i, armour_thud(rng))
+    for i in range(1, 3):
+        save("stone_chip_%d" % i, stone_chip(rng))
 
 
 if __name__ == "__main__":
     main()
+    hit_sounds()

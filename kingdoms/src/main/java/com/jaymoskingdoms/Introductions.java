@@ -282,6 +282,10 @@ public final class Introductions {
 	 * you've won enough of MCA's hearts (gifts and talk): {@link #PROVEN_HEARTS_PER_DEGREE} for each degree they mind.
 	 */
 	public static boolean wary(ServerPlayer player, Villager villager) {
+		if (Groves.is(villager)) {
+			// (2026-11-19) an old druid minds no one's blood and no realm's word of them: only what you've done to her
+			return Recollections.leaning(villager, player) <= Recollections.COLD;
+		}
 		int lean = Recollections.leaning(villager, player);
 		if (lean >= Recollections.WARM) {
 			return false;
@@ -425,6 +429,11 @@ public final class Introductions {
 			// (0.7.490) an orc or goblin refuses in its own dialect
 			return refusal(player, villager,
 				() -> Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_outlaw." + villager.getRandom().nextInt(OUTLAW_LINES)));
+		}
+		if (Groves.is(villager)) {
+			// (2026-11-19) an old druid goes by what she is
+			learn(player, villager);
+			return Component.translatable("dialogue.chat.jaymoskingdoms.name_druid", Component.literal(villager.getName().getString()));
 		}
 		String kind = ZFighterFolk.is(villager) ? ZFighterFolk.kind(villager) : null;
 		if (kind != null) {

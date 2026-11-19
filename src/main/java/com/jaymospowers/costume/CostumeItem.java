@@ -87,6 +87,10 @@ public class CostumeItem extends Item {
 			// (0.17.60) the suit editor's pieces
 			builder.accept(Component.translatable("tooltip.jaymospowers.costume.kit", design.kit().pieces()).withStyle(ChatFormatting.GRAY));
 		}
+		if (design.kit().plates().any()) {
+			// metal plates sewn in: the armour they give while it is worn (before any real armour in the same slots)
+			builder.accept(Component.translatable("tooltip.jaymospowers.costume.plates", design.kit().plates().count()).withStyle(ChatFormatting.GRAY));
+		}
 		if (design.hasEmblem()) {
 			builder.accept(Component.translatable("tooltip.jaymospowers.costume.emblem").withStyle(ChatFormatting.GRAY));
 		}

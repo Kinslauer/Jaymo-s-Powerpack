@@ -5002,5 +5002,144 @@
 				"name": "jaymoskingdoms:voice/villager/wavenet_d_old_angry_4"
 			}
 		]
+	},
+	"place_music.townsong": {
+		"sounds": [
+			{
+				"name": "minecraft:music/townsong",
+				"stream": true,
+				"volume": 0.5
+			}
+		]
+	},
+	"place_music.greenlands": {
+		"sounds": [
+			{
+				"name": "minecraft:music/greenlands",
+				"stream": true,
+				"volume": 0.5
+			}
+		]
+	},
+	"place_music.now_we_feast": {
+		"sounds": [
+			{
+				"name": "minecraft:music/now_we_feast",
+				"stream": true,
+				"volume": 0.5
+			}
+		]
+	},
+	"place_music.celebration": {
+		"sounds": [
+			{
+				"name": "minecraft:music/celebration",
+				"stream": true,
+				"volume": 0.5
+			}
+		]
+	},
+	"place_music.bonfire": {
+		"sounds": [
+			{
+				"name": "minecraft:music/bonfire",
+				"stream": true,
+				"volume": 0.5
+			}
+		]
+	},
+	"place_music.marked": {
+		"sounds": [
+			{
+				"name": "minecraft:music/marked",
+				"stream": true,
+				"volume": 0.5
+			}
+		]
+	},
+	"place_music.grundar": {
+		"sounds": [
+			{
+				"name": "minecraft:music/grundar",
+				"stream": true,
+				"volume": 0.5
+			}
+		]
+	},
+	"place_music.now_we_ride": {
+		"sounds": [
+			{
+				"name": "minecraft:music/now_we_ride",
+				"stream": true,
+				"volume": 0.5
+			}
+		]
+	},
+	"place_music.the_road_home": {
+		"sounds": [
+			{
+				"name": "minecraft:music/the_road_home",
+				"stream": true,
+				"volume": 0.5
+			}
+		]
+	},
+	"place_music.behind_the_sword": {
+		"sounds": [
+			{
+				"name": "minecraft:music/behind_the_sword",
+				"stream": true,
+				"volume": 0.5
+			}
+		]
+	},
+	"place_music.might_magic": {
+		"sounds": [
+			{
+				"name": "minecraft:music/might_magic",
+				"stream": true,
+				"volume": 0.5
+			}
+		]
+	},
+	"bard.bonfire": {
+		"sounds": [
+			{
+				"name": "minecraft:music/bonfire",
+				"stream": true,
+				"volume": 0.7,
+				"attenuation_distance": 16
+			}
+		]
+	},
+	"bard.now_we_feast": {
+		"sounds": [
+			{
+				"name": "minecraft:music/now_we_feast",
+				"stream": true,
+				"volume": 0.7,
+				"attenuation_distance": 16
+			}
+		]
+	},
+	"bard.celebration": {
+		"sounds": [
+			{
+				"name": "minecraft:music/celebration",
+				"stream": true,
+				"volume": 0.7,
+				"attenuation_distance": 16
+			}
+		]
+	},
+	"bard.tam_lin": {
+		"sounds": [
+			{
+				"name": "minecraft:music/tam_lin",
+				"stream": true,
+				"volume": 0.7,
+				"attenuation_distance": 16
+			}
+		]
 	}
 }

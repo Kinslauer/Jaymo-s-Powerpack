@@ -1,0 +1,41 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 0,
+        "max": 1
+      },
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:pick_head",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:bow_limb",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jaymospowers:tool_binding",
+          "weight": 4
+        }
+      ]
+    }
+  ],
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:registry_contains",
+      "registry": "minecraft:item",
+      "values": [
+        "jaymospowers:pick_head",
+        "jaymospowers:bow_limb",
+        "jaymospowers:tool_binding"
+      ]
+    }
+  ]
+}

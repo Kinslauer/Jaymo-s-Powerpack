@@ -74,6 +74,9 @@ public final class GearClient {
 			if (attack && !attackWas) {
 				if (player.isShiftKeyDown()) {
 					ClientPlayNetworking.send(new GearNet.Shield(ShieldMoves.SLAM));
+				} else if (minecraft.options.keyJump.isDown() && !player.isPassenger() && (player.onGround() || player.getDeltaMovement().y > 0.0)) {
+					// jump + attack with the shield up: the rising uppercut
+					ClientPlayNetworking.send(new GearNet.Shield(ShieldMoves.RISE));
 				} else if (!ShieldBang.ready(player)) {
 					ClientPlayNetworking.send(new GearNet.Shield(ShieldMoves.THROW));
 				}

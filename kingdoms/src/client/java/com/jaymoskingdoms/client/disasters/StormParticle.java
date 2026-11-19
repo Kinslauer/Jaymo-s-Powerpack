@@ -17,6 +17,8 @@ final class StormParticle extends SingleQuadParticle {
 	static final int CLOUD = 0, FUNNEL = 1, DEBRIS = 2;
 	/** A bank of ground fog that belongs to no storm: it drifts the way it was sent and turns slowly. */
 	static final int FOG = 3;
+	/** Smoke off a big fire ({@link FireSmoke}): it rises, slowing, leans downwind as it climbs, swells, pales and thins. */
+	static final int SMOKE = 4;
 	/** How many ticks it takes to fade in and out. */
 	private static final int FADE = 25;
 
@@ -32,6 +34,9 @@ final class StormParticle extends SingleQuadParticle {
 	private float h, angle, out, climb;
 	/** A cloud: where it sits relative to its storm. */
 	private double offX, offZ;
+	/** Smoke: how fast it starts rising, the wind it leans into aloft, how much it swells, and its grey at the top. */
+	private float rise, swell, greyTop, baseSize, greyFoot;
+	private double windX, windZ;
 
 	StormParticle(ClientLevel level, double x, double y, double z, TextureAtlasSprite sprite, int kind, int owner, float size, int life,
 		float r, float g, float b, float alpha) {
@@ -57,6 +62,18 @@ final class StormParticle extends SingleQuadParticle {
 		return this;
 	}
 
+	/** Smoke rises {@code rise} a tick at first, leans into (windX, windZ) aloft, swells by {@code swell} times and pales from {@code greyFoot} to {@code greyTop}. */
+	StormParticle smoke(float rise, double windX, double windZ, float swell, float greyFoot, float greyTop) {
+		this.rise = rise;
+		this.windX = windX;
+		this.windZ = windZ;
+		this.swell = swell;
+		this.greyTop = greyTop;
+		this.baseSize = this.quadSize;
+		this.greyFoot = greyFoot;
+		return this;
+	}
+
 	/** A funnel wisp starts {@code h} up, at {@code angle}, {@code out} of the radius, climbing {@code climb} a tick. */
 	StormParticle funnel(float h, float angle, float out, float climb) {
 		this.h = h;
@@ -77,7 +94,22 @@ final class StormParticle extends SingleQuadParticle {
 			return;
 		}
 		boolean alive = true;
-		if (this.kind == FOG) {
+		if (this.kind == SMOKE) {
+			float t = this.age / (float)this.lifetime;
+			// rising fast off the flames and slowing as it cools; the wind takes it more the higher it gets
+			this.xd = Mth.lerp(Math.min(1.0F, t * 2.5F), 0.0, this.windX);
+			this.zd = Mth.lerp(Math.min(1.0F, t * 2.5F), 0.0, this.windZ);
+			this.x += this.xd;
+			this.y += this.rise * (1.0F - 0.6F * t);
+			this.z += this.zd;
+			this.roll += 0.004F;
+			this.quadSize = this.baseSize * (1.0F + this.swell * t);
+			float grey = Mth.lerp(Math.min(1.0F, t * 1.5F), this.greyFoot, this.greyTop);
+			this.setColor(grey, grey * 0.97F, grey * 0.94F);
+			net.minecraft.world.phys.Vec3 eye = net.minecraft.client.Minecraft.getInstance().gameRenderer.mainCamera().position();
+			double away = Math.sqrt((this.x - eye.x) * (this.x - eye.x) + (this.y - eye.y) * (this.y - eye.y) + (this.z - eye.z) * (this.z - eye.z));
+			this.near = Mth.clamp((float)((away - FOG_CLEAR) / FOG_THIN), 0.0F, 1.0F) * (1.0F - 0.7F * t);
+		} else if (this.kind == FOG) {
 			this.x += this.xd;
 			this.z += this.zd;
 			this.roll += 0.002F;

@@ -6192,3 +6192,287 @@ Built; not played in game.
 - **Arm forms**: `RigForms` started the move with the action id instead of the move kind, so no arm-form pose played. It now starts `ARM_BLADE + (form - AF_BLADE)`.
 - **Palm charge and railgun**: firing started a move from a tick constant, which played the launcher and palm poses. Firing now just ends the charge move.
 - Not built here (CI compiles); not played.
+
+## 0.25.40 (2026-11-19): Alex's Mobs Continued joins the pack (#1793)
+
+- **Alex's Mobs Continued** 2.2.4 (Codx.io's Fabric 26.3 port; 2.3.0 needs Fabric Loader 0.20 and the pack is on 0.19.5; LGPL-3.0 in its jar, shipped unchanged; needs CodxLib, already in the pack) joins `packMods`: seagulls, orcas, cachalot whales, giant squid, seals, frilled sharks, blobfish, comb jellies, mimic octopuses, lobsters and the rest of its animals. Andy wanted all of them, so its animals that match Naturalist's, Cube Animals' or ours spawn alongside them as other breeds.
+- Its mod id `alexsmobs` leaves `removedIdsFromProfile`, so Build Modpack no longer moves it out. Citadel and the old port's jars still go.
+- The old port (0.8.82) left in 0.8.107 because its models drew black slabs and streaks with Iris shaders. This is a different port, but worth a look with shaders on.
+- Not played.
+
+## 0.25.41 (2026-11-19): Vanilla+ mods join the pack (#1796)
+
+- From Andy's Vanilla+ list, shipped unchanged: **Break Free** (keep breaking a block when you switch items), **Shared Advancements** (advancements count for your team or everyone), **Horse Expert** (a horse's real speed, jump and health), **VillagersPlus** with its library VillagersTradingPlus (new villager jobs, trades and workstations), **MasterCutter** (500+ stonecutter recipes, woodcutting and un-crafting), **Vanilla Fireflies**, **qraftyfied: Structures** and **Vanilla Constructs** (100+ small vanilla-style features).
+- Break Free, VillagersPlus, MasterCutter, Vanilla Fireflies and Vanilla Constructs have no CurseForge file, so they're in `packModsNoCf` (server, profile and dev game, not the CurseForge import zip).
+- `checkPackMods` passes (488 mods, loader 0.19.5). Not played: the overlaps with MCA villagers, the Saw recipes and Effectual's fireflies haven't been looked at in game.
+- Incendium is held back for its own patch: its Nether file lists its biomes outright, so Fabric's biome API (which adds our Gloam, Ash and Abyss) would have nothing to add them to and the demons' country would stop generating.
+
+## 0.25.42 (2026-11-19): practice dummy: kinds and coloured numbers (#1801)
+
+- **Kinds**: a Practice Dummy wearing a skeleton, wither skeleton or zombie skull counts as undead (Smite bites), a turtle shell as aquatic (Impaling bites), an ominous banner as an illager. The numbers it shows include the extra.
+- **Coloured numbers**: floating damage numbers take a colour from the blow: crits red, fire orange, lightning yellow, magic violet, ki in the striker's ki colour; plain blows keep the white, gold and red size colours.
+- Medieval Buildings is not added (no 26.3 build yet). Built; not played.
+
+## 0.25.43 (2026-11-19): Medieval Music pack, trimmed and on by default (#1795)
+
+- **The music**: Alexander Nakarada's Medieval Music (CC BY 4.0), in Sarisan's 26.3 resource pack (CC BY 4.0), now comes with the pack as "Jaymo Medieval Music": the same 51 tracks re-encoded at about 80 kbps (about 105 MB instead of 490), with a `CREDITS.txt` inside naming both and the change. `PackResourcePacks` fetches it on the first launch from this repo's GitHub release `medieval-music-v1` (assets `Jaymo.Medieval.Music.zip` and `Jaymo.Medieval.Music.zip.sha1`; the SHA-1 comes from the second file), saves it as `resourcepacks/Jaymo Medieval Music.zip`, and switches it on. It stays on at every launch unless `config/jaymospowers-medieval-music-off` exists; the game's situational music (biomes, menu, creative, underwater) becomes the pack's. Credit: Alexander Nakarada (creatorchords.com) and Sarisan.
+- **Gaps**: the pack empties the warped forest's list, so a small built-in pack of ours (`medieval_music_gaps`, switched on just above the music pack with it) gives the warped forest three of its Nether tracks. Aether, Cloud Sea and other worlds' own music events are in their own namespaces and keep playing; the End list is the vanilla `music.end` event, so Enderscape's own biome music (its own events) is untouched.
+- `tools/music_trim.py` builds the zip (needs ffmpeg) and prints its SHA-1.
+- Built (CI); not played. The release asset still has to be uploaded by hand.
+
+## 0.25.44 (2026-11-19): drifting flotsam: ripple spots on rivers and the sea (#1799)
+
+- Now and then a ripple spot (fishing ripples on the water) sits on a river or the sea, drifts a few blocks over five minutes and goes. A hook that lands in one and is reeled in pulls an odd catch instead of a fish: a purse of coin (Kingdoms' money, emeralds without it), a bottle, old worn gear, bits and pieces, now and then a name tag, nautilus shell or saddle. Each spot gives one catch. A long cast reaches farther ones.
+- `fishing/Flotsam` (worked out from the world's clock, nothing saved; hooked in `FishingHookMixin#onRetrieve`). The remains' token of the gone-before isn't in the catches yet (patch 3).
+- Built by CI only; not played.
+
+## 0.25.45 (2026-11-19): the hooded cloak leans in the world's wind (#1798)
+
+- **Hooded cloak** (`HoodedCloakLayer`, `KingdomsCompat.capeInWind`): with Jaymo's Kingdoms loaded, the hooded cloak streams out and lifts to the side with the world's wind (Kingdoms' wind and its way as the client has it), and its hem flutters, gently, a quarter as much behind a wall. Without Kingdoms nothing changes.
+- Built; not played.
+
+## 0.25.46 (2026-11-19): charge jump and Web slingshot on a horse's jump bar, orange peak (#1804)
+
+- **Charge jump** works like a horse's jump now. Stand still holding Sneak and the XP bar turns into the horse jump bar (the level number hides with it). Hold Jump to fill it, let go to leap at the charge it shows; a short tap is a plain jump.
+- **Orange peak**: a stretch of the bar is orange. Letting go inside it gives the full leap (about twice a jump); anywhere else tops out at 70% of the extra height, building up to that short of the peak. With the Charge Jump perk the peak always sits at 70-85% of the bar; without it, it lands somewhere new on every charge.
+- **Web slingshot** uses the same bar: braced between two webs, the jump bar replaces the XP bar, holding Jump draws it, and letting go inside the orange peak gives the full launch (elsewhere up to 70% of the extra speed). The same Charge Jump perk keeps its peak steady. Living Armor's break-free launch (a full draw) counts as letting go at the end of the bar. `WebSwing` (slingPeak, fireSling).
+- **Everyone** can charge jump again; the perk no longer locks it (no "not learned" refusal).
+- The old pale veil over the Feathers row is gone. Tuning in `ChargeJump` (PEAK_WIDTH, PEAK_SKILLED, PEAK_RANDOM_MIN/MAX, MISS_SHARE); `RunMovesClient` draws the bar, `ChargeJumpMixin` holds the plain jump back while Jump fills it.
+- Built (compileClientJava); not played.
+
+## 0.25.47 (2026-11-19): Interactive Foliage - plants bend as you walk through them (#1805)
+
+- **Pack**: added Interactive Foliage 2.2.1 and its library SWAY API 2.4.5 (both official 26.3 Fabric builds, shipped unchanged). Grass, flowers, crops and other plants lean away from players, mobs and dropped items and spring back. Works with Sodium, Iris and shaders. Its settings (radius, strength) are on its Mod Menu screen.
+- Their declared needs (Fabric API 0.161+, loader 0.19.5+, Minecraft 26.3, Java 25) checked by hand against the pack; not built or played.
+
+## 0.25.48 (2026-11-19): flotsam can bring up a dead one's token (#1807)
+
+- **Flotsam**: with Jaymo's Kingdoms loaded, about one odd catch in twenty-five from a ripple spot is a dead one's token (a ring or a carved spoon naming a village near there, `Remains.token` through `KingdomsCompat`). Without Kingdoms, or with no village in the world, it is one of the odd bits as before.
+- Built by CI; not played.
+
+## 0.25.49 (2026-11-19): metal-hit sparks - blows, strikes and arrows on metal (#1809)
+
+- **Sparks off metal** (Andy's ask, after Hackers 'n Slashers, ideas only): clashes, parries and blocked blows already
+  sparked; now a blow that lands does too when it lands on metal. A blade, axe, pick or mace (or a golem's iron fist)
+  hitting metal armour where it struck (head, chest, legs or feet by the height of the hit; a horse's or wolf's armour
+  anywhere), or a metal body (iron and copper golems, clockwork golems, mechs, drones, the goblins' war barrel, rebuilt
+  androids), throws a small shower and a light clink. Heavy weapons and harder blows throw more. Leather, cloth, flesh,
+  wooden weapons and bare fists throw none.
+- Striking a metal block with a weapon or tool (anvils, iron bars, chains, lanterns, copper, iron doors, cauldrons,
+  hoppers: anything that sounds like metal, or tag `jaymospowers:metal_blocks`) sparks at the spot you hit, at most
+  every 5 ticks. Arrows spark off metal armour, metal bodies and metal blocks.
+- `combat/MetalHits` (tuning at the top), `ArrowSparkMixin`, tags `jaymospowers:metal_bodies` (entity) and
+  `jaymospowers:metal_blocks`. Uses ClashFx's sparks and BladeSounds' clash.
+- Compiled; not played.
+
+## 0.25.50 (2026-11-19): crits - riposte kinds, crit cue, camera punch, heavy crit ring, combat attributes (#1813)
+
+Andy's Hackers 'n Slashers picks (All Rights Reserved: ideas only; code, sounds and look are ours).
+- **Riposte by weapon** (`Guard#riposte`): a great weapon staggers and slows, a one-handed blade opens a bleed, a knife or dagger lands a quick second hit, a polearm shoves the foe back.
+- **Crit cue** (`combat/CritCue`): every riposte, perfect parry and jumping crit rings a short synthesised sound (`blade/crit_1..3`, `tools/gen_blade_sounds.py`) and a small white flash. `CritCue.cue(level, at)` is public for Kingdoms.
+- **Camera punch**: landing a cue shakes your own screen; `/critpunch off` turns it off.
+- **Heavy crit**: a jumping crit with a great weapon, warhammer or mace throws a ring (MagicFx) and knocks back those near the foe.
+- **Attributes** `riposte_power`, `sneak_attack_power`, `headshot_power`, `parry_recharge` (multipliers, base 1). Guard reads riposte power and parry recharge (a shorter lockout after a missed raise). Raised by existing gear only: rapier, daggers/knives, recurve bow held; Brawler's Belt (riposte) and Swiftfoot Ring (parry recharge) worn.
+- Compiles in CI; not played.
+
+## 0.25.51 (2026-11-19): Hackers 'n Slashers 4: a shove for everyone, and weapon kinds' on-hit effects (#1814)
+
+- **Shove** (new key, default backslash, rebindable under Jaymo's Powers): with a weapon in your main hand it is a pommel strike, with an empty off hand a shoulder shove. You lunge half a step; whatever is in front of you within 2.4 blocks is thrown back, reels for 14 ticks, and has a raised shield or weapon guard knocked aside (a pommel also does 1.5 damage). Costs 2 feathers, 24 ticks apart; a raised shield keeps its own bang and bash. Classes `combat/Shove`, `client/combat/ShoveClient`.
+- **Weapon procs** (`tinkering/WeaponProcs`, beside `TraitEffects`): small chances per blow by weapon kind (`WeaponKind`): an axe cleaves into the next foe beside the one struck (25%, half damage), a mace or hammer dazes (20%, 1.5 s stun), a spear pierces the foe behind (25%, 60% damage), a sickle swipes twice (20%, half damage). One effect per blow, 12 ticks apart, never from an effect's own damage, and a forged tool with Sweeping, Area or Piercing keeps its trait instead.
+- Idea from Hackers 'n Slashers (All Rights Reserved); our own code and effects. Compiled in CI; not played.
+
+## 0.25.52 (2026-11-19): edges and sparks - blades dull, grindstones, sparks that catch, armour that rings (#1815)
+
+Hackers 'n Slashers patch 3 (ideas only; our own code, sounds and names).
+- **Edges (`combat/Edge`)**: a sword, axe or spear (not wood) keeps a dullness in its custom data. Flesh takes a little off, metal armour or a metal body a lot, a metal block or bare stone a good deal. A dull blade does up to 35% less damage (nothing lost until it is worn). Use a grindstone with the blade in hand (not sneaking: that is the Kingdoms marks screen) to take 75 off a use, with sparks and the grinding sound. Tooltip line "Edge: keen / worn / dull / blunt". Mobs' blades wear the same way (`EdgeLivingMixin`).
+- **Steel on stone**: a hard weapon or tool started on stone, deepslate, tuff, basalt or nether ore now and then throws 3 dull sparks (5, and likelier, off an ore or deepslate) with a dry chip sound.
+- **Sparks that catch**: a shower of 14 sparks or more (a clash, a parry, a heavy blow on plate) may light dry grass, ferns, dead bushes, hay, cobweb or gunpowder lying on the ground. Never in rain, never with fire spread off. Chance 12% at 14 sparks, +4% per spark, at most 50%.
+- **Armour sounds**: plate rings, mail rasps and padding thuds when a blade lands (picked by `ArmourKind`, i.e. the plate_armor/mail_armor/cloth_armor tags); synthesised by `tools/gen_blade_sounds.py` (`hit_sounds()`), 11 new ogg files, `lang/parts/edges.json`.
+- Not played; compiles in CI.
+
+## 0.25.53 (2026-11-19): Powerborne Heroes picks - deeds, storm, Web, second jump, costumes, Divine-born, Smoke banish, Ember, fusion, shields (#1816)
+
+- **Deeds, the crater spider, the Xeno-Band vessel and the Draught of Mettle**
+  - A powerless survival player who is already set to awaken a power (handed down, a calling's, or their affinity's) can wake it early by one deed that fits it, and only that power (a player left to fate is called by the first deed they do, which wakes it at once): Wind survives a lightning strike, Gravity survives a long fall, Cryokinesis is frozen through a night, Darktide nearly drowns at night, Smoke breathes a big fire's smoke, Chrono keeps a clock in hand through a night awake, Pocket Arsenal makes a kill carrying five kinds of weapon, Z Fighter beats a hardy monster bare-handed while badly hurt. Resonance (the Tuning Fork while blind) and Xenoform (the band) keep the ways they already had. No line says what the deed was. Class: `core/AwakeningDeeds`.
+  - A cave spider shut in glass (glass or panes on four sides and below, open top) and fed a lump of meteoric iron becomes a crater spider (named, marked by a tag). Its bite wakes a Web-leaning player; anyone else is poisoned and sickened. Class: `power/web/CraterSpider`.
+  - The Mad Tinkerer has an aside about the filings on his bench that hints at it.
+  - The Xeno-Band already keeps its learned aliens, reforge, modules, skills and look on the item when it is torn off a downed wearer or given up with the Draught of Release, and gives them to its next wearer (`XenoBands`, `XenoBandItem`). Nothing changed.
+  - Draught of Mettle: a rare Infusion (research "Mettle") for people with no power: 8 minutes of Speed, Jump Boost II, Dolphin's Grace, slower hunger and one extra jump in the air (`alchemy/picks/MettleDraught`, client `client/alchemy/MettleJump`). Someone with a power only gets nausea.
+- **Storm: draw the sky, three hammer throws, recall, twin bolt, storm landing, storm road, the worthy dagger**
+  - Wind Control's Stormbound (and Thunderhead) mode gains six keys, all rebindable and all doing nothing unless the mode is on. Default keys: `-` Draw from the sky (hold), `=` Hurl hammer (hold; sneak while winding up switches the throw), `Home` Call it back (sneak: bind the weapon in hand), `Page Up` Bring two storm weapons together, `Page Down` Storm landing (then jump), `Insert` Storm road (sneak: mark the place). The gauge chip sits left of Wind's ability chips (the throw mode, `+` when the landing is armed, `*` when a road is marked).
+  - **Draw from the sky**: outdoors under rain or thunder, hold the draw key: small bolts arc from the clouds to both hands with a rising hum (Soundscape), thunder fills the gauge in 5 s, rain more slowly. A full draw opens the storm state for 20 s: +50% melee damage, Resistance I, sparks on the body, a little hunger. 30 s cooldown after it ends. Needs open sky and 3+ shanks of food.
+  - **Three throws for a war hammer** (the Armory warhammer, a mace, any hammer or mace by `WeaponKind`): hold Hurl to wind up (6 ticks at least, full strength at 20), sneak while winding up cycles the throw. Lightning: it flies as a thrown weapon and a bolt (WindBolts' own strike) comes down where it lands or strikes. Ride: you are carried with it to your aim, it bursts where it lands, then bounces from foe to foe (5 bursts at most, nearest foe in sight within 14 blocks) while you stay off the ground; sneak steps off; it lies where the chain ends. Spin: it stays in your hand, spun overhead while the key is held; double-tap Jump to fly on it for up to 5 s along your look at a hunger cost; it falls when the flight ends and the fall hurts. A thrown hammer never despawns (ThrownWeapon.lasting) and is bound for Call it back.
+  - **Call it back**: sneak + the recall key at a storm (rain or thunder) binds the weapon in hand (a thrown hammer is bound by the throw); binding another lets the first go. The recall key sends the bound weapon to your hand from anywhere in the same dimension, through what is in the way (6 damage to what it passes, once each); further than 48 blocks it comes out of the storm at the edge of sight. Its chunk not loaded: the call waits (5 minutes) and it answers when the chunk is there. The bond is a token in the weapon's custom data and on the player (persistent).
+  - **Two storm weapons together**: a hammer, mace or storm-marked weapon in each hand; the key sends one great bolt beam (40 blocks, 16 lightning damage, a bolt at the end) with a 13 s cooldown.
+  - **Storm landing**: press the key (ground or air), then jump: a great leap on the ground, a dive in the air. On landing, 2 to 8 lightning bolts strike round you, more and harder and wider the further you fell (3 blocks of drop at least). The fall still hurts.
+  - **Storm road home**: sneak + the key marks where you stand (needs open sky). The key alone calls a column of storm light over you (and one over the mark); held in it for 3 s you are carried to the mark in the same world. 5 minute cooldown; fails underground at either end, in another world, or if the mark is walled in (cooldown refunded). No portal, no screen; the travel road screen was not found in the code so only the column is used.
+  - **Fall damage**: the storm's leaps, rides and flights set `StormNet.hardFall`, which `WindFall.damage` honours, so a Wind user with mastery 2 takes the fall in full there (it is still none for their ordinary falls).
+  - **Only the worthy lift it** (Sora's Dagger, third discovery): while no line is out, a fallen star's crater (FallingStars) may have a dark stone beside it with the stone blade driven into it (invisible item frame, `SorasStone`). Only a player with 200 hostile monsters killed (own counter, counts anything with `Enemy`) and a village saved (Hero of the Village earned once, or the scoreboard tag `jaymos_village_saved`) can draw it. The unworthy strain: a grunt, grit knocked loose, a jolt through them, brief heavy slowness, no text. It follows SorasLineage's one-find rule: claiming the dagger by any way removes the stone's blade; a new line can leave a new stone at the next fallen star.
+  - Classes: power/wind `StormNet` (keys, HUD packet, routing), `StormDraw`, `StormHammer`, `StormRecall`, `StormTwin`, `StormLanding`, `StormRoad`, `SorasStone`; client `WindStormClient` (keys, gauge); hooks in `WindPower`, `WindNet`, `WindModes`, `WindFall`, `WindBolts` (strike, zap, sky made package-private), `SorasLineage`, `FallingStars`, `armory/ThrownWeapon` (lasting, lying, struck). Lang `wind_storm.json`. New attachments (listed in registerAttachments): recall token, road mark, stone, kills, village saved.
+- **Web Slinger: Blossom, whirl, web shield, dark sense, tight gaps**
+  - **Web Blossom (Sneak + C, once every web ability is unlocked):** you leap and spin, and web lines from both wrists go round the ring at every creature in sight (16 blocks, line of sight; hostile, after you, or the one you're fighting; never tamed pets, villagers or players you aren't fighting), each cocooning what it hits. One shooter shot per web (the suit's mass needs none); it stops where the wrists run dry. `WebBlossom`; C now also answers for a fully unlocked slinger (Web Strike still needs ascension).
+  - **Whirl the webbed:** the old two-handed lasso (`WebWhip`) is now the default for Sneak with both webs on a creature, on the ground or in the air (Sneak + Jump gives the overhead and seesaw slams as before). New one-line whirl: with a single web on a creature, punch to swing it round you in a circle, knocking down whoever it sweeps; hold to keep it going, let go to fling it. `WebWhip` (Hold packet now carries a mode), `WebSwing` (client input).
+  - **Web shield:** with Webbed Fists on, right click with an empty hand spins a round web disc onto your main forearm. It takes the next 3 hits whole with no knockback, then tears into web shreds; it ends with the fists. `WebShield`, `WebShieldClient`, texture `web_shield.png` (`tools/gen_web_shield.py`).
+  - **Dark sense:** where the light is low a web slinger sees faintly (a dim night sight, never full). On by default; a fourth slot on the H power screen switches it. `WebDarkSense`, `WebDarkSenseMixin`, `PowerClient.extraToggle*`.
+  - **Tight gaps:** climbing a wall or ceiling on the tendrils' latch (or a wall cling) lies you low (swimming pose) when the way ahead only fits that, so one-block gaps can be crawled through. Web slingers walk through cobwebs unslowed and tear them down by hand at once. `WebGaps`, `CrawlPlayerMixin`, `WebCobwebMixin`, `WebCobwebTearMixin`.
+- **A second jump in the air for every power**
+  - Press Jump once more in the air (a few ticks after leaving the ground) and every power gives one extra jump, once for each time off the ground; the ground, water, lava, a ladder, a mount or flying give it back. It costs a little hunger, and the fall is counted from the top of the jump, so fall damage still applies.
+  - Each power kicks off something of its own: Pocket Arsenal opens a small rift under the feet with a mountain's peak standing up out of it (the highest jump of all); Chronokinesis kicks off a speed remnant of himself left in the air and is thrown forward; Wind Control pushes off a gust; Emberborn (power or not) a burst of fire; Web a spring off a puff of web; Gravity lightens himself for a moment; Smoke a puff of smoke; Cryo a thin ice plate; Darktide a splash of dark water; Resonance a pulse of sound; Xenoform a pad of the band's light; Z Fighter a ki burst.
+  - Anyone in a power's flight (Wind, Smoke, Z Fighter, Xenoform's fliers, Gravity's rock flight), on a web line or on an Arsenal ride keeps what they have. Web's wall jump, cling and charged jump are unchanged.
+  - With a cloud in a bottle, its jump takes the first press and the power's the next: one each, never both on a press.
+  - Key classes: `core/jump/PowerJump` (kinds, packet, server effects), `client/jump/PowerJumpClient` (the kick, lift and push per kind, `mortal(...)` for the no-power draught's jump), `ArtifactBaublesClient.cloudJump`.
+- **Costumes: patterns, plates, armour stands, and first-time tips**
+  - **Costume Patterns** (new item): use one and you learn one new designer piece for good; it is used up. Eleven new pieces start locked: cuts Striped, Harlequin and Scaled; head pieces Domino Mask, Masquerade Mask, Face Scarf, Cowl (a hood), Skull Mask and Visored Mask; capes Scalloped and Trailing. Everything already in the designer stays open to everyone (creative sees all). The server checks learned pieces when a costume is sewn, at the table or by a tailor.
+  - Patterns turn up: from a boss (each fighter who did a tenth of the harm, one time in two), in buried treasure and bastion treasure chests, from the wandering trader (12 emeralds each, one use), and from costumed gifted villagers, who sometimes wear a pattern piece and drop its pattern when a player kills them.
+  - **Metal plates**: the suit editor has a plate button each for head, chest, legs and feet (copper, iron, bronze, steel, netherite; right-click steps back). Each plate takes 2 ingots of its metal when sewn, is drawn over that part in the metal's colour, and gives armour while the costume is worn: slot base (head 1, chest 3, legs 2, feet 1) times the metal (copper 0.6, iron 1, bronze 1.2, steel 1.5, netherite 1.7), at most 12 (chainmail). A plate only counts where you wear no real armour in that slot. The plates are part of the design, so costume items, armour stands and corpses keep them.
+  - **Armour stands**: sneak and right-click a stand with an empty hand to swap your worn costume with the stand's (or dress it, or take its costume). The stand is drawn as a body in the costume, keeps it in its save, and drops it as an item when broken.
+  - **First-time tips**: the first time a player is seen with Arsenal, Chrono, Cryo, Darktide, Gravity, Resonance, Smoke, Web, Wind or Xenoform, a tip card names its two to four least obvious inputs (Wind: the storm keys; Web: Sneak + C Web Blossom, the one-line whirl, the web shield). Shown once per player, saved in the client config.
+  - Key classes: `costume/CostumePatterns`, `CostumePlates`, `CostumePlating`, `CostumeStand`, `CostumeSets.Piece`, `client/costume/CostumeModels#plate`, `client/costume/GiftedCostumeClient`, `client/hud/PowerTips`; art by `tools/gen_costume.py`.
+- **Light, dark and fire: golden shell, healing ward, banish, darkness feeds corruption, rise and crash, cook in hand, drink the blast**
+  - Divine-born: golden shell. While nothing has hurt them for 10 s, a golden absorption heart builds every 4 s, up to 10 hearts; any hit restarts the wait. A faint gold mote lifts off the halo as each heart forms. Class `divine/DivineShell`.
+  - Divine-born: healing ward. Sprint + the heritage key raises a dome of light (radius 5, 8 s, follows them) that heals them, other players, tame animals and villagers inside (1.5 health a second) and shoves hostile creatures out and keeps them out. Costs 8 half-feathers, 60 s cooldown. Class `divine/DivineWard`; the key is routed from Kingdoms.
+  - Smoke: Banish, sneak + B. The creature aimed at is wrapped in smoke and gone for 10 s: invisible, silent, no AI, no gravity, nothing hurts it, and a knot of smoke curls where it went. Hitting the knot (its own hitbox) takes 3 s off. It comes back where it went, dazed 4 s (slowness, weakness). Players, tame pets and bosses (Dragon, Wither, Warden, 150 health or more) are immune. The end time and what it was before are saved on the creature, so a chunk unload or a server stop never keeps it gone. Class `power/smoke/SmokeBanish`.
+  - Corruption: for a meter that has already started (1 to 89 of 100), a hit taken adds 1 (at most one per 2 s), a kill adds 1, and every 10 s in full darkness (light 0) adds 1. Never starts corruption in someone clean; never takes it past 90. Class `core/DarkFeed`.
+  - Emberborn: rise and crash. Sprint + the heritage key shoots you straight up (about 11 ticks), then down toward where you looked at the top, landing in a ring of fire (radius 4.5, 11 damage, burning 6 s, thrown back, shake; no block broken). Feeds Running Hot. The crash's own landing takes no fall damage; every other fall still does. 18 s cooldown. Class `power/ember/EmberCrash`.
+  - Emberborn: cook in your hands. Sneaking with something raw in the off hand (anything the furnace, smoker or campfire cooks into food) cooks it, one at a time, 8 s each, with smoke and a sizzle; the cooked food goes to the inventory or the ground. Class `power/ember/EmberCook`.
+  - Emberborn: drink the blast. A braced Emberborn (EmberSoak) soaks 90% of an explosion's damage (60% for other blows) and it feeds Running Hot twice as hard. Class `power/ember/EmberSoak`.
+- **Fusion: fuse with a villager, pass the reins, find your partner**
+  - Z Fighter: fuse with a villager. Dance alone (Z, then C) within 5 blocks of a villager who trusts you: an MCA villager with 50 or more hearts for you, or family, a spouse, a betrothed, a promised one or hired help; a plain villager whose gossip about you comes to 30. They join the dance, and when it ends you are one for 5 minutes (20 ticks longer for each heart past 50, up to 50 more). You steer the whole time. The villager is held, not killed or moved into anything: the same villager, invisible, unhurtable and unthinking, carried inside the body, then set down beside you unchanged (all their MCA data untouched) when it ends or the server stops. They add a little (1.5 fists, 12 health, 20 ki, 0.25 ki power, 3% toughness, and a 5% bonus). The body gets a knack from their job: farmer (bone-meal pulses on crops within 6 blocks), armorer/toolsmith/weaponsmith (held items mend 1 durability every 2 s), cleric (you and players within 8 blocks heal 1 every 4 s), fisherman (Luck and Water Breathing), librarian/cartographer (3 extra XP per kill), butcher/leatherworker (half the stackable drops of animals and beasts you kill give one more), mason (Haste), fletcher (4 arrows every 10 s while you carry fewer than 24), shepherd (sheep within 8 blocks regrow their wool); no job, nitwit or anything else: no knack. With MCA, the fused body is drawn blended with the villager (the existing fusion look); a plain villager is not blended in. Classes `power/zfighter/ZFighterVillagerFusion`, `ZFighterMasterFusion.hold` (shared), `ZFighterFusion.Kind.VILLAGER`.
+  - Z Fighter: pass the reins. In a fusion of two (dance, earrings, arm bands) the one steering presses Z, then C (the fusion dance's keys, free once fused) to hand the body to the other, any time, in the air too; the new driver can hand it back the same way (2 s apart at least). Once anyone has passed the reins, the halfway swap no longer happens. The one inside presses Z to ask to split; the one steering sees it for 10 s and Z, then C agrees and the fusion ends at once. Classes `power/zfighter/ZFighterReins`, `ZFighterFusion.passReins`, a hook in `core/PowerEvents` (a spectator's Z).
+  - Z Fighter: find your partner. The two Bonding Earrings made together carry one pair mark (also on each half of a split stack). Carrying one (any slot) shows where the other one's carrier is, in the same dimension: within 128 blocks a faint gold outline through walls (the ki-sense outline mixins), beyond that, or if not loaded here, an arrow and the distance at the top of the HUD. Only the paired partner. Classes `power/zfighter/ZFighterPartner` (attachment `zfighter_partner_mark`, sent to the carrier only), `client/power/zfighter/ZFighterPartnerClient`.
+- **Shield and rhythm**
+  - Ride the shield down: with a shield up and looking steeply down (past 60 degrees) as you land, the shield takes half the fall (a fall that would leave 3 or less is untouched, and the fall never leaves less than 3), wearing as it goes, with a thud, dust and a small shake. Fall damage still applies.
+  - Slam from the air: sneak + attack with the shield up while off the ground drives you down; the slam lands on impact, harder and wider by the distance fallen (capped). The ground slam is unchanged.
+  - Rising uppercut: jump + attack with the shield up launches you up and lifts the mobs within 2.5 blocks in front (a hit, a stun, then they drop). Other players are only lifted a little. A weapon-and-shield bang no longer fires while jump is held.
+  - Battle rhythm: landing melee blows without a break quickens your attacks 4% a step up to 5 steps; stop for 4 seconds and a step fades every 1.5 seconds. It is a Kingdoms skill-tree perk (Might, tier 2), read through Powers' TreeLocks.
+  - Key classes: gear/shield/ShieldMoves, mortal/BattleRhythm, core/TreeLocks; Kingdoms Skills.Perk.BATTLE_RHYTHM and TreeLocks.Lock.BATTLE_RHYTHM.
+- Fixes after review:
+  - Soras' Stone's frame is fixed (an ItemFrame accessor mixin), so breaking the blackstone never drops the blade.
+  - A fusion's held master or villager is put down on safe ground (not lava or the void; else where he stood before), unhurtable with a slow fall until he lands.
+  - Smoke Banish skips held masters and unhurtable creatures, forgets banished mobs that are discarded, and a villager fusion skips banished villagers.
+  - Riding the Storm Hammer no longer ends at once (a rider does not pick up the weapon carrying them).
+  - The Storm keys Recall, Twin, Landing and Road start unbound (Home, Page Up/Down, Insert clashed with Kingdoms keys); the tip says to set them in Controls.
+  - The Divine shell can build (a transient absorption ceiling for the Divine-born) and does not refill a golden apple's absorption.
+  - The server checks the jump kind a client sends; Storm Road no longer cancels fall damage in its wind-up, stopping it by hand costs 30 s of cooldown, and it loads the destination chunk; costume stand swap passes through when neither side has a costume.
+  - Per-player maps are cleared on disconnect (Ember Crash, Storm fall/throw, Z-Fighter reins); the Awakening deeds register once.
+- Built; not played.
+
+## 0.25.54 (2026-11-19): Server starts again: SWAY and Interactive Foliage stay on players' games (#1817)
+
+- Fixes: the server would not start after Interactive Foliage and SWAY joined the pack: SWAY carries client-only drawing code the server doesn't have. Both are now left out of the server's mods; players keep them (they add no blocks, items or network messages, so joining is unaffected).
+- Built by CI; checked by starting the Deck server.
+
+## 0.25.55 (2026-11-19): Earth & Water's chunk scan skipped where it can find nothing (#1819)
+
+- Fixes: the earlier speed-up for Earth & Water's per-chunk scan checked for any of its blocks, and its common ones are in most chunks, so the scan still ran almost everywhere (216 samples of a 37 s freeze on a new world). It now looks only for the five blocks the scan ticks.
+- Built by CI; not played.
+
+## 0.25.56 (2026-11-19): NPC fights 1: the fighter brain (tyrants, Patrolmen and gifted folk fight in the air, dodge, guard and parry) (#1825)
+
+Andy: "i like the way these npcs fight, can our powered npcs be similar?" and "they should be able to employ these techniques against players as well." Every move below works on players as well as on NPC foes.
+- **One brain** (`core/brawl/Brawl`) that tyrants and raider men (`ZFighterRogue`), Galactic Patrolmen (`ZFighterPatrol#fight`) and every power's gifted villagers (`GiftedAI`) run. A fighter's **rank** (0 to 1) comes from what it is (tyrant, raider, champion, Patrolman, master or plain gifted, bold or wary) plus the world tier of the nearest player; everything below scales with it, and a rank-0 fighter behaves about as before.
+- **Flight in a fight**: when the foe is in the air (or the fighter was knocked up) they take off, hover at the foe's height, circle at 3 to 6 blocks, dive in for their blows, and land once the foe has stood on the ground a while. Checks ahead for walls, never below the world floor or above the build limit. `Brawl.flyTo(mob, target)` is the same flight for a trip (cruise height, capped speed, a trail through `MagicFx`, sets down within 4 blocks) for the showdown patch to call.
+- **Flying powers in their own flavour** (`GiftKit.flies/color/trail/vanishFx/flyingBy/groundOnly`): Wind folk ride gusts (and keep their own soar and wing), Smoke folk fly as vapour and vanish as smoke, Z Fighter folk fly on ki. Cryo, Gravity, Darktide, Web, Arsenal and Resonance folk get the ground half in their power's colour. No Xenoform NPC exists.
+- **Dash and strafe**: a burst in from 6 to 12 blocks away, sidesteps and circling between blows.
+- **Vanish dodge**: a blow, blast or beam from someone may be dodged by blinking behind them, leaving a fading ki silhouette (about 5 percent at rank 0, 40 percent at rank 1; never falls, fire, the void or commands); the next string starts at once.
+- **Guard and parry**: they raise crossed arms (drawn on a rogue fighter) against an attacker in front, taking half the damage; a blow in the first moments is parried with `ClashFx` sparks, the attacker thrown back and staggered, and a counter a beat later. The guard breaks after a few blows so nobody turtles. Players' own guards already work on any attacker.
+- **Tempo**: gifted folk think every 10 ticks down to 5, and rogues rest and volley up to twice as often, as rank grows.
+- Not played; compiles in CI. Not done: the vanish afterimage is a `MagicFx` silhouette, not a translucent model copy; guard arms are drawn only on rogue fighters (Patrolmen and gifted villagers show sparks and sounds); Patrolmen have one fixed rank rather than rising with arrests; a player's bare-handed swing alone doesn't raise a guard (their string, or trading blows, does).
+
+## 0.25.57 (2026-11-19): NPC fights 4: tyrants vs the Patrol (sworn foes, showdowns) (#1829)
+
+- **Sworn foes**: a tyrant, or one of a raider band's men, now goes for a Galactic Patrolman before anyone else he could fight (before players, golems and villagers). A patrolman picks a tyrant or raider within 48 blocks over any other monster (a recruiter keeps to what is at hand). Players can stand with either side: the tyrant already fights them, and a patrolman is an ordinary villager.
+- **Showdowns**: from world tier 3 (Dread) with a player within 160 blocks, a landing raider band, a tyrant raid or a siege's tyrant has a 35% chance that, 20 seconds later, a Patrol pod comes down 40 to 80 blocks off with one officer. He flies at the tyrant (the tyrant flies to meet him, both through the shared fighter brain's travel flight), then they fight with the same moves. When the tyrant falls or goes, the officer lingers half a minute and leaves in his pod. If the officer falls, the tyrant goes on as before.
+- **Rumour**: players within 160 blocks of the tyrant get a letter line ("Word", through Jaymo's Kingdoms' post, roost or not) of two fighters in the sky. No screen text.
+- Classes: `ZFighterPatrol` (`Cause.SHOWDOWN`, `showdown`, `foe`), `ZFighterRogue.registerGoals`, `ZFighterRaiders`, `ZFighterRaids`, `ZFighterInvasions`, `ZFighterKingdoms.word`.
+- Built; not played.
+
+## 0.25.58 (2026-11-19): hero add-on picks - web, symbiote, gear, Chrono, Cryo, size draughts (#1827)
+
+Andy's 29 picks from three Bedrock hero add-ons (ideas only, our own names and art). Built; not played.
+- **Web Slinger**: let go of a low, fast swing over water and you skim across it on your feet for about four seconds (a bar shows the time; Jump hops off, Sneak sinks). After letting go of a swing, click in the air for a rising blow that throws the foe up, click mid-trick for a spinning strike, or Sneak + click for a two-footed dive kick that slams the ground where you land. Flips, strikes and long runs without touching the ground count toward the web's mastery, more for a chain of different tricks. A web slinger can carry people (players, villagers, illagers, zombies and the like, up to player size) at their side through every swing; villagers can be snatched mid-air.
+- **Symbiote**: at full bond, the radial menu's Wings chip spreads huge red-and-black bat wings: glide, and Jump in the air beats them for a climb (4 flaps, each costing satiety). Ring a bell close by while holding a glass bottle (bond under 70) and the symbiote goes slack; pour it into a Jarred Symbiote. It hates this, says why, trusts you less and remembers who held the jar; use the jar to let it back in. The white strain gets a Pale Burst chip that tears other symbiotes off hosts and mobs and sends loose ones fleeing. Riding a horse, the Steed chip lets the symbiote into it: glossy black, no saddle needed, deer-like leaps, no fall damage, and the symbiote eats for two. Charge the weapon arm while looking at a log and every strain forms an axe: one to three blows by the tree's size, and the last one cuts the log it hits clean out so the tree topples over like any felled tree.
+- **Gear for everyone**: lodestone chips (4 from a lodestone) clicked onto a throwing weapon make it bend toward the nearest foe ahead. Frost bomb for the belt: a 4-block ring of frost that slows and chills and freezes the water's surface. Three arrowheads: Blunt (shoves hard, never bleeds), Spark (shocks the target still and jumps to a nearby foe), Mending (heals whoever it hits). A deck of throwing cards throws three at a time, each card cutting, burning, poisoning or bursting at random.
+- **Fighting**: Sneak + right-click a hostile person-sized mob to hold it in front of you for 3 seconds while you hit it. The Z Fighter's Ki Wave kicks you back when fired, harder with charge, and lifts you if fired at the ground. Kingdoms' new Survival perk Stubborn: once a day a killing blow downs you instead, mending fast for 40 seconds before you get up; struck again while down, you die.
+- **Chrono**: with every ability learned, Sneak + R marks a 25-block space and Sneak + R again puts it back as it was in a golden wave (walls, burnt houses, blast holes, anything fire, mobs or explosions did; blocks a player broke or placed by hand stay as they are, and chests, hives and the like come back empty). A mark younger than 30 seconds turns it back to how it was 30 seconds ago. At top Overclock speed, holding Jump runs you up the air about 5-6 blocks, and use with an empty hand and no static charge throws a thunderbolt in your Speed Prism's colour.
+- **Cryo**: Frost Breath turns lava into obsidian (still) or basalt (flowing).
+- **Alchemy**: the red Small Draught halves your size for 4 minutes (fits one-block gaps, high jump, softer hits); the blue Great Draught grows you half again (long reach, heavy blows, slower).
+
+## 0.25.59 (2026-11-19): Shifting Wares no longer crashes the server on VillagersPlus professions (#1828)
+
+- **Fix**: Shifting Wares' daily trade reroll crashed the server tick (NoSuchElementException in `SlotRerollSource.FromSet`) for a villager whose profession names a trade set that isn't registered. VillagersPlus' miner, alchemist, oceanographer, occultist and horticulturist name `villagersplus:<job>/level_1..5`, which its jar never defines. Such a villager now keeps its trades and restocks them the vanilla way instead of rerolling; professions whose sets exist reroll as before.
+- Class: `mixin/shiftingwares/TradeShufflerMixin` (compat mixin, `@Pseudo`, skipped when Shifting Wares isn't there).
+- Built by CI; not played.
+
+## 0.25.60 (2026-11-19): Sounds no longer stay quieter after the Rig's dip or Z Fighter deafness (#1830)
+
+- The Rig's big-shot dip (`RigImpact`) and Z Fighter deafness (`ZFighterGammaClient`) gave each sound category its slider volume as an extra gain, which 26.3 multiplies by the slider again, so music, blocks, mobs and the rest stayed quieter (slider squared) until a restart. They now pass only the dip itself.
+- Compiled; not played.
+
+## 0.25.61 (2026-11-19): NPC fights 1b: feints and Patrol ranks (#1832)
+
+Andy: "they need to react to feints at least. and give patrolmen ranks".
+- **Feints, both ways** (`core/brawl/Feints`, a swing note in a mixin on `LivingEntity#swing`): every arm swing, a player's or an NPC's, that does no damage a few ticks later is a whiff, and each brawler (tyrants, raiders, Patrolmen, every power's gifted folk) it was aimed at reacts by rank. A low-rank one bites: it flinches into a short guard, and when that drops it is open for a moment (no guard, no dodge, 1.5 times the damage), so the real blow that follows lands hard. A high-rank one reads it (10 to 85 percent of the time by rank): it sidesteps or, from mid rank, blinks away, and punishes the whiff with a counter.
+- **NPCs feint too**: a fighter of rank 0.4 or more swings at a foe who is guarding (a player's Z Fighter guard or another NPC's), then pokes for real 10 ticks later. A player's guard raised in answer to a feint (within 12 ticks) has its parry spent: it cools down 30 ticks and costs 3 ki (`ZFighterGuard.feinted`), so the poke meets only the plain guard. A guard held up before, or not up, is not touched.
+- **Patrolman ranks**: each patrolman who lands gets a Patrol rank (Rookie, Officer, Sergeant, Inspector, Commander), stored on him (`ZFighterPatrol.RANK`, saved), picked weighted by the nearest player's world tier and what each rank needs (`RANK_TIER`); a showdown's patrolman is at least an Inspector. The rank sets his brawl rank (0.15 Rookie to 0.8 Commander), health (up to 1.8 times), armour (up to +6), how hard he punches (up to 1.6 times) and how often, and shows in his name ("Sergeant Jaco"). Player ranks are unchanged. Patrolmen already out keep their old name and count as Rookies; called officers (writs) are not ranked.
+- Built; not played. A feint is read from the arm swing alone, so a slow real blow is told apart only by whether it landed.
+
+## 0.25.62 (2026-11-19): no Animal Dictionary on first join; UI tips as you meet things (#1833)
+
+- Alex's Mobs Continued no longer hands every new player its Animal Dictionary (Andy: players shouldn't spawn with it).
+  `compat/AlexsMobsCompat` turns its `giveBookOnStartup` flag off once the server is up and as each player connects. The
+  book can still be crafted and read; players who already have one keep it.
+- **UI tutorial as tips** (Andy picked tips as you meet things over a walkthrough): the first time a part of the screen
+  shows, a tip card says what lives there: left of the hotbar (body), right of it, around the crosshair, over the hotbar,
+  top left, then how to move HUD parts (/hudmove); the character menu the first time it's open; the journal key the
+  first time you carry the traveller's journal. Once per player, one at a time, none in the first 10 seconds of a
+  session. `client/hud/UiTips`, lang `parts/ui_tips.json`; `TipCard.busy()` added. Powers keep their own tips.
+- Built; not played.
+
+## 0.25.63 (2026-11-19): The last hold gives a breather; gifted folk leave the downed alone (#1831)
+
+- **The last hold** (the one health mercy) now gives 3 seconds after it catches you in which no attack lands, to get
+  away. In Andy's clip it held him on half a heart, and the stranger's next blast downed him 2.5 s later.
+- **Gifted folk** no longer throw their power at anyone downed.
+- `MobExecutions.order`: a mob may set out to execute a downed player by its own choice (Kingdoms' spiteful strangers).
+- (LastHold, GiftedAI, MobExecutions). Built; not played.
+
+## 0.25.64 (2026-11-19): New worlds get the Cloud Sea again
+
+- **New stacked worlds now get the Cloud Sea between the Overworld and the Aether.** Once One Dimension has run, it rewrites `config/one-dimension.json` itself: plain ids, and every dimension it knows added to the end of the list. Our upgrade only recognised the old file exactly, so on every server and install that had played before, new maps were still made with the Aether sitting straight on the Overworld at Y 320 (Andy's clip, 2026-11-19). Now, if the Aether sits directly on the Overworld in that list and there's no Cloud Sea, the Cloud Sea is put between them and the rest of the order is kept (`compat/OneDimensionDefaults.update`).
+- Only worlds made from now on change. A world keeps the layers it was made with, so an existing map stays without a Cloud Sea.
+- Checked on a test server with the full pack and an old-style file: the file was brought up to date and the new world stacked the Cloud Sea at Y 320-575. Not played.
+
+## 0.25.65 (2026-11-19): NPC fights 2: strings, chases and ki for tyrants, Patrolmen and Z Fighter gifted folk (#1836)
+
+Andy: "they should be able to employ these techniques against players as well." Everything below aims at players as well as NPC foes.
+- **Strings (F4)**: the tyrant's blow-string runner is now shared (`ZFighterStrings`), so a Galactic Patrolman and a Z Fighter gifted villager throw 4 to 6 blow strings too, the longer ones as they rank up (a Patrolman's string follows the brawl rank; Inspectors and Commanders blow faster). The Patrolman's single 7-damage punch is gone (his damage still scales with his Patrol rank). Higher ranks mix feints into a string (a blow thrown and not landed, a beat's pause) to bait a guard or a parry.
+- **Launch and chase (F5)**: a finisher throws the foe 8 blocks at rank 0 up to about 15 at rank 1 (it was a fixed 2.2), then the thrower rushes after and, there, either follows up with a second string in the air (those who fly) or hammers the foe down into the ground with the slam ring (more often at higher rank; fighters who can't fly always slam).
+- **Ki (F7)**: tyrants, Patrolmen and Z Fighter gifted folk (new moves "string", "beam", "seeking volley", "charged blast") use a short 20-block beam gathered for 12 ticks in the palms (every 15 to 25 seconds, quicker with rank), a volley of 5 seeking bolts, and a charged blast: an orb gathered for 20 ticks that grows in the hands, then thrown as a slow ball that bursts for big damage where it lands (a foe who moves out of its way is missed). The tyrant's old plain 3-blast volley stays.
+- For the beam clash patch: `ZFighterNpcKi.fireBeam(level, mob, foe, fists, color)` is the NPC beam's single entry point; it builds an `NpcBeam` and offers it to `ZFighterNpcKi.taker` before any damage or drawing.
+- Built; not played. Patrolmen and gifted villagers (MCA models) show strings as arm swings and sounds; only the rogue fighter's model draws the combo poses.
+
+## 0.25.66 (2026-11-19): NPC fights 3: trading blows, beam struggles, impact, soft blocks, power-ups (#1834)
+
+- **Trading blows**: when a fighting NPC (tyrant, raider, patrolman, any power's gifted villager) and a player or another NPC land blows on each other within 3 ticks, the second blow does not land: sparks at the midpoint, a shockwave ring, cracks and dust, a boom, both pushed back 2 to 4 blocks (less in the air; further the higher their rank), a shake for everyone near, and the first blow's damage is given back. One clash for each pair every 2 seconds.
+- **Beam struggles with NPCs**: `BeamClash` takes any `LivingEntity` now. A Z Fighter's gifted villager now holds their Wave Beam out for about a second (hitting in two pulses) and it meets another beam head-on, a player's or another fighter's, and locks into a struggle: the NPC is rooted, pushes on its own by rank with random surges and a last-stand surge when the knot nears it, and the loser is blasted back like a player. `BeamClash.npcBeam` is the hook for any NPC beam (patch 2's will use it). A struggle with no player in it is drawn from the server.
+- **NPC beams (patch 2's)**: every ki beam a tyrant, patrolman or Z Fighter gifted villager fires (`ZFighterNpcKi.fireBeam`) is taken over through `ZFighterNpcKi.taker` (`core/brawl/NpcBeams`): held out about a second, it locks into a struggle with a player's or another NPC's beam, and otherwise hits in two pulses that add up to the damage it did before.
+- **Impact**: slams and the palm's throw leave a shockwave ring, a ring of dust and cracks in the ground's own debris; a thrown body leaves a dust trail; everyone near feels it (`Shakes`).
+- **Soft blocks**: a thrown body plows through, and a slam breaks, only blocks in `#jaymospowers:brawl_breakable` (leaves, glass, dirt, sand, gravel, snow, ice, small flowers, short plants); leaves and glass drop nothing. Never on a kingdom's or settlement's land (Kingdoms' `Factions.around`, 64 blocks of a seat) and never with `mobGriefing` off.
+- **Power-up**: at half health, once, a tyrant, a Galactic Patrolman or a Z Fighter's gifted villager backs off 6 to 10 blocks, hovers and flares for 30 to 40 ticks (rocks lift, the ground shakes, a hum climbs), then goes up: the tyrant's Super 2 now comes after this build-up; the others gain rank (faster tempo, more guard and dodge) and a brighter aura. A blow of 12% of their health during the build-up cuts it short (no new form, a stagger).
+- Classes: `core/brawl/TradeBlows`, `Spectacle`, `SoftBreak`, `PowerUp`, `BeamClash`, `ZFighterImpact`, `ZFighterGift`, `ZFighterRogue`, `ZFighterKingdoms.protectedLand`.
+- Built; not played.
+
+## 0.25.67 (2026-11-19): TaCZ loot lookup no longer stalls the server (#1840)
+
+- **Pre-generating and exploring**: new land no longer freezes the server while TaCZ works out which loot table is being rolled. It used to search every loot table for each mob's equipment roll; it now looks the table up in a map built once per reload.
+- Classes: new optional mixin `TaczLootLookupMixin` (own config `jaymospowers.tacz.mixins.json`, skipped when TaCZ is absent). Nothing of TaCZ is copied.
+- Built by CI; not played.
+
+## 0.25.68 (2026-11-19): One Dimension stack back to the pack's order (#1852)
+
+- **New worlds** stack the high sky, the Aether, the Cloud Sea, the Overworld and the Nether, top to bottom, again. One Dimension had rewritten its config with every dimension it knew, which put the Cloud Sea and high sky under the Nether.
+- **Lost Cities** is no longer stacked (nor are the proving grounds); they are left out like the other worlds you reach another way.
+- A One Dimension config whose order differs from the pack's is put back to it on start-up and logged; the pack's order wins over hand edits, since One Dimension's own rewrite can't be told from one. Worlds that already exist are unchanged.
+- Class: `OneDimensionDefaults`.
+- Built by CI; not played.

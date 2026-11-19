@@ -193,6 +193,11 @@ def packMods = [
 	// levers, buttons, chests, lecterns and more swing smoothly; lanterns and chains sway. Works with Sodium and Iris.
 	// Client-only. 1.3.7: 1.3.6 and older patch a field Entity Culling 1.12 no longer has, and the game stops on start.
 	[dep: "maven.modrinth:fwa:JRzSDvfy", cf: [1452982, 9594250]],
+	// Interactive Foliage (by Karto; the jar says CC BY-NC-SA 4.0, Modrinth says All Rights Reserved: ship unchanged only)
+	// and its library SWAY API (CC BY-NC-SA 4.0, by razorplay01): grass, flowers, crops and other plants bend away from
+	// players, mobs and dropped items and spring back. Works with Sodium and Iris. Only drawn on the client.
+	[dep: "maven.modrinth:mc2-interactive-foliage:lQmGa1wY", cf: [1560873, 9260861]],
+	[dep: "maven.modrinth:sway:J9WbqmZ9", cf: [1568089, 8937229]],
 	// Controlling (MIT, by Jaredlll08) and its library Searchables (MIT, same author): a search bar on the Controls >
 	// Key Binds screen (by name, by key, or by category), plus a filter for conflicting and unbound keys. Client-only.
 	[dep: "maven.modrinth:controlling:V6AbRm67", cf: [250398, 9110875]],
@@ -302,6 +307,12 @@ def packMods = [
 	[dep: "curse.maven:customchunks-1727847:9101536", cf: [1727847, 9101536], dev: false],
 	[dep: "curse.maven:planeshift-1714620:9083764", cf: [1714620, 9083764], dev: false],
 	[dep: "curse.maven:codxlib-1633207:8893340", cf: [1633207, 8893340], dev: false],
+	// Alex's Mobs Continued 2.2.4 (Codx.io's port of Alexthe668's Alex's Mobs; 2.3.0 needs Fabric Loader 0.20, the pack has 0.19.5;
+	// LGPL-3.0 in its jar, shipped unchanged; needs
+	// Fabric API and CodxLib above): ~90 lively animals, seagulls, orcas, cachalots, giant squid, seals and deep-sea fish
+	// among them. Andy (2026-11-19): "their animals seem to be the most interactive", all of them, duplicates of
+	// Naturalist/Cube/ours kept as other breeds. Not Citadel or the old port taken out in 0.8.107 (black slabs under Iris).
+	[dep: "curse.maven:alexs-mobs-continued-1635121:9256210", cf: [1635121, 9256210], dev: false],
 	// Voice (0.17.157; Kingdoms' ProximityChat does typed chat). Simple Voice Chat (all rights reserved, henkelmax; downloaded
 	// by id, never copied or taken apart): proximity voice, push-to-talk or voice activation (V opens its menu). Client
 	// and server; the server listens on UDP 24454, so the Deck's playit tunnel needs a UDP tunnel to it (deck/README.md).
@@ -454,6 +465,16 @@ def packMods = [
 	// spiked mace, hand scythe and throwing axe. A datapack switches off its grid recipes (its armour stays off: Kingdoms'
 	// heraldry harness is the pack's knight armour) and the Smithing Anvil forges the weapons instead (KnightArmorForging). Client and server. 1.1.1 for 26.3. Needs Fabric API.
 	[dep: "maven.modrinth:knight-armor-and-weapons:WqwhtagO", cf: [1563034, 9620320]],
+	// From Andy's Vanilla+ list (2026-11-19 pick list), shipped unchanged:
+	// Shared Advancements (MIT, server side): advancements count for your team or every player.
+	[dep: "maven.modrinth:shared-advancements:cbhS9PTE", cf: [831959, 8942452]],
+	// Horse Expert (MPL-2.0, Fuzs; needs Puzzles Lib and Forge Config API Port above): a horse's real speed, jump and health.
+	[dep: "maven.modrinth:horse-expert:qUjLS9C5", cf: [666942, 9088683]],
+	// Incendium (Stardust Labs licence, packs allowed): Nether biomes, structures, weapons and mobs, beside our demon-realm biomes.
+	// qraftyfied: STRUCTURES (CC BY-NC 4.0, free pack): built structures to explore across the Overworld.
+	[dep: "maven.modrinth:qraftyfied:cpRes8NL", cf: [1005868, 8916149]],
+	// VillagersTradingPlus (GPL-3.0): the trading library VillagersPlus needs (packModsNoCf).
+	[dep: "maven.modrinth:villagerstradingplus:uut3GStm", cf: [1635301, 9346754]],
 ]
 // on Modrinth, but CurseForge has no file matching the version we use (checked 2026-11-04), so the CurseForge manifest
 // can't list them: they're in modpack/mods (server, hand-made profile) and the dev game, but not in the CurseForge import
@@ -706,6 +727,17 @@ def packModsNoCf = [
 	[dep: "maven.modrinth:polymorph_plus:1Q5h8wvM", cf: null],
 	// Chat Heads (MPL-2.0, dzwdz): player heads beside chat lines. Client-only. 1.3.2 for 26.3.
 	[dep: "maven.modrinth:chat-heads:i3gcElvQ", cf: null],
+	// From Andy's Vanilla+ list (2026-11-19), shipped unchanged; no CurseForge file found for these:
+	// Break Free (Unlicense, client): keep breaking a block when you switch items.
+	[dep: "maven.modrinth:breakfree:WUBobDKx", cf: null],
+	// VillagersPlus (GPL-3.0): new villager jobs, trades and workstations (needs VillagersTradingPlus, packMods).
+	[dep: "maven.modrinth:villagersplus:6TiiJgHL", cf: null],
+	// MasterCutter (CC BY-ND 4.0): 500+ stonecutter recipes, woodcutting and un-crafting, beside our Saw.
+	[dep: "maven.modrinth:mastercutter:iKLtSp2g", cf: null],
+	// Vanilla Fireflies (CC BY 4.0): fireflies at night, beside Effectual's.
+	[dep: "maven.modrinth:vanilla-fireflies:f9FE4diA", cf: null],
+	// Vanilla Constructs (all rights reserved; shipped unchanged from Modrinth): 100+ small vanilla-style features.
+	[dep: "maven.modrinth:vanilla-constructs:il0WctcM", cf: null],
 ]
 // on Modrinth only and needed by every client, so the CurseForge import zip carries the jar itself (overrides/mods), and
 // the server, modpack/mods and your profile get it like any pack mod. Not loaded in the dev game (too heavy).
@@ -884,7 +916,7 @@ def packShaderPacks = [
 // sodium-2MZWfUts: Modrinth's Sodium 0.9.3 beta 4 (ImmersiveVFX's test, 2026-11-10); its name didn't match
 // "sodium-fabric-0.9.3", so it stayed after the test ended and Iris 1.11.7 refused to start the game
 def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-", "alexs-mobs-", "citadel-", "sodium-fabric-0.9.3", "sodium-2MZWfUts"]
-// the same, by Fabric mod id, for mods whose CurseForge file names we don't know: Alex's Mobs and Citadel (0.8.107,
+// the same, by Fabric mod id, for mods whose CurseForge file names we don't know: Citadel (0.8.107, with the old Alex's Mobs port;
 // their models drew black slabs and streaks across the screen with Iris shaders), Distant Horizons (0.9.6, taken out
 // at Andy's request; a new world on the Deck's server had hung at startup with it), Camera Utils (0.10.57, Shoulder
 // Surfing Reloaded won't load beside it), Combat Roll (0.15.16: it left the pack in 0.15.5 for our own feathers and
@@ -897,7 +929,7 @@ def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-",
 // think the new grass and punchy are lagging the game"; punchy_expressions comes inside Punchy! Moves);
 // Ragdollified and Ragdollified Reactions (out until its whole set can go in, see the pack list);
 // VO: Better Dogs and Dasik Library (its wolves stopped the server, see the pack list)
-def removedIdsFromProfile = ["alexsmobs", "citadel", "distanthorizons", "camerautils", "combat_roll", "ctov", "immersivevfx", "immersivefx", "streamsreflowing",
+def removedIdsFromProfile = ["citadel", "distanthorizons", "camerautils", "combat_roll", "ctov", "immersivevfx", "immersivefx", "streamsreflowing",
 	"grassiergrass", "punchy", "punchy_moves", "punchy_expressions", "ragdollified", "ragdollifiedreactions",
 	"vanilla-outsider-better-dogs", "dasik-library", "scalablelux"]
 // a jar's fabric.mod.json (null if it isn't a Fabric mod): the profile's CurseForge file names differ from the pack's
@@ -1175,6 +1207,10 @@ def serverRunning = {
 		false
 	}
 }
+// Mods that say they run on both sides but break a dedicated server (client classes in their common mixins): kept out of
+// the server's mods. SWAY API's LevelRendererMixin stopped the Deck server starting (2026-11-19 7:36 AM), and
+// Interactive Foliage needs SWAY and only draws on the client.
+def notOnServer = ["sway-*.jar", "mc2-interactive-foliage-*.jar"]
 tasks.register("serverMods", Sync) {
 	onlyIf {
 		if (!serverDir.isDirectory()) {
@@ -1196,6 +1232,7 @@ tasks.register("serverMods", Sync) {
 	from dwJar
 	from localPackJars
 	into new File(serverDir, "mods")
+	exclude notOnServer
 }
 // the user's own CurseForge profile (imported from the pack zip): swap in the new Jaymo's Powers jar, the current
 // Jaymo's Kitchen jar and the local pack mods (each replacing older versions of itself). Skipped while the game is
@@ -1303,7 +1340,10 @@ tasks.register("deckMods", Tar) {
 	archiveFileName = "Deck-mods-${project.version}.tar.gz"
 	compression = Compression.GZIP
 	destinationDirectory = packDir
-	from(new File(packDir, "mods")) { into "mods" }
+	from(new File(packDir, "mods")) {
+		into "mods"
+		exclude notOnServer
+	}
 }
 tasks.register("packageModpack") {
 	group = "build"

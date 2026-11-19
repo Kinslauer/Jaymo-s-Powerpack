@@ -132,6 +132,12 @@ public final class Senses {
 	/** A sneak attack only from the mob's rear: the way from it to the attacker, flat, against its look, at most this (-0.3: the back 145 degrees or so). */
 	static final double REAR_DOT = -0.3;
 
+	/** (hs_backstab) A blow from a mob's rear, with no Sneak Attack perk, is this much stronger (the perk's is {@link #SNEAK_ATTACK_RANK_MULT}). */
+	static final float BACKSTAB_MULT = 1.25F;
+	/** (hs_cover) Standing in grass, a bush or leaves ({@link RogueExtras#inCover}): this share of a mob's range; sprinting: this much more; the player a mob last fought (within this many ticks): this much more. */
+	static final double COVER = 0.8, SPRINT = 1.25, REVENGE = 1.5;
+	static final int REVENGE_TICKS = 200;
+
 	/** Bosses: stealth cuts their sight no lower than this share; they see within this cosine of their look (-0.5: a 240 degree cone). */
 	static final double BOSS_SIGHT_MIN = 0.4, BOSS_VIEW_COS = -0.5;
 	/** Bosses: a sneak attack or assassination deals at most this share of their max health, and never less than this times the plain blow. */
@@ -414,6 +420,16 @@ public final class Senses {
 			f *= Pace.SIGHT;
 		}
 		f *= FieldWeather.sight(level, looker);
+		// (hs_cover) grass, bushes and leaves hide anyone a little, a runner is given away, and the one a mob last fought is easier to see
+		if (RogueExtras.inCover(player)) {
+			f *= COVER;
+		}
+		if (player.isSprinting()) {
+			f *= SPRINT;
+		}
+		if (looker.getLastHurtByMob() == player && looker.tickCount - looker.getLastHurtByMobTimestamp() < REVENGE_TICKS) {
+			f *= REVENGE;
+		}
 		if (player.distanceTo(looker) > BEHIND_CLOSE) {
 			// (2026-11-19) well above it, and steeply up out of its sight, as if behind it
 			double rise = player.getEyeY() - looker.getEyeY();
@@ -947,7 +963,10 @@ public final class Senses {
 	 */
 	public static float dealt(LivingEntity target, DamageSource source, float amount) {
 		float mult = sneakAttack(target, source);
-		if (mult <= 0.0F || !(source.getEntity() instanceof ServerPlayer sp)) {
+		if (mult <= 0.0F) {
+			return backstabbed(target, source, amount);
+		}
+		if (!(source.getEntity() instanceof ServerPlayer sp)) {
 			return amount;
 		}
 		long now = sp.level().getGameTime();
@@ -959,6 +978,7 @@ public final class Senses {
 		if (sp.level() instanceof ServerLevel level) {
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 0.8F, 0.8F);
 			level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY(0.6), target.getZ(), 10, 0.25, 0.3, 0.25, 0.2);
+			PowersCompat.critCue(level, target.position().add(0.0, target.getBbHeight() * 0.6, 0.0), sp);
 		}
 		sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.senses.sneak_attack").withStyle(ChatFormatting.GRAY));
 		Skills.sneakAttack(sp, now);
@@ -981,6 +1001,31 @@ public final class Senses {
 		if (rank <= 0 || !fromRear(target, sp) || cooling(target, source)) {
 			return 0.0F;
 		}
-		return SNEAK_ATTACK_RANK_MULT[Math.min(rank, SNEAK_ATTACK_RANK_MULT.length) - 1];
+		// Jaymo's Powers' sneak attack power (a held dagger, the hidden blade) multiplies it
+		return SNEAK_ATTACK_RANK_MULT[Math.min(rank, SNEAK_ATTACK_RANK_MULT.length) - 1] * CritPower.sneak(sp);
+	}
+
+	/**
+	 * (hs_backstab) What a melee blow from a mob's rear deals for anyone: {@link #BACKSTAB_MULT} times {@code amount}. Not with the
+	 * Sneak Attack perk (its own is bigger and unchanged), not a Thief (whose burst is {@link ThiefSneak}), not on a boss, a pet of
+	 * theirs or a mob already after them, and none for a player sworn to a patron whose law holds {@code sneak_attack}: it never
+	 * rewards what that law forbids (and this adds no break: the commandment's own hook is untouched).
+	 */
+	static float backstabbed(LivingEntity target, DamageSource source, float amount) {
+		if (CombatArts.striking() || !(target instanceof Mob mob) || !sensing(mob) || boss(mob) || !(source.getEntity() instanceof ServerPlayer sp)
+			|| source.getDirectEntity() != sp || !source.is(DamageTypes.PLAYER_ATTACK) || sp.isSpectator() || mob.getTarget() == sp
+			|| mob instanceof TamableAnimal tame && tame.isOwnedBy(sp) || HiddenBlade.is(sp.getMainHandItem()) && !HiddenBlade.skilled(sp)
+			|| Skills.rank(sp, Skills.Perk.SNEAK_ATTACK) > 0 || Classes.is(sp, Classes.PlayerClass.THIEF) || Commandments.forbids(sp, "sneak_attack")
+			|| !mob.isAlive() || !fromRear(mob, sp) || cooling(mob, source)) {
+			return amount;
+		}
+		if (sp.level() instanceof ServerLevel level) {
+			Vec3 at = mob.position().add(0.0, mob.getBbHeight() * 0.6, 0.0);
+			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 0.5F, 1.0F);
+			level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 5, 0.2, 0.25, 0.2, 0.2);
+			PowersCompat.critCue(level, at, sp);
+		}
+		// (hs_attrs) the sneak attack power scales the bonus part: a dagger backstabs harder
+		return amount * (1.0F + (BACKSTAB_MULT - 1.0F) * CritPower.sneak(sp));
 	}
 }

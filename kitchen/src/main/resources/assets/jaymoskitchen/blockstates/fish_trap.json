@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "baited=false,waterlogged=false": {
+      "model": "jaymoskitchen:block/fish_trap"
+    },
+    "baited=false,waterlogged=true": {
+      "model": "jaymoskitchen:block/fish_trap"
+    },
+    "baited=true,waterlogged=false": {
+      "model": "jaymoskitchen:block/fish_trap_baited"
+    },
+    "baited=true,waterlogged=true": {
+      "model": "jaymoskitchen:block/fish_trap_baited"
+    }
+  }
+}

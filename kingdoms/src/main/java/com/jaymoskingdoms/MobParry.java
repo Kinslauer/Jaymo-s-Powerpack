@@ -61,7 +61,7 @@ public final class MobParry {
 			|| source.getDirectEntity() != player || source.isCreativePlayer() || amount <= 0.0F || CombatArts.striking()) {
 			return true;
 		}
-		if (!mob.isAlive() || mob.isPassenger() || Downed.isDowned(mob) || MobCombat.swinging(mob) || MobShields.guardHand(mob) == null
+		if (!mob.isAlive() || mob.isPassenger() || Downed.isDowned(mob) || FighterPosture.reeling(mob) || MobCombat.swinging(mob) || MobShields.guardHand(mob) == null
 			|| !MobCombat.handles(mob)) {
 			return true;
 		}
@@ -118,6 +118,7 @@ public final class MobParry {
 			player.push(back.x, 0.1, back.z);
 			player.needsSync = true;
 		}
+		FighterPosture.parried(level, mob);
 		MobShields.drop(mob);
 		MobCombat.hasten(mob);
 	}

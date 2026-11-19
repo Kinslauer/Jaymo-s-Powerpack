@@ -41,6 +41,8 @@
   "skill.jaymoskingdoms.perk.iron_stomach.desc": "Rotten flesh, raw chicken and the like never give you Hunger, and dirty water from anywhere (a river, a swamp, a puddle) never turns your stomach.",
   "skill.jaymoskingdoms.perk.hardy_landing": "Hardy Landing",
   "skill.jaymoskingdoms.perk.hardy_landing.desc": "Falls hurt 30% less (but they always hurt). Powers that cancel fall damage work as before.",
+  "skill.jaymoskingdoms.perk.stubborn": "Stubborn",
+  "skill.jaymoskingdoms.perk.stubborn.desc": "Once a day, a killing blow leaves you downed instead, mending fast for 40 seconds before you get up. Struck again while down, you die.",
   "skill.jaymoskingdoms.perk.last_stand": "Last Stand",
   "skill.jaymoskingdoms.perk.last_stand.desc": "Once a day, a blow that would kill you leaves you on half a heart instead.",
   "skill.jaymoskingdoms.perk.meditation": "Meditation",

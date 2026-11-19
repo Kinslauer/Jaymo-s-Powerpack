@@ -44,6 +44,7 @@ import net.minecraft.world.phys.Vec3;
  * it hangs before you. Use again and it flies back {@link #HURL_FACTOR} times as fast, down your sight.</li>
  * <li><b>Static:</b> use with an empty hand and nothing to catch or snatch hurls the run's static charge as a bolt
  * ({@link ChronoMomentum#hurl}).</li>
+ * <li><b>Thrown lightning:</b> in top gear with nothing to spend, use throws a bolt that bursts where it lands ({@link ChronoBolt}).</li>
  * <li><b>Weapon snatch:</b> use on an armed mob while you run past: its main-hand weapon is in your hand (or your pack,
  * or on the ground). Never on players.</li>
  * <li><b>Quickened rocks:</b> Andy: "chrono should be able to accelerate thrown rocks to an insane fps. almost becoming
@@ -188,7 +189,10 @@ public final class ChronoRapid {
 		}
 		if (!snatch(player, level)) {
 			// nothing to catch, nothing to snatch: the run's static goes
-			ChronoMomentum.hurl(player, level);
+			if (!ChronoMomentum.hurl(player, level)) {
+				// no static to spend: in top gear, the speed's lightning is thrown instead
+				ChronoBolt.throwBolt(player, level);
+			}
 		}
 	}
 

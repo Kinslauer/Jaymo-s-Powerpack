@@ -164,7 +164,8 @@ public final class KingdomEvents {
 					Component rep = Component.translatable("reputation.jaymoskingdoms." + Reputation.word(Reputation.get(player, here.id())));
 					// ((0.7.475) a greenskin camp by its tier: "Entering Skullmaw, Horde town")
 					String tier = Hordes.tierKey(server, here);
-					player.sendOverlayMessage((tier != null
+					net.minecraft.network.chat.MutableComponent illager = IllagerHolds.campEntering(server, player, here, rep);
+					player.sendOverlayMessage((illager != null ? illager : tier != null
 						? Component.translatable("message.jaymoskingdoms.entering_camp", here.name(), Component.translatable(tier), rep)
 						: Component.translatable("message.jaymoskingdoms.entering", here.name(), rep))
 						.withStyle(here.color().getTextColor() == 0 ? ChatFormatting.WHITE : ChatFormatting.GOLD));

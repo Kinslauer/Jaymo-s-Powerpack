@@ -148,6 +148,13 @@ public final class LifeStory {
 	 */
 	static final int ORIGIN_SPREAD = 1500, ORIGIN_TRIES = 8, ORIGIN_APART = 480;
 	/**
+	 * (2026-11-19, Andy: "starting you in the more temperate area") The point is drawn in the temperate lands ({@link HarshLands}):
+	 * up to ORIGIN_TEMPERATE_TRIES times ORIGIN_TRIES points are drawn for one that is (biome noise only, as before), else dry
+	 * land past them. A last death out in the harsh lands doesn't hold the point near it: it's drawn round the spawn instead,
+	 * and the start's own search keeps to the temperate lands (but where the road's climate is its own: {@code MILD}).
+	 */
+	static final int ORIGIN_TEMPERATE_TRIES = 4;
+	/**
 	 * A taken wreck or farmhouse is looked past at most FREE_TRIES times, each from FREE_STEP blocks further off; with no
 	 * free spot to wake near a start's place, one is looked for up to FREE_WIDEN blocks further out.
 	 */
@@ -739,6 +746,17 @@ public final class LifeStory {
 	 * every start but a Divine-born one's (and the afterlife's, which makes you Divine-born); false outside a start.
 	 */
 	private static boolean GROUNDED;
+	/**
+	 * Andy, 2026-11-19 ("starting you in the more temperate area and increasing difficulty as you go hotter or [colder]"): while
+	 * a road is set out on ({@link #arrive}), whether its place and wake must be in the temperate lands ({@link HarshLands}).
+	 * True but where the climate is the road's own: the snowed-in peaks, a realm the player named, and a heritage of the cold
+	 * or the heat taken in by (the Family farmhand's village, past the farmhouse) or cast out of their own people
+	 * ({@link #homeland}), whose land is looked for from the temperate start point, so it's the nearest edge of it. False
+	 * outside a start.
+	 */
+	private static boolean MILD;
+	/** While a road is set out on: the player's last death lies outside the temperate lands, so the new life needn't stay near it. */
+	private static boolean DEATH_HARSH;
 	/** (Tiv) Lost in time, not in Powers' future yet: their start is noted where they arrive there ({@link #leftWorld}). */
 	private static final Set<java.util.UUID> TIMELOST_PENDING = new java.util.HashSet<>();
 	/** (0.7.356) Players asked for their road since they joined. */
@@ -916,6 +934,23 @@ public final class LifeStory {
 	}
 
 	/**
+	 * Player → server: {@link Live} for a story left wholly to fate. Andy: "after choosing gender and skipping, to TRULY
+	 * randomize, everything else. then you start. nothing else is told or chosen." Every answer was drawn on the client;
+	 * here MCA's look and name are drawn too ({@link McaCompat#fateLook}), its creator is never shown, and the road is
+	 * fate's, as a skipped story's is.
+	 */
+	public record Fated(Live live) implements CustomPacketPayload {
+		public static final Type<Fated> TYPE = new Type<>(JaymosKingdoms.id("story_fated"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Fated> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> Live.CODEC.encode(buf, p.live), buf -> new Fated(Live.CODEC.decode(buf)));
+
+		@Override
+		public Type<Fated> type() {
+			return TYPE;
+		}
+	}
+
+	/**
 	 * (0.7.356) Player → server: the road, told after MCA's creator ({@link #roadOwed}). {@code road}: the answer's index;
 	 * {@code roadRealm}: the realm named for a banished or sworn start (-1: none); {@code look}: the look of a heritage the
 	 * road makes you (the afterlife's); {@code tone}: (0.7.474) a half-orc's skin on the greenskin road's slider
@@ -974,6 +1009,24 @@ public final class LifeStory {
 			live(player, payload.live());
 			if (untold && roadOwed(player)) {
 				player.setAttached(SKIPPED, true);
+			}
+		});
+		PayloadTypeRegistry.serverboundPlay().register(Fated.TYPE, Fated.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Fated.TYPE, (payload, context) -> {
+			ServerPlayer player = context.player();
+			if (!untold(player)) {
+				return;
+			}
+			live(player, payload.live());
+			if (of(player) == null) {
+				return;
+			}
+			if (roadOwed(player)) {
+				player.setAttached(SKIPPED, true);
+			}
+			// MCA's creator is never shown: its look and name are drawn here, and it counts as done
+			if (McaCompat.destinyPending(player)) {
+				McaCompat.fateLook(player, payload.live().gender(), Heritage.of(player));
 			}
 		});
 		PayloadTypeRegistry.serverboundPlay().register(Road.TYPE, Road.CODEC);
@@ -1525,6 +1578,7 @@ public final class LifeStory {
 		OTHERS = others(player);
 		DEATH = lastDeath(player);
 		GROUNDED = bornAs != Heritage.Kind.DIVINE && start != Start.AFTERLIFE;
+		DEATH_HARSH = DEATH != null && !HarshLands.temperate(player.level().getServer().overworld(), DEATH);
 		Faction asked = null;
 		boolean skyRealm = false;
 		try {
@@ -1544,6 +1598,9 @@ public final class LifeStory {
 					roadRealm = free;
 				}
 			}
+			// (2026-11-19) set after the realm is settled: a realm the player named is theirs wherever it lies
+			MILD = start != Start.SNOWED && !(start.realm && roadRealm != null)
+				&& !(start == Start.CAST_OUT && homeland(bornAs));
 			landed = begin(player, start, roadRealm, bornAs, random);
 			if (landed == null) {
 				return false;
@@ -1553,6 +1610,8 @@ public final class LifeStory {
 			OTHERS = java.util.Map.of();
 			DEATH = null;
 			GROUNDED = false;
+			MILD = false;
+			DEATH_HARSH = false;
 		}
 		if (asked != null && landed == start && roadRealm != null) {
 			player.sendSystemMessage(Component.translatable(skyRealm ? "message.jaymoskingdoms.story.realm_aloft" : "message.jaymoskingdoms.story.realm_taken",
@@ -1811,6 +1870,9 @@ public final class LifeStory {
 					FarmhandHome.takeIn(player, level, house, heritage);
 					break;
 				}
+				// (2026-11-19) a heritage of the cold or the heat is taken in by its own people in their own land (MILD)
+				boolean mild = MILD;
+				MILD = mild && !homeland(heritage);
 				// (0.7.381, Andy) a haven of your own people, else one that takes your blood in; never shunned there (StoryHomes)
 				Faction standing = StoryHomes.standing(server, player, heritage, spawn, f -> freePlace(level, f.seat()));
 				Faction mates = mate == null ? null : Factions.around(server, level, mate.pos, StoryHomes.PENDING_RANGE);
@@ -1847,6 +1909,7 @@ public final class LifeStory {
 						}
 					}
 				}
+				MILD = mild;
 			}
 			case MONOLITH -> {
 				// (Tiv) one nobody else was drawn to; with every one taken, a new one is raised as for a world with none
@@ -2331,6 +2394,11 @@ public final class LifeStory {
 			case DAWNBORN -> StructureTags.ON_DESERT_VILLAGE_MAPS;
 			default -> StructureTags.ON_PLAINS_VILLAGE_MAPS;
 		};
+	}
+
+	/** (2026-11-19) Whether {@code heritage}'s own villages are of a land past the temperate ones ({@link #MILD}). */
+	private static boolean homeland(Heritage.Kind heritage) {
+		return villages(heritage) != StructureTags.ON_PLAINS_VILLAGE_MAPS;
 	}
 
 	/** The deadline (nanoTime) for a start's structure search beginning now ({@link #STRUCTURE_BUDGET_MS}). */
@@ -2957,6 +3025,10 @@ public final class LifeStory {
 		MinecraftServer server = player.level().getServer();
 		String self = player.getUUID().toString(), shared = mate == null ? "" : mate.toString();
 		return (level, at) -> {
+			if (!HarshLands.temperate(level, at)) {
+				// (Andy 2026-11-19) a whaler's harbour or a milestone out in the harsh lands is no start (other worlds have no climate here)
+				return false;
+			}
 			java.util.Map<String, Born> all = server.overworld().getAttachedOrElse(BORN, java.util.Map.of());
 			String dimension = level.dimension().identifier().toString();
 			for (java.util.Map.Entry<String, Born> e : all.entrySet()) {
@@ -2991,20 +3063,24 @@ public final class LifeStory {
 	 * (2026-11-14) Where a setting out on {@code level} is worked out from ({@link #ORIGIN_SPREAD}): a random point round the
 	 * world's spawn, off the open sea if one of {@link #ORIGIN_TRIES} is, and never within {@link #ORIGIN_APART} of where
 	 * {@code player} last woke; with a last death known the point is {@link #DEATH_APART} to {@link #DEATH_FAR} from it instead
-	 * (round the spawn only when none is). Only biome noise is read, so nothing is made
-	 * or loaded to choose it.
+	 * (round the spawn only when none is, or when it was out in the harsh lands). (2026-11-19) In the temperate lands
+	 * ({@link #ORIGIN_TEMPERATE_TRIES}). Only biome noise is read, so nothing is made or loaded to choose it.
 	 */
 	static BlockPos origin(ServerLevel level, ServerPlayer player, RandomSource random) {
 		BlockPos spawn = level.getRespawnData().pos();
 		BlockPos died = lastDeath(player);
+		if (died != null && !HarshLands.temperate(level, died)) {
+			// (2026-11-19) a life lost out in the harsh lands starts again round the spawn, in the temperate lands
+			died = null;
+		}
 		Born past = level.getServer().overworld().getAttachedOrElse(BORN, java.util.Map.of()).get(player.getUUID().toString());
 		BlockPos woke = past != null && past.dimension.equals(level.dimension().identifier().toString()) ? BlockPos.of(past.wake) : null;
 		int sea = net.minecraft.core.QuartPos.fromBlock(level.getSeaLevel());
-		BlockPos wet = null;
+		BlockPos wet = null, harsh = null;
 		// (2026-11-17) inside the land Chunky has made, where it's known
 		Pregen.Area made = Pregen.of(level);
 		double spread = made == null ? ORIGIN_SPREAD : Math.min(ORIGIN_SPREAD, made.reach());
-		for (int i = 0; i < ORIGIN_TRIES; i++) {
+		for (int i = 0; i < ORIGIN_TRIES * ORIGIN_TEMPERATE_TRIES; i++) {
 			double angle = random.nextDouble() * Math.PI * 2.0, d = spread * Math.sqrt(random.nextDouble());
 			BlockPos from = spawn;
 			if (died != null) {
@@ -3018,14 +3094,19 @@ public final class LifeStory {
 			}
 			if (!level.getUncachedNoiseBiome(net.minecraft.core.QuartPos.fromBlock(at.getX()), sea, net.minecraft.core.QuartPos.fromBlock(at.getZ()))
 				.is(net.minecraft.tags.BiomeTags.IS_OCEAN)) {
-				logOrigin(player, at, spawn);
-				return at;
-			}
-			if (wet == null) {
+				// (Andy 2026-11-19) in the temperate lands (HarshLands); dry land past them only if none turns up
+				if (HarshLands.temperate(level, at)) {
+					logOrigin(player, at, spawn);
+					return at;
+				}
+				if (harsh == null) {
+					harsh = at;
+				}
+			} else if (wet == null) {
 				wet = at;
 			}
 		}
-		BlockPos at = wet != null ? wet : spawn;
+		BlockPos at = harsh != null ? harsh : wet != null ? wet : spawn;
 		logOrigin(player, at, spawn);
 		return at;
 	}
@@ -3049,6 +3130,10 @@ public final class LifeStory {
 	private static boolean clear(ServerLevel level, BlockPos at, int apart, boolean place) {
 		if (aloft(level, at)) {
 			// (Andy 2026-11-13) nor in the Aether, but for a Divine-born start
+			return false;
+		}
+		if (MILD && !HarshLands.temperate(level, at)) {
+			// (Andy 2026-11-19) nor out in the harsh lands: a place past the temperate lands is looked past as a taken one is
 			return false;
 		}
 		String dimension = level.dimension().identifier().toString();
@@ -3141,7 +3226,7 @@ public final class LifeStory {
 		if (at == null) {
 			at = ground(level, center, max, max + FREE_WIDEN, random, ok);
 		}
-		if (at == null && !settled && DEATH != null && min >= BANISHED_MIN) {
+		if (at == null && !settled && DEATH != null && !DEATH_HARSH && min >= BANISHED_MIN) {
 			at = ground(level, DEATH, DEATH_APART, DEATH_FAR, random, ok);
 		}
 		return at;
@@ -3155,7 +3240,9 @@ public final class LifeStory {
 
 	/** Whether {@code at} is {@link #DEATH_APART} to {@link #DEATH_FAR} blocks from where the player last died (always, with no death known). */
 	private static boolean awayFromDeath(BlockPos at) {
-		return DEATH == null || flat(at, DEATH) >= (double) DEATH_APART * DEATH_APART && flat(at, DEATH) <= (double) DEATH_FAR * DEATH_FAR;
+		// (2026-11-19) a death out in the harsh lands doesn't hold the new life near it: it goes back to the temperate lands
+		return DEATH == null || flat(at, DEATH) >= (double) DEATH_APART * DEATH_APART
+			&& (DEATH_HARSH || flat(at, DEATH) <= (double) DEATH_FAR * DEATH_FAR);
 	}
 
 	/** (0.7.417) The camp a chained mate is held by, if it still stands. */
@@ -3326,6 +3413,8 @@ public final class LifeStory {
 		if (!canReincarnate(player)) {
 			return false;
 		}
+		// the old life's face, offered to keep as a doppelganger and marked for those who knew it, before anything is unmade
+		Doppelgangers.lifeEnds(player);
 		Skills.refresh(player);
 		// the old life's companions live on, lost (docs/Pawn-Plan.md H3); before MCA forgets who they followed
 		Masterless.forsaken(player);

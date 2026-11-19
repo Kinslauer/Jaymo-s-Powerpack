@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.mixin.disasters;
 
+import com.jaymoskingdoms.client.disasters.FireSmoke;
 import com.jaymoskingdoms.client.disasters.SkiesClient;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
@@ -14,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * The everyday weather's fog ({@link SkiesClient}): morning mist pales and shortens the view, a downpour closes it in
- * to a grey few dozen blocks, and dawn and dusk warm its colour. Dimmed by night like the sky's own fog, as a sandstorm's is ({@link CalamityFogMixin}).
+ * to a grey few dozen blocks, the air round a big fire fills with brown smoke ({@link FireSmoke}), and dawn and dusk warm its colour. Dimmed by night like the sky's own fog, as a sandstorm's is ({@link CalamityFogMixin}).
  */
 @Mixin(FogRenderer.class)
 abstract class SkiesFogMixin {
@@ -31,6 +32,7 @@ abstract class SkiesFogMixin {
 		}
 		jaymoskingdoms$veil(fog, SkiesClient.mist * SkiesClient.MIST_FOG, SkiesClient.MIST_SIGHT, SkiesClient.MIST_COLOUR);
 		jaymoskingdoms$veil(fog, SkiesClient.downpour, SkiesClient.DOWNPOUR_SIGHT, SkiesClient.DOWNPOUR_COLOUR);
+		jaymoskingdoms$veil(fog, FireSmoke.haze, FireSmoke.HAZE_SIGHT, FireSmoke.HAZE_COLOUR);
 	}
 
 	private static void jaymoskingdoms$veil(FogData fog, float thick, float sight, float[] colour) {

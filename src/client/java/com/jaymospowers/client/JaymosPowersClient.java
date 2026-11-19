@@ -61,6 +61,9 @@ public class JaymosPowersClient implements ClientModInitializer {
 		// Powers' training on the experience meter (Kingdoms' SkillMeter)
 		com.jaymospowers.client.hud.MeterFeed.init();
 		com.jaymospowers.client.hud.TipCard.init();
+		com.jaymospowers.client.hud.PowerTips.init();
+		// the UI tutorial: a card the first time each part of the screen shows
+		com.jaymospowers.client.hud.UiTips.init();
 		com.jaymospowers.client.hud.TitleCard.init();
 		com.jaymospowers.client.hud.DreadVignette.init();
 		com.jaymospowers.client.hud.MoveHints.init();
@@ -123,11 +126,13 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.web.FirstPersonCompat.hideInPanoramas();
 		LockOnClient.init();
 		com.jaymospowers.client.combat.GuardClient.init();
+		com.jaymospowers.client.combat.CritPunchClient.init();
 		com.jaymospowers.client.combat.IncomingBlowsClient.init();
 		com.jaymospowers.client.combat.TellGlintParticle.register(); // (0.20.4)
 		com.jaymospowers.client.tundra.SnowMote.register();
 		com.jaymospowers.client.tundra.TundraGrass.register();
 		com.jaymospowers.client.combat.ShieldBangClient.init();
+		com.jaymospowers.client.combat.ShoveClient.init();
 		com.jaymospowers.client.combat.NetheriteShieldRenderer.init(); // (medieval picks) the netherite shield and its trims
 		com.jaymospowers.client.collide.CollisionsClient.init();
 		com.jaymospowers.client.combat.ClashFxClient.init();
@@ -216,6 +221,12 @@ public class JaymosPowersClient implements ClientModInitializer {
 			net.minecraft.network.chat.Component.literal("Jaymo's Powers: Excalibur colours and leaves"),
 			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.NORMAL);
 		ExcaliburLook.init();
+		// the Medieval Music pack empties the warped forest's music: this gives it three Nether tracks of the pack's. Not on by
+		// default: PackResourcePacks puts it just above the music pack when that is switched on (it points at that pack's files)
+		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("medieval_music_gaps"),
+			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
+			net.minecraft.network.chat.Component.literal("Jaymo's Powers: warped forest music"),
+			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.NORMAL);
 		// (0.19.63) bushy leaves (tools/bushy_leaves.py: every vanilla leaf block also draws two crossed planes reaching past
 		// it) and grass and snow lips leaning over open ledges (tools/grass_edges.py); on by default, switched off in
 		// Resource Packs. Our own take on Recrafted's bushy leaves and overlays (nothing copied).
@@ -274,6 +285,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.armory.TaczGuns.trimDefaultPack();
 		CrawlTaps.init();
 		com.jaymospowers.client.moving.LateJumps.init();
+		com.jaymospowers.client.jump.PowerJumpClient.init();
 		com.jaymospowers.client.moving.AutoWalk.init();
 		StanceScroll.init();
 		ProneTransition.init();

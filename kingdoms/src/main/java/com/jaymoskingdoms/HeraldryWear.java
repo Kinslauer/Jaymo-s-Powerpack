@@ -75,6 +75,7 @@ public final class HeraldryWear {
 			if (server.getTickCount() % GILDED_CHECK == 0) {
 				for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 					ungild(player);
+					unsleeve(player);
 				}
 			}
 			if (server.getTickCount() % SWEEP == 0) {
@@ -106,6 +107,26 @@ public final class HeraldryWear {
 	/** The crest beast of {@code f}'s realm (an item name of {@link HeraldryArmour#BEASTS}). */
 	public static String beast(Faction f) {
 		return pick(HeraldryArmour.BEASTS, hash(realm(f)));
+	}
+
+	/** (GuardKit) The helm shape {@code f}'s realm keeps for its knights. */
+	static String realmHelm(Faction f) {
+		return helm(realm(f));
+	}
+
+	/** (GuardKit) The war arm {@code f}'s knights carry, marked as the realm's make; empty without Powers. */
+	static ItemStack warArm(MinecraftServer server, Faction f) {
+		return plate(server, f, EquipmentSlot.MAINHAND);
+	}
+
+	/** (GuardKit) The finish {@code f}'s knights' plate has in {@code climate}: its creed's, else its land's, else the realm's own. */
+	static String knightFinish(@Nullable MinecraftServer server, Faction f, Climate climate) {
+		String creed = creedFinish(server, f);
+		if (!creed.isEmpty()) {
+			return creed;
+		}
+		String land = landFinish(f, climate);
+		return land.isEmpty() ? finish(f) : land;
 	}
 
 	/** {@code f}'s crest: its beast on a torse of the realm's colour. */
@@ -452,7 +473,9 @@ public final class HeraldryWear {
 			}
 		}
 		for (Villager v : seen) {
-			if (!Harness.get(v, Harness.Slot.ARMS).isEmpty() && HeraldryArmour.of(v.getItemBySlot(EquipmentSlot.CHEST)) == null) {
+			// (a guard kitted by GuardKit keeps his harness over whatever chest piece was bought him, and puts it by with his armour)
+			ItemStack chest = v.getItemBySlot(EquipmentSlot.CHEST);
+			if (!Harness.get(v, Harness.Slot.ARMS).isEmpty() && HeraldryArmour.of(chest) == null && (!v.hasAttached(GuardKit.KIT) || chest.isEmpty())) {
 				Harness.clear(v);
 			}
 		}
@@ -538,6 +561,17 @@ public final class HeraldryWear {
 				player.getInventory().placeItemBackInInventory(worn, Prediction.SERVER_ONLY);
 				refused(player);
 			}
+		}
+	}
+
+	/** Andy: oath sleeves are "lost when the oath breaks": a Paladin whose oath is broken can't keep them on till it's atoned for. */
+	private static void unsleeve(ServerPlayer player) {
+		ItemStack arms = Harness.get(player, Harness.Slot.ARMS);
+		HeraldryArmour.Piece sleeves = HeraldryArmour.PIECES.get("oath_sleeves");
+		if (sleeves != null && arms.is(sleeves.item()) && player.getAttachedOrElse(Paladins.BROKEN, false)) {
+			Harness.set(player, Harness.Slot.ARMS, ItemStack.EMPTY);
+			player.getInventory().placeItemBackInInventory(arms, Prediction.SERVER_ONLY);
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.oath_sleeves_off"));
 		}
 	}
 

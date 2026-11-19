@@ -3,13 +3,20 @@ package com.jaymoskingdoms.client;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.jaymoskingdoms.Doppelgangers;
+import com.jaymoskingdoms.Heritage;
+import com.jaymoskingdoms.HeritageVariants;
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.LifeStory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -36,6 +43,11 @@ final class CharacterPresets {
 		String cls = "", option = "", raisedRealm = "";
 		int look, flaws, switches;
 		int[] sparks = new int[3];
+		/**
+		 * A kept face ({@link Doppelgangers}): its id ("" for a preset that is only picks), and MCA's look and name as text
+		 * (SNBT, "" for none).
+		 */
+		String face = "", mca = "";
 	}
 
 	private CharacterPresets() {
@@ -66,6 +78,75 @@ final class CharacterPresets {
 			}
 		}
 		return presets;
+	}
+
+	/** The face kept last (a doppelganger's preset), or null if none is kept. */
+	static @Nullable Preset lastFace() {
+		List<Preset> list = all();
+		for (int i = list.size() - 1; i >= 0; i--) {
+			Preset p = list.get(i);
+			if (p.face != null && !p.face.isEmpty() && p.mca != null && !p.mca.isEmpty()) {
+				return p;
+			}
+		}
+		return null;
+	}
+
+	/** The name the face went by in the life that ended (MCA's), or a plain one. */
+	static String faceName(Doppelgangers.Offer offer) {
+		String name = offer.look().getStringOr("FamilyTreeName", "").strip();
+		return name.isEmpty() ? Component.translatable("gui.jaymoskingdoms.doppel.unnamed").getString() : name;
+	}
+
+	/** A life that ended ({@link Doppelgangers.Offer}) as a preset, named for it (a second of that name numbered, never written over). */
+	static Preset fromOffer(Doppelgangers.Offer offer) {
+		Preset p = new Preset();
+		String base = faceName(offer);
+		base = base.length() > MAX_NAME ? base.substring(0, MAX_NAME) : base;
+		p.name = base;
+		for (int n = 2; named(p.name) != null; n++) {
+			String tail = " " + n;
+			p.name = (base.length() + tail.length() > MAX_NAME ? base.substring(0, MAX_NAME - tail.length()) : base) + tail;
+		}
+		p.gender = offer.gender();
+		p.heritage = offer.heritage();
+		List<String> story = offer.story();
+		p.born = keyAt(story, LifeStory.Question.BORN);
+		p.raised = keyAt(story, LifeStory.Question.RAISED);
+		p.childhood = keyAt(story, LifeStory.Question.CHILDHOOD);
+		p.youth = keyAt(story, LifeStory.Question.YOUTH);
+		p.turn = keyAt(story, LifeStory.Question.TURN);
+		p.cls = offer.cls();
+		p.option = offer.option();
+		Heritage.Kind kind = Heritage.Kind.byKey(offer.heritage());
+		if (kind != null) {
+			for (int i = 0; i <= HeritageVariants.of(kind).size(); i++) {
+				HeritageVariants.Variant v = HeritageVariants.at(kind, i);
+				if (v != null && v.key().equals(offer.variant())) {
+					p.look = i;
+				}
+			}
+		}
+		p.face = offer.face();
+		p.mca = offer.look().toString();
+		return p;
+	}
+
+	private static String keyAt(List<String> story, LifeStory.Question q) {
+		return q.ordinal() < story.size() ? story.get(q.ordinal()) : "";
+	}
+
+	/** A preset's kept look as MCA's data (empty for none, or if it can't be read). */
+	static CompoundTag look(Preset p) {
+		if (p.mca == null || p.mca.isEmpty()) {
+			return new CompoundTag();
+		}
+		try {
+			return TagParser.parseCompoundFully(p.mca);
+		} catch (com.mojang.brigadier.exceptions.CommandSyntaxException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't read the face kept in preset {}", p.name, e);
+			return new CompoundTag();
+		}
 	}
 
 	static @Nullable Preset named(String name) {

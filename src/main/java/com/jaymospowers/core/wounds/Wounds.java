@@ -148,6 +148,7 @@ public final class Wounds {
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> WoundsCommand.register(dispatcher));
 		// (0.14.1) phase 2: the downed
 		Downed.register();
+		Stubborn.register();
 		LastHold.register();
 		// (Clouds and Bits) a blow that would kill from full health downs instead, never gibs
 		NoOneShot.register();

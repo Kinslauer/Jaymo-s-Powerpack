@@ -29,7 +29,7 @@ import org.jspecify.annotations.Nullable;
 public final class WebPowerClient implements PowerClient {
 	public static final WebPowerClient INSTANCE = new WebPowerClient();
 
-	final WebSwing swing = new WebSwing();
+	public final WebSwing swing = new WebSwing();
 	private final WebWallRunClient wallRun = new WebWallRunClient();
 	private final WebParkourClient parkour = new WebParkourClient();
 	/** What the swing key would stick to right now, for the reticle (refreshed every other tick). */
@@ -92,6 +92,10 @@ public final class WebPowerClient implements PowerClient {
 				ClientPlayNetworking.send(new com.jaymospowers.power.web.WebTendrils.Smash(WebNet.MAIN));
 				return true;
 			}
+			if (clicks > 0 && isActive(player) && WebAirStrikesClient.onAttack(player, INSTANCE.swing, INSTANCE.swing.tricks())) {
+				// (after the tendrils' own clicks) let go of a swing and still in the air: the click is a rising blow, a spinning strike or a dive kick
+				return true;
+			}
 			// (a Verdant's or Frost-born's race move is sneak + left hold here: RaceHoldClient.secondary)
 			if (com.jaymospowers.power.web.WebMorph.usable(player) && !com.jaymospowers.client.power.zfighter.RaceHoldClient.first(minecraft, player)
 				&& (grips == null || grips.get(WebNet.MAIN) < 0 && grips.get(WebNet.OFF) < 0)) {
@@ -100,6 +104,12 @@ public final class WebPowerClient implements PowerClient {
 				net.minecraft.world.entity.LivingEntity aimed = com.jaymospowers.power.web.WebMorph.aim(player);
 				boolean block = hit != null && hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK
 					&& (aimed == null || hit.getLocation().distanceToSqr(player.getEyePosition()) < aimed.distanceToSqr(player.getEyePosition()));
+				if (block && !player.isShiftKeyDown() && hit instanceof net.minecraft.world.phys.BlockHitResult blockHit
+					&& player.level().getBlockState(blockHit.getBlockPos()).is(net.minecraft.tags.BlockTags.LOGS)
+					&& hit.getLocation().distanceToSqr(player.getEyePosition()) <= com.jaymospowers.power.web.WebMorph.REACH * com.jaymospowers.power.web.WebMorph.REACH) {
+					// a tree under the crosshair: the arm forms its axe on it (sneak to still mine the log by hand)
+					block = false;
+				}
 				if (!block && clicks > 0 && !morphHeld) {
 					// pressed: it gathers into the arm while held, and strikes when let go (see below)
 					morphHeld = true;
@@ -195,11 +205,13 @@ public final class WebPowerClient implements PowerClient {
 		});
 		PowerClients.register(WebPower.ID, INSTANCE);
 		WebSymbioteClient.init();
+		WebSkimClient.init();
 		WebBehemothClient.init();
 		EntityRenderers.register(com.jaymospowers.power.web.WebSymbioteBlob.TYPE, WebBlobRenderer::new);
 		EntityRenderers.register(WebPower.WEB_BALL, context -> new ThrownItemRenderer<>(context, 0.85F, false));
 		LevelRenderEvents.COLLECT_SUBMITS.register(WebLineRenderer::render);
 		WebShootersClient.init();
+		WebShieldClient.init();
 		WebMeetingClient.init();
 		LevelRenderEvents.COLLECT_SUBMITS.register(WebSenseBolts::render);
 		WebSenseGlance.init();
@@ -248,6 +260,22 @@ public final class WebPowerClient implements PowerClient {
 
 	static boolean isActive(@Nullable LocalPlayer player) {
 		return player != null && Powers.has(player, WebPower.INSTANCE);
+	}
+
+	@Override
+	public net.minecraft.network.chat.@Nullable Component extraToggleName(LocalPlayer player) {
+		return net.minecraft.network.chat.Component.translatable("screen.jaymospowers.toggle.web_dark_sense");
+	}
+
+	@Override
+	public net.minecraft.network.chat.Component extraToggleDesc(LocalPlayer player) {
+		return net.minecraft.network.chat.Component.translatable("screen.jaymospowers.toggle.web_dark_sense."
+			+ (com.jaymospowers.power.web.WebDarkSense.on(player) ? "on" : "off"));
+	}
+
+	@Override
+	public void extraToggle(LocalPlayer player) {
+		ClientPlayNetworking.send(new com.jaymospowers.power.web.WebDarkSense.Toggle());
 	}
 
 	@Override
@@ -515,6 +543,7 @@ public final class WebPowerClient implements PowerClient {
 		int height = graphics.guiHeight();
 		WebSymbioteClient.renderHud(graphics, player);
 		WebFuryClient.renderHud(graphics, player);
+		WebSkimClient.renderHud(graphics, player);
 		WebSenseBolts.renderHud(graphics, player);
 		// the ascended ability (Web Strike) joins the end of the row once you have it
 		boolean ascended = com.jaymospowers.core.Fate.isAscended(player);

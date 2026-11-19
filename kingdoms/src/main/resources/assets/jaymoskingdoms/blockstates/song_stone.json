@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jaymoskingdoms:block/song_stone"
+    },
+    "facing=east": {
+      "model": "jaymoskingdoms:block/song_stone",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jaymoskingdoms:block/song_stone",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jaymoskingdoms:block/song_stone",
+      "y": 270
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=north,pumpkin=false": {
+      "model": "jaymoskitchen:block/scarecrow"
+    },
+    "facing=east,pumpkin=false": {
+      "model": "jaymoskitchen:block/scarecrow",
+      "y": 90
+    },
+    "facing=south,pumpkin=false": {
+      "model": "jaymoskitchen:block/scarecrow",
+      "y": 180
+    },
+    "facing=west,pumpkin=false": {
+      "model": "jaymoskitchen:block/scarecrow",
+      "y": 270
+    },
+    "facing=north,pumpkin=true": {
+      "model": "jaymoskitchen:block/scarecrow_pumpkin"
+    },
+    "facing=east,pumpkin=true": {
+      "model": "jaymoskitchen:block/scarecrow_pumpkin",
+      "y": 90
+    },
+    "facing=south,pumpkin=true": {
+      "model": "jaymoskitchen:block/scarecrow_pumpkin",
+      "y": 180
+    },
+    "facing=west,pumpkin=true": {
+      "model": "jaymoskitchen:block/scarecrow_pumpkin",
+      "y": 270
+    }
+  }
+}

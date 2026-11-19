@@ -223,8 +223,8 @@ final class Corsairs implements Ship.Captaincy {
 	@Override
 	public @Nullable Input helm(ServerLevel level, Ship ship, Crew crew) {
 		long now = level.getGameTime();
-		// (0.7.437) a far ground's sea rover long out with nobody near is gone again
-		if (crew.side == Crew.Side.PIRATE && FarGrounds.stowIdle(level, ship)) {
+		// (0.7.437) a far ground's sea rover long out with nobody near is gone again (and a merchantman met at sea, SeaPassers)
+		if ((crew.side == Crew.Side.PIRATE || crew.side == Crew.Side.MERCHANT) && FarGrounds.stowIdle(level, ship)) {
 			return null;
 		}
 		Ship foe = crew.target >= 0 && level.getEntity(crew.target) instanceof Ship s && !s.isRemoved() && !s.foundering() ? s : null;
@@ -670,6 +670,10 @@ final class Corsairs implements Ship.Captaincy {
 		if (crew.gunners.isEmpty()) {
 			return;
 		}
+		if (!SkyShips.sky(crew)) {
+			// (2026-11-19) a sea ship's magazine made up in home waters (ShipMagazine)
+			ShipMagazine.resupply(level, ship, crew, foe, now);
+		}
 		boolean monkey = false;
 		Map<UUID, LivingEntity> aboard = new java.util.HashMap<>();
 		for (LivingEntity e : ship.crewAboard()) {
@@ -696,8 +700,10 @@ final class Corsairs implements Ship.Captaincy {
 				} else if (now >= ready) {
 					crew.loading.remove(gun);
 					ShotKind kind = this.pick(level, ship, crew, foe);
-					// (an airship's guns load from her hold: powder and shot spent, and none left, none fired)
-					if (SkyShips.sky(crew) && (kind = SkyShips.charge(ship, kind)) == null) {
+					// (an airship's guns load from her hold, (2026-11-19) a sea ship's from her magazine: powder and
+					// shot spent, and none left, none fired)
+					kind = SkyShips.sky(crew) ? SkyShips.charge(ship, kind) : ShipMagazine.charge(crew, kind);
+					if (kind == null) {
 						continue;
 					}
 					ship.loadGun(gun, kind);

@@ -17,6 +17,10 @@ abstract class CrawlPlayerMixin {
 		if (Crawl.crawling(self) && Crawl.canCrawl(self)	|| (com.jaymospowers.freerun.Slide.sliding(self) || com.jaymospowers.stamina.Dodge.rollingLow(self)) && !self.isSleeping() && !self.isPassenger() && !self.isFallFlying()) {
 			self.setPose(Pose.SWIMMING);
 			ci.cancel();
+		} else if (com.jaymospowers.power.web.WebGaps.needsLow(self)) {
+			// a web slinger climbing a wall or ceiling lies low to fit a one-block gap
+			self.setPose(Pose.SWIMMING);
+			ci.cancel();
 		}
 	}
 }

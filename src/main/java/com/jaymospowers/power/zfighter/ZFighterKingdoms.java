@@ -58,7 +58,9 @@ public final class ZFighterKingdoms {
 	private static Method TIER_OPEN;
 	private static Object[] TIERS;
 	/** (0.18.54) Kingdoms' LandingYard: padsNear(level, pos, range), nameNear(level, pos, range), touched(level, pos). */
-	private static Method YARD_PADS, YARD_NAME, YARD_TOUCHED;
+	private static Method YARD_PADS, YARD_NAME, YARD_TOUCHED, WORD;
+	/** Kingdoms' Factions.around(server, level, pos, radius): the faction whose land it is, or whose seat is within the radius. */
+	private static Method AROUND;
 	/** (0.18.54) Kingdoms' Careers.flown(pilot, passenger, level, pos) and Careers.firstFind(player, world, kind). */
 	private static Method FLOWN, FIRST_FIND;
 	private static Object[] STATS;
@@ -166,6 +168,17 @@ public final class ZFighterKingdoms {
 				YARD_TOUCHED = yard.getMethod("touched", ServerLevel.class, BlockPos.class);
 			} catch (ReflectiveOperationException | LinkageError e) {
 				YARD_PADS = null;
+			}
+			try {
+				AROUND = Class.forName("com.jaymoskingdoms.Factions").getMethod("around", MinecraftServer.class, net.minecraft.world.level.Level.class,
+					BlockPos.class, double.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				AROUND = null;
+			}
+			try {
+				WORD = Class.forName("com.jaymoskingdoms.Post").getMethod("report", java.util.UUID.class, net.minecraft.network.chat.Component.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				WORD = null;
 			}
 			try {
 				Class<?> careers = Class.forName("com.jaymoskingdoms.Careers");
@@ -392,6 +405,36 @@ public final class ZFighterKingdoms {
 			YARD_TOUCHED.invoke(null, level, at);
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			YARD_TOUCHED = null;
+		}
+	}
+
+	/**
+	 * Whether {@code pos} is a kingdom's or settlement's land: a faction claims its chunk, or its seat is within {@code radius}. False
+	 * without Kingdoms; true if Kingdoms is there but cannot be asked (so nothing is broken on a guess).
+	 */
+	public static boolean protectedLand(ServerLevel level, BlockPos pos, double radius) {
+		if (!LOADED) {
+			return false;
+		}
+		if (AROUND == null) {
+			return true;
+		}
+		try {
+			return AROUND.invoke(null, level.getServer(), level, pos, radius) != null;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return true;
+		}
+	}
+
+	/** Word sent to {@code player} through Kingdoms' post (a letter, roost or not); nothing without Kingdoms. */
+	static void word(ServerPlayer player, net.minecraft.network.chat.Component line) {
+		if (WORD == null) {
+			return;
+		}
+		try {
+			WORD.invoke(null, player.getUUID(), line);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			WORD = null;
 		}
 	}
 

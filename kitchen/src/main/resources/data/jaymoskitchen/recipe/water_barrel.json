@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "N": "minecraft:iron_nugget",
+    "B": "minecraft:barrel"
+  },
+  "pattern": [
+    "N N",
+    "NBN",
+    "N N"
+  ],
+  "result": {
+    "id": "jaymoskitchen:water_barrel"
+  }
+}

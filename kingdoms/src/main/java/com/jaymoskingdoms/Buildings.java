@@ -105,6 +105,8 @@ final class Buildings {
 			dnt(FactionType.VILLAGE, "farmhouse", 1, 16);
 			dnt(FactionType.VILLAGE, "sawmill", 1, 20);
 		}
+		// the song stone, where a capital's firsts are cut ({@link Firsts})
+		realm(FactionType.KINGDOM, "song_stone", Buildings::songStone, 1, 18);
 		// (0.7.518) the Truth's great temple, only the capital of a Faith-creed realm ({@link Planner#eligible})
 		realm(FactionType.KINGDOM, Temples.GREAT_TEMPLE, GreatTemple::draw, 1, Temples.GREAT_TEMPLE_FROM);
 		realm(FactionType.VILLAGE, "tree_farm", Buildings::treeFarm, 1, 0);
@@ -557,6 +559,22 @@ final class Buildings {
 		return s.done();
 	}
 
+	/** The song stone's square: paving round the stone ({@link SongStoneBlock}) and a lantern on a post at each corner. */
+	static Blueprint songStone(Kit k) {
+		Sketch s = new Sketch("song_stone", 5, 5, 4);
+		for (int x = 0; x < 5; x++) {
+			for (int z = 0; z < 5; z++) {
+				s.set(x, 0, z, x == 0 || x == 4 || z == 0 || z == 4 ? k.road : k.p.wall());
+			}
+		}
+		s.set(2, 1, 2, SongStoneBlock.STONE.defaultBlockState().setValue(SongStoneBlock.FACING, Direction.SOUTH));
+		for (int[] c : new int[][] {{0, 0}, {4, 0}, {0, 4}, {4, 4}}) {
+			s.set(c[0], 1, c[1], k.wallTop);
+			s.set(c[0], 2, c[1], Blocks.LANTERN.defaultBlockState());
+		}
+		return s.done();
+	}
+
 	static Blueprint well(Kit k) {
 		Sketch s = new Sketch("well", 5, 5, 6);
 		BlockState stone = k.pick(k.p.wall(), k.p.mossy(), k.p.cracked());
@@ -618,7 +636,8 @@ final class Buildings {
 		for (int x = 1; x <= 3; x++) {
 			s.set(x, 1, 1, Sketch.top(k.p.woodSlab()));
 		}
-		s.set(1, 1, 3, Blocks.BARREL.defaultBlockState());
+		// a fishmonger's stall keeps its catch in a fish barrel
+		s.set(1, 1, 3, k.chance(0.3) ? KitchenCompat.fishBarrel() : Blocks.BARREL.defaultBlockState());
 		k.display(s, 3, 3);
 		s.set(2, 1, 3, k.carpet);
 		if (k.chance(0.5)) {

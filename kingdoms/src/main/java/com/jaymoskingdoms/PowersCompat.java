@@ -807,6 +807,35 @@ public final class PowersCompat {
 		}
 	}
 
+	private static final java.util.Map<String, java.lang.invoke.MethodHandle> SPRINT_MOVES = new java.util.HashMap<>();
+	private static final java.util.Set<String> SPRINT_LOOKED = new java.util.HashSet<>();
+
+	/**
+	 * (Powerborne picks) A heritage's sprint + heritage key move in Jaymo's Powers: {@code className.method(ServerPlayer)}
+	 * returns true if it took the key. False without Powers or if the class isn't there.
+	 */
+	public static boolean sprintMove(String className, String method, net.minecraft.server.level.ServerPlayer player) {
+		String name = className + "#" + method;
+		if (SPRINT_LOOKED.add(name) && FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			try {
+				SPRINT_MOVES.put(name, java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName(className), method,
+					java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class)));
+			} catch (ReflectiveOperationException | LinkageError e) {
+				JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' " + name + " (older Powers?)", e);
+			}
+		}
+		java.lang.invoke.MethodHandle handle = SPRINT_MOVES.get(name);
+		if (handle == null) {
+			return false;
+		}
+		try {
+			return (boolean) handle.invokeExact(player);
+		} catch (Throwable e) {
+			SPRINT_MOVES.remove(name);
+			return false;
+		}
+	}
+
 	/** Powers' {@code PowerTrials.questDone(ServerPlayer)}. */
 	private static java.lang.invoke.@Nullable MethodHandle questDone;
 	private static boolean lookedForQuestDone;
@@ -2175,7 +2204,7 @@ public final class PowersCompat {
 
 	/** How a gifted villager fights (Powers' {@code Gifted.BOLD}...). */
 	public static final int BOLD = 0, STEADY = 1, WARY = 2;
-	private static java.lang.invoke.@Nullable MethodHandle giftGive, giftPower, giftCorrupted, giftUnleash, giftable;
+	private static java.lang.invoke.@Nullable MethodHandle giftGive, giftPower, giftCorrupted, giftUnleash, giftable, giftTake;
 	/** (0.7.227) A gift's ways (Powers 0.17.12): a master, open or hidden, and seen by a player. */
 	private static java.lang.invoke.@Nullable MethodHandle giftGiveWays, giftWays, giftMaster, giftRevealed, giftCloseOnes, giftOpen, giftWitnesses;
 	private static boolean lookedForGifts;
@@ -2197,6 +2226,7 @@ public final class PowersCompat {
 			giftCorrupted = lookup.findStatic(gifted, "corrupted", java.lang.invoke.MethodType.methodType(boolean.class, entity));
 			giftUnleash = lookup.findStatic(gifted, "unleash", java.lang.invoke.MethodType.methodType(boolean.class, entity, entity));
 			giftable = lookup.findStatic(gifted, "giftable", java.lang.invoke.MethodType.methodType(java.util.List.class));
+			giftTake = lookup.findStatic(gifted, "take", java.lang.invoke.MethodType.methodType(void.class, entity));
 		} catch (ReflectiveOperationException | LinkageError e) {
 			giftGive = null;
 			JaymosKingdoms.LOGGER.debug("Jaymo's Powers has no gifted villagers (older Powers?)", e);
@@ -2379,6 +2409,18 @@ public final class PowersCompat {
 			return giftGive == null ? null : (String)giftPower.invoke(entity);
 		} catch (Throwable e) {
 			return null;
+		}
+	}
+
+	/** Takes {@code entity}'s gift away (a villager drained of it, {@link GiftEaters}); nothing without Powers. */
+	public static void giftTake(net.minecraft.world.entity.Entity entity) {
+		lookForGifts();
+		try {
+			if (giftGive != null) {
+				giftTake.invoke(entity);
+			}
+		} catch (Throwable e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Powers couldn't take a gift away", e);
 		}
 	}
 
@@ -3089,6 +3131,32 @@ public final class PowersCompat {
 
 	private static java.lang.invoke.@Nullable MethodHandle carried;
 	private static boolean carriedLooked;
+
+	private static java.lang.invoke.@Nullable MethodHandle executeOrder;
+	private static boolean executeLooked;
+
+	/**
+	 * {@code mob} sets out to execute downed {@code player} (Powers' {@code MobExecutions.order}: the walk over, the film,
+	 * the blow); false if it can't, or without Powers.
+	 */
+	public static boolean orderExecution(net.minecraft.world.entity.Mob mob, net.minecraft.server.level.ServerPlayer player) {
+		if (!executeLooked) {
+			executeLooked = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					executeOrder = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wounds.MobExecutions"),
+						"order", java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.world.entity.Mob.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' MobExecutions.order (older Powers?)", e);
+				}
+			}
+		}
+		try {
+			return executeOrder != null && (boolean)executeOrder.invoke(mob, player);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
 
 	/** Someone is carrying {@code entity} in their arms or dragging it (Powers' {@code Carry.isCarried}); false without Powers. */
 	public static boolean isCarried(net.minecraft.world.entity.Entity entity) {
@@ -4823,6 +4891,49 @@ public final class PowersCompat {
 			} catch (Throwable e) {
 				JaymosKingdoms.LOGGER.warn("Jaymo's Powers' Patrol arrest failed", e);
 			}
+		}
+	}
+
+	/** Powers' {@code CritCue.cue(ServerLevel, Vec3, ServerPlayer)} (it also punches the attacker's camera) and {@code cue(ServerLevel, Vec3)}. */
+	private static java.lang.invoke.@Nullable MethodHandle critCue, critCuePunch;
+	private static boolean lookedForCritCue;
+
+	/** A crit cue at {@code at}. Nothing at all without Jaymo's Powers, or if its CritCue isn't there or doesn't take these. */
+	public static void critCue(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at) {
+		critCue(level, at, null);
+	}
+
+	/** A crit cue at {@code at} that also punches {@code attacker}'s camera, when there is one and Powers has it; else the plain cue. */
+	public static void critCue(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at,
+		net.minecraft.server.level.@Nullable ServerPlayer attacker) {
+		if (!lookedForCritCue) {
+			lookedForCritCue = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					Class<?> cue = Class.forName("com.jaymospowers.combat.CritCue");
+					critCue = java.lang.invoke.MethodHandles.publicLookup().findStatic(cue, "cue",
+						java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerLevel.class, net.minecraft.world.phys.Vec3.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					critCue = null;
+				}
+				try {
+					Class<?> cue = Class.forName("com.jaymospowers.combat.CritCue");
+					critCuePunch = java.lang.invoke.MethodHandles.publicLookup().findStatic(cue, "cue",
+						java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerLevel.class, net.minecraft.world.phys.Vec3.class,
+							net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					critCuePunch = null;
+				}
+			}
+		}
+		try {
+			if (attacker != null && critCuePunch != null) {
+				critCuePunch.invoke(level, at, attacker);
+			} else if (critCue != null) {
+				critCue.invoke(level, at);
+			}
+		} catch (Throwable e) {
+			// a cue is only a flourish: any mismatch is silent
 		}
 	}
 }
