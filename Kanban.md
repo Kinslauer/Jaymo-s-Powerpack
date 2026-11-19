@@ -40,6 +40,7 @@ kanban-plugin: board
 - [ ] [[Inbox/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-gaps-8-raids|zfighter-gaps-8-raids]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
@@ -50,7 +51,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/smoothmount-6-heave-downed|smoothmount-6-heave-downed]] · cloud-smoothmount-thread · #1884 · in-review
 
 
 ## Needs Andy
@@ -58,7 +58,6 @@ kanban-plugin: board
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
 - [ ] [[Inbox/class-trees-plan|class-trees-plan]] · for 💻 Odysseus · blocked
-- [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🍇 Bacchus · blocked
 - [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · blocked
 
 

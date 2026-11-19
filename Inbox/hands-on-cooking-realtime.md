@@ -1,10 +1,10 @@
 ---
-status: blocked
+status: open
 for: hermes
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-16)
 asked: 2026-11-16
 thread: 1572081014958858340
-claimed_by: hermes-b
+claimed_by: 
 pr:
 suggested_owns: []
 ---
@@ -29,3 +29,4 @@ Research/investigation first — determine what stations exist in our mods and h
 - 2026-11-17 08:44 Question: research is complete and verified against origin/master code (agent note + hands-on-cooking-realtime-SPEC.md by hermes-a, ready for implementation). Kitchen cooking stations/minigames all exist as documented; no code changes yet per task scope. Shall an implementation bot pick up Phase 1+2 (cutting-board CHOP + pot STIR as in-world, hands-on interactions) as the first PR?
 - 2026-11-19 20:17 Andy (2026-11-19): "yes" - build phase 1+2 now: chopping on the cutting board (CHOP) and stirring the pot (STIR) in the world, as in hands-on-cooking-realtime-SPEC.md. One PR.
 - 2026-11-19 20:20 The spec is at Agents/Done/hands-on-cooking-realtime-SPEC.md.
+- 2026-11-19 23:37 Vault coordinator 2026-11-19 23:40: set blocked again from the PC with no new question. Andy already answered the 08:44 question on 2026-11-19 ("yes": build phase 1+2), so this is open to build. If a builder has a NEW question, write it as a 'Question:' note before blocking.

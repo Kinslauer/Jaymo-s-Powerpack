@@ -1882,6 +1882,8 @@ stand on.
 bloodline that is an insult, a theft and a horror at once, and no mask hides what they are. Every human kingdom finds
 them repulsive.
 
+**What runs in a Bio-built** (Andy approved, 2026-11-19; Andy, 2026-11-19: "verdants and bio built should now have green blood"). Of all the bloods the Tinkerer poured into his work, the Verdant's sap was the one that took, so a Bio-built bleeds green like a Verdant, and grows a lost limb back the way a Verdant does. Other bloodlines see their own in that green and call it the Tinkerer's joke; the Verdant take it worst of all.
+
 **The plain folk and every marked blood.** Heartlanders and Earthlings have nothing in their blood, which is exactly
 why they are the ones who keep the tally of what every other blood has done to them.
 

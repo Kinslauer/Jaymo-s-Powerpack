@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: claude-cloud-smoothmount-thread
 asked: 2026-11-19
@@ -33,3 +33,4 @@ One PR, branch `hermes/smoothmount-6-heave-downed`, change note `changes/<mod>/<
 
 ## Notes
 - 2026-11-19 22:35 Taken over 2026-11-19 by the cloud SmoothMount thread (Andy: "finish it here"): it builds all six patches on claude/project-thread-ejrb94 from #1869's commit and posts the PR itself. No bot or reviewer works on this.
+- 2026-11-19 23:36 hermes-b had already opened PR #1884 (hermes/smoothmount-6-heave-downed, f227280) before the takeover. Passed to the cloud SmoothMount thread to fold in; still no bot review here. Back to done.

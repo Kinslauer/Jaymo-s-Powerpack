@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 23:11). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 23:40). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -7,23 +7,26 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 **Questions for you:**
 - [[Inbox/class-trees-plan|class-trees-plan]] · 2026-11-19 20:22 Parked (not for a bot): waits on Andy fleshing out the Monk/Paladin/Cleric/Druid/Warlock trees. Raised; don't raise again.
-- [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 2026-11-19 20:20 The spec is at Agents/Done/hands-on-cooking-realtime-SPEC.md.
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 - [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
-- [[Inbox/wither-model|wither-model]] · 2026-11-19 17:58 Previews ready for your look on the rebuilt Wither model (per your 2026-11-19 3:41 PM ET hulking direction): broad shoulder bar, centre skull …
+- [[Inbox/wither-model|wither-model]] · 2026-11-19 23:40 ON HOLD (Andy 2026-11-19 6:40 PM ET): "dont send it back ill have someone else take it from here later". Leave the model as it is (v3 previews…
 
 ## Stuck
 
-- [[Agents/wither-model|wither-model]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+Nothing stuck.
 
 ## On the board
 
-32 waiting for a bot, 2 being built, 1 in review: see [[Kanban]].
+33 waiting for a bot, 2 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1891 Z Fighter line message no longer claims your heritage (Powers, 2026-11-19)
+- [ ] #1890 taken-in wake-ups bind your stumps (Powers, Kingdoms, 2026-11-19)
+- [ ] #1889 Regrown limbs come back unbroken, Verdant regrowth crunch (Powers, Kingdoms, 2026-11-19)
+- [ ] #1888 climbing onto and off mounts (SmoothMount-style, our own) (Powers, Kingdoms, 2026-11-19)
 - [ ] #1886 hit streak count off the action bar with Kingdoms (Powers, Kingdoms, 2026-11-19)
 - [ ] #1885 Deathless returns (for Kingdoms' Pallid) (Powers, Kingdoms, Kitchen, 2026-11-19)
 - [ ] #1883 Any hide stands in for rabbit hide (Powers, Kingdoms, Kitchen, 2026-11-19)
@@ -53,6 +56,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1855 Take bows and arrows from any downed foe (Kingdoms, 2026-11-19)
 - [ ] #1854 masons' pattern books - the building library (Kingdoms, 2026-11-19)
 - [ ] #1852 One Dimension stack back to the pack's order (Powers, 2026-11-19)
+- [ ] #1851 Building plans: wrong-block colours, layer view, full material list (Kingdoms, 2026-11-19)
 - [ ] #1850 First kingdom raised in the surface town, not a Lost Cities copy under it (Kingdoms, 2026-11-19)
 - [ ] #1849 Watcher's huts much rarer (Kingdoms, 2026-11-19)
 - [ ] #1848 The Old Druid talks to everyone (Kingdoms, 2026-11-19)
@@ -79,16 +83,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1824 life story: leave it all to fate, and kept faces (doppelgangers) (Kingdoms, 2026-11-19)
 - [ ] #1822 Rangers read droppings (Kingdoms, Kitchen, 2026-11-19)
 - [ ] #1821 The wind no longer stops the server (Kingdoms, 2026-11-19)
-- [ ] #1820 birthplace page lists the heritage's strengths and weaknesses (Kingdoms, 2026-11-19)
-- [ ] #1819 Earth & Water's chunk scan skipped where it can find nothing (Powers, 2026-11-19)
-- [ ] #1816 Powerborne Heroes picks - deeds, storm, Web, second jump, costumes, Divine-born, Smoke banish, Ember, fusion, shields (Powers, Kingdoms, 2026-11-19)
-- [ ] #1815 edges and sparks - blades dull, grindstones, sparks that catch, armour that rings (Powers, Kingdoms, 2026-11-19)
-- [ ] #1814 Hackers 'n Slashers 4: a shove for everyone, and weapon kinds' on-hit effects (Powers, 2026-11-19)
-- …and 260 older ones.
+- …and 265 older ones.
 
 ## Health
 
-1 problem in the notes: [[Health]].
+Nothing wrong: [[Health]].
 
 ## Last week
 
