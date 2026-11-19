@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: Roast whole animals on spits
 branch: claude/project-thread-kxd0tr
 with: cloud Claude, Reason Art thread "Roast whole animals on spits"
-pr: 
+pr: 1881
 mods: Kitchen, Kingdoms
 versions: 
 started: 2026-11-19
@@ -26,3 +26,4 @@ owns:
 - Follow-up promised: camp hunters, farmer kills leaving carcasses, butchers dressing (see food-getting audit in the thread).
 
 ## Done
+PR #1881. Kitchen + Kingdoms compile clean; not played. Lore paragraph "The great spit" (new) awaits Andy.
