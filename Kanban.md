@@ -36,8 +36,8 @@ kanban-plugin: board
 
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
-- [ ] [[Inbox/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · rig-beetle-5-the-mind · #1774 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
+- [ ] [[Agents/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · 💻 Odysseus · #1774 · in-review
 
 
 ## Needs Andy
@@ -56,6 +56,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/rig-beetle-5-the-mind|rig-beetle-5-the-mind]]
 - [x] [[Inbox/Done/rig-beetle-4-flight|rig-beetle-4-flight]]
 - [x] [[Inbox/Done/rig-beetle-2-guns|rig-beetle-2-guns]]
 - [x] [[Inbox/Done/lanterns-10-orbit|lanterns-10-orbit]]
@@ -63,7 +64,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/lanterns-08-dream|lanterns-08-dream]]
 - [x] [[Inbox/Done/lanterns-06-space-medium|lanterns-06-space-medium]]
 - [x] [[Inbox/Done/lanterns-05-patrol-law|lanterns-05-patrol-law]]
-- [x] [[Inbox/Done/rig-beetle-3-back-rig|rig-beetle-3-back-rig]]
 
 
 %% kanban:settings
