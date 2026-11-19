@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 20:06). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 20:14). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -36,13 +36,17 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1865 Gnomes: real gnomes with their own model, gardens and temper (Kingdoms, 2026-11-19)
+- [ ] #1864 Blackouts wake you where you were taken (Powers, Kingdoms, 2026-11-19)
 - [ ] #1863 goblins speak broken English (Kingdoms, 2026-11-19)
 - [ ] #1862 Youth's wisp really disappears while it thinks (Kingdoms, 2026-11-19)
+- [ ] #1861 symbiote infection - it no longer starves itself feeding you, and warns before it leaves (Powers, 2026-11-19)
 - [ ] #1860 Goblins take the downed alive too (Kingdoms, 2026-11-19)
 - [ ] #1859 Slower NPCs, and barbarians take the downed alive (Kingdoms, 2026-11-19)
 - [ ] #1858 campfire life - camps sit, talk, sing and share a spit roast round their fire (Kingdoms, Kitchen, 2026-11-19)
 - [ ] #1856 speaker shot finds a clear angle (Powers, Kingdoms, 2026-11-19)
 - [ ] #1855 Take bows and arrows from any downed foe (Kingdoms, 2026-11-19)
+- [ ] #1854 masons' pattern books - the building library (Kingdoms, 2026-11-19)
 - [ ] #1852 One Dimension stack back to the pack's order (Powers, 2026-11-19)
 - [ ] #1850 First kingdom raised in the surface town, not a Lost Cities copy under it (Kingdoms, 2026-11-19)
 - [ ] #1849 Watcher's huts much rarer (Kingdoms, 2026-11-19)
@@ -92,15 +96,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1797 drinks and kitchen - vines, press, vintage, tea, smoke chips, black wine (Kitchen, 2026-11-19)
 - [ ] #1796 Vanilla+ mods join the pack (Powers, 2026-11-19)
 - [ ] #1795 Medieval Music pack, trimmed and on by default (Powers, Kingdoms, 2026-11-19)
-- [ ] #1794 villager talk camera faces the villager (Kingdoms, 2026-11-19)
-- [ ] #1793 Alex's Mobs Continued joins the pack (Powers, Kingdoms, 2026-11-19)
-- [ ] #1792 life story: one random heritage look, no paths list (Kingdoms, 2026-11-19)
-- [ ] #1791 guards wear what their rank and their settlement's purse allow (Kingdoms, 2026-11-19)
-- …and 239 older ones.
+- …and 243 older ones.
 
 ## Health
 
-23 problems in the notes: [[Health]].
+20 problems in the notes: [[Health]].
 
 ## Last week
 

@@ -1,16 +1,15 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 20:06). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 20:14). Don't edit. -->
 # Vault health
 
 Problems in the live notes, found on every sync. Nothing here is fixed by itself: whoever reads it (the coordinator's hourly check, a bot, Andy) fixes the note, and the line goes away on the next sync. `python tools/vault_sync.py --health` prints the same list.
 
-**23 problems.**
+**20 problems.**
 
 ## Statuses the pipeline doesn't know
 
 - [[Inbox/class-trees-plan|class-trees-plan]]: `status: todo` (known: blocked, changes, claimed, done, in-review, open, ready, sent, writing)
 - [[Inbox/harness-upkeep|harness-upkeep]]: `status: running` (known: blocked, changes, claimed, done, in-review, open, ready, sent, writing)
 - [[Inbox/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]]: `status: todo` (known: blocked, changes, claimed, done, in-review, open, ready, sent, writing)
-- [[Agents/gnomes|gnomes]]: `status: (none)` (known: blocked, done, in-review, merged, ready, running, sent, stalled)
 - [[Agents/hands-on-cooking-realtime-SPEC|hands-on-cooking-realtime-SPEC]]: `status: ready-for-implementation` (known: blocked, done, in-review, merged, ready, running, sent, stalled)
 - [[Agents/medieval-deco-5-farm-water|medieval-deco-5-farm-water]]: `status: working` (known: blocked, done, in-review, merged, ready, running, sent, stalled)
 - [[Agents/story-x-mark|story-x-mark]]: `status: (none)` (known: blocked, done, in-review, merged, ready, running, sent, stalled)
@@ -37,8 +36,3 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 ## Tasks for nobody
 
 - [[Inbox/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]]: `for: Medieval build (branch claude/project-thread-9de3pc), patch 10` matches no bot or agent, so no one will claim it.
-
-## Project memory
-
-- The memory index is 56 KB; only the first 16 KB load in a new thread. Shorten entries to one line and move detail into topic files.
-- 5 index lines are over 300 characters (lines 2, 54, 159, 211, 220): move their detail into topic files.
