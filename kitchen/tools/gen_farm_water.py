@@ -232,9 +232,9 @@ write_json(DATA / "loot_table" / "blocks" / "scarecrow.json", {
     "pools": [
         {"rolls": 1, "conditions": [{"condition": "minecraft:survives_explosion"}],
          "entries": [{"type": "minecraft:item", "name": f"{NS}:scarecrow"}]},
-        {"rolls": 1, "conditions": [{"condition": "minecraft:survives_explosion"},
-                                    {"condition": "minecraft:block_state_property", "block": f"{NS}:scarecrow", "properties": {"pumpkin": "true"}}],
-         "entries": [{"type": "minecraft:item", "name": "minecraft:carved_pumpkin"}]}]})
+        {"rolls": 1, "conditions": [{"condition": "minecraft:survives_explosion"}],
+         "entries": [{"type": "minecraft:item", "name": "minecraft:carved_pumpkin",
+                      "condition": {"type": "minecraft:match_block", "blocks": f"{NS}:scarecrow", "state": {"pumpkin": "true"}}}]}]})
 
 # ---------------------------------------------------------------- recipes
 def recipe(name, obj):

@@ -20,19 +20,19 @@
       "conditions": [
         {
           "condition": "minecraft:survives_explosion"
-        },
-        {
-          "condition": "minecraft:block_state_property",
-          "block": "jaymoskitchen:scarecrow",
-          "properties": {
-            "pumpkin": "true"
-          }
         }
       ],
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:carved_pumpkin"
+          "name": "minecraft:carved_pumpkin",
+          "condition": {
+            "type": "minecraft:match_block",
+            "blocks": "jaymoskitchen:scarecrow",
+            "state": {
+              "pumpkin": "true"
+            }
+          }
         }
       ]
     }
