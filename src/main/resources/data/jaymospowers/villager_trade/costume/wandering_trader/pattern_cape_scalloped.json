@@ -1,0 +1,15 @@
+{
+  "gives": {
+    "id": "jaymospowers:costume_pattern",
+    "components": {
+      "jaymospowers:costume_pattern_piece": "cape:scalloped"
+    }
+  },
+  "max_uses": 1,
+  "reputation_discount": 0.05,
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 12
+  },
+  "xp": 0
+}
