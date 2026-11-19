@@ -24,6 +24,7 @@
 		"XenoformDamageMixin",
 		"ArmourWearLivingMixin",
 		"BlowsLivingMixin",
+		"EdgeLivingMixin",
 		"BlowsPlayerMixin",
 		"ArmourWearMobMixin",
 		"ArmourWearEnchantMixin",

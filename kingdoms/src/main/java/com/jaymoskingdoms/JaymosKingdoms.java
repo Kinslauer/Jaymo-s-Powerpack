@@ -238,6 +238,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Emigrants.register();
 		// 0.7.299: meals cooked at home or bought at a cookhouse or tavern, and visitors for the day
 		Meals.register();
+		// smiths sharpen the guards' dull blades at a grindstone
+		Whetting.register();
 		Visitors.register();
 		// 0.7.483: every settlement keeps a butcher and a healer
 		TownTrades.register();

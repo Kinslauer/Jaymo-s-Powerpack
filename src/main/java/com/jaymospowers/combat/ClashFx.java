@@ -113,6 +113,7 @@ public final class ClashFx {
 	 */
 	public static void sparks(ServerLevel level, Vec3 at, @Nullable Vec3 line, int count, float scale) {
 		send(level, at, burst(line, count, scale, 0xFFFFFF, false));
+		MetalHits.kindle(level, at, count);
 	}
 
 	/**

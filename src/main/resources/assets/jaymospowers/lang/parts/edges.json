@@ -1,0 +1,12 @@
+{
+  "subtitles.jaymospowers.armed.hit.plate": "Plate rings",
+  "subtitles.jaymospowers.armed.hit.mail": "Mail rasps",
+  "subtitles.jaymospowers.armed.hit.padding": "Padding thuds",
+  "subtitles.jaymospowers.armed.hit.stone": "Steel chips stone",
+  "tooltip.jaymospowers.edge.keen": "Edge: keen",
+  "tooltip.jaymospowers.edge.worn": "Edge: worn",
+  "tooltip.jaymospowers.edge.dull": "Edge: dull",
+  "tooltip.jaymospowers.edge.blunt": "Edge: blunt (work it on a grindstone)",
+  "message.jaymospowers.edge.sharpened": "You work the edge on the grindstone.",
+  "message.jaymospowers.edge.keen": "The edge is keen."
+}
