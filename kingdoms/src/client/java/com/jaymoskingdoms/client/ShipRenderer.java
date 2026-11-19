@@ -224,7 +224,7 @@ public final class ShipRenderer extends EntityRenderer<Ship, ShipRenderer.State>
 	/** (gb-sails) Her sails this frame: {how full (eased), the gust's share, how hard they flap}. */
 	private static float[] sailing(Ship ship, ClientLevel level, float time) {
 		float yaw = ship.getYRot();
-		float wind = com.jaymoskingdoms.sailing.Winds.clientStrength(level, ship.getX(), ship.getZ());
+		float wind = com.jaymoskingdoms.sailing.Winds.clientStrength(level, ship.getX(), ship.getZ()) * com.jaymoskingdoms.sailing.WindPush.exposure(ship);
 		float off = com.jaymoskingdoms.sailing.Winds.clientOffWind(yaw);
 		float target = Mth.clamp(ship.sailSet() * com.jaymoskingdoms.sailing.Winds.clientCatches(yaw) * wind, 0.0F, FULL_MOST);
 		float[] fill = FILL.computeIfAbsent(ship, s -> new float[] {s.tickCount, target});
