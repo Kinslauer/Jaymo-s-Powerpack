@@ -43,6 +43,10 @@ public class YouthWispRenderer extends InhabitantRenderer<YouthWisp> {
 
 	@Override
 	public RenderType getRenderType(LivingEntityRenderState renderState, Identifier texture) {
+		// gone off to think (invisible), it isn't drawn: GeckoLib's own choice, which hides an invisible entity
+		if (renderState.isInvisible) {
+			return super.getRenderType(renderState, texture);
+		}
 		return RenderTypes.entityTranslucentEmissive(texture);
 	}
 
