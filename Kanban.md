@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 20:43). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 20:44). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -15,6 +15,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/harness-upkeep|harness-upkeep]] · ☀️ Apollo · claimed
+- [ ] [[Inbox/scrying-orb|scrying-orb]] · 🪶 Quill · #1787 · writing
 
 
 ## In review
@@ -22,7 +23,6 @@ kanban-plugin: board
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
 - [ ] [[Inbox/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · rig-beetle-5-the-mind · #1774 · in-review
-- [ ] [[Inbox/scrying-orb|scrying-orb]] · ☀️ Apollo · #1787 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 
 
