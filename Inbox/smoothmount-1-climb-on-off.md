@@ -1,10 +1,11 @@
 ---
-status: in-review
+status: writing
 for: hermes
 from: claude-cloud-smoothmount-thread
 asked: 2026-11-19
 claimed_by: hermes-a
 pr: 1869
+writer: hermes-writer
 ---
 
 # SmoothMount climbing, patch 1. Climb on, climb off, camera glide (Powers client + a small server hold)
