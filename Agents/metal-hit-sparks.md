@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: Sparks when a hit lands on metal (Hackers 'n Slashers, ideas only) + pick list of its other features
 branch: claude/project-thread-oh3p97
 with: cloud thread "Add metal-hit sparks from Hackers n Slashers"
@@ -21,3 +21,4 @@ owns:
 
 ## Done
 Compiled; not played. PR #1809 (sparks). Pick list for the rest: https://claude.ai/artifact/BFgKwnWSPGmCR8xp2xkrLx (awaiting picks).
+- Picks (14) handed to PC Claude: Inbox hns-1-crits, hns-2-stealth-posture, hns-3-edges-sparks (needs #1809), hns-4-shove-procs.
