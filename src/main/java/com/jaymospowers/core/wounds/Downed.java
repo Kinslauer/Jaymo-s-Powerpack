@@ -234,6 +234,13 @@ public final class Downed {
 	 */
 	public static final AttachmentType<Long> RISING = AttachmentRegistry.create(JaymosPowers.id("downed_rising"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG.cast(), AttachmentSyncPredicate.all()));
+	/**
+	 * (0.26.x) A downed player slung over a horse's back: the horse's entity id, or -1 when not slung.
+	 * Set by {@link Carry#heave(ServerPlayer, ServerPlayer, net.minecraft.world.entity.animal.equine.AbstractHorse)}.
+	 * Synced to everyone (who draw them across the horse's back); not saved.
+	 */
+	public static final AttachmentType<Integer> SLUNG_ON = AttachmentRegistry.create(JaymosPowers.id("downed_slung_on"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 	/** How long this rise takes (ticks), when it isn't {@link #RISE_TICKS} (up a wall, too wounded otherwise). Synced; not saved. */
 	public static final AttachmentType<Integer> RISE_LENGTH = AttachmentRegistry.create(JaymosPowers.id("downed_rise_ticks"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT.cast(), AttachmentSyncPredicate.all()));
@@ -374,7 +381,7 @@ public final class Downed {
 				// (Andy, 2026-11-18: a downed pillager burning to death "pops into the air when it dies because it defaults back
 				// to standing") whatever ends them, the body starts lying where and how they lay
 				DownedLie.markBody(entity);
-				forget(entity);
+						forget(entity);
 				return true;
 			}
 			if (!downable(entity) || !spared(entity, source)) {
@@ -686,6 +693,21 @@ public final class Downed {
 		return !passedOut(entity) && !entity.hasAttached(KNOCKED);
 	}
 
+	/** Whether this downed player is slung over a horse's back. */
+	public static boolean isSlung(Entity entity) {
+		Integer horse = entity.getAttached(SLUNG_ON);
+		return horse != null && horse >= 0;
+	}
+
+	/** The horse this downed player is slung over, if any (either side). */
+	public static @Nullable Entity slungHorse(Entity entity) {
+		Integer horse = entity.getAttached(SLUNG_ON);
+		if (horse == null || horse < 0) {
+			return null;
+		}
+		return entity.level().getEntity(horse);
+	}
+
 	/**
 	 * (0.15.89) In water, or floating just over it (a limp body bobbing at the surface): a downed player here can't swim
 	 * and floats limp ({@code DownedKeysMixin}, {@code KitchenCompat.registerRagdollHolds}).
@@ -854,6 +876,7 @@ public final class Downed {
 		entity.removeAttached(KNOCKED);
 		entity.removeAttached(RISING);
 		entity.removeAttached(TOO_HURT);
+		entity.removeAttached(SLUNG_ON);
 		entity.removeTag(DOWNED_TAG);
 		entity.removeTag(REVIVE_TAG);
 		if (entity instanceof Player player) {
@@ -911,9 +934,12 @@ public final class Downed {
 			// (out of the arms that held them)
 			Carry.slip(carrier);
 		}
-		forget(entity);
-		entity.stopRiding();
-		entity.setHealth(Math.max(entity.getHealth(), Math.max(1.0F, entity.getMaxHealth() * RECOVER_HEALTH)));
+								boolean wasSlung = isSlung(entity);
+						forget(entity);
+				if (!wasSlung) {
+					entity.stopRiding();
+				}
+				entity.setHealth(Math.max(entity.getHealth(), Math.max(1.0F, entity.getMaxHealth() * RECOVER_HEALTH)));
 		Wounds.reconcile(entity);
 		level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.ARMOR_EQUIP_GENERIC.value(), SoundSource.NEUTRAL, 0.8F, 0.9F);
 		if (entity instanceof ServerPlayer player) {
@@ -1248,7 +1274,16 @@ public final class Downed {
 		}
 		// (0.15.92) lying downed, not also knocked flat by a leg shot (that turned it over twice, head into the ground)
 		com.jaymospowers.power.web.KitchenCompat.endLegCrawl(mob);
-		long now = level.getGameTime();
+				// (0.26.x) slung over a horse's back: up there they don't bleed out, crawl, or give up
+				if (isSlung(mob)) {
+					Entity horse = slungHorse(mob);
+					if (horse == null || horse.isRemoved() || !horse.isAlive()) {
+						mob.removeAttached(SLUNG_ON);
+						mob.stopRiding();
+					}
+					return;
+				}
+				long now = level.getGameTime();
 		Long wounds = mob.getAttached(WOUNDS);
 		if (wounds == null && now - since(mob) >= RECOVER_TICKS && !mob.hasAttached(KNOCKED)) {
 			getUp(level, mob);
@@ -1305,7 +1340,16 @@ public final class Downed {
 			// (the tag Kingdoms reads goes with the state, wherever the state went)
 			player.addTag(DOWNED_TAG);
 		}
-		long now = level.getGameTime();
+				// (0.26.x) slung over a horse's back: up there they don't bleed out, crawl, or give up
+				if (isSlung(player)) {
+					Entity horse = slungHorse(player);
+					if (horse == null || horse.isRemoved() || !horse.isAlive()) {
+						player.removeAttached(SLUNG_ON);
+						player.stopRiding();
+					}
+					return;
+				}
+				long now = level.getGameTime();
 		// (0.21.49) lying in a bed they struggled into, mending: never bleeding out ({@link DownedStruggle})
 		boolean resting = DownedStruggle.tick(level, player, now);
 		// (Andy, 2026-11-12) or lying still by a lit fire, which mends them till they can rise ({@link Resting#downed})
@@ -1650,7 +1694,16 @@ public final class Downed {
 				// (up already, by someone else's hand)
 				r.over = true;
 			}
-			long now = level.getGameTime();
+					// (0.26.x) slung over a horse's back: up there they don't bleed out, crawl, or give up
+				if (isSlung(player)) {
+					Entity horse = slungHorse(player);
+					if (horse == null || horse.isRemoved() || !horse.isAlive()) {
+						player.removeAttached(SLUNG_ON);
+						player.stopRiding();
+					}
+					return;
+				}
+				long now = level.getGameTime();
 			if (now - r.held > REVIVE_GRACE) {
 				// let go
 				it.remove();

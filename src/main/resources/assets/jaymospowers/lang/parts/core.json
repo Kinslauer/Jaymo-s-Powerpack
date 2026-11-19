@@ -111,6 +111,8 @@
 	"message.jaymospowers.carry.no_room": "No room there: look at a free spot within 3 blocks",
 	"message.jaymospowers.carry.part": "Right-click to drop it, sneak + right-click to throw it",
 	"message.jaymospowers.carry.container": "Right-click to place it where you look",
+"message.jaymospowers.carry.heaved": "You heave %s onto %s's back",
+"message.jaymospowers.carry.slung": "%s has slung you over their horse's back",
 	"button.jaymospowers.armor.hide": "Hide %s (it still protects you)",
 	"button.jaymospowers.armor.show": "Show %s",
 	"button.jaymospowers.armor.head": "helmet",

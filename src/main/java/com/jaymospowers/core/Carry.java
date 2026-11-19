@@ -58,6 +58,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
@@ -629,7 +630,16 @@ public final class Carry {
 			// a parrot, a cat, a cricket... climbs onto you instead of into your arms (Perch)
 			return InteractionResult.SUCCESS;
 		}
-		if (!(target instanceof SeveredPart) && (player.isShiftKeyDown() || player.getMainHandItem().isEmpty())) {
+				// (0.26.x) Carrying a downed player, right-click a horse: heave them up onto its back
+				if (hand == InteractionHand.MAIN_HAND && !player.isShiftKeyDown()
+					&& target instanceof AbstractHorse && level instanceof ServerLevel server && player instanceof ServerPlayer carrier) {
+					ServerPlayer carried = carriedPlayer(carrier);
+					if (carried != null && Downed.isDowned(carried)) {
+						heave(carrier, carried, (AbstractHorse) target);
+						return InteractionResult.SUCCESS;
+					}
+				}
+				if (!(target instanceof SeveredPart) && (player.isShiftKeyDown() || player.getMainHandItem().isEmpty())) {
 			// (0.15.114) Andy: "heads from decaptiations should be grabable like they are otherwise": a head that came to
 			// rest in (or in front of) a body, its corpse or a finisher's, is what's taken, not the body
 			SeveredPart part = partInView(player, target, hit);
@@ -973,7 +983,48 @@ public final class Carry {
 		}
 	}
 
-	// ---- letting go
+
+	/**
+	 * (0.26.x) Carrying a downed player, right-click a horse: heave them up onto its back.
+	 * They ride slung until they come to, then can sit up or get off.
+	 */
+	private static void heave(ServerPlayer carrier, ServerPlayer downed, AbstractHorse horse) {
+	    Entry entry = CARRIES.get(carrier.getUUID());
+	    if (entry == null) {
+	        return;
+	    }
+	    // End the carry without putting them on the ground
+	    CARRIES.remove(carrier.getUUID());
+	    carrier.removeAttached(CARRYING);
+	    downed.removeAttached(CARRIED_BY);
+	    AttributeInstance speed = carrier.getAttribute(Attributes.MOVEMENT_SPEED);
+	    if (speed != null) {
+	        speed.removeModifier(WEIGHT_ID);
+	    }
+	    // Mount the horse
+	    downed.stopRiding();
+	    downed.startRiding(horse);
+	    downed.setAttached(Downed.SLUNG_ON, horse.getId());
+	    downed.resetFallDistance();
+	    // Tell the client they're free (not carried)
+	    ServerPlayNetworking.send(downed, new Self(-1));
+	    // Grace period
+	    GRACE.put(downed.getUUID(), downed.level().getGameTime() + RELEASE_GRACE_TICKS);
+	    // Messages
+	    carrier.sendOverlayMessage(Component.translatable("message.jaymospowers.carry.heaved",
+	        downed.getDisplayName(), horse.getDisplayName()).withStyle(ChatFormatting.GRAY));
+	    downed.sendOverlayMessage(Component.translatable("message.jaymospowers.carry.slung",
+	        carrier.getDisplayName()).withStyle(ChatFormatting.GRAY));
+	    // Sound
+	    horse.level().playSound(null, horse.getX(), horse.getY(), horse.getZ(),
+	        SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS, 0.8F, 0.8F);
+	    // Listeners
+	    for (BiConsumer<ServerPlayer, Entity> listener : PICKED_UP_LISTENERS) {
+	        listener.accept(carrier, downed);
+	    }
+	}
+
+		// ---- letting go
 
 	private static void release(ServerPlayer carrier, boolean toss) {
 		Entry entry = CARRIES.get(carrier.getUUID());
