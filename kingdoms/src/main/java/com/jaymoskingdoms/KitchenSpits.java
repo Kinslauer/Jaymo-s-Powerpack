@@ -28,10 +28,17 @@ final class KitchenSpits {
 
 	private static final @Nullable Block SPIT;
 	private static final @Nullable Method SKEWER, TEAR, DONENESS, ROASTING;
+	/**
+	 * The great spit, for a whole beast (Kitchen's {@code GreatSpitBlock}), and what goes with it: a carcass put on whole
+	 * ({@code skewerWhole}), the tear seen by whoever tears it ({@code tear(ServerLevel, Entity)}), and whether the bar's
+	 * full ({@code full}). Null with a Kitchen too old for them: the cook roasts a piece at a time as before.
+	 */
+	private static final @Nullable Block GREAT;
+	private static final @Nullable Method SKEWER_WHOLE, TEAR_BY, FULL;
 
 	static {
-		Block spit = null;
-		Method skewer = null, tear = null, doneness = null, roasting = null;
+		Block spit = null, great = null;
+		Method skewer = null, tear = null, doneness = null, roasting = null, skewerWhole = null, tearBy = null, full = null;
 		if (FabricLoader.getInstance().isModLoaded(KitchenCompat.MOD)) {
 			try {
 				Class<?> be = Class.forName("com.jaymoskitchen.cooking.spit.SpitBlockEntity");
@@ -40,6 +47,15 @@ final class KitchenSpits {
 				doneness = be.getMethod("doneness");
 				roasting = be.getMethod("roasting");
 				spit = BuiltInRegistries.BLOCK.getOptional(Identifier.fromNamespaceAndPath(KitchenCompat.MOD, "spit")).orElse(null);
+				try {
+					skewerWhole = be.getMethod("skewerWhole", net.minecraft.world.entity.Entity.class);
+					tearBy = be.getMethod("tear", ServerLevel.class, net.minecraft.world.entity.Entity.class);
+					full = be.getMethod("full");
+					great = BuiltInRegistries.BLOCK.getOptional(Identifier.fromNamespaceAndPath(KitchenCompat.MOD, "great_spit")).orElse(null);
+				} catch (ReflectiveOperationException e) {
+					JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for camp cooks to roast a whole beast: {}", e.toString());
+					skewerWhole = null;
+				}
 			} catch (ReflectiveOperationException | LinkageError e) {
 				JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for camp cooks to use its spit: {}", e.toString());
 				skewer = null;
@@ -50,6 +66,10 @@ final class KitchenSpits {
 		TEAR = tear;
 		DONENESS = doneness;
 		ROASTING = roasting;
+		GREAT = skewer == null || skewerWhole == null ? null : great;
+		SKEWER_WHOLE = GREAT == null ? null : skewerWhole;
+		TEAR_BY = GREAT == null ? null : tearBy;
+		FULL = GREAT == null ? null : full;
 	}
 
 	private KitchenSpits() {
@@ -65,12 +85,35 @@ final class KitchenSpits {
 		return SPIT;
 	}
 
-	/** The spit's own data at {@code pos}, or null if there's no spit there. */
+	/** The great spit (null without a Kitchen that has it). */
+	static @Nullable Block great() {
+		return GREAT;
+	}
+
+	/** The spit's own data at {@code pos} (a spit or a great spit), or null if there's no spit there. */
 	static @Nullable BlockEntity at(ServerLevel level, BlockPos pos) {
-		if (SPIT == null || !level.getBlockState(pos).is(SPIT)) {
+		if (SPIT == null || !level.getBlockState(pos).is(SPIT) && (GREAT == null || !level.getBlockState(pos).is(GREAT))) {
 			return null;
 		}
 		return level.getBlockEntity(pos);
+	}
+
+	/** The spit at {@code pos} is a great spit. */
+	static boolean isGreat(ServerLevel level, BlockPos pos) {
+		return GREAT != null && level.getBlockState(pos).is(GREAT);
+	}
+
+	/** No room on the bar for another piece (with an old Kitchen: anything on it). */
+	static boolean full(BlockEntity spit) {
+		if (FULL == null) {
+			return roasting(spit);
+		}
+		return call(FULL, spit) instanceof Boolean b && b;
+	}
+
+	/** A dressed carcass ({@link KitchenCompat#dressForSpit}) goes on the bare great spit whole. True if it did. */
+	static boolean skewerWhole(BlockEntity spit, net.minecraft.world.entity.Entity corpse) {
+		return call(SKEWER_WHOLE, spit, corpse) instanceof Boolean b && b;
 	}
 
 	/** One of {@code raw} goes on the bare spit (shrinking it). True if it did. */
@@ -80,8 +123,9 @@ final class KitchenSpits {
 	}
 
 	/** A cooked chunk torn off (empty if it wasn't done, or was burnt and is thrown out). */
-	static ItemStack tear(BlockEntity spit, ServerLevel level) {
-		Object out = call(TEAR, spit, level);
+	static ItemStack tear(BlockEntity spit, ServerLevel level, net.minecraft.world.entity.Entity by) {
+		// everyone near sees them reach in and rip it off (Kitchen's tearing), with a Kitchen that knows who
+		Object out = TEAR_BY != null ? call(TEAR_BY, spit, level, by) : call(TEAR, spit, level);
 		return out instanceof ItemStack s ? s : ItemStack.EMPTY;
 	}
 

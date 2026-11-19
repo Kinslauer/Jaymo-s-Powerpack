@@ -1129,7 +1129,7 @@ tasks.register("curseforgeManifest") {
 			minecraft      : [version: project.minecraft_version, modLoaders: [[id: "fabric-${project.loader_version}", primary: true]]],
 			manifestType   : "minecraftModpack",
 			manifestVersion: 1,
-			name           : "Jaymo's Powers",
+			name           : "Reason",
 			version        : project.version,
 			author         : "Manigraphic78",
 			files          : (packMods + localPackMods + packResourcePacks + packShaderPacks).collect { [projectID: it.cf[0], fileID: it.cf[1], required: true] },
@@ -1187,7 +1187,7 @@ tasks.register("packwizList") {
 		// on CurseForge only: downloaded through CurseForge by its ids
 		localPackMods.each { mods << [file: file(it.file).absolutePath, from: "curseforge", cf: it.cf, side: side(file(it.file))] }
 		out.get().asFile.text = JsonOutput.prettyPrint(JsonOutput.toJson([
-			name         : "Jaymo's Powers",
+			name         : "Reason",
 			version      : project.version,
 			minecraft    : project.minecraft_version,
 			fabric       : project.loader_version,

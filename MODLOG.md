@@ -6562,3 +6562,36 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - **Creative mode no longer pops prosthetics off**: creative's healing (`Wounds.creativeHeal`) used to grow every severed limb back, and a limb that grows back drops its wooden, iron or Rig limb as an item. A limb that wears a prosthetic now stays as it is; bare severed limbs and the head still grow back. Chrono's rewind out of death (`Wounds.undoAll`) goes through the same heal, so it keeps them too.
 - `Dismember.regrow(target, all, keep)`: regrow that leaves the parts in `keep` missing.
 - Compile-checked; not played.
+
+## 0.25.78 (2026-11-19): Harness 6: forge the rest of the harness (#1877)
+
+- The smithing anvil (`HeraldryForging`) now forges, from steel in every finish: gorget, bevor, faulds and tassets, spaulders with rondels, and the fur-lined spaulders, arm harness, gauntlets, cuisses and greaves (a fur lining takes 2 rabbit hides when the piece is done). From iron: jazerant, mail mitons, mail coif, standard of mail, mail skirt, splinted vambraces and splinted greaves.
+- Built; not played.
+
+## 0.25.79 (2026-11-19): Reason: the pack's new name on the title screen (#1872)
+
+- **Title logo**: the title screen (and the credits) show our own "REASON" logo in place of MINECRAFT / JAVA EDITION:
+  deep blocky stone letters with ivy grown over them, and behind them one warrior with a raised sword and shield facing
+  a crowd of mob shadows with faint red eyes. `ReasonLogoMixin` draws `jaymospowers:textures/gui/title/reason.png`
+  (drawn by `tools/reason_logo.py`), 256x80, rising 28 units above where vanilla's logo starts.
+- **Caption**: the yellow line beside the logo always reads "what's yours" (`ReasonSplashMixin`), on holidays too. Our
+  old random splash list is gone.
+- **Window title**: "Reason" in place of "Minecraft* 26.3" (`ReasonTitleMixin`), keeping " - Singleplayer" and the like.
+- **Pack name**: the CurseForge import and the testers' Prism/packwiz pack are named "Reason". Mod ids, jar and zip
+  file names are unchanged.
+- Compile-checked against the 26.3 client jar; not played.
+
+## 0.25.80 (2026-11-19): final deaths cut straight to black (#1878)
+
+- Andy (2026-11-19): "deaths like this should cut straight to black. i shouldnt see the enemies despawned. only hearing nothing and the long wait for the respawn screen", then "the cut to black is only for a final death".
+- All of this is only for a death that ends the character (`Mortality.FINAL`); every other death plays as before.
+- **No film.** A film after death (a Kingdoms captain's scene over your body, the shot round an executioner) is cut the moment the death is known to be final (`UltimateCinematic.deathFilm`, its tick), so the death screen's black comes at once. The captain is still raised in the world. Films after other deaths stay.
+- **The long black.** The death screen stays all black for 5 s (`DeathScreenBlackMixin.HOLD_TICKS` 100, buttons can't be clicked yet), then comes up over the old 2.5 s fade.
+- **Silence at once.** Every sound is cut the moment you die for good (not eased out over half a second), the downed heartbeat and the other black-screen cues too; only the death screen's button clicks are heard (`BlackoutHush`).
+- **No world after Respawn on the way down.** One sent below by their weight is knocked out again on the tick they're back on their feet, not up to a second later (`Karma`), so the camp that killed them doesn't show in between.
+- Built; not played.
+
+## 0.25.81 (2026-11-19): JEI shows how to forge the metal harness pieces (#1882)
+
+- New JEI page **Smithing Anvil: Harness** (`HarnessForgingJei`): every plate and mail harness piece the Smithing Anvil forges (`HeraldryForging`), with the ingots to heat, the rabbit hides a fur lining takes or the gold for gilding, and the blows. Before, these pieces showed no recipe in JEI at all, so they looked unmakeable.
+- Built; not played.

@@ -165,7 +165,7 @@ def prism_zip(minecraft, fabric):
     command = f'"$INST_JAVA" -jar packwiz-installer-bootstrap.jar {PACK_URL}'
     cfg = "\n".join([
         "InstanceType=OneSix",
-        "name=Jaymo's Powers",
+        "name=Reason",
         "OverrideCommands=true",
         # no ConfigVersion line: Prism then reads this as MultiMC's plain format, where a value is taken as written
         # (quotes kept), as packwiz's own Prism instructions write it

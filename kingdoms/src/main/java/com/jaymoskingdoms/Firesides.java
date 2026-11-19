@@ -30,6 +30,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -110,8 +111,19 @@ public final class Firesides {
 	static final float MEAL_HEAL = 4.0F;
 	/** The cook turns the spit this often (ticks); a cook who can't reach whom they're feeding gives up after this (ticks). */
 	static final int TURN = 40, CARRY_TICKS = 300;
+	/** Pieces the spit's bar takes (Kitchen's {@code SpitBlockEntity.PLACES}). */
+	static final int PLACES = 5;
 	/** A share is handed over this close (blocks). */
 	static final double HAND = 2.2;
+	/** The cook stands this far off the fire's middle (blocks), to the side of it. */
+	static final int COOK_SIDE = 2;
+	/**
+	 * A whole beast (Andy, 2026-11-19, of the great spit: "the barbarians should use that"): a body lying this near the
+	 * fire (blocks) is skinned and gutted where it lies with this many knife strokes, one a second, carried to the fire and
+	 * roasted whole. Given up on after this long (ticks) and not looked for again for as long.
+	 */
+	static final double CARCASS_NEAR = 24.0, DRESS_REACH = 2.0;
+	static final int DRESS_STROKES = 8, CARCASS_GIVE_UP = 900;
 
 	/** How one sitting at a fire sits (and what their hands are about), for the client to draw. Not kept. */
 	public static final int WARM = 1, LEAN = 2, HUNCH = 3, EAT = 4, SING = 5, WHETTING = 6;
@@ -130,7 +142,11 @@ public final class Firesides {
 		/** Watching it roast, turning it. */
 		ROAST,
 		/** Carrying a share to whoever's next. */
-		CARRY
+		CARRY,
+		/** Skinning and gutting a beast's body lying in camp, for the great spit. */
+		DRESS,
+		/** Carrying it, dressed, to the fire. */
+		BRING
 	}
 
 	private static final class Sitter {
@@ -172,6 +188,10 @@ public final class Firesides {
 		long answerAt;
 		boolean wary;
 		boolean outOfFood;
+		/** A beast's body the cook is readying for the great spit; knife strokes into it; no other looked for till then. */
+		@Nullable Entity carcass;
+		int strokes;
+		long carcassAfter;
 
 		Fire(int camp, BlockPos fire) {
 			this.camp = camp;
@@ -684,7 +704,7 @@ public final class Firesides {
 		Mob cook = f.cook;
 		if (cook == null) {
 			// someone gets up to cook once a few are sat and there's someone not fed
-			if (f.outOfFood || f.sitters.size() < 2 || next(level, f) == null) {
+			if (f.outOfFood && carcass(level, f, now) == null || f.sitters.size() < 2 || next(level, f) == null) {
 				return;
 			}
 			Mob pick = null;
@@ -712,6 +732,17 @@ public final class Firesides {
 		BlockEntity spit = KitchenSpits.at(level, spitPos);
 		switch (f.step) {
 			case SKEWER -> {
+				// a beast's body lying in camp goes on the great spit whole, once the spit is bare
+				if (spit == null || !KitchenSpits.roasting(spit)) {
+					Entity carcass = carcass(level, f, now);
+					if (carcass != null) {
+						f.carcass = carcass;
+						f.strokes = 0;
+						f.step = Step.DRESS;
+						f.stepAt = now;
+						return;
+					}
+				}
 				if (!tend(cook, f)) {
 					return;
 				}
@@ -728,23 +759,37 @@ public final class Firesides {
 					level.playSound(null, spitPos, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 1.0F, 0.9F);
 					return;
 				}
-				if (!KitchenSpits.roasting(spit)) {
+				boolean bare = !KitchenSpits.roasting(spit);
+				if (bare || f.strokes > 0 && f.strokes < loadFor(f) && !KitchenSpits.full(spit)) {
+					// (Andy: "they could put maybe 5 steaks on that thing") a piece for each mouth, a piece a look, till
+					// the bar's full; the count of pieces put on rides in strokes while loading
 					ItemStack meat = meat(level, f);
 					if (meat.isEmpty()) {
-						Callouts.say(cook, "fire.hungry", null, false);
-						f.outOfFood = true;
-						dropCook(f, now);
-						return;
+						if (bare) {
+							Callouts.say(cook, "fire.hungry", null, false);
+							f.outOfFood = true;
+							dropCook(f, now);
+							return;
+						}
+					} else if (!KitchenSpits.skewer(spit, meat)) {
+						if (bare) {
+							f.outOfFood = true;
+							dropCook(f, now);
+							return;
+						}
+					} else {
+						cook.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+						level.playSound(null, spitPos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.8F, 0.8F);
+						if (bare) {
+							Callouts.say(cook, "fire.cook", null, false);
+						}
+						f.strokes++;
+						if (f.strokes < loadFor(f) && !KitchenSpits.full(spit)) {
+							return;
+						}
 					}
-					if (!KitchenSpits.skewer(spit, meat)) {
-						f.outOfFood = true;
-						dropCook(f, now);
-						return;
-					}
-					cook.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
-					level.playSound(null, spitPos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.8F, 0.8F);
-					Callouts.say(cook, "fire.cook", null, false);
 				}
+				f.strokes = 0;
 				f.step = Step.ROAST;
 				f.stepAt = now;
 			}
@@ -763,7 +808,7 @@ public final class Firesides {
 					return;
 				}
 				boolean burnt = done >= KitchenSpits.BURNT;
-				ItemStack chunk = KitchenSpits.tear(spit, level);
+				ItemStack chunk = KitchenSpits.tear(spit, level, cook);
 				if (burnt || chunk.isEmpty()) {
 					if (burnt) {
 						level.playSound(null, spitPos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.6F, 1.0F);
@@ -828,30 +873,135 @@ public final class Firesides {
 				f.step = Step.SKEWER;
 				f.stepAt = now;
 			}
+			case DRESS -> {
+				Entity carcass = f.carcass;
+				if (carcass == null || carcass.isRemoved() || KitchenCompat.carrier(carcass) != null || now - f.stepAt > CARCASS_GIVE_UP) {
+					giveUpCarcass(f, now);
+					return;
+				}
+				if (cook.distanceTo(carcass) > DRESS_REACH) {
+					if (cook.getNavigation().isDone()) {
+						cook.getNavigation().moveTo(carcass.getX(), carcass.getY(), carcass.getZ(), 0.55);
+					}
+					return;
+				}
+				cook.getNavigation().stop();
+				cook.getLookControl().setLookAt(carcass.getX(), carcass.getY() + 0.3, carcass.getZ());
+				if (!KitchenCompat.dressedWhole(carcass)) {
+					// skinning and gutting it where it lies, a knife stroke a second
+					if ((now - f.stepAt) % 20 < EVERY) {
+						cook.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+						level.playSound(null, carcass.blockPosition(), f.strokes % 2 == 0 ? SoundEvents.SHEEP_SHEAR : SoundEvents.SLIME_SQUISH_SMALL,
+							SoundSource.NEUTRAL, 0.6F, 0.9F + random.nextFloat() * 0.2F);
+						level.sendParticles(ParticleTypes.CRIT, carcass.getX(), carcass.getY() + 0.3, carcass.getZ(), 3, 0.3, 0.2, 0.3, 0.05);
+						if (++f.strokes >= DRESS_STROKES && !KitchenCompat.dressForSpit(carcass)) {
+							giveUpCarcass(f, now);
+						}
+					}
+					return;
+				}
+				if (!KitchenCompat.carry(carcass, cook)) {
+					giveUpCarcass(f, now);
+					return;
+				}
+				f.strokes = 0;
+				f.step = Step.BRING;
+				f.stepAt = now;
+			}
+			case BRING -> {
+				Entity carcass = f.carcass;
+				if (carcass == null || carcass.isRemoved() || KitchenCompat.carrier(carcass) != cook || now - f.stepAt > CARCASS_GIVE_UP) {
+					giveUpCarcass(f, now);
+					return;
+				}
+				if (!tend(cook, f)) {
+					return;
+				}
+				Block great = KitchenSpits.great();
+				if (!KitchenSpits.isGreat(level, spitPos)) {
+					// the great spit up over the fire, in place of a bare spit
+					if (great == null || spit != null && KitchenSpits.roasting(spit) || spit == null && !level.getBlockState(spitPos).isAir()) {
+						giveUpCarcass(f, now);
+						return;
+					}
+					cook.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+					level.setBlock(spitPos, great.defaultBlockState(), Block.UPDATE_ALL);
+					level.playSound(null, spitPos, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 1.0F, 0.8F);
+					return;
+				}
+				if (spit == null || !KitchenSpits.skewerWhole(spit, carcass)) {
+					giveUpCarcass(f, now);
+					return;
+				}
+				cook.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+				Callouts.say(cook, "fire.cook", null, false);
+				f.carcass = null;
+				f.outOfFood = false;
+				f.step = Step.ROAST;
+				f.stepAt = now;
+			}
 		}
 	}
 
-	/** The cook goes to the fire's side; true once there. */
+	/** How many pieces the cook puts on the spit at once: one for each sat at the fire, the bar's worth at most. */
+	private static int loadFor(Fire f) {
+		return Math.max(1, Math.min(PLACES, f.sitters.size() + 1));
+	}
+
+	/** A beast's body near the fire the cook could roast whole (none while one's given up on, or with an old Kitchen). */
+	private static @Nullable Entity carcass(ServerLevel level, Fire f, long now) {
+		if (now < f.carcassAfter || KitchenSpits.great() == null) {
+			return null;
+		}
+		return KitchenCompat.spitCarcassNear(level, Vec3.atCenterOf(f.fire), CARCASS_NEAR);
+	}
+
+	/** The beast's body is left be (gone, taken, or it wouldn't go on): set down where the cook is, and back to the spit. */
+	private static void giveUpCarcass(Fire f, long now) {
+		Entity carcass = f.carcass;
+		if (carcass != null && f.cook != null && KitchenCompat.carrier(carcass) == f.cook) {
+			KitchenCompat.throwAt(carcass, f.cook.position());
+		}
+		f.carcass = null;
+		f.strokes = 0;
+		f.carcassAfter = now + CARCASS_GIVE_UP;
+		f.step = Step.SKEWER;
+		f.stepAt = now;
+	}
+
+	/**
+	 * The cook goes to the fire's side; true once there. (Andy, on a clip of a cook stood in the smoke over the fire: "they
+	 * should stand to the side".) They stand {@link #COOK_SIDE} blocks off the fire, on whichever side of it is clear and
+	 * nearest them, out of the smoke, never over it.
+	 */
 	private static boolean tend(Mob cook, Fire f) {
+		ServerLevel level = (ServerLevel) cook.level();
 		Vec3 by = null;
 		double best = Double.MAX_VALUE;
-		for (BlockPos p : f.seats) {
-			double d = p.distSqr(f.fire);
+		for (Direction side : Direction.Plane.HORIZONTAL) {
+			BlockPos spot = f.fire.relative(side, COOK_SIDE);
+			BlockPos stand = Construction.standable(level, spot, 0);
+			if (stand.distManhattan(spot) > 1 || Math.abs(stand.getY() - f.fire.getY()) > 1) {
+				continue;
+			}
+			double d = cook.distanceToSqr(Vec3.atBottomCenterOf(stand));
 			if (d < best) {
 				best = d;
-				by = Vec3.atBottomCenterOf(p);
+				by = Vec3.atBottomCenterOf(stand);
 			}
 		}
 		if (by == null) {
-			by = Vec3.atBottomCenterOf(f.fire.relative(Direction.NORTH, 2));
+			by = Vec3.atBottomCenterOf(f.fire.relative(Direction.NORTH, COOK_SIDE));
 		}
-		if (cook.position().distanceToSqr(by) <= 1.6 * 1.6 || cook.distanceToSqr(Vec3.atCenterOf(f.fire)) <= 2.6 * 2.6) {
+		Vec3 fire = Vec3.atBottomCenterOf(f.fire);
+		double fromFire = Math.hypot(cook.getX() - fire.x, cook.getZ() - fire.z);
+		if (cook.position().distanceToSqr(by) <= 1.2 * 1.2) {
 			cook.getNavigation().stop();
 			return true;
 		}
 		if (cook.getNavigation().isDone() && !cook.getNavigation().moveTo(by.x, by.y, by.z, 0.55)) {
-			// can't get to the fire's side: near enough if they're by it
-			return cook.distanceToSqr(Vec3.atCenterOf(f.fire)) <= 4.0 * 4.0;
+			// can't get to the fire's side: near enough if they're beside it, not over it
+			return fromFire >= 1.4 && fromFire <= 4.0;
 		}
 		return false;
 	}
@@ -888,6 +1038,11 @@ public final class Firesides {
 			takeCarried(f, cook);
 			cook.heal(MEAL_HEAL);
 		}
+		if (f.carcass != null && KitchenCompat.carrier(f.carcass) == cook) {
+			KitchenCompat.throwAt(f.carcass, cook.position());
+		}
+		f.carcass = null;
+		f.strokes = 0;
 		cook.removeAttached(POSE);
 		cook.getNavigation().stop();
 		AWAY_UNTIL.put(cook, now + AWAY);

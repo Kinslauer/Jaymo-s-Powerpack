@@ -403,12 +403,18 @@ public final class Payloads {
 		}
 	}
 
-	/** Server → client: the player tore a chunk off the spit at {@code pos}; play the tearing animation. */
-	public record SpitRip(BlockPos pos) implements CustomPacketPayload {
+	/**
+	 * Server → client: someone ({@code by}, an entity id, or -1) tore a chunk off the spit at {@code pos}; the roast shakes
+	 * and they're drawn reaching in and ripping it away.
+	 */
+	public record SpitRip(BlockPos pos, int by) implements CustomPacketPayload {
 		public static final Type<SpitRip> TYPE = new Type<>(JaymosKitchen.id("spit_rip"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, SpitRip> CODEC = CustomPacketPayload.codec(
-			(p, buf) -> buf.writeBlockPos(p.pos),
-			buf -> new SpitRip(buf.readBlockPos()));
+			(p, buf) -> {
+				buf.writeBlockPos(p.pos);
+				buf.writeVarInt(p.by);
+			},
+			buf -> new SpitRip(buf.readBlockPos(), buf.readVarInt()));
 
 		@Override
 		public Type<SpitRip> type() {

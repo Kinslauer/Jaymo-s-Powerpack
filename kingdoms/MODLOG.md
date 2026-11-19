@@ -15691,3 +15691,45 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
   lost-limb hide and Kitchen's corpse hide, which hide the part by name.
 - Tested in a dev client: a villager with a cut right leg and a Frostborn leg, standing and then dead (the leg lies at
   the hip with the body). Not tested: a downed body, a wooden or iron limb, a scouter on a corpse, Fresh Animations.
+
+## 0.11.7 (2026-11-19): Captives who die and are weighed leave their chains (#1876)
+
+- **Sent below from the chains**: a captive who died in a camp's chains and was weighed wicked used to land in the Nether and be dragged straight back to the stake by the shackle the same moment, which also ended their last chance ("The heat lets go of you"). Now when a weighing takes a chained player out of the world (sent below to the Nether, let into the Other World, or among the dead there), the shackle comes off quietly, with no camp hunt, and the descent goes through.
+- `StoryHard.chained` asks the new `PowersCompat.weighedAway` (Powers' `Karma.just`/`wicked`/`below` and `ZFighterAfterlife.among`) before the chain's pull. Any other trip out of the world in chains still drags them back.
+- Built; not played.
+
+## 0.11.8 (2026-11-19): Harness 6: three craftable makes for every harness place (#1877)
+
+- **13 new harness pieces**, our own models and art (`gen_heraldry_armour.py`): padding **Aketon** (quilted linen, dyeable) and **Fur Jerkin**; mail **Jazerant** (mail sewn between cloth); arms **Splinted Vambraces**; hands **Mail Mitons**; thighs **Padded Cuisses**; shins **Splinted Greaves**; hood **Fur Hood** and **Mail Coif**; neck **Standard of Mail** and **Bevor** (plate, every finish); waist **Mail Skirt** and **Leather Tassets**. `HeraldryArmour`; the aketon, fur jerkin and jazerant draw on the under-armour layer with their own sheets (`UnderArmourLayer`).
+- **Crafting-table recipes** for the cloth and leather (before, these were only bought): arming doublet, aketon, fur jerkin, quilted coat, padded cuisses, leather tassets, hood, fur hood, cloak, giornea, tabard, torse, and the plume, wings and horns crests (torse + feathers / feathers and leather / bones and leather). The realm beast crests stay the ruler's.
+- Iron and steel pieces are forged at the smithing anvil (Jaymo's Powers `HeraldryForging`), none at the grid.
+- Every place now has at least three craftable makes: padding 3, mail 3, shoulders 4, arms 3, hands 3, thighs 3, shins 3, over 3, hood 3, crest 4, neck 3, waist 3.
+- New pieces join `jaymospowers:cloth_armor` / `mail_armor` / `plate_armor`.
+- Built; not played.
+
+## 0.11.9 (2026-11-19): Harness fits MCA bodies; captors calm down around a captive (#1875)
+
+- **The harness on MCA bodies** (Andy: "the harness armor doesnt fit different body types correctly, i was a bit fat and stout here and it looked very....clippy"). MCA already stretches a whole body (harness included) to its width and height; what the harness missed was what MCA's own armour model does beyond that. Now (`McaHarnessFit`, called from `HeraldryLayer`'s worn model): helms, hoods and crests take MCA's head size (a hood sat on top of a big head with the face showing under it); the pieces on the arms and legs are drawn 7% wider and deeper about each limb's middle so MCA's sleeve/trouser layer and the doublet and mail under the harness no longer show through the plate; on a body MCA draws with breasts, everything the harness hangs on the body (cuirass, coat, tabard, giornea, gorget, faulds) is drawn deeper from the back by as much as they stand out (at most 1.6x). Bodies MCA doesn't draw are unchanged.
+- **Captors calm down** (Andy: "im getting mobbed by my captors, i had just spawned. i think they were still aggrod, but not attacking"). A captive keeping their place was only let go by mobs' goal targets, every half second; a captain's bodyguard took up his boss's fight with them again every second ("Anyone who wants Ketil the Burner comes through me" over and over), and MCA's people kept the target in their brains. Now `CaptiveConduct.calm` also clears brain targets and anger, forgets the captive's last blow, and stops captors walking up to them so they go back to the camp's day; a new `CaptorHoldMixin` stops anything (bodyguards, rallies, comrades' calls) setting a captor on a captive keeping their place; and a bodyguard only takes up his boss's fight with someone he may attack. Acting up still turns the camp on you as before.
+- Built; not played.
+
+## 0.11.10 (2026-11-19): Captors take the harness too (#1879)
+
+- Taken captive, you lose your harness pieces as well as your inventory (Andy: "the harness should be gone yes"; before, "You wake in chains. Your things are gone." left spaulders, arm harness and the rest on). They go where the rest of your things go that captors can't put on: buried in the stash chests about the camp (`Captors.strip`).
+- Built; not played.
+
+## 0.11.11 (2026-11-19): An escape isn't known to the camp until they see you gone (#1880)
+
+- **Escaping your chains**: picking the shackle, slipping it, breaking the chain or sawing the rope no longer sets the whole camp on you that moment. The camp only hunts you, for the rest of the day as before, once one of its people sees you loose (in front of them, in sight, within 32 blocks) or comes within 12 blocks of your empty chain with a clear view of it. The one who notices shouts it (a speech bubble, in orc or goblin speech for their camps). If nobody notices within the day, the camp lets it go.
+- The "hunted" line now comes when you're seen, not when the chain comes off.
+- `StoryHard.free` puts the runaway in `LOOSE`, and `StoryHard.loose` (each second) raises `LifeStory.startHunt` on sight (`Exposure.sees`) or on the empty chain (a clear sightline). The "Escaped captive" start still begins with the hunt on, as it always has.
+- Built; not played.
+
+## 0.11.12 (2026-11-19): camp cooks roast whole beasts on the great spit and stand to the side (#1881)
+
+- **Whole beasts** (Andy: "the barbarians should use that"): with Kitchen's great spit, a camp's fire cook who finds a beast's body lying within 24 blocks of the fire walks to it, skins and guts it where it lies (8 knife strokes, a second apart, its skin and offal left there), carries it to the fire, swaps the bare spit for a great spit and roasts it whole, turning it, then tears it apart and carries the pieces round as before. A body they can't get at is left for a while.
+- **Five at once**: the cook puts a piece on for each sat at the fire (up to five) before roasting, instead of one at a time.
+- **Out of the smoke** (Andy, on a clip of a cook stood in it: "they should stand to the side"): the cook stands two blocks off the fire on whichever clear side is nearest, never over it.
+- Everyone near sees the cook rip each piece off (Kitchen's tearing).
+- The day's meat that turns up for a camp with empty stores is unchanged for now; camp hunters bringing in real kills is the next change (Andy: "everyone should have to do this or some way of getting food").
+- Built (Gradle compile); not played.

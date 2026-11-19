@@ -3,6 +3,7 @@ package com.jaymoskingdoms.client;
 import com.jaymoskingdoms.Harness;
 import com.jaymoskingdoms.HeraldryArmour;
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.McaCompat;
 import com.jaymoskingdoms.client.bb.BbModel;
 import com.jaymoskingdoms.client.disasters.WindCloth;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -227,6 +228,10 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 				if (under != null) {
 					this.crest.y -= under.crestRise();
 				}
+			}
+			if (McaCompat.LOADED) {
+				// (Andy, 2026-11-19) fitted to the body MCA draws: its head size, breasts and clothes
+				McaHarnessFit.fit(this, state);
 			}
 		}
 	}

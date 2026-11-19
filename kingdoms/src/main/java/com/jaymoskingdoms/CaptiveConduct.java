@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -25,6 +26,8 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.NeutralMob;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 
@@ -55,6 +58,8 @@ public final class CaptiveConduct {
 	static final double WATCH_RANGE = 16.0, CALM_RANGE = 40.0;
 	/** How often (ticks) captors about a well-behaved captive are made to let go. */
 	static final int CALM_EVERY = 10;
+	/** A captor whose walk ends this near (blocks) a captive keeping their place is stopped: they're not to crowd them. */
+	static final double CROWD = 3.0;
 
 	/** How many times a captive may act up; at this many the camp kills them. */
 	static final int STRIKE_LIMIT = 3;
@@ -239,10 +244,42 @@ public final class CaptiveConduct {
 			if (player.level().getGameTime() % CALM_EVERY != 0L || !behaving(player) || !player.isAlive()) {
 				continue;
 			}
-			AABB around = player.getBoundingBox().inflate(CALM_RANGE);
-			for (Mob mob : player.level().getEntitiesOfClass(Mob.class, around, m -> m.getTarget() == player)) {
-				if (spares(mob, player)) {
-					mob.setTarget(null);
+			calm(player);
+		}
+	}
+
+	/**
+	 * Captors about {@code player}, a captive keeping their place, let go of them and go back to the camp's day. Andy
+	 * (2026-11-19), just woken in chains: "im getting mobbed by my captors ... i think they were still aggrod, but not
+	 * attacking". Only the goal target was let go here, and only every {@link #CALM_EVERY} ticks; a brain's attack target
+	 * (MCA's people) stayed, a captain's bodyguard took up his boss's fight again each second, and the last blow the fight
+	 * left them remembering set them on again. Now the brain's target and anger go too, the blow is forgotten, and anyone
+	 * still walking up to them stops ({@link #CROWD} blocks short), so they go back to their fire. Their targeting itself
+	 * is held off by {@code CaptorHoldMixin}.
+	 */
+	static void calm(ServerPlayer player) {
+		if (!behaving(player)) {
+			return;
+		}
+		AABB around = player.getBoundingBox().inflate(CALM_RANGE);
+		for (Mob mob : player.level().getEntitiesOfClass(Mob.class, around, m -> m.isAlive() && spares(m, player))) {
+			if (Comrades.target(mob) == player || mob.getTarget() == player) {
+				Comrades.stand(mob);
+			}
+			if (mob.getBrain().hasMemoryValue(MemoryModuleType.ANGRY_AT)
+				&& mob.getBrain().getMemory(MemoryModuleType.ANGRY_AT).filter(player.getUUID()::equals).isPresent()) {
+				mob.getBrain().eraseMemory(MemoryModuleType.ANGRY_AT);
+			}
+			if (mob instanceof NeutralMob neutral && neutral.isAngryAt(player, player.level())) {
+				neutral.stopBeingAngry();
+			}
+			if (mob.getLastHurtByMob() == player) {
+				mob.setLastHurtByMob(null);
+			}
+			if (mob.getTarget() == null && !mob.getNavigation().isDone()) {
+				BlockPos to = mob.getNavigation().getTargetPos();
+				if (to != null && to.closerToCenterThan(player.position(), CROWD)) {
+					mob.getNavigation().stop();
 				}
 			}
 		}

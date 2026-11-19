@@ -149,6 +149,11 @@ public class JaymosKitchen implements ModInitializer {
 						return InteractionResult.SUCCESS;
 					}
 					BlockState clickedState = level.getBlockState(clicked);
+					if (com.jaymoskitchen.cooking.spit.GreatSpitBlock.is(clickedState)) {
+						// a dressed carcass heaved onto the great spit, to turn there whole
+						com.jaymoskitchen.cooking.spit.GreatSpitBlock.skewer(carried, player, clicked);
+						return InteractionResult.SUCCESS;
+					}
 					if (clickedState.is(net.minecraft.tags.BlockTags.CAMPFIRES) && carried.oneHanded()) {
 						// (0.5.77) a small animal laid on the campfire to roast whole (see CorpseEntity#roast)
 						carried.putDown(Vec3.atBottomCenterOf(clicked).add(0.0, clickedState.getShape(level, clicked).max(net.minecraft.core.Direction.Axis.Y), 0.0),
