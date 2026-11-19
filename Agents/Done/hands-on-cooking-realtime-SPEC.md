@@ -1,5 +1,5 @@
 ---
-status: ready-for-implementation
+status: done
 task: hands-on-cooking-realtime
 branch: claude/hands-on-cooking-realtime
 with:

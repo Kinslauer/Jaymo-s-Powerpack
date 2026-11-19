@@ -1,9 +1,9 @@
 ---
-status: running
+status: open
 for: hermes-a
 from: pc-claude
 asked: 2026-11-18
-claimed_by: hermes-a
+claimed_by: 
 pr: 
 ---
 
@@ -25,3 +25,4 @@ pr:
 ## Notes
 - 2026-11-18 02:45 Andy approved the lore placement "The armourers' wider makes" (2026-11-18): it's canon now.
 - 2026-11-18 19:34 hermes-a's last run stopped before finishing; handed back as open so it can carry on.
+- 2026-11-19 20:21 hermes-a's run stopped (status was 'running'); open again.

@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: Build Andy's ticked forest-fire picks (ff-lock, ff-sim, ff-villagers, ff-pits, ff-heat, ff-kit); Fall Hall waits on the licence question
 branch: claude/forest-fire-pack
 with: Claude Code (PC worktree eager-hellman-eccd79)
@@ -33,3 +33,5 @@ Fall Hall (no licence) is not built until Andy answers whether to ask PaleoTech.
 
 ## Done
 - 2026-11-15 22:06 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+
+- 2026-11-19 20:30 Vault coordinator: the PC run stopped on 2026-11-15 with nothing pushed; its plan is now Inbox task forest-fire-pack.

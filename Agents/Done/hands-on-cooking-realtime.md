@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: hands-on-cooking-realtime
 branch: claude/hands-on-cooking-realtime
 with:
@@ -137,3 +137,5 @@ OVEN (baking), GRILL (campfire grill), SMOKE (smoker), SEAR (blast furnace), CHO
 - No code changes made; no PR opened
 - 2026-11-17 08:15 No sign of work for 30 min: marked stalled (whoever ran it stopped).
 - 2026-11-17 10:31 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+
+- 2026-11-19 20:30 Vault coordinator: research run finished long ago; Andy said build phase 1+2, so the task is open again for a fresh builder.

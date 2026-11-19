@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: epic-fight-animation-research
 branch: claude/epic-fight-animation-research
 with: 
@@ -83,3 +83,5 @@ owns:
 
 ## Done
 Compiled research report on Epic Fight's animation system (custom, not GeckoLib), first-person handling (battle/mining mode, remade first-person system), combat animation timing (combo phases, stun), entity animation controllers (LivingMotions, Animator, entity patches), and registration/playback (AnimationRegistryEvent, AnimationAccessor, playAnimationInstantly, datapack item capabilities). No code changes made — research only. Not tested in game (research task).
+
+- 2026-11-19 20:30 Vault coordinator: research finished; task already done.

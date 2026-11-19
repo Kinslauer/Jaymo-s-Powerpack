@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: realistic-water-trial
 branch: claude/realistic-water-trial
 with: 
@@ -42,3 +42,4 @@ owns:
 - Any visual rendering artifacts or crashes
 
 **Recommendation:** Test on a local machine with display by adding the jar to modpack/mods, setting Graphics API to Vulkan, and launching with a copy of a world. If Sodium/Iris breaks, that is the answer — no workaround needed.
+- 2026-11-19 20:30 Vault coordinator: trial finished; task already done.

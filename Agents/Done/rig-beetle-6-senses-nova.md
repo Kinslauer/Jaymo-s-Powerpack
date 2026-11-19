@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: Rig patch 6: senses, tech override and nova - Active camouflage, tech override, ore callouts, hex visor, nova
 branch: claude/rig-beetle-6-senses-nova
 with:
@@ -38,3 +38,5 @@ owns:
 ## Done
 What a player will see, and what wasn't tested.
 - 2026-11-18 18:01 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+
+- 2026-11-19 20:30 Vault coordinator: merged as #1776.

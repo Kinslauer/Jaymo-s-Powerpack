@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: harness-upkeep
 branch: claude/harness-upkeep
 with: 
@@ -30,3 +30,5 @@ owns:
 
 ## Done
 - 2026-11-19 07:59 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+
+- 2026-11-19 20:30 Vault coordinator: the run stopped; the task is open again for the next builder.

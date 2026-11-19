@@ -1,5 +1,5 @@
 ---
-status: ready
+status: done
 for: hermes
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-12)
 asked: 2026-11-12
@@ -68,3 +68,4 @@ No code changes yet — research only, as the task states.
 - 2026-11-15 20:03 hermes-writer's claim had no sign of work for 30 min: handed back as in-review.
 - 2026-11-18 21:43 Review (research, no PR): pass. Covers Sky Lands' 6 sky biomes, the Abyss dimension, its mechanics and five adaptation angles against our 16 Aether biomes. GPL-3.0 and Forge-only: ideas only, any adaptation is our own Fabric code and art. Not checked: the in-game look of their biomes.
 - 2026-11-18 21:43 Reviewed; Andy allowed sending it to the coordinator.
+- 2026-11-19 20:21 Research task with no PR: findings recorded above, closed by the vault coordinator 2026-11-19.

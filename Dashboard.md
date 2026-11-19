@@ -1,38 +1,29 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 15:19). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 20:23). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
 
 ## Waiting on you
 
-**Ready to merge** (say "merge" in the project chat):
-- [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · no PR number on the task · ready
-- [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · no PR number on the task · ready
-
 **Questions for you:**
+- [[Inbox/class-trees-plan|class-trees-plan]] · 2026-11-19 20:22 Parked (not for a bot): waits on Andy fleshing out the Monk/Paladin/Cleric/Druid/Warlock trees. Raised; don't raise again.
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 - [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 - [[Inbox/wither-model|wither-model]] · 2026-11-18 5:27 PM hermes-modeller: previews ready for Andy's look. kingdoms/art/wither.bbmodel is valid JSON and bakes cleanly (7 bones, 58 quads, idle animat…
 
 ## Stuck
 
-- [[Agents/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]]: stalled, last change 2026-11-13. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/forest-fire-pack|forest-fire-pack]]: stalled, last change 2026-11-15. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/hands-on-cooking-realtime|hands-on-cooking-realtime]]: stalled, last change 2026-11-17. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/harness-upkeep|harness-upkeep]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/heritage-paths|heritage-paths]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]]: stalled, last change 2026-11-18. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/scrying-orb|scrying-orb]]: stalled, last change 2026-11-18. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/sky-lands-aether-biomes|sky-lands-aether-biomes]]: stalled, last change 2026-11-15. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+Nothing stuck.
 
 ## On the board
 
-22 waiting for a bot, 3 being built, 1 in review: see [[Kanban]].
+25 waiting for a bot, 4 being built, 1 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1867 symbiote - a takeover no longer freezes a host who isn't a web slinger, and a blob that left you runs away (Powers, 2026-11-19)
 - [ ] #1865 Gnomes: real gnomes with their own model, gardens and temper (Kingdoms, 2026-11-19)
 - [ ] #1864 Blackouts wake you where you were taken (Powers, Kingdoms, 2026-11-19)
 - [ ] #1863 goblins speak broken English (Kingdoms, 2026-11-19)
@@ -92,12 +83,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1799 drifting flotsam: ripple spots on rivers and the sea (Powers, Kingdoms, Kitchen, 2026-11-19)
 - [ ] #1798 the hooded cloak leans in the world's wind (Powers, Kingdoms, 2026-11-19)
 - [ ] #1797 drinks and kitchen - vines, press, vintage, tea, smoke chips, black wine (Kitchen, 2026-11-19)
-- [ ] #1796 Vanilla+ mods join the pack (Powers, 2026-11-19)
-- …and 244 older ones.
+- …and 245 older ones.
 
 ## Health
 
-21 problems in the notes: [[Health]].
+1 problem in the notes: [[Health]].
 
 ## Last week
 
