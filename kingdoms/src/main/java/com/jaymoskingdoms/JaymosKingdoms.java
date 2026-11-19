@@ -837,6 +837,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// the illager tongue, learned from their writings, banners, paintings and holds, and talking with illagers once you know it
 		IllagerTongue.register();
 		IllagerHolds.register();
+		BlastMend.register();
+		Craters.register();
 		IllagerTalk.register();
 		// (0.6.9) tag, little ones, daily routines, suspicion in their homes
 		Tag.register();

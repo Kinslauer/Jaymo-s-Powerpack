@@ -113,6 +113,8 @@ public final class Weathering {
 		if (server.getTickCount() % 20 != 7) {
 			return;
 		}
+		// (village mods 2) blast craters away from any settlement heal, a stage at a time
+		Craters.step(server);
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			ServerLevel level = player.level();
 			if (player.isSpectator() || !level.getGameRules().get(WEATHERING)) {
