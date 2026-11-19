@@ -15291,3 +15291,16 @@ Not tested in game.
 - **Temperate starts** (`LifeStory`): every setting out's random point is drawn in the temperate lands (up to 32 points, biome noise only; dry land past them only if none is), and the start's place and wake spot keep to them: a village, wreck, camp, capital, harbour, milestone or wild spot past them is looked past like a taken one. A last death out in the harsh lands no longer holds the new life 500-1,000 blocks from it: it sets out round the spawn instead. Left in their own climate on purpose, searched from the temperate point so the nearest edge of it: Snowed in (the peaks), a realm the player named (Banished, Sworn, the cells), and a cold- or heat-land heritage taken in by its own people's village (Family farmhand past the farmhouse) or cast out of its haven.
 - What spawns where already followed the map (biomes, `wild.PredatorRanges`); unchanged. The world's own spawn search is vanilla's (it ignores temperature): every start sets out from its own temperate point anyway.
 - Built; not played, no server run.
+
+## 0.10.65 (2026-11-19): Cannon shot types for wall and siege guns, Explosive Shell costs TNT (#1808)
+
+- **Explosive Shell** recipe is now a Round Shot and **3 TNT** (was 3 gunpowder). Andy: "they should require 3 tnt instead of 3 gunpowder."
+- **Wall cannons and siege field guns load all five shot types** (Andy: "these should work for the ship cannons too. they can also make and fire explosive shells, but these are expensive"). The gunner picks the shot for his foe:
+  - **Grape** at a foe within 15 blocks, always at two or more foes standing together. It spreads where its short flight ends.
+  - **Explosive Shell** at a knot of three or more foes, or a great beast (80+ max health). The realm pays 40 from its treasury for each one, and only fires shells while it holds at least 1,040, so shells never push it toward selling its guns. A realm that can't pay loads heavy or round shot instead.
+  - **Chain** at a mounted foe, most of the time, to cut down the rider and his mount.
+  - **Heavy** at a big or well-armoured foe (40+ max health or 10+ armour). A siege gun also loads it about a third of the time to batter.
+  - **Round** otherwise, as before.
+- Each kind flies, hits, bursts, shoves and craters as it does from a ship's gun, and the barrel is laid for that kind's flight. Round shot keeps the old field-gun pit. A wall gun still never craters its own realm's land or buildings. The ball in flight is drawn as its item, and a shell's fuse sputters.
+- Classes: `Cannon` (`pick`, `knot`, `payForShell`, `SHELL_COST`), `Cannonball` (`fire(..., ShotKind)`, synced kind).
+- Built; not played.
