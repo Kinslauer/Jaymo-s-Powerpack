@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 23:11). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 23:34). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -24,6 +24,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1888 climbing onto and off mounts (SmoothMount-style, our own) (Powers, Kingdoms, 2026-11-19)
 - [ ] #1886 hit streak count off the action bar with Kingdoms (Powers, Kingdoms, 2026-11-19)
 - [ ] #1885 Deathless returns (for Kingdoms' Pallid) (Powers, Kingdoms, Kitchen, 2026-11-19)
 - [ ] #1883 Any hide stands in for rabbit hide (Powers, Kingdoms, Kitchen, 2026-11-19)
@@ -53,6 +54,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1855 Take bows and arrows from any downed foe (Kingdoms, 2026-11-19)
 - [ ] #1854 masons' pattern books - the building library (Kingdoms, 2026-11-19)
 - [ ] #1852 One Dimension stack back to the pack's order (Powers, 2026-11-19)
+- [ ] #1851 Building plans: wrong-block colours, layer view, full material list (Kingdoms, 2026-11-19)
 - [ ] #1850 First kingdom raised in the surface town, not a Lost Cities copy under it (Kingdoms, 2026-11-19)
 - [ ] #1849 Watcher's huts much rarer (Kingdoms, 2026-11-19)
 - [ ] #1848 The Old Druid talks to everyone (Kingdoms, 2026-11-19)
@@ -82,13 +84,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1820 birthplace page lists the heritage's strengths and weaknesses (Kingdoms, 2026-11-19)
 - [ ] #1819 Earth & Water's chunk scan skipped where it can find nothing (Powers, 2026-11-19)
 - [ ] #1816 Powerborne Heroes picks - deeds, storm, Web, second jump, costumes, Divine-born, Smoke banish, Ember, fusion, shields (Powers, Kingdoms, 2026-11-19)
-- [ ] #1815 edges and sparks - blades dull, grindstones, sparks that catch, armour that rings (Powers, Kingdoms, 2026-11-19)
-- [ ] #1814 Hackers 'n Slashers 4: a shove for everyone, and weapon kinds' on-hit effects (Powers, 2026-11-19)
-- …and 260 older ones.
+- …and 262 older ones.
 
 ## Health
 
-1 problem in the notes: [[Health]].
+3 problems in the notes: [[Health]].
 
 ## Last week
 
