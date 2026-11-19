@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 16:19). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 16:20). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -55,7 +55,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/plan-ghosts-litematica-tools|plan-ghosts-litematica-tools]] · plan-ghosts-litematica-tools · #1851 · in-review
 - [ ] [[Inbox/smoothmount-1-climb-on-off|smoothmount-1-climb-on-off]] · ☀️ Apollo · #1869 · in-review
-- [ ] [[Inbox/harness-upkeep|harness-upkeep]] · harness-upkeep-pc · #1870 · in-review
 
 
 ## Needs Andy
@@ -68,6 +67,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/harness-upkeep|harness-upkeep]]
 - [x] [[Inbox/Done/harness-body-pieces|harness-body-pieces]]
 - [x] [[Inbox/Done/medieval-deco-7-practice-dummy|medieval-deco-7-practice-dummy]]
 - [x] [[Inbox/Done/medieval-deco-5-farm-water|medieval-deco-5-farm-water]]
@@ -75,7 +75,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/medieval-deco-3-dead-in-the-wild|medieval-deco-3-dead-in-the-wild]]
 - [x] [[Inbox/Done/medieval-deco-2-wind|medieval-deco-2-wind]]
 - [x] [[Inbox/Done/medieval-deco-1-music|medieval-deco-1-music]]
-- [x] [[Inbox/Done/village-mods-3-guards-fight-mend|village-mods-3-guards-fight-mend]]
 
 
 %% kanban:settings
