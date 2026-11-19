@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 19:44). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 19:45). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -28,8 +28,8 @@ kanban-plugin: board
 - [ ] [[Inbox/lanterns-09-talk-typed|lanterns-09-talk-typed]] · lanterns-09-talk-typed · #1770 · in-review
 - [ ] [[Inbox/lanterns-05-patrol-law|lanterns-05-patrol-law]] · lanterns-05-patrol-law · #1764 · in-review
 - [ ] [[Inbox/lanterns-10-orbit|lanterns-10-orbit]] · lanterns-10-orbit · #1772 · in-review
-- [ ] [[Inbox/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · rig-beetle-5-the-mind · #1774 · in-review
 - [ ] [[Inbox/lanterns-06-space-medium|lanterns-06-space-medium]] · lanterns-06-space-medium · #1766 · in-review
+- [ ] [[Inbox/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · rig-beetle-5-the-mind · #1774 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 
 
