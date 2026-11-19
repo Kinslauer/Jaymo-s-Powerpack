@@ -83,6 +83,11 @@ public final class ZFighterMasterFusion {
 		});
 	}
 
+	/** Whether the entity with this id is held out of the world for a fusion (a master, or a villager). */
+	static boolean held(UUID id) {
+		return HELD.containsKey(id);
+	}
+
 	/** Whether a master is held now (the masters' own upkeep waits for it). */
 	static boolean holding() {
 		return !HELD.isEmpty();
@@ -208,7 +213,7 @@ public final class ZFighterMasterFusion {
 	}
 
 	/** Hidden, silent, unhurtable, unthinking, with no body to bump into: carried along. */
-	private static void hold(LivingEntity master, ServerPlayer leader) {
+	static void hold(LivingEntity master, ServerPlayer leader) {
 		HELD.put(master.getUUID(), new Held(leader.getUUID()));
 		master.addTag(HELD_TAG);
 		master.setInvisible(true);

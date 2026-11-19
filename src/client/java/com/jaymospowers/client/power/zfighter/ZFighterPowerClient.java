@@ -76,6 +76,7 @@ public final class ZFighterPowerClient implements PowerClient {
 		ZFighterCombatClient.init();
 		// (0.17.45) ki sense, scouter, teleport list, impact frames, banking, air burst
 		ZFighterSensesClient.init();
+		ZFighterPartnerClient.init();
 		ZFighterBeams.init();
 		ZFighterSpirit.init();
 		ZFighterOrbs.init();
