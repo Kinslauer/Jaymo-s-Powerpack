@@ -186,7 +186,7 @@ public class GrapeVineBlock extends VegetationBlock {
 		int age = state.getValue(AGE);
 		if (age == RIPE) {
 			if (!kind.nether() && !state.getValue(NETTED) && level.canSeeSky(pos.above()) && level.getOverworldClockTime() % 24000L < 12000L
-				&& random.nextInt(BIRD_ODDS) == 0) {
+				&& random.nextInt(BIRD_ODDS) == 0 && !com.jaymoskitchen.farmwater.Scarecrows.guarded(level, pos)) {
 				// the birds got the bunches: they ripen again
 				level.setBlock(pos, state.setValue(AGE, RIPE - 1), Block.UPDATE_CLIENTS);
 				level.playSound(null, pos, SoundEvents.BAT_TAKEOFF, SoundSource.BLOCKS, 0.6F, 1.6F);
