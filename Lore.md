@@ -782,7 +782,7 @@ Overworld in the old age, before they were stopped. A powerful Frostborn Z Fight
 cannot go home, cannot cross back to the dark they came from, and cannot die out. They stand in the Stormborn Tomb
 still, in horned helm, mail and fur, and they never leave it.
 
-**The Warrior-born dead** (new) (warrior-born zombies thread, 2026-11-18; Andy: "there should be rare warrior born
+**The Warrior-born dead** (Andy approved, 2026-11-19) (warrior-born zombies thread, 2026-11-18; Andy: "there should be rare warrior born
 zombies with the same decrepit rotting tails, that have a chance to turn during the moons. Undead MCA Verdant should
 have a similar but higher chance to turn giant"; the rest Claude's placement, approved by Andy 2026-11-18). Not every raider who died on the
 Overworld in the old age lies in the Stormborn Tomb. A few went into common ground and rise with the old dead, rare among
