@@ -1,5 +1,5 @@
 ---
-status: blocked
+status: done
 task: future-gun-gear
 branch: claude/future-gun-gear
 pr: 
@@ -27,3 +27,5 @@ owns:
 ## Done
 What a player will see, and what wasn't tested.
 - 2026-11-18 20:12 PR #1671 is merged into master; moved to Agents/Done.
+
+- 2026-11-19 07:35 Cloud vault check (Health.md): task is in Inbox/Done, so this note is done.

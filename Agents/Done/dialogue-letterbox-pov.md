@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: dialogue-letterbox-pov
 branch: claude/dialogue-letterbox-pov
 with:
@@ -32,3 +32,5 @@ owns:
 
 **Done**
 Not built or played yet.
+
+- 2026-11-19 07:35 Cloud vault check (Health.md): task is in Inbox/Done, so this note is done.

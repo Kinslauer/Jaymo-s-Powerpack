@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: rig-beetle-5-the-mind
 branch: claude/rig-beetle-5-the-mind
 pr: 1774
@@ -34,3 +34,5 @@ owns:
 ## Done
 What a player will see, and what wasn't tested.
 - Not tested in game: compile-checked with sh ./gradlew compileClientJava/compileJava and tools/pr_checks.py passes; did not boot the pack.
+
+- 2026-11-19 07:35 Cloud vault check (Health.md): task is in Inbox/Done, so this note is done.
