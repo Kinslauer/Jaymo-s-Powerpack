@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 21:36). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 21:37). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -12,8 +12,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## Stuck
 
-- [[Agents/smoothmount-1-climb-on-off|smoothmount-1-climb-on-off]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+Nothing stuck.
 
 ## On the board
 
@@ -87,7 +86,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 ## Health
 
-3 problems in the notes: [[Health]].
+Nothing wrong: [[Health]].
 
 ## Last week
 
