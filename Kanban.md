@@ -33,7 +33,6 @@ kanban-plugin: board
 - [ ] [[Inbox/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-aura-rework|zfighter-aura-rework]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/forest-fire-pack|forest-fire-pack]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · open
 
 
 ## Being built
@@ -41,6 +40,7 @@ kanban-plugin: board
 - [ ] [[Inbox/smoothmount-1-climb-on-off|smoothmount-1-climb-on-off]] · ☀️ Apollo · claimed
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · #1853 · changes · fixing review notes
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · ☀️ Apollo · #1787 · changes · fixing review notes
+- [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · claimed
 
 
 ## In review
