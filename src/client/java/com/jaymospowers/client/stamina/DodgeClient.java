@@ -23,6 +23,8 @@ import org.jspecify.annotations.Nullable;
  * The hop goes the way the movement keys point (back with none held), at once, and the server is told.
  * <p>(0.20.65) Andy: "alt should be roll". Sneak tapped twice no longer dodges (Combat Roll's old gesture): a double
  * tap held is the zoom now ({@code SneakZoom}), and OK Zoomer's own key came off Left Alt so Alt only dodges.
+ * <p>Acrobatics: in the air it throws a trick when there's time before the ground, and on the ground with Back held alone
+ * and the Backflip perk learnt it backflips instead of rolling back ({@code AcrobaticsClient}).
  */
 public final class DodgeClient {
 	private static @Nullable KeyMapping dodgeKey;
@@ -62,6 +64,11 @@ public final class DodgeClient {
 		return bound.getType() == InputConstants.Type.KEYBOARD && bound.getValue() > 0 && InputConstants.isKeyDown(bound.getValue());
 	}
 
+	/** The Dodge key's mapping (the move hints name its binding), or null before {@link #init}. */
+	public static @Nullable KeyMapping key() {
+		return dodgeKey;
+	}
+
 	public static void init() {
 		dodgeKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.dodge", InputConstants.KEY_LALT, JaymosPowersClient.CATEGORY));
 		ClientTickEvents.END_CLIENT_TICK.register(DodgeClient::tick);
@@ -80,6 +87,9 @@ public final class DodgeClient {
 			return;
 		}
 		boolean ground = player.onGround();
+		if (ground || player.isInWater() || player.isPassenger()) {
+			com.jaymospowers.client.freerun.moves.AcrobaticsClient.grounded();
+		}
 		if (ground) {
 			jumped = false;
 			flipped = false;
@@ -101,6 +111,11 @@ public final class DodgeClient {
 			// in the air off a jump, armed and schooled: the flip, once a jump
 			wanted = false;
 			flipped = true;
+			landingRoll = 0;
+		}
+		if (wanted && !player.onGround() && com.jaymospowers.client.freerun.moves.AcrobaticsClient.trick(player)) {
+			// in the air with time to spare before the ground: a trick (Acrobatics); nearer the ground the press is the landing roll's
+			wanted = false;
 			landingRoll = 0;
 		}
 		if (wanted && !player.onGround() && player.getDeltaMovement().y < 0.0) {
@@ -193,6 +208,12 @@ public final class DodgeClient {
 				cooldown = com.jaymospowers.boxing.BoxingEvades.COOLDOWN;
 				sinceDodge = 0;
 			}
+			return;
+		}
+		if (!landing && com.jaymospowers.client.freerun.moves.AcrobaticsClient.backflip(player)) {
+			// Back held alone, Backflip learnt: the standing backflip in place of the back roll (Acrobatics); a dodge all the same
+			cooldown = Dodge.COOLDOWN;
+			sinceDodge = 0;
 			return;
 		}
 		if (com.jaymospowers.client.freerun.moves.RunMovesClient.safetyTap(player, landing)) {
