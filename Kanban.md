@@ -33,7 +33,6 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-l-carts-check|vanilla-plus-l-carts-check]] · for 💻 Odysseus · open
 - [ ] [[Inbox/medieval-deco-3-dead-in-the-wild|medieval-deco-3-dead-in-the-wild]] · for 💻 Odysseus · open
 - [ ] [[Inbox/medieval-deco-6-towns-sea|medieval-deco-6-towns-sea]] · for 💻 Odysseus · open
-- [ ] [[Inbox/medieval-deco-7-practice-dummy|medieval-deco-7-practice-dummy]] · for 💻 Odysseus · open
 
 
 ## Being built
@@ -43,6 +42,7 @@ kanban-plugin: board
 
 ## In review
 
+- [ ] [[Inbox/medieval-deco-7-practice-dummy|medieval-deco-7-practice-dummy]] · for 💻 Odysseus · #1801 · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
 - [ ] [[Agents/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · 💻 Odysseus · #1774 · in-review
 
