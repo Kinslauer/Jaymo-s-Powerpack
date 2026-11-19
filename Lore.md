@@ -140,6 +140,14 @@ the dark's own phantoms come for them out of it, real enough that anyone awake n
 bed. Nobody has died of one; the dark lets go before that, and takes the power back with it. Whoever lives the night through
 wakes with their power already bent the wrong way, corrupted from its first breath.
 
+**Woken by a deed** (new; Claude's placement, Powerborne picks 2026-11-19, for Andy to approve). A power that is stirring in someone need not wait out its days: a deed that matches
+its nature can bring it up all at once. The wind answers someone who lives through a lightning strike, weight a long fall
+survived, the cold a night frozen through, the deep a drowning refused in the dark, smoke a great fire's smoke breathed
+in, time a whole night watched awake with a clock in hand, the arsenal a kill made with five kinds of weapon on the
+back, the fist a hard fight won bare-handed while half dead. A deed only wakes the power already stirring in that
+person, or, in someone the well has not yet chosen for, the first one they do. Nobody teaches the deeds; folk only
+notice afterwards that the gift came the day of the storm, or the fall, or the fire.
+
 **The eleven powers known in the world** (twelve until 2026-11-11, when Andy ruled Blindness a condition and not a power), as folk would describe them:
 
 - **Pocket Arsenal**: the holder reaches into somewhere else and pulls out whatever weapon answers; it goes back after
@@ -206,10 +214,27 @@ wakes with their power already bent the wrong way, corrupted from its first brea
   Ascended it becomes the Choir, corrupted the Shrieker.
 - **Smoke**: real smoke, that billows and leaks under doors, and nobody sees through it but its maker. Corrupted, it is
   Smog.
+  **Handed to the smoke** (new; Claude's placement, Powerborne picks 2026-11-19, for Andy to approve). A Smoke holder who closes their hands on a creature need not kill it: they can
+  hand it to the smoke, and the smoke keeps it, unseen and unmoving, where it stood, for as long as the knot holds.
+  Strike the knot and it tears and gives the creature back, giddy and slow. The great and the old (the Dragon, the
+  Wither, the Warden) and people are too much for it: the smoke slides off them.
 - **Web Slinger**: a spider's body, webs to swing on, and in time a symbiote that bonds with its host. The web is a
   side effect of the Quiet One's passing: it binds to those who gain an affinity for it during their life (see *The
   symbiote*).
+  **The crater spider** (new; Claude's placement, Powerborne picks 2026-11-19, for Andy to approve). The meteorite that carried the black symbiote was soaked through with the Quiet
+  One's mana, and so is the star iron that falls with any star. The Mad Tinkerer, who sweeps star-iron filings off his
+  bench, learned what that does to a cave spider kept under glass and fed it: the spider takes on the thread, and its
+  bite is a summons as much as a poison. Someone already leaning toward the web is woken by it; anyone else only
+  sickens. He tells it as a story about an assistant and a jar that ticked, and never says it was a lesson.
 - **Wind Control**: flight, and the wind held in a fist. Ascended it is the Tempest, corrupted Stormbound.
+  **The storm's own tricks** (new; Claude's placement, Powerborne picks 2026-11-19, for Andy to approve). A Stormbound's wind has gone loud and sour, and the storm answers it. Standing
+  under a thundering sky they can pull the charge down into their hands until it runs through them. A hammer they throw
+  is a thing the sky follows: it calls a bolt where it lands, carries its thrower along with it, or spun overhead lifts
+  them. A weapon thrown so is known to the storm afterwards, and flies home to its thrower's hand from as far as the
+  storm can hear, which the blade schools count beside the Gravity-touched, a fighter's ki and a mage's spirit hand.
+  Two storm weapons brought together throw one great bolt; a Stormbound who leaps and comes down brings the lightning
+  down with them. And a place marked under open sky can be reached again by a column of storm light, the road home,
+  which needs to see both ends and so never runs under a roof or between worlds.
 - **Xenoform**: a band of alien metal from a fallen star (see *Fallen stars*).
 - **Z Fighter**: the fighter who lets ki out raw (see *The Z Fighters*).
 
@@ -282,6 +307,19 @@ farmhand like anyone else, and the street doesn't know whose face is under it.
 - **The everyday gifted** (the open ones, and the hidden ones when no one is looking): a Darktide washes out a fire with
   dark water, a Wind blows one out, a Cryo smothers it in frost, freezes the water trough, and keeps the larder and the
   house cold, so food keeps longer near a Cryo's home and the house is cool in a hot land.
+
+**Patterns and plated costumes** (new; Claude's placement, Powerborne picks 2026-11-19, for Andy to approve). The tailor sews from patterns: folded paper scraps marked in chalk
+with a cut, a mask or a cape. The old tailors passed theirs down and lost many, and they turn up in buried chests,
+bastion treasure and a wandering trader's pack, or on the costumed gifted, who keep the patterns of what they wore and
+lose them when they fall. Anyone who studies a pattern can have that piece sewn from then on. A costume can be plated:
+the tailor sews the cloth and the smith fits plates of copper, iron, bronze, steel or the black netherite over brow,
+breast, thighs and feet. A plated costume turns a blow a little, as armour does; folk say it is no replacement for
+mail, and where real armour is worn the plate is only for show. A costume can be hung on an armour stand between nights.
+
+**The Draught of Mettle** (new; Claude's placement, Powerborne picks 2026-11-19, for Andy to approve). The alchemists' answer to the gifted, steeped from air and spirit with a rabbit's foot,
+a phantom's membrane and sugar on the infusion altar. In someone with no power it lends a long while of a quick, light
+body that swims like a dolphin and can leap once more in the air. A body with a gift in it rejects the draught and is
+only sick.
 
 **The classes.** The nine classes are trades, each taught by the people who live by it: the **Thief** learns from
 the Ash Whisperer's quick-handed faithful, the **Warlord** in Conquest realms' war camps, the **Mage** from court
@@ -411,6 +449,13 @@ over some folded sheets found in the city: a great wheel "every rivet", the same
 chest plate ("they will want to keep time"), the city's streets with a mark where every sweeper stands, and the maker's
 name scraped off every sheet, neatly. Nothing says whose they are.
 
+**The dance with a villager** (new; Claude's placement, Powerborne picks 2026-11-19, for Andy to approve). The fusion dance was made for two fighters, but it only asks that two
+people want to be one for a while, and a villager who has come to trust a fighter (family, a long friend, hired help)
+will answer it; a stranger steps away. The fighter keeps the body and the will. The villager rides inside, safe as a
+coin in a pocket, and lends what their hands have always known: the farmer's green thumb, the smith's mending, the
+cleric's slow mercy, the mason's quick grip. When it ends they are set down beside the fighter unharmed, and remember
+only a warm, wide afternoon with no edges.
+
 **Divine-born.** Those who die a second time among the dead may wake Divine-born (see *The dead*), warm to the
 touch, with a halo of blue or white light at the neck for the Starlit and the Seraphic.
 
@@ -428,6 +473,12 @@ is a thing practised: it lands harder the more seasoned they are and the more th
 them wind, and when the wind is gone they are hit like anyone. To get it back they rise a hand's breadth off the
 ground and stand in the light until feathers of it have wound down round them. They do not fly without training,
 but they fall slowly when they choose to.
+
+**The shell and the ward** (new; Claude's placement, Powerborne picks 2026-11-19, for Andy to approve). The Divine-born do not armour themselves. Where nothing has touched them for a
+while, gold gathers round them a heart's breadth at a time, slow as dew on a high place; a blow scatters it, and the calm
+has to be earned again. The Judge's people call it the shell. A Divine-born can also draw their light out wide enough
+to stand a few people in, for a few breaths: friends and the folk they shelter are mended inside, and whatever means harm
+is pushed to its edge and held there, not struck. It costs them feathers, and they will not do it twice in a minute.
 
 **The sky villages** (four-mods thread, 2026-11-11; Andy: "should all instead spawn in the aether proper, and be
 filled with divine born, any other heritage has a reason for not only having traveled but being accepted"). The
@@ -970,6 +1021,12 @@ and a far world freed or conquered, all before the Skeleton Lord.
 those craters. About one in ten comes down as a **star wreck**, which sends out probes while a band wearer is near and
 holds a wreck core at its heart. Star tablets turn up in fallen stars, in fishing treasure and in the remnants' chests;
 star-readers trade band plans for star metal.
+
+**The worthy stone** (new; Claude's placement, Powerborne picks 2026-11-19, for Andy to approve). Sometimes a fallen star leaves a dark stone beside its crater with the wind's curved
+stone dagger driven into it, the same blade a smith once made and could not make work. It lets go only of someone who
+has put down many of the things that prey on villages and has stood for a village in its danger. The unworthy can
+strain at it all night. It does not say why, and once the blade is drawn, or found any other way, the stone holds
+nothing.
 
 **The Xeno-Band.** A band of alien metal from a fallen star, holding the bodies of aliens its wearer becomes for
 a while: forty-odd of them, from Bulwark and Gremlin to Wyrm, Lurk and the rule-writing Nadir. It learns new ones by
