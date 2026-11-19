@@ -34,4 +34,4 @@ Stoneborn, Heartlander and Tideborn paths. Lore paragraphs drafted as (new) and 
 - Builds on CI (Andy's PC runs only the game).
 
 ## Done
-- 2026-11-19 14:11 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-19 20:14 No sign of work for 30 min: marked stalled (whoever ran it stopped).

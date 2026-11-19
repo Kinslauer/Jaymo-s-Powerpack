@@ -806,3 +806,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 
 - 2026-11-19 (goblin speech thread): Andy: "the goblins also dont seem to have their own language, they should speak very broken but intelligible english, unlike orcs who you really cant tell". Goblins now speak broken English (GoblinTalk) to everyone in any land; orcs keep the land tongue.
 - 2026-11-19 (PC Claude, gnome models): Andy approved the lore paragraph 'The gnomes' and the behaviour list (zombies named Gnome swap to our gnome; neutral until you trample its garden, dig near its house or open its chests; gnomes bone-meal their garden; gifts of seeds/saplings/flowers/bone meal calm them and get ore/emerald/rare diamond with a cooldown; a stripped garden makes them dig away).
+- 2026-11-19 3:13 PM ET (goblin speech thread): Andy approved the lore paragraph "Goblin talk".
