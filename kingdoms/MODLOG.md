@@ -15138,3 +15138,10 @@ Not tested in game.
 - New Freerunning perk **Backflip** (Stealth, level 5, needs Freerunner, ring 3 beside Slide): the standing backflip off the dodge key with Back held (Jaymo's Powers' Acrobatics).
 - Freerunner's description now covers the dodge key's mid-air tricks (rank 1 plain ones, rank 2 the harder ones). Two new loading hints (205, 206).
 - Built; not played.
+
+## 0.10.45 (2026-11-19): repo cleanup: stray javac argument file removed (#1779)
+
+- Removes `kingdoms/src/javac.20261104_084443.args`, an argument file a crashed javac run left on 4 Nov. Nothing in the
+  build reads it; no game change.
+- Same PR (repo only, no mod change): root `genSources.log` and javac args, 12 committed `__pycache__` files, two old
+  Sora's dagger drafts in tools/blockbench, and the finished docs AGENT_BRIEF_0.2, Kingdoms-Plan-0.3 and Plan-0.7.
