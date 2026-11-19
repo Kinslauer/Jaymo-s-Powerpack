@@ -227,10 +227,12 @@ public final class GiftedAI {
 		}
 		float base = BRAWL_BASE + (gift.master() ? BRAWL_MASTER : 0.0F)
 			+ (gift.style() == Gifted.BOLD ? BRAWL_BOLD : gift.style() == Gifted.WARY ? BRAWL_WARY : 0.0F);
-		Brawl.tick(level, mob, foe, Brawl.Profile.gifted(Math.max(BRAWL_FLOOR, base), mob), false, false);
+		Brawl.tick(level, mob, foe, Brawl.Profile.gifted(Math.max(BRAWL_FLOOR, base), mob),
+			com.jaymospowers.power.zfighter.ZFighterStrings.engaged(mob), com.jaymospowers.power.zfighter.ZFighterStrings.rushing(mob));
 		if (Brawl.takeVanish(mob)) {
 			// they blinked behind whoever struck: their next move is ready at once
 			NEXT.remove(mob);
+			com.jaymospowers.power.zfighter.ZFighterStrings.rested(mob);
 		}
 	}
 

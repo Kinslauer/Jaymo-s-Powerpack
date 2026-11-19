@@ -137,7 +137,9 @@ public final class ZFighterPatrol {
 	static final int[] RANK_WEIGHT = {6, 4, 3, 2, 1};
 	/** The lowest rank a showdown's patrolman holds (Inspector). */
 	static final int SHOWDOWN_RANK = 3;
-	static final int PUNCH_EVERY = 16, ROAM_EVERY = 240, THINK_EVERY = 10;
+	static final int ROAM_EVERY = 240, THINK_EVERY = 10;
+	/** His ki's colour (the Patrol's gold). */
+	static final int PATROL_KI_COLOR = 0xFFC830;
 	/** The power level he wants to see before he offers to take you on. */
 	public static final int RECRUIT_POWER = 1500;
 	/** The fuel a patrolman gives an officer once a visit (blaze powder: two fuel each). */
@@ -755,29 +757,31 @@ public final class ZFighterPatrol {
 		}
 	}
 
-	/** He closes on {@code foe} and, in reach, strikes for {@code damage} every {@link #PUNCH_EVERY} ticks. */
+	/**
+	 * He closes on {@code foe} and fights it: strings of blows of {@code damage} (his punch, by rank) with a finisher that throws it, a rush
+	 * after it and a follow-up ({@link ZFighterStrings}), and a beam, a seeking volley or a charged blast at range ({@link ZFighterNpcKi}). The
+	 * old single punch every 16 ticks is gone.
+	 */
 	static void fight(ServerLevel level, PathfinderMob man, LivingEntity foe, float damage) {
 		man.setTarget(foe);
 		man.getLookControl().setLookAt(foe, 30.0F, 30.0F);
 		// the fighter brain ({@link Brawl}): he flies at a foe in the air, dashes, dodges, guards (his rank is his Patrol's, before the world tier)
-		Brawl.tick(level, man, foe, Brawl.Profile.gifted(BRAWL_RANKS[manRank(man)], man), man.distanceTo(foe) <= REACH, false);
+		Brawl.tick(level, man, foe, Brawl.Profile.gifted(BRAWL_RANKS[manRank(man)], man), ZFighterStrings.engaged(man) || man.distanceTo(foe) <= REACH,
+			ZFighterStrings.rushing(man));
+		int rank = manRank(man);
+		double fists = damage * PUNCH_BY_RANK[rank];
+		if (ZFighterStrings.rushing(man)) {
+			return;
+		}
 		if (man.distanceTo(foe) > REACH) {
-			if (!Brawl.flying(man)) {
+			if (!Brawl.flying(man) && !ZFighterStrings.engaged(man)) {
 				man.getNavigation().moveTo(foe, 1.0);
 			}
 		} else {
 			man.getNavigation().stop();
-			damage *= PUNCH_BY_RANK[manRank(man)];
-			if (man.tickCount % Brawl.tempo(man, PUNCH_EVERY) < THINK_EVERY) {
-				man.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
-				DamageSource source = level.damageSources().mobAttack(man);
-				if (foe.hurtServer(level, source, damage)) {
-					Vec3 push = foe.position().subtract(man.position()).multiply(1.0, 0.0, 1.0).normalize().scale(0.6);
-					foe.push(push.x, 0.25, push.z);
-					level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.NEUTRAL, 0.8F, 0.9F);
-				}
-			}
 		}
+		ZFighterStrings.engage(level, man, foe, ZFighterStrings.Cfg.patrol(fists, rank));
+		ZFighterNpcKi.decide(level, man, foe, fists, PATROL_KI_COLOR);
 	}
 
 	/** The nearest of {@code from} within {@code range} of him, or null. */
