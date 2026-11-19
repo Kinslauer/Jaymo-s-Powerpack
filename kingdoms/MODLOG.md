@@ -15541,3 +15541,10 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - The capital's village search and the far Epic town search now take only towns that stand in the Overworld band; a town in another band is passed over and the search goes on to the next spot. The log says which band it was in.
 - Classes touched: `EpicTowns` (`surface`, `foundFar`), `StoryGround` (village search).
 - Built by CI; not played.
+
+## 0.10.94 (2026-11-19): Take bows and arrows from any downed foe (#1855)
+
+- Andy: "you should be able to take their bows." Standing over anyone downed (not kneeling), a tap of use takes the weapons out of both their hands, as it already did for villagers, Kingdoms folk and illagers: now bandits, skeletons, pillagers, zombies with blades and any other downed humanoid too. Not a tamed animal that belongs to someone.
+- Their arrows come with the bow: whatever is left in their quiver (or a full one for a bowman that never shot, or a skeleton or pillager whose bow flew off as it fell) comes away as real arrows. Once up again they're short of arrows as after shooting them all, and pick up or restock as before.
+- A downed foe with nothing left to take lets the tap through to whatever else uses it (pulling a stuck blade). Kneel tap (lift), kneel hold (revive), left-click executions and sneak pickpocketing are unchanged. Armour and pockets are still not taken.
+- Downed (`disarmable`, `armed`), MobAmmo (`quiver`, `emptyQuiver`). Built; not played.
