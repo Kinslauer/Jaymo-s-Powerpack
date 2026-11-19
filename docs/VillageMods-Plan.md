@@ -13,8 +13,8 @@ nothing of its art or data is used.
 
 Left out by Andy: golem floating [gv_golem_float] (replaced by better golem pathing, below), the hall of makers
 [mil_hall], shipping Millénaire [mil_ship], Cherry Grove's datapack and its pieces [cg_ship, cg_pieces], and shipping
-Ribbits [rb_ship]. Shipping Bountiful [bt_ship] showed ticked; it has no 26.3 build and would put a second board in every
-village, so it waits on Andy's yes and is not in any patch.
+Ribbits [rb_ship]. Shipping Bountiful [bt_ship] showed ticked by mistake (Andy: no); it has no 26.3 build and would put a second board in every
+village, so it is not in any patch.
 
 Sky Villages: already ours (PR #1312). Andy's own follow-up became the steam towns in the Cloud Sea (PR #1790, merged).
 
