@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 22:04). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 22:10). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -23,7 +23,9 @@ Nothing stuck.
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1880 An escape isn't known to the camp until they see you gone (Kingdoms, 2026-11-19)
 - [ ] #1879 Captors take the harness too (Kingdoms, 2026-11-19)
+- [ ] #1878 final deaths cut straight to black (Powers, 2026-11-19)
 - [ ] #1877 Harness 6: forge the rest of the harness (Powers, Kingdoms, 2026-11-19)
 - [ ] #1876 Captives who die and are weighed leave their chains (Kingdoms, 2026-11-19)
 - [ ] #1875 Harness fits MCA bodies; captors calm down around a captive (Kingdoms, 2026-11-19)
@@ -81,9 +83,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1811 A harness piece with no model no longer crashes the game (Kingdoms, 2026-11-19)
 - [ ] #1810 NPC sea ships pay for their powder and shot (Kingdoms, 2026-11-19)
 - [ ] #1809 metal-hit sparks - blows, strikes and arrows on metal (Powers, 2026-11-19)
-- [ ] #1808 Cannon shot types for wall and siege guns, Explosive Shell costs TNT (Kingdoms, 2026-11-19)
-- [ ] #1807 flotsam can bring up a dead one's token (Powers, Kitchen, 2026-11-19)
-- …and 253 older ones.
+- …and 255 older ones.
 
 ## Health
 
