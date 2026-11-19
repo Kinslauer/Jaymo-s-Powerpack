@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 16:08). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 16:13). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -36,6 +36,7 @@ kanban-plugin: board
 
 ## In review
 
+- [ ] [[Agents/camp-alarm-horn|camp-alarm-horn]] · 💻 Odysseus · #1846 · in-review
 
 
 ## Needs Andy
