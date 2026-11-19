@@ -15491,3 +15491,9 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 
 - **Story hold screen**: each hint now wipes in from the left (a thin gold edge leading it) when it's dealt and wipes off to the right before the next one, instead of swapping at once. Each wipe takes 0.45 s (`WIPE_MS` in `StoryHoldScreen`).
 - Built; not played.
+
+## 0.10.87 (2026-11-19): boiling oil pot rebuilt from sprite stacks (#1844)
+
+- **Oil pot**: the walls' boiling oil pot is no longer three plain boxes with cauldron textures. It's a round, bulging iron pot with a rivet band, ring handles and a pouring lip, standing on a three-legged brazier. Cold, the brazier holds grey ash; lit, the coals glow, flames lick the pot's foot and the oil bubbles.
+- Built from two 16x16 x 13-slice sprite stacks (`kingdoms/tools/sprite_stacks/`) by the new converter `tools/sprite_stack/stack2model.py` (88 and 96 cubes, one 64x64 texture each). `kingdoms/tools/gen_oil_pot.py` paints the stacks and converts them; `gen_whaling.py` no longer writes the pot's models, and the old brazier textures are gone.
+- Resources and tools only, no code. Previewed with our own renderer; not built or seen in game.

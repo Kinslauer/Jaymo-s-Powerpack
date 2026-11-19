@@ -1,4 +1,0 @@
-# boiling oil pot rebuilt from sprite stacks
-- **Oil pot**: the walls' boiling oil pot is no longer three plain boxes with cauldron textures. It's a round, bulging iron pot with a rivet band, ring handles and a pouring lip, standing on a three-legged brazier. Cold, the brazier holds grey ash; lit, the coals glow, flames lick the pot's foot and the oil bubbles.
-- Built from two 16x16 x 13-slice sprite stacks (`kingdoms/tools/sprite_stacks/`) by the new converter `tools/sprite_stack/stack2model.py` (88 and 96 cubes, one 64x64 texture each). `kingdoms/tools/gen_oil_pot.py` paints the stacks and converts them; `gen_whaling.py` no longer writes the pot's models, and the old brazier textures are gone.
-- Resources and tools only, no code. Previewed with our own renderer; not built or seen in game.
