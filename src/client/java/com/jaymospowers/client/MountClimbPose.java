@@ -298,7 +298,8 @@ public final class MountClimbPose {
 		Easing e = EASING.get(mountId);
 		if (e != null) {
 			float t = 1.0F - Mth.clamp((e.age + partialTicks) / MOUNT_EASE, 0.0F, 1.0F);
-			return new float[] {e.style, e.side, e.from * t, e.share};
+			// the share runs on to the end as it eases, so a pose drawn from it (the elephant's trunk) lets go instead of holding, then snapping
+			return new float[] {e.style, e.side, e.from * t, Mth.lerp(1.0F - t, e.share, 1.0F)};
 		}
 		return null;
 	}

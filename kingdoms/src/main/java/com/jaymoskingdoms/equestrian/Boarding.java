@@ -14,8 +14,8 @@ import net.minecraft.world.entity.player.Player;
  * Powers nobody climbs, the rider is simply seated, as before).
  * <ul>
  * <li><b>War elephants and mammoths:</b> stand at its head and it curls its trunk down, takes you up in it and sets you on its
- * back ({@link #STYLE_TRUNK}); anywhere else along its flank, or if you are in heavy armour (it kneels for those anyway,
- * {@link Bonding#KNEEL_ARMOUR}), it kneels and you climb up its folded foreleg ({@link #STYLE_KNEEL}). The kneel is the one the
+ * back ({@link #STYLE_TRUNK}); anywhere else along its flank, or if you are in heavy armour ({@link Bonding#KNEEL_ARMOUR}: only one that will kneel for you lets you up at
+ * all, {@link Bonding#use}), it kneels and you climb up its folded foreleg ({@link #STYLE_KNEEL}). The kneel is the one the
  * armoured rider's already gets ({@link Bonding#KNEEL}, drawn by (the elephant model in the client) and
  * followed by the saddle). The trunk's curl is drawn from the climb itself, in step with the rider.</li>
  * <li><b>Wind dragons:</b> it lowers its neck to someone who stands at its head ({@link #STYLE_NECK}), and (Notus, Boreas,
