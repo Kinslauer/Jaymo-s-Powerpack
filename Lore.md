@@ -67,8 +67,8 @@ shows no words either. Copies turn up on draugr and in camps.
 **The title: one at the ford** (new) (Claude's placement for the "Reason" title logo, 2026-11-19). Behind the pack's
 name, ivy grown over its old stone letters, one figure stands with a raised sword and a shield, and behind him the dark's
 host waits as shadows with faint red eyes. It is the swordsman of *The Long Defence*, or whoever keeps the warden's light
-after him; the picture never says which, and nothing on screen names the host. The ivy is the same green that covers the
-keep above the ford.
+after him; the picture never says which, and nothing on screen names the host. The letters are cracked, overgrown
+stone, like the keep above the ford.
 
 **The demons remember it.** The demon masters below say the surface has forgotten the old war and they have not:
 "We remember it. We were there." They do not say which side they stood on.
