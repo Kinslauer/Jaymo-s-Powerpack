@@ -25,7 +25,8 @@ import org.jspecify.annotations.Nullable;
  * Deeds: one thing a powerless survival player can do that wakes the power they are already set to awaken, early and
  * all at once, next to the 3-5 day timer. A deed only ever wakes the power the player leans to ({@link #leaning}: a
  * power handed down, a calling's, or their affinity's); it never gives a second power, and does nothing for someone who
- * has one, or who has no leaning (a player left to fate has no pick yet to wake). Felt, not read: no line says what
+ * has one. A player left to fate (no leaning) is called by their first deed, as by a calling ({@link Callings#call}),
+ * and it wakes at once. Felt, not read: no line says what
  * the deed was; the awakening plays as any other ({@link Powers#awakenAs}).
  * <ul>
  * <li>Wind: struck by lightning and live.</li>
@@ -86,7 +87,16 @@ public final class AwakeningDeeds {
 	public static boolean wake(ServerPlayer player, String name) {
 		Power power = Powers.byName(name);
 		if (power == null || Powers.of(player) != null || player.isCreative() || player.isSpectator() || !player.isAlive()
-			|| GivingUp.settled(player) || leaning(player) != power) {
+			|| GivingUp.settled(player)) {
+			return false;
+		}
+		Power leaning = leaning(player);
+		if (leaning == null) {
+			// left to fate (no affinity, calling or inheritance): the deed is their calling, and wakes it at once
+			Callings.call(player, name, Integer.MAX_VALUE);
+			return Powers.of(player) == power;
+		}
+		if (leaning != power) {
 			return false;
 		}
 		player.removeAttached(Affinity.INHERITED);
