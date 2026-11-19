@@ -1,5 +1,6 @@
 package com.jaymospowers.core;
 
+import com.jaymospowers.core.wounds.Downed;
 import com.jaymospowers.freerun.Freerun;
 import com.jaymospowers.stamina.Dodge;
 import java.util.HashMap;
@@ -25,8 +26,10 @@ import net.minecraft.world.phys.Vec3;
  * fall away: {@link LandingRoll}). Slower, or without the skill, getting off is the ordinary climb down
  * ({@link MountClimb}); the client plays the leap ({@code MountClimbPose}, {@link MountClimb.Kind#OFF_LEAP}) by the same
  * test, {@link #leaps}.
- * <p>The server finds the dismount the way the client does (a rider seen in the saddle a tick ago who isn't now, with
- * Sneak held), since vanilla has no event for it, and measures the mount's speed from where it was a tick before.
+ * <p>The server decides, and tells the rider and everyone who sees them ({@link MountClimb.Start} with the leap's kind).
+ * It counts only the rider's own Sneak dismount ({@link #sneakedOff}, from vanilla's rideTick), seen a tick after in a
+ * rider who was in the saddle a tick before, and measures the mount's speed from where it was a tick earlier. A rider
+ * knocked down, thrown, ejected by a dying mount or lifted off by another move doesn't leap.
  * Gallop is a speed, so one test serves Kingdoms' horses and vanilla ones: its canter and gallop (and a vanilla horse at
  * full tilt) pass, a walk and trot don't.
  */
@@ -52,6 +55,8 @@ public final class MountLeap {
 
 	private static final Map<UUID, Ride> RIDING = new HashMap<>();
 	private static final Map<UUID, Leap> LEAPING = new HashMap<>();
+	/** Game time each player last got off their mount by their own Sneak. */
+	private static final Map<UUID, Long> SNEAKED = new HashMap<>();
 
 	private MountLeap() {
 	}
@@ -61,10 +66,12 @@ public final class MountLeap {
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			RIDING.remove(handler.player.getUUID());
 			LEAPING.remove(handler.player.getUUID());
+			SNEAKED.remove(handler.player.getUUID());
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			RIDING.clear();
 			LEAPING.clear();
+			SNEAKED.clear();
 		});
 	}
 
@@ -73,7 +80,14 @@ public final class MountLeap {
 		return (rider.level().isClientSide() ? Freerun.perk(rider, Freerun.Perk.FREERUNNER) : Freerun.rank(rider, Freerun.Perk.FREERUNNER)) >= 1;
 	}
 
-	/** Both sides' test: {@code rider}, off a mount that was going {@code speed} blocks a tick, with Sneak held, leaps. */
+	/** From {@code MountLeapSneakMixin}: {@code player}'s own Sneak is getting them off their mount (server side only). */
+	public static void sneakedOff(Player player) {
+		if (!player.level().isClientSide()) {
+			SNEAKED.put(player.getUUID(), player.level().getGameTime());
+		}
+	}
+
+	/** Whether {@code rider}, off a mount that was going {@code speed} blocks a tick, with Sneak held, leaps (the server's test; a client uses it only to wait for the server's word). */
 	public static boolean leaps(Player rider, double speed) {
 		return speed >= LEAP_SPEED && rider.isShiftKeyDown() && !rider.isInWater() && skilled(rider);
 	}
@@ -89,7 +103,10 @@ public final class MountLeap {
 				continue;
 			}
 			Ride ride = RIDING.remove(id);
-			if (ride != null && player.isAlive() && !player.isSpectator() && !MountClimb.climbing(player) && !player.isPassenger()
+			Long sneaked = SNEAKED.remove(id);
+			Entity mount = ride == null ? null : player.level().getEntity(ride.mountId);
+			if (ride != null && sneaked != null && player.level().getGameTime() - sneaked <= 1L && mount != null && mount.isAlive()
+				&& player.isAlive() && !player.isSpectator() && !Downed.isDowned(player) && !MountClimb.climbing(player) && !player.isPassenger()
 				&& player.position().distanceTo(ride.seat) < SEAT_REACH && leaps(player, Math.hypot(ride.velocity.x, ride.velocity.z))) {
 				leap(player, ride);
 			}
@@ -125,6 +142,8 @@ public final class MountLeap {
 		Vec3 v = carried.scale(LEAP_KEEP).add(side.scale(LEAP_SIDE)).add(0.0, LEAP_UP, 0.0);
 		player.setDeltaMovement(v);
 		player.needsSync = true;
+		int ticks = Math.max(1, Mth.ceil(MountClimb.seconds(MountClimb.Kind.OFF_LEAP, player) * 20.0F));
+		MountClimb.send(player, new MountClimb.Start(player.getId(), ride.mountId, (byte)MountClimb.Kind.OFF_LEAP.ordinal(), (short)ticks));
 		Vec3 way = carried.lengthSqr() > 1.0E-4 ? carried.normalize() : side;
 		LEAPING.put(player.getUUID(), new Leap(player.level().getGameTime(), player.position(), way));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.PLAYERS, 0.7F, 1.2F);

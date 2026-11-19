@@ -39,6 +39,11 @@ public final class DodgeClient {
 	static float rollX, rollZ;
 	/** Whether our own last roll was the flip in the air ({@link Dodge#canFlip}). */
 	static boolean rollFlip;
+	/** Forgets our last own roll, so the next roll drawn for us is the server's copy (a leap off a mount ends in one the server throws). */
+	public static void forgetRoll() {
+		rollStart = Long.MIN_VALUE;
+	}
+
 	/** Leaving the ground faster than this upward (blocks/tick) is a jump, not a step off an edge. */
 	static final double JUMP_RISE = 0.1;
 	/** We were on the ground last tick; we're in the air off a jump; this jump's flip is spent. */

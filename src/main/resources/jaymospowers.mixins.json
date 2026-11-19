@@ -63,6 +63,7 @@
 		"PerchRidingMixin",
 		"MountClimbHorseMixin",
 		"MountClimbPigMixin",
+		"MountLeapSneakMixin",
 		"RockSnowballMixin",
 		"CostumeNameMixin",
 		"CostumeTabListMixin",
