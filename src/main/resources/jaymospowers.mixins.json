@@ -116,6 +116,7 @@
 		"StructureStateLockMixin",
 		"BaublesQuickEquipMixin",
 		"BlockFxMixin",
+		"SwingNoteMixin",
 		"ArrowSparkMixin",
 		"ShieldHookMixin",
 		"SnowballStingMixin",

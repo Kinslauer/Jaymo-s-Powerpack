@@ -126,8 +126,17 @@ public final class ZFighterPatrol {
 	/** How far he goes for a foe, how far he roams from his pod, how hard his fists land and how often. */
 	static final double FIGHT_RANGE = 24.0, ROAM = 22.0, REACH = 2.6;
 	static final float PUNCH = 7.0F;
-	/** His rank for the fighter brain, before the world tier. */
-	static final float BRAWL_RANK = 0.35F;
+	/**
+	 * (NPC fights 1b) A patrolman's own rank (an index into {@link #RANKS}: Rookie to Commander), picked when he lands. By rank: his rank for
+	 * the fighter brain ({@code Brawl}, before the world tier; a Commander is about a tyrant's), his health and armour, how hard he
+	 * hits, and how likely each rank is to be sent ({@link #RANK_WEIGHT}, more so the higher the world tier is above what it needs).
+	 */
+	static final float[] BRAWL_RANKS = {0.15F, 0.3F, 0.45F, 0.6F, 0.8F};
+	static final double[] HEALTH_BY_RANK = {1.0, 1.15, 1.3, 1.5, 1.8}, ARMOR_BY_RANK = {0.0, 1.0, 2.0, 4.0, 6.0};
+	static final float[] PUNCH_BY_RANK = {1.0F, 1.1F, 1.25F, 1.4F, 1.6F};
+	static final int[] RANK_WEIGHT = {6, 4, 3, 2, 1};
+	/** The lowest rank a showdown's patrolman holds (Inspector). */
+	static final int SHOWDOWN_RANK = 3;
 	static final int PUNCH_EVERY = 16, ROAM_EVERY = 240, THINK_EVERY = 10;
 	/** The power level he wants to see before he offers to take you on. */
 	public static final int RECRUIT_POWER = 1500;
@@ -203,6 +212,9 @@ public final class ZFighterPatrol {
 	/** The travel stories a patrolman has told (bits). */
 	public static final AttachmentType<Integer> TOLD = AttachmentRegistry.create(JaymosPowers.id("patrol_told"),
 		builder -> builder.persistent(Codec.INT));
+	/** (NPC fights 1b) On a patrolman: his rank, an index into {@link #RANKS} (none: a Rookie). */
+	public static final AttachmentType<Integer> RANK = AttachmentRegistry.create(JaymosPowers.id("patrol_rank"),
+		builder -> builder.persistent(Codec.INT).syncWith(net.minecraft.network.codec.ByteBufCodecs.INT, net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate.all()));
 	public static final AttachmentType<Member> MEMBER = AttachmentRegistry.create(JaymosPowers.id("patrol_member"),
 		builder -> builder.persistent(Member.CODEC).copyOnDeath());
 	/** (0.19.1) No longer used: patrolmen stopped coming on a timer. Kept registered so older saves load cleanly. */
@@ -314,6 +326,39 @@ public final class ZFighterPatrol {
 			rank--;
 		}
 		return rank;
+	}
+
+	/** {@code man}'s own rank (0: Rookie). */
+	static int manRank(LivingEntity man) {
+		return Mth.clamp(man.getAttachedOrElse(RANK, 0), 0, RANKS.length - 1);
+	}
+
+	/**
+	 * The rank a patrolman who lands near {@code at} holds: weighted toward the ranks the nearest player's world tier opens
+	 * ({@link #RANK_TIER}), more so the higher the tier is above what a rank needs; never below {@code min}.
+	 */
+	static int pickRank(ServerLevel level, Vec3 at, int min) {
+		Player near = level.getNearestPlayer(at.x, at.y, at.z, 256.0, false);
+		int tier = near == null ? 0 : Math.max(0, ZFighterKingdoms.worldTier(near));
+		int[] weight = new int[RANKS.length];
+		int total = 0;
+		for (int r = min; r < RANKS.length; r++) {
+			if (r == 0 || RANK_TIER[r] <= tier) {
+				weight[r] = RANK_WEIGHT[r] * (1 + Math.max(0, tier - RANK_TIER[r]));
+				total += weight[r];
+			}
+		}
+		if (total == 0) {
+			return min;
+		}
+		int roll = level.getRandom().nextInt(total);
+		for (int r = min; r < RANKS.length; r++) {
+			roll -= weight[r];
+			if (roll < 0) {
+				return r;
+			}
+		}
+		return min;
 	}
 
 	static Component rankName(int rank) {
@@ -583,6 +628,19 @@ public final class ZFighterPatrol {
 		}
 		man.setAttached(VISIT, new Visit(ground, level.getGameTime() + stay, cause, java.util.Optional.of(target)));
 		Gifted.give(man, "zfighter", Gifted.BOLD, true, true);
+		// (NPC fights 1b) his rank: stored on him, shown in his name, and what he's made of; a showdown's officer is at least an Inspector
+		int rank = pickRank(level, feet, cause == Cause.SHOWDOWN ? SHOWDOWN_RANK : 0);
+		man.setAttached(RANK, rank);
+		man.setCustomName(Component.translatable("entity.jaymospowers.patrol_ranked", rankName(rank), Component.translatable("entity.jaymospowers.patrol_name." + f.name)));
+		var health = man.getAttribute(Attributes.MAX_HEALTH);
+		if (health != null) {
+			health.setBaseValue(health.getBaseValue() * HEALTH_BY_RANK[rank]);
+			man.setHealth(man.getMaxHealth());
+		}
+		var armour = man.getAttribute(Attributes.ARMOR);
+		if (armour != null) {
+			armour.setBaseValue(armour.getBaseValue() + ARMOR_BY_RANK[rank]);
+		}
 	}
 
 	/** Every half second: each patrolman fights what is near, roams, or, his stay over, goes home. */
@@ -702,14 +760,15 @@ public final class ZFighterPatrol {
 		man.setTarget(foe);
 		man.getLookControl().setLookAt(foe, 30.0F, 30.0F);
 		// the fighter brain ({@link Brawl}): he flies at a foe in the air, dashes, dodges, guards (his rank is his Patrol's, before the world tier)
-		Brawl.tick(level, man, foe, Brawl.Profile.gifted(BRAWL_RANK, man), man.distanceTo(foe) <= REACH, false);
+		Brawl.tick(level, man, foe, Brawl.Profile.gifted(BRAWL_RANKS[manRank(man)], man), man.distanceTo(foe) <= REACH, false);
 		if (man.distanceTo(foe) > REACH) {
 			if (!Brawl.flying(man)) {
 				man.getNavigation().moveTo(foe, 1.0);
 			}
 		} else {
 			man.getNavigation().stop();
-			if (man.tickCount % PUNCH_EVERY < THINK_EVERY) {
+			damage *= PUNCH_BY_RANK[manRank(man)];
+			if (man.tickCount % Brawl.tempo(man, PUNCH_EVERY) < THINK_EVERY) {
 				man.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 				DamageSource source = level.damageSources().mobAttack(man);
 				if (foe.hurtServer(level, source, damage)) {
