@@ -24,6 +24,7 @@ kanban-plugin: board
 - [ ] [[Inbox/rig-beetle-5-the-mind|rig-beetle-5-the-mind]] · rig-beetle-5-the-mind · #1774 · in-review
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
 - [ ] [[Agents/dialogue-letterbox-pov|dialogue-letterbox-pov]] · 💻 Odysseus · in-review
+- [ ] [[Agents/guard-ranks-paid-kit|guard-ranks-paid-kit]] · 💻 Odysseus · in-review
 
 
 ## Needs Andy
