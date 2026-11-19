@@ -211,6 +211,7 @@ public final class ZFighterFusionItems {
 			return;
 		}
 		ItemStack pair = new ItemStack(BONDING_EARRING, 2);
+		ZFighterPartner.pair(pair);
 		if (!top.getInventory().add(pair)) {
 			top.drop(pair, false, net.minecraft.util.Prediction.SERVER_ONLY);
 		}

@@ -27,7 +27,7 @@ public final class GearNet {
 		}
 	}
 
-	/** A shield move was asked for ({@link ShieldMoves#THROW}, {@code SLAM}, {@code CHARGE}). */
+	/** A shield move was asked for ({@link ShieldMoves#THROW}, {@code SLAM}, {@code CHARGE}, {@code RISE}). */
 	public record Shield(int move) implements CustomPacketPayload {
 		public static final Type<Shield> TYPE = new Type<>(JaymosPowers.id("gear_shield"));
 		public static final StreamCodec<ByteBuf, Shield> CODEC = ByteBufCodecs.VAR_INT.map(Shield::new, Shield::move);

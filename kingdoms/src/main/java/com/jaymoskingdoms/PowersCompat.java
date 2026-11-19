@@ -807,6 +807,35 @@ public final class PowersCompat {
 		}
 	}
 
+	private static final java.util.Map<String, java.lang.invoke.MethodHandle> SPRINT_MOVES = new java.util.HashMap<>();
+	private static final java.util.Set<String> SPRINT_LOOKED = new java.util.HashSet<>();
+
+	/**
+	 * (Powerborne picks) A heritage's sprint + heritage key move in Jaymo's Powers: {@code className.method(ServerPlayer)}
+	 * returns true if it took the key. False without Powers or if the class isn't there.
+	 */
+	public static boolean sprintMove(String className, String method, net.minecraft.server.level.ServerPlayer player) {
+		String name = className + "#" + method;
+		if (SPRINT_LOOKED.add(name) && FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			try {
+				SPRINT_MOVES.put(name, java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName(className), method,
+					java.lang.invoke.MethodType.methodType(boolean.class, net.minecraft.server.level.ServerPlayer.class)));
+			} catch (ReflectiveOperationException | LinkageError e) {
+				JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' " + name + " (older Powers?)", e);
+			}
+		}
+		java.lang.invoke.MethodHandle handle = SPRINT_MOVES.get(name);
+		if (handle == null) {
+			return false;
+		}
+		try {
+			return (boolean) handle.invokeExact(player);
+		} catch (Throwable e) {
+			SPRINT_MOVES.remove(name);
+			return false;
+		}
+	}
+
 	/** Powers' {@code PowerTrials.questDone(ServerPlayer)}. */
 	private static java.lang.invoke.@Nullable MethodHandle questDone;
 	private static boolean lookedForQuestDone;

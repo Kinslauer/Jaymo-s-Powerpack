@@ -26,6 +26,10 @@ public final class PowerEvents {
 		});
 		ServerPlayNetworking.registerGlobalReceiver(PowerPayloads.ModeKey.TYPE,
 			(payload, ctx) -> {
+				if (payload.down() && com.jaymospowers.power.zfighter.ZFighterReins.insidePressedZ(ctx.player())) {
+					// a fusion's one inside asks to split
+					return;
+				}
 				if (!(payload.down() && Downed.isDowned(ctx.player()))) {
 					Powers.mode(ctx.player(), payload.down());
 				}
@@ -46,6 +50,9 @@ public final class PowerEvents {
 			Affinity.forget(handler.player);
 		});
 		Callings.register();
+		AwakeningDeeds.register();
+		com.jaymospowers.power.web.CraterSpider.register();
+		AwakeningDeeds.register();
 		OneHolder.register();
 		ServerTickEvents.END_SERVER_TICK.register(Powers::tick);
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> PowerCommand.register(dispatcher));

@@ -92,6 +92,7 @@ final class WindHud {
 		flight(graphics, font, client.flight(), right - GLYPH_SPACE * (cold ? 2 : 1), chipsAt[1], time);
 		channel(graphics, font, client, cx, cy, time, cold);
 		chips(graphics, font, client, chipsAt[0], chipsAt[1], time);
+		WindStormClient.render(graphics, font, player, chipsAt[0] - CHIP - 4, chipsAt[1], time);
 		int next = WindAbility.values().length;
 		if (cyclone) {
 			cycloneChip(graphics, font, player, chipsAt[0] + next++ * (CHIP + CHIP_GAP), chipsAt[1], time);

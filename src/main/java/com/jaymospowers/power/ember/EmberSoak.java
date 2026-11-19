@@ -34,7 +34,8 @@ import net.minecraft.world.phys.Vec3;
  * Soak and return, the fire users' bracing (Emberborn of any power, and Pyre). Brace: sneak on the ground, standing
  * still with both hands empty. While braced:
  * <ul>
- * <li>Blows (a strike, a blast, a bolt that is not caught) lose {@link #SOAK_SHARE} of their damage into a store (the
+ * <li>Explosions are drunk: {@link #BLAST_SHARE} of their damage is soaked, and it feeds {@link RunningHot} {@link #BLAST_HEAT_MULT} times as hard.</li>
+ * <li>Blows (a strike, a bolt that is not caught) lose {@link #SOAK_SHARE} of their damage into a store (the
  * HUD's thin bar under the heat bar) and the soaked heat feeds {@link RunningHot} too. The rest lands as normal.</li>
  * <li>A projectile that hits you (a fireball, a ki blast, a magic bolt) is caught: it does no harm, it is gone, and a
  * stronger bolt of your own flies back along your look ({@link #CATCH_MULT} times its damage, at least {@link #CATCH_MIN}).</li>
@@ -52,6 +53,8 @@ public final class EmberSoak {
 	static final float SOAK_SHARE = 0.6F, STORE_PER_DAMAGE = 5.0F, CATCH_STORE_MIN = 10.0F;
 	/** Heat the soak gives the gauge per point soaked. */
 	static final float HEAT_PER_SOAK = 3.0F;
+	/** A braced Emberborn drinks an explosion: the share of its damage soaked, and the extra heat per point soaked (times {@link #HEAT_PER_SOAK}). */
+	static final float BLAST_SHARE = 0.9F, BLAST_HEAT_MULT = 2.0F;
 	/** Ticks unbraced before the store leaks, and the leak a second. */
 	static final int LEAK_AFTER = 60;
 	static final float LEAK = 2.0F;
@@ -148,9 +151,13 @@ public final class EmberSoak {
 				catchBolt(player, live, bolt, amount);
 				return false;
 			}
-			float soaked = amount * SOAK_SHARE;
+			boolean blast = source.is(DamageTypeTags.IS_EXPLOSION);
+			float soaked = amount * (blast ? BLAST_SHARE : SOAK_SHARE);
 			fill(live, soaked * STORE_PER_DAMAGE);
-			RunningHot.add(player, soaked * HEAT_PER_SOAK);
+			RunningHot.add(player, soaked * HEAT_PER_SOAK * (blast ? BLAST_HEAT_MULT : 1.0F));
+			if (blast) {
+				player.level().sendParticles(MagicFx.mote(WHITE, 1.0F), player.getX(), player.getY() + 1.0, player.getZ(), 6, 0.3, 0.5, 0.3, 0.02);
+			}
 			player.level().sendParticles(MagicFx.spark(COLOR, 0.8F), player.getX(), player.getY() + 1.0, player.getZ(), 8, 0.4, 0.5, 0.4, 0.06);
 			if (amount - soaked <= 0.0F) {
 				return false;

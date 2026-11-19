@@ -264,7 +264,7 @@ public class PowerScreen extends Screen {
 		}
 		switch (this.tab) {
 			case OVERVIEW -> {
-				for (int i = 0; i < 3; i++) {
+				for (int i = 0; i < toggleCount(); i++) {
 					if (over(mx, my, toggleX(i), toggleY(), SLOT, SLOT) && toggleOpen(i)) {
 						toggle(i);
 						return true;
@@ -472,10 +472,10 @@ public class PowerScreen extends Screen {
 			return;
 		}
 		Component hover = null;
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < toggleCount(); i++) {
 			int tx = toggleX(i), ty = toggleY();
 			well(graphics, tx, ty);
-			ItemStack stack = new ItemStack(i == 0 ? Items.ENDER_EYE : i == 1 ? Items.NETHER_STAR : Items.CARVED_PUMPKIN);
+			ItemStack stack = new ItemStack(i == 0 ? Items.ENDER_EYE : i == 1 ? Items.NETHER_STAR : i == 2 ? Items.CARVED_PUMPKIN : Items.GOLDEN_CARROT);
 			graphics.item(stack, tx + 1, ty + 1);
 			boolean open = toggleOpen(i);
 			if (!open) {
@@ -484,12 +484,14 @@ public class PowerScreen extends Screen {
 				graphics.fill(tx + 1, ty + 1, tx + SLOT - 1, ty + SLOT - 1, 0x60FFFFFF);
 			}
 			String id = i == 0 ? "mode" : i == 1 ? "ultimate" : "mask";
-			Component label = i == 0 ? modeLabel() : Component.translatable("screen.jaymospowers.toggle." + id);
+			PowerClient extra = i == 3 ? extraClient() : null;
+			Component label = i == 3 && extra != null ? extra.extraToggleName(this.minecraft.player) : i == 0 ? modeLabel() : Component.translatable("screen.jaymospowers.toggle." + id);
 			// (0.16.6) a power's Mode is named for what it does, so cut a long name to the slot's room
 			int room = (CANVAS_W - 3 * SLOT) / 4 + SLOT - 2;
 			lineCentred(graphics, label, tx + SLOT / 2, ty + SLOT + 2, room, open ? COLOR_TEXT : COLOR_DIM);
 			if (over(mouseX, mouseY, tx, ty, SLOT, SLOT)) {
-				hover = i == 0 ? modeHover(open) : Component.translatable("screen.jaymospowers.toggle." + id + (open ? ".desc" : ".locked"));
+				hover = i == 3 && extra != null ? extra.extraToggleDesc(this.minecraft.player) : i == 0 ? modeHover(open)
+					: Component.translatable("screen.jaymospowers.toggle." + id + (open ? ".desc" : ".locked"));
 			}
 		}
 		if (hover != null) {
@@ -497,8 +499,18 @@ public class PowerScreen extends Screen {
 		}
 	}
 
+	/** The power's own extra toggle (a fourth slot), or null: see {@link PowerClient#extraToggleName}. */
+	private @Nullable PowerClient extraClient() {
+		PowerClient client = this.selected == null ? null : PowerClients.get(this.selected.id());
+		return client != null && this.minecraft.player != null && client.extraToggleName(this.minecraft.player) != null ? client : null;
+	}
+
+	private int toggleCount() {
+		return extraClient() == null ? 3 : 4;
+	}
+
 	private int toggleX(int i) {
-		int gap = (CANVAS_W - 3 * SLOT) / 4;
+		int gap = (CANVAS_W - toggleCount() * SLOT) / (toggleCount() + 1);
 		return cx() + gap + i * (SLOT + gap);
 	}
 
@@ -568,6 +580,7 @@ public class PowerScreen extends Screen {
 				yield ownModeKey() != null || line != null && !line.locked();
 			}
 			case 1 -> this.selected.ultimateAnswers(player);
+			case 3 -> true;
 			default -> {
 				com.jaymospowers.costume.CostumeDesign worn = com.jaymospowers.costume.Costume.worn(player);
 				yield worn != null && worn.mask() != com.jaymospowers.costume.CostumeDesign.Mask.NONE;
@@ -587,6 +600,12 @@ public class PowerScreen extends Screen {
 				}
 			}
 			case 1 -> press(JaymosPowersClient.TAP_ULTIMATE);
+			case 3 -> {
+				PowerClient extra = extraClient();
+				if (extra != null && this.minecraft.player != null) {
+					extra.extraToggle(this.minecraft.player);
+				}
+			}
 			default -> com.jaymospowers.client.costume.CostumeClient.toggleMask();
 		}
 	}

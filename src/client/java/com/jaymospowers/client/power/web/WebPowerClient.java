@@ -200,6 +200,7 @@ public final class WebPowerClient implements PowerClient {
 		EntityRenderers.register(WebPower.WEB_BALL, context -> new ThrownItemRenderer<>(context, 0.85F, false));
 		LevelRenderEvents.COLLECT_SUBMITS.register(WebLineRenderer::render);
 		WebShootersClient.init();
+		WebShieldClient.init();
 		WebMeetingClient.init();
 		LevelRenderEvents.COLLECT_SUBMITS.register(WebSenseBolts::render);
 		WebSenseGlance.init();
@@ -248,6 +249,22 @@ public final class WebPowerClient implements PowerClient {
 
 	static boolean isActive(@Nullable LocalPlayer player) {
 		return player != null && Powers.has(player, WebPower.INSTANCE);
+	}
+
+	@Override
+	public net.minecraft.network.chat.@Nullable Component extraToggleName(LocalPlayer player) {
+		return net.minecraft.network.chat.Component.translatable("screen.jaymospowers.toggle.web_dark_sense");
+	}
+
+	@Override
+	public net.minecraft.network.chat.Component extraToggleDesc(LocalPlayer player) {
+		return net.minecraft.network.chat.Component.translatable("screen.jaymospowers.toggle.web_dark_sense."
+			+ (com.jaymospowers.power.web.WebDarkSense.on(player) ? "on" : "off"));
+	}
+
+	@Override
+	public void extraToggle(LocalPlayer player) {
+		ClientPlayNetworking.send(new com.jaymospowers.power.web.WebDarkSense.Toggle());
 	}
 
 	@Override

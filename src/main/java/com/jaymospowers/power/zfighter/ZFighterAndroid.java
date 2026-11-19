@@ -400,10 +400,19 @@ public final class ZFighterAndroid {
 		ZFighterNpcs.Option gadgets = com.jaymospowers.compat.KingdomsCompat.tinkerer(player)
 			? ZFighterNpcs.Option.of("talk.jaymospowers.tinkerer.gadgets", true, () -> com.jaymospowers.compat.KingdomsCompat.mimicShop(player, scientist))
 			: null;
+		// (pb-spider) an aside about the filings on his bench: heard by anyone who talks to him
+		ZFighterNpcs.Option filings = ZFighterNpcs.Option.of("talk.jaymospowers.tinkerer.filings", true, () -> ZFighterNpcs.ask(player, scientist,
+			Component.translatable("talk.jaymospowers.tinkerer.filings.1"),
+			java.util.List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back))));
 		if (!ZFighterBranchForms.fighter(player) || OPERATIONS.containsKey(player.getUUID())) {
+			java.util.List<ZFighterNpcs.Option> bare = new java.util.ArrayList<>();
+			if (gadgets != null) {
+				bare.add(gadgets);
+			}
+			bare.add(filings);
 			ZFighterNpcs.ask(player, scientist, Component.translatable(OPERATIONS.containsKey(player.getUUID())
 				? "message.jaymospowers.zfighter_scientist_operating" : gadgets != null ? "talk.jaymospowers.tinkerer.gadgets.greet"
-				: "message.jaymospowers.zfighter_scientist_no_spark"), gadgets != null ? java.util.List.of(gadgets) : java.util.List.of());
+				: "message.jaymospowers.zfighter_scientist_no_spark"), bare);
 			return;
 		}
 		int stage = stage(player);
@@ -427,6 +436,7 @@ public final class ZFighterAndroid {
 		options.add(ZFighterNpcs.Option.of("talk.jaymospowers.tinkerer.pod", true, () -> ZFighterNpcs.ask(player, scientist,
 			Component.translatable("talk.jaymospowers.tinkerer.pod." + (1 + player.getRandom().nextInt(3))),
 			java.util.List.of(ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)))));
+		options.add(filings);
 		// (Andy, 2026-11-11: the bug that turned Los Perrito's androids was his, and he will never tell you)
 		options.add(ZFighterNpcs.Option.of("talk.jaymospowers.tinkerer.turned", true, () -> ZFighterNpcs.ask(player, scientist,
 			Component.translatable("talk.jaymospowers.tinkerer.turned." + (1 + player.getRandom().nextInt(3))),

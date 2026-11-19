@@ -65,6 +65,16 @@ public final class Costume {
 	/** (0.19.49) On a corpse: its costume's head piece was off when they died (the face shows). */
 	public static final AttachmentType<Boolean> CORPSE_UNMASKED = AttachmentRegistry.create(JaymosPowers.id("corpse_costume_unmasked"),
 		builder -> builder.persistent(Codec.BOOL).syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+	/**
+	 * On a player: the pattern pieces they have learned from Costume Patterns ({@link CostumePatterns}), as piece keys
+	 * ({@code mask:domino}). Synced to them alone (the designer reads it), kept through death.
+	 */
+	public static final AttachmentType<java.util.List<String>> LEARNED = AttachmentRegistry.create(JaymosPowers.id("costume_learned"),
+		builder -> builder.persistent(Codec.STRING.listOf()).copyOnDeath().syncWith(ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()),
+			AttachmentSyncPredicate.targetOnly()));
+	/** On an armour stand: the costume it is dressed in (synced to everyone, so the client draws it; {@link CostumeStand}). */
+	public static final AttachmentType<CostumeDesign> STAND = AttachmentRegistry.create(JaymosPowers.id("stand_costume"),
+		builder -> builder.persistent(CostumeDesign.CODEC).syncWith(CostumeDesign.STREAM_CODEC, AttachmentSyncPredicate.all()));
 	/** (0.12.3) The mask key can't flip the mask again sooner than this (ticks). */
 	static final int MASK_COOLDOWN = 10;
 	/** The sound of the mask coming off and going on: pitches. */
@@ -96,6 +106,9 @@ public final class Costume {
 		item("wardrobe", p -> new BlockItem(WARDROBE, p.useBlockDescriptionPrefix()));
 		COSTUME = item("costume", p -> new CostumeItem(p.stacksTo(1).component(DESIGN, CostumeDesign.DEFAULT)));
 		CostumeNet.init();
+		CostumePatterns.init();
+		CostumePlating.init();
+		CostumeStand.init();
 		CostumeTailoring.init();
 		SecretIdentity.init();
 		CorpseCostume.init();

@@ -51,6 +51,7 @@ public final class WindPowerClient implements PowerClient {
 	public static void init() {
 		PowerClients.register(WindPower.ID, INSTANCE);
 		WindCycloneClient.init();
+		WindStormClient.init();
 		// 0.11.104: white, glowing eyes in the Thunderhead
 		WindStormEyes.register();
 		ClientPlayNetworking.registerGlobalReceiver(WindNet.Status.TYPE, (payload, ctx) -> INSTANCE.onStatus(ctx.client(), payload));
