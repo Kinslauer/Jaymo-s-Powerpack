@@ -30,6 +30,8 @@
 	"item.jaymoskingdoms.harness.over": "Worn over armour",
 	"item.jaymoskingdoms.harness.hood": "Hood: goes over a helm",
 	"item.jaymoskingdoms.harness.crest": "Crest: stands on a helm",
+	"item.jaymoskingdoms.harness.neck": "Neck",
+	"item.jaymoskingdoms.harness.waist": "Waist and hips",
 	"harness.jaymoskingdoms.slot.padding": "Padding",
 	"harness.jaymoskingdoms.slot.mail": "Mail",
 	"harness.jaymoskingdoms.slot.shoulders": "Shoulders",
@@ -40,5 +42,7 @@
 	"harness.jaymoskingdoms.slot.over": "Over armour",
 	"harness.jaymoskingdoms.slot.hood": "Hood",
 	"harness.jaymoskingdoms.slot.crest": "Crest",
+	"harness.jaymoskingdoms.slot.neck": "Neck",
+	"harness.jaymoskingdoms.slot.waist": "Waist",
 	"message.jaymoskingdoms.gilded_refused": "Gilded plate is for royals and lords."
 }

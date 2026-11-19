@@ -72,6 +72,8 @@ public final class GuardKit {
 	/** Harness helms by face; a plain cuirass, a creed's or a kingdom's, a gilt-banded one; the land's chest pieces; sabatons. */
 	static final int OPEN_HELM = 4, VISORED_HELM = 7, FIXED_HELM = 6, CUIRASS = 8, CREED_CUIRASS = 10, GILT_CUIRASS = 14, LAND_CHEST = 5,
 		CLOTH_CHEST = 3, SABATONS = 4;
+	/** The coat of plates: a poorer realm's guards' chest piece, cheaper than a plate cuirass. */
+	static final int COAT_OF_PLATES = 6;
 	/** The harness's parts: plate (ingots, emeralds), mail and brigandine, cloth (wool, emeralds); the winged crest. */
 	static final int PLATE_INGOTS = 3, PLATE_PART = 5, MAIL_PART = 3, CLOTH_WOOL = 3, CLOTH_PART = 3, CREST = HeraldryWear.CREST_PRICE;
 	/** Weapons (sword, spear, axe): ingots, emeralds for iron and for copper; a realm's war arm or a polearm; a shield. */
@@ -648,6 +650,10 @@ public final class GuardKit {
 				if (c.is(VET | LEAD) && c.realm() && c.ironRich()) {
 					add(out, HeraldryArmour.stack("plate_cuirass", c.finish()), IRON, CUIRASS, CUIRASS);
 				}
+				// a poorer realm sews its plates inside a coat in its colour
+				if (c.is(SOL | KN | VET | LEAD) && c.realm() && !c.ironRich()) {
+					add(out, dyed(HeraldryArmour.stack("coat_of_plates"), c.field()), IRON, COAT_OF_PLATES, COAT_OF_PLATES);
+				}
 				if (c.is(SOL | KN | VET) && c.land() == Climate.CHERRY) {
 					add(out, HeraldryArmour.stack("laced_lamellar", c.finish()), IRON, INGOTS[1], LAND_CHEST + 2);
 				}
@@ -829,7 +835,7 @@ public final class GuardKit {
 					add(out, dyed(HeraldryArmour.stack("cloak"), c.field()), WOOL, CLOTH_WOOL + 1, HeraldryWear.CLOAK_PRICE);
 				}
 				if (c.is(MIL | SOL | KN | VET | LEAD | ARCH)) {
-					add(out, dyed(HeraldryArmour.stack("tabard"), c.field()), WOOL, CLOTH_WOOL, CLOTH_PART);
+					add(out, HeraldryWear.withArms(dyed(HeraldryArmour.stack("tabard"), c.field()), c.level().getServer(), c.f()), WOOL, CLOTH_WOOL, CLOTH_PART);
 				}
 			}
 			case HOOD -> {
@@ -850,7 +856,7 @@ public final class GuardKit {
 	private static @Nullable ItemStack cloth(Ctx c, Harness.Slot slot) {
 		return switch (slot) {
 			case MAIL -> HeraldryArmour.stack("quilted_coat");
-			case OVER -> c.is(GUN) ? null : dyed(HeraldryArmour.stack("tabard"), c.field());
+			case OVER -> c.is(GUN) ? null : HeraldryWear.withArms(dyed(HeraldryArmour.stack("tabard"), c.field()), c.level().getServer(), c.f());
 			default -> null;
 		};
 	}

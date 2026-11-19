@@ -14,13 +14,14 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * The harness screen's slots ({@link Harness}): the ten places of the harness round the wearer's figure, the helmet,
+ * The harness screen's slots ({@link Harness}): the twelve places of the harness round the wearer's figure, the helmet,
  * chestplate, leggings and boots beside them (so the whole harness is put on in one place), and the inventory below.
  * Each place takes only its own pieces, and only ones that fit how the wearer is dressed and that they may wear.
  */
 public class HarnessMenu extends AbstractContainerMenu {
 	/** Where each place of the harness is drawn ({@link Harness.Slot} order), then the four armour slots, then the inventory. */
-	public static final int[][] AT = {{124, 54}, {124, 36}, {106, 36}, {106, 54}, {106, 72}, {26, 54}, {26, 72}, {26, 36}, {26, 18}, {106, 18}};
+	public static final int[][] AT = {{124, 54}, {124, 36}, {106, 36}, {106, 54}, {106, 72}, {26, 54}, {26, 72}, {26, 36}, {26, 18}, {106, 18},
+		{124, 18}, {124, 72}};
 	public static final int ARMOUR_X = 8, ARMOUR_Y = 18, STEP = 18, INVENTORY_Y = 122;
 	private static final int OWN = Harness.SLOTS + 4;
 	private static final EquipmentSlot[] ARMOUR = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
