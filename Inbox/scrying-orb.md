@@ -1,17 +1,18 @@
 ---
-status: claimed
+status: writing
 for: any
 from: coordinator
 asked: 2026-11-18
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9B9itiE9SZUhU3wrwbx6xdLi
 claimed_by: hermes-a
-pr: 
+pr: 1787
 suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/Scrying.java
   - kingdoms/src/main/java/com/jaymoskingdoms/ScryingOrb.java
   - kingdoms/src/main/java/com/jaymoskingdoms/SightedShard.java
   - kingdoms/src/client/java/com/jaymoskingdoms/client/ScryingOrbRenderer.java
   - kingdoms/src/main/resources/assets/jaymoskingdoms/lang/parts/scrying-orb.json
+writer: hermes-writer
 ---
 # Scrying orb (people and places)
 

@@ -3,7 +3,7 @@ status: stalled
 task: scrying-orb
 branch: claude/scrying-orb
 with:
-pr:
+pr: 1787
 mods: kingdoms
 versions:
 started: 2026-11-18
