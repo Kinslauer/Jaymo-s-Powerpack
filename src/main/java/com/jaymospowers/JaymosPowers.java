@@ -297,7 +297,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.web.WebWallRun", "power.web.WebParkour", "power.web.WebStrength", "power.web.WebShooters", "power.web.WebSymbioteStrains", "power.web.WebSymbioteCollect", "power.web.WebSymbioteBody",
 			"power.web.WebSymbioteMind",
 			"power.web.WebGrudges", "power.web.WebMeeting", "power.web.Webbed",
-			"power.wind.WindModes", "power.wind.WindPower", "power.wind.SorasLineage", "power.wind.WindStorm", "power.wind.WindTempest",
+			"power.wind.WindModes", "power.wind.WindPower", "power.wind.StormRecall", "power.wind.StormRoad", "power.wind.SorasStone", "power.wind.SorasLineage", "power.wind.WindStorm", "power.wind.WindTempest",
 			"power.wind.WindCyclone", "power.wind.WindJet", "power.wind.aether.WindAether",
 			"power.resonance.ResonancePower", "power.resonance.ResonanceHush", "power.resonance.ResonanceSight",
 			"power.darktide.DarktideState", "power.darktide.DarktideSouls",

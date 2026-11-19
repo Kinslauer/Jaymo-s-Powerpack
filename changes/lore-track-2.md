@@ -1,0 +1,7 @@
+# Lore draft, track 2 (storm hammer, storm road, the worthy dagger) - (new), for Andy to approve
+
+(new) **The storm hammer.** The storm does not give a hammer its throw; it answers one. Those whose wind has gone sour and loud (the Stormbound) learned that a hammer thrown into a storm is a thing the sky will follow: it can call a bolt down where it lands, carry its thrower across the field, or be spun overhead until the wind takes hold of the one who spins it. A weapon thrown so is known to the storm afterwards, and can be called back from any distance the storm can hear. This is the storm's own answer to "Only those whose gift can fetch it (the Gravity-touched, a Z Fighter's ki, a mage's spirit hand) have it fly home": the Stormbound's weapon flies home too, by the storm.
+
+(new) **The storm road.** A Stormbound who has marked a place under open sky can later call a column of storm light that carries them back there, in the same world. The old Stormbound called it the road home; it does not run under a roof or under the ground, since the storm has to be able to see both ends. Nobody has seen it carry anyone between worlds.
+
+(new) **The worthy stone.** Some fallen stars leave a dark stone in the crater with a blade driven in to the hilt: the one a smith failed to make work and a child found, set there instead by whatever sends the stars. It lets go only of someone who has put down many of the things that prey on villages and has stood for a village that was in danger. The unworthy can strain at it all night. It does not say why.
