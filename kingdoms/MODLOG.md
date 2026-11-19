@@ -15486,3 +15486,8 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - **Craters heal in the wild**: a blast away from any settlement marks the soft ground it took (dirt, grass, podzol, mud; never stone or ore). From `Weathering`'s step the land puts back dirt (from the bottom up, onto firm ground), then grass (only beside grass, under open sky, in a land with rain), then sprouts (a flower already growing within 4 blocks, else short grass), a day for each stage, quicker in rain. Bone meal on a healing cell carries it a stage on at once; a fresh blast on the spot starts it over; left alone it heals by itself.
 - Classes: `BlastMend`, `Craters`, `Upkeep` (three small hooks), `Weathering` (one line), `ServerExplosionMixin`.
 - Built; not played.
+
+## 0.10.86 (2026-11-19): loading screen hints wipe in and out (#1843)
+
+- **Story hold screen**: each hint now wipes in from the left (a thin gold edge leading it) when it's dealt and wipes off to the right before the next one, instead of swapping at once. Each wipe takes 0.45 s (`WIPE_MS` in `StoryHoldScreen`).
+- Built; not played.
