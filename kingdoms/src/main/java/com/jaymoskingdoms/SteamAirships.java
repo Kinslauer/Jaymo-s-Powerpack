@@ -829,7 +829,7 @@ public final class SteamAirships implements Ship.Skyfaring {
 			Vec3 at = ship.toWorld(c[0], 0.0, c[1]);
 			int x = Mth.floor(at.x), z = Mth.floor(at.z);
 			if (Loaded.made(level, x, z)) {
-				top = Math.max(top, level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z));
+				top = Math.max(top, Stacked.top(level, Heightmap.Types.MOTION_BLOCKING, x, z, ship.getBlockY()));
 			}
 		}
 		return top + 1 - h.minY;
@@ -844,7 +844,7 @@ public final class SteamAirships implements Ship.Skyfaring {
 			int d = i < 0 ? 0 : LOOK_AHEAD[i];
 			int x = Mth.floor(ship.getX() + sx * d), z = Mth.floor(ship.getZ() + sz * d);
 			if (Loaded.made(level, x, z)) {
-				top = Math.max(top, level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z));
+				top = Math.max(top, Stacked.top(level, Heightmap.Types.MOTION_BLOCKING, x, z, ship.getBlockY()));
 			}
 		}
 		return top;

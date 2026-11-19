@@ -14,17 +14,16 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -36,10 +35,15 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * Like a Blossom village it rises by itself, out of sight of the player passing ({@link #tryRise}), and from then on it
  * is an ordinary {@link FactionType#VILLAGE} (an elder, a shed, a builder crew, its own growth and coin). It rises only
- * near a player who has opened {@link WorldTiers.Tier#BORDERLANDS} (the iron age; the way {@link IllagerSites} move in
- * only once a tier is open), only on plain open ground away from the sea and from Mohknee, and rarely: every steam
- * town is at least {@link #STEAM_SPACING} from the next. Every steam town ever raised is kept on the Overworld
- * ({@link #TOWNS}), with its airfield and its airship's comings and goings.
+ * over a player who has opened {@link WorldTiers.Tier#BORDERLANDS} (the iron age; the way {@link IllagerSites} move in
+ * only once a tier is open), and rarely: every steam town is at least {@link #STEAM_SPACING} from the next. Every steam
+ * town ever raised is kept on the Overworld ({@link #TOWNS}), with its airfield and its airship's comings and goings.
+ * <p>
+ * (Andy, 2026-11-19: "i completely intended for these to be steampunk towns in the cloud sea, please remove them from the
+ * overworld") They rise only in the <b>Cloud Sea</b> ({@link Stacked#CLOUD_SEA}), on a stone deck laid over the overcast
+ * ({@link #deck}) with cloud banked up under it and an iron rail round its edge, never under an Aether island, and their
+ * airships fly between them over the clouds. A world without the Cloud Sea (not stacked) raises none. Steam towns
+ * already standing on the ground in an older world are left as they are.
  */
 public final class SteamTowns {
 	// ---- tuning ----
@@ -53,8 +57,14 @@ public final class SteamTowns {
 	static final double HIDE_RANGE = 64.0;
 	/** No settlement's seat this near (blocks), no bell this near, and no other steam town this near. */
 	static final int SPACING = 400, BELL_CLEARANCE = 160, STEAM_SPACING = 1400;
-	/** The town's ground: its radius, how high it's cleared, the most the ground may rise and fall across it; tries for a site. */
-	static final int RADIUS = 40, CLEAR_HEIGHT = 24, MAX_SPREAD = 10, SITE_TRIES = 6;
+	/** The town's ground: its radius, how high it's cleared; tries for a site. */
+	static final int RADIUS = 40, CLEAR_HEIGHT = 24, SITE_TRIES = 6;
+	/** Its deck lies this high over the overcast's middle (in the Cloud Sea's own heights: just over the overcast's top). */
+	static final int DECK_OVER = 20;
+	/** The middle of the overcast in the Cloud Sea's own heights (a copy of Jaymo's Powers' {@code CloudSea.OVERCAST}). */
+	static final int OVERCAST = 184;
+	/** How deep cloud is banked up under the deck at most, and how far round the site no Aether island may hang. */
+	static final int BANK_DEPTH = 24, OPEN_SKY = 72;
 	/** Who moves in: villagers in each house and each workshop, and its iron golems. */
 	static final int PER_HOUSE = 2, PER_SHOP = 1, GOLEMS = 1;
 	/** How far round its bell a steam town's people live (blocks): its stalls are kept within this ({@link SteamTrades}). */
@@ -148,7 +158,7 @@ public final class SteamTowns {
 
 	private static void tick(MinecraftServer server) {
 		ServerLevel level = Factions.level(server);
-		if (level.getGameTime() % RISE_TICKS == 0 && level.getRandom().nextFloat() < RISE_CHANCE) {
+		if (Stacked.joined(server, Stacked.CLOUD_SEA) && level.getGameTime() % RISE_TICKS == 0 && level.getRandom().nextFloat() < RISE_CHANCE) {
 			tryRise(level);
 		}
 	}
@@ -213,12 +223,9 @@ public final class SteamTowns {
 			ServerPlayer player = players.get(random.nextInt(players.size()));
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			int r = SITE_MIN + random.nextInt(SITE_SPREAD);
-			BlockPos at = player.blockPosition().offset((int)Math.round(Math.cos(angle) * r), 0, (int)Math.round(Math.sin(angle) * r));
+			int floor = deckHeight(level.getServer());
+			BlockPos at = new BlockPos(player.getBlockX() + (int)Math.round(Math.cos(angle) * r), floor, player.getBlockZ() + (int)Math.round(Math.sin(angle) * r));
 			if (!open(level, at)) {
-				continue;
-			}
-			int floor = IllagerBuildings.floor(level, at, MAX_SPREAD, RADIUS);
-			if (floor == Integer.MIN_VALUE) {
 				continue;
 			}
 			// its gate toward the way the player came
@@ -228,18 +235,34 @@ public final class SteamTowns {
 		}
 	}
 
-	/** {@code at} is free for a steam town: all its ground loaded, nobody's land, no settlement, bell or steam town near, out of sight. */
+	/** The height of a steam town's deck in the level: over the Cloud Sea's overcast. */
+	static int deckHeight(MinecraftServer server) {
+		return Stacked.shift(server, Stacked.CLOUD_SEA) + OVERCAST + DECK_OVER;
+	}
+
+	/**
+	 * {@code at} (on the deck's height) is free for a steam town: in the Cloud Sea, all its land loaded, no Aether island
+	 * hanging over it or near it, nobody's land, no settlement, bell or steam town near, out of sight.
+	 */
 	private static boolean open(ServerLevel level, BlockPos at) {
 		MinecraftServer server = level.getServer();
-		if (!level.isPositionEntityTicking(at) || com.jaymoskingdoms.seas.Mohknee.on(level, at)
-			|| !Loaded.made(level, at.getX() - RADIUS, at.getZ() - RADIUS, at.getX() + RADIUS, at.getZ() + RADIUS)) {
+		if (Stacked.band(server, at.getY()) != Stacked.CLOUD || at.getY() + CLEAR_HEIGHT > Stacked.maxY(server, Stacked.CLOUD_SEA)
+			|| !level.isPositionEntityTicking(at)
+			|| !Loaded.made(level, at.getX() - OPEN_SKY, at.getZ() - OPEN_SKY, at.getX() + OPEN_SKY, at.getZ() + OPEN_SKY)) {
 			return false;
+		}
+		// nothing of the Aether over its land: the level's heightmap reaches no higher than the Cloud Sea's top
+		int sky = Stacked.maxY(server, Stacked.CLOUD_SEA) + 1;
+		for (int dx = -OPEN_SKY; dx <= OPEN_SKY; dx += 8) {
+			for (int dz = -OPEN_SKY; dz <= OPEN_SKY; dz += 8) {
+				if (level.getHeight(Heightmap.Types.MOTION_BLOCKING, at.getX() + dx, at.getZ() + dz) > sky) {
+					return false;
+				}
+			}
 		}
 		for (BlockPos corner : new BlockPos[] {at, at.offset(-RADIUS, 0, -RADIUS), at.offset(RADIUS, 0, -RADIUS), at.offset(-RADIUS, 0, RADIUS),
 			at.offset(RADIUS, 0, RADIUS)}) {
-			var biome = level.getBiome(corner);
-			if (!com.jaymoskingdoms.Loaded.made(level, corner) || biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_RIVER) || biome.is(BiomeTags.IS_BEACH)
-				|| biome.is(Biomes.CHERRY_GROVE) || biome.is(Biomes.MUSHROOM_FIELDS) || Factions.at(server, level, corner) != null) {
+			if (Factions.at(server, level, corner) != null) {
 				return false;
 			}
 		}
@@ -254,14 +277,15 @@ public final class SteamTowns {
 				return false;
 			}
 		}
-		if (Raids.playerNear(level, at, HIDE_RANGE) || com.jaymoskingdoms.seas.Offshore.island(level, at.getX(), at.getZ()) || built(level, at)) {
+		if (Raids.playerNear(level, at, HIDE_RANGE) || built(level, at)) {
 			return false;
 		}
 		return level.getPoiManager().findClosest(holder -> holder.is(PoiTypes.MEETING), at, BELL_CLEARANCE, PoiManager.Occupancy.ANY).isEmpty();
 	}
 
-	/** Some player has set a block anywhere on the town's ground, at any height ({@link Placed}): somebody's, not ours to level. */
+	/** Some player has set a block anywhere on the town's ground in the Cloud Sea ({@link Placed}): somebody's, not ours to level. */
 	private static boolean built(ServerLevel level, BlockPos at) {
+		int low = Stacked.minY(level.getServer(), Stacked.CLOUD_SEA);
 		int x0 = at.getX() - RADIUS, x1 = at.getX() + RADIUS, z0 = at.getZ() - RADIUS, z1 = at.getZ() + RADIUS;
 		for (int cx = x0 >> 4; cx <= x1 >> 4; cx++) {
 			for (int cz = z0 >> 4; cz <= z1 >> 4; cz++) {
@@ -275,7 +299,7 @@ public final class SteamTowns {
 				}
 				for (String key : marks.keySet()) {
 					BlockPos p = BlockPos.of(Long.parseLong(key));
-					if (p.getX() >= x0 && p.getX() <= x1 && p.getZ() >= z0 && p.getZ() <= z1) {
+					if (p.getX() >= x0 && p.getX() <= x1 && p.getZ() >= z0 && p.getZ() <= z1 && p.getY() >= low) {
 						return true;
 					}
 				}
@@ -289,13 +313,13 @@ public final class SteamTowns {
 		MinecraftServer server = level.getServer();
 		RandomSource random = level.getRandom();
 		BlockPos bell = new BlockPos(center.getX(), floor, center.getZ());
-		CampBuildings.level(level, bell, RADIUS, CLEAR_HEIGHT);
+		deck(level, bell);
 		CampBuildings.Placer frame = new CampBuildings.Placer(bell, gate, 0);
-		// the streets in cinders and cobble, the square in brick, the bell on it
+		// the streets in andesite and cobble (no gravel: it would fall through the cloud), the square in brick, the bell on it
 		for (int[] street : STREETS) {
 			for (int x = street[0]; x <= street[2]; x++) {
 				for (int z = street[1]; z <= street[3]; z++) {
-					BlockState road = Math.floorMod(x * 7 + z * 13, 5) == 0 ? Blocks.COBBLESTONE.defaultBlockState() : Blocks.GRAVEL.defaultBlockState();
+					BlockState road = Math.floorMod(x * 7 + z * 13, 5) == 0 ? Blocks.COBBLESTONE.defaultBlockState() : Blocks.POLISHED_ANDESITE.defaultBlockState();
 					level.setBlock(frame.at(x, -1, z), road, Block.UPDATE_ALL);
 				}
 			}
@@ -354,6 +378,46 @@ public final class SteamTowns {
 		JaymosKingdoms.LOGGER.info("A steam town, {}, rose at {}", town.name(), bell);
 		Faction out = Factions.get(server, id);
 		return out != null ? out : town;
+	}
+
+	/**
+	 * The town's deck round {@code bell} (on its floor): everything over it cleared, a floor of stone bricks (a few cracked,
+	 * a few mossy where the damp gets in), cloud banked up under it down onto the overcast so it sits in the clouds rather than
+	 * over them, and an iron rail round its edge so nobody walks off it.
+	 */
+	private static void deck(ServerLevel level, BlockPos bell) {
+		int floor = bell.getY();
+		Block cloudBlock = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(
+			net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", "cloudbank"));
+		BlockState cloud = cloudBlock == Blocks.AIR ? wool(DyeColor.WHITE) : cloudBlock.defaultBlockState();
+		int inner = (RADIUS - 1) * (RADIUS - 1), outer = RADIUS * RADIUS;
+		for (int dx = -RADIUS; dx <= RADIUS; dx++) {
+			for (int dz = -RADIUS; dz <= RADIUS; dz++) {
+				int d = dx * dx + dz * dz;
+				if (d > outer) {
+					continue;
+				}
+				BlockPos column = bell.offset(dx, 0, dz);
+				for (int y = floor; y <= floor + CLEAR_HEIGHT; y++) {
+					if (!level.getBlockState(column.atY(y)).isAir()) {
+						level.setBlock(column.atY(y), Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+					}
+				}
+				int mix = Math.floorMod(dx * 31 + dz * 17, 23);
+				BlockState stone = mix == 0 ? Blocks.CRACKED_STONE_BRICKS.defaultBlockState()
+					: mix == 1 ? Blocks.MOSSY_STONE_BRICKS.defaultBlockState() : Blocks.STONE_BRICKS.defaultBlockState();
+				level.setBlock(column.atY(floor - 1), stone, Block.UPDATE_CLIENTS);
+				for (int y = floor - 2; y >= floor - 1 - BANK_DEPTH; y--) {
+					if (!level.getBlockState(column.atY(y)).isAir()) {
+						break;
+					}
+					level.setBlock(column.atY(y), cloud, Block.UPDATE_CLIENTS);
+				}
+				if (d > inner) {
+					level.setBlock(column.atY(floor), Blocks.IRON_BARS.defaultBlockState(), Block.UPDATE_ALL);
+				}
+			}
+		}
 	}
 
 	/** {@code gate} turned clockwise {@code turns} times. */
