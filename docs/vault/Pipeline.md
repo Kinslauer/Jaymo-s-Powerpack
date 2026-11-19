@@ -85,7 +85,7 @@ The modeller and the writer are specialists: they skip `for: hermes` and `for: a
 | Builder A | `hermes-a` | every 15 min | The prompt above with `hermes` swapped for `hermes-a`. |
 | Builder B | `hermes-b` | every 15 min, 7 min after A | Same, as `hermes-b`. Two builders take two tracks at once (ParCool A and B). |
 | Fixer | `hermes-fixer --fixes` | every 15 min | Takes the oldest task the reviewer sent back, from whichever bot, so a busy or rate-limited builder doesn't hold it up. |
-| Modeller (Prometheus) | `hermes-modeller` | every 15 min | GeckoLib/Blockbench models, textures and animations. Takes only tasks with `for: hermes-modeller` or `for: prometheus`. |
+| Modeller (Prometheus) | `hermes-modeller` | every 15 min | GeckoLib/Blockbench models, textures and animations, made with the art agent (`tools/art-agent`, below). Takes only tasks with `for: hermes-modeller` or `for: prometheus`. |
 | Writer (Quill) | `hermes-writer` | every 15 min | Lore, dialogue, quest and item text, hints, lang entries, patch notes. Takes only tasks with `for: hermes-writer` or `for: quill`. |
 
 Keep it to **two builders**, plus the fixer if you want one: the vault allows three agents editing at once (the
@@ -114,6 +114,21 @@ a third builder only once two have run for a day without hitting them.
 > `python tools/vault_sync.py --set <task> status=in-review text_pass=done` (`text_pass=none` if there was nothing to
 > read). If it said "No task waiting", run `python tools/vault_sync.py --claim hermes-writer` for a writing task of
 > your own, and do that one as a normal task.
+
+**Prometheus's scheduled prompt** (every 15 minutes). Prometheus does its art through the art agent in
+`tools/art-agent` (a Google agents CLI agent on Gemini: it paints the textures, builds and animates the Blockbench
+model, previews it and fixes it, and exports the GeckoLib files). One-time setup on the PC is in
+`tools/art-agent/README.md` ("On Andy's PC").
+
+> Run `python tools/vault_sync.py --claim hermes-modeller`. If it says "No task waiting", stop. Otherwise make your
+> worktree and branch as usual, then `cd tools/art-agent` and give the art agent the brief:
+> `agents-cli run "<what to make, its size in blocks, which mod (jaymospowers, jaymoskingdoms or jaymoskitchen), the
+> model and animation names>"` (add `--file <picture>` for each reference picture in the task). Look at what it made in
+> `out/previews/` and send it back with `agents-cli run` for fixes until it looks right. If Gemini is rate-limited or
+> down, call the same tools yourself: `python -m app.cli tools` lists them, `python -m app.cli <tool> <args.json>`
+> runs one. Then `python -m app.cli install <name> <mod>` copies the files into the mod, and you wire up anything else
+> the task asks for (entity, renderer, item), following `AGENTS.md` and `CLAUDE.md`. Build the mod, open the PR,
+> attach the preview PNG to it, and `python tools/vault_sync.py --set <task> status=in-review`.
 
 **The Fixer's scheduled prompt:**
 

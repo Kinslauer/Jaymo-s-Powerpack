@@ -4799,4 +4799,30 @@ public final class PowersCompat {
 			return false;
 		}
 	}
+
+	/** Powers' {@code PatrolLaw.handedOver(ServerPlayer, LivingEntity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle patrolHandedOver;
+	private static boolean lookedForPatrol;
+
+	/** {@code player} handed {@code crook} over to a ruler: with Jaymo's Powers, a Galactic Patrol officer's arrest. */
+	public static void patrolHandedOver(net.minecraft.server.level.ServerPlayer player, net.minecraft.world.entity.LivingEntity crook) {
+		if (!lookedForPatrol) {
+			lookedForPatrol = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					patrolHandedOver = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.PatrolLaw"), "handedOver",
+						java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class, net.minecraft.world.entity.LivingEntity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Patrol arrests", e);
+				}
+			}
+		}
+		if (patrolHandedOver != null) {
+			try {
+				patrolHandedOver.invoke(player, crook);
+			} catch (Throwable e) {
+				JaymosKingdoms.LOGGER.warn("Jaymo's Powers' Patrol arrest failed", e);
+			}
+		}
+	}
 }

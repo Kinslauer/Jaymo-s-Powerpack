@@ -1,0 +1,14 @@
+{
+  "message.jaymospowers.patrol.warrant_issued": "The Galactic Patrol has written a warrant for you: an officer wanted for a crime.",
+  "message.jaymospowers.patrol.warrant_grows": "Another crime on your Patrol warrant (%1$s now).",
+  "message.jaymospowers.patrol.warrant_coming": "A Patrol pod is coming down for you.",
+  "message.jaymospowers.patrol.demoted": "You've been stripped to %1$s.",
+  "message.jaymospowers.patrol.came_quietly": "You came quietly. Your Patrol warrant is served.",
+  "message.jaymospowers.patrol.brought_in": "Beaten and brought in. Your Patrol warrant is served.",
+  "message.jaymospowers.patrol.arrest_handed": "Arrest made: %1$s handed over. Arrests: %2$s.",
+  "message.jaymospowers.patrol.partner_fell": "Your partner %1$s has fallen. Ask a patrolman for another.",
+  "talk.jaymospowers.patrol.opt.quietly": "I'll come quietly.",
+  "talk.jaymospowers.patrol.quietly": "\"Smart. We'll call it served. Keep your nose clean from here.\"",
+  "talk.jaymospowers.patrol.opt.partner": "I could use a partner.",
+  "talk.jaymospowers.patrol.partnered": "\"You've earned one. Here's your partner. Watch each other's backs.\""
+}

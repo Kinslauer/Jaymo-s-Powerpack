@@ -343,5 +343,12 @@
  "rig.jaymospowers.view.speed": "SPD %s",
  "rig.jaymospowers.view.climb": "VS %s",
  "rig.jaymospowers.view.pullup": "Pull up: %s",
- "gui.jaymospowers.rig_menu.sentry": "Sentry"
+ "gui.jaymospowers.rig_menu.sentry": "Sentry",
+ "gui.jaymospowers.rig_menu.palm_charge": "Palm Charge",
+ "gui.jaymospowers.rig_menu.gatling": "Gatling Arm",
+ "gui.jaymospowers.rig_menu.railgun": "Railgun",
+ "gui.jaymospowers.rig_menu.sonic": "Sonic Cannon",
+ "gui.jaymospowers.rig_menu.twin": "Twin Beam",
+ "gui.jaymospowers.rig_menu.siege": "Siege Mode",
+ "message.jaymospowers.rig.guns.siege_frame": "Siege mode requires the Siege frame"
 }
