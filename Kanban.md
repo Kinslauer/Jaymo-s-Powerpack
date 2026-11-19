@@ -47,13 +47,13 @@ kanban-plugin: board
 
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · ☀️ Apollo · #1787 · changes · fixing review notes
 - [ ] [[Inbox/smoothmount-6-heave-downed|smoothmount-6-heave-downed]] · 🍇 Bacchus · claimed
-- [ ] [[Inbox/heritage-paths|heritage-paths]] · 🪶 Quill · #1853 · writing
 
 
 ## In review
 
 - [ ] [[Inbox/plan-ghosts-litematica-tools|plan-ghosts-litematica-tools]] · plan-ghosts-litematica-tools · #1851 · in-review
 - [ ] [[Inbox/smoothmount-1-climb-on-off|smoothmount-1-climb-on-off]] · ☀️ Apollo · #1869 · in-review
+- [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · in-review
 
 
 ## Needs Andy
