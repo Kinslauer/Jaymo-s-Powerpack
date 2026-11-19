@@ -6590,3 +6590,8 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - **Silence at once.** Every sound is cut the moment you die for good (not eased out over half a second), the downed heartbeat and the other black-screen cues too; only the death screen's button clicks are heard (`BlackoutHush`).
 - **No world after Respawn on the way down.** One sent below by their weight is knocked out again on the tick they're back on their feet, not up to a second later (`Karma`), so the camp that killed them doesn't show in between.
 - Built; not played.
+
+## 0.25.81 (2026-11-19): JEI shows how to forge the metal harness pieces (#1882)
+
+- New JEI page **Smithing Anvil: Harness** (`HarnessForgingJei`): every plate and mail harness piece the Smithing Anvil forges (`HeraldryForging`), with the ingots to heat, the rabbit hides a fur lining takes or the gold for gilding, and the blows. Before, these pieces showed no recipe in JEI at all, so they looked unmakeable.
+- Built; not played.
