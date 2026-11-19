@@ -902,9 +902,29 @@ final class LifeStoryScreen extends Screen {
 			story.add(line);
 		}
 		List<Component> gives = gives(s.question, a, false);
-		sections.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.strengths"), Ui.GOOD, gives));
-		if (!open(a)) {
-			sections.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.weaknesses"), Ui.BAD, List.of(reason(a))));
+		List<PickerLayout.Pill> pills = new ArrayList<>();
+		if (s.question == Question.BORN && a.heritage() != null) {
+			// Andy: "this place should display all heritage strengths and weaknesses": the heritage's whole kit, from its card as the
+			// heritage screen sorts it (so what's added to a heritage shows here too), for the look the figure wears
+			Heritage.Kind kind = a.heritage();
+			int look = draft.look >= 0 && kind == heritage() ? draft.look : rolledLook(kind, picked(Question.CHILDHOOD), true);
+			pills.addAll(HeritageScreen.statPills(kind));
+			for (PickerLayout.Section kit : HeritageScreen.kitSections(kind, HeritageVariants.at(kind, look))) {
+				List<Component> lines = new ArrayList<>();
+				if (kit.color() == Ui.GOOD) {
+					lines.addAll(gives);
+				}
+				lines.addAll(kit.lines());
+				if (kit.color() == Ui.BAD && !open(a)) {
+					lines.add(reason(a));
+				}
+				sections.add(new PickerLayout.Section(kit.label(), kit.color(), lines));
+			}
+		} else {
+			sections.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.strengths"), Ui.GOOD, gives));
+			if (!open(a)) {
+				sections.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.weaknesses"), Ui.BAD, List.of(reason(a))));
+			}
 		}
 		// the paths: a trade's class and what it picks (a birthplace's looks aren't listed: the figure wears one drawn at random)
 		if (a.cls() != null && !a.cls().options.isEmpty()) {
@@ -920,7 +940,7 @@ final class LifeStoryScreen extends Screen {
 			}
 			note = Component.translatable("gui.jaymoskingdoms.picker.paths_options", Component.translatable("class.jaymoskingdoms." + cls.key()));
 		}
-		return new PickerLayout.Info(icon, g == null ? null : (gr, x, y) -> drawGlyph(gr, g, x, y), name, tag, ACCENT, List.of(), story, sections, note, paths, -1);
+		return new PickerLayout.Info(icon, g == null ? null : (gr, x, y) -> drawGlyph(gr, g, x, y), name, tag, ACCENT, pills, story, sections, note, paths, -1);
 	}
 
 	/**
