@@ -92,5 +92,8 @@
   "message.jaymospowers.raiders.beaten": "The raiders are beaten. One of their pods still ticks over where it landed.",
   "talk.jaymospowers.patrol.deeds": "\"Strong enough, I'd say. But the Patrol takes nobody who hasn't been out and done something: a forged tool in your hand, at least. Do it, and ask again.\"",
   "talk.jaymospowers.patrol.yard": "\"Good landing at %s, this last run. They keep a yard of pads there, with a post lit at the middle. Come down on a pad and nobody rings the bell.\"",
-  "message.jaymospowers.patrol.held_back": "Your arrests are enough for Galactic Patrol %1$s, but the Patrol wants more from you than arrests: go further up the ladder first."
+  "message.jaymospowers.patrol.held_back": "Your arrests are enough for Galactic Patrol %1$s, but the Patrol wants more from you than arrests: go further up the ladder first.",
+  "news.jaymospowers.showdown.0": "Shepherds on the high ground say two figures were fighting above the clouds last night, too far up to tell apart, and that the thunder came a long time after the light.",
+  "news.jaymospowers.showdown.1": "A pod came down out of a clear sky by the raiders' camp, and the one who stepped out did not stop to look at anyone. He went straight up after the biggest of them.",
+  "news.jaymospowers.showdown.2": "Word from the edge of the fields: something is circling over the ridge, blow for blow, and the birds have left. Best keep to the roads until it is over."
 }
