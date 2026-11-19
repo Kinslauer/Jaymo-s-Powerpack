@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 02:42). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 02:45). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -39,7 +39,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/medieval-deco-6-towns-sea|medieval-deco-6-towns-sea]] · pc-claude-deco-6 · #1803 · in-review
 
 
 ## Needs Andy
@@ -57,6 +56,7 @@ kanban-plugin: board
 - [ ] [[Inbox/medieval-deco-7-practice-dummy|medieval-deco-7-practice-dummy]] · for 💻 Odysseus · #1801 · ready
 - [ ] [[Inbox/medieval-deco-3-dead-in-the-wild|medieval-deco-3-dead-in-the-wild]] · for 💻 Odysseus · #1802 · ready
 - [ ] [[Inbox/medieval-deco-2-wind|medieval-deco-2-wind]] · pc-claude-deco-2 · #1798 · ready
+- [ ] [[Inbox/medieval-deco-6-towns-sea|medieval-deco-6-towns-sea]] · pc-claude-deco-6 · #1803 · ready
 - [ ] [[Agents/forest-fire-pack|forest-fire-pack]] · 💻 Odysseus · stalled
 - [ ] [[Agents/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]] · 💻 Odysseus · stalled
 
