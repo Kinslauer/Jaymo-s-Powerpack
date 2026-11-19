@@ -17,6 +17,41 @@
           "type": "minecraft:model",
           "model": "jaymoskingdoms:item/armet_gilded"
         }
+      },
+      {
+        "when": "russeted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/armet_russeted"
+        }
+      },
+      {
+        "when": "blued",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/armet_blued"
+        }
+      },
+      {
+        "when": "painted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/armet_painted"
+        }
+      },
+      {
+        "when": "etched",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/armet_etched"
+        }
+      },
+      {
+        "when": "rusted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/armet_rusted"
+        }
       }
     ],
     "fallback": {

@@ -49,8 +49,6 @@ public final class HeraldryWear {
 	/** How often the villagers near players are looked over (ticks), and how far round each player; how often players' gilded plate is checked. */
 	static final int SWEEP = 100, GILDED_CHECK = 40;
 	static final double SWEEP_RANGE = 48.0;
-	/** One realm in this many blackens its knights' plate. */
-	static final int BLACKENED_REALMS = 3;
 	/** The share of a bandit leader's men with a torn cloak as well as the hood. */
 	static final float BANDIT_CLOAK_SHARE = 0.5F;
 	/** Prices (emeralds): the tailor's cloth, and the armourer's crests. */
@@ -131,8 +129,18 @@ public final class HeraldryWear {
 	}
 
 	private static String finish(Faction f) {
-		return Math.floorMod(hash(realm(f)) >>> 24, (long)BLACKENED_REALMS) == 0 ? HeraldryArmour.BLACKENED : "";
-	}
+			long h = hash(realm(f)) >>> 24;
+			long r = Math.floorMod(h, 7L);
+			return switch ((int)r) {
+				case 0 -> HeraldryArmour.BLACKENED;
+				case 1 -> HeraldryArmour.RUSSETED;
+				case 2 -> HeraldryArmour.BLUED;
+				case 3 -> HeraldryArmour.PAINTED;
+				case 4 -> HeraldryArmour.ETCHED;
+				case 5 -> HeraldryArmour.RUSTED;
+				default -> "";
+			};
+		}
 
 	/** What {@code f}'s knights wear in {@code slot} (the realm's helm, cuirass or sabatons) or carry (its war arm; the cuirass carries the realm's cape), or empty for the other slots. */
 	private static ItemStack plate(@Nullable MinecraftServer server, Faction f, EquipmentSlot slot) {
