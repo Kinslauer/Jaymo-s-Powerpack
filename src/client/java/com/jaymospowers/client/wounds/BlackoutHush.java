@@ -20,6 +20,10 @@ import net.minecraft.sounds.SoundSource;
  * menu clicks (the death screen's buttons), the master category, and the black's own cues ({@link #CUES}): the heartbeat
  * while down or swooning, the breath as they wake, and a turning's groan.
  * <p>
+ * Death is the exception (Andy, 2026-11-19: "only hearing nothing and the long wait for the respawn screen"): the moment
+ * you die it's silent at once, not eased into, and the black's own cues are hushed with the rest; only the menu clicks
+ * (the death screen's buttons) and the master category are left.
+ * <p>
  * Works beside Sound Physics Remastered: it only scales each source's gain, so its reverb and muffling fade with it.
  */
 public final class BlackoutHush {
@@ -36,6 +40,8 @@ public final class BlackoutHush {
 
 	/** How far to silent the game is now (0-1), and what the playing sounds were last worked out for. */
 	private static float hush, refreshed;
+	/** Whether you are dead just now (the death screen up, or dying): silent at once, cues and all. */
+	private static boolean dead;
 
 	private BlackoutHush() {
 	}
@@ -50,16 +56,20 @@ public final class BlackoutHush {
 			return 1.0F;
 		}
 		SoundSource source = sound.getSource();
-		if (source == SoundSource.UI || source == SoundSource.MASTER || source == SoundSource.PLAYERS && CUES.contains(sound.getIdentifier())) {
+		if (source == SoundSource.UI || source == SoundSource.MASTER
+			|| !dead && source == SoundSource.PLAYERS && CUES.contains(sound.getIdentifier())) {
 			return 1.0F;
 		}
 		return Math.max(SILENT, 1.0F - hush);
 	}
 
 	private static void tick(Minecraft minecraft) {
+		boolean wasDead = dead;
+		dead = minecraft.player != null && minecraft.level != null
+			&& (minecraft.gui.screen() instanceof DeathScreen || minecraft.player.isDeadOrDying());
 		float target = target(minecraft);
-		hush = target > hush ? Math.min(target, hush + QUIET_STEP) : Math.max(target, hush - RETURN_STEP);
-		if (hush == refreshed || minecraft.getSoundManager() == null) {
+		hush = dead ? 1.0F : target > hush ? Math.min(target, hush + QUIET_STEP) : Math.max(target, hush - RETURN_STEP);
+		if (hush == refreshed && dead == wasDead || minecraft.getSoundManager() == null) {
 			return;
 		}
 		refreshed = hush;
