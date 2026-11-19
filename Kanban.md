@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 03:03). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 03:10). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -51,13 +51,6 @@ kanban-plugin: board
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 🍇 Bacchus · blocked
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · ready
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · ready
-- [ ] [[Inbox/medieval-deco-1-music|medieval-deco-1-music]] · pc-claude-deco-1 · #1795 · ready
-- [ ] [[Inbox/medieval-deco-4-drinks|medieval-deco-4-drinks]] · pc-claude-deco-4 · #1797 · ready
-- [ ] [[Inbox/medieval-deco-5-farm-water|medieval-deco-5-farm-water]] · pc-claude-deco-5 · #1799 · ready
-- [ ] [[Inbox/medieval-deco-7-practice-dummy|medieval-deco-7-practice-dummy]] · for 💻 Odysseus · #1801 · ready
-- [ ] [[Inbox/medieval-deco-3-dead-in-the-wild|medieval-deco-3-dead-in-the-wild]] · for 💻 Odysseus · #1802 · ready
-- [ ] [[Inbox/medieval-deco-2-wind|medieval-deco-2-wind]] · pc-claude-deco-2 · #1798 · ready
-- [ ] [[Inbox/medieval-deco-6-towns-sea|medieval-deco-6-towns-sea]] · pc-claude-deco-6 · #1803 · ready
 - [ ] [[Agents/forest-fire-pack|forest-fire-pack]] · 💻 Odysseus · stalled
 - [ ] [[Agents/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]] · 💻 Odysseus · stalled
 
@@ -65,14 +58,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/medieval-deco-7-practice-dummy|medieval-deco-7-practice-dummy]]
+- [x] [[Inbox/Done/medieval-deco-6-towns-sea|medieval-deco-6-towns-sea]]
+- [x] [[Inbox/Done/medieval-deco-5-farm-water|medieval-deco-5-farm-water]]
+- [x] [[Inbox/Done/medieval-deco-4-drinks|medieval-deco-4-drinks]]
+- [x] [[Inbox/Done/medieval-deco-3-dead-in-the-wild|medieval-deco-3-dead-in-the-wild]]
+- [x] [[Inbox/Done/medieval-deco-2-wind|medieval-deco-2-wind]]
+- [x] [[Inbox/Done/medieval-deco-1-music|medieval-deco-1-music]]
 - [x] [[Inbox/Done/rig-beetle-5-the-mind|rig-beetle-5-the-mind]]
-- [x] [[Inbox/Done/rig-beetle-4-flight|rig-beetle-4-flight]]
-- [x] [[Inbox/Done/rig-beetle-2-guns|rig-beetle-2-guns]]
-- [x] [[Inbox/Done/lanterns-10-orbit|lanterns-10-orbit]]
-- [x] [[Inbox/Done/lanterns-09-talk-typed|lanterns-09-talk-typed]]
-- [x] [[Inbox/Done/lanterns-08-dream|lanterns-08-dream]]
-- [x] [[Inbox/Done/lanterns-06-space-medium|lanterns-06-space-medium]]
-- [x] [[Inbox/Done/lanterns-05-patrol-law|lanterns-05-patrol-law]]
 
 
 %% kanban:settings
