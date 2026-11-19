@@ -1327,6 +1327,8 @@ public final class Downed {
 		} else if (!player.hasAttached(Crawl.CRAWLING) && Crawl.canCrawl(player)) {
 			player.setAttached(Crawl.CRAWLING, true);
 		}
+		// (Andy, 2026-11-19) crawled into a wall, they sit up against it ({@link DownedLie#crawlInto})
+		DownedLie.crawlInto(player);
 		player.setSprinting(false);
 		AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
 		// (0.19.55) quick on adrenaline, then slower as their strength fades (in hundredths, so it isn't resent every tick)
