@@ -6071,3 +6071,28 @@ Built; not played in game.
 
 - **Orders by voice**: as Duplex, say an order aloud (or "doubles, ..." first) and your doubles within 32 blocks do it. *follow* (come, heel); *wait* (stay, hold), where they stand; *scout*: one runs 20 blocks the way you face and comes back with how many foes it saw; *collect* (gather, pick up): they pick up the drops near and bring them to you; *mine* (dig): one digs out the open block you look at, then up to 8 more of the same touching it, never anything you couldn't break yourself or harder than stone-and-ore; *fetch <thing>* (bring, get): one fetches a stack with that in its name from a chest or barrel within 16 blocks, or the first stack of the container you look at; *fight* (attack): all go for what you look at, or the nearest foe. Anything a double holds drops if it pops. (`DoubleOrders`, `XenoDouble`)
 - Built; not played.
+
+## 0.25.25 (2026-11-19): acrobatics - standing backflip, dodge-key mid-air tricks (#1778)
+
+- **Standing backflip** (new Kingdoms perk Backflip): on the ground with only Back held, the dodge key (Left Alt) throws a backflip instead of the back roll: a high hop backwards (0.52 up, 0.24 back), arms swung up, heels over head, landing on your feet facing the same way. It is a dodge (the roll's evasion window and cooldown, `Dodge.dodgeBy`), costs 5 feathers. Plain Alt still rolls back; Sneak + Alt is still the zoom.
+- **Mid-air tricks**: the dodge key in the air throws a trick (for show, no push), picked at random from the family the movement keys choose and never the one just thrown: forward/none = front flip, tornado spin, toe touch (rank 2: double front, corkscrew); back = back flip, swan (rank 2: full-twisting layout, double back); strafe = cartwheel, side flip (rank 2: butterfly twist). Freerunner rank 1 (or the web power) opens the plain ones and 2 a jump; rank 2 the harder ones and 3 a jump. A trick goes only if it can finish before the ground (the client works out the fall); otherwise the press is the landing roll's as before. Each next trick can start once the last is 75% through. 2 feathers (3 for rank-2 tricks), Stealth experience.
+- Shield vault and the Weapon Forms flip still come first in the air. Move hint "Alt: trick" shows while a trick fits. The falling poses step aside while any flip or trick plays; a trick cut short by landing stops drawing.
+- `freerun/moves/Acrobatics`, `client/freerun/moves/AcrobaticsClient`, `RunMoves` asks 15-16, `Freerun.Perk.BACKFLIP`, `WebPose` kinds 19-27 drawn in `WebBodyPose`.
+- Built; not played.
+
+## 0.25.26 (2026-11-19): Rig: the back rig (wings, wing slash, spear legs, pincers, grapple, horn lightning) (#1777)
+
+- **Wings**: two vanes fold flat down the Core's back and spread wide in full flight, beating a little as you fly with a quiet buzz, and fold away again in hover or on the ground. (`RigBackClient`)
+- New Rig menu entries, each needing the whole set and costing charge:
+  - **Wing Slash** (Mind level 3, 60 charge): the dash with the vanes out as blades. It cuts everything you pass, each once, instead of ramming the first thing.
+  - **Spear Legs** (level 2, 50): four jointed legs stab out of the back in a ring and back in. Everything within 3.5 blocks is run through and lifted.
+  - **Pincers** (level 3, 40): two arms over the shoulders seize the creature in front of you (up to 60 health) and hold it before you for up to 5 seconds. Pick it again to throw it along your look.
+  - **Grapple Claw** (level 2, 25): a claw on a line, up to 24 blocks. At a wall it pulls you there; at a creature it pulls it to you.
+  - **Horn Lightning** (level 4, 90): lightning leaps from the helm to the nearest foe and on to up to four, half again as strong in the rain, and overcharges the Core.
+- Metal art: `tools/gen_rig.py` `back()` writes `textures/entity/rig/back.png` and its glow. (`RigBack`)
+- Built; not played.
+
+## 0.25.27 (2026-11-19): Duplex doubles take spoken orders (#1770)
+
+- **Orders by voice**: as Duplex, say an order aloud (or "doubles, ..." first) and your doubles within 32 blocks do it. *follow* (come, heel); *wait* (stay, hold), where they stand; *scout*: one runs 20 blocks the way you face and comes back with how many foes it saw; *collect* (gather, pick up): they pick up the drops near and bring them to you; *mine* (dig): one digs out the open block you look at, then up to 8 more of the same touching it, never anything you couldn't break yourself or harder than stone-and-ore; *fetch <thing>* (bring, get): one fetches a stack with that in its name from a chest or barrel within 16 blocks, or the first stack of the container you look at; *fight* (attack): all go for what you look at, or the nearest foe. Anything a double holds drops if it pops. (`DoubleOrders`, `XenoDouble`)
+- Built; not played.
