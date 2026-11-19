@@ -6600,3 +6600,8 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 
 - New shared tag `c:hides` (rabbit hide, Kitchen hide, raw hide, wolf/wild/bear fur, beast pelt, Naturalist bear fur). Fur-lined harness forging (`HeraldryForging`) takes any 2 of them; JEI shows the choices.
 - Built; not played.
+
+## 0.25.83 (2026-11-19): Deathless returns (for Kingdoms' Pallid) (#1885)
+
+- `Mortality.DEATHLESS` and `Mortality.Deathless`: other mods can name players the grave won't keep. Such a death is never rolled or final; it takes a mid-turn death's long black with the mod's own vignette and two lines, they rise where they fell with no injury, and no sure wake is used up. Only what ends a mid-turn death ends them (head, void, lava, an execution by a player or a boss, the Nether's last chance).
+- Built; not played.

@@ -2568,3 +2568,8 @@ Added a new **Cooking Block** to the Functional creative tab. The block has iron
 
 - A loom lining takes any hide or pelt (`c:hides`) as it takes rabbit hide; the furs keep their own warmer linings (`Lining`).
 - Built; not played.
+
+## 0.6.61 (2026-11-19): Thirst can be switched off for some players (#1885)
+
+- `Thirst.setUnthirsting`: another mod (Kingdoms, for its Pallid Hollow) names players who never thirst; their water stays full.
+- Built; not played.
