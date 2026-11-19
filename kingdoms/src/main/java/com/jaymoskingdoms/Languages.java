@@ -317,7 +317,11 @@ public final class Languages {
 		Tongue t = of(speaker);
 		net.minecraft.core.@Nullable Holder<net.minecraft.sounds.SoundEvent> spoken = t == null ? null
 			: Voices.tongue(t, key.getPath().startsWith("villager.female."), kind);
-		net.minecraft.core.Holder<net.minecraft.sounds.SoundEvent> own = net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound);
+		// (a hello, yes, no or angry shout in the villager's own Google voice, where it has one: Voices.villager)
+		net.minecraft.core.@Nullable Holder<net.minecraft.sounds.SoundEvent> google =
+			Voices.villager(speaker.getUUID(), key.getPath().startsWith("villager.female."), kind);
+		net.minecraft.core.Holder<net.minecraft.sounds.SoundEvent> own = google != null ? google
+			: net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound);
 		double range = sound.getRange(volume);
 		long seed = level.getRandom().nextLong();
 		int longest = VoiceGate.length(own);
@@ -333,9 +337,11 @@ public final class Languages {
 			int length = VoiceGate.length(heard);
 			longest = Math.max(longest, length);
 			VoiceGate.heard(p, now, length);
-			float loud = volume * (heard == spoken ? VoiceGate.TONGUE_VOLUME : VoiceGate.WORDS_VOLUME);
+			float loud = volume * (heard == spoken || heard == google ? VoiceGate.TONGUE_VOLUME : VoiceGate.WORDS_VOLUME);
+			// (a Google voice keeps only a little of MCA's per-villager pitch, or it turns squeaky or slurred)
+			float said = heard == google ? 1.0F + (pitch - 1.0F) * VoiceGate.GOOGLE_PITCH_SHARE : pitch;
 			p.connection.send(new net.minecraft.network.protocol.game.ClientboundSoundPacket(heard, speaker.getSoundSource(),
-				speaker.getX(), speaker.getY(), speaker.getZ(), loud, pitch, seed));
+				speaker.getX(), speaker.getY(), speaker.getZ(), loud, said, seed));
 		}
 		VoiceGate.spoke(speaker, now, longest);
 		return true;

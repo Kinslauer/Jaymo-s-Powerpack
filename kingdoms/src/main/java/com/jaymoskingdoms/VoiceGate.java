@@ -26,6 +26,8 @@ public final class VoiceGate {
 	static final float TONGUE_VOLUME = 0.4F;
 	/** How loud MCA's own words and the vanilla grunt in their place are played. */
 	static final float WORDS_VOLUME = 0.7F;
+	/** How much of MCA's per-villager voice pitch a villager's Google voice keeps (0: none, 1: all of it). */
+	static final float GOOGLE_PITCH_SHARE = 0.4F;
 	/** Quiet after a villager's line before it may say another (ticks). */
 	static final int SPEAKER_GAP = 20 * 4;
 	/** How long a line we can't measure (MCA's own clips) is taken to last (ticks). */

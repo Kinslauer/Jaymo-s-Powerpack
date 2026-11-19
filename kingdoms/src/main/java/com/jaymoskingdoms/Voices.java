@@ -77,7 +77,20 @@ public final class Voices {
 	 */
 	public static final List<String> TONGUE_LINES = List.of("greet", "farewell", "celebrate", "scream");
 
+	/**
+	 * Andy (2026-11-19), on the Google voice samples: "they can be for MCA villagers instead of what we have now". MCA's
+	 * spoken words (its hello, yes, no and angry shout; {@link Languages#voice}) are said by one of these Google voices
+	 * instead, the same one every time for the same villager ({@link #villager}). {@code tools/voices/google_voices.py
+	 * --villagers} makes {@code voice.villager.<voice>.<line>}, a few lines each; its lists must match these. MCA's laughs,
+	 * cries and screams stay its own.
+	 */
+	static final List<String> VILLAGER_MEN = List.of("charon", "iapetus", "wavenet_d", "neural2_d", "neural2_j", "studio_q");
+	static final List<String> VILLAGER_WOMEN = List.of("kore", "leda", "despina", "sulafat", "gacrux", "vindemiatrix");
+	static final List<String> VILLAGER_LINES = List.of("greet", "yes", "no", "angry");
+
 	private static final Map<String, Holder<SoundEvent>> SOUNDS = new HashMap<>();
+	/** {@code <voice>.<line>} -> its sound (villager voices with clips only). */
+	private static final Map<String, Holder<SoundEvent>> VILLAGERS = new HashMap<>();
 	/** (0.7.348) {@code <tongue>.<male|female>.<line>} -> its sound. */
 	private static final Map<String, Holder<SoundEvent>> TONGUES = new HashMap<>();
 
@@ -176,7 +189,29 @@ public final class Voices {
 				}
 			}
 		}
+		for (String voice : concat(VILLAGER_MEN, VILLAGER_WOMEN)) {
+			for (String line : VILLAGER_LINES) {
+				if (Voices.class.getResource("/assets/jaymoskingdoms/sounds/voice/villager/" + voice + "_" + line + "_1.ogg") == null) {
+					continue;
+				}
+				Identifier id = JaymosKingdoms.id("voice.villager." + voice + "." + line);
+				VILLAGERS.put(voice + "." + line, Registry.registerForHolder(BuiltInRegistries.SOUND_EVENT, id, SoundEvent.createVariableRangeEvent(id)));
+			}
+		}
 		PayloadTypeRegistry.clientboundPlay().register(Spoken.TYPE, Spoken.CODEC);
+	}
+
+	private static List<String> concat(List<String> a, List<String> b) {
+		List<String> out = new ArrayList<>(a);
+		out.addAll(b);
+		return out;
+	}
+
+	/** {@code line} ({@link #VILLAGER_LINES}) in the Google voice that is {@code villager}'s own; null if it has no clip. */
+	public static @Nullable Holder<SoundEvent> villager(java.util.UUID villager, boolean female, String line) {
+		List<String> voices = female ? VILLAGER_WOMEN : VILLAGER_MEN;
+		String voice = voices.get(Math.floorMod(villager.getMostSignificantBits() ^ villager.getLeastSignificantBits(), voices.size()));
+		return VILLAGERS.get(voice + "." + line);
 	}
 
 	/** (0.7.490) Whether the narrator's clip for {@code path} ({@code voice.narrator.<rest>}) is in the jar. */
