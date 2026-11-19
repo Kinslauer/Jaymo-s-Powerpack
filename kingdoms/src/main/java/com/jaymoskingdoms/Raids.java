@@ -550,6 +550,10 @@ final class Raids {
 					if (target(raider) != null) {
 						continue;
 					}
+					// (gv_raid_beasts) a free raider may turn on the town's livestock first
+					if (RaidBeasts.pick(level, raider, target)) {
+						continue;
+					}
 					// (0.7.490) the last loose chest may have gone to an earlier raider this pass: back to the depot then
 					bare &= !raid.loose.isEmpty();
 					BlockPos aim = bare ? raid.loose.get(Math.floorMod(raider.getUUID().hashCode(), raid.loose.size())) : depot;

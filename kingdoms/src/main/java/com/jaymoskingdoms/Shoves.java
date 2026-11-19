@@ -146,6 +146,39 @@ public final class Shoves {
 		}
 	}
 
+	/** (gv_kick) A guard's kick wears a fighter's stance by this much ({@link FighterPosture}), and a foe already reeling is kicked over without a contest. */
+	static final float KICK_WEAR = 3.0F;
+
+	/**
+	 * (gv_kick) {@code kicker} (a guard whose bow is no use with a foe on top of them) kicks {@code foe} back a block: the same contest as
+	 * a shove, from the foe's size and Might save alone. It wears the foe's stance ({@link FighterPosture#kicked}), and a foe whose
+	 * stance is already broken goes over without a roll. Never a boss. True if the kick sent it back.
+	 */
+	static boolean kick(ServerLevel level, LivingEntity kicker, LivingEntity foe) {
+		if (foe instanceof Mob boss && Senses.boss(boss)) {
+			return false;
+		}
+		boolean reeling = foe instanceof Mob m && FighterPosture.reeling(m);
+		float size = Math.max(0.0F, foe.getBbWidth() * foe.getBbHeight() - PERSON);
+		float chance = BASE - SAVE_TAKES * Saves.chance(foe, Saves.Kind.GRAB) - SIZE_TAKES * size;
+		if (!reeling && level.getRandom().nextFloat() >= Math.max(FLOOR, Math.min(CEILING, chance))) {
+			level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.SHIELD_BLOCK.value(), SoundSource.NEUTRAL, 0.8F, 1.3F);
+			return false;
+		}
+		Vec3 away = foe.position().subtract(kicker.position()).multiply(1.0, 0.0, 1.0);
+		away = away.lengthSqr() < 1.0E-4 ? kicker.getLookAngle().multiply(1.0, 0.0, 1.0) : away;
+		away = away.normalize();
+		Vec3 v = foe.getDeltaMovement();
+		foe.setDeltaMovement(away.x * PUSH, Math.max(v.y, HOP), away.z * PUSH);
+		foe.syncVelocity = true;
+		if (foe instanceof Mob m && !reeling) {
+			FighterPosture.kicked(level, m, KICK_WEAR);
+		}
+		level.playSound(null, foe.getX(), foe.getY(), foe.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.NEUTRAL, 0.9F, 1.2F);
+		level.sendParticles(ParticleTypes.POOF, foe.getX(), foe.getY(0.5), foe.getZ(), 4, 0.2, 0.2, 0.2, 0.02);
+		return true;
+	}
+
 	/** The one in front of {@code player} within reach. */
 	private static @Nullable LivingEntity target(ServerPlayer player) {
 		Vec3 eye = player.getEyePosition();

@@ -240,6 +240,15 @@ public final class JaymosKingdoms implements ModInitializer {
 		Meals.register();
 		// smiths sharpen the guards' dull blades at a grindstone
 		Whetting.register();
+		// village mods 3: guards that fight and mend
+		ClericHeals.register();
+		SmithMending.register();
+		GuardMeals.register();
+		GuardKicks.register();
+		AlarmBells.register();
+		RaidBeasts.register();
+		WitchRaids.register();
+		GolemPathing.register();
 		Visitors.register();
 		// 0.7.483: every settlement keeps a butcher and a healer
 		TownTrades.register();
