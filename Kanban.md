@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 23:55). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 00:30). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -39,7 +39,7 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/medieval-deco-2-wind|medieval-deco-2-wind]] · 🔨 Hephaestus · #1798 · claimed
+- [ ] [[Inbox/medieval-deco-2-wind|medieval-deco-2-wind]] · for 💻 Odysseus · #1798 · changes · fixing review notes
 
 
 ## In review
