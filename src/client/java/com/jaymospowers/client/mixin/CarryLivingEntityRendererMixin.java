@@ -24,6 +24,7 @@ abstract class CarryLivingEntityRendererMixin {
 		at = @At("TAIL"))
 	private void jaymospowers$carryState(LivingEntity entity, LivingEntityRenderState state, float partialTicks, CallbackInfo ci) {
 		CarryPose.extract(entity, state, partialTicks);
+		com.jaymospowers.client.SlingPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.PerchClient.extract(entity, state);
 	}
 
@@ -39,5 +40,6 @@ abstract class CarryLivingEntityRendererMixin {
 	@Inject(method = "setupRotations", at = @At("TAIL"))
 	private void jaymospowers$carryHold(LivingEntityRenderState state, PoseStack poseStack, float bodyRot, float entityScale, CallbackInfo ci) {
 		CarryPose.rotate(state, poseStack, entityScale);
+		com.jaymospowers.client.SlingPose.rotate(state, poseStack, entityScale);
 	}
 }

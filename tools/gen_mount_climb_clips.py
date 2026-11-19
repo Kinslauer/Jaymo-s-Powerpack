@@ -80,12 +80,27 @@ OFF_BACK = [
     (1.0, STAND),
 ]
 
+# heaving a downed friend over a horse's back (Sling): from a hold in the arms, a crouch under the weight, then up and
+# over in one push with the arms thrown high and the back arched, and a settle back to standing
+HEAVE = [
+    (0.0, {"body": (0, 0, 0), "right_arm": (-55, 0, -8), "left_arm": (-55, 0, 8),
+           "right_leg": (0, 0, 2), "left_leg": (0, 0, -2)}),
+    (0.3, {"body": (22, 0, 0), "right_arm": (-30, 0, -12), "left_arm": (-30, 0, 12),
+           "right_leg": (-28, 0, 4), "left_leg": (14, 0, -4)}),
+    (0.6, {"body": (-14, 0, 0), "right_arm": (-160, 0, -10), "left_arm": (-160, 0, 10),
+           "right_leg": (12, 0, 3), "left_leg": (-22, 0, -3)}),
+    (0.82, {"body": (-4, 0, 0), "right_arm": (-110, 0, -6), "left_arm": (-110, 0, 6),
+            "right_leg": (4, 0, 2), "left_leg": (-6, 0, -2)}),
+    (1.0, STAND),
+]
+
 CLIPS = {
     "on_left": ON_LEFT,
     "on_right": [(t, mirror(p)) for t, p in ON_LEFT],
     "on_back": ON_BACK,
     "off_forward": OFF_FORWARD,
     "off_back": OFF_BACK,
+    "heave": HEAVE,
 }
 
 
