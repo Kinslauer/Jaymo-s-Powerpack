@@ -322,6 +322,13 @@ public final class KitchenCompat {
 		} catch (ReflectiveOperationException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for Iron Stomach to drink dirty water (needs 0.5.80): {}", e.toString());
 		}
+		// a Pallid never thirsts (PallidHollows)
+		try {
+			Class.forName("com.jaymoskitchen.climate.Thirst").getMethod("setUnthirsting", java.util.function.Predicate.class)
+				.invoke(null, (java.util.function.Predicate<net.minecraft.world.entity.player.Player>) PallidHollows::is);
+		} catch (ReflectiveOperationException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for the Pallid's thirst to stay off: {}", e.toString());
+		}
 	}
 
 	/**

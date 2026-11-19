@@ -513,6 +513,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (2026-11-14) and townsfolk who see one risen Hollow react to it, once each (and its attachment)
 		LOGGER.debug("hollow sighting attachment: {}", HollowSighting.RISEN);
 		HollowSighting.register();
+		LOGGER.debug("pallid seen attachment: {}", PallidHollows.SEEN);
+		PallidHollows.register();
 		// the Skeleton Lord's curse: the only way to rise a skeleton (and its attachment)
 		LOGGER.debug("skeleton curse attachment: {}", SkeletonCurse.CURSED);
 		SkeletonCurse.register();
