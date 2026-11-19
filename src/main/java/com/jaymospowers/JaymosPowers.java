@@ -51,6 +51,11 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.jump.PowerJump.init();
 		// the Divine-born's feather sense, Alight and hover (after the dodge: a dodge misses first)
 		com.jaymospowers.divine.DivineSense.init();
+		// (pb-shell, pb-ward) the Divine-born's golden shell and healing ward
+		com.jaymospowers.divine.DivineShell.init();
+		// (pb-darkcorrupt) hits, kills and full darkness feed a corruption meter that has begun
+		com.jaymospowers.core.DarkFeed.init();
+		com.jaymospowers.divine.DivineWard.init();
 		com.jaymospowers.core.Meditate.init();
 		com.jaymospowers.core.Sitting.init();
 		// (0.19.29) training gear and the Mastery ranks
@@ -146,6 +151,9 @@ public class JaymosPowers implements ModInitializer {
 		// fire users: the fight gauge, soak and return, the fire kit's gaps
 		com.jaymospowers.power.ember.RunningHot.init();
 		com.jaymospowers.power.ember.EmberSoak.init();
+		// (pb-firecrash, pb-cook) the Emberborn's rise and crash, and cooking in the hands
+		com.jaymospowers.power.ember.EmberCrash.init();
+		com.jaymospowers.power.ember.EmberCook.init();
 		com.jaymospowers.power.ember.FireKit.init();
 		// weapons from the Stone Age to the pirates (after Age of Weapons), not a power
 		com.jaymospowers.armory.Armory.init();
@@ -307,7 +315,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.xenoform.XenoformState", "power.xenoform.XenoBands", "power.xenoform.StarReaders", "power.xenoform.BandUpgrades", "power.xenoform.BandForge", "power.xenoform.RivalHunter", "power.xenoform.BandStyle", "power.xenoform.nadir.NadirRules", "power.xenoform.nadir.NadirStash",
 			"power.xenoform.forms.BulwarkFury",
 			"power.xenoform.forms.FuseStore",
-			"power.ember.RunningHot", "power.ember.EmberSoak",
+			"power.ember.RunningHot", "power.ember.EmberSoak", "power.smoke.SmokeBanish",
 			"power.xenoform.XenoMinds",
 			"power.zfighter.ZFighterPower", "power.zfighter.ZFighterTraining", "power.zfighter.ZFighterGrowth", "power.zfighter.ZFighterLineage", "power.zfighter.ApeRage", "power.zfighter.ApeSmash", "power.zfighter.ApeGrab", "power.zfighter.VillagerApe", "power.zfighter.UndeadBlood", "power.zfighter.UndeadGiant","power.zfighter.RaceMoves", "power.zfighter.FrostBeam", "power.zfighter.ZFighterGuard", "power.zfighter.ZFighterCombo", "power.zfighter.ZFighterStretchCombo", "power.zfighter.ZFighterDisc", "power.zfighter.ZFighterWaveBeam", "power.zfighter.ZFighterHands",
 			"power.zfighter.ZFighterTeleport",

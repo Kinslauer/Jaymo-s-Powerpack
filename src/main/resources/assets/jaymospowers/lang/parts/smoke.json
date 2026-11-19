@@ -1,4 +1,7 @@
 {
+	"message.jaymospowers.smoke_banish_nothing": "Nothing there to banish.",
+	"message.jaymospowers.smoke_banish_too_strong": "The smoke slides off it.",
+	"message.jaymospowers.smoke_banish_wait": "Banish: %s s.",
 	"power.jaymospowers.smoke": "Smoke",
 	"power.jaymospowers.smoke.desc": "You make smoke, and it's real: it billows, climbs, fills rooms, leaks under doors and drifts on the wind. Nothing sees through it but you.",
 	"power.jaymospowers.smoke.corrupted": "Smog",
