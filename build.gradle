@@ -193,6 +193,11 @@ def packMods = [
 	// levers, buttons, chests, lecterns and more swing smoothly; lanterns and chains sway. Works with Sodium and Iris.
 	// Client-only. 1.3.7: 1.3.6 and older patch a field Entity Culling 1.12 no longer has, and the game stops on start.
 	[dep: "maven.modrinth:fwa:JRzSDvfy", cf: [1452982, 9594250]],
+	// Interactive Foliage (by Karto; the jar says CC BY-NC-SA 4.0, Modrinth says All Rights Reserved: ship unchanged only)
+	// and its library SWAY API (CC BY-NC-SA 4.0, by razorplay01): grass, flowers, crops and other plants bend away from
+	// players, mobs and dropped items and spring back. Works with Sodium and Iris. Only drawn on the client.
+	[dep: "maven.modrinth:mc2-interactive-foliage:lQmGa1wY", cf: [1560873, 9260861]],
+	[dep: "maven.modrinth:sway:J9WbqmZ9", cf: [1568089, 8937229]],
 	// Controlling (MIT, by Jaredlll08) and its library Searchables (MIT, same author): a search bar on the Controls >
 	// Key Binds screen (by name, by key, or by category), plus a filter for conflicting and unbound keys. Client-only.
 	[dep: "maven.modrinth:controlling:V6AbRm67", cf: [250398, 9110875]],
