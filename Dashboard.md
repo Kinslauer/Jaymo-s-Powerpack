@@ -5,9 +5,6 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## Waiting on you
 
-**Ready to merge** (say "merge" in the project chat):
-- [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · no PR number on the task · ready
-
 **Questions for you:**
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 - [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
@@ -89,7 +86,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 ## Health
 
-6 problems in the notes: [[Health]].
+5 problems in the notes: [[Health]].
 
 ## Last week
 

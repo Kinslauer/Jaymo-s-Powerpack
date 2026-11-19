@@ -3,7 +3,7 @@
 
 Problems in the live notes, found on every sync. Nothing here is fixed by itself: whoever reads it (the coordinator's hourly check, a bot, Andy) fixes the note, and the line goes away on the next sync. `python tools/vault_sync.py --health` prints the same list.
 
-**6 problems.**
+**5 problems.**
 
 ## Statuses the pipeline doesn't know
 
@@ -15,7 +15,3 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 
 - [[Inbox/harness-body-pieces|harness-body-pieces]]: `for: pc-claude` matches no bot or agent, so no one will claim it.
 - [[Inbox/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]]: `for: Medieval build (branch claude/project-thread-9de3pc), patch 10` matches no bot or agent, so no one will claim it.
-
-## Missing PR numbers
-
-- [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]]: `ready` with no `pr:`.
