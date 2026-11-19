@@ -27,12 +27,14 @@ public final class RigNet {
 	public static final int SENTRY = 10;
 	/** The Rig prosthetics: the arm's repulsor shot and the leg's thruster kick (no suit needed, just the fitted limb). */
 	public static final int LIMB_SHOT = 11, LIMB_KICK = 12;
+	/** Flight actives: pull-up warning, hyper thrust, banking, meteor dive, smooth others. */
+	public static final int PULLUP = 19, HYPER = 20, BANK = 21, METEOR = 22, SMOOTH = 23;
 	/** The most targets one missile volley marks. */
 	public static final int MAX_MARKS = 6;
 	/** (0.11.112) The Rig's gun actives ({@link RigGuns}). */
 	public static final int PALM_CHARGE = 13, GATLING = 14, RAILGUN = 15, SONIC = 16, TWIN = 17, SIEGE = 18;
 	/** The actives J cycles through, in order (the stage-2 ones only once the Mind's level has them). */
-	public static final int[] CYCLE = {HOVER, PALM, LAUNCHER, UNIBEAM, SCAN, CALL, PALM_CHARGE, GATLING, RAILGUN, SONIC, TWIN, SIEGE};
+	public static final int[] CYCLE = {HOVER, PALM, LAUNCHER, UNIBEAM, SCAN, CALL, PALM_CHARGE, GATLING, RAILGUN, SONIC, TWIN, SIEGE, PULLUP, HYPER, BANK, METEOR, SMOOTH};
 	/** The first three of {@link #CYCLE} need no level. */
 	public static final int ACTIVES = 3;
 
@@ -120,34 +122,35 @@ public final class RigNet {
 	/**
 	 * Server → client: hovering (and in full flight), the Mind's current warnings, the actives' cooldowns (ticks), the
 	 * locked target's entity id (-1: none), the takeover save's cooldown (seconds; 0 ready), the Unibeam's (ticks), and how
-	 * long the Core's overcharge has left (ticks; 0 none).
+	 * long the Core's overcharge has left (ticks; 0 none), and the flight actives' states.
 	 */
-	public record Status(boolean hovering, boolean flying, int warnings, int palmCooldown, int launcherCooldown, int scanCooldown, int lock,
-		int takeoverSeconds, int unibeamCooldown, int overcharge) implements CustomPacketPayload {
-	public static final Status NONE = new Status(false, false, 0, 0, 0, 0, -1, 0, 0, 0);
-	public static final Type<Status> TYPE = new Type<>(JaymosPowers.id("rig_status"));
-	public static final StreamCodec<ByteBuf, Status> CODEC = StreamCodec.of((buf, s) -> {
-	buf.writeByte((s.hovering ? 1 : 0) | (s.flying ? 2 : 0));
-	ByteBufCodecs.VAR_INT.encode(buf, s.warnings);
-	ByteBufCodecs.VAR_INT.encode(buf, s.palmCooldown);
-	ByteBufCodecs.VAR_INT.encode(buf, s.launcherCooldown);
-	ByteBufCodecs.VAR_INT.encode(buf, s.scanCooldown);
-	ByteBufCodecs.VAR_INT.encode(buf, s.lock + 1);
-	ByteBufCodecs.VAR_INT.encode(buf, s.takeoverSeconds);
-	ByteBufCodecs.VAR_INT.encode(buf, s.unibeamCooldown);
-	ByteBufCodecs.VAR_INT.encode(buf, s.overcharge);
-		}, buf -> {
-	int flags = buf.readByte();
-	return new Status((flags & 1) != 0, (flags & 2) != 0, ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf),
-				ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf) - 1,
-				ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf));
-		});
+		public record Status(boolean hovering, boolean flying, int warnings, int palmCooldown, int launcherCooldown, int scanCooldown, int lock,
+			int takeoverSeconds, int unibeamCooldown, int overcharge, boolean pullup, boolean hyper, boolean banking, boolean smoothOthers) implements CustomPacketPayload {
+			public static final Status NONE = new Status(false, false, 0, 0, 0, 0, -1, 0, 0, 0, false, false, false, false);
+			public static final Type<Status> TYPE = new Type<>(JaymosPowers.id("rig_status"));
+			public static final StreamCodec<ByteBuf, Status> CODEC = StreamCodec.of((buf, s) -> {
+				buf.writeByte((s.hovering ? 1 : 0) | (s.flying ? 2 : 0) | (s.pullup ? 4 : 0) | (s.hyper ? 8 : 0) | (s.banking ? 16 : 0) | (s.smoothOthers ? 32 : 0));
+				ByteBufCodecs.VAR_INT.encode(buf, s.warnings);
+				ByteBufCodecs.VAR_INT.encode(buf, s.palmCooldown);
+				ByteBufCodecs.VAR_INT.encode(buf, s.launcherCooldown);
+				ByteBufCodecs.VAR_INT.encode(buf, s.scanCooldown);
+				ByteBufCodecs.VAR_INT.encode(buf, s.lock + 1);
+				ByteBufCodecs.VAR_INT.encode(buf, s.takeoverSeconds);
+				ByteBufCodecs.VAR_INT.encode(buf, s.unibeamCooldown);
+				ByteBufCodecs.VAR_INT.encode(buf, s.overcharge);
+			}, buf -> {
+				int flags = buf.readByte();
+				return new Status((flags & 1) != 0, (flags & 2) != 0, ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf),
+					ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf) - 1,
+					ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf), ByteBufCodecs.VAR_INT.decode(buf),
+					(flags & 4) != 0, (flags & 8) != 0, (flags & 16) != 0, (flags & 32) != 0);
+			});
 
-		@Override
-		public Type<Status> type() {
-	return TYPE;
+			@Override
+			public Type<Status> type() {
+				return TYPE;
+			}
 		}
-	}
 
 	/**
 	 * (0.11.87) Server → client: what a scan found, for the wearer's eyes only: entities (by id) glow, blocks (packed

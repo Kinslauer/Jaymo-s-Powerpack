@@ -46,9 +46,11 @@ final class RigHud {
 	static final int TAKEOVER_ALPHA = 170, TAKEOVER_STEPS = 8;
 	static final float TAKEOVER_DEPTH = 0.2F;
 	private static final String[] ACTIVE_KEYS = {"rig.jaymospowers.hud.hover", "rig.jaymospowers.hud.palm", "rig.jaymospowers.hud.launcher"};
-	private static final int[] WARN_BITS = {RigNet.WARN_EXPLOSION, RigNet.WARN_PROJECTILE, RigNet.WARN_LAVA, RigNet.WARN_VOID, RigNet.WARN_BEHIND,
-		RigNet.WARN_LOW_HEALTH, RigNet.WARN_LOW_CHARGE};
-	private static final String[] WARN_KEYS = {"explosion", "projectile", "lava", "void", "behind", "low_health", "low_charge"};
+		private static final int[] WARN_BITS = {RigNet.WARN_EXPLOSION, RigNet.WARN_PROJECTILE, RigNet.WARN_LAVA, RigNet.WARN_VOID, RigNet.WARN_BEHIND,
+			RigNet.WARN_LOW_HEALTH, RigNet.WARN_LOW_CHARGE};
+		private static final String[] WARN_KEYS = {"explosion", "projectile", "lava", "void", "behind", "low_health", "low_charge"};
+		/** Flight active keys for the HUD. */
+		private static final String[] FLIGHT_KEYS = {"rig.jaymospowers.hud.pullup", "rig.jaymospowers.hud.hyper", "rig.jaymospowers.hud.bank", "rig.jaymospowers.hud.meteor", "rig.jaymospowers.hud.smooth"};
 
 	private RigHud() {
 	}
@@ -170,20 +172,40 @@ final class RigHud {
 			cell(graphics, font, cx, row, cell, callKey, Component.translatable("rig.jaymospowers.hud.call").getString(), false,
 				!powerless && RigClient.selected == RigNet.CALL, 0, 1);
 			cx += cell;
-			if (level >= Rig.TAKEOVER_LEVEL) {
-				int s = status.takeoverSeconds();
-				String save = s <= 0 ? Component.translatable("rig.jaymospowers.hud.save").getString() : (s / 60) + ":" + String.format("%02d", s % 60);
-				cell(graphics, font, cx, row, cell, "", save, s <= 0 && RigClient.takeoverTicks > 0, false, 0, 1);
-				if (s > 0) {
-					graphics.fill(cx, row + 7, cx + cell - 2, row + 9, 0x60FF8040);
-				}
-			}
-			cx += cell;
-			if (level >= Rig.FLIGHT_LEVEL) {
-				cell(graphics, font, cx, row, cell, "", Component.translatable("rig.jaymospowers.hud.fly").getString(), status.flying(), false, 0, 1);
-			}
-			row += LINE;
-		}
+						if (level >= Rig.TAKEOVER_LEVEL) {
+							int s = status.takeoverSeconds();
+							String save = s <= 0 ? Component.translatable("rig.jaymospowers.hud.save").getString() : (s / 60) + ":" + String.format("%02d", s % 60);
+							cell(graphics, font, cx, row, cell, "", save, s <= 0 && RigClient.takeoverTicks > 0, false, 0, 1);
+							if (s > 0) {
+								graphics.fill(cx, row + 7, cx + cell - 2, row + 9, 0x60FF8040);
+							}
+						}
+						cx += cell;
+						if (level >= Rig.FLIGHT_LEVEL) {
+							cell(graphics, font, cx, row, cell, "", Component.translatable("rig.jaymospowers.hud.fly").getString(), status.flying(), false, 0, 1);
+						}
+						row += LINE;
+					}
+
+					// (0.12.x) Flight actives: pull-up, hyper, bank, meteor, smooth
+					if (level >= Rig.FLIGHT_LEVEL && Rig.fullSet(player)) {
+						int cell = (WIDTH - 6) / 5;
+						int cx = x + 3;
+						for (int i = 0; i < 5; i++) {
+							boolean lit = false;
+							switch (i) {
+								case 0 -> lit = RigClient.pullup();
+								case 1 -> lit = RigClient.hyper();
+								case 2 -> lit = RigClient.banking();
+								case 3 -> lit = false; // meteor is a one-shot
+								case 4 -> lit = RigClient.smoothOthers();
+							}
+							String key = powerless ? "" : RigClient.selected == RigNet.PULLUP + i ? keyName(RigClient.rigKey().getTranslatedKeyMessage()) : "";
+							cell(graphics, font, cx, row, cell, key, Component.translatable(FLIGHT_KEYS[i]).getString(), lit, false, 0, 1);
+							cx += cell;
+						}
+						row += LINE;
+					}
 
 		// the target (or the lock)
 		if (target != null) {

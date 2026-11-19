@@ -49,18 +49,21 @@ final class RigMenuScreen extends Screen {
 		com.jaymospowers.rig.RigBack.WINGSLASH, com.jaymospowers.rig.RigBack.SPEARS, com.jaymospowers.rig.RigBack.PINCER,
 		com.jaymospowers.rig.RigBack.GRAPPLE, com.jaymospowers.rig.RigBack.HORNS,
 		// the guns (RigGuns)
-		RigNet.PALM_CHARGE, RigNet.GATLING, RigNet.RAILGUN, RigNet.SONIC, RigNet.TWIN, RigNet.SIEGE};
+		RigNet.PALM_CHARGE, RigNet.GATLING, RigNet.RAILGUN, RigNet.SONIC, RigNet.TWIN, RigNet.SIEGE,
+		// flight actives
+		RigPicks.PULLUP, RigPicks.HYPER, RigPicks.BANK_TURN, RigPicks.METEOR, RigPicks.SMOOTH};
 	private static final String[] NAMES = {"hover", "palm", "launcher", "unibeam", "scan", "call", "sentry", "faceplate", "night", "drones", "mark", "table", "decoy", "field", "bank", "jet_start", "dash", "barrage",
 		"slow_beat", "failsafe", "blade", "mace", "pile", "drill", "lance", "lash", "mimic", "wingslash", "spears", "pincer", "grapple", "horns",
-		"palm_charge", "gatling", "railgun", "sonic", "twin", "siege"};
+		"palm_charge", "gatling", "railgun", "sonic", "twin", "siege", "pullup", "hyper", "bank_turn", "meteor", "smooth"};
 	private static final int[] LEVEL = {1, 1, 1, Rig.UNIBEAM_LEVEL, Rig.SCAN_LEVEL, Rig.CALL_LEVEL, Rig.CALL_LEVEL, 1, 1, 1, 1, 1, 1, 1, 1, Rig.FLIGHT_LEVEL, 1, Rig.MAX_LEVEL, Rig.UNIBEAM_LEVEL, 1,
 		RigForms.BLADE_LEVEL, RigForms.MACE_LEVEL, RigForms.PILE_LEVEL, RigForms.DRILL_LEVEL, RigForms.LANCE_LEVEL, RigForms.LASH_LEVEL, RigForms.MIMIC_LEVEL,
 		3, 2, 3, 2, 4,
-		Rig.LOCK_LEVEL, Rig.SCAN_LEVEL, Rig.UNIBEAM_LEVEL, Rig.UNIBEAM_LEVEL, Rig.MAX_LEVEL, Rig.MAX_LEVEL};
+		Rig.LOCK_LEVEL, Rig.SCAN_LEVEL, Rig.UNIBEAM_LEVEL, Rig.UNIBEAM_LEVEL, Rig.MAX_LEVEL, Rig.MAX_LEVEL,
+		Rig.FLIGHT_LEVEL, Rig.FLIGHT_LEVEL, Rig.FLIGHT_LEVEL, Rig.FLIGHT_LEVEL, Rig.FLIGHT_LEVEL};
 	/** Cooldowns' full lengths (ticks), for the shading; 0 for none. */
 	private static final int[] COOLDOWN = {0, RigHud.PALM_COOLDOWN, RigHud.LAUNCHER_COOLDOWN, RigHud.UNIBEAM_COOLDOWN, RigScan.SCAN_COOLDOWN, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		RigForms.BLADE_COOLDOWN, RigForms.MACE_COOLDOWN, RigForms.PILE_COOLDOWN, RigForms.DRILL_COOLDOWN, RigForms.LANCE_COOLDOWN, RigForms.LASH_COOLDOWN, RigForms.MIMIC_COOLDOWN,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	private static final double SLICE = 360.0 / ACTIONS.length;
 
 	private int selected = -1;
@@ -109,6 +112,11 @@ final class RigMenuScreen extends Screen {
 			case 35 -> Items.NOTE_BLOCK;
 			case 36 -> Items.NETHER_STAR;
 			case 37 -> Items.OBSIDIAN;
+			case 38 -> Items.REDSTONE;
+			case 39 -> Items.NETHER_STAR;
+			case 40 -> Items.FEATHER;
+			case 41 -> Items.FIRE_CHARGE;
+			case 42 -> Items.CLOCK;
 			default -> Items.ENDER_EYE;
 		};
 	}
@@ -164,29 +172,30 @@ final class RigMenuScreen extends Screen {
 	}
 
 	/** Why this entry can't be used now, or null if it can. */
-	private static Component blocker(LocalPlayer player, int i) {
-		int level = Rig.level(player);
-		if (level < LEVEL[i]) {
-			return Component.translatable("gui.jaymospowers.rig_menu.level", LEVEL[i]);
+		private static Component blocker(LocalPlayer player, int i) {
+			int level = Rig.level(player);
+			if (level < LEVEL[i]) {
+				return Component.translatable("gui.jaymospowers.rig_menu.level", LEVEL[i]);
+			}
+			int action = ACTIONS[i];
+			boolean helm = Rig.wears(player, Rig.Piece.HELM);
+			boolean core = !Rig.core(player).isEmpty();
+			if (action == RigNet.FACEPLATE && !helm) {
+				return Component.translatable("gui.jaymospowers.rig_menu.no_helm");
+			}
+			if ((action == RigNet.NIGHT || action == RigNet.SCAN) && (!helm || !core)) {
+				return Component.translatable("gui.jaymospowers.rig_menu.no_helm_core");
+			}
+			if ((action == RigNet.CALL || action == RigNet.SENTRY || action == RigPicks.DRONES || action == RigPicks.DECOY || action == RigPicks.FIELD) && !core) {
+				return Component.translatable("gui.jaymospowers.rig_menu.no_core");
+			}
+			if ((action == RigNet.HOVER || action == RigNet.PALM || action == RigNet.LAUNCHER || action == RigNet.UNIBEAM || action == RigPicks.DASH
+				|| action == RigPicks.BARRAGE || com.jaymospowers.rig.RigBack.is(action) || action == RigPicks.PULLUP || action == RigPicks.HYPER || action == RigPicks.BANK_TURN
+				|| action == RigPicks.METEOR || action == RigPicks.SMOOTH) && !Rig.fullSet(player)) {
+				return Component.translatable("gui.jaymospowers.rig_menu.incomplete");
+			}
+			return null;
 		}
-		int action = ACTIONS[i];
-		boolean helm = Rig.wears(player, Rig.Piece.HELM);
-		boolean core = !Rig.core(player).isEmpty();
-		if (action == RigNet.FACEPLATE && !helm) {
-			return Component.translatable("gui.jaymospowers.rig_menu.no_helm");
-		}
-		if ((action == RigNet.NIGHT || action == RigNet.SCAN) && (!helm || !core)) {
-			return Component.translatable("gui.jaymospowers.rig_menu.no_helm_core");
-		}
-		if ((action == RigNet.CALL || action == RigNet.SENTRY || action == RigPicks.DRONES || action == RigPicks.DECOY || action == RigPicks.FIELD) && !core) {
-			return Component.translatable("gui.jaymospowers.rig_menu.no_core");
-		}
-		if ((action == RigNet.HOVER || action == RigNet.PALM || action == RigNet.LAUNCHER || action == RigNet.UNIBEAM || action == RigPicks.DASH
-			|| action == RigPicks.BARRAGE || com.jaymospowers.rig.RigBack.is(action)) && !Rig.fullSet(player)) {
-			return Component.translatable("gui.jaymospowers.rig_menu.incomplete");
-		}
-		return null;
-	}
 
 	/** Ticks left on this entry's cooldown. */
 	private static int left(int i) {
@@ -201,17 +210,21 @@ final class RigMenuScreen extends Screen {
 	}
 
 	/** Whether this entry is switched on (hovering, the faceplate up, night vision on). */
-	private static boolean on(LocalPlayer player, int i) {
-		return switch (ACTIONS[i]) {
-			case RigNet.HOVER -> RigClient.status.hovering();
-			case RigNet.FACEPLATE -> RigHelm.faceUp(player);
-			case RigNet.NIGHT -> RigHelm.night(player);
-			case RigClient.JET_START -> RigFlightFeel.jetStart();
-			case RigClient.SLOW_BEAT -> RigImpact.slowBeat();
-			case RigPicks.FAILSAFE -> com.jaymospowers.rig.RigCall.failsafeOn(player);
-			default -> false;
-		};
-	}
+		private static boolean on(LocalPlayer player, int i) {
+			return switch (ACTIONS[i]) {
+				case RigNet.HOVER -> RigClient.status.hovering();
+				case RigNet.FACEPLATE -> RigHelm.faceUp(player);
+				case RigNet.NIGHT -> RigHelm.night(player);
+				case RigClient.JET_START -> RigFlightFeel.jetStart();
+				case RigClient.SLOW_BEAT -> RigImpact.slowBeat();
+				case RigPicks.FAILSAFE -> com.jaymospowers.rig.RigCall.failsafeOn(player);
+				case RigPicks.PULLUP -> RigClient.status.pullup();
+				case RigPicks.HYPER -> RigClient.status.hyper();
+				case RigPicks.BANK_TURN -> RigClient.status.banking();
+				case RigPicks.SMOOTH -> RigClient.status.smoothOthers();
+				default -> false;
+			};
+		}
 
 	@Override
 	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
@@ -288,21 +301,22 @@ final class RigMenuScreen extends Screen {
 	}
 
 	private Component status(LocalPlayer player) {
-		if (selected < 0) {
-			return Component.translatable("gui.jaymospowers.rig_menu.hint");
+			if (selected < 0) {
+				return Component.translatable("gui.jaymospowers.rig_menu.hint");
+			}
+			Component blocker = blocker(player, selected);
+			if (blocker != null) {
+				return blocker;
+			}
+			int left = left(selected);
+			if (left > 0) {
+				return Component.translatable("gui.jaymospowers.rig_menu.cooling", String.format(Locale.ROOT, "%.1f", left / 20.0));
+			}
+			if (ACTIONS[selected] == RigNet.FACEPLATE || ACTIONS[selected] == RigNet.NIGHT || ACTIONS[selected] == RigNet.HOVER || ACTIONS[selected] == RigClient.JET_START
+				|| ACTIONS[selected] == RigClient.SLOW_BEAT || ACTIONS[selected] == RigPicks.FAILSAFE || ACTIONS[selected] == RigPicks.PULLUP || ACTIONS[selected] == RigPicks.HYPER
+				|| ACTIONS[selected] == RigPicks.BANK_TURN || ACTIONS[selected] == RigPicks.SMOOTH) {
+				return Component.translatable(on(player, selected) ? "gui.jaymospowers.rig_menu.on" : "gui.jaymospowers.rig_menu.off");
+			}
+			return Component.translatable("gui.jaymospowers.rig_menu.ready");
 		}
-		Component blocker = blocker(player, selected);
-		if (blocker != null) {
-			return blocker;
-		}
-		int left = left(selected);
-		if (left > 0) {
-			return Component.translatable("gui.jaymospowers.rig_menu.cooling", String.format(Locale.ROOT, "%.1f", left / 20.0));
-		}
-		if (ACTIONS[selected] == RigNet.FACEPLATE || ACTIONS[selected] == RigNet.NIGHT || ACTIONS[selected] == RigNet.HOVER || ACTIONS[selected] == RigClient.JET_START
-			|| ACTIONS[selected] == RigClient.SLOW_BEAT || ACTIONS[selected] == RigPicks.FAILSAFE) {
-			return Component.translatable(on(player, selected) ? "gui.jaymospowers.rig_menu.on" : "gui.jaymospowers.rig_menu.off");
-		}
-		return Component.translatable("gui.jaymospowers.rig_menu.ready");
-	}
 }

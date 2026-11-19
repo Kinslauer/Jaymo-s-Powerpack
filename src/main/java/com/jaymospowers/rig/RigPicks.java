@@ -15,6 +15,11 @@ import net.minecraft.server.level.ServerPlayer;
  * <li>{@link #DECOY} the decoy ({@link RigDecoy}).</li>
  * <li>{@link #FIELD} the storing field ({@link RigField}).</li>
  * <li>{@link #BANK} bank shot ({@link RigBank}).</li>
+ * <li>{@link #PULLUP} pull-up warning ({@link RigActives}).</li>
+ * <li>{@link #HYPER} hyper thrust ({@link RigActives}).</li>
+ * <li>{@link #BANK_TURN} banking turns ({@link RigActives}).</li>
+ * <li>{@link #METEOR} meteor dive ({@link RigDive}).</li>
+ * <li>{@link #SMOOTH} smooth other flyers ({@link RigActives}).</li>
  * </ul>
  * These actions share {@link RigNet.Use} with the Rig's own, numbered from {@link #FIRST}.
  */
@@ -28,6 +33,8 @@ public final class RigPicks {
 		AF_MIMIC = 35;
 	/** The failsafe's switch ({@link RigCall}): works with the suit parked too. */
 	public static final int FAILSAFE = 28;
+	/** (0.12.x) Flight actives: pull-up, hyper thrust, banking, meteor dive, smooth others. */
+	public static final int PULLUP = 36, HYPER = 37, BANK_TURN = 38, METEOR = 39, SMOOTH = 40;
 
 	private RigPicks() {
 	}
@@ -41,6 +48,7 @@ public final class RigPicks {
 		RigField.init();
 		RigBank.init();
 		RigStrikes.init();
+		RigDive.init();
 		RigForms.init();
 		RigBack.init();
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
@@ -55,7 +63,7 @@ public final class RigPicks {
 
 	/** Whether {@code action} is one of these. */
 	public static boolean is(int action) {
-		return action >= FIRST && action <= AF_MIMIC || RigBack.is(action);
+		return action >= FIRST && action <= SMOOTH || RigBack.is(action);
 	}
 
 	/** A Rig menu entry from the client. */
@@ -81,6 +89,11 @@ public final class RigPicks {
 			case DASH -> RigStrikes.dash(player);
 			case BARRAGE -> RigStrikes.barrage(player);
 			case AF_BLADE, AF_MACE, AF_PILE, AF_DRILL, AF_LANCE, AF_LASH, AF_MIMIC -> RigForms.use(player, action);
+			case PULLUP -> RigActives.pullUp(player);
+			case HYPER -> RigActives.hyperThrust(player);
+			case BANK_TURN -> RigActives.toggleBanking(player);
+			case METEOR -> RigDive.meteorDive(player);
+			case SMOOTH -> RigActives.toggleSmoothOthers(player);
 			case RigBack.WINGSLASH, RigBack.SPEARS, RigBack.PINCER, RigBack.GRAPPLE, RigBack.HORNS -> RigBack.use(player, action);
 			default -> {
 			}
