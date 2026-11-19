@@ -2472,3 +2472,15 @@ Andy's scaling pick "feasts": a late food tier. Three feast dishes from Legend-a
 ## 0.6.51 (2026-11-18): Add Cooking Block (#1687)
 
 Added a new **Cooking Block** to the Functional creative tab. The block has iron-like properties (metal sound, hardness 5.0, resistance 6.0) and uses a single cube_all texture for both block and item models.
+
+## 0.6.52 (2026-11-19): drinks and kitchen - vines, press, vintage, tea, smoke chips, black wine (#1797)
+
+- **Grape vines**: a vine on a trellis (Grape Vine; crafted from grapes and two sticks), wild ones on the edges of plains, savanna and flower forests. Prune it with shears in winter and it bears three bunches; a vine bears one crop a year (after picking it stays bare until it has been through a winter), and one left unpruned bears one fewer each year, down to one. Ripe bunches in the open are stripped by birds now and then; a net (string) keeps them off and adds a bunch. Pick with an empty hand.
+- **Treading tub and apple press**: load grapes (or crimson and warped grapes) into the tub and jump in it, or apples into the press and turn the screw with an empty hand; draw the juice into glass bottles. Three bottles of juice fill a cask on their own. Our grapes make Grape Wine alongside Pantry's.
+- **Vintage**: wine drawn from a cask carries the year it was made. Left in a cask in a cool cellar (`Freshness#cellar`) it improves each in-game year, up to five. Sneak and use a bottle on a villager, wandering trader or (with Kingdoms) its folk and Hornkin to sell it; older wine pays up to 3.5 times as much (`KingdomsMoney`).
+- **Tea**: tea bushes in jungles, cherry groves and windswept hills; they grow in rain and shade. Fresh leaves dry on the drying rack, only with the sun on them, into Dried Tea Leaves, which the tea kettle brews like any tea herb. A tea pot on a table, filled with cups of tea, serves everyone sitting on a cushion nearby with a short calm and a little warmth.
+- **Smoke chips**: oak, birch, cherry, apple and dark oak wood chips (crafted from logs). One from your pockets goes on the coals when the smoker's minigame ends well: each keeps the food a different time (oak 5x, birch 4x, cherry 5x, apple 4x, dark oak 7x; plain smoke 4x) and fills a little more.
+- **Black wine**: crimson and warped vines grow along the Nether's lava shores and only near lava; their grapes make juice and Black Wine, which sells for a lord's price.
+- JEI: a Tub and Press page, a Cask page, tea leaves on the Drying Rack page, and notes on the vines, tea bush, pot and wood chips.
+- Classes: `vintner/Vintner`, `GrapeVineBlock`, `TeaBushBlock`, `JuiceBlock`, `JuiceEntity`, `TeaPotBlock`, `Juice`, `Vintage`, `WineTrade`, `Chip`; `CaskEntity`, `Brew`, `Brewing`, `Curing`, `Kitchen#award`, `Hides#dried`, `DryingRackEntity`, `MillJei`.
+- Built; not played.
