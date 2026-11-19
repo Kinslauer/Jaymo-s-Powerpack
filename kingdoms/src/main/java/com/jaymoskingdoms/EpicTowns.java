@@ -25,6 +25,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -314,16 +315,21 @@ public final class EpicTowns {
 		HolderSet<Structure> towns = towns(level);
 		StructureStart start = null;
 		String id = "";
+		String skipped = null;
 		for (Holder<Structure> town : towns) {
 			StructureStart there = level.structureManager().getStartForStructure(town.value(), chunk);
 			if (there != null && there.isValid()) {
+				if (!surface(level, there)) {
+					skipped = Stacked.realm(level, there.getBoundingBox().getCenter().getY()).identifier().toString();
+					continue;
+				}
 				start = there;
 				id = town.unwrapKey().map(k -> k.identifier().toString()).orElse("");
 				break;
 			}
 		}
 		if (start == null) {
-			return pass(looking, "no town started there");
+			return pass(looking, skipped != null ? "its town is in " + skipped + ", not the Overworld" : "no town started there");
 		}
 		BoundingBox box = start.getBoundingBox();
 		BlockPos middle = box.getCenter();
@@ -355,6 +361,11 @@ public final class EpicTowns {
 		PASSED.add(looking.chunk().pack());
 		far = null;
 		return null;
+	}
+
+	/** Whether the town stands in the Overworld's band (a One Dimension world's other bands share its town spots; in an ordinary world always). */
+	static boolean surface(ServerLevel level, StructureStart start) {
+		return Stacked.at(level, start.getBoundingBox().getCenter(), Level.OVERWORLD);
 	}
 
 	/** Whether more than {@link #WET_MOST} of its pieces stand over water. */
