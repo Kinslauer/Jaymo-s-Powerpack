@@ -3850,5 +3850,1605 @@
 		"sounds": [
 			"jaymoskingdoms:war_drum"
 		]
+	},
+	"voice.narrator.faith.title": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/faith_title",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.faith.sub": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/faith_sub",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.born.plains.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/born_plains_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.born.forest.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/born_forest_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.born.north.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/born_north_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.born.warband.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/born_warband_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.born.vats.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/born_vats_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.born.den.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/born_den_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.starwrights.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_starwrights_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.smiths.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_smiths_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.fisherfolk.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_fisherfolk_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.hunters.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_hunters_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.healers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_healers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.outlaws.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_outlaws_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.tinkerer.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_tinkerer_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.vatkin.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_vatkin_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.acrobats.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_acrobats_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.ringmaster.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_ringmaster_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.keepers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_keepers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.grovekeepers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_grovekeepers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.elders.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_elders_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.hornkin.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_hornkin_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.wolves.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_wolves_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.barrows.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_barrows_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.chieftain.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_chieftain_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.master.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_master_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.sunpriests.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_sunpriests_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.raised.pack.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/raised_pack_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.youth.cutpurses.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/youth_cutpurses_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.youth.levy.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/youth_levy_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.youth.hermit.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/youth_hermit_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.youth.hunted.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/youth_hunted_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.youth.winter.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/youth_winter_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.youth.gunsmith.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/youth_gunsmith_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.youth.messenger.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/youth_messenger_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.youth.acolyte.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/youth_acolyte_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.youth.squire.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/youth_squire_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.youth.bargain.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/youth_bargain_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.youth.sprig.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/youth_sprig_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.youth.boxer.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/youth_boxer_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.youth.bench.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/youth_bench_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.youth.drifted.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/youth_drifted_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.turn.bite.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/turn_bite_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.turn.weapon.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/turn_weapon_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.turn.sea.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/turn_sea_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.turn.fists.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/turn_fists_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.monolith.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_monolith_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.moon.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_moon_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.demon.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_demon_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.afterlife.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_afterlife_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.chained.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_chained_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.rock_bottom.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_rock_bottom_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.sentenced.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_sentenced_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.evicted.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_evicted_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.hideout.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_hideout_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.cast_out.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_cast_out_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.heirloom.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_heirloom_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.trader.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_trader_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.pup.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_pup_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.nobodies.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_nobodies_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.lab.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_lab_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.android.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_android_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.moon_cursed.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_moon_cursed_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.road.greenskin.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/road_greenskin_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.faith.hearthkeeper.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/faith_hearthkeeper_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.faith.anvil_father.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/faith_anvil_father_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.faith.deep_mother.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/faith_deep_mother_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.faith.green_huntsman.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/faith_green_huntsman_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.faith.lantern_warden.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/faith_lantern_warden_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.faith.crowned_sun.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/faith_crowned_sun_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.faith.ash_whisperer.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/faith_ash_whisperer_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.faith.truth.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/faith_truth_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.faith.none.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/faith_none_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.raised.title": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_raised_title",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.raised.sub": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_raised_sub",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.raised.farmers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_raised_farmers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.raised.smiths.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_raised_smiths_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.raised.fisherfolk.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_raised_fisherfolk_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.raised.hunters.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_raised_hunters_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.raised.merchants.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_raised_merchants_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.raised.soldiers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_raised_soldiers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.raised.healers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_raised_healers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.raised.wizard.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_raised_wizard_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.raised.outlaws.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_raised_outlaws_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.raised.foundling.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_raised_foundling_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.childhood.title": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_childhood_title",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.childhood.sub": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_childhood_sub",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.childhood.roofs.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_childhood_roofs_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.childhood.caves.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_childhood_caves_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.childhood.fights.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_childhood_fights_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.childhood.books.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_childhood_books_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.childhood.swimming.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_childhood_swimming_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.childhood.storms.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_childhood_storms_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.childhood.fire.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_childhood_fire_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.childhood.snow.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_childhood_snow_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.childhood.bells.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_childhood_bells_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.childhood.blades.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_childhood_blades_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.youth.title": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_youth_title",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.youth.sub": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_youth_sub",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.youth.cutpurses.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_youth_cutpurses_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.youth.levy.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_youth_levy_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.youth.apprentice.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_youth_apprentice_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.youth.hermit.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_youth_hermit_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.youth.hunted.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_youth_hunted_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.youth.winter.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_youth_winter_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.youth.pits.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_youth_pits_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.youth.gunsmith.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_youth_gunsmith_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.youth.messenger.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_youth_messenger_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.youth.acolyte.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_youth_acolyte_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.youth.squire.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_youth_squire_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.youth.bargain.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_youth_bargain_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.youth.sprig.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_youth_sprig_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.youth.boxer.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_youth_boxer_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.youth.bench.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_youth_bench_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.biobuilt.turn.sub": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_biobuilt_turn_sub",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.rubberfolk.raised.title": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_rubberfolk_raised_title",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.rubberfolk.raised.sub": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_rubberfolk_raised_sub",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.rubberfolk.raised.farmers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_rubberfolk_raised_farmers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.rubberfolk.raised.merchants.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_rubberfolk_raised_merchants_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.rubberfolk.raised.wizard.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_rubberfolk_raised_wizard_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.rubberfolk.raised.outlaws.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_rubberfolk_raised_outlaws_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.rubberfolk.raised.foundling.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_rubberfolk_raised_foundling_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.rubberfolk.childhood.roofs.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_rubberfolk_childhood_roofs_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.rubberfolk.childhood.blades.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_rubberfolk_childhood_blades_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.rubberfolk.youth.pits.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_rubberfolk_youth_pits_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.tideborn.raised.title": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_tideborn_raised_title",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.tideborn.raised.sub": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_tideborn_raised_sub",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.tideborn.raised.fisherfolk.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_tideborn_raised_fisherfolk_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.tideborn.raised.farmers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_tideborn_raised_farmers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.tideborn.raised.foundling.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_tideborn_raised_foundling_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.stoneborn.raised.sub": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_stoneborn_raised_sub",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.stoneborn.raised.farmers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_stoneborn_raised_farmers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.stoneborn.raised.smiths.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_stoneborn_raised_smiths_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.stoneborn.raised.fisherfolk.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_stoneborn_raised_fisherfolk_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.stoneborn.raised.hunters.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_stoneborn_raised_hunters_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.stoneborn.raised.merchants.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_stoneborn_raised_merchants_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.stoneborn.childhood.roofs.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_stoneborn_childhood_roofs_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.stoneborn.childhood.swimming.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_stoneborn_childhood_swimming_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.stoneborn.childhood.storms.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_stoneborn_childhood_storms_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.sylvan.raised.sub": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_sylvan_raised_sub",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.sylvan.raised.farmers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_sylvan_raised_farmers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.sylvan.raised.hunters.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_sylvan_raised_hunters_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.sylvan.childhood.roofs.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_sylvan_childhood_roofs_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.verdant.raised.sub": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_verdant_raised_sub",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.verdant.raised.farmers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_verdant_raised_farmers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.verdant.raised.soldiers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_verdant_raised_soldiers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.verdant.raised.merchants.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_verdant_raised_merchants_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.emberborn.raised.sub": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_emberborn_raised_sub",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.emberborn.raised.smiths.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_emberborn_raised_smiths_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.emberborn.raised.soldiers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_emberborn_raised_soldiers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.emberborn.raised.healers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_emberborn_raised_healers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.emberborn.childhood.snow.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_emberborn_childhood_snow_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.frostborn.raised.sub": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_frostborn_raised_sub",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.frostborn.raised.farmers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_frostborn_raised_farmers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.frostborn.raised.fisherfolk.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_frostborn_raised_fisherfolk_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.frostborn.raised.hunters.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_frostborn_raised_hunters_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.frostborn.childhood.swimming.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_frostborn_childhood_swimming_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.nightborn.raised.sub": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_nightborn_raised_sub",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.nightborn.raised.farmers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_nightborn_raised_farmers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.nightborn.raised.hunters.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_nightborn_raised_hunters_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.warriorborn.raised.title": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_warriorborn_raised_title",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.warriorborn.raised.sub": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_warriorborn_raised_sub",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.warriorborn.raised.farmers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_warriorborn_raised_farmers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.warriorborn.raised.smiths.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_warriorborn_raised_smiths_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.warriorborn.raised.merchants.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_warriorborn_raised_merchants_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.warriorborn.raised.soldiers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_warriorborn_raised_soldiers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.warriorborn.raised.healers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_warriorborn_raised_healers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.warriorborn.raised.foundling.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_warriorborn_raised_foundling_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.warriorborn.childhood.fights.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_warriorborn_childhood_fights_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.earthling.raised.sub": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_earthling_raised_sub",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.earthling.raised.wizard.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_earthling_raised_wizard_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.dawnborn.raised.sub": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_dawnborn_raised_sub",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.dawnborn.raised.farmers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_dawnborn_raised_farmers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.dawnborn.raised.fisherfolk.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_dawnborn_raised_fisherfolk_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.dawnborn.raised.merchants.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_dawnborn_raised_merchants_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.dawnborn.childhood.snow.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_dawnborn_childhood_snow_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.beastfolk.raised.title": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_beastfolk_raised_title",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.beastfolk.raised.sub": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_beastfolk_raised_sub",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.beastfolk.raised.farmers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_beastfolk_raised_farmers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.beastfolk.raised.smiths.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_beastfolk_raised_smiths_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.beastfolk.raised.fisherfolk.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_beastfolk_raised_fisherfolk_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.beastfolk.raised.hunters.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_beastfolk_raised_hunters_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.beastfolk.raised.merchants.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_beastfolk_raised_merchants_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.beastfolk.raised.soldiers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_beastfolk_raised_soldiers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.beastfolk.raised.healers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_beastfolk_raised_healers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.beastfolk.raised.wizard.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_beastfolk_raised_wizard_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.beastfolk.raised.outlaws.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_beastfolk_raised_outlaws_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.beastfolk.raised.nobles.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_beastfolk_raised_nobles_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.beastfolk.raised.foundling.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_beastfolk_raised_foundling_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.beastfolk.childhood.title": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_beastfolk_childhood_title",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.beastfolk.childhood.sub": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_beastfolk_childhood_sub",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.beastfolk.childhood.roofs.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_beastfolk_childhood_roofs_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.beastfolk.childhood.caves.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_beastfolk_childhood_caves_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.beastfolk.childhood.fights.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_beastfolk_childhood_fights_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.frostborn.raised.smiths.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_frostborn_raised_smiths_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.nightborn.raised.healers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_nightborn_raised_healers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.stoneborn.raised.healers.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_stoneborn_raised_healers_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.frostborn.raised.foundling.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_frostborn_raised_foundling_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.frostborn.from_foundling.born.north.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_frostborn_from_foundling_born_north_tale",
+				"stream": true
+			}
+		]
+	},
+	"voice.narrator.as.emberborn.raised.foundling.tale": {
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:voice/narrator/as_emberborn_raised_foundling_tale",
+				"stream": true
+			}
+		]
 	}
 }
