@@ -4,125 +4,111 @@
   "pools": [
     {
       "rolls": 1,
-      "conditions": [
-        {
-          "condition": "minecraft:survives_explosion"
-        }
-      ],
       "entries": [
         {
           "type": "minecraft:item",
           "name": "jaymoskingdoms:crown_stand"
         }
-      ]
+      ],
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      }
     },
     {
       "rolls": 1,
-      "conditions": [
-        {
-          "condition": "minecraft:block_state_property",
-          "block": "jaymoskingdoms:crown_stand",
-          "properties": {
-            "s0": "true"
-          }
-        }
-      ],
       "entries": [
         {
           "type": "minecraft:item",
           "name": "jaymoskingdoms:sky_shard_step"
         }
-      ]
+      ],
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "jaymoskingdoms:crown_stand",
+        "state": {
+          "s0": "true"
+        }
+      }
     },
     {
       "rolls": 1,
-      "conditions": [
-        {
-          "condition": "minecraft:block_state_property",
-          "block": "jaymoskingdoms:crown_stand",
-          "properties": {
-            "s1": "true"
-          }
-        }
-      ],
       "entries": [
         {
           "type": "minecraft:item",
           "name": "jaymoskingdoms:sky_shard_lode"
         }
-      ]
+      ],
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "jaymoskingdoms:crown_stand",
+        "state": {
+          "s1": "true"
+        }
+      }
     },
     {
       "rolls": 1,
-      "conditions": [
-        {
-          "condition": "minecraft:block_state_property",
-          "block": "jaymoskingdoms:crown_stand",
-          "properties": {
-            "s2": "true"
-          }
-        }
-      ],
       "entries": [
         {
           "type": "minecraft:item",
           "name": "jaymoskingdoms:sky_shard_cold"
         }
-      ]
+      ],
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "jaymoskingdoms:crown_stand",
+        "state": {
+          "s2": "true"
+        }
+      }
     },
     {
       "rolls": 1,
-      "conditions": [
-        {
-          "condition": "minecraft:block_state_property",
-          "block": "jaymoskingdoms:crown_stand",
-          "properties": {
-            "s3": "true"
-          }
-        }
-      ],
       "entries": [
         {
           "type": "minecraft:item",
           "name": "jaymoskingdoms:sky_shard_night"
         }
-      ]
+      ],
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "jaymoskingdoms:crown_stand",
+        "state": {
+          "s3": "true"
+        }
+      }
     },
     {
       "rolls": 1,
-      "conditions": [
-        {
-          "condition": "minecraft:block_state_property",
-          "block": "jaymoskingdoms:crown_stand",
-          "properties": {
-            "s4": "true"
-          }
-        }
-      ],
       "entries": [
         {
           "type": "minecraft:item",
           "name": "jaymoskingdoms:sky_shard_breath"
         }
-      ]
+      ],
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "jaymoskingdoms:crown_stand",
+        "state": {
+          "s4": "true"
+        }
+      }
     },
     {
       "rolls": 1,
-      "conditions": [
-        {
-          "condition": "minecraft:block_state_property",
-          "block": "jaymoskingdoms:crown_stand",
-          "properties": {
-            "s5": "true"
-          }
-        }
-      ],
       "entries": [
         {
           "type": "minecraft:item",
           "name": "jaymoskingdoms:sky_shard_heart"
         }
-      ]
+      ],
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "jaymoskingdoms:crown_stand",
+        "state": {
+          "s5": "true"
+        }
+      }
     }
   ]
 }
