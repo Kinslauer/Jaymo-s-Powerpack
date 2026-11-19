@@ -4,12 +4,11 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 13:05). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 13:06). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
-- [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · open
 - [ ] [[Inbox/village-mods-4-board-work|village-mods-4-board-work]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-5-town-life-hats|village-mods-5-town-life-hats]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-6-small-structures|village-mods-6-small-structures]] · for 💻 Odysseus · open
@@ -32,6 +31,7 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/heritage-paths|heritage-paths]] · heritage-paths · claimed
 
 
 ## In review
