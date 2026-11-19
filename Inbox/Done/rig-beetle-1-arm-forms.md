@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: any
 from: coordinator (Zemo Baki cross-reference thread)
 asked: 2026-11-18
@@ -41,3 +41,4 @@ text_pass: done
 
 ## Notes
 - 2026-11-18 13:02 Text pass: reviewed changes/powers/rig-beetle-1-arm-forms.md (already player-facing, 'Built; not played in game.') and the lang/parts/rig.json additions (seven arm-form menu entries: Arm Blade, Mace Arm, Pile Bunker, Drill Breaker, Thruster Lance, Energy Lash, Weapon Mimic; messages needs_arms, form_wait, study_none, mimic_ready). All strings plain, brief and consistent with existing rig message style; every key the new code references exists. No rewrites needed.
+- 2026-11-18 19:03 PR #1746 is merged into master; moved to Inbox/Done.

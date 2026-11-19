@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes-a
 from: pc-claude
 asked: 2026-11-18
@@ -35,3 +35,4 @@ text_pass: done
 ## Notes
 - 2026-11-18 02:44 Andy approved the lore placement "The armourers' wider makes" (2026-11-18): it's canon now.
 - 2026-11-18 10:54 Text pass on PR #1721 (Harness 1: helms, finishes, crests). Reviewed every player-visible string the PR adds or changes: kingdoms lang heraldry-armour-items.json (6 new helm names, 5 new crest names, Crest of Plumes), heraldry-armour.json (5 finish names: Russeted, Heat-blued, Painted, Etched and Gilt, Rusted), message.json (bounty.paid, job.paid, job.paid_short shortened), class.rider.desc, heritage dragonblood gift_rimewyrm, story shorts (born.den, childhood.blades, raised.pack, turn.fate, youth.drifted) and gui.creator.faith. All text is plain, brief, in the speaker's voice, matches the Harness Pattern Book names Andy approved; all lang keys and placeholders kept. No rewrites needed, so no files were changed and nothing was built or pushed. Change note changes/kingdoms/harness-helms-finishes-crests.md reads well.
+- 2026-11-18 19:03 PR #1721 is merged into master; moved to Inbox/Done.

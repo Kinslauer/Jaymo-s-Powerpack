@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: harness-barding
 branch: claude/harness-barding
 with:
@@ -41,3 +41,4 @@ owns:
 ## Done
 Player will see: matching barding sets in three finishes (bright/blackened/gilded) that match their heraldry armour, and caparisons in realm colours. Not tested in game.
 - 2026-11-18 20:11 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-18 19:03 PR #1744 is merged into master; moved to Agents/Done.

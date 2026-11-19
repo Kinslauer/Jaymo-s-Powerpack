@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: harness-helms-finishes-crests
 branch: claude/harness-helms-finishes-crests
 with: 
@@ -35,3 +35,4 @@ owns:
 - Generator creates models, textures, icons, item models, lang entries
 
 ## Done
+- 2026-11-18 19:03 PR #1721 is merged into master; moved to Agents/Done.

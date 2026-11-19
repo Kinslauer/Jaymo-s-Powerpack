@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: rig-beetle-1-arm-forms
 branch: claude/rig-beetle-1-arm-forms
 with: 
@@ -34,3 +34,4 @@ owns:
 
 ## Done
 What a player will see: seven new arm forms in the Rig menu (Sneak + J), each a Rig menu entry with charge cost, pose and sound. Not tested in game.
+- 2026-11-18 19:03 PR #1746 is merged into master; moved to Agents/Done.

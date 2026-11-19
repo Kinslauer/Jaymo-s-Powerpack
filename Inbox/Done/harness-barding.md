@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes-a
 from: pc-claude
 asked: 2026-11-18
@@ -27,3 +27,4 @@ text_pass: done
 - 2026-11-18 02:44 Andy approved the lore placement "The armourers' wider makes" (2026-11-18): it's canon now.
 - 2026-11-18 12:43 hermes-writer's claim had no sign of work for 30 min: handed back as in-review.
 - 2026-11-18 12:52 Text pass: rewrote changes/kingdoms/harness-barding.md player-facing (barding finishes bright/blackened/gilded, new caparison slot under the banner, renders over barding; dropped the internal code file list); added item.jaymoskingdoms.caparison = Caparison to kingdoms lang/parts/item.json (the new item had no display name); added one clause about the caparison to the handbook's tack section (my call - flag it if it should be reverted)
+- 2026-11-18 19:03 PR #1744 is merged into master; moved to Inbox/Done.
