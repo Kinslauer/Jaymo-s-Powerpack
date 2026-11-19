@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-18 18:51). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-18 19:03). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -23,10 +23,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · in-review
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · in-review
-- [ ] [[Inbox/harness-helms-finishes-crests|harness-helms-finishes-crests]] · ☀️ Apollo · #1721 · in-review
 - [ ] [[Inbox/harness-creeds-and-lands|harness-creeds-and-lands]] · ☀️ Apollo · #1728 · in-review
-- [ ] [[Inbox/harness-barding|harness-barding]] · ☀️ Apollo · #1744 · in-review
-- [ ] [[Inbox/rig-beetle-1-arm-forms|rig-beetle-1-arm-forms]] · 🍇 Bacchus · #1746 · in-review
 - [ ] [[Inbox/rig-beetle-2-guns|rig-beetle-2-guns]] · ☀️ Apollo · #1749 · in-review
 - [ ] [[Inbox/lanterns-01-crime-small|lanterns-01-crime-small]] · lanterns-01-crime-small · #1751 · in-review
 - [ ] [[Inbox/lanterns-02-space-small|lanterns-02-space-small]] · lanterns-02-space-small · #1753 · in-review
@@ -57,14 +54,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/rig-beetle-1-arm-forms|rig-beetle-1-arm-forms]]
+- [x] [[Inbox/Done/harness-helms-finishes-crests|harness-helms-finishes-crests]]
+- [x] [[Inbox/Done/harness-barding|harness-barding]]
 - [x] [[Inbox/Done/wither-reincarnated-fight|wither-reincarnated-fight]]
 - [x] [[Inbox/Done/weapon-hooks-and-breaks|weapon-hooks-and-breaks]]
 - [x] [[Inbox/Done/labyrinth-builders-craft|labyrinth-builders-craft]]
 - [x] [[Inbox/Done/inferno-fire|inferno-fire]]
 - [x] [[Inbox/Done/fishing-fire-and-crates|fishing-fire-and-crates]]
-- [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
-- [x] [[Inbox/Done/armor-pngs-vanilla-style|armor-pngs-vanilla-style]]
-- [x] [[Inbox/Done/conjoined-twin-mutation|conjoined-twin-mutation]]
 
 
 %% kanban:settings
