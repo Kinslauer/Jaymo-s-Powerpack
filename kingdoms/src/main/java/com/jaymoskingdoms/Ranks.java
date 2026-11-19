@@ -197,8 +197,10 @@ public final class Ranks {
 	}
 
 	/**
-	 * (Learners, Veterans) {@code v}'s wins may have earned them a rank: if so they take it, with the realm's kit for it
-	 * and (unless {@code quiet}) a few words. One who gets to knight with a bow in hand goes the archers' way.
+	 * (Learners, Veterans) {@code v}'s wins may have earned them a rank: if so they take it and (unless {@code quiet}) say
+	 * a few words. Only a new recruit is issued the realm's kit for their rank, the stock they were taken on in; after
+	 * that they wear what their employer puts in their pack (Andy: "you need to give them what you want them to equip").
+	 * One who gets to knight with a bow in hand goes the archers' way.
 	 */
 	static void rise(VillagerEntityMCA v, boolean quiet) {
 		if (!(v.level() instanceof ServerLevel level)) {
@@ -221,7 +223,9 @@ public final class Ranks {
 		}
 		int code = step | (bow ? BOW : 0);
 		v.setAttached(RANK, code);
-		kit(level, v, code);
+		if (had == null) {
+			kit(level, v, code);
+		}
 		apply(v);
 		if (!quiet && had != null) {
 			level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.ARMOR_EQUIP_IRON.value(), SoundSource.NEUTRAL, 1.0F, 0.9F);
@@ -433,6 +437,18 @@ public final class Ranks {
 		// (the very stack in their pack, as MCA dresses them: wear on one is wear on the other)
 		ItemStack own = packed ? held(pack, piece) : null;
 		v.setItemSlot(slot, own != null ? own : piece.copy());
+	}
+
+	/**
+	 * From {@code McaEquipmentMixin}: what a recruit ({@link #RANK} given) puts in {@code slot} when MCA dresses or arms
+	 * them with {@code stack}: only what is in their pack (their stock kit and what they were given). Nothing is handed
+	 * out of thin air: what isn't in their pack is nothing. Anyone else's {@code stack} is returned unchanged.
+	 */
+	public static ItemStack owned(LivingEntity villager, ItemStack stack) {
+		if (stack.isEmpty() || !villager.hasAttached(RANK) || !(villager instanceof VillagerEntityMCA v)) {
+			return stack;
+		}
+		return holds(v.getInventory(), stack) ? stack : ItemStack.EMPTY;
 	}
 
 	/** The stack in {@code pack} the same as {@code stack}, or null. */

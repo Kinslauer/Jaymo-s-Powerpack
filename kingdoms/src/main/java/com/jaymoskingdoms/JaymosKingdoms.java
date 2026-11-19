@@ -169,6 +169,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.132: townsfolk bury their dead in a graveyard (burn the enemy's), and mourn; looters and the poor rob the dead
 		LOGGER.debug("grave attachment: {}", Bearers.GRAVES);
 		Bearers.register();
+		// the dead's gear goes into the stores, and guards brag about the spoils they wear
+		Salvage.register();
 		GraveGhost.register();
 		RoyalRemains.register();
 		Looters.register();
