@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 09:38). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 10:01). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -34,6 +34,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1837 The wind's push no longer loads land (Kingdoms, 2026-11-19)
 - [ ] #1836 NPC fights 2: strings, chases and ki for tyrants, Patrolmen and Z Fighter gifted folk (Powers, 2026-11-19)
 - [ ] #1834 NPC fights 3: trading blows, beam struggles, impact, soft blocks, power-ups (Powers, 2026-11-19)
 - [ ] #1833 no Animal Dictionary on first join; UI tips as you meet things (Powers, Kingdoms, 2026-11-19)
@@ -93,8 +94,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1754 Patrol: relief runs and your Patrol file (Powers, 2026-11-19)
 - [ ] #1753 Space: the star map's atlas, and the ringed giant in the night sky (Powers, 2026-11-19)
 - [ ] #1751 Crime: sleepers woken, suspects watched (Kingdoms, 2026-11-19)
-- [ ] #1749 Rig patch 2: guns that unfold (Powers, 2026-11-19)
-- …and 219 older ones.
+- …and 220 older ones.
 
 ## Health
 
