@@ -51,3 +51,4 @@ SchematicFiles, Designs. `MasonTable` around line 580 builds today's top-8 needs
 - One PR, one change note `changes/kingdoms/<branch>.md`. No `version=`, MODLOG or codemap edits.
 - Check every 26.3 render/keybind API against the sources. Build `kingdoms/` to prove it compiles.
 - Andy tests by merging, so don't ask him to test an unmerged build.
+- 2026-11-19 20:39 Review (head 82b21c6, vault coordinator, reviewer away): code passes - all three asks built (red/orange/blue ghosts, layer view on numpad 8/2 or Ctrl+scroll with action-bar 'Layer N of M', full scrolling material list with dirt and door/bed halves counted). Build Kingdoms green; Build Powers failed on a Gradle download error before compiling (this PR touches only Kingdoms), so the failed job was re-run. Sent to Andy once checks are green.
