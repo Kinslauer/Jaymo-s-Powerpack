@@ -189,6 +189,8 @@ public final class Throwables {
 			GroundFx.caltrops(level, at, owner, CALTROPS_SCATTERED);
 		} else if (kind == BEAR_TRAP) {
 			GroundFx.bearTrap(level, at, owner);
+		} else if (kind == com.jaymospowers.gear.ThrowingCards.CARD) {
+			com.jaymospowers.gear.ThrowingCards.hit(level, owner, hit);
 		} else if (kind == FROST_BOMB) {
 			frost(level, at, owner);
 		} else {

@@ -63,6 +63,7 @@ public final class GearPicks {
 		STEEL_BELT = belt("steel_thrower_belt", STEEL_SLOTS, Rarity.UNCOMMON);
 		Throwables.register();
 		SeekingChip.init();
+		ThrowingCards.init();
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
 			HEADS.values().forEach(output::accept);
@@ -82,6 +83,7 @@ public final class GearPicks {
 			output.accept(new ItemStack(Throwables.BEAR_TRAP));
 			output.accept(new ItemStack(Throwables.FROST_BOMB));
 			output.accept(new ItemStack(SeekingChip.ITEM));
+			output.accept(new ItemStack(ThrowingCards.DECK_ITEM));
 		});
 		GearNet.init();
 		GroundFx.init();

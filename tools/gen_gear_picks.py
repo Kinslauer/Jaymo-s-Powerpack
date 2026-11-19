@@ -289,6 +289,40 @@ GRIDS = {
         "................",
         "................",
         "................"],
+    "throwing_card": [
+        "................",
+        "................",
+        "......#####.....",
+        "......#wwww#....",
+        "......#wrrw#....",
+        "......#wrrw#....",
+        "......#wwww#....",
+        "......#wrrw#....",
+        "......#wwww#....",
+        "......#####.....",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................"],
+    "throwing_cards": [
+        "................",
+        "...#####........",
+        "...#wwww#.##....",
+        "...#wrrw##w#....",
+        "...#wwww#ww##...",
+        "....#####wrrw#..",
+        ".....#wwww#ww#..",
+        ".....#wrrw#wr#..",
+        ".....#wwww####..",
+        "......######....",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................"],
     "bear_trap": [
         "................",
         "................",
@@ -413,6 +447,8 @@ THROWABLES = {
     "choking_vial": ("Choking Vial", "A vial of heavy gas: a cloud that sickens, weakens and slows whoever breathes it."),
     "caltrops": ("Caltrops", "Scatters iron spikes that cut and slow whoever steps on them."),
     "lodestone_chip": ("Lodestone Chip", ""),
+    "throwing_card": ("Throwing Card", ""),
+    "throwing_cards": ("Deck of Throwing Cards", ""),
     "bear_trap": ("Bear Trap", "Set where it lands: it snaps shut on the first thing to step near it and holds it fast."),
     "frost_bomb": ("Frost Bomb", "Bursts in a ring of frost: everything in it is slowed hard and starts to freeze, and the water's surface turns to ice."),
 }
@@ -502,6 +538,7 @@ def recipes():
     shapeless("head_blunt", ["#minecraft:wool", "minecraft:leather", "minecraft:stick"], "head_blunt", 2)
     shapeless("head_spark", ["minecraft:copper_ingot", "minecraft:string", "minecraft:redstone"], "head_spark", 2)
     shapeless("head_mending", ["minecraft:fern", "minecraft:sweet_berries", "minecraft:string"], "head_mending", 2)
+    shapeless("throwing_cards", ["minecraft:paper", "minecraft:paper", "minecraft:paper", "minecraft:iron_nugget", "minecraft:iron_nugget", "minecraft:iron_nugget"], "throwing_cards", 1)
     shapeless("lodestone_chip", ["minecraft:lodestone"], "lodestone_chip", 4)
     shapeless("frost_bomb", ["minecraft:glass_bottle", "minecraft:gunpowder", "minecraft:snowball", "minecraft:snowball"], "frost_bomb", 1)
     shapeless("smoke_pot", ["minecraft:clay_ball", "minecraft:charcoal", "minecraft:spider_eye"], "smoke_pot", 2)

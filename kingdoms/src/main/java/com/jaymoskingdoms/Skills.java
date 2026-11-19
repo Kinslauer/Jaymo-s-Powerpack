@@ -127,6 +127,8 @@ public final class Skills {
 	static final String TREATED_TAG = "jaymospowers_treated";
 	/** (0.7.102) The entity tag Jaymo's Powers puts on a player for each freerun move ({@code Freerun.XP_TAG}); taken off as it's read. */
 	static final String FREERUN_TAG = "jaymospowers_freerun";
+	/** Put on a player with the Stubborn perk, for Jaymo's Powers (its downed save once a day). */
+	static final String STUBBORN_TAG = "jaymospowers_stubborn";
 	/** Practice: each Stealth level takes this share off how long your hand must stay in a pocket. */
 	static final float PRACTICE_PER_LEVEL = 0.03F;
 	/** Light Fingers: this share off the hold per rank. */
@@ -427,7 +429,9 @@ public final class Skills {
 		// of the back roll. On Freerunning under Freerunner; last, so no ordinal moves
 		BACKFLIP(Pillar.STEALTH, 1, 1, 5, 5, 1, FREERUNNER),
 		// Might: the battle rhythm (Jaymo's Powers' BattleRhythm), attacks quickening a step at a time while you keep fighting. Last, so no ordinal moves
-		BATTLE_RHYTHM(Pillar.STRENGTH, 1, 1, 3, 2, 1);
+		BATTLE_RHYTHM(Pillar.STRENGTH, 1, 1, 3, 2, 1),
+		// Stubborn: once a day a killing blow leaves you downed, mending fast for 40 s (Jaymo's Powers' Stubborn reads the tag); last, so no ordinal moves
+		STUBBORN(Pillar.SURVIVAL, 1, 2, 8, 4, 1, STEADY_HANDS, FIELD_DRESSER);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;
