@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 21:10). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 21:12). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -33,6 +33,7 @@ kanban-plugin: board
 - [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
 - [ ] [[Inbox/zfighter-aura-rework|zfighter-aura-rework]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/zfighter-gaps-1-stats|zfighter-gaps-1-stats]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
