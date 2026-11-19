@@ -15236,3 +15236,10 @@ Not tested in game.
 - `Navies.shipLost` only clears a harbour's merchantman when it was that one.
 - Built; not played. Mixin targets checked against the 26.3 jar with javap; no dev server boot.
 - **Wind on show** (Andy's sea-life pick): the wind that fills ships' sails (`Winds`) now carries smoke (campfires, fires, torches, chimneys), dust and falling leaves along with it under open sky, harder the stronger it blows; under a roof or canopy they rise and fall as before (`WindDriftMixin`, client). In a fresh wind or harder, white crests break on the sea round you, blown downwind (`WindSigns`). Rain already slanted with the wind. Banners are left as they are.
+
+## 0.10.58 (2026-11-19): Music of the places, and a tavern's bard (#1795)
+
+- **Places**: with the Medieval Music pack on, where you stand has its tune (`PlaceThemes` on the server says which place, `client/music/PlaceMusic` plays it as Music-slider music, resting a while between tracks, fading in and out): a realm's town plays Townsong or Greenlands; a tavern or the cafe, Now We Feast or Celebration; an illager camp, Marked; any other camp, Grundar; riding a King's Road, Now We Ride or The Road Home; near a realm at war, Behind the Sword or Might & Magic. Great foes' themes and letterboxed scenes' music win and this fades under them. With the pack off the sound events (`place_music.*` in sounds.json, pointing at the pack's own files) resolve to nothing, nothing is played, and the game's own music goes on.
+- **Festival**: on a realm's festival day its square plays Celebration and Bonfire, louder within 10 blocks of the seat.
+- **Bard** (`Bards`): in a standing tavern with a player near, one villager takes a lute (Nightfall's) and plays Bonfire, Now We Feast, Celebration or Tam Lin as a positional streamed sound (`bard.*`, attenuation 16 blocks: heard at 16, silent at 40), then rests. Sneak and use on the bard with a coin in your purse and they stop and play another. One bard per tavern.
+- Built (CI); not played.
