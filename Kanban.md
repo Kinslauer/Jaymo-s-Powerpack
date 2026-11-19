@@ -30,6 +30,7 @@ kanban-plugin: board
 - [ ] [[Inbox/smoothmount-6-heave-downed|smoothmount-6-heave-downed]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · open
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/harness-body-pieces|harness-body-pieces]] · ☀️ Apollo · open
 
 
 ## Being built
