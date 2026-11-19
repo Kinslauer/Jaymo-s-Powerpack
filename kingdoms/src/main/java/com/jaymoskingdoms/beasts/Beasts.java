@@ -137,6 +137,8 @@ public final class Beasts {
 		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_WILD_BOAR), MobCategory.CREATURE, WILD_BOAR, WILD_BOAR_WEIGHT, BOAR_MIN, BOAR_MAX);
 		// the cyclops of the peaks and the satyrs of the woods (Mythika's, our own make)
 		Satyrs.register();
+		// the gnomes of the forest huts and towers, made ours (our own model, tools/gen_gnome.py)
+		Gnomes.register();
 		// (medieval picks) the great goat of the high mountains, the Stoneborn's mount
 		GreatGoat.register();
 	}

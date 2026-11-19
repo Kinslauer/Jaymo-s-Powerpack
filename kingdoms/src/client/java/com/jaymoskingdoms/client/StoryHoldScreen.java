@@ -32,7 +32,7 @@ final class StoryHoldScreen extends Screen {
 	 * continue saying what it does now". So under the title a hint ({@code gui.jaymoskingdoms.story.hint.<1..HINTS>}) shows
 	 * for HINT_MS each, from a random one on. Widest a hint may run.
 	 */
-	private static final int HINTS = 206, HINT_W = 320;
+	private static final int HINTS = 207, HINT_W = 320;
 	private static final long HINT_MS = 7000L;
 	/** Andy: "load screen hints should animate a wipe in and out". Each wipe (left to right) takes this long (ms). */
 	private static final long WIPE_MS = 450L;
