@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 09:10). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 09:11). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -53,7 +53,6 @@ kanban-plugin: board
 - [ ] [[Inbox/sky-lands-aether-biomes|sky-lands-aether-biomes]] · 🪶 Quill · ready
 - [ ] [[Inbox/deepseek-v4-pro-9b-uncensored-experiment|deepseek-v4-pro-9b-uncensored-experiment]] · ☀️ Apollo · ready
 - [ ] [[Agents/forest-fire-pack|forest-fire-pack]] · 💻 Odysseus · stalled
-- [ ] [[Agents/hero-addon-picks|hero-addon-picks]] · 💻 Odysseus · #1827 · stalled
 - [ ] [[Agents/rig-beetle-6-senses-nova|rig-beetle-6-senses-nova]] · 💻 Odysseus · stalled
 
 
