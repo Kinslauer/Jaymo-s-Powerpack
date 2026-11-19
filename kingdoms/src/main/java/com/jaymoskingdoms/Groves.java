@@ -13,6 +13,8 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -22,6 +24,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -36,6 +40,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -51,6 +58,11 @@ import org.jspecify.annotations.Nullable;
  * once from who she is. Held out to her, she takes it (once a day from each player), thinks better of you for it
  * ({@link #GIFT_HEARTS}), and plants it in her grove if there's ground for it ({@link #offer}). She minds no one's blood
  * and no realm's word of them ({@link Introductions#wary}).
+ * <p>
+ * Andy (2026-11-19): "she should also be found in any of the generating homes in the forests". The lone homes other mods
+ * build in the woods ({@link #HOMES}: Homesteads' farmsteads, Moog's Voyager houses and huts, the Grim Kingdoms cabins,
+ * Vanilla Constructs' lumberjack cabin), standing in a forest or a taiga, are each rolled once when a player comes near,
+ * and {@link #HOME_DRUID} of them have an old druid living inside ({@link #moveIn}).
  */
 public final class Groves {
 	// ---- tuning ----
@@ -68,10 +80,18 @@ public final class Groves {
 	static final int GIFT_HEARTS = 6, PLANT_REACH = 4;
 	/** How many lines she has: openings, wordless openings, thanks, and the want said aloud. */
 	public static final int OPENINGS = 4, THANKS = 3;
+	/** The lone homes of the woods an old druid may live in, and the share of them that has one. */
+	static final TagKey<Structure> HOMES = TagKey.create(Registries.STRUCTURE, JaymosKingdoms.id("druid_homes"));
+	static final float HOME_DRUID = 0.35F;
+	/** How far round a player a home is looked for (blocks, each way along the ground). */
+	static final int HOME_LOOK = 16;
 
 	private static final AttachmentType<List<Long>> ROLLED = AttachmentRegistry.create(JaymosKingdoms.id("druids_rolled"),
 		b -> b.persistent(Codec.LONG.listOf()));
 	private static Set<Long> rolled;
+	private static final AttachmentType<List<Long>> HOMES_ROLLED = AttachmentRegistry.create(JaymosKingdoms.id("druid_homes_rolled"),
+		b -> b.persistent(Codec.LONG.listOf()));
+	private static Set<Long> homesRolled;
 	/** "druid/player" → the day the player last brought her want. */
 	private static final Map<String, Long> GIVEN = new HashMap<>();
 
@@ -84,6 +104,7 @@ public final class Groves {
 		UseEntityCallback.EVENT.register(Groves::offer);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			rolled = null;
+			homesRolled = null;
 			GIVEN.clear();
 		});
 	}
@@ -190,11 +211,17 @@ public final class Groves {
 		}
 		ServerLevel level = server.overworld();
 		for (ServerPlayer player : level.players()) {
-			if (player.isSpectator() || !player.isAlive() || !level.getBiome(player.blockPosition()).is(BiomeTags.IS_FOREST)) {
+			if (player.isSpectator() || !player.isAlive()) {
 				continue;
 			}
+			var biome = level.getBiome(player.blockPosition());
 			try {
-				place(level, player);
+				if (biome.is(BiomeTags.IS_FOREST)) {
+					place(level, player);
+				}
+				if (biome.is(BiomeTags.IS_FOREST) || biome.is(BiomeTags.IS_TAIGA)) {
+					home(level, player);
+				}
 			} catch (RuntimeException e) {
 				JaymosKingdoms.LOGGER.debug("druid scan failed", e);
 			}
@@ -227,6 +254,81 @@ public final class Groves {
 			}
 			return;
 		}
+	}
+
+	/** A lone home of the woods near {@code player}, not rolled yet: rolled once, and maybe an old druid moves in. */
+	private static void home(ServerLevel level, ServerPlayer player) {
+		var homes = level.registryAccess().lookupOrThrow(Registries.STRUCTURE).get(HOMES).orElse(null);
+		if (homes == null || homes.size() == 0) {
+			return;
+		}
+		if (homesRolled == null) {
+			homesRolled = new HashSet<>(level.getAttachedOrElse(HOMES_ROLLED, List.<Long>of()));
+		}
+		BlockPos here = player.blockPosition();
+		for (BlockPos at : new BlockPos[] {here, here.east(HOME_LOOK), here.west(HOME_LOOK), here.south(HOME_LOOK), here.north(HOME_LOOK)}) {
+			StructureStart start = level.structureManager().getStructureAt(at, homes);
+			if (!start.isValid()) {
+				continue;
+			}
+			long key = start.getChunkPos().pack();
+			if (homesRolled.contains(key)) {
+				continue;
+			}
+			BoundingBox box = start.getBoundingBox();
+			BlockPos middle = box.getCenter();
+			if (!Loaded.made(level, new BlockPos(box.minX(), middle.getY(), box.minZ()))
+				|| !Loaded.made(level, new BlockPos(box.maxX(), middle.getY(), box.maxZ()))) {
+				// (not all of it made and loaded yet: looked at again later)
+				continue;
+			}
+			var biome = level.getBiome(middle);
+			if (!biome.is(BiomeTags.IS_FOREST) && !biome.is(BiomeTags.IS_TAIGA)) {
+				homesRolled.add(key);
+				level.setAttached(HOMES_ROLLED, new ArrayList<>(homesRolled));
+				continue;
+			}
+			homesRolled.add(key);
+			level.setAttached(HOMES_ROLLED, new ArrayList<>(homesRolled));
+			if (level.getRandom().nextFloat() < HOME_DRUID) {
+				moveIn(level, start);
+			}
+			return;
+		}
+	}
+
+	/** An old druid comes to live in {@code start}: on a floor inside it, under its roof if there is one; true if they did. */
+	static boolean moveIn(ServerLevel level, StructureStart start) {
+		BoundingBox box = start.getBoundingBox();
+		RandomSource random = level.getRandom();
+		BlockPos outdoors = null;
+		for (int tries = 0; tries < 300; tries++) {
+			BlockPos p = new BlockPos(Mth.randomBetweenInclusive(random, box.minX(), box.maxX()),
+				Mth.randomBetweenInclusive(random, box.minY() + 1, box.maxY()), Mth.randomBetweenInclusive(random, box.minZ(), box.maxZ()));
+			if (!level.isLoaded(p) || !level.structureManager().structureHasPieceAt(p, start) || !standable(level, p)) {
+				continue;
+			}
+			if (!level.canSeeSky(p)) {
+				druidAt(level, p);
+				return true;
+			}
+			if (outdoors == null) {
+				outdoors = p;
+			}
+		}
+		if (outdoors != null) {
+			druidAt(level, outdoors);
+			return true;
+		}
+		return false;
+	}
+
+	/** Whether one can stand at {@code p}: a firm floor under it, and room for a body, dry. */
+	private static boolean standable(ServerLevel level, BlockPos p) {
+		BlockPos below = p.below();
+		return level.getBlockState(below).isFaceSturdy(level, below, Direction.UP)
+			&& level.getBlockState(p).getCollisionShape(level, p).isEmpty() && level.getFluidState(p).isEmpty()
+			&& level.getBlockState(p.above()).getCollisionShape(level, p.above()).isEmpty();
 	}
 
 	/** An old druid, standing at {@code ground}. */
