@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 01:59). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 02:33). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -44,7 +44,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · for any · #1787 · changes · fixing review notes
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · #1853 · changes · fixing review notes
-- [ ] [[Inbox/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]] · ☀️ Apollo · claimed
 
 
 ## In review
