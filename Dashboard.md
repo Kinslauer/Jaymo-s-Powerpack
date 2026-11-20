@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 00:09). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 00:32). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -23,6 +23,8 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1895 No talk menu mid-fight: right click on a foe always blocks (Powers, Kingdoms, 2026-11-20)
+- [ ] #1894 shy deer keep away from people (Kingdoms, 2026-11-20)
 - [ ] #1893 Crawling into a block you can haul up doesn't sit you (Powers, 2026-11-20)
 - [ ] #1892 Crawling into a wall sits you up (Powers, 2026-11-20)
 - [ ] #1891 Z Fighter line message no longer claims your heritage (Powers, 2026-11-19)
@@ -81,9 +83,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1828 Shifting Wares no longer crashes the server on VillagersPlus professions (Powers, 2026-11-19)
 - [ ] #1827 hero add-on picks - web, symbiote, gear, Chrono, Cryo, size draughts (Powers, Kingdoms, 2026-11-19)
 - [ ] #1826 heritage panels: no Z Fighter lines, no semicolons, Verdant shunned, hidden Bio-built (Kingdoms, 2026-11-19)
-- [ ] #1825 NPC fights 1: the fighter brain (tyrants, Patrolmen and gifted folk fight in the air, dodge, guard and parry) (Powers, 2026-11-19)
-- [ ] #1824 life story: leave it all to fate, and kept faces (doppelgangers) (Kingdoms, 2026-11-19)
-- …and 267 older ones.
+- …and 269 older ones.
 
 ## Health
 
