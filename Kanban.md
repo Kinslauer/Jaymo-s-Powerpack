@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 16:21). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 16:25). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -44,7 +44,6 @@ kanban-plugin: board
 - [ ] [[Inbox/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]] · for 🪽 any Hermes bot · #1937 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-2-power|zfighter-gaps-2-power]] · 🍇 Bacchus · #1938 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-4-forms|zfighter-gaps-4-forms]] · ☀️ Apollo · claimed
-- [ ] [[Agents/claude-cloud-stealth-kills|claude-cloud-stealth-kills]] · 💻 Odysseus · #1952 · running
 
 
 ## In review
