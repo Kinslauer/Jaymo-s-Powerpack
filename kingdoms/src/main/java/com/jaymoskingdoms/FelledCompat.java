@@ -119,7 +119,7 @@ public final class FelledCompat {
 		double speed = m.top == null ? 0.0 : top.distanceTo(m.top);
 		double was = m.speed;
 		if (speed >= KNOCK_SPEED) {
-			// (0.11.44) Andy, downed by a tree out of nowhere while chopping up one he'd felled half a minute before
+			// Andy, downed by a tree out of nowhere while chopping up one he'd felled half a minute before
 			// ("what hit me here?"). Felled's trunkTop is its middle log, not a fixed point: chop a log off a tree lying
 			// still and the middle moves along the trunk a block or so in one tick. That read as the tree moving fast,
 			// so it knocked over the standing tree beside it, which came down on him. A tree that lost logs since we
