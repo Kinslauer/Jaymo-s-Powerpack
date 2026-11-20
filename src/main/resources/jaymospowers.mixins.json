@@ -80,6 +80,7 @@
 		"DismemberGameEventMixin",
 		"ExplosionLogMixin",
 		"DownedMobMixin",
+		"PredatorEatMixin",
 		"DownedHealMixin",
 		"DownedLimboMixin",
 		"GhostUnseenMixin",
