@@ -97,6 +97,8 @@ public final class Disasters {
 		ServerTickEvents.END_SERVER_TICK.register(Downpours::tick);
 		// the great disasters (medieval picks): every block they change shares one budget a tick
 		RedSky.register();
+		FireSmog.register();
+		ServerTickEvents.END_SERVER_TICK.register(FireSmog::tick);
 		JaymosKingdoms.LOGGER.debug("great disaster attachments: {} {} {} {} {}", Doomsday.STATE, Volcanoes.SAVED, HighGround.FITTED, Bolides.VEIL_UNTIL, Tsunamis.UNDRAINED);
 		ServerTickEvents.START_SERVER_TICK.register(server -> BlockBudget.refill());
 		ServerTickEvents.END_SERVER_TICK.register(Signs::tick);
@@ -116,6 +118,7 @@ public final class Disasters {
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			Storms.clear();
+			FireSmog.clear();
 			Volcanoes.clear();
 			Hurricanes.clear();
 			Avalanches.clear();
