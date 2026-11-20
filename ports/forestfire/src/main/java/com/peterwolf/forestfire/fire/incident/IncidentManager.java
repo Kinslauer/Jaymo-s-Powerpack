@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.AABB;
@@ -267,21 +266,12 @@ public final class IncidentManager {
    }
 
    private void alertNearbyPlayers(FireIncident incident) {
+      // (Jaymo's port) no chat or action-bar alert: Jaymo's Powers keeps world events out of chat. Players near the
+      // fire are still counted as its responders.
       AABB box = new AABB(incident.ignitionPos).inflate(256.0);
-      Component message = Component.translatable(
-         "message.peterwolfs_forestfire.incident_alert",
-         new Object[]{incident.name, incident.ignitionPos.getX(), incident.ignitionPos.getY(), incident.ignitionPos.getZ()}
-      );
 
       for (ServerPlayer player : this.level.getEntitiesOfClass(ServerPlayer.class, box)) {
-         player.sendSystemMessage(message);
          incident.addParticipant(player.getUUID());
-      }
-
-      for (ServerPlayer player : this.level.players()) {
-         if (!box.contains(player.position())) {
-            player.sendOverlayMessage(message);
-         }
       }
    }
 }
