@@ -6742,3 +6742,9 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
   Entity Model Features, PetPoses now steps aside and the pack's own sitting and sleeping animations show
   (`EmfCompat.customModel`, `PetPoses.extract`). Without Fresh Animations the poses are unchanged.
 - Built; not played.
+
+## 0.26.0 (2026-11-20): Knight armour set removed (#1919)
+
+- **Knight armour gone** (Andy: "please remove this armor set"): the Knight Helmet, Chestplate, Leggings and Boots from Knight Armor and Weapons are no longer in the "Knight Armor & Weapons" creative tab (whose icon is now the long sword, not the helmet), the search tab or JEI (their grid recipes were already off). The tab keeps the long sword, spiked mace, hand scythe and throwing axe, still forged at the Smithing Anvil.
+- Any Knight armour already in a world turns into the iron piece for the same slot, keeping its wear, enchantments, name and trim: in your inventory, armour slots and ender chest (checked every 2 s), in any chest or other container you open, worn by mobs and villagers when they load or come within 48 blocks of a player, and dropped on the ground. The mod's items stay registered so old saves load. `armory/RetiredKnightArmour`, `client/jei/RetiredKnightArmourJei`, `mixin/RetiredKnightTabIconMixin`.
+- Built; not played.
