@@ -7,7 +7,8 @@
 		"FishingHookRendererMixin",
 		"FishingRodFirstPersonMixin",
 		"FishingRodThirdPersonMixin",
-		"FishingScrollMixin"
+		"FishingScrollMixin",
+		"RodTipLayerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

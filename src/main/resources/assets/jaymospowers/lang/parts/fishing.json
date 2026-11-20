@@ -22,7 +22,7 @@
   "item.jaymospowers.skipjack_spawn_egg": "Skipjack Tuna Spawn Egg",
   "message.jaymospowers.fishing.baited": "Baited the hook with %s.",
   "message.jaymospowers.fishing.already_baited": "The hook is already baited.",
-  "message.jaymospowers.fishing.bare_hook": "Nothing will bite a bare hook. Sneak and use the rod with bait in your other hand.",
+  "message.jaymospowers.fishing.bare_hook": "Nothing will bite a bare hook. Reel in and use the rod with bait in your other hand or pack to bait it.",
   "tooltip.jaymospowers.hook_bait": "Baited: %s",
   "tooltip.jaymospowers.hook_bare": "Hook not baited",
   "item.jaymospowers.cane_pole": "Cane Pole",
@@ -49,5 +49,5 @@
   "tooltip.jaymospowers.rod.spinning_rod": "Works lures; for the fish that chase them",
   "tooltip.jaymospowers.rod.ledger_rod": "Bait on the bottom: draws fish from farther off",
   "tooltip.jaymospowers.lure": "Lure: stays on the line (spinning or sea rod)",
-  "tooltip.jaymospowers.bait": "Bait: sneak and use a rod with this in your other hand"
+  "tooltip.jaymospowers.bait": "Bait: use a bare rod with this in your other hand or pack"
 }

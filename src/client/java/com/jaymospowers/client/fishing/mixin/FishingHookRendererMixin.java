@@ -1,6 +1,7 @@
 package com.jaymospowers.client.fishing.mixin;
 
 import com.jaymospowers.client.fishing.HookBaitState;
+import com.jaymospowers.client.fishing.RodTip;
 import com.jaymospowers.fishing.FishTackle;
 import com.jaymospowers.fishing.HookBait;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -16,6 +17,7 @@ import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -23,7 +25,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * (0.21.61, Andy: "you should have to manually and visually bait the hook") The bait on a hook ({@link HookBait}) hangs
- * just under the bobber, small, turned to the camera like a dropped item.
+ * just under the bobber, small, turned to the camera like a dropped item. The line starts at the rod's real tip
+ * ({@link RodTip}).
  */
 @Mixin(FishingHookRenderer.class)
 public abstract class FishingHookRendererMixin {
@@ -35,6 +38,11 @@ public abstract class FishingHookRendererMixin {
     @Inject(method = "extractRenderState(Lnet/minecraft/world/entity/projectile/FishingHook;Lnet/minecraft/client/renderer/entity/state/FishingHookRenderState;F)V",
             at = @At("TAIL"))
     private void jaymospowers$extractBait(FishingHook hook, FishingHookRenderState state, float partialTicks, CallbackInfo ci) {
+        // the line starts at the rod's real tip, not vanilla's fixed guess beside the eyes
+        Vec3 tip = hook.getPlayerOwner() == null ? null : RodTip.tip(hook.getPlayerOwner(), partialTicks);
+        if (tip != null) {
+            state.lineOriginOffset = tip.subtract(hook.getPosition(partialTicks).add(0.0D, 0.25D, 0.0D));
+        }
         ItemStackRenderState bead = ((HookBaitState) state).jaymospowers$bead();
         Item beadItem = hook.getPlayerOwner() == null ? null
                 : FishTackle.bead(FishTackle.fit(HookBait.rod(hook.getPlayerOwner())));
