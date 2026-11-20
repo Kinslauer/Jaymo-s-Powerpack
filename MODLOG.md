@@ -6823,3 +6823,16 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - Tested in a cloud test game with Horseman, Kaffee's Dual Ride and Kingdoms: a climb called off partway leaves you
   standing; a finished climb seats you and Sneak gets you off. The server side is unchanged, so a wild horse throws
   you as before (seen in the same game before the fix, not again after). Not tested on a dedicated server.
+
+## 0.26.8 (2026-11-20): downed wall sit: getting up stays on the wall (#1930)
+
+- **Getting up from sitting against a wall** (Andy: "the seated get up should stay seated for the duration of the animation"): holding sneak sat against a wall now always draws the rise up the wall, pushing up from the seat to your feet over the whole bar. Before, if you held sneak a moment before your body had finished getting up against the wall (the server counted you sat a little before the drawing was done), or while you were sliding back down after letting go, the body dropped off the wall, rolled face down and did the floor get-up instead, standing up long before the bar was full.
+- If you start rising before you've finished getting up against the wall, you finish sitting down first and then rise up the wall. If you start while sliding back down after letting go, the rise goes on from where you are, and it always finishes when the bar does.
+- WallSit (the seat's rise up the wall: where it started, when it began, when it ends).
+- Built; not played.
+
+## 0.26.9 (2026-11-20): another player shakes a fainted player awake (#1932)
+
+- Andy: "players and npcs should be able to wake players who faint". A player lying out in a faint (hunger, thirst, exhaustion, Overcome) is shaken awake by another player's right-click on them (main hand, not sneaking): a swing and a rustle, and they come round on the spot, the letterbox opening as after any faint. Sneak-use is left to seizing, lifting and pickpockets.
+- `Fainting.shake` (UseEntityCallback, Downed's first phase). The faint attachment now syncs to everyone, so the shaker's client doesn't eat or draw a bow at the same time.
+- Built; not played.

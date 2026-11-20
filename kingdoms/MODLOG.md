@@ -16005,3 +16005,10 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - Loading hint 187 now says how to scrub blood off floors and walls.
 - Code: `BloodChores`, `PowersCompat.bloodStains`/`scrubStains`; lines in `lang/parts/blood_chores.json`.
 - Built; not played.
+
+## 0.11.42 (2026-11-20): companions wake you from a faint, captors don't (#1932)
+
+- Andy: "players and npcs should be able to wake players who faint". Your own companions now come to wake you first, from up to 32 blocks and without needing to see you, and quicker than villagers walk. They always wake you (a hint or a straight telling plus a drink or a bite, by temperament) and never rob you.
+- Villagers, guards and settlement folk still come as before, but nobody who'd carry you off wakes you first: camp raiders, outlaws and other captors, and guards whose realm wants you in its cells. Those leave you to be taken.
+- `FaintWakers.companion`, `choose(mob, canSteal)`; `HeldBack.wants` (the check from `gaol`, now shared).
+- Built; not played.
