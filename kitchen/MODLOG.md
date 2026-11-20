@@ -2577,3 +2577,10 @@ Added a new **Cooking Block** to the Functional creative tab. The block has iron
 ## 0.6.62 (2026-11-19): Bodies can be cut up where they lie (#1887)
 
 - A beast's body can be cut up where it lies by someone who isn't a player (`CorpseEntity.butcherWhereLies`). Jaymo's Kingdoms' town hunters use it to carry their kills home as cuts, the same cuts a butcher block gets.
+
+## 0.6.63 (2026-11-20): meat hooks easier to hang a dragged carcass on (#1910)
+
+- **Meat hooks**: right-clicking a meat hook while dragging a big carcass (a cow, a horse) used to drop it without a word when the body lagged too far behind you, or when the click just missed the thin hook and hit the beam or ceiling behind it. Now a click on the hook, or right by it, heaves the carcass up as long as you're standing near the hook; too far away, you keep hold and are told to get under the hook. The same forgiving click works when carrying a smaller carcass.
+- The dragging prompt now names the Meat Hook alongside the Butcher Block.
+- `Hanging.hookAt`, `CorpseEntity.dragOnto`, `JaymosKitchen` (carried branch).
+- Built; not played.
