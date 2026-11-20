@@ -33,5 +33,19 @@
   "hud.jaymospowers.beam_clash.timing": "Right click on the mark!",
   "hud.jaymospowers.beam_clash.timing_perfect": "Perfect!",
   "hud.jaymospowers.beam_clash.timing_good": "Good",
-  "hud.jaymospowers.beam_clash.timing_miss": "Miss"
+  "hud.jaymospowers.beam_clash.timing_miss": "Miss",
+  "config.jaymospowers.hud.hide_numbers": "Hide HUD Numbers",
+  "config.jaymospowers.hud.hide_numbers.tooltip": "Hide numeric values on the Z Fighter HUD (ki, combo count, etc.)",
+  "config.jaymospowers.hud.always_visible": "Always Show HUD",
+  "config.jaymospowers.hud.always_visible.tooltip": "Show the Z Fighter HUD even when not playing as a Z Fighter",
+  "config.jaymospowers.hud.menu_scale": "HUD Menu Scale",
+  "config.jaymospowers.hud.menu_scale.tooltip": "Scale multiplier for the HUD editor and menus",
+  "config.jaymospowers.hud.party_markers": "Party Member Markers",
+  "config.jaymospowers.hud.party_markers.tooltip": "Show markers above party members when ki sense is active",
+  "config.jaymospowers.ki_sense.damage_tally": "Ki Sense Damage Tally",
+  "config.jaymospowers.ki_sense.damage_tally.tooltip": "Show how much damage sensed entities have taken",
+  "config.jaymospowers.flight.travel_mode": "Flight Travel Mode",
+  "config.jaymospowers.flight.travel_mode.tooltip": "Enable travel mode for faster but less nimble flight",
+  "config.jaymospowers.flight.mode_locked": "Lock Flight Mode",
+  "config.jaymospowers.flight.mode_locked.tooltip": "Prevent accidental switching between travel and combat flight modes"
 }

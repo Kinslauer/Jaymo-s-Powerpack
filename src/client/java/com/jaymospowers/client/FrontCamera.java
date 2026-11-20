@@ -2,12 +2,14 @@ package com.jaymospowers.client;
 
 import com.jaymospowers.client.finisher.FinisherPose;
 import com.jaymospowers.client.power.chrono.ChronoFlowClient;
+import com.jaymospowers.client.power.zfighter.ZFighterClientConfig;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -22,11 +24,18 @@ import org.jspecify.annotations.Nullable;
  * While a film or a power holds the camera (an ultimate's or a beam battle's film, Time Flow's shoulder view, a
  * finisher watched from behind), presses do nothing, so they don't fight it or fire once it ends. Those put back the
  * view they found, so the front camera comes back after them, and pressing again still returns to the view before it.
+ * <p>
+ * The front camera supports configurable distance, height, side offset and smoothing via the client settings screen.
  */
 public final class FrontCamera {
 	private static @Nullable KeyMapping key;
 	/** The view before the key turned it to the front. */
 	private static @Nullable CameraType viewBefore;
+
+	/** Current smoothed camera position. */
+	private static double smoothX, smoothY, smoothZ;
+	/** Whether the smoothed position has been initialised. */
+	private static boolean smoothInit;
 
 	private FrontCamera() {
 	}
@@ -45,6 +54,12 @@ public final class FrontCamera {
 			if (!held()) {
 				toggle(minecraft);
 			}
+		}
+		// Update smoothed camera position when in front camera mode
+		if (minecraft.options.getCameraType() == CameraType.THIRD_PERSON_FRONT) {
+			updateSmoothPosition(minecraft);
+		} else {
+			smoothInit = false;
 		}
 	}
 
@@ -68,5 +83,29 @@ public final class FrontCamera {
 		if (now.isFirstPerson() != next.isFirstPerson()) {
 			minecraft.gameRenderer.checkEntityPostEffect(next.isFirstPerson() ? minecraft.getCameraEntity() : null);
 		}
+		smoothInit = false;
 	}
-}
+
+	/** Updates the smoothed camera position for the front camera. */
+		private static void updateSmoothPosition(Minecraft minecraft) {
+			double targetX = ZFighterClientConfig.getFrontCamSide();
+			double targetY = ZFighterClientConfig.getFrontCamHeight();
+			double targetZ = ZFighterClientConfig.getFrontCamDistance();
+			double smoothing = ZFighterClientConfig.getFrontCamSmoothing();
+
+			if (!smoothInit) {
+				smoothX = targetX;
+				smoothY = targetY;
+				smoothZ = targetZ;
+				smoothInit = true;
+			} else {
+				// Lerp toward target
+				smoothX += (targetX - smoothX) * smoothing;
+				smoothY += (targetY - smoothY) * smoothing;
+				smoothZ += (targetZ - smoothZ) * smoothing;
+			}
+
+			// Apply the smoothed position via Shoulder Surfing's config
+			CameraPreset.syncFrontCameraSettings(smoothX, smoothY, smoothZ);
+		}
+	}

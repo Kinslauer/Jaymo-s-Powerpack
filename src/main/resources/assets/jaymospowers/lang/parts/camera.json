@@ -1,5 +1,13 @@
 {
 	"key.jaymospowers.front_camera": "Toggle Front Camera",
 	"jaymospowers.freecam.creative_only": "Freecam requires creative mode",
-	"jaymospowers.freecam.film": "Freecam disabled during films"
+	"jaymospowers.freecam.film": "Freecam disabled during films",
+	"config.jaymospowers.front_camera.distance": "Front Camera Distance",
+	"config.jaymospowers.front_camera.distance.tooltip": "How far the front camera sits from the player (blocks)",
+	"config.jaymospowers.front_camera.height": "Front Camera Height",
+	"config.jaymospowers.front_camera.height.tooltip": "Vertical offset of the front camera (blocks)",
+	"config.jaymospowers.front_camera.side": "Front Camera Side Offset",
+	"config.jaymospowers.front_camera.side.tooltip": "Horizontal offset of the front camera (blocks)",
+	"config.jaymospowers.front_camera.smoothing": "Front Camera Smoothing",
+	"config.jaymospowers.front_camera.smoothing.tooltip": "How smoothly the front camera moves to its target (0 = instant, 1 = no movement)"
 }

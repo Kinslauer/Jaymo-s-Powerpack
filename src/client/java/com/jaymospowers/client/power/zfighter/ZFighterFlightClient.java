@@ -59,21 +59,31 @@ public final class ZFighterFlightClient {
 	static final float LOW_HEALTH = 0.3F;
 	static final double CHARGING_SPEED = 0.08;
 	/** The server's word wins: once it says he's down this long after our last word, the flight ends here too. */
-	static final int SERVER_GRACE = 20;
+		static final int SERVER_GRACE = 20;
 
-	private static int pose;
-	private static int burst;
-	private static int sinceTakeOff;
-	private static boolean boosted;
-	private static boolean cruising;
-	private static Vec3 velocity = Vec3.ZERO;
-	private static double speed;
-	private static int sinceSent;
-	private static boolean sinkArmed;
-	private static long ticks;
-	private static boolean zHeld;
-	private static boolean zScrolled;
-	private static @Nullable LocalPlayer owner;
+		// ---- flight mode ----
+		/** Travel mode: faster cruise, less nimble. */
+		static final double TRAVEL_CRUISE_MULTIPLIER = 2.0;
+		/** Combat mode: slower cruise, more nimble. */
+		static final double COMBAT_CRUISE_MULTIPLIER = 1.0;
+		/** Travel mode turn rate multiplier. */
+		static final double TRAVEL_TURN_RATE_MULTIPLIER = 0.5;
+		/** Combat mode turn rate multiplier. */
+		static final double COMBAT_TURN_RATE_MULTIPLIER = 1.5;
+
+		private static int pose;
+		private static int burst;
+		private static int sinceTakeOff;
+		private static boolean boosted;
+		private static boolean cruising;
+		private static Vec3 velocity = Vec3.ZERO;
+		private static double speed;
+		private static int sinceSent;
+		private static boolean sinkArmed;
+		private static long ticks;
+		private static boolean zHeld;
+		private static boolean zScrolled;
+		private static @Nullable LocalPlayer owner;
 
 	private ZFighterFlightClient() {
 	}
@@ -264,44 +274,68 @@ public final class ZFighterFlightClient {
 	}
 
 	private static void cruise(LocalPlayer player, Input input, boolean charging, boolean slowed) {
-		// (in orbit, high in the high sky, a cruise carries far across the world below: HighSkyClient)
-		double boost = com.jaymospowers.client.power.zfighter.sky.HighSkyClient.cruiseBoost(player);
-		double top = ZFighterPower.FORM_CRUISE[Mth.clamp(ZFighterPower.state(player).form(), 0, ZFighterPower.FORM_CRUISE.length - 1)] * boost;
-		if (slowed) {
-			speed = Math.max(0.0, speed - CRUISE_BRAKE);
-		} else if (charging) {
-			// charging holds the speed he had
-		} else if (input.sprint() && speed < top) {
-			speed = Math.min(top, speed + CRUISE_ACCEL * boost * (1.0 - CRUISE_ACCEL_TAPER * speed / top));
-		} else if (!input.sprint()) {
-			speed -= CRUISE_DECEL;
-			if (input.backward()) {
-				speed -= CRUISE_BRAKE;
+			// (in orbit, high in the high sky, a cruise carries far across the world below: HighSkyClient)
+			double boost = com.jaymospowers.client.power.zfighter.sky.HighSkyClient.cruiseBoost(player);
+			boolean travelMode = ZFighterClientConfig.getFlightTravelMode();
+			double cruiseMultiplier = travelMode ? TRAVEL_CRUISE_MULTIPLIER : COMBAT_CRUISE_MULTIPLIER;
+			double turnRateMultiplier = travelMode ? TRAVEL_TURN_RATE_MULTIPLIER : COMBAT_TURN_RATE_MULTIPLIER;
+			double top = ZFighterPower.FORM_CRUISE[Mth.clamp(ZFighterPower.state(player).form(), 0, ZFighterPower.FORM_CRUISE.length - 1)] * boost * cruiseMultiplier;
+			if (slowed) {
+				speed = Math.max(0.0, speed - CRUISE_BRAKE);
+			} else if (charging) {
+				// charging holds the speed he had
+			} else if (input.sprint() && speed < top) {
+				speed = Math.min(top, speed + CRUISE_ACCEL * boost * (1.0 - CRUISE_ACCEL_TAPER * speed / top));
+			} else if (!input.sprint()) {
+				speed -= CRUISE_DECEL;
+				if (input.backward()) {
+					speed -= CRUISE_BRAKE;
+				}
 			}
+			speed = Math.min(speed, top);
+			if (speed < CRUISE_EXIT_SPEED) {
+				cruising = false;
+				return;
+			}
+			Vec3 heading = velocity.lengthSqr() < 1.0E-6 ? player.getLookAngle() : velocity.normalize();
+			Vec3 look = player.getLookAngle();
+			double angle = Math.acos(Mth.clamp(heading.dot(look), -1.0, 1.0));
+			double rate = Mth.lerp(Mth.clamp(speed / top, 0.0, 1.0), TURN_RATE_SLOW, TURN_RATE_FAST) * Mth.DEG_TO_RAD * turnRateMultiplier;
+			velocity = rotateToward(heading, look, angle, rate).scale(speed);
 		}
-		speed = Math.min(speed, top);
-		if (speed < CRUISE_EXIT_SPEED) {
-			cruising = false;
-			return;
-		}
-		Vec3 heading = velocity.lengthSqr() < 1.0E-6 ? player.getLookAngle() : velocity.normalize();
-		Vec3 look = player.getLookAngle();
-		double angle = Math.acos(Mth.clamp(heading.dot(look), -1.0, 1.0));
-		double rate = Mth.lerp(Mth.clamp(speed / top, 0.0, 1.0), TURN_RATE_SLOW, TURN_RATE_FAST) * Mth.DEG_TO_RAD;
-		velocity = rotateToward(heading, look, angle, rate).scale(speed);
-	}
 
-	/** {@code from} turned toward {@code to} (unit vectors {@code angle} apart) by {@code by} radians, on the great circle. */
-	private static Vec3 rotateToward(Vec3 from, Vec3 to, double angle, double by) {
-		if (by >= angle) {
-			return to;
+		/** {@code from} turned toward {@code to} (unit vectors {@code angle} apart) by {@code by} radians, on the great circle. */
+		private static Vec3 rotateToward(Vec3 from, Vec3 to, double angle, double by) {
+			if (by >= angle) {
+				return to;
+			}
+			double sin = Math.sin(angle);
+			if (sin < 1.0E-4) {
+				Vec3 axis = Math.abs(from.y) < 0.95 ? new Vec3(0.0, 1.0, 0.0) : new Vec3(1.0, 0.0, 0.0);
+				Vec3 side = from.cross(axis).normalize();
+				return from.scale(Math.cos(by)).add(side.scale(Math.sin(by))).normalize();
+			}
+			return from.scale(Math.sin(angle - by) / sin).add(to.scale(Math.sin(by) / sin)).normalize();
 		}
-		double sin = Math.sin(angle);
-		if (sin < 1.0E-4) {
-			Vec3 axis = Math.abs(from.y) < 0.95 ? new Vec3(0.0, 1.0, 0.0) : new Vec3(1.0, 0.0, 0.0);
-			Vec3 side = from.cross(axis).normalize();
-			return from.scale(Math.cos(by)).add(side.scale(Math.sin(by))).normalize();
+
+		// ---- flight mode getters ----
+		/** Whether flight is currently in travel mode (fast) vs combat mode (nimble). */
+		public static boolean isTravelMode() {
+			return ZFighterClientConfig.getFlightTravelMode();
 		}
-		return from.scale(Math.sin(angle - by) / sin).add(to.scale(Math.sin(by) / sin)).normalize();
+
+		/** Sets whether flight is in travel mode. */
+		public static void setTravelMode(boolean value) {
+			ZFighterClientConfig.setFlightTravelMode(value);
+		}
+
+		/** Whether the flight mode is locked (prevents accidental switching). */
+		public static boolean isModeLocked() {
+			return ZFighterClientConfig.getFlightModeLocked();
+		}
+
+		/** Sets whether the flight mode is locked. */
+		public static void setModeLocked(boolean value) {
+			ZFighterClientConfig.setFlightModeLocked(value);
+		}
 	}
-}
