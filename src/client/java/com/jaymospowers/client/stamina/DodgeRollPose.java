@@ -75,13 +75,14 @@ public final class DodgeRollPose {
 		long now = player.level().getGameTime();
 		long start;
 		float x, z;
-		boolean flip;
+		boolean flip, extended;
 		if (player == Minecraft.getInstance().player && DodgeClient.rollStart != Long.MIN_VALUE) {
 			// our own roll: drawn the moment we hop, not when the server's copy comes back
 			start = DodgeClient.rollStart;
 			x = DodgeClient.rollX;
 			z = DodgeClient.rollZ;
 			flip = DodgeClient.rollFlip;
+			extended = DodgeClient.rollLong;
 		} else {
 			Dodge.Rolling rolling = player.getAttached(Dodge.ROLLING);
 			if (rolling == null) {
@@ -91,8 +92,11 @@ public final class DodgeRollPose {
 			x = rolling.x();
 			z = rolling.z();
 			flip = rolling.flip();
+			extended = rolling.extended();
 		}
-		float t = (now - start + partialTicks) / (flip ? Dodge.FLIP_TICKS : Dodge.ROLL_TICKS);
+		float elapsed = now - start + partialTicks;
+		// (a long roll, the key held into it, turns slower over more ground: Dodge#rollShare)
+		float t = flip ? elapsed / Dodge.FLIP_TICKS : Dodge.rollShare(elapsed, extended);
 		// (a flip in the air is a flip for everyone)
 		return t < 0.0F || t >= 1.0F ? null : new Roll(t, x, z, flip, !flip && Boolean.TRUE.equals(player.getAttached(Dodge.STRETCHY)));
 	}

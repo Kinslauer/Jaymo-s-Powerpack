@@ -25,6 +25,12 @@ import org.jspecify.annotations.Nullable;
  * tap held is the zoom now ({@code SneakZoom}), and OK Zoomer's own key came off Left Alt so Alt only dodges.
  * <p>Acrobatics: in the air it throws a trick when there's time before the ground, and on the ground with Back held alone
  * and the Backflip perk learnt it backflips instead of rolling back ({@code AcrobaticsClient}).
+ * <p>Andy: "back dodge should only activate when locked, and they should all only activate once per press, holding the
+ * button should make you cover a bit more ground, then gradually transition to prone". Each press of the key does one
+ * thing, however long it's held (the key's repeats don't count). A roll goes back only while locked on to a foe
+ * ({@code LockOnClient}): otherwise the back of the movement keys is dropped, so Back with Left or Right rolls to that
+ * side, nothing held rolls forward, and Back alone doesn't roll. Held into a ground roll, the roll goes long
+ * ({@link Dodge#HOLD_TICKS}) and, still held as it ends, you go on down into prone ({@code CrawlTaps.goProne}).
  */
 public final class DodgeClient {
 	private static @Nullable KeyMapping dodgeKey;
@@ -39,9 +45,19 @@ public final class DodgeClient {
 	static float rollX, rollZ;
 	/** Whether our own last roll was the flip in the air ({@link Dodge#canFlip}). */
 	static boolean rollFlip;
+	/** Whether our own last roll is the long one (the key held into it, {@link Dodge#HOLD_TICKS}). */
+	static boolean rollLong;
+	/** Our own ground roll may still go long (not yet {@link Dodge#HOLD_TICKS} in); its end may still take us prone. */
+	private static boolean holdPending, proneAtEnd;
+	/** The Dodge key was down last tick: a press is the key going down, once, however long it's held. */
+	private static boolean keyWasDown;
 	/** Forgets our last own roll, so the next roll drawn for us is the server's copy (a leap off a mount ends in one the server throws). */
 	public static void forgetRoll() {
 		rollStart = Long.MIN_VALUE;
+		rollLong = false;
+		holdPending = false;
+		proneAtEnd = false;
+		Dodge.localRollTicks = Dodge.ROLL_TICKS;
 	}
 
 	/** Leaving the ground faster than this upward (blocks/tick) is a jump, not a step off an edge. */
@@ -87,8 +103,10 @@ public final class DodgeClient {
 		if (sinceDodge < Integer.MAX_VALUE) {
 			sinceDodge++;
 		}
+		boolean down = keyDown();
 		if (player == null || minecraft.gui.screen() != null) {
 			landingRoll = 0;
+			keyWasDown = down;
 			return;
 		}
 		boolean ground = player.onGround();
@@ -102,12 +120,15 @@ public final class DodgeClient {
 			jumped = true;
 		}
 		wasOnGround = ground;
-		boolean wanted = false;
+		boolean clicked = false;
 		KeyMapping key = dodgeKey;
 		while (key != null && key.consumeClick()) {
-			// (0.20.74) Sneak + Alt is the zoom (SneakZoom), not a dodge
-			wanted = !minecraft.options.keyShift.isDown();
+			clicked = true;
 		}
+		// one press, one move: the key going down (or a tap quicker than a tick), never its repeats while held;
+		// (0.20.74) Sneak + Alt is the zoom (SneakZoom), not a dodge
+		boolean wanted = (down || clicked) && !keyWasDown && !minecraft.options.keyShift.isDown();
+		keyWasDown = down;
 		if (wanted && vault(player)) {
 			// (0.21.22) in the air over a raised shield: the vault, not a roll
 			wanted = false;
@@ -137,6 +158,51 @@ public final class DodgeClient {
 				landingRoll = 0;
 			} else {
 				landingRoll--;
+			}
+		}
+		tickHold(player, down);
+	}
+
+	/**
+	 * Our own ground roll with the key held: {@link Dodge#HOLD_TICKS} in it goes long (the server's told, so everyone
+	 * draws it so), carried on along the ground, slowing; still held as it ends, we go on down into prone, which
+	 * {@code ProneTransition} draws as a gradual crouch and lowering onto the hands.
+	 */
+	private static void tickHold(LocalPlayer player, boolean down) {
+		if (rollStart == Long.MIN_VALUE || rollFlip) {
+			return;
+		}
+		long elapsed = player.level().getGameTime() - rollStart;
+		if (holdPending && elapsed >= Dodge.HOLD_TICKS) {
+			holdPending = false;
+			if (down && elapsed < Dodge.LONG_ROLL_TICKS) {
+				rollLong = true;
+				proneAtEnd = true;
+				Dodge.localRollTicks = Dodge.LONG_ROLL_TICKS;
+				cooldown = Math.max(cooldown, (int)(Dodge.LONG_ROLL_TICKS - elapsed));
+				if (ClientPlayNetworking.canSend(Dodge.Extend.TYPE)) {
+					ClientPlayNetworking.send(new Dodge.Extend());
+				}
+			}
+		}
+		if (!rollLong) {
+			return;
+		}
+		if (elapsed < Dodge.LONG_ROLL_TICKS) {
+			if (player.onGround() && !player.isInWater()) {
+				// carried on the way of the roll, easing off toward its end (never slowed below what the hop still gives)
+				float share = (elapsed - Dodge.HOLD_TICKS) / (float)(Dodge.LONG_ROLL_TICKS - Dodge.HOLD_TICKS);
+				double speed = Mth.lerp(Mth.clamp(share, 0.0F, 1.0F), Dodge.LONG_SPEED_START, Dodge.LONG_SPEED_END);
+				Vec3 motion = player.getDeltaMovement();
+				double along = motion.x * rollX + motion.z * rollZ;
+				if (along < speed) {
+					player.setDeltaMovement(motion.x + rollX * (speed - along), motion.y, motion.z + rollZ * (speed - along));
+				}
+			}
+		} else if (proneAtEnd) {
+			proneAtEnd = false;
+			if (down && player.onGround() && !com.jaymospowers.client.CrawlTaps.prone()) {
+				com.jaymospowers.client.CrawlTaps.goProne(player, false);
 			}
 		}
 	}
@@ -196,6 +262,9 @@ public final class DodgeClient {
 		rollX = (float)dir.x;
 		rollZ = (float)dir.z;
 		rollFlip = true;
+		rollLong = false;
+		holdPending = false;
+		proneAtEnd = false;
 		if (ClientPlayNetworking.canSend(Dodge.Flip.TYPE)) {
 			ClientPlayNetworking.send(new Dodge.Flip((float)dir.x, (float)dir.z));
 		}
@@ -232,8 +301,17 @@ public final class DodgeClient {
 		Input input = player.input.keyPresses;
 		float forward = (input.forward() ? 1.0F : 0.0F) - (input.backward() ? 1.0F : 0.0F);
 		float strafe = (input.left() ? 1.0F : 0.0F) - (input.right() ? 1.0F : 0.0F);
+		boolean locked = com.jaymospowers.client.LockOnClient.locked() != null;
+		if (!locked && forward < 0.0F) {
+			// a roll goes back only while locked on to a foe: otherwise Back is dropped (Back alone doesn't roll at all)
+			forward = 0.0F;
+			if (strafe == 0.0F && !landing) {
+				return;
+			}
+		}
 		if (forward == 0.0F && strafe == 0.0F) {
-			forward = landing ? 1.0F : -1.0F;
+			// nothing held: the back hop when locked on, a roll forward otherwise (and always on landing)
+			forward = landing || !locked ? 1.0F : -1.0F;
 		}
 		// the movement keys turned to the world by the player's facing (as vanilla's own input is)
 		float yaw = player.getYRot() * Mth.DEG_TO_RAD;
@@ -248,6 +326,10 @@ public final class DodgeClient {
 		rollX = (float)dir.x;
 		rollZ = (float)dir.z;
 		rollFlip = false;
+		rollLong = false;
+		holdPending = true;
+		proneAtEnd = false;
+		Dodge.localRollTicks = Dodge.ROLL_TICKS;
 		// the body is the low one for the roll (Dodge#rollingLow), at once
 		Dodge.localRollId = player.getId();
 		Dodge.localRollStart = player.level().getGameTime();
