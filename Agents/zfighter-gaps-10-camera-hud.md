@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: stalled
 task: zfighter-gaps-10-camera-hud
 branch: claude/zfighter-gaps-10-camera-hud
 with:
@@ -38,13 +38,4 @@ owns:
 ## Done
 - Created worktree and agent note
 - Read relevant source files
-- Implemented front camera settings with smoothing
-- Implemented HUD options (hide numbers, always visible, menu scale, party markers)
-- Implemented ki sense damage tally (server and client)
-- Implemented travel/combat flight modes with lock
-- Added translations for all new settings
-- Created change note
-- Built successfully with `./gradlew build`
-- PR checks passed
-- Opened PR #1937
-- Set task to in-review
+- 2026-11-20 08:36 No sign of work for 30 min: marked stalled (whoever ran it stopped).
