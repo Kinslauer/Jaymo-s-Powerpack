@@ -5,7 +5,7 @@ from: coordinator
 asked: 2026-11-20
 thread: cmsg_scrying_orb_design_spec
 claimed_by: hermes-a
-pr:
+pr: 1896
 suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/ScryingOrb.java
   - kingdoms/src/main/java/com/jaymoskingdoms/ScryingOrbBlock.java
