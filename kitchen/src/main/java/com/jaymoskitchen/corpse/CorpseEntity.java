@@ -2279,12 +2279,16 @@ public class CorpseEntity extends Entity {
 	 * needs a 2x2), else it's let go.
 	 */
 	public void dragOnto(Player player, BlockPos clicked, Vec3 hit) {
-		// (0.5.51) heaved up onto a meat hook near enough
-		if (com.jaymoskitchen.butchery.Butchery.isHook(level().getBlockState(clicked))
-			&& position().distanceTo(Vec3.atCenterOf(clicked)) <= Hanging.DRAG_TO_HOOK + getBbHeight()) {
-			if (Hanging.hang(this, player, clicked)) {
-				return;
+		// heaved up onto a meat hook you're standing near. A click on or right by a hook never lets go: it
+		// hangs, or says why it won't
+		BlockPos hook = Hanging.hookAt(level(), clicked, hit);
+		if (hook != null) {
+			if (player.position().distanceTo(Vec3.atCenterOf(hook)) > Hanging.DRAG_TO_HOOK + player.getBbHeight()) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.closer"));
+			} else {
+				Hanging.hang(this, player, hook);
 			}
+			return;
 		}
 		if (Corpses.isButcherBlock(level().getBlockState(clicked)) && position().distanceTo(Vec3.atCenterOf(clicked)) <= DRAG_TO_TABLE) {
 			Vec3 at = tableSpot(level(), clicked, hit, isBigCarcass());

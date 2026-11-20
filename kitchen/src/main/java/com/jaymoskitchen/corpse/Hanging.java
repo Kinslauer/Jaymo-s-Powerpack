@@ -20,6 +20,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -49,9 +51,11 @@ public final class Hanging {
 	static final int BLOOD_SMALL = 250, BLOOD = 1000, BLOOD_BIG = 2000;
 	/** A drop falls every this many ticks; blood with no grate under it pools on the ground every this many. */
 	static final int DRIP_EVERY = 4, SPILL_EVERY = 20;
-	/** How far below the carcass a grate can be (blocks), and how far a dragged carcass can be heaved onto a hook. */
+	/** How far below the carcass a grate can be (blocks), and how far from a hook (past your own height) you can heave a dragged carcass onto it. */
 	static final int GRATE_DEPTH = 4;
 	public static final double DRAG_TO_HOOK = 3.0;
+	/** A click this close to a hook's middle (blocks) counts as on it: the beam it hangs from, the ceiling behind it. */
+	static final double HOOK_SLACK = 1.25;
 	/** Bones left over after the last cut (at least one, up to this many more). */
 	static final int BONES_MORE = 2;
 	/** Skinned on the hook: this many more of each skin (a clean, whole one), and leather scraps (at least one, up to this many more). */
@@ -138,6 +142,30 @@ public final class Hanging {
 		player.sendOverlayMessage(Component.translatable(corpse.butcherStage() == FRESH ? "message.jaymoskitchen.hook.hung"
 			: "message.jaymoskitchen.hook.hung_again"));
 		return true;
+	}
+
+	/**
+	 * The meat hook a right-click with a carcass in hand meant: the one clicked, or (a hook is thin, and easy to miss
+	 * looking up at it) the nearest one right by the click. Null for none, or a click on a butcher block.
+	 */
+	public static @Nullable BlockPos hookAt(Level level, BlockPos clicked, Vec3 hit) {
+		BlockState state = level.getBlockState(clicked);
+		if (Butchery.isHook(state)) {
+			return clicked;
+		}
+		if (Corpses.isButcherBlock(state)) {
+			return null;
+		}
+		BlockPos best = null;
+		double bestDist = HOOK_SLACK * HOOK_SLACK;
+		for (BlockPos pos : BlockPos.betweenClosed(clicked.offset(-1, -1, -1), clicked.offset(1, 1, 1))) {
+			double dist = Vec3.atCenterOf(pos).distanceToSqr(hit);
+			if (dist <= bestDist && Butchery.isHook(level.getBlockState(pos))) {
+				best = pos.immutable();
+				bestDist = dist;
+			}
+		}
+		return best;
 	}
 
 	/** Where the hook holds the legs. */
