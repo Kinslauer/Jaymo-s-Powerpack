@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 01:21). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 01:25). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -50,7 +50,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/forest-fire-pack|forest-fire-pack]] · ☁️ Cloud · #1902 · in-review
 
 
 ## Needs Andy
@@ -64,6 +63,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/forest-fire-pack|forest-fire-pack]]
 - [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
 - [x] [[Inbox/Done/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]]
 - [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
@@ -71,7 +71,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
 - [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
 - [x] [[Inbox/Done/wither-reincarnated-fight|wither-reincarnated-fight]]
-- [x] [[Inbox/Done/weapon-hooks-and-breaks|weapon-hooks-and-breaks]]
 
 
 %% kanban:settings
