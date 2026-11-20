@@ -1,0 +1,8 @@
+{
+  "credit": "Original art for Jaymo's Kingdoms; no external assets used.",
+  "variants": {
+    "": {
+      "model": "jaymoskingdoms:block/scrying_orb"
+    }
+  }
+}

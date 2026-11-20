@@ -1,0 +1,382 @@
+{
+ "format": "blockbench",
+ "version": "4.2.2",
+ "project": {
+  "name": "scrying_orb",
+  "author": "Prometheus (hermes-modeller) for Jaymo's Kingdoms",
+  "notes": "Scrying orb: glass sphere (6-10, tintindex 0) on carved stand (5-11, Y 0-6). Per docs/ScryingOrb-Spec.md \u00a71. No external assets; original art.",
+  "workspace": []
+ },
+ "textures": [
+  {
+   "name": "scrying_orb_glass",
+   "path": "jaymoskingdoms:block/scrying_orb_glass",
+   "id": "17bc4ede-394c-4640-a8ca-79d754cd0fe2",
+   "type": 0,
+   "size": {
+    "w": 16,
+    "h": 16
+   },
+   "display": {
+    "name": "Glass",
+    "min": [
+     0,
+     0,
+     0
+    ],
+    "max": [
+     16,
+     16
+    ]
+   },
+   "source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABWklEQVR4nKWTsU4CQRCGvzkWbKztLH0LGmo7ExNLY4caeAA7SypilN7Gh7CAhsZQ8gI22tuYwN0tZu52LsNZcskXYJn/35l/92QynJ8LdAVChKCfAtloNngFeLpd3ETYCUQlQiGJCHlA6EJDSHRUDPwgHAE7IAIlkCVECwJSCfZMRs+D6+n9Yiwg45fq+1sSl16sxjIZzq8EekqsR1E6o9ngLI3wGev2S0XblppthK11YDRdTO8WX5qF1CNo+0Wi2jmtRTXI0syGGvVaWVjrJKHVZoHYhOINzMQbmLg0cW0gVSBG20zb12fjRa5e1OCgJxCrQHY+GHdkGzdC6f5vNAH5JypcYD4DO4U9s5AMbNEKLTCffNugMgnEZkd/w/y19b+V3JkV2Wq9PEYoEPLE1rFJ+DWrK1br5Ymet+6rrv6GdS4e+t+/ec775OO09TLZ7pVGLvuPs0OO8Q9jhZj+VcPzKgAAAABJRU5ErkJggg=="
+  },
+  {
+   "name": "scrying_orb_stand",
+   "path": "jaymoskingdoms:block/scrying_orb_stand",
+   "id": "08cb1d10-caf1-496f-a50a-217259d2e848",
+   "type": 0,
+   "size": {
+    "w": 16,
+    "h": 16
+   },
+   "display": {
+    "name": "Stand",
+    "min": [
+     0,
+     0,
+     0
+    ],
+    "max": [
+     16,
+     16
+    ]
+   },
+   "source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAcElEQVR4nGNc1ZT5/8XLtwzkAAlxYQYmZM1nLt8gqAlZDUgvEwOFgAWfDUQZ8OL9GzhHRkaEKE3IepgYKARMQ98AFnSBa7ee4NWgpSaD3wAtNRmwIegKsYnh9IIWFoXYxHAawEACGHgDWO48eUWRAQD+qyVfgTsEhgAAAABJRU5ErkJggg=="
+  }
+ ],
+ "outliner": [
+  {
+   "uuid": "f339ce69-bb5c-4b02-89cc-e65329b207b0",
+   "children": [
+    "6da1e3d8-cbcf-4d70-9408-1b913a80c09e",
+    "8c4be031-f6ad-4ad5-9a22-f32be0acbfe9"
+   ]
+  }
+ ],
+ "elements": [
+  {
+   "uuid": "6da1e3d8-cbcf-4d70-9408-1b913a80c09e",
+   "name": "glass sphere",
+   "from": [
+    6,
+    6,
+    6
+   ],
+   "to": [
+    10,
+    10,
+    10
+   ],
+   "origin": [
+    8,
+    8,
+    8
+   ],
+   "rotation": [
+    0,
+    0,
+    0
+   ],
+   "shade": true,
+   "faces": {
+    "down": {
+     "uv": [
+      0,
+      0,
+      8,
+      8
+     ],
+     "texture": 0,
+     "tintindex": 0
+    },
+    "up": {
+     "uv": [
+      8,
+      0,
+      16,
+      8
+     ],
+     "texture": 0,
+     "tintindex": 0
+    },
+    "north": {
+     "uv": [
+      0,
+      8,
+      8,
+      16
+     ],
+     "texture": 0,
+     "tintindex": 0
+    },
+    "south": {
+     "uv": [
+      8,
+      8,
+      16,
+      16
+     ],
+     "texture": 0,
+     "tintindex": 0
+    },
+    "west": {
+     "uv": [
+      0,
+      0,
+      8,
+      8
+     ],
+     "texture": 0,
+     "tintindex": 0
+    },
+    "east": {
+     "uv": [
+      8,
+      8,
+      16,
+      16
+     ],
+     "texture": 0,
+     "tintindex": 0
+    }
+   }
+  },
+  {
+   "uuid": "8c4be031-f6ad-4ad5-9a22-f32be0acbfe9",
+   "name": "carved stand",
+   "from": [
+    5,
+    0,
+    5
+   ],
+   "to": [
+    11,
+    6,
+    11
+   ],
+   "origin": [
+    8,
+    3,
+    8
+   ],
+   "rotation": [
+    0,
+    0,
+    0
+   ],
+   "shade": true,
+   "faces": {
+    "down": {
+     "uv": [
+      0,
+      0,
+      8,
+      8
+     ],
+     "texture": 1
+    },
+    "up": {
+     "uv": [
+      8,
+      0,
+      16,
+      8
+     ],
+     "texture": 1
+    },
+    "north": {
+     "uv": [
+      0,
+      8,
+      8,
+      16
+     ],
+     "texture": 1
+    },
+    "south": {
+     "uv": [
+      8,
+      8,
+      16,
+      16
+     ],
+     "texture": 1
+    },
+    "west": {
+     "uv": [
+      0,
+      0,
+      8,
+      8
+     ],
+     "texture": 1
+    },
+    "east": {
+     "uv": [
+      8,
+      8,
+      16,
+      16
+     ],
+     "texture": 1
+    }
+   }
+  }
+ ],
+ "groups": [
+  {
+   "uuid": "f339ce69-bb5c-4b02-89cc-e65329b207b0",
+   "name": "root",
+   "origin": [
+    0,
+    0,
+    0
+   ],
+   "rotation": [
+    0,
+    0,
+    0
+   ],
+   "children": [
+    "6da1e3d8-cbcf-4d70-9408-1b913a80c09e",
+    "8c4be031-f6ad-4ad5-9a22-f32be0acbfe9"
+   ]
+  }
+ ],
+ "resolution": {
+  "width": 16,
+  "height": 16
+ },
+ "display": {
+  "thirdperson_righthand": {
+   "rotation": [
+    75,
+    0,
+    45
+   ],
+   "translation": [
+    0,
+    3,
+    -3.5
+   ],
+   "scale": [
+    0.6,
+    0.6,
+    0.6
+   ]
+  },
+  "thirdperson_lefthand": {
+   "rotation": [
+    75,
+    0,
+    -45
+   ],
+   "translation": [
+    0,
+    3,
+    -3.5
+   ],
+   "scale": [
+    0.6,
+    0.6,
+    0.6
+   ]
+  },
+  "firstperson_righthand": {
+   "rotation": [
+    0,
+    0,
+    70
+   ],
+   "translation": [
+    0,
+    4.5,
+    -4
+   ],
+   "scale": [
+    0.5,
+    0.5,
+    0.5
+   ]
+  },
+  "firstperson_lefthand": {
+   "rotation": [
+    0,
+    0,
+    -70
+   ],
+   "translation": [
+    0,
+    4.5,
+    -4
+   ],
+   "scale": [
+    0.5,
+    0.5,
+    0.5
+   ]
+  },
+  "gui": {
+   "rotation": [
+    25,
+    225,
+    0
+   ],
+   "translation": [
+    0,
+    1,
+    0
+   ],
+   "scale": [
+    1.4,
+    1.4,
+    1.4
+   ]
+  },
+  "ground": {
+   "rotation": [
+    0,
+    0,
+    0
+   ],
+   "translation": [
+    0,
+    3,
+    0
+   ],
+   "scale": [
+    0.5,
+    0.5,
+    0.5
+   ]
+  },
+  "fixed": {
+   "rotation": [
+    0,
+    0,
+    0
+   ],
+   "translation": [
+    0,
+    0,
+    0
+   ],
+   "scale": [
+    1,
+    1,
+    1
+   ]
+  }
+ }
+}

@@ -1,0 +1,41 @@
+{
+  "credit": "Original art for Jaymo's Kingdoms; no external assets used.",
+  "parent": "jaymoskingdoms:block/scrying_orb",
+  "display": {
+    "thirdperson_righthand": {
+      "rotation": [75, 0, 45],
+      "translation": [0, 3, -3.5],
+      "scale": [0.6, 0.6, 0.6]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [75, 0, -45],
+      "translation": [0, 3, -3.5],
+      "scale": [0.6, 0.6, 0.6]
+    },
+    "firstperson_righthand": {
+      "rotation": [0, 0, 70],
+      "translation": [0, 4.5, -4],
+      "scale": [0.5, 0.5, 0.5]
+    },
+    "firstperson_lefthand": {
+      "rotation": [0, 0, -70],
+      "translation": [0, 4.5, -4],
+      "scale": [0.5, 0.5, 0.5]
+    },
+    "gui": {
+      "rotation": [25, 225, 0],
+      "translation": [0, 1, 0],
+      "scale": [1.4, 1.4, 1.4]
+    },
+    "ground": {
+      "rotation": [0, 0, 0],
+      "translation": [0, 3, 0],
+      "scale": [0.5, 0.5, 0.5]
+    },
+    "fixed": {
+      "rotation": [0, 0, 0],
+      "translation": [0, 0, 0],
+      "scale": [1, 1, 1]
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "credit": "Original art for Jaymo's Kingdoms; no external assets used.",
+  "texture_size": [16, 16],
+  "textures": {
+    "0": "jaymoskingdoms:block/scrying_orb_glass",
+    "1": "jaymoskingdoms:block/scrying_orb_stand",
+    "particle": "jaymoskingdoms:block/scrying_orb_glass"
+  },
+  "elements": [
+    {
+      "from": [6, 6, 6],
+      "to": [10, 10, 10],
+      "origin": [8, 8, 8],
+      "faces": {
+        "down": {"uv": [0, 0, 8, 8], "texture": "#0", "tintindex": 0},
+        "up": {"uv": [8, 0, 16, 8], "texture": "#0", "tintindex": 0},
+        "north": {"uv": [0, 8, 8, 16], "texture": "#0", "tintindex": 0},
+        "south": {"uv": [8, 8, 16, 16], "texture": "#0", "tintindex": 0},
+        "west": {"uv": [0, 0, 8, 8], "texture": "#0", "tintindex": 0},
+        "east": {"uv": [8, 8, 16, 16], "texture": "#0", "tintindex": 0}
+      }
+    },
+    {
+      "from": [5, 0, 5],
+      "to": [11, 6, 11],
+      "origin": [8, 3, 8],
+      "faces": {
+        "down": {"uv": [0, 0, 8, 8], "texture": "#1"},
+        "up": {"uv": [8, 0, 16, 8], "texture": "#1"},
+        "north": {"uv": [0, 8, 8, 16], "texture": "#1"},
+        "south": {"uv": [8, 8, 16, 16], "texture": "#1"},
+        "west": {"uv": [0, 0, 8, 8], "texture": "#1"},
+        "east": {"uv": [8, 8, 16, 16], "texture": "#1"}
+      }
+    }
+  ],
+  "display": {}
+}
