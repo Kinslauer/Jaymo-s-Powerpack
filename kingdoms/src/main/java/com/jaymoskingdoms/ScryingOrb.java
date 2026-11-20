@@ -179,18 +179,19 @@ public final class ScryingOrb {
         }));
 
         public static final StreamCodec<RegistryFriendlyByteBuf, Target> STREAM_CODEC = StreamCodec.composite(
-            TargetKind.STREAM_CODEC,
-            Target::kind,
-            ByteBufCodecs.UUID,
-            Target::person,
-            ByteBufCodecs.STRING_UTF8,
-            Target::dimension,
-            BlockPos.STREAM_CODEC,
-            Target::pos,
-            ByteBufCodecs.STRING_UTF8,
-            Target::name,
-            Target::new
-        );
+                    TargetKind.STREAM_CODEC,
+                    Target::kind,
+                    // UUID encoded as string for compatibility with 26.3 ByteBufCodecs
+                    ByteBufCodecs.STRING_UTF8, Target::person,
+                    ByteBufCodecs.STRING_UTF8,
+                    Target::dimension,
+                    BlockPos.STREAM_CODEC,
+                    Target::pos,
+                    ByteBufCodecs.STRING_UTF8,
+                    Target::name,
+                    // UUID from string constructor
+                    java.util.UUID::new
+            );
     }
 
     /** A ticket keeping a place's 3x3 chunks loaded while the orb is awake on it. */
@@ -377,10 +378,10 @@ public final class ScryingOrb {
                     }
                     BlockPos pos = new BlockPos(x, y, z);
                     BlockState state = level.getBlockState(pos);
-                    int mapColor = state.getMapColor(level, pos).col;
-                    int paletteIdx = paletteMap.computeIfAbsent(mapColor, c -> {
+                    int stateId = Block.getId(state);
+                    int paletteIdx = paletteMap.computeIfAbsent(stateId, id -> {
                         if (paletteSize < 256) {
-                            palette[paletteSize] = c;
+                            palette[paletteSize] = id;
                             return paletteSize++;
                         }
                         return 0;
@@ -410,8 +411,9 @@ public final class ScryingOrb {
             }
             return null;
         } else {
-            ServerLevel targetLevel = level.getServer().getLevel(net.minecraft.resources.ResourceKey.create(
-                net.minecraft.core.registries.Registries.DIMENSION, net.minecraft.resources.ResourceLocation.parse(target.dimension())));
+                    ServerLevel targetLevel = level.getServer().getLevel(net.minecraft.resources.ResourceKey.create(
+                        net.minecraft.core.registries.Registries.DIMENSION,
+                        new net.minecraft.resources.ResourceLocation(target.dimension())));
             if (targetLevel == null) {
                 return null;
             }
@@ -439,7 +441,7 @@ public final class ScryingOrb {
             int dy = Math.clamp(e.getBlockY() - cy, -RADIUS, RADIUS);
             int dz = Math.clamp(e.getBlockZ() - cz, -RADIUS, RADIUS);
             int facing = (int) (e.getYRot() / 90.0) & 3;
-            int walking = e.isMoving() ? 1 : 0;
+            int walking = !e.onGround() ? 1 : 0;
             figures[n * 4] = dx;
             figures[n * 4 + 1] = dy;
             figures[n * 4 + 2] = dz;

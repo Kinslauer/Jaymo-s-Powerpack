@@ -3,6 +3,7 @@ package com.jaymoskingdoms.client;
 import com.jaymoskingdoms.ScryingOrb;
 import com.jaymoskingdoms.ScryingOrbBlockEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.QuadInstance;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import java.util.ArrayList;
@@ -53,19 +54,22 @@ public final class ScryingOrbRenderer implements BlockEntityRenderer<ScryingOrbB
     private static final int STAND_COLOUR = 0xFF3A2E24;
     /** Full bright light coords. */
     private static final int FULL_BRIGHT = 0xF000F0;
+    /** Sphere scale: 17x17x11 blocks at 1/24 scale. */
+    private static final double SCALE = 1.0 / 24.0;
+    private static final Direction[] SIDES = {Direction.DOWN, Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST, null};
 
     /** One active orb's data as received from the server. */
     private static final class OrbData {
         final UUID id;
         final Component who;
-        final int[] palette;
+        final BlockState[] palette;
         final byte[] indices;
         final int[] figures;
         final boolean night;
         final long receivedAt;
         int tickOffset;
 
-        OrbData(UUID id, Component who, int[] palette, byte[] indices, int[] figures, boolean night) {
+        OrbData(UUID id, Component who, BlockState[] palette, byte[] indices, int[] figures, boolean night) {
             this.id = id;
             this.who = who;
             this.palette = palette;
@@ -78,6 +82,8 @@ public final class ScryingOrbRenderer implements BlockEntityRenderer<ScryingOrbB
     }
 
     private static final Map<UUID, OrbData> ORBS = new HashMap<>();
+    /** Quad cache: BlockState -> List<BakedQuad> */
+    private static final Map<BlockState, List<BakedQuad>> QUADS = new HashMap<>();
 
     public static final class State extends BlockEntityRenderState {
         BlockPos pos;
@@ -129,7 +135,7 @@ public final class ScryingOrbRenderer implements BlockEntityRenderer<ScryingOrbB
         // Draw the stand
         drawStand(collector, poseStack, cx, cy - 0.55, cz, state.blockLight, state.skyLight);
 
-        // Draw the miniature inside the sphere
+        // Draw the miniature inside the sphere using PlanGhosts approach
         drawMiniature(collector, poseStack, cx, cy, cz, spin, data, state.blockLight, state.skyLight);
 
         // Draw the glass sphere
@@ -191,14 +197,72 @@ public final class ScryingOrbRenderer implements BlockEntityRenderer<ScryingOrbB
         int diameter = ScryingOrb.SIZE;
         int height = ScryingOrb.HEIGHT;
         int radius = ScryingOrb.RADIUS;
+        int total = diameter * diameter * height;
 
-        // Build quad cache for the palette states
-        Map<Integer, List<BakedQuad>> quadCache = new HashMap<>();
-        for (int i = 0; i < data.palette.length; i++) {
-            // We don't have the actual BlockState here, just the map color
-            // In a full implementation we'd send block state IDs, not map colors
-            // For now, skip drawing actual blocks - this is a placeholder
+        // Build list of visible block positions and states
+        List<long[]> visiblePos = new ArrayList<>();
+        List<BlockState> visibleStates = new ArrayList<>();
+
+        for (int idx = 0; idx < total && idx < data.indices.length; idx++) {
+            byte paletteIdx = data.indices[idx];
+            if (paletteIdx < 0) continue; // outside sphere
+            if (paletteIdx == 0) continue; // air
+            if (paletteIdx >= data.palette.length) continue;
+
+            BlockState state = data.palette[paletteIdx];
+            if (state == null || state.isAir() || state.getRenderShape() != RenderShape.MODEL) continue;
+
+            int dx = idx % diameter;
+            int dz = (idx / diameter) % diameter;
+            int dy = idx / (diameter * diameter);
+
+            int wx = dx - radius;
+            int wy = dy - radius;
+            int wz = dz - radius;
+
+            long pos = BlockPos.asLong(wx, wy, wz);
+            visiblePos.add(new long[]{pos, ((long) paletteIdx & 0xFFL) << 32 | idx & 0xFFFFFFFFL}); // pack pos and idx
+            visibleStates.add(state);
         }
+
+        if (visiblePos.isEmpty()) return;
+
+        // Render using submitCustomGeometry like PlanGhosts
+        Vec3 camera = mc.gameRenderer.getMainCamera().getPosition();
+        poseStack.pushPose();
+        collector.submitNodeCollector().submitCustomGeometry(poseStack, RenderTypes.entityTranslucent(TextureAtlas.LOCATION_BLOCKS), (pose, consumer) -> {
+            QuadInstance instance = new QuadInstance();
+            instance.setColor(0xFFFFFFFF); // white tint, block model provides color
+            instance.setLightCoords(FULL_BRIGHT);
+            instance.setOverlayCoords(OverlayTexture.NO_OVERLAY);
+            RandomSource random = RandomSource.create(42L);
+
+            for (int i = 0; i < visiblePos.size(); i++) {
+                long[] posData = visiblePos.get(i);
+                BlockState state = visibleStates.get(i);
+
+                int wx = BlockPos.getX(posData[0]);
+                int wy = BlockPos.getY(posData[0]);
+                int wz = BlockPos.getZ(posData[0]);
+
+                // Translate to orb center + scaled position
+                PoseStack.Pose p = pose.copy();
+                p.translate((float)(cx + wx * SCALE - camera.x) + 0.01F,
+                           (float)(cy + wy * SCALE - camera.y) + 0.01F,
+                           (float)(cz + wz * SCALE - camera.z) + 0.01F);
+                p.scale((float)SCALE, (float)SCALE, (float)SCALE);
+
+                // Apply slow rotation
+                p.mulPose(Axis.YP.rotationDegrees((float) Math.toDegrees(spin)));
+
+                // Get or compute quads for this state
+                List<BakedQuad> quads = getQuads(mc, state, random);
+                for (BakedQuad quad : quads) {
+                    consumer.putBakedQuad(p, quad, instance);
+                }
+            }
+        });
+        poseStack.popPose();
 
         // Draw figures as motes (first cut: small lit motes)
         if (data.figures.length > 0) {
@@ -208,8 +272,6 @@ public final class ScryingOrbRenderer implements BlockEntityRenderer<ScryingOrbB
                 int dz = data.figures[i + 2];
                 int packed = data.figures[i + 3];
                 int kind = packed >> 6; // 0=watched, 1=folk, 2=monsters, 3=animals
-                // int facing = (packed >> 1) & 3;
-                // int walking = packed & 1;
 
                 int colour = switch (kind) {
                     case 0 -> 0xFFFFFFFF; // white - watched
@@ -218,12 +280,27 @@ public final class ScryingOrbRenderer implements BlockEntityRenderer<ScryingOrbB
                     default -> 0xFF8AE06A; // green - animals
                 };
 
-                double fx = cx + dx * (SPHERE_R / radius);
-                double fy = cy + dy * (SPHERE_R / radius);
-                double fz = cz + dz * (SPHERE_R / radius);
+                double fx = cx + dx * SCALE;
+                double fy = cy + dy * SCALE;
+                double fz = cz + dz * SCALE;
                 mote(collector, poseStack, fx, fy, fz, colour, blockLight, skyLight);
             }
         }
+    }
+
+    private static List<BakedQuad> getQuads(Minecraft minecraft, BlockState state, RandomSource random) {
+        return QUADS.computeIfAbsent(state, s -> {
+            BlockStateModel model = minecraft.getModelManager().getBlockStateModelSet().get(s);
+            List<BlockStateModelPart> parts = new ArrayList<>();
+            model.collectParts(random, parts);
+            List<BakedQuad> out = new ArrayList<>();
+            for (BlockStateModelPart part : parts) {
+                for (Direction side : SIDES) {
+                    out.addAll(part.getQuads(side));
+                }
+            }
+            return List.copyOf(out);
+        });
     }
 
     private static void quad(VertexConsumer consumer, double x0, double y0, double z0, double x1, double y1, double z1,
@@ -261,11 +338,20 @@ public final class ScryingOrbRenderer implements BlockEntityRenderer<ScryingOrbB
 
     public static void register() {
         ClientPlayNetworking.registerGlobalReceiver(ScryingOrb.OrbView.TYPE, (payload, context) -> context.client().execute(() -> {
-            ORBS.put(payload.who().getString().isEmpty() ? UUID.randomUUID() : UUID.nameUUIDFromBytes(payload.who().getString().getBytes()),
-                    new OrbData(UUID.randomUUID(), payload.who(), payload.palette(), payload.indices(), payload.figures(), payload.night()));
+            // Convert palette int[] (block state IDs) to BlockState[]
+            BlockState[] paletteStates = new BlockState[payload.palette().length];
+            for (int i = 0; i < payload.palette().length; i++) {
+                int stateId = payload.palette()[i];
+                if (stateId > 0) {
+                    paletteStates[i] = BlockState.stateById(stateId);
+                }
+            }
+            ORBS.put(UUID.nameUUIDFromBytes(payload.who().getString().getBytes()),
+                    new OrbData(UUID.randomUUID(), payload.who(), paletteStates, payload.indices(), payload.figures(), payload.night()));
         }));
         ClientPlayNetworking.registerGlobalReceiver(ScryingOrb.Close.TYPE, (payload, context) -> context.client().execute(() -> {
             ORBS.clear();
+            QUADS.clear();
         }));
         ClientPlayNetworking.registerGlobalReceiver(ScryingOrb.Cloud.TYPE, (payload, context) -> context.client().execute(() -> {
             ORBS.clear();
@@ -273,6 +359,7 @@ public final class ScryingOrbRenderer implements BlockEntityRenderer<ScryingOrbB
         ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
             if (minecraft.level == null) {
                 ORBS.clear();
+                QUADS.clear();
                 return;
             }
             for (OrbData data : ORBS.values()) {

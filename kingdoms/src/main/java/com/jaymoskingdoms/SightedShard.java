@@ -9,7 +9,9 @@ import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
+import org.jspecify.annotations.Nullable;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -87,7 +89,7 @@ public final class SightedShard {
     }
 
     /** The target stored in {@code stack}, or null. */
-    public static @Nullable ScryingOrb.Target targetOf(ItemStack stack) {
+    public static ScryingOrb.Target targetOf(ItemStack stack) {
         if (!stack.is(ITEM)) {
             return null;
         }
@@ -101,8 +103,8 @@ public final class SightedShard {
 
     private static boolean mark(ServerLevel level, ServerPlayer player, InteractionHand hand, BlockPos pos) {
         ItemStack stack = player.getItemInHand(hand);
-        String dim = level.dimension().location().toString();
-        String dimName = level.dimension().location().getPath();
+        String dim = level.dimension().identifier().toString();
+        String dimName = level.dimension().identifier().getPath();
         String name = Component.translatable("item.jaymoskingdoms.sighted_shard.default_name",
                 dimName,
                 pos.getX(), pos.getY(), pos.getZ()).getString();
