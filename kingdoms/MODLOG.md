@@ -15815,3 +15815,45 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - Andy: "i tried to face an honor duel, but i was constantly opening the chat menu with the guard mid fight".
 - An honour duel's student (duels and festival bouts) and a veteran's parry drill or spar keep their fighting flag up for the whole fight and drop it when it ends. Powers reads that flag to tell a foe, so right click on them now raises your guard instead of opening their talk menu (needs Powers' matching change). Their talk menu works again once the duel ends.
 - `Duels.fight`/`finish`, `GuardDrills.tickParries`/`tickSpar`/`stand`. Built; not played.
+
+## 0.11.23 (2026-11-20): smog over large fires (#1897)
+
+- **Smog over large fires** (Andy, 2026-11-20, with a picture of big dark puffy clouds hanging in the sky: "it should go for any large flame so players can see it from a distance"): any large flame (a burning house, a burning tree, a forest; about 8 fires in a 16x16 patch, not a campfire or a lone burning block) gathers a dark bank of smog high above it, where the smoke plumes end: about 30 blocks over a small blaze, up to about 48 over a big one. Big, slow, dark grey puffs (12 to 28 blocks across, bigger, darker and wider over a bigger fire) that hang there, heave a little, drift slowly downwind and linger a minute or two after the fire is out (less over a small fire). They thin when you fly up into them. Not in the Nether.
+- **Seen from afar**: the server counts every fire as it burns and tells each player where the large flames are, out to 512 blocks, so the smog (and a smoke plume under it, for fires further than the plumes used to reach) shows over fires across the land, as far as you can see. A fire in a loaded chunk too far off to tick keeps its smog until the chunk unloads.
+- Cheap: the smog has its own budget of about 0.15 puffs a tick (0.05 in low-end mode, `/lowend`), and far plumes another 0.5 (0.15), so all the smog together stays at about 300 puffs at most. The server sends at most the 64 nearest fires every 2 seconds.
+- Classes: `disasters/FireSmog` (new, server count and sync), `mixin/FireBlockSmogMixin` (new), `client/disasters/FireSmoke` (pall, far plumes), `StormParticle` (PALL kind), `Disasters`, `SkiesClient`.
+- Compiled; not seen in game. Heights, sizes, darkness, how long it lingers and the 8-fire threshold are first guesses.
+
+## 0.11.24 (2026-11-20): Busy villagers say so instead of opening their talk (#1899)
+
+- Andy: "if a villager is busy period theyll give you a message instead of the chat openining, the openining means they are stopping to speak with you".
+- Right click on an MCA villager who is in the middle of something that can't wait gets a line in a bubble (in their tongue), and their talk menu stays shut. Busy is: a fight (anyone they're after, including you on a sneak + right click; a duel, drill or barrage), a talk with someone else, tending the downed, carrying or burying the dead, hauling, unmasking or pinning someone, and looting. Everyday work (routines, hunting, a job) still stops for you, and the menu opening means they have stopped to talk.
+- One line every 2 seconds, so clicking again doesn't stack bubbles.
+- `TalkBusy` (new), `McaTalkHoldMixin`, `Conversations.talkingWithOther`, lang part `talk-busy.json`. Built; not played.
+
+## 0.11.25 (2026-11-20): Castle towns: a real Epic town round the castle, crowned in the castle (#1898)
+
+- **Seat compounds** (`SeatCompounds`) now lay the land's Epic Structures town round their castle instead of our five
+  drawn homes (Andy: "a kingdom built around a castle like fenford's and the surrounding kingdom's buildings made like
+  the ati thalstead"). The town is generated from its own mod by id with the castle where its middle would be; every
+  piece that would stand on the castle, the square, the garden or the barracks, or reach past 128 blocks, is left out.
+  With fewer than 12 pieces of town left (`TOWN_MIN_PIECES`), no compound is placed there.
+- **Grim Kingdoms' castles** (Fenford's kind: Glacierfall Keep, Glimmervault Fortress, Silentgale and the rest, 18 by
+  land, `GRIM_CASTLES`) can be a compound's castle now, beside ATi's and Repurposed Structures'. Alone they are still only
+  fiefdoms' holds, never a kingdom's seat.
+- **Crowned in the castle:** far from any realm the compound is a kingdom (an Epic town with a castle at its heart is a
+  great town); `Seats.buildings` puts the castle's rooms first, so the throne, banner and panic room go in the castle's
+  hall and not in a big house of the town. Near a kingdom it is still its fiefdom, else an allied village. Compounds
+  already in a world (with our drawn homes) keep the old rule and are never crowned.
+- New chunks only. Built and compile-checked; not played (no world generated with it).
+
+## 0.11.26 (2026-11-20): NPCs need light to see at night; they fetch torches and lanterns, the night watch always carries one (#1901)
+
+- Andy: "npcs should be unable to see in the dark as well, searching for a torch or lantern before they venture out, and night watch guards should always have one equipped", and "you may even encounter villagers with lanterns on sticks".
+- **Sight** (`NightLights.makesOut`, new `NightSightMixin` on every NPC line-of-sight check): villagers (MCA's too), a settlement's or camp's folk and outlaws see you as by day in light 7 or more. In less they make you out only within 3.5 blocks, plus 2.5 per level of light. The light is the brightest of where you stand, what you carry (a torch or lantern in hand, a hip lantern or lantern pole) and their own carried light, which fades a level per block. At night the sky's share follows the moon the way the screen does: about 13 blocks under a full moon, 3.5 under a new one. Anyone on fire or glowing is seen. This covers every system that asks whether an NPC sees you (theft witnesses, villagers coming over to talk, guards and raiders targeting). A foe they're already chasing stays in sight. Folk's stealth sight (`Senses`) uses the same light.
+- **Who sees in the dark anyway**: undead and creatures of the night (`jaymoskingdoms:darkvision`), darkvision bloods (Nightborn, Deepborn, Stoneborn, Hollow, goblins, orcs, moon elves, Feline, Serpen, Arachnid), orc and goblin folk, vampires, a changed werewolf, anyone with night vision.
+- **Fetching a light**: a grown, waking villager or folk in the dark at night with no light in hand gets one before going on. In order: one from their own pocket (a villager's inventory), the lantern they kept from the night before, else they walk to the nearest of their home, their settlement's stores (a lantern, else a torch, taken from the chests) or a lit campfire (they light a torch at it). At home they take their household's light, picked by who they are: 3 in 20 a lantern on a pole, 5 in 20 a lantern, the rest a torch (free; the stores are the paid source). Nothing within 48 blocks, or not reached in a minute, and they go without for two minutes before trying again.
+- **Night watch**: a guard or archer awake at night and not off duty (MCA realm guards' evenings off count as off) always carries a light, even in a lit street and even if he sees in the dark. It comes from the stores (a lantern, on a pole one time in three, else a torch), else a torch for nothing.
+- **Putting it away**: at dawn, asleep or downed the light goes and the hand holds what it held. Lanterns and poles are kept for the next night; a torch carried all night is burnt down by morning. The light sits in the off hand, so the weapon hand is left alone; a watchman's shield is put back at dawn (saved on him). A plain non-MCA villager uses the main hand, the only one its model shows. A villager who dies holding one drops what that hand held before.
+- With LambDynamicLights the lights in NPC hands light the area round them (lantern poles through Powers' matching change). Without Powers the pole share are plain lanterns.
+- `NightLights`, `NightSightMixin`, `Senses.sight`. Built (`compileJava`); not played. Not checked in game: how far NPCs see on a moonlit night, MCA villagers' AI pulling against the walk home for a light, and the lantern pole's look in hand.

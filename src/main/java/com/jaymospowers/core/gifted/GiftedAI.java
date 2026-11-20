@@ -149,7 +149,7 @@ public final class GiftedAI {
 	 * {@code killer} slew a gifted villager: something of their power seeps into them. Andy: "It should corrupt you, but
 	 * also boost your mastery gain or xp." Their own power's corruption fills ({@link #SLAIN_CORRUPTION}, more for a
 	 * corrupted gift) and their mastery leaps ({@link #SLAIN_MASTERY}); with nothing left to learn, or no power, it's
-	 * experience instead.
+	 * experience instead. Only the ink and the sound tell of it (Andy 2026-11-20: no chat line, it read as discovery text).
 	 */
 	private static void slain(ServerPlayer killer, Gifted.Gift gift) {
 		com.jaymospowers.core.Fate.addCorruption(killer, gift.corrupted() ? SLAIN_CORRUPTION_TAKEN : SLAIN_CORRUPTION);
@@ -159,7 +159,6 @@ public final class GiftedAI {
 		ServerLevel level = killer.level();
 		level.sendParticles(ParticleTypes.SQUID_INK, killer.getX(), killer.getY(0.6), killer.getZ(), 16, 0.3, 0.5, 0.3, 0.03);
 		level.playSound(null, killer.getX(), killer.getY(), killer.getZ(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.PLAYERS, 1.0F, 0.7F);
-		killer.sendSystemMessage(Component.translatable("gift.jaymospowers.slain"));
 	}
 
 	static void track(PathfinderMob mob) {

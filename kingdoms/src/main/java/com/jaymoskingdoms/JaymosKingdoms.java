@@ -611,6 +611,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		CoinToss.register();
 		Lanterns.register();
 		Lamplight.register();
+		// NPCs need light to see by: they fetch a torch or lantern for the dark, and the night watch always carries one
+		NightLights.register();
 		// medieval picks: lamps gutter in abandoned places, and the court wizards' everburning mote lantern
 		GutteringLamps.register();
 		MoteLanterns.register();

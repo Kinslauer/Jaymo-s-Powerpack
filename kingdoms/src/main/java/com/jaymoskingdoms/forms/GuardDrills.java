@@ -221,7 +221,7 @@ public final class GuardDrills {
 	}
 
 	/** (0.7.385) Whether {@code id} (a player, or a veteran) is in a drill just now: a duel or a bout doesn't begin on them then. */
-	static boolean busy(UUID id) {
+	public static boolean busy(UUID id) {
 		if (RUNS.containsKey(id)) {
 			return true;
 		}

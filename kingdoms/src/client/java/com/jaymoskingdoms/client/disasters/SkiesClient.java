@@ -102,6 +102,7 @@ public final class SkiesClient {
 			downpour = mist = aurora = glow = 0.0F;
 			FireSmoke.clear();
 		});
+		FireSmoke.register();
 		ClientTickEvents.END_CLIENT_TICK.register(SkiesClient::tick);
 	}
 

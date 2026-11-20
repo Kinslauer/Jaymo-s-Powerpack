@@ -6679,3 +6679,14 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - Right click on anyone who talks (MCA villagers, guards, orcs, bandits) while they're fighting you no longer opens their talk menu, whatever you hold: the click goes to your hand, so a guarding weapon or a shield (either hand) goes up. Before, only a guarding weapon in the main hand skipped the talk, so a shield in the off hand or bare hands still opened the chat.
 - Against other foes, a shield in either hand now counts too, as a guarding weapon already did. Sneak + right click still talks (ruling #987).
 - `Guard.guardsAgainst`. Built; not played.
+
+## 0.25.92 (2026-11-20): no chat line when you slay a gifted villager (#1900)
+
+- Killing a villager with a hidden gift no longer posts "Something of their power seeps into you as they fall" in chat (it broke the no discovery chat text rule). The cost and reward are unchanged: corruption +15 (+25 for a corrupted gift), 30 mastery or 60 XP, with the ink puff and soul sound still marking it. `GiftedAI.slain`, `lang/parts/gifted.json`.
+- Built; not played.
+
+## 0.25.93 (2026-11-20): Lantern pole carried in hand: drawn as a pole with its lantern, and lights the way (#1901)
+
+- For Kingdoms' NPCs who carry lanterns on poles at night (Andy: "you may even encounter villagers with lanterns on sticks"). The lantern pole held in either hand (anyone's: an MCA villager's, a watchman's, a player's) is now a stripped-spruce staff standing upright in the fist with a lantern hung forward off a hook at the top (`models/item/lantern_pole_in_hand.json`, picked by display context the way the spyglass is). In the inventory, on the ground and in frames it stays the flat icon.
+- With LambDynamicLights, anyone holding a lantern pole in a hand gives off a lantern's light (`LdlWornLanternMixin`); worn on the back it already did.
+- Built; not seen in game (the model's angle in hand is worked out on paper, not looked at).
