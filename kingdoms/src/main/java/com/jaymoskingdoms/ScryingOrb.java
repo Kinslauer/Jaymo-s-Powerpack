@@ -3,6 +3,7 @@ package com.jaymoskingdoms;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -19,6 +20,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,6 +31,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
@@ -135,7 +138,21 @@ public final class ScryingOrb {
 
     /** What the orb is watching: a person (by UUID) or a place (dimension + pos). */
     public enum TargetKind {
-        PERSON, PLACE
+        PERSON, PLACE;
+
+        public static final Codec<TargetKind> CODEC = Codec.STRING.comapFlatMap(
+            s -> {
+                try {
+                    return com.mojang.serialization.DataResult.success(TargetKind.valueOf(s.toUpperCase(Locale.ROOT)));
+                } catch (IllegalArgumentException e) {
+                    return com.mojang.serialization.DataResult.error(() -> "Not a TargetKind: " + s);
+                }
+            },
+            Enum::name
+        );
+        public static final StreamCodec<RegistryFriendlyByteBuf, TargetKind> STREAM_CODEC = ByteBufCodecs.STRING_UTF8.map(
+            s -> TargetKind.valueOf(s.toUpperCase(Locale.ROOT)), Enum::name
+        );
     }
 
     public record Target(TargetKind kind, UUID person, String dimension, BlockPos pos, String name) {
@@ -177,8 +194,6 @@ public final class ScryingOrb {
     }
 
     /** A ticket keeping a place's 3x3 chunks loaded while the orb is awake on it. */
-    private static final Map<UUID, net.minecraft.world.level.ChunkHolder> LOADED = new HashMap<>();
-
     private record Watch(ServerLevel from, Target target, long until, int lastRefresh, long[] lastPos, BlockState[] lastStates) {
     }
 

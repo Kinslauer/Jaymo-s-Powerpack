@@ -149,7 +149,7 @@ public final class ScryingOrbRenderer implements BlockEntityRenderer<ScryingOrbB
         poseStack.translate(cx, cy, cz);
         VertexConsumer consumer = collector.submitNodeCollector().getBuffer(RenderTypes.entityTranslucent(TextureAtlas.LOCATION_BLOCKS));
         // Base plate
-        quad(consumer, -0.35, 0.0, -0.35, 0.35, 0.0, -0.35, 0.35, 0.05, 0.35, -0.35, 0.05, STAND_COLOUR, blockLight, skyLight);
+        quad(consumer, -0.35, 0.0, -0.35, 0.35, 0.0, -0.35, 0.35, 0.05, 0.35, -0.35, 0.05, -0.35, STAND_COLOUR, blockLight, skyLight);
         quad(consumer, -0.35, 0.05, -0.35, -0.35, 0.05, 0.35, 0.35, 0.05, 0.35, 0.35, 0.05, 0.35, STAND_COLOUR, blockLight, skyLight);
         // Column
         quad(consumer, -0.08, 0.05, -0.08, 0.08, 0.05, -0.08, 0.08, 0.55, -0.08, -0.08, 0.55, -0.08, STAND_COLOUR, blockLight, skyLight);
@@ -221,7 +221,7 @@ public final class ScryingOrbRenderer implements BlockEntityRenderer<ScryingOrbB
                 double fx = cx + dx * (SPHERE_R / radius);
                 double fy = cy + dy * (SPHERE_R / radius);
                 double fz = cz + dz * (SPHERE_R / radius);
-                mote(collectator, poseStack, fx, fy, fz, colour, blockLight, skyLight);
+                mote(collector, poseStack, fx, fy, fz, colour, blockLight, skyLight);
             }
         }
     }

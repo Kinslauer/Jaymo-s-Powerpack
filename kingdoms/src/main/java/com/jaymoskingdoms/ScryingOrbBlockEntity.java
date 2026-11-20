@@ -13,6 +13,8 @@ import java.util.UUID;
  * The block entity behind a scrying orb: it remembers who is using it and whether it's active.
  */
 public final class ScryingOrbBlockEntity extends BlockEntity {
+    private static final String USER_KEY = "user";
+
     /** The UUID of the player currently using this orb, or null if idle. */
     @Nullable
     private UUID user;
@@ -54,13 +56,13 @@ public final class ScryingOrbBlockEntity extends BlockEntity {
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
         if (user != null) {
-            output.putUUID(USER_KEY, user);
+            output.store(USER_KEY, UUIDUtil.CODEC, user);
         }
     }
 
     @Override
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
-        this.user = input.getUUID(USER_KEY).orElse(null);
+        this.user = input.read(USER_KEY, UUIDUtil.CODEC).orElse(null);
     }
 }

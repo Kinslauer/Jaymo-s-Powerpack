@@ -9,7 +9,7 @@ import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -20,6 +20,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -29,6 +30,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
@@ -60,12 +62,12 @@ public final class SightedShard {
                 ItemStack stack = p.getItemInHand(hand);
                 if (SightedShard.targetOf(stack) != null) {
                     // Clear the target (shift-right-click in air to reset)
-                    CustomData.update(stack.getComponentsPatch(), stack, tag -> {
+                    CustomData.update(stack.get(DataComponents.CUSTOM_DATA), stack, tag -> {
                         tag.remove(TARGET);
                         tag.remove(NAME);
                     });
                     p.sendSystemMessage(Component.translatable("item.jaymoskingdoms.sighted_shard.cleared").withStyle(ChatFormatting.GRAY));
-                    p.swing(InteractionHand.MAIN_HAND, true);
+                    p.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                     return InteractionResult.SUCCESS;
                 }
             }
@@ -76,7 +78,7 @@ public final class SightedShard {
     /** A sighted shard storing {@code target}. */
     public static ItemStack of(ScryingOrb.Target target) {
         ItemStack stack = new ItemStack(ITEM);
-        CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> {
+        CustomData.update(stack.get(DataComponents.CUSTOM_DATA), stack, tag -> {
             tag.put(TARGET, ScryingOrb.Target.CODEC, target);
             tag.putString(NAME, target.name());
         });
@@ -100,15 +102,16 @@ public final class SightedShard {
     private static boolean mark(ServerLevel level, ServerPlayer player, InteractionHand hand, BlockPos pos) {
         ItemStack stack = player.getItemInHand(hand);
         String dim = level.dimension().location().toString();
+        String dimName = level.dimension().location().getPath();
         String name = Component.translatable("item.jaymoskingdoms.sighted_shard.default_name",
-                Component.translatable(level.dimensionType().effects().location().getPath()),
+                dimName,
                 pos.getX(), pos.getY(), pos.getZ()).getString();
         ItemStack sighted = of(ScryingOrb.Target.place(dim, pos.immutable(), name));
         if (!stack.isEmpty()) {
             stack.shrink(1);
         }
         if (!player.getInventory().add(sighted)) {
-            player.drop(sighted, false);
+            player.drop(sighted, false, Prediction.SERVER_ONLY);
         }
         level.playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.PLAYERS, 0.6F, 1.2F);
         level.sendParticles(Fx.mote(0x8A5CFF, 0.6F), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 8, 0.2, 0.2, 0.2, 0.02);
