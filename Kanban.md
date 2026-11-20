@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 19:57). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 20:00). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -27,7 +27,6 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-l-carts-check|vanilla-plus-l-carts-check]] · for 💻 Odysseus · open
-- [ ] [[Inbox/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-aura-rework|zfighter-aura-rework]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-gaps-1-stats|zfighter-gaps-1-stats]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]] · for 🪽 any Hermes bot · open
@@ -47,6 +46,7 @@ kanban-plugin: board
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · for any · #1787 · changes · fixing review notes
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · #1853 · changes · fixing review notes
 - [ ] [[Inbox/forest-fire-pack|forest-fire-pack]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]] · 🍇 Bacchus · claimed
 
 
 ## In review
