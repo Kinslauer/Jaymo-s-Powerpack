@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 00:36). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 19:58). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -23,6 +23,10 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1901 Lantern pole carried in hand: drawn as a pole with its lantern, and lights the way (Powers, Kingdoms, 2026-11-20)
+- [ ] #1900 no chat line when you slay a gifted villager (Powers, 2026-11-20)
+- [ ] #1899 Busy villagers say so instead of opening their talk (Kingdoms, 2026-11-20)
+- [ ] #1898 Castle towns: a real Epic town round the castle, crowned in the castle (Kingdoms, 2026-11-20)
 - [ ] #1895 No talk menu mid-fight: right click on a foe always blocks (Powers, Kingdoms, 2026-11-20)
 - [ ] #1894 shy deer keep away from people (Kingdoms, 2026-11-20)
 - [ ] #1893 Crawling into a block you can haul up doesn't sit you (Powers, 2026-11-20)
@@ -79,11 +83,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1832 NPC fights 1b: feints and Patrol ranks (Powers, 2026-11-19)
 - [ ] #1831 The last hold gives a breather; gifted folk leave the downed alone (Powers, Kingdoms, 2026-11-19)
 - [ ] #1830 Sounds no longer stay quieter after the Rig's dip or Z Fighter deafness (Powers, Kingdoms, 2026-11-19)
-- [ ] #1829 NPC fights 4: tyrants vs the Patrol (sworn foes, showdowns) (Powers, 2026-11-19)
-- [ ] #1828 Shifting Wares no longer crashes the server on VillagersPlus professions (Powers, 2026-11-19)
-- [ ] #1827 hero add-on picks - web, symbiote, gear, Chrono, Cryo, size draughts (Powers, Kingdoms, 2026-11-19)
-- [ ] #1826 heritage panels: no Z Fighter lines, no semicolons, Verdant shunned, hidden Bio-built (Kingdoms, 2026-11-19)
-- …and 269 older ones.
+- …and 273 older ones.
 
 ## Health
 

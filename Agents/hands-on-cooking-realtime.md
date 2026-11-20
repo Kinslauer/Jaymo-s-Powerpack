@@ -40,4 +40,4 @@ owns:
 - Reuse existing Payloads patterns for network code
 
 ## Done
-- 2026-11-19 18:23 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-20 00:37 No sign of work for 30 min: marked stalled (whoever ran it stopped).
