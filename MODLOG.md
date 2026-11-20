@@ -6797,3 +6797,18 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - Its kit still works on ordinary fire (the hose and sprinklers put it out), and its wind follows ours.
 - Tested on a plain 26.3 server: fires lit on grass and planks made no incident, and the grass fire burnt out by
   itself; a fire incident started by command was gone after a restart. Not played in the full pack.
+
+## 0.26.6 (2026-11-20): cleaning up blood - scrub stains off floors and walls, poured water washes them (#1931)
+
+- **Scrub blood off a floor or wall**: sneak and use a straw wisp or a handful of sand on the stain with a water bucket
+  or a water bottle in your other hand (the bottle is emptied), or a wet sponge on its own. Each scrub takes some of
+  every stain within about a block off (pools, smears, drag trails, footprints, splats and runs down a wall); a big
+  pool takes about five scrubs. Blood that has dried (5 minutes old) takes twice the scrubbing, except with sand, which
+  scours. The wisp wears and the sand is used up as when scrubbing yourself; the sponge and the bucket don't. A clean
+  floor still takes sand as a block.
+- **Water washes blood away**: water poured over a stain (a bucket emptied on it, a flood) washes it off in a few
+  seconds, so pouring a bucket and scooping it back up cleans a floor. Splashes and runs down a wall in water go too.
+- Runs down a wall that a pool poured over its edge now go when that pool is scrubbed, washed or drawn away.
+- Every client near a scrub is told to wipe the blood only it draws there (`BloodParticles.Wipe`). Code:
+  `BloodTrail.scrub`/`stained`/`stains`, `Scrubbing.scrubStain`, client `BloodClient.wipe`, `BloodWallMark.wipe`.
+- Built; not played.
