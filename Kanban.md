@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 02:33). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 02:34). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -42,8 +42,8 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/scrying-orb|scrying-orb]] · for any · #1787 · changes · fixing review notes
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · #1853 · changes · fixing review notes
+- [ ] [[Inbox/scrying-orb|scrying-orb]] · 🔨 Hephaestus · #1787 · claimed
 
 
 ## In review
