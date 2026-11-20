@@ -32,4 +32,4 @@ writer: hermes-writer
 - `python3 tools/pr_checks.py` passes; compile check in the cloud.
 
 ## Notes
--
+- 2026-11-20 05:29 Text pass: changes/powers/zfighter-gaps-2-power.md rewritten to player-facing wording (removed the javadoc {@link} and the dev-only hooks-ownership and waiting-rows bullets; kept the stamina bullet and 'Built; not played in game.'). New lang part lang/parts/zfighter_stamina.json has one string - message.jaymospowers.zfighter_stamina_empty 'Running on empty: your stamina is spent.' - shown when a stamina cost can't be paid; wording kept, it's plain and brief. ZFighterGuard/ZFighterHooks/ZFighterPower changes add no other player-visible strings.
