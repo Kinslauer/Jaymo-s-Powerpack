@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Kingdoms built round a Fenford-style castle with a real Epic town round it
 branch: claude/project-thread-mon8et
 with: cloud thread "Build kingdoms around Fenford-style castles"
