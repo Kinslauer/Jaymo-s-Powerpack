@@ -571,6 +571,10 @@ public final class Rulers {
 			|| Audiences.leading(v)) {
 			return false;
 		}
+		if (HallWatch.nightWatch(v, w, t)) {
+			// (Andy, 2026-11-20: "why is the throneroom empty?") the hall's and the gate's guards keep the night watch
+			return false;
+		}
 		if (t >= GUARD_EVENING) {
 			return true;
 		}

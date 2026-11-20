@@ -197,8 +197,9 @@ public final class Workers {
 		if (w.role() == Folk.GUARD && w instanceof Enlisted e) {
 			// (the gun his realm's purse runs to, handed out or taken back)
 			EarlyGuns.garrison(level, mob, w.factionId());
-			// (0.7.138) one of its MCA guards on their ruler's escort, or leading a prisoner
-			return Rulers.guardStep(level, e);
+			// (0.7.138) one of its MCA guards on their ruler's escort, or leading a prisoner; else, posted in the
+			// throne room or at the gate, at their post while on duty
+			return Rulers.guardStep(level, e) || HallWatch.step(level, e);
 		}
 		if (mob.entityTags().contains(WarParties.CASTER_TAG) && w instanceof Enlisted e && !mob.isSleeping() && !McaCompat.busy(mob)
 			&& (w.role() == Sorcery.WIZARD || Casters.isOffice(w.role()))) {
