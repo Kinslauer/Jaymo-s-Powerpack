@@ -1,0 +1,14 @@
+{
+  "talk_busy.jaymoskingdoms.fight.0": "Not now, %s!",
+  "talk_busy.jaymoskingdoms.fight.1": "No time for talk!",
+  "talk_busy.jaymoskingdoms.talk.0": "One moment, %s. I'm speaking with someone.",
+  "talk_busy.jaymoskingdoms.talk.1": "Wait your turn, %s.",
+  "talk_busy.jaymoskingdoms.tend.0": "Not now, %s. Someone's hurt.",
+  "talk_busy.jaymoskingdoms.tend.1": "Let me see to them first.",
+  "talk_busy.jaymoskingdoms.dead.0": "Not now, %s. I'm seeing to the dead.",
+  "talk_busy.jaymoskingdoms.dead.1": "Show some respect. Later.",
+  "talk_busy.jaymoskingdoms.prisoner.0": "Stand aside, %s. I've someone in hand.",
+  "talk_busy.jaymoskingdoms.prisoner.1": "Not now. This one's going nowhere.",
+  "talk_busy.jaymoskingdoms.loot.0": "Not now, %s!",
+  "talk_busy.jaymoskingdoms.loot.1": "Busy. Go away."
+}
