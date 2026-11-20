@@ -1,4 +1,0 @@
-# Nether Portal Spread no longer freezes the server in land not yet ready
-- **Fix**: the server no longer crashes (watchdog kill) when Nether Portal Spread checks a portal in land that is still loading or generating, for example after a player teleports far outside the pre-generated area. A new portal waits at the end of the mod's queue until all the land round it is ready, and a known portal skips its spreading round until then (as the mod already did for a portal in unloaded land), so it is never mistaken for broken. A portal near the edge of loaded land now waits to spread until its land is loaded, instead of loading it. Nothing changes if the mod is absent.
-- Classes: `PortalSpreadQueueMixin`, `PortalSpreadLookMixin` (`mixin/portalspread/`, config `jaymospowers.portalspread.mixins.json`), `compat/PortalSpreadCompat`.
-- Built by CI; not played.

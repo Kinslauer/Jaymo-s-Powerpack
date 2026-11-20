@@ -6706,3 +6706,9 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - Pack wiring: built by `buildForestFire` and shipped in the modpack, the CurseForge zip, the server mods and packwiz.
 - The port was built and run on a plain 26.3 server: a grass and oak fire became an incident and spread (33 to 197
   blocks). Not played in the full pack; the preset not run in game.
+
+## 0.25.95 (2026-11-20): Nether Portal Spread no longer freezes the server in land not yet ready (#1904)
+
+- **Fix**: the server no longer crashes (watchdog kill) when Nether Portal Spread checks a portal in land that is still loading or generating, for example after a player teleports far outside the pre-generated area. A new portal waits at the end of the mod's queue until all the land round it is ready, and a known portal skips its spreading round until then (as the mod already did for a portal in unloaded land), so it is never mistaken for broken. A portal near the edge of loaded land now waits to spread until its land is loaded, instead of loading it. Nothing changes if the mod is absent.
+- Classes: `PortalSpreadQueueMixin`, `PortalSpreadLookMixin` (`mixin/portalspread/`, config `jaymospowers.portalspread.mixins.json`), `compat/PortalSpreadCompat`.
+- Built by CI; not played.
