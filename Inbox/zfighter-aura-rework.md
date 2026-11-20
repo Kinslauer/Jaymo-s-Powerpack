@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: in-review
 for: hermes
 from: vault-coordinator
 asked: 2026-11-19
 claimed_by: hermes-b
-pr: 
+pr: 1911
 ---
 
 # Z Fighter aura rework (DragonMineZ / Sparking Zero feel)
