@@ -24,7 +24,9 @@ import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -32,7 +34,10 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -53,6 +58,7 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.monster.skeleton.AbstractSkeleton;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.player.Input;
@@ -100,6 +106,10 @@ import org.jspecify.annotations.Nullable;
  * press counting once in {@link #PRESS_GAP} ticks however fast it's mashed, {@link #PLAYER_HOLD_PRESSES} on the rope and
  * {@link #PLAYER_TIE_PRESSES} tied. A bare-fisted punch on anyone roped deals no damage: it knocks their struggle back
  * ({@link #STALL_SHARE}) and stalls it for {@link #STALL_TICKS}.</li>
+ * <li><b>On horseback.</b> A tied body carried in your arms is heaved over a horse's back as the downed are (Powers' Sling),
+ * and stays there until it works free. Riding that horse, the strike-captive key ({@link StrikeCaptive}) hits it, as in RDR2
+ * (Andy: "add a button for the rider to hit the captive and reset their struggle progress"): no damage, but the struggle
+ * starts over and is stalled a moment; once in {@link #STRIKE_GAP} ticks.</li>
  * <li><b>Boarding by hook</b> (the medieval picks' vp-boarding). Thrown up at an airship, the loop catches on the first of her
  * that it meets, her rail or her side, and holds there, going with her. You hang on the rope below her; hold jump to climb
  * it hand over hand, and at the top you're over her rail onto her deck, where her crew come for you ({@code Corsairs}).
@@ -140,6 +150,8 @@ public final class Lasso {
 	/** A bare-fisted punch on someone roped: their struggle knocked back this share of the whole, and stalled this long (ticks). */
 	static final double STALL_SHARE = 0.2;
 	static final int STALL_TICKS = 30;
+	/** A rider strikes the captive slung over their horse no more often than this (ticks). */
+	static final int STRIKE_GAP = 20;
 	/** A captor's knots: struggle this long and they still hold (only a blade or a pair of hands frees them). */
 	static final double FAST_KNOTS = 1.0E12;
 	/** A mob this strong shrugs the loop off. */
@@ -164,6 +176,20 @@ public final class Lasso {
 
 	/** Runs ahead of the other use-on-entity listeners. */
 	public static final Identifier EARLY = JaymosKingdoms.id("lasso_early");
+
+	/** Client to server: the rider's strike-captive key was pressed. */
+	public record StrikeCaptive() implements CustomPacketPayload {
+		public static final Type<StrikeCaptive> TYPE = new Type<>(JaymosKingdoms.id("lasso_strike_captive"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, StrikeCaptive> CODEC = StreamCodec.unit(new StrikeCaptive());
+
+		@Override
+		public Type<StrikeCaptive> type() {
+			return TYPE;
+		}
+	}
+
+	/** Rider → when they last struck their slung captive (game time). */
+	private static final Map<UUID, Long> STRUCK = new HashMap<>();
 
 	public static EntityType<Loop> TYPE;
 	public static Item ITEM;
@@ -248,7 +274,10 @@ public final class Lasso {
 			BY_HELD.clear();
 			TIES.clear();
 			HOOKS.clear();
+			STRUCK.clear();
 		});
+		PayloadTypeRegistry.serverboundPlay().register(StrikeCaptive.TYPE, StrikeCaptive.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(StrikeCaptive.TYPE, (payload, context) -> context.server().execute(() -> strikeSlung(context.player())));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			Hold hold = BY_HOLDER.get(handler.getPlayer().getUUID());
 			if (hold != null) {
@@ -258,6 +287,7 @@ public final class Lasso {
 			if (tie != null) {
 				untie(tie);
 			}
+			STRUCK.remove(handler.getPlayer().getUUID());
 		});
 		// a bare-fisted punch on anyone roped: no damage, their struggle knocked back; and the tied strike at nothing
 		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
@@ -908,6 +938,34 @@ public final class Lasso {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.lasso.stalled").withStyle(ChatFormatting.RED));
 		}
 		return true;
+	}
+
+	/**
+	 * The rider strikes the hogtied one slung across their horse's back (Powers' Sling): no damage, but their struggle against
+	 * the knots starts over, and is stalled for {@link #STALL_TICKS}.
+	 */
+	private static void strikeSlung(ServerPlayer rider) {
+		if (!(rider.level() instanceof ServerLevel level) || !rider.isAlive() || rider.isSpectator() || hogtied(rider) || Downed.isDowned(rider)
+			|| !(rider.getVehicle() instanceof AbstractHorse horse)) {
+			return;
+		}
+		LivingEntity body = PowersCompat.slungOn(horse);
+		Tie tie = body != null ? TIES.get(body.getUUID()) : null;
+		long now = level.getGameTime();
+		Long last = STRUCK.get(rider.getUUID());
+		if (tie == null || body == rider || last != null && now - last < STRIKE_GAP) {
+			return;
+		}
+		STRUCK.put(rider.getUUID(), now);
+		tie.left = tie.total;
+		tie.lastStall = now;
+		tie.stalledUntil = now + STALL_TICKS;
+		rider.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.9F, 0.8F);
+		Fx.burst(level, body.getX(), body.getY(0.6), body.getZ(), 0xC4A56A, 0.5F, 2, 0.2, 0.2, 0.2);
+		if (body instanceof ServerPlayer player) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.lasso.stalled").withStyle(ChatFormatting.RED));
+		}
 	}
 
 	/** The rope comes off: {@code why} is said to the holder. A hogtie stays on. */
