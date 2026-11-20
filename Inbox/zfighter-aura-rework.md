@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: writing
 for: hermes
 from: vault-coordinator
 asked: 2026-11-19
