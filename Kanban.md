@@ -42,10 +42,10 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · for any · #1896 · changes · fixing review notes
-- [ ] [[Inbox/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]] · for 🪽 any Hermes bot · #1937 · changes · fixing review notes
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-aura-rework|zfighter-aura-rework]] · 🍇 Bacchus · #1911 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-2-power|zfighter-gaps-2-power]] · 🍇 Bacchus · #1938 · changes · fixing review notes
+- [ ] [[Inbox/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]] · for 🪽 any Hermes bot · #1937 · changes · fixing review notes
 
 
 ## In review
