@@ -6748,3 +6748,8 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - **Knight armour gone** (Andy: "please remove this armor set"): the Knight Helmet, Chestplate, Leggings and Boots from Knight Armor and Weapons are no longer in the "Knight Armor & Weapons" creative tab (whose icon is now the long sword, not the helmet), the search tab or JEI (their grid recipes were already off). The tab keeps the long sword, spiked mace, hand scythe and throwing axe, still forged at the Smithing Anvil.
 - Any Knight armour already in a world turns into the iron piece for the same slot, keeping its wear, enchantments, name and trim: in your inventory, armour slots and ender chest (checked every 2 s), in any chest or other container you open, worn by mobs and villagers when they load or come within 48 blocks of a player, and dropped on the ground. The mod's items stay registered so old saves load. `armory/RetiredKnightArmour`, `client/jei/RetiredKnightArmourJei`, `mixin/RetiredKnightTabIconMixin`.
 - Built; not played.
+
+## 0.26.1 (2026-11-20): crushing blows throw a few blocks, not across the field (#1922)
+
+- A crushing blow (a mutant's slam, or a heavy blow from something three times your bulk, like a bear in harsh land) that you live through threw you 1 to 1.5 blocks a tick and 0.45 up, about 15 blocks; it now throws 0.5 to 0.75 and 0.3 up (`BlastGore.CRUSH_THROW`, `CRUSH_LIFT`), a few blocks. With Kitchen's ragdoll cap, a body knocked limp by it slides a block or two (Andy: "the super knockback ragdolls are back. can we tame them").
+- Built; not played.
