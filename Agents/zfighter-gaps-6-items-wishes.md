@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: zfighter-gaps-6-items-wishes
 branch: claude/zfighter-gaps-6-items-wishes
 with:
@@ -47,3 +47,4 @@ owns:
 - Added 6 new wishes: reset story, revive friends (up to 3), armor set, fighter weapon, pod, materials
 - Updated wish screen and lang entries
 - PR #1955 created, compiles and passes pr_checks, but hasn't been played in game
+- 2026-11-20 18:11 No sign of work for 30 min: marked stalled (whoever ran it stopped).
