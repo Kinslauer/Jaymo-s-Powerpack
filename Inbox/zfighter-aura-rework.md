@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: sent
 text_pass: done
 for: hermes
 from: vault-coordinator
