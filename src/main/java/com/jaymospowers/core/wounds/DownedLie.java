@@ -303,7 +303,9 @@ public final class DownedLie {
 	 * awake, not carried), they sit up against it as the Sit key would ({@link #sitKey}).
 	 */
 	static void crawlInto(ServerPlayer player) {
-		if (player.hasAttached(PROPPED) || player.hasAttached(Downed.RISING) || Downed.passedOut(player)) {
+		// (a block they could haul up instead, holding Use: that's the climb, not a wall to sit at; the Sit key still sits there)
+		if (player.hasAttached(PROPPED) || player.hasAttached(Downed.RISING) || Downed.passedOut(player)
+			|| player.hasAttached(com.jaymospowers.core.ProneHaul.HAUL) || com.jaymospowers.core.ProneHaul.find(player) != null) {
 			BUMPING.remove(player);
 			return;
 		}
