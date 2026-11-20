@@ -1161,6 +1161,8 @@ public final class ZFighterPower implements Power {
 		MagicFx.blast(level, center.x, center.y + 1.0, center.z, MagicFx.FLASH_RADIUS, 0xFFE08A);
 		level.sendParticles(ParticleTypes.EXPLOSION, true, false, center.x, center.y + 0.5, center.z, 6, 1.2, 0.4, 1.2, 0.0);
 		MagicFx.burst(level, center.x, center.y + 1.0, center.z, ZFighterLineage.color(live.lineage, form), 2.0F, 40 + 20 * tier, 1.2, 1.2, 1.2);
+		// the transformation burst throws the ground under him out in a ring of flying bits
+		debris(player, 24, 2.0, 0.7, false);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 0.8F, 1.8F - 0.25F * tier);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.7F, 1.4F);
 		com.jaymospowers.core.Shakes.heavy(player, center, SUPER_SHAKE_RANGE, SUPER_SHAKE + SUPER_SHAKE_PER_FORM * tier);
@@ -1585,12 +1587,41 @@ public final class ZFighterPower implements Power {
 		if (now % CHARGE_DEBRIS_EVERY == 0) {
 			debris(player, CHARGE_DEBRIS * tier, 1.0 + 0.6 * tier, 0.25 + 0.15 * tier, false);
 		}
-		if (random.nextInt(CHARGE_CRACKLE) < tier) {
+		// the ground cracks round him while he charges, harder in each form: the block his foot came
+		// down on (the solid block below), and no more than once every ten ticks on a long charge
+		if (now % 10 == 0) {
+			GroundCracks.crack(level, player.blockPosition().below(), random, live.tier() + 2);
+		}
+		// small lightning crackles over him from the second form up
+		if (live.form > 0 && random.nextInt(CHARGE_CRACKLE) < tier) {
 			crackle(player, random, tier);
 		}
 		if (now % 4 == 0) {
-			// the ground cracks round him while he charges, harder in each form
-			GroundCracks.crack(level, player.blockPosition(), random, live.tier() + 2);
+			// rising embers: a few glowing sparks drift up from him, more in each form
+			for (int i = 0; i < tier; i++) {
+				double a = random.nextDouble() * Math.PI * 2.0;
+				double r = 0.3 + random.nextDouble() * 0.4;
+				level.sendParticles(ParticleTypes.LAVA, true, false,
+					player.getX() + Math.cos(a) * r, player.getY() + 1.0 + random.nextDouble() * 0.6,
+					player.getZ() + Math.sin(a) * r,
+					0, 0.0, 0.04 + random.nextDouble() * 0.04, 0.0, 0.0);
+			}
+		}
+		if (now % 6 == 0) {
+			// a dust ring at his feet while he charges, thicker each form
+			BlockState ground = groundUnder(player);
+			if (ground != null) {
+				BlockParticleOption bits = new BlockParticleOption(ParticleTypes.BLOCK, ground);
+				double y = player.getY();
+				int count = 12 + 4 * tier;
+				for (int i = 0; i < count; i++) {
+					double a = Math.PI * 2.0 * i / count;
+					level.sendParticles(bits, true, false,
+						player.getX() + Math.cos(a) * 0.7, y + 0.05,
+						player.getZ() + Math.sin(a) * 0.7,
+						0, Math.cos(a) * 0.1, 0.05, Math.sin(a) * 0.1, 0.0);
+				}
+			}
 		}
 		if (now % 2 == 0) {
 			boolean mist = live.lineage == ZFighterLineage.VERDANT;
