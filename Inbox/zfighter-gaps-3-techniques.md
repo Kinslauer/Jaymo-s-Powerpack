@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: changes
 for: hermes
 from: claude-cloud-zfighter-checklist-thread
 asked: 2026-11-19
@@ -7,7 +7,7 @@ claimed_by: hermes-a
 pr: 1939
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWJ3UmFH2PavpakbTsfUgXo4
 writer: hermes-writer
-text_pass: done
+text_pass: 
 ---
 
 # Z Fighter gaps 3: techniques (ki shell, healing ki, twin discs, ring beam, sword technique, purging beam, sticky bind, rift moves, ki-drinking barrier, ki cell)
@@ -39,3 +39,4 @@ text_pass: done
 
 ## Notes
 - 2026-11-20 07:33 Text pass: added missing en_us lang strings in src/main/resources/assets/jaymospowers/lang/parts/zfighter.json — technique names and descriptions for Ki Shell, Twin Discs, Ring Beam, Sword Technique, Purging Beam, Sticky Bind, Rift Fist, Rift Step and Ki-Drinking Barrier, the Ki Cell item name, and the ten new overlay messages (ki cell restored/full, ki barrier android-only/absorbed, rift fist/step blocked, sticky bind stuck/mash/free, sword technique no blade). All keys, placeholders and format codes match the code; no code changed.
+- 2026-11-20 12:38 Review (PR #1939 head b3abcd0, vault coordinator, reviewer away): changes needed; checks green, but much of it is never wired in. 1) None of the new classes' init() is called anywhere (git grep for ZFighterStickyBind.init/ZFighterKiCell.init/ZFighterRiftMoves.init etc. finds nothing): the Ki Cell item is never registered, Sticky Bind's server tick never runs (a stuck foe never counts down or comes free), and the other init hooks do nothing. Call each from ZFighterPower.init or ZFighterArts' init. 2) Ki Shell does nothing: ZFighterPower.java:496 ALLOW_DAMAGE computes the reduced amount and throws it away (empty if-block, 'heal the difference after the fact' never happens). Also the task asks that it soak part of EVERY blow, paid from ki, when not guarding; ZFighterKiShell.onHurt only touches ki damage and spends no ki. Hook the real damage modifier (ZFighterHooks.modifyDamage chain) and draw ki for what it soaks. 3) The new attachments (ZFighterStickyBind.STUCK, ZFighterRiftMoves.RIFT_EXIT, ZFighterKiDrinkingBarrier.ABSORBED_KI) aren't listed in JaymosPowers.registerAttachments() (CLAUDE.md rule). 4) Sticky Bind isn't gated to Rubber-folk (task: 'a Rubber-folk wad'), spends ki before looking for a target (ZFighterStickyBind.java:91-99, ki lost on 'no foe'), and its mash (ZFighterPower.java:814) fires every tick sneak is held, so holding sneak frees you in a moment; count presses (edges), and use the existing out-cold mash as the task says. 5) Rift Fist / Rift Step have no Divine-born check (ZFighterRiftMoves.java has none). 6) Purging Beam: Andy's note says Galactic Patrolmen use and teach it; nothing in ZFighterPatrol/ZFighterNpcKi changed. It also spots possession by a description-id substring (ZFighterPurgingBeam.java:73); use the real possession/nightmare checks. 7) Ki Cell: no Tinkerer craft is added (only a creative-tab entry), and no item model/texture. 8) ZFighterKi.throwDisc (ZFighterKi.java ~948) and ZFighterCreator lost their indentation; Bolt made public only for one hook. 9) ZFighterSwordTechnique.init calls ZFighterHands.init() again (double-registers its events if ever called). 10) ZFighterPower.java edits go past one-line hooks (an inline ALLOW_DAMAGE lambda) while #1911 owns that file. Build each row fully or name the cut in the PR.
