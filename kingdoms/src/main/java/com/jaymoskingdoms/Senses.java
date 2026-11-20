@@ -404,7 +404,8 @@ public final class Senses {
 	/** {@link #factor} for a player and a mob it applies to. */
 	private static double sight(ServerPlayer player, ServerLevel level, Mob looker) {
 		BlockPos eyes = BlockPos.containing(player.getEyePosition());
-		double light = level.getMaxLocalRawBrightness(eyes) / 15.0;
+		// (NightLights) the world's people see by the moon, by what you carry and by their own light
+		double light = (NightLights.npc(looker) ? NightLights.light(level, looker, player, player.distanceTo(looker)) : level.getMaxLocalRawBrightness(eyes)) / 15.0;
 		// the creatures of the dark see in it
 		double seen = looker.getType().builtInRegistryHolder().is(DARKVISION) ? Math.max(light, DARKVISION_LIGHT) : light;
 		double f = LIGHT_MIN + (LIGHT_MAX - LIGHT_MIN) * seen;
