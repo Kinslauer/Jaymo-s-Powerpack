@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: stalled
 task: zfighter-gaps-3-techniques
 branch: claude/zfighter-gaps-3-techniques
 with:
@@ -40,4 +40,5 @@ owns:
 - One PR, branch claude/zfighter-gaps-3-techniques
 
 ## Done
-10 new techniques added: Ki Shell (passive), Twin Discs, Ring Beam, Sword Technique, Purging Beam, Sticky Bind, Rift Fist/Step, Ki-Drinking Barrier, Ki Cell, plus heal shape for Technique Creator. Builds and passes PR checks. Ready for review as PR #1939. Not tested in game.
+What a player will see, and what wasn't tested.
+- 2026-11-20 12:36 No sign of work for 30 min: marked stalled (whoever ran it stopped).
