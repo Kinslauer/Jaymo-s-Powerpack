@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 11:53). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 11:54). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -27,7 +27,6 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-l-carts-check|vanilla-plus-l-carts-check]] · for 💻 Odysseus · open
-- [ ] [[Inbox/zfighter-gaps-5-training|zfighter-gaps-5-training]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-gaps-8-raids|zfighter-gaps-8-raids]] · for 🪽 any Hermes bot · open
@@ -44,6 +43,7 @@ kanban-plugin: board
 - [ ] [[Inbox/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]] · for 🪽 any Hermes bot · #1937 · changes · fixing review notes
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · for any · #1896 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-2-power|zfighter-gaps-2-power]] · 🍇 Bacchus · #1938 · changes · fixing review notes
+- [ ] [[Inbox/zfighter-gaps-5-training|zfighter-gaps-5-training]] · ☀️ Apollo · claimed
 
 
 ## In review
