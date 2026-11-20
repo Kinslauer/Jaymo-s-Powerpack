@@ -180,7 +180,7 @@ final class Seats {
 		}
 	}
 
-	/** A structure's pieces that may be buildings (no streets, farms, decorations...), largest first. */
+	/** A structure's pieces that may be buildings (no streets, farms, decorations...), largest first (a seat compound's castle's before the rest). */
 	static List<Building> buildings(StructureStart start) {
 		List<Building> out = new ArrayList<>();
 		for (StructurePiece piece : start.getPieces()) {
@@ -198,6 +198,17 @@ final class Seats {
 			}
 		}
 		out.sort(Comparator.comparingLong(Building::volume).reversed());
+		// (a seat compound: its castle's rooms first, so the throne goes in the castle and not in a big house of the town round it)
+		BoundingBox castle = null;
+		for (StructurePiece piece : start.getPieces()) {
+			if (piece instanceof SeatCompounds.Clean) {
+				castle = piece.getBoundingBox();
+			}
+		}
+		if (castle != null) {
+			BoundingBox c = castle;
+			out.sort(Comparator.comparing((Building b) -> !c.isInside(b.box().getCenter())));
+		}
 		return out;
 	}
 
