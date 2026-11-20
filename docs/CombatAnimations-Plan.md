@@ -86,11 +86,9 @@ impossible to have missed, so each is checked again before it's built.
 - **Window dive:** a run at an open window or gap dives through it and rolls.
 - **Vault by speed:** pick the vault from the run's speed and the obstacle's height, not at random.
 
-**Lore.** The moves are the Kingdoms Stealth tree's second page (Freerunning), and Lore.md already has rooftop runners:
-the Ash Whisperer's cat burglar, and the jacks that leave their wearer "quick enough to climb". New moves are placed
-there once Andy has picked them.
+**Lore.** No new thing in the world, so no Lore.md paragraph, as with the ParCool moves and the trial above. The moves
+stay the Kingdoms Stealth tree's freerunning.
 
-**Questions for Andy.**
-1. Re-key first (Part A), add the new moves first (Part B), or both together?
-2. Which Part B moves?
-3. Blockbench for these, as with the NPC actions (2026-11-19)?
+**Andy's answers (2026-11-20).** Both parts together. From Part B: climb down, around corners, and adaptive speed
+(read as the vault chosen by speed and height). Blockbench clips in GeckoLib format ("blockbench and geckolib have the
+best results for our animations"). Task for pickup: vault Inbox `parkour-animations`.
