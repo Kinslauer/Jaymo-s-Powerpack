@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 17:03). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 17:21). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -40,7 +40,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]] · for 🪽 any Hermes bot · #1937 · changes · fixing review notes
-- [ ] [[Inbox/scrying-orb|scrying-orb]] · 🔨 Hephaestus · #1896 · claimed
+- [ ] [[Inbox/scrying-orb|scrying-orb]] · 🔨 Hephaestus · #1896 · changes · fixing review notes
 
 
 ## In review
