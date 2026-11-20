@@ -48,7 +48,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]] · ☀️ Apollo · #1939 · in-review
 
 
 ## Needs Andy
