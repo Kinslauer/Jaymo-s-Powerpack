@@ -1,0 +1,5 @@
+# downed wall sit: getting up stays on the wall
+- **Getting up from sitting against a wall** (Andy: "the seated get up should stay seated for the duration of the animation"): holding sneak sat against a wall now always draws the rise up the wall, pushing up from the seat to your feet over the whole bar. Before, if you held sneak a moment before your body had finished getting up against the wall (the server counted you sat a little before the drawing was done), or while you were sliding back down after letting go, the body dropped off the wall, rolled face down and did the floor get-up instead, standing up long before the bar was full.
+- If you start rising before you've finished getting up against the wall, you finish sitting down first and then rise up the wall. If you start while sliding back down after letting go, the rise goes on from where you are, and it always finishes when the bar does.
+- WallSit (the seat's rise up the wall: where it started, when it began, when it ends).
+- Built; not played.

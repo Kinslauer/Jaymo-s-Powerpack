@@ -157,6 +157,8 @@ public final class WallSit {
 		WallSitArms.Plan plan;
 		/** Rising to their feet up the wall: how far (0-1, sat to stood); -1 if not. */
 		float up = -1.0F;
+		/** The rise up the wall: how far up it was when it began, when it began and when it ends (ticks). */
+		float upFrom, upAt, upEnd;
 		/** How far out from the back a worn backpack sits (model pixels); 0 if none. */
 		float bag;
 
@@ -293,15 +295,26 @@ public final class WallSit {
 		Seat seat = SEATS.get(id);
 		Long propped = player.getAttached(DownedLie.PROPPED);
 		Long risingAt = player.getAttached(Downed.RISING);
-		if (seat != null && propped != null && risingAt != null && seat.in && !Downed.standless(player)
-			&& (seat.up >= 0.0F || seat.progress(now) >= 1.0F)) {
-			// (Andy, 2026-11-16) sat there and rising: up the wall to their feet, the slide down it played back up
+		if (seat != null && propped != null && risingAt != null && seat.in && !Downed.standless(player)) {
+			// (Andy, 2026-11-20: "the seated get up should stay seated for the duration of the animation") rising from the
+			// wall is always up the wall, never dropped to the floor to get up from there: the rise could start (the server
+			// counts them sat after DownedLie.SAT_TICKS) a moment before the getting up against it was done drawing here, or
+			// while they slid back down it after letting go
+			LAST_MOVED.put(id, now);
+			if (seat.up < 0.0F && !seat.placed && seat.progress(now) < 1.0F) {
+				// still getting up against it from the floor: that finishes first, and the rise up it starts from there
+				return seat;
+			}
 			if (seat.up < 0.0F) {
+				// (Andy, 2026-11-16) sat there and rising: up the wall to their feet, the slide down it played back up, from as
+				// far down it as they are, ending as the rise does
+				seat.upFrom = seat.placed ? 1.0F - seat.progress(now) : 0.0F;
+				seat.upAt = now;
+				seat.upEnd = Math.max(now + 1.0F, risingAt + Downed.riseTicks(player));
 				seat.placed = true;
 				seat.turnFrom(player, bodyRot);
 			}
-			seat.up = Mth.clamp((now - risingAt) / Downed.riseTicks(player), 0.0F, 1.0F);
-			LAST_MOVED.put(id, now);
+			seat.up = Mth.lerp(Mth.clamp((now - seat.upAt) / (seat.upEnd - seat.upAt), 0.0F, 1.0F), seat.upFrom, 1.0F);
 			return seat;
 		}
 		if (seat != null && seat.up >= 0.0F) {
@@ -310,7 +323,8 @@ public final class WallSit {
 			seat.at = now;
 			seat.up = -1.0F;
 		}
-		rising |= risingAt != null;
+		// (rising from a wall the server has them sat against isn't crawling off it: they get up against it here first)
+		rising = propped != null && risingAt != null && DownedLie.satAgainst(player) ? false : rising || risingAt != null;
 		if (propped != null && (!TAKEN.containsKey(id) || TAKEN.get(id) != propped)) {
 			// set against a wall by another (or let go beside one): sat there now (once they're seen there)
 			Sit sit = of(player);
