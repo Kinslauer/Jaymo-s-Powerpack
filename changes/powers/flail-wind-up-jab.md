@@ -1,0 +1,8 @@
+# flail left click: hold to wind up a swing, tap to jab
+- Andy: "the flail needs to wind up a swing on left click hold, and a short jab with the weight follwing the cursor direction on tap". Balkon's flails (not the chain axe, which keeps its overhead chop, and not the whip, which keeps its swipe) now take their left click for themselves (`armory/Lash`, new `client/armory/FlailSwingClient`):
+  - **Hold left click**: the arm goes up and back and the ball loops round behind your shoulder, faster and faster, fully wound up after about 1.2 s (`Lash.WIND`). Let go and it swings through in front of you (`Lash.SWING`) along the way you flicked the mouse (no flick: from your weapon shoulder down across you), hitting from 0.3x to 1.1x the flail's damage by how long you wound it up; wound up past halfway it comes round a raised shield. Something too heavy for the swing still stops it dead.
+  - **Tap left click** (under a quarter second): a short jab (`Lash.JAB`), the ball thrown 2.8 blocks straight out from your chest. It goes where you look as it flies, so moving the mouse drags the weight after it. The first creature it meets takes 0.5x the flail's damage and the ball stops there; a shield blocks it.
+  - Locked on, both go at the picked region of your foe. Neither puts the flail on cooldown, and a new press as the ball comes back carries on from where it is.
+  - No plain swing, hit, digging or Better Combat attack goes with the flail's left click any more (`ToolSwingGateMixin`, so region swings don't touch it). With Sneak held the click works as before (executions, shaking someone awake). Right-click whirl and slam unchanged. The flail's old charged left-click swipe is replaced by the wound-up swing.
+  - New tooltip line on flails.
+- Built; not played.

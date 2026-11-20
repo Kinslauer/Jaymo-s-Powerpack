@@ -110,6 +110,11 @@ public final class Lash {
 	 * where you aim.
 	 */
 	public static final byte HEW = 11;
+	/**
+	 * Balkon's flail's left click ({@link #windUp}): the ball wound up behind you while it's held, the swing it's let go
+	 * into, and the short jab a tap throws.
+	 */
+	public static final byte WIND = 12, JAB = 13, SWING = 14;
 
 	// ---- the flail --------------------------------------------------------------------------------------------------
 	/**
@@ -156,6 +161,41 @@ public final class Lash {
 	static final float WHIRL_EXHAUSTION = 0.01F, SLAM_EXHAUSTION = 0.3F;
 	/** Ticks before the flail (or the whip) can be used again. */
 	static final int FLAIL_COOLDOWN = 14, WHIP_COOLDOWN = 12;
+
+	// ---- the flail's left click -------------------------------------------------------------------------------------
+	/**
+	 * Andy: "the flail needs to wind up a swing on left click hold, and a short jab with the weight follwing the cursor
+	 * direction on tap". Balkon's flail's left click is its own (client/armory/FlailSwingClient sends it; no plain swing,
+	 * hit or Better Combat attack goes with it, except with Sneak held):
+	 * <ul>
+	 * <li>Pressed, the ball is drawn up over your weapon shoulder ({@link #WIND}), the arm raised up and back
+	 * ({@code WIND_RAISE}, {@code WIND_OUT}); held, it loops round behind the hand ({@code WIND_BACK} behind it,
+	 * {@code WIND_LOOP} round), faster and faster, wound up fully after {@code WIND_FULL} ticks.</li>
+	 * <li>Let go after at least {@code TAP_TICKS}: the swing ({@link #SWING}), the swipe's arc through your chest along
+	 * the mouse's flick (no flick: from the weapon shoulder down across you, {@code SWING_ACROSS} across and
+	 * {@code SWING_DOWN} down), {@code SWING_REACH} out, over {@code SWING_TICKS}. What it meets takes from
+	 * {@code SWING_SHARE_MIN} to {@code SWING_SHARE_MAX} of the flail's blow by how far it was wound up, and is pushed off
+	 * {@code SWING_PUSH} hard (more wound up, more); wound up past {@link #WRAP_SPIN} it comes round a guard, and like
+	 * every swing it's stopped by something too heavy for it ({@link #momentum}).</li>
+	 * <li>Let go sooner (a tap): the jab ({@link #JAB}), the ball thrown straight out {@code JAB_REACH} from the chest
+	 * over {@code JAB_OUT} ticks and held out there till {@code JAB_TICKS}. It goes the way you look as it flies, so
+	 * turning the mouse drags the weight after it. The first creature it meets takes {@code JAB_SHARE} of the blow (a
+	 * guard stops it) and the ball stops there.</li>
+	 * </ul>
+	 * Locked on, both go at the picked region of the foe ({@code LockOn.aim}). Neither puts the flail on cooldown: the
+	 * next press can follow the last swing as the ball comes back, from where it is.
+	 */
+	public static final int TAP_TICKS = 5, WIND_FULL = 24, WIND_LEAD = 3, WIND_MAX = 600;
+	public static final float WIND_RAISE = 3.3F, WIND_OUT = 0.3F, JAB_RAISE = 1.45F;
+	public static final double WIND_BACK = 0.9, WIND_LOOP = 0.6, WIND_SPIN_START = 0.15, WIND_SPIN_FULL = 0.5;
+	public static final double SWING_REACH = 2.4, SWING_ACROSS = 0.8, SWING_DOWN = 0.6;
+	public static final int SWING_TICKS = 5;
+	static final float SWING_SHARE_MIN = 0.3F, SWING_SHARE_MAX = 1.1F;
+	static final double SWING_PUSH = 0.45;
+	public static final double JAB_REACH = 2.8;
+	public static final int JAB_OUT = 3, JAB_TICKS = 6;
+	static final float JAB_SHARE = 0.5F;
+	static final double JAB_HIT = 0.5, JAB_PUSH = 0.3;
 
 	// ---- the whip ---------------------------------------------------------------------------------------------------
 	/** How far the lash reaches ((0.16.11) Andy chose 10 blocks), and the ticks it takes to crack out. */
@@ -305,6 +345,23 @@ public final class Lash {
 		}
 	}
 
+	/**
+	 * Client → server, after an {@link Aim}: Balkon's flail's left click pressed ({@code down}), or let go after
+	 * {@code held} ticks (fewer than {@link #TAP_TICKS}: a jab).
+	 */
+	public record Swing(boolean down, int held) implements net.minecraft.network.protocol.common.custom.CustomPacketPayload {
+		public static final Type<Swing> TYPE = new Type<>(JaymosPowers.id("flail_swing"));
+		public static final StreamCodec<ByteBuf, Swing> CODEC = StreamCodec.composite(
+			ByteBufCodecs.BOOL, Swing::down,
+			ByteBufCodecs.VAR_INT, Swing::held,
+			Swing::new);
+
+		@Override
+		public Type<Swing> type() {
+			return TYPE;
+		}
+	}
+
 	/** (0.19.73) What the client said with its last press, and when (game time). */
 	private record Pending(Aim aim, long at) {
 	}
@@ -360,6 +417,14 @@ public final class Lash {
 				AIMS.put(ctx.player().getUUID(), new Pending(aim, ctx.player().level().getGameTime()));
 			}
 		});
+		net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.serverboundPlay().register(Swing.TYPE, Swing.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Swing.TYPE, (payload, ctx) -> {
+			if (payload.down()) {
+				windUp(ctx.player());
+			} else {
+				letSwing(ctx.player(), payload.held());
+			}
+		});
 		ServerTickEvents.END_SERVER_TICK.register(Lash::tick);
 		// (0.16.24) a blow at someone swipes too (an air swing comes in through mixin/ServerGamePacketListenerImplMixin)
 		net.fabricmc.fabric.api.event.player.AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
@@ -407,6 +472,11 @@ public final class Lash {
 
 	public static boolean isFlail(ItemStack stack) {
 		return !stack.isEmpty() && isFlail(stack.getItem());
+	}
+
+	/** Balkon's flail, a ball on a chain (not the chain axe): its left click winds up and swings, or jabs. */
+	public static boolean isBallFlail(ItemStack stack) {
+		return isFlail(stack) && !isChainAxe(stack);
 	}
 
 	public static boolean isWhip(ItemStack stack) {
@@ -490,7 +560,16 @@ public final class Lash {
 				yield over.add(down.scale(0.5 * s + 0.5 * s * s));
 			}
 			case CRACK -> state.from().lerp(state.aim(), Math.min(1.0, t / CRACK_TICKS));
-			case SWEEP -> {
+			case WIND -> {
+				Vec3 loop = windPoint(player, t, partialTick);
+				yield t < WIND_LEAD ? state.from().lerp(loop, smooth(t / WIND_LEAD)) : loop;
+			}
+			case JAB -> {
+				// thrown out fast, easing as the chain runs out
+				double s = 1.0 - Math.min(1.0, t / JAB_OUT);
+				yield state.from().lerp(jabPoint(player, state, partialTick), 1.0 - s * s);
+			}
+			case SWEEP, SWING -> {
 				Vec3 arc = sweepPoint(player, state, t, partialTick);
 				yield t < SWEEP_LEAD ? state.from().lerp(arc, smooth(t / SWEEP_LEAD)) : arc;
 			}
@@ -526,13 +605,50 @@ public final class Lash {
 	 * started at round to {@link #SWEEP_ARC} past in front.
 	 */
 	public static Vec3 sweepPoint(Player player, State state, double t, float partialTick) {
-		double s = smooth(Mth.clamp(t / SWEEP_TICKS, 0.0, 1.0));
+		double s = smooth(Mth.clamp(t / (state.phase() == SWING ? SWING_TICKS : SWEEP_TICKS), 0.0, 1.0));
 		double a = Mth.lerp(s, state.shape().z, SWEEP_ARC);
 		Vec3[] plane = sweepPlane(state.aim().x, state.aim().y, state.shape().x, state.shape().y);
 		Vec3 chest = player.getEyePosition(partialTick).add(0.0, -0.4 * player.getScale(), 0.0);
 		// a level sweep is a little low at the ends, highest across the front
 		double droop = 0.25 * Math.abs(state.shape().x) * Math.abs(Math.sin(a));
 		return chest.add(plane[0].scale(Math.cos(a) * state.aim().z)).add(plane[1].scale(Math.sin(a) * state.aim().z)).add(0.0, -droop, 0.0);
+	}
+
+	/**
+	 * The flail's wind-up, {@code t} ticks in: the ball looping round behind the raised hand, upright along the way you
+	 * face, up and back over the top and round under, speeding up ({@link #windAngle}).
+	 */
+	public static Vec3 windPoint(Player player, double t, float partialTick) {
+		Vec3 hand = armHand(player, partialTick, WIND_RAISE, WIND_OUT);
+		double yaw = player.getViewYRot(partialTick) * Mth.DEG_TO_RAD, scale = player.getScale();
+		Vec3 forward = new Vec3(-Math.sin(yaw), 0.0, Math.cos(yaw));
+		Vec3 center = hand.subtract(forward.scale(WIND_BACK * scale));
+		double a = windAngle(t), r = WIND_LOOP * scale;
+		return center.add(forward.scale(Math.cos(a) * r)).add(0.0, Math.sin(a) * r, 0.0);
+	}
+
+	/** How far round the wind-up's loop the ball is (radians: from the top toward the back), speeding up to full by {@link #WIND_FULL}. */
+	public static double windAngle(double t) {
+		double ramp = Math.min(t, WIND_FULL);
+		double angle = WIND_SPIN_START * ramp + (WIND_SPIN_FULL - WIND_SPIN_START) * ramp * ramp / (2.0 * WIND_FULL);
+		return Math.PI / 2.0 + angle + Math.max(0.0, t - WIND_FULL) * WIND_SPIN_FULL;
+	}
+
+	/** How far the flail is wound up after {@code t} ticks held, 0 (a tap's worth) to 1 (full). */
+	public static float windCharge(double t) {
+		return (float)Mth.clamp((t - TAP_TICKS) / (double)(WIND_FULL - TAP_TICKS), 0.0, 1.0);
+	}
+
+	/**
+	 * Where the jab throws the ball: from the chest along {@code aim} (yaw, pitch in radians, then the reach), turned as
+	 * far as you've turned since it began ({@code shape}: your look then, yaw and pitch in degrees), so it follows the
+	 * mouse.
+	 */
+	public static Vec3 jabPoint(Player player, State state, float partialTick) {
+		double yaw = state.aim().x + Mth.wrapDegrees(player.getViewYRot(partialTick) - state.shape().x) * Mth.DEG_TO_RAD;
+		double pitch = Mth.clamp(state.aim().y + (player.getViewXRot(partialTick) - state.shape().y) * Mth.DEG_TO_RAD, -1.5, 1.5);
+		Vec3 dir = new Vec3(-Math.sin(yaw) * Math.cos(pitch), -Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch));
+		return player.getEyePosition(partialTick).add(0.0, -0.4 * player.getScale(), 0.0).add(dir.scale(state.aim().z));
 	}
 
 	/**
@@ -569,7 +685,14 @@ public final class Lash {
 	 * head's side of in front of you, at least {@link #SWEEP_BACK_MIN} back. Returns (across, up, start angle).
 	 */
 	static Vec3 sweepShape(Player player, Vec3 head, float turnYaw, float turnPitch) {
-		double yaw = player.getYRot() * Mth.DEG_TO_RAD, pitch = player.getXRot() * Mth.DEG_TO_RAD;
+		return sweepShape(player, player.getYRot() * Mth.DEG_TO_RAD, player.getXRot() * Mth.DEG_TO_RAD, head, turnYaw, turnPitch, 0.97, -0.24);
+	}
+
+	/**
+	 * A swipe's (or the flail's wound-up swing's) way, ahead along {@code yaw} and {@code pitch} (radians): with the mouse
+	 * still, from the head's side across ({@code still}) and up ({@code stillUp}, negative: down).
+	 */
+	static Vec3 sweepShape(Player player, double yaw, double pitch, Vec3 head, float turnYaw, float turnPitch, double still, double stillUp) {
 		double across, up;
 		if (Math.abs(turnYaw) + Math.abs(turnPitch) >= TURN_MIN) {
 			double length = Math.sqrt(turnYaw * turnYaw + turnPitch * turnPitch);
@@ -580,8 +703,8 @@ public final class Lash {
 			double side = head.subtract(player.position()).dot(right);
 			// hanging near the middle: the weapon side's forehand
 			double from = Math.abs(side) > 0.1 ? Math.signum(side) : player.getMainArm() == net.minecraft.world.entity.HumanoidArm.RIGHT ? 1 : -1;
-			across = -from * 0.97;
-			up = -0.24;
+			across = -from * still;
+			up = stillUp;
 		}
 		Vec3[] plane = sweepPlane(yaw, pitch, across, up);
 		Vec3 chest = player.getEyePosition().add(0.0, -0.4 * player.getScale(), 0.0);
@@ -694,6 +817,10 @@ public final class Lash {
 				float s = (float)Math.min(1.0, (t - STRIKE_OVER) / (STRIKE_TICKS - 1 - STRIKE_OVER));
 				yield Mth.lerp(s * s, OVERHEAD_RAISE, DROP_RAISE);
 			}
+			// the flail's wind-up: up and back over the shoulder; the jab: thrown out in front; the swing: brought down from the wind-up
+			case WIND -> Mth.lerp((float)smooth(Math.min(1.0, t / WIND_LEAD)), REST_RAISE, WIND_RAISE);
+			case JAB -> Mth.lerp((float)smooth(Math.min(1.0, t / JAB_OUT)), REST_RAISE, JAB_RAISE);
+			case SWING -> Mth.lerp((float)smooth(Math.min(1.0, t / SWING_TICKS)), WIND_RAISE, DROP_RAISE);
 			// the chop: the arm goes up with the head, then comes down with it
 			case HEW -> t < SWEEP_LEAD ? Mth.lerp((float)smooth(t / SWEEP_LEAD), REST_RAISE, OVERHEAD_RAISE)
 				: Mth.lerp((float)Mth.clamp((chopAngle(state, t) - state.shape().z) / (CHOP_END - state.shape().z), 0.0, 1.0), OVERHEAD_RAISE, DROP_RAISE);
@@ -902,9 +1029,24 @@ public final class Lash {
 					rip(run, state, target);
 				}
 			}
-			case SWEEP -> {
+			case SWEEP, SWING -> {
 				sweep(run, state, t);
-				if (t >= SWEEP_TICKS && player.getAttached(STATE) != null && player.getAttached(STATE).phase() == SWEEP) {
+				int ticks = state.phase() == SWING ? SWING_TICKS : SWEEP_TICKS;
+				if (t >= ticks && player.getAttached(STATE) != null && player.getAttached(STATE).phase() == state.phase()) {
+					back(player, state, now);
+				}
+			}
+			case WIND -> {
+				if (!run.held || t > WIND_MAX) {
+					// (the let-go never came)
+					back(player, state, now);
+					return true;
+				}
+				wind(run, t);
+			}
+			case JAB -> {
+				jabStep(run, state, t);
+				if (t >= JAB_TICKS && player.getAttached(STATE) != null && player.getAttached(STATE).phase() == JAB) {
 					back(player, state, now);
 				}
 			}
@@ -1419,7 +1561,7 @@ public final class Lash {
 		Run last = RUNS.get(player.getUUID());
 		// (0.19.73) a swipe can follow a swipe still coming back: it goes on from where the head is
 		boolean following = was != null && was.phase() == RETURN && was.kind() == (flail ? FLAIL : WHIP) && last != null && last.swipe;
-		if (!flail && !isWhip(held) || was != null && !following || player.isUsingItem() || player.isSpectator()
+		if (!flail && !isWhip(held) || isBallFlail(held) || was != null && !following || player.isUsingItem() || player.isSpectator()
 			|| player.getCooldowns().isOnCooldown(held) || player.getAttackStrengthScale(0.5F) < SWEEP_MIN_CHARGE) {
 			return;
 		}
@@ -1465,19 +1607,23 @@ public final class Lash {
 			// the lash's outer half sweeps too
 			swept = swept.minmax(new AABB(hand.lerp(last, 0.5), hand.lerp(head, 0.5)).inflate(SWEEP_HIT * 0.5));
 		}
-		float damage = (flail ? flailDamage(player) * SWEEP_SHARE : SWEEP_WHIP_DAMAGE) * run.spin;
+		// the flail's wound-up swing hits as hard as it was wound up
+		boolean swing = state.phase() == SWING;
+		float damage = swing ? flailDamage(player) * Mth.lerp(run.spin, SWING_SHARE_MIN, SWING_SHARE_MAX)
+			: (flail ? flailDamage(player) * SWEEP_SHARE : SWEEP_WHIP_DAMAGE) * run.spin;
 		for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, swept, e -> struck(player, e))) {
 			if (run.glanced.containsKey(other.getId())) {
 				continue;
 			}
 			run.glanced.put(other.getId(), now);
-			// (0.19.73) a chop comes over the top of a guard; any other swipe is stopped by it, as by anything too heavy
+			// (0.19.73) a chop comes over the top of a guard, as a well wound-up swing comes round it; any other swipe is
+			// stopped by it, as by anything too heavy
 			boolean guarded = guarding(other, player);
-			boolean wrapped = guarded && chop(state);
+			boolean wrapped = guarded && (chop(state) || swing && run.spin >= WRAP_SPIN);
 			boolean stopped = guarded && !wrapped || heft(other) >= momentum(state.kind(), run.spin);
 			if (strike(player, other, damage, wrapped)) {
 				Vec3 push = head.subtract(last).multiply(1.0, 0.0, 1.0);
-				push = push.lengthSqr() < 1.0E-4 ? Vec3.ZERO : push.normalize().scale(SWEEP_PUSH);
+				push = push.lengthSqr() < 1.0E-4 ? Vec3.ZERO : push.normalize().scale(swing ? SWING_PUSH * (0.5 + run.spin) : SWEEP_PUSH);
 				shove(other, new Vec3(push.x, 0.1, push.z));
 				level.playSound(null, other.getX(), other.getY(), other.getZ(), flail ? SoundEvents.CHAIN_HIT : SoundEvents.PLAYER_ATTACK_CRIT,
 					SoundSource.PLAYERS, 0.7F, flail ? 0.9F : 1.6F);
@@ -1490,6 +1636,96 @@ public final class Lash {
 				back(player, state, now);
 				return;
 			}
+		}
+	}
+
+	/**
+	 * Balkon's flail's left click pressed ({@link Swing}): the ball is wound up from where it is ({@link #WIND}). Not with
+	 * the flail busy, in use or cooling down; a press as the last swing's ball comes back goes on from where it is.
+	 */
+	static void windUp(ServerPlayer player) {
+		Aim press = press(player, FLAIL);
+		ItemStack held = player.getMainHandItem();
+		State was = player.getAttached(STATE);
+		Run last = RUNS.get(player.getUUID());
+		boolean following = was != null && was.phase() == RETURN && was.kind() == FLAIL && last != null && last.swipe;
+		if (!isBallFlail(held) || was != null && !following || player.isUsingItem() || player.isSpectator() || player.getCooldowns().isOnCooldown(held)) {
+			return;
+		}
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		Vec3 head = following ? head(player, was, now, 1.0F) : player.position().add(press.head());
+		Run run = new Run(player);
+		run.swipe = true;
+		RUNS.put(player.getUUID(), run);
+		player.setAttached(STATE, new State(FLAIL, WIND, now, -1, head, Vec3.ZERO, Vec3.ZERO));
+		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.CHAIN_PLACE, SoundSource.PLAYERS, 0.6F, 1.3F);
+	}
+
+	/**
+	 * Balkon's flail's left click let go after {@code heldTicks}: a tap jabs ({@link #JAB}), a hold swings as hard as it
+	 * was wound up ({@link #SWING}), from where the ball is, at the locked foe's picked region or where you look.
+	 */
+	static void letSwing(ServerPlayer player, int heldTicks) {
+		Aim press = press(player, FLAIL);
+		Run run = RUNS.get(player.getUUID());
+		State state = player.getAttached(STATE);
+		if (run == null || state == null || state.phase() != WIND) {
+			return;
+		}
+		run.held = false;
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		Vec3 head = head(player, state, now, 1.0F);
+		Vec3 dir = com.jaymospowers.core.LockOn.aim(player);
+		double yaw = Math.atan2(-dir.x, dir.z), pitch = -Math.asin(Mth.clamp(dir.y, -1.0, 1.0));
+		if (heldTicks < TAP_TICKS) {
+			player.setAttached(STATE, state.to(JAB, now, -1, head, new Vec3(yaw, pitch, JAB_REACH * player.getScale()),
+				new Vec3(player.getYRot(), player.getXRot(), 0.0)));
+			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.PLAYER_ATTACK_WEAK, SoundSource.PLAYERS, 0.7F, 0.8F);
+			level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.CHAIN_HIT, SoundSource.PLAYERS, 0.4F, 1.3F);
+			return;
+		}
+		run.spin = windCharge(now - state.since());
+		Vec3 shape = sweepShape(player, yaw, pitch, head, press.turnYaw(), press.turnPitch(), SWING_ACROSS, -SWING_DOWN);
+		player.setAttached(STATE, new State(FLAIL, SWING, now, -1, head, new Vec3(yaw, pitch, SWING_REACH * player.getScale()), shape));
+		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS,
+			0.6F + 0.4F * run.spin, 0.7F);
+		level.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.CHAIN_HIT, SoundSource.PLAYERS, 0.5F, 1.0F);
+	}
+
+	/** One tick of the wind-up: it costs a little, and whooshes each time round. */
+	private static void wind(Run run, long t) {
+		ServerPlayer player = run.player;
+		player.causeFoodExhaustion(WHIRL_EXHAUSTION);
+		double turn = Math.PI * 2.0;
+		if (t > WIND_LEAD && Math.floor(windAngle(t) / turn) != Math.floor(windAngle(t - 1) / turn)) {
+			float charge = windCharge(t);
+			player.level().playSound(null, player.getX(), player.getEyeY() + 0.5, player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP,
+				SoundSource.PLAYERS, 0.3F + 0.3F * charge, 0.6F + 0.5F * charge);
+		}
+	}
+
+	/** One tick of the jab: the first creature the ball passed through is struck, and the ball stops in it. */
+	private static void jabStep(Run run, State state, long t) {
+		if (t < 1) {
+			return;
+		}
+		ServerPlayer player = run.player;
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		Vec3 head = head(player, state, now, 1.0F), last = head(player, state, now - 1, 1.0F);
+		for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, new AABB(last, head).inflate(JAB_HIT), e -> struck(player, e))) {
+			if (strike(player, other, flailDamage(player) * JAB_SHARE, false)) {
+				Vec3 push = other.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
+				push = push.lengthSqr() < 1.0E-4 ? Vec3.ZERO : push.normalize().scale(JAB_PUSH);
+				shove(other, new Vec3(push.x, 0.05, push.z));
+				Vec3 at = other.getBoundingBox().getCenter();
+				level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 3, 0.15, 0.15, 0.15, 0.1);
+			}
+			level.playSound(null, other.getX(), other.getY(), other.getZ(), SoundEvents.CHAIN_HIT, SoundSource.PLAYERS, 0.8F, 0.9F);
+			back(player, state, now);
+			return;
 		}
 	}
 
