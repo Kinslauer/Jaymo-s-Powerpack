@@ -6731,3 +6731,14 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 
 - **Pitchfork**: redrawn at 32x32 (a long ash shaft, an iron socket and crossbar, three tines) and held like the glaives, so in the hand it is longer than a trident (about two and a half blocks), with the grip low on the shaft. A thrown pitchfork is drawn at the same length in flight (`ThrownWeaponRenderer` size per item).
 - Built; not played.
+
+## 0.25.99 (2026-11-20): Sitting cats no longer stand on end under Fresh Animations (#1909)
+
+- **Pets' poses on Fresh Animations' models**: a tamed cat left sitting was drawn standing on its end, legs laid flat
+  and tail sticking straight up (Andy's clip at a camp). Our pet poses (the cat's loaf, knead, groom and stretch; the
+  wolf's greeting, play bow, lying down and dozing) are worked out on vanilla's cat and wolf parts, and Fresh Animations
+  builds those animals its own way (head and tail inside the body, the body's boxes turned flat inside it), so resetting
+  the body for the loaf turned the whole cat upright. Where a resource pack has replaced the animal's model through
+  Entity Model Features, PetPoses now steps aside and the pack's own sitting and sleeping animations show
+  (`EmfCompat.customModel`, `PetPoses.extract`). Without Fresh Animations the poses are unchanged.
+- Built; not played.
