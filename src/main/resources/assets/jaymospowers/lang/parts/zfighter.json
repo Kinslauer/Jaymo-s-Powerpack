@@ -351,5 +351,10 @@
   "message.jaymospowers.zfighter_super_4_no_super": "Break through to your first Super before you reach for Primal Super.",
   "message.jaymospowers.zfighter_super_4_ape": "Not while you are the ape.",
   "message.jaymospowers.zfighter_super_primal_wait": "The ape's fire isn't all yours yet.",
-  "message.jaymospowers.villager_ape_turn_fake_moon": "%s stares up at the false moon. Something tears loose from their belt. They're growing..."
-}
+  "message.jaymospowers.villager_ape_turn_fake_moon": "%s stares up at the false moon. Something tears loose from their belt. They're growing...",
+    "drill.jaymospowers.zfighter.pod_pilot": "Pod Pilot",
+      "drill.jaymospowers.zfighter.pod_pilot.help": "Fly the pod through gaps in rock pillars. Gravity pulls you down; tap Space to boost up.",
+      "drill.jaymospowers.zfighter.pod_crashed": "Crashed!",
+      "message.jaymospowers.zfighter_drill_unlocked": "Master teaches you: %s!",
+    "message.jaymospowers.zfighter_challenge_done": "Challenge complete: %s points, grade %s, +%s TP"
+  }
