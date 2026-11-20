@@ -6,6 +6,7 @@ import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Fate;
+import com.jaymospowers.core.GroundCracks;
 import com.jaymospowers.core.Mastery;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.Soundscape;
@@ -1586,6 +1587,10 @@ public final class ZFighterPower implements Power {
 		}
 		if (random.nextInt(CHARGE_CRACKLE) < tier) {
 			crackle(player, random, tier);
+		}
+		if (now % 4 == 0) {
+			// the ground cracks round him while he charges, harder in each form
+			GroundCracks.crack(level, player.blockPosition(), random, live.tier() + 2);
 		}
 		if (now % 2 == 0) {
 			boolean mist = live.lineage == ZFighterLineage.VERDANT;
