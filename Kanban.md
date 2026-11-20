@@ -4,11 +4,13 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 04:36). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 05:51). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
+- [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/vanilla-plus-a-incendium-castle-start|vanilla-plus-a-incendium-castle-start]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-b-stellarity-end-enderscape-band|vanilla-plus-b-stellarity-end-enderscape-band]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-c-back-slot|vanilla-plus-c-back-slot]] · for 💻 Odysseus · open
@@ -36,14 +38,12 @@ kanban-plugin: board
 - [ ] [[Inbox/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-gaps-8-raids|zfighter-gaps-8-raids]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
 
-- [ ] [[Inbox/scrying-orb|scrying-orb]] · for any · #1787 · changes · fixing review notes
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · #1853 · changes · fixing review notes
+- [ ] [[Inbox/scrying-orb|scrying-orb]] · for any · #1787 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-aura-rework|zfighter-aura-rework]] · 🪶 Quill · #1911 · writing
 - [ ] [[Inbox/zfighter-gaps-1-stats|zfighter-gaps-1-stats]] · 🍇 Bacchus · claimed
 
@@ -54,23 +54,23 @@ kanban-plugin: board
 
 ## Needs Andy
 
+- [ ] [[Inbox/class-trees-plan|class-trees-plan]] · for 💻 Odysseus · blocked
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
-- [ ] [[Inbox/class-trees-plan|class-trees-plan]] · for 💻 Odysseus · blocked
 - [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · blocked
 
 
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/forest-fire-pack|forest-fire-pack]]
-- [x] [[Inbox/Done/plan-ghosts-litematica-tools|plan-ghosts-litematica-tools]]
-- [x] [[Inbox/Done/harness-upkeep|harness-upkeep]]
-- [x] [[Inbox/Done/harness-body-pieces|harness-body-pieces]]
-- [x] [[Inbox/Done/village-mods-3-guards-fight-mend|village-mods-3-guards-fight-mend]]
-- [x] [[Inbox/Done/village-mods-2-blast-mending|village-mods-2-blast-mending]]
-- [x] [[Inbox/Done/village-mods-1-illager-names|village-mods-1-illager-names]]
-- [x] [[Inbox/Done/npc-fights-4-rivals|npc-fights-4-rivals]]
+- [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
+- [x] [[Inbox/Done/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]]
+- [x] [[Inbox/Done/xenoband-elder-moon-kingdom|xenoband-elder-moon-kingdom]]
+- [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
+- [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
+- [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
+- [x] [[Inbox/Done/wither-reincarnated-fight|wither-reincarnated-fight]]
+- [x] [[Inbox/Done/weapon-hooks-and-breaks|weapon-hooks-and-breaks]]
 
 
 %% kanban:settings
