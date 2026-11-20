@@ -40,4 +40,10 @@ owns:
 - All APIs checked against 26.3 sources
 
 ## Done
-Compiles but hasn't been played yet.
+- Added Medi-Bug and Medi-Bug Pair (healing bugs you eat whole)
+- Added Radar Parts (3 parts to assemble Wish Radar)
+- Added Verdant World Orbs (7 orbs with Verdant Dragon)
+- Added herb boosts to Hermit Bean and Medi-Bug (ki regen, cleared cooldowns, stamina, mastery, calm mind)
+- Added 6 new wishes: reset story, revive friends (up to 3), armor set, fighter weapon, pod, materials
+- Updated wish screen and lang entries
+- PR #1955 created, compiles and passes pr_checks, but hasn't been played in game
