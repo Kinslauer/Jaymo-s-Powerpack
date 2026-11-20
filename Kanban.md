@@ -9,12 +9,6 @@ kanban-plugin: board
 ## Waiting for a bot
 
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
-- [ ] [[Inbox/village-mods-4-board-work|village-mods-4-board-work]] · for 💻 Odysseus · open
-- [ ] [[Inbox/village-mods-5-town-life-hats|village-mods-5-town-life-hats]] · for 💻 Odysseus · open
-- [ ] [[Inbox/village-mods-6-small-structures|village-mods-6-small-structures]] · for 💻 Odysseus · open
-- [ ] [[Inbox/village-mods-7-ctov-tidal-towns|village-mods-7-ctov-tidal-towns]] · for 💻 Odysseus · open
-- [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · for 💻 Odysseus · open
-- [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-a-incendium-castle-start|vanilla-plus-a-incendium-castle-start]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-b-stellarity-end-enderscape-band|vanilla-plus-b-stellarity-end-enderscape-band]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-c-back-slot|vanilla-plus-c-back-slot]] · for 💻 Odysseus · open
@@ -27,6 +21,12 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-l-carts-check|vanilla-plus-l-carts-check]] · for 💻 Odysseus · open
+- [ ] [[Inbox/village-mods-4-board-work|village-mods-4-board-work]] · for 💻 Odysseus · open
+- [ ] [[Inbox/village-mods-5-town-life-hats|village-mods-5-town-life-hats]] · for 💻 Odysseus · open
+- [ ] [[Inbox/village-mods-6-small-structures|village-mods-6-small-structures]] · for 💻 Odysseus · open
+- [ ] [[Inbox/village-mods-7-ctov-tidal-towns|village-mods-7-ctov-tidal-towns]] · for 💻 Odysseus · open
+- [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · for 💻 Odysseus · open
+- [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
 - [ ] [[Inbox/zfighter-gaps-5-training|zfighter-gaps-5-training]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]] · for 🪽 any Hermes bot · open
@@ -42,8 +42,8 @@ kanban-plugin: board
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]] · for 🪽 any Hermes bot · #1937 · changes · fixing review notes
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · for any · #1896 · changes · fixing review notes
-- [ ] [[Inbox/zfighter-gaps-4-forms|zfighter-gaps-4-forms]] · ☀️ Apollo · claimed
 - [ ] [[Inbox/zfighter-gaps-2-power|zfighter-gaps-2-power]] · 🍇 Bacchus · #1938 · changes · fixing review notes
+- [ ] [[Inbox/zfighter-gaps-4-forms|zfighter-gaps-4-forms]] · ☀️ Apollo · claimed
 
 
 ## In review
@@ -65,6 +65,7 @@ kanban-plugin: board
 - [x] [[Inbox/Done/zfighter-aura-rework|zfighter-aura-rework]]
 - [x] [[Inbox/Done/forest-fire-pack|forest-fire-pack]]
 - [x] [[Inbox/Done/plan-ghosts-litematica-tools|plan-ghosts-litematica-tools]]
+- [x] [[Inbox/Done/harness-upkeep|harness-upkeep]]
 - [x] [[Inbox/Done/harness-body-pieces|harness-body-pieces]]
 - [x] [[Inbox/Done/village-mods-3-guards-fight-mend|village-mods-3-guards-fight-mend]]
 - [x] [[Inbox/Done/village-mods-2-blast-mending|village-mods-2-blast-mending]]
