@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 15:27). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 18:44). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -8,6 +8,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 **Questions for you:**
 - [[Inbox/class-trees-plan|class-trees-plan]] · 2026-11-19 20:22 Parked (not for a bot): waits on Andy fleshing out the Monk/Paladin/Cleric/Druid/Warlock trees. Raised; don't raise again.
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
+- [[Inbox/scrying-orb|scrying-orb]] · 2026-11-20 17:21 hermes-fixer's last run stopped before finishing; handed back as changes so it can carry on.
 - [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 - [[Inbox/wither-model|wither-model]] · 2026-11-19 23:40 ON HOLD (Andy 2026-11-19 6:40 PM ET): "dont send it back ill have someone else take it from here later". Leave the model as it is (v3 previews…
 - [[Inbox/zfighter-gaps-5-training|zfighter-gaps-5-training]] · 2026-11-20 13:08 Text pass on PR #1953 zfighter-gaps-5-training: reviewed all player-visible text - lang/parts/zfighter.json (5 new keys: pod_pilot, pod_pilot.…
@@ -19,10 +20,11 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/zfighter-gaps-1-stats|zfighter-gaps-1-stats]]: stalled, last change 2026-11-20. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]]: stalled, last change 2026-11-20. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]]: stalled, last change 2026-11-20. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]]: stalled, last change 2026-11-20. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-27 waiting for a bot, 3 being built, 3 in review: see [[Kanban]].
+27 waiting for a bot, 1 being built, 4 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
@@ -92,7 +94,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 ## Health
 
-5 problems in the notes: [[Health]].
+6 problems in the notes: [[Health]].
 
 ## Last week
 
