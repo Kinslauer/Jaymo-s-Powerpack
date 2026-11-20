@@ -18,14 +18,15 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.EntityHitResult;
 
 /**
- * (0.17.7) The execution's hold is sneak + left-click's ({@link Finishers}): while both are held with the crosshair on someone,
+ * (0.17.7) The execution's hold is left-click's ({@link Finishers}; sneak too, till Andy, 2026-11-20: "Holding left click
+ * should execute period"): while it's held with the crosshair on someone down,
  * the server is told who (once, and again when it changes or is let go: {@link Finishers.Execute}). The server times it
  * and decides whether they're down for it. Holding attack on an entity does nothing else in vanilla.
  * <p>
  * (0.17.97) Andy: "stop attacking while charging an execution". Better Combat swings again and again while attack is held,
  * and the click that started the hold was a blow of its own, so the charge took swings at the body it was meant to finish.
  * Now the hands are the hold's ({@link #holdsAttack}, from {@code HeldInputMixin} by way of {@link com.jaymospowers.client.HeldInput}): no click, held swing or digging
- * while you're sneaking with the crosshair on someone you could finish, nor while the finisher or execution plays.
+ * while the crosshair is on someone you could finish, nor while the finisher or execution plays.
  * <p>
  * (0.19.78) Andy: "it should be 3 bars that fill, and once the third is filled the execution plays ... maybe we try a double
  * left click as the override?". The server's count ({@link Finishers.Charge}) is drawn as {@link Finishers#HOLD_BARS} bars
@@ -103,12 +104,14 @@ public final class FinisherClient {
 			}
 		}
 		int target = -1;
-		boolean held = player != null && player.isShiftKeyDown() && minecraft.options.keyAttack.isDown() && minecraft.gui.screen() == null
-			&& !player.isSpectator();
+		// (Andy, 2026-11-20: "Holding left click should execute period") attack held on someone down is the execution's,
+		// sneaking or not; on one standing, only sneaking (Quiet Word, a hit streak's quick kill)
+		boolean held = player != null && minecraft.options.keyAttack.isDown() && minecraft.gui.screen() == null && !player.isSpectator();
 		if (held && choosing >= 0) {
 			// (0.18.97) turning to choose takes the crosshair off them: the hold stays on whom it was
 			target = choosing;
-		} else if (held && minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity body) {
+		} else if (held && minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity body
+			&& (player.isShiftKeyDown() || down(body))) {
 			target = body.getId();
 		}
 		if (choosing >= 0 && (player == null || target != choosing)) {
@@ -196,20 +199,27 @@ public final class FinisherClient {
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.finisher.choose", slider.toString()).withStyle(ChatFormatting.GOLD));
 	}
 
-	/**
-	 * Whether you're sneaking with the crosshair on someone helpless enough to execute: sneak + left-click held there is the
-	 * execution's, so the powers' own held-attack moves (Z Fighter's combos and race holds) stand aside.
-	 */
-	public static boolean aimingAtHelpless(Minecraft minecraft) {
-		// ((0.18.97) or, with Quiet Word, someone on their feet to take from behind for questioning; (0.21.22) or a full hit
-		// streak's quick kill on one still standing)
-		return minecraft.player != null && minecraft.player.isShiftKeyDown() && minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity body
-			&& (Finishers.helpless(body) || com.jaymospowers.core.finisher.Prompts.open(body) || Finishers.chokeable(minecraft.player, body) || Finishers.quickKillable(minecraft.player, body));
+	/** Someone down for an execution as they are (downed, crippled, legless, tripped, or a prompted finisher open on them). */
+	private static boolean down(LivingEntity body) {
+		return Finishers.helpless(body) || com.jaymospowers.core.finisher.Prompts.open(body);
 	}
 
 	/**
-	 * (0.17.97) Whether attack is the execution's just now, not a blow: a finisher or a symbiote execution playing, or you
-	 * sneaking with the crosshair on someone helpless and something in hand that finishes them (a torch or a loaf finishes
+	 * Whether the crosshair is on someone helpless enough to execute: left-click held there is the execution's (Andy,
+	 * 2026-11-20: "Holding left click should execute period"; it used to want sneak too), so the powers' own held-attack
+	 * moves (Z Fighter's combos and race holds, a weapon's wind-up) stand aside. Sneaking, also someone on their feet to take
+	 * from behind (Quiet Word) or a full hit streak's quick kill.
+	 */
+	public static boolean aimingAtHelpless(Minecraft minecraft) {
+		if (minecraft.player == null || !(minecraft.hitResult instanceof EntityHitResult hit) || !(hit.getEntity() instanceof LivingEntity body)) {
+			return false;
+		}
+		return down(body) || minecraft.player.isShiftKeyDown() && (Finishers.chokeable(minecraft.player, body) || Finishers.quickKillable(minecraft.player, body));
+	}
+
+	/**
+	 * (0.17.97) Whether attack is the execution's just now, not a blow: a finisher or a symbiote execution playing, or the
+	 * crosshair on someone helpless and something in hand that finishes them (a torch or a loaf finishes
 	 * nobody, so it still swings: {@link Finishers#move}).
 	 */
 	public static boolean holdsAttack(Minecraft minecraft) {

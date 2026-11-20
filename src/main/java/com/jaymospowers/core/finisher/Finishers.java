@@ -983,8 +983,11 @@ public final class Finishers {
 				hold.rushed = true;
 			}
 			// (0.18.97) Quiet Word: one on their feet who hasn't noticed you, taken from behind
-			boolean choke = !finishable(player, hold.body) && chokeable(player, hold.body) && unaware(player, hold.body);
-			if (!player.isShiftKeyDown() || !player.isWithinEntityInteractionRange(hold.body, SLACK) || !finishable(player, hold.body) && !choke) {
+			// (Andy, 2026-11-20: "Holding left click should execute period, ive found it isnt intuitive enough right now for new
+			// players") on someone down, a hold of attack is the execution with no sneak; taking one on their feet from behind
+			// (and the hit streak's quick kill, above) still wants sneak, so a held swing in a fight stays a swing
+			boolean choke = player.isShiftKeyDown() && !finishable(player, hold.body) && chokeable(player, hold.body) && unaware(player, hold.body);
+			if (!player.isWithinEntityInteractionRange(hold.body, SLACK) || !finishable(player, hold.body) && !choke) {
 				// (still on their feet, or not yet in reach: it counts from when they're down in front of you)
 				if (hold.rushed) {
 					// ((0.19.78) a double click that came to nothing: no hold left to count)

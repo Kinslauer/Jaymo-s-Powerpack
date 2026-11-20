@@ -5,5 +5,15 @@
 	"body_menu.jaymospowers.lift": "Lift",
 	"body_menu.jaymospowers.pull_blade": "Pull out the blade",
 	"body_menu.jaymospowers.xeno_band": "Tear off the band",
-	"message.jaymospowers.body_menu.nothing": "There's nothing you can do for %s just now."
+	"message.jaymospowers.body_menu.nothing": "There's nothing you can do for %s just now.",
+	"body_tip.jaymospowers.body_menu.title": "Someone down",
+	"body_tip.jaymospowers.body_menu": "Tap %1$s on someone downed, tied up or out cold to pick what to do: revive, untie, lift, go through their pockets. Hold %1$s to drag them, or hold %2$s and %1$s to revive them.",
+	"body_tip.jaymospowers.execute.title": "Finishing",
+	"body_tip.jaymospowers.execute": "Hold %1$s on someone downed to execute them. Every kind of weapon does it its own way, and bare hands snap the neck from their head.",
+	"body_tip.jaymospowers.lasso.title": "The lasso",
+	"body_tip.jaymospowers.lasso": "Hold %1$s to whirl it and let go to throw. Walk in to wind the rope, back off to drag. At a person's side, hold %1$s to hogtie them; then tap %1$s on them to untie, lift or search them.",
+	"body_tip.jaymospowers.downed.title": "You're down",
+	"body_tip.jaymospowers.downed": "Hold %1$s to get back up if your wounds let you. Too badly hurt to rise, holding it gives up and you die, so wait for help instead.",
+	"body_tip.jaymospowers.wall_sit.title": "A wall beside you",
+	"body_tip.jaymospowers.wall_sit": "Press %1$s to sit up against the wall. Sat there, hold %2$s to push yourself up it to your feet: it works even with limbs too hurt to stand on, just slower."
 }
