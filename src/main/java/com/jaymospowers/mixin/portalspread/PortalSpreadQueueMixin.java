@@ -1,5 +1,6 @@
 package com.jaymospowers.mixin.portalspread;
 
+import com.jaymospowers.compat.PortalSpreadCompat;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import java.util.HashMap;
@@ -23,9 +24,6 @@ import org.spongepowered.asm.mixin.injection.At;
 @Pseudo
 @Mixin(targets = "com.serilum.netherportalspread_common_fabric.events.SpreadEvent", remap = false)
 abstract class PortalSpreadQueueMixin {
-	// The check follows a portal's frame at most one portal width (21 blocks) from the block it was given, and looks 3 blocks around it.
-	private static final int REACH = 25;
-
 	@Shadow(remap = false)
 	@Final
 	private static HashMap<Level, CopyOnWriteArrayList<BlockPos>> portals_to_process;
@@ -34,16 +32,11 @@ abstract class PortalSpreadQueueMixin {
 		at = @At(value = "INVOKE", remap = false,
 			target = "Lcom/serilum/netherportalspread_common_fabric/util/Util;validatePortalAndAdd(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)V"))
 	private static void jaymospowers$onlyWhereLoaded(Level level, BlockPos pos, Operation<Void> original) {
-		for (int cx = (pos.getX() - REACH) >> 4; cx <= (pos.getX() + REACH) >> 4; cx++) {
-			for (int cz = (pos.getZ() - REACH) >> 4; cz <= (pos.getZ() + REACH) >> 4; cz++) {
-				// (getChunkNow: only a chunk already at FULL, never scheduled or waited for; hasChunk only asks for a ticket,
-				// and is true for a chunk still generating under a player's view)
-				if (level.getChunkSource().getChunkNow(cx, cz) == null) {
-					// onWorldTick removes the head of this queue right after the check, so add it to the tail first.
-					portals_to_process.get(level).add(pos);
-					return;
-				}
-			}
+		// (the check follows the frame, then counts nether blocks within the spread radius round the portal)
+		if (!PortalSpreadCompat.ready(level, pos, PortalSpreadCompat.FRAME_REACH + PortalSpreadCompat.spreadRadius())) {
+			// onWorldTick removes the head of this queue right after the check, so add it to the tail first.
+			portals_to_process.get(level).add(pos);
+			return;
 		}
 		original.call(level, pos);
 	}
