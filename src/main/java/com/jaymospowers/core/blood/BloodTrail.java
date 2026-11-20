@@ -44,12 +44,25 @@ import org.jspecify.annotations.Nullable;
  * <p>(0.20.54) Andy: "rain should wash away blood". A stain out in the rain shrinks by {@link #RAIN_WASH} each sync
  * ({@link #wash}), so a big pool is gone in about half a minute, a drip's in a few seconds; under a roof or the trees it
  * stays. A washed stain stops being a trail to follow.
+ * <p>Andy: "we need a way to clean blood". Water poured over a stain (a bucket, a flood) washes it away in a few
+ * seconds, and a stain can be scrubbed off by hand ({@link #scrub}: {@code Scrubbing}'s wisp, sand or wet sponge, and
+ * Jaymo's Kingdoms' villagers scrubbing their homes).
  */
 public final class BloodTrail {
 	/** How long a stain lies (ticks), the last {@link #FADE} of them fading away. */
 	public static final int LIFE = 12000, FADE = 1200;
 	/** (0.20.54) How much of a stain's size the rain washes away each {@link #SYNC_TICKS}. */
 	static final float RAIN_WASH = 0.03F;
+	/**
+	 * How much water standing or flowing over a stain (a bucket poured on it, a flood) washes away each
+	 * {@link #SYNC_TICKS}: the biggest pool is gone in a few seconds.
+	 */
+	static final float WATER_WASH = 0.4F;
+	/**
+	 * A scrub ({@link #scrub}) takes this share of its due off blood that has dried (older than {@code Bloodied.DRIES_IN});
+	 * a scouring (sand) takes it all.
+	 */
+	static final float DRIED_SCRUB = 0.5F;
 	/** How often players are sent the stains near them (ticks), and how near (blocks). */
 	static final int SYNC_TICKS = 10;
 	static final double SYNC_RANGE = 64.0;
@@ -467,9 +480,7 @@ public final class BloodTrail {
 				continue;
 			}
 			long now = level.getGameTime();
-			if (level.isRaining()) {
-				wash(level, marks, now);
-			}
+			wash(level, marks, now, level.isRaining());
 			List<Long> gone = new ArrayList<>();
 			for (Mark mark : marks.order) {
 				if (mark.expires <= now) {
@@ -619,20 +630,29 @@ public final class BloodTrail {
 	}
 
 	/**
-	 * (0.20.54) The rain washes every stain it falls on (loaded ground only) smaller; one washed down past
-	 * {@link #DRAWN_DRY} is gone in a moment, as when blood magic draws one dry. Players near are sent it smaller.
+	 * (0.20.54) The rain washes every stain it falls on (loaded ground only) smaller, and water over a stain washes it
+	 * faster ({@link #WATER_WASH}); one washed down past {@link #DRAWN_DRY} is gone in a moment, as when blood magic draws
+	 * one dry. Players near are sent it smaller.
 	 */
-	private static void wash(ServerLevel level, Marks marks, long now) {
+	private static void wash(ServerLevel level, Marks marks, long now, boolean raining) {
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 		for (Mark mark : marks.order) {
 			if (mark.scale <= 0.0F || now < mark.showFrom) {
 				continue;
 			}
-			pos.set(mark.x, mark.y + 0.5, mark.z);
-			if (!com.jaymospowers.core.Loaded.made(level, pos) || !level.isRainingAt(pos)) {
+			pos.set(mark.x, mark.y + 0.05, mark.z);
+			if (!com.jaymospowers.core.Loaded.made(level, pos)) {
 				continue;
 			}
-			mark.scale -= RAIN_WASH;
+			float washed;
+			if (level.getFluidState(pos).is(net.minecraft.tags.FluidTags.WATER)) {
+				washed = WATER_WASH;
+			} else if (raining && level.isRainingAt(pos.set(mark.x, mark.y + 0.5, mark.z))) {
+				washed = RAIN_WASH;
+			} else {
+				continue;
+			}
+			mark.scale -= washed;
 			if (mark.scale < DRAWN_DRY) {
 				mark.scale = 0.0F;
 				mark.expires = Math.min(mark.expires, now + DRAWN_GONE);
@@ -770,6 +790,50 @@ public final class BloodTrail {
 			}
 		}
 		return total;
+	}
+
+	/**
+	 * Andy: "we need a way to clean blood". Scrubs the stains within {@code range} of {@code at} (any kind: pools, smears,
+	 * trails, footprints): each loses up to {@code amount} of its size ({@link #DRIED_SCRUB} of that if it has dried,
+	 * unless {@code scour}), and one scrubbed down past {@link #DRAWN_DRY} is gone in a moment. Every client near is told to
+	 * take its own blood there off too ({@link BloodParticles.Wipe}): splashes, and splats and runs on the walls. Returns how
+	 * much was scrubbed off, in stain size. Plain types only: Jaymo's Kingdoms' villagers call it by reflection.
+	 */
+	public static float scrub(ServerLevel level, Vec3 at, double range, float amount, boolean scour) {
+		long now = level.getGameTime();
+		float total = 0.0F;
+		for (Mark mark : near(level, at, range, mark -> mark.scale > 0.0F)) {
+			float take = Math.min(mark.scale, amount * (scour || now - mark.laid < Bloodied.DRIES_IN ? 1.0F : DRIED_SCRUB));
+			mark.scale -= take;
+			if (mark.scale < DRAWN_DRY) {
+				take += mark.scale;
+				mark.scale = 0.0F;
+				mark.expires = Math.min(mark.expires, now + DRAWN_GONE);
+			}
+			mark.version++;
+			total += take;
+		}
+		level.sendParticles(new BloodParticles.Wipe((float) range), true, true, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+		return total;
+	}
+
+	/** Whether any stain lies within {@code range} of {@code at}. */
+	public static boolean stained(ServerLevel level, Vec3 at, double range) {
+		return !near(level, at, range, mark -> mark.scale > 0.0F).isEmpty();
+	}
+
+	/**
+	 * Where the stains within {@code range} of {@code at} lie, the nearest first (at most {@code most}). Plain types only:
+	 * Jaymo's Kingdoms' villagers look for blood in their homes with it, by reflection.
+	 */
+	public static List<Vec3> stains(ServerLevel level, Vec3 at, double range, int most) {
+		List<Mark> found = near(level, at, range, mark -> mark.scale > 0.0F);
+		found.sort(java.util.Comparator.comparingDouble(mark -> at.distanceToSqr(mark.x, mark.y, mark.z)));
+		List<Vec3> out = new ArrayList<>();
+		for (int i = 0; i < found.size() && i < most; i++) {
+			out.add(found.get(i).position());
+		}
+		return out;
 	}
 
 	/** Whether {@code entity} is in this level and alive. */

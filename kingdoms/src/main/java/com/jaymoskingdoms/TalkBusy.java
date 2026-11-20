@@ -74,6 +74,15 @@ public final class TalkBusy {
 		return null;
 	}
 
+	/** Whether {@code mob} is busy with something that can't wait (as {@link #why} has it, with anyone at all). */
+	static boolean occupied(PathfinderMob mob) {
+		LivingEntity target = mob.getTarget();
+		return target != null && target.isAlive() || Duels.busy(mob.getUUID()) || GuardDrills.busy(mob.getUUID()) || SpiritBarrage.busy(mob)
+			|| McaCompat.busy(mob) || FieldMedics.busy(mob) || Downed.helping(mob) || Bearers.busy(mob) || Undertakers.busy(mob)
+			|| RoyalRemains.busy(mob) || Arrests.busy(mob) || Unmasking.busy(mob) || Grapples.busy(mob) || Looters.busy(mob)
+			|| Scavengers.busy(mob);
+	}
+
 	/**
 	 * Right click on {@code entity} to talk: if they're busy, they say so (now and then: not on every click) and true is
 	 * returned, so the talk menu doesn't open.

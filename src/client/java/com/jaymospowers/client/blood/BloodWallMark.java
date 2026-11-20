@@ -53,6 +53,11 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 	static final float SPLAT_GROWTH = 2.6F, RUNS_FROM = 0.3F;
 	/** How far off the face it's drawn (against flicker). */
 	static final float LIFT = 0.015F;
+	/** Scrubbed off ({@link #wipe}), or its stain gone: it fades away over this many ticks. */
+	static final int WIPED = 20;
+
+	/** The marks lying now, for a scrub to find ({@link #wipe}). */
+	private static final java.util.Set<BloodWallMark> LYING = java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
 
 	/** The face it lies on; changes when the door it's on swings ({@link #follow}). */
 	private Direction face;
@@ -72,6 +77,8 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 	private int drips;
 	/** (0.20.54) When the rain started washing it off (it fades from then), or -1. */
 	private int washFrom = -1;
+	/** The lasting stain that poured it over the edge (null: a splat): when that's scrubbed or washed away, so is this. */
+	private @Nullable BloodPuddle from;
 
 	private BloodWallMark(ClientLevel level, BlockPos host, double x, double y, double z, Direction face, float splat, float run,
 		float runWidth, int color, int age, int life, boolean stain) {
@@ -112,11 +119,17 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 			this.remove();
 			return;
 		}
-		// (0.20.54) rain running down the wall washes it away (stain's runs too, as the server washes the stain)
+		// (0.20.54) rain running down the wall washes it away (stain's runs too, as the server washes the stain); so does
+		// water poured down it
 		if (this.age % BloodPuddle.RAIN_CHECK == 0 && this.lifetime - this.age > BloodPuddle.RAIN_WASH
-			&& BloodPuddle.rainedOn(this.level, this.x, this.y, this.z)) {
+			&& (BloodPuddle.rainedOn(this.level, this.x, this.y, this.z) || BloodPuddle.underWater(this.level, this.x, this.y, this.z))) {
 			this.lifetime = this.age + BloodPuddle.RAIN_WASH;
 			this.washFrom = this.age;
+		}
+		// the stain that fed it scrubbed or washed away: it goes too
+		if (this.from != null && this.from.emptied()) {
+			this.from = null;
+			this.fadeOut();
 		}
 		// the run, grown to its length, drips off its end for a while
 		if (this.drips > 0 && this.age >= RUN_TICKS && this.age < RUN_TICKS + DRIP_EVERY * DRIPS * 2 && this.age % DRIP_EVERY == 0
@@ -338,7 +351,8 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 	 * A pool of {@code color} lying at ({@code x}, {@code y}, {@code z}), {@code size} blocks across: wherever it spreads
 	 * over the edge of the block it lies on and nothing is beyond that edge, it pours down the side. At most two runs.
 	 */
-	static void edges(ClientLevel level, double x, double y, double z, float size, int color, int age, int life, boolean stain) {
+	static void edges(ClientLevel level, double x, double y, double z, float size, int color, int age, int life, boolean stain,
+		BloodPuddle from) {
 		if (BloodClient.runSprites() == null || size < 0.5F) {
 			return;
 		}
@@ -376,7 +390,11 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 				under.getZ() + 0.85);
 			float run = (float) Math.min(reach(level, under, face, y), 0.3 + over * 1.6 + level.getRandom().nextDouble() * 0.5);
 			float width = (float) Mth.clamp(over * 0.6, 0.12, 0.4);
-			add(new BloodWallMark(level, under, fx, y, fz, face, 0.0F, run, width, color, age, Math.max(1, life), stain));
+			BloodWallMark mark = new BloodWallMark(level, under, fx, y, fz, face, 0.0F, run, width, color, age, Math.max(1, life), stain);
+			if (stain) {
+				mark.from = from;
+			}
+			add(mark);
 			made++;
 		}
 	}
@@ -397,10 +415,52 @@ public final class BloodWallMark extends Particle implements BloodDecals.Decal {
 		return state.getCollisionShape(level, pos).isEmpty() && state.getFluidState().isEmpty();
 	}
 
-	private static void add(Particle particle) {
+	private static void add(BloodWallMark mark) {
 		if (BloodSettings.off()) {
 			return;
 		}
-		Minecraft.getInstance().particleEngine.add(particle);
+		Minecraft.getInstance().particleEngine.add(mark);
+		LYING.add(mark);
+	}
+
+	/** It fades away over {@link #WIPED} ticks (unless it's going sooner already). */
+	private void fadeOut() {
+		if (this.lifetime - this.age > WIPED) {
+			this.lifetime = this.age + WIPED;
+			this.washFrom = this.age;
+		}
+	}
+
+	/** Whether any of it (its splat, or the run down from it) lies within {@code range} of {@code at}. */
+	private boolean near(Vec3 at, double range) {
+		double r = range + Math.max(this.splat * 0.5, this.runWidth * 0.5);
+		double dx = at.x - this.ax, dz = at.z - this.az;
+		if (dx * dx + dz * dz > r * r) {
+			return false;
+		}
+		// up and down: anywhere from its top to the foot of its run
+		double dy = at.y > this.ay ? at.y - this.ay : at.y < this.ay - this.run ? this.ay - this.run - at.y : 0.0;
+		return Math.abs(dy) <= r;
+	}
+
+	/** Whether a mark lies within {@code range} of {@code at} in {@code level} (and isn't already going). */
+	static boolean any(ClientLevel level, Vec3 at, double range) {
+		LYING.removeIf(mark -> !mark.isAlive());
+		for (BloodWallMark mark : LYING) {
+			if (mark.level == level && mark.washFrom < 0 && mark.near(at, range)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** Scrubbed: the marks within {@code range} of {@code at} fade away. */
+	static void wipe(ClientLevel level, Vec3 at, double range) {
+		LYING.removeIf(mark -> !mark.isAlive());
+		for (BloodWallMark mark : LYING) {
+			if (mark.level == level && mark.near(at, range)) {
+				mark.fadeOut();
+			}
+		}
 	}
 }

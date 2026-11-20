@@ -3719,6 +3719,56 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code BloodTrail.stains(ServerLevel, Vec3, double, int)} and {@code BloodTrail.scrub(ServerLevel, Vec3, double, float, boolean)}. */
+	private static java.lang.invoke.@Nullable MethodHandle stainsNear, scrubHandle;
+	private static boolean lookedForScrub;
+
+	private static void lookForScrub() {
+		if (!lookedForScrub) {
+			lookedForScrub = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					Class<?> trail = Class.forName("com.jaymospowers.core.blood.BloodTrail");
+					var lookup = java.lang.invoke.MethodHandles.publicLookup();
+					stainsNear = lookup.findStatic(trail, "stains", java.lang.invoke.MethodType.methodType(java.util.List.class,
+						net.minecraft.server.level.ServerLevel.class, net.minecraft.world.phys.Vec3.class, double.class, int.class));
+					scrubHandle = lookup.findStatic(trail, "scrub", java.lang.invoke.MethodType.methodType(float.class,
+						net.minecraft.server.level.ServerLevel.class, net.minecraft.world.phys.Vec3.class, double.class, float.class, boolean.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.debug("Jaymo's Powers' blood stains can't be scrubbed (older Powers?)", e);
+				}
+			}
+		}
+	}
+
+	/** Where Powers' blood stains lie within {@code range} of {@code at}, the nearest first, at most {@code most}; none without Powers. */
+	@SuppressWarnings("unchecked")
+	public static java.util.List<net.minecraft.world.phys.Vec3> bloodStains(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at,
+		double range, int most) {
+		lookForScrub();
+		if (stainsNear == null) {
+			return java.util.List.of();
+		}
+		try {
+			return (java.util.List<net.minecraft.world.phys.Vec3>) stainsNear.invoke(level, at, range, most);
+		} catch (Throwable e) {
+			return java.util.List.of();
+		}
+	}
+
+	/** Scrubs the blood stains within {@code range} of {@code at}, each by up to {@code amount}; how much came off (0 without Powers). */
+	public static float scrubStains(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at, double range, float amount) {
+		lookForScrub();
+		if (scrubHandle == null) {
+			return 0.0F;
+		}
+		try {
+			return (float) scrubHandle.invoke(level, at, range, amount, false);
+		} catch (Throwable e) {
+			return 0.0F;
+		}
+	}
+
 	// ---- (0.7.426) crippling blows: a broken leg ------------------------------------------------------------------------
 
 	private static boolean lookedForBreak;
