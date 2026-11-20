@@ -350,6 +350,36 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code MountClimb.begin(Player, Entity)}. */
+	private static java.lang.invoke.@Nullable MethodHandle climbOn;
+	private static boolean lookedForClimb;
+
+	/**
+	 * A second rider climbing up behind the first: Jaymo's Powers plays the climb and seats them at its end. True if it took
+	 * the ride over (the caller mustn't start it); false without Powers, or for a mount it doesn't climb.
+	 */
+	public static boolean climbOn(Player player, net.minecraft.world.entity.Entity mount) {
+		if (!lookedForClimb) {
+			lookedForClimb = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					climbOn = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.MountClimb"),
+						"begin", java.lang.invoke.MethodType.methodType(boolean.class, Player.class, net.minecraft.world.entity.Entity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' mount climb", e);
+				}
+			}
+		}
+		if (climbOn == null) {
+			return false;
+		}
+		try {
+			return (boolean)climbOn.invoke(player, mount);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** (Andy, 2026-11-01) Powers' {@code ZFighterFakeMoon.shines(ServerLevel, Entity)}. */
 	private static java.lang.invoke.@Nullable MethodHandle falseMoon;
 	private static boolean lookedForMoon;
@@ -890,6 +920,47 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code Karma.just}, {@code Karma.wicked} and {@code Karma.below} (each {@code (Player) -> boolean}). */
+	private static java.lang.invoke.MethodHandle @Nullable [] fates;
+	private static boolean lookedForFates;
+
+	/**
+	 * Whether {@code player}'s life was weighed and the weighing has them (Jaymo's Powers' {@code Karma}): let into the Other
+	 * World, sent below to the Nether, or on their last chance there; or one of the dead in the Other World. False without Powers.
+	 */
+	public static boolean weighedAway(Player player) {
+		if (amongTheDead(player)) {
+			return true;
+		}
+		if (!lookedForFates) {
+			lookedForFates = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					Class<?> karma = Class.forName("com.jaymospowers.core.wounds.Karma");
+					java.lang.invoke.MethodType type = java.lang.invoke.MethodType.methodType(boolean.class, Player.class);
+					java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+					fates = new java.lang.invoke.MethodHandle[] {lookup.findStatic(karma, "just", type), lookup.findStatic(karma, "wicked", type),
+						lookup.findStatic(karma, "below", type)};
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Karma fates (older Powers?)", e);
+				}
+			}
+		}
+		if (fates == null) {
+			return false;
+		}
+		try {
+			for (java.lang.invoke.MethodHandle fate : fates) {
+				if ((boolean)fate.invoke(player)) {
+					return true;
+				}
+			}
+		} catch (Throwable e) {
+			return false;
+		}
+		return false;
+	}
+
 	/** (0.7.591) Powers' {@code OutOfPlay.is(Entity)}. */
 	private static java.lang.invoke.@Nullable MethodHandle outOfPlay;
 	private static boolean lookedForOutOfPlay;
@@ -1378,7 +1449,7 @@ public final class PowersCompat {
 	/**
 	 * (Kingdoms 0.7.645, Powers 0.21.49) Andy: "make sure stoneborn and certain hollow don't bleed, and any other relevant race.
 	 * (emberborn should have the magma blood)". A heritage's own blood, for Powers' {@code BladeBlood.BLOOD}: no blood in a
-	 * Stoneborn, the bone-and-spirit Hollow ({@link #BLOODLESS_HOLLOW}) or a Bio-built; an Emberborn's runs as magma.
+	 * Stoneborn or the bone-and-spirit Hollow ({@link #BLOODLESS_HOLLOW}); an Emberborn's runs as magma, a Bio-built's green.
 	 * (0.7.646) Andy: "the emberborn should have the same type of cooling magma blood that the cubes have, and so should the
 	 * magmavein stoneborn. all zombies should get the rotten blood, and the rest of the blood changes are good to go too":
 	 * a Magmavein Stoneborn bleeds magma too, a Zombie Hollow rotten blood, an Endborn ender-purple, a Divine gold, a
@@ -1405,12 +1476,15 @@ public final class PowersCompat {
 				return switch (kind) {
 					// (0.7.646) Andy: "the magmavein stoneborn" bleeds the magma cubes' cooling magma; the other Stoneborn none
 					case STONEBORN -> variant == HeritageVariants.Variant.MAGMAVEIN ? magma : noBlood;
-					case BIOBUILT -> noBlood;
+					// Andy (2026-11-19): "verdants and bio built should now have green blood"
+					case BIOBUILT -> sap;
 					case EMBERBORN -> magma;
 					case ENDBORN -> ender;
 					case DIVINE -> gold;
 					case VERDANT -> sap;
-					case HOLLOW -> BLOODLESS_HOLLOW.contains(variant) ? noBlood : variant == HeritageVariants.Variant.ZOMBIE ? rotten : noSay;
+					// (the Pallid, the first look, has no blood either: PallidHollows)
+					case HOLLOW -> variant == null || BLOODLESS_HOLLOW.contains(variant) ? noBlood
+						: variant == HeritageVariants.Variant.ZOMBIE ? rotten : noSay;
 					default -> noSay;
 				};
 			});
@@ -1419,7 +1493,7 @@ public final class PowersCompat {
 		}
 	}
 
-	/** (0.7.645) The Hollow with no blood in them: bones and spirits. A Zombie Hollow (and the first look) still bleeds. */
+	/** (0.7.645) The Hollow with no blood in them: bones and spirits (and the Pallid, the first look). A Zombie Hollow still bleeds. */
 	static final java.util.Set<HeritageVariants.Variant> BLOODLESS_HOLLOW = java.util.EnumSet.of(HeritageVariants.Variant.SKELETON,
 		HeritageVariants.Variant.WRAITH, HeritageVariants.Variant.REAPER);
 
@@ -4135,6 +4209,38 @@ public final class PowersCompat {
 		}
 	}
 
+	/**
+	 * Hands Powers' death by cause those the grave won't keep ({@link PallidHollows}): given a dying player, {@code back}
+	 * answers what's done as they get up again (null: they die as anyone does); {@code tint} is the black's vignette (RGB) and
+	 * {@code fading} and {@code woke} its two lines (translation keys). Nothing without Powers (or an older one).
+	 */
+	@SuppressWarnings("unchecked")
+	static void tellDeathless(java.util.function.Function<net.minecraft.server.level.ServerPlayer, @Nullable Runnable> back, int tint,
+		String fading, String woke) {
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		try {
+			Class<?> mortality = Class.forName("com.jaymospowers.core.wounds.Mortality");
+			java.lang.reflect.Constructor<?> deathless = Class.forName("com.jaymospowers.core.wounds.Mortality$Deathless")
+				.getConstructor(int.class, String.class, String.class, Runnable.class);
+			Object list = mortality.getField("DEATHLESS").get(null);
+			((java.util.List<java.util.function.Function<net.minecraft.server.level.ServerPlayer, Object>>)list).add(player -> {
+				Runnable then = back.apply(player);
+				if (then == null) {
+					return null;
+				}
+				try {
+					return deathless.newInstance(tint, fading, woke, then);
+				} catch (ReflectiveOperationException e) {
+					throw new IllegalStateException(e);
+				}
+			});
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' deathless returns (older Powers?)", e);
+		}
+	}
+
 	private static volatile java.lang.invoke.@Nullable MethodHandle ghostOf;
 	private static volatile boolean ghostAtLooked;
 
@@ -4196,6 +4302,59 @@ public final class PowersCompat {
 		lookForHealing();
 		try {
 			return missingLimbs == null ? 0 : (int)missingLimbs.invoke(entity);
+		} catch (Throwable e) {
+			return 0;
+		}
+	}
+
+	/** Looked up once: Powers' {@code Mortality.tendCaptive}, or null without Powers (or an older one). */
+	private static java.lang.invoke.@Nullable MethodHandle tendCaptive;
+	private static boolean tendCaptiveLooked;
+
+	/**
+	 * Captors keep {@code player} from bleeding out as they haul them up (Powers' {@code Mortality.tendCaptive}: dirty rags if
+	 * they're lucky, else a stump seared shut). Nothing without Powers.
+	 */
+	public static void tendCaptive(net.minecraft.server.level.ServerPlayer player) {
+		if (!tendCaptiveLooked) {
+			tendCaptiveLooked = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					tendCaptive = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wounds.Mortality"),
+						"tendCaptive", java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mortality.tendCaptive (older Powers?)", e);
+				}
+			}
+		}
+		if (tendCaptive != null) {
+			try {
+				tendCaptive.invoke(player);
+			} catch (Throwable e) {
+				JaymosKingdoms.LOGGER.warn("Captors couldn't tend {}", player.getScoreboardName(), e);
+			}
+		}
+	}
+
+	/** Looked up once: Powers' {@code Prosthetics.fitted}, or null without Powers (or an older one). */
+	private static java.lang.invoke.@Nullable MethodHandle fittedLimbs;
+	private static boolean fittedLimbsLooked;
+
+	/** The lost limbs {@code entity} has a wooden or iron one fitted on (Powers' {@code Prosthetics.fitted}, Dismember bits); 0 without Powers. */
+	public static int fittedLimbs(net.minecraft.world.entity.Entity entity) {
+		if (!fittedLimbsLooked) {
+			fittedLimbsLooked = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					fittedLimbs = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.Prosthetics"),
+						"fitted", java.lang.invoke.MethodType.methodType(int.class, net.minecraft.world.entity.Entity.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Prosthetics.fitted (older Powers?)", e);
+				}
+			}
+		}
+		try {
+			return fittedLimbs == null ? 0 : (int)fittedLimbs.invoke(entity);
 		} catch (Throwable e) {
 			return 0;
 		}

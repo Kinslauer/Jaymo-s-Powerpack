@@ -11,5 +11,9 @@
   "tooltip.jaymospowers.rust.spotted": "Spotted with rust",
   "tooltip.jaymospowers.rust.rusty": "Rusty",
   "tooltip.jaymospowers.rust.corroded": "Corroded with rust",
+  "tooltip.jaymospowers.oiled": "Oiled: keeps the rust off",
+  "item.jaymospowers.armour_oil": "Armour Oil",
+  "message.jaymospowers.armour_oil.oiled": "You oil %s pieces of armour. They'll stay bright for three days.",
+  "message.jaymospowers.armour_oil.nothing": "You're wearing nothing that rusts.",
   "jei.jaymospowers.straw_wisp": "Stand in water (or at a water cauldron), sneak and use it to scrub blood and dirt off yourself and your armour, rotten blood too. Hold something in your other hand to scrub that instead. A handful of sand does the same, used up each scrub. Nothing takes rust off."
 }

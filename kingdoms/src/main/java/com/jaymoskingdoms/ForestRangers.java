@@ -27,7 +27,9 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.TamableAnimal;
@@ -57,6 +59,11 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Poachers:</b> the ranger walks them down and hogties them ({@link Lasso#bind}), then carries them to the nearest
  * realm's seat and gives them over to its guards, who sentence them as for any crime ({@link Busts#sentence}). With no
  * guard there to take them, the realm hears of the poaching ({@link Theft.Crime#POACHING}) and its guards come.</li>
+ * <li><b>Folk who poach</b> (Andy, 2026-11-19: "any of them can hunt on their own ... but rangers who see this will hogtie
+ * and turn them in, just like players"): a camp's or a town's hunter ({@link Hunters}) is tallied as a player is. A ranger
+ * who sees one who has killed too much ({@link #SIGHT}), or comes out of the trees after one near a player, runs them down
+ * and hogties them: a camp's outlaw is taken away to the nearest realm's court and not seen again; a townsman is brought
+ * before it and let go, and their realm pays the fine ({@link #FOLK_FINE}).</li>
  * </ul>
  * Nothing is saved: the tallies and rangers are forgotten with the server, and rangers wander off after
  * {@link #STAY_TICKS}.
@@ -84,6 +91,10 @@ public final class ForestRangers {
 	/** How far round the realm's seat a guard is looked for (blocks). */
 	static final double GUARD_RANGE = 48.0;
 	static final String TAG = "jaymoskingdoms_ranger";
+	/** A ranger sees a poaching hunter this far off, in the open (blocks); one near a player is sought this far round them. */
+	static final double SIGHT = 32.0, FOLK_NEAR = 64.0;
+	/** A townsman poacher's realm pays its court this many emeralds. */
+	static final int FOLK_FINE = 5;
 
 	/** Player → the times of their wild kills (a young one is there twice). */
 	private static final Map<UUID, Deque<Long>> KILLS = new HashMap<>();
@@ -106,9 +117,12 @@ public final class ForestRangers {
 
 	static void register() {
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
-			if (source.getEntity() instanceof ServerPlayer player && entity instanceof Animal beast && wild(beast)) {
-				Deque<Long> kills = KILLS.computeIfAbsent(player.getUUID(), id -> new ArrayDeque<>());
-				long now = player.level().getGameTime();
+			Entity killer = source.getEntity();
+			boolean counts = killer instanceof ServerPlayer
+				|| killer instanceof Mob m && Temperaments.humanoid(m) && !RANGERS.containsKey(m.getUUID());
+			if (counts && entity instanceof Animal beast && wild(beast)) {
+				Deque<Long> kills = KILLS.computeIfAbsent(killer.getUUID(), id -> new ArrayDeque<>());
+				long now = entity.level().getGameTime();
 				kills.add(now);
 				if (beast.isBaby()) {
 					kills.add(now);
@@ -130,7 +144,7 @@ public final class ForestRangers {
 	}
 
 	/** A beast of the wilds, not someone's stock: not tame, leashed or named, not where a realm's law holds nor on a homestead. */
-	private static boolean wild(Animal beast) {
+	static boolean wild(Animal beast) {
 		if (beast instanceof TamableAnimal t && t.isTame() || beast.isLeashed() || beast.hasCustomName() || !(beast.level() instanceof ServerLevel level)) {
 			return false;
 		}
@@ -139,11 +153,16 @@ public final class ForestRangers {
 
 	/** {@code player}'s wild kills in the last day (a young one counts twice). */
 	static int tally(ServerPlayer player) {
-		Deque<Long> kills = KILLS.get(player.getUUID());
+		return tally((Entity) player);
+	}
+
+	/** {@code who}'s (a player's or a hunter's) wild kills in the last day (a young one counts twice). */
+	static int tally(Entity who) {
+		Deque<Long> kills = KILLS.get(who.getUUID());
 		if (kills == null) {
 			return 0;
 		}
-		long now = player.level().getGameTime();
+		long now = who.level().getGameTime();
 		while (!kills.isEmpty() && now - kills.peekFirst() > DAY_TICKS) {
 			kills.pollFirst();
 		}
@@ -159,8 +178,11 @@ public final class ForestRangers {
 			for (ServerPlayer player : level.players()) {
 				boolean poacher = tally(player) >= POACH_FROM;
 				if (!player.isSpectator() && woods(level, player.blockPosition()) && Theft.lawAt(level, player.blockPosition()) == null
-					&& near(level, player.position(), CROWD) == null && (poacher || level.getRandom().nextFloat() < MEET_CHANCE)) {
-					meet(level, player, poacher);
+					&& near(level, player.position(), CROWD) == null) {
+					Mob folk = poacher ? null : folkPoacher(level, player.position(), FOLK_NEAR, null);
+					if (poacher || folk != null || level.getRandom().nextFloat() < MEET_CHANCE) {
+						meet(level, player, poacher, folk);
+					}
 				}
 			}
 		}
@@ -177,6 +199,14 @@ public final class ForestRangers {
 				RANGERS.remove(e.getKey());
 				v.discard();
 				continue;
+			}
+			if (r.poacher == null) {
+				// a hunter seen killing too much
+				Mob folk = folkPoacher(level, v.position(), SIGHT, v);
+				if (folk != null) {
+					r.poacher = folk.getUUID();
+					r.quarry = null;
+				}
 			}
 			if (r.poacher != null) {
 				chase(level, v, r, now);
@@ -200,8 +230,19 @@ public final class ForestRangers {
 		return null;
 	}
 
-	/** A ranger comes out of the trees near {@code player}: after them, if they're a poacher. */
-	private static void meet(ServerLevel level, ServerPlayer player, boolean poacher) {
+	/** A hunter (not a player) near {@code at} who has killed too much today, out in the wilds; seen by {@code by} if given. */
+	private static @Nullable Mob folkPoacher(ServerLevel level, Vec3 at, double range, @Nullable Villager by) {
+		for (Mob m : level.getEntitiesOfClass(Mob.class, new AABB(BlockPos.containing(at)).inflate(range),
+			m -> m.isAlive() && !RANGERS.containsKey(m.getUUID()) && !Lasso.hogtied(m) && KILLS.containsKey(m.getUUID()))) {
+			if (tally(m) >= POACH_FROM && Theft.lawAt(level, m.blockPosition()) == null && (by == null || by.hasLineOfSight(m))) {
+				return m;
+			}
+		}
+		return null;
+	}
+
+	/** A ranger comes out of the trees near {@code player}: after them, if they're a poacher, or after {@code folk}, a hunter who is. */
+	private static void meet(ServerLevel level, ServerPlayer player, boolean poacher, @Nullable Mob folk) {
 		RandomSource random = level.getRandom();
 		double angle = random.nextDouble() * Math.PI * 2.0;
 		int x = (int) (player.getX() + Math.cos(angle) * MEET_DISTANCE), z = (int) (player.getZ() + Math.sin(angle) * MEET_DISTANCE);
@@ -226,6 +267,8 @@ public final class ForestRangers {
 		if (poacher) {
 			r.poacher = player.getUUID();
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.ranger.coming").withStyle(ChatFormatting.DARK_GREEN));
+		} else if (folk != null) {
+			r.poacher = folk.getUUID();
 		}
 		RANGERS.put(v.getUUID(), r);
 	}
@@ -311,6 +354,10 @@ public final class ForestRangers {
 
 	/** Walks the poacher down, hogties them, then carries them off to the nearest realm's guards. */
 	private static void chase(ServerLevel level, Villager v, Ranger r, long now) {
+		if (level.getEntity(r.poacher) instanceof Mob folk) {
+			chaseFolk(level, v, r, folk, now);
+			return;
+		}
 		ServerPlayer poacher = level.getServer().getPlayerList().getPlayer(r.poacher);
 		if (poacher == null || poacher.level() != level || !poacher.isAlive() || poacher.isCreative() || poacher.isSpectator()) {
 			r.poacher = null;
@@ -335,6 +382,85 @@ public final class ForestRangers {
 		deliver(level, poacher, v);
 		RANGERS.remove(v.getUUID());
 		v.discard();
+	}
+
+	/** As {@link #chase}, a hunter who isn't a player: run down, hogtied, then turned in ({@link #deliverFolk}). */
+	private static void chaseFolk(ServerLevel level, Villager v, Ranger r, Mob folk, long now) {
+		if (!folk.isAlive()) {
+			r.poacher = null;
+			r.caught = -1L;
+			return;
+		}
+		v.getLookControl().setLookAt(folk);
+		if (r.caught < 0L) {
+			if (v.distanceTo(folk) > TIE_REACH) {
+				v.getNavigation().moveTo(folk, 0.9);
+				return;
+			}
+			v.getNavigation().stop();
+			Hunters.caught(level, folk);
+			Lasso.bind(level, folk, true);
+			r.caught = now;
+			Speech.say(level, v, Component.translatable("speech.jaymoskingdoms.ranger.folk_caught", folk.getName()), 0x88CC66, SIGHT);
+			return;
+		}
+		if (now - r.caught < CARRY_TICKS) {
+			return;
+		}
+		deliverFolk(level, folk, v);
+		RANGERS.remove(v.getUUID());
+		v.discard();
+	}
+
+	/**
+	 * A hunter turned in at the nearest realm's court: a camp's outlaw is taken away and not seen again; a townsman is
+	 * brought before it, let go, and their own realm pays the court the fine.
+	 */
+	private static void deliverFolk(ServerLevel level, Mob folk, Villager ranger) {
+		KILLS.remove(folk.getUUID());
+		MinecraftServer server = level.getServer();
+		Faction court = null;
+		double best = Double.MAX_VALUE;
+		for (Faction f : Factions.all(server)) {
+			if (f.fallen() || f.type() == FactionType.BARBARIAN) {
+				continue;
+			}
+			double d = f.seat().distSqr(folk.blockPosition());
+			if (d < best) {
+				best = d;
+				court = f;
+			}
+		}
+		String side = Comrades.side(folk);
+		boolean outlaw = side.startsWith("f:") && Camps.all(server).containsKey(side.substring(2));
+		Faction home = outlaw ? null : Factions.around(server, level, folk.blockPosition(), Hunters.TOWN_RANGE + 32.0);
+		Component name = folk.getName();
+		Component courtName = Component.literal(court != null ? court.name() : "");
+		for (ServerPlayer p : level.players()) {
+			if (p.distanceTo(folk) < SIGHT * 2) {
+				p.sendSystemMessage(Component.translatable(court == null ? "message.jaymoskingdoms.ranger.folk_let_off"
+					: outlaw ? "message.jaymoskingdoms.ranger.folk_taken" : "message.jaymoskingdoms.ranger.folk_fined", ranger.getName(), name, courtName)
+					.withStyle(ChatFormatting.DARK_GREEN));
+			}
+		}
+		if (court == null) {
+			Lasso.free(folk);
+			return;
+		}
+		if (outlaw) {
+			// to the court, and its gallows or its cells: the camp is a hand short
+			folk.discard();
+			return;
+		}
+		Lasso.free(folk);
+		BlockPos to = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, court.seat());
+		folk.teleportTo(to.getX() + 0.5, to.getY(), to.getZ() + 0.5);
+		if (home != null && home.id() != court.id() && home.type().isRealm()) {
+			long fine = Math.min(FOLK_FINE, Math.max(0L, home.treasury()));
+			int payer = home.id(), payee = court.id();
+			Factions.update(server, payer, x -> x.withTreasury(Math.max(0L, x.treasury() - fine)));
+			Factions.update(server, payee, x -> x.withTreasury(x.treasury() + fine));
+		}
 	}
 
 	/** The poacher given over at the nearest realm's seat: sentenced by its guards, or reported to them if none is there. */

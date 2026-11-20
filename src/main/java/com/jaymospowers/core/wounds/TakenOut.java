@@ -102,6 +102,8 @@ public final class TakenOut {
 		if ("lair".equals(taken.line())) {
 			com.jaymospowers.power.web.Webbed.wrap(player, Mortality.LAIR_WEB_TICKS, com.jaymospowers.power.web.Webbed.MOST);
 		}
+		// (cells and captors keep them from bleeding out where they wake)
+		Mortality.tendTaken(player, taken.line());
 		// (a faint gives way to the knock-out's black; one down stays down and comes round still down)
 		String woke = "message.jaymospowers.mortality.wake." + taken.line();
 		player.setAttached(Mortality.WAKE_LINE, woke);

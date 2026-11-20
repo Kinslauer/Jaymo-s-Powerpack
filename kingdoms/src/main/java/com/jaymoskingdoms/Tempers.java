@@ -201,7 +201,7 @@ final class Tempers {
 			}
 			case NOBLE -> {
 				// the plain greeting, and a word, and bread
-				gift(v, new ItemStack(Items.BREAD, 2));
+				gift(v, fromStores(level, f, 2));
 				say(level, king, f, t);
 				return false;
 			}
@@ -221,7 +221,7 @@ final class Tempers {
 			case PURIST -> {
 				// (0.7.130) bread and pride for his own blood; a sneer and a shove out of his path for anyone else
 				if (Purists.kin(f, v)) {
-					gift(v, new ItemStack(Items.BREAD, PURIST_BREAD));
+					gift(v, fromStores(level, f, PURIST_BREAD));
 					level.sendParticles(ParticleTypes.HAPPY_VILLAGER, v.getX(), v.getY() + 1.8, v.getZ(), 4, 0.3, 0.3, 0.3, 0.0);
 					Speech.say(level, king, Component.translatable("temper.jaymoskingdoms.purist.kin" + level.getRandom().nextInt(4), Purists.bloodName(f),
 						v.getDisplayName()), Speech.GOLD, SPEECH_RANGE);
@@ -237,7 +237,7 @@ final class Tempers {
 				return true;
 			}
 			case REVELER -> {
-				gift(v, new ItemStack(level.getRandom().nextBoolean() ? Items.COOKIE : Items.BREAD, 2));
+				gift(v, fromStores(level, f, 2));
 				level.playSound(null, v.blockPosition(), SoundEvents.NOTE_BLOCK_BELL.value(), SoundSource.NEUTRAL, 1.0F, 1.2F);
 				level.sendParticles(ParticleTypes.NOTE, king.getX(), king.getY() + 2.3, king.getZ(), 3, 0.4, 0.2, 0.4, 1.0);
 				say(level, king, f, t);
@@ -254,8 +254,13 @@ final class Tempers {
 		Speech.say(level, king, words, t == Temper.TYRANT || t == Temper.PARANOID ? Speech.RED : Speech.GOLD, SPEECH_RANGE);
 	}
 
+	/** Food for his gifts, out of the realm's storehouse (Andy, 2026-11-19: no food out of nowhere); empty when it's bare. */
+	private static ItemStack fromStores(ServerLevel level, Faction f, int count) {
+		return Storage.loaded(level, f) ? Storage.take(level, f, Storage::isFood, count) : ItemStack.EMPTY;
+	}
+
 	private static void gift(Villager v, ItemStack gift) {
-		if (v.getInventory().canAddItem(gift)) {
+		if (!gift.isEmpty() && v.getInventory().canAddItem(gift)) {
 			v.getInventory().addItem(gift);
 		}
 	}
@@ -376,7 +381,7 @@ final class Tempers {
 		for (Villager v : people) {
 			BlockPos spot = Construction.standable(level, seat.offset(level.getRandom().nextInt(9) - 4, 0, level.getRandom().nextInt(9) - 4), 3);
 			v.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(spot, 0.6F, 2));
-			gift(v, new ItemStack(Items.BREAD, FEAST_BREAD));
+			gift(v, fromStores(level, f, FEAST_BREAD));
 		}
 		if (Storage.loaded(level, f)) {
 			int eaten = 0;

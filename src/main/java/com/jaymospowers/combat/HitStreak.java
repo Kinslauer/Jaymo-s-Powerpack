@@ -37,6 +37,12 @@ public final class HitStreak {
 	public static final int MAX = 32, DOUBLE = 16;
 	/** The count shows from this many on. */
 	public static final int SHOW_FROM = 3;
+	/**
+	 * Andy, of "x3 Good" by the crosshair and "Streak 3" over the hotbar on the same blows: "what is that repeat hit
+	 * indicator?" With Jaymo's Kingdoms there, its chain counter by the crosshair already counts the blows, so the count
+	 * here stays off the action bar (where it pushed out sprains and the like) and only "Streak 8!" for the quick kill shows.
+	 */
+	static final boolean KINGDOMS_COUNTS = net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymoskingdoms");
 	/** The streak runs out after this long without a blow landed (ticks). */
 	public static final int LAPSE_TICKS = 100;
 	/** A quick kill drops a foe this long (ticks; it's finished long before). */
@@ -138,7 +144,7 @@ public final class HitStreak {
 		if (now == READY || now == DOUBLE) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.hit_streak.ready", now).withStyle(ChatFormatting.GOLD));
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.35F, 1.8F);
-		} else if (now >= SHOW_FROM) {
+		} else if (now >= SHOW_FROM && !KINGDOMS_COUNTS) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.hit_streak.count", now).withStyle(ChatFormatting.YELLOW));
 		}
 	}

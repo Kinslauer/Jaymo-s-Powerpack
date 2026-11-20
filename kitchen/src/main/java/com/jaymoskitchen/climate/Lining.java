@@ -32,6 +32,8 @@ public enum Lining {
 	public static final Codec<Lining> CODEC = Codec.STRING.xmap(Lining::byId, lining -> lining.id);
 	/** Qiviut, whichever mod's it is (Kingdoms lists its own; the tag is empty without it). */
 	public static final TagKey<Item> QIVIUT_CLOTH = TagKey.create(Registries.ITEM, JaymosKitchen.id("qiviut"));
+	/** Any hide or pelt (c:hides). */
+	public static final TagKey<Item> HIDES = TagKey.create(Registries.ITEM, net.minecraft.resources.Identifier.fromNamespaceAndPath("c", "hides"));
 	public static final StreamCodec<ByteBuf, Lining> STREAM_CODEC = ByteBufCodecs.STRING_UTF8.map(Lining::byId, lining -> lining.id);
 
 	public final String id;
@@ -88,6 +90,10 @@ public enum Lining {
 		}
 		if (stack.is(Furs.WILD_FUR)) {
 			return WILD_FUR;
+		}
+		// any other hide or pelt lines as rabbit hide does (Andy: "everything that requires rabbit pelts should also take hides")
+		if (stack.is(HIDES)) {
+			return RABBIT_HIDE;
 		}
 		return null;
 	}

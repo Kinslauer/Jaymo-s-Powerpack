@@ -63,6 +63,12 @@ public class SpitBlock extends BaseEntityBlock {
 	public static Block SPIT;
 	public static Item ITEM;
 	public static BlockEntityType<SpitBlockEntity> ENTITY;
+	/**
+	 * Not to be had: only drawn, as the 3D look of a piece of meat on the spit (kitchen/tools/gen_great_spit.py): a shank
+	 * (mutton, a leg of chicken or rabbit) or a steak (beef, pork, venison and the rest), raw to charred by its custom
+	 * model data.
+	 */
+	public static Item SHANK, STEAK;
 
 	public static void register() {
 		ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, JaymosKitchen.id("spit"));
@@ -77,10 +83,19 @@ public class SpitBlock extends BaseEntityBlock {
 		ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, JaymosKitchen.id("spit"));
 		ITEM = Registry.register(BuiltInRegistries.ITEM, itemKey,
 			new BlockItem(SPIT, new Item.Properties().useBlockDescriptionPrefix().setId(itemKey)));
+		SHANK = look("spit_shank");
+		STEAK = look("spit_steak");
+		// the great spit, for a whole beast (GreatSpitBlock), shares the spit's block entity
+		GreatSpitBlock.registerGreat();
 		ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosKitchen.id("spit"),
-			new BlockEntityType<>(SpitBlockEntity::new, Set.of(SPIT)));
+			new BlockEntityType<>(SpitBlockEntity::new, GreatSpitBlock.blocks()));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS)
 			.register(output -> output.accept(new ItemStack(ITEM)));
+	}
+
+	private static Item look(String name) {
+		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosKitchen.id(name));
+		return Registry.register(BuiltInRegistries.ITEM, key, new Item(new Item.Properties().stacksTo(1).setId(key)));
 	}
 
 	public SpitBlock(BlockBehaviour.Properties properties) {
@@ -93,6 +108,15 @@ public class SpitBlock extends BaseEntityBlock {
 	@Override
 	protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
 		return SHAPE;
+	}
+
+	/**
+	 * Nothing stands on it (Andy, on a clip of a camp's cook stood in the smoke on top of the spit: "they should stand to
+	 * the side"): it's sticks over a fire, not a step.
+	 */
+	@Override
+	protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+		return net.minecraft.world.phys.shapes.Shapes.empty();
 	}
 
 	@Override
@@ -167,6 +191,48 @@ public class SpitBlock extends BaseEntityBlock {
 		return null;
 	}
 
+	/**
+	 * A whole beast's pieces, in the order they're torn off: each piece of meat in it ({@link CorpseData#loot}), cooked as
+	 * {@link #cookedOf} or a campfire would cook it, one to a piece. What isn't meat (feathers left on, a bone) isn't a piece.
+	 */
+	static List<ItemStack> wholePieces(ItemStack stack, ServerLevel server) {
+		List<ItemStack> pieces = new ArrayList<>();
+		CorpseData data = stack.get(Corpses.CORPSE_DATA);
+		if (data == null) {
+			return pieces;
+		}
+		for (var template : data.loot()) {
+			ItemStack raw = template.create();
+			if (raw.isEmpty()) {
+				continue;
+			}
+			ItemStack one = raw.copyWithCount(1);
+			Item cooked = cookedOf(one.getItem());
+			ItemStack done = cooked != null ? new ItemStack(cooked) : server.recipeAccess()
+				.getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CAMPFIRE_COOKING, new net.minecraft.world.item.crafting.SingleRecipeInput(one), server)
+				.map(recipe -> recipe.value().assemble(new net.minecraft.world.item.crafting.SingleRecipeInput(one)))
+				.orElse(ItemStack.EMPTY);
+			if (done.isEmpty() || !done.has(net.minecraft.core.component.DataComponents.FOOD)) {
+				continue;
+			}
+			for (int i = 0; i < raw.getCount(); i++) {
+				pieces.add(done.copyWithCount(1));
+			}
+		}
+		return pieces;
+	}
+
+	/** Everyone near sees {@code by} reach in and tear a piece off the spit at {@code pos}: the client's tearing (Payloads.SpitRip). */
+	static void ripSeen(ServerLevel level, BlockPos pos, net.minecraft.world.entity.@Nullable Entity by) {
+		if (by instanceof net.minecraft.world.entity.LivingEntity living) {
+			living.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+		}
+		Payloads.SpitRip rip = new Payloads.SpitRip(pos, by == null ? -1 : by.getId());
+		for (ServerPlayer near : net.fabricmc.fabric.api.networking.v1.PlayerLookup.tracking(level, pos)) {
+			net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(near, rip);
+		}
+	}
+
 	/** How many tears this roast yields: a whole carcass more than a single piece. */
 	static int chunksFor(ItemStack stack) {
 		return stack.is(Corpses.CORPSE_ITEM) ? SpitBlockEntity.CHUNKS_PER_ANIMAL : SpitBlockEntity.CHUNKS_PER_PIECE;
@@ -182,12 +248,7 @@ public class SpitBlock extends BaseEntityBlock {
 		if (be == null) {
 			return InteractionResult.PASS;
 		}
-		if (!held.isEmpty() && held.is(SpitBlockEntity.ROASTABLE) && be.items.get(0).isEmpty()) {
-			be.items.set(0, held.copyWithCount(1));
-			be.chunks = chunksFor(held);
-			held.shrink(1);
-			be.doneness = 0.0F;
-			be.markUpdated();
+		if (!held.isEmpty() && held.is(SpitBlockEntity.ROASTABLE) && be.skewer(held)) {
 			server.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1.0F, 1.0F);
 			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.spit.on"));
 			return InteractionResult.SUCCESS_SERVER;
@@ -202,51 +263,33 @@ public class SpitBlock extends BaseEntityBlock {
 			return InteractionResult.SUCCESS;
 		}
 		SpitBlockEntity be = blockEntity(level, pos);
-		if (be == null || be.items.get(0).isEmpty()) {
+		if (be == null || be.roasting().isEmpty()) {
 			return InteractionResult.PASS;
 		}
-		ItemStack stack = be.items.get(0);
-		if (be.doneness >= SpitBlockEntity.BURNT) {
-			be.items.set(0, ItemStack.EMPTY);
-			be.doneness = 0.0F;
-			be.markUpdated();
+		if (be.throwOutBurnt()) {
 			server.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 1.0F, 1.0F);
 			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.spit.burnt"));
 			return InteractionResult.SUCCESS_SERVER;
 		}
-		if (be.doneness >= SpitBlockEntity.COOKED) {
-			if (player.isSecondaryUseActive()) {
-				// the whole cooked product
-				for (ItemStack piece : cookedProduct(stack, server)) {
-					give(player, piece);
-				}
-				be.items.set(0, ItemStack.EMPTY);
-				be.doneness = 0.0F;
-				be.markUpdated();
-				server.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1.0F, 1.0F);
-			} else {
-				// tear a cooked chunk off: one cooked piece per tear, counting down the roast's chunks;
-				// the last tear clears the spit
-				if (be.chunks > 0) {
-					ItemStack chunk = cookedProduct(stack, server).get(0).copyWithCount(1);
-					give(player, chunk);
-					be.chunks -= 1;
-					be.doneness = Mth.clamp(be.doneness - SpitBlockEntity.CHUNK, 0.0F, SpitBlockEntity.BURNT);
-					if (be.chunks <= 0) {
-						be.items.set(0, ItemStack.EMPTY);
-					}
-					be.markUpdated();
-					server.playSound(null, pos, SoundEvents.WOOD_HIT, SoundSource.BLOCKS, 1.0F, 1.0F);
-					player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
-					if (player instanceof ServerPlayer serverPlayer) {
-						net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(serverPlayer, new Payloads.SpitRip(pos));
-					}
-					player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.spit.done"));
-				}
-			}
+		if (be.doneness() < SpitBlockEntity.COOKED) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.spit.raw"));
 			return InteractionResult.SUCCESS_SERVER;
 		}
-		player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.spit.raw"));
+		if (player.isSecondaryUseActive()) {
+			// everything cooked at once (a whole beast's: what meat is left on it, and its bones)
+			for (ItemStack piece : be.takeCooked(server)) {
+				give(player, piece);
+			}
+			server.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1.0F, 1.0F);
+		} else {
+			// tear the most done piece off, or a chunk off a body; the last tear clears the spit
+			ItemStack chunk = be.tear(server, player);
+			if (!chunk.isEmpty()) {
+				give(player, chunk);
+			}
+			server.playSound(null, pos, SoundEvents.WOOD_HIT, SoundSource.BLOCKS, 1.0F, 1.0F);
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.spit.done"));
+		}
 		return InteractionResult.SUCCESS_SERVER;
 	}
 }

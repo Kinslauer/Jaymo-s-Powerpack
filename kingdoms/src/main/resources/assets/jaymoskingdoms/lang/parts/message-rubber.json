@@ -33,5 +33,7 @@
   "message.jaymoskingdoms.rubber.organ.left_lung": "%s knocks the breath out of a lung!",
   "message.jaymoskingdoms.rubber.organ.right_lung": "%s knocks the breath out of a lung!",
   "message.jaymoskingdoms.rubber.organ.stomach": "%s churns your stomach. You feel sick!",
-  "message.jaymoskingdoms.rubber.mending": "You start stretching back together. It will take a while"
+  "message.jaymoskingdoms.rubber.mending": "You start stretching back together. It will take a while",
+  "subtitles.jaymoskingdoms.rubber.stretch": "Rubber stretches",
+  "subtitles.jaymoskingdoms.rubber.pop": "Rubber pops"
 }

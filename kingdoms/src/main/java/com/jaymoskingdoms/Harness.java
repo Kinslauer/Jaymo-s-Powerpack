@@ -45,7 +45,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The harness: the armour slots a body has beyond helmet, chestplate, leggings and boots. Padding and mail under the
- * chest piece, shoulders, arms, hands, thighs and shins, something over it all, a hood and a crest ({@link Slot}); the
+ * chest piece, shoulders, arms, hands, thighs and shins, the neck (a gorget) and the waist (faulds and tassets),
+ * something over it all, a hood and a crest ({@link Slot}); the
  * pieces are {@link HeraldryArmour}'s. Kept on the wearer (players, folk, villagers alike), saved, and synced so every
  * client draws it.
  * <p>
@@ -63,9 +64,12 @@ public final class Harness {
 	/** How often (ticks) a player's harness is checked for pieces that no longer fit. */
 	static final int CHECK = 20;
 
-	/** The places of the harness, in the order they are kept. */
+	/**
+	 * The places of the harness, in the order they are kept. New places go on the end, never between: a saved harness is
+	 * a list in this order, and an older, shorter one is read with its new places bare ({@link #worn}).
+	 */
 	public enum Slot {
-		PADDING, MAIL, SHOULDERS, ARMS, HANDS, THIGHS, SHINS, OVER, HOOD, CREST;
+		PADDING, MAIL, SHOULDERS, ARMS, HANDS, THIGHS, SHINS, OVER, HOOD, CREST, NECK, WAIST;
 
 		public String key() {
 			return name().toLowerCase(Locale.ROOT);
@@ -151,10 +155,23 @@ public final class Harness {
 
 	// ---- what is worn --------------------------------------------------------------------------------------------------
 
-	/** Everything in {@code wearer}'s harness, by {@link Slot#ordinal()} (empty stacks for bare places). */
+	/**
+	 * Everything in {@code wearer}'s harness, by {@link Slot#ordinal()} (empty stacks for bare places). A harness saved
+	 * before the gorget and tassets had places is shorter: its pieces stay where they were and the new places are bare.
+	 */
 	public static List<ItemStack> worn(LivingEntity wearer) {
 		List<ItemStack> worn = wearer.getAttached(WORN);
-		return worn == null || worn.size() != SLOTS ? NONE : worn;
+		if (worn == null || worn.isEmpty() || worn.size() > SLOTS) {
+			return NONE;
+		}
+		if (worn.size() < SLOTS) {
+			List<ItemStack> padded = new ArrayList<>(worn);
+			while (padded.size() < SLOTS) {
+				padded.add(ItemStack.EMPTY);
+			}
+			return padded;
+		}
+		return worn;
 	}
 
 	public static ItemStack get(LivingEntity wearer, Slot slot) {
@@ -187,6 +204,11 @@ public final class Harness {
 			wearer.setAttached(WORN, List.copyOf(worn));
 		}
 		refresh(wearer);
+	}
+
+	/** The harness's pieces were changed where they lie (fitted, oiled): saved and sent to every client again. */
+	static void resync(LivingEntity wearer) {
+		put(wearer, new ArrayList<>(worn(wearer)));
 	}
 
 	/** Takes everything off {@code wearer} (nothing is dropped). */
@@ -240,7 +262,7 @@ public final class Harness {
 					out.add(limb);
 				}
 			}
-			case "all" -> add(out, worn, Slot.PADDING, Slot.MAIL, Slot.SHOULDERS, Slot.ARMS, Slot.HANDS, Slot.THIGHS, Slot.SHINS);
+			case "all" -> add(out, worn, Slot.PADDING, Slot.MAIL, Slot.NECK, Slot.SHOULDERS, Slot.ARMS, Slot.HANDS, Slot.WAIST, Slot.THIGHS, Slot.SHINS);
 			default -> {
 			}
 		}
@@ -277,6 +299,7 @@ public final class Harness {
 			modifier(wearer, Attributes.ARMOR, slot, piece == null ? 0.0 : piece.armour());
 			modifier(wearer, Attributes.ARMOR_TOUGHNESS, slot, piece == null ? 0.0 : piece.toughness());
 		}
+		Fitting.bonus(wearer);
 	}
 
 	private static void modifier(LivingEntity wearer, Holder<Attribute> attribute, Slot slot, double amount) {
@@ -330,6 +353,8 @@ public final class Harness {
 
 	/** Pieces that no longer fit how {@code player} is dressed (spaulders without a chest piece, a crest without a helm) or that they may not wear come off into the inventory. */
 	private static void check(ServerPlayer player) {
+		// (a fitted helm, cuirass or sabatons put on or taken off in the inventory counts here)
+		Fitting.bonus(player);
 		List<ItemStack> worn = worn(player);
 		if (worn == NONE) {
 			return;

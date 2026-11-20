@@ -277,6 +277,23 @@ public final class Mortality {
 	 */
 	public static final List<java.util.function.Function<ServerPlayer, java.util.Map.@Nullable Entry<Integer, Runnable>>> MID_TURNS = new ArrayList<>();
 
+	/**
+	 * Those the grave won't keep (Kingdoms: a Pallid Hollow; Andy: "he doesnt die under regular means"). Given the player as
+	 * they die, each may hand back how they come back; the first to answer has them. Asked after {@link #MID_TURNS} and before
+	 * {@link #TURNINGS}. Such a death is never final and never rolled: they lie in the black of a mid-turn death (its
+	 * vignette {@link Deathless#tint}), rise where they fell with no new injury, and no sure wake is used up. Only what ends
+	 * a mid-turn death ends them: losing their head, the void, lava, an execution by a player or a boss, or the Nether's
+	 * last chance.
+	 */
+	public static final List<java.util.function.Function<ServerPlayer, @Nullable Deathless>> DEATHLESS = new ArrayList<>();
+
+	/**
+	 * How one of the {@link #DEATHLESS} comes back: the vignette's colour (RGB), the line on the black as they go
+	 * ({@code fading}) and as they open their eyes ({@code woke}), both translation keys, and what's done as they rise.
+	 */
+	public record Deathless(int tint, String fading, String woke, Runnable back) {
+	}
+
 	/** (0.21.42) The black before one dying mid-turn rises (ticks; a turned kill's is {@link #OUT_BEFORE}). */
 	static final int TURN_DARK = 20 * 14;
 
@@ -333,6 +350,8 @@ public final class Mortality {
 		final @Nullable Runnable turn;
 		/** (0.21.42) Died mid-turn ({@link #MID_TURNS}): the longer black, its vignette, and the turned wake line. */
 		boolean midTurn;
+		/** One of the {@link #DEATHLESS} coming back: the line they wake to in place of the turned one, else null. */
+		@Nullable String ownWake;
 		int tries;
 		/** (0.21.7) Whether they've chosen to come to (the roll goes ahead), and how long they've held sneak towards it. */
 		boolean chosen;
@@ -759,6 +778,13 @@ public final class Mortality {
 			leftForDead(player, cause, sub(source, felled), by, mid.getValue(), mid.getKey());
 			return false;
 		}
+		// the grave won't keep them: they come back, whatever killed them
+		Deathless deathless = unturnable ? null : deathless(player);
+		if (deathless != null) {
+			JaymosPowers.LOGGER.info("{} fell to {} ({}): deathless, coming back", player.getScoreboardName(), cause.key(), source.getMsgId());
+			leftForDead(player, cause, sub(source, felled), by, deathless.back(), deathless.tint(), deathless.fading(), deathless.woke());
+			return false;
+		}
 		Runnable turn = unturnable || by == null ? null : turning(player, by);
 		// (0.20.83) the first deaths of a life always wake (no head, the void, or a deliberate execution aside)
 		int woken = player.getAttachedOrElse(WOKEN, 0);
@@ -801,6 +827,21 @@ public final class Mortality {
 				}
 			} catch (RuntimeException e) {
 				JaymosPowers.LOGGER.warn("A turning under way failed for {}", player.getScoreboardName(), e);
+			}
+		}
+		return null;
+	}
+
+	/** How {@code player} comes back from this death ({@link #DEATHLESS}), or null if they don't. */
+	private static @Nullable Deathless deathless(ServerPlayer player) {
+		for (java.util.function.Function<ServerPlayer, Deathless> answer : DEATHLESS) {
+			try {
+				Deathless back = answer.apply(player);
+				if (back != null) {
+					return back;
+				}
+			} catch (RuntimeException e) {
+				JaymosPowers.LOGGER.warn("A deathless return failed for {}", player.getScoreboardName(), e);
 			}
 		}
 		return null;
@@ -944,6 +985,12 @@ public final class Mortality {
 	 */
 	private static void leftForDead(ServerPlayer player, Cause cause, @Nullable String sub, @Nullable Entity by, @Nullable Runnable turn,
 		@Nullable Integer tint) {
+		leftForDead(player, cause, sub, by, turn, tint, null, null);
+	}
+
+	/** As above; {@code ownFading} and {@code ownWake} (translation keys, or null) replace a mid-turn death's two lines. */
+	private static void leftForDead(ServerPlayer player, Cause cause, @Nullable String sub, @Nullable Entity by, @Nullable Runnable turn,
+		@Nullable Integer tint, @Nullable String ownFading, @Nullable String ownWake) {
 		ServerLevel level = player.level();
 		boolean midTurn = tint != null && turn != null;
 		if (!midTurn) {
@@ -963,7 +1010,8 @@ public final class Mortality {
 		// ((0.21.7) out cold where they fell until they come to by themselves, or someone brings them round; with nobody near
 		// to do either, they don't lie waiting for it: the black lifts onto wherever they were taken, HELP_RANGE)
 		boolean straight = turn != null || alone(player);
-		String fading = midTurn ? "message.jaymospowers.mortality.turning" : "message.jaymospowers.mortality.fading";
+		String fading = midTurn && ownFading != null ? ownFading
+			: midTurn ? "message.jaymospowers.mortality.turning" : "message.jaymospowers.mortality.fading";
 		// (the line first: the black draws it, so the knock-out doesn't repeat it on the action bar)
 		player.setAttached(WAKE_LINE, fading);
 		Downed.knockOut(level, player, straight ? (midTurn ? TURN_DARK : OUT_BEFORE) + OUT_AFTER + 20 * 60 : LIE_TICKS, false, fading, false);
@@ -978,6 +1026,7 @@ public final class Mortality {
 		Wake wake = new Wake(cause, sub, level.dimension(), player.blockPosition(),
 			level.getServer().getTickCount() + (midTurn ? TURN_DARK : OUT_BEFORE), by, turn);
 		wake.midTurn = midTurn;
+		wake.ownWake = midTurn ? ownWake : null;
 		wake.since = level.getServer().getTickCount();
 		// ((0.21.7) the turned rise as they rise: nothing to carry them away from; nor is there for one with nobody near)
 		if (straight) {
@@ -1398,17 +1447,15 @@ public final class Mortality {
 				injure(player, wake.cause, wake.sub);
 			}
 			player.setAttached(SURVIVOR, true);
-			if ("sheltered".equals(line)) {
-				// (0.20.83) those who took them in bound their wounds and splinted what was broken
-				Treatment.tendAll(player, false);
-			}
+			tendTaken(player, line);
 		}
 		// (out cold a while more, wherever they are now: then they come round, still hurt)
 		if (Downed.isDowned(player)) {
 			Downed.forgetQuietly(player);
 		}
 		wakeHungry(player);
-		String woke = "message.jaymospowers.mortality.wake." + (wake.midTurn ? "turned" : wake.turn != null ? "risen" : line);
+		String woke = wake.ownWake != null ? wake.ownWake
+			: "message.jaymospowers.mortality.wake." + (wake.midTurn ? "turned" : wake.turn != null ? "risen" : line);
 		player.setAttached(WAKE_LINE, woke);
 		Downed.knockOut(level, player, OUT_AFTER, false, woke, false);
 		WOKE.put(player.getUUID(), (long) level.getServer().getTickCount() + WOKE_GRACE);
@@ -1420,6 +1467,86 @@ public final class Mortality {
 			} catch (RuntimeException e) {
 				JaymosPowers.LOGGER.warn("{} couldn't be turned", player.getScoreboardName(), e);
 			}
+		}
+	}
+
+	/**
+	 * What those who carried {@code player} off out cold saw to before they woke ({@code line}: where they were taken).
+	 * Andy (2026-11-19, woken in a village bed with both legs gone and bleeding into it: "these good people took me in and im
+	 * bleeding all over they bed ... i should have been bandaged no?"):
+	 * <ul>
+	 * <li>Taken in ({@code sheltered}): their cuts bandaged in clean linen, their breaks splinted, their stumps bound tight
+	 * ({@link Bleeding#bindStumps}), and anything dirty or festering washed out with the herbs.</li>
+	 * <li>Locked in a realm's cells ({@code jailed}): the gaolers keep a prisoner alive for judgement, roughly: rags on the
+	 * cuts and stumps, the breaks splinted.</li>
+	 * <li>Taken captive ({@code captured}): a slave is worth more alive ({@link #tendCaptive}).</li>
+	 * </ul>
+	 * Spiders' lairs, a berth of their own and the wild see to nothing: nobody tended them there.
+	 */
+	static void tendTaken(ServerPlayer player, String line) {
+		switch (line) {
+			case "sheltered" -> {
+				Treatment.tendAll(player, false);
+				Bleeding.bindStumps(player, false);
+				int foul = Bleeding.festering(player) | Bleeding.dirty(player);
+				for (BodyPart part : BodyPart.values()) {
+					if ((foul & Breaks.bit(part)) != 0) {
+						Bleeding.clean(player, part);
+					}
+				}
+			}
+			case "jailed" -> {
+				Treatment.tendAll(player, true);
+				Bleeding.bindStumps(player, true);
+			}
+			case "captured" -> tendCaptive(player);
+			default -> {
+				// (nobody saw to them)
+			}
+		}
+	}
+
+	/** The chance captors bother with rags ({@link #tendCaptive}); else a stump is seared shut and the cuts left. */
+	public static final float CAPTIVE_RAGS = 0.5F;
+
+	/**
+	 * Captors keep a captive from bleeding out (Andy, 2026-11-19: "they should resusitate you, using dirty rags if you're
+	 * lucky and bind you"). Lucky ({@link #CAPTIVE_RAGS}): dirty rags tied round every cut and stump (a rag's slow heal, and
+	 * it may fester), no splints. Unlucky: a bleeding stump is seared shut with a hot blade (a cautery's burn) and the cuts
+	 * are left to close by themselves. Kingdoms calls it as its captors haul a beaten captive up ({@code CaptiveConduct}).
+	 */
+	public static void tendCaptive(ServerPlayer player) {
+		if (!(player.level() instanceof net.minecraft.server.level.ServerLevel level)) {
+			return;
+		}
+		int open = Bleeding.bleeding(player);
+		if (open == 0) {
+			return;
+		}
+		if (player.getRandom().nextFloat() < CAPTIVE_RAGS) {
+			BodyPlan plan = BodyPlan.of(player);
+			for (int i = 0; plan != null && i < plan.size(); i++) {
+				BodyPart part = plan.part(i);
+				if (!Breaks.missing(player, part) && Treatment.helps(Treatment.Remedy.RAG, player, part)) {
+					Bleeding.stop(player, part, false);
+					Bleeding.dress(player, part, Treatment.RAG_HEAL, Treatment.BANDAGE_TICKS, true);
+				}
+			}
+			Bleeding.bindStumps(player, true);
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.mortality.captive_rags").withStyle(ChatFormatting.GRAY));
+			return;
+		}
+		boolean seared = false;
+		for (BodyPart part : BodyPart.values()) {
+			if ((open & Breaks.bit(part)) != 0 && Breaks.missing(player, part) && Bleeding.stop(player, part, true)) {
+				Wounds.hurtPart(player, part, Treatment.CAUTERY_BURN, null);
+				seared = true;
+			}
+		}
+		if (seared) {
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 1.0F, 0.8F);
+			level.sendParticles(net.minecraft.core.particles.ParticleTypes.SMOKE, player.getX(), player.getY() + 0.5, player.getZ(), 10, 0.2, 0.2, 0.2, 0.01);
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.mortality.captive_seared").withStyle(ChatFormatting.RED));
 		}
 	}
 

@@ -24,6 +24,8 @@ public final class MasonNet {
 	public static final int REFRESH = 0, DRAW = 1, TAKE = 2, RETRY = 3, SUBMIT = 4, SAVE = 5;
 	/** Copy a pattern book among your designs and draw it on a plan ({@link Library}). */
 	public static final int COPY = 6;
+	/** Ask for the full material list of the plan on the table ({@code PlanMaterialsScreen}). */
+	public static final int MATERIALS = 7;
 
 	/** A design on the world: its name, size, blocks, who drew it, and whether a settlement's builders can put it up. */
 	public record Design(String name, int w, int d, int h, int blocks, String author, boolean crews) {
@@ -131,6 +133,50 @@ public final class MasonNet {
 		}
 	}
 
+	/** One material a plan still needs: how many, how many the player carries (dirt counted for grass and paths). */
+	public record Mat(ItemStack item, int need, int have) {
+		public int shortBy() {
+			return Math.max(0, this.need - this.have);
+		}
+	}
+
+	/**
+	 * Server to client: the full material list of plan {@code design}, short first. {@code table}: the table it's in, to go
+	 * back to (null for a plan in hand); {@code laid}: it's laid out here, so what's already in place isn't counted.
+	 */
+	public record Materials(String design, java.util.Optional<BlockPos> table, boolean laid, List<Mat> mats) implements CustomPacketPayload {
+		public static final Type<Materials> TYPE = new Type<>(JaymosKingdoms.id("mason_materials"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Materials> CODEC = CustomPacketPayload.codec((p, buf) -> {
+			buf.writeUtf(p.design, 64);
+			buf.writeOptional(p.table, BlockPos.STREAM_CODEC);
+			buf.writeBoolean(p.laid);
+			buf.writeVarInt(p.mats.size());
+			for (Mat m : p.mats) {
+				ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, m.item);
+				buf.writeVarInt(m.need);
+				buf.writeVarInt(m.have);
+			}
+		}, buf -> {
+			String design = buf.readUtf(64);
+			java.util.Optional<BlockPos> table = buf.readOptional(BlockPos.STREAM_CODEC);
+			boolean laid = buf.readBoolean();
+			int n = Math.min(buf.readVarInt(), MAX_MATS);
+			List<Mat> mats = new ArrayList<>();
+			for (int i = 0; i < n; i++) {
+				mats.add(new Mat(ItemStack.OPTIONAL_STREAM_CODEC.decode(buf), buf.readVarInt(), buf.readVarInt()));
+			}
+			return new Materials(design, table, laid, mats);
+		});
+
+		@Override
+		public Type<Materials> type() {
+			return TYPE;
+		}
+	}
+
+	/** The most materials one list holds (more kinds of block than any design has). */
+	static final int MAX_MATS = 2048;
+
 	/** Client to server: {@code action} at the table at {@code pos}, on design {@code name} (DRAW, SUBMIT, SAVE). */
 	public record Act(BlockPos pos, int action, String name) implements CustomPacketPayload {
 		public static final Type<Act> TYPE = new Type<>(JaymosKingdoms.id("mason_act"));
@@ -151,6 +197,7 @@ public final class MasonNet {
 
 	static void register() {
 		PayloadTypeRegistry.clientboundPlay().register(Open.TYPE, Open.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(Materials.TYPE, Materials.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Act.TYPE, Act.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Act.TYPE, (payload, context) -> MasonTable.act(context.player(), payload));
 	}

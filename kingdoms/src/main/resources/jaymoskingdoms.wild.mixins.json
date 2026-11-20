@@ -5,7 +5,9 @@
 	"mixins": [
 		"MarkedSpawnMixin",
 		"PredatorTargetMixin",
-		"SilkDeepsPlacementMixin"
+		"SilkDeepsPlacementMixin",
+		"SpiderBlowMixin",
+		"SpiderLandingMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

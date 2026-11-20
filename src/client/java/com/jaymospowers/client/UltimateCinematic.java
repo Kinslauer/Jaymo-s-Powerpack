@@ -3,6 +3,7 @@ package com.jaymospowers.client;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.client.power.xenoform.XenoMorph;
 import com.jaymospowers.core.UltimateFilm;
+import com.jaymospowers.core.wounds.Mortality;
 import com.jaymospowers.client.sound.SceneMusic;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -144,9 +145,14 @@ public final class UltimateCinematic {
 		return running && !witness;
 	}
 
-	/** (0.18.106) Your own film is playing after your death: the death screen waits. */
+	/**
+	 * (0.18.106) Your own film is playing after your death: the death screen waits. Not for a death that ends the character
+	 * ({@link Mortality#FINAL}): Andy (2026-11-19), "the cut to black is only for a final death", so its film is cut
+	 * and the death screen's black comes at once.
+	 */
 	public static boolean deathFilm() {
-		return running && !witness && afterDeath;
+		Minecraft minecraft = Minecraft.getInstance();
+		return running && !witness && afterDeath && !(minecraft.player != null && Mortality.isFinal(minecraft.player));
 	}
 
 	private static void start(Minecraft minecraft, UltimateFilm.Play play) {
@@ -205,7 +211,8 @@ public final class UltimateCinematic {
 			}
 			// (0.18.106) one after your death plays on while you're dead, and ends once you're back
 			boolean gone = afterDeath ? age > 20 && self != null && self.isAlive() : self == null || !self.isAlive();
-			if (self == null || gone || skipped || ++age >= length || !witness && BeamCinematic.running()) {
+			boolean finalDeath = afterDeath && self != null && Mortality.isFinal(self);
+			if (self == null || gone || skipped || finalDeath || ++age >= length || !witness && BeamCinematic.running()) {
 				stop(minecraft);
 			}
 		}

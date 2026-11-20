@@ -3,6 +3,7 @@ package com.jaymoskingdoms.client;
 import com.jaymoskingdoms.Harness;
 import com.jaymoskingdoms.HeraldryArmour;
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.McaCompat;
 import com.jaymoskingdoms.client.bb.BbModel;
 import com.jaymoskingdoms.client.disasters.WindCloth;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -53,12 +54,16 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 	private static final Map<String, String> BONES = Map.of("armorHead", "head", "armorBody", "body", "armorRightArm", "right_arm",
 		"armorLeftArm", "left_arm", "armorRightLeg", "right_leg", "armorLeftLeg", "left_leg", "armorRightBoot", "right_leg", "armorLeftBoot", "left_leg");
 	/** The harness places drawn here, innermost first. */
-	private static final Harness.Slot[] DRAWN = {Harness.Slot.SHINS, Harness.Slot.THIGHS, Harness.Slot.HANDS, Harness.Slot.ARMS, Harness.Slot.SHOULDERS,
-		Harness.Slot.OVER, Harness.Slot.HOOD, Harness.Slot.CREST};
+	private static final Harness.Slot[] DRAWN = {Harness.Slot.SHINS, Harness.Slot.THIGHS, Harness.Slot.WAIST, Harness.Slot.HANDS, Harness.Slot.ARMS,
+		Harness.Slot.NECK, Harness.Slot.SHOULDERS, Harness.Slot.OVER, Harness.Slot.HOOD, Harness.Slot.CREST};
 	/** An undyed piece of cloth's colour, by piece (as its icon's: the generator's DYED). */
 	private static final Map<String, Integer> UNDYED = Map.of("giornea", 0x8E2B2B, "cloak", 0x4A5568, "torn_cloak", 0x5A5246, "hood", 0x4A5568,
-		"torn_hood", 0x5A5246);
+		"torn_hood", 0x5A5246, "tabard", 0x2B4A8E, "coat_of_plates", 0x7A2E2A);
 	static final int TORSE_UNDYED = 0xB02E26;
+	/** How many ordinaries a tabard's arms can show (the generator's ORDINARIES, one sheet each: heraldry_tabard_arms_N). */
+	static final int ORDINARIES = 18;
+	/** The share of a plate piece's durability gone when it shows dents, and when it shows many. */
+	static final float DENTED = 0.5F, BATTERED = 0.8F;
 	private static final String TORSE = "heraldry_torse";
 
 	/** The models, each read once, and the textures by name. */
@@ -97,7 +102,11 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 		for (ItemStack stack : new ItemStack[] {state.feetEquipment, state.chestEquipment, state.headEquipment}) {
 			HeraldryArmour.Piece piece = HeraldryArmour.of(stack);
 			if (piece != null && piece.slot() == null) {
-				draw(poseStack, collector, lightCoords, state, piece.model(), texture(piece, stack), -1);
+				// (the coat of plates is cloth outside, in its dye)
+				Integer undyed = UNDYED.get(piece.name());
+				draw(poseStack, collector, lightCoords, state, piece.model(), texture(piece, stack),
+					undyed == null ? -1 : ARGB.opaque(DyedItemColor.getOrDefault(stack, undyed)));
+				dents(poseStack, collector, lightCoords, state, piece, stack);
 			}
 		}
 		List<ItemStack> harness = state.getData(HARNESS);
@@ -120,7 +129,28 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 				Integer undyed = UNDYED.get(piece.name());
 				draw(poseStack, collector, lightCoords, state, piece.model(), texture(piece, stack),
 					undyed == null ? -1 : ARGB.opaque(DyedItemColor.getOrDefault(stack, undyed)));
+				dents(poseStack, collector, lightCoords, state, piece, stack);
+				// a tabard in a realm's arms: its ordinary laid over the field, front and back, in the charge's colour
+				HeraldryArmour.Arms arms = stack.get(HeraldryArmour.ARMS);
+				if (arms != null && arms.ordinary() >= 0 && arms.ordinary() < ORDINARIES) {
+					draw(poseStack, collector, lightCoords, state, piece.model(), "heraldry_tabard_arms_" + arms.ordinary(), ARGB.opaque(arms.charge()));
+				}
 			}
+		}
+	}
+
+	/**
+	 * (Harness 5) Plate shows its wear: past {@link #DENTED} of its durability gone it is dented and scratched, past
+	 * {@link #BATTERED} badly (the generator's {@code heraldry_PIECE_dents1} and {@code _dents2}, over any finish).
+	 */
+	private void dents(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, HeraldryArmour.Piece piece, ItemStack stack) {
+		if (!piece.plate() || !stack.isDamageableItem() || stack.getMaxDamage() <= 0) {
+			return;
+		}
+		float worn = stack.getDamageValue() / (float)stack.getMaxDamage();
+		int stage = worn >= BATTERED ? 2 : worn >= DENTED ? 1 : 0;
+		if (stage > 0) {
+			draw(poseStack, collector, lightCoords, state, piece.model(), "heraldry_" + piece.name() + "_dents" + stage, -1);
 		}
 	}
 
@@ -198,6 +228,10 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 				if (under != null) {
 					this.crest.y -= under.crestRise();
 				}
+			}
+			if (McaCompat.LOADED) {
+				// (Andy, 2026-11-19) fitted to the body MCA draws: its head size, breasts and clothes
+				McaHarnessFit.fit(this, state);
 			}
 		}
 	}

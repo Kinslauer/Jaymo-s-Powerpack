@@ -58,6 +58,13 @@ public final class DownedLie {
 	static final double PROP_SLIP = 0.3;
 	/** Propped this long (ticks), they are sat there: past the get-up from the floor ({@code WallSit.IN_TICKS}, 30) and the slide down (16). */
 	static final long SAT_TICKS = 34;
+	/**
+	 * Andy (2026-11-19): "crawling into a block should also activate the sit". A downed player crawling into a wall (their
+	 * keys pushing them at its face, at least this much of the push straight at it) with their side no further than this
+	 * off it (blocks), this many ticks running, sits up against it as the Sit key does.
+	 */
+	static final double BUMP_FACING = 0.7, BUMP_GAP = 0.08;
+	static final int BUMP_TICKS = 6;
 
 	/**
 	 * On someone downed whom another set against a wall (carried there and set down looking at it, or dragged there and
@@ -69,6 +76,11 @@ public final class DownedLie {
 		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG.cast(), AttachmentSyncPredicate.all()));
 	/** Each propped body and where it was set (server side). */
 	private static final Map<LivingEntity, Vec3> PROPPED_AT = new WeakHashMap<>();
+	/**
+	 * Each downed player crawling into a wall: the ticks running they've pushed at it; -1 once the Sit key laid them back
+	 * down off it, until they stop pushing (so holding the key into the wall doesn't sit them straight back up).
+	 */
+	private static final Map<ServerPlayer, Integer> BUMPING = new WeakHashMap<>();
 
 	private DownedLie() {
 	}
@@ -280,8 +292,47 @@ public final class DownedLie {
 		if (player.hasAttached(PROPPED)) {
 			player.removeAttached(PROPPED);
 			PROPPED_AT.remove(player);
+			BUMPING.put(player, -1);
 		} else if (!Downed.passedOut(player)) {
 			prop(player, true);
+		}
+	}
+
+	/**
+	 * Each tick of a downed {@code player} ({@code Downed}): crawled into a wall beside them ({@link #BUMP_TICKS} running,
+	 * awake, not carried), they sit up against it as the Sit key would ({@link #sitKey}).
+	 */
+	static void crawlInto(ServerPlayer player) {
+		// (a block they could haul up instead, holding Use: that's the climb, not a wall to sit at; the Sit key still sits there)
+		if (player.hasAttached(PROPPED) || player.hasAttached(Downed.RISING) || Downed.passedOut(player)
+			|| player.hasAttached(com.jaymospowers.core.ProneHaul.HAUL) || com.jaymospowers.core.ProneHaul.find(player) != null) {
+			BUMPING.remove(player);
+			return;
+		}
+		double[] wall = wall(player);
+		net.minecraft.world.entity.player.Input input = player.getLastClientInput();
+		// where their keys push them (as Entity#getInputVector turns them by the look): forward/back, left/right
+		float ahead = (input.forward() ? 1.0F : 0.0F) - (input.backward() ? 1.0F : 0.0F);
+		float side = (input.left() ? 1.0F : 0.0F) - (input.right() ? 1.0F : 0.0F);
+		double sin = Math.sin(Math.toRadians(player.getYRot())), cos = Math.cos(Math.toRadians(player.getYRot()));
+		double mx = side * cos - ahead * sin, mz = ahead * cos + side * sin;
+		double push = Math.sqrt(mx * mx + mz * mz);
+		boolean into = wall != null && push > 0.0 && wall[2] <= player.getBbWidth() * 0.5 + BUMP_GAP
+			&& -(mx * wall[0] + mz * wall[1]) / push >= BUMP_FACING;
+		if (!into) {
+			BUMPING.remove(player);
+			return;
+		}
+		int pushed = BUMPING.getOrDefault(player, 0);
+		if (pushed < 0) {
+			// (laid back down by the key while pushing: not again till they let go)
+			return;
+		}
+		if (++pushed >= BUMP_TICKS) {
+			BUMPING.remove(player);
+			prop(player, true);
+		} else {
+			BUMPING.put(player, pushed);
 		}
 	}
 

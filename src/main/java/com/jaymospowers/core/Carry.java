@@ -1080,6 +1080,34 @@ public final class Carry {
 		return entry != null && entry.carried instanceof ServerPlayer player ? player : null;
 	}
 
+	/** Whoever (or whatever) this carrier holds in their arms, if anyone (not one they drag). For {@link Sling}. */
+	static @Nullable Entity held(ServerPlayer carrier) {
+		Entry entry = CARRIES.get(carrier.getUUID());
+		return entry == null || entry.npc != null || entry.hold == DRAG ? null : entry.carried;
+	}
+
+	/**
+	 * The carry ends with the body handed on ({@link Sling} slings it over a horse): no put-down, no push, it stays where it is
+	 * and the caller says where it goes next. The carrier is free of the weight.
+	 */
+	static void handOver(ServerPlayer carrier) {
+		Entry entry = CARRIES.remove(carrier.getUUID());
+		if (entry == null) {
+			return;
+		}
+		carrier.removeAttached(CARRYING);
+		AttributeInstance speed = carrier.getAttribute(Attributes.MOVEMENT_SPEED);
+		if (speed != null) {
+			speed.removeModifier(WEIGHT_ID);
+		}
+		entry.carried.removeAttached(CARRIED_BY);
+	}
+
+	/** A player the server moved itself ({@link Sling} sets them down) isn't checked for moving too fast until {@code now} plus a moment. */
+	static void grace(ServerPlayer player, long now) {
+		GRACE.put(player.getUUID(), now + RELEASE_GRACE_TICKS);
+	}
+
 	/** The carrier loses their grip: whatever they hold drops with their momentum, as if let go. */
 	public static void slip(ServerPlayer carrier) {
 		Entry entry = CARRIES.get(carrier.getUUID());

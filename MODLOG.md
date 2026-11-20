@@ -6544,3 +6544,131 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - Andy: "maces and blunt weapons should crush skulls upon a blow that connects on [the head] and kills". A killing blow from a mace, hammer, club, flail or any other blunt weapon (`Fractures.blunt`) that lands on a humanoid's head crushes it (`Dismember.crushSkull`, `LETHAL_CRUSH`), unless the helmet turns it (`armourGuard`, the same roll a severing gets). The head is gone as a severed one is, but nothing flies off whole: a crack, a burst of white bone and blood, the helmet falls, and Jaymo's Kitchen throws pieces of skull and lumps of brain and leaves Brain Matter on the ground (`KitchenCompat.skullCrushed`). A skeleton's skull shatters as before. Bare fists don't crush.
 - **Players** (Andy: "it should certainly happen to players who take a decapitating or head crushing blow, that just means they cannot be revived, and forces a reincarnation"): the blow that finishes a downed player, if it lands on the head, takes it off (a blade, the same chances as a mob's killing blow) or crushes it (a blunt weapon), helmet permitting (`Dismember.playerHeadBlow`, from `Downed`). It happens before the death, so Mortality counts it a beheading: final, no revive, a reincarnation. Still only ever the downed, never a player on their feet, never in creative.
 - Built; not played.
+
+## 0.25.76 (2026-11-19): Harness 5: armour oil, and the harness rusts (#1870)
+
+- **Armour Oil**: a glass bottle and a fat (porkchop, cod, salmon, or Kingdoms' whale oil or Kitchen's cooking oil).
+  Use it to oil all the iron armour you're wearing, including Kingdoms' harness pieces. Oiled armour gathers no new
+  rust for three days, and its tooltip says "Oiled". Eight uses a flask. It takes no rust off: nothing does.
+- **The harness rusts**: Kingdoms' harness pieces rust like armour in the four slots, worn wet or lying in water.
+- **Fitted armour is lighter**: a piece a Kingdoms armourer fitted to you counts three quarters of its weight in your
+  load.
+- Classes: `core/wet/ArmourOil` (new), `core/wet/Rust` (`OILED_UNTIL`, harness rust), `core/ArmourKind` (fitted weight),
+  client `WetClient`.
+- Built; not played.
+
+## 0.25.77 (2026-11-19): creative keeps your prosthetics (#1874)
+
+- **Creative mode no longer pops prosthetics off**: creative's healing (`Wounds.creativeHeal`) used to grow every severed limb back, and a limb that grows back drops its wooden, iron or Rig limb as an item. A limb that wears a prosthetic now stays as it is; bare severed limbs and the head still grow back. Chrono's rewind out of death (`Wounds.undoAll`) goes through the same heal, so it keeps them too.
+- `Dismember.regrow(target, all, keep)`: regrow that leaves the parts in `keep` missing.
+- Compile-checked; not played.
+
+## 0.25.78 (2026-11-19): Harness 6: forge the rest of the harness (#1877)
+
+- The smithing anvil (`HeraldryForging`) now forges, from steel in every finish: gorget, bevor, faulds and tassets, spaulders with rondels, and the fur-lined spaulders, arm harness, gauntlets, cuisses and greaves (a fur lining takes 2 rabbit hides when the piece is done). From iron: jazerant, mail mitons, mail coif, standard of mail, mail skirt, splinted vambraces and splinted greaves.
+- Built; not played.
+
+## 0.25.79 (2026-11-19): Reason: the pack's new name on the title screen (#1872)
+
+- **Title logo**: the title screen (and the credits) show our own "REASON" logo in place of MINECRAFT / JAVA EDITION:
+  deep blocky stone letters with ivy grown over them, and behind them one warrior with a raised sword and shield facing
+  a crowd of mob shadows with faint red eyes. `ReasonLogoMixin` draws `jaymospowers:textures/gui/title/reason.png`
+  (drawn by `tools/reason_logo.py`), 256x80, rising 28 units above where vanilla's logo starts.
+- **Caption**: the yellow line beside the logo always reads "what's yours" (`ReasonSplashMixin`), on holidays too. Our
+  old random splash list is gone.
+- **Window title**: "Reason" in place of "Minecraft* 26.3" (`ReasonTitleMixin`), keeping " - Singleplayer" and the like.
+- **Pack name**: the CurseForge import and the testers' Prism/packwiz pack are named "Reason". Mod ids, jar and zip
+  file names are unchanged.
+- Compile-checked against the 26.3 client jar; not played.
+
+## 0.25.80 (2026-11-19): final deaths cut straight to black (#1878)
+
+- Andy (2026-11-19): "deaths like this should cut straight to black. i shouldnt see the enemies despawned. only hearing nothing and the long wait for the respawn screen", then "the cut to black is only for a final death".
+- All of this is only for a death that ends the character (`Mortality.FINAL`); every other death plays as before.
+- **No film.** A film after death (a Kingdoms captain's scene over your body, the shot round an executioner) is cut the moment the death is known to be final (`UltimateCinematic.deathFilm`, its tick), so the death screen's black comes at once. The captain is still raised in the world. Films after other deaths stay.
+- **The long black.** The death screen stays all black for 5 s (`DeathScreenBlackMixin.HOLD_TICKS` 100, buttons can't be clicked yet), then comes up over the old 2.5 s fade.
+- **Silence at once.** Every sound is cut the moment you die for good (not eased out over half a second), the downed heartbeat and the other black-screen cues too; only the death screen's button clicks are heard (`BlackoutHush`).
+- **No world after Respawn on the way down.** One sent below by their weight is knocked out again on the tick they're back on their feet, not up to a second later (`Karma`), so the camp that killed them doesn't show in between.
+- Built; not played.
+
+## 0.25.81 (2026-11-19): JEI shows how to forge the metal harness pieces (#1882)
+
+- New JEI page **Smithing Anvil: Harness** (`HarnessForgingJei`): every plate and mail harness piece the Smithing Anvil forges (`HeraldryForging`), with the ingots to heat, the rabbit hides a fur lining takes or the gold for gilding, and the blows. Before, these pieces showed no recipe in JEI at all, so they looked unmakeable.
+- Built; not played.
+
+## 0.25.82 (2026-11-19): Any hide stands in for rabbit hide (#1883)
+
+- New shared tag `c:hides` (rabbit hide, Kitchen hide, raw hide, wolf/wild/bear fur, beast pelt, Naturalist bear fur). Fur-lined harness forging (`HeraldryForging`) takes any 2 of them; JEI shows the choices.
+- Built; not played.
+
+## 0.25.83 (2026-11-19): Deathless returns (for Kingdoms' Pallid) (#1885)
+
+- `Mortality.DEATHLESS` and `Mortality.Deathless`: other mods can name players the grave won't keep. Such a death is never rolled or final; it takes a mid-turn death's long black with the mod's own vignette and two lines, they rise where they fell with no injury, and no sure wake is used up. Only what ends a mid-turn death ends them (head, void, lava, an execution by a player or a boss, the Nether's last chance).
+- Built; not played.
+
+## 0.25.84 (2026-11-19): hit streak count off the action bar with Kingdoms (#1886)
+
+- The "Streak 3", "Streak 4"... line over the hotbar no longer shows on every blow when Jaymo's Kingdoms is there: its "x3 Good" chain counter by the crosshair already counts the same blows, and the line pushed sprain and other messages off the action bar. "Streak 8!" (and 16) for the quick kill still shows, with its sound.
+- combat/HitStreak#KINGDOMS_COUNTS.
+- Built; not played.
+
+## 0.25.85 (2026-11-19): climbing onto and off mounts (SmoothMount-style, our own) (#1888)
+
+- **Climbing on**: getting onto a horse, donkey, mule or pig now plays a climb instead of a snap into the saddle: from its left a foot in the stirrup and the leg swung over, from its right the same mirrored, from behind hands on the rump and a jump astride. The mount stands still for it. It takes about 0.7 s (0.5 s from behind), up to twice as long in full armour (20 armour). A hit, sneaking or walking away calls it off. Seen by everyone, in first and third person; your keys are held while you climb.
+- **Climbing off**: getting off plays the way down: down the side, or back over the rump if you were set down behind it.
+- New clips in `tools/gen_mount_climb_clips.py` (`player_mount_*`). New classes: `MountClimb` (server), `MountClimbPose` (client) and their mixins. Camels and llamas are mounted as before.
+- **Kneeling horse**: an armoured rider on a horse that kneels for them (Kingdoms) now takes a low step across onto it instead of the stirrup climb.
+- **Skittish horses**: a horse may shy mid-climb and step sideways with a snort; the rider slides down from wherever the climb had got to and the climb is called off. Wild horses do it most (untamed horses without Kingdoms 1 time in 3, tamed ones never); pigs never. A horse that has shied settles for 10 seconds.
+- **A hand up**: a second rider climbing up behind a seated rider is pulled up (new clip) while the front rider reaches back an arm, and the climber is aimed at the second seat, not the first.
+- A climb onto a mount plays to its end even if the server seats the rider a tick early, so the body no longer snaps into the saddle.
+- **Moa**: crouches while you climb on (its sitting pose), and you hop onto its low back (new clip). A moa or any other flier that is off the ground is mounted as before, with no climb, and nobody plays the climb-off from one in the air.
+- **Phyg and flying cow**: lower the wing on the side you stand, and you walk up it like a ramp (new clip, mirrored for the other side). Riding them with valkyrie wings in hand climbs the same way.
+- **Kingdoms' mounts** (when Kingdoms is loaded): a war elephant or mammoth curls its trunk down and lifts you onto its back, or kneels and you step up its folded foreleg; a wind dragon lowers its neck or its wings and you climb up. Powers plays the rider's clips and carries the body along the neck, wing or trunk; Kingdoms bends the mount. New clips: lifted in the trunk, up a kneeling elephant, up a neck, up a dragon's wing.
+- The climb aims at each mount's real seat (the elephants' and dragons' are high, the Aether animals' are set by hand), and the climb reach grows for wide mounts so you can start it from an elephant's head.
+- Without Kingdoms nothing about elephants or dragons changes; without Powers they are seated at once, as before.
+- **Running vault**: with Freerunner learnt (Kingdoms), sprint at a horse, donkey, mule or pig from behind and use it: you leapfrog it, hands on the rump and legs parted over, straight into the saddle in about a third of a second (armour slows it only a little). You keep running through it, your keys aren't held still, and you may drift further than in an ordinary climb before it is called off. Sneaking or a hit still calls it off. The mount stands still for it as ever, but a quick vault is never shied from. Without Freerunner, or from the side or standing, the ordinary climb plays.
+- **Flying dismount**: with Freerunner learnt, sneaking off a mount that is going at a canter or better (about 7 blocks a second; a trot or walk doesn't count) throws you clear sideways with the mount's speed and a little lift, tucked in the air (new clip), and you roll as you land with the dodge's own roll, which takes the fall away. It costs no feathers. If the dodge is cooling down there is no roll and the fall is the ordinary fall for that height (a leap off a saddle is well under the safe 3 blocks). Slower, or without Freerunner, getting off is the ordinary climb down.
+- Only your own sneak off the mount leaps (not being knocked down, thrown, or the mount dying). Both need Kingdoms (Freerunner is its skill); Powers alone keeps the ordinary climbs. The leap's landing roll is thrown by the server and drawn for you too.
+- **Carts, wagons, coaches, rickshaws and cabs**: getting in plays a short step up (a foot on the step, a hand on the rail, pulled up onto the bench), and getting out a step down to the road. Kitchen's carts and Kingdoms' rickshaws, cabs, carriages and coaches. Shown by the client after the game seats you, so nothing is held back and nothing automatic is delayed.
+- **Boats**: getting in is a leg over the side with the arms out for balance, down onto the thwart; getting out is the same the other way, onto the bank (not shown if you drop into the water). Kingdoms' skiff too.
+- **Villagers, guards, carters and caravan hands** (Kingdoms' folk and MCA's villagers) climb onto and off horses the way players do: from the side or the back, up behind a rider already seated, down over the rump or the flank. A guard who gets down to tend someone and climbs back on shows it. Purely visual: their AI mounts and dismounts exactly as before, and the body rides with the horse if it walks off. Folk who are put in a saddle or seat from more than 4 blocks away, or appear seated, just sit as before. Folk step into carts and boats the same way.
+- The climb's arm and leg poses now also show in the final draw of the model and on armour pieces (the player climb's limbs were only laid on the model for the render layers).
+- New clips: `player_mount_step_up`, `step_down`, `step_in`, `step_out` (from `tools/gen_mount_climb_clips.py`). New classes: `SeatSteps` (watches who gets a seat or loses one), `MountClimbMobRendererMixin`, `MountClimbModelFeatureRendererMixin`; `MountClimbPose` gains `play` and `extractMob`.
+- **Heave**: carrying someone downed (a player, or one of the folk), right-click a horse, donkey, mule, camel or llama and you heave them up over its back. They lie across it face down, head on one side and legs on the other, arms and legs hanging and swinging with the horse's stride. You play a short heave: a crouch under the weight, then a push up and over. One body to a horse.
+- **Riding along**: the body goes wherever the horse does, whether someone rides it, leads it or has it on a rope. It counts as carried: the downed can't act, crawl or struggle, no respawn countdown starts for them, and no one can shove or aim at them.
+- **Coming to**: when they come to (or if the horse dies or goes) they slide down on the ground beside the horse.
+- **Lifting them off**: stand by the horse with empty hands and sneak + right-click it to take the body down into your arms, as a lift from the ground does. If they wear too much armour for you to lift, they're set down beside the horse instead.
+- A relog or restart ends it, with the body left down where the horse was. Carrying someone dragged, or any carry that isn't a downed body, still lets go as before when you right-click a horse.
+- Built; not played. Every clip and every mount pose angle is a first guess that hasn't been seen in game.
+
+## 0.25.86 (2026-11-19): Z Fighter line message no longer claims your heritage (#1891)
+
+- **"You are Earthling."** was the Z Fighter lineage being announced, and Earthling is also a heritage, so a Z Fighter whose heritage has no line of its own (Heartlander, Stoneborn, Divine-born and the rest, who fight the Earthling way) was told they were an Earthling. Now a heritage with a line of its own reads "Your Z Fighter line: Warrior-born." and the rest read "Your blood has no Z Fighter line of its own, so you fight the Earthling way." The heritage itself was never changed by this message (`ZFighterLineage.become`).
+- Built; not played.
+
+## 0.25.87 (2026-11-19): taken-in wake-ups bind your stumps (#1890)
+
+- **Taken in by a village**: Andy woke in a village bed with both legs gone, still bleeding into it. Those who carry you in already bandaged your cuts and splinted your breaks, but a stump was never touched (a bandage can't close one). Now they bind every bleeding stump tight in linen (`Bleeding.bindStumps`), and wash out anything dirty or festering with their herbs. All in `Mortality.tendTaken`.
+- **Bound stumps show**: the stump's end and lower half are painted wrapped in linen (or a rag), on the stump's own skin (`WoundMarksLayer`), for a Minecraft day or until a wooden or iron limb is fitted over it.
+- **Other wake-ups**: carried out cold to a realm's cells, the gaolers keep you alive for judgement with rags on your cuts and stumps and your breaks splinted. Taken captive (`Mortality.tendCaptive`, Andy: "they should resusitate you, using dirty rags if you're lucky and bind you"): half the time they tie dirty rags round every cut and stump (a rag's slow heal, and it may fester; no splints), otherwise they sear a bleeding stump shut with a hot blade and leave the cuts. Kingdoms calls it each time captors haul a beaten captive up. Spiders' lairs, your own berth and the wild still see to nothing. Both the death wake and the blackout wake (`TakenOut`) do this.
+- Kingdoms' tending villagers (the bandaged tag) already stopped a stump's bleeding; the stump now shows its binding too.
+- Built; not played.
+
+## 0.25.88 (2026-11-19): Regrown limbs come back unbroken, Verdant regrowth crunch (#1889)
+
+- **Regrowth heals the break**: a limb that grows back (Verdant, Rubber-folk, Bio-built, Hermit Bean, the symbiote, Slipfin/Brinecrown) is no longer still broken. Its break, set mark, splint and broken tag go, and the limb comes back at 30% of its part instead of 0 (`Breaks.regrown`, `REGROWN_SHARE`). Creative healing still skips prosthetic limbs.
+- **Verdant regrowth**: a Verdant's open stumps (no prosthetic) spurt green blood every half second until the limb grows back (`Dismember.spurtStumps`, `ZFighterLineage.STUMP_SPURT_EVERY`), and the regrowth plays a fleshy crunch (new sound `verdant/regrow_1..3`, made by `tools/gen_regrow_sounds.py`).
+- **Green Verdant blood**: a Verdant Z Fighter bleeds green sap whatever their heritage (Verdant heritage already did).
+- Built; not played or listened to in game.
+
+## 0.25.89 (2026-11-20): Crawling into a wall sits you up (#1892)
+
+- Downed players who crawl into a wall now sit up against it, the same as pressing the Sit key beside one. Pushing at the wall for about a third of a second starts the get-up. If you use the Sit key to lie back down while you're still pushing, it won't sit you up again until you let go.
+- `DownedLie#crawlInto` (called from `Downed#tickPlayer`) reads the player's movement keys (`getLastClientInput`), turns them by the look, and starts `prop(player, true)` after `BUMP_TICKS` (6) ticks pushing within `BUMP_GAP` of a wall's face, at least `BUMP_FACING` (0.7) of the push straight at it. Passed out, carried, rising or already sat: nothing.
+- Built; not played.
+
+## 0.25.90 (2026-11-20): Crawling into a block you can haul up doesn't sit you (#1893)
+
+- Downed, crawling into a block about one high that you could haul yourself up (hold Use) no longer sits you up against it, so the haul can start. Taller walls still sit you up when you crawl into them, and the Sit key still sits you against either.
+- `DownedLie#crawlInto` skips while `ProneHaul.find` finds a rise ahead or a haul is under way.
+- Built; not played.

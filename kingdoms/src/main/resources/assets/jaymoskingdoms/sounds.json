@@ -5141,5 +5141,33 @@
 				"attenuation_distance": 16
 			}
 		]
+	},
+	"rubber.stretch": {
+		"subtitle": "subtitles.jaymoskingdoms.rubber.stretch",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:rubber/stretch_1"
+			},
+			{
+				"name": "jaymoskingdoms:rubber/stretch_2"
+			},
+			{
+				"name": "jaymoskingdoms:rubber/stretch_3"
+			}
+		]
+	},
+	"rubber.pop": {
+		"subtitle": "subtitles.jaymoskingdoms.rubber.pop",
+		"sounds": [
+			{
+				"name": "jaymoskingdoms:rubber/pop_1"
+			},
+			{
+				"name": "jaymoskingdoms:rubber/pop_2"
+			},
+			{
+				"name": "jaymoskingdoms:rubber/pop_3"
+			}
+		]
 	}
 }

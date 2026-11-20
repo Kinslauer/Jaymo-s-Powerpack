@@ -1043,13 +1043,18 @@ public final class Dismember {
 	 * doesn't, 0.18.87): every one, or just the first still missing. True if anything grew back.
 	 */
 	public static boolean regrow(LivingEntity target, boolean all) {
+		return regrow(target, all, 0);
+	}
+
+	/** As {@link #regrow(LivingEntity, boolean)}, but the parts in {@code keep} stay missing. */
+	public static boolean regrow(LivingEntity target, boolean all, int keep) {
 		int mask = missing(target);
-		if (mask == 0) {
+		if ((mask & ~keep) == 0) {
 			return false;
 		}
 		int before = mask;
 		for (int part : PARTS) {
-			if ((mask & part) != 0) {
+			if ((mask & part & ~keep) != 0) {
 				mask &= ~part;
 				target.removeTag(tag(part));
 				if (!all) {
@@ -1225,6 +1230,19 @@ public final class Dismember {
 			Vec3 v = out.scale(push).add((random.nextDouble() - 0.5) * 2.0 * SPURT_SPREAD, (random.nextDouble() - 0.5) * SPURT_SPREAD,
 				(random.nextDouble() - 0.5) * 2.0 * SPURT_SPREAD);
 			level.sendParticles(spray, true, false, at.x, at.y, at.z, 0, v.x, v.y, v.z, 1.0);
+		}
+	}
+
+	/**
+	 * Every stump {@code body} has that no prosthetic covers spurts once ({@link #spurt}). Andy (2026-11-19): a Verdant's
+	 * stump spurts its green blood until the limb grows back in.
+	 */
+	public static void spurtStumps(ServerLevel level, LivingEntity body) {
+		int open = missing(body) & ~Prosthetics.fitted(body);
+		for (int part : PARTS) {
+			if ((open & part) != 0) {
+				spurt(level, body, part);
+			}
 		}
 	}
 

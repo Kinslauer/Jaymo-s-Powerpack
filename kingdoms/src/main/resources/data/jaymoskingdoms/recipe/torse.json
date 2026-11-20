@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "group": "jaymoskingdoms:crest",
+  "ingredients": [
+    "#minecraft:wool",
+    "#minecraft:wool",
+    "minecraft:string"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:torse"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "group": "jaymoskingdoms:harness",
+  "pattern": [
+    "R R",
+    "RLR",
+    "RRR"
+  ],
+  "key": {
+    "R": "#c:hides",
+    "L": "minecraft:leather"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:fur_jerkin"
+  }
+}

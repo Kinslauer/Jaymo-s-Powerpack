@@ -2548,3 +2548,32 @@ Added a new **Cooking Block** to the Functional creative tab. The block has iron
 - **Crushed skulls** (`Gibs.skullCrushed`, called by Jaymo's Powers): pieces of skull and jaw (`Gib.SKULL`) and lumps of brain (`Gib.BRAIN`) fly a little way, a puff of white bone dust, and **Brain Matter** (new block + item, `BrainMatterBlock`) lands under the head: small pale pebbles with white chips of skull, 1-4 to a block, rotting away like offal. Bodies with no blood leave only the bone, machines nothing.
 - Art and models from `kitchen/tools/gen_gut_piles.py`.
 - Built; not played.
+
+## 0.6.58 (2026-11-19): gut piles, intestines and brain matter lie at eight facings
+
+- Andy: "the drops should randomly rotate orientation like item frames". Gut piles, Intestines and Brain Matter now lie at one of eight facings (45 degree steps), picked at random by where they lie, not four: each pile size has an eighth-turned copy of its model (`*_turned.json`, every element rotated 45 degrees about the block's middle) beside the quarter turns. Written by `kitchen/tools/gen_gut_piles.py`.
+- Not played.
+
+## 0.6.59 (2026-11-19): great spit for whole beasts, 3D roasts, tearing pieces off (#1881)
+
+- **Great spit** (Andy: "yes", to a big-game spit for whole gutted carcasses): crafted from three sticks over two logs, set on a lit campfire like the spit, its bar running across the way you face. Carry or drag a carcass that's been skinned and gutted on the hook (a sheep, a pig, a calf, a deer...) onto it and it turns there whole, lying along the bar, drawn skinned and gutted and browning as it roasts (3 min to cooked, 2 more to burnt). Done, an empty hand tears off a piece at a time, as many pieces as there was meat in it, cooked; its bones fall away with the last. Sneak + right-click takes all that's left. Not dressed yet: "Skin and gut it first."
+- **The spit holds five** (Andy: "they could put maybe 5 steaks on that thing"): pieces of meat take places along the bar, each cooking at its own pace. A tear takes the most done one off; a burnt one is thrown out first. Drawn in 3D (kitchen/tools/gen_great_spit.py): mutton, chicken and rabbit as a shank on its bone, other meat as a steak with a rim of fat, raw to browning to cooked to charred; fish as before.
+- **Tearing** (Andy: "animate ripping chunks off, for both them and players"): whoever tears a piece off either spit (a player, a camp's cook) is seen by everyone near reaching in with both hands and ripping it away (TearPose), and the roast shakes.
+- Nobody stands on a spit any more (no collision): a camp cook was stood on top of it in the smoke.
+- Kingdoms' camp cooks use it all through `SpitBlockEntity.skewerWhole`, `tear(ServerLevel, Entity)`, `full` and `CorpseEntity.dressForSpit` / `spitWholeable` / `dressedWhole`.
+- The roasting piece was passed as the item's outline colour; now pieces draw with none.
+- Built (Gradle compile); not played. The 3D shank and steak are new models nobody has looked at in game.
+
+## 0.6.60 (2026-11-19): Any hide stands in for rabbit hide (#1883)
+
+- A loom lining takes any hide or pelt (`c:hides`) as it takes rabbit hide; the furs keep their own warmer linings (`Lining`).
+- Built; not played.
+
+## 0.6.61 (2026-11-19): Thirst can be switched off for some players (#1885)
+
+- `Thirst.setUnthirsting`: another mod (Kingdoms, for its Pallid Hollow) names players who never thirst; their water stays full.
+- Built; not played.
+
+## 0.6.62 (2026-11-19): Bodies can be cut up where they lie (#1887)
+
+- A beast's body can be cut up where it lies by someone who isn't a player (`CorpseEntity.butcherWhereLies`). Jaymo's Kingdoms' town hunters use it to carry their kills home as cuts, the same cuts a butcher block gets.

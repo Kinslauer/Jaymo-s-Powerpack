@@ -33,6 +33,10 @@ final class KintsugiDragonModel extends EntityModel<WindDragonRenderer.State> {
 
 	private final BbModel bb;
 	private final ModelPart top, neck, head, jaw, legL, legR, tail;
+	/** The neck's parts, root to head, bent down together for a rider to climb up it. */
+	private final ModelPart[] neckChain;
+	/** How far (degrees) the whole neck is lowered for a rider, and the head with it. */
+	static final float NECK_DOWN = 70.0F;
 
 	/** (0.7.612) Stood idle, it roars once in this many ticks; once this far settled into its sit it curls up asleep. */
 	static final float ROAR_EVERY = 520.0F, SLEEP_AFTER = 0.9F;
@@ -59,6 +63,7 @@ final class KintsugiDragonModel extends EntityModel<WindDragonRenderer.State> {
 		this.legL = bb.part("leftLeg");
 		this.legR = bb.part("rightLeg");
 		this.tail = bb.part("tail");
+		this.neckChain = new ModelPart[] {this.neck, bb.part("neck1"), bb.part("neck3"), bb.part("neck4"), bb.part("neck6"), bb.part("neck7"), this.head};
 	}
 
 	/** {@code anim} looping by the clock, {@code weight} of it. */
@@ -144,6 +149,14 @@ final class KintsugiDragonModel extends EntityModel<WindDragonRenderer.State> {
 			this.bb.play("wyvern_fly_move", phase * length, fly * (1.0F - glide) * (1.0F - move));
 			this.bb.play("wyvern_fly_move", GLIDE_AT, glide * (1.0F - move));
 			this.top.xRot += s.pitch * fly;
+		}
+
+		// being climbed onto from its head, it lowers its neck for the rider (spread over the neck's seven parts and the head)
+		if (s.neckDown > 0.0F) {
+			float each = s.neckDown * NECK_DOWN * Mth.DEG_TO_RAD / this.neckChain.length;
+			for (ModelPart part : this.neckChain) {
+				part.xRot += each;
+			}
 		}
 
 		// the tail sways; the head looks about; the jaw drops to breathe

@@ -100,7 +100,7 @@ public final class Callouts {
 		for (String k : new String[] {"bond.cool", "spec.known", "spec.learned", "spec.haggle", "spec.overheard", "spec.track", "spec.forage",
 			"spec.pack", "spec.pack.full", "spec.unpack", "land.forest", "land.desert", "land.swamp", "land.jungle", "land.snow", "land.mountain",
 			"land.coast", "land.plains", "land.trap", "land.ruin", "town.glad", "town.grim", "quest.way", "tip", "foe.ours", "foe.headed",
-			"taunt.hurt", "taunt.broken", "taunt.arrow", "supper.confront", "supper.sick", "supper.scramble", "supper.caught", "you.up", "you.hurt",
+			"taunt.hurt", "taunt.broken", "taunt.arrow", "supper.confront", "supper.sick", "supper.scramble", "supper.caught", "supper.none", "supper.short", "you.up", "you.hurt",
 			"you.hungry", "you.armour", "table.sit"}) {
 			LINES.put(k, 3);
 		}

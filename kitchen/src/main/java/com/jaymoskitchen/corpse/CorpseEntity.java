@@ -1045,6 +1045,56 @@ public class CorpseEntity extends Entity {
 		}
 	}
 
+	/**
+	 * Can go on the great spit whole once it's dressed ({@link com.jaymoskitchen.cooking.spit.GreatSpitBlock}): an animal's
+	 * body a hook would take, lying loose (not hung, carried by someone else or dragged), with no cut made in it yet.
+	 */
+	public boolean spitWholeable() {
+		return Hanging.hangable(this) && butcherStage != Hanging.BLEEDING && butcherStage <= Hanging.SKINNED && hook == null;
+	}
+
+	/**
+	 * Cut up where it lies by someone who isn't a player (Jaymo's Kingdoms: a town's hunter, after working at it a while):
+	 * the body is gone, and everything a butcher block would get out of it ({@link #butcheredDrops}) is returned for them
+	 * to carry home. Empty, and the body left be, if it isn't a beast fit to butcher ({@link #isButcherable}).
+	 */
+	public List<ItemStack> butcherWhereLies() {
+		if (!(level() instanceof ServerLevel level) || isRemoved() || !isButcherable() || carrier() != null) {
+			return List.of();
+		}
+		List<ItemStack> cuts = butcheredDrops();
+		play(level, SoundEvents.SLIME_SQUISH, 0.7F);
+		discard();
+		return cuts;
+	}
+
+	/** Skinned and gutted, and nothing cut off it yet: ready to go on the great spit whole. */
+	public boolean dressedWhole() {
+		return Hanging.hangable(this) && butcherStage == Hanging.SKINNED && gutted;
+	}
+
+	/**
+	 * Skinned and gutted where it lies by someone who isn't a player (Jaymo's Kingdoms: a camp's cook readying a beast for
+	 * the great spit, after working at it a while): its skin and offal drop beside it. False if it can't go on the spit
+	 * whole ({@link #spitWholeable}).
+	 */
+	public boolean dressForSpit() {
+		if (!(level() instanceof ServerLevel level) || !spitWholeable()) {
+			return false;
+		}
+		for (ItemStack skin : takeLoot(stack -> stack.is(com.jaymoskitchen.butchery.Butchery.SKINS))) {
+			spawnAtLocation(level, skin, 0.3F);
+		}
+		if (!gutted) {
+			spawnAtLocation(level, new ItemStack(com.jaymoskitchen.butchery.Butchery.OFFAL, oneHanded() ? 1 : 2), 0.3F);
+		}
+		butcherStage = Hanging.SKINNED;
+		addDressed(DRESSED_SKINNED);
+		setGutted();
+		play(level, SoundEvents.SLIME_SQUISH, 0.7F);
+		return true;
+	}
+
 	public int butcherStage() {
 		return butcherStage;
 	}
@@ -2283,6 +2333,13 @@ public class CorpseEntity extends Entity {
 		if (com.jaymoskitchen.butchery.Butchery.isHook(level().getBlockState(clicked))
 			&& position().distanceTo(Vec3.atCenterOf(clicked)) <= Hanging.DRAG_TO_HOOK + getBbHeight()) {
 			if (Hanging.hang(this, player, clicked)) {
+				return;
+			}
+		}
+		// a dressed carcass dragged up onto the great spit near enough
+		if (com.jaymoskitchen.cooking.spit.GreatSpitBlock.is(level().getBlockState(clicked))
+			&& position().distanceTo(Vec3.atCenterOf(clicked)) <= com.jaymoskitchen.cooking.spit.GreatSpitBlock.DRAG_ONTO + getBbHeight()) {
+			if (com.jaymoskitchen.cooking.spit.GreatSpitBlock.skewer(this, player, clicked)) {
 				return;
 			}
 		}

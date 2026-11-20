@@ -15643,3 +15643,157 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
   `/kingdom library reload | list | tag <file> <kind> [land]` (operators).
 - Lore: the masons' pattern books (approved).
 - Built (compileClientJava); not played. Not checked in game: the books' look when built, the Lost Castle as a seat, the table's new tab.
+
+## 0.11.4 (2026-11-19): Harness 2: wider makes of cuirass, the coat of plates, gorget, tassets, rondels and the tabard of arms (#1868)
+
+- **Two more cuirasses**: the **Fluted Cuirass** and the **Rounded Breastplate**, beside the plain one. Each realm's knights
+  wear their realm's own make where its creed or land doesn't choose one. Both take every finish.
+- **Coat of Plates**: plates riveted inside a cloth coat in the realm's colour (chestplate slot, dyeable). A little
+  weaker than plate (4 armour, 0.5 toughness) and mended with iron. A realm's armourer sells it, and a poorer realm's
+  guards (one without iron to spare) wear it.
+- **Two new harness places**: **Neck** for the **Gorget** and **Waist** for the **Faulds and Tassets**. Both are plate,
+  take every finish, give 1 armour and 0.5 toughness each, and sit in the free corners of the harness screen. Realm
+  knights wear both. Harnesses saved before this load as they were, with the new places empty.
+- **Spaulders with Rondels**: plate spaulders with a disc guarding each armpit, a little tougher than plain ones. Some
+  realms put them on their knights.
+- **Heraldic Tabard**: now drawn, in the realm's arms: dyed the realm's field, with its ordinary (cross, saltire, bend,
+  chief, lozenge...) laid front and back in the charge's colour. A realm's tailor sells one in its arms, and the guards'
+  and Crown kings' tabards carry them too.
+- **Fix**: the harness art generator (`kingdoms/tools/gen_heraldry_armour.py`) had stopped making plate and cloth art
+  (half its main step was indented into a helper after its `return`). So Harness 3's creed and land pieces had no
+  models and were invisible: faith, etched and gilt-banded cuirasses, spiked and gilt-banded spaulders, oath sleeves,
+  the fur-lined set, the veiled helm, quilted cotton, hide, bronze and lamellar. They are drawn now.
+- Lore: "The armourers' wider makes" (Andy approved 2026-11-18). Classes: `Harness`, `HarnessMenu`, `HeraldryArmour`
+  (`ARMS`, the coat's material), `HeraldryWear`, `GuardKit`, client `HeraldryLayer`.
+- Built; not played: the new pieces, the tabard's arms and the regenerated art haven't been seen in game.
+
+## 0.11.5 (2026-11-19): Harness 5: upkeep - dents, rust on the harness, fitting (#1870)
+
+- **Dents and scratches**: harness plate shows its wear. Past half its durability gone a piece is dented and scratched,
+  and past 80% it's battered. Works in every finish, on the helm, cuirass and sabatons and on every harness plate piece.
+  The art is from `kingdoms/tools/gen_heraldry_armour.py` (`--dents` makes only this).
+- **Fitting**: crouch and use emeralds on an armourer, and he fits the harness plate you're wearing to you, 2 emeralds a
+  piece. A fitted piece gives you 0.5 more armour and weighs a quarter less (with Jaymo's Powers). On anyone else it's
+  only plate. The tooltip says whom it was fitted to.
+- **The harness rusts and can be oiled**: see Powers' note. Harness 1 to 3's helms, creed and land pieces and Harness 2's
+  new pieces are now in the plate, mail and cloth weight tags, so they weigh what they should and rust like the rest.
+- Lore: "The armourers' wider makes" (Andy approved 2026-11-18). Classes: `Fitting` (new), `Harness`, client
+  `HeraldryLayer`.
+- Built; not played.
+
+## 0.11.6 (2026-11-19): fitted limbs lie with the body (#1871)
+
+- **Fitted and Frostborn limbs follow the body**: a villager's wooden, iron or Frostborn-made limb (and a scouter) was
+  drawn on the bones before the dead, downed and ragdoll poses were laid on, so on a corpse a fitted leg stood upright on
+  its own while the body lay on the ground (Andy's armoured Frostborn leg on a dead villager). They are now worn models
+  (`FrostTechLayer` Scouter and Limbs, on `WornModel`) drawn in the body's pose as it is drawn, so they lie, slump and
+  move with it. A new late hook (`FrostTechModelFeatureRendererMixin`) shows the fitted limb again after Jaymo's Powers'
+  lost-limb hide and Kitchen's corpse hide, which hide the part by name.
+- Tested in a dev client: a villager with a cut right leg and a Frostborn leg, standing and then dead (the leg lies at
+  the hip with the body). Not tested: a downed body, a wooden or iron limb, a scouter on a corpse, Fresh Animations.
+
+## 0.11.7 (2026-11-19): Captives who die and are weighed leave their chains (#1876)
+
+- **Sent below from the chains**: a captive who died in a camp's chains and was weighed wicked used to land in the Nether and be dragged straight back to the stake by the shackle the same moment, which also ended their last chance ("The heat lets go of you"). Now when a weighing takes a chained player out of the world (sent below to the Nether, let into the Other World, or among the dead there), the shackle comes off quietly, with no camp hunt, and the descent goes through.
+- `StoryHard.chained` asks the new `PowersCompat.weighedAway` (Powers' `Karma.just`/`wicked`/`below` and `ZFighterAfterlife.among`) before the chain's pull. Any other trip out of the world in chains still drags them back.
+- Built; not played.
+
+## 0.11.8 (2026-11-19): Harness 6: three craftable makes for every harness place (#1877)
+
+- **13 new harness pieces**, our own models and art (`gen_heraldry_armour.py`): padding **Aketon** (quilted linen, dyeable) and **Fur Jerkin**; mail **Jazerant** (mail sewn between cloth); arms **Splinted Vambraces**; hands **Mail Mitons**; thighs **Padded Cuisses**; shins **Splinted Greaves**; hood **Fur Hood** and **Mail Coif**; neck **Standard of Mail** and **Bevor** (plate, every finish); waist **Mail Skirt** and **Leather Tassets**. `HeraldryArmour`; the aketon, fur jerkin and jazerant draw on the under-armour layer with their own sheets (`UnderArmourLayer`).
+- **Crafting-table recipes** for the cloth and leather (before, these were only bought): arming doublet, aketon, fur jerkin, quilted coat, padded cuisses, leather tassets, hood, fur hood, cloak, giornea, tabard, torse, and the plume, wings and horns crests (torse + feathers / feathers and leather / bones and leather). The realm beast crests stay the ruler's.
+- Iron and steel pieces are forged at the smithing anvil (Jaymo's Powers `HeraldryForging`), none at the grid.
+- Every place now has at least three craftable makes: padding 3, mail 3, shoulders 4, arms 3, hands 3, thighs 3, shins 3, over 3, hood 3, crest 4, neck 3, waist 3.
+- New pieces join `jaymospowers:cloth_armor` / `mail_armor` / `plate_armor`.
+- Built; not played.
+
+## 0.11.9 (2026-11-19): Harness fits MCA bodies; captors calm down around a captive (#1875)
+
+- **The harness on MCA bodies** (Andy: "the harness armor doesnt fit different body types correctly, i was a bit fat and stout here and it looked very....clippy"). MCA already stretches a whole body (harness included) to its width and height; what the harness missed was what MCA's own armour model does beyond that. Now (`McaHarnessFit`, called from `HeraldryLayer`'s worn model): helms, hoods and crests take MCA's head size (a hood sat on top of a big head with the face showing under it); the pieces on the arms and legs are drawn 7% wider and deeper about each limb's middle so MCA's sleeve/trouser layer and the doublet and mail under the harness no longer show through the plate; on a body MCA draws with breasts, everything the harness hangs on the body (cuirass, coat, tabard, giornea, gorget, faulds) is drawn deeper from the back by as much as they stand out (at most 1.6x). Bodies MCA doesn't draw are unchanged.
+- **Captors calm down** (Andy: "im getting mobbed by my captors, i had just spawned. i think they were still aggrod, but not attacking"). A captive keeping their place was only let go by mobs' goal targets, every half second; a captain's bodyguard took up his boss's fight with them again every second ("Anyone who wants Ketil the Burner comes through me" over and over), and MCA's people kept the target in their brains. Now `CaptiveConduct.calm` also clears brain targets and anger, forgets the captive's last blow, and stops captors walking up to them so they go back to the camp's day; a new `CaptorHoldMixin` stops anything (bodyguards, rallies, comrades' calls) setting a captor on a captive keeping their place; and a bodyguard only takes up his boss's fight with someone he may attack. Acting up still turns the camp on you as before.
+- Built; not played.
+
+## 0.11.10 (2026-11-19): Captors take the harness too (#1879)
+
+- Taken captive, you lose your harness pieces as well as your inventory (Andy: "the harness should be gone yes"; before, "You wake in chains. Your things are gone." left spaulders, arm harness and the rest on). They go where the rest of your things go that captors can't put on: buried in the stash chests about the camp (`Captors.strip`).
+- Built; not played.
+
+## 0.11.11 (2026-11-19): An escape isn't known to the camp until they see you gone (#1880)
+
+- **Escaping your chains**: picking the shackle, slipping it, breaking the chain or sawing the rope no longer sets the whole camp on you that moment. The camp only hunts you, for the rest of the day as before, once one of its people sees you loose (in front of them, in sight, within 32 blocks) or comes within 12 blocks of your empty chain with a clear view of it. The one who notices shouts it (a speech bubble, in orc or goblin speech for their camps). If nobody notices within the day, the camp lets it go.
+- The "hunted" line now comes when you're seen, not when the chain comes off.
+- `StoryHard.free` puts the runaway in `LOOSE`, and `StoryHard.loose` (each second) raises `LifeStory.startHunt` on sight (`Exposure.sees`) or on the empty chain (a clear sightline). The "Escaped captive" start still begins with the hunt on, as it always has.
+- Built; not played.
+
+## 0.11.12 (2026-11-19): camp cooks roast whole beasts on the great spit and stand to the side (#1881)
+
+- **Whole beasts** (Andy: "the barbarians should use that"): with Kitchen's great spit, a camp's fire cook who finds a beast's body lying within 24 blocks of the fire walks to it, skins and guts it where it lies (8 knife strokes, a second apart, its skin and offal left there), carries it to the fire, swaps the bare spit for a great spit and roasts it whole, turning it, then tears it apart and carries the pieces round as before. A body they can't get at is left for a while.
+- **Five at once**: the cook puts a piece on for each sat at the fire (up to five) before roasting, instead of one at a time.
+- **Out of the smoke** (Andy, on a clip of a cook stood in it: "they should stand to the side"): the cook stands two blocks off the fire on whichever clear side is nearest, never over it.
+- Everyone near sees the cook rip each piece off (Kitchen's tearing).
+- The day's meat that turns up for a camp with empty stores is unchanged for now; camp hunters bringing in real kills is the next change (Andy: "everyone should have to do this or some way of getting food").
+- Built (Gradle compile); not played.
+
+## 0.11.13 (2026-11-19): Any hide stands in for rabbit hide (#1883)
+
+- The Fur Jerkin and Fur Hood recipes take any hide or pelt (`c:hides`), and the Fur Jerkin is mended with any of them (`HeraldryArmour`).
+- Built; not played.
+
+## 0.11.14 (2026-11-19): Pallid Hollows are deathless (#1885)
+
+- **Death won't keep a Pallid** (Andy: like a deathless ranger, "he doesnt die under regular means"). A Pallid player's death is never rolled and never final: they lie in a long grey black where they fell ("the grave turns you away again") and get up there, whole, with no new injury and no sure wake used up. They still go down like anyone. Only losing your head, the void, lava, an execution by a player or a boss, or the Nether's last chance ends them, and then it's the Reincarnate as for anyone (`PallidHollows`, through Powers' new `Mortality.DEATHLESS`).
+- **No hunger, thirst or blood**: a Pallid's food bar and Kitchen water stay full; they can still eat for the taste (Kitchen's meals are still what mends the body, as for the Divine-born). A Pallid body, player or villager, bleeds nothing, like the bone and spirit Hollow.
+- **Folk who keep seeing the same Pallid**: every villager and townsperson counts the days they've seen a Pallid and the deaths and returns they watched (kept on them). Seen often, or once they've seen one die or come back, they say something over their head in the way of their temperament (all 12, 3 lines each for "seen again", "came back" and "came back yet again", plus children's): the kindhearted are glad, the timid and children run (until they've seen it 3 times), the spiteful jeer, the greedy wonder what it's worth, the devout first call it wrong and later a sign. A return they watch moves MCA hearts by temperament and goes into what they remember (`Recollections.Kind.SAW_DEATHLESS`), so they bring it up and pass it on. A full mask hides it.
+- The Pallid's trait line now says so (`variant.jaymoskingdoms.hollow_base.trait`); new lang part `pallid.json`.
+- Built; not played.
+
+## 0.11.15 (2026-11-19): spiders squash underfoot, die to one blow, and NPCs can hit them (#1886)
+
+- **Squashed underfoot**: a small spider (no taller than half a block: the usual half-size spider, cave spiders, spiny spiders, spiderlings, young ones) dies when anyone walks over it: a player, one of the folk, or a beast of some size (a cow, a horse). Monsters don't squash their own.
+- **Jump and land**: a bigger spider (a netcaster, a mother, a tarantula, a spider at the game's own size) is squashed by a jump that lands on it; small ones too. The brood queen is fought as before.
+- **Blows**: a small spider dies to any one blow, a bare punch included, from a player or anyone else. A bigger one takes at most 2 blows, and a bigger special kind (a tarantula, a netcaster, a mother) at most 5; a harder blow can do it in fewer.
+- Squashed spiders die crushed, so Kitchen bursts them into a few loose legs and no body.
+- **NPCs hit small spiders**: a barbarian's (or any fighter's) slow wind-up let a small spider skitter out of reach before the blow fell. Against one the blow now comes down at once and still finds it a block past the reach.
+- wild/SpiderSquash (tiers, walk-over tick, landing, one blow), mixin/wild/SpiderBlowMixin (hurtServer) and SpiderLandingMixin (causeFallDamage), MobCombat#small/slack.
+- Built; not played.
+
+## 0.11.16 (2026-11-19): Building plans: wrong-block colours, layer view, full material list (#1851)
+
+- **Coloured ghosts**: a laid plan's ghosts now show what's wrong as well as what's missing. A block not yet in is its pale blue ghost as before; a wrong block where one should go is tinted red; a block standing inside the plan's box where the design has nothing (air or a structure void) is tinted orange. Right blocks show nothing. The orange check looks within 24 blocks of you (the ghosts still show to 48) so a big plan costs about the same to draw (`PlanGhosts`).
+- **Layer view**: holding a laid plan, Plan layer up/down (numpad 8 and 2, rebindable, under "Jaymo's Building") or Ctrl + scroll shows one layer at a time: up from all layers is the bottom layer, and stepping past either end shows them all again. The action bar shows "Layer 4 of 12". Only the held plan's ghosts are thinned; it's your own view, nobody else's. Ctrl + scroll is left to the forms belt while you're in a stance (`PlanLayerScrollMixin`).
+- **Full material list**: use a written plan in the air, or press the mason's table's new Materials button, for every block the plan still needs (not just the table's top 8), how many you carry and how many you're short, short first. The list scrolls. It counts the way the build does: the second half of a door or bed comes with the first, spare dirt counts for grass and paths, and blocks already in place where the plan is laid aren't counted (`MasonTable.sendMaterials`, `MasonNet.Materials`, `PlanMaterialsScreen`). Using a plan in the air used to show the how-to line; that line is now at the bottom of the list.
+- Our own versions of Litematica's ideas; no Litematica code or art.
+- Built; not played.
+
+## 0.11.17 (2026-11-19): No food out of nowhere: camp hunters, hungry camps, starving towns (#1887)
+
+- Camps no longer get a daily catch of meat from nothing. Camps and towns both hunt and gather (`Hunters`). When a camp has less meat than it has mouths, or a town less food than it wants, one of them goes out by day, and now and then someone goes on their own anyway. Any of a camp's band can go, and so can any free grown townsfolk (not the ruler, guards, cooks, visitors, or anyone at work or at a meal). Hunters go after real game out in the wilds (tag `jaymoskingdoms:camp_game`: deer, boar, sheep, pigs, cattle, goats, fowl, rabbits), never where a realm's law holds, on a homestead, or a beast on a lead or named. They creep up crouched, run it down when it bolts, and strike it. A camp hunter carries the body home to the fire, where the cook skins it and roasts it whole on the great spit. A town hunter cuts the body up where it fell and carries the cuts to the storehouse. Without Kitchen they gather the meat where it fell. Gatherers pick ripe sweet berries (the bush grows again) and wild mushrooms, an armful at a time, never on a homestead. Everything goes into the communal chest: the camp's chests by the fire, or the town's storehouse. A camp that has hunted everything round it says so and goes hungry.
+- Rangers treat hunters as they treat players. A camp's or town's hunter's wild kills are tallied the same way, and one who kills too much in a day is a poacher. A ranger who sees one within 32 blocks, or comes out of the trees after one near a player, runs them down and hogties them. A camp's outlaw is taken to the nearest realm's court and never seen again. A townsman is brought before it and let go, and their own realm pays the court a 5-emerald fine.
+- Camp suppers come out of the larder: one bite each, the leader first. Anyone who gets nothing sits with the rest, goes without and is weak for a day or until they next eat. A poisoned supper only sickens those who had something in their bowl.
+- Towns starve when the storehouse is bare. Each meal a villager goes to and can't get is counted. After a day without they are weak. After two days they are slow too, and every meal missed after that costs 2 hearts, the way hunger hurts a player: never below half their health on Easy, never below half a heart on Normal, and on Hard it kills them. One meal clears it. Starving townsfolk say so.
+- Village fishermen only catch fish with open water within 10 blocks of their barrel. They cast into it, and you see the splash.
+- Kings' gifts of bread to their people and to favoured players (noble, purist, reveler, and the reveler's feast) come out of the realm's storehouse. A bare storehouse means no gift.
+- A realm short of food no longer gets bread from nothing for treasury coin. It sends its trade carts out at once to buy food from a trading partner. When the carts arrive, the partner's spare food is loaded on top of the usual return load, as much as the realm's purse can pay for, and it's paid for in the settling. The food comes home on the road. If the partner has none to spare or the carts are robbed, none comes. Towns' trade carts now bring hides home as well as sending them.
+
+## 0.11.18 (2026-11-19): mounts kneel, lift and lower for their riders (#1888)
+
+- **The kneeling horse, seen**: when a horse kneels for an armoured rider it now really drops: forelegs folded, hind legs tucked, body lowered, head bowed, the saddle going down with it. It rises as soon as the rider is seated. The kneel lasts 60 ticks (it was 30) to cover the whole climb.
+- **Skittish horses**: how likely a horse is to shy from someone climbing on (with Jaymo's Powers) comes from its trust in that rider and its temper: untrusted, hot-tempered horses most, a horse that trusts the rider 70 or more almost never (a hot-tempered one a little, still).
+- **A second rider** climbing up behind the first now climbs (with Jaymo's Powers) and is aimed at the second seat.
+- **War elephants and mammoths** (with Jaymo's Powers): stand at its head and it curls its trunk down, takes you up in it and sets you on its back; anywhere else along its flank, or in heavy armour (20 armour or more), it kneels and you step up its folded foreleg. The kneel is the horses' kneel, now drawn on the elephant too (it sat lowered under the saddle before with its legs still standing, for an armoured rider).
+- **Wind dragons** (with Jaymo's Powers): a tamed dragon you ride lowers its neck for someone at its head, and (Notus, Boreas, Zephyrus, Aetherion) both wings for someone at its side or rump; you climb up. The wingless kinds (Atroxiia, Stegonaut, Varasuchus) and the Kintsugi ones (Eurus, Ignivorus) lower the neck at the head and are climbed from the side like a horse otherwise. One in the air is boarded as before.
+- Without Powers nothing is climbed: riders are seated at once as before.
+- **Freerunner** rank 1's description now also names the running vault into the saddle and the flying dismount off a mount at a canter or gallop (Jaymo's Powers does the moves).
+- Built; not played. The trunk curl and the dragons' neck and wing angles are guessed per model and haven't been seen in game.
+
+## 0.11.19 (2026-11-19): a carer speaks when you're taken in (#1890)
+
+- **Taken in**: when you come round in the village bed you were carried to (`Shelter`), the nearest of the village's folk who is awake turns to you and says you were bound up while you slept, with its own lines when a limb was lost and the stump bound. Nobody near, no word. Lines in `lang/parts/shelter.json`.
+- **Captives**: when captors haul a downed captive up (`CaptiveConduct`), including one barbarians or goblins just carried off (`TakenAlive`), they keep them from bleeding out through Powers' `Mortality.tendCaptive` (`PowersCompat.tendCaptive`): dirty rags if you're lucky, else a stump seared shut.
+- Built; not played.
+
+## 0.11.20 (2026-11-19): Rubber-folk regrowth sounds, green Bio-built blood (#1889)
+
+- **Rubber-folk regrowth**: a lost limb stretching back plays a balloon being stretched (starting just before the limb is back), then a pop as it lands; a swallow's regrowth plays the stretch and the pop after it (`RubberFolk.STRETCH`, `POP`, `STRETCH_TICKS`; new sounds `rubber/stretch_1..3`, `rubber/pop_1..3`, made by `tools/gen_regrow_sounds.py`).
+- **Green Bio-built blood**: Bio-built now bleed green (the Verdant's sap colour) instead of not bleeding at all, so they bleed, leave stains and can bleed out like other bleeding heritages (`PowersCompat.heritageBlood`).
+- Built; not played or listened to in game.
