@@ -43,13 +43,13 @@ kanban-plugin: board
 
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · for any · #1896 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]] · ☀️ Apollo · #1937 · claimed
+- [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · changes · fixing review notes
 
 
 ## In review
 
 - [ ] [[Inbox/zfighter-aura-rework|zfighter-aura-rework]] · 🍇 Bacchus · #1911 · in-review
 - [ ] [[Inbox/zfighter-gaps-2-power|zfighter-gaps-2-power]] · 🍇 Bacchus · #1938 · in-review
-- [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · in-review
 
 
 ## Needs Andy
