@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -136,6 +137,70 @@ public final class HeraldryWear {
 		return land.isEmpty() ? finish(f) : land;
 	}
 
+	/**
+	 * (Andy, 2026-11-20: "the gold helm they wear needs to go") The finishes that read as gold: gilt-banded, etched and
+	 * gilt, gilded. No guard's or knight's helm takes one. The Crown's guards wear theirs heat-blued, the royal colour
+	 * without the gilt; the rest wear bright steel, as their mail is. Their other plate keeps its finish.
+	 */
+	static final Set<String> GOLD_FINISHES = Set.of(HeraldryArmour.GILDED, HeraldryArmour.GILT_BANDED, HeraldryArmour.ETCHED);
+
+	/** The finish a helm takes where its wearer's plate is {@code finish}: the same, unless that reads as gold. */
+	static String helmFinish(String finish) {
+		if (!GOLD_FINISHES.contains(finish)) {
+			return finish;
+		}
+		return HeraldryArmour.GILT_BANDED.equals(finish) ? HeraldryArmour.BLUED : "";
+	}
+
+	/**
+	 * {@code helm} refinished as {@link #helmFinish} has it if it's a harness helm in a gold finish (a copy: its wear,
+	 * enchantments, raised visor and realm's make kept, its name's finish changed); anything else is given back as it is.
+	 */
+	static ItemStack ungilded(ItemStack helm) {
+		HeraldryArmour.Piece piece = HeraldryArmour.of(helm);
+		String was = HeraldryArmour.finish(helm);
+		if (piece == null || piece.face() == null || !GOLD_FINISHES.contains(was)) {
+			return helm;
+		}
+		String now = helmFinish(was);
+		ItemStack out = helm.copy();
+		if (now.isEmpty()) {
+			out.remove(HeraldryArmour.FINISH);
+		} else {
+			out.set(HeraldryArmour.FINISH, now);
+		}
+		Component name = out.get(DataComponents.ITEM_NAME);
+		if (name != null) {
+			out.set(DataComponents.ITEM_NAME, refinishedName(name, now));
+		}
+		return out;
+	}
+
+	/** {@code name} with its finish's word ("Gilt-Banded %s") made {@code finish}'s (none for bright), at any depth (a realm's make wraps it). */
+	private static Component refinishedName(Component name, String finish) {
+		if (!(name.getContents() instanceof TranslatableContents t)) {
+			return name;
+		}
+		Object[] args = t.getArgs().clone();
+		if (t.getKey().startsWith(FINISH_KEY)) {
+			if (args.length == 0 || !(args[0] instanceof Component piece)) {
+				return name;
+			}
+			return finish.isEmpty() ? piece : Component.translatable(FINISH_KEY + finish, piece).withStyle(name.getStyle());
+		}
+		boolean changed = false;
+		for (int i = 0; i < args.length; i++) {
+			if (args[i] instanceof Component arg) {
+				Component now = refinishedName(arg, finish);
+				changed |= now != arg;
+				args[i] = now;
+			}
+		}
+		return changed ? Component.translatable(t.getKey(), args).withStyle(name.getStyle()) : name;
+	}
+
+	private static final String FINISH_KEY = "item.jaymoskingdoms.finish.";
+
 	/** {@code f}'s crest: its beast on a torse of the realm's colour. */
 	static ItemStack crest(@Nullable MinecraftServer server, Faction f) {
 		return dyed(HeraldryArmour.stack(beast(f)), Outfits.rgb(Outfits.heraldry(f, server).field()));
@@ -236,7 +301,7 @@ public final class HeraldryWear {
 		
 			return switch (slot) {
 				case HEAD -> {
-					ItemStack helm = HeraldryArmour.stack(helmName, effectiveFinish);
+					ItemStack helm = HeraldryArmour.stack(helmName, helmFinish(effectiveFinish));
 					yield tag == null ? helm : PowersCompat.realmMarked(helm, tag);
 				}
 				case MAINHAND -> tag == null || arm == null ? ItemStack.EMPTY : PowersCompat.realmArm(arm, tag);
