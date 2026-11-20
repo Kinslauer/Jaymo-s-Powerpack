@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: deer avoid civilization, only come near for crops, scarecrows keep them off
 branch: claude/project-thread-hpy142
 with: cloud Claude (Reason Art thread)
