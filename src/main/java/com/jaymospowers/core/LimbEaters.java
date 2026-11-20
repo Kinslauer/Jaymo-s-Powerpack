@@ -79,6 +79,8 @@ public final class LimbEaters {
 	static final float HEAL = 3.0F;
 	/** Parts until it's full, and how long it stays full (ticks). */
 	static final int FULL_AFTER = 2, FULL_TICKS = 4800;
+	/** How often eaters set on a player who has gone down are made to let the fight go and eat (ticks). */
+	static final int DROP_EVERY = 5;
 	/** Ticks before it gives up on a part it can't reach. */
 	static final int GIVE_UP = 300;
 
@@ -94,10 +96,19 @@ public final class LimbEaters {
 	private record Tear(java.util.UUID body, long at) {
 	}
 
+	/** Parts (or mouthfuls of a body) an eater has had toward being full, and the game time it's full until. */
+	private static final Map<Mob, Fed> FED = new WeakHashMap<>();
+
+	private static final class Fed {
+		int eaten;
+		long fullUntil;
+	}
+
 	private LimbEaters() {
 	}
 
 	public static void init() {
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(LimbEaters::dropDowned);
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof Mob mob && eats(mob) && GIVEN.put(mob, true) == null) {
 				// beside a scavenger's gnawing at bodies (6): only one runs at a time
@@ -149,8 +160,7 @@ public final class LimbEaters {
 	private static final class EatLimbGoal extends Goal {
 		private final Mob mob;
 		private @Nullable SeveredPart part;
-		private int ticks, giveUp, eaten;
-		private long fullUntil;
+		private int ticks, giveUp;
 
 		EatLimbGoal(Mob mob) {
 			this.mob = mob;
@@ -159,7 +169,7 @@ public final class LimbEaters {
 
 		@Override
 		public boolean canUse() {
-			if (busy(mob) || mob.level().getGameTime() < fullUntil || mob.getRandom().nextInt(LOOK_ODDS) != 0) {
+			if (busy(mob) || full(mob) || mob.getRandom().nextInt(LOOK_ODDS) != 0) {
 				return false;
 			}
 			part = null;
@@ -231,10 +241,7 @@ public final class LimbEaters {
 				}
 				if (part.bite(level, mob)) {
 					mob.heal(HEAL);
-					if (++eaten >= FULL_AFTER) {
-						eaten = 0;
-						fullUntil = level.getGameTime() + FULL_TICKS;
-					}
+					ate(mob);
 					part = null;
 				}
 			}
@@ -247,11 +254,69 @@ public final class LimbEaters {
 		}
 	}
 
+	/** Whether {@code mob} has eaten its fill lately ({@link #FULL_AFTER} parts, good for {@link #FULL_TICKS}). */
+	public static boolean full(Mob mob) {
+		Fed fed = FED.get(mob);
+		return fed != null && mob.level().getGameTime() < fed.fullUntil;
+	}
+
+	/** One part (or a limb's worth of the body) eaten: {@link #FULL_AFTER} of them and it's full a while. */
+	static void ate(Mob mob) {
+		Fed fed = FED.computeIfAbsent(mob, m -> new Fed());
+		if (++fed.eaten >= FULL_AFTER) {
+			fed.eaten = 0;
+			fed.fullUntil = mob.level().getGameTime() + FULL_TICKS;
+		}
+	}
+
+	/**
+	 * Andy (2026-11-20): "predators should start eating you when you go down. and only finish you if they are full". Whether
+	 * {@code mob} is a meat-eating animal (not a monster, a pet, the young or the leashed) that's still hungry, and
+	 * {@code target} a downed player it would eat alive: then it doesn't fight them, it eats them ({@link TearGoal});
+	 * {@code PredatorEatMixin} keeps it from being set on them, and {@code MobExecutions} leaves the finishing till it's full.
+	 */
+	public static boolean hungryFor(Mob mob, net.minecraft.world.entity.@Nullable LivingEntity target) {
+		return target instanceof net.minecraft.world.entity.player.Player player && com.jaymospowers.core.wounds.Downed.isDowned(player)
+			&& player.isAlive() && !player.isCreative() && !player.isSpectator() && eatsAlive(mob) && !full(mob);
+	}
+
+	/** A meat-eating animal that eats the downed alive: not a monster, a carrion bird, a pet, the young or the leashed. */
+	public static boolean eatsAlive(Mob mob) {
+		return mob instanceof Animal && !(mob instanceof net.minecraft.world.entity.monster.Enemy) && !mob.getType().builtInRegistryHolder().is(CARRIERS)
+			&& eats(mob) && !mob.isBaby() && !mob.isLeashed() && !mob.isNoAi() && !(mob instanceof TamableAnimal tame && tame.isTame());
+	}
+
+	/**
+	 * Every {@link #DROP_EVERY} ticks: a hungry eater still set on a player who has gone down lets the fight go
+	 * ({@link #hungryFor}), so its eating ({@link TearGoal}) takes over at once.
+	 */
+	private static void dropDowned(net.minecraft.server.MinecraftServer server) {
+		if (server.getTickCount() % DROP_EVERY != 0) {
+			return;
+		}
+		for (net.minecraft.server.level.ServerPlayer player : server.getPlayerList().getPlayers()) {
+			if (!com.jaymospowers.core.wounds.Downed.isDowned(player) || !(player.level() instanceof ServerLevel level)) {
+				continue;
+			}
+			for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(SMELL * 2.0), m -> m.getTarget() == player)) {
+				if (hungryFor(mob, player)) {
+					if (mob instanceof net.minecraft.world.entity.NeutralMob angry) {
+						angry.stopBeingAngry();
+					}
+					mob.setTarget(null);
+					if (mob.getLastHurtByMob() == player) {
+						mob.setLastHurtByMob(null);
+					}
+				}
+			}
+		}
+	}
+
 	/**
 	 * Whether {@code mob} has gone for {@code body} to eat it alive, or torn at it, within {@code ticks}. Andy (2026-11-20,
 	 * a bear tearing at him for most of a minute): "why didnt the bear execute here? it had more than enough time". An
-	 * animal eating a downed player has no target, so {@code MobExecutions} counts this as fighting them: it finishes
-	 * them like anyone else in the fight.
+	 * animal eating a downed player has no target, so {@code MobExecutions} counts this as fighting them: once it's
+	 * {@link #full} it finishes them like anyone else in the fight.
 	 */
 	public static boolean toreAt(Mob mob, net.minecraft.world.entity.LivingEntity body, int ticks) {
 		Tear tear = TEARS.get(mob);
@@ -313,7 +378,7 @@ public final class LimbEaters {
 		/** A carrion bird: only once it's circled them. */
 		private final boolean circles;
 		private net.minecraft.world.entity.@Nullable LivingEntity body;
-		private int ticks, giveUp, bites, limb;
+		private int ticks, giveUp, bites, limb, mouthfuls;
 
 		TearGoal(Mob mob, boolean circles) {
 			this.mob = mob;
@@ -412,6 +477,12 @@ public final class LimbEaters {
 				mob.playAmbientSound();
 			}
 			body.hurtServer(level, level.damageSources().mobAttack(mob), limb > 0 ? LIMB_BITE_HURT : BODY_BITE_HURT);
+			if (limb < 0 && ++mouthfuls >= LIMB_BITES) {
+				// no limbs left to take: as many mouthfuls of the body feed it as a limb would
+				mouthfuls = 0;
+				mob.heal(HEAL);
+				ate(mob);
+			}
 			if (limb > 0 && ++bites >= LIMB_BITES && body.isAlive()) {
 				// torn off: it lies there to be eaten (by this one, or whoever's quicker)
 				Dismember.sever(body, limb, mob);

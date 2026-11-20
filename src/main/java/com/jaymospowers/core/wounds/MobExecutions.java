@@ -239,6 +239,10 @@ public final class MobExecutions {
 				return false;
 			}
 		}
+		// (Andy, 2026-11-20: "predators should start eating you when you go down. and only finish you if they are full")
+		if (com.jaymospowers.core.LimbEaters.eatsAlive(mob) && !com.jaymospowers.core.LimbEaters.full(mob)) {
+			return false;
+		}
 		if (mob instanceof Enemy || fighting(mob, victim)) {
 			return true;
 		}
