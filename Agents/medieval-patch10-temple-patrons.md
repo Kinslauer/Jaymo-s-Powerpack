@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: medieval-patch10-temple-patrons
 branch: claude/medieval-patch10-temple-patrons
 with: 
@@ -26,3 +26,4 @@ owns:
 
 ## Done
 What a player will see, and what wasn't tested.
+- 2026-11-19 21:06 No sign of work for 30 min: marked stalled (whoever ran it stopped).
