@@ -6922,3 +6922,8 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - **Reviving on your knees** (Andy picked kneeling down for it): sneak + hold use revives only from a kneel at their side (the low crouch, Shift + scroll down, held still; it tells you if you're standing), and the menu's Revive kneels you itself. The reviver is drawn on both knees beside the body while the bar fills (`Downed`, `Tending`, `TendPose`).
 - **First-time tips** (`client.hud.BodyTips`): one card the first time each comes up, once per player: someone down in front of you (the menu, the drag, the revive), someone you can execute, a lasso in hand, being downed yourself (getting up), and downed beside a wall (sit up against it, then rise up it).
 - Built; not played.
+
+## 0.26.20 (2026-11-20): Z Fighter aura rework - flame shell and white core (#1911)
+
+- **Aura rework**: a Z Fighter charging up now shows a flame shell around his body with a bright white core at its heart. While charging, small lightning crackles over him from the second form up, glowing embers drift up from him, and a ring of dust rises at his feet; cracks open at a random spot in a small ring round his feet, throttled so a long charge doesn't keep re-cracking the same spot. Going into a form throws a transformation burst of light and flying ground, and hitting full charge blows out in a ring of ki.
+- Built; not played in game.
