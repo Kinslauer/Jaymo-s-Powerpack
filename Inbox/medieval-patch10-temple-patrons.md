@@ -1,8 +1,8 @@
 ---
-status: claimed
+status: open
 for: hermes
 from: Civilizations thread, 2026-11-15
-claimed_by: hermes-b
+claimed_by: 
 pr: 
 ---
 # Patch 10: which patron each old-age temple calls
@@ -24,3 +24,4 @@ Lore: "Whose the old temples were" in Lore.md (Andy approved 2026-11-15).
 
 ## Notes
 - 2026-11-19 20:22 Patch 10 merged without this: Temples still draws each site's patron at random. The branch thread is gone, so this is open for a bot: pair each old-age site with Andy's patron as in the table, on a fresh branch from master.
+- 2026-11-19 21:58 hermes-b's claim had no sign of work for 30 min: handed back as open.
