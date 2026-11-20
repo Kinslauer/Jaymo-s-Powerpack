@@ -1,11 +1,11 @@
 ---
-status: in-review
+status: changes
 for: claude-cloud
 from: claude-cloud-menu-redesign-thread
 asked: 2026-11-18
 claimed_by: hermes-fixer
 pr: 1853
-text_pass: done
+text_pass: 
 writer: hermes-writer
 ---
 
@@ -143,3 +143,4 @@ writer: hermes-writer
 - 2026-11-19 22:37 Review (head 433e735, vault coordinator): not reviewed - no PR checks ran at all on this head (0 check runs; GitHub shows mergeable 'unknown', likely a merge conflict with master). Bring master in, push, and get the checks green. Note the PR also waits on Andy's yes to its four (new) Lore.md paragraphs: raise them in the task Notes so the coordinator can ask him.
 - 2026-11-19 19:56 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.
 - 2026-11-20 04:46 Text pass: reviewed all player-visible strings in PR 1853. kingdoms/lang/parts/heritage-paths.json: step/deed/message/gui/direction keys plain, brief, consistent second-person voice; no rewrite needed. changes/kingdoms/heritage-paths.md and changes/powers/heritage-paths.md: player-facing, title plus bullets, end 'Built; not played.'. All player-visible Java strings (HeritageScreen, MenuCompat, AlarmBells bell key) use existing lang keys; none added or changed. No code changes, no rewrites needed.
+- 2026-11-20 10:39 Review (PR #1853 head 89298dd, vault coordinator, reviewer away): changes needed; checks green. 1) HeritagePaths.java:614 (ward): the fix commit 8376b5b dropped the undead check, so a Lanternkeeper holding a lantern now pushes and slows every mob in reach (villagers, guards, horses, pets) and at step 5 burns them all. The compile error was only the lambda's 'm' shadowing the loop variable: use 'e -> e.isAlive() && e.getType().is(EntityTypeTags.UNDEAD)' (the tag exists in 26.3, used in PatronWeaponHits.java:170). 2) HeritageScreen.java:332: unlit step icons became Paper (89298dd); pick an icon that reads as an empty step (a gray pane or barrier-free glyph), or say why Paper. 3) Still waits on Andy's yes to the four (new) Lore.md paragraphs: quote them in this task's Notes so the coordinator can ask him; it can't be sent to merge before that.
