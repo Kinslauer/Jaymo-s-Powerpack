@@ -6836,3 +6836,8 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - Andy: "players and npcs should be able to wake players who faint". A player lying out in a faint (hunger, thirst, exhaustion, Overcome) is shaken awake by another player's right-click on them (main hand, not sneaking): a swing and a rustle, and they come round on the spot, the letterbox opening as after any faint. Sneak-use is left to seizing, lifting and pickpockets.
 - `Fainting.shake` (UseEntityCallback, Downed's first phase). The faint attachment now syncs to everyone, so the shaker's client doesn't eat or draw a bow at the same time.
 - Built; not played.
+
+## 0.26.10 (2026-11-20): H only opens the character menu (Auto HUD toggle unbound) (#1928)
+
+- **Keys**: Auto HUD's "Toggle dynamic HUD" shipped on H, the character menu key, so opening the character menu also switched the auto-hiding HUD on or off. Once per install it now comes off H (unbound) if it's still there; Controls > Key Binds > Auto HUD can set it again. To keep Auto HUD off for good: Mods > Auto HUD > General > "Enable on game load" off.
+- `KeyConflicts` move list v11 (`key.autohud.toggle-hud`). Built; not played.
