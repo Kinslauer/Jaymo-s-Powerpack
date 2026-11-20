@@ -520,7 +520,7 @@ public final class GuardKit {
 	private static @Nullable ItemStack pay(Ctx c, Option o) {
 		Cost cost = o.cost();
 		if (cost.material() == null && cost.count() == 0 && cost.emeralds() == 0) {
-			return o.stack().copy();
+			return gold(c, o.stack().copy());
 		}
 		ItemStack own = Storage.take(c.level(), c.f(), s -> s.is(o.stack().getItem()), 1);
 		if (!own.isEmpty()) {
@@ -535,17 +535,29 @@ public final class GuardKit {
 				}
 				left -= taken.getCount();
 			}
-			return o.stack().copy();
+			return gold(c, o.stack().copy());
 		}
 		if (cost.emeralds() > 0) {
 			MinecraftServer server = c.level().getServer();
 			Faction now = Factions.get(server, c.f().id());
 			if (now != null && now.treasury() >= TREASURY_KEPT + cost.emeralds()) {
 				Factions.update(server, now.id(), x -> x.withTreasury(Math.max(0L, x.treasury() - cost.emeralds())));
-				return o.stack().copy();
+				return gold(c, o.stack().copy());
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * (Andy, 2026-11-20: "they can have the gold armor as long as it requires gold to craft") A piece made new in a gold
+	 * finish takes {@link HeraldryWear#GILD_GOLD} gold ingots from the stores as well; without them it's made heat-blued
+	 * (the Crown's) or bright instead.
+	 */
+	private static ItemStack gold(Ctx c, ItemStack made) {
+		if (!HeraldryWear.gilt(made) || HeraldryWear.payGold(c.level(), c.f(), 1)) {
+			return made;
+		}
+		return HeraldryWear.refinished(made, HeraldryWear.helmFinish(HeraldryArmour.finish(made)));
 	}
 
 	/** The pieces of the spoils in the stores that someone may wear (never the crown's tiers, {@link Regalia#reserved}). */
