@@ -6712,3 +6712,9 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - **Fix**: the server no longer crashes (watchdog kill) when Nether Portal Spread checks a portal in land that is still loading or generating, for example after a player teleports far outside the pre-generated area. A new portal waits at the end of the mod's queue until all the land round it is ready, and a known portal skips its spreading round until then (as the mod already did for a portal in unloaded land), so it is never mistaken for broken. A portal near the edge of loaded land now waits to spread until its land is loaded, instead of loading it. Nothing changes if the mod is absent.
 - Classes: `PortalSpreadQueueMixin`, `PortalSpreadLookMixin` (`mixin/portalspread/`, config `jaymospowers.portalspread.mixins.json`), `compat/PortalSpreadCompat`.
 - Built by CI; not played.
+
+## 0.25.96 (2026-11-20): A new life no longer keeps the old body's lost-leg slowness (#1906)
+
+- **The bug**: losing both legs puts a saved -85% walking speed (and no jump) on you. Ending a life wiped the lost legs with every other mark, but that saved slowness stayed on, so a fresh character walked at about a sixth of normal speed and couldn't jump, with both legs.
+- **Fix**: a new life (`Mortality.endLife`) now takes the slowness and the old stump tags off (`Dismember.bodyRenewed`). Anyone already stuck with it is put right within a second of this version loading (`Prosthetics`' check also reworks a lost-leg slowness that has no lost leg under it, `Dismember.legsSlowed`). Someone who really has lost legs keeps their slowness.
+- Built; not played.
