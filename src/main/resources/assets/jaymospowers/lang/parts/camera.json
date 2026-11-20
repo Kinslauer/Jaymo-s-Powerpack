@@ -9,5 +9,5 @@
 	"config.jaymospowers.front_camera.side": "Front Camera Side Offset",
 	"config.jaymospowers.front_camera.side.tooltip": "Horizontal offset of the front camera (blocks)",
 	"config.jaymospowers.front_camera.smoothing": "Front Camera Smoothing",
-	"config.jaymospowers.front_camera.smoothing.tooltip": "How smoothly the front camera moves to its target (0 = instant, 1 = no movement)"
+	"config.jaymospowers.front_camera.smoothing.tooltip": "How smoothly the front camera moves to its target."
 }
