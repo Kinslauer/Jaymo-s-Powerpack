@@ -21,7 +21,10 @@ That's it. Each time you press Launch you're on the newest master build.
 - The instance gets 8 GB of memory. Change it under **Edit → Settings → Java** if your PC has less (6 GB is the least
   that runs well).
 - If a launch fails with "packwiz-installer" errors, launch again (GitHub can be slow for a minute right after a new
-  build is published). If it keeps failing, send the instance's `logs/latest.log`.
+  build is published). If it keeps failing on an instance imported before 2026-11-20, import the zip again: the newer
+  zip carries packwiz-installer itself, so a first launch no longer needs GitHub's API (which refuses after 60 calls
+  an hour from one address). If it still fails, send the text of Prism's launch window (the pre-launch output is
+  there, not in `logs/latest.log`).
 - Your options, worlds and keybinds stay in this instance. To keep the ones from your CurseForge profile, copy its
   `options.txt` into the instance's `.minecraft` folder (Prism: right-click the instance → **Folder**).
 - Your own extra mods (a minimap, say) can go in `.minecraft/mods` as usual. packwiz leaves files it didn't put there
@@ -57,7 +60,9 @@ That's it. Each time you press Launch you're on the newest master build.
 
 ## Other launchers
 
-- **CurseForge app:** can't follow a packwiz pack. Keep using the Build Modpack zip there.
+- **CurseForge app:** can't follow a packwiz pack. Keep using the Build Modpack zip there
+  (`modpack/Jaymos-Powers-Modpack-<version>.zip`). Mods with no matching CurseForge file (`packModsNoCf`) ride inside
+  that zip's `overrides/mods`, so the import has every mod the server has.
 - **OneLauncher / OneClient (Polyfrost):** it has no packwiz support of its own, and it only updates packs published on
   Modrinth or CurseForge. It does have a per-profile pre-launch command, and that can run packwiz:
   `java -jar packwiz-installer-bootstrap.jar https://raw.githubusercontent.com/Kinslauer/jaymo-s-powerpack/tester-pack/pack.toml`

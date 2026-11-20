@@ -35,6 +35,10 @@ RELEASE_TAG = "tester-pack-files"  # the release holding our jars and the Prism 
 PACK_URL = f"https://raw.githubusercontent.com/{REPO}/{BRANCH}/pack.toml"
 PRISM_ZIP = "Jaymos-Powers-Prism.zip"
 BOOTSTRAP_URL = "https://github.com/packwiz/packwiz-installer-bootstrap/releases/download/v0.0.3/packwiz-installer-bootstrap.jar"
+# packwiz-installer itself, shipped in the zip next to the bootstrap: without it the bootstrap's first run has to ask
+# api.github.com for the newest installer, and when GitHub refuses (403, its limit of 60 unsigned calls an hour per
+# address) it stops with "error loading packwiz-installer" and Prism doesn't launch. With the jar there it carries on.
+INSTALLER_URL = "https://github.com/packwiz/packwiz-installer/releases/download/v0.5.14/packwiz-installer.jar"
 USER_AGENT = "jaymos-powers-tester-pack/1.0"
 MEMORY_MB = 8192  # the Prism instance's -Xmx: the pack is heavy
 
@@ -181,14 +185,16 @@ def prism_zip(minecraft, fabric):
         {"uid": "net.fabricmc.fabric-loader", "version": fabric},
     ]}
     bootstrap = http(BOOTSTRAP_URL)
+    installer = http(INSTALLER_URL)
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
         for name, data in [("instance.cfg", cfg), ("mmc-pack.json", json.dumps(pack, indent=2) + "\n"),
-                           (".minecraft/packwiz-installer-bootstrap.jar", bootstrap)]:
+                           (".minecraft/packwiz-installer-bootstrap.jar", bootstrap),
+                           (".minecraft/packwiz-installer.jar", installer)]:
             info = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
             info.compress_type = zipfile.ZIP_DEFLATED
             z.writestr(info, data)
-    label = sha("sha256", (cfg + json.dumps(pack, sort_keys=True) + BOOTSTRAP_URL).encode())
+    label = sha("sha256", (cfg + json.dumps(pack, sort_keys=True) + BOOTSTRAP_URL + INSTALLER_URL).encode())
     return buf.getvalue(), label
 
 
