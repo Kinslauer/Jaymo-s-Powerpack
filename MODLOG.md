@@ -6679,3 +6679,8 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - Right click on anyone who talks (MCA villagers, guards, orcs, bandits) while they're fighting you no longer opens their talk menu, whatever you hold: the click goes to your hand, so a guarding weapon or a shield (either hand) goes up. Before, only a guarding weapon in the main hand skipped the talk, so a shield in the off hand or bare hands still opened the chat.
 - Against other foes, a shield in either hand now counts too, as a guarding weapon already did. Sneak + right click still talks (ruling #987).
 - `Guard.guardsAgainst`. Built; not played.
+
+## 0.25.92 (2026-11-20): no chat line when you slay a gifted villager (#1900)
+
+- Killing a villager with a hidden gift no longer posts "Something of their power seeps into you as they fall" in chat (it broke the no discovery chat text rule). The cost and reward are unchanged: corruption +15 (+25 for a corrupted gift), 30 mastery or 60 XP, with the ink puff and soul sound still marking it. `GiftedAI.slain`, `lang/parts/gifted.json`.
+- Built; not played.
