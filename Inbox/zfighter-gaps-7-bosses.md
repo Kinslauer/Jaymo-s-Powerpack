@@ -28,4 +28,4 @@ thread: cmsg_017LSt6rWz6CzxSGvzDd41XWJ3UmFH2PavpakbTsfUgXo4
 - `python3 tools/pr_checks.py` passes; compile check in the cloud.
 
 ## Notes
--
+- 2026-11-20 18:53 Question: which lore/location should the set-piece boss live in? Options grounded in existing lore: (1) the old temples' proving grounds — a patron's champion called down by an offering on a bare stone floor (Lore.md 'The proving grounds'); (2) the demon country's roosts/ring/den — a gorgon's old ruin, violently territorial; (3) a Z Fighter site (Tower/Lookout, Keeper's blessing). Once you pick, I'll build the boss (player-model fighter, telegraphed phases, power clash via BeamClash.npcBeam, weak point, shared revives, contribution-split reward).
