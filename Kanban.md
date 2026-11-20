@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 04:46). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 04:50). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -44,8 +44,8 @@ kanban-plugin: board
 
 - [ ] [[Inbox/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]] · ☀️ Apollo · #1937 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-aura-rework|zfighter-aura-rework]] · 🍇 Bacchus · #1911 · claimed
-- [ ] [[Inbox/heritage-paths|heritage-paths]] · 🪶 Quill · #1853 · writing
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · for any · #1896 · changes · fixing review notes
+- [ ] [[Inbox/heritage-paths|heritage-paths]] · 🪶 Quill · #1853 · writing
 
 
 ## In review
