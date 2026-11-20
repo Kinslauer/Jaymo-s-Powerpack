@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 02:36). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 03:36). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -24,6 +24,10 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1909 Sitting cats no longer stand on end under Fresh Animations (Powers, 2026-11-20)
+- [ ] #1907 long pitchfork (Powers, Kingdoms, 2026-11-20)
+- [ ] #1906 A new life no longer keeps the old body's lost-leg slowness (Powers, 2026-11-20)
+- [ ] #1905 Forest fire alert out of chat (Powers, Kingdoms, 2026-11-20)
 - [ ] #1904 Nether Portal Spread no longer freezes the server in land not yet ready (Powers, 2026-11-20)
 - [ ] #1903 Start searches read the land from the seed first, like /locate (Kingdoms, 2026-11-20)
 - [ ] #1902 forest-fire pack - Peterwolf's Forest Fire & Firefighting in the pack (Powers, Kingdoms, 2026-11-20)
@@ -80,11 +84,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1840 TaCZ loot lookup no longer stalls the server (Powers, 2026-11-19)
 - [ ] #1839 Village mods 1: the illagers' names (Kingdoms, 2026-11-19)
 - [ ] #1838 Village mods 3: guards that fight and mend (Kingdoms, 2026-11-19)
-- [ ] #1837 The wind's push no longer loads land (Kingdoms, 2026-11-19)
-- [ ] #1836 NPC fights 2: strings, chases and ki for tyrants, Patrolmen and Z Fighter gifted folk (Powers, 2026-11-19)
-- [ ] #1834 NPC fights 3: trading blows, beam struggles, impact, soft blocks, power-ups (Powers, 2026-11-19)
-- [ ] #1833 no Animal Dictionary on first join; UI tips as you meet things (Powers, Kingdoms, 2026-11-19)
-- …and 276 older ones.
+- …and 280 older ones.
 
 ## Health
 
