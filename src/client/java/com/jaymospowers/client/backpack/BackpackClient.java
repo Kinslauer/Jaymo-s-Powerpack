@@ -45,6 +45,16 @@ public final class BackpackClient {
 	/** How far the bag sits off the back (pixels), and how much further over a chestplate. */
 	static final float OFF_BACK = 2.2F;
 	static final float OVER_ARMOUR = 1.0F;
+	/**
+	 * The worn bag's far corners (x, y down from the neck, z out from where it sits off the back; body model pixels), as
+	 * {@link BackpackModel} builds it: the flap, the bag's back, the pouch and the side pockets. For poses that keep it out
+	 * of the floor (WallSit). Not the bedroll under it: it hangs below the hips, and sat on the floor it would hold the body
+	 * up off it (a rolled blanket squashes).
+	 */
+	public static final float[][] OUTLINE = {{4, 1, 4.75F}, {-4, 1, 4.75F}, {4, 11, 4}, {-4, 11, 4}, {2.5F, 6, 6}, {-2.5F, 6, 6},
+		{2.5F, 10, 6}, {-2.5F, 10, 6}, {6, 5, 3.5F}, {-6, 5, 3.5F}, {6, 10, 3.5F}, {-6, 10, 3.5F}};
+	/** How deep the bag is behind where it sits off the back, leaned back against a wall (pixels): the top, and the pouch lower down. */
+	public static final float DEEP = 4.0F;
 
 	private static KeyMapping key;
 	private static final Map<Avatar, Sway> SWAYS = new WeakHashMap<>();
@@ -89,6 +99,15 @@ public final class BackpackClient {
 			-Mth.clamp(Sway.FLAP_BOUNCE * bob + Sway.FLAP_LIFT * Math.abs(sway.swingSpeed), 0.0F, Sway.FLAP_MAX),
 			Sway.BOB * bob});
 		state.showCape = false;
+	}
+
+	/** How far off {@code player}'s back their worn backpack sits (pixels, over a chestplate if they wear one); 0 if they wear none. */
+	public static float out(Player player) {
+		if (!Backpack.wearing(player)) {
+			return 0.0F;
+		}
+		net.minecraft.world.item.ItemStack chest = player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST);
+		return OFF_BACK + (!chest.isEmpty() && !chest.has(DataComponents.GLIDER) ? OVER_ARMOUR : 0.0F);
 	}
 
 	/** Whether this player is drawn wearing a backpack (after {@link #extract}). */
