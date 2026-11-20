@@ -15966,3 +15966,27 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - A Cleric raised to the Ash Whisperer no longer gets a patron their class can't take on the server; they pick, as the screen already showed.
 - Existing saves: Warlocks already made keep the pact they have (`Classes.storyPatron`, `LifeStory.live`, `LifeStoryScreen.patronChip`).
 - Built; not played.
+
+## 0.11.39 (2026-11-20): throne room and gate guards keep their posts, and a night watch (#1918)
+
+- Andy: "why is the throneroom empty?" (a clip of an empty throne room at about 9 PM in game). The ruler holds court
+  there only at their morning court and the afternoon audience, and is in bed by evening, as before. But the two guards
+  posted in the throne room and the three at the gate never stayed there either: since a realm's guards became MCA
+  villagers, MCA's brain ignored the post they were given and they walked off with the town patrol, so the hall was
+  empty whenever the ruler was out of it.
+- Now a guard posted in the throne room or at the gate (`HallWatch`) walks back when they stray and stands at their post
+  while on duty, watching a player who comes near. Their shift off by day and their evening among their people stay as
+  they were; the escort, arrests, audiences and fights still come first.
+- Night watch: those posted guards keep watch from dusk to dawn (woken if abed), so the throne room and the gate are
+  never left empty at night. The town's other guards still have the night off (`Rulers.offDuty`).
+- Built; not played.
+
+## 0.11.40 (2026-11-20): Wildfires spread our own way again (#1926)
+
+- Our wildfires (`Calamities`) are no longer handed to Peterwolf's Forest Fire: they spread with the wind, light the
+  woods and burn out on their own timer as before the forest-fire pack, with vanilla fire, so they can be beaten and
+  punched out and follow the fire-spread gamerule (Andy, 2026-11-20).
+- Gone with it: the kept-fire mixin (`ForestFireKeptMixin`; fire pits and hearths were only at risk while it took
+  fires over) and `ForestFireCompat.wildfire`, `front` and `kept`. Dousing its fire, its heat in Kitchen's body heat,
+  the wind and the HUD plate stay (they only matter for an incident started by its commands, or for the hose).
+- Built; not played.
