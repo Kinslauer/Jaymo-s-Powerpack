@@ -192,6 +192,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.25: trees take chops to fell (TreeChop's way), the chopped logs narrowing
 		ChoppedLog.register();
 		Trees.register();
+		LooseWood.register();
 		// 0.7.588: mob griefing always on (Andy)
 		PackRules.register();
 		// 0.5.5: the working folk sleep in beds at night; villagers take a trade at the settlement's job sites and work it
@@ -271,6 +272,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Clearing.register();
 		Herds.register();
 		Strays.register();
+		BloodChores.register();
 		// 0.7.84: villagers shut in somewhere with no way out turn up on open ground
 		ShutIn.register();
 		// 0.6.4: Jaymo's Powers' aliens (the Xeno-Band) are monsters to folk who haven't seen you change (and its attachment)
@@ -626,6 +628,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.wild.SpiderSquash.register();
 		// medieval picks: one a spider killed (or who died among spiders underground) wakes webbed up in their lair
 		com.jaymoskingdoms.wild.SpiderLairs.register();
+		// spiders leave anyone webbed up, or kept in their lair, be till they're struck
+		com.jaymoskingdoms.wild.SpiderKeep.register();
 		// medieval picks: the old age's peoples (their ruined cities, sleeping rulers, temples and descendants)
 		com.jaymoskingdoms.oldage.OldAge.register();
 		// medieval picks: the mineshafts (Moog's Mineshafts Reimagined's, and the game's) worked, looted, shaken and haunted

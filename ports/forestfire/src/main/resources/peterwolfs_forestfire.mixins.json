@@ -3,7 +3,6 @@
 	"package": "com.peterwolf.forestfire.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"FireBlockMixin",
 		"ServerLevelMixin"
 	],
 	"injectors": {

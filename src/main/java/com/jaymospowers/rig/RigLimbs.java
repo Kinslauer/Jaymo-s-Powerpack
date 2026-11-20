@@ -39,6 +39,8 @@ public final class RigLimbs {
 	static final double SHOT_RANGE = 18.0, SHOT_KNOCKBACK = 0.6, SCRAP_KNOCKBACK = 1.2;
 	static final int SHOT_COOLDOWN = 30;
 	static final float SHOT_EXHAUSTION = 0.4F, SIEGE_BURST = 0.8F;
+	/** Where the shot leaves the palm: out to the fitted arm's side, ahead and below the eye (blocks). */
+	static final double PALM_OUT = 0.35, PALM_AHEAD = 0.6, PALM_DOWN = 0.35;
 	/** The leg: the hop (up and forward, b/t), the kick (forward, b/t), its damage, reach (blocks), throw, cooldown (ticks), hunger. */
 	static final double HOP_UP = 0.85, HOP_FORWARD = 0.45, KICK_FORWARD = 1.0, KICK_REACH = 2.6, KICK_KNOCKBACK = 1.1;
 	static final float KICK_DAMAGE = 5.0F, SIEGE_KICK = 1.4F, SCRAP_HOP = 0.8F;
@@ -103,7 +105,7 @@ public final class RigLimbs {
 		RigFrame frame = frameOf(player, part);
 		if (arm) {
 			ready[slot] = now + SHOT_COOLDOWN;
-			shot(player, frame);
+			shot(player, frame, part);
 		} else {
 			ready[slot] = now + KICK_COOLDOWN;
 			kick(player, frame);
@@ -113,7 +115,7 @@ public final class RigLimbs {
 		}
 	}
 
-	private static void shot(ServerPlayer player, RigFrame frame) {
+	private static void shot(ServerPlayer player, RigFrame frame, int part) {
 		ServerLevel level = player.level();
 		RigMoves.start(player, RigMoves.PALM);
 		// the state ticks the move off; make sure there is one
@@ -130,7 +132,11 @@ public final class RigLimbs {
 		if (hit != null) {
 			end = hit.getLocation();
 		}
-		Vec3 from = eye.add(look.scale(0.6)).add(0.0, -0.35, 0.0);
+		// out of the palm of the arm the Rig limb is fitted to
+		double yaw = Math.toRadians(player.getYRot());
+		Vec3 right = new Vec3(-Math.cos(yaw), 0.0, -Math.sin(yaw));
+		double side = part == Dismember.LEFT_ARM ? -1.0 : 1.0;
+		Vec3 from = eye.add(look.scale(PALM_AHEAD)).add(right.scale(side * PALM_OUT)).add(0.0, -PALM_DOWN, 0.0);
 		int color = color(frame);
 		MagicFx.beam(level, from, end, frame == RigFrame.SIEGE ? 0.14F : 0.07F, color, 5);
 		MagicFx.blast(level, end, 0.45F, color);

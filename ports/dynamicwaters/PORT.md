@@ -107,6 +107,15 @@ Once AdamNew releases for 26.3, the pack switches to the official jar and this f
   which in 26.3 is also true of a chunk only scheduled, so they read land the server thread then waited to have made.
   They ask `Loaded.made` (a chunk made and loaded, on the server's thread) instead.
 
+- **Structures keep out of mountain rivers and lakes on fresh ground**: `StructureMixin` drops a structure that would
+  stand in or beside a mountain river or lake, but `isNearMountainWater` and `isTooCloseToMountainWater` read only the
+  watershed cache. A structure start is placed before any chunk near it has its terrain, so before the watershed
+  prefetch has run, and on fresh ground the cache is empty: the check saw no water and let it through, and the river or
+  lake was carved round it afterwards (Andy's clip, 2026-11-19: qraftyfied's tulip windmill standing in a mountain lake,
+  its grass footprint and flowers drowned, its hay bales and bushes floating). Both checks now build the watershed
+  regions they look at (`getWatershedRegion`, on the worker thread that places the start; on the server thread it still
+  only reads, as before). Built; not played.
+
 ### Data
 - Density functions in 26.3 form: `flat_cache`/`cache_2d`/`cache_once` → `cache`, `shifted_noise` → `noise`, binary
   `argument1`/`argument2` → `left`/`right`, unary `argument` → `input` (all built-in packs, compat packs included).

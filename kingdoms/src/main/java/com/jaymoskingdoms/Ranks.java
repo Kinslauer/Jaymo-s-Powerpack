@@ -606,8 +606,8 @@ public final class Ranks {
 				continue;
 			}
 			apply(m);
-			if (m.hasAttached(RANK) && !(m instanceof Folk)) {
-				// (a recruit's kit is their own; a party's leader already has his banner)
+			if (m.hasAttached(RANK) && !(m instanceof Folk) || m.entityTags().contains(Downed.DISARMED_TAG)) {
+				// (a recruit's kit is their own; a party's leader already has his banner; one a player disarmed isn't handed a new shield or banner to take again)
 				continue;
 			}
 			if (step(code) == LEADER) {

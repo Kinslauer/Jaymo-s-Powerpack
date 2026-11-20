@@ -411,13 +411,14 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	/**
-	 * (Andy, 2026-11-17) The chip a Cleric's option is held to: the patron the story's faith page names; -1 when it's theirs to
-	 * pick (another class, or no faith). The server holds them to it too ({@link LifeStory}).
+	 * (Andy, 2026-11-17) The chip a Cleric's or a Warlock's option is held to: the patron the story's faith page names; -1 when
+	 * it's theirs to pick (another class, or no faith). The server holds them to it too ({@link LifeStory}).
 	 */
-	private static int clericChip() {
+	private static int patronChip() {
 		Classes.PlayerClass cls = youthClass();
 		Answer faith = picked(Question.FAITH);
-		return cls != Classes.PlayerClass.CLERIC || faith == null || faith.patron() == null ? -1 : cls.options.indexOf(faith.patron().key);
+		return cls != Classes.PlayerClass.CLERIC && cls != Classes.PlayerClass.WARLOCK || faith == null || faith.patron() == null ? -1
+			: cls.options.indexOf(faith.patron().key);
 	}
 
 	/** (0.7.501) Whether a birthplace's blood is one this player may be born to: an earned one (the Bio-built's vats) only once woken. */
@@ -1439,9 +1440,9 @@ final class LifeStoryScreen extends Screen {
 			onClose();
 			return;
 		}
-		// a Cleric's patron is the faith page's, however the option was last moved
-		if (clericChip() >= 0) {
-			draft.option = clericChip();
+		// a Cleric's (a Warlock's) patron is the faith page's, however the option was last moved
+		if (patronChip() >= 0) {
+			draft.option = patronChip();
 		}
 		Step s = step();
 		if (this.cards != (s.summary() && draft.explicit)) {
@@ -2025,8 +2026,13 @@ final class LifeStoryScreen extends Screen {
 		Classes.PlayerClass cls = youthClass();
 		if (cls != null && !cls.options.isEmpty()) {
 			y += 4;
-			graphics.text(this.font, Component.translatable(cls == Classes.PlayerClass.MAGE ? "gui.jaymoskingdoms.story.spell"
-				: cls == Classes.PlayerClass.CLERIC ? "gui.jaymoskingdoms.story.faith" : "gui.jaymoskingdoms.story.element"),
+			graphics.text(this.font, Component.translatable(switch (cls) {
+					case MAGE -> "gui.jaymoskingdoms.story.spell";
+					case CLERIC, WARLOCK -> "gui.jaymoskingdoms.story.faith";
+					case PALADIN -> "gui.jaymoskingdoms.story.oath";
+					case RANGER -> "gui.jaymoskingdoms.story.foe";
+					default -> "gui.jaymoskingdoms.story.element";
+				}),
 				px + 10, y, draft.option < 0 ? ACCENT : Ui.DIM);
 			y += 12;
 			this.chipsTop = y + this.scroll;
@@ -2041,7 +2047,7 @@ final class LifeStoryScreen extends Screen {
 					graphics.fill(chip[0], cy + 12, chip[0] + chip[2], cy + 14, ACCENT);
 				}
 				graphics.centeredText(this.font, Component.translatable("class.jaymoskingdoms.option." + cls.options.get(c)), chip[0] + chip[2] / 2, cy + 3,
-					chosen ? ACCENT : clericChip() >= 0 ? Ui.DIM : Ui.TEXT);
+					chosen ? ACCENT : patronChip() >= 0 ? Ui.DIM : Ui.TEXT);
 				y = Math.max(y, cy + 18);
 			}
 		} else {

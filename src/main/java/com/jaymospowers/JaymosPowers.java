@@ -172,6 +172,7 @@ public class JaymosPowers implements ModInitializer {
 		// weapons from the Stone Age to the pirates (after Age of Weapons), not a power
 		com.jaymospowers.armory.Armory.init();
 		com.jaymospowers.armory.TaczGuns.init();
+		com.jaymospowers.armory.RetiredKnightArmour.init();
 		com.jaymospowers.armory.GunLasers.init();
 		com.jaymospowers.armory.FlintlockDraw.init();
 		com.jaymospowers.armory.GunBlast.init();

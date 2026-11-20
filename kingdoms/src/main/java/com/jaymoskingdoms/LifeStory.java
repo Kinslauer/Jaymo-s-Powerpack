@@ -1317,8 +1317,10 @@ public final class LifeStory {
 		if (!classless && (cls == null || !cls.options.isEmpty() && option.isEmpty())) {
 			return;
 		}
-		// (Andy, 2026-11-17) a Cleric serves the patron they grew up praying to; only one with no faith in their story picks
-		if (cls == Classes.PlayerClass.CLERIC && faith != null && faith.patron() != null) {
+		// (Andy, 2026-11-17) a Cleric serves the patron they grew up praying to; only one with no faith in their story picks.
+		// A Warlock's pact is with the patron the story pledged them to as well (a Cleric's options lack the Ash Whisperer)
+		if ((cls == Classes.PlayerClass.CLERIC || cls == Classes.PlayerClass.WARLOCK) && faith != null && faith.patron() != null
+			&& cls.options.contains(faith.patron().key)) {
 			option = faith.patron().key;
 		}
 

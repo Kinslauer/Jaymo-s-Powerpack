@@ -34,6 +34,11 @@ the official jar and this folder goes.
 - No incident alert: `IncidentManager.alertNearbyPlayers` no longer sends "INCIDENT ALERT: ... respond with pump, hose and
   command post" to chat (players within 256 blocks) or the action bar (everyone else). The pack keeps world events out of
   chat. Nearby players are still counted as the fire's responders.
+- Fire is vanilla fire (Andy, 2026-11-20): `FireBlockMixin` is gone, so the simulation never takes over a fire (it
+  adopted every fire as an incident, kept it alight by putting the fire block back when it was hit, ignored the
+  fire-spread gamerule and burnt grass blocks to dirt). Fire burns, spreads, goes out and can be punched out by the
+  vanilla rules. Its incidents still run when started by its commands. `FirePersistenceHooks` puts out whatever an
+  older version left burning when the server starts.
 
 ## Checked
 Every Minecraft, Fabric API and Fabric Loader member the jar refers to (its own classes' inherited ones included) was

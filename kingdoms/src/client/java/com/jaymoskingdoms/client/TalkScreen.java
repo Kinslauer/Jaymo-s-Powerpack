@@ -34,9 +34,9 @@ final class TalkScreen extends Screen {
 	private static int typableId = -1, typableFollow;
 
 	private TalkScreen(TalkNet.Ask ask) {
-		super(ask.speaker());
-		// (an illager's words, as far as you know their tongue: IllagerWords)
-		this.ask = new TalkNet.Ask(ask.entityId(), ask.speaker(), IllagerWords.resolve(ask.words()), ask.options(), ask.enabled());
+		super(IntroNames.hide(ask.speaker()));
+		// (an illager's words, as far as you know their tongue: IllagerWords; one you haven't met goes by what they are: IntroNames)
+		this.ask = new TalkNet.Ask(ask.entityId(), IntroNames.hide(ask.speaker()), IllagerWords.resolve(ask.words()), ask.options(), ask.enabled());
 		this.typed = ask.entityId() == typableId;
 		this.follow = this.typed ? Math.min(typableFollow, ask.options().size()) : 0;
 		if (this.typed) {

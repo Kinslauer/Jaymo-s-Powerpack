@@ -85,6 +85,9 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		com.jaymoskitchen.stomach.FoodJournalItem.openScreen = com.jaymoskitchen.client.stomach.FoodJournalScreen::open;
 		net.minecraft.client.gui.screens.MenuScreens.register(com.jaymoskitchen.stomach.LunchBox.MENU,
 			com.jaymoskitchen.client.stomach.LunchBoxScreen::new);
+		// a body's loot screen
+		net.minecraft.client.gui.screens.MenuScreens.register(com.jaymoskitchen.corpse.Corpses.LOOT_MENU,
+			com.jaymoskitchen.client.corpse.CorpseLootScreen::new);
 		// the mill machines' moving parts, loads and leads
 		BlockEntityRenderers.register(Mill.MACHINE_ENTITY, MachineRenderer::new);
 		// windmills and waterwheels turning

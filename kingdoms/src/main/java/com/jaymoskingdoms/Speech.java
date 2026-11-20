@@ -59,7 +59,7 @@ public final class Speech {
 		if (ServerPlayNetworking.canSend(player, Said.TYPE)) {
 			ServerPlayNetworking.send(player, new Said(speaker.getId(), words, color));
 		} else {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.says", speaker.getDisplayName(), words).withColor(color));
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.says", Introductions.called(player, speaker), words).withColor(color));
 		}
 	}
 
@@ -77,7 +77,7 @@ public final class Speech {
 		if (ServerPlayNetworking.canSend(player, Said.TYPE)) {
 			ServerPlayNetworking.send(player, new Said(speaker.getId(), heard, color));
 		} else {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.says", speaker.getDisplayName(), heard).withColor(color));
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.says", Introductions.called(player, speaker), heard).withColor(color));
 		}
 		overheard(level, speaker, player, words, color);
 	}
@@ -96,7 +96,7 @@ public final class Speech {
 		if (ServerPlayNetworking.canSend(player, Said.TYPE)) {
 			ServerPlayNetworking.send(player, new Said(speaker.getId(), plain, color));
 		} else {
-			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.says", speaker.getDisplayName(), plain).withColor(color));
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.says", Introductions.called(player, speaker), plain).withColor(color));
 		}
 		overheard(level, speaker, player, words, color);
 	}
@@ -147,7 +147,7 @@ public final class Speech {
 				ServerPlayNetworking.send(p, new Said(speaker.getId(), heard, color));
 			} else {
 				// (a client without the mod: chat, as before)
-				p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.says", speaker.getDisplayName(), heard)
+				p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.says", Introductions.called(p, speaker), heard)
 					.withColor(color));
 			}
 		}

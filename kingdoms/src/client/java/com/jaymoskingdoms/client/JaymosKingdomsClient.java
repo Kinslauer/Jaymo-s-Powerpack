@@ -36,6 +36,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.wild.nest.SilkDeeps.place();
 		// (0.7.180) whose names this client's player knows
 		com.jaymoskingdoms.Introductions.viewer = () -> net.minecraft.client.Minecraft.getInstance().player;
+		// and lines naming someone they don't know call them what they are
+		IntroNames.register();
 		// great foes' themes, and the trophy stand's item
 		com.jaymoskingdoms.client.music.FoeMusicClient.register();
 		com.jaymoskingdoms.client.music.SceneMusic.register();

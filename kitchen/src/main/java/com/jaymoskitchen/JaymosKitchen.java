@@ -143,9 +143,10 @@ public class JaymosKitchen implements ModInitializer {
 			if (carried != null) {
 				if (!level.isClientSide()) {
 					BlockPos clicked = hit.getBlockPos();
-					if (com.jaymoskitchen.butchery.Butchery.isHook(level.getBlockState(clicked))) {
+					BlockPos hook = com.jaymoskitchen.corpse.Hanging.hookAt(level, clicked, hit.getLocation());
+					if (hook != null) {
 						// (0.5.51) hung up on a meat hook by its hind legs
-						com.jaymoskitchen.corpse.Hanging.hang(carried, player, clicked);
+						com.jaymoskitchen.corpse.Hanging.hang(carried, player, hook);
 						return InteractionResult.SUCCESS;
 					}
 					BlockState clickedState = level.getBlockState(clicked);

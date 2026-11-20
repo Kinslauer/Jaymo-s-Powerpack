@@ -237,7 +237,7 @@ final class SkyWrecks {
 		for (int i = 0; i < dead; i++) {
 			int x = ground.getX() + Mth.nextInt(random, -5, 5), z = ground.getZ() + Mth.nextInt(random, -5, 5);
 			if (Loaded.made(level, new BlockPos(x, 0, z))) {
-				body(level, new BlockPos(x, floor(level, x, z), z), random);
+				body(level, new BlockPos(x, floor(level, x, z), z), i == 0, random);
 			}
 		}
 		List<Long> laid = new ArrayList<>(level.getAttachedOrElse(LAID, List.of()));
@@ -285,11 +285,19 @@ final class SkyWrecks {
 		return new Faction[] {null, null};
 	}
 
-	/** One of her dead at {@code at}: the body a crewman would leave (Kitchen's), or his bones and skull without. */
-	private static void body(ServerLevel level, BlockPos at, RandomSource random) {
-		Villager crewman = net.minecraft.world.entity.EntityTypes.VILLAGER.create(level, EntitySpawnReason.STRUCTURE);
+	/**
+	 * One of her dead at {@code at}: the body a crewman would leave (Kitchen's), or his bones and skull without. Her crew
+	 * were steam-town folk, as her log says: with MCA they're its people (never the plain villager), her captain
+	 * ({@code captain}) dressed as the town's aeronaut, the rest as its engineers who kept her boilers.
+	 */
+	private static void body(ServerLevel level, BlockPos at, boolean captain, RandomSource random) {
+		Villager crewman = McaCompat.newVillager(level, Vec3.atBottomCenterOf(at));
 		if (crewman != null) {
 			crewman.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, random.nextFloat() * 360.0F, 0.0F);
+			// (MCA's people get their looks, name and clothes here; they're never added to the world, so MCA never swaps them in itself)
+			crewman.finalizeSpawn(level, level.getCurrentDifficultyAt(at), EntitySpawnReason.STRUCTURE, null);
+			crewman.setVillagerData(crewman.getVillagerData().withProfession(
+				net.minecraft.core.registries.BuiltInRegistries.VILLAGER_PROFESSION.wrapAsHolder(captain ? Professions.AERONAUT : Professions.ENGINEER)));
 			boolean laid = KitchenCompat.corpseOf(crewman) != null;
 			crewman.discard();
 			if (laid) {

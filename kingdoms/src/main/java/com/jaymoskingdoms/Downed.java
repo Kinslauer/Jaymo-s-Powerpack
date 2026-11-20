@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
+import net.conczin.mca.entity.VillagerEntityMCA;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -19,6 +20,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -82,6 +84,11 @@ public final class Downed {
 	 * gives it a linen bandage's heal (Wounds phase 4).
 	 */
 	public static final String BANDAGED_TAG = "jaymospowers_bandaged";
+	/**
+	 * On one whose weapons a player took ({@link #disarm}): from then on they hold only what they own (an MCA villager's
+	 * pack), so nothing hands them a fresh blade or shield out of thin air for the next tap to take again.
+	 */
+	public static final String DISARMED_TAG = "jaymoskingdoms.disarmed";
 	/** Our hurt listener runs before everyone else's (Powers' takes a player's blow on the downed, and stops it there). */
 	private static final Identifier EARLY = JaymosKingdoms.id("downed_early");
 
@@ -102,6 +109,8 @@ public final class Downed {
 	private static final Map<Villager, LivingEntity> HELPING = new WeakHashMap<>();
 	/** (0.7.453) Horses waiting while their riders tend someone downed. */
 	private static final Map<AbstractHorse, Villager> WAITING = new WeakHashMap<>();
+	/** The downed whose hands a player emptied: kept empty till they come to. Not saved. */
+	private static final Map<Mob, Boolean> EMPTIED = new WeakHashMap<>();
 
 	private Downed() {
 	}
@@ -145,19 +154,24 @@ public final class Downed {
 			return true;
 		});
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
-			// (sneak + use on the downed is Powers' lift; a plain hold is its revive, which only watches, so the disarm still comes first)
+			// (sneak + use held on the downed is Powers' revive, a plain hold its drag; both only watch the click)
 			if (!(entity instanceof Mob body) || !isDowned(body) || player.isSpectator() || player.isShiftKeyDown() || !disarmable(body)) {
 				return InteractionResult.PASS;
 			}
 			if (!world.isClientSide() && !ours(body) && !armed(body)) {
-				// (anyone else with nothing left to take: the tap is free for whatever else would take it, a blade stuck in them)
 				return InteractionResult.PASS;
 			}
-			// (taken here, so a downed villager's screen doesn't open, and neither hand gets at their pockets)
-			if (!world.isClientSide() && hand == InteractionHand.MAIN_HAND) {
+			// (swallowed here, so a downed villager's screen doesn't open, and neither hand gets at their pockets; the weapons
+			// come out on the tap, below)
+			return InteractionResult.SUCCESS;
+		});
+		// Andy (2026-11-20): "right click hold should always be drag, tap can loot". The weapons come out on a tap, once the
+		// press is let go (Powers tells of it), so a hold drags the body instead of emptying its hands first
+		PowersCompat.<LivingEntity>listen("com.jaymospowers.core.wounds.Downed", "TAPPED_LISTENERS", (player, entity) -> {
+			if (entity instanceof Mob body && isDowned(body) && !player.isSpectator() && !player.isShiftKeyDown() && disarmable(body)
+				&& (ours(body) || armed(body))) {
 				disarm(player, body);
 			}
-			return InteractionResult.SUCCESS;
 		});
 		ServerTickEvents.END_SERVER_TICK.register(Downed::tick);
 	}
@@ -341,6 +355,17 @@ public final class Downed {
 	 * any player (where the world is awake) are looked over for someone to come and tend them.
 	 */
 	private static void tick(MinecraftServer server) {
+		if (!EMPTIED.isEmpty()) {
+			for (Mob body : new ArrayList<>(EMPTIED.keySet())) {
+				if (!body.isAlive() || body.isRemoved() || !isDowned(body)) {
+					EMPTIED.remove(body);
+					continue;
+				}
+				// (whatever put something back in a downed one's hands made it from nothing: it goes, so it can't be taken twice)
+				body.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+				body.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
+			}
+		}
 		if (!TENDED.isEmpty()) {
 			for (Map.Entry<LivingEntity, Tending> e : new ArrayList<>(TENDED.entrySet())) {
 				LivingEntity body = e.getKey();
@@ -539,6 +564,8 @@ public final class Downed {
 				WornGear.wear(held, body.getRandom());
 			}
 			body.setItemSlot(slot, ItemStack.EMPTY);
+			// (MCA arms a villager with the very stack in their pack: taken from the hand, it leaves the pack too)
+			unpack(body, held);
 			if (!player.getInventory().add(held) && !held.isEmpty()) {
 				player.drop(held, false, net.minecraft.util.Prediction.SERVER_ONLY);
 			}
@@ -553,10 +580,45 @@ public final class Downed {
 			took = true;
 		}
 		if (took) {
+			body.addTag(DISARMED_TAG);
+			EMPTIED.put(body, Boolean.TRUE);
 			body.level().playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.ARMOR_EQUIP_CHAIN.value(), SoundSource.PLAYERS, 0.8F, 1.1F);
-			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.downed.disarmed", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.downed.disarmed", Introductions.called(player, body)).withStyle(ChatFormatting.GRAY));
 		} else {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.downed.nothing").withStyle(ChatFormatting.GRAY));
 		}
+	}
+
+	/** {@code stack}, taken from {@code body}'s hand, out of their pack as well if it's the same stack (an MCA villager's). */
+	private static void unpack(Mob body, ItemStack stack) {
+		if (!(body instanceof VillagerEntityMCA v)) {
+			return;
+		}
+		SimpleContainer pack = v.getInventory();
+		for (int i = 0; i < pack.getContainerSize(); i++) {
+			if (pack.getItem(i) == stack) {
+				pack.setItem(i, ItemStack.EMPTY);
+			}
+		}
+	}
+
+	/**
+	 * From {@code McaEquipmentMixin}: what a villager a player disarmed ({@link #DISARMED_TAG}) takes up in {@code slot}
+	 * hand when MCA arms them with {@code stack}: only what is in their pack. MCA otherwise hands a guard a new shield
+	 * (and a sword, if their pack has none) whenever a hand is empty, and the disarmed would be armed again at once.
+	 * Anyone else's {@code stack}, and any armour, is returned unchanged.
+	 */
+	public static ItemStack owned(LivingEntity villager, EquipmentSlot slot, ItemStack stack) {
+		if (stack.isEmpty() || slot.getType() != EquipmentSlot.Type.HAND || !villager.entityTags().contains(DISARMED_TAG)
+			|| !(villager instanceof VillagerEntityMCA v)) {
+			return stack;
+		}
+		SimpleContainer pack = v.getInventory();
+		for (int i = 0; i < pack.getContainerSize(); i++) {
+			if (ItemStack.isSameItemSameComponents(pack.getItem(i), stack)) {
+				return stack;
+			}
+		}
+		return ItemStack.EMPTY;
 	}
 }

@@ -96,8 +96,12 @@ import org.jspecify.annotations.Nullable;
  * executions are left-click, {@code Finishers}). Held for {@link #REVIVE_TICKS}, it gets them up, for the least filling food you carry (a tamed animal
  * takes one of its own treats instead, {@link #TREATS}). Kingdoms' villagers tend the downed too, and ask for the
  * getting up with the tag {@link #REVIVE_TAG}. Andy (2026-11-14): "kneeling ... unlocks a context where you can use right click
- * to interact, for lockpicking, reviving, lifting, this should help free up some binds": the revive's hold is now made from a
- * kneel at their side ({@code Kneel}), and a tap from the kneel lifts them ({@link Carry#liftDowned}); standing, a hold does nothing.
+ * to interact, for lockpicking, reviving, lifting, this should help free up some binds": the revive's hold was made from a
+ * kneel at their side. Andy (2026-11-20): "right click hold should always be drag, tap can loot. and shift should revive.
+ * the binds got confusing". So now, on anyone downed: a hold of use standing drags them ({@link Carry#liftDowned}; sneak +
+ * right-click while dragging lifts them into your arms), a tap takes the weapons from their hands (Kingdoms, through
+ * {@link #TAPPED_LISTENERS}) or pulls a blade out of them, and sneak + a hold of use brings them round. Executions stay
+ * sneak + held attack ({@code Finishers}).
  * <p>
  * (0.18.5) Andy (2026-10-29): "while downed, any attack that would deal 3 hearts or more of damage kills instantly ... if
  * anyone goes down without red damage or worse to limbs, they can stand themselves up with shift instead. if they are too
@@ -292,16 +296,17 @@ public final class Downed {
 		boolean begun, over;
 		/** (0.21.39) Whether its bar has been carried on from the last hold on this body ({@link HoldProgress}). */
 		boolean resumed;
-		/** (Andy, 2026-11-14) Begun from a kneel at their side: a hold brings them round, a tap lifts them. Else only a tap. */
-		final boolean knelt;
-		/** Told to kneel first (a hold standing over them). */
-		boolean hinted;
+		/**
+		 * Andy (2026-11-20): "right click hold should always be drag, tap can loot. and shift should revive". Begun sneaking: a
+		 * hold brings them round. Begun standing: a hold drags them ({@link Carry#liftDowned}), a tap takes what they hold.
+		 */
+		final boolean sneaking;
 
-		Revive(LivingEntity body, long start, boolean knelt) {
+		Revive(LivingEntity body, long start, boolean sneaking) {
 			this.body = body;
 			this.start = start;
 			this.held = start;
-			this.knelt = knelt;
+			this.sneaking = sneaking;
 		}
 	}
 
@@ -312,8 +317,9 @@ public final class Downed {
 	public static final List<BiConsumer<ServerPlayer, LivingEntity>> BROUGHT_ROUND_LISTENERS = new ArrayList<>();
 
 	/**
-	 * (0.18.92) Told of every tap on a downed body: use let go before {@link #TAP_TICKS}, so never a revive's hold.
-	 * Xenoform adds one: a tap tears the Xeno-Band off a downed wearer.
+	 * (0.18.92) Told of every tap on a downed body: use let go before {@link #TAP_TICKS}, standing, so never a drag's or a
+	 * revive's hold. Xenoform adds one: a tap tears the Xeno-Band off a downed wearer. Kingdoms adds one: a tap takes the
+	 * weapons and arrows out of a downed one's hands.
 	 */
 	public static final List<BiConsumer<ServerPlayer, LivingEntity>> TAPPED_LISTENERS = new ArrayList<>();
 
@@ -327,6 +333,16 @@ public final class Downed {
 
 	/** Player → their revive. Not saved. */
 	private static final Map<UUID, Revive> REVIVING = new HashMap<>();
+
+	/**
+	 * Server: {@code player} is still holding the use that began on {@code entity} while it was down (a revive, a drag, a tap
+	 * not yet let go), even if they're up now. Carry won't take that hold for a lift (Andy, 2026-11-20: "i revived then
+	 * instantly tossed her, no struggle to pickup at all").
+	 */
+	public static boolean handOn(Player player, Entity entity) {
+		Revive r = REVIVING.get(player.getUUID());
+		return r != null && r.body == entity;
+	}
 
 	/** (0.18.5) A downed player getting up by themselves: how far along, the hits taken, and knocked back (sneak let go first). */
 	private static final class Rise {
@@ -483,8 +499,8 @@ public final class Downed {
 		// trading with a downed villager, no saddling a downed horse
 		UseEntityCallback.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LAST);
 		UseEntityCallback.EVENT.register(LAST, (player, world, hand, entity, hit) ->
-			// ((0.15.98) and a plain click on a downed player is a revive's hold, not a bow drawn or a meal eaten)
-			(entity instanceof Mob || entity instanceof Player && (!player.isShiftKeyDown() || com.jaymospowers.core.Stance.low(player))) && isDowned(entity)
+			// ((0.15.98) and a click on a downed player, sneaking or not, is a drag's or a revive's hold, not a bow drawn or a meal eaten)
+			(entity instanceof Mob || entity instanceof Player) && isDowned(entity)
 				? InteractionResult.SUCCESS
 				: InteractionResult.PASS);
 		// a downed player's hands are gone slack: no attacking, using, building or breaking
@@ -1614,22 +1630,19 @@ public final class Downed {
 			// a limb in hand that they lack: it's fitted to them (Prosthetics), not a revive
 			return InteractionResult.PASS;
 		}
-		// (Andy, 2026-11-14) "kneeling ... unlocks a context where you can use right click to interact, for lockpicking,
-		// reviving, lifting": from a kneel at their side (Kneel: the low crouch, held still) a hold of use brings them round and
-		// a tap lifts them (Carry#liftDowned). Standing, a tap is only a tap (a Xenoform band torn off); a sneak standing over
-		// them is nothing of this any more (Carry leaves the downed to the kneel), and medicine that wants sneak is Treatment's
-		boolean knelt = player instanceof ServerPlayer sp && com.jaymospowers.core.Kneel.kneeling(sp);
-		if (player.isShiftKeyDown() && !knelt) {
-			return InteractionResult.PASS;
-		}
+		// Andy (2026-11-20): "right click hold should always be drag, tap can loot. and shift should revive. the binds got
+		// confusing". Standing, a hold of use drags them (Carry#liftDowned) and a tap takes what's in their hands (Kingdoms) or
+		// stuck in them (Lodged); sneaking, a hold brings them round. No low crouch or kneel needed first any more. Medicine
+		// that wants sneak is Treatment's (above)
+		boolean sneaking = player.isShiftKeyDown();
 		Revive held = REVIVING.get(player.getUUID());
 		if (held != null && held.body == entity) {
-			// still holding use: the bar keeps filling, or, once it's over (they're up), nothing more till let go
+			// still holding use: the bar keeps filling, or, once it's over (they're up, or taken hold of), nothing more till let go
 			held.held = world.getGameTime();
 		} else if (entity instanceof LivingEntity body && isDowned(body) && !player.isSpectator()) {
-			REVIVING.put(player.getUUID(), new Revive(body, world.getGameTime(), knelt));
+			REVIVING.put(player.getUUID(), new Revive(body, world.getGameTime(), sneaking));
 		}
-		// (only watching: a tap on a downed guard still has Kingdoms take its weapons, and Downed's catch-all swallows the rest)
+		// (only watching: the tap and the holds are worked out in revives(); Downed's catch-all swallows the click)
 		return InteractionResult.PASS;
 	}
 
@@ -1656,14 +1669,15 @@ public final class Downed {
 			if (now - r.held > REVIVE_GRACE) {
 				// let go
 				it.remove();
-				if (!r.begun && r.held - r.start < TAP_TICKS && isDowned(body)) {
-					if (r.knelt) {
-						// (Andy, 2026-11-14) a tap from the kneel: taken up
-						com.jaymospowers.core.Carry.liftDowned(player, body);
-					} else {
-						for (BiConsumer<ServerPlayer, LivingEntity> listener : TAPPED_LISTENERS) {
-							listener.accept(player, body);
-						}
+				if (!r.begun && !r.over && !r.sneaking && r.held - r.start < TAP_TICKS && isDowned(body)) {
+					// (Andy, 2026-11-20) "tap can loot": a tap standing takes what's in their hands (Kingdoms), or else
+					// pulls out a blade stuck in them
+					ItemStack main = body.getMainHandItem().copy(), off = body.getOffhandItem().copy();
+					for (BiConsumer<ServerPlayer, LivingEntity> listener : TAPPED_LISTENERS) {
+						listener.accept(player, body);
+					}
+					if (ItemStack.matches(main, body.getMainHandItem()) && ItemStack.matches(off, body.getOffhandItem())) {
+						com.jaymospowers.armory.Lodged.pullOnTap(level, player, body);
 					}
 				}
 				if (r.begun && !r.over) {
@@ -1674,11 +1688,19 @@ public final class Downed {
 			if (r.over || r.held - r.start < TAP_TICKS) {
 				continue;
 			}
-			if (!r.knelt) {
-				// (Andy, 2026-11-14) a hold standing over them does nothing now: kneel at their side first
-				if (!r.hinted) {
-					r.hinted = true;
-					player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.kneel_first", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
+			if (!r.sneaking) {
+				// (Andy, 2026-11-20) "right click hold should always be drag": held standing, they're taken by the shoulder
+				// (by the arms, if they can't be dragged: a small animal), from the shore too if they lie in the water
+				long holding = now - r.start;
+				if (holding >= Carry.LIFT_TICKS) {
+					r.over = true;
+					if (!Carry.liftDowned(player, body)) {
+						player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.cant_take_hold", body.getDisplayName())
+							.withStyle(ChatFormatting.GRAY));
+					}
+				} else if (holding % 2 == 0) {
+					HudBar.hold(player, "carry_lift", holding / (float) Carry.LIFT_TICKS, HudBar.GREY,
+						Component.translatable("bar.jaymospowers.taking_hold", body.getDisplayName()), true);
 				}
 				continue;
 			}
@@ -1698,7 +1720,7 @@ public final class Downed {
 					continue;
 				}
 			}
-			if (!com.jaymospowers.core.Kneel.crouched(player) || Carry.isCarried(body) || !player.isWithinEntityInteractionRange(body, REVIVE_SLACK)) {
+			if (!player.isShiftKeyDown() || Carry.isCarried(body) || !player.isWithinEntityInteractionRange(body, REVIVE_SLACK)) {
 				r.over = true;
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.revive_stopped", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
 				continue;

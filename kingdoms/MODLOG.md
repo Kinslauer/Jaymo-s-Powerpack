@@ -15913,3 +15913,140 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 
 - **Farmers** (our own farmers, MCA farmers and the Family farmhand start) wear the Blossomland straw hat instead of the settler's wide hat; they keep the settler coat and trousers. Carters keep the settler hat. A farmer already in the settler hat changes into the straw one the next time a player is near, and MCA no longer takes a farmer's straw hat off (`FrontierWear.keeps`).
 - Built; not played.
+
+## 0.11.32 (2026-11-20): spiders leave webbed and lair-kept players be (#1916)
+
+- **Saved for the queen** (Andy: "when you get this respawn the spiders shouldnt keep attacking you, they also shouldnt attack you if you are webbed up, as they are saving you for the queen"): spiders no longer bite anyone wrapped in web (Powers' Webbed, any layer), and after a blackout wakes you in a spiders' lair, the lair's spiders leave you be there, webbed or not, until you get 32 blocks out of it or a day passes. Spiders already on you let go; none can be set on you (`wild/SpiderKeep`, `SpiderKeepMixin` on `Mob.setTarget`).
+- Striking a spider (a blow or a shot; a squash underfoot doesn't count) rouses them for a minute, webbed or kept, and ends the lair's keeping, as captors turn on a captive who acts up. The brood queen isn't held back.
+- Built; not played.
+
+## 0.11.33 (2026-11-20): Speakeasy ladder loop: climbers no longer pulled back into the den (#1913)
+
+- Andy: "why do they keep spawning back in the speakeasy then going out the ladder?" The den's housekeeping (every 2 s) put anyone it found on the ladder twice running back at the nearer end, so with a player below, a guard or townsman climbing out who was still in the lower half was set back down in the room, climbed again, and was set down again. Now someone who has moved up or down the ladder since the last look is left to climb; only one who hasn't moved for two looks (or has been on it 16 s) is put out.
+- A guard making an arrest and the man he's taking are no longer moved by the den at all (a den hand being marched off was snapped back to his spot); nor is anyone still on a raid.
+- The bookie may climb out to town by day without being put back at his table.
+- `Underworld.keepHome`, `Underworld.stranded`. Built; not played.
+
+## 0.11.34 (2026-11-20): Everyone who speaks to you needs introducing first (#1915)
+
+- Andy: "every humanoid that speaks should have to be introduced except for the exceptions we made before like the judge". Names already stayed off name tags, Jade and MCA's screens until you were introduced, but our own talk cards and lines still gave them away (his clip: Petra asking "Name the ground you stand on", Vlastimil's rescue plea, "[Helena]" at the dice table, "You take the weapons from Vlastimil").
+- `Introductions.called(viewer, entity)`: what a player hears someone called. Their name once introduced, else what they are ("Male Villager", "Orc", "Stranger" for a player). Used for the head of every talk card (`Menus.ask` and the cards in Approaches, Careers, Classes, ClassTeachers, Helmsmen, Restoration, ShipTalk, Skills, SteamAirships, BlossomTraders, Talks, Disguises), the approach hints, the downed "You take the weapons from" line and the chat fallback of `Speech`.
+- Gambling tables (`Tables`): each player sees the house and the other players by the names they know them by, in the seat list and in the table's note (whose turn, who won, who was caught).
+- Client safety net (`client/IntroNames`): any chat or action-bar line, or talk card head, carrying the name of a villager or player you haven't been introduced to (a name keeps which entity it is in its hover) has it swapped for what they are.
+- Exceptions kept as before: Powers' Z Fighter characters at their post (the Judge, the Keeper, the Hermit, the Tinkerer, the masters...), your MCA family, your group, a masked player's costume name, rulers once you've had an audience. Strangers, captains, helmsmen, druids and the like still introduce themselves as before.
+- Names spoken inside a line (a tale's characters, a villager mentioning a neighbour) aren't changed, only who is speaking. Built; not played.
+
+## 0.11.35 (2026-11-20): Taken weapons stay taken: no more shields duplicating off downed villagers (#1912)
+
+- **Dupe fixed** (Andy's clip, 2026-11-19: a downed MCA guard's shield came back after every tap of use, three shields from one villager). MCA's equipment routine hands a guard a brand-new shield (and a sword if their pack has none) whenever a hand is empty, and it kept running on the downed, so each disarm (the standing tap of use) was refilled at once.
+- MCA no longer dresses or arms a downed villager (`McaEquipmentMixin`). A villager a player has disarmed is tagged `jaymoskingdoms.disarmed` and from then on only takes up hand items that are in their own pack (`Downed.owned`), so coming to doesn't hand them a fresh shield to take again; give them a weapon and they'll use it.
+- MCA arms a villager with the very stack in their pack, so a weapon taken from the hand now leaves the pack too (`Downed.unpack`); before, a full inventory dropped a stack that was still in their pack.
+- A realm's Folk soldier who was disarmed isn't given a new shield or banner by the rank sweep (`Ranks`).
+- Safety net: while a disarmed body stays down, anything that turns up in its hands is cleared each tick, so nothing can be taken twice.
+- Built; not played.
+
+## 0.11.36 (2026-11-20): Guards' gold helms gone (#1914)
+
+- **No gold helm on a guard or knight** (Andy: "the gold helm they wear needs to go"): the harness helm no longer takes a gold-looking finish (gilt-banded, etched and gilt, gilded). A Crown realm's guards wear theirs heat-blued, the royal colour without the gilt; Faith and Coin realms' guards (etched and gilt) wear bright steel, as their mail is. The rest of their plate keeps its finish.
+- **Guards already wearing one swap it**: a guard or archer near a player who has a gold-finished helm on, or kitted for him, has it refinished at once (the same helm and wear, its name changed to match). A gold helm in the stores' spoils is refinished when it's handed out.
+- `HeraldryWear.helmFinish` / `ungilded`, used by `GuardKit` (helm options, the kit, its sweep) and `HeraldryWear.plate` (knights).
+- Built; not played.
+
+## 0.11.37 (2026-11-20): Guards' gold plate costs gold (#1917)
+
+- **Gold armour needs gold** (Andy: "they can have the gold armor as long as it requires gold to craft"): a guard's plate piece in a gold finish (gilt-banded, etched and gilt, gilded) now takes 2 gold ingots from the settlement's stores when it's made, as gilding at the smithing anvil does for a player. Without the gold it's made heat-blued (the Crown's) or bright instead. A piece already in the stores is handed out as it is.
+- A realm's knights (the troop ladder's, and those dressed as the realm's knights) pay for their gold-finished kit once, 18 gold for its nine plate pieces, when they're made knight; without it the kit is heat-blued or bright. One already wearing gold plate keeps it.
+- `HeraldryWear.payGold` / `kitFinish` / `refinished`, `GuardKit.gold`.
+- Built; not played.
+
+## 0.11.38 (2026-11-20): Warlock patron from the story, not "element" (#1921)
+
+- **Life story page**: a Warlock's pick under the story no longer says "Pick your element:". It reads "Pick the patron you serve:", like a Cleric's. Paladins now read "Pick your oath:" and Rangers "Pick your sworn foe:" (both said "element" too).
+- **Patron = the one you pledged to**: a first-class Warlock's pact is now with the patron the story's faith page names, the same way a Cleric serves theirs (the chips are held to it on the story page, in the character creator and on the class screen; the server holds them to it as well). Only a Warlock who grew up praying to no one picks freely (the Reaper included). The Ash Whisperer, who no Cleric serves, can be a Warlock's story patron.
+- A Cleric raised to the Ash Whisperer no longer gets a patron their class can't take on the server; they pick, as the screen already showed.
+- Existing saves: Warlocks already made keep the pact they have (`Classes.storyPatron`, `LifeStory.live`, `LifeStoryScreen.patronChip`).
+- Built; not played.
+
+## 0.11.39 (2026-11-20): throne room and gate guards keep their posts, and a night watch (#1918)
+
+- Andy: "why is the throneroom empty?" (a clip of an empty throne room at about 9 PM in game). The ruler holds court
+  there only at their morning court and the afternoon audience, and is in bed by evening, as before. But the two guards
+  posted in the throne room and the three at the gate never stayed there either: since a realm's guards became MCA
+  villagers, MCA's brain ignored the post they were given and they walked off with the town patrol, so the hall was
+  empty whenever the ruler was out of it.
+- Now a guard posted in the throne room or at the gate (`HallWatch`) walks back when they stray and stands at their post
+  while on duty, watching a player who comes near. Their shift off by day and their evening among their people stay as
+  they were; the escort, arrests, audiences and fights still come first.
+- Night watch: those posted guards keep watch from dusk to dawn (woken if abed), so the throne room and the gate are
+  never left empty at night. The town's other guards still have the night off (`Rulers.offDuty`).
+- Built; not played.
+
+## 0.11.40 (2026-11-20): Wildfires spread our own way again (#1926)
+
+- Our wildfires (`Calamities`) are no longer handed to Peterwolf's Forest Fire: they spread with the wind, light the
+  woods and burn out on their own timer as before the forest-fire pack, with vanilla fire, so they can be beaten and
+  punched out and follow the fire-spread gamerule (Andy, 2026-11-20).
+- Gone with it: the kept-fire mixin (`ForestFireKeptMixin`; fire pits and hearths were only at risk while it took
+  fires over) and `ForestFireCompat.wildfire`, `front` and `kept`. Dousing its fire, its heat in Kitchen's body heat,
+  the wind and the HUD plate stay (they only matter for an incident started by its commands, or for the hose).
+- Built; not played.
+
+## 0.11.41 (2026-11-20): villagers scrub blood out of their homes (#1931)
+
+- **Villagers clean up blood indoors**: a blood stain on a settlement's floors under a roof (Powers' pools, smears and
+  footprints) is seen by the nearest grown villager within 14 blocks who can see it and has nothing pressing to do.
+  They sometimes grumble about it in a bubble, walk over and scrub it with swipes of the arm, a splash and a brush
+  sound, until it's gone, then the next stain in the same room, and now and then say they're done. A big pool takes
+  them about half a minute.
+- Guards stay at their posts. A villager busy with something that can't wait (a fight, a talk, tending, the dead, a
+  prisoner, loot: `TalkBusy.occupied`), afraid, held by the guards, downed or shooing an animal out leaves it. Blood
+  with a body still in it (a corpse, the downed) is left until the body's gone. They give up after a minute and leave
+  that spot for two. Outdoors the rain does it. Nothing without Powers.
+- Loading hint 187 now says how to scrub blood off floors and walls.
+- Code: `BloodChores`, `PowersCompat.bloodStains`/`scrubStains`; lines in `lang/parts/blood_chores.json`.
+- Built; not played.
+
+## 0.11.42 (2026-11-20): companions wake you from a faint, captors don't (#1932)
+
+- Andy: "players and npcs should be able to wake players who faint". Your own companions now come to wake you first, from up to 32 blocks and without needing to see you, and quicker than villagers walk. They always wake you (a hint or a straight telling plus a drink or a bite, by temperament) and never rob you.
+- Villagers, guards and settlement folk still come as before, but nobody who'd carry you off wakes you first: camp raiders, outlaws and other captors, and guards whose realm wants you in its cells. Those leave you to be taken.
+- `FaintWakers.companion`, `choose(mob, canSteal)`; `HeldBack.wants` (the check from `gaol`, now shared).
+- Built; not played.
+
+## 0.11.43 (2026-11-20): body controls - tap takes a downed one's weapons (#1935)
+
+- Andy: "right click hold should always be drag, tap can loot". Taking the weapons and arrows off a downed mob now happens on the tap (Powers' `Downed.TAPPED_LISTENERS`, once use is let go), so holding use to drag them no longer empties their hands first. The click is still swallowed so a downed villager's screen never opens.
+- Loading hint 169 rewritten for the new controls (hold drags, tap takes, sneak + hold revives, kneel for locks); hint 4 now says executions are sneak + hold attack.
+- Built; not played.
+
+## 0.11.44 (2026-11-20): Downed airships' dead crew are steam-town people, not plain villagers (#1944)
+
+- **A downed airship's dead are her steam-town crew** (Andy: "these villagers shouldnt exist, they need to be reskinned or swapped to MCA from the steampunk to match the lore book you find with that wreck"). The bodies lying round a sky wreck were made from a plain villager that never joined the world, so MCA never swapped it for one of its people, and they lay there as vanilla villagers with big noses and robes. Now each is one of MCA's people (their own face, hair and name), dressed for the steam town her log says she was out of: the first is her captain, in the town's aeronaut's clothes, the others her engineers who kept her boilers. Without MCA they stay plain villagers; without Kitchen it's still bones and a skull. `SkyWrecks`.
+- Built; not played.
+
+## 0.11.45 (2026-11-20): drivers never lie across their horses (#1943)
+
+- **Carriage and cab drivers**: a coachman or cab driver who was knocked down or had gone to bed was put straight back in the saddle (the "out of the saddle, get back on" check), so he lay flat across his horse. Now a driver who is down, asleep or being carried stays where he is until he is up again, then gets back on. One found down in the saddle is taken off the horse, and one found asleep there is woken. (`Drivers.canMount`, `Drivers.step`, `Cabs`, `Carriages`)
+- The same check for caravan riders getting back on (`Caravans.remount`) and for guards being given a spare horse (`Cavalry`): no downed guard is put on a horse.
+- Built; not played.
+
+## 0.11.46 (2026-11-20): no floating trees: unsupported wood falls (#1942)
+
+- **Trees don't float any more** (Andy's burnt birch wood clip): whenever something holding wood up goes, by any cause
+  (a log burned, blown, broken or chopped out, the ground dug from under a trunk), the logs beside it are looked at once
+  the tick is over. A piece of joined logs that touches nothing solid but other wood and leaves comes down: with leaves
+  left on it, or more than 3 logs, it drops as a falling tree (tumbles to its heavier side, crashes, strikes what it
+  lands on, then lies as a fallen tree to chop up); 1 to 3 bare logs fall like sand and land as logs, hurting a little.
+- **Builds stay up**: a piece with any player-placed log or any stripped log is never brought down, and logs in a
+  building touch its planks, stone or earth, which hold them. Leaves, vines, fire, cocoa pods and bee nests hold nothing up.
+  Pieces over 200 logs, or running into unloaded land, are left alone.
+- Logs already floating in old worlds only come down once something next to them changes.
+- `LooseWood` (new), `LooseWoodMixin` (ServerLevel block changes), `FallingTree.drop`; `Trees.leavesOf` now package-wide.
+- Built; not played.
+
+## 0.11.47 (2026-11-20): chopping up a felled tree no longer knocks the next tree onto you (#1945)
+
+- Andy, downed while chopping up a tree he'd felled half a minute before (clip "Clip 2026-11-20 00-37-46 2"): "what hit me here?". It was the standing tree beside it, knocked over onto him by `FelledCompat`'s knock-on.
+- Cause: the knock-on reads how fast a Felled tree is moving from Felled's `trunkTop`, which is the tree's middle log. Chopping a log off a tree lying still moves that middle a block or so along the trunk in one tick, which read as the tree moving fast, so any natural tree within a block of its logs went over that way (and our falling trees hit whoever they pass, up to 7 hearts).
+- `FelledCompat` now counts the tree's logs; when it has fewer than when last counted, that tick's jump isn't motion and it starts again from where the middle is now. Real falls, leaning trees and blasts knock on as before.
+- Built; not played.

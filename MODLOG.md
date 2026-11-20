@@ -6731,3 +6731,163 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 
 - **Pitchfork**: redrawn at 32x32 (a long ash shaft, an iron socket and crossbar, three tines) and held like the glaives, so in the hand it is longer than a trident (about two and a half blocks), with the grip low on the shaft. A thrown pitchfork is drawn at the same length in flight (`ThrownWeaponRenderer` size per item).
 - Built; not played.
+
+## 0.25.99 (2026-11-20): Sitting cats no longer stand on end under Fresh Animations (#1909)
+
+- **Pets' poses on Fresh Animations' models**: a tamed cat left sitting was drawn standing on its end, legs laid flat
+  and tail sticking straight up (Andy's clip at a camp). Our pet poses (the cat's loaf, knead, groom and stretch; the
+  wolf's greeting, play bow, lying down and dozing) are worked out on vanilla's cat and wolf parts, and Fresh Animations
+  builds those animals its own way (head and tail inside the body, the body's boxes turned flat inside it), so resetting
+  the body for the loaf turned the whole cat upright. Where a resource pack has replaced the animal's model through
+  Entity Model Features, PetPoses now steps aside and the pack's own sitting and sleeping animations show
+  (`EmfCompat.customModel`, `PetPoses.extract`). Without Fresh Animations the poses are unchanged.
+- Built; not played.
+
+## 0.26.0 (2026-11-20): Knight armour set removed (#1919)
+
+- **Knight armour gone** (Andy: "please remove this armor set"): the Knight Helmet, Chestplate, Leggings and Boots from Knight Armor and Weapons are no longer in the "Knight Armor & Weapons" creative tab (whose icon is now the long sword, not the helmet), the search tab or JEI (their grid recipes were already off). The tab keeps the long sword, spiked mace, hand scythe and throwing axe, still forged at the Smithing Anvil.
+- Any Knight armour already in a world turns into the iron piece for the same slot, keeping its wear, enchantments, name and trim: in your inventory, armour slots and ender chest (checked every 2 s), in any chest or other container you open, worn by mobs and villagers when they load or come within 48 blocks of a player, and dropped on the ground. The mod's items stay registered so old saves load. `armory/RetiredKnightArmour`, `client/jei/RetiredKnightArmourJei`, `mixin/RetiredKnightTabIconMixin`.
+- Built; not played.
+
+## 0.26.1 (2026-11-20): crushing blows throw a few blocks, not across the field (#1922)
+
+- A crushing blow (a mutant's slam, or a heavy blow from something three times your bulk, like a bear in harsh land) that you live through threw you 1 to 1.5 blocks a tick and 0.45 up, about 15 blocks; it now throws 0.5 to 0.75 and 0.3 up (`BlastGore.CRUSH_THROW`, `CRUSH_LIFT`), a few blocks. With Kitchen's ragdoll cap, a body knocked limp by it slides a block or two (Andy: "the super knockback ragdolls are back. can we tame them").
+- Built; not played.
+
+## 0.26.2 (2026-11-20): downed wall sit: no more sinking into the ground (#1920)
+
+- **Legless, sat against a wall** (Andy: "the wall sit while downed clips into the ground"): with both legs gone (and nothing fitted in their place) a downed player or NPC now sits down on their stumps, the leaned torso resting on the floor. Before, the hips stayed where the thighs would hold them, so the bare torso hung a little over the floor with nothing under it and read as sunk into the ground.
+- **Backpack**: a worn backpack no longer goes through the floor while you roll over onto your back to sit up (the body rides up over it), nor into the wall behind you sat there (you sit out from the wall by the bag's depth). The torso is kept above the floor through the whole get-up too.
+- WallSit (Sit carries whether it sits on stumps; a floor check on the torso and bag), BackpackClient (the bag's outline and how far it sits off the back).
+- Built; not played.
+
+## 0.26.3 (2026-11-20): Rig arm blast from the fitted arm (#1924)
+
+- **Rig prosthetic arm**: the repulsor shot (G, no suit on) now leaves the palm of the arm the Rig limb is fitted to, a little out to that side, instead of from under the middle of your view. The palm-blast pose raises that same arm too, not your main hand (`RigLimbs.shot`, `RigPose`). A Rig arm on each side fires from the right one, as before.
+- Built; not played.
+
+## 0.26.4 (2026-11-20): predators eat the downed, and finish them once full (#1923)
+
+- Andy (2026-11-20, clip of a brown bear tearing at him for most of a minute while he lay downed): "why didnt the bear
+  execute here? it had more than enough time", then: "predators should start eating you when you go down. and only
+  finish you if they are full".
+- **Eating starts as you go down:** a hungry meat-eating animal (bear, wolf, big cat; not monsters, carrion birds, pets,
+  the young or the leashed: `LimbEaters.eatsAlive`) lets the fight go the moment its target is a downed player (checked
+  every 5 ticks, anger and grudge cleared), and can't be set on a downed player at all (`PredatorEatMixin` on
+  `Mob.setTarget`). Its eating (`TearGoal`: a limb per 5 bites, eaten where it falls) takes over instead of its claws.
+- **Finished only when full:** `MobExecutions` won't let a hungry eater execute anyone. Fullness is now kept per animal
+  (`LimbEaters.full`/`ate`, shared by limb eating and tearing): 2 parts, or with no limbs left 5 mouthfuls of the body
+  for each, and it's full for 4 minutes. Once full, going for a downed body or tearing at it counts as fighting them
+  for 20 s (`LimbEaters.toreAt`, read by `MobExecutions.fighting`): after the usual 5 s grace it stands over them and
+  finishes them. An animal already full when it downs you finishes you after the grace.
+- A meat-eating animal's execution is the mauling (`Move.FEED`: two tearing bites, then the last), however big it is,
+  with its own growl at the wind-up, not a ravager's crush and roar.
+- Big executioners (a bear, a ravager) count as there once their bulk reaches the body, so they can't stop short of
+  the 1.6-block reach and give up after 10 s.
+- A standing player within 6 blocks still keeps the animals off a downed friend.
+- Built; not played.
+
+## 0.26.5 (2026-11-20): Fire is vanilla fire again (#1926)
+
+- **Fire goes out when you hit it, burns out and spreads by the vanilla rules again**, and the fire-spread gamerule
+  (`fire_spread_radius_around_player`) counts. Peterwolf's Forest Fire was taking over every fire as one of its
+  "incidents": it put the fire back when you punched it, kept it alight for ever, ignored the gamerule and burnt grass
+  blocks to dirt. Our port no longer lets it take fires over (`FireBlockMixin` removed; port 1.1.11-26.3-jaymo.3,
+  `PORT.md`), and any fire an older version left burning is put out when the server starts.
+- Its kit still works on ordinary fire (the hose and sprinklers put it out), and its wind follows ours.
+- Tested on a plain 26.3 server: fires lit on grass and planks made no incident, and the grass fire burnt out by
+  itself; a fire incident started by command was gone after a restart. Not played in the full pack.
+
+## 0.26.6 (2026-11-20): cleaning up blood - scrub stains off floors and walls, poured water washes them (#1931)
+
+- **Scrub blood off a floor or wall**: sneak and use a straw wisp or a handful of sand on the stain with a water bucket
+  or a water bottle in your other hand (the bottle is emptied), or a wet sponge on its own. Each scrub takes some of
+  every stain within about a block off (pools, smears, drag trails, footprints, splats and runs down a wall); a big
+  pool takes about five scrubs. Blood that has dried (5 minutes old) takes twice the scrubbing, except with sand, which
+  scours. The wisp wears and the sand is used up as when scrubbing yourself; the sponge and the bucket don't. A clean
+  floor still takes sand as a block.
+- **Water washes blood away**: water poured over a stain (a bucket emptied on it, a flood) washes it off in a few
+  seconds, so pouring a bucket and scooping it back up cleans a floor. Splashes and runs down a wall in water go too.
+- Runs down a wall that a pool poured over its edge now go when that pool is scrubbed, washed or drawn away.
+- Every client near a scrub is told to wipe the blood only it draws there (`BloodParticles.Wipe`). Code:
+  `BloodTrail.scrub`/`stained`/`stains`, `Scrubbing.scrubStain`, client `BloodClient.wipe`, `BloodWallMark.wipe`.
+- Built; not played.
+
+## 0.26.7 (2026-11-20): no more getting stuck on a horse after a called-off climb (#1929)
+
+- **Stuck on a horse**: with Horseman in the pack, clicking a horse sat you in the saddle on your own screen at once,
+  while the server was still running the climb. When the climb was called off (the horse shied, you stepped away or
+  were hit) the server never had you riding, but your screen kept you on the horse: Sneak did nothing and a wild horse
+  never threw you, until you left the game. Now your game never starts the ride itself; you are in the saddle only
+  when the server's climb ends (`MountClimbHorseMixin`).
+- Tested in a cloud test game with Horseman, Kaffee's Dual Ride and Kingdoms: a climb called off partway leaves you
+  standing; a finished climb seats you and Sneak gets you off. The server side is unchanged, so a wild horse throws
+  you as before (seen in the same game before the fix, not again after). Not tested on a dedicated server.
+
+## 0.26.8 (2026-11-20): downed wall sit: getting up stays on the wall (#1930)
+
+- **Getting up from sitting against a wall** (Andy: "the seated get up should stay seated for the duration of the animation"): holding sneak sat against a wall now always draws the rise up the wall, pushing up from the seat to your feet over the whole bar. Before, if you held sneak a moment before your body had finished getting up against the wall (the server counted you sat a little before the drawing was done), or while you were sliding back down after letting go, the body dropped off the wall, rolled face down and did the floor get-up instead, standing up long before the bar was full.
+- If you start rising before you've finished getting up against the wall, you finish sitting down first and then rise up the wall. If you start while sliding back down after letting go, the rise goes on from where you are, and it always finishes when the bar does.
+- WallSit (the seat's rise up the wall: where it started, when it began, when it ends).
+- Built; not played.
+
+## 0.26.9 (2026-11-20): another player shakes a fainted player awake (#1932)
+
+- Andy: "players and npcs should be able to wake players who faint". A player lying out in a faint (hunger, thirst, exhaustion, Overcome) is shaken awake by another player's right-click on them (main hand, not sneaking): a swing and a rustle, and they come round on the spot, the letterbox opening as after any faint. Sneak-use is left to seizing, lifting and pickpockets.
+- `Fainting.shake` (UseEntityCallback, Downed's first phase). The faint attachment now syncs to everyone, so the shaker's client doesn't eat or draw a bow at the same time.
+- Built; not played.
+
+## 0.26.10 (2026-11-20): H only opens the character menu (Auto HUD toggle unbound) (#1928)
+
+- **Keys**: Auto HUD's "Toggle dynamic HUD" shipped on H, the character menu key, so opening the character menu also switched the auto-hiding HUD on or off. Once per install it now comes off H (unbound) if it's still there; Controls > Key Binds > Auto HUD can set it again. To keep Auto HUD off for good: Mods > Auto HUD > General > "Enable on game load" off.
+- `KeyConflicts` move list v11 (`key.autohud.toggle-hud`). Built; not played.
+
+## 0.26.11 (2026-11-20): Rig leg kick from the fitted leg (#1933)
+
+- **Rig prosthetic leg**: the kick pose (V, no suit on) swings the leg the Rig limb is fitted to, not always the right one (`RigPose`). A Rig leg on each side kicks with the right one, as the kick itself picks.
+- Built; not played.
+
+## 0.26.12 (2026-11-20): body controls - hold drags, tap loots, sneak revives (#1935)
+
+- Andy: "right click hold should always be drag, tap can loot. and shift should revive. the binds got confusing". On anyone downed:
+  - **Hold use (standing)**: a bar fills ("Taking hold of ...", `Carry.LIFT_TICKS`) and you drag them by the shoulder (`Carry.liftDowned`); a small downed animal is taken up instead. Sneak + right-click while dragging still lifts them into your arms, right-click lets go. No kneel needed first any more.
+  - **Drag out of the water**: someone downed lying in water can be taken hold of from anywhere within arm's reach (not just touching), so you can haul them out from the bank.
+  - **Tap use**: takes the weapons and arrows from their hands (Jaymo's Kingdoms, now on the tap's release instead of the first press), or else pulls out a blade stuck in them (`Lodged.pullOnTap`). A Xeno-Band is still torn off a downed wearer on a tap.
+  - **Sneak + hold use**: brings them round (the revive, food or treat as before). Any sneak works now, not only the low crouch held still.
+  - **Fainted players** are shaken awake with sneak + right-click (was a plain right-click).
+  - Executions are unchanged: sneak + hold attack.
+- Andy: "throwing needs to be more deliberate, i revived then instantly tossed her, no struggle to pickup at all":
+  - The hold that revived someone (or took hold of them) can't carry on into a lift once they're up (`Downed.handOn`); let go of right-click first.
+  - Lifting a person off their feet (sneak + hold) takes 2 s (`Carry.PERSON_LIFT_TICKS` 40, was 0.6 s); small animals stay quick.
+  - Throwing is a wind-up: sneak + **hold** right-click for 1 s ("Winding up to throw ...", `THROW_TICKS` 20), and only counted from 1 s after they're in your arms (`THROW_READY`). Heaving someone you're dragging up into your arms is the same held sneak + right-click, 1.5 s (`HOIST_TICKS`). Let go sooner and nothing happens. Blocks and severed parts throw the same way. Client `CarryUseMixin` sends each beat of the held press.
+- `Downed.onUseEntity/revives`, `Carry.liftDowned`, `Lodged`, `Fainting.shake`. Lang: `message.jaymospowers.downed.cant_take_hold`, `bar.jaymospowers.taking_hold` (the old kneel-first message is gone).
+- Built; not played.
+
+## 0.26.13 (2026-11-20): dodge rolls - back dodge only when locked on, one per press, hold to roll on into prone (#1936)
+
+- Andy: "back dodge should only activate when locked, and they should all only activate once per press, holding the button should make you cover a bit more ground, then gradually transition to prone."
+- **Back dodge only while locked on**: a roll goes back only with a lock-on target. Not locked on, the Back key is dropped from the roll's way: Back with Left or Right rolls to that side, nothing held rolls forward (it was the back hop), and Back alone does nothing. Locked on, everything is as before (nothing held = the back hop). The Backflip perk (Back alone) still flips whether or not you're locked on; landing rolls still always roll.
+- **One move per press**: each press of the Dodge key does one roll, flip, trick, vault or landing roll. Holding it no longer fires another one each time the cooldown ends (the key's repeats are ignored; a quick tap still counts).
+- **Hold to roll on into prone**: still holding the key 4 ticks into a ground roll makes it the long roll: the tumble slows to last 18 ticks and carries you on along the ground (about 2 more blocks, easing off). Still held as it ends, you go on down into prone with the gradual crouch-and-lower of the prone move (ProneTransition); let go before the end and you come up on your feet. Others see the long roll too (synced through the roll's attachment).
+- Code: DodgeClient (press edge, lock check, tickHold), Dodge (HOLD_TICKS, LONG_ROLL_TICKS, LONG_SPEED_*, Rolling.extended, Extend payload, rollShare, rollingLow uses the roll's own length), DodgeRollPose (rollShare), ProneTransition (a roll counts as on the feet, so prone after it goes down gradually).
+- Built; not played.
+
+## 0.26.14 (2026-11-20): fishing line from the rod tip, bait on the first click (#1934)
+
+- **Line from the rod tip**: the fishing line now leaves the rod's actual tip, in first and third person, either hand, on the 3D held rods, the cane pole, spinning and ledger rods, tinker rods and the metal rod, and it follows the rod's bend while a fish fights. A fishing player's rod-hand item render state is marked when it's filled (`RodTipArmedMixin` third person, `RodTipHandsMixin` first person); when that state is drawn (`RodTipItemMixin`) its tip is read off the real model matrix (`RodTip`, `RodTipLayerMixin`; first-person hand FOV and view bob are taken out so the line meets the tip on screen). Watching the render state, not one renderer's method, keeps it working when another mod draws held items its own way. The hook renderer starts the line there, else vanilla's old guess.
+- **Bait on the first click**: using a bare rod with bait in your other hand, or anywhere in your pack (hotbar first), puts it on the hook straight away; no sneaking. The next use casts. Sneak + use still turns the drag, and a baited rod casts as before (`HookBait`).
+- Tried in a dev game: the third-person line and the first-person body view (a camera mod draws your body) end at the rod tip. The plain first-person hands path and the bait change are built, not played.
+
+## 0.26.15 (2026-11-20): stance wheel: a second on the knee before prone (#1941)
+
+- **Prone buffer**: Sneak + a fast scroll down now stops at the low crouch (the kneel). You have to stay there a second (`StanceScroll.PRONE_AFTER_TICKS`, 20 ticks) before another notch down lays you flat; notches sooner are dropped. Kneeling to revive or vault no longer throws you on your belly. Slide-into-prone and the sprint-jump leap are unchanged.
+- Syntax-checked only; not played.
+
+## 0.26.16 (2026-11-20): Gibs toned down: only overwhelming force bursts a body (#1946)
+
+- Andy (a mule burst apart by one crossbow bolt to the head): "gibs need to be turned down realistically".
+- **Big bodies are harder to burst**: every burst chance (blast, blunderbuss shot, crushing blow on someone standing) is cut by the body's bulk over a man's (`BlastGore.sizeScale`, `MAN_BULK`). A horse or mule bursts about a fifth as often as a man, a cow about half as often, a ravager about a thirteenth. Man-sized and smaller bodies are unchanged.
+- **A crushing blow bursts someone standing only if that one blow could have killed them from full health** (`CRUSH_GIB_OVERKILL`). A lesser killing blow still takes the part it lands on, as before (`CRUSH_SEVER`).
+- **A crushing blow has to land in reach** (`CRUSH_REACH`, 3.5 blocks between the two bodies' edges): another mod's spell or shot that counts as the caster's own hand no longer counts as a slam (no burst, no throw, no extra limb loss).
+- Unchanged: someone downed under a slam still bursts; blasts still gib by closeness (now also cut for big bodies); Stoneborn are never burst.
+- Built; not played. The server log for the mule clip wasn't reachable (it runs on the Deck), so which rule burst the mule wasn't confirmed: all three ways a single hit could burst it are covered.

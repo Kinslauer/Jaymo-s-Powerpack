@@ -76,9 +76,29 @@ final class Drivers {
 		return true;
 	}
 
-	/** A villager driver's step ({@code Workers.step}): true (his brain set aside) while he's in the saddle. */
+	/**
+	 * {@code w} may be put back in the saddle: alive, awake, not down and not being carried. A driver knocked down (Powers
+	 * takes him off his horse as he falls) or gone to bed stays where he is till he's up again; put back on as he was, he
+	 * lay across his horse.
+	 */
+	static boolean canMount(Worker w) {
+		PathfinderMob mob = w.mob();
+		return mob.isAlive() && !mob.isPassenger() && !mob.isSleeping() && !Downed.isDowned(mob) && !PowersCompat.isCarried(mob);
+	}
+
+	/**
+	 * A villager driver's step ({@code Workers.step}): true (his brain set aside) while he's in the saddle. One down or
+	 * asleep there is got off his horse (or woken), so he never lies across it.
+	 */
 	static boolean step(ServerLevel level, Worker w) {
 		PathfinderMob mob = w.mob();
+		if (mob.isPassenger() && Downed.isDowned(mob)) {
+			mob.stopRiding();
+			return false;
+		}
+		if (mob.isPassenger() && mob.isSleeping()) {
+			mob.stopSleeping();
+		}
 		return !(mob instanceof Folk) && !w.task().isEmpty() && mob.isPassenger();
 	}
 }

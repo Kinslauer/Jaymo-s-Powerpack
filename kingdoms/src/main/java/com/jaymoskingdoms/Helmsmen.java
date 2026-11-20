@@ -197,7 +197,7 @@ public final class Helmsmen implements Ship.Helmsmanship {
 			return;
 		}
 		MENUS.put(player.getUUID(), new Menu(v.getId(), List.of("hire", "close")));
-		ServerPlayNetworking.send(player, new TalkNet.Ask(v.getId(), v.getDisplayName(), words,
+		ServerPlayNetworking.send(player, new TalkNet.Ask(v.getId(), Introductions.called(player, v), words,
 			List.of(Component.translatable("talk.jaymoskingdoms.helm.option.hire", HIRE_COST), Component.translatable("talk.jaymoskingdoms.work.close")),
 			List.of(Money.canPay(player, Money.worth(HIRE_COST)), true)));
 	}
@@ -299,7 +299,7 @@ public final class Helmsmen implements Ship.Helmsmanship {
 			return;
 		}
 		MENUS.put(player.getUUID(), new Menu(v.getId(), List.copyOf(actions)));
-		ServerPlayNetworking.send(player, new TalkNet.Ask(v.getId(), v.getDisplayName(), words, options, enabled));
+		ServerPlayNetworking.send(player, new TalkNet.Ask(v.getId(), Introductions.called(player, v), words, options, enabled));
 	}
 
 	/** An answer to a helmsman's question; false when it wasn't one. */
