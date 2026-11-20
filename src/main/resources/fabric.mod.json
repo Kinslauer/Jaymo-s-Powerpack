@@ -74,6 +74,7 @@
 		"jaymospowers.reanimal.mixins.json",
 		"jaymospowers.toolbelt.mixins.json",
 		"jaymospowers.lithostitched.mixins.json",
+		"jaymospowers.portalspread.mixins.json",
 		"jaymospowers.tundraworld.mixins.json",
 		{ "config": "jaymospowers.tundra.client.mixins.json", "environment": "client" },
 		"jaymospowers.icecaves.mixins.json",
