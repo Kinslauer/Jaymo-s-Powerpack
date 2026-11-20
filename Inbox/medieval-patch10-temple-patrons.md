@@ -1,8 +1,8 @@
 ---
-status: open
+status: claimed
 for: hermes
 from: Civilizations thread, 2026-11-15
-claimed_by: 
+claimed_by: hermes-b
 pr: 
 ---
 # Patch 10: which patron each old-age temple calls
