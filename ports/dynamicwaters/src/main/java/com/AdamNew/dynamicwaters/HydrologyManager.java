@@ -4145,11 +4145,23 @@ public class HydrologyManager {
         return new net.minecraft.world.phys.Vec3((int) bestX, 0, (int) bestZ);
     }
 
-    public static boolean isNearMountainWater(int x, int z, int radius) {
-        return isNearWatershed(x, z, radius);
+    /**
+     * Whether a mountain river or lake runs near (x, z). Structure starts are placed before any chunk near them has its
+     * terrain (and so before the watershed prefetch has run), so this builds the regions it looks at instead of reading
+     * only the cache: with the cache alone a structure on fresh ground saw no water and was placed in the river or lake
+     * that was carved round it afterwards (a windmill standing in a mountain lake, its grass footprint drowned).
+     */
+    public static boolean isNearMountainWater(int x, int z, int radius,
+            net.minecraft.world.level.chunk.ChunkGenerator generator,
+            net.minecraft.world.level.LevelHeightAccessor level,
+            net.minecraft.world.level.levelgen.RandomState randomState) {
+        return isNearWatershed(x, z, radius, generator, level, randomState);
     }
 
-    private static boolean isNearWatershed(int x, int z, int radius) {
+    private static boolean isNearWatershed(int x, int z, int radius,
+            net.minecraft.world.level.chunk.ChunkGenerator generator,
+            net.minecraft.world.level.LevelHeightAccessor level,
+            net.minecraft.world.level.levelgen.RandomState randomState) {
         final int reach = radius + WATERSHED_REGION_SIZE;
         final int r0x = Math.floorDiv(x - reach, WATERSHED_REGION_SIZE);
         final int r1x = Math.floorDiv(x + reach, WATERSHED_REGION_SIZE);
@@ -4157,8 +4169,7 @@ public class HydrologyManager {
         final int r1z = Math.floorDiv(z + reach, WATERSHED_REGION_SIZE);
         for (int rz = r0z; rz <= r1z; rz++) {
             for (int rx = r0x; rx <= r1x; rx++) {
-                WatershedRegionData data = WATERSHED_REGION_CACHE.get(getRegionKey(rx, rz));
-                if (data == null) continue;
+                WatershedRegionData data = getWatershedRegion(rx, rz, generator, level, randomState);
                 for (WatershedPath p : data.allPaths) {
                     if (x >= p.influenceMinX() - radius && x <= p.influenceMaxX() + radius
                             && z >= p.influenceMinZ() - radius && z <= p.influenceMaxZ() + radius) {
@@ -4185,7 +4196,7 @@ public class HydrologyManager {
 
         for (int x : xs) {
             for (int z : zs) {
-                WatershedContext mountainCtx = evaluateWatershedContext(x, z, generator, level, randomState, true);
+                WatershedContext mountainCtx = evaluateWatershedContext(x, z, generator, level, randomState, false);
                 if (mountainCtx.bestPath != null) {
                     double baseBankWidth = 8.0;
                     double baseSegmentWidth = mountainCtx.bestPath.segmentWidths.length > 0
@@ -4207,7 +4218,7 @@ public class HydrologyManager {
                     }
                 }
 
-                WatershedLake lake = findLake(x, z, null, null, null, true);
+                WatershedLake lake = findLake(x, z, generator, level, randomState, false);
                 if (lake != null) {
                     int lakeY = lake.waterY;
                     if (Math.abs(minY - lakeY) <= 40 || Math.abs(maxY - lakeY) <= 40
