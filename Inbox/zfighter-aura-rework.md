@@ -19,3 +19,4 @@ Ideas only: DMZ is GPL-3.0, ours is ARR, so no copied code or art. Expected file
 
 ## Notes
 - 2026-11-19 22:58 hermes-b's last text pass stopped before finishing; handed back so it can carry on.
+- 2026-11-19 23:30 Text pass: changes/powers/zfighter-aura-rework.md rewritten to player-facing wording (flame shell with white core while charging, ground cracks beneath the fighter; code file paths removed); kitchen/lang/en_us.json message.jaymoskitchen.corpse.dragging now says right-click a Meat Hook to heave it up - the code heaves onto hooks only, the butcher block puts the carcass down on the table; hook_reach.json deletion verified safe (message.jaymoskitchen.hook.closer unreferenced after the CorpseEntity change). Kitchen buildKitchen passes.
