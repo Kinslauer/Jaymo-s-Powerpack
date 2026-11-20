@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IGI",
+    " R ",
+    " I "
+  ],
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "G": "minecraft:glass_pane",
+    "R": "minecraft:redstone"
+  },
+  "result": {
+    "id": "peterwolfs_forestfire:thermal_scanner",
+    "count": 1
+  }
+}

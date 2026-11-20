@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "waterlogged=false": {
+      "model": "peterwolfs_forestfire:block/intake_strainer"
+    },
+    "waterlogged=true": {
+      "model": "peterwolfs_forestfire:block/intake_strainer"
+    }
+  }
+}
