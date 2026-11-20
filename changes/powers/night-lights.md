@@ -1,0 +1,4 @@
+# Lantern pole carried in hand: drawn as a pole with its lantern, and lights the way
+- For Kingdoms' NPCs who carry lanterns on poles at night (Andy: "you may even encounter villagers with lanterns on sticks"). The lantern pole held in either hand (anyone's: an MCA villager's, a watchman's, a player's) is now a stripped-spruce staff standing upright in the fist with a lantern hung forward off a hook at the top (`models/item/lantern_pole_in_hand.json`, picked by display context the way the spyglass is). In the inventory, on the ground and in frames it stays the flat icon.
+- With LambDynamicLights, anyone holding a lantern pole in a hand gives off a lantern's light (`LdlWornLanternMixin`); worn on the back it already did.
+- Built; not seen in game (the model's angle in hand is worked out on paper, not looked at).
