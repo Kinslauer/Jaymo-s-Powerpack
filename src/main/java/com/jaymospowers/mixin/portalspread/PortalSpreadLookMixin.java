@@ -25,7 +25,8 @@ abstract class PortalSpreadLookMixin {
 		at = @At(value = "INVOKE", remap = false,
 			target = "Lnet/minecraft/world/level/Level;getBlockState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;"))
 	private static BlockState jaymospowers$loadedOnly(Level level, BlockPos pos, Operation<BlockState> original) {
-		if (level.isInValidBounds(pos) && !level.isLoaded(pos)) {
+		// (getChunkNow: only a chunk already at FULL, never scheduled or waited for; isLoaded only asks for a ticket)
+		if (level.isInValidBounds(pos) && level.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4) == null) {
 			return Blocks.AIR.defaultBlockState();
 		}
 		return original.call(level, pos);

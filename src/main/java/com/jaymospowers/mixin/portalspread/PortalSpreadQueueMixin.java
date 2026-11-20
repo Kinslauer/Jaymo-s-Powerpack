@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Shadow;
@@ -26,6 +27,7 @@ abstract class PortalSpreadQueueMixin {
 	private static final int REACH = 25;
 
 	@Shadow(remap = false)
+	@Final
 	private static HashMap<Level, CopyOnWriteArrayList<BlockPos>> portals_to_process;
 
 	@WrapOperation(method = "onWorldTick", require = 0, remap = false,
@@ -34,7 +36,9 @@ abstract class PortalSpreadQueueMixin {
 	private static void jaymospowers$onlyWhereLoaded(Level level, BlockPos pos, Operation<Void> original) {
 		for (int cx = (pos.getX() - REACH) >> 4; cx <= (pos.getX() + REACH) >> 4; cx++) {
 			for (int cz = (pos.getZ() - REACH) >> 4; cz <= (pos.getZ() + REACH) >> 4; cz++) {
-				if (!level.hasChunk(cx, cz)) {
+				// (getChunkNow: only a chunk already at FULL, never scheduled or waited for; hasChunk only asks for a ticket,
+				// and is true for a chunk still generating under a player's view)
+				if (level.getChunkSource().getChunkNow(cx, cz) == null) {
 					// onWorldTick removes the head of this queue right after the check, so add it to the tail first.
 					portals_to_process.get(level).add(pos);
 					return;
