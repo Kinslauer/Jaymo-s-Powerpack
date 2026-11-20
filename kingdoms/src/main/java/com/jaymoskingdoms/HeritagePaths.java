@@ -611,7 +611,7 @@ public final class HeritagePaths {
 			return;
 		}
 		double reach = WARD_BASE + WARD_STEP * step;
-		for (Mob m : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(reach), m -> m.isAlive())) {
+		for (Mob e : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(reach), e -> e.isAlive() && e.is(EntityTypeTags.UNDEAD))) {
 			Vec3 away = m.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
 			if (away.lengthSqr() < 1.0E-4) {
 				continue;

@@ -329,7 +329,7 @@ final class HeritageScreen extends Screen {
 			int steps = player == null ? 0 : com.jaymoskingdoms.HeritagePaths.stepsShown(player, p);
 			List<ItemStack> icons = new ArrayList<>();
 			for (int i = 0; i < 5; i++) {
-				icons.add(new ItemStack(i < steps ? p.icon : net.minecraft.world.item.Items.PAPER));
+				icons.add(new ItemStack(i < steps ? p.icon : net.minecraft.world.item.Items.BARRIER));
 			}
 			Component name = Component.translatable("path.jaymoskingdoms." + p.key());
 			rows.add(new PickerLayout.Path(icons, player == null ? name : Component.translatable("gui.jaymoskingdoms.path.row", name,
