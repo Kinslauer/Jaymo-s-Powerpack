@@ -69,7 +69,7 @@ public final class SightedShard {
                         tag.remove(NAME);
                     });
                     p.sendSystemMessage(Component.translatable("item.jaymoskingdoms.sighted_shard.cleared").withStyle(ChatFormatting.GRAY));
-                    p.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+                    p.swing(InteractionHand.MAIN_HAND);
                     return InteractionResult.SUCCESS;
                 }
             }

@@ -371,7 +371,7 @@ public final class ScryingOrb {
                         indices[idx++] = -1; // outside sphere
                         continue;
                     }
-                    LevelChunk chunk = level.getChunkSource().getChunkNow(x >> 4, z >> 4);
+                    LevelChunk chunk = level.getChunk(x >> 4, z >> 4);
                     if (chunk == null) {
                         indices[idx++] = 0; // air
                         continue;
@@ -411,7 +411,7 @@ public final class ScryingOrb {
             }
             return null;
         } else {
-                    ServerLevel targetLevel = level.getServer().getLevel(net.minecraft.resources.ResourceKey.create(
+                    ServerLevel targetLevel = level.getLevel(ResourceKey.create(
                         net.minecraft.core.registries.Registries.DIMENSION,
                         new net.minecraft.resources.ResourceLocation(target.dimension())));
             if (targetLevel == null) {
@@ -454,7 +454,7 @@ public final class ScryingOrb {
     private static void requestTicket(MinecraftServer server, Target target) {
         // Track place-sight count server-wide
         // For now, just request the chunks directly
-        ServerLevel level = server.getLevel(net.minecraft.resources.ResourceKey.create(
+        ServerLevel level = server.getLevel(ResourceKey.create(
             net.minecraft.core.registries.Registries.DIMENSION, net.minecraft.resources.ResourceLocation.parse(target.dimension())));
         if (level == null) {
             return;
