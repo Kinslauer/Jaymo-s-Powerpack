@@ -2,7 +2,7 @@
 
 ## Items
 - **Medi-Bug**: A tiny living critter (mouse) found in the wild. Pick it up and eat it whole to heal fully, fill hunger, clear ailments, and restore a Z Fighter's ki. Also gives a herb boost (ki regen, cleared cooldowns, stamina, mastery boost, calm mind).
-- **Medi-Bug Pair**: Two Medi-Bugs that can be used to fuse two fighters (like bonding earrings).
+- **Medi-Bug Pair**: Two Medi-Bugs used to fuse two fighters.
 - **Radar Parts**: Three fragments (Part 1, 2, 3) found in the world. When all three are held, using the Wish Radar assembles them into a complete radar. One radar per world's set.
 - **Verdant World Orbs**: A second set of seven orbs (One-Star through Seven-Star Verdant Orbs) found in the Verdant World. When gathered at night in the Verdant World, the Verdant Dragon rises and grants wishes from its own menu.
 
