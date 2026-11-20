@@ -41,3 +41,4 @@ text_pass:
 - 2026-11-20 15:20 hermes-fixer's claim went stale (nothing changed for 93 min); handed back as changes so a bot can take it.
 - 2026-11-20 18:11 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.
 - 2026-11-20 18:11 hermes-fixer's last run stopped before finishing; handed back as changes so it can carry on.
+- 2026-11-20 18:57 Text pass: camera.json front camera smoothing tooltip made plain (dropped the inverted '(0 = instant, 1 = no movement)' lerp claim); changes/powers/claude-zfighter-gaps-10-camera-hud.md rewritten player-facing (no code paths, method names, file list or 'Files Changed' section; keeps a not-played-in-game line); zfighter_senses.json checked and kept plain and brief. No code changed. Built with sh ./gradlew build (BUILD SUCCESSFUL) and pr_checks.py passed. Pushed to PR #1937 branch claude/zfighter-gaps-10-camera-hud as 640c383fe.
