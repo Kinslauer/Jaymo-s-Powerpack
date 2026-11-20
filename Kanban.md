@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 10:36). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 10:39). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -47,9 +47,9 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · in-review
 - [ ] [[Inbox/zfighter-aura-rework|zfighter-aura-rework]] · 🍇 Bacchus · #1911 · in-review
 - [ ] [[Inbox/zfighter-gaps-2-power|zfighter-gaps-2-power]] · 🍇 Bacchus · #1938 · in-review
+- [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · in-review
 
 
 ## Needs Andy
