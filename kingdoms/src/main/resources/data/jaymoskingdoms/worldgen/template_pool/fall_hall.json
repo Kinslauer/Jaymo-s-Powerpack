@@ -1,0 +1,15 @@
+{
+  "name": "jaymoskingdoms:fall_hall",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "processors": "minecraft:empty",
+        "projection": "rigid",
+        "location": "jaymoskingdoms:fall_hall/manor"
+      },
+      "weight": 1
+    }
+  ]
+}

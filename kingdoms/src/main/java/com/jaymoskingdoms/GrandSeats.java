@@ -64,7 +64,10 @@ final class GrandSeats {
 		new Choice("ati_structures:catalonian_castle", Palette.DESERT, Palette.BADLANDS, Palette.SAVANNA),
 		new Choice("ati_structures:granite_fort", Palette.DESERT, Palette.BADLANDS, Palette.SAVANNA),
 		new Choice("ati_structures:fortified_temple", Palette.CHERRY, Palette.JUNGLE),
-		new Choice("ati_structures:dojo", Palette.CHERRY));
+		new Choice("ati_structures:dojo", Palette.CHERRY),
+		// Fall Hall by PaleoTech (CC BY, with the author's OK; FALL-HALL-CREDITS.md): its autumn manor, cut from the map and
+		// shipped with us, so it's always there; the woods count as plains here
+		new Choice("jaymoskingdoms:fall_hall", Palette.PLAINS));
 	// (0.7.598) Grim Kingdoms' keeps and citadels (Winterhold, Whitewarden, Snowgrave, Grain Sack, Glimmervault) are no
 	// longer kingdom seats. Andy: "this would never pass a kingdom's structure": they are fiefdoms' holds only
 	// (GrimSites#HOLDS), and a kingdom raised from nothing gets an Epic town first (EpicTowns).
