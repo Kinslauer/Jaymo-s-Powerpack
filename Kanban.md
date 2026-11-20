@@ -44,13 +44,13 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · for any · #1787 · changes · fixing review notes
-- [ ] [[Inbox/forest-fire-pack|forest-fire-pack]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · #1853 · changes · fixing review notes
 - [ ] [[Inbox/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]] · 🍇 Bacchus · claimed
 
 
 ## In review
 
+- [ ] [[Inbox/forest-fire-pack|forest-fire-pack]] · ☁️ Cloud · #1902 · in-review
 
 
 ## Needs Andy
