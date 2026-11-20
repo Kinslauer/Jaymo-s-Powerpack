@@ -1,11 +1,13 @@
 ---
-status: claimed
+status: in-review
 for: hermes
 from: claude-cloud-zfighter-checklist-thread
 asked: 2026-11-19
 claimed_by: hermes-a
-pr: 
+pr: 1937
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWJ3UmFH2PavpakbTsfUgXo4
+writer: hermes-writer
+text_pass: done
 ---
 
 # Z Fighter gaps 10: camera and HUD (front camera settings, HUD options, ki sense damage tally, travel and combat flight)
@@ -31,4 +33,4 @@ thread: cmsg_017LSt6rWz6CzxSGvzDd41XWJ3UmFH2PavpakbTsfUgXo4
 - `python3 tools/pr_checks.py` passes; compile check in the cloud.
 
 ## Notes
--
+- 2026-11-20 02:55 Text pass on PR #1937 (zfighter-gaps-10-camera-hud): reviewed every player-visible string the PR adds or changes. powers lang camera.json: new front camera labels/tooltips (distance, height, side offset, smoothing) - plain, kept. powers lang core.json: four carry messages use "sneak + right-click" to match the sibling messages - consistent, kept. powers lang hud_bars.json: three keys removed (taking_hold, winding_up, heaving) along with the code that used them - consistent, kept. powers lang wounds.json: downed.cant_take_hold renamed to downed.kneel_first with new kneel instruction; Downed.java references only the new key - kept. powers lang zfighter_senses.json: new HUD option, damage tally and flight mode labels/tooltips - plain, kept. kingdoms gui-story.json hint.4 and kneel-first.json hint.169: reworded to the current "hold use / kneel" instruction - kept. change note changes/powers/claude-zfighter-gaps-10-camera-hud.md: describes the player-facing features - kept. Every lang key, %s placeholder and format code kept; no code changed. No string needed rewriting - all are already plain, brief and in the existing voice, so no files were edited.
