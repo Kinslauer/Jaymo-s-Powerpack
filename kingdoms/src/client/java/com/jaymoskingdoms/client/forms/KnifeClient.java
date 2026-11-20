@@ -32,6 +32,7 @@ public final class KnifeClient {
 		EntityRenderers.register(com.jaymoskingdoms.forms.Lasso.TYPE, net.minecraft.client.renderer.entity.NoopRenderer::new);
 		LassoRope.register();
 		LassoPose.register();
+		LassoStrikeKey.register();
 		ClientPlayNetworking.registerGlobalReceiver(KnifeForms.Mark.TYPE, (payload, context) -> {
 			Minecraft minecraft = context.client();
 			if (minecraft.level == null) {

@@ -119,8 +119,8 @@ public final class Lodged {
 	}
 
 	/**
-	 * Andy (2026-11-20): "right click hold should always be drag, tap can loot". {@code Downed}'s tap on someone downed,
-	 * with nothing taken from their hands: the last blade stuck in them comes out into an empty main hand.
+	 * Andy (2026-11-20): "right click hold should always be drag, tap can loot". Chosen from the body menu on someone
+	 * downed or tied ({@code core.BodyMenu}, a tap of use): the last blade stuck in them comes out into an empty main hand.
 	 */
 	public static void pullOnTap(ServerLevel level, Player player, LivingEntity body) {
 		if (player.getMainHandItem().isEmpty() && body.isAlive() && !stuck(body).isEmpty()) {

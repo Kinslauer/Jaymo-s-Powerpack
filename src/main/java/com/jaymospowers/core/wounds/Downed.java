@@ -99,8 +99,8 @@ import org.jspecify.annotations.Nullable;
  * to interact, for lockpicking, reviving, lifting, this should help free up some binds": the revive's hold was made from a
  * kneel at their side. Andy (2026-11-20): "right click hold should always be drag, tap can loot. and shift should revive.
  * the binds got confusing". So now, on anyone downed: a hold of use standing drags them ({@link Carry#liftDowned}; sneak +
- * right-click while dragging lifts them into your arms), a tap takes the weapons from their hands (Kingdoms, through
- * {@link #TAPPED_LISTENERS}) or pulls a blade out of them, and sneak + a hold of use brings them round. Executions stay
+ * right-click while dragging lifts them into your arms), a tap opens the body menu ({@link com.jaymospowers.core.BodyMenu}:
+ * revive, drag, lift, their weapons, a blade stuck in them), and sneak + a hold of use brings them round. Executions stay
  * sneak + held attack ({@code Finishers}).
  * <p>
  * (0.18.5) Andy (2026-10-29): "while downed, any attack that would deal 3 hearts or more of damage kills instantly ... if
@@ -301,6 +301,10 @@ public final class Downed {
 		 * hold brings them round. Begun standing: a hold drags them ({@link Carry#liftDowned}), a tap takes what they hold.
 		 */
 		final boolean sneaking;
+		/** Chosen from the body menu ({@link #reviveChosen}): it goes on with no sneak held. */
+		boolean chosen;
+		/** Told already, this hold, to get down on a knee first. */
+		boolean toldKneel;
 
 		Revive(LivingEntity body, long start, boolean sneaking) {
 			this.body = body;
@@ -317,11 +321,43 @@ public final class Downed {
 	public static final List<BiConsumer<ServerPlayer, LivingEntity>> BROUGHT_ROUND_LISTENERS = new ArrayList<>();
 
 	/**
-	 * (0.18.92) Told of every tap on a downed body: use let go before {@link #TAP_TICKS}, standing, so never a drag's or a
-	 * revive's hold. Xenoform adds one: a tap tears the Xeno-Band off a downed wearer. Kingdoms adds one: a tap takes the
-	 * weapons and arrows out of a downed one's hands.
+	 * Uses on a body that another mod takes for its own, so no drag, revive or body menu starts from them: Kingdoms adds the
+	 * lasso's (Andy, 2026-11-20, hogtying: "way too many prompts", the drag's bar came up under the tying's).
 	 */
-	public static final List<BiConsumer<ServerPlayer, LivingEntity>> TAPPED_LISTENERS = new ArrayList<>();
+	public static final List<java.util.function.BiPredicate<Player, Entity>> CLAIMED_USES = new ArrayList<>();
+
+	/** Whether another mod takes {@code player}'s use on {@code entity} for its own ({@link #CLAIMED_USES}). */
+	public static boolean claimed(Player player, Entity entity) {
+		for (java.util.function.BiPredicate<Player, Entity> check : CLAIMED_USES) {
+			if (check.test(player, entity)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Revive chosen from the body menu ({@link com.jaymospowers.core.BodyMenu}): one tick of it, as a sneak + hold of use
+	 * would be, with nothing held. True while it goes on.
+	 */
+	public static boolean reviveChosen(ServerPlayer player, LivingEntity body) {
+		if (!isDowned(body) || isDowned(player)) {
+			return false;
+		}
+		long now = player.level().getGameTime();
+		Revive r = REVIVING.get(player.getUUID());
+		if (r == null || r.body != body || !r.chosen) {
+			// (from the menu: no tap to wait out)
+			r = new Revive(body, now - TAP_TICKS, true);
+			r.chosen = true;
+			REVIVING.put(player.getUUID(), r);
+		}
+		if (r.over) {
+			return false;
+		}
+		r.held = now;
+		return true;
+	}
 
 	/**
 	 * (0.21.39) A revive's job in {@link HoldProgress}: this body, this time down (a bar left half full stays with that
@@ -1634,6 +1670,9 @@ public final class Downed {
 		// confusing". Standing, a hold of use drags them (Carry#liftDowned) and a tap takes what's in their hands (Kingdoms) or
 		// stuck in them (Lodged); sneaking, a hold brings them round. No low crouch or kneel needed first any more. Medicine
 		// that wants sneak is Treatment's (above)
+		if (claimed(player, entity)) {
+			return InteractionResult.PASS;
+		}
 		boolean sneaking = player.isShiftKeyDown();
 		Revive held = REVIVING.get(player.getUUID());
 		if (held != null && held.body == entity) {
@@ -1669,17 +1708,7 @@ public final class Downed {
 			if (now - r.held > REVIVE_GRACE) {
 				// let go
 				it.remove();
-				if (!r.begun && !r.over && !r.sneaking && r.held - r.start < TAP_TICKS && isDowned(body)) {
-					// (Andy, 2026-11-20) "tap can loot": a tap standing takes what's in their hands (Kingdoms), or else
-					// pulls out a blade stuck in them
-					ItemStack main = body.getMainHandItem().copy(), off = body.getOffhandItem().copy();
-					for (BiConsumer<ServerPlayer, LivingEntity> listener : TAPPED_LISTENERS) {
-						listener.accept(player, body);
-					}
-					if (ItemStack.matches(main, body.getMainHandItem()) && ItemStack.matches(off, body.getOffhandItem())) {
-						com.jaymospowers.armory.Lodged.pullOnTap(level, player, body);
-					}
-				}
+				// (a tap standing opens the body menu, BodyMenu: their weapons and a blade in them are taken from there)
 				if (r.begun && !r.over) {
 					player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.revive_stopped", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
 				}
@@ -1704,6 +1733,15 @@ public final class Downed {
 				}
 				continue;
 			}
+			// Andy (2026-11-20): "the revive needs to be on knees", and he picked kneeling down for it: a sneak + hold brings
+			// them round only from a kneel at their side (the low crouch, held still: Kneel). The menu's Revive kneels you itself
+			if (!r.chosen && !com.jaymospowers.core.Kneel.kneeling(player)) {
+				if (!r.toldKneel) {
+					r.toldKneel = true;
+					player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.kneel_first", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
+				}
+				continue;
+			}
 			if (!r.begun) {
 				r.begun = true;
 				// (0.21.7) one left for dead is brought round only once they're somewhere safe: no hostile near
@@ -1720,13 +1758,13 @@ public final class Downed {
 					continue;
 				}
 			}
-			if (!player.isShiftKeyDown() || Carry.isCarried(body) || !player.isWithinEntityInteractionRange(body, REVIVE_SLACK)) {
+			if (!r.chosen && !player.isShiftKeyDown() || Carry.isCarried(body) || !player.isWithinEntityInteractionRange(body, REVIVE_SLACK)) {
 				r.over = true;
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.revive_stopped", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
 				continue;
 			}
-			// (0.15.99) down on one knee at their side
-			Tending.keep(player, body);
+			// (0.15.99) down at their side; (Andy, 2026-11-20: "the revive needs to be on knees") on both knees
+			Tending.keep(player, body, true);
 			String job = reviveJob(body);
 			if (!r.resumed) {
 				// (0.21.39) let go before: the bar carries on where it stopped
