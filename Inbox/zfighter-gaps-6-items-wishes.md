@@ -32,4 +32,4 @@ writer: hermes-writer
 - `python3 tools/pr_checks.py` passes; compile check in the cloud.
 
 ## Notes
--
+- 2026-11-20 17:01 Text pass: zfighter.json dedented new entries and added missing item keys fighter_weapon and space_pod; charm_cannot not added since it already exists in zfighter_fusion.json; change note removed the bonding earrings analogy
