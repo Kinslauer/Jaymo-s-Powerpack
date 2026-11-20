@@ -3194,7 +3194,12 @@ public class CorpseEntity extends Entity {
 		}
 		Entity entity = type.get().create(level(), EntitySpawnReason.LOAD);
 		if (entity != null) {
-			entity.load(TagValueInput.create(ProblemReporter.DISCARDING, level().registryAccess(), tag));
+			try {
+				entity.load(TagValueInput.create(ProblemReporter.DISCARDING, level().registryAccess(), tag));
+			} catch (RuntimeException e) {
+				// another mod's own saved part that won't load here (see rebuild()): it keeps what was read before it
+				com.jaymoskitchen.JaymosKitchen.LOGGER.warn("A {} corpse only partly loaded: {}", type.get(), e.toString());
+			}
 		}
 		return entity;
 	}
