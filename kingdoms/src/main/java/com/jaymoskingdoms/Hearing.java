@@ -253,6 +253,8 @@ public final class Hearing {
 		}
 		long now = level.getGameTime();
 		double r = cover(level, at, reach * weather(level, at), now);
+		// (the shy deer run from what people do: they hear it as far as it carries, walls aside)
+		ShyDeer.heard(level, at, r, who, kind);
 		if (who != null && kind != Kind.DECOY && kind != Kind.IMPACT) {
 			long[] was = NOISE.get(who);
 			if (was == null || now - was[1] > NOISE_SHOWN || was[0] <= r * 10.0) {

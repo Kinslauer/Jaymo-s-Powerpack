@@ -866,6 +866,34 @@ public final class KitchenCompat {
 		}
 	}
 
+	/** Kitchen's {@code Scarecrows.guarded(Level, BlockPos)}, looked up the first time (null: no Kitchen, or too old). */
+	private static @Nullable Method GUARDED;
+	private static boolean guardedLooked;
+
+	/** For {@link ShyDeer}: whether one of Kitchen's scarecrows (with its pumpkin) watches over {@code pos}. False without Kitchen. */
+	static boolean scarecrowed(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos) {
+		if (!guardedLooked) {
+			guardedLooked = true;
+			if (FabricLoader.getInstance().isModLoaded(MOD)) {
+				try {
+					GUARDED = Class.forName("com.jaymoskitchen.farmwater.Scarecrows")
+						.getMethod("guarded", net.minecraft.world.level.Level.class, net.minecraft.core.BlockPos.class);
+				} catch (ReflectiveOperationException e) {
+					JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for its scarecrows to keep deer off: {}", e.toString());
+				}
+			}
+		}
+		if (GUARDED == null) {
+			return false;
+		}
+		try {
+			return Boolean.TRUE.equals(GUARDED.invoke(null, level, pos));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Kitchen's scarecrow check failed: {}", e.toString());
+			return false;
+		}
+	}
+
 	private static @Nullable Object call(@Nullable Method method, Entity corpse, Object... args) {
 		if (method == null) {
 			return null;
