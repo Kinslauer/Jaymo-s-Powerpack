@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 12:46). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 13:29). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -10,6 +10,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 - [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 - [[Inbox/wither-model|wither-model]] · 2026-11-19 23:40 ON HOLD (Andy 2026-11-19 6:40 PM ET): "dont send it back ill have someone else take it from here later". Leave the model as it is (v3 previews…
+- [[Inbox/zfighter-gaps-5-training|zfighter-gaps-5-training]] · 2026-11-20 13:08 Text pass on PR #1953 zfighter-gaps-5-training: reviewed all player-visible text - lang/parts/zfighter.json (5 new keys: pod_pilot, pod_pilot.…
 
 ## Stuck
 
@@ -21,7 +22,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-27 waiting for a bot, 4 being built, 2 in review: see [[Kanban]].
+27 waiting for a bot, 3 being built, 2 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
