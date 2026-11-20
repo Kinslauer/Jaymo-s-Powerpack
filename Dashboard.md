@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-19 23:04). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 06:24). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -13,17 +13,34 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## Stuck
 
-- [[Agents/hands-on-cooking-realtime|hands-on-cooking-realtime]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/hands-on-cooking-realtime|hands-on-cooking-realtime]]: stalled, last change 2026-11-20. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]]: stalled, last change 2026-11-20. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/zfighter-gaps-1-stats|zfighter-gaps-1-stats]]: stalled, last change 2026-11-20. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-30 waiting for a bot, 3 being built, 1 in review: see [[Kanban]].
+30 waiting for a bot, 4 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1931 cleaning up blood - scrub stains off floors and walls, poured water washes them (Powers, Kingdoms, 2026-11-20)
+- [ ] #1927 A leg or bagged corpse of a modded creature no longer crashes the game (Kitchen, 2026-11-20)
+- [ ] #1926 Fire is vanilla fire again (Powers, Kingdoms, 2026-11-20)
+- [ ] #1924 Rig arm blast from the fitted arm (Powers, 2026-11-20)
+- [ ] #1923 predators eat the downed, and finish them once full (Powers, 2026-11-20)
+- [ ] #1922 crushing blows throw a few blocks, not across the field (Powers, Kitchen, 2026-11-20)
+- [ ] #1921 Warlock patron from the story, not "element" (Kingdoms, 2026-11-20)
+- [ ] #1920 downed wall sit: no more sinking into the ground (Powers, 2026-11-20)
+- [ ] #1919 Knight armour set removed (Powers, 2026-11-20)
+- [ ] #1918 throne room and gate guards keep their posts, and a night watch (Kingdoms, 2026-11-20)
+- [ ] #1917 Guards' gold plate costs gold (Kingdoms, 2026-11-20)
+- [ ] #1916 spiders leave webbed and lair-kept players be (Kingdoms, 2026-11-20)
+- [ ] #1915 Everyone who speaks to you needs introducing first (Kingdoms, 2026-11-20)
+- [ ] #1914 Guards' gold helms gone (Kingdoms, 2026-11-20)
+- [ ] #1913 Speakeasy ladder loop: climbers no longer pulled back into the den (Kingdoms, 2026-11-20)
+- [ ] #1912 Taken weapons stay taken: no more shields duplicating off downed villagers (Kingdoms, 2026-11-20)
 - [ ] #1910 meat hooks easier to hang a dragged carcass on (Kitchen, 2026-11-20)
 - [ ] #1909 Sitting cats no longer stand on end under Fresh Animations (Powers, 2026-11-20)
 - [ ] #1907 long pitchfork (Powers, Kingdoms, 2026-11-20)
@@ -68,27 +85,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1860 Goblins take the downed alive too (Kingdoms, 2026-11-19)
 - [ ] #1859 Slower NPCs, and barbarians take the downed alive (Kingdoms, 2026-11-19)
 - [ ] #1858 campfire life - camps sit, talk, sing and share a spit roast round their fire (Kingdoms, Kitchen, 2026-11-19)
-- [ ] #1857 The minimap stops showing the Aether again (Powers, 2026-11-19)
-- [ ] #1856 speaker shot finds a clear angle (Powers, Kingdoms, 2026-11-19)
-- [ ] #1855 Take bows and arrows from any downed foe (Kingdoms, 2026-11-19)
-- [ ] #1854 masons' pattern books - the building library (Kingdoms, 2026-11-19)
-- [ ] #1852 One Dimension stack back to the pack's order (Powers, 2026-11-19)
-- [ ] #1851 Building plans: wrong-block colours, layer view, full material list (Kingdoms, 2026-11-19)
-- [ ] #1850 First kingdom raised in the surface town, not a Lost Cities copy under it (Kingdoms, 2026-11-19)
-- [ ] #1849 Watcher's huts much rarer (Kingdoms, 2026-11-19)
-- [ ] #1848 The Old Druid talks to everyone (Kingdoms, 2026-11-19)
-- [ ] #1847 Villagers stop to talk and reply from their own shot (Kingdoms, 2026-11-19)
-- [ ] #1846 camps sound the alarm with a horn (Kingdoms, 2026-11-19)
-- [ ] #1843 loading screen hints wipe in and out (Kingdoms, 2026-11-19)
-- [ ] #1842 Village mods 2: blast mending (Kingdoms, 2026-11-19)
-- [ ] #1841 MCA's village swap rests while its land isn't loaded (Kingdoms, 2026-11-19)
-- [ ] #1840 TaCZ loot lookup no longer stalls the server (Powers, 2026-11-19)
-- [ ] #1839 Village mods 1: the illagers' names (Kingdoms, 2026-11-19)
-- …and 281 older ones.
+- …and 297 older ones.
 
 ## Health
 
-2 problems in the notes: [[Health]].
+3 problems in the notes: [[Health]].
 
 ## Last week
 
