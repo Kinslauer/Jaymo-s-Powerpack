@@ -16050,3 +16050,11 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - Cause: the knock-on reads how fast a Felled tree is moving from Felled's `trunkTop`, which is the tree's middle log. Chopping a log off a tree lying still moves that middle a block or so along the trunk in one tick, which read as the tree moving fast, so any natural tree within a block of its logs went over that way (and our falling trees hit whoever they pass, up to 7 hearts).
 - `FelledCompat` now counts the tree's logs; when it has fewer than when last counted, that tick's jump isn't motion and it starts again from where the middle is now. Real falls, leaning trees and blasts knock on as before.
 - Built; not played.
+
+## 0.11.48 (2026-11-20): strike a hogtied captive from the saddle (#1948)
+
+- **Strike your captive** (Andy: "add a button for the rider to hit the captive and reset their struggle progress, much like red dead redemption 2"): riding a horse with a hogtied captive slung across its back (Powers' Sling), the attack button hits them. No damage, but their struggle against the knots starts over from nothing and stalls for 1.5 s; one strike a second at most. A tied player sees "The blow knocks the fight out of you."
+- It's its own key in Controls ("Strike your captive (on horseback)", Jaymo's Lasso), on the left mouse button by default alongside Attack, and does nothing unless you're riding a horse with a hogtied body over it.
+- Loading hint 173 mentions slinging a captive and striking them.
+- `Lasso.StrikeCaptive` payload, `Lasso.strikeSlung`, `PowersCompat.slungOn`, client `LassoStrikeKey`.
+- Built; not played.
