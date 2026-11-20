@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: zfighter-gaps-1-stats
 branch: claude/zfighter-gaps-1-stats
 with: 
@@ -35,3 +35,4 @@ owns:
 
 ## Done
 What a player will see, and what wasn't tested.
+- 2026-11-20 05:36 No sign of work for 30 min: marked stalled (whoever ran it stopped).
