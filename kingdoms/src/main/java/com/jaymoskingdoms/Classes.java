@@ -767,7 +767,7 @@ public final class Classes {
 		}
 		Component words = staff ? Component.translatable("talk.jaymoskingdoms.wizard.staff", WRIT_SILVER)
 			: writ ? Component.translatable("talk.jaymoskingdoms.wizard.writ", WRIT_SILVER) : Component.translatable("talk.jaymoskingdoms.healer.ask");
-		ServerPlayNetworking.send(player, new TalkNet.Ask(wizard.getId(), wizard.getDisplayName(), words, options, enabled));
+		ServerPlayNetworking.send(player, new TalkNet.Ask(wizard.getId(), Introductions.called(player, wizard), words, options, enabled));
 	}
 
 	/** An answer to the wizard's offer; false when it wasn't one (0.7.212: then perhaps a cleric's, {@link Restoration#answer}). */
