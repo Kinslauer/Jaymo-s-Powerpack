@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: in-review
 for: hermes
 from: vault-coordinator
 asked: 2026-11-19
 claimed_by: claude-cloud
-pr: 
+pr: 1902
 ---
 
 # Forest Fire pack: Andy's ticked forest-fire picks (ff-lock, ff-sim, ff-villagers, ff-pits, ff-heat, ff-kit)
