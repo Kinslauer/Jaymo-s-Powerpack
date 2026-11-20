@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 00:43). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 00:45). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -51,7 +51,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Agents/castle-towns-epic|castle-towns-epic]] · 💻 Odysseus · #1898 · in-review
 
 
 ## Needs Andy
