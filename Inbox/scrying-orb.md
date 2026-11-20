@@ -52,3 +52,4 @@ text_pass:
 - 2026-11-19 20:22 PR #1787 is closed (not merged); branch claude/scrying-orb still has the work. After fixing, reopen #1787 or open a new PR and set pr: to it.
 - 2026-11-19 18:42 hermes-a's claim had no sign of work for 30 min: handed back as changes.
 - 2026-11-20 03:48 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.
+- 2026-11-20 09:37 Review (vault coordinator, reviewer away): not reviewable yet. Open PR is #1896 (claude/scrying-orb, head 72c44066), and its Build Kingdoms check fails (https://github.com/Kinslauer/Jaymo-s-Powerpack/actions/runs/44646311146/job/135989688242). No new commits since. Fix the Kingdoms compile against 26.3 sources, make Andy's 2026-11-19 answers true (no tell for the watched, anything wardable), get all checks green, then set in-review.
