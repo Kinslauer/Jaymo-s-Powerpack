@@ -15857,3 +15857,38 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - **Putting it away**: at dawn, asleep or downed the light goes and the hand holds what it held. Lanterns and poles are kept for the next night; a torch carried all night is burnt down by morning. The light sits in the off hand, so the weapon hand is left alone; a watchman's shield is put back at dawn (saved on him). A plain non-MCA villager uses the main hand, the only one its model shows. A villager who dies holding one drops what that hand held before.
 - With LambDynamicLights the lights in NPC hands light the area round them (lantern poles through Powers' matching change). Without Powers the pole share are plain lanterns.
 - `NightLights`, `NightSightMixin`, `Senses.sight`. Built (`compileJava`); not played. Not checked in game: how far NPCs see on a moonlit night, MCA villagers' AI pulling against the walk home for a light, and the lantern pole's look in hand.
+
+## 0.11.27 (2026-11-20): Fall Hall - PaleoTech's autumn manor as a kingdom's castle (#1902)
+
+- **Fall Hall** (by PaleoTech, CC BY, used with the author's OK; `FALL-HALL-CREDITS.md`) is now one of the castles a
+  kingdom can be raised round: a tall keep of deepslate tile and oak on its own knoll, a lower hall and a second spire,
+  about 26 by 28 blocks and 58 high, with its rooms furnished as PaleoTech built them (beehives, bookshelves, lecterns,
+  paintings, cushions).
+- It joins the plains castles (woods count as plains), so a plains kingdom raised from nothing (`GrandSeats`) or a castle
+  town (`SeatCompounds`) may get it; the throne goes in its hall like any seat's.
+- Cut from the map as our own structure (`jaymoskingdoms:fall_hall`, `structure/fall_hall/manor.nbt`): the manor alone,
+  with no forest or village, trees round its walls taken out, chests, barrels and furnaces emptied, the map's mobs
+  left out. How it was cut: `tools/fall_hall/`.
+- Lore: "Fall Hall" in Lore.md (new): a Heartlander lord's manor-keep of the autumn country.
+- Placed with `/place structure` on a plain 26.3 server: every block, the 7 paintings and 12 cushions came down whole
+  and nothing dropped. Not played in a full world: a kingdom or castle town actually raised round it, and where its
+  throne lands, were not seen.
+
+## 0.11.28 (2026-11-20): forest-fire pack - our wildfires, firefighters and heat run through it (#1902)
+
+- With Peterwolf's Forest Fire in the pack (`ForestFireCompat`; every part does nothing without it):
+- **Wildfires** (Calamities) become its fire incidents: its fire runs them (embers, crown fires, faster uphill, trees
+  burning through), our smoke follows where it burns, and a taken fire may burn three times as long. Its wind follows
+  ours, so its fire, our smoke and the smog lean the same way.
+- **Firefighters**: when our people put a fire out (beaten out, a golem's fist, a thrown water bottle), its fire there
+  goes out too, so it doesn't light again from the hot ground (`Firefighting`, `SplashDousesForestFireMixin`).
+- **Kept fires**: a fire on netherrack or anything else that burns forever (fire pits, village hearths, the Nether's
+  fires) never becomes one of its incidents, so it isn't put out or spread (`ForestFireKeptMixin`).
+- **Heat**: its burning blocks within 12 blocks warm you through Kitchen's body heat (more for a bigger, hotter front,
+  up to 50 degrees); its own heat damage is off (Powers' preset). Its smoke still hurts.
+- **HUD**: its firefighter panel (always at the top left, in fixed English, whenever any fire burned) is replaced by
+  one plate on the top-left rail under the party, shown only while you carry its kit: the fire's name, status, blocks
+  burning and containment, the wind, and your nozzle, pressure and hose (`ForestFireHud`, lang part `forest_fire`).
+- Lore: "The fire crews" in Lore.md (new): Frostborn pumps and air tanks, Verdant crews at the command posts.
+- Built and compiled; not played. The port itself was tested on a plain server (it removes fires on netherrack, which
+  is why the kept-fire mixin exists); the hand-off, dousing, kept fires, body heat and the HUD were not run in game.

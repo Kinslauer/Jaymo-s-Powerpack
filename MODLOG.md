@@ -6690,3 +6690,19 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - For Kingdoms' NPCs who carry lanterns on poles at night (Andy: "you may even encounter villagers with lanterns on sticks"). The lantern pole held in either hand (anyone's: an MCA villager's, a watchman's, a player's) is now a stripped-spruce staff standing upright in the fist with a lantern hung forward off a hook at the top (`models/item/lantern_pole_in_hand.json`, picked by display context the way the spyglass is). In the inventory, on the ground and in frames it stays the flat icon.
 - With LambDynamicLights, anyone holding a lantern pole in a hand gives off a lantern's light (`LdlWornLanternMixin`); worn on the back it already did.
 - Built; not seen in game (the model's angle in hand is worked out on paper, not looked at).
+
+## 0.25.94 (2026-11-20): forest-fire pack - Peterwolf's Forest Fire & Firefighting in the pack (#1902)
+
+- **Peterwolf's Forest Fire & Firefighting** (MIT, by Peterwolf) now ships in the pack, ported to 26.3 by us
+  (`ports/forestfire`, see its `PORT.md`): wildfires that spread with the wind and the slope, throw embers ahead, climb
+  into the crowns and burn trees through, with fire incidents, smoke, and a firefighter's kit (pump, hoses, splitters,
+  nozzles, tanks, sprinklers, breathing mask, air tank, Pulaski, rake). Its water bomber is left out (it needs the
+  Planes mod, which isn't in the pack); its title-screen dedication stays as Peterwolf wrote it.
+- **Its options are set once per install** (`ForestFirePreset`, preLaunch): its villager panic off (ours answer fires
+  their own way), its heat damage off (Kingdoms counts its heat into Kitchen's body heat instead), and lower limits so
+  the friends' server on the Steam Deck keeps up (3000 burning blocks, 200 spread checks and 8 embers a tick, 4 fires at
+  once, 48 chunk tickets, 120 smoke particles). A change made after that is never touched; delete
+  `config/jaymospowers-forestfire-preset-v1` to set them again.
+- Pack wiring: built by `buildForestFire` and shipped in the modpack, the CurseForge zip, the server mods and packwiz.
+- The port was built and run on a plain 26.3 server: a grass and oak fire became an incident and spread (33 to 197
+  blocks). Not played in the full pack; the preset not run in game.
