@@ -476,8 +476,8 @@ public final class Classes {
 			SecondClass.chosen(player, cls, option);
 			return;
 		}
-		// (Andy, 2026-11-17) a first-class Cleric serves the patron their life story raised them to, if it names one
-		String raised = clericPatron(player, cls);
+		// (Andy, 2026-11-17) a first-class Cleric serves the patron their life story raised them to, if it names one; a Warlock's pact is with it too
+		String raised = storyPatron(player, cls);
 		if (raised != null) {
 			option = raised;
 		}
@@ -535,10 +535,13 @@ public final class Classes {
 			Component.translatable("class.jaymoskingdoms.option." + option)).withStyle(ChatFormatting.GOLD));
 	}
 
-	/** The patron a first-class Cleric must serve: the one their life story says they grew up praying to; null for any other class or no faith. */
-	public static @Nullable String clericPatron(Player player, PlayerClass cls) {
+	/**
+	 * The patron a first-class Cleric serves or a first-class Warlock is pacted to: the one their life story says they grew up
+	 * praying to; null for any other class, no faith, or one the class can't take (a Cleric never serves the Ash Whisperer).
+	 */
+	public static @Nullable String storyPatron(Player player, PlayerClass cls) {
 		String faith = player.getAttached(LifeStory.FAITH);
-		return cls == PlayerClass.CLERIC && faith != null && cls.options.contains(faith) ? faith : null;
+		return (cls == PlayerClass.CLERIC || cls == PlayerClass.WARLOCK) && faith != null && cls.options.contains(faith) ? faith : null;
 	}
 
 	/** The spells a new {@code cls} starts with (a Mage's first, a Cleric's prayer, a Druid's rites, a Warlock's pact). */
