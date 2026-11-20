@@ -22,10 +22,11 @@ public final class ZFighterHooks {
 	}
 
 	/** Guarding holds stamina: one feather every eight ticks while it is up. */
-	public static void guardStamina(ServerPlayer player) {
+	public static boolean guardStamina(ServerPlayer player) {
 		if (!player.isCreative() && !player.isSpectator()) {
-			Feathers.spend(player, 1);
+			return spend(player, 1);
 		}
+		return true;
 	}
 
 	/** Flash Step costs stamina; false when empty. */
