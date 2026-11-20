@@ -302,6 +302,11 @@ public final class KitchenCompat {
 			// a warmed or chilled dish keeps the body so for a while, and a dome of force keeps the weather off it
 			bodyHeat.getMethod("addWeather", java.util.function.ToDoubleFunction.class)
 				.invoke(null, (java.util.function.ToDoubleFunction<net.minecraft.server.level.ServerPlayer>) Cantrips::bodyHeat);
+			// (ff-heat) the heat off Peterwolf's forest fire, when it's in the pack (ForestFireCompat)
+			if (ForestFireCompat.LOADED) {
+				bodyHeat.getMethod("addWeather", java.util.function.ToDoubleFunction.class)
+					.invoke(null, (java.util.function.ToDoubleFunction<net.minecraft.server.level.ServerPlayer>) ForestFireCompat::bodyHeat);
+			}
 			bodyHeat.getMethod("addTemperate", java.util.function.Predicate.class)
 				.invoke(null, (java.util.function.Predicate<net.minecraft.world.entity.player.Player>) CampSpells::domed);
 		} catch (ReflectiveOperationException e) {
@@ -862,6 +867,34 @@ public final class KitchenCompat {
 			return true;
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			JaymosKingdoms.LOGGER.debug("Kitchen's waterskin sip failed: {}", e.toString());
+			return false;
+		}
+	}
+
+	/** Kitchen's {@code Scarecrows.guarded(Level, BlockPos)}, looked up the first time (null: no Kitchen, or too old). */
+	private static @Nullable Method GUARDED;
+	private static boolean guardedLooked;
+
+	/** For {@link ShyDeer}: whether one of Kitchen's scarecrows (with its pumpkin) watches over {@code pos}. False without Kitchen. */
+	static boolean scarecrowed(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos) {
+		if (!guardedLooked) {
+			guardedLooked = true;
+			if (FabricLoader.getInstance().isModLoaded(MOD)) {
+				try {
+					GUARDED = Class.forName("com.jaymoskitchen.farmwater.Scarecrows")
+						.getMethod("guarded", net.minecraft.world.level.Level.class, net.minecraft.core.BlockPos.class);
+				} catch (ReflectiveOperationException e) {
+					JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for its scarecrows to keep deer off: {}", e.toString());
+				}
+			}
+		}
+		if (GUARDED == null) {
+			return false;
+		}
+		try {
+			return Boolean.TRUE.equals(GUARDED.invoke(null, level, pos));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Kitchen's scarecrow check failed: {}", e.toString());
 			return false;
 		}
 	}

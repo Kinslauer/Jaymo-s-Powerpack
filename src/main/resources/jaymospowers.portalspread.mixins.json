@@ -1,0 +1,12 @@
+{
+	"required": false,
+	"package": "com.jaymospowers.mixin.portalspread",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"PortalSpreadLookMixin",
+		"PortalSpreadQueueMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}

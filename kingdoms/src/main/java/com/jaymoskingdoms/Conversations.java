@@ -153,6 +153,16 @@ public final class Conversations {
 		}
 	}
 
+	/** Whether {@code mob} is in a talk with someone other than {@code player}. */
+	static boolean talkingWithOther(Mob mob, ServerPlayer player) {
+		for (Map.Entry<UUID, Talk> e : TALKS.entrySet()) {
+			if (e.getValue().villager == mob && !e.getKey().equals(player.getUUID())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** Whether MCA's menu on {@code mob} is open for {@code player}. */
 	private static boolean inMenu(Mob mob, ServerPlayer player) {
 		return McaCompat.interactingWith(mob, player);

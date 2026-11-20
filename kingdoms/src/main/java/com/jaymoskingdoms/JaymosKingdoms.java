@@ -165,6 +165,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.11: lost buildings put up again; the settlement's people answer fires
 		Rebuilds.register();
 		Firefighting.register();
+		// Peterwolf's Forest Fire (when it's in the pack): its fire runs our wildfires, its wind follows ours
+		ForestFireCompat.register();
 		// 0.7.31: disasters strike settlements: news, repairs, tempers, relief quests
 		DisasterRelief.register();
 		// 0.5.23: guards burn monsters' corpses (with Jaymo's Kitchen), or throw them into a fire pit or lava
@@ -269,6 +271,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Clearing.register();
 		Herds.register();
 		Strays.register();
+		BloodChores.register();
 		// 0.7.84: villagers shut in somewhere with no way out turn up on open ground
 		ShutIn.register();
 		// 0.6.4: Jaymo's Powers' aliens (the Xeno-Band) are monsters to folk who haven't seen you change (and its attachment)
@@ -611,6 +614,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		CoinToss.register();
 		Lanterns.register();
 		Lamplight.register();
+		// NPCs need light to see by: they fetch a torch or lantern for the dark, and the night watch always carries one
+		NightLights.register();
 		// medieval picks: lamps gutter in abandoned places, and the court wizards' everburning mote lantern
 		GutteringLamps.register();
 		MoteLanterns.register();
@@ -624,6 +629,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.wild.SpiderSquash.register();
 		// medieval picks: one a spider killed (or who died among spiders underground) wakes webbed up in their lair
 		com.jaymoskingdoms.wild.SpiderLairs.register();
+		// spiders leave anyone webbed up, or kept in their lair, be till they're struck
+		com.jaymoskingdoms.wild.SpiderKeep.register();
 		// medieval picks: the old age's peoples (their ruined cities, sleeping rulers, temples and descendants)
 		com.jaymoskingdoms.oldage.OldAge.register();
 		// medieval picks: the mineshafts (Moog's Mineshafts Reimagined's, and the game's) worked, looted, shaken and haunted

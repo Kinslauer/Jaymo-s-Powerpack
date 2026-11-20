@@ -141,6 +141,13 @@ public final class Underworld {
 	 * running is put out at its nearer end. The bookie alone may go up into town by day ({@link Bookies}).
 	 */
 	static final int HOME_CHECK = 40, SHAFT_STUCK = 2;
+	/**
+	 * Andy: "why do they keep spawning back in the speakeasy then going out the ladder?" Someone on the ladder who has
+	 * climbed at least this far (blocks) since the last check is getting somewhere and is left to it; only one who hasn't
+	 * counts towards {@link #SHAFT_STUCK}. One still on the ladder after this many checks is put out all the same.
+	 */
+	static final double CLIMBING = 0.5;
+	static final int SHAFT_LONGEST = 8;
 	/** A stranger found in a den's room this many checks running, with no player down there, is put out up top. */
 	static final int ROOM_STUCK = 3;
 	/** A den's open hatch falls shut once no player is this near it (blocks) or down below. */
@@ -309,8 +316,14 @@ public final class Underworld {
 	private static int games;
 	/** Realm → the day a site for its den was last looked for and none found (looked for once a day after that). */
 	private static final Map<String, Long> NO_SITE = new HashMap<>();
-	/** Villager or townsman → how many checks running it's been found stranded in a den's shaft or room. */
-	private static final Map<UUID, Integer> IN_SHAFT = new HashMap<>();
+	/**
+	 * Villager or townsman → how many checks running it's been found stranded in a den's shaft or room ({@code still}: of
+	 * those, how many running it hadn't moved up or down the ladder), and its height at the last one.
+	 */
+	private static final Map<UUID, Stranded> IN_SHAFT = new HashMap<>();
+
+	private record Stranded(int checks, int still, double y) {
+	}
 
 	private Underworld() {
 	}
@@ -712,6 +725,10 @@ public final class Underworld {
 			AABB around = room.inflate(HANDS_RANGE, HANDS_RANGE, HANDS_RANGE);
 			for (PathfinderMob m : level.getEntitiesOfClass(PathfinderMob.class, around,
 				m -> m.isAlive() && !m.isPassenger() && !m.isLeashed() && (m instanceof Villager || m instanceof Folk))) {
+				if (Arrests.held(m) || Arrests.busy(m) || DenRaids.involved(m.getUUID())) {
+					// a guard about an arrest and the man he's taking (in or out): theirs to walk, not ours to move
+					continue;
+				}
 				boolean inShaft = shaft.intersects(m.getBoundingBox()) && !room.contains(m.position());
 				boolean inRoom = room.contains(m.position()) || pitRoom != null && pitRoom.contains(m.position());
 				String tag = m instanceof Villager v ? hand(v) : null;
@@ -720,9 +737,7 @@ public final class Underworld {
 					// can't work a trapdoor): up and out beside the hatch. With a player below, a stranger in the room may
 					// be with them, and one on the ladder nearer its foot is put down there instead.
 					if (inShaft || inRoom && !playerBelow) {
-						int n = IN_SHAFT.merge(m.getUUID(), 1, Integer::sum);
-						stuck.add(m.getUUID());
-						if (n >= (inShaft ? SHAFT_STUCK : ROOM_STUCK)) {
+						if (stranded(m, inShaft, stuck)) {
 							boolean down = inShaft && playerBelow && m.getY() - room.minY < hatch.getY() - m.getY();
 							Vec3 out = down ? Speakeasy.wakeSpot(hatch) : topside(level, hatch);
 							m.snapTo(out.x, out.y, out.z, m.getYRot(), 0.0F);
@@ -745,8 +760,9 @@ public final class Underworld {
 				}
 				AABB home = tag.equals(FightPit.FIGHTER_TAG) || tag.equals(FightPit.ATTENDANT_TAG) && pitRoom != null ? pitRoom : room;
 				boolean atHome = home.contains(v.position()) || tag.equals(FightPit.ATTENDANT_TAG) && room.contains(v.position());
-				if (tag.equals(Bookies.TAG) && (Bookies.walking(v.getUUID()) || !atHome && !inShaft && Bookies.outAndAbout(level, v, d))) {
-					// the bookie, up in town on his own business, or leading someone down
+				if (tag.equals(Bookies.TAG) && (Bookies.walking(v.getUUID()) || !atHome && (!inShaft || !stranded(v, true, stuck))
+					&& Bookies.outAndAbout(level, v, d))) {
+					// the bookie, up in town on his own business (or climbing out to it), or leading someone down
 					if (!keptHands.containsKey(tag)) {
 						keptHands.put(tag, v);
 					}
@@ -781,6 +797,20 @@ public final class Underworld {
 			}
 		}
 		IN_SHAFT.keySet().retainAll(stuck);
+	}
+
+	/**
+	 * {@code m}, found in a den's shaft ({@code inShaft}) or room where he doesn't belong, has been there long enough to be
+	 * put out. One climbing up or down the ladder isn't stuck: only the checks he hasn't moved count, unless he's been on it
+	 * far too long. {@code seen} gathers everyone counted this round.
+	 */
+	private static boolean stranded(PathfinderMob m, boolean inShaft, java.util.Set<UUID> seen) {
+		Stranded was = IN_SHAFT.get(m.getUUID());
+		boolean moving = inShaft && was != null && Math.abs(m.getY() - was.y()) >= CLIMBING;
+		Stranded now = was == null ? new Stranded(1, 1, m.getY()) : new Stranded(was.checks() + 1, moving ? 0 : was.still() + 1, m.getY());
+		IN_SHAFT.put(m.getUUID(), now);
+		seen.add(m.getUUID());
+		return inShaft ? now.still() >= SHAFT_STUCK || now.checks() >= SHAFT_LONGEST : now.checks() >= ROOM_STUCK;
 	}
 
 	/** {@code v}'s work site, meeting place or home, if any was down in the den (taken before it kept none): forgotten. */

@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "I I",
+    "III",
+    "III"
+  ],
+  "key": {
+    "I": "minecraft:leather"
+  },
+  "result": {
+    "id": "peterwolfs_forestfire:firefighter_jacket",
+    "count": 1
+  }
+}

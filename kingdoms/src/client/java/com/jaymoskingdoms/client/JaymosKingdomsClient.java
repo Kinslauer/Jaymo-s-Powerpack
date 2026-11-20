@@ -36,6 +36,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.wild.nest.SilkDeeps.place();
 		// (0.7.180) whose names this client's player knows
 		com.jaymoskingdoms.Introductions.viewer = () -> net.minecraft.client.Minecraft.getInstance().player;
+		// and lines naming someone they don't know call them what they are
+		IntroNames.register();
 		// great foes' themes, and the trophy stand's item
 		com.jaymoskingdoms.client.music.FoeMusicClient.register();
 		com.jaymoskingdoms.client.music.SceneMusic.register();
@@ -45,6 +47,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// (Andy, 2026-11-06) what is beyond this player's tier, off JEI and the recipe book
 		TierHidingClient.register();
 		LocksClient.register();
+		// (ff-kit) Peterwolf's firefighter readout on our HUD layout, only while carrying the kit
+		ForestFireHud.register();
 		// (0.7.329) the second batch of Blockbench Workshop creatures
 		com.jaymoskingdoms.client.beasts.BeastsClient.register();
 		EntityRenderers.register(com.jaymoskingdoms.FallingTree.TYPE, FallingTreeRenderer::new);

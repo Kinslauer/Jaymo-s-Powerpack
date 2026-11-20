@@ -12,8 +12,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Carrying someone, right-click (anywhere, at the air too) lets go: they drop from your arms, or with sneak held
- * they're thrown a short way ahead. The same controls as Jaymo's Kitchen's corpses. (0.17.7) Only a fresh press: the
+ * Carrying someone, right-click (anywhere, at the air too) lets go: they drop from your arms, or (Andy, 2026-11-20:
+ * "throwing needs to be more deliberate") with sneak and right-click held they're thrown a short way ahead once the
+ * wind-up fills ({@code Carry.THROW_TICKS}). The same controls as Jaymo's Kitchen's corpses. (0.17.7) Only a fresh press: the
  * held right-click that lifted them doesn't put them straight back down.
  */
 @Mixin(Minecraft.class)
@@ -35,6 +36,12 @@ abstract class CarryUseMixin {
 
 	/** (0.17.7) When use last came (the player's tick count): a pick-up is a held lift now, and that hold mustn't let go at once. */
 	private static int jaymospowers$lastUse = Integer.MIN_VALUE / 2;
+
+	/**
+	 * Andy (2026-11-20): "throwing needs to be more deliberate". This hold began, sneaking, while already carrying: a throw's
+	 * (or a heave's) wind-up, so each repeat of it goes to the server, which throws once it's been held long enough.
+	 */
+	private static boolean jaymospowers$windingUp;
 
 	@Inject(method = "startUseItem", at = @At("HEAD"), cancellable = true)
 	private void jaymospowers$letGo(CallbackInfo ci) {
@@ -58,10 +65,16 @@ abstract class CarryUseMixin {
 			return;
 		}
 		if (sameHold) {
-			// (0.17.7) still the hold that lifted them: let go of right-click first
+			if (jaymospowers$windingUp && this.player.isShiftKeyDown()) {
+				// (Andy, 2026-11-20) still winding up the throw: the server keeps count
+				ClientPlayNetworking.send(new Carry.Release(true));
+				this.rightClickDelay = RELEASE_DELAY;
+			}
+			// (0.17.7) or still the hold that lifted them: let go of right-click first
 			ci.cancel();
 			return;
 		}
+		jaymospowers$windingUp = false;
 		Carry.Carrying carrying = this.player.getAttached(Carry.CARRYING);
 		if (carrying != null && this.hitResult instanceof net.minecraft.world.phys.EntityHitResult aimed
 			&& com.jaymospowers.core.Sling.slingable(aimed.getEntity())
@@ -69,8 +82,14 @@ abstract class CarryUseMixin {
 			// a downed one carried, at a horse: the use goes through to the horse and heaves them over its back (Sling), no letting go
 			return;
 		}
-		ClientPlayNetworking.send(new Carry.Release(this.player.isShiftKeyDown()));
-		this.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, false);
+		boolean toss = this.player.isShiftKeyDown();
+		ClientPlayNetworking.send(new Carry.Release(toss));
+		if (toss) {
+			// (Andy, 2026-11-20) a throw is held for now: the first beat of its wind-up
+			jaymospowers$windingUp = true;
+		} else {
+			this.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, false);
+		}
 		this.rightClickDelay = RELEASE_DELAY;
 		ci.cancel();
 	}

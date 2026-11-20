@@ -15797,3 +15797,224 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - **Rubber-folk regrowth**: a lost limb stretching back plays a balloon being stretched (starting just before the limb is back), then a pop as it lands; a swallow's regrowth plays the stretch and the pop after it (`RubberFolk.STRETCH`, `POP`, `STRETCH_TICKS`; new sounds `rubber/stretch_1..3`, `rubber/pop_1..3`, made by `tools/gen_regrow_sounds.py`).
 - **Green Bio-built blood**: Bio-built now bleed green (the Verdant's sap colour) instead of not bleeding at all, so they bleed, leave stains and can bleed out like other bleeding heritages (`PowersCompat.heritageBlood`).
 - Built; not played or listened to in game.
+
+## 0.11.21 (2026-11-20): shy deer keep away from people (#1894)
+
+- Andy: "deer should avoid civilization completely, darting away from any POSSIBILITY people may be near, much like the real thing ... they only ever come near to eat crops and even then scarecrows will prevent their proximity".
+- **Every deer**: the new `jaymoskingdoms:shy_deer` tag (Naturalist's deer, Cube Animals' red deer, roe deer and reindeer) gets the shy rules, not just Naturalist's. The blossom shrines' little deer stay tame by their shrines. Naturalist's herd sizes and patch rules are unchanged.
+- **Spawning**: no deer spawns within 64 blocks of a settlement's seat, 32 of anything people use (beds, workstations, bells: any point of interest but a wild bee nest), in lamplight, by a scarecrow, within 48 of a player or 32 of a villager/folk/golem, or round a home they've been scared off (`ShyDeer.wild`, `DeerSpawnMixin`).
+- **Bolting**: a deer runs 24 blocks from a player it sees (40 blocks, 16 if sneaking, 10 whatever is between), smells on the wind (48 blocks before sneaking, rain and wind, the wolves' nose), or whose footsteps are fresh (2 minutes) beside it; from any villager, folk, illager or golem it sees within 32; from any noise a person makes that reaches it (steps, work, doors, voices, shots, blasts, through `Hearing.noise`).
+- **Shunning places**: a deer that wanders near a seat, a point of interest, lamplight or a scarecrow turns and runs back out.
+- **Crops**: the one lure. From dusk through the night a deer that isn't full looks for crops within 40 blocks, steals in (still bolting from people, noise and scent, but ignoring houses and lamps), crops 4 plants back to their first stage, then is full for half a day. A spooked raid ends early. Respects mobGriefing.
+- **Scarecrows**: crops guarded by Kitchen's scarecrow (with its pumpkin) or our straw scarecrow (10 blocks) never draw deer, and deer near either run from it; the straw scarecrow now sends deer off too.
+- Druids with Beast Tongue who have studied deer still frighten none; owned, leashed, ridden or named deer are left alone.
+- Built (`compileJava`); not played.
+
+## 0.11.22 (2026-11-20): Duelling guards count as fighting you, so right click blocks (#1895)
+
+- Andy: "i tried to face an honor duel, but i was constantly opening the chat menu with the guard mid fight".
+- An honour duel's student (duels and festival bouts) and a veteran's parry drill or spar keep their fighting flag up for the whole fight and drop it when it ends. Powers reads that flag to tell a foe, so right click on them now raises your guard instead of opening their talk menu (needs Powers' matching change). Their talk menu works again once the duel ends.
+- `Duels.fight`/`finish`, `GuardDrills.tickParries`/`tickSpar`/`stand`. Built; not played.
+
+## 0.11.23 (2026-11-20): smog over large fires (#1897)
+
+- **Smog over large fires** (Andy, 2026-11-20, with a picture of big dark puffy clouds hanging in the sky: "it should go for any large flame so players can see it from a distance"): any large flame (a burning house, a burning tree, a forest; about 8 fires in a 16x16 patch, not a campfire or a lone burning block) gathers a dark bank of smog high above it, where the smoke plumes end: about 30 blocks over a small blaze, up to about 48 over a big one. Big, slow, dark grey puffs (12 to 28 blocks across, bigger, darker and wider over a bigger fire) that hang there, heave a little, drift slowly downwind and linger a minute or two after the fire is out (less over a small fire). They thin when you fly up into them. Not in the Nether.
+- **Seen from afar**: the server counts every fire as it burns and tells each player where the large flames are, out to 512 blocks, so the smog (and a smoke plume under it, for fires further than the plumes used to reach) shows over fires across the land, as far as you can see. A fire in a loaded chunk too far off to tick keeps its smog until the chunk unloads.
+- Cheap: the smog has its own budget of about 0.15 puffs a tick (0.05 in low-end mode, `/lowend`), and far plumes another 0.5 (0.15), so all the smog together stays at about 300 puffs at most. The server sends at most the 64 nearest fires every 2 seconds.
+- Classes: `disasters/FireSmog` (new, server count and sync), `mixin/FireBlockSmogMixin` (new), `client/disasters/FireSmoke` (pall, far plumes), `StormParticle` (PALL kind), `Disasters`, `SkiesClient`.
+- Compiled; not seen in game. Heights, sizes, darkness, how long it lingers and the 8-fire threshold are first guesses.
+
+## 0.11.24 (2026-11-20): Busy villagers say so instead of opening their talk (#1899)
+
+- Andy: "if a villager is busy period theyll give you a message instead of the chat openining, the openining means they are stopping to speak with you".
+- Right click on an MCA villager who is in the middle of something that can't wait gets a line in a bubble (in their tongue), and their talk menu stays shut. Busy is: a fight (anyone they're after, including you on a sneak + right click; a duel, drill or barrage), a talk with someone else, tending the downed, carrying or burying the dead, hauling, unmasking or pinning someone, and looting. Everyday work (routines, hunting, a job) still stops for you, and the menu opening means they have stopped to talk.
+- One line every 2 seconds, so clicking again doesn't stack bubbles.
+- `TalkBusy` (new), `McaTalkHoldMixin`, `Conversations.talkingWithOther`, lang part `talk-busy.json`. Built; not played.
+
+## 0.11.25 (2026-11-20): Castle towns: a real Epic town round the castle, crowned in the castle (#1898)
+
+- **Seat compounds** (`SeatCompounds`) now lay the land's Epic Structures town round their castle instead of our five
+  drawn homes (Andy: "a kingdom built around a castle like fenford's and the surrounding kingdom's buildings made like
+  the ati thalstead"). The town is generated from its own mod by id with the castle where its middle would be; every
+  piece that would stand on the castle, the square, the garden or the barracks, or reach past 128 blocks, is left out.
+  With fewer than 12 pieces of town left (`TOWN_MIN_PIECES`), no compound is placed there.
+- **Grim Kingdoms' castles** (Fenford's kind: Glacierfall Keep, Glimmervault Fortress, Silentgale and the rest, 18 by
+  land, `GRIM_CASTLES`) can be a compound's castle now, beside ATi's and Repurposed Structures'. Alone they are still only
+  fiefdoms' holds, never a kingdom's seat.
+- **Crowned in the castle:** far from any realm the compound is a kingdom (an Epic town with a castle at its heart is a
+  great town); `Seats.buildings` puts the castle's rooms first, so the throne, banner and panic room go in the castle's
+  hall and not in a big house of the town. Near a kingdom it is still its fiefdom, else an allied village. Compounds
+  already in a world (with our drawn homes) keep the old rule and are never crowned.
+- New chunks only. Built and compile-checked; not played (no world generated with it).
+
+## 0.11.26 (2026-11-20): NPCs need light to see at night; they fetch torches and lanterns, the night watch always carries one (#1901)
+
+- Andy: "npcs should be unable to see in the dark as well, searching for a torch or lantern before they venture out, and night watch guards should always have one equipped", and "you may even encounter villagers with lanterns on sticks".
+- **Sight** (`NightLights.makesOut`, new `NightSightMixin` on every NPC line-of-sight check): villagers (MCA's too), a settlement's or camp's folk and outlaws see you as by day in light 7 or more. In less they make you out only within 3.5 blocks, plus 2.5 per level of light. The light is the brightest of where you stand, what you carry (a torch or lantern in hand, a hip lantern or lantern pole) and their own carried light, which fades a level per block. At night the sky's share follows the moon the way the screen does: about 13 blocks under a full moon, 3.5 under a new one. Anyone on fire or glowing is seen. This covers every system that asks whether an NPC sees you (theft witnesses, villagers coming over to talk, guards and raiders targeting). A foe they're already chasing stays in sight. Folk's stealth sight (`Senses`) uses the same light.
+- **Who sees in the dark anyway**: undead and creatures of the night (`jaymoskingdoms:darkvision`), darkvision bloods (Nightborn, Deepborn, Stoneborn, Hollow, goblins, orcs, moon elves, Feline, Serpen, Arachnid), orc and goblin folk, vampires, a changed werewolf, anyone with night vision.
+- **Fetching a light**: a grown, waking villager or folk in the dark at night with no light in hand gets one before going on. In order: one from their own pocket (a villager's inventory), the lantern they kept from the night before, else they walk to the nearest of their home, their settlement's stores (a lantern, else a torch, taken from the chests) or a lit campfire (they light a torch at it). At home they take their household's light, picked by who they are: 3 in 20 a lantern on a pole, 5 in 20 a lantern, the rest a torch (free; the stores are the paid source). Nothing within 48 blocks, or not reached in a minute, and they go without for two minutes before trying again.
+- **Night watch**: a guard or archer awake at night and not off duty (MCA realm guards' evenings off count as off) always carries a light, even in a lit street and even if he sees in the dark. It comes from the stores (a lantern, on a pole one time in three, else a torch), else a torch for nothing.
+- **Putting it away**: at dawn, asleep or downed the light goes and the hand holds what it held. Lanterns and poles are kept for the next night; a torch carried all night is burnt down by morning. The light sits in the off hand, so the weapon hand is left alone; a watchman's shield is put back at dawn (saved on him). A plain non-MCA villager uses the main hand, the only one its model shows. A villager who dies holding one drops what that hand held before.
+- With LambDynamicLights the lights in NPC hands light the area round them (lantern poles through Powers' matching change). Without Powers the pole share are plain lanterns.
+- `NightLights`, `NightSightMixin`, `Senses.sight`. Built (`compileJava`); not played. Not checked in game: how far NPCs see on a moonlit night, MCA villagers' AI pulling against the walk home for a light, and the lantern pole's look in hand.
+
+## 0.11.27 (2026-11-20): Fall Hall - PaleoTech's autumn manor as a kingdom's castle (#1902)
+
+- **Fall Hall** (by PaleoTech, CC BY, used with the author's OK; `FALL-HALL-CREDITS.md`) is now one of the castles a
+  kingdom can be raised round: a tall keep of deepslate tile and oak on its own knoll, a lower hall and a second spire,
+  about 26 by 28 blocks and 58 high, with its rooms furnished as PaleoTech built them (beehives, bookshelves, lecterns,
+  paintings, cushions).
+- It joins the plains castles (woods count as plains), so a plains kingdom raised from nothing (`GrandSeats`) or a castle
+  town (`SeatCompounds`) may get it; the throne goes in its hall like any seat's.
+- Cut from the map as our own structure (`jaymoskingdoms:fall_hall`, `structure/fall_hall/manor.nbt`): the manor alone,
+  with no forest or village, trees round its walls taken out, chests, barrels and furnaces emptied, the map's mobs
+  left out. How it was cut: `tools/fall_hall/`.
+- Lore: "Fall Hall" in Lore.md (new): a Heartlander lord's manor-keep of the autumn country.
+- Placed with `/place structure` on a plain 26.3 server: every block, the 7 paintings and 12 cushions came down whole
+  and nothing dropped. Not played in a full world: a kingdom or castle town actually raised round it, and where its
+  throne lands, were not seen.
+
+## 0.11.28 (2026-11-20): forest-fire pack - our wildfires, firefighters and heat run through it (#1902)
+
+- With Peterwolf's Forest Fire in the pack (`ForestFireCompat`; every part does nothing without it):
+- **Wildfires** (Calamities) become its fire incidents: its fire runs them (embers, crown fires, faster uphill, trees
+  burning through), our smoke follows where it burns, and a taken fire may burn three times as long. Its wind follows
+  ours, so its fire, our smoke and the smog lean the same way.
+- **Firefighters**: when our people put a fire out (beaten out, a golem's fist, a thrown water bottle), its fire there
+  goes out too, so it doesn't light again from the hot ground (`Firefighting`, `SplashDousesForestFireMixin`).
+- **Kept fires**: a fire on netherrack or anything else that burns forever (fire pits, village hearths, the Nether's
+  fires) never becomes one of its incidents, so it isn't put out or spread (`ForestFireKeptMixin`).
+- **Heat**: its burning blocks within 12 blocks warm you through Kitchen's body heat (more for a bigger, hotter front,
+  up to 50 degrees); its own heat damage is off (Powers' preset). Its smoke still hurts.
+- **HUD**: its firefighter panel (always at the top left, in fixed English, whenever any fire burned) is replaced by
+  one plate on the top-left rail under the party, shown only while you carry its kit: the fire's name, status, blocks
+  burning and containment, the wind, and your nozzle, pressure and hose (`ForestFireHud`, lang part `forest_fire`).
+- Lore: "The fire crews" in Lore.md (new): Frostborn pumps and air tanks, Verdant crews at the command posts.
+- Built and compiled; not played. The port itself was tested on a plain server (it removes fires on netherrack, which
+  is why the kept-fire mixin exists); the hand-off, dousing, kept fires, body heat and the HUD were not run in game.
+
+## 0.11.29 (2026-11-20): Start searches read the land from the seed first, like /locate (#1903)
+
+- **Faster starts**: a life story's search for a place to stand (the wild, camps, realms, wrecks, monoliths, the death ring) now reads land that isn't made yet straight from the world seed, the way /locate does: the generator's own column of blocks shows whether a spot will be sea, lake or dry ground without making the chunk. Only spots the seed says are dry land are made, in at most 2 chunks a search (`FORESEEN_CHUNKS`, was up to 6 blind ones). Before, a ring that fell half in the sea made chunks of open water, tried again, and could wait out the whole minute before falling back.
+- A whaler's harbour walks in from the sea by the seed too, making only the shore's own chunks (it used to make every chunk of water on the way, on the server thread), and a new monolith is never tried for out at sea.
+- The log says how many columns each search read and how long it took ("A start's search read N columns of land not made yet from the seed (M dry) in X ms").
+- Classes: `LifeStory` (`worthMaking`, `foreseenDry`, `FORESEEN_CHUNKS`), `StoryGround` (`shore`, `monolith`).
+- Dynamic Waters rivers are carved after the seed's column, so a spot in one still shows up only once its chunk is made (the search then tries the next).
+- Built; not played.
+
+## 0.11.30 (2026-11-20): Town troubles out of chat (#1905)
+
+- **No more "Fire has swept through Briarwood."** A town's troubles (fire, raid, war, famine, plague, drought, a missing
+  villager, a feud) no longer post a line to the chat of players nearby when they start or end (Andy, 2026-11-20). You
+  learn of one from the gold-marked villagers asking for help; the town's ledger still lists them (`TownTroubles`).
+- Built; not played.
+
+## 0.11.31 (2026-11-20): farmers wear straw hats (#1907)
+
+- **Farmers** (our own farmers, MCA farmers and the Family farmhand start) wear the Blossomland straw hat instead of the settler's wide hat; they keep the settler coat and trousers. Carters keep the settler hat. A farmer already in the settler hat changes into the straw one the next time a player is near, and MCA no longer takes a farmer's straw hat off (`FrontierWear.keeps`).
+- Built; not played.
+
+## 0.11.32 (2026-11-20): spiders leave webbed and lair-kept players be (#1916)
+
+- **Saved for the queen** (Andy: "when you get this respawn the spiders shouldnt keep attacking you, they also shouldnt attack you if you are webbed up, as they are saving you for the queen"): spiders no longer bite anyone wrapped in web (Powers' Webbed, any layer), and after a blackout wakes you in a spiders' lair, the lair's spiders leave you be there, webbed or not, until you get 32 blocks out of it or a day passes. Spiders already on you let go; none can be set on you (`wild/SpiderKeep`, `SpiderKeepMixin` on `Mob.setTarget`).
+- Striking a spider (a blow or a shot; a squash underfoot doesn't count) rouses them for a minute, webbed or kept, and ends the lair's keeping, as captors turn on a captive who acts up. The brood queen isn't held back.
+- Built; not played.
+
+## 0.11.33 (2026-11-20): Speakeasy ladder loop: climbers no longer pulled back into the den (#1913)
+
+- Andy: "why do they keep spawning back in the speakeasy then going out the ladder?" The den's housekeeping (every 2 s) put anyone it found on the ladder twice running back at the nearer end, so with a player below, a guard or townsman climbing out who was still in the lower half was set back down in the room, climbed again, and was set down again. Now someone who has moved up or down the ladder since the last look is left to climb; only one who hasn't moved for two looks (or has been on it 16 s) is put out.
+- A guard making an arrest and the man he's taking are no longer moved by the den at all (a den hand being marched off was snapped back to his spot); nor is anyone still on a raid.
+- The bookie may climb out to town by day without being put back at his table.
+- `Underworld.keepHome`, `Underworld.stranded`. Built; not played.
+
+## 0.11.34 (2026-11-20): Everyone who speaks to you needs introducing first (#1915)
+
+- Andy: "every humanoid that speaks should have to be introduced except for the exceptions we made before like the judge". Names already stayed off name tags, Jade and MCA's screens until you were introduced, but our own talk cards and lines still gave them away (his clip: Petra asking "Name the ground you stand on", Vlastimil's rescue plea, "[Helena]" at the dice table, "You take the weapons from Vlastimil").
+- `Introductions.called(viewer, entity)`: what a player hears someone called. Their name once introduced, else what they are ("Male Villager", "Orc", "Stranger" for a player). Used for the head of every talk card (`Menus.ask` and the cards in Approaches, Careers, Classes, ClassTeachers, Helmsmen, Restoration, ShipTalk, Skills, SteamAirships, BlossomTraders, Talks, Disguises), the approach hints, the downed "You take the weapons from" line and the chat fallback of `Speech`.
+- Gambling tables (`Tables`): each player sees the house and the other players by the names they know them by, in the seat list and in the table's note (whose turn, who won, who was caught).
+- Client safety net (`client/IntroNames`): any chat or action-bar line, or talk card head, carrying the name of a villager or player you haven't been introduced to (a name keeps which entity it is in its hover) has it swapped for what they are.
+- Exceptions kept as before: Powers' Z Fighter characters at their post (the Judge, the Keeper, the Hermit, the Tinkerer, the masters...), your MCA family, your group, a masked player's costume name, rulers once you've had an audience. Strangers, captains, helmsmen, druids and the like still introduce themselves as before.
+- Names spoken inside a line (a tale's characters, a villager mentioning a neighbour) aren't changed, only who is speaking. Built; not played.
+
+## 0.11.35 (2026-11-20): Taken weapons stay taken: no more shields duplicating off downed villagers (#1912)
+
+- **Dupe fixed** (Andy's clip, 2026-11-19: a downed MCA guard's shield came back after every tap of use, three shields from one villager). MCA's equipment routine hands a guard a brand-new shield (and a sword if their pack has none) whenever a hand is empty, and it kept running on the downed, so each disarm (the standing tap of use) was refilled at once.
+- MCA no longer dresses or arms a downed villager (`McaEquipmentMixin`). A villager a player has disarmed is tagged `jaymoskingdoms.disarmed` and from then on only takes up hand items that are in their own pack (`Downed.owned`), so coming to doesn't hand them a fresh shield to take again; give them a weapon and they'll use it.
+- MCA arms a villager with the very stack in their pack, so a weapon taken from the hand now leaves the pack too (`Downed.unpack`); before, a full inventory dropped a stack that was still in their pack.
+- A realm's Folk soldier who was disarmed isn't given a new shield or banner by the rank sweep (`Ranks`).
+- Safety net: while a disarmed body stays down, anything that turns up in its hands is cleared each tick, so nothing can be taken twice.
+- Built; not played.
+
+## 0.11.36 (2026-11-20): Guards' gold helms gone (#1914)
+
+- **No gold helm on a guard or knight** (Andy: "the gold helm they wear needs to go"): the harness helm no longer takes a gold-looking finish (gilt-banded, etched and gilt, gilded). A Crown realm's guards wear theirs heat-blued, the royal colour without the gilt; Faith and Coin realms' guards (etched and gilt) wear bright steel, as their mail is. The rest of their plate keeps its finish.
+- **Guards already wearing one swap it**: a guard or archer near a player who has a gold-finished helm on, or kitted for him, has it refinished at once (the same helm and wear, its name changed to match). A gold helm in the stores' spoils is refinished when it's handed out.
+- `HeraldryWear.helmFinish` / `ungilded`, used by `GuardKit` (helm options, the kit, its sweep) and `HeraldryWear.plate` (knights).
+- Built; not played.
+
+## 0.11.37 (2026-11-20): Guards' gold plate costs gold (#1917)
+
+- **Gold armour needs gold** (Andy: "they can have the gold armor as long as it requires gold to craft"): a guard's plate piece in a gold finish (gilt-banded, etched and gilt, gilded) now takes 2 gold ingots from the settlement's stores when it's made, as gilding at the smithing anvil does for a player. Without the gold it's made heat-blued (the Crown's) or bright instead. A piece already in the stores is handed out as it is.
+- A realm's knights (the troop ladder's, and those dressed as the realm's knights) pay for their gold-finished kit once, 18 gold for its nine plate pieces, when they're made knight; without it the kit is heat-blued or bright. One already wearing gold plate keeps it.
+- `HeraldryWear.payGold` / `kitFinish` / `refinished`, `GuardKit.gold`.
+- Built; not played.
+
+## 0.11.38 (2026-11-20): Warlock patron from the story, not "element" (#1921)
+
+- **Life story page**: a Warlock's pick under the story no longer says "Pick your element:". It reads "Pick the patron you serve:", like a Cleric's. Paladins now read "Pick your oath:" and Rangers "Pick your sworn foe:" (both said "element" too).
+- **Patron = the one you pledged to**: a first-class Warlock's pact is now with the patron the story's faith page names, the same way a Cleric serves theirs (the chips are held to it on the story page, in the character creator and on the class screen; the server holds them to it as well). Only a Warlock who grew up praying to no one picks freely (the Reaper included). The Ash Whisperer, who no Cleric serves, can be a Warlock's story patron.
+- A Cleric raised to the Ash Whisperer no longer gets a patron their class can't take on the server; they pick, as the screen already showed.
+- Existing saves: Warlocks already made keep the pact they have (`Classes.storyPatron`, `LifeStory.live`, `LifeStoryScreen.patronChip`).
+- Built; not played.
+
+## 0.11.39 (2026-11-20): throne room and gate guards keep their posts, and a night watch (#1918)
+
+- Andy: "why is the throneroom empty?" (a clip of an empty throne room at about 9 PM in game). The ruler holds court
+  there only at their morning court and the afternoon audience, and is in bed by evening, as before. But the two guards
+  posted in the throne room and the three at the gate never stayed there either: since a realm's guards became MCA
+  villagers, MCA's brain ignored the post they were given and they walked off with the town patrol, so the hall was
+  empty whenever the ruler was out of it.
+- Now a guard posted in the throne room or at the gate (`HallWatch`) walks back when they stray and stands at their post
+  while on duty, watching a player who comes near. Their shift off by day and their evening among their people stay as
+  they were; the escort, arrests, audiences and fights still come first.
+- Night watch: those posted guards keep watch from dusk to dawn (woken if abed), so the throne room and the gate are
+  never left empty at night. The town's other guards still have the night off (`Rulers.offDuty`).
+- Built; not played.
+
+## 0.11.40 (2026-11-20): Wildfires spread our own way again (#1926)
+
+- Our wildfires (`Calamities`) are no longer handed to Peterwolf's Forest Fire: they spread with the wind, light the
+  woods and burn out on their own timer as before the forest-fire pack, with vanilla fire, so they can be beaten and
+  punched out and follow the fire-spread gamerule (Andy, 2026-11-20).
+- Gone with it: the kept-fire mixin (`ForestFireKeptMixin`; fire pits and hearths were only at risk while it took
+  fires over) and `ForestFireCompat.wildfire`, `front` and `kept`. Dousing its fire, its heat in Kitchen's body heat,
+  the wind and the HUD plate stay (they only matter for an incident started by its commands, or for the hose).
+- Built; not played.
+
+## 0.11.41 (2026-11-20): villagers scrub blood out of their homes (#1931)
+
+- **Villagers clean up blood indoors**: a blood stain on a settlement's floors under a roof (Powers' pools, smears and
+  footprints) is seen by the nearest grown villager within 14 blocks who can see it and has nothing pressing to do.
+  They sometimes grumble about it in a bubble, walk over and scrub it with swipes of the arm, a splash and a brush
+  sound, until it's gone, then the next stain in the same room, and now and then say they're done. A big pool takes
+  them about half a minute.
+- Guards stay at their posts. A villager busy with something that can't wait (a fight, a talk, tending, the dead, a
+  prisoner, loot: `TalkBusy.occupied`), afraid, held by the guards, downed or shooing an animal out leaves it. Blood
+  with a body still in it (a corpse, the downed) is left until the body's gone. They give up after a minute and leave
+  that spot for two. Outdoors the rain does it. Nothing without Powers.
+- Loading hint 187 now says how to scrub blood off floors and walls.
+- Code: `BloodChores`, `PowersCompat.bloodStains`/`scrubStains`; lines in `lang/parts/blood_chores.json`.
+- Built; not played.
+
+## 0.11.42 (2026-11-20): companions wake you from a faint, captors don't (#1932)
+
+- Andy: "players and npcs should be able to wake players who faint". Your own companions now come to wake you first, from up to 32 blocks and without needing to see you, and quicker than villagers walk. They always wake you (a hint or a straight telling plus a drink or a bite, by temperament) and never rob you.
+- Villagers, guards and settlement folk still come as before, but nobody who'd carry you off wakes you first: camp raiders, outlaws and other captors, and guards whose realm wants you in its cells. Those leave you to be taken.
+- `FaintWakers.companion`, `choose(mob, canSteal)`; `HeldBack.wants` (the check from `gaol`, now shared).
+- Built; not played.
+
+## 0.11.43 (2026-11-20): body controls - tap takes a downed one's weapons (#1935)
+
+- Andy: "right click hold should always be drag, tap can loot". Taking the weapons and arrows off a downed mob now happens on the tap (Powers' `Downed.TAPPED_LISTENERS`, once use is let go), so holding use to drag them no longer empties their hands first. The click is still swallowed so a downed villager's screen never opens.
+- Loading hint 169 rewritten for the new controls (hold drags, tap takes, sneak + hold revives, kneel for locks); hint 4 now says executions are sneak + hold attack.
+- Built; not played.

@@ -195,7 +195,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		}
 		if (!wet && !this.print && round) {
 			// (0.20.41) a pool spread over a ledge pours down its side
-			BloodWallMark.edges(level, x, y, z, this.baseSize, color, this.age, this.lifetime - this.age, this.stain);
+			BloodWallMark.edges(level, x, y, z, this.baseSize, color, this.age, this.lifetime - this.age, this.stain, this);
 		}
 		if (this.magma && this.age < 40) {
 			level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE, x, y + 0.05, z, 0.0, 0.04, 0.0);
@@ -255,6 +255,30 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 	/** (0.20.54) How often a passing pool checks for rain on it (ticks), and how long it then takes to wash away. */
 	static final int RAIN_CHECK = 20, RAIN_WASH = 100;
 
+	/** Whether water stands or runs at this spot (a bucket poured over it, a flood): it washes the blood that's only for show away. */
+	static boolean underWater(ClientLevel level, double x, double y, double z) {
+		net.minecraft.core.BlockPos pos = net.minecraft.core.BlockPos.containing(x, y, z);
+		return level.hasChunkAt(pos) && level.getFluidState(pos).is(net.minecraft.tags.FluidTags.WATER);
+	}
+
+	/** Scrubbed off ({@code BloodClient.wipe}): a passing pool fades away over {@code ticks}. Lasting stains are the server's to scrub. */
+	void wipe(int ticks) {
+		if (!this.wet && !this.stain && this.lifetime - this.age > ticks) {
+			this.lifetime = this.age + ticks;
+			this.quickFade = ticks;
+		}
+	}
+
+	/** Whether it is a lasting stain that has been scrubbed, washed or drawn away (or is gone): the runs it fed down a wall go with it. */
+	boolean emptied() {
+		return !this.isAlive() || this.stain && this.targetSize <= 0.0F;
+	}
+
+	/** Whether there's blood to see here: not water, and not already going. */
+	boolean bloody() {
+		return this.isAlive() && !this.wet && this.targetSize > 0.0F && this.quickFade == 0;
+	}
+
 	/** (0.20.54) Whether rain falls on this spot (a client-side check, for the blood that's only for show). */
 	static boolean rainedOn(ClientLevel level, double x, double y, double z) {
 		if (!level.isRaining()) {
@@ -269,7 +293,7 @@ public final class BloodPuddle extends Particle implements BloodDecals.Decal {
 		super.tick();
 		// (0.20.54) rain washes a passing pool away (a lasting stain is washed by the server, BloodTrail.wash)
 		if (!this.wet && !this.stain && this.age % RAIN_CHECK == 0 && this.lifetime - this.age > RAIN_WASH
-			&& rainedOn(this.level, this.x, this.y + 0.5, this.z)) {
+			&& (rainedOn(this.level, this.x, this.y + 0.5, this.z) || underWater(this.level, this.x, this.y + 0.05, this.z))) {
 			this.lifetime = this.age + RAIN_WASH;
 			this.quickFade = RAIN_WASH;
 		}

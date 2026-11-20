@@ -1656,6 +1656,8 @@ public final class Mortality {
 		// experience, their spawn point and every effect too)
 		long dark = player.getAttachedOrElse(REBORNING, (long)player.level().getServer().getTickCount());
 		wipe(player);
+		// (the lost legs' slowness is a saved modifier: it doesn't go with the wiped marks on its own)
+		Dismember.bodyRenewed(player);
 		player.setAttached(REBORNING, dark);
 		player.getInventory().clearContent();
 		player.getEnderChestInventory().clearContent();

@@ -60,6 +60,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.npc.Npc;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.Item;
@@ -348,15 +349,26 @@ public final class Guard {
 
 	/**
 	 * (0.20.76) Right click on {@code mob} (both sides) should raise {@code player}'s guard rather than reach the mob
-	 * (MCA's chat, a trade): a guarding weapon in the main hand and a foe under the crosshair. Sneaking talks as before.
+	 * (MCA's chat, a trade): a foe under the crosshair, and either something that blocks in hand (a guarding weapon, a
+	 * shield in either hand) or a foe who talks (an {@link Npc}: its talk menu never opens mid-fight, so a mid-duel click
+	 * never lands in the chat). Sneaking talks as before.
 	 */
 	public static boolean guardsAgainst(Player player, Mob mob) {
 		if (player.isSpectator() || player.isShiftKeyDown() || !mob.isAlive() || Downed.isDowned(mob)) {
 			return false;
 		}
+		if (!foe(player, mob)) {
+			return false;
+		}
+		// someone who talks (MCA's villagers, guards, orcs, bandits) never opens their talk mid-fight, whatever is in
+		// hand: the click goes to the hand (a guard, a shield, a fist), and sneak still talks
+		if (mob instanceof Npc) {
+			return true;
+		}
 		ItemStack main = player.getMainHandItem();
-		boolean guards = KnifeGuard.guards(main.getItem()) || weaponGuard(main) && !HammerSlam.isWarhammer(main.getItem());
-		return guards && foe(player, mob);
+		// a guarding weapon or a shield in the main hand (not a warhammer: its right click is the smash), a shield in the off
+		return KnifeGuard.guards(main.getItem()) || main.has(DataComponents.BLOCKS_ATTACKS) && !HammerSlam.isWarhammer(main.getItem())
+			|| player.getOffhandItem().has(DataComponents.BLOCKS_ATTACKS);
 	}
 
 	/**

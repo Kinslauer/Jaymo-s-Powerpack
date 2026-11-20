@@ -53,16 +53,21 @@ import org.jspecify.annotations.Nullable;
  * Seat compounds ({@code jaymoskingdoms:seat_compound}): a kingdom's seat the world generates whole, in every kind of
  * country, not only where an Epic town stands. Andy (of Hedmere's chateau): "make bits and pieces (castle, garden,
  * square, barracks, homes) generate together and allow builders to expand". In the middle, one of the seat castles the
- * pack's structure mods ship ({@link GrandSeats#CHOICES}, picked by the land and read from its own mod by id, as the
- * grand seats are); round it the town's first pieces, drawn in the land's materials by the same designs the builders
- * use ({@link Buildings}): a paved square with the bell, a walled garden with a fountain, the barracks and three to five
- * homes, each door turned toward the castle. The ground under all of it is levelled as a village's is (beard_box).
+ * pack's structure mods ship ({@link GrandSeats#CHOICES}, or one of Grim Kingdoms' castles, {@link #GRIM_CASTLES}, picked
+ * by the land and read from its own mod by id, as the grand seats are); beside it a paved square with the bell, a walled
+ * garden with a fountain and the barracks, drawn in the land's materials by the same designs the builders use
+ * ({@link Buildings}), each door turned toward the castle; and round all of it the land's Epic town (Andy, 2026-11-20:
+ * "a kingdom built around a castle like fenford's and the surrounding kingdom's buildings made like the ati thalstead"),
+ * generated from its own mod by id with the castle where its middle would be, every piece of it that would stand on the
+ * castle or the square, garden and barracks left out. No town round it, no compound. The ground under all of it is
+ * levelled as a village's is (beard_box).
  * <p>
  * The castle comes as a lived-in seat, not a dungeon: its spawners and loot are taken out as it generates. When a
- * player first comes near the bell, the compound is founded ({@link #found}): a kingdom of its own when no realm stands
- * within {@link KingdomEvents#CAPITAL_SPACING}, its throne in the castle ({@link KingdomEvents#foundIn}); near a
- * kingdom, that kingdom's fiefdom ({@link GrimSites#foundFief}); else a village allied to the nearest. Every piece is
- * kept from the builders' tearing down ({@link Holds}), and the barracks and homes count as built, so the builders grow
+ * player first comes near the bell, the compound is founded ({@link #found}): an Epic town with a castle at its heart is
+ * a great town, so it is a kingdom of its own when no realm stands within {@link KingdomEvents#CAPITAL_SPACING}, its
+ * throne in the castle's hall ({@link KingdomEvents#foundIn}; the castle's rooms are looked at first, {@link Seats#buildings});
+ * near a kingdom, that kingdom's fiefdom ({@link GrimSites#foundFief}); else a village allied to the nearest. Every
+ * piece is kept from the builders' tearing down ({@link Holds}), and the barracks counts as built, so the builders grow
  * the town outward from there as any other ({@link Planner}).
  */
 public final class SeatCompounds {
@@ -70,8 +75,8 @@ public final class SeatCompounds {
 	static final Identifier ID = JaymosKingdoms.id("seat_compound");
 	/** Chunks kept from the world's middle, where players start. */
 	static final int SPAWN_CLEARANCE = 24;
-	/** Homes round the castle: at least, at most. */
-	static final int HOMES_MIN = 3, HOMES_MAX = 5;
+	/** The town round the castle: at least this many of its pieces must stand clear of the castle, or there's no compound. */
+	static final int TOWN_MIN_PIECES = 12;
 	/** Blocks kept clear between two pieces; how many times a crowded piece is pushed out, and how far each time. */
 	static final int GAP = 4, PUSHES = 3, PUSH_STEP = 6;
 	/** Angles tried round the castle for each piece (each side of its own, in turn), and the step between them (degrees). */
@@ -90,7 +95,32 @@ public final class SeatCompounds {
 	public static StructureType<Compound> TYPE;
 	public static StructurePieceType PIECE, CLEAN;
 
-	/** What a ring piece is. */
+	/**
+	 * Grim Kingdoms' castles (Vanilla Edition: all rights reserved, "feel free to add to any modpack"; read from its own
+	 * mod by id, nothing copied), Fenford's kind (Andy, 2026-11-20). Only ever at the heart of a town here: alone they
+	 * stay fiefdoms' holds ({@link GrimSites}), never a kingdom's seat ({@link GrandSeats}).
+	 */
+	static final List<GrandSeats.Choice> GRIM_CASTLES = List.of(
+		new GrandSeats.Choice("grim_kingdoms:glacierfall_keep_plains", Palette.PLAINS),
+		new GrandSeats.Choice("grim_kingdoms:glimmervault_fortress_plains", Palette.PLAINS),
+		new GrandSeats.Choice("grim_kingdoms:silentgale_citadel_plains", Palette.PLAINS),
+		new GrandSeats.Choice("grim_kingdoms:eldermoor", Palette.PLAINS),
+		new GrandSeats.Choice("grim_kingdoms:grain_sack_keep", Palette.PLAINS),
+		new GrandSeats.Choice("grim_kingdoms:zweiberg_plains", Palette.PLAINS),
+		new GrandSeats.Choice("grim_kingdoms:glacierfall_keep", Palette.SNOWY),
+		new GrandSeats.Choice("grim_kingdoms:glimmervault_fortress", Palette.SNOWY),
+		new GrandSeats.Choice("grim_kingdoms:silentgale_citadel", Palette.SNOWY),
+		new GrandSeats.Choice("grim_kingdoms:snowgrave_citadel", Palette.SNOWY),
+		new GrandSeats.Choice("grim_kingdoms:winterhold_citadel", Palette.SNOWY),
+		new GrandSeats.Choice("grim_kingdoms:shardspire_castle", Palette.SNOWY),
+		new GrandSeats.Choice("grim_kingdoms:whitewarden_keep", Palette.SNOWY),
+		new GrandSeats.Choice("grim_kingdoms:frostbloom_bastion", Palette.SNOWY),
+		new GrandSeats.Choice("grim_kingdoms:zweiberg", Palette.SNOWY),
+		new GrandSeats.Choice("grim_kingdoms:winterhold_citadel_taiga", Palette.TAIGA),
+		new GrandSeats.Choice("grim_kingdoms:zweiberg_taiga", Palette.TAIGA),
+		new GrandSeats.Choice("grim_kingdoms:frozen_onion_fort_taiga", Palette.TAIGA));
+
+	/** What a ring piece is (HOUSE: no longer drawn, kept for compounds already in saved chunks). */
 	enum Kind {
 		SQUARE("meeting_point_square"), GARDEN("decor_garden"), BARRACKS("barracks"), HOUSE("house");
 
@@ -175,23 +205,40 @@ public final class SeatCompounds {
 				GrandSeats.empty(level, piece.getBoundingBox());
 			}
 		}
-		// a lone castle is never a kingdom: a fiefdom of the kingdom near, else a village; with none near to swear to, a kingdom
-		// is looked for in an Epic town further out meanwhile
-		Faction lord = nearestKingdom(server, bell);
-		Faction founded = lord != null && GrimSites.count(server, lord, true) < GrimSites.FIEFS_PER_KINGDOM
-			? GrimSites.foundFief(level, start, "seat_compound", lord, "message.jaymoskingdoms.seat.fiefdom") : null;
-		if (founded == null) {
-			founded = Villages.found(level, bell);
-			Villages.ally(server, founded);
+		// an Epic town with its castle is a great town: a kingdom far from any realm, its throne in the castle (Andy, 2026-11-20);
+		// a compound from before the town came round it (homes of ours only) is never one. Near a kingdom, its fiefdom, else a village
+		Faction founded = null;
+		boolean town = !homes(start);
+		if (town && Factions.realmNear(server, bell, KingdomEvents.CAPITAL_SPACING) == null) {
+			founded = KingdomEvents.foundIn(level, bell, start);
 		}
-		if (Factions.realmNear(server, bell, KingdomEvents.CAPITAL_SPACING) == null) {
-			EpicTowns.seek(level, bell);
+		if (founded == null) {
+			Faction lord = nearestKingdom(server, bell);
+			founded = lord != null && GrimSites.count(server, lord, true) < GrimSites.FIEFS_PER_KINGDOM
+				? GrimSites.foundFief(level, start, "seat_compound", lord, "message.jaymoskingdoms.seat.fiefdom") : null;
+			if (founded == null) {
+				founded = Villages.found(level, bell);
+				Villages.ally(server, founded);
+			}
+			if (Factions.realmNear(server, bell, KingdomEvents.CAPITAL_SPACING) == null) {
+				EpicTowns.seek(level, bell);
+			}
 		}
 		if (founded != null) {
 			settle(server, founded, start);
 			JaymosKingdoms.LOGGER.info("The seat compound by {} is {}'s ({})", bell, founded.name(), founded.type());
 		}
 		return founded;
+	}
+
+	/** A compound laid before the Epic town came round the castle: our own drawn homes instead. */
+	private static boolean homes(StructureStart start) {
+		for (StructurePiece piece : start.getPieces()) {
+			if (piece instanceof Piece p && p.kind == Kind.HOUSE) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** The kingdom whose seat is nearest {@code at}, within {@link #FIEF_RANGE}. */
@@ -211,7 +258,7 @@ public final class SeatCompounds {
 		return best;
 	}
 
-	/** Every piece held from the builders; the barracks and homes entered as built (never rebuilt to another design). */
+	/** Every piece held from the builders; the barracks (and an old compound's homes) entered as built (never rebuilt to another design). */
 	private static void settle(MinecraftServer server, Faction f, StructureStart start) {
 		List<Works.Built> built = new ArrayList<>();
 		for (StructurePiece piece : start.getPieces()) {
@@ -292,22 +339,17 @@ public final class SeatCompounds {
 			if (core == null) {
 				return Optional.empty();
 			}
-			// the town's first pieces round it
-			List<Kind> plan = new ArrayList<>(List.of(Kind.SQUARE, Kind.BARRACKS, Kind.GARDEN));
-			int homes = HOMES_MIN + random.nextInt(HOMES_MAX - HOMES_MIN + 1);
-			for (int i = 0; i < homes; i++) {
-				plan.add(Kind.HOUSE);
-			}
+			// the square, the barracks and the garden beside it
+			List<Kind> plan = List.of(Kind.SQUARE, Kind.BARRACKS, Kind.GARDEN);
 			double base = random.nextDouble() * Math.PI * 2.0;
 			boolean squared = false;
 			for (int i = 0; i < plan.size(); i++) {
 				Kind kind = plan.get(i);
-				// (the square at the front, the barracks beside it, the garden behind, the homes spread round)
+				// (the square at the front, the barracks beside it, the garden behind)
 				double want = switch (kind) {
 					case SQUARE -> base;
 					case BARRACKS -> base + Math.PI / 3.0;
-					case GARDEN -> base + Math.PI;
-					case HOUSE -> base - Math.PI / 3.0 - (i - 3) * (Math.PI * 4.0 / 3.0) / Math.max(1, homes);
+					case GARDEN, HOUSE -> base + Math.PI;
 				};
 				Piece piece = this.ring(context, kind, land, random.nextLong(), want, core, placed, middle);
 				if (piece != null) {
@@ -320,9 +362,50 @@ public final class SeatCompounds {
 				// (no bell, nothing to found)
 				return Optional.empty();
 			}
+			// the land's Epic town round all of it, its middle under the castle
+			if (!this.town(context, land, middle, placed, all)) {
+				return Optional.empty();
+			}
 			// last, the castle cleared of its spawners and loot as each chunk of it is made
 			all.addPiece(new Clean(core.inflatedBy(2)));
 			return Optional.of(new GenerationStub(first, Either.right(all)));
+		}
+
+		/**
+		 * The land's Epic town ({@link EpicTowns#villageFor}) generated at the compound's chunk, as world generation would,
+		 * each of its pieces added that stands clear of everything {@code placed} (the castle, the square, the garden and
+		 * the barracks) and within {@link #REACH}. False if the town won't generate or too little of it is left.
+		 */
+		private boolean town(GenerationContext context, Palette land, ChunkPos middle, List<BoundingBox> placed, StructurePiecesBuilder all) {
+			Optional<Holder.Reference<Structure>> village = context.registryAccess().lookupOrThrow(Registries.STRUCTURE)
+				.get(Identifier.parse(EpicTowns.villageFor(land)));
+			if (village.isEmpty()) {
+				return false;
+			}
+			GenerationContext there = new GenerationContext(context.registryAccess(), context.chunkGenerator(), context.biomeSource(),
+				context.climateSampler(), context.randomState(), context.structureTemplateManager(), context.seed(), middle,
+				context.heightAccessor(), b -> true);
+			Optional<GenerationStub> stub = village.get().value().findValidGenerationPoint(there);
+			if (stub.isEmpty() || stub.get().getPiecesBuilder().isEmpty()) {
+				return false;
+			}
+			int x0 = middle.getMinBlockX() - REACH, z0 = middle.getMinBlockZ() - REACH, x1 = middle.getMaxBlockX() + REACH,
+				z1 = middle.getMaxBlockZ() + REACH;
+			List<StructurePiece> kept = new ArrayList<>();
+			for (StructurePiece piece : stub.get().getPiecesBuilder().build().pieces()) {
+				BoundingBox b = piece.getBoundingBox();
+				if (b.minX() < x0 || b.minZ() < z0 || b.maxX() > x1 || b.maxZ() > z1 || crowded(b, placed)) {
+					continue;
+				}
+				kept.add(piece);
+			}
+			if (kept.size() < TOWN_MIN_PIECES) {
+				return false;
+			}
+			for (StructurePiece piece : kept) {
+				all.addPiece(piece);
+			}
+			return true;
 		}
 
 		/** A ring piece set round the castle near the angle it wants, on ground level and dry enough; null if none fits. */
@@ -370,13 +453,15 @@ public final class SeatCompounds {
 		}
 	}
 
-	/** The seat castles that suit {@code land} in this world (the plains' if it has none of its own). */
+	/** The seat castles and Grim castles that suit {@code land} in this world (the plains' if it has none of its own). */
 	private static List<Holder<Structure>> castles(RegistryAccess access, Palette land) {
 		Registry<Structure> registry = access.lookupOrThrow(Registries.STRUCTURE);
 		List<Holder<Structure>> out = new ArrayList<>();
-		for (GrandSeats.Choice c : GrandSeats.CHOICES) {
-			if (c.suits(land)) {
-				registry.get(Identifier.parse(c.id())).ifPresent(out::add);
+		for (List<GrandSeats.Choice> choices : List.of(GrandSeats.CHOICES, GRIM_CASTLES)) {
+			for (GrandSeats.Choice c : choices) {
+				if (c.suits(land)) {
+					registry.get(Identifier.parse(c.id())).ifPresent(out::add);
+				}
 			}
 		}
 		return out.isEmpty() && land != Palette.PLAINS ? castles(access, Palette.PLAINS) : out;

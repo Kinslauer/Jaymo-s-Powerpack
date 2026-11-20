@@ -75,6 +75,14 @@ public final class Dodge {
 	static final int COOLDOWN_SLACK = 3;
 	/** How long the drawn roll takes (ticks): one full tumble. */
 	public static final int ROLL_TICKS = 10;
+	/**
+	 * Andy: "holding the button should make you cover a bit more ground, then gradually transition to prone". The Dodge
+	 * key still held this many ticks into a ground roll makes it the long roll: the tumble slows to last
+	 * {@link #LONG_ROLL_TICKS} in all, carried along the ground at {@link #LONG_SPEED_START} easing to {@link #LONG_SPEED_END}
+	 * (blocks/tick), and if the key is still held as it ends you go on down into prone ({@code DodgeClient}).
+	 */
+	public static final int HOLD_TICKS = 4, LONG_ROLL_TICKS = 18;
+	public static final double LONG_SPEED_START = 0.24, LONG_SPEED_END = 0.08;
 	/** The flip: feathers it costs, the push along the way you hold and up (blocks/tick), how much of your own speed is kept, and how long the turn takes (ticks). */
 	public static final int FLIP_COST = 4;
 	public static final double FLIP_SPEED = 0.42, FLIP_UP = 0.3, FLIP_KEEP = 0.6;
@@ -105,19 +113,50 @@ public final class Dodge {
 		}
 	}
 
-	/** A dodge's roll: when it started, which way it went (a unit vector on the ground), and whether it's the flip in the air. */
-	public record Rolling(long start, float x, float z, boolean flip) {
+	/** Client → server: the Dodge key is still held into the roll, so it's the long one ({@link #HOLD_TICKS}). */
+	public record Extend() implements CustomPacketPayload {
+		public static final Type<Extend> TYPE = new Type<>(JaymosPowers.id("dodge_extend"));
+		public static final StreamCodec<ByteBuf, Extend> CODEC = StreamCodec.unit(new Extend());
+
+		@Override
+		public Type<Extend> type() {
+			return TYPE;
+		}
+	}
+
+	/**
+	 * A dodge's roll: when it started, which way it went (a unit vector on the ground), whether it's the flip in the air,
+	 * and whether the key was held into it so it's the long roll ({@link #LONG_ROLL_TICKS}).
+	 */
+	public record Rolling(long start, float x, float z, boolean flip, boolean extended) {
 		public static final StreamCodec<ByteBuf, Rolling> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, Rolling::start,
 			ByteBufCodecs.FLOAT, Rolling::x,
 			ByteBufCodecs.FLOAT, Rolling::z,
 			ByteBufCodecs.BOOL, Rolling::flip,
+			ByteBufCodecs.BOOL, Rolling::extended,
 			Rolling::new);
+
+		public Rolling(long start, float x, float z, boolean flip) {
+			this(start, x, z, flip, false);
+		}
 
 		/** How long this one's turn takes (ticks). */
 		public int ticks() {
-			return this.flip ? FLIP_TICKS : ROLL_TICKS;
+			return this.flip ? FLIP_TICKS : this.extended ? LONG_ROLL_TICKS : ROLL_TICKS;
 		}
+	}
+
+	/**
+	 * How far through its one tumble a ground roll is drawn (0 to 1), {@code elapsed} ticks in. A long roll goes as a short
+	 * one does for its first {@link #HOLD_TICKS} (it's only known to be long then), then turns slower to end at
+	 * {@link #LONG_ROLL_TICKS}, so nothing jumps when it becomes long.
+	 */
+	public static float rollShare(float elapsed, boolean extended) {
+		if (extended && elapsed > HOLD_TICKS) {
+			elapsed = HOLD_TICKS + (elapsed - HOLD_TICKS) * (ROLL_TICKS - HOLD_TICKS) / (float)(LONG_ROLL_TICKS - HOLD_TICKS);
+		}
+		return elapsed / ROLL_TICKS;
 	}
 
 	/** (0.15.74) On a player who's dodging (or last did): synced to everyone, who draw the roll. */
@@ -139,19 +178,21 @@ public final class Dodge {
 	 */
 	public static volatile int localRollId = -1;
 	public static volatile long localRollStart = Long.MIN_VALUE / 2;
+	/** Client only: how long the local player's own roll keeps the low body ({@link #ROLL_TICKS}, or the long roll's). */
+	public static volatile int localRollTicks = ROLL_TICKS;
 
 	/**
 	 * Whether {@code player} is in a dodge's roll on the ground (not the flip in the air), rolled up small: for those
-	 * {@link #ROLL_TICKS} ticks the body is the crawl's low one ({@code CrawlPlayerMixin}), so a roll goes under a gap a block
+	 * {@link #ROLL_TICKS} ticks (a long roll's {@link #LONG_ROLL_TICKS}) the body is the crawl's low one ({@code CrawlPlayerMixin}), so a roll goes under a gap a block
 	 * and a half high. Standing up afterwards is vanilla's: a crouch or crawl is kept until there's room. Either side.
 	 */
 	public static boolean rollingLow(Player player) {
 		long now = player.level().getGameTime();
-		if (player.level().isClientSide() && player.getId() == localRollId && now - localRollStart < ROLL_TICKS) {
+		if (player.level().isClientSide() && player.getId() == localRollId && now - localRollStart < localRollTicks) {
 			return true;
 		}
 		Rolling rolling = player.getAttached(ROLLING);
-		return rolling != null && !rolling.flip() && now - rolling.start() < ROLL_TICKS;
+		return rolling != null && !rolling.flip() && now - rolling.start() < rolling.ticks();
 	}
 
 	/** Told of every dodge the server lets through. */
@@ -176,6 +217,8 @@ public final class Dodge {
 		ServerPlayNetworking.registerGlobalReceiver(Start.TYPE, (payload, ctx) -> start(ctx.player(), payload));
 		PayloadTypeRegistry.serverboundPlay().register(Flip.TYPE, Flip.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Flip.TYPE, (payload, ctx) -> flip(ctx.player(), payload));
+		PayloadTypeRegistry.serverboundPlay().register(Extend.TYPE, Extend.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Extend.TYPE, (payload, ctx) -> extend(ctx.player()));
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer player && evades(player, source)));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			LAST.remove(handler.player.getUUID());
@@ -267,6 +310,15 @@ public final class Dodge {
 		for (Listener listener : LISTENERS) {
 			listener.dodged(player, dir);
 		}
+	}
+
+	/** The key held into a ground roll still under way: everyone sees it go long, and the low body lasts as long. */
+	private static void extend(ServerPlayer player) {
+		Rolling rolling = player.getAttached(ROLLING);
+		if (rolling == null || rolling.flip() || rolling.extended() || player.level().getGameTime() - rolling.start() >= LONG_ROLL_TICKS) {
+			return;
+		}
+		player.setAttached(ROLLING, new Rolling(rolling.start(), rolling.x(), rolling.z(), false, true));
 	}
 
 	private static void start(ServerPlayer player, Start start) {

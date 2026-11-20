@@ -372,6 +372,7 @@ public final class GuardKit {
 		for (ServerPlayer player : level.players()) {
 			for (Worker w : Workers.near(level, player.getBoundingBox().inflate(SWEEP_RANGE), x -> x.role() == Folk.GUARD || x.role() == Folk.ARCHER)) {
 				PathfinderMob m = w.mob();
+				ungild(m);
 				Kit kit = m.getAttached(KIT);
 				if (kit == null || now - kit.reviewed() < REVIEW || m.getTarget() != null) {
 					continue;
@@ -387,6 +388,26 @@ public final class GuardKit {
 				if (m instanceof Folk || !m.getItemBySlot(EquipmentSlot.CHEST).isEmpty()) {
 					wear(m, after, given);
 				}
+			}
+		}
+	}
+
+	/**
+	 * (Andy, 2026-11-20: "the gold helm they wear needs to go") A guard who has a gold-finished helm on, or kitted for him
+	 * to put on, has it refinished at once ({@link HeraldryWear#ungilded}): the same helm, its gilt gone.
+	 */
+	private static void ungild(Mob m) {
+		ItemStack worn = m.getItemBySlot(EquipmentSlot.HEAD);
+		ItemStack plain = HeraldryWear.ungilded(worn);
+		if (plain != worn) {
+			m.setItemSlot(EquipmentSlot.HEAD, plain);
+		}
+		Kit kit = m.getAttached(KIT);
+		if (kit != null) {
+			ItemStack kitted = kit.piece(0);
+			ItemStack refinished = HeraldryWear.ungilded(kitted);
+			if (refinished != kitted) {
+				m.setAttached(KIT, kit.with(0, refinished));
 			}
 		}
 	}
@@ -413,7 +434,9 @@ public final class GuardKit {
 		for (int i = 0; i < SIZE; i++) {
 			ItemStack held = keep ? had.piece(i) : ItemStack.EMPTY;
 			if (i < ARMOUR.length) {
-				out.set(i, choose(c, armour(c, i, given[i]), held, given[i], spoils, leather(c, i, given[i])));
+				ItemStack piece = choose(c, armour(c, i, given[i]), held, given[i], spoils, leather(c, i, given[i]));
+				// (no gold helm on a guard, kept or taken from the spoils: HeraldryWear.helmFinish)
+				out.set(i, i == 0 ? HeraldryWear.ungilded(piece) : piece);
 			} else if (i == MAINHAND) {
 				List<Option> options = weapons(c, given[i]);
 				out.set(i, options == null ? ItemStack.EMPTY : choose(c, options, held, given[i], null, stone(given[i])));
@@ -497,7 +520,7 @@ public final class GuardKit {
 	private static @Nullable ItemStack pay(Ctx c, Option o) {
 		Cost cost = o.cost();
 		if (cost.material() == null && cost.count() == 0 && cost.emeralds() == 0) {
-			return o.stack().copy();
+			return gold(c, o.stack().copy());
 		}
 		ItemStack own = Storage.take(c.level(), c.f(), s -> s.is(o.stack().getItem()), 1);
 		if (!own.isEmpty()) {
@@ -512,17 +535,29 @@ public final class GuardKit {
 				}
 				left -= taken.getCount();
 			}
-			return o.stack().copy();
+			return gold(c, o.stack().copy());
 		}
 		if (cost.emeralds() > 0) {
 			MinecraftServer server = c.level().getServer();
 			Faction now = Factions.get(server, c.f().id());
 			if (now != null && now.treasury() >= TREASURY_KEPT + cost.emeralds()) {
 				Factions.update(server, now.id(), x -> x.withTreasury(Math.max(0L, x.treasury() - cost.emeralds())));
-				return o.stack().copy();
+				return gold(c, o.stack().copy());
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * (Andy, 2026-11-20: "they can have the gold armor as long as it requires gold to craft") A piece made new in a gold
+	 * finish takes {@link HeraldryWear#GILD_GOLD} gold ingots from the stores as well; without them it's made heat-blued
+	 * (the Crown's) or bright instead.
+	 */
+	private static ItemStack gold(Ctx c, ItemStack made) {
+		if (!HeraldryWear.gilt(made) || HeraldryWear.payGold(c.level(), c.f(), 1)) {
+			return made;
+		}
+		return HeraldryWear.refinished(made, HeraldryWear.helmFinish(HeraldryArmour.finish(made)));
 	}
 
 	/** The pieces of the spoils in the stores that someone may wear (never the crown's tiers, {@link Regalia#reserved}). */
@@ -625,7 +660,7 @@ public final class GuardKit {
 				String helm = helm(c);
 				if (helm != null) {
 					HeraldryArmour.Piece piece = HeraldryArmour.PIECES.get(helm);
-					ItemStack stack = HeraldryArmour.stack(helm, c.finish());
+					ItemStack stack = HeraldryArmour.stack(helm, HeraldryWear.helmFinish(c.finish()));
 					if (c.tag() != null && helm.equals(HeraldryWear.realmHelm(c.f()))) {
 						stack = PowersCompat.realmMarked(stack, c.tag());
 					}

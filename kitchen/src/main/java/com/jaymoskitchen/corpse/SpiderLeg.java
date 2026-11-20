@@ -89,7 +89,14 @@ public class SpiderLeg extends Entity {
 			return null;
 		}
 		ValueInput input = TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), tag);
-		entity.load(input);
+		try {
+			entity.load(input);
+		} catch (RuntimeException e) {
+			// another mod's own saved part that won't load on the client (Re:Animal's wolf ball-play is never made there,
+			// so reading it threw while a leg was drawn, and Andy's game crashed, 2026-11-20 12:21 AM): the body keeps what
+			// was read before it, as CorpseEntity's body does
+			com.jaymoskitchen.JaymosKitchen.LOGGER.warn("A {} leg's body only partly loaded: {}", type.get(), e.toString());
+		}
 		if (entity instanceof LivingEntity living) {
 			input.read("attributes", AttributeInstance.Packed.LIST_CODEC).ifPresent(living.getAttributes()::apply);
 		}

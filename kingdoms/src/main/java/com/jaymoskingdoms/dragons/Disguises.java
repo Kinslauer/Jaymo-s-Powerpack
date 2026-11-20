@@ -480,7 +480,7 @@ public final class Disguises {
 		ASKED.put(player.getUUID(), new Asking(villager.getId(), kind, stage));
 		List<Component> options = List.of(Component.translatable(lang(kind, q + ".a")), Component.translatable(lang(kind, q + ".b")),
 			Component.translatable(lang(kind, q + ".c")));
-		ServerPlayNetworking.send(player, new TalkNet.Ask(villager.getId(), villager.getDisplayName(), Component.translatable(lang(kind, q)).withColor(kind.color),
+		ServerPlayNetworking.send(player, new TalkNet.Ask(villager.getId(), com.jaymoskingdoms.Introductions.called(player, villager), Component.translatable(lang(kind, q)).withColor(kind.color),
 			options, List.of(true, true, true)));
 	}
 

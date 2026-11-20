@@ -1179,6 +1179,24 @@ public final class Dismember {
 		}
 	}
 
+	/** Whether {@code target} carries the lost legs' slowness or weak jump (right or not: {@link #legs} reworks it). */
+	public static boolean legsSlowed(LivingEntity target) {
+		AttributeInstance speed = target.getAttribute(Attributes.MOVEMENT_SPEED);
+		AttributeInstance jump = target.getAttribute(Attributes.JUMP_STRENGTH);
+		return speed != null && speed.getModifier(LEG_SPEED_ID) != null || jump != null && jump.getModifier(LEG_JUMP_ID) != null;
+	}
+
+	/**
+	 * A new life's body ({@code Mortality#endLife}): the old one's lost parts are already wiped with its other marks, so the
+	 * stump tags go too and the legs' slowness is taken off (it is a saved modifier, so it outlived the wipe).
+	 */
+	public static void bodyRenewed(LivingEntity target) {
+		for (int part : PARTS) {
+			target.removeTag(tag(part));
+		}
+		Prosthetics.apply(target);
+	}
+
 	/** Slowed by the legs it's lost (none: back to normal). */
 	static void legs(LivingEntity target, int mask) {
 		// (0.18.82) a leg with a prosthetic isn't bare: Prosthetics adds its own, smaller penalty

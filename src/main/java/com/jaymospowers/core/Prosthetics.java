@@ -132,7 +132,8 @@ public final class Prosthetics {
 				return;
 			}
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-				if (fitted(player) != 0 || hasModifiers(player)) {
+				// (a lost legs' slowness with no lost legs under it is reworked too: a new life used to keep it)
+				if (fitted(player) != 0 || hasModifiers(player) || Dismember.legsSlowed(player)) {
 					sync(player);
 				}
 			}

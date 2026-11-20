@@ -47,6 +47,9 @@ Sources: github.com/ElenaiDev/Feathers, github.com/ElenaiDev/ElenaiDodge2.0, git
 - `client/stamina/DodgeClient`: the key and the double-tap Sneak (with Combat Roll's old guards: not while clinging or
   hanging from a bar, nor 10 ticks after; not on Web's double-Sneak yank), direction from the movement keys turned by
   your facing, back with none held. The hop is applied on the client at once.
+  Now: one move per press (the key going down, not its repeats); back only while locked on (unlocked, Back is dropped,
+  nothing held rolls forward, Back alone does nothing); the key held 4 ticks into a ground roll makes the long roll
+  (`Dodge.HOLD_TICKS`, `LONG_ROLL_TICKS`, synced as `Rolling.extended`), and held to its end it goes on into prone.
 - `client/stamina/FeathersHud`: the row, right above hunger, moved up for air bubbles and a mount's hearts. Art
   `textures/gui/feathers.png` from `tools/gen_feathers.py` (9x9 icons on vanilla's HUD grid).
 - Powers (Andy: the powers that had extra dodges get extra feathers): Darktide +12 golden (`DarktideDodges`; dashes cost a dodge's feathers, a landed flurry refunds them; the

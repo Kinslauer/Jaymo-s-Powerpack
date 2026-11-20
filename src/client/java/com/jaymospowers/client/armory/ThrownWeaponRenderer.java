@@ -30,6 +30,8 @@ public class ThrownWeaponRenderer extends EntityRenderer<ThrownWeapon, ThrownWea
 		boolean upright;
 		/** How far its tip reaches past the middle (model pixels). */
 		float tip;
+		/** How much bigger than a plain sprite it's drawn. */
+		float size;
 	}
 
 	/** Tumbling weapons turn this many degrees a tick. */
@@ -44,6 +46,8 @@ public class ThrownWeaponRenderer extends EntityRenderer<ThrownWeapon, ThrownWea
 	 * (tools/blockbench/harpoon.py), so it rolls 45 like a sprite but reaches 12.5 pixels past the middle, not 11.3.
 	 */
 	private static final java.util.Map<Identifier, Float> TIPS = java.util.Map.of(JaymosPowers.id("harpoon"), 12.5F);
+	/** Long weapons drawn bigger than a plain sprite: the pitchfork is as long in flight as in the hand (its model's held size). */
+	private static final java.util.Map<Identifier, Float> SIZES = java.util.Map.of(JaymosPowers.id("pitchfork"), 2.0F);
 	/** How deep the tip sinks in (blocks). */
 	private static final float TIP_SINK = 0.2F;
 
@@ -68,6 +72,7 @@ public class ThrownWeaponRenderer extends EntityRenderer<ThrownWeapon, ThrownWea
 		Identifier id = BuiltInRegistries.ITEM.getKey(entity.getItem().getItem());
 		state.upright = UPRIGHT.contains(id);
 		state.tip = TIPS.getOrDefault(id, state.upright ? UPRIGHT_TIP : SPRITE_TIP);
+		state.size = SIZES.getOrDefault(id, 1.0F);
 		this.itemModelResolver.updateForNonLiving(state.item, entity.getItem(), ItemDisplayContext.NONE, entity);
 	}
 
@@ -76,15 +81,16 @@ public class ThrownWeaponRenderer extends EntityRenderer<ThrownWeapon, ThrownWea
 		poseStack.pushPose();
 		poseStack.rotateDegrees(Axis.YP, state.yRot - 90.0F);
 		poseStack.rotateDegrees(Axis.ZP, state.xRot);
+		float scale = SCALE * state.size;
 		if (!state.spins) {
-			float tip = state.tip * SCALE / 16.0F;
+			float tip = state.tip * scale / 16.0F;
 			poseStack.translate(TIP_SINK - tip, 0.0F, 0.0F);
 		}
 		poseStack.rotateDegrees(Axis.ZN, state.upright ? 90.0F : 45.0F);
 		if (state.spins) {
 			poseStack.rotateDegrees(Axis.ZN, state.ageInTicks * SPIN_DEGREES);
 		}
-		poseStack.scale(SCALE, SCALE, SCALE);
+		poseStack.scale(scale, scale, scale);
 		state.item.submit(poseStack, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor);
 		poseStack.popPose();
 		super.submit(state, poseStack, collector, camera);

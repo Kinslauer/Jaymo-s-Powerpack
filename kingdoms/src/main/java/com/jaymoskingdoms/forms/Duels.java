@@ -202,7 +202,7 @@ public final class Duels {
 	}
 
 	/** Whether {@code id} (a student, or a player) is in a duel just now. */
-	static boolean busy(UUID id) {
+	public static boolean busy(UUID id) {
 		for (Duel d : DUELS.values()) {
 			if (d.foe.equals(id) || d.player.equals(id)) {
 				return true;
@@ -454,6 +454,9 @@ public final class Duels {
 			foe.setTarget(null);
 		}
 		foe.setLastHurtByMob(null);
+		// their fighting flag stays up the whole duel (both sides see it), so a right click on them raises your guard
+		// instead of opening their talk menu (Powers' Guard#guardsAgainst)
+		foe.setAggressive(true);
 		foe.getLookControl().setLookAt(player, 30.0F, 30.0F);
 		if (foe.distanceTo(player) > REACH) {
 			foe.getNavigation().moveTo(player, 1.1);
@@ -562,6 +565,7 @@ public final class Duels {
 		PathfinderMob foe = level.getEntity(duel.foe) instanceof PathfinderMob f && f.isAlive() ? f : null;
 		if (foe != null) {
 			foe.setTarget(null);
+			foe.setAggressive(false);
 			foe.getNavigation().stop();
 			float least = foe.getMaxHealth() * HEAL_TO;
 			if (!Downed.isDowned(foe) && foe.getHealth() < least) {

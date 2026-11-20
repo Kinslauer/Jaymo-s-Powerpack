@@ -169,7 +169,7 @@ public final class ClassTeachers {
 			enabled.add(k.equals("no") || open(player, k));
 		}
 		OFFERS.put(player.getUUID(), new Offer(teacher.getId(), List.copyOf(kinds)));
-		ServerPlayNetworking.send(player, new TalkNet.Ask(teacher.getId(), teacher.getDisplayName(), Component.translatable("talk.jaymoskingdoms.teacher.ask"), options, enabled));
+		ServerPlayNetworking.send(player, new TalkNet.Ask(teacher.getId(), Introductions.called(player, teacher), Component.translatable("talk.jaymoskingdoms.teacher.ask"), options, enabled));
 	}
 
 	/** An answer to a teacher's offer; false when it wasn't one. */

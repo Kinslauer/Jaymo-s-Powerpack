@@ -344,7 +344,7 @@ public final class WolfStalkers {
 	}
 
 	/** The wind's share for a wolf at {@code wolf} smelling a player at {@code player}: more downwind, less upwind, none under cover. */
-	static double windShare(ServerLevel level, Vec3 player, Vec3 wolf) {
+	public static double windShare(ServerLevel level, Vec3 player, Vec3 wolf) {
 		BlockPos at = BlockPos.containing(player);
 		if (!level.dimensionType().hasSkyLight() || level.dimensionType().hasCeiling() || !level.canSeeSky(at.above())) {
 			return 1.0;
@@ -358,7 +358,7 @@ public final class WolfStalkers {
 	}
 
 	/** The shares of scent {@code player} gives off, before the wind. */
-	static double shares(ServerLevel level, Player player) {
+	public static double shares(ServerLevel level, Player player) {
 		double share = 1.0;
 		if (player.isShiftKeyDown()) {
 			share *= SNEAK_SCENT;

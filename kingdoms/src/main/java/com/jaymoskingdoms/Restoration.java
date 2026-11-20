@@ -694,7 +694,7 @@ public final class Restoration {
 			enabled.add(optionOpen(player, kind));
 		}
 		OFFERS.put(player.getUUID(), new Offer(healer.getId(), kinds));
-		ServerPlayNetworking.send(player, new TalkNet.Ask(healer.getId(), healer.getDisplayName(),
+		ServerPlayNetworking.send(player, new TalkNet.Ask(healer.getId(), Introductions.called(player, healer),
 			Component.translatable(ForbiddenArts.known(player) ? "talk.jaymoskingdoms.healer.refuse"
 				: kinds.size() == 1 ? "talk.jaymoskingdoms.healer.refuse_hollow" : "talk.jaymoskingdoms.healer.ask"), options, enabled));
 	}

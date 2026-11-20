@@ -2577,3 +2577,28 @@ Added a new **Cooking Block** to the Functional creative tab. The block has iron
 ## 0.6.62 (2026-11-19): Bodies can be cut up where they lie (#1887)
 
 - A beast's body can be cut up where it lies by someone who isn't a player (`CorpseEntity.butcherWhereLies`). Jaymo's Kingdoms' town hunters use it to carry their kills home as cuts, the same cuts a butcher block gets.
+
+## 0.6.63 (2026-11-20): meat hooks easier to hang a dragged carcass on (#1910)
+
+- **Meat hooks**: right-clicking a meat hook while dragging a big carcass (a cow, a horse) used to drop it without a word when the body lagged too far behind you, or when the click just missed the thin hook and hit the beam or ceiling behind it. Now a click on the hook, or right by it, heaves the carcass up as long as you're standing near the hook; too far away, you keep hold and are told to get under the hook. The same forgiving click works when carrying a smaller carcass.
+- The dragging prompt now names the Meat Hook alongside the Butcher Block.
+- `Hanging.hookAt`, `CorpseEntity.dragOnto`, `JaymosKitchen` (carried branch).
+- Built; not played.
+
+## 0.6.64 (2026-11-20): ragdolls no longer flung across the field (#1922)
+
+- Andy (bear clip, 2026-11-19): "the super knockback ragdolls are back. can we tame them". A blow or shove on a body lying limp, or one that knocks it limp, now carries it at most 0.45 blocks a tick along the ground with at most 0.1 lift, for players (`LimpController`: shoves while limp went in at full strength before, with no lift cap) and mobs (`MobRagdolls`). You slide a block or two, never across the field. Throws a power means to make (being thrown by a carrier, a crash) are untouched.
+- Built; not played.
+
+## 0.6.65 (2026-11-20): A leg or bagged corpse of a modded creature no longer crashes the game (#1927)
+
+- **Fix**: drawing a severed leg (`SpiderLeg`) whose creature another mod adds saved data to (Re:Animal's wolves) crashed the game: that mod's part of the save isn't set up on a body rebuilt only to be drawn. The leg now keeps what was read before it (as corpses already did), and a corpse taken out of a body bag does the same (`CorpseEntity.rebuildFrom`). A warning is logged instead.
+- Built by CI; not played.
+
+## 0.6.66 (2026-11-20): body controls - hold drags a body, tap searches it (#1935)
+
+- Andy: "right click hold should always be drag, tap can loot". An empty hand on a body lying loose (not on a hook):
+  - **Hold use**: drags it by the legs (bar "Taking hold"), any kind, a player's body too; anything pocket-sized is taken up in one hand by the neck. Solid iron says it's too heavy.
+  - **Tap use** (worked out once use is let go, `CorpseEntity.press/tickPress/tapped`): arrows come out first, one a tap; a fish is looted; a machine is stripped; a player's body gives back what they carried; a skeleton gives its gear, then bones; anything else is searched. An animal carcass tells you its bleeding, or how to move it.
+  - Sneak + hold still lifts it into your arms; tools, hooks and flint work as before.
+- Built; not played.
