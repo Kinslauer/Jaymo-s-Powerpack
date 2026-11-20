@@ -123,7 +123,7 @@ public final class Cabs {
 			if (horse != null && driver == null) {
 				// ((0.7.294) a folk or a villager)
 				for (Worker lost : Workers.near(level, new AABB(f.seat()).inflate(RANGE),
-					x -> x.isAlive() && x.factionId() == f.id() && Drivers.on(x, TASK) && !x.mob().isPassenger())) {
+					x -> x.factionId() == f.id() && Drivers.on(x, TASK) && Drivers.canMount(x))) {
 					lost.mob().teleportTo(horse.getX(), horse.getY(), horse.getZ());
 					lost.mob().startRiding(horse);
 					break;

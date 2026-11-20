@@ -263,6 +263,10 @@ public class CorpseEntity extends Entity {
 	private List<ItemStack> loot = new ArrayList<>();
 	private int bones;
 	private boolean searched;
+	/** Its gear has had its wear put on already ({@link #wornGear}), so it isn't worn again. */
+	private boolean gearWorn;
+	/** Server: the loot screen open on it (shared by everyone looking), or null. Never saved. */
+	private @Nullable CorpseLoot looting;
 	private int chops;
 	/** (0.5.31) A lift being held on it: by whom, since when, and when use last came (game time). Never saved. */
 	private java.util.@Nullable UUID liftBy;
@@ -433,7 +437,7 @@ public class CorpseEntity extends Entity {
 			ItemStack stack = ItemStack.CODEC.parse(registryAccess().createSerializationContext(NbtOps.INSTANCE), gear.get(slot))
 				.result().orElse(ItemStack.EMPTY);
 			gear.remove(slot);
-			if (!stack.isEmpty() && stack.isDamageableItem() && !preserved(tag, slot)) {
+			if (!stack.isEmpty() && stack.isDamageableItem() && !preserved(tag, slot) && !gearWorn) {
 				wear(stack, kind == CorpseKind.SKELETON && slot.equals("mainhand"));
 			}
 			if (gear.isEmpty()) {
@@ -478,7 +482,7 @@ public class CorpseEntity extends Entity {
 	 */
 	public List<ItemStack> robBy(Entity robber) {
 		List<ItemStack> taken = new ArrayList<>();
-		if (!(level() instanceof ServerLevel level) || isRemoved() || !robbable()) {
+		if (!(level() instanceof ServerLevel level) || isRemoved() || !robbable() || looting != null) {
 			return taken;
 		}
 		if (!searched) {
@@ -2131,11 +2135,149 @@ public class CorpseEntity extends Entity {
 			}
 			case PLAYER -> PlayerCorpses.restore(this, player, hotbar, selected);
 			case SKELETON -> {
-				if (!takeGear(level, player)) {
+				if (!openLoot(level, player)) {
 					pullBone(level);
 				}
 			}
-			default -> search(level, player);
+			default -> {
+				if (!openLoot(level, player)) {
+					search(level, player);
+				}
+			}
+		}
+	}
+
+	// ---- the loot screen ---------------------------------------------------------------------------------------------
+
+	/**
+	 * Andy (2026-11-20): "there should be a screen that opens like a chest when you loot enemies, after tapping to remove
+	 * arrows, a window showing their corpse in the inventory slot, and all their gear should open. this way you dont always
+	 * need to take everything." A tap (once the arrows are out) opens {@link CorpseLootMenu}: the body drawn in the middle,
+	 * what it wears and holds beside it, its pockets on the right; take only what you want, the rest stays on it. Everyone
+	 * looking shares one {@link CorpseLoot}. False (nothing opened) if it has nothing left on it.
+	 */
+	private boolean openLoot(ServerLevel level, Player player) {
+		if (!(player instanceof net.minecraft.server.level.ServerPlayer server)) {
+			return false;
+		}
+		loot.removeIf(ItemStack::isEmpty);
+		if (looting == null && loot.isEmpty() && !hasGear()) {
+			searched = true;
+			return false;
+		}
+		if (looting == null) {
+			looting = new CorpseLoot(this, wornGear());
+		}
+		CorpseLoot shared = looting;
+		server.openMenu(new net.fabricmc.fabric.api.menu.v1.ExtendedMenuProvider<Integer>() {
+			@Override
+			public Integer getScreenOpeningData(net.minecraft.server.level.ServerPlayer p) {
+				return getId();
+			}
+
+			@Override
+			public Component getDisplayName() {
+				return CorpseEntity.this.getDisplayName();
+			}
+
+			@Override
+			public net.minecraft.world.inventory.AbstractContainerMenu createMenu(int id, net.minecraft.world.entity.player.Inventory inventory, Player p) {
+				return new CorpseLootMenu(id, inventory, shared);
+			}
+		});
+		jolt(false);
+		play(level, SoundEvents.BUNDLE_DROP_CONTENTS, 1.0F);
+		return true;
+	}
+
+	/** Whether it still wears or holds anything. */
+	private boolean hasGear() {
+		CompoundTag tag = parse(look());
+		return tag != null && !tag.getCompoundOrEmpty("equipment").isEmpty();
+	}
+
+	/**
+	 * What it wears and holds, slot by slot in {@link #GEAR} order (empty where nothing), worn the way {@link #takeGear}
+	 * wears it. The wear is put on once, the first time it's looked at, and kept on the body, so looking again (or taking
+	 * it off some other way later) doesn't wear it a second time.
+	 */
+	ItemStack[] wornGear() {
+		ItemStack[] out = new ItemStack[GEAR.length];
+		java.util.Arrays.fill(out, ItemStack.EMPTY);
+		CompoundTag tag = parse(look());
+		if (tag == null) {
+			return out;
+		}
+		CompoundTag gear = tag.getCompoundOrEmpty("equipment");
+		var ops = registryAccess().createSerializationContext(NbtOps.INSTANCE);
+		for (int i = 0; i < GEAR.length; i++) {
+			String slot = GEAR[i];
+			if (!gear.contains(slot)) {
+				continue;
+			}
+			ItemStack stack = ItemStack.CODEC.parse(ops, gear.get(slot)).result().orElse(ItemStack.EMPTY);
+			if (!stack.isEmpty() && stack.isDamageableItem() && !preserved(tag, slot) && !gearWorn) {
+				wear(stack, kind == CorpseKind.SKELETON && slot.equals("mainhand"));
+			}
+			out[i] = stack;
+		}
+		if (!gearWorn) {
+			gearWorn = true;
+			putGear(out);
+		}
+		return out;
+	}
+
+	/** Puts {@code gear} (in {@link #GEAR} order) back on it as what it wears and holds, so it's drawn wearing just that. */
+	void putGear(ItemStack[] gear) {
+		CompoundTag tag = parse(look());
+		if (tag == null) {
+			return;
+		}
+		var ops = registryAccess().createSerializationContext(NbtOps.INSTANCE);
+		CompoundTag equipment = new CompoundTag();
+		for (int i = 0; i < GEAR.length && i < gear.length; i++) {
+			if (gear[i].isEmpty()) {
+				continue;
+			}
+			net.minecraft.nbt.Tag saved = ItemStack.CODEC.encodeStart(ops, gear[i]).result().orElse(null);
+			if (saved != null) {
+				equipment.put(GEAR[i], saved);
+			}
+		}
+		if (equipment.isEmpty()) {
+			tag.remove("equipment");
+		} else {
+			tag.put("equipment", equipment);
+		}
+		String look = tag.toString();
+		if (!look.equals(look())) {
+			this.entityData.set(LOOK, look);
+		}
+	}
+
+	/** Its pockets, as they are (the loot screen reads and takes from this list itself). */
+	List<ItemStack> pockets() {
+		return loot;
+	}
+
+	/** A player took something off it in the loot screen. */
+	void lootTaken(Player player, boolean gear) {
+		if (level() instanceof ServerLevel level) {
+			jolt(false);
+			play(level, gear ? SoundEvents.ARMOR_EQUIP_GENERIC.value() : SoundEvents.BUNDLE_REMOVE_ONE, 0.9F);
+		}
+		robbed(player);
+	}
+
+	/** The last one looking has closed the loot screen: what's left stays on it. */
+	void lootClosed(CorpseLoot closed) {
+		if (looting == closed) {
+			looting = null;
+		}
+		loot.removeIf(ItemStack::isEmpty);
+		if (loot.isEmpty()) {
+			searched = true;
 		}
 	}
 
@@ -3932,7 +4074,7 @@ public class CorpseEntity extends Entity {
 		}
 		ItemStack stack = ItemStack.CODEC.parse(registryAccess().createSerializationContext(NbtOps.INSTANCE), gear.get(slot))
 			.result().orElse(ItemStack.EMPTY);
-		if (!stack.isEmpty() && stack.isDamageableItem() && !preserved(tag, slot)) {
+		if (!stack.isEmpty() && stack.isDamageableItem() && !preserved(tag, slot) && !gearWorn) {
 			wear(stack, kind == CorpseKind.SKELETON && slot.equals("mainhand"));
 		}
 		gear.remove(slot);
@@ -4039,6 +4181,7 @@ public class CorpseEntity extends Entity {
 		this.loot = new ArrayList<>(input.read("Loot", ItemStack.CODEC.listOf()).orElse(List.of()));
 		this.bones = input.getIntOr("Bones", 0);
 		this.searched = input.getBooleanOr("Searched", false);
+		this.gearWorn = input.getBooleanOr("GearWorn", false);
 		this.chops = input.getIntOr("Chops", 0);
 		this.burnTicks = input.getIntOr("Burned", 0);
 		this.firesLit = input.getIntOr("FiresLit", 0);
@@ -4108,9 +4251,11 @@ public class CorpseEntity extends Entity {
 	protected void addAdditionalSaveData(ValueOutput output) {
 		output.putString("Look", look());
 		output.putString("Kind", kind.name());
-		output.store("Loot", ItemStack.CODEC.listOf(), loot);
+		// (a stack taken out in the loot screen leaves an empty one in the list until it's closed: never saved)
+		output.store("Loot", ItemStack.CODEC.listOf(), loot.stream().filter(stack -> !stack.isEmpty()).toList());
 		output.putInt("Bones", bones);
 		output.putBoolean("Searched", searched);
+		output.putBoolean("GearWorn", gearWorn);
 		output.putInt("Chops", chops);
 		output.putInt("Burned", burnTicks);
 		output.putInt("FiresLit", firesLit);

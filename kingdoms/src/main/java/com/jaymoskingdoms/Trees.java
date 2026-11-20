@@ -1010,7 +1010,7 @@ public final class Trees {
 	}
 
 	/** The leaves these logs hold that no other wood does. */
-	private static List<BlockPos> leavesOf(ServerLevel level, List<BlockPos> logs) {
+	static List<BlockPos> leavesOf(ServerLevel level, List<BlockPos> logs) {
 		Set<BlockPos> wood = new HashSet<>(logs);
 		List<BlockPos> leaves = new ArrayList<>();
 		Set<BlockPos> looked = new HashSet<>();

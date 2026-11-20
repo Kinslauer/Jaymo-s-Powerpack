@@ -62,6 +62,18 @@ import org.jspecify.annotations.Nullable;
  * so the one striking (a mutant's seismic wave nudges what it hits) can't soften it.</li>
  * </ul>
  * Only the Stoneborn are never burst, as with blasts.
+ * <p>Andy (2026-11-20, a mule burst by one crossbow bolt to the head): "gibs need to be turned down realistically". A body
+ * comes apart only under force far beyond what kills it:
+ * <ul>
+ * <li>A body bigger than a man is that much harder to burst ({@link #sizeScale}): the chance is cut by its bulk over a
+ * man's ({@link #MAN_BULK}), so a horse or a mule bursts about a fifth as often, a cow about half as often. Smaller bodies
+ * are no easier than a man.</li>
+ * <li>A crushing blow bursts someone on their feet only if the one blow could have killed them from full health
+ * ({@link #CRUSH_GIB_OVERKILL}); a lesser killing blow still takes the part it lands on as before.</li>
+ * <li>A crushing blow is struck in reach ({@link #CRUSH_REACH}): a spell or a shot that counts as the caster's own hand
+ * (another mod's damage with no projectile) is never one.</li>
+ * </ul>
+ * Someone downed under a slam still bursts as before: the ground takes what the body can't.
  */
 public final class BlastGore {
 	/** A blast this big (radius; TNT's is 4) counts in full; a smaller one's closeness is scaled by the root of its share. */
@@ -107,6 +119,12 @@ public final class BlastGore {
 	 * are back. can we tame them"). A body knocked limp by it takes less still (Kitchen caps a ragdoll's carry).
 	 */
 	public static final double CRUSH_THROW = 0.5, CRUSH_LIFT = 0.3;
+	/** A man's bulk (a player's box: 0.6 by 0.6 by 1.8): a bulkier body's burst chance is cut by its bulk over this ({@link #sizeScale}). */
+	public static final double MAN_BULK = 0.6 * 0.6 * 1.8;
+	/** A crushing blow bursts someone standing only if it was at least this share of their full health (one blow that could kill them from full). */
+	public static final float CRUSH_GIB_OVERKILL = 1.0F;
+	/** A crushing blow by hand or body lands within this many blocks of the body's edge, measured from the striker's edge. */
+	public static final double CRUSH_REACH = 3.5;
 
 	private static final Identifier PHASE = JaymosPowers.id("blast_gib");
 	/** Before anything else hears of a blow (Downed takes a blow on the downed for itself): whether it's crushing. */
@@ -223,10 +241,26 @@ public final class BlastGore {
 		if (source.is(CRUSHING_TYPES)) {
 			return true;
 		}
-		if (amount < CRUSH_DAMAGE || !(source.getEntity() instanceof LivingEntity by) || source.getDirectEntity() != by) {
+		if (amount < CRUSH_DAMAGE || !(source.getEntity() instanceof LivingEntity by) || source.getDirectEntity() != by || !inReach(by, target)) {
 			return false;
 		}
 		return amount >= CRUSH_ANY || bulk(by) >= CRUSH_BULK * bulk(target);
+	}
+
+	/** Whether {@code by} stands close enough to {@code target} to have struck it by hand or body ({@link #CRUSH_REACH} between their edges). */
+	private static boolean inReach(LivingEntity by, LivingEntity target) {
+		double dx = by.getX() - target.getX(), dz = by.getZ() - target.getZ();
+		double across = Math.sqrt(dx * dx + dz * dz) - (by.getBbWidth() + target.getBbWidth()) * 0.5;
+		return across <= CRUSH_REACH;
+	}
+
+	/**
+	 * How much harder {@code body} is to burst than a man: 1 for a man-sized body or smaller, else a man's bulk over its own
+	 * ({@link #MAN_BULK}). Andy: a shot to a mule's head shouldn't obliterate it.
+	 */
+	public static float sizeScale(LivingEntity body) {
+		double bulk = bulk(body);
+		return bulk <= MAN_BULK ? 1.0F : (float) (MAN_BULK / bulk);
 	}
 
 	/** Whether {@code target} is under a crushing blow this tick ({@link #crushing}). */
@@ -370,7 +404,16 @@ public final class BlastGore {
 		boolean crush = !blast(source) && !blunderShot(source);
 		// (a crushing blow lands as a blast's centre does)
 		float closeness = crush ? 1.0F : closeness(entity, source, amount);
-		float chance = crush ? com.jaymospowers.core.wounds.Downed.isDowned(entity) ? CRUSH_DOWNED_GIB : CRUSH_GIB : gibChance(closeness);
+		boolean downedCrush = crush && com.jaymospowers.core.wounds.Downed.isDowned(entity);
+		float chance = downedCrush ? CRUSH_DOWNED_GIB : crush ? CRUSH_GIB : gibChance(closeness);
+		if (!downedCrush) {
+			// (Andy: "gibs need to be turned down realistically") only overwhelming force bursts a body: a big one far less
+			// often, and a crushing blow on someone standing only if it could have killed them from full
+			chance *= sizeScale(entity);
+			if (crush && amount < entity.getMaxHealth() * CRUSH_GIB_OVERKILL) {
+				chance = 0.0F;
+			}
+		}
 		boolean gib = (!blunderShot(source) || fromFull(entity)) && entity.getRandom().nextFloat() < chance;
 		ROLLED.put(entity, new long[] {now, gib ? 1 : 0, Float.floatToIntBits(closeness)});
 		return gib;
