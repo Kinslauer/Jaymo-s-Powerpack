@@ -68,7 +68,7 @@ public class StructureMixin {
             int cz = (box.minZ() + box.maxZ()) / 2;
             int radius = Math.max(box.maxX() - box.minX(), box.maxZ() - box.minZ()) / 2;
 
-            if (HydrologyManager.isNearMountainWater(cx, cz, radius)) {
+            if (HydrologyManager.isNearMountainWater(cx, cz, radius, pChunkGenerator, pLevel, pRandomState)) {
                 if (HydrologyManager.isTooCloseToMountainWater(box.minX(), box.maxX(), box.minZ(), box.maxZ(), box.minY(), box.maxY(), pChunkGenerator, pLevel, pRandomState)) {
                     tooClose = true;
                 } else {
