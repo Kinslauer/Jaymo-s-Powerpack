@@ -41,11 +41,19 @@ import org.jspecify.annotations.Nullable;
  * ({@link #steal}): you come round with it gone. A villager keeps it in their own inventory, so picking their pocket
  * (Pickpocket) can win it back. Guards and other settlement folk never steal.</li>
  * </ul>
+ * Andy (2026-11-20): "players and npcs should be able to wake players who faint". Your own companions ({@link Bonds#companions})
+ * come first, from as far as {@link #COMPANION_RANGE} and without needing to see you: they always wake you (hint or tell by
+ * temperament), never rob you. Nobody who'd carry you off wakes you first: a camp's raiders and the like
+ * ({@link Captors#sentient}), or a guard of a realm that wants you in its cells ({@link HeldBack#wants}).
+ * <p>
  * Speech bubbles only, no chat. One waker per faint; nobody comes while you're downed, carried or otherwise out of play.
  */
 public final class FaintWakers {
 	/** How far a waker may be (blocks), how close they come to act, and how long they may take to get there (ticks). */
 	static final double RANGE = 16.0, REACH = 2.2;
+	/** How far your own companions come from to wake you (blocks), and their pace getting there (a villager's, others'). */
+	static final double COMPANION_RANGE = 32.0, COMPANION_FOLK_SPEED = 1.2;
+	static final float COMPANION_VILLAGER_SPEED = 0.8F;
 	static final int GIVE_UP_TICKS = 300;
 	/** Walking over: a villager's speed, and settlement folk's. */
 	static final float VILLAGER_SPEED = 0.6F;
@@ -68,13 +76,16 @@ public final class FaintWakers {
 		final Mob mob;
 		final Deed deed;
 		final long since;
+		/** One of the fainted player's own companions (hurries, never steals). */
+		final boolean companion;
 		/** When they shook the player awake (game time), or -1 while walking over. */
 		long woke = -1;
 
-		Waker(Mob mob, Deed deed, long since) {
+		Waker(Mob mob, Deed deed, long since, boolean companion) {
 			this.mob = mob;
 			this.deed = deed;
 			this.since = since;
+			this.companion = companion;
 		}
 	}
 
@@ -115,12 +126,46 @@ public final class FaintWakers {
 			if (player.tickCount % 10 != 0 || SEEN.containsKey(id) || Downed.isDowned(player)) {
 				continue;
 			}
+			long now = player.level().getGameTime();
+			Mob companion = companion(player);
+			if (companion != null) {
+				SEEN.put(id, now);
+				WAKERS.put(id, new Waker(companion, choose(companion, false), now, true));
+				continue;
+			}
 			Mob mob = nearest(player);
 			if (mob != null) {
-				SEEN.put(id, player.level().getGameTime());
-				WAKERS.put(id, new Waker(mob, choose(mob), player.level().getGameTime()));
+				SEEN.put(id, now);
+				WAKERS.put(id, new Waker(mob, choose(mob, mob instanceof Villager), now, false));
 			}
 		}
+	}
+
+	/** The nearest of {@code player}'s own companions free to come over, seen or not. */
+	private static @Nullable Mob companion(ServerPlayer player) {
+		Mob best = null;
+		double bestD = Double.MAX_VALUE;
+		for (Mob m : Bonds.companions(player, COMPANION_RANGE)) {
+			if (!(m instanceof PathfinderMob) || m.isSleeping() || m.isPassenger() || m.getTarget() != null || PowersCompat.outOfPlay(m) || waking(m)) {
+				continue;
+			}
+			double d = m.distanceToSqr(player);
+			if (d < bestD) {
+				best = m;
+				bestD = d;
+			}
+		}
+		return best;
+	}
+
+	/** Whether {@code m} is already on its way to wake someone. */
+	private static boolean waking(Mob m) {
+		for (Waker w : WAKERS.values()) {
+			if (w.mob == m) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** The nearest of a settlement's people free to come over, in sight of {@code player}. */
@@ -143,18 +188,13 @@ public final class FaintWakers {
 			|| m.getTarget() != null || Downed.isDowned(m) || PowersCompat.outOfPlay(m) || Approaches.talking(m) || !m.hasLineOfSight(player)) {
 			return false;
 		}
-		for (Waker w : WAKERS.values()) {
-			if (w.mob == m) {
-				return false;
-			}
-		}
-		return true;
+		// (those who'd carry them off don't rouse them first: TakenOut has them taken)
+		return !waking(m) && !Captors.sentient(m) && !HeldBack.wants(player, m);
 	}
 
-	/** What {@code mob} does for (or to) someone passed out, by temperament. */
-	static Deed choose(Mob mob) {
+	/** What {@code mob} does for (or to) someone passed out, by temperament; {@code canSteal} false, it never robs them. */
+	static Deed choose(Mob mob, boolean canSteal) {
 		float r = mob.getRandom().nextFloat();
-		boolean canSteal = mob instanceof Villager;
 		Temperaments.Temperament t = Temperaments.of(mob);
 		// hint below the first share, tell below the second, steal past it
 		float hint, tell;
@@ -215,11 +255,11 @@ public final class FaintWakers {
 			}
 			return true;
 		}
-		if (!PowersCompat.fainted(player) || now - w.since > GIVE_UP_TICKS || mob.distanceTo(player) > RANGE * 1.5) {
+		if (!PowersCompat.fainted(player) || now - w.since > GIVE_UP_TICKS || mob.distanceTo(player) > (w.companion ? COMPANION_RANGE : RANGE) * 1.5) {
 			return false;
 		}
 		if (mob.distanceTo(player) > REACH) {
-			walk(mob, player);
+			walk(mob, player, w.companion);
 			return true;
 		}
 		hold(mob, player);
@@ -288,11 +328,11 @@ public final class FaintWakers {
 		inv.setChanged();
 	}
 
-	private static void walk(Mob mob, ServerPlayer player) {
+	private static void walk(Mob mob, ServerPlayer player, boolean hurry) {
 		if (mob instanceof Villager v) {
-			BehaviorUtils.setWalkAndLookTargetMemories(v, new EntityTracker(player, true), VILLAGER_SPEED, 1);
+			BehaviorUtils.setWalkAndLookTargetMemories(v, new EntityTracker(player, true), hurry ? COMPANION_VILLAGER_SPEED : VILLAGER_SPEED, 1);
 		} else {
-			mob.getNavigation().moveTo(player, FOLK_SPEED);
+			mob.getNavigation().moveTo(player, hurry ? COMPANION_FOLK_SPEED : FOLK_SPEED);
 		}
 	}
 

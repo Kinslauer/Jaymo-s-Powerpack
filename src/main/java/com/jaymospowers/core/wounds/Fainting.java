@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
@@ -17,9 +18,14 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,6 +54,11 @@ import java.util.UUID;
  * <b>Overcome:</b> Kingdoms' {@code Overcome} drops a player of little occult exposure in the same faint at the sight of an
  * especially strong supernatural thing ({@link #overcome}); the swoon, the fall and the waking are the same, only shorter
  * to start ({@link #OVERCOME_SWOON}).
+ * <p>
+ * <b>Shaken awake:</b> Andy (2026-11-20): "players and npcs should be able to wake players who faint". Another player
+ * uses (right-click, not sneaking) one lying out and shakes them by the shoulder ({@link #shake}): they come round there
+ * and then, as from a blow but without the harm. Kingdoms' villagers, guards and companions come over and do the same by
+ * their nature ({@code FaintWakers}).
  * <p>
  * Not while downed, carried, held in Chrono's window, left for dead, on adrenaline (it keeps them up), riding, asleep, in
  * creative or spectating. Passed out, nobody walks up to talk ({@link com.jaymospowers.core.OutOfPlay}). No text: a slow
@@ -82,9 +93,12 @@ public final class Fainting {
 	 */
 	static final int HOLD_GRACE = 6;
 
-	/** When the faint began (game time). Synced to the fainting player, not saved. */
+	/**
+	 * When the faint began (game time). Synced to everyone (another player's client must know a use on them is a shake,
+	 * {@link #shake}, not a bite of food or a drawn bow), not saved.
+	 */
 	public static final AttachmentType<Long> FAINT = AttachmentRegistry.create(JaymosPowers.id("wounds_faint"),
-		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG.cast(), AttachmentSyncPredicate.targetOnly()));
+		builder -> builder.syncWith(ByteBufCodecs.VAR_LONG.cast(), AttachmentSyncPredicate.all()));
 
 	/** When the warnings before a faint began (game time). Synced to the player, not saved. */
 	public static final AttachmentType<Long> WARN = AttachmentRegistry.create(JaymosPowers.id("wounds_faint_warn"),
@@ -108,6 +122,8 @@ public final class Fainting {
 				bringRound(player);
 			}
 		});
+		// another player's use on one lying out shakes them awake: first, before any other mod's use on a player
+		UseEntityCallback.EVENT.register(Downed.FIRST, Fainting::shake);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			RESTED.clear();
 			TIPPED.clear();
@@ -135,8 +151,9 @@ public final class Fainting {
 	}
 
 	/**
-	 * (0.20.112) Someone shakes {@code player} awake (Kingdoms' villagers, {@code FaintWakers}): lying out, they come round
-	 * now, the letterbox opening as after any faint. Returns whether they were out.
+	 * (0.20.112) Someone shakes {@code player} awake (Kingdoms' villagers and companions, {@code FaintWakers}; another
+	 * player, {@link #shake}): lying out, they come round now, the letterbox opening as after any faint. Returns whether
+	 * they were out.
 	 */
 	public static boolean bringRound(ServerPlayer player) {
 		if (!out(player)) {
@@ -144,6 +161,24 @@ public final class Fainting {
 		}
 		player.setAttached(FAINT, player.level().getGameTime() - SWOON - OUT);
 		return true;
+	}
+
+	/**
+	 * Another player's use on {@code entity}: lying out in a faint, they're shaken by the shoulder and come round
+	 * ({@link #bringRound}). Main hand, not sneaking (sneak is a seize, a lift, a pocket picked), and not from the downed or
+	 * a spectator. Both sides alike (the faint is synced to all), so the client neither eats nor draws a bow meanwhile.
+	 */
+	private static InteractionResult shake(Player player, Level level, InteractionHand hand, Entity entity, @Nullable EntityHitResult hit) {
+		if (hand != InteractionHand.MAIN_HAND || !(entity instanceof Player lying) || lying == player || !out(lying) || player.isShiftKeyDown()
+			|| player.isSpectator() || Downed.isDowned(player) || is(player)) {
+			return InteractionResult.PASS;
+		}
+		if (player instanceof ServerPlayer shaker && lying instanceof ServerPlayer fainted && bringRound(fainted)) {
+			shaker.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+			level.playSound(null, fainted.getX(), fainted.getY(), fainted.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS,
+				0.7F, 0.8F);
+		}
+		return InteractionResult.SUCCESS;
 	}
 
 	/**
