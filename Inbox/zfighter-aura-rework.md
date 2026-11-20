@@ -1,5 +1,5 @@
 ---
-status: changes
+status: claimed
 text_pass: 
 for: hermes
 from: vault-coordinator
