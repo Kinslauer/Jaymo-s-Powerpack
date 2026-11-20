@@ -15926,3 +15926,12 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - A guard making an arrest and the man he's taking are no longer moved by the den at all (a den hand being marched off was snapped back to his spot); nor is anyone still on a raid.
 - The bookie may climb out to town by day without being put back at his table.
 - `Underworld.keepHome`, `Underworld.stranded`. Built; not played.
+
+## 0.11.34 (2026-11-20): Everyone who speaks to you needs introducing first (#1915)
+
+- Andy: "every humanoid that speaks should have to be introduced except for the exceptions we made before like the judge". Names already stayed off name tags, Jade and MCA's screens until you were introduced, but our own talk cards and lines still gave them away (his clip: Petra asking "Name the ground you stand on", Vlastimil's rescue plea, "[Helena]" at the dice table, "You take the weapons from Vlastimil").
+- `Introductions.called(viewer, entity)`: what a player hears someone called. Their name once introduced, else what they are ("Male Villager", "Orc", "Stranger" for a player). Used for the head of every talk card (`Menus.ask` and the cards in Approaches, Careers, Classes, ClassTeachers, Helmsmen, Restoration, ShipTalk, Skills, SteamAirships, BlossomTraders, Talks, Disguises), the approach hints, the downed "You take the weapons from" line and the chat fallback of `Speech`.
+- Gambling tables (`Tables`): each player sees the house and the other players by the names they know them by, in the seat list and in the table's note (whose turn, who won, who was caught).
+- Client safety net (`client/IntroNames`): any chat or action-bar line, or talk card head, carrying the name of a villager or player you haven't been introduced to (a name keeps which entity it is in its hover) has it swapped for what they are.
+- Exceptions kept as before: Powers' Z Fighter characters at their post (the Judge, the Keeper, the Hermit, the Tinkerer, the masters...), your MCA family, your group, a masked player's costume name, rulers once you've had an audience. Strangers, captains, helmsmen, druids and the like still introduce themselves as before.
+- Names spoken inside a line (a tale's characters, a villager mentioning a neighbour) aren't changed, only who is speaking. Built; not played.
