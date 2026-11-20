@@ -1,9 +1,9 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 03:49). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 04:22). Don't edit. -->
 # Vault health
 
 Problems in the live notes, found on every sync. Nothing here is fixed by itself: whoever reads it (the coordinator's hourly check, a bot, Andy) fixes the note, and the line goes away on the next sync. `python tools/vault_sync.py --health` prints the same list.
 
-**4 problems.**
+**5 problems.**
 
 ## Stalled agent notes
 
@@ -11,3 +11,7 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 - [[Agents/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/zfighter-gaps-1-stats|zfighter-gaps-1-stats]]: stalled, last change 2026-11-20. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]]: stalled, last change 2026-11-20. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+
+## Missing PR numbers
+
+- [[Agents/scrying-orb-design-spec|scrying-orb-design-spec]]: in review with no `pr:`.
