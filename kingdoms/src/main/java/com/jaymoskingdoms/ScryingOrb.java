@@ -58,7 +58,6 @@ public final class ScryingOrb {
     /** The most dots/figures drawn. */
     static final int FIGURES_MOST = 32;
     static final int COLOUR = 0x4C8DFF;
-/** @noeditor */ // trivial marker to trigger rebuild
 
     /** Server to player: the snapshot (palette + indices) or a delta, and the figures. */
     public record OrbView(Component who, int[] palette, byte[] indices, int[] changed, int[] figures, boolean night) implements CustomPacketPayload {
