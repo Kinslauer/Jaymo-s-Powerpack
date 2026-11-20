@@ -15797,3 +15797,15 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - **Rubber-folk regrowth**: a lost limb stretching back plays a balloon being stretched (starting just before the limb is back), then a pop as it lands; a swallow's regrowth plays the stretch and the pop after it (`RubberFolk.STRETCH`, `POP`, `STRETCH_TICKS`; new sounds `rubber/stretch_1..3`, `rubber/pop_1..3`, made by `tools/gen_regrow_sounds.py`).
 - **Green Bio-built blood**: Bio-built now bleed green (the Verdant's sap colour) instead of not bleeding at all, so they bleed, leave stains and can bleed out like other bleeding heritages (`PowersCompat.heritageBlood`).
 - Built; not played or listened to in game.
+
+## 0.11.21 (2026-11-20): shy deer keep away from people (#1894)
+
+- Andy: "deer should avoid civilization completely, darting away from any POSSIBILITY people may be near, much like the real thing ... they only ever come near to eat crops and even then scarecrows will prevent their proximity".
+- **Every deer**: the new `jaymoskingdoms:shy_deer` tag (Naturalist's deer, Cube Animals' red deer, roe deer and reindeer) gets the shy rules, not just Naturalist's. The blossom shrines' little deer stay tame by their shrines. Naturalist's herd sizes and patch rules are unchanged.
+- **Spawning**: no deer spawns within 64 blocks of a settlement's seat, 32 of anything people use (beds, workstations, bells: any point of interest but a wild bee nest), in lamplight, by a scarecrow, within 48 of a player or 32 of a villager/folk/golem, or round a home they've been scared off (`ShyDeer.wild`, `DeerSpawnMixin`).
+- **Bolting**: a deer runs 24 blocks from a player it sees (40 blocks, 16 if sneaking, 10 whatever is between), smells on the wind (48 blocks before sneaking, rain and wind, the wolves' nose), or whose footsteps are fresh (2 minutes) beside it; from any villager, folk, illager or golem it sees within 32; from any noise a person makes that reaches it (steps, work, doors, voices, shots, blasts, through `Hearing.noise`).
+- **Shunning places**: a deer that wanders near a seat, a point of interest, lamplight or a scarecrow turns and runs back out.
+- **Crops**: the one lure. From dusk through the night a deer that isn't full looks for crops within 40 blocks, steals in (still bolting from people, noise and scent, but ignoring houses and lamps), crops 4 plants back to their first stage, then is full for half a day. A spooked raid ends early. Respects mobGriefing.
+- **Scarecrows**: crops guarded by Kitchen's scarecrow (with its pumpkin) or our straw scarecrow (10 blocks) never draw deer, and deer near either run from it; the straw scarecrow now sends deer off too.
+- Druids with Beast Tongue who have studied deer still frighten none; owned, leashed, ridden or named deer are left alone.
+- Built (`compileJava`); not played.
