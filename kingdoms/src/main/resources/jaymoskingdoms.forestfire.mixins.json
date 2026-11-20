@@ -2,6 +2,6 @@
 	"required": false,
 	"package": "com.jaymoskingdoms.mixin.forestfire",
 	"compatibilityLevel": "JAVA_25",
-	"mixins": ["ForestFireKeptMixin", "SplashDousesForestFireMixin"],
+	"mixins": ["SplashDousesForestFireMixin"],
 	"injectors": { "defaultRequire": 0 }
 }
