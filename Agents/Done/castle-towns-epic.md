@@ -26,4 +26,4 @@ town round it built like the Epic Structures: Villages town (ATi + HardWater). T
 
 ## Done
 PR #1898: Epic town round the compound castle (pieces over it dropped, min 12), Grim castles allowed, kingdom far from realms with throne in the castle. Compile-checked, not played. Lore (new) "The castle at the heart of the town" awaiting Andy.
-- 2026-11-20 01:00 PR #1898 is merged into master; moved to Agents/Done.
+- 2026-11-20 01:36 PR #1898 is merged into master; moved to Agents/Done.
