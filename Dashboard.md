@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 06:35). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 07:36). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -19,12 +19,14 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-30 waiting for a bot, 4 being built, 0 in review: see [[Kanban]].
+30 waiting for a bot, 2 being built, 1 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1936 dodge rolls - back dodge only when locked on, one per press, hold to roll on into prone (Powers, 2026-11-20)
+- [ ] #1935 body controls - hold drags, tap loots, sneak revives (Powers, Kingdoms, Kitchen, 2026-11-20)
 - [ ] #1933 Rig leg kick from the fitted leg (Powers, 2026-11-20)
 - [ ] #1932 another player shakes a fainted player awake (Powers, Kingdoms, 2026-11-20)
 - [ ] #1931 cleaning up blood - scrub stains off floors and walls, poured water washes them (Powers, Kingdoms, 2026-11-20)
@@ -83,13 +85,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1867 symbiote - a takeover no longer freezes a host who isn't a web slinger, and a blob that left you runs away (Powers, 2026-11-19)
 - [ ] #1865 Gnomes: real gnomes with their own model, gardens and temper (Kingdoms, 2026-11-19)
 - [ ] #1864 Blackouts wake you where you were taken (Powers, Kingdoms, 2026-11-19)
-- [ ] #1863 goblins speak broken English (Kingdoms, 2026-11-19)
-- [ ] #1862 Youth's wisp really disappears while it thinks (Kingdoms, 2026-11-19)
-- …and 301 older ones.
+- …and 303 older ones.
 
 ## Health
 
-3 problems in the notes: [[Health]].
+4 problems in the notes: [[Health]].
 
 ## Last week
 
