@@ -44,6 +44,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · for ☁️ Cloud · #1853 · changes · fixing review notes
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · 🔨 Hephaestus · #1787 · claimed
+- [ ] [[Inbox/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]] · ☀️ Apollo · claimed
 
 
 ## In review
