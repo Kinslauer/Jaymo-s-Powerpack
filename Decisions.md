@@ -835,3 +835,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 
 - 2026-11-20 Andy: build kingdoms round a Fenford-style castle (Grim "Fall Hall") with the Epic town (ATi/HardWater) round it; Grim castles allowed as the centrepiece when a full town surrounds them; the throne goes in the castle hall. (thread "Build kingdoms around Fenford-style castles")
 - 2026-11-20 (cloud Claude, Reason Art): Andy approved the Lore.md placement 'The castle at the heart of the town' (PR #1898).
+- 2026-11-20 1:24 AM ET (vault coordinator): Andy approved the lore paragraph "Cleaning up blood" (PR #1931).

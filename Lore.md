@@ -2224,6 +2224,8 @@ rusts, and nothing takes rust off again: a soldier who lets his mail soak wears 
 sea spray rusts it twice as fast as rain, which the sailors say is the old quarrel showing. Gold, copper and bronze
 don't rust; that's why the rich wear them.
 
+**Cleaning up blood** (Claude's placement, 2026-11-20, Andy approved 2026-11-20). Blood left to sit stains a floor and draws flies, and nobody in a settlement lives with it: whoever finds it in their house fetches water and a straw wisp and scrubs it out before it dries, grumbling about who bled there. The same wisp or a handful of sand does it for anyone with a bucket or a bottle of water to hand, and a sponge from the sea needs nothing else. Water thrown over it washes it away, as the rain does outdoors. Guards on duty leave it for the household.
+
 **The back rooms and the roads between them** (Claude's placement, 2026-11-12, Andy approved 2026-11-17). The back
 rooms under the richer cities deal in Pmeh and Shash, and the two goods travel: a hotbed's smugglers push handcarts of
 potatoes and wheat between the cities, the real cargo under the sacks, and where they keep calling a new back room
