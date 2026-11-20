@@ -31,6 +31,9 @@ the official jar and this folder goes.
   `client/aircraft/`, `compat/planes/`, `component/water_tank/`, `simulation/water_drop/`, `command/FireplaneCommands`,
   `network/firefighting/FireplaneActionPayload`, the `FireplaneAimCameraMixin`, and the plane's recipe, item model, textures and water-source tag (its recipe names an item only Planes registers, so it failed the data load). The mod only ever loaded these by
   name when Planes was installed, so nothing else changes. Its config keys for the aircraft are still read and ignored.
+- No incident alert: `IncidentManager.alertNearbyPlayers` no longer sends "INCIDENT ALERT: ... respond with pump, hose and
+  command post" to chat (players within 256 blocks) or the action bar (everyone else). The pack keeps world events out of
+  chat. Nearby players are still counted as the fire's responders.
 
 ## Checked
 Every Minecraft, Fabric API and Fabric Loader member the jar refers to (its own classes' inherited ones included) was
