@@ -60,6 +60,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1914 Guards' gold helms gone (Kingdoms, 2026-11-20)
 - [ ] #1913 Speakeasy ladder loop: climbers no longer pulled back into the den (Kingdoms, 2026-11-20)
 - [ ] #1912 Taken weapons stay taken: no more shields duplicating off downed villagers (Kingdoms, 2026-11-20)
+- [ ] #1911 Z Fighter aura rework - flame shell and white core (Powers, 2026-11-20)
 - [ ] #1910 meat hooks easier to hang a dragged carcass on (Kitchen, 2026-11-20)
 - [ ] #1909 Sitting cats no longer stand on end under Fresh Animations (Powers, 2026-11-20)
 - [ ] #1907 long pitchfork (Powers, Kingdoms, 2026-11-20)
@@ -86,8 +87,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1882 JEI shows how to forge the metal harness pieces (Powers, 2026-11-19)
 - [ ] #1881 camp cooks roast whole beasts on the great spit and stand to the side (Kingdoms, Kitchen, 2026-11-19)
 - [ ] #1880 An escape isn't known to the camp until they see you gone (Kingdoms, 2026-11-19)
-- [ ] #1879 Captors take the harness too (Kingdoms, 2026-11-19)
-- …and 314 older ones.
+- …and 315 older ones.
 
 ## Health
 
