@@ -1586,6 +1586,29 @@ public final class PowersCompat {
 		}
 	}
 
+	private static java.lang.invoke.@Nullable MethodHandle slungOn;
+	private static boolean lookedForSlungOn;
+
+	/** Server: Powers' {@code Sling.slungOn}, the body slung across {@code horse}'s back, or null (and null without Powers). */
+	public static @Nullable LivingEntity slungOn(net.minecraft.world.entity.Entity horse) {
+		if (!lookedForSlungOn) {
+			lookedForSlungOn = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					slungOn = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.Sling"), "slungOn",
+						java.lang.invoke.MethodType.methodType(LivingEntity.class, net.minecraft.world.entity.Entity.class));
+				} catch (ReflectiveOperationException | LinkageError ex) {
+					slungOn = null;
+				}
+			}
+		}
+		try {
+			return slungOn != null ? (LivingEntity) slungOn.invoke(horse) : null;
+		} catch (Throwable ex) {
+			return null;
+		}
+	}
+
 	/**
 	 * (0.7.623, Rivals patch 8) Powers' shields ({@code combat/Shields}): a Yank or a stun knocks an armoured ogre's shield
 	 * off ({@link com.jaymoskingdoms.monsters.Ogre#tearShield}), and its raised shield counts as one (for Powers' vault, which
