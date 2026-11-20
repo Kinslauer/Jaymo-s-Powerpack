@@ -77,7 +77,7 @@ final class ExecutionReact {
 					case CRUSH, KI, POWER -> Blow.CRUSH;
 					case SHOT, BOLT, BLAST -> Blow.SHOT;
 					case SNAP -> Blow.CHOKE;
-					case HOLD -> null;
+					case HOLD, SILENT -> null;
 				};
 				return blow == null ? null : react(blow, kind.beats, finish.at(entity.level().getGameTime(), partialTicks), false);
 			}

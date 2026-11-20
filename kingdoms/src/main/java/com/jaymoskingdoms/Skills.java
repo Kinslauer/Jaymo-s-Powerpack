@@ -431,7 +431,14 @@ public final class Skills {
 		// Might: the battle rhythm (Jaymo's Powers' BattleRhythm), attacks quickening a step at a time while you keep fighting. Last, so no ordinal moves
 		BATTLE_RHYTHM(Pillar.STRENGTH, 1, 1, 3, 2, 1),
 		// Stubborn: once a day a killing blow leaves you downed, mending fast for 40 s (Jaymo's Powers' Stubborn reads the tag); last, so no ordinal moves
-		STUBBORN(Pillar.SURVIVAL, 1, 2, 8, 4, 1, STEADY_HANDS, FIELD_DRESSER);
+		STUBBORN(Pillar.SURVIVAL, 1, 2, 8, 4, 1, STEADY_HANDS, FIELD_DRESSER),
+		// the Rogue's Arts, Stealth's fourth page again (its first perks moved into the Thief's tree): the stealth kill, everyone's
+		// (Jaymo's Powers' Finishers, sneak + hold attack behind one who never saw you), made quicker, bare-handed and able
+		// to take bigger foes, and Into the Dark after it ({@link StealthKills}). Last, so no ordinal moves
+		QUICK_WORK(Pillar.STEALTH, 2, 1, 5, 12, 0),
+		SILENT_SNAP(Pillar.STEALTH, 1, 1, 5, 12, 2),
+		BIGGER_GAME(Pillar.STEALTH, 2, 1, 9, 13, 1, QUICK_WORK),
+		INTO_THE_DARK(Pillar.STEALTH, 1, 2, 13, 14, 1, BIGGER_GAME);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;
@@ -659,6 +666,7 @@ public final class Skills {
 			NEXT_SNEAK_XP.clear();
 			NEXT_TREAT_XP.clear();
 			RESPEC_OFFERS.clear();
+			StealthKills.clear();
 		});
 		// (0.7.102) freerun moves (Jaymo's Powers tags the player for each one): a little Stealth experience
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
@@ -674,6 +682,11 @@ public final class Skills {
 				if (player.entityTags().contains(TREATED_TAG)) {
 					player.removeTag(TREATED_TAG);
 					treated(player, player.level().getGameTime());
+				}
+				// stealth kills (Powers' Finishers tags the killer): an assassination's experience, and Into the Dark
+				if (player.entityTags().contains(StealthKills.TAG)) {
+					player.removeTag(StealthKills.TAG);
+					StealthKills.killed(player);
 				}
 			}
 		});
