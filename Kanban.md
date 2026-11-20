@@ -39,7 +39,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]] · 🪶 Quill · #1937 · writing
-- [ ] [[Inbox/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]] · 🍇 Bacchus · claimed
 
 
 ## In review
@@ -58,6 +57,7 @@ kanban-plugin: board
 - [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · blocked
 - [ ] [[Inbox/zfighter-gaps-5-training|zfighter-gaps-5-training]] · ☀️ Apollo · #1953 · blocked
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · 🔨 Hephaestus · #1896 · blocked
+- [ ] [[Inbox/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]] · 🍇 Bacchus · blocked
 
 
 ## Done
