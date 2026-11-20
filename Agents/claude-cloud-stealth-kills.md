@@ -3,7 +3,7 @@ status: running
 task: stealth kills and Rogue's Arts
 branch: claude/project-thread-gn5ka6
 with: cloud Claude (Reason bugfixing thread "Add stealth executions and fill Rogue Arts")
-pr: 
+pr: 1952
 mods: powers, kingdoms
 versions: 
 started: 2026-11-20
