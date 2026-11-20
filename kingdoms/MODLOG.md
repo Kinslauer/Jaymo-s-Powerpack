@@ -15919,3 +15919,10 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - **Saved for the queen** (Andy: "when you get this respawn the spiders shouldnt keep attacking you, they also shouldnt attack you if you are webbed up, as they are saving you for the queen"): spiders no longer bite anyone wrapped in web (Powers' Webbed, any layer), and after a blackout wakes you in a spiders' lair, the lair's spiders leave you be there, webbed or not, until you get 32 blocks out of it or a day passes. Spiders already on you let go; none can be set on you (`wild/SpiderKeep`, `SpiderKeepMixin` on `Mob.setTarget`).
 - Striking a spider (a blow or a shot; a squash underfoot doesn't count) rouses them for a minute, webbed or kept, and ends the lair's keeping, as captors turn on a captive who acts up. The brood queen isn't held back.
 - Built; not played.
+
+## 0.11.33 (2026-11-20): Speakeasy ladder loop: climbers no longer pulled back into the den (#1913)
+
+- Andy: "why do they keep spawning back in the speakeasy then going out the ladder?" The den's housekeeping (every 2 s) put anyone it found on the ladder twice running back at the nearer end, so with a player below, a guard or townsman climbing out who was still in the lower half was set back down in the room, climbed again, and was set down again. Now someone who has moved up or down the ladder since the last look is left to climb; only one who hasn't moved for two looks (or has been on it 16 s) is put out.
+- A guard making an arrest and the man he's taking are no longer moved by the den at all (a den hand being marched off was snapped back to his spot); nor is anyone still on a raid.
+- The bookie may climb out to town by day without being put back at his table.
+- `Underworld.keepHome`, `Underworld.stranded`. Built; not played.
