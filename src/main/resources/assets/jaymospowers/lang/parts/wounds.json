@@ -39,6 +39,7 @@
 	"message.jaymospowers.downed.no_food": "You've nothing to eat to bring %s round with.",
 	"message.jaymospowers.downed.no_treat": "You've nothing %s would take to bring them round.",
 	"message.jaymospowers.downed.revive_stopped": "You leave %s where they lie.",
+	"message.jaymospowers.downed.kneel_first": "Get down on a knee beside %s first: sneak, scroll down and keep still.",
 	"message.jaymospowers.downed.held_down": "%s won't get up while someone's Will holds them down.",
 	"message.jaymospowers.downed.revived": "%s is back on their feet (your %s went to them).",
 	"message.jaymospowers.downed.rider_hands": "Rider's know-how",
