@@ -11,8 +11,8 @@ import net.minecraft.world.item.ItemStack;
 /**
  * (Smithing) Knight Armor and Weapons' metal pieces, hammered out here when it is in (its pieces are found by id;
  * without it there is nothing to forge). Its grid recipes are switched off in data (data/knightarmorweapons/recipe).
- * Its armour is turned off (the grid recipes in data; Jaymo's Kingdoms' heraldry harness is the pack's knight armour), so only
- * the weapons are forged.
+ * Its armour is out of the pack ({@code armory/RetiredKnightArmour}: hidden, and any piece left becomes iron; Jaymo's
+ * Kingdoms' heraldry harness is the pack's knight armour), so only the weapons are forged.
  */
 public final class KnightArmorForging {
 	/** Item ids (in the mod's namespace) and the iron ingots each takes: the weapons. */
