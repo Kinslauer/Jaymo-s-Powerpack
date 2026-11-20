@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 00:32). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 00:34). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -47,11 +47,11 @@ kanban-plugin: board
 
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · claimed
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · for any · #1787 · changes · fixing review notes
-- [ ] [[Agents/castle-towns-epic|castle-towns-epic]] · 💻 Odysseus · running
 
 
 ## In review
 
+- [ ] [[Agents/castle-towns-epic|castle-towns-epic]] · 💻 Odysseus · #1898 · in-review
 
 
 ## Needs Andy
