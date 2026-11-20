@@ -44,11 +44,11 @@ kanban-plugin: board
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · for any · #1896 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-4-forms|zfighter-gaps-4-forms]] · ☀️ Apollo · claimed
 - [ ] [[Inbox/zfighter-gaps-2-power|zfighter-gaps-2-power]] · 🍇 Bacchus · #1938 · changes · fixing review notes
+- [ ] [[Inbox/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]] · 🪶 Quill · #1939 · writing
 
 
 ## In review
 
-- [ ] [[Inbox/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]] · ☀️ Apollo · #1939 · in-review
 
 
 ## Needs Andy
