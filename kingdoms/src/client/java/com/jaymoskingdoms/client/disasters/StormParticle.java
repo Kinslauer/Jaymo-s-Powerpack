@@ -19,8 +19,11 @@ final class StormParticle extends SingleQuadParticle {
 	static final int FOG = 3;
 	/** Smoke off a big fire ({@link FireSmoke}): it rises, slowing, leans downwind as it climbs, swells, pales and thins. */
 	static final int SMOKE = 4;
-	/** How many ticks it takes to fade in and out. */
-	private static final int FADE = 25;
+	/** A bank of dark smog hanging high over a burning forest ({@link FireSmoke}): it drifts downwind at its height,
+	 * heaves slowly and swells, and lingers after the fire below has gone out. */
+	static final int PALL = 5;
+	/** How many ticks it takes to fade in and out (smog takes longer, so a bank gathers and clears slowly). */
+	private static final int FADE = 25, PALL_FADE = 120;
 
 	/** Ground fog is not drawn within FOG_CLEAR blocks of the camera, and thins in over the next FOG_THIN. */
 	private static final double FOG_CLEAR = 5.0, FOG_THIN = 9.0;
@@ -74,6 +77,17 @@ final class StormParticle extends SingleQuadParticle {
 		return this;
 	}
 
+	/** Smog hangs where it is put, drifts with (windX, windZ), heaves up and down a little and swells by {@code swell} times over its life. */
+	StormParticle pall(double windX, double windZ, float swell) {
+		this.windX = windX;
+		this.windZ = windZ;
+		this.swell = swell;
+		this.baseSize = this.quadSize;
+		this.h = (float)y;
+		this.angle = this.random.nextFloat() * Mth.TWO_PI;
+		return this;
+	}
+
 	/** A funnel wisp starts {@code h} up, at {@code angle}, {@code out} of the radius, climbing {@code climb} a tick. */
 	StormParticle funnel(float h, float angle, float out, float climb) {
 		this.h = h;
@@ -94,7 +108,22 @@ final class StormParticle extends SingleQuadParticle {
 			return;
 		}
 		boolean alive = true;
-		if (this.kind == SMOKE) {
+		if (this.kind == PALL) {
+			float t = this.age / (float)this.lifetime;
+			this.xd = this.windX;
+			this.zd = this.windZ;
+			this.x += this.xd;
+			this.z += this.zd;
+			// (h is the height it was put at: it heaves a block or so round it, as a cloud does)
+			this.angle += 0.01F;
+			this.y = this.h + Mth.sin(this.angle) * 1.2F;
+			this.roll += 0.0015F;
+			this.quadSize = this.baseSize * (1.0F + this.swell * t);
+			// (thin close to, so flying up through it is not a wall of grey)
+			net.minecraft.world.phys.Vec3 eye = net.minecraft.client.Minecraft.getInstance().gameRenderer.mainCamera().position();
+			double away = Math.sqrt((this.x - eye.x) * (this.x - eye.x) + (this.y - eye.y) * (this.y - eye.y) + (this.z - eye.z) * (this.z - eye.z));
+			this.near = Mth.clamp((float)((away - FOG_CLEAR * 2.0) / (FOG_THIN * 2.0)), 0.0F, 1.0F);
+		} else if (this.kind == SMOKE) {
 			float t = this.age / (float)this.lifetime;
 			// rising fast off the flames and slowing as it cools; the wind takes it more the higher it gets
 			this.xd = Mth.lerp(Math.min(1.0F, t * 2.5F), 0.0, this.windX);
@@ -153,7 +182,8 @@ final class StormParticle extends SingleQuadParticle {
 			}
 			this.roll += 0.05F;
 		}
-		float fade = Math.min(1.0F, Math.min(this.age / (float)FADE, (this.lifetime - this.age) / (float)FADE));
+		int fadeTicks = this.kind == PALL ? PALL_FADE : FADE;
+		float fade = Math.min(1.0F, Math.min(this.age / (float)fadeTicks, (this.lifetime - this.age) / (float)fadeTicks));
 		if (!alive) {
 			this.age = Math.max(this.age, this.lifetime - FADE);
 		}

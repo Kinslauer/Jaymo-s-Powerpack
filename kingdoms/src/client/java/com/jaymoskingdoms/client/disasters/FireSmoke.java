@@ -25,6 +25,10 @@ import net.minecraft.world.phys.Vec3;
  * downwind as they climb; the bigger the blaze round it, the bigger the puffs and the more of them. All the plumes
  * together share one budget a tick (a third of it in low-end mode, {@code /lowend}), so a whole forest burning costs
  * no more than a few hundred puffs.</li>
+ * <li>Over a burning forest (a blaze of PALL_FROM fires or more), a dark bank of smog gathers high up where the plumes
+ * end ({@link StormParticle#PALL}): big, slow, dark grey puffs that hang there, drift downwind and linger a minute or two
+ * after the fire is out (Andy, 2026-11-20). They share a budget of their own, so a whole forest's pall stays at a couple of
+ * hundred puffs.</li>
  * <li>Near a big blaze and out under the sky, the air fills with smoke: the fog closes in and browns
  * ({@link #haze}, read by {@code SkiesFogMixin} with the weather's other fogs).</li>
  * </ul>
@@ -50,6 +54,17 @@ public final class FireSmoke {
 	static final float GREY_FOOT = 0.22F, GREY_TOP = 0.46F, ALPHA = 0.55F;
 	/** How fast it leans with the wind once aloft, as a share of the wind's own drift. */
 	static final float LEAN = 1.5F;
+	/** Smog: a cell gathers a pall once it and the 8 next to it hold PALL_FROM fires; puffs a tick for each fire round it,
+	 * and the most a tick for every pall together (normal, low-end). */
+	static final float PALL_FROM = 30.0F, PALL_PER_FIRE = 0.0015F, PALL_BUDGET = 0.12F, PALL_LOW_BUDGET = 0.04F;
+	/** How high over the burning tops a pall hangs (blocks, and how much either way), and how far it spreads from the cell
+	 * (each way) and downwind. */
+	static final float PALL_HEIGHT = 46.0F, PALL_HEIGHT_SPREAD = 8.0F, PALL_SPREAD = 16.0F, PALL_DOWNWIND = 24.0F;
+	/** A smog puff's size (blocks) for a pall just gathering and for one over BIG fires or more; how much it swells. */
+	static final float PALL_SIZE_SMALL = 16.0F, PALL_SIZE_BIG = 28.0F, PALL_SWELL = 0.5F;
+	/** How long a smog puff lasts (ticks), how fast it drifts as a share of the wind, its grey by day (a big blaze's is darker) and how thick it is. */
+	static final int PALL_LIFE_MIN = 1400, PALL_LIFE_MAX = 2200;
+	static final float PALL_DRIFT = 0.5F, PALL_GREY = 0.27F, PALL_GREY_BIG = 0.18F, PALL_ALPHA = 0.62F;
 	/** The smoky air: fires within HAZE_RANGE blocks count (the nearer the more), HAZE_FULL of them at the camera's
 	 * door make it full; how fast it comes and goes (a tick); indoors it's this much of itself. */
 	static final double HAZE_RANGE = 48.0;
@@ -65,9 +80,9 @@ public final class FireSmoke {
 	private static final class Cell {
 		/** Fires found, each worth the columns one sample stands for, cooling every tick. */
 		float tally;
-		/** The height of the last fire found in it, and the puffs owed. */
+		/** The height of the last fire found in it, and the puffs (plume, smog) owed. */
 		int top;
-		float carry;
+		float carry, pallCarry;
 
 		float fires() {
 			return this.tally * (1.0F - COOL);
@@ -104,6 +119,7 @@ public final class FireSmoke {
 		haze = haze < target ? Math.min(target, haze + HAZE_EASE) : Math.max(target, haze - HAZE_EASE);
 		if (!CELLS.isEmpty()) {
 			puff(minecraft, level, random);
+			pall(minecraft, level, random);
 		}
 	}
 
@@ -184,6 +200,57 @@ public final class FireSmoke {
 				float rise = Mth.lerp(random.nextFloat(), RISE_MIN, RISE_MAX) * (0.85F + 0.3F * blaze);
 				minecraft.particleEngine.add(new StormParticle(level, x, y, z, StormsClient.cloudSprites.get(random), StormParticle.SMOKE, 0, size, life,
 					GREY_FOOT, GREY_FOOT * 0.95F, GREY_FOOT * 0.92F, ALPHA).smoke(rise, wx, wz, SWELL, GREY_FOOT, GREY_TOP));
+			}
+		}
+	}
+
+	/** Each cell in the middle of a big enough blaze gathers its share of this tick's smog high above it. */
+	private static void pall(Minecraft minecraft, ClientLevel level, RandomSource random) {
+		if (StormsClient.cloudSprites == null) {
+			return;
+		}
+		float wanted = 0.0F;
+		for (Long2ObjectMap.Entry<Cell> e : CELLS.long2ObjectEntrySet()) {
+			Cell cell = e.getValue();
+			if (cell.fires() < SMOKES_FROM) {
+				cell.pallCarry = 0.0F;
+				continue;
+			}
+			float round = round(BlockPos.getX(e.getLongKey()), BlockPos.getZ(e.getLongKey()));
+			if (round >= PALL_FROM) {
+				wanted += round * PALL_PER_FIRE;
+			}
+		}
+		if (wanted <= 0.0F) {
+			return;
+		}
+		float share = Math.min(1.0F, (low ? PALL_LOW_BUDGET : PALL_BUDGET) / wanted);
+		double drift = Storms.clientWindSpeed * PALL_DRIFT;
+		double ca = Math.cos(Storms.clientWindAngle), sa = Math.sin(Storms.clientWindAngle);
+		for (Long2ObjectMap.Entry<Cell> e : CELLS.long2ObjectEntrySet()) {
+			Cell cell = e.getValue();
+			if (cell.fires() < SMOKES_FROM) {
+				continue;
+			}
+			int gx = BlockPos.getX(e.getLongKey()), gz = BlockPos.getZ(e.getLongKey());
+			float round = round(gx, gz);
+			if (round < PALL_FROM) {
+				continue;
+			}
+			cell.pallCarry += round * PALL_PER_FIRE * share;
+			int n = (int)cell.pallCarry;
+			cell.pallCarry -= n;
+			float blaze = Mth.clamp(round / BIG, 0.0F, 1.0F);
+			for (int i = 0; i < n; i++) {
+				double down = random.nextDouble() * PALL_DOWNWIND;
+				double x = (gx << CELL) + 4.0 + (random.nextDouble() * 2.0 - 1.0) * PALL_SPREAD + ca * down;
+				double z = (gz << CELL) + 4.0 + (random.nextDouble() * 2.0 - 1.0) * PALL_SPREAD + sa * down;
+				double y = cell.top + PALL_HEIGHT + (random.nextDouble() * 2.0 - 1.0) * PALL_HEIGHT_SPREAD;
+				float size = Mth.lerp(blaze, PALL_SIZE_SMALL, PALL_SIZE_BIG) * (0.8F + random.nextFloat() * 0.4F);
+				int life = Mth.nextInt(random, PALL_LIFE_MIN, PALL_LIFE_MAX);
+				float grey = Mth.lerp(blaze, PALL_GREY, PALL_GREY_BIG) * (0.9F + random.nextFloat() * 0.2F);
+				minecraft.particleEngine.add(new StormParticle(level, x, y, z, StormsClient.cloudSprites.get(random), StormParticle.PALL, 0, size, life,
+					grey, grey * 0.97F, grey * 0.95F, PALL_ALPHA).pall(ca * drift, sa * drift, PALL_SWELL));
 			}
 		}
 	}
