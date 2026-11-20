@@ -15913,3 +15913,9 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 
 - **Farmers** (our own farmers, MCA farmers and the Family farmhand start) wear the Blossomland straw hat instead of the settler's wide hat; they keep the settler coat and trousers. Carters keep the settler hat. A farmer already in the settler hat changes into the straw one the next time a player is near, and MCA no longer takes a farmer's straw hat off (`FrontierWear.keeps`).
 - Built; not played.
+
+## 0.11.32 (2026-11-20): spiders leave webbed and lair-kept players be (#1916)
+
+- **Saved for the queen** (Andy: "when you get this respawn the spiders shouldnt keep attacking you, they also shouldnt attack you if you are webbed up, as they are saving you for the queen"): spiders no longer bite anyone wrapped in web (Powers' Webbed, any layer), and after a blackout wakes you in a spiders' lair, the lair's spiders leave you be there, webbed or not, until you get 32 blocks out of it or a day passes. Spiders already on you let go; none can be set on you (`wild/SpiderKeep`, `SpiderKeepMixin` on `Mob.setTarget`).
+- Striking a spider (a blow or a shot; a squash underfoot doesn't count) rouses them for a minute, webbed or kept, and ends the lair's keeping, as captors turn on a captive who acts up. The brood queen isn't held back.
+- Built; not played.
