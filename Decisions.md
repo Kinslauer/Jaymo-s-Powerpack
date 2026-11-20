@@ -831,3 +831,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-19 (Andy, PR #1889): regrown limbs come back unbroken (Rubber-folk, Verdant, Bio-built; every regrowth). Rubber-folk regrowth plays a balloon stretch then a pop; a Verdant's regrowth a fleshy crunch, with green blood spurting from the stump until the limb is back; Verdant and Bio-built bleed green.
 - 2026-11-19 (cloud Claude, Reason Art): Andy approved the Lore.md placement 'What runs in a Bio-built'.
 - 2026-11-19 6:40 PM ET (vault coordinator): Wither model stays as the third preview; Andy will have someone else take it on later.
+- 2026-11-19 (Andy, PR #1894): deer avoid civilization completely and bolt from any sign of people; they come near only to eat crops (at night), and scarecrows keep them off even then.
