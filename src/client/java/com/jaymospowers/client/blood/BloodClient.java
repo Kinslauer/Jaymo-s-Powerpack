@@ -13,6 +13,7 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -105,6 +106,29 @@ public final class BloodClient {
 			puddles = sprites;
 			return (options, level, x, y, z, xd, yd, zd, random) -> puddle(level, x, y, z, sprites, options);
 		});
+		// blood scrubbed off here (BloodTrail.scrub): what only this client draws goes too
+		registry.register(BloodParticles.WIPE, sprites -> (options, level, x, y, z, xd, yd, zd, random) -> {
+			wipe(level, new Vec3(x, y, z), options.radius());
+			return null;
+		});
+		com.jaymospowers.core.wet.Scrubbing.seen = new com.jaymospowers.core.wet.Scrubbing.SeenBlood() {
+			@Override
+			public boolean near(net.minecraft.world.level.Level level, Vec3 at, double range) {
+				return level instanceof ClientLevel client && bloodNear(client, at, range);
+			}
+
+			@Override
+			public boolean stain(net.minecraft.world.level.Level level, Vec3 at, double range) {
+				return level instanceof ClientLevel client && stainNear(client, at, range);
+			}
+
+			@Override
+			public void wipe(net.minecraft.world.level.Level level, Vec3 at, double range) {
+				if (level instanceof ClientLevel client) {
+					BloodClient.wipe(client, at, range);
+				}
+			}
+		};
 		// (0.20.41) sprites only: a bare /particle of either lays nothing
 		registry.register(BloodParticles.PRINT_SPRITES, sprites -> {
 			prints = sprites;
@@ -225,6 +249,55 @@ public final class BloodClient {
 			}
 		}
 		return best;
+	}
+
+	/** Whether one of the server's lasting stains lies within {@code range} of {@code at}, as this client was sent them. */
+	static boolean stainNear(ClientLevel level, Vec3 at, double range) {
+		double rangeSqr = range * range;
+		if (level == stainsIn) {
+			for (BloodPuddle stain : STAINS.values()) {
+				if (stain.bloody() && stain.position().distanceToSqr(at) <= rangeSqr) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/** Whether any blood this client draws (a stain, a splash, a mark on a wall) lies within {@code range} of {@code at}. */
+	static boolean bloodNear(ClientLevel level, Vec3 at, double range) {
+		double rangeSqr = range * range;
+		if (stainNear(level, at, range)) {
+			return true;
+		}
+		if (level == poolsIn) {
+			for (List<BloodPuddle> chunk : POOLS.values()) {
+				for (BloodPuddle pool : chunk) {
+					if (pool.bloody() && pool.position().distanceToSqr(at) <= rangeSqr) {
+						return true;
+					}
+				}
+			}
+		}
+		return BloodWallMark.any(level, at, range);
+	}
+
+	/**
+	 * Scrubbed: the splashes and wall marks within {@code range} of {@code at} fade away (the server's lasting stains are
+	 * scrubbed there and sent again smaller).
+	 */
+	static void wipe(ClientLevel level, Vec3 at, double range) {
+		double rangeSqr = range * range;
+		if (level == poolsIn) {
+			for (List<BloodPuddle> chunk : POOLS.values()) {
+				for (BloodPuddle pool : chunk) {
+					if (pool.position().distanceToSqr(at) <= rangeSqr) {
+						pool.wipe(BloodWallMark.WIPED);
+					}
+				}
+			}
+		}
+		BloodWallMark.wipe(level, at, range);
 	}
 
 	/** The F3 line: the blood setting, the server's stains and the splash pools lying near, and the drops in the air. */

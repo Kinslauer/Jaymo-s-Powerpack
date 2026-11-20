@@ -242,7 +242,7 @@ final class Strays {
 		return m.isAlive() && !m.isBaby() && !Downed.isDowned(m) && !Frights.afraid(m.getUUID()) && !shooing(m.getUUID());
 	}
 
-	private static boolean shooing(UUID mob) {
+	static boolean shooing(UUID mob) {
 		for (Shoo s : SHOOS.values()) {
 			if (s.shooer.equals(mob)) {
 				return true;
