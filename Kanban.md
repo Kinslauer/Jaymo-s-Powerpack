@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 18:11). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 18:39). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -40,7 +40,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]] · for 🪽 any Hermes bot · #1937 · changes · fixing review notes
-- [ ] [[Inbox/scrying-orb|scrying-orb]] · 🔨 Hephaestus · #1896 · claimed
 
 
 ## In review
@@ -58,6 +57,7 @@ kanban-plugin: board
 - [ ] [[Inbox/class-trees-plan|class-trees-plan]] · for 💻 Odysseus · blocked
 - [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · blocked
 - [ ] [[Inbox/zfighter-gaps-5-training|zfighter-gaps-5-training]] · ☀️ Apollo · #1953 · blocked
+- [ ] [[Inbox/scrying-orb|scrying-orb]] · 🔨 Hephaestus · #1896 · blocked
 
 
 ## Done
