@@ -8,6 +8,9 @@
 		"FishingRodFirstPersonMixin",
 		"FishingRodThirdPersonMixin",
 		"FishingScrollMixin",
+		"RodTipArmedMixin",
+		"RodTipHandsMixin",
+		"RodTipItemMixin",
 		"RodTipLayerMixin"
 	],
 	"injectors": {
