@@ -88,6 +88,11 @@ public final class LimbEaters {
 	private static final Map<Mob, Boolean> GIVEN = new WeakHashMap<>();
 	/** A carrion bird that has circled the dead may come down to them until this game time. */
 	private static final Map<Mob, Long> CIRCLED = new WeakHashMap<>();
+	/** An eater going for a downed body or tearing at it: whose, and the game time it last did ({@link #toreAt}). */
+	private static final Map<Mob, Tear> TEARS = new WeakHashMap<>();
+
+	private record Tear(java.util.UUID body, long at) {
+	}
 
 	private LimbEaters() {
 	}
@@ -242,6 +247,17 @@ public final class LimbEaters {
 		}
 	}
 
+	/**
+	 * Whether {@code mob} has gone for {@code body} to eat it alive, or torn at it, within {@code ticks}. Andy (2026-11-20,
+	 * a bear tearing at him for most of a minute): "why didnt the bear execute here? it had more than enough time". An
+	 * animal eating a downed player has no target, so {@code MobExecutions} counts this as fighting them: it finishes
+	 * them like anyone else in the fight.
+	 */
+	public static boolean toreAt(Mob mob, net.minecraft.world.entity.LivingEntity body, int ticks) {
+		Tear tear = TEARS.get(mob);
+		return tear != null && tear.body().equals(body.getUUID()) && mob.level().getGameTime() - tear.at() <= ticks;
+	}
+
 	/** Whether {@code bird} has circled the dead lately and may come down to them. */
 	static boolean circled(Mob bird) {
 		Long until = CIRCLED.get(bird);
@@ -350,6 +366,7 @@ public final class LimbEaters {
 			if (body == null || !(mob.level() instanceof ServerLevel level)) {
 				return;
 			}
+			TEARS.put(mob, new Tear(body.getUUID(), level.getGameTime()));
 			double r = mob.getBbWidth() / 2.0 + body.getBbWidth() / 2.0 + 0.9;
 			if (mob.distanceToSqr(body) > r * r) {
 				giveUp--;
