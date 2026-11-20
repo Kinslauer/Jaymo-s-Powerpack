@@ -209,7 +209,7 @@ public final class KingdomEvents {
 		Faction founded;
 		// (0.7.598) only an Epic town becomes a capital; any other mod's village is a village, allied to the nearest kingdom
 		if (SeatCompounds.is(village.id())) {
-			// a seat compound: a fiefdom of the kingdom near, or a village ({@link SeatCompounds#found})
+			// a seat compound: a kingdom in its castle far from any realm, else a fiefdom of the kingdom near, or a village ({@link SeatCompounds#found})
 			founded = SeatCompounds.found(level, bell.get(), village.start());
 		} else if (Seats.epic(village.id()) && Factions.realmNear(server, bell.get(), CAPITAL_SPACING) == null) {
 			founded = foundIn(level, bell.get(), village.start());
