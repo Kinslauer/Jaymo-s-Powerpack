@@ -1,6 +1,6 @@
 ---
-status: writing
-text_pass: 
+status: in-review
+text_pass: done
 for: hermes
 from: vault-coordinator
 asked: 2026-11-19
