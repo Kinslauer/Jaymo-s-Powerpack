@@ -59,6 +59,14 @@ public final class FinisherClient {
 	private static int pressedAt = Integer.MIN_VALUE / 2, pressedOn = -1;
 	/** (0.19.78) A double click was sent and its press is still held: letting go is told to the server (it calls it off). */
 	private static boolean rushHeld;
+	/**
+	 * A press on someone you could take with a stealth kill is held back (it would wake them); let go within this many ticks
+	 * it was a tap, and the blow is thrown then (your sneak attack), as if nothing had held it.
+	 */
+	static final int TAP_TICKS = 5;
+	/** A press held back for the stealth kill, on whom (entity id, -1 none); and whether the late blow is being thrown now. */
+	private static int tapOn = -1, tapAt;
+	private static boolean tapping;
 
 	private FinisherClient() {
 	}
@@ -94,6 +102,24 @@ public final class FinisherClient {
 			// (Andy, 2026-11-12) attack let go: the symbiote's execution stops if it hasn't killed yet
 			ClientPlayNetworking.send(new Finishers.Execute(Finishers.LET_GO_ID));
 			sent = -1;
+		}
+		if (pressed && player != null && minecraft.gui.screen() == null && minecraft.hitResult instanceof EntityHitResult hit
+			&& hit.getEntity() instanceof LivingEntity body && stealthOnly(player, body)) {
+			// (a press on someone you could take from behind: held back till it's clear whether it's a tap or the hold)
+			tapOn = body.getId();
+			tapAt = ticks;
+		}
+		if (released && tapOn >= 0 && ticks - tapAt <= TAP_TICKS && player != null && minecraft.gui.screen() == null && !Finishers.busy(player)) {
+			// a tap after all: the blow goes now, whatever held it back
+			tapping = true;
+			try {
+				((com.jaymospowers.client.mixin.MinecraftAttackInvoker) minecraft).jaymospowers$startAttack();
+			} finally {
+				tapping = false;
+			}
+		}
+		if (!down) {
+			tapOn = -1;
 		}
 		locked = player != null && (charging() || choosing >= 0 || locked && down);
 		if (rushHeld && (!down || player == null)) {
@@ -215,7 +241,17 @@ public final class FinisherClient {
 		if (minecraft.player == null || !(minecraft.hitResult instanceof EntityHitResult hit) || !(hit.getEntity() instanceof LivingEntity body)) {
 			return false;
 		}
-		return down(body) || minecraft.player.isShiftKeyDown() && (Finishers.chokeable(minecraft.player, body) || Finishers.quickKillable(minecraft.player, body));
+		return down(body) || minecraft.player.isShiftKeyDown() && (Finishers.chokeable(minecraft.player, body) || Finishers.quickKillable(minecraft.player, body)
+			|| Finishers.stealthKillable(minecraft.player, body));
+	}
+
+	/**
+	 * Whether sneaking with the crosshair on {@code body} is the stealth kill's alone: not someone down, not Quiet Word's
+	 * choke, not a quick kill. Then a tap still lands a blow ({@link #TAP_TICKS}); only the hold is the kill.
+	 */
+	private static boolean stealthOnly(LocalPlayer player, LivingEntity body) {
+		return player.isShiftKeyDown() && !down(body) && !Finishers.chokeable(player, body) && !Finishers.quickKillable(player, body)
+			&& Finishers.stealthKillable(player, body);
 	}
 
 	/**
@@ -225,7 +261,8 @@ public final class FinisherClient {
 	 */
 	public static boolean holdsAttack(Minecraft minecraft) {
 		LocalPlayer player = minecraft.player;
-		if (player == null || player.isSpectator()) {
+		if (player == null || player.isSpectator() || tapping) {
+			// (the stealth kill's held-back tap, thrown late, is a blow like any)
 			return false;
 		}
 		if (Finishers.busy(player) || locked) {
@@ -234,6 +271,10 @@ public final class FinisherClient {
 		}
 		if (!aimingAtHelpless(minecraft)) {
 			return false;
+		}
+		if (minecraft.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity body && stealthOnly(player, body)) {
+			// (stealthKillable has already asked for something in hand that kills)
+			return true;
 		}
 		ItemStack stack = player.getMainHandItem();
 		return stack.isEmpty() || Finishers.kind(stack) != Finishers.Kind.FIST || stack.isDamageableItem();

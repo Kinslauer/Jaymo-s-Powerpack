@@ -19,6 +19,7 @@
 		"WetCoatTintMixin",
 		"TakeoverFacingMixin",
 		"TakeoverFacingHeadMixin",
+		"StillBodyHeadMixin",
 		"CritterArmourFreshAnimationsMixin",
 		"CritterArmourFreshAnimationsEquineMixin",
 		"AetherVeilFrustumMixin",
