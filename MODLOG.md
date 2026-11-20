@@ -6726,3 +6726,8 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
   world events out of chat; you see the fire, its smoke and the firefighter's plate while carrying the kit. Players
   near it are still counted as its responders. (Our port, `ports/forestfire`, 1.1.11-26.3-jaymo.2; `PORT.md` lists it.)
 - Built; not played.
+
+## 0.25.98 (2026-11-20): long pitchfork (#1907)
+
+- **Pitchfork**: redrawn at 32x32 (a long ash shaft, an iron socket and crossbar, three tines) and held like the glaives, so in the hand it is longer than a trident (about two and a half blocks), with the grip low on the shaft. A thrown pitchfork is drawn at the same length in flight (`ThrownWeaponRenderer` size per item).
+- Built; not played.

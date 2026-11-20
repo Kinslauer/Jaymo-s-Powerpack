@@ -15908,3 +15908,8 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
   villager, a feud) no longer post a line to the chat of players nearby when they start or end (Andy, 2026-11-20). You
   learn of one from the gold-marked villagers asking for help; the town's ledger still lists them (`TownTroubles`).
 - Built; not played.
+
+## 0.11.31 (2026-11-20): farmers wear straw hats (#1907)
+
+- **Farmers** (our own farmers, MCA farmers and the Family farmhand start) wear the Blossomland straw hat instead of the settler's wide hat; they keep the settler coat and trousers. Carters keep the settler hat. A farmer already in the settler hat changes into the straw one the next time a player is near, and MCA no longer takes a farmer's straw hat off (`FrontierWear.keeps`).
+- Built; not played.
