@@ -1587,13 +1587,14 @@ public final class ZFighterPower implements Power {
 		if (now % CHARGE_DEBRIS_EVERY == 0) {
 			debris(player, CHARGE_DEBRIS * tier, 1.0 + 0.6 * tier, 0.25 + 0.15 * tier, false);
 		}
-		// the ground cracks round him while he charges, harder in each form: the block his foot came
-		// down on (the solid block below), and no more than once every ten ticks on a long charge
+		// the ground cracks round him while he charges, harder in each form: a random block in a small ring
+		// round where his foot came down (the solid block below), no more than once every ten ticks
 		if (now % 10 == 0) {
-			GroundCracks.crack(level, player.blockPosition().below(), random, live.tier() + 2);
+			BlockPos crackAt = player.blockPosition().below().offset(random.nextInt(3) - 1, 0, random.nextInt(3) - 1);
+			GroundCracks.crack(level, crackAt, random, live.tier() + 2);
 		}
 		// small lightning crackles over him from the second form up
-		if (live.form > 0 && random.nextInt(CHARGE_CRACKLE) < tier) {
+		if (live.tier() >= 2 && random.nextInt(CHARGE_CRACKLE) < tier) {
 			crackle(player, random, tier);
 		}
 		if (now % 4 == 0) {
@@ -1601,10 +1602,10 @@ public final class ZFighterPower implements Power {
 			for (int i = 0; i < tier; i++) {
 				double a = random.nextDouble() * Math.PI * 2.0;
 				double r = 0.3 + random.nextDouble() * 0.4;
-				level.sendParticles(ParticleTypes.LAVA, true, false,
+				level.sendParticles(MagicFx.EMBER, true, false,
 					player.getX() + Math.cos(a) * r, player.getY() + 1.0 + random.nextDouble() * 0.6,
 					player.getZ() + Math.sin(a) * r,
-					0, 0.0, 0.04 + random.nextDouble() * 0.04, 0.0, 0.0);
+					1, 0.0, 0.05 + random.nextDouble() * 0.05, 0.0, 0.0);
 			}
 		}
 		if (now % 6 == 0) {
