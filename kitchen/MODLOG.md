@@ -2589,3 +2589,8 @@ Added a new **Cooking Block** to the Functional creative tab. The block has iron
 
 - Andy (bear clip, 2026-11-19): "the super knockback ragdolls are back. can we tame them". A blow or shove on a body lying limp, or one that knocks it limp, now carries it at most 0.45 blocks a tick along the ground with at most 0.1 lift, for players (`LimpController`: shoves while limp went in at full strength before, with no lift cap) and mobs (`MobRagdolls`). You slide a block or two, never across the field. Throws a power means to make (being thrown by a carrier, a crash) are untouched.
 - Built; not played.
+
+## 0.6.65 (2026-11-20): A leg or bagged corpse of a modded creature no longer crashes the game (#1927)
+
+- **Fix**: drawing a severed leg (`SpiderLeg`) whose creature another mod adds saved data to (Re:Animal's wolves) crashed the game: that mod's part of the save isn't set up on a body rebuilt only to be drawn. The leg now keeps what was read before it (as corpses already did), and a corpse taken out of a body bag does the same (`CorpseEntity.rebuildFrom`). A warning is logged instead.
+- Built by CI; not played.
