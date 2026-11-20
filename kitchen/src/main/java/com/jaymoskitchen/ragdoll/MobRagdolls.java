@@ -45,6 +45,11 @@ public final class MobRagdolls {
 	private static final double KNOCK_CARRY = 0.7;
 	/** The most a shove while it's down lifts the body (blocks a tick). */
 	private static final double SHOVE_LIFT = 0.1;
+	/**
+	 * The most speed along the ground (blocks a tick) a blow or shove carries the body on, whatever gave it (a mutant's
+	 * slam throws 1-1.5): a slide of a block or two, as players (LimpController).
+	 */
+	private static final double MAX_CARRY = 0.45;
 	/** A topple: the share of the fling the head takes, and the share the rest of the body feels. */
 	private static final double TOPPLE = 0.35;
 	private static final float TOPPLE_SHARE = 0.15F;
@@ -187,8 +192,8 @@ public final class MobRagdolls {
 			fx = Math.cos(angle) * HIT_FLING;
 			fz = Math.sin(angle) * HIT_FLING;
 		}
-		Vec3 v = mob.getDeltaMovement();
-		double vx = fx + v.x * KNOCK_CARRY, vy = HIT_LIFT + Math.max(0.0, Math.min(v.y, HIT_LIFT)), vz = fz + v.z * KNOCK_CARRY;
+		Vec3 v = flatCap(mob.getDeltaMovement().multiply(KNOCK_CARRY, 1.0, KNOCK_CARRY));
+		double vx = fx + v.x, vy = HIT_LIFT + Math.max(0.0, Math.min(v.y, HIT_LIFT)), vz = fz + v.z;
 		body.setSpeed(vx, vy, vz);
 		int head = switch (rig.shape) {
 			case HUMANOID -> RagdollRig.HEAD;
@@ -271,7 +276,14 @@ public final class MobRagdolls {
 	 * the hop the game gives every knockback past {@link #SHOVE_LIFT} (Andy: "fall where you stand or a bit further").
 	 */
 	private static void takeIn(RagdollBody body, Vec3 pushed) {
-		body.shove(pushed.x * KNOCK_CARRY, Math.min(pushed.y, SHOVE_LIFT), pushed.z * KNOCK_CARRY);
+		Vec3 push = flatCap(pushed.multiply(KNOCK_CARRY, 1.0, KNOCK_CARRY));
+		body.shove(push.x, Math.min(push.y, SHOVE_LIFT), push.z);
+	}
+
+	/** {@code v} with its speed along the ground cut to {@link #MAX_CARRY}. */
+	private static Vec3 flatCap(Vec3 v) {
+		double flat = Math.hypot(v.x, v.z);
+		return flat > MAX_CARRY ? new Vec3(v.x * MAX_CARRY / flat, v.y, v.z * MAX_CARRY / flat) : v;
 	}
 
 	private static void send(Mob mob, Limp limp) {
