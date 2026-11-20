@@ -27,7 +27,6 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-l-carts-check|vanilla-plus-l-carts-check]] · for 💻 Odysseus · open
-- [ ] [[Inbox/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-gaps-4-forms|zfighter-gaps-4-forms]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-gaps-5-training|zfighter-gaps-5-training]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]] · for 🪽 any Hermes bot · open
@@ -46,6 +45,7 @@ kanban-plugin: board
 - [ ] [[Inbox/zfighter-aura-rework|zfighter-aura-rework]] · 🍇 Bacchus · #1911 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-2-power|zfighter-gaps-2-power]] · 🍇 Bacchus · #1938 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]] · for 🪽 any Hermes bot · #1937 · changes · fixing review notes
+- [ ] [[Inbox/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]] · ☀️ Apollo · claimed
 
 
 ## In review
