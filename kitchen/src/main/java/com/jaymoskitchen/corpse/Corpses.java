@@ -105,6 +105,8 @@ public final class Corpses {
 		"attributes", "Attributes", "active_effects", "ActiveEffects", "Passengers", "Leash", "leash");
 
 	public static EntityType<CorpseEntity> CORPSE;
+	/** The loot screen a tap on a body opens ({@link CorpseLootMenu}); the client's menu is told the body's network id. */
+	public static net.fabricmc.fabric.api.menu.v1.ExtendedMenuType<CorpseLootMenu, Integer> LOOT_MENU;
 	public static DataComponentType<CorpseData> CORPSE_DATA;
 	public static Item CORPSE_ITEM;
 	/** The oak butcher block (the original one); every wood has its own, all in {@link #BUTCHER_BLOCKS}. */
@@ -132,6 +134,8 @@ public final class Corpses {
 				.updateInterval(1)
 				.noSummon()
 				.build(corpseKey));
+		LOOT_MENU = Registry.register(BuiltInRegistries.MENU, JaymosKitchen.id("corpse_loot"),
+			new net.fabricmc.fabric.api.menu.v1.ExtendedMenuType<>(CorpseLootMenu::new, net.minecraft.network.codec.ByteBufCodecs.VAR_INT));
 		// (0.5.1) someone coming into range sees a resting body's points at once, not at its next resend
 		EntityTrackingEvents.START_TRACKING.register((tracked, player) -> {
 			if (tracked instanceof CorpseEntity corpse) {
