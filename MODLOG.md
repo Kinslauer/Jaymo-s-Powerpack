@@ -6841,3 +6841,8 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 
 - **Keys**: Auto HUD's "Toggle dynamic HUD" shipped on H, the character menu key, so opening the character menu also switched the auto-hiding HUD on or off. Once per install it now comes off H (unbound) if it's still there; Controls > Key Binds > Auto HUD can set it again. To keep Auto HUD off for good: Mods > Auto HUD > General > "Enable on game load" off.
 - `KeyConflicts` move list v11 (`key.autohud.toggle-hud`). Built; not played.
+
+## 0.26.11 (2026-11-20): Rig leg kick from the fitted leg (#1933)
+
+- **Rig prosthetic leg**: the kick pose (V, no suit on) swings the leg the Rig limb is fitted to, not always the right one (`RigPose`). A Rig leg on each side kicks with the right one, as the kick itself picks.
+- Built; not played.
