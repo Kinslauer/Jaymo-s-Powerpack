@@ -15809,3 +15809,9 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - **Scarecrows**: crops guarded by Kitchen's scarecrow (with its pumpkin) or our straw scarecrow (10 blocks) never draw deer, and deer near either run from it; the straw scarecrow now sends deer off too.
 - Druids with Beast Tongue who have studied deer still frighten none; owned, leashed, ridden or named deer are left alone.
 - Built (`compileJava`); not played.
+
+## 0.11.22 (2026-11-20): Duelling guards count as fighting you, so right click blocks (#1895)
+
+- Andy: "i tried to face an honor duel, but i was constantly opening the chat menu with the guard mid fight".
+- An honour duel's student (duels and festival bouts) and a veteran's parry drill or spar keep their fighting flag up for the whole fight and drop it when it ends. Powers reads that flag to tell a foe, so right click on them now raises your guard instead of opening their talk menu (needs Powers' matching change). Their talk menu works again once the duel ends.
+- `Duels.fight`/`finish`, `GuardDrills.tickParries`/`tickSpar`/`stand`. Built; not played.

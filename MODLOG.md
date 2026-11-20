@@ -6672,3 +6672,10 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - Downed, crawling into a block about one high that you could haul yourself up (hold Use) no longer sits you up against it, so the haul can start. Taller walls still sit you up when you crawl into them, and the Sit key still sits you against either.
 - `DownedLie#crawlInto` skips while `ProneHaul.find` finds a rise ahead or a haul is under way.
 - Built; not played.
+
+## 0.25.91 (2026-11-20): No talk menu mid-fight: right click on a foe always blocks (#1895)
+
+- Andy: "i tried to face an honor duel, but i was constantly opening the chat menu with the guard mid fight, that should be disabled in combat so that you can stil block".
+- Right click on anyone who talks (MCA villagers, guards, orcs, bandits) while they're fighting you no longer opens their talk menu, whatever you hold: the click goes to your hand, so a guarding weapon or a shield (either hand) goes up. Before, only a guarding weapon in the main hand skipped the talk, so a shield in the off hand or bare hands still opened the chat.
+- Against other foes, a shield in either hand now counts too, as a guarding weapon already did. Sneak + right click still talks (ruling #987).
+- `Guard.guardsAgainst`. Built; not played.
