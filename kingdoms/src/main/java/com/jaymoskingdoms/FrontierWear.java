@@ -28,8 +28,9 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Templar plate</b>: the guards of every kingdom and fiefdom whose state patron is The Truth or the Crowned Sun
  * ({@link RealmFaiths#patron}); a fiefdom in a Grim keep wears the blackened steel one. Those realms' armourers sell the
  * four pieces and the Templar schematic, to buyers who follow either faith.</li>
- * <li><b>Settler's gear</b>: a village's guards wear all of it, the kettle helm under the hat; farmers and carters wear the
- * hat without the helm, the coat and the trousers ("only the guards should wear the full helm"). Village armourers sell
+ * <li><b>Settler's gear</b>: a village's guards wear all of it, the kettle helm under the hat; carters wear the
+ * hat without the helm, the coat and the trousers ("only the guards should wear the full helm"); farmers the coat and
+ * trousers under a straw hat (Andy: "straw hats instead of the expensive metal ones"). Village armourers sell
  * the hat, coat, trousers and boots, and the schematic.</li>
  * <li><b>Ranger's harness</b>: every musketeer and every caravan guard with a {@link Musketoon}; a kingdom rich enough
  * for muskets has the schematic at its armourer's.</li>
@@ -126,7 +127,7 @@ public final class FrontierWear {
 			}
 		} else if (role == Folk.FARMER || role == Folk.CARTER) {
 			if (faction.type() != FactionType.BARBARIAN) {
-				hatAndCoat(folk);
+				hatAndCoat(folk, role == Folk.FARMER);
 			}
 		} else if (role == Sorcery.WIZARD) {
 			FrontierArmour.dress(folk, "hedge_elite", false);
@@ -152,9 +153,9 @@ public final class FrontierWear {
 		return climate == Climate.DESERT || climate == Climate.BADLANDS || climate == Climate.SAVANNA;
 	}
 
-	/** A farmhand's or carter's wear: the wide hat (no helm under it), the grey coat and the green trousers. */
-	static void hatAndCoat(Mob mob) {
-		wear(mob, EquipmentSlot.HEAD, new ItemStack(FrontierArmour.SETTLER_HAT));
+	/** A farmhand's or carter's wear: a straw hat on a farmer, the settler's wide hat on a carter (no helm under either), the grey coat and the green trousers. */
+	static void hatAndCoat(Mob mob, boolean farmer) {
+		wear(mob, EquipmentSlot.HEAD, new ItemStack(farmer ? com.jaymoskingdoms.blossomland.BlossomDress.STRAW_HAT : FrontierArmour.SETTLER_HAT));
 		wear(mob, EquipmentSlot.CHEST, FrontierArmour.stack("settler", ArmorType.CHESTPLATE));
 		wear(mob, EquipmentSlot.LEGS, FrontierArmour.stack("settler", ArmorType.LEGGINGS));
 	}
@@ -211,13 +212,15 @@ public final class FrontierWear {
 	 * in a guard's hand, taking the armour off someone off duty). True if what's there stays: a {@link Musketoon} or a
 	 * realm gunner's gun ({@link EarlyGuns}) and the hand beside it, a Flame Avatar's hands as its class armed them (a
 	 * Tinkerer's fire cannon, a Brute's bare fists), and any piece of ours on a villager who isn't a guard by trade (a
-	 * carter's hat, a fence's hood).
+	 * carter's hat, a farmer's straw hat, a fence's hood).
 	 */
 	public static boolean keeps(LivingEntity villager, EquipmentSlot slot, boolean guard) {
 		if (slot.getType() == EquipmentSlot.Type.HAND) {
 			return Musketoon.holds(villager) || EarlyGuns.gunner(villager) || com.jaymoskingdoms.nether.AvatarClasses.of(villager) != null;
 		}
-		return !guard && FrontierArmour.setOf(villager.getItemBySlot(slot)) != null || FantasyArmorCompat.keeps(villager, slot);
+		ItemStack worn = villager.getItemBySlot(slot);
+		boolean straw = slot == EquipmentSlot.HEAD && worn.is(com.jaymoskingdoms.blossomland.BlossomDress.STRAW_HAT);
+		return !guard && (FrontierArmour.setOf(worn) != null || straw) || FantasyArmorCompat.keeps(villager, slot);
 	}
 
 	/** The villagers round each player: those whose trade has a look of ours put it on. */
@@ -240,7 +243,7 @@ public final class FrontierWear {
 			} else if (role == Sorcery.WIZARD) {
 				wearAll(v, "hedge_elite");
 			} else if (role == Folk.CARTER) {
-				hatAndCoat(v);
+				hatAndCoat(v, false);
 			} else if (role == Folk.GUARD || role == Folk.ARCHER) {
 				continue;
 			} else if (Crooks.isCrook(v)) {
@@ -254,7 +257,7 @@ public final class FrontierWear {
 			} else {
 				String job = BuiltInRegistries.VILLAGER_PROFESSION.getKey(v.getVillagerData().profession().value()).getPath();
 				if (job.equals("farmer")) {
-					hatAndCoat(v);
+					hatAndCoat(v, true);
 				} else if (job.equals("fletcher")) {
 					wear(v, EquipmentSlot.CHEST, FrontierArmour.stack("foxshade", ArmorType.CHESTPLATE));
 				}
