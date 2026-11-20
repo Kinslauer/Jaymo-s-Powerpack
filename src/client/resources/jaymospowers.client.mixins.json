@@ -51,6 +51,7 @@
 		"HeldInputMixin",
 		"HeldInputOverlayMixin",
 		"SceneBlackOverlayMixin",
+		"HintCardOverlayMixin",
 		"BombGliderAvatarRendererMixin",
 		"BombGliderInputMixin",
 		"BodyCoverAvatarRendererMixin",
