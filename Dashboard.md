@@ -1,12 +1,9 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 15:39). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 16:02). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
 
 ## Waiting on you
-
-**Ready to merge** (say "merge" in the project chat):
-- [[Inbox/zfighter-aura-rework|zfighter-aura-rework]] · PR #1911 · sent
 
 **Questions for you:**
 - [[Inbox/class-trees-plan|class-trees-plan]] · 2026-11-19 20:22 Parked (not for a bot): waits on Andy fleshing out the Monk/Paladin/Cleric/Druid/Warlock trees. Raised; don't raise again.
@@ -30,6 +27,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1949 body menu - a tap of use on a body opens what you can do to it (Powers, Kingdoms, 2026-11-20)
 - [ ] #1948 hogtied captives ride over a horse (Powers, Kingdoms, 2026-11-20)
 - [ ] #1947 flail left click: hold to wind up a swing, tap to jab (Powers, 2026-11-20)
 - [ ] #1946 Gibs toned down: only overwhelming force bursts a body (Powers, 2026-11-20)
@@ -89,8 +87,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1881 camp cooks roast whole beasts on the great spit and stand to the side (Kingdoms, Kitchen, 2026-11-19)
 - [ ] #1880 An escape isn't known to the camp until they see you gone (Kingdoms, 2026-11-19)
 - [ ] #1879 Captors take the harness too (Kingdoms, 2026-11-19)
-- [ ] #1878 final deaths cut straight to black (Powers, 2026-11-19)
-- …and 313 older ones.
+- …and 314 older ones.
 
 ## Health
 
