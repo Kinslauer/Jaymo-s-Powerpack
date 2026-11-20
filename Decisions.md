@@ -832,3 +832,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-19 (cloud Claude, Reason Art): Andy approved the Lore.md placement 'What runs in a Bio-built'.
 - 2026-11-19 6:40 PM ET (vault coordinator): Wither model stays as the third preview; Andy will have someone else take it on later.
 - 2026-11-19 (Andy, PR #1894): deer avoid civilization completely and bolt from any sign of people; they come near only to eat crops (at night), and scarecrows keep them off even then.
+
+- 2026-11-20 Andy: build kingdoms round a Fenford-style castle (Grim "Fall Hall") with the Epic town (ATi/HardWater) round it; Grim castles allowed as the centrepiece when a full town surrounds them; the throne goes in the castle hall. (thread "Build kingdoms around Fenford-style castles")
