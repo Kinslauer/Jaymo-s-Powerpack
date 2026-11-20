@@ -39,8 +39,8 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/scrying-orb|scrying-orb]] · 🔨 Hephaestus · #1896 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]] · for 🪽 any Hermes bot · #1937 · changes · fixing review notes
+- [ ] [[Inbox/scrying-orb|scrying-orb]] · 🔨 Hephaestus · #1896 · claimed
 
 
 ## In review
