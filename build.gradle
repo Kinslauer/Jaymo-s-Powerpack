@@ -477,8 +477,10 @@ def packMods = [
 	[dep: "maven.modrinth:villagerstradingplus:uut3GStm", cf: [1635301, 9346754]],
 ]
 // on Modrinth, but CurseForge has no file matching the version we use (checked 2026-11-04), so the CurseForge manifest
-// can't list them: they're in modpack/mods (server, hand-made profile) and the dev game, but not in the CurseForge import
-// zip. Once CurseForge has the matching file, add its [project id, file id] and move the line into packMods.
+// can't list them: the CurseForge import zip carries the jars themselves (overrides/mods), and they're in modpack/mods
+// (server, hand-made profile) and the dev game. A friend whose import lacked them couldn't join the server (FrozenLib's
+// registries, for Luna Slimes, 2026-11-20). Once CurseForge has the matching file, add its [project id, file id] and
+// move the line into packMods.
 def packModsNoCf = [
 	// Runes (all rights reserved, Zsolt Molnar; shipped unchanged): the rune reagents Wizards' spells use up, and its
 	// Rune Crafting Altar. No CurseForge page found.
@@ -1024,7 +1026,7 @@ dependencies {
 	compileOnly "maven.modrinth:shoulder-surfing-reloaded:sEg9bfXx"
 	packMods.drop(1).findAll { it.dev != false }.each { localRuntime it.dep }
 	packMods.each { packJars it.dep }
-	packModsNoCf.each { localRuntime it.dep; packJars it.dep }
+	packModsNoCf.each { localRuntime it.dep; packJars it.dep; packOverrideJars it.dep }
 	packModsOverride.each { packJars it.dep; packOverrideJars it.dep }
 	serverOnlyMods.each { serverOnlyJars it.dep }
 }
