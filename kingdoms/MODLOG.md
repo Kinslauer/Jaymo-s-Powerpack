@@ -16023,3 +16023,9 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 
 - **A downed airship's dead are her steam-town crew** (Andy: "these villagers shouldnt exist, they need to be reskinned or swapped to MCA from the steampunk to match the lore book you find with that wreck"). The bodies lying round a sky wreck were made from a plain villager that never joined the world, so MCA never swapped it for one of its people, and they lay there as vanilla villagers with big noses and robes. Now each is one of MCA's people (their own face, hair and name), dressed for the steam town her log says she was out of: the first is her captain, in the town's aeronaut's clothes, the others her engineers who kept her boilers. Without MCA they stay plain villagers; without Kitchen it's still bones and a skull. `SkyWrecks`.
 - Built; not played.
+
+## 0.11.45 (2026-11-20): drivers never lie across their horses (#1943)
+
+- **Carriage and cab drivers**: a coachman or cab driver who was knocked down or had gone to bed was put straight back in the saddle (the "out of the saddle, get back on" check), so he lay flat across his horse. Now a driver who is down, asleep or being carried stays where he is until he is up again, then gets back on. One found down in the saddle is taken off the horse, and one found asleep there is woken. (`Drivers.canMount`, `Drivers.step`, `Cabs`, `Carriages`)
+- The same check for caravan riders getting back on (`Caravans.remount`) and for guards being given a spare horse (`Cavalry`): no downed guard is put on a horse.
+- Built; not played.
