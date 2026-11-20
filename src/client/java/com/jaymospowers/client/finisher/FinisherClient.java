@@ -201,7 +201,8 @@ public final class FinisherClient {
 
 	/** Someone down for an execution as they are (downed, crippled, legless, tripped, or a prompted finisher open on them). */
 	private static boolean down(LivingEntity body) {
-		return Finishers.helpless(body) || com.jaymospowers.core.finisher.Prompts.open(body);
+		// (not one carried or slung over a horse: the server won't finish them, and the rider's attack strikes a slung captive)
+		return (Finishers.helpless(body) || com.jaymospowers.core.finisher.Prompts.open(body)) && !com.jaymospowers.core.Carry.isCarried(body);
 	}
 
 	/**
