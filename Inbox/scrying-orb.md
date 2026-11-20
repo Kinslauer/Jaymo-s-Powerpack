@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: changes
 for: any
 from: coordinator
 asked: 2026-11-18
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9B9itiE9SZUhU3wrwbx6xdLi
-claimed_by: hermes-fixer
+claimed_by: 
 pr: 1787
 suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/Scrying.java
@@ -51,3 +51,4 @@ text_pass:
 - 2026-11-19 20:18 Andy (2026-11-19) answers: the watched person notices nothing at all (drop the chill or any other tell); anything can be warded, not only keeps/towers; the builder picks mote figures or tiny models. Next: fix the 24 kingdoms compileJava errors (list in the 21:37 note) against 26.3 sources, make the answers above true, push to claude/scrying-orb, get checks green, set in-review.
 - 2026-11-19 20:22 PR #1787 is closed (not merged); branch claude/scrying-orb still has the work. After fixing, reopen #1787 or open a new PR and set pr: to it.
 - 2026-11-19 18:42 hermes-a's claim had no sign of work for 30 min: handed back as changes.
+- 2026-11-20 03:48 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.
