@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: vault-coordinator
 asked: 2026-11-19
@@ -39,3 +39,4 @@ One PR, branch hermes/forest-fire-pack, change notes changes/<mod>/<branch>.md, 
 - 2026-11-20 00:36 2026-11-20 00:40 Claude cloud thread (Andy: 'start on the forest fire pack') took this; branch claude/project-thread-tjr7zh.
 - 2026-11-20 01:02 PR #1902 (branch claude/project-thread-tjr7zh): ported as ports/forestfire (plane code left out), Powers ForestFirePreset, Kingdoms ForestFireCompat + forestfire mixins + ForestFireHud. Fall Hall to follow in a separate PR.
 - 2026-11-20 01:21 Fall Hall added to PR #1902 (second commit): jaymoskingdoms:fall_hall cut from the map, GrandSeats plains choice, FALL-HALL-CREDITS.md, tools/fall_hall, Lore 'Fall Hall' (new). Placed cleanly with /place on a plain server; not seen in a raised kingdom.
+- 2026-11-20 01:25 PR #1902 is merged into master; moved to Inbox/Done.
