@@ -6660,3 +6660,9 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - **Verdant regrowth**: a Verdant's open stumps (no prosthetic) spurt green blood every half second until the limb grows back (`Dismember.spurtStumps`, `ZFighterLineage.STUMP_SPURT_EVERY`), and the regrowth plays a fleshy crunch (new sound `verdant/regrow_1..3`, made by `tools/gen_regrow_sounds.py`).
 - **Green Verdant blood**: a Verdant Z Fighter bleeds green sap whatever their heritage (Verdant heritage already did).
 - Built; not played or listened to in game.
+
+## 0.25.89 (2026-11-20): Crawling into a wall sits you up (#1892)
+
+- Downed players who crawl into a wall now sit up against it, the same as pressing the Sit key beside one. Pushing at the wall for about a third of a second starts the get-up. If you use the Sit key to lie back down while you're still pushing, it won't sit you up again until you let go.
+- `DownedLie#crawlInto` (called from `Downed#tickPlayer`) reads the player's movement keys (`getLastClientInput`), turns them by the look, and starts `prop(player, true)` after `BUMP_TICKS` (6) ticks pushing within `BUMP_GAP` of a wall's face, at least `BUMP_FACING` (0.7) of the push straight at it. Passed out, carried, rising or already sat: nothing.
+- Built; not played.
