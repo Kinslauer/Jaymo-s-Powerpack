@@ -98,7 +98,10 @@ public final class SpiderLairs {
 		}
 		stow(level, player, cache, at, random);
 		JaymosKingdoms.LOGGER.info("{} was carried off to a spiders' lair at {}", player.getScoreboardName(), at);
-		return GlobalPos.of(level.dimension(), at);
+		// (Andy) kept for the queen: the lair's spiders leave them be there
+		GlobalPos lair = GlobalPos.of(level.dimension(), at);
+		SpiderKeep.keep(player, lair);
+		return lair;
 	}
 
 	// ---- a nest cave ----

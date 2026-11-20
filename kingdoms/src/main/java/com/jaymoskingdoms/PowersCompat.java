@@ -63,16 +63,26 @@ public final class PowersCompat {
 
 	/** (medieval picks, spider nests) As {@link #web(LivingEntity, int, net.minecraft.world.entity.Entity)}, {@code layers} layers at once (a net, a burst, a queen's spit). */
 	public static boolean web(LivingEntity body, int ticks, net.minecraft.world.entity.@Nullable Entity by, int layers) {
+		if (webbedEffect() == null) {
+			return false;
+		}
+		body.addEffect(new net.minecraft.world.effect.MobEffectInstance(webbedEffect, ticks, Math.max(0, layers - 1)), by);
+		return true;
+	}
+
+	/** Whether {@code body} is wrapped in web now (Jaymo's Powers' Webbed, any layer); false without Powers. */
+	public static boolean webbed(LivingEntity body) {
+		net.minecraft.core.Holder<net.minecraft.world.effect.MobEffect> effect = webbedEffect();
+		return effect != null && body.hasEffect(effect);
+	}
+
+	private static net.minecraft.core.@Nullable Holder<net.minecraft.world.effect.MobEffect> webbedEffect() {
 		if (!lookedForWebbed) {
 			lookedForWebbed = true;
 			webbedEffect = net.minecraft.core.registries.BuiltInRegistries.MOB_EFFECT.get(Identifier.fromNamespaceAndPath("jaymospowers", "webbed"))
 				.orElse(null);
 		}
-		if (webbedEffect == null) {
-			return false;
-		}
-		body.addEffect(new net.minecraft.world.effect.MobEffectInstance(webbedEffect, ticks, Math.max(0, layers - 1)), by);
-		return true;
+		return webbedEffect;
 	}
 
 	/** (0.7.505) Powers' {@code AttackTells.glint(ServerLevel, Vec3, boolean)}. */
