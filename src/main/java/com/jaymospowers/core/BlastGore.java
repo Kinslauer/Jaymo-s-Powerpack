@@ -101,8 +101,12 @@ public final class BlastGore {
 	public static final float CRUSH_SEVER = 0.5F;
 	/** Someone living through a crushing blow loses a limb this often (before small bodies, Rubber-folk and Grim Hand). */
 	public static final float CRUSH_LIMB = 0.35F;
-	/** A crushing blow of {@link #CRUSH_DAMAGE} throws the body this fast across (blocks a tick; more for more, up to half again) and up. */
-	public static final double CRUSH_THROW = 1.0, CRUSH_LIFT = 0.45;
+	/**
+	 * A crushing blow of {@link #CRUSH_DAMAGE} throws the body this fast across (blocks a tick; more for more, up to half
+	 * again) and up: a few blocks, not across the field (Andy, of ragdolls flung by a bear: "the super knockback ragdolls
+	 * are back. can we tame them"). A body knocked limp by it takes less still (Kitchen caps a ragdoll's carry).
+	 */
+	public static final double CRUSH_THROW = 0.5, CRUSH_LIFT = 0.3;
 
 	private static final Identifier PHASE = JaymosPowers.id("blast_gib");
 	/** Before anything else hears of a blow (Downed takes a blow on the downed for itself): whether it's crushing. */
