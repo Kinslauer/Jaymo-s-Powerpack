@@ -236,7 +236,7 @@ public final class ZFighterKi {
 	static final int BOMB = 3;
 	static final int SPIRIT = 4;
 
-	private static final class Bolt {
+	public static final class Bolt {
 		final ServerLevel level;
 		final UUID owner;
 		Vec3 pos;
@@ -544,6 +544,12 @@ public final class ZFighterKi {
 			}
 		}
 		if (hit != null && hit.getEntity() instanceof LivingEntity target) {
+			// Check for Ki-Drinking Barrier absorption
+			if (bolt.kind == BOLT || bolt.kind == DISC || bolt.kind == HOMING) {
+				if (target instanceof ServerPlayer && ZFighterKiDrinkingBarrier.onKiHit((ServerPlayer)target, bolt)) {
+					return false;
+				}
+			}
 			if (bolt.kind == BOMB || bolt.kind == SPIRIT) {
 				burst(owner, bolt, hit.getLocation());
 				return false;
@@ -942,21 +948,26 @@ public final class ZFighterKi {
 	}
 
 	/**
-	 * The Ki Disc leaves his hand at {@code from}, flying along {@code dir} (the ki was paid when the wind-up began,
-	 * {@code ZFighterDisc}).
-	 */
-	static void throwDisc(ServerPlayer player, ZFighterPower.Live live, Vec3 from, Vec3 dir) {
-		ServerLevel level = player.level();
-		Bolt bolt = new Bolt(level, player.getUUID(), from, dir.scale(DISC_SPEED), DISC_DAMAGE * ZFighterPower.kiPower(player, live),
-			formColor(live), DISC, Mth.ceil(DISC_RANGE / DISC_SPEED));
-		// flat and level: across it is his right, whichever way he looks (straight down too)
-		bolt.side = Vec3.directionFromRotation(0.0F, player.getYRot() + 90.0F);
-		BOLTS.add(bolt);
-		exhaust(player, BLAST_EXHAUSTION);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.8F, 1.6F);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 0.6F, 1.2F);
-		level.playSound(null, from.x, from.y, from.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.8F, 2.0F);
-	}
+		 * The Ki Disc leaves his hand at {@code from}, flying along {@code dir} (the ki was paid when the wind-up began,
+		 * {@code ZFighterDisc}).
+		 */
+		static void throwDisc(ServerPlayer player, ZFighterPower.Live live, Vec3 from, Vec3 dir) {
+			throwDisc(player, live, from, dir, ZFighterKi.DISC_DAMAGE * ZFighterPower.kiPower(player, live));
+		}
+
+		/** Throw a disc with custom damage. */
+		static void throwDisc(ServerPlayer player, ZFighterPower.Live live, Vec3 from, Vec3 dir, float damage) {
+			ServerLevel level = player.level();
+			Bolt bolt = new Bolt(level, player.getUUID(), from, dir.scale(DISC_SPEED), damage,
+					formColor(live), DISC, Mth.ceil(DISC_RANGE / DISC_SPEED));
+			// flat and level: across it is his right, whichever way he looks (straight down too)
+			bolt.side = Vec3.directionFromRotation(0.0F, player.getYRot() + 90.0F);
+			BOLTS.add(bolt);
+			exhaust(player, BLAST_EXHAUSTION);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.8F, 1.6F);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 0.6F, 1.2F);
+			level.playSound(null, from.x, from.y, from.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.8F, 2.0F);
+		}
 
 	/** A Ki Disc {@code size} blocks across at {@code at} this tick, drawn flat and spinning (in the hand or in flight). */
 	static void discOrb(ServerLevel level, int id, Vec3 at, double size, int color) {
