@@ -37,4 +37,4 @@ writer: hermes-writer
 - `python3 tools/pr_checks.py` passes; compile check in the cloud.
 
 ## Notes
--
+- 2026-11-20 07:33 Text pass: added missing en_us lang strings in src/main/resources/assets/jaymospowers/lang/parts/zfighter.json — technique names and descriptions for Ki Shell, Twin Discs, Ring Beam, Sword Technique, Purging Beam, Sticky Bind, Rift Fist, Rift Step and Ki-Drinking Barrier, the Ki Cell item name, and the ten new overlay messages (ki cell restored/full, ki barrier android-only/absorbed, rift fist/step blocked, sticky bind stuck/mash/free, sword technique no blade). All keys, placeholders and format codes match the code; no code changed.
