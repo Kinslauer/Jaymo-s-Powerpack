@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 14:27). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 14:36). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -27,7 +27,11 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1946 Gibs toned down: only overwhelming force bursts a body (Powers, 2026-11-20)
+- [ ] #1945 chopping up a felled tree no longer knocks the next tree onto you (Kingdoms, 2026-11-20)
 - [ ] #1944 Downed airships' dead crew are steam-town people, not plain villagers (Kingdoms, 2026-11-20)
+- [ ] #1943 drivers never lie across their horses (Kingdoms, 2026-11-20)
+- [ ] #1942 no floating trees: unsupported wood falls (Kingdoms, 2026-11-20)
 - [ ] #1941 stance wheel: a second on the knee before prone (Powers, 2026-11-20)
 - [ ] #1940 corpse loot screen - take only what you want (Kitchen, 2026-11-20)
 - [ ] #1936 dodge rolls - back dodge only when locked on, one per press, hold to roll on into prone (Powers, 2026-11-20)
@@ -83,11 +87,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1878 final deaths cut straight to black (Powers, 2026-11-19)
 - [ ] #1877 Harness 6: forge the rest of the harness (Powers, Kingdoms, 2026-11-19)
 - [ ] #1876 Captives who die and are weighed leave their chains (Kingdoms, 2026-11-19)
-- [ ] #1875 Harness fits MCA bodies; captors calm down around a captive (Kingdoms, 2026-11-19)
-- [ ] #1874 creative keeps your prosthetics (Powers, 2026-11-19)
-- [ ] #1872 Reason: the pack's new name on the title screen (Powers, 2026-11-19)
-- [ ] #1870 Harness 5: armour oil, and the harness rusts (Powers, Kingdoms, 2026-11-19)
-- …and 307 older ones.
+- …and 311 older ones.
 
 ## Health
 
