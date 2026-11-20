@@ -6871,3 +6871,23 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - **Hold to roll on into prone**: still holding the key 4 ticks into a ground roll makes it the long roll: the tumble slows to last 18 ticks and carries you on along the ground (about 2 more blocks, easing off). Still held as it ends, you go on down into prone with the gradual crouch-and-lower of the prone move (ProneTransition); let go before the end and you come up on your feet. Others see the long roll too (synced through the roll's attachment).
 - Code: DodgeClient (press edge, lock check, tickHold), Dodge (HOLD_TICKS, LONG_ROLL_TICKS, LONG_SPEED_*, Rolling.extended, Extend payload, rollShare, rollingLow uses the roll's own length), DodgeRollPose (rollShare), ProneTransition (a roll counts as on the feet, so prone after it goes down gradually).
 - Built; not played.
+
+## 0.26.14 (2026-11-20): fishing line from the rod tip, bait on the first click (#1934)
+
+- **Line from the rod tip**: the fishing line now leaves the rod's actual tip, in first and third person, either hand, on the 3D held rods, the cane pole, spinning and ledger rods, tinker rods and the metal rod, and it follows the rod's bend while a fish fights. A fishing player's rod-hand item render state is marked when it's filled (`RodTipArmedMixin` third person, `RodTipHandsMixin` first person); when that state is drawn (`RodTipItemMixin`) its tip is read off the real model matrix (`RodTip`, `RodTipLayerMixin`; first-person hand FOV and view bob are taken out so the line meets the tip on screen). Watching the render state, not one renderer's method, keeps it working when another mod draws held items its own way. The hook renderer starts the line there, else vanilla's old guess.
+- **Bait on the first click**: using a bare rod with bait in your other hand, or anywhere in your pack (hotbar first), puts it on the hook straight away; no sneaking. The next use casts. Sneak + use still turns the drag, and a baited rod casts as before (`HookBait`).
+- Tried in a dev game: the third-person line and the first-person body view (a camera mod draws your body) end at the rod tip. The plain first-person hands path and the bait change are built, not played.
+
+## 0.26.15 (2026-11-20): stance wheel: a second on the knee before prone (#1941)
+
+- **Prone buffer**: Sneak + a fast scroll down now stops at the low crouch (the kneel). You have to stay there a second (`StanceScroll.PRONE_AFTER_TICKS`, 20 ticks) before another notch down lays you flat; notches sooner are dropped. Kneeling to revive or vault no longer throws you on your belly. Slide-into-prone and the sprint-jump leap are unchanged.
+- Syntax-checked only; not played.
+
+## 0.26.16 (2026-11-20): Gibs toned down: only overwhelming force bursts a body (#1946)
+
+- Andy (a mule burst apart by one crossbow bolt to the head): "gibs need to be turned down realistically".
+- **Big bodies are harder to burst**: every burst chance (blast, blunderbuss shot, crushing blow on someone standing) is cut by the body's bulk over a man's (`BlastGore.sizeScale`, `MAN_BULK`). A horse or mule bursts about a fifth as often as a man, a cow about half as often, a ravager about a thirteenth. Man-sized and smaller bodies are unchanged.
+- **A crushing blow bursts someone standing only if that one blow could have killed them from full health** (`CRUSH_GIB_OVERKILL`). A lesser killing blow still takes the part it lands on, as before (`CRUSH_SEVER`).
+- **A crushing blow has to land in reach** (`CRUSH_REACH`, 3.5 blocks between the two bodies' edges): another mod's spell or shot that counts as the caster's own hand no longer counts as a slam (no burst, no throw, no extra limb loss).
+- Unchanged: someone downed under a slam still bursts; blasts still gib by closeness (now also cut for big bodies); Stoneborn are never burst.
+- Built; not played. The server log for the mule clip wasn't reachable (it runs on the Deck), so which rule burst the mule wasn't confirmed: all three ways a single hit could burst it are covered.

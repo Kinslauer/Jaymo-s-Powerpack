@@ -23,8 +23,9 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.21.61, Andy: "you should have to manually and visually bait the hook") A hook has to be baited by hand before a fish
- * will come to it. Sneak and use the rod with bait in the other hand (anything in {@code #jaymospowers:fishing_bait}:
- * Jaymo's Kitchen's fish bait, bread, rotten flesh, a spider eye): one goes on the hook ({@link #BAIT} on the rod),
+ * will come to it. The first use of a bare rod baits it (no sneaking) with bait from the other hand, else from the pack
+ * (anything in {@code #jaymospowers:fishing_bait}: Jaymo's Kitchen's fish bait, bread, rotten flesh, a spider eye); the next
+ * use casts. One goes on the hook ({@link #BAIT} on the rod),
  * and it hangs under the bobber when you cast (drawn by the client's hook renderer mixin). A fish that takes the hook
  * eats it, caught or not.
  */
@@ -40,29 +41,35 @@ public final class HookBait {
         BAIT = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("hook_bait"),
                 DataComponentType.<Identifier>builder().persistent(Identifier.CODEC).networkSynchronized(Identifier.STREAM_CODEC).build());
         UseItemCallback.EVENT.register((player, level, hand) -> {
-            if (!player.isShiftKeyDown() || player.fishing != null) {
+            if (player.fishing != null) {
                 return InteractionResult.PASS;
             }
             ItemStack rod = player.getItemInHand(hand);
             if (!isRod(rod)) {
                 return InteractionResult.PASS;
             }
-            ItemStack bait = player.getItemInHand(hand == InteractionHand.MAIN_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
-            if (!bait.is(BAITS)) {
-                return InteractionResult.PASS;
-            }
-            if (Tackle.isLure(bait.getItem()) && !Tackle.rodOf(rod).lures) {
-                // (0.21.64) a lure needs a rod that can work it
-                if (player instanceof ServerPlayer sp) {
-                    sp.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.lure_needs_rod").withStyle(ChatFormatting.GRAY));
-                }
-                return InteractionResult.FAIL;
-            }
+            ItemStack other = player.getItemInHand(hand == InteractionHand.MAIN_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
             if (rod.has(BAIT)) {
+                // a baited hook: use casts it (sneak + use turns the drag); sneak + use with bait in the other hand says so
+                if (!player.isShiftKeyDown() || !other.is(BAITS)) {
+                    return InteractionResult.PASS;
+                }
                 if (player instanceof ServerPlayer sp) {
                     sp.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.already_baited").withStyle(ChatFormatting.GRAY));
                 }
                 return InteractionResult.FAIL;
+            }
+            // (Andy: "the bait should be applied to the hook with the first right click") a bare hook takes bait on the first
+            // use, no sneaking: from the other hand first, else the first bait in the pack; the next use casts. Sneaking takes
+            // it only from the other hand, so sneak + use still turns the drag.
+            boolean wrongLure = other.is(BAITS) && !fits(rod, other);
+            ItemStack bait = fits(rod, other) ? other : player.isShiftKeyDown() ? ItemStack.EMPTY : fromPack(player, rod);
+            if (bait.isEmpty()) {
+                if (wrongLure && player instanceof ServerPlayer sp) {
+                    // (0.21.64) a lure needs a rod that can work it; cast bare rather than block the rod
+                    sp.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.lure_needs_rod").withStyle(ChatFormatting.GRAY));
+                }
+                return InteractionResult.PASS;
             }
             if (!level.isClientSide()) {
                 rod.set(BAIT, BuiltInRegistries.ITEM.getKey(bait.getItem()));
@@ -77,6 +84,23 @@ public final class HookBait {
             }
             return InteractionResult.SUCCESS;
         });
+    }
+
+    /** {@code bait} can go on {@code rod}'s hook: it's bait, and a lure only on a rod that can work it. */
+    private static boolean fits(ItemStack rod, ItemStack bait) {
+        return !bait.isEmpty() && bait.is(BAITS) && (!Tackle.isLure(bait.getItem()) || Tackle.rodOf(rod).lures);
+    }
+
+    /** The first bait in {@code player}'s pack (hotbar first) that fits {@code rod}, or empty. */
+    private static ItemStack fromPack(Player player, ItemStack rod) {
+        var inventory = player.getInventory();
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            ItemStack stack = inventory.getItem(i);
+            if (stack != rod && fits(rod, stack)) {
+                return stack;
+            }
+        }
+        return ItemStack.EMPTY;
     }
 
     /** A fishing rod: vanilla's or the metal rod (or any other mod's rod that is a FishingRodItem). */
