@@ -3,7 +3,7 @@ status: stalled
 task: zfighter-gaps-3-techniques
 branch: claude/zfighter-gaps-3-techniques
 with:
-pr:
+pr: 1939
 mods: powers
 versions:
 started: 2026-11-20
