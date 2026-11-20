@@ -15901,3 +15901,10 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - Classes: `LifeStory` (`worthMaking`, `foreseenDry`, `FORESEEN_CHUNKS`), `StoryGround` (`shore`, `monolith`).
 - Dynamic Waters rivers are carved after the seed's column, so a spot in one still shows up only once its chunk is made (the search then tries the next).
 - Built; not played.
+
+## 0.11.30 (2026-11-20): Town troubles out of chat (#1905)
+
+- **No more "Fire has swept through Briarwood."** A town's troubles (fire, raid, war, famine, plague, drought, a missing
+  villager, a feud) no longer post a line to the chat of players nearby when they start or end (Andy, 2026-11-20). You
+  learn of one from the gold-marked villagers asking for help; the town's ledger still lists them (`TownTroubles`).
+- Built; not played.
