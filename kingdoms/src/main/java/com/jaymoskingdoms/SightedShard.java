@@ -81,7 +81,7 @@ public final class SightedShard {
     public static ItemStack of(ScryingOrb.Target target) {
         ItemStack stack = new ItemStack(ITEM);
         CustomData.update(stack.get(DataComponents.CUSTOM_DATA), stack, tag -> {
-            tag.putString(TARGET, ScryingOrb.Target.CODEC.encode(net.minecraft.nbt.NbtOps.INSTANCE, target).getOrThrow());
+            tag.putString(TARGET, ScryingOrb.Target.CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, target).getOrThrow());
             tag.putString(NAME, target.name());
         });
         stack.set(DataComponents.CUSTOM_NAME, Component.translatable("item.jaymoskingdoms.sighted_shard.of", target.name()).withStyle(s -> s.withItalic(false)));
