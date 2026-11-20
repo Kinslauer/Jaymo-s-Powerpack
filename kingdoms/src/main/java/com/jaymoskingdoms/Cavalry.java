@@ -221,7 +221,7 @@ final class Cavalry {
 			if (riding < wantGuards) {
 				List<PathfinderMob> walkers = new ArrayList<>(folk.stream().filter(x -> x.role() == Folk.GUARD && !mounted(x.mob()) && !x.mob().isPassenger()
 					&& Rulers.target(x.mob()) == null && !escorting(x) && !Downed.helping(x.mob()) && !soldier(x) && x.task().isEmpty() && level.canSeeSky(x.blockPosition())
-					&& !x.mob().isSleeping() && (keep == null || !x.mob().getHomePosition().closerThan(keep.gate(), POST_ON_FOOT)
+					&& !x.mob().isSleeping() && !Downed.isDowned(x.mob()) && (keep == null || !x.mob().getHomePosition().closerThan(keep.gate(), POST_ON_FOOT)
 						&& !x.mob().getHomePosition().closerThan(keep.throne(), POST_ON_FOOT))).map(Worker::mob).toList());
 				// (0.7.486) those whose shape takes no helmet or chestplate first (SeaBodies: archery and the saddle)
 				walkers.sort(Comparator.comparing((PathfinderMob x) -> !SeaBodies.unarmoured(HeritageVariants.of(x)))

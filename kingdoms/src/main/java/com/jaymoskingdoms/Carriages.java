@@ -295,7 +295,7 @@ final class Carriages {
 	private static void unhorsed(ServerLevel level, Faction f, @Nullable Wagon carriage) {
 		// ((0.7.294) a folk or a villager)
 		for (Worker w : Workers.near(level, new AABB(f.seat()).inflate(RANGE),
-			x -> x.isAlive() && x.factionId() == f.id() && Drivers.on(x, TASK) && !x.mob().isPassenger())) {
+			x -> x.factionId() == f.id() && Drivers.on(x, TASK) && Drivers.canMount(x))) {
 			PathfinderMob coachman = w.mob();
 			Entity horse = carriage == null ? null : carriage.horse();
 			if (horse == null || horse.isVehicle()) {
