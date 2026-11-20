@@ -1,5 +1,5 @@
 ---
-status: claimed
+status: in-review
 for: claude-cloud
 from: claude-cloud-menu-redesign-thread
 asked: 2026-11-18
