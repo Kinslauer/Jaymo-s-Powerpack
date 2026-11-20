@@ -114,6 +114,11 @@ public final class LifeStory {
 	 */
 	static final int NEW_CHUNKS = 6;
 	/**
+	 * (2026-11-20) Of those, the chunks one search for a place to stand asks for, at most: only where the seed says the ground
+	 * will be dry ({@link #foreseenDry}), so one or two nearly always hold a spot, and fewer chunks are waited for.
+	 */
+	static final int FORESEEN_CHUNKS = 2;
+	/**
 	 * Tries at a start, at most: the chosen start's place is waited for this many times ({@code CHOSEN_TRIES}), then the
 	 * wild's; on the last the start makes do with the land there is (as it always did with nothing found).
 	 */
@@ -2421,11 +2426,79 @@ public final class LifeStory {
 	private static @Nullable BlockPos ground(ServerLevel level, BlockPos center, int min, int max, RandomSource random,
 		java.util.function.Predicate<BlockPos> ok) {
 		int[] made = {NEW_CHUNKS};
-		if (WANTED != null) {
+		Wanted wanted = WANTED;
+		// (2026-11-20) columns of land not made yet read from the seed, and how many of them came out dry land
+		int[] foreseen = {0, 0};
+		long since = System.nanoTime();
+		if (wanted != null) {
 			// (2026-11-17) a start stands you only in the land Chunky has made ({@link Pregen}), where it's known
 			java.util.function.Predicate<BlockPos> given = ok;
-			ok = column -> Pregen.inside(level, column) && given.test(column);
+			int asked = wanted.freshChunks.size();
+			ok = column -> Pregen.inside(level, column) && given.test(column) && worthMaking(level, wanted, column, asked, foreseen);
 		}
+		try {
+			return groundIn(level, center, min, max, random, ok, made);
+		} finally {
+			if (foreseen[0] > 0) {
+				JaymosKingdoms.LOGGER.info("A start's search read {} columns of land not made yet from the seed ({} dry) in {} ms", foreseen[0],
+					foreseen[1], (System.nanoTime() - since) / 1_000_000L);
+			}
+		}
+	}
+
+	/**
+	 * (2026-11-20, Andy: "when i use /locate how is the game finding locations if the map isnt loaded? ... why cant the game
+	 * do that when searching for a new spawn?") Whether a start's search should look at {@code column}, or ask for its land:
+	 * land made already is looked at as it is; land not made yet is asked for only where the seed says it will be dry land
+	 * ({@link #foreseenDry}), and in at most {@link #FORESEEN_CHUNKS} chunks a search. Before, every column drawn was asked
+	 * for blind: a ring that fell half in the sea made chunks of open water, tried again, and ran the minute out.
+	 */
+	private static boolean worthMaking(ServerLevel level, Wanted wanted, BlockPos column, int asked, int[] foreseen) {
+		int cx = column.getX() >> 4, cz = column.getZ() >> 4;
+		if (level.getChunkSource().getChunkNow(cx, cz) != null || wanted.freshChunks.contains(new ChunkPos(cx, cz))) {
+			return true;
+		}
+		if (wanted.freshChunks.size() >= NEW_CHUNKS || wanted.freshChunks.size() - asked >= FORESEEN_CHUNKS) {
+			// (enough land asked for: what's left isn't read, it wouldn't be made this try)
+			return false;
+		}
+		foreseen[0]++;
+		boolean dry = foreseenDry(level, column.getX(), column.getZ());
+		if (dry) {
+			foreseen[1]++;
+		}
+		return dry;
+	}
+
+	/**
+	 * Whether the top of the ground at {@code (x, z)} on {@code level} will be dry once its chunk is made, read from the seed
+	 * as /locate reads it, without making or loading anything: the world generator's own column of blocks there (its noise:
+	 * land, sea, lakes, rivers; not yet the trees, carvers or buildings), dry when its topmost block holds no water or lava.
+	 * Off the Overworld (or if the generator can't say) it's taken as dry, as every column was before.
+	 */
+	static boolean foreseenDry(ServerLevel level, int x, int z) {
+		if (level.dimension() != net.minecraft.world.level.Level.OVERWORLD) {
+			return true;
+		}
+		try {
+			// (in a One Dimension world, the Overworld band's own generator: the stacked level's reads the clouds as ground)
+			Stacked.Ground ground = Stacked.overworldGround(level);
+			net.minecraft.world.level.NoiseColumn blocks = ground.generator().getBaseColumn(x, z, ground.heights(), ground.randomState());
+			for (int y = ground.heights().getMaxY(); y >= ground.heights().getMinY(); y--) {
+				BlockState state = blocks.getBlock(y);
+				if (!state.isAir()) {
+					return state.getFluidState().isEmpty();
+				}
+			}
+			return false;
+		} catch (RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Couldn't read the ground at {}, {} from the seed", x, z, e);
+			return true;
+		}
+	}
+
+	private static @Nullable BlockPos groundIn(ServerLevel level, BlockPos center, int min, int max, RandomSource random,
+		java.util.function.Predicate<BlockPos> ok, int[] made) {
 		// (0.7.584) Andy, woken in chains on a camp hut's roof: open ground first (earth, sand, stone), then anywhere to stand
 		for (BlockPos column : columns(center, min, max, random, GROUND_TRIES * 2)) {
 			if (!ok.test(column) || !reach(level, column.getX(), column.getZ(), made)) {
