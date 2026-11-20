@@ -6753,3 +6753,10 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 
 - A crushing blow (a mutant's slam, or a heavy blow from something three times your bulk, like a bear in harsh land) that you live through threw you 1 to 1.5 blocks a tick and 0.45 up, about 15 blocks; it now throws 0.5 to 0.75 and 0.3 up (`BlastGore.CRUSH_THROW`, `CRUSH_LIFT`), a few blocks. With Kitchen's ragdoll cap, a body knocked limp by it slides a block or two (Andy: "the super knockback ragdolls are back. can we tame them").
 - Built; not played.
+
+## 0.26.2 (2026-11-20): downed wall sit: no more sinking into the ground (#1920)
+
+- **Legless, sat against a wall** (Andy: "the wall sit while downed clips into the ground"): with both legs gone (and nothing fitted in their place) a downed player or NPC now sits down on their stumps, the leaned torso resting on the floor. Before, the hips stayed where the thighs would hold them, so the bare torso hung a little over the floor with nothing under it and read as sunk into the ground.
+- **Backpack**: a worn backpack no longer goes through the floor while you roll over onto your back to sit up (the body rides up over it), nor into the wall behind you sat there (you sit out from the wall by the bag's depth). The torso is kept above the floor through the whole get-up too.
+- WallSit (Sit carries whether it sits on stumps; a floor check on the torso and bag), BackpackClient (the bag's outline and how far it sits off the back).
+- Built; not played.
