@@ -59,6 +59,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		BlockEntityRenderers.register(com.jaymoskingdoms.ChoppedLog.ENTITY, ChoppedLogRenderer::new);
 		// the armillary sphere's animated rings and its screen
 		BlockEntityRenderers.register(com.jaymoskingdoms.astronomy.ArmillarySphereBlock.ENTITY, com.jaymoskingdoms.client.astronomy.ArmillaryBlockEntityRenderer::new);
+		// the scrying orb's living miniature
+		BlockEntityRenderers.register(ScryingOrbBlock.ENTITY, ScryingOrbRenderer::new);
 		ClientPlayNetworking.registerGlobalReceiver(com.jaymoskingdoms.astronomy.ArmillaryNet.Open.TYPE,
 				(payload, context) -> context.client().gui.setScreen(new com.jaymoskingdoms.client.astronomy.ArmillaryScreen(payload.pos())));
 		// (batch 4) plot stakes' lines, path and grass slabs, wind chimes, the rope lift

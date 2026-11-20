@@ -122,6 +122,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		CafeBoard.register();
 		// the armillary sphere: an observatory instrument that reads the discovered sky
 		com.jaymoskingdoms.astronomy.ArmillarySphereBlock.register();
+		// the scrying orb: a crystal orb on a stand for place-scrying
+		ScryingOrbBlock.register();
+		// the sighted shard: marks a place for the scrying orb
+		SightedShard.register();
 		// the stars each player has discovered, kept on the server (the sky, armillary and journal read them)
 		com.jaymoskingdoms.astronomy.StarDiscovery.register();
 		// the Astronomer's Journal: the armillary's readings, the Scholar pillar's points, the study pages
