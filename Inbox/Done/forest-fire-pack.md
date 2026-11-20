@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: vault-coordinator
 asked: 2026-11-19
@@ -38,3 +38,4 @@ One PR, branch hermes/forest-fire-pack, change notes changes/<mod>/<branch>.md, 
 - 2026-11-19 20:36 Andy (2026-11-19): Fall Hall is approved by its author (PaleoTech), so build it too: Andy asked for it "integrated as one of the kingdom's castles" (https://www.curseforge.com/minecraft/worlds/fall-hall-paleotech, CF file 9313294, 26.3, a Java world folder with no datapacks/templates). Credit PaleoTech in the pack credits. See Agents/forest-fire-and-fall-hall.md and Kingdoms GrandSeats / Castle.site for how castles are placed.
 - 2026-11-20 00:36 2026-11-20 00:40 Claude cloud thread (Andy: 'start on the forest fire pack') took this; branch claude/project-thread-tjr7zh.
 - 2026-11-20 01:02 PR #1902 (branch claude/project-thread-tjr7zh): ported as ports/forestfire (plane code left out), Powers ForestFirePreset, Kingdoms ForestFireCompat + forestfire mixins + ForestFireHud. Fall Hall to follow in a separate PR.
+- 2026-11-19 20:28 PR #1902 is merged into master; moved to Inbox/Done.
