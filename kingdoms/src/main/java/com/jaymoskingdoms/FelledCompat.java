@@ -70,6 +70,8 @@ public final class FelledCompat {
 	private static final class Motion {
 		@Nullable Vec3 top, stump, way;
 		double speed;
+		/** How many logs it had when last counted ({@code -1}: not yet). */
+		int logs = -1;
 	}
 
 	static void register() {
@@ -111,8 +113,26 @@ public final class FelledCompat {
 		if (m.stump == null) {
 			m.stump = (Vec3)mStart.invoke(tree);
 		}
+		if (m.top == null) {
+			m.logs = logs(tree);
+		}
 		double speed = m.top == null ? 0.0 : top.distanceTo(m.top);
 		double was = m.speed;
+		if (speed >= KNOCK_SPEED) {
+			// (0.11.44) Andy, downed by a tree out of nowhere while chopping up one he'd felled half a minute before
+			// ("what hit me here?"). Felled's trunkTop is its middle log, not a fixed point: chop a log off a tree lying
+			// still and the middle moves along the trunk a block or so in one tick. That read as the tree moving fast,
+			// so it knocked over the standing tree beside it, which came down on him. A tree that lost logs since we
+			// last counted hasn't moved: start again from where its middle is now.
+			int logs = logs(tree);
+			if (m.logs >= 0 && logs != m.logs) {
+				m.logs = logs;
+				m.top = top;
+				m.speed = 0.0;
+				return;
+			}
+			m.logs = logs;
+		}
 		if (m.top != null && speed >= KNOCK_SPEED) {
 			Vec3 flat = new Vec3(top.x - m.top.x, 0.0, top.z - m.top.z);
 			if (flat.lengthSqr() > 1.0E-6) {
