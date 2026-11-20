@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.props;
 
+import com.jaymoskingdoms.ShyDeer;
 import java.util.EnumMap;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
@@ -61,7 +62,7 @@ public class PropBlock extends Block {
 	/** A plush's squeak: its pitch, give or take. */
 	static final float SQUEAK_PITCH = 1.7F, SQUEAK_SPREAD = 0.25F;
 
-	final Kind kind;
+	public final Kind kind;
 	private final Map<Direction, VoxelShape> shapes = new EnumMap<>(Direction.class);
 
 	public PropBlock(BlockBehaviour.Properties properties, Kind kind) {
@@ -137,6 +138,7 @@ public class PropBlock extends Block {
 		if (this.kind != Kind.SCARECROW) {
 			return;
 		}
+		ShyDeer.strawStands(level, pos);
 		Vec3 here = Vec3.atCenterOf(pos);
 		for (PathfinderMob mob : level.getEntitiesOfClass(PathfinderMob.class, new AABB(pos).inflate(SCARE_RANGE), PropBlock::scared)) {
 			Vec3 away = mob.position().subtract(here).multiply(1.0, 0.0, 1.0);
@@ -147,10 +149,10 @@ public class PropBlock extends Block {
 		level.scheduleTick(pos, this, SCARE_EVERY);
 	}
 
-	/** What a scarecrow sends off: birds that peck at crops, and rabbits. */
+	/** What a scarecrow sends off: birds that peck at crops, rabbits, and the shy deer ({@link ShyDeer}). */
 	private static boolean scared(PathfinderMob mob) {
 		String id = BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType()).toString();
-		return mob.isAlive() && !mob.isLeashed() && !mob.isPersistenceRequired()
-			&& (id.equals("minecraft:chicken") || id.equals("minecraft:rabbit") || id.equals("minecraft:parrot") || id.equals("jaymoskingdoms:pigeon"));
+		return mob.isAlive() && !mob.isLeashed() && (ShyDeer.shy(mob.getType()) || !mob.isPersistenceRequired()
+			&& (id.equals("minecraft:chicken") || id.equals("minecraft:rabbit") || id.equals("minecraft:parrot") || id.equals("jaymoskingdoms:pigeon")));
 	}
 }
