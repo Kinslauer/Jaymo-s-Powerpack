@@ -58,25 +58,34 @@ public final class ZFighterPurgingBeam {
     }
 
     /** Whether {@code entity} is corrupted, dark, or a nightmare (takes extra damage). */
-    static boolean isCorrupted(LivingEntity entity) {
-        if (entity.hasEffect(MobEffects.WITHER) || entity.hasEffect(MobEffects.DARKNESS)) {
-            return true;
-        }
-        if (Downed.isDowned(entity)) {
-            return true;
-        }
-        if (entity.entityTags().contains("corrupted") || entity.entityTags().contains("demon_realm")) {
-            return true;
-        }
-        for (MobEffectInstance effect : entity.getActiveEffects()) {
-            if (effect.getEffect().value().getCategory() == net.minecraft.world.effect.MobEffectCategory.HARMFUL
-                    && (effect.getEffect().value().getDescriptionId().contains("possession")
-                            || effect.getEffect().value().getDescriptionId().contains("corrupt"))) {
-                return true;
-            }
-        }
-        return false;
-    }
+    	static boolean isCorrupted(LivingEntity entity) {
+    		if (entity.hasEffect(MobEffects.WITHER) || entity.hasEffect(MobEffects.DARKNESS)) {
+    			return true;
+    		}
+    		if (Downed.isDowned(entity)) {
+    			return true;
+    		}
+    		if (entity.entityTags().contains("corrupted") || entity.entityTags().contains("demon_realm")
+    				|| entity.entityTags().contains("jaymospowers.dream_phantom")) {
+    			return true;
+    		}
+    		// Corrupted players (Fate corruption)
+    		if (entity instanceof ServerPlayer player && com.jaymospowers.core.Fate.isCorrupted(player)) {
+    			return true;
+    		}
+    		// Possession: check for Revenant's possession tag or other possession indicators
+    		if (entity.entityTags().contains("jaymospowers.possession")) {
+    			return true;
+    		}
+    		for (MobEffectInstance effect : entity.getActiveEffects()) {
+    			if (effect.getEffect().value().getCategory() == net.minecraft.world.effect.MobEffectCategory.HARMFUL
+    					&& (effect.getEffect().value().getDescriptionId().contains("possession")
+    							|| effect.getEffect().value().getDescriptionId().contains("corrupt"))) {
+    				return true;
+    			}
+    		}
+    		return false;
+    	}
 
     /** V held: gathering the purging beam. */
     static void gather(ServerPlayer player, ZFighterPower.Live live, float charge) {

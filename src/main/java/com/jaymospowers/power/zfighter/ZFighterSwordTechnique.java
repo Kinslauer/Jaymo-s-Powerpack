@@ -69,7 +69,6 @@ public final class ZFighterSwordTechnique {
 	}
 
 	static void init() {
-		com.jaymospowers.power.zfighter.ZFighterHands.init(); // already in ZFighterPower.init
 	}
 
 	static void clear() {

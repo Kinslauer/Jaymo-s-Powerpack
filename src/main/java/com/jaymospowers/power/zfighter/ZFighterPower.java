@@ -493,14 +493,7 @@ public final class ZFighterPower implements Power {
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ZFighterDebugCommand.register(dispatcher));
 		ZFighterGrowth.init();
 		// Ki Shell: reduce ki damage for players who have it
-		net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
-			if (!(entity instanceof net.minecraft.server.level.ServerPlayer player)) return true;
-			float reduced = ZFighterKiShell.onHurt(player, source, amount);
-			if (reduced < amount) {
-				// Damage was reduced; we heal the difference after the fact
-			}
-			return true;
-		});
+		// (handled in ZFighterHooks.modifyDamage)
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			LIVE.remove(handler.player.getUUID());
 			ZFighterGrowth.forget(handler.player);

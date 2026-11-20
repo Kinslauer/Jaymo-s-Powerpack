@@ -959,7 +959,7 @@ public final class ZFighterKi {
 		static void throwDisc(ServerPlayer player, ZFighterPower.Live live, Vec3 from, Vec3 dir, float damage) {
 			ServerLevel level = player.level();
 			Bolt bolt = new Bolt(level, player.getUUID(), from, dir.scale(DISC_SPEED), damage,
-					formColor(live), DISC, Mth.ceil(DISC_RANGE / DISC_SPEED));
+				formColor(live), DISC, Mth.ceil(DISC_RANGE / DISC_SPEED));
 			// flat and level: across it is his right, whichever way he looks (straight down too)
 			bolt.side = Vec3.directionFromRotation(0.0F, player.getYRot() + 90.0F);
 			BOLTS.add(bolt);

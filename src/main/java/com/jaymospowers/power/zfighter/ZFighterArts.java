@@ -37,18 +37,28 @@ public final class ZFighterArts {
 	}
 
 	public static void init() {
-		ZFighterRingOfOrbs.init();
-		ZFighterRisingDome.init();
-		ZFighterKiRain.init();
-		ZFighterAfterimage.init();
-		ZFighterSonicSway.init();
-		ZFighterCreator.init();
-		ZFighterEyeBeams.init();
-		ZFighterGreatBreath.init();
-		ZFighterAerialCharge.init();
-		ZFighterThunderclap.init();
-		ZFighterBracers.init();
-	}
+			ZFighterRingOfOrbs.init();
+			ZFighterRisingDome.init();
+			ZFighterKiRain.init();
+			ZFighterAfterimage.init();
+			ZFighterSonicSway.init();
+			ZFighterCreator.init();
+			ZFighterEyeBeams.init();
+			ZFighterGreatBreath.init();
+			ZFighterAerialCharge.init();
+			ZFighterThunderclap.init();
+			ZFighterBracers.init();
+			// Patch 3 techniques
+			ZFighterKiShell.init();
+			ZFighterTwinDiscs.init();
+			ZFighterRingBeam.init();
+			ZFighterSwordTechnique.init();
+			ZFighterPurgingBeam.init();
+			ZFighterStickyBind.init();
+			ZFighterRiftMoves.init();
+			ZFighterKiDrinkingBarrier.init();
+			ZFighterKiCell.init();
+		}
 
 	public static void clear() {
 		ZFighterRingOfOrbs.clear();

@@ -110,8 +110,13 @@ public final class ZFighterRiftMoves {
     // =========================== Rift Fist (G) ===========================
 
     /** G (quick): punch into a rift to hit a foe from behind. Returns cooldown, or 0. */
-    static int riftFist(ServerPlayer player, ZFighterPower.Live live) {
-        if (!ZFighterPower.spend(player, live, FIST_KI)) {
+    	static int riftFist(ServerPlayer player, ZFighterPower.Live live) {
+    		// Divine-born only
+    		if (!ZFighterLineage.divine(player)) {
+    			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_rift.divine_only").withStyle(net.minecraft.ChatFormatting.GRAY));
+    			return 0;
+    		}
+    		if (!ZFighterPower.spend(player, live, FIST_KI)) {
             return 0;
         }
         ServerLevel level = player.level();
@@ -146,8 +151,13 @@ public final class ZFighterRiftMoves {
     // =========================== Rift Step (sneak+G) ===========================
 
     /** Sneak+G: open a rift and step through it. Returns cooldown, or 0. */
-    static int riftStep(ServerPlayer player, ZFighterPower.Live live) {
-        if (!ZFighterPower.spend(player, live, STEP_KI)) {
+    	static int riftStep(ServerPlayer player, ZFighterPower.Live live) {
+    		// Divine-born only
+    		if (!ZFighterLineage.divine(player)) {
+    			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_rift.divine_only").withStyle(net.minecraft.ChatFormatting.GRAY));
+    			return 0;
+    		}
+    		if (!ZFighterPower.spend(player, live, STEP_KI)) {
             return 0;
         }
         ServerLevel level = player.level();

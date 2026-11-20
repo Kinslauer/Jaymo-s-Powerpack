@@ -34,6 +34,7 @@ import java.util.UUID;
  * Sticky Bind: a Rubber-folk wad that sticks a foe; mash to tear free (the out-cold mash).
  * Quick technique on G ({@link ZFighterTraining#STICKY_BIND}).
  * Throws a sticky wad that attaches to a target, immobilizing them until they mash jump/sneak.
+ * Only usable by Rubber-folk Z Fighters.
  */
 public final class ZFighterStickyBind {
 	/** Ki cost. */
@@ -72,7 +73,11 @@ public final class ZFighterStickyBind {
 
 	/** Attachment on the stuck target: how long they're stuck (ticks). */
 	public static final AttachmentType<Integer> STUCK = AttachmentRegistry.create(JaymosPowers.id("zfighter_stuck"),
-			builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+
+	/** Attachment on the stuck target: previous key state for detecting presses (sneak|jump bits). */
+	public static final AttachmentType<Integer> MASH_STATE = AttachmentRegistry.create(JaymosPowers.id("zfighter_mash_state"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.targetOnly()));
 
 	private ZFighterStickyBind() {
 	}
@@ -88,7 +93,9 @@ public final class ZFighterStickyBind {
 
 	/** G: throw the sticky wad. Returns cooldown, or 0 if it couldn't start. */
 	static int start(ServerPlayer player, ZFighterPower.Live live) {
-		if (!ZFighterPower.spend(player, live, KI_COST)) {
+		// Only Rubber-folk can use Sticky Bind
+		if (!ZFighterRubberBody.is(player)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_sticky_bind.rubber_only").withStyle(net.minecraft.ChatFormatting.GRAY));
 			return 0;
 		}
 		ServerLevel level = player.level();
@@ -96,6 +103,10 @@ public final class ZFighterStickyBind {
 		LivingEntity target = ZFighterArts.find(player, RANGE);
 		if (target == null) {
 			ZFighterArts.noFoe(player);
+			return 0;
+		}
+		// Spend ki only after confirming a valid target
+		if (!ZFighterPower.spend(player, live, KI_COST)) {
 			return 0;
 		}
 		// Throw the wad as a projectile
@@ -140,32 +151,43 @@ public final class ZFighterStickyBind {
 		}
 		int duration = BASE_DURATION;
 		target.setAttached(STUCK, duration);
+		target.setAttached(MASH_STATE, 0); // initialize mash state
 		WADS.put(target.getUUID(), new Wad(level, target.getUUID(), owner.getUUID(), duration));
 		// Immobilize
 		target.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOWNESS, duration, 10, false, false));
 		if (target instanceof net.minecraft.world.entity.Mob m) m.getNavigation().stop();
 		level.sendParticles(MagicFx.wisp(COLOR, 1.5F), true, false, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(),
-				20, 0.3, 0.3, 0.3, 0.05);
+			20, 0.3, 0.3, 0.3, 0.05);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.SLIME_BLOCK_BREAK, SoundSource.PLAYERS, 0.8F, 1.5F);
 		if (target instanceof ServerPlayer sp) {
 			sp.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_sticky_bind.stuck").withStyle(net.minecraft.ChatFormatting.YELLOW));
 		}
 	}
 
-	/** Called when the target presses jump or sneak (mashing to escape). */
+	/** Called when the target presses jump or sneak (mashing to escape). Detects key presses (edges), not holds. */
 	public static void mash(ServerPlayer target) {
 		Integer stuck = target.getAttached(STUCK);
-		if (stuck != null && stuck > 0) {
-			target.setAttached(STUCK, stuck - MASH_REDUCTION);
+		if (stuck == null || stuck <= 0) {
+			return;
+		}
+		// Detect key presses: sneak (bit 0) and jump (bit 1)
+		int prev = target.getAttachedOrElse(MASH_STATE, 0);
+		int curr = 0;
+		if (target.isShiftKeyDown()) curr |= 1;
+		if (target.getLastClientInput() != null && target.getLastClientInput().jump()) curr |= 2;
+		int pressed = curr & ~prev; // edges: newly pressed this tick
+		target.setAttached(MASH_STATE, curr);
+		if (pressed != 0) {
+			target.setAttached(STUCK, Math.max(0, stuck - MASH_REDUCTION));
 			ServerLevel level = target.level();
 			level.sendParticles(ParticleTypes.CRIT, true, false, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(),
-					4, 0.2, 0.2, 0.2, 0.1);
+				4, 0.2, 0.2, 0.2, 0.1);
 			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.SLIME_BLOCK_BREAK, SoundSource.PLAYERS, 0.5F, 1.8F);
-			target.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_sticky_bind.mash", (stuck - MASH_REDUCTION + 19) / 20).withStyle(net.minecraft.ChatFormatting.GREEN));
+			target.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_sticky_bind.mash", (Math.max(0, stuck - MASH_REDUCTION) + 19) / 20).withStyle(net.minecraft.ChatFormatting.GREEN));
 		}
 	}
 
-	/** Server tick: count down stuck duration. */
+	/** Server tick: count down stuck duration and check for mash presses. */
 	private static void tick(MinecraftServer server) {
 		if (WADS.isEmpty()) {
 			return;
@@ -183,6 +205,7 @@ public final class ZFighterStickyBind {
 			if (stuck == null || stuck <= 0) {
 				it.remove();
 				target.removeAttached(STUCK);
+				target.removeAttached(MASH_STATE);
 				target.removeEffect(net.minecraft.world.effect.MobEffects.SLOWNESS);
 				if (target instanceof ServerPlayer sp) {
 					sp.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_sticky_bind.free").withStyle(net.minecraft.ChatFormatting.GOLD));
@@ -191,10 +214,14 @@ public final class ZFighterStickyBind {
 				continue;
 			}
 			target.setAttached(STUCK, stuck - 1);
+			// Check for mash presses (sneak or jump) for players
+			if (target instanceof ServerPlayer sp) {
+				mash(sp);
+			}
 			// Particles while stuck
 			if (server.getTickCount() % 10 == 0) {
 				wad.level.sendParticles(MagicFx.wisp(COLOR, 0.8F), true, false, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(),
-						4, 0.2, 0.2, 0.2, 0.02);
+					4, 0.2, 0.2, 0.2, 0.02);
 			}
 		}
 	}
