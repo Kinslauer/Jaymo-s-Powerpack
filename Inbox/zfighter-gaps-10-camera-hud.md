@@ -40,3 +40,4 @@ text_pass:
 - 2026-11-20 15:20 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.
 - 2026-11-20 15:20 hermes-fixer's claim went stale (nothing changed for 93 min); handed back as changes so a bot can take it.
 - 2026-11-20 18:11 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.
+- 2026-11-20 18:11 hermes-fixer's last run stopped before finishing; handed back as changes so it can carry on.
