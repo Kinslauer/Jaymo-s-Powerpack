@@ -315,23 +315,32 @@ final class HeldBack {
 	 * the cell; they open their eyes in it. Null otherwise (a village has no cells: nobody is locked up).
 	 */
 	static net.minecraft.core.@Nullable GlobalPos gaol(ServerPlayer player, net.minecraft.world.entity.@Nullable Entity by) {
-		if (!(by instanceof Mob guard) || !guard.isAlive() || !(Downed.isGuard(guard) || HavenGrowth.sworn(guard))
-			|| !(player.level() instanceof ServerLevel level) || level != Factions.level(level.getServer()) || Busts.jailed(player)) {
+		if (!wants(player, by) || !(by instanceof Mob guard) || !(player.level() instanceof ServerLevel level)) {
 			return null;
 		}
 		Faction f = realmOf(level, guard);
-		if (f == null || !f.type().isRealm()) {
-			return null;
-		}
-		long[] blow = ASSAULTS.get(player.getUUID());
-		boolean struck = blow != null && blow[0] == f.id() && level.getGameTime() <= blow[1];
-		if (!struck && !serious(level, guard, player)) {
-			return null;
-		}
 		ASSAULTS.remove(player.getUUID());
 		BlockPos cell = lockUp(level, player, f, guard);
 		JaymosKingdoms.LOGGER.info("{} was carried out cold to {}'s cells", player.getScoreboardName(), f.name());
 		return net.minecraft.core.GlobalPos.of(level.dimension(), cell);
+	}
+
+	/**
+	 * Whether {@code by} is a kingdom's or fiefdom's guard (or sworn) whose realm wants {@code player} in its cells: an
+	 * outlaw, hated, at war with it, or fresh from striking one of its people. Changes nothing ({@link #gaol} locks them up).
+	 */
+	static boolean wants(ServerPlayer player, net.minecraft.world.entity.@Nullable Entity by) {
+		if (!(by instanceof Mob guard) || !guard.isAlive() || !(Downed.isGuard(guard) || HavenGrowth.sworn(guard))
+			|| !(player.level() instanceof ServerLevel level) || level != Factions.level(level.getServer()) || Busts.jailed(player)) {
+			return false;
+		}
+		Faction f = realmOf(level, guard);
+		if (f == null || !f.type().isRealm()) {
+			return false;
+		}
+		long[] blow = ASSAULTS.get(player.getUUID());
+		boolean struck = blow != null && blow[0] == f.id() && level.getGameTime() <= blow[1];
+		return struck || serious(level, guard, player);
 	}
 
 	// ---- no catapults ------------------------------------------------------------------------------------------------
