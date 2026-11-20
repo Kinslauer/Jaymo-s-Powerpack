@@ -6846,3 +6846,19 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 
 - **Rig prosthetic leg**: the kick pose (V, no suit on) swings the leg the Rig limb is fitted to, not always the right one (`RigPose`). A Rig leg on each side kicks with the right one, as the kick itself picks.
 - Built; not played.
+
+## 0.26.12 (2026-11-20): body controls - hold drags, tap loots, sneak revives (#1935)
+
+- Andy: "right click hold should always be drag, tap can loot. and shift should revive. the binds got confusing". On anyone downed:
+  - **Hold use (standing)**: a bar fills ("Taking hold of ...", `Carry.LIFT_TICKS`) and you drag them by the shoulder (`Carry.liftDowned`); a small downed animal is taken up instead. Sneak + right-click while dragging still lifts them into your arms, right-click lets go. No kneel needed first any more.
+  - **Drag out of the water**: someone downed lying in water can be taken hold of from anywhere within arm's reach (not just touching), so you can haul them out from the bank.
+  - **Tap use**: takes the weapons and arrows from their hands (Jaymo's Kingdoms, now on the tap's release instead of the first press), or else pulls out a blade stuck in them (`Lodged.pullOnTap`). A Xeno-Band is still torn off a downed wearer on a tap.
+  - **Sneak + hold use**: brings them round (the revive, food or treat as before). Any sneak works now, not only the low crouch held still.
+  - **Fainted players** are shaken awake with sneak + right-click (was a plain right-click).
+  - Executions are unchanged: sneak + hold attack.
+- Andy: "throwing needs to be more deliberate, i revived then instantly tossed her, no struggle to pickup at all":
+  - The hold that revived someone (or took hold of them) can't carry on into a lift once they're up (`Downed.handOn`); let go of right-click first.
+  - Lifting a person off their feet (sneak + hold) takes 2 s (`Carry.PERSON_LIFT_TICKS` 40, was 0.6 s); small animals stay quick.
+  - Throwing is a wind-up: sneak + **hold** right-click for 1 s ("Winding up to throw ...", `THROW_TICKS` 20), and only counted from 1 s after they're in your arms (`THROW_READY`). Heaving someone you're dragging up into your arms is the same held sneak + right-click, 1.5 s (`HOIST_TICKS`). Let go sooner and nothing happens. Blocks and severed parts throw the same way. Client `CarryUseMixin` sends each beat of the held press.
+- `Downed.onUseEntity/revives`, `Carry.liftDowned`, `Lodged`, `Fainting.shake`. Lang: `message.jaymospowers.downed.cant_take_hold`, `bar.jaymospowers.taking_hold` (the old kneel-first message is gone).
+- Built; not played.

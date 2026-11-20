@@ -2594,3 +2594,11 @@ Added a new **Cooking Block** to the Functional creative tab. The block has iron
 
 - **Fix**: drawing a severed leg (`SpiderLeg`) whose creature another mod adds saved data to (Re:Animal's wolves) crashed the game: that mod's part of the save isn't set up on a body rebuilt only to be drawn. The leg now keeps what was read before it (as corpses already did), and a corpse taken out of a body bag does the same (`CorpseEntity.rebuildFrom`). A warning is logged instead.
 - Built by CI; not played.
+
+## 0.6.66 (2026-11-20): body controls - hold drags a body, tap searches it (#1935)
+
+- Andy: "right click hold should always be drag, tap can loot". An empty hand on a body lying loose (not on a hook):
+  - **Hold use**: drags it by the legs (bar "Taking hold"), any kind, a player's body too; anything pocket-sized is taken up in one hand by the neck. Solid iron says it's too heavy.
+  - **Tap use** (worked out once use is let go, `CorpseEntity.press/tickPress/tapped`): arrows come out first, one a tap; a fish is looted; a machine is stripped; a player's body gives back what they carried; a skeleton gives its gear, then bones; anything else is searched. An animal carcass tells you its bleeding, or how to move it.
+  - Sneak + hold still lifts it into your arms; tools, hooks and flint work as before.
+- Built; not played.
