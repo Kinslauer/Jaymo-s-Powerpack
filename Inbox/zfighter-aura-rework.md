@@ -16,3 +16,6 @@ Restarted by the vault coordinator 2026-11-19. Andy: "The Z fighter auras need s
 
 
 Ideas only: DMZ is GPL-3.0, ours is ARR, so no copied code or art. Expected files: client/power/zfighter/ZFighterAuraFlame.java (new), ZFighterKiAura.java, ZFighterKiAuraStyles.java, power/zfighter/ZFighterPower.java; ground cracks reuse core/GroundCracks. One PR, change note changes/powers/<branch>.md, never version=/MODLOG/codemap. Check APIs against 26.3.
+
+## Notes
+- 2026-11-19 22:58 hermes-b's last text pass stopped before finishing; handed back so it can carry on.
