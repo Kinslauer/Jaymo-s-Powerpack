@@ -124,7 +124,7 @@ public final class HeraldryWear {
 
 	/** (GuardKit) The war arm {@code f}'s knights carry, marked as the realm's make; empty without Powers. */
 	static ItemStack warArm(MinecraftServer server, Faction f) {
-		return plate(server, f, EquipmentSlot.MAINHAND);
+		return plate(server, f, EquipmentSlot.MAINHAND, "");
 	}
 
 	/** (GuardKit) The finish {@code f}'s knights' plate has in {@code climate}: its creed's, else its land's, else the realm's own. */
@@ -162,18 +162,82 @@ public final class HeraldryWear {
 		if (piece == null || piece.face() == null || !GOLD_FINISHES.contains(was)) {
 			return helm;
 		}
-		String now = helmFinish(was);
-		ItemStack out = helm.copy();
-		if (now.isEmpty()) {
+		return refinished(helm, helmFinish(was));
+	}
+
+	/** A copy of plate piece {@code stack} in {@code finish} ("" bright), everything else on it kept and its name's finish changed. */
+	static ItemStack refinished(ItemStack stack, String finish) {
+		ItemStack out = stack.copy();
+		if (finish.isEmpty()) {
 			out.remove(HeraldryArmour.FINISH);
 		} else {
-			out.set(HeraldryArmour.FINISH, now);
+			out.set(HeraldryArmour.FINISH, finish);
 		}
 		Component name = out.get(DataComponents.ITEM_NAME);
 		if (name != null) {
-			out.set(DataComponents.ITEM_NAME, refinishedName(name, now));
+			out.set(DataComponents.ITEM_NAME, refinishedName(name, finish));
 		}
 		return out;
+	}
+
+	/**
+	 * (Andy, 2026-11-20: "they can have the gold armor as long as it requires gold to craft") The gold ingots a piece in a
+	 * gold finish takes from its realm's stores, as gilding at the smithing anvil takes from a player; and the plate pieces
+	 * of a knight's kit (cuirass, sabatons and the harness's seven) that take a finish.
+	 */
+	static final int GILD_GOLD = 2, KNIGHT_GILT_PIECES = 9;
+
+	/** Whether {@code stack} is plate in a gold finish. */
+	static boolean gilt(ItemStack stack) {
+		HeraldryArmour.Piece piece = HeraldryArmour.of(stack);
+		return piece != null && piece.plate() && GOLD_FINISHES.contains(HeraldryArmour.finish(stack));
+	}
+
+	/** Takes the gold for {@code pieces} gold-finished pieces out of {@code f}'s stores; false (nothing taken) if there isn't that much. */
+	static boolean payGold(ServerLevel level, Faction f, int pieces) {
+		int need = pieces * GILD_GOLD;
+		if (Storage.count(level, f, Items.GOLD_INGOT) < need) {
+			return false;
+		}
+		while (need > 0) {
+			ItemStack taken = Storage.take(level, f, Items.GOLD_INGOT, need);
+			if (taken.isEmpty()) {
+				break;
+			}
+			need -= taken.getCount();
+		}
+		return true;
+	}
+
+	/**
+	 * The finish {@code mob}'s knight's plate and harness come in: the realm's ({@link #knightFinish}), but a gold one only
+	 * once paid for. One already in gold plate (wearing it, or {@code putting} it on) has paid; else, with {@code pay}
+	 * pieces to pay for now, the gold comes out of the realm's stores. Without it the kit is heat-blued or bright
+	 * ({@link #helmFinish}).
+	 */
+	private static String kitFinish(Mob mob, Faction f, ItemStack putting, int pay) {
+		MinecraftServer server = mob.level().getServer();
+		Climate climate = server == null ? Climate.PLAINS : Climate.at(server.getLevel(Level.OVERWORLD), f.seat());
+		String finish = knightFinish(server, f, climate);
+		if (!GOLD_FINISHES.contains(finish) || gilt(putting) || giltOn(mob)) {
+			return finish;
+		}
+		return pay > 0 && mob.level() instanceof ServerLevel level && payGold(level, f, pay) ? finish : helmFinish(finish);
+	}
+
+	/** Whether {@code mob} has gold-finished plate on (armour or harness). */
+	private static boolean giltOn(Mob mob) {
+		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.FEET}) {
+			if (gilt(mob.getItemBySlot(slot))) {
+				return true;
+			}
+		}
+		for (Harness.Slot slot : Harness.Slot.values()) {
+			if (gilt(Harness.get(mob, slot))) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** {@code name} with its finish's word ("Gilt-Banded %s") made {@code finish}'s (none for bright), at any depth (a realm's make wraps it). */
@@ -284,16 +348,10 @@ public final class HeraldryWear {
 		}
 
 	/** What {@code f}'s knights wear in {@code slot} (the realm's helm, cuirass or sabatons) or carry (its war arm; the cuirass carries the realm's cape), or empty for the other slots. */
-		private static ItemStack plate(@Nullable MinecraftServer server, Faction f, EquipmentSlot slot) {
+		private static ItemStack plate(@Nullable MinecraftServer server, Faction f, EquipmentSlot slot, String effectiveFinish) {
 			Climate climate = server == null ? Climate.PLAINS : Climate.at(server.getLevel(Level.OVERWORLD), f.seat());
-			String baseFinish = finish(f);
-			String cFinish = creedFinish(server, f);
-			String lFinish = landFinish(f, climate);
 			String tag = server == null ? null : realmTag(server, f);
 			String arm = arm(realm(f));
-		
-			// Determine the effective finish: creed > land > base
-			String effectiveFinish = !cFinish.isEmpty() ? cFinish : (!lFinish.isEmpty() ? lFinish : baseFinish);
 		
 			// Determine creed/land-specific piece names
 			String helmName = helmName(f, climate, server);
@@ -380,13 +438,9 @@ public final class HeraldryWear {
 		}
 
 	/** The harness under and round a knight of {@code f}'s plate. */
-		private static void harness(Mob mob, Faction f) {
+		private static void harness(Mob mob, Faction f, String effectiveFinish) {
 			MinecraftServer server = mob.level().getServer();
 			Climate climate = server == null ? Climate.PLAINS : Climate.at(server.getLevel(Level.OVERWORLD), f.seat());
-			String baseFinish = finish(f);
-			String cFinish = creedFinish(server, f);
-			String lFinish = landFinish(f, climate);
-			String effectiveFinish = !cFinish.isEmpty() ? cFinish : (!lFinish.isEmpty() ? lFinish : baseFinish);
 		
 			// Determine creed/land-specific harness pieces
 			String spauldersName = spauldersName(f, climate, server);
@@ -480,13 +534,14 @@ public final class HeraldryWear {
 		if (role == Folk.KING || role == Folk.LORD) {
 			ruler(folk, faction);
 		} else if (role == Folk.GUARD && FrontierArmour.setOf(folk.getItemBySlot(EquipmentSlot.CHEST)) == null && knightly(folk, faction, climate)) {
+			String finish = kitFinish(folk, faction, ItemStack.EMPTY, 0);
 			for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.FEET, EquipmentSlot.MAINHAND}) {
-				ItemStack piece = plate(folk.level().getServer(), faction, slot);
+				ItemStack piece = plate(folk.level().getServer(), faction, slot, finish);
 				if (!piece.isEmpty()) {
 					folk.setItemSlot(slot, piece);
 				}
 			}
-			harness(folk, faction);
+			harness(folk, faction, finish);
 		} else if (folk.hasAttached(Harness.WORN)) {
 			Harness.clear(folk);
 		}
@@ -501,13 +556,14 @@ public final class HeraldryWear {
 			|| !Outfits.ironRich(mob, f) || Outfits.heraldry(f, level.getServer()).armoury()) {
 			return false;
 		}
+		String finish = kitFinish(mob, f, ItemStack.EMPTY, KNIGHT_GILT_PIECES);
 		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.FEET, EquipmentSlot.MAINHAND}) {
-			ItemStack piece = plate(level.getServer(), f, slot);
+			ItemStack piece = plate(level.getServer(), f, slot, finish);
 			if (!piece.isEmpty()) {
 				mob.setItemSlot(slot, piece);
 			}
 		}
-		harness(mob, f);
+		harness(mob, f, finish);
 		return true;
 	}
 
@@ -549,14 +605,15 @@ public final class HeraldryWear {
 		if (f == null || !knightly(mob, f, Climate.at(level, f.seat()))) {
 			return stack;
 		}
-		ItemStack plate = plate(server, f, slot);
+		String finish = kitFinish(mob, f, stack, 0);
+		ItemStack plate = plate(server, f, slot, finish);
 		if (plate.isEmpty()) {
 			return stack;
 		}
 		if (slot == EquipmentSlot.CHEST) {
-			harness(mob, f);
+			harness(mob, f, finish);
 			// (and he takes up the realm's war arm)
-			ItemStack arm = plate(server, f, EquipmentSlot.MAINHAND);
+			ItemStack arm = plate(server, f, EquipmentSlot.MAINHAND, "");
 			if (!arm.isEmpty()) {
 				mob.setItemSlot(EquipmentSlot.MAINHAND, arm);
 			}
