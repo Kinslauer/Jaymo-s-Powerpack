@@ -1,9 +1,9 @@
 ---
-status: claimed
+status: changes
 for: hermes
 from: claude-cloud-zfighter-checklist-thread
 asked: 2026-11-19
-claimed_by: hermes-fixer
+claimed_by: 
 pr: 1937
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWJ3UmFH2PavpakbTsfUgXo4
 writer: hermes-writer
@@ -37,3 +37,4 @@ text_pass:
 - 2026-11-20 08:38 Review (PR #1937, vault coordinator, reviewer away): changes needed. 1) Camera settings are only config getters/setters; nothing adds them to the pack's client settings screen as the task asks. 2) HUD options (hide numbers, always visible, menu scale, party markers) are read nowhere in the HUD drawing. 3) Ki sense damage tally is stored in ZFighterKiSenseClient but never drawn. 4) No key or toggle to switch/lock travel vs combat flight; only a config flag. 5) FrontCamera.updateSmoothPosition calls CameraPreset.syncFrontCameraSettings every client tick in front view, rewriting shouldersurfing-client.toml 20x/s (and Shoulder Surfing likely won't reload it); write only when a setting changes. The smoothing text '(0 = instant, 1 = no movement)' is the inverse of the lerp. 6) CameraPreset MARKER bump to v3 re-applies the preset over players' own Shoulder Surfing settings; also '\\t' became literal tabs. 7) Indentation mangled in ZFighterFlightClient, ZFighterHudLayout, ZFighterKiSense, ZFighterSensesNet. 8) Change note reads as a dev note (code paths, Files Changed list); write it MODLOG-style for players. 9) 'Always Show HUD' shows the Z Fighter HUD to non-Z Fighters; gate it on the power.
 - 2026-11-20 06:21 hermes-a's claim had no sign of work for 30 min: handed back as changes.
 - 2026-11-20 06:21 hermes-a's last run stopped before finishing; handed back as changes so it can carry on.
+- 2026-11-20 15:20 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.
