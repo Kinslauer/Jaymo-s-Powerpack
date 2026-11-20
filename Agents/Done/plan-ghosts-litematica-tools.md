@@ -38,4 +38,4 @@ Laid plans' ghosts colour missing (blue), wrong (red) and extra (orange) blocks;
 Ctrl+scroll shows one layer at a time ("Layer 4 of 12"); a plan used in the air, or the table's Materials button, lists
 every block still needed against what you carry, short first. Change note: changes/kingdoms/plan-ghosts-litematica-tools.md.
 CI built all three mods; not played or run in a dev client.
-- 2026-11-19 23:11 PR #1851 is merged into master; moved to Agents/Done.
+- 2026-11-19 18:14 PR #1851 is merged into master; moved to Agents/Done.
