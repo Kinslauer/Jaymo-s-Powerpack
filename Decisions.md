@@ -838,3 +838,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-20 1:24 AM ET (vault coordinator): Andy approved the lore paragraph "Cleaning up blood" (PR #1931).
 - 2026-11-20 2:35 AM ET (Andy, via coordinator, Hermes Training thread): "start working on every waiting task": dispatch-bots cron was already active (no resume needed), Minecraft closed, gateway up. 30 open Inbox tasks. Hephaestus fired 2:32 AM and claimed scrying-orb (sent back); Apollo's 1:30 AM run on zfighter-gaps-10 ended with a gateway error, task left at running; Bacchus and Apollo wait on the one-builder rule.
 - 2026-11-20 11:06 AM ET (Andy, Reason bugfixing thread): yes to a stealth kill (sneak + hold LMB behind an unaware standing foe), accessible to all, improved through the tree; fill the empty Rogue's Arts, starting with 4 entries.
+- 2026-11-20 11:24 AM ET (Andy, Reason bugfixing thread): approved the Lore.md placement 'The quiet kill' (PR #1952).
