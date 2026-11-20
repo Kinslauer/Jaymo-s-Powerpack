@@ -56,7 +56,7 @@ import java.util.UUID;
  * to start ({@link #OVERCOME_SWOON}).
  * <p>
  * <b>Shaken awake:</b> Andy (2026-11-20): "players and npcs should be able to wake players who faint". Another player
- * uses (right-click, not sneaking) one lying out and shakes them by the shoulder ({@link #shake}): they come round there
+ * uses (sneak + right-click: Andy, 2026-11-20, "shift should revive") one lying out and shakes them by the shoulder ({@link #shake}): they come round there
  * and then, as from a blow but without the harm. Kingdoms' villagers, guards and companions come over and do the same by
  * their nature ({@code FaintWakers}).
  * <p>
@@ -164,12 +164,11 @@ public final class Fainting {
 	}
 
 	/**
-	 * Another player's use on {@code entity}: lying out in a faint, they're shaken by the shoulder and come round
-	 * ({@link #bringRound}). Main hand, not sneaking (sneak is a seize, a lift, a pocket picked), and not from the downed or
-	 * a spectator. Both sides alike (the faint is synced to all), so the client neither eats nor draws a bow meanwhile.
+	 * Another player's sneak + use on {@code entity} (Andy, 2026-11-20: "shift should revive"): lying out in a faint, they're
+	 * shaken by the shoulder and come round ({@link #bringRound}). Main hand, and not from the downed or a spectator. Both sides alike (the faint is synced to all), so the client neither eats nor draws a bow meanwhile.
 	 */
 	private static InteractionResult shake(Player player, Level level, InteractionHand hand, Entity entity, @Nullable EntityHitResult hit) {
-		if (hand != InteractionHand.MAIN_HAND || !(entity instanceof Player lying) || lying == player || !out(lying) || player.isShiftKeyDown()
+		if (hand != InteractionHand.MAIN_HAND || !(entity instanceof Player lying) || lying == player || !out(lying) || !player.isShiftKeyDown()
 			|| player.isSpectator() || Downed.isDowned(player) || is(player)) {
 			return InteractionResult.PASS;
 		}

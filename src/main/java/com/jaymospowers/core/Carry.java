@@ -101,11 +101,12 @@ import org.jspecify.annotations.Nullable;
  * sooner, or look away, and nothing happens. Only a severed part and a Wind user's grab in the air stay a click. Holding
  * plain right-click on someone downed is the revive ({@link Downed}), and holding left-click executes them
  * ({@code Finishers}), so none of the three can be mistaken for another. Nobody lifts a big animal or anything bigger than a
- * person by hand ({@link #tooBig}): a downed horse or cow stays where it lies (Gravity still can). (Andy, 2026-11-14) Someone
- * downed is lifted from a kneel at their side instead, with a tap of use ({@link #liftDowned}), and revived with a hold from it.
+ * person by hand ({@link #tooBig}): a downed horse or cow stays where it lies (Gravity still can). (Andy, 2026-11-20) Someone
+ * downed is taken hold of with a plain hold of use instead ({@link #liftDowned}, from {@link Downed}): dragged, then lifted
+ * from the drag with sneak + right-click. Sneak + a hold on them is the revive.
  * <p>
  * (0.19.55) Andy: "the user dragging a player grabs them by the shoulder, while the legs ragdoll and drag along" (Death
- * Engine's drag as the idea, rebuilt). Sneak + held use on someone downed ({@link #draggable}) now takes them by the
+ * Engine's drag as the idea, rebuilt). Held use on someone downed ({@link #draggable}) now takes them by the
  * shoulder and drags them along the ground behind you ({@link #DRAG}), whatever armour they wear; their body follows your
  * hand on its own path ({@link #dragStep}), and they smear their blood along it ({@code BloodSmears}). Right-click lets
  * go where they lie; sneak + right-click hoists them up into your arms (a carry's hold, if their armour isn't too heavy:
@@ -148,6 +149,19 @@ public final class Carry {
 	static final int RELEASE_GRACE_TICKS = 40;
 	/** (0.17.7) How long sneak + use is held on someone to lift them (ticks), and the gap between use's repeats (every 4 ticks) that still counts as held. */
 	public static final int LIFT_TICKS = 12, LIFT_GRACE = 8;
+	/**
+	 * Andy (2026-11-20): "throwing needs to be more deliberate, i revived then instantly tossed her, no struggle to pickup at
+	 * all". Lifting a person (anyone but a small animal, a part or a block) off their feet takes this long a hold instead of
+	 * {@link #LIFT_TICKS} (ticks).
+	 */
+	public static final int PERSON_LIFT_TICKS = 40;
+	/**
+	 * And a throw is a wind-up: sneak + right-click <i>held</i> this long (ticks), and only once they've been in your arms
+	 * {@link #THROW_READY} (the wind-up's bar starts from then). Heaving someone dragged up into your arms is the same held
+	 * sneak + right-click, for {@link #HOIST_TICKS}. Let go sooner and nothing happens. Use repeats every 4 ticks while
+	 * held; a gap past {@link #WIND_UP_GRACE} is a let-go.
+	 */
+	public static final int THROW_TICKS = 20, THROW_READY = 20, HOIST_TICKS = 30, WIND_UP_GRACE = 8;
 	/** (0.17.7) How far past reach they may slip while the lift fills (blocks). */
 	static final double LIFT_SLACK = 0.5;
 	/**
@@ -299,6 +313,8 @@ public final class Carry {
 		@Nullable Vec3 dragShoulders, dragHips;
 		/** Not a player but a mob dragging someone ({@link #npcDrag}); null for a player's carry. */
 		@Nullable Mob npc;
+		/** When it was taken up or taken hold of (game time): no throw before {@link #THROW_READY} after. */
+		long since;
 
 		Entry(UUID carrier, Entity carried, int hold, boolean flying, Vec3 at, boolean gravityOnly, boolean windOnly) {
 			this.carrier = carrier;
@@ -313,6 +329,8 @@ public final class Carry {
 
 	/** Carrier → what they carry. */
 	private static final Map<UUID, Entry> CARRIES = new HashMap<>();
+	/** Carrier → their throw's (or heave's) wind-up: {when it began, when use last came} (game time). Not saved. */
+	private static final Map<UUID, long[]> WIND_UPS = new HashMap<>();
 	/** Released players → until when their movement isn't checked (game time). */
 	private static final Map<UUID, Long> GRACE = new HashMap<>();
 	/** Let go → not before this game time can it be picked up again. Also a failed struggle's cooldown. */
@@ -624,6 +642,11 @@ public final class Carry {
 			// (the same click seen twice)
 			return InteractionResult.SUCCESS;
 		}
+		if (Downed.handOn(player, target)) {
+			// (Andy, 2026-11-20: "i revived then instantly tossed her") the hold that brought them round (or took hold of
+			// them) is spent: let go of right-click before it lifts anyone
+			return InteractionResult.SUCCESS;
+		}
 		if (hand == InteractionHand.MAIN_HAND && player.isShiftKeyDown() && Perch.rides(target) && !isCarrying(player)
 			&& !KitchenCompat.isCarryingCorpse(player) && Perch.tryPerch(player, target)) {
 			// a parrot, a cat, a cricket... climbs onto you instead of into your arms (Perch)
@@ -653,8 +676,8 @@ public final class Carry {
 			return InteractionResult.PASS;
 		}
 		if (target instanceof LivingEntity body && Downed.isDowned(body) && !snatches(player, target)) {
-			// (Andy, 2026-11-14) someone downed is lifted from a kneel at their side, with a tap of use ({@link #liftDowned});
-			// a sneak and a hold standing over them no longer does it
+			// (Andy, 2026-11-20) someone downed is taken hold of by a plain hold of use ({@link #liftDowned}, from Downed);
+			// sneak + a hold on them is the revive, not a lift
 			return InteractionResult.PASS;
 		}
 		if (level instanceof ServerLevel server && player instanceof ServerPlayer carrier) {
@@ -705,20 +728,29 @@ public final class Carry {
 			if (now - lift.last > LIFT_GRACE || !player.isShiftKeyDown() || liftGap(player, target) > LIFT_GAP + LIFT_SLACK) {
 				// let go too soon, stood up, or they slipped away: (0.21.39) the bar stays where it got to, for the next hold
 				it.remove();
-				HoldProgress.set(player.getUUID(), liftJob(target), (int) Math.min(LIFT_TICKS - 1, lift.last - lift.start));
+				HoldProgress.set(player.getUUID(), liftJob(target), (int) Math.min(liftTicks(target) - 1, lift.last - lift.start));
 				continue;
 			}
 			long held = now - lift.start;
-			if (held >= LIFT_TICKS) {
+			if (held >= liftTicks(target)) {
 				it.remove();
 				HoldProgress.forget(player.getUUID(), liftJob(target));
 				lift(player, target);
 				continue;
 			}
 			if (held >= 2) {
-				HudBar.hold(player, "carry_lift", held / (float) LIFT_TICKS, HudBar.GREY, Component.translatable("bar.jaymospowers.lifting", target.getDisplayName()), true);
+				HudBar.hold(player, "carry_lift", held / (float) liftTicks(target), HudBar.GREY, Component.translatable("bar.jaymospowers.lifting", target.getDisplayName()), true);
 			}
 		}
+	}
+
+	/**
+	 * (Andy, 2026-11-20: "no struggle to pickup at all") How long a lift of {@code target} is held: {@link #PERSON_LIFT_TICKS}
+	 * for a person (a player, or any living thing but an animal), {@link #LIFT_TICKS} for a small animal.
+	 */
+	static int liftTicks(Entity target) {
+		return target instanceof Player || target instanceof LivingEntity && !(target instanceof Animal) && !(target instanceof SeveredPart)
+			? PERSON_LIFT_TICKS : LIFT_TICKS;
 	}
 
 	/** The lift done: {@code player} takes {@code target} up, if both are still free to. */
@@ -743,12 +775,15 @@ public final class Carry {
 	}
 
 	/**
-	 * (Andy, 2026-11-14) "kneeling ... unlocks a context where you can use right click to interact, for lockpicking, reviving,
-	 * lifting": a tap of use from a kneel at a downed body's side ({@link Downed}'s revive watch tells it) takes them up at
-	 * once, as a full lift's hold did. True if they were.
+	 * Andy (2026-11-20): "right click hold should always be drag ... you should also be able to drag people out of the
+	 * water by holding right click". A hold of use standing over a downed body ({@link Downed}'s revive watch tells it, after
+	 * {@link #LIFT_TICKS}) takes them by the shoulder and drags them (or, if they can't be dragged, takes them up as a lift
+	 * would). One lying in the water is reached from anywhere within arm's reach, so they can be hauled out from the bank.
+	 * True if they were taken.
 	 */
 	public static boolean liftDowned(ServerPlayer player, LivingEntity body) {
-		if (player.isSpectator() || liftGap(player, body) > LIFT_GAP + LIFT_SLACK) {
+		if (player.isSpectator()
+			|| liftGap(player, body) > LIFT_GAP + LIFT_SLACK && !(body.isInWater() && player.isWithinEntityInteractionRange(body, 0.0))) {
 			return false;
 		}
 		Long ready = REGRAB.get(body.getUUID());
@@ -867,6 +902,7 @@ public final class Carry {
 	/** (0.19.55) Takes {@code target} (someone downed) by the shoulder, to drag along the ground behind {@code carrier}. */
 	static void drag(ServerPlayer carrier, Entity target) {
 		Entry entry = new Entry(carrier.getUUID(), target, DRAG, false, carrier.position(), false, false);
+		entry.since = carrier.level().getGameTime();
 		Vec3[] lay = dragStep(carrier.position(), carrier.getYRot(), null, null);
 		entry.dragShoulders = lay[0];
 		entry.dragHips = lay[1];
@@ -935,6 +971,7 @@ public final class Carry {
 		Entry entry = new Entry(carrier.getUUID(), target, hold, flying, carrier.position(), outside && !windCarries(carrier, target) && !webCarries(carrier, target),
 			outside && windCarries(carrier, target));
 		entry.webOnly = outside && !windCarries(carrier, target) && webCarries(carrier, target);
+		entry.since = carrier.level().getGameTime();
 		CARRIES.put(carrier.getUUID(), entry);
 		carrier.setAttached(CARRYING, new Carrying(target.getId(), hold));
 		target.setAttached(CARRIED_BY, carrier.getId());
@@ -978,6 +1015,10 @@ public final class Carry {
 	private static void release(ServerPlayer carrier, boolean toss) {
 		Entry entry = CARRIES.get(carrier.getUUID());
 		if (entry == null) {
+			return;
+		}
+		if (toss && !woundUp(carrier, entry)) {
+			// (Andy, 2026-11-20) a throw, or a heave up out of a drag, is held for, not clicked
 			return;
 		}
 		if (entry.hold == DRAG) {
@@ -1042,6 +1083,33 @@ public final class Carry {
 		}
 		// a chest is only ever set down, never thrown
 		end(carrier, entry, toss && !CarryBlock.holdsContents(entry.carried) ? Let.THROW : Let.DROP);
+	}
+
+	/**
+	 * (Andy, 2026-11-20: "throwing needs to be more deliberate") One more beat of sneak + right-click held while carrying
+	 * (the client sends one every 4 ticks of the hold): true once the wind-up is full, {@link #THROW_TICKS} for a throw or
+	 * {@link #HOIST_TICKS} to heave someone dragged up into the arms; a throw's wind-up only counts from {@link #THROW_READY}
+	 * after they were taken up. Until then a bar fills.
+	 */
+	private static boolean woundUp(ServerPlayer carrier, Entry entry) {
+		long now = carrier.level().getGameTime();
+		boolean heave = entry.hold == DRAG;
+		long[] wind = WIND_UPS.get(carrier.getUUID());
+		if (wind == null || now - wind[1] > WIND_UP_GRACE || !heave && now - entry.since < THROW_READY) {
+			// a fresh hold (or still too soon after the lift: it starts counting once they're settled in your arms)
+			wind = new long[] {now, now};
+			WIND_UPS.put(carrier.getUUID(), wind);
+		}
+		wind[1] = now;
+		int need = heave ? HOIST_TICKS : THROW_TICKS;
+		long held = now - wind[0];
+		if (held >= need) {
+			WIND_UPS.remove(carrier.getUUID());
+			return true;
+		}
+		HudBar.hold(carrier, "carry_wind_up", held / (float) need, HudBar.GREY,
+			Component.translatable(heave ? "bar.jaymospowers.heaving" : "bar.jaymospowers.winding_up", entry.carried.getDisplayName()), true);
+		return false;
 	}
 
 	private static void struggle(ServerPlayer player) {
@@ -1487,6 +1555,7 @@ public final class Carry {
 		}
 		CARRIES.clear();
 		LIFTING.clear();
+		WIND_UPS.clear();
 		GRACE.clear();
 		REGRAB.clear();
 		STRUGGLE_READY.clear();
