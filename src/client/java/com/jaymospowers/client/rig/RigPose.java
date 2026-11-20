@@ -8,6 +8,8 @@ import static com.jaymospowers.client.rig.RigBeats.OUT;
 import static com.jaymospowers.client.rig.RigBeats.SINE;
 
 import com.jaymospowers.client.rig.RigFormsClient;
+import com.jaymospowers.core.Dismember;
+import com.jaymospowers.core.Prosthetics;
 
 import com.jaymospowers.rig.Rig;
 import com.jaymospowers.rig.RigFrame;
@@ -50,9 +52,10 @@ public final class RigPose {
 	/**
 	 * {@code kind}: a {@link RigMoves} kind or 0; {@code t}: ticks into it; {@code hover}: 0-1; {@code flight}: 0-1;
 	 * {@code bank}: banking roll (-1 to 1); {@code recoil}: how hard this frame's shots rock the wearer (1: the standard frame); {@code still}: 1 standing, 0 at a
-	 * walk (a move's stance only takes the legs of someone standing).
+	 * walk (a move's stance only takes the legs of someone standing); {@code palmSide}: the arm a palm blast comes from
+	 * (1 right, -1 left: a Rig prosthetic arm's, with no suit on), 0 for the main arm.
 	 */
-		public record Pose(int kind, float t, float hover, float flight, float bank, float time, float recoil, float still) {
+		public record Pose(int kind, float t, float hover, float flight, float bank, float time, float recoil, float still, int palmSide) {
 		}
 
 	/** Moving at least this fast (blocks/tick) in full flight, Wind's cruise lean takes the body. */
@@ -195,7 +198,11 @@ public final class RigPose {
 			}
 			float recoil = Rig.frame(player) == RigFrame.SIEGE ? SIEGE_RECOIL : 1.0F;
 			float still = player.onGround() ? 1.0F - Mth.clamp(state.walkAnimationSpeed / STILL_PACE, 0.0F, 1.0F) : 1.0F;
-			state.setData(KEY, kind == 0 && hover <= 0.001F && flight <= 0.001F && Math.abs(bank) < 0.001F ? null : new Pose(kind, t, hover, flight, bank, now, recoil, still));
+			// a Rig prosthetic arm's shot (no suit on) comes from the arm it is fitted to (the right one first, as RigLimbs picks)
+			int palmSide = Rig.wearsAny(player) ? 0
+				: Prosthetics.hasRig(player, Dismember.RIGHT_ARM) ? 1 : Prosthetics.hasRig(player, Dismember.LEFT_ARM) ? -1 : 0;
+			state.setData(KEY, kind == 0 && hover <= 0.001F && flight <= 0.001F && Math.abs(bank) < 0.001F ? null
+				: new Pose(kind, t, hover, flight, bank, now, recoil, still, palmSide));
 		}
 
 	/** The hover pose's amount, easing toward {@code on} as time passes. */
@@ -246,7 +253,7 @@ public final class RigPose {
 			set(h.rightArm, FLIGHT_ARM_BACK, 0.0F, FLIGHT_ARM_OUT, pose.flight());
 			set(h.leftArm, FLIGHT_ARM_BACK, 0.0F, -FLIGHT_ARM_OUT, pose.flight());
 		}
-		boolean leftMain = avatar.mainArm == HumanoidArm.LEFT;
+		boolean leftMain = pose.kind() == RigMoves.PALM && pose.palmSide() != 0 ? pose.palmSide() < 0 : avatar.mainArm == HumanoidArm.LEFT;
 		ModelPart main = leftMain ? h.leftArm : h.rightArm, off = leftMain ? h.rightArm : h.leftArm;
 		ModelPart front = leftMain ? h.rightLeg : h.leftLeg, rear = leftMain ? h.leftLeg : h.rightLeg;
 		float side = leftMain ? -1.0F : 1.0F;
