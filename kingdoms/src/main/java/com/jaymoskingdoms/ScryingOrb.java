@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -182,13 +183,13 @@ public final class ScryingOrb {
                     TargetKind.STREAM_CODEC,
                     Target::kind,
                     // UUID encoded as string for compatibility with 26.3 ByteBufCodecs
-                    ByteBufCodecs.STRING_UTF8, Target::person,
+                    ByteBufCodecs.STRING_UTF8, (v) -> v.person.toString(),
                     ByteBufCodecs.STRING_UTF8,
                     Target::dimension,
                     BlockPos.STREAM_CODEC,
                     Target::pos,
                     ByteBufCodecs.STRING_UTF8,
-                    Target::name,
+                    (v) -> v.name,
                     // UUID from string constructor
                     java.util.UUID::new
             );
@@ -378,7 +379,7 @@ public final class ScryingOrb {
                     }
                     BlockPos pos = new BlockPos(x, y, z);
                     BlockState state = level.getBlockState(pos);
-                    int stateId = Block.getId(state);
+                    int stateId = BuiltInRegistries.BLOCK.getId(state.getBlock());
                     int paletteIdx = paletteMap.computeIfAbsent(stateId, id -> {
                         if (paletteSize < 256) {
                             palette[paletteSize] = id;
@@ -394,7 +395,7 @@ public final class ScryingOrb {
         int[] figures = gatherFigures(level, centre);
         boolean night = level.isDarkOutside();
         if (ServerPlayNetworking.canSend(caster, OrbView.TYPE)) {
-            ServerPlayNetworking.send(caster, new OrbView(target.name(), usedPalette, indices, new int[0], figures, night));
+            ServerPlayNetworking.send(caster, new OrbView(Component.literal(target.name()), usedPalette, indices, new int[0], figures, night));
         }
     }
 
