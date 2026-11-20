@@ -1,0 +1,4 @@
+# Knight armour set removed
+- **Knight armour gone** (Andy: "please remove this armor set"): the Knight Helmet, Chestplate, Leggings and Boots from Knight Armor and Weapons are no longer in the "Knight Armor & Weapons" creative tab (whose icon is now the long sword, not the helmet), the search tab or JEI (their grid recipes were already off). The tab keeps the long sword, spiked mace, hand scythe and throwing axe, still forged at the Smithing Anvil.
+- Any Knight armour already in a world turns into the iron piece for the same slot, keeping its wear, enchantments, name and trim: in your inventory, armour slots and ender chest (checked every 2 s), in any chest or other container you open, worn by mobs and villagers when they load or come within 48 blocks of a player, and dropped on the ground. The mod's items stay registered so old saves load. `armory/RetiredKnightArmour`, `client/jei/RetiredKnightArmourJei`, `mixin/RetiredKnightTabIconMixin`.
+- Built; not played.

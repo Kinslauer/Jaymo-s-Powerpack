@@ -462,8 +462,8 @@ def packMods = [
 	// StrawberryLib (MoriyaShiine; all rights reserved; shipped untouched with credit; Cardinal Components is inside it): the library Inferno needs. 26.3-r1.
 	[dep: "maven.modrinth:strawberrylib:OoMuF3O2", cf: [1218484, 8895101]],
 	// Knight Armor and Weapons (Pete MC Mods, all rights reserved; linked, never edited or bundled): the long sword,
-	// spiked mace, hand scythe and throwing axe. A datapack switches off its grid recipes (its armour stays off: Kingdoms'
-	// heraldry harness is the pack's knight armour) and the Smithing Anvil forges the weapons instead (KnightArmorForging). Client and server. 1.1.1 for 26.3. Needs Fabric API.
+	// spiked mace, hand scythe and throwing axe. A datapack switches off its grid recipes; its armour is out of the pack
+	// (armory/RetiredKnightArmour hides it and turns any piece left into iron; Kingdoms' heraldry harness is the pack's knight armour) and the Smithing Anvil forges the weapons instead (KnightArmorForging). Client and server. 1.1.1 for 26.3. Needs Fabric API.
 	[dep: "maven.modrinth:knight-armor-and-weapons:WqwhtagO", cf: [1563034, 9620320]],
 	// From Andy's Vanilla+ list (2026-11-19 pick list), shipped unchanged:
 	// Shared Advancements (MIT, server side): advancements count for your team or every player.
