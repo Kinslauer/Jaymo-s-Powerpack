@@ -134,7 +134,7 @@
   "skill.jaymoskingdoms.perk.rough_questions": "Rough Questions",
   "skill.jaymoskingdoms.perk.rough_questions.desc": "Turn left on a full execution hold to question a downed villager, goblin, orc or player instead of killing them (turn right to kill). Your own edge: your threats hurt, break them twice as often, and you get one more try.",
   "skill.jaymoskingdoms.perk.quiet_word": "Quiet Word",
-  "skill.jaymoskingdoms.perk.quiet_word.desc": "Turn left on a full execution hold to question a downed villager, goblin, orc or player instead of killing them (turn right to kill). Your own edge: sneak up behind someone who hasn't noticed you and hold the execution to question them in a choke hold, without downing them first. They never see who held them. You can also ask who else is about.",
+  "skill.jaymoskingdoms.perk.quiet_word.desc": "Turn left on a full execution hold to question a downed villager, goblin, orc or player instead of killing them (turn right to kill). Your own edge: sneak up behind someone who hasn't noticed you and hold the execution with empty hands to question them in a choke hold, without downing them first (with a weapon in hand the same hold is the stealth kill). They never see who held them. You can also ask who else is about.",
   "skill.jaymoskingdoms.perk.devotion": "Devotion",
   "skill.jaymoskingdoms.perk.devotion.desc": "Your patron's favour slips more slowly: a point less a day for each rank.",
   "skill.jaymoskingdoms.perk.ambusher": "Ambusher",
