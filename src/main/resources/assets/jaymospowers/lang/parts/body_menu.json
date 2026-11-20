@@ -7,7 +7,7 @@
 	"body_menu.jaymospowers.xeno_band": "Tear off the band",
 	"message.jaymospowers.body_menu.nothing": "There's nothing you can do for %s just now.",
 	"body_tip.jaymospowers.body_menu.title": "Someone down",
-	"body_tip.jaymospowers.body_menu": "Tap %1$s on someone downed, tied up or out cold to pick what to do: revive, untie, lift, go through their pockets. Hold %1$s to drag them, or hold %2$s and %1$s to revive them.",
+	"body_tip.jaymospowers.body_menu": "Tap %1$s on someone downed, tied up or out cold to pick what to do: revive, untie, lift, go through their pockets. Hold %1$s to drag them. To revive them yourself, kneel beside them (hold %2$s, scroll down, keep still) and hold %1$s, or pick Revive and you kneel on your own.",
 	"body_tip.jaymospowers.execute.title": "Finishing",
 	"body_tip.jaymospowers.execute": "Hold %1$s on someone downed to execute them. Every kind of weapon does it its own way, and bare hands snap the neck from their head.",
 	"body_tip.jaymospowers.lasso.title": "The lasso",

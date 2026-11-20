@@ -303,6 +303,8 @@ public final class Downed {
 		final boolean sneaking;
 		/** Chosen from the body menu ({@link #reviveChosen}): it goes on with no sneak held. */
 		boolean chosen;
+		/** Told already, this hold, to get down on a knee first. */
+		boolean toldKneel;
 
 		Revive(LivingEntity body, long start, boolean sneaking) {
 			this.body = body;
@@ -1728,6 +1730,15 @@ public final class Downed {
 				} else if (holding % 2 == 0) {
 					HudBar.hold(player, "carry_lift", holding / (float) Carry.LIFT_TICKS, HudBar.GREY,
 						Component.translatable("bar.jaymospowers.taking_hold", body.getDisplayName()), true);
+				}
+				continue;
+			}
+			// Andy (2026-11-20): "the revive needs to be on knees", and he picked kneeling down for it: a sneak + hold brings
+			// them round only from a kneel at their side (the low crouch, held still: Kneel). The menu's Revive kneels you itself
+			if (!r.chosen && !com.jaymospowers.core.Kneel.kneeling(player)) {
+				if (!r.toldKneel) {
+					r.toldKneel = true;
+					player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.kneel_first", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
 				}
 				continue;
 			}
