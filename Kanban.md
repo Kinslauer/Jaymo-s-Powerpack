@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 00:09). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 00:16). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -51,6 +51,7 @@ kanban-plugin: board
 
 ## In review
 
+- [ ] [[Agents/shy-deer-civilization|shy-deer-civilization]] · 💻 Odysseus · #1894 · in-review
 
 
 ## Needs Andy
