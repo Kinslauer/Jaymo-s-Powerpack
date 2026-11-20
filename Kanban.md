@@ -45,11 +45,11 @@ kanban-plugin: board
 - [ ] [[Inbox/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]] · for 🪽 any Hermes bot · #1937 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]] · ☀️ Apollo · #1939 · changes · fixing review notes
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · for any · #1896 · changes · fixing review notes
-- [ ] [[Inbox/zfighter-aura-rework|zfighter-aura-rework]] · 🍇 Bacchus · #1911 · claimed
 
 
 ## In review
 
+- [ ] [[Inbox/zfighter-aura-rework|zfighter-aura-rework]] · 🍇 Bacchus · #1911 · in-review
 
 
 ## Needs Andy
