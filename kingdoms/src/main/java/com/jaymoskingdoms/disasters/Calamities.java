@@ -96,9 +96,6 @@ public final class Calamities {
 	 * far it runs from where it began, how many burning spots the front keeps. */
 	static final int FIRE_LIFE_MIN = 2400, FIRE_LIFE_MAX = 4800, FIRE_SPREAD_EVERY = 8, FIRE_SPREAD = 5, FIRE_FRONT = 48;
 	static final double FIRE_REACH = 90.0;
-	/** (ff-sim) A wildfire handed to Peterwolf's fire is followed this many times its own life at most (its fire decides
-	 * when it's out; this only stops a lost one being followed for ever). */
-	static final int TAKEN_LIFE = 3;
 	/** Where dry lightning starts one: this far from the one it's for. */
 	static final double FIRE_MIN = 45.0, FIRE_MAX = 75.0;
 	/** Settlements this near a wildfire fight it all-out. */
@@ -752,8 +749,6 @@ public final class Calamities {
 		if (fire.front.isEmpty()) {
 			return false;
 		}
-		// (ff-sim) with Peterwolf's Forest Fire in the pack, its fire runs it from here
-		fire.incident = com.jaymoskingdoms.ForestFireCompat.wildfire(level, top, m);
 		FIRES.add(fire);
 		news(level, fire.x, fire.z, "disaster.jaymoskingdoms.wildfire");
 		com.jaymoskingdoms.DisasterRelief.struck(level, fire.x, fire.z, fire.reach, "wildfire", m);
@@ -777,7 +772,6 @@ public final class Calamities {
 		if (fire.front.isEmpty()) {
 			return false;
 		}
-		fire.incident = com.jaymoskingdoms.ForestFireCompat.wildfire(level, at, m);
 		FIRES.add(fire);
 		// a great disaster's own fire: no word in chat
 		com.jaymoskingdoms.DisasterRelief.struck(level, fire.x, fire.z, fire.reach, "wildfire", m, true);
@@ -793,8 +787,6 @@ public final class Calamities {
 		final double reach;
 		int age;
 		final ArrayDeque<BlockPos> front = new ArrayDeque<>();
-		/** (ff-sim) Peterwolf's fire incident running it (its fire spreads it; the front is where it burns), or 0: ours. */
-		int incident;
 
 		Wildfire(double x, double z, int life, int spread, double reach) {
 			this.x = x;
@@ -837,15 +829,10 @@ public final class Calamities {
 
 		/** One tick; false when it's burnt out. */
 		boolean tick(ServerLevel level, RandomSource random, long now, boolean damage) {
-			if (++age >= (incident > 0 ? life * TAKEN_LIFE : life) || front.isEmpty() || !damage) {
+			if (++age >= life || front.isEmpty() || !damage) {
 				return false;
 			}
-			if (incident > 0) {
-				// (ff-sim) its fire spreads itself (with our wind, faster uphill, embers ahead); the front follows it
-				if (now % 20 == 0 && !com.jaymoskingdoms.ForestFireCompat.front(level, incident, front, FIRE_FRONT)) {
-					return false;
-				}
-			} else if (now % FIRE_SPREAD_EVERY == 0) {
+			if (now % FIRE_SPREAD_EVERY == 0) {
 				List<BlockPos> from = new ArrayList<>(front);
 				double wx = Math.cos(Storms.windAngle), wz = Math.sin(Storms.windAngle);
 				for (int i = 0; i < spread; i++) {
