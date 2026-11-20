@@ -4,12 +4,11 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 00:34). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 00:36). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
-- [ ] [[Inbox/forest-fire-pack|forest-fire-pack]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/vanilla-plus-a-incendium-castle-start|vanilla-plus-a-incendium-castle-start]] · for 💻 Odysseus · open
@@ -47,6 +46,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · claimed
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · for any · #1787 · changes · fixing review notes
+- [ ] [[Inbox/forest-fire-pack|forest-fire-pack]] · ☁️ Cloud · claimed
 
 
 ## In review
