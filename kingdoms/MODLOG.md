@@ -16018,3 +16018,8 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - Andy: "right click hold should always be drag, tap can loot". Taking the weapons and arrows off a downed mob now happens on the tap (Powers' `Downed.TAPPED_LISTENERS`, once use is let go), so holding use to drag them no longer empties their hands first. The click is still swallowed so a downed villager's screen never opens.
 - Loading hint 169 rewritten for the new controls (hold drags, tap takes, sneak + hold revives, kneel for locks); hint 4 now says executions are sneak + hold attack.
 - Built; not played.
+
+## 0.11.44 (2026-11-20): Downed airships' dead crew are steam-town people, not plain villagers (#1944)
+
+- **A downed airship's dead are her steam-town crew** (Andy: "these villagers shouldnt exist, they need to be reskinned or swapped to MCA from the steampunk to match the lore book you find with that wreck"). The bodies lying round a sky wreck were made from a plain villager that never joined the world, so MCA never swapped it for one of its people, and they lay there as vanilla villagers with big noses and robes. Now each is one of MCA's people (their own face, hair and name), dressed for the steam town her log says she was out of: the first is her captain, in the town's aeronaut's clothes, the others her engineers who kept her boilers. Without MCA they stay plain villagers; without Kitchen it's still bones and a skull. `SkyWrecks`.
+- Built; not played.
