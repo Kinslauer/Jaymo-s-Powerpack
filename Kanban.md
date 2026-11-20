@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 15:39). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 16:02). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -57,12 +57,12 @@ kanban-plugin: board
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
 - [ ] [[Inbox/class-trees-plan|class-trees-plan]] · for 💻 Odysseus · blocked
 - [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · blocked
-- [ ] [[Inbox/zfighter-aura-rework|zfighter-aura-rework]] · 🍇 Bacchus · #1911 · sent
 
 
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/zfighter-aura-rework|zfighter-aura-rework]]
 - [x] [[Inbox/Done/forest-fire-pack|forest-fire-pack]]
 - [x] [[Inbox/Done/plan-ghosts-litematica-tools|plan-ghosts-litematica-tools]]
 - [x] [[Inbox/Done/harness-upkeep|harness-upkeep]]
@@ -70,7 +70,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/village-mods-3-guards-fight-mend|village-mods-3-guards-fight-mend]]
 - [x] [[Inbox/Done/village-mods-2-blast-mending|village-mods-2-blast-mending]]
 - [x] [[Inbox/Done/village-mods-1-illager-names|village-mods-1-illager-names]]
-- [x] [[Inbox/Done/npc-fights-4-rivals|npc-fights-4-rivals]]
 
 
 %% kanban:settings
