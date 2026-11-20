@@ -1,26 +1,24 @@
 ---
-status: running
+status: in-review
 task: zfighter-gaps-10-camera-hud
 branch: claude/zfighter-gaps-10-camera-hud
 with:
-pr:
+pr: 1937
 mods:
   - powers
 versions:
 started: 2026-11-20
 owns:
   - src/client/java/com/jaymospowers/client/FrontCamera.java
+  - src/client/java/com/jaymospowers/client/CameraPreset.java
   - src/client/java/com/jaymospowers/client/power/zfighter/ZFighterClientConfig.java
   - src/client/java/com/jaymospowers/client/power/zfighter/ZFighterHudLayout.java
   - src/client/java/com/jaymospowers/client/power/zfighter/ZFighterKiSenseClient.java
   - src/client/java/com/jaymospowers/client/power/zfighter/ZFighterFlightClient.java
-  - src/client/java/com/jaymospowers/client/power/zfighter/ZFighterSensesClient.java
-  - src/client/java/com/jaymospowers/client/power/zfighter/ZFighterHudEditor.java
-  - src/client/java/com/jaymospowers/client/power/zfighter/ZFighterPowerClient.java
   - src/main/java/com/jaymospowers/power/zfighter/ZFighterSensesNet.java
   - src/main/java/com/jaymospowers/power/zfighter/ZFighterKiSense.java
   - src/main/resources/assets/jaymospowers/lang/parts/camera.json
-  - src/main/resources/assets/jaymospowers/lang/parts/zfighter_hud.json
+  - src/main/resources/assets/jaymospowers/lang/parts/zfighter_senses.json
 ---
 # Z Fighter gaps 10: camera and HUD
 
@@ -40,3 +38,13 @@ owns:
 ## Done
 - Created worktree and agent note
 - Read relevant source files
+- Implemented front camera settings with smoothing
+- Implemented HUD options (hide numbers, always visible, menu scale, party markers)
+- Implemented ki sense damage tally (server and client)
+- Implemented travel/combat flight modes with lock
+- Added translations for all new settings
+- Created change note
+- Built successfully with `./gradlew build`
+- PR checks passed
+- Opened PR #1937
+- Set task to in-review
