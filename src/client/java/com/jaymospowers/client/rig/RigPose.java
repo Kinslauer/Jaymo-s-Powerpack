@@ -53,9 +53,11 @@ public final class RigPose {
 	 * {@code kind}: a {@link RigMoves} kind or 0; {@code t}: ticks into it; {@code hover}: 0-1; {@code flight}: 0-1;
 	 * {@code bank}: banking roll (-1 to 1); {@code recoil}: how hard this frame's shots rock the wearer (1: the standard frame); {@code still}: 1 standing, 0 at a
 	 * walk (a move's stance only takes the legs of someone standing); {@code palmSide}: the arm a palm blast comes from
-	 * (1 right, -1 left: a Rig prosthetic arm's, with no suit on), 0 for the main arm.
+	 * (1 right, -1 left: a Rig prosthetic arm's, with no suit on), 0 for the main arm; {@code kickSide}: the leg a Rig
+	 * prosthetic leg's kick swings (1 right, -1 left).
 	 */
-		public record Pose(int kind, float t, float hover, float flight, float bank, float time, float recoil, float still, int palmSide) {
+		public record Pose(int kind, float t, float hover, float flight, float bank, float time, float recoil, float still, int palmSide,
+			int kickSide) {
 		}
 
 	/** Moving at least this fast (blocks/tick) in full flight, Wind's cruise lean takes the body. */
@@ -201,8 +203,10 @@ public final class RigPose {
 			// a Rig prosthetic arm's shot (no suit on) comes from the arm it is fitted to (the right one first, as RigLimbs picks)
 			int palmSide = Rig.wearsAny(player) ? 0
 				: Prosthetics.hasRig(player, Dismember.RIGHT_ARM) ? 1 : Prosthetics.hasRig(player, Dismember.LEFT_ARM) ? -1 : 0;
+			// and a Rig leg's kick swings the leg it is fitted to (the right one first, as RigLimbs picks)
+			int kickSide = Prosthetics.hasRig(player, Dismember.RIGHT_LEG) || !Prosthetics.hasRig(player, Dismember.LEFT_LEG) ? 1 : -1;
 			state.setData(KEY, kind == 0 && hover <= 0.001F && flight <= 0.001F && Math.abs(bank) < 0.001F ? null
-				: new Pose(kind, t, hover, flight, bank, now, recoil, still, palmSide));
+				: new Pose(kind, t, hover, flight, bank, now, recoil, still, palmSide, kickSide));
 		}
 
 	/** The hover pose's amount, easing toward {@code on} as time passes. */
@@ -320,8 +324,9 @@ public final class RigPose {
 				float out = RigBeats.at(t, KICK_RAISE, 0.0F, LINEAR, KICK_RAISE + 2.0F, 1.0F, BACK, KICK_LOWER_AT, 1.0F, LINEAR, RigMoves.KICK_TICKS, 0.0F, SINE);
 				float amount = Math.max(chamber, Math.min(out, 1.0F));
 				crouch(h, 0.0F, -KICK_LEAN * amount);
-				set(h.rightLeg, Mth.lerp(chamber, 0.0F, KICK_CHAMBER) + KICK_LEG * out, 0.0F, 0.0F, amount);
-				set(h.leftLeg, 0.25F, 0.0F, 0.0F, amount);
+				ModelPart kicker = pose.kickSide() < 0 ? h.leftLeg : h.rightLeg, standing = pose.kickSide() < 0 ? h.rightLeg : h.leftLeg;
+				set(kicker, Mth.lerp(chamber, 0.0F, KICK_CHAMBER) + KICK_LEG * out, 0.0F, 0.0F, amount);
+				set(standing, 0.25F, 0.0F, 0.0F, amount);
 				set(h.rightArm, 0.5F, 0.0F, 0.5F, amount);
 				set(h.leftArm, 0.5F, 0.0F, -0.5F, amount);
 			}
