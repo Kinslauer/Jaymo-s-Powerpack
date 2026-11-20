@@ -626,6 +626,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.wild.SpiderSquash.register();
 		// medieval picks: one a spider killed (or who died among spiders underground) wakes webbed up in their lair
 		com.jaymoskingdoms.wild.SpiderLairs.register();
+		// spiders leave anyone webbed up, or kept in their lair, be till they're struck
+		com.jaymoskingdoms.wild.SpiderKeep.register();
 		// medieval picks: the old age's peoples (their ruined cities, sleeping rulers, temples and descendants)
 		com.jaymoskingdoms.oldage.OldAge.register();
 		// medieval picks: the mineshafts (Moog's Mineshafts Reimagined's, and the game's) worked, looted, shaken and haunted
