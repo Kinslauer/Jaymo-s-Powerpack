@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 01:25). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-19 20:29). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -13,7 +13,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## Stuck
 
-- [[Agents/hands-on-cooking-realtime|hands-on-cooking-realtime]]: stalled, last change 2026-11-20. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/hands-on-cooking-realtime|hands-on-cooking-realtime]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
@@ -23,6 +23,8 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1903 Start searches read the land from the seed first, like /locate (Kingdoms, 2026-11-20)
+- [ ] #1902 forest-fire pack - Peterwolf's Forest Fire & Firefighting in the pack (Powers, Kingdoms, 2026-11-20)
 - [ ] #1901 Lantern pole carried in hand: drawn as a pole with its lantern, and lights the way (Powers, Kingdoms, 2026-11-20)
 - [ ] #1900 no chat line when you slay a gifted villager (Powers, 2026-11-20)
 - [ ] #1899 Busy villagers say so instead of opening their talk (Kingdoms, 2026-11-20)
@@ -81,9 +83,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1834 NPC fights 3: trading blows, beam struggles, impact, soft blocks, power-ups (Powers, 2026-11-19)
 - [ ] #1833 no Animal Dictionary on first join; UI tips as you meet things (Powers, Kingdoms, 2026-11-19)
 - [ ] #1832 NPC fights 1b: feints and Patrol ranks (Powers, 2026-11-19)
-- [ ] #1831 The last hold gives a breather; gifted folk leave the downed alone (Powers, Kingdoms, 2026-11-19)
-- [ ] #1830 Sounds no longer stay quieter after the Rig's dip or Z Fighter deafness (Powers, Kingdoms, 2026-11-19)
-- …and 273 older ones.
+- …and 275 older ones.
 
 ## Health
 
