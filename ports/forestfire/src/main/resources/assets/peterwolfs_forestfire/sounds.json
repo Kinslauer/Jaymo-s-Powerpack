@@ -1,0 +1,26 @@
+{
+	"pump_start": {
+		"subtitle": "subtitles.peterwolfs_forestfire.pump_start",
+		"sounds": ["minecraft:block.piston.extend"]
+	},
+	"pump_idle": {
+		"subtitle": "subtitles.peterwolfs_forestfire.pump_idle",
+		"sounds": ["minecraft:block.furnace.fire_crackle"]
+	},
+	"pump_load": {
+		"subtitle": "subtitles.peterwolfs_forestfire.pump_load",
+		"sounds": ["minecraft:block.piston.contract"]
+	},
+	"pump_fail": {
+		"subtitle": "subtitles.peterwolfs_forestfire.pump_fail",
+		"sounds": ["minecraft:block.anvil.land"]
+	},
+	"pump_low_water": {
+		"subtitle": "subtitles.peterwolfs_forestfire.pump_low_water",
+		"sounds": ["minecraft:block.note_block.bass"]
+	},
+	"incident_alert": {
+		"subtitle": "subtitles.peterwolfs_forestfire.incident_alert",
+		"sounds": ["minecraft:block.note_block.pling"]
+	}
+}

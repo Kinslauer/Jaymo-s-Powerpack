@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "I I",
+    "I I"
+  ],
+  "key": {
+    "I": "minecraft:leather"
+  },
+  "result": {
+    "id": "peterwolfs_forestfire:firefighter_boots",
+    "count": 1
+  }
+}

@@ -223,6 +223,7 @@ public final class Firefighting {
 		// (the golem's own attack swing and its sound)
 		level.broadcastEntityEvent(golem, EntityEvent.START_ATTACKING);
 		level.setBlock(fire, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+		ForestFireCompat.douse(level, fire, 1);
 		level.playSound(null, fire, SoundEvents.FIRE_EXTINGUISH, SoundSource.NEUTRAL, 0.7F, 1.2F);
 		FIRES.remove(fire);
 	}
@@ -307,6 +308,9 @@ public final class Firefighting {
 			SPLASHES.add(new Splash(fire, now + SPLASH_TICKS));
 		} else {
 			level.setBlock(fire, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+			// Peterwolf's fire (when it's in the pack) goes out with it, or the hot ground lights it again; a thrown
+			// bottle does the same where it splashes (mixin/forestfire/SplashDousesForestFireMixin)
+			ForestFireCompat.douse(level, fire, 1);
 			level.playSound(null, fire, SoundEvents.FIRE_EXTINGUISH, SoundSource.NEUTRAL, 0.7F, 1.4F);
 			// what's burning under it, knocked out so it can't spread from there
 			BlockPos under = fire.below();

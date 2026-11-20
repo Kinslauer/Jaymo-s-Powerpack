@@ -165,6 +165,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.11: lost buildings put up again; the settlement's people answer fires
 		Rebuilds.register();
 		Firefighting.register();
+		// Peterwolf's Forest Fire (when it's in the pack): its fire runs our wildfires, its wind follows ours
+		ForestFireCompat.register();
 		// 0.7.31: disasters strike settlements: news, repairs, tempers, relief quests
 		DisasterRelief.register();
 		// 0.5.23: guards burn monsters' corpses (with Jaymo's Kitchen), or throw them into a fire pit or lava

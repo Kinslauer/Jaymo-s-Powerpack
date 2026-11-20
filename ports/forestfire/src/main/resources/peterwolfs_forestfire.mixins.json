@@ -1,0 +1,12 @@
+{
+	"required": true,
+	"package": "com.peterwolf.forestfire.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"FireBlockMixin",
+		"ServerLevelMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

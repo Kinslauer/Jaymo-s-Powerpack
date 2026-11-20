@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " II",
+    "IHI",
+    "  I"
+  ],
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "H": "peterwolfs_forestfire:hose_roll_small"
+  },
+  "result": {
+    "id": "peterwolfs_forestfire:fire_hose_nozzle",
+    "count": 1
+  }
+}

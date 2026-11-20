@@ -302,6 +302,11 @@ public final class KitchenCompat {
 			// a warmed or chilled dish keeps the body so for a while, and a dome of force keeps the weather off it
 			bodyHeat.getMethod("addWeather", java.util.function.ToDoubleFunction.class)
 				.invoke(null, (java.util.function.ToDoubleFunction<net.minecraft.server.level.ServerPlayer>) Cantrips::bodyHeat);
+			// (ff-heat) the heat off Peterwolf's forest fire, when it's in the pack (ForestFireCompat)
+			if (ForestFireCompat.LOADED) {
+				bodyHeat.getMethod("addWeather", java.util.function.ToDoubleFunction.class)
+					.invoke(null, (java.util.function.ToDoubleFunction<net.minecraft.server.level.ServerPlayer>) ForestFireCompat::bodyHeat);
+			}
 			bodyHeat.getMethod("addTemperate", java.util.function.Predicate.class)
 				.invoke(null, (java.util.function.Predicate<net.minecraft.world.entity.player.Player>) CampSpells::domed);
 		} catch (ReflectiveOperationException e) {

@@ -1,0 +1,54 @@
+{
+	"schemaVersion": 1,
+	"id": "peterwolfs_forestfire",
+	"version": "${version}",
+	"name": "Peterwolf's Forest Fire & Firefighting",
+	"description": "Cooperative wildfire and firefighting simulator with realistic fire behaviour, pumps, hoses, command posts and multiplayer incident management.
+
+Dedicated to all firefighters who risk their lives protecting forests, wildlife and communities.",
+	"authors": [
+		"Peterwolf"
+	],
+	"contact": {
+		"homepage": "https://github.com/peterwolf-pl/Peterwolf-s-Forest-Fire-Firefighting",
+		"sources": "https://github.com/peterwolf-pl/Peterwolf-s-Forest-Fire-Firefighting",
+		"issues": "https://github.com/peterwolf-pl/Peterwolf-s-Forest-Fire-Firefighting/issues"
+	},
+	"license": "MIT",
+	"icon": "assets/peterwolfs_forestfire/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.peterwolf.forestfire.ForestFireMod"
+		],
+		"client": [
+			"com.peterwolf.forestfire.client.ForestFireClient"
+		]
+	},
+	"mixins": [
+		"peterwolfs_forestfire.mixins.json",
+		{
+			"config": "peterwolfs_forestfire.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"modmenu": "*",
+		"peterwolfs_realistic_tree_felling": "*",
+		"peterwolfs_planes": "*"
+	},
+	"custom": {
+		"modmenu": {
+			"links": {
+				"modmenu.discord": ""
+			}
+		},
+		"peterwolfs_forestfire:planes_compat": "Soft dependency: install peterwolfs_planes alongside this mod to unlock the Firefighting Water Bomber. Neither mod is required by the other."
+	}
+}

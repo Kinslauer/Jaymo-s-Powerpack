@@ -858,6 +858,22 @@ tasks.register("buildDynamicWaters", GradleBuild) {
 }
 def dwLibs = file(file("E:/").exists() ? "E:/dynamicwaters-port-build/libs" : "ports/dynamicwaters/build/libs")
 def dwJar = fileTree(dwLibs) { include "dynamicwaters-${dwProps.mod_version}.jar" }.builtBy("buildDynamicWaters")
+// Peterwolf's Forest Fire & Firefighting (MIT, by Peterwolf; CurseForge 1658918, github.com/peterwolf-pl/Peterwolf-s-Forest-Fire-Firefighting;
+// credited on the pack page): forest fires that burn like real ones (embers, crown fires, wind, slope, trees burning
+// through and falling), and the kit to fight them (pumps, hoses, tanks, nozzles, turnout gear, a command post). Its only
+// file, 1.1.11, is built for 26.2 and doesn't start on 26.3 (block codecs, item drops and a few more changed), and its
+// public source is older than that file. So ports/forestfire is the 1.1.11 jar's code ported to 26.3 (changes listed in
+// ports/forestfire/PORT.md, licence and credit kept), built by the pack tasks and shipped as an override like TRMT.
+// Jaymo's Kingdoms ties it in (ForestFireCompat); Powers sets its options (core/ForestFirePreset). TODO: once Peterwolf
+// has a 26.3 file on CurseForge, move it into packMods and delete ports/forestfire.
+def ffProps = new Properties()
+file("ports/forestfire/gradle.properties").withInputStream { ffProps.load(it) }
+tasks.register("buildForestFire", GradleBuild) {
+	dir = file("ports/forestfire")
+	tasks = ["build"]
+}
+def ffLibs = file(file("E:/").exists() ? "E:/forestfire-port-build/libs" : "ports/forestfire/build/libs")
+def forestFireJar = fileTree(ffLibs) { include "peterwolfs-forest-fire-${ffProps.mod_version}.jar" }.builtBy("buildForestFire")
 // on CurseForge but not on a maven we use: the jar sits in libs/ (git-ignored, copied from the Jaymo's Kitchen
 // profile) and the CurseForge import downloads it by id. Not loaded in the dev game (too heavy for quick tests).
 def localPackMods = [
@@ -1026,6 +1042,7 @@ tasks.register("modpackMods", Sync) {
 	from kingdomsJar
 	from trmtJar
 	from dwJar
+	from forestFireJar
 	from localPackJars
 	into new File(packDir, "mods")
 }
@@ -1045,7 +1062,7 @@ dependencies {
 	packCheckLoader "net.fabricmc:fabric-loader:${project.loader_version}"
 }
 tasks.register("checkPackMods") {
-	def jars = configurations.packJars.plus(configurations.serverOnlyJars).plus(localPackJars).plus(mcaJar)
+	def jars = configurations.packJars.plus(configurations.serverOnlyJars).plus(localPackJars).plus(mcaJar).plus(forestFireJar)
 	def loaderJars = configurations.packCheckLoader
 	def own = ["src", "kingdoms/src", "kitchen/src", "ports/trmt/src", "ports/dynamicwaters/src"]
 		.collect { file("$it/main/resources/fabric.mod.json") }.findAll { it.exists() }
@@ -1152,13 +1169,14 @@ tasks.register("curseforgePack", Zip) {
 		from kingdomsJar
 		from trmtJar
 		from dwJar
+		from forestFireJar
 	}
 }
 // gradlew packwizList: every file of the testers' packwiz pack (docs/Tester-Pack.md), written to
 // build/packwiz-list.json for tools/packwiz_pack.py, which .github/workflows/tester-pack.yml runs after each release.
 // Each mod's side comes from its fabric.mod.json "environment", so client-only mods stay off a packwiz server install.
 tasks.register("packwizList") {
-	dependsOn "jar", "buildKitchen", "buildKingdoms", "buildTrmt", "buildDynamicWaters"
+	dependsOn "jar", "buildKitchen", "buildKingdoms", "buildTrmt", "buildDynamicWaters", "buildForestFire"
 	def out = layout.buildDirectory.file("packwiz-list.json")
 	outputs.file out
 	outputs.upToDateWhen { false }
@@ -1183,7 +1201,7 @@ tasks.register("packwizList") {
 		fetched(configurations.serverOnlyJars, "server")
 		// ours and our ports: uploaded to the repo's tester-pack release
 		([tasks.named("jar").get().archiveFile.get().asFile] + kitchenShipJar.files + mcaJar.files + kingdomsJar.files +
-			trmtJar.files + dwJar.files).each { mods << [file: it.absolutePath, from: "release", side: side(it)] }
+			trmtJar.files + dwJar.files + forestFireJar.files).each { mods << [file: it.absolutePath, from: "release", side: side(it)] }
 		// on CurseForge only: downloaded through CurseForge by its ids
 		localPackMods.each { mods << [file: file(it.file).absolutePath, from: "curseforge", cf: it.cf, side: side(file(it.file))] }
 		out.get().asFile.text = JsonOutput.prettyPrint(JsonOutput.toJson([
@@ -1230,6 +1248,7 @@ tasks.register("serverMods", Sync) {
 	from kingdomsJar
 	from trmtJar
 	from dwJar
+	from forestFireJar
 	from localPackJars
 	into new File(serverDir, "mods")
 	exclude notOnServer
@@ -1239,7 +1258,7 @@ tasks.register("serverMods", Sync) {
 // running (its jars are locked).
 def profileMods = new File(System.getProperty("user.home"), "curseforge/minecraft/Instances/Jaymo's Powers/mods")
 tasks.register("profileMods") {
-	dependsOn "jar", "buildKitchen", "buildKingdoms", "buildTrmt", "buildDynamicWaters"
+	dependsOn "jar", "buildKitchen", "buildKingdoms", "buildTrmt", "buildDynamicWaters", "buildForestFire"
 	onlyIf { profileMods.isDirectory() }
 	doLast {
 		def wanted = [[jar: tasks.named("jar").get().archiveFile.get().asFile, prefix: "jaymos-powers-"]]
@@ -1248,6 +1267,7 @@ tasks.register("profileMods") {
 		kingdomsJar.files.each { wanted << [jar: it, prefix: "jaymos-kingdoms-"] }
 		trmtJar.files.each { wanted << [jar: it, prefix: "trmt-"] }
 		dwJar.files.each { wanted << [jar: it, prefix: "dynamicwaters-"] }
+		forestFireJar.files.each { wanted << [jar: it, prefix: "peterwolfs-forest-fire-"] }
 		localPackMods.each { wanted << [jar: file(it.file), prefix: it.prefix] }
 		def old = profileMods.listFiles().findAll { f -> f.name.endsWith(".jar") && wanted.any { w -> f.name.startsWith(w.prefix) && f.name != w.jar.name } }
 		if (old.any { !it.renameTo(new File(it.path + ".old")) }) {

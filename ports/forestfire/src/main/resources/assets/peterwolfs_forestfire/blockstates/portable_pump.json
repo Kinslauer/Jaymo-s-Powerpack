@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "peterwolfs_forestfire:block/portable_pump",
+      "y": 0
+    },
+    "facing=east": {
+      "model": "peterwolfs_forestfire:block/portable_pump",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "peterwolfs_forestfire:block/portable_pump",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "peterwolfs_forestfire:block/portable_pump",
+      "y": 270
+    }
+  }
+}

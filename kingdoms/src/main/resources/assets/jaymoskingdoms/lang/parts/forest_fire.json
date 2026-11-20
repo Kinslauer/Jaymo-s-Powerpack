@@ -1,0 +1,23 @@
+{
+  "hud.jaymoskingdoms.forest_fire.incident": "%s · %s",
+  "hud.jaymoskingdoms.forest_fire.burning": "Burning %s · held %s%%",
+  "hud.jaymoskingdoms.forest_fire.wind": "Wind from the %s, %s%%",
+  "hud.jaymoskingdoms.forest_fire.nozzle": "Nozzle: %s, %s",
+  "hud.jaymoskingdoms.forest_fire.open": "open",
+  "hud.jaymoskingdoms.forest_fire.shut": "shut",
+  "hud.jaymoskingdoms.forest_fire.pressure": "Pressure %s%%",
+  "hud.jaymoskingdoms.forest_fire.hose": "Hose %s, %s blocks left",
+  "hud.jaymoskingdoms.forest_fire.status.unreported": "unseen",
+  "hud.jaymoskingdoms.forest_fire.status.reported": "seen",
+  "hud.jaymoskingdoms.forest_fire.status.responding": "crews on the way",
+  "hud.jaymoskingdoms.forest_fire.status.active": "burning",
+  "hud.jaymoskingdoms.forest_fire.status.contained": "held",
+  "hud.jaymoskingdoms.forest_fire.status.controlled": "under control",
+  "hud.jaymoskingdoms.forest_fire.status.overhaul": "smouldering",
+  "hud.jaymoskingdoms.forest_fire.status.closed": "out",
+  "hud.jaymoskingdoms.forest_fire.status.escaped": "out of hand",
+  "hud.jaymoskingdoms.forest_fire.tension.slack": "slack",
+  "hud.jaymoskingdoms.forest_fire.tension.normal": "easy",
+  "hud.jaymoskingdoms.forest_fire.tension.tight": "tight",
+  "hud.jaymoskingdoms.forest_fire.tension.maximum": "at full stretch"
+}

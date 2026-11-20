@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "LLL",
+    "LCL",
+    "LLL"
+  ],
+  "key": {
+    "L": "minecraft:leather",
+    "C": "minecraft:copper_ingot"
+  },
+  "result": {
+    "id": "peterwolfs_forestfire:hose_roll_large",
+    "count": 1
+  }
+}

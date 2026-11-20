@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " L ",
+    "LBL",
+    " L "
+  ],
+  "key": {
+    "L": "minecraft:leather",
+    "B": "minecraft:bucket"
+  },
+  "result": {
+    "id": "peterwolfs_forestfire:backpack_sprayer",
+    "count": 1
+  }
+}
