@@ -643,8 +643,11 @@ public final class StoryGround {
 		// (land a start's earlier try had made in the background looked at first: LifeStory.Wanted)
 		for (BlockPos column : LifeStory.columns(from, MONOLITH_MIN, MONOLITH_MAX, random, MONOLITH_TRIES)) {
 			// spots in land not yet made are made only while the budget lasts (24 new chunks held the server past its
-			// watchdog), and never while a start is tried: that has them made in the background and tries again
-			if (!LifeStory.reach(level, column.getX(), column.getZ(), made)) {
+			// watchdog), and never while a start is tried: that has them made in the background and tries again.
+			// (2026-11-20) Nor where the seed says it's water: no stone stands in the sea
+			if (level.getChunkSource().getChunkNow(column.getX() >> 4, column.getZ() >> 4) == null
+				&& !LifeStory.foreseenDry(level, column.getX(), column.getZ())
+				|| !LifeStory.reach(level, column.getX(), column.getZ(), made)) {
 				continue;
 			}
 			BlockPos foot = Monoliths.fit(level, column);
@@ -904,6 +907,12 @@ public final class StoryGround {
 		int[] made = {SHORE_NEW_CHUNKS};
 		for (int d = 0; d < Math.min(len, SHORE_WALK); d += SHORE_STEP) {
 			BlockPos column = water.offset(Mth.floor(dx / len * d), 0, Mth.floor(dz / len * d));
+			if (level.getChunkSource().getChunkNow(column.getX() >> 4, column.getZ() >> 4) == null
+				&& !LifeStory.foreseenDry(level, column.getX(), column.getZ())) {
+				// (2026-11-20) still at sea by the seed (as /locate reads it): walked on without making the chunk, so only the
+				// shore's own land is made (before, every chunk of open water on the way was, on the server thread)
+				continue;
+			}
 			if (!LifeStory.reach(level, column.getX(), column.getZ(), made)) {
 				return null;
 			}
