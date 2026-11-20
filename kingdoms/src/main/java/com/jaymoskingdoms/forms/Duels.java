@@ -202,7 +202,7 @@ public final class Duels {
 	}
 
 	/** Whether {@code id} (a student, or a player) is in a duel just now. */
-	static boolean busy(UUID id) {
+	public static boolean busy(UUID id) {
 		for (Duel d : DUELS.values()) {
 			if (d.foe.equals(id) || d.player.equals(id)) {
 				return true;
