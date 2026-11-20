@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 05:36). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 06:24). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -25,6 +25,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1931 cleaning up blood - scrub stains off floors and walls, poured water washes them (Powers, Kingdoms, 2026-11-20)
 - [ ] #1927 A leg or bagged corpse of a modded creature no longer crashes the game (Kitchen, 2026-11-20)
 - [ ] #1926 Fire is vanilla fire again (Powers, Kingdoms, 2026-11-20)
 - [ ] #1924 Rig arm blast from the fitted arm (Powers, 2026-11-20)
@@ -84,8 +85,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1860 Goblins take the downed alive too (Kingdoms, 2026-11-19)
 - [ ] #1859 Slower NPCs, and barbarians take the downed alive (Kingdoms, 2026-11-19)
 - [ ] #1858 campfire life - camps sit, talk, sing and share a spit roast round their fire (Kingdoms, Kitchen, 2026-11-19)
-- [ ] #1857 The minimap stops showing the Aether again (Powers, 2026-11-19)
-- …and 296 older ones.
+- …and 297 older ones.
 
 ## Health
 
