@@ -16029,3 +16029,17 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - **Carriage and cab drivers**: a coachman or cab driver who was knocked down or had gone to bed was put straight back in the saddle (the "out of the saddle, get back on" check), so he lay flat across his horse. Now a driver who is down, asleep or being carried stays where he is until he is up again, then gets back on. One found down in the saddle is taken off the horse, and one found asleep there is woken. (`Drivers.canMount`, `Drivers.step`, `Cabs`, `Carriages`)
 - The same check for caravan riders getting back on (`Caravans.remount`) and for guards being given a spare horse (`Cavalry`): no downed guard is put on a horse.
 - Built; not played.
+
+## 0.11.46 (2026-11-20): no floating trees: unsupported wood falls (#1942)
+
+- **Trees don't float any more** (Andy's burnt birch wood clip): whenever something holding wood up goes, by any cause
+  (a log burned, blown, broken or chopped out, the ground dug from under a trunk), the logs beside it are looked at once
+  the tick is over. A piece of joined logs that touches nothing solid but other wood and leaves comes down: with leaves
+  left on it, or more than 3 logs, it drops as a falling tree (tumbles to its heavier side, crashes, strikes what it
+  lands on, then lies as a fallen tree to chop up); 1 to 3 bare logs fall like sand and land as logs, hurting a little.
+- **Builds stay up**: a piece with any player-placed log or any stripped log is never brought down, and logs in a
+  building touch its planks, stone or earth, which hold them. Leaves, vines, fire, cocoa pods and bee nests hold nothing up.
+  Pieces over 200 logs, or running into unloaded land, are left alone.
+- Logs already floating in old worlds only come down once something next to them changes.
+- `LooseWood` (new), `LooseWoodMixin` (ServerLevel block changes), `FallingTree.drop`; `Trees.leavesOf` now package-wide.
+- Built; not played.
