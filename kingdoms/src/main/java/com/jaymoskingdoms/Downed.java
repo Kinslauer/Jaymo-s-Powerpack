@@ -554,7 +554,7 @@ public final class Downed {
 		}
 		if (took) {
 			body.level().playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.ARMOR_EQUIP_CHAIN.value(), SoundSource.PLAYERS, 0.8F, 1.1F);
-			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.downed.disarmed", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.downed.disarmed", Introductions.called(player, body)).withStyle(ChatFormatting.GRAY));
 		} else {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.downed.nothing").withStyle(ChatFormatting.GRAY));
 		}

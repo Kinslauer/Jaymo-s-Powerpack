@@ -257,8 +257,8 @@ public final class BlossomTraders {
 		Component close = Component.translatable("talk.jaymoskingdoms.work.close");
 		boolean canPay = Money.canPay(player, Money.worth(PASSAGE_COST));
 		// off Mohknee itself nobody needs the chart
-		ServerPlayNetworking.send(player, home ? new TalkNet.Ask(v.getId(), v.getDisplayName(), words, List.of(pay, close), List.of(canPay, true))
-			: new TalkNet.Ask(v.getId(), v.getDisplayName(), words,
+		ServerPlayNetworking.send(player, home ? new TalkNet.Ask(v.getId(), Introductions.called(player, v), words, List.of(pay, close), List.of(canPay, true))
+			: new TalkNet.Ask(v.getId(), Introductions.called(player, v), words,
 				List.of(pay, Component.translatable("talk.jaymoskingdoms.blossom_trader.option.chart", CHART_COST), close),
 				List.of(canPay, Money.canPay(player, Money.worth(CHART_COST)), true)));
 	}

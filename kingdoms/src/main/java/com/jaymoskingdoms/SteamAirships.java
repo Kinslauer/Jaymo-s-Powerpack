@@ -601,7 +601,7 @@ public final class SteamAirships implements Ship.Skyfaring {
 		options.add(Component.translatable("talk.jaymoskingdoms.work.close"));
 		enabled.add(true);
 		ASKED.put(player.getUUID(), new Asked(v.getId(), m.berth().helm(), m.owner(), dests));
-		ServerPlayNetworking.send(player, new TalkNet.Ask(v.getId(), v.getDisplayName(), words, options, enabled));
+		ServerPlayNetworking.send(player, new TalkNet.Ask(v.getId(), Introductions.called(player, v), words, options, enabled));
 	}
 
 	/** An answer to a steam captain's fares; false when it wasn't one. */

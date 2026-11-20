@@ -824,7 +824,7 @@ public final class Skills {
 		}
 		int price = respecPrice(player);
 		RESPEC_OFFERS.put(player.getUUID(), wizard.getId());
-		ServerPlayNetworking.send(player, new TalkNet.Ask(wizard.getId(), wizard.getDisplayName(),
+		ServerPlayNetworking.send(player, new TalkNet.Ask(wizard.getId(), Introductions.called(player, wizard),
 			Component.translatable("talk.jaymoskingdoms.wizard.respec", Money.text(player, Money.worth(price))),
 			List.of(Component.translatable("talk.jaymoskingdoms.wizard.respec.yes", Money.text(player, Money.worth(price))), Component.translatable("talk.jaymoskingdoms.wizard.respec.no")),
 			List.of(Money.canPay(player, Money.worth(price)), true)));

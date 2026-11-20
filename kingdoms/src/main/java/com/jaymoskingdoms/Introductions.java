@@ -252,6 +252,30 @@ public final class Introductions {
 		return Component.translatable("identity.jaymoskingdoms.stranger");
 	}
 
+	/**
+	 * (2026-11-20) Andy: "every humanoid that speaks should have to be introduced except for the exceptions we made before
+	 * like the judge". What {@code viewer} hears {@code e} called wherever they're named to them: the head of a talk card,
+	 * a line in chat, a seat at a table. Their name once {@code viewer} {@linkplain #knows knows} it, else what they are
+	 * ({@link #what}: "Villager", "Orc"; a player is a {@linkplain #stranger stranger}). The exceptions stay named as
+	 * before: Powers' Z Fighter characters at their post ({@link ZFighterFolk#PART}: the Judge, the Keeper, the masters...),
+	 * who go by their part and skip the stranger's page, and anyone whose name isn't kept at all ({@link #named}).
+	 */
+	public static Component called(@Nullable Player viewer, Entity e) {
+		if (knows(viewer, e) || e.getAttached(ZFighterFolk.PART) != null) {
+			return e.getDisplayName();
+		}
+		return e instanceof Player ? stranger() : what(e);
+	}
+
+	/** {@code viewer} knows the name of whoever has the id {@code id} (when they may not be about: a seat at a table). */
+	public static boolean knowsId(Player viewer, UUID id) {
+		if (viewer.getUUID().equals(id)) {
+			return true;
+		}
+		Set<UUID> known = viewer.getAttached(KNOWN);
+		return known != null && known.contains(id);
+	}
+
 	/** {@code player} now knows {@code e}'s name. True if they didn't before. */
 	static boolean learn(ServerPlayer player, Entity e) {
 		boolean fresh = learn(player, e.getUUID());

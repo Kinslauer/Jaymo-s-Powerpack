@@ -396,6 +396,6 @@ public final class ShipTalk {
 			return;
 		}
 		MENUS.put(player.getUUID(), new Menu(speaker.getId(), List.copyOf(actions)));
-		ServerPlayNetworking.send(player, new TalkNet.Ask(speaker.getId(), speaker.getDisplayName(), words, options, enabled));
+		ServerPlayNetworking.send(player, new TalkNet.Ask(speaker.getId(), Introductions.called(player, speaker), words, options, enabled));
 	}
 }
