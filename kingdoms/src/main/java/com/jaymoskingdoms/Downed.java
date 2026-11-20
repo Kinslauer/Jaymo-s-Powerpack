@@ -154,20 +154,24 @@ public final class Downed {
 			return true;
 		});
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
-			// (sneak + use on the downed is Powers' lift; a plain hold is its revive, which only watches, so the disarm still comes first)
+			// (sneak + use held on the downed is Powers' revive, a plain hold its drag; both only watch the click)
 			if (!(entity instanceof Mob body) || !isDowned(body) || player.isSpectator() || player.isShiftKeyDown() || !disarmable(body)) {
 				return InteractionResult.PASS;
 			}
-			if (!world.isClientSide() && !ours(body) && !armed(body)) {
-				// (anyone else with nothing left to take: the tap is free for whatever else would take it, a blade stuck in them)
+			if (!world.isClientSide() && !ours(body) && !armed(body) || PowersCompat.bodyMenu()) {
+				// (with Powers, its catch-all swallows the click once its body menu has seen it)
 				return InteractionResult.PASS;
 			}
-			// (taken here, so a downed villager's screen doesn't open, and neither hand gets at their pockets)
-			if (!world.isClientSide() && hand == InteractionHand.MAIN_HAND) {
-				disarm(player, body);
-			}
+			// (swallowed here, so a downed villager's screen doesn't open, and neither hand gets at their pockets)
 			return InteractionResult.SUCCESS;
 		});
+		// Andy (2026-11-20): "there needs to be a context menu on right click for lifting, pickpocketing, reviving, untying".
+		// The weapons come out from Powers' body menu (a tap of use on them), so a hold still drags the body
+		PowersCompat.bodyOption("disarm", 60, (player, entity) -> entity instanceof Mob body && isDowned(body) && disarmable(body)
+			&& (ours(body) || armed(body)), (player, entity) -> {
+				disarm(player, (Mob) entity);
+				return false;
+			});
 		ServerTickEvents.END_SERVER_TICK.register(Downed::tick);
 	}
 

@@ -193,11 +193,26 @@ public final class Finishers {
 	static final String ROUGH_PERK = "rough_questions", QUIET_PERK = "quiet_word", WILL_PERK = "interrogation";
 	/** (0.18.97) Quiet Word's choke hold: how far round behind them you must be (degrees off the way they face). */
 	static final float BEHIND_DEGREES = 110.0F;
+	/**
+	 * The stealth kill, everyone's ({@link #stealthKind}): sneak + hold attack from behind ({@link #BEHIND_DEGREES}) on one
+	 * on their feet who hasn't noticed you, a weapon in hand, and they die where they stand, quietly. How long the hold is
+	 * at each rank of Kingdoms' Quick Work (ticks: none, one, two), and the biggest one it takes at each rank of Bigger Game:
+	 * most health, tallest and widest (blocks). Bare hands do it only with Silent Snap; Into the Dark is Kingdoms' own.
+	 */
+	public static final int[] STEALTH_HOLD = {HOLD_TICKS, 20, 10};
+	static final float[] STEALTH_HEALTH = {40.0F, 80.0F, 150.0F};
+	static final float[] STEALTH_HEIGHT = {2.5F, 3.2F, 4.2F}, STEALTH_WIDTH = {1.0F, 1.6F, 2.2F};
+	/** The Kingdoms (Stealth, Rogue's Arts) perks that better it. */
+	static final String QUICK_WORK = "quick_work", BIGGER_GAME = "bigger_game", SILENT_SNAP = "silent_snap";
+	/** Put on the player for each stealth kill, for Kingdoms (its Stealth experience and Into the Dark); taken off as it's read. */
+	public static final String STEALTH_KILL_TAG = "jaymospowers_stealth_kill";
 
 	/** How a blow lands: what it sounds and looks like. */
 	public enum Strike { CUT, STAB, CRUSH, PIERCE, SHOT, BOLT, BLAST, SNAP, KI, POWER,
 		/** (0.18.97) No blow at all: they're held where they lie and questioned ({@link Kind#questioning}). */
-		HOLD }
+		HOLD,
+		/** A stealth kill's: taken from behind on their feet, quietly ({@link Kind#stealth}). */
+		SILENT }
 
 	/**
 	 * One finisher per kind of weapon: how long it plays (ticks), the beats its blows land on (the last is the kill), how
@@ -326,7 +341,14 @@ public final class Finishers {
 		/** Cocoon (Web Slinger, no suit showing): both hands out, wound in silk, and the lines hauled apart. */
 		P_WEB(40, new int[] {14, 30}, Strike.POWER),
 		/** Undertow (Darktide): both hands out, the pool open under them, and one stroke of the tide across them. */
-		P_DARKTIDE(40, new int[] {14, 30}, Strike.POWER);
+		P_DARKTIDE(40, new int[] {14, 30}, Strike.POWER),
+		// ---- stealth kills ({@link Finishers#stealthKind}): one on their feet who never saw you, taken from behind -----------
+		/** Silent Blade: the off hand clamped over the mouth from behind, the blade driven in under the skull, and them let down. */
+		S_BLADE(28, new int[] {14}, Strike.SILENT),
+		/** Lights Out: a hand on the shoulder, the weapon raised, one blow to the back of the head, and them let down. */
+		S_BLUNT(26, new int[] {13}, Strike.SILENT),
+		/** (Silent Snap) Bare hands: both on the head from behind, one sharp twist, and them let down. */
+		S_SNAP(26, new int[] {14}, Strike.SILENT);
 
 		/** (0.15.148) The tick the whip's crack lands round the neck. */
 		public static final int WHIP_CRACK = 8;
@@ -356,6 +378,11 @@ public final class Finishers {
 		/** (0.18.97) One of the questioning holds: nobody dies of it. */
 		public boolean questioning() {
 			return this.strike == Strike.HOLD;
+		}
+
+		/** One of the stealth kills: taken standing, from behind. */
+		public boolean stealth() {
+			return this.strike == Strike.SILENT;
 		}
 
 		public static Kind of(int ordinal) {
@@ -490,17 +517,41 @@ public final class Finishers {
 
 	private static final boolean KINGDOMS = net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymoskingdoms");
 	private static final java.lang.reflect.@Nullable Method KINGDOMS_RANK;
+	/** Kingdoms' {@code Commandments.forbids(Player, String)}: a patron's law that forbids an act (synced, so both sides). */
+	private static final java.lang.reflect.@Nullable Method KINGDOMS_FORBIDS;
 
 	static {
-		java.lang.reflect.Method rank = null;
+		java.lang.reflect.Method rank = null, forbids = null;
 		if (KINGDOMS) {
 			try {
 				rank = Class.forName("com.jaymoskingdoms.Skills").getMethod("rank", Player.class, String.class);
 			} catch (ReflectiveOperationException | LinkageError e) {
 				rank = null;
 			}
+			try {
+				forbids = Class.forName("com.jaymoskingdoms.Commandments").getMethod("forbids", Player.class, String.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				forbids = null;
+			}
 		}
 		KINGDOMS_RANK = rank;
+		KINGDOMS_FORBIDS = forbids;
+	}
+
+	/**
+	 * Whether {@code player} is sworn to a patron whose law forbids striking from behind (the Crowned Sun's: a blow is dealt
+	 * face to face). They never learned the stealth kill, as they never learned the backstab: nothing new rewards what their
+	 * law forbids, and nothing new breaks it for them by accident.
+	 */
+	static boolean swornFaceToFace(Player player) {
+		if (KINGDOMS_FORBIDS == null) {
+			return false;
+		}
+		try {
+			return (boolean) KINGDOMS_FORBIDS.invoke(null, player, "sneak_attack");
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
 	}
 
 	/** A finisher playing: who, on whom. */
@@ -536,6 +587,8 @@ public final class Finishers {
 	private static final Map<UUID, Playing> PLAYING = new HashMap<>();
 	/** The bodies being finished, by entity UUID, and by whom. */
 	private static final Map<UUID, UUID> TARGETED = new HashMap<>();
+	/** The bodies a stealth kill made silent (no cry, no hurt sound), to be given their voices back if they live through it. */
+	private static final java.util.Set<UUID> SILENCED = new java.util.HashSet<>();
 
 	private Finishers() {
 	}
@@ -598,6 +651,7 @@ public final class Finishers {
 			HOLDING.clear();
 			PLAYING.clear();
 			TARGETED.clear();
+			SILENCED.clear();
 		});
 	}
 
@@ -983,8 +1037,15 @@ public final class Finishers {
 				hold.rushed = true;
 			}
 			// (0.18.97) Quiet Word: one on their feet who hasn't noticed you, taken from behind
-			boolean choke = !finishable(player, hold.body) && chokeable(player, hold.body) && unaware(player, hold.body);
-			if (!player.isShiftKeyDown() || !player.isWithinEntityInteractionRange(hold.body, SLACK) || !finishable(player, hold.body) && !choke) {
+			// (Andy, 2026-11-20: "Holding left click should execute period, ive found it isnt intuitive enough right now for new
+			// players") on someone down, a hold of attack is the execution with no sneak; taking one on their feet from behind
+			// (and the hit streak's quick kill, above) still wants sneak, so a held swing in a fight stays a swing
+			boolean choke = player.isShiftKeyDown() && !finishable(player, hold.body) && chokeable(player, hold.body) && unaware(player, hold.body);
+			// the stealth kill, everyone's: one on their feet who never saw you, taken from behind with a weapon in hand
+			// (Quiet Word's choke, above, is the empty hand's, so the two never ask for the same hold)
+			boolean stealth = !choke && player.isShiftKeyDown() && !finishable(player, hold.body) && stealthKillable(player, hold.body)
+				&& unaware(player, hold.body);
+			if (!player.isWithinEntityInteractionRange(hold.body, SLACK) || !finishable(player, hold.body) && !choke && !stealth) {
 				// (still on their feet, or not yet in reach: it counts from when they're down in front of you)
 				if (hold.rushed) {
 					// ((0.19.78) a double click that came to nothing: no hold left to count)
@@ -1000,6 +1061,24 @@ public final class Finishers {
 					begin(level, player, hold.body, Kind.Q_CHOKE);
 				} else {
 					ServerPlayNetworking.send(player, new Charge(hold.body.getId(), (int) (now - hold.start), true));
+				}
+				continue;
+			}
+			if (stealth) {
+				// (Quick Work shortens it: the bars fill as fast, so they're drawn against the full hold)
+				int need = stealthHold(player);
+				long held = now - hold.start;
+				Kind kind = stealthKind(player);
+				if (held >= need && kind != null) {
+					it.remove();
+					begin(level, player, hold.body, kind);
+					Playing playing = PLAYING.get(player.getUUID());
+					if (hold.rushed && playing != null && playing.body == hold.body) {
+						// (a double click's: it plays only while that click is held, as every one does)
+						playing.held = true;
+					}
+				} else {
+					ServerPlayNetworking.send(player, new Charge(hold.body.getId(), (int) Math.min(HOLD_TICKS, held * HOLD_TICKS / Math.max(1, need)), false));
 				}
 				continue;
 			}
@@ -1140,8 +1219,75 @@ public final class Finishers {
 			|| !KingdomsQuestioning.questionable(body) || !questionPerk(player, QUIET_PERK)) {
 			return false;
 		}
+		// (a weapon in hand makes it the stealth kill: the choke hold is the empty hand's, Silent Snap's too)
+		if (!player.getMainHandItem().isEmpty() && stealthKind(player) != null) {
+			return false;
+		}
+		return behind(player, body);
+	}
+
+	/** Whether {@code player} stands behind {@code body}: {@link #BEHIND_DEGREES} or more round from the way its head faces. */
+	static boolean behind(Player player, LivingEntity body) {
 		float toPlayer = (float) (Mth.atan2(player.getZ() - body.getZ(), player.getX() - body.getX()) * Mth.RAD_TO_DEG) - 90.0F;
 		return Math.abs(Mth.wrapDegrees(toPlayer - body.getYHeadRot())) >= BEHIND_DEGREES;
+	}
+
+	/**
+	 * The stealth kill {@code player}'s main hand makes: a blade's {@link Kind#S_BLADE}, anything else that finishes anyone
+	 * ({@link #move}: a club, a bow, a gun, a tool that wears) {@link Kind#S_BLUNT}, bare hands {@link Kind#S_SNAP} with
+	 * Kingdoms' Silent Snap; null with a torch or a loaf, or bare hands without it. No Executioner: it's everyone's.
+	 */
+	public static @Nullable Kind stealthKind(Player player) {
+		ItemStack stack = player.getMainHandItem();
+		if (stack.isEmpty()) {
+			return questionPerk(player, SILENT_SNAP) ? Kind.S_SNAP : null;
+		}
+		Kind kind = kind(stack);
+		if (kind == Kind.FIST && !stack.isDamageableItem()) {
+			return null;
+		}
+		return switch (kind) {
+			case SWORD, GREATSWORD, DAGGER, AXE, SPEAR, POLEARM -> Kind.S_BLADE;
+			default -> stack.is(ItemTags.SWORDS) || stack.is(ItemTags.AXES) ? Kind.S_BLADE : Kind.S_BLUNT;
+		};
+	}
+
+	/** {@code player}'s rank of a Kingdoms perk by key (0 without Kingdoms). */
+	static int perkRank(Player player, String key) {
+		if (KINGDOMS_RANK == null) {
+			return 0;
+		}
+		try {
+			return (int) KINGDOMS_RANK.invoke(null, player, key);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return 0;
+		}
+	}
+
+	/** How long {@code player} holds attack for a stealth kill (ticks): shorter with Quick Work. */
+	public static int stealthHold(Player player) {
+		return STEALTH_HOLD[Mth.clamp(perkRank(player, QUICK_WORK), 0, STEALTH_HOLD.length - 1)];
+	}
+
+	/**
+	 * Whether {@code player} could take {@code entity} with a stealth kill from where they stand (sneaking aside, which the
+	 * hold asks for): a monster or a person (not a player, an animal, a boss or someone's pet), on their feet, awake and not
+	 * riding, small enough for Bigger Game's rank, with {@code player} behind them and something in hand that kills
+	 * ({@link #stealthKind}). Also asked on the client, so the hold doesn't swing at them; the server asks {@link #unaware} too.
+	 */
+	public static boolean stealthKillable(Player player, Entity entity) {
+		if (!(entity instanceof Mob body) || !body.isAlive() || helpless(body) || targeted(body) || Carry.isCarried(body) || body.isSleeping()
+			|| body.isPassenger() || com.jaymospowers.core.wounds.Mortality.boss(body) || body instanceof TamableAnimal tame && tame.isTame()
+			|| !(body instanceof net.minecraft.world.entity.monster.Enemy || Carry.isVillager(body) || DarktideStatus.humanoid(body))
+			|| stealthKind(player) == null || swornFaceToFace(player)) {
+			return false;
+		}
+		int rank = Mth.clamp(perkRank(player, BIGGER_GAME), 0, STEALTH_HEALTH.length - 1);
+		if (!player.isCreative() && (body.getMaxHealth() > STEALTH_HEALTH[rank] || body.getBbHeight() > STEALTH_HEIGHT[rank]
+			|| body.getBbWidth() > STEALTH_WIDTH[rank])) {
+			return false;
+		}
+		return behind(player, body);
 	}
 
 	/**
@@ -1235,6 +1381,11 @@ public final class Finishers {
 			// (0.15.114) a crippled one is held where it is too
 			root(body, true);
 		}
+		if (kind.stealth() && !body.isSilent()) {
+			// a stealth kill makes no noise: no cry from them, no hurt sound on the blow
+			body.setSilent(true);
+			SILENCED.add(body.getUUID());
+		}
 		if (kind.strike == Strike.POWER) {
 			// (Andy: "nothing labels them": a power's own has no name, on screen or off)
 			PowerFinishers.begin(level, player, body, kind);
@@ -1251,7 +1402,8 @@ public final class Finishers {
 			// (0.15.114) the gun's own cock
 			return;
 		}
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), opening(kind), SoundSource.PLAYERS, 0.8F, 0.9F + level.getRandom().nextFloat() * 0.2F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), opening(kind), SoundSource.PLAYERS, kind.stealth() ? 0.25F : 0.8F,
+			0.9F + level.getRandom().nextFloat() * 0.2F);
 	}
 
 	private static void plays(MinecraftServer server) {
@@ -1450,6 +1602,18 @@ public final class Finishers {
 			// (0.18.46) a Z Fighter's: his ki, his fists
 			case KI -> com.jaymospowers.power.zfighter.ZFighterExecutions.blow(level, player, body, kind, kill);
 			case POWER -> PowerFinishers.blow(level, player, body, kind, kill);
+			case SILENT -> {
+				// a stealth kill: heard only close by
+				if (kind == Kind.S_BLADE) {
+					level.playSound(null, x, y, z, SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.3F, pitch * 0.8F);
+					BladeBlood.splash(body, 5.0F);
+				} else if (kind == Kind.S_BLUNT) {
+					level.playSound(null, x, y, z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 0.35F, pitch * 0.7F);
+					BladeBlood.blunt(body, 4.0F);
+				} else {
+					level.playSound(null, x, y, z, SoundEvents.SKELETON_HURT, SoundSource.PLAYERS, 0.4F, 0.5F);
+				}
+			}
 			case SNAP -> {
 				if (kill) {
 					level.playSound(null, x, y, z, SoundEvents.SKELETON_HURT, SoundSource.PLAYERS, 1.0F, 0.5F);
@@ -1494,6 +1658,10 @@ public final class Finishers {
 			Dismember.sever(body, Dismember.HEAD, player);
 		}
 		Downed.execute(level, body, player);
+		if (kind.stealth()) {
+			// (Kingdoms' Stealth experience, and Into the Dark)
+			player.addTag(STEALTH_KILL_TAG);
+		}
 		// (0.18.118) now and then the blade stays in them (less, the more you've done this)
 		com.jaymospowers.armory.Lodged.killingStroke(level, player, body, kind);
 		if (kind.strike == Strike.CRUSH || kind == Kind.GREATSWORD || com.jaymospowers.power.zfighter.ZFighterExecutions.crushes(kind)) {
@@ -1582,7 +1750,7 @@ public final class Finishers {
 		return switch (kind) {
 			case BOW -> SoundEvents.ARROW_SHOOT;
 			case CROSSBOW -> SoundEvents.CROSSBOW_LOADING_END.value();
-			case FIST -> SoundEvents.ARMOR_EQUIP_LEATHER.value();
+			case FIST, S_SNAP -> SoundEvents.ARMOR_EQUIP_LEATHER.value();
 			case BLUNT, STAFF, SLAM, FLAIL -> SoundEvents.ARMOR_EQUIP_CHAIN.value();
 			case ROCK -> SoundEvents.STONE_HIT;
 			case STOMP, HEAD_SMASH -> SoundEvents.ZOMBIE_AMBIENT;
@@ -1606,6 +1774,10 @@ public final class Finishers {
 		TARGETED.remove(body.getUUID());
 		// (unrooting one that never was is nothing)
 		root(body, false);
+		if (SILENCED.remove(body.getUUID()) && body.isAlive()) {
+			// (a stealth kill that came to nothing: their voice back)
+			body.setSilent(false);
+		}
 	}
 
 	private static void root(LivingEntity entity, boolean on) {

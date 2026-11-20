@@ -40,7 +40,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Heave a downed friend onto a horse. Carrying someone downed ({@link Carry}, not dragged), right-click a horse, donkey,
+ * Heave a downed friend onto a horse. Carrying someone downed or hogtied ({@link Carry}, not dragged), right-click a horse, donkey,
  * mule, camel or llama (any grown {@link AbstractHorse}): they're heaved up and lie slung across its back, face down,
  * head to one side and legs to the other, and ride along wherever it goes (ridden, led, or on a rope). One body to a
  * horse, as Kitchen's slung corpses.
@@ -49,11 +49,14 @@ import org.jspecify.annotations.Nullable;
  * {@link Carry#CARRIED_BY}): the downed can't act, crawl or struggle, no respawn countdown starts, nobody shoves or aims at
  * them. They aren't vehicle passengers, so nothing treats them as riders (the mount climb, the seat). Their client (and every
  * other) holds them at the horse's feet each tick and the pose lays them across its back ({@code SlingPose}); the server holds
- * a mob there too. They're set down beside the horse when they come to ({@link Downed#isDowned} no longer true), or if the
- * horse dies or goes.
+ * a mob there too. They're set down beside the horse when they come to ({@link Downed#isDowned} no longer true) and aren't
+ * tied ({@link Carry#bound}): a hogtied captive (Andy: "hogtied people can go on a horse too and stay there until they work
+ * free") stays across the back until it struggles out of the knots, the rider able to strike it to set its struggle back
+ * (Kingdoms' lasso). They're also set down if the horse dies or goes.
  * <p>
  * Someone standing by the horse with free hands lifts the body off again: sneak + right-click the horse. It goes into their
- * arms (as a lift from the ground does), or is set down beside the horse if it's too heavy in its armour for them.
+ * arms (as a lift from the ground does), or is set down beside the horse if it's too heavy in its armour for them (or is
+ * hogtied and they haven't learned to haul the bound).
  * <p>
  * Never saved: a relog or a restart ends it, the body staying down where the horse was.
  */
@@ -115,11 +118,12 @@ public final class Sling {
 	}
 
 	/**
-	 * Both sides: whether {@code body} is a downed one that could be heaved onto a horse from a carry. A carry that drags,
-	 * or holds a block or a severed part, is none.
+	 * Both sides: whether {@code body} is a downed or hogtied one that could be heaved onto a horse from a carry. A carry
+	 * that drags, or holds a block or a severed part, is none.
 	 */
 	public static boolean heavable(@Nullable Entity body, int hold) {
-		return body instanceof LivingEntity && Downed.isDowned(body) && hold != Carry.DRAG && hold != Carry.BLOCK && hold != Carry.PART;
+		return body instanceof LivingEntity && (Downed.isDowned(body) || Carry.bound(body)) && hold != Carry.DRAG && hold != Carry.BLOCK
+			&& hold != Carry.PART;
 	}
 
 	/** Server: the body slung over this horse, if any. */
@@ -208,7 +212,8 @@ public final class Sling {
 		if (entry == null || taker.level() != body.level() || Carry.liftGap(taker, entry.horse) > Carry.LIFT_GAP + Carry.LIFT_SLACK) {
 			return;
 		}
-		if (Carry.overloaded(taker, body) > 0 || !Carry.canBeCarriedBy(taker, body)) {
+		if (Carry.overloaded(taker, body) > 0 || !Carry.canBeCarriedBy(taker, body)
+			|| Carry.bound(body) && !TreeLocks.has(taker, TreeLocks.HAUL_BOUND)) {
 			setDown(entry);
 			return;
 		}
@@ -229,9 +234,9 @@ public final class Sling {
 				SLINGS.remove(body.getUUID());
 				continue;
 			}
-			if (horse.isRemoved() || !horse.isAlive() || horse.level() != body.level() || body.isPassenger() || !Downed.isDowned(body)
-				|| body instanceof Player player && (player.isSleeping() || player.isSpectator())) {
-				// came to, or the horse is gone: down beside it
+			if (horse.isRemoved() || !horse.isAlive() || horse.level() != body.level() || body.isPassenger()
+				|| !Downed.isDowned(body) && !Carry.bound(body) || body instanceof Player player && (player.isSleeping() || player.isSpectator())) {
+				// came to (and not tied), worked free of the knots, or the horse is gone: down beside it
 				setDown(entry);
 				continue;
 			}

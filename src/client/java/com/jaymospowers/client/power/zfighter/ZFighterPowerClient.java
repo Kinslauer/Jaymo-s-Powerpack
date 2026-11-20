@@ -123,6 +123,8 @@ public final class ZFighterPowerClient implements PowerClient {
 				helper.register(new ZFighterKiGlow.Layer(avatar));
 				// (0.16.20) the flame aura: charging, held after a full charge, flaring in a form
 				helper.register(new ZFighterKiAura.Layer(avatar));
+				// (flame shell + white core round the aura)
+				helper.register(new ZFighterAuraFlame.Layer(avatar));
 				// (0.17.45) the ki weapon on the right fist
 				helper.register(new ZFighterKiWeaponLayer.Layer(avatar));
 			} else if (renderer.getModel() instanceof net.minecraft.client.model.HumanoidModel<?>) {

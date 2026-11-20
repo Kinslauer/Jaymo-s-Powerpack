@@ -2594,3 +2594,18 @@ Added a new **Cooking Block** to the Functional creative tab. The block has iron
 
 - **Fix**: drawing a severed leg (`SpiderLeg`) whose creature another mod adds saved data to (Re:Animal's wolves) crashed the game: that mod's part of the save isn't set up on a body rebuilt only to be drawn. The leg now keeps what was read before it (as corpses already did), and a corpse taken out of a body bag does the same (`CorpseEntity.rebuildFrom`). A warning is logged instead.
 - Built by CI; not played.
+
+## 0.6.66 (2026-11-20): body controls - hold drags a body, tap searches it (#1935)
+
+- Andy: "right click hold should always be drag, tap can loot". An empty hand on a body lying loose (not on a hook):
+  - **Hold use**: drags it by the legs (bar "Taking hold"), any kind, a player's body too; anything pocket-sized is taken up in one hand by the neck. Solid iron says it's too heavy.
+  - **Tap use** (worked out once use is let go, `CorpseEntity.press/tickPress/tapped`): arrows come out first, one a tap; a fish is looted; a machine is stripped; a player's body gives back what they carried; a skeleton gives its gear, then bones; anything else is searched. An animal carcass tells you its bleeding, or how to move it.
+  - Sneak + hold still lifts it into your arms; tools, hooks and flint work as before.
+- Built; not played.
+
+## 0.6.67 (2026-11-20): corpse loot screen - take only what you want (#1940)
+
+- **Loot screen**: once the arrows are out, a tap on a monster's or a person's body (zombies, skeletons, villagers, Kingdoms folk, anything that isn't an animal, a fish, a machine or a player's body) opens a chest-like screen instead of spilling everything: the body itself in the middle, drawn as it lies (its own ragdoll, wounds, arrows and shut eyes, seen from above and turning a little with the mouse), its helmet, chestplate, leggings and boots down the left, its main hand, off hand (and body armour, if any) beside it, its pockets (up to 12 stacks) on the right. Click or shift-click to take a piece; whatever you leave stays on the body (and is drawn on it), for later or for someone else. Nothing can be put on a body.
+- A body with nothing left on it gives the old "Nothing left on it" line; a bare skeleton gives up its bones, a tap at a time, as before.
+- Gear's wear is put on once, the first time the body is looked at, so looking again doesn't wear it more. Several players can look at once (one shared view, nothing taken twice); a Kingdoms looter won't rob a body someone is going through. Taking counts as robbing the dead for Kingdoms, a piece at a time, as before.
+- `CorpseLoot`, `CorpseLootMenu`, `CorpseLootScreen`, `CorpseEntity#openLoot`. Compiled; not played.

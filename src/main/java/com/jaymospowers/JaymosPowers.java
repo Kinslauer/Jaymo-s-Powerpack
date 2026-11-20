@@ -26,6 +26,8 @@ public class JaymosPowers implements ModInitializer {
 		// (the sling's use on a horse comes before Carry's, which would otherwise lift a horse a Gravity user can carry)
 		com.jaymospowers.core.Sling.init();
 		com.jaymospowers.core.Carry.init();
+		// (Andy, 2026-11-20) a tap of use on a body opens what can be done to it
+		com.jaymospowers.core.BodyMenu.init();
 		com.jaymospowers.core.Perch.init();
 		com.jaymospowers.core.Kneel.init();
 		com.jaymospowers.core.Crawl.init();
