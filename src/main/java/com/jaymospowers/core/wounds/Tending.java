@@ -35,11 +35,15 @@ public final class Tending {
 	/** (0.21.28) How long a drink at the ground holds them down after each call (ticks: a held button repeats every 4). */
 	static final long DRINK_HOLD = 10L;
 
-	/** Kneeling by {@code target} (entity id, or {@link #GROUND_DRINK}), since {@code since} (game time). */
-	public record Tend(int target, long since) {
+	/**
+	 * Kneeling by {@code target} (entity id, or {@link #GROUND_DRINK}), since {@code since} (game time); {@code knees}: down
+	 * on both knees (a revive, Andy 2026-11-20: "the revive needs to be on knees"), not one (treating a wound).
+	 */
+	public record Tend(int target, long since, boolean knees) {
 		public static final StreamCodec<ByteBuf, Tend> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_INT, Tend::target,
 			ByteBufCodecs.VAR_LONG, Tend::since,
+			ByteBufCodecs.BOOL, Tend::knees,
 			Tend::new);
 	}
 
@@ -57,15 +61,20 @@ public final class Tending {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> KEPT.clear());
 	}
 
-	/** {@code healer} is still at work on {@code body} this tick (nothing for treating yourself). */
+	/** {@code healer} is still at work on {@code body} this tick, on one knee (nothing for treating yourself). */
 	static void keep(ServerPlayer healer, LivingEntity body) {
+		keep(healer, body, false);
+	}
+
+	/** {@code healer} is still at work on {@code body} this tick; {@code knees}: down on both knees (a revive). */
+	static void keep(ServerPlayer healer, LivingEntity body, boolean knees) {
 		if (body == healer) {
 			return;
 		}
 		long now = healer.level().getGameTime();
 		Tend tend = healer.getAttached(TEND);
-		if (tend == null || tend.target() != body.getId()) {
-			healer.setAttached(TEND, new Tend(body.getId(), now));
+		if (tend == null || tend.target() != body.getId() || tend.knees() != knees) {
+			healer.setAttached(TEND, new Tend(body.getId(), tend != null && tend.target() == body.getId() ? tend.since() : now, knees));
 		}
 		KEPT.put(healer.getUUID(), now);
 	}
@@ -78,7 +87,7 @@ public final class Tending {
 		long now = player.level().getGameTime();
 		Tend tend = player.getAttached(TEND);
 		if (tend == null || tend.target() != GROUND_DRINK) {
-			player.setAttached(TEND, new Tend(GROUND_DRINK, now));
+			player.setAttached(TEND, new Tend(GROUND_DRINK, now, true));
 		}
 		KEPT.put(player.getUUID(), now + DRINK_HOLD);
 	}

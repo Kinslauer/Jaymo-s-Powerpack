@@ -45,11 +45,15 @@ public final class TendPose {
 
 	/**
 	 * {@code down}: 0 standing to 1 on the knee; {@code low}: 0 reaching ahead to 1 reaching down; {@code time}: ticks;
-	 * {@code drink}: (0.21.28) down at the ground drinking, not tending.
+	 * {@code drink}: (0.21.28) down at the ground drinking, not tending; {@code knees}: on both knees (a revive).
 	 */
-	public record Tend(float down, float low, float time, boolean drink) {
+	public record Tend(float down, float low, float time, boolean drink, boolean knees) {
+		Tend(float down, float low, float time, boolean drink) {
+			this(down, low, time, drink, false);
+		}
+
 		Tend(float down, float low, float time) {
-			this(down, low, time, false);
+			this(down, low, time, false, false);
 		}
 	}
 
@@ -61,7 +65,7 @@ public final class TendPose {
 		float low;
 		float releasedAt = -1.0F;
 		float releasedDown;
-		boolean drink;
+		boolean drink, knees;
 	}
 
 	private static final Int2ObjectOpenHashMap<Track> TRACKS = new Int2ObjectOpenHashMap<>();
@@ -86,6 +90,9 @@ public final class TendPose {
 			track.releasedAt = -1.0F;
 			track.down = smooth((now - tend.since()) / KNEEL_IN);
 			track.drink = tend.target() == Tending.GROUND_DRINK;
+			track.knees = tend.knees() && !track.drink;
+			// (a revive begun sneaking: down on the knees, not hunched in a sneak over them)
+			state.isCrouching = false;
 			if (track.drink) {
 				track.low = 1.0F;
 				state.setData(KEY, new Tend(track.down, 1.0F, now, true));
@@ -94,7 +101,7 @@ public final class TendPose {
 			Entity target = entity.level().getEntity(tend.target());
 			float low = target instanceof LivingEntity body && (Downed.isDowned(body) || body.getBbHeight() < LOW_HEIGHT) ? 1.0F : 0.0F;
 			track.low = Mth.lerp(0.2F, track.low, low);
-			state.setData(KEY, new Tend(track.down, track.low, now));
+			state.setData(KEY, new Tend(track.down, track.low, now, false, track.knees));
 			return;
 		}
 		// done: back up, from however far down they were
@@ -109,7 +116,7 @@ public final class TendPose {
 			return;
 		}
 		track.down = track.releasedDown * (1.0F - smooth(up));
-		state.setData(KEY, new Tend(track.down, track.low, now, track.drink));
+		state.setData(KEY, new Tend(track.down, track.low, now, track.drink, track.knees));
 	}
 
 	/** After the body faces its way: sunk onto the knee, leaning in from the hips. */
@@ -153,9 +160,15 @@ public final class TendPose {
 			blend(h.head, HEAD_DRINK + gulp, 0.0F, 0.0F, k);
 			return;
 		}
-		// the legs as the world sees them, so they stay planted under the lean: (0.21.28) the right foot planted, the
-		// thigh level and the shin straight down, the left knee on the ground with the shin flat behind (KneelLegs)
-		if (!theirs) {
+		if (tend.knees() && !theirs) {
+			// (Andy, 2026-11-20: "the revive needs to be on knees") a revive: both knees on the ground beside them, shins flat
+			// behind (KneelLegs), as the drink's legs are
+			blend(h.rightLeg, KneelLegs.DOWN_THIGH - pitch, 0.08F, 0.0F, k);
+			blend(h.leftLeg, KneelLegs.DOWN_THIGH - pitch, -0.08F, 0.0F, k);
+			KneelLegs.want(state, KneelLegs.DOWN_KNEE * k, KneelLegs.DOWN_KNEE * k);
+		} else if (!theirs) {
+			// the legs as the world sees them, so they stay planted under the lean: (0.21.28) the right foot planted, the
+			// thigh level and the shin straight down, the left knee on the ground with the shin flat behind (KneelLegs)
 			blend(h.rightLeg, KneelLegs.UP_THIGH - pitch, 0.1F, 0.0F, k);
 			blend(h.leftLeg, KneelLegs.DOWN_THIGH - pitch, -0.1F, 0.0F, k);
 			KneelLegs.want(state, KneelLegs.UP_KNEE * k, KneelLegs.DOWN_KNEE * k);

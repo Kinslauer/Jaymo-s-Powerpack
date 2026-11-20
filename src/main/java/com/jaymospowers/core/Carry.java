@@ -793,6 +793,49 @@ public final class Carry {
 		return lift(player, body);
 	}
 
+	/** Whether the body menu offers {@code player} to drag {@code body} ({@link BodyMenu}): someone downed, by the shoulder. */
+	public static boolean offersDrag(ServerPlayer player, LivingEntity body) {
+		return Downed.isDowned(body) && draggable(body) && armsFree(player, body) && !GravityWeight.lightens(player) && !flying(player);
+	}
+
+	/** Whether the body menu offers {@code player} to lift {@code body} up into their arms: someone downed, hogtied or out cold. */
+	public static boolean offersLift(ServerPlayer player, LivingEntity body) {
+		return canBeCarriedBy(player, body) && armsFree(player, body);
+	}
+
+	private static boolean armsFree(ServerPlayer player, LivingEntity body) {
+		return !isCarrying(player) && !isCarried(player) && !KitchenCompat.isCarryingCorpse(player) && !player.isPassenger()
+			&& !isCarried(body) && !isCarrying(body) && !body.isPassenger() && !body.isVehicle();
+	}
+
+	/**
+	 * Lift chosen from the body menu ({@link BodyMenu}): {@code body} up into {@code player}'s arms at once (the menu is the
+	 * deliberate part, so no hold), or, too heavy in their armour, a piece pulled off first. Dragging is {@link #liftDowned}.
+	 */
+	public static boolean liftChosen(ServerPlayer player, LivingEntity body) {
+		if (player.isSpectator() || !offersLift(player, body)) {
+			return false;
+		}
+		if (liftGap(player, body) > LIFT_GAP + LIFT_SLACK) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.cant_take_hold", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
+			return false;
+		}
+		Long ready = REGRAB.get(body.getUUID());
+		if (ready != null && player.level().getGameTime() < ready) {
+			return false;
+		}
+		if (bound(body) && !TreeLocks.check(player, TreeLocks.HAUL_BOUND)) {
+			// (Andy's skill-tree locks) lifting someone hogtied is learned: Haul the Bound
+			return false;
+		}
+		if (overloaded(player, body) > 0) {
+			shed(player, body);
+		} else {
+			pickUp(player, body);
+		}
+		return true;
+	}
+
 	/**
 	 * (0.18.84) Andy: "you can then lift and carry them if you are strong enough. you may have to remove armor." How much
 	 * more armour {@code target} wears than {@code carrier} can lift (armour + toughness points, {@link #armourWeight}): 0
