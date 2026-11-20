@@ -1752,8 +1752,8 @@ public final class Downed {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.revive_stopped", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
 				continue;
 			}
-			// (0.15.99) down on one knee at their side
-			Tending.keep(player, body);
+			// (0.15.99) down at their side; (Andy, 2026-11-20: "the revive needs to be on knees") on both knees
+			Tending.keep(player, body, true);
 			String job = reviveJob(body);
 			if (!r.resumed) {
 				// (0.21.39) let go before: the bar carries on where it stopped
