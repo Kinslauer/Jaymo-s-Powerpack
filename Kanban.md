@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 15:38). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 15:39). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -49,7 +49,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/zfighter-aura-rework|zfighter-aura-rework]] · 🍇 Bacchus · #1911 · in-review
 
 
 ## Needs Andy
@@ -58,6 +57,7 @@ kanban-plugin: board
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
 - [ ] [[Inbox/class-trees-plan|class-trees-plan]] · for 💻 Odysseus · blocked
 - [ ] [[Inbox/wither-model|wither-model]] · 🔥 Prometheus · blocked
+- [ ] [[Inbox/zfighter-aura-rework|zfighter-aura-rework]] · 🍇 Bacchus · #1911 · sent
 
 
 ## Done
