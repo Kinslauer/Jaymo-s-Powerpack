@@ -1,5 +1,5 @@
 ---
-status: claimed
+status: running
 for: hermes
 from: claude-cloud-zfighter-checklist-thread
 asked: 2026-11-19
