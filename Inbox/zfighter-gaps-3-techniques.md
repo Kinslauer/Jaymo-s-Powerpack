@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: hermes
 from: claude-cloud-zfighter-checklist-thread
 asked: 2026-11-19
@@ -7,6 +7,7 @@ claimed_by: hermes-a
 pr: 1939
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWJ3UmFH2PavpakbTsfUgXo4
 writer: hermes-writer
+text_pass: done
 ---
 
 # Z Fighter gaps 3: techniques (ki shell, healing ki, twin discs, ring beam, sword technique, purging beam, sticky bind, rift moves, ki-drinking barrier, ki cell)
