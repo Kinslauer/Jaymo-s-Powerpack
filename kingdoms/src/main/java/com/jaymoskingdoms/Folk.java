@@ -165,7 +165,8 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 			// (Jaymo's Powers' pitchfork when it is here: a farmer carries one, as a farmhand does)
 			net.minecraft.world.item.Item fork = Careers.pitchfork();
 			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(fork != null ? fork : Items.IRON_HOE));
-			folk.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
+			// a straw hat against the sun, not a helm
+			folk.setItemSlot(EquipmentSlot.HEAD, new ItemStack(com.jaymoskingdoms.blossomland.BlossomDress.STRAW_HAT));
 			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.farmer_of", faction.name()));
 		}));
 		defineRole(new Role(MINER, "miner", false, false, null, (folk, faction) -> {
