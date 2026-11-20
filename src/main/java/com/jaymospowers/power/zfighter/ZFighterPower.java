@@ -725,7 +725,8 @@ public final class ZFighterPower implements Power {
 						ZFighterKi.KI_SURGE);
 				}
 			}
-		} else if (!live.superOn() && !hungry && live.waveFrom < 0 && live.barrageFrom < 0 && live.spiritFrom < 0) {
+			if (live.guarding && now % 8 == 0) ZFighterHooks.guardStamina(player);
+	} else if (!live.superOn() && !hungry && live.waveFrom < 0 && live.barrageFrom < 0 && live.spiritFrom < 0) {
 			live.ki += KI_REGEN * ZFighterRealism.kiRegen() * ZFighterBioForms.regen(player) * ZFighterDivineGrace.regen(player);
 		}
 
@@ -899,7 +900,7 @@ public final class ZFighterPower implements Power {
 					if (ready(player, ZFighterState.STEP) && ZFighterLineage.heal(player, live)) {
 						cooldown(player, ZFighterState.STEP, ZFighterLineage.HEAL_COOLDOWN);
 					}
-				} else if (down && ready(player, ZFighterState.STEP) && ZFighterKi.step(player, live)) {
+				} else if (down && ready(player, ZFighterState.STEP) && ZFighterHooks.flashStepStamina(player) && ZFighterKi.step(player, live)) {
 					cooldown(player, ZFighterState.STEP, ZFighterKi.STEP_COOLDOWN);
 				}
 			}
@@ -1136,6 +1137,7 @@ public final class ZFighterPower implements Power {
 
 	/** The transformation into {@code form}: a blast of gold that throws back everything near. */
 	static void transform(ServerPlayer player, Live live, int form) {
+		if (!ZFighterHooks.enterFormStamina(player)) return;
 		// (0.17.50) a legendary-born takes his own line in place of Super's (the breakthrough lands him in Legend 1)
 		form = ZFighterLegendary.line(player, form);
 		int tier = ZFighterForms.tier(form);
@@ -1300,6 +1302,7 @@ public final class ZFighterPower implements Power {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_limit_hurt").withStyle(ChatFormatting.GRAY));
 			return;
 		}
+		if (next > 0 && !ZFighterHooks.enterLimitStamina(player)) return;
 		if (next == 0) {
 			endLimit(player, live);
 		} else {
