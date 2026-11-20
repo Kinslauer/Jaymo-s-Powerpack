@@ -34,7 +34,9 @@ import org.jspecify.annotations.Nullable;
  * it kneads or grooms a paw; getting up from a loaf it stretches.</li>
  * </ul>
  * Worked out from what everyone's client sees (sitting, the owner, movement, the game clock), and while one plays base
- * Fresh Animations steps aside for that animal ({@code PoseTakeover#mobPosed}).
+ * Fresh Animations steps aside for that animal ({@code PoseTakeover#mobPosed}). Only on vanilla-shaped models: where a
+ * resource pack has built the animal its own way (Fresh Animations' cat and wolf), its own animations show instead
+ * ({@link #extract}).
  */
 public final class PetPoses {
 	// ===== the knobs ================================================================================================
@@ -219,9 +221,16 @@ public final class PetPoses {
 		}
 	}
 
-	public static void extract(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
+	/**
+	 * {@code model} is the renderer's body model. A resource pack's own model for the animal (Fresh Animations' cat and wolf)
+	 * is built differently from vanilla's: the head and tail are new parts inside the body, and the body's boxes are turned
+	 * flat inside it rather than by the body part itself. Our poses are worked out on vanilla's parts, so laid over such a
+	 * model they stood a sitting cat on end with its tail straight up: there the pack's own sitting and sleeping animations
+	 * show instead, and nothing of ours is laid over them.
+	 */
+	public static void extract(LivingEntity entity, LivingEntityRenderState state, float partialTicks, Model<?> model) {
 		Track t = entity instanceof Wolf || entity instanceof Cat ? TRACKS.get(entity.getId()) : null;
-		if (t == null) {
+		if (t == null || com.jaymospowers.client.EmfCompat.customModel(model)) {
 			state.setData(KEY, null);
 			return;
 		}

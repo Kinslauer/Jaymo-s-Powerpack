@@ -38,6 +38,20 @@ final class EmfAccess {
 		}
 	}
 
+	/** Whether a resource pack's model has replaced this one's parts (see EmfCompat#customModel). */
+	static boolean customModel(net.minecraft.client.model.Model<?> model) {
+		if (broken) {
+			return false;
+		}
+		try {
+			return model.root() instanceof EMFModelPartRoot root && root.containsCustomModel;
+		} catch (Throwable e) {
+			broken = true;
+			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't ask Entity Model Features whether a model is a resource pack's; pets' poses go on every model as before", e);
+			return false;
+		}
+	}
+
 	/** The players we paused EMF for ourselves (see EmfCompat#hold), by entity id. */
 	private static final IntOpenHashSet HELD = new IntOpenHashSet();
 

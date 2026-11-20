@@ -28,7 +28,7 @@ abstract class DownedLivingEntityRendererMixin {
 		// (0.19.60) a Z Fighter's ki in the hands (players, gifted villagers, rogue fighters)
 		com.jaymospowers.client.power.zfighter.ZFighterHandsPose.extract(entity, state, partialTicks);
 		// (Motion patch 6) pets' own poses, wet coats, and the mob's id so Fresh Animations can step aside for our poses
-		com.jaymospowers.client.pets.PetPoses.extract(entity, state, partialTicks);
+		com.jaymospowers.client.pets.PetPoses.extract(entity, state, partialTicks, ((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel());
 		com.jaymospowers.client.pets.WetCoats.extract(entity, state, partialTicks);
 		com.jaymospowers.client.pets.NameLooks.extract(entity, state);
 		com.jaymospowers.client.PoseTakeover.markMob(entity, state);

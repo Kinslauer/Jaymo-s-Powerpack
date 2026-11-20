@@ -26,6 +26,14 @@ public final class EmfCompat {
 	}
 
 	/**
+	 * Whether a resource pack (Fresh Animations) has replaced this model's own parts through EMF, so the parts aren't
+	 * vanilla's shape any more and poses worked out on vanilla's parts don't fit it (PetPoses).
+	 */
+	public static boolean customModel(Model<?> model) {
+		return LOADED && EmfAccess.customModel(model);
+	}
+
+	/**
 	 * (0.15.147) Keeps EMF paused for a player while one of our poses is on, by EMF's own per-player pause, which nothing
 	 * lifts. The pause condition alone isn't enough with Touch'n Motion: its EMF Compat Core lifts EMF's pause for a player
 	 * any of its addons holds a pose for (Touch'n Motion's riding pose), and Fresh Animations would come back over ours.
