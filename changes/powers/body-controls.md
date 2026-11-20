@@ -6,5 +6,9 @@
   - **Sneak + hold use**: brings them round (the revive, food or treat as before). Any sneak works now, not only the low crouch held still.
   - **Fainted players** are shaken awake with sneak + right-click (was a plain right-click).
   - Executions are unchanged: sneak + hold attack.
+- Andy: "throwing needs to be more deliberate, i revived then instantly tossed her, no struggle to pickup at all":
+  - The hold that revived someone (or took hold of them) can't carry on into a lift once they're up (`Downed.handOn`); let go of right-click first.
+  - Lifting a person off their feet (sneak + hold) takes 2 s (`Carry.PERSON_LIFT_TICKS` 40, was 0.6 s); small animals stay quick.
+  - Throwing is a wind-up: sneak + **hold** right-click for 1 s ("Winding up to throw ...", `THROW_TICKS` 20), and only counted from 1 s after they're in your arms (`THROW_READY`). Heaving someone you're dragging up into your arms is the same held sneak + right-click, 1.5 s (`HOIST_TICKS`). Let go sooner and nothing happens. Blocks and severed parts throw the same way. Client `CarryUseMixin` sends each beat of the held press.
 - `Downed.onUseEntity/revives`, `Carry.liftDowned`, `Lodged`, `Fainting.shake`. Lang: `message.jaymospowers.downed.cant_take_hold`, `bar.jaymospowers.taking_hold` (the old kneel-first message is gone).
 - Built; not played.

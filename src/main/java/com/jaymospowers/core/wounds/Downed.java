@@ -334,6 +334,16 @@ public final class Downed {
 	/** Player → their revive. Not saved. */
 	private static final Map<UUID, Revive> REVIVING = new HashMap<>();
 
+	/**
+	 * Server: {@code player} is still holding the use that began on {@code entity} while it was down (a revive, a drag, a tap
+	 * not yet let go), even if they're up now. Carry won't take that hold for a lift (Andy, 2026-11-20: "i revived then
+	 * instantly tossed her, no struggle to pickup at all").
+	 */
+	public static boolean handOn(Player player, Entity entity) {
+		Revive r = REVIVING.get(player.getUUID());
+		return r != null && r.body == entity;
+	}
+
 	/** (0.18.5) A downed player getting up by themselves: how far along, the hits taken, and knocked back (sneak let go first). */
 	private static final class Rise {
 		int ticks, hits, length = RISE_TICKS;
