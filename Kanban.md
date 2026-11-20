@@ -42,7 +42,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/scrying-orb|scrying-orb]] · for any · #1787 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]] · ☀️ Apollo · #1937 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-aura-rework|zfighter-aura-rework]] · 🍇 Bacchus · #1911 · claimed
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · 🪶 Quill · #1853 · writing
@@ -50,6 +49,7 @@ kanban-plugin: board
 
 ## In review
 
+- [ ] [[Inbox/scrying-orb|scrying-orb]] · for any · #1787 · in-review
 - [ ] [[Agents/scrying-orb-design-spec|scrying-orb-design-spec]] · ☀️ Apollo · in-review
 
 
