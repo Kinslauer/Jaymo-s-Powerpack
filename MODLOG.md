@@ -6666,3 +6666,9 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - Downed players who crawl into a wall now sit up against it, the same as pressing the Sit key beside one. Pushing at the wall for about a third of a second starts the get-up. If you use the Sit key to lie back down while you're still pushing, it won't sit you up again until you let go.
 - `DownedLie#crawlInto` (called from `Downed#tickPlayer`) reads the player's movement keys (`getLastClientInput`), turns them by the look, and starts `prop(player, true)` after `BUMP_TICKS` (6) ticks pushing within `BUMP_GAP` of a wall's face, at least `BUMP_FACING` (0.7) of the push straight at it. Passed out, carried, rising or already sat: nothing.
 - Built; not played.
+
+## 0.25.90 (2026-11-20): Crawling into a block you can haul up doesn't sit you (#1893)
+
+- Downed, crawling into a block about one high that you could haul yourself up (hold Use) no longer sits you up against it, so the haul can start. Taller walls still sit you up when you crawl into them, and the Sit key still sits you against either.
+- `DownedLie#crawlInto` skips while `ProneHaul.find` finds a rise ahead or a haul is under way.
+- Built; not played.
