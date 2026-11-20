@@ -101,11 +101,12 @@ import org.jspecify.annotations.Nullable;
  * sooner, or look away, and nothing happens. Only a severed part and a Wind user's grab in the air stay a click. Holding
  * plain right-click on someone downed is the revive ({@link Downed}), and holding left-click executes them
  * ({@code Finishers}), so none of the three can be mistaken for another. Nobody lifts a big animal or anything bigger than a
- * person by hand ({@link #tooBig}): a downed horse or cow stays where it lies (Gravity still can). (Andy, 2026-11-14) Someone
- * downed is lifted from a kneel at their side instead, with a tap of use ({@link #liftDowned}), and revived with a hold from it.
+ * person by hand ({@link #tooBig}): a downed horse or cow stays where it lies (Gravity still can). (Andy, 2026-11-20) Someone
+ * downed is taken hold of with a plain hold of use instead ({@link #liftDowned}, from {@link Downed}): dragged, then lifted
+ * from the drag with sneak + right-click. Sneak + a hold on them is the revive.
  * <p>
  * (0.19.55) Andy: "the user dragging a player grabs them by the shoulder, while the legs ragdoll and drag along" (Death
- * Engine's drag as the idea, rebuilt). Sneak + held use on someone downed ({@link #draggable}) now takes them by the
+ * Engine's drag as the idea, rebuilt). Held use on someone downed ({@link #draggable}) now takes them by the
  * shoulder and drags them along the ground behind you ({@link #DRAG}), whatever armour they wear; their body follows your
  * hand on its own path ({@link #dragStep}), and they smear their blood along it ({@code BloodSmears}). Right-click lets
  * go where they lie; sneak + right-click hoists them up into your arms (a carry's hold, if their armour isn't too heavy:
@@ -653,8 +654,8 @@ public final class Carry {
 			return InteractionResult.PASS;
 		}
 		if (target instanceof LivingEntity body && Downed.isDowned(body) && !snatches(player, target)) {
-			// (Andy, 2026-11-14) someone downed is lifted from a kneel at their side, with a tap of use ({@link #liftDowned});
-			// a sneak and a hold standing over them no longer does it
+			// (Andy, 2026-11-20) someone downed is taken hold of by a plain hold of use ({@link #liftDowned}, from Downed);
+			// sneak + a hold on them is the revive, not a lift
 			return InteractionResult.PASS;
 		}
 		if (level instanceof ServerLevel server && player instanceof ServerPlayer carrier) {
@@ -743,12 +744,15 @@ public final class Carry {
 	}
 
 	/**
-	 * (Andy, 2026-11-14) "kneeling ... unlocks a context where you can use right click to interact, for lockpicking, reviving,
-	 * lifting": a tap of use from a kneel at a downed body's side ({@link Downed}'s revive watch tells it) takes them up at
-	 * once, as a full lift's hold did. True if they were.
+	 * Andy (2026-11-20): "right click hold should always be drag ... you should also be able to drag people out of the
+	 * water by holding right click". A hold of use standing over a downed body ({@link Downed}'s revive watch tells it, after
+	 * {@link #LIFT_TICKS}) takes them by the shoulder and drags them (or, if they can't be dragged, takes them up as a lift
+	 * would). One lying in the water is reached from anywhere within arm's reach, so they can be hauled out from the bank.
+	 * True if they were taken.
 	 */
 	public static boolean liftDowned(ServerPlayer player, LivingEntity body) {
-		if (player.isSpectator() || liftGap(player, body) > LIFT_GAP + LIFT_SLACK) {
+		if (player.isSpectator()
+			|| liftGap(player, body) > LIFT_GAP + LIFT_SLACK && !(body.isInWater() && player.isWithinEntityInteractionRange(body, 0.0))) {
 			return false;
 		}
 		Long ready = REGRAB.get(body.getUUID());

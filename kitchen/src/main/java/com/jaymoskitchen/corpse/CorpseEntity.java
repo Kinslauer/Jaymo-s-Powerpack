@@ -223,6 +223,8 @@ public class CorpseEntity extends Entity {
 	 * still counts as the same hold.
 	 */
 	public static final int LIFT_TICKS = 12, USE_REPEAT = 4, HOLD_GRACE = 8;
+	/** A plain press of an empty hand let go within this many ticks is a tap: the search, not the drag. */
+	public static final int TAP_TICKS = 4;
 	/**
 	 * (0.5.31) Andy: "for those larger animals that can't be picked up, they are butchered instead with a knife on the spot,
 	 * and the meat/ hide etc, slowly gathered". A big carcass ({@link #tooBigToLift}) is cut up where it lies with a
@@ -265,6 +267,13 @@ public class CorpseEntity extends Entity {
 	/** (0.5.31) A lift being held on it: by whom, since when, and when use last came (game time). Never saved. */
 	private java.util.@Nullable UUID liftBy;
 	private long liftStart, liftLast;
+	/**
+	 * Andy (2026-11-20): "right click hold should always be drag, tap can loot". A plain press of an empty hand on it: by
+	 * whom, since when, and when use last came (game time). Let go within {@link #TAP_TICKS} it's a tap ({@link #tapped});
+	 * held on, it's taken hold of ({@link #takeHold}). Never saved.
+	 */
+	private java.util.@Nullable UUID pressBy;
+	private long pressStart, pressLast;
 	/** (0.5.31) A big carcass being cut up where it lies: by whom, when use last came, and how far into the next piece (ticks). */
 	private java.util.@Nullable UUID cutBy;
 	private long cutLast;
@@ -1781,6 +1790,7 @@ public class CorpseEntity extends Entity {
 	}
 
 	private void serverTick(ServerLevel level) {
+		tickPress(level);
 		age++;
 		if (Keeping.kept(this, level)) {
 			// kept fresh (a priest's rite, a salt-and-herb wrap): its clock stands still, so it neither rots nor gets up
@@ -1980,10 +1990,11 @@ public class CorpseEntity extends Entity {
 			// (0.5.31) being dragged: let go of first
 			return InteractionResult.SUCCESS_SERVER;
 		}
-
-		// (0.5.23) arrows still in it come out first, one a click, to an empty hand
-		if (held.isEmpty() && !player.isShiftKeyDown() && com.jaymoskitchen.archery.StuckArrows.total(arrows()) > 0) {
-			return pullArrow(level, player);
+		// Andy (2026-11-20): "right click hold should always be drag, tap can loot". A plain empty hand on a body lying
+		// loose: held, it's taken hold of (dragged, or a small one taken up by the neck); a tap is the search, the arrows or
+		// the loot, worked out once the press is let go (tickPress). Sneak + a hold still lifts it into your arms (below)
+		if (held.isEmpty() && !player.isShiftKeyDown() && hook() == null) {
+			return press(level, player);
 		}
 		// a fish is looted in one go, whatever's in your hand: out comes its loot and the body's gone
 		if (isFish()) {
@@ -2023,10 +2034,6 @@ public class CorpseEntity extends Entity {
 		if (isMachine()) {
 			return search(level, player);
 		}
-		// an empty hand on anything small enough (whatever it was): (0.5.50) taken up in one hand, by the neck
-		if (held.isEmpty() && kind != CorpseKind.PLAYER && fitsInPocket()) {
-			return carry(level, player);
-		}
 
 		switch (kind) {
 			case ANIMAL -> {
@@ -2046,6 +2053,89 @@ public class CorpseEntity extends Entity {
 			default -> {
 				return search(level, player);
 			}
+		}
+	}
+
+	/** Andy (2026-11-20): a plain press of an empty hand: a tap so far, or, held on past {@link #TAP_TICKS}, taken hold of. */
+	private InteractionResult press(ServerLevel level, Player player) {
+		long now = level.getGameTime();
+		if (!player.getUUID().equals(pressBy) || now - pressLast > HOLD_GRACE) {
+			pressBy = player.getUUID();
+			pressStart = now;
+		}
+		pressLast = now;
+		if (now - pressStart < TAP_TICKS) {
+			// (maybe a tap: told once it's let go)
+			return InteractionResult.SUCCESS_SERVER;
+		}
+		return takeHold(level, player);
+	}
+
+	/**
+	 * Andy (2026-11-20): "right click hold should always be drag". An empty hand held on it: anything small enough (whatever
+	 * it was, never a player's) is taken up in one hand by the neck, (0.5.50) as a tap used to; anything else is taken by the
+	 * legs and dragged once the bar fills. Solid iron (an iron golem) won't budge.
+	 */
+	private InteractionResult takeHold(ServerLevel level, Player player) {
+		if (isHeavy()) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.too_heavy"));
+			return InteractionResult.SUCCESS_SERVER;
+		}
+		if (kind != CorpseKind.PLAYER && fitsInPocket()) {
+			pressBy = null;
+			return carry(level, player);
+		}
+		return grab(level, player, true);
+	}
+
+	/** Server, each tick: a plain press let go, if it was a tap, is the search ({@link #tapped}). */
+	private void tickPress(ServerLevel level) {
+		if (pressBy == null || level.getGameTime() - pressLast <= HOLD_GRACE) {
+			return;
+		}
+		java.util.UUID by = pressBy;
+		boolean tap = pressLast - pressStart < TAP_TICKS;
+		pressBy = null;
+		Player player = tap ? level.getPlayerByUUID(by) : null;
+		if (player == null || !player.isAlive() || player.isSpectator() || !player.getMainHandItem().isEmpty() || carrier() != null || dragger() != null
+			|| hook() != null || !player.isWithinEntityInteractionRange(this, 1.0)) {
+			return;
+		}
+		tapped(level, player);
+	}
+
+	/**
+	 * Andy (2026-11-20): "tap can loot". A tap of an empty hand: (0.5.23) arrows still in it come out first, one a tap; a
+	 * fish's loot comes out and the body's gone; a machine is stripped; a player's body gives back what they carried; a
+	 * skeleton's gear comes off, then its bones; anything else is searched. An animal's carcass has nothing to take by hand:
+	 * where it is in its bleeding, or how to move it.
+	 */
+	private void tapped(ServerLevel level, Player player) {
+		if (com.jaymoskitchen.archery.StuckArrows.total(arrows()) > 0) {
+			pullArrow(level, player);
+			return;
+		}
+		if (isFish()) {
+			lootFish(level);
+			return;
+		}
+		if (isMachine()) {
+			search(level, player);
+			return;
+		}
+		switch (kind) {
+			case ANIMAL -> {
+				if (Hanging.use(this, level, player, ItemStack.EMPTY) == null) {
+					player.sendOverlayMessage(Component.translatable(tooBigToLift() ? "message.jaymoskitchen.corpse.too_big" : "message.jaymoskitchen.corpse.lift_hint"));
+				}
+			}
+			case PLAYER -> PlayerCorpses.restore(this, player, hotbar, selected);
+			case SKELETON -> {
+				if (!takeGear(level, player)) {
+					pullBone(level);
+				}
+			}
+			default -> search(level, player);
 		}
 	}
 

@@ -106,7 +106,9 @@ public final class Lodged {
 		});
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
 			if (hand != InteractionHand.MAIN_HAND || !player.getMainHandItem().isEmpty() || player.isSpectator()
-				|| !(entity instanceof LivingEntity body) || !body.isAlive() || stuck(body).isEmpty()) {
+				|| !(entity instanceof LivingEntity body) || !body.isAlive() || stuck(body).isEmpty()
+				|| com.jaymospowers.core.wounds.Downed.isDowned(body)) {
+				// (someone downed: a tap pulls it, after the press is let go, so a hold can drag them instead: pullOnTap)
 				return InteractionResult.PASS;
 			}
 			if (world instanceof ServerLevel level) {
@@ -114,6 +116,16 @@ public final class Lodged {
 			}
 			return InteractionResult.SUCCESS;
 		});
+	}
+
+	/**
+	 * Andy (2026-11-20): "right click hold should always be drag, tap can loot". {@code Downed}'s tap on someone downed,
+	 * with nothing taken from their hands: the last blade stuck in them comes out into an empty main hand.
+	 */
+	public static void pullOnTap(ServerLevel level, Player player, LivingEntity body) {
+		if (player.getMainHandItem().isEmpty() && body.isAlive() && !stuck(body).isEmpty()) {
+			pull(level, player, body);
+		}
 	}
 
 	/** What's stuck in {@code body}. */
