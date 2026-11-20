@@ -15823,3 +15823,10 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - Cheap: the smog has its own budget of about 0.15 puffs a tick (0.05 in low-end mode, `/lowend`), and far plumes another 0.5 (0.15), so all the smog together stays at about 300 puffs at most. The server sends at most the 64 nearest fires every 2 seconds.
 - Classes: `disasters/FireSmog` (new, server count and sync), `mixin/FireBlockSmogMixin` (new), `client/disasters/FireSmoke` (pall, far plumes), `StormParticle` (PALL kind), `Disasters`, `SkiesClient`.
 - Compiled; not seen in game. Heights, sizes, darkness, how long it lingers and the 8-fire threshold are first guesses.
+
+## 0.11.24 (2026-11-20): Busy villagers say so instead of opening their talk (#1899)
+
+- Andy: "if a villager is busy period theyll give you a message instead of the chat openining, the openining means they are stopping to speak with you".
+- Right click on an MCA villager who is in the middle of something that can't wait gets a line in a bubble (in their tongue), and their talk menu stays shut. Busy is: a fight (anyone they're after, including you on a sneak + right click; a duel, drill or barrage), a talk with someone else, tending the downed, carrying or burying the dead, hauling, unmasking or pinning someone, and looting. Everyday work (routines, hunting, a job) still stops for you, and the menu opening means they have stopped to talk.
+- One line every 2 seconds, so clicking again doesn't stack bubbles.
+- `TalkBusy` (new), `McaTalkHoldMixin`, `Conversations.talkingWithOther`, lang part `talk-busy.json`. Built; not played.
