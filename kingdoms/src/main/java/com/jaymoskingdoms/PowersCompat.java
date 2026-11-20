@@ -3874,6 +3874,44 @@ public final class PowersCompat {
 		}
 	}
 
+	/**
+	 * Andy (2026-11-20): "there needs to be a context menu on right click for lifting, pickpocketing, reviving, untying".
+	 * Whether Powers' body menu is there ({@code core.BodyMenu}): a tap of use on a body opens it, and what Kingdoms does to
+	 * a body (untying, cutting free, pockets, weapons) is chosen from it instead of being a click or a hold of its own.
+	 */
+	public static boolean bodyMenu() {
+		return FabricLoader.getInstance().isModLoaded("jaymospowers");
+	}
+
+	/**
+	 * Adds a row to Powers' body menu: {@code offered} says if it's there for this player and body now, {@code step} does one
+	 * tick of it (true while it goes on). Its label is the lang key {@code body_menu.jaymoskingdoms.<id>}. Nothing without Powers.
+	 */
+	@SuppressWarnings("unchecked")
+	public static void bodyOption(String id, int order, java.util.function.BiPredicate<net.minecraft.server.level.ServerPlayer, LivingEntity> offered,
+		java.util.function.BiPredicate<net.minecraft.server.level.ServerPlayer, LivingEntity> step) {
+		if (!bodyMenu()) {
+			return;
+		}
+		Object[] option = {JaymosKingdoms.id(id).toString(), order, offered, step};
+		FabricLoader.getInstance().getObjectShare().whenAvailable("jaymos:body_menu",
+			(key, adder) -> ((java.util.function.Consumer<Object[]>) adder).accept(option));
+	}
+
+	/** A use on a body that Kingdoms takes for its own (the lasso's): Powers starts no drag, revive or body menu from it. */
+	@SuppressWarnings("unchecked")
+	public static void claimUse(java.util.function.BiPredicate<Player, net.minecraft.world.entity.Entity> check) {
+		if (!bodyMenu()) {
+			return;
+		}
+		try {
+			Object list = Class.forName("com.jaymospowers.core.wounds.Downed").getField("CLAIMED_USES").get(null);
+			((java.util.List<java.util.function.BiPredicate<Player, net.minecraft.world.entity.Entity>>)list).add(check);
+		} catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Downed.CLAIMED_USES (older Powers?)", e);
+		}
+	}
+
 	private static java.lang.invoke.@Nullable MethodHandle carrierOf, slip;
 	private static boolean lookedForSlip;
 

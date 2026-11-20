@@ -1,0 +1,9 @@
+{
+	"body_menu.jaymospowers.revive": "Revive",
+	"body_menu.jaymospowers.shake": "Shake awake",
+	"body_menu.jaymospowers.drag": "Drag",
+	"body_menu.jaymospowers.lift": "Lift",
+	"body_menu.jaymospowers.pull_blade": "Pull out the blade",
+	"body_menu.jaymospowers.xeno_band": "Tear off the band",
+	"message.jaymospowers.body_menu.nothing": "There's nothing you can do for %s just now."
+}

@@ -65,12 +65,14 @@ public final class XenoBands {
 				worn(handler.player, false);
 			}
 		});
-		// a tap on a downed wearer tears the band off
-		com.jaymospowers.core.wounds.Downed.TAPPED_LISTENERS.add((taker, body) -> {
-			if (body instanceof ServerPlayer player && player != taker && XenoformPower.has(player)) {
-				takenBy(player, taker);
-			}
-		});
+		// a downed wearer's band is torn off from the body menu (a tap of use on them)
+		com.jaymospowers.core.BodyMenu.add("jaymospowers:xeno_band", 80,
+			(taker, body) -> body instanceof ServerPlayer player && player != taker && com.jaymospowers.core.wounds.Downed.isDowned(player)
+				&& XenoformPower.has(player),
+			(taker, body) -> {
+				takenBy((ServerPlayer) body, taker);
+				return false;
+			});
 		// a loose band destroyed goes back to the stars (one picked up leaves an emptied stack behind: not destroyed)
 		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
 			if (entity instanceof ItemEntity item && entity.getRemovalReason() != null && entity.getRemovalReason().shouldDestroy()

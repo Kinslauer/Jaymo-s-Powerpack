@@ -1,0 +1,8 @@
+# body menu - a tap of use on a body opens what you can do to it
+- Andy (2026-11-20, hogtying with the lasso): "there needs to be a context menu on right click for lifting, pickpocketing, reviving, untying. I had way too many prompts come up just now".
+- **Body menu** (`core.BodyMenu`, client `bodymenu.BodyMenuScreen`/`BodyMenuClient`): a quick tap of use, standing, on someone downed, hogtied or out cold in a faint opens a small list beside the crosshair with only what can be done to them now: Revive, Shake awake, Untie or Cut them free, Hear them out, Drag, Lift, Pick their pockets, Take their weapons, Pull out the blade, Tear off the band. Click a row or press its number; right-click or Escape closes it.
+- What you pick is done with nothing held: a timed one (revive, untying, pockets) fills its usual bar and stops, keeping its progress, if you step away. Opening the menu again stops it too.
+- Unchanged: hold use still drags the downed, sneak + hold use still revives, sneak + use still shakes a faint awake, sneak + hold left-click still executes. Medicine, a limb to fit, a gag, a wrap, a carried body and the lasso's own rope keep their clicks.
+- The standing tap on the downed no longer takes their weapons or a stuck blade straight away (both are on the menu now); Xeno-Band tear-off moved to the menu (`XenoBands`); `Downed.TAPPED_LISTENERS` is gone, `Downed.CLAIMED_USES` added (a use another mod takes for itself starts no drag or revive: the lasso's tying).
+- Lift from the menu takes them straight into your arms (too heavy in armour: a piece comes off first, as before); Haul the Bound is still needed for someone hogtied.
+- Built; not played.

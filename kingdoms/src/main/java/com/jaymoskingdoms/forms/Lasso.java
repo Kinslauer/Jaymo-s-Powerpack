@@ -281,6 +281,8 @@ public final class Lasso {
 		PowersCompat.listen("com.jaymospowers.core.Carry", "PICKED_UP_LISTENERS", (ServerPlayer carrier, Entity body) -> drop(body, false));
 		// a tied body is lifted as someone downed is, and a tied player can't jump out of the arms (Powers' Carry)
 		PowersCompat.boundCheck(Lasso::hogtied);
+		// (the tying's hold is the lasso's alone: no drag bar under it)
+		PowersCompat.claimUse((player, entity) -> claims(player, InteractionHand.MAIN_HAND, entity));
 	}
 
 	// ---- the loop ---------------------------------------------------------------------------------------------------------
@@ -720,10 +722,11 @@ public final class Lasso {
 	/**
 	 * Use (not sneaking) on the one on your own rope with the lasso in hand: the lasso's use, as if at the air (hauled, tied,
 	 * grabbed), not whatever a click on them does otherwise. Sneak and use on them is left to the rest (lifting a tied body).
+	 * Andy (2026-11-20): "there needs to be a context menu on right click ... I had way too many prompts come up": once they're
+	 * hogtied and at your side, a click on them is the body menu's (Powers' {@code BodyMenu}: untie, lift, pockets), not a spin.
 	 */
 	private static InteractionResult useOnHeld(Player player, Level level, InteractionHand hand, Entity entity, @Nullable EntityHitResult hit) {
-		Integer holding = player.getAttached(HOLDING);
-		if (holding == null || holding != entity.getId() || player.isShiftKeyDown() || !player.getItemInHand(hand).is(ITEM) || player.isUsingItem()) {
+		if (!claims(player, hand, entity) || player.isUsingItem()) {
 			return InteractionResult.PASS;
 		}
 		player.startUsingItem(hand);
@@ -734,6 +737,17 @@ public final class Lasso {
 			}
 		}
 		return InteractionResult.SUCCESS;
+	}
+
+	/**
+	 * Whether {@code player}'s use on {@code entity} is the lasso's: their own rope's, lasso in hand, standing, and not on
+	 * someone already hogtied at their side. Both sides alike (the rope and the hogtie are synced). Powers' downed drag and
+	 * revive and its body menu leave such a use alone ({@code Downed.CLAIMED_USES}), so the tying's bar is the only one.
+	 */
+	public static boolean claims(Player player, InteractionHand hand, Entity entity) {
+		Integer holding = player.getAttached(HOLDING);
+		return holding != null && holding == entity.getId() && !player.isShiftKeyDown() && player.getItemInHand(hand).is(ITEM)
+			&& !(entity instanceof LivingEntity body && hogtied(body) && player.distanceTo(body) <= TIE_REACH);
 	}
 
 	/** Using the lasso with someone on it: far, a haul; near, a humanoid's hogtie begins (use held) and anything else is grabbed. */
