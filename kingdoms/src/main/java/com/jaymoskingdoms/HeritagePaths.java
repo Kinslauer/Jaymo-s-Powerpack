@@ -612,17 +612,17 @@ public final class HeritagePaths {
 		}
 		double reach = WARD_BASE + WARD_STEP * step;
 		for (Mob e : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(reach), e -> e.isAlive() && e.is(EntityTypeTags.UNDEAD))) {
-			Vec3 away = m.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
+			Vec3 away = e.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
 			if (away.lengthSqr() < 1.0E-4) {
 				continue;
 			}
 			away = away.normalize().scale(WARD_PUSH);
-			m.push(away.x, 0.05, away.z);
-			m.syncVelocity = true;
-			m.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, GIFT_TICKS * 2, 1, true, false, false));
+			e.push(away.x, 0.05, away.z);
+			e.syncVelocity = true;
+			e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, GIFT_TICKS * 2, 1, true, false, false));
 			if (step >= 5) {
-				m.hurtServer(level, level.damageSources().magic(), WARD_BURN);
-				level.sendParticles(ParticleTypes.SMALL_FLAME, m.getX(), m.getY() + m.getBbHeight() * 0.6, m.getZ(), 3, 0.2, 0.3, 0.2, 0.01);
+				e.hurtServer(level, level.damageSources().magic(), WARD_BURN);
+				level.sendParticles(ParticleTypes.SMALL_FLAME, e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 3, 0.2, 0.3, 0.2, 0.01);
 			}
 		}
 	}
