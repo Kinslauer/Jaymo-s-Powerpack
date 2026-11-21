@@ -16012,3 +16012,70 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - Villagers, guards and settlement folk still come as before, but nobody who'd carry you off wakes you first: camp raiders, outlaws and other captors, and guards whose realm wants you in its cells. Those leave you to be taken.
 - `FaintWakers.companion`, `choose(mob, canSteal)`; `HeldBack.wants` (the check from `gaol`, now shared).
 - Built; not played.
+
+## 0.11.43 (2026-11-20): body controls - tap takes a downed one's weapons (#1935)
+
+- Andy: "right click hold should always be drag, tap can loot". Taking the weapons and arrows off a downed mob now happens on the tap (Powers' `Downed.TAPPED_LISTENERS`, once use is let go), so holding use to drag them no longer empties their hands first. The click is still swallowed so a downed villager's screen never opens.
+- Loading hint 169 rewritten for the new controls (hold drags, tap takes, sneak + hold revives, kneel for locks); hint 4 now says executions are sneak + hold attack.
+- Built; not played.
+
+## 0.11.44 (2026-11-20): Downed airships' dead crew are steam-town people, not plain villagers (#1944)
+
+- **A downed airship's dead are her steam-town crew** (Andy: "these villagers shouldnt exist, they need to be reskinned or swapped to MCA from the steampunk to match the lore book you find with that wreck"). The bodies lying round a sky wreck were made from a plain villager that never joined the world, so MCA never swapped it for one of its people, and they lay there as vanilla villagers with big noses and robes. Now each is one of MCA's people (their own face, hair and name), dressed for the steam town her log says she was out of: the first is her captain, in the town's aeronaut's clothes, the others her engineers who kept her boilers. Without MCA they stay plain villagers; without Kitchen it's still bones and a skull. `SkyWrecks`.
+- Built; not played.
+
+## 0.11.45 (2026-11-20): drivers never lie across their horses (#1943)
+
+- **Carriage and cab drivers**: a coachman or cab driver who was knocked down or had gone to bed was put straight back in the saddle (the "out of the saddle, get back on" check), so he lay flat across his horse. Now a driver who is down, asleep or being carried stays where he is until he is up again, then gets back on. One found down in the saddle is taken off the horse, and one found asleep there is woken. (`Drivers.canMount`, `Drivers.step`, `Cabs`, `Carriages`)
+- The same check for caravan riders getting back on (`Caravans.remount`) and for guards being given a spare horse (`Cavalry`): no downed guard is put on a horse.
+- Built; not played.
+
+## 0.11.46 (2026-11-20): no floating trees: unsupported wood falls (#1942)
+
+- **Trees don't float any more** (Andy's burnt birch wood clip): whenever something holding wood up goes, by any cause
+  (a log burned, blown, broken or chopped out, the ground dug from under a trunk), the logs beside it are looked at once
+  the tick is over. A piece of joined logs that touches nothing solid but other wood and leaves comes down: with leaves
+  left on it, or more than 3 logs, it drops as a falling tree (tumbles to its heavier side, crashes, strikes what it
+  lands on, then lies as a fallen tree to chop up); 1 to 3 bare logs fall like sand and land as logs, hurting a little.
+- **Builds stay up**: a piece with any player-placed log or any stripped log is never brought down, and logs in a
+  building touch its planks, stone or earth, which hold them. Leaves, vines, fire, cocoa pods and bee nests hold nothing up.
+  Pieces over 200 logs, or running into unloaded land, are left alone.
+- Logs already floating in old worlds only come down once something next to them changes.
+- `LooseWood` (new), `LooseWoodMixin` (ServerLevel block changes), `FallingTree.drop`; `Trees.leavesOf` now package-wide.
+- Built; not played.
+
+## 0.11.47 (2026-11-20): chopping up a felled tree no longer knocks the next tree onto you (#1945)
+
+- Andy, downed while chopping up a tree he'd felled half a minute before (clip "Clip 2026-11-20 00-37-46 2"): "what hit me here?". It was the standing tree beside it, knocked over onto him by `FelledCompat`'s knock-on.
+- Cause: the knock-on reads how fast a Felled tree is moving from Felled's `trunkTop`, which is the tree's middle log. Chopping a log off a tree lying still moves that middle a block or so along the trunk in one tick, which read as the tree moving fast, so any natural tree within a block of its logs went over that way (and our falling trees hit whoever they pass, up to 7 hearts).
+- `FelledCompat` now counts the tree's logs; when it has fewer than when last counted, that tick's jump isn't motion and it starts again from where the middle is now. Real falls, leaning trees and blasts knock on as before.
+- Built; not played.
+
+## 0.11.48 (2026-11-20): strike a hogtied captive from the saddle (#1948)
+
+- **Strike your captive** (Andy: "add a button for the rider to hit the captive and reset their struggle progress, much like red dead redemption 2"): riding a horse with a hogtied captive slung across its back (Powers' Sling), the attack button hits them. No damage, but their struggle against the knots starts over from nothing and stalls for 1.5 s; one strike a second at most. A tied player sees "The blow knocks the fight out of you."
+- It's its own key in Controls ("Strike your captive (on horseback)", Jaymo's Lasso), on the left mouse button by default alongside Attack, and does nothing unless you're riding a horse with a hogtied body over it.
+- Loading hint 173 mentions slinging a captive and striking them.
+- `Lasso.StrikeCaptive` payload, `Lasso.strikeSlung`, `PowersCompat.slungOn`, client `LassoStrikeKey`.
+- Built; not played.
+
+## 0.11.49 (2026-11-20): body menu rows - untie, cut free, hear out, pick pockets, take weapons (#1949)
+
+- Andy (2026-11-20, hogtying with the lasso): "there needs to be a context menu on right click for lifting, pickpocketing, reviving, untying. I had way too many prompts come up just now".
+- With Jaymo's Powers, Kingdoms' actions on a body are rows on Powers' body menu (a tap of use on them) instead of clicks and holds of their own: **Untie** / **Cut them free** (a blade in hand) and **Hear them out** for the wanted (`Captures`), **Pick their pockets** on a downed or hogtied villager or settlement folk (`Pickpocket`: they can't turn and catch you, anyone watching still sees a theft; Light Fingers still needed), **Take their weapons** off the downed (`Downed`).
+- A plain hold of use on someone hogtied no longer starts untying (that bar came up over the others). Without Powers, the old click and hold still work.
+- The lasso: holding use to tie someone no longer has Powers' drag bar starting under it (`Lasso.claims`, through `PowersCompat.claimUse`); a click on someone already hogtied at your side is the menu's, not a spin of the lasso.
+- Hints 169 and 173 say so (169: a revive is from a kneel now); the story hint and the Executioner perk say a hold of attack finishes a downed enemy, with no sneak (Powers' executions no longer need it).
+- Built; not played.
+
+## 0.11.50 (2026-11-20): Rogue's Arts: four perks for the stealth kill (#1952)
+
+- **The Rogue's Arts page on Stealth is back** (its old perks moved into the Thief's tree, which left it empty), with four perks for Powers' stealth kill (sneak + hold attack behind someone on their feet who hasn't seen you, a weapon in hand), which everyone has without them:
+  - **Quick Work** (2 ranks, Stealth 5): the hold is 1 s, then 0.5 s (from 1.5 s).
+  - **Silent Snap** (Stealth 5): the stealth kill with empty hands, a twist of the head. Quiet Word's choke hold still comes first on someone who talks.
+  - **Bigger Game** (2 ranks, Stealth 9, after Quick Work): up to 80 health and 3.2 blocks tall, then 150 and 4.2 (from 40 and 2.5). Never bosses.
+  - **Into the Dark** (2 points, Stealth 13, after Bigger Game): for 8 s after a stealth kill mobs see you at 0.35 of the distance (`StealthKills.sight`, in `Senses`).
+- Every stealth kill gives an assassination's Stealth (and Thief) experience.
+- Quiet Word's description says the choke hold is the empty hand's now.
+- Classes: `Skills` (the four perks, the tag read), `StealthKills` (new), `Senses`, `client/SkillIcons`; lang part `rogues-arts.json`.
+- Built; not played.

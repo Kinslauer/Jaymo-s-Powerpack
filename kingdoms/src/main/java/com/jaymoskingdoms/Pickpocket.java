@@ -135,6 +135,8 @@ public final class Pickpocket {
 		final LivingEntity mark;
 		final long start, until;
 		long held;
+		/** A helpless mark's (downed or hogtied, from the body menu): they can't turn and catch the hand. */
+		boolean helpless;
 
 		Lift(LivingEntity mark, long start, long until) {
 			this.mark = mark;
@@ -207,6 +209,9 @@ public final class Pickpocket {
 			start(sp, level, mark, now);
 			return InteractionResult.SUCCESS;
 		});
+		// Andy (2026-11-20): "there needs to be a context menu on right click for lifting, pickpocketing, reviving, untying".
+		// Someone downed or hogtied has their pockets gone through from Powers' body menu (a tap of use on them)
+		PowersCompat.bodyOption("pickpocket", 50, (player, body) -> searchable(body) && player.getMainHandItem().isEmpty(), Pickpocket::search);
 		ServerTickEvents.END_SERVER_TICK.register(Pickpocket::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			LIFTING.clear();
@@ -223,6 +228,49 @@ public final class Pickpocket {
 			return false;
 		}
 		return e instanceof Villager || e instanceof Folk folk && !folk.leader();
+	}
+
+	/** Has pockets to go through as they lie: a grown villager or a settlement's folk (not its ruler), downed or hogtied. */
+	static boolean searchable(LivingEntity e) {
+		if (!e.isAlive() || e.isBaby() || e.getAttached(com.jaymoskingdoms.dragons.Disguises.DISGUISE) != null
+			|| !(e instanceof Villager || e instanceof Folk folk && !folk.leader())) {
+			return false;
+		}
+		return Downed.isDowned(e) || com.jaymoskingdoms.forms.Lasso.hogtied(e);
+	}
+
+	/**
+	 * One tick of {@code player}'s hand in a helpless {@code mark}'s pockets, chosen from the body menu: the hand goes in as
+	 * a held use would put it, and stays while this goes on. They can't turn to catch it; anyone watching still sees a theft
+	 * ({@link #pick}). True while the hand's in.
+	 */
+	private static boolean search(ServerPlayer player, LivingEntity mark) {
+		if (!(player.level() instanceof ServerLevel level) || !searchable(mark)) {
+			return false;
+		}
+		long now = level.getGameTime();
+		Lift lift = LIFTING.get(player.getUUID());
+		if (lift != null) {
+			if (lift.mark != mark) {
+				return false;
+			}
+			lift.held = now;
+			return true;
+		}
+		Rest rest = RESTING.get(player.getUUID());
+		if (rest != null && rest.until() > now || !player.getMainHandItem().isEmpty()) {
+			return false;
+		}
+		if (!TreeLocks.check(player, TreeLocks.Lock.PICKPOCKET) || !Vows.allows(player, "pickpocket")) {
+			// (learned: Light Fingers; or an oath or a pact that forbids it)
+			return false;
+		}
+		start(player, level, mark, now);
+		Lift started = LIFTING.get(player.getUUID());
+		if (started != null) {
+			started.helpless = true;
+		}
+		return true;
 	}
 
 	/** {@code player} is behind {@code mark}: the way its body faces and the line to them are at least this far apart. */
@@ -336,7 +384,7 @@ public final class Pickpocket {
 				end(player, mark, now);
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.pickpocket.slipped_away", mark.getDisplayName())
 					.withStyle(ChatFormatting.GRAY));
-			} else if (!mark.isSleeping() && !behind(player, mark, Skills.turnCos(player, TURN_COS))) {
+			} else if (!lift.helpless && !mark.isSleeping() && !behind(player, mark, Skills.turnCos(player, TURN_COS))) {
 				it.remove();
 				end(player, mark, now);
 				caught(player, level, mark, law(level, mark));

@@ -28,6 +28,14 @@ import org.jspecify.annotations.Nullable;
 public final class StanceScroll {
 	/** After a climb from the crouch: how long (ticks, counted once the climb is over) Sneak and the wheel don't crouch you. */
 	static final int CLIMB_STAND_TICKS = 20;
+	/**
+	 * Andy (2026-11-20): "a rapid scroll down should get you to crouch, you should have to spend at least a second there"
+	 * before the wheel takes you on down to prone. Ticks in the low crouch before a notch down lays you flat; notches
+	 * sooner are dropped, so a fast scroll stops on the knee.
+	 */
+	static final int PRONE_AFTER_TICKS = 20;
+	/** Ticks spent in the low crouch so far (see {@link #PRONE_AFTER_TICKS}). */
+	private static int lowTicks;
 	/** Ticks left of that ({@link #CLIMB_STAND_TICKS}). */
 	private static int standTicks;
 	/** The stance held for you (a {@link Stance} constant), or null: none, Sneak works as it always has. */
@@ -97,6 +105,11 @@ public final class StanceScroll {
 		}
 		if (standTicks > 0 && !CrawlTaps.prone()) {
 			// (just up from a climb: the wheel doesn't crouch you yet)
+			wheel = 0.0;
+			return true;
+		}
+		if (from == Stance.LOW && to == Stance.PRONE && lowTicks < PRONE_AFTER_TICKS) {
+			// (not on the knee long enough yet: the notch is dropped)
 			wheel = 0.0;
 			return true;
 		}
@@ -193,6 +206,7 @@ public final class StanceScroll {
 			held = null;
 			Stance.localLow = -1;
 			wheel = 0.0;
+			lowTicks = 0;
 			return;
 		}
 		boolean shift = minecraft.options.keyShift.isDown();
@@ -226,6 +240,7 @@ public final class StanceScroll {
 		if (held != null && held == Stance.STAND && !shift) {
 			held = null;
 		}
+		lowTicks = Stance.localLow == player.getId() ? lowTicks + 1 : 0;
 		tickKneel(player);
 		shiftWas = shift;
 		jumpWas = jump;
