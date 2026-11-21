@@ -16,10 +16,10 @@ public sealed interface HandsOnInputPayload {
         public static final Type<ChopInput> TYPE = new Type<>(JaymosKitchen.id("hands_on_chop"));
         public static final StreamCodec<RegistryFriendlyByteBuf, ChopInput> CODEC = CustomPacketPayload.codec(
                 (p, buf) -> {
-                    buf.writeUuid(p.sessionId());
+                    buf.writeUUID(p.sessionId());
                     buf.writeFloat(p.cutOffset());
                 },
-                buf -> new ChopInput(buf.readUuid(), buf.readFloat()));
+                buf -> new ChopInput(buf.readUUID(), buf.readFloat()));
 
         @Override
         public Type<ChopInput> type() {
@@ -32,12 +32,12 @@ public sealed interface HandsOnInputPayload {
         public static final Type<StirInput> TYPE = new Type<>(JaymosKitchen.id("hands_on_stir"));
         public static final StreamCodec<RegistryFriendlyByteBuf, StirInput> CODEC = CustomPacketPayload.codec(
                 (p, buf) -> {
-                    buf.writeUuid(p.sessionId());
+                    buf.writeUUID(p.sessionId());
                     buf.writeFloat(p.angle());
                     buf.writeFloat(p.speed());
                     buf.writeBoolean(p.boiling());
                 },
-                buf -> new StirInput(buf.readUuid(), buf.readFloat(), buf.readFloat(), buf.readBoolean()));
+                buf -> new StirInput(buf.readUUID(), buf.readFloat(), buf.readFloat(), buf.readBoolean()));
 
         @Override
         public Type<StirInput> type() {

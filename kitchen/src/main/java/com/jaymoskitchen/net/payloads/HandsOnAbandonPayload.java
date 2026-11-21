@@ -12,8 +12,8 @@ public record HandsOnAbandonPayload(UUID sessionId)
         implements CustomPacketPayload {
     public static final Type<HandsOnAbandonPayload> TYPE = new Type<>(JaymosKitchen.id("hands_on_abandon"));
     public static final StreamCodec<RegistryFriendlyByteBuf, HandsOnAbandonPayload> CODEC = CustomPacketPayload.codec(
-            (p, buf) -> buf.writeUuid(p.sessionId()),
-            buf -> new HandsOnAbandonPayload(buf.readUuid()));
+            (p, buf) -> buf.writeUUID(p.sessionId()),
+            buf -> new HandsOnAbandonPayload(buf.readUUID()));
 
     @Override
     public Type<HandsOnAbandonPayload> type() {

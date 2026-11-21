@@ -16,13 +16,13 @@ public record HandsOnSyncPayload(UUID sessionId, float heat, float progress, int
     public static final Type<HandsOnSyncPayload> TYPE = new Type<>(JaymosKitchen.id("hands_on_sync"));
     public static final StreamCodec<RegistryFriendlyByteBuf, HandsOnSyncPayload> CODEC = CustomPacketPayload.codec(
             (p, buf) -> {
-                buf.writeUuid(p.sessionId());
+                buf.writeUUID(p.sessionId());
                 buf.writeFloat(p.heat());
                 buf.writeFloat(p.progress());
                 buf.writeVarInt(p.status());
                 buf.writeVarInt(p.quality());
             },
-            buf -> new HandsOnSyncPayload(buf.readUuid(), buf.readFloat(), buf.readFloat(), buf.readVarInt(), buf.readVarInt()));
+            buf -> new HandsOnSyncPayload(buf.readUUID(), buf.readFloat(), buf.readFloat(), buf.readVarInt(), buf.readVarInt()));
 
     @Override
     public Type<HandsOnSyncPayload> type() {

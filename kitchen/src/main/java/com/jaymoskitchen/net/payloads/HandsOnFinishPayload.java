@@ -16,14 +16,14 @@ public record HandsOnFinishPayload(UUID sessionId, int quality, ItemStack[] rewa
     public static final Type<HandsOnFinishPayload> TYPE = new Type<>(JaymosKitchen.id("hands_on_finish"));
     public static final StreamCodec<RegistryFriendlyByteBuf, HandsOnFinishPayload> CODEC = CustomPacketPayload.codec(
             (p, buf) -> {
-                buf.writeUuid(p.sessionId());
+                buf.writeUUID(p.sessionId());
                 buf.writeVarInt(p.quality());
                 buf.writeVarInt(p.rewards.length);
                 for (ItemStack s : p.rewards()) {
-                    buf.writeItemStack(s);
+                    ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, s);
                 }
             },
-            buf -> new HandsOnFinishPayload(buf.readUuid(), buf.readVarInt(),
+            buf -> new HandsOnFinishPayload(buf.readUUID(), buf.readVarInt(),
                     buf.readList(buf.readVarInt(), ItemStack.STREAM_CODEC::new).toArray(ItemStack[]::new)));
 
     @Override
