@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-21 12:08). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-21 12:09). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -31,7 +31,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/devils-hole-pupfish-writeup|devils-hole-pupfish-writeup]] · 🪶 Quill · #1971 · claimed
 
 
 ## In review
@@ -48,6 +47,7 @@ kanban-plugin: board
 - [ ] [[Inbox/zfighter-gaps-4-forms|zfighter-gaps-4-forms]] · 🍇 Bacchus · #1965 · in-review
 - [ ] [[Inbox/mutant-zombie-reskin|mutant-zombie-reskin]] · 🔥 Prometheus · #1968 · in-review
 - [ ] [[Inbox/enemy-damage-balance|enemy-damage-balance]] · ☀️ Apollo · #1970 · in-review
+- [ ] [[Inbox/devils-hole-pupfish-writeup|devils-hole-pupfish-writeup]] · 🪶 Quill · #1971 · in-review
 
 
 ## Needs Andy
