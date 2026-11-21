@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-21 23:39
+updated: 2026-11-21 23:47
 ---
 # Open PRs
 
-23 open, as of 2026-11-21 23:39. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+23 open, as of 2026-11-21 23:47. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1853](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1853) Heritage paths: core + Heartlander, Stoneborn, Tideborn (Kingdoms, Powers)
@@ -118,5 +118,5 @@ Andy merges only on "merge", one at a time.
 
 ## [#1973](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1973) Kingdoms rise without a visit, VillagersPlus job houses, forestry fiefs
 - **Branch:** `claude/project-thread-utfz5g` · **Updated:** 2026-11-21 (today)
-- **Checks:** ⏳ 1 of 4 running
+- **Checks:** ✅ 5 passed
 - **Agent:** no agent note
