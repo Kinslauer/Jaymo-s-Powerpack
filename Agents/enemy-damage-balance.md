@@ -1,14 +1,26 @@
 ---
-status: running
+status: in-review
 task: enemy-damage-balance
 branch: claude/enemy-damage-balance
 with: 
-pr: 
-mods: 
+pr: 1970
+mods: powers, kingdoms
 versions: 
 started: 2026-11-21
 owns:
-  - 
+  - src/main/java/com/jaymospowers/power/zfighter/ZFighterRogue.java
+  - src/main/java/com/jaymospowers/power/zfighter/ZFighterNpcKi.java
+  - src/main/java/com/jaymospowers/power/xenoform/RivalAlien.java
+  - src/main/java/com/jaymospowers/power/xenoform/XenoDouble.java
+  - src/main/java/com/jaymospowers/power/chrono/ChronoEcho.java
+  - src/main/java/com/jaymospowers/power/blindness/Unseeing.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/wild/Grizzly.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/wild/FeralWolf.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/wild/Coyote.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/wild/Moose.java
+  - kingdoms/src/main/java/com/jaymoskingdoms/beasts/WildBoar.java
+  - changes/powers/enemy-damage-balance.md
+  - changes/kingdoms/enemy-damage-balance.md
 ---
 # Enemy Damage Balance
 
@@ -26,4 +38,9 @@ owns:
 - No code changes yet — research first
 
 ## Done
-What a player will see, and what wasn't tested.
+- Reduced base damage and heavy move damage across all enemy types in Powers and Kingdoms
+- Increased cooldowns on heavy moves (ki attacks, beast special moves) so they're used occasionally
+- Basic melee attacks now deal low damage per hit, giving players time to react
+- Created change notes for both Powers and Kingdoms
+- PR #1970 opened for review
+- Compiles but hasn't been played yet
