@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-21 04:53). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-21 05:20). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -32,7 +32,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · ☀️ Apollo · #1957 · changes · fixing review notes
-- [ ] [[Inbox/zfighter-gaps-2-power|zfighter-gaps-2-power]] · 🔨 Hephaestus · #1938 · claimed
 
 
 ## In review
@@ -58,6 +57,7 @@ kanban-plugin: board
 - [ ] [[Inbox/zfighter-gaps-5-training|zfighter-gaps-5-training]] · ☀️ Apollo · #1953 · blocked
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · 🔨 Hephaestus · #1896 · blocked
 - [ ] [[Inbox/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]] · 🍇 Bacchus · blocked
+- [ ] [[Inbox/zfighter-gaps-2-power|zfighter-gaps-2-power]] · 🔨 Hephaestus · #1938 · blocked
 
 
 ## Done
