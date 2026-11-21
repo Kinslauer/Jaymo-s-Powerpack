@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-21 05:20). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-21 05:21). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -31,7 +31,7 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · ☀️ Apollo · #1957 · changes · fixing review notes
+- [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🔨 Hephaestus · #1957 · claimed
 
 
 ## In review
