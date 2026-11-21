@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-20 20:27
+updated: 2026-11-21 04:45
 ---
 # Open PRs
 
-10 open, as of 2026-11-20 20:27. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+19 open, as of 2026-11-21 04:45. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1853](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1853) Heritage paths: core + Heartlander, Stoneborn, Tideborn (Kingdoms, Powers)
@@ -55,3 +55,48 @@ Andy merges only on "merge", one at a time.
 - **Branch:** `claude/zfighter-gaps-9-afterlife-tourneys` · **Updated:** 2026-11-21 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[zfighter-gaps-9-afterlife-tourneys]]
+
+## [#1957](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1957) Hands-on cooking: CHOP and STIR in-world interactions (Phase 1+2)
+- **Branch:** `claude/hands-on-cooking-realtime` · **Updated:** 2026-11-21 (today)
+- **Checks:** no checks
+- **Agent:** no agent note
+
+## [#1958](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1958) Z Fighter gaps 1: Strike stat and critical blows
+- **Branch:** `claude/zfighter-gaps-1-stats` · **Updated:** 2026-11-21 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[zfighter-gaps-1-stats]]
+
+## [#1959](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1959) Freerun: keyframe ledge hang and mantle via GeckoLib clips
+- **Branch:** `claude/parkour-animations` · **Updated:** 2026-11-21 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[parkour-animations]]
+
+## [#1960](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1960) Blockbench models for the 4 Z Fighter form lines
+- **Branch:** `claude/zfighter-forms-models` · **Updated:** 2026-11-21 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#1961](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1961) Z Fighter gaps 8: four themed raids (crashed pod, razed Verdant village, demon camp, machine army)
+- **Branch:** `claude/zfighter-gaps-8-raids` · **Updated:** 2026-11-21 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#1962](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1962) Z Fighter form animations: idle, walk, attack for the four forms
+- **Branch:** `claude/zfighter-form-animations` · **Updated:** 2026-11-21 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#1963](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1963) Textures for the four Z Fighter form lines
+- **Branch:** `claude/zfighter-forms-textures` · **Updated:** 2026-11-21 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#1964](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1964) Patch 10: pair each old-age temple site with its patron
+- **Branch:** `claude/medieval-patch10-temple-patrons` · **Updated:** 2026-11-21 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[medieval-patch10-temple-patrons]]
+
+## [#1965](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1965) Z Fighter gaps 4: form foundation
+- **Branch:** `claude/zfighter-gaps-4-forms` · **Updated:** 2026-11-21 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[zfighter-gaps-4-forms]]
