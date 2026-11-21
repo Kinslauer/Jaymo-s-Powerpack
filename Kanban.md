@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 19:04). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 19:35). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -33,11 +33,11 @@ kanban-plugin: board
 - [ ] [[Inbox/zfighter-gaps-1-stats|zfighter-gaps-1-stats]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-gaps-4-forms|zfighter-gaps-4-forms]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/parkour-animations|parkour-animations]] · for any · open
+- [ ] [[Inbox/zfighter-gaps-8-raids|zfighter-gaps-8-raids]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
 
-- [ ] [[Inbox/zfighter-gaps-8-raids|zfighter-gaps-8-raids]] · 🍇 Bacchus · claimed
 
 
 ## In review
