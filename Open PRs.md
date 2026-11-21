@@ -1,40 +1,35 @@
 ---
-updated: 2026-11-21 23:20
+updated: 2026-11-21 23:39
 ---
 # Open PRs
 
-22 open, as of 2026-11-21 23:20. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+23 open, as of 2026-11-21 23:39. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1853](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1853) Heritage paths: core + Heartlander, Stoneborn, Tideborn (Kingdoms, Powers)
 - **Branch:** `claude/heritage-paths` · **Updated:** 2026-11-20 (1 day ago)
 - **Checks:** ✅ 5 passed
-- **Agent:** no agent note
+- **Agent:** [[heritage-paths]]
 
 ## [#1896](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1896) Scrying Orb: fix 26.3 API issues
 - **Branch:** `claude/scrying-orb` · **Updated:** 2026-11-20 (1 day ago)
 - **Checks:** ❌ failing: Build Kingdoms
-- **Agent:** no agent note
+- **Agent:** [[scrying-orb-design-spec]]
 
 ## [#1937](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1937) Z Fighter gaps 10: front camera settings, HUD options, ki sense damage tally, travel/combat flight
 - **Branch:** `claude/zfighter-gaps-10-camera-hud` · **Updated:** 2026-11-21 (today)
 - **Checks:** ✅ 5 passed
-- **Agent:** no agent note
+- **Agent:** [[zfighter-gaps-10-camera-hud]]
 
 ## [#1938](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1938) Z Fighter gaps 2: stamina for Flash Step, guard and forms
 - **Branch:** `claude/zfighter-gaps-2-power` · **Updated:** 2026-11-21 (today)
 - **Checks:** ❌ failing: Build Powers
-- **Agent:** no agent note
+- **Agent:** [[zfighter-gaps-2-power]]
 
 ## [#1939](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1939) Z Fighter gaps 3: 10 new techniques
 - **Branch:** `claude/zfighter-gaps-3-techniques` · **Updated:** 2026-11-20 (1 day ago)
 - **Checks:** ✅ 5 passed
-- **Agent:** no agent note
-
-## [#1951](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1951) Text hints show as tip cards in the top right
-- **Branch:** `claude/project-thread-hag1a3` · **Updated:** 2026-11-20 (1 day ago)
-- **Checks:** ✅ 5 passed
-- **Agent:** no agent note
+- **Agent:** [[zfighter-gaps-3-techniques]]
 
 ## [#1953](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1953) Z Fighter gaps 5: training drills, grades, pod pilot, shadow dummy
 - **Branch:** `claude/zfighter-gaps-5-training` · **Updated:** 2026-11-20 (1 day ago)
@@ -54,7 +49,7 @@ Andy merges only on "merge", one at a time.
 ## [#1956](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1956) Z Fighter gaps 9: borrowed time, spared masters' homes, themed tournaments
 - **Branch:** `claude/zfighter-gaps-9-afterlife-tourneys` · **Updated:** 2026-11-21 (today)
 - **Checks:** ✅ 5 passed
-- **Agent:** no agent note
+- **Agent:** [[zfighter-gaps-9-afterlife-tourneys]]
 
 ## [#1957](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1957) Hands-on cooking: CHOP and STIR in-world interactions (Phase 1+2)
 - **Branch:** `claude/hands-on-cooking-realtime` · **Updated:** 2026-11-21 (today)
@@ -64,12 +59,12 @@ Andy merges only on "merge", one at a time.
 ## [#1958](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1958) Z Fighter gaps 1: Strike stat and critical blows
 - **Branch:** `claude/zfighter-gaps-1-stats` · **Updated:** 2026-11-21 (today)
 - **Checks:** ✅ 5 passed
-- **Agent:** no agent note
+- **Agent:** [[zfighter-gaps-1-stats]]
 
 ## [#1959](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1959) Freerun: keyframe ledge hang and mantle via GeckoLib clips
 - **Branch:** `claude/parkour-animations` · **Updated:** 2026-11-21 (today)
 - **Checks:** ✅ 5 passed
-- **Agent:** no agent note
+- **Agent:** [[parkour-animations]]
 
 ## [#1960](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1960) Blockbench models for the 4 Z Fighter form lines
 - **Branch:** `claude/zfighter-forms-models` · **Updated:** 2026-11-21 (today)
@@ -94,24 +89,34 @@ Andy merges only on "merge", one at a time.
 ## [#1964](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1964) Patch 10: pair each old-age temple site with its patron
 - **Branch:** `claude/medieval-patch10-temple-patrons` · **Updated:** 2026-11-21 (today)
 - **Checks:** ✅ 5 passed
-- **Agent:** no agent note
+- **Agent:** [[medieval-patch10-temple-patrons]]
 
 ## [#1965](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1965) Z Fighter gaps 4: form foundation
 - **Branch:** `claude/zfighter-gaps-4-forms` · **Updated:** 2026-11-21 (today)
 - **Checks:** ✅ 5 passed
-- **Agent:** no agent note
+- **Agent:** [[zfighter-gaps-4-forms]]
 
 ## [#1968](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1968) Mutant zombie reskin: cyan chestplate and blue pants
 - **Branch:** `claude/mutant-zombie-reskin` · **Updated:** 2026-11-21 (today)
 - **Checks:** ✅ 5 passed
-- **Agent:** no agent note
+- **Agent:** [[mutant-zombie-reskin]]
 
 ## [#1970](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1970) Enemy damage balance: reduce damage across Powers and Kingdoms enemies
 - **Branch:** `claude/enemy-damage-balance` · **Updated:** 2026-11-21 (today)
 - **Checks:** ✅ 5 passed
-- **Agent:** no agent note
+- **Agent:** [[enemy-damage-balance]]
 
 ## [#1971](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1971) Devil's Hole Pupfish lore write-up
 - **Branch:** `claude/devils-hole-pupfish-writeup` · **Updated:** 2026-11-21 (today)
 - **Checks:** ✅ 5 passed
+- **Agent:** [[devils-hole-pupfish-writeup]]
+
+## [#1972](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1972) Tips switch: /tips off, or a button on the Notices page
+- **Branch:** `claude/project-thread-hag1a3` · **Updated:** 2026-11-21 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#1973](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1973) Kingdoms rise without a visit, VillagersPlus job houses, forestry fiefs
+- **Branch:** `claude/project-thread-utfz5g` · **Updated:** 2026-11-21 (today)
+- **Checks:** ⏳ 1 of 4 running
 - **Agent:** no agent note
