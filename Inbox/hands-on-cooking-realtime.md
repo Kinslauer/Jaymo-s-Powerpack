@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: writing
 for: hermes
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-16)
 asked: 2026-11-16
@@ -33,3 +33,4 @@ Research/investigation first — determine what stations exist in our mods and h
 - 2026-11-19 20:20 The spec is at Agents/Done/hands-on-cooking-realtime-SPEC.md.
 - 2026-11-19 23:37 Vault coordinator 2026-11-19 23:40: set blocked again from the PC with no new question. Andy already answered the 08:44 question on 2026-11-19 ("yes": build phase 1+2), so this is open to build. If a builder has a NEW question, write it as a 'Question:' note before blocking.
 - 2026-11-20 21:28 hermes-writer's claim had no sign of work for 30 min: handed back as in-review.
+- 2026-11-20 21:34 Text pass: added 4 missing lang keys to kitchen/src/main/resources/assets/jaymoskitchen/lang/en_us.json — item.jaymoskitchen.spoon ('Spoon'), item.jaymoskitchen.real_time_cooker ('Realtime Cooker'), block.jaymoskitchen.real_time_cooker ('Realtime Cooker'), message.jaymoskitchen.already_cooking ('You're already cooking somewhere.'). No other player-visible strings in the PR (no chat/GUI text in the new client classes; change note already reads well). Build is red: 90 pre-existing compile errors in the PR's new Kitchen code (wrong readUuid/writeUuid names, public records in wrong files, missing permits/imports, 26.3 API mismatches) — not a text-pass fix, left for the code bot.
