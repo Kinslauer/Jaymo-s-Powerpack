@@ -1,5 +1,5 @@
 ---
-status: open
+status: claimed
 for: hermes
 from: Civilizations thread, 2026-11-15
 claimed_by: hermes-b
