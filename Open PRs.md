@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-21 06:26
+updated: 2026-11-21 08:16
 ---
 # Open PRs
 
-19 open, as of 2026-11-21 06:26. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+20 open, as of 2026-11-21 08:16. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1853](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1853) Heritage paths: core + Heartlander, Stoneborn, Tideborn (Kingdoms, Powers)
@@ -58,7 +58,7 @@ Andy merges only on "merge", one at a time.
 
 ## [#1957](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1957) Hands-on cooking: CHOP and STIR in-world interactions (Phase 1+2)
 - **Branch:** `claude/hands-on-cooking-realtime` · **Updated:** 2026-11-21 (today)
-- **Checks:** no checks
+- **Checks:** ❌ failing: Build Kitchen
 - **Agent:** no agent note
 
 ## [#1958](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1958) Z Fighter gaps 1: Strike stat and critical blows
@@ -100,3 +100,8 @@ Andy merges only on "merge", one at a time.
 - **Branch:** `claude/zfighter-gaps-4-forms` · **Updated:** 2026-11-21 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[zfighter-gaps-4-forms]]
+
+## [#1968](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1968) Mutant zombie reskin: cyan chestplate and blue pants
+- **Branch:** `claude/mutant-zombie-reskin` · **Updated:** 2026-11-21 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[mutant-zombie-reskin]]
