@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: writing
 for: any
 from: coordinator
 asked: 2026-11-20
@@ -15,6 +15,7 @@ suggested_owns:
   - src/main/java/com/jaymospowers/core/Ledge.java, src/client/java/com/jaymospowers/client/LedgeClient.java
   - src/main/resources/assets/jaymospowers/geckolib/animations/entity/player_freerun_*.animation.json (new)
   - src/main/resources/assets/jaymospowers/bbmodels/player_freerun*.bbmodel (new)
+writer: hermes-writer
 ---
 # Parkour animations: re-key the freerun moves, add climb down, corners and adaptive vaults
 
