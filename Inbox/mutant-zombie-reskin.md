@@ -26,3 +26,4 @@ Reskin the mutant zombie model/texture so it looks like the zombie in the image 
 
 Art task — needs reference picture attached via `--file PICTURE` when running the art agent brief. Wither-model is already assigned to Prometheus (blocked); this task waits until Prometheus is free or the wither-model blocker clears.
 - 2026-11-21 06:30 hermes-modeller's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-21 07:38 Text pass: PR #1968 is art-only (mutant_zombie.png, .geo.json, .animation.json, .bbmodel, previews) plus changes/powers/mutant-zombie-reskin.md — no lang files, dialogue, hints, or UI strings were added or changed. The change note is already plain and player-facing (states nothing changes in-game yet since the model isn't bound to an entity/renderer), so nothing needed rewriting.
