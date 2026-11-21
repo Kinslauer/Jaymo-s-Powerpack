@@ -52,6 +52,7 @@ kanban-plugin: board
 - [ ] [[Inbox/zfighter-gaps-8-raids|zfighter-gaps-8-raids]] · for 🪽 any Hermes bot · #1961 · in-review
 - [ ] [[Inbox/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]] · for 🪽 any Hermes bot · #1956 · in-review
 - [ ] [[Inbox/hint-tip-cards|hint-tip-cards]] · for ☁️ Cloud · #1951 · in-review
+- [ ] [[Inbox/zfighter-forms-models|zfighter-forms-models]] · for any · #1960 · in-review
 
 
 ## Needs Andy
