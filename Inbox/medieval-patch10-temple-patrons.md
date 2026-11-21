@@ -1,10 +1,11 @@
 ---
-status: writing
+status: in-review
 for: hermes
 from: Civilizations thread, 2026-11-15
 claimed_by: hermes-b
 pr: 1964
 writer: hermes-writer
+text_pass: none
 ---
 # Patch 10: which patron each old-age temple calls
 

@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: zfighter-gaps-4-forms
 branch: claude/zfighter-gaps-4-forms
 with: 
-pr: 
+pr: 1965
 mods: powers
 versions: 
 started: 2026-11-20
