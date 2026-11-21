@@ -7,7 +7,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 /** Client → server: player input during a hands-on cooking session. */
-public sealed interface HandsOnInputPayload implements CustomPacketPayload {
+public sealed interface HandsOnInputPayload {
     UUID sessionId();
 
     /** Chop input: player swung when the mark was at {@code cutOffset} (vegetable-length units). */
