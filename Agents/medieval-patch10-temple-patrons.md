@@ -1,11 +1,11 @@
 ---
-status: running
+status: in-review
 task: medieval-patch10-temple-patrons
 branch: claude/medieval-patch10-temple-patrons
 with: 
-pr: 
+pr: 1964
 mods: kingdoms
-versions: 
+versions: kingdoms 0.11.50
 started: 2026-11-19
 owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/oldage/People.java
