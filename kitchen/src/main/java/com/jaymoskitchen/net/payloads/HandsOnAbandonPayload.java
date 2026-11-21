@@ -6,6 +6,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.item.ItemStack;
+import java.util.UUID;
 
 /** Client → server: abandon the session (walked away or let go). */
 public record HandsOnAbandonPayload(UUID sessionId)
