@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 21:58). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 21:59). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -35,6 +35,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/zfighter-gaps-4-forms|zfighter-gaps-4-forms]] · 🍇 Bacchus · claimed
+- [ ] [[Inbox/zfighter-gaps-1-stats|zfighter-gaps-1-stats]] · 🪶 Quill · #1958 · writing
 
 
 ## In review
@@ -46,7 +47,6 @@ kanban-plugin: board
 - [ ] [[Inbox/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]] · 🔨 Hephaestus · #1937 · in-review
 - [ ] [[Inbox/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]] · 🍇 Bacchus · #1956 · in-review
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · ☀️ Apollo · #1957 · in-review
-- [ ] [[Inbox/zfighter-gaps-1-stats|zfighter-gaps-1-stats]] · 🍇 Bacchus · #1958 · in-review
 
 
 ## Needs Andy
