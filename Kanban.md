@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-21 23:39). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-21 23:51). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -38,7 +38,6 @@ kanban-plugin: board
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · 🔨 Hephaestus · #1896 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-2-power|zfighter-gaps-2-power]] · 🔨 Hephaestus · #1938 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-5-training|zfighter-gaps-5-training]] · ☀️ Apollo · #1953 · changes · fixing review notes
-- [ ] [[Agents/drill-and-talk-fixes|drill-and-talk-fixes]] · 💻 Odysseus · running
 
 
 ## In review
@@ -60,6 +59,7 @@ kanban-plugin: board
 - [ ] [[Inbox/parkour-animations|parkour-animations]] · for any · #1959 · in-review
 - [ ] [[Inbox/zfighter-forms-animations|zfighter-forms-animations]] · for any · #1962 · in-review
 - [ ] [[Inbox/zfighter-forms-textures|zfighter-forms-textures]] · for any · #1963 · in-review
+- [ ] [[Agents/drill-and-talk-fixes|drill-and-talk-fixes]] · 💻 Odysseus · #1974 · in-review
 
 
 ## Needs Andy
