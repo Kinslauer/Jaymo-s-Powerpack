@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-21 23:31). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-21 23:36). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -29,10 +29,15 @@ kanban-plugin: board
 - [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
 - [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · for ☁️ Cloud · open
 - [ ] [[Inbox/village-mines-job-buildings|village-mines-job-buildings]] · for ☁️ Cloud · open
+- [ ] [[Inbox/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
 
+- [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🔨 Hephaestus · #1957 · changes · fixing review notes
+- [ ] [[Inbox/scrying-orb|scrying-orb]] · 🔨 Hephaestus · #1896 · changes · fixing review notes
+- [ ] [[Inbox/zfighter-gaps-2-power|zfighter-gaps-2-power]] · 🔨 Hephaestus · #1938 · changes · fixing review notes
+- [ ] [[Inbox/zfighter-gaps-5-training|zfighter-gaps-5-training]] · ☀️ Apollo · #1953 · changes · fixing review notes
 
 
 ## In review
@@ -43,7 +48,6 @@ kanban-plugin: board
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · in-review
 - [ ] [[Inbox/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]] · 🍇 Bacchus · #1964 · in-review
 - [ ] [[Inbox/mutant-zombie-reskin|mutant-zombie-reskin]] · for 🔥 Prometheus · #1968 · in-review
-- [ ] [[Inbox/parkour-animations|parkour-animations]] · for any · #1959 · in-review
 - [ ] [[Inbox/zfighter-gaps-1-stats|zfighter-gaps-1-stats]] · for 🪽 any Hermes bot · #1958 · in-review
 - [ ] [[Inbox/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]] · for 🪽 any Hermes bot · #1937 · in-review
 - [ ] [[Inbox/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]] · for 🪽 any Hermes bot · #1939 · in-review
@@ -52,19 +56,17 @@ kanban-plugin: board
 - [ ] [[Inbox/zfighter-gaps-8-raids|zfighter-gaps-8-raids]] · for 🪽 any Hermes bot · #1961 · in-review
 - [ ] [[Inbox/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]] · for 🪽 any Hermes bot · #1956 · in-review
 - [ ] [[Inbox/zfighter-forms-models|zfighter-forms-models]] · for any · #1960 · in-review
+- [ ] [[Inbox/zfighter-forms-animations|zfighter-forms-animations]] · for any · #1962 · in-review
+- [ ] [[Inbox/zfighter-forms-textures|zfighter-forms-textures]] · for any · #1963 · in-review
+- [ ] [[Inbox/parkour-animations|parkour-animations]] · for any · #1959 · in-review
 
 
 ## Needs Andy
 
 - [ ] [[Inbox/class-trees-plan|class-trees-plan]] · for 💻 Odysseus · blocked
-- [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🔨 Hephaestus · #1957 · blocked
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
-- [ ] [[Inbox/scrying-orb|scrying-orb]] · 🔨 Hephaestus · #1896 · blocked
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
 - [ ] [[Inbox/wither-model|wither-model]] · 🍇 Bacchus · blocked
-- [ ] [[Inbox/zfighter-gaps-2-power|zfighter-gaps-2-power]] · 🔨 Hephaestus · #1938 · blocked
-- [ ] [[Inbox/zfighter-gaps-5-training|zfighter-gaps-5-training]] · ☀️ Apollo · #1953 · blocked
-- [ ] [[Inbox/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]] · 🍇 Bacchus · blocked
 
 
 ## Done
