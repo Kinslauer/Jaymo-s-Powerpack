@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: prometheus
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-18)
 asked: 2026-11-18
 thread: 1569107033607643388
-claimed_by: hermes-modeller
+claimed_by: 
 pr:
 suggested_owns: []
 ---
@@ -24,3 +24,4 @@ Reskin the mutant zombie model/texture so it looks like the zombie in the image 
 ## Notes
 
 Art task — needs reference picture attached via `--file PICTURE` when running the art agent brief. Wither-model is already assigned to Prometheus (blocked); this task waits until Prometheus is free or the wither-model blocker clears.
+- 2026-11-21 06:30 hermes-modeller's claim had no sign of work for 30 min: handed back as open.
