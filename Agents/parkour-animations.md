@@ -3,7 +3,7 @@ status: running
 task: parkour-animations
 branch: claude/parkour-animations
 with: 
-pr: 
+pr: 1959
 mods: powers
 versions: powers 0.21.85
 started: 2026-11-20
