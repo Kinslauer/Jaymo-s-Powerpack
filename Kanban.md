@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-21 08:17). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-21 08:22). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -27,7 +27,6 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-l-carts-check|vanilla-plus-l-carts-check]] · for 💻 Odysseus · open
-- [ ] [[Inbox/enemy-damage-balance|enemy-damage-balance]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/wither-model|wither-model]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/devils-hole-pupfish-writeup|devils-hole-pupfish-writeup]] · for 🪶 Quill · open
 
@@ -35,6 +34,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · for 🪽 any Hermes bot · #1957 · changes · fixing review notes
+- [ ] [[Inbox/enemy-damage-balance|enemy-damage-balance]] · ☀️ Apollo · claimed
 
 
 ## In review
