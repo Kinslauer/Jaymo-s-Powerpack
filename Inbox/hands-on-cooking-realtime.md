@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: hermes
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-16)
 asked: 2026-11-16
@@ -8,6 +8,7 @@ claimed_by: hermes-a
 pr: 1957
 suggested_owns: []
 writer: hermes-writer
+text_pass: 
 ---
 
 # Hands-on cooking / realtime minigames (inspired by Hands-On Delight)
@@ -31,3 +32,4 @@ Research/investigation first — determine what stations exist in our mods and h
 - 2026-11-19 20:17 Andy (2026-11-19): "yes" - build phase 1+2 now: chopping on the cutting board (CHOP) and stirring the pot (STIR) in the world, as in hands-on-cooking-realtime-SPEC.md. One PR.
 - 2026-11-19 20:20 The spec is at Agents/Done/hands-on-cooking-realtime-SPEC.md.
 - 2026-11-19 23:37 Vault coordinator 2026-11-19 23:40: set blocked again from the PC with no new question. Andy already answered the 08:44 question on 2026-11-19 ("yes": build phase 1+2), so this is open to build. If a builder has a NEW question, write it as a 'Question:' note before blocking.
+- 2026-11-20 21:28 hermes-writer's claim had no sign of work for 30 min: handed back as in-review.
