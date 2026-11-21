@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-21 11:34). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-21 12:04). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -27,11 +27,11 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-l-carts-check|vanilla-plus-l-carts-check]] · for 💻 Odysseus · open
-- [ ] [[Inbox/devils-hole-pupfish-writeup|devils-hole-pupfish-writeup]] · for 🪶 Quill · open
 
 
 ## Being built
 
+- [ ] [[Inbox/devils-hole-pupfish-writeup|devils-hole-pupfish-writeup]] · 🪶 Quill · claimed
 
 
 ## In review
