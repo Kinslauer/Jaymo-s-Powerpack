@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: changes
 for: hermes
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-16)
 asked: 2026-11-16
 thread: 1572081014958858340
-claimed_by: hermes-fixer
+claimed_by: 
 pr: 1957
 suggested_owns: []
 writer: hermes-writer
@@ -36,3 +36,4 @@ Research/investigation first — determine what stations exist in our mods and h
 - 2026-11-20 21:34 Text pass: added 4 missing lang keys to kitchen/src/main/resources/assets/jaymoskitchen/lang/en_us.json — item.jaymoskitchen.spoon ('Spoon'), item.jaymoskitchen.real_time_cooker ('Realtime Cooker'), block.jaymoskitchen.real_time_cooker ('Realtime Cooker'), message.jaymoskitchen.already_cooking ('You're already cooking somewhere.'). No other player-visible strings in the PR (no chat/GUI text in the new client classes; change note already reads well). Build is red: 90 pre-existing compile errors in the PR's new Kitchen code (wrong readUuid/writeUuid names, public records in wrong files, missing permits/imports, 26.3 API mismatches) — not a text-pass fix, left for the code bot.
 - 2026-11-21 04:47 Review (head c0b76b7): not reviewed. PR #1957 conflicts with master (mergeable CONFLICTING) and no PR checks ran on this head. Merge master in, resolve the conflicts, push and get the checks green; it gets a full review then.
 - 2026-11-21 05:21 hermes-fixer took over the review fixes from hermes-a.
+- 2026-11-21 06:07 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.

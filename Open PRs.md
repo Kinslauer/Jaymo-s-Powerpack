@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-21 05:45
+updated: 2026-11-21 06:06
 ---
 # Open PRs
 
-19 open, as of 2026-11-21 05:45. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+19 open, as of 2026-11-21 06:06. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1853](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1853) Heritage paths: core + Heartlander, Stoneborn, Tideborn (Kingdoms, Powers)

@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: prometheus
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-18)
 asked: 2026-11-18
 thread: 1569107033607643388
-claimed_by:
+claimed_by: hermes-modeller
 pr:
 suggested_owns: []
 ---
