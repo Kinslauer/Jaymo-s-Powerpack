@@ -725,10 +725,10 @@ public final class ZFighterPower implements Power {
 					Soundscape.play(level, player.position(), SoundSource.PLAYERS, ZFighterKi.KI_HUM.louder(1.2F).pitched(0.7F + fill * 0.9F),
 						ZFighterKi.KI_SURGE);
 				}
-			}
 		} else if (!live.superOn() && !hungry && live.waveFrom < 0 && live.barrageFrom < 0 && live.spiritFrom < 0) {
 			live.ki += KI_REGEN * ZFighterRealism.kiRegen() * ZFighterBioForms.regen(player) * ZFighterDivineGrace.regen(player);
 		}
+		if (live.guarding && now % 8 == 0 && !ZFighterHooks.guardStamina(player)) ZFighterGuard.set(player, false);
 
 		ZFighterKi.tickWave(player, live);
 		ZFighterKi.tickBarrage(player, live);
@@ -900,7 +900,7 @@ public final class ZFighterPower implements Power {
 					if (ready(player, ZFighterState.STEP) && ZFighterLineage.heal(player, live)) {
 						cooldown(player, ZFighterState.STEP, ZFighterLineage.HEAL_COOLDOWN);
 					}
-				} else if (down && ready(player, ZFighterState.STEP) && ZFighterKi.step(player, live)) {
+				} else if (down && ready(player, ZFighterState.STEP) && ZFighterHooks.flashStepStamina(player) && ZFighterKi.step(player, live)) {
 					cooldown(player, ZFighterState.STEP, ZFighterKi.STEP_COOLDOWN);
 				}
 			}
@@ -1123,7 +1123,8 @@ public final class ZFighterPower implements Power {
 			boolean free = player.isCreative() || ZFighterTraining.of(player).mastery(next) >= ZFighterTraining.FREE_ENTRY_MASTERY;
 			if (!free && live.ki < FORM_ENTER_KI[next]) {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_no_ki").withStyle(ChatFormatting.GRAY));
-			} else {
+			} else if (ZFighterHooks.enterFormStamina(player)) {
+				// stamina empty: enterFormStamina already told the player
 				if (!free) {
 					live.ki -= FORM_ENTER_KI[next];
 				}
@@ -1261,6 +1262,8 @@ public final class ZFighterPower implements Power {
 				boolean free = player.isCreative() || ZFighterTraining.of(player).mastery(ZFighterLegendary.chain(form)) >= ZFighterTraining.FREE_ENTRY_MASTERY;
 				if (!free && live.ki < FORM_ENTER_KI[form]) {
 					player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_no_ki").withStyle(ChatFormatting.GRAY));
+				} else if (!ZFighterHooks.enterFormStamina(player)) {
+					// stamina empty: enterFormStamina already told the player
 				} else {
 					if (!free) {
 						live.ki -= FORM_ENTER_KI[form];
@@ -1303,6 +1306,7 @@ public final class ZFighterPower implements Power {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_limit_hurt").withStyle(ChatFormatting.GRAY));
 			return;
 		}
+		if (next > 0 && !ZFighterHooks.enterLimitStamina(player)) return;
 		if (next == 0) {
 			endLimit(player, live);
 		} else {
