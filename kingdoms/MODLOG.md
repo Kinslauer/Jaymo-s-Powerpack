@@ -16085,3 +16085,9 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - **Fix**: the server no longer crashes when trees come down while new land is generating. Block changes made by world generation threads are now queued (up to 4096 at a time) and looked at on the server thread the next tick, instead of touching the loose-wood lists from another thread.
 - Class: `LooseWood`.
 - Built by CI; not played.
+
+## 0.11.52 (2026-11-21): loose wood no longer makes the server wait on land still generating (#1969)
+
+- **Fix**: falling-wood checks no longer stop the server while new land generates near a player (two watchdog crashes on 2026-11-21, 8:10 and 8:16 AM). It only reads blocks in chunks that are fully there; the rest wait for a later tick.
+- Class: `LooseWood` (`ready`, in place of `Level.isLoaded`).
+- Built by CI; not played.
