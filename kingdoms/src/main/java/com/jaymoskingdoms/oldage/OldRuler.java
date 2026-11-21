@@ -188,6 +188,10 @@ public class OldRuler extends Monster {
 			case PILLARED -> 0xC8463C;
 			case MOUND -> 0xB8D4E8;
 			case COURT -> 0x7A4FB8;
+			case ANVIL -> 0xB0B4BC;
+			case DEEP_FOLK -> 0x3A8FB7;
+			case GROVE -> 0x5E9E3A;
+			case TRUTH_FOLK -> 0xF2F2F2;
 		};
 	}
 
