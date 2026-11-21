@@ -29,3 +29,4 @@ Research how to apply a similar AI-assisted process to our item PNGs and model t
 ## Notes
 
 Research/investigation first — no code or art changes yet. The output should be a process recommendation with tools, costs, and steps, plus an assessment of whether it fits our pack's art style and pipeline.
+- 2026-11-21 14:39 hermes-modeller's last text pass stopped before finishing; handed back so it can carry on.
