@@ -725,7 +725,6 @@ public final class ZFighterPower implements Power {
 					Soundscape.play(level, player.position(), SoundSource.PLAYERS, ZFighterKi.KI_HUM.louder(1.2F).pitched(0.7F + fill * 0.9F),
 						ZFighterKi.KI_SURGE);
 				}
-		}
 		} else if (!live.superOn() && !hungry && live.waveFrom < 0 && live.barrageFrom < 0 && live.spiritFrom < 0) {
 			live.ki += KI_REGEN * ZFighterRealism.kiRegen() * ZFighterBioForms.regen(player) * ZFighterDivineGrace.regen(player);
 		}
@@ -1124,7 +1123,7 @@ public final class ZFighterPower implements Power {
 			boolean free = player.isCreative() || ZFighterTraining.of(player).mastery(next) >= ZFighterTraining.FREE_ENTRY_MASTERY;
 			if (!free && live.ki < FORM_ENTER_KI[next]) {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_no_ki").withStyle(ChatFormatting.GRAY));
-			} else if (!ZFighterHooks.enterFormStamina(player)) {
+			} else if (ZFighterHooks.enterFormStamina(player)) {
 				// stamina empty: enterFormStamina already told the player
 				if (!free) {
 					live.ki -= FORM_ENTER_KI[next];
