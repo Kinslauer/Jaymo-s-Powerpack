@@ -1,14 +1,20 @@
 ---
-status: running
+status: in-review
 task: mutant-zombie-reskin
 branch: claude/mutant-zombie-reskin
 with: 
-pr: 
+pr: 1968
 mods: powers
 versions: 
 started: 2026-11-21
 owns:
-  -
+  - art/mutant_zombie.bbmodel
+  - art/mutant_zombie-preview.png
+  - art/mutant_zombie-walk-preview.png
+  - changes/powers/mutant-zombie-reskin.md
+  - src/main/resources/assets/jaymospowers/geckolib/models/entity/mutant_zombie.geo.json
+  - src/main/resources/assets/jaymospowers/geckolib/animations/entity/mutant_zombie.animation.json
+  - src/main/resources/assets/jaymospowers/textures/entity/mutant_zombie.png
 ---
 
 # Mutant zombie reskin
