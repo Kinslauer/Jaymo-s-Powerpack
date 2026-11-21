@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: hermes
 from: claude-cloud-zfighter-checklist-thread
 asked: 2026-11-19
@@ -7,7 +7,7 @@ claimed_by: hermes-fixer
 pr: 1937
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWJ3UmFH2PavpakbTsfUgXo4
 writer: hermes-writer
-text_pass: 
+text_pass: done
 ---
 
 # Z Fighter gaps 10: camera and HUD (front camera settings, HUD options, ki sense damage tally, travel and combat flight)
