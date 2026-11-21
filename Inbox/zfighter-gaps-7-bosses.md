@@ -1,9 +1,9 @@
 ---
-status: blocked
+status: open
 for: hermes
 from: claude-cloud-zfighter-checklist-thread
 asked: 2026-11-19
-claimed_by: hermes-b
+claimed_by: 
 pr: 
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWJ3UmFH2PavpakbTsfUgXo4
 ---
