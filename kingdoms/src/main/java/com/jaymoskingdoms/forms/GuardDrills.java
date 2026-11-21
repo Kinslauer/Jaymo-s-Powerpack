@@ -21,8 +21,10 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSetHeldSlotPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -41,6 +43,7 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -87,6 +90,18 @@ public final class GuardDrills {
 	/** Spar: the share of most health whoever drops under it first has fallen, how often the veteran strikes (ticks), its harm. */
 	static final float SPAR_FLOOR = 0.4F, SPAR_HARM = 3.0F;
 	static final int SPAR_EVERY = 25;
+	/**
+	 * Andy (2026-11-21): "when you ask for a drill you need time to draw a weapon or it should force you to draw". A spar
+	 * or the gate starts with your weapon drawn from your hotbar; the veteran's first blow waits this long after a weapon
+	 * is in your hand (ticks), and with none drawn in this long the veteran stands down.
+	 */
+	static final int DRAW_BEAT = 30, DRAW_GRACE = 200;
+	/**
+	 * Andy (2026-11-21): "i fell, and it was over. that should be the way it works." For this long after a spar ends
+	 * (ticks) blows between the two still land on nothing and are no crime, so a swing already on its way doesn't
+	 * start a brawl.
+	 */
+	static final int SPAR_GRACE = 60;
 	/** How close (blocks) the veteran must be to land a blow. */
 	static final double REACH = 2.6;
 	/** What a finished drill is worth to a form you know (practice). */
@@ -155,6 +170,8 @@ public final class GuardDrills {
 		final long until;
 		final List<Zombie> foes = new ArrayList<>();
 		int defeated, parries;
+		/** Spar: when a weapon was first in the player's hand (-1: not yet). */
+		long drawnAt = -1L;
 		/** A practice foe gone without being struck down (its chunk unloaded): the drill no longer counts. */
 		boolean lost;
 		long nextBlow, lastParry = -1L;
@@ -167,6 +184,11 @@ public final class GuardDrills {
 	}
 
 	private static final Map<UUID, Run> RUNS = new HashMap<>();
+	/** A spar just over: the player, their veteran, and the game time the grace ends ({@link #SPAR_GRACE}). */
+	private record Ended(UUID guard, long until) {
+	}
+
+	private static final Map<UUID, Ended> ENDED = new HashMap<>();
 
 	private GuardDrills() {
 	}
@@ -186,6 +208,7 @@ public final class GuardDrills {
 				sweep(run);
 			}
 			RUNS.clear();
+			ENDED.clear();
 		});
 		ServerTickEvents.END_SERVER_TICK.register(GuardDrills::tick);
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> allow(entity, source, amount));
@@ -235,6 +258,9 @@ public final class GuardDrills {
 
 	/** Whether a blow between {@code a} and {@code b} is a drill's spar (no crime). */
 	public static boolean sparring(net.minecraft.world.entity.Entity a, net.minecraft.world.entity.Entity b) {
+		if (justSparred(a, b)) {
+			return true;
+		}
 		if (RUNS.isEmpty()) {
 			return false;
 		}
@@ -246,6 +272,40 @@ public final class GuardDrills {
 			}
 		}
 		return false;
+	}
+
+	/** Whether {@code a} and {@code b} are a player and the veteran whose spar ended under {@link #SPAR_GRACE} ago. */
+	private static boolean justSparred(net.minecraft.world.entity.Entity a, net.minecraft.world.entity.Entity b) {
+		if (ENDED.isEmpty()) {
+			return false;
+		}
+		Ended e = ENDED.get(a.getUUID());
+		UUID other = b.getUUID();
+		if (e == null) {
+			e = ENDED.get(b.getUUID());
+			other = a.getUUID();
+		}
+		return e != null && e.guard.equals(other) && a.level().getGameTime() < e.until;
+	}
+
+	/** A weapon: anything made to strike with (a sword, an axe, a mace, a spear...). */
+	private static boolean weapon(ItemStack stack) {
+		return !stack.isEmpty() && stack.has(DataComponents.WEAPON);
+	}
+
+	/** Takes the first weapon on {@code player}'s hotbar into their hand, if their hand holds none. */
+	private static void draw(ServerPlayer player) {
+		if (weapon(player.getMainHandItem())) {
+			return;
+		}
+		Inventory inv = player.getInventory();
+		for (int slot = 0; slot < Inventory.getSelectionSize(); slot++) {
+			if (weapon(inv.getItem(slot))) {
+				inv.setSelectedSlot(slot);
+				player.connection.send(new ClientboundSetHeldSlotPacket(slot));
+				return;
+			}
+		}
 	}
 
 	// ---- the offer ---------------------------------------------------------------------------------------------------
@@ -318,6 +378,10 @@ public final class GuardDrills {
 				return false;
 			}
 		}
+		if (kind != Kind.PARRIES) {
+			draw(player);
+		}
+		ENDED.remove(player.getUUID());
 		RUNS.put(player.getUUID(), run);
 		player.setAttached(DRILLS, stateOf(player).under(kind, guard.getUUID(), 0));
 		say(level, guard, player, "drill.jaymoskingdoms." + kind.key() + ".start");
@@ -408,6 +472,10 @@ public final class GuardDrills {
 	}
 
 	private static void tick(MinecraftServer server) {
+		if (!ENDED.isEmpty()) {
+			long now = server.overworld().getGameTime();
+			ENDED.values().removeIf(e -> now >= e.until);
+		}
 		if (RUNS.isEmpty()) {
 			return;
 		}
@@ -505,6 +573,18 @@ public final class GuardDrills {
 			return;
 		}
 		guard.getNavigation().stop();
+		if (run.drawnAt < 0L) {
+			// the first blow waits for your weapon to be out; too long with none and the veteran won't spar
+			if (weapon(player.getMainHandItem())) {
+				run.drawnAt = now;
+				run.nextBlow = Math.max(run.nextBlow, now + DRAW_BEAT);
+			} else if (now >= run.until - SPAR_TICKS + DRAW_GRACE) {
+				abandon(level, player, run, guard, "drill.jaymoskingdoms.spar.undrawn");
+				return;
+			} else {
+				return;
+			}
+		}
 		if (now >= run.nextBlow) {
 			run.nextBlow = now + SPAR_EVERY;
 			strike(level, guard, player, SPAR_HARM);
@@ -520,6 +600,9 @@ public final class GuardDrills {
 
 	/** Blows in a drill: a turned blow counts as a parry, and a spar's last blow is stopped (the spar is over). */
 	private static boolean allow(LivingEntity entity, DamageSource source, float amount) {
+		if (source.getEntity() != null && justSparred(entity, source.getEntity())) {
+			return false; // the spar is over: a swing still on its way lands on nothing
+		}
 		if (RUNS.isEmpty() || amount <= 0.0F) {
 			return true;
 		}
@@ -569,6 +652,7 @@ public final class GuardDrills {
 	/** The drill is done: the day is spent and the veteran's lesson is yours. */
 	private static void complete(ServerLevel level, ServerPlayer player, PathfinderMob guard, Run run) {
 		RUNS.remove(player.getUUID());
+		ended(level, player, run);
 		stand(guard);
 		sweep(run);
 		player.setAttached(DRILLS, stateOf(player).finished(run.guard, today(level)));
@@ -579,6 +663,7 @@ public final class GuardDrills {
 	/** The drill ends unfinished: no day spent, the veteran stands down, and says {@code line}. */
 	private static void abandon(ServerLevel level, ServerPlayer player, Run run, @Nullable PathfinderMob guard, String line) {
 		RUNS.remove(player.getUUID());
+		ended(level, player, run);
 		sweep(run);
 		player.setAttached(DRILLS, stateOf(player).idle());
 		if (guard != null) {
@@ -586,6 +671,13 @@ public final class GuardDrills {
 			if (guard.isAlive()) {
 				say(level, guard, player, line);
 			}
+		}
+	}
+
+	/** A spar is over: for {@link #SPAR_GRACE} the two of them can't hurt each other. */
+	private static void ended(ServerLevel level, ServerPlayer player, Run run) {
+		if (run.kind == Kind.SPAR) {
+			ENDED.put(player.getUUID(), new Ended(run.guard, level.getGameTime() + SPAR_GRACE));
 		}
 	}
 

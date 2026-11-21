@@ -52,5 +52,8 @@
   "drill.jaymoskingdoms.spar.lost.2": "That's the fall, %s. You'll learn from it.",
   "drill.jaymoskingdoms.spar.draw.0": "Neither of us fell, %s. We'll call it even.",
   "drill.jaymoskingdoms.spar.draw.1": "A draw, %s. Next time, finish it.",
-  "drill.jaymoskingdoms.spar.draw.2": "Time, %s. No one fell."
+  "drill.jaymoskingdoms.spar.draw.2": "Time, %s. No one fell.",
+  "drill.jaymoskingdoms.spar.undrawn.0": "No blade in your hand, %s? Then there's no spar today.",
+  "drill.jaymoskingdoms.spar.undrawn.1": "I'll not strike an empty hand, %s. Come back armed.",
+  "drill.jaymoskingdoms.spar.undrawn.2": "Draw first, %s, then ask me. We're done."
 }

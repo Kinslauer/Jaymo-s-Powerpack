@@ -1,0 +1,5 @@
+# drills wait for your weapon, a spar ends at the fall, the talk box
+- **Drills draw your weapon**: asking a veteran for a Spar or Hold the Gate takes the first weapon on your hotbar into your hand. In a spar the veteran's first blow waits 1.5 s after a weapon is in your hand; with none drawn in 10 s they stand down ("I'll not strike an empty hand"). (`GuardDrills`)
+- **A spar is over when someone falls**: for 3 s after a spar ends, blows between you and that veteran land on nothing and are no crime, so a swing already on its way can't start a brawl with the guards. (`GuardDrills`)
+- **The talk box**: while you talk with a villager, their words appear in a box low on the left under their name, typed out, instead of over their head. MCA's dialogue answers sit in a list low on the right, and they and the button column show only once the villager has finished the line. The camera is unchanged. (`DialogueCinematic`, `SpeechBubbles`, `McaDialogueBoxMixin`, `McaButtonColumnMixin`)
+- Built; not played.

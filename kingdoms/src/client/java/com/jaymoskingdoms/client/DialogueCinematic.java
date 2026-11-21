@@ -15,15 +15,19 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import java.util.List;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -38,6 +42,13 @@ import org.jspecify.annotations.Nullable;
  * cutscene plays on: the player's line on camera, then the villager's reply from their own shot for as long as their
  * words are up over their head, and only then is it over. The server keeps the villager standing still till the client
  * says so ({@link DialogueCue.Done}, {@link com.jaymoskingdoms.Conversations}).
+ *
+ * <p>Andy (2026-11-21): "a lot of text is over the villager's head and the framing of the convo window occludes it ...
+ * keep the framing, just put the villager's text in a box on the left side of the screen, and then a list of responses
+ * on the right that pops up after the villager finishes their sentence." While the cutscene runs, what the villager
+ * says goes in a box low on the left, under their name, a few letters a tick ({@link #CHARS_PER_TICK}), not over their
+ * head. MCA's answers and its button column on the right ({@code McaDialogueBoxMixin}, {@code McaButtonColumnMixin})
+ * show only once the line is all out ({@link #answersUp}).
  */
 public final class DialogueCinematic {
 	/** Each bar's height, as a share of the screen; how much of the way they slide a tick. */
@@ -56,6 +67,15 @@ public final class DialogueCinematic {
 	static final int REPLY_WINDOW = 10;
 	/** The villager's reply shot after the menu has shut: at least this long, at most this long (ticks). */
 	static final int REPLY_MIN = 40, REPLY_MAX = 20 * 12;
+	/** The villager's box: how fast their words come out (letters a tick), and how long a reply stays up once it's all out (ticks). */
+	static final float CHARS_PER_TICK = 1.5F;
+	static final int READ_TICKS = 50;
+	/** With nothing said yet, the answers come up this long after the talk opens (ticks), in case a greeting is on its way. */
+	static final int OPEN_WAIT = 10;
+	/** The box: its left margin, its width at most and its text's wrap width, its padding, and its gap above the bottom bar (GUI pixels). */
+	public static final int BOX_MARGIN = 10, BOX_WIDTH = 220, BOX_PAD = 6, BOX_GAP = 8;
+	/** Box fill and border, the dark purple of MCA's info tags and our answer column; the name's colour. */
+	public static final int BOX_FILL = 0xC0100010, BORDER_TOP = 0x905000FF, BORDER_BOTTOM = 0x9028007F, NAME_COLOR = 0xFFFFD27A;
 
 	private static final Identifier[] HIDDEN = { VanillaHudElements.CROSSHAIR, VanillaHudElements.HOTBAR,
 		VanillaHudElements.ARMOR_BAR, VanillaHudElements.HEALTH_BAR, VanillaHudElements.FOOD_BAR,
@@ -73,6 +93,10 @@ public final class DialogueCinematic {
 	/** The menu has shut after a pick: the reply plays out (from {@code replyFrom}) with no screen up. */
 	private static boolean replying;
 	private static int replyFrom, lastCue = Integer.MIN_VALUE / 2;
+	/** What the villager is saying in the box (null: nothing yet, or the player's turn), its rows, its letters, and the tick it began. */
+	private static @Nullable Component line;
+	private static List<FormattedCharSequence> rows = List.of();
+	private static int letters, lineFrom, startedAt;
 
 	private DialogueCinematic() {
 	}
@@ -104,6 +128,8 @@ public final class DialogueCinematic {
 		speaker = Speaker.VILLAGER;
 		DialogueCinematic.villager = villager;
 		viewBefore = minecraft.options.getCameraType();
+		line = null;
+		startedAt = ticks;
 	}
 
 	/** The speaker changed to {@code speaker} on {@code villager}'s talk screen. */
@@ -118,6 +144,7 @@ public final class DialogueCinematic {
 			DialogueCinematic.speaker = speaker;
 			pending = null;
 			holdUntil = ticks + PLAYER_HOLD;
+			line = null; // their last line is answered: the box waits for the next
 		} else if (ticks < holdUntil) {
 			pending = speaker;
 		} else {
@@ -144,6 +171,48 @@ public final class DialogueCinematic {
 		holdUntil = 0;
 		villager = -1;
 		viewBefore = null;
+		line = null;
+		rows = List.of();
+	}
+
+	/**
+	 * {@code entityId} says {@code text}: if it's the villager being talked to, it goes in the box (true) instead of over
+	 * their head. The same words again leave the box as it is.
+	 */
+	public static boolean said(int entityId, Component text) {
+		if (!running || entityId != villager) {
+			return false;
+		}
+		if (line != null && line.getString().equals(text.getString())) {
+			return true;
+		}
+		line = text;
+		rows = Minecraft.getInstance().font.split(text, BOX_WIDTH - BOX_PAD * 2);
+		int n = 0;
+		for (FormattedCharSequence row : rows) {
+			int[] count = { 0 };
+			row.accept((index, style, codePoint) -> {
+				count[0]++;
+				return true;
+			});
+			n += count[0];
+		}
+		letters = n;
+		lineFrom = ticks;
+		return true;
+	}
+
+	/** The tick the villager's line is all out. */
+	private static int lineDoneAt() {
+		return lineFrom + Mth.ceil(letters / CHARS_PER_TICK);
+	}
+
+	/** Whether the answers may show: no talk on, or the villager's line is all out (or nothing said a moment after opening). */
+	public static boolean answersUp() {
+		if (!running) {
+			return true;
+		}
+		return line == null ? ticks - startedAt >= OPEN_WAIT && speaker != Speaker.PLAYER : ticks >= lineDoneAt();
 	}
 
 	private static void tick(Minecraft minecraft) {
@@ -195,7 +264,7 @@ public final class DialogueCinematic {
 		if (ticks < shot + REPLY_MIN) {
 			return false;
 		}
-		return ticks >= shot + REPLY_MAX || SpeechBubbles.own(villager).isEmpty();
+		return ticks >= shot + REPLY_MAX || line != null && ticks >= lineDoneAt() + READ_TICKS;
 	}
 
 	@Nullable
@@ -281,5 +350,54 @@ public final class DialogueCinematic {
 		int bar = Math.round(height * BAR_SHARE * shown);
 		graphics.fill(0, 0, width, bar, 0xFF000000);
 		graphics.fill(0, height - bar, width, height, 0xFF000000);
+		if (running && line != null && !rows.isEmpty()) {
+			box(graphics, delta.getGameTimeDeltaPartialTick(false), height - bar);
+		}
+	}
+
+	/** The villager's name and words, typed out, in a box low on the left with its foot {@link #BOX_GAP} over {@code floor}. */
+	private static void box(GuiGraphicsExtractor graphics, float partial, int floor) {
+		Minecraft minecraft = Minecraft.getInstance();
+		Font font = minecraft.font;
+		Entity them = minecraft.level == null ? null : minecraft.level.getEntity(villager);
+		Component name = them == null ? null : them.getDisplayName();
+		int rowHeight = font.lineHeight + 1;
+		int textWidth = 0;
+		for (FormattedCharSequence row : rows) {
+			textWidth = Math.max(textWidth, font.width(row));
+		}
+		if (name != null) {
+			textWidth = Math.max(textWidth, font.width(name));
+		}
+		int x0 = BOX_MARGIN, x1 = x0 + textWidth + BOX_PAD * 2;
+		int high = BOX_PAD * 2 + rows.size() * rowHeight + (name != null ? rowHeight + 2 : 0);
+		int y1 = floor - BOX_GAP, y0 = y1 - high;
+		graphics.fill(x0, y0, x1, y1, BOX_FILL);
+		graphics.fillGradient(x0, y0, x0 + 1, y1, BORDER_TOP, BORDER_BOTTOM);
+		graphics.fillGradient(x1 - 1, y0, x1, y1, BORDER_TOP, BORDER_BOTTOM);
+		graphics.fill(x0, y0, x1, y0 + 1, BORDER_TOP);
+		graphics.fill(x0, y1 - 1, x1, y1, BORDER_BOTTOM);
+		int y = y0 + BOX_PAD;
+		if (name != null) {
+			graphics.text(font, name.getVisualOrderText(), x0 + BOX_PAD, y, NAME_COLOR);
+			y += rowHeight + 2;
+		}
+		// the words come out a few letters a tick
+		int left = (int) ((ticks - lineFrom + partial) * CHARS_PER_TICK);
+		for (FormattedCharSequence row : rows) {
+			if (left <= 0) {
+				break;
+			}
+			int[] room = { left };
+			FormattedCharSequence shown = sink -> row.accept((index, style, codePoint) -> room[0]-- > 0 && sink.accept(index, style, codePoint));
+			graphics.text(font, shown, x0 + BOX_PAD, y, 0xFFFFFFFF);
+			int[] count = { 0 };
+			row.accept((index, style, codePoint) -> {
+				count[0]++;
+				return true;
+			});
+			left -= count[0];
+			y += rowHeight;
+		}
 	}
 }
