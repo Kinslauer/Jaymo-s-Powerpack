@@ -78,9 +78,11 @@ public final class ZFighterWishes {
 	public static final int UNDO_ANDROID = 11;
 	/** (0.17.62) Call back everyone who died and woke in the Other World ({@link ZFighterAfterlife}). */
 	public static final int CALL_BACK = 12;
-	public static final int WISHES = 13;
+	/** (0.21.37) A borrowed life made lasting: the borrowed minutes stop burning down. */
+	public static final int LASTING = 13;
+	public static final int WISHES = 14;
 	public static final String[] KEYS = {"power", "revive", "riches", "awaken", "rebirth", "blessing", "bonding", "remake", "racial", "restat", "difficulty",
-		"undo_android", "call_back"};
+		"undo_android", "call_back", "lasting"};
 
 	static final int WISH_TP = 1250;
 	static final int WISH_LEVELS = 30;
@@ -417,6 +419,7 @@ public final class ZFighterWishes {
 			case DIFFICULTY -> ZFighterWishExtras.difficulty(player);
 			case UNDO_ANDROID -> ZFighterWishExtras.android(player, zfighter);
 			case CALL_BACK -> ZFighterAfterlife.callBack(player);
+			case LASTING -> lasting(player);
 			default -> false;
 		};
 		if (!granted) {
@@ -469,16 +472,28 @@ public final class ZFighterWishes {
 			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_wish_no_fallen").withStyle(ChatFormatting.GRAY));
 		}
 		return any;
+		}
+
+	/** A wish makes his borrowed time lasting: the minutes stop burning down. Refused if he has none to make last. */
+	private static boolean lasting(ServerPlayer player) {
+	Long owed = player.getAttached(ZFighterAfterlife.BORROWED);
+	if (owed == null || owed <= 0) {
+		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_wish_cannot").withStyle(ChatFormatting.GRAY));
+		return false;
+	}
+	player.setAttached(ZFighterAfterlife.BORROWED, ZFighterAfterlife.LASTING);
+	player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_wish_lasting").withStyle(ChatFormatting.GOLD));
+	return true;
 	}
 
 	private static boolean awaken(ServerPlayer player, boolean zfighter) {
-		if (!zfighter || ZFighterTraining.formsOpen(player) > 0) {
-			player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_wish_cannot").withStyle(ChatFormatting.GRAY));
-			return false;
-		}
-		player.setAttached(ZFighterPower.HARDSHIP, Math.max(ZFighterPower.hardship(player), ZFighterBattle.SUPER_HARDSHIP));
-		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_wish_awakened").withStyle(ChatFormatting.GOLD));
-		return true;
+	if (!zfighter || ZFighterTraining.formsOpen(player) > 0) {
+		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_wish_cannot").withStyle(ChatFormatting.GRAY));
+		return false;
+	}
+	player.setAttached(ZFighterPower.HARDSHIP, Math.max(ZFighterPower.hardship(player), ZFighterBattle.SUPER_HARDSHIP));
+	player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_wish_awakened").withStyle(ChatFormatting.GOLD));
+	return true;
 	}
 
 	private static boolean rebirth(ServerPlayer player, boolean zfighter) {

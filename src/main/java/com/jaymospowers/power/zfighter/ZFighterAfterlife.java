@@ -159,6 +159,9 @@ public final class ZFighterAfterlife {
 	/** The fortune teller's price in silver coins (0.19.69: was emeralds, 1 silver = 1 old emerald). */
 	static final int PRICE_SILVER = 24;
 	static final int PRICE_TP = 400;
+	/** Minutes the fortune teller can lend among the living, in ticks, and the mark that a wish made them last. */
+	static final long BORROWED_TICKS = 12000L;
+	static final long LASTING = Long.MAX_VALUE;
 	/** The effects of waking up again. */
 	static final int WAKE_REGEN = 200;
 	static final int WAKE_RESISTANCE = 200;
@@ -194,6 +197,9 @@ public final class ZFighterAfterlife {
 	/** (0.19.33) He paid the fortune teller this stay but hasn't gone yet (he chose nothing): the next ask is free. Saved. */
 	public static final AttachmentType<Boolean> PAID = AttachmentRegistry.create(JaymosPowers.id("zfighter_afterlife_paid"),
 		builder -> builder.persistent(Codec.BOOL).copyOnDeath());
+	/** Minutes the fortune teller lent him among the living: ticks left while he is alive (LASTING when a wish made them last). Saved. */
+	public static final AttachmentType<Long> BORROWED = AttachmentRegistry.create(JaymosPowers.id("zfighter_afterlife_borrowed"),
+		builder -> builder.persistent(Codec.LONG));
 	/** On the Aether's level: the Other World's site has been built. Saved. */
 	public static final AttachmentType<Boolean> BUILT = AttachmentRegistry.create(JaymosPowers.id("zfighter_afterlife_built"),
 		builder -> builder.persistent(Codec.BOOL));
@@ -407,6 +413,24 @@ public final class ZFighterAfterlife {
 				returnHome(player, After.ASK);
 			} else if (player.isAlive() && !ARRIVALS.containsKey(player.getUUID()) && (!inOtherWorld(player) || player.getY() < FLOOR - FALL_LIMIT)) {
 				hold(server, player);
+			}
+		}
+		// borrowed time lent by the fortune teller burns a minute a minute, twice as fast in a form, till it is up
+		if (now % 20 == 0) {
+			for (ServerPlayer player : new ArrayList<>(server.getPlayerList().getPlayers())) {
+				Long owed = player.getAttached(BORROWED);
+				if (owed == null || owed <= 0 || owed == LASTING || among(player)) {
+					continue;
+				}
+				ZFighterPower.Live live = ZFighterPower.live(player);
+				long left = owed - (live != null && live.form != 0 ? 2 : 1);
+				if (left <= 0) {
+					player.removeAttached(BORROWED);
+					player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_borrowed_up")
+						.withStyle(ChatFormatting.AQUA));
+				} else {
+					player.setAttached(BORROWED, left);
+				}
 			}
 		}
 		ServerLevel world = server.getLevel(WindAether.AETHER);
@@ -775,7 +799,41 @@ public final class ZFighterAfterlife {
 			teller.getDisplayName()).withStyle(ChatFormatting.LIGHT_PURPLE));
 	}
 
-	// ---------------------------------------------------------------- talking (0.17.146)
+/**
+ * The fortune teller lends him minutes among the living: he pays like a return (silver from anywhere he carries it,
+ * else TP), goes back where he woke, and the minutes burn down - twice as fast while he is in a form.
+ */
+private static void borrow(ServerPlayer player, LivingEntity teller, Runnable back) {
+	if (!among(player) || com.jaymospowers.core.wounds.Karma.just(player)) {
+		return;
+	}
+	Runnable lend = () -> {
+		boolean emeralds = KingdomsMoney.canPay(player, KingdomsMoney.worth(PRICE_SILVER));
+		if (!emeralds) {
+			ZFighterTraining.Data data = ZFighterTraining.of(player);
+			if (data.tp() < PRICE_TP) {
+				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_teller_poor",
+					teller.getDisplayName(), KingdomsMoney.text(player, KingdomsMoney.worth(PRICE_SILVER)), PRICE_TP)
+					.withStyle(ChatFormatting.LIGHT_PURPLE));
+				return;
+			}
+			player.setAttached(ZFighterTraining.DATA, data.withTp(data.tp() - PRICE_TP));
+		} else {
+			KingdomsMoney.charge(player, KingdomsMoney.worth(PRICE_SILVER));
+		}
+		player.setAttached(BORROWED, BORROWED_TICKS);
+		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_afterlife_borrowed", BORROWED_TICKS / 1200)
+			.withStyle(ChatFormatting.LIGHT_PURPLE));
+		returnHome(player);
+	};
+	ZFighterNpcs.ask(player, teller, Component.translatable("talk.jaymospowers.teller.borrow_ask",
+		teller.getDisplayName(), BORROWED_TICKS / 1200, PRICE_SILVER, PRICE_TP),
+		List.of(
+			ZFighterNpcs.Option.of("talk.jaymospowers.teller.borrow_yes", true, lend),
+			ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.back", true, back)));
+}
+
+// ---------------------------------------------------------------- talking (0.17.146)
 
 	/**
 	 * The Judge's choices, with one more for one of the dead whose page weighed just (Andy: "some live there perpetually
@@ -869,9 +927,13 @@ public final class ZFighterAfterlife {
 				}
 				boolean emeralds = KingdomsMoney.canPay(player, KingdomsMoney.worth(PRICE_SILVER));
 				boolean tp = ZFighterTraining.of(player).tp() >= PRICE_TP;
-				ZFighterNpcs.ask(player, npc, Component.translatable("talk.jaymospowers.teller.greet", KingdomsMoney.text(player, KingdomsMoney.worth(PRICE_SILVER)), PRICE_TP), List.of(
-					ZFighterNpcs.Option.of("talk.jaymospowers.teller.pay_emeralds", emeralds, () -> paid(player, npc, true, back), KingdomsMoney.text(player, KingdomsMoney.worth(PRICE_SILVER))),
-					ZFighterNpcs.Option.of("talk.jaymospowers.teller.pay_tp", tp, () -> paid(player, npc, false, back), PRICE_TP)));
+				// she can lend minutes among the living, too: he pays like a return and goes back with them
+				boolean canBorrow = among(player) && !Boolean.TRUE.equals(player.getAttached(CHAMPION)) && !Boolean.TRUE.equals(player.getAttached(PAID));
+				List<ZFighterNpcs.Option> options = new ArrayList<>();
+				options.add(ZFighterNpcs.Option.of("talk.jaymospowers.teller.pay_emeralds", emeralds, () -> paid(player, npc, true, back), KingdomsMoney.text(player, KingdomsMoney.worth(PRICE_SILVER))));
+				options.add(ZFighterNpcs.Option.of("talk.jaymospowers.teller.pay_tp", tp, () -> paid(player, npc, false, back), PRICE_TP));
+				options.add(ZFighterNpcs.Option.of("talk.jaymospowers.teller.borrow", canBorrow, () -> borrow(player, npc, back)));
+				ZFighterNpcs.ask(player, npc, Component.translatable("talk.jaymospowers.teller.greet", KingdomsMoney.text(player, KingdomsMoney.worth(PRICE_SILVER)), PRICE_TP), options);
 			}
 		}
 	}
