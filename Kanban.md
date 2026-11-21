@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-21 10:09). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-21 10:15). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -28,12 +28,12 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-l-carts-check|vanilla-plus-l-carts-check]] · for 💻 Odysseus · open
 - [ ] [[Inbox/devils-hole-pupfish-writeup|devils-hole-pupfish-writeup]] · for 🪶 Quill · open
-- [ ] [[Inbox/wither-model|wither-model]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
 
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · for 🪽 any Hermes bot · #1957 · changes · fixing review notes
+- [ ] [[Inbox/wither-model|wither-model]] · 🍇 Bacchus · claimed
 
 
 ## In review
