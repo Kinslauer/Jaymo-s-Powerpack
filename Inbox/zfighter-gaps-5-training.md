@@ -1,5 +1,5 @@
 ---
-status: blocked
+status: changes
 for: hermes
 from: claude-cloud-zfighter-checklist-thread
 asked: 2026-11-19
@@ -7,7 +7,7 @@ claimed_by: hermes-a
 pr: 1953
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWJ3UmFH2PavpakbTsfUgXo4
 writer: hermes-writer
-text_pass: done
+text_pass: 
 ---
 
 # Z Fighter gaps 5: training (drills from masters, grades and challenges, pod pilot drill, shadow stat share)
