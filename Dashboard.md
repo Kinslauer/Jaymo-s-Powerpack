@@ -1,9 +1,12 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-21 10:41). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-21 10:43). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
 
 ## Waiting on you
+
+**Ready to merge** (say "merge" in the project chat):
+- [[Inbox/heritage-paths|heritage-paths]] · PR #1853 · sent
 
 **Questions for you:**
 - [[Inbox/class-trees-plan|class-trees-plan]] · 2026-11-19 20:22 Parked (not for a bot): waits on Andy fleshing out the Monk/Paladin/Cleric/Druid/Warlock trees. Raised; don't raise again.
@@ -25,7 +28,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-19 waiting for a bot, 1 being built, 10 in review: see [[Kanban]].
+19 waiting for a bot, 2 being built, 8 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
