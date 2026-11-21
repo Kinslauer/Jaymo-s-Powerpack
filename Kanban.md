@@ -27,7 +27,6 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-l-carts-check|vanilla-plus-l-carts-check]] · for 💻 Odysseus · open
-- [ ] [[Inbox/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/zfighter-gaps-1-stats|zfighter-gaps-1-stats]] · for 🪽 any Hermes bot · open
@@ -38,6 +37,7 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]] · 🍇 Bacchus · claimed
 
 
 ## In review
