@@ -1,5 +1,5 @@
 ---
-status: claimed
+status: blocked
 for: hermes
 from: pc-claude
 asked: 2026-11-18
