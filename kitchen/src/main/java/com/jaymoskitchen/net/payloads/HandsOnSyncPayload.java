@@ -32,15 +32,3 @@ public record HandsOnSyncPayload(UUID sessionId, float heat, float progress, int
 
 
 
-/** Client → server: abandon the session (walked away or let go). */
-public record HandsOnAbandonPayload(UUID sessionId) implements CustomPacketPayload {
-    public static final Type<HandsOnAbandonPayload> TYPE = new Type<>(JaymosKitchen.id("hands_on_abandon"));
-    public static final StreamCodec<RegistryFriendlyByteBuf, HandsOnAbandonPayload> CODEC = CustomPacketPayload.codec(
-            (p, buf) -> buf.writeUuid(p.sessionId()),
-            buf -> new HandsOnAbandonPayload(buf.readUuid()));
-
-    @Override
-    public Type<HandsOnAbandonPayload> type() {
-        return TYPE;
-    }
-}

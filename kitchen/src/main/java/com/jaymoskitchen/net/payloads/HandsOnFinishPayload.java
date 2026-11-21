@@ -6,7 +6,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.item.ItemStack;
+import java.util.UUID;
 
 /** Server → client: the session finished with {@code quality}; {@code rewards} are the items to grant. */
 public record HandsOnFinishPayload(UUID sessionId, int quality, ItemStack[] rewards)
