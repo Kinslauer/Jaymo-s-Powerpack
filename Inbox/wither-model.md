@@ -1,9 +1,9 @@
 ---
-status: open
+status: claimed
 for: hermes
 from: pc-claude
 asked: 2026-11-18
-claimed_by:
+claimed_by: hermes-a
 pr: 
 writer: hermes-writer
 text_pass: 
