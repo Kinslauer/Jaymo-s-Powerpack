@@ -1,5 +1,6 @@
 package com.jaymospowers.client;
 
+import com.jaymospowers.client.KeyframeClip;
 import com.jaymospowers.core.Ledge;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -10,6 +11,7 @@ import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.util.Mth;
+import org.jspecify.annotations.Nullable;
 import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
 
@@ -33,6 +35,8 @@ public final class LedgePose {
 	/** How quick the hang comes on (the weight's spring, times its usual). */
 	static final float ENTRY_SPEED = 1.4F;
 	private static final PoseBlend.Channel BLEND = PoseBlend.channel("ledge");
+private static @Nullable KeyframeClip HANG_CLIP;
+private static @Nullable KeyframeClip MANTLE_CLIP;
 	/** Hanging: the sway from the hands (degrees, and radians a tick) and the legs' dangle (radians). */
 	static final float SWAY_DEGREES = 3.0F, SWAY_SPEED = 0.07F, DANGLE = 0.14F;
 	/** Climbing: how far the body leans in over the edge at the most (degrees). */
@@ -69,6 +73,11 @@ public final class LedgePose {
 	public static final RenderStateDataKey<State> KEY = RenderStateDataKey.create(() -> "jaymospowers:ledge");
 
 	private LedgePose() {
+	}
+
+	static {
+	    HANG_CLIP = KeyframeClip.load("jaymospowers", "player_freerun_ledge_hang", "player_freerun_ledge_hang");
+	    MANTLE_CLIP = KeyframeClip.load("jaymospowers", "player_freerun_ledge_mantle", "player_freerun_ledge_mantle");
 	}
 
 	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
@@ -174,41 +183,91 @@ public final class LedgePose {
 	}
 
 	private static void pose(HumanoidModel<?> h, State ledge, float age) {
-		h.body.xRot = 0.0F;
-		h.body.yRot = 0.0F;
-		float p = ledge.climb();
-		if (p >= 0.0F && ledge.prone()) {
-			proneModel(h, p);
-			return;
-		}
-		if (p < 0.0F) {
-			float t = ledge.time();
-			float give = Mth.sin(t * SWAY_SPEED * 1.3F) * 0.04F;
-			// the catch: the arms take the jolt, the legs swing on after the body (a beat behind it)
-			float jolt = (float)Math.exp(-age * CATCH_SWING_DECAY * 1.5F) * CATCH_ARMS;
-			float legs = catchSwing(Math.max(0.0F, age - 0.12F)) * CATCH_LEGS;
-			// (ParCool track A) shimmying: one hand off the edge and along it, then the other after it
-			float hand = Mth.sin(t * SHUFFLE_RATE);
-			float shuffle = ledge.shuffle();
-			float rightOff = Math.abs(shuffle) * Math.max(0.0F, hand), leftOff = Math.abs(shuffle) * Math.max(0.0F, -hand);
-			set(h.rightArm, ARM_UP + give + jolt + rightOff * SHUFFLE_LIFT, 0.0F, ARM_SPREAD + Math.signum(shuffle) * rightOff * SHUFFLE_REACH);
-			set(h.leftArm, ARM_UP - give + jolt + leftOff * SHUFFLE_LIFT, 0.0F, -ARM_SPREAD + Math.signum(shuffle) * leftOff * SHUFFLE_REACH);
-			set(h.rightLeg, DANGLE * Mth.sin(t * 0.09F) + 0.05F - legs, 0.0F, 0.05F);
-			set(h.leftLeg, DANGLE * Mth.sin(t * 0.09F + 2.1F) - 0.03F - legs * 0.8F, 0.0F, -0.05F);
-			return;
-		}
-		// the arms: pull down from overhead, press on the top, then come down to the sides as you stand
-		float pull = smooth(p / 0.55F);
-		float stand = smooth((p - 0.8F) / 0.2F);
-		float arm = Mth.lerp(stand, Mth.lerp(pull, ARM_UP, ARM_PRESS), 0.0F);
-		float spread = Mth.lerp(stand, Mth.lerp(pull, ARM_SPREAD, ARM_SPREAD * 1.6F), 0.05F);
-		set(h.rightArm, arm, 0.0F, spread);
-		set(h.leftArm, arm, 0.0F, -spread);
-		// the right knee up onto the edge, then the left after it, both down to stand
-		float right = smooth((p - 0.35F) / 0.3F) * (1.0F - smooth((p - 0.75F) / 0.25F));
-		float left = smooth((p - 0.55F) / 0.25F) * (1.0F - smooth((p - 0.82F) / 0.18F));
-		set(h.rightLeg, KNEE_UP * right + 0.1F * (1.0F - pull), 0.0F, 0.04F);
-		set(h.leftLeg, KNEE_UP * 0.6F * left - 0.1F * (1.0F - pull), 0.0F, -0.04F);
+	    h.body.xRot = 0.0F;
+	    h.body.yRot = 0.0F;
+	    float p = ledge.climb();
+	    if (p >= 0.0F && ledge.prone()) {
+	        proneModel(h, p);
+	        return;
+	    }
+	    if (p < 0.0F && HANG_CLIP != null && Math.abs(ledge.shuffle()) < 0.15F) {
+	        // hanging: keyframed clip for arms and legs
+	        float share = age % 1.0F;
+	        if (HANG_CLIP.has("right_arm")) {
+	            h.rightArm.xRot = HANG_CLIP.partX("right_arm", share);
+	            h.rightArm.yRot = HANG_CLIP.partY("right_arm", share);
+	            h.rightArm.zRot = HANG_CLIP.partZ("right_arm", share);
+	        }
+	        if (HANG_CLIP.has("left_arm")) {
+	            h.leftArm.xRot = HANG_CLIP.partX("left_arm", share);
+	            h.leftArm.yRot = HANG_CLIP.partY("left_arm", share);
+	            h.leftArm.zRot = HANG_CLIP.partZ("left_arm", share);
+	        }
+	        if (HANG_CLIP.has("right_leg")) {
+	            h.rightLeg.xRot = HANG_CLIP.partX("right_leg", share);
+	            h.rightLeg.yRot = HANG_CLIP.partY("right_leg", share);
+	            h.rightLeg.zRot = HANG_CLIP.partZ("right_leg", share);
+	        }
+	        if (HANG_CLIP.has("left_leg")) {
+	            h.leftLeg.xRot = HANG_CLIP.partX("left_leg", share);
+	            h.leftLeg.yRot = HANG_CLIP.partY("left_leg", share);
+	            h.leftLeg.zRot = HANG_CLIP.partZ("left_leg", share);
+	        }
+	        return;
+	    }
+	    if (p >= 0.0F && MANTLE_CLIP != null) {
+	        // climbing/mantling: keyframed clip for arms and legs
+	        float share = Mth.clamp(p, 0.0F, 1.0F);
+	        if (MANTLE_CLIP.has("right_arm")) {
+	            h.rightArm.xRot = MANTLE_CLIP.partX("right_arm", share);
+	            h.rightArm.yRot = MANTLE_CLIP.partY("right_arm", share);
+	            h.rightArm.zRot = MANTLE_CLIP.partZ("right_arm", share);
+	        }
+	        if (MANTLE_CLIP.has("left_arm")) {
+	            h.leftArm.xRot = MANTLE_CLIP.partX("left_arm", share);
+	            h.leftArm.yRot = MANTLE_CLIP.partY("left_arm", share);
+	            h.leftArm.zRot = MANTLE_CLIP.partZ("left_arm", share);
+	        }
+	        if (MANTLE_CLIP.has("right_leg")) {
+	            h.rightLeg.xRot = MANTLE_CLIP.partX("right_leg", share);
+	            h.rightLeg.yRot = MANTLE_CLIP.partY("right_leg", share);
+	            h.rightLeg.zRot = MANTLE_CLIP.partZ("right_leg", share);
+	        }
+	        if (MANTLE_CLIP.has("left_leg")) {
+	            h.leftLeg.xRot = MANTLE_CLIP.partX("left_leg", share);
+	            h.leftLeg.yRot = MANTLE_CLIP.partY("left_leg", share);
+	            h.leftLeg.zRot = MANTLE_CLIP.partZ("left_leg", share);
+	        }
+	        return;
+	    }
+	    if (p < 0.0F) {
+	        float t = ledge.time();
+	        float give = Mth.sin(t * SWAY_SPEED * 1.3F) * 0.04F;
+	        // the catch: the arms take the jolt, the legs swing on after the body (a beat behind it)
+	        float jolt = (float)Math.exp(-age * CATCH_SWING_DECAY * 1.5F) * CATCH_ARMS;
+	        float legs = catchSwing(Math.max(0.0F, age - 0.12F)) * CATCH_LEGS;
+	        // (ParCool track A) shimmying: one hand off the edge and along it, then the other after it
+	        float hand = Mth.sin(t * SHUFFLE_RATE);
+	        float shuffle = ledge.shuffle();
+	        float rightOff = Math.abs(shuffle) * Math.max(0.0F, hand), leftOff = Math.abs(shuffle) * Math.max(0.0F, -hand);
+	        set(h.rightArm, ARM_UP + give + jolt + rightOff * SHUFFLE_LIFT, 0.0F, ARM_SPREAD + Math.signum(shuffle) * rightOff * SHUFFLE_REACH);
+	        set(h.leftArm, ARM_UP - give + jolt + leftOff * SHUFFLE_LIFT, 0.0F, -ARM_SPREAD + Math.signum(shuffle) * leftOff * SHUFFLE_REACH);
+	        set(h.rightLeg, DANGLE * Mth.sin(t * 0.09F) + 0.05F - legs, 0.0F, 0.05F);
+	        set(h.leftLeg, DANGLE * Mth.sin(t * 0.09F + 2.1F) - 0.03F - legs * 0.8F, 0.0F, -0.05F);
+	        return;
+	    }
+	    // the arms: pull down from overhead, press on the top, then come down to the sides as you stand
+	    float pull = smooth(p / 0.55F);
+	    float stand = smooth((p - 0.8F) / 0.2F);
+	    float arm = Mth.lerp(stand, Mth.lerp(pull, ARM_UP, ARM_PRESS), 0.0F);
+	    float spread = Mth.lerp(stand, Mth.lerp(pull, ARM_SPREAD, ARM_SPREAD * 1.6F), 0.05F);
+	    set(h.rightArm, arm, 0.0F, spread);
+	    set(h.leftArm, arm, 0.0F, -spread);
+	    // the right knee up onto the edge, then the left after it, both down to stand
+	    float right = smooth((p - 0.35F) / 0.3F) * (1.0F - smooth((p - 0.75F) / 0.25F));
+	    float left = smooth((p - 0.55F) / 0.25F) * (1.0F - smooth((p - 0.82F) / 0.18F));
+	    set(h.rightLeg, KNEE_UP * right + 0.1F * (1.0F - pull), 0.0F, 0.04F);
+	    set(h.leftLeg, KNEE_UP * 0.6F * left - 0.1F * (1.0F - pull), 0.0F, -0.04F);
 	}
 
 	/** (0.15.108) How far the body has tipped onto its belly (0-1) at {@code p} through the prone climb. */
