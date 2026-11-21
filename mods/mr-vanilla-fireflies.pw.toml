@@ -1,0 +1,13 @@
+name = "Vanilla Fireflies"
+filename = "vanilla-fireflies-5.1.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/dxiyDLYV/versions/f9FE4diA/vanilla-fireflies-5.1.jar"
+hash-format = "sha512"
+hash = "df43ea262251f0a35226a612ca2282907715c2bb8d676b19913b343f9c41606ff6e331f58fe1ccf778617ca985400aab953399c969564b5430c42e838ac8380a"
+
+[update]
+[update.modrinth]
+mod-id = "dxiyDLYV"
+version = "f9FE4diA"

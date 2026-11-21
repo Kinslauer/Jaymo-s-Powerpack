@@ -1,0 +1,13 @@
+name = "homesteads"
+filename = "homesteads-3.0.0-for-fabric-26.3.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/6ItsEKMh/versions/xYCdL31w/homesteads-3.0.0-for-fabric-26.3.jar"
+hash-format = "sha512"
+hash = "ba6c7ba9521a323255a3d2cd955cdf6b2f6620c20cacd82140317e7d04127283c79f97819b4fdb6c1568d70436b98ae53a34b6ba364b80393d84dee8ef148b85"
+
+[update]
+[update.modrinth]
+mod-id = "6ItsEKMh"
+version = "xYCdL31w"

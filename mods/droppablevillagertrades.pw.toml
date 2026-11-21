@@ -1,0 +1,13 @@
+name = "Droppable Villager Trades"
+filename = "droppablevillagertrades-fabric-26.1-1.0.1.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/SlhyZVWA/versions/HR2MyIvc/droppablevillagertrades-fabric-26.1-1.0.1.jar"
+hash-format = "sha512"
+hash = "4961d96ab81ab845fe6d33b592b19a5b8158f75aaac118f4ff19996f8117867b1ab84558beef89ad0aeb14a060071a8c4f7e5570dc1899b4eb7b8bd398208c1a"
+
+[update]
+[update.modrinth]
+mod-id = "SlhyZVWA"
+version = "HR2MyIvc"

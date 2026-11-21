@@ -1,0 +1,13 @@
+name = "ThirstyBottles"
+filename = "ThirstyBottles-fabric-MC26.3-26.3.0.1.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/F2F7kDiU/versions/KYrS8t6q/ThirstyBottles-fabric-MC26.3-26.3.0.1.jar"
+hash-format = "sha512"
+hash = "d7bdb17afec38b979fc0c64f88de45e96754833ef30f2eed8b87b43ccc74f7137825324e1884352f1756abb7031cd7dcd3f10c8a77f8ba34bcfb01cea6111490"
+
+[update]
+[update.modrinth]
+mod-id = "F2F7kDiU"
+version = "KYrS8t6q"

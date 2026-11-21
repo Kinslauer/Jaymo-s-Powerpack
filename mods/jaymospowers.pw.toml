@@ -1,0 +1,8 @@
+name = "Jaymo's Powers"
+filename = "jaymos-powers-0.26.22.jar"
+side = "both"
+
+[download]
+url = "https://github.com/Kinslauer/jaymo-s-powerpack/releases/download/tester-pack-files/jaymos-powers-0.26.22-440a22910019.jar"
+hash-format = "sha256"
+hash = "e3d88b6fd6ad160e8895c6d015d38dcfa6587f7a4d439607e06834bf55cfcb24"

@@ -1,0 +1,13 @@
+name = "Biome Blends"
+filename = "biomeblends-fabric-26.3-1.5.1.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/q95zxc4j/versions/JMV9cA1C/biomeblends-fabric-26.3-1.5.1.jar"
+hash-format = "sha512"
+hash = "50caf9f06418147431440118824d6c198d2a51dcb3c11a182d94d1e2502d0d43cf86a29020c97d5d755975d1235a007533707f343d3eb8719fa3871ccc746513"
+
+[update]
+[update.modrinth]
+mod-id = "q95zxc4j"
+version = "JMV9cA1C"

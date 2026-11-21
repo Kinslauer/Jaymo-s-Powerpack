@@ -1,0 +1,13 @@
+name = "Tiered Shields"
+filename = "ks-shields-26.3.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/uTtoJYEu/versions/N2OYaKps/ks-shields-26.3.jar"
+hash-format = "sha512"
+hash = "0d6707adf2b7e7215a5540e569f5703c7aeab8e29ca342daf138ef28e86e54fddc99417b8c1b1d612b37d21ccf4cf8761c5b2530bef1191ef03bdd4f70cdc71b"
+
+[update]
+[update.modrinth]
+mod-id = "uTtoJYEu"
+version = "N2OYaKps"

@@ -1,0 +1,13 @@
+name = "MoogsMineshaftsReimagined"
+filename = "MoogsMineshaftsReimagined-universal-1.21-1.1.0.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/z25hqseO/versions/JJc7pNHb/MoogsMineshaftsReimagined-universal-1.21-1.1.0.jar"
+hash-format = "sha512"
+hash = "ccf495329a6afc5cf73f18e1b1a6c7eecf74378cad1513fdeb0e76d836fecb7013d61bc3f5e70e566dd1f5507b6c381a43bf50cd9bb096c6af035929a23a9f20"
+
+[update]
+[update.modrinth]
+mod-id = "z25hqseO"
+version = "JJc7pNHb"

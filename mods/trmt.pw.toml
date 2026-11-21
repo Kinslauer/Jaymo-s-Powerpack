@@ -1,0 +1,8 @@
+name = "TRMT"
+filename = "trmt-0.5.1-26.3-jaymo.1.jar"
+side = "both"
+
+[download]
+url = "https://github.com/Kinslauer/jaymo-s-powerpack/releases/download/tester-pack-files/trmt-0.5.1-26.3-jaymo.1-c9b367d078c8.jar"
+hash-format = "sha256"
+hash = "2356e9a5cecce8bdc4ab639bf905b905a51fd8cc7b07e3252ed136678605680c"

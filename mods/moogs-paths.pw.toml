@@ -1,0 +1,13 @@
+name = "Moog's Paths"
+filename = "MoogsPaths-fabric-26.3-1.2.0.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/HDB8pnki/versions/irh19s8L/MoogsPaths-fabric-26.3-1.2.0.jar"
+hash-format = "sha512"
+hash = "3c43c4e8e7109899b2c1680a655946ac55fa75988fe374ee10834deffa2d72e4a9e5fc88fd538890ce34a7b6bbdc0ec42b090a93e421365f22795aa6fff5d9c6"
+
+[update]
+[update.modrinth]
+mod-id = "HDB8pnki"
+version = "irh19s8L"

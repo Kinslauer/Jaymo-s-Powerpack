@@ -1,0 +1,13 @@
+name = "Critter Armory"
+filename = "critterarmory-26.3-0.6.5-fabric.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/eDysihLO/versions/Qcu5lZ5g/critterarmory-26.3-0.6.5-fabric.jar"
+hash-format = "sha512"
+hash = "320184b937e3c1a2b04295fdbbd94a6cf3a4d29792cef7501de53d2fdca6c8567d87f015651a9ce27126227c4ac2bbf68504457b611bb559642b5532bff4d057"
+
+[update]
+[update.modrinth]
+mod-id = "eDysihLO"
+version = "Qcu5lZ5g"

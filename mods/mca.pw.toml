@@ -1,0 +1,8 @@
+name = "Minecraft Comes Alive"
+filename = "mca-fabric-7.8.0-dev.3badc42+26.3.jar"
+side = "both"
+
+[download]
+url = "https://github.com/Kinslauer/jaymo-s-powerpack/releases/download/tester-pack-files/mca-fabric-7.8.0-dev.3badc42-26.3-298f8ab2caf5.jar"
+hash-format = "sha256"
+hash = "5bb7c15e962c5125a6bb5ec3ca423a34685c9c3d74abcdfda229c759d68b9f4d"

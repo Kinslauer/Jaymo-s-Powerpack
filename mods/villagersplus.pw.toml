@@ -1,0 +1,13 @@
+name = "VillagersPlus"
+filename = "villagersplus-fabric-mc26.3-4.1.0.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/oHGMwNDR/versions/6TiiJgHL/villagersplus-fabric-mc26.3-4.1.0.jar"
+hash-format = "sha512"
+hash = "e0854fe9341307893dd50459a2a5860ea47bb634bde3e6623f443543ba16f7650b77dc4a594574d8469e693f4cfb48e44ea595ccf334df08da0441a7e72c2e6d"
+
+[update]
+[update.modrinth]
+mod-id = "oHGMwNDR"
+version = "6TiiJgHL"

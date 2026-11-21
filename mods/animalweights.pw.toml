@@ -1,0 +1,13 @@
+name = "Animal Weights"
+filename = "animalweights-26.3-Fabric-1.2.2.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/L8hKhAzB/versions/gVMKXZKE/animalweights-26.3-Fabric-1.2.2.jar"
+hash-format = "sha512"
+hash = "acc5817eb46cefb8fc1191944ac7ac6d92538b5606d6c861e57c0be2c7e0edc2de62027cd84d1abce3019d933402da23c3d2cc71bb459099d1d969af9b531669"
+
+[update]
+[update.modrinth]
+mod-id = "L8hKhAzB"
+version = "gVMKXZKE"

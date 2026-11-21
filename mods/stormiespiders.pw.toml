@@ -1,0 +1,13 @@
+name = "Stormie's Spiders"
+filename = "stormiespiders-fabric-26.3-3.3.1.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/3dsI6Hle/versions/jTOAPFV5/stormiespiders-fabric-26.3-3.3.1.jar"
+hash-format = "sha512"
+hash = "77c1c62322caea42f1f4ffb8924f5713b0ee04b431ba23dfb26629d09f4ba1c3efd12e9f56b1fb34a6f315d48b6d555e1c868eedd423d1766e2a0c57b316024f"
+
+[update]
+[update.modrinth]
+mod-id = "3dsI6Hle"
+version = "jTOAPFV5"

@@ -1,0 +1,13 @@
+name = "HerdMentality"
+filename = "HerdMentality-fabric-MC26.3-26.3.0.1.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/zOBrENMH/versions/aCvupK5j/HerdMentality-fabric-MC26.3-26.3.0.1.jar"
+hash-format = "sha512"
+hash = "bfbf3ebb7e826a757945030642e2dfec9176c040dccba6f3a09d091e4d73fc9ae919689c71db2ed857a729ef12ddfd87dfe3142e8e3c7c9eaaf6d1748feb3c99"
+
+[update]
+[update.modrinth]
+mod-id = "zOBrENMH"
+version = "aCvupK5j"

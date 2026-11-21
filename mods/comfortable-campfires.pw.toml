@@ -1,0 +1,13 @@
+name = "Comfortable Campfires"
+filename = "comfortable_campfires-2.0.1+26.1-snapshot-10-fabric.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/lOZBoyio/versions/3dQrrBky/comfortable_campfires-2.0.1%2B26.1-snapshot-10-fabric.jar"
+hash-format = "sha512"
+hash = "a5b65f1eebfe0fea89abeb41b096fb63f603ec276dc38e143f8b40f5794f631203ee69d6fb63d5d3459012a89aa09a4b602c3646467c069a41db8351b6a27d13"
+
+[update]
+[update.modrinth]
+mod-id = "lOZBoyio"
+version = "3dQrrBky"

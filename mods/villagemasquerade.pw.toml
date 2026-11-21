@@ -1,0 +1,13 @@
+name = "Village Masquerade"
+filename = "villagemasquerade-v26.3.0-mc26.3.x+fabric.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/leFnAa7O/versions/NhCCM1f5/villagemasquerade-v26.3.0-mc26.3.x%2Bfabric.jar"
+hash-format = "sha512"
+hash = "54d22dea2bc212d0af2a5708d64f10f6689f559d60240cf8218516c54f5f195053e51c90b74cf5e03b7bce7badc4d3640564d981291e980b86e0cc78ccaad957"
+
+[update]
+[update.modrinth]
+mod-id = "leFnAa7O"
+version = "NhCCM1f5"

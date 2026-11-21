@@ -1,0 +1,13 @@
+name = "Ultimate Horseshoes"
+filename = "ultimate_horseshoes-26.3.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/z4gIGraY/versions/CmIcH7gj/ultimate_horseshoes-26.3.jar"
+hash-format = "sha512"
+hash = "ca1f47b65fdde8674432d88e5d16d7dba9cc8caf57495a657fcf12cd517a850e8127ae0b4fbe5c99e0cf36b2d99d63c076d0f3d6556d856f802889fd708cd1c3"
+
+[update]
+[update.modrinth]
+mod-id = "z4gIGraY"
+version = "CmIcH7gj"

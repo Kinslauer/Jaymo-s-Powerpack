@@ -1,0 +1,13 @@
+name = "SWAY"
+filename = "sway-2.4.5-fabric+26.3.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/Gj6Yce3v/versions/J9WbqmZ9/sway-2.4.5-fabric%2B26.3.jar"
+hash-format = "sha512"
+hash = "8b92d3d763b51b8c858be16bf16f63e7c2398d5bf92dbe937660b558003e11b6887c74921f3143b4aa2bb31daa3804e4b00c913f3412b319c1b9a4f4aa4780d3"
+
+[update]
+[update.modrinth]
+mod-id = "Gj6Yce3v"
+version = "J9WbqmZ9"

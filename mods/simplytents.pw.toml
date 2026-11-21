@@ -1,0 +1,13 @@
+name = "SimplyTents"
+filename = "simplytents-3.5-26.3.fabric.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/yWY7WWmg/versions/wvIeMmbl/simplytents-3.5-26.3.fabric.jar"
+hash-format = "sha512"
+hash = "181975439a809f910d8f36220c9e70080864c08d066fd7a81e0eecb9bc72bcc5ed4ddcb7a1336545281aba40e01ff933662f32894a72037c297a680739e4059c"
+
+[update]
+[update.modrinth]
+mod-id = "yWY7WWmg"
+version = "wvIeMmbl"

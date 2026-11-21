@@ -1,0 +1,13 @@
+name = "Stretchy Leash"
+filename = "stretchy-leash-3.0.0+26.1.2.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/G0HCO06K/versions/yewvryEP/stretchy-leash-3.0.0%2B26.1.2.jar"
+hash-format = "sha512"
+hash = "031f12730292b21e80d32a5f0060da0936aedad529f9844315ff43b44f167ba87adbcb029222ee1dc5357ec9210c97e77c3fd06e8cebb0fdb32784602b103630"
+
+[update]
+[update.modrinth]
+mod-id = "G0HCO06K"
+version = "yewvryEP"

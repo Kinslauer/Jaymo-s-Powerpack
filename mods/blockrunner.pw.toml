@@ -1,0 +1,13 @@
+name = "Block Runner"
+filename = "blockrunner-v26.3.0-mc26.3.x+fabric.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/1VSGxqkt/versions/32WnkvOu/blockrunner-v26.3.0-mc26.3.x%2Bfabric.jar"
+hash-format = "sha512"
+hash = "11129a59e7eed8fc57687f87c8ab7fe4f899ebbe052158d90eb37069f2bcd5b682fddec60fcc7a991e82d090cf6cdfee56639400ffd8cc5e68ec733201349fc9"
+
+[update]
+[update.modrinth]
+mod-id = "1VSGxqkt"
+version = "32WnkvOu"

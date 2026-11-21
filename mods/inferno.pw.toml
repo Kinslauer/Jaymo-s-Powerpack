@@ -1,0 +1,13 @@
+name = "Inferno"
+filename = "inferno-fabric-26.3-r1.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/ORIQOtZ5/versions/VP7Dlhrg/inferno-fabric-26.3-r1.jar"
+hash-format = "sha512"
+hash = "a8921ed899b15673c0095d7744338aafaad99e1f8ff6840601181de7d83bc895f28f272d8ca1765fc42482a0b90fc55b6c0eb4de5771954b39b9bffb1eaa1aa9"
+
+[update]
+[update.modrinth]
+mod-id = "ORIQOtZ5"
+version = "VP7Dlhrg"

@@ -1,0 +1,13 @@
+name = "Armored Foes"
+filename = "armoredfoes-v26.3.0-mc26.3.x+fabric.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/ahTPKYtE/versions/PEU7vsJj/armoredfoes-v26.3.0-mc26.3.x%2Bfabric.jar"
+hash-format = "sha512"
+hash = "2b5f8bc358f1cdb6482b19a970b585422e40c00ced90bd3d9d0730c45e9be76c8d46a08a68b2c381040f3f33fea33ee5aed3542b94b50f5280e5b83b64db0e40"
+
+[update]
+[update.modrinth]
+mod-id = "ahTPKYtE"
+version = "PEU7vsJj"

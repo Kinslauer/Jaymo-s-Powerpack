@@ -1,0 +1,13 @@
+name = "NoWeatherSkip"
+filename = "noweatherskip_mt-1.1.1-fabric+mc26.1.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/ncsAPvAb/versions/oJgqPe4k/noweatherskip_mt-1.1.1-fabric%2Bmc26.1.jar"
+hash-format = "sha512"
+hash = "993c3bd50c909027f6a164096e470e1e8f955b3b4f88596fc767d83afe15f44337beb20555224e6fddedcc2b390400a6f8cc30f72a78110507a6c42c2dcd46d6"
+
+[update]
+[update.modrinth]
+mod-id = "ncsAPvAb"
+version = "oJgqPe4k"

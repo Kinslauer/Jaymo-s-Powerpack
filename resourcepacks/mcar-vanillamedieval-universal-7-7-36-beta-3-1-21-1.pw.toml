@@ -1,0 +1,13 @@
+name = "MCAR_VanillaMedieval_Universal_7.7.36-beta.3+1.21.1"
+filename = "MCAR_VanillaMedieval_Universal_7.7.36-beta.3+1.21.1.zip"
+side = "client"
+
+[download]
+url = "https://mediafilez.forgecdn.net/files/8868/890/MCAR_VanillaMedieval_Universal_7.7.36-beta.3%2B1.21.1.zip"
+hash-format = "sha1"
+hash = "63400dbf8cd26a8b3309c3625c1f5b971b636f57"
+
+[update]
+[update.curseforge]
+file-id = 8868890
+project-id = 667175

@@ -1,0 +1,13 @@
+name = "OmniCrossbow"
+filename = "omnicrossbow-1.1.4+mc26.3.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/TxqFWfQR/versions/Zcu2HGlU/omnicrossbow-1.1.4%2Bmc26.3.jar"
+hash-format = "sha512"
+hash = "1086c577e1d87ccc35c64d106ecacd7423b5696d83df2867f2c5df6712d3b892561e2030c067a97d20e5c9f491f2550f8cc8561077b29cbacf895fc3422952e2"
+
+[update]
+[update.modrinth]
+mod-id = "TxqFWfQR"
+version = "Zcu2HGlU"

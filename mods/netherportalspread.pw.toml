@@ -1,0 +1,13 @@
+name = "Nether Portal Spread"
+filename = "netherportalspread-26.3.0-8.6.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/z7UX4SHt/versions/LOQ01v7s/netherportalspread-26.3.0-8.6.jar"
+hash-format = "sha512"
+hash = "67bb5c41aab6dc1d8f54651bec0d120c9315a3b22745f0bad06899054b55b313f1495659f8b66ff6969a0e805640ccf3cb2a2d2ef06f9ce7f4d0fef680c8e1fa"
+
+[update]
+[update.modrinth]
+mod-id = "z7UX4SHt"
+version = "LOQ01v7s"

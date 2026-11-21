@@ -1,0 +1,13 @@
+name = "Shippy Ships"
+filename = "shippy-ships-1.0.25.3-FABRIC-MC-26.3.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/oxBNHOmi/versions/q3Hz6ClL/shippy-ships-1.0.25.3-FABRIC-MC-26.3.jar"
+hash-format = "sha512"
+hash = "a787df28bc333df6f1149d45a0d7a64ae1c2ecc6c3ff19b6c4d337fff36e53980aab79af9b54d2bed69c10acb89bca11b31aba5e5bd57eed4b54ed0e019c5baf"
+
+[update]
+[update.modrinth]
+mod-id = "oxBNHOmi"
+version = "q3Hz6ClL"

@@ -1,0 +1,13 @@
+name = "Eternal Nether"
+filename = "eternalnether-v26.3.0-mc26.3.x+fabric.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/s6R4jmL8/versions/TIviaC6F/eternalnether-v26.3.0-mc26.3.x%2Bfabric.jar"
+hash-format = "sha512"
+hash = "fe9ac1cd606b424f8fbc094c1d116231b33561208491b1071f9e6b8e6e44f3c310b7f4f753ce44d8fca9deee98d2a62ae2740a510a38ce9bc20186716150b28f"
+
+[update]
+[update.modrinth]
+mod-id = "s6R4jmL8"
+version = "TIviaC6F"

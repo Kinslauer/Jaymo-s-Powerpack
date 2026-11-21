@@ -1,0 +1,13 @@
+name = "Break Free"
+filename = "breakfree-1.5.1.jar"
+side = "client"
+
+[download]
+url = "https://cdn.modrinth.com/data/Xlr5lMDF/versions/WUBobDKx/breakfree-1.5.1.jar"
+hash-format = "sha512"
+hash = "20de87b6dd4f7c1e564e70125ce4aa7a932f7b6438e94b33dd7dc49dfdfe6a6cb3df95ca970ca1ccfdd8af2e35928f53872a5cf6624c6218558f8f87456d2dae"
+
+[update]
+[update.modrinth]
+mod-id = "Xlr5lMDF"
+version = "WUBobDKx"

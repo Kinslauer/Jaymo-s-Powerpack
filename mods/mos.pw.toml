@@ -1,0 +1,13 @@
+name = "MoogsOceanStructures"
+filename = "MoogsOceanStructures-universal-1.21-1.1.1.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/ZKBkklMv/versions/QfMITqh9/MoogsOceanStructures-universal-1.21-1.1.1.jar"
+hash-format = "sha512"
+hash = "62c209637f8fad6588caf39ce2357672b3fffdd0d12afdbf75e2ab77654073f773d386e8271666774d08134e6ae617d65581df7fa1695c298c91eb8831bda961"
+
+[update]
+[update.modrinth]
+mod-id = "ZKBkklMv"
+version = "QfMITqh9"

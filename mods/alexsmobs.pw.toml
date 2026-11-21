@@ -1,0 +1,13 @@
+name = "Alex's Mobs Continued"
+filename = "alexs-mobs-continued-1635121-9256210.jar"
+side = "both"
+
+[download]
+hash-format = "sha1"
+hash = "49845190a4952fe303e9297bc143de098878b476"
+mode = "metadata:curseforge"
+
+[update]
+[update.curseforge]
+file-id = 9256210
+project-id = 1635121

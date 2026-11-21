@@ -1,0 +1,8 @@
+name = "Jaymo's Kingdoms"
+filename = "jaymos-kingdoms-0.11.51.jar"
+side = "both"
+
+[download]
+url = "https://github.com/Kinslauer/jaymo-s-powerpack/releases/download/tester-pack-files/jaymos-kingdoms-0.11.51-41204d87e45a.jar"
+hash-format = "sha256"
+hash = "f36e51f617da98664c781df953f1bff090c9e7d3f21d1d77b8f916f16c162531"

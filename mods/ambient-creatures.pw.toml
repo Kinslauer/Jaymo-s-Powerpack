@@ -1,0 +1,13 @@
+name = "Ambient Creatures"
+filename = "ambient_creatures-0.3.0-beta-26.3.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/egUSQYsJ/versions/sJb88U80/ambient_creatures-0.3.0-beta-26.3.jar"
+hash-format = "sha512"
+hash = "34744d779c318a148fa24119d43fea255c35a0eb813c68723fddf075d7e555c99a54b6bdbe749b5e0b0957a4755f7c659dd26666263e1b591b6011dba89088b2"
+
+[update]
+[update.modrinth]
+mod-id = "egUSQYsJ"
+version = "sJb88U80"
