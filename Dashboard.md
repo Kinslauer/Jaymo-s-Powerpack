@@ -35,6 +35,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 - [ ] #1969 loose wood no longer makes the server wait on land still generating (Kingdoms, 2026-11-21)
 - [ ] #1966 loose wood no longer crashes the server while land generates (Kingdoms, 2026-11-21)
+- [ ] #1951 hints as tip cards - text hints show top right instead of over the hotbar (Powers, 2026-11-21)
 - [ ] #1952 Stealth kills: sneak + hold attack behind someone who never saw you (Powers, Kingdoms, 2026-11-20)
 - [ ] #1950 bodies keep their facing prone, sat or crouched; the view rises with the head on get-ups (Powers, 2026-11-20)
 - [ ] #1949 body menu - a tap of use on a body opens what you can do to it (Powers, Kingdoms, 2026-11-20)
@@ -92,8 +93,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1889 Regrown limbs come back unbroken, Verdant regrowth crunch (Powers, Kingdoms, 2026-11-19)
 - [ ] #1888 climbing onto and off mounts (SmoothMount-style, our own) (Powers, Kingdoms, 2026-11-19)
 - [ ] #1886 hit streak count off the action bar with Kingdoms (Powers, Kingdoms, 2026-11-19)
-- [ ] #1885 Deathless returns (for Kingdoms' Pallid) (Powers, Kingdoms, Kitchen, 2026-11-19)
-- …and 319 older ones.
+- …and 320 older ones.
 
 ## Health
 
