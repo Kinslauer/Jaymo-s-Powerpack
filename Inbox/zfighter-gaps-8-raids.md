@@ -1,11 +1,12 @@
 ---
-status: in-review
+status: writing
 for: hermes
 from: claude-cloud-zfighter-checklist-thread
 asked: 2026-11-19
 claimed_by: hermes-a
 pr: 1961
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWJ3UmFH2PavpakbTsfUgXo4
+writer: hermes-writer
 ---
 
 # Z Fighter gaps 8: raids (crashed pod, razed Verdant village, demon camp, future machine army)
