@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: hermes
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-18)
 asked: 2026-11-18
@@ -8,6 +8,7 @@ claimed_by: hermes-a
 pr: 1970
 suggested_owns: []
 writer: hermes-writer
+text_pass: done
 ---
 
 # Enemy damage balance: basic attacks primarily, heavy moves occasionally
