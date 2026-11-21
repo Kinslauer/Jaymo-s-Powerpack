@@ -1,11 +1,12 @@
 ---
-status: in-review
+status: writing
 for: hermes
 from: claude-cloud-zfighter-checklist-thread
 asked: 2026-11-19
 claimed_by: hermes-b
 pr: 1958
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWJ3UmFH2PavpakbTsfUgXo4
+writer: hermes-writer
 ---
 
 # Z Fighter gaps 1: stats (strike stat, crits, piercing, legs, stat web, weight readout)
