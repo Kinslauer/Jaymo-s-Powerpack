@@ -1,9 +1,9 @@
 ---
-status: changes
+status: claimed
 for: hermes
 from: claude-cloud-zfighter-checklist-thread
 asked: 2026-11-19
-claimed_by: hermes-b
+claimed_by: hermes-fixer
 pr: 1938
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWJ3UmFH2PavpakbTsfUgXo4
 writer: hermes-writer
