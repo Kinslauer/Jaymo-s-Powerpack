@@ -1,0 +1,10 @@
+{
+  "skill.jaymoskingdoms.perk.quick_work": "Quick Work",
+  "skill.jaymoskingdoms.perk.quick_work.desc": "The stealth kill (sneak and hold attack behind someone on their feet who hasn't seen you, a weapon in hand) wants a shorter hold: 1 second at the first rank, half a second at the second, down from 1.5 seconds.",
+  "skill.jaymoskingdoms.perk.silent_snap": "Silent Snap",
+  "skill.jaymoskingdoms.perk.silent_snap.desc": "The stealth kill with empty hands: both hands on their head from behind, one twist, and they drop without a sound. Quiet Word's choke hold still comes first on someone who talks, if you've learned it.",
+  "skill.jaymoskingdoms.perk.bigger_game": "Bigger Game",
+  "skill.jaymoskingdoms.perk.bigger_game.desc": "The stealth kill takes bigger foes. Without it, nothing over 40 health or taller than a tall man. The first rank takes up to 80 health and 3.2 blocks tall, the second up to 150 health and 4.2 blocks. Bosses never.",
+  "skill.jaymoskingdoms.perk.into_the_dark": "Into the Dark",
+  "skill.jaymoskingdoms.perk.into_the_dark.desc": "For 8 seconds after a stealth kill, monsters and folk see you at about a third of the distance they would, long enough to slip away or reach the next one."
+}

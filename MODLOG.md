@@ -6891,3 +6891,55 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - **A crushing blow has to land in reach** (`CRUSH_REACH`, 3.5 blocks between the two bodies' edges): another mod's spell or shot that counts as the caster's own hand no longer counts as a slam (no burst, no throw, no extra limb loss).
 - Unchanged: someone downed under a slam still bursts; blasts still gib by closeness (now also cut for big bodies); Stoneborn are never burst.
 - Built; not played. The server log for the mule clip wasn't reachable (it runs on the Deck), so which rule burst the mule wasn't confirmed: all three ways a single hit could burst it are covered.
+
+## 0.26.17 (2026-11-20): flail left click: hold to wind up a swing, tap to jab (#1947)
+
+- Andy: "the flail needs to wind up a swing on left click hold, and a short jab with the weight follwing the cursor direction on tap". Balkon's flails (not the chain axe, which keeps its overhead chop, and not the whip, which keeps its swipe) now take their left click for themselves (`armory/Lash`, new `client/armory/FlailSwingClient`):
+  - **Hold left click**: the arm goes up and back and the ball loops round behind your shoulder, faster and faster, fully wound up after about 1.2 s (`Lash.WIND`). Let go and it swings through in front of you (`Lash.SWING`) along the way you flicked the mouse (no flick: from your weapon shoulder down across you), hitting from 0.3x to 1.1x the flail's damage by how long you wound it up; wound up past halfway it comes round a raised shield. Something too heavy for the swing still stops it dead.
+  - **Tap left click** (under a quarter second): a short jab (`Lash.JAB`), the ball thrown 2.8 blocks straight out from your chest. It goes where you look as it flies, so moving the mouse drags the weight after it. The first creature it meets takes 0.5x the flail's damage and the ball stops there; a shield blocks it.
+  - Locked on, both go at the picked region of your foe. Neither puts the flail on cooldown, and a new press as the ball comes back carries on from where it is.
+  - No plain swing, hit, digging or Better Combat attack goes with the flail's left click any more (`ToolSwingGateMixin`, so region swings don't touch it). With Sneak held the click works as before (executions, shaking someone awake). Right-click whirl and slam unchanged. The flail's old charged left-click swipe is replaced by the wound-up swing.
+  - New tooltip line on flails.
+- Built; not played.
+
+## 0.26.18 (2026-11-20): hogtied captives ride over a horse (#1948)
+
+- **Hogtied captives on horseback** (Andy: "hogtied people can go on a horse too and stay there until they work free"): someone hogtied by a lasso, carried in your arms, is heaved over a horse's back with a right-click on it, the same as someone downed. They stay slung there until they work free of the knots (Kingdoms' lasso struggle), then they're set down beside the horse. Before, only the downed could go on a horse, and a downed captive was set down as soon as they came to.
+- Lifting a hogtied body back off (sneak + right-click the horse) needs Haul the Bound, as lifting one off the ground does; without it the body is set down beside the horse.
+- `Sling.heavable` and `Sling.tick` count `Carry.bound` bodies alongside the downed.
+- Built; not played.
+
+## 0.26.19 (2026-11-20): body menu - a tap of use on a body opens what you can do to it (#1949)
+
+- Andy (2026-11-20, hogtying with the lasso): "there needs to be a context menu on right click for lifting, pickpocketing, reviving, untying. I had way too many prompts come up just now".
+- **Body menu** (`core.BodyMenu`, client `bodymenu.BodyMenuScreen`/`BodyMenuClient`): a quick tap of use, standing, on someone downed, hogtied or out cold in a faint opens a small list beside the crosshair with only what can be done to them now: Revive, Shake awake, Untie or Cut them free, Hear them out, Drag, Lift, Pick their pockets, Take their weapons, Pull out the blade, Tear off the band. Click a row or press its number; right-click or Escape closes it.
+- What you pick is done with nothing held: a timed one (revive, untying, pockets) fills its usual bar and stops, keeping its progress, if you step away. Opening the menu again stops it too.
+- Unchanged: hold use still drags the downed, sneak + use still shakes a faint awake. Medicine, a limb to fit, a gag, a wrap, a carried body and the lasso's own rope keep their clicks.
+- The standing tap on the downed no longer takes their weapons or a stuck blade straight away (both are on the menu now); Xeno-Band tear-off moved to the menu (`XenoBands`); `Downed.TAPPED_LISTENERS` is gone, `Downed.CLAIMED_USES` added (a use another mod takes for itself starts no drag or revive: the lasso's tying).
+- Lift from the menu takes them straight into your arms (too heavy in armour: a piece comes off first, as before); Haul the Bound is still needed for someone hogtied.
+- Andy (2026-11-20): "Holding left click should execute period, ive found it isnt intuitive enough right now for new players. And the revive needs to be on knees. Also add tutorial tooltip popups for these mechanics along with wall sit recoveries."
+- **Executions**: holding left-click on anyone downed or helpless now executes them, no sneak needed (`Finishers`, `FinisherClient`); it still wins over a flail's wind-up. Choking someone from behind, the Quiet Word and the hit-streak quick kill still need sneak.
+- **Reviving on your knees** (Andy picked kneeling down for it): sneak + hold use revives only from a kneel at their side (the low crouch, Shift + scroll down, held still; it tells you if you're standing), and the menu's Revive kneels you itself. The reviver is drawn on both knees beside the body while the bar fills (`Downed`, `Tending`, `TendPose`).
+- **First-time tips** (`client.hud.BodyTips`): one card the first time each comes up, once per player: someone down in front of you (the menu, the drag, the revive), someone you can execute, a lasso in hand, being downed yourself (getting up), and downed beside a wall (sit up against it, then rise up it).
+- Built; not played.
+
+## 0.26.20 (2026-11-20): Z Fighter aura rework - flame shell and white core (#1911)
+
+- **Aura rework**: a Z Fighter charging up now shows a flame shell around his body with a bright white core at its heart. While charging, small lightning crackles over him from the second form up, glowing embers drift up from him, and a ring of dust rises at his feet; cracks open at a random spot in a small ring round his feet, throttled so a long charge doesn't keep re-cracking the same spot. Going into a form throws a transformation burst of light and flying ground, and hitting full charge blows out in a ring of ki.
+- Built; not played in game.
+
+## 0.26.21 (2026-11-20): bodies keep their facing prone, sat or crouched; the view rises with the head on get-ups (#1950)
+
+- **The body stays put** (Andy: "when players are prone or sitting or crouched they should stay in their orientation... only their head and pov should do that"): lying flat (prone by the gesture or a low ceiling, downed, on broken legs), sat on the ground or a seat, or crouched, a player standing still no longer swivels round with the camera. Only the head turns after it, as far as a neck goes (75°), and the view turns freely. Moving, the body swings round to the way you go at vanilla's pace and only catches up with the look past the neck's reach, eased, never vanilla's snap. Swinging or using an item (drawing a bow, aiming a crossbow, eating) still turns you, so your arms stay on what you aim at. Worked out the same on the server and every client (`core/StillBody`, `mixin/StillBodyMixin`, client `StillBodyHeadMixin`).
+- **First person follows the rising head** ("it should also follow the rising head as you get up from downed or wall sit"): getting up off the floor while downed, the view now rides up with the body's eyes as the get-up turns it up off the ground (and drops back with it if you let go part way), instead of staying on the floor until you pop up (`CrawlPose.riseEye`, `ProneCameraMixin`). Getting up against a wall already followed the head (`WallSit.eye`). Stood up from either, the view starts at the standing eyes at once, where it used to dip back toward the floor for a moment while vanilla's view caught up.
+- Built; not played.
+
+## 0.26.22 (2026-11-20): Stealth kills: sneak + hold attack behind someone who never saw you (#1952)
+
+- **Stealth kill, everyone's**: sneak and hold attack (1.5 s, the three bars) behind a monster or a person on their feet who hasn't noticed you, with a weapon in hand, and they die where they stand. A blade plays Silent Blade (a hand over the mouth, the blade in under the skull), anything else that finishes anyone plays Lights Out (one blow to the back of the head). Taken from behind (110 degrees round from where they look), awake, not riding, not a player, an animal, a boss or someone's pet; up to 40 health and about a tall man's size. It is a real kill, as an execution is. No sound but a soft one close by: they make no cry and the blow no hurt sound. A sneak + double click does it at once, as with executions.
+- **Taps still hit**: a press on someone you could take this way is held back for a moment; let go within a quarter second and it lands as an ordinary blow (your sneak attack, the hidden blade's assassination), so sneaking up and striking still works.
+- **Quiet Word split**: its choke hold from behind is the empty hand's now; with a weapon in hand the same hold is the stealth kill. Bare hands kill only with Kingdoms' Silent Snap (and Quiet Word's choke still comes first on someone who talks).
+- **Rogue's Arts** (Kingdoms) better it, read by key: Quick Work shortens the hold (1 s, then 0.5 s), Bigger Game takes bigger foes (80 health and 3.2 blocks, then 150 and 4.2), Silent Snap kills bare-handed (a twist of the head). Each kill tags the player for Kingdoms (`jaymospowers_stealth_kill`).
+- First-time tip card (top right) the first time you stand behind someone you could take.
+- Classes: `core/finisher/Finishers` (stealthKind, stealthKillable, stealthHold, the hold), `client/finisher/FinisherClient` (the held-back tap), `FinisherPose` (the three moves), `client/hud/BodyTips`, `client/wounds/ExecutionReact`.
+- Built; not played.

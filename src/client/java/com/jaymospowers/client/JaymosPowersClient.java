@@ -67,6 +67,10 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.hud.TitleCard.init();
 		com.jaymospowers.client.hud.DreadVignette.init();
 		com.jaymospowers.client.hud.MoveHints.init();
+		// (Andy, 2026-11-20) a tap of use on a body: the body menu
+		com.jaymospowers.client.bodymenu.BodyMenuClient.init();
+		// (Andy, 2026-11-20) first-time cards for the body menu, executions, the lasso, being downed and the wall sit
+		com.jaymospowers.client.hud.BodyTips.init();
 		// biome name, use bar, chat mentions and Shift+T item sharing (client/bits)
 		com.jaymospowers.client.bits.BiomeTitle.init();
 		com.jaymospowers.client.bits.UseBar.init();
