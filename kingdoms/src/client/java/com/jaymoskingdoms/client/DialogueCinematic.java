@@ -49,6 +49,12 @@ import org.jspecify.annotations.Nullable;
  * says goes in a box low on the left, under their name, a few letters a tick ({@link #CHARS_PER_TICK}), not over their
  * head. MCA's answers and its button column on the right ({@code McaDialogueBoxMixin}, {@code McaButtonColumnMixin})
  * show only once the line is all out ({@link #answersUp}).
+ *
+ * <p>Andy (2026-11-21): "the camera should pan from the over user shoulder pov, maybe fading the player's character model
+ * out while their line's play so you can see the person you interact with. it should also pan and swap to outside on the
+ * left or right of both characters." While the villager speaks you aren't drawn ({@link #hidesPlayer}), so the shot over
+ * your shoulder sees them clearly. Your own lines are shot side-on, from outside the two of you, the other side each time.
+ * The camera glides from shot to shot ({@link #PAN_PER_SECOND}) instead of cutting.
  */
 public final class DialogueCinematic {
 	/** Each bar's height, as a share of the screen; how much of the way they slide a tick. */
@@ -57,8 +63,10 @@ public final class DialogueCinematic {
 	static final double CLOSE_BACK = 0.9, CLOSE_SIDE = 0.55, CLOSE_UP = 0.15;
 	/** The player's shot, wider and behind them: back, side, up (blocks). */
 	static final double WIDE_BACK = 2.0, WIDE_SIDE = 0.9, WIDE_UP = 0.5;
-	/** The side-on view when there's no room behind the player: how far out from the middle between them (blocks). */
-	static final double PROFILE_OUT = 1.8;
+	/** The side-on view of the two of them (the player's lines, or no room behind the player): how far out from the middle between them (blocks). */
+	static final double PROFILE_OUT = 2.4;
+	/** How quickly the camera glides to a new shot: the share of the way left it closes in a second (as 1 - e^-k). */
+	static final double PAN_PER_SECOND = 4.0;
 	/** How far the camera stays off a wall; the share of a shot's distance that must be free for it to be used. */
 	static final double WALL_MARGIN = 0.3, ROOM_NEEDED = 0.8;
 	/** How long the camera stays on the player after they pick an answer before it swaps to the villager's reply (ticks). */
@@ -97,6 +105,10 @@ public final class DialogueCinematic {
 	private static @Nullable Component line;
 	private static List<FormattedCharSequence> rows = List.of();
 	private static int letters, lineFrom, startedAt;
+	/** Which side the player's side-on shot is from (flips each line); where the camera is and looks, eased (null: cut to the shot). */
+	private static boolean leftSide;
+	private static @Nullable Vec3 camAt, camLook;
+	private static long camMillis;
 
 	private DialogueCinematic() {
 	}
@@ -130,6 +142,8 @@ public final class DialogueCinematic {
 		viewBefore = minecraft.options.getCameraType();
 		line = null;
 		startedAt = ticks;
+		camAt = null;
+		camLook = null;
 	}
 
 	/** The speaker changed to {@code speaker} on {@code villager}'s talk screen. */
@@ -145,6 +159,7 @@ public final class DialogueCinematic {
 			pending = null;
 			holdUntil = ticks + PLAYER_HOLD;
 			line = null; // their last line is answered: the box waits for the next
+			leftSide = !leftSide;
 		} else if (ticks < holdUntil) {
 			pending = speaker;
 		} else {
@@ -173,6 +188,13 @@ public final class DialogueCinematic {
 		viewBefore = null;
 		line = null;
 		rows = List.of();
+		camAt = null;
+		camLook = null;
+	}
+
+	/** Whether {@code entity} isn't drawn now: the player, while the villager is speaking to them. */
+	public static boolean hidesPlayer(Entity entity) {
+		return running && speaker != Speaker.PLAYER && entity == Minecraft.getInstance().player;
 	}
 
 	/**
@@ -296,12 +318,15 @@ public final class DialogueCinematic {
 		// the villager's face while they speak, both of them while the player does
 		Vec3 look = wide ? me.add(you).scale(0.5) : you;
 		Vec3 mid = me.add(you).scale(0.5);
-		// over one shoulder, else the other, else side-on to them both; whichever has room first
-		Vec3[][] shots = {
-			{ me, me.add(axis.scale(-back)).add(side.scale(out)).add(0.0, up, 0.0) },
-			{ me, me.add(axis.scale(-back)).add(side.scale(-out)).add(0.0, up, 0.0) },
-			{ mid, mid.add(side.scale(PROFILE_OUT)).add(0.0, up, 0.0) },
-			{ mid, mid.add(side.scale(-PROFILE_OUT)).add(0.0, up, 0.0) } };
+		double flip = leftSide ? -1.0 : 1.0;
+		Vec3[] shoulder = { me, me.add(axis.scale(-back)).add(side.scale(out)).add(0.0, up, 0.0) };
+		Vec3[] otherShoulder = { me, me.add(axis.scale(-back)).add(side.scale(-out)).add(0.0, up, 0.0) };
+		Vec3[] profile = { mid, mid.add(side.scale(PROFILE_OUT * flip)).add(0.0, WIDE_UP, 0.0) };
+		Vec3[] otherProfile = { mid, mid.add(side.scale(-PROFILE_OUT * flip)).add(0.0, WIDE_UP, 0.0) };
+		// the villager's lines over one shoulder, else the other, else side-on; the player's side-on (this line's side
+		// first), else from behind; whichever has room first
+		Vec3[][] shots = wide ? new Vec3[][] { profile, otherProfile, shoulder, otherShoulder }
+			: new Vec3[][] { shoulder, otherShoulder, profile, otherProfile };
 		Vec3 pos = null;
 		double best = -1.0;
 		for (Vec3[] shot : shots) {
@@ -316,6 +341,19 @@ public final class DialogueCinematic {
 				pos = at;
 			}
 		}
+		// glide there from where the camera was, not a cut
+		long millis = net.minecraft.util.Util.getMillis();
+		if (camAt == null || camLook == null || camAt.distanceToSqr(pos) > 64.0) {
+			camAt = pos;
+			camLook = look;
+		} else {
+			double share = 1.0 - Math.exp(-PAN_PER_SECOND * Math.min(0.25, (millis - camMillis) / 1000.0));
+			camAt = camAt.lerp(pos, share);
+			camLook = camLook.lerp(look, share);
+		}
+		camMillis = millis;
+		pos = camAt;
+		look = camLook;
 		Vec3 dir = look.subtract(pos);
 		if (dir.lengthSqr() < 1.0E-6) {
 			dir = Vec3.directionFromRotation(0.0F, self.getYRot());

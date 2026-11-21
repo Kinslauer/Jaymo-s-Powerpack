@@ -43,11 +43,15 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.SwingAnimation;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -102,6 +106,16 @@ public final class GuardDrills {
 	 * start a brawl.
 	 */
 	static final int SPAR_GRACE = 60;
+	/**
+	 * Andy (2026-11-21, a wide swing in a spar caught someone standing by and the guards rose): "the guard should have you
+	 * follow him to an area without passerbys". Before a spar the veteran leads you to ground with nobody else (no
+	 * villager, player or animal) within {@link #CLEAR} blocks, looked for up to {@link #LEAD_MAX} blocks away; if he can't
+	 * get there in {@link #LEAD_TICKS}, you spar where you stand.
+	 */
+	static final double CLEAR = 6.0, LEAD_MAX = 20.0;
+	static final int LEAD_TICKS = 600, LEAD_TRIES = 24;
+	/** How near (blocks) the veteran must be to the spot, and you to him, for the spar to begin there. */
+	static final double LEAD_ARRIVED = 2.0, LEAD_FOLLOWED = 5.0;
 	/** How close (blocks) the veteran must be to land a blow. */
 	static final double REACH = 2.6;
 	/** What a finished drill is worth to a form you know (practice). */
@@ -167,11 +181,14 @@ public final class GuardDrills {
 	private static final class Run {
 		final Kind kind;
 		final UUID guard;
-		final long until;
+		long until;
 		final List<Zombie> foes = new ArrayList<>();
 		int defeated, parries;
 		/** Spar: when a weapon was first in the player's hand (-1: not yet). */
 		long drawnAt = -1L;
+		/** Spar: the clear ground the veteran is leading you to (null: the spar is on), and when the spar began. */
+		@Nullable BlockPos leadTo;
+		long started;
 		/** A practice foe gone without being struck down (its chunk unloaded): the drill no longer counts. */
 		boolean lost;
 		long nextBlow, lastParry = -1L;
@@ -288,6 +305,16 @@ public final class GuardDrills {
 		return e != null && e.guard.equals(other) && a.level().getGameTime() < e.until;
 	}
 
+	/** Whether {@code a} and {@code b} are a player and the veteran leading them to clear ground for a spar. */
+	private static boolean leading(net.minecraft.world.entity.Entity a, net.minecraft.world.entity.Entity b) {
+		Run run = RUNS.get(a.getUUID());
+		if (run != null && run.leadTo != null && run.guard.equals(b.getUUID())) {
+			return true;
+		}
+		run = RUNS.get(b.getUUID());
+		return run != null && run.leadTo != null && run.guard.equals(a.getUUID());
+	}
+
 	/** A weapon: anything made to strike with (a sword, an axe, a mace, a spear...). */
 	private static boolean weapon(ItemStack stack) {
 		return !stack.isEmpty() && stack.has(DataComponents.WEAPON);
@@ -366,6 +393,10 @@ public final class GuardDrills {
 			case SPAR -> SPAR_TICKS;
 		});
 		run.nextBlow = now + 60;
+		run.started = now;
+		if (kind == Kind.SPAR && !clear(level, guard.position(), guard, player)) {
+			run.leadTo = clearGround(level, guard, player);
+		}
 		if (kind == Kind.GATE) {
 			for (int i = 0; i < WAVE; i++) {
 				Zombie foe = foe(level, guard, player);
@@ -384,8 +415,51 @@ public final class GuardDrills {
 		ENDED.remove(player.getUUID());
 		RUNS.put(player.getUUID(), run);
 		player.setAttached(DRILLS, stateOf(player).under(kind, guard.getUUID(), 0));
-		say(level, guard, player, "drill.jaymoskingdoms." + kind.key() + ".start");
+		say(level, guard, player, "drill.jaymoskingdoms." + kind.key() + (run.leadTo != null ? ".follow" : ".start"));
+		if (run.leadTo != null) {
+			run.until += LEAD_TICKS;
+		}
 		return true;
+	}
+
+	/** Whether nobody but the two of them (no villager, player or beast; monsters don't count) is within {@link #CLEAR} of {@code at}. */
+	private static boolean clear(ServerLevel level, Vec3 at, PathfinderMob guard, ServerPlayer player) {
+		return level.getEntitiesOfClass(LivingEntity.class, AABB.ofSize(at, CLEAR * 2.0, 6.0, CLEAR * 2.0),
+			e -> e != guard && e != player && e.isAlive() && !(e instanceof Enemy) && !(e instanceof ArmorStand)
+				&& e.distanceToSqr(at) <= CLEAR * CLEAR).isEmpty();
+	}
+
+	/** The nearest clear ground ({@link #clear}) within {@link #LEAD_MAX} of {@code guard} that he can walk to, or null. */
+	private static @Nullable BlockPos clearGround(ServerLevel level, PathfinderMob guard, ServerPlayer player) {
+		BlockPos best = null;
+		double bestDist = Double.MAX_VALUE;
+		for (int tries = 0; tries < LEAD_TRIES; tries++) {
+			double angle = level.getRandom().nextDouble() * Math.PI * 2.0;
+			double dist = CLEAR + level.getRandom().nextDouble() * (LEAD_MAX - CLEAR);
+			BlockPos at = ground(level, Mth.floor(guard.getX() + Math.cos(angle) * dist), Mth.floor(guard.getZ() + Math.sin(angle) * dist),
+				guard.blockPosition().getY());
+			if (at == null || dist >= bestDist || !clear(level, Vec3.atBottomCenterOf(at), guard, player)) {
+				continue;
+			}
+			net.minecraft.world.level.pathfinder.Path path = guard.getNavigation().createPath(at, 1);
+			if (path != null && path.canReach()) {
+				best = at;
+				bestDist = dist;
+			}
+		}
+		return best;
+	}
+
+	/** A spot to stand on at column {@code x}, {@code z}, near height {@code y} (dry, two blocks of room), or null. */
+	private static @Nullable BlockPos ground(ServerLevel level, int x, int z, int y) {
+		for (int dy = y + 3; dy >= y - 4; dy--) {
+			BlockPos p = new BlockPos(x, dy, z);
+			if (level.getBlockState(p.below()).isSolid() && level.getBlockState(p).getCollisionShape(level, p).isEmpty()
+				&& level.getBlockState(p.above()).getCollisionShape(level, p.above()).isEmpty() && level.getFluidState(p).isEmpty()) {
+				return p;
+			}
+		}
+		return null;
 	}
 
 	/** A practice foe on a free spot {@link #WAVE_MIN}-{@link #WAVE_MAX} blocks from {@code guard}, going for {@code player}, or null. */
@@ -394,15 +468,7 @@ public final class GuardDrills {
 			double angle = level.getRandom().nextDouble() * Math.PI * 2.0;
 			double dist = WAVE_MIN + level.getRandom().nextDouble() * (WAVE_MAX - WAVE_MIN);
 			int x = Mth.floor(guard.getX() + Math.cos(angle) * dist), z = Mth.floor(guard.getZ() + Math.sin(angle) * dist);
-			BlockPos at = null;
-			for (int y = guard.blockPosition().getY() + 3; y >= guard.blockPosition().getY() - 4; y--) {
-				BlockPos p = new BlockPos(x, y, z);
-				if (level.getBlockState(p.below()).isSolid() && level.getBlockState(p).getCollisionShape(level, p).isEmpty()
-					&& level.getBlockState(p.above()).getCollisionShape(level, p.above()).isEmpty() && level.getFluidState(p).isEmpty()) {
-					at = p;
-					break;
-				}
-			}
+			BlockPos at = ground(level, x, z, guard.blockPosition().getY());
 			if (at == null) {
 				continue;
 			}
@@ -566,6 +632,25 @@ public final class GuardDrills {
 	}
 
 	private static void tickSpar(ServerLevel level, ServerPlayer player, PathfinderMob guard, Run run, long now) {
+		if (run.leadTo != null) {
+			// leading you to clear ground: the spar begins once he's there and you're with him (or it's taking too long)
+			BlockPos to = run.leadTo;
+			boolean there = guard.distanceToSqr(Vec3.atBottomCenterOf(to)) <= LEAD_ARRIVED * LEAD_ARRIVED;
+			if (!(there && guard.distanceTo(player) <= LEAD_FOLLOWED) && now < run.started + LEAD_TICKS) {
+				guard.setAggressive(false);
+				if (!there) {
+					guard.getNavigation().moveTo(to.getX() + 0.5, to.getY(), to.getZ() + 0.5, 0.9);
+				} else {
+					guard.getNavigation().stop();
+					guard.getLookControl().setLookAt(player);
+				}
+				return;
+			}
+			run.leadTo = null;
+			run.started = now;
+			run.nextBlow = now + 60;
+			say(level, guard, player, "drill.jaymoskingdoms.spar.start");
+		}
 		guard.setAggressive(true);
 		guard.getLookControl().setLookAt(player);
 		if (guard.distanceTo(player) > REACH) {
@@ -578,7 +663,7 @@ public final class GuardDrills {
 			if (weapon(player.getMainHandItem())) {
 				run.drawnAt = now;
 				run.nextBlow = Math.max(run.nextBlow, now + DRAW_BEAT);
-			} else if (now >= run.until - SPAR_TICKS + DRAW_GRACE) {
+			} else if (now >= run.started + DRAW_GRACE) {
 				abandon(level, player, run, guard, "drill.jaymoskingdoms.spar.undrawn");
 				return;
 			} else {
@@ -600,8 +685,8 @@ public final class GuardDrills {
 
 	/** Blows in a drill: a turned blow counts as a parry, and a spar's last blow is stopped (the spar is over). */
 	private static boolean allow(LivingEntity entity, DamageSource source, float amount) {
-		if (source.getEntity() != null && justSparred(entity, source.getEntity())) {
-			return false; // the spar is over: a swing still on its way lands on nothing
+		if (source.getEntity() != null && (justSparred(entity, source.getEntity()) || leading(entity, source.getEntity()))) {
+			return false; // the spar is over (or not begun): a swing between them lands on nothing
 		}
 		if (RUNS.isEmpty() || amount <= 0.0F) {
 			return true;
