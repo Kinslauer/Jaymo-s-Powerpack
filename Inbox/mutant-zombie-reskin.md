@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: prometheus
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-18)
 asked: 2026-11-18
@@ -8,6 +8,7 @@ claimed_by: hermes-modeller
 pr: 1968
 suggested_owns: []
 writer: hermes-writer
+text_pass: done
 ---
 
 # Mutant zombie reskin
