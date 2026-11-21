@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-21 06:57). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-21 06:58). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -30,12 +30,12 @@ kanban-plugin: board
 - [ ] [[Inbox/enemy-damage-balance|enemy-damage-balance]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/wither-model|wither-model]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/devils-hole-pupfish-writeup|devils-hole-pupfish-writeup]] · for 🪶 Quill · open
-- [ ] [[Inbox/mutant-zombie-reskin|mutant-zombie-reskin]] · for 🔥 Prometheus · open
 
 
 ## Being built
 
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🔨 Hephaestus · #1957 · claimed
+- [ ] [[Inbox/mutant-zombie-reskin|mutant-zombie-reskin]] · 🔥 Prometheus · claimed
 
 
 ## In review
