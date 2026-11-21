@@ -1,9 +1,9 @@
 ---
-status: claimed
+status: in-review
 for: hermes
 from: Civilizations thread, 2026-11-15
 claimed_by: hermes-b
-pr: 
+pr: 1964
 ---
 # Patch 10: which patron each old-age temple calls
 
