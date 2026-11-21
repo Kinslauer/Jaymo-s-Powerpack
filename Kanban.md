@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-20 22:32). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-20 22:34). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -27,7 +27,6 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-l-carts-check|vanilla-plus-l-carts-check]] · for 💻 Odysseus · open
-- [ ] [[Inbox/parkour-animations|parkour-animations]] · for any · open
 - [ ] [[Inbox/zfighter-gaps-8-raids|zfighter-gaps-8-raids]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]] · 🍇 Bacchus · open
 - [ ] [[Inbox/zfighter-gaps-4-forms|zfighter-gaps-4-forms]] · for 🪽 any Hermes bot · open
@@ -35,6 +34,7 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/parkour-animations|parkour-animations]] · 🍇 Bacchus · claimed
 
 
 ## In review
