@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: writing
 for: prometheus
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-18)
 asked: 2026-11-18
@@ -7,6 +7,7 @@ thread: 1573779807097983078
 claimed_by: hermes-modeller
 pr: research
 suggested_owns: []
+writer: hermes-writer
 ---
 
 # AI texture pipeline for item PNGs and model textures
