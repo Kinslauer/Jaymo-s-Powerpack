@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-21 08:22). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-21 09:36). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -34,7 +34,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · for 🪽 any Hermes bot · #1957 · changes · fixing review notes
-- [ ] [[Inbox/enemy-damage-balance|enemy-damage-balance]] · ☀️ Apollo · claimed
 
 
 ## In review
@@ -50,6 +49,7 @@ kanban-plugin: board
 - [ ] [[Inbox/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]] · 🍇 Bacchus · #1964 · in-review
 - [ ] [[Inbox/zfighter-gaps-4-forms|zfighter-gaps-4-forms]] · 🍇 Bacchus · #1965 · in-review
 - [ ] [[Inbox/mutant-zombie-reskin|mutant-zombie-reskin]] · 🔥 Prometheus · #1968 · in-review
+- [ ] [[Inbox/enemy-damage-balance|enemy-damage-balance]] · ☀️ Apollo · #1970 · in-review
 
 
 ## Needs Andy
