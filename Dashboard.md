@@ -7,7 +7,6 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 **Questions for you:**
 - [[Inbox/class-trees-plan|class-trees-plan]] · 2026-11-19 20:22 Parked (not for a bot): waits on Andy fleshing out the Monk/Paladin/Cleric/Druid/Warlock trees. Raised; don't raise again.
-- [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 2026-11-21 11:33 Blocked: text pass complete, no changes needed (reviewed PR #1957's player-visible strings: en_us.json keys spoon / real_time_cooker item+bloc…
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 - [[Inbox/scrying-orb|scrying-orb]] · 2026-11-20 17:21 hermes-fixer's last run stopped before finishing; handed back as changes so it can carry on.
 - [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
@@ -26,7 +25,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-22 waiting for a bot, 0 being built, 17 in review: see [[Kanban]].
+22 waiting for a bot, 1 being built, 17 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
