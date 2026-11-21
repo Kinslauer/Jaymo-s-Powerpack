@@ -9,6 +9,7 @@
   "message.jaymospowers.zfighter_afterlife_borrowed": "%s: \"I can lend you %d minutes among the living. Your forms burn them fast; only a wish makes them last.\"",
   "message.jaymospowers.zfighter_afterlife_borrowed_up": "Your borrowed time is up.",
   "talk.jaymospowers.teller.borrow_ask": "%s: \"I can lend you %d minutes among the living for %d silver or %d TP. Your forms burn them fast; only a wish makes them last. Take them?\"",
+  "talk.jaymospowers.teller.borrow": "Borrow time",
   "talk.jaymospowers.teller.borrow_yes": "Borrow them",
   "message.jaymospowers.zfighter_wish_no_dead": "Nobody waits in the Other World. The dragon waits for another wish.",
   "entity.jaymospowers.afterlife_judge": "The Judge",

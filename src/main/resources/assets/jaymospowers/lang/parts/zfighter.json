@@ -296,7 +296,7 @@
   "message.jaymospowers.zfighter_tournament_champion": "%s is the champion of the tournament at %s!",
   "message.jaymospowers.zfighter_tournament_prize_tp": "Prize: %s TP and %s.",
   "message.jaymospowers.zfighter_tournament_prize": "Prize: %s.",
-  "message.jaymospowers.zfighter_tournament_tyrant": "%s the tyrant opens his games at %s! Step into the ring of light at %s, %s within %s minutes to enter. The tyrant's hoard pays double.",
+  "message.jaymospowers.zfighter_tournament_tyrant": "%s the tyrant opens the games at %s! Step into the ring of light at %s, %s within %s minutes to enter. The tyrant's hoard pays double.",
   "message.jaymospowers.zfighter_tournament_five": "The fortune teller's five fighters at %s! Five challengers in the ring of light at %s, %s within %s minutes to enter.",
   "entity.jaymospowers.rogue_fighter": "Rogue Fighter",
   "entity.jaymospowers.rogue_fighter.tyrant.garrok": "Garrok the Tyrant",
