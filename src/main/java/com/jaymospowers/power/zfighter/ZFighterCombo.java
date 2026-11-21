@@ -502,6 +502,9 @@ public final class ZFighterCombo {
 			// met by another great blow (BlowClash)
 			return;
 		}
+		if (finisher) {
+			fists = ZFighterTraining.strikeFists(player);
+		}
 		float damage = (float)fists * (finisher ? FINISHER_SHARE[run.tier] : HIT_SHARE[run.tier] * MOVE_WEIGHT[move]);
 		if (stretched && !finisher) {
 			damage *= ZFighterStretchCombo.STRETCH_DAMAGE;
