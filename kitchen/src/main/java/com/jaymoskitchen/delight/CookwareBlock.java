@@ -11,8 +11,10 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -27,7 +29,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * for the kitchen, a pot the stews and soups, a pan the grilled and seared dishes (see
  * {@link com.jaymoskitchen.cooking.Station#HEARTH_POT}). Cold, they're just a pot and a pan.
  */
-public class CookwareBlock extends HorizontalDirectionalBlock {
+public class CookwareBlock extends BaseEntityBlock {
 	/** Standing on something hot: drawn on a heating tray, and it cooks. */
 	public static final BooleanProperty HEATED = BooleanProperty.create("heated");
 
@@ -60,12 +62,12 @@ public class CookwareBlock extends HorizontalDirectionalBlock {
 	public BlockState getStateForPlacement(BlockPlaceContext context) {
 		BlockPos pos = context.getClickedPos();
 		return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite())
-			.setValue(HEATED, hot(context.getLevel().getBlockState(pos.below())));
+				.setValue(HEATED, hot(context.getLevel().getBlockState(pos.below())));
 	}
 
 	@Override
 	protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction direction,
-		BlockPos neighbourPos, BlockState neighbour, RandomSource random) {
+			BlockPos neighbourPos, BlockState neighbour, RandomSource random) {
 		if (direction == Direction.DOWN) {
 			return state.setValue(HEATED, hot(neighbour));
 		}
@@ -75,13 +77,18 @@ public class CookwareBlock extends HorizontalDirectionalBlock {
 	/** Whether a block below would heat cookware: in the heat sources tag and, if it can be lit, lit. */
 	public static boolean hot(BlockState below) {
 		return below.is(Delight.HEAT_SOURCES)
-			&& (!below.hasProperty(BlockStateProperties.LIT) || below.getValue(BlockStateProperties.LIT));
+				&& (!below.hasProperty(BlockStateProperties.LIT) || below.getValue(BlockStateProperties.LIT));
 	}
 
 	/** Cookware at a spot that's hot enough to cook in. */
 	public static boolean heated(Level level, BlockPos pos) {
 		BlockState state = level.getBlockState(pos);
 		return state.getBlock() instanceof CookwareBlock && hot(level.getBlockState(pos.below()));
+	}
+
+	@Override
+	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+		return new CookwareBlockEntity(pos, state);
 	}
 
 	@Override

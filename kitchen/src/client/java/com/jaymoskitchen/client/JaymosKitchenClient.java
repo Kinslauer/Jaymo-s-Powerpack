@@ -19,6 +19,9 @@ import com.jaymoskitchen.mill.Mill;
 import com.jaymoskitchen.table.Tables;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import com.jaymoskitchen.net.Payloads;
+import com.jaymoskitchen.net.payloads.HandsOnFinishPayload;
+import com.jaymoskitchen.net.payloads.HandsOnStartPayload;
+import com.jaymoskitchen.net.payloads.HandsOnSyncPayload;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
@@ -125,7 +128,9 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		});
 
 		com.jaymoskitchen.client.season.SeasonTints.register();
-		ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenButcher.TYPE, (payload, ctx) -> ctx.client().gui.setScreen(new ButcherScreen(payload)));
+				// Hands-on cooking input handler
+				com.jaymoskitchen.client.HandsOnInputHandler.register();
+				ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenButcher.TYPE, (payload, ctx) -> ctx.client().gui.setScreen(new ButcherScreen(payload)));
 		ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenKitchen.TYPE, (payload, ctx) -> {
 			Station station = Station.byIndex(payload.station());
 			if (station != null) {
@@ -157,12 +162,23 @@ public class JaymosKitchenClient implements ClientModInitializer {
 			}
 		});
 		ClientPlayNetworking.registerGlobalReceiver(Payloads.SpitRip.TYPE, (payload, ctx) -> {
-			net.minecraft.client.multiplayer.ClientLevel level = net.minecraft.client.Minecraft.getInstance().level;
-			if (level != null) {
-				com.jaymoskitchen.client.spit.SpitBlockEntityRenderer.ripAt(payload.pos(), level.getGameTime());
+					net.minecraft.client.multiplayer.ClientLevel level = net.minecraft.client.Minecraft.getInstance().level;
+					if (level != null) {
+						com.jaymoskitchen.client.spit.SpitBlockEntityRenderer.ripAt(payload.pos(), level.getGameTime());
+					}
+				});
+
+				// Hands-on cooking client handlers
+				ClientPlayNetworking.registerGlobalReceiver(HandsOnStartPayload.TYPE, (payload, ctx) -> {
+					HandsOnClient.onStart(payload);
+				});
+				ClientPlayNetworking.registerGlobalReceiver(HandsOnSyncPayload.TYPE, (payload, ctx) -> {
+					HandsOnClient.onSync(payload);
+				});
+				ClientPlayNetworking.registerGlobalReceiver(HandsOnFinishPayload.TYPE, (payload, ctx) -> {
+					HandsOnClient.onFinish(payload);
+				});
 			}
-		});
-		}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	private static net.minecraft.client.renderer.entity.layers.RenderLayer stuckArrows(net.minecraft.client.renderer.entity.LivingEntityRenderer<?, ?, ?> renderer,

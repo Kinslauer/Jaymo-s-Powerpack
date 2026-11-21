@@ -14,9 +14,19 @@ import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
-/** What's lying on a cutting board waiting for the knife (one item; everyone sees it, see CuttingBoardRenderer). */
+import com.jaymoskitchen.cooking.Dish;
+import com.jaymoskitchen.cooking.HandsOnSession;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+/** What's lying on a cutting board waiting for the knife (one item; everyone sees it, see CuttingBoardRenderer).
+ * Also stores per-player hands-on cooking sessions for CHOP. */
 public class CuttingBoardEntity extends BlockEntity {
 	private ItemStack item = ItemStack.EMPTY;
+	/** Active hands-on cooking sessions on this board, keyed by player UUID. */
+	private final Map<UUID, HandsOnSession> handsOnSessions = new HashMap<>();
 
 	public CuttingBoardEntity(BlockPos pos, BlockState state) {
 		super(Delight.CUTTING_BOARD_ENTITY, pos, state);
@@ -41,6 +51,23 @@ public class CuttingBoardEntity extends BlockEntity {
 		return taken;
 	}
 
+	/** Returns the hands-on sessions on this board. */
+	public Map<UUID, HandsOnSession> getHandsOnSessions() {
+		return handsOnSessions;
+	}
+
+	/** Adds or updates a hands-on session. */
+	public void setHandsOnSession(UUID playerId, HandsOnSession session) {
+		handsOnSessions.put(playerId, session);
+		setChanged();
+	}
+
+	/** Removes a hands-on session. */
+	public void removeHandsOnSession(UUID playerId) {
+		handsOnSessions.remove(playerId);
+		setChanged();
+	}
+
 	@Override
 	public void preRemoveSideEffects(BlockPos pos, BlockState state) {
 		if (level != null && !item.isEmpty()) {
@@ -52,6 +79,7 @@ public class CuttingBoardEntity extends BlockEntity {
 	protected void loadAdditional(ValueInput input) {
 		super.loadAdditional(input);
 		item = input.read("item", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
+		// Note: hands-on sessions are not persisted (they're short-lived)
 	}
 
 	@Override
@@ -60,6 +88,7 @@ public class CuttingBoardEntity extends BlockEntity {
 		if (!item.isEmpty()) {
 			output.store("item", ItemStack.OPTIONAL_CODEC, item);
 		}
+		// Note: hands-on sessions are not persisted (they're short-lived)
 	}
 
 	@Override
