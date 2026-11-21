@@ -51,7 +51,6 @@ kanban-plugin: board
 - [ ] [[Inbox/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]] · for 🪽 any Hermes bot · #1955 · in-review
 - [ ] [[Inbox/zfighter-gaps-8-raids|zfighter-gaps-8-raids]] · for 🪽 any Hermes bot · #1961 · in-review
 - [ ] [[Inbox/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]] · for 🪽 any Hermes bot · #1956 · in-review
-- [ ] [[Inbox/hint-tip-cards|hint-tip-cards]] · for ☁️ Cloud · #1951 · in-review
 - [ ] [[Inbox/zfighter-forms-models|zfighter-forms-models]] · for any · #1960 · in-review
 
 
@@ -71,6 +70,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/hint-tip-cards|hint-tip-cards]]
 - [x] [[Inbox/Done/zfighter-aura-rework|zfighter-aura-rework]]
 - [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
 - [x] [[Inbox/Done/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]]
@@ -78,7 +78,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
 - [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
 - [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
-- [x] [[Inbox/Done/wither-reincarnated-fight|wither-reincarnated-fight]]
 
 
 %% kanban:settings
