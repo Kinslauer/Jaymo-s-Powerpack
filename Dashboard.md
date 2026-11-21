@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-21 23:32). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-21 23:33). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -14,7 +14,6 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Inbox/wither-model|wither-model]] · 2026-11-21 10:18 Andy hold instruction (2026-11-19 23:40 ET): leave the model as-is (v3 previews); do not pick up or raise this again until Andy hands it on. N…
 - [[Inbox/zfighter-gaps-2-power|zfighter-gaps-2-power]] · 2026-11-21 04:54 hermes-fixer took over the review fixes from hermes-b.
 - [[Inbox/zfighter-gaps-5-training|zfighter-gaps-5-training]] · 2026-11-20 13:08 Text pass on PR #1953 zfighter-gaps-5-training: reviewed all player-visible text - lang/parts/zfighter.json (5 new keys: pod_pilot, pod_pilot.…
-- [[Inbox/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]] · 2026-11-21 10:41 Raised to Andy (2026-11-21, vault coordinator): the boss-location question, as a pick card (proving grounds / demon-country ruin / Z Fighter s…
 
 ## Stuck
 
@@ -27,7 +26,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-21 waiting for a bot, 0 being built, 17 in review: see [[Kanban]].
+22 waiting for a bot, 0 being built, 17 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
