@@ -38,12 +38,12 @@ import org.jspecify.annotations.Nullable;
  */
 public class RivalAlien extends PathfinderMob {
 	// ---- tuning ----
-	/** How long a change lasts (ticks) before he's back in his own body. */
-	public static final int LIFE = 600;
-	/** Its share of the alien's life and fists (the hunter's band is an older, cruder one). */
-	public static final double HEALTH_SHARE = 1.2, DAMAGE_SHARE = 1.0;
-	/** Its walking pace before the alien's own share is added, and the chase. */
-	public static final double BASE_SPEED = 0.28, CHASE_SPEED = 1.25;
+		/** How long a change lasts (ticks) before he's back in his own body. */
+		public static final int LIFE = 600;
+		/** Its share of the alien's life and fists (the hunter's band is an older, cruder one). */
+		public static final double HEALTH_SHARE = 1.2, DAMAGE_SHARE = 0.7;
+		/** Its walking pace before the alien's own share is added, and the chase. */
+		public static final double BASE_SPEED = 0.28, CHASE_SPEED = 1.25;
 
 	public static EntityType<RivalAlien> TYPE;
 
@@ -70,15 +70,15 @@ public class RivalAlien extends PathfinderMob {
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
-		return PathfinderMob.createMobAttributes()
-			.add(Attributes.MAX_HEALTH, 24.0)
-			.add(Attributes.ATTACK_DAMAGE, 4.0)
-			.add(Attributes.MOVEMENT_SPEED, BASE_SPEED)
-			.add(Attributes.FOLLOW_RANGE, 32.0)
-			.add(Attributes.SCALE, 1.0)
-			.add(Attributes.KNOCKBACK_RESISTANCE, 0.0)
-			.add(Attributes.STEP_HEIGHT, 0.6);
-	}
+			return PathfinderMob.createMobAttributes()
+					.add(Attributes.MAX_HEALTH, 24.0)
+					.add(Attributes.ATTACK_DAMAGE, 2.5)
+					.add(Attributes.MOVEMENT_SPEED, BASE_SPEED)
+					.add(Attributes.FOLLOW_RANGE, 32.0)
+					.add(Attributes.SCALE, 1.0)
+					.add(Attributes.KNOCKBACK_RESISTANCE, 0.0)
+					.add(Attributes.STEP_HEIGHT, 0.6);
+		}
 
 	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {

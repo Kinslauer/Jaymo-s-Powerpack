@@ -37,17 +37,17 @@ import org.jspecify.annotations.Nullable;
  */
 public final class ZFighterNpcKi {
 	// ---- beam ----
-	static final int BEAM_GATHER = 12, BEAM_COOL_SLOW = 500, BEAM_COOL_FAST = 300;
-	static final double BEAM_LENGTH = 20.0, BEAM_WIDTH = 1.2, BEAM_PUSH = 0.9, BEAM_LIFT = 0.3;
-	static final float BEAM_SHARE = 1.4F, BEAM_RADIUS = 0.8F;
-	// ---- seeking volley ----
-	static final int VOLLEY_BOLTS = 5, VOLLEY_GAP = 3, VOLLEY_COOL_SLOW = 260, VOLLEY_COOL_FAST = 150, BOLT_LIFE = 40;
-	static final double BOLT_SPEED = 0.75, BOLT_TURN = 0.22, BOLT_SPREAD = 0.6, BOLT_HIT = 0.9;
-	static final float BOLT_SHARE = 0.35F;
-	// ---- charged blast ----
-	static final int CHARGE_GATHER = 20, CHARGE_COOL_SLOW = 420, CHARGE_COOL_FAST = 260, BALL_LIFE = 45;
-	static final double BALL_SPEED = 0.8, BALL_RADIUS = 3.0, BALL_HIT = 1.2, BALL_PUSH = 1.2, BALL_ORB = 1.6;
-	static final float BALL_SHARE = 3.0F;
+		static final int BEAM_GATHER = 12, BEAM_COOL_SLOW = 1000, BEAM_COOL_FAST = 600;
+		static final double BEAM_LENGTH = 20.0, BEAM_WIDTH = 1.2, BEAM_PUSH = 0.9, BEAM_LIFT = 0.3;
+		static final float BEAM_SHARE = 1.0F, BEAM_RADIUS = 0.8F;
+		// ---- seeking volley ----
+		static final int VOLLEY_BOLTS = 5, VOLLEY_GAP = 3, VOLLEY_COOL_SLOW = 520, VOLLEY_COOL_FAST = 300, BOLT_LIFE = 40;
+		static final double BOLT_SPEED = 0.75, BOLT_TURN = 0.22, BOLT_SPREAD = 0.6, BOLT_HIT = 0.9;
+		static final float BOLT_SHARE = 0.25F;
+		// ---- charged blast ----
+		static final int CHARGE_GATHER = 20, CHARGE_COOL_SLOW = 840, CHARGE_COOL_FAST = 520, BALL_LIFE = 45;
+		static final double BALL_SPEED = 0.8, BALL_RADIUS = 3.0, BALL_HIT = 1.2, BALL_PUSH = 1.2, BALL_ORB = 1.6;
+		static final float BALL_SHARE = 2.0F;
 	/** The range at which they use ki at all (blocks), and the checks' spacing (ticks). */
 	static final double RANGE_MIN = 6.0, RANGE_MAX = 24.0;
 	static final int DECIDE_EVERY = 10;

@@ -82,10 +82,10 @@ import org.jspecify.annotations.Nullable;
  */
 public class ChronoEcho extends Monster implements GeoEntity {
 	// ---- tuning ----
-	public static final double MAX_HEALTH = 30.0;
-	/** Melee damage, fixed (the held item doesn't add to it). */
-	public static final float ATTACK_DAMAGE = 5.0F;
-	public static final double MOVE_SPEED = 0.26;
+		public static final double MAX_HEALTH = 30.0;
+		/** Melee damage, fixed (the held item doesn't add to it). */
+		public static final float ATTACK_DAMAGE = 3.0F;
+		public static final double MOVE_SPEED = 0.26;
 	/** How far it notices living things to attack (and how far it keeps chasing). */
 	public static final double AGGRO_RANGE = 16.0;
 	static final double CHASE_SPEED = 1.2;
