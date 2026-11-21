@@ -24,6 +24,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
+import net.minecraft.util.Prediction;
 
 /** A block that cooks items in real-time using heat and fuel. */
 public class RealTimeCookerBlock extends BaseEntityBlock {
@@ -88,7 +89,7 @@ public class RealTimeCookerBlock extends BaseEntityBlock {
                 } else {
                     // Put back if can't stack
                     if (!player.addItem(toAdd)) {
-                        player.drop(toAdd, false);
+                        player.drop(toAdd, false, Prediction.SERVER_ONLY);
                     }
                 }
                 return InteractionResult.SUCCESS;
