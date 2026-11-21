@@ -1,11 +1,12 @@
 ---
-status: in-review
+status: writing
 for: hermes
 from: claude-cloud-zfighter-checklist-thread
 asked: 2026-11-19
 claimed_by: hermes-b
 pr: 1965
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWJ3UmFH2PavpakbTsfUgXo4
+writer: hermes-writer
 ---
 
 # Z Fighter gaps 4: forms (Earthling, Rubber-folk and Divine-born lines, Bio-built past Perfect, mastered steps, outline)
