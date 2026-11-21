@@ -493,6 +493,8 @@ public final class ZFighterPower implements Power {
 		ZFighterForms.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ZFighterDebugCommand.register(dispatcher));
 		ZFighterGrowth.init();
+		// Ki Shell: reduce ki damage for players who have it
+		// (handled in ZFighterHooks.modifyDamage)
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			LIVE.remove(handler.player.getUUID());
 			ZFighterGrowth.forget(handler.player);
@@ -802,7 +804,12 @@ public final class ZFighterPower implements Power {
 			}
 		}
 		ZFighterTraining.tick(player, live);
-
+		// Sticky Bind: check for mash (jump or sneak) to escape
+		if (ZFighterStickyBind.isStuck(player)) {
+			if (player.isShiftKeyDown()) {
+				ZFighterStickyBind.mash(player);
+			}
+		}
 		ZFighterCombo.tick(player, live);
 		live.ki = Mth.clamp(live.ki, 0.0F, max);
 		auraHold(player, live, now, max);
