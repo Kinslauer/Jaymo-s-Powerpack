@@ -37,6 +37,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · ☀️ Apollo · claimed
+- [ ] [[Inbox/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]] · 🪶 Quill · #1956 · writing
 
 
 ## In review
@@ -46,7 +47,6 @@ kanban-plugin: board
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · in-review
 - [ ] [[Inbox/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]] · ☀️ Apollo · #1955 · in-review
 - [ ] [[Inbox/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]] · 🔨 Hephaestus · #1937 · in-review
-- [ ] [[Inbox/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]] · 🍇 Bacchus · #1956 · in-review
 
 
 ## Needs Andy
