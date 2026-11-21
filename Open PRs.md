@@ -1,13 +1,13 @@
 ---
-updated: 2026-11-21 08:45
+updated: 2026-11-21 23:28
 ---
 # Open PRs
 
-20 open, as of 2026-11-21 08:45. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+22 open, as of 2026-11-21 23:28. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1853](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1853) Heritage paths: core + Heartlander, Stoneborn, Tideborn (Kingdoms, Powers)
-- **Branch:** `claude/heritage-paths` · **Updated:** 2026-11-20 (today)
+- **Branch:** `claude/heritage-paths` · **Updated:** 2026-11-20 (1 day ago)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[heritage-paths]]
 
@@ -27,27 +27,27 @@ Andy merges only on "merge", one at a time.
 - **Agent:** [[zfighter-gaps-2-power]]
 
 ## [#1939](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1939) Z Fighter gaps 3: 10 new techniques
-- **Branch:** `claude/zfighter-gaps-3-techniques` · **Updated:** 2026-11-20 (today)
+- **Branch:** `claude/zfighter-gaps-3-techniques` · **Updated:** 2026-11-20 (1 day ago)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[zfighter-gaps-3-techniques]]
 
 ## [#1951](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1951) Text hints show as tip cards in the top right
-- **Branch:** `claude/project-thread-hag1a3` · **Updated:** 2026-11-20 (today)
-- **Checks:** ✅ 5 passed
+- **Branch:** `claude/project-thread-hag1a3` · **Updated:** 2026-11-21 (today)
+- **Checks:** ⏳ 4 of 4 running
 - **Agent:** no agent note
 
 ## [#1953](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1953) Z Fighter gaps 5: training drills, grades, pod pilot, shadow dummy
-- **Branch:** `claude/zfighter-gaps-5-training` · **Updated:** 2026-11-20 (today)
+- **Branch:** `claude/zfighter-gaps-5-training` · **Updated:** 2026-11-20 (1 day ago)
 - **Checks:** ❌ failing: Build Powers
 - **Agent:** no agent note
 
 ## [#1954](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1954) Plan: parkour animations
-- **Branch:** `plan-parkour-animations` · **Updated:** 2026-11-20 (today)
+- **Branch:** `plan-parkour-animations` · **Updated:** 2026-11-20 (1 day ago)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
 ## [#1955](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1955) Z Fighter gaps 6: items and wishes
-- **Branch:** `claude/zfighter-gaps-6-items-wishes` · **Updated:** 2026-11-20 (today)
+- **Branch:** `claude/zfighter-gaps-6-items-wishes` · **Updated:** 2026-11-20 (1 day ago)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
@@ -105,3 +105,13 @@ Andy merges only on "merge", one at a time.
 - **Branch:** `claude/mutant-zombie-reskin` · **Updated:** 2026-11-21 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[mutant-zombie-reskin]]
+
+## [#1970](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1970) Enemy damage balance: reduce damage across Powers and Kingdoms enemies
+- **Branch:** `claude/enemy-damage-balance` · **Updated:** 2026-11-21 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[enemy-damage-balance]]
+
+## [#1971](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1971) Devil's Hole Pupfish lore write-up
+- **Branch:** `claude/devils-hole-pupfish-writeup` · **Updated:** 2026-11-21 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[devils-hole-pupfish-writeup]]
