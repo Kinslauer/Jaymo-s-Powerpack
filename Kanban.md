@@ -48,7 +48,6 @@ kanban-plugin: board
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · in-review
 - [ ] [[Inbox/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]] · 🍇 Bacchus · #1964 · in-review
 - [ ] [[Inbox/mutant-zombie-reskin|mutant-zombie-reskin]] · for 🔥 Prometheus · #1968 · in-review
-- [ ] [[Inbox/parkour-animations|parkour-animations]] · for any · #1959 · in-review
 - [ ] [[Inbox/zfighter-gaps-1-stats|zfighter-gaps-1-stats]] · for 🪽 any Hermes bot · #1958 · in-review
 - [ ] [[Inbox/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]] · for 🪽 any Hermes bot · #1937 · in-review
 - [ ] [[Inbox/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]] · for 🪽 any Hermes bot · #1939 · in-review
@@ -59,6 +58,7 @@ kanban-plugin: board
 - [ ] [[Inbox/zfighter-forms-models|zfighter-forms-models]] · for any · #1960 · in-review
 - [ ] [[Inbox/zfighter-forms-animations|zfighter-forms-animations]] · for any · #1962 · in-review
 - [ ] [[Inbox/zfighter-forms-textures|zfighter-forms-textures]] · for any · #1963 · in-review
+- [ ] [[Inbox/parkour-animations|parkour-animations]] · for any · #1959 · in-review
 
 
 ## Needs Andy
