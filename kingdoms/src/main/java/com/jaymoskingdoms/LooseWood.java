@@ -16,6 +16,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -114,7 +115,7 @@ public final class LooseWood {
 			OFF_THREAD_SIZE.decrementAndGet();
 			BlockPos pos = BlockPos.of(p.pos());
 			// (it may have changed again since: what counts is the block now, and what it was then)
-			if (p.level().isLoaded(pos)) {
+			if (ready(p.level(), pos)) {
 				note(p.level(), pos, p.was(), p.level().getBlockState(pos));
 			}
 		}
@@ -133,11 +134,11 @@ public final class LooseWood {
 			}
 			Set<BlockPos> seen = new HashSet<>();
 			for (BlockPos pos : now) {
-				if (!level.isLoaded(pos)) {
+				if (!ready(level, pos)) {
 					continue;
 				}
 				for (BlockPos n : BlockPos.betweenClosed(pos.offset(-1, -1, -1), pos.offset(1, 1, 1))) {
-					if (!seen.contains(n) && level.isLoaded(n) && level.getBlockState(n).is(BlockTags.LOGS)) {
+					if (!seen.contains(n) && ready(level, n) && level.getBlockState(n).is(BlockTags.LOGS)) {
 						look(level, n.immutable(), seen);
 					}
 				}
@@ -161,7 +162,7 @@ public final class LooseWood {
 				}
 				for (Direction d : Direction.values()) {
 					BlockPos q = at.relative(d);
-					if (!level.isLoaded(q)) {
+					if (!ready(level, q)) {
 						return;
 					}
 					BlockState s = level.getBlockState(q);
@@ -170,7 +171,7 @@ public final class LooseWood {
 					}
 				}
 				for (BlockPos n : BlockPos.betweenClosed(at.offset(-1, -1, -1), at.offset(1, 1, 1))) {
-					if (piece.contains(n) || !level.isLoaded(n) || !level.getBlockState(n).is(BlockTags.LOGS)) {
+					if (piece.contains(n) || !ready(level, n) || !level.getBlockState(n).is(BlockTags.LOGS)) {
 						continue;
 					}
 					BlockPos q = n.immutable();
@@ -196,6 +197,15 @@ public final class LooseWood {
 	private static boolean holds(ServerLevel level, BlockPos pos, BlockState state) {
 		return !state.isAir() && !state.is(BlockTags.LOGS) && !(state.getBlock() instanceof LeavesBlock) && !state.is(BlockTags.BEEHIVES)
 			&& !state.is(Blocks.COCOA) && !state.getCollisionShape(level, pos).isEmpty();
+	}
+
+	/**
+	 * Whether {@code pos}'s chunk is fully there to read now. Level.isLoaded only asks whether the chunk has a ticket, and
+	 * is true for one still generating under a player's view: reading a block there made the server wait on it past the
+	 * watchdog (2026-11-21 8:10 and 8:16 AM). getChunkNow never schedules or waits; what isn't ready is left for later.
+	 */
+	private static boolean ready(ServerLevel level, BlockPos pos) {
+		return level.getChunkSource().getChunkNow(SectionPos.blockToSectionCoord(pos.getX()), SectionPos.blockToSectionCoord(pos.getZ())) != null;
 	}
 
 	/** The piece of {@code logs} held by nothing comes down: as a tree, or a few bare logs like sand. */
