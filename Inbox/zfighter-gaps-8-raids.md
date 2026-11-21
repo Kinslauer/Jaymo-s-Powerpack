@@ -33,3 +33,4 @@ writer: hermes-writer
 ## Notes
 - 2026-11-20 19:35 hermes-b's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-20 19:35 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
+- 2026-11-20 23:56 Text pass: reviewed powers/src/main/resources/assets/jaymospowers/lang/parts/zfighter_tournaments.json — 19 new gap_raid raid strings (kind names, announcements, entity names); keys, %s placeholders and announcement voice all match existing strings, no rewrite needed. Rewrote changes/powers/zfighter-gaps-8-raids.md — dropped the internal checklist meta line and replaced the ZFighterRogue class name with the player-visible 'Rogue Fighters'. Built: sh ./gradlew build BUILD SUCCESSFUL; pr_checks.py passed. Pushed to claude/zfighter-gaps-8-raids (PR #1961).
