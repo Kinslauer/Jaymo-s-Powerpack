@@ -1,6 +1,11 @@
 package com.jaymoskitchen.net;
 
 import com.jaymoskitchen.JaymosKitchen;
+import com.jaymoskitchen.net.payloads.HandsOnAbandonPayload;
+import com.jaymoskitchen.net.payloads.HandsOnFinishPayload;
+import com.jaymoskitchen.net.payloads.HandsOnInputPayload;
+import com.jaymoskitchen.net.payloads.HandsOnStartPayload;
+import com.jaymoskitchen.net.payloads.HandsOnSyncPayload;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -610,5 +615,10 @@ public final class Payloads {
 		PayloadTypeRegistry.serverboundPlay().register(StartCooking.TYPE, StartCooking.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(PressStep.TYPE, PressStep.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Abandon.TYPE, Abandon.CODEC);
-	}
+			HandsOnInputPayload.register();
+			PayloadTypeRegistry.clientboundPlay().register(HandsOnStartPayload.TYPE, HandsOnStartPayload.CODEC);
+			PayloadTypeRegistry.clientboundPlay().register(HandsOnSyncPayload.TYPE, HandsOnSyncPayload.CODEC);
+			PayloadTypeRegistry.clientboundPlay().register(HandsOnFinishPayload.TYPE, HandsOnFinishPayload.CODEC);
+			PayloadTypeRegistry.serverboundPlay().register(HandsOnAbandonPayload.TYPE, HandsOnAbandonPayload.CODEC);
+		}
 }

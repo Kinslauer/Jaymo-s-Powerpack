@@ -19,6 +19,9 @@ import com.jaymoskitchen.mill.Mill;
 import com.jaymoskitchen.table.Tables;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import com.jaymoskitchen.net.Payloads;
+import com.jaymoskitchen.net.payloads.HandsOnFinishPayload;
+import com.jaymoskitchen.net.payloads.HandsOnStartPayload;
+import com.jaymoskitchen.net.payloads.HandsOnSyncPayload;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
@@ -42,7 +45,6 @@ public class JaymosKitchenClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		// a corpse is named to the one looking at it only if they can read it (CorpseEntity#reads)
 		com.jaymoskitchen.corpse.CorpseEntity.viewer = () -> net.minecraft.client.Minecraft.getInstance().player;
-		com.jaymoskitchen.client.hands.HandsClient.register();
 		com.jaymoskitchen.client.stomach.StomachHud.register();
 		// (0.5.25) thirst row, thermometer, heat edges, sips
 		com.jaymoskitchen.client.climate.ClimateHud.register();
@@ -55,7 +57,6 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		com.jaymoskitchen.client.climate.DryVeins.register();
 		com.jaymoskitchen.client.climate.ParasiteHud.register();
 		com.jaymoskitchen.client.herb.PmehTooltip.register();
-		com.jaymoskitchen.client.vintner.VintageTooltip.register();
 		// (0.5.1) ragdolls: the bodies the server (or this client, for its own limp player) simulates, drawn here
 		com.jaymoskitchen.client.ragdoll.ClientRagdolls.register();
 		// (0.5.45) a dragged body follows the hand this client draws
@@ -85,9 +86,6 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		com.jaymoskitchen.stomach.FoodJournalItem.openScreen = com.jaymoskitchen.client.stomach.FoodJournalScreen::open;
 		net.minecraft.client.gui.screens.MenuScreens.register(com.jaymoskitchen.stomach.LunchBox.MENU,
 			com.jaymoskitchen.client.stomach.LunchBoxScreen::new);
-		// a body's loot screen
-		net.minecraft.client.gui.screens.MenuScreens.register(com.jaymoskitchen.corpse.Corpses.LOOT_MENU,
-			com.jaymoskitchen.client.corpse.CorpseLootScreen::new);
 		// the mill machines' moving parts, loads and leads
 		BlockEntityRenderers.register(Mill.MACHINE_ENTITY, MachineRenderer::new);
 		// windmills and waterwheels turning
@@ -130,7 +128,9 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		});
 
 		com.jaymoskitchen.client.season.SeasonTints.register();
-		ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenButcher.TYPE, (payload, ctx) -> ctx.client().gui.setScreen(new ButcherScreen(payload)));
+				// Hands-on cooking input handler
+				com.jaymoskitchen.client.HandsOnInputHandler.register();
+				ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenButcher.TYPE, (payload, ctx) -> ctx.client().gui.setScreen(new ButcherScreen(payload)));
 		ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenKitchen.TYPE, (payload, ctx) -> {
 			Station station = Station.byIndex(payload.station());
 			if (station != null) {
@@ -162,13 +162,24 @@ public class JaymosKitchenClient implements ClientModInitializer {
 			}
 		});
 		ClientPlayNetworking.registerGlobalReceiver(Payloads.SpitRip.TYPE, (payload, ctx) -> {
-			net.minecraft.client.multiplayer.ClientLevel level = net.minecraft.client.Minecraft.getInstance().level;
-			if (level != null) {
-				com.jaymoskitchen.client.spit.SpitBlockEntityRenderer.ripAt(payload.pos(), level.getGameTime());
-				com.jaymoskitchen.client.spit.TearPose.start(payload.by(), payload.pos(), level.getGameTime());
+					net.minecraft.client.multiplayer.ClientLevel level = net.minecraft.client.Minecraft.getInstance().level;
+					if (level != null) {
+						com.jaymoskitchen.client.spit.SpitBlockEntityRenderer.ripAt(payload.pos(), level.getGameTime());
+					com.jaymoskitchen.client.spit.TearPose.start(payload.by(), payload.pos(), level.getGameTime());
+					}
+				});
+
+				// Hands-on cooking client handlers
+				ClientPlayNetworking.registerGlobalReceiver(HandsOnStartPayload.TYPE, (payload, ctx) -> {
+					HandsOnClient.onStart(payload);
+				});
+				ClientPlayNetworking.registerGlobalReceiver(HandsOnSyncPayload.TYPE, (payload, ctx) -> {
+					HandsOnClient.onSync(payload);
+				});
+				ClientPlayNetworking.registerGlobalReceiver(HandsOnFinishPayload.TYPE, (payload, ctx) -> {
+					HandsOnClient.onFinish(payload);
+				});
 			}
-		});
-		}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	private static net.minecraft.client.renderer.entity.layers.RenderLayer stuckArrows(net.minecraft.client.renderer.entity.LivingEntityRenderer<?, ?, ?> renderer,

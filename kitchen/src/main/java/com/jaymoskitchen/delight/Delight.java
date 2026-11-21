@@ -69,6 +69,8 @@ public final class Delight {
 	public static final TagKey<net.minecraft.world.level.block.Block> HEAT_SOURCES = TagKey.create(Registries.BLOCK, JaymosKitchen.id("heat_sources"));
 	/** What cuts on the cutting board (and harvests straw from wheat). */
 	public static final TagKey<Item> KNIVES = TagKey.create(Registries.ITEM, JaymosKitchen.id("knives"));
+	/** What stirs a pot (for hands-on cooking). */
+	public static final TagKey<Item> SPOONS = TagKey.create(Registries.ITEM, JaymosKitchen.id("spoons"));
 	/** A knife's attack damage over its material's, and its swing speed (the iron knife's). */
 	static final float KNIFE_DAMAGE = 0.5F, KNIFE_SPEED = -1.8F;
 	/** A flint knife: a wooden tool's reach into blocks, a stone tool's wear; mended with flint. */
@@ -78,8 +80,9 @@ public final class Delight {
 	public static CookwareBlock COOKING_POT_BLOCK;
 	public static CookwareBlock FRYING_PAN_BLOCK;
 	public static CuttingBoardBlock CUTTING_BOARD;
-	public static BlockEntityType<CuttingBoardEntity> CUTTING_BOARD_ENTITY;
-	public static CabbageCropBlock CABBAGES;
+		public static BlockEntityType<CuttingBoardEntity> CUTTING_BOARD_ENTITY;
+		public static BlockEntityType<CookwareBlockEntity> COOKWARE_ENTITY;
+		public static CabbageCropBlock CABBAGES;
 	public static RiceBlock RICE_CROP;
 	public static RicePaniclesBlock RICE_PANICLES;
 	public static WildCropBlock WILD_CABBAGES;
@@ -92,6 +95,8 @@ public final class Delight {
 	public static Item IRON_KNIFE;
 	/** Farmer's Delight's other knives; each does everything the iron one does (the {@link #KNIVES} tag). */
 	public static Item FLINT_KNIFE, COPPER_KNIFE, GOLDEN_KNIFE, DIAMOND_KNIFE, NETHERITE_KNIFE;
+	/** A spoon for stirring pots (hands-on cooking). */
+	public static Item SPOON;
 
 	public static Holder<MobEffect> COMFORT;
 	public static Holder<MobEffect> NOURISHMENT;
@@ -139,10 +144,12 @@ public final class Delight {
 			new DelightEffect(MobEffectCategory.BENEFICIAL, 0xD9A440));
 
 		CUTTING_BOARD = block("cutting_board", CuttingBoardBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
-			.strength(1.0F).sound(SoundType.WOOD).noOcclusion());
-		CUTTING_BOARD_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosKitchen.id("cutting_board"),
-			new BlockEntityType<>(CuttingBoardEntity::new, Set.of(CUTTING_BOARD)));
-		blockItem("cutting_board", CUTTING_BOARD, new Item.Properties());
+					.strength(1.0F).sound(SoundType.WOOD).noOcclusion());
+			CUTTING_BOARD_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosKitchen.id("cutting_board"),
+					new BlockEntityType<>(CuttingBoardEntity::new, Set.of(CUTTING_BOARD)));
+			COOKWARE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosKitchen.id("cookware"),
+					new BlockEntityType<>(CookwareBlockEntity::new, Set.of(COOKING_POT_BLOCK, FRYING_PAN_BLOCK)));
+			blockItem("cutting_board", CUTTING_BOARD, new Item.Properties());
 		STRAW_BALE = block("straw_bale", HayBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.HAY_BLOCK));
 		blockItem("straw_bale", STRAW_BALE, new Item.Properties());
 
@@ -182,8 +189,9 @@ public final class Delight {
 		GOLDEN_KNIFE = item("golden_knife", new Item.Properties().sword(ToolMaterial.GOLD, KNIFE_DAMAGE, KNIFE_SPEED));
 		DIAMOND_KNIFE = item("diamond_knife", new Item.Properties().sword(ToolMaterial.DIAMOND, KNIFE_DAMAGE, KNIFE_SPEED));
 		NETHERITE_KNIFE = item("netherite_knife", new Item.Properties().sword(ToolMaterial.NETHERITE, KNIFE_DAMAGE, KNIFE_SPEED).fireResistant());
+			SPOON = item("spoon", new Item.Properties());
 
-		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> {
+			CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> {
 			for (Item item : FOOD_TAB) {
 				output.accept(new ItemStack(item));
 			}
@@ -201,14 +209,15 @@ public final class Delight {
 			output.accept(new ItemStack(STRAW));
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
-			output.accept(new ItemStack(CUTTING_BOARD));
-			output.accept(new ItemStack(FLINT_KNIFE));
-			output.accept(new ItemStack(COPPER_KNIFE));
-			output.accept(new ItemStack(IRON_KNIFE));
-			output.accept(new ItemStack(GOLDEN_KNIFE));
-			output.accept(new ItemStack(DIAMOND_KNIFE));
-			output.accept(new ItemStack(NETHERITE_KNIFE));
-		});
+				output.accept(new ItemStack(CUTTING_BOARD));
+				output.accept(new ItemStack(FLINT_KNIFE));
+				output.accept(new ItemStack(COPPER_KNIFE));
+				output.accept(new ItemStack(IRON_KNIFE));
+				output.accept(new ItemStack(GOLDEN_KNIFE));
+				output.accept(new ItemStack(DIAMOND_KNIFE));
+				output.accept(new ItemStack(NETHERITE_KNIFE));
+				output.accept(new ItemStack(SPOON));
+			});
 
 		// a grown wheat cut with a knife gives straw too
 		PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, blockEntity) -> {

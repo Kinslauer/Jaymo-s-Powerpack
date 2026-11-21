@@ -1,6 +1,7 @@
 package com.jaymoskitchen.kitchen;
 
 import com.jaymoskitchen.JaymosKitchen;
+import com.jaymoskitchen.cooking.RealTimeCookingBlockEntity;
 import com.jaymoskitchen.mixin.ItemAccessor;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -8,47 +9,61 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.Consumables;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
 
-/**
- * The cookware (cooking pot, frying pan, saucepan, baking tray, rolling pin), which stays in the crafting grid when
+/** The cookware (cooking pot, frying pan, saucepan, baking tray, rolling pin), which stays in the crafting grid when
  * you cook with it, and the foods it makes. The kitchen itself (oven, fridges, counters...) is Cooking for
  * Blockheads'. Original art (the pot and pan's are Farmer's Delight's, MIT); the idea of cookware as crafting tools comes from Pam's HarvestCraft.
  */
 public final class KitchenBlocks {
-	public static Item COOKING_POT;
-	public static Item FRYING_PAN;
-	public static Item SAUCEPAN;
-	public static Item BAKING_TRAY;
-	public static Item ROLLING_PIN;
-	/** Food made with the cookware, by id. */
-	public static final Map<String, Item> FOODS = new LinkedHashMap<>();
+    public static Item COOKING_POT;
+    public static Item FRYING_PAN;
+    public static Item SAUCEPAN;
+    public static Item BAKING_TRAY;
+    public static Item ROLLING_PIN;
+    /** The real-time cooker block and its entity. */
+    public static Block REAL_TIME_COOKER_BLOCK;
+    public static BlockEntityType<RealTimeCookingBlockEntity> REAL_TIME_COOKER_ENTITY;
+    /** Food made with the cookware, by id. */
+    public static final Map<String, Item> FOODS = new LinkedHashMap<>();
 
-	private KitchenBlocks() {
-	}
+    private KitchenBlocks() {
+    }
 
-	public static void register() {
-		// (0.5.28) the pot and pan also set down over a fire to cook in (delight/CookwareBlock)
-		com.jaymoskitchen.delight.Delight.registerCookware();
-		COOKING_POT = tool("cooking_pot", com.jaymoskitchen.delight.Delight.COOKING_POT_BLOCK);
-		// (0.5.30) the Frying Pan is Farmer's Delight's Skillet now (same id): a weapon and a pan to cook in the hand
-		com.jaymoskitchen.delight.SkilletItem.registerComponents();
-		FRYING_PAN = skillet("frying_pan", com.jaymoskitchen.delight.Delight.FRYING_PAN_BLOCK);
-		SAUCEPAN = tool("saucepan");
-		BAKING_TRAY = tool("baking_tray");
-		ROLLING_PIN = tool("rolling_pin");
+    public static void register() {
+        // (0.5.28) the pot and pan also set down over a fire to cook in (delight/CookwareBlock)
+        com.jaymoskitchen.delight.Delight.registerCookware();
+        COOKING_POT = tool("cooking_pot", com.jaymoskitchen.delight.Delight.COOKING_POT_BLOCK);
+        // (0.5.30) the Frying Pan is Farmer's Delight's Skillet now (same id): a weapon and a pan to cook in the hand
+        com.jaymoskitchen.delight.SkilletItem.registerComponents();
+        FRYING_PAN = skillet("frying_pan", com.jaymoskitchen.delight.Delight.FRYING_PAN_BLOCK);
+        SAUCEPAN = tool("saucepan");
+        BAKING_TRAY = tool("baking_tray");
+        ROLLING_PIN = tool("rolling_pin");
 
-		food("fried_egg", 4, 0.6F, null, false);
+        // Real-time cooker block
+        registerRealTimeCooker();
+
+        food("fried_egg", 4, 0.6F, null, false);
 		food("bacon", 3, 0.6F, null, false);
 		food("fries", 6, 0.6F, null, false);
 		food("vegetable_soup", 8, 0.7F, Items.BOWL, false);
@@ -109,7 +124,32 @@ public final class KitchenBlocks {
 	}
 
 	private static Item register(String id, Function<Item.Properties, Item> factory, Item.Properties properties) {
-		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosKitchen.id(id));
-		return Registry.register(BuiltInRegistries.ITEM, key, factory.apply(properties.setId(key)));
+	        ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosKitchen.id(id));
+	        return Registry.register(BuiltInRegistries.ITEM, key, factory.apply(properties.setId(key)));
+	    }
+
+	    /** Registers the real-time cooker block and its entity. */
+	    private static void registerRealTimeCooker() {
+	        REAL_TIME_COOKER_BLOCK = Registry.register(BuiltInRegistries.BLOCK, JaymosKitchen.id("real_time_cooker"),
+	                new RealTimeCookerBlock(BlockBehaviour.Properties.of()
+	                        .mapColor(MapColor.METAL)
+	                        .strength(3.5F)
+	                        .sound(SoundType.METAL)
+	                        .requiresCorrectToolForDrops()
+	                        .pushReaction(PushReaction.BLOCK)));
+
+	        REAL_TIME_COOKER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosKitchen.id("real_time_cooker"),
+	                BlockEntityType.Builder.of(RealTimeCookingBlockEntity::new, REAL_TIME_COOKER_BLOCK).build(null));
+
+	        // Register block item
+	        Registry.register(BuiltInRegistries.ITEM, JaymosKitchen.id("real_time_cooker"),
+	                new BlockItem(REAL_TIME_COOKER_BLOCK, new Item.Properties()
+	                        .stacksTo(64)
+	                        .setId(ResourceKey.create(Registries.ITEM, JaymosKitchen.id("real_time_cooker")))));
+
+	        // Add to creative tabs
+	        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
+	            output.accept(new ItemStack(REAL_TIME_COOKER_BLOCK.asItem()));
+	        });
+	    }
 	}
-}
