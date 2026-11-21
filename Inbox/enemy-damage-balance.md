@@ -4,7 +4,7 @@ for: hermes
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-18)
 asked: 2026-11-18
 thread: 1569107033607643388
-claimed_by: hermes-a
+claimed_by:
 pr: 1970
 suggested_owns: []
 writer: hermes-writer
