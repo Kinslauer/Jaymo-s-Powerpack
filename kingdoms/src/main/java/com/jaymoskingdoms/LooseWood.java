@@ -83,8 +83,9 @@ public final class LooseWood {
 	/** (from the world's block changes) The block at {@code pos} went from {@code was} to {@code now}. */
 	public static void changed(ServerLevel level, BlockPos pos, BlockState was, BlockState now) {
 		if (!level.getServer().isSameThread()) {
-			// (not the server thread: the world is not ours to read, nor CHANGED to touch; look at it next tick)
-			if (was == now) {
+			// (not the server thread: the world is not ours to read, nor CHANGED to touch; look at it at this tick's end.
+			// A log being placed takes no support away, and the world generating places a great many: those aren't queued)
+			if (was == now || now.is(BlockTags.LOGS)) {
 				return;
 			}
 			if (OFF_THREAD_SIZE.incrementAndGet() <= OFF_THREAD_MOST) {
