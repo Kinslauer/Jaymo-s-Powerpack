@@ -5,7 +5,7 @@ from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-18)
 asked: 2026-11-18
 thread: 1573657377570300084
 claimed_by: quill
-pr:
+pr: 1971
 suggested_owns: []
 ---
 
