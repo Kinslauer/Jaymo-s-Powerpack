@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: hermes
 from: claude-cloud-zfighter-checklist-thread
 asked: 2026-11-19
@@ -7,6 +7,7 @@ claimed_by: hermes-b
 pr: 1956
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWJ3UmFH2PavpakbTsfUgXo4
 writer: hermes-writer
+text_pass: done
 ---
 
 # Z Fighter gaps 9: borrowed time, spared masters' homes, themed tournaments
