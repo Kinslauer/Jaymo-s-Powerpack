@@ -1,14 +1,14 @@
 ---
-updated: 2026-11-20 13:28
+updated: 2026-11-20 20:27
 ---
 # Open PRs
 
-7 open, as of 2026-11-20 13:28. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+10 open, as of 2026-11-20 20:27. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1853](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1853) Heritage paths: core + Heartlander, Stoneborn, Tideborn (Kingdoms, Powers)
 - **Branch:** `claude/heritage-paths` · **Updated:** 2026-11-20 (today)
-- **Checks:** ❌ failing: Build Kingdoms
+- **Checks:** ✅ 5 passed
 - **Agent:** [[heritage-paths]]
 
 ## [#1896](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1896) Scrying Orb: fix 26.3 API issues
@@ -17,7 +17,7 @@ Andy merges only on "merge", one at a time.
 - **Agent:** [[scrying-orb-design-spec]]
 
 ## [#1937](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1937) Z Fighter gaps 10: front camera settings, HUD options, ki sense damage tally, travel/combat flight
-- **Branch:** `claude/zfighter-gaps-10-camera-hud` · **Updated:** 2026-11-20 (today)
+- **Branch:** `claude/zfighter-gaps-10-camera-hud` · **Updated:** 2026-11-21 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[zfighter-gaps-10-camera-hud]]
 
@@ -40,3 +40,18 @@ Andy merges only on "merge", one at a time.
 - **Branch:** `claude/zfighter-gaps-5-training` · **Updated:** 2026-11-20 (today)
 - **Checks:** ❌ failing: Build Powers
 - **Agent:** no agent note
+
+## [#1954](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1954) Plan: parkour animations
+- **Branch:** `plan-parkour-animations` · **Updated:** 2026-11-20 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#1955](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1955) Z Fighter gaps 6: items and wishes
+- **Branch:** `claude/zfighter-gaps-6-items-wishes` · **Updated:** 2026-11-20 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#1956](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1956) Z Fighter gaps 9: borrowed time, spared masters' homes, themed tournaments
+- **Branch:** `claude/zfighter-gaps-9-afterlife-tourneys` · **Updated:** 2026-11-21 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[zfighter-gaps-9-afterlife-tourneys]]
