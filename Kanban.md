@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-21 14:22). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-21 14:38). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -31,7 +31,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · 🔥 Prometheus · claimed
 
 
 ## In review
@@ -49,6 +48,7 @@ kanban-plugin: board
 - [ ] [[Inbox/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]] · for 🪽 any Hermes bot · #1955 · in-review
 - [ ] [[Inbox/zfighter-gaps-8-raids|zfighter-gaps-8-raids]] · for 🪽 any Hermes bot · #1961 · in-review
 - [ ] [[Inbox/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]] · for 🪽 any Hermes bot · #1956 · in-review
+- [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · 🔥 Prometheus · #research · in-review
 
 
 ## Needs Andy
