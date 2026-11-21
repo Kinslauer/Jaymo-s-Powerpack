@@ -855,7 +855,7 @@ public final class Ship extends Entity {
 			return PADDLE;
 		}
 		double push = PER_SAIL * Math.sqrt(h.sails) * Winds.catches(this.getYRot()) * Winds.strength(this.level(), this.getX(), this.getZ())
-			* WindPush.exposure(this);
+			* WindPush.exposure(this) * com.jaymoskingdoms.HeritagePaths.sail(this);
 		return Math.min(FASTEST, Math.min(PER_LENGTH * h.waterline, push));
 	}
 

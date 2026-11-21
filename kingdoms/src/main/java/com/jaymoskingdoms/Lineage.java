@@ -175,6 +175,8 @@ public final class Lineage {
 		}
 		Skills.respec(player);
 		Classes.clear(player);
+		// a new life: the path walked is the child's to find again, opened but not chosen
+		HeritagePaths.newLife(player);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8F, 1.2F);
 		Heritage.Kind now = Heritage.of(player);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.lineage.lives_on", parentName,
