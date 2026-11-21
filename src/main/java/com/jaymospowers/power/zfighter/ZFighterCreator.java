@@ -17,6 +17,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -418,7 +419,7 @@ public final class ZFighterCreator {
 			}
 			Vec3 aim = player.getEyePosition().add(look.scale(24.0)).subtract(from).normalize();
 			ZFighterKi.throwBall(player, from, aim.scale(1.1), damage, color, size, 2.0 + size * 2.0, 1.0F + charge * p * 0.5F,
-				ZFighterArts.griefing(level) && p >= 3, 120);
+				PackRules.mayBreak(level, BlockPos.containing(from)) && p >= 3, 120);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1.0F, 0.6F);
 		} else {
 			int style = switch (made.shape()) {
