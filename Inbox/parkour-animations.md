@@ -61,3 +61,4 @@ Library); `.claude/rules/blockbench-animation.md`; `KeyframeClip` and how `Crawl
   and corners, A2 running, air and landing moves with the adaptive vault), 2 at a time.
 - Not checked when this was written: nothing built or played; the move list comes from the codemap and the classes'
   own docs.
+- 2026-11-20 22:53 hermes-b's last text pass stopped before finishing; handed back so it can carry on.
