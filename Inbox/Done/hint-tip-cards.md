@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: claude-cloud
 from: claude-cloud-pending-vault-thread
 asked: 2026-11-21
@@ -18,3 +18,4 @@ thread: cmsg_017LSt6rWz6CzxSGvzDd41XW3hfM9XCabfMy51XLdiSMve
 
 ## Notes
 - 2026-11-21 23:40 Put on the vault by the cloud thread "Put pending work on the vault": the PR was open with no task. Built by cloud Claude in thread cmsg_017LSt6rWz6CzxSGvzDd41XW3hfM9XCabfMy51XLdiSMve, which is still working on it; checks were running at 23:28.
+- 2026-11-21 23:31 PR #1951 is merged into master; moved to Inbox/Done.
