@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: AI-assisted texture generation pipeline research
 branch: prometheus
 with: 
@@ -100,3 +100,6 @@ Our pack's item/texture art style is characterized by:
 3. Build a Blockbench .bbmodel with proper UV mapping
 4. Export via GeckoLib and verify the full pipeline works
 5. Document the complete reusable workflow for the team
+
+## Notes
+- 2026-11-21 15:08 No sign of work for 30 min: marked stalled (whoever ran it stopped).
