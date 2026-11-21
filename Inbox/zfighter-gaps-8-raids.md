@@ -1,9 +1,9 @@
 ---
-status: claimed
+status: open
 for: hermes
 from: claude-cloud-zfighter-checklist-thread
 asked: 2026-11-19
-claimed_by: hermes-b
+claimed_by: 
 pr: 
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWJ3UmFH2PavpakbTsfUgXo4
 ---
@@ -30,4 +30,4 @@ thread: cmsg_017LSt6rWz6CzxSGvzDd41XWJ3UmFH2PavpakbTsfUgXo4
 - `python3 tools/pr_checks.py` passes; compile check in the cloud.
 
 ## Notes
--
+- 2026-11-20 19:35 hermes-b's claim had no sign of work for 30 min: handed back as open.
