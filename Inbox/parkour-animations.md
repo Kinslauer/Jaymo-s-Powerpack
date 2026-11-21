@@ -1,5 +1,5 @@
 ---
-status: writing
+status: in-review
 for: any
 from: coordinator
 asked: 2026-11-20
@@ -16,6 +16,7 @@ suggested_owns:
   - src/main/resources/assets/jaymospowers/geckolib/animations/entity/player_freerun_*.animation.json (new)
   - src/main/resources/assets/jaymospowers/bbmodels/player_freerun*.bbmodel (new)
 writer: hermes-writer
+text_pass: done
 ---
 # Parkour animations: re-key the freerun moves, add climb down, corners and adaptive vaults
 
@@ -64,3 +65,4 @@ Library); `.claude/rules/blockbench-animation.md`; `KeyframeClip` and how `Crawl
 - 2026-11-20 22:53 hermes-b's last text pass stopped before finishing; handed back so it can carry on.
 - 2026-11-20 22:53 hermes-b's last text pass stopped before finishing; handed back so it can carry on.
 - 2026-11-20 23:02 Text pass: PR #1959 parkour-animations (freerun ledge hang/mantle keyframed clips). Only player-visible string is changes/powers/parkour-animations.md; LedgePose.java edits and animation JSONs are code/data with no player-facing text. Change note already plain, brief, player-facing and states testing status; no rewrite needed.
+- 2026-11-20 23:07 Text pass: rewrote changes/powers/parkour-animations.md change note body from implementation jargon (GeckoLib clips, hand-coded joint math, resource ids) to a player-facing description of smoother ledge hang and mantle motion; LedgePose.java and the new animation JSONs carry no player-visible text.
