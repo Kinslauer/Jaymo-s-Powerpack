@@ -63,6 +63,8 @@ public class ZFighterRogueRenderer extends MobRenderer<ZFighterRogue, AvatarRend
 			ZFighterHair.style(entity.getUUID())));
 		// (0.16.10) his strings, drawn as a player's hold combo is
 		ZFighterComboPose.extract(entity, state, partialTicks);
+		// his guard, crossed arms, when the fighter brain raises it
+		ZFighterGuardPose.extract(entity, state);
 	}
 
 	static final net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey<Integer> KIND =

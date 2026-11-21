@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Debris;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.fx.MagicFx;
@@ -106,7 +107,7 @@ public final class GorgerRoll {
 		roll.bowling = false;
 		roll.rising = true;
 		player.removeEffect(MobEffects.SLOWNESS);
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(RISE_RADIUS), e -> valid(player, e))) {
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, RISE_RADIUS)), e -> valid(player, e))) {
 			e.hurtServer(level, player.damageSources().playerAttack(player), damage);
 			e.setDeltaMovement(e.getDeltaMovement().x * 0.5, RISE_TOSS, e.getDeltaMovement().z * 0.5);
 			e.syncVelocity = true;
@@ -114,7 +115,7 @@ public final class GorgerRoll {
 		}
 		player.setDeltaMovement(roll.dir.x * 0.3, RISE_UP, roll.dir.z * 0.3);
 		player.syncVelocity = true;
-		MagicFx.blast(level, player.position().add(0.0, 0.5, 0.0), (float)RISE_RADIUS * 0.8F, COLOR);
+		MagicFx.blast(level, player.position().add(0.0, 0.5, 0.0), (float)AbilityPower.size(player, RISE_RADIUS) * 0.8F, COLOR);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.MACE_SMASH_GROUND, SoundSource.PLAYERS, 1.2F, 1.2F);
 		Shakes.heavy(player, player.position(), 10.0, 0.4F);
 		return true;

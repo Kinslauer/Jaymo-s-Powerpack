@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms.ultimate;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.compat.Stacked;
@@ -241,7 +242,7 @@ public final class Sunheart extends XenoUltimate {
 		}
 		ServerLevel level = player.level();
 		Vec3 centre = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
-		for (LivingEntity living : around(player, CORONA_RADIUS)) {
+		for (LivingEntity living : around(player, AbilityPower.size(player, CORONA_RADIUS))) {
 			// (0.20.21) burn and blind only when the hit landed (pvp off or a blocked hit does neither)
 			if (living.hurtServer(level, player.damageSources().playerAttack(player), CORONA_DAMAGE)) {
 				living.igniteForSeconds(CORONA_BURN_SECONDS);
@@ -250,8 +251,8 @@ public final class Sunheart extends XenoUltimate {
 				}
 			}
 		}
-		Flames.scare(level, new AABB(centre, centre).inflate(CORONA_RADIUS));
-		melt(player, CORONA_MELT_RADIUS);
+		Flames.scare(level, new AABB(centre, centre).inflate(AbilityPower.size(player, CORONA_RADIUS)));
+		melt(player, AbilityPower.size(player, CORONA_MELT_RADIUS));
 		// a flat ring of fireballs
 		for (int i = 0; i < CORONA_FIREBALLS; i++) {
 			double a = i / (double)CORONA_FIREBALLS * Math.PI * 2.0;
@@ -267,9 +268,9 @@ public final class Sunheart extends XenoUltimate {
 		}
 		MagicFx.blast(level, centre.x, centre.y, centre.z, MagicFx.FLASH_RADIUS, 0xFFC040);
 		level.sendParticles(ParticleTypes.FLAME, centre.x, centre.y, centre.z, 80, 1.2, 1.0, 1.2, 0.25);
-		ring(level, ParticleTypes.FLAME, player.position(), CORONA_RADIUS * 0.5, 32);
-		ring(level, ParticleTypes.FLAME, player.position(), CORONA_RADIUS, 48);
-		ring(level, ParticleTypes.LAVA, player.position(), CORONA_MELT_RADIUS, 20);
+		ring(level, ParticleTypes.FLAME, player.position(), AbilityPower.size(player, CORONA_RADIUS) * 0.5, 32);
+		ring(level, ParticleTypes.FLAME, player.position(), AbilityPower.size(player, CORONA_RADIUS), 48);
+		ring(level, ParticleTypes.LAVA, player.position(), AbilityPower.size(player, CORONA_MELT_RADIUS), 20);
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		player.swing(InteractionHand.OFF_HAND, SwingAnimation.DEFAULT, true);
 		sound(player, SoundEvents.GENERIC_EXPLODE.value(), 1.4F, 0.6F);
@@ -445,16 +446,16 @@ public final class Sunheart extends XenoUltimate {
 	private static void nova(ServerPlayer player) {
 		ServerLevel level = player.level();
 		Vec3 at = player.position().add(0.0, 0.5, 0.0);
-		for (LivingEntity living : around(player, NOVA_RADIUS)) {
+		for (LivingEntity living : around(player, AbilityPower.size(player, NOVA_RADIUS))) {
 			if (living.hurtServer(level, player.damageSources().playerAttack(player), NOVA_DAMAGE) || !(living instanceof ServerPlayer)) { // (0.20.21) no shove for a player the hit missed (pvp off)
 				shove(living, player.position(), 0.9, 0.4);
 			}
 		}
-		Flames.area(level, at, NOVA_RADIUS, NOVA_BURN_SECONDS, player,
+		Flames.area(level, at, AbilityPower.size(player, NOVA_RADIUS), NOVA_BURN_SECONDS, player,
 			e -> e != player && !spared(player, e) && harmable(player, e));
-		ring(level, ParticleTypes.FLAME, at, NOVA_RADIUS * 0.4, 24);
-		ring(level, ParticleTypes.FLAME, at, NOVA_RADIUS * 0.7, 36);
-		ring(level, ParticleTypes.FLAME, at, NOVA_RADIUS, 48);
+		ring(level, ParticleTypes.FLAME, at, AbilityPower.size(player, NOVA_RADIUS) * 0.4, 24);
+		ring(level, ParticleTypes.FLAME, at, AbilityPower.size(player, NOVA_RADIUS) * 0.7, 36);
+		ring(level, ParticleTypes.FLAME, at, AbilityPower.size(player, NOVA_RADIUS), 48);
 		level.sendParticles(ParticleTypes.LAVA, at.x, at.y + 0.5, at.z, 30, 1.4, 0.6, 1.4, 0.0);
 		sound(player, SoundEvents.GENERIC_EXPLODE.value(), 1.0F, 1.2F);
 		sound(player, SoundEvents.BLAZE_SHOOT, 1.2F, 0.5F);

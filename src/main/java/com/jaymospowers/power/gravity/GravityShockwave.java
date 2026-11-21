@@ -67,11 +67,14 @@ public final class GravityShockwave {
 		final Vec3 at;
 		final long start;
 		final List<Spot> spots = new ArrayList<>();
+		/** How far the bubble swells: {@link #RADIUS}, wider by its maker's Ability Power. */
+		final double radius;
 
-		Wave(ResourceKey<Level> dimension, Vec3 at, long start) {
+		Wave(ResourceKey<Level> dimension, Vec3 at, long start, double radius) {
 			this.dimension = dimension;
 			this.at = at;
 			this.start = start;
+			this.radius = radius;
 		}
 	}
 
@@ -86,22 +89,22 @@ public final class GravityShockwave {
 	}
 
 	/** The well opens at {@code at}: the bubble starts to swell. */
-	static void start(ServerLevel level, Vec3 at) {
-		Wave wave = new Wave(level.dimension(), at, level.getGameTime());
+	static void start(ServerLevel level, Vec3 at, net.minecraft.world.entity.Entity owner) {
+		Wave wave = new Wave(level.dimension(), at, level.getGameTime(), com.jaymospowers.core.AbilityPower.size(owner, RADIUS));
 		RandomSource random = level.getRandom();
 		for (int ring = 0; ring < RINGS.length; ring++) {
 			double offset = random.nextDouble() * Math.PI * 2.0;
 			for (int i = 0; i < RING_LUMPS[ring]; i++) {
 				double angle = offset + (i + random.nextDouble() * 0.6) / RING_LUMPS[ring] * Math.PI * 2.0;
 				double radius = RINGS[ring] + (random.nextDouble() - 0.5) * 1.2;
-				wave.spots.add(new Spot(angle, radius, (int)Math.round(radius / RADIUS * GROW_TICKS)));
+				wave.spots.add(new Spot(angle, radius * wave.radius / RADIUS, (int)Math.round(radius / RADIUS * GROW_TICKS)));
 			}
 		}
 		WAVES.add(wave);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.4F, 0.5F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.RESPAWN_ANCHOR_DEPLETE.value(), SoundSource.PLAYERS, 1.2F, 0.6F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 0.5F, 1.6F);
-		GravityPower.shake(level, at, RADIUS * 2.5, 0.8F);
+		GravityPower.shake(level, at, wave.radius * 2.5, 0.8F);
 	}
 
 	static void tick(MinecraftServer server) {
@@ -148,7 +151,7 @@ public final class GravityShockwave {
 		Vec3 at = wave.at;
 		float p = Mth.clamp(t / (float)GROW_TICKS, 0.0F, 1.0F);
 		// fast at first, slowing as it nears its size
-		double r = RADIUS * (1.0 - (1.0 - p) * (1.0 - p));
+		double r = wave.radius * (1.0 - (1.0 - p) * (1.0 - p));
 		if (t <= GROW_TICKS) {
 			int points = 24 + (int)(r * 8);
 			for (int i = 0; i < points; i++) {

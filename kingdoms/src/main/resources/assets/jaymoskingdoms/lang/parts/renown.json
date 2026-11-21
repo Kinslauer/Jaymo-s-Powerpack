@@ -1,0 +1,8 @@
+{
+  "message.jaymoskingdoms.renown.earned": "Renown earned. You have %s to spend (K).",
+  "gui.jaymoskingdoms.renown.have": "Renown: %s to spend, %s earned",
+  "gui.jaymoskingdoms.renown.learn": "Press the button to spend a renown point on this skill.",
+  "gui.jaymoskingdoms.renown.web.spend": "Spend renown (%s)",
+  "gui.jaymoskingdoms.renown.stat": "Renown: %1$s (+%2$s points)",
+  "gui.jaymoskingdoms.renown.count": "Renown: %1$s"
+}

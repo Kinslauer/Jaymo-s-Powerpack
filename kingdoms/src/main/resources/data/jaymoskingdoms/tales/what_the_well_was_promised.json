@@ -1,0 +1,869 @@
+{
+  "title": "What the Well Was Promised",
+  "start": {
+    "by": "giver",
+    "jobs": [
+      "farmer",
+      "shepherd",
+      "baker",
+      "cleric",
+      "butcher",
+      "none"
+    ],
+    "weight": 2
+  },
+  "roll": {
+    "asked": [
+      "water",
+      "more"
+    ]
+  },
+  "cast": {
+    "debtor": {
+      "name": [
+        "Hesk Marlow",
+        "Ned Marlow",
+        "Wat Marlow"
+      ],
+      "body": "villager",
+      "job": "farmer",
+      "female": false,
+      "at": "steading"
+    },
+    "girl": {
+      "name": [
+        "Bet Marlow",
+        "Annis Marlow",
+        "Tibby Marlow"
+      ],
+      "body": "villager",
+      "job": "none",
+      "female": true,
+      "at": "steading"
+    },
+    "caller": {
+      "name": "what came up the rope",
+      "body": "minecraft:drowned",
+      "at": "well",
+      "hours": "night",
+      "if": "mark:well_debt_called",
+      "health": 60,
+      "damage": 6
+    }
+  },
+  "places": {
+    "steading": {
+      "at": "near",
+      "from": "home",
+      "dist": [
+        50,
+        90
+      ],
+      "name": "the Marlow steading"
+    },
+    "well": {
+      "at": "near",
+      "from": "steading",
+      "dist": [
+        12,
+        24
+      ],
+      "name": "the well at the Marlow steading"
+    }
+  },
+  "first": "ask",
+  "steps": {
+    "ask": {
+      "do": "talk",
+      "who": "giver",
+      "clock": {
+        "seventh": [
+          3,
+          4
+        ]
+      },
+      "say": [
+        "You'll think me soft in the head. The well up at {place:steading} went dry some days back. That's nothing, wells do. But this one knocks. At night, from underneath, three at a time, like somebody wanting to be let in.",
+        "{debtor} has nailed the cover down and keeps that daughter of his indoors, and he won't say a word to any of us who've drunk his water seven summers. Seven summers that well ran sweet when every other on the ridge was mud. We all thought him lucky.",
+        "He is counting the nights. I've watched him do it on his fingers. Whatever he's waiting for, it comes {in:seventh}. Somebody who isn't his neighbour ought to ask him what he did."
+      ],
+      "replies": [
+        {
+          "say": "I'll go up and ask him.",
+          "then": "see_debtor",
+          "journal": "The well at the Marlow steading ran sweet for seven dry summers and has now failed. Something knocks under its cover at night. {giver} says {debtor} is counting the nights to something, and will tell his neighbours nothing."
+        },
+        {
+          "say": "What do you think he did?",
+          "then": "ask_more"
+        },
+        {
+          "say": "A dry well is a dry well. Tell him to dig another.",
+          "then": "end:refused"
+        }
+      ]
+    },
+    "ask_more": {
+      "do": "talk",
+      "who": "giver",
+      "say": "My grandmother used to say you never ask a dry well for water out loud, because you don't know who's listening at the bottom. I took it for a thing you tell children. But he went down that well on a rope in the dry summer, at night, and he came up grey in the face, and by morning it was full. That's all I know, and I wish I knew less.",
+      "replies": [
+        {
+          "say": "I'll go up and ask him.",
+          "then": "see_debtor",
+          "journal": "The well at the Marlow steading ran sweet for seven dry summers and has now failed. Something knocks under its cover at night. {giver} says {debtor} went down it on a rope the night before it first filled."
+        },
+        {
+          "say": "Then it's between him and the well.",
+          "then": "end:refused"
+        }
+      ]
+    },
+    "see_debtor": {
+      "do": "talk",
+      "who": "debtor",
+      "goal": "Speak with {debtor} at {place:steading}",
+      "say": [
+        "I knew somebody would come up in the end. Sit, if you're stopping. Don't lean on the well cover.",
+        "It was the dry summer. The beasts were dying on their feet and my wife was near her time. I went down the well to see was there any wet at the bottom at all, and there was a voice down there, as near as I am to you. It said it could spare me seven summers. I said yes before it had finished. I'd have said yes to anything.",
+        "It gave me a thing to put my mark on, and I can't read what's on it. I can't read at all. I only have what it said out loud, and I've had that by heart seven years: at the end of the seventh summer, the dearest thing I have. The thing's under the hearthstone. I've not lifted that stone since. Lift it yourself. I'll not."
+      ],
+      "journal": "{debtor} went down his dry well seven summers ago, and something at the bottom gave him seven summers of water for the dearest thing he has. He put his mark to a thing he could not read. It is under his hearthstone.",
+      "replies": [
+        {
+          "say": "I'll lift it.",
+          "then": "find_tablet"
+        },
+        {
+          "say": "What is the dearest thing you have?",
+          "then": "debtor_dearest"
+        }
+      ],
+      "within": "seventh",
+      "late": "end:chose",
+      "until": "before the seventh night"
+    },
+    "debtor_dearest": {
+      "do": "talk",
+      "who": "debtor",
+      "say": "You passed her at the window coming in. {girl}. She was born the week the water came back. Don't make me say more than that in my own kitchen.",
+      "then": "find_tablet",
+      "within": "seventh",
+      "late": "end:chose",
+      "until": "before the seventh night"
+    },
+    "find_tablet": {
+      "do": "search",
+      "at": "steading",
+      "need": 1,
+      "goal": "Lift the hearthstone at {place:steading}",
+      "clues": [
+        {
+          "if": "asked=water",
+          "name": "A Lead Tablet",
+          "item": "minecraft:iron_ingot",
+          "tongue": "old",
+          "mark": "well_terms_read",
+          "lore": [
+            "Seven summers of sweet water to the one who asks.",
+            "At the end of the seventh I am owed the dearest thing that is carried down to me.",
+            "It is to be carried down by the one who asked, in his own two hands, and given, not thrown.",
+            "If nothing is carried down by the seventh night after the water fails, I come up and choose."
+          ],
+          "told": "Marlow's tablet is a bargain with whatever is under that well. Seven summers of water, for the dearest thing carried down to it. I read it out myself, and I did not like the feel of the lead.",
+          "journal": "I have the tablet from under {debtor}'s hearthstone. It is lead, colder than it should be, and written in the old letters. His mark is scratched at the foot."
+        },
+        {
+          "if": "asked=more",
+          "name": "A Lead Tablet",
+          "item": "minecraft:iron_ingot",
+          "tongue": "old",
+          "mark": "well_terms_read",
+          "lore": [
+            "Seven summers of sweet water to the one who asks.",
+            "And the well at the Pask steading is to fail for the same seven summers, as he asked.",
+            "At the end of the seventh I am owed the dearest thing that is carried down to me.",
+            "It is to be carried down by the one who asked, in his own two hands, and given, not thrown.",
+            "If nothing is carried down by the seventh night after the water fails, I come up and choose."
+          ],
+          "told": "Marlow's tablet is a bargain with whatever is under that well. Seven summers of water, for the dearest thing carried down to it. And the Pasks' well to go dry the same seven summers, because he asked for that too. I read it out myself.",
+          "journal": "I have the tablet from under {debtor}'s hearthstone. It is lead, colder than it should be, and written in the old letters. His mark is scratched at the foot."
+        }
+      ],
+      "then": "ways",
+      "within": "seventh",
+      "late": "end:chose",
+      "until": "before the seventh night"
+    },
+    "ways": {
+      "do": "talk",
+      "who": "debtor",
+      "goal": "Decide with {debtor} what is to be done about the well",
+      "say": {
+        "?mark:well_terms_read": "You've had it read. I can see that much in your face. Go on, then. Tell me what I put my mark to, and what's to be done about it ({left:seventh}).",
+        "?": "That's it. That's my mark at the foot, the crooked one. If you can't read the rest either, the priest in {town} has the old letters, or whoever keeps the books there. I never dared carry it down to them. Whatever's to be done, it wants doing soon ({left:seventh})."
+      },
+      "voices": {
+        "mercy": "He had dying beasts and a wife near her time. I'd have said yes as well.",
+        "faith": "No patron keeps a shrine at the bottom of a well. Whatever answered him, it wasn't one of ours.",
+        "courage": "Somebody is going down that rope. It may as well be somebody who isn't afraid of it.",
+        "gain": "Seven summers of water on a dry ridge. He was paid in full. Now he pays."
+      },
+      "replies": [
+        {
+          "if": "!mark:well_seen_well",
+          "say": "Show me the well.",
+          "then": "look_well"
+        },
+        {
+          "if": "!mark:well_spoke_girl",
+          "say": "Let me speak to {girl}.",
+          "then": "see_girl"
+        },
+        {
+          "if": "mark:well_terms_read",
+          "say": "It asks for the dearest thing that is carried down. Carry down one thing, and that thing is the dearest.",
+          "then": "choose_thing",
+          "for": [
+            "mercy"
+          ],
+          "try": {
+            "how": "persuade",
+            "odds": 1,
+            "helps": [
+              "reads:old",
+              "mark:well_seen_well",
+              "mark:well_spoke_girl"
+            ],
+            "hurts": [
+              "mark:well_coin_refused"
+            ],
+            "fail": "words_no",
+            "refuse": "A quibble. You want me to go down that rope with a quibble in my hand, to a thing that has had seven years to think about what it's owed. No."
+          },
+          "journal": "The tablet does not ask for the dearest thing {debtor} has. It asks for the dearest thing that is carried down. I told him so, and he will try it."
+        },
+        {
+          "say": "A debt can change hands. I'll go to the well tonight and take it on myself.",
+          "then": "mine_night",
+          "for": [
+            "courage",
+            "mercy"
+          ],
+          "irks": [
+            "gain"
+          ],
+          "journal": "I told {debtor} I would take the debt at his well on myself."
+        },
+        {
+          "say": "It's your debt. What will you carry down?",
+          "then": "pay_talk",
+          "for": [
+            "law"
+          ],
+          "irks": [
+            "mercy"
+          ]
+        }
+      ],
+      "within": "seventh",
+      "late": "end:chose",
+      "until": "before the seventh night"
+    },
+    "words_no": {
+      "do": "talk",
+      "who": "debtor",
+      "say": "I'll not be talked down a well. If your reading's right, then the thing down there knows it's right, and it has let me sweat seven years regardless. Find me another road, or leave me to mine.",
+      "journal": "{debtor} would not trust his neck to the words on the tablet.",
+      "then": "ways",
+      "within": "seventh",
+      "late": "end:chose",
+      "until": "before the seventh night"
+    },
+    "look_well": {
+      "do": "search",
+      "at": "well",
+      "need": 3,
+      "goal": "Look over {place:well}",
+      "mark": "well_seen_well",
+      "clues": [
+        {
+          "name": "A Wet Rope",
+          "item": "minecraft:lead",
+          "lore": [
+            "The well is dry to the bottom, and has been for days.",
+            "The rope is wet all the way up to the windlass."
+          ],
+          "journal": "The rope in {debtor}'s dry well is wet to the top."
+        },
+        {
+          "name": "A Hair Ribbon",
+          "item": "minecraft:string",
+          "lore": [
+            "Blue, and tied in a neat bow round the bucket's handle.",
+            "It has been down the well and come up again."
+          ],
+          "journal": "A girl's blue hair ribbon is tied to the handle of the well bucket. It has been down and come back."
+        },
+        {
+          "name": "Salt in the Bucket",
+          "item": "minecraft:sugar",
+          "lore": [
+            "A white crust dried in the bottom of the bucket.",
+            "It tastes of the sea. The sea is a month's walk from here."
+          ],
+          "journal": "The dry bucket has sea salt crusted in it, a month's walk from any sea."
+        },
+        {
+          "name": "A Scored Board",
+          "item": "minecraft:stick",
+          "lore": [
+            "A splinter from the underside of the well cover, scored in threes.",
+            "The marks were made upward, from below."
+          ],
+          "journal": "The well cover is scored on its underside, in threes."
+        }
+      ],
+      "then": "ways",
+      "within": "seventh",
+      "late": "end:chose",
+      "until": "before the seventh night"
+    },
+    "see_girl": {
+      "do": "talk",
+      "who": "girl",
+      "goal": "Speak with {girl}",
+      "mark": "well_spoke_girl",
+      "say": [
+        "Father thinks I don't know. I've known since I was small. You can hear it from my bed when the wind's off the ridge.",
+        "It doesn't frighten me. It hums. It's the tune mother hums at the churn, only slower, as if somebody taught it a long time ago and it has been keeping it safe. I sent my ribbon down on the bucket the day the water went. It seemed rude to send the bucket down empty.",
+        "If it's me it's owed, I'd sooner be asked than be kept behind a door. And if it only wants a thing carried down, it can have Dolly. I've had her since I could walk. I'm too old for her now, and I'd cry all the same."
+      ],
+      "journal": "{girl} has always known about the well. She says what is down there hums her mother's churning tune. She offered her old rag doll, if a thing must be carried down.",
+      "then": "ways",
+      "within": "seventh",
+      "late": "end:chose",
+      "until": "before the seventh night"
+    },
+    "choose_thing": {
+      "do": "talk",
+      "who": "debtor",
+      "goal": "Choose what {debtor} carries down",
+      "say": "Then say what I carry. One thing, in my two hands, given and not thrown. And remember that if you've read it wrong, it isn't you on the rope.",
+      "replies": [
+        {
+          "say": "A heel of bread from your table.",
+          "then": "down_walk",
+          "mark": "well_carried_bread",
+          "journal": "{debtor} is to carry a heel of bread down the well, and nothing else."
+        },
+        {
+          "if": "mark:well_spoke_girl",
+          "say": "The girl's rag doll. She offered it, and she'll cry for it.",
+          "then": "down_walk",
+          "mark": "well_carried_doll",
+          "journal": "{debtor} is to carry {girl}'s rag doll down the well, and nothing else."
+        },
+        {
+          "say": "A stone from your yard. It asked for nothing better.",
+          "then": "down_walk",
+          "mark": "well_carried_stone",
+          "journal": "{debtor} is to carry a stone from his yard down the well, and nothing else."
+        }
+      ],
+      "within": "seventh",
+      "late": "end:chose",
+      "until": "before the seventh night"
+    },
+    "down_walk": {
+      "do": "escort",
+      "who": "debtor",
+      "to": "well",
+      "when": "night",
+      "goal": "Walk {debtor} to the well after dark",
+      "failed": "end:debtor_dead",
+      "then": "down_watch",
+      "within": "seventh",
+      "late": "end:chose",
+      "until": "before the seventh night"
+    },
+    "down_watch": {
+      "do": "vigil",
+      "at": "well",
+      "when": "night",
+      "gap": 9,
+      "goal": "Hold the rope while {debtor} goes down",
+      "lines": [
+        {
+          "who": "debtor",
+          "say": "Take the rope twice round the post. If I shout, you pull, and you don't stop to ask why."
+        },
+        {
+          "say": "He goes over the lip backwards with it held against his chest in both hands. The dark takes him at the knees, then at the shoulders.",
+          "sound": "minecraft:block.wood.step"
+        },
+        {
+          "say": "The rope pays out a long way. Further than the well is deep.",
+          "sound": "minecraft:block.wood.hit"
+        },
+        {
+          "say": "The rope stops. Nothing comes up, no voice and no sound, for as long as it takes to say the hours.",
+          "sound": "minecraft:ambient.cave"
+        },
+        {
+          "say": {
+            "?mark:well_carried_stone": "Three knocks come up through the stone, slow and even. Then a long scraping, as of something heavy being turned over and over.",
+            "?": "Three knocks come up through the stone, slow and even. Then one more, lighter."
+          },
+          "sound": "minecraft:block.stone.hit"
+        },
+        {
+          "who": "debtor",
+          "say": {
+            "?mark:well_carried_doll": "It took her. It held her up to look at her a long while, and it took her gentle. Pull me up. Pull.",
+            "?mark:well_carried_stone": "It took it. And it laughed. I never want to hear that again as long as I live. Pull me up, for pity's sake.",
+            "?": "It took it. It turned it over like a man with a coin he doesn't know, and then it took it. Pull me up."
+          }
+        }
+      ],
+      "journal": "{debtor} went down his well with one thing in his two hands, and gave it. Something took it from him.",
+      "then": "end:loophole",
+      "within": "seventh",
+      "late": "end:chose",
+      "until": "before the seventh night"
+    },
+    "mine_night": {
+      "do": "vigil",
+      "at": "well",
+      "when": "night",
+      "gap": 9,
+      "goal": "Go to {place:well} after dark and call down",
+      "lines": [
+        {
+          "say": "The nails come out of the well cover easily. They have been worked loose from underneath.",
+          "sound": "minecraft:block.wood.hit"
+        },
+        {
+          "say": "I call down that the debt at this well has a new name on it, and I say the name.",
+          "sound": "minecraft:ambient.cave",
+          "mark": "well_debt_called"
+        },
+        {
+          "say": "The rope begins to come up by itself, hand over hand, with nobody at the windlass.",
+          "sound": "minecraft:block.wood.step"
+        },
+        {
+          "say": "It stands in the well mouth with the water running off it, and it looks at my hands for a long time.",
+          "sound": "minecraft:entity.generic.splash"
+        },
+        {
+          "who": "caller",
+          "say": "Seven summers. Sweet water wherever you drink. Then you carry it down, in your own two hands."
+        },
+        {
+          "say": "It goes down the way it came. Behind it, the well begins to fill.",
+          "sound": "minecraft:item.bucket.fill"
+        }
+      ],
+      "journal": "I called down the well that the debt was mine. Something came up the rope and looked at my hands, and went down again. The well is filling.",
+      "then": "end:mine",
+      "within": "seventh",
+      "late": "end:chose",
+      "until": "before the seventh night"
+    },
+    "pay_talk": {
+      "do": "talk",
+      "who": "debtor",
+      "goal": "Hear what {debtor} will carry down",
+      "say": [
+        "I've had seven years to think what I'd carry. The dearest thing I have is asleep up that ladder, and I'll go into the ground before I carry her to it.",
+        "So it's me. A man's own skin is dear enough to him, when it comes to it. I'll carry myself down, and it can make what it likes of the bargain."
+      ],
+      "replies": [
+        {
+          "say": "Go, then. I'll walk you to it.",
+          "then": "pay_walk",
+          "for": [
+            "law"
+          ],
+          "irks": [
+            "mercy"
+          ],
+          "journal": "{debtor} will not carry his daughter down. He means to carry himself."
+        },
+        {
+          "if": "!mark:well_coin_refused",
+          "say": "Try coin first. Dear is dear. {coins:12}, let down on the bucket.",
+          "needs_coins": 12,
+          "then": "coin_back"
+        },
+        {
+          "if": "asked=more & mark:well_terms_read",
+          "say": "You dried the Pasks' well to sell them their own water. Yes. Carry yourself down.",
+          "then": "pay_walk",
+          "mark": "well_shamed",
+          "for": [
+            "vengeance",
+            "law"
+          ],
+          "irks": [
+            "mercy"
+          ],
+          "journal": "I told {debtor} what his tablet says about the Pasks' well. He did not deny it. He means to carry himself down."
+        },
+        {
+          "say": "Wait. There may be another road.",
+          "then": "ways"
+        }
+      ],
+      "within": "seventh",
+      "late": "end:chose",
+      "until": "before the seventh night"
+    },
+    "coin_back": {
+      "do": "talk",
+      "who": "debtor",
+      "mark": "well_coin_refused",
+      "pay": 12,
+      "say": "There. You saw the windlass turn by itself. Every piece is back in the bucket, wet, and stacked, the way a man stacks coin he has counted and doesn't want. Take it. It isn't that kind of dear.",
+      "journal": "We let coin down the well on the bucket. It came back up, counted and stacked.",
+      "then": "ways",
+      "within": "seventh",
+      "late": "end:chose",
+      "until": "before the seventh night"
+    },
+    "pay_walk": {
+      "do": "escort",
+      "who": "debtor",
+      "to": "well",
+      "when": "night",
+      "goal": "Walk {debtor} to the well after dark",
+      "failed": "end:debtor_dead",
+      "then": "pay_watch",
+      "within": "seventh",
+      "late": "end:chose",
+      "until": "before the seventh night"
+    },
+    "pay_watch": {
+      "do": "vigil",
+      "at": "well",
+      "when": "night",
+      "gap": 9,
+      "goal": "See {debtor} down the well",
+      "lines": [
+        {
+          "who": "debtor",
+          "say": "Tell {girl} I went to see about the water. It's near enough true."
+        },
+        {
+          "say": "He goes over the lip with his hands empty. He does not ask for the rope to be held.",
+          "sound": "minecraft:block.wood.step"
+        },
+        {
+          "say": "The rope goes slack all at once.",
+          "sound": "minecraft:block.wood.hit"
+        },
+        {
+          "say": "Under the stone something begins to hum. It is a churning tune, very slow.",
+          "sound": "minecraft:block.amethyst_block.resonate"
+        },
+        {
+          "say": "By the time the tune is done there is water in the well, black and still, a hand below the lip.",
+          "sound": "minecraft:item.bucket.fill"
+        }
+      ],
+      "journal": "{debtor} went down his well with empty hands. The rope went slack, and the well filled.",
+      "then": "end:paid",
+      "within": "seventh",
+      "late": "end:chose",
+      "until": "before the seventh night"
+    }
+  },
+  "endings": {
+    "refused": {
+      "text": "I told {giver} that a dry well is a dry well, and left the Marlows to theirs."
+    },
+    "loophole": {
+      "text": {
+        "?mark:well_carried_doll": "{debtor} carried his daughter's rag doll down the well in his own two hands, and what is down there took it as the dearest thing carried down. The tablet's words were kept to the letter. The well is dry, and it has stopped knocking.",
+        "?mark:well_carried_stone": "{debtor} carried a stone from his own yard down the well in his own two hands. It was taken, and it was laughed at. The tablet's words were kept to the letter. The well is dry, and it has stopped knocking.",
+        "?": "{debtor} carried a heel of bread down the well in his own two hands, and what is down there took it as the dearest thing carried down. The tablet's words were kept to the letter. The well is dry, and it has stopped knocking."
+      },
+      "reward": {
+        "coins": 10,
+        "hearts": 25,
+        "reputation": 8
+      },
+      "marks": [
+        "well_words_kept"
+      ],
+      "town": [
+        "The Marlow well's dry as a kiln and he's digging a new one in the low field. He whistles while he digs. I'd not heard that man whistle in seven years.",
+        "Nothing knocks up at Marlow's any more. I went and listened myself, a whole evening, like a fool."
+      ],
+      "later": [
+        {
+          "days": [
+            15,
+            25
+          ],
+          "if": "mark:well_carried_doll",
+          "letter": {
+            "from": "{debtor}",
+            "lines": [
+              "I can't write, so the priest is putting this down for me and you'll forgive his long words.",
+              "The new well came in sweet at eleven feet, and nothing answered when I shouted down it. I shouted a good while, to be sure.",
+              "{girl} sits by the old one of an evening. She says it hums the churning tune still, and now and then a second one she doesn't know. She hums that one back, to learn it. I've not the heart to stop her, and I've not the nerve to listen."
+            ]
+          }
+        },
+        {
+          "days": [
+            15,
+            25
+          ],
+          "if": "mark:well_carried_bread",
+          "town": [
+            "Marlow drew up the old well bucket last week, meaning to burn it. There was a heel of bread in it, green with age, with one bite out of it. He burned the bucket anyway."
+          ]
+        },
+        {
+          "days": [
+            15,
+            25
+          ],
+          "if": "mark:well_carried_stone",
+          "scene": [
+            [
+              "a",
+              "Have you seen the old well at Marlow's? It's full to the lip."
+            ],
+            [
+              "b",
+              "With water? After all that?"
+            ],
+            [
+              "a",
+              "With stones. Round ones, wet, each the size of a fist. Hundreds of them. Nobody carted them there."
+            ],
+            [
+              "b",
+              "Then somebody has had the last word, and it wasn't Marlow."
+            ]
+          ]
+        },
+        {
+          "days": [
+            10,
+            14
+          ],
+          "if": "asked=more",
+          "town": [
+            "The Pasks' well came back in the night. Seven years dry, and sweet as you like by morning. Old Pask sat down in his own yard and cried.",
+            "Seven summers the Pasks carted water from Marlow's and paid for every barrel. Now theirs runs again, and nobody can say why it ever stopped."
+          ]
+        }
+      ]
+    },
+    "mine": {
+      "text": "I called down the well that the debt at the Marlow steading was mine. What came up the rope looked at my hands and agreed to it. {debtor}'s well is full again. I have seven summers of sweet water wherever I drink, and at the end of them I am to carry down the dearest thing I have.",
+      "reward": {
+        "hearts": 30,
+        "reputation": 10
+      },
+      "marks": [
+        "well_debt_mine"
+      ],
+      "town": [
+        "The Marlow well filled overnight, and Marlow has taken the nails out of the cover. He'll not say what changed. He looks at {player} the way you'd look at somebody who paid your fine."
+      ],
+      "returns": {
+        "who": "caller",
+        "days": [
+          12,
+          20
+        ],
+        "as": "warning",
+        "say": "One summer is begun. Six come after it. I know your hands now. I can wait until you have something dear.",
+        "gift": [
+          "minecraft:water_bucket"
+        ]
+      },
+      "later": [
+        {
+          "days": [
+            25,
+            40
+          ],
+          "letter": {
+            "from": "nobody the runner could name",
+            "tongue": "old",
+            "mark": "well_own_terms_read",
+            "lines": [
+              "Seven summers of sweet water to the one who asked in another's place.",
+              "At the end of the seventh I am owed the dearest thing that is carried down to me.",
+              "You have read these words before. I have left them as they were."
+            ]
+          }
+        },
+        {
+          "days": [
+            10,
+            14
+          ],
+          "if": "asked=more",
+          "town": [
+            "The Pasks' well came back in the night. Seven years dry, and sweet as you like by morning. Old Pask sat down in his own yard and cried.",
+            "Seven summers the Pasks carted water from Marlow's and paid for every barrel. Now theirs runs again, and nobody can say why it ever stopped."
+          ]
+        }
+      ]
+    },
+    "paid": {
+      "text": {
+        "?mark:well_shamed": "I told {debtor} what his tablet says of the Pasks' well, and he carried himself down his own with empty hands. The rope went slack. By morning the well was full. {girl} has her father's debt paid, and no father.",
+        "?": "{debtor} would not carry his daughter down, so he carried himself, with empty hands, as the dearest thing he had left to give. The rope went slack. By morning the well was full. {girl} has her father's debt paid, and no father."
+      },
+      "reward": {
+        "coins": 6,
+        "hearts": -10
+      },
+      "marks": [
+        "well_paid"
+      ],
+      "town": [
+        "Marlow's gone. Went to see about the water, the girl says, and she says it as if she half believes it.",
+        "The well's sweet again up at Marlow's. I'll not drink from it. I'd sooner walk to the beck."
+      ],
+      "later": [
+        {
+          "days": [
+            14,
+            24
+          ],
+          "letter": {
+            "from": "{girl}",
+            "lines": [
+              "The well is full and mother will not let a bucket near it. We cart from the beck now, which is a mile each way.",
+              "It hums most nights. There is a second voice in the tune that was not there before, lower, and not so sure of the notes.",
+              "I know whose it is. I hum back, so he knows we are still here."
+            ]
+          }
+        },
+        {
+          "days": [
+            10,
+            14
+          ],
+          "if": "asked=more",
+          "town": [
+            "The Pasks' well came back in the night. Seven years dry, and sweet as you like by morning. Old Pask sat down in his own yard and cried.",
+            "Seven summers the Pasks carted water from Marlow's and paid for every barrel. Now theirs runs again, and nobody can say why it ever stopped."
+          ]
+        }
+      ]
+    },
+    "debtor_dead": {
+      "failed": true,
+      "text": "{debtor} died on the path to his own well, with nothing carried down. The seventh night came all the same. In the morning the cover was off the well, with its nails laid in a row along the lip, and {girl}'s bed was empty and wet through. The well is full.",
+      "reward": {
+        "hearts": -20
+      },
+      "marks": [
+        "well_chose"
+      ],
+      "town": [
+        "Marlow dead on the path to his own well, and the girl's bed wet through, and the well full to the lip. All in the one week.",
+        "Never ask a dry well for water out loud. My grandmother said it, and I laughed at her."
+      ],
+      "later": [
+        {
+          "days": [
+            10,
+            18
+          ],
+          "scene": [
+            [
+              "a",
+              "Marlow's wife says the well hums at night. A churning tune."
+            ],
+            [
+              "b",
+              "That's the wind in the shaft."
+            ],
+            [
+              "a",
+              "It hums it in a girl's voice. She says she'd know it anywhere."
+            ],
+            [
+              "b",
+              "Then don't tell me any more."
+            ]
+          ]
+        },
+        {
+          "days": [
+            10,
+            14
+          ],
+          "if": "asked=more",
+          "town": [
+            "The Pasks' well came back in the night. Seven years dry, and sweet as you like by morning. Old Pask sat down in his own yard and cried.",
+            "Seven summers the Pasks carted water from Marlow's and paid for every barrel. Now theirs runs again, and nobody can say why it ever stopped."
+          ]
+        }
+      ]
+    },
+    "chose": {
+      "failed": true,
+      "text": "The seventh night came and nothing had been carried down. In the morning the cover was off the well, with its nails laid in a row along the lip, and {girl}'s bed was empty and wet through. The well is full.",
+      "reward": {
+        "hearts": -20
+      },
+      "marks": [
+        "well_chose"
+      ],
+      "town": [
+        "They found the Marlow girl's bed wet through and the well full to the lip. Marlow hasn't spoken since. He sits by it.",
+        "Never ask a dry well for water out loud. My grandmother said it, and I laughed at her."
+      ],
+      "later": [
+        {
+          "days": [
+            10,
+            18
+          ],
+          "scene": [
+            [
+              "a",
+              "Marlow's wife says the well hums at night. A churning tune."
+            ],
+            [
+              "b",
+              "That's the wind in the shaft."
+            ],
+            [
+              "a",
+              "It hums it in a girl's voice. She says she'd know it anywhere."
+            ],
+            [
+              "b",
+              "Then don't tell me any more."
+            ]
+          ]
+        },
+        {
+          "days": [
+            10,
+            14
+          ],
+          "if": "asked=more",
+          "town": [
+            "The Pasks' well came back in the night. Seven years dry, and sweet as you like by morning. Old Pask sat down in his own yard and cried.",
+            "Seven summers the Pasks carted water from Marlow's and paid for every barrel. Now theirs runs again, and nobody can say why it ever stopped."
+          ]
+        }
+      ]
+    }
+  }
+}

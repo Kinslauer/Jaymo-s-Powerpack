@@ -10,11 +10,14 @@
       "do": "await",
       "who": "giver",
       "goal": "Cure the sleeping smith, or break his keeping light",
-      "journal": "Under the floor of an old home I found a smith asleep in a cell, a red light burning on the wall over him. He has the blight in him, and the light holds it.",
+      "journal": "Under the floor of an old home I found a smith asleep in a cell, a red light burning on the wall over him. He has the blight in him, and the light holds it. The husks walking the rooms upstairs wear what is left of a household's clothes.",
       "then": {
         "?mark:keeping_cured_asleep": "cured_asleep",
         "?mark:keeping_woke_cured": "unbelieved",
         "?": "his_day"
+      },
+      "noted": {
+        "keeping_rested": "The husks upstairs were a household once, a woman and her children by the look of them. I put them down while he slept, and the house is quiet now."
       }
     },
     "cured_asleep": {
@@ -22,7 +25,10 @@
       "who": "giver",
       "goal": "Wait for the smith to wake",
       "journal": "I gave {giver} the cure while he slept. He never stirred.",
-      "then": "unbelieved"
+      "then": "unbelieved",
+      "noted": {
+        "keeping_rested": "The husks upstairs were a household once, a woman and her children by the look of them. I put them down while he slept, and the house is quiet now."
+      }
     },
     "his_day": {
       "do": "await",
@@ -41,10 +47,18 @@
       "do": "talk",
       "who": "giver",
       "goal": "Speak with the smith",
-      "say": [
-        "You. You came down for me. I heard the light go and thought, well, that's the end of it. And here you are, and the cold's going out of my hands.",
-        "I'm a smith. It's all I've got that's worth giving. Tell me what you want for it and I'll make it to your measure."
-      ],
+      "say": {
+        "?mark:keeping_rested": [
+          "You. You came down for me. I heard the light go and thought, well, that's the end of it. And here you are, and the cold's going out of my hands.",
+          "I went up. I had to. I thought I'd find them at the door still, the way I left them. The rooms were quiet. They are at rest, all of them. That was you.",
+          "I couldn't do it. I had the hammer in my hand and I couldn't, so I went under the floor and lit the light instead. You did what I owed them. I'm a smith, it's all I've got worth giving. Tell me what you want and I'll make it to your measure."
+        ],
+        "?": [
+          "You. You came down for me. I heard the light go and thought, well, that's the end of it. And here you are, and the cold's going out of my hands.",
+          "Don't go up with me. Those were mine, up there. My wife. The boys. If any of them are still walking, leave them to me, now I can lift a hammer again. I should have done it before I lay down.",
+          "I'm a smith. It's all I've got that's worth giving. Tell me what you want for it and I'll make it to your measure."
+        ]
+      },
       "replies": [
         {
           "say": "Iron will do.",
@@ -177,11 +191,21 @@
       "do": "talk",
       "who": "giver",
       "goal": "Speak with the smith",
-      "say": [
-        "I've been sick, they tell me. Asleep under the floor of my own house, and I don't remember a day of it.",
-        "Cured me? In my sleep? Anyone could walk in here and say that. I'll thank you not to tell me tales. Out of my house."
-      ],
-      "then": "end:unbelieved"
+      "say": {
+        "?mark:keeping_rested": [
+          "I've been sick, they tell me. Asleep under the floor of my own house, and I don't remember a day of it.",
+          "Cured me? In my sleep? Anyone could walk in here and say that. And somebody has been upstairs. The rooms are quiet. They are at rest, all of them.",
+          "If that was you, then I thank you for them. It's more than I managed. But I'll not be told tales about the other. Go on, now. Leave me with them."
+        ],
+        "?": [
+          "I've been sick, they tell me. Asleep under the floor of my own house, and I don't remember a day of it.",
+          "Cured me? In my sleep? Anyone could walk in here and say that. I'll thank you not to tell me tales. Out of my house."
+        ]
+      },
+      "then": {
+        "?mark:keeping_rested": "end:unbelieved_rested",
+        "?": "end:unbelieved"
+      }
     }
   },
   "endings": {
@@ -196,7 +220,23 @@
       "text": "{giver} wanted to make me something for the cure. I told him to get his strength back first. His forge is lit again, and he sells a master's work at the old home.",
       "reward": {
         "hearts": 15
-      }
+      },
+      "later": [
+        {
+          "days": [
+            10,
+            20
+          ],
+          "if": "mark:keeping_rested",
+          "letter": {
+            "from": "{giver}",
+            "lines": [
+              "I've put them in the ground behind the house, all of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
+              "I wanted you to know where they are, since you were the last one kind to them. If you pass this way, the forge is lit and there's a seat by it."
+            ]
+          }
+        }
+      ]
     },
     "diamond_helmet": {
       "text": "{giver} forged me a helmet in diamond for the cure, made to my measure.",
@@ -205,7 +245,23 @@
           "minecraft:diamond_helmet"
         ],
         "hearts": 10
-      }
+      },
+      "later": [
+        {
+          "days": [
+            10,
+            20
+          ],
+          "if": "mark:keeping_rested",
+          "letter": {
+            "from": "{giver}",
+            "lines": [
+              "I've put them in the ground behind the house, all of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
+              "I wanted you to know where they are, since you were the last one kind to them. If you pass this way, the forge is lit and there's a seat by it."
+            ]
+          }
+        }
+      ]
     },
     "diamond_chestplate": {
       "text": "{giver} forged me a chestplate in diamond for the cure, made to my measure.",
@@ -214,7 +270,23 @@
           "minecraft:diamond_chestplate"
         ],
         "hearts": 10
-      }
+      },
+      "later": [
+        {
+          "days": [
+            10,
+            20
+          ],
+          "if": "mark:keeping_rested",
+          "letter": {
+            "from": "{giver}",
+            "lines": [
+              "I've put them in the ground behind the house, all of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
+              "I wanted you to know where they are, since you were the last one kind to them. If you pass this way, the forge is lit and there's a seat by it."
+            ]
+          }
+        }
+      ]
     },
     "diamond_leggings": {
       "text": "{giver} forged me leggings in diamond for the cure, made to my measure.",
@@ -223,7 +295,23 @@
           "minecraft:diamond_leggings"
         ],
         "hearts": 10
-      }
+      },
+      "later": [
+        {
+          "days": [
+            10,
+            20
+          ],
+          "if": "mark:keeping_rested",
+          "letter": {
+            "from": "{giver}",
+            "lines": [
+              "I've put them in the ground behind the house, all of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
+              "I wanted you to know where they are, since you were the last one kind to them. If you pass this way, the forge is lit and there's a seat by it."
+            ]
+          }
+        }
+      ]
     },
     "diamond_boots": {
       "text": "{giver} forged me boots in diamond for the cure, made to my measure.",
@@ -232,7 +320,23 @@
           "minecraft:diamond_boots"
         ],
         "hearts": 10
-      }
+      },
+      "later": [
+        {
+          "days": [
+            10,
+            20
+          ],
+          "if": "mark:keeping_rested",
+          "letter": {
+            "from": "{giver}",
+            "lines": [
+              "I've put them in the ground behind the house, all of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
+              "I wanted you to know where they are, since you were the last one kind to them. If you pass this way, the forge is lit and there's a seat by it."
+            ]
+          }
+        }
+      ]
     },
     "iron_helmet": {
       "text": "{giver} forged me a helmet in iron for the cure, made to my measure.",
@@ -241,7 +345,23 @@
           "minecraft:iron_helmet"
         ],
         "hearts": 10
-      }
+      },
+      "later": [
+        {
+          "days": [
+            10,
+            20
+          ],
+          "if": "mark:keeping_rested",
+          "letter": {
+            "from": "{giver}",
+            "lines": [
+              "I've put them in the ground behind the house, all of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
+              "I wanted you to know where they are, since you were the last one kind to them. If you pass this way, the forge is lit and there's a seat by it."
+            ]
+          }
+        }
+      ]
     },
     "iron_chestplate": {
       "text": "{giver} forged me a chestplate in iron for the cure, made to my measure.",
@@ -250,7 +370,23 @@
           "minecraft:iron_chestplate"
         ],
         "hearts": 10
-      }
+      },
+      "later": [
+        {
+          "days": [
+            10,
+            20
+          ],
+          "if": "mark:keeping_rested",
+          "letter": {
+            "from": "{giver}",
+            "lines": [
+              "I've put them in the ground behind the house, all of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
+              "I wanted you to know where they are, since you were the last one kind to them. If you pass this way, the forge is lit and there's a seat by it."
+            ]
+          }
+        }
+      ]
     },
     "iron_leggings": {
       "text": "{giver} forged me leggings in iron for the cure, made to my measure.",
@@ -259,7 +395,23 @@
           "minecraft:iron_leggings"
         ],
         "hearts": 10
-      }
+      },
+      "later": [
+        {
+          "days": [
+            10,
+            20
+          ],
+          "if": "mark:keeping_rested",
+          "letter": {
+            "from": "{giver}",
+            "lines": [
+              "I've put them in the ground behind the house, all of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
+              "I wanted you to know where they are, since you were the last one kind to them. If you pass this way, the forge is lit and there's a seat by it."
+            ]
+          }
+        }
+      ]
     },
     "iron_boots": {
       "text": "{giver} forged me boots in iron for the cure, made to my measure.",
@@ -267,6 +419,28 @@
         "items": [
           "minecraft:iron_boots"
         ],
+        "hearts": 10
+      },
+      "later": [
+        {
+          "days": [
+            10,
+            20
+          ],
+          "if": "mark:keeping_rested",
+          "letter": {
+            "from": "{giver}",
+            "lines": [
+              "I've put them in the ground behind the house, all of them, under the one stone. I cut their names myself. It took me four days, which is slow for a smith.",
+              "I wanted you to know where they are, since you were the last one kind to them. If you pass this way, the forge is lit and there's a seat by it."
+            ]
+          }
+        }
+      ]
+    },
+    "unbelieved_rested": {
+      "text": "{giver} woke well and never believed I was the one who cured him. He did believe I had laid his wife and his boys to rest, and thanked me for that.",
+      "reward": {
         "hearts": 10
       }
     }

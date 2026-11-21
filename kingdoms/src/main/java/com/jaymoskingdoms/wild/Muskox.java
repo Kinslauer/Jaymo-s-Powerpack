@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.wild;
 
+import com.jaymoskingdoms.Loaded;
 import com.jaymoskingdoms.JaymosKingdoms;
 import java.util.EnumSet;
 import java.util.List;
@@ -255,7 +256,7 @@ public class Muskox extends Animal {
 	 * (not the one at {@code skip}, which it couldn't get to).
 	 */
 	static @Nullable BlockPos findLichen(ServerLevel level, BlockPos from, int range, int up, @Nullable BlockPos skip) {
-		if (!level.hasChunksAt(from.getX() - range, from.getZ() - range, from.getX() + range, from.getZ() + range)) {
+		if (!Loaded.made(level, from.getX() - range, from.getZ() - range, from.getX() + range, from.getZ() + range)) {
 			return null;
 		}
 		BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();

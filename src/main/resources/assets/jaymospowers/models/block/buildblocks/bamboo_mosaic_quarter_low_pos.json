@@ -1,0 +1,8 @@
+{
+  "parent": "jaymospowers:block/buildblocks/template_quarter_low_pos",
+  "textures": {
+    "top": "minecraft:block/bamboo_mosaic",
+    "bottom": "minecraft:block/bamboo_mosaic",
+    "side": "minecraft:block/bamboo_mosaic"
+  }
+}

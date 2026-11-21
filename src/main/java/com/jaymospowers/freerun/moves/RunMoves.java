@@ -34,6 +34,7 @@ import org.jspecify.annotations.Nullable;
  * <li>{@link Leap}: just after a sprint jump, the Crawl key dives you forward onto your belly and you land prone.</li>
  * <li>{@link AirRoll}: just after a sprint jump, a fresh Sprint press rolls you forward through the air (a Freerun perk).</li>
  * <li>Water skip ({@link Slide#waterSkip}): a slide that reaches water bounces off it.</li>
+ * <li>{@link Acrobatics}: the dodge key's standing backflip (Back held, a perk) and its mid-air tricks.</li>
  * </ul>
  * Like the other freerun moves they are the client's ({@code client/freerun/moves/RunMovesClient} moves the body), and it
  * tells the server each one ({@link Ask}), which checks it, charges the feathers and shows it to everyone
@@ -43,7 +44,9 @@ public final class RunMoves {
 	/** What an {@link Ask} is for. */
 	public static final int LONG_JUMP = 1, CHARGE_JUMP = 2, TRICK_JUMP = 3, SAFETY_TAP = 4, SKY_DIVE = 5, SKY_DIVE_END = 6, HIDE = 7, UNHIDE = 8,
 		/** The swim burst, the breach leap and a skip off the water after it; the leap into prone, the air roll, a slide's water skip. */
-		SWIM_BURST = 9, BREACH = 10, BREACH_SKIP = 11, LEAP = 12, AIR_ROLL = 13, WATER_SKIP = 14;
+		SWIM_BURST = 9, BREACH = 10, BREACH_SKIP = 11, LEAP = 12, AIR_ROLL = 13, WATER_SKIP = 14,
+		/** Acrobatics: a mid-air trick (the arg packs it, {@link Acrobatics#arg}) and the standing backflip. */
+		AIR_TRICK = 15, BACKFLIP = 16;
 
 	/**
 	 * A short whole-body move everyone draws ({@code RunMovesPose}): the kind ({@link #LONG_JUMP}, {@link #SAFETY_TAP},
@@ -74,6 +77,7 @@ public final class RunMoves {
 		SkyDive.init();
 		FastSwim.init();
 		Hiding.init();
+		Acrobatics.init();
 	}
 
 	private static void ask(ServerPlayer player, Ask ask) {
@@ -92,6 +96,8 @@ public final class RunMoves {
 			case LEAP -> Leap.jumped(player);
 			case AIR_ROLL -> AirRoll.rolled(player);
 			case WATER_SKIP -> Slide.waterSkip(player);
+			case AIR_TRICK -> Acrobatics.trick(player, ask.arg());
+			case BACKFLIP -> Acrobatics.backflip(player);
 			default -> {
 			}
 		}

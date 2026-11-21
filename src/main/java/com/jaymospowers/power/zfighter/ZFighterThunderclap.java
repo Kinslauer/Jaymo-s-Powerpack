@@ -1,6 +1,7 @@
 package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.wounds.BodyPart;
@@ -96,10 +97,10 @@ public final class ZFighterThunderclap {
 		float power = ZFighterPower.kiPower(player, live);
 		Vec3 hands = player.getEyePosition().add(player.getViewVector(1.0F).scale(0.6)).add(0.0, -0.5, 0.0);
 		var source = ZFighterKi.source(player);
-		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(WAVE_RADIUS),
+		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, WAVE_RADIUS)),
 			e -> ZFighterArts.valid(player, e) && !(e instanceof ArmorStand))) {
 			Vec3 away = near.position().subtract(player.position());
-			if (away.horizontalDistance() > WAVE_RADIUS) {
+			if (away.horizontalDistance() > AbilityPower.size(player, WAVE_RADIUS)) {
 				continue;
 			}
 			near.setInvulnerableTime(0);
@@ -108,8 +109,8 @@ public final class ZFighterThunderclap {
 			ZFighterPoise.wear(near, WAVE_POISE);
 		}
 		MagicFx.blast(level, hands, 1.4F, color);
-		MagicFx.ring(level, player.position().add(0.0, 0.15, 0.0), (float)WAVE_RADIUS, color);
-		MagicFx.ring(level, hands, null, (float)WAVE_RADIUS * 0.6F, 0xFFFFFF, 12);
+		MagicFx.ring(level, player.position().add(0.0, 0.15, 0.0), (float)AbilityPower.size(player, WAVE_RADIUS), color);
+		MagicFx.ring(level, hands, null, (float)AbilityPower.size(player, WAVE_RADIUS) * 0.6F, 0xFFFFFF, 12);
 		level.playSound(null, hands.x, hands.y, hands.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 0.9F, 1.7F);
 		level.playSound(null, hands.x, hands.y, hands.z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 0.6F, 1.8F);
 		Shakes.around(level, player.position(), SHAKE_RANGE, WAVE_SHAKE);

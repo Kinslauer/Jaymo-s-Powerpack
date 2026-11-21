@@ -243,8 +243,9 @@ public final class CoarseHeightField {
 
     static int surfaceFromDensity(RandomState randomState, NoiseRouter router, SamplerContext ctx, int x, int z,
             int minY, int maxY, int cellHeight) {
-        final DensitySampler preliminary = randomState.getSampler(router.chunkSurfaceLevel());
-        final DensitySampler density = randomState.getSampler(router.finalDensity());
+        final WiredRouter.Samplers samplers = WiredRouter.samplers(randomState);
+        final DensitySampler preliminary = samplers.surface();
+        final DensitySampler density = samplers.density();
 
         int bracket = Math.max(minY, Math.min(maxY - 1, Mth.floor(preliminary.sampleValue(ctx, x, 0, z))));
 

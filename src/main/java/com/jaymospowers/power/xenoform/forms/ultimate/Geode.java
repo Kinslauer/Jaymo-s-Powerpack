@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms.ultimate;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoUltimate;
@@ -463,7 +464,7 @@ public final class Geode extends XenoUltimate {
 
 	private static void forest(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
-		for (LivingEntity living : around(player, SPIKE_RADIUS)) {
+		for (LivingEntity living : around(player, AbilityPower.size(player, SPIKE_RADIUS))) {
 			if (!living.hurtServer(level, player.damageSources().playerAttack(player), SPIKE_DAMAGE) && living instanceof Player) {
 				continue; // (0.20.21) a player it could not hurt (pvp off) is not slowed or shoved
 			}
@@ -471,14 +472,14 @@ public final class Geode extends XenoUltimate {
 			shove(living, player.position(), 0.25, 0.4);
 		}
 		Vec3 feet = player.position();
-		ring(level, CRYSTAL_DUST, feet, SPIKE_RADIUS * 0.4, 12);
-		ring(level, CRYSTAL_DUST, feet, SPIKE_RADIUS * 0.7, 20);
-		ring(level, CRYSTAL_DUST, feet, SPIKE_RADIUS, 32);
+		ring(level, CRYSTAL_DUST, feet, AbilityPower.size(player, SPIKE_RADIUS) * 0.4, 12);
+		ring(level, CRYSTAL_DUST, feet, AbilityPower.size(player, SPIKE_RADIUS) * 0.7, 20);
+		ring(level, CRYSTAL_DUST, feet, AbilityPower.size(player, SPIKE_RADIUS), 32);
 		// the clusters that stay up
 		Forest forest = FORESTS.computeIfAbsent(player.getUUID(), id -> new Forest());
 		for (int i = 0; i < CLUSTERS; i++) {
 			double a = player.getRandom().nextDouble() * Math.PI * 2.0;
-			double r = 1.5 + player.getRandom().nextDouble() * (SPIKE_RADIUS - 1.5);
+			double r = 1.5 + player.getRandom().nextDouble() * (AbilityPower.size(player, SPIKE_RADIUS) - 1.5);
 			BlockPos spot = standAt(level, BlockPos.containing(feet.x + Math.cos(a) * r, feet.y, feet.z + Math.sin(a) * r));
 			if (spot != null && canPlace(player, level, spot) && !live.wall.contains(spot.below()) && !live.crystals.contains(spot.below())) { // (0.20.21) never on the Geode's own temporary blocks
 				level.setBlock(spot, CLUSTER, Block.UPDATE_ALL);
@@ -491,7 +492,7 @@ public final class Geode extends XenoUltimate {
 		forest.centre = feet;
 		sound(player, SoundEvents.AMETHYST_CLUSTER_PLACE, 1.4F, 0.5F);
 		sound(player, SoundEvents.GLASS_BREAK, 0.9F, 0.6F);
-		Shakes.heavy(player, feet, SPIKE_RADIUS * 2.5, SPIKE_SHAKE);
+		Shakes.heavy(player, feet, AbilityPower.size(player, SPIKE_RADIUS) * 2.5, SPIKE_SHAKE);
 	}
 
 	/** The air block near {@code column} with solid ground under it, or null. */
@@ -508,7 +509,7 @@ public final class Geode extends XenoUltimate {
 	/** Anything standing in a cluster takes {@link #CLUSTER_DAMAGE}. */
 	private static void cut(ServerPlayer player, Forest forest) {
 		ServerLevel level = player.level();
-		double reach = SPIKE_RADIUS + 2.0;
+		double reach = AbilityPower.size(player, SPIKE_RADIUS) + 2.0;
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(forest.centre, forest.centre).inflate(reach),
 			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && !e.isPassengerOfSameVehicle(player) && !spared(player, e)
 				&& e.position().distanceToSqr(forest.centre) <= reach * reach)) {
@@ -546,7 +547,7 @@ public final class Geode extends XenoUltimate {
 	private static void geode(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
 		shatter(level, live);
-		for (LivingEntity living : around(player, GEODE_RADIUS)) {
+		for (LivingEntity living : around(player, AbilityPower.size(player, GEODE_RADIUS))) {
 			if (living instanceof ServerPlayer other && !player.canHarmPlayer(other)) {
 				continue; // (0.20.21) no cage for a player pvp protects
 			}
@@ -568,7 +569,7 @@ public final class Geode extends XenoUltimate {
 				}
 			}
 		}
-		for (Projectile projectile : level.getEntitiesOfClass(Projectile.class, player.getBoundingBox().inflate(GEODE_RADIUS),
+		for (Projectile projectile : level.getEntitiesOfClass(Projectile.class, player.getBoundingBox().inflate(AbilityPower.size(player, GEODE_RADIUS)),
 			p -> !(p instanceof ThrownTrident) && !(p instanceof FishingHook) && !(p instanceof ThrownEnderpearl) && !(p instanceof net.minecraft.world.entity.projectile.FireworkRocketEntity)
 				&& p.getOwner() != player && (p.getOwner() == null || !spared(player, p.getOwner())))) { // (0.20.21)
 			level.sendParticles(CRYSTAL_DUST, projectile.getX(), projectile.getY(), projectile.getZ(), 6, 0.1, 0.1, 0.1, 0.0);
@@ -577,12 +578,12 @@ public final class Geode extends XenoUltimate {
 		player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, GEODE_TICKS, GEODE_RESISTANCE, false, false));
 		live.geodeUntil = level.getGameTime() + GEODE_TICKS;
 		Vec3 at = player.position();
-		ring(level, CRYSTAL_DUST, at, GEODE_RADIUS * 0.4, 16);
-		ring(level, CRYSTAL_DUST, at, GEODE_RADIUS * 0.7, 28);
-		ring(level, CRYSTAL_DUST, at, GEODE_RADIUS, 40);
+		ring(level, CRYSTAL_DUST, at, AbilityPower.size(player, GEODE_RADIUS) * 0.4, 16);
+		ring(level, CRYSTAL_DUST, at, AbilityPower.size(player, GEODE_RADIUS) * 0.7, 28);
+		ring(level, CRYSTAL_DUST, at, AbilityPower.size(player, GEODE_RADIUS), 40);
 		sound(player, SoundEvents.AMETHYST_CLUSTER_PLACE, 1.6F, 0.5F);
 		sound(player, SoundEvents.AMETHYST_BLOCK_CHIME, 1.6F, 0.5F);
-		Shakes.heavy(player, at, GEODE_RADIUS * 2.5, GEODE_SHAKE);
+		Shakes.heavy(player, at, AbilityPower.size(player, GEODE_RADIUS) * 2.5, GEODE_SHAKE);
 	}
 
 	/** Everything caught is held fast and loses its target, until Geode ends. */

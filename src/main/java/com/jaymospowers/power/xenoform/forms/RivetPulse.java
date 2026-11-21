@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.power.darktide.DarktideStatus;
 import java.util.ArrayList;
@@ -86,10 +87,10 @@ public final class RivetPulse {
 		ServerLevel level = player.level();
 		Vec3 at = player.position().add(0.0, 0.6, 0.0);
 		int machines = 0, seized = 0;
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(PULSE_RADIUS),
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, PULSE_RADIUS)),
 			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && !e.isPassengerOfSameVehicle(player)
 				&& !(e instanceof net.minecraft.world.entity.OwnableEntity pet && pet.getOwner() == player) && !player.isAlliedTo(e)
-				&& e.distanceToSqr(player) <= PULSE_RADIUS * PULSE_RADIUS)) {
+				&& e.distanceToSqr(player) <= AbilityPower.size(player, PULSE_RADIUS) * AbilityPower.size(player, PULSE_RADIUS))) {
 			boolean machine = isMachine(e);
 			DarktideStatus.stun(e, machine ? MACHINE_STALL : SEIZE_TICKS);
 			if (e instanceof Mob mob && mob.getTarget() == player) {
@@ -102,7 +103,7 @@ public final class RivetPulse {
 				seized++;
 			}
 		}
-		MagicFx.ring(level, player.position(), (float)PULSE_RADIUS, COLOR);
+		MagicFx.ring(level, player.position(), (float)AbilityPower.size(player, PULSE_RADIUS), COLOR);
 		MagicFx.blast(level, at, 2.0F, COLOR);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.COPPER_GOLEM_SPAWN, SoundSource.PLAYERS, 1.2F, 1.5F);
 		if (machines + seized > 0) {
@@ -114,11 +115,11 @@ public final class RivetPulse {
 	private static boolean hack(ServerPlayer player) {
 		ServerLevel level = player.level();
 		BlockPos centre = player.blockPosition();
-		int r = (int)HACK_RADIUS;
+		int r = (int)AbilityPower.size(player, HACK_RADIUS);
 		List<BlockPos> doors = new ArrayList<>();
 		List<BlockPos> others = new ArrayList<>();
 		for (BlockPos pos : BlockPos.betweenClosed(centre.offset(-r, -r, -r), centre.offset(r, r, r))) {
-			if (doors.size() + others.size() >= HACK_MAX || pos.distSqr(centre) > HACK_RADIUS * HACK_RADIUS || !player.mayInteract(level, pos)) {
+			if (doors.size() + others.size() >= HACK_MAX || pos.distSqr(centre) > AbilityPower.size(player, HACK_RADIUS) * AbilityPower.size(player, HACK_RADIUS) || !player.mayInteract(level, pos)) {
 				continue;
 			}
 			BlockState state = level.getBlockState(pos);
@@ -162,7 +163,7 @@ public final class RivetPulse {
 		for (BlockPos pos : doors.isEmpty() ? others : doors) {
 			MagicFx.beam(level, player.position().add(0.0, 1.0, 0.0), Vec3.atCenterOf(pos), 0.05F, COLOR, 6);
 		}
-		MagicFx.ring(level, player.position(), (float)HACK_RADIUS, COLOR);
+		MagicFx.ring(level, player.position(), (float)AbilityPower.size(player, HACK_RADIUS), COLOR);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.COPPER_GOLEM_SPAWN, SoundSource.PLAYERS, 1.0F, 1.8F);
 		return true;
 	}

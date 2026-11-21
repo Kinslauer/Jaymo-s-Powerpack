@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.GroundCracks;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.fx.MagicFx;
@@ -112,7 +113,7 @@ public final class ApeEarthwork {
 			double length = LINE_LENGTH * live.apeSize;
 			MagicFx.wave(level, origin.add(0.0, 0.2, 0.0), dir, length, 2.5F, COLOR, 14);
 		} else {
-			MagicFx.ring(level, origin.add(0.0, 0.2, 0.0), (float)(RING_RADIUS * live.apeSize), COLOR);
+			MagicFx.ring(level, origin.add(0.0, 0.2, 0.0), (float)(AbilityPower.size(player, RING_RADIUS) * live.apeSize), COLOR);
 		}
 	}
 
@@ -125,7 +126,7 @@ public final class ApeEarthwork {
 				it.remove();
 				continue;
 			}
-			double max = (quake.line ? LINE_LENGTH : RING_RADIUS) * quake.size;
+			double max = (quake.line ? LINE_LENGTH : AbilityPower.size(by, RING_RADIUS)) * quake.size;
 			double front = Math.min(max, (level.getGameTime() - quake.start + 1) * (quake.line ? LINE_SPEED : RING_SPEED));
 			if (quake.line) {
 				line(level, by, quake, front);

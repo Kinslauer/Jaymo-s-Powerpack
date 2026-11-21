@@ -136,6 +136,8 @@ public class LegendRenderer<T extends LegendMonster> extends MobRenderer<T, Lege
 		register(Monsters.MUD_GOLEM, MudGolemModel::new, MudGolemModel.createBodyLayer(), 0.9F, 1.2F, state -> mud[Math.floorMod(state.variant, mud.length)],
 			false);
 		register(Monsters.MIMIC, MimicModel::new, MimicModel.createBodyLayer(), 0.6F, 1.0F, one("mimic"), false);
+		register(com.jaymoskingdoms.beasts.LabyrinthCraft.BRAZIER_MIMIC, BrazierMimicModel::new, BrazierMimicModel.createBodyLayer(), 0.6F, 1.0F,
+			one("brazier_mimic"), false);
 		register(com.jaymoskingdoms.hunger.Hunger.GAUNT, GauntModel::new, GauntModel.createBodyLayer(), 0.8F, 1.0F, one("gaunt"), false);
 	}
 }

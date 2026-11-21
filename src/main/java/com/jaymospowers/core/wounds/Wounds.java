@@ -148,6 +148,10 @@ public final class Wounds {
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> WoundsCommand.register(dispatcher));
 		// (0.14.1) phase 2: the downed
 		Downed.register();
+		Stubborn.register();
+		LastHold.register();
+		// (Clouds and Bits) a blow that would kill from full health downs instead, never gibs
+		NoOneShot.register();
 		// (0.17.183) Kingdoms' Will pages: No Getting Up, No Mercy, Grim Hand, hushes, Will Over Flesh
 		WillSkill.register();
 		// (0.14.2) phase 3: broken limbs
@@ -180,6 +184,8 @@ public final class Wounds {
 		HealStruggle.register();
 		// (0.20.26) death by cause: final, or left for dead with an injury that fits (after the downed state, which it follows)
 		Mortality.register();
+		// (Andy, 2026-11-19) blacked out with captors, guards or spiders round: they open their eyes where they were taken
+		TakenOut.register();
 		// Andy's picks E3 and E5: a minute for a reviver before a final death, and Limbo beside Reincarnate
 		Revival.register();
 		Limbo.register();
@@ -553,8 +559,10 @@ public final class Wounds {
 	 * {@link Downed}'s own tick).
 	 */
 	static void creativeHeal(ServerPlayer player) {
-		if (Dismember.missing(player) != 0) {
-			Dismember.regrow(player, true);
+		// a limb wearing a prosthetic stays as it is: creative never pops a fitted wooden, iron or Rig limb off
+		int fitted = com.jaymospowers.core.Prosthetics.fitted(player);
+		if ((Dismember.missing(player) & ~fitted) != 0) {
+			Dismember.regrow(player, true, fitted);
 		}
 		Tripped.clear(player);
 		if (player.getAttached(PARTS) != null || Breaks.broken(player) != 0 || Bleeding.bleeding(player) != 0

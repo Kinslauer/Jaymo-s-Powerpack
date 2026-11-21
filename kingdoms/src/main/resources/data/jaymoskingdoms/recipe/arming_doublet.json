@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "group": "jaymoskingdoms:harness",
+  "pattern": [
+    "L L",
+    "WSW",
+    "WWW"
+  ],
+  "key": {
+    "L": "minecraft:leather",
+    "W": "#minecraft:wool",
+    "S": "minecraft:string"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:arming_doublet"
+  }
+}

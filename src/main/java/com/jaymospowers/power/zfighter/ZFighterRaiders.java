@@ -204,6 +204,8 @@ public final class ZFighterRaiders {
 		level.playSound(null, middle.getX(), middle.getY() + 30, middle.getZ(), SoundEvents.WITHER_SPAWN, SoundSource.HOSTILE, 3.0F, 1.5F);
 		// (0.19.1) the Patrol may be on their tail
 		ZFighterPatrol.pursue(level, band.id, middle);
+		// (and from a late world tier, an officer may come for their chief)
+		ZFighterPatrol.showdown(level, middle, null, band.id);
 		return true;
 	}
 

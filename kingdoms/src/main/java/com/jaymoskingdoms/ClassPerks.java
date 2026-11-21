@@ -237,7 +237,7 @@ public final class ClassPerks {
 			}
 			case DRUID -> {
 				lines.add(line("rites", "+"));
-				lines.add(line("shapes", "4"));
+				lines.add(line("shapes", "1"));
 				lines.add(line("shape_time", Druids.SHAPE_TICKS / 1200 + "m"));
 			}
 			case MONK -> {
@@ -428,6 +428,10 @@ public final class ClassPerks {
 				}
 			}
 		}
+		if (Fury.weightless(player)) {
+			// (class trees) a raging Juggernaut: heavy armour weighs nothing
+			weight = 0.0;
+		}
 		float before = player.getMaxHealth();
 		Skills.modifier(player, Attributes.ATTACK_DAMAGE, DAMAGE_ID, damage, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
 		Skills.modifier(player, Attributes.ATTACK_SPEED, ATTACK_SPEED_ID, attackSpeed, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
@@ -578,7 +582,9 @@ public final class ClassPerks {
 				double hitY = arrow.getY() + arrow.getBbHeight() * 0.5;
 				boolean head = hitY >= target.getEyeY() - HEADSHOT_BELOW_EYES;
 				if (head) {
-					amount *= ARCHER_HEADSHOT;
+					// (hs_attrs) Jaymo's Powers' headshot power (a recurve bow) multiplies it
+					amount *= ARCHER_HEADSHOT * CritPower.headshot(sp);
+					PowersCompat.critCue(sp.level(), new net.minecraft.world.phys.Vec3(arrow.getX(), hitY, arrow.getZ()), sp);
 				}
 				pin(sp, target, arrow, amount, head, hitY);
 			} else if (cls == PlayerClass.MARKSMAN && arrow.getWeaponItem() != null && arrow.getWeaponItem().getItem() instanceof net.minecraft.world.item.CrossbowItem) {
@@ -755,12 +761,13 @@ public final class ClassPerks {
 			return;
 		}
 		// (enemies, and whatever has its eye on the warlord: no townsfolk or friends caught in the swing)
-		List<LivingEntity> near = CombatArts.foes(level, warlord, struck.getBoundingBox().inflate(WARLORD_CLEAVE_RANGE));
+		// (class trees: a Two-Handed Master's sweep is wider, Discipline)
+		List<LivingEntity> near = CombatArts.foes(level, warlord, struck.getBoundingBox().inflate(WARLORD_CLEAVE_RANGE * Discipline.sweep(warlord)));
 		near.remove(struck);
 		near.sort(java.util.Comparator.comparingDouble(e -> e.distanceToSqr(struck)));
 		cleaving = true;
 		try {
-			for (int i = 0; i < Math.min(WARLORD_CLEAVE_COUNT, near.size()); i++) {
+			for (int i = 0; i < Math.min(WARLORD_CLEAVE_COUNT + Discipline.sweepMore(warlord), near.size()); i++) {
 				CombatArts.strike(level, warlord, near.get(i), share);
 			}
 		} finally {

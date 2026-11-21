@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:cobbled_deepslate_vslab",
+    "jaymospowers:cobbled_deepslate_vslab"
+  ],
+  "result": {
+    "id": "minecraft:cobbled_deepslate"
+  }
+}

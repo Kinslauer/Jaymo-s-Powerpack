@@ -1,5 +1,8 @@
 package com.jaymoskitchen.brewing;
 
+import com.jaymoskitchen.fresh.Freshness;
+import com.jaymoskitchen.vintner.Juice;
+import com.jaymoskitchen.vintner.Vintage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
@@ -43,6 +46,8 @@ public class CaskEntity extends BlockEntity {
 	/** Half a Minecraft day. */
 	public static final int FERMENT_TICKS = 12000;
 	public static final int DRINKS_PER_BATCH = 3;
+	/** How often (ticks) a finished batch in a cool cellar is counted as ageing (see Vintage). */
+	private static final int AGE_STEP = 200;
 
 	private int water;
 	private @Nullable Brew base;
@@ -53,6 +58,9 @@ public class CaskEntity extends BlockEntity {
 	private int progress;
 	/** Drinks waiting (of {@link #base}); 0 unless the batch is done. */
 	private int left;
+	/** The in-game year the waiting batch was done (-1 if unknown), and ticks it has aged in a cool cellar since. */
+	private int vintageYear = -1;
+	private long aged;
 
 	public CaskEntity(BlockPos pos, BlockState state) {
 		super(Brewing.CASK_ENTITY, pos, state);
@@ -87,7 +95,7 @@ public class CaskEntity extends BlockEntity {
 		}
 		if (left > 0) {
 			if (held.is(Items.GLASS_BOTTLE) && base != null) {
-				player.setItemInHand(hand, ItemUtils.createFilledResult(held, player, new ItemStack(Brewing.drink(base))));
+				player.setItemInHand(hand, ItemUtils.createFilledResult(held, player, drink()));
 				left--;
 				if (left == 0) {
 					base = null;
@@ -109,6 +117,23 @@ public class CaskEntity extends BlockEntity {
 				water++;
 				play(SoundEvents.BOTTLE_EMPTY, 1.0F);
 				afterFilling(player);
+				return InteractionResult.SUCCESS_SERVER;
+			}
+			Juice juice = Juice.ofBottle(held);
+			if (juice != null) {
+				// a bottle of juice is a bottle of water and a third of the base at once
+				if (base != null && base != juice.brew) {
+					player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.cask.mixed"));
+				} else if (baseCount >= BASE_PER_BATCH) {
+					player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.cask.base_full"));
+				} else {
+					player.setItemInHand(hand, ItemUtils.createFilledResult(held, player, new ItemStack(Items.GLASS_BOTTLE)));
+					base = juice.brew;
+					baseCount++;
+					water = Math.min(CAPACITY, water + 1);
+					play(SoundEvents.BOTTLE_EMPTY, 1.0F);
+					afterFilling(player);
+				}
 				return InteractionResult.SUCCESS_SERVER;
 			}
 			Brew brew = Brewing.baseOf(held);
@@ -159,6 +184,15 @@ public class CaskEntity extends BlockEntity {
 		}
 		status(player);
 		return InteractionResult.SUCCESS_SERVER;
+	}
+
+	/** One drink of the waiting batch, with the year it was made and how well it has aged. */
+	private ItemStack drink() {
+		ItemStack drink = new ItemStack(Brewing.drink(base));
+		if (vintageYear >= 0) {
+			Vintage.stamp(drink, vintageYear, (int)Math.min(Vintage.MAX_AGE, aged / Vintage.ticksPerYear()));
+		}
+		return drink;
 	}
 
 	private static boolean isWaterBottle(ItemStack stack) {
@@ -236,11 +270,18 @@ public class CaskEntity extends BlockEntity {
 			} else if (cask.progress % 200 == 0) {
 				cask.setChanged();
 			}
+		} else if (level instanceof ServerLevel server && cask.left > 0 && server.getGameTime() % AGE_STEP == 0L
+			&& cask.aged < Vintage.MAX_AGE * Vintage.ticksPerYear() && Freshness.cellar(server, pos)) {
+			// the wine waiting in the cask improves in a cool cellar
+			cask.aged += AGE_STEP;
+			cask.setChanged();
 		}
 	}
 
 	private void finish() {
 		left = DRINKS_PER_BATCH;
+		vintageYear = level == null ? -1 : Vintage.yearOf(level);
+		aged = 0;
 		water = 0;
 		baseCount = 0;
 		glowCount = 0;
@@ -269,7 +310,9 @@ public class CaskEntity extends BlockEntity {
 				}
 			}
 			if (left > 0) {
-				Block.popResource(server, pos, new ItemStack(Brewing.drink(base), left));
+				ItemStack drink = drink();
+				drink.setCount(left);
+				Block.popResource(server, pos, drink);
 			}
 		}
 	}
@@ -298,6 +341,8 @@ public class CaskEntity extends BlockEntity {
 		glowCount = Math.min(baseCount, input.getIntOr("GlowCount", 0));
 		progress = input.getIntOr("Progress", 0);
 		left = input.getIntOr("Left", 0);
+		vintageYear = input.getIntOr("VintageYear", -1);
+		aged = input.getLongOr("Aged", 0L);
 	}
 
 	@Override
@@ -313,6 +358,8 @@ public class CaskEntity extends BlockEntity {
 		output.putInt("GlowCount", glowCount);
 		output.putInt("Progress", progress);
 		output.putInt("Left", left);
+		output.putInt("VintageYear", vintageYear);
+		output.putLong("Aged", aged);
 	}
 
 	@Override

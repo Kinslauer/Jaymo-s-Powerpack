@@ -421,7 +421,10 @@ public final class ToolStats {
 		ItemAttributeModifiers.Builder attributes = ItemAttributeModifiers.builder();
 		if (!broken) {
 			net.minecraft.resources.Identifier id = com.jaymospowers.JaymosPowers.id("tinker_armor." + slot.getName());
-			attributes.add(Attributes.ARMOR, new AttributeModifier(id, armour.armour(), AttributeModifier.Operation.ADD_VALUE), group);
+			// (Smithing) a forged plate's grade adds its armour a piece, as it does on every other armour
+			com.jaymospowers.tinkering.smithing.Grade grade = com.jaymospowers.tinkering.smithing.Grades.of(stack);
+			float armourValue = Math.max(0.0F, armour.armour() + (grade == null ? 0.0F : grade.armor));
+			attributes.add(Attributes.ARMOR, new AttributeModifier(id, armourValue, AttributeModifier.Operation.ADD_VALUE), group);
 			if (armour.toughness() > 0) {
 				attributes.add(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(id, armour.toughness(), AttributeModifier.Operation.ADD_VALUE), group);
 			}

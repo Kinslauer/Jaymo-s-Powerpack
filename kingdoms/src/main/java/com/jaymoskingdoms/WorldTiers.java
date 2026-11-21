@@ -73,8 +73,15 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
  */
 public final class WorldTiers {
 	/** How near a player a hostile has to come to take their tier (blocks), and how often that's looked for (ticks). */
+	/**
+	 * (Andy, 2026-11-19: "keep this as a rule global within hearth") In the Hearth tier no single hit on a player (a blow,
+	 * a shot, a blast: anything that strikes them) takes more than this share of their full health ({@link #hearthHit}).
+	 */
+	static final float HEARTH_MOST_HIT = 0.2F;
 	static final double TIER_RANGE = 40.0;
 	static final int SCAN_TICKS = 20;
+	/** A tiered hostile with no player of its tier within {@link #TIER_RANGE} for this long (ticks) falls to the tier of the nearest player. */
+	static final long FALL_TICKS = 12000L;
 	/** How near a great foe a player has to be when it falls to share the kill (the Ender Dragon: much further). */
 	static final double CREDIT_RANGE = 64.0, DRAGON_CREDIT_RANGE = 160.0;
 	/** The wait between a player's tier changes (ticks; never for creative players). */
@@ -269,6 +276,8 @@ public final class WorldTiers {
 	static final AttachmentType<Integer> FLOOR = AttachmentRegistry.create(JaymosKingdoms.id("world_tier_floor"), builder -> builder.persistent(Codec.INT));
 	/** The tier a hostile has taken (its ordinal). Saved with it. */
 	static final AttachmentType<Integer> MOB_TIER = AttachmentRegistry.create(JaymosKingdoms.id("mob_world_tier"), builder -> builder.persistent(Codec.INT));
+	/** The last game time a player of at least a hostile's tier was near it (old saves: none, so it starts counting when next seen). Saved with it. */
+	static final AttachmentType<Long> MOB_TIER_SEEN = AttachmentRegistry.create(JaymosKingdoms.id("mob_world_tier_seen"), builder -> builder.persistent(Codec.LONG));
 
 	private static final Identifier HEALTH_ID = JaymosKingdoms.id("world_tier_health"), DAMAGE_ID = JaymosKingdoms.id("world_tier_damage"),
 		ARMOR_ID = JaymosKingdoms.id("world_tier_armor"), TOUGHNESS_ID = JaymosKingdoms.id("world_tier_toughness"),
@@ -331,6 +340,20 @@ public final class WorldTiers {
 			}
 			drops.addAll(extra);
 		});
+	}
+
+	/**
+	 * A hit on {@code player} as it lands ({@code HearthHitMixin}, before armour): in Hearth no more than
+	 * {@link #HEARTH_MOST_HIT} of their full health. Falls, fire, drowning, hunger and the like aren't hits; nor is anything
+	 * that ignores invulnerability (the void, /kill), and the downed are past it (a finishing blow is a finishing blow).
+	 */
+	public static float hearthHit(Player player, net.minecraft.world.damagesource.DamageSource source, float amount) {
+		if (amount <= 0.0F || of(player) != Tier.HEARTH || source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)
+			|| Downed.isDowned(player) || source.getEntity() == null && source.getDirectEntity() == null
+			&& !source.is(net.minecraft.tags.DamageTypeTags.IS_EXPLOSION)) {
+			return amount;
+		}
+		return Math.min(amount, player.getMaxHealth() * HEARTH_MOST_HIT);
 	}
 
 	public static Tier of(Player player) {
@@ -500,6 +523,7 @@ public final class WorldTiers {
 		if (server.getTickCount() % SCAN_TICKS != 0) {
 			return;
 		}
+		long now = server.overworld().getGameTime();
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			if (player.isSpectator()) {
 				continue;
@@ -512,12 +536,36 @@ public final class WorldTiers {
 				feat(player, Progress.AETHER_TROPHY);
 			}
 			int tier = of(player).ordinal();
-			if (tier <= 0) {
+			for (Mob mob : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(TIER_RANGE),
+				m -> m.isAlive() && hostile(m))) {
+				// (2026-11-19, Andy) a hostile of the harsh lands takes the player's tier its land's steps higher (HarshLands)
+				int want = HarshLands.tierFor(mob, tier);
+				int has = mob.getAttachedOrElse(MOB_TIER, 0);
+				if (has < want) {
+					raise(mob, want);
+					has = want;
+				}
+				if (has > 0 && has <= want) {
+					mob.setAttached(MOB_TIER_SEEN, now);
+				}
+			}
+		}
+		// (a hostile no player of its tier has been near for a while takes the tier of the nearest player instead, its land's
+		// steps above it)
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			if (player.isSpectator()) {
 				continue;
 			}
+			int tier = of(player).ordinal();
 			for (Mob mob : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(TIER_RANGE),
-				m -> m.isAlive() && m.getAttachedOrElse(MOB_TIER, 0) < tier && hostile(m))) {
-				raise(mob, tier);
+				m -> m.isAlive() && m.getAttachedOrElse(MOB_TIER, 0) > HarshLands.tierFor(m, tier) && hostile(m) && !m.hasAttached(RustStorms.RAGED))) {
+				Long seen = mob.getAttached(MOB_TIER_SEEN);
+				if (seen == null) {
+					mob.setAttached(MOB_TIER_SEEN, now);
+				} else if (now - seen >= FALL_TICKS && mob.level().getNearestPlayer(mob, TIER_RANGE) == player) {
+					raise(mob, HarshLands.tierFor(mob, tier));
+					mob.setAttached(MOB_TIER_SEEN, now);
+				}
 			}
 		}
 	}
@@ -530,6 +578,10 @@ public final class WorldTiers {
 		}
 		if (mob instanceof Folk folk) {
 			return folk.style() == FactionType.BARBARIAN || Orcs.isOrc(folk) || Goblins.isGoblin(folk) || Assassins.is(folk);
+		}
+		if (mob instanceof com.jaymoskingdoms.wild.WildBeast || mob instanceof com.jaymoskingdoms.dragons.WindDragon) {
+			// a wild beast or a wind dragon is a foe only while it hunts a player
+			return mob.getTarget() instanceof Player;
 		}
 		if (Orcs.isOrc(mob) || Goblins.isGoblin(mob)) {
 			// (0.7.292) a goblin or an orc as an MCA villager

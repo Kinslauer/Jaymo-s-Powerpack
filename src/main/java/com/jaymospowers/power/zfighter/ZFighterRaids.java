@@ -130,6 +130,7 @@ public final class ZFighterRaids {
 		tyrant.become(ZFighterRogue.TYRANT, Component.translatable("entity.jaymospowers.rogue_fighter.tyrant." + who));
 		tyrant.kingdom = kingdom;
 		level.addFreshEntity(tyrant);
+		ZFighterPatrol.showdown(level, at, tyrant.getUUID(), null);
 		LightningBolt bolt = EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.TRIGGERED);
 		if (bolt != null) {
 			bolt.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);

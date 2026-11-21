@@ -30,6 +30,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
@@ -1081,7 +1082,8 @@ final class Caravans {
 	 * his horse wades after him.
 	 */
 	static void remount(Entity rider, Entity horse) {
-		if (rider.getVehicle() == horse) {
+		if (rider.getVehicle() == horse || rider instanceof LivingEntity l && l.isSleeping() || Downed.isDowned(rider) || PowersCompat.isCarried(rider)) {
+			// (one down, asleep or carried off is left be: put back on as he was, he'd lie across his horse)
 			return;
 		}
 		if (rider.isInWater() || horse.isInWater()) {

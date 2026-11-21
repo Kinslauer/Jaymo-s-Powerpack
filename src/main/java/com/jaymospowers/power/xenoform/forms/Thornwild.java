@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Loaded;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
@@ -219,8 +220,8 @@ public final class Thornwild extends XenoForm {
 	private static void bloom(ServerPlayer player, ServerLevel level) {
 		var random = player.getRandom();
 		for (int i = 0; i < BLOOM_TRIES; i++) {
-			BlockPos at = player.blockPosition().offset(random.nextInt(BLOOM_RADIUS * 2 + 1) - BLOOM_RADIUS, random.nextInt(3) - 1,
-				random.nextInt(BLOOM_RADIUS * 2 + 1) - BLOOM_RADIUS);
+			BlockPos at = player.blockPosition().offset(random.nextInt(AbilityPower.size(player, BLOOM_RADIUS) * 2 + 1) - AbilityPower.size(player, BLOOM_RADIUS), random.nextInt(3) - 1,
+				random.nextInt(AbilityPower.size(player, BLOOM_RADIUS) * 2 + 1) - AbilityPower.size(player, BLOOM_RADIUS));
 			if (level.mayInteract(player, at) && BoneMealItem.growCrop(new ItemStack(Items.BONE_MEAL), level, at)) {
 				level.sendParticles(ParticleTypes.HAPPY_VILLAGER, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 6, 0.3, 0.3, 0.3, 0.0);
 			}

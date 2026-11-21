@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import net.minecraft.core.particles.ParticleTypes;
@@ -90,7 +91,7 @@ public final class Dud extends XenoForm {
 		switch (key) {
 			case ABILITY_1 -> {
 				if (ready(player, live, R)) {
-					lure(player, TAUNT_RADIUS);
+					lure(player, AbilityPower.size(player, TAUNT_RADIUS));
 					burst(level, ParticleTypes.ANGRY_VILLAGER, player.getEyePosition().add(0.0, 0.5, 0.0), 4, 0.3, 0.0);
 					sound(player, SoundEvents.VILLAGER_NO, 1.2F, 1.8F);
 					cooldown(player, live, R, TAUNT_COOLDOWN);
@@ -156,7 +157,7 @@ public final class Dud extends XenoForm {
 			return;
 		}
 		if (player.tickCount % LURE_EVERY == 0) {
-			lure(player, LURE_RADIUS);
+			lure(player, AbilityPower.size(player, LURE_RADIUS));
 		}
 	}
 }

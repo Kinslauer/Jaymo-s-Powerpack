@@ -91,6 +91,10 @@ public final class Callings {
 	public static final AttachmentType<Integer> FIST_KILLS = AttachmentRegistry.create(JaymosPowers.id("fist_kills"),
 		builder -> builder.persistent(Codec.INT).copyOnDeath());
 
+	/** Ender pearls a powerless player had landed (the retired Blinker's calling). Still registered so old saves load; {@link RetiredPowers} drops it. */
+	public static final AttachmentType<Integer> BLINKS = AttachmentRegistry.create(JaymosPowers.id("blinks"),
+		builder -> builder.persistent(Codec.INT).copyOnDeath());
+
 	/** One Minecraft day of the wait (20 minutes). */
 	public static final int DAY = 24000;
 	/** Gravity: the smallest fall (blocks) that counts. */
@@ -126,6 +130,14 @@ public final class Callings {
 	/** (0.14.0) Cryokinesis: seconds in a row spent freezing, and the day it last counted. */
 	private static final Map<UUID, Integer> IN_COLD = new HashMap<>();
 	private static final Map<UUID, Long> COLD_DAY = new HashMap<>();
+	/**
+	 * (Awakening pick) The brink: a powerless player left at {@link #BRINK_HEALTH} or less by a blow lives through it, and
+	 * whatever sleeps in them stirs. Once a day it takes {@link #DAY} off the wait, never past {@link #BRINK_FLOOR} (it
+	 * shortens the wait; it never skips it) and never claims a power.
+	 */
+	public static final float BRINK_HEALTH = 4.0F;
+	public static final int BRINK_FLOOR = 6000;
+	private static final Map<UUID, Long> BRINK_DAY = new HashMap<>();
 
 	private Callings() {
 	}
@@ -169,6 +181,9 @@ public final class Callings {
 			if (!(entity instanceof ServerPlayer player) || !player.isAlive()) {
 				return;
 			}
+			if (damageTaken > 0.0F && player.getHealth() <= BRINK_HEALTH && Powers.of(player) == null) {
+				brink(player);
+			}
 			if (source.is(DamageTypes.SONIC_BOOM)) {
 				call(player, "resonance", Integer.MAX_VALUE);
 			} else if (source.getEntity() instanceof CaveSpider && !source.is(DamageTypeTags.IS_PROJECTILE)
@@ -195,7 +210,24 @@ public final class Callings {
 			SMOKE_DAY.clear();
 			IN_COLD.clear();
 			COLD_DAY.clear();
+			BRINK_DAY.clear();
 		});
+	}
+
+	/** (Awakening pick) Brought to the brink and still standing: the wait shortens by a day (once a day), never below the floor. */
+	private static void brink(ServerPlayer player) {
+		if (player.isCreative() || player.isSpectator() || com.jaymospowers.alchemy.picks.GivingUp.settled(player)) {
+			return;
+		}
+		Integer left = player.getAttached(Powers.AWAKEN_IN);
+		int now = left == null ? Powers.AWAKEN_MIN_TICKS : left;
+		if (now <= BRINK_FLOOR || !once(BRINK_DAY, player)) {
+			return;
+		}
+		player.setAttached(Powers.AWAKEN_IN, Math.max(BRINK_FLOOR, now - DAY));
+		player.setAttached(Powers.AWAKEN_SLOW, true);
+		player.sendOverlayMessage(Component.translatable("message.jaymospowers.brink").withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.ITALIC));
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.8F, 0.5F);
 	}
 
 	/** Counts once per in-game day for this player: true the first time today. */
@@ -360,11 +392,16 @@ public final class Callings {
 
 	/** Burning blocks and lit campfires within {@link #SMOKE_REACH} blocks of {@code center} (stops counting at enough). */
 	private static int fires(ServerLevel level, BlockPos center) {
+		return fires(level, center, SMOKE_FIRES);
+	}
+
+	/** The same count, stopping at {@code cap} (the awakening deeds ask for a bigger fire). */
+	static int fires(ServerLevel level, BlockPos center, int cap) {
 		int found = 0;
 		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-SMOKE_REACH, -2, -SMOKE_REACH), center.offset(SMOKE_REACH, SMOKE_REACH, SMOKE_REACH))) {
 			BlockState state = level.getBlockState(pos);
 			if (state.is(BlockTags.FIRE) || state.is(BlockTags.CAMPFIRES) && state.getValueOrElse(CampfireBlock.LIT, false)) {
-				if (++found >= SMOKE_FIRES) {
+				if (++found >= cap) {
 					return found;
 				}
 			}

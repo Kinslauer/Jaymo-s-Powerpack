@@ -14,6 +14,7 @@ import com.jaymospowers.aether.mob.SkyrootLizard;
 import com.jaymospowers.aether.mob.Taegore;
 import com.jaymospowers.aether.mob.Wool;
 import com.jaymospowers.aether.mob.Zone;
+import com.jaymospowers.client.MountClimbPose;
 import com.jaymospowers.aether.mob.ZoneAnimal;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.HashMap;
@@ -60,6 +61,9 @@ final class AetherAnimalRenderer<T extends Mob> extends MobRenderer<T, AetherAni
 		float size = 1.0F, lower;
 		/** Wing beat: the phase, and how hard (0 on the ground to 1 in the air). */
 		float flap, flapSpeed;
+		/** Being climbed onto: how far it crouches or lowers a wing (0 to 1), and which wing (-1 left, 1 right). */
+		float climb;
+		int climbSide;
 		/** Grazing, 0 to 1. */
 		float eating;
 		/** An aerbunny's swell, 0 to 1, and 1 when it is off the ground. */
@@ -180,6 +184,9 @@ final class AetherAnimalRenderer<T extends Mob> extends MobRenderer<T, AetherAni
 			state.saddled = rideable.isSaddled();
 			state.flap = Mth.lerp(partialTicks, rideable.oFlap, rideable.flap);
 			state.flapSpeed = Mth.lerp(partialTicks, rideable.oFlapSpeed, rideable.flapSpeed);
+			float[] boarding = MountClimbPose.mountPose(mob.getId(), partialTicks);
+			state.climb = boarding == null ? 0.0F : boarding[2];
+			state.climbSide = boarding == null ? 0 : (int)boarding[1];
 		}
 		this.look.extract(mob, state, partialTicks);
 		state.action = state.windup ? 1 : state.digging ? 2 : state.resting ? 3 : state.air > 0.0F ? 4 : 0;

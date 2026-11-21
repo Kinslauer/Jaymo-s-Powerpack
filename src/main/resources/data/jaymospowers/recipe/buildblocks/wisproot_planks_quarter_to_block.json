@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:wisproot_planks_quarter",
+    "jaymospowers:wisproot_planks_quarter",
+    "jaymospowers:wisproot_planks_quarter",
+    "jaymospowers:wisproot_planks_quarter"
+  ],
+  "result": {
+    "id": "jaymospowers:wisproot_planks"
+  }
+}

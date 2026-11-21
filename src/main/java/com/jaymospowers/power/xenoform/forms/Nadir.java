@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.HudBar;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
@@ -273,9 +274,8 @@ public final class Nadir extends XenoForm {
 			if (live.beaconHeld % 20 == 1) {
 				target.addEffect(new MobEffectInstance(MobEffects.GLOWING, GLOW_TICKS, 0, false, false));
 			}
-			int bars = Math.min(10, live.beaconHeld * 10 / PHASE_HOLD);
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.beacon_hold", target.getDisplayName(),
-				"|".repeat(bars) + ".".repeat(10 - bars)).withStyle(ChatFormatting.LIGHT_PURPLE));
+			HudBar.hold(player, "nadir_beacon", live.beaconHeld / (float) PHASE_HOLD, HudBar.PURPLE,
+				Component.translatable("bar.jaymospowers.beacon_hold", target.getDisplayName()), true);
 			if (live.beaconHeld >= PHASE_HOLD) {
 				phase(player, live, target);
 			}
@@ -325,9 +325,7 @@ public final class Nadir extends XenoForm {
 	}
 
 	private static void bar(ServerPlayer player, String what, long held, int full) {
-		int bars = (int)Math.min(10, held * 10 / full);
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.nadir." + what, "|".repeat(bars) + ".".repeat(10 - bars))
-			.withStyle(ChatFormatting.LIGHT_PURPLE));
+		HudBar.hold(player, "nadir_" + what, held / (float) full, HudBar.PURPLE, Component.translatable("bar.jaymospowers.nadir." + what), true);
 	}
 
 	/** Nothing of the world touches it; what does strike it answers to the Command's "what hits me" rules. */

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.chrono.future;
 
+import com.jaymospowers.armory.GunLasers;
 import com.jaymospowers.armory.TaczGuns;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -119,6 +120,8 @@ public final class FutureGuns {
 	 * magazine), and its spare rounds (none up to this share of a magazine).
 	 */
 	static final float DROP_CHANCE = 0.1F, MAG_SHARE = 0.25F, SPARE_SHARE = 0.5F;
+	/** (ad_laser) A gunner's gun has a laser fitted this often (if the gun takes one). */
+	static final float LASER_CHANCE = 0.35F;
 	/** Changing magazines takes this many times the gun's pause between bursts. */
 	static final int RELOAD_SCALE = 2;
 	/**
@@ -166,6 +169,20 @@ public final class FutureGuns {
 		});
 	}
 
+	/** (Gun handling) Kinds of gun, numbered for the client's tables: pistol, SMG, rifle, machine gun, shotgun, sniper. */
+	public static final int KIND_PISTOL = 0, KIND_SMG = 1, KIND_RIFLE = 2, KIND_MG = 3, KIND_SHOTGUN = 4, KIND_SNIPER = 5;
+
+	/** (Gun handling) The kind of the future gun in {@code stack} ({@link #KIND_PISTOL} and on), or -1 if it isn't one we know. */
+	public static int kindOf(ItemStack stack) {
+		Gun gun = BY_ID.get(TaczGuns.gunId(stack));
+		if (gun == null) {
+			return -1;
+		}
+		Kind kind = gun.kind;
+		return kind == PISTOL ? KIND_PISTOL : kind == SMG ? KIND_SMG : kind == MG ? KIND_MG : kind == SHOTGUN ? KIND_SHOTGUN
+			: kind == SNIPER ? KIND_SNIPER : KIND_RIFLE;
+	}
+
 	/** The gun a mob holds, if it's one we know. */
 	static @Nullable Gun held(Mob mob) {
 		return BY_ID.get(TaczGuns.gunId(mob.getMainHandItem()));
@@ -177,6 +194,9 @@ public final class FutureGuns {
 		ItemStack gun = TaczGuns.modernGun(pick.id.substring("tacz:".length()), 1 + random.nextInt(Math.max(1, Math.round(pick.magazine * MAG_SHARE))));
 		if (gun.isEmpty()) {
 			return false;
+		}
+		if (random.nextFloat() < LASER_CHANCE) {
+			GunLasers.fit(gun, random);
 		}
 		mob.setItemSlot(EquipmentSlot.MAINHAND, gun);
 		mob.setAttached(SPARE, random.nextInt(Math.round(pick.magazine * SPARE_SHARE) + 1));
@@ -255,6 +275,18 @@ public final class FutureGuns {
 
 	/** Every couple of ticks for a gunner: fire at its target when loaded, in range and in sight, a burst at a time. */
 	public static void tick(ServerLevel level, Mob mob) {
+		try {
+			fight(level, mob);
+		} finally {
+			// (ad_laser) a laser comes on as it takes aim and goes off once the burst is done
+			ItemStack held = mob.getMainHandItem();
+			if (GunLasers.fitted(held)) {
+				GunLasers.setOff(held, !AIMING.containsKey(mob) && !BURST.containsKey(mob));
+			}
+		}
+	}
+
+	private static void fight(ServerLevel level, Mob mob) {
 		Gun gun = held(mob);
 		LivingEntity foe = mob.getTarget();
 		boolean fighting = foe != null && foe.isAlive();
@@ -457,6 +489,10 @@ public final class FutureGuns {
 			if (wall.getType() != HitResult.Type.MISS) {
 				end = wall.getLocation();
 			}
+			// (ad_splash) into water, it stops a few blocks down
+			Vec3 dry = end;
+			end = GunGear.underwater(level, eye, end);
+			boolean wet = end != dry;
 			EntityHitResult hit = ProjectileUtil.getEntityHitResult(mob, eye, end, new AABB(eye, end).inflate(1.0),
 				e -> e instanceof LivingEntity && e.isAlive() && !e.isSpectator() && e != mob, eye.distanceToSqr(end));
 			if (hit != null) {
@@ -471,7 +507,7 @@ public final class FutureGuns {
 				if (tagged) {
 					mob.removeTag(com.jaymospowers.combat.Guard.UNPARRYABLE_TAG);
 				}
-			} else if (wall.getType() != HitResult.Type.MISS) {
+			} else if (wall.getType() != HitResult.Type.MISS && !wet) {
 				level.sendParticles(ParticleTypes.CRIT, end.x, end.y, end.z, 3, 0.05, 0.05, 0.05, 0.1);
 			}
 			if (first == null) {

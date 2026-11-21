@@ -199,6 +199,11 @@ public final class LoreBooks {
 			book.set(DataComponents.CUSTOM_NAME, lore.title());
 		}
 		tag(book, id.toString());
+		// a patron's lore book: the written book with its sigil on the cover (tools/gen_holy_books.py)
+		Patron patron = id.getPath().startsWith("patron_") ? Patron.byKey(id.getPath().substring("patron_".length())) : null;
+		if (patron != null && id.getNamespace().equals(JaymosKingdoms.MOD_ID)) {
+			book.set(DataComponents.ITEM_MODEL, JaymosKingdoms.id("holy_lore_" + patron.key));
+		}
 		return book;
 	}
 

@@ -180,7 +180,7 @@ final class Seats {
 		}
 	}
 
-	/** A structure's pieces that may be buildings (no streets, farms, decorations...), largest first. */
+	/** A structure's pieces that may be buildings (no streets, farms, decorations...), largest first (a seat compound's castle's before the rest). */
 	static List<Building> buildings(StructureStart start) {
 		List<Building> out = new ArrayList<>();
 		for (StructurePiece piece : start.getPieces()) {
@@ -198,6 +198,17 @@ final class Seats {
 			}
 		}
 		out.sort(Comparator.comparingLong(Building::volume).reversed());
+		// (a seat compound: its castle's rooms first, so the throne goes in the castle and not in a big house of the town round it)
+		BoundingBox castle = null;
+		for (StructurePiece piece : start.getPieces()) {
+			if (piece instanceof SeatCompounds.Clean) {
+				castle = piece.getBoundingBox();
+			}
+		}
+		if (castle != null) {
+			BoundingBox c = castle;
+			out.sort(Comparator.comparing((Building b) -> !c.isInside(b.box().getCenter())));
+		}
 		return out;
 	}
 
@@ -249,7 +260,7 @@ final class Seats {
 	/** Its rooms, if {@code b} is a building with a floor under a roof (and all its chunks are loaded); null if not. */
 	static @Nullable Room room(ServerLevel level, Building b, BlockPos toward) {
 		BoundingBox box = b.box();
-		if (!level.hasChunksAt(box.minX(), box.minZ(), box.maxX(), box.maxZ())) {
+		if (!Loaded.made(level, box.minX(), box.minZ(), box.maxX(), box.maxZ())) {
 			return null;
 		}
 		Map<Integer, List<BlockPos>> byFloor = new HashMap<>();

@@ -1,0 +1,13 @@
+{
+  "gives": {
+    "count": 4,
+    "id": "jaymospowers:mail_sheet"
+  },
+  "max_uses": 8,
+  "reputation_discount": 0.05,
+  "wants": {
+    "count": 3,
+    "id": "minecraft:emerald"
+  },
+  "xp": 8
+}

@@ -20,6 +20,7 @@ import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.item.ItemStack;
@@ -53,6 +54,12 @@ public final class UnderArmourLayer<S extends HumanoidRenderState> extends Rende
 	private static final Identifier DOUBLET = JaymosKingdoms.id("textures/entity/under_armour/doublet.png");
 	private static final Identifier MAIL = JaymosKingdoms.id("textures/entity/under_armour/gambeson_mail.png");
 	private static final Identifier IRON = JaymosKingdoms.id("textures/entity/under_armour/gambeson_iron.png");
+	/** The other shirts of the harness (Harness 6): the aketon (tinted, as the doublet), the fur jerkin, the jazerant. */
+	private static final Identifier AKETON = JaymosKingdoms.id("textures/entity/under_armour/aketon.png");
+	private static final Identifier FUR_JERKIN = JaymosKingdoms.id("textures/entity/under_armour/fur_jerkin.png");
+	private static final Identifier JAZERANT = JaymosKingdoms.id("textures/entity/under_armour/jazerant.png");
+	/** An undyed aketon's colour (pale linen; the generator's DYED). */
+	static final int AKETON_UNDYED = 0xD8CCB0;
 	/** An undyed doublet's colour (brown leather, as vanilla's). */
 	static final int UNDYED = 0xA06540;
 
@@ -124,11 +131,14 @@ public final class UnderArmourLayer<S extends HumanoidRenderState> extends Rende
 		// (MCA's body has the one armour model: the outer shirt alone goes on it)
 		HumanoidModel<HumanoidRenderState> mca = McaCompat.LOADED ? McaUnderArmour.model(state) : null;
 		if (!padding.isEmpty() && (mca == null || mail.isEmpty())) {
-			collector.submitModel(mca != null ? mca : this.suit, state, poseStack, RenderTypes.armorCutoutNoCull(DOUBLET), lightCoords, OverlayTexture.NO_OVERLAY,
-				ARGB.opaque(DyedItemColor.getOrDefault(padding, UNDYED)), null, state.outlineColor);
+			String kind = BuiltInRegistries.ITEM.getKey(padding.getItem()).getPath();
+			Identifier texture = kind.equals("aketon") ? AKETON : kind.equals("fur_jerkin") ? FUR_JERKIN : DOUBLET;
+			int color = texture == FUR_JERKIN ? -1 : ARGB.opaque(DyedItemColor.getOrDefault(padding, texture == AKETON ? AKETON_UNDYED : UNDYED));
+			collector.submitModel(mca != null ? mca : this.suit, state, poseStack, RenderTypes.armorCutoutNoCull(texture), lightCoords, OverlayTexture.NO_OVERLAY,
+				color, null, state.outlineColor);
 		}
 		if (!mail.isEmpty()) {
-			collector.submitModel(mca != null ? mca : this.mail, state, poseStack, RenderTypes.armorCutoutNoCull(HAUBERGEON), lightCoords, OverlayTexture.NO_OVERLAY,
+			collector.submitModel(mca != null ? mca : this.mail, state, poseStack, RenderTypes.armorCutoutNoCull(BuiltInRegistries.ITEM.getKey(mail.getItem()).getPath().equals("jazerant") ? JAZERANT : HAUBERGEON), lightCoords, OverlayTexture.NO_OVERLAY,
 				-1, null, state.outlineColor);
 		}
 		return true;

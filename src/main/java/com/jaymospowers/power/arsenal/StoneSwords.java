@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Flames;
@@ -226,7 +227,7 @@ public final class StoneSwords {
 		switch (variant) {
 			case LAEVATEINN -> {
 				Flames.touch(level, entity, LAEV_BURN_SECONDS, attacker);
-				Flames.area(level, entity.getBoundingBox().inflate(LAEV_SPLASH), LAEV_BURN_SECONDS, attacker,
+				Flames.area(level, entity.getBoundingBox().inflate(AbilityPower.size(attacker, LAEV_SPLASH)), LAEV_BURN_SECONDS, attacker,
 					e -> e != entity && !(e instanceof OwnableEntity pet && pet.getOwner() == attacker));
 				level.sendParticles(ParticleTypes.FLAME, entity.getX(), entity.getY() + entity.getBbHeight() * 0.6, entity.getZ(), 6, 0.2, 0.3, 0.2, 0.02);
 			}
@@ -397,7 +398,7 @@ public final class StoneSwords {
 					plantImpact(this.level, this.player);
 				}
 				if (ring % PLANT_RING_INTERVAL == 0) {
-					plantRing(this.level, this.player, PLANT_RADIUS * (ring / PLANT_RING_INTERVAL + 1) / PLANT_RINGS);
+					plantRing(this.level, this.player, AbilityPower.size(player, PLANT_RADIUS) * (ring / PLANT_RING_INTERVAL + 1) / PLANT_RINGS);
 				}
 				return ring >= (long)(PLANT_RINGS - 1) * PLANT_RING_INTERVAL;
 			}
@@ -410,14 +411,14 @@ public final class StoneSwords {
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		player.setDeltaMovement(player.getDeltaMovement().multiply(0.0, 1.0, 0.0));
 		player.syncVelocity = true;
-		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(PLANT_RADIUS, 1.5, PLANT_RADIUS),
+		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, PLANT_RADIUS), 1.5, AbilityPower.size(player, PLANT_RADIUS)),
 			e -> catchable(player, e))) {
 			Vec3 away = target.position().subtract(centre).horizontal();
 			double dist = away.length();
-			if (dist > PLANT_RADIUS) {
+			if (dist > AbilityPower.size(player, PLANT_RADIUS)) {
 				continue;
 			}
-			float share = 1.0F - (1.0F - PLANT_EDGE_SHARE) * (float)(dist / PLANT_RADIUS);
+			float share = 1.0F - (1.0F - PLANT_EDGE_SHARE) * (float)(dist / AbilityPower.size(player, PLANT_RADIUS));
 			target.hurtServer(level, level.damageSources().playerAttack(player), PLANT_DAMAGE * share);
 			Vec3 push = (dist < 1.0E-3 ? player.getLookAngle().horizontal() : away).normalize().scale(PLANT_PUSH * share);
 			target.push(push.x, PLANT_LIFT * share, push.z);
@@ -430,7 +431,7 @@ public final class StoneSwords {
 		level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.4F, 0.7F);
 		level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.6F, 0.5F);
 		level.sendParticles(ParticleTypes.EXPLOSION, centre.x, centre.y + 0.2, centre.z, 1, 0.0, 0.0, 0.0, 0.0);
-		com.jaymospowers.core.Shakes.heavy(player, centre, PLANT_RADIUS * 2.5, 1.4F);
+		com.jaymospowers.core.Shakes.heavy(player, centre, AbilityPower.size(player, PLANT_RADIUS) * 2.5, 1.4F);
 	}
 
 	/** One ring of the shockwave: dust of whatever ground it runs over. */

@@ -289,7 +289,15 @@ public enum Dish {
 		List.of(new Buff(MobEffects.NIGHT_VISION, 180 * 20, 0), new Buff(MobEffects.CONDUIT_POWER, 60 * 20, 0))),
 	// Farmer's Delight's hot cocoa: a hot mug gives Comfort like a hot bowl (delight/Delight#onEat)
 	HOT_COCOA(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(GLASS_BOTTLE, MILK_BOTTLE, COCOA_BEANS, COCOA_BEANS, SUGAR), 4, 0.4F, false,
-		List.of(new Buff(MobEffects.REGENERATION, 10 * 20, 0)));
+		List.of(new Buff(MobEffects.REGENERATION, 10 * 20, 0))),
+	// --- the Legend feasts: the age of songs' great beasts, set only by a Perfect cook; each gives its effect for three minutes ---
+	SKYFALL_ROAST(Method.ROAST, EnumSet.of(Station.CAMPFIRE), List.of(WIND_DRAGON_MEAT, POTATO, CARROT), 14, 1.0F, false,
+		List.of(new Buff(MobEffects.STRENGTH, 180 * 20, 1))),
+	GIANTS_MARROW_BROTH(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, GIANTS_MARROW, CARROT, POTATO), 12, 1.0F, true,
+		List.of(new Buff(MobEffects.RESISTANCE, 180 * 20, 1))),
+	DEEP_KINGS_PLATTER(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(LEGEND_FILLET, DRIED_KELP, FLIP, FLIP), 13, 1.0F, false,
+		List.of(new Buff(MobEffects.STRENGTH, 180 * 20, 1)));
+
 	/** Which minigame cooks the dish. */
 	public enum Method {
 		/** Press the recipe steps in order (furnace / smoker). */
@@ -444,7 +452,7 @@ public enum Dish {
 			case ROAST_CHICKEN -> 90;
 			case ROAST_MUTTON -> 80;
 			case LEMON_CHICKEN, ROAST_DUCK -> 90;
-			case MAMMOTH_ROAST -> 110;
+			case MAMMOTH_ROAST, SKYFALL_ROAST -> 110;
 			case KIRRID_ROAST -> 85;
 			case HAMBURGER, BACON_AND_EGGS -> 100;
 			case PIE_CRUST -> 130;

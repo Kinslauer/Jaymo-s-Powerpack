@@ -17,6 +17,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Enemy;
@@ -60,6 +61,10 @@ public final class StrengthSkill {
 	static void register() {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, baseDamage, damageTaken, blocked) -> {
 			if (!(source.getEntity() instanceof ServerPlayer sp) || source.getDirectEntity() != sp || entity == sp || damageTaken <= 0.0F || sp.isCreative()) {
+				return;
+			}
+			// (only a foe teaches: a monster, or a folk or villager that is actually fighting them)
+			if (!(entity instanceof Enemy) && !(entity instanceof Mob mob && mob.getTarget() == sp)) {
 				return;
 			}
 			long now = sp.level().getGameTime();

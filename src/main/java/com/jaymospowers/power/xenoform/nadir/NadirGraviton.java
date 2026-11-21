@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.nadir;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import java.util.Iterator;
 import java.util.List;
@@ -180,11 +181,11 @@ public final class NadirGraviton {
 		if (now % 2 == 0) {
 			for (int i = 0; i < 16; i++) {
 				double a = i / 16.0 * Math.PI * 2.0 + now * 0.05;
-				level.sendParticles(MagicFx.VOID, c.x + Math.cos(a) * ZONE_RADIUS, c.y + 0.2, c.z + Math.sin(a) * ZONE_RADIUS, 1, 0.0, 0.3, 0.0, 0.02);
+				level.sendParticles(MagicFx.VOID, c.x + Math.cos(a) * AbilityPower.size(player, ZONE_RADIUS), c.y + 0.2, c.z + Math.sin(a) * AbilityPower.size(player, ZONE_RADIUS), 1, 0.0, 0.3, 0.0, 0.02);
 			}
-			level.sendParticles(MagicFx.LIGHT, c.x, c.y + 1.0, c.z, 3, ZONE_RADIUS * 0.5, 1.0, ZONE_RADIUS * 0.5, 0.01);
+			level.sendParticles(MagicFx.LIGHT, c.x, c.y + 1.0, c.z, 3, AbilityPower.size(player, ZONE_RADIUS) * 0.5, 1.0, AbilityPower.size(player, ZONE_RADIUS) * 0.5, 0.01);
 		}
-		for (LivingEntity e : NadirAim.around(player, c, ZONE_RADIUS)) {
+		for (LivingEntity e : NadirAim.around(player, c, AbilityPower.size(player, ZONE_RADIUS))) {
 			if (!st.floaters.containsKey(e.getId())) {
 				int ticks = e instanceof Player ? FLOAT_PLAYER : FLOAT_MOB;
 				e.addEffect(new MobEffectInstance(MobEffects.LEVITATION, ticks, 2, false, false, true));
@@ -195,7 +196,7 @@ public final class NadirGraviton {
 			}
 		}
 		// arrows and the like thrown through it drift and slow
-		for (Projectile p : level.getEntitiesOfClass(Projectile.class, new AABB(c, c).inflate(ZONE_RADIUS), p -> p.getOwner() != player)) {
+		for (Projectile p : level.getEntitiesOfClass(Projectile.class, new AABB(c, c).inflate(AbilityPower.size(player, ZONE_RADIUS)), p -> p.getOwner() != player)) {
 			p.setDeltaMovement(p.getDeltaMovement().scale(0.8).add(0.0, 0.03, 0.0));
 			p.syncVelocity = true;
 		}
@@ -237,14 +238,14 @@ public final class NadirGraviton {
 			double r = 1.0 + 2.5 * open;
 			level.sendParticles(MagicFx.VOID, c.x + Math.cos(a) * r, c.y + Math.sin(a * 2.0) * 0.3, c.z + Math.sin(a) * r, 1, 0.0, 0.0, 0.0, 0.0);
 		}
-		level.sendParticles(MagicFx.VOID, c.x, c.y, c.z, 6, HORIZON_PULL * 0.3 * open, 2.0, HORIZON_PULL * 0.3 * open, 0.0);
+		level.sendParticles(MagicFx.VOID, c.x, c.y, c.z, 6, AbilityPower.size(player, HORIZON_PULL) * 0.3 * open, 2.0, AbilityPower.size(player, HORIZON_PULL) * 0.3 * open, 0.0);
 		if (now % 20 == 0) {
 			level.playSound(null, c.x, c.y, c.z, SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 1.5F, 0.3F);
 		}
 		if (age < HORIZON_OPEN / 2) {
 			return;
 		}
-		double reach = HORIZON_PULL * open;
+		double reach = AbilityPower.size(player, HORIZON_PULL) * open;
 		for (Entity e : level.getEntities(player, new AABB(c, c).inflate(reach), e -> e.isAlive() && !e.isSpectator())) {
 			boolean living = e instanceof LivingEntity;
 			if (living && !NadirAim.fair(player, e) || !living && !(e instanceof ItemEntity) && !(e instanceof ExperienceOrb)) {
@@ -269,7 +270,7 @@ public final class NadirGraviton {
 			e.syncVelocity = true;
 			if (e instanceof LivingEntity target) {
 				target.resetFallDistance();
-				if (d <= HORIZON_CORE && now % 10 == 0) {
+				if (d <= AbilityPower.size(player, HORIZON_CORE) && now % 10 == 0) {
 					target.hurtServer(level, player.damageSources().playerAttack(player), HORIZON_DAMAGE);
 				}
 				if (d <= 1.4 && !(target instanceof Player) && target.getMaxHealth() <= ERASE_HEALTH) {
@@ -290,7 +291,7 @@ public final class NadirGraviton {
 		Vec3 c = st.horizon;
 		st.horizon = null;
 		com.jaymospowers.core.Lens.close(level, c);
-		List<Entity> caught = level.getEntities(player, new AABB(c, c).inflate(HORIZON_PULL), e -> e.isAlive() && !e.isSpectator());
+		List<Entity> caught = level.getEntities(player, new AABB(c, c).inflate(AbilityPower.size(player, HORIZON_PULL)), e -> e.isAlive() && !e.isSpectator());
 		for (Entity e : caught) {
 			if (e instanceof ItemEntity || e instanceof ExperienceOrb) {
 				e.setNoGravity(false);
@@ -312,10 +313,10 @@ public final class NadirGraviton {
 			}
 			Vec3 out = e.position().subtract(c);
 			double d = Math.max(0.5, out.length());
-			if (living && d <= COLLAPSE_RADIUS) {
+			if (living && d <= AbilityPower.size(player, COLLAPSE_RADIUS)) {
 				((LivingEntity)e).hurtServer(level, player.damageSources().playerAttack(player), COLLAPSE_DAMAGE);
 			}
-			double fling = 2.4 * (1.0 - d / (HORIZON_PULL + 1.0)) + 0.3;
+			double fling = 2.4 * (1.0 - d / (AbilityPower.size(player, HORIZON_PULL) + 1.0)) + 0.3;
 			e.setDeltaMovement(out.scale(1.0 / d).scale(fling).add(0.0, 0.5, 0.0));
 			e.syncVelocity = true;
 		}

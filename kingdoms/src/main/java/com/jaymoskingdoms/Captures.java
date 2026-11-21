@@ -99,6 +99,15 @@ final class Captures {
 	static void register() {
 		Lasso.toughness = Captures::toughness;
 		UseEntityCallback.EVENT.register(Lasso.EARLY, Captures::use);
+		PowersCompat.bodyOption("untie", 20, (player, body) -> freeable(player, body) && !Nets.blade(player.getMainHandItem()),
+			(player, body) -> freeable(player, body) && freeing(player.level(), player, body, false));
+		PowersCompat.bodyOption("cut", 20, (player, body) -> freeable(player, body) && Nets.blade(player.getMainHandItem()),
+			(player, body) -> freeable(player, body) && Nets.blade(player.getMainHandItem()) && freeing(player.level(), player, body, true));
+		PowersCompat.bodyOption("hear_out", 25, (player, body) -> !(body instanceof Player) && Lasso.hogtied(body) && !Lasso.hogtied(player)
+			&& wanted(player.level(), body), (player, body) -> {
+				talk(player.level(), player, body);
+				return false;
+			});
 		ServerTickEvents.END_SERVER_TICK.register(Captures::duels);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			CUTTING.clear();
@@ -130,7 +139,9 @@ final class Captures {
 
 	private static InteractionResult use(Player player, Level level, InteractionHand hand, Entity entity, @Nullable EntityHitResult hit) {
 		if (hand != InteractionHand.MAIN_HAND || player.isShiftKeyDown() || !(entity instanceof LivingEntity body) || !Lasso.hogtied(body)
-			|| Lasso.hogtied(player)) {
+			|| Lasso.hogtied(player) || PowersCompat.bodyMenu()) {
+			// (Andy, 2026-11-20: "there needs to be a context menu on right click ... untying". With Powers, a tap of use
+			// on someone tied opens its body menu, and untying, cutting free and talking are chosen there: see register)
 			return InteractionResult.PASS;
 		}
 		ItemStack held = player.getMainHandItem();
@@ -154,21 +165,33 @@ final class Captures {
 			}
 			return InteractionResult.SUCCESS;
 		}
+		if (fresh) {
+			CUTTING.remove(p.getUUID());
+		}
+		freeing(server, p, body, blade);
+		return InteractionResult.SUCCESS;
+	}
+
+	/**
+	 * One tick of {@code p} working {@code body}'s knots loose, with a blade or by hand (a gap of more than {@link #GAP}
+	 * starts it over). True while it goes on, false once they're free.
+	 */
+	private static boolean freeing(ServerLevel server, ServerPlayer p, LivingEntity body, boolean blade) {
+		long now = server.getGameTime();
 		Cutting c = CUTTING.get(p.getUUID());
-		if (c == null || fresh || !c.body().equals(body.getUUID())) {
+		if (c == null || now - c.last() > GAP || !c.body().equals(body.getUUID())) {
 			c = new Cutting(body.getUUID(), now, now);
 		}
 		long done = now - c.start();
 		int need = blade ? CUT_TICKS : UNTIE_TICKS;
 		if (done < need) {
 			CUTTING.put(p.getUUID(), new Cutting(c.body(), c.start(), now));
-			int bar = 10, filled = (int)Math.min(bar, bar * done / need);
-			p.sendOverlayMessage(Component.translatable(blade ? "captive.jaymoskingdoms.cutting" : "captive.jaymoskingdoms.untying", body.getDisplayName(),
-				"|".repeat(filled) + ".".repeat(bar - filled)).withStyle(ChatFormatting.GRAY));
+			HudBars.hold(p, "captive", done / (float) need, HudBars.GREY,
+				Component.translatable(blade ? "bar.jaymoskingdoms.cutting" : "bar.jaymoskingdoms.untying", body.getDisplayName()), true);
 			if (done % 8 == 0) {
 				server.playSound(null, body.getX(), body.getY(), body.getZ(), blade ? SoundEvents.SHEEP_SHEAR : SoundEvents.LEAD_TIED, SoundSource.PLAYERS, 0.6F, 1.2F);
 			}
-			return InteractionResult.SUCCESS;
+			return true;
 		}
 		CUTTING.remove(p.getUUID());
 		Lasso.free(body);
@@ -176,7 +199,12 @@ final class Captures {
 		server.playSound(null, body.getX(), body.getY(), body.getZ(), blade ? SoundEvents.SHEEP_SHEAR : SoundEvents.LEAD_BREAK, SoundSource.PLAYERS, 1.0F, 0.9F);
 		p.sendOverlayMessage(Component.translatable(blade ? "captive.jaymoskingdoms.cut" : "captive.jaymoskingdoms.untied", body.getDisplayName()).withStyle(ChatFormatting.GOLD));
 		QuestJobs.freed(server, p, body);
-		return InteractionResult.SUCCESS;
+		return false;
+	}
+
+	/** Whether {@code body} lies hogtied and can be freed by {@code player} from the body menu (the wanted are talked to instead). */
+	private static boolean freeable(ServerPlayer player, LivingEntity body) {
+		return Lasso.hogtied(body) && !Lasso.hogtied(player) && (body instanceof Player || !wanted(player.level(), body));
 	}
 
 	/** Whether {@code body} is wanted alive: a live bounty on them, or a capture job's. */
@@ -452,5 +480,7 @@ final class Captures {
 		}
 		DUELS.remove(body.getUUID());
 		Lasso.drop(body);
+		// a Galactic Patrol officer's arrest (Jaymo's Powers)
+		PowersCompat.patrolHandedOver(player, body);
 	}
 }

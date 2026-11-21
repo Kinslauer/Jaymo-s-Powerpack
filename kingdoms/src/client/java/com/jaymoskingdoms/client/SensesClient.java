@@ -48,8 +48,8 @@ public final class SensesClient {
 	/** Zoom (camera FOV over the FOV setting) at which the eye and meter start to fade, and at which they're gone. */
 	static final float ZOOM_SHOWN = 0.97F, ZOOM_GONE = 0.8F;
 
-	/** What the server last said, and how visible the eye is now and a tick ago. */
-	private static int state, fill;
+	/** What the server last said (and a goblin village's suspicion of your disguise), and how visible the eye is now and a tick ago. */
+	private static int state, fill, suspicion;
 	private static float alpha, lastAlpha;
 	/** The meter as last sent, and how visible it is. */
 	private static int noise, light, voice;
@@ -64,6 +64,7 @@ public final class SensesClient {
 			state = payload.state();
 			fill = payload.fill();
 		}));
+		ClientPlayNetworking.registerGlobalReceiver(Senses.Suspicion.TYPE, (payload, context) -> context.client().execute(() -> suspicion = payload.fill()));
 		ClientPlayNetworking.registerGlobalReceiver(Senses.Meter.TYPE, (payload, context) -> context.client().execute(() -> {
 			noise = payload.noise();
 			light = payload.light();
@@ -71,7 +72,7 @@ public final class SensesClient {
 			voice = payload.voice();
 		}));
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
-			state = fill = 0;
+			state = fill = suspicion = 0;
 			alpha = lastAlpha = 0.0F;
 			noise = light = voice = 0;
 			bleeding = false;
@@ -79,7 +80,7 @@ public final class SensesClient {
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			lastAlpha = alpha;
-			alpha = state > 0 ? Math.min(1.0F, alpha + FADE) : Math.max(0.0F, alpha - FADE);
+			alpha = state > 0 || suspicion > 0 ? Math.min(1.0F, alpha + FADE) : Math.max(0.0F, alpha - FADE);
 			lastMeterAlpha = meterAlpha;
 			boolean shown = state > 0 || bleeding || voice > 0 || minecraft.player != null && minecraft.player.isShiftKeyDown();
 			meterAlpha = shown ? Math.min(1.0F, meterAlpha + FADE) : Math.max(0.0F, meterAlpha - FADE);
@@ -115,7 +116,7 @@ public final class SensesClient {
 			default -> {
 				frame(graphics, EMPTY, x, y, color);
 				// (the fill rises from the bottom of the full eye)
-				int h = Mth.clamp(Math.round(SIZE * fill / (float) Senses.FILL_STEPS), 0, SIZE);
+				int h = Mth.clamp(Math.round(SIZE * Math.max(fill, suspicion) / (float) Senses.FILL_STEPS), 0, SIZE);
 				if (h > 0) {
 					graphics.blit(RenderPipelines.GUI_TEXTURED, EYE, x, y + SIZE - h, 0.0F, (float) (FULL * SIZE + SIZE - h), SIZE, h, SIZE, SIZE * FRAMES, color);
 				}

@@ -1,0 +1,9 @@
+{
+  "values": [
+    "minecraft:rabbit",
+    {
+      "id": "jaymoskitchen:rat",
+      "required": false
+    }
+  ]
+}

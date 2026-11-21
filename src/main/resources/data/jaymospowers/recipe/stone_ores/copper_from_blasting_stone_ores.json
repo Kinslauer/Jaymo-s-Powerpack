@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:blasting",
+  "category": "blocks",
+  "cookingtime": 100,
+  "experience": 0.7,
+  "group": "copper_ingot",
+  "ingredient": [
+    "jaymospowers:andesite_copper_ore",
+    "jaymospowers:diorite_copper_ore",
+    "jaymospowers:granite_copper_ore",
+    "jaymospowers:tuff_copper_ore"
+  ],
+  "result": {
+    "id": "minecraft:copper_ingot"
+  }
+}

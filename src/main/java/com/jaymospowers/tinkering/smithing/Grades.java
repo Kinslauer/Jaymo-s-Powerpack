@@ -57,7 +57,7 @@ public final class Grades {
 		} else {
 			stack.set(Smithing.GRADE, grade.id);
 		}
-		if (grade == Grade.MASTER) {
+		if (grade != null && grade.atLeast(Grade.MASTER)) {
 			stack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
 		} else if (stack.getPrototype().get(DataComponents.ENCHANTMENT_GLINT_OVERRIDE) == null) {
 			stack.remove(DataComponents.ENCHANTMENT_GLINT_OVERRIDE);

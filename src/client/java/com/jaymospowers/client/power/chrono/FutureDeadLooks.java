@@ -1,6 +1,7 @@
 package com.jaymospowers.client.power.chrono;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.power.zfighter.UndeadBlood;
 import com.jaymospowers.power.chrono.future.Future;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -40,7 +41,8 @@ import org.jspecify.annotations.Nullable;
  * husk one of our dried ones (tools/gen_future_zombies.py; {@code FutureZombieRendererMixin}, {@code FutureHuskRendererMixin}),
  * and every zombie, husk and stranger's zombie player there (Kitchen's, from {@code FutureKitchen}) drags a mangled tail
  * in one of {@link Condition}'s states. Skin and tail are picked by the mob's id, so it keeps them. Back home, and on a
- * dead player who got up again, nothing changes.
+ * dead player who got up again, nothing changes, except on the few of the dead who were Warrior-born ({@code UndeadBlood}):
+ * they drag the same rotted tails (a stump, if theirs was cut), in their own skins.
  *
  * <p>The tail is drawn like a Warrior-born's own ({@code zfighter/ZFighterTail}): a chain of boxes from the small of the
  * back, each at its own place on the pose stack, from the materials in {@code textures/entity/future/dead_tail.png}
@@ -207,7 +209,10 @@ public final class FutureDeadLooks {
 	}
 
 	private static boolean dead(EntityType<?> type) {
-		return type == EntityTypes.ZOMBIE || type == EntityTypes.HUSK || ZOMBIE_PLAYER.equals(BuiltInRegistries.ENTITY_TYPE.getKey(type));
+		Identifier id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
+		// zombie villagers (MCA's too) only ever carry a Warrior-born's tail (UndeadBlood)
+		return type == EntityTypes.ZOMBIE || type == EntityTypes.HUSK || type == EntityTypes.ZOMBIE_VILLAGER || ZOMBIE_PLAYER.equals(id)
+			|| id.getNamespace().equals("mca") && id.getPath().contains("zombie");
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
@@ -217,32 +222,46 @@ public final class FutureDeadLooks {
 
 	/** From every living renderer's extractRenderState: a grown zombie, husk or stranger's zombie player in the future gets its tail. */
 	public static void extractTail(LivingEntity entity, LivingEntityRenderState state) {
-		if (entity.level().dimension() != Future.FUTURE || entity.isBaby()) {
-			return;
-		}
 		EntityType<?> type = entity.getType();
 		boolean husk = type == EntityTypes.HUSK;
+		if (entity.level().dimension() != Future.FUTURE) {
+			// one of the Warrior-born dead here: its tail as the server says it is (on it, or a stump); set every time,
+			// since the renderer hands the same state to the next zombie
+			Boolean on = entity.isBaby() ? null : entity.getAttached(UndeadBlood.TAIL);
+			state.setData(TAIL, on == null ? null : tail(entity, husk, on ? Boolean.FALSE : Boolean.TRUE));
+			return;
+		}
+		if (entity.isBaby()) {
+			return;
+		}
 		if (husk || type == EntityTypes.ZOMBIE || Kitchen.LOADED && Kitchen.stranger(entity)) {
-			state.setData(TAIL, tail(entity, husk));
+			state.setData(TAIL, tail(entity, husk, null));
 		}
 	}
 
-	static Tail tail(Entity entity, boolean dusty) {
+	/** Its tail; {@code stump}: true, a root stump; false, never one; null, any condition. */
+	static Tail tail(Entity entity, boolean dusty, @Nullable Boolean stump) {
 		Tail known = TAILS.get(entity.getUUID());
-		if (known != null && known.dusty() == dusty) {
+		if (known != null && known.dusty() == dusty && (stump == null || stump == (known.condition() == Condition.ROOT_STUMP))) {
 			return known;
 		}
 		if (TAILS.size() > CACHE_MAX) {
 			TAILS.clear();
 		}
-		Tail tail = roll(entity.getUUID(), dusty);
+		Tail tail = roll(entity.getUUID(), dusty, stump);
 		TAILS.put(entity.getUUID(), tail);
 		return tail;
 	}
 
-	private static Tail roll(UUID id, boolean dusty) {
+	private static Tail roll(UUID id, boolean dusty, @Nullable Boolean stump) {
 		RandomSource r = RandomSource.create(id.getMostSignificantBits() * 31L ^ id.getLeastSignificantBits() ^ 0xDEADL);
 		Condition condition = Condition.values()[r.nextInt(Condition.values().length)];
+		if (Boolean.TRUE.equals(stump)) {
+			condition = Condition.ROOT_STUMP;
+		} else if (Boolean.FALSE.equals(stump) && condition == Condition.ROOT_STUMP) {
+			// a tail still on it: the one after the stump instead
+			condition = Condition.values()[condition.ordinal() + 1];
+		}
 		int segments = SEGMENTS_MIN + r.nextInt(SEGMENTS_MAX - SEGMENTS_MIN + 1);
 		int at = 1 + r.nextInt(segments - 2);
 		switch (condition) {

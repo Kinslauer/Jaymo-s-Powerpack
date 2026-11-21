@@ -59,6 +59,14 @@ public final class DownedHud {
 	 */
 	static final float TURN_STRENGTH = 0.25F, TURN_GLOW = 1.1F, TURN_BREATH = 70.0F;
 
+	/**
+	 * (dw_blink, after Ragdollified Revive &amp; Drag's downed screen; nothing of it copied) Down and awake, the eyes droop shut
+	 * and open again: one blink every this many ticks at full strength and spent, each taking this long, closing this far
+	 * (1 = shut).
+	 */
+	static final float BLINK_EVERY_STRONG = 100.0F, BLINK_EVERY_SPENT = 35.0F, BLINK_TICKS_STRONG = 6.0F, BLINK_TICKS_SPENT = 22.0F;
+	static final float BLINK_DEPTH_STRONG = 0.75F, BLINK_DEPTH_SPENT = 1.0F;
+
 	/** Out of the body (OutOfBodyClient): the pale blue laid over the screen (RGB), and how thick (0-255). */
 	static final int GHOST = 0x8ACEFF, GHOST_ALPHA = 0x26;
 
@@ -72,7 +80,15 @@ public final class DownedHud {
 	/** The black this dark or more, with a line on it, keeps the chat and the rest of the HUD off the screen. */
 	static final float SCENE_DARK = 0.5F;
 
+	/** The last hold's cue: a heartbeat this loud and this low, and the edge pulse's fade per tick (it lasts a second). */
+	static final float HOLD_VOLUME = 1.0F, HOLD_PITCH = 0.5F, HOLD_PULSE_FADE = 0.05F;
+	/** The hold's spent-at time last seen, and the edge pulse's strength (0-1), last tick and now. */
+	private static @org.jspecify.annotations.Nullable Long holdSeen;
+	private static float holdPulse, holdPulseBefore;
+
 	private static int downTicks;
+	/** (dw_blink) Ticks to the next blink, how far into the one going on (ticks, or -1), and how shut the eyes are (0-1) last tick and now. */
+	private static float toBlink = BLINK_EVERY_STRONG, blinking = -1.0F, lid, lidBefore;
 	/** (0.19.55) Ticks since the last heartbeat, and how far through the beat's swell the ring is (0-1). */
 	private static float sinceBeat, beatSwell, beatSwellBefore;
 	/** (0.18.84) How black the screen is (0-1), last tick and this one. */
@@ -123,6 +139,16 @@ public final class DownedHud {
 	private static void tick(Minecraft minecraft) {
 		LocalPlayer player = minecraft.player;
 		blackBefore = black;
+		// the last hold spent (LastHold): a thud of the heart and the screen's edge flushes once
+		holdPulseBefore = holdPulse;
+		holdPulse = Math.max(0.0F, holdPulse - HOLD_PULSE_FADE);
+		Long spent = player == null ? null : player.getAttached(com.jaymospowers.core.wounds.LastHold.SPENT);
+		if (spent != null && !spent.equals(holdSeen)) {
+			holdPulse = 1.0F;
+			holdPulseBefore = 1.0F;
+			player.level().playLocalSound(player, SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, HOLD_VOLUME, HOLD_PITCH);
+		}
+		holdSeen = spent;
 		// ((0.20.94) and black while a life that ended waits for the new character: Mortality.REBORNING)
 		boolean reborning = player != null && player.isAlive() && player.hasAttached(com.jaymospowers.core.wounds.Mortality.REBORNING);
 		// (out of their body, the black lifts: they look out of their ghost, OutOfBodyClient)
@@ -149,7 +175,10 @@ public final class DownedHud {
 			com.jaymospowers.client.hud.HudZones.hideFor(100L);
 		}
 		beatSwellBefore = beatSwell;
+		lidBefore = lid;
 		if (player == null || !Downed.isDowned(player)) {
+			lid = 0.0F;
+			blinking = -1.0F;
 			downTicks = 0;
 			sinceBeat = 0.0F;
 			beatSwell = 0.0F;
@@ -158,8 +187,10 @@ public final class DownedHud {
 		downTicks++;
 		beatSwell = Math.max(0.0F, beatSwell - 0.12F);
 		if (player.hasAttached(Downed.KNOCKED)) {
+			lid = 0.0F;
 			return;
 		}
+		blink(Downed.passedOut(player) ? -1.0F : Downed.strength(player));
 		// (0.19.55) racing at first, slowing as they weaken, slowest out cold
 		boolean out = Downed.passedOut(player);
 		float strength = Downed.strength(player);
@@ -173,8 +204,38 @@ public final class DownedHud {
 		}
 	}
 
+	/** (dw_blink) The blink's tick: slower, longer and fully shut as {@code strength} fades; none passed out (below 0). */
+	private static void blink(float strength) {
+		if (strength < 0.0F) {
+			lid = 0.0F;
+			blinking = -1.0F;
+			return;
+		}
+		float weak = 1.0F - strength;
+		float lasts = net.minecraft.util.Mth.lerp(weak, BLINK_TICKS_STRONG, BLINK_TICKS_SPENT);
+		if (blinking >= 0.0F) {
+			blinking++;
+			if (blinking >= lasts) {
+				blinking = -1.0F;
+				lid = 0.0F;
+				toBlink = net.minecraft.util.Mth.lerp(weak, BLINK_EVERY_STRONG, BLINK_EVERY_SPENT) * (0.7F + 0.6F * (float) Math.random());
+				return;
+			}
+			// down fast, up slowly: shut by a third of the way through
+			float t = blinking / lasts;
+			float shut = t < 0.33F ? t / 0.33F : 1.0F - (t - 0.33F) / 0.67F;
+			lid = shut * net.minecraft.util.Mth.lerp(weak, BLINK_DEPTH_STRONG, BLINK_DEPTH_SPENT);
+		} else if (--toBlink <= 0.0F) {
+			blinking = 0.0F;
+		}
+	}
+
 	private static void render(GuiGraphicsExtractor graphics, DeltaTracker delta) {
 		LocalPlayer player = Minecraft.getInstance().player;
+		float pulse = holdPulseBefore + (holdPulse - holdPulseBefore) * delta.getGameTimeDeltaPartialTick(false);
+		if (pulse > 0.0F) {
+			ring(graphics, 0.0F, pulse, pulse);
+		}
 		if (player != null && OutOfBodyClient.drifting()) {
 			// a ghost's eyes: the world a little pale and blue, not the grey of the dying
 			graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), GHOST_ALPHA << 24 | GHOST);
@@ -186,6 +247,11 @@ public final class DownedHud {
 				float fade = Math.min(downTicks, FADE_IN_TICKS) / (float) FADE_IN_TICKS;
 				float swell = beatSwellBefore + (beatSwell - beatSwellBefore) * delta.getGameTimeDeltaPartialTick(false);
 				ring(graphics, Downed.strength(player), swell, fade);
+				// (dw_blink) the eyes drooping shut and opening again
+				float shut = lidBefore + (lid - lidBefore) * delta.getGameTimeDeltaPartialTick(false);
+				if (shut > 0.0F) {
+					lids(graphics, Math.min(0.99F, shut));
+				}
 			}
 		}
 	}

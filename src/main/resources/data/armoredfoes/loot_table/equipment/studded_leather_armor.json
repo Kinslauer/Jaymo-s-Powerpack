@@ -1,0 +1,202 @@
+{
+  "type": "minecraft:equipment",
+  "pools": [
+    {
+      "entries": [
+        {
+          "type": "armoredfoes:unpacking_sequence",
+          "children": [
+            {
+              "type": "minecraft:item",
+              "modifier": {
+                "type": "armoredfoes:apply_enchantment_provider",
+                "condition": {
+                  "type": "armoredfoes:effective_difficulty_check",
+                  "chance": 0.5
+                },
+                "provider": "minecraft:mob_spawn_equipment"
+              },
+              "name": "jaymospowers:studded_cap"
+            },
+            {
+              "type": "minecraft:alternatives",
+              "children": [
+                {
+                  "type": "minecraft:item",
+                  "condition": {
+                    "type": "minecraft:all_of",
+                    "terms": [
+                      {
+                        "type": "minecraft:random_chance",
+                        "chance": 0.9
+                      },
+                      {
+                        "type": "armoredfoes:difficulty_check",
+                        "difficulty": "hard"
+                      }
+                    ]
+                  },
+                  "modifier": {
+                    "type": "armoredfoes:apply_enchantment_provider",
+                    "condition": {
+                      "type": "armoredfoes:effective_difficulty_check",
+                      "chance": 0.5
+                    },
+                    "provider": "minecraft:mob_spawn_equipment"
+                  },
+                  "name": "jaymospowers:studded_brigandine"
+                },
+                {
+                  "type": "minecraft:item",
+                  "condition": {
+                    "type": "minecraft:all_of",
+                    "terms": [
+                      {
+                        "type": "minecraft:random_chance",
+                        "chance": 0.75
+                      },
+                      {
+                        "type": "minecraft:inverted",
+                        "term": {
+                          "type": "armoredfoes:difficulty_check",
+                          "difficulty": "hard"
+                        }
+                      }
+                    ]
+                  },
+                  "modifier": {
+                    "type": "armoredfoes:apply_enchantment_provider",
+                    "condition": {
+                      "type": "armoredfoes:effective_difficulty_check",
+                      "chance": 0.5
+                    },
+                    "provider": "minecraft:mob_spawn_equipment"
+                  },
+                  "name": "jaymospowers:studded_brigandine"
+                }
+              ]
+            },
+            {
+              "type": "minecraft:alternatives",
+              "children": [
+                {
+                  "type": "minecraft:item",
+                  "condition": {
+                    "type": "minecraft:all_of",
+                    "terms": [
+                      {
+                        "type": "minecraft:random_chance",
+                        "chance": 0.9
+                      },
+                      {
+                        "type": "armoredfoes:difficulty_check",
+                        "difficulty": "hard"
+                      }
+                    ]
+                  },
+                  "modifier": {
+                    "type": "armoredfoes:apply_enchantment_provider",
+                    "condition": {
+                      "type": "armoredfoes:effective_difficulty_check",
+                      "chance": 0.5
+                    },
+                    "provider": "minecraft:mob_spawn_equipment"
+                  },
+                  "name": "jaymospowers:studded_leggings"
+                },
+                {
+                  "type": "minecraft:item",
+                  "condition": {
+                    "type": "minecraft:all_of",
+                    "terms": [
+                      {
+                        "type": "minecraft:random_chance",
+                        "chance": 0.75
+                      },
+                      {
+                        "type": "minecraft:inverted",
+                        "term": {
+                          "type": "armoredfoes:difficulty_check",
+                          "difficulty": "hard"
+                        }
+                      }
+                    ]
+                  },
+                  "modifier": {
+                    "type": "armoredfoes:apply_enchantment_provider",
+                    "condition": {
+                      "type": "armoredfoes:effective_difficulty_check",
+                      "chance": 0.5
+                    },
+                    "provider": "minecraft:mob_spawn_equipment"
+                  },
+                  "name": "jaymospowers:studded_leggings"
+                }
+              ]
+            },
+            {
+              "type": "minecraft:alternatives",
+              "children": [
+                {
+                  "type": "minecraft:item",
+                  "condition": {
+                    "type": "minecraft:all_of",
+                    "terms": [
+                      {
+                        "type": "minecraft:random_chance",
+                        "chance": 0.9
+                      },
+                      {
+                        "type": "armoredfoes:difficulty_check",
+                        "difficulty": "hard"
+                      }
+                    ]
+                  },
+                  "modifier": {
+                    "type": "armoredfoes:apply_enchantment_provider",
+                    "condition": {
+                      "type": "armoredfoes:effective_difficulty_check",
+                      "chance": 0.5
+                    },
+                    "provider": "minecraft:mob_spawn_equipment"
+                  },
+                  "name": "jaymospowers:studded_boots"
+                },
+                {
+                  "type": "minecraft:item",
+                  "condition": {
+                    "type": "minecraft:all_of",
+                    "terms": [
+                      {
+                        "type": "minecraft:random_chance",
+                        "chance": 0.75
+                      },
+                      {
+                        "type": "minecraft:inverted",
+                        "term": {
+                          "type": "armoredfoes:difficulty_check",
+                          "difficulty": "hard"
+                        }
+                      }
+                    ]
+                  },
+                  "modifier": {
+                    "type": "armoredfoes:apply_enchantment_provider",
+                    "condition": {
+                      "type": "armoredfoes:effective_difficulty_check",
+                      "chance": 0.5
+                    },
+                    "provider": "minecraft:mob_spawn_equipment"
+                  },
+                  "name": "jaymospowers:studded_boots"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "armoredfoes:equipment/studded_leather_armor"
+}

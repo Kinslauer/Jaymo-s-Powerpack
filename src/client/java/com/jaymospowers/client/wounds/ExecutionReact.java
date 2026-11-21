@@ -77,9 +77,9 @@ final class ExecutionReact {
 					case CRUSH, KI, POWER -> Blow.CRUSH;
 					case SHOT, BOLT, BLAST -> Blow.SHOT;
 					case SNAP -> Blow.CHOKE;
-					case HOLD -> null;
+					case HOLD, SILENT -> null;
 				};
-				return blow == null ? null : react(blow, kind.beats, now - finish.start(), false);
+				return blow == null ? null : react(blow, kind.beats, finish.at(entity.level().getGameTime(), partialTicks), false);
 			}
 			WebExecutions.Execution execution = WebExecutions.of(player);
 			if (execution != null && execution.target() == id) {

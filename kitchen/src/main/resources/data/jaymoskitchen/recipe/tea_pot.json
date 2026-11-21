@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    " B ",
+    "CCC",
+    "CCC"
+  ],
+  "key": {
+    "B": "minecraft:brick",
+    "C": "minecraft:clay_ball"
+  },
+  "result": {
+    "id": "jaymoskitchen:tea_pot"
+  }
+}

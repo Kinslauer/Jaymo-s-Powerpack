@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:barrel",
+    "jaymoskitchen:salt",
+    "jaymoskitchen:salt"
+  ],
+  "result": {
+    "id": "jaymoskitchen:fish_barrel"
+  }
+}

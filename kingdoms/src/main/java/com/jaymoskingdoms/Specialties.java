@@ -115,7 +115,7 @@ public final class Specialties {
 	/** Any companion this near a quest's place (blocks) points out its levers and buttons. */
 	static final double QUEST_NEAR = 48.0;
 	/** A haggler gives an emerald's worth for this much junk (what a cleric gives for rotten flesh). */
-	static final int JUNK_PER_COIN = 32;
+	static final int JUNK_PER_COIN = 256;
 
 	/** On a fighter: its specialty key, or "" (rolled, none). Saved. */
 	public static final AttachmentType<String> SPECIALTY = AttachmentRegistry.create(JaymosKingdoms.id("comrade_specialty"),
@@ -536,7 +536,7 @@ public final class Specialties {
 	/** What a haggler takes off your hands. */
 	static boolean junk(ItemStack s) {
 		return s.is(Items.ROTTEN_FLESH) || s.is(Items.BONE) || s.is(Items.STRING) || s.is(Items.SPIDER_EYE) || s.is(Items.POISONOUS_POTATO)
-			|| s.is(Items.WHEAT_SEEDS) || s.is(Items.DIRT) || s.is(Items.GRAVEL) || s.is(Items.COBBLESTONE) || s.is(Items.STICK);
+			|| s.is(Items.WHEAT_SEEDS) || s.is(Items.STICK);
 	}
 
 	/** A haggler buys the junk in your hand, {@link #JUNK_PER_COIN} to a coin, to sell on. */

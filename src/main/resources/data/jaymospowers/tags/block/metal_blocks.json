@@ -1,0 +1,12 @@
+{
+	"replace": false,
+	"values": [
+		"minecraft:iron_door",
+		"minecraft:iron_trapdoor",
+		"minecraft:hopper",
+		"minecraft:cauldron",
+		"minecraft:water_cauldron",
+		"minecraft:lava_cauldron",
+		"minecraft:powder_snow_cauldron"
+	]
+}

@@ -254,6 +254,12 @@ public class CookingScreen extends Screen {
 			return;
 		}
 		switch (update.status()) {
+			case CookUpdate.STATUS_HANDS -> {
+				// the dish went on at the block, done by hand: nothing more for the screen to do
+				phase = Phase.RESULT;
+				onClose();
+				return;
+			}
 			case CookUpdate.STATUS_REJECTED -> {
 				// refused (missing ingredients, the fire's out...): back to the dish list, with its buttons
 				phase = Phase.SELECT;

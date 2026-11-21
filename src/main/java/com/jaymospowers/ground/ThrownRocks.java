@@ -515,7 +515,7 @@ public final class ThrownRocks {
 			redealing = false;
 		}
 		if (hurt && unsuspecting && victim.isAlive() && !Downed.passedOut(victim)
-			&& level.getRandom().nextFloat() < (head ? HEAD_CHANCE : BODY_CHANCE)) {
+			&& level.getRandom().nextFloat() < (head ? HEAD_CHANCE * Downed.headKnock(victim) : BODY_CHANCE)) {
 			int ticks = OUT_MIN + level.getRandom().nextInt(OUT_MAX - OUT_MIN + 1);
 			if (Downed.knockOut(level, victim, ticks, true, "message.jaymospowers.downed.knocked_rock")) {
 				level.playSound(null, victim.getX(), victim.getEyeY(), victim.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.NEUTRAL, 0.9F, 0.7F);

@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.BlockCluster;
 import com.jaymospowers.core.Debris;
 import com.jaymospowers.power.xenoform.XenoForm;
@@ -197,7 +198,7 @@ public final class Bulwark extends XenoForm {
 	private static void clap(ServerPlayer player, XenoformPower.Live live) {
 		ServerLevel level = player.level();
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
-		for (LivingEntity living : around(player, CLAP_RADIUS)) {
+		for (LivingEntity living : around(player, AbilityPower.size(player, CLAP_RADIUS))) {
 			if (living.getId() == live.grabbed) {
 				continue;
 			}
@@ -205,9 +206,9 @@ public final class Bulwark extends XenoForm {
 			shove(living, player.position(), 1.0, 0.5);
 		}
 		Vec3 feet = player.position();
-		ring(level, ParticleTypes.CLOUD, feet, CLAP_RADIUS * 0.5, 16);
-		ring(level, ParticleTypes.POOF, feet, CLAP_RADIUS, 24);
-		Debris.ring(level, player.blockPosition(), (int)CLAP_RADIUS, 1.0F);
+		ring(level, ParticleTypes.CLOUD, feet, AbilityPower.size(player, CLAP_RADIUS) * 0.5, 16);
+		ring(level, ParticleTypes.POOF, feet, AbilityPower.size(player, CLAP_RADIUS), 24);
+		Debris.ring(level, player.blockPosition(), (int)AbilityPower.size(player, CLAP_RADIUS), 1.0F);
 		sound(player, SoundEvents.ANVIL_LAND, 1.2F, 0.5F);
 		sound(player, SoundEvents.GENERIC_EXPLODE.value(), 0.6F, 1.3F);
 		com.jaymospowers.core.Shakes.heavy(player, feet, CLAP_SHAKE_RANGE, CLAP_SHAKE);
@@ -269,14 +270,14 @@ public final class Bulwark extends XenoForm {
 
 	private static void slam(ServerPlayer player) {
 		ServerLevel level = player.level();
-		for (LivingEntity living : around(player, SLAM_RADIUS)) {
+		for (LivingEntity living : around(player, AbilityPower.size(player, SLAM_RADIUS))) {
 			living.hurtServer(level, player.damageSources().playerAttack(player), BulwarkFury.boost(player, SLAM_DAMAGE));
 			com.jaymospowers.core.Crushing.mark(living);
 			shove(living, player.position(), 0.8, 0.6);
 		}
 		Vec3 feet = player.position();
 		Debris.smash(level, feet, 1.4, player);
-		ring(level, ParticleTypes.POOF, feet, SLAM_RADIUS, 20);
+		ring(level, ParticleTypes.POOF, feet, AbilityPower.size(player, SLAM_RADIUS), 20);
 		sound(player, SoundEvents.GENERIC_EXPLODE.value(), 1.0F, 1.1F);
 		sound(player, SoundEvents.IRON_GOLEM_HURT, 1.0F, 0.6F);
 		com.jaymospowers.core.Shakes.heavy(player, feet, SLAM_SHAKE_RANGE, SLAM_SHAKE);

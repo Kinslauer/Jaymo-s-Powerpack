@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Debris;
 import com.jaymospowers.core.GroundCracks;
 import com.jaymospowers.core.Shakes;
@@ -114,7 +115,7 @@ public final class BulwarkSuplex {
 		}
 		target.setDeltaMovement(behind.x * 0.2, 0.15, behind.z * 0.2);
 		target.syncVelocity = true;
-		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(RING_RADIUS), e -> e != player && e != target
+		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(AbilityPower.size(player, RING_RADIUS)), e -> e != player && e != target
 			&& e.isAlive() && !e.isSpectator() && !player.isAlliedTo(e) && !e.isPassengerOfSameVehicle(player))) {
 			near.hurtServer(level, player.damageSources().playerAttack(player), BulwarkFury.boost(player, NEAR_DAMAGE));
 			Vec3 away = near.position().subtract(target.position()).multiply(1.0, 0.0, 1.0);
@@ -123,9 +124,9 @@ public final class BulwarkSuplex {
 			near.syncVelocity = true;
 		}
 		BlockPos under = BlockPos.containing(at.x, at.y - 0.5, at.z);
-		GroundCracks.crack(level, under, level.getRandom(), Math.max(2, (int)Math.round(RING_RADIUS)));
+		GroundCracks.crack(level, under, level.getRandom(), Math.max(2, (int)Math.round(AbilityPower.size(player, RING_RADIUS))));
 		Debris.smash(level, at, 1.4, player);
-		MagicFx.ring(level, at.add(0.0, 0.1, 0.0), (float)RING_RADIUS, COLOR);
+		MagicFx.ring(level, at.add(0.0, 0.1, 0.0), (float)AbilityPower.size(player, RING_RADIUS), COLOR);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 1.6F, 0.7F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.8F, 1.2F);
 		Shakes.heavy(player, at, SHAKE_RANGE, SHAKE);

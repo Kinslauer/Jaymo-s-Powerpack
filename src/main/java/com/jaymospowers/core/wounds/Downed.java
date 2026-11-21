@@ -6,6 +6,7 @@ import com.jaymospowers.api.Power;
 import com.jaymospowers.core.Crawl;
 import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.HoldProgress;
+import com.jaymospowers.core.HudBar;
 import com.jaymospowers.core.Powers;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
@@ -95,8 +96,12 @@ import org.jspecify.annotations.Nullable;
  * executions are left-click, {@code Finishers}). Held for {@link #REVIVE_TICKS}, it gets them up, for the least filling food you carry (a tamed animal
  * takes one of its own treats instead, {@link #TREATS}). Kingdoms' villagers tend the downed too, and ask for the
  * getting up with the tag {@link #REVIVE_TAG}. Andy (2026-11-14): "kneeling ... unlocks a context where you can use right click
- * to interact, for lockpicking, reviving, lifting, this should help free up some binds": the revive's hold is now made from a
- * kneel at their side ({@code Kneel}), and a tap from the kneel lifts them ({@link Carry#liftDowned}); standing, a hold does nothing.
+ * to interact, for lockpicking, reviving, lifting, this should help free up some binds": the revive's hold was made from a
+ * kneel at their side. Andy (2026-11-20): "right click hold should always be drag, tap can loot. and shift should revive.
+ * the binds got confusing". So now, on anyone downed: a hold of use standing drags them ({@link Carry#liftDowned}; sneak +
+ * right-click while dragging lifts them into your arms), a tap opens the body menu ({@link com.jaymospowers.core.BodyMenu}:
+ * revive, drag, lift, their weapons, a blade stuck in them), and sneak + a hold of use brings them round. Executions stay
+ * sneak + held attack ({@code Finishers}).
  * <p>
  * (0.18.5) Andy (2026-10-29): "while downed, any attack that would deal 3 hearts or more of damage kills instantly ... if
  * anyone goes down without red damage or worse to limbs, they can stand themselves up with shift instead. if they are too
@@ -173,13 +178,13 @@ public final class Downed {
 	 * (0.18.84) Andy: "Players see a black screen and can mash to wake faster." Andy (2026-11-13): presses count from the
 	 * first, and it takes "closer to 3-5". Each press of sneak while knocked out takes an even share off what's left, so a
 	 * knock-out of up to {@link #MASH_SHORT} ticks takes {@link #MASH_LEAST} presses, up to {@link #MASH_LONG} one more,
-	 * and anything longer {@link #MASH_MOST}. The bar ({@link #MASH_BAR} long) measures the whole knock-out, so it moves
+	 * and anything longer {@link #MASH_MOST}. The bar measures the whole knock-out, so it moves
 	 * from the first press and as time passes. Not for a scene's black (a death turned away, a turning, the descent below:
 	 * {@code Mortality.WAKE_LINE}), which runs its own time.
 	 */
-	public static final int MASH_LEAST = 3, MASH_MOST = 5, MASH_SHORT = 300, MASH_LONG = 1200, MASH_BAR = 12;
-	/** How often a downed player is reminded they can give up (ticks), and the give-up bar's length. */
-	static final int HINT_TICKS = 20, GIVE_UP_BAR = 12;
+	public static final int MASH_LEAST = 3, MASH_MOST = 5, MASH_SHORT = 300, MASH_LONG = 1200;
+	/** How often a downed player is reminded they can give up (ticks). */
+	static final int HINT_TICKS = 20;
 	/** (0.7.93) A revive: how long use is held to get them up (ticks), and how long before the bar shows (a tap is Kingdoms' disarm). */
 	public static final int REVIVE_TICKS = 60, TAP_TICKS = 4;
 	/**
@@ -193,8 +198,6 @@ public final class Downed {
 	/** How far past your reach you may lean while reviving, and how often your hands work at it (a swing, a sound). */
 	static final double REVIVE_SLACK = 0.5;
 	static final int REVIVE_WORK_TICKS = 15;
-	/** The revive bar's length. */
-	static final int REVIVE_BAR = 12;
 
 	/** The scoreboard tag on everyone downed (what Kingdoms reads: it never compiles against Powers). */
 	public static final String DOWNED_TAG = "jaymospowers_downed";
@@ -252,6 +255,8 @@ public final class Downed {
 	static final Identifier FIRST = JaymosPowers.id("downed_first");
 	/** Going down is the last say on a death (every other mod's save comes first), and on a right-click on the downed. */
 	static final Identifier LAST = JaymosPowers.id("downed_last");
+	/** After Downed's verdict: a player dying flat is marked to lie ({@link DownedLie#markPlayer}). */
+	static final Identifier LIE_PHASE = JaymosPowers.id("downed_lie");
 
 	/** (0.20.67) The death event's phase Downed decides in (others that must see its verdict order after it). */
 	public static Identifier lastPhase() {
@@ -278,7 +283,7 @@ public final class Downed {
 	/** The blow that put each down: whose kill it is when it dies (not saved; after a reload it dies unclaimed). */
 	private static final Map<LivingEntity, DamageSource> FELLED_BY = new WeakHashMap<>();
 	/** Those being finished off just now (their death let through as it comes). */
-	private static final Set<LivingEntity> FINISHING = Collections.newSetFromMap(new WeakHashMap<>());
+	static final Set<LivingEntity> FINISHING = Collections.newSetFromMap(new WeakHashMap<>());
 	/** A downed player → how long they've held sneak to give up (ticks). */
 	private static final Map<UUID, Integer> GIVING_UP = new HashMap<>();
 
@@ -291,16 +296,21 @@ public final class Downed {
 		boolean begun, over;
 		/** (0.21.39) Whether its bar has been carried on from the last hold on this body ({@link HoldProgress}). */
 		boolean resumed;
-		/** (Andy, 2026-11-14) Begun from a kneel at their side: a hold brings them round, a tap lifts them. Else only a tap. */
-		final boolean knelt;
-		/** Told to kneel first (a hold standing over them). */
-		boolean hinted;
+		/**
+		 * Andy (2026-11-20): "right click hold should always be drag, tap can loot. and shift should revive". Begun sneaking: a
+		 * hold brings them round. Begun standing: a hold drags them ({@link Carry#liftDowned}), a tap takes what they hold.
+		 */
+		final boolean sneaking;
+		/** Chosen from the body menu ({@link #reviveChosen}): it goes on with no sneak held. */
+		boolean chosen;
+		/** Told already, this hold, to get down on a knee first. */
+		boolean toldKneel;
 
-		Revive(LivingEntity body, long start, boolean knelt) {
+		Revive(LivingEntity body, long start, boolean sneaking) {
 			this.body = body;
 			this.start = start;
 			this.held = start;
-			this.knelt = knelt;
+			this.sneaking = sneaking;
 		}
 	}
 
@@ -311,10 +321,43 @@ public final class Downed {
 	public static final List<BiConsumer<ServerPlayer, LivingEntity>> BROUGHT_ROUND_LISTENERS = new ArrayList<>();
 
 	/**
-	 * (0.18.92) Told of every tap on a downed body: use let go before {@link #TAP_TICKS}, so never a revive's hold.
-	 * Xenoform adds one: a tap tears the Xeno-Band off a downed wearer.
+	 * Uses on a body that another mod takes for its own, so no drag, revive or body menu starts from them: Kingdoms adds the
+	 * lasso's (Andy, 2026-11-20, hogtying: "way too many prompts", the drag's bar came up under the tying's).
 	 */
-	public static final List<BiConsumer<ServerPlayer, LivingEntity>> TAPPED_LISTENERS = new ArrayList<>();
+	public static final List<java.util.function.BiPredicate<Player, Entity>> CLAIMED_USES = new ArrayList<>();
+
+	/** Whether another mod takes {@code player}'s use on {@code entity} for its own ({@link #CLAIMED_USES}). */
+	public static boolean claimed(Player player, Entity entity) {
+		for (java.util.function.BiPredicate<Player, Entity> check : CLAIMED_USES) {
+			if (check.test(player, entity)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Revive chosen from the body menu ({@link com.jaymospowers.core.BodyMenu}): one tick of it, as a sneak + hold of use
+	 * would be, with nothing held. True while it goes on.
+	 */
+	public static boolean reviveChosen(ServerPlayer player, LivingEntity body) {
+		if (!isDowned(body) || isDowned(player)) {
+			return false;
+		}
+		long now = player.level().getGameTime();
+		Revive r = REVIVING.get(player.getUUID());
+		if (r == null || r.body != body || !r.chosen) {
+			// (from the menu: no tap to wait out)
+			r = new Revive(body, now - TAP_TICKS, true);
+			r.chosen = true;
+			REVIVING.put(player.getUUID(), r);
+		}
+		if (r.over) {
+			return false;
+		}
+		r.held = now;
+		return true;
+	}
 
 	/**
 	 * (0.21.39) A revive's job in {@link HoldProgress}: this body, this time down (a bar left half full stays with that
@@ -326,6 +369,16 @@ public final class Downed {
 
 	/** Player → their revive. Not saved. */
 	private static final Map<UUID, Revive> REVIVING = new HashMap<>();
+
+	/**
+	 * Server: {@code player} is still holding the use that began on {@code entity} while it was down (a revive, a drag, a tap
+	 * not yet let go), even if they're up now. Carry won't take that hold for a lift (Andy, 2026-11-20: "i revived then
+	 * instantly tossed her, no struggle to pickup at all").
+	 */
+	public static boolean handOn(Player player, Entity entity) {
+		Revive r = REVIVING.get(player.getUUID());
+		return r != null && r.body == entity;
+	}
 
 	/** (0.18.5) A downed player getting up by themselves: how far along, the hits taken, and knocked back (sneak let go first). */
 	private static final class Rise {
@@ -351,6 +404,10 @@ public final class Downed {
 	private static final Set<UUID> MASH_HELD = new java.util.HashSet<>();
 	/** Knocked-out player → how long their knock-out was in all (ticks), for the presses it takes and the bar. Not saved. */
 	private static final Map<UUID, Integer> MASH_LENGTH = new HashMap<>();
+	/** Downed players whose own time runs fast (Chrono's Time Bloom, {@link #timeMend}): the game time they last were. */
+	private static final Map<UUID, Long> HASTENED = new HashMap<>();
+	/** Downed players whose parts time has mended: they rise with what those parts hold, as from a rest in bed. */
+	private static final Set<UUID> TIME_MENDED = new java.util.HashSet<>();
 
 	private Downed() {
 	}
@@ -366,6 +423,9 @@ public final class Downed {
 				// (a mob, fire, a fall, the void: they die as anyone would, body and all; no second downing)
 				// ((0.20.26) what downed them is the cause the death is rolled on, Mortality)
 				Mortality.felled(entity, FELLED_BY.get(entity));
+				// (Andy, 2026-11-18: a downed pillager burning to death "pops into the air when it dies because it defaults back
+				// to standing") whatever ends them, the body starts lying where and how they lay
+				DownedLie.markBody(entity);
 				forget(entity);
 				return true;
 			}
@@ -401,7 +461,8 @@ public final class Downed {
 			}
 			// (Andy, 2026-11-16) a hit that would have killed a humanoid takes a part off; a head (half the time) ends them
 			int lethal = Dismember.lethalPart(entity, source, Wounds.landed(entity, source));
-			if (lethal == Dismember.HEAD) {
+			// (a head taken off or crushed in ends them)
+			if ((lethal & ~Dismember.LETHAL_CRUSH) == Dismember.HEAD) {
 				Dismember.lethalSever(entity, lethal, source);
 				return true;
 			}
@@ -411,18 +472,41 @@ public final class Downed {
 			UndeadFortitude.downed(entity, source);
 			return false;
 		});
+		// (Andy, 2026-11-18) a player who dies lying flat (crawling, crippled, under a low ceiling; the downed are marked as
+		// they're finished) starts their body lying too: after every save, so only a death that goes through is marked
+		ServerLivingEntityEvents.ALLOW_DEATH.addPhaseOrdering(LAST, LIE_PHASE);
+		ServerLivingEntityEvents.ALLOW_DEATH.register(LIE_PHASE, (entity, source, amount) -> {
+			if (entity instanceof Player player && entity.level() instanceof ServerLevel) {
+				DownedLie.markPlayer(player);
+			}
+			return true;
+		});
+		// (and a mark their body didn't use isn't kept for their next death)
+		net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> DownedLie.clearBody(newPlayer));
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
-			if (isDowned(entity) && !FINISHING.contains(entity) && amount >= KILL_BLOW && attack(source) && !outCold(entity)
+			// (Andy, 2026-11-18) a crushing blow (a mutant's slam) on the downed: "theres just simply no place else for that
+			// force to go, so obviously they get gibbed"; knocked out cold or not
+			boolean crushed = isDowned(entity) && com.jaymospowers.core.BlastGore.crushedNow(entity);
+			if (isDowned(entity) && !FINISHING.contains(entity) && amount >= KILL_BLOW && attack(source) && (!outCold(entity) || crushed)
 				&& !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && entity.level() instanceof ServerLevel level) {
+				boolean burst = crushed && com.jaymospowers.core.BlastGore.gibs(entity, source, amount);
+				if (burst && Dismember.rubber(entity) && com.jaymospowers.core.BlastGore.tearLimbs(entity, source)) {
+					// (Rubber-folk: every limb gone but the head kept; they stay down to mend, as from a blast)
+					Dismember.split(entity);
+					return false;
+				}
 				// (0.18.5) three hearts or more on the downed: that's the end of them
 				FELLED_BY.put(entity, source);
 				// (the blow still lands with its thud; the death cry is its own)
 				if (!(entity instanceof Player)) {
 					blowLands(level, entity, source, false);
 				}
+				// (Andy, 2026-11-19) a player's finishing blow to the head takes it off or crushes it before they die, so the
+				// death is a beheading: no reviving it, a reincarnation (Mortality)
+				boolean headGone = !burst && Dismember.playerHeadBlow(entity, source, Wounds.landed(entity, source));
 				finish(level, entity);
-				// (Andy, 2026-11-16) the killing hit takes a part off the body
-				if (entity.isDeadOrDying()) {
+				// (Andy, 2026-11-16) the killing hit takes a part off the body (a burst one has none left to take)
+				if (entity.isDeadOrDying() && !burst && !headGone) {
 					Dismember.lethalBlow(entity, source, null);
 				}
 				return false;
@@ -451,8 +535,8 @@ public final class Downed {
 		// trading with a downed villager, no saddling a downed horse
 		UseEntityCallback.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, LAST);
 		UseEntityCallback.EVENT.register(LAST, (player, world, hand, entity, hit) ->
-			// ((0.15.98) and a plain click on a downed player is a revive's hold, not a bow drawn or a meal eaten)
-			(entity instanceof Mob || entity instanceof Player && (!player.isShiftKeyDown() || com.jaymospowers.core.Stance.low(player))) && isDowned(entity)
+			// ((0.15.98) and a click on a downed player, sneaking or not, is a drag's or a revive's hold, not a bow drawn or a meal eaten)
+			(entity instanceof Mob || entity instanceof Player) && isDowned(entity)
 				? InteractionResult.SUCCESS
 				: InteractionResult.PASS);
 		// a downed player's hands are gone slack: no attacking, using, building or breaking
@@ -609,6 +693,38 @@ public final class Downed {
 		}
 	}
 
+	/**
+	 * Andy (2026-11-17): "bloom will wake them faster as they heal". A downed player's own time run fast, this tick (Chrono's
+	 * Time Bloom, and Overclock's quicker mending): their most hurt part mends {@code amount} (a bed's mend, {@link
+	 * DownedStruggle}) and the bleed-out clock holds; with {@code hasten} (the Bloom) a passed-out one comes round and a
+	 * rise started now takes half as long. They rise with what the mended parts hold. Server side; nothing for one who isn't down.
+	 */
+	public static void timeMend(ServerPlayer player, float amount, boolean hasten) {
+		if (!isDowned(player) || player.hasAttached(KNOCKED)) {
+			return;
+		}
+		long now = player.level().getGameTime();
+		if (hasten && passedOut(player)) {
+			wake(player, false);
+		}
+		if (now - since(player) > ADRENALINE_TICKS) {
+			// (held past the rush only: one still on adrenaline keeps it)
+			holdClock(player, now);
+		}
+		if (amount > 0.0F && DownedStruggle.mendWorst(player, amount)) {
+			TIME_MENDED.add(player.getUUID());
+		}
+		if (hasten) {
+			HASTENED.put(player.getUUID(), now);
+		}
+	}
+
+	/** Whether {@code player}'s time ran fast last tick or this one ({@link #timeMend}). */
+	private static boolean hastened(ServerPlayer player, long now) {
+		Long at = HASTENED.get(player.getUUID());
+		return at != null && now - at <= 1L;
+	}
+
 	/** A downed player who has passed out. */
 	public static boolean passedOut(Entity entity) {
 		return entity.hasAttached(OUT);
@@ -707,7 +823,7 @@ public final class Downed {
 	 * Whether this blow leaves anything to get up: not one that ignores invulnerability, nor a beheading (or a body already
 	 * headless). And a totem in hand is left to do its work (this event comes before it).
 	 */
-	private static boolean spared(LivingEntity entity, DamageSource source) {
+	static boolean spared(LivingEntity entity, DamageSource source) {
 		return !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !source.is(Dismember.DECAPITATION) && !Dismember.headless(entity)
 			&& !entity.entityTags().contains(Dismember.tag(Dismember.HEAD))
 			&& !entity.getMainHandItem().is(Items.TOTEM_OF_UNDYING) && !entity.getOffhandItem().is(Items.TOTEM_OF_UNDYING)
@@ -771,6 +887,10 @@ public final class Downed {
 			GIVING_UP.remove(player.getUUID());
 			RISES.remove(player.getUUID());
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.down").withStyle(ChatFormatting.RED));
+			if (source != null && !keepHealth) {
+				// a lethal blow downed them: the Stubborn perk's fast-mending window
+				Stubborn.downed(player, level);
+			}
 		}
 		level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.PLAYER_BIG_FALL, SoundSource.NEUTRAL, 0.9F, 0.8F);
 	}
@@ -792,6 +912,8 @@ public final class Downed {
 			GIVING_UP.remove(player.getUUID());
 			RISES.remove(player.getUUID());
 			SINKING.remove(player.getUUID());
+			HASTENED.remove(player.getUUID());
+			TIME_MENDED.remove(player.getUUID());
 			if (player instanceof ServerPlayer server) {
 				DownedStruggle.forget(server);
 			}
@@ -905,6 +1027,22 @@ public final class Downed {
 		// (0.15.82) up, but battered
 		Battered.gotUp(entity);
 		return true;
+	}
+
+	/**
+	 * How likely a blow to the head is to knock {@code victim} out cold, against anyone else (1): a thrown rock's and a blunt
+	 * arrow's chance is multiplied by it. Jaymo's Kingdoms sets this at server start (its {@code PowersCompat}, a Brute's
+	 * Thick Skull); without Kingdoms every skull is 1.
+	 */
+	public static java.util.function.ToDoubleFunction<LivingEntity> headKnock = victim -> 1.0;
+
+	/** {@link #headKnock} for {@code victim}, safely. */
+	public static float headKnock(LivingEntity victim) {
+		try {
+			return (float) headKnock.applyAsDouble(victim);
+		} catch (RuntimeException e) {
+			return 1.0F;
+		}
 	}
 
 	/**
@@ -1241,6 +1379,8 @@ public final class Downed {
 		} else if (!player.hasAttached(Crawl.CRAWLING) && Crawl.canCrawl(player)) {
 			player.setAttached(Crawl.CRAWLING, true);
 		}
+		// (Andy, 2026-11-19) crawled into a wall, they sit up against it ({@link DownedLie#crawlInto})
+		DownedLie.crawlInto(player);
 		player.setSprinting(false);
 		AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
 		// (0.19.55) quick on adrenaline, then slower as their strength fades (in hundredths, so it isn't resent every tick)
@@ -1281,9 +1421,8 @@ public final class Downed {
 				player.setAttached(KNOCKED, until << 1 | (knocked & 1L));
 			}
 			if (press || now % HINT_TICKS == 0) {
-				int filled = MASH_BAR - Math.round(MASH_BAR * Math.min(1.0F, (until - now) / (float) length));
-				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.knocked_mash",
-					"|".repeat(filled) + ".".repeat(MASH_BAR - filled)).withStyle(ChatFormatting.DARK_PURPLE));
+				HudBar.hold(player, "knocked", 1.0F - Math.min(1.0F, (until - now) / (float) length), HudBar.PURPLE,
+					Component.translatable("bar.jaymospowers.knocked"), true);
 			}
 			return;
 		}
@@ -1306,16 +1445,17 @@ public final class Downed {
 			return;
 		}
 		if (sneaking ? held % 2 == 0 : now % HINT_TICKS == 0) {
-			int filled = Math.round(GIVE_UP_BAR * held / (float) GIVE_UP_TICKS);
-			String bar = "|".repeat(filled) + ".".repeat(GIVE_UP_BAR - filled);
 			// (0.18.68) why they can't get up: the part at red, or being carried or in the water
 			BodyPart blocking = blocksRise(player);
-			Component message = out ? Component.translatable("message.jaymospowers.downed.give_up_out", bar)
+			Component message = out ? Component.translatable("message.jaymospowers.downed.give_up_out")
 				// (Andy, 2026-11-14) cut in two, nothing will get them up: only the drag and the bleed-out
-				: Dismember.halved(player) ? Component.translatable("message.jaymospowers.downed.give_up_halved", bar)
-				: blocking != null ? Component.translatable(feet(player, "message.jaymospowers.downed.give_up_hurt"), blocking.displayName(), bar)
-				: Component.translatable("message.jaymospowers.downed.give_up", bar);
+				: Dismember.halved(player) ? Component.translatable("message.jaymospowers.downed.give_up_halved")
+				: blocking != null ? Component.translatable(feet(player, "message.jaymospowers.downed.give_up_hurt"), blocking.displayName())
+				: Component.translatable("message.jaymospowers.downed.give_up");
 			player.sendOverlayMessage(message.copy().withStyle(sneaking ? ChatFormatting.RED : ChatFormatting.GRAY));
+			if (held > 0) {
+				HudBar.hold(player, "give_up", held / (float) GIVE_UP_TICKS, HudBar.DARK_RED, Component.translatable("bar.jaymospowers.give_up"), true);
+			}
 		}
 	}
 
@@ -1360,6 +1500,10 @@ public final class Downed {
 		}
 		if (r.ticks++ == 0) {
 			r.length = tooHurt(player) ? Math.round(RISE_TICKS * WALL_RISE_SLOW) : RISE_TICKS;
+			if (hastened(player, now)) {
+				// (Andy, 2026-11-17) their own time running fast under a Time Bloom: up in half the time
+				r.length = Math.max(1, r.length / 2);
+			}
 			if (r.length != RISE_TICKS) {
 				player.setAttached(RISE_LENGTH, r.length);
 			} else if (player.hasAttached(RISE_LENGTH)) {
@@ -1374,15 +1518,13 @@ public final class Downed {
 		}
 		if (r.ticks < r.length) {
 			if (r.ticks % 2 == 0) {
-				int filled = Math.round(GIVE_UP_BAR * r.ticks / (float) r.length);
-				player.sendOverlayMessage(Component.translatable(feet(player, "message.jaymospowers.downed.rising"), "|".repeat(filled) + ".".repeat(GIVE_UP_BAR - filled))
-					.withStyle(ChatFormatting.YELLOW));
+				HudBar.hold(player, "rising", r.ticks / (float) r.length, HudBar.YELLOW, Component.translatable(feet(player, "bar.jaymospowers.rising")), true);
 			}
 			return;
 		}
 		RISES.remove(player.getUUID());
 		// (0.21.49) what a rest in bed mended, they rise with
-		float rested = DownedStruggle.resting(player) ? Wounds.restedHealth(player) : 0.0F;
+		float rested = DownedStruggle.resting(player) || TIME_MENDED.contains(player.getUUID()) ? Wounds.restedHealth(player) : 0.0F;
 		// (asked before the getting up: a cane picked up after doesn't change what they did)
 		String risen = feet(player, "message.jaymospowers.downed.risen");
 		getUp(level, player);
@@ -1520,22 +1662,26 @@ public final class Downed {
 			// (0.14.4) medicine in hand: Treatment's, not a revive
 			return InteractionResult.PASS;
 		}
-		// (Andy, 2026-11-14) "kneeling ... unlocks a context where you can use right click to interact, for lockpicking,
-		// reviving, lifting": from a kneel at their side (Kneel: the low crouch, held still) a hold of use brings them round and
-		// a tap lifts them (Carry#liftDowned). Standing, a tap is only a tap (a Xenoform band torn off); a sneak standing over
-		// them is nothing of this any more (Carry leaves the downed to the kneel), and medicine that wants sneak is Treatment's
-		boolean knelt = player instanceof ServerPlayer sp && com.jaymospowers.core.Kneel.kneeling(sp);
-		if (player.isShiftKeyDown() && !knelt) {
+		if (com.jaymospowers.core.Prosthetics.fitsOn(player.getMainHandItem(), entity) != 0) {
+			// a limb in hand that they lack: it's fitted to them (Prosthetics), not a revive
 			return InteractionResult.PASS;
 		}
+		// Andy (2026-11-20): "right click hold should always be drag, tap can loot. and shift should revive. the binds got
+		// confusing". Standing, a hold of use drags them (Carry#liftDowned) and a tap takes what's in their hands (Kingdoms) or
+		// stuck in them (Lodged); sneaking, a hold brings them round. No low crouch or kneel needed first any more. Medicine
+		// that wants sneak is Treatment's (above)
+		if (claimed(player, entity)) {
+			return InteractionResult.PASS;
+		}
+		boolean sneaking = player.isShiftKeyDown();
 		Revive held = REVIVING.get(player.getUUID());
 		if (held != null && held.body == entity) {
-			// still holding use: the bar keeps filling, or, once it's over (they're up), nothing more till let go
+			// still holding use: the bar keeps filling, or, once it's over (they're up, or taken hold of), nothing more till let go
 			held.held = world.getGameTime();
 		} else if (entity instanceof LivingEntity body && isDowned(body) && !player.isSpectator()) {
-			REVIVING.put(player.getUUID(), new Revive(body, world.getGameTime(), knelt));
+			REVIVING.put(player.getUUID(), new Revive(body, world.getGameTime(), sneaking));
 		}
-		// (only watching: a tap on a downed guard still has Kingdoms take its weapons, and Downed's catch-all swallows the rest)
+		// (only watching: the tap and the holds are worked out in revives(); Downed's catch-all swallows the click)
 		return InteractionResult.PASS;
 	}
 
@@ -1562,16 +1708,7 @@ public final class Downed {
 			if (now - r.held > REVIVE_GRACE) {
 				// let go
 				it.remove();
-				if (!r.begun && r.held - r.start < TAP_TICKS && isDowned(body)) {
-					if (r.knelt) {
-						// (Andy, 2026-11-14) a tap from the kneel: taken up
-						com.jaymospowers.core.Carry.liftDowned(player, body);
-					} else {
-						for (BiConsumer<ServerPlayer, LivingEntity> listener : TAPPED_LISTENERS) {
-							listener.accept(player, body);
-						}
-					}
-				}
+				// (a tap standing opens the body menu, BodyMenu: their weapons and a blade in them are taken from there)
 				if (r.begun && !r.over) {
 					player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.revive_stopped", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
 				}
@@ -1580,10 +1717,27 @@ public final class Downed {
 			if (r.over || r.held - r.start < TAP_TICKS) {
 				continue;
 			}
-			if (!r.knelt) {
-				// (Andy, 2026-11-14) a hold standing over them does nothing now: kneel at their side first
-				if (!r.hinted) {
-					r.hinted = true;
+			if (!r.sneaking) {
+				// (Andy, 2026-11-20) "right click hold should always be drag": held standing, they're taken by the shoulder
+				// (by the arms, if they can't be dragged: a small animal), from the shore too if they lie in the water
+				long holding = now - r.start;
+				if (holding >= Carry.LIFT_TICKS) {
+					r.over = true;
+					if (!Carry.liftDowned(player, body)) {
+						player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.cant_take_hold", body.getDisplayName())
+							.withStyle(ChatFormatting.GRAY));
+					}
+				} else if (holding % 2 == 0) {
+					HudBar.hold(player, "carry_lift", holding / (float) Carry.LIFT_TICKS, HudBar.GREY,
+						Component.translatable("bar.jaymospowers.taking_hold", body.getDisplayName()), true);
+				}
+				continue;
+			}
+			// Andy (2026-11-20): "the revive needs to be on knees", and he picked kneeling down for it: a sneak + hold brings
+			// them round only from a kneel at their side (the low crouch, held still: Kneel). The menu's Revive kneels you itself
+			if (!r.chosen && !com.jaymospowers.core.Kneel.kneeling(player)) {
+				if (!r.toldKneel) {
+					r.toldKneel = true;
 					player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.kneel_first", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
 				}
 				continue;
@@ -1604,13 +1758,13 @@ public final class Downed {
 					continue;
 				}
 			}
-			if (!com.jaymospowers.core.Kneel.crouched(player) || Carry.isCarried(body) || !player.isWithinEntityInteractionRange(body, REVIVE_SLACK)) {
+			if (!r.chosen && !player.isShiftKeyDown() || Carry.isCarried(body) || !player.isWithinEntityInteractionRange(body, REVIVE_SLACK)) {
 				r.over = true;
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.revive_stopped", body.getDisplayName()).withStyle(ChatFormatting.GRAY));
 				continue;
 			}
-			// (0.15.99) down on one knee at their side
-			Tending.keep(player, body);
+			// (0.15.99) down at their side; (Andy, 2026-11-20: "the revive needs to be on knees") on both knees
+			Tending.keep(player, body, true);
 			String job = reviveJob(body);
 			if (!r.resumed) {
 				// (0.21.39) let go before: the bar carries on where it stopped
@@ -1632,9 +1786,7 @@ public final class Downed {
 			}
 			if (r.ticks < need) {
 				if (r.ticks % 2 == 0) {
-					int filled = Math.round(REVIVE_BAR * r.ticks / (float) need);
-					String bar = "|".repeat(filled) + ".".repeat(REVIVE_BAR - filled);
-					player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.reviving", body.getDisplayName(), bar).withStyle(ChatFormatting.GRAY));
+					HudBar.hold(player, "reviving", r.ticks / (float) need, HudBar.GREY, Component.translatable("bar.jaymospowers.reviving", body.getDisplayName()), true);
 				}
 				continue;
 			}
@@ -1663,6 +1815,10 @@ public final class Downed {
 					eaten = stack.getHoverName();
 					stack.consume(1, player);
 					player.getInventory().setChanged();
+				}
+				if (body instanceof ServerPlayer patient) {
+					// (Andy, 2026-11-17) the limbs they carry, or that lie by them, are strapped on as they're got up
+					com.jaymospowers.core.Prosthetics.fitFrom(patient, player);
 				}
 				String revived = feet(body, "message.jaymospowers.downed.revived");
 				getUp(level, body);

@@ -107,7 +107,7 @@ public final class SkyCourt {
 								continue;
 							}
 							BoundingBox box = start.getBoundingBox();
-							if (!level.hasChunksAt(box.minX(), box.minZ(), box.maxX(), box.maxZ())) {
+							if (!Loaded.made(level, box.minX(), box.minZ(), box.maxX(), box.maxZ())) {
 								continue;
 							}
 							if (castle) {

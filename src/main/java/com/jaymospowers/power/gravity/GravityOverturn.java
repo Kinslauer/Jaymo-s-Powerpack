@@ -133,6 +133,7 @@ public final class GravityOverturn {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		GravityPower.touch(target, player);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "gravity.overturn", 1);
 		boolean resists = !overpowers(player, target);
 		Turn turn = new Turn(level.dimension(), target, player, resists);
 		if (resists) {

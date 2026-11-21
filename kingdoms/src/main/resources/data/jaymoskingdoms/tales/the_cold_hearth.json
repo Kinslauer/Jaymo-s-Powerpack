@@ -30,6 +30,7 @@
     "camp": { "at": "camp", "name": "the raiders' camp on the moor" },
     "tents": { "at": "near", "from": "camp", "dist": [15, 30], "name": "the camp's tents" },
     "ditch": { "at": "near", "from": "camp", "dist": [60, 120], "name": "the old ditch below the moor" },
+    "hollow": { "at": "near", "from": "ditch", "dist": [50, 90], "name": "a hollow under the moor's edge" },
     "grave": { "at": "near", "from": "camp", "dist": [30, 60], "name": "a stone at the camp's edge" }
   },
   "first": "to_fork",
@@ -234,10 +235,58 @@
       "then": "rite"
     },
     "escort_cass": {
-      "do": "escort", "who": "cass", "to": "hall", "goal": "Walk Cass down to {place:hall}",
+      "do": "escort", "who": "cass", "to": "hollow", "goal": "Walk Cass down off the moor to {place:hollow}",
       "journal": "Cass came down off the moor, past the old ditch where her village had walked. She did not look at it, and she did not hurry.",
       "failed": "end:lost_on_road",
-      "then": "rite"
+      "then": "camp_one"
+    },
+    "camp_one": {
+      "do": "build", "at": "hollow", "blocks": "minecraft:campfire", "count": 1, "goal": "Make a fire for the night at {place:hollow}", "then": "fire_one",
+      "give": [
+        {"item": "minecraft:campfire", "count": 1, "name": "Cass's kindling", "lore": ["A bundle from under her shawl: three sticks to cross and one to stand up.", "Dry, for all the moor is wet."]}
+      ]
+    },
+    "fire_one": {
+      "do": "vigil", "at": "hollow", "when": "night", "gap": 10, "goal": "Sit the night at the fire with Cass", "mark": "ch_fire_one", "left": "walk_two", "then": "walk_two",
+      "lines": [
+        {"who": "cass", "say": "Three sticks crossed and one stood up in the middle. That is a Larkfold fire. I have not sat at one in two winters."},
+        {"say": "The fire catches and settles. Cass sits with her back to the moor and to the old ditch.", "sound": "minecraft:block.campfire.crackle"},
+        {"who": "cass", "say": "There are twenty-two of them, and I have not said one aloud since the night it burned. If I come to the hall with my mouth cold I shall stop at the third and stand there like a post."},
+        {"who": "cass", "say": "So I'll say one at each fire, going down, to get my tongue round them. You need not answer. You did not know them."},
+        {"who": "cass", "say": "Harry Coombe. The miller. He laughed so that you heard it at the far end of the street, and he gave short weight to nobody but the priest."},
+        {"who": "cass", "if": "cass=held", "say": "He put me in the meal bin when they came, and shut the lid, and sat down on it. That is why I was the one they found last. I have never got the flour out of this shawl."},
+        {"who": "cass", "if": "cass=wed", "say": "My boy's second name is Harry. I have never told {raider} why. He thinks it is for an uncle."},
+        {"say": "She says the name once more, under her breath. The flame leans towards her, though there is no wind in the hollow.", "sound": "minecraft:block.campfire.crackle"},
+        {"who": "cass", "say": "That is one. Sleep, if you can. I'll watch the first half."}
+      ],
+      "journal": "At the first fire Cass said one of Larkfold's names aloud: Harry Coombe, the miller. She means to say one at every fire on the way down."
+    },
+    "walk_two": {
+      "do": "escort", "who": "cass", "to": "fork", "goal": "Walk Cass on down the road to {place:fork}", "failed": "end:lost_on_road", "then": "camp_two"
+    },
+    "camp_two": {
+      "do": "build", "at": "fork", "blocks": "minecraft:campfire", "count": 1, "goal": "Make a fire for the night at {place:fork}", "then": "fire_two",
+      "give": [
+        {"item": "minecraft:campfire", "count": 1, "name": "Cass's kindling", "lore": ["A bundle from under her shawl: three sticks to cross and one to stand up.", "She gathered it on the way down and said nothing about it."]}
+      ]
+    },
+    "fire_two": {
+      "do": "vigil", "at": "fork", "when": "night", "gap": 10, "goal": "Sit the night at the fire with Cass", "mark": "ch_fire_two", "left": "escort_hall", "then": "escort_hall",
+      "lines": [
+        {"say": "Cass kneels at the waystone and puts her hand into the hollow under it, where the pot was.", "sound": "minecraft:block.campfire.crackle"},
+        {"who": "cass", "say": "He put it here on his way up, in case, with a day or two of fire still in it. He could have carried it on to the camp and lost it with the purse. He left a coal where somebody would find it."},
+        {"who": "cass", "say": "Ada Wren. She kept the geese, and one of them bit the priest, and she said it had better judgment than the whole street."},
+        {"who": "cass", "say": "She worked a wren on every shawl she owned, so that nobody could say they had taken hers by mistake."},
+        {"say": "Cass looks across the fire for a long moment. She does not ask who walked at the old ditch, or who put them down."},
+        {"who": "cass", "if": "cass=held", "say": "Up at the camp I kept my teeth shut on them, so that nobody there should have the use of them. I had forgotten they would still come when called."},
+        {"who": "cass", "if": "cass=wed", "say": "When the boy is old enough I shall say them to him at our own fire, one a night, like this. Somebody ought to say them up there, of all places."},
+        {"who": "cass", "say": "That is two. Twenty yet, and then his. I can do twenty. I think I can do twenty."},
+        {"say": "The fire burns down to a red eye. A long way down the road there is one light, where the town is.", "sound": "minecraft:block.campfire.crackle"}
+      ],
+      "journal": "At the waystone fire Cass said the second: Ada Wren, who kept the geese and worked a wren on every shawl. Twenty left to say, and then her father's."
+    },
+    "escort_hall": {
+      "do": "escort", "who": "cass", "to": "hall", "goal": "Walk Cass down to {place:hall}", "failed": "end:lost_on_road", "then": "rite"
     },
     "rite": {
       "do": "build", "at": "hall", "blocks": "minecraft:campfire", "count": 1, "goal": "Light the Larkfold coal from the hall's fire and set it in the hearth",

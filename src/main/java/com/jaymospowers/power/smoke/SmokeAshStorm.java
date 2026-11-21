@@ -1,6 +1,7 @@
 package com.jaymospowers.power.smoke;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Fate;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -109,7 +110,7 @@ final class SmokeAshStorm {
 			return;
 		}
 		STORMS.put(player.getUUID(), now);
-		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.CRANE, FILM_TICKS, RADIUS * 2.0);
+		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.CRANE, FILM_TICKS, AbilityPower.size(player, RADIUS) * 2.0);
 		SmokePower.cooldown(player, SmokeState.ASH, COOLDOWN);
 		SmokeMoves.begin(player, SmokeMoves.ASH);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 1.5F, 0.5F);
@@ -139,7 +140,7 @@ final class SmokeAshStorm {
 		}
 		ServerLevel level = player.level();
 		float strength = Math.min(1.0F, age / (float)BUILD_TICKS);
-		double r = RADIUS * (0.4 + 0.6 * strength);
+		double r = AbilityPower.size(player, RADIUS) * (0.4 + 0.6 * strength);
 		double base = cloudBase(level, player);
 		// the cloud: smog high overhead, kept topped up, and ash falling out of it
 		if (age % 10 == 0) {

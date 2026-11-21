@@ -77,13 +77,16 @@ final class TimeBloom {
 	/** Its owner's particle style ({@link ChronoFx#style}). */
 	final int fx;
 	final BlockPos center;
+	/** How far it reaches: {@link #RADIUS}, wider by its maker's Ability Power when it was made. */
+	private final int radius;
 	int ticksLeft = DURATION;
 	private int age;
 	private final List<BlockPos> randomTickers = new ArrayList<>();
 	private final List<BlockPos> blockEntities = new ArrayList<>();
 
-	TimeBloom(ServerLevel level, BlockPos center, int fx) {
+	TimeBloom(ServerLevel level, BlockPos center, int fx, net.minecraft.world.entity.Entity owner) {
 		this.level = level;
+		this.radius = com.jaymospowers.core.AbilityPower.size(owner, RADIUS);
 		this.fx = fx;
 		this.center = center;
 	}
@@ -92,7 +95,7 @@ final class TimeBloom {
 		Vec3 c = Vec3.atCenterOf(center);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 1.2F);
 		level.playSound(null, c.x, c.y, c.z, SoundEvents.BONE_MEAL_USE, SoundSource.PLAYERS, 1.0F, 0.8F);
-		ChronoFx.particles(level, fx, ParticleTypes.HAPPY_VILLAGER, c.x, c.y, c.z, 30, RADIUS * 0.5, 0.6, RADIUS * 0.5, 0.0);
+		ChronoFx.particles(level, fx, ParticleTypes.HAPPY_VILLAGER, c.x, c.y, c.z, 30, radius * 0.5, 0.6, radius * 0.5, 0.0);
 		ChronoFx.particles(level, fx, MagicFx.EMBER, c.x, c.y + 0.5, c.z, 20, 1.0, 0.5, 1.0, 0.5);
 		scan();
 	}
@@ -118,8 +121,8 @@ final class TimeBloom {
 	private void scan() {
 		randomTickers.clear();
 		blockEntities.clear();
-		int r2 = RADIUS * RADIUS;
-		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-RADIUS, -RADIUS, -RADIUS), center.offset(RADIUS, RADIUS, RADIUS))) {
+		int r2 = radius * radius;
+		for (BlockPos pos : BlockPos.betweenClosed(center.offset(-radius, -radius, -radius), center.offset(radius, radius, radius))) {
 			if (pos.distSqr(center) > r2 || !level.shouldTickBlocksAt(pos)) {
 				continue;
 			}
@@ -187,13 +190,13 @@ final class TimeBloom {
 	/** The creatures in the bloom (and Kingdoms' growing trees) have a second's worth of quickened time. */
 	private void ageCreatures() {
 		int ticks = CREATURE_EXTRA_TICKS * RESCAN_INTERVAL;
-		AABB box = new AABB(center).inflate(RADIUS);
-		for (Animal animal : level.getEntitiesOfClass(Animal.class, box, a -> a.isAlive() && a.position().closerThan(Vec3.atCenterOf(center), RADIUS))) {
+		AABB box = new AABB(center).inflate(radius);
+		for (Animal animal : level.getEntitiesOfClass(Animal.class, box, a -> a.isAlive() && a.position().closerThan(Vec3.atCenterOf(center), radius))) {
 			BloomFarms.bloom(animal, ticks);
 			ChronoFx.particles(level, fx, ParticleTypes.HAPPY_VILLAGER, animal.getX(), animal.getY() + animal.getBbHeight() * 0.7, animal.getZ(),
 				2, 0.3, 0.3, 0.3, 0.0);
 		}
-		com.jaymospowers.compat.KingdomsCompat.hurryTrees(level, center, RADIUS, ticks);
+		com.jaymospowers.compat.KingdomsCompat.hurryTrees(level, center, radius, ticks);
 	}
 
 	private void blockEntityTicks() {
@@ -250,8 +253,8 @@ final class TimeBloom {
 		RandomSource random = level.getRandom();
 		if (age % 3 == 0) {
 			for (int i = 0; i < 4; i++) {
-				double x = center.getX() + 0.5 + (random.nextDouble() * 2 - 1) * RADIUS;
-				double z = center.getZ() + 0.5 + (random.nextDouble() * 2 - 1) * RADIUS;
+				double x = center.getX() + 0.5 + (random.nextDouble() * 2 - 1) * radius;
+				double z = center.getZ() + 0.5 + (random.nextDouble() * 2 - 1) * radius;
 				double y = center.getY() + random.nextDouble() * 2.0;
 				ChronoFx.particles(level, fx, i % 2 == 0 ? BLOOM_DUST : GOLD_DUST, x, y, z, 1, 0.0, 0.0, 0.0, 0.0);
 			}
@@ -262,7 +265,7 @@ final class TimeBloom {
 			for (int h = 0; h < 12; h++) {
 				double a = a0 + h / 12.0 * Math.PI * 2.0;
 				ChronoFx.particles(level, fx, h % 3 == 0 ? MagicFx.EMBER : ParticleTypes.COMPOSTER,
-					center.getX() + 0.5 + Math.sin(a) * RADIUS, center.getY() + 0.15, center.getZ() + 0.5 - Math.cos(a) * RADIUS,
+					center.getX() + 0.5 + Math.sin(a) * radius, center.getY() + 0.15, center.getZ() + 0.5 - Math.cos(a) * radius,
 					1, 0.0, 0.0, 0.0, 0.0);
 			}
 		}

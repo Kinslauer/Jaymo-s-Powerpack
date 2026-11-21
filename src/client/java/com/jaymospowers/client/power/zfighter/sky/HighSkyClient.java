@@ -29,6 +29,10 @@ import net.minecraft.world.phys.Vec3;
  * blasts) is drawn in front of it. Near the bottom of the high sky it all fades ({@link #FADE_FROM}, {@link #FADE_OVER}) so you
  * see the Aether's islands coming up as you sink toward them. Textures: {@code textures/environment/high_sky.png}
  * ({@code tools/gen_high_sky.py}).
+ * <p>(Lanterns, Andy: "this is what i want the high sky to look like") The higher you climb, the farther below the planet lies and
+ * the more of its curve you see ({@link #CURVE_GROWTH}); the sun up here is hard and white, with glare across it. From
+ * {@link #ORBIT_ABOVE} blocks up the high sky you are in orbit ({@link #inOrbit}): a Z Fighter's cruise goes {@link #ORBIT_SPEED}
+ * times as fast, carrying them far across the world below, and they come down wherever they dive.
  */
 public final class HighSkyClient {
 	// ---- tuning ----
@@ -61,6 +65,13 @@ public final class HighSkyClient {
 	};
 	/** It fades out this many blocks above the bottom of the high sky, over this many more. */
 	static final float FADE_FROM = 8.0F, FADE_OVER = 40.0F;
+	/** The climb: over this many blocks above the high sky's bottom the planet sinks to this many times as far below (more curve). */
+	static final float CLIMB_SPAN = 160.0F, CURVE_GROWTH = 1.6F;
+	/** Orbit: from this many blocks above the high sky's bottom, a cruise goes this many times as fast. */
+	static final float ORBIT_ABOVE = 96.0F;
+	public static final double ORBIT_SPEED = 3.0;
+	/** The sun's glare: how long its spikes reach (blocks on the sky) and how thin they are. */
+	static final float GLARE_LONG = 9.0F, GLARE_THIN = 0.12F;
 
 	static final Identifier ATLAS = JaymosPowers.id("textures/environment/high_sky.png");
 	/** The atlas's plain white cell (u, v of its middle). */
@@ -85,6 +96,36 @@ public final class HighSkyClient {
 
 	public static void init() {
 		LevelRenderEvents.COLLECT_SUBMITS.register(HighSkyClient::render);
+	}
+
+	/** How many blocks above the high sky's bottom {@code y} is (looked for down to {@code most}; 0 when not in it). */
+	static float above(ClientLevel level, double y, float most) {
+		if (Stacked.realm(level, y) != ZFighterHighSky.HIGH_SKY) {
+			return 0.0F;
+		}
+		for (int down = 4; down <= most; down += 4) {
+			if (Stacked.realm(level, y - down) != ZFighterHighSky.HIGH_SKY) {
+				return down;
+			}
+		}
+		return most;
+	}
+
+	/** Whether {@code at} is in orbit: high in the high sky. */
+	public static boolean inOrbit(ClientLevel level, Vec3 at) {
+		return above(level, at.y, ORBIT_ABOVE) >= ORBIT_ABOVE;
+	}
+
+	private static boolean toldOrbit;
+
+	/** How many times as fast a cruise goes for {@code player} here (in orbit, {@link #ORBIT_SPEED}); says so once on getting there. */
+	public static double cruiseBoost(net.minecraft.client.player.LocalPlayer player) {
+		boolean orbit = inOrbit((ClientLevel) player.level(), player.position());
+		if (orbit && !toldOrbit) {
+			player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymospowers.orbit"));
+		}
+		toldOrbit = orbit;
+		return orbit ? ORBIT_SPEED : 1.0;
 	}
 
 	/** How far into the high sky the camera is (0 not in it, 1 well up in it). */
@@ -113,6 +154,8 @@ public final class HighSkyClient {
 		if (fade <= 0.0F) {
 			return;
 		}
+		// the higher, the farther below the planet, and the more of its curve shows
+		curve(PLANET_DOWN * (1.0F + CURVE_GROWTH * Mth.clamp(above(level, camera.y, CLIMB_SPAN) / CLIMB_SPAN, 0.0F, 1.0F)));
 		float partial = minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		long time = Math.floorMod(level.getOverworldClockTime(), 24000L);
 		double turn = Math.PI * 2.0 * ((time - 6000L + partial) / 24000.0);
@@ -182,10 +225,31 @@ public final class HighSkyClient {
 
 	private static void sun(VertexConsumer buffer, PoseStack.Pose pose, float x, float y, int alpha) {
 		float u0 = 48.0F / 64.0F, v0 = 16.0F / 64.0F, u1 = 64.0F / 64.0F, v1 = 32.0F / 64.0F;
-		// a soft glow round it, then the disc
-		billboard(buffer, pose, x * (BODY_R + 1.0F), y * (BODY_R + 1.0F), 0.0F, SUN_SIZE * 2.2F, (alpha / 5) << 24 | 0xFFE9B0, WHITE_U, WHITE_V,
+		// no air to soften it: a tight white glare, spikes across it, then the disc
+		billboard(buffer, pose, x * (BODY_R + 1.0F), y * (BODY_R + 1.0F), 0.0F, SUN_SIZE * 3.0F, (alpha / 8) << 24 | 0xFFFFFF, WHITE_U, WHITE_V,
 			WHITE_U, WHITE_V);
-		billboard(buffer, pose, x * BODY_R, y * BODY_R, 0.0F, SUN_SIZE, alpha << 24 | 0xFFFFFF, u0, v0, u1, v1);
+		billboard(buffer, pose, x * (BODY_R + 0.8F), y * (BODY_R + 0.8F), 0.0F, SUN_SIZE * 1.6F, (alpha / 2) << 24 | 0xFFFFFF, WHITE_U, WHITE_V,
+			WHITE_U, WHITE_V);
+		glare(buffer, pose, x, y, alpha);
+		billboard(buffer, pose, x * BODY_R, y * BODY_R, 0.0F, SUN_SIZE * 1.15F, alpha << 24 | 0xFFFFFF, u0, v0, u1, v1);
+	}
+
+	/** Two thin spikes of glare crossing the sun (direction {@code x}, {@code y} in the plane the sky turns in). */
+	private static void glare(VertexConsumer buffer, PoseStack.Pose pose, float x, float y, int alpha) {
+		float cx = x * (BODY_R + 0.5F), cy = y * (BODY_R + 0.5F);
+		// across the sky's turning plane (z), and along it, square to the sun's direction
+		float[][] axes = {{0.0F, 0.0F, 1.0F}, {-y, x, 0.0F}};
+		int k = (alpha * 3 / 4) << 24 | 0xFFFFFF, edge = 0x00FFFFFF;
+		for (int i = 0; i < 2; i++) {
+			float[] a = axes[i], b = axes[1 - i];
+			float lx = a[0] * GLARE_LONG, ly = a[1] * GLARE_LONG, lz = a[2] * GLARE_LONG;
+			float tx = b[0] * GLARE_THIN, ty = b[1] * GLARE_THIN, tz = b[2] * GLARE_THIN;
+			float[] mid0 = {cx - tx, cy - ty, -tz}, mid1 = {cx + tx, cy + ty, tz};
+			float[] tipA = {cx + lx, cy + ly, lz}, tipB = {cx - lx, cy - ly, -lz};
+			// each half fades from the middle out to its tip
+			quad(buffer, pose, mid0, k, WHITE_U, WHITE_V, mid1, k, WHITE_U, WHITE_V, tipA, edge, WHITE_U, WHITE_V, tipA, edge, WHITE_U, WHITE_V);
+			quad(buffer, pose, mid1, k, WHITE_U, WHITE_V, mid0, k, WHITE_U, WHITE_V, tipB, edge, WHITE_U, WHITE_V, tipB, edge, WHITE_U, WHITE_V);
+		}
 	}
 
 	private static void world(VertexConsumer buffer, PoseStack.Pose pose, float[] world, float c, float s, int alpha) {
@@ -198,11 +262,20 @@ public final class HighSkyClient {
 
 	// ---------------------------------------------------------------- the planet below
 
-	/** The horizontal reach of the planet's edge as seen from the camera, its height there, and how far below level it lies (radians). */
-	private static final float LIMB_REACH, LIMB_Y, LIMB_DIP;
+	/**
+	 * How far under the camera the planet's face is (blocks at its scale; it grows as you climb), the horizontal reach of its edge as
+	 * seen from the camera, its height there, and how far below level it lies (radians). Worked out each frame ({@link #curve}).
+	 */
+	private static float down = PLANET_DOWN, LIMB_REACH, LIMB_Y, LIMB_DIP;
 
 	static {
-		float out = PLANET_R + PLANET_DOWN;
+		curve(PLANET_DOWN);
+	}
+
+	/** The planet lies {@code planetDown} under the camera: where its edge falls. */
+	private static void curve(float planetDown) {
+		down = planetDown;
+		float out = PLANET_R + down;
 		float cos = PLANET_R / out;
 		LIMB_REACH = PLANET_R * (float) Math.sqrt(1.0 - cos * cos);
 		LIMB_Y = -out + PLANET_R * cos;
@@ -217,7 +290,7 @@ public final class HighSkyClient {
 			z *= LIMB_REACH / reach;
 			reach = LIMB_REACH;
 		}
-		float y = -(PLANET_R + PLANET_DOWN) + (float) Math.sqrt(PLANET_R * PLANET_R - reach * reach);
+		float y = -(PLANET_R + down) + (float) Math.sqrt(PLANET_R * PLANET_R - reach * reach);
 		return onSky(x, y, z, at);
 	}
 

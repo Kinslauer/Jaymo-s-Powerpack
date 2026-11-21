@@ -121,11 +121,16 @@ public final class Tinkering {
 	/** (0.18.52) The materials that make a tool a forged iron one. */
 	static final Set<String> IRONWORK = Set.of("iron", "pig_iron", "steel");
 
+	/** Put on a player for gear they made at a tool station, for Jaymo's Kingdoms' class experience (taken off as it's read). */
+	public static final String MADE_TAG = "jaymospowers_made";
+
 	/** (0.18.52) Tells {@link #TOOL_BUILT_LISTENERS} that {@code player} took {@code tool}, if it is made of iron or better. */
 	public static void toolBuilt(net.minecraft.world.entity.player.Player player, ItemStack tool) {
 		if (!(player instanceof net.minecraft.server.level.ServerPlayer smith) || tool.isEmpty() || TOOL_MATERIALS == null) {
 			return;
 		}
+		// gear made at a station: Jaymo's Kingdoms reads the tag (a Tinkerer's class experience) and takes it off
+		smith.addTag(MADE_TAG);
 		List<String> made = tool.get(TOOL_MATERIALS);
 		if (made == null || made.stream().noneMatch(IRONWORK::contains)) {
 			return;

@@ -603,6 +603,8 @@ public final class FallingStars {
 	private static void starAt(ServerLevel level, BlockPos pos) {
 		BlockPos at = pos.immutable();
 		level.setBlock(at, FallenStarBlock.FALLEN_STAR.defaultBlockState(), Block.UPDATE_ALL);
+		// (Sora's Dagger) the blade may stand in a stone beside the crater
+		com.jaymospowers.power.wind.SorasStone.crater(level, at);
 		if (level.getRandom().nextInt(XenoFinds.WRECK_ONE_IN) == 0) {
 			StarWreckBlock.wreck(level, at);
 		}

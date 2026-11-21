@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_dye",
+  "dye": "#minecraft:dyes",
+  "group": "dyed_armor",
+  "result": {
+    "id": "jaymospowers:mailed_jack"
+  },
+  "target": "jaymospowers:mailed_jack"
+}

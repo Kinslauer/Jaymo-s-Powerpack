@@ -57,6 +57,16 @@ public final class Fanfare {
 		burst(player, color, s);
 	}
 
+	/**
+	 * A big moment with no chord or burst: just the title and the line under it (a heritage chosen, a realm sworn to, a
+	 * ladder king felled). With Jaymo's Powers on the client it is drawn as its title card; without, as vanilla's title.
+	 */
+	public static void title(ServerPlayer player, Component title, @Nullable Component subtitle) {
+		player.connection.send(new ClientboundSetTitlesAnimationPacket(8, TITLE_STAY[MAJOR], 20));
+		player.connection.send(new ClientboundSetTitleTextPacket(title));
+		player.connection.send(new ClientboundSetSubtitleTextPacket(subtitle == null ? Component.empty() : subtitle));
+	}
+
 	/** The chord alone (layered, so a bigger step sounds bigger). */
 	public static void chord(ServerPlayer player, int size) {
 		ServerLevel level = player.level();

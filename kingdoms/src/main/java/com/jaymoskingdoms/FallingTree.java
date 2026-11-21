@@ -259,6 +259,31 @@ public final class FallingTree extends Entity {
 	 * tick (null if nothing was there). It falls as anything does once the winds let it go, and breaks apart where it strikes the ground.
 	 */
 	public static @Nullable FallingTree fling(ServerLevel level, BlockPos foot, List<BlockPos> logs, List<BlockPos> leaves, Vec3 velocity, float heading, float tumble) {
+		FallingTree tree = loose(level, foot, logs, leaves, velocity, heading, tumble);
+		if (tree != null) {
+			level.playSound(null, foot, SoundEvents.ROOTED_DIRT_BREAK, SoundSource.BLOCKS, 1.6F, 0.6F);
+			level.playSound(null, foot, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.4F, 0.5F);
+		}
+		return tree;
+	}
+
+	/**
+	 * Wood left hanging on nothing ({@link LooseWood}): the {@code logs} and {@code leaves} whose lowest log is
+	 * {@code foot} drop from where they hang, tumbling toward {@code heading} by {@code tumble} degrees a tick, and land
+	 * and crash as any falling tree does. Null if nothing was there.
+	 */
+	static @Nullable FallingTree drop(ServerLevel level, BlockPos foot, List<BlockPos> logs, List<BlockPos> leaves, float heading, float tumble) {
+		FallingTree tree = loose(level, foot, logs, leaves, Vec3.ZERO, heading, tumble);
+		if (tree != null) {
+			// (it falls at once, and lands on the first thing under it: there's no hole of its own to clear)
+			hurl(tree, Vec3.ZERO, tumble, null);
+			level.playSound(null, foot, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.4F, 0.5F);
+		}
+		return tree;
+	}
+
+	/** {@link #fling}'s tree, without its sounds. */
+	private static @Nullable FallingTree loose(ServerLevel level, BlockPos foot, List<BlockPos> logs, List<BlockPos> leaves, Vec3 velocity, float heading, float tumble) {
 		int height = 1;
 		for (BlockPos p : logs) {
 			height = Math.max(height, p.getY() - foot.getY() + 1);
@@ -275,8 +300,6 @@ public final class FallingTree extends Entity {
 		tree.tumble = tumble;
 		tree.setDeltaMovement(velocity);
 		level.addFreshEntity(tree);
-		level.playSound(null, foot, SoundEvents.ROOTED_DIRT_BREAK, SoundSource.BLOCKS, 1.6F, 0.6F);
-		level.playSound(null, foot, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.4F, 0.5F);
 		return tree;
 	}
 

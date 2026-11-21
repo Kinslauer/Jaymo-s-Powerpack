@@ -1,0 +1,11 @@
+{
+	"menu.jaymoskingdoms.tab.rewards": "Rewards",
+	"gui.jaymoskingdoms.rewards.none": "Nothing waits for you. Pay from bounties, wages and rescues is kept here until you claim it.",
+	"gui.jaymoskingdoms.rewards.from": "%s from %s",
+	"gui.jaymoskingdoms.rewards.claim": "Claim",
+	"gui.jaymoskingdoms.rewards.all": "Claim all",
+	"rewards.jaymoskingdoms.source.bounty": "Bounty",
+	"rewards.jaymoskingdoms.source.wages": "Wages",
+	"rewards.jaymoskingdoms.source.rescue": "Rescue",
+	"message.jaymoskingdoms.rewards.held": "%s from %s waits in your Rewards (the H menu, or /rewards)."
+}

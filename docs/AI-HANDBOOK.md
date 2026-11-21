@@ -92,84 +92,13 @@ Check every Minecraft API against the 26.3 sources (`sh ./gradlew genSources`) b
 
 ### Adding a GeckoLib mob to Kingdoms
 
-Kingdoms draws new animated mobs with GeckoLib 5.5.7 (`maven.modrinth:geckolib:kSxHvs99`, the same file the pack ships;
-package `com.geckolib`, not GeckoLib 4's `software.bernie`). The example to copy is the **barrow beetle**:
-`kingdoms/src/main/java/com/jaymoskingdoms/inhabitants/BarrowBeetle.java`. The Bogre, Impaler and Warped Clam follow it.
-
-1. **Model, texture, animations.** Keep an editable Blockbench project in `kingdoms/art/<mob>.bbmodel` (a ported model:
-   its licence and credit beside it, `kingdoms/art/<mob>-LICENSE.txt` and `-CREDITS.md`). Model it facing north (-z),
-   feet at y 0; bone names must be unique. Then write the game's files with
-   `py -3 -I tools/bbmodel_geckolib.py kingdoms/art/<mob>.bbmodel kingdoms/src/main/resources/assets/jaymoskingdoms <mob>`.
-   It writes exactly where GeckoLib 5 looks, and nowhere else works (5.5.7 only scans these two folders):
-   - `assets/jaymoskingdoms/geckolib/models/entity/<mob>.geo.json`
-   - `assets/jaymoskingdoms/geckolib/animations/entity/<mob>.animation.json`
-   - `assets/jaymoskingdoms/textures/entity/<mob>.png` (several Blockbench textures are stacked into one sheet)
-
-   Old GeckoLib 4 paths (`geo/<mob>.geo.json`, `animations/<mob>.animation.json`) are not loaded: move such files.
-   Check the look before Java: bake to scratch with `tools/bbmodel_bake.py` and render poses with
-   `tools/bbmodel_preview.py <scratch> <mob> out.png <animation> <seconds>`.
-2. **The entity** (`inhabitants/<Mob>.java`): extend the vanilla base you need (`PathfinderMob`, `Monster`, ...) and
-   `implements GeoEntity`. Keep `private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);`
-   and return it from `getAnimatableInstanceCache()`. In `registerControllers` add:
-   - a looping controller that picks the animation every frame:
-     `new AnimationController<Mob>("move", 4, test -> test.setAndContinue(test.isMoving() ? WALK : IDLE))`; the client
-     entity is `test.animatable()`, so read its synced data there (a dormant statue, a block just taken);
-   - a controller for one-off moves the server starts:
-     `new AnimationController<Mob>("action", test -> PlayState.STOP).triggerableAnim("attack", ATTACK)`, played with
-     `this.triggerAnim("action", "attack")` on the server (GeckoLib sends it to every client watching).
-   Animation names are the keys in the `.animation.json`: `RawAnimation.begin().thenLoop("walk")`, `.thenPlay("attack")`.
-   Attributes, goals, sounds and tuning constants as for any Kingdoms mob.
-3. **Registration** (`inhabitants/Inhabitants.java`): `Beasts.type("<mob>", EntityType.Builder.of(...).sized(w, h), attrs)`
-   registers the type, its attributes and its spawn egg; then `SpawnPlacements.register(...)` and, if it spawns in the
-   world, `BiomeModifications.addSpawn` on a biome tag of its own (`data/jaymoskingdoms/tags/worldgen/biome/has_<mob>.json`).
-4. **The renderer** (`client/inhabitants/InhabitantsClient.register()`): one line,
-   `EntityRenderers.register(Inhabitants.MOB, ctx -> new InhabitantRenderer<Mob>(ctx, "<mob>", scale, shadow, "head"))`.
-   To show or hide bones by state (the draugr's axe or sword, the Skeleton Lord's crystals), subclass it as
-   `DraugrRenderer` does: put the state in with `addRenderData` (a `DataTicket`) and read it in `adjustModelBonesForRender`
-   (`snapshots.ifPresent("bone", b -> b.skipRender(...))`).
-5. **The rest:** lang in `lang/parts/inhabitants.json` (entity name and `item.jaymoskingdoms.<mob>_spawn_egg`), the egg's
-   `items/`, `models/item/` and `textures/item/` files (`kingdoms/tools/gen_tomb_undead.py`'s `eggs()` makes them), a
-   change note, then build and boot `runServer` once (a new entity type).
-
-Credits: never copy Draugr Invasion (All Rights Reserved) or Supplementaries in any form. Inhabitants (JeremySeq / Team
-Synapse), Stormborn Tomb (Tada_no_ahiru), DungeonZ and FrogiLib are MIT: reuse with their licence text kept beside what
-uses them and credit in the change note.
+Moved to `.claude/rules/geckolib-mobs.md` (Claude Code loads it when you touch a GeckoLib mob's files; other
+assistants read it before adding or changing one). The example to copy is still the barrow beetle.
 
 ### Animating a Blockbench model with keyframes of our own
 
-How Notus and Boreas moved to GeckoLib (2026-11-09; the example is `kingdoms/tools/gen_fire_dragon_geo.py`). Use it
-for a model that comes with too few animations, or to move a mob off our own loader (`BbModel`, `BbMobRenderer`, or
-a model posed in Java) without changing how it looks.
-
-1. **Write the animations in a script, not by hand.** The script reads the source `.bbmodel` (`tools/bbmodels/`), adds
-   animations in Blockbench's own format (an `animators` entry per bone, keyed by the bone's group `uuid`, keyframes
-   with `channel`, `data_points`, `time` and `interpolation`), and writes `kingdoms/art/<mob>.bbmodel`. Then it runs
-   `tools/bbmodel_geckolib.py` on that file. Andy can still open the result in Blockbench, but the script is the
-   source: change the numbers there and run it again.
-2. **Units and signs.** In a "free" or "modded entity" project, keyframe values are the game's way: degrees as a
-   `ModelPart`'s angles, positions with x and y turned round (+y is up). A bone's resting angle in the game is the
-   Blockbench rotation with x and y negated. Keyframes are *added* to the resting pose, so to hold a part at an
-   absolute angle `a`, key `a - rest`. Old Java posing code turns straight into keyframes this way: `part.xRot += d`
-   becomes a key of `d`, `part.xRot = a` a key of `a - rest`, and `top.y -= 19` a position y of +19.
-3. **Check every pose against the old one before writing Java.** Bake to scratch (`tools/bbmodel_bake.py <art> <scratch>
-   <mob>`) and render with `tools/bbmodel_preview.py <scratch> <mob> out.png <anim> <seconds> <texture>`. The old
-   code's pose renders with the `POSE` variable (`bone:=x:y:z` sets an angle, `bone=x:y:z` adds, `bone@=x:y:z` moves
-   the pivot), so you can put the two side by side. Pass `--drop` to the bake too, for any bone the GeckoLib files leave out.
-4. **Controllers.** A `move` controller picks the looping animation every frame from the entity's own client-side
-   state (`AnimationTest.animatable()`), and `test.setControllerSpeed(...)` keeps a loop in time with the game (the
-   dragons' wingbeat follows their stroke rate, the walk their walk speed). An `action` controller plays one-off moves
-   the server triggers (`triggerAnim`), from hooks the base class already has (`WindDragon.bitten`/`swept`).
-   Controllers aren't additive by default: a later controller replaces an earlier one on every bone it keys. So key
-   only the bones a move needs (the bite keys the neck, head and jaw) and the legs keep walking underneath.
-5. **Things that follow the game every frame** (head look, a jaw while breathing, pitching with a climb) go in the
-   renderer's `adjustModelBonesForRender`. GeckoLib's x and y rotations are the negative of a `ModelPart`'s (see
-   `DefaultAnimations.hardcodedHeadRotation`), so `part.xRot += d` becomes `bone.setRotX(bone.getRotX() - d)`.
-6. **Textures that change per mob** (hides, markings): override the model's `getTextureResource(GeoRenderState)` and
-   read a `DataTicket` the renderer adds in `addRenderData`. Glowing markings are a `TextureLayerGeoLayer` with
-   `RenderTypes::eyes` (`FireDragonRenderer`).
-7. Credit and licence beside the art (`<mob>-CREDITS.md`, `<mob>-LICENSE.txt`), a render (`<mob>-render.png`), and
-   update `textures/entity/bb/CREDITS.txt` if the mob was listed there. Build. Say plainly that the animations
-   haven't been seen in game.
+Moved to `.claude/rules/blockbench-animation.md` (the Notus and Boreas method: animations written by a script,
+units and signs, checking poses before Java, controllers).
 
 ## 4. Versions, branches, PRs and merging
 

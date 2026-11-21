@@ -73,6 +73,11 @@ public final class LockOnRegions {
 	 * server start (its {@code PowersCompat}); without Kingdoms every face is 1.
 	 */
 	public static ToDoubleFunction<LivingEntity> face = victim -> 1.0;
+	/**
+	 * Whether this blow on {@code victim} is one that can't miss or glance off the head it was called on. Jaymo's Kingdoms
+	 * sets this at server start (its {@code PowersCompat}, a Ranger's Heartseeker); without Kingdoms no blow is.
+	 */
+	public static java.util.function.BiPredicate<LivingEntity, DamageSource> sure = (victim, source) -> false;
 	/** The last aimed hit's roll on each victim, so the one blow asked twice (routing, then its damage) glances the same. */
 	private static final Map<LivingEntity, Rolled> ROLLED = new WeakHashMap<>();
 
@@ -108,12 +113,20 @@ public final class LockOnRegions {
 
 	/** Whether this blow, aimed at {@code victim}'s head through the lock, misses ({@link #HEAD_MISS}); a whiff is heard. */
 	private static boolean missesHead(LivingEntity victim, DamageSource source) {
-		if (aimedRegion(victim, source) != Region.HEAD || !(source.getEntity() instanceof Player player)
+		if (aimedRegion(victim, source) != Region.HEAD || !(source.getEntity() instanceof Player player) || sure(victim, source)
 			|| victim.getRandom().nextFloat() >= HEAD_MISS * steadiness(player) || !(victim.level() instanceof ServerLevel level)) {
 			return false;
 		}
 		level.playSound(null, victim.getX(), victim.getEyeY(), victim.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.PLAYERS, 1.0F, 1.2F);
 		return true;
+	}
+
+	private static boolean sure(LivingEntity victim, DamageSource source) {
+		try {
+			return sure.test(victim, source);
+		} catch (RuntimeException e) {
+			return false;
+		}
 	}
 
 	/** What's left of the head's miss and glance chances for {@code player}: 1 with no Finesse, {@code 1 - FINESSE_AIM} at full. */
@@ -302,7 +315,7 @@ public final class LockOnRegions {
 		}
 		Region region = aimed;
 		// a head shot may glance off onto the torso
-		if (region == Region.HEAD && victim.getRandom().nextFloat() < glance(victim, player)) {
+		if (region == Region.HEAD && !sure(victim, source) && victim.getRandom().nextFloat() < glance(victim, player)) {
 			region = Region.TORSO;
 		}
 		BodyPart part = part(victim, plan, region, player.getEyePosition());

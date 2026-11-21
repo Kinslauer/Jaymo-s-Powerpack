@@ -136,11 +136,12 @@ public record BigVeinFeature(BlockState ore, Optional<BlockState> deep, int size
 		if (nether) {
 			return there.is(BlockTags.BASE_STONE_NETHER) ? stoneOre : null;
 		}
+		// (andesite, diorite, granite and tuff keep their own look: stoneores/StoneOres)
 		if (there.is(BlockTags.STONE_ORE_REPLACEABLES)) {
-			return stoneOre;
+			return com.jaymospowers.stoneores.StoneOres.variant(stoneOre, there);
 		}
 		if (there.is(BlockTags.DEEPSLATE_ORE_REPLACEABLES)) {
-			return mixed && partner.isPresent() ? partnerDeep.orElse(stoneOre) : deep.orElse(ore);
+			return com.jaymospowers.stoneores.StoneOres.variant(mixed && partner.isPresent() ? partnerDeep.orElse(stoneOre) : deep.orElse(ore), there);
 		}
 		return null;
 	}

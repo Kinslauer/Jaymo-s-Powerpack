@@ -1,5 +1,7 @@
 package com.jaymospowers.tinkering;
 
+import com.jaymospowers.bonebond.Boneiron;
+import com.jaymospowers.bonebond.BoneironPlateItem;
 import com.jaymospowers.power.wind.SorasDagger;
 import com.jaymospowers.power.wind.SorasLineage;
 import com.jaymospowers.tinkering.table.TableExtras;
@@ -34,6 +36,7 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * (Tool Forge) The same menu with 5 slots is the Tool Forge's ({@link #forge}): a tool of more than
  * {@link Tables#STATION_MAX_PARTS} parts (or a weapon head with more than that in all) can only be put together there.
+ * A piece of armour (any armour) and a boneiron plate plates the piece there ({@link Boneiron}).
  * Both have the side inventory and tabs ({@link TableExtras}).
  */
 public class ToolStationMenu extends AbstractContainerMenu implements TinkerTableMenu {
@@ -99,7 +102,8 @@ public class ToolStationMenu extends AbstractContainerMenu implements TinkerTabl
 				public boolean mayPlace(ItemStack stack) {
 					return stack.getItem() instanceof ToolPartItem || stack.getItem() instanceof WeaponPartItem || Modifier.takes(stack) || TinkerMaterial.of(stack) != null
 						|| stack.getItem() instanceof SorasDagger || stack.is(Items.BREEZE_ROD) || WeaponParts.isExtra(stack) || ToolBuilds.isBit(stack)
-						|| Modifier.ingredient(stack);
+						|| Modifier.ingredient(stack)
+						|| kind == StationBlock.Kind.TOOL_FORGE && (stack.is(Boneiron.PLATE) || BoneironPlateItem.armour(stack));
 				}
 			});
 		}
@@ -192,6 +196,13 @@ public class ToolStationMenu extends AbstractContainerMenu implements TinkerTabl
 			broadcastChanges();
 			return;
 		}
+		// (a plated piece may be Tinkering armour, so it's checked before the repair)
+		ItemStack plated = plate();
+		if (plated != null) {
+			result.setItem(inputCount, plated);
+			broadcastChanges();
+			return;
+		}
 		if (toolSlot >= 0 && filled > 1) {
 			out = repair(toolSlot);
 			if (out.isEmpty()) {
@@ -239,6 +250,44 @@ public class ToolStationMenu extends AbstractContainerMenu implements TinkerTabl
 		uses[rod] = 1;
 		status = Component.translatable("gui.jaymospowers.tool_station.embed");
 		return inputs.getItem(dagger).transmuteCopy(SorasDagger.STAGES[SorasDagger.DIAMOND], 1);
+	}
+
+	/**
+	 * (Tool Forge) A piece of armour and a boneiron plate, nothing else: the piece with one more plating ({@link Boneiron};
+	 * null when that's not what is in; empty when the piece has all {@link Boneiron#PLATINGS}).
+	 */
+	private @Nullable ItemStack plate() {
+		if (kind != StationBlock.Kind.TOOL_FORGE) {
+			return null;
+		}
+		int armour = -1, plate = -1;
+		for (int i = 0; i < inputCount; i++) {
+			ItemStack stack = inputs.getItem(i);
+			if (stack.isEmpty()) {
+				continue;
+			}
+			if (stack.is(Boneiron.PLATE) && plate == -1) {
+				plate = i;
+			} else if (BoneironPlateItem.armour(stack) && stack.getCount() == 1 && armour == -1) {
+				armour = i;
+			} else {
+				return null;
+			}
+		}
+		if (armour == -1 || plate == -1) {
+			return null;
+		}
+		int had = inputs.getItem(armour).getOrDefault(Boneiron.PLATED, 0);
+		if (had >= Boneiron.PLATINGS) {
+			status = Component.translatable("gui.jaymospowers.tool_station.plate_full");
+			return ItemStack.EMPTY;
+		}
+		ItemStack out = inputs.getItem(armour).copy();
+		out.set(Boneiron.PLATED, had + 1);
+		uses[armour] = 1;
+		uses[plate] = 1;
+		status = Component.translatable("gui.jaymospowers.tool_station.plate", had + 1, Boneiron.PLATINGS);
+		return out;
 	}
 
 	/** Parts only: the tool whose parts they are. */

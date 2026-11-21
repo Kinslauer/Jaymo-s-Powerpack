@@ -45,6 +45,20 @@ public record WebPose(int kind, long start, int side) {
 	public static final int UPSIDE = 17;
 	/** A balanced crouch on a narrow top ({@link WebPerch}); lasts as long as the attachment {@link WebPower#PERCH} does. */
 	public static final int PERCH = 18;
+	/**
+	 * Acrobatics ({@code freerun.moves.Acrobatics}): the standing backflip off the dodge key with Back held (the Backflip
+	 * perk), then the dodge key's mid-air tricks: a tucked side flip, a tornado spin, a toe touch, a swan, a straight back
+	 * flip with a full twist, a double front, a double back and a butterfly twist. Numbered past the perch, so nothing saved moves.
+	 */
+	public static final int STAND_BACKFLIP = 19, SIDE_FLIP = 20, AIR_SPIN = 21, TOE_TOUCH = 22, SWAN = 23, LAYOUT_TWIST = 24,
+		DOUBLE_FRONT = 25, DOUBLE_BACK = 26, BUTTERFLY = 27;
+	public static final int FIRST_ACRO = STAND_BACKFLIP, LAST_ACRO = BUTTERFLY;
+	/**
+	 * Strikes out of a swing ({@link WebAirStrikes}), thrown in the air after a web is let go: a rising blow that sends
+	 * the foe up, a two-footed dive kick that slams the ground where it lands, and a spinning strike that hits all round.
+	 * Not tricks, so nothing cuts them short and they hold off the next trick while they play.
+	 */
+	public static final int RISING_BLOW = 28, DIVE_KICK = 29, SPIN_STRIKE = 30;
 
 	/** How long each kind lasts (ticks). */
 	public static final int DODGE_TICKS = 12;
@@ -65,6 +79,13 @@ public record WebPose(int kind, long start, int side) {
 			case GLIDE_KICK -> 16;
 			case HERO_LAND -> 28;
 			case WINGS_LAND -> 20;
+			case STAND_BACKFLIP, LAYOUT_TWIST -> 18;
+			case SIDE_FLIP, SWAN -> 14;
+			case AIR_SPIN, TOE_TOUCH -> 10;
+			case DOUBLE_FRONT, DOUBLE_BACK -> 22;
+			case BUTTERFLY -> 16;
+			case RISING_BLOW, SPIN_STRIKE -> 14;
+			case DIVE_KICK -> 40;
 			case ROAR -> WebSymbiote.ROAR_TICKS;
 			case SPIKES -> WebSymbiote.SPIKE_POSE_TICKS;
 			default -> DODGE_TICKS;
@@ -72,7 +93,17 @@ public record WebPose(int kind, long start, int side) {
 	}
 
 	public static boolean trick(int kind) {
-		return kind >= FIRST_TRICK && kind <= LAST_TRICK || kind == BACK_FLIP;
+		return kind >= FIRST_TRICK && kind <= LAST_TRICK || kind == BACK_FLIP || acro(kind);
+	}
+
+	/** The acrobatics' own kinds: the standing backflip and the mid-air tricks that are new with it. */
+	public static boolean acro(int kind) {
+		return kind >= FIRST_ACRO && kind <= LAST_ACRO;
+	}
+
+	/** How long {@code kind} lasts (ticks). */
+	public static int ticks(int kind) {
+		return new WebPose(kind, 0L, 1).ticks();
 	}
 
 	public static boolean landing(int kind) {

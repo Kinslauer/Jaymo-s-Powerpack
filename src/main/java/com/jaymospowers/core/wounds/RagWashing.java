@@ -1,6 +1,7 @@
 package com.jaymospowers.core.wounds;
 
 import com.jaymospowers.core.HoldProgress;
+import com.jaymospowers.core.HudBar;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -59,7 +60,6 @@ public final class RagWashing {
 	public static final int BOIL_TICKS = 400, RAGS_PER_LEVEL = 4;
 	/** Washing is a held use this long (ticks); it ends when you let go or run out of rags. */
 	public static final int USE_TICKS = 72000;
-	static final int BAR = 12;
 	/** (0.21.39) The wash in {@link HoldProgress}: one rag's worth, kept between holds. */
 	static final String WASH_JOB = "wash_rag";
 
@@ -136,9 +136,7 @@ public final class RagWashing {
 		int into = HoldProgress.add(player.getUUID(), WASH_JOB, 1);
 		if (into < WASH_TICKS) {
 			if (into % 2 == 0) {
-				int filled = Math.round(BAR * into / (float) WASH_TICKS);
-				player.sendOverlayMessage(Component.translatable("message.jaymospowers.wounds.washing_bar", "|".repeat(filled) + ".".repeat(BAR - filled))
-					.withStyle(ChatFormatting.GRAY));
+				HudBar.hold(player, "washing", into / (float) WASH_TICKS, HudBar.AQUA, Component.translatable("bar.jaymospowers.washing"), true);
 			}
 			return;
 		}

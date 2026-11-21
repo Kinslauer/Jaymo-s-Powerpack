@@ -195,7 +195,7 @@ public final class Riders {
 		}
 		Vec3 ahead = Vec3.directionFromRotation(0.0F, mount.getYRot());
 		target.push(ahead.x * 0.6 * pace, 0.15 * pace, ahead.z * 0.6 * pace);
-		return amount * (float)(1.0 + LANCE_CHARGE * pace);
+		return amount * (float)(1.0 + LANCE_CHARGE * pace * Horsemanship.lancer(rider));
 	}
 
 	static boolean lance(ItemStack held) {

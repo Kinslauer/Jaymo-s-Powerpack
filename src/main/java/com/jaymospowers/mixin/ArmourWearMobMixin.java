@@ -13,5 +13,6 @@ abstract class ArmourWearMobMixin {
 	@Inject(method = "aiStep", at = @At("TAIL"))
 	private void jaymospowers$restArmour(CallbackInfo ci) {
 		ArmourWear.rest((Mob) (Object) this);
+		com.jaymospowers.tinkering.smithing.LightFoes.tick((Mob) (Object) this);
 	}
 }

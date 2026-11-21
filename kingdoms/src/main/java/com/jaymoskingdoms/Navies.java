@@ -580,6 +580,7 @@ final class Navies {
 		}
 		Raids.tell(level, ship.blockPosition(), Component.translatable("message.jaymoskingdoms.ship.harboured", crew.name,
 			to == null ? Component.literal("?") : Component.literal(to.name())).withStyle(ChatFormatting.AQUA));
+		FarGrounds.roverLost(level, ship);
 		stow(ship);
 	}
 
@@ -606,10 +607,12 @@ final class Navies {
 				put(server, crew.faction, h.withSquadron(squadron));
 			} else if (crew.side == Crew.Side.NAVY) {
 				put(server, crew.faction, h.withWarship(null, null, now));
-			} else if (h.merchant().isPresent()) {
+			} else if (h.merchant().isPresent() && h.merchant().get().equals(ship.getUUID())) {
 				put(server, crew.faction, h.withMerchant(null, now));
 			}
 		}
+		// (a merchantman met out at sea (SeaPassers) isn't her harbour's own)
+		FarGrounds.roverLost(level, ship);
 		Faction f = Factions.get(server, crew.faction);
 		if (player != null && f != null) {
 			Reputation.change(player, f, REP_SINK);

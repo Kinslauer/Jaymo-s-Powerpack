@@ -1,5 +1,6 @@
 package com.jaymospowers.power.wind;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Shakes;
 import java.util.HashMap;
@@ -162,7 +163,7 @@ public final class WindThunderDive {
 		ServerLevel level = player.level();
 		double dropped = Math.max(0.0, dive.startY() - player.getY());
 		float power = (float)Mth.clamp(dropped / FULL_DROP, 0.0, 1.0);
-		double radius = Mth.lerp(power, RADIUS_MIN, RADIUS_MAX);
+		double radius = Mth.lerp(power, AbilityPower.size(player, RADIUS_MIN), AbilityPower.size(player, RADIUS_MAX));
 		float damage = Mth.lerp(power, DAMAGE_MIN, DAMAGE_MAX) * WindModes.abilityScale(player);
 		double push = Mth.lerp(power, PUSH_MIN, PUSH_MAX);
 		Vec3 at = player.position();

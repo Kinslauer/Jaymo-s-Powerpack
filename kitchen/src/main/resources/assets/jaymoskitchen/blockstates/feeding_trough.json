@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "fill=0": {
+      "model": "jaymoskitchen:block/feeding_trough_0"
+    },
+    "fill=1": {
+      "model": "jaymoskitchen:block/feeding_trough_1"
+    },
+    "fill=2": {
+      "model": "jaymoskitchen:block/feeding_trough_2"
+    },
+    "fill=3": {
+      "model": "jaymoskitchen:block/feeding_trough_3"
+    }
+  }
+}

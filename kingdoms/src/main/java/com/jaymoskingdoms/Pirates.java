@@ -74,6 +74,8 @@ public final class Pirates {
 	static final int BOMB_RELOAD = 70, BOMB_JITTER = 40, BOMB_FLIGHT_MIN = 14, BOMB_FLIGHT_MAX = 30;
 	/** How wide of his mark a throw lands at its furthest (blocks). */
 	static final double BOMB_STRAY = 1.5;
+	/** The share of a pirate crew's deckhands in a studded leather jerkin. */
+	static final float DECKHAND_STUDDED = 0.5F;
 	/** While fighting, a pirate shouts about once in this many ticks. */
 	static final int SHOUT_ONE_IN = 300;
 	/** Their colours: a red bandana, a black one; a sailor's striped shirt (white), a blue coat; tar-black breeches. */
@@ -106,10 +108,11 @@ public final class Pirates {
 			folk.getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(2.0);
 			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
 			folk.setItemSlot(EquipmentSlot.OFFHAND, pistol());
-			folk.setItemSlot(EquipmentSlot.HEAD, dyed(Items.LEATHER_HELMET, BLACK_CLOTH));
-			folk.setItemSlot(EquipmentSlot.CHEST, dyed(Items.LEATHER_CHESTPLATE, CAPTAIN_COAT));
-			folk.setItemSlot(EquipmentSlot.LEGS, dyed(Items.LEATHER_LEGGINGS, TAR));
-			folk.setItemSlot(EquipmentSlot.FEET, dyed(Items.LEATHER_BOOTS, BLACK_CLOTH));
+			// a pirate captain's coat is mailed leather throughout
+			folk.setItemSlot(EquipmentSlot.HEAD, LightLeather.piece(LightLeather.MAILED, EquipmentSlot.HEAD, dyed(Items.LEATHER_HELMET, BLACK_CLOTH)));
+			folk.setItemSlot(EquipmentSlot.CHEST, LightLeather.piece(LightLeather.MAILED, EquipmentSlot.CHEST, dyed(Items.LEATHER_CHESTPLATE, CAPTAIN_COAT)));
+			folk.setItemSlot(EquipmentSlot.LEGS, LightLeather.piece(LightLeather.MAILED, EquipmentSlot.LEGS, dyed(Items.LEATHER_LEGGINGS, TAR)));
+			folk.setItemSlot(EquipmentSlot.FEET, LightLeather.piece(LightLeather.MAILED, EquipmentSlot.FEET, dyed(Items.LEATHER_BOOTS, BLACK_CLOTH)));
 			folk.setCustomName(Component.literal(captainName(folk.getUUID().getLeastSignificantBits() ^ faction.id())));
 		}));
 		Folk.defineRole(new Folk.Role(GUNNER, "pirate_gunner", true, false, null, (folk, faction) -> {
@@ -127,6 +130,10 @@ public final class Pirates {
 			folk.setItemSlot(EquipmentSlot.OFFHAND, pistol());
 			if (random.nextInt(3) > 0) {
 				folk.setItemSlot(EquipmentSlot.HEAD, dyed(Items.LEATHER_HELMET, random.nextBoolean() ? RED_CLOTH : BLACK_CLOTH));
+			}
+			// the hands among the crew: studded leather on about half
+			if (random.nextFloat() < DECKHAND_STUDDED) {
+				folk.setItemSlot(EquipmentSlot.CHEST, LightLeather.piece(LightLeather.STUDDED, EquipmentSlot.CHEST, new ItemStack(Items.LEATHER_CHESTPLATE)));
 			}
 			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.pirate_of", faction.name()));
 		}));
@@ -151,8 +158,8 @@ public final class Pirates {
 		Folk.defineRole(new Folk.Role(SEA_CAPTAIN, "sea_captain", true, false, null, (folk, faction) -> {
 			base(folk, SEA_CAPTAIN_HEALTH, SEA_CAPTAIN_DAMAGE, 0.3);
 			folk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
-			folk.setItemSlot(EquipmentSlot.HEAD, dyed(Items.LEATHER_HELMET, COAT));
-			folk.setItemSlot(EquipmentSlot.CHEST, dyed(Items.LEATHER_CHESTPLATE, COAT));
+			folk.setItemSlot(EquipmentSlot.HEAD, LightLeather.piece(LightLeather.MAILED, EquipmentSlot.HEAD, dyed(Items.LEATHER_HELMET, COAT)));
+			folk.setItemSlot(EquipmentSlot.CHEST, LightLeather.piece(LightLeather.MAILED, EquipmentSlot.CHEST, dyed(Items.LEATHER_CHESTPLATE, COAT)));
 			folk.setItemSlot(EquipmentSlot.LEGS, dyed(Items.LEATHER_LEGGINGS, SHIRT));
 			folk.setItemSlot(EquipmentSlot.FEET, dyed(Items.LEATHER_BOOTS, BLACK_CLOTH));
 			folk.setCustomName(Component.translatable("entity.jaymoskingdoms.sea_captain_of", faction.name()));

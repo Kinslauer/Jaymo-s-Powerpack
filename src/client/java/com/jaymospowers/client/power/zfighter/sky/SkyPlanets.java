@@ -38,8 +38,10 @@ public final class SkyPlanets {
 		{245.0F, 46.0F, 0x9FE0FF, 1.0F}, // Glacia: ice blue
 		{170.0F, 14.0F, 0xFFB050, 1.0F}, // Cinder: ember orange
 		{190.0F, 62.0F, 0xB070FF, 0.8F}, // the Maw: a dim violet
-		{105.0F, 22.0F, 0x7CFF8A, 1.0F}, // the Verdant World: green
+		{105.0F, 22.0F, 0x7FA8FF, 2.0F}, // the Verdant World: what shows from here is its blue giant, with the ring
 	};
+	/** The world whose light wears the giant's ring (the Verdant World), and the ring's colour (rgb). */
+	static final int RINGED = 5, RING_RGB = 0xD6E2EE;
 	/** How long a world shines brighter after a flight to it or from it (ticks), and by how much. */
 	static final int GLOW_TICKS = 6000;
 	static final float GLOW_GAIN = 1.6F, BASE_LIGHT = 0.8F;
@@ -173,6 +175,9 @@ public final class SkyPlanets {
 			float twinkle = 1.0F - TWINKLE * (0.5F + 0.5F * Mth.sin((clock + partial) * TWINKLE_RATE + world * 1.7F));
 			float light = night * SEEN[world] * twinkle * (glowing ? GLOW_GAIN : BASE_LIGHT);
 			point(graphics, x, y, (int)SPOTS[world][2], Mth.clamp(light, 0.0F, 1.0F), glowing ? 2 : 1, SPOTS[world][3]);
+			if (world == RINGED) {
+				ring(graphics, x, y, Math.max(1, Math.round(SPOTS[world][3])), Mth.clamp(light, 0.0F, 1.0F));
+			}
 		}
 	}
 
@@ -192,6 +197,13 @@ public final class SkyPlanets {
 			graphics.fill(x, y - i, x + core, y - i + 1, a);
 			graphics.fill(x, y + core + i - 1, x + core, y + core + i, a);
 		}
+	}
+
+	/** The giant's ring: a short leaning dash out of each side of the point, low on the left and high on the right. */
+	private static void ring(GuiGraphicsExtractor graphics, int x, int y, int core, float light) {
+		int c = colour(RING_RGB, light * 0.7F);
+		graphics.fill(x - 4, y + core, x - 1, y + core + 1, c);
+		graphics.fill(x + core + 1, y - 1, x + core + 4, y, c);
 	}
 
 	private static int colour(int rgb, float alpha) {

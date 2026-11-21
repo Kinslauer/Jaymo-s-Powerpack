@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskitchen:tea_leaves",
+    "jaymoskitchen:tea_leaves",
+    "minecraft:dirt"
+  ],
+  "result": {
+    "id": "jaymoskitchen:tea_bush"
+  }
+}

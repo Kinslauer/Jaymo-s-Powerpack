@@ -319,7 +319,8 @@ public class SmithingAnvilEntity extends BlockEntity {
 	}
 
 	private void finish(ServerPlayer player, Smithing.Work progress, Forging.Option option) {
-		Grade grade = Forging.grade(progress, option.hits(), new Random(progress.seed() ^ level.getGameTime()));
+		Grade grade = Forging.grade(progress, option.hits(), new Random(progress.seed() ^ level.getGameTime()),
+			com.jaymospowers.compat.KingdomsCompat.legend(player));
 		for (Forging.Cap cap : Forging.CAPS) {
 			Grade most = cap.cap(player, this, option);
 			if (most != null) {
@@ -341,9 +342,9 @@ public class SmithingAnvilEntity extends BlockEntity {
 		endSession();
 		changed();
 		ServerLevel server = (ServerLevel) level;
-		server.playSound(null, worldPosition, grade == Grade.MASTER ? SoundEvents.PLAYER_LEVELUP : SoundEvents.ANVIL_USE, SoundSource.BLOCKS,
-			grade == Grade.MASTER ? 0.8F : 1.0F, grade == Grade.MASTER ? 1.2F : 0.7F);
-		if (grade == Grade.MASTER) {
+		server.playSound(null, worldPosition, grade.atLeast(Grade.MASTER) ? SoundEvents.PLAYER_LEVELUP : SoundEvents.ANVIL_USE, SoundSource.BLOCKS,
+			grade.atLeast(Grade.MASTER) ? 0.8F : 1.0F, grade.atLeast(Grade.MASTER) ? 1.2F : 0.7F);
+		if (grade.atLeast(Grade.MASTER)) {
 			server.sendParticles(ParticleTypes.TOTEM_OF_UNDYING, worldPosition.getX() + 0.5, worldPosition.getY() + 1.1, worldPosition.getZ() + 0.5,
 				30, 0.3, 0.3, 0.3, 0.3);
 		}

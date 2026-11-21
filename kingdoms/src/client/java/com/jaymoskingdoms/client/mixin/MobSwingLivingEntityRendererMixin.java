@@ -36,8 +36,12 @@ abstract class MobSwingLivingEntityRendererMixin {
 		com.jaymoskingdoms.client.RubberEngulf.extract(entity, state, partialTicks);
 		com.jaymoskingdoms.client.HandshakePose.extract(entity, state, partialTicks);
 		com.jaymoskingdoms.client.CastPose.extract(entity, state, partialTicks);
+		// (class trees) a Rider hanging off the side of the horse
+		com.jaymoskingdoms.client.HangPose.extract(entity, state, partialTicks);
 		// a horde's dead reaching, shouldering doors, staggering, lunging
 		com.jaymoskingdoms.client.HordePoses.extract(entity, state, partialTicks);
+		// one sitting at a camp's fire (Firesides)
+		com.jaymoskingdoms.client.FiresidePose.extract(entity, state, partialTicks);
 		VerdantLook.extract(entity, state);
 		com.jaymoskingdoms.client.EmberLook.extract(entity, state);
 		com.jaymoskingdoms.client.BlightLook.extract(entity, state);
@@ -83,7 +87,9 @@ abstract class MobSwingLivingEntityRendererMixin {
 		com.jaymoskingdoms.client.BioForms.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		com.jaymoskingdoms.client.HandshakePose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		com.jaymoskingdoms.client.CastPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
+		com.jaymoskingdoms.client.HangPose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		com.jaymoskingdoms.client.HordePoses.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
+		com.jaymoskingdoms.client.FiresidePose.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		// (0.7.641) a staked vampire struggling with the stake
 		com.jaymoskingdoms.client.StakeStruggle.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);
 		MobAnimations.apply(((LivingEntityRenderer<?, ?, ?>) (Object) this).getModel(), state);

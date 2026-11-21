@@ -59,7 +59,8 @@ public final class CatchRelease {
 		Vec3 from = player.getEyePosition();
 		Vec3 to = from.add(player.getViewVector(1.0F).scale(player.blockInteractionRange()));
 		BlockHitResult hit = level.clip(new ClipContext(from, to, ClipContext.Block.OUTLINE, ClipContext.Fluid.SOURCE_ONLY, player));
-		if (hit.getType() != HitResult.Type.BLOCK || !level.getFluidState(hit.getBlockPos()).is(FluidTags.WATER)) {
+		Species kept = info.kind();
+		if (hit.getType() != HitResult.Type.BLOCK || !level.getFluidState(hit.getBlockPos()).is(kept != null && kept.lava() ? FluidTags.LAVA : FluidTags.WATER)) {
 			return InteractionResult.PASS;
 		}
 		if (level instanceof ServerLevel server && player instanceof ServerPlayer angler) {

@@ -64,7 +64,7 @@ public final class YouthCommand {
 		for (ServerPlayer player : c.getSource().getServer().getPlayerList().getPlayers()) {
 			YouthWisp wisp = YouthWisp.has(player) ? YouthWisp.gesture(player) : null;
 			if (wisp != null) {
-				wisp.speak(player, words);
+				wisp.answer(player, words);
 			} else {
 				player.sendSystemMessage(YouthWisp.line(words));
 			}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskingdoms:remains",
+          "condition": "minecraft:tool/can_silk_touch"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymoskingdoms:blocks/remains"
+}

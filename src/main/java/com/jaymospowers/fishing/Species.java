@@ -67,6 +67,13 @@ public enum Species {
 	CRAB("crab", Water.SEA, 0.2F, 1.5F, Feeds.NIGHT, Depth.BOTTOM, 0.2F, 2.0F, 0.1F, Species.OURS | Species.CRITTER | Species.WALKER, 1, 3, 5, Fillet.SHELL, l(1, 0, 4, 1, 0, 0), s(1, 1.2F, 1, 0.6F), 500),
 	LOBSTER("lobster", Water.SEA, -0.3F, 0.8F, Feeds.NIGHT, Depth.BOTTOM, 0.5F, 6.0F, 0.1F, Species.OURS | Species.CRITTER | Species.WALKER, 1, 1, 2, Fillet.SHELL, l(0, 0, 4, 2, 0, 0), s(1, 1.2F, 1, 0.7F), 1500),
 	JELLYFISH("jellyfish", Water.SEA, 0.3F, 2.0F, Feeds.ALWAYS, Depth.SURFACE, 0.1F, 3.0F, 0.1F, Species.OURS | Species.CRITTER, 1, 4, 3, Fillet.NONE, l(0, 0, 0, 0, 0, 0), s(1, 1.4F, 1, 0.5F), 0),
+	// cave pools: the real cavefish and olm, pale and blind, living slowly on little (see CAVE_KEEN)
+	CAVEFISH("cavefish", Water.CAVE, -1.0F, 2.0F, Feeds.ALWAYS, Depth.BOTTOM, 0.01F, 0.12F, 0.15F, Species.OURS, 2, 4, 5, Fillet.WHITE, l(4, 1, 2, 0, 0, 0), s(1, 1, 1, 1), 1500),
+	OLM("olm", Water.CAVE, -1.0F, 2.0F, Feeds.ALWAYS, Depth.BOTTOM, 0.02F, 0.15F, 0.2F, Species.OURS, 1, 1, 3, Fillet.WHITE, l(4, 0, 3, 0, 0, 0), s(1, 1, 1, 1), 2500),
+	// the Ash's lava lakes: warm-edge fish, after the real fish of hot springs (sulphur molly, pupfish, Magadi tilapia)
+	ASH_MOLLY("ash_molly", Water.LAVA, 0.0F, 0.0F, Feeds.ALWAYS, Depth.SURFACE, 0.01F, 0.12F, 0.2F, Species.OURS, 4, 8, 8, Fillet.WHITE, l(1, 4, 1, 0, 1, 0), s(1, 1, 1, 1), 1500),
+	CINDER_PUPFISH("cinder_pupfish", Water.LAVA, 0.0F, 0.0F, Feeds.ALWAYS, Depth.SURFACE, 0.005F, 0.04F, 0.15F, Species.OURS, 1, 3, 6, Fillet.WHITE, l(3, 2, 1, 0, 1, 0), s(1, 1, 1, 1), 2500),
+	EMBER_TILAPIA("ember_tilapia", Water.LAVA, 0.0F, 0.0F, Feeds.ALWAYS, Depth.MID, 0.3F, 3.5F, 0.55F, Species.OURS | Species.PREDATOR, 1, 2, 3, Fillet.WHITE, l(1, 4, 2, 2, 3, 0), s(1, 1, 1, 1), 800),
 	// any other mod's fish we have no species for (True Fishing's idea: their fish count too)
 	OTHER("other", Water.BOTH, -2.0F, 3.0F, Feeds.ALWAYS, Depth.MID, 0.3F, 3.0F, 0.45F, 0, 0, 0, 0, Fillet.NONE, l(2, 2, 2, 1, 2, 0), s(1, 1, 1, 1), 80);
 
@@ -88,7 +95,10 @@ public enum Species {
 	public static final int SHARKISH = 128;
 
 	/** Where it lives. */
-	public enum Water { FRESH, SEA, BOTH }
+	public enum Water { FRESH, SEA, BOTH, CAVE, LAVA }
+
+	/** Cave fish are slow: they feed this much as often as a surface fish at its keenest (no dawn, dusk or season underground). */
+	static final float CAVE_KEEN = 0.5F;
 
 	/** When it feeds: by day (keenest at dawn and dusk), at dawn and dusk, at dusk, after dark, or whenever. */
 	public enum Feeds { DAY, DAWN_DUSK, DUSK, NIGHT, ALWAYS }
@@ -200,6 +210,11 @@ public enum Species {
 		return (flags & SHARKISH) != 0;
 	}
 
+	/** It lives in lava (a lake in the Nether), and can only be fished with a heat-proof rod ({@link LavaFishing}). */
+	public boolean lava() {
+		return water == Water.LAVA;
+	}
+
 	/** A rod can hook it. */
 	public boolean hookable() {
 		return !critter();
@@ -239,7 +254,10 @@ public enum Species {
 	/** It could live in this biome's water. */
 	public boolean livesIn(Holder<Biome> biome) {
 		boolean sea = sea(biome);
-		if (water == Water.SEA && !sea || water == Water.FRESH && sea) {
+		if (water == Water.LAVA) {
+			return true;
+		}
+		if (water == Water.SEA && !sea || (water == Water.FRESH || water == Water.CAVE) && sea) {
 			return false;
 		}
 		if (deep() && !biome.is(BiomeTags.IS_DEEP_OCEAN)) {
@@ -254,6 +272,9 @@ public enum Species {
 	 * its season (Kitchen's, when it's there) and the rain.
 	 */
 	public float activity(ServerLevel level, BlockPos pos) {
+		if (water == Water.CAVE) {
+			return CAVE_KEEN;
+		}
 		long day = Math.floorMod(level.getOverworldClockTime(), 24000L);
 		boolean dawn = day >= 23000 || day < 1500, dusk = day >= 11000 && day < 13500, night = day >= 13500 && day < 23000;
 		float f = switch (feeds) {
@@ -290,7 +311,8 @@ public enum Species {
 			case WHITEFISH -> 38; case BURBOT -> 50; case MACKEREL -> 35; case HERRING -> 26; case POLLOCK -> 62; case SEA_BASS -> 50;
 			case HALIBUT -> 110; case SWORDFISH -> 240; case CATSHARK -> 60; case DOGFISH -> 90; case BLUE_SHARK -> 260;
 			case HAMMERHEAD -> 300; case GREAT_WHITE -> 400; case SHRIMP -> 6; case CRAYFISH -> 12; case CRAB -> 15; case LOBSTER -> 40;
-			case JELLYFISH -> 25; case OTHER -> 40;
+			case JELLYFISH -> 25; case OTHER -> 40; case CAVEFISH -> 8; case OLM -> 25; case ASH_MOLLY -> 6; case CINDER_PUPFISH -> 4;
+			case EMBER_TILAPIA -> 25;
 		};
 		return Math.max(1, Math.round(usualCm * (float) Math.cbrt(kg / usualKg())));
 	}

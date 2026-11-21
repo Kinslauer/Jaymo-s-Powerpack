@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:saw",
+    "jaymospowers:crimson_stem_vslab"
+  ],
+  "result": {
+    "id": "jaymospowers:crimson_stem_quarter",
+    "count": 2
+  }
+}

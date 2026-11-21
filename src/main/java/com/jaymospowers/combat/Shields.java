@@ -1,14 +1,17 @@
 package com.jaymospowers.combat;
 
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -25,6 +28,8 @@ import org.jspecify.annotations.Nullable;
 public final class Shields {
 	/** A torn-away shield flies off this fast toward whoever tore it (blocks/tick). */
 	static final double TEAR_FLING = 0.5;
+	/** The share of a blow that gets through a raised shield when a hooked weapon (a scythe, a bill, a gutting hook) reaches round it. */
+	static final float HOOK_THROUGH = 0.5F;
 
 	/**
 	 * Other mods' shields: given the one losing it and who did it (null: a stun), true if a shield came off. Kingdoms adds
@@ -93,5 +98,27 @@ public final class Shields {
 				return;
 			}
 		}
+	}
+
+	/** Whether {@code weapon} hooks: a scythe, a bill or a gutting hook, by its id. */
+	public static boolean hooks(ItemStack weapon) {
+		String path = BuiltInRegistries.ITEM.getKey(weapon.getItem()).getPath().toLowerCase(Locale.ROOT);
+		return path.contains("scythe") || path.contains("billhook") || path.contains("bill_hook") || path.equals("bill") || path.endsWith("_bill")
+			|| path.contains("gutting_hook");
+	}
+
+	/**
+	 * The damage a raised shield is asked to stop (from {@code LivingEntity.applyItemBlocking}): a hooked weapon's blow
+	 * reaches round it, so only {@code 1 - HOOK_THROUGH} of it is stopped and the rest gets through.
+	 */
+	public static float hookedBlock(LivingEntity victim, DamageSource source, float damage) {
+		if (damage <= 0.0F || victim.getItemBlockingWith() == null || !(source.getDirectEntity() instanceof LivingEntity attacker)
+			|| source.getEntity() != attacker || !hooks(attacker.getMainHandItem()) || !(victim.level() instanceof ServerLevel level)) {
+			return damage;
+		}
+		Vec3 at = victim.getBoundingBox().getCenter();
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.CHAIN_HIT, victim.getSoundSource(), 0.9F, 0.9F);
+		ClashFx.sparks(level, at, at.subtract(attacker.getEyePosition()), 3, 0.5F);
+		return damage * (1.0F - HOOK_THROUGH);
 	}
 }

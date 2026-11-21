@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:bamboo_mosaic_vslab",
+    "jaymospowers:bamboo_mosaic_vslab"
+  ],
+  "result": {
+    "id": "minecraft:bamboo_mosaic"
+  }
+}

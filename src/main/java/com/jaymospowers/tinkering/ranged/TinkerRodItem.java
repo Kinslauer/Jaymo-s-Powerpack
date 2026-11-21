@@ -71,5 +71,8 @@ public class TinkerRodItem extends MetalFishingRodItem implements TinkerTool {
 		TinkerTool.tooltip(stack, type, builder);
 		builder.accept(Component.translatable(seaRod(stack) ? "tooltip.jaymospowers.tinkering.rod_sea" : "tooltip.jaymospowers.tinkering.rod_plain")
 			.withStyle(ChatFormatting.GRAY));
+		if (com.jaymospowers.fishing.LavaFishing.heatProof(stack)) {
+			builder.accept(Component.translatable("tooltip.jaymospowers.fishing.rod_heatproof").withStyle(ChatFormatting.GOLD));
+		}
 	}
 }

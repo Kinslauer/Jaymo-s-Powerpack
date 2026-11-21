@@ -2,6 +2,7 @@ package com.jaymospowers.core.wounds;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.HoldProgress;
+import com.jaymospowers.core.HudBar;
 import com.mojang.serialization.Codec;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -44,7 +45,6 @@ public final class SelfRevive {
 	public static final long EVERY = 24000L;
 	/** The perk's key in Kingdoms' tree. */
 	static final String PERK = "self_revive";
-	static final int BAR = 12;
 
 	/** When Second Wind last got them up (game time). Saved, kept through death, synced to its player (their keys). */
 	public static final AttachmentType<Long> LAST = AttachmentRegistry.create(JaymosPowers.id("self_revive_last"),
@@ -161,9 +161,7 @@ public final class SelfRevive {
 			int need = MedicineSkill.ticks(player, EAT_TICKS);
 			if (e.ticks < need) {
 				if (e.ticks % 2 == 0) {
-					int filled = Math.round(BAR * e.ticks / (float) need);
-					player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.self_reviving", "|".repeat(filled) + ".".repeat(BAR - filled))
-						.withStyle(ChatFormatting.GRAY));
+					HudBar.hold(player, "self_revive", e.ticks / (float) need, HudBar.GREEN, Component.translatable("bar.jaymospowers.self_reviving"), true);
 				}
 				continue;
 			}

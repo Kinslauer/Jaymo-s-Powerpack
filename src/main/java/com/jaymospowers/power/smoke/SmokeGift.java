@@ -47,6 +47,8 @@ final class SmokeGift implements GiftKit {
 	/** Everyday: how far they look for a campfire to draw smoke off, and the size of a smoke ring (blocks). */
 	static final int CAMPFIRE_RADIUS = 5;
 	static final double RING_RADIUS = 0.35;
+	/** Smoke's colour for the fighter brain's vapour trail and vanish. */
+	static final int VAPOUR_COLOR = 0x8A8F98;
 
 	static void init() {
 		Gifted.register(new SmokeGift());
@@ -55,6 +57,32 @@ final class SmokeGift implements GiftKit {
 	@Override
 	public Identifier power() {
 		return SmokePower.ID;
+	}
+
+	/** (fighter brain) Smoke flies for players as vapour: its folk fight from the air as a drift of smoke, and vanish as smoke. */
+	@Override
+	public boolean flies() {
+		return true;
+	}
+
+	@Override
+	public int color() {
+		return VAPOUR_COLOR;
+	}
+
+	@Override
+	public void trail(ServerLevel level, PathfinderMob mob, Vec3 at) {
+		level.sendParticles(com.jaymospowers.core.fx.MagicFx.miasma(VAPOUR_COLOR, 1.4F), at.x, at.y, at.z, 3, 0.25, 0.3, 0.25, 0.01);
+		level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y, at.z, 1, 0.2, 0.2, 0.2, 0.01);
+	}
+
+	/** A vanish is a puff of smoke where they stood, and a cloud that gathers where they come in. */
+	@Override
+	public void vanishFx(ServerLevel level, PathfinderMob mob, Vec3 from, Vec3 to) {
+		cloud(level, from.add(0.0, 1.0, 0.0), 40, 0.5);
+		com.jaymospowers.core.fx.MagicFx.pool(level, from.add(0.0, 0.1, 0.0), 1.2F, VAPOUR_COLOR, 12);
+		cloud(level, to.add(0.0, 1.0, 0.0), 30, 0.5);
+		level.playSound(null, to.x, to.y, to.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.NEUTRAL, 0.8F, 1.3F);
 	}
 
 	@Override

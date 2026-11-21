@@ -260,6 +260,9 @@ public final class KitchenCompat {
 			hanging.getMethod("addExtraCuts", java.util.function.ToIntFunction.class)
 				.invoke(null, (java.util.function.ToIntFunction<net.minecraft.world.entity.player.Player>) player ->
 					Patrons.blessed(player, Patron.GREEN_HUNTSMAN, 2) ? Blessings.CLEAN_CUTS_EXTRA : 0);
+			// (class trees) Field Dressing: a Ranger's own kill gives one more round
+			hanging.getMethod("addExtraCuts", java.util.function.ToIntFunction.class)
+				.invoke(null, (java.util.function.ToIntFunction<net.minecraft.world.entity.player.Player>) RogueExtras::dressing);
 			hanging.getMethod("addOnDone", java.util.function.BiConsumer.class)
 				.invoke(null, (java.util.function.BiConsumer<net.minecraft.world.entity.player.Player, net.minecraft.world.entity.Entity>) (player, carcass) ->
 					Patrons.deed(player, Patron.GREEN_HUNTSMAN, Patrons.DEED_SMALL, "carcass"));
@@ -299,6 +302,11 @@ public final class KitchenCompat {
 			// a warmed or chilled dish keeps the body so for a while, and a dome of force keeps the weather off it
 			bodyHeat.getMethod("addWeather", java.util.function.ToDoubleFunction.class)
 				.invoke(null, (java.util.function.ToDoubleFunction<net.minecraft.server.level.ServerPlayer>) Cantrips::bodyHeat);
+			// (ff-heat) the heat off Peterwolf's forest fire, when it's in the pack (ForestFireCompat)
+			if (ForestFireCompat.LOADED) {
+				bodyHeat.getMethod("addWeather", java.util.function.ToDoubleFunction.class)
+					.invoke(null, (java.util.function.ToDoubleFunction<net.minecraft.server.level.ServerPlayer>) ForestFireCompat::bodyHeat);
+			}
 			bodyHeat.getMethod("addTemperate", java.util.function.Predicate.class)
 				.invoke(null, (java.util.function.Predicate<net.minecraft.world.entity.player.Player>) CampSpells::domed);
 		} catch (ReflectiveOperationException e) {
@@ -318,6 +326,13 @@ public final class KitchenCompat {
 				.invoke(null, (java.util.function.Predicate<net.minecraft.world.entity.player.Player>) player -> Skills.of(player).rank(Skills.Perk.IRON_STOMACH) > 0);
 		} catch (ReflectiveOperationException e) {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for Iron Stomach to drink dirty water (needs 0.5.80): {}", e.toString());
+		}
+		// a Pallid never thirsts (PallidHollows)
+		try {
+			Class.forName("com.jaymoskitchen.climate.Thirst").getMethod("setUnthirsting", java.util.function.Predicate.class)
+				.invoke(null, (java.util.function.Predicate<net.minecraft.world.entity.player.Player>) PallidHollows::is);
+		} catch (ReflectiveOperationException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for the Pallid's thirst to stay off: {}", e.toString());
 		}
 	}
 
@@ -396,6 +411,13 @@ public final class KitchenCompat {
 		return rice == net.minecraft.world.level.block.Blocks.AIR ? null : rice;
 	}
 
+	/** Kitchen's fish barrel for a fishery or a market stall, or a plain barrel without Kitchen. */
+	static net.minecraft.world.level.block.state.BlockState fishBarrel() {
+		net.minecraft.world.level.block.Block barrel = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(
+			net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymoskitchen", "fish_barrel"));
+		return (barrel == net.minecraft.world.level.block.Blocks.AIR ? net.minecraft.world.level.block.Blocks.BARREL : barrel).defaultBlockState();
+	}
+
 	/** Kitchen is here, and new enough. */
 	static boolean loaded() {
 		return CORPSE != null;
@@ -432,7 +454,8 @@ public final class KitchenCompat {
 			return java.util.List.of();
 		}
 		return level.getEntities((Entity)null, new net.minecraft.world.phys.AABB(at, at).inflate(range), e -> {
-			if (!isFreeCorpse(e) || isPlayerCorpse(e)) {
+			// (class trees) a body the rites were read over never rises
+			if (!isFreeCorpse(e) || isPlayerCorpse(e) || e.entityTags().contains(Litany.RITES_TAG)) {
 				return false;
 			}
 			net.minecraft.world.entity.EntityType<?> was = sourceType(e);
@@ -499,7 +522,8 @@ public final class KitchenCompat {
 	/** A body the Reaper can raise: any a necromancer can ({@link #isRaisableCorpse}), and a player's too. */
 	static boolean isReapableCorpse(Entity entity) {
 		return isRaisableCorpse(entity) || CORPSE != null && CORPSE.isInstance(entity) && !entity.isRemoved() && !entity.isPassenger()
-			&& call(CARRIER, entity) == null && isPlayerCorpse(entity) && !BodyKeeping.isPreserved(entity);
+			&& call(CARRIER, entity) == null && isPlayerCorpse(entity) && !BodyKeeping.isPreserved(entity)
+			&& !entity.entityTags().contains(Litany.RITES_TAG);
 	}
 
 	/** (0.7.132) Something on the body worth a robber's while (unsearched pockets, or gear still on it). */
@@ -590,12 +614,88 @@ public final class KitchenCompat {
 	static boolean isRaisableCorpse(Entity entity) {
 		return CORPSE != null && SOURCE_TYPE != null && CORPSE.isInstance(entity) && !entity.isRemoved() && !entity.isPassenger()
 			&& call(CARRIER, entity) == null && !Boolean.TRUE.equals(call(PLAYER_CORPSE, entity))
-			&& !BodyKeeping.isPreserved(entity);
+			// (class trees) nothing raises a body the rites were read over
+			&& !BodyKeeping.isPreserved(entity) && !entity.entityTags().contains(Litany.RITES_TAG);
 	}
 
 	/** (0.5.37) What the corpse was in life, or null. */
 	static net.minecraft.world.entity.@Nullable EntityType<?> sourceType(Entity corpse) {
 		return call(SOURCE_TYPE, corpse) instanceof net.minecraft.world.entity.EntityType<?> type ? type : null;
+	}
+
+	/** Kitchen's {@code CorpseEntity.spitWholeable}, {@code dressedWhole} and {@code dressForSpit}, looked up the first time. */
+	private static @Nullable Method SPIT_WHOLEABLE, DRESSED_WHOLE, DRESS_FOR_SPIT;
+	private static boolean spitLooked;
+
+	private static boolean spitMethods() {
+		if (!spitLooked) {
+			spitLooked = true;
+			if (CORPSE != null) {
+				try {
+					SPIT_WHOLEABLE = CORPSE.getMethod("spitWholeable");
+					DRESSED_WHOLE = CORPSE.getMethod("dressedWhole");
+					DRESS_FOR_SPIT = CORPSE.getMethod("dressForSpit");
+				} catch (ReflectiveOperationException e) {
+					JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for camp cooks to roast a whole beast: {}", e.toString());
+					SPIT_WHOLEABLE = null;
+				}
+			}
+		}
+		return SPIT_WHOLEABLE != null && DRESSED_WHOLE != null && DRESS_FOR_SPIT != null;
+	}
+
+	/**
+	 * A beast's body near {@code at} (within {@code range} blocks) that could go on the great spit whole, lying loose and
+	 * not carried: the nearest, or null (always without a Kitchen that has the great spit).
+	 */
+	static @Nullable Entity spitCarcassNear(net.minecraft.server.level.ServerLevel level, Vec3 at, double range) {
+		if (!spitMethods()) {
+			return null;
+		}
+		Entity best = null;
+		double bestD = Double.MAX_VALUE;
+		for (Entity e : level.getEntities((Entity) null, new net.minecraft.world.phys.AABB(at, at).inflate(range, 6.0, range),
+			e -> CORPSE.isInstance(e) && carrier(e) == null && Boolean.TRUE.equals(call(SPIT_WHOLEABLE, e)))) {
+			double d = e.position().distanceToSqr(at);
+			if (d < bestD) {
+				best = e;
+				bestD = d;
+			}
+		}
+		return best;
+	}
+
+	/** Skinned and gutted, ready for the great spit. */
+	static boolean dressedWhole(Entity corpse) {
+		return spitMethods() && Boolean.TRUE.equals(call(DRESSED_WHOLE, corpse));
+	}
+
+	/** Skinned and gutted where it lies (its skin and offal drop beside it). False if it can't go on the spit whole. */
+	static boolean dressForSpit(Entity corpse) {
+		return spitMethods() && Boolean.TRUE.equals(call(DRESS_FOR_SPIT, corpse));
+	}
+
+	private static @Nullable Method BUTCHER_HERE;
+	private static boolean butcherLooked;
+
+	/**
+	 * Kitchen's {@code CorpseEntity.butcherWhereLies}: a beast's body cut up where it lies (a town hunter's kill), gone,
+	 * and its cuts returned. Empty if it can't be (not a beast fit to butcher, or a Kitchen too old for it).
+	 */
+	@SuppressWarnings("unchecked")
+	static java.util.List<net.minecraft.world.item.ItemStack> butcherWhereLies(Entity corpse) {
+		if (!butcherLooked) {
+			butcherLooked = true;
+			if (CORPSE != null) {
+				try {
+					BUTCHER_HERE = CORPSE.getMethod("butcherWhereLies");
+				} catch (ReflectiveOperationException e) {
+					JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for town hunters to cut up their kills: {}", e.toString());
+				}
+			}
+		}
+		return call(BUTCHER_HERE, corpse) instanceof java.util.List<?> list ? (java.util.List<net.minecraft.world.item.ItemStack>) list
+			: java.util.List.of();
 	}
 
 	/** Who's carrying this corpse, if anyone. */
@@ -732,6 +832,69 @@ public final class KitchenCompat {
 			return true;
 		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
 			JaymosKingdoms.LOGGER.debug("Kitchen's drink failed: {}", e.toString());
+			return false;
+		}
+	}
+
+	/**
+	 * (Carry your water) Takes a sip out of a Kitchen waterskin: its water is the data component
+	 * {@code jaymoskitchen:waterskin_water}, a record whose first part is the sips left. False if {@code stack} has none.
+	 */
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	static boolean sipWaterskin(net.minecraft.world.item.ItemStack stack) {
+		if (stack.isEmpty() || !FabricLoader.getInstance().isModLoaded(MOD)) {
+			return false;
+		}
+		try {
+			net.minecraft.core.component.DataComponentType type = net.minecraft.core.registries.BuiltInRegistries.DATA_COMPONENT_TYPE
+				.getValue(net.minecraft.resources.Identifier.fromNamespaceAndPath(MOD, "waterskin_water"));
+			Object water = type == null ? null : stack.get(type);
+			if (water == null) {
+				return false;
+			}
+			java.lang.reflect.RecordComponent[] parts = water.getClass().getRecordComponents();
+			Object[] args = new Object[parts.length];
+			Class<?>[] types = new Class<?>[parts.length];
+			for (int i = 0; i < parts.length; i++) {
+				types[i] = parts[i].getType();
+				args[i] = parts[i].getAccessor().invoke(water);
+			}
+			if (!(args[0] instanceof Integer sips) || sips <= 0) {
+				return false;
+			}
+			args[0] = sips - 1;
+			stack.set(type, water.getClass().getDeclaredConstructor(types).newInstance(args));
+			return true;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Kitchen's waterskin sip failed: {}", e.toString());
+			return false;
+		}
+	}
+
+	/** Kitchen's {@code Scarecrows.guarded(Level, BlockPos)}, looked up the first time (null: no Kitchen, or too old). */
+	private static @Nullable Method GUARDED;
+	private static boolean guardedLooked;
+
+	/** For {@link ShyDeer}: whether one of Kitchen's scarecrows (with its pumpkin) watches over {@code pos}. False without Kitchen. */
+	static boolean scarecrowed(net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos) {
+		if (!guardedLooked) {
+			guardedLooked = true;
+			if (FabricLoader.getInstance().isModLoaded(MOD)) {
+				try {
+					GUARDED = Class.forName("com.jaymoskitchen.farmwater.Scarecrows")
+						.getMethod("guarded", net.minecraft.world.level.Level.class, net.minecraft.core.BlockPos.class);
+				} catch (ReflectiveOperationException e) {
+					JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for its scarecrows to keep deer off: {}", e.toString());
+				}
+			}
+		}
+		if (GUARDED == null) {
+			return false;
+		}
+		try {
+			return Boolean.TRUE.equals(GUARDED.invoke(null, level, pos));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Kitchen's scarecrow check failed: {}", e.toString());
 			return false;
 		}
 	}

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:cauldron",
+    "jaymospowers:boneiron_ingot",
+    "jaymospowers:boneiron_ingot",
+    "minecraft:bone_block"
+  ],
+  "result": {
+    "id": "jaymospowers:bonding_vat"
+  }
+}

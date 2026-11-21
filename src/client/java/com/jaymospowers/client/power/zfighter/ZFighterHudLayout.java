@@ -133,7 +133,7 @@ public final class ZFighterHudLayout {
 			case SPIRIT -> zoned(piece, new Rect(cx - 40, cy - com.jaymospowers.client.hud.HudZones.ABOVE_BOTTOM - 16, 80, 16, 0.5F));
 			// (the bar now sits in the shared FOCUS zone; this is its usual spot when nothing else is stacked under it)
 			case APE_RAGE -> new Rect(cx - ApeRageClient.BAR_W / 2, gh - com.jaymospowers.client.hud.HudZones.FOCUS_BOTTOM - 17, ApeRageClient.BAR_W, 17, 0.5F);
-			case SCOUTER -> zoned(piece, new Rect(cx + com.jaymospowers.client.hud.HudZones.INSPECT_X, cy + com.jaymospowers.client.hud.HudZones.INSPECT_TOP, 90, 22, 0.0F));
+			case SCOUTER -> zoned(piece, new Rect(cx + com.jaymospowers.client.hud.HudZones.INSPECT_X, cy + com.jaymospowers.client.hud.HudZones.INSPECT_TOP, 90, ZFighterScouterClient.PANEL_H, 0.0F));
 		};
 	}
 

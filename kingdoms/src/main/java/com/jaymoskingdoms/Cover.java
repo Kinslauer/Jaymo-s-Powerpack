@@ -117,7 +117,8 @@ public final class Cover {
 
 	/**
 	 * A place for a shooter to take cover from {@code foe}: a spot within {@code reach} blocks of it where, crouching, the line to
-	 * the foe is stopped by something, and standing it is clear (so it can lean out to shoot). Null if none is found.
+	 * the foe is stopped by something, and standing it is clear (so it can lean out to shoot), or a wall's corner it can lean out
+	 * past ({@link #corner}). Null if none is found.
 	 */
 	public static @Nullable BlockPos spot(ServerLevel level, LivingEntity shooter, LivingEntity foe, double reach, int tries) {
 		var random = shooter.getRandom();
@@ -136,7 +137,7 @@ public final class Cover {
 			if (feet == null) {
 				continue;
 			}
-			if (works(level, shooter, foe, Vec3.atBottomCenterOf(feet))) {
+			if (shelters(level, shooter, foe, Vec3.atBottomCenterOf(feet))) {
 				return feet;
 			}
 		}
@@ -153,5 +154,38 @@ public final class Cover {
 		boolean leans = level.clip(new ClipContext(standing, foe.getEyePosition(), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, shooter)).getType() == HitResult.Type.MISS;
 		boolean hidden = level.clip(new ClipContext(ducking, foe.getBoundingBox().getCenter(), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, shooter)).getType() == HitResult.Type.BLOCK;
 		return leans && hidden && base.distanceTo(foe.position()) > 5.0;
+	}
+
+	/** Whether {@code base} is cover from {@code foe} either way: low cover to shoot over ({@link #works}) or a corner to lean past ({@link #corner}). */
+	public static boolean shelters(ServerLevel level, LivingEntity shooter, LivingEntity foe, Vec3 base) {
+		return works(level, shooter, foe, base) || corner(level, shooter, foe, base) != 0;
+	}
+
+	/**
+	 * Whether {@code base} is a corner to lean out past at {@code foe}, and which way (-1 left, 1 right, as it faces the foe; 0
+	 * if not): standing there a wall hides the head and the body from the foe, and a lean ({@link Lean#REACH}) out to one side
+	 * clears the wall, with room for the head out there. The foe more than five blocks off.
+	 */
+	public static int corner(ServerLevel level, LivingEntity shooter, LivingEntity foe, Vec3 base) {
+		if (base.distanceTo(foe.position()) <= 5.0) {
+			return 0;
+		}
+		Vec3 eye = base.add(0.0, shooter.getEyeHeight(), 0.0), target = foe.getEyePosition();
+		if (!blocked(level, shooter, eye, target) || !blocked(level, shooter, base.add(0.0, shooter.getBbHeight() * 0.5, 0.0), foe.getBoundingBox().getCenter())) {
+			return 0;
+		}
+		double yaw = Math.toDegrees(Math.atan2(target.z - eye.z, target.x - eye.x)) - 90.0;
+		int first = shooter.getRandom().nextBoolean() ? 1 : -1;
+		for (int side : new int[] {first, -first}) {
+			Vec3 out = eye.add(Lean.offset(yaw, side * Lean.REACH));
+			if (!blocked(level, shooter, eye, out) && !blocked(level, shooter, out, target)) {
+				return side;
+			}
+		}
+		return 0;
+	}
+
+	private static boolean blocked(ServerLevel level, LivingEntity shooter, Vec3 from, Vec3 to) {
+		return level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, shooter)).getType() != HitResult.Type.MISS;
 	}
 }

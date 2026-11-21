@@ -12,6 +12,14 @@ public abstract class FishingHookRenderStateMixin implements HookBaitState {
     @Unique
     private final ItemStackRenderState jaymospowers$bait = new ItemStackRenderState();
 
+    @Unique
+    private final ItemStackRenderState jaymospowers$bead = new ItemStackRenderState();
+
+    @Override
+    public ItemStackRenderState jaymospowers$bead() {
+        return this.jaymospowers$bead;
+    }
+
     @Override
     public ItemStackRenderState jaymospowers$bait() {
         return this.jaymospowers$bait;

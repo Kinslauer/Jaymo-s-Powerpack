@@ -32,6 +32,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -94,6 +95,21 @@ public final class Bonding {
 	/** A rider wearing this much armour can only climb onto a horse that kneels for them (it knows how, or trusts them this much). */
 	public static final int KNEEL_ARMOUR = 20;
 	public static final float KNEEL_TRUST = 80.0F;
+	/** A horse kneeling for a rider gets up again if no player is this near (blocks): the climb was given up. */
+	static final double KNEEL_WAIT_REACH = 4.0;
+	/**
+	 * A kneel lasts this long (ticks): long enough for the horse to go down ({@code KNEEL_DOWN}), for the longest armoured
+	 * climb Jaymo's Powers plays (a step-across of 0.6 s, twice that in full plate: 24 ticks), and to rise again
+	 * ({@code KNEEL_RISE}). It rises early, the moment the rider is in the saddle. How far it drops (blocks) while down.
+	 */
+	public static final int KNEEL_WINDOW = 60, KNEEL_DOWN = 8, KNEEL_RISE = 10;
+	public static final double KNEEL_DROP = 0.5;
+	/**
+	 * Shying from someone climbing on: the most likely it gets (at no trust and an average temper; a hot temper makes it
+	 * likelier, a cool one less), the trust that calms it completely, and the little a hot-tempered horse keeps even for
+	 * the one who raised it.
+	 */
+	public static final float SKITTISH_MAX = 0.5F, SKITTISH_CALM_TRUST = 70.0F, SKITTISH_FLOOR = 0.03F;
 	/** The war kick and the rear: reach, damage, knockback. */
 	static final double KICK_REACH = 3.0, REAR_REACH = 5.0;
 	static final float KICK_DAMAGE = 7.0F;
@@ -148,6 +164,8 @@ public final class Bonding {
 	}
 
 	private static final Map<Integer, Call> CALLED = new HashMap<>();
+	/** Horses kneeling for a rider: horse id → until when (game time), so one is let up the moment its rider is seated. */
+	private static final Map<Integer, Long> KNEELING = new HashMap<>();
 	/** Horse id → the highest it's fallen since it left the ground (for the racing saddle); horse ids in the air (for jumps). */
 	private static final Map<Integer, Float> FALLING = new HashMap<>();
 	private static final Set<Integer> AIRBORNE = new HashSet<>();
@@ -255,6 +273,7 @@ public final class Bonding {
 		ServerTickEvents.END_LEVEL_TICK.register(Bonding::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			CALLED.clear();
+			KNEELING.clear();
 			FALLING.clear();
 			AIRBORNE.clear();
 			TRICKED.clear();
@@ -330,7 +349,7 @@ public final class Bonding {
 	/** Its nerve, more for its war level. */
 	public static double bravery(AbstractHorse horse, Equine e) {
 		Bond b = horse.getAttached(BOND);
-		return Math.min(1.0, e.bravery() + WAR_COURAGE * ((b == null ? 1 : b.level(Discipline.WAR)) - 1));
+		return Math.min(1.0, e.bravery() + WAR_COURAGE * ((b == null ? 1 : b.level(Discipline.WAR)) - 1) + Horsemanship.nerve(horse));
 	}
 
 	/** Its jump, higher for its jumping level. */
@@ -380,6 +399,47 @@ public final class Bonding {
 	public static boolean kneels(AbstractHorse horse, Player player) {
 		Bond b = bond(horse);
 		return b.level(Discipline.WAR) >= KNEEL_WAR || b.level(Discipline.TRAIL) >= KNEEL_TRAIL || b.trustOf(player.getUUID()) >= KNEEL_TRUST;
+	}
+
+	/** (Server) it goes down on its knees for {@link #KNEEL_WINDOW} ticks, or till its rider is up. */
+	public static void kneel(AbstractHorse horse) {
+		long until = horse.level().getGameTime() + KNEEL_WINDOW;
+		horse.setAttached(KNEEL, until);
+		KNEELING.put(horse.getId(), until);
+	}
+
+	/** It's kneeling for {@code player} (an armoured rider it let on): down, or going down. Read by Jaymo's Powers' mount climb. */
+	public static boolean kneelingFor(AbstractHorse horse, Player player) {
+		Long until = horse.getAttached(KNEEL);
+		return until != null && until > horse.level().getGameTime() && player.getArmorValue() >= KNEEL_ARMOUR;
+	}
+
+	/**
+	 * How far down it is, 0 (standing) to 1 (on its knees), at game time {@code time}: it goes down over
+	 * {@link #KNEEL_DOWN} ticks from the start of the kneel and rises over the last {@link #KNEEL_RISE}. Worked out from the
+	 * synced {@link #KNEEL} alone, so the client draws it and the saddle follows it with no state of its own.
+	 */
+	public static float kneelAmount(AbstractHorse horse, float time) {
+		Long until = horse.getAttached(KNEEL);
+		if (until == null) {
+			return 0.0F;
+		}
+		float remaining = until - time;
+		return Math.min(Mth.clamp((KNEEL_WINDOW - remaining) / KNEEL_DOWN, 0.0F, 1.0F), Mth.clamp(remaining / KNEEL_RISE, 0.0F, 1.0F));
+	}
+
+	/**
+	 * (Read by Jaymo's Powers' mount climb) the chance {@code horse} shies from {@code player} climbing on, 0 to 1; negative
+	 * if it isn't one of ours (Powers then judges by its own plain rule). Less the more it trusts them, more the hotter its
+	 * temper (a wild horse trusts nobody); a little is left of the temper alone for the hot-tempered ones.
+	 */
+	public static float skittish(AbstractHorse horse, Player player) {
+		Equine e = Equestrian.peek(horse);
+		if (e == null || !Equestrian.covered(horse)) {
+			return -1.0F;
+		}
+		float calm = Mth.clamp(trust(horse, player) / SKITTISH_CALM_TRUST, 0.0F, 1.0F);
+		return Mth.clamp(SKITTISH_MAX * (1.0F - calm) * (0.5F + e.temper()) + SKITTISH_FLOOR * e.temper(), 0.0F, 1.0F);
 	}
 
 	/** (From {@code AbstractHorseMixin}, client and server) it side-passes: full speed sideways at a walk, from trail level 3. */
@@ -432,11 +492,20 @@ public final class Bonding {
 		if (xp <= 0.0F || kept(horse) && b.hunger() < HUNGRY) {
 			return;
 		}
+		if (d == Discipline.WAR) {
+			// a Cavalier's horse learns war twice as fast
+			xp *= Horsemanship.warSchool(rider);
+		}
 		int before = b.level(d);
 		b = b.withXp(d, b.xp(d) + xp);
 		horse.setAttached(BOND, b);
 		int after = b.level(d);
+		if (d == Discipline.JUMPING) {
+			// (class trees) a jump cleared: the Rider's
+			com.jaymoskingdoms.ClassTrees.giveEvery(rider, com.jaymoskingdoms.Classes.PlayerClass.RIDER, com.jaymoskingdoms.ClassTrees.XP_JUMP, "jump", 20L);
+		}
 		if (after > before) {
+			com.jaymoskingdoms.ClassTrees.give(rider, com.jaymoskingdoms.Classes.PlayerClass.RIDER, com.jaymoskingdoms.ClassTrees.XP_DISCIPLINE);
 			rider.sendSystemMessage(Component.translatable("message.jaymoskingdoms.horse_level", name(horse),
 				Component.translatable(d.key()), after), true);
 			level.playSound(null, horse.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.NEUTRAL, 0.6F, 1.4F);
@@ -473,7 +542,8 @@ public final class Bonding {
 		// (0.7.305) a second rider climbs up behind the first
 		if (stack.isEmpty() && !player.isSecondaryUseActive() && !horse.hasPassenger(player) && player.getVehicle() == null
 			&& Mounted.pillion(horse, player)) {
-			if (!level.isClientSide()) {
+			if (!level.isClientSide() && !com.jaymoskingdoms.PowersCompat.climbOn(player, horse)) {
+				// (without Jaymo's Powers, or for a mount it doesn't climb: straight on)
 				player.startRiding(horse);
 			}
 			return InteractionResult.SUCCESS;
@@ -534,7 +604,7 @@ public final class Bonding {
 				return InteractionResult.FAIL;
 			}
 			if (!level.isClientSide()) {
-				horse.setAttached(KNEEL, level.getGameTime() + 30L);
+				kneel(horse);
 			}
 		}
 		return InteractionResult.PASS;
@@ -571,7 +641,8 @@ public final class Bonding {
 		}
 		if (!horse.level().isClientSide()) {
 			ate(horse, player, stack, fill);
-			horse.heal(fill / 8.0F);
+			// (class trees) a Farrier's feeding mends their own horse besides
+			horse.heal(fill / 8.0F + Horsemanship.farrierHeal(horse, player));
 		}
 		return true;
 	}
@@ -581,6 +652,7 @@ public final class Bonding {
 		Float fill = FEED.get(stack.getItem());
 		if (fill != null && Equestrian.covered(horse) && kept(horse) && !horse.level().isClientSide()) {
 			ate(horse, player, stack, fill);
+			horse.heal(Horsemanship.farrierHeal(horse, player));
 		}
 	}
 
@@ -607,6 +679,10 @@ public final class Bonding {
 	private static void whistle(ServerPlayer player) {
 		if (!com.jaymoskingdoms.TreeLocks.check(player, com.jaymoskingdoms.TreeLocks.Lock.WHISTLE)) {
 			// (Andy's skill-tree locks) the whistle is learned: Horseman (a Rider knows it)
+			return;
+		}
+		if (Horsemanship.swap(player)) {
+			// an Outrider in the saddle: a fresh horse comes to be swapped onto
 			return;
 		}
 		ServerLevel level = player.level();
@@ -743,6 +819,24 @@ public final class Bonding {
 
 	private static void tick(ServerLevel level) {
 		long now = level.getGameTime();
+		if (!KNEELING.isEmpty()) {
+			KNEELING.entrySet().removeIf(entry -> {
+				if (entry.getValue() < now) {
+					return true;
+				}
+				if (level.getEntity(entry.getKey()) instanceof AbstractHorse horse) {
+					if (!horse.isAlive()) {
+						return true;
+					}
+					if (horse.isVehicle() || level.getNearestPlayer(horse, KNEEL_WAIT_REACH) == null) {
+						// the rider is up (or nobody is left to climb on): it rises
+						horse.setAttached(KNEEL, Math.min(entry.getValue(), now + KNEEL_RISE));
+						return true;
+					}
+				}
+				return false;
+			});
+		}
 		if (now % 10 == 0 && !CALLED.isEmpty()) {
 			CALLED.entrySet().removeIf(entry -> {
 				Call call = entry.getValue();
@@ -928,6 +1022,10 @@ public final class Bonding {
 					}
 				} else {
 					float hooves = b.hooves() - (float)blocks / HOOF_WEAR;
+					if (Horsemanship.farriered(horse)) {
+						// (class trees) a Farrier's own horse never wears its hooves down to lameness
+						hooves = Math.max(hooves, Math.min(b.hooves(), LAME));
+					}
 					horse.setAttached(BOND, b.withFeet(hooves, 0.0F));
 					if (b.hooves() >= LAME && hooves < LAME) {
 						rider.sendSystemMessage(Component.translatable("message.jaymoskingdoms.lame", name(horse)), true);
@@ -938,6 +1036,10 @@ public final class Bonding {
 	}
 
 	static void throwOff(AbstractHorse horse, ServerPlayer rider, String message) {
+		if (Horsemanship.whisperer(rider) || Horsemanship.sureSeat(rider)) {
+			// a Horse Whisperer is never thrown, nor one with a Sure Seat
+			return;
+		}
 		rider.stopRiding();
 		Vec3 back = Vec3.directionFromRotation(0.0F, horse.getYRot()).scale(-0.4);
 		rider.push(back.x, 0.3, back.z);

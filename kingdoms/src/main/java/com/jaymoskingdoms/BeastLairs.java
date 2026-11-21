@@ -51,7 +51,7 @@ public final class BeastLairs {
 			List<Job> jobs = List.copyOf(QUEUE);
 			QUEUE.clear();
 			for (Job job : jobs) {
-				if (!job.level().hasChunksAt(job.at().offset(-COLUMN_RING, 0, -COLUMN_RING), job.at().offset(COLUMN_RING, 0, COLUMN_RING))) {
+				if (!Loaded.made(job.level(), job.at().offset(-COLUMN_RING, 0, -COLUMN_RING), job.at().offset(COLUMN_RING, 0, COLUMN_RING))) {
 					continue;
 				}
 				if (job.gorgon()) {

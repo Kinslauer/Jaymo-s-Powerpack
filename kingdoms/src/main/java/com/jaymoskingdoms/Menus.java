@@ -41,7 +41,7 @@ final class Menus {
 
 	/** {@code speaker} says {@code words} to {@code player} and offers {@code choices}. */
 	static void ask(ServerPlayer player, LivingEntity speaker, Component words, List<Choice> choices) {
-		ask(player, speaker, speaker.getDisplayName(), words, choices);
+		ask(player, speaker, Introductions.called(player, speaker), words, choices);
 	}
 
 	/** {@link #ask}, with the card headed {@code title} instead of the speaker's name (an illager's name and mood, IllagerTalk). */
@@ -59,7 +59,9 @@ final class Menus {
 			});
 		}
 		OPEN.put(player.getUUID(), new Open(speaker.getId(), actions));
-		ServerPlayNetworking.send(player, new TalkNet.Ask(speaker.getId(), title, words, labels, enabled));
+		// (a goblin says it in its broken English: Dialects.broken)
+		ServerPlayNetworking.send(player, new TalkNet.Ask(speaker.getId(), title, Dialects.goblin(speaker) ? Dialects.broken(words) : words,
+			labels, enabled));
 	}
 
 	/** An answer to one of these menus; false when it was not. */

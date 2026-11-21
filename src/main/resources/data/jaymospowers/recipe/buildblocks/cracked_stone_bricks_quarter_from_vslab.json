@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:cracked_stone_bricks_vslab",
+  "result": {
+    "id": "jaymospowers:cracked_stone_bricks_quarter",
+    "count": 2
+  }
+}

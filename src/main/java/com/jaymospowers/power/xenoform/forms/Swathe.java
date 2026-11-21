@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.wounds.Bleeding;
 import com.jaymospowers.core.wounds.Tripped;
 import com.jaymospowers.power.xenoform.XenoForm;
@@ -145,7 +146,7 @@ public final class Swathe extends XenoForm {
 		live.storm--;
 		ServerLevel level = player.level();
 		boolean sandy = sandy(player);
-		double radius = sandy ? STORM_RADIUS_DESERT : STORM_RADIUS;
+		double radius = sandy ? AbilityPower.size(player, STORM_RADIUS_DESERT) : AbilityPower.size(player, STORM_RADIUS);
 		BlockParticleOption sand = new BlockParticleOption(ParticleTypes.BLOCK, Blocks.SAND.defaultBlockState());
 		for (int i = 0; i < 6; i++) {
 			double a = player.tickCount * 0.4 + i * Math.PI / 3.0;

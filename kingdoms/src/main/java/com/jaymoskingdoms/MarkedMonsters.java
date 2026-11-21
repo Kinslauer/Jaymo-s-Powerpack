@@ -275,7 +275,7 @@ public final class MarkedMonsters {
 	}
 
 	/** Whether {@code e} carries a boss bar for its marks (its blows are tallied by {@link BossBars}). */
-	static boolean barred(Entity e) {
+	public static boolean barred(Entity e) {
 		return of(e).size() >= BAR_AT;
 	}
 
@@ -298,7 +298,8 @@ public final class MarkedMonsters {
 		int tier = mob.getAttachedOrElse(WorldTiers.MOB_TIER, 0);
 		for (ServerPlayer p : level.players()) {
 			if (!p.isSpectator() && p.distanceToSqr(mob) <= TIER_NEAR * TIER_NEAR) {
-				tier = Math.max(tier, WorldTiers.of(p).ordinal());
+				// (2026-11-19) the harsh lands' steps on top, as the tier the monster will take there (HarshLands)
+				tier = Math.max(tier, HarshLands.tierFor(mob, WorldTiers.of(p).ordinal()));
 			}
 		}
 		tier = Math.clamp(tier, 0, CHANCE.length - 1);

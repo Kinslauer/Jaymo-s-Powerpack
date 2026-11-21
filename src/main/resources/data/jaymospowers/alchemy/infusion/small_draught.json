@@ -1,0 +1,21 @@
+{
+  "centre": "minecraft:glass_bottle",
+  "components": [
+    "minecraft:spider_eye",
+    "minecraft:sugar",
+    "minecraft:amethyst_shard",
+    "jaymospowers:ichor"
+  ],
+  "essences": {
+    "air": 10,
+    "water": 8,
+    "salt": 6
+  },
+  "instability": 5,
+  "result": {
+    "item": "jaymospowers:small_draught",
+    "count": 1
+  },
+  "research": "shrinking",
+  "flux": 5
+}

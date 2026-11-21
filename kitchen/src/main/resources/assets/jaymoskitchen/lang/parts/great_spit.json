@@ -1,0 +1,9 @@
+{
+  "block.jaymoskitchen.great_spit": "Great Spit",
+  "item.jaymoskitchen.spit_shank": "Shank on the Spit",
+  "item.jaymoskitchen.spit_steak": "Steak on the Spit",
+  "message.jaymoskitchen.great_spit.on": "Turning whole over the fire. It'll take a while.",
+  "message.jaymoskitchen.great_spit.dress_first": "Skin and gut it first.",
+  "message.jaymoskitchen.great_spit.wont_go": "That won't go on a spit whole.",
+  "message.jaymoskitchen.great_spit.taken": "There's something on the spit already."
+}

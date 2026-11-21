@@ -113,6 +113,7 @@ public final class ClashFx {
 	 */
 	public static void sparks(ServerLevel level, Vec3 at, @Nullable Vec3 line, int count, float scale) {
 		send(level, at, burst(line, count, scale, 0xFFFFFF, false));
+		MetalHits.kindle(level, at, count);
 	}
 
 	/**
@@ -204,7 +205,7 @@ public final class ClashFx {
 	}
 
 	/** A weapon of wood or bare stick (a wooden sword, a club, a staff): no sparks off it. */
-	private static boolean woodenWeapon(ItemStack stack) {
+	static boolean woodenWeapon(ItemStack stack) {
 		String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().toLowerCase(Locale.ROOT);
 		for (String word : path.split("[_./]")) {
 			if (word.equals("wooden") || word.equals("wood") || word.equals("club") || word.equals("staff") || word.equals("stick")

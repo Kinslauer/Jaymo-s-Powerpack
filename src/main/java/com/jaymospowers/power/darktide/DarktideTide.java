@@ -1,5 +1,6 @@
 package com.jaymospowers.power.darktide;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Oddities;
@@ -55,7 +56,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * C and Z. Ascended: sneak + C <b>Tide Arms</b> (bare hands draw your own best blade; a real knife → a katana of dark
  * water of its tier, a real katana → twin daggers of its tier; your real items are stored and come back). While corrupted, Z on a Jaymo's Kitchen corpse takes its shadow; ascended, <b>Necromancy</b>: tap C
- * to raise one, which follows and defends you until the corruption lifts (a villager rises as itself: a guard fights for
+ * to raise one (or the wave set in the soul menu, {@link DarktideSouls}), which follows and defends you until the corruption
+ * lifts, when it sinks back among your shadows; only one that dies is gone (a villager rises as itself: a guard fights for
  * you, anyone else goes back to its life, not quite right). Corrupted, not ascended: C is <b>Drown</b>, a
  * sphere of water around a target.
  */
@@ -98,6 +100,8 @@ final class DarktideTide {
 	/** Risen shadow → its master. */
 	private static final Map<UUID, UUID> RISEN_OWNER = new HashMap<>();
 	private static final List<Mob> RISEN = new ArrayList<>();
+	/** Risen shadow → the shadow it was raised from (as stored), so one that sinks back is not lost. */
+	private static final Map<UUID, String> RISEN_SHADOW = new HashMap<>();
 	private static final Map<UUID, Enemy> ENEMIES = new HashMap<>();
 
 	private DarktideTide() {
@@ -166,7 +170,11 @@ final class DarktideTide {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.no_corpse").withStyle(ChatFormatting.GRAY));
 			return;
 		}
-		if (DarktideState.save(player).shadows().size() >= MAX_SHADOWS) {
+		if (DarktideSouls.taken(corpse)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.shadow_gone").withStyle(ChatFormatting.GRAY));
+			return;
+		}
+		if (DarktideState.save(player).shadows().size() + risenShadows(player).size() >= MAX_SHADOWS) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.shadows_full").withStyle(ChatFormatting.GRAY));
 			return;
 		}
@@ -413,7 +421,7 @@ final class DarktideTide {
 
 	// ---- Necromancy ---------------------------------------------------------------------------------------------------
 
-	private static @Nullable Entity aimedCorpse(ServerPlayer player) {
+	static @Nullable Entity aimedCorpse(ServerPlayer player) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getLookAngle();
 		Entity best = null;
@@ -529,6 +537,10 @@ final class DarktideTide {
 		return entity.getAttached(DarktideState.HOLLOW) != null;
 	}
 
+	/**
+	 * A tap of C: the wave set in the soul menu rises, as much of it as is not up yet ({@link DarktideSouls#pending}); with
+	 * no wave set (or all of it up), the last shadow taken.
+	 */
 	private static void raise(ServerPlayer player) {
 		DarktideLive live = DarktidePower.live(player);
 		ServerLevel level = player.level();
@@ -541,12 +553,24 @@ final class DarktideTide {
 			return;
 		}
 		List<String> shadows = DarktideState.mutable(DarktideState.save(player).shadows());
-		String id = shadows.removeLast();
+		List<String> wave = DarktideSouls.pending(player, shadows, MAX_RISEN - live.risen.size());
+		if (wave.isEmpty()) {
+			wave = List.of(shadows.removeLast());
+		}
 		player.setAttached(DarktideState.SAVE, DarktideState.save(player).withShadows(shadows));
 		Vec3 eye = player.getEyePosition();
 		BlockHitResult hit = level.clip(new ClipContext(eye, eye.add(player.getLookAngle().scale(RISE_REACH)), ClipContext.Block.COLLIDER,
 			ClipContext.Fluid.NONE, player));
 		BlockPos at = hit.getType() == HitResult.Type.MISS ? BlockPos.containing(eye.add(player.getLookAngle().scale(3.0))) : hit.getBlockPos().relative(hit.getDirection());
+		for (int i = 0; i < wave.size(); i++) {
+			// side by side, the first where you look
+			raiseOne(player, live, level, wave.get(i), at.relative(player.getDirection().getClockWise(), i % 2 == 1 ? (i + 1) / 2 : -(i / 2)));
+		}
+		DarktideMove.play(player, DarktideMove.CAST, DarktideMove.CAST_TICKS, 4);
+		DarktidePower.cooldown(player, DarktideState.RAISE, RAISE_COOLDOWN);
+	}
+
+	private static void raiseOne(ServerPlayer player, DarktideLive live, ServerLevel level, String id, BlockPos at) {
 		Entity spawned;
 		if (id.startsWith("{")) {
 			// (0.11.103) a villager's shadow: the very one that died
@@ -581,12 +605,11 @@ final class DarktideTide {
 			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.WARDEN_EMERGE, SoundSource.PLAYERS, 0.5F, 1.6F);
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.darktide.hollow_rises", mob.getDisplayName())
 				.withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.ITALIC));
-			DarktideMove.play(player, DarktideMove.CAST, DarktideMove.CAST_TICKS, 4);
-			DarktidePower.cooldown(player, DarktideState.RAISE, RAISE_COOLDOWN);
 			return;
 		}
 		mob.setAttached(DarktideState.RISEN, player.getId());
 		RISEN_OWNER.put(mob.getUUID(), player.getUUID());
+		RISEN_SHADOW.put(mob.getUUID(), id);
 		RISEN.add(mob);
 		live.risen.add(mob.getId());
 		mob.setTarget(null);
@@ -596,8 +619,50 @@ final class DarktideTide {
 		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.SOUL_SAND.defaultBlockState()), mob.getX(), mob.getY(), mob.getZ(),
 			30, 0.4, 0.1, 0.4, 0.1);
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.WARDEN_EMERGE, SoundSource.PLAYERS, 0.6F, 1.4F);
-		DarktideMove.play(player, DarktideMove.CAST, DarktideMove.CAST_TICKS, 4);
-		DarktidePower.cooldown(player, DarktideState.RAISE, RAISE_COOLDOWN);
+	}
+
+	/** The master of the risen shadow {@code entity} if they are here, or null. */
+	static @Nullable ServerPlayer masterOf(Entity entity, @Nullable MinecraftServer server) {
+		UUID owner = RISEN_OWNER.get(entity.getUUID());
+		return owner == null || server == null ? null : server.getPlayerList().getPlayer(owner);
+	}
+
+	/** The shadows (as stored) that {@code player}'s risen were raised from. */
+	static List<String> risenShadows(ServerPlayer player) {
+		List<String> out = new ArrayList<>();
+		for (Mob mob : RISEN) {
+			String shadow = RISEN_SHADOW.get(mob.getUUID());
+			if (shadow != null && mob.isAlive() && risenOf(mob, player)) {
+				out.add(shadow);
+			}
+		}
+		return out;
+	}
+
+	/** {@code player}'s newest risen shadow sinks back into the dark, not lost ({@link DarktideSouls#upkeep}). True if one did. */
+	static boolean sinkNewest(ServerPlayer player) {
+		for (int i = RISEN.size() - 1; i >= 0; i--) {
+			Mob mob = RISEN.get(i);
+			if (risenOf(mob, player)) {
+				RISEN.remove(i);
+				sink(mob, player);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** A risen shadow that did not die goes back among its master's shadows (if there is room), and melts. */
+	private static void sink(Mob mob, @Nullable ServerPlayer owner) {
+		String shadow = RISEN_SHADOW.get(mob.getUUID());
+		if (owner != null && shadow != null && mob.isAlive()) {
+			List<String> shadows = DarktideState.mutable(DarktideState.save(owner).shadows());
+			if (shadows.size() < MAX_SHADOWS) {
+				shadows.add(shadow);
+				owner.setAttached(DarktideState.SAVE, DarktideState.save(owner).withShadows(shadows));
+			}
+		}
+		melt(mob);
 	}
 
 	/** Whether {@code entity} is one of {@code player}'s risen shadows. */
@@ -627,6 +692,7 @@ final class DarktideTide {
 			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.PLAYERS, 0.6F, 0.6F);
 		}
 		RISEN_OWNER.remove(mob.getUUID());
+		RISEN_SHADOW.remove(mob.getUUID());
 		mob.discard();
 	}
 
@@ -635,7 +701,7 @@ final class DarktideTide {
 			Mob mob = it.next();
 			if (risenOf(mob, player)) {
 				it.remove();
-				melt(mob);
+				sink(mob, player);
 			}
 		}
 		DarktideLive live = DarktidePower.liveIfAny(player);
@@ -662,13 +728,15 @@ final class DarktideTide {
 			if (mob.isRemoved() || !mob.isAlive()) {
 				it.remove();
 				RISEN_OWNER.remove(mob.getUUID());
+				RISEN_SHADOW.remove(mob.getUUID());
 				continue;
 			}
 			// they melt when the corruption lifts (sunrise, for a cured master), and without their master near
 			if (owner == null || owner.level() != mob.level() || !DarktidePower.has(owner) || !DarktidePower.corrupted(owner)
 				|| mob.distanceTo(owner) > RISEN_LEASH) {
 				it.remove();
-				melt(mob);
+				// it melts, but it did not die: its shadow is its master's still
+				sink(mob, owner);
 				continue;
 			}
 			mob.clearFire();
@@ -737,36 +805,36 @@ final class DarktideTide {
 			if (now >= zone.until || zone.owner.isRemoved()) {
 				it.remove();
 				// it lets go: the water drops and runs out over the ground
-				Vec3 floor = zone.center.add(0.0, -DROWN_RADIUS, 0.0);
-				DarktideLooks.spray(level, floor, (float) DROWN_RADIUS * 1.4F);
-				DarktideLooks.pool(level, floor, (float) DROWN_RADIUS, DarktideLooks.POOL_TICKS);
+				Vec3 floor = zone.center.add(0.0, -AbilityPower.size(zone.owner, DROWN_RADIUS), 0.0);
+				DarktideLooks.spray(level, floor, (float) AbilityPower.size(zone.owner, DROWN_RADIUS) * 1.4F);
+				DarktideLooks.pool(level, floor, (float) AbilityPower.size(zone.owner, DROWN_RADIUS), DarktideLooks.POOL_TICKS);
 				continue;
 			}
 			// a ball of dark water, drawn as a slow, wobbling see-through orb (ZFighterOrbs)
 			float swell = Math.min(1.0F, (now - (zone.until - DROWN_TICKS) + 1) / (float)DROWN_SWELL);
-			ZFighterKi.waterOrb(level, -(zone.owner.getId() * 4 + 3), zone.center, DROWN_RADIUS * 2.0 * (1.0 - (1.0 - swell) * (1.0 - swell)),
+			ZFighterKi.waterOrb(level, -(zone.owner.getId() * 4 + 3), zone.center, AbilityPower.size(zone.owner, DROWN_RADIUS) * 2.0 * (1.0 - (1.0 - swell) * (1.0 - swell)),
 				DROWN_COLOR);
 			var random = level.getRandom();
 			for (int i = 0; i < 8; i++) {
 				// bubbles through it, a shimmering skin
 				Vec3 dir = new Vec3(random.nextGaussian(), random.nextGaussian(), random.nextGaussian()).normalize();
-				Vec3 skin = zone.center.add(dir.scale(DROWN_RADIUS));
+				Vec3 skin = zone.center.add(dir.scale(AbilityPower.size(zone.owner, DROWN_RADIUS)));
 				level.sendParticles(MagicFx.mote(DarktideLooks.DROP, 0.7F), skin.x, skin.y, skin.z, 1, 0.0, 0.0, 0.0, 0.0);
-				Vec3 inside = zone.center.add(dir.scale(random.nextDouble() * DROWN_RADIUS));
+				Vec3 inside = zone.center.add(dir.scale(random.nextDouble() * AbilityPower.size(zone.owner, DROWN_RADIUS)));
 				level.sendParticles(MagicFx.mote(DarktideLooks.PALE, 0.6F), inside.x, inside.y, inside.z, 1, 0.0, 0.0, 0.0, 0.0);
 				if (i % 3 == 0) {
 					level.sendParticles(MagicFx.wisp(0x0C2450, 1.5F), inside.x, inside.y, inside.z, 1, 0.1, 0.1, 0.1, 0.0);
 				}
 			}
-			for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, new AABB(zone.center, zone.center).inflate(DROWN_RADIUS + 1.0),
+			for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, new AABB(zone.center, zone.center).inflate(AbilityPower.size(zone.owner, DROWN_RADIUS) + 1.0),
 					e -> e.isAlive() && !e.isSpectator() && e != zone.owner && !risenOf(e, zone.owner))) {
 				Vec3 off = victim.position().add(0.0, victim.getBbHeight() / 2.0, 0.0).subtract(zone.center);
 				double d = off.length();
-				if (d > DROWN_RADIUS + 0.5) {
+				if (d > AbilityPower.size(zone.owner, DROWN_RADIUS) + 0.5) {
 					continue;
 				}
 				// can't swim out: pulled back from the skin, and held low in the water
-				if (d > DROWN_RADIUS - 1.2) {
+				if (d > AbilityPower.size(zone.owner, DROWN_RADIUS) - 1.2) {
 					Vec3 back = off.normalize().scale(-0.25);
 					victim.setDeltaMovement(back.x, Math.min(back.y, 0.02), back.z);
 					victim.syncVelocity = true;
@@ -797,6 +865,7 @@ final class DarktideTide {
 		}
 		RISEN.clear();
 		RISEN_OWNER.clear();
+		RISEN_SHADOW.clear();
 		ENEMIES.clear();
 	}
 }

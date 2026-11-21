@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:mangrove_planks_quarter",
+    "jaymospowers:mangrove_planks_quarter",
+    "jaymospowers:mangrove_planks_quarter",
+    "jaymospowers:mangrove_planks_quarter"
+  ],
+  "result": {
+    "id": "minecraft:mangrove_planks"
+  }
+}

@@ -47,6 +47,9 @@ public final class ZFighterGuard {
 	static final double PARRY_KNOCKBACK = 0.9;
 	static final int COUNTER_TICKS = 40;
 	static final float COUNTER_BONUS = 0.6F;
+	/** (NPC fights 1b) A guard raised within this many ticks of a feint was raised for nothing: its parry cools down this long and costs this much ki. */
+	static final int FEINT_BAIT = 12, FEINT_COOLDOWN = 30;
+	static final float FEINT_KI = 3.0F;
 
 	/** He holds his guard up, for everyone's client (the crossed arms). Not saved. */
 	public static final AttachmentType<Boolean> GUARD = AttachmentRegistry.create(JaymosPowers.id("zfighter_guard"),
@@ -71,6 +74,10 @@ public final class ZFighterGuard {
 		if (up) {
 			live.guardStart = player.level().getGameTime();
 			player.setAttached(GUARD, true);
+			if (player.isShiftKeyDown()) {
+				// (Awakening pick) raised with Sneak held: Full Counter
+				ZFighterFullCounter.open(player);
+			}
 			Guard.showPower(player, live.guardStart, PARRY_TICKS, live.parryReadyAt);
 		} else {
 			player.removeAttached(GUARD);
@@ -81,16 +88,41 @@ public final class ZFighterGuard {
 		ZFighterPower.refresh(player, live);
 	}
 
+	/**
+	 * (NPC fights 1b) A fighter just feinted at {@code player} (a swing that did nothing, {@code core/brawl/Feints}): a guard raised in answer
+	 * to it, within {@link #FEINT_BAIT} ticks, was raised for nothing, so its parry is spent and cools down ({@link #FEINT_COOLDOWN}), and
+	 * the real blow that follows meets only the plain guard. A guard held up long before, or not up, is not touched.
+	 */
+	public static void feinted(ServerPlayer player) {
+		ZFighterPower.Live live = ZFighterPower.live(player);
+		ServerLevel level = player.level();
+		long now = level.getGameTime();
+		if (!live.guarding || now - live.guardStart > FEINT_BAIT || live.parryReadyAt > now + FEINT_COOLDOWN) {
+			return;
+		}
+		live.parryReadyAt = now + FEINT_COOLDOWN;
+		if (!player.isCreative() && !live.raging()) {
+			live.ki = Math.max(0.0F, live.ki - FEINT_KI);
+		}
+		Guard.showPower(player, live.guardStart, PARRY_TICKS, live.parryReadyAt);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_WEAK, SoundSource.PLAYERS, 0.8F, 0.7F);
+	}
+
 	/** Dropped when the power goes or he dies. */
 	static void drop(ServerPlayer player, ZFighterPower.Live live) {
 		live.guarding = false;
 		player.removeAttached(GUARD);
 		Guard.hidePower(player);
 		ZFighterBracers.dropped(player);
+		ZFighterFullCounter.forget(player);
 	}
 
 	/** What's left of {@code damage} after his guard (the victim side of the damage hook). */
 	static float guard(ServerPlayer player, ZFighterPower.Live live, DamageSource source, float damage) {
+		if (live.guarding && ZFighterFullCounter.holding(player)) {
+			// Full Counter: whatever hits him goes back
+			damage = ZFighterFullCounter.take(player, source, damage);
+		}
 		if (!live.guarding || damage <= 0.0F) {
 			return damage;
 		}
@@ -143,6 +175,7 @@ public final class ZFighterGuard {
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		live.parryReadyAt = now + PARRY_COOLDOWN;
+		com.jaymospowers.core.trials.PowerTrials.count(player, "zfighter.parry", 1);
 		live.counterUntil = now + COUNTER_TICKS;
 		live.ki = Math.min(ZFighterPower.maxKi(player), live.ki + PARRY_KI);
 		Mastery.used(player);

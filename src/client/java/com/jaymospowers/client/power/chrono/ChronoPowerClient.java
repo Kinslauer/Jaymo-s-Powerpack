@@ -157,6 +157,7 @@ public final class ChronoPowerClient implements PowerClient {
 		}
 		ultimateLeft = ultimateTotal = ultimateDenied = ultimateReady = 0;
 		ChronoSpeedClient.reset();
+		ChronoFlurryClient.reset();
 	}
 
 	@Override
@@ -167,6 +168,7 @@ public final class ChronoPowerClient implements PowerClient {
 	@Override
 	public void tick(Minecraft minecraft, LocalPlayer player) {
 		ChronoSpeedClient.tick(player, activeLeft[OVERCLOCK] > 0);
+		ChronoFlurryClient.tick(player, activeLeft[OVERCLOCK] > 0);
 		for (int i = 0; i < ChronoSync.ABILITIES; i++) {
 			if (cooldownLeft[i] > 0 && --cooldownLeft[i] == 0) {
 				readyFlash[i] = 8;

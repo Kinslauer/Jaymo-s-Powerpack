@@ -1,5 +1,6 @@
 package com.jaymospowers.power.heritage;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import io.netty.buffer.ByteBuf;
@@ -296,9 +297,9 @@ public final class HeritageMoves {
 	/** The flash: the undead set alight, other mobs blinded, friends healed a little. */
 	private static boolean sunflare(ServerPlayer player, ServerLevel level) {
 		Vec3 center = player.position().add(0.0, player.getBbHeight() * 0.6, 0.0);
-		AABB box = player.getBoundingBox().inflate(FLARE_RADIUS);
+		AABB box = player.getBoundingBox().inflate(AbilityPower.size(player, FLARE_RADIUS));
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box,
-			e -> e != player && e.isAlive() && !e.isSpectator() && e.distanceToSqr(player) <= FLARE_RADIUS * FLARE_RADIUS)) {
+			e -> e != player && e.isAlive() && !e.isSpectator() && e.distanceToSqr(player) <= AbilityPower.size(player, FLARE_RADIUS) * AbilityPower.size(player, FLARE_RADIUS))) {
 			if (e.is(EntityTypeTags.UNDEAD)) {
 				e.igniteForSeconds(FLARE_BURN);
 			} else if (e instanceof Player || e instanceof OwnableEntity owned && player.equals(owned.getOwner())) {

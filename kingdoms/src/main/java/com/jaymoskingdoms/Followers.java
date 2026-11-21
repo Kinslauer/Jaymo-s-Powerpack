@@ -154,6 +154,8 @@ public final class Followers {
 			// (Andy's skill-tree locks) giving orders is learned: Command (followers still follow and fight on their own)
 			return;
 		}
+		// (class trees) an order given: the Warlord's
+		ClassTrees.giveEvery(player, Classes.PlayerClass.WARLORD, ClassTrees.XP_ORDER, "order", 100L);
 		ServerLevel level = player.level();
 		List<Villager> asked = new ArrayList<>();
 		if (target >= 0) {
@@ -181,7 +183,7 @@ public final class Followers {
 				}
 				continue;
 			}
-			if (!Languages.understands(player, v)) {
+			if (!Languages.understands(player, v) && !Discipline.commands(player, v)) {
 				Languages.shrug(player, v);
 				continue;
 			}

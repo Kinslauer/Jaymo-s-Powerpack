@@ -289,9 +289,8 @@ public final class Deeds {
 		thank(level, captive, player, "talk.jaymoskingdoms.deed.rescue.home", hearts);
 		// (0.7.109) they, and their family, remember it always
 		Recollections.broughtHome(level, player, captive);
-		for (ItemStack reward : rewards) {
-			give(player, reward);
-		}
+		// (held in the H menu's Rewards page until claimed)
+		Rewards.hold(player, Rewards.RESCUE, home.name(), rewards);
 		captive.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		cheer(level, player, captive, "talk.jaymoskingdoms.deed.rescue.cheer", HOMECOMING_HEARTS);
 		record(player, home, Kind.RESCUE);

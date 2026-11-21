@@ -66,7 +66,7 @@ import org.jspecify.annotations.Nullable;
 public final class Pacts {
 	// ---- tuning: the Cinder Pact ----
 	/** Speed lost (a share), max health and armour toughness gained. */
-	public static final double CINDER_SPEED = -0.15, CINDER_HEALTH = 12.0, CINDER_TOUGHNESS = 4.0;
+	public static final double CINDER_SPEED = -0.15, CINDER_HEALTH = 12.0, CINDER_TOUGHNESS = 2.0;
 	/** Seconds a struck mob burns, and a mob that struck them. */
 	public static final float CINDER_BURN = 6.0F, CINDER_RETURN = 4.0F;
 	/** Water's damage every second they stand in it or rain. */

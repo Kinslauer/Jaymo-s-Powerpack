@@ -122,6 +122,27 @@
           "type": "minecraft:model",
           "model": "jaymospowers:item/gear/arrow_cloth"
         }
+      },
+      {
+        "when": "blunt",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/gear/arrow_blunt"
+        }
+      },
+      {
+        "when": "spark",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/gear/arrow_spark"
+        }
+      },
+      {
+        "when": "mending",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/gear/arrow_mending"
+        }
       }
     ],
     "fallback": {

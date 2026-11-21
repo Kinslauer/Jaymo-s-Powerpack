@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
@@ -509,7 +510,7 @@ public final class Rivet extends XenoForm {
 			}
 			case ABILITY_3 -> {
 				if (ready(player, live, V)) {
-					shoveAhead(player, SHOVE_RADIUS * boost, SHOVE_DAMAGE * boost, 0.3, SHOVE_OUT * boost);
+					shoveAhead(player, AbilityPower.size(player, SHOVE_RADIUS) * boost, SHOVE_DAMAGE * boost, 0.3, SHOVE_OUT * boost);
 					sound(player, SoundEvents.PISTON_EXTEND, 1.2F, 0.7F);
 					cooldown(player, live, V, SHOVE_COOLDOWN);
 				}
@@ -597,10 +598,10 @@ public final class Rivet extends XenoForm {
 			}
 			case ABILITY_4 -> {
 				if (ready(player, live, B)) {
-					for (LivingEntity e : around(player, SPIN_RADIUS)) {
+					for (LivingEntity e : around(player, AbilityPower.size(player, SPIN_RADIUS))) {
 						e.hurtServer(level, player.damageSources().playerAttack(player), SPIN_DAMAGE);
 					}
-					ring(level, ParticleTypes.SWEEP_ATTACK, player.position().add(0.0, 0.5, 0.0), SPIN_RADIUS * 0.7, 8);
+					ring(level, ParticleTypes.SWEEP_ATTACK, player.position().add(0.0, 0.5, 0.0), AbilityPower.size(player, SPIN_RADIUS) * 0.7, 8);
 					sound(player, SoundEvents.PLAYER_ATTACK_SWEEP, 1.0F, 1.5F);
 					cooldown(player, live, B, SPIN_COOLDOWN);
 				}
@@ -653,7 +654,7 @@ public final class Rivet extends XenoForm {
 					return;
 				}
 				int mended = 0;
-				for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class, player.getBoundingBox().inflate(TEMPER_RADIUS))) {
+				for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, TEMPER_RADIUS)))) {
 					ItemStack s = item.getItem();
 					if (s.isDamageableItem() && s.isDamaged()) {
 						s.setDamageValue(0);
@@ -777,12 +778,12 @@ public final class Rivet extends XenoForm {
 		switch (key) {
 			case ABILITY_1 -> {
 				if (ready(player, live, R)) {
-					for (LivingEntity e : around(player, STUN_RADIUS)) {
+					for (LivingEntity e : around(player, AbilityPower.size(player, STUN_RADIUS))) {
 						e.hurtServer(level, player.damageSources().playerAttack(player), STUN_DAMAGE);
 						e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, STUN_TICKS, 3));
 						e.addEffect(new MobEffectInstance(MobEffects.NAUSEA, STUN_TICKS, 0));
 					}
-					ring(level, ParticleTypes.NOTE, player.position().add(0.0, 0.5, 0.0), STUN_RADIUS * 0.6, 16);
+					ring(level, ParticleTypes.NOTE, player.position().add(0.0, 0.5, 0.0), AbilityPower.size(player, STUN_RADIUS) * 0.6, 16);
 					sound(player, SoundEvents.NOTE_BLOCK_BELL.value(), 1.5F, 0.5F);
 					cooldown(player, live, R, STUN_COOLDOWN);
 				}
@@ -795,7 +796,7 @@ public final class Rivet extends XenoForm {
 				if (at == null) {
 					return;
 				}
-				for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(LURE_RADIUS), m -> m.isAlive() && !spared(player, m))) {
+				for (Mob mob : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(AbilityPower.size(player, LURE_RADIUS)), m -> m.isAlive() && !spared(player, m))) {
 					mob.getNavigation().moveTo(at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5, 1.0);
 				}
 				level.sendParticles(ParticleTypes.NOTE, at.getX() + 0.5, at.getY() + 1.2, at.getZ() + 0.5, 10, 0.5, 0.3, 0.5, 1.0);
@@ -805,7 +806,7 @@ public final class Rivet extends XenoForm {
 			case ABILITY_3 -> {
 				if (ready(player, live, V)) {
 					live.song = 1;
-					for (ServerPlayer friend : level.getEntitiesOfClass(ServerPlayer.class, player.getBoundingBox().inflate(CHORD_RADIUS))) {
+					for (ServerPlayer friend : level.getEntitiesOfClass(ServerPlayer.class, player.getBoundingBox().inflate(AbilityPower.size(player, CHORD_RADIUS)))) {
 						friend.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 100, 0));
 					}
 					cooldown(player, live, V, CHORD_COOLDOWN);
@@ -813,11 +814,11 @@ public final class Rivet extends XenoForm {
 			}
 			case ABILITY_4 -> {
 				if (ready(player, live, B)) {
-					for (LivingEntity e : around(player, BASS_RADIUS)) {
+					for (LivingEntity e : around(player, AbilityPower.size(player, BASS_RADIUS))) {
 						e.hurtServer(level, player.damageSources().playerAttack(player), BASS_DAMAGE);
 						shove(e, player.position(), 1.4, 0.5);
 					}
-					ring(level, ParticleTypes.SONIC_BOOM, player.position().add(0.0, 0.5, 0.0), BASS_RADIUS * 0.5, 6);
+					ring(level, ParticleTypes.SONIC_BOOM, player.position().add(0.0, 0.5, 0.0), AbilityPower.size(player, BASS_RADIUS) * 0.5, 6);
 					sound(player, SoundEvents.NOTE_BLOCK_BASS.value(), 2.0F, 0.5F);
 					cooldown(player, live, B, BASS_COOLDOWN);
 				}
@@ -875,12 +876,12 @@ public final class Rivet extends XenoForm {
 		if (live.anvilDrop && (player.onGround() || player.isInWater())) {
 			live.anvilDrop = false;
 			float hit = Math.min(DROP_MAX * boost, (DROP_DAMAGE + (float)Math.max(0.0, live.dropFrom - player.getY()) * DROP_PER_BLOCK) * boost);
-			for (LivingEntity e : around(player, DROP_RADIUS)) {
+			for (LivingEntity e : around(player, AbilityPower.size(player, DROP_RADIUS))) {
 				e.hurtServer(level, player.damageSources().playerAttack(player), hit);
 				shove(e, player.position(), 0.6, 0.4);
 			}
 			BlockState ground = level.getBlockState(player.blockPosition().below());
-			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, ground), player.getX(), player.getY(), player.getZ(), 40, DROP_RADIUS * 0.4, 0.1, DROP_RADIUS * 0.4, 0.2);
+			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, ground), player.getX(), player.getY(), player.getZ(), 40, AbilityPower.size(player, DROP_RADIUS) * 0.4, 0.1, AbilityPower.size(player, DROP_RADIUS) * 0.4, 0.2);
 			sound(player, SoundEvents.ANVIL_LAND, 1.4F, 0.7F);
 			com.jaymospowers.core.Shakes.heavy(player, player.position(), 8.0, 0.4F);
 		}

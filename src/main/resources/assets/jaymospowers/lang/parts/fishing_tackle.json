@@ -1,0 +1,18 @@
+{
+  "block.jaymospowers.tackle_bench": "Tackle Bench",
+  "container.jaymospowers.tackle_bench": "Tackle Bench",
+  "item.jaymospowers.barbed_hook": "Barbed Hook",
+  "item.jaymospowers.braided_line": "Braided Line",
+  "item.jaymospowers.weighted_line": "Weighted Line",
+  "item.jaymospowers.torn_note": "Torn Note",
+  "tooltip.jaymospowers.fit.barbed": "Barbed hook: a hooked fish takes line back slowly",
+  "tooltip.jaymospowers.fit.braided": "Braided line: takes more strain before it snaps",
+  "tooltip.jaymospowers.fit.weighted": "Weighted line: the hook sinks fast",
+  "tooltip.jaymospowers.fit.float": "Float: %s",
+  "message.jaymospowers.fishing.note_read": "You copy the scrap into your journal.",
+  "message.jaymospowers.fishing.note_known": "Your journal has this one already.",
+  "gui.jaymospowers.journal.hint.cavefish": "A torn scrap: \"...pale and blind, in the still pools far under the hills. Keeps to the bottom. Bait that lies there...\"",
+  "gui.jaymospowers.journal.hint.olm": "A torn scrap: \"...slow, and wants it cold and dark. Not a fish for the sun. Leave the bait on the bottom and wait...\"",
+  "gui.jaymospowers.journal.hint.ember_tilapia": "A torn scrap: \"...in the fire lakes the big ones hang at middle depth, not at the top. Let a lure sink before you reel...\"",
+  "gui.jaymospowers.journal.hint.cinder_pupfish": "A torn scrap: \"...tiny, right at the top, along the warm edge of the lava. Not worth a big hook...\""
+}

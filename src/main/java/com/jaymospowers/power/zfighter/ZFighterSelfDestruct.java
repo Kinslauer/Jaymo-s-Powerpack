@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Shakes;
@@ -186,7 +187,7 @@ final class ZFighterSelfDestruct {
 		float rest = Math.max(0.0F, live.ki);
 		live.ki = 0.0F;
 		float boost = 1.0F + Math.min(1.0F, rest / MAX_KI) * 0.5F;
-		double radius = Mth.lerp(charge, RADIUS_MIN, RADIUS_MAX) * boost;
+		double radius = Mth.lerp(charge, AbilityPower.size(player, RADIUS_MIN), AbilityPower.size(player, RADIUS_MAX)) * boost;
 		float damage = Mth.lerp(charge, DAMAGE_MIN, DAMAGE_MAX) * boost * ZFighterPower.kiPower(player, live);
 		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius),
 			e -> ZFighterArts.valid(player, e))) {

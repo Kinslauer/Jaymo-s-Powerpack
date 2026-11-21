@@ -43,8 +43,8 @@ final class Muskets {
 	static final double NEAREST = 3.0, FURTHEST = 26.0;
 	/** Reloading takes this long (ticks), plus up to {@link #JITTER} more. */
 	static final int RELOAD = 120, JITTER = 40;
-	/** A ball hits for this much (WeaponMod's own musket hits for 20, too much for a whole garrison of them). */
-	static final float DAMAGE = 9.0F;
+	/** A ball hits for this much (WeaponMod's own musket hits for 20; a Dread musketeer hits for 18). */
+	static final float DAMAGE = 18.0F;
 	/** How fast the ball flies, and how wide it may stray. */
 	static final float SPEED = 4.0F, SPREAD = 2.5F;
 

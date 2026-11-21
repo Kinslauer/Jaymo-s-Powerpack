@@ -126,6 +126,22 @@ public final class BloodParticles {
 		}
 	}
 
+	/**
+	 * Blood scrubbed off ({@link BloodTrail#scrub}): every client near takes the blood only it draws (splashes, splats and
+	 * runs down a wall, which the server never knew of) off within {@code radius} blocks of where it's sent.
+	 */
+	public record Wipe(float radius) implements ParticleOptions {
+		public static final MapCodec<Wipe> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+			Codec.FLOAT.optionalFieldOf("radius", 1.0F).forGetter(Wipe::radius)).apply(i, Wipe::new));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Wipe> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.FLOAT, Wipe::radius, Wipe::new);
+
+		@Override
+		public ParticleType<?> getType() {
+			return WIPE;
+		}
+	}
+
 	public static final ParticleType<Spray> SPRAY = Registry.register(BuiltInRegistries.PARTICLE_TYPE, JaymosPowers.id("blood_spray"),
 		FabricParticleTypes.complex(true, Spray.CODEC, Spray.STREAM_CODEC));
 	public static final ParticleType<Puddle> PUDDLE = Registry.register(BuiltInRegistries.PARTICLE_TYPE, JaymosPowers.id("blood_puddle"),
@@ -133,6 +149,8 @@ public final class BloodParticles {
 
 	public static final ParticleType<Fleck> FLECK = Registry.register(BuiltInRegistries.PARTICLE_TYPE, JaymosPowers.id("blood_fleck"),
 		FabricParticleTypes.complex(false, Fleck.CODEC, Fleck.STREAM_CODEC));
+	public static final ParticleType<Wipe> WIPE = Registry.register(BuiltInRegistries.PARTICLE_TYPE, JaymosPowers.id("blood_wipe"),
+		FabricParticleTypes.complex(true, Wipe.CODEC, Wipe.STREAM_CODEC));
 	/** (0.15.109) A plain red {@link Fleck}, by id for mods that can't build one (Jaymo's Kingdoms looks it up). */
 	public static final SimpleParticleType RED_FLECK = simple("blood_fleck_red");
 

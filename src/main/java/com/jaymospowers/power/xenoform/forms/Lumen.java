@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Loaded;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
@@ -91,19 +92,19 @@ public final class Lumen extends XenoForm {
 			case ABILITY_1 -> {
 				if (ready(player, live, R)) {
 					LumenShapes.topUp(player, LumenShapes.MEND_TOPUP);
-					for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(MEND_RADIUS),
-						e -> e.isAlive() && (e == player || e instanceof Player || spared(player, e)) && e.distanceTo(player) <= MEND_RADIUS)) {
+					for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, MEND_RADIUS)),
+						e -> e.isAlive() && (e == player || e instanceof Player || spared(player, e)) && e.distanceTo(player) <= AbilityPower.size(player, MEND_RADIUS))) {
 						e.heal(MEND_HEAL);
 						level.sendParticles(ParticleTypes.HAPPY_VILLAGER, e.getX(), e.getY() + e.getBbHeight() * 0.6, e.getZ(), 6, 0.3, 0.4, 0.3, 0.0);
 					}
-					ring(level, MagicFx.GLOW, player.position().add(0.0, 0.2, 0.0), MEND_RADIUS * 0.5, 24);
+					ring(level, MagicFx.GLOW, player.position().add(0.0, 0.2, 0.0), AbilityPower.size(player, MEND_RADIUS) * 0.5, 24);
 					sound(player, SoundEvents.ALLAY_ITEM_GIVEN, 1.2F, 1.0F);
 					cooldown(player, live, R, MEND_COOLDOWN);
 				}
 			}
 			case ABILITY_2 -> {
 				if (ready(player, live, G)) {
-					for (LivingEntity e : around(player, FLARE_RADIUS)) {
+					for (LivingEntity e : around(player, AbilityPower.size(player, FLARE_RADIUS))) {
 						e.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, FLARE_BLIND, 0), player);
 						if (e instanceof Mob mob && mob.getTarget() == player) {
 							mob.setTarget(null);

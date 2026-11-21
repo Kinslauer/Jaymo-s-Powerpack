@@ -1,0 +1,11 @@
+{
+  "type": "jaymospowers:ore_vein",
+  "target": {
+    "predicate_type": "minecraft:block_match",
+    "block": "minecraft:netherrack"
+  },
+  "ore": "minecraft:nether_gold_ore",
+  "size": 34,
+  "rare": "minecraft:raw_gold_block",
+  "rare_chance": 0.03
+}

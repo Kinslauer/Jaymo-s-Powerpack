@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import net.minecraft.core.particles.ParticleTypes;
@@ -185,13 +186,13 @@ public final class Fuse extends XenoForm {
 	/** Defuse: what's about to blow near it is put out; blasts can't hurt it for a while. */
 	private static void defuse(ServerPlayer player, XenoformPower.Live live, ServerLevel level) {
 		int soaked = 0;
-		for (PrimedTnt tnt : level.getEntitiesOfClass(PrimedTnt.class, player.getBoundingBox().inflate(DEFUSE_RADIUS))) {
+		for (PrimedTnt tnt : level.getEntitiesOfClass(PrimedTnt.class, player.getBoundingBox().inflate(AbilityPower.size(player, DEFUSE_RADIUS)))) {
 			level.addFreshEntity(new ItemEntity(level, tnt.getX(), tnt.getY(), tnt.getZ(), new ItemStack(Items.TNT)));
 			level.sendParticles(ParticleTypes.SMOKE, tnt.getX(), tnt.getY() + 0.5, tnt.getZ(), 8, 0.2, 0.2, 0.2, 0.02);
 			tnt.discard();
 			soaked++;
 		}
-		for (Creeper creeper : level.getEntitiesOfClass(Creeper.class, player.getBoundingBox().inflate(DEFUSE_RADIUS), c -> c.getSwellDir() > 0)) {
+		for (Creeper creeper : level.getEntitiesOfClass(Creeper.class, player.getBoundingBox().inflate(AbilityPower.size(player, DEFUSE_RADIUS)), c -> c.getSwellDir() > 0)) {
 			creeper.setSwellDir(-1);
 			level.sendParticles(ParticleTypes.SMOKE, creeper.getX(), creeper.getY() + 1.0, creeper.getZ(), 8, 0.2, 0.3, 0.2, 0.02);
 			soaked++;

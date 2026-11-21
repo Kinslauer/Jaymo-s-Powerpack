@@ -49,6 +49,9 @@ import net.minecraft.world.phys.Vec3;
  * while it lies there cuts the tail off. Then its tail is cut for good ({@link #TAIL_CUT}, {@link #CUT_IN_RAMPAGE}); it
  * never turns again. A villager whose tail was cut at birth never turns at all.
  *
+ * <p>The Warrior-born dead ({@link UndeadBlood}: a zombie with a tail left on it) turn the same way, at the same chance,
+ * and under Jaymo's Kingdoms' Blood Moons as well as the full moon.
+ *
  * <p>Read and written by entity tag, so Powers needs no Kingdoms classes: Kingdoms marks the heritage and the tail
  * ({@link #WARRIOR}, {@link #TAIL_WRAPPED}, {@link #TAIL_CUT}) and its villagers' talk reads {@link #TURNED} and
  * {@link #CUT_IN_RAMPAGE}.
@@ -131,8 +134,14 @@ final class VillagerApe {
 		return level.isDarkOutside() && level.environmentAttributes().getValue(EnvironmentAttributes.MOON_PHASE, BlockPos.ZERO) == MoonPhase.FULL_MOON;
 	}
 
+	/** A night the moon can take one: the full moon, and for the dead ({@code dead}) Kingdoms' Blood Moons too. */
+	static boolean moonNight(ServerLevel level, boolean dead) {
+		return fullMoonNight(level)
+			|| dead && level.dimension() == net.minecraft.world.level.Level.OVERWORLD && level.isDarkOutside() && ZFighterKingdoms.bloodMoon(level.getServer());
+	}
+
 	private static boolean moonlit(Mob mob, ServerLevel level) {
-		return fullMoonNight(level) && level.canSeeSky(BlockPos.containing(mob.getEyePosition())) || ZFighterFakeMoon.shines(level, mob);
+		return moonNight(level, UndeadBlood.dead(mob)) && level.canSeeSky(BlockPos.containing(mob.getEyePosition())) || ZFighterFakeMoon.shines(level, mob);
 	}
 
 	/** (Andy, 2026-11-01) A false moon's light takes it ({@link ZFighterFakeMoon}), whatever the real moon is doing. */
@@ -153,13 +162,15 @@ final class VillagerApe {
 			return;
 		}
 		for (ServerLevel level : server.getAllLevels()) {
-			if (!fullMoonNight(level)) {
+			boolean full = moonNight(level, false);
+			if (!full && !moonNight(level, true)) {
 				continue;
 			}
 			long now = level.getGameTime();
 			List<Mob> turning = new ArrayList<>();
 			for (Entity entity : level.getAllEntities()) {
 				if (entity instanceof Mob mob && mob.isAlive() && !APES.containsKey(mob.getUUID()) && wrapped(mob) && !mob.isBaby()
+					&& (full || UndeadBlood.dead(mob))
 					&& level.canSeeSky(BlockPos.containing(mob.getEyePosition()))
 					&& now - mob.getAttachedOrElse(ROLLED, Long.MIN_VALUE / 2) >= ZFighterLineage.WILD_ROLL_EVERY) {
 					// the moon may or may not take it, once a night
@@ -170,7 +181,7 @@ final class VillagerApe {
 				}
 			}
 			for (Mob mob : turning) {
-				turn(mob, level, now, "message.jaymospowers.villager_ape_turn");
+				turn(mob, level, now, UndeadBlood.dead(mob) ? "message.jaymospowers.dead_ape_turn" : "message.jaymospowers.villager_ape_turn");
 			}
 		}
 	}
@@ -491,6 +502,7 @@ final class VillagerApe {
 		mob.removeTag(TAIL_WRAPPED);
 		mob.addTag(TAIL_CUT);
 		mob.addTag(CUT_IN_RAMPAGE);
+		UndeadBlood.mark(mob);
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.HOSTILE, 3.0F, 0.5F);
 		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.RAVAGER_HURT, SoundSource.HOSTILE, 4.0F, 0.4F);
 		level.sendParticles(com.jaymospowers.core.blood.BloodParticles.fleck(0x8A0A0A, 3.0F), true, false, mob.getX(), mob.getY() + 1.0, mob.getZ(), 40, mob.getBbWidth() * 0.4,

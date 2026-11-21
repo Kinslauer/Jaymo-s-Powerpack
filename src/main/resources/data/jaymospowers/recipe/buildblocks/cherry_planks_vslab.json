@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:saw",
+    "minecraft:cherry_planks",
+    "minecraft:cherry_planks",
+    "minecraft:cherry_planks",
+    "minecraft:cherry_planks"
+  ],
+  "result": {
+    "id": "jaymospowers:cherry_planks_vslab",
+    "count": 8
+  }
+}

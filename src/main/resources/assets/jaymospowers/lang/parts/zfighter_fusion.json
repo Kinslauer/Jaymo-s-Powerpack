@@ -19,5 +19,19 @@
   "message.jaymospowers.zfighter_five_fused": "%s become one colossal fighter!",
   "message.jaymospowers.zfighter_master_fuse_refuses": "%s turns away from the dance.",
   "message.jaymospowers.zfighter_master_fuse_not_yet": "%1$s: \"Not yet. Learn more from me first.\" (%2$s of %3$s lessons)",
-  "message.jaymospowers.zfighter_master_fuse_joins": "%s joins your dance."
+  "message.jaymospowers.zfighter_master_fuse_joins": "%s joins your dance.",
+  "message.jaymospowers.zfighter_villager_refuses": "%s does not know you well enough to join your dance.",
+  "message.jaymospowers.zfighter_villager_joins": "%s joins your dance.",
+  "message.jaymospowers.zfighter_knack.farmer": "The farmer's knack: crops round you grow faster.",
+  "message.jaymospowers.zfighter_knack.smith": "The smith's knack: what you hold slowly mends.",
+  "message.jaymospowers.zfighter_knack.cleric": "The cleric's knack: you and those near you slowly heal.",
+  "message.jaymospowers.zfighter_knack.fisher": "The fisherman's knack: the water's luck, and the breath to stay in it.",
+  "message.jaymospowers.zfighter_knack.scholar": "The scholar's knack: every kill teaches you more.",
+  "message.jaymospowers.zfighter_knack.butcher": "The butcher's knack: beasts give up more.",
+  "message.jaymospowers.zfighter_knack.mason": "The mason's knack: your hands work fast.",
+  "message.jaymospowers.zfighter_knack.fletcher": "The fletcher's knack: arrows turn up in your quiver.",
+  "message.jaymospowers.zfighter_knack.shepherd": "The shepherd's knack: sheep near you grow their wool back.",
+  "message.jaymospowers.zfighter_reins_asked": "You ask %s to let you out.",
+  "message.jaymospowers.zfighter_reins_split_ask": "%s asks to split. Z, then C to agree.",
+  "hud.jaymospowers.zfighter_partner": "%1$s %2$s m"
 }

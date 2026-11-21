@@ -43,6 +43,11 @@ public final class SecondClass {
 	static final int MASTER_LEVEL = 5;
 	/** What the lesson costs. */
 	static final int FEE_SILVER = 60;
+	/**
+	 * (class trees, Andy's page note) What a first class costs a player who started with none: any villager of a trade that
+	 * grows the class (any rung, not only a master) teaches it.
+	 */
+	static final int FIRST_FEE_SILVER = 10;
 	/** The trades that grow each class. */
 	private static final Map<PlayerClass, Set<ResourceKey<VillagerProfession>>> MASTERS = new EnumMap<>(PlayerClass.class);
 
@@ -66,6 +71,8 @@ public final class SecondClass {
 
 	/** The class each player was offered with options to pick, until they seal it (or walk off). */
 	private static final Map<UUID, PlayerClass> PENDING = new HashMap<>();
+	/** The same, for a first class taught to a player who started with none. */
+	private static final Map<UUID, PlayerClass> PENDING_FIRST = new HashMap<>();
 
 	private SecondClass() {
 	}
@@ -93,11 +100,13 @@ public final class SecondClass {
 
 	static void clear() {
 		PENDING.clear();
+		PENDING_FIRST.clear();
 	}
 
 	/** The classes unmade with the character. */
 	static void unmake(ServerPlayer player) {
 		PENDING.remove(player.getUUID());
+		PENDING_FIRST.remove(player.getUUID());
 	}
 
 	/** Whether {@code player} may take {@code cls} as a second class now. */
@@ -112,6 +121,17 @@ public final class SecondClass {
 	/** The option kinds ("learn:cleric") {@code master} offers {@code player} now. */
 	static List<String> offers(ServerPlayer player, Villager master) {
 		List<String> out = new ArrayList<>();
+		if (Classes.classless(player)) {
+			// (class trees) no class yet: any villager of a class's trade teaches it as the first
+			if (!master.isBaby()) {
+				for (Map.Entry<PlayerClass, Set<ResourceKey<VillagerProfession>>> e : MASTERS.entrySet()) {
+					if (e.getValue().stream().anyMatch(p -> master.getVillagerData().profession().is(p))) {
+						out.add("first:" + e.getKey().key());
+					}
+				}
+			}
+			return out;
+		}
 		if (master.isBaby() || master.getVillagerData().level() < MASTER_LEVEL) {
 			return out;
 		}
@@ -123,9 +143,35 @@ public final class SecondClass {
 		return out;
 	}
 
-	/** The class a "learn:..." kind teaches. */
+	/** The class a "learn:..." or "first:..." kind teaches. */
 	static PlayerClass classOf(String kind) {
-		return PlayerClass.byKey(kind.substring("learn:".length()));
+		return PlayerClass.byKey(kind.substring(kind.indexOf(':') + 1));
+	}
+
+	/** (class trees) {@code player}, who started with no class, took a teacher's offer of a first class. */
+	static void acceptFirst(ServerPlayer player, LivingEntity teacher, String kind) {
+		PlayerClass cls = classOf(kind);
+		if (cls == null || !Classes.classless(player) || !Money.canPay(player, Money.worth(FIRST_FEE_SILVER))) {
+			return;
+		}
+		if (cls.options.isEmpty()) {
+			teachFirst(player, teacher, cls, "");
+			return;
+		}
+		PENDING_FIRST.put(player.getUUID(), cls);
+		if (ServerPlayNetworking.canSend(player, Classes.Open.TYPE)) {
+			ServerPlayNetworking.send(player, new Classes.Open(false, cls.ordinal() + 1));
+		}
+	}
+
+	private static void teachFirst(ServerPlayer player, @org.jspecify.annotations.Nullable LivingEntity teacher, PlayerClass cls, String option) {
+		if (!Classes.classless(player) || !Money.charge(player, Money.worth(FIRST_FEE_SILVER))) {
+			return;
+		}
+		Classes.set(player, cls, option);
+		if (teacher != null) {
+			Speech.tell(player.level(), teacher, player, Component.translatable("talk.jaymoskingdoms.teacher.learned", Component.translatable("class.jaymoskingdoms." + cls.key())), Speech.GOLD);
+		}
 	}
 
 	/** {@code player} took a master's offer: the class screen opens if there is a pick to make, else the lesson is given. */
@@ -146,6 +192,11 @@ public final class SecondClass {
 
 	/** The class screen came back with the pick: the lesson is paid and given. */
 	static void chosen(ServerPlayer player, PlayerClass cls, String option) {
+		if (PENDING_FIRST.get(player.getUUID()) == cls) {
+			PENDING_FIRST.remove(player.getUUID());
+			teachFirst(player, null, cls, option);
+			return;
+		}
 		if (PENDING.remove(player.getUUID()) != cls || !may(player, cls) || !Money.canPay(player, Money.worth(FEE_SILVER))) {
 			return;
 		}

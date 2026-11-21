@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {"id": "homesteads:forest_home_steads", "required": false},
+    {"id": "homesteads:flower_home_steads", "required": false},
+    {"id": "homesteads:taiga_home_steads", "required": false},
+    {"id": "mvs:house", "required": false},
+    {"id": "mvs:tall_house", "required": false},
+    {"id": "mvs:lil_house", "required": false},
+    {"id": "mvs:azelea_house", "required": false},
+    {"id": "mvs:fox_hut", "required": false},
+    {"id": "grim_kingdoms:pine_cabin", "required": false},
+    {"id": "grim_kingdoms:long_pine_cabin", "required": false},
+    {"id": "grim_kingdoms:secluded_cabin", "required": false},
+    {"id": "grim_kingdoms:nordic_cabin1", "required": false},
+    {"id": "grim_kingdoms:nordic_cabin2", "required": false},
+    {"id": "grim_kingdoms:nordic_cabin3", "required": false},
+    {"id": "grim_kingdoms:nordic_cabin4", "required": false},
+    {"id": "vanillaconstructs:lumberjack_cabin", "required": false}
+  ]
+}

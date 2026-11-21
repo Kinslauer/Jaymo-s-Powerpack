@@ -1,4 +1,21 @@
 {
   "replace": false,
-  "values": []
+  "values": [
+    {
+      "id": "jaymospowers:ember_dragon_bone",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:rime_dragon_bone",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:venom_dragon_bone",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:storm_dragon_bone",
+      "required": false
+    }
+  ]
 }

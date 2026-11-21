@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "jaymospowers:block/stone_ores/andesite_redstone_ore"
+    },
+    "lit=true": {
+      "model": "jaymospowers:block/stone_ores/andesite_redstone_ore"
+    }
+  }
+}

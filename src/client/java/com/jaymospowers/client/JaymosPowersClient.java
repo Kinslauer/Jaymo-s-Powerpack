@@ -57,10 +57,25 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.frost.IceCaves.place();
 		// (0.15.147) the inventory's tab to the powers screen
 		PowerInventoryTab.init();
+		DreamView.init();
 		// Powers' training on the experience meter (Kingdoms' SkillMeter)
 		com.jaymospowers.client.hud.MeterFeed.init();
 		com.jaymospowers.client.hud.TipCard.init();
+		com.jaymospowers.client.hud.PowerTips.init();
+		// the UI tutorial: a card the first time each part of the screen shows
+		com.jaymospowers.client.hud.UiTips.init();
+		com.jaymospowers.client.hud.TitleCard.init();
+		com.jaymospowers.client.hud.DreadVignette.init();
 		com.jaymospowers.client.hud.MoveHints.init();
+		// (Andy, 2026-11-20) a tap of use on a body: the body menu
+		com.jaymospowers.client.bodymenu.BodyMenuClient.init();
+		// (Andy, 2026-11-20) first-time cards for the body menu, executions, the lasso, being downed and the wall sit
+		com.jaymospowers.client.hud.BodyTips.init();
+		// biome name, use bar, chat mentions and Shift+T item sharing (client/bits)
+		com.jaymospowers.client.bits.BiomeTitle.init();
+		com.jaymospowers.client.bits.UseBar.init();
+		com.jaymospowers.client.bits.Mentions.init();
+		com.jaymospowers.client.bits.ItemShareClient.init();
 		// the Verdant World's sky: the blue giant and its ring
 		com.jaymospowers.client.eden.VerdantSkyClient.init();
 		com.jaymospowers.client.eden.EdenWindClient.init();
@@ -110,15 +125,18 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.finisher.FinisherPose.register();
 		com.jaymospowers.client.finisher.FinisherClient.register();
 		com.jaymospowers.client.HeldInput.register();
+		com.jaymospowers.client.hud.HudBars.register();
 		// (0.18.12) no body in the logout panorama
 		com.jaymospowers.client.power.web.FirstPersonCompat.hideInPanoramas();
 		LockOnClient.init();
 		com.jaymospowers.client.combat.GuardClient.init();
+		com.jaymospowers.client.combat.CritPunchClient.init();
 		com.jaymospowers.client.combat.IncomingBlowsClient.init();
 		com.jaymospowers.client.combat.TellGlintParticle.register(); // (0.20.4)
 		com.jaymospowers.client.tundra.SnowMote.register();
 		com.jaymospowers.client.tundra.TundraGrass.register();
 		com.jaymospowers.client.combat.ShieldBangClient.init();
+		com.jaymospowers.client.combat.ShoveClient.init();
 		com.jaymospowers.client.combat.NetheriteShieldRenderer.init(); // (medieval picks) the netherite shield and its trims
 		com.jaymospowers.client.collide.CollisionsClient.init();
 		com.jaymospowers.client.combat.ClashFxClient.init();
@@ -129,6 +147,9 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.ember.RunningHotClient.init();
 		com.jaymospowers.client.power.heritage.HeritageMovesClient.init();
 		com.jaymospowers.client.tinkering.TinkeringClient.init();
+		// mixed slabs: the two slabs of one block, drawn by their block entity
+		net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(com.jaymospowers.buildblocks.MixedSlabs.ENTITY,
+			com.jaymospowers.client.buildblocks.MixedSlabRenderer::new);
 		// (0.15.58) the Aether: the rising gravitite block, quicksoil's speed cap
 		com.jaymospowers.client.aether.AetherClient.init();
 		com.jaymospowers.client.frost.FrostClient.init();
@@ -204,6 +225,12 @@ public class JaymosPowersClient implements ClientModInitializer {
 			net.minecraft.network.chat.Component.literal("Jaymo's Powers: Excalibur colours and leaves"),
 			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.NORMAL);
 		ExcaliburLook.init();
+		// the Medieval Music pack empties the warped forest's music: this gives it three Nether tracks of the pack's. Not on by
+		// default: PackResourcePacks puts it just above the music pack when that is switched on (it points at that pack's files)
+		net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosPowers.id("medieval_music_gaps"),
+			net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosPowers.MOD_ID).orElseThrow(),
+			net.minecraft.network.chat.Component.literal("Jaymo's Powers: warped forest music"),
+			net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.NORMAL);
 		// (0.19.63) bushy leaves (tools/bushy_leaves.py: every vanilla leaf block also draws two crossed planes reaching past
 		// it) and grass and snow lips leaning over open ledges (tools/grass_edges.py); on by default, switched off in
 		// Resource Packs. Our own take on Recrafted's bushy leaves and overlays (nothing copied).
@@ -243,6 +270,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.sound.ImmersiveSounds.init();
 		LeafRustle.init();
 		CarryClient.init();
+		SlingPose.init();
 		PerchClient.init();
 		com.jaymospowers.client.stamina.DodgeClient.init();
 		com.jaymospowers.client.divine.DivineSenseClient.init();
@@ -252,13 +280,20 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.combat.BlowTooltips.init();
 		JeiCheats.init();
 		EmfCompat.init();
+		MountClimbPose.init();
+		SeatSteps.init();
 		com.jaymospowers.client.armory.TaczFirstPerson.init();
+		com.jaymospowers.client.armory.GunLaserClient.init();
+		com.jaymospowers.client.armory.GunHandling.init();
 		com.jaymospowers.client.armory.MusketSights.init();
 		com.jaymospowers.client.armory.guns.AnimatedGunModel.init();
 		com.jaymospowers.client.armory.HeldItems.init();
 		// after every mod's main entrypoint (TaCZ adds its modern pack there), before resources load
 		com.jaymospowers.armory.TaczGuns.trimDefaultPack();
 		CrawlTaps.init();
+		com.jaymospowers.client.moving.LateJumps.init();
+		com.jaymospowers.client.jump.PowerJumpClient.init();
+		com.jaymospowers.client.moving.AutoWalk.init();
 		StanceScroll.init();
 		ProneTransition.init();
 		StanceHud.init();
@@ -285,6 +320,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.hud.HudArrange.register();
 		com.jaymospowers.client.backpack.BackpackClient.init();
 		com.jaymospowers.client.gear.GearClient.init();
+		com.jaymospowers.client.fighting.ArrowPickClient.init();
 		com.jaymospowers.client.baubles.BaublesClient.init();
 		// (0.19.87) the jeweller's bench screen, the lapidary wheel's cut screen and cutting bar
 		com.jaymospowers.client.jewellery.JewelleryClient.init();
@@ -300,6 +336,10 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.darktide.DarktidePowerClient.init();
 		com.jaymospowers.client.power.xenoform.XenoformPowerClient.init();
 		com.jaymospowers.client.power.zfighter.ZFighterPowerClient.init();
+		// (Awakening picks) the power trials page and the pinned trial
+		com.jaymospowers.client.trials.TrialsScreen.register();
+		com.jaymospowers.client.boss.BossShareCard.register();
+		com.jaymospowers.client.bonebond.BoneironClient.init();
 		// (0.20.52) the stacked Aether hidden from under the clouds
 		com.jaymospowers.client.aether.AetherVeil.init();
 		com.jaymospowers.client.aether.CloudSeaWind.init();
@@ -431,7 +471,10 @@ public class JaymosPowersClient implements ClientModInitializer {
 			boolean avatar = com.jaymospowers.client.power.ember.FlameAvatarClient.route(player, key, physical, wasDown[key.ordinal()]);
 			// (Jung) a Wind user's crouch + V is the airflow sense, not V's channel
 			boolean sensing = com.jaymospowers.client.power.wind.WindAirSense.route(player, key, physical, wasDown[key.ordinal()]);
-			boolean down = power != null && physical && !avatar && !sensing
+			// a symbiote host who isn't a web slinger: with the tendrils out, R and G are theirs
+			boolean tendrils = !avatar && !sensing
+				&& com.jaymospowers.client.power.web.WebPowerClient.routeHostKey(player, key, physical, wasDown[key.ordinal()]);
+			boolean down = power != null && physical && !avatar && !sensing && !tendrils
 				&& !(key == PowerKey.ABILITY_1 && com.jaymospowers.client.armory.BombGliderClient.riding(player) != null)
 				// (0.15.53) steering a Kingdoms dragon, ability 1's key (R) is its breath
 				&& !(key == PowerKey.ABILITY_1 && steeringDragon(player));
@@ -480,6 +523,10 @@ public class JaymosPowersClient implements ClientModInitializer {
 		}
 		if (client != null && !minecraft.isPaused()) {
 			client.tick(minecraft, player);
+		}
+		if (!minecraft.isPaused()) {
+			// a symbiote in someone who isn't a web slinger still drives, hangs and crawls them (a web slinger's ticks above)
+			com.jaymospowers.client.power.web.WebPowerClient.hostTick(minecraft, player);
 		}
 		// (0.11.87) the Rig's hover and full flight, before the roll too
 		com.jaymospowers.client.rig.RigClient.motion(minecraft, player);

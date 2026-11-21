@@ -74,6 +74,13 @@ final class Rumours {
 			// (a tale's rumour instead of a treasure's: it's told its own way)
 			return null;
 		}
+		// (village mods 1) now and then, the nearest illager hold or camp by name
+		BlockPos[] hold = new BlockPos[1];
+		Component named = IllagerHolds.hint(level, teller, hold);
+		if (named != null) {
+			Speech.tell(level, teller, player, named, Speech.GOLD);
+			return hold[0];
+		}
 		BlockPos at = place(level, teller.blockPosition());
 		if (at == null) {
 			Speech.tell(level, teller, player, Component.translatable("rumour.jaymoskingdoms.none"), Speech.WHITE);

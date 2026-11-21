@@ -2,6 +2,7 @@ package com.jaymospowers.power.xenoform.forms;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.BladeBlood;
 import com.jaymospowers.core.blood.BloodTrail;
 import com.jaymospowers.core.wounds.Bleeding;
@@ -412,7 +413,7 @@ public final class Prowl extends XenoForm {
 
 	/** Every mob round you breaks off and runs. */
 	private static void roar(ServerPlayer player, ServerLevel level) {
-		for (LivingEntity living : around(player, ROAR_RADIUS)) {
+		for (LivingEntity living : around(player, AbilityPower.size(player, ROAR_RADIUS))) {
 			if (!(living instanceof Mob mob)) {
 				continue;
 			}
@@ -424,7 +425,7 @@ public final class Prowl extends XenoForm {
 		}
 		sound(player, SoundEvents.RAVAGER_ROAR, 1.6F, 1.3F);
 		ring(level, ParticleTypes.CLOUD, player.position().add(0.0, 1.0, 0.0), 2.0, 16);
-		com.jaymospowers.core.Shakes.heavy(player, player.position(), ROAR_RADIUS, 0.6F);
+		com.jaymospowers.core.Shakes.heavy(player, player.position(), AbilityPower.size(player, ROAR_RADIUS), 0.6F);
 	}
 
 	@Override

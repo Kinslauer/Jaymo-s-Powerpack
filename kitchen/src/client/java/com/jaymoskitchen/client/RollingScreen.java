@@ -131,6 +131,10 @@ public class RollingScreen extends Screen {
 				phase = Phase.RESULT;
 				rebuildWidgets();
 			}
+			case PrepUpdate.STATUS_HANDS -> {
+				phase = Phase.RESULT;
+				onClose();
+			}
 			default -> onClose();
 		}
 	}

@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:deepslate_vslab",
+  "result": {
+    "id": "jaymospowers:deepslate_quarter",
+    "count": 2
+  }
+}

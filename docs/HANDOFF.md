@@ -18,7 +18,7 @@ Written 2026-10-10 at the end of a long local session, so a cloud session can ca
     side, `client/sound/PowerLoop` (a looping bed that follows speed/charge) plus `client/sound/Accents`. Don't add
     a bare `% N == 0` sound loop.
   - `docs/Abilities.md`: the table of every ability (the user edits the "Change to" column; "Line" = the row's own line
-    number in the file). `docs/Plan-0.7.md`: the 0.7 plan and the user's answers (all built).
+    number in the file).
   - `docs/<power>.md`: per-power design notes. `MODLOG.md`: the design log (recent; older entries in `docs/modlog/`).
   - `docs/codemap/*.md`: one line per class for each project, made by `tools/codemap.py`. Grep it before searching the code.
   - `tools/*.py`: asset generators (sprites, models, worldgen JSON); run `python -I tools/<x>.py` from the root.

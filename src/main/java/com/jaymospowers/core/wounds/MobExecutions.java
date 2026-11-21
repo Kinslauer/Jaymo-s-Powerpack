@@ -205,6 +205,20 @@ public final class MobExecutions {
 		return BY_VICTIM.containsKey(player.getUUID());
 	}
 
+	/**
+	 * {@code mob} sets out to execute downed {@code player} now, by its own choice (Kingdoms: a spiteful or hotheaded
+	 * awakened stranger who has beaten them): no grace and no {@link #SPARE}, but it must be {@link #fit}. Plain JDK and
+	 * vanilla types, so Kingdoms can call it by reflection. True if it set out.
+	 */
+	public static boolean order(Mob mob, ServerPlayer player) {
+		if (!Downed.isDowned(player) || !player.isAlive() || player.isCreative() || player.isSpectator() || BY_VICTIM.containsKey(player.getUUID())
+			|| BY_MOB.containsKey(mob) || !fit(mob) || mob.level() != player.level() || Finishers.busy(mob)) {
+			return false;
+		}
+		claim(new Execution(player.getUUID(), null, mob, moveOf(mob), mob.level().getGameTime()));
+		return true;
+	}
+
 	/** (0.20.50) The mob coming to execute {@code player}, or standing over them; null if none. */
 	public static @Nullable Mob executioner(ServerPlayer player) {
 		Execution e = BY_VICTIM.get(player.getUUID());
@@ -224,6 +238,10 @@ public final class MobExecutions {
 			if (spare.test(mob, victim)) {
 				return false;
 			}
+		}
+		// (Andy, 2026-11-20: "predators should start eating you when you go down. and only finish you if they are full")
+		if (com.jaymospowers.core.LimbEaters.eatsAlive(mob) && !com.jaymospowers.core.LimbEaters.full(mob)) {
+			return false;
 		}
 		if (mob instanceof Enemy || fighting(mob, victim)) {
 			return true;
@@ -255,7 +273,8 @@ public final class MobExecutions {
 
 	/**
 	 * Whether {@code mob} is fighting {@code victim}: it has them as its target (or its brain's attack target), or they
-	 * struck it within {@link #GRUDGE_TICKS}.
+	 * struck it within {@link #GRUDGE_TICKS}, or it went to eat them alive or tore at them within as long (a bear or a
+	 * wolf drops its target to feed on the downed, {@link com.jaymospowers.core.LimbEaters#toreAt}).
 	 */
 	public static boolean fighting(Mob mob, LivingEntity victim) {
 		if (mob.getTarget() == victim) {
@@ -266,7 +285,8 @@ public final class MobExecutions {
 			&& mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null) == victim) {
 			return true;
 		}
-		return mob.getLastHurtByMob() == victim && mob.tickCount - mob.getLastHurtByMobTimestamp() < GRUDGE_TICKS;
+		return mob.getLastHurtByMob() == victim && mob.tickCount - mob.getLastHurtByMobTimestamp() < GRUDGE_TICKS
+			|| com.jaymospowers.core.LimbEaters.toreAt(mob, victim, GRUDGE_TICKS);
 	}
 
 	/** What {@code mob} does it with. */
@@ -293,6 +313,10 @@ public final class MobExecutions {
 	}
 
 	private static Move bare(Mob mob) {
+		if (mob instanceof net.minecraft.world.entity.animal.Animal && !(mob instanceof Enemy) && com.jaymospowers.core.LimbEaters.eats(mob)) {
+			// a bear, a wolf, a big cat: it mauls them and feeds, however big it is (no ravager's crush)
+			return Move.FEED;
+		}
 		if (mob instanceof Zombie || mob instanceof Spider || BodyPlan.of(mob) != BodyPlan.HUMANOID) {
 			return mob.getBbWidth() >= 1.3F ? Move.CRUSH : Move.FEED;
 		}
@@ -407,12 +431,14 @@ public final class MobExecutions {
 		Mob mob = e.mob;
 		long now = level.getGameTime();
 		double flat = Math.sqrt(Mth.square(mob.getX() - victim.getX()) + Mth.square(mob.getZ() - victim.getZ()));
+		// (a bear, a ravager: its bulk keeps its middle further off than a man's)
+		double bulk = Math.max(0.0, (mob.getBbWidth() + victim.getBbWidth()) / 2.0 + 0.7 - REACH);
 		if (e.at == 0L) {
 			if (now - e.claimed > APPROACH_MAX) {
 				stop(e, true);
 				return;
 			}
-			if (flat > REACH || Math.abs(mob.getY() - victim.getY()) > 1.5) {
+			if (flat > REACH + bulk || Math.abs(mob.getY() - victim.getY()) > 1.5) {
 				if (now % 5 == 0 || mob.getNavigation().isDone()) {
 					mob.getNavigation().moveTo(victim, APPROACH_SPEED);
 				}
@@ -422,7 +448,7 @@ public final class MobExecutions {
 			return;
 		}
 		int t = (int)(now - e.at);
-		if (t < STRIKE && flat > SLIP) {
+		if (t < STRIKE && flat > SLIP + bulk) {
 			// they crawled off: after them, and it begins again when it's there
 			e.at = 0L;
 			return;
@@ -464,10 +490,15 @@ public final class MobExecutions {
 			case SHOT -> SoundEvents.CROSSBOW_LOADING_END.value();
 			case FANGS -> SoundEvents.EVOKER_PREPARE_ATTACK;
 			case POTION -> SoundEvents.WITCH_CELEBRATE;
-			case FEED -> mob instanceof Spider ? SoundEvents.SPIDER_AMBIENT : SoundEvents.ZOMBIE_AMBIENT;
+			case FEED -> mob instanceof Spider ? SoundEvents.SPIDER_AMBIENT : mob instanceof Zombie ? SoundEvents.ZOMBIE_AMBIENT : null;
 			case CRUSH -> mob instanceof Warden ? SoundEvents.WARDEN_ROAR : SoundEvents.RAVAGER_ROAR;
 		};
-		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), sound, SoundSource.HOSTILE, 1.1F, 0.8F + mob.getRandom().nextFloat() * 0.2F);
+		if (sound != null) {
+			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), sound, SoundSource.HOSTILE, 1.1F, 0.8F + mob.getRandom().nextFloat() * 0.2F);
+		} else {
+			// (an animal's own growl)
+			mob.playAmbientSound();
+		}
 		if (e.move == Move.FANGS) {
 			level.sendParticles(ParticleTypes.ENCHANT, mob.getX(), mob.getY() + mob.getBbHeight() + 0.3, mob.getZ(), 30, 0.4, 0.4, 0.4, 0.5);
 		}

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Shakes;
 import java.util.ArrayList;
@@ -117,10 +118,10 @@ final class ZFighterRisingDome {
 		Vec3 base = hit.getType() == HitResult.Type.MISS ? over.add(0.0, -PILLAR_BELOW, 0.0) : hit.getLocation();
 		Vec3 top = new Vec3(over.x, over.y + PILLAR_ABOVE, over.z);
 		var source = ZFighterKi.source(owner);
-		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, new AABB(base, top).inflate(PILLAR_RADIUS),
+		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, new AABB(base, top).inflate(AbilityPower.size(owner, PILLAR_RADIUS)),
 			e -> e != owner && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand))) {
 			Vec3 centre = near.getBoundingBox().getCenter();
-			if (Math.hypot(centre.x - over.x, centre.z - over.z) > PILLAR_RADIUS + near.getBbWidth() * 0.5) {
+			if (Math.hypot(centre.x - over.x, centre.z - over.z) > AbilityPower.size(owner, PILLAR_RADIUS) + near.getBbWidth() * 0.5) {
 				continue;
 			}
 			near.setInvulnerableTime(0);
@@ -130,7 +131,7 @@ final class ZFighterRisingDome {
 			ZFighterPoise.wear(near, POISE_WEAR);
 		}
 		level.explode(owner, source, ZFighterKi.GROUND_ONLY, base.x, base.y + 0.3, base.z, PILLAR_BLAST, false, Level.ExplosionInteraction.NONE);
-		ZFighterKi.showBeam(level, base, top, (float)PILLAR_RADIUS, pillar.color);
+		ZFighterKi.showBeam(level, base, top, (float)AbilityPower.size(owner, PILLAR_RADIUS), pillar.color);
 		ParticleOptions dust = MagicFx.wisp(pillar.color, 2.0F);
 		// a dome of motes at the foot, then sparks up the column
 		for (int i = 0; i < 48; i++) {
@@ -138,7 +139,7 @@ final class ZFighterRisingDome {
 			level.sendParticles(dust, true, false, base.x, base.y + 0.2, base.z, 0, dir.x, dir.y, dir.z, 0.5);
 		}
 		for (double y = base.y; y < top.y; y += 1.0) {
-			level.sendParticles(MagicFx.LIGHT, true, false, over.x, y, over.z, 2, PILLAR_RADIUS * 0.4, 0.4, PILLAR_RADIUS * 0.4, 0.05);
+			level.sendParticles(MagicFx.LIGHT, true, false, over.x, y, over.z, 2, AbilityPower.size(owner, PILLAR_RADIUS) * 0.4, 0.4, AbilityPower.size(owner, PILLAR_RADIUS) * 0.4, 0.05);
 		}
 		level.playSound(null, base.x, base.y, base.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.2F, 1.1F);
 		level.playSound(null, over.x, over.y, over.z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 0.8F, 1.3F);

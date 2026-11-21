@@ -62,8 +62,14 @@ public class Moose extends WildBeast {
 			.add(Attributes.ATTACK_KNOCKBACK, ATTACK_KNOCKBACK).add(Attributes.FOLLOW_RANGE, 24.0);
 	}
 
+	/** Cube Animals' moose type once found; looked up until then. */
+	private static @Nullable EntityType<?> cow;
+
 	static @Nullable EntityType<?> cowType() {
-		return BuiltInRegistries.ENTITY_TYPE.getOptional(Identifier.parse(COW)).orElse(null);
+		if (cow == null) {
+			cow = BuiltInRegistries.ENTITY_TYPE.getOptional(Identifier.parse(COW)).orElse(null);
+		}
+		return cow;
 	}
 
 	@Override

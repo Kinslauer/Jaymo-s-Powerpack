@@ -2,6 +2,7 @@ package com.jaymospowers.core.wounds;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.HoldProgress;
+import com.jaymospowers.core.HudBar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -42,7 +43,6 @@ public final class HealStruggle {
 	public static final int STRUGGLE_TICKS = 80, GRACE = 8;
 	/** The least health they get up with. */
 	static final float RISE_HEALTH = 4.0F;
-	static final int BAR = 12;
 
 	/** What a downed player can struggle up with. More can be added by datapack. */
 	public static final TagKey<Item> SELF_REVIVE = TagKey.create(Registries.ITEM, JaymosPowers.id("self_revive"));
@@ -154,9 +154,8 @@ public final class HealStruggle {
 			}
 			if (s.ticks < STRUGGLE_TICKS) {
 				if (s.ticks % 2 == 0) {
-					int filled = Math.round(BAR * s.ticks / (float) STRUGGLE_TICKS);
-					player.sendOverlayMessage(Component.translatable(Downed.feet(player, "message.jaymospowers.downed.heal_struggling"), "|".repeat(filled) + ".".repeat(BAR - filled))
-						.withStyle(ChatFormatting.YELLOW));
+					HudBar.hold(player, "heal_struggle", s.ticks / (float) STRUGGLE_TICKS, HudBar.YELLOW,
+						Component.translatable(Downed.feet(player, "bar.jaymospowers.heal_struggling")), true);
 				}
 				continue;
 			}

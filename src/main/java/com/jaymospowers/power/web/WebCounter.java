@@ -1,6 +1,7 @@
 package com.jaymospowers.power.web;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Powers;
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -761,8 +762,8 @@ public final class WebCounter {
 	private static void roar(ServerPlayer player, ServerLevel level, LivingEntity target) {
 		sound(level, player, SoundEvents.WARDEN_ROAR, 1.2F, 1.3F);
 		com.jaymospowers.core.Shakes.send(player, 1.2F, null);
-		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(ROAR_RADIUS),
-			e -> e != player && e.isAlive() && !e.isSpectator() && e.distanceTo(player) <= ROAR_RADIUS && !(e instanceof Player p && p.isCreative()))) {
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, ROAR_RADIUS)),
+			e -> e != player && e.isAlive() && !e.isSpectator() && e.distanceTo(player) <= AbilityPower.size(player, ROAR_RADIUS) && !(e instanceof Player p && p.isCreative()))) {
 			living.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 0), player);
 			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 40, 1), player);
 			Vec3 push = away(player, living).scale(ROAR_PUSH).add(0.0, 0.3, 0.0);

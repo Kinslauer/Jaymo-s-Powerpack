@@ -106,7 +106,7 @@ public final class Gifted {
 		}
 	}
 
-	static @Nullable GiftKit kit(Identifier power) {
+	public static @Nullable GiftKit kit(Identifier power) {
 		return KITS.get(power);
 	}
 

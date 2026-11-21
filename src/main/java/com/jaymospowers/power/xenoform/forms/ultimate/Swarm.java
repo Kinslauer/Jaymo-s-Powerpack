@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms.ultimate;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
@@ -278,7 +279,7 @@ public final class Swarm extends XenoUltimate {
 			return false;
 		}
 		BlockPos centre = hit.getBlockPos();
-		int r = HAYWIRE_RADIUS;
+		int r = AbilityPower.size(player, HAYWIRE_RADIUS);
 		int flipped = 0;
 		for (BlockPos pos : BlockPos.betweenClosed(centre.offset(-r, -r, -r), centre.offset(r, r, r))) {
 			if (flipped >= HAYWIRE_MAX) {

@@ -139,7 +139,7 @@ public final class CyclopsCaves {
 	/** The hall's room is natural rock and earth (mostly), dry, unbuilt, with the mountain over it. */
 	private static boolean fits(ServerLevel level, BlockPos mouth, Direction way) {
 		BlockPos a = cell(mouth, way, -2, -HALF_WIDTH - 4, 0), b = cell(mouth, way, DEPTH + 1, HALF_WIDTH + 4, HEIGHT);
-		if (!level.hasChunksAt(new BlockPos(Math.min(a.getX(), b.getX()), 0, Math.min(a.getZ(), b.getZ())),
+		if (!Loaded.made(level, new BlockPos(Math.min(a.getX(), b.getX()), 0, Math.min(a.getZ(), b.getZ())),
 			new BlockPos(Math.max(a.getX(), b.getX()), 0, Math.max(a.getZ(), b.getZ())))) {
 			return false;
 		}

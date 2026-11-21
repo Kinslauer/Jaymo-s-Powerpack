@@ -197,6 +197,39 @@ public final class MobAmmo {
 		}
 	}
 
+	/**
+	 * Andy (2026-11-19): "you should be able to take their bows". The arrows a downed {@code mob} would give up to a player
+	 * taking its weapons: what's left in its quiver if it has ever had one, else a full one if it has a bow or crossbow in
+	 * hand or is a born bowman (a skeleton, a pillager, an illusioner) that never loosed a shot. Nothing is taken.
+	 */
+	static int quiver(Mob mob) {
+		if (carries(mob, Kind.ARROWS) || ranged(mob.getMainHandItem()) || ranged(mob.getOffhandItem()) || mob instanceof AbstractSkeleton
+			|| mob instanceof Pillager || mob instanceof Illusioner) {
+			return left(mob, Kind.ARROWS);
+		}
+		return 0;
+	}
+
+	/**
+	 * Empties {@code mob}'s quiver ({@link #quiver}) for a player taking its weapons: how many arrows there were. Once it's
+	 * up it goes short, as after shooting them all: it picks arrows up again or restocks as it would.
+	 */
+	static int emptyQuiver(Mob mob) {
+		int arrows = quiver(mob);
+		if (arrows > 0) {
+			set(mob, Kind.ARROWS, 0, fullOf(mob, Kind.ARROWS));
+			SHORT.add(mob);
+			if (mob instanceof AbstractSkeleton skeleton) {
+				skeleton.reassessWeaponGoal();
+			}
+		}
+		return arrows;
+	}
+
+	private static boolean ranged(ItemStack stack) {
+		return stack.getItem() instanceof net.minecraft.world.item.ProjectileWeaponItem;
+	}
+
 	private static int fullOf(Mob mob, Kind kind) {
 		Map<String, Integer> ammo = mob.getAttached(AMMO);
 		Integer full = ammo == null ? null : ammo.get(kind.key + "_full");

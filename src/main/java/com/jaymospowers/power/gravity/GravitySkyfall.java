@@ -1,5 +1,6 @@
 package com.jaymospowers.power.gravity;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.BlockCluster;
 import com.jaymospowers.JaymosPowers;
@@ -153,8 +154,8 @@ final class GravitySkyfall {
 		ServerLevel level = player.level();
 		Vec3 center = player.position();
 		Skyfall skyfall = new Skyfall(level.dimension(), player.getUUID(), center, level.getGameTime());
-		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(center, center).inflate(RADIUS),
-			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && e.distanceToSqr(center) <= RADIUS * RADIUS
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(center, center).inflate(AbilityPower.size(player, RADIUS)),
+			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && e.distanceToSqr(center) <= AbilityPower.size(player, RADIUS) * AbilityPower.size(player, RADIUS)
 				&& !(e instanceof ServerPlayer p && p.isCreative()))) {
 			skyfall.lifted.add(living.getId());
 			living.setNoGravity(true);
@@ -166,10 +167,10 @@ final class GravitySkyfall {
 		}
 		// the ground comes up too: loose surface blocks, torn loose one by one
 		List<BlockPos> surface = new ArrayList<>();
-		int r = (int)RADIUS;
+		int r = (int)AbilityPower.size(player, RADIUS);
 		for (int dx = -r; dx <= r; dx += 2) {
 			for (int dz = -r; dz <= r; dz += 2) {
-				if (dx * dx + dz * dz > RADIUS * RADIUS) {
+				if (dx * dx + dz * dz > AbilityPower.size(player, RADIUS) * AbilityPower.size(player, RADIUS)) {
 					continue;
 				}
 				int x = Mth.floor(center.x) + dx, z = Mth.floor(center.z) + dz;
@@ -188,17 +189,17 @@ final class GravitySkyfall {
 			}
 		}
 		SKYFALLS.add(skyfall);
-		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.CRANE, FILM_TICKS, RADIUS * 2.0);
+		com.jaymospowers.core.UltimateFilm.play(player, com.jaymospowers.core.UltimateFilm.CRANE, FILM_TICKS, AbilityPower.size(player, RADIUS) * 2.0);
 		// cast while weightless: you go up with it
 		mount(player, skyfall);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 3.0F, 0.3F);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.END_PORTAL_SPAWN, SoundSource.PLAYERS, 2.0F, 0.5F);
 		for (int i = 0; i < 48; i++) {
 			double a = i / 48.0 * Math.PI * 2.0;
-			level.sendParticles(MagicFx.VOID, center.x + Math.cos(a) * RADIUS * 0.8, center.y + 0.3, center.z + Math.sin(a) * RADIUS * 0.8,
+			level.sendParticles(MagicFx.VOID, center.x + Math.cos(a) * AbilityPower.size(player, RADIUS) * 0.8, center.y + 0.3, center.z + Math.sin(a) * AbilityPower.size(player, RADIUS) * 0.8,
 				4, 0.2, 0.0, 0.2, 0.3);
 		}
-		GravityPower.shake(level, center, RADIUS * 1.5, 0.8F);
+		GravityPower.shake(level, center, AbilityPower.size(player, RADIUS) * 1.5, 0.8F);
 		return true;
 	}
 
@@ -348,7 +349,7 @@ final class GravitySkyfall {
 				}
 				level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, skyfall.center.x, skyfall.center.y + 0.5, skyfall.center.z, 2, 4.0, 0.5, 4.0, 0.0);
 				level.playSound(null, skyfall.center.x, skyfall.center.y, skyfall.center.z, SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 3.0F, 0.4F);
-				GravityPower.shake(level, skyfall.center, RADIUS * 2.0, 1.4F);
+				GravityPower.shake(level, skyfall.center, AbilityPower.size(owner, RADIUS) * 2.0, 1.4F);
 				it.remove();
 			}
 		}
@@ -390,7 +391,7 @@ final class GravitySkyfall {
 	/** The caster, weightless and near enough, joins the rise. */
 	private static void mount(ServerPlayer player, Skyfall skyfall) {
 		if (skyfall.rider || player.getAttached(GravityPower.WEIGHTLESS_ON) == null || !player.isAlive() || player.isSpectator()
-			|| player.level().dimension() != skyfall.dimension || player.position().distanceToSqr(skyfall.center) > RADIUS * RADIUS
+			|| player.level().dimension() != skyfall.dimension || player.position().distanceToSqr(skyfall.center) > AbilityPower.size(player, RADIUS) * AbilityPower.size(player, RADIUS)
 			|| player.getAttached(GravityPower.ROCK_FLIGHT) != null) {
 			return;
 		}

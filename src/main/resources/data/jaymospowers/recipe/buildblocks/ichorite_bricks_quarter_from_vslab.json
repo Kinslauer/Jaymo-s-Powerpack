@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:ichorite_bricks_vslab",
+  "result": {
+    "id": "jaymospowers:ichorite_bricks_quarter",
+    "count": 2
+  }
+}

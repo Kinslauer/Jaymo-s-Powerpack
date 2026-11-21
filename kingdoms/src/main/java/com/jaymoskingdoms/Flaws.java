@@ -187,11 +187,15 @@ public final class Flaws {
 	 * is slid in at 0 so every number stays on its own attribute.
 	 */
 	private static List<Integer> upgraded(List<Integer> given) {
-		if (given == null || given.size() != SLOTS - 1) {
+		if (given == null || given.size() >= SLOTS || given.size() < SLOTS - 2) {
 			return given;
 		}
 		List<Integer> out = new ArrayList<>(given);
-		out.add(Stats.Stat.PRESENCE.ordinal(), 0);
+		// saved before Presence, then before (Awakening pick) Ability Power: each gets a 0 in its place
+		if (out.size() == SLOTS - 2) {
+			out.add(Stats.Stat.PRESENCE.ordinal(), 0);
+		}
+		out.add(Stats.Stat.POWER.ordinal(), 0);
 		return List.copyOf(out);
 	}
 

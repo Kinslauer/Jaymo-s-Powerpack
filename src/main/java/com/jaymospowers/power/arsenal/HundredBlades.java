@@ -1,5 +1,6 @@
 package com.jaymospowers.power.arsenal;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Fate;
@@ -157,8 +158,8 @@ public final class HundredBlades {
 		boolean corrupted = Fate.isCorrupted(player);
 		float damage = BLADE_DAMAGE * (corrupted ? ArsenalVoid.DAMAGE_MULTIPLIER : 1.0F);
 		List<LivingEntity> targets = level.getEntitiesOfClass(LivingEntity.class,
-			new AABB(point.x - RADIUS, point.y - 3, point.z - RADIUS, point.x + RADIUS, point.y + height, point.z + RADIUS),
-			e -> e != player && e.isAlive() && !e.isSpectator() && horizontal(e.position(), point) <= RADIUS);
+			new AABB(point.x - AbilityPower.size(player, RADIUS), point.y - 3, point.z - AbilityPower.size(player, RADIUS), point.x + AbilityPower.size(player, RADIUS), point.y + height, point.z + AbilityPower.size(player, RADIUS)),
+			e -> e != player && e.isAlive() && !e.isSpectator() && horizontal(e.position(), point) <= AbilityPower.size(player, RADIUS));
 		for (int i = 0; i < BLADES; i++) {
 			Vec3 portal = sky.portal(i % PORTALS);
 			double ja = player.getRandom().nextDouble() * Mth.TWO_PI;
@@ -170,7 +171,7 @@ public final class HundredBlades {
 				aim = target.getBoundingBox().getCenter();
 			} else {
 				double a = player.getRandom().nextDouble() * Mth.TWO_PI;
-				double r = Math.sqrt(player.getRandom().nextDouble()) * RADIUS;
+				double r = Math.sqrt(player.getRandom().nextDouble()) * AbilityPower.size(player, RADIUS);
 				aim = point.add(Math.cos(a) * r, 0.1, Math.sin(a) * r);
 			}
 			RiftBlade blade = RiftBlade.create(level, player,

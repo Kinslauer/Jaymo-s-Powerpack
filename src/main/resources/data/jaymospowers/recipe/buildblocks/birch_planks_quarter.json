@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:saw",
+    "jaymospowers:birch_planks_vslab"
+  ],
+  "result": {
+    "id": "jaymospowers:birch_planks_quarter",
+    "count": 2
+  }
+}

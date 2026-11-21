@@ -124,6 +124,7 @@ public final class WebWallRun {
 			return;
 		}
 		player.resetFallDistance();
+		com.jaymospowers.core.trials.PowerTrials.count(RUNNING.containsKey(player.getUUID()) ? null : player, "web.wallrun", 1);
 		RUNNING.put(player.getUUID(), new Running(side, 0));
 		player.setAttached(WALL, side.get3DDataValue());
 	}

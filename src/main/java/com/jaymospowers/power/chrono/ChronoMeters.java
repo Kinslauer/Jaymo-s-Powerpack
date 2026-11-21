@@ -17,6 +17,8 @@ public final class ChronoMeters {
 	public static final AttachmentType<Integer> PHASE = meter("chrono_meter_phase");
 	public static final AttachmentType<Integer> SLOW = meter("chrono_meter_slow");
 	public static final AttachmentType<Integer> CAUGHT = meter("chrono_meter_caught");
+	/** The static charge a run has built ({@link ChronoMomentum}). */
+	public static final AttachmentType<Integer> STATIC = meter("chrono_meter_static");
 	/** Calculation ({@link ChronoCalculation}): the bar, and while it is being spent the dodging left. */
 	public static final AttachmentType<Integer> CALC = meter("chrono_meter_calc");
 	public static final AttachmentType<Integer> CALC_RUN = meter("chrono_meter_calc_run");

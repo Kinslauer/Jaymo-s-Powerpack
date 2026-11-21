@@ -415,10 +415,12 @@ public final class ChronoCheatDeath {
 	/**
 	 * (0.20.92) Down, R goes to cheating death whenever Rewind itself can't answer it: out cold, on its cooldown, or
 	 * someone coming to finish you. Andy spammed R lying down and out cold and nothing happened, then died for good.
-	 * (Down with Rewind ready and awake, R is Rewind's own, as since 0.15.83.)
+	 * (Down with Rewind ready and awake, R is Rewind's own, as since 0.15.83.) Since Rewind only reaches the fall if it's
+	 * soon enough (Andy, 2026-11-17), lain past that is one more time Rewind can't answer.
 	 */
 	static boolean downedOpen(ServerPlayer player) {
-		return Downed.isDowned(player) && (Downed.passedOut(player) || executed(player) || !ChronoPower.rewindReady(player));
+		return Downed.isDowned(player) && (Downed.passedOut(player) || executed(player) || !ChronoPower.rewindReady(player)
+			|| !ChronoPower.rewindReachesFall(player));
 	}
 
 	/** R from the client: inside a held death or a waking, or down where Rewind can't answer (out cold, an execution). */
@@ -568,6 +570,7 @@ public final class ChronoCheatDeath {
 		if (held == null) {
 			return;
 		}
+		com.jaymospowers.core.trials.PowerTrials.count(player, "chrono.cheat_death", 1);
 		if (held.wake) {
 			// no waking anywhere: up, and back
 			Mortality.cancelWake(player);

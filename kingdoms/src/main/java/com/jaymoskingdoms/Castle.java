@@ -85,7 +85,7 @@ final class Castle {
 				for (int i = 0; i < 16; i++) {
 					double a = turnFrom + i / 16.0 * Math.PI * 2.0;
 					BlockPos center = bell.offset((int)Math.round(Math.cos(a) * r), 0, (int)Math.round(Math.sin(a) * r));
-					if (onlyLoaded && !level.hasChunksAt(center.getX() - halfWidth - 1, center.getZ() - halfWidth - 1, center.getX() + halfWidth + 1,
+					if (onlyLoaded && !Loaded.made(level, center.getX() - halfWidth - 1, center.getZ() - halfWidth - 1, center.getX() + halfWidth + 1,
 						center.getZ() + halfWidth + 1)) {
 						continue;
 					}

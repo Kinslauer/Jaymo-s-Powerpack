@@ -163,11 +163,15 @@ public final class CryoShards {
 
 	private static void hit(ServerLevel level, Shard shard, LivingEntity living) {
 		living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SLOW_TICKS, 1), shard.owner);
+		com.jaymospowers.core.trials.PowerTrials.count(CryoFlashFreeze.jailed(living) ? shard.owner : null, "cryo.shatter", 1);
+		com.jaymospowers.core.trials.PowerTrials.count(shard.owner, "cryo.shards", 1);
+		com.jaymospowers.core.trials.PowerTrials.reach(shard.owner, "cryo.shards_far", (int)shard.owner.distanceTo(living));
 		if (shard.snow) {
 			living.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, SNOW_BLIND_TICKS, 0), shard.owner);
 			return;
 		}
 		living.hurtServer(level, level.damageSources().thrown(shard.ball, shard.owner), DAMAGE * shard.strength);
+		CryoFrostbite.bite(living, shard.owner, 1);
 		if (living.canFreeze()) {
 			living.setTicksFrozen(Math.min(living.getTicksRequiredToFreeze() + FREEZE, living.getTicksFrozen() + Math.round(FREEZE * shard.strength)));
 		}

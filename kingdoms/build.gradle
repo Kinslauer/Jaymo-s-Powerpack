@@ -16,6 +16,11 @@ repositories {
 		forRepository { maven { url = "https://api.modrinth.com/maven" } }
 		filter { includeGroup "maven.modrinth" }
 	}
+	// CurseForge files by project and file id, for mods that are only on CurseForge
+	exclusiveContent {
+		forRepository { maven { url = "https://cursemaven.com" } }
+		filter { includeGroup "curse.maven" }
+	}
 }
 
 loom {
@@ -103,6 +108,10 @@ dependencies {
 	// Epic Knights (KnightsCompat) is looked up by registry id only: no build for 26.3 yet, so nothing to compile against.
 	// Xaero's Minimap (all rights reserved, xaero96; in Powers' pack): client/XaeroRealms puts the realms' seats, holders and
 	// borders on it (RealmMap). Compiled against the pack's version and the library it carries inside it, never required.
+	// Peterwolf's Forest Fire & Firefighting (MIT; in Powers' pack with its Minecraft lock lifted): ForestFireCompat hands it
+	// our wildfires, puts its fire out where our people douse theirs, keeps kept fires out of it and counts its heat into
+	// body heat. Compiled against the pack's file, never required.
+	compileOnly "curse.maven:peterwolfs-forest-fire-firefighting-1658918:8681320"
 	compileOnly xaeroMinimap
 	compileOnly files(xaeroLibDir.map { it.file("xaerolib.jar") }).builtBy(xaeroLib)
 }

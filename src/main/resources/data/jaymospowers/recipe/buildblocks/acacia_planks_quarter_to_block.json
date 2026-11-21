@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:acacia_planks_quarter",
+    "jaymospowers:acacia_planks_quarter",
+    "jaymospowers:acacia_planks_quarter",
+    "jaymospowers:acacia_planks_quarter"
+  ],
+  "result": {
+    "id": "minecraft:acacia_planks"
+  }
+}

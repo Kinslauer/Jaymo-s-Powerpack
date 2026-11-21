@@ -53,6 +53,8 @@ public final class Forging {
 	public static final float PERFECT_GRADE = 0.9F, EXPERT_GRADE = 0.72F, WELL_GRADE = 0.45F;
 	/** Chance an all-perfect forging turns out a Masterwork (Overgeared's is 5%; Andy: friends should see one). */
 	public static final float MASTER_CHANCE = 0.15F;
+	/** At Legend, how often a Master-worthy forging comes out Legendary instead. */
+	public static final float LEGENDARY_CHANCE = 0.5F;
 	/** Ticks between blows (the hammer's cooldown). */
 	public static final int BLOW_TICKS = 8;
 
@@ -173,9 +175,14 @@ public final class Forging {
 
 	/** The grade a finished forging earns before any cap. */
 	public static Grade grade(Smithing.Work work, int hits, Random random) {
+		return grade(work, hits, random, false);
+	}
+
+	/** {@link #grade(Smithing.Work, int, Random)}; {@code legend}: the smith's world tier is Legend, so Legendary can be forged. */
+	public static Grade grade(Smithing.Work work, int hits, Random random, boolean legend) {
 		float average = hits <= 0 ? 0.0F : work.score() / hits;
 		if (work.perfects() >= hits && random.nextFloat() < MASTER_CHANCE) {
-			return Grade.MASTER;
+			return legend && random.nextFloat() < LEGENDARY_CHANCE ? Grade.LEGENDARY : Grade.MASTER;
 		}
 		if (average >= PERFECT_GRADE) {
 			return Grade.PERFECT;

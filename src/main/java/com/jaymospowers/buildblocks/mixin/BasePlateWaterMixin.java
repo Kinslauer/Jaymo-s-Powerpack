@@ -1,0 +1,68 @@
+package com.jaymospowers.buildblocks.mixin;
+
+import com.jaymospowers.buildblocks.Waterlogging;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.block.BasePressurePlateBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+/**
+ * Pressure plates can be waterlogged (see {@link Waterlogging}); the property itself is added by the two kinds of plate that
+ * list their own ({@link PlateWaterMixin}, {@link WeightedPlateWaterMixin}).
+ */
+@Mixin(BasePressurePlateBlock.class)
+public abstract class BasePlateWaterMixin extends Block implements SimpleWaterloggedBlock {
+	public BasePlateWaterMixin(Properties properties) {
+		super(properties);
+	}
+
+	@Inject(method = "updateShape", at = @At("HEAD"))
+	private void jaymospowers$keepFlowing(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction direction,
+		BlockPos neighbourPos, BlockState neighbour, RandomSource random, CallbackInfoReturnable<BlockState> cir) {
+		Waterlogging.tick(state, level, ticks, pos);
+	}
+
+	/** Plates had no placement state of their own: they were the default. */
+	@Override
+	public BlockState getStateForPlacement(BlockPlaceContext context) {
+		return Waterlogging.placed(super.getStateForPlacement(context), context);
+	}
+
+	@Override
+	protected FluidState getFluidState(BlockState state) {
+		return Waterlogging.fluid(state, super.getFluidState(state));
+	}
+
+	@Override
+	public boolean canPlaceLiquid(LivingEntity user, BlockGetter level, BlockPos pos, BlockState state, Fluid fluid) {
+		return Waterlogging.canPlace(state, fluid);
+	}
+
+	/** A mod's subclass that builds its own state list has no water property: buckets then leave it alone. */
+	@Override
+	public net.minecraft.world.item.ItemStack pickupBlock(net.minecraft.world.entity.@org.jspecify.annotations.Nullable LivingEntity user,
+		net.minecraft.world.level.LevelAccessor level, net.minecraft.core.BlockPos pos, BlockState state) {
+		return state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED)
+			? SimpleWaterloggedBlock.super.pickupBlock(user, level, pos, state) : net.minecraft.world.item.ItemStack.EMPTY;
+	}
+
+	@Override
+	public boolean placeLiquid(net.minecraft.world.level.LevelAccessor level, net.minecraft.core.BlockPos pos, BlockState state, FluidState fluid) {
+		return state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED)
+			&& SimpleWaterloggedBlock.super.placeLiquid(level, pos, state, fluid);
+	}
+}

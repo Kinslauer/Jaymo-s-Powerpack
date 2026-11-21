@@ -47,6 +47,7 @@ final class VarasuchusDragonRenderer extends GeoEntityRenderer<VarasuchusDragon,
 	@Override
 	public void addRenderData(VarasuchusDragon dragon, Void related, LivingEntityRenderState state, float partialTick) {
 		super.addRenderData(dragon, related, state, partialTick);
+		DragonBoarding.extract(dragon, state, partialTick);
 		state.addGeckolibData(LOOK, dragon.look());
 		state.addGeckolibData(SADDLED, dragon.saddled());
 		state.addGeckolibData(BREATH, Mth.lerp(partialTick, dragon.breathAnimO, dragon.breathAnim));
@@ -62,6 +63,7 @@ final class VarasuchusDragonRenderer extends GeoEntityRenderer<VarasuchusDragon,
 	@Override
 	public void adjustModelBonesForRender(RenderPassInfo<LivingEntityRenderState> info, BoneSnapshots snapshots) {
 		super.adjustModelBonesForRender(info, snapshots);
+		DragonBoarding.apply(info, snapshots, new String[] {"neck0", "neck1"}, "head");
 		LivingEntityRenderState state = info.renderState();
 		boolean dead = info.getOrDefaultGeckolibData(DEAD, false);
 		float yaw = dead ? 0.0F : Mth.clamp(state.yRot, -LOOK_YAW, LOOK_YAW) * Mth.DEG_TO_RAD;

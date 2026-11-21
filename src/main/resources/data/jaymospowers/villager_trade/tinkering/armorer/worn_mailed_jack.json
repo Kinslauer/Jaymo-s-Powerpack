@@ -1,0 +1,13 @@
+{
+  "gives": {
+    "count": 4,
+    "id": "minecraft:emerald"
+  },
+  "max_uses": 4,
+  "reputation_discount": 0.05,
+  "wants": {
+    "count": 1,
+    "id": "jaymospowers:mailed_jack"
+  },
+  "xp": 12
+}

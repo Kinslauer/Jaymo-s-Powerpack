@@ -29,7 +29,7 @@ final class BoonScreen extends Screen {
 	}
 
 	private int left() {
-		return (this.width - W) / 2;
+		return MenuCompat.centre(this.width, W);
 	}
 
 	private int top() {

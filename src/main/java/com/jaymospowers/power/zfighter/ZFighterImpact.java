@@ -42,6 +42,10 @@ public final class ZFighterImpact {
 	static final double SHAKE_RANGE = 16.0;
 	/** A rush stops this short of the foe (and never goes faster than what's left of the gap). */
 	static final double RUSH_STOP = 0.6;
+	/** The slam's spectacle (0 to 1: how big its ring, cracks and dust are). */
+	static final float SLAM_POWER = 0.7F;
+	/** A flying body breaks the soft blocks this far ahead of it (times its last step) once it moves faster than this (blocks a tick). */
+	static final double PLOW_AHEAD = 2.0, PLOW_SPEED = 0.35;
 
 	/** One foe in flight. */
 	private static final class Flight {
@@ -90,6 +94,11 @@ public final class ZFighterImpact {
 			flight.before = moved;
 			flight.last = entity.position();
 			double sideways = Math.sqrt(was.x * was.x + was.z * was.z);
+			// the body flying leaves a dust trail and plows through soft blocks in its way (leaves, glass, dirt...)
+			com.jaymospowers.core.brawl.Spectacle.trail(level, entity);
+			if (moved.lengthSqr() > PLOW_SPEED * PLOW_SPEED) {
+				com.jaymospowers.core.brawl.SoftBreak.plow(level, entity.getBoundingBox().move(0.0, 0.3, 0.0).expandTowards(moved.x * PLOW_AHEAD, 0.0, moved.z * PLOW_AHEAD).inflate(0.1, 0.0, 0.1), flight.by);
+			}
 			boolean wall = entity.horizontalCollision && sideways > WALL_SPEED;
 			boolean ground = entity.onGround() && was.y < -GROUND_SPEED && level.getGameTime() - flight.from > LIFT_OFF_TICKS;
 			if (wall || ground) {
@@ -101,6 +110,7 @@ public final class ZFighterImpact {
 
 	/** It hits: the block it met bursts into debris, a ring of dust goes out, everyone near feels it. */
 	private static void slam(ServerLevel level, LivingEntity entity, Flight flight, Vec3 into) {
+		com.jaymospowers.core.trials.PowerTrials.count(flight.by, "zfighter.slam", 1);
 		Vec3 centre = entity.getBoundingBox().getCenter();
 		Vec3 at = into.y < 0.0 ? entity.position() : centre.add(into.scale(entity.getBbWidth() * 0.5));
 		BlockState state = struck(level, at, into);
@@ -122,6 +132,9 @@ public final class ZFighterImpact {
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.6F, 1.3F);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.0F, 0.6F);
 		Shakes.around(level, at, SHAKE_RANGE, SHAKE);
+		// cracks and a ring of dust on the ground, and the soft blocks under and about the slam break
+		com.jaymospowers.core.brawl.Spectacle.impact(level, at, SLAM_POWER);
+		com.jaymospowers.core.brawl.SoftBreak.plow(level, entity.getBoundingBox().inflate(1.0, 0.2, 1.0).move(0.0, -0.6, 0.0), flight.by);
 		if (flight.damage > 0.0F) {
 			Entity by = flight.by;
 			DamageSource source = by instanceof Player player ? level.damageSources().playerAttack(player)

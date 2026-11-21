@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:dark_oak_log_vslab",
+    "jaymospowers:dark_oak_log_vslab"
+  ],
+  "result": {
+    "id": "minecraft:dark_oak_log"
+  }
+}

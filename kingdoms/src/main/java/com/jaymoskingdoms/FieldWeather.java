@@ -1,6 +1,7 @@
 package com.jaymoskingdoms;
 
 import com.jaymoskingdoms.disasters.Storms;
+import com.jaymoskingdoms.sailing.WindPush;
 import com.jaymoskingdoms.sailing.Winds;
 import java.util.Collections;
 import java.util.Set;
@@ -13,7 +14,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -56,11 +56,12 @@ public final class FieldWeather {
 
 	static void register() {
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
-			if (entity instanceof AbstractArrow arrow && arrow.is(EntityTypeTags.ARROWS)) {
+			if (entity instanceof AbstractArrow arrow) {
 				ARROWS.add(arrow);
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(FieldWeather::tick);
+		WindPush.register();
 	}
 
 	/** Whether the wind at {@code pos} is a gale and the place is open to the sky. */
@@ -91,10 +92,9 @@ public final class FieldWeather {
 				continue;
 			}
 			float wind = Winds.strength(level, arrow.getX(), arrow.getZ());
-			if (wind < GALE) {
-				continue;
-			}
-			double push = PUSH_LEAST + (PUSH - PUSH_LEAST) * Math.min(1.0, (wind - GALE) / (PUSH_CAP - GALE));
+			// any wind bends a shot a little; from a gale the push grows to its full strength
+			double push = wind < GALE ? PUSH_LEAST * wind / GALE
+				: PUSH_LEAST + (PUSH - PUSH_LEAST) * Math.min(1.0, (wind - GALE) / (PUSH_CAP - GALE));
 			float way = Storms.windAngle();
 			arrow.setDeltaMovement(v.add(Math.cos(way) * push, 0.0, Math.sin(way) * push));
 			arrow.syncVelocity = true;

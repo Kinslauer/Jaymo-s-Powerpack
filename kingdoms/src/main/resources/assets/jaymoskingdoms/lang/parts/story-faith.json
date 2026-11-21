@@ -25,9 +25,21 @@
   "story.jaymoskingdoms.faith.truth": "The Truth, in plain words",
   "story.jaymoskingdoms.faith.truth.tale": "Your household kept no idols, only the Truth: you said what was so, and a lie in that house was the worst thing you could do.",
   "story.jaymoskingdoms.faith.truth.short": "Raised to the plain word of the Truth.",
+  "story.jaymoskingdoms.faith.none": "No one at all",
+  "story.jaymoskingdoms.faith.none.tale": "Nobody in your house prayed. The patrons were names other people swore by, and you grew up owing none of them anything.",
+  "story.jaymoskingdoms.faith.none.short": "Raised without a god.",
   "gui.jaymoskingdoms.story.gives.faith": "Faith: %s",
   "gui.jaymoskingdoms.story.confirm": "Confirm",
   "gui.jaymoskingdoms.story.review.realm": "Realm: %s",
   "gui.jaymoskingdoms.story.review.faith": "Raised to %s",
-  "gui.jaymoskingdoms.creator.faith": "Faith:"
+  "gui.jaymoskingdoms.creator.faith": "Faith:",
+  "story.jaymoskingdoms.faith.hearthkeeper.tag": "the open door",
+  "story.jaymoskingdoms.faith.anvil_father.tag": "iron and the seam",
+  "story.jaymoskingdoms.faith.deep_mother.tag": "salt and the swell",
+  "story.jaymoskingdoms.faith.green_huntsman.tag": "the quiet hunt",
+  "story.jaymoskingdoms.faith.lantern_warden.tag": "a lantern in the dark",
+  "story.jaymoskingdoms.faith.crowned_sun.tag": "crown and tribute",
+  "story.jaymoskingdoms.faith.ash_whisperer.tag": "quick hands, shut mouth",
+  "story.jaymoskingdoms.faith.truth.tag": "the plain word",
+  "story.jaymoskingdoms.faith.none.tag": "raised without one"
 }

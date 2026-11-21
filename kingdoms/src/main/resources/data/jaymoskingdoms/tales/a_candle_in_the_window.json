@@ -1,0 +1,583 @@
+{
+  "title": "A Candle in the Window",
+  "arc": "The Black Candle",
+  "start": {
+    "by": "rumour",
+    "weight": 3,
+    "needs": [
+      "mark:runner_knows_tam",
+      "since:the_runners_round>=5"
+    ],
+    "rumour": "Tam Rudd, the valley runner, has been sat in the tavern {way:inn} for two days with his bag at his feet. Tam Rudd, sitting still! He asks everyone who comes in whether they have their letters. And there is a black candle in the window over his head, and he is the only soul in the room who has not looked at it."
+  },
+  "cast": {
+    "runner": {
+      "name": "Tam Rudd",
+      "body": "villager",
+      "job": "none",
+      "female": false,
+      "at": "inn"
+    },
+    "door": {
+      "name": [
+        "Lob Carter",
+        "Short Hugh",
+        "Daw Pike"
+      ],
+      "body": "villager",
+      "job": "none",
+      "female": false,
+      "at": "den"
+    },
+    "denkeeper": {
+      "name": [
+        "Jess Harrow",
+        "Mab Lorimer",
+        "Nan Trussell"
+      ],
+      "body": "villager",
+      "job": "none",
+      "female": true,
+      "at": "den",
+      "hours": "night"
+    }
+  },
+  "places": {
+    "inn": {
+      "at": "tavern",
+      "name": "the tavern"
+    },
+    "den": {
+      "at": "near",
+      "from": "inn",
+      "dist": [
+        30,
+        70
+      ],
+      "name": "the hatch in the osier bed"
+    },
+    "oak": {
+      "at": "wild",
+      "from": "inn",
+      "dist": [
+        200,
+        380
+      ],
+      "name": "the split oak"
+    }
+  },
+  "first": "to_inn",
+  "steps": {
+    "to_inn": {
+      "do": "go",
+      "to": "inn",
+      "hidden": true,
+      "candle": true,
+      "journal": "I went to the tavern where Tam Rudd was said to be sitting. A black candle was burning in the window above his table, and he was the only one in the room who had not looked at it.",
+      "then": "tam_asks"
+    },
+    "tam_asks": {
+      "do": "talk",
+      "who": "runner",
+      "goal": "Speak with Tam Rudd in {place:inn}",
+      "say": {
+        "?mark:caught:runner_all_done": [
+          "You. Sit down. No, I'll not shout. I have not the breath for it. Nothing went in the oak the week you had my bag. Old Sallow has told the whole valley. And you sat in my loft and said every door and the tree.",
+          "Here is the joke of it. I need somebody who has their letters and is not off my round, and you are the only one I know. So sit. You owe me a thing, and I have come to collect it.",
+          "Two days back I was at the oak with the packet. There was a candle stub in the hollow. Black wax, burned down. I have seen that twice before and laughed at old Sallow for minding it. This time there was a paper under it. Folded once, lying open side up, with a stone on it. No seal. No door on it.",
+          "I picked it up. Eleven years of not looking back at that tree, and I picked it up, because a paper left out in a hollow gets wet, and I am a runner. I have had it in my shirt for two days. I cannot take this one round by the cleric. I do not know why not. I only know that I can't.",
+          "I would have taken it down the hatch in the osier bed, where they know about things that come out of trees. But they would ask what it says before they told me what it means, and I'll not hand it over unread. So. Read it to me. Quietly."
+        ],
+        "?mark:runner_tam_knows_purse": [
+          "You. I said I would not look at you again, and I meant it.",
+          "Here is the joke of it. I need somebody who has their letters and is not off my round, and you are the only one I know. So sit. You owe me a thing, and I have come to collect it.",
+          "Two days back I was at the oak with the packet. There was a candle stub in the hollow. Black wax, burned down. I have seen that twice before and laughed at old Sallow for minding it. This time there was a paper under it. Folded once, lying open side up, with a stone on it. No seal. No door on it.",
+          "I picked it up. Eleven years of not looking back at that tree, and I picked it up, because a paper left out in a hollow gets wet, and I am a runner. I have had it in my shirt for two days. I cannot take this one round by the cleric. I do not know why not. I only know that I can't.",
+          "I would have taken it down the hatch in the osier bed, where they know about things that come out of trees. But they would ask what it says before they told me what it means, and I'll not hand it over unread. So. Read it to me. Quietly."
+        ],
+        "?mark:runner_round_late": [
+          "The legs. Sit down. I have not forgotten that week, and I am not going to talk about it.",
+          "I need somebody who has their letters and is not off my round. I have asked every face that came through that door for two days. Yours is the first I knew.",
+          "Two days back I was at the oak with the packet. There was a candle stub in the hollow. Black wax, burned down. I have seen that twice before and laughed at old Sallow for minding it. This time there was a paper under it. Folded once, lying open side up, with a stone on it. No seal. No door on it.",
+          "I picked it up. Eleven years of not looking back at that tree, and I picked it up, because a paper left out in a hollow gets wet, and I am a runner. I have had it in my shirt for two days. I cannot take this one round by the cleric. I do not know why not. I only know that I can't.",
+          "I would have taken it down the hatch in the osier bed, where they know about things that come out of trees. But they would ask what it says before they told me what it means, and I'll not hand it over unread. So. Read it to me. Quietly."
+        ],
+        "?": [
+          "The legs! Sit, sit. I have been asking every face that comes through that door whether it has its letters, and feeling a fool for it. And here is the one soul off my round who knows why I ask.",
+          "I am not laid up. I am sat here because I do not know where else to sit.",
+          "Two days back I was at the oak with the packet. There was a candle stub in the hollow. Black wax, burned down. I have seen that twice before and laughed at old Sallow for minding it. This time there was a paper under it. Folded once, lying open side up, with a stone on it. No seal. No door on it.",
+          "I picked it up. Eleven years of not looking back at that tree, and I picked it up, because a paper left out in a hollow gets wet, and I am a runner. I have had it in my shirt for two days. I cannot take this one round by the cleric. I do not know why not. I only know that I can't.",
+          "I would have taken it down the hatch in the osier bed, where they know about things that come out of trees. But they would ask what it says before they told me what it means, and I'll not hand it over unread. So. Read it to me. Quietly."
+        ]
+      },
+      "replies": [
+        {
+          "say": "Give it here.",
+          "then": "read_paper",
+          "journal": "Tam Rudd found a paper lying open under a black candle stub in the hollow of his oak, and picked it up. He cannot read it. He asked me to."
+        },
+        {
+          "say": "A runner does not read what he carries, Tam.",
+          "then": "tam_rule"
+        },
+        {
+          "say": "Whatever it says, it says it to you. Not to me.",
+          "then": "end:refused"
+        }
+      ]
+    },
+    "tam_rule": {
+      "do": "talk",
+      "who": "runner",
+      "say": [
+        "A runner doesn't. That is why I am asking you. Nobody paid carriage on this. Nobody said it over to me. It has no door. I have turned it about for two days, and it is not a thing I am carrying. It is a thing I picked up. Read it."
+      ],
+      "replies": [
+        {
+          "say": "Give it here.",
+          "then": "read_paper",
+          "journal": "Tam Rudd found a paper lying open under a black candle stub in the hollow of his oak, and picked it up. He cannot read it. He asked me to."
+        },
+        {
+          "say": "Whatever it says, it says it to you. Not to me.",
+          "then": "end:refused"
+        }
+      ]
+    },
+    "read_paper": {
+      "do": "talk",
+      "who": "runner",
+      "clock": {
+        "candle": 3
+      },
+      "give": [
+        {
+          "item": "minecraft:paper",
+          "count": 1,
+          "name": "A paper from under a black candle",
+          "lore": [
+            "The candle is lit for you.",
+            "Tam Rudd, runner, of the valley round.",
+            "Before it burns down. Paid in full, in the usual way.",
+            "Nobody sent you."
+          ]
+        }
+      ],
+      "say": [
+        "There. Mind the wax on the corner. Well? You have gone the colour of that candle. What does it say? It looks like a bill to me. It is short enough for a bill."
+      ],
+      "replies": [
+        {
+          "say": "It has your name on it, Tam. It says the candle is lit, and that you are paid for.",
+          "then": "tam_told",
+          "mark": "candle_told_tam",
+          "for": [
+            "honour"
+          ],
+          "journal": "The paper is a contract. It says the candle is lit for whoever takes it up, it names Tam Rudd, and it says he is paid for. I read it to him as it was written."
+        },
+        {
+          "say": "It is a bill. Somebody owes a chandler for candles.",
+          "then": "tam_lied",
+          "irks": [
+            "honour"
+          ],
+          "journal": "The paper is a contract. It says the candle is lit for whoever takes it up, it names Tam Rudd, and it says he is paid for. I told him it was a chandler's bill.",
+          "lie": {
+            "name": "candle_only_a_bill",
+            "days": [
+              5,
+              9
+            ],
+            "unless": "mark:candle_told_tam",
+            "reputation": 5,
+            "town": [
+              "Tam Rudd had a paper read to him by {player}, and was told it was a chandler's bill. He has had it said over by somebody else since.",
+              "His own name, under a black candle, and told it was candles owing. I would want to know. Would you not want to know?"
+            ],
+            "returns": {
+              "who": "runner",
+              "as": "warning",
+              "say": "I'll not come in. I had it said over to me by a hedge clerk two valleys off, who did not know my face. You read me my own name and called it candles. I have carried that about word for word, 'somebody owes a chandler', because that is what I do with what I am told. I do not know if you meant it kindly. I would sooner have had it true."
+            }
+          }
+        }
+      ]
+    },
+    "tam_told": {
+      "do": "talk",
+      "who": "runner",
+      "say": [
+        "Paid for. Me. I carry bottles to coughing children. Who pays for a runner?",
+        "And it was lying open, for whoever took it up. I took it up. I have had my own death in my shirt for two days, and thought it might be a bill.",
+        "That candle over my head. I took it for the taverner's thrift. They will know at the hatch in the osier bed what can be done with a paper like that. I cannot go down. Every door in this valley knows my face, and I would be seen on the ladder. It is in your hand now. Will you ask?"
+      ],
+      "replies": [
+        {
+          "say": "I'll go down and ask.",
+          "then": "to_den",
+          "journal": "Tam Rudd asked me to take the paper down the hatch in the osier bed, where they will know what can be done with it. He dare not be seen on the ladder."
+        },
+        {
+          "say": "Keep away from that window, Tam. I'll ask.",
+          "then": "to_den",
+          "journal": "Tam Rudd asked me to take the paper down the hatch in the osier bed, where they will know what can be done with it. He dare not be seen on the ladder."
+        }
+      ]
+    },
+    "tam_lied": {
+      "do": "talk",
+      "who": "runner",
+      "say": [
+        "A bill! For candles! Left in a tree, the lazy dog, for the runner to find and carry on for nothing. Ha. And I have sat here two days sweating over a chandler's bill.",
+        "Well, it is no door of mine. Keep it, or put it on the fire. I'll not carry a bill that nobody has paid carriage on. I am for my round at first light. No, sit, I'll stand you one. You have taken a weight off me."
+      ],
+      "replies": [
+        {
+          "say": "Go carefully, Tam.",
+          "then": "to_den",
+          "journal": "Tam Rudd went off easy in his mind. I still have the paper. He said they know about such things at the hatch in the osier bed."
+        }
+      ]
+    },
+    "to_den": {
+      "do": "go",
+      "to": "den",
+      "when": "night",
+      "goal": "After dark, take the paper to {place:den} and knock twice",
+      "then": "den_door",
+      "within": "candle",
+      "late": "end:held",
+      "until": "before the candle in the window burns down"
+    },
+    "den_door": {
+      "do": "talk",
+      "who": "door",
+      "when": "night",
+      "goal": "Get past the man on the bucket",
+      "not_now": "Nothing here but osiers. Come and look at them after dark, if you are fond of osiers.",
+      "say": [
+        "Evening. Two knocks on a hatch in an osier bed. So somebody has told you that much. Who sent you?"
+      ],
+      "replies": [
+        {
+          "say": "Nobody sent me.",
+          "then": "den_in"
+        },
+        {
+          "say": "Tam Rudd sent me.",
+          "then": "den_door_wrong"
+        }
+      ],
+      "within": "candle",
+      "late": "end:held",
+      "until": "before the candle in the window burns down"
+    },
+    "den_door_wrong": {
+      "do": "talk",
+      "who": "door",
+      "say": [
+        "Then Tam Rudd can come himself, and I notice he has not. I'll ask it once more. Who sent you?"
+      ],
+      "replies": [
+        {
+          "say": "Nobody sent me.",
+          "then": "den_in"
+        }
+      ]
+    },
+    "den_in": {
+      "do": "talk",
+      "who": "denkeeper",
+      "when": "night",
+      "goal": "Show the paper to whoever keeps the den",
+      "say": {
+        "?mark:potato_candle_lit": [
+          "Put it on the barrel. Do not unfold it. I can see the wax from here. And I know your face: there was a candle in a window for a gate sergeant, and you were on the road that night. Candles follow you about.",
+          "Do not tell me where that came from. Tell me whose hand it was in before yours. The runner's own? He picked it up himself, out of the tree, and then he gave it to you, in a tavern, of his own will?",
+          "Then here is what you hold. A paper under a candle lies there until a hand takes it up. Whoever takes it up has taken it on. That is the whole of the hiring. No names, no faces, and nobody sent anybody. He took up his own, the fool, and then he passed it on. So it is yours. You are holding a paper on Tam Rudd, and so far as that candle knows, you are the one who is going to earn it."
+        ],
+        "?": [
+          "Put it on the barrel. Do not unfold it. I can see the wax from here.",
+          "Do not tell me where that came from. Tell me whose hand it was in before yours. The runner's own? He picked it up himself, out of the tree, and then he gave it to you, in a tavern, of his own will?",
+          "Then here is what you hold. A paper under a candle lies there until a hand takes it up. Whoever takes it up has taken it on. That is the whole of the hiring. No names, no faces, and nobody sent anybody. He took up his own, the fool, and then he passed it on. So it is yours. You are holding a paper on Tam Rudd, and so far as that candle knows, you are the one who is going to earn it."
+        ]
+      },
+      "replies": [
+        {
+          "say": "I am not going to kill Tam Rudd.",
+          "then": "den_terms"
+        },
+        {
+          "say": "What can be done with it?",
+          "then": "den_terms"
+        }
+      ]
+    },
+    "den_terms": {
+      "do": "talk",
+      "who": "denkeeper",
+      "say": [
+        "Nobody asked what you were going to do. I am telling you what you hold. There are three things done with a paper, and I have seen all three.",
+        "You can hold it. While a paper is in a hand, no other hand is sent. That is their custom, and they keep their customs better than the watch keeps its own. But if the candle burns down and the work is not done, the hand that held it is noted. I cannot tell you what noted means. The ones it happened to do not come down here any more.",
+        "You can put it back where it lay, under the stub, before the candle in the window burns down. Then you never took it up. Somebody harder does, and your runner is dead inside the week, and not by you.",
+        "Or you can burn it. People think that ends it. Twice I have known it done. Both times there were two candles in the window before the week was out."
+      ],
+      "journal": "{denkeeper}, who keeps the den under the osier bed, says whoever takes up a paper from under a black candle has taken it on, and Tam passed his to me. I can hold it, and no other hand is sent while I do. I can put it back under the stub before the window candle burns down, and somebody else will take it up. Or I can burn it, and both times that was done there were two candles in the window inside the week.",
+      "replies": [
+        {
+          "say": "{price} on the barrel says you know why a runner is paid for.",
+          "then": "den_why",
+          "mark": "candle_knows_why",
+          "try": {
+            "how": "dice",
+            "coins": 6,
+            "fail": "den_dice_lost",
+            "refuse": "Fours. Mine. I'll tell you this much for nothing: do not ask who. Nobody down here knows who pays."
+          }
+        },
+        {
+          "say": "I have heard enough.",
+          "then": "den_choice"
+        }
+      ]
+    },
+    "den_why": {
+      "do": "talk",
+      "who": "denkeeper",
+      "say": {
+        "?mark:runner_purse_short": [
+          "Your throw. Not who. Nobody knows who pays. A purse goes to a tree, a name goes on a paper, a candle goes in a window. That is three hands, and not one of them ever sees another. But the why, I hear.",
+          "A purse went short at a tree on his round. Once, in all the years. Somebody did their work and was not paid for it. Somebody has to answer for a tree, and a tree has only the one man who goes to it.",
+          "Do not ask me whose pocket it went into. I do not know, and I would not say it if I did. But you look to me like a body who knows already."
+        ],
+        "?mark:runner_round_late": [
+          "Your throw. Not who. Nobody knows who pays. A purse goes to a tree, a name goes on a paper, a candle goes in a window. That is three hands, and not one of them ever sees another. But the why, I hear.",
+          "A packet came late to a tree on his round. Somebody stood out in the open by that tree a whole night waiting for it, and was seen standing. That is all it takes. Somebody has to answer for a tree, and a tree has only the one man who goes to it.",
+          "Do not ask me who made it late. I do not know, and I would not say it if I did. But you look to me like a body who knows already."
+        ],
+        "?": [
+          "Your throw. Not who. Nobody knows who pays. A purse goes to a tree, a name goes on a paper, a candle goes in a window. That is three hands, and not one of them ever sees another. But the why, I hear.",
+          "A strange face was at the tree on his round. Not his. Somebody he sent. The packet was right and the day was right. But a tree that two people know of is not the same tree, and he is the one who showed it.",
+          "Do not ask me whose face it was. I do not know, and I would not say it if I did. But you look to me like a body who knows already."
+        ]
+      },
+      "replies": [
+        {
+          "say": "I know.",
+          "then": "den_choice",
+          "journal": {
+            "?mark:runner_purse_short": "I won a throw from {denkeeper}. Nobody knows who pays: a purse to a tree, a name on a paper, a candle in a window, three hands that never see each other. But Tam Rudd is paid for because a purse went short at his oak. I am the one who kept it.",
+            "?mark:runner_round_late": "I won a throw from {denkeeper}. Nobody knows who pays: a purse to a tree, a name on a paper, a candle in a window, three hands that never see each other. But Tam Rudd is paid for because a packet came late to his oak. It was late the week I had his bag.",
+            "?": "I won a throw from {denkeeper}. Nobody knows who pays: a purse to a tree, a name on a paper, a candle in a window, three hands that never see each other. But Tam Rudd is paid for because he showed his oak to a stranger. I am the stranger."
+          }
+        }
+      ]
+    },
+    "den_dice_lost": {
+      "do": "talk",
+      "who": "denkeeper",
+      "say": [
+        "Do not take it hard. It would only have been a thing to lie awake on. Now. The paper."
+      ],
+      "replies": [
+        {
+          "say": "The paper.",
+          "then": "den_choice"
+        }
+      ]
+    },
+    "den_choice": {
+      "do": "talk",
+      "who": "denkeeper",
+      "say": [
+        "So. Hold it, put it back, or burn it. I'll not take it off you, and nobody down here will. A paper is the one thing in this room that is not for sale. Decide before you are up the ladder. It gets harder in the open air."
+      ],
+      "voices": {
+        "mercy": "Hold it. If it is in your coat, nobody else comes for him.",
+        "courage": "Do not put it back. That is only killing him with somebody else's hand.",
+        "law": "This should go to the watch, paper and candle and all. Though I never heard of a watch that took a candle down.",
+        "gain": "It says paid in full. I only mention it."
+      },
+      "replies": [
+        {
+          "say": "I'll hold it. Nobody else is sent while I do.",
+          "then": "tell_tam",
+          "mark": "candle_chose_hold",
+          "for": [
+            "mercy",
+            "courage"
+          ],
+          "journal": "I kept the paper. While I hold it nobody else is sent for Tam Rudd, and when the candle burns down I am the one who is noted."
+        },
+        {
+          "say": "It goes back under the stub.",
+          "then": "put_back",
+          "irks": [
+            "courage",
+            "mercy"
+          ]
+        },
+        {
+          "say": "Lend me that tallow dip. It burns.",
+          "needs_item": {
+            "item": "minecraft:paper",
+            "count": 1
+          },
+          "then": "tell_tam",
+          "mark": "candle_burned",
+          "journal": "I burned the paper with Tam Rudd's name on it over a tallow dip in the den. {denkeeper} watched it go and said nothing at all."
+        }
+      ]
+    },
+    "put_back": {
+      "do": "stash",
+      "at": "oak",
+      "item": "minecraft:paper",
+      "count": 1,
+      "goal": "Put the paper back under the candle stub in {place:oak}",
+      "mark": "candle_put_back",
+      "journal": "I put the paper back in the hollow of the split oak, under the black stub, with the stone on it. It is as if I never took it up. Somebody else will.",
+      "then": "tell_tam",
+      "within": "candle",
+      "late": "end:held",
+      "until": "before the candle in the window burns down"
+    },
+    "tell_tam": {
+      "do": "talk",
+      "who": "runner",
+      "goal": "Go back to Tam Rudd at {place:inn}",
+      "say": {
+        "?mark:candle_told_tam&mark:candle_put_back": [
+          "You put it back. Under the stub, with the stone on it. Where somebody will find it who is not you.",
+          "No. Do not say anything. I asked you to read a paper, and you read it, and after that it was never yours to carry. A runner knows about not carrying things. I had best not sleep where I usually sleep."
+        ],
+        "?mark:candle_told_tam&mark:candle_burned": [
+          "Burned. Ha! Good. That is what I would have done. That is what anybody would do. Why are you looking at me like that? What did they say down there about burning it?",
+          "Two candles. Well. Then one of them is yours. We are a pair, the runner and the legs."
+        ],
+        "?mark:candle_told_tam": [
+          "You are holding it. So the candle up there is for me, and the paper is in your coat, and as long as it stays in your coat I can walk my round. Is that the size of it?",
+          "Then I owe my legs to your pocket. I have owed worse. I'll go out in the morning the same as ever. If I sat here, they would only wonder why."
+        ],
+        "?": [
+          "Still about? I am off at first light. You look as though you have been down a hole. That chandler's bill is not weighing on you, is it?"
+        ]
+      },
+      "replies": [
+        {
+          "say": "Go carefully, Tam.",
+          "then": "wait_burn"
+        },
+        {
+          "if": "!mark:candle_told_tam",
+          "say": "Tam. It was not a bill.",
+          "then": "tam_truth",
+          "for": [
+            "honour"
+          ]
+        }
+      ]
+    },
+    "tam_truth": {
+      "do": "talk",
+      "who": "runner",
+      "say": {
+        "?mark:candle_put_back": [
+          "Not a bill. My name. You read me my own name and called it candles, and I have been saying it over in my head ever since, 'somebody owes a chandler', because that is what I do with what I am told.",
+          "And it is back in the tree for the next hand. Then I have less time than I thought, and I have spent a day of it whistling."
+        ],
+        "?mark:candle_burned": [
+          "Not a bill. My name. You read me my own name and called it candles, and I have been saying it over in my head ever since, 'somebody owes a chandler', because that is what I do with what I am told.",
+          "And burned. And two candles to come of it, they say. You do not do things by halves."
+        ],
+        "?": [
+          "Not a bill. My name. You read me my own name and called it candles, and I have been saying it over in my head ever since, 'somebody owes a chandler', because that is what I do with what I am told.",
+          "And you hold it. Well. That is something, to have it held by one who lies kindly. I'll go out in the morning the same as ever. If I sat here, they would only wonder why."
+        ]
+      },
+      "replies": [
+        {
+          "say": "I should have said it at the table.",
+          "then": "wait_burn",
+          "mark": "candle_told_tam",
+          "journal": "I told Tam Rudd what the paper truly said. He had been saying my lie over to himself, word for word, the way he does with every letter."
+        }
+      ]
+    },
+    "wait_burn": {
+      "do": "wait",
+      "days": [
+        2,
+        3
+      ],
+      "wake": "none",
+      "then": "see_window"
+    },
+    "see_window": {
+      "do": "go",
+      "to": "inn",
+      "goal": "Look in at {place:inn}, three nights on",
+      "journal": {
+        "?mark:candle_put_back": "Three nights on, the black candle still stands in the tavern window. Tam Rudd's table is empty, and nobody will say where he has been sleeping. The taverner says a civil stranger has asked after the runner's lodgings, and paid for the end room in advance.",
+        "?mark:candle_burned": "Three nights on, the black candle still stands in the tavern window. Tam Rudd went out on his round as if nothing had been said. The taverner says nobody saw who lit that candle, and he does not mean to be the one who sees who lights the next.",
+        "?": "Three nights on, the black candle still stands in the tavern window, and Tam Rudd went out on his round this morning with his bag over his shoulder. The paper is still in my coat. Nobody has come for him. Nobody has come for me."
+      },
+      "then": {
+        "?mark:candle_put_back": "end:put_back",
+        "?mark:candle_burned": "end:burned",
+        "?": "end:held"
+      }
+    }
+  },
+  "endings": {
+    "held": {
+      "text": {
+        "?mark:candle_chose_hold": "I am holding a paper with Tam Rudd's name on it. While it is in my coat nobody else is sent for him. I am told that the hand that holds a paper past its candle is noted.",
+        "?met:denkeeper": "I still had the paper when its three days were out. I never chose to hold it. I only never let it go. Nobody else has been sent for Tam Rudd, and I am told that the hand that holds a paper past its candle is noted.",
+        "?": "I still had the paper when its three days were out. I never chose to hold it. I only never let it go."
+      },
+      "reward": {
+        "hearts": 6,
+        "reputation": 3
+      },
+      "marks": [
+        "candle_paper_dealt",
+        "candle_held"
+      ],
+      "town": [
+        "That black candle is still in the tavern window. Days now, and nobody dead that I have heard of. Somebody is slow.",
+        "Tam Rudd sat under it two days and never once looked up. Then off on his round, whistling. He cannot know. Can he?"
+      ]
+    },
+    "put_back": {
+      "text": "I put the paper back under the black stub in the split oak. I never took it up. Somebody else has by now, and Tam Rudd is not sleeping where he usually sleeps.",
+      "marks": [
+        "candle_paper_dealt",
+        "candle_put_back"
+      ],
+      "town": [
+        "There is a stranger asking after the valley runner's lodgings. Very civil. Pays in advance.",
+        "Tam Rudd has stopped whistling. Eleven years I have heard that man coming before I saw him, and now he is at the door before you know it."
+      ]
+    },
+    "burned": {
+      "text": "I burned the paper with Tam Rudd's name on it. I am told that does not end it, and that both times it was done before there were two candles in the window inside the week.",
+      "reward": {
+        "hearts": 4
+      },
+      "marks": [
+        "candle_paper_dealt",
+        "candle_burned"
+      ],
+      "town": [
+        "Somebody burned a thing they should not have, down the osier hatch. The whole cellar went quiet for it, I hear.",
+        "Two candles, that is what they say comes of it. I have only ever seen the one. One is plenty."
+      ]
+    },
+    "refused": {
+      "text": "I would not read Tam Rudd's paper for him. Whatever it says, it says it to him.",
+      "failed": true
+    }
+  }
+}

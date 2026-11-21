@@ -1,6 +1,7 @@
 package com.jaymospowers.power.gravity;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.wounds.BodyPart;
 import com.jaymospowers.core.wounds.BodyPlan;
@@ -384,9 +385,9 @@ public final class GravityRocks {
 	private static void burst(ServerLevel level, @Nullable ServerPlayer owner, Flying flying, Vec3 at, @Nullable LivingEntity struck) {
 		Throw thrown = flying.thrown();
 		if (owner != null) {
-			for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(at, at).inflate(BURST_RADIUS),
+			for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(at, at).inflate(AbilityPower.size(owner, BURST_RADIUS)),
 				e -> e.isAlive() && !e.isSpectator() && e != owner && !e.isAlliedTo(owner) && !(e instanceof net.minecraft.world.entity.decoration.ArmorStand))) {
-				if (near != struck && near.getBoundingBox().distanceToSqr(at) > BURST_RADIUS * BURST_RADIUS) {
+				if (near != struck && near.getBoundingBox().distanceToSqr(at) > AbilityPower.size(owner, BURST_RADIUS) * AbilityPower.size(owner, BURST_RADIUS)) {
 					continue;
 				}
 				if (near instanceof Player other && (other.isCreative() || !owner.canHarmPlayer(other))) {
@@ -402,9 +403,9 @@ public final class GravityRocks {
 			}
 			// leaves and glass in the way go
 			net.minecraft.core.BlockPos centre = net.minecraft.core.BlockPos.containing(at);
-			int r = (int)Math.ceil(BREAK_RADIUS);
+			int r = (int)Math.ceil(AbilityPower.size(owner, BREAK_RADIUS));
 			for (net.minecraft.core.BlockPos pos : net.minecraft.core.BlockPos.betweenClosed(centre.offset(-r, -r, -r), centre.offset(r, r, r))) {
-				if (pos.distToCenterSqr(at) > BREAK_RADIUS * BREAK_RADIUS) {
+				if (pos.distToCenterSqr(at) > AbilityPower.size(owner, BREAK_RADIUS) * AbilityPower.size(owner, BREAK_RADIUS)) {
 					continue;
 				}
 				net.minecraft.world.level.block.state.BlockState state = level.getBlockState(pos);
@@ -608,6 +609,7 @@ public final class GravityRocks {
 	/** A rock (or the ball) lands: its damage, and with a bleed tick when it's one of the small ones. */
 	static void hit(ServerPlayer player, ServerLevel level, LivingEntity target, float damage, boolean bleed) {
 		GravityPower.touch(target, player);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "gravity.rocks", 1);
 		striking = true;
 		try {
 			target.setInvulnerableTime(0);

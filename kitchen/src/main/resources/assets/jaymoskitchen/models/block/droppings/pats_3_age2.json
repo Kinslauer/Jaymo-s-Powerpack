@@ -1,0 +1,7 @@
+{
+  "parent": "jaymoskitchen:block/droppings/pats_3",
+  "textures": {
+    "all": "jaymoskitchen:block/droppings/pats_2",
+    "particle": "jaymoskitchen:block/droppings/pats_2"
+  }
+}

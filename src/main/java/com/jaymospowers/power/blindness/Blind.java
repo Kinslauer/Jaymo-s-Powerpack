@@ -75,6 +75,8 @@ public final class Blind {
 		BlindnessEnclaves.init();
 		BlindnessRadar.init();
 		BlindnessPursuit.init();
+		// the ritual-keepers fight with decay, blood and death magic
+		UnseeingRites.init();
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
 			if (level.isClientSide() || !(player instanceof ServerPlayer attacker) || !(entity instanceof ServerPlayer victim)
 				|| !player.isShiftKeyDown() || !player.getItemInHand(hand).is(Items.SHEARS) || !Downed.isDowned(victim)) {

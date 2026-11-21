@@ -127,11 +127,13 @@ public final class Baubles {
 		HEARTSTONE_AMULET = bauble("heartstone_amulet", Kind.AMULET, Rarity.UNCOMMON,
 			new BaubleItem.Bonus(Attributes.MAX_HEALTH, 4.0, AttributeModifier.Operation.ADD_VALUE));
 		SWIFTFOOT_RING = bauble("swiftfoot_ring", Kind.RING, Rarity.UNCOMMON,
-			new BaubleItem.Bonus(Attributes.MOVEMENT_SPEED, 0.08, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
+			new BaubleItem.Bonus(Attributes.MOVEMENT_SPEED, 0.08, AttributeModifier.Operation.ADD_MULTIPLIED_BASE),
+			new BaubleItem.Bonus(com.jaymospowers.combat.CombatAttrs.PARRY_RECHARGE, 0.15, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
 		DELVERS_RING = bauble("delvers_ring", Kind.RING, Rarity.UNCOMMON,
 			new BaubleItem.Bonus(Attributes.BLOCK_BREAK_SPEED, 0.2, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
 		BRAWLERS_BELT = bauble("brawlers_belt", Kind.BELT, Rarity.COMMON,
-			new BaubleItem.Bonus(Attributes.KNOCKBACK_RESISTANCE, 0.25, AttributeModifier.Operation.ADD_VALUE));
+			new BaubleItem.Bonus(Attributes.KNOCKBACK_RESISTANCE, 0.25, AttributeModifier.Operation.ADD_VALUE),
+			new BaubleItem.Bonus(com.jaymospowers.combat.CombatAttrs.RIPOSTE_POWER, 0.15, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
 		DIVERS_CIRCLET = bauble("divers_circlet", Kind.HEAD, Rarity.UNCOMMON,
 			new BaubleItem.Bonus(Attributes.OXYGEN_BONUS, 1.0, AttributeModifier.Operation.ADD_VALUE),
 			new BaubleItem.Bonus(Attributes.SUBMERGED_MINING_SPEED, 0.5, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));

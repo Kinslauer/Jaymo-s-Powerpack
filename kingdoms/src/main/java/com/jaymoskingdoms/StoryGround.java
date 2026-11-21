@@ -45,7 +45,6 @@ import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.Structure;
-import net.minecraft.world.level.levelgen.structure.StructureCheckResult;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
@@ -62,6 +61,13 @@ public final class StoryGround {
 	static final int TICKET_RADIUS = 10;
 	/** How often a waiting job tries again, and how long before it settles for less (a citadel, the wild). */
 	static final int TRY_EVERY = 20, GIVE_UP_TICKS = 1800;
+	/**
+	 * How long the capital's Epic town is kept trying (ticks) before another is looked for: 1800 was too short for the
+	 * wide land round its bell to load (the 2026-11-17 world gave up and raised a castle). Only an Epic town is crowned.
+	 */
+	static final int EPIC_GIVE_UP_TICKS = 6000;
+	/** How long the capital waits (ticks) for a kingdom in an Epic town further out ({@link EpicTowns#foundFar}) before it goes without one. */
+	static final int FAR_GIVE_UP_TICKS = 6000;
 	/** The bell searched for round a village's middle. */
 	static final int BELL_SEARCH = 96;
 	/**
@@ -72,8 +78,6 @@ public final class StoryGround {
 	 * found (30 chunks out).
 	 */
 	static final int CAPITAL_VILLAGE_SEARCH = 40;
-	/** (0.7.350) Time the capital's village search may take each tick (ms), so the server keeps ticking meanwhile. */
-	static final int VILLAGE_SEARCH_MS = 15;
 	/** A new barbarian camp: this far from spawn. */
 	static final int CAMP_MIN = 200, CAMP_MAX = 360;
 	/** A new monolith: this far from spawn, and the spots tried. */
@@ -123,6 +127,9 @@ public final class StoryGround {
 		@Nullable VillageSearch search;
 		/** The mainland the capital's citadel is looked for round, and its spot there (null: not chosen yet). */
 		@Nullable BlockPos citadelNear, citadel;
+		/** The capital's Epic town has no building fit for a king (so another is looked for), and the last reason it was waited on. */
+		boolean townUnfit;
+		@Nullable String waitingOn;
 		/** Beyond {@link #TICKET_RADIUS}: how far the land round {@link #landAt} is being loaded so far ({@link #step}). */
 		int land;
 		@Nullable ChunkPos landAt;
@@ -168,6 +175,9 @@ public final class StoryGround {
 		}
 	}
 
+	/** The first capital's job ended with no realm made: it is not asked for again this session ({@link #capital}). */
+	static boolean noRealm;
+
 	private StoryGround() {
 	}
 
@@ -177,7 +187,11 @@ public final class StoryGround {
 		ServerTickEvents.END_SERVER_TICK.register(StoryGround::holds);
 		PayloadTypeRegistry.clientboundPlay().register(Hold.TYPE, Hold.CODEC);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+			if (capital != null && capital.search != null) {
+				capital.search.cancel();
+			}
 			capital = null;
+			noRealm = false;
 			HARBOURS.clear();
 			ROADWAYS.clear();
 			AHEAD.clear();
@@ -219,7 +233,7 @@ public final class StoryGround {
 	 * {@code waiting} is held safe meanwhile. With a realm standing already, {@code then} runs at once.
 	 */
 	static void capital(MinecraftServer server, @Nullable ServerPlayer waiting, @Nullable Runnable then) {
-		if (!realmless(server)) {
+		if (!realmless(server) || noRealm) {
 			if (then != null) {
 				then.run();
 			}
@@ -236,11 +250,16 @@ public final class StoryGround {
 				// (0.7.243) with no village near, the citadel is started at the first try, not after waiting out the village's
 				// time; a village that never takes it settles for a citadel by it, made the same way
 				BlockPos village = search.found;
-				if (village != null && job().citadelNear == null && l.getGameTime() < job().giveUpAt) {
+				if (village != null && job().citadelNear == null && !job().townUnfit && l.getGameTime() < job().giveUpAt) {
 					return foundInVillage(l, village);
 				}
 				return citadelWhenLoaded(l, job());
-			}, l -> citadel(l, job().at));
+			}, l -> {
+				// (once its land is held the far search has had its time: raising one more town on land not yet made is not tried)
+				if (job().citadelNear == null) {
+					citadel(l, job().at);
+				}
+			});
 			job.search = search;
 			capital = job;
 		}
@@ -259,8 +278,12 @@ public final class StoryGround {
 
 	/**
 	 * (0.7.350) Where the first capital's village might be: every village's possible starts within
-	 * {@link #CAPITAL_VILLAGE_SEARCH} chunks of spawn, nearest first, looked at for a few ms a tick. What vanilla's
-	 * findNearestMapStructure does, but bounded in chunks and spread over ticks.
+	 * {@link #CAPITAL_VILLAGE_SEARCH} chunks of spawn, nearest first. What vanilla's findNearestMapStructure does, but
+	 * bounded in chunks. Whether a village could start at each spot is worked out on a background thread, from the
+	 * Overworld's own ground ({@link Stacked#overworldGround}): that check lays out the whole town, loading (and on the
+	 * first look in a session, upgrading) every building's template and reading the land and rivers under it, which on the
+	 * server thread stalled a newcomer's first seconds for 10-20 s. The server thread only follows its answers in order and
+	 * makes the chunk of the first likely one, to see if its village really starts there.
 	 */
 	private static final class VillageSearch {
 		record Spot(Structure structure, StructurePlacement placement, ChunkPos chunk, int distance) {
@@ -271,6 +294,10 @@ public final class StoryGround {
 
 		final BlockPos spawn;
 		final List<Spot> spots = new ArrayList<>();
+		/** The background's answer for each spot looked at so far (true: a village could start there), and how many it has. */
+		private boolean[] could = new boolean[0];
+		private volatile int answered;
+		private volatile boolean cancelled;
 		int next;
 		@Nullable BlockPos found;
 		/** The spot whose chunk is being made, to see if its village really starts, and when that's done (null: none). */
@@ -288,7 +315,8 @@ public final class StoryGround {
 				return;
 			}
 			// (a One Dimension world's Overworld band's own placements: the stacked level's has none, "0 of 0 places looked at")
-			ChunkGeneratorStructureState state = Stacked.overworldGround(level).structures();
+			Stacked.Ground ground = Stacked.overworldGround(level);
+			ChunkGeneratorStructureState state = ground.structures();
 			ChunkPos origin = ChunkPos.containing(spawn);
 			int reach = CAPITAL_VILLAGE_SEARCH * CAPITAL_VILLAGE_SEARCH;
 			for (Holder<Structure> village : villages.get()) {
@@ -314,10 +342,45 @@ public final class StoryGround {
 				}
 			}
 			this.spots.sort(Comparator.comparingInt(Spot::distance));
+			this.could = new boolean[this.spots.size()];
+			if (!this.spots.isEmpty()) {
+				lookAhead(level.registryAccess(), level.getServer().getStructureTemplateManager(), ground, state.getLevelSeed());
+			}
 		}
 
-		/** Looks at spots till {@code budgetNanos} is used up; true once it's over (found, or none left). */
-		boolean step(ServerLevel level, long budgetNanos) {
+		/** Asks, on a background thread and nearest first, whether a village could start at each spot, till cancelled. */
+		private void lookAhead(net.minecraft.core.RegistryAccess registries, net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager templates,
+			Stacked.Ground ground, long seed) {
+			List<Spot> spots = List.copyOf(this.spots);
+			boolean[] could = this.could;
+			CompletableFuture.runAsync(() -> {
+				// (this thread's own: a climate sampler's caches aren't shared between threads)
+				net.minecraft.world.level.biome.Climate.Sampler climate = ground.randomState().createClimateSampler(
+					net.minecraft.world.level.levelgen.densityfunction.SamplerContext.builder().enableCaches().build());
+				for (int i = 0; i < spots.size() && !this.cancelled; i++) {
+					Spot spot = spots.get(i);
+					boolean can = false;
+					try {
+						can = spot.placement().applyAdditionalChunkRestrictions(spot.chunk().x(), spot.chunk().z(), seed)
+							&& spot.structure().findValidGenerationPoint(new Structure.GenerationContext(registries, ground.generator(),
+								ground.generator().getBiomeSource(), climate, ground.randomState(), templates, seed, spot.chunk(), ground.heights(),
+								spot.structure().biomes()::contains)).isPresent();
+					} catch (RuntimeException e) {
+						JaymosKingdoms.LOGGER.debug("The capital's village search couldn't look at {}", spot.chunk(), e);
+					}
+					could[i] = can;
+					this.answered = i + 1;
+				}
+			}, net.minecraft.util.Util.backgroundExecutor());
+		}
+
+		/** Stops the background looking (the search is over, or the server is stopping). */
+		void cancel() {
+			this.cancelled = true;
+		}
+
+		/** Follows the background's answers as far as it has got; true once it's over (found, or none left). */
+		boolean step(ServerLevel level) {
 			if (this.making != null) {
 				if (!this.made.isDone()) {
 					return false;
@@ -330,38 +393,35 @@ public final class StoryGround {
 					return true;
 				}
 			}
-			long until = System.nanoTime() + budgetNanos;
-			while (this.next < this.spots.size()) {
-				Spot spot = this.spots.get(this.next++);
-				StructureCheckResult result = Stacked.searchingOverworld(level,
-					() -> level.structureManager().checkStructurePresence(spot.chunk(), spot.structure(), spot.placement(), false));
-				if (result == StructureCheckResult.START_PRESENT) {
-					this.found = spot.placement().getLocatePos(spot.chunk());
-					return true;
-				}
-				if (result == StructureCheckResult.CHUNK_LOAD_NEEDED) {
-					// vanilla's check says a village starts here: its chunk is made off the server thread and looked at once
-					// it's there (made on the server thread, the wait behind Chunky's pregen ran into the 60 s watchdog)
+			int answered = this.answered;
+			while (this.next < answered) {
+				int i = this.next++;
+				Spot spot = this.spots.get(i);
+				if (this.could[i]) {
+					// a village could start here: its chunk is made off the server thread and looked at once it's there
+					// (made on the server thread, the wait behind Chunky's pregen ran into the 60 s watchdog)
 					this.making = spot;
 					this.made = level.getChunkSource().addTicketAndLoadWithRadius(MAKING, spot.chunk(), 0);
 					return false;
 				}
-				if (System.nanoTime() >= until) {
-					return false;
-				}
 			}
-			return true;
+			return this.next >= this.spots.size();
 		}
 
-		/** Whether the village vanilla's check foresaw at {@code spot} started in its chunk, now made (null: it didn't). */
+		/** Whether the village the background foresaw at {@code spot} started in its chunk, now made (null: it didn't). */
 		private static @Nullable BlockPos started(ServerLevel level, Spot spot) {
 			LevelChunk chunk = level.getChunkSource().getChunkNow(spot.chunk().x(), spot.chunk().z());
 			StructureStart start = chunk == null ? null : level.structureManager().getStartForStructure(spot.structure(), chunk);
+			if (start != null && start.isValid() && !EpicTowns.surface(level, start)) {
+				JaymosKingdoms.LOGGER.info("The capital's village at chunk {} is in {}, not the Overworld: passed over", spot.chunk(),
+					Stacked.realm(level, start.getBoundingBox().getCenter().getY()).identifier());
+				return null;
+			}
 			return start != null && start.isValid() ? spot.placement().getLocatePos(start.getChunkPos()) : null;
 		}
 	}
 
-	/** (0.7.350) Each tick: a few ms more of the capital's village search, and the capital set going once it's over. */
+	/** Each tick: the capital's village search followed on, and the capital set going once it's over. */
 	private static void searchVillages(MinecraftServer server) {
 		Job job = capital;
 		if (job == null || job.search == null) {
@@ -371,7 +431,7 @@ public final class StoryGround {
 		ServerLevel level = Factions.level(server);
 		boolean over;
 		try {
-			over = search.step(level, VILLAGE_SEARCH_MS * 1_000_000L);
+			over = search.step(level);
 		} catch (RuntimeException e) {
 			JaymosKingdoms.LOGGER.warn("The first capital's village search failed; raising it at spawn", e);
 			search.found = null;
@@ -381,10 +441,11 @@ public final class StoryGround {
 			return;
 		}
 		job.search = null;
+		search.cancel();
 		if (search.found != null) {
 			job.at = search.found;
 		}
-		job.giveUpAt = level.getGameTime() + GIVE_UP_TICKS;
+		job.giveUpAt = level.getGameTime() + (search.found != null ? EPIC_GIVE_UP_TICKS : GIVE_UP_TICKS);
 		JaymosKingdoms.LOGGER.info("No realm yet for a life story: raising a capital {} ({} of {} places looked at in {} ms)",
 			search.found != null ? "in the village at " + search.found : "at spawn", search.next, search.spots.size(),
 			(System.nanoTime() - search.startedAt) / 1_000_000L);
@@ -399,7 +460,7 @@ public final class StoryGround {
 		// the bell is looked for in made land only (isPositionEntityTicking, like hasChunksAt, is true of chunks only
 		// scheduled: see Loaded)
 		if (!level.isPositionEntityTicking(village) || !loaded(level, village, BELL_SEARCH / 16 + 1)) {
-			return false;
+			return waitOn("its land is not loaded yet");
 		}
 		// the search found the village's chunk at y 0: the bell is looked for round its ground, or a town on high land (a
 		// savanna plateau at y 108) has its bell out of reach of a search that measures height too, and is never found
@@ -410,11 +471,11 @@ public final class StoryGround {
 		poi.ensureLoadedAndValid(level, village, BELL_SEARCH);
 		Optional<BlockPos> bell = poi.findClosest(holder -> holder.is(PoiTypes.MEETING), village, BELL_SEARCH, PoiManager.Occupancy.ANY);
 		if (bell.isEmpty()) {
-			return false;
+			return waitOn("no bell found within " + BELL_SEARCH + " blocks of it yet");
 		}
 		Seats.Found found = Seats.structureAt(level, bell.get(), Seats::epic);
 		if (found.status() != Seats.Status.FOUND || found.start() == null) {
-			return false;
+			return waitOn("its Epic town is not found at the bell yet (" + found.status() + ")");
 		}
 		// the land round the bell made first, as for a citadel ({@link #CITADEL_RADIUS}): the town takes its buildings, and if
 		// it won't, a castle is raised beside it, its site looked for up to 183 blocks off; the job's ticket is moved to the
@@ -424,16 +485,29 @@ public final class StoryGround {
 			job().at = b;
 			job().radius = CITADEL_RADIUS;
 			// (the wider land takes longer: the village keeps its full time from here)
-			job().giveUpAt = Math.max(job().giveUpAt, level.getGameTime() + GIVE_UP_TICKS);
-			return false;
+			job().giveUpAt = Math.max(job().giveUpAt, level.getGameTime() + EPIC_GIVE_UP_TICKS);
+			return waitOn("making the wider land round its bell ready");
 		}
 		if (!loaded(level, b, CITADEL_RADIUS)) {
-			return false;
+			return waitOn("the wider land round its bell is still loading");
 		}
 		if (KingdomEvents.foundIn(level, b, found.start()) == null) {
-			KingdomEvents.found(level, b, Castle.Kind.CITADEL);
+			// no lone castle beside it: another Epic town is looked for instead (citadelWhenLoaded)
+			JaymosKingdoms.LOGGER.info("The capital's village at {} has no building fit for a king; looking for another Epic town", b);
+			job().townUnfit = true;
+			return false;
 		}
 		return true;
+	}
+
+	/** The capital's village isn't founded yet: false, saying why the first time and whenever the reason changes. */
+	private static boolean waitOn(String why) {
+		Job job = job();
+		if (!why.equals(job.waitingOn)) {
+			job.waitingOn = why;
+			JaymosKingdoms.LOGGER.info("The capital's village at {} is not founded yet: {}", job.at, why);
+		}
+		return false;
 	}
 
 	/**
@@ -457,8 +531,8 @@ public final class StoryGround {
 		if (!realmless(level.getServer())) {
 			return true;
 		}
-		job.giveUpAt = Long.MAX_VALUE;
 		if (job.citadelNear == null) {
+			job.giveUpAt = Long.MAX_VALUE;
 			job.citadelNear = mainland(level, job.at);
 			job.at = job.citadelNear;
 			job.radius = SPOT_RADIUS;
@@ -476,7 +550,20 @@ public final class StoryGround {
 		if (!loaded(level, job.citadel, CITADEL_RADIUS)) {
 			return false;
 		}
-		return KingdomEvents.foundTown(level, job.citadel) != null || !realmless(level.getServer());
+		// an Epic town raised there, else the nearest one further out, a try at a time; never a castle. Waited for till
+		// FAR_GIVE_UP_TICKS, or till none is left to look at, then the world goes on without a realm (the first bell a player
+		// reaches in an Epic town founds one: KingdomEvents#tryFound)
+		if (KingdomEvents.foundTown(level, job.citadel) != null || !realmless(level.getServer())) {
+			return true;
+		}
+		if (job.giveUpAt == Long.MAX_VALUE) {
+			job.giveUpAt = level.getGameTime() + FAR_GIVE_UP_TICKS;
+		}
+		if (!EpicTowns.farLeft(level, job.citadel)) {
+			JaymosKingdoms.LOGGER.warn("No Epic town to raise a first kingdom in near {}: going on without a realm", job.citadel);
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -501,7 +588,7 @@ public final class StoryGround {
 		return ground != null ? ground : level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, near);
 	}
 
-	/** A kingdom on open ground near {@code near} (no village would do): an Epic town raised there, else its castle. */
+	/** A kingdom on open ground near {@code near} (no village would do): an Epic town raised there, else the nearest one further out (never a castle). */
 	private static @Nullable Faction citadel(ServerLevel level, BlockPos near) {
 		if (!realmless(level.getServer())) {
 			return null;
@@ -556,8 +643,11 @@ public final class StoryGround {
 		// (land a start's earlier try had made in the background looked at first: LifeStory.Wanted)
 		for (BlockPos column : LifeStory.columns(from, MONOLITH_MIN, MONOLITH_MAX, random, MONOLITH_TRIES)) {
 			// spots in land not yet made are made only while the budget lasts (24 new chunks held the server past its
-			// watchdog), and never while a start is tried: that has them made in the background and tries again
-			if (!LifeStory.reach(level, column.getX(), column.getZ(), made)) {
+			// watchdog), and never while a start is tried: that has them made in the background and tries again.
+			// (2026-11-20) Nor where the seed says it's water: no stone stands in the sea
+			if (level.getChunkSource().getChunkNow(column.getX() >> 4, column.getZ() >> 4) == null
+				&& !LifeStory.foreseenDry(level, column.getX(), column.getZ())
+				|| !LifeStory.reach(level, column.getX(), column.getZ(), made)) {
 				continue;
 			}
 			BlockPos foot = Monoliths.fit(level, column);
@@ -631,6 +721,10 @@ public final class StoryGround {
 	static void milestone(ServerPlayer player, BlockPos spawn, Runnable then, Runnable fallback) {
 		MinecraftServer server = player.level().getServer();
 		if (realmless(server)) {
+			if (noRealm) {
+				fallback.run();
+				return;
+			}
 			capital(server, player, () -> milestone(player, spawn, then, fallback));
 			return;
 		}
@@ -663,7 +757,7 @@ public final class StoryGround {
 		ROADWAYS.put(id, job);
 	}
 
-	/** A second kingdom (its town, else its castle) a few hundred blocks from the first town's seat (so a road can join them). */
+	/** A second kingdom (its Epic town) a few hundred blocks from the first town's seat (so a road can join them). */
 	private static void secondTown(ServerLevel level, BlockPos spawn) {
 		List<Faction> towns = Roads.towns(level.getServer());
 		BlockPos from = towns.isEmpty() ? spawn : towns.getFirst().seat();
@@ -813,6 +907,12 @@ public final class StoryGround {
 		int[] made = {SHORE_NEW_CHUNKS};
 		for (int d = 0; d < Math.min(len, SHORE_WALK); d += SHORE_STEP) {
 			BlockPos column = water.offset(Mth.floor(dx / len * d), 0, Mth.floor(dz / len * d));
+			if (level.getChunkSource().getChunkNow(column.getX() >> 4, column.getZ() >> 4) == null
+				&& !LifeStory.foreseenDry(level, column.getX(), column.getZ())) {
+				// (2026-11-20) still at sea by the seed (as /locate reads it): walked on without making the chunk, so only the
+				// shore's own land is made (before, every chunk of open water on the way was, on the server thread)
+				continue;
+			}
 			if (!LifeStory.reach(level, column.getX(), column.getZ(), made)) {
 				return null;
 			}
@@ -959,6 +1059,7 @@ public final class StoryGround {
 		if (capital != null && step(level, capital, "message.jaymoskingdoms.story.making.realm")) {
 			Job done = capital;
 			capital = null;
+			noRealm = realmless(server);
 			done.then.forEach(Runnable::run);
 		}
 		for (UUID id : List.copyOf(HARBOURS.keySet())) {

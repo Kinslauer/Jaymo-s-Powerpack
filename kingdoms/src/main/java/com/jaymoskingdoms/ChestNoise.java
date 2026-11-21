@@ -127,7 +127,7 @@ public final class ChestNoise {
 				chance *= WALL_FACTOR;
 			}
 			if (level.getRandom().nextDouble() < chance) {
-				wake(level, e, player, pos, now);
+				wake(level, e, player, pos, now, "message.jaymoskingdoms.chest_noise.woke.");
 			}
 		}
 	}
@@ -142,15 +142,20 @@ public final class ChestNoise {
 
 	/** (Footsteps) {@code player}'s noise at {@code pos} wakes {@code sleeper}, as a chest's creak would. */
 	static void wakeBy(ServerLevel level, LivingEntity sleeper, ServerPlayer player, BlockPos pos) {
-		wake(level, sleeper, player, pos, level.getGameTime());
+		wake(level, sleeper, player, pos, level.getGameTime(), "message.jaymoskingdoms.chest_noise.woke.");
 	}
 
-	private static void wake(ServerLevel level, LivingEntity sleeper, ServerPlayer player, BlockPos pos, long now) {
+	/** (Theft) {@code sleeper} is woken by a witness to {@code player}'s crime and comes over to {@code pos} to hear it. */
+	static void wakeToHear(ServerLevel level, LivingEntity sleeper, ServerPlayer player, BlockPos pos) {
+		wake(level, sleeper, player, pos, level.getGameTime(), "message.jaymoskingdoms.crime_woke.");
+	}
+
+	private static void wake(ServerLevel level, LivingEntity sleeper, ServerPlayer player, BlockPos pos, long now, String lines) {
 		sleeper.stopSleeping();
 		WOKEN.put(sleeper.getUUID(), new Woken(sleeper, player.getUUID(), pos.immutable(), now + STAY_AWAKE_TICKS));
 		face(sleeper, player.getEyePosition());
 		come(sleeper, pos);
-		Speech.say(level, sleeper, Component.translatable("message.jaymoskingdoms.chest_noise.woke." + level.getRandom().nextInt(LINES)),
+		Speech.say(level, sleeper, Component.translatable(lines + level.getRandom().nextInt(LINES)),
 			Speech.WHITE, RANGE);
 	}
 

@@ -73,6 +73,7 @@ public final class ForbiddenArts {
 
 	/** (0.7.465) {@code player}'s spirit stops a forbidden cast before it's made (the Grue is near): true if it did, and the cast mustn't happen. */
 	static boolean stayed(Player player) {
-		return player instanceof ServerPlayer sp && com.jaymoskingdoms.spirits.Grue.stayHand(sp);
+		// (or a pact that forbids it, the Lantern Warden's: refused, unless it's broken on purpose, {@link Vows})
+		return player instanceof ServerPlayer sp && (!Vows.allows(sp, "dark_arts") || com.jaymoskingdoms.spirits.Grue.stayHand(sp));
 	}
 }

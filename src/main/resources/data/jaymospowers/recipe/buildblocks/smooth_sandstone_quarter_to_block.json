@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:smooth_sandstone_quarter",
+    "jaymospowers:smooth_sandstone_quarter",
+    "jaymospowers:smooth_sandstone_quarter",
+    "jaymospowers:smooth_sandstone_quarter"
+  ],
+  "result": {
+    "id": "minecraft:smooth_sandstone"
+  }
+}

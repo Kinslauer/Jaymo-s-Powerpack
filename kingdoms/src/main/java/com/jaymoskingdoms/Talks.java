@@ -278,7 +278,7 @@ public final class Talks {
 			labels.add(label);
 			enabled.add(ok);
 		}
-		ServerPlayNetworking.send(player, new TalkNet.Ask(v.getId(), v.getDisplayName(), words, labels, enabled));
+		ServerPlayNetworking.send(player, new TalkNet.Ask(v.getId(), Introductions.called(player, v), words, labels, enabled));
 		OPEN.put(player.getUUID(), new Open(v.getId(), talk.id(), player.level().getGameTime() + OPEN_TICKS));
 		// (it counts as had when it's shown, so closing it doesn't let you fish for another)
 		long today = c.today();

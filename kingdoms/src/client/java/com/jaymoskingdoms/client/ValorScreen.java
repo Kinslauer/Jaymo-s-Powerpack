@@ -34,11 +34,11 @@ final class ValorScreen extends Screen {
 	}
 
 	private int panelW() {
-		return Math.min(PANEL_W, this.width - 12);
+		return Math.min(PANEL_W, this.width - 12 - MenuCompat.SIDE);
 	}
 
 	private int left() {
-		return (this.width - panelW()) / 2;
+		return MenuCompat.centre(this.width, panelW());
 	}
 
 	private int top() {

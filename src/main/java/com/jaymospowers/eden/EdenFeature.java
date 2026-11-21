@@ -820,6 +820,11 @@ public record EdenFeature(Kind kind) implements Feature {
 		return state.is(AetherBlocks.HOLYSTONE) || state.is(AetherBlocks.AETHER_DIRT) || state.is(AetherBlocks.QUICKSOIL);
 	}
 
+	/** Whether pos is in the 3x3 chunks round the feature's origin chunk, the most worldgen may read or write. */
+	private static boolean inReach(BlockPos origin, BlockPos pos) {
+		return Math.abs((pos.getX() >> 4) - (origin.getX() >> 4)) <= 1 && Math.abs((pos.getZ() >> 4) - (origin.getZ() >> 4)) <= 1;
+	}
+
 	/**
 	 * Caves worn into an island itself: from a point in its body, winding tunnels swell and narrow, never wandering far, cut
 	 * only through the island's own stone and soil (so they open on air where they meet it); now and then one is a gas
@@ -854,7 +859,7 @@ public record EdenFeature(Kind kind) implements Feature {
 								continue;
 							}
 							pos.set((int)Math.floor(x) + dx, (int)Math.floor(y) + dy, (int)Math.floor(z) + dz);
-							if (body(level.getBlockState(pos))) {
+							if (inReach(origin, pos) && body(level.getBlockState(pos))) {
 								level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
 								cut = true;
 							}
@@ -871,7 +876,7 @@ public record EdenFeature(Kind kind) implements Feature {
 				}
 				if (i % 3 == 0) {
 					pos.set((int)Math.floor(x), (int)Math.floor(y) - Math.max(1, (int)Math.floor(girth)), (int)Math.floor(z));
-					if (level.getBlockState(pos.above()).isAir() && body(level.getBlockState(pos))) {
+					if (inReach(origin, pos) && level.getBlockState(pos.above()).isAir() && body(level.getBlockState(pos))) {
 						if (gassy) {
 							level.setBlock(pos, EdenCaves.GAS_VENT.defaultBlockState(), Block.UPDATE_CLIENTS);
 						} else if (random.nextInt(3) == 0) {

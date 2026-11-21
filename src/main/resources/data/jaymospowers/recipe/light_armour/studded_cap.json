@@ -1,0 +1,14 @@
+{
+  "type": "jaymospowers:light_armour_crafting",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:leather_helmet",
+    "minecraft:iron_nugget",
+    "minecraft:iron_nugget",
+    "minecraft:iron_nugget",
+    "#jaymospowers:hammers"
+  ],
+  "result": {
+    "id": "jaymospowers:studded_cap"
+  }
+}

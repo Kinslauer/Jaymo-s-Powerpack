@@ -83,7 +83,7 @@ final class JournalScreen extends Screen {
 			if (sp == picked || hover) {
 				graphics.fill(lx, ry, lx + LIST_W, ry + ROW_H, sp == picked ? UiStyle.ROW_PICKED : UiStyle.ROW_HOVER);
 			}
-			Component name = e.caught() > 0 ? Component.translatable(sp.nameKey()) : Component.literal("? ? ?");
+			Component name = e.caught() > 0 ? Component.translatable(sp.nameKey()) : Component.literal(log.notes().contains(sp.id) ? "? ? ? *" : "? ? ?");
 			UiStyle.line(graphics, font, name, lx + 2, ry + 1, LIST_W - 40, e.caught() > 0 ? UiStyle.TEXT : UiStyle.HINT);
 			if (e.caught() > 0) {
 				UiStyle.lineRight(graphics, font, Component.literal(String.format(Locale.ROOT, "%.1f kg", e.best())), lx + LIST_W - 2, ry + 1, 40,
@@ -100,7 +100,9 @@ final class JournalScreen extends Screen {
 		} else {
 			FishLog.Entry e = log.entry(picked);
 			if (e.caught() <= 0) {
-				UiStyle.wrapped(graphics, font, Component.translatable("gui.jaymospowers.journal.unknown"), px, py, pw, 6, UiStyle.LINE, UiStyle.DIM, false);
+				py += UiStyle.wrapped(graphics, font, Component.translatable("gui.jaymospowers.journal.unknown"), px, py, pw, 6, UiStyle.LINE, UiStyle.DIM, false)
+					* UiStyle.LINE + 3;
+				hint(graphics, log, px, py, pw);
 			} else {
 				UiStyle.line(graphics, font, Component.translatable(picked.nameKey()), px, py, pw, ACCENT);
 				py += 12;
@@ -117,6 +119,7 @@ final class JournalScreen extends Screen {
 				}
 				py = page(graphics, Component.translatable("gui.jaymospowers.journal.hours",
 					Component.translatable("gui.jaymospowers.journal.quarter." + QUARTERS[most])), px, py, pw);
+				hint(graphics, log, px, py, pw);
 			}
 		}
 		// legends and contests
@@ -127,6 +130,13 @@ final class JournalScreen extends Screen {
 		UiStyle.line(graphics, font, legends, x + PAD, fy, W - 2 * PAD, UiStyle.DIM);
 		UiStyle.line(graphics, font, Component.translatable("gui.jaymospowers.journal.contests", log.contests(), log.won()), x + PAD, fy + 10,
 			W - 2 * PAD, UiStyle.DIM);
+	}
+
+	/** The picked kind's torn-note hint, if the angler has read one. */
+	private void hint(GuiGraphicsExtractor graphics, FishLog.Log log, int x, int y, int w) {
+		if (picked != null && log.notes().contains(picked.id)) {
+			UiStyle.wrapped(graphics, font, Component.translatable("gui.jaymospowers.journal.hint." + picked.id), x, y, w, 5, UiStyle.LINE, UiStyle.HINT, false);
+		}
 	}
 
 	private int page(GuiGraphicsExtractor graphics, Component text, int x, int y, int w) {

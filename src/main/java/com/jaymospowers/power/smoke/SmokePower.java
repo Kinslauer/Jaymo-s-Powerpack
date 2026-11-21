@@ -27,6 +27,7 @@ import org.jspecify.annotations.Nullable;
  * <li>V, Smoke Bomb ({@link SmokeBomb}): a thrown ball that bursts into a cloud.</li>
  * <li>B (hold), Smother ({@link SmokeSmother}): smoke wraps whoever you aim at; they're blinded, slowed and choke.</li>
  * <li>X (hold), Smoke Jet ({@link SmokeJet}): a jet of smoke where you look; it fills a ship's sails.</li>
+ * <li>Sneak + B, Banish ({@link SmokeBanish}): a creature you aim at is wrapped in smoke and gone for ten seconds; hitting the smoke brings it back sooner.</li>
  * <li>Sneak + X, Smoke Step ({@link SmokeStep}): re-form inside one of your clouds under the crosshair.</li>
  * <li>Z, Smoke Sight ({@link SmokeSight}): creatures in smoke are outlined through walls.</li>
  * <li>Fully mastered, Shift in Vapour Form turns the whole body to smoke ({@link SmokeVapour#WHOLLY}): intangible.</li>
@@ -78,6 +79,7 @@ public final class SmokePower implements Power {
 		SmokeJet.init();
 		SmokePyroclasm.init();
 		SmokeCloudshaper.init();
+		SmokeBanish.init();
 		SmokeParticles.init();
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> forget(handler.player));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
@@ -193,8 +195,23 @@ public final class SmokePower implements Power {
 		return true;
 	}
 
+	/** C answers Smoke's own ultimate, and from the master rank the Airless Dome. */
+	@Override
+	public boolean ultimateAnswers(net.minecraft.world.entity.player.Player player) {
+		return com.jaymospowers.core.Fate.isAscended(player) || com.jaymospowers.core.Fate.isCorrupted(player)
+			|| com.jaymospowers.power.wind.AirlessDome.unlocked(player);
+	}
+
 	@Override
 	public void onUltimate(ServerPlayer player, boolean down) {
+		// (Awakening pick) the Airless Dome, as Wind's: C before Smoke has a C of its own, sprint + C after
+		boolean own = com.jaymospowers.core.Fate.isAscended(player) || com.jaymospowers.core.Fate.isCorrupted(player);
+		if ((!own || player.isSprinting()) && com.jaymospowers.power.wind.AirlessDome.unlocked(player)) {
+			if (down) {
+				com.jaymospowers.power.wind.AirlessDome.cast(player, COLOR);
+			}
+			return;
+		}
 		if (com.jaymospowers.core.Fate.isCorrupted(player) && !com.jaymospowers.core.Fate.isAscended(player)) {
 			SmokePyroclasm.key(player, down);
 		} else {
@@ -226,6 +243,13 @@ public final class SmokePower implements Power {
 				}
 			}
 			case ABILITY_4 -> {
+				if (player.isShiftKeyDown() && !SmokeSmother.holding(player)) {
+					// sneak + B: Banish, a foe wrapped in smoke and gone a while (SmokeBanish)
+					if (down) {
+						SmokeBanish.cast(player);
+					}
+					return;
+				}
 				if (down && ready(player, SmokeState.SMOTHER)) {
 					SmokeSmother.start(player);
 				} else if (!down) {

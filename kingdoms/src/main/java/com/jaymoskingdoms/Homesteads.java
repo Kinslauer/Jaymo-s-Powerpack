@@ -128,6 +128,23 @@ public final class Homesteads {
 		return null;
 	}
 
+	/** A realm's grant ({@link EstateCharters}): {@code player}'s homestead is the patch round {@code at}, if it overlaps no one else's. */
+	static boolean grant(ServerPlayer player, ServerLevel level, BlockPos at) {
+		String me = player.getUUID().toString();
+		for (var e : all(level).entrySet()) {
+			BlockPos other = e.getValue();
+			if (!e.getKey().equals(me) && Math.abs(other.getX() - at.getX()) <= 2 * RADIUS && Math.abs(other.getZ() - at.getZ()) <= 2 * RADIUS
+				&& Math.abs(other.getY() - at.getY()) <= 2 * HEIGHT) {
+				return false;
+			}
+		}
+		ServerLevel world = Factions.level(level.getServer());
+		Map<String, BlockPos> all = new HashMap<>(all(world));
+		all.put(me, at.immutable());
+		world.setAttached(HOMESTEADS, all);
+		return true;
+	}
+
 	// ---- pitching -----------------------------------------------------------------------------------------------
 
 	/** The tent: used on the middle of a laid 3 x 3 foundation of your own blocks, it pitches there and claims the patch. */

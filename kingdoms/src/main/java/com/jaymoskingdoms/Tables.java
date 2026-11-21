@@ -24,6 +24,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.level.block.state.BlockState;
@@ -75,6 +76,8 @@ public final class Tables {
 	static final class Seat {
 		@Nullable UUID player;
 		String name;
+		/** The house's villager (a player's seat is known by {@link #player}). */
+		@Nullable UUID villager;
 		final List<Integer> cards = new ArrayList<>();
 		int status = WAITING;
 		boolean armed, ante;
@@ -99,6 +102,13 @@ public final class Tables {
 		boolean houseIn;
 		List<Integer> deck = new ArrayList<>();
 		Component note = Component.empty();
+		/**
+		 * The seat {@link #note} names (whose turn it is, who won, who was caught) and the note with another name in its
+		 * place, so each player reads it with the names they know ({@link #seen}); only while {@link #named} is the note.
+		 */
+		@Nullable Seat noteSeat;
+		@Nullable Component named;
+		java.util.function.@Nullable Function<String, Component> renamed;
 
 		Table(ServerLevel level, BlockPos pos) {
 			this.level = level;
@@ -265,6 +275,7 @@ public final class Tables {
 
 	private static Seat house(Table t, Villager v) {
 		Seat s = t.house != null && t.house.name.equals(v.getName().getString()) ? t.house : new Seat(null, v.getName().getString());
+		s.villager = v.getUUID();
 		return s;
 	}
 
@@ -501,7 +512,7 @@ public final class Tables {
 			Sparks.act(p, Sparks.Act.CHEATED, true);
 			p.sendOverlayMessage(Component.translatable("table.jaymoskingdoms.you_caught"));
 		}
-		t.note = Component.translatable("table.jaymoskingdoms.caught_note", cheater.name);
+		note(t, cheater, name -> Component.translatable("table.jaymoskingdoms.caught_note", name));
 	}
 
 	// ---- dice -------------------------------------------------------------------------------------------------------
@@ -639,7 +650,7 @@ public final class Tables {
 				s.status = TURN;
 				t.turn = next;
 				t.deadline = t.level.getGameTime() + TURN_TICKS;
-				t.note = Component.translatable("table.jaymoskingdoms.turn", s.name);
+				note(t, s, name -> Component.translatable("table.jaymoskingdoms.turn", name));
 				broadcast(t);
 				return;
 			}
@@ -715,7 +726,8 @@ public final class Tables {
 					s.status = LOST;
 				}
 			}
-			t.note = Component.translatable(winners.size() > 1 ? "table.jaymoskingdoms.tie" : "table.jaymoskingdoms.winner", winners.getFirst().name, share);
+			String won = winners.size() > 1 ? "table.jaymoskingdoms.tie" : "table.jaymoskingdoms.winner";
+			note(t, winners.getFirst(), name -> Component.translatable(won, name, share));
 		}
 		t.phase = RESULT;
 		if (t.houseId != null && houseVillager(t) != null && houseVillager(t).entityTags().contains(Underworld.DICER_TAG)) {
@@ -809,17 +821,43 @@ public final class Tables {
 		List<Entry> entries = new ArrayList<>();
 		boolean reveal = t.phase == RESULT;
 		for (Seat s : t.seats) {
-			entries.add(entry(t, s, s == mine, false, reveal));
+			entries.add(entry(t, s, p, s == mine, false, reveal));
 		}
 		if (t.house != null && (t.houseIn || t.phase == IDLE)) {
-			entries.add(entry(t, t.house, false, true, reveal || t.phase == IDLE));
+			entries.add(entry(t, t.house, p, false, true, reveal || t.phase == IDLE));
 		}
 		boolean canDeal = t.phase == IDLE && (t.seats.size() > 1 || t.house != null);
 		boolean yourTurn = mine != null && t.phase == PLAY && t.game == Game.CARDS && myTurn(t, mine);
-		ServerPlayNetworking.send(p, new State(closed, t.game.ordinal(), t.phase, t.stake, t.pot, canDeal, yourTurn, t.note, entries));
+		Component note = t.noteSeat != null && t.renamed != null && t.note == t.named ? t.renamed.apply(seen(t, t.noteSeat, p)) : t.note;
+		ServerPlayNetworking.send(p, new State(closed, t.game.ordinal(), t.phase, t.stake, t.pot, canDeal, yourTurn, note, entries));
 	}
 
-	private static Entry entry(Table t, Seat s, boolean you, boolean house, boolean reveal) {
+	/** The table's note names {@code s}: everyone reads it with the name they know them by ({@link #seen}). */
+	private static void note(Table t, Seat s, java.util.function.Function<String, Component> words) {
+		t.note = words.apply(s.name);
+		t.named = t.note;
+		t.noteSeat = s;
+		t.renamed = words;
+	}
+
+	/**
+	 * (2026-11-20) Andy: "every humanoid that speaks should have to be introduced". What {@code viewer} sees {@code s}
+	 * called at the table: their name once introduced ({@link Introductions#knows}), else what they are ("Villager", a
+	 * stranger).
+	 */
+	private static String seen(Table t, Seat s, ServerPlayer viewer) {
+		UUID who = s.player != null ? s.player : s.villager;
+		if (who == null || Introductions.knowsId(viewer, who)) {
+			return s.name;
+		}
+		Entity e = t.level.getEntity(who);
+		if (e != null) {
+			return Introductions.knows(viewer, e) || e.getAttached(ZFighterFolk.PART) != null ? s.name : Introductions.called(viewer, e).getString();
+		}
+		return (s.player != null ? Introductions.stranger() : Component.translatable("entity.minecraft.villager")).getString();
+	}
+
+	private static Entry entry(Table t, Seat s, ServerPlayer viewer, boolean you, boolean house, boolean reveal) {
 		List<Integer> cards = new ArrayList<>();
 		for (int i = 0; i < s.cards.size(); i++) {
 			// (in play, another hand's cards are face down but for the house's second card at twenty-one, and one's own)
@@ -830,6 +868,6 @@ public final class Tables {
 		if (you || reveal) {
 			total = t.game == Game.DICE ? (s.cards.size() == 2 ? s.cards.get(0) + s.cards.get(1) : -1) : total(s.cards);
 		}
-		return new Entry(s.name, you, house, cards, total, s.status, you && s.armed);
+		return new Entry(you ? s.name : seen(t, s, viewer), you, house, cards, total, s.status, you && s.armed);
 	}
 }

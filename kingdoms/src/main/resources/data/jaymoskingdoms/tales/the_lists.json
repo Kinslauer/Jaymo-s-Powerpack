@@ -1,0 +1,955 @@
+{
+  "title": "The Lists",
+  "start": {
+    "by": "notice",
+    "jobs": [
+      "armorer",
+      "weaponsmith",
+      "toolsmith",
+      "leatherworker",
+      "none"
+    ],
+    "weight": 2,
+    "notice": {
+      "title": "A strong arm wanted",
+      "lines": [
+        "Wanted for one afternoon at the fair: a strong arm, steady feet and a shut mouth.",
+        "Harness found. Fair pay to stand, and more to win.",
+        "Ask the one who nailed this up, and ask quietly."
+      ],
+      "hand": "a careful, schooled hand, blotted where the writer hurried"
+    }
+  },
+  "roll": {
+    "state": [
+      "drunk",
+      "hurt"
+    ],
+    "hand": [
+      "rival",
+      "groom"
+    ]
+  },
+  "cast": {
+    "knight": {
+      "name": [
+        "Sir Oswin Hale",
+        "Sir Garrick Hale",
+        "Sir Aldous Hale"
+      ],
+      "body": "villager",
+      "job": "armorer",
+      "female": false,
+      "at": "tent"
+    },
+    "groom": {
+      "name": [
+        "Dunstan Pike",
+        "Hob Pike",
+        "Perrin Pike"
+      ],
+      "body": "villager",
+      "job": "none",
+      "female": false,
+      "at": "tent"
+    },
+    "marshal": {
+      "name": [
+        "Odo Tarrant",
+        "Hugh Tarrant",
+        "Reynold Tarrant"
+      ],
+      "body": "villager",
+      "job": "cartographer",
+      "female": false,
+      "at": "lists",
+      "hours": "day"
+    },
+    "rival": {
+      "name": [
+        "Sir Brandt Colley",
+        "Sir Ivo Colley",
+        "Sir Merrick Colley"
+      ],
+      "body": "fighter",
+      "female": false,
+      "at": "lists",
+      "if": "!mark:lists_rival_struck",
+      "hours": "day",
+      "health": 85,
+      "damage": 8,
+      "armor": 10,
+      "hand": "minecraft:wooden_sword",
+      "head": "minecraft:iron_helmet",
+      "chest": "minecraft:iron_chestplate"
+    },
+    "first": {
+      "name": [
+        "Jack Fenner",
+        "Tom Barrow",
+        "Wat Stile"
+      ],
+      "body": "fighter",
+      "female": false,
+      "at": "lists",
+      "late": true,
+      "health": 45,
+      "damage": 5,
+      "armor": 6,
+      "hand": "minecraft:wooden_sword",
+      "chest": "minecraft:chainmail_chestplate"
+    },
+    "second": {
+      "name": [
+        "Hamo Rudd",
+        "Giles Rudd",
+        "Piers Rudd"
+      ],
+      "body": "fighter",
+      "female": false,
+      "at": "lists",
+      "late": true,
+      "health": 65,
+      "damage": 6,
+      "armor": 8,
+      "hand": "minecraft:wooden_axe",
+      "chest": "minecraft:chainmail_chestplate"
+    },
+    "bookie": {
+      "name": [
+        "Nan Pettle",
+        "Sly Pettle",
+        "Coll Pettle"
+      ],
+      "body": "villager",
+      "job": "none",
+      "at": "den",
+      "hours": "night"
+    },
+    "heavy": {
+      "name": "the bookie's man",
+      "body": "fighter",
+      "female": false,
+      "at": "den",
+      "late": true,
+      "health": 70,
+      "damage": 7,
+      "armor": 6,
+      "hand": "minecraft:iron_axe",
+      "men": 1
+    }
+  },
+  "places": {
+    "tent": {
+      "at": "near",
+      "from": "home",
+      "dist": [
+        30,
+        60
+      ],
+      "name": "Hale's pavilion"
+    },
+    "lists": {
+      "at": "near",
+      "from": "home",
+      "dist": [
+        80,
+        130
+      ],
+      "name": "the lists on the fair meadow"
+    },
+    "den": {
+      "at": "near",
+      "from": "lists",
+      "dist": [
+        30,
+        55
+      ],
+      "name": "the hatch behind the horse lines"
+    }
+  },
+  "first": "ask",
+  "steps": {
+    "ask": {
+      "do": "talk",
+      "who": "giver",
+      "clock": {
+        "melee": [
+          3,
+          4
+        ]
+      },
+      "say": {
+        "?state=drunk": [
+          "You took it down. Good. Keep your voice low. I've told nobody else why it's up.",
+          "I'm squire to {knight}. The fair's melee is {in:melee}, and his name is on the roll, and he has borrowed against the prize to keep a roof on his hall. If he doesn't take the field he's finished, and so is every soul who eats at his table. I'm one of them.",
+          "He has been blind drunk two days and I can't get him sober enough to stand, never mind fight. I don't know where the wine keeps coming from. But with a helm shut, nobody on that meadow knows who is inside the harness, and you're near enough his build. Fight as him."
+        ],
+        "?": [
+          "You took it down. Good. Keep your voice low. I've told nobody else why it's up.",
+          "I'm squire to {knight}. The fair's melee is {in:melee}, and his name is on the roll, and he has borrowed against the prize to keep a roof on his hall. If he doesn't take the field he's finished, and so is every soul who eats at his table. I'm one of them.",
+          "His horse came over on him at practice and his sword arm is in a sling. A girth doesn't just part, whatever anyone says. But with a helm shut, nobody on that meadow knows who is inside the harness, and you're near enough his build. Fight as him."
+        ]
+      },
+      "replies": [
+        {
+          "say": "Show me the man whose name I'd be wearing.",
+          "then": "see_knight",
+          "journal": {
+            "?state=drunk": "{giver}, squire to {knight}, wants me to fight the fair's melee in the knight's harness with the helm shut. The knight is too drunk to stand, and has borrowed against the prize.",
+            "?": "{giver}, squire to {knight}, wants me to fight the fair's melee in the knight's harness with the helm shut. The knight's sword arm is in a sling, and he has borrowed against the prize."
+          }
+        },
+        {
+          "say": "If he can't stand, he can't stand. That's what lists are for.",
+          "then": "end:refused"
+        }
+      ]
+    },
+    "see_knight": {
+      "do": "talk",
+      "who": "knight",
+      "goal": "See {knight} at {place:tent}",
+      "give": [
+        {
+          "item": "minecraft:iron_helmet",
+          "count": 1,
+          "name": "A Tourney Helm",
+          "lore": [
+            "Old iron, well kept, the visor shut.",
+            "With this on, you are whoever the roll says you are."
+          ]
+        }
+      ],
+      "say": {
+        "?state=drunk": [
+          "Who's this? Another creditor. No. Too well fed for a creditor.",
+          "Eleven summers nobody put me on the ground. Eleven. And now I can't find the tent flap. Somebody keeps filling the skin, and I keep being thirsty, and that's all the mystery there is to it.",
+          "That's the helm you've got. It knows the work better than I do just now. Don't dent it. It was my father's."
+        ],
+        "?": [
+          "So you're the arm. Turn round. Hm. You'll pass, in a closed helm at forty paces.",
+          "I've ridden that saddle nine years and it never shifted a finger's width. The girth went like wet paper and the gelding came over on me like a wall. Don't talk to me about luck.",
+          "That's the helm you've got. Fight clean under it, because it's my name on the roll and not yours. Don't dent it. It was my father's."
+        ]
+      },
+      "journal": "{knight} has lent me his father's helm. On the meadow I am him.",
+      "then": "ready",
+      "within": "melee",
+      "late": "muster",
+      "until": "before the trumpet"
+    },
+    "ready": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Make ready for the melee with {giver}",
+      "say": {
+        "?mark:lists_exposed": "The whole meadow is talking about that hatch. You've made the lists honest, which is more than I asked of you. You've still to fight in them ({left:melee}).",
+        "?met:bookie": "So that's what the hatch wanted. I'll not ask what you answered. It's your skin inside the harness. The trumpet goes soon enough ({left:melee}).",
+        "?": [
+          "The melee is three bouts on foot with blunted steel, and a man yields or is put down. Anyone who kills in the lists is struck from the roll and whipped off the meadow, so mind your temper ({left:melee}).",
+          "There's one thing more. A fellow came by the pavilion at dusk asking for whoever is wearing Hale's helm this year. He said to come to {place:den} after dark, and to tell them nobody sent you. I don't like it. In your place I'd still hear it."
+        ]
+      },
+      "replies": [
+        {
+          "if": "!mark:lists_seen_tent",
+          "say": "I want to look over that pavilion first.",
+          "then": "search_tent"
+        },
+        {
+          "if": "!met:bookie",
+          "say": "I'll go and hear what the hatch has to say.",
+          "then": "den_go"
+        },
+        {
+          "if": "!mark:lists_exposed",
+          "say": "Somebody has fixed these lists. I'm going to the marshal.",
+          "then": "name_marshal"
+        },
+        {
+          "say": "I'm ready. Send for me on the day.",
+          "then": "wait_melee"
+        }
+      ],
+      "within": "melee",
+      "late": "muster",
+      "until": "before the trumpet"
+    },
+    "search_tent": {
+      "do": "search",
+      "at": "tent",
+      "need": 3,
+      "goal": "Look over {place:tent}",
+      "mark": "lists_seen_tent",
+      "clues": [
+        {
+          "if": "state=drunk",
+          "name": "A Wineskin",
+          "item": "minecraft:leather",
+          "mark": "lists_proof_tent",
+          "lore": [
+            "Good red, far better than a knight in debt could buy.",
+            "There is a bitter grit in the dregs. Poppy, by the smell of it."
+          ],
+          "journal": "The knight's wineskin is full of wine he could not afford, and it is dosed with poppy."
+        },
+        {
+          "if": "state=hurt",
+          "name": "A Girth Strap",
+          "item": "minecraft:lead",
+          "mark": "lists_proof_tent",
+          "lore": [
+            "Parted at the buckle.",
+            "Half the break is torn. The other half is cut clean, with a small sharp knife."
+          ],
+          "journal": "The knight's girth strap was cut half through with a knife before it tore."
+        },
+        {
+          "if": "hand=groom",
+          "name": "A Purse in the Straw",
+          "item": "minecraft:gold_nugget",
+          "mark": "lists_proof_groom",
+          "lore": [
+            "Tucked under the groom's own pallet.",
+            "More in it than a groom sees in two years, with a wager slip folded round the coin."
+          ],
+          "journal": "There is a fat purse under the groom's pallet, wrapped in a wager slip."
+        },
+        {
+          "if": "hand=rival",
+          "name": "A Riding Glove",
+          "item": "minecraft:rabbit_hide",
+          "mark": "lists_proof_rival",
+          "lore": [
+            "Dropped by the saddle rack. Far too fine for this pavilion.",
+            "The cuff is worked with a colt's head. That is the Colley badge."
+          ],
+          "journal": "A riding glove with the Colley badge on its cuff was lying by Hale's saddle rack."
+        },
+        {
+          "name": "The Roll of the Lists",
+          "item": "minecraft:paper",
+          "lore": [
+            "A copy of the melee's order, in the squire's hand.",
+            "Hale meets Colley in the last bout, if both come through."
+          ],
+          "journal": "The roll puts Hale against Colley in the last bout."
+        }
+      ],
+      "then": "ready",
+      "within": "melee",
+      "late": "muster",
+      "until": "before the trumpet"
+    },
+    "den_go": {
+      "do": "go",
+      "to": "den",
+      "when": "night",
+      "radius": 10,
+      "goal": "Find {place:den} after dark",
+      "journal": "There is a hatch in the grass behind the horse lines, and a lamp under it.",
+      "then": "den",
+      "within": "melee",
+      "late": "muster",
+      "until": "before the trumpet"
+    },
+    "den": {
+      "do": "talk",
+      "who": "bookie",
+      "when": "night",
+      "goal": "Hear the bookie under the horse lines",
+      "not_now": "Not by daylight. Go away.",
+      "say": {
+        "?mark:lists_den_heard": "Well? I've a book to keep, and it doesn't keep itself.",
+        "?": [
+          "Nobody sent you. Good. Sit where I can see the helm. It's a handsome helm. A lot of people's money is sitting on it.",
+          "Here is the whole of it, since you're a stranger and you'll be gone by the next fair. Colley wins the melee. That's arranged and paid for, and half the meadow has wagered accordingly, through me. Hale was meant not to turn up at all. Now I hear there's a body in his harness after all.",
+          "So you may as well earn by it. Come through your first two bouts however you like. It makes the last one look honest. Then go down to Colley in the third exchange, and stay down. {coins:20} for it, half now. What do you say?"
+        ]
+      },
+      "voices": {
+        "honour": "It's another man's name you'd be lying down in. He lent you his father's helm.",
+        "gain": "Half now, and you need not even bruise. I've heard worse offers from honest people.",
+        "law": "Every wager on that meadow is a theft if this stands. Somebody ought to hear of it."
+      },
+      "replies": [
+        {
+          "if": "!mark:lists_took_purse",
+          "say": "Done. The third exchange.",
+          "then": "purse_half",
+          "mark": "lists_took_purse",
+          "for": [
+            "gain"
+          ],
+          "irks": [
+            "honour",
+            "law"
+          ],
+          "journal": "I took the bookie's coin to go down to Colley in the third exchange of the last bout."
+        },
+        {
+          "say": "I'll throw you for a look at that book. {price} on one cast.",
+          "then": "book_won",
+          "mark": "lists_den_heard",
+          "try": {
+            "how": "dice",
+            "coins": 8,
+            "fail": "den_lost",
+            "refuse": "Hard luck. The book stays shut. That's what it's for."
+          }
+        },
+        {
+          "say": "Tell me who put Hale out of the lists, or the marshal hears about this hatch tonight.",
+          "then": "den_told",
+          "mark": "lists_den_heard",
+          "try": {
+            "how": "threaten",
+            "helps": [
+              "mark:lists_seen_tent"
+            ],
+            "fail": "den_scorn",
+            "refuse": "Tell him what? That a stranger in a borrowed helm heard a rumour down a hole? Sit down before you hurt yourself."
+          }
+        },
+        {
+          "say": "No. I fight to win.",
+          "then": "den_no",
+          "for": [
+            "honour"
+          ],
+          "irks": [
+            "gain"
+          ]
+        }
+      ],
+      "within": "melee",
+      "late": "muster",
+      "until": "before the trumpet"
+    },
+    "purse_half": {
+      "do": "talk",
+      "who": "bookie",
+      "when": "night",
+      "mark": "lists_proof_offer",
+      "pay": 10,
+      "say": "Half. Count it outside. The rest is here the night after, if Colley is on his feet and you are not. And if you take my coin and then forget yourself out there, I've a man who'll remind you. He isn't fast, but he's thorough.",
+      "then": "ready",
+      "within": "melee",
+      "late": "muster",
+      "until": "before the trumpet"
+    },
+    "den_no": {
+      "do": "talk",
+      "who": "bookie",
+      "when": "night",
+      "mark": "lists_proof_offer",
+      "say": "Then we never spoke, and you've a hard afternoon coming. Colley has had the best of everything this month, and nobody has told him to go easy. Mind your head on the hatch.",
+      "journal": "The bookie under the horse lines has fixed the melee for Colley, and offered me coin to fall. I refused it.",
+      "then": "ready",
+      "within": "melee",
+      "late": "muster",
+      "until": "before the trumpet"
+    },
+    "book_won": {
+      "do": "talk",
+      "who": "bookie",
+      "when": "night",
+      "mark": "lists_proof_book",
+      "say": {
+        "?hand=rival": "Well. They do fall that way, one time in a few. A cast is a cast. One look, and the book stays on the table. There. 'To Sir {rival}, for a certainty in the melee, and for seeing to Hale beforehand.' He wanted it certain. Gentlemen always do.",
+        "?": "Well. They do fall that way, one time in a few. A cast is a cast. One look, and the book stays on the table. There. 'To {groom}, groom to Hale, for seeing that his master does not take the field.' Cheap, too. A man's own stable always is."
+      },
+      "journal": {
+        "?hand=rival": "I won a look at the bookie's book at dice. It shows a payment to {rival} for a certain win, and for seeing to Hale beforehand.",
+        "?": "I won a look at the bookie's book at dice. It shows a payment to {groom}, Hale's own groom, for keeping his master off the field."
+      },
+      "then": "den",
+      "within": "melee",
+      "late": "muster",
+      "until": "before the trumpet"
+    },
+    "den_lost": {
+      "do": "talk",
+      "who": "bookie",
+      "when": "night",
+      "mark": "lists_den_heard",
+      "say": "That's mine, then. Don't look so sour. You'd have done the same to me. Now, where were we? You were about to be sensible.",
+      "then": "den",
+      "within": "melee",
+      "late": "muster",
+      "until": "before the trumpet"
+    },
+    "den_told": {
+      "do": "talk",
+      "who": "bookie",
+      "when": "night",
+      "mark": "lists_proof_told",
+      "say": {
+        "?hand=rival": "All right. All right. Sit down. It was Colley himself. He wanted it certain, so he saw to Hale with his own hands and paid me to make the rest tidy. Much good the knowing will do you. He is a knight of the roll and you are nobody in a borrowed hat.",
+        "?": "All right. All right. Sit down. It was Hale's own groom. {groom}. I gave him a purse and he saw to it that his master wouldn't take the field. Much good the knowing will do you. Who takes a stranger's word against a man's own household?"
+      },
+      "journal": {
+        "?hand=rival": "The bookie says it was {rival} himself who put Hale out of the melee.",
+        "?": "The bookie says it was {groom}, Hale's own groom, who put his master out of the melee."
+      },
+      "then": "den",
+      "within": "melee",
+      "late": "muster",
+      "until": "before the trumpet"
+    },
+    "den_scorn": {
+      "do": "talk",
+      "who": "bookie",
+      "when": "night",
+      "mark": "lists_den_heard",
+      "say": "There, now. You've had your shout. I'll forget it, because I'm in a forgiving humour and you're wearing my money. The offer stands as it stood.",
+      "then": "den",
+      "within": "melee",
+      "late": "muster",
+      "until": "before the trumpet"
+    },
+    "name_marshal": {
+      "do": "name",
+      "who": "marshal",
+      "when": "day",
+      "goal": "Tell the marshal of the lists who fixed them",
+      "not_now": "The marshal hears nothing after dark. Come to the lists rope by daylight.",
+      "say": "I hear complaints until the trumpet and not after. Be quick, and be sure. A false word against a name on my roll is paid for on this meadow, in front of everybody. Who?",
+      "suspects": [
+        {
+          "who": "bookie",
+          "say": "The one who keeps a book under your horse lines. {bookie}.",
+          "proof": [
+            "mark:lists_proof_book",
+            "mark:lists_proof_tent",
+            "mark:lists_proof_offer",
+            "mark:lists_proof_told"
+          ],
+          "need": 2,
+          "then": "marshal_bookie",
+          "doubted": "marshal_doubt",
+          "journal": "I named the bookie {bookie} to the marshal of the lists."
+        },
+        {
+          "who": "rival",
+          "say": "{rival}. He paid for the melee and saw to Hale himself.",
+          "proof": [
+            "mark:lists_proof_rival",
+            "mark:lists_proof_book & hand=rival",
+            "mark:lists_proof_told & hand=rival"
+          ],
+          "need": 2,
+          "then": "marshal_rival",
+          "doubted": "marshal_doubt",
+          "journal": "I named {rival} to the marshal of the lists."
+        },
+        {
+          "who": "groom",
+          "say": "{groom}, Hale's own groom. He was paid to keep his master off the field.",
+          "proof": [
+            "mark:lists_proof_groom",
+            "mark:lists_proof_book & hand=groom",
+            "mark:lists_proof_told & hand=groom"
+          ],
+          "need": 2,
+          "then": "marshal_groom",
+          "doubted": "marshal_doubt",
+          "journal": "I named the groom {groom} to the marshal of the lists."
+        }
+      ],
+      "none": {
+        "say": "I can't say yet.",
+        "then": "ready"
+      },
+      "within": "melee",
+      "late": "muster",
+      "until": "before the trumpet"
+    },
+    "marshal_bookie": {
+      "do": "talk",
+      "who": "marshal",
+      "when": "day",
+      "mark": "lists_exposed",
+      "say": [
+        "Under my own horse lines. Three fairs I've wondered why the same names win when the weather turns.",
+        "I'll have that hatch dug out before noon and the book read aloud from the rope. Every wager made through it is void. As for Hale, his name is on my roll, and a shut helm is a shut helm. I haven't seen who is in it and I don't mean to look. Fight your bouts."
+      ],
+      "journal": "The marshal believed me. The bookie's hatch is to be dug out and the book read aloud. Every wager through it is void.",
+      "then": "ready",
+      "within": "melee",
+      "late": "muster",
+      "until": "before the trumpet"
+    },
+    "marshal_rival": {
+      "do": "talk",
+      "who": "marshal",
+      "when": "day",
+      "mark": "lists_rival_struck",
+      "say": [
+        "A knight of the roll, with his own hand in another man's harness. And his badge on the glove to prove it.",
+        "Colley is struck from my lists and whipped off the meadow like any other cheat, and his harness is forfeit to the man he wronged. The last bout falls to Hale unfought, if Hale comes through the first two."
+      ],
+      "journal": "The marshal believed me. {rival} is struck from the roll, and his harness is forfeit to Hale.",
+      "then": "marshal_after",
+      "within": "melee",
+      "late": "muster",
+      "until": "before the trumpet"
+    },
+    "marshal_groom": {
+      "do": "talk",
+      "who": "marshal",
+      "when": "day",
+      "mark": "lists_groom_taken",
+      "say": [
+        "His own groom. There's nothing lower on a meadow than that, and I have seen most of what there is.",
+        "My men will have him out of that pavilion before he has finished his dinner. He can tell the reeve whose purse it was."
+      ],
+      "journal": "The marshal believed me. {groom} is to be taken, and made to say whose purse he was given.",
+      "then": "marshal_after",
+      "within": "melee",
+      "late": "muster",
+      "until": "before the trumpet"
+    },
+    "marshal_after": {
+      "do": "talk",
+      "who": "marshal",
+      "when": "day",
+      "mark": "lists_exposed",
+      "say": "As for the hatch he was paid from, I'll have it dug out before noon and every wager through it called void. And Hale's name is on my roll, and a shut helm is a shut helm. I haven't seen who is in it. Fight your bouts.",
+      "then": "ready",
+      "within": "melee",
+      "late": "muster",
+      "until": "before the trumpet"
+    },
+    "marshal_doubt": {
+      "do": "talk",
+      "who": "marshal",
+      "when": "day",
+      "say": [
+        "{named}. And what do you bring me for it? A feeling. I told you to be sure.",
+        "I'll strike no name on a stranger's say. But I know that helm, and I know Hale's build, and you are not it. Take it off. I thought as much. Hale is scratched from the melee for sending another man out under his name. Get off my meadow."
+      ],
+      "journal": "The marshal would not believe me without proof. He had the helm off me, and has scratched Hale from the melee.",
+      "then": "end:slander",
+      "within": "melee",
+      "late": "muster",
+      "until": "before the trumpet"
+    },
+    "wait_melee": {
+      "do": "wait",
+      "days": [
+        9,
+        9
+      ],
+      "wake": "giver",
+      "journal": "I told {giver} to send for me on the day of the melee.",
+      "then": "muster",
+      "within": "melee",
+      "late": "muster",
+      "until": "before the trumpet"
+    },
+    "muster": {
+      "do": "talk",
+      "who": "giver",
+      "goal": "Go to {giver}: the melee is today",
+      "say": "It's today. The trumpet has gone once already. Get to {place:lists} with the visor down. Say nothing to anybody, and if anyone calls you Sir, nod.",
+      "journal": "The day of the melee. I am to fight three bouts on foot as {knight}, with blunted steel.",
+      "then": "bout1",
+      "within": 1,
+      "late": "end:forfeit",
+      "until": "before the lists close"
+    },
+    "bout1": {
+      "do": "foe",
+      "who": "first",
+      "when": "day",
+      "goal": "First bout: make {first} yield",
+      "taunt": "Hale! They said you were past it. Let's see what's left.",
+      "plea": "Enough! I yield. Past it, they said. I'll have a word with whoever said it.",
+      "mercy": "Yielded. Get up, and off the grass.",
+      "thanks": "Fairly done. I'll drink your health tonight, if I can lift the cup.",
+      "yield_at": 0.4,
+      "slain": "killed",
+      "spared": "bout2",
+      "within": 1,
+      "late": "end:forfeit",
+      "until": "before the lists close"
+    },
+    "bout2": {
+      "do": "foe",
+      "who": "second",
+      "when": "day",
+      "goal": "Second bout: make {second} yield",
+      "taunt": "I've a week's wages on Colley, old man. Nothing against you.",
+      "plea": "Hold! That's my shoulder gone. I yield, I yield.",
+      "mercy": "Yielded. Go and get that seen to.",
+      "thanks": "You hit like a younger man, Hale. I'll say so to anyone who asks.",
+      "yield_at": 0.4,
+      "slain": "killed",
+      "spared": {
+        "?mark:lists_rival_struck": "end:exposed",
+        "?": "final_gate"
+      },
+      "within": 1,
+      "late": "end:forfeit",
+      "until": "before the lists close"
+    },
+    "final_gate": {
+      "do": "talk",
+      "who": "marshal",
+      "when": "day",
+      "goal": "Answer the marshal at the rope",
+      "say": "Last bout. Hale and Colley, on foot, blunted steel. A man yields or is put down, and whoever kills is struck from my roll. Hale. Are you fit?",
+      "replies": [
+        {
+          "if": "mark:lists_took_purse & !mark:lists_exposed",
+          "say": "Fit. And I remember what I was paid for.",
+          "then": "end:threw",
+          "for": [
+            "gain"
+          ],
+          "irks": [
+            "honour",
+            "courage"
+          ]
+        },
+        {
+          "if": "mark:lists_took_purse",
+          "say": "Fit. And the hatch can whistle for its fall.",
+          "then": "final",
+          "for": [
+            "honour",
+            "courage"
+          ]
+        },
+        {
+          "say": "Fit.",
+          "then": "final"
+        }
+      ],
+      "within": 1,
+      "late": "end:forfeit",
+      "until": "before the lists close"
+    },
+    "final": {
+      "do": "foe",
+      "who": "rival",
+      "when": "day",
+      "goal": "Last bout: make {rival} yield",
+      "taunt": {
+        "?hand=rival": "Hale. On your feet after all. I'd heard you were indisposed.",
+        "?": "Hale. They told me this would be an easy afternoon. Let's have it over."
+      },
+      "plea": "Yield! I yield. Whoever you are under that, you are not Hale. He never hit like that in his life.",
+      "mercy": "Yielded. The marshal saw it.",
+      "thanks": "I'll not ask whose face is under the visor. I don't believe I want to know.",
+      "yield_at": 0.35,
+      "slain": "killed",
+      "spared": {
+        "?mark:lists_exposed": "end:exposed",
+        "?mark:lists_took_purse": "end:crossed",
+        "?": "end:won"
+      },
+      "within": 1,
+      "late": "end:forfeit",
+      "until": "before the lists close"
+    },
+    "killed": {
+      "do": "talk",
+      "who": "marshal",
+      "when": "day",
+      "goal": "Answer to the marshal",
+      "say": [
+        "Stop the bout! Stand off him. That man is dead, in a blunted melee, under my rope.",
+        "Take the helm off. So. Not Hale either. Hale is struck from the roll for the death and for the lie both, and you are whipped off this meadow. Be thankful it's only that."
+      ],
+      "then": "end:disgraced"
+    }
+  },
+  "endings": {
+    "refused": {
+      "text": "I put the notice back on its nail. If a knight cannot stand, he cannot stand."
+    },
+    "won": {
+      "text": "I fought the fair's melee in {knight}'s harness and took all three bouts with the helm shut. Colley yielded in front of the whole meadow. The prize is Hale's, and so is his roof.",
+      "reward": {
+        "coins": 16,
+        "hearts": 25,
+        "reputation": 8
+      },
+      "marks": [
+        "lists_won"
+      ],
+      "town": [
+        "Did you see Hale in the melee? Eleven summers he's been at it and I never saw him move like that. Like a different man.",
+        "Somebody lost a great deal of money on Colley. There was a face like thunder behind the horse lines all evening."
+      ],
+      "later": [
+        {
+          "days": [
+            10,
+            18
+          ],
+          "letter": {
+            "from": "{knight}",
+            "lines": [
+              "The prize has paid what I owed, and the hall has a roof for another winter.",
+              "I am told I fought the best melee of my life, and that I did it on a day when I could not have lifted a sword. I have decided not to argue with either.",
+              "The helm is back on its peg. There is a new dent in it. I find I do not mind."
+            ]
+          }
+        }
+      ]
+    },
+    "crossed": {
+      "text": "I took the bookie's coin to fall in the third exchange, and then I put Colley on the grass instead. The prize is Hale's. Half the meadow lost its wagers through the hatch, and the hatch knows whose fault that is.",
+      "reward": {
+        "coins": 16,
+        "hearts": 20,
+        "reputation": 4
+      },
+      "marks": [
+        "lists_won",
+        "lists_crossed"
+      ],
+      "town": [
+        "Did you see Hale in the melee? Eleven summers he's been at it and I never saw him move like that. Like a different man.",
+        "They say the book under the horse lines paid out nothing at all this fair. Somebody will answer for that. They always do."
+      ],
+      "returns": {
+        "who": "heavy",
+        "days": [
+          3,
+          6
+        ],
+        "as": "revenge",
+        "say": "You'll be the one from the melee. Pettle says you took half and forgot the rest of the bargain. I'm the reminder."
+      }
+    },
+    "threw": {
+      "text": "I went down to Colley in the third exchange and stayed down, as I was paid to. Colley has the prize. {knight} has a beaten name and his debts, and I have the bookie's purse.",
+      "reward": {
+        "coins": 10,
+        "hearts": -25,
+        "reputation": -6
+      },
+      "marks": [
+        "lists_threw"
+      ],
+      "town": [
+        "Hale went down in the last bout like a sack of meal. Third exchange. I had money on him, more fool me.",
+        "They are saying Hale's hall is to be sold. Eleven summers in the lists, and it ends face down on the fair meadow."
+      ],
+      "later": [
+        {
+          "days": [
+            10,
+            18
+          ],
+          "scene": [
+            [
+              "a",
+              "Hale's squire was asking after work at the forge. Hale's had to let the whole household go."
+            ],
+            [
+              "b",
+              "After one bad melee?"
+            ],
+            [
+              "a",
+              "He'd borrowed against the prize. And the squire says it wasn't even Hale in the harness. Says the one who was took a fall for money."
+            ],
+            [
+              "b",
+              "Then I hope it was a great deal of money."
+            ]
+          ]
+        }
+      ]
+    },
+    "exposed": {
+      "text": {
+        "?mark:lists_rival_struck": "I showed the marshal that {rival} had fixed the melee and seen to Hale with his own hand. Colley was whipped off the meadow, the bookie's hatch was dug out, and the last bout fell to Hale unfought. I won the two that were left under his helm.",
+        "?mark:lists_groom_taken": "I showed the marshal that Hale's own groom was paid to keep him off the field. The groom was taken, the bookie's hatch was dug out, and every wager through it was called void. Then I won the melee under Hale's helm, and this time it was an honest one.",
+        "?": "I showed the marshal the book kept under his horse lines. The hatch was dug out and every wager through it was called void. Then I won the melee under Hale's helm, and this time it was an honest one."
+      },
+      "reward": {
+        "coins": 18,
+        "hearts": 30,
+        "reputation": 14
+      },
+      "marks": [
+        "lists_won",
+        "lists_exposed_den"
+      ],
+      "town": [
+        "The marshal had the book from under the horse lines read out at the rope. Every name in it. There were some red faces on that meadow, I can tell you.",
+        "Did you see Hale in the melee? Eleven summers he's been at it and I never saw him move like that. Like a different man."
+      ],
+      "returns": {
+        "who": "knight",
+        "days": [
+          5,
+          9
+        ],
+        "as": "thanks",
+        "say": "They tell me I won my melee, and that the lists were clean for once, and that I've you to thank for both. I had this made up from the prize. It's the least of what's owed.",
+        "gift": [
+          "minecraft:iron_chestplate"
+        ]
+      },
+      "later": [
+        {
+          "days": [
+            12,
+            20
+          ],
+          "town": [
+            "The hatch behind the horse lines is filled in and turfed over. There'll be another by the next fair, mind. There always is."
+          ]
+        }
+      ]
+    },
+    "slander": {
+      "failed": true,
+      "text": "I named {named} to the marshal with nothing to show for it. He would not strike a name on my word, and he had the helm off me. {knight} is scratched from the melee.",
+      "reward": {
+        "hearts": -20,
+        "reputation": -8
+      },
+      "marks": [
+        "lists_slander"
+      ],
+      "town": [
+        "Hale sent a stranger out in his own helm, and the stranger went and accused half the meadow. The marshal scratched the pair of them.",
+        "I don't know who {player} thought would listen. You don't call a cheat on a fair meadow with empty hands."
+      ]
+    },
+    "disgraced": {
+      "failed": true,
+      "text": "I killed a man in a blunted melee. The marshal had the helm off me in front of the meadow. {knight} is struck from the roll for the death and for the lie, and I was whipped off the field.",
+      "reward": {
+        "hearts": -30,
+        "reputation": -15
+      },
+      "marks": [
+        "lists_killed"
+      ],
+      "town": [
+        "A man was killed in the melee. With blunted steel. You have to mean it, to kill a man with blunted steel.",
+        "It wasn't even Hale in Hale's harness. It was {player}. They'll not be let near a lists rope again in this country."
+      ]
+    },
+    "forfeit": {
+      "failed": true,
+      "text": "The marshal called Hale's name three times at the rope and nobody answered. The bout was forfeit, and the prize with it.",
+      "reward": {
+        "hearts": -20
+      },
+      "town": [
+        "They called Hale three times for his bout and he never came. I'd have thought better of him. Drunk or dead, they're saying."
+      ]
+    }
+  }
+}

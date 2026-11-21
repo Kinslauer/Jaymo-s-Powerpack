@@ -44,11 +44,12 @@ public final class WebTricks {
 	}
 
 	private static void trick(ServerPlayer player, Trick trick) {
-		if (!WebPose.trick(trick.kind()) || !player.isAlive() || player.isSpectator() || player.isPassenger()
+		if (!WebPose.trick(trick.kind()) || WebPose.acro(trick.kind()) || !player.isAlive() || player.isSpectator() || player.isPassenger()
 			|| !Powers.has(player, WebPower.INSTANCE)) {
 			return;
 		}
 		ServerLevel level = player.level();
+		com.jaymospowers.core.trials.PowerTrials.count(player, "web.trick", 1);
 		long now = level.getGameTime();
 		WebPose current = player.getAttached(WebPower.POSE);
 		if (current != null && now - current.start() < current.ticks()) {
@@ -58,6 +59,7 @@ public final class WebTricks {
 			}
 		}
 		WebPower.pose(player, trick.kind(), trick.side() < 0 ? -1 : 1);
+		WebStunts.trick(player, trick.kind());
 		double x = player.getX(), y = player.getY(), z = player.getZ();
 		switch (trick.kind()) {
 			case WebPose.HERO_LAND -> {

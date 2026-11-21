@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.power.darktide.DarktideStatus;
 import java.util.ArrayList;
@@ -307,20 +308,20 @@ public final class SeaCalls {
 		}
 		Vec3 c = w.centre;
 		if (now % 10 == 0) {
-			MagicFx.pool(level, c, (float)WHIRL_RADIUS * 0.8F, WATER, 14);
-			MagicFx.ring(level, c, (float)WHIRL_RADIUS * 0.5F, WATER);
+			MagicFx.pool(level, c, (float)AbilityPower.size(player, WHIRL_RADIUS) * 0.8F, WATER, 14);
+			MagicFx.ring(level, c, (float)AbilityPower.size(player, WHIRL_RADIUS) * 0.5F, WATER);
 		}
-		AABB box = new AABB(c, c).inflate(WHIRL_RADIUS, WHIRL_RADIUS * 0.6, WHIRL_RADIUS);
+		AABB box = new AABB(c, c).inflate(AbilityPower.size(player, WHIRL_RADIUS), AbilityPower.size(player, WHIRL_RADIUS) * 0.6, AbilityPower.size(player, WHIRL_RADIUS));
 		for (Entity e : level.getEntities(player, box, x -> x.isAlive() && !x.isSpectator() && !(x instanceof Player p && p == player)
 			&& (x instanceof ItemEntity || x instanceof LivingEntity l && !(l instanceof ArmorStand) && !(l instanceof OwnableEntity pet && pet.getOwner() == player) && !player.isAlliedTo(l)))) {
 			Vec3 to = c.subtract(e.position());
 			double d = to.length();
-			if (d > WHIRL_RADIUS || d < 0.01) {
+			if (d > AbilityPower.size(player, WHIRL_RADIUS) || d < 0.01) {
 				continue;
 			}
 			Vec3 in = to.normalize();
 			Vec3 swirl = new Vec3(-in.z, 0.0, in.x);
-			double pull = WHIRL_PULL * (0.4 + 0.6 * (1.0 - d / WHIRL_RADIUS));
+			double pull = WHIRL_PULL * (0.4 + 0.6 * (1.0 - d / AbilityPower.size(player, WHIRL_RADIUS)));
 			e.setDeltaMovement(e.getDeltaMovement().scale(0.85).add(in.scale(pull)).add(swirl.scale(WHIRL_SWIRL)).add(0.0, d < WHIRL_GRIND ? 0.0 : 0.02, 0.0));
 			e.syncVelocity = true;
 			e.resetFallDistance();
@@ -376,20 +377,20 @@ public final class SeaCalls {
 		}
 		if (now >= d.until || !d.dimension.equals(level.dimension())) {
 			DOMES.remove(player.getUUID());
-			MagicFx.blast(level, d.centre.add(0.0, 1.0, 0.0), (float)DOME_RADIUS * 0.6F, WATER);
+			MagicFx.blast(level, d.centre.add(0.0, 1.0, 0.0), (float)AbilityPower.size(player, DOME_RADIUS) * 0.6F, WATER);
 			return;
 		}
 		Vec3 c = d.centre.add(0.0, 0.5, 0.0);
 		if (now % 4 == 0) {
-			MagicFx.orb(level, c, (float)DOME_RADIUS, WATER, 6);
+			MagicFx.orb(level, c, (float)AbilityPower.size(player, DOME_RADIUS), WATER, 6);
 		}
-		for (Projectile p : level.getEntitiesOfClass(Projectile.class, new AABB(c, c).inflate(DOME_RADIUS + 1.0))) {
+		for (Projectile p : level.getEntitiesOfClass(Projectile.class, new AABB(c, c).inflate(AbilityPower.size(player, DOME_RADIUS) + 1.0))) {
 			Entity owner = p.getOwner();
 			if (owner == player || owner instanceof OwnableEntity pet && pet.getOwner() == player || owner != null && player.isAlliedTo(owner)) {
 				continue;
 			}
 			Vec3 to = c.subtract(p.position());
-			if (to.length() <= DOME_RADIUS && p.getDeltaMovement().dot(to) > 0.0) {
+			if (to.length() <= AbilityPower.size(player, DOME_RADIUS) && p.getDeltaMovement().dot(to) > 0.0) {
 				MagicFx.blast(level, p.position(), 0.8F, WATER);
 				level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.PLAYER_SPLASH, SoundSource.PLAYERS, 0.8F, 1.6F);
 				p.discard();

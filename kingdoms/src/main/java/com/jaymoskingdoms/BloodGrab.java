@@ -189,6 +189,10 @@ public final class BloodGrab {
 		if (target.getBoundingBox().distanceToSqr(player.getEyePosition()) > REACH * REACH || isHeld(target)) {
 			return;
 		}
+		if (!Vows.allows(player, "feeding")) {
+			// (a pact that forbids it, the Lantern Warden's)
+			return;
+		}
 		Hold hold = new Hold(target, level.getGameTime());
 		HOLDS.put(player.getUUID(), hold);
 		THROWS.remove(target.getUUID());
@@ -230,6 +234,10 @@ public final class BloodGrab {
 		if (!player.getMainHandItem().isEmpty()) {
 			player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymoskingdoms.feed.hand")
 				.withStyle(net.minecraft.ChatFormatting.DARK_RED));
+			return false;
+		}
+		if (!(prey(target) && !isHeld(target)) && !Vows.allows(player, "feeding")) {
+			// (a grab asks in start; a bite here)
 			return false;
 		}
 		if (prey(target) && !isHeld(target)) {

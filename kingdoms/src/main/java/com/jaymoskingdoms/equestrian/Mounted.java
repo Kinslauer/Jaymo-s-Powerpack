@@ -119,7 +119,11 @@ public final class Mounted {
 	public static Vec3 seat(AbstractHorse horse, Entity passenger, Vec3 vanilla, float scale) {
 		// (0.7.322) our horses stand taller than vanilla's (BreedHorseModel.LIFT, 3 px), so every seat is that much higher
 		Vec3 seat = horse instanceof WarElephant ? vanilla : vanilla.add(0.0, SEAT_LIFT * scale, 0.0);
-		if (horse.getPassengers().indexOf(passenger) != 1) {
+		// (a kneeling horse carries its saddle down with it)
+		seat = seat.subtract(0.0, Bonding.KNEEL_DROP * scale * Bonding.kneelAmount(horse, horse.level().getGameTime()), 0.0);
+		// the second seat is the one the next passenger would take, too, so a player climbing on is aimed at it
+		int index = horse.getPassengers().indexOf(passenger);
+		if (index != 1 && !(index < 0 && passenger instanceof Player && horse.getPassengers().size() == 1)) {
 			return seat;
 		}
 		return seat.add(new Vec3(0.0, -PILLION_DROP * scale, -PILLION_BACK * scale).yRot(-horse.getYRot() * Mth.DEG_TO_RAD));
@@ -178,7 +182,7 @@ public final class Mounted {
 		float c = was;
 		float seconds = STEP / 20.0F;
 		if (gait.ordinal() >= Gait.CANTER.ordinal() && speed > top * 0.4) {
-			float fill = (gait == Gait.GALLOP ? 1.0F : 0.5F) * (s.sprint() ? 2.0F : 1.0F) * Riders.chargeFill(rider);
+			float fill = (gait == Gait.GALLOP ? 1.0F : 0.5F) * (s.sprint() ? 2.0F : 1.0F) * Riders.chargeFill(rider) * Horsemanship.lancerCharge(rider);
 			c += fill * seconds / CHARGE_SECONDS;
 		} else {
 			c -= CHARGE_DRAIN * seconds;
@@ -206,7 +210,8 @@ public final class Mounted {
 				continue;
 			}
 			HIT.put(target.getId(), now + CHARGE_COOLDOWN);
-			float damage = CHARGE_HIT * c * (float)Mth.clamp(pace, 0.4, 1.3) * (1.0F + BARDING_HIT * horse.getArmorValue()) * Riders.runDown(rider);
+			float damage = CHARGE_HIT * c * (float)Mth.clamp(pace, 0.4, 1.3) * (1.0F + BARDING_HIT * horse.getArmorValue()) * Riders.runDown(rider)
+				* Horsemanship.cavalier(rider);
 			DamageSource source = level.damageSources().mobAttack(horse);
 			target.hurtServer(level, source, damage);
 			target.knockback(CHARGE_KNOCKBACK * c, -ahead.x, -ahead.z, source, damage);

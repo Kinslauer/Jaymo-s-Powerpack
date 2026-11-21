@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:blasting",
+  "category": "blocks",
+  "cookingtime": 100,
+  "experience": 1.0,
+  "group": "diamond",
+  "ingredient": [
+    "jaymospowers:andesite_diamond_ore",
+    "jaymospowers:diorite_diamond_ore",
+    "jaymospowers:granite_diamond_ore",
+    "jaymospowers:tuff_diamond_ore"
+  ],
+  "result": {
+    "id": "minecraft:diamond"
+  }
+}

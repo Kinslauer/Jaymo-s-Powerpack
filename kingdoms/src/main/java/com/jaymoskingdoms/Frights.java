@@ -36,7 +36,7 @@ import org.jspecify.annotations.Nullable;
  * in a fight ({@link BlastFright#standsGround}), and the people of a camp (barbarians, orcs, goblins, pirates), who
  * aren't village folk, unless they're timid. Nor does anyone take fright at their own side's people.
  */
-final class Frights {
+public final class Frights {
 	/** How often villagers look about them (ticks); how close a monster frightens them; how close to a seat they're watched. */
 	static final int EVERY = 10;
 	static final double FRIGHT = 12.0, WATCHED = 96.0;
@@ -150,7 +150,7 @@ final class Frights {
 	}
 
 	/** (0.6.11) Something came down at {@code at} (a meteor, a star): it runs from the spot and hides a while. */
-	static void scare(ServerLevel level, Villager v, Vec3 at) {
+	public static void scare(ServerLevel level, Villager v, Vec3 at) {
 		long now = level.getGameTime();
 		if (!FRIGHTS.containsKey(v.getUUID())) {
 			level.playSound(null, v.blockPosition(), SoundEvents.VILLAGER_HURT, SoundSource.NEUTRAL, 0.6F, 1.3F);

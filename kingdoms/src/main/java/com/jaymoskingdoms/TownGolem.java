@@ -249,6 +249,9 @@ public class TownGolem extends AbstractGolem implements GeoEntity {
 	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
+		// better pathing: round water, up ledges, and out of the water over a bank
+		this.goalSelector.addGoal(1, new GolemPathing.ClimbOut(this));
+		GolemPathing.improve(this);
 		this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0, true) {
 			@Override
 			public boolean canUse() {
@@ -277,6 +280,8 @@ public class TownGolem extends AbstractGolem implements GeoEntity {
 		this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Mob.class, 5, false, false,
 			(target, level) -> this.kind() == Kind.DIAMOND && !this.throne() && target instanceof Enemy));
+		// and a creeper is a thing a golem puts down, for those that fight on foot (GolemHunt)
+		this.targetSelector.addGoal(3, com.jaymoskingdoms.mobs.GolemHunt.creeperGoal(this, () -> this.kind() == Kind.DIAMOND && !this.throne()));
 	}
 
 	public Kind kind() {

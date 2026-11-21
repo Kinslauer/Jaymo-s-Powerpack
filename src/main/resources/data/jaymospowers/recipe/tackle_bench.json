@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SSS",
+    "PPP",
+    "P P"
+  ],
+  "key": {
+    "S": "minecraft:string",
+    "P": "#minecraft:planks"
+  },
+  "result": {
+    "id": "jaymospowers:tackle_bench",
+    "count": 1
+  }
+}

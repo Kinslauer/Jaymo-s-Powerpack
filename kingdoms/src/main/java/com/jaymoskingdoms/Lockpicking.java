@@ -210,6 +210,10 @@ public final class Lockpicking {
 		if (lock == null || !lock.locked()) {
 			return InteractionResult.PASS;
 		}
+		if (TinkerPerks.dismantleLock(sp, server, lockPos)) {
+			// (class trees) a Tinkerer's Dismantle: the lock comes apart at a touch
+			return InteractionResult.SUCCESS;
+		}
 		if (sp.getMainHandItem().is(RaiderGear.KEY) && lock.level() <= RaiderGear.KEY_LEVEL) {
 			// a rusty key (the illagers'): it turns a simple lock once, and snaps in it
 			sp.getMainHandItem().consume(1, sp);
@@ -224,6 +228,10 @@ public final class Lockpicking {
 			return InteractionResult.PASS;
 		}
 		server.playSound(null, pos, SoundEvents.CHEST_LOCKED, SoundSource.BLOCKS, 1.0F, 1.0F);
+		if (!Vows.allows(sp, "lockpick")) {
+			// (an oath or a pact that forbids it)
+			return InteractionResult.FAIL;
+		}
 		if (!TreeLocks.check(sp, TreeLocks.Lock.LOCKPICK)) {
 			// (Andy's skill-tree locks) picking a lock is learned: Lockpicking Prowess (a Thief knows how)
 			return InteractionResult.FAIL;
@@ -296,6 +304,7 @@ public final class Lockpicking {
 				level.playSound(null, pos, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 0.6F, 1.5F);
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.lock.picked").withStyle(ChatFormatting.GREEN));
 				Skills.grant(player, Skills.Pillar.STEALTH, XP_PICK + XP_PER_LEVEL * lock.level());
+				ClassTrees.give(player, Classes.PlayerClass.THIEF, ClassTrees.XP_LOCK);
 				Patrons.deed(player, Patron.ASH_WHISPERER, Patrons.DEED_SMALL, "lock");
 				StoryRoads.thief(player, "lock");
 				Commandments.act(player, "lockpick");
@@ -333,6 +342,10 @@ public final class Lockpicking {
 			// caller doesn't add its own "no lockpick" line over the one naming the perk
 			return true;
 		}
+		if (!Vows.allows(sp, "lockpick")) {
+			// (an oath or a pact that forbids it: told so, as above)
+			return true;
+		}
 		int picks = sp.getInventory().countItem(LOCKPICK);
 		if (picks == 0 || !ServerPlayNetworking.canSend(sp, Open.TYPE)) {
 			return false;
@@ -365,6 +378,7 @@ public final class Lockpicking {
 				VIRTUAL.remove(player.getUUID());
 				level.playSound(null, pos, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 0.6F, 1.5F);
 				Skills.grant(player, Skills.Pillar.STEALTH, XP_PICK + XP_PER_LEVEL * pending.level());
+				ClassTrees.give(player, Classes.PlayerClass.THIEF, ClassTrees.XP_LOCK);
 				Patrons.deed(player, Patron.ASH_WHISPERER, Patrons.DEED_SMALL, "lock");
 				StoryRoads.thief(player, "lock");
 				Commandments.act(player, "lockpick");
@@ -406,6 +420,7 @@ public final class Lockpicking {
 		level.playSound(null, at, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 0.6F, 1.5F);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.lock.picked").withStyle(ChatFormatting.GREEN));
 		Skills.grant(player, Skills.Pillar.STEALTH, XP_PICK + XP_PER_LEVEL * lock.level());
+		ClassTrees.give(player, Classes.PlayerClass.THIEF, ClassTrees.XP_LOCK);
 		Patrons.deed(player, Patron.ASH_WHISPERER, Patrons.DEED_SMALL, "lock");
 		Commandments.act(player, "lockpick");
 		return true;

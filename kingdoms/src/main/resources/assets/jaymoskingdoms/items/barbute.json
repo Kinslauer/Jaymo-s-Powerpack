@@ -1,0 +1,118 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:component",
+    "component": "jaymoskingdoms:finish",
+    "cases": [
+      {
+        "when": "blackened",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/barbute_blackened"
+        }
+      },
+      {
+        "when": "gilded",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/barbute_gilded"
+        }
+      },
+      {
+        "when": "spiked",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/barbute_spiked"
+        }
+      },
+      {
+        "when": "gilt_banded",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/barbute_gilt_banded"
+        }
+      },
+      {
+        "when": "fur_lined",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/barbute_fur_lined"
+        }
+      },
+      {
+        "when": "quilted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/barbute_quilted"
+        }
+      },
+      {
+        "when": "brine_soaked",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/barbute_brine_soaked"
+        }
+      },
+      {
+        "when": "hide",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/barbute_hide"
+        }
+      },
+      {
+        "when": "bronze",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/barbute_bronze"
+        }
+      },
+      {
+        "when": "lamellar",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/barbute_lamellar"
+        }
+      },
+      {
+        "when": "russeted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/barbute_russeted"
+        }
+      },
+      {
+        "when": "blued",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/barbute_blued"
+        }
+      },
+      {
+        "when": "painted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/barbute_painted"
+        }
+      },
+      {
+        "when": "etched",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/barbute_etched"
+        }
+      },
+      {
+        "when": "rusted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/barbute_rusted"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "jaymoskingdoms:item/barbute"
+    }
+  }
+}

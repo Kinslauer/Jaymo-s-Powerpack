@@ -37,6 +37,13 @@ public class WebCartridgeItem extends Item {
 		return InteractionResult.SUCCESS;
 	}
 
+	/** (Web cartridges) A cartridge of another kind of web is named for it. */
+	@Override
+	public Component getName(ItemStack stack) {
+		int kind = WebShooters.kind(stack);
+		return kind == WebKinds.STICKY ? super.getName(stack) : Component.translatable("item.jaymospowers.web_cartridge." + WebKinds.name(kind));
+	}
+
 	@Override
 	public boolean isBarVisible(ItemStack stack) {
 		return WebShooters.fluid(stack) < WebShooters.CARTRIDGE_SHOTS;
@@ -56,6 +63,7 @@ public class WebCartridgeItem extends Item {
 	public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag flag) {
 		builder.accept(Component.translatable("item.jaymospowers.web_shooter.shots", WebShooters.fluid(stack), WebShooters.CARTRIDGE_SHOTS)
 			.withStyle(ChatFormatting.GRAY));
+		builder.accept(Component.translatable("item.jaymospowers.web_cartridge.kind." + WebKinds.name(WebShooters.kind(stack))).withStyle(ChatFormatting.GRAY));
 		builder.accept(Component.translatable("item.jaymospowers.web_cartridge.hint").withStyle(ChatFormatting.DARK_GRAY));
 	}
 }

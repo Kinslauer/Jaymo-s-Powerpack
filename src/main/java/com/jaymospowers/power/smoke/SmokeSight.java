@@ -65,6 +65,7 @@ public final class SmokeSight {
 	static void tick(ServerPlayer player) {
 		if (player.getAttached(ON) != null && player.isAlive() && !player.getAbilities().instabuild) {
 			player.causeFoodExhaustion(EXHAUSTION);
+			com.jaymospowers.core.trials.PowerTrials.count(player, "smoke.sight", player.tickCount % 20 == 0 ? 1 : 0);
 		}
 	}
 }

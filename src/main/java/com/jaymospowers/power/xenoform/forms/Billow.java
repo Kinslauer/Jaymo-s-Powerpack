@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
@@ -192,10 +193,10 @@ public final class Billow extends XenoForm {
 		if (live.fog > 0) {
 			live.fog--;
 			if (live.fog % 4 == 0) {
-				level.sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY() + 1.0, player.getZ(), 12, FOG_RADIUS * 0.5, 1.0, FOG_RADIUS * 0.5, 0.0);
+				level.sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY() + 1.0, player.getZ(), 12, AbilityPower.size(player, FOG_RADIUS) * 0.5, 1.0, AbilityPower.size(player, FOG_RADIUS) * 0.5, 0.0);
 			}
 			if (live.fog % 10 == 0) {
-				for (LivingEntity e : around(player, FOG_RADIUS)) {
+				for (LivingEntity e : around(player, AbilityPower.size(player, FOG_RADIUS))) {
 					if (e instanceof Player || player.getPassengers().contains(e)) {
 						continue;
 					}
@@ -211,19 +212,19 @@ public final class Billow extends XenoForm {
 	/** Rain round and below it: fire on blocks and creatures goes out. */
 	private static void downpour(ServerPlayer player, ServerLevel level) {
 		if (player.tickCount % 2 == 0) {
-			level.sendParticles(ParticleTypes.FALLING_WATER, player.getX(), player.getY(), player.getZ(), 10, RAIN_RADIUS * 0.5, 0.2, RAIN_RADIUS * 0.5, 0.0);
+			level.sendParticles(ParticleTypes.FALLING_WATER, player.getX(), player.getY(), player.getZ(), 10, AbilityPower.size(player, RAIN_RADIUS) * 0.5, 0.2, AbilityPower.size(player, RAIN_RADIUS) * 0.5, 0.0);
 		}
 		if (player.tickCount % 5 != 0) {
 			return;
 		}
 		BlockPos base = player.blockPosition();
-		for (BlockPos at : BlockPos.betweenClosed(base.offset(-RAIN_RADIUS, -8, -RAIN_RADIUS), base.offset(RAIN_RADIUS, 1, RAIN_RADIUS))) {
+		for (BlockPos at : BlockPos.betweenClosed(base.offset(-AbilityPower.size(player, RAIN_RADIUS), -8, -AbilityPower.size(player, RAIN_RADIUS)), base.offset(AbilityPower.size(player, RAIN_RADIUS), 1, AbilityPower.size(player, RAIN_RADIUS)))) {
 			if (level.getBlockState(at).is(BlockTags.FIRE)) {
 				level.setBlockAndUpdate(at, Blocks.AIR.defaultBlockState());
 				level.sendParticles(ParticleTypes.SMOKE, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 3, 0.2, 0.2, 0.2, 0.0);
 			}
 		}
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(RAIN_RADIUS, 8.0, RAIN_RADIUS), LivingEntity::isOnFire)) {
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, RAIN_RADIUS), 8.0, AbilityPower.size(player, RAIN_RADIUS)), LivingEntity::isOnFire)) {
 			e.clearFire();
 		}
 	}

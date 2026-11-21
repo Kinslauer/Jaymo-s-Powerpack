@@ -1,5 +1,6 @@
 package com.jaymospowers.power.gravity;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.Power;
@@ -261,9 +262,9 @@ public final class GravityPower implements Power {
 	static final float IMPACT_DEBRIS = 2.2F, BURY_DEBRIS = 2.8F;
 	/**
 	 * Damage. The most a slam ever does is {@code SLAM_DAMAGE_MAX}: from mid-air, on something big, every ability
-	 * mastered and ascended. Everything else is a share of that: a fresh power {@code SLAM_DAMAGE_FRESH} of it (growing
-	 * with each ability and the ascension), from the ground {@code SLAM_GROUND_SHARE}, on something small
-	 * {@code SLAM_SMALL_SHARE}.
+	 * mastered and ascended. Everything else is a share of that: {@code SLAM_DAMAGE_FRESH} of it with no abilities (growing
+	 * with each ability and the ascension; a slam needs the first ability, so the first slam is 0.48 of it, 9.6), from
+	 * the ground {@code SLAM_GROUND_SHARE}, on something small {@code SLAM_SMALL_SHARE}.
 	 */
 	static final float SLAM_DAMAGE_MAX = 20.0F, SLAM_DAMAGE_FRESH = 0.35F, SLAM_GROUND_SHARE = 0.65F, SLAM_SMALL_SHARE = 0.75F;
 	/** Something hurled with Lift never hits harder than this. */
@@ -533,6 +534,8 @@ public final class GravityPower implements Power {
 			GravityForward.forget(handler.player);
 			GravityCometRam.forget(handler.player);
 			GravityWalk.stop(handler.player);
+			GravityHeft.clear(handler.player);
+			GravityPlanets.forget(handler.player);
 		});
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			STATES.clear();
@@ -649,6 +652,8 @@ public final class GravityPower implements Power {
 			jump.removeModifier(PULL_JUMP_ID);
 		}
 		GravityWeight.clear(player);
+		GravityHeft.clear(player);
+		GravityPlanets.forget(player);
 		player.removeAttached(COOLDOWNS);
 		player.removeAttached(KILLS);
 	}
@@ -662,13 +667,18 @@ public final class GravityPower implements Power {
 	@Override
 	public boolean allowsFloating(ServerPlayer player) {
 		return player.getAttached(WEIGHTLESS_ON) != null || GravitySkyfall.riding(player) || GravityForward.falling(player)
-			|| GravityCometRam.ramming(player) || GravityWalk.walking(player);
+			|| GravityCometRam.ramming(player) || GravityWalk.walking(player) || GravityPlanets.falling(player);
 	}
 
 	// ---------------------------------------------------------------- keys
 
 	@Override
 	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
+		if (down && key == PowerKey.ABILITY_2 && player.isShiftKeyDown() && !PowerInput.isDown(player, PowerKey.ABILITY_4) && ownWell(player) == null
+			&& GravityPlanets.throwPlanet(player)) {
+			// sneak + G: a planet thrown to fall to (GravityPlanets)
+			return;
+		}
 		State state = state(player);
 		if (down && key == PowerKey.ABILITY_4 && player.isShiftKeyDown() && state.liftTarget < 0 && !state.chunkHold && state.ripFrom < 0 && ownWell(player) == null
 			&& GravityPicks.bands(player)) {
@@ -786,12 +796,22 @@ public final class GravityPower implements Power {
 	/** Z: the Immense Field (a dome of heavy gravity to train in), or take yours down. */
 	@Override
 	public void onMode(ServerPlayer player, boolean down) {
-		if (down && player.isShiftKeyDown() && GravityPicks.trade(player)) {
+		// (Heavy and light) a hold of Z steps your weight; a tap, told from it as the key comes up, is what Z always did
+		if (GravityHeft.key(player, down)) {
 			return;
 		}
-		if (down) {
-			GravityTrainingField.toggle(player);
+		if (player.isShiftKeyDown() && GravityPicks.trade(player)) {
+			return;
 		}
+		GravityTrainingField.toggle(player);
+	}
+
+	/** (Heavy and light) Weightless on or off from the far end of the weight scale: true if it is now as asked. */
+	static boolean heftWeightless(ServerPlayer player, boolean on) {
+		if ((player.getAttached(WEIGHTLESS_ON) != null) != on) {
+			toggleWeightless(player, state(player));
+		}
+		return (player.getAttached(WEIGHTLESS_ON) != null) == on;
 	}
 
 	/** Collapse has a C of its own (the black hole), corrupted or not ascended. */
@@ -892,6 +912,7 @@ public final class GravityPower implements Power {
 	/** Lift takes hold of {@code target}. */
 	private static void hold(ServerPlayer player, State state, Entity target) {
 		state.liftTarget = target.getId();
+		com.jaymospowers.core.trials.PowerTrials.count(target instanceof LivingEntity ? player : null, "gravity.lift", 1);
 		state.liftTicks = 0;
 		state.choking = false;
 		state.drawing = false;
@@ -1325,6 +1346,7 @@ public final class GravityPower implements Power {
 		dropLift(player, state, true);
 		// (0.21.8) the arm whips through with it, as a thrown rock's does (RockThrowPose)
 		com.jaymospowers.ground.ThrownRocks.hurled(player);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "gravity.hurl", 1);
 		Vec3 velocity = player.getViewVector(1.0F).scale(THROW_SPEED);
 		entity.setDeltaMovement(velocity);
 		entity.needsSync = true;
@@ -1758,7 +1780,7 @@ public final class GravityPower implements Power {
 		cool(player, WELL, WELL_COOLDOWN);
 		player.level().playSound(null, at.x, at.y, at.z, SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.5F, 1.8F);
 		// it goes off in a swelling bubble that shoves the ground up around it
-		GravityShockwave.start(player.level(), at);
+		GravityShockwave.start(player.level(), at, player);
 	}
 
 	/** What Lift holds, if it's a living creature (not a chunk, an item, a cart or a corpse), or null. */
@@ -1780,7 +1802,7 @@ public final class GravityPower implements Power {
 			if (ownWell(player) != null) {
 				wellLaunch(player, state);
 			}
-			crush(player, 0.0F, player.position(), CRUSH_TAP_RADIUS);
+			crush(player, 0.0F, player.position(), AbilityPower.size(player, CRUSH_TAP_RADIUS));
 			return;
 		}
 		if (!ready(player, CRUSH)) {
@@ -1789,7 +1811,7 @@ public final class GravityPower implements Power {
 		ServerLevel level = player.level();
 		if (GravityOrbit.collapsingHorizon(player)) {
 			GravityOrbit.rain(player, aimPoint(player, GravityWave.range(charge) + GravityWave.COLLAPSE_RANGE_BONUS),
-				Mth.lerp(charge, CRUSH_RADIUS_MIN, CRUSH_RADIUS_MAX) + COLLAPSE_RADIUS_BONUS);
+				Mth.lerp(charge, AbilityPower.size(player, CRUSH_RADIUS_MIN), AbilityPower.size(player, CRUSH_RADIUS_MAX)) + COLLAPSE_RADIUS_BONUS);
 		}
 		GravityWave.fire(player, charge);
 		int cooldown = Math.round(Mth.lerp(charge, CRUSH_COOLDOWN_MIN, CRUSH_COOLDOWN_MAX));
@@ -1848,6 +1870,7 @@ public final class GravityPower implements Power {
 				continue;
 			}
 			touch(target, player);
+			com.jaymospowers.core.trials.PowerTrials.count(player, "gravity.crush", 1);
 			Vec3 v = target.getDeltaMovement();
 			target.setDeltaMovement(v.x * 0.3, -CRUSH_SLAM * (0.4 + charge), v.z * 0.3);
 			target.needsSync = true;
@@ -1954,6 +1977,8 @@ public final class GravityPower implements Power {
 		smallThings(player);
 		GravityPicks.tick(player);
 		GravityWeight.tick(player);
+		GravityHeft.tick(player);
+		GravityPlanets.tick(player);
 		if (state.meteorFrom >= 0) {
 			if (Fate.isAscended(player) && !Fate.isCorrupted(player)) {
 				GravityMeteor.charging(player, meteorCharge(player, state), player.level().getGameTime() - state.meteorFrom);
@@ -2007,6 +2032,7 @@ public final class GravityPower implements Power {
 		GravityCometRam.tick(player);
 		if (player.getAttached(WEIGHTLESS_ON) != null) {
 			state.weightlessTicks++;
+			com.jaymospowers.core.trials.PowerTrials.count(player, "gravity.weightless", state.weightlessTicks % 20 == 0 ? 1 : 0);
 			// no fall counts while weightless: only what you fall after it ends
 			player.resetFallDistance();
 			if (player.tickCount % HEAVY_AURA_REFRESH == 0) {
@@ -2099,12 +2125,12 @@ public final class GravityPower implements Power {
 		ServerLevel level = player.level();
 		if (player.tickCount % 4 == 0) {
 			Vec3 me = player.position().add(0.0, 1.0, 0.0);
-			AABB area = player.getBoundingBox().inflate(COLLAPSE_DRIFT_RADIUS);
+			AABB area = player.getBoundingBox().inflate(AbilityPower.size(player, COLLAPSE_DRIFT_RADIUS));
 			for (Entity e : level.getEntities(player, area, e -> e instanceof ItemEntity
 				|| e instanceof LivingEntity living && living.getMaxHealth() <= 10.0F && !(e instanceof Player) && living.isAlive())) {
 				Vec3 to = me.subtract(e.position());
 				double d = to.length();
-				if (d > 0.8 && d < COLLAPSE_DRIFT_RADIUS) {
+				if (d > 0.8 && d < AbilityPower.size(player, COLLAPSE_DRIFT_RADIUS)) {
 					e.setDeltaMovement(e.getDeltaMovement().add(to.scale(COLLAPSE_DRIFT * 4.0 / d)));
 					e.needsSync = true;
 				}
@@ -2130,7 +2156,7 @@ public final class GravityPower implements Power {
 	/** Event Horizon: projectiles that come too close are bent away. */
 	private static void deflect(ServerPlayer player) {
 		Vec3 me = player.getBoundingBox().getCenter();
-		for (Projectile projectile : player.level().getEntitiesOfClass(Projectile.class, player.getBoundingBox().inflate(HORIZON_DEFLECT_RADIUS),
+		for (Projectile projectile : player.level().getEntitiesOfClass(Projectile.class, player.getBoundingBox().inflate(AbilityPower.size(player, HORIZON_DEFLECT_RADIUS)),
 			p -> p.isAlive() && p.getOwner() != player)) {
 			Vec3 away = projectile.position().subtract(me);
 			double d = away.length();
@@ -2145,7 +2171,7 @@ public final class GravityPower implements Power {
 
 	/** Weightless: the weight you shed lands on everyone around you. */
 	private static void heavyAura(ServerPlayer player) {
-		weighDown(player, player.position(), HEAVY_AURA_RADIUS);
+		weighDown(player, player.position(), AbilityPower.size(player, HEAVY_AURA_RADIUS));
 	}
 
 	/**
@@ -2294,7 +2320,7 @@ public final class GravityPower implements Power {
 			tickField(level, well, owner, left);
 			return;
 		}
-		double radius = SINGULARITY_PULL_RADIUS;
+		double radius = AbilityPower.size(owner, SINGULARITY_PULL_RADIUS);
 		double pull = SINGULARITY_PULL;
 		if (owner != null && Fate.isCorrupted(owner)) {
 			pull *= COLLAPSE_DAMAGE;
@@ -2318,7 +2344,7 @@ public final class GravityPower implements Power {
 				if (owner != null) {
 					touch(living, owner);
 				}
-				if (hit && d <= SINGULARITY_CORE) {
+				if (hit && d <= AbilityPower.size(owner, SINGULARITY_CORE)) {
 					DamageSource source = owner != null ? level.damageSources().indirectMagic(owner, owner) : level.damageSources().magic();
 					living.setInvulnerableTime(0);
 					living.hurtServer(level, source, SINGULARITY_HIT);
@@ -2341,8 +2367,9 @@ public final class GravityPower implements Power {
 			return;
 		}
 		Vec3 at = owner.position();
-		double radius = WELL_RADIUS;
+		double radius = AbilityPower.size(owner, WELL_RADIUS);
 		if (left % HEAVY_AURA_REFRESH == 0) {
+			com.jaymospowers.core.trials.PowerTrials.reach(owner, "gravity.well_many", level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, new AABB(at, at).inflate(radius), e -> e.isAlive() && e.position().distanceToSqr(at) <= radius * radius).size());
 			weighDown(owner, at, radius);
 		}
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(radius, radius + 2.0, radius),
@@ -2367,7 +2394,7 @@ public final class GravityPower implements Power {
 	/** The Singularity's end: it snaps open and throws everything out. */
 	private static void burst(ServerLevel level, Well well, @Nullable ServerPlayer owner) {
 		Vec3 at = well.at();
-		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(SINGULARITY_CORE + 1.0),
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(AbilityPower.size(owner, SINGULARITY_CORE) + 1.0),
 			e -> e.isAlive() && !e.isSpectator() && e != owner && !(e instanceof ArmorStand))) {
 			Vec3 away = living.getBoundingBox().getCenter().subtract(at);
 			double d = Math.max(0.3, away.length());
@@ -2424,6 +2451,7 @@ public final class GravityPower implements Power {
 			return;
 		}
 		countTowardAscension(player);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "gravity.weight_kills", 1);
 	}
 
 	/** A death by weight, or a hard fall survived: one closer to the Event Horizon. */

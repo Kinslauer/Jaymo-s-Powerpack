@@ -142,6 +142,17 @@ public final class CostumeNet {
 		if (kit.pieces() > 0) {
 			out.add(new Need(s -> s.is(Items.IRON_NUGGET), NUGGETS_PER_PIECE * kit.pieces(), new ItemStack(Items.IRON_NUGGET)));
 		}
+		// metal plates: INGOTS_PER_PLATE ingots of the metal each, one line per metal
+		for (CostumePlates.Metal metal : CostumePlates.Metal.values()) {
+			int plates = 0;
+			for (CostumePlates.Slot slot : CostumePlates.Slot.values()) {
+				plates += kit.plates().at(slot) == metal && metal != CostumePlates.Metal.NONE ? 1 : 0;
+			}
+			if (plates > 0) {
+				Item ingot = metal.ingot();
+				out.add(new Need(s -> s.is(ingot), CostumePlates.INGOTS_PER_PLATE * plates, new ItemStack(ingot)));
+			}
+		}
 		return out;
 	}
 

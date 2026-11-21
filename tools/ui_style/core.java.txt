@@ -45,6 +45,81 @@
 		graphics.fill(x, y, x + w, y + 2, accent);
 	}
 
+	/** The thin gold of {@link #frame}. */
+	public static final int FRAME = c(0xFFB8924A, 0xFF6A6A6A);
+
+	/**
+	 * The framed panel the picker screens use (character creation, patrons): the {@link #panel}'s fill, then a {@link #frame}
+	 * in place of its stripe.
+	 */
+	public static void panelFramed(GuiGraphicsExtractor graphics, int x, int y, int w, int h, int accent) {
+		if (GREY) {
+			window(graphics, x, y, w, h);
+		} else {
+			graphics.fill(x, y, x + w, y + h, PANEL);
+		}
+		frame(graphics, x, y, w, h, accent);
+	}
+
+	/**
+	 * A thin gold frame round {@code x, y, w, h} with a small diamond at each corner and a short tick in {@code accent}
+	 * over the panel's title (on its top edge, at the left). Draws only the frame: the fill is the caller's.
+	 */
+	public static void frame(GuiGraphicsExtractor graphics, int x, int y, int w, int h, int accent) {
+		graphics.fill(x, y, x + w, y + 1, FRAME);
+		graphics.fill(x, y + h - 1, x + w, y + h, FRAME);
+		graphics.fill(x, y + 1, x + 1, y + h - 1, FRAME);
+		graphics.fill(x + w - 1, y + 1, x + w, y + h - 1, FRAME);
+		graphics.fill(x + 10, y, x + 10 + Math.min(44, Math.max(12, w / 5)), y + 2, accent);
+		diamond(graphics, x, y);
+		diamond(graphics, x + w - 1, y);
+		diamond(graphics, x, y + h - 1);
+		diamond(graphics, x + w - 1, y + h - 1);
+	}
+
+	/** A little diamond (5 px across) centred on the pixel {@code cx, cy}. */
+	private static void diamond(GuiGraphicsExtractor graphics, int cx, int cy) {
+		for (int dy = -2; dy <= 2; dy++) {
+			int half = 2 - Math.abs(dy);
+			graphics.fill(cx - half, cy + dy, cx + half + 1, cy + dy + 1, FRAME);
+		}
+	}
+
+	/** The height of a {@link #pill}. */
+	public static final int PILL_H = 12;
+
+	/** The width a {@link #pill} of this label and value takes. */
+	public static int pillWidth(Font font, String label, String value) {
+		return font.width(value.isEmpty() ? label : label + " " + value) + 10;
+	}
+
+	/**
+	 * A small rounded tag: {@code label} dim and {@code value} in {@code color} inside a thin rim of that colour (a stat, a
+	 * count, a bonus). Returns its width, so the next one can sit beside it.
+	 */
+	public static int pill(GuiGraphicsExtractor graphics, Font font, int x, int y, String label, String value, int color) {
+		int w = pillWidth(font, label, value);
+		int rim = (color & 0x00FFFFFF) | 0x90000000;
+		graphics.fill(x + 1, y, x + w - 1, y + PILL_H, ROW_ALT);
+		graphics.fill(x, y + 1, x + w, y + PILL_H - 1, ROW_ALT);
+		graphics.fill(x + 2, y, x + w - 2, y + 1, rim);
+		graphics.fill(x + 2, y + PILL_H - 1, x + w - 2, y + PILL_H, rim);
+		graphics.fill(x, y + 2, x + 1, y + PILL_H - 2, rim);
+		graphics.fill(x + w - 1, y + 2, x + w, y + PILL_H - 2, rim);
+		graphics.fill(x + 1, y + 1, x + 2, y + 2, rim);
+		graphics.fill(x + w - 2, y + 1, x + w - 1, y + 2, rim);
+		graphics.fill(x + 1, y + PILL_H - 2, x + 2, y + PILL_H - 1, rim);
+		graphics.fill(x + w - 2, y + PILL_H - 2, x + w - 1, y + PILL_H - 1, rim);
+		int tx = x + 5;
+		if (!value.isEmpty()) {
+			graphics.text(font, label, tx, y + 2, DIM);
+			graphics.text(font, value, tx + font.width(label + " "), y + 2, color);
+		} else {
+			graphics.text(font, label, tx, y + 2, color);
+		}
+		return w;
+	}
+
 	/**
 	 * The solid window of the H character menu (every tab of it, in whichever mod): opaque and bevelled like vanilla's
 	 * inventory, in dark tones, because it sits where the inventory does. Other screens use {@link #panel}.

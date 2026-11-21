@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:diorite_vslab",
+  "result": {
+    "id": "jaymospowers:diorite_quarter",
+    "count": 2
+  }
+}

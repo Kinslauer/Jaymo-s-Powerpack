@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.HudBar;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import net.minecraft.ChatFormatting;
@@ -176,7 +177,7 @@ public final class Locust extends XenoForm {
 		if (live.leapCharge > 0) {
 			live.leapCharge = Math.min(CHARGE_MAX, live.leapCharge + 1);
 			if (live.leapCharge % 5 == 0) {
-				player.sendOverlayMessage(Component.literal("|".repeat(live.leapCharge / 3) + ".".repeat((CHARGE_MAX - live.leapCharge) / 3)).withStyle(ChatFormatting.GREEN));
+				HudBar.hold(player, "locust_leap", live.leapCharge / (float) CHARGE_MAX, HudBar.GREEN, null, true);
 			}
 		}
 		if (live.horn > 0) {

@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "#minecraft:birch_logs"
+  ],
+  "result": {
+    "id": "jaymoskitchen:wood_chip_birch",
+    "count": 4
+  }
+}

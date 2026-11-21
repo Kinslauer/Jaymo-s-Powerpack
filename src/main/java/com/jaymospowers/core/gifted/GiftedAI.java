@@ -1,5 +1,6 @@
 package com.jaymospowers.core.gifted;
 
+import com.jaymospowers.core.brawl.Brawl;
 import com.jaymospowers.core.fx.MagicFx;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,6 +57,9 @@ public final class GiftedAI {
 	/** How often each gifted villager thinks about a move (ticks), and how often their passive runs. */
 	static final int THINK_EVERY = 10;
 	public static final int PASSIVE_EVERY = 20;
+	/** How often (ticks) the fighter brain ({@link Brawl}) is told their foe, how fast a rank 1 villager thinks, their rank at base, a master's and a bold one's extra. */
+	static final int BRAWL_EVERY = 2, THINK_FASTEST = 5;
+	static final float BRAWL_BASE = 0.2F, BRAWL_MASTER = 0.2F, BRAWL_BOLD = 0.1F, BRAWL_WARY = -0.1F, BRAWL_FLOOR = 0.05F;
 	/** How far off a foe can be and still be fought with the power (blocks). */
 	static final double RANGE = 20.0;
 	/** A foe this near is close (a wary villager gets away first). */
@@ -145,7 +149,7 @@ public final class GiftedAI {
 	 * {@code killer} slew a gifted villager: something of their power seeps into them. Andy: "It should corrupt you, but
 	 * also boost your mastery gain or xp." Their own power's corruption fills ({@link #SLAIN_CORRUPTION}, more for a
 	 * corrupted gift) and their mastery leaps ({@link #SLAIN_MASTERY}); with nothing left to learn, or no power, it's
-	 * experience instead.
+	 * experience instead. Only the ink and the sound tell of it (Andy 2026-11-20: no chat line, it read as discovery text).
 	 */
 	private static void slain(ServerPlayer killer, Gifted.Gift gift) {
 		com.jaymospowers.core.Fate.addCorruption(killer, gift.corrupted() ? SLAIN_CORRUPTION_TAKEN : SLAIN_CORRUPTION);
@@ -155,7 +159,6 @@ public final class GiftedAI {
 		ServerLevel level = killer.level();
 		level.sendParticles(ParticleTypes.SQUID_INK, killer.getX(), killer.getY(0.6), killer.getZ(), 16, 0.3, 0.5, 0.3, 0.03);
 		level.playSound(null, killer.getX(), killer.getY(), killer.getZ(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.PLAYERS, 1.0F, 0.7F);
-		killer.sendSystemMessage(Component.translatable("gift.jaymospowers.slain"));
 	}
 
 	static void track(PathfinderMob mob) {
@@ -179,7 +182,9 @@ public final class GiftedAI {
 				LOADED.remove(mob);
 				continue;
 			}
-			if (!mob.isAlive() || mob.isBaby() || mob.entityTags().contains(DOWNED)) {
+			if (!mob.isAlive() || mob.isBaby() || mob.entityTags().contains(DOWNED)
+				|| com.jaymospowers.power.arsenal.ArsenalSeal.sealed(mob) || com.jaymospowers.core.RuledMute.on(mob)) {
+				// (a Rift Seal round them, or an oath or pact rule) their power sleeps
 				continue;
 			}
 			kit.tick(level, mob, gift);
@@ -188,7 +193,8 @@ public final class GiftedAI {
 				kit.passive(level, mob, gift);
 			}
 			echo(level, mob, gift);
-			if ((mob.tickCount + phase) % THINK_EVERY == 0) {
+			brawl(level, mob, gift, phase);
+			if ((mob.tickCount + phase) % Brawl.byRank(mob, THINK_EVERY, THINK_FASTEST) == 0) {
 				think(level, mob, gift, kit);
 			}
 			int everyday = gift.open() ? EVERYDAY_EVERY / 2 : EVERYDAY_EVERY;
@@ -199,6 +205,33 @@ public final class GiftedAI {
 					Gifted.set(mob, seen(level, mob, gift));
 				}
 			}
+		}
+	}
+
+	/**
+	 * The fighter brain for a gifted villager with a foe: flight if their power flies, dashes and sidesteps, the vanish dodge,
+	 * guard and parry, all in their power's own flavour ({@link GiftKit#color}, {@link GiftKit#trail}). A Galactic Patrolman's
+	 * brain is run by the Patrol itself.
+	 */
+	private static void brawl(ServerLevel level, PathfinderMob mob, Gifted.Gift gift, int phase) {
+		if ((mob.tickCount + phase) % BRAWL_EVERY != 0 || mob.entityTags().contains(com.jaymospowers.power.zfighter.ZFighterPatrol.TAG)) {
+			return;
+		}
+		LivingEntity foe = foe(mob);
+		if (foe == null && !Brawl.flying(mob) && Brawl.rank(mob) == 0.0F) {
+			return;
+		}
+		if (foe != null && !gift.open() && mob.getHealth() > mob.getMaxHealth() * HIDE_UNTIL && watched(level, mob, foe)) {
+			return; // a hidden gift stays hidden in front of their own, as in think
+		}
+		float base = BRAWL_BASE + (gift.master() ? BRAWL_MASTER : 0.0F)
+			+ (gift.style() == Gifted.BOLD ? BRAWL_BOLD : gift.style() == Gifted.WARY ? BRAWL_WARY : 0.0F);
+		Brawl.tick(level, mob, foe, Brawl.Profile.gifted(Math.max(BRAWL_FLOOR, base), mob),
+			com.jaymospowers.power.zfighter.ZFighterStrings.engaged(mob), com.jaymospowers.power.zfighter.ZFighterStrings.rushing(mob));
+		if (Brawl.takeVanish(mob)) {
+			// they blinked behind whoever struck: their next move is ready at once
+			NEXT.remove(mob);
+			com.jaymospowers.power.zfighter.ZFighterStrings.rested(mob);
 		}
 	}
 
@@ -275,7 +308,7 @@ public final class GiftedAI {
 			return; // not in front of their own, not yet
 		}
 		if (gift.master() && mob.getHealth() <= mob.getMaxHealth() * MASTER_ULTIMATE_AT && unleash(mob, foe)) {
-			NEXT.put(mob, now + gap(gift));
+			NEXT.put(mob, now + gap(mob, gift));
 			return;
 		}
 		double distance = mob.distanceTo(foe);
@@ -294,6 +327,9 @@ public final class GiftedAI {
 			if (move.kind() == GiftKit.Kind.STRIKE && !seen) {
 				continue;
 			}
+			if (Brawl.flying(mob) && kit.groundOnly(move)) {
+				continue;
+			}
 			ready.add(move);
 		}
 		if (ready.isEmpty()) {
@@ -305,7 +341,7 @@ public final class GiftedAI {
 			return;
 		}
 		cooling.put(pick.name(), now + (gift.master() ? (long)(pick.cooldown() * MASTER_COOLDOWN) : pick.cooldown()));
-		NEXT.put(mob, now + gap(gift));
+		NEXT.put(mob, now + gap(mob, gift));
 		if (pick == signature) {
 			flourish(level, mob);
 			if (pick.kind() == GiftKit.Kind.STRIKE || pick.kind() == GiftKit.Kind.CLOSE) {
@@ -321,11 +357,13 @@ public final class GiftedAI {
 	}
 
 	/** The gap after a move: by how they fight, shorter for a master, longer for a hidden gift. */
-	private static int gap(Gifted.Gift gift) {
+	private static int gap(PathfinderMob mob, Gifted.Gift gift) {
 		int gap = GAP[Math.clamp(gift.style(), 0, GAP.length - 1)];
 		if (gift.master()) {
 			gap = (int)(gap * MASTER_COOLDOWN);
 		}
+		// (fighter brain) a higher rank shortens the gap, down to half
+		gap = Brawl.tempo(mob, gap);
 		return gift.open() ? gap : gap * HIDDEN_GAP;
 	}
 
@@ -367,7 +405,9 @@ public final class GiftedAI {
 	}
 
 	private static boolean fightable(PathfinderMob mob, @Nullable LivingEntity foe) {
-		if (foe == null || foe == mob || !foe.isAlive() || foe.isRemoved() || foe.level() != mob.level() || mob.distanceTo(foe) > MASTER_RANGE) {
+		// (Andy, 2026-11-19) the downed are out of the fight: no power thrown at them
+		if (foe == null || foe == mob || !foe.isAlive() || foe.isRemoved() || foe.level() != mob.level() || mob.distanceTo(foe) > MASTER_RANGE
+			|| foe.entityTags().contains(DOWNED)) {
 			return false;
 		}
 		return !(foe instanceof Player player) || !player.isCreative() && !player.isSpectator();
@@ -403,7 +443,7 @@ public final class GiftedAI {
 		GiftKit kit = gift == null ? null : Gifted.kit(gift.power());
 		GiftKit.Ultimate ultimate = kit == null ? null : kit.ultimate();
 		if (ultimate == null || !(mob.level() instanceof ServerLevel level) || !mob.isAlive() || mob.entityTags().contains(DOWNED)
-			|| !fightable(mob, foe)) {
+			|| !fightable(mob, foe) || com.jaymospowers.power.arsenal.ArsenalSeal.sealed(mob) || com.jaymospowers.core.RuledMute.on(mob)) {
 			return false;
 		}
 		long now = level.getGameTime();

@@ -3,6 +3,7 @@ package com.jaymospowers.core.wounds;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.compat.SpookyDoorsCompat;
 import com.jaymospowers.core.Carry;
+import com.jaymospowers.core.HudBar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -57,8 +58,6 @@ public final class DownedStruggle {
 	static final int GRACE_TICKS = 8;
 	/** A struggle left this long (ticks) is forgotten: the next one starts from nothing. */
 	public static final int FORGET_TICKS = 200;
-	/** The struggle's bar length. */
-	static final int BAR = 12;
 	/** In bed: ticks between mends, what each mends (health points), and the share of a part rest mends it to. */
 	public static final int REST_INTERVAL = 40;
 	public static final float REST_HEAL = 1.0F;
@@ -166,9 +165,7 @@ public final class DownedStruggle {
 				0.6F + level.getRandom().nextFloat() * 0.3F);
 		}
 		if (done < 1.0F) {
-			int filled = Math.round(BAR * done);
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.downed.struggle", "|".repeat(filled) + ".".repeat(BAR - filled))
-				.withStyle(ChatFormatting.YELLOW));
+			HudBar.hold(player, "struggle", done, HudBar.YELLOW, Component.translatable("bar.jaymospowers.struggle"), true);
 			return InteractionResult.SUCCESS_SERVER;
 		}
 		STRUGGLES.remove(player.getUUID());
@@ -314,7 +311,7 @@ public final class DownedStruggle {
 		}
 		long lain = now - rest.since;
 		if (lain > 0 && lain % REST_INTERVAL == 0) {
-			mendWorst(player);
+			mendWorst(player, REST_HEAL);
 		}
 		if (REST_SET_TICKS > 0 && lain == REST_SET_TICKS) {
 			BodyPlan plan = Wounds.plan(player);
@@ -330,11 +327,11 @@ public final class DownedStruggle {
 		return true;
 	}
 
-	/** The most hurt part that can still mend, by {@link #REST_HEAL}. */
-	private static void mendWorst(ServerPlayer player) {
+	/** The most hurt part that can still mend, by {@code amount}. True if one did. */
+	static boolean mendWorst(ServerPlayer player, float amount) {
 		BodyPlan plan = Wounds.plan(player);
 		if (plan == null) {
-			return;
+			return false;
 		}
 		@Nullable BodyPart worst = null;
 		float lowest = REST_CAP - 0.001F;
@@ -350,9 +347,7 @@ public final class DownedStruggle {
 				}
 			}
 		}
-		if (worst != null) {
-			Wounds.restPart(player, worst, REST_HEAL, REST_CAP);
-		}
+		return worst != null && Wounds.restPart(player, worst, amount, REST_CAP) > 0.0F;
 	}
 
 	/** They're up, gone or dead: nothing of theirs is kept. */

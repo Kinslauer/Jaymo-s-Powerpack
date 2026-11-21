@@ -43,11 +43,12 @@
     },
     "set_lamps": {
       "do": "lamps", "at": "square", "count": 6, "goal": "Light the dark corners of {town}",
+      "clock": { "raid": [4, 5] }, "within": "raid", "late": "hold", "until": "before the dark of the moon",
       "journal": "I set lamps in the dark corners of {town}. Nothing comes down a lit lane unseen.",
       "then": "lamps_done"
     },
     "lamps_done": {
-      "do": "talk", "who": "giver", "goal": "Tell {giver} the lamps are set",
+      "do": "talk", "who": "giver", "goal": "Tell {giver} the lamps are set", "within": "raid", "late": "hold", "until": "before the dark of the moon",
       "say": [
         "Better. I can see the end of the tanners' row for the first time in my life. Now the north side.",
         "The old fence rotted out at the gap two springs ago, and the elders have been meaning to mend it ever since. {warden} has asked them for stone every year for thirty years. They say nothing has happened yet, and stone costs. Timber will have to do."
@@ -59,23 +60,90 @@
     },
     "raise_fence": {
       "do": "build", "at": "gap", "blocks": "#minecraft:fences", "count": 16, "goal": "Raise a palisade across the gap on the north side",
+      "within": "raid", "late": "hold", "until": "before the dark of the moon",
       "journal": "I closed the gap on the north side with a stretch of palisade.",
       "then": "readied"
     },
     "readied": {
-      "do": "talk", "who": "giver", "goal": "Tell {giver} the gap is closed", "pay": 6,
+      "do": "talk", "who": "giver", "goal": "Tell {giver} the gap is closed", "pay": 6, "within": "raid", "late": "hold", "until": "before the dark of the moon",
       "say": [
         "That will turn them, or slow them, and slow is all I ask. Here, for the timber and the sweat.",
         "When the moon is gone, {ringer} rings the night bell and every door in {town} bars. {warden} has the river postern, as ever. {carter} has offered his cart to block the market lane, which is the first useful thing he has offered this town. The children go to the cellar under {widow}'s house. She'd not hear of anywhere else."
       ],
       "replies": [
-        { "say": "I'll be ready.", "then": "wait_dark", "journal": "The town is as ready as timber and lamp oil can make it. {giver} will send for me when the moon is gone." },
-        { "say": "And where do you want me?", "then": "wait_dark", "journal": "The town is as ready as timber and lamp oil can make it. {giver} wants me in the square, where the lamps are, when the bell rings." }
+        { "say": "I'll be ready.", "then": "more_to_do", "mark": "bell_readied", "journal": "The town is as ready as timber and lamp oil can make it. {giver} will send for me when the moon is gone." },
+        { "say": "And where do you want me?", "then": "more_to_do", "mark": "bell_readied", "journal": "The town is as ready as timber and lamp oil can make it. {giver} wants me in the square, where the lamps are, when the bell rings." }
       ]
     },
-    "wait_dark": { "do": "wait", "days": [2, 3], "wake": "giver", "then": "eve" },
+    "more_to_do": {
+      "do": "talk", "who": "giver", "goal": "Ask {giver} what is still to do", "within": "raid", "late": "hold", "until": "before the dark of the moon",
+      "say": {
+        "?mark:bell_bar_mended & mark:bell_archers_posted & mark:bell_girl_posted": "The bar, the roofs and the bell. I've nothing left to ask of you, and I never thought to say that to anyone. Sleep while you can. The moon is nearly gone. Our last quiet day is {in:raid}.",
+        "?mark:bell_bar_mended": "Good. That's one thing less to lie awake over. See to what's left if there's time for it. Our last quiet day is {in:raid}. Or tell me you're done and I'll send for you on the night.",
+        "?mark:bell_archers_posted": "Good. That's one thing less to lie awake over. See to what's left if there's time for it. Our last quiet day is {in:raid}. Or tell me you're done and I'll send for you on the night.",
+        "?mark:bell_girl_posted": "Good. That's one thing less to lie awake over. See to what's left if there's time for it. Our last quiet day is {in:raid}. Or tell me you're done and I'll send for you on the night.",
+        "?": [
+          "The lamps and the fence were what I couldn't do without. The rest is what I lie awake over, and there are few enough days for it. Our last quiet day is {in:raid}. They'll come on their night whether we're ready or not.",
+          "The river postern's bar is old oak, split along the grain. The three lads who can shoot have a dozen shafts between them. And {ringer}'s knees are that bad he rings sitting down. Do what you can of it, or none of it. I'll not think the worse of you."
+        ]
+      },
+      "replies": [
+        { "say": "I'll see {warden} about the postern bar.", "if": "!mark:bell_bar_mended", "then": "bar_ask" },
+        { "say": "I'll find shafts for your archers.", "if": "!mark:bell_archers_posted", "then": "archers_bring" },
+        { "say": "I'll speak to {ringer} about the bell.", "if": "!mark:bell_girl_posted", "then": "bell_ask" },
+        { "say": "That will have to do. Send for me on the night.", "then": "wait_dark" }
+      ]
+    },
+    "bar_ask": {
+      "do": "talk", "who": "warden", "goal": "See {warden} about the postern bar", "within": "raid", "late": "hold", "until": "before the dark of the moon",
+      "say": [
+        "The bar? Look at it. Oak my father hung, and split from end to end. A child could slip it with one hand. I've asked the elders for iron to shoe it since before {giver} could walk.",
+        "Bring me three ingots and I'll have it shod and banded by dusk. Then it'll take two hands and a grunt to lift, as a bar should."
+      ],
+      "replies": [
+        { "say": "You'll have your iron.", "then": "bar_bring" },
+        { "say": "It has held this long.", "then": "more_to_do" }
+      ]
+    },
+    "bar_bring": { "do": "bring", "who": "warden", "item": "minecraft:iron_ingot", "count": 3, "goal": "Bring {warden} three iron ingots for the postern bar", "within": "raid", "late": "hold", "until": "before the dark of the moon", "then": "bar_done" },
+    "bar_done": {
+      "do": "talk", "who": "warden", "goal": "Hear {warden} on the new bar", "within": "raid", "late": "hold", "until": "before the dark of the moon",
+      "say": "There. Shod at both ends and banded in the middle. Thirty years I've asked them for that, and a stranger does it in a day. Lift it. Go on. No, both hands. That's a bar.",
+      "replies": [
+        { "say": "It'll hold.", "then": "more_to_do", "mark": "bell_bar_mended", "journal": "I brought {warden} iron and he shod the postern bar. It takes two hands and some time to lift now." }
+      ]
+    },
+    "archers_bring": { "do": "bring", "who": "giver", "item": "minecraft:arrow", "count": 24, "goal": "Bring {giver} two dozen arrows for the roofs", "within": "raid", "late": "hold", "until": "before the dark of the moon", "then": "archers_done" },
+    "archers_done": {
+      "do": "talk", "who": "giver", "goal": "Hear where {giver} will post the archers", "within": "raid", "late": "hold", "until": "before the dark of the moon",
+      "say": "Two dozen. That's eight apiece, and the tanners' roofs look straight down the lane. They'll not hit much. They don't need to. A raider who is being shot at walks slower, and slow is all I ask.",
+      "replies": [
+        { "say": "Put them where they can see the lamps.", "then": "more_to_do", "mark": "bell_archers_posted", "journal": "I found two dozen arrows, and {giver} has posted the three lads who can shoot on the tanners' roofs." }
+      ]
+    },
+    "bell_ask": {
+      "do": "talk", "who": "ringer", "goal": "Speak to {ringer} about the bell", "within": "raid", "late": "hold", "until": "before the dark of the moon",
+      "say": [
+        "My knees? Who's been talking about my knees? Well. They're bad. I ring sitting down, and if that rope were ever out of my reach I'd be a while getting to it.",
+        "There's a child, {girl}, that I chase off the bell post six times a day. Goes up it like a squirrel. If it's quick hands at the bell you want, they're hers. Her mam won't like it, and nor do I."
+      ],
+      "replies": [
+        { "say": "I'll ask her.", "then": "bell_girl" },
+        { "say": "Then we leave it as it is.", "then": "more_to_do" }
+      ]
+    },
+    "bell_girl": {
+      "do": "talk", "who": "girl", "goal": "Ask {girl} to keep the bell post on the night", "within": "raid", "late": "hold", "until": "before the dark of the moon",
+      "say": "Me? At the bell? At night, when they come? Everybody else has to go in the cellar. You can see the whole town from up the post. I'd see them first. I'd see them before anybody.",
+      "voices": { "mercy": "She's a child. Put her in the cellar with the rest of them.", "courage": "She's keener than half the watch, and she can climb. Let her." },
+      "replies": [
+        { "say": "You'd see them first, and the whole town would hear you. Stay up the post and don't come down.", "then": "more_to_do", "mark": "bell_girl_posted", "for": ["courage"], "irks": ["mercy"], "journal": "{girl} will keep the bell post on the night. She climbs it like a squirrel, and old {ringer} cannot." },
+        { "say": "No. The cellar is the place for you.", "then": "more_to_do", "journal": "I thought better of putting a child at the bell post." }
+      ]
+    },
+    "wait_dark": { "do": "wait", "days": [9, 9], "wake": "giver", "within": "raid", "late": "eve", "until": "until the dark of the moon", "then": "eve" },
     "eve": {
-      "do": "talk", "who": "giver", "goal": "Speak with {giver}",
+      "do": "talk", "who": "giver", "goal": "Speak with {giver}", "within": 0, "late": "hold", "until": "before the bell",
       "say": "It's tonight. No moon, and the dogs have been uneasy since noon. When you hear the bell, come to the square and stand where the lamps are. Whatever comes down that lane, it does not reach the cellar.",
       "replies": [
         { "say": "It won't.", "then": "hold" },
@@ -83,17 +151,35 @@
       ]
     },
     "hold": {
-      "do": "defend", "at": "square", "waves": 3, "foes": "minecraft:pillager", "stars": 2,
+      "do": "defend", "at": "square", "foes": "minecraft:pillager", "stars": 2,
+      "waves": {
+        "?mark:bell_bar_mended & mark:bell_archers_posted & mark:bell_girl_posted": 1,
+        "?mark:bell_bar_mended": 2,
+        "?mark:bell_archers_posted": 2,
+        "?mark:bell_girl_posted": 2,
+        "?mark:bell_readied": 3,
+        "?": 5
+      },
       "goal": "Hold {town} until dawn", "pay": 10,
-      "journal": "They came at the dark of the moon, and we held the square until it was light.",
+      "within": 2, "late": "end:sacked", "until": "the raid is on the town",
+      "journal": {
+        "?mark:bell_readied": "They came at the dark of the moon, and we held the square until it was light.",
+        "?": "They came at the dark of the moon with the town half ready, and we held the square until it was light."
+      },
       "then": "after"
     },
     "after": {
       "do": "talk", "who": "giver", "goal": "Find {giver} when it's over",
-      "say": [
-        "We held. I've two men hurt and the cooper's roof is gone, and I'll take that and be glad.",
-        "But hear this. They never came at the north side. They came up the river lane, inside the wall, and the bell rang late. The postern bar was lying in the grass. Not split. Lifted out. Someone in {town} opened that door, and I broke bread with them this week."
-      ],
+      "say": {
+        "?mark:bell_girl_posted": [
+          "We held. I've two men hurt and the cooper's roof is gone, and I'll take that and be glad.",
+          "But hear this. They never came at the north side. They came up the river lane, inside the wall, and the bell rang late. It would have rung a deal later, only that child {girl} went up the post after the rope. The postern bar was lying in the grass. Not split. Lifted out. Someone in {town} opened that door, and I broke bread with them this week."
+        ],
+        "?": [
+          "We held. I've two men hurt and the cooper's roof is gone, and I'll take that and be glad.",
+          "But hear this. They never came at the north side. They came up the river lane, inside the wall, and the bell rang late. The postern bar was lying in the grass. Not split. Lifted out. Someone in {town} opened that door, and I broke bread with them this week."
+        ]
+      },
       "replies": [
         { "say": "I'll find out whose hand it was.", "then": "search_postern", "journal": "The raiders came in by the river postern. Its bar was lifted out from inside, and the bell rang late. {giver} wants to know whose hand it was." },
         { "say": "You held. Some doors are better left shut.", "then": "end:let_lie" }
@@ -102,7 +188,8 @@
     "search_postern": {
       "do": "search", "at": "postern", "need": 3, "goal": "Look over the river postern",
       "clues": [
-        { "name": "The postern bar", "item": "minecraft:stick", "lore": ["Lifted clean out of its brackets and laid in the grass.", "There is no axe mark on it anywhere."], "journal": "The postern bar was lifted out and laid down, not broken." },
+        { "name": "The postern bar", "item": "minecraft:stick", "lore": ["Lifted clean out of its brackets and laid in the grass.", "There is no axe mark on it anywhere."], "journal": "The postern bar was lifted out and laid down, not broken.", "if": "!mark:bell_bar_mended" },
+        { "name": "The postern bar", "item": "minecraft:stick", "lore": ["The new iron is on it, and not a scratch. Lifted clean out and laid in the grass.", "It takes two hands and time. Whoever did it was not hurried, and not afraid of being seen at that door."], "journal": "The postern bar I had shod was lifted out and laid down, not broken. Whoever lifted it had time, and no fear of being seen there.", "if": "mark:bell_bar_mended" },
         { "name": "An unshot bolt", "item": "minecraft:arrow", "lore": ["Dropped inside the wall, not shot over it.", "Black fletching: the fort's."], "journal": "A fort bolt lay inside the wall, dropped by someone who walked in." },
         { "name": "A heel of bread in a cloth", "item": "minecraft:bread", "lore": ["Left on the wall top, on the river side.", "Last night's bake. The cloth is hemmed with a weaver's stitch."], "journal": "Someone left bread on the river wall last night, in a cloth with a weaver's hem.", "if": "!traitor=widow" },
         { "name": "A thread of loom wool", "item": "minecraft:string", "lore": ["Undyed, greasy still, caught on the bar's bracket.", "It hangs at the height of a woman's sleeve."], "journal": "A thread of loom wool was caught on the bracket the bar was lifted from.", "if": "traitor=widow" },
@@ -117,6 +204,21 @@
     "ringer": {
       "do": "talk", "who": "ringer", "goal": "Ask {ringer} why the bell rang late",
       "say": {
+        "?mark:bell_girl_posted & traitor=widow": [
+          "Late. Yes. Thirty years I've rung that bell and it has never once been late, and you may write that down.",
+          "I went for the rope at the first shout and the rope wasn't there. Someone had looped it up over the beam, out of an old man's reach. I was still feeling about for the stool when that child {girl}, up the post already, shook it loose and swung on it with her whole weight. A dozen breaths late, where it might have been fifty. You put her there. I'd not have thought of it.",
+          "Who was by the bell post at dusk? Everyone. {widow} came for a light for her lantern and stood a while looking up. I thought she was praying. {carter} was about with that cart. {warden} went by to his door. That's the whole town, isn't it. That's no help to you."
+        ],
+        "?mark:bell_girl_posted & traitor=warden": [
+          "Late. Yes. Thirty years I've rung that bell and it has never once been late, and you may write that down.",
+          "I went for the rope at the first shout and the rope wasn't there. Someone had looped it up over the beam, out of an old man's reach. I was still feeling about for the stool when that child {girl}, up the post already, shook it loose and swung on it with her whole weight. A dozen breaths late, where it might have been fifty. You put her there. I'd not have thought of it.",
+          "Who was by the bell post at dusk? Everyone. {warden} stopped to look the rope over, said he'd save my knees the climb this once. {widow} came for a light for her lantern. {carter} was about with that cart. That's the whole town, isn't it. That's no help to you."
+        ],
+        "?mark:bell_girl_posted": [
+          "Late. Yes. Thirty years I've rung that bell and it has never once been late, and you may write that down.",
+          "I went for the rope at the first shout and the rope wasn't there. Someone had looped it up over the beam, out of an old man's reach. I was still feeling about for the stool when that child {girl}, up the post already, shook it loose and swung on it with her whole weight. A dozen breaths late, where it might have been fifty. You put her there. I'd not have thought of it.",
+          "Who was by the bell post at dusk? Everyone. {carter} stood his cart right under it to rest the horse, and climbed about on the load a good while. {widow} came for a light for her lantern. {warden} went by to his door. That's the whole town, isn't it. That's no help to you."
+        ],
         "?traitor=widow": [
           "Late. Yes. Thirty years I've rung that bell and it has never once been late, and you may write that down.",
           "I went for the rope at the first shout and the rope wasn't there. Someone had looped it up over the beam, out of an old man's reach. I had to fetch a stool. Fifty breaths, I counted after.",
@@ -134,6 +236,9 @@
         ]
       },
       "journal": {
+        "?mark:bell_girl_posted & traitor=widow": "The bell rope had been looped up out of {ringer}'s reach, and {girl} climbed the post to ring it. At dusk {widow} stood under the bell a while, looking up. The carter and the gate warden were both near as well.",
+        "?mark:bell_girl_posted & traitor=warden": "The bell rope had been looped up out of {ringer}'s reach, and {girl} climbed the post to ring it. At dusk {warden} looked the rope over himself, to save the old man's knees. The weaver and the carter were both near as well.",
+        "?mark:bell_girl_posted": "The bell rope had been looped up out of {ringer}'s reach, and {girl} climbed the post to ring it. At dusk {carter} stood his cart under the bell post and climbed about on the load. The weaver and the gate warden were both near as well.",
         "?traitor=widow": "The bell rope had been looped up out of {ringer}'s reach. At dusk {widow} stood under the bell a while, looking up. The carter and the gate warden were both near as well.",
         "?traitor=warden": "The bell rope had been looped up out of {ringer}'s reach. At dusk {warden} looked the rope over himself, to save the old man's knees. The weaver and the carter were both near as well.",
         "?": "The bell rope had been looped up out of {ringer}'s reach. At dusk {carter} stood his cart under the bell post and climbed about on the load. The weaver and the gate warden were both near as well."
@@ -143,6 +248,9 @@
     "girl": {
       "do": "talk", "who": "girl", "goal": "Ask the child by the bell post what she saw",
       "say": {
+        "?mark:bell_girl_posted & traitor=widow": "I was up the bell post, like you said. You can see Mistress {widow}'s cellar door from up there. She came up out of it before anybody had shouted anything. She didn't have the pail. She went off down the river lane, close to the wall, where the lamps don't reach.",
+        "?mark:bell_girl_posted & traitor=warden": "I was up the bell post, like you said. You can see right down the river lane to the door from up there. Old {warden} sent the other watchman away up the lane. Then he put his lantern out with his fingers, on purpose. Then he just stood by the door, like he was waiting for the miller.",
+        "?mark:bell_girl_posted": "I was up the bell post, like you said. You can see right down the river lane to the door from up there. {carter}'s horse had sacks tied on its feet, all four. I thought it was a game. He left the cart in the market lane like he said, but he took the horse down to the river door.",
         "?traitor=widow": "We were all in the cellar, and Mistress {widow} said she was going up for water. But she didn't take the pail. I had the pail. I was sitting on it. She was gone a long time, and when she came back her hands were shaking and she counted us twice.",
         "?traitor=warden": "I wasn't in the cellar. Don't tell. I was in the hayloft, you can see the river door from there. Old {warden} sent the other watchman away up the lane. Then he put his lantern out with his fingers, on purpose. Then he just stood by the door, like he was waiting for the miller.",
         "?": "I wasn't in the cellar. Don't tell. I was in the hayloft, you can see the river door from there. {carter}'s horse had sacks tied on its feet, all four. I thought it was a game. He left the cart in the market lane like he said, but he took the horse down to the river door."
@@ -155,11 +263,17 @@
     "girl_more": {
       "do": "talk", "who": "girl",
       "say": {
+        "?mark:bell_girl_posted & traitor=widow": "Then I saw the river door open, and I went for the rope, and the rope was up over the beam, so I climbed. Mistress {widow} puts bread on the river wall every night for her boy, in case they let him have it. Everybody knows. Last night she didn't. I looked this morning. Why would she stop?",
+        "?mark:bell_girl_posted & traitor=warden": "Then men came in, quiet, lots of them. More than he thought, I think, because he said a word my mam smacks me for. He shouted for the watch, but he'd sent the watch away. So I went for the rope, and it was up over the beam, and I climbed. And Mistress {widow} had put her bread out on the wall same as always, and they trod on it.",
+        "?mark:bell_girl_posted": "Then men came in at the door, and I went for the rope, and it was up over the beam, so I climbed. He came back up the lane without his hat. And this morning his cart's all loaded, with the good chairs on it and everything. My da says nobody loads the good chairs for market.",
         "?traitor=widow": "Then the bell, and the shouting. Mistress {widow} puts bread on the river wall every night for her boy, in case they let him have it. Everybody knows. Last night she didn't. I looked this morning. Why would she stop?",
         "?traitor=warden": "Then men came in, quiet, lots of them. More than he thought, I think, because he said a word my mam smacks me for. He shouted for the watch, but he'd sent the watch away. Then the bell. And Mistress {widow} had put her bread out on the wall same as always, and they trod on it.",
         "?": "Then the bell, late. He came back up the lane without his hat. And this morning his cart's all loaded, with the good chairs on it and everything. My da says nobody loads the good chairs for market."
       },
       "journal": {
+        "?mark:bell_girl_posted & traitor=widow": "From the bell post the child saw {widow} leave the cellar before any shout, with no pail, and go down the river lane in the dark. And the bread she leaves on the wall each night for her son was not there last night.",
+        "?mark:bell_girl_posted & traitor=warden": "From the bell post the child watched {warden} send the other watchman away, put out his own lantern and stand by the door. More men came in than he seemed to expect.",
+        "?mark:bell_girl_posted": "From the bell post the child watched {carter} lead his horse to the river door with its hooves muffled. This morning his cart is loaded with everything he owns.",
         "?traitor=widow": "The child says {widow} left the cellar before the bell, without the pail she said she went to fill. And the bread she leaves on the wall each night for her son was not there last night.",
         "?traitor=warden": "The child watched from a hayloft. {warden} sent the other watchman away, put out his own lantern and stood by the door. More men came in than he seemed to expect.",
         "?": "The child watched from a hayloft. {carter} led his horse to the river door with its hooves muffled. This morning his cart is loaded with everything he owns."
@@ -277,11 +391,18 @@
     },
     "confess_warden": {
       "do": "talk", "who": "warden", "goal": "Put it to {warden} before the elders do",
-      "say": [
-        "The child in the hayloft. I saw the straw move and thought it was a cat. Thirty years on a door and I can't tell a child from a cat.",
-        "I sent word to the fort by a pedlar: the river door, the dark of the moon. Six men, I thought. Enough to break a few shutters, and I'd hold them at the lane's mouth and be found there, bloody, and the elders would open the chest for stone at last. There were thirty. I couldn't hold thirty.",
-        "I'm not sorry I wanted the wall. I'm sorry for the cooper. Say which it's to be."
-      ],
+      "say": {
+        "?mark:bell_girl_posted": [
+          "The child on the bell post. I looked that rope over at dusk and never once looked higher. Thirty years on a door and I can't see a child over my own head.",
+          "I sent word to the fort by a pedlar: the river door, the dark of the moon. Six men, I thought. Enough to break a few shutters, and I'd hold them at the lane's mouth and be found there, bloody, and the elders would open the chest for stone at last. There were thirty. I couldn't hold thirty.",
+          "I'm not sorry I wanted the wall. I'm sorry for the cooper. Say which it's to be."
+        ],
+        "?": [
+          "The child in the hayloft. I saw the straw move and thought it was a cat. Thirty years on a door and I can't tell a child from a cat.",
+          "I sent word to the fort by a pedlar: the river door, the dark of the moon. Six men, I thought. Enough to break a few shutters, and I'd hold them at the lane's mouth and be found there, bloody, and the elders would open the chest for stone at last. There were thirty. I couldn't hold thirty.",
+          "I'm not sorry I wanted the wall. I'm sorry for the cooper. Say which it's to be."
+        ]
+      },
       "replies": [
         { "say": "The elders must hear it from you.", "then": "wait_judged", "journal": "{warden} let the raiders in himself. He thought six would come, enough to frighten the elders into paying for a wall. I left him to the elders." },
         { "say": "Leave the key on the hook and go tonight.", "then": "wait_fled", "mark": "bell_let_run", "journal": "{warden} let the raiders in himself. He thought six would come, enough to frighten the elders into paying for a wall. I told him to leave his key and go.", "against": ["law"], "returns": { "who": "warden", "days": [9, 15], "as": "warning", "say": "I'll not come in. I've no right to that gate now. I watch the fort road from a shepherd's hut, from habit. They've a new captain up there, and he's been asking pedlars about a river door that opened once. Tell them to keep it barred, and bar it twice." } }
@@ -352,6 +473,12 @@
   },
   "endings": {
     "refused": { "text": "I left {giver} to ready {town} without me.", "failed": true },
+    "sacked": {
+      "text": "The fort came down on {town} at the dark of the moon, on its own night, and I was not in the square. They took what they came for. {giver} does not ask where I was.",
+      "failed": true,
+      "marks": ["bell_sacked"],
+      "town": ["The bell rang, and the one who said they'd stand in the square wasn't standing in it.", "They took the grain and two of the cooper's lads. We count what's left. It doesn't take long."]
+    },
     "let_lie": {
       "text": "We held {town}, and I didn't ask who lifted the bar. Nobody asks it aloud. Everybody asks it quietly.",
       "reward": { "coins": 10, "hearts": 6, "reputation": 8 },

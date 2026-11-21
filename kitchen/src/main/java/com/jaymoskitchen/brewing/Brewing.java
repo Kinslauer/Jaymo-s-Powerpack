@@ -115,7 +115,14 @@ public final class Brewing {
 				return brew;
 			}
 		}
-		return stack.is(Items.GLOW_BERRIES) ? Brew.BERRY_WINE : null;
+		if (stack.is(Items.GLOW_BERRIES)) {
+			return Brew.BERRY_WINE;
+		}
+		if (stack.is(com.jaymoskitchen.vintner.Vintner.WARPED_GRAPES)) {
+			return Brew.BLACK_WINE;
+		}
+		Item pantryGrapes = com.jaymoskitchen.OptionalItems.item(com.jaymoskitchen.OptionalItems.PANTRY, "grapes");
+		return pantryGrapes != Items.AIR && stack.is(pantryGrapes) ? Brew.GRAPE_WINE : null;
 	}
 
 	public static Item drink(Brew brew) {

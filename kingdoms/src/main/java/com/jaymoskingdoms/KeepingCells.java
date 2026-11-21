@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -26,7 +27,9 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.ItemStack;
@@ -41,6 +44,7 @@ import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import com.mojang.serialization.Codec;
@@ -62,6 +66,10 @@ import org.jspecify.annotations.Nullable;
  * tale goes on to his thanks. Cured asleep (Andy: "whenever he wakes he doesnt know it was you and wont believe you when you
  * say. so you get nothing"), he sleeps on until the light is broken, and wakes well with nobody to thank.</li>
  * <li><b>Turned</b>: nobody cured him in his day; he rises as one of the dead ({@link BlightSpread}) and the tale ends so.</li>
+ * <li><b>His household</b> (Andy's 2026-11-17 pick): the husks upstairs were his family. Each one put down while he sleeps is
+ * counted ({@link #LAID}); once at least one has been and none is left walking the house ({@link #REST_REACH}), whoever has
+ * the tale carries {@link #RESTED}, and his thanks are different for it. Checked again as he wakes, so it has to be done
+ * before the light goes.</li>
  * <li><b>Master smith</b> (Andy: "add it", the master smith trader of the tale's draft): he sells nothing while he's kept, sick or
  * unthanked (an old home's smith comes with a master weaponsmith's stall; it's taken off him). Once a player he knows cured him
  * has seen the tale through to his thanks ({@link #ended}), he's a master armourer and sells his own stall ({@link #wares}) to
@@ -76,6 +84,14 @@ public final class KeepingCells {
 	/** The marks the tale's waiting steps go on by. */
 	static final String WOKE = "keeping_woke", WOKE_CURED = "keeping_woke_cured", CURED = "keeping_cured", CURED_ASLEEP = "keeping_cured_asleep",
 		TURNED = "keeping_turned";
+	/** The mark of having laid his household to rest while he slept. */
+	static final String RESTED = "keeping_rested";
+	/** How far round his light his household is counted (blocks: across, below, above). */
+	static final int REST_REACH = 14, REST_BELOW = 3, REST_ABOVE = 14;
+	/** How near the house a player has to be for its dead to be counted as his household the first time (blocks). */
+	static final double COUNT_NEAR = 24.0;
+	/** How far from the house one of his household who wandered out is still looked for (blocks). */
+	static final double STRAY_REACH = 64.0;
 	/** How far round a villager the keeping light is looked for (blocks, across; up and down one). */
 	static final int LIGHT_REACH = 2;
 	/** How far round the light the cell's bed is looked for, and the way out (blocks). */
@@ -98,6 +114,11 @@ public final class KeepingCells {
 	static final String LOOKED_TAG = "jaymoskingdoms.keeping_looked";
 	/** Set for good on an old home's smith once he has been laid under his keeping. */
 	static final String SMITH_TAG = "jaymoskingdoms.keeping_smith";
+	/**
+	 * On the dead who are his household (those in his house when it's first read, and any the structure made to stay),
+	 * and on a smith whose house has been read for them: a stray in the yard is nobody of his.
+	 */
+	static final String HOUSEHOLD_TAG = "jaymoskingdoms.keeping_household", COUNTED_TAG = "jaymoskingdoms.keeping_counted";
 
 	/** The master smith's stall: uses of each piece a day (iron and the rest; diamond), his experience for a sale, the price rise. */
 	static final int USES = 12, DIAMOND_USES = 3, XP = 10;
@@ -115,6 +136,10 @@ public final class KeepingCells {
 	/** On an old home's smith once he's a master smith: the day his stall was last stocked. Persistent. */
 	static final AttachmentType<Long> MASTER = AttachmentRegistry.create(JaymosKingdoms.id("keeping_master"),
 		builder -> builder.persistent(Codec.LONG));
+
+	/** On a kept smith: how many of his household were put down while he slept. Persistent. */
+	static final AttachmentType<Integer> LAID = AttachmentRegistry.create(JaymosKingdoms.id("keeping_laid"),
+		builder -> builder.persistent(Codec.INT));
 
 	/** Villagers just loaded, to look at on the next tick. */
 	private static final Set<Villager> FRESH = new HashSet<>();
@@ -148,6 +173,11 @@ public final class KeepingCells {
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(KeepingCells::tick);
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+			if (entity instanceof Zombie && entity.level() instanceof ServerLevel level) {
+				laid(level, entity);
+			}
+		});
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
 			if (world.isClientSide() || hand != InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer sp)
 				|| !(world instanceof ServerLevel level) || !(entity instanceof Villager v) || !v.entityTags().contains(SMITH_TAG)) {
@@ -165,6 +195,55 @@ public final class KeepingCells {
 			KEEPING.clear();
 			WAITED.clear();
 		});
+	}
+
+	/** One of the dead fell: if it was one of a sleeping smith's household, it's laid to rest. */
+	private static void laid(ServerLevel level, LivingEntity dead) {
+		for (Villager v : new ArrayList<>(KEEPING)) {
+			BlockPos light = v.level() == level ? v.getAttached(KEPT) : null;
+			// (one of his, wherever they fell: chased out of the door first, they're still his)
+			if (light != null && dead.entityTags().contains(mark(v))) {
+				v.setAttached(LAID, v.getAttachedOrElse(LAID, 0) + 1);
+				rest(level, v, light, dead);
+			}
+		}
+	}
+
+	/**
+	 * The dead in {@code v}'s house are marked as his household: everyone there the first time it's read with a player
+	 * near enough for them to be loaded, after that only the structure's own (those made to stay).
+	 */
+	private static void household(ServerLevel level, Villager v, BlockPos light) {
+		boolean counted = v.entityTags().contains(COUNTED_TAG);
+		if (!counted && level.getEntitiesOfClass(ServerPlayer.class, house(light).inflate(COUNT_NEAR), p -> !p.isSpectator()).isEmpty()) {
+			return;
+		}
+		for (Zombie z : level.getEntitiesOfClass(Zombie.class, house(light), z -> z.isAlive() && (!counted || z.isPersistenceRequired()))) {
+			z.addTag(mark(v));
+		}
+		v.addTag(COUNTED_TAG);
+	}
+
+	/** The tag on {@code v}'s own household, so one smith's dead never count for another's. */
+	private static String mark(Villager v) {
+		return HOUSEHOLD_TAG + "." + v.getUUID();
+	}
+
+	private static AABB house(BlockPos light) {
+		return new AABB(light).inflate(REST_REACH, 0, REST_REACH).expandTowards(0, REST_ABOVE, 0).expandTowards(0, -REST_BELOW, 0);
+	}
+
+	/**
+	 * Whoever has the smith's tale carries {@link #RESTED} if his household has been put down and none of it still
+	 * walks, in his house or out of it (not counting {@code but}, who is falling now), and doesn't if not.
+	 */
+	private static void rest(ServerLevel level, Villager v, BlockPos light, @Nullable LivingEntity but) {
+		String mark = mark(v);
+		boolean rested = v.getAttachedOrElse(LAID, 0) > 0
+			&& level.getEntitiesOfClass(Zombie.class, house(light).inflate(STRAY_REACH), z -> z != but && z.isAlive() && z.entityTags().contains(mark)).isEmpty();
+		for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
+			Tales.remark(player, TALE, v, RESTED, rested);
+		}
 	}
 
 	/** Whether {@code v} is a smith asleep under his keeping. */
@@ -245,7 +324,7 @@ public final class KeepingCells {
 
 	/** Whether every chunk within {@code reach} blocks (across) of {@code at} is loaded, so reading them never makes one. */
 	private static boolean loaded(ServerLevel level, BlockPos at, int reach) {
-		return level.hasChunksAt(at.offset(-reach, 0, -reach), at.offset(reach, 0, reach));
+		return Loaded.made(level, at.offset(-reach, 0, -reach), at.offset(reach, 0, reach));
 	}
 
 	private static boolean isLight(BlockState state) {
@@ -277,6 +356,7 @@ public final class KeepingCells {
 			// (the cell's edge isn't loaded: the bed, the hatch and the way out are read next second instead)
 			return;
 		}
+		household(level, v, light);
 		if (!isLight(level.getBlockState(light))) {
 			wake(level, v, light);
 			return;
@@ -293,8 +373,14 @@ public final class KeepingCells {
 			}
 		}
 		// (found once the hatch is open and he can be seen, not through the floor)
+		boolean found = false;
 		for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class, v.getBoundingBox().inflate(FIND), p -> !p.isSpectator() && v.hasLineOfSight(p))) {
 			Tales.found(level, player, TALE, v);
+			found = true;
+		}
+		if (found && v.getAttachedOrElse(LAID, 0) > 0) {
+			// (someone who put his household down before they found him)
+			rest(level, v, light, null);
 		}
 	}
 
@@ -347,6 +433,8 @@ public final class KeepingCells {
 				Speech.tell(level, v, player, Component.translatable("keeping.jaymoskingdoms.woke." + v.getRandom().nextInt(WOKE_LINES)), Speech.WHITE);
 			}
 		}
+		// (what was done for his household had to be done by now)
+		rest(level, v, light, null);
 		for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
 			Tales.advance(player, TALE, v, sick ? WOKE : WOKE_CURED, v);
 		}

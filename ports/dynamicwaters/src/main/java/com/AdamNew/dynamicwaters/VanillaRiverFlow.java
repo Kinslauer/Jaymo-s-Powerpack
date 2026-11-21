@@ -65,8 +65,8 @@ public final class VanillaRiverFlow {
     }
 
     static double computeAngle(net.minecraft.world.level.levelgen.RandomState randomState, double x, double z, int y) {
-        final NoiseRouter router = com.AdamNew.dynamicwaters.terrain.WiredRouter.of(randomState);
-        final DensitySampler ridges = randomState.getSampler(router.ridges()), continents = randomState.getSampler(router.continents());
+        final com.AdamNew.dynamicwaters.terrain.WiredRouter.Samplers samplers = com.AdamNew.dynamicwaters.terrain.WiredRouter.samplers(randomState);
+        final DensitySampler ridges = samplers.ridges(), continents = samplers.continents();
         final double gx = sample(ridges, x + STEP, y, z) - sample(ridges, x - STEP, y, z);
         final double gz = sample(ridges, x, y, z + STEP) - sample(ridges, x, y, z - STEP);
         final double len = Math.sqrt(gx * gx + gz * gz);

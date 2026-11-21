@@ -46,7 +46,7 @@ import net.minecraft.world.level.material.PushReaction;
  */
 public final class Whaling {
 	/** Great whales come to the deep oceans with this weight, in pods of this many. */
-	static final int WEIGHT = 2, POD_MIN = 1, POD_MAX = 3;
+	static final int WEIGHT = 4, POD_MIN = 1, POD_MAX = 3;
 
 	public static EntityType<GreatWhale> GREAT_WHALE;
 	public static EntityType<WhaleCarcass> WHALE_CARCASS;

@@ -97,6 +97,7 @@ public class XenoDouble extends PathfinderMob {
 	}
 
 	static void init() {
+		DoubleOrders.init();
 		ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("xeno_double"));
 		TYPE = Registry.register(BuiltInRegistries.ENTITY_TYPE, key,
 			EntityType.Builder.<XenoDouble>of(XenoDouble::new, MobCategory.MISC)
@@ -136,6 +137,7 @@ public class XenoDouble extends PathfinderMob {
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
 		this.goalSelector.addGoal(1, new ErrandGoal(this));
+		this.goalSelector.addGoal(1, new DoubleOrders.OrderGoal(this));
 		this.goalSelector.addGoal(2, new SwarmGoal(this));
 		this.goalSelector.addGoal(4, new FollowGoal(this));
 		this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 8.0F));
@@ -299,6 +301,13 @@ public class XenoDouble extends PathfinderMob {
 	public void remove(Entity.RemovalReason reason) {
 		if (reason.shouldDestroy()) {
 			this.dropBlock();
+			if (this.level() instanceof ServerLevel level) {
+				// and what it picked up or fetched for its owner
+				for (net.minecraft.world.item.ItemStack stack : this.held) {
+					this.spawnAtLocation(level, stack);
+				}
+			}
+			this.held.clear();
 		}
 		super.remove(reason);
 	}
@@ -328,6 +337,37 @@ public class XenoDouble extends PathfinderMob {
 				com.jaymospowers.power.xenoform.forms.Duplex.doubleDied(player, level);
 			}
 		}
+	}
+
+	// ---------------------------------------------------------------- spoken orders (DoubleOrders)
+
+	private DoubleOrders.Order order = DoubleOrders.Order.FOLLOW;
+	private BlockPos orderPos = BlockPos.ZERO;
+	private @Nullable String orderWords;
+	/** What it picked up or fetched, to hand its owner. */
+	private final java.util.List<net.minecraft.world.item.ItemStack> held = new java.util.ArrayList<>();
+
+	/** Given a spoken order: what, where (the spot to wait, scout, dig or fetch from), and what to fetch. */
+	public void order(DoubleOrders.Order order, BlockPos pos, @Nullable String words) {
+		this.order = order;
+		this.orderPos = pos.immutable();
+		this.orderWords = words;
+	}
+
+	public DoubleOrders.Order order() {
+		return this.order;
+	}
+
+	BlockPos orderPos() {
+		return this.orderPos;
+	}
+
+	@Nullable String orderWords() {
+		return this.orderWords;
+	}
+
+	java.util.List<net.minecraft.world.item.ItemStack> held() {
+		return this.held;
 	}
 
 	// ---------------------------------------------------------------- carrying (0.15.96)
@@ -579,7 +619,7 @@ public class XenoDouble extends PathfinderMob {
 
 		@Override
 		public boolean canUse() {
-			if (this.mob.getTarget() != null) {
+			if (this.mob.getTarget() != null || this.mob.order != DoubleOrders.Order.FOLLOW) {
 				return false;
 			}
 			this.player = this.mob.ownerPlayer();

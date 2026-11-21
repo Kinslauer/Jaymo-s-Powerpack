@@ -53,8 +53,8 @@ import org.jspecify.annotations.Nullable;
  * <p><b>The Sorcerer's Imbue:</b> on the {@code J} key a Sorcerer charges the blade in their hand with their element
  * (picked with the class: water, fire, earth, air, lightning or ice; 0.7.212 restoration; 0.7.231 death, {@link Necromancy}, and
  * blood, {@link Hemomancy}) for a while; every blow it lands carries the
- * element ({@link #strike}), and the blade trails its colour. Sneak and {@code J} throws a bolt of the element at what
- * they're looking at instead, on a short cooldown: few spells, quick ones.
+ * element ({@link #strike}), and the blade trails its colour. (Class trees) The Imbue is held now and learned at Sorcerer level
+ * 5; a tap throws the sigil ({@link Sigils}), which took the place of sneak and {@code J}'s bolt.
  *
  * <p>(0.7.49) The element lives on the blade itself ({@link Charge}, in the stack's custom data), not on the Sorcerer:
  * dropped, handed over or picked up from a corpse, it keeps burning in anyone's hand until it wears off. So a Sorcerer
@@ -76,11 +76,8 @@ public final class Spellcraft {
 		Map.entry("bulwark", 20 * 40), Map.entry("tide_pearl", 20 * 15), Map.entry("harrying_gale", 20 * 20));
 	/** (0.7.212) An attuned player who isn't a Mage ({@link Mana}) casts from a staff only as hard as a scroll, and waits this much longer between casts. */
 	static final float ATTUNED_POWER = 1.0F, ATTUNED_COOLDOWN = 1.5F;
-	/** How long an imbued blade keeps its element (ticks); the Imbue's own cooldown; the bolt's. */
+	/** How long an imbued blade keeps its element (ticks); the Imbue's own cooldown; death's and blood's sneak keys'. */
 	static final int IMBUE_TICKS = 20 * 120, IMBUE_COOLDOWN = 20 * 10, BOLT_COOLDOWN = 40;
-	/** The bolt's reach and damage before its element. */
-	static final double BOLT_REACH = 20.0;
-	static final float BOLT_DAMAGE = 5.0F;
 	/** The elements' numbers: fire's burn (s) and extra damage; water's slow (ticks) and the hurt to what fears water;
 	 * earth's stagger (ticks); air's lift; lightning's damage, how far it chains and to how many; ice's freeze (ticks). */
 	static final float FIRE_SECONDS = 4.0F, FIRE_DAMAGE = 1.0F, WATER_DAMAGE = 6.0F, LIGHTNING_DAMAGE = 3.0F;
@@ -114,6 +111,18 @@ public final class Spellcraft {
 		}
 	}
 
+	/** Player → server: sneak and the class key held for {@link Abilities#HOLD_TICKS} ({@code second}: the second class's key). */
+	public record Held(boolean second) implements CustomPacketPayload {
+		public static final Type<Held> TYPE = new Type<>(JaymosKingdoms.id("class_key_held"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Held> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeBoolean(p.second), buf -> new Held(buf.readBoolean()));
+
+		@Override
+		public Type<Held> type() {
+			return TYPE;
+		}
+	}
+
 	/** The custom data key an imbued blade keeps its {@link Charge} under. */
 	static final String CHARGE_KEY = "jaymoskingdoms_imbue";
 	/** How often (ticks) a player's whole inventory is checked for blades whose element has gone out. */
@@ -137,6 +146,8 @@ public final class Spellcraft {
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(Imbue.TYPE, Imbue.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Imbue.TYPE, (payload, context) -> imbue(context.player(), payload.bolt()));
+		PayloadTypeRegistry.serverboundPlay().register(Held.TYPE, Held.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Held.TYPE, (payload, context) -> Abilities.held(context.player(), payload.second()));
 		Mana.register();
 		com.jaymoskingdoms.spirits.Spirits.register();
 		Restoration.register();
@@ -166,6 +177,10 @@ public final class Spellcraft {
 			if (source.getEntity() instanceof LivingEntity attacker && source.getDirectEntity() == attacker && entity != attacker
 				&& damageTaken > 0.0F && !blocked && entity.level() instanceof ServerLevel level) {
 				String element = live(attacker.getMainHandItem(), level.getGameTime());
+				if (element == null) {
+					// (class trees) Twin Imbue: the off hand's blade burns too
+					element = live(attacker.getOffhandItem(), level.getGameTime());
+				}
 				if (element == null) {
 					return;
 				}
@@ -243,6 +258,7 @@ public final class Spellcraft {
 		level.sendParticles(Fx.GLYPH, player.getX(), player.getY() + 1.2, player.getZ(), 40, 0.4, 0.5, 0.4, 0.8);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.5F, 1.4F);
 		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.spell.learned", spellName(spell)).withStyle(ChatFormatting.LIGHT_PURPLE));
+		ClassTrees.give(player, Classes.PlayerClass.MAGE, ClassTrees.XP_SCROLL);
 		return true;
 	}
 
@@ -278,7 +294,11 @@ public final class Spellcraft {
 		// a Warlock's magic is bought from a patron, in pact slots, not mana ({@link Warlocks})
 		boolean pact = ClassCasters.pact(player, spell);
 		float cost = pact ? 0.0F : blood ? Hemomancy.cost(spell) : Mana.cost(spell);
-		if (pact ? !Warlocks.afford(player) : !blood && !Mana.afford(player, cost) || blood && !pact && player.getHealth() - cost < Hemomancy.MIN_LEFT && !player.isCreative()) {
+		// (class trees) the Warlock's Arcanum: once a day, sneaking, a great cast with no slot and no debt
+		boolean arcanum = pact && PactArts.arcanum(player);
+		// (class trees) the Hand of the Patron: after a debt settled and a rest, one cast for nothing
+		boolean free = pact && !arcanum && ArcaneExtras.handReady(player);
+		if (!arcanum && !free && (pact ? !Warlocks.afford(player) : !blood && !Mana.afford(player, cost) || blood && !pact && player.getHealth() - cost < Hemomancy.MIN_LEFT && !player.isCreative())) {
 			if (blood && !pact) {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.blood.too_little").withStyle(ChatFormatting.DARK_RED));
 			}
@@ -288,18 +308,27 @@ public final class Spellcraft {
 		if (!SpellParts.allow(player, spell, null)) {
 			return;
 		}
-		if (!Arcana.cast(spell, level, player, ClassCasters.power(player, mage, ATTUNED_POWER) * (blood && !pact ? Hemomancy.power(player) : 1.0F))) {
+		// (class trees) a Warder's wards last longer
+		float wardPower = mage ? ClassForks.wardPower(player, spell) : 1.0F;
+		if (!Arcana.cast(spell, level, player, ClassCasters.power(player, mage, ATTUNED_POWER) * wardPower * (blood && !pact ? Hemomancy.power(player) : 1.0F)
+			* (arcanum ? PactArts.ARCANUM_POWER : 1.0F))) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.scroll_no_target"));
 			return;
 		}
 		SpellParts.spend(player, spell);
-		if (pact) {
+		if (arcanum) {
+			PactArts.arcanumCast(player, level);
+		} else if (free) {
+			ArcaneExtras.handSpent(player, level);
+		} else if (pact) {
 			Warlocks.pay(player, spell);
 		} else if (blood) {
 			Hemomancy.pay(player, cost);
 		} else {
 			Mana.take(player, cost);
 		}
+		// (class trees) a Battlemage's shield stays up through the cast
+		ArcaneExtras.cast(player);
 		Casting.gesture(player, Casting.of(spell), Casting.colour(spell));
 		level.sendParticles(Fx.GLYPH, player.getX(), player.getY() + 1.2, player.getZ(), 16, 0.3, 0.4, 0.3, 0.5);
 		if (!mage && "wind".equals(PowersCompat.power(player))) {
@@ -392,7 +421,7 @@ public final class Spellcraft {
 	}
 
 	/** A blade the Imbue takes: a sword, or anything the classes count as a blade. */
-	private static boolean blade(ItemStack stack) {
+	static boolean blade(ItemStack stack) {
 		return stack.is(ItemTags.SWORDS) || stack.is(ClassPerks.LIGHT_BLADES) || stack.is(ClassPerks.TWO_HANDED);
 	}
 
@@ -404,61 +433,119 @@ public final class Spellcraft {
 		sorcerer(player, bolt);
 	}
 
-	/** The Sorcerer's own answer to the class key: the imbue, the bolt, their element's spell. */
+	/**
+	 * The Sorcerer's own answer to the class key (class trees, {@link Sigils}): a tap throws the sigil, off the blade or
+	 * from the open hand, whatever the element; sneak and the key their element's own key or, with Ward Sigil, lays a sigil
+	 * on the ground, and throws the sigil when there's neither (where the old bolt was). Holding the key imbues the blade
+	 * ({@link #holdImbue}); sneak and the key held is the element's open-hand working ({@link #working}). Death's tap
+	 * raises a body and restoration's keys heal, as before.
+	 */
 	static void sorcerer(ServerPlayer player, boolean bolt) {
 		String element = element(player);
 		if (element.isEmpty() || !(player.level() instanceof ServerLevel level)) {
 			return;
 		}
-		// (Andy's skill-tree locks) the imbue, the bolt and the element's spells are learned: Sorcery, and Death and Blood
-		// the Forbidden Arts after it
-		if (!TreeLocks.check(player, TreeLocks.Lock.SORCERY)
-			|| ForbiddenArts.forbidden(element) && !TreeLocks.check(player, TreeLocks.Lock.FORBIDDEN)) {
+		// (Andy's skill-tree locks) death and blood are the Forbidden Arts; the element's own workings come with Absorbing
+		// (the old Sorcery perk); the sigil is every Sorcerer's from the start
+		if (ForbiddenArts.forbidden(element) && !TreeLocks.check(player, TreeLocks.Lock.FORBIDDEN)) {
 			return;
 		}
 		// a cast in the window is answered first, if they know counterspell
 		if (Counterspell.key(player, level)) {
 			return;
 		}
+		boolean arts = TreeLocks.has(player, TreeLocks.Lock.SORCERY);
 		if (!bolt && element.equals("death")) {
 			// (Andy 2026-11-14: "they shouldnt get a blade imbuement") death's tap raises a body instead
 			Necromancy.tapKey(player, level);
 			return;
 		}
 		if (element.equals(WildMagic.WILD)) {
-			// the wild bloodline's blade and bolt take a different element every time
+			// the wild bloodline's sigil takes a different element every time (their Hide and Wellspring follow it)
 			element = WildMagic.element(level.getRandom());
+			ArcaneExtras.wildCast(player, element);
 		}
 		if (element.equals("restoration")) {
-			// (0.7.212) the healer's keys: Mend, and Renewal or Rekindle; their blade never takes a charge
+			// (0.7.212) the healer's keys: Mend, and Renewal or Rekindle; their healing is their sigil, theirs from the start
 			Restoration.key(player, level, bolt);
 			return;
 		}
 		if (bolt) {
 			// (0.7.231) death and blood have keys of their own first: Reap or Raise; Grip or Hemorrhage
 			// (patch 6) lightning's: Bolt Step when no one is in sight
-			if (element.equals("blood") && BruteRite.key(player, level)) {
+			if (arts && element.equals("blood") && BruteRite.key(player, level)) {
 				return;
 			}
-			if (element.equals("death") && Necromancy.key(player, level) || element.equals("blood") && Hemomancy.key(player, level)
-				|| element.equals("lightning") && StormArts.stepKey(player, level)) {
+			if (arts && (element.equals("death") && Necromancy.key(player, level) || element.equals("blood") && Hemomancy.key(player, level)
+				|| element.equals("lightning") && StormArts.stepKey(player, level))) {
 				return;
 			}
-			bolt(level, player, element);
+			if (ClassTrees.has(player, Sigils.WARD) > 0) {
+				Sigils.ward(player, level, element);
+				return;
+			}
+			Sigils.cast(player, level, element, false);
+			return;
+		}
+		Sigils.cast(player, level, element, false);
+	}
+
+	/** The elements with a working on sneak and the key held ({@link #working}). */
+	public static boolean hasWorking(String element) {
+		return "lightning".equals(element) || SorceryPicks.spellOf(element) != null;
+	}
+
+	/**
+	 * Sneak and the class key held: the element's own working, which comes with Absorbing (lightning's Storm Ring, earth's
+	 * Bulwark, water's Tide Pearl, air's Harrying Gale; they were on the tap with no blade in hand, which is the sigil's
+	 * now). False when they have none, and sneak and the key answers as a tap.
+	 */
+	static boolean working(ServerPlayer player) {
+		String element = element(player);
+		if (!hasWorking(element) || !TreeLocks.has(player, TreeLocks.Lock.SORCERY) || !(player.level() instanceof ServerLevel level)) {
+			return false;
+		}
+		// a cast in the window is answered first, if they know counterspell
+		if (Counterspell.key(player, level)) {
+			return true;
+		}
+		return element.equals("lightning") ? StormArts.ring(player, level) : SorceryPicks.key(player, level, element);
+	}
+
+	/**
+	 * The class key held (class trees: Imbue, level 5): the blade in hand soaks up the element for {@link #IMBUE_TICKS}
+	 * (twice that with Lingering Imbue; the off hand's blade too with Twin Imbue). With Elemental Burst, held on a blade
+	 * already burning, the imbue ends early in a blast round you ({@link Sigils#burst}).
+	 */
+	static void holdImbue(ServerPlayer player) {
+		String element = element(player);
+		if (element.isEmpty() || element.equals("death") || element.equals("restoration") || !(player.level() instanceof ServerLevel level)) {
+			// death takes no blade imbuement (Andy), restoration's blade never takes a charge
+			return;
+		}
+		if (ForbiddenArts.forbidden(element) && !TreeLocks.check(player, TreeLocks.Lock.FORBIDDEN)) {
 			return;
 		}
 		ItemStack held = player.getMainHandItem();
-		// (patch 6) a lightning Sorcerer with no blade in hand: the Storm Ring
-		if (!blade(held) && element.equals("lightning") && StormArts.ring(player, level)) {
-			return;
-		}
-		// the same for earth (Bulwark), water (Tide Pearl) and air (Harrying Gale)
-		if (!blade(held) && SorceryPicks.key(player, level, element)) {
-			return;
-		}
 		if (!blade(held)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.imbue.no_blade"));
 			return;
+		}
+		if (!ClassTrees.check(player, Sigils.IMBUE)) {
+			return;
+		}
+		long now = level.getGameTime();
+		Charge had = charge(held);
+		boolean sameBlade = had != null && had.sorcerer().equals(player.getUUID()) && live(held, now) != null;
+		if (sameBlade && ClassTrees.has(player, Sigils.BURST) > 0) {
+			// Elemental Burst: the imbue let go all at once, harder the more of it was left
+			endImbue(player);
+			Sigils.burst(player, level, had.element(), (had.until() - now) / (float) Math.max(1L, had.until() - had.stamp()));
+			return;
+		}
+		if (element.equals(WildMagic.WILD)) {
+			element = WildMagic.element(level.getRandom());
+			ArcaneExtras.wildCast(player, element);
 		}
 		if (player.getCooldowns().isOnCooldown(Arcana.WIZARD_STAFF.getDefaultInstance())) {
 			return;
@@ -466,14 +553,19 @@ public final class Spellcraft {
 		if (!pay(player, element, "imbue")) {
 			return;
 		}
-		long now = level.getGameTime();
-		Charge had = charge(held);
-		boolean sameBlade = had != null && had.sorcerer().equals(player.getUUID()) && live(held, now) != null;
 		Current before = IMBUED.get(player.getUUID());
 		// one blade at a time: this one takes the element, the last one goes cold wherever it is
 		int lasts = Paths.imbueTicks(player, IMBUE_TICKS);
+		if (ClassTrees.has(player, Sigils.LINGER) > 0) {
+			lasts = Math.round(lasts * Sigils.LINGER_FACTOR);
+		}
 		IMBUED.put(player.getUUID(), new Current(now, now + lasts));
-		write(held, new Charge(player.getUUID(), player.getGameProfile().name(), element, now + lasts, now));
+		Charge charge = new Charge(player.getUUID(), player.getGameProfile().name(), element, now + lasts, now);
+		write(held, charge);
+		if (ClassTrees.has(player, Sigils.TWIN) > 0 && blade(player.getOffhandItem())) {
+			// Twin Imbue: the same imbue (one stamp) burns in both hands
+			write(player.getOffhandItem(), charge);
+		}
 		Inventory inv = player.getInventory();
 		for (int i = 0; i < inv.getContainerSize(); i++) {
 			stripIfDead(inv.getItem(i), now);
@@ -487,45 +579,31 @@ public final class Spellcraft {
 		afterCast(player, level, element);
 	}
 
-	/** A bolt of the element at what the Sorcerer is looking at. */
-	private static void bolt(ServerLevel level, ServerPlayer player, String element) {
-		ItemStack key = Arcana.BONE_STAFF.getDefaultInstance();
-		if (player.getCooldowns().isOnCooldown(key)) {
-			return;
+	/** Ends {@code player}'s imbue now: their blade (both, with Twin Imbue) goes cold. */
+	static void endImbue(ServerPlayer player) {
+		IMBUED.remove(player.getUUID());
+		for (ItemStack stack : new ItemStack[] {player.getMainHandItem(), player.getOffhandItem()}) {
+			Charge c = charge(stack);
+			if (c != null && c.sorcerer().equals(player.getUUID())) {
+				strip(stack);
+			}
 		}
-		LivingEntity target = Arcana.sighted(player);
-		if (target == null || player.distanceTo(target) > BOLT_REACH) {
-			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.scroll_no_target"));
-			return;
+	}
+
+	/** The element burning in a blade {@code player} holds (either hand) that is their own imbue, or null. */
+	static @Nullable String ownImbue(ServerPlayer player) {
+		long now = player.level().getGameTime();
+		for (ItemStack stack : new ItemStack[] {player.getMainHandItem(), player.getOffhandItem()}) {
+			Charge c = charge(stack);
+			if (c != null && c.sorcerer().equals(player.getUUID()) && live(stack, now) != null) {
+				return c.element();
+			}
 		}
-		if (!pay(player, element, "bolt")) {
-			return;
-		}
-		player.getCooldowns().addCooldown(key, BOLT_COOLDOWN);
-		Casting.gesture(player, Casting.Gesture.PUSH, Absorption.colour(element));
-		Vec3 start = player.getEyePosition().add(0.0, -0.3, 0.0);
-		// what the foe crouches behind may take the bolt instead
-		net.minecraft.world.phys.BlockHitResult cover = Cover.takesBolt(level, player, target);
-		Vec3 step = (cover != null ? cover.getLocation() : target.getBoundingBox().getCenter()).subtract(start);
-		int n = Math.max(2, (int) (step.length() * 3.0));
-		ParticleOptions trail = particle(element);
-		for (int i = 0; i <= n; i++) {
-			Vec3 p = start.add(step.scale(i / (double) n));
-			level.sendParticles(trail, p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
-		}
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), sound(element), SoundSource.PLAYERS, 1.0F, 1.3F);
-		if (cover != null) {
-			Cover.stuck(level, cover, target);
-			afterCast(player, level, element);
-			return;
-		}
-		target.hurtServer(level, level.damageSources().indirectMagic(player, player), BOLT_DAMAGE * Math.max(Classes.SECOND_SHARE, Classes.share(player, PlayerClass.SORCERER)));
-		strike(level, player, target, element, true);
-		afterCast(player, level, element);
+		return null;
 	}
 
 	/** (0.7.231) A Sorcerer's key paid for: in mana, or (blood) in blood ({@link Hemomancy#pay}). */
-	private static boolean pay(ServerPlayer player, String element, String what) {
+	static boolean pay(ServerPlayer player, String element, String what) {
 		// (0.7.465) the spirit stays a death or blood Sorcerer's hand (the Grue is near)
 		if (ForbiddenArts.forbidden(element) && ForbiddenArts.stayed(player)) {
 			return false;
@@ -535,6 +613,14 @@ public final class Spellcraft {
 
 	/** (0.7.231) After a cast: sorcery where a realm frowns on it; death and blood magic are forbidden everywhere ({@link ForbiddenArts}). */
 	static void afterCast(ServerPlayer player, ServerLevel level, String spellOrElement) {
+		// (class trees) a cast is the caster's class experience: a Sorcerer's element, else a Mage's spell
+		if (Classes.PlayerClass.SORCERER.options.contains(spellOrElement)) {
+			ClassTrees.giveEvery(player, Classes.PlayerClass.SORCERER, ClassTrees.XP_SIGIL, "cast", 20L);
+		} else {
+			ClassTrees.giveEvery(player, Classes.PlayerClass.MAGE, ClassTrees.XP_SPELL, "cast", 20L);
+			// a Cleric's prayers: friends healed and blessed
+			ClassTrees.giveEvery(player, Classes.PlayerClass.CLERIC, ClassTrees.XP_HEAL, "cast", 20L);
+		}
 		Paths.cast(player, level);
 		// a cast may surge into something else (the wild bloodline, a cursed place)
 		WildMagic.cast(player, level);
@@ -549,6 +635,10 @@ public final class Spellcraft {
 
 	/** {@code element} bursting on a blow {@code player} landed on {@code target} ({@code bolt}: thrown, not struck). */
 	static void strike(ServerLevel level, LivingEntity player, LivingEntity target, String element, boolean bolt) {
+		if (player instanceof ServerPlayer sp) {
+			// (class trees) a sigil or an imbued blow that lands
+			ClassTrees.giveBlow(sp, Classes.PlayerClass.SORCERER, ClassTrees.XP_SIGIL);
+		}
 		Vec3 away = target.position().subtract(player.position()).normalize();
 		switch (element) {
 			case "fire" -> {
@@ -675,6 +765,7 @@ public final class Spellcraft {
 				stripIfDead(inv.getItem(i), now);
 			}
 			stripIfDead(player.containerMenu.getCarried(), now);
+			remember(player, now);
 		}
 		String element = live(held, now);
 		if (element != null && now % 4L == 0L && player.level() instanceof ServerLevel level) {
@@ -682,6 +773,37 @@ public final class Spellcraft {
 			// (0.7.212) a blade's quiet trail is for the attuned to see
 			Mana.sendSeen(level, particle(element), hand.x, hand.y, hand.z, 1, 0.15, 0.2, 0.15, 0.01);
 		}
+	}
+
+	/**
+	 * (class trees) Blade Memory: while the Sorcerer's own imbued blade is put away (in the pack, in neither hand), it
+	 * doesn't burn down: its clock and theirs are pushed on by the sweep that just passed (a second class's by its share).
+	 */
+	private static void remember(ServerPlayer player, long now) {
+		Current mine = IMBUED.get(player.getUUID());
+		float memory = Math.min(1.0F, ClassTrees.power(player, ArcaneExtras.MEMORY));
+		if (mine == null || memory <= 0.0F || own(player, player.getMainHandItem(), mine) || own(player, player.getOffhandItem(), mine)) {
+			return;
+		}
+		long more = Math.round(SWEEP_EVERY * memory);
+		Inventory inv = player.getInventory();
+		boolean kept = false;
+		for (int i = 0; i < inv.getContainerSize(); i++) {
+			ItemStack stack = inv.getItem(i);
+			if (own(player, stack, mine)) {
+				Charge c = charge(stack);
+				write(stack, new Charge(c.sorcerer(), c.name(), c.element(), c.until() + more, c.stamp()));
+				kept = true;
+			}
+		}
+		if (kept) {
+			IMBUED.put(player.getUUID(), new Current(mine.stamp(), mine.until() + more));
+		}
+	}
+
+	private static boolean own(ServerPlayer player, ItemStack stack, Current mine) {
+		Charge c = charge(stack);
+		return c != null && c.sorcerer().equals(player.getUUID()) && c.stamp() == mine.stamp();
 	}
 
 	/** The element of an imbued blade someone holds (or, a player, carries), for a HUD or a look; null for none. */

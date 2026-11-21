@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:cobblestone_vslab",
+    "jaymospowers:cobblestone_vslab"
+  ],
+  "result": {
+    "id": "minecraft:cobblestone"
+  }
+}

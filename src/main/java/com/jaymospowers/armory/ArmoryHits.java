@@ -1,5 +1,8 @@
 package com.jaymospowers.armory;
 
+import com.jaymospowers.combat.Shields;
+import com.jaymospowers.combat.WeaponKind;
+import com.jaymospowers.freerun.Freerun;
 import com.jaymospowers.power.darktide.DarktideStatus;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.core.particles.ParticleTypes;
@@ -10,8 +13,10 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * (0.13.32) What JMB's Better Weapons (MIT, by jmb19905; github.com/jmb05/BetterWeapons) gives its weapons, on the
@@ -22,6 +27,8 @@ import net.minecraft.world.item.ItemStack;
  * thinking, a player loses their movement keys), with a clang and stars.</li>
  * <li><b>Dismount:</b> a glaive, or WeaponMod's halberd, now and then hooks a rider off its mount and leaves them
  * staggering.</li>
+ * <li><b>Mace stagger:</b> any mace blow slows what it hits for a moment.</li>
+ * <li><b>Hook:</b> a scythe, bill or gutting hook drags a wall-climber down off the wall.</li>
  * <li><b>Staff block:</b> a quarterstaff held up (right mouse) blocks blows from the front like a shield, over a
  * narrower arc, wearing the staff. A wind sorcerer's right mouse stays the Staff Vault.</li>
  * </ul>
@@ -34,6 +41,10 @@ public final class ArmoryHits {
 	/** Chance a hit on a rider knocks them off; then this long (ticks) slowed at this level. */
 	static final float DISMOUNT_CHANCE = 0.3F;
 	static final int DISMOUNT_SLOW_TICKS = 20, DISMOUNT_SLOW_LEVEL = 1;
+	/** A mace blow slows what it hits: for this long (ticks), at this level. */
+	static final int MACE_SLOW_TICKS = 30, MACE_SLOW_LEVEL = 0;
+	/** A hook (scythe, bill, gutting hook) drags a wall-climber down: how fast it falls (blocks/tick). */
+	static final double HOOK_DRAG_DOWN = 0.8;
 	/** Staff block: seconds to raise it (the round shield 0.15), and how wide it covers (degrees; the round shield 90). */
 	static final float STAFF_RAISE = 0.2F, STAFF_ARC = 70.0F;
 
@@ -53,12 +64,29 @@ public final class ArmoryHits {
 				level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.35F, 1.7F);
 				level.sendParticles(ParticleTypes.CRIT, entity.getX(), entity.getEyeY() + 0.3, entity.getZ(), 10, 0.3, 0.1, 0.3, 0.05);
 			}
+			if (WeaponKind.of(held) == WeaponKind.MACE && entity.isAlive()) {
+				entity.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, MACE_SLOW_TICKS, MACE_SLOW_LEVEL), attacker);
+			}
+			if (Shields.hooks(held) && entity.isAlive() && dragsDown(entity)) {
+				Vec3 v = entity.getDeltaMovement();
+				entity.setDeltaMovement(v.x, -HOOK_DRAG_DOWN, v.z);
+				entity.syncVelocity = true;
+				level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.CHAIN_BREAK, SoundSource.PLAYERS, 0.8F, 1.2F);
+			}
 			if (entity.isPassenger() && dismounts(held) && attacker.getRandom().nextFloat() < DISMOUNT_CHANCE) {
 				entity.stopRiding();
 				entity.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, DISMOUNT_SLOW_TICKS, DISMOUNT_SLOW_LEVEL), attacker);
 				level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.CHAIN_BREAK, SoundSource.PLAYERS, 0.8F, 0.8F);
 			}
 		});
+	}
+
+	/** Whether {@code entity} was on a wall: a cling that is let go (Freerun), or a ladder, vine or wall climber's hold. */
+	static boolean dragsDown(LivingEntity entity) {
+		if (entity instanceof ServerPlayer player && Freerun.dragOff(player)) {
+			return true;
+		}
+		return entity.onClimbable() && !entity.onGround();
 	}
 
 	/** The chance {@code held} stuns with a hit (0: never). */

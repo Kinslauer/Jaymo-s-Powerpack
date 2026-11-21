@@ -1,0 +1,48 @@
+{
+	"replace": false,
+	"values": [
+		"minecraft:sheep",
+		"minecraft:goat",
+		"minecraft:rabbit",
+		"minecraft:llama",
+		"minecraft:trader_llama",
+		"minecraft:camel",
+		"minecraft:armadillo",
+		{
+			"id": "jaymoskingdoms:moose",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:serow",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:shrine_deer",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:great_goat",
+			"required": false
+		},
+		{
+			"id": "naturalist:deer",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:roedeer",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:reddeer",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:reindeer",
+			"required": false
+		},
+		{
+			"id": "cubeanimals:moose",
+			"required": false
+		}
+	]
+}

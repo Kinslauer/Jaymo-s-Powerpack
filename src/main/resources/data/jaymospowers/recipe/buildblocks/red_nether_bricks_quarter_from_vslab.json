@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:red_nether_bricks_vslab",
+  "result": {
+    "id": "jaymospowers:red_nether_bricks_quarter",
+    "count": 2
+  }
+}

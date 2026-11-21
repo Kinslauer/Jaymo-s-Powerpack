@@ -1,5 +1,6 @@
 package com.jaymospowers.power.web;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.fx.MagicFx;
 import java.util.ArrayList;
@@ -206,19 +207,19 @@ public final class WebSpit {
 		}
 		Vec3 ground = down.getLocation().add(0.0, 0.02, 0.0);
 		PATCHES.add(new Patch(owner == null ? new UUID(0L, 0L) : owner.getUUID(), level.dimension(), ground, level.getGameTime() + PATCH_TICKS, color));
-		MagicFx.pool(level, ground, (float)PATCH_RADIUS, color, PATCH_TICKS);
+		MagicFx.pool(level, ground, (float)AbilityPower.size(owner, PATCH_RADIUS), color, PATCH_TICKS);
 	}
 
 	/** Slows whatever stands on the patch (not the spitter). */
 	private static void soak(ServerLevel level, Patch patch) {
-		AABB flat = new AABB(patch.center().x - PATCH_RADIUS, patch.center().y - 0.3, patch.center().z - PATCH_RADIUS,
-			patch.center().x + PATCH_RADIUS, patch.center().y + 1.0, patch.center().z + PATCH_RADIUS);
+		AABB flat = new AABB(patch.center().x - AbilityPower.size(level, patch.owner(), PATCH_RADIUS), patch.center().y - 0.3, patch.center().z - AbilityPower.size(level, patch.owner(), PATCH_RADIUS),
+			patch.center().x + AbilityPower.size(level, patch.owner(), PATCH_RADIUS), patch.center().y + 1.0, patch.center().z + AbilityPower.size(level, patch.owner(), PATCH_RADIUS));
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, flat, e -> e.isAlive() && !e.isSpectator() && !e.getUUID().equals(patch.owner()))) {
-			if (living.getY() - patch.center().y < 0.7 && Math.hypot(living.getX() - patch.center().x, living.getZ() - patch.center().z) <= PATCH_RADIUS) {
+			if (living.getY() - patch.center().y < 0.7 && Math.hypot(living.getX() - patch.center().x, living.getZ() - patch.center().z) <= AbilityPower.size(level, patch.owner(), PATCH_RADIUS)) {
 				living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, PATCH_SLOW_TICKS, PATCH_SLOW_LEVEL, false, false));
 			}
 		}
-		level.sendParticles(MagicFx.miasma(patch.color(), 0.5F), patch.center().x + (level.getRandom().nextDouble() - 0.5) * PATCH_RADIUS,
-			patch.center().y + 0.1, patch.center().z + (level.getRandom().nextDouble() - 0.5) * PATCH_RADIUS, 1, 0.0, 0.05, 0.0, 0.0);
+		level.sendParticles(MagicFx.miasma(patch.color(), 0.5F), patch.center().x + (level.getRandom().nextDouble() - 0.5) * AbilityPower.size(level, patch.owner(), PATCH_RADIUS),
+			patch.center().y + 0.1, patch.center().z + (level.getRandom().nextDouble() - 0.5) * AbilityPower.size(level, patch.owner(), PATCH_RADIUS), 1, 0.0, 0.05, 0.0, 0.0);
 	}
 }

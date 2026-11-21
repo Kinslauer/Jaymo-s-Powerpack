@@ -138,6 +138,7 @@ public final class DarktideStatus {
 	 * {@link #LEG_WOUND} of it, and breaks at zero; anything else is crippled for {@link #CRIPPLE_TICKS} as before.
 	 */
 	static void cripple(LivingEntity target, Player attacker) {
+		com.jaymospowers.core.trials.PowerTrials.count(attacker, "darktide.cripple", 1);
 		BodyPlan plan = Wounds.plan(target);
 		if (plan == BodyPlan.HUMANOID) {
 			int aimed = Dismember.aimedPart(attacker, target);

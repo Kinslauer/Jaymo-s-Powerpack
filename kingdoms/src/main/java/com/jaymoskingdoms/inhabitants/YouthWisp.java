@@ -7,13 +7,16 @@ import com.geckolib.animation.AnimationController;
 import com.geckolib.animation.RawAnimation;
 import com.geckolib.animation.object.PlayState;
 import com.geckolib.util.GeckoLibUtil;
+import com.jaymoskingdoms.CharacterNames;
 import com.jaymoskingdoms.Fx;
+import com.jaymoskingdoms.Introductions;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -45,7 +48,20 @@ import org.jspecify.annotations.Nullable;
  */
 public class YouthWisp extends PathfinderMob implements GeoEntity {
 	/** It vanishes after this long with no question (ticks). */
-	static final int IDLE_TIMEOUT = 2 * 60 * 20;
+	static final int IDLE_TIMEOUT = 15 * 20;
+	/** ...but while an answer is coming it waits this long, then says "be right back" ({@link #HOLD_LINES}) and goes. */
+	static final int ANSWER_TIMEOUT = 2 * 60 * 20;
+	/**
+	 * Sending it off (Andy: "leave anytime you tell him to"): "go away", "bye", "thanks", "leave", "go home"... with its
+	 * name, or bare while its wisp is beside you.
+	 */
+	static final java.util.regex.Pattern BYE = java.util.regex.Pattern.compile(
+		"^(go away|go home|leave|you can go|off you go|shoo|dismissed|bye|goodbye|good bye|bye bye|see ya|see you|later|cya|thanks|thank you|thx|ty|cheers|that's all|thats all|never ?mind|nvm)\\b[\\s,!.]*(youth)?[\\s!.]*$",
+		java.util.regex.Pattern.CASE_INSENSITIVE);
+	/** How many goodbye lines it has (message.jaymoskingdoms.youth_wisp.bye.0 ...). */
+	static final int BYE_LINES = 4;
+	/** How many "I heard you" lines it has, for its name said aloud (message.jaymoskingdoms.youth_wisp.voice.0 ...). */
+	static final int VOICE_LINES = 3;
 	/** Ticks between two right-click hints from the same wisp. */
 	static final int HINT_COOLDOWN = 5 * 20;
 	/** A chat line that calls Youth: its name anywhere in it, as a word, in any case ("youth, how does Crush work?"). */
@@ -60,6 +76,21 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	static final java.util.regex.Pattern QUESTION = java.util.regex.Pattern.compile(
 		"^.*\\?.*$|^(what|whats|what's|how|hows|how's|why|where|when|who|which|can|could|is|are|does|do|did|should|will|would|wheres|where's)\\b.*$",
 		java.util.regex.Pattern.CASE_INSENSITIVE | java.util.regex.Pattern.DOTALL);
+	/** "youth, look!": what follows "look" is the question about the thing it is shown (often nothing). */
+	static final java.util.regex.Pattern LOOK = java.util.regex.Pattern.compile("^look\\b[\\s,:!.?-]*(.*)$",
+		java.util.regex.Pattern.CASE_INSENSITIVE | java.util.regex.Pattern.DOTALL);
+	/** A yes to "This?" ("yes", "yeah", "that one!", "mhm"). */
+	static final java.util.regex.Pattern YES = java.util.regex.Pattern.compile(
+		"^(y|ya|ye|yes|yeah|yea|yep|yup|mhm|uh huh|sure|correct|right|exactly|that|that one|this|this one|thats it|that's it|there)\\b[\\s!.,]*$",
+		java.util.regex.Pattern.CASE_INSENSITIVE);
+	/** A no to "This?" ("no", "nope, that", "not that"): it looks again at whatever the player points at now. */
+	static final java.util.regex.Pattern NO = java.util.regex.Pattern.compile("^(n|no|nah|nope|not that|not that one|wrong|other one)\\b.*$",
+		java.util.regex.Pattern.CASE_INSENSITIVE | java.util.regex.Pattern.DOTALL);
+	/** How far it will go to look at what it's shown (blocks), and how long it waits by it for a yes (ticks). */
+	static final double LOOK_RANGE = 48.0;
+	static final int LOOK_WAIT = IDLE_TIMEOUT;
+	/** How many "This?" lines it has (message.jaymoskingdoms.youth_wisp.look.0 ...). */
+	static final int LOOK_LINES = 4;
 	/** A cry for help ("HELP", "help me!", "youth, help me"), which carries its crier home if a wisp is in sight. */
 	static final java.util.regex.Pattern HELP = java.util.regex.Pattern.compile("^help(\\s+me)?[\\s!.]*$", java.util.regex.Pattern.CASE_INSENSITIVE);
 	/** A wisp is in sight for a cry for help this near (blocks), in clear view and within this cosine of where they look. */
@@ -94,6 +125,22 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	static final int COLOUR = 0xBEF0D6;
 	/** How often (ticks) a mote drifts off it while it waits. */
 	static final int MOTE_EVERY = 12;
+	/**
+	 * Off to find out (Andy: "he should animate flying away, then come back with the answer"): given a question, it
+	 * swoops off this far from its asker (blocks, out and up), fades into the trees there, and keeps that place by them
+	 * while it thinks. The answer brings it flying back, and it says it once it's beside them again.
+	 */
+	static final double AWAY_OUT = 10.0, AWAY_UP = 7.0;
+	/** Its speed going and coming (blocks a tick): it speeds up as it leaves, and slows to a stop as it comes back. */
+	static final double LEAVE_START = 0.08, LEAVE_GAIN = 0.04, LEAVE_TOP = 0.9, RETURN_TOP = 0.8, RETURN_EASE = 0.18;
+	/** It is gone, or back, once this near its mark (blocks), or after this long whatever happens (ticks). */
+	static final double ARRIVED = 0.4;
+	static final int LEAVE_TICKS = 40, RETURN_TICKS = 60;
+
+	/** Where it is with a question: here, flying off, gone off to think, or flying back with the answer. */
+	enum Away {
+		HERE, LEAVING, GONE, RETURNING
+	}
 
 	/** How often (ticks) the wisp may switch to a new idle behavior mode. */
 	static final int BEHAVIOR_SWITCH_MIN = 20 * 20; // 20 seconds
@@ -117,10 +164,25 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	static final String[] IDLES = {"hover", "crow", "flip", "sit", "swoop", "lounge", "spin", "laugh"};
 	static final float[] IDLE_SECONDS = {1.2F, 1.3F, 0.7F, 1.8F, 0.8F, 1.8F, 0.6F, 1.2F};
 	static final int[] IDLE_WEIGHT = {3, 1, 1, 1, 1, 1, 1, 1};
+	/**
+	 * The four it wanders between while it thinks (an answer is coming, {@link #THINKING}): chin in hand, pacing the air,
+	 * scratching its head, hanging upside down. Never the same one twice running, and only a short hover between them,
+	 * so it is plainly busy, not frozen. How long each plays (seconds).
+	 */
+	static final String[] THINKS = {"ponder", "pace", "scratch", "upside"};
+	static final float[] THINK_SECONDS = {2.0F, 2.4F, 1.4F, 2.0F};
+	/** The hover between two thinking animations (ticks, a random length between these). */
+	static final int THINK_GAP_MIN = 4, THINK_GAP_MAX = 12;
+	/** While it thinks, three dots of light wink on over its head in turn, one every this many ticks. */
+	static final int DOT_EVERY = 6;
+	/** Thinking: summoned for a question whose answer hasn't come yet. Synced, so the client plays the thinking set. */
+	static final net.minecraft.network.syncher.EntityDataAccessor<Boolean> THINKING = net.minecraft.network.syncher.SynchedEntityData
+		.defineId(YouthWisp.class, net.minecraft.network.syncher.EntityDataSerializers.BOOLEAN);
 	static final RawAnimation HOVER = RawAnimation.begin().thenLoop("hover");
 	static final RawAnimation APPEAR = RawAnimation.begin().thenPlay("appear");
 	static final RawAnimation VANISH = RawAnimation.begin().thenPlayAndHold("vanish");
 	static final RawAnimation TALK = RawAnimation.begin().thenPlay("talk");
+	static final RawAnimation SWOOP = RawAnimation.begin().thenPlay("swoop");
 
 	/** The wisps in the world, by their asker (server side). */
 	static final Map<UUID, YouthWisp> BY_ASKER = new HashMap<>();
@@ -130,25 +192,50 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	private Vec3 spot = Vec3.ZERO;
 	private int lastAsked;
 	private int lastHint = -HINT_COOLDOWN - 1;
-	/** Summoned for a question whose answer hasn't come yet. */
-	private boolean pending;
 	private int vanishing = -1;
+	/** What it was shown ("youth, look!"), while it hovers there asking "This?"; null when it isn't looking at anything. */
+	private @Nullable Shown shown;
 	/** The current idle behavior mode. */
 	private BehaviorMode behaviorMode = BehaviorMode.DRIFT;
 	/** Tick count when the behavior mode may next switch. */
 	private int behaviorSwitchAt;
+	/** Off thinking ({@link #AWAY_OUT}): where it is, since when (tick), which way from its asker, and the answer it brings. */
+	private Away away = Away.HERE;
+	private int awaySince;
+	private Vec3 awayDir = new Vec3(0, 0, 1);
+	private final List<Component> bringing = new ArrayList<>();
 
 	// the idle picker's state (client side)
 	private @Nullable RandomSource idleRandom;
 	private RawAnimation idle = HOVER;
 	private int idleIndex;
 	private int idleUntil;
+	private boolean wasThinking;
 
 	public YouthWisp(EntityType<? extends YouthWisp> type, Level level) {
 		super(type, level);
 		this.setNoGravity(true);
 		this.noPhysics = true;
 		this.setPersistenceRequired();
+	}
+
+	@Override
+	protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder entityData) {
+		super.defineSynchedData(entityData);
+		entityData.define(THINKING, false);
+	}
+
+	/** Summoned for a question whose answer hasn't come yet. */
+	boolean pending() {
+		return this.entityData.get(THINKING);
+	}
+
+	/** Starts (or stops) waiting for an answer; starting, it flies off to think ({@link #leave}). */
+	void setPending(boolean pending) {
+		this.entityData.set(THINKING, pending);
+		if (pending && this.away == Away.HERE) {
+			this.leave();
+		}
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
@@ -169,6 +256,7 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		Vec3 spot = spotBeside(player);
 		if (wisp != null) {
 			wisp.spot = spot;
+			wisp.shown = null;
 			wisp.lastAsked = wisp.tickCount;
 			wisp.behaviorMode = randomBehaviorMode(player.getRandom());
 			wisp.behaviorSwitchAt = wisp.tickCount + BEHAVIOR_SWITCH_MIN + player.getRandom().nextInt(BEHAVIOR_SWITCH_MAX - BEHAVIOR_SWITCH_MIN);
@@ -205,7 +293,7 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	public static @Nullable YouthWisp hold(ServerPlayer player) {
 		YouthWisp wisp = summon(player);
 		if (wisp != null) {
-			wisp.pending = true;
+			wisp.setPending(true);
 		}
 		return wisp;
 	}
@@ -222,6 +310,19 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	public static void heard(ServerPlayer player, String text) {
 		java.util.regex.Matcher lead = LEAD.matcher(text);
 		String rest = lead.matches() ? lead.group(1) : text;
+		// sent off: says goodbye and goes (with its name, or bare while it's beside them)
+		if ((lead.matches() || has(player)) && BYE.matcher(rest.strip()).matches()) {
+			YouthWisp wisp = BY_ASKER.get(player.getUUID());
+			if (wisp != null && has(player)) {
+				wisp.triggerAnim("action", "talk");
+				wisp.speak(player, Component.translatable("message.jaymoskingdoms.youth_wisp.bye." + wisp.random.nextInt(BYE_LINES)));
+				wisp.vanish();
+			}
+			return;
+		}
+		if (looked(player, lead.matches(), rest.strip())) {
+			return;
+		}
 		if (HELP.matcher(rest.strip()).matches()) {
 			YouthWisp seen = inSight(player);
 			if (seen != null) {
@@ -232,12 +333,132 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		// its name calls it; with its wisp already beside them, a plain question is asked of it too
 		if (CALL.matcher(text).find() || has(player) && QUESTION.matcher(text.strip()).matches()) {
 			YouthWisp wisp = summon(player);
+			String question = rest.replaceAll("\\s+", " ").strip();
 			if (wisp != null) {
 				wisp.lastAsked = wisp.tickCount;
+				// a question (not only its name) and it starts thinking at once, till the answer comes
+				if (!question.isEmpty()) {
+					wisp.setPending(true);
+				}
 			}
-			com.jaymoskingdoms.JaymosKingdoms.LOGGER.info("[youth-ask] {} {}", player.getGameProfile().name(),
-				rest.replaceAll("\\s+", " ").strip());
+			com.jaymoskingdoms.JaymosKingdoms.LOGGER.info("[youth-ask] {} {}", player.getGameProfile().name(), question);
 		}
+	}
+
+	/** What a wisp was shown: an entity (followed as it moves) or a spot on a block, what to call it, and the question. */
+	record Shown(@Nullable Entity entity, Vec3 at, String what, String question, int until) {
+	}
+
+	/**
+	 * Showing it something (Andy): "youth, look!" (or "youth, look, what's this?") and the wisp flies to whatever the
+	 * player's crosshair is on, hovers round it and asks "This?". A yes ({@link #YES}), or any question, and the ask goes
+	 * to Hermes with what it is: {@code [youth-ask] <name> <question> (pointing at: <id> "<name>" at x y z)}, and it thinks
+	 * there till the answer comes. A no ({@link #NO}) and it looks again at wherever they point now. Unanswered, it comes
+	 * back after {@link #LOOK_WAIT}. True when the line was one of these (nothing else is done with it).
+	 */
+	static boolean looked(ServerPlayer player, boolean named, String rest) {
+		YouthWisp wisp = has(player) ? BY_ASKER.get(player.getUUID()) : null;
+		java.util.regex.Matcher look = LOOK.matcher(rest);
+		if (look.matches() && (named || wisp != null)) {
+			wisp = wisp != null ? wisp : summon(player);
+			if (wisp != null) {
+				wisp.show(player, look.group(1).strip());
+			}
+			return true;
+		}
+		if (wisp == null || wisp.shown == null) {
+			return false;
+		}
+		Shown shown = wisp.shown;
+		if (NO.matcher(rest).matches()) {
+			wisp.show(player, shown.question());
+			return true;
+		}
+		boolean yes = YES.matcher(rest).matches();
+		if (yes && wisp.pending()) {
+			// already asked about it: a second yes changes nothing
+			return true;
+		}
+		if (!yes && !QUESTION.matcher(rest).matches()) {
+			return false;
+		}
+		String question = yes ? shown.question() : rest;
+		if (question.isEmpty()) {
+			question = "what is this?";
+		}
+		BlockPos pos = BlockPos.containing(shown.at());
+		wisp.lastAsked = wisp.tickCount;
+		wisp.setPending(true);
+		wisp.shown = new Shown(shown.entity(), shown.at(), shown.what(), question, wisp.tickCount + LOOK_WAIT);
+		wisp.triggerAnim("action", "talk");
+		com.jaymoskingdoms.JaymosKingdoms.LOGGER.info("[youth-ask] {} {} (pointing at: {} at {} {} {})", player.getGameProfile().name(),
+			question.replaceAll("\\s+", " "), shown.what(), pos.getX(), pos.getY(), pos.getZ());
+		return true;
+	}
+
+	/** Flies to what {@code player} is pointing at and asks "This?" (or says it can't see anything there). */
+	void show(ServerPlayer player, String question) {
+		this.lastAsked = this.tickCount;
+		Vec3 eye = player.getEyePosition(), look = player.getLookAngle(), end = eye.add(look.scale(LOOK_RANGE));
+		net.minecraft.world.phys.AABB box = player.getBoundingBox().expandTowards(look.scale(LOOK_RANGE)).inflate(1.0);
+		net.minecraft.world.phys.EntityHitResult mob = net.minecraft.world.entity.projectile.ProjectileUtil.getEntityHitResult(player, eye, end, box,
+			e -> !(e instanceof YouthWisp) && !e.isSpectator() && e.isPickable(), LOOK_RANGE * LOOK_RANGE);
+		net.minecraft.world.phys.HitResult block = player.pick(LOOK_RANGE, 1.0F, false);
+		double blockSq = block.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK ? block.getLocation().distanceToSqr(eye) : Double.MAX_VALUE;
+		if (mob != null && mob.getLocation().distanceToSqr(eye) <= blockSq && player.hasLineOfSight(mob.getEntity())) {
+			Entity entity = mob.getEntity();
+			String id = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString();
+			this.shown = new Shown(entity, entity.position(), id + " \"" + entity.getName().getString() + "\"", question, this.tickCount + LOOK_WAIT);
+		} else if (block instanceof net.minecraft.world.phys.BlockHitResult hit && block.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK) {
+			net.minecraft.world.level.block.state.BlockState state = player.level().getBlockState(hit.getBlockPos());
+			String id = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(state.getBlock()).toString();
+			this.shown = new Shown(null, Vec3.atCenterOf(hit.getBlockPos()), id + " \"" + state.getBlock().getName().getString() + "\"", question,
+				this.tickCount + LOOK_WAIT);
+		} else {
+			this.shown = null;
+			this.triggerAnim("action", "talk");
+			this.speak(player, Component.translatable("message.jaymoskingdoms.youth_wisp.look_miss"));
+			return;
+		}
+		this.setPending(false);
+		this.triggerAnim("action", "talk");
+		this.speak(player, Component.translatable("message.jaymoskingdoms.youth_wisp.look." + this.random.nextInt(LOOK_LINES)));
+	}
+
+	/** Hovers round what it was shown, facing its asker; false once that's over (gone, or no answer in time). */
+	private boolean hoverShown(ServerPlayer player) {
+		Shown shown = this.shown;
+		if (shown == null) {
+			return false;
+		}
+		if (this.tickCount > shown.until() || shown.entity() != null && (shown.entity().isRemoved() || shown.entity().level() != this.level())) {
+			this.shown = null;
+			return false;
+		}
+		// above the thing, a little toward the asker, circling it
+		Vec3 base = shown.entity() != null ? shown.entity().position().add(0, shown.entity().getBbHeight() + 0.4, 0) : shown.at().add(0, 0.9, 0);
+		Vec3 toward = player.position().subtract(base).multiply(1, 0, 1);
+		toward = toward.lengthSqr() < 1.0E-4 ? Vec3.ZERO : toward.normalize().scale(0.5);
+		double t = (this.tickCount + this.getId() * 37) / 14.0;
+		Vec3 target = base.add(toward).add(Math.cos(t) * 0.6, Math.sin(t * 1.7) * 0.15, Math.sin(t) * 0.6);
+		this.setPos(this.position().add(target.subtract(this.position()).scale(0.2)));
+		this.face(player);
+		return true;
+	}
+
+	/**
+	 * {@code player} said "youth" aloud in voice chat ({@link YouthEars}): their wisp comes (or perks up) and asks them to
+	 * type the question. Logged as {@code [youth-call] <account name> voice} (Hermes needn't answer it).
+	 */
+	static void calledByVoice(ServerPlayer player) {
+		YouthWisp wisp = summon(player);
+		if (wisp == null) {
+			return;
+		}
+		wisp.lastAsked = wisp.tickCount;
+		wisp.triggerAnim("action", "talk");
+		wisp.speak(player, Component.translatable("message.jaymoskingdoms.youth_wisp.voice." + wisp.random.nextInt(VOICE_LINES)));
+		com.jaymoskingdoms.JaymosKingdoms.LOGGER.info("[youth-call] {} voice", player.getGameProfile().name());
 	}
 
 	/** The nearest wisp {@code player} can see on their screen (near, in clear view, before them), or null. */
@@ -246,7 +467,7 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		YouthWisp best = null;
 		double bestSq = HELP_RANGE * HELP_RANGE;
 		for (YouthWisp wisp : BY_ASKER.values()) {
-			if (wisp.isRemoved() || wisp.vanishing >= 0 || wisp.level() != player.level()) {
+			if (wisp.isRemoved() || wisp.vanishing >= 0 || wisp.away != Away.HERE || wisp.level() != player.level()) {
 				continue;
 			}
 			Vec3 to = wisp.getBoundingBox().getCenter().subtract(eye);
@@ -345,7 +566,7 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		YouthWisp wisp = gesture(player);
 		Component words = Component.literal(text);
 		if (wisp != null) {
-			wisp.speak(player, words);
+			wisp.answer(player, words);
 		} else {
 			player.sendSystemMessage(line(words));
 		}
@@ -362,15 +583,123 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 		}
 	}
 
-	/** {@code player}'s wisp comes (if it isn't about) and gestures as it talks. */
+	/** {@code player}'s wisp comes (if it isn't about) and gestures as it talks (or, off thinking, starts back). */
 	static @Nullable YouthWisp gesture(ServerPlayer player) {
 		YouthWisp wisp = summon(player);
 		if (wisp != null) {
 			wisp.lastAsked = wisp.tickCount;
-			wisp.pending = false;
-			wisp.triggerAnim("action", "talk");
+			wisp.setPending(false);
+			if (wisp.away == Away.HERE) {
+				wisp.triggerAnim("action", "talk");
+			} else {
+				wisp.comeBack();
+			}
 		}
 		return wisp;
+	}
+
+	/** Says {@code words} to {@code player} now, or, while it is off thinking, once it's back beside them. */
+	void answer(ServerPlayer player, Component words) {
+		if (this.away == Away.HERE) {
+			this.speak(player, words);
+		} else {
+			this.bringing.add(words);
+		}
+	}
+
+	/** Swoops off away from its asker (out and up) to think. */
+	private void leave() {
+		ServerPlayer player = this.askerPlayer();
+		Vec3 dir = player == null ? Vec3.ZERO : this.position().subtract(player.position()).multiply(1, 0, 1);
+		if (dir.lengthSqr() < 1.0E-4 && player != null) {
+			dir = player.getLookAngle().multiply(1, 0, 1);
+		}
+		this.awayDir = dir.lengthSqr() < 1.0E-4 ? new Vec3(0, 0, 1) : dir.normalize();
+		this.shown = null;
+		this.away = Away.LEAVING;
+		this.awaySince = this.tickCount;
+		this.triggerAnim("action", "swoop");
+	}
+
+	/** Shows itself again where it went, and flies back to its asker. */
+	private void comeBack() {
+		if (this.away == Away.GONE) {
+			this.setInvisible(false);
+			if (this.level() instanceof ServerLevel level) {
+				Fx.burst(level, this.getX(), this.getY() + 0.5, this.getZ(), COLOUR, 0.8F, 18, 0.3, 0.4, 0.3);
+			}
+		}
+		if (this.away != Away.RETURNING) {
+			this.away = Away.RETURNING;
+			this.awaySince = this.tickCount;
+			this.triggerAnim("action", "swoop");
+		}
+	}
+
+	/** Where it goes to think: out from its asker the way it left, and up. */
+	private Vec3 awaySpot(ServerPlayer player) {
+		return player.position().add(this.awayDir.scale(AWAY_OUT)).add(0, AWAY_UP, 0);
+	}
+
+	/**
+	 * Off thinking, each tick: flying off (and fading there), keeping its place by its asker while gone, or flying back
+	 * and, once beside them, saying the answer it brought. False when it's here and this is nothing to do with it.
+	 */
+	private boolean tickAway(ServerLevel level, ServerPlayer player) {
+		int ticks = this.tickCount - this.awaySince;
+		switch (this.away) {
+			case LEAVING -> {
+				Vec3 to = this.awaySpot(player);
+				if (this.flyTo(to, Math.min(LEAVE_TOP, LEAVE_START + LEAVE_GAIN * ticks)) || ticks > LEAVE_TICKS) {
+					this.away = Away.GONE;
+					this.setInvisible(true);
+					Fx.burst(level, this.getX(), this.getY() + 0.5, this.getZ(), COLOUR, 0.8F, 18, 0.3, 0.4, 0.3);
+				} else {
+					this.motes(level);
+				}
+			}
+			case GONE -> this.setPos(this.awaySpot(player));
+			case RETURNING -> {
+				Vec3 to = spotBeside(player);
+				double speed = Math.min(RETURN_TOP, Math.max(0.05, this.position().distanceTo(to) * RETURN_EASE));
+				if (this.flyTo(to, speed) || ticks > RETURN_TICKS) {
+					this.away = Away.HERE;
+					this.spot = to;
+					this.face(player);
+					this.triggerAnim("action", "talk");
+					for (Component words : this.bringing) {
+						this.speak(player, words);
+					}
+					this.bringing.clear();
+				} else {
+					this.motes(level);
+				}
+			}
+			default -> {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** One tick's flight toward {@code to}, at most {@code speed} blocks, facing the way it goes; true once it's there. */
+	private boolean flyTo(Vec3 to, double speed) {
+		Vec3 gap = to.subtract(this.position());
+		double length = gap.length();
+		if (length <= ARRIVED) {
+			this.setPos(to);
+			return true;
+		}
+		Vec3 next = this.position().add(gap.scale(Math.min(1.0, speed / length)));
+		double dx = gap.x, dz = gap.z;
+		if (dx * dx + dz * dz > 1.0E-4) {
+			float yaw = (float) (Mth.atan2(dz, dx) * Mth.RAD_TO_DEG) - 90.0F;
+			this.setYRot(yaw);
+			this.setYHeadRot(yaw);
+			this.setYBodyRot(yaw);
+		}
+		this.setPos(next);
+		return false;
 	}
 
 	/** One line of Youth's in chat: its name in its own colour, then the words. */
@@ -470,13 +799,21 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 			return;
 		}
 		ServerPlayer player = this.askerPlayer();
-		if (player == null || player.level() != level || player.distanceToSqr(this) > LEASH * LEASH
-			|| this.tickCount - this.lastAsked > IDLE_TIMEOUT || BY_ASKER.get(this.asker) != this) {
-			if (player != null && this.pending && this.tickCount - this.lastAsked > IDLE_TIMEOUT) {
+		double leash = this.shown != null ? LOOK_RANGE + LEASH : LEASH;
+		if (player == null || player.level() != level || this.away == Away.HERE && player.distanceToSqr(this) > leash * leash
+			|| this.tickCount - this.lastAsked > (this.pending() ? ANSWER_TIMEOUT : IDLE_TIMEOUT) || BY_ASKER.get(this.asker) != this) {
+			if (player != null && this.pending() && this.tickCount - this.lastAsked > ANSWER_TIMEOUT) {
 				this.triggerAnim("action", "talk");
 				this.speak(player, Component.translatable("message.jaymoskingdoms.youth_wisp.hold." + this.random.nextInt(HOLD_LINES)));
 			}
 			this.vanish();
+			return;
+		}
+		if (this.tickAway(level, player)) {
+			return;
+		}
+		if (this.hoverShown(player)) {
+			this.motes(level);
 			return;
 		}
 		// switch to a new behavior mode if it's time
@@ -547,8 +884,21 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 				this.face(nearest != null ? nearest : player);
 				break;
 		}
+		this.motes(level);
+	}
+
+	/** Its motes, and the thinking dots over its head while an answer is coming. */
+	private void motes(ServerLevel level) {
 		if (this.tickCount % MOTE_EVERY == 0) {
 			level.sendParticles(Fx.mote(COLOUR, 0.6F), this.getX(), this.getY() + 0.3, this.getZ(), 1, 0.15, 0.1, 0.15, 0.0);
+		}
+		if (this.pending() && this.tickCount % DOT_EVERY == 0) {
+			// "...": a dot over its head, left to right across where it faces, then again
+			int dot = this.tickCount / DOT_EVERY % 3 - 1;
+			float yaw = this.getYRot() * Mth.DEG_TO_RAD;
+			double sx = Math.cos(yaw) * 0.18 * dot, sz = Math.sin(yaw) * 0.18 * dot;
+			level.sendParticles(Fx.mote(COLOUR, 0.5F), this.getX() + sx, this.getY() + this.getBbHeight() + 0.25, this.getZ() + sz,
+				1, 0.0, 0.0, 0.0, 0.0);
 		}
 	}
 
@@ -624,7 +974,7 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 	public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
 		controllers.add(new AnimationController<YouthWisp>("idle", 6, test -> test.setAndContinue(test.animatable().nextIdle())));
 		controllers.add(new AnimationController<YouthWisp>("action", test -> PlayState.STOP)
-			.triggerableAnim("appear", APPEAR).triggerableAnim("vanish", VANISH).triggerableAnim("talk", TALK));
+			.triggerableAnim("appear", APPEAR).triggerableAnim("vanish", VANISH).triggerableAnim("talk", TALK).triggerableAnim("swoop", SWOOP));
 	}
 
 	/**
@@ -636,10 +986,28 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 			this.idleRandom = RandomSource.create(this.getId() * 0x9E3779B97F4A7C15L);
 			this.idleUntil = this.tickCount + gap(this.idleRandom);
 		}
+		boolean thinking = this.pending();
+		if (thinking != this.wasThinking) {
+			// starts (or stops) thinking: the next animation now, from the other set
+			this.wasThinking = thinking;
+			this.idleIndex = -1;
+			this.idleUntil = this.tickCount;
+		}
 		if (this.tickCount < this.idleUntil) {
 			return this.idle;
 		}
 		RandomSource random = this.idleRandom;
+		if (thinking) {
+			int pick = random.nextInt(this.idleIndex >= 0 && this.idleIndex < THINKS.length ? THINKS.length - 1 : THINKS.length);
+			if (this.idleIndex >= 0 && pick >= this.idleIndex) {
+				pick++;
+			}
+			this.idleIndex = pick;
+			this.idle = RawAnimation.begin().thenPlay(THINKS[pick]).thenLoop("hover");
+			this.idleUntil = this.tickCount + Math.round(THINK_SECONDS[pick] * 20) + THINK_GAP_MIN
+				+ random.nextInt(THINK_GAP_MAX - THINK_GAP_MIN + 1);
+			return this.idle;
+		}
 		int total = 0;
 		for (int i = 0; i < IDLES.length; i++) {
 			total += i == this.idleIndex ? 0 : IDLE_WEIGHT[i];
@@ -674,14 +1042,25 @@ public class YouthWisp extends PathfinderMob implements GeoEntity {
 
 	/**
 	 * The online players as one line of JSON: name, the display name chat shows (a nickname can differ from the account
-	 * name, and Hermes reads chat from the log), dimension, block position, and whether their wisp is about.
+	 * name, and Hermes reads chat from the log), dimension, block position, whether their wisp is about, their own MCA
+	 * character name (empty if none; a mask doesn't hide it here), and the online players they've been introduced to
+	 * (accounts), so Youth names someone's character only to those who've met it (Andy: "Desto, Kinslauer, or whatever
+	 * my MCA character's name is if the requesting player has been introduced").
 	 */
 	static String status(List<ServerPlayer> players) {
 		List<String> rows = new ArrayList<>();
 		for (ServerPlayer p : players) {
-			rows.add(String.format("{\"name\":\"%s\",\"display\":\"%s\",\"dim\":\"%s\",\"x\":%d,\"y\":%d,\"z\":%d,\"wisp\":%b}",
+			List<String> knows = new ArrayList<>();
+			for (ServerPlayer other : players) {
+				if (other != p && Introductions.introduced(p, other)) {
+					knows.add("\"" + json(other.getName().getString()) + "\"");
+				}
+			}
+			String character = CharacterNames.character(p);
+			rows.add(String.format("{\"name\":\"%s\",\"display\":\"%s\",\"dim\":\"%s\",\"x\":%d,\"y\":%d,\"z\":%d,\"wisp\":%b,"
+				+ "\"character\":\"%s\",\"knows\":[%s]}",
 				json(p.getName().getString()), json(p.getDisplayName().getString()), p.level().dimension().identifier(),
-				p.getBlockX(), p.getBlockY(), p.getBlockZ(), has(p)));
+				p.getBlockX(), p.getBlockY(), p.getBlockZ(), has(p), json(character == null ? "" : character), String.join(",", knows)));
 		}
 		return "{\"players\":[" + String.join(",", rows) + "]}";
 	}

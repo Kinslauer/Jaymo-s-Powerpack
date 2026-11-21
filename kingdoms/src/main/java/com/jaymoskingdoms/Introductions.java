@@ -183,6 +183,15 @@ public final class Introductions {
 		return known != null && known.contains(e.getUUID());
 	}
 
+	/**
+	 * {@code viewer} has been introduced to {@code other} (told their name, or in their group). Unlike {@link #knows}, a
+	 * mask doesn't count: for Youth, who names a player's character only to those who've met it.
+	 */
+	public static boolean introduced(Player viewer, Player other) {
+		Set<UUID> known = viewer.getAttached(KNOWN);
+		return Groups.together(viewer, other) || known != null && known.contains(other.getUUID());
+	}
+
 	/** This client's player knows {@code e}'s name (client side; true where there's no one looking). */
 	public static boolean knownHere(Entity e) {
 		return knows(viewer.get(), e);
@@ -243,6 +252,30 @@ public final class Introductions {
 		return Component.translatable("identity.jaymoskingdoms.stranger");
 	}
 
+	/**
+	 * (2026-11-20) Andy: "every humanoid that speaks should have to be introduced except for the exceptions we made before
+	 * like the judge". What {@code viewer} hears {@code e} called wherever they're named to them: the head of a talk card,
+	 * a line in chat, a seat at a table. Their name once {@code viewer} {@linkplain #knows knows} it, else what they are
+	 * ({@link #what}: "Villager", "Orc"; a player is a {@linkplain #stranger stranger}). The exceptions stay named as
+	 * before: Powers' Z Fighter characters at their post ({@link ZFighterFolk#PART}: the Judge, the Keeper, the masters...),
+	 * who go by their part and skip the stranger's page, and anyone whose name isn't kept at all ({@link #named}).
+	 */
+	public static Component called(@Nullable Player viewer, Entity e) {
+		if (knows(viewer, e) || e.getAttached(ZFighterFolk.PART) != null) {
+			return e.getDisplayName();
+		}
+		return e instanceof Player ? stranger() : what(e);
+	}
+
+	/** {@code viewer} knows the name of whoever has the id {@code id} (when they may not be about: a seat at a table). */
+	public static boolean knowsId(Player viewer, UUID id) {
+		if (viewer.getUUID().equals(id)) {
+			return true;
+		}
+		Set<UUID> known = viewer.getAttached(KNOWN);
+		return known != null && known.contains(id);
+	}
+
 	/** {@code player} now knows {@code e}'s name. True if they didn't before. */
 	static boolean learn(ServerPlayer player, Entity e) {
 		boolean fresh = learn(player, e.getUUID());
@@ -273,6 +306,10 @@ public final class Introductions {
 	 * you've won enough of MCA's hearts (gifts and talk): {@link #PROVEN_HEARTS_PER_DEGREE} for each degree they mind.
 	 */
 	public static boolean wary(ServerPlayer player, Villager villager) {
+		if (Groves.is(villager)) {
+			// (2026-11-19) an old druid minds no one's blood and no realm's word of them: only what you've done to her
+			return Recollections.leaning(villager, player) <= Recollections.COLD;
+		}
 		int lean = Recollections.leaning(villager, player);
 		if (lean >= Recollections.WARM) {
 			return false;
@@ -416,6 +453,11 @@ public final class Introductions {
 			// (0.7.490) an orc or goblin refuses in its own dialect
 			return refusal(player, villager,
 				() -> Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_outlaw." + villager.getRandom().nextInt(OUTLAW_LINES)));
+		}
+		if (Groves.is(villager)) {
+			// (2026-11-19) an old druid goes by what she is
+			learn(player, villager);
+			return Component.translatable("dialogue.chat.jaymoskingdoms.name_druid", Component.literal(villager.getName().getString()));
 		}
 		String kind = ZFighterFolk.is(villager) ? ZFighterFolk.kind(villager) : null;
 		if (kind != null) {

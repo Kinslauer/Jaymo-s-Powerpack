@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -248,12 +246,9 @@ public final class Stakes {
 		}
 	}
 
-	/** (0.7.641) The pull meter on the action bar, drawn like the chop meter ({@code Trees.showChops}): it holds where it is. */
+	/** (0.7.641) The pull meter, drawn like the chop meter ({@code Trees.showChops}): it holds where it is. */
 	private static void showTugs(ServerPlayer player, int tugs) {
-		int marks = TUGS;
-		Component bar = Component.literal("\u25A0".repeat(tugs)).withStyle(tugs >= marks ? ChatFormatting.RED : ChatFormatting.DARK_RED)
-			.append(Component.literal("\u25A1".repeat(marks - tugs)).withStyle(ChatFormatting.DARK_GRAY));
-		player.sendOverlayMessage(bar);
+		HudBars.marks(player, "stake", tugs, TUGS, HudBars.DARK_RED, null);
 	}
 
 	private static void tick(MinecraftServer server) {

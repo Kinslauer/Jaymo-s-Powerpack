@@ -20,7 +20,8 @@
     "lodging": { "at": "near", "from": "home", "dist": [20, 50], "name": "the lamp-bearer's lodging" },
     "bookhouse": { "at": "near", "from": "home", "dist": [40, 80], "name": "the bookhouse" },
     "chapel": { "at": "other_town", "name": "the old priest's chapel" },
-    "thicket": { "at": "wild", "from": "home", "dist": [180, 320], "name": "the thicket to the north" }
+    "thicket": { "at": "wild", "from": "home", "dist": [180, 320], "name": "the thicket to the north" },
+    "cellar": { "at": "near", "from": "home", "dist": [8, 20], "name": "the root cellar" }
   },
   "first": "ask",
   "steps": {
@@ -53,11 +54,11 @@
       "clues": [
         { "name": "The dead man's purse", "item": "minecraft:gold_nugget", "lore": ["Still on his belt, and heavy.", "Whatever walked here did not want money."], "journal": "Carrick's purse was left on him, full." },
         { "name": "A sleeper's footprints", "item": "minecraft:packed_mud", "lore": ["A man's bare feet, from the lane to the pond and back, unhurried.", "Someone walks here asleep."], "journal": "A man walked barefoot from the lane to the pond and back, at a sleeper's pace." },
-        { "name": "A print in the clay", "item": "minecraft:clay_ball", "lore": ["A paw as wide as a spread hand.", "Two strides on, the same track is a bare human foot."], "journal": "By the pond a great paw print becomes, within two strides, the print of a bare foot.", "if": "truth=cursed" },
-        { "name": "A split nightshirt", "item": "minecraft:white_wool", "lore": ["Linen, burst along every seam from the inside.", "As if it was outgrown in a breath."], "journal": "A nightshirt lay in the reeds, burst at every seam from within.", "if": "truth=cursed" },
-        { "name": "A print in the clay", "item": "minecraft:clay_ball", "lore": ["A wolf's paw, with one pad dragged.", "The beast is old, and lame in a hind leg."], "journal": "A wolf's track by the pond, lame in one hind leg.", "if": "truth=wolf" },
-        { "name": "Grey hair on the thorn", "item": "minecraft:string", "lore": ["Coarse and grey, with the rank smell of a den.", "There is no more to it than that."], "journal": "Coarse grey hair was caught on the thorn hedge. It smells of a den.", "if": "truth=wolf" },
-        { "name": "A print in the clay", "item": "minecraft:clay_ball", "lore": ["A paw, pressed square, as deep at the heel as at the toe.", "A beast rolls its foot. This was stamped."], "journal": "The paw print by the pond is the same depth all over. It was stamped, not trodden.", "if": "truth=murder" },
+        { "name": "A print in the clay", "item": "minecraft:clay_ball", "lore": ["A paw as wide as a spread hand.", "Two strides on, the same track is a bare human foot."], "journal": "By the pond a great paw print becomes, within two strides, the print of a bare foot.", "mark": "moon_tracks_changed", "if": "truth=cursed" },
+        { "name": "A split nightshirt", "item": "minecraft:white_wool", "lore": ["Linen, burst along every seam from the inside.", "As if it was outgrown in a breath."], "journal": "A nightshirt lay in the reeds, burst at every seam from within.", "mark": "moon_tracks_shirt", "if": "truth=cursed" },
+        { "name": "A print in the clay", "item": "minecraft:clay_ball", "lore": ["A wolf's paw, with one pad dragged.", "The beast is old, and lame in a hind leg."], "journal": "A wolf's track by the pond, lame in one hind leg.", "mark": "moon_tracks_lame", "if": "truth=wolf" },
+        { "name": "Grey hair on the thorn", "item": "minecraft:string", "lore": ["Coarse and grey, with the rank smell of a den.", "There is no more to it than that."], "journal": "Coarse grey hair was caught on the thorn hedge. It smells of a den.", "mark": "moon_tracks_hair", "if": "truth=wolf" },
+        { "name": "A print in the clay", "item": "minecraft:clay_ball", "lore": ["A paw, pressed square, as deep at the heel as at the toe.", "A beast rolls its foot. This was stamped."], "journal": "The paw print by the pond is the same depth all over. It was stamped, not trodden.", "mark": "moon_tracks_stamped", "if": "truth=murder" },
         { "name": "A broken iron tine", "item": "minecraft:iron_nugget", "lore": ["Snapped from a rake or a wool comb.", "The break is bright, and there is something dark dried in it."], "journal": "A snapped iron tine lay in the grass where Carrick fell.", "if": "truth=murder" }
       ],
       "then": "witness"
@@ -157,9 +158,103 @@
         "And since you asked: there's an old priest, {priest}, a village over. He keeps a rite older than his chapel. I've seen it lift the curse twice and fail once. I'd sooner it worked. I'm not fond of my trade. I'm only good at it."
       ],
       "replies": [
+        { "say": "What does your trade carry against it?", "then": "lamp_arms" },
+        { "say": "Then we wait for the moon, and I keep the door with him myself.", "then": "to_cellar", "journal": "{lampbearer} hunts the cursed for the Lantern Warden. She says there is a priest, {priest}, who keeps a rite that can lift the curse. I chose to wait for the next moon, and to keep the door on {sleeper} myself." },
         { "say": "Then we wait for the moon, behind a door.", "then": "wait_moon", "journal": "{lampbearer} hunts the cursed for the Lantern Warden. She says there is a priest, {priest}, who keeps a rite that can lift the curse. I chose to wait for the next moon, with {sleeper} behind a locked door." },
         { "say": "The book is quicker. Let {examiner} look at him.", "then": "book", "journal": "{lampbearer} hunts the cursed for the Lantern Warden. She says there is a priest, {priest}, who keeps a rite that can lift the curse. I chose to stand {sleeper} before the Truth's book." }
       ]
+    },
+    "lamp_arms": {
+      "do": "talk", "who": "lampbearer",
+      "say": [
+        "More than I'll lend. But I'll tell you where I learned it. {examiner} keeps a bestiary in the bookhouse, greasy with a hundred years of thumbs. Look up the one who walks. Look up the plain wolf while you're about it, for your tracks may have told you more than they've told me.",
+        "Then go and get what the page says, before the moon and not on the night. I've buried two who meant to get it on the night."
+      ],
+      "then": "look_up"
+    },
+    "look_up": {
+      "do": "search", "at": "bookhouse", "need": 2, "goal": "Look the thing up in the bookhouse bestiary",
+      "clues": [
+        { "name": "The bestiary, at 'One Who Walks'", "item": "minecraft:book", "lore": ["'It cannot abide wolfsbane, the hooded blue flower that grows among fern in damp woods. A sprig carried close turns its head and slows its spring.'", "'Silver bites it as iron bites us. Bring both to it, or do not go.'"], "journal": "The bookhouse bestiary says the one who walks cannot abide wolfsbane, and that silver bites it. Wolfsbane grows among fern in damp woods.", "mark": "moon_knows_bane" },
+        { "name": "The bestiary, at 'Wolf'", "item": "minecraft:book", "lore": ["'An old wolf that comes to the pens is lame or starving, and has lost its fear of walls.'", "'It has not lost its fear of fire. Carry a brand, and it will not close with you gladly.'"], "journal": "The bookhouse bestiary says an old wolf that takes penned stock still fears fire. A torch in the hand keeps it from closing.", "mark": "moon_knows_fire" }
+      ],
+      "then": "lamp_choose"
+    },
+    "lamp_choose": {
+      "do": "talk", "who": "lampbearer", "goal": "Tell {lampbearer} how you mean to know",
+      "say": "You've read it. Good. Then you know what to carry, whichever it turns out to be. Now choose how we find out. The book, the door, or the door with you sat against it.",
+      "replies": [
+        { "say": "The door, and I keep it with him myself.", "then": "to_cellar", "journal": "{lampbearer} hunts the cursed for the Lantern Warden. She says there is a priest, {priest}, who keeps a rite that can lift the curse. I chose to wait for the next moon, and to keep the door on {sleeper} myself." },
+        { "say": "The door. Send for me when the moon has been.", "then": "wait_moon", "journal": "{lampbearer} hunts the cursed for the Lantern Warden. She says there is a priest, {priest}, who keeps a rite that can lift the curse. I chose to wait for the next moon, with {sleeper} behind a locked door." },
+        { "say": "The book is quicker. Let {examiner} look at him.", "then": "book", "journal": "{lampbearer} hunts the cursed for the Lantern Warden. She says there is a priest, {priest}, who keeps a rite that can lift the curse. I chose to stand {sleeper} before the Truth's book." }
+      ]
+    },
+    "to_cellar": {
+      "do": "escort", "who": "sleeper", "to": "cellar", "goal": "Walk {sleeper} to {place:cellar}",
+      "journal": "I walked {sleeper} to {giver}'s root cellar. He carried his own blanket, and asked me to drop the bar from my side.",
+      "then": "keep_door"
+    },
+    "keep_door": {
+      "do": "vigil", "at": "cellar", "goal": "Keep the cellar door through the night of the full moon", "when": "moon:full", "gap": 20, "within": 9, "late": "moon_after", "until": "the night of the full moon",
+      "lines": {
+        "?truth=cursed": [
+          { "who": "sleeper", "say": "Bar it. Whatever I say after, don't lift it. If I ask nicely, least of all then." },
+          { "say": "The moon is up over the common. Behind the door {sleeper} has stopped talking in the middle of a word." },
+          { "say": "Something heavy turns over on the cellar floor. The iron bar jumps in its brackets.", "sound": "minecraft:entity.zombie.break_wooden_door" },
+          { "say": "It is at the door now, breathing through the gap at the hinge. It knows somebody is sat on this side.", "sound": "minecraft:entity.wolf.growl" },
+          { "say": "Claws on oak, slow and steady, like a man planing a board. It goes on a long while.", "sound": "minecraft:block.wood.hit" },
+          { "say": "Every dog in {town} is barking. Then, all at once, none of them is.", "sound": "minecraft:entity.wolf.whine" },
+          { "say": "Grey light under the shutters. The scratching has stopped. Somebody is crying behind the door, in {sleeper}'s voice.", "mark": "moon_kept_door" },
+          { "who": "sleeper", "say": "Is it morning? What have I done to the door? Don't open it yet. Tell me first if anybody is hurt." }
+        ],
+        "?truth=wolf": [
+          { "who": "sleeper", "say": "Bar it. I'd sooner be a fool behind a door than the other thing in front of one." },
+          { "say": "The moon is up over the common. Behind the door {sleeper} is breathing slow and even." },
+          { "say": "Bare feet on the cellar floor, going round and round. He begs a barrel's pardon, very politely, and lies down again.", "sound": "minecraft:block.wood.step" },
+          { "say": "A sheep cries out on the far side of the common, once. {sleeper} is still behind the door. The bar has not moved.", "sound": "minecraft:entity.sheep.hurt" },
+          { "say": "Something goes off north through the long grass with one foot dragging. It is in no hurry.", "sound": "minecraft:entity.wolf.growl" },
+          { "say": "Grey light under the shutters. {sleeper} is snoring.", "mark": "moon_kept_door" },
+          { "who": "sleeper", "say": "Is it morning? Did I walk? I dreamed about apples." }
+        ],
+        "?": [
+          { "who": "sleeper", "say": "Bar it. I'd sooner be a fool behind a door than the other thing in front of one." },
+          { "say": "The moon is up over the common. Behind the door {sleeper} is breathing slow and even." },
+          { "say": "Bare feet on the cellar floor, going round and round. He begs a barrel's pardon, very politely, and lies down again.", "sound": "minecraft:block.wood.step" },
+          { "say": "Midnight by the stars. The flock on the common has not stirred. Nothing has cried out anywhere." },
+          { "say": "A lantern crosses the far end of the common at a walk, and goes in at the Carrick farm gate. Somebody else is awake to see what the moon does." },
+          { "say": "Grey light under the shutters. Nothing was killed. {sleeper} is snoring.", "mark": "moon_kept_door" },
+          { "who": "sleeper", "say": "Is it morning? Did I walk? I dreamed about apples." }
+        ]
+      },
+      "left": "moon_after",
+      "then": "door_after"
+    },
+    "door_after": {
+      "do": "talk", "who": "giver", "goal": "Tell {giver} how the night went",
+      "say": {
+        "?truth=cursed": [
+          "You sat it out. I heard some of it from my bed and put the bolster over my head, and I'm not proud of that.",
+          "There are marks on the inside of that door that I must plane out before anyone sees. So now we know, and you know it better than any of us. {lampbearer} is sharpening something. I asked her for a day, for you."
+        ],
+        "?truth=wolf": [
+          "You sat it out. And he never left the cellar. You'd swear to that before the book, and you may have to, for there's a ewe dead on the far side of the common this morning, the same as before.",
+          "So it isn't him. The shepherd lad found a trail going off north, toward the thicket. A plain trail. Paws, and one of them dragging. You heard it go, you say. Then you know more than the street does."
+        ],
+        "?": [
+          "You sat it out. And he never left the cellar, and nothing was killed. Not a hen. The first full moon in four with nothing dead on the common.",
+          "I've been turning it over since dawn. Three beasts, to set the street talking, then one old man, then nothing. As if whatever walks got what it wanted from Hobb Carrick. And a lantern went in at the Carrick gate in the small hours, you say. Did it, now."
+        ]
+      },
+      "journal": {
+        "?truth=cursed": "I kept the cellar door through the full moon with {sleeper} behind it. The door held, barely, and I heard what he becomes. He is the one who walks, and he did not know it.",
+        "?truth=wolf": "I kept the cellar door through the full moon. {sleeper} never left it, and a ewe was killed on the common all the same. It is not him. I heard something lame go off north, and its trail leads to the thicket.",
+        "?": "I kept the cellar door through the full moon. {sleeper} never left it, and nothing at all was killed. Whatever walks seems to have had what it wanted when Carrick died. In the small hours a lantern went in at the Carrick farm gate."
+      },
+      "then": {
+        "?truth=cursed": "knows",
+        "?truth=wolf": "to_thicket",
+        "?": "search_barn"
+      }
     },
     "book": {
       "do": "talk", "who": "examiner", "goal": "Stand {sleeper} before {examiner} and the book",
@@ -247,8 +342,13 @@
     },
     "wait_last": { "do": "wait", "days": [5, 8], "wake": "none", "then": "beast_fight" },
     "beast_fight": {
-      "do": "foe", "who": "beast", "goal": "Meet {sleeper} at the pond at moonrise",
+      "do": "foe", "who": "beast", "bestiary_kind": "Those who walk at the moon", "goal": "Meet {sleeper} at the pond at moonrise",
       "journal": "At moonrise I met him by the pond, as I had said I would. I was quick. In the morning it was only {sleeper} lying there, and his mother came with a blanket.",
+      "weak_to": [
+        { "know": "mark:moon_knows_bane", "item": "jaymoskingdoms:wolfsbane", "share": 0.75, "journal": "I carried wolfsbane to the pond, as the bestiary said. It turned its head from me twice before it sprang, and the spring was slow.", "bestiary": "It cannot abide wolfsbane. A sprig carried close turns its head and slows its spring." },
+        { "know": "mark:moon_knows_bane", "item": "jaymoskingdoms:silver_sword", "share": 0.75, "journal": "I brought a silver blade to the pond, as the bestiary said. Every cut I gave it stayed open.", "bestiary": "Silver bites it as iron bites us. What a silver edge opens does not close." },
+        { "know": "mark:moon_knows_bane", "item": "#c:ingots/silver", "share": 0.85, "journal": "I had silver on me at the pond, as the bestiary said. It would not come in close on that side.", "bestiary": "It shies from silver, even silver that is only carried." }
+      ],
       "slain": "end:killed"
     },
     "wait_ran": {
@@ -265,6 +365,10 @@
     "wolf_fight": {
       "do": "foe", "who": "greywolf", "goal": "Put down the lame grey wolf",
       "journal": "It was a wolf. Old, grey, lame in the off hind, too slow for deer and too hungry to leave a penned ewe alone.",
+      "weak_to": [
+        { "know": "mark:moon_tracks_lame", "share": 0.8, "journal": "I had read its track by the pond: lame in the off hind. I kept to that side of it, and it could not turn fast enough." },
+        { "know": "mark:moon_knows_fire", "item": "minecraft:torch", "share": 0.75, "journal": "I carried a torch into the thicket, as the bestiary said. The old grey would not close with me gladly.", "bestiary": "An old wolf that has lost its fear of walls has not lost its fear of fire." }
+      ],
       "slain": "report_wolf"
     },
     "report_wolf": {

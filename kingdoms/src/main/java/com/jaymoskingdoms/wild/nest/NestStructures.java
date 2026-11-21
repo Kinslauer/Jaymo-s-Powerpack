@@ -188,7 +188,7 @@ public final class NestStructures {
 				}
 			}
 			for (int i = 0; i < LAIR_HUNG; i++) {
-				BlockPos at = this.roofOver(level, cx + random.nextInt(CHAMBER_R * 2 - 3) - CHAMBER_R + 2, cz + random.nextInt(CHAMBER_R * 2 - 3) - CHAMBER_R + 2);
+				BlockPos at = this.roofOver(level, box, cx + random.nextInt(CHAMBER_R * 2 - 3) - CHAMBER_R + 2, cz + random.nextInt(CHAMBER_R * 2 - 3) - CHAMBER_R + 2);
 				if (at != null && box.isInside(at)) {
 					EggSacBlock.lay(level, at, true, 60 + random.nextInt(60));
 				}
@@ -200,15 +200,18 @@ public final class NestStructures {
 				}
 			}
 			for (int i = 0; i < LAIR_WEBS; i++) {
-				BlockPos at = this.roofOver(level, cx + random.nextInt(CHAMBER_R * 2 - 1) - CHAMBER_R + 1, cz + random.nextInt(CHAMBER_R * 2 - 1) - CHAMBER_R + 1);
+				BlockPos at = this.roofOver(level, box, cx + random.nextInt(CHAMBER_R * 2 - 1) - CHAMBER_R + 1, cz + random.nextInt(CHAMBER_R * 2 - 1) - CHAMBER_R + 1);
 				if (at != null && box.isInside(at) && at.getY() > cy + 3) {
 					level.setBlock(at, Blocks.COBWEB.defaultBlockState(), 2);
 				}
 			}
 		}
 
-		/** The open spot just under the chamber's roof over column (x, z), or null. */
-		private BlockPos roofOver(WorldGenLevel level, int x, int z) {
+		/** The open spot just under the chamber's roof over column (x, z), or null (also when the column is outside box, the chunk being built). */
+		private BlockPos roofOver(WorldGenLevel level, BoundingBox box, int x, int z) {
+			if (x < box.minX() || x > box.maxX() || z < box.minZ() || z > box.maxZ()) {
+				return null;
+			}
 			for (int y = this.floor.getY() + CHAMBER_H + 1; y > this.floor.getY() + 1; y--) {
 				BlockPos at = new BlockPos(x, y, z);
 				if (level.getBlockState(at).isAir() && !level.getBlockState(at.above()).isAir()) {

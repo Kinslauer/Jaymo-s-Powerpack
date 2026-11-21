@@ -82,7 +82,9 @@ public final class Inhabitants {
 			.sized(0.5F, 0.9F).clientTrackingRange(8).updateInterval(2).build(wisp));
 		FabricDefaultAttributeRegistry.register(YOUTH_WISP, YouthWisp.createAttributes());
 		YouthCommand.register();
+		YouthEars.register();
 		net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.clientboundPlay().register(YouthWisp.HomeFlash.TYPE, YouthWisp.HomeFlash.CODEC);
+		net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.clientboundPlay().register(YouthEars.Hearing.TYPE, YouthEars.Hearing.CODEC);
 
 		SpawnPlacements.register(BARROW_BEETLE, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, BarrowBeetle::checkSpawn);
 		SpawnPlacements.register(DRAUGR, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Monster::checkMonsterSpawnRules);

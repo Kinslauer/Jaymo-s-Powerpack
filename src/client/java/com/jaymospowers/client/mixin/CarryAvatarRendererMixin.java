@@ -17,5 +17,6 @@ abstract class CarryAvatarRendererMixin {
 		at = @At("TAIL"))
 	private void jaymospowers$carryState(Avatar entity, AvatarRenderState state, float partialTicks, CallbackInfo ci) {
 		CarryPose.extract(entity, state, partialTicks);
+		com.jaymospowers.client.SlingPose.extract(entity, state, partialTicks);
 	}
 }

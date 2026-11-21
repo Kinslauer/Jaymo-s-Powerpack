@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:andesite_vslab",
+  "result": {
+    "id": "jaymospowers:andesite_quarter",
+    "count": 2
+  }
+}

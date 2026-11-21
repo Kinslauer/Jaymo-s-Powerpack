@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:tuff_quarter",
+    "jaymospowers:tuff_quarter",
+    "jaymospowers:tuff_quarter",
+    "jaymospowers:tuff_quarter"
+  ],
+  "result": {
+    "id": "minecraft:tuff"
+  }
+}

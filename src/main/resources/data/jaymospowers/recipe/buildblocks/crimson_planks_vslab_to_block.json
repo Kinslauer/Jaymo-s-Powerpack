@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:crimson_planks_vslab",
+    "jaymospowers:crimson_planks_vslab"
+  ],
+  "result": {
+    "id": "minecraft:crimson_planks"
+  }
+}

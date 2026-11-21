@@ -108,7 +108,7 @@ public final class ZFighterFusion {
 
 	/** (0.17.53) How a fusion came about. */
 	enum Kind {
-		DANCE, EARRING, BAND, FIVE, MASTER
+		DANCE, EARRING, BAND, FIVE, MASTER, VILLAGER
 	}
 
 	/** What a partner adds to the leader (or, for several, what they add together). */
@@ -193,6 +193,9 @@ public final class ZFighterFusion {
 		ZFighterFusionItems.init();
 		ZFighterFiveFusion.init();
 		ZFighterMasterFusion.init();
+		ZFighterPartner.init();
+		ZFighterReins.init();
+		ZFighterVillagerFusion.init();
 		ServerTickEvents.END_SERVER_TICK.register(ZFighterFusion::tick);
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> server.execute(() -> giveBack(handler.player, null)));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
@@ -225,6 +228,10 @@ public final class ZFighterFusion {
 	static boolean tryDance(ServerPlayer player, ZFighterPower.Live live) {
 		long now = player.level().getGameTime();
 		Long z = Z_TAPS.remove(player.getUUID());
+		if (z != null && now - z <= DANCE_WINDOW && ZFighterReins.dance(player, now)) {
+			// already fused with one other: the same two keys pass the reins (or agree to split)
+			return true;
+		}
 		if (z == null || now - z > DANCE_WINDOW || live.flying || !player.onGround() || FUSED.containsKey(player.getUUID())) {
 			return false;
 		}
@@ -245,7 +252,7 @@ public final class ZFighterFusion {
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 1.2F);
 		if (partner == null) {
 			// (0.17.53) a master who has taught him enough answers the dance instead
-			if (!ZFighterMasterFusion.begin(player, now)) {
+			if (!ZFighterMasterFusion.begin(player, now) && !ZFighterVillagerFusion.begin(player, now)) {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_fusion_waiting").withStyle(ChatFormatting.AQUA));
 			}
 		} else {
@@ -619,6 +626,26 @@ public final class ZFighterFusion {
 				false);
 		}
 		partner.setGameMode(GameType.byId(mode));
+	}
+
+	/** The one steering the fusion {@code inside} watches from (null if he watches none). */
+	static UUID leaderOf(ServerPlayer inside) {
+		for (Map.Entry<UUID, Fused> entry : FUSED.entrySet()) {
+			if (entry.getValue().inside.contains(inside.getUUID())) {
+				return entry.getKey();
+			}
+		}
+		return null;
+	}
+
+	/** Whether {@code fused} is a fusion of exactly two players (so the reins can pass). */
+	static boolean twoWay(Fused fused) {
+		return fused.master == null && fused.inside.size() == 1 && (fused.kind == Kind.DANCE || fused.kind == Kind.EARRING || fused.kind == Kind.BAND);
+	}
+
+	/** {@code leader} hands the body to {@code inside}, who steers from now on (and the halfway swap is off). */
+	static void passReins(ServerPlayer leader, ServerPlayer inside, Fused fused) {
+		swap(leader, inside, fused);
 	}
 
 	static Fused of(ServerPlayer player) {

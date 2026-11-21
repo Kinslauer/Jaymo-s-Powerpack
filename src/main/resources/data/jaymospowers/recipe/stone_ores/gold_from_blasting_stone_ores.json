@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:blasting",
+  "category": "blocks",
+  "cookingtime": 100,
+  "experience": 1.0,
+  "group": "gold_ingot",
+  "ingredient": [
+    "jaymospowers:andesite_gold_ore",
+    "jaymospowers:diorite_gold_ore",
+    "jaymospowers:granite_gold_ore",
+    "jaymospowers:tuff_gold_ore"
+  ],
+  "result": {
+    "id": "minecraft:gold_ingot"
+  }
+}

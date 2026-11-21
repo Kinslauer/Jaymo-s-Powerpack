@@ -37,6 +37,7 @@ final class WindDouse {
 		for (BlockPos pos : BlockPos.betweenClosed(box)) {
 			if (level.getBlockState(pos).getBlock() instanceof BaseFireBlock && Vec3.atCenterOf(pos).distanceToSqr(centre) <= r2) {
 				level.removeBlock(pos, false);
+				com.jaymospowers.core.trials.PowerTrials.count(caster, "wind.douse", 1);
 				level.sendParticles(ParticleTypes.SMOKE, pos.getX() + 0.5, pos.getY() + 0.3, pos.getZ() + 0.5, 3, 0.25, 0.1, 0.25, 0.02);
 				if (sound == null) {
 					sound = pos.immutable();

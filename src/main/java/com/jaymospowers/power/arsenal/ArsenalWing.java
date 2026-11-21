@@ -2,6 +2,7 @@ package com.jaymospowers.power.arsenal;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.combat.Guard;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.ground.FirstTools;
 import com.jaymospowers.api.PowerKey;
@@ -595,6 +596,7 @@ public final class ArsenalWing {
 				}
 				last.put(living.getId(), now);
 				if (living.hurtServer(level, source, damage * (corrupted ? ArsenalVoid.DAMAGE_MULTIPLIER : 1.0F))) {
+					com.jaymospowers.core.trials.PowerTrials.count(player, "arsenal.wing", 1);
 					Vec3 away = living.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
 					if (!anything && away.lengthSqr() > 1.0E-4) {
 						away = away.normalize().scale(0.45);
@@ -796,7 +798,7 @@ public final class ArsenalWing {
 		int n = wing.blades().size();
 		if (wing.mode() == WHIRL) {
 			double angle = (now - wing.modeStart()) * 0.6 + i * Mth.TWO_PI / n;
-			return player.getPosition(partialTick).add(Math.cos(angle) * WHIRL_RADIUS, 1.0 + Math.sin(angle * 0.5 + i) * 0.35, Math.sin(angle) * WHIRL_RADIUS);
+			return player.getPosition(partialTick).add(Math.cos(angle) * AbilityPower.size(player, WHIRL_RADIUS), 1.0 + Math.sin(angle * 0.5 + i) * 0.35, Math.sin(angle) * AbilityPower.size(player, WHIRL_RADIUS));
 		}
 		if (wing.mode() == RING) {
 			Vec3 ringed = ArsenalWingMoves.ringSlot(player, wing, i, now, partialTick);

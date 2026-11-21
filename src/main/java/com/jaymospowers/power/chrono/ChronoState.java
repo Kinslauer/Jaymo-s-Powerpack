@@ -54,6 +54,8 @@ final class ChronoState {
 	boolean synced;
 	/** (0.15.83) Down last tick: the history then held still, kept from before the fall for a Rewind back up. */
 	boolean downed;
+	/** The game time they went down (while {@link #downed}): how long a Rewind has to reach back to before the fall. */
+	long downedAt;
 	int lastSync;
 
 	void record(Vec3 pos, float yRot, float xRot, float health, ResourceKey<Level> dimension) {

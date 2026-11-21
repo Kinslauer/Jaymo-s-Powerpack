@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms.ultimate;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoUltimate;
@@ -263,14 +264,14 @@ public final class Brinecrown extends XenoUltimate {
 
 	private static void undertow(ServerPlayer player, ServerLevel level) {
 		Slipfin.free(player);
-		for (LivingEntity e : foes(player, SLIP_RADIUS)) {
+		for (LivingEntity e : foes(player, AbilityPower.size(player, SLIP_RADIUS))) {
 			double resist = 1.0 - e.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
 			shove(e, player.position(), SLIP_OUT * resist, SLIP_UP * resist);
 		}
 		player.addEffect(new MobEffectInstance(MobEffects.SPEED, SLIP_SPEED_TICKS, 2, false, true));
 		Vec3 at = player.position().add(0.0, 0.6, 0.0);
 		burst(level, ParticleTypes.SPLASH, at, 60, 0.6, 0.15);
-		ring(level, ParticleTypes.BUBBLE_POP, at, SLIP_RADIUS, 24);
+		ring(level, ParticleTypes.BUBBLE_POP, at, AbilityPower.size(player, SLIP_RADIUS), 24);
 		sound(player, SoundEvents.SLIME_SQUISH, 1.0F, 1.4F);
 		sound(player, SoundEvents.PLAYER_SPLASH_HIGH_SPEED, 1.0F, 1.0F);
 		player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.jaymospowers.xenoform.slipfin.slip")
@@ -298,13 +299,13 @@ public final class Brinecrown extends XenoUltimate {
 		player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, REGROW_TICKS, 2, false, true));
 		burst(level, ParticleTypes.HEART, player.position().add(0.0, 1.0, 0.0), 8, 0.4, 0.05);
 		// allies nearby (team, own pets) bloom too
-		AABB box = player.getBoundingBox().inflate(ALLY_RADIUS);
+		AABB box = player.getBoundingBox().inflate(AbilityPower.size(player, ALLY_RADIUS));
 		for (LivingEntity ally : level.getEntitiesOfClass(LivingEntity.class, box,
-			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && spared(player, e) && e.distanceToSqr(player) <= ALLY_RADIUS * ALLY_RADIUS)) {
+			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && spared(player, e) && e.distanceToSqr(player) <= AbilityPower.size(player, ALLY_RADIUS) * AbilityPower.size(player, ALLY_RADIUS))) {
 			ally.addEffect(new MobEffectInstance(MobEffects.REGENERATION, ALLY_REGEN_TICKS, 0, false, true));
 			level.sendParticles(ParticleTypes.HEART, ally.getX(), ally.getY() + ally.getBbHeight() + 0.3, ally.getZ(), 3, 0.3, 0.2, 0.3, 0.02);
 		}
-		ring(level, ParticleTypes.HAPPY_VILLAGER, player.position().add(0.0, 0.3, 0.0), ALLY_RADIUS, 36);
+		ring(level, ParticleTypes.HAPPY_VILLAGER, player.position().add(0.0, 0.3, 0.0), AbilityPower.size(player, ALLY_RADIUS), 36);
 		sound(player, SoundEvents.AXOLOTL_SPLASH, 1.0F, 0.8F);
 	}
 
@@ -366,12 +367,12 @@ public final class Brinecrown extends XenoUltimate {
 		// the rain: falling water from above and splashes where it lands
 		for (int i = 0; i < RAIN_DROPS; i++) {
 			double a = random.nextDouble() * Math.PI * 2.0;
-			double r = Math.sqrt(random.nextDouble()) * STORM_RADIUS;
+			double r = Math.sqrt(random.nextDouble()) * AbilityPower.size(player, STORM_RADIUS);
 			level.sendParticles(ParticleTypes.FALLING_WATER, player.getX() + Math.cos(a) * r, player.getY() + 3.0 + random.nextDouble() * 3.0, player.getZ() + Math.sin(a) * r, 1, 0.0, 0.0, 0.0, 0.0);
 		}
 		for (int i = 0; i < RAIN_SPLASHES; i++) {
 			double a = random.nextDouble() * Math.PI * 2.0;
-			double r = Math.sqrt(random.nextDouble()) * STORM_RADIUS;
+			double r = Math.sqrt(random.nextDouble()) * AbilityPower.size(player, STORM_RADIUS);
 			level.sendParticles(ParticleTypes.SPLASH, player.getX() + Math.cos(a) * r, player.getY() + 0.1, player.getZ() + Math.sin(a) * r, 1, 0.1, 0.0, 0.1, 0.0);
 		}
 		if (left % 20 == 0) {
@@ -380,14 +381,14 @@ public final class Brinecrown extends XenoUltimate {
 		// fire in it goes out: the player, everything burning in it and fire blocks the player may put out
 		player.clearFire();
 		if (player.tickCount % DOUSE_EVERY == 0) {
-			AABB box = player.getBoundingBox().inflate(STORM_RADIUS);
-			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box, e -> e.isAlive() && e.isOnFire() && e.distanceToSqr(player) <= STORM_RADIUS * STORM_RADIUS)) {
+			AABB box = player.getBoundingBox().inflate(AbilityPower.size(player, STORM_RADIUS));
+			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box, e -> e.isAlive() && e.isOnFire() && e.distanceToSqr(player) <= AbilityPower.size(player, STORM_RADIUS) * AbilityPower.size(player, STORM_RADIUS))) {
 				e.clearFire();
 			}
 			BlockPos centre = player.blockPosition();
 			for (int i = 0; i < DOUSE_TRIES; i++) {
 				BlockPos at = centre.offset(random.nextInt(21) - 10, random.nextInt(8) - 3, random.nextInt(21) - 10);
-				if (at.distSqr(centre) <= STORM_RADIUS * STORM_RADIUS) {
+				if (at.distSqr(centre) <= AbilityPower.size(player, STORM_RADIUS) * AbilityPower.size(player, STORM_RADIUS)) {
 					douse(player, level, at);
 				}
 			}
@@ -395,7 +396,7 @@ public final class Brinecrown extends XenoUltimate {
 		// foes in it are slowed (II), and a wave every couple of seconds pushes them out
 		if (player.tickCount % STORM_SLOW_EVERY == 0 || left % WAVE_EVERY == 0 && left < STORM_TICKS) {
 			boolean wave = left % WAVE_EVERY == 0 && left < STORM_TICKS;
-			for (LivingEntity e : foes(player, STORM_RADIUS)) {
+			for (LivingEntity e : foes(player, AbilityPower.size(player, STORM_RADIUS))) {
 				e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, STORM_SLOW_TICKS, 1, false, true));
 				if (wave) {
 					double resist = 1.0 - e.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
@@ -404,9 +405,9 @@ public final class Brinecrown extends XenoUltimate {
 			}
 			if (wave) {
 				Vec3 at = player.position().add(0.0, 0.3, 0.0);
-				ring(level, ParticleTypes.SPLASH, at, STORM_RADIUS * 0.3, 16);
-				ring(level, ParticleTypes.SPLASH, at, STORM_RADIUS * 0.6, 28);
-				ring(level, ParticleTypes.SPLASH, at, STORM_RADIUS, 44);
+				ring(level, ParticleTypes.SPLASH, at, AbilityPower.size(player, STORM_RADIUS) * 0.3, 16);
+				ring(level, ParticleTypes.SPLASH, at, AbilityPower.size(player, STORM_RADIUS) * 0.6, 28);
+				ring(level, ParticleTypes.SPLASH, at, AbilityPower.size(player, STORM_RADIUS), 44);
 				sound(player, SoundEvents.PLAYER_SPLASH_HIGH_SPEED, 1.5F, 0.6F);
 				sound(player, SoundEvents.BUBBLE_COLUMN_WHIRLPOOL_INSIDE, 1.0F, 0.8F);
 				Shakes.heavy(player, at, STORM_SHAKE_RANGE, STORM_SHAKE);

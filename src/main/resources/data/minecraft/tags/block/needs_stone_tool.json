@@ -39,6 +39,18 @@
     "jaymospowers:small_tin_ore",
     "jaymospowers:deepslate_small_tin_ore",
     "jaymospowers:lead_ore",
-    "jaymospowers:deepslate_lead_ore"
+    "jaymospowers:deepslate_lead_ore",
+    "jaymospowers:andesite_iron_ore",
+    "jaymospowers:diorite_iron_ore",
+    "jaymospowers:granite_iron_ore",
+    "jaymospowers:tuff_iron_ore",
+    "jaymospowers:andesite_copper_ore",
+    "jaymospowers:diorite_copper_ore",
+    "jaymospowers:granite_copper_ore",
+    "jaymospowers:tuff_copper_ore",
+    "jaymospowers:andesite_lapis_ore",
+    "jaymospowers:diorite_lapis_ore",
+    "jaymospowers:granite_lapis_ore",
+    "jaymospowers:tuff_lapis_ore"
   ]
 }

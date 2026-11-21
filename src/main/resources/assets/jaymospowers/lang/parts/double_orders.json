@@ -1,0 +1,15 @@
+{
+  "message.jaymospowers.double_orders.follow": "Your doubles fall in behind you.",
+  "message.jaymospowers.double_orders.wait": "Your doubles hold where they stand.",
+  "message.jaymospowers.double_orders.scout": "A double runs ahead to scout.",
+  "message.jaymospowers.double_orders.collect": "Your doubles gather up the drops.",
+  "message.jaymospowers.double_orders.mine": "A double sets to digging.",
+  "message.jaymospowers.double_orders.fetch": "A double goes to fetch it.",
+  "message.jaymospowers.double_orders.fight": "Your doubles go for it.",
+  "message.jaymospowers.double_orders.mine_none": "Nothing there your doubles can dig.",
+  "message.jaymospowers.double_orders.fetch_none": "Your doubles find no chest near with that in it.",
+  "message.jaymospowers.double_orders.fetch_gone": "It's not there any more.",
+  "message.jaymospowers.double_orders.fight_none": "Nothing for your doubles to fight.",
+  "message.jaymospowers.double_orders.scout_clear": "Your scout's back: all clear ahead.",
+  "message.jaymospowers.double_orders.scout_foes": "Your scout's back: %1$s foes ahead."
+}

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms.ultimate;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.core.Shakes;
@@ -395,13 +396,13 @@ public final class CopperStorm extends XenoUltimate {
 		Vec3 at = player.position().add(0.0, 1.0, 0.0);
 		burst(level, ParticleTypes.HAPPY_VILLAGER, at, 6 * merged, 0.4, 0.02);
 		if (merged >= RING_NEEDS) {
-			for (LivingEntity e : around(player, RING_RADIUS)) {
+			for (LivingEntity e : around(player, AbilityPower.size(player, RING_RADIUS))) {
 				if (!Duplex.mine(player, e) && !(e instanceof XenoDouble) && harmable(player, e)) {
 					e.hurtServer(level, level.damageSources().lightningBolt(), RING_DAMAGE);
 				}
 			}
-			ring(level, MagicFx.CRACKLE, player.position(), RING_RADIUS, 28);
-			ring(level, MagicFx.CRACKLE, player.position(), RING_RADIUS * 0.5, 14);
+			ring(level, MagicFx.CRACKLE, player.position(), AbilityPower.size(player, RING_RADIUS), 28);
+			ring(level, MagicFx.CRACKLE, player.position(), AbilityPower.size(player, RING_RADIUS) * 0.5, 14);
 			sound(player, SoundEvents.LIGHTNING_BOLT_IMPACT, 0.8F, 1.6F);
 			Shakes.heavy(player, player.position(), SHAKE_RANGE * 0.5, STORM_SHAKE * 0.6F);
 		}
@@ -433,9 +434,9 @@ public final class CopperStorm extends XenoUltimate {
 		List<LivingEntity> shocked = new ArrayList<>();
 		for (XenoDouble twin : doubles) {
 			bolt(level, twin.position());
-			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, twin.getBoundingBox().inflate(STORM_RADIUS),
+			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, twin.getBoundingBox().inflate(AbilityPower.size(player, STORM_RADIUS)),
 				e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && !Duplex.mine(player, e) && !spared(player, e)
-					&& harmable(player, e) && e.distanceToSqr(twin) <= STORM_RADIUS * STORM_RADIUS)) {
+					&& harmable(player, e) && e.distanceToSqr(twin) <= AbilityPower.size(player, STORM_RADIUS) * AbilityPower.size(player, STORM_RADIUS))) {
 				if (!shocked.contains(e)) {
 					shocked.add(e);
 				}

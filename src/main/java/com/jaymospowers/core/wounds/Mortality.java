@@ -4,6 +4,8 @@ import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.armory.Lodged;
 import com.jaymospowers.core.Carry;
 import com.jaymospowers.core.Dismember;
+import com.jaymospowers.core.FarLand;
+import com.jaymospowers.core.HudBar;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.power.zfighter.ZFighterAfterlife;
 import com.jaymospowers.power.zfighter.ZFighterRealism;
@@ -96,15 +98,22 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Mortality {
 	// ---- tuning ----
-	/** How far (blocks) from where they fell a survivor wakes: most causes, and one a boss spared. */
+	/**
+	 * How far (blocks) from where they fell a survivor wakes on the Overworld's land (Andy, 2026-11-18: respawns were too close
+	 * to the last death): picked with {@link FarLand}, never nearer. One a boss spared keeps its own range, moved out to the same floor.
+	 */
+	static final int FAR_MIN = 500, FAR_MAX = 1000;
+	static final int SPARED_MIN = 500, SPARED_MAX = 800;
+	/** The near wake (blocks) for a realm {@link #afar} doesn't cover (the Nether, the End, a ceilinged world), looked for in loaded ground. */
 	static final int NEAR_MIN = 40, NEAR_MAX = 120;
-	static final int SPARED_MIN = 300, SPARED_MAX = 800;
-	/** How far a drowned one may wash up (blocks), looked for in loaded ground. */
+	/** How far a drowned one may wash up (blocks) in those realms, looked for in loaded ground. */
 	static final int SHORE_MAX = 160;
 	/** No town this near (blocks: no villager) a waking spot. */
 	static final double TOWN_CLEAR = 48.0;
 	/** Tries at a spot in loaded ground, then far spots loaded for it, before they simply wake where they fell. */
 	static final int NEAR_TRIES = 24, FAR_TRIES = 4;
+	/** Other columns of the far chunk tried, once it is loaded, before a try is spent. */
+	static final int CHUNK_TRIES = 12;
 	/** How long they lie out cold before they are moved (ticks), and after waking where they're put. */
 	static final int OUT_BEFORE = 60, OUT_AFTER = 100;
 	/** The share of their health a survivor wakes with. */
@@ -135,8 +144,8 @@ public final class Mortality {
 	 * they fell until they hold sneak this long (ticks) to come to by themselves (the wake roll), or someone brings them round.
 	 */
 	static final int COME_TO_TICKS = 40;
-	/** (0.21.7) How long the body lies before the wake roll once they've chosen to come to (ticks), and the bar's length. */
-	static final int COME_TO_AFTER = 20, COME_TO_BAR = 12;
+	/** (0.21.7) How long the body lies before the wake roll once they've chosen to come to (ticks). */
+	static final int COME_TO_AFTER = 20;
 	/** (0.21.7) How long one left for dead is held out cold at most while lying (ticks): long enough never to end by itself. */
 	static final int LIE_TICKS = 20 * 60 * 60 * 24;
 	/** (0.21.7) No hostile this near (blocks) the body: safe enough to bring one left for dead round. */
@@ -202,6 +211,30 @@ public final class Mortality {
 	public static final List<java.util.function.BiFunction<ServerPlayer, Entity, net.minecraft.core.@Nullable GlobalPos>> CAPTORS = new ArrayList<>();
 
 	/**
+	 * Who locks one up in their cells (Kingdoms: a town's guards, where the player is an outlaw, hated, at war, or just struck
+	 * one of its people), asked with {@link #CAPTORS} for each who might have them ({@link #takenBy}). Given the player and one
+	 * who might; the first to name a place has them wake there (it locks them in itself).
+	 */
+	public static final List<java.util.function.BiFunction<ServerPlayer, Entity, net.minecraft.core.@Nullable GlobalPos>> GAOLS = new ArrayList<>();
+
+	/**
+	 * How near the body (blocks) those who might take one out cold are looked for ({@link #takenBy}), beside whoever downed them.
+	 */
+	static final double TAKE_NEAR = 16.0;
+
+	/**
+	 * Andy (2026-11-19), of the faint's black: "a screen like this where you go unconscious should reopen your eyes enslaved or
+	 * whatever else happened instead of a death roll". One left for dead with no other player this near (blocks) to carry them
+	 * or bring them round doesn't lie waiting to come to: the black lifts straight onto wherever they were taken ({@link #place}).
+	 * With someone this near they lie as before, so a friend can still carry them to safety.
+	 */
+	static final double HELP_RANGE = 64.0;
+
+	/** Where one out cold was taken, and the line they wake to ({@code message.jaymospowers.mortality.wake.<line>}). */
+	public record Taken(net.minecraft.core.GlobalPos at, String line) {
+	}
+
+	/**
 	 * (0.20.83) Who takes one left for dead in (Kingdoms: a friendly village, fiefdom or kingdom near where they fell; Andy:
 	 * "taken in by a village or nearby villagers"), asked after {@link #CAPTORS}. Given the player and whoever downed them (or
 	 * null); the first to name a place has them carried there, their wounds dressed and their breaks splinted.
@@ -243,6 +276,23 @@ public final class Mortality {
 	 * has no come-to bar, and doesn't use up one of the sure wakes.
 	 */
 	public static final List<java.util.function.Function<ServerPlayer, java.util.Map.@Nullable Entry<Integer, Runnable>>> MID_TURNS = new ArrayList<>();
+
+	/**
+	 * Those the grave won't keep (Kingdoms: a Pallid Hollow; Andy: "he doesnt die under regular means"). Given the player as
+	 * they die, each may hand back how they come back; the first to answer has them. Asked after {@link #MID_TURNS} and before
+	 * {@link #TURNINGS}. Such a death is never final and never rolled: they lie in the black of a mid-turn death (its
+	 * vignette {@link Deathless#tint}), rise where they fell with no new injury, and no sure wake is used up. Only what ends
+	 * a mid-turn death ends them: losing their head, the void, lava, an execution by a player or a boss, or the Nether's
+	 * last chance.
+	 */
+	public static final List<java.util.function.Function<ServerPlayer, @Nullable Deathless>> DEATHLESS = new ArrayList<>();
+
+	/**
+	 * How one of the {@link #DEATHLESS} comes back: the vignette's colour (RGB), the line on the black as they go
+	 * ({@code fading}) and as they open their eyes ({@code woke}), both translation keys, and what's done as they rise.
+	 */
+	public record Deathless(int tint, String fading, String woke, Runnable back) {
+	}
 
 	/** (0.21.42) The black before one dying mid-turn rises (ticks; a turned kill's is {@link #OUT_BEFORE}). */
 	static final int TURN_DARK = 20 * 14;
@@ -300,6 +350,8 @@ public final class Mortality {
 		final @Nullable Runnable turn;
 		/** (0.21.42) Died mid-turn ({@link #MID_TURNS}): the longer black, its vignette, and the turned wake line. */
 		boolean midTurn;
+		/** One of the {@link #DEATHLESS} coming back: the line they wake to in place of the turned one, else null. */
+		@Nullable String ownWake;
 		int tries;
 		/** (0.21.7) Whether they've chosen to come to (the roll goes ahead), and how long they've held sneak towards it. */
 		boolean chosen;
@@ -458,10 +510,11 @@ public final class Mortality {
 			return;
 		}
 		if (!dark && (holding ? wake.held % 2 == 0 : now % 20 == 0)) {
-			int filled = Math.round(COME_TO_BAR * wake.held / (float) COME_TO_TICKS);
-			String bar = "|".repeat(filled) + ".".repeat(COME_TO_BAR - filled);
 			player.sendOverlayMessage(Component.translatable(carried ? "message.jaymospowers.mortality.come_to_carried"
-				: "message.jaymospowers.mortality.come_to", bar).withStyle(holding ? ChatFormatting.YELLOW : ChatFormatting.GRAY));
+				: "message.jaymospowers.mortality.come_to").withStyle(holding ? ChatFormatting.YELLOW : ChatFormatting.GRAY));
+			if (wake.held > 0) {
+				HudBar.hold(player, "come_to", wake.held / (float) COME_TO_TICKS, HudBar.YELLOW, Component.translatable("bar.jaymospowers.come_to"), true);
+			}
 		}
 	}
 
@@ -725,6 +778,13 @@ public final class Mortality {
 			leftForDead(player, cause, sub(source, felled), by, mid.getValue(), mid.getKey());
 			return false;
 		}
+		// the grave won't keep them: they come back, whatever killed them
+		Deathless deathless = unturnable ? null : deathless(player);
+		if (deathless != null) {
+			JaymosPowers.LOGGER.info("{} fell to {} ({}): deathless, coming back", player.getScoreboardName(), cause.key(), source.getMsgId());
+			leftForDead(player, cause, sub(source, felled), by, deathless.back(), deathless.tint(), deathless.fading(), deathless.woke());
+			return false;
+		}
 		Runnable turn = unturnable || by == null ? null : turning(player, by);
 		// (0.20.83) the first deaths of a life always wake (no head, the void, or a deliberate execution aside)
 		int woken = player.getAttachedOrElse(WOKEN, 0);
@@ -767,6 +827,21 @@ public final class Mortality {
 				}
 			} catch (RuntimeException e) {
 				JaymosPowers.LOGGER.warn("A turning under way failed for {}", player.getScoreboardName(), e);
+			}
+		}
+		return null;
+	}
+
+	/** How {@code player} comes back from this death ({@link #DEATHLESS}), or null if they don't. */
+	private static @Nullable Deathless deathless(ServerPlayer player) {
+		for (java.util.function.Function<ServerPlayer, Deathless> answer : DEATHLESS) {
+			try {
+				Deathless back = answer.apply(player);
+				if (back != null) {
+					return back;
+				}
+			} catch (RuntimeException e) {
+				JaymosPowers.LOGGER.warn("A deathless return failed for {}", player.getScoreboardName(), e);
 			}
 		}
 		return null;
@@ -910,6 +985,12 @@ public final class Mortality {
 	 */
 	private static void leftForDead(ServerPlayer player, Cause cause, @Nullable String sub, @Nullable Entity by, @Nullable Runnable turn,
 		@Nullable Integer tint) {
+		leftForDead(player, cause, sub, by, turn, tint, null, null);
+	}
+
+	/** As above; {@code ownFading} and {@code ownWake} (translation keys, or null) replace a mid-turn death's two lines. */
+	private static void leftForDead(ServerPlayer player, Cause cause, @Nullable String sub, @Nullable Entity by, @Nullable Runnable turn,
+		@Nullable Integer tint, @Nullable String ownFading, @Nullable String ownWake) {
 		ServerLevel level = player.level();
 		boolean midTurn = tint != null && turn != null;
 		if (!midTurn) {
@@ -926,11 +1007,14 @@ public final class Mortality {
 		if (by instanceof net.minecraft.world.entity.Mob mob && mob.getTarget() == player) {
 			mob.setTarget(null);
 		}
-		// ((0.21.7) out cold where they fell until they come to by themselves, or someone brings them round)
-		String fading = midTurn ? "message.jaymospowers.mortality.turning" : "message.jaymospowers.mortality.fading";
+		// ((0.21.7) out cold where they fell until they come to by themselves, or someone brings them round; with nobody near
+		// to do either, they don't lie waiting for it: the black lifts onto wherever they were taken, HELP_RANGE)
+		boolean straight = turn != null || alone(player);
+		String fading = midTurn && ownFading != null ? ownFading
+			: midTurn ? "message.jaymospowers.mortality.turning" : "message.jaymospowers.mortality.fading";
 		// (the line first: the black draws it, so the knock-out doesn't repeat it on the action bar)
 		player.setAttached(WAKE_LINE, fading);
-		Downed.knockOut(level, player, turn != null ? (midTurn ? TURN_DARK : OUT_BEFORE) + OUT_AFTER + 20 * 60 : LIE_TICKS, false, fading, false);
+		Downed.knockOut(level, player, straight ? (midTurn ? TURN_DARK : OUT_BEFORE) + OUT_AFTER + 20 * 60 : LIE_TICKS, false, fading, false);
 		if (midTurn) {
 			player.setAttached(TURN_TINT, tint);
 			level.playSound(null, player.blockPosition(), SoundEvents.ZOMBIE_VILLAGER_CONVERTED, SoundSource.PLAYERS, 0.7F, 0.5F);
@@ -942,13 +1026,76 @@ public final class Mortality {
 		Wake wake = new Wake(cause, sub, level.dimension(), player.blockPosition(),
 			level.getServer().getTickCount() + (midTurn ? TURN_DARK : OUT_BEFORE), by, turn);
 		wake.midTurn = midTurn;
+		wake.ownWake = midTurn ? ownWake : null;
 		wake.since = level.getServer().getTickCount();
-		// ((0.21.7) the turned rise as they rise: nothing to carry them away from)
-		if (turn != null) {
+		// ((0.21.7) the turned rise as they rise: nothing to carry them away from; nor is there for one with nobody near)
+		if (straight) {
 			wake.chosen = true;
 			wake.moveAtChosen = wake.moveAt;
 		}
 		WAKES.put(player.getUUID(), wake);
+		if (turn == null && straight) {
+			JaymosPowers.LOGGER.info("{} has nobody near to carry them: they wake where they're taken", player.getScoreboardName());
+		}
+	}
+
+	/** Whether no other player is within {@link #HELP_RANGE} of {@code player} to carry them or bring them round. */
+	private static boolean alone(ServerPlayer player) {
+		return player.level().getEntitiesOfClass(Player.class, player.getBoundingBox().inflate(HELP_RANGE),
+			other -> other != player && other.isAlive() && !other.isSpectator() && other.distanceTo(player) <= HELP_RANGE).isEmpty();
+	}
+
+	/**
+	 * Who takes {@code player}, out cold, and where: {@code by} (whoever put them down, or null) first, then whoever else stands
+	 * within {@link #TAKE_NEAR}, nearest first. Each is asked of {@link #CAPTORS} (they wake in chains) and of {@link #GAOLS}
+	 * (they wake in the cells), and a spider of {@link #LAIRS} (wrapped in a lair). Null: nobody takes them. Whoever names a place
+	 * has already done what taking them means (their things taken, the shackles on, the cell door shut).
+	 */
+	public static @Nullable Taken takenBy(ServerPlayer player, @Nullable Entity by) {
+		List<Entity> who = new ArrayList<>();
+		if (by != null && by != player) {
+			who.add(by);
+		}
+		List<LivingEntity> near = player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(TAKE_NEAR),
+			e -> e != player && e != by && e.isAlive() && !(e instanceof Player) && !Downed.isDowned(e) && e.distanceTo(player) <= TAKE_NEAR);
+		near.sort(java.util.Comparator.comparingDouble(e -> e.distanceToSqr(player)));
+		who.addAll(near);
+		for (Entity one : who) {
+			net.minecraft.core.GlobalPos at = ask(CAPTORS, player, one, "captor");
+			if (at != null) {
+				return new Taken(at, "captured");
+			}
+			at = ask(GAOLS, player, one, "gaol");
+			if (at != null) {
+				return new Taken(at, "jailed");
+			}
+		}
+		for (Entity one : who) {
+			if (one instanceof Spider) {
+				net.minecraft.core.GlobalPos at = ask(LAIRS, player, one, "lair");
+				if (at != null) {
+					return new Taken(at, "lair");
+				}
+			}
+		}
+		return null;
+	}
+
+	/** The first of {@code takers} to name a place for {@code player} held by {@code one}, or null. */
+	private static net.minecraft.core.@Nullable GlobalPos ask(
+		List<java.util.function.BiFunction<ServerPlayer, Entity, net.minecraft.core.GlobalPos>> takers, ServerPlayer player, Entity one,
+		String what) {
+		for (java.util.function.BiFunction<ServerPlayer, Entity, net.minecraft.core.GlobalPos> taker : takers) {
+			try {
+				net.minecraft.core.GlobalPos at = taker.apply(player, one);
+				if (at != null && player.level().getServer().getLevel(at.dimension()) != null) {
+					return at;
+				}
+			} catch (RuntimeException e) {
+				JaymosPowers.LOGGER.warn("A {} failed to take {}", what, player.getScoreboardName(), e);
+			}
+		}
+		return null;
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -1076,21 +1223,15 @@ public final class Mortality {
 			wakeAt(player, level, wake.fell, wake, "risen");
 			return true;
 		}
-		// (0.20.26) taken captive by those who downed them, if they're the kind who would
-		if (wake.turn == null && wake.by != null && wake.tries == 0 && wake.far == null) {
-			for (java.util.function.BiFunction<ServerPlayer, Entity, net.minecraft.core.GlobalPos> captor : CAPTORS) {
-				net.minecraft.core.GlobalPos held;
-				try {
-					held = captor.apply(player, wake.by);
-				} catch (RuntimeException e) {
-					JaymosPowers.LOGGER.warn("A captor failed to take {}", player.getScoreboardName(), e);
-					held = null;
-				}
-				ServerLevel to = held == null ? null : server.getLevel(held.dimension());
-				if (to != null) {
-					wakeAt(player, to, held.pos(), wake, "captured");
-					return true;
-				}
+		// (0.20.26) taken captive by those who downed them, if they're the kind who would; (Andy, 2026-11-19: "reopen your
+		// eyes enslaved or whatever else happened") else by whoever stands round the body who would: captors, or a town's
+		// guards who'd lock them up
+		if (wake.turn == null && wake.tries == 0 && wake.far == null) {
+			Taken taken = takenBy(player, wake.by);
+			ServerLevel to = taken == null ? null : server.getLevel(taken.at().dimension());
+			if (to != null) {
+				wakeAt(player, to, taken.at().pos(), wake, taken.line());
+				return true;
 			}
 		}
 		// (medieval picks) or carried off wrapped to a spiders' lair
@@ -1147,7 +1288,7 @@ public final class Mortality {
 		if (wake.cause == Cause.FALL) {
 			// (they wake where they landed)
 			at = wake.fell;
-		} else if (wake.far == null && wake.loading == null) {
+		} else if (wake.far == null && wake.loading == null && !afar(level, wake.fell)) {
 			at = wake.cause == Cause.DROWNING ? shore(level, wake.fell, random) : null;
 			for (int i = 0; at == null && wake.cause != Cause.BOSS && i < NEAR_TRIES; i++) {
 				at = near(level, wake.fell, NEAR_MIN, NEAR_MAX, random, true);
@@ -1159,16 +1300,25 @@ public final class Mortality {
 			}
 			if (wake.far != null) {
 				at = ground(level, wake.far.getX(), wake.far.getZ(), true);
+				// (a pond or a hut on the one column: the rest of the chunk is loaded too)
+				for (int i = 0; at == null && i < CHUNK_TRIES; i++) {
+					at = ground(level, (wake.far.getX() & ~15) + random.nextInt(16), (wake.far.getZ() & ~15) + random.nextInt(16), true);
+				}
 				level.getChunkSource().removeTicketWithRadius(WAKING, ChunkPos.containing(wake.far), 0);
 				wake.far = null;
 				wake.loading = null;
 			}
 			if (at == null && wake.tries++ < FAR_TRIES) {
-				int min = wake.cause == Cause.BOSS ? SPARED_MIN : NEAR_MIN;
-				int max = wake.cause == Cause.BOSS ? SPARED_MAX : NEAR_MAX;
-				double angle = random.nextDouble() * Math.PI * 2.0;
-				double r = min + random.nextDouble() * (max - min);
-				BlockPos far = BlockPos.containing(wake.fell.getX() + Math.cos(angle) * r, wake.fell.getY(), wake.fell.getZ() + Math.sin(angle) * r);
+				boolean afar = afar(level, wake.fell);
+				int min = wake.cause == Cause.BOSS ? SPARED_MIN : afar ? FAR_MIN : NEAR_MIN;
+				int max = wake.cause == Cause.BOSS ? SPARED_MAX : afar ? FAR_MAX : NEAR_MAX;
+				// (dry, gentle land the generator would make, read without making a chunk; else a blind point on the ring)
+				BlockPos far = afar ? FarLand.pick(level, wake.fell, min, max, random) : null;
+				if (far == null) {
+					double angle = random.nextDouble() * Math.PI * 2.0;
+					double r = min + random.nextDouble() * (max - min);
+					far = BlockPos.containing(wake.fell.getX() + Math.cos(angle) * r, wake.fell.getY(), wake.fell.getZ() + Math.sin(angle) * r);
+				}
 				if (level.getWorldBorder().isWithinBounds(far)) {
 					wake.far = far;
 					wake.loading = level.getChunkSource().addTicketAndLoadWithRadius(WAKING, ChunkPos.containing(far), 0);
@@ -1184,6 +1334,11 @@ public final class Mortality {
 		}
 		wakeAt(player, level, at, wake, wake.cause.key());
 		return true;
+	}
+
+	/** Whether a wake from {@code fell} goes far ({@link #FAR_MIN}): the Overworld's own land, in a stacked world the Overworld's band. */
+	private static boolean afar(ServerLevel level, BlockPos fell) {
+		return !level.dimensionType().hasCeiling() && com.jaymospowers.compat.Stacked.realm(level, fell.getY()) == net.minecraft.world.level.Level.OVERWORLD;
 	}
 
 	/** A dry spot within {@code min} to {@code max} blocks of {@code from} in ground already loaded, or null. */
@@ -1292,17 +1447,15 @@ public final class Mortality {
 				injure(player, wake.cause, wake.sub);
 			}
 			player.setAttached(SURVIVOR, true);
-			if ("sheltered".equals(line)) {
-				// (0.20.83) those who took them in bound their wounds and splinted what was broken
-				Treatment.tendAll(player, false);
-			}
+			tendTaken(player, line);
 		}
 		// (out cold a while more, wherever they are now: then they come round, still hurt)
 		if (Downed.isDowned(player)) {
 			Downed.forgetQuietly(player);
 		}
 		wakeHungry(player);
-		String woke = "message.jaymospowers.mortality.wake." + (wake.midTurn ? "turned" : wake.turn != null ? "risen" : line);
+		String woke = wake.ownWake != null ? wake.ownWake
+			: "message.jaymospowers.mortality.wake." + (wake.midTurn ? "turned" : wake.turn != null ? "risen" : line);
 		player.setAttached(WAKE_LINE, woke);
 		Downed.knockOut(level, player, OUT_AFTER, false, woke, false);
 		WOKE.put(player.getUUID(), (long) level.getServer().getTickCount() + WOKE_GRACE);
@@ -1314,6 +1467,86 @@ public final class Mortality {
 			} catch (RuntimeException e) {
 				JaymosPowers.LOGGER.warn("{} couldn't be turned", player.getScoreboardName(), e);
 			}
+		}
+	}
+
+	/**
+	 * What those who carried {@code player} off out cold saw to before they woke ({@code line}: where they were taken).
+	 * Andy (2026-11-19, woken in a village bed with both legs gone and bleeding into it: "these good people took me in and im
+	 * bleeding all over they bed ... i should have been bandaged no?"):
+	 * <ul>
+	 * <li>Taken in ({@code sheltered}): their cuts bandaged in clean linen, their breaks splinted, their stumps bound tight
+	 * ({@link Bleeding#bindStumps}), and anything dirty or festering washed out with the herbs.</li>
+	 * <li>Locked in a realm's cells ({@code jailed}): the gaolers keep a prisoner alive for judgement, roughly: rags on the
+	 * cuts and stumps, the breaks splinted.</li>
+	 * <li>Taken captive ({@code captured}): a slave is worth more alive ({@link #tendCaptive}).</li>
+	 * </ul>
+	 * Spiders' lairs, a berth of their own and the wild see to nothing: nobody tended them there.
+	 */
+	static void tendTaken(ServerPlayer player, String line) {
+		switch (line) {
+			case "sheltered" -> {
+				Treatment.tendAll(player, false);
+				Bleeding.bindStumps(player, false);
+				int foul = Bleeding.festering(player) | Bleeding.dirty(player);
+				for (BodyPart part : BodyPart.values()) {
+					if ((foul & Breaks.bit(part)) != 0) {
+						Bleeding.clean(player, part);
+					}
+				}
+			}
+			case "jailed" -> {
+				Treatment.tendAll(player, true);
+				Bleeding.bindStumps(player, true);
+			}
+			case "captured" -> tendCaptive(player);
+			default -> {
+				// (nobody saw to them)
+			}
+		}
+	}
+
+	/** The chance captors bother with rags ({@link #tendCaptive}); else a stump is seared shut and the cuts left. */
+	public static final float CAPTIVE_RAGS = 0.5F;
+
+	/**
+	 * Captors keep a captive from bleeding out (Andy, 2026-11-19: "they should resusitate you, using dirty rags if you're
+	 * lucky and bind you"). Lucky ({@link #CAPTIVE_RAGS}): dirty rags tied round every cut and stump (a rag's slow heal, and
+	 * it may fester), no splints. Unlucky: a bleeding stump is seared shut with a hot blade (a cautery's burn) and the cuts
+	 * are left to close by themselves. Kingdoms calls it as its captors haul a beaten captive up ({@code CaptiveConduct}).
+	 */
+	public static void tendCaptive(ServerPlayer player) {
+		if (!(player.level() instanceof net.minecraft.server.level.ServerLevel level)) {
+			return;
+		}
+		int open = Bleeding.bleeding(player);
+		if (open == 0) {
+			return;
+		}
+		if (player.getRandom().nextFloat() < CAPTIVE_RAGS) {
+			BodyPlan plan = BodyPlan.of(player);
+			for (int i = 0; plan != null && i < plan.size(); i++) {
+				BodyPart part = plan.part(i);
+				if (!Breaks.missing(player, part) && Treatment.helps(Treatment.Remedy.RAG, player, part)) {
+					Bleeding.stop(player, part, false);
+					Bleeding.dress(player, part, Treatment.RAG_HEAL, Treatment.BANDAGE_TICKS, true);
+				}
+			}
+			Bleeding.bindStumps(player, true);
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.mortality.captive_rags").withStyle(ChatFormatting.GRAY));
+			return;
+		}
+		boolean seared = false;
+		for (BodyPart part : BodyPart.values()) {
+			if ((open & Breaks.bit(part)) != 0 && Breaks.missing(player, part) && Bleeding.stop(player, part, true)) {
+				Wounds.hurtPart(player, part, Treatment.CAUTERY_BURN, null);
+				seared = true;
+			}
+		}
+		if (seared) {
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 1.0F, 0.8F);
+			level.sendParticles(net.minecraft.core.particles.ParticleTypes.SMOKE, player.getX(), player.getY() + 0.5, player.getZ(), 10, 0.2, 0.2, 0.2, 0.01);
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.mortality.captive_seared").withStyle(ChatFormatting.RED));
 		}
 	}
 
@@ -1423,6 +1656,8 @@ public final class Mortality {
 		// experience, their spawn point and every effect too)
 		long dark = player.getAttachedOrElse(REBORNING, (long)player.level().getServer().getTickCount());
 		wipe(player);
+		// (the lost legs' slowness is a saved modifier: it doesn't go with the wiped marks on its own)
+		Dismember.bodyRenewed(player);
 		player.setAttached(REBORNING, dark);
 		player.getInventory().clearContent();
 		player.getEnderChestInventory().clearContent();

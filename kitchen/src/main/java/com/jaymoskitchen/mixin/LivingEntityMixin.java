@@ -123,6 +123,12 @@ abstract class LivingEntityMixin implements CorpseCapture {
 		jaymoskitchen$keptOn = null;
 	}
 
+	/** The pose a body dies in is remembered before it turns {@code DYING}: one dying flat starts its corpse lying (Corpses#deathBody). */
+	@Inject(method = "die", at = @At("HEAD"))
+	private void jaymoskitchen$poseAtDeath(DamageSource source, CallbackInfo ci) {
+		Corpses.noteDying((LivingEntity) (Object) this);
+	}
+
 	/**
 	 * (0.5.1) The body appears on the first tick of dying, not after the death animation: it falls and crumples as a
 	 * ragdoll from the start, so the mob is swapped for it at once (no puff).

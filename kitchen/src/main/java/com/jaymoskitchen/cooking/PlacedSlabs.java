@@ -19,6 +19,11 @@ import net.minecraft.world.level.block.state.properties.SlabType;
  * slabs don't. Recorded by {@code BlockMixin} when a player places a slab.
  */
 public final class PlacedSlabs {
+	/** Loads the class, so its saved attachment is known before any chunk with it loads (it was dropped as unknown). */
+	public static void register() {
+		JaymosKitchen.LOGGER.debug("placed slabs attachment: {}", PLACED);
+	}
+
 	private static final AttachmentType<List<Long>> PLACED = AttachmentRegistry.create(JaymosKitchen.id("placed_slabs"),
 		builder -> builder.persistent(Codec.LONG.listOf()).initializer(List::of));
 

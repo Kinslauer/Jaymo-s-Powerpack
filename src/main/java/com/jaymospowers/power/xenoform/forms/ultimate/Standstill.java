@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms.ultimate;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.api.PowerKey;
@@ -386,7 +387,7 @@ public final class Standstill extends XenoUltimate {
 		live.cyclone = VORTEX_TICKS;
 		work.lifted.clear();
 		work.swept.clear();
-		List<LivingEntity> near = foes(player, VORTEX_RADIUS);
+		List<LivingEntity> near = foes(player, AbilityPower.size(player, VORTEX_RADIUS));
 		near.sort(Comparator.comparingDouble(e -> e.distanceToSqr(player)));
 		for (LivingEntity living : near) {
 			living.hurtServer(level, player.damageSources().playerAttack(player), VORTEX_DAMAGE);
@@ -404,7 +405,7 @@ public final class Standstill extends XenoUltimate {
 		ServerLevel level = player.level();
 		Vec3 centre = player.position();
 		boolean lifting = live.cyclone > VORTEX_TICKS / 2;
-		for (LivingEntity living : foes(player, VORTEX_RADIUS)) {
+		for (LivingEntity living : foes(player, AbilityPower.size(player, VORTEX_RADIUS))) {
 			work.swept.add(living.getId());
 			Vec3 rel = living.position().subtract(centre).horizontal();
 			double d = rel.length();
@@ -418,8 +419,8 @@ public final class Standstill extends XenoUltimate {
 			living.syncVelocity = true;
 		}
 		// projectiles inside are caught and held the way Standstill holds them
-		double r2 = VORTEX_RADIUS * VORTEX_RADIUS;
-		for (Projectile projectile : level.getEntitiesOfClass(Projectile.class, player.getBoundingBox().inflate(VORTEX_RADIUS),
+		double r2 = AbilityPower.size(player, VORTEX_RADIUS) * AbilityPower.size(player, VORTEX_RADIUS);
+		for (Projectile projectile : level.getEntitiesOfClass(Projectile.class, player.getBoundingBox().inflate(AbilityPower.size(player, VORTEX_RADIUS)),
 			p -> p.isAlive() && p.getOwner() != player && (p.getOwner() == null || !spared(player, p.getOwner())) && p.distanceToSqr(player) <= r2
 				&& !live.held.containsKey(p.getId()))) {
 			XenoformPower.Held held = work.vortexHeld.get(projectile.getId());
@@ -450,7 +451,7 @@ public final class Standstill extends XenoUltimate {
 		double t = (VORTEX_TICKS - live.cyclone) / (double)VORTEX_TICKS;
 		for (int arm = 0; arm < 4; arm++) {
 			double a = (VORTEX_TICKS - live.cyclone) * 0.7 + arm * Math.PI * 0.5;
-			double r = 1.0 + t * (VORTEX_RADIUS - 1.5);
+			double r = 1.0 + t * (AbilityPower.size(player, VORTEX_RADIUS) - 1.5);
 			level.sendParticles(arm % 2 == 0 ? ParticleTypes.CLOUD : MagicFx.LIGHT, centre.x + Math.cos(a) * r, centre.y + 0.3 + t * VORTEX_MAX_RISE,
 				centre.z + Math.sin(a) * r, 1, 0.1, 0.1, 0.1, 0.0);
 		}
@@ -464,7 +465,7 @@ public final class Standstill extends XenoUltimate {
 		ServerLevel level = player.level();
 		Vec3 centre = player.position();
 		for (int id : work.swept) {
-			if (level.getEntity(id) instanceof LivingEntity living && living.isAlive() && living.distanceToSqr(player) <= VORTEX_RADIUS * VORTEX_RADIUS * 1.5) {
+			if (level.getEntity(id) instanceof LivingEntity living && living.isAlive() && living.distanceToSqr(player) <= AbilityPower.size(player, VORTEX_RADIUS) * AbilityPower.size(player, VORTEX_RADIUS) * 1.5) {
 				shove(living, centre, VORTEX_THROW_OUT, VORTEX_THROW_UP);
 			}
 		}
@@ -484,7 +485,7 @@ public final class Standstill extends XenoUltimate {
 		work.vortexHeld.clear();
 		work.swept.clear();
 		work.lifted.clear();
-		ring(level, ParticleTypes.CLOUD, centre.add(0.0, 0.3, 0.0), VORTEX_RADIUS * 0.6, 28);
+		ring(level, ParticleTypes.CLOUD, centre.add(0.0, 0.3, 0.0), AbilityPower.size(player, VORTEX_RADIUS) * 0.6, 28);
 		sound(player, SoundEvents.WIND_CHARGE_BURST.value(), 1.4F, 0.6F);
 	}
 
@@ -575,15 +576,15 @@ public final class Standstill extends XenoUltimate {
 			return;
 		}
 		ServerLevel level = player.level();
-		double r2 = STANDSTILL_RADIUS * STANDSTILL_RADIUS;
+		double r2 = AbilityPower.size(player, STANDSTILL_RADIUS) * AbilityPower.size(player, STANDSTILL_RADIUS);
 		Work work = WORK.get(player.getUUID());
-		for (LivingEntity living : foes(player, STANDSTILL_RADIUS)) {
+		for (LivingEntity living : foes(player, AbilityPower.size(player, STANDSTILL_RADIUS))) {
 			living.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 10, STANDSTILL_SLOWNESS, false, false));
 			living.setDeltaMovement(living.getDeltaMovement().scale(STANDSTILL_DRAG));
 			living.syncVelocity = true;
 		}
 		// projectiles caught in it hang almost still
-		for (Projectile projectile : level.getEntitiesOfClass(Projectile.class, player.getBoundingBox().inflate(STANDSTILL_RADIUS),
+		for (Projectile projectile : level.getEntitiesOfClass(Projectile.class, player.getBoundingBox().inflate(AbilityPower.size(player, STANDSTILL_RADIUS)),
 			p -> p.isAlive() && p.getOwner() != player && (p.getOwner() == null || !spared(player, p.getOwner())) && p.distanceToSqr(player) <= r2
 				&& (work == null || !work.vortexHeld.containsKey(p.getId())))) {
 			XenoformPower.Held held = live.held.get(projectile.getId());
@@ -614,8 +615,8 @@ public final class Standstill extends XenoUltimate {
 		});
 		// the air itself holds still
 		for (int i = 0; i < 6; i++) {
-			level.sendParticles(MagicFx.LIGHT, player.getX() + (level.getRandom().nextDouble() - 0.5) * STANDSTILL_RADIUS,
-				player.getY() + level.getRandom().nextDouble() * 4.0, player.getZ() + (level.getRandom().nextDouble() - 0.5) * STANDSTILL_RADIUS, 1, 0.0, 0.0, 0.0, 0.0);
+			level.sendParticles(MagicFx.LIGHT, player.getX() + (level.getRandom().nextDouble() - 0.5) * AbilityPower.size(player, STANDSTILL_RADIUS),
+				player.getY() + level.getRandom().nextDouble() * 4.0, player.getZ() + (level.getRandom().nextDouble() - 0.5) * AbilityPower.size(player, STANDSTILL_RADIUS), 1, 0.0, 0.0, 0.0, 0.0);
 		}
 		if (--live.standstill <= 0) {
 			endStandstill(player, live, true);

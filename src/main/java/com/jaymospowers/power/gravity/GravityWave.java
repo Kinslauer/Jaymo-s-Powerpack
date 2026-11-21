@@ -217,6 +217,7 @@ final class GravityWave {
 				continue;
 			}
 			wave.hit.add(target.getId());
+			com.jaymospowers.core.trials.PowerTrials.count(owner, "gravity.wave", 1);
 			float share = 1.0F - DAMAGE_FALLOFF * (float)(along / wave.range);
 			GravityPower.hurtByWeight(target, owner, wave.damage * share);
 			double shove = Mth.lerp(wave.charge, SHOVE_MIN, SHOVE_MAX) * share;

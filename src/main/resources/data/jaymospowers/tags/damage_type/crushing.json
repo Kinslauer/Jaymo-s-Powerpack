@@ -1,0 +1,6 @@
+{
+	"values": [
+		{"id": "mutantmonsters:mutant_zombie_seismic_wave", "required": false},
+		{"id": "mutantmonsters:player_seismic_wave", "required": false}
+	]
+}

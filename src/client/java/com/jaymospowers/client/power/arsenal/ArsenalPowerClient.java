@@ -63,6 +63,9 @@ public final class ArsenalPowerClient implements PowerClient {
 		// Rift Chains: the rifts around whatever is bound, and their chains
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalChainsRenderer::render);
 		ArsenalPortalRenderer.init();
+		// the Void Arsenal's blinks: a rift pair for each
+		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ArsenalBlinkRenderer::render);
+		ArsenalBlinkRenderer.init();
 		EntityRendererRegistry.register(ArsenalEntities.RIFT_CANNONBALL, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.4F, false));
 		ClientTickEvents.START_CLIENT_TICK.register(ArsenalPowerClient::cannonInput);
 		ClientTickEvents.START_CLIENT_TICK.register(ArsenalPowerClient::wingInput);

@@ -233,6 +233,10 @@ public final class Rig {
 		RigSentry.init();
 		RigLimbs.init();
 		RigPicks.init();
+		RigTalk.init();
+		RigPilot.init();
+		RigEvac.init();
+		RigLog.init();
 		ServerTickEvents.END_SERVER_TICK.register(Rig::tick);
 	}
 

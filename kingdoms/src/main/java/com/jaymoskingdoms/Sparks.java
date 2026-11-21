@@ -109,7 +109,8 @@ public final class Sparks {
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(Give.TYPE, Give.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Give.TYPE, (payload, context) -> give(context.player(), payload.friend()));
-		PowersCompat.sparkParry(Sparks::rescue);
+		// (class trees: a Warlord's Read the Foe widens the parry window first, Discipline)
+		PowersCompat.sparkParry(p -> Discipline.readTheFoe(p) || rescue(p));
 	}
 
 	// ---- choosing ----------------------------------------------------------------------------------------------------

@@ -25,10 +25,15 @@ public class EatGroundFoodGoal extends Goal {
 	private static final int LOVE_CHANCE = 4;
 	/** One in this many goal checks looks for food (the search isn't free). */
 	private static final int LOOK_CHANCE = 10;
+	/**
+	 * Ticks between new paths to food it hasn't reached. Asking every tick, an animal by food it couldn't reach (behind a
+	 * fence, across water) worked out a path every tick for ten seconds, a large share of a freeze on the Deck (2026-11-18).
+	 */
+	private static final int REPATH_TICKS = 20;
 
 	private final Animal animal;
 	private @Nullable ItemEntity target;
-	private int giveUp;
+	private int giveUp, repathIn;
 
 	public EatGroundFoodGoal(Animal animal) {
 		this.animal = animal;
@@ -58,6 +63,7 @@ public class EatGroundFoodGoal extends Goal {
 	@Override
 	public void start() {
 		giveUp = 200;
+		repathIn = REPATH_TICKS;
 		if (target != null) {
 			animal.getNavigation().moveTo(target, 1.1);
 		}
@@ -76,8 +82,12 @@ public class EatGroundFoodGoal extends Goal {
 		}
 		animal.getLookControl().setLookAt(target, 30.0F, 30.0F);
 		if (animal.distanceToSqr(target) > REACH_SQ) {
-			if (animal.getNavigation().isDone()) {
-				animal.getNavigation().moveTo(target, 1.1);
+			if (animal.getNavigation().isDone() && --repathIn <= 0) {
+				repathIn = REPATH_TICKS;
+				if (!animal.getNavigation().moveTo(target, 1.1)) {
+					// no way to it: leave it
+					target = null;
+				}
 			}
 			return;
 		}

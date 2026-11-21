@@ -21,6 +21,22 @@
             },
             {
               "type": "minecraft:loot_table",
+              "value": "armoredfoes:equipment/mailed_leather_armor"
+            },
+            {
+              "type": "minecraft:loot_table",
+              "value": "armoredfoes:equipment/mailed_leather_armor"
+            },
+            {
+              "type": "minecraft:loot_table",
+              "value": "armoredfoes:equipment/studded_leather_armor"
+            },
+            {
+              "type": "minecraft:loot_table",
+              "value": "armoredfoes:equipment/studded_leather_armor"
+            },
+            {
+              "type": "minecraft:loot_table",
               "value": "armoredfoes:equipment/iron_armor"
             },
             {

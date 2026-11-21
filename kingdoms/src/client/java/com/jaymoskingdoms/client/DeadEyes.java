@@ -60,7 +60,7 @@ public final class DeadEyes {
 	/** From OldDeadSkins.extract: a zombie's or husk's eyes, lit at night. */
 	static void extract(LivingEntity zombie, LivingEntityRenderState state, boolean future, boolean tissou) {
 		Level level = zombie.level();
-		if (tissou || !level.isDarkOutside()) {
+		if (tissou || !level.isDarkOutside() && !com.jaymoskingdoms.wither.WitherNight.clientOn) {
 			return;
 		}
 		float blood = level.dimension() == Level.OVERWORLD

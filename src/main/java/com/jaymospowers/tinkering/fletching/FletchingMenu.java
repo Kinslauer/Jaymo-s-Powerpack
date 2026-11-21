@@ -91,6 +91,10 @@ public class FletchingMenu extends AbstractContainerMenu {
 						player.getInventory().placeItemBackInInventory(new ItemStack(Items.GLASS_BOTTLE), Prediction.SERVER_ONLY);
 					}
 					access.execute((level, pos) -> level.playSound(null, pos, SoundEvents.UI_STONECUTTER_TAKE_RESULT, SoundSource.BLOCKS, 0.8F, 1.3F));
+					int more = player.level().isClientSide() ? 0 : (int)Math.round(craft.result().getCount() * Fletching.more.applyAsDouble(player));
+					if (more > 0) {
+						player.getInventory().placeItemBackInInventory(craft.result().copyWithCount(more), Prediction.SERVER_ONLY);
+					}
 				}
 				super.onTake(player, carried);
 				update();

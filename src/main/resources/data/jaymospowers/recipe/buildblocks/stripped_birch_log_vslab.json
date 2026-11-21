@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:saw",
+    "minecraft:stripped_birch_log",
+    "minecraft:stripped_birch_log",
+    "minecraft:stripped_birch_log",
+    "minecraft:stripped_birch_log"
+  ],
+  "result": {
+    "id": "jaymospowers:stripped_birch_log_vslab",
+    "count": 8
+  }
+}

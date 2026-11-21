@@ -58,7 +58,9 @@ public final class ZFighterKingdoms {
 	private static Method TIER_OPEN;
 	private static Object[] TIERS;
 	/** (0.18.54) Kingdoms' LandingYard: padsNear(level, pos, range), nameNear(level, pos, range), touched(level, pos). */
-	private static Method YARD_PADS, YARD_NAME, YARD_TOUCHED;
+	private static Method YARD_PADS, YARD_NAME, YARD_TOUCHED, WORD;
+	/** Kingdoms' Factions.around(server, level, pos, radius): the faction whose land it is, or whose seat is within the radius. */
+	private static Method AROUND;
 	/** (0.18.54) Kingdoms' Careers.flown(pilot, passenger, level, pos) and Careers.firstFind(player, world, kind). */
 	private static Method FLOWN, FIRST_FIND;
 	private static Object[] STATS;
@@ -168,6 +170,17 @@ public final class ZFighterKingdoms {
 				YARD_PADS = null;
 			}
 			try {
+				AROUND = Class.forName("com.jaymoskingdoms.Factions").getMethod("around", MinecraftServer.class, net.minecraft.world.level.Level.class,
+					BlockPos.class, double.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				AROUND = null;
+			}
+			try {
+				WORD = Class.forName("com.jaymoskingdoms.Post").getMethod("report", java.util.UUID.class, net.minecraft.network.chat.Component.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				WORD = null;
+			}
+			try {
 				Class<?> careers = Class.forName("com.jaymoskingdoms.Careers");
 				FLOWN = careers.getMethod("flown", ServerPlayer.class, ServerPlayer.class, ServerLevel.class, BlockPos.class);
 				FIRST_FIND = careers.getMethod("firstFind", ServerPlayer.class, String.class, String.class);
@@ -253,6 +266,26 @@ public final class ZFighterKingdoms {
 			STAYED.invoke(null, player);
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			JaymosPowers.LOGGER.warn("Kingdoms couldn't note that {} stayed", player.getScoreboardName(), e);
+		}
+	}
+
+	/** Kingdoms' Moons.now(MinecraftServer), looked up the first time it's asked for (its enum's names: NONE, BLOOD, SUPER_BLOOD, ...). */
+	private static @Nullable Method MOON_NOW;
+	private static boolean moonMissing;
+
+	/** Whether Kingdoms says tonight is a Blood Moon or a Super Blood Moon; false without it. */
+	static boolean bloodMoon(MinecraftServer server) {
+		if (!LOADED || moonMissing) {
+			return false;
+		}
+		try {
+			if (MOON_NOW == null) {
+				MOON_NOW = Class.forName("com.jaymoskingdoms.Moons").getMethod("now", MinecraftServer.class);
+			}
+			return MOON_NOW.invoke(null, server) instanceof Enum<?> moon && (moon.name().equals("BLOOD") || moon.name().equals("SUPER_BLOOD"));
+		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
+			moonMissing = true;
+			return false;
 		}
 	}
 
@@ -372,6 +405,36 @@ public final class ZFighterKingdoms {
 			YARD_TOUCHED.invoke(null, level, at);
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			YARD_TOUCHED = null;
+		}
+	}
+
+	/**
+	 * Whether {@code pos} is a kingdom's or settlement's land: a faction claims its chunk, or its seat is within {@code radius}. False
+	 * without Kingdoms; true if Kingdoms is there but cannot be asked (so nothing is broken on a guess).
+	 */
+	public static boolean protectedLand(ServerLevel level, BlockPos pos, double radius) {
+		if (!LOADED) {
+			return false;
+		}
+		if (AROUND == null) {
+			return true;
+		}
+		try {
+			return AROUND.invoke(null, level.getServer(), level, pos, radius) != null;
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return true;
+		}
+	}
+
+	/** Word sent to {@code player} through Kingdoms' post (a letter, roost or not); nothing without Kingdoms. */
+	static void word(ServerPlayer player, net.minecraft.network.chat.Component line) {
+		if (WORD == null) {
+			return;
+		}
+		try {
+			WORD.invoke(null, player.getUUID(), line);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			WORD = null;
 		}
 	}
 

@@ -65,6 +65,11 @@ public final class FoeMusicClient {
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> hush());
 	}
 
+	/** A great foe's theme sounds now (the music of the places gives way to it). */
+	public static boolean sounding() {
+		return gain > 0.0F;
+	}
+
 	private static void told(String newTheme, int newTension) {
 		lastTold = age;
 		if (newTheme.isEmpty()) {

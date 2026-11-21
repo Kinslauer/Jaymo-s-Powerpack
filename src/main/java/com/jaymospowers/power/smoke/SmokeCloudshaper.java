@@ -1,5 +1,6 @@
 package com.jaymospowers.power.smoke;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Loaded;
 import com.jaymospowers.power.wind.WindWeather;
@@ -361,11 +362,11 @@ final class SmokeCloudshaper {
 				}
 			}
 			if (rain.soot) {
-				level.sendParticles(ParticleTypes.ASH, cx, rain.top - 2.0, cz, 40, RAIN_RADIUS * 0.5, 2.0, RAIN_RADIUS * 0.5, 0.0);
-				level.sendParticles(ParticleTypes.LARGE_SMOKE, cx, rain.top + 0.5, cz, 3, RAIN_RADIUS * 0.45, 0.3, RAIN_RADIUS * 0.45, 0.0);
+				level.sendParticles(ParticleTypes.ASH, cx, rain.top - 2.0, cz, 40, AbilityPower.size(owner, RAIN_RADIUS) * 0.5, 2.0, AbilityPower.size(owner, RAIN_RADIUS) * 0.5, 0.0);
+				level.sendParticles(ParticleTypes.LARGE_SMOKE, cx, rain.top + 0.5, cz, 3, AbilityPower.size(owner, RAIN_RADIUS) * 0.45, 0.3, AbilityPower.size(owner, RAIN_RADIUS) * 0.45, 0.0);
 			} else {
-				level.sendParticles(ParticleTypes.FALLING_WATER, cx, rain.top - 0.5, cz, 24, RAIN_RADIUS * 0.5, 0.2, RAIN_RADIUS * 0.5, 0.0);
-				level.sendParticles(ParticleTypes.CLOUD, cx, rain.top + 0.5, cz, 4, RAIN_RADIUS * 0.45, 0.3, RAIN_RADIUS * 0.45, 0.0);
+				level.sendParticles(ParticleTypes.FALLING_WATER, cx, rain.top - 0.5, cz, 24, AbilityPower.size(owner, RAIN_RADIUS) * 0.5, 0.2, AbilityPower.size(owner, RAIN_RADIUS) * 0.5, 0.0);
+				level.sendParticles(ParticleTypes.CLOUD, cx, rain.top + 0.5, cz, 4, AbilityPower.size(owner, RAIN_RADIUS) * 0.45, 0.3, AbilityPower.size(owner, RAIN_RADIUS) * 0.45, 0.0);
 			}
 			if (now % 40 == 0) {
 				level.playSound(null, cx, rain.top, cz, SoundEvents.WEATHER_RAIN, SoundSource.WEATHER, 0.6F, 1.0F);
@@ -384,8 +385,9 @@ final class SmokeCloudshaper {
 	/** Under the raincloud: fires go out, burning things stop burning, crops grow. */
 	private static void water(ServerLevel level, Rain rain) {
 		BlockPos g = rain.ground;
-		for (BlockPos pos : BlockPos.betweenClosed(g.offset(-RAIN_RADIUS, -4, -RAIN_RADIUS), g.offset(RAIN_RADIUS, rain.top - g.getY(), RAIN_RADIUS))) {
-			if (pos.distSqr(new BlockPos(g.getX(), pos.getY(), g.getZ())) > RAIN_RADIUS * RAIN_RADIUS) {
+		int wide = AbilityPower.size(level, rain.owner, RAIN_RADIUS);
+		for (BlockPos pos : BlockPos.betweenClosed(g.offset(-wide, -4, -wide), g.offset(wide, rain.top - g.getY(), wide))) {
+			if (pos.distSqr(new BlockPos(g.getX(), pos.getY(), g.getZ())) > wide * wide) {
 				continue;
 			}
 			if (!Loaded.made(level, pos)) {
@@ -399,7 +401,7 @@ final class SmokeCloudshaper {
 				state.randomTick(level, pos.immutable(), level.getRandom());
 			}
 		}
-		AABB box = new AABB(g).inflate(RAIN_RADIUS, 0, RAIN_RADIUS).expandTowards(0, rain.top - g.getY() + 2, 0);
+		AABB box = new AABB(g).inflate(wide, 0, wide).expandTowards(0, rain.top - g.getY() + 2, 0);
 		for (Entity e : level.getEntitiesOfClass(Entity.class, box, Entity::isOnFire)) {
 			e.clearFire();
 		}
@@ -408,7 +410,7 @@ final class SmokeCloudshaper {
 	/** Under a raincloud of soot: everyone but its maker is blinded; nothing is put out. */
 	private static void soot(ServerLevel level, Rain rain, @Nullable ServerPlayer owner) {
 		BlockPos g = rain.ground;
-		AABB box = new AABB(g).inflate(RAIN_RADIUS, 0, RAIN_RADIUS).expandTowards(0, rain.top - g.getY() + 2, 0);
+		AABB box = new AABB(g).inflate(AbilityPower.size(owner, RAIN_RADIUS), 0, AbilityPower.size(owner, RAIN_RADIUS)).expandTowards(0, rain.top - g.getY() + 2, 0);
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box, e -> e.isAlive() && e != owner)) {
 			e.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 40, 0, false, false, true));
 		}

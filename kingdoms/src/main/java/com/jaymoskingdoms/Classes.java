@@ -74,6 +74,13 @@ import com.jaymoskingdoms.money.Money;
  * {@code /kingdom class get <player>}.
  */
 public final class Classes {
+	/**
+	 * (class trees, Andy's page note) The class saved for a player who chose to start with no class yet: they learn one later
+	 * from a class's teacher ({@link SecondClass#offers}). {@link #classOf} is null for them, but they are not unmade.
+	 */
+	public static final String NONE_KEY = "none";
+	/** The class choice that means "no class yet". */
+	public static final int NONE_CHOICE = -1;
 	/** The share of a class's perks, pools and numbers its holder has when it is their second class. */
 	public static final float SECOND_SHARE = 0.5F;
 	/** How often a court wizard will sell you a Writ of Rebirth (ticks): once a Minecraft week. */
@@ -99,7 +106,8 @@ public final class Classes {
 	public enum PlayerClass {
 		THIEF, WARLORD, MAGE("fire", "arcane", "warding", "mending"), BRUTE, MARKSMAN,
 		SORCERER("water", "fire", "earth", "air", "lightning", "ice", "restoration", "death", "blood", "wild"), RIDER,
-		CLERIC("hearthkeeper", "anvil_father", "deep_mother", "green_huntsman", "lantern_warden", "crowned_sun", "ash_whisperer", "truth"),
+		// Andy: Clerics never pledge to the Ash Whisperer; she backs only death, blood and the evil sorceries (Warlocks keep her)
+		CLERIC("hearthkeeper", "anvil_father", "deep_mother", "green_huntsman", "lantern_warden", "crowned_sun", "truth"),
 		DRUID, MONK, PALADIN("mercy", "justice", "honour"), RANGER("undead", "raiders", "beasts", "spiders", "greenskins", "monsters"),
 		WARLOCK("hearthkeeper", "anvil_father", "deep_mother", "green_huntsman", "lantern_warden", "crowned_sun", "ash_whisperer", "truth", "reaper"),
 		TINKERER;
@@ -180,6 +188,18 @@ public final class Classes {
 	/** The second class a player learned from a master ({@link SecondClass}); same shape as the first. Saved, kept through death, synced to its own player. */
 	public static final AttachmentType<Chosen> SECOND = AttachmentRegistry.create(JaymosKingdoms.id("second_class"),
 		builder -> builder.persistent(Chosen.CODEC).copyOnDeath().syncWith(Chosen.STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
+	/**
+	 * Specialization: changing what you picked with your class (a Mage's spell, a Sorcerer's element, a Paladin's oath, a Ranger's foe)
+	 * after the first pick costs this much silver and a wait of this many ticks since the last change (ten minutes). What the class
+	 * has earned (its levels, points and perks, the spells you know) is kept. A Cleric's or Warlock's patron is the Patrons' own
+	 * ({@link Patrons}), not changed here.
+	 */
+	public static final int RESPEC_SILVER = 250;
+	public static final long RESPEC_WAIT_TICKS = 24000L;
+	/** The game time a player last changed what they picked with their class. Saved, kept through death, synced to its own player (the class screen shows the wait). */
+	public static final AttachmentType<Long> RESPEC_AT = AttachmentRegistry.create(JaymosKingdoms.id("class_respec_at"),
+		builder -> builder.persistent(Codec.LONG).copyOnDeath().syncWith(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG, AttachmentSyncPredicate.targetOnly()));
+
 	/** When a player last bought a writ from a court wizard (game time). Saved, kept through death. */
 	static final AttachmentType<Long> WRIT_BOUGHT = AttachmentRegistry.create(JaymosKingdoms.id("writ_bought"),
 		builder -> builder.persistent(Codec.LONG).copyOnDeath());
@@ -277,6 +297,7 @@ public final class Classes {
 			Druids.clear();
 			Monks.clear();
 			Paladins.clear();
+			Vows.clear();
 			Rangers.clear();
 			Tinkerers.clear();
 			ClassTeachers.clear();
@@ -333,6 +354,16 @@ public final class Classes {
 		return of(player).playerClass();
 	}
 
+	/** Whether {@code player} started with no class yet and hasn't learned one. */
+	public static boolean classless(Player player) {
+		return NONE_KEY.equals(of(player).cls());
+	}
+
+	/** Whether {@code player} has made the class step of their character: a class, or no class yet. */
+	public static boolean decided(Player player) {
+		return !of(player).cls().isEmpty();
+	}
+
 	/** Whether {@code player} holds {@code cls}, as their first class or the second they learned. */
 	public static boolean is(Player player, PlayerClass cls) {
 		return classOf(player) == cls || second(player) == cls;
@@ -384,7 +415,7 @@ public final class Classes {
 	 * so the screen is up for them), or MCA's destiny screen still to finish.
 	 */
 	public static boolean unmade(ServerPlayer player) {
-		return classOf(player) == null && ServerPlayNetworking.canSend(player, Open.TYPE) || Heritage.of(player) == null && Heritage.canAsk(player);
+		return !decided(player) && ServerPlayNetworking.canSend(player, Open.TYPE) || Heritage.of(player) == null && Heritage.canAsk(player);
 	}
 
 	/** (0.7.45) MCA's destiny screen was just finished: (0.7.57) the heritage screen is next, then the class screen; neither can be shut without picking. */
@@ -405,7 +436,7 @@ public final class Classes {
 			LifeStory.ask(player, true);
 		} else if (Heritage.of(player) == null && Heritage.canAsk(player)) {
 			Heritage.ask(player, true);
-		} else if (classOf(player) == null) {
+		} else if (!decided(player)) {
 			ask(player, true);
 		}
 	}
@@ -419,8 +450,20 @@ public final class Classes {
 
 	private static void choose(ServerPlayer player, Choose choose) {
 		PlayerClass[] all = PlayerClass.values();
+		if (choose.cls() == NONE_CHOICE && !choose.second()) {
+			// (class trees) no class yet: one is learned later from a teacher
+			if (!decided(player)) {
+				setNone(player);
+			}
+			return;
+		}
+		// (specialization) the class you hold, a different pick under it: it costs silver and a wait
+		if (!choose.second() && decided(player) && !player.isCreative() && choose.cls() >= 0 && choose.cls() < all.length && all[choose.cls()] == classOf(player)) {
+			respec(player, all[choose.cls()], choose.option());
+			return;
+		}
 		// (a creative player may switch, from the H menu's class tab)
-		if (choose.cls() < 0 || choose.cls() >= all.length || !choose.second() && classOf(player) != null && !player.isCreative()) {
+		if (choose.cls() < 0 || choose.cls() >= all.length || !choose.second() && decided(player) && !player.isCreative()) {
 			return;
 		}
 		PlayerClass cls = all[choose.cls()];
@@ -429,13 +472,76 @@ public final class Classes {
 			return;
 		}
 		if (choose.second()) {
+			// (a Cleric taken as a second class picks its patron freely: Andy, "or they multi class into it")
 			SecondClass.chosen(player, cls, option);
 			return;
+		}
+		// (Andy, 2026-11-17) a first-class Cleric serves the patron their life story raised them to, if it names one; a Warlock's pact is with it too
+		String raised = storyPatron(player, cls);
+		if (raised != null) {
+			option = raised;
 		}
 		if (classOf(player) != null) {
 			clear(player);
 		}
 		set(player, cls, option);
+	}
+
+	/** Whether {@code cls}'s pick can be changed after the first pick (a patron can't: it is the Patrons' own). */
+	public static boolean respecable(PlayerClass cls) {
+		return !cls.options.isEmpty() && cls != PlayerClass.CLERIC && cls != PlayerClass.WARLOCK;
+	}
+
+	/** Ticks until {@code player} may change their pick again (0: now). Only the client's synced copy is needed for the screen. */
+	public static long respecWait(Player player, long now) {
+		Long at = player.getAttached(RESPEC_AT);
+		return at == null ? 0L : Math.max(0L, at + RESPEC_WAIT_TICKS - now);
+	}
+
+	/**
+	 * (specialization) {@code player}, who holds {@code cls}, picks another of its options: pays {@link #RESPEC_SILVER} and waits
+	 * {@link #RESPEC_WAIT_TICKS} before the next change. Their levels, points, perks and spells are kept.
+	 */
+	private static void respec(ServerPlayer player, PlayerClass cls, int index) {
+		String option = index >= 0 && index < cls.options.size() ? cls.options.get(index) : "";
+		Chosen old = of(player);
+		if (!respecable(cls) || option.isEmpty() || option.equals(old.option())) {
+			return;
+		}
+		long now = player.level().getGameTime(), wait = respecWait(player, now);
+		if (wait > 0L) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.class.respec.wait", (wait + 1199L) / 1200L).withStyle(ChatFormatting.GRAY));
+			return;
+		}
+		if (!Money.canPay(player, Money.worth(RESPEC_SILVER))) {
+			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.class.respec.poor", RESPEC_SILVER).withStyle(ChatFormatting.GRAY));
+			return;
+		}
+		Money.charge(player, Money.worth(RESPEC_SILVER));
+		List<String> spells = new java.util.ArrayList<>(old.spells());
+		for (String spell : startingSpells(cls, option)) {
+			if (!spells.contains(spell)) {
+				spells.add(spell);
+			}
+		}
+		player.setAttached(CLASS, new Chosen(cls.key(), option, List.copyOf(spells), old.selected()));
+		player.setAttached(RESPEC_AT, now);
+		refresh(player);
+		if (cls == PlayerClass.PALADIN) {
+			Paladins.begin(player, option);
+		}
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.5F, 1.2F);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.class.respec.done", Component.translatable("class.jaymoskingdoms." + cls.key()),
+			Component.translatable("class.jaymoskingdoms.option." + option)).withStyle(ChatFormatting.GOLD));
+	}
+
+	/**
+	 * The patron a first-class Cleric serves or a first-class Warlock is pacted to: the one their life story says they grew up
+	 * praying to; null for any other class, no faith, or one the class can't take (a Cleric never serves the Ash Whisperer).
+	 */
+	public static @Nullable String storyPatron(Player player, PlayerClass cls) {
+		String faith = player.getAttached(LifeStory.FAITH);
+		return (cls == PlayerClass.CLERIC || cls == PlayerClass.WARLOCK) && faith != null && cls.options.contains(faith) ? faith : null;
 	}
 
 	/** The spells a new {@code cls} starts with (a Mage's first, a Cleric's prayer, a Druid's rites, a Warlock's pact). */
@@ -469,6 +575,13 @@ public final class Classes {
 			.withStyle(ChatFormatting.GOLD));
 	}
 
+	/** (class trees, Andy's page note) {@code player} starts with no class yet: any class's teacher can teach them one later. */
+	static void setNone(ServerPlayer player) {
+		player.setAttached(CLASS, new Chosen(NONE_KEY, "", List.of(), 0));
+		refresh(player);
+		player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.class.none").withStyle(ChatFormatting.GRAY));
+	}
+
 	/** The classes' own beginnings: a patron sworn, an oath taken, a foe and land to pick, a first style of fighting. */
 	static void begin(ServerPlayer player, PlayerClass cls, String option) {
 		switch (cls) {
@@ -484,11 +597,23 @@ public final class Classes {
 		}
 	}
 
+	/** {@code player}'s class becomes {@code cls}: what the old one gave goes (its oath, pact, shapes and paths), the second class and feats stay. */
+	static void replace(ServerPlayer player, PlayerClass cls, String option) {
+		Druids.unmake(player);
+		Paladins.unmake(player);
+		Warlocks.unmake(player);
+		Paths.unmake(player);
+		player.removeAttached(CLASS);
+		set(player, cls, option);
+	}
+
 	/**
 	 * Takes {@code player}'s classes away (their attributes with them), and what the classes gave them: the second class, the
 	 * paths and the feats too (a Writ of Rebirth remakes the whole character).
 	 */
 	static void clear(ServerPlayer player) {
+		// (class trees) the classes' levels go with them, and every rank paid from them
+		ClassTrees.unmake(player, both(player));
 		Druids.unmake(player);
 		Paladins.unmake(player);
 		Warlocks.unmake(player);
@@ -572,7 +697,7 @@ public final class Classes {
 			if (!(player instanceof ServerPlayer sp)) {
 				return InteractionResult.SUCCESS;
 			}
-			if (classOf(sp) == null) {
+			if (!decided(sp)) {
 				next(sp);
 				return InteractionResult.SUCCESS;
 			}
@@ -645,7 +770,7 @@ public final class Classes {
 		}
 		Component words = staff ? Component.translatable("talk.jaymoskingdoms.wizard.staff", WRIT_SILVER)
 			: writ ? Component.translatable("talk.jaymoskingdoms.wizard.writ", WRIT_SILVER) : Component.translatable("talk.jaymoskingdoms.healer.ask");
-		ServerPlayNetworking.send(player, new TalkNet.Ask(wizard.getId(), wizard.getDisplayName(), words, options, enabled));
+		ServerPlayNetworking.send(player, new TalkNet.Ask(wizard.getId(), Introductions.called(player, wizard), words, options, enabled));
 	}
 
 	/** An answer to the wizard's offer; false when it wasn't one (0.7.212: then perhaps a cleric's, {@link Restoration#answer}). */

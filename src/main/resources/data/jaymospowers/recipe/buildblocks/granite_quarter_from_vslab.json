@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:granite_vslab",
+  "result": {
+    "id": "jaymospowers:granite_quarter",
+    "count": 2
+  }
+}

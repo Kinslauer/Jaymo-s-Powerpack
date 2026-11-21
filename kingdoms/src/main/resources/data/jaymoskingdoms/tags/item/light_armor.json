@@ -74,6 +74,38 @@
     "jaymoskingdoms:sanguine_purple_leggings",
     "jaymoskingdoms:sanguine_purple_boots",
     "jaymoskingdoms:settler_hat_helmet",
-    "jaymoskingdoms:foxshade_chestplate"
+    "jaymoskingdoms:foxshade_chestplate",
+    {
+      "id": "jaymospowers:mailed_cap",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:mailed_jack",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:mailed_chausses",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:mailed_boots",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:studded_cap",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:studded_brigandine",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:studded_leggings",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:studded_boots",
+      "required": false
+    }
   ]
 }

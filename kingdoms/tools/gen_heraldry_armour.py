@@ -46,6 +46,20 @@ FINISHES = {
 	"": {"plate": (172, 180, 190), "edge": (228, 234, 240), "dark": (36, 38, 46), "rivet": (120, 126, 136)},
 	"blackened": {"plate": (44, 44, 52), "edge": (112, 114, 128), "dark": (12, 12, 16), "rivet": (150, 152, 162)},
 	"gilded": {"plate": (212, 170, 64), "edge": (252, 230, 146), "dark": (40, 28, 12), "rivet": (255, 244, 196)},
+	# creed/land variant finishes
+	"spiked": {"plate": (38, 38, 46), "edge": (96, 98, 112), "dark": (10, 10, 14), "rivet": (130, 132, 142)},
+	"gilt_banded": {"plate": (190, 150, 50), "edge": (230, 200, 120), "dark": (35, 25, 10), "rivet": (230, 210, 170)},
+	"fur_lined": {"plate": (180, 170, 150), "edge": (220, 210, 190), "dark": (40, 35, 30), "rivet": (140, 130, 110)},
+	"quilted": {"plate": (150, 140, 130), "edge": (190, 180, 170), "dark": (35, 30, 25), "rivet": (110, 100, 90)},
+	"brine_soaked": {"plate": (100, 120, 140), "edge": (140, 160, 180), "dark": (25, 30, 35), "rivet": (80, 90, 100)},
+	"hide": {"plate": (110, 80, 60), "edge": (150, 120, 100), "dark": (25, 20, 15), "rivet": (90, 70, 50)},
+	"bronze": {"plate": (150, 110, 70), "edge": (190, 150, 100), "dark": (30, 25, 20), "rivet": (130, 90, 50)},
+	"lamellar": {"plate": (140, 130, 120), "edge": (180, 170, 160), "dark": (30, 28, 26), "rivet": (100, 90, 80)},
+	"russeted": {"plate": (140, 90, 50), "edge": (180, 130, 80), "dark": (60, 40, 25), "rivet": (100, 70, 40)},
+	"blued": {"plate": (60, 80, 130), "edge": (120, 150, 200), "dark": (20, 30, 50), "rivet": (100, 120, 180)},
+	"painted": {"plate": (100, 50, 50), "edge": (180, 100, 100), "dark": (40, 20, 20), "rivet": (140, 80, 80)},
+	"etched": {"plate": (180, 160, 80), "edge": (230, 210, 140), "dark": (60, 50, 20), "rivet": (200, 180, 100)},
+	"rusted": {"plate": (120, 60, 30), "edge": (160, 100, 60), "dark": (40, 20, 10), "rivet": (100, 50, 25)},
 }
 FIXED = {"mail": (124, 132, 142), "strap": (96, 66, 40), "brig": (124, 44, 38), "padding": (206, 190, 150),
 	"cloth": (236, 236, 236), "cloth_dark": (150, 150, 150), "bone": (226, 216, 186), "gilt": (214, 172, 66),
@@ -53,6 +67,8 @@ FIXED = {"mail": (124, 132, 142), "strap": (96, 66, 40), "brig": (124, 44, 38), 
 	# the crests' paint
 	"dragon": (58, 128, 62), "dragon_wing": (176, 50, 40), "lion": (214, 164, 54), "mane": (158, 104, 34),
 	"stag": (134, 88, 52), "boar": (54, 46, 42), "eagle": (38, 38, 46), "white": (238, 238, 242), "snake": (62, 124, 70),
+	"griffin": (180, 140, 50), "griffin_wing": (160, 120, 40), "bear": (80, 60, 45), "wolf": (100, 100, 110),
+	"raven": (35, 35, 45), "hound": (140, 110, 80),
 	"belly": (212, 196, 110), "red": (190, 40, 36), "feather": (230, 230, 236), "horn": (222, 212, 186), "pink": (206, 140, 130)}
 
 
@@ -436,6 +452,100 @@ def morion(b):
 	both(b, h, (4.3, 24.4, -2), (4.8, 28, 2), "plate", faces_paint=P)
 
 
+def great_helm(b):
+	"""The great helm: a flat-topped pot helm with eye slits and breaths. Fixed face."""
+	bones(b, "head")
+	h = "armorHead"
+	b.cube(h, (-4.5, 24, -4.5), (4.5, 32, 4.5), "plate", faces_paint=P)
+	b.cube(h, (-4, 32, -4), (4, 33, 4), "plate", faces_paint=P_ALL)
+	# the sight: dark behind the gap
+	b.cube(h, (-4.3, 28.8, -4.8), (4.3, 29.9, -4.4), "dark")
+	# breaths on the lower front
+	b.cube(h, (-4.6, 23, -5.6), (4.6, 28.9, -4.5), "plate", faces_paint={**P_ALL, "north": breaths})
+	b.cube(h, (-5, 22, -5), (5, 24, 5), "plate", faces_paint=P)
+	b.cube(h, (-1, 22.2, -7.6), (1, 23.6, -6.6), "rivet")
+
+
+def barbute(b):
+	"""The barbute: deep helm, T/Y face opening. Open face."""
+	bones(b, "head")
+	h = "armorHead"
+	b.cube(h, (-4.5, 25, -4.5), (4.5, 32.5, 4.5), "plate", faces_paint=P)
+	b.cube(h, (-3.5, 32.5, -3.5), (3.5, 33.5, 3.5), "plate", faces_paint=P_ALL)
+	# the T-face opening: cut out from the front
+	b.cube(h, (-4.3, 24, -5.7), (4.3, 32, -4.3), "plate", faces_paint={**P_ALL, "north": lambda i, r: opening(1, 1, 2, 4)(i, r)})
+	b.cube(h, (-5, 22, -5), (5, 24, 5), "plate", faces_paint=P)
+	both(b, h, (4.2, 24.4, -1), (4.7, 28.4, 1), "strap")
+
+
+def burgonet(b):
+	"""The burgonet: open helm with peak, comb, hinged cheek plates. Visored."""
+	bones(b, "head")
+	h = "armorHead"
+	v = "visor"
+	visor(b)
+	b.cube(h, (-4.5, 25, -4.5), (4.5, 32, 4.5), "plate", faces_paint=P)
+	b.cube(h, (-3.5, 32, -3.5), (3.5, 33.5, 3.5), "plate", faces_paint=P_ALL)
+	# the peak/comb
+	b.cube(h, (-0.5, 32, -4.5), (0.5, 35, 4.5), "plate", faces_paint=P_ALL)
+	# hinged cheek plates on visor
+	b.cube(v, (-4.7, 25.5, -5.5), (4.7, 30.5, -4.4), "plate", faces_paint={**P_ALL, "north": slit(1)})
+	b.cube(v, (-3, 25.5, -7), (3, 29.5, -5.5), "plate", faces_paint={**P_ALL, "east": breaths, "west": breaths})
+	b.cube(v, (-1.5, 26, -8.5), (1.5, 29, -7), "plate", faces_paint=P_ALL)
+	both(b, "visor", (4.5, 28.4, -0.6), (5.2, 29.6, 0.6), "rivet")
+	b.cube(h, (-5, 22, -5), (5, 24, 5), "plate", faces_paint=P)
+
+
+def spangenhelm(b):
+	"""The spangenhelm: riveted segments, nose bar, mail curtain. Fixed face."""
+	bones(b, "head")
+	h = "armorHead"
+	b.cube(h, (-4.5, 25, -4.5), (4.5, 32, 4.5), "plate", faces_paint=P)
+	b.cube(h, (-3.5, 32, -3.5), (3.5, 33, 3.5), "plate", faces_paint=P_ALL)
+	# riveted segments (spangen)
+	b.cube(h, (-4.7, 23.5, -5.2), (4.7, 27, -4.3), "plate", faces_paint={**P_ALL, "north": lambda i, r: lames(3, 1)(i, r)})
+	b.cube(h, (-4.9, 23.2, -4.9), (4.9, 24.2, 4.9), "plate", faces_paint=P)
+	# nose bar
+	b.cube(h, (-0.5, 25, -5.2), (0.5, 28, -4.3), "plate", faces_paint={"north": plate})
+	# mail curtain
+	b.cube(h, (-5.5, 21.8, -5.5), (5.5, 25.2, 5.5), "mail")
+	both(b, h, (4.5, 28.4, -0.6), (5.2, 29.6, 0.6), "rivet")
+
+
+def lobster_tail(b):
+	"""The lobster-tail pot: round skull, sliding nose bar (lifts like a visor), laminated neck tail. Visored."""
+	bones(b, "head")
+	h = "armorHead"
+	v = "visor"
+	visor(b)
+	b.cube(h, (-4.5, 25, -4.5), (4.5, 32.5, 4.5), "plate", faces_paint=P)
+	b.cube(h, (-3.5, 32.5, -3.5), (3.5, 33.5, 3.5), "plate", faces_paint=P_ALL)
+	# sliding nasal on visor
+	b.cube(v, (-4.7, 25.5, -5.5), (4.7, 30.5, -4.4), "plate", faces_paint={**P_ALL, "north": slit(1, 1, 1.5)})
+	b.cube(v, (-3, 25.5, -7), (3, 29.5, -5.5), "plate", faces_paint={**P_ALL, "east": breaths, "west": breaths})
+	# laminated tail (lames down the neck)
+	b.cube(h, (-4.8, 22, -5.2), (4.8, 24.5, 5.2), "plate", faces_paint={**P_ALL, "south": lames(2)})
+	b.cube(h, (-4.5, 20, -5.5), (4.5, 22.5, 5.5), "plate", faces_paint={**P_ALL, "south": lames(2)})
+	both(b, "visor", (4.5, 28.4, -0.6), (5.2, 29.6, 0.6), "rivet")
+	b.cube(h, (-5, 22, -5), (5, 24, 5), "plate", faces_paint=P)
+
+
+def grotesque_visor(b):
+	"""The grotesque visor: an armet whose visor is a sculpted beast or grinning face. Visored."""
+	bones(b, "head")
+	h = "armorHead"
+	v = "visor"
+	visor(b, 30.0)
+	b.cube(h, (-4.5, 24.2, -4.5), (4.5, 32.4, 4.5), "plate", faces_paint=P)
+	b.cube(h, (-3.5, 32.4, -3.5), (3.5, 33.3, 3.5), "plate", faces_paint=P_ALL)
+	b.cube(h, (-0.5, 33.3, -2), (0.5, 34, 3), "plate", faces_paint=P_ALL)
+	b.cube(h, (-6, 23.2, -6), (6, 24.2, 6), "plate", faces_paint=P_ALL)
+	# sculpted visor face
+	b.cube(v, (-4.4, 24.6, -5.4), (4.4, 30.8, -4.4), "plate", faces_paint={**P_ALL, "north": death})
+	b.cube(v, (-4.6, 30.6, -5.8), (4.6, 31.7, -4.4), "plate", faces_paint=P_ALL)
+	both(b, "visor", (4.5, 29.4, -0.6), (5.2, 30.6, 0.6), "rivet")
+
+
 # ---- the body and limbs ----------------------------------------------------------------------------------------------
 
 def cuirass(b):
@@ -689,6 +799,65 @@ def crest_wings(b):
 	wing(b, 4.3, -0.4, ((32, 41), (33, 40.8), (34.4, 40.2), (36, 39.4), (37.6, 38.6)), "feather", 12, (4.5, 32, 0))
 
 
+def crest_griffin(b):
+	bones(b, "head")
+	h = "armorHead"
+	b.cube(h, (-1, 34.2, -1), (1, 36.6, 2), "griffin", faces_paint={"north": lambda i, q: belly(i, q)})
+	b.cube(h, (-0.7, 36, -2.2), (0.7, 38.6, -0.8), "griffin")
+	b.cube(h, (-0.9, 38, -4), (0.9, 39.4, -1.6), "griffin", faces_paint={"east": eye, "west": eye})
+	both(b, h, (0.3, 39.4, -2.2), (0.8, 40.4, -1.7), "horn")
+	wing(b, 1, -0.4, ((35.6, 40.2), (36.8, 40), (37.6, 39.4), (38.2, 38.8)), "griffin_wing", 24, (1, 35.6, 0))
+	b.cube(h, (-0.5, 34.2, 2), (0.5, 35.2, 4), "griffin")
+	b.cube(h, (-0.4, 35.2, 3.3), (0.4, 36.6, 4), "griffin")
+
+
+def crest_bear(b):
+	bones(b, "head")
+	h = "armorHead"
+	b.cube(h, (-1.3, 34.2, -1.2), (1.3, 37.5, 2), "bear")
+	b.cube(h, (-1.8, 36.5, -3), (1.8, 39.5, -0.6), "bear", faces_paint={"north": muzzle, "east": eye, "west": eye})
+	both(b, h, (1.1, 39.5, -2), (1.8, 40.2, -1.2), "bear")
+	both(b, h, (0.4, 34.2, -2.2), (1.2, 36.5, -1.2), "bear")
+	b.cube(h, (-0.3, 35, 2), (0.3, 38.6, 2.6), "bear")
+
+
+def crest_wolf(b):
+	bones(b, "head")
+	h = "armorHead"
+	b.cube(h, (-1.1, 34.2, -0.8), (1.1, 37.2, 1.5), "wolf")
+	b.cube(h, (-0.9, 36.6, -2.8), (0.9, 39, -0.4), "wolf", faces_paint={"north": muzzle, "east": eye, "west": eye})
+	both(b, h, (0.9, 38.8, -0.2), (1.6, 39.5, 0.4), "wolf")
+	b.cube(h, (-0.3, 35, 1.5), (0.3, 38.8, 2.2), "wolf")
+
+
+def crest_raven(b):
+	bones(b, "head")
+	h = "armorHead"
+	b.cube(h, (-1, 34.2, -0.6), (1, 37.5, 1), "raven")
+	b.cube(h, (-0.8, 37, -2.5), (0.8, 39.5, -0.3), "raven", faces_paint={"east": eye, "west": eye})
+	both(b, h, (0.8, 39.2, -1.5), (1.5, 40, -0.7), "raven")
+	wing(b, 1, -0.3, ((36.5, 40), (37.2, 39.5), (37.8, 39), (38.4, 38.5)), "feather", 20, (1, 36.5, 0))
+	b.cube(h, (-0.2, 35, 1), (0.2, 38.5, 1.6), "raven")
+
+
+def crest_hound(b):
+	bones(b, "head")
+	h = "armorHead"
+	b.cube(h, (-1.2, 34.2, -1), (1.2, 37.5, 1.8), "hound")
+	b.cube(h, (-1.5, 36.5, -3), (1.5, 39.5, -0.5), "hound", faces_paint={"north": muzzle, "east": eye, "west": eye})
+	both(b, h, (1, 39.5, -2), (1.7, 40.2, -1.2), "hound")
+	both(b, h, (0.4, 34.2, -2.2), (1.2, 36.5, -1.2), "hound")
+	b.cube(h, (-0.3, 35, 1.8), (0.3, 38.8, 2.5), "hound")
+
+
+def crest_plume(b):
+	"""A plume of feathers in the realm's colour, in the crest place instead of a beast."""
+	bones(b, "head")
+	h = "armorHead"
+	both(b, h, (3.6, 31, -0.6), (4.8, 33, 1.6), "feather")
+	wing(b, 4.3, -0.4, ((32, 42), (33, 41.5), (34.4, 41), (36, 40), (37.6, 39), (38.8, 38)), "feather", 12, (4.5, 32, 0))
+
+
 def eye(img, rect):
 	x0, y0, x1, y1 = rect
 	put(img, (x0 + x1) // 2, y0, (20, 16, 14))
@@ -714,33 +883,539 @@ def belly(img, rect):
 			put(img, x, y, shade(FIXED["belly"], 0.9 if (y - y0) % 2 else 1.05))
 
 
+# ---- creed/land variant pieces ----------------------------------------------------------------------------------------
+
+def veiled_helm(b):
+	"""The veiled helm: a spiked helm with a mail veil over the face."""
+	bones(b, "head")
+	h = "armorHead"
+	b.cube(h, (-4.5, 24, -4.5), (4.5, 32, 4.5), "plate", faces_paint=P)
+	b.cube(h, (-3.5, 32, -3.5), (3.5, 33, 3.5), "plate", faces_paint=P_ALL)
+	b.cube(h, (-0.5, 33, -2), (0.5, 34, 3), "plate", faces_paint=P_ALL)
+	# mail veil
+	b.cube(h, (-5, 23, -6), (5, 32, -4.5), "mail")
+	# spiked crown
+	b.cube(h, (-4, 32, -4), (4, 34, 4), "plate", faces_paint=P_ALL)
+	visor(b, 29.0)
+	v = "visor"
+	b.cube(v, (-4.5, 24.5, -5.5), (4.5, 31.5, -4.5), "plate", faces_paint={**P_ALL, "north": slit(1, 1, 2)})
+
+
+def faith_cuirass(b):
+	"""The faith-marked cuirass: plate with the faith's sign etched on the breast."""
+	cuirass(b)
+	# The etching is handled by the etched finish palette
+
+
+def oath_sleeves(b):
+	"""Oath sleeves: a favour tied on the arm."""
+	bones(b, "arms")
+	a = "armor{}Arm"
+	# A ribbon/favour wrapped around the upper arm
+	both(b, a, (4, 20, -2.5), (6, 22, 2.5), "cloth", faces_paint=P_ALL)
+
+
+def spiked_spaulders(b):
+	"""Spiked spaulders: plate spaulders with spikes on the neck guard."""
+	spaulders(b)
+	# Add spikes to the neck guard
+	bones(b, "arms")
+	a = "armor{}Arm"
+	both(b, a, (4.5, 25.5, -3), (5.5, 27.5, 3), "plate", faces_paint=P_ALL, rotation=(0, 0, -15), origin=(5, 25.5, 0))
+	both(b, a, (4.5, 26.5, -3), (5.5, 28.5, 3), "plate", faces_paint=P_ALL, rotation=(0, 0, -25), origin=(5, 26.5, 0))
+
+
+def etched_cuirass(b):
+	"""Etched cuirass: bought plate with decorative etching."""
+	cuirass(b)
+
+
+def gilt_banded_cuirass(b):
+	"""Gilt-banded cuirass: King's Guard plate with gilt bands."""
+	cuirass(b)
+
+
+def gilt_banded_spaulders(b):
+	"""Gilt-banded spaulders: King's Guard spaulders with gilt bands."""
+	spaulders(b)
+
+
+def fur_lined_cuirass(b):
+	"""Fur-lined cuirass: plate with fur trim at the neck and waist."""
+	cuirass(b)
+	bones(b, "body")
+	o = "armorBody"
+	# fur collar
+	b.cube(o, (-4.6, 23, -3), (4.6, 24.5, 3), "cloth", faces_paint=P_ALL)
+	# fur at waist
+	b.cube(o, (-4.8, 10.5, -3.2), (4.8, 11.5, 3.2), "cloth", faces_paint=P_ALL)
+
+
+def fur_lined_spaulders(b):
+	"""Fur-lined spaulders: plate spaulders with fur trim."""
+	spaulders(b)
+	bones(b, "arms")
+	a = "armor{}Arm"
+	both(b, a, (3.8, 24.8, -3.2), (9.2, 25.5, 3.2), "cloth", faces_paint=P_ALL)
+
+
+def fur_lined_arm_harness(b):
+	"""Fur-lined arm harness: plate arm harness with fur at the cuffs."""
+	arm_harness(b)
+	bones(b, "arms")
+	a = "armor{}Arm"
+	both(b, a, (3.7, 13.5, -2.5), (8.3, 14.2, 2.5), "cloth", faces_paint=P_ALL)
+	both(b, a, (3.7, 22, -2.5), (8.3, 22.7, 2.5), "cloth", faces_paint=P_ALL)
+
+
+def fur_lined_gauntlets(b):
+	"""Fur-lined gauntlets: plate gauntlets with fur cuffs."""
+	gauntlets(b)
+	bones(b, "arms")
+	a = "armor{}Arm"
+	both(b, a, (3.4, 13.8, -2.8), (8.6, 14.5, 2.8), "cloth", faces_paint=P_ALL)
+
+
+def fur_lined_cuisses(b):
+	"""Fur-lined cuisses: plate cuisses with fur at the top."""
+	cuisses(b)
+	bones(b, "legs")
+	leg = "armor{}Leg"
+	both(b, leg, (-0.6, 11.4, -2.7), (4.6, 12.2, 2.7), "cloth", faces_paint=P_ALL)
+
+
+def fur_lined_greaves(b):
+	"""Fur-lined greaves: plate greaves with fur at the top."""
+	greaves(b)
+	bones(b, "legs")
+	leg = "armor{}Leg"
+	both(b, leg, (-0.6, 5, -2.6), (4.6, 5.8, 2.6), "cloth", faces_paint=P_ALL)
+
+
+def quilted_cotton_armor(b):
+	"""Quilted cotton armour: brine-soaked padded armour (Aztec ichcahuipilli style)."""
+	bones(b, "body")
+	o = "armorBody"
+	# quilted torso
+	b.cube(o, (-4.4, 12, -2.7), (4.4, 23.6, 2.7), "padding", faces_paint={**P, "south": lames(3, 4)})
+	# quilted shoulders
+	both(b, o, (0.4, 23.6, -3.5), (4.4, 24.4, 1.6), "padding", faces_paint=P_ALL)
+
+
+def hide_armor(b):
+	"""Hide armour: toughened hide over a padded base."""
+	bones(b, "body")
+	o = "armorBody"
+	b.cube(o, (-4.4, 12, -2.7), (4.4, 23.6, 2.7), "strap", faces_paint={**P, "south": lames(3, 4)})
+
+
+def bronze_armor(b):
+	"""Bronze armour: bronze plate in the ancient style."""
+	bones(b, "body")
+	o = "armorBody"
+	b.cube(o, (-4.4, 14.8, -2.7), (4.4, 23.6, 2.7), "plate", faces_paint={**P, "south": lames(4, 5)})
+	b.cube(o, (-3.7, 17.4, -3.5), (3.7, 22.8, -2.7), "plate", faces_paint={**P_ALL, "north": keel})
+	b.cube(o, (-4.2, 14.2, -3.2), (4.2, 17.8, -2.6), "plate", faces_paint={**P_ALL, "north": keel})
+	b.cube(o, (-4.3, 13, -2.6), (4.3, 14.8, 2.6), "plate", faces_paint=P)
+	b.cube(o, (-4.7, 11.4, -3), (4.7, 13.2, 3), "plate", faces_paint=P)
+	b.cube(o, (-5, 9.8, -3.2), (5, 11.6, 3.2), "plate", faces_paint=P)
+	both(b, o, (0.4, 6.4, -3.5), (4.4, 10, -2.8), "plate", faces_paint={**P, "north": lames(2)})
+	both(b, o, (2.2, 23.6, -1.6), (4.2, 24.4, 1.6), "strap")
+
+
+def laced_lamellar(b):
+	"""Laced lamellar: the blossom lands' folded lamellar extended for knights."""
+	bones(b, "body")
+	o = "armorBody"
+	# lamellar lames overlapping downwards (b.lame is a whole cube's faces, so its east face is the one painter)
+	lame = b.lame["east"]
+	b.cube(o, (-4.4, 14.8, -2.7), (4.4, 23.6, 2.7), "brig", faces_paint={**P, "south": lame})
+	b.cube(o, (-3.7, 17.4, -3.5), (3.7, 22.8, -2.7), "brig", faces_paint={**P_ALL, "north": keel})
+	b.cube(o, (-4.2, 14.2, -3.2), (4.2, 17.8, -2.6), "brig", faces_paint={**P_ALL, "north": keel})
+	b.cube(o, (-4.3, 13, -2.6), (4.3, 14.8, 2.6), "brig", faces_paint=P)
+	b.cube(o, (-4.7, 11.4, -3), (4.7, 13.2, 3), "brig", faces_paint=P)
+	b.cube(o, (-5, 9.8, -3.2), (5, 11.6, 3.2), "brig", faces_paint=P)
+	both(b, o, (0.4, 6.4, -3.5), (4.4, 10, -2.8), "brig", faces_paint={**P, "north": lames(2)})
+	both(b, o, (2.2, 23.6, -1.6), (4.2, 24.4, 1.6), "strap")
+
+
+def tabard(b):
+	"""The heraldic tabard: a panel before and behind hung from the shoulders over the armour, down to mid-thigh, open
+	at the sides. Pale cloth the game dyes the realm's field; the realm's arms are a second sheet laid on the front and
+	back faces ({b.arms}), one for each ordinary."""
+	bones(b, "body")
+	o = "armorBody"
+	front = b.cube(o, (-4.6, 7.5, -4.7), (4.6, 24.2, -4.3), "cloth")
+	back = b.cube(o, (-4.6, 7.5, 3.7), (4.6, 24.2, 4.1), "cloth")
+	both(b, o, (1.6, 24.0, -4.7), (4.6, 24.7, 4.1), "cloth")
+	b.arms = [front["faces"]["north"]["uv"], back["faces"]["south"]["uv"]]
+
+
+# ---- the realm's arms on a tabard: Outfits.ORDINARIES in order, each a test of a face's pixel (u, v) of (w, h) --------
+
+ORDINARIES = [
+	lambda u, v, w, h: abs(u - (w - 1) / 2) <= 1 or abs(v - h * 0.38) <= 1,                  # the cross
+	lambda u, v, w, h: abs(u / w - v / h) < 0.13 or abs(u / w + v / h - 1) < 0.13,            # the saltire
+	lambda u, v, w, h: v >= h - h * 0.55 * (1 - abs(u - (w - 1) / 2) / (w / 2)),             # the pile from the base
+	lambda u, v, w, h: abs(u / w - v / h) < 0.16,                                             # the bend
+	lambda u, v, w, h: abs(u - (w - 1) / 2) <= w * 0.18,                                      # the pale
+	lambda u, v, w, h: abs(v - (h - 1) / 2) <= h * 0.14,                                      # the fess
+	lambda u, v, w, h: u < w / 2,                                                             # per pale
+	lambda u, v, w, h: v < h / 2,                                                             # per fess
+	lambda u, v, w, h: v < h * 0.3,                                                           # the chief
+	lambda u, v, w, h: abs(u - (w - 1) / 2) / (w / 2) + abs(v - (h - 1) / 2) / (h / 2) <= 0.62,  # the lozenge
+	lambda u, v, w, h: (u - (w - 1) / 2) ** 2 + (v - (h - 1) / 2) ** 2 <= (min(w, h) * 0.32) ** 2,  # the roundel
+	lambda u, v, w, h: u < w * 0.45 and v < h * 0.4,                                          # the canton
+	lambda u, v, w, h: u % 2 == 1,                                                            # paly
+	lambda u, v, w, h: u in (0, w - 1) or v in (0, h - 1),                                    # the bordure
+	lambda u, v, w, h: ((u - (w - 1) / 2) ** 2 + (v - (h - 1) / 2) ** 2 <= 2.5                # a rose
+		or abs(u - (w - 1) / 2) <= 0.6 and abs(v - (h - 1) / 2) <= 3.2
+		or abs(v - (h - 1) / 2) <= 0.6 and abs(u - (w - 1) / 2) <= 3.2),
+	lambda u, v, w, h: v < 1 + u % 2 or v > h - 2 - u % 2,                                    # indented in chief and base
+	lambda u, v, w, h: u < w * 0.24 or u >= w * 0.76,                                         # the flaunches
+	lambda u, v, w, h: u / w + v / h < 1,                                                     # per bend
+]
+
+
+# ---- the wider makes (Harness 2) ---------------------------------------------------------------------------------------
+
+def flutes(img, rect):
+	"""Fluting: ridges running down the plate, bright and dark by turns."""
+	plate(img, rect)
+	x0, y0, x1, y1 = rect
+	for x in range(x0 + 1, x1 - 1):
+		k = 1.28 if (x - x0) % 2 == 0 else 0.72
+		for y in range(y0 + 1, y1 - 1):
+			mul(img, x, y, k)
+
+
+def fluted_cuirass(b):
+	"""The fluted cuirass: the cuirass's lines, its breast, plackart and tassets fluted, and a roped edge at the neck."""
+	bones(b, "body")
+	o = "armorBody"
+	b.cube(o, (-4.4, 14.8, -2.7), (4.4, 23.6, 2.7), "plate", faces_paint={**P, "north": flutes, "south": lames(4, 5)})
+	b.cube(o, (-3.7, 17.4, -3.5), (3.7, 22.8, -2.7), "plate", faces_paint={**P_ALL, "north": flutes})
+	b.cube(o, (-4.2, 14.2, -3.2), (4.2, 17.8, -2.6), "plate", faces_paint={**P_ALL, "north": flutes})
+	b.cube(o, (-4.3, 13, -2.6), (4.3, 14.8, 2.6), "plate", faces_paint=P)
+	b.cube(o, (-4.7, 11.4, -3), (4.7, 13.2, 3), "plate", faces_paint=P)
+	b.cube(o, (-5, 9.8, -3.2), (5, 11.6, 3.2), "plate", faces_paint=P)
+	both(b, o, (0.4, 6.4, -3.5), (4.4, 10, -2.8), "plate", faces_paint={**P, "north": flutes})
+	b.cube(o, (-3.2, 23.6, -3.1), (3.2, 24.2, -2.6), "plate", faces_paint=on_sides(lames(1)))
+	both(b, o, (2.2, 23.6, -1.6), (4.2, 24.4, 1.6), "strap")
+
+
+def rounded_breastplate(b):
+	"""The rounded breastplate: one great swelling plate over the chest, rounded as cubes go, over two short lames."""
+	bones(b, "body")
+	o = "armorBody"
+	b.cube(o, (-4.4, 13, -2.7), (4.4, 23.6, 2.7), "plate", faces_paint={**P, "south": lames(4, 5)})
+	b.cube(o, (-4.0, 14.6, -3.4), (4.0, 22.6, -2.7), "plate", faces_paint=P_ALL)
+	b.cube(o, (-3.2, 15.6, -3.9), (3.2, 21.6, -3.4), "plate", faces_paint=P_ALL)
+	b.cube(o, (-2.0, 16.8, -4.2), (2.0, 20.4, -3.9), "plate", faces_paint=P_ALL)
+	b.cube(o, (-4.7, 11.4, -3), (4.7, 13.2, 3), "plate", faces_paint=P)
+	b.cube(o, (-5, 9.8, -3.2), (5, 11.6, 3.2), "plate", faces_paint=P)
+	both(b, o, (2.2, 23.6, -1.6), (4.2, 24.4, 1.6), "strap")
+
+
+def rivets(img, rect):
+	"""A coat of plates' cloth: the heads of the rivets that hold the plates inside, in rows."""
+	x0, y0, x1, y1 = rect
+	for y in range(y0 + 1, y1 - 1, 3):
+		for x in range(x0 + 1, x1 - 1, 2):
+			put(img, x, y, kit.PALETTE["rivet"])
+			mul(img, x, y + 1, 0.75)
+
+
+def coat_of_plates(b):
+	"""The coat of plates: a cloth coat (the game dyes it the realm's colour) with plates riveted inside, belted."""
+	bones(b, "body")
+	o = "armorBody"
+	b.cube(o, (-4.5, 10.5, -2.9), (4.5, 24, 2.9), "cloth", faces_paint=on_sides(rivets))
+	both(b, o, (1.8, 23.8, -2.9), (4.5, 24.6, 2.9), "cloth")
+	b.cube(o, (-4.7, 12.2, -3.1), (4.7, 13.2, 3.1), "strap")
+
+
+def gorget(b):
+	"""The gorget: a collar of plate lames round the neck, standing over the top of the breastplate, with a bib before
+	and behind."""
+	bones(b, "body")
+	o = "armorBody"
+	b.cube(o, (-4.6, 22.4, -3.3), (4.6, 24.8, 3.3), "plate", faces_paint={**on_sides(lames(1)), "up": plate})
+	b.cube(o, (-3.6, 21.2, -3.7), (3.6, 22.6, -3.2), "plate", faces_paint=P_ALL)
+	b.cube(o, (-3.6, 21.2, 3.2), (3.6, 22.6, 3.7), "plate", faces_paint=P_ALL)
+
+
+def faulds_and_tassets(b):
+	"""Faulds and tassets: hoops of plate round the hips below the breastplate, and a tasset of lames hung over each
+	thigh."""
+	bones(b, "body", "legs")
+	o = "armorBody"
+	leg = "armor{}Leg"
+	b.cube(o, (-4.9, 10.6, -3.1), (4.9, 12.4, 3.1), "plate", faces_paint=P)
+	b.cube(o, (-5.1, 9.0, -3.3), (5.1, 10.8, 3.3), "plate", faces_paint=P)
+	b.cube(o, (-5.3, 7.4, -3.5), (5.3, 9.2, 3.5), "plate", faces_paint=P)
+	both(b, leg, (-0.2, 5.4, -3.4), (4.4, 9.6, -2.6), "plate", faces_paint={**P_ALL, "north": lames(2)})
+
+
+def rondel_spaulders(b):
+	"""Plate spaulders with rondels: a round disc guarding each armpit in front, on its boss."""
+	spaulders(b)
+	a = "armor{}Arm"
+	disc = {"north": plate, "south": plate}
+	both(b, a, (2.8, 19.4, -3.9), (5.0, 21.6, -3.3), "plate", faces_paint=disc)
+	both(b, a, (3.2, 19.0, -3.9), (4.6, 22.0, -3.3), "plate", faces_paint=disc)
+	both(b, a, (3.6, 20.1, -4.2), (4.2, 20.9, -3.9), "rivet")
+
+
+def quilted_coat(b):
+	"""Quilted coat: a padded coat worn under mail in the desert."""
+	bones(b, "body")
+	o = "armorBody"
+	# quilted torso
+	b.cube(o, (-4.4, 10, -2.7), (4.4, 24, 2.7), "padding", faces_paint={**P, "south": lames(3, 4)})
+	# quilted sleeves
+	both(b, o, (0.4, 23.8, -3.5), (4.4, 24.5, 1.6), "padding", faces_paint=P_ALL)
+
+
+# ---- every place filled (Harness 6): a third make, at least, for every place a smith or a tailor can make ------------
+
+def rings(img, rect):
+	"""Mail: rings in a close weave, bright and dark by turns, the lowest row in shadow."""
+	x0, y0, x1, y1 = rect
+	for y in range(y0, y1):
+		for x in range(x0, x1):
+			mul(img, x, y, (1.2 if (x + y) % 2 == 0 else 0.82) * (0.75 if y == y1 - 1 else 1.0))
+
+
+def splints(img, rect):
+	"""Splinted leather: upright strips of iron riveted onto the leather, a strip of leather showing between each."""
+	x0, y0, x1, y1 = rect
+	for x in range(x0, x1):
+		if (x - x0) % 3 == 2:
+			continue
+		for y in range(y0, y1):
+			put(img, x, y, shade(kit.PALETTE["plate"], 0.9 if (x - x0) % 3 else 1.1))
+		put(img, x, y0, kit.PALETTE["rivet"])
+		mul(img, x, y1 - 1, 0.7)
+
+
+def quilting(img, rect):
+	"""Quilted cloth: stitched channels running down, a stitch across every third row."""
+	x0, y0, x1, y1 = rect
+	for y in range(y0, y1):
+		for x in range(x0, x1):
+			if (x - x0) % 2 == 1:
+				mul(img, x, y, 0.8)
+			elif (y - y0) % 3 == 2:
+				mul(img, x, y, 0.9)
+
+
+def fur(img, rect):
+	"""Fur: tufts lighter and darker, never in rows."""
+	x0, y0, x1, y1 = rect
+	for y in range(y0, y1):
+		for x in range(x0, x1):
+			mul(img, x, y, (0.78, 1.0, 1.16, 0.92, 1.06)[(x * 7 + y * 13 + x * y) % 5])
+
+
+def fur_face(img, rect):
+	fur(img, rect)
+	opening(2, 2, 3, 2)(img, rect)
+
+
+def coif_face(img, rect):
+	rings(img, rect)
+	opening(2, 2, 2, 2)(img, rect)
+
+
+def splinted_vambraces(b):
+	"""Splinted vambraces: leather round the upper and lower arm with iron splints riveted down it, buckled on, and a
+	plate couter over the elbow."""
+	bones(b, "arms")
+	a = "armor{}Arm"
+	both(b, a, (3.7, 18.8, -2.3), (8.3, 22.2, 2.3), "leather", faces_paint=on_sides(splints))
+	both(b, a, (3.7, 13.6, -2.3), (8.3, 16.8, 2.3), "leather", faces_paint=on_sides(splints))
+	both(b, a, (3.5, 16.6, -2.6), (8.5, 19, 2.6), "plate", faces_paint=P_ALL)
+	both(b, a, (3.6, 14.6, -2.45), (8.4, 15.2, 2.45), "strap")
+	both(b, a, (3.6, 20.2, -2.45), (8.4, 20.8, 2.45), "strap")
+
+
+def mail_mitons(b):
+	"""Mail mitons: mittens of mail over the hand, a leather strap round the wrist."""
+	bones(b, "arms")
+	a = "armor{}Arm"
+	both(b, a, (3.5, 11.6, -2.5), (8.5, 15.4, 2.5), "mail", faces_paint={**on_sides(rings), "down": rings})
+	both(b, a, (3.4, 15.2, -2.6), (8.6, 16.0, 2.6), "strap")
+
+
+def padded_cuisses(b):
+	"""Padded cuisses: quilted thigh defences laced up the side, a little plate poleyn over the knee."""
+	bones(b, "legs")
+	leg = "armor{}Leg"
+	both(b, leg, (-0.4, 6.8, -2.6), (4.4, 11.8, 2.6), "padding", faces_paint=on_sides(quilting))
+	both(b, leg, (-0.5, 9.0, -2.7), (4.5, 9.6, 2.7), "strap")
+	both(b, leg, (-0.2, 4.8, -3.0), (4.2, 7.1, -1.8), "plate", faces_paint=P_ALL)
+
+
+def splinted_greaves(b):
+	"""Splinted greaves: leather round the shin with iron splints down it, strapped at the calf."""
+	bones(b, "legs")
+	leg = "armor{}Leg"
+	both(b, leg, (-0.4, 1.6, -2.5), (4.4, 5.4, 2.5), "leather", faces_paint=on_sides(splints))
+	both(b, leg, (-0.5, 2.2, -2.6), (4.5, 2.8, 2.6), "strap")
+	both(b, leg, (-0.5, 4.2, -2.6), (4.5, 4.8, 2.6), "strap")
+
+
+def fur_hood(b):
+	"""The fur hood: a short hood of pelts round the face and a cape of them over the shoulders, the hair outside."""
+	bones(b, "head", "body")
+	h = "armorHead"
+	b.cube(h, (-5.4, 23.6, -5.3), (5.4, 33.8, 5.6), "fur", faces_paint={"north": fur_face, "east": fur, "west": fur, "south": fur, "up": fur})
+	b.cube(h, (-2.2, 30.4, 5.6), (2.2, 33.0, 6.6), "fur", faces_paint={**on_sides(fur), "up": fur})
+	b.cube("armorBody", (-5.8, 20.4, -3.6), (5.8, 24.4, 3.8), "fur", faces_paint={**on_sides(fur), "up": fur})
+	b.cube("armorBody", (-0.6, 22.4, -3.9), (0.6, 23.4, -3.6), "strap")
+
+
+def mail_coif(b):
+	"""The mail coif: a hood of mail close round the head and face, falling in a short cape over the shoulders."""
+	bones(b, "head", "body")
+	h = "armorHead"
+	b.cube(h, (-4.9, 23.6, -4.9), (4.9, 33.2, 4.9), "mail", faces_paint={"north": coif_face, "east": rings, "west": rings, "south": rings, "up": rings})
+	b.cube("armorBody", (-5.6, 20.4, -3.4), (5.6, 24.4, 3.6), "mail", faces_paint={**on_sides(rings), "up": rings})
+
+
+def standard_of_mail(b):
+	"""The standard of mail: a stiff collar of mail round the neck, bound in leather at the top, a bib before and behind."""
+	bones(b, "body")
+	o = "armorBody"
+	b.cube(o, (-4.5, 22.2, -3.2), (4.5, 24.8, 3.2), "mail", faces_paint={**on_sides(rings), "up": rings})
+	b.cube(o, (-4.6, 24.4, -3.3), (4.6, 25.0, 3.3), "strap")
+	b.cube(o, (-3.4, 20.6, -3.5), (3.4, 22.4, -3.1), "mail", faces_paint=on_sides(rings))
+	b.cube(o, (-3.4, 20.6, 3.1), (3.4, 22.4, 3.5), "mail", faces_paint=on_sides(rings))
+
+
+def bevor(b):
+	"""The bevor: plate rising from the breast over the throat to the chin, its sides wrapping back, strapped behind the
+	neck."""
+	bones(b, "body")
+	o = "armorBody"
+	# (it stands clear of the face: the head reaches z -4)
+	b.cube(o, (-4.0, 21.4, -4.9), (4.0, 26.2, -4.1), "plate", faces_paint={**P_ALL, "north": lames(2)})
+	b.cube(o, (-3.6, 21.0, -4.1), (3.6, 22.6, -2.2), "plate", faces_paint=P_ALL)
+	both(b, o, (4.0, 21.8, -4.9), (4.6, 25.6, 0.6), "plate", faces_paint=P_ALL)
+	b.cube(o, (-4.6, 22.8, 0.6), (4.6, 23.6, 2.6), "strap")
+
+
+def mail_skirt(b):
+	"""The mail skirt: mail hung from a belt round the hips and down over the top of each thigh."""
+	bones(b, "body", "legs")
+	o = "armorBody"
+	leg = "armor{}Leg"
+	b.cube(o, (-4.7, 10.2, -2.9), (4.7, 12.6, 2.9), "mail", faces_paint=on_sides(rings))
+	b.cube(o, (-4.8, 12.2, -3.0), (4.8, 13.0, 3.0), "strap")
+	both(b, leg, (-0.3, 6.4, -2.6), (4.3, 10.4, 2.6), "mail", faces_paint=on_sides(rings))
+
+
+def leather_tassets(b):
+	"""Leather tassets: a belt with a hoop of boiled leather round the hips, and a tasset of leather lames hung before
+	each thigh."""
+	bones(b, "body", "legs")
+	o = "armorBody"
+	leg = "armor{}Leg"
+	b.cube(o, (-4.9, 10.2, -3.1), (4.9, 12.0, 3.1), "leather", faces_paint=P)
+	b.cube(o, (-4.8, 11.8, -3.0), (4.8, 13.0, 3.0), "strap")
+	b.cube(o, (-0.7, 11.9, -3.3), (0.7, 12.9, -3.0), "gilt")
+	both(b, leg, (-0.2, 5.8, -3.3), (4.4, 10.0, -2.6), "leather", faces_paint={**P_ALL, "north": lames(2)})
+
+
+# the new places' pieces that aren't plate (one look each): piece -> build
+FILLED = {"splinted_vambraces": splinted_vambraces, "mail_mitons": mail_mitons, "padded_cuisses": padded_cuisses,
+	"splinted_greaves": splinted_greaves, "fur_hood": fur_hood, "mail_coif": mail_coif, "standard_of_mail": standard_of_mail,
+	"mail_skirt": mail_skirt, "leather_tassets": leather_tassets}
+
+
+def under_sheet(paint, sleeves=True, short=False):
+	"""A shirt on the under-armour layer's 64x32 sheet (as the haubergeon's): body, and the arms unless {sleeves} is
+	False, to the elbow when {short}; {paint}(x, y) gives each pixel."""
+	img = Image.new("RGBA", (64, 32))
+	for y in range(16, 32):
+		for x in range(16, 56):
+			arm = x >= 40
+			if arm and (not sleeves or short and y >= 27) or y < 20 and not (20 <= x < 36 or 44 <= x < 52):
+				continue
+			put(img, x, y, paint(x, y, arm))
+	return img
+
+
+AKETON_PAINT = lambda x, y, arm=False: shade(FIXED["cloth"], 0.8 if x % 2 else 0.9 if y % 3 == 2 else 1.0)  # noqa: E731
+FUR_PAINT = lambda x, y, arm=False: shade(kit.PALETTE["fur"], (0.78, 1.0, 1.16, 0.92, 1.06)[(x * 7 + y * 13 + x * y) % 5])  # noqa: E731
+
+
+def jazerant_paint(x, y, arm=False):
+	"""Cloth over mail: brass rivet heads in rows on the body (the plates and rings sewn inside), mail on the sleeves."""
+	if arm:
+		return shade(FIXED["mail"], 1.2 if (x + y) % 2 == 0 else 0.82)
+	if x % 2 == 1 and y % 3 == 1:
+		return FIXED["gilt"]
+	return shade(JAZERANT_CLOTH, 0.85 if y % 3 == 2 else 1.0)
+
+
+JAZERANT_CLOTH = (112, 50, 42)
+
+
 # ---- what there is ---------------------------------------------------------------------------------------------------
 
 # piece (item id) -> (build, sheet size, the bones its icon shows); the plate pieces, painted in each finish
 PLATE = {
 	"frogmouth_helm": (frogmouth, 64), "houndskull_bascinet": (houndskull, 64), "armet": (armet, 64), "close_helm": (close_helm, 64),
 	"savoyard_helm": (savoyard, 64), "sallet": (sallet, 64), "kettle_hat": (kettle_hat, 64), "morion": (morion, 64),
+	"great_helm": (great_helm, 64), "barbute": (barbute, 64), "veiled_helm": (veiled_helm, 64), "burgonet": (burgonet, 64), "spangenhelm": (spangenhelm, 64),
+	"lobster_tail": (lobster_tail, 64), "grotesque_visor": (grotesque_visor, 64),
 	"plate_cuirass": (cuirass, 64), "plate_spaulders": (spaulders, 64), "plate_arm_harness": (arm_harness, 64),
 	"plate_gauntlets": (gauntlets, 64), "plate_cuisses": (cuisses, 64), "plate_greaves": (greaves, 64), "plate_sabatons": (sabatons, 64),
+	"faith_cuirass": (faith_cuirass, 64), "oath_sleeves": (oath_sleeves, 64), "spiked_spaulders": (spiked_spaulders, 64),
+	"etched_cuirass": (etched_cuirass, 64), "gilt_banded_cuirass": (gilt_banded_cuirass, 64), "gilt_banded_spaulders": (gilt_banded_spaulders, 64),
+	"fur_lined_cuirass": (fur_lined_cuirass, 64), "fur_lined_spaulders": (fur_lined_spaulders, 64), "fur_lined_arm_harness": (fur_lined_arm_harness, 64),
+	"fur_lined_gauntlets": (fur_lined_gauntlets, 64), "fur_lined_cuisses": (fur_lined_cuisses, 64), "fur_lined_greaves": (fur_lined_greaves, 64),
+	"quilted_cotton_armor": (quilted_cotton_armor, 64), "hide_armor": (hide_armor, 64), "bronze_armor": (bronze_armor, 64), "laced_lamellar": (laced_lamellar, 64),
+	"fluted_cuirass": (fluted_cuirass, 64), "rounded_breastplate": (rounded_breastplate, 64), "gorget": (gorget, 64),
+	"faulds_and_tassets": (faulds_and_tassets, 64), "rondel_spaulders": (rondel_spaulders, 64), "bevor": (bevor, 64),
 }
 CRESTS = {"crest_dragon": crest_dragon, "crest_lion": crest_lion, "crest_stag": crest_stag, "crest_boar": crest_boar,
 	"crest_eagle": crest_eagle, "crest_pegasus": crest_pegasus, "crest_unicorn": crest_unicorn, "crest_snake": crest_snake,
-	"crest_horns": crest_horns, "crest_wings": crest_wings}
+	"crest_griffin": crest_griffin, "crest_bear": crest_bear, "crest_wolf": crest_wolf, "crest_raven": crest_raven,
+	"crest_hound": crest_hound, "crest_horns": crest_horns, "crest_wings": crest_wings, "crest_plume": crest_plume}
 TORN_STRIPS = (0, 9, 4, 13, 6, 1, 11, 3, 8, 15, 2, 7)
 NAMES = {
 	"frogmouth_helm": "Frogmouth Helm", "houndskull_bascinet": "Houndskull Bascinet", "armet": "Armet", "close_helm": "Close Helm",
 	"savoyard_helm": "Savoyard Helm", "sallet": "Sallet and Bevor", "kettle_hat": "Kettle Hat", "morion": "Morion",
+	"great_helm": "Great Helm", "barbute": "Barbute", "veiled_helm": "Veiled Helm", "burgonet": "Burgonet", "spangenhelm": "Spangenhelm",
+	"lobster_tail": "Lobster-tail Pot", "grotesque_visor": "Grotesque Visor",
 	"plate_cuirass": "Plate Cuirass", "plate_spaulders": "Plate Spaulders", "mail_spaulders": "Mail Spaulders",
 	"brigandine_spaulders": "Brigandine Spaulders", "plate_arm_harness": "Arm Harness", "plate_gauntlets": "Plate Gauntlets",
 	"plate_cuisses": "Cuisses", "plate_greaves": "Greaves", "plate_sabatons": "Sabatons", "arming_doublet": "Arming Doublet",
 	"mail_haubergeon": "Mail Haubergeon", "giornea": "Giornea", "cloak": "Cloak", "torn_cloak": "Torn Cloak", "hood": "Hood",
 	"torn_hood": "Torn Hood", "torse": "Torse", "crest_dragon": "Dragon Crest", "crest_lion": "Lion Crest", "crest_stag": "Stag Crest",
 	"crest_boar": "Boar Crest", "crest_eagle": "Eagle Crest", "crest_pegasus": "Pegasus Crest", "crest_unicorn": "Unicorn Crest",
-	"crest_snake": "Serpent Crest", "crest_horns": "Crest of Horns", "crest_wings": "Crest of Wings",
+	"crest_snake": "Serpent Crest", "crest_griffin": "Griffin Crest", "crest_bear": "Bear Crest", "crest_wolf": "Wolf Crest",
+	"crest_raven": "Raven Crest", "crest_hound": "Hound Crest", "crest_horns": "Crest of Horns", "crest_wings": "Crest of Wings",
+	"crest_plume": "Crest of Plumes",
+	"faith_cuirass": "Faith-Marked Cuirass", "oath_sleeves": "Oath Sleeves", "spiked_spaulders": "Spiked Spaulders",
+	"etched_cuirass": "Etched Cuirass", "gilt_banded_cuirass": "Gilt-Banded Cuirass", "gilt_banded_spaulders": "Gilt-Banded Spaulders",
+	"fur_lined_cuirass": "Fur-Lined Cuirass", "fur_lined_spaulders": "Fur-Lined Spaulders", "fur_lined_arm_harness": "Fur-Lined Arm Harness",
+	"fur_lined_gauntlets": "Fur-Lined Gauntlets", "fur_lined_cuisses": "Fur-Lined Cuisses", "fur_lined_greaves": "Fur-Lined Greaves",
+	"quilted_cotton_armor": "Quilted Cotton Armour", "hide_armor": "Hide Armour", "bronze_armor": "Bronze Armour", "laced_lamellar": "Laced Lamellar",
+	"tabard": "Heraldic Tabard", "quilted_coat": "Quilted Coat",
+	"fluted_cuirass": "Fluted Cuirass", "rounded_breastplate": "Rounded Breastplate", "coat_of_plates": "Coat of Plates",
+	"gorget": "Gorget", "faulds_and_tassets": "Faulds and Tassets", "rondel_spaulders": "Spaulders with Rondels",
+	"aketon": "Aketon", "fur_jerkin": "Fur Jerkin", "jazerant": "Jazerant", "splinted_vambraces": "Splinted Vambraces",
+	"mail_mitons": "Mail Mitons", "padded_cuisses": "Padded Cuisses", "splinted_greaves": "Splinted Greaves", "fur_hood": "Fur Hood",
+	"mail_coif": "Mail Coif", "standard_of_mail": "Standard of Mail", "bevor": "Bevor", "mail_skirt": "Mail Skirt",
+	"leather_tassets": "Leather Tassets",
 }
-# the cloth the game tints with the piece's dye, and the colour its icon and an undyed one show
+# the cloth the game tints with the piece's dye, and the colour its icon and an undyed one show (HeraldryLayer.UNDYED)
 DYED = {"arming_doublet": 0xA06540, "giornea": 0x8E2B2B, "cloak": 0x4A5568, "torn_cloak": 0x5A5246, "hood": 0x4A5568, "torn_hood": 0x5A5246,
-	"torse": 0xB02E26}
+	"torse": 0xB02E26, "tabard": 0x2B4A8E, "quilted_coat": 0xCEBE96, "coat_of_plates": 0x7A2E2A, "aketon": 0xD8CCB0}
 
 
 def make(build, size, finish="", seed=7, figure=False, **marks):
@@ -826,11 +1501,12 @@ def entity_texture(img, name):
 	img.save(path)
 
 
-def shirt(out, paint):
-	"""An icon for a shirt worn under armour (it has no model of its own): body and sleeves, painted by {paint}(x, y)."""
+def shirt(out, paint, sleeves=True):
+	"""An icon for a shirt worn under armour (it has no model of its own): body and (unless not {sleeves}) sleeves,
+	painted by {paint}(x, y)."""
 	img = Image.new("RGBA", (16, 16))
 	outline = (58, 40, 24)
-	body = [(x, y) for y in range(3, 14) for x in range(5, 11)] + [(x, y) for y in range(3, 9) for x in (2, 3, 4, 11, 12, 13)]
+	body = [(x, y) for y in range(3, 14) for x in range(5, 11)] + ([(x, y) for y in range(3, 9) for x in (2, 3, 4, 11, 12, 13)] if sleeves else [])
 	body = [p for p in body if p not in ((7, 3), (8, 3))]
 	for x, y in body:
 		put(img, x, y, paint(x, y))
@@ -897,17 +1573,35 @@ def main(argv):
 	item("brigandine_spaulders", flat("brigandine_spaulders"))
 	for extra in ("mail_spaulders", "brigandine_spaulders"):
 		os.remove(os.path.join(ASSETS, "bbmodels", "heraldry_" + extra + ".json"))
+	# creed/land variant helms: veiled_helm and barbute use all finishes
+	for name in ("veiled_helm", "barbute"):
+		icons = piece(name, globals()[name], 64, tuple(FINISHES))
+		item(name, {"type": "minecraft:select", "property": "minecraft:component", "component": "jaymoskingdoms:finish",
+			"cases": [{"when": f, "model": flat(icons[f])} for f in FINISHES if f], "fallback": flat(icons[""])})
 	# cloth: pale sheets the game tints; the torn ones are the same cubes with the cloth torn away
 	tint = lambda name: {"type": "minecraft:model", "model": "jaymoskingdoms:item/" + name,  # noqa: E731
 		"tints": [{"type": "minecraft:dye", "default": DYED[name] - (1 << 24)}]}
 	for name, build, marks in (("giornea", giornea, {}), ("cloak", cloak, {}), ("torn_cloak", cloak, {"fold": ragged(TORN_STRIPS, ((2, 5), (7, 9)))}),
-		("hood", hood, {}), ("torn_hood", hood, {"fold": ragged((0, 2, 1, 3, 0, 1)), "face": torn_opening(2, 2, 3, 2)})):
+		("hood", hood, {}), ("torn_hood", hood, {"fold": ragged((0, 2, 1, 3, 0, 1)), "face": torn_opening(2, 2, 3, 2)}),
+		("tabard", tabard, {}), ("quilted_coat", quilted_coat, {}), ("coat_of_plates", coat_of_plates, {})):
 		piece(name, build, 128, dye=None, **marks)
 		flat(name)
 		item(name, tint(name))
 		dye_recipe(name)
-	for extra in ("torn_cloak", "torn_hood"):
+	for extra in ("torn_cloak", "torn_hood", "quilted_coat"):
 		os.remove(os.path.join(ASSETS, "bbmodels", "heraldry_" + extra + ".json"))
+	# a tabard's arms: one sheet for each realm ordinary, only its front and back painted, which the game draws over the
+	# tabard tinted with the charge's colour
+	b, _ = make(tabard, 128)
+	for i, paint in enumerate(ORDINARIES):
+		img = Image.new("RGBA", b.img.size, (0, 0, 0, 0))
+		for x0, y0, x1, y1 in b.arms:
+			w, h = x1 - x0, y1 - y0
+			for v in range(h):
+				for u in range(w):
+					if paint(u, v, w, h):
+						put(img, x0 + u, y0 + v, b.img.getpixel((x0 + u, y0 + v))[:3])
+		entity_texture(img, "heraldry_tabard_arms_%d" % i)
 	# the torse (tinted), and the crests that stand on it: the icon is the torse (tinted) under the beast
 	piece("torse", torse, 32)
 	flat("torse")
@@ -929,6 +1623,23 @@ def main(argv):
 	flat("arming_doublet")
 	item("arming_doublet", tint("arming_doublet"))
 	dye_recipe("arming_doublet")
+	# every place filled (Harness 6): the pieces that aren't plate, one look each
+	for name, build in FILLED.items():
+		piece(name, build, 64)
+		item(name, flat(name))
+	# and the new shirts under it all: the aketon (pale, the game tints it), the fur jerkin and the jazerant
+	ua = os.path.join(ASSETS, "textures", "entity", "under_armour")
+	under_sheet(AKETON_PAINT).save(os.path.join(ua, "aketon.png"))
+	under_sheet(FUR_PAINT, sleeves=False).save(os.path.join(ua, "fur_jerkin.png"))
+	under_sheet(jazerant_paint, short=True).save(os.path.join(ua, "jazerant.png"))
+	shirt(os.path.join(ASSETS, "textures", "item", "aketon.png"), AKETON_PAINT)
+	flat("aketon")
+	item("aketon", tint("aketon"))
+	dye_recipe("aketon")
+	shirt(os.path.join(ASSETS, "textures", "item", "fur_jerkin.png"), FUR_PAINT, sleeves=False)
+	item("fur_jerkin", flat("fur_jerkin"))
+	shirt(os.path.join(ASSETS, "textures", "item", "jazerant.png"), lambda x, y: jazerant_paint(x + 16, y + 16, x < 5 or x > 10))
+	item("jazerant", flat("jazerant"))
 	for name, text in NAMES.items():
 		lang["item.jaymoskingdoms." + name] = text
 	r.write(os.path.join(ASSETS, "lang", "parts", "heraldry-armour-items.json"), lang)
@@ -940,8 +1651,43 @@ def main(argv):
 			bake(model, scratch, tex)
 			subprocess.run([sys.executable, "-I", os.path.join(ROOT, "tools", "bbmodel_preview.py"), scratch, tex, os.path.join(preview, tex + ".png")],
 				check=True, capture_output=True)
+	dents()
 	print("heraldry armour:", len(NAMES), "pieces")
 
 
+# ---- dents and scratches (Harness 5): plate shows its wear ----------------------------------------------------------
+
+# each stage, and the share of the plate's pixels dented by it (the heavier stage keeps the lighter one's dents)
+DENT_STAGES = ((1, 0.04), (2, 0.10))
+DENT, DENT_LIP = (66, 68, 74), (198, 202, 208)
+
+
+def dents():
+	"""For each plate piece, a sheet of dents and scratches for each stage of wear, drawn over the piece (in any finish) as
+	it loses its durability (HeraldryLayer). Only the plate is dented: the pixels that change between the bright and
+	the blackened sheet (straps, cloth and rivets stay as they are). A dent is a dark pit with a bright lip under it."""
+	import random
+	bb = os.path.join(ASSETS, "textures", "entity", "bb")
+	for name in PLATE:
+		bright = Image.open(os.path.join(bb, "heraldry_%s.png" % name)).convert("RGBA")
+		dark = Image.open(os.path.join(bb, "heraldry_%s_blackened.png" % name)).convert("RGBA")
+		w, h = bright.size
+		metal = {(x, y) for y in range(h) for x in range(w)
+			if bright.getpixel((x, y))[3] and bright.getpixel((x, y))[:3] != dark.getpixel((x, y))[:3]}
+		order = sorted(metal)
+		random.Random(name).shuffle(order)
+		for stage, share in DENT_STAGES:
+			img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+			pits = set(order[:int(len(order) * share)])
+			for x, y in pits:
+				put(img, x, y, DENT)
+				if (x, y + 1) in metal and (x, y + 1) not in pits:
+					put(img, x, y + 1, DENT_LIP)
+			entity_texture(img, "heraldry_%s_dents%d" % (name, stage))
+
+
 if __name__ == "__main__":
-	main(sys.argv[1:])
+	if "--dents" in sys.argv:
+		dents()
+	else:
+		main(sys.argv[1:])

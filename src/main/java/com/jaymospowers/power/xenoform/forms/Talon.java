@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.wounds.Bleeding;
 import com.jaymospowers.core.wounds.BodyPart;
@@ -332,7 +333,7 @@ public final class Talon extends XenoForm {
 
 	/** Landed after a takedown: one beat of the wings bowls over everything near. */
 	private void wingbeat(ServerPlayer player, ServerLevel level) {
-		for (LivingEntity e : around(player, BEAT_RADIUS)) {
+		for (LivingEntity e : around(player, AbilityPower.size(player, BEAT_RADIUS))) {
 			e.hurtServer(level, player.damageSources().playerAttack(player), BEAT_DAMAGE);
 			shove(e, player.position(), BEAT_OUT, BEAT_UP);
 			if (!Tripped.bind(e, player, BEAT_DOWN)) {
@@ -340,10 +341,10 @@ public final class Talon extends XenoForm {
 			}
 		}
 		Vec3 at = player.position().add(0.0, 0.2, 0.0);
-		MagicFx.ring(level, at, (float)BEAT_RADIUS, color);
-		ring(level, ParticleTypes.CLOUD, at, BEAT_RADIUS * 0.6, 20);
+		MagicFx.ring(level, at, (float)AbilityPower.size(player, BEAT_RADIUS), color);
+		ring(level, ParticleTypes.CLOUD, at, AbilityPower.size(player, BEAT_RADIUS) * 0.6, 20);
 		sound(player, SoundEvents.PHANTOM_FLAP, 1.6F, 0.6F);
-		com.jaymospowers.core.Shakes.heavy(player, player.position(), BEAT_RADIUS * 2.0, 0.5F);
+		com.jaymospowers.core.Shakes.heavy(player, player.position(), AbilityPower.size(player, BEAT_RADIUS) * 2.0, 0.5F);
 	}
 
 	private static void release(XenoformPower.Live live) {

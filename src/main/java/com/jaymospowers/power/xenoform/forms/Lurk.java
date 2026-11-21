@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.power.xenoform.HunterHits;
 import com.jaymospowers.power.xenoform.LurkBlend;
 import com.jaymospowers.power.xenoform.XenoForm;
@@ -215,7 +216,7 @@ public final class Lurk extends XenoForm {
 
 	private static void dread(ServerPlayer player, ServerLevel level) {
 		int caught = 0;
-		for (LivingEntity e : around(player, DREAD_RADIUS)) {
+		for (LivingEntity e : around(player, AbilityPower.size(player, DREAD_RADIUS))) {
 			Vec3 toMe = player.getEyePosition().subtract(e.getEyePosition()).normalize();
 			if (e.getViewVector(1.0F).dot(toMe) < DREAD_LOOK || !e.hasLineOfSight(player)) {
 				continue;

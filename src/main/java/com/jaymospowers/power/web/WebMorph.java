@@ -1,6 +1,7 @@
 package com.jaymospowers.power.web;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.BladeBlood;
 import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.Fractures;
@@ -65,7 +66,7 @@ import org.jspecify.annotations.Nullable;
 public final class WebMorph {
 	/** The weapons. */
 	public static final int MACE = 0, SCYTHE = 1, SPEAR = 2, WHIP = 3, HAMMER = 4, HOOK = 5, PALM = 6, AXE = 7, WEAPONS = 8;
-	/** What each strain forms: black every weapon but the palm and the axe; white blunt only; red blades only. */
+	/** What each strain forms: black every weapon but the palm and the axe; white blunt only; red blades only. Looking at a log, any strain forms the axe ({@link WebSymbioteFell}). */
 	static final int[] BLACK_WEAPONS = {MACE, SCYTHE, SPEAR, WHIP, HAMMER, HOOK};
 	static final int[] WHITE_WEAPONS = {MACE, PALM};
 	static final int[] RED_WEAPONS = {SCYTHE, SPEAR, AXE};
@@ -332,9 +333,14 @@ public final class WebMorph {
 			default -> BLACK_WEAPONS;
 		};
 		int weapon;
-		do {
-			weapon = pool[player.getRandom().nextInt(pool.length)];
-		} while (weapon == live.lastWeapon && pool.length > 1);
+		if (WebSymbioteFell.lookingAtLog(player)) {
+			// (at a tree, whatever the strain: always the axe)
+			weapon = AXE;
+		} else {
+			do {
+				weapon = pool[player.getRandom().nextInt(pool.length)];
+			} while (weapon == live.lastWeapon && pool.length > 1);
+		}
 		live.lastWeapon = weapon;
 		live.side = -live.side;
 		live.pending = NONE;
@@ -428,6 +434,9 @@ public final class WebMorph {
 		if (found instanceof LivingEntity target && target.isAlive()
 			&& player.getEyePosition().distanceTo(target.getBoundingBox().getCenter()) <= reach(morph.weapon(), morph.armor()) + REACH_SLACK + 1.0 + target.getBbWidth() * 0.5) {
 			land(player, level, morph, target);
+		} else if (morph.weapon() == AXE && WebSymbioteFell.chop(player)) {
+			// a tree: bitten, and felled on the last blow (WebSymbioteFell)
+			return;
 		} else {
 			// the air: a crack of the whip, nothing more
 			sound(level, player, SoundEvents.PLAYER_ATTACK_NODAMAGE, 0.8F, 0.7F);
@@ -508,7 +517,7 @@ public final class WebMorph {
 				Dismember.cut(player, target, part, SCYTHE_SEVER * sever, () -> blow(target, level, source, damage));
 				push(target, right.scale(-SCYTHE_KNOCK).add(away.scale(0.3)).add(0.0, 0.25, 0.0));
 				// the sweep carries on through what's beside it
-				for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(SCYTHE_SWEEP),
+				for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(AbilityPower.size(player, SCYTHE_SWEEP)),
 					e -> e != player && e != target && e.isAlive() && !e.isSpectator() && !(e instanceof Player p && p.isCreative())
 						&& e.position().subtract(player.position()).horizontal().dot(player.getLookAngle().horizontal()) > 0.0)) {
 					Dismember.cut(player, other, Dismember.aimedPart(player, other), SCYTHE_SEVER * 0.5F * sever,

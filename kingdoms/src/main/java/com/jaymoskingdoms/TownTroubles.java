@@ -17,7 +17,6 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -36,8 +35,9 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.7.530) What is happening in a town, as work for its folk. While a town is hungry, sick, hurt, raided, burned, sacked, in
  * drought, missing one of its own or feuding with a neighbour, two to four of its villagers wear the gold mark and ask for
- * help with that trouble ({@link Quests#offerNow}, as {@link DisasterRelief} does for a disaster). Players near the town hear
- * when it starts and ends; when it ends the asks not yet taken are taken back. Food, timber and iron brought for a trouble
+ * help with that trouble ({@link Quests#offerNow}, as {@link DisasterRelief} does for a disaster). Nothing is said in chat
+ * (Andy, 2026-11-20): the gold-marked folk and their asks are how you learn of it; when it ends the asks not yet taken are
+ * taken back. Food, timber and iron brought for a trouble
  * go into the town's stores, so a famine can really end.
  */
 public final class TownTroubles {
@@ -46,9 +46,9 @@ public final class TownTroubles {
 	/** When a town has more than {@link #MOST_AT_ONCE}, these come first. */
 	static final List<String> ORDER = List.of(WAR, RAID, FIRE, MISSING, FAMINE, PLAGUE, WOUNDS, DROUGHT, FEUD);
 
-	/** How often the towns are looked at (ticks); a town needs a player this near its seat to be looked at; how far its folk are asked; how far players hear of it. */
+	/** How often the towns are looked at (ticks); a town needs a player this near its seat to be looked at; how far its folk are asked. */
 	static final int CHECK_TICKS = 600;
-	static final double PLAYER_NEAR = 160.0, ASK_RANGE = 48.0, LOCAL_NEWS = 300.0;
+	static final double PLAYER_NEAR = 160.0, ASK_RANGE = 48.0;
 	/** How many villagers ask (least, most), and how many troubles a town has at once. */
 	static final int ASKERS_MIN = 2, ASKERS_MAX = 4, MOST_AT_ONCE = 2;
 	/** A famine: food in store below this, with at least this many villagers. */
@@ -318,7 +318,6 @@ public final class TownTroubles {
 		Map<String, Trouble> map = new HashMap<>(all(level));
 		map.put(key(f.id(), kind), new Trouble(kind, Quests.day(level), until, data, List.of(), -1L));
 		save(level, map);
-		news(level, f, Component.translatable("trouble.jaymoskingdoms." + kind + ".start", f.name()).withStyle(ChatFormatting.GOLD));
 		JaymosKingdoms.LOGGER.debug("trouble {} in {}", kind, f.name());
 	}
 
@@ -326,7 +325,7 @@ public final class TownTroubles {
 		remove(level, f, t, false);
 	}
 
-	/** Removes a trouble. {@code quiet} is for one pushed out to make room: its cause is still there, so no "over" news. */
+	/** Removes a trouble. {@code quiet} is for one pushed out to make room: its cause is still there. */
 	private static void remove(ServerLevel level, Faction f, Trouble t, boolean quiet) {
 		Map<String, Trouble> map = new HashMap<>(all(level));
 		map.remove(key(f.id(), t.kind()));
@@ -334,22 +333,11 @@ public final class TownTroubles {
 		finish(level, quiet ? null : f, t);
 	}
 
-	/** The news and the taking back, after a trouble has been removed. {@code f} is null for a town that has fallen. */
+	/** The taking back, after a trouble has been removed. {@code f} is null for a town that has fallen. */
 	private static void finish(ServerLevel level, @Nullable Faction f, Trouble t) {
-		if (f != null) {
-			news(level, f, Component.translatable("trouble.jaymoskingdoms." + t.kind() + ".end", f.name()).withStyle(ChatFormatting.GREEN));
-		}
 		for (UUID id : t.askers()) {
 			if (level.getEntity(id) instanceof LivingEntity v) {
 				Quests.withdraw(v, "trouble." + t.kind() + ".");
-			}
-		}
-	}
-
-	private static void news(ServerLevel level, Faction f, Component message) {
-		for (ServerPlayer p : level.players()) {
-			if (p.blockPosition().closerThan(f.seat(), LOCAL_NEWS)) {
-				p.sendSystemMessage(message);
 			}
 		}
 	}

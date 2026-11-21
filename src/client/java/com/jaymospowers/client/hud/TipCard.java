@@ -51,9 +51,16 @@ public final class TipCard {
 
 	/** Queues a card. */
 	public static void show(Component title, Component text) {
+		// (kept in the menu's Notices page, so a card that was missed can be read again)
+		com.jaymospowers.client.menu.NoticeLog.add(Component.empty().append(title).append(": ").append(text));
 		if (WAITING.size() < QUEUE_MAX) {
 			WAITING.add(new Card(title, text));
 		}
+	}
+
+	/** Whether a card is up or waiting. */
+	public static boolean busy() {
+		return showing != null || !WAITING.isEmpty();
 	}
 
 	private static void draw(GuiGraphicsExtractor graphics, DeltaTracker delta) {

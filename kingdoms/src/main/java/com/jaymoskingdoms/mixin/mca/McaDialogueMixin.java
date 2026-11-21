@@ -65,6 +65,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (0.7.397) Opening the menu on an outlaw ({@link com.jaymoskingdoms.Outlaws}): a curt word, never MCA's stranger's welcome.
  * (0.7.424) Held down on the execution hold for questioning ({@link com.jaymoskingdoms.Questioning}): the questions only.
  * (0.7.405) Opening it on a Z Fighter character ({@link com.jaymoskingdoms.ZFighterFolk}): a line of their own, likewise.
+ * (2026-11-19) Opening it on an old druid ({@link com.jaymoskingdoms.Groves}): who she is, her grove, and her want, likewise.
  * (0.7.597) Opening it on one wary of you ({@link Introductions#wary}): the cold word they'd give for your name, likewise
  * (once a day: after that a look, {@link Introductions#waryOpening}). Opening it on one who turned their back on you for
  * asking again ({@link Introductions#shuns}): it closes, and costs hearts ({@link Introductions#shunned}).
@@ -109,7 +110,7 @@ abstract class McaDialogueMixin {
 		}
 		if ("root".equals(question) && (McaCompat.dealingOpening(villager, player) || McaCompat.storyOpening(villager, player)
 			|| McaCompat.outlawOpening(villager, player) || McaCompat.zfighterOpening(villager, player)
-			|| McaCompat.waryOpening(villager, player))) {
+			|| McaCompat.druidOpening(villager, player) || McaCompat.waryOpening(villager, player))) {
 			// (0.7.380) just after something passed between you: they open with that; (0.7.246) a shipmate, or one who knows
 			// how your story started: they open with that, and never as to a stranger; (0.7.397) an outlaw: a curt word;
 			// (0.7.405) a Z Fighter character: a line of their own; (0.7.597) one wary of you: the same cold word as for your name

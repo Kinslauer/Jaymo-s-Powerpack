@@ -30,6 +30,8 @@ import net.minecraft.world.item.ItemUseAnimation;
 public final class MusketSights {
 	private static final String MUSKET = "weaponmod:musket";
 	private static final String FLINTLOCK = "weaponmod:flintlock";
+	/** (Gun handling) WeaponMod's blunderbuss, held and raised like the musket. */
+	private static final String BLUNDERBUSS = "weaponmod:blunderbuss";
 	/** (Motion patch 4) The pistol held ready: up to the eye line, out at its own side, for the right hand (blocks). */
 	static final float PISTOL_X = -0.12F;
 	static final float PISTOL_Y = 0.16F;
@@ -55,6 +57,23 @@ public final class MusketSights {
 	/** Share of the way down per tick. */
 	static final float LOWER_SPEED = 0.2F;
 
+	/**
+	 * (Gun handling, Andy: "Musket and blunderbuss need this too, and changed grip in the different stances") The long
+	 * guns' grip by stance, not aiming: a plain sneak is the low ready above; the low crouch brings the stock to the
+	 * shoulder at a high ready, this share of the way to the sights and the muzzle dipped this much (degrees); prone, the gun
+	 * lies forward along the ground, moved this far (blocks, right hand) and levelled this much.
+	 */
+	static final float HIGH_SHARE = 0.55F, HIGH_PITCH = -6.0F;
+	static final float PRONE_X = -0.16F, PRONE_Y = 0.04F, PRONE_Z = -0.14F, PRONE_PITCH = 8.0F;
+	/** (Gun handling) Up against a wall: a wall within this far (blocks) of the eye; the gun pulled back and turned muzzle up this much. */
+	static final double TUCK_REACH_LONG = 1.1, TUCK_REACH_BLUNDERBUSS = 0.9, TUCK_REACH_PISTOL = 0.55;
+	static final float TUCK_BACK = 0.14F, TUCK_PITCH = 55.0F;
+	/** (Gun handling) Share of the way into or out of a stance's grip, or the tuck, per tick. */
+	static final float GRIP_SPEED = 0.2F;
+
+	/** (Gun handling) Easing into the high ready, the prone grip and the tuck (0-1), last tick and this one. */
+	private static float high, lastHigh, prone, lastProne, tuck, lastTuck;
+
 	/** Per arm (right 0, left 1): how far up to the sights or eye line. */
 	private static final float[] aim = new float[2];
 	private static final float[] lastAim = new float[2];
@@ -64,8 +83,17 @@ public final class MusketSights {
 	private MusketSights() {
 	}
 
+	/** WeaponMod's musket (its bayonet muskets too) or blunderbuss: the long guns. */
 	public static boolean isMusket(ItemStack stack) {
-		return !stack.isEmpty() && BuiltInRegistries.ITEM.getKey(stack.getItem()).toString().equals(MUSKET);
+		if (stack.isEmpty()) {
+			return false;
+		}
+		Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+		return "weaponmod".equals(id.getNamespace()) && (id.getPath().startsWith("musket") && !id.getPath().contains("part") || id.toString().equals(BLUNDERBUSS));
+	}
+
+	private static boolean isBlunderbuss(ItemStack stack) {
+		return !stack.isEmpty() && BuiltInRegistries.ITEM.getKey(stack.getItem()).toString().equals(BLUNDERBUSS);
 	}
 
 	/** (Motion patch 4) WeaponMod's flintlock pistol. */
@@ -92,13 +120,26 @@ public final class MusketSights {
 		int i = arm == HumanoidArm.RIGHT ? 0 : 1;
 		float raised = ease(Mth.lerp(partialTicks, lastAim[i], aim[i]));
 		float side = arm == HumanoidArm.RIGHT ? 1.0F : -1.0F;
+		float tucked = ease(Mth.lerp(partialTicks, lastTuck, tuck));
 		if (isPistol(stack)) {
 			if (raised > 0.0F) {
 				poseStack.translate(PISTOL_X * side * raised, PISTOL_Y * raised, PISTOL_Z * raised);
 				poseStack.rotateDegrees(Axis.YP, PISTOL_YAW * side * raised);
 			}
+			tuck(poseStack, side, tucked);
 			return;
 		}
+		float highReady = ease(Mth.lerp(partialTicks, lastHigh, high)) * (1.0F - raised);
+		if (highReady > 0.0F) {
+			poseStack.translate(AIM_X * side * HIGH_SHARE * highReady, AIM_Y * HIGH_SHARE * highReady, AIM_Z * HIGH_SHARE * highReady);
+			pivot(poseStack, side, HIGH_PITCH * highReady);
+		}
+		float lying = ease(Mth.lerp(partialTicks, lastProne, prone)) * (1.0F - raised);
+		if (lying > 0.0F) {
+			poseStack.translate(PRONE_X * side * lying, PRONE_Y * lying, PRONE_Z * lying);
+			pivot(poseStack, side, PRONE_PITCH * lying);
+		}
+		tuck(poseStack, side, tucked);
 		float lowered = ease(Mth.lerp(partialTicks, lastLow, low)) * (1.0F - raised);
 		if (raised > 0.0F) {
 			poseStack.translate(AIM_X * side * raised, AIM_Y * raised, AIM_Z * raised);
@@ -112,6 +153,26 @@ public final class MusketSights {
 		}
 	}
 
+	/** (Gun handling) Turns the gun about its grip, muzzle up for positive {@code degrees}. */
+	private static void pivot(PoseStack poseStack, float side, float degrees) {
+		poseStack.translate(GRIP_X * side, GRIP_Y, GRIP_Z);
+		poseStack.rotateDegrees(Axis.XP, degrees);
+		poseStack.translate(-GRIP_X * side, -GRIP_Y, -GRIP_Z);
+	}
+
+	/** (Gun handling) Up against a wall: pulled back to the chest, muzzle up. */
+	private static void tuck(PoseStack poseStack, float side, float tucked) {
+		if (tucked > 0.0F) {
+			poseStack.translate(0.0F, 0.0F, TUCK_BACK * tucked);
+			pivot(poseStack, side, TUCK_PITCH * tucked);
+		}
+	}
+
+	/** (Gun handling) Whether the long gun or pistol in your hand is tucked against a wall (it can't be readied). */
+	public static boolean tucked() {
+		return tuck > 0.5F;
+	}
+
 	private static float ease(float t) {
 		return t * t * (3.0F - 2.0F * t);
 	}
@@ -123,9 +184,22 @@ public final class MusketSights {
 			aim[i] = Mth.clamp(aim[i] + (up ? RAISE_SPEED : -RAISE_SPEED), 0.0F, 1.0F);
 		}
 		lastLow = low;
-		boolean down = minecraft.player != null && minecraft.player.isCrouching()
-			&& (isMusket(minecraft.player.getMainHandItem()) || isMusket(minecraft.player.getOffhandItem()));
+		lastHigh = high;
+		lastProne = prone;
+		lastTuck = tuck;
+		LocalPlayer player = minecraft.player;
+		boolean longGun = player != null && (isMusket(player.getMainHandItem()) || isMusket(player.getOffhandItem()));
+		boolean lyingDown = longGun && (com.jaymospowers.core.Crawl.crawling(player) || player.isVisuallyCrawling());
+		boolean lowCrouch = longGun && !lyingDown && player.isCrouching() && com.jaymospowers.core.Stance.low(player);
+		// (Gun handling) a plain sneak is the low ready; the low crouch the high ready; prone its own
+		boolean down = longGun && !lyingDown && !lowCrouch && player.isCrouching();
 		low = Mth.clamp(low + (down ? LOWER_SPEED : -LOWER_SPEED), 0.0F, 1.0F);
+		high = Mth.clamp(high + (lowCrouch ? GRIP_SPEED : -GRIP_SPEED), 0.0F, 1.0F);
+		prone = Mth.clamp(prone + (lyingDown ? GRIP_SPEED : -GRIP_SPEED), 0.0F, 1.0F);
+		double reach = player == null ? 0.0 : isBlunderbuss(player.getMainHandItem()) ? TUCK_REACH_BLUNDERBUSS
+			: isMusket(player.getMainHandItem()) ? TUCK_REACH_LONG : isPistol(player.getMainHandItem()) ? TUCK_REACH_PISTOL : 0.0;
+		boolean wall = reach > 0.0 && !minecraft.isPaused() && GunHandling.wallAhead(minecraft, player, reach);
+		tuck = Mth.clamp(tuck + (wall ? GRIP_SPEED : -GRIP_SPEED), 0.0F, 1.0F);
 	}
 
 	public static void init() {
@@ -133,10 +207,15 @@ public final class MusketSights {
 			return;
 		}
 		ClientTickEvents.END_CLIENT_TICK.register(MusketSights::tick);
+		// (Gun handling) tucked against a wall, a flintlock can't be brought up to fire
+		net.fabricmc.fabric.api.event.player.UseItemCallback.EVENT.register((player, level, hand) ->
+			level.isClientSide() && player == Minecraft.getInstance().player && tucked() && isGun(player.getItemInHand(hand))
+				? net.minecraft.world.InteractionResult.FAIL : net.minecraft.world.InteractionResult.PASS);
 		if (FabricLoader.getInstance().isModLoaded("firstperson")) {
 			ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
 				TaczFirstPerson.addToVanillaHands(MUSKET);
 				TaczFirstPerson.addToVanillaHands(FLINTLOCK);
+				TaczFirstPerson.addToVanillaHands(BLUNDERBUSS);
 			});
 		}
 	}

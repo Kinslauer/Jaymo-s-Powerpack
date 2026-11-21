@@ -43,6 +43,7 @@ public final class BloodDecals {
 
 	static {
 		registerPipeline(DECAL_PIPELINE);
+		BloodDecalsIris.assign(DECAL_PIPELINE);
 	}
 
 	/** The layer {@link BloodPuddle}s, {@linkplain BloodPuddle#printQuad footprints} and {@link BloodWallMark}s are

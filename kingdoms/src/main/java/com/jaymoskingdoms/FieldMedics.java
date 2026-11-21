@@ -243,6 +243,10 @@ public final class FieldMedics {
 		}
 		if (medic.ticks >= TEND_TICKS) {
 			release(body);
+			if (body instanceof ServerPlayer player) {
+				// a player's lost limbs: what they carry or what lies by them is strapped on first
+				PowersCompat.fitProsthetics(player, helper);
+			}
 			body.addTag(Downed.REVIVE_TAG);
 			body.addTag(Downed.BANDAGED_TAG);
 			level.sendParticles(ParticleTypes.HAPPY_VILLAGER, body.getX(), body.getY() + 0.8, body.getZ(), 10, 0.4, 0.4, 0.4, 0.0);

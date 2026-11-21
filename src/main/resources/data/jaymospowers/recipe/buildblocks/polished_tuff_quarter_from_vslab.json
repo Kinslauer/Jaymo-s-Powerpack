@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:polished_tuff_vslab",
+  "result": {
+    "id": "jaymospowers:polished_tuff_quarter",
+    "count": 2
+  }
+}

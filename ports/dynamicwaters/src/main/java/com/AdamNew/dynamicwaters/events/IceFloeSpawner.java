@@ -3,6 +3,7 @@ package com.AdamNew.dynamicwaters.events;
 import com.AdamNew.dynamicwaters.Config;
 import com.AdamNew.dynamicwaters.DynamicWaters;
 import com.AdamNew.dynamicwaters.HydrologyManager;
+import com.AdamNew.dynamicwaters.Loaded;
 import com.AdamNew.dynamicwaters.entity.IceFloe;
 import com.AdamNew.dynamicwaters.registry.ModEntities;
 import net.minecraft.core.BlockPos;
@@ -67,7 +68,7 @@ public class IceFloeSpawner {
         for (int t = 0; t < rate.tries(); t++) {
             final double[] node = nodes.get(rnd.nextInt(nodes.size()));
             final int x = Mth.floor(node[0]), z = Mth.floor(node[1]);
-            if (!level.hasChunkAt(new BlockPos(x, level.getSeaLevel(), z))) {
+            if (!Loaded.made(level, x, z)) {
                 LAB_WHY[1]++;
                 continue;
             }
@@ -106,7 +107,7 @@ public class IceFloeSpawner {
             final float size = IceFloe.randomSize(rnd);
             if (!clearOfFloes(level, fx, top, fz, size)) continue;
             final int cx = Mth.floor(fx), cz = Mth.floor(fz);
-            if (!level.hasChunkAt(new BlockPos(cx, top, cz))) continue;
+            if (!Loaded.made(level, cx, cz)) continue;
             final int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING, cx, cz) - 1;
             final BlockPos at = new BlockPos(cx, y, cz);
             final FluidState fluid = level.getFluidState(at);

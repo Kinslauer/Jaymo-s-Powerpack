@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:smelting",
+  "category": "blocks",
+  "cookingtime": 200,
+  "experience": 0.7,
+  "group": "redstone",
+  "ingredient": [
+    "jaymospowers:andesite_redstone_ore",
+    "jaymospowers:diorite_redstone_ore",
+    "jaymospowers:granite_redstone_ore",
+    "jaymospowers:tuff_redstone_ore"
+  ],
+  "result": {
+    "id": "minecraft:redstone"
+  }
+}

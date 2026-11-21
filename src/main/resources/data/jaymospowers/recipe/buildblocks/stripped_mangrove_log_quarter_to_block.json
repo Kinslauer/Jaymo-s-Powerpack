@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:stripped_mangrove_log_quarter",
+    "jaymospowers:stripped_mangrove_log_quarter",
+    "jaymospowers:stripped_mangrove_log_quarter",
+    "jaymospowers:stripped_mangrove_log_quarter"
+  ],
+  "result": {
+    "id": "minecraft:stripped_mangrove_log"
+  }
+}

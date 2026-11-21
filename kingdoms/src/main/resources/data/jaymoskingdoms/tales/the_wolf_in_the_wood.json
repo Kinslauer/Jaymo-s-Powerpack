@@ -1,0 +1,965 @@
+{
+  "title": "The Wolf in the Wood",
+  "start": {
+    "by": "rumour",
+    "weight": 1,
+    "rumour": "There's a farmer out {way:steading} who puts a shoulder of mutton on a stump at the wood's edge every dusk, and takes the bone in every morning. His wife walked into those trees at the last full moon. He's told the priest she died of a fever. So why has the reeve got six men sharpening hay forks? I'm only saying what I've seen."
+  },
+  "roll": {
+    "blood": [
+      "clean",
+      "killed"
+    ]
+  },
+  "cast": {
+    "husband": {
+      "name": [
+        "Hugh Garth",
+        "Simon Garth",
+        "Alard Garth"
+      ],
+      "body": "villager",
+      "job": "farmer",
+      "female": false,
+      "at": "steading"
+    },
+    "daughter": {
+      "name": [
+        "Ebba Garth",
+        "Linnet Garth",
+        "Joan Garth"
+      ],
+      "body": "villager",
+      "job": "none",
+      "female": true,
+      "at": "steading"
+    },
+    "wife": {
+      "name": [
+        "Maud Garth",
+        "Ysolt Garth",
+        "Agnes Garth"
+      ],
+      "body": "villager",
+      "job": "none",
+      "female": true,
+      "at": "hollow",
+      "hours": "day"
+    },
+    "beast": {
+      "late": true,
+      "name": "the wolf in the wood",
+      "body": "jaymoskingdoms:werewolf",
+      "at": "hollow",
+      "health": 90,
+      "damage": 9,
+      "armor": 4
+    },
+    "hunter": {
+      "name": [
+        "Godwin Pell",
+        "Harald Pell",
+        "Osmund Pell"
+      ],
+      "body": "villager",
+      "job": "fletcher",
+      "female": false,
+      "at": "green"
+    },
+    "priest": {
+      "name": [
+        "Benet Ashlock",
+        "Hubert Ashlock",
+        "Wystan Ashlock"
+      ],
+      "body": "villager",
+      "job": "cleric",
+      "female": false,
+      "at": "chapel"
+    }
+  },
+  "places": {
+    "steading": {
+      "at": "wild",
+      "from": "home",
+      "dist": [
+        140,
+        240
+      ],
+      "name": "Garth's steading"
+    },
+    "hollow": {
+      "at": "wild",
+      "from": "steading",
+      "dist": [
+        90,
+        160
+      ],
+      "name": "the hollow in the wood"
+    },
+    "fold": {
+      "at": "near",
+      "from": "steading",
+      "dist": [
+        50,
+        90
+      ],
+      "name": "the reeve's sheep fold"
+    },
+    "green": {
+      "at": "town",
+      "name": "the green"
+    },
+    "chapel": {
+      "at": "near",
+      "from": "green",
+      "dist": [
+        20,
+        50
+      ],
+      "name": "the chapel"
+    }
+  },
+  "first": "find",
+  "steps": {
+    "find": {
+      "do": "go",
+      "to": "steading",
+      "hidden": true,
+      "journal": "I followed a rumour to a steading by the wood. There is a shoulder of mutton on a stump at the tree line, and a man watching it from his door.",
+      "then": "meet"
+    },
+    "meet": {
+      "do": "talk",
+      "who": "husband",
+      "goal": "Speak with the man at {place:steading}",
+      "clock": {
+        "hunt": [
+          4,
+          5
+        ]
+      },
+      "say": [
+        "You've been listening to talk in {town}. Then you know, or you've guessed it. I haven't the strength left to lie to one more person.",
+        "{wife}. My wife. Something bit her in the back pasture at lambing, a great grey thing, and she mended. Then the moon came full. She woke in the yard with the ewe-house door in pieces round her. She kissed the little ones in their sleep and walked into the wood, and she has not come out of it since. I leave the meat so she'll not need to come for the sheep.",
+        "The reeve's lad was found dead at his fold three nights back, and {hunter} has called a hunt. They go into the wood {in:hunt}, with forks and fire. By day she's in {place:hollow}, and she is herself, as much as she ever was. Speak to her. She'll not speak to me. She says I smell of the children."
+      ],
+      "replies": [
+        {
+          "say": "I'll go and speak to her.",
+          "then": "see_wife",
+          "journal": "{husband}'s wife {wife} carries the wolf's curse and has hidden in the wood since the last full moon. A lad is dead at the reeve's fold, and {hunter} leads a hunt into the wood in a few days."
+        },
+        {
+          "say": "What do the children know?",
+          "then": "see_daughter",
+          "journal": "{husband}'s wife {wife} carries the wolf's curse and has hidden in the wood since the last full moon. A lad is dead at the reeve's fold, and {hunter} leads a hunt into the wood in a few days."
+        },
+        {
+          "say": "This is past my mending. I'm sorry.",
+          "then": "end:refused"
+        }
+      ]
+    },
+    "see_daughter": {
+      "do": "talk",
+      "who": "daughter",
+      "goal": "Speak with {daughter}",
+      "say": [
+        "I'm the eldest. I know. The little ones think she's nursing Aunt Sib at Tarn End, and I mean to keep it so.",
+        "I've hung her shawl on the bedpost so the room smells right. If you see her, tell her Wilkin has both his front teeth through. And tell her I've not let the bread burn once. Not once. She'll not believe that part."
+      ],
+      "mark": "wolf_daughter",
+      "journal": "{daughter}, the eldest, keeps the house and the secret. She gave me a message for her mother: the baby's front teeth are through, and the bread has not burned once.",
+      "then": "see_wife",
+      "within": "hunt",
+      "late": "end:hunted",
+      "until": "before the hunt goes into the wood"
+    },
+    "see_wife": {
+      "do": "talk",
+      "who": "wife",
+      "when": "day",
+      "goal": "Find {wife} in {place:hollow}, by day",
+      "say": [
+        "Stay there. Not for what I am. I've not washed in a month, and I know it.",
+        "He sent you. {husband}. He leaves a shoulder of mutton on the stump every dusk, as if I were a dog he was sorry for. I eat it. That's the worst of it. I eat it and I'm glad of it.",
+        "I don't know what I do at night. I wake by the stream with my hands dirty. Three nights back I woke and the dirt was red. They say the reeve's boy is dead. If that was me, I want the hunt to find me. If it wasn't, I want to go home. I can't tell which I'm to want."
+      ],
+      "replies": [
+        {
+          "if": "mark:wolf_daughter",
+          "say": "Your eldest says Wilkin has both front teeth through. And she's not burned the bread once.",
+          "then": "wife_hears",
+          "mark": "wolf_message"
+        },
+        {
+          "say": "Then I'll find out which.",
+          "then": "search_fold",
+          "journal": "{wife} does not remember her nights. She woke with blood on her hands the morning the reeve's lad was found, and does not know whether it was his."
+        }
+      ],
+      "within": "hunt",
+      "late": "end:hunted",
+      "until": "before the hunt goes into the wood"
+    },
+    "wife_hears": {
+      "do": "talk",
+      "who": "wife",
+      "when": "day",
+      "say": "Not once? She's lying. She burns it every time, she gets to looking out of the window. Both teeth. He'll bite, then. He'll bite like his mother. Oh, that's not funny. Don't look at me. Go and find out what I did.",
+      "journal": "I gave {wife} her daughter's message. She laughed, and then could not stop crying. She does not remember her nights, and does not know whether the blood on her hands was the reeve's lad's.",
+      "then": "search_fold",
+      "within": "hunt",
+      "late": "end:hunted",
+      "until": "before the hunt goes into the wood"
+    },
+    "search_fold": {
+      "do": "search",
+      "at": "fold",
+      "need": 2,
+      "when": "day",
+      "goal": "Look over {place:fold}, where the lad died",
+      "clues": [
+        {
+          "name": "A Shepherd's Horn",
+          "item": "minecraft:goat_horn",
+          "lore": [
+            "Dropped in the mud by the hurdle, never blown.",
+            "He had no time to sound it."
+          ],
+          "journal": "The lad's horn lay in the mud at the fold, unblown. Whatever came, came fast."
+        },
+        {
+          "if": "blood=clean",
+          "name": "A Dozen Small Tracks",
+          "item": "minecraft:clay_ball",
+          "mark": "wolf_proof_pack",
+          "lore": [
+            "Paw prints all round the fold, a dozen sets, none bigger than a hound's.",
+            "A pack. Whatever walks in the hollow at night is one, and it is not small."
+          ],
+          "journal": "A dozen sets of small prints ring the fold. A pack of common wolves did this. The thing in the hollow is one, and far bigger."
+        },
+        {
+          "if": "blood=clean",
+          "name": "A Half-Grown Wolf",
+          "item": "minecraft:bone",
+          "mark": "wolf_proof_pack",
+          "lore": [
+            "A young wolf with its back broken by a crook.",
+            "The lad got one of them before the rest got him."
+          ],
+          "journal": "A half-grown wolf lies dead by the fold wall, its back broken by a shepherd's crook. The lad killed one of a pack before the rest reached him."
+        },
+        {
+          "if": "blood=killed",
+          "name": "A Print as Wide as a Platter",
+          "item": "minecraft:clay_ball",
+          "mark": "wolf_proof_her",
+          "lore": [
+            "One set of prints, each as wide as a platter.",
+            "They go to the stream. On the far bank they are a woman's bare feet."
+          ],
+          "journal": "One set of great prints leads from the fold to the stream. On the far bank they are the prints of a woman's bare feet."
+        },
+        {
+          "if": "blood=killed",
+          "name": "A Torn Kerchief",
+          "item": "minecraft:white_wool",
+          "mark": "wolf_proof_her",
+          "lore": [
+            "A woman's kerchief, caught on the fold's hurdle and split along the hem.",
+            "The same weave as the ones drying at Garth's steading."
+          ],
+          "journal": "A torn kerchief hangs on the fold's hurdle. It is of the same weave as the washing at {place:steading}."
+        }
+      ],
+      "then": "tell_wife",
+      "within": "hunt",
+      "late": "end:hunted",
+      "until": "before the hunt goes into the wood"
+    },
+    "tell_wife": {
+      "do": "talk",
+      "who": "wife",
+      "when": "day",
+      "goal": "Tell {wife} what the fold showed, by day",
+      "say": {
+        "?mark:wolf_held": "I'm here. Still myself. Have you been to {hunter}?",
+        "?mark:wolf_proof_her": [
+          "You needn't say it. I can see it on you from here.",
+          "Then it was me. Dickon, who used to bring us eggs. I'll not ask you to make it sound better. I'll ask you what I'm to do now, because I can't be trusted to choose."
+        ],
+        "?": [
+          "Small prints. A dozen sets. A pack.",
+          "Then it wasn't me. I'd made up my mind that it was. I had it all settled. That doesn't mend what I am, does it? The hunt won't stop to count paw prints. Tell me what I'm to do, because I can't be trusted to choose."
+        ]
+      },
+      "voices": {
+        "faith": "The priests have a rite for those the moon takes. Ask a priest before you ask a pitchfork.",
+        "mercy": "She kissed her children and walked away from them so they'd be safe. That isn't a beast.",
+        "vengeance": "A boy is dead at that fold. Somebody answers for a thing like that.",
+        "law": "The reeve has called a hunt. It isn't ours to stand in front of it."
+      },
+      "replies": [
+        {
+          "if": "!mark:wolf_held & !mark:wolf_priest_refused",
+          "say": "There are priests with a rite for this. I'll fetch one.",
+          "then": {
+            "?cursed": "priest_no",
+            "?": "see_priest"
+          },
+          "for": [
+            "faith"
+          ],
+          "journal": "I told {wife} I would bring a priest who knows the rite against the wolf's curse."
+        },
+        {
+          "if": "!mark:wolf_held & !mark:wolf_hold_refused",
+          "say": "Some who carry it learn to hold it, and keep their own mind when it comes. I'll sit the night with you.",
+          "then": "hold_ask",
+          "for": [
+            "courage",
+            "mercy"
+          ]
+        },
+        {
+          "say": "I'll go and speak to the hunt.",
+          "then": "see_hunter"
+        }
+      ],
+      "within": "hunt",
+      "late": "end:hunted",
+      "until": "before the hunt goes into the wood"
+    },
+    "priest_no": {
+      "do": "talk",
+      "who": "priest",
+      "goal": "Ask {priest} for the rite at {place:chapel}",
+      "say": [
+        "Stop there. Not a step nearer. I keep the Truth, and the Truth will not let what you carry hide behind a civil face.",
+        "Abomination. It walks among us, and it knocks at my door for help. Whatever she is, she gets no rite that you would carry out to her. Go."
+      ],
+      "replies": [
+        {
+          "say": "Then she'll do without you.",
+          "then": "tell_wife",
+          "mark": "wolf_priest_refused",
+          "journal": "{priest} keeps the Truth. He saw what I carry and would not hear me out. There will be no rite for {wife} that I bring."
+        }
+      ],
+      "within": "hunt",
+      "late": "end:hunted",
+      "until": "before the hunt goes into the wood"
+    },
+    "see_priest": {
+      "do": "talk",
+      "who": "priest",
+      "goal": "Ask {priest} for the rite at {place:chapel}",
+      "say": [
+        "The wolf's curse. Yes. It can be lifted, if it is young in her and she wants it lifted. It is a healer's work as much as a priest's, and it is not kind. It comes out the way an arrow comes out.",
+        "I need wolfsbane, three sprigs, fresh. It grows among the fern in damp woods. You find it cutting fern. And I need her willing, in her hollow, at night, when it lies nearest the skin. Bring me the sprigs and then walk me out there."
+      ],
+      "replies": [
+        {
+          "say": "I'll bring them.",
+          "then": "bring_bane",
+          "mark": "wolf_knows_bane",
+          "journal": "{priest} can lift the curse, at night, in the hollow, if {wife} is willing. He needs three fresh sprigs of wolfsbane, which grows among fern."
+        },
+        {
+          "say": "Not yet. I'll think on it.",
+          "then": "tell_wife"
+        }
+      ],
+      "within": "hunt",
+      "late": "end:hunted",
+      "until": "before the hunt goes into the wood"
+    },
+    "bring_bane": {
+      "do": "bring",
+      "who": "priest",
+      "item": "jaymoskingdoms:wolfsbane",
+      "count": 3,
+      "goal": "Bring three sprigs of wolfsbane to {priest}",
+      "say": "Fresh. Good. Hooded like little monks, every flower. We go at dusk. Carry the lantern, and whatever you hear out there, don't draw anything.",
+      "then": "walk_priest",
+      "within": "hunt",
+      "late": "end:hunted",
+      "until": "before the hunt goes into the wood"
+    },
+    "walk_priest": {
+      "do": "escort",
+      "who": "priest",
+      "to": "hollow",
+      "when": "night",
+      "goal": "Walk {priest} out to {place:hollow} after dark",
+      "failed": "end:hunted",
+      "then": "rite",
+      "within": "hunt",
+      "late": "end:hunted",
+      "until": "before the hunt goes into the wood"
+    },
+    "rite": {
+      "do": "vigil",
+      "at": "hollow",
+      "when": "night",
+      "gap": 11,
+      "goal": "Stand by {priest} while he says the rite",
+      "lines": [
+        {
+          "who": "priest",
+          "say": "Set the lantern down there. She's close. Don't look for her. Let her look at us."
+        },
+        {
+          "say": "Something large moves at the edge of the light. It does not come nearer. It does not go away.",
+          "sound": "minecraft:entity.wolf.growl"
+        },
+        {
+          "who": "priest",
+          "say": "{wife}. You were bitten at lambing. You have three children, and a husband who leaves you meat on a stump. Come and be rid of it."
+        },
+        {
+          "say": "The priest burns the wolfsbane in the lantern flame, sprig by sprig. The smoke is blue and bitter, and it goes toward the trees as if something there were breathing it in.",
+          "sound": "minecraft:block.fire.ambient"
+        },
+        {
+          "say": "A howl, very near, that breaks in the middle and comes down into a woman's voice.",
+          "sound": "minecraft:entity.wolf.whine"
+        },
+        {
+          "who": "priest",
+          "say": "There. There, it's out. Don't touch her yet. Give me your cloak for her.",
+          "mark": "wolf_rite_done"
+        }
+      ],
+      "left": "end:hunted",
+      "journal": "{priest} burned the wolfsbane and called {wife} by her name out of the dark. Something howled, and then it was a woman crying.",
+      "then": "after_rite",
+      "within": "hunt",
+      "late": "end:hunted",
+      "until": "before the hunt goes into the wood"
+    },
+    "after_rite": {
+      "do": "talk",
+      "who": "wife",
+      "when": "day",
+      "goal": "See {wife} by daylight",
+      "say": {
+        "?mark:wolf_proof_her": [
+          "It's gone. I can tell because the wood is only a wood this morning. I can't smell what's under it.",
+          "I remember the fold now. The priest said I might. It came back with the rest. I'll go home, and I'll go to Dickon's mother first and tell her myself, and then {hunter} may do as he likes with me. But I'll do it standing up, as a woman."
+        ],
+        "?": [
+          "It's gone. I can tell because the wood is only a wood this morning. I can't smell what's under it.",
+          "I remember my nights now. The priest said I might. A month of rabbits and a stump with mutton on it, and never once the fold. I'm going home. If that girl has let the bread burn, I'll know she missed me."
+        ]
+      },
+      "then": "end:rite"
+    },
+    "hold_ask": {
+      "do": "talk",
+      "who": "wife",
+      "when": "day",
+      "say": {
+        "?cursed": [
+          "Hold it. As you'd hold a breath?",
+          "Wait. You. You carry it yourself. I can smell it, now I think to, under the soap. And you walk about in daylight and talk to priests and farmers' wives. Then it can be done. Show me. I don't care what it costs."
+        ],
+        "?": [
+          "Hold it. As you'd hold a breath?",
+          "Who told you that could be done? And if it can't, and you're sat an arm's length from me when the moon comes over those trees?"
+        ]
+      },
+      "replies": [
+        {
+          "if": "cursed",
+          "say": "I carry it. I'll show you how I keep my own mind.",
+          "then": "bring_sprig",
+          "journal": "I told {wife} that I carry the curse myself, and that it can be held. She asked me to show her."
+        },
+        {
+          "if": "!cursed",
+          "say": "A bitter sprig under the tongue, and someone to say your name till morning. I'll be the someone.",
+          "then": "bring_sprig",
+          "try": {
+            "how": "persuade",
+            "helps": [
+              "mark:wolf_proof_pack",
+              "mark:wolf_message",
+              "patron:lantern_warden"
+            ],
+            "hurts": [
+              "mark:wolf_proof_her",
+              "dress:bloodied"
+            ],
+            "fail": "hold_no",
+            "refuse": "No. I'll not try it on a stranger's guess. Not with someone sat beside me who has a face."
+          },
+          "journal": "I told {wife} I had heard the curse can be held: wolfsbane under the tongue, and someone to say her name through the night. She agreed to try."
+        },
+        {
+          "say": "You're right. It's too much to stake on a night.",
+          "then": "tell_wife"
+        }
+      ],
+      "within": "hunt",
+      "late": "end:hunted",
+      "until": "before the hunt goes into the wood"
+    },
+    "hold_no": {
+      "do": "talk",
+      "who": "wife",
+      "when": "day",
+      "mark": "wolf_hold_refused",
+      "say": "Fetch the priest, or fetch the hunt. Those are the two things I can bear to have fetched.",
+      "then": "tell_wife",
+      "within": "hunt",
+      "late": "end:hunted",
+      "until": "before the hunt goes into the wood"
+    },
+    "bring_sprig": {
+      "do": "bring",
+      "who": "wife",
+      "item": "jaymoskingdoms:wolfsbane",
+      "count": 1,
+      "when": "day",
+      "goal": "Bring {wife} a sprig of wolfsbane, by day",
+      "say": "Under the tongue. Oh, that's foul. Good. I want it foul. Come back at dusk, and sit where I can see you.",
+      "then": "night_watch",
+      "within": "hunt",
+      "late": "end:hunted",
+      "until": "before the hunt goes into the wood"
+    },
+    "night_watch": {
+      "do": "vigil",
+      "at": "hollow",
+      "when": "night",
+      "gap": 12,
+      "goal": "Sit the night with {wife} in {place:hollow}",
+      "lines": [
+        {
+          "say": "{wife} sits against the oak with the sprig under her tongue, saying her children's names in order, eldest first."
+        },
+        {
+          "say": "The moon clears the trees. She stops at the second name and cannot find the third.",
+          "sound": "minecraft:entity.wolf.growl"
+        },
+        {
+          "say": "I say the third name for her. She says it after me, in a voice with too much breath in it."
+        },
+        {
+          "say": "Her hands are wrong, and then they are not hands. She is still saying the names. They are not words any more, but there are three of them, and they come in order.",
+          "sound": "minecraft:entity.wolf.whine"
+        },
+        {
+          "say": "A lean grey wolf sits against the oak where she sat, no bigger than a sheepdog. It looks at me with her eyes. It does not get up.",
+          "mark": "wolf_held"
+        },
+        {
+          "say": "It lies down with its chin on my boot, and stays there until the light comes."
+        }
+      ],
+      "left": "end:hunted",
+      "journal": "I sat the night with {wife}. When the change came she kept her children's names, and what sat against the oak afterward was a lean grey wolf that knew me.",
+      "then": "held_morning",
+      "within": "hunt",
+      "late": "end:hunted",
+      "until": "before the hunt goes into the wood"
+    },
+    "held_morning": {
+      "do": "talk",
+      "who": "wife",
+      "when": "day",
+      "goal": "Speak with {wife} in the morning",
+      "say": {
+        "?mark:wolf_proof_her": [
+          "I was there. All night I was there, behind my own eyes, and I could have got up and I did not.",
+          "So I could have been there that night at the fold as well, if anyone had taught me. That doesn't give Dickon back. I'll not go home. Not into a street where his mother draws water. There's the old charcoal burner's hut at the wood's edge. {husband} can bring the children on Sundays, by daylight. Go and tell {hunter} whatever you think he ought to hear."
+        ],
+        "?": [
+          "I was there. All night I was there, behind my own eyes, and I could have got up and I did not.",
+          "I could sit in my own kitchen on a full moon, with the door barred and a sprig in my teeth. I could go home. But there's still {hunter} and his forks, and he'll not take my word, nor my husband's. Will you speak to him?"
+        ]
+      },
+      "then": "see_hunter"
+    },
+    "see_hunter": {
+      "do": "talk",
+      "who": "hunter",
+      "goal": "Speak with {hunter} on {place:green}",
+      "say": {
+        "?mark:wolf_held": [
+          "You've been out to Garth's wood. Don't tell me you haven't, there's leaf mould to your knees.",
+          "The reeve's lad is dead, and there's a thing in that wood that was Garth's wife. We go in {in:hunt}. Unless you've brought me something better than a husband's word."
+        ],
+        "?": [
+          "If you've come to talk me out of it, you're the fourth. Garth has been on his knees to me twice.",
+          "The reeve's lad is dead, and there's a thing in that wood that was Garth's wife. I don't say it gladly. She stood godmother to my youngest. We go in {in:hunt}, at night, when it is what it is. I'll not have my men kill a woman by daylight and call that a hunt."
+        ]
+      },
+      "voices": {
+        "honour": "He's no butcher. He's a man doing a thing he hates. Tell him the truth of it.",
+        "mercy": "Six men with forks, and she'll not lift a hand to them by day. Stop this."
+      },
+      "replies": [
+        {
+          "if": "mark:wolf_held & mark:wolf_proof_pack",
+          "say": "A pack killed the lad. A dozen sets of small prints, and a half-grown wolf dead by his crook. And she holds it now. I sat the night with her.",
+          "then": "end:held",
+          "for": [
+            "honour",
+            "mercy"
+          ],
+          "try": {
+            "how": "persuade",
+            "odds": 1,
+            "helps": [
+              "reputation>=20"
+            ],
+            "hurts": [
+              "dress:bloodied"
+            ],
+            "fail": "hunter_no",
+            "refuse": "A wolf that sits when it's told. My grandfather had that story, from a man who was eaten."
+          }
+        },
+        {
+          "if": "mark:wolf_held & mark:wolf_proof_her",
+          "say": "She did it, and she knows it. She holds it now. She'll live at the wood's edge and never come into the street.",
+          "then": "end:held_away",
+          "for": [
+            "honour"
+          ],
+          "try": {
+            "how": "persuade",
+            "odds": -1,
+            "helps": [
+              "reputation>=30"
+            ],
+            "hurts": [
+              "dress:bloodied"
+            ],
+            "fail": "hunter_no",
+            "refuse": "And Dickon's mother is to see smoke from that hut every morning of her life? No."
+          }
+        },
+        {
+          "if": "mark:wolf_held",
+          "say": "She's gone. Over the ridge and away north. I followed the tracks myself.",
+          "mark": "wolf_said_north",
+          "then": "end:held_away",
+          "irks": [
+            "honour"
+          ],
+          "lie": {
+            "name": "wolf_gone_north",
+            "days": [
+              8,
+              16
+            ],
+            "reputation": 12,
+            "town": [
+              "{player} swore to the hunt that Garth's wife had gone north over the ridge. Then who is it that Garth's children walk out to see of a Sunday?",
+              "Pell called the hunt off on a stranger's word. He's not a man who likes to be made a fool of."
+            ]
+          },
+          "journal": "I told {hunter} that {wife} had gone north over the ridge."
+        },
+        {
+          "if": "!mark:wolf_held",
+          "say": "I'll come in with you. I want it done properly.",
+          "then": "join_hunt",
+          "for": [
+            "law",
+            "vengeance"
+          ],
+          "irks": [
+            "mercy"
+          ]
+        },
+        {
+          "say": "Not yet. I'll be back before you go in.",
+          "then": "tell_wife"
+        }
+      ],
+      "within": "hunt",
+      "late": "end:hunted",
+      "until": "before the hunt goes into the wood"
+    },
+    "hunter_no": {
+      "do": "talk",
+      "who": "hunter",
+      "say": "I believe you believe it. But I've six men who buried that lad, and I can't send them home on a story. We go in, as we said. If she's what you say, she'll have the sense to be gone when we get there.",
+      "mark": "wolf_hunt_went",
+      "then": "end:held_away"
+    },
+    "join_hunt": {
+      "do": "talk",
+      "who": "hunter",
+      "say": [
+        "Then hear what my grandfather told me, for what it's worth. Wolfsbane. They can't abide it. Carry a sprig where it can smell it and it comes at you slower, as if through water. It grows in the fern.",
+        "And silver, if you had any, which nobody here ever has. Be at the hollow after dark. We'll come up behind you with the fire."
+      ],
+      "replies": [
+        {
+          "say": "I'll be at the hollow after dark.",
+          "then": "hunt",
+          "mark": "wolf_knows_bane",
+          "journal": "I joined the hunt. {hunter} says a wolf of that kind cannot abide wolfsbane, and that silver wounds it as steel does not."
+        }
+      ],
+      "within": "hunt",
+      "late": "end:hunted",
+      "until": "before the hunt goes into the wood"
+    },
+    "hunt": {
+      "do": "foe",
+      "who": "beast",
+      "when": "night",
+      "goal": "Hunt the wolf at {place:hollow}, after dark",
+      "weak_to": [
+        {
+          "know": "mark:wolf_knows_bane",
+          "item": "jaymoskingdoms:wolfsbane",
+          "share": 0.7,
+          "journal": "I carried wolfsbane into the hollow. The beast would not come straight at me, and struck short every time it smelled the sprig.",
+          "bestiary": "One who walks at the moon cannot abide wolfsbane. Carry a sprig and it comes on slowly, and strikes short."
+        },
+        {
+          "item": "jaymoskingdoms:silver_sword",
+          "share": 0.75,
+          "journal": "The silver bit deeper than steel has any right to.",
+          "bestiary": "Silver wounds the moon's beasts as steel does not. The cuts stay open."
+        }
+      ],
+      "slain": "end:hunted_down",
+      "within": "hunt",
+      "late": "end:hunted",
+      "until": "before the hunt goes into the wood"
+    }
+  },
+  "endings": {
+    "refused": {
+      "text": "I left the man to his stump and his shoulder of mutton. Some things are past a stranger's mending."
+    },
+    "rite": {
+      "text": {
+        "?mark:wolf_proof_her": "The priest's rite took the wolf out of {wife}. She went home, and went first to the dead lad's mother to say what she had done.",
+        "?": "The priest's rite took the wolf out of {wife}. She never went near the fold. She has gone home to her children."
+      },
+      "reward": {
+        "coins": 8,
+        "reputation": 12
+      },
+      "marks": [
+        "wolf_rite"
+      ],
+      "town": [
+        "Garth's wife is back. Thin as a rake, and she'll not say where she's been. The priest walked her home himself, so nobody's asking.",
+        "Pell has stood his men down. He looked ten years younger doing it."
+      ],
+      "returns": {
+        "who": "husband",
+        "days": [
+          3,
+          6
+        ],
+        "as": "thanks",
+        "say": "She's in the kitchen. She's shouting at Ebba about the bread. I stood in the yard and listened to it for an hour. This is from the back pasture. It's all I have that's worth the carrying.",
+        "gift": [
+          "minecraft:mutton*4",
+          "minecraft:white_wool*6"
+        ]
+      },
+      "later": [
+        {
+          "days": [
+            18,
+            30
+          ],
+          "if": "blood=killed",
+          "scene": [
+            [
+              "a",
+              "Garth's wife went to the reeve's door on her knees. Told the lad's mother it was her. Before the whole street."
+            ],
+            [
+              "b",
+              "And what did the mother do?"
+            ],
+            [
+              "a",
+              "Shut the door. Then opened it again. They've sat together every evening since. I don't understand it either."
+            ]
+          ]
+        },
+        {
+          "days": [
+            18,
+            30
+          ],
+          "if": "blood=clean",
+          "letter": {
+            "from": "{wife}",
+            "lines": [
+              "The moon was full last night and I slept through it, in a bed, with a child's foot in my back.",
+              "They caught the pack that killed Dickon, up on the scar. Nine of them. Godwin Pell brought me the news himself and could not look at me.",
+              "Wilkin bites. I am told it is his teeth, and nothing else."
+            ]
+          }
+        }
+      ]
+    },
+    "held": {
+      "text": "{wife} learned to hold the wolf, and {hunter} called off his hunt. She has gone home. On full-moon nights her husband bars the door from the inside.",
+      "reward": {
+        "coins": 6,
+        "reputation": 10
+      },
+      "marks": [
+        "wolf_held_home"
+      ],
+      "town": [
+        "Pell called his hunt off. He says it was a common pack killed the reeve's lad, and he's gone up the scar after them instead.",
+        "Garth's wife is home. She keeps to the house, mostly. There's a new grey dog sleeps across their threshold some nights. I've never once seen it by day."
+      ],
+      "returns": {
+        "who": "husband",
+        "days": [
+          3,
+          6
+        ],
+        "as": "thanks",
+        "say": "She's home. I'll not pretend it's as it was. But she's home, and the little ones sleep. I don't know what you did out there and she'll not tell me. Take this.",
+        "gift": [
+          "minecraft:mutton*4",
+          "minecraft:white_wool*6"
+        ]
+      },
+      "later": [
+        {
+          "days": [
+            20,
+            32
+          ],
+          "scene": [
+            [
+              "a",
+              "Full moon last night. Did you hear anything from Garth's?"
+            ],
+            [
+              "b",
+              "Not a sound. Only that grey dog of theirs, sat on the step, looking at the moon."
+            ],
+            [
+              "a",
+              "Just sat?"
+            ],
+            [
+              "b",
+              "All night. Good as gold. I never saw a dog so pleased with itself."
+            ]
+          ]
+        }
+      ]
+    },
+    "held_away": {
+      "text": {
+        "?mark:wolf_said_north": "{wife} holds the wolf now. I told {hunter} she had gone north over the ridge, and he called off his hunt on my word. She keeps the charcoal burner's hut at the wood's edge, and her children come on Sundays.",
+        "?mark:wolf_hunt_went": "{wife} holds the wolf now, but the hunt would not be turned. They found the hollow empty. She keeps to the wood's edge, a lean grey shape at dusk, and her children know where to leave the bread.",
+        "?blood=killed": "{wife} holds the wolf now, but will not go home to the street where the dead lad's mother lives. She keeps the charcoal burner's hut at the wood's edge, and her children come on Sundays.",
+        "?": "{wife} holds the wolf now, but the hunt would not be turned. They found the hollow empty. She keeps to the wood's edge, a lean grey shape at dusk, and her children know where to leave the bread."
+      },
+      "reward": {
+        "reputation": 4
+      },
+      "marks": [
+        "wolf_held_away"
+      ],
+      "town": [
+        "There's smoke from the old charcoal burner's hut again. Nobody goes up to ask whose.",
+        "Garth walks his children up to the wood's edge of a Sunday. They come back singing. Make of that what you like."
+      ],
+      "later": [
+        {
+          "days": [
+            20,
+            34
+          ],
+          "letter": {
+            "from": "{husband}",
+            "lines": [
+              "She will not come in, and I have stopped asking her to.",
+              "But the fox has not been near the hens since the first frost, and twice now I have found the ewes gathered in before a storm, with nobody near them.",
+              "Ebba leaves a loaf on the stump. It is not burned. Some of them are not burned."
+            ]
+          }
+        }
+      ]
+    },
+    "hunted_down": {
+      "text": "I went into the hollow after dark and killed the wolf that was {wife}. The hunt came up with their fire and found it done.",
+      "reward": {
+        "coins": 14,
+        "reputation": 8
+      },
+      "marks": [
+        "wolf_slain"
+      ],
+      "town": [
+        "It's done. {player} put down the thing in Garth's wood. Pell paid out of the reeve's purse and nobody cheered.",
+        "They buried her at the wood's edge, not the yard. Garth dug it himself and would not be helped."
+      ],
+      "later": [
+        {
+          "days": [
+            10,
+            22
+          ],
+          "if": "blood=clean",
+          "scene": [
+            [
+              "a",
+              "They've caught a pack up on the scar. Nine wolves. The reeve's lad's own crook was in the den, chewed."
+            ],
+            [
+              "b",
+              "A pack? Then it was never Garth's wife at the fold."
+            ],
+            [
+              "a",
+              "No. It never was."
+            ],
+            [
+              "b",
+              "Don't say that where Pell can hear you."
+            ]
+          ]
+        },
+        {
+          "days": [
+            10,
+            22
+          ],
+          "if": "blood=killed",
+          "town": [
+            "Garth has sold the steading and taken the children to his sister's. The eldest left a loaf on that stump before they went."
+          ]
+        }
+      ]
+    },
+    "hunted": {
+      "failed": true,
+      "text": "The hunt went into the wood with forks and fire. In the morning {wife} was dead in the hollow, and two of {hunter}'s men with her.",
+      "reward": {
+        "reputation": -5
+      },
+      "town": [
+        "Three burials in one week, and one of them outside the yard. Pell hasn't spoken since they came down out of that wood.",
+        "Garth's little ones still think their mother is at Tarn End, nursing."
+      ]
+    }
+  }
+}

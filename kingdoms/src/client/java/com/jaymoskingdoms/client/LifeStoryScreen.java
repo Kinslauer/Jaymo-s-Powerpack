@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.Classes;
+import com.jaymoskingdoms.Doppelgangers;
 import com.jaymoskingdoms.Flaws;
 import com.jaymoskingdoms.GreenskinLife;
 import com.jaymoskingdoms.Heritage;
@@ -20,6 +21,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import com.jaymoskingdoms.client.ui.FlatButton;
+import com.jaymoskingdoms.client.ui.PickerLayout;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractSliderButton;
@@ -74,8 +76,8 @@ final class LifeStoryScreen extends Screen {
 	 * the page has stood this long (ms) unanswered. The road's page is only ever its title.
 	 */
 	static final long SUB_DELAY_MS = 10_000L;
-	/** (0.7.275) The skip-the-story ask: its box's size. */
-	static final int ASK_W = 240, ASK_H = 96;
+	/** (0.7.275) The skip-the-story ask: its box's size, and the height its words may take (the buttons go under them). */
+	static final int ASK_W = 240, ASK_H = 140, ASK_TEXT_H = 70;
 	/** (0.7.282) The figure of you at the foot of the left side ({@link StoryFigure}): its most height, and the least room it's drawn in. */
 	static final int FIGURE_H = 96, FIGURE_MIN_H = 48;
 	/**
@@ -127,6 +129,8 @@ final class LifeStoryScreen extends Screen {
 		 * page here.
 		 */
 		boolean explicit;
+		/** The look drawn at random for each heritage the story has shown, kept till a choice rules it out ({@link #rolledLook}). */
+		final java.util.Map<Heritage.Kind, Integer> rolls = new java.util.EnumMap<>(Heritage.Kind.class);
 
 		Draft() {
 			Arrays.fill(this.answers, -1);
@@ -137,6 +141,14 @@ final class LifeStoryScreen extends Screen {
 	private @Nullable Button back, next, look, heritageButton, classButton, later, skip, skipYes, skipNo, prev, after, lockedButton;
 	/** (0.7.474) On the greenskin road: a half-orc's skin. */
 	private @Nullable ToneSlider tone;
+	/** The question pages' layout (figure, list, info panel), and whether the footer buttons are placed for it now. */
+	private final PickerLayout picker = new PickerLayout();
+
+	{
+		// the answers fill the middle column as big boxes
+		this.picker.rowMax = PickerLayout.FILL_ROW_MAX;
+	}
+	private boolean pickerPlaced;
 	/** The character creator's: every row drawn again, and its presets (a name to save under, save, delete, load the next). */
 	/** Whether the creator's cards ({@link CreatorTab}) are on this screen now: the story skipped, with no creator of MCA's to hold them. */
 	private boolean cards;
@@ -153,6 +165,10 @@ final class LifeStoryScreen extends Screen {
 	private int scroll, contentH, viewH;
 	/** (0.7.275) Whether "On second thought..." is asking if they'd skip the story. */
 	private boolean asking;
+	/** The ask's leave-it-all-to-fate and wear-a-kept-face buttons, and the kept-face ask's two ({@link Doppelgangers}). */
+	private @Nullable Button fateAll, pastFace, keepFace, dropFace;
+	/** The life that just ended, offered to keep as a doppelganger preset (null: none, or answered). */
+	private static Doppelgangers.@Nullable Offer offered;
 
 	/** The story owed (the screen comes back whenever it's shut), the realms there are to name, and the answers so far. */
 	private static boolean owed;
@@ -188,6 +204,7 @@ final class LifeStoryScreen extends Screen {
 	}
 
 	static void register() {
+		ClientPlayNetworking.registerGlobalReceiver(Doppelgangers.Offer.TYPE, (payload, context) -> offered = payload);
 		ClientPlayNetworking.registerGlobalReceiver(LifeStory.Open.TYPE, (payload, context) -> {
 			owed |= payload.forced();
 			realms = payload.realms();
@@ -239,6 +256,7 @@ final class LifeStoryScreen extends Screen {
 			shutRoads = List.of();
 			draft = new Draft();
 			creatorScreen = null;
+			offered = null;
 			presetAt = -1;
 			narrated = null;
 			toRead.clear();
@@ -387,7 +405,20 @@ final class LifeStoryScreen extends Screen {
 	 * (0.7.349) one that's only for a heritage (the Verdant World's start) only for those born to it.
 	 */
 	private static boolean open(Answer a) {
-		return a.offered() && (!a.realm() || !realms.isEmpty()) && a.fits(bornAs()) && earned(a) && woken(a);
+		com.jaymoskingdoms.Patron bound = com.jaymoskingdoms.Faiths.bound(heritage());
+		return a.offered() && (!a.realm() || !realms.isEmpty()) && a.fits(bornAs()) && earned(a) && woken(a)
+			&& (a.patron() == null || bound == null || a.patron() == bound);
+	}
+
+	/**
+	 * (Andy, 2026-11-17) The chip a Cleric's or a Warlock's option is held to: the patron the story's faith page names; -1 when
+	 * it's theirs to pick (another class, or no faith). The server holds them to it too ({@link LifeStory}).
+	 */
+	private static int patronChip() {
+		Classes.PlayerClass cls = youthClass();
+		Answer faith = picked(Question.FAITH);
+		return cls != Classes.PlayerClass.CLERIC && cls != Classes.PlayerClass.WARLOCK || faith == null || faith.patron() == null ? -1
+			: cls.options.indexOf(faith.patron().key);
 	}
 
 	/** (0.7.501) Whether a birthplace's blood is one this player may be born to: an earned one (the Bio-built's vats) only once woken. */
@@ -529,13 +560,29 @@ final class LifeStoryScreen extends Screen {
 			// (gb-faith) every patron is open to every blood (folk of any blood hold any faith now and then), the one most of
 			// your blood pray to listed first
 			com.jaymoskingdoms.Patron usual = kind == null ? null : com.jaymoskingdoms.Faiths.startOf(kind);
+			// (Andy, 2026-11-17) but the Tideborn and the Dawnborn are bound to theirs: it's the only one listed
+			com.jaymoskingdoms.Patron bound = com.jaymoskingdoms.Faiths.bound(heritage());
+			if (bound != null) {
+				for (int i = 0; i < q.answers().size(); i++) {
+					if (q.answers().get(i).patron() == bound) {
+						out.add(i);
+					}
+				}
+				return out;
+			}
 			for (int i = 0; i < q.answers().size(); i++) {
-				if (q.answers().get(i).patron() == usual) {
+				if (usual != null && q.answers().get(i).patron() == usual) {
 					out.add(i);
 				}
 			}
 			for (int i = 0; i < q.answers().size(); i++) {
-				if (q.answers().get(i).patron() != usual) {
+				if (q.answers().get(i).patron() != usual && q.answers().get(i).patron() != null) {
+					out.add(i);
+				}
+			}
+			// no faith, always last
+			for (int i = 0; i < q.answers().size(); i++) {
+				if (q.answers().get(i).patron() == null) {
 					out.add(i);
 				}
 			}
@@ -602,7 +649,41 @@ final class LifeStoryScreen extends Screen {
 		if (kind == null) {
 			return 0;
 		}
-		return draft.look >= 0 ? draft.look : LifeStory.lookFor(kind, picked(Question.CHILDHOOD));
+		return draft.look >= 0 ? draft.look : rolledLook(kind, picked(Question.CHILDHOOD), true);
+	}
+
+	/**
+	 * Andy: "all heritage paths should no longer be shown on this screen, instead randomize the one shown on the side. and
+	 * change it as selections allow". The look of {@code kind} the story gives: one drawn at random from those
+	 * {@code childhood} allows (the looks it leans to, else every look), kept while it stays allowed. {@code keep}: whether
+	 * a new draw is kept (not for an answer only pointed at).
+	 */
+	private static int rolledLook(Heritage.Kind kind, @Nullable Answer childhood, boolean keep) {
+		List<Integer> allowed = new ArrayList<>();
+		if (childhood != null) {
+			for (String key : childhood.looks()) {
+				HeritageVariants.Variant v = HeritageVariants.Variant.byKey(key);
+				if (v != null && v.heritage == kind && !allowed.contains(v.index())) {
+					allowed.add(v.index());
+				}
+			}
+		}
+		if (allowed.isEmpty()) {
+			for (int i = 0; i <= HeritageVariants.of(kind).size(); i++) {
+				allowed.add(i);
+			}
+		}
+		Integer had = draft.rolls.get(kind);
+		if (had != null && allowed.contains(had)) {
+			return had;
+		}
+		if (!keep) {
+			// pointed at only: the same one each frame, the kept draw untouched
+			return allowed.get(Math.floorMod(had == null ? 0 : had, allowed.size()));
+		}
+		int drawn = allowed.get(new java.util.Random().nextInt(allowed.size()));
+		draft.rolls.put(kind, drawn);
+		return drawn;
 	}
 
 	// ---- layout ------------------------------------------------------------------------------------------------------
@@ -645,7 +726,15 @@ final class LifeStoryScreen extends Screen {
 		return top() + HEADER + index * rowH(s) - this.scroll;
 	}
 
+	/** A question's answers (or the gender) are listed in the picker layout: figure, list, info panel across the screen. */
+	private static boolean pickerPage(Step s) {
+		return (s.gender || s.question != null && !s.realm) && !carousel(s);
+	}
+
 	private int rowAt(Step s, int mouseX, int mouseY) {
+		if (pickerPage(s)) {
+			return this.picker.rowAt(rowCount(s), mouseX, mouseY);
+		}
 		int viewTop = top() + HEADER, viewBottom = top() + panelH() - FOOTER;
 		if (mouseY < viewTop || mouseY >= viewBottom) {
 			return -1;
@@ -670,6 +759,7 @@ final class LifeStoryScreen extends Screen {
 		}
 		int y = top() + panelH() - FOOTER + 4;
 		int right = paneX() + paneW() - 6;
+		this.pickerPlaced = false;
 		this.next = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.story.next"), b -> forward()).bounds(right - 110, y, 110, 16).build());
 		this.back = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.story.back"), b -> {
 			// (from the character creator: back to the story's first page, to tell it after all)
@@ -706,23 +796,234 @@ final class LifeStoryScreen extends Screen {
 			CreatorTab.build(this.width, this.height, this.font, this::addRenderableWidget, this::rebuildWidgets, null);
 		}
 		int ax = (this.width - ASK_W) / 2, ay = top() + (panelH() - ASK_H) / 2;
-		this.skipYes = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.story.skip.yes"), b -> {
-			draft.explicit = true;
-			randomize(false);
-			if (draft.sparks[0] == 0 && draft.sparks[1] == 0 && draft.sparks[2] == 0 && !draft.sparksTouched) {
-				Arrays.fill(draft.sparks, 1);
-			}
-			this.asking = false;
-			// (with MCA's creator to come, the rows are a tab of it: this screen steps aside)
-			if (tabbed()) {
-				hush();
-				onClose();
-				return;
-			}
-			this.scroll = 0;
-		}).bounds(ax + 10, ay + ASK_H - 24, ASK_W / 2 - 14, 16).build());
+		this.skipYes = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.story.skip.yes"), b -> skipStory(null)).bounds(ax + 10, ay + ASK_H - 24, ASK_W / 2 - 14, 16).build());
 		this.skipNo = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.story.skip.no"), b -> this.asking = false)
 			.bounds(ax + ASK_W / 2 + 4, ay + ASK_H - 24, ASK_W / 2 - 14, 16).build());
+		// Andy: "add another option to the origin story, after choosing gender and skipping, to TRULY randomize, everything
+		// else. then you start. nothing else is told or chosen."
+		this.fateAll = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.story.fate_all"), b -> {
+			this.asking = false;
+			leaveAllToFate();
+		}).bounds(ax + 10, ay + ASK_TEXT_H + 4, ASK_W - 20, 16).build());
+		this.fateAll.setTooltip(Ui.tipOf(Component.translatable("gui.jaymoskingdoms.story.fate_all.desc")));
+		// a face kept from a life that ended: skipped as ever, with that face and that life's picks on the creator
+		CharacterPresets.Preset face = CharacterPresets.lastFace();
+		this.pastFace = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.story.past_face", face == null ? "" : face.name), b -> {
+			CharacterPresets.Preset kept = CharacterPresets.lastFace();
+			if (kept != null) {
+				skipStory(kept);
+			}
+		}).bounds(ax + 10, ay + ASK_TEXT_H + 24, ASK_W - 20, 16).build());
+		this.pastFace.setTooltip(Ui.tipOf(Component.translatable("gui.jaymoskingdoms.story.past_face.desc")));
+		this.keepFace = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.doppel.keep"), b -> keepFace(true))
+			.bounds(ax + 10, ay + ASK_H - 24, ASK_W / 2 - 14, 16).build());
+		this.dropFace = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.doppel.drop"), b -> keepFace(false))
+			.bounds(ax + ASK_W / 2 + 4, ay + ASK_H - 24, ASK_W / 2 - 14, 16).build());
+	}
+
+	/**
+	 * The story skipped (its "Skip the story"): every row drawn at random, or set from {@code preset} (a kept face's, with
+	 * that face put on), for the character creator to change.
+	 */
+	private void skipStory(CharacterPresets.@Nullable Preset preset) {
+		draft.explicit = true;
+		randomize(false);
+		if (draft.sparks[0] == 0 && draft.sparks[1] == 0 && draft.sparks[2] == 0 && !draft.sparksTouched) {
+			Arrays.fill(draft.sparks, 1);
+		}
+		if (preset != null) {
+			presetAt = CharacterPresets.all().indexOf(preset);
+			presetTyped = preset.name;
+			apply(preset);
+		}
+		this.asking = false;
+		// (with MCA's creator to come, the rows are a tab of it: this screen steps aside)
+		if (tabbed()) {
+			hush();
+			onClose();
+			return;
+		}
+		this.scroll = 0;
+	}
+
+	/**
+	 * Andy: "TRULY randomize, everything else. then you start. nothing else is told or chosen." Past the gender, every
+	 * answer is drawn (blood, upbringing, childhood, youth, calling, faith, the class's first pick, the ideal, bond and
+	 * flaw), the start is fate's, and with MCA the look and name are drawn on the server and its creator never opens.
+	 * Nothing is shown: the screen shuts at once and the story is lived.
+	 */
+	private void leaveAllToFate() {
+		draft.explicit = false;
+		randomize(true);
+		java.util.Random random = new java.util.Random();
+		for (int i = 0; i < draft.sparks.length; i++) {
+			draft.sparks[i] = 1 + random.nextInt(3);
+		}
+		draft.sparksTouched = true;
+		settle();
+		if (McaCompat.LOADED) {
+			McaCreatorDrop.drop();
+		}
+		ClientPlayNetworking.send(new LifeStory.Fated(life(draft.gender)));
+		quietUntil = System.currentTimeMillis() + LIVE_GRACE_MS;
+		hush();
+		onClose();
+	}
+
+	/** The kept-face ask answered: the life that ended is saved as a preset (a doppelganger's), or let go. */
+	private void keepFace(boolean keep) {
+		Doppelgangers.Offer offer = offered;
+		offered = null;
+		if (keep && offer != null) {
+			CharacterPresets.Preset p = CharacterPresets.fromOffer(offer);
+			if (CharacterPresets.save(p)) {
+				presetAt = CharacterPresets.all().indexOf(p);
+				presetTyped = p.name;
+			}
+		}
+		rebuildWidgets();
+	}
+
+	/** The footer buttons where the other pages have them (under the right pane, and the skip button under the left). */
+	private void placeFooter() {
+		this.pickerPlaced = false;
+		int y = top() + panelH() - FOOTER + 4, right = paneX() + paneW() - 6;
+		place(this.next, right - 110, y, 110);
+		place(this.back, paneX() + 6, y, 60);
+		place(this.later, paneX() + 70, y, 50);
+		place(this.skip, left() + 6, y, TELL_W - 12);
+	}
+
+	private static void place(@Nullable Button b, int x, int y, int w) {
+		if (b != null) {
+			b.setPosition(x, y);
+			b.setWidth(w);
+		}
+	}
+
+	/** The footer buttons stacked under the figure on a question page: Next, then Back and Skip side by side, then Later. */
+	private void placePicker() {
+		this.pickerPlaced = true;
+		int rows = this.forced ? 2 : 3;
+		this.picker.fit(this.width, this.height, 0, rows);
+		int[] n = this.picker.button(0), b = this.picker.button(1);
+		int half = (b[2] - 3) / 2;
+		place(this.next, n[0], n[1], n[2]);
+		place(this.back, b[0], b[1], half);
+		place(this.skip, b[0] + half + 3, b[1], b[2] - half - 3);
+		if (this.later != null) {
+			int[] l = this.picker.button(2);
+			place(this.later, l[0], l[1], l[2]);
+		}
+	}
+
+	/** A question page (or the gender's): the figure on the left, the answers in the middle, the one pointed at told on the right. */
+	private void pickerPage(GuiGraphicsExtractor graphics, Step s, int mouseX, int mouseY) {
+		this.picker.fit(this.width, this.height, 0, this.forced ? 2 : 3);
+		int n = rowCount(s);
+		int hover = this.picker.rowAt(n, mouseX, mouseY);
+		this.picker.header(graphics, this.font, heading(s), null, ACCENT);
+		List<PickerLayout.Entry> entries = new ArrayList<>();
+		int pickedRow = -1;
+		for (int i = 0; i < n; i++) {
+			if (s.gender) {
+				entries.add(new PickerLayout.Entry(ItemStack.EMPTY, null, Component.translatable("story.jaymoskingdoms.gender." + GENDERS[i]), null, ACCENT, false));
+				if (draft.gender == i) {
+					pickedRow = i;
+				}
+				continue;
+			}
+			Answer a = listedAt(s.question, i);
+			if (draft.answers[s.question.ordinal()] == s.question.answers().indexOf(a)) {
+				pickedRow = i;
+			}
+			net.minecraft.resources.Identifier glyph = glyph(a);
+			entries.add(new PickerLayout.Entry(new ItemStack(a.icon()), glyph == null ? null : (g, x, y) -> drawGlyph(g, glyph, x, y),
+				Component.translatable(story(s.question.key() + "." + a.key())), PickerLayout.tag("story.jaymoskingdoms." + s.question.key() + "." + a.key() + ".tag"),
+				ACCENT, !open(a)));
+		}
+		this.picker.list(graphics, this.font, entries, pickedRow, hover, ACCENT, true);
+		this.picker.backdrop(graphics, ACCENT, StoryFigure.SCALE);
+		int[] box = this.picker.figureBox();
+		figure(graphics, s, mouseX, mouseY, box[0], box[1], box[2], box[3], true);
+		int shown = hover >= 0 ? hover : pickedRow;
+		this.picker.info(graphics, this.font, pickerInfo(s, shown), s.gender ? "gender" + shown : s.question + "." + shown, mouseX, mouseY);
+	}
+
+	/** The info panel for row {@code row} of the page (-1: none picked or pointed at yet). */
+	private PickerLayout.Info pickerInfo(Step s, int row) {
+		List<Component> story = new ArrayList<>();
+		List<PickerLayout.Section> sections = new ArrayList<>();
+		List<PickerLayout.Path> paths = new ArrayList<>();
+		Component name, tag = null, note = null;
+		ItemStack icon = ItemStack.EMPTY;
+		net.minecraft.resources.Identifier glyph = null;
+		if (s.gender) {
+			name = Component.translatable(row < 0 ? "story.jaymoskingdoms.gender.title" : "story.jaymoskingdoms.gender." + GENDERS[row]);
+			return new PickerLayout.Info(icon, null, name, null, ACCENT, List.of(), story, sections, null, paths, -1);
+		}
+		Answer a = row >= 0 ? listedAt(s.question, row) : null;
+		if (a == null) {
+			name = Component.translatable(story(s.question.key() + ".title"));
+			story.add(Component.translatable("gui.jaymoskingdoms.story.lead").withColor(Ui.DIM));
+			return new PickerLayout.Info(icon, null, name, null, ACCENT, List.of(), story, sections, null, paths, -1);
+		}
+		icon = new ItemStack(a.icon());
+		glyph = glyph(a);
+		net.minecraft.resources.Identifier g = glyph;
+		name = Component.translatable(story(s.question.key() + "." + a.key()));
+		tag = PickerLayout.tag("story.jaymoskingdoms." + s.question.key() + "." + a.key() + ".tag");
+		if (s.question == Question.BORN && a.heritage() == Heritage.Kind.BIOBUILT) {
+			// Andy: "all bio built info should be hidden except unlock method"
+			sections.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.hint"), Ui.DIM,
+				List.of(Component.translatable("heritage.jaymoskingdoms.biobuilt.hint"))));
+			return new PickerLayout.Info(icon, g == null ? null : (gr, x, y) -> drawGlyph(gr, g, x, y), name, tag, ACCENT, List.of(), story, sections, null, paths, -1);
+		}
+		// the option's short line; its whole tale is told on the last page
+		Component line = shortLine(s.question, a);
+		if (line != null) {
+			story.add(line);
+		}
+		List<Component> gives = gives(s.question, a, false);
+		List<PickerLayout.Pill> pills = new ArrayList<>();
+		if (s.question == Question.BORN && a.heritage() != null) {
+			// Andy: "this place should display all heritage strengths and weaknesses": the heritage's whole kit, from its card as the
+			// heritage screen sorts it (so what's added to a heritage shows here too), for the look the figure wears
+			Heritage.Kind kind = a.heritage();
+			int look = draft.look >= 0 && kind == heritage() ? draft.look : rolledLook(kind, picked(Question.CHILDHOOD), true);
+			pills.addAll(HeritageScreen.statPills(kind));
+			for (PickerLayout.Section kit : HeritageScreen.kitSections(kind, HeritageVariants.at(kind, look))) {
+				List<Component> lines = new ArrayList<>();
+				if (kit.color() == Ui.GOOD) {
+					lines.addAll(gives);
+				}
+				lines.addAll(kit.lines());
+				if (kit.color() == Ui.BAD && !open(a)) {
+					lines.add(reason(a));
+				}
+				sections.add(new PickerLayout.Section(kit.label(), kit.color(), lines));
+			}
+		} else {
+			sections.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.strengths"), Ui.GOOD, gives));
+			if (!open(a)) {
+				sections.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.weaknesses"), Ui.BAD, List.of(reason(a))));
+			}
+		}
+		// the paths: a trade's class and what it picks (a birthplace's looks aren't listed: the figure wears one drawn at random)
+		if (a.cls() != null && !a.cls().options.isEmpty()) {
+			Classes.PlayerClass cls = a.cls();
+			for (String option : cls.options) {
+				List<ItemStack> icons = new ArrayList<>();
+				for (ItemStack stack : Classes.gear(cls, option)) {
+					if (!stack.isEmpty() && icons.size() < 3) {
+						icons.add(stack);
+					}
+				}
+				paths.add(new PickerLayout.Path(icons, Component.translatable("class.jaymoskingdoms.option." + option), -1));
+			}
+			note = Component.translatable("gui.jaymoskingdoms.picker.paths_options", Component.translatable("class.jaymoskingdoms." + cls.key()));
+		}
+		return new PickerLayout.Info(icon, g == null ? null : (gr, x, y) -> drawGlyph(gr, g, x, y), name, tag, ACCENT, pills, story, sections, note, paths, -1);
 	}
 
 	/**
@@ -955,7 +1256,7 @@ final class LifeStoryScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-		if (this.asking) {
+		if (modal()) {
 			// (only the ask's buttons answer while it's up)
 			return super.mouseClicked(event, doubleClick);
 		}
@@ -1082,13 +1383,16 @@ final class LifeStoryScreen extends Screen {
 
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-		if (this.asking) {
+		if (modal()) {
 			return true;
 		}
 		// (0.7.356) the wheel turns the carousel
 		if (carousel(step()) && scrollY != 0) {
 			turn(scrollY > 0 ? -1 : 1);
 			return true;
+		}
+		if (pickerPage(step())) {
+			return this.picker.scrolled(mouseX, mouseY, scrollY, rowCount(step())) || super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
 		}
 		if (this.contentH > this.viewH && mouseX >= paneX()) {
 			this.scroll = Math.clamp(this.scroll - (int)Math.round(scrollY * SCROLL_STEP), 0, this.contentH - this.viewH);
@@ -1100,7 +1404,7 @@ final class LifeStoryScreen extends Screen {
 	@Override
 	public boolean keyPressed(KeyEvent event) {
 		// (0.7.356) left and right (or A and D) turn the carousel
-		if (!this.asking && carousel(step())) {
+		if (!modal() && carousel(step())) {
 			int key = event.key();
 			if (key == InputConstants.KEY_LEFT || key == InputConstants.KEY_A) {
 				turn(-1);
@@ -1136,24 +1440,36 @@ final class LifeStoryScreen extends Screen {
 			onClose();
 			return;
 		}
+		// a Cleric's (a Warlock's) patron is the faith page's, however the option was last moved
+		if (patronChip() >= 0) {
+			draft.option = patronChip();
+		}
 		Step s = step();
 		if (this.cards != (s.summary() && draft.explicit)) {
 			rebuildWidgets();
 		}
 		narrate(s, this.asking);
 		int x = left(), y = top(), w = panelW(), h = panelH();
-		Ui.panel(graphics, x, y, w, h, ACCENT);
-		boolean wheel = carousel(s);
-		if (wheel) {
-			carouselPage(graphics, mouseX, mouseY);
+		boolean wheel = carousel(s), picking = pickerPage(s);
+		if (picking) {
+			placePicker();
+			pickerPage(graphics, s, mouseX, mouseY);
 		} else {
-			page(graphics, s, mouseX, mouseY);
+			if (this.pickerPlaced) {
+				placeFooter();
+			}
+			Ui.panelFramed(graphics, x, y, w, h, ACCENT);
+			if (wheel) {
+				carouselPage(graphics, mouseX, mouseY);
+			} else {
+				page(graphics, s, mouseX, mouseY);
+			}
 		}
 
-		if (this.back != null) {
+		if (this.back != null && !picking) {
 			this.back.setX(wheel ? x + 6 : paneX() + 6);
 		}
-		if (this.skip != null) {
+		if (this.skip != null && !picking) {
 			this.skip.setX(wheel ? x + 70 : x + 6);
 		}
 		for (Button b : new Button[] {this.prev, this.after}) {
@@ -1217,8 +1533,12 @@ final class LifeStoryScreen extends Screen {
 			// (Andy: "gender should be before you can select skip the story")
 			this.skip.visible = (s.question != null || s.gender) && !roadOnly() && (!McaCompat.LOADED || draft.gender >= 0);
 		}
-		if (this.asking) {
-			ask(graphics);
+		if (modal()) {
+			if (offered != null) {
+				keepAsk(graphics);
+			} else {
+				ask(graphics);
+			}
 			for (Button b : new Button[] {this.next, this.back, this.look, this.heritageButton, this.classButton, this.later, this.skip}) {
 				if (b != null) {
 					b.visible = false;
@@ -1233,9 +1553,20 @@ final class LifeStoryScreen extends Screen {
 				}
 			}
 		}
+		boolean asked = this.asking && offered == null;
 		if (this.skipYes != null && this.skipNo != null) {
-			this.skipYes.visible = this.asking;
-			this.skipNo.visible = this.asking;
+			this.skipYes.visible = asked;
+			this.skipNo.visible = asked;
+		}
+		if (this.fateAll != null) {
+			this.fateAll.visible = asked;
+		}
+		if (this.pastFace != null) {
+			this.pastFace.visible = asked && CharacterPresets.lastFace() != null && ClientPlayNetworking.canSend(Doppelgangers.Wear.TYPE);
+		}
+		if (this.keepFace != null && this.dropFace != null) {
+			this.keepFace.visible = offered != null;
+			this.dropFace.visible = offered != null;
 		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}
@@ -1561,15 +1892,48 @@ final class LifeStoryScreen extends Screen {
 					: Component.translatable("gui.jaymoskingdoms.story.no_realms");
 	}
 
+	/** Whether an ask is up over the page (the skip-the-story ask, or the kept-face one), so only its buttons answer. */
+	private boolean modal() {
+		return this.asking || offered != null;
+	}
+
+	/**
+	 * The kept-face ask, over the dimmed page, as a new life's story opens: the life that ended ({@code offered}), and whether
+	 * its face is saved as a preset to wear again, as a doppelganger.
+	 */
+	private void keepAsk(GuiGraphicsExtractor graphics) {
+		Doppelgangers.Offer offer = offered;
+		if (offer == null) {
+			return;
+		}
+		graphics.fill(0, 0, this.width, this.height, 0xC0000000);
+		int x = (this.width - ASK_W) / 2, y = top() + (panelH() - ASK_H) / 2;
+		Ui.panel(graphics, x, y, ASK_W, ASK_H, ACCENT);
+		String name = CharacterPresets.faceName(offer);
+		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.doppel.ask", name), x + 10, y + 8, ASK_W - 20, ACCENT);
+		int ty = y + 24;
+		for (FormattedCharSequence line : this.font.split(Component.translatable("gui.jaymoskingdoms.doppel.desc", name), ASK_W - 20)) {
+			if (ty + Ui.LINE > y + ASK_H - 28) {
+				break;
+			}
+			graphics.text(this.font, line, x + 10, ty, Ui.TEXT);
+			ty += Ui.LINE;
+		}
+	}
+
 	/** (0.7.275) The skip-the-story ask, over the dimmed page: the question, what skipping does, and the yes and no under it. */
 	private void ask(GuiGraphicsExtractor graphics) {
-		graphics.fill(left(), top(), left() + panelW(), top() + panelH(), 0xC0000000);
+		if (pickerPage(step())) {
+			graphics.fill(0, 0, this.width, this.height, 0xC0000000);
+		} else {
+			graphics.fill(left(), top(), left() + panelW(), top() + panelH(), 0xC0000000);
+		}
 		int x = (this.width - ASK_W) / 2, y = top() + (panelH() - ASK_H) / 2;
 		Ui.panel(graphics, x, y, ASK_W, ASK_H, ACCENT);
 		Ui.line(graphics, this.font, Component.translatable("gui.jaymoskingdoms.story.skip.ask"), x + 10, y + 8, ASK_W - 20, ACCENT);
 		int ty = y + 24;
 		for (FormattedCharSequence line : this.font.split(Component.translatable("gui.jaymoskingdoms.creator.skip.desc"), ASK_W - 20)) {
-			if (ty + Ui.LINE > y + ASK_H - 26) {
+			if (ty + Ui.LINE > y + ASK_TEXT_H) {
 				break;
 			}
 			graphics.text(this.font, line, x + 10, ty, Ui.TEXT);
@@ -1662,7 +2026,13 @@ final class LifeStoryScreen extends Screen {
 		Classes.PlayerClass cls = youthClass();
 		if (cls != null && !cls.options.isEmpty()) {
 			y += 4;
-			graphics.text(this.font, Component.translatable(cls == Classes.PlayerClass.MAGE ? "gui.jaymoskingdoms.story.spell" : "gui.jaymoskingdoms.story.element"),
+			graphics.text(this.font, Component.translatable(switch (cls) {
+					case MAGE -> "gui.jaymoskingdoms.story.spell";
+					case CLERIC, WARLOCK -> "gui.jaymoskingdoms.story.faith";
+					case PALADIN -> "gui.jaymoskingdoms.story.oath";
+					case RANGER -> "gui.jaymoskingdoms.story.foe";
+					default -> "gui.jaymoskingdoms.story.element";
+				}),
 				px + 10, y, draft.option < 0 ? ACCENT : Ui.DIM);
 			y += 12;
 			this.chipsTop = y + this.scroll;
@@ -1677,7 +2047,7 @@ final class LifeStoryScreen extends Screen {
 					graphics.fill(chip[0], cy + 12, chip[0] + chip[2], cy + 14, ACCENT);
 				}
 				graphics.centeredText(this.font, Component.translatable("class.jaymoskingdoms.option." + cls.options.get(c)), chip[0] + chip[2] / 2, cy + 3,
-					chosen ? ACCENT : Ui.TEXT);
+					chosen ? ACCENT : patronChip() >= 0 ? Ui.DIM : Ui.TEXT);
 				y = Math.max(y, cy + 18);
 			}
 		} else {
@@ -2032,6 +2402,12 @@ final class LifeStoryScreen extends Screen {
 		p.flaws = draft.flaws;
 		p.switches = draft.switches;
 		p.sparks = draft.sparks.clone();
+		// (a kept face saved over keeps its face)
+		CharacterPresets.Preset old = CharacterPresets.named(p.name);
+		if (old != null) {
+			p.face = old.face;
+			p.mca = old.mca;
+		}
 		if (CharacterPresets.save(p)) {
 			presetAt = CharacterPresets.all().indexOf(p);
 		}
@@ -2118,6 +2494,10 @@ final class LifeStoryScreen extends Screen {
 		draft.sparksTouched = true;
 		draft.raisedRealm = realmNamed(p.raisedRealm == null ? "" : p.raisedRealm);
 		settle();
+		// (Doppelgangers) a kept face is put on with its picks; any other preset takes a face worn off again
+		if (ClientPlayNetworking.canSend(Doppelgangers.Wear.TYPE)) {
+			ClientPlayNetworking.send(new Doppelgangers.Wear(p.face == null ? "" : p.face, CharacterPresets.look(p)));
+		}
 	}
 
 	// ---- a harder life (0.7.420) --------------------------------------------------------------------------------------
@@ -2183,13 +2563,26 @@ final class LifeStoryScreen extends Screen {
 			} else {
 				Ui.row(graphics, px + 6, y, px + pw - 8, y + rh - 1, i, hover && able);
 			}
-			graphics.text(this.font, Component.literal(on ? "[x] " : "[  ] ").append(choiceName(i)), px + 12, y + 2, on ? ACCENT : able ? Ui.TEXT : Ui.HINT);
+			tickBox(graphics, px + 12, y + 1, on, able);
+			graphics.text(this.font, choiceName(i), px + 24, y + 2, on ? ACCENT : able ? Ui.TEXT : Ui.HINT);
 			for (int l = 0; l < fx.size(); l++) {
 				graphics.text(this.font, fx.get(l), px + 24, y + 2 + (l + 1) * Ui.LINE, able ? Ui.DIM : Ui.HINT);
 			}
 			y += rh;
 		}
 		return sparkRows(graphics, mouseX, mouseY, y, px, pw, textW);
+	}
+
+	/** A flaw's or spark's box at x, y (9 square), struck with the story's hand-drawn X when {@code on}. */
+	private static void tickBox(GuiGraphicsExtractor graphics, int x, int y, boolean on, boolean able) {
+		int edge = on ? ACCENT : able ? Ui.DIM : Ui.HINT;
+		graphics.fill(x, y, x + 9, y + 1, edge);
+		graphics.fill(x, y + 8, x + 9, y + 9, edge);
+		graphics.fill(x, y + 1, x + 1, y + 8, edge);
+		graphics.fill(x + 8, y + 1, x + 9, y + 8, edge);
+		if (on) {
+			PickerLayout.cross(graphics, x, y, 9);
+		}
 	}
 
 	/** The first choice index of the spark picks: 3 lists of 3, ideal then bond then flaw. */
@@ -2232,8 +2625,8 @@ final class LifeStoryScreen extends Screen {
 				} else {
 					Ui.row(graphics, px + 6, y, px + pw - 8, y + rh - 1, index, hover);
 				}
-				graphics.text(this.font, Component.literal(on ? "[x] " : "[  ] ").append(Component.translatable("spark." + kinds[kind] + "." + offered.get(pos))),
-					px + 12, y + 2, on ? ACCENT : Ui.TEXT);
+				tickBox(graphics, px + 12, y + 1, on, true);
+				graphics.text(this.font, Component.translatable("spark." + kinds[kind] + "." + offered.get(pos)), px + 24, y + 2, on ? ACCENT : Ui.TEXT);
 				for (int l = 0; l < split.size(); l++) {
 					graphics.text(this.font, split.get(l), px + 24, y + 2 + (l + 1) * Ui.LINE, Ui.DIM);
 				}
@@ -2628,16 +3021,16 @@ final class LifeStoryScreen extends Screen {
 				icon = new ItemStack(here.icon());
 				if (s.question == Question.BORN && here.heritage() != null) {
 					kind = here.heritage();
-					look = LifeStory.lookFor(kind, picked(Question.CHILDHOOD));
+					look = draft.look >= 0 && kind == heritage() ? draft.look : rolledLook(kind, picked(Question.CHILDHOOD), true);
 				} else if (s.question == Question.CHILDHOOD && kind != null && draft.look < 0) {
-					look = LifeStory.lookFor(kind, here);
+					look = rolledLook(kind, here, here == picked(Question.CHILDHOOD));
 				}
 			}
 		}
 		// (0.7.364) Andy: "make this a ki ghost instead of the character, implying what is all within us": fate's road shows
 		// no one in particular, only the ki every one of them holds
 		if (s.question == Question.ROAD && here != null && here.start() == LifeStory.Start.FATE) {
-			KiGhost.draw(graphics, x0, y0, x1, y1);
+			KiGhost.draw(graphics, x0, y0, x1, y1, mouseX);
 			return;
 		}
 		// (gb-faith) the chosen faith's sigil behind the figure, from this page on (on the story pages the panel draws it)
@@ -2650,10 +3043,11 @@ final class LifeStoryScreen extends Screen {
 		}
 		// (gb-faith) on the faith page the figure is the chosen faith's champion; The Truth has no champion,
 		// so it is drawn as a bright yellow-white ki ghost instead
-		if (s.question == Question.FAITH && here != null) {
+		// (no faith has no champion: it shows you, as the other pages do)
+		if (s.question == Question.FAITH && here != null && here.patron() != null) {
 			com.jaymoskingdoms.Patron faithPatron = here.patron();
 			if (faithPatron == com.jaymoskingdoms.Patron.TRUTH) {
-				drawTruthGhost(graphics, x0, y0, x1, y1);
+				drawTruthGhost(graphics, x0, y0, x1, y1, mouseX);
 				return;
 			}
 			com.jaymoskingdoms.PatronChampion champ = null;
@@ -2715,9 +3109,14 @@ final class LifeStoryScreen extends Screen {
 
 	/**
 	 * The faith whose sigil shows on this page: the one pointed at or picked on the faith page, the one picked after it;
-	 * none on the gender page or while fate's road shows its ki ghost.
+	 * none on the gender page, while fate's road shows its ki ghost, or for no faith (it has no sigil).
 	 */
 	private @Nullable Answer faithShown(Step s, int mouseX, int mouseY) {
+		Answer a = faithShownAny(s, mouseX, mouseY);
+		return a == null || a.patron() == null ? null : a;
+	}
+
+	private @Nullable Answer faithShownAny(Step s, int mouseX, int mouseY) {
 		if (s.gender) {
 			return null;
 		}
@@ -2743,16 +3142,29 @@ final class LifeStoryScreen extends Screen {
 		graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, glyph, x, y, 0.0F, 0.0F, w, h, 16, 16, 16, 16, 0x60FFFFFF);
 	}
 
-	/** (gb-faith) The chosen faith's champion, standing in the figure's box. */
+	/**
+	 * (gb-faith) The chosen faith's champion, standing in the figure's box. Champions stand far taller than a man, so it is
+	 * sized to the player's height in the box (Andy: "patron heads are cut"), and drawn as an apparition, see-through and
+	 * glowing (Andy: "they should be more ethereal looking"; {@link com.jaymoskingdoms.client.champions.ChampionRenderer#apparition}).
+	 */
 	private static void drawChampion(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, com.jaymoskingdoms.PatronChampion champ) {
-		int size = Math.max(8, (int)((y1 - y0) * StoryFigure.SCALE));
+		float tall = Math.max(0.5F, champ.getBbHeight() / Math.max(0.01F, champ.getScale()));
+		int size = Math.max(8, (int)((y1 - y0) * StoryFigure.SCALE * PLAYER_TALL / tall));
 		float cx = (x0 + x1) / 2.0F, cy = y0 + (y1 - y0) * 0.35F;
-		net.minecraft.client.gui.screens.inventory.InventoryScreen.extractEntityInInventoryFollowsMouse(graphics, x0, y0, x1, y1, size, 0.0625F, cx, cy, champ);
+		com.jaymoskingdoms.client.champions.ChampionRenderer.apparition = true;
+		try {
+			net.minecraft.client.gui.screens.inventory.InventoryScreen.extractEntityInInventoryFollowsMouse(graphics, x0, y0, x1, y1, size, 0.0625F, cx, cy, champ);
+		} finally {
+			com.jaymoskingdoms.client.champions.ChampionRenderer.apparition = false;
+		}
 	}
 
+	/** A player's height (blocks): a champion is drawn this tall in the figure's box, as you are. */
+	private static final float PLAYER_TALL = 1.8F;
+
 	/** (gb-faith) The Truth has no champion: a bright yellow-white ki ghost. */
-	private static void drawTruthGhost(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1) {
-		KiGhost.draw(graphics, x0, y0, x1, y1, 0xFFFFFE, 0xFFFFFFFF, 0xFFFFFF);
+	private static void drawTruthGhost(GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, int mouseX) {
+		KiGhost.draw(graphics, x0, y0, x1, y1, mouseX, 0xFFFFFE, 0xFFFFFFFF, 0xFFFFFF);
 	}
 
 	// ---- the realm page's people (gb-realmcards) ----------------------------------------------------------------------

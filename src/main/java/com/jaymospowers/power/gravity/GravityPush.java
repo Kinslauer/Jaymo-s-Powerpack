@@ -69,6 +69,7 @@ final class GravityPush {
 	/** {@code target} is pushed away from {@code player}. */
 	static void push(ServerPlayer player, LivingEntity target) {
 		ServerLevel level = player.level();
+		com.jaymospowers.core.trials.PowerTrials.count(player, "gravity.push", 1);
 		double distance = Mth.lerp(Mastery.unlocked(player) / (float)Mastery.ALL, DISTANCE_BASE, DISTANCE_MAX);
 		boolean phasing = !level.noCollision(target, target.getBoundingBox().deflate(0.05));
 		PUSHES.removeIf(p -> p.entity.equals(target.getUUID()));

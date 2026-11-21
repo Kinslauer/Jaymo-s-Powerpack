@@ -36,14 +36,19 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.wild.nest.SilkDeeps.place();
 		// (0.7.180) whose names this client's player knows
 		com.jaymoskingdoms.Introductions.viewer = () -> net.minecraft.client.Minecraft.getInstance().player;
+		// and lines naming someone they don't know call them what they are
+		IntroNames.register();
 		// great foes' themes, and the trophy stand's item
 		com.jaymoskingdoms.client.music.FoeMusicClient.register();
 		com.jaymoskingdoms.client.music.SceneMusic.register();
+		com.jaymoskingdoms.client.music.PlaceMusic.register();
 		com.jaymoskingdoms.client.trophies.TrophyStandRenderer.register();
 		EntityRenderers.register(JaymosKingdoms.FOLK, FolkRenderer::new);
 		// (Andy, 2026-11-06) what is beyond this player's tier, off JEI and the recipe book
 		TierHidingClient.register();
 		LocksClient.register();
+		// (ff-kit) Peterwolf's firefighter readout on our HUD layout, only while carrying the kit
+		ForestFireHud.register();
 		// (0.7.329) the second batch of Blockbench Workshop creatures
 		com.jaymoskingdoms.client.beasts.BeastsClient.register();
 		EntityRenderers.register(com.jaymoskingdoms.FallingTree.TYPE, FallingTreeRenderer::new);
@@ -87,6 +92,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// (0.7.310) a Bio-built's buds, small copies of their maker
 		BioBudRenderer.register();
 		RisenOrcRenderer.register();
+		// (Awakening pick) the Cordon
+		CordonRenderer.register();
 		CampSkins.register();
 		GoblinSkins.register();
 		// 0.5.45: orcs
@@ -141,6 +148,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		PartyClient.register();
 		// 0.5.50: the traveller's journal on M
 		JournalClient.register();
+		AimPageClient.register();
 		// 0.7.649: Kingdoms' tabs on Jaymo's Powers' character menu (H), when Powers is loaded
 		MenuCompat.register();
 		// (0.7.490) Hordes, Orc war journals: the Lore Codex screen
@@ -159,6 +167,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		SignInScreen.register();
 		// 0.7.238: black over the world from the story until MCA's creator
 		StoryCurtain.register();
+		KeptMusicSetting.register();
 		LineageScreen.register();
 		// (0.7.519) an envoy's offer, and the sovereign's desk
 		EnvoyScreen.register();
@@ -182,6 +191,15 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		LoanScreen.register();
 		ClassKeys.register();
 		MagicKeys.register();
+		// whom a harness piece was fitted to (Fitting)
+		net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
+			java.util.UUID to = stack.get(com.jaymoskingdoms.Fitting.FITTED);
+			net.minecraft.client.player.LocalPlayer me = net.minecraft.client.Minecraft.getInstance().player;
+			if (to != null) {
+				lines.add(net.minecraft.network.chat.Component.translatable(me != null && me.getUUID().equals(to) ? "tooltip.jaymoskingdoms.fitted.you"
+					: "tooltip.jaymoskingdoms.fitted.other").withStyle(net.minecraft.ChatFormatting.GRAY));
+			}
+		});
 		FamiliarClient.register();
 		CombatArtKey.register();
 		// (0.7.381) Weapon Forms: the belt strip, the chain counter, the belt screen
@@ -201,6 +219,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		WerewolfKey.register();
 		PaceKey.register();
 		FrostPrisonKey.register();
+		SorcererJumpClient.register();
 		LeanClient.register();
 		NightGiftsClient.register();
 		BloodVision.register();
@@ -225,6 +244,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		KinshipClient.register();
 		WarriorFury.register();
 		BruteRageHud.register();
+		ComposureHud.register();
 		OwnSpeechHud.register();
 		BloodReservoirHud.register();
 		// BWM batch 5: the gloom's whispers and dark edges
@@ -238,11 +258,14 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.7.111: the awareness gauge (mob senses)
 		SensesClient.register();
 		HiddenBladeClient.register();
+		CaseMarkClient.register();
 		VampireLooks.register();
 		StakeLayer.register();
 		TalkScreen.register();
 		GameScreen.register();
 		RecallScreen.register();
+		RenegeScreen.register();
+		VowBookScreen.register();
 		ChalkClient.register();
 		ResearchScreen.register();
 		MimicBenchScreen.register();
@@ -251,6 +274,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		CastOutMap.register();
 		// 0.6.6: lunar events' colours
 		MoonClient.register();
+		// the Wither's night: the sky stays dark while one lives
+		WitherNightClient.register();
 		HordeDaysClient.register();
 		// the real night sky: the HYG catalog's stars and the 88 constellation figures,
 		// drawn as camera-centred sky geometry at night (never replaces the vanilla sky renderer)
@@ -333,11 +358,16 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.disasters.LastBellClient.register();
 		// downpours, morning mist, sand winds, auroras and livelier fire
 		com.jaymoskingdoms.client.disasters.SkiesClient.register();
+		com.jaymoskingdoms.client.disasters.WindSigns.register();
+		com.jaymoskingdoms.client.disasters.WindFeel.register();
+		com.jaymoskingdoms.client.disasters.WindSounds.register();
 		com.jaymoskingdoms.client.disasters.SunShade.register();
 		// layered clouds instead of the game's single sheet
 		com.jaymoskingdoms.client.disasters.CloudDecks.register();
 		// 0.7.509: the patrons screen, the boon menu and the boon key
 		PatronKeys.register();
+		// the four art keys (Soul, Claw, Wild, Sun)
+		ArtKeysClient.register();
 		// 0.5.47: stablehands' and farriers' screens (the scroll kept when one comes again after a button)
 		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(com.jaymoskingdoms.StableNet.Open.TYPE, (payload, context) -> {
 			int scroll = context.client().gui.screen() instanceof StableScreen was && was.workerId() == payload.workerId() ? was.scroll() : 0;

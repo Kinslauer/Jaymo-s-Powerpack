@@ -1,0 +1,9 @@
+{
+  "talk.jaymospowers.patrol.opt.relief": "Any relief work?",
+  "talk.jaymospowers.patrol.opt.relief_take": "I'll take it.",
+  "talk.jaymospowers.patrol.relief.offer": "\"Not every job's a fight. The healers down here are short of limphium, and the dried leaf keeps. Bring %1$s dried leaves to any town's healer and the Patrol pays for the run.\"",
+  "talk.jaymospowers.patrol.relief.taken": "\"Good. Hand them to the healer yourself, they'll want to know who brought them.\"",
+  "talk.jaymospowers.patrol.relief.on_it": "\"You're already on a run: %1$s dried limphium leaves to a town's healer.\"",
+  "message.jaymospowers.patrol.relief_done": "Relief run done: %1$s takes the limphium. Paid %2$s. Relief runs: %3$s.",
+  "talk.jaymospowers.patrol.file": "\"Your file, officer. Rank: %1$s. Arrests on warrant: %2$s. Skip writs drawn: %3$s. Relief runs: %4$s.\""
+}

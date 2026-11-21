@@ -179,6 +179,7 @@ public final class SmokeJet {
 			e.syncVelocity = true;
 			if (e instanceof LivingEntity living && player.tickCount % HIT_EVERY == 0) {
 				living.hurtServer(level, player.damageSources().playerAttack(player), DAMAGE * (float)(1.0 - 0.5 * t / RANGE));
+				com.jaymospowers.core.trials.PowerTrials.count(player, "smoke.jet", 1);
 			}
 			if (soot && e instanceof LivingEntity living && player.tickCount % 10 == 0) {
 				// Soot Jet (smog): it blinds what it catches

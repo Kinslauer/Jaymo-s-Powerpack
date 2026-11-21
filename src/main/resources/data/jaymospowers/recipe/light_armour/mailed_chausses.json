@@ -1,0 +1,14 @@
+{
+  "type": "jaymospowers:light_armour_crafting",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:leather_leggings",
+    "jaymospowers:mail_sheet",
+    "jaymospowers:mail_sheet",
+    "jaymospowers:mail_sheet",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "jaymospowers:mailed_chausses"
+  }
+}

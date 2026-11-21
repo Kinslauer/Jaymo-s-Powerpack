@@ -27,6 +27,7 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.component.Consumables;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -43,6 +44,8 @@ public final class FishSpecies {
 	static final float RAW_SAT = 0.1F, COOKED_SAT = 0.6F, OILY_SAT = 0.8F;
 	/** Health of a fish at its usual weight: a cod's 3, growing with the weight, at most this. */
 	static final double HEALTH_MOST = 40.0;
+	/** Cave fish live only in pools this far (blocks) under the sea's level. */
+	static final int CAVE_DEPTH = 30;
 
 	private static final Map<EntityType<?>, Species> BY_TYPE = new HashMap<>();
 	private static final Map<Species, EntityType<?>> TYPES = new EnumMap<>(Species.class);
@@ -100,11 +103,13 @@ public final class FishSpecies {
 		SpeciesSizes.Size size = SpeciesSizes.ALL.get(sp.id);
 		ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, JaymosPowers.id(sp.id));
 		EntityType<WildFish> type = Registry.register(BuiltInRegistries.ENTITY_TYPE, key,
-			EntityType.Builder.<WildFish>of(WildFish::new, MobCategory.WATER_AMBIENT).sized(size.width(), size.height())
+			(sp.lava() ? EntityType.Builder.<WildFish>of(LavaFish::new, MobCategory.WATER_AMBIENT).fireImmune()
+				: EntityType.Builder.<WildFish>of(WildFish::new, MobCategory.WATER_AMBIENT)).sized(size.width(), size.height())
 				.eyeHeight(size.height() * 0.6F).clientTrackingRange(sp.big() ? 8 : 4).build(key));
 		FabricDefaultAttributeRegistry.register(type, AbstractFish.createAttributes().add(Attributes.MAX_HEALTH, health(sp))
 			.add(Attributes.MOVEMENT_SPEED, sp.big() ? 1.1 : 0.8));
-		SpawnPlacements.register(type, SpawnPlacementTypes.IN_WATER, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, FishSpecies::canSpawn);
+		SpawnPlacements.register(type, sp.lava() ? SpawnPlacementTypes.IN_LAVA : SpawnPlacementTypes.IN_WATER,
+			Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, FishSpecies::canSpawn);
 		spawns(sp, type);
 		return type;
 	}
@@ -127,7 +132,7 @@ public final class FishSpecies {
 	}
 
 	private static void spawns(Species sp, EntityType<? extends Mob> type) {
-		BiomeModifications.addSpawn(ctx -> ctx.canGenerateIn(LevelStem.OVERWORLD) && sp.livesIn(ctx.getBiomeHolder()),
+		BiomeModifications.addSpawn(ctx -> ctx.canGenerateIn(sp.lava() ? LevelStem.NETHER : LevelStem.OVERWORLD) && sp.livesIn(ctx.getBiomeHolder()),
 			MobCategory.WATER_AMBIENT, type, sp.spawnWeight, Math.max(1, sp.schoolMin), Math.max(1, sp.schoolMax));
 	}
 
@@ -138,8 +143,16 @@ public final class FishSpecies {
 	private static <T extends Mob> boolean canSpawn(EntityType<T> type, ServerLevelAccessor level, EntitySpawnReason reason, BlockPos pos,
 		RandomSource random) {
 		Species sp = BY_TYPE.get(type);
+		if (sp != null && sp.lava()) {
+			return LavaFish.canSpawn(level, pos);
+		}
 		if (sp == null || !level.getFluidState(pos).is(FluidTags.WATER)) {
 			return false;
+		}
+		if (sp.water == Species.Water.CAVE) {
+			// cave pools only: deep under the sea's level, and no sky light reaches them
+			return level.getFluidState(pos.below()).is(FluidTags.WATER) && pos.getY() <= level.getSeaLevel() - CAVE_DEPTH
+				&& level.getBrightness(LightLayer.SKY, pos) == 0;
 		}
 		if (sp.walker()) {
 			return !level.getFluidState(pos.below()).is(FluidTags.WATER) && level.getBlockState(pos.below()).isSolid();

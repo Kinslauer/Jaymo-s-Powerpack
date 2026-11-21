@@ -38,6 +38,8 @@ public record WebSymbioteState(boolean bonded, int satiety, int stress, int reje
 	public static final int COLLECT = 64;
 	/** (0.17.150) The mantle is unfurled: a cape of symbiote ({@code WebSymbioteBody}). */
 	public static final int MANTLE = 128;
+	/** The wings are spread (a whole bond only, {@code WebSymbioteWings}). */
+	public static final int WINGS = 256;
 
 	public static final WebSymbioteState NONE = new WebSymbioteState(false, 0, 0, 0, 0, 0, 0, 0);
 

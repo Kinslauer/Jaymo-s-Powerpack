@@ -245,7 +245,7 @@ public final class FreefallPose {
 			// a ledge hang or climb, a freerun move (wall run, bar hang...), a web's ragdoll after the lines snap
 			|| com.jaymospowers.core.Ledge.onLedge(player) || player.hasAttached(com.jaymospowers.freerun.Freerun.MOVE)
 			|| player.hasAttached(com.jaymospowers.freerun.Freerun.HANG) || player.hasAttached(com.jaymospowers.freerun.Freerun.WALL)
-			|| com.jaymospowers.power.web.WebPower.ragdolled(player)) {
+			|| com.jaymospowers.power.web.WebPower.ragdolled(player) || acrobatics(player)) {
 			return true;
 		}
 		com.jaymospowers.power.wind.WindMoves.Move move = player.getAttached(com.jaymospowers.power.wind.WindMoves.MOVE);
@@ -253,7 +253,13 @@ public final class FreefallPose {
 		return move != null && move.kind() == com.jaymospowers.power.wind.WindMoves.DIVE;
 	}
 
-	/** A wind user, or a freerunner with Leap of Faith falling looking down: the dive, not a flail. */
+	/** A flip or trick (the air flip, the dodge key's acrobatics, a web trick) is being turned: it has its own body ({@code WebBodyPose}). */
+	private static boolean acrobatics(Player player) {
+		com.jaymospowers.power.web.WebPose pose = player.getAttached(com.jaymospowers.power.web.WebPower.POSE);
+		return pose != null && com.jaymospowers.power.web.WebPose.trick(pose.kind()) && player.level().getGameTime() - pose.start() < pose.ticks();
+	}
+
+		/** A wind user, or a freerunner with Leap of Faith falling looking down: the dive, not a flail. */
 	private static boolean dives(Player player) {
 		return com.jaymospowers.core.Powers.has(player, com.jaymospowers.power.wind.WindPower.INSTANCE)
 			|| com.jaymospowers.freerun.Freerun.dives(player);

@@ -187,6 +187,10 @@ public final class EarlyGuns {
 
 	/** A match burns in neither rain nor water, and damp powder often won't take (decided on the server). */
 	private static boolean wet(LivingEntity shooter) {
+		// (class trees) a Marksman's Dry Powder takes in rain, standing water or a soaking
+		if (WarExtras.dryPowder(shooter)) {
+			return false;
+		}
 		return shooter.isInWaterOrRain()
 			|| shooter.level() instanceof ServerLevel && PowersCompat.soaked(shooter) && shooter.getRandom().nextFloat() < DAMP_FIZZLE;
 	}
@@ -197,19 +201,32 @@ public final class EarlyGuns {
 		return dir.add(random.triangle(0.0, s), random.triangle(0.0, s), random.triangle(0.0, s)).normalize();
 	}
 
+	/** The ball's blow times the gun's forging grade: Poor to Legendary (an ungraded gun, or no Powers, is Well Forged). */
+	static final float[] GRADE_DAMAGE = {0.85F, 1.0F, 1.1F, 1.25F, 1.4F, 1.5F};
+
+	private static float gradeFactor(ItemStack gun) {
+		int grade = GradedTrades.gradeIndex(gun);
+		return grade < 0 ? 1.0F : GRADE_DAMAGE[Math.min(grade, GRADE_DAMAGE.length - 1)];
+	}
+
 	/** Out of {@code shooter}'s hands: the ball, the noise, and (with Jaymo's Powers) the blast at its muzzle. */
 	private static void fire(ServerLevel level, LivingEntity shooter, ItemStack gun, Rung rung, Vec3 aim, float damage) {
-		Vec3 dir = stray(aim, rung.spread, level.getRandom());
+		// (class trees) a Marksman's Steady Aim: less stray
+		Vec3 dir = stray(aim, rung.spread * Workshop.spread(shooter), level.getRandom());
+		boolean muffled = Workshop.muffled(gun);
 		Vec3 eye = shooter.getEyePosition().add(0.0, -0.1, 0.0);
 		Vec3 muzzle = eye.add(dir);
-		GunBall.shot(level, shooter, eye, dir, rung.speed, damage);
+		GunBall.shot(level, shooter, eye, dir, rung.speed, damage * gradeFactor(gun));
 		if (!PowersCompat.gunFired(shooter, gun)) {
 			level.sendParticles(ParticleTypes.LARGE_SMOKE, muzzle.x, muzzle.y, muzzle.z, 8, 0.12, 0.12, 0.12, 0.03);
 			level.sendParticles(ParticleTypes.FLAME, muzzle.x, muzzle.y, muzzle.z, 3, 0.06, 0.06, 0.06, 0.02);
 		}
+		// (class trees) a Muffled barrel: a cough, not a bang
 		level.playSound(null, shooter.getX(), shooter.getY(), shooter.getZ(), SoundEvents.GENERIC_EXPLODE.value(),
-			shooter instanceof Player ? SoundSource.PLAYERS : SoundSource.HOSTILE, 1.1F, rung.pitch + level.getRandom().nextFloat() * 0.2F);
-		Deafened.blast(level, muzzle, Deafened.MUZZLE);
+			shooter instanceof Player ? SoundSource.PLAYERS : SoundSource.HOSTILE, muffled ? 0.15F : 1.1F, rung.pitch + level.getRandom().nextFloat() * 0.2F);
+		if (!muffled) {
+			Deafened.blast(level, muzzle, Deafened.MUZZLE);
+		}
 	}
 
 	/** The match hisses out: nothing fires. */
@@ -367,7 +384,8 @@ public final class EarlyGuns {
 				ServerPlayer smith = (ServerPlayer) args[0];
 				String option = (String) id.invoke(args[2]);
 				for (Rung rung : Rung.values()) {
-					if (option.contains("weapon/" + rung.id() + "_barrel") && !WorldTiers.open(smith, WorldTiers.Tier.values()[rung.tier])) {
+					// (class trees: a Tinkerer's eye opens the tiers early, TierGate.gearTier)
+					if (option.contains("weapon/" + rung.id() + "_barrel") && !smith.isCreative() && TierGate.gearTier(smith) < rung.tier) {
 						return Component.translatable("message.jaymoskingdoms.early_gun.tier." + rung.id());
 					}
 				}
@@ -423,7 +441,8 @@ public final class EarlyGuns {
 
 		@Override
 		public int getUseDuration(ItemStack stack, LivingEntity user) {
-			return loaded(stack) ? this.rung.touch : 72000;
+			// (class trees) a Gunslinger's match comes down twice as fast just after the draw
+			return loaded(stack) ? Math.round(this.rung.touch * WarExtras.draw(user)) : 72000;
 		}
 
 		@Override
@@ -464,7 +483,10 @@ public final class EarlyGuns {
 				player.push(back.x, 0.05, back.z);
 				player.syncVelocity = true;
 				player.awardStat(Stats.ITEM_USED.get(this));
-				gun.hurtAndBreak(1, player, hand);
+				// (class trees) a gun on a Gunsmith's barrel wears slower
+				if (!Workshop.spared(gun, player)) {
+					gun.hurtAndBreak(1, player, hand);
+				}
 			}
 			player.getCooldowns().addCooldown(gun, SETTLE);
 		}
@@ -490,8 +512,14 @@ public final class EarlyGuns {
 				return;
 			}
 			int held = this.getUseDuration(stack, user) - remaining;
+			if (Workshop.primed(user) && user instanceof Player && this.loadNow(stack, level, (Player) user)) {
+				// (class trees) Speed Load: loaded at once, with a spin of the gun
+				Workshop.spin(user);
+				user.stopUsingItem();
+				return;
+			}
 			// (quicker in the Ranger's harness: FrontierPerks)
-			int load = FrontierPerks.reload(user, this.rung.load);
+			int load = Workshop.reload(user, FrontierPerks.reload(user, this.rung.load));
 			if (held == load / 3 || held == load * 2 / 3) {
 				// the powder down, then the ball rammed home
 				level.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.CROSSBOW_LOADING_MIDDLE.value(), SoundSource.PLAYERS, 0.7F, 0.6F);
@@ -502,7 +530,15 @@ public final class EarlyGuns {
 
 		@Override
 		public boolean releaseUsing(ItemStack stack, Level level, LivingEntity user, int remaining) {
-			if (!(user instanceof Player player) || loaded(stack) || this.getUseDuration(stack, user) - remaining < FrontierPerks.reload(user, this.rung.load)) {
+			if (!(user instanceof Player player) || loaded(stack) || this.getUseDuration(stack, user) - remaining < Workshop.reload(user, FrontierPerks.reload(user, this.rung.load))) {
+				return false;
+			}
+			return this.loadNow(stack, level, player);
+		}
+
+		/** Powder and ball into {@code stack}, out of {@code player}'s pack; false if they haven't both. */
+		private boolean loadNow(ItemStack stack, Level level, Player player) {
+			if (loaded(stack)) {
 				return false;
 			}
 			ItemStack powder = powder(player), ball = ball(player);

@@ -3,6 +3,7 @@ package com.jaymoskingdoms.tinker;
 import com.jaymoskingdoms.BossBars;
 import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.WarExtras;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -277,7 +278,7 @@ public final class MimicGadgets {
 				spend(sp, this.mimic.fuel);
 			}
 			if (this.mimic.cooldown > 0 && this.mimic != Mimic.BLAST) {
-				sp.getCooldowns().addCooldown(stack, this.mimic.cooldown);
+				sp.getCooldowns().addCooldown(stack, WarExtras.wait(sp, this.mimic.cooldown));
 			}
 			return InteractionResult.SUCCESS;
 		}
@@ -383,7 +384,7 @@ public final class MimicGadgets {
 		public boolean releaseUsing(ItemStack stack, Level level, LivingEntity user, int remaining) {
 			// (no fluttering the guard: a parry is a moment, not a wall)
 			if (user instanceof Player player) {
-				player.getCooldowns().addCooldown(stack, GUARD_PAUSE);
+				player.getCooldowns().addCooldown(stack, WarExtras.wait(player, GUARD_PAUSE));
 			}
 			return true;
 		}
@@ -478,7 +479,7 @@ public final class MimicGadgets {
 		spend(player, Mimic.BEAM.fuel);
 		target.hurtServer(level, level.damageSources().indirectMagic(player, player), BEAM_DAMAGE);
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.GUARDIAN_ATTACK, SoundSource.PLAYERS, 1.0F, 0.8F);
-		player.getCooldowns().addCooldown(stack, Mimic.BEAM.cooldown);
+		player.getCooldowns().addCooldown(stack, WarExtras.wait(player, Mimic.BEAM.cooldown));
 		return false;
 	}
 
@@ -654,7 +655,7 @@ public final class MimicGadgets {
 			}
 			for (ItemStack s : List.of(player.getMainHandItem(), player.getOffhandItem())) {
 				if (is(s, Mimic.GROWTH)) {
-					player.getCooldowns().addCooldown(s, Mimic.GROWTH.cooldown);
+					player.getCooldowns().addCooldown(s, WarExtras.wait(player, Mimic.GROWTH.cooldown));
 				}
 			}
 		}
@@ -769,7 +770,7 @@ public final class MimicGadgets {
 		level.addFreshEntity(charge);
 		FUSED.add(new Fused(charge, level.getGameTime() + FUSE, player.getUUID()));
 		// the charge itself is what is thrown (the pause first, while the stack is still there to carry it)
-		player.getCooldowns().addCooldown(stack, Mimic.BLAST.cooldown);
+		player.getCooldowns().addCooldown(stack, WarExtras.wait(player, Mimic.BLAST.cooldown));
 		stack.consume(1, player);
 		level.playSound(null, charge.getX(), charge.getY(), charge.getZ(), SoundEvents.CREEPER_PRIMED, SoundSource.PLAYERS, 1.0F, 1.0F);
 		return true;
@@ -829,8 +830,9 @@ public final class MimicGadgets {
 		ItemStack gauntlet = player.getUseItem();
 		InteractionHand hand = player.getUsedItemHand();
 		player.stopUsingItem();
-		gauntlet.hurtAndBreak(1, player, hand);
-		player.getCooldowns().addCooldown(gauntlet, GUARD_PAUSE);
+		player.getCooldowns().addCooldown(gauntlet, WarExtras.wait(player, GUARD_PAUSE));
+		// (class trees) a Scrapper's worn-out gadget gives back half its parts
+		WarExtras.wear(player, gauntlet, hand, Mimic.PARRY.cost);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 1.0F, 1.5F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.4F, 1.8F);
 		level.sendParticles(ParticleTypes.CRIT, player.getX(), player.getY(1.0), player.getZ(), 12, 0.4, 0.4, 0.4, 0.3);
@@ -866,7 +868,7 @@ public final class MimicGadgets {
 			if (now % 20 == 0 && player.onClimbable() && !player.onGround() && player.horizontalCollision && !player.isCreative()) {
 				for (InteractionHand hand : InteractionHand.values()) {
 					if (is(player.getItemInHand(hand), Mimic.CLIMB)) {
-						player.getItemInHand(hand).hurtAndBreak(1, player, hand);
+						WarExtras.wear(player, player.getItemInHand(hand), hand, Mimic.CLIMB.cost);
 						break;
 					}
 				}

@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "jaymoskitchen:block/fish_barrel_top_0",
+    "side": "minecraft:block/barrel_side",
+    "bottom": "minecraft:block/barrel_bottom",
+    "particle": "minecraft:block/barrel_side"
+  }
+}

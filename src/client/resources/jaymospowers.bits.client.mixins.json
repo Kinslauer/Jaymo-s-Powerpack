@@ -1,0 +1,14 @@
+{
+	"required": true,
+	"package": "com.jaymospowers.client.bits.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"HoveredSlotAccessor",
+		"NightVisionFadeMixin",
+		"SoulFlameEntityRendererMixin",
+		"SoulFlameFeatureRendererMixin",
+		"SoulFlameScreenMixin",
+		"FirstPersonModelMountedHandsMixin"
+	],
+	"injectors": { "defaultRequire": 1 }
+}

@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import net.minecraft.ChatFormatting;
@@ -252,16 +253,16 @@ public final class Gorger extends XenoForm {
 		live.hornSlam = false;
 		player.resetFallDistance();
 		float hit = Math.min(SLAM_MAX, SLAM_DAMAGE + (float)Math.max(0.0, live.hornFrom - player.getY()) * SLAM_PER_BLOCK);
-		for (LivingEntity e : around(player, SLAM_RADIUS)) {
+		for (LivingEntity e : around(player, AbilityPower.size(player, SLAM_RADIUS))) {
 			e.hurtServer(level, player.damageSources().playerAttack(player), hit);
 			shove(e, player.position(), 0.8, 0.5);
 		}
 		BlockState ground = level.getBlockState(player.blockPosition().below());
 		if (!ground.isAir()) {
-			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, ground), player.getX(), player.getY(), player.getZ(), 50, SLAM_RADIUS * 0.4, 0.1,
-				SLAM_RADIUS * 0.4, 0.2);
+			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, ground), player.getX(), player.getY(), player.getZ(), 50, AbilityPower.size(player, SLAM_RADIUS) * 0.4, 0.1,
+				AbilityPower.size(player, SLAM_RADIUS) * 0.4, 0.2);
 		}
-		ring(level, ParticleTypes.EXPLOSION, player.position(), SLAM_RADIUS * 0.6, 6);
+		ring(level, ParticleTypes.EXPLOSION, player.position(), AbilityPower.size(player, SLAM_RADIUS) * 0.6, 6);
 		sound(player, SoundEvents.MACE_SMASH_GROUND_HEAVY, 1.4F, 0.8F);
 		com.jaymospowers.core.Shakes.heavy(player, player.position(), 10.0, 0.5F);
 	}

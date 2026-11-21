@@ -24,8 +24,10 @@ final class PatronKeys {
 	}
 
 	static void register() {
-		boon = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.boon", InputConstants.KEY_LBRACKET,
-			KeyMapping.Category.register(JaymosKingdoms.id("patrons"))));
+		KeyMapping.Category category = KeyMapping.Category.register(JaymosKingdoms.id("patrons"));
+		boon = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.boon", InputConstants.KEY_LBRACKET, category));
+		// the Ash Whisperer's Rot key, beside it
+		RotKey.register(category);
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			while (boon.consumeClick()) {
 				if (minecraft.player != null && minecraft.gui.screen() == null && minecraft.player.onGround()

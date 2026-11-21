@@ -53,6 +53,8 @@ public final class CrawlTaps {
 	private static boolean rollRight;
 	/** Client game time the local roll started, for drawing it before the server's copy arrives. */
 	private static long rollStart = Long.MIN_VALUE;
+	/** How long the local roll takes (ticks; longer under heavy armour, {@link Crawl#rollTicks}). */
+	private static int rollTicks = Crawl.ROLL_TICKS;
 	/** The local player's last roll, to spend a direction after 2 s just as the server does. */
 	private static Crawl.@Nullable Rolling lastRoll;
 
@@ -70,7 +72,7 @@ public final class CrawlTaps {
 
 	/** The local player's roll progress (see {@link Crawl#rollProgress}), or null when they aren't rolling. */
 	static @Nullable Float localRollProgress(long gameTime, float partialTick) {
-		float t = (gameTime - rollStart + partialTick) / Crawl.ROLL_TICKS;
+		float t = (gameTime - rollStart + partialTick) / rollTicks;
 		if (rollStart == Long.MIN_VALUE || t < 0.0F || t >= 1.0F) {
 			return null;
 		}
@@ -179,7 +181,7 @@ public final class CrawlTaps {
 			rollLeft--;
 			// slide a share of the block each tick (the next tick's move uses this; walls stop it as usual)
 			double yaw = Math.toRadians(player.getYRot());
-			double step = (rollRight ? Crawl.ROLL_DISTANCE : -Crawl.ROLL_DISTANCE) / Crawl.ROLL_TICKS;
+			double step = (rollRight ? Crawl.ROLL_DISTANCE : -Crawl.ROLL_DISTANCE) / rollTicks;
 			Vec3 motion = player.getDeltaMovement();
 			player.setDeltaMovement(-Math.cos(yaw) * step, motion.y, -Math.sin(yaw) * step);
 			// holding the key keeps you rolling that way, one block after another
@@ -211,13 +213,15 @@ public final class CrawlTaps {
 			return;
 		}
 		long now = player.level().getGameTime();
-		Crawl.Rolling next = Crawl.nextRoll(lastRoll, now, right);
+		int ticks = Crawl.rollTicks(player);
+		Crawl.Rolling next = Crawl.nextRoll(lastRoll, now, right, ticks);
 		if (next == null) {
 			// this way is spent: roll back the other way first
 			return;
 		}
 		lastRoll = next;
-		rollLeft = Crawl.ROLL_TICKS;
+		rollLeft = ticks;
+		rollTicks = ticks;
 		rollRight = right;
 		rollStart = now;
 		ClientPlayNetworking.send(new Crawl.Roll(right));

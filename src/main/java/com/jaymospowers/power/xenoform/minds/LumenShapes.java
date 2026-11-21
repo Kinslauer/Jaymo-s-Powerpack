@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.minds;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.power.xenoform.GreatFoes;
@@ -193,8 +194,8 @@ public final class LumenShapes {
 	private static boolean dome(ServerPlayer player, ServerLevel level, State s) {
 		s.domeAt = player.position();
 		s.domeUntil = level.getGameTime() + DOME_TICKS;
-		MagicFx.blast(level, s.domeAt.add(0.0, 1.0, 0.0), (float)DOME_RADIUS * 0.8F, COLOR);
-		MagicFx.sigil(level, s.domeAt.add(0.0, 0.05, 0.0), (float)DOME_RADIUS * 0.8F, COLOR, 20);
+		MagicFx.blast(level, s.domeAt.add(0.0, 1.0, 0.0), (float)AbilityPower.size(player, DOME_RADIUS) * 0.8F, COLOR);
+		MagicFx.sigil(level, s.domeAt.add(0.0, 0.05, 0.0), (float)AbilityPower.size(player, DOME_RADIUS) * 0.8F, COLOR, 20);
 		MindsKit.sound(player, SoundEvents.BEACON_ACTIVATE, 1.2F, 1.6F);
 		return true;
 	}
@@ -322,25 +323,25 @@ public final class LumenShapes {
 	private static void dome(ServerPlayer player, ServerLevel level, State s, long now) {
 		Vec3 c = s.domeAt;
 		if (now >= s.domeUntil || player.level().dimension() != level.dimension()) {
-			MagicFx.blast(level, c.add(0.0, 1.0, 0.0), (float)DOME_RADIUS, COLOR, 8);
+			MagicFx.blast(level, c.add(0.0, 1.0, 0.0), (float)AbilityPower.size(player, DOME_RADIUS), COLOR, 8);
 			s.domeAt = null;
 			return;
 		}
 		Vec3 mid = c.add(0.0, 1.0, 0.0);
 		if (player.tickCount % 4 == 0) {
-			MagicFx.orb(level, mid, (float)DOME_RADIUS, COLOR, 5);
+			MagicFx.orb(level, mid, (float)AbilityPower.size(player, DOME_RADIUS), COLOR, 5);
 		}
 		if (player.tickCount % 10 == 0) {
-			MagicFx.sigil(level, c.add(0.0, 0.05, 0.0), (float)DOME_RADIUS * 0.8F, COLOR, 12);
+			MagicFx.sigil(level, c.add(0.0, 0.05, 0.0), (float)AbilityPower.size(player, DOME_RADIUS) * 0.8F, COLOR, 12);
 		}
-		AABB box = new AABB(mid, mid).inflate(DOME_RADIUS + 2.0);
+		AABB box = new AABB(mid, mid).inflate(AbilityPower.size(player, DOME_RADIUS) + 2.0);
 		for (Projectile shot : level.getEntitiesOfClass(Projectile.class, box, Entity::isAlive)) {
 			Entity owner = shot.getOwner();
 			if (owner != null && (owner == player || MindsKit.spared(player, owner))) {
 				continue;
 			}
 			double d = shot.position().distanceTo(mid);
-			if (d >= DOME_RADIUS - DOME_SHELL && d <= DOME_RADIUS + DOME_SHELL * 0.5) {
+			if (d >= AbilityPower.size(player, DOME_RADIUS) - DOME_SHELL && d <= AbilityPower.size(player, DOME_RADIUS) + DOME_SHELL * 0.5) {
 				MagicFx.blast(level, shot.position(), 0.6F, COLOR, 6);
 				MindsKit.soundAt(level, shot.position(), SoundEvents.AMETHYST_BLOCK_HIT, 0.8F, 1.6F);
 				shot.discard();
@@ -348,9 +349,9 @@ public final class LumenShapes {
 		}
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box, LivingEntity::isAlive)) {
 			double d = e.position().add(0.0, e.getBbHeight() * 0.5, 0.0).distanceTo(mid);
-			if (MindsKit.fair(player, e) && !(e instanceof Player) && d >= DOME_RADIUS - DOME_SHELL && d <= DOME_RADIUS + DOME_SHELL * 0.5) {
+			if (MindsKit.fair(player, e) && !(e instanceof Player) && d >= AbilityPower.size(player, DOME_RADIUS) - DOME_SHELL && d <= AbilityPower.size(player, DOME_RADIUS) + DOME_SHELL * 0.5) {
 				MindsKit.shove(e, mid, DOME_PUSH, 0.1);
-			} else if ((e == player || e instanceof Player || MindsKit.spared(player, e)) && d < DOME_RADIUS && now % 10 == 0) {
+			} else if ((e == player || e instanceof Player || MindsKit.spared(player, e)) && d < AbilityPower.size(player, DOME_RADIUS) && now % 10 == 0) {
 				e.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 24, 0, false, false), player);
 			}
 		}
@@ -443,7 +444,7 @@ public final class LumenShapes {
 	}
 
 	private static void burst(ServerPlayer player, ServerLevel level, Vec3 at, boolean block) {
-		double radius = block ? BLOCK_RADIUS : MISSILE_RADIUS;
+		double radius = block ? AbilityPower.size(player, BLOCK_RADIUS) : MISSILE_RADIUS;
 		float damage = block ? BLOCK_DAMAGE : MISSILE_DAMAGE;
 		for (LivingEntity e : MindsKit.near(player, at, radius)) {
 			e.setInvulnerableTime(0);

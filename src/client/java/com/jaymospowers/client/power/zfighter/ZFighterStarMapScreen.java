@@ -1,6 +1,7 @@
 package com.jaymospowers.client.power.zfighter;
 
 import com.jaymospowers.client.UiStyle;
+import com.jaymospowers.power.zfighter.ZFighterAtlas;
 import com.jaymospowers.power.zfighter.ZFighterSpace;
 import com.jaymospowers.power.zfighter.ZFighterSpaceMissions;
 import com.jaymospowers.power.zfighter.fuel.PodFuel;
@@ -25,6 +26,10 @@ import org.jspecify.annotations.Nullable;
  * (0.18.53) Only Home and the worlds whose star charts the pilot has read are on the map ({@link #read}); the server refuses the rest.
  * The blue giant sits on the Verdant World's orbit with the Verdant World going round it (its moon), on the map whenever the
  * Verdant World is.
+ * The Hollow, a black hole past the outer orbits, sits in the far corner from the Maw: it can't be picked or flown to, and
+ * trips to and from the worlds past it run long ({@link ZFighterSpace#skirtsHollow}).
+ * The atlas ({@link ZFighterAtlas}): a world you've come down on wears a small gold pin on the map, and its card says how often
+ * you've landed there, where you last did, and where your bed is if your respawn point is there.
  */
 public class ZFighterStarMapScreen extends Screen {
 	private static final int MAP = 200;
@@ -49,6 +54,8 @@ public class ZFighterStarMapScreen extends Screen {
 	private static final float MOON_ORBIT = 11.0F;
 	/** The blue giant's size on the map, and the Verdant World's orbit round it (pixels) and speed (turns a minute). */
 	private static final float GIANT_SIZE = 9.0F, GIANT_MOON_ORBIT = 15.0F, GIANT_MOON_SPEED = 1.5F;
+	/** The Hollow (the black hole past the outer worlds): where it hangs off the sun (pixels) and its size. No pod flies to it. */
+	private static final float HOLLOW_X = -80.0F, HOLLOW_Y = 78.0F, HOLLOW_SIZE = 5.0F;
 	/** The map's order of worlds: Home first, then the destinations (the future left off). */
 	private static final int[] BODIES = {ZFighterSpace.HOME_INDEX, ZFighterSpace.CINDER, ZFighterSpace.MOON, ZFighterSpace.RUSTFALL, ZFighterSpace.GLACIA,
 		ZFighterSpace.GIANT, ZFighterSpace.VERDANT, ZFighterSpace.MAW};
@@ -290,6 +297,7 @@ public class ZFighterStarMapScreen extends Screen {
 			}
 		}
 		ZFighterSpaceArt.sun(graphics, cx, cy, 9);
+		ZFighterSpaceArt.hollow(graphics, cx + HOLLOW_X, cy + HOLLOW_Y, HOLLOW_SIZE, time() * 60.0F);
 		int hover = bodyAt(mx, my);
 		for (int index : BODIES) {
 			if (!shown(index)) {
@@ -306,6 +314,12 @@ public class ZFighterStarMapScreen extends Screen {
 			} else if (index == hover) {
 				ZFighterSpaceArt.ring(graphics, p[0], p[1], p[2] + 3.0F, 0xA0FFFFFF, 1);
 			}
+			if (ZFighterAtlas.of(player, index) != null) {
+				// the atlas: you've been down there
+				int px = Math.round(p[0] + p[2]), py = Math.round(p[1] - p[2]) - 2;
+				graphics.fill(px, py, px + 2, py + 2, GOLD);
+				graphics.fill(px, py + 2, px + 1, py + 4, GOLD);
+			}
 			if (isHere(player, index)) {
 				// you are here: a small marker over the world
 				int tx = Math.round(p[0]), ty = Math.round(p[1] - p[2] - 7);
@@ -319,6 +333,11 @@ public class ZFighterStarMapScreen extends Screen {
 			// (0.18.53) no chart read yet: only Home is on the map
 			UiStyle.lineCentred(graphics, this.font, Component.translatable("screen.jaymospowers.zfighter_space.uncharted"), x0 + MAP / 2, y0 + MAP - 14, MAP - 12,
 				UiStyle.HINT);
+		}
+		double hdx = mx - (cx + HOLLOW_X), hdy = my - (cy + HOLLOW_Y);
+		if (hover == Integer.MIN_VALUE && hdx * hdx + hdy * hdy < (HOLLOW_SIZE + 5.0F) * (HOLLOW_SIZE + 5.0F)) {
+			UiStyle.lineCentred(graphics, this.font, Component.translatable("space.jaymospowers.hollow"), Math.round(cx + HOLLOW_X),
+				Math.round(cy + HOLLOW_Y + HOLLOW_SIZE + 6.0F), 90, UiStyle.TEXT);
 		}
 		if (hover != Integer.MIN_VALUE) {
 			float[] p = at(hover);
@@ -352,6 +371,19 @@ public class ZFighterStarMapScreen extends Screen {
 		if (planet >= 0) {
 			UiStyle.line(graphics, this.font, status(index, data), x + 2, ty, w - 6, GOLD);
 			ty += 11;
+		}
+		ZFighterAtlas.Pin pin = index == ZFighterSpace.HOME_INDEX ? null : ZFighterAtlas.of(player, index);
+		if (pin != null) {
+			UiStyle.line(graphics, this.font, pin.landings() == 1
+				? Component.translatable("screen.jaymospowers.zfighter_space.atlas_landed_once", pin.landed().getX(), pin.landed().getZ())
+				: Component.translatable("screen.jaymospowers.zfighter_space.atlas_landed", pin.landings(), pin.landed().getX(), pin.landed().getZ()),
+				x + 2, ty, w - 6, UiStyle.DIM);
+			ty += 10;
+			if (pin.bed().isPresent()) {
+				UiStyle.line(graphics, this.font, Component.translatable("screen.jaymospowers.zfighter_space.atlas_bed", pin.bed().get().getX(), pin.bed().get().getZ()),
+					x + 2, ty, w - 6, UiStyle.DIM);
+				ty += 10;
+			}
 		}
 		List<Component> titles = ZFighterSpaceMissions.titles(player);
 		if (!titles.isEmpty() && index == ZFighterSpace.HOME_INDEX) {

@@ -76,7 +76,9 @@ public final class BossBars {
 			// the brood queen, once woken
 			|| entity instanceof com.jaymoskingdoms.wild.nest.BroodQueen queen && !queen.sleeping()
 			// a horde's grave-captain
-			|| ZombieHordes.captain(entity);
+			|| ZombieHordes.captain(entity)
+			// (Awakening pick) the Cordon's Arbiter in its Court of Judgment
+			|| entity instanceof CordonFolk cordon && cordon.rank() == Cordon.Rank.ARBITER;
 	}
 
 	/** Whether {@code player} has struck {@code boss} (or met it) and not left it since: they are in its fight. */

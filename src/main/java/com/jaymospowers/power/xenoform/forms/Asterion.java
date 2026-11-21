@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Carry;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.wounds.Bleeding;
@@ -552,7 +553,7 @@ public final class Asterion extends XenoForm {
 		s.roarPose = ROAR_POSE;
 		s.roarAt = player.position();
 		s.roarRadius = 0.0;
-		s.roarMax = Mth.lerp(f, ROAR_MIN_RADIUS, ROAR_MAX_RADIUS);
+		s.roarMax = Mth.lerp(f, AbilityPower.size(player, ROAR_MIN_RADIUS), AbilityPower.size(player, ROAR_MAX_RADIUS));
 		s.roarForce = Mth.lerp(f, ROAR_MIN_FORCE, ROAR_MAX_FORCE);
 		s.roarUp = Mth.lerp(f, ROAR_MIN_UP, ROAR_MAX_UP);
 		s.roarDamage = Mth.lerp(f, ROAR_MIN_DAMAGE, ROAR_MAX_DAMAGE);
@@ -614,7 +615,7 @@ public final class Asterion extends XenoForm {
 	/** The slam lands: the ground breaks round it and everyone near is thrown off their feet. */
 	private static void slam(ServerPlayer player, XenoformPower.Live live, ServerLevel level) {
 		Vec3 at = player.position();
-		for (LivingEntity e : around(player, SLAM_RADIUS)) {
+		for (LivingEntity e : around(player, AbilityPower.size(player, SLAM_RADIUS))) {
 			e.hurtServer(level, player.damageSources().playerAttack(player), SLAM_DAMAGE);
 			Vec3 away = e.position().subtract(at).horizontal();
 			away = away.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : away.normalize();
@@ -627,7 +628,7 @@ public final class Asterion extends XenoForm {
 		}
 		level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y + 0.2, at.z, 3, 1.5, 0.1, 1.5, 0.0);
 		sound(player, SoundEvents.MACE_SMASH_GROUND_HEAVY, 2.0F, 0.6F);
-		Shakes.heavy(player, at, SLAM_RADIUS + 8.0, 0.9F);
+		Shakes.heavy(player, at, AbilityPower.size(player, SLAM_RADIUS) + 8.0, 0.9F);
 	}
 
 	/** The horns into the creature in reach: a bleeding cut and a toss. Nothing there, nothing spent. */

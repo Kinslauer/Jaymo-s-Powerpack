@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:stripped_skyroot_log_quarter",
+    "jaymospowers:stripped_skyroot_log_quarter",
+    "jaymospowers:stripped_skyroot_log_quarter",
+    "jaymospowers:stripped_skyroot_log_quarter"
+  ],
+  "result": {
+    "id": "jaymospowers:stripped_skyroot_log"
+  }
+}

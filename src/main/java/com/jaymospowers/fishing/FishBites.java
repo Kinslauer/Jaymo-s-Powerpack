@@ -247,9 +247,11 @@ public final class FishBites {
 		}
 		double range = DRAW_RANGE * rod.range * (line.trolling() ? FishingGear.TROLL_RANGE : 1.0);
 		Vec3 b = line.bait();
+		boolean lava = LavaFishing.lava(level, at);
 		List<LivingEntity> near = level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(b, b).inflate(range), e -> {
 			int kind = kindOf(e);
 			return kind >= 0 && e.isAlive() && e.isInWater() && !taken(e) && rod.takes(kind) && bait.draw(kind) > 0
+				&& lava == (Species.of(kind) != null && Species.of(kind).lava())
 				&& Math.abs(e.getY() - b.y) <= DEPTH_REACH;
 		});
 		if (near.isEmpty()) {

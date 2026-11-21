@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms.ultimate;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.BlockCluster;
 import com.jaymospowers.core.Debris;
 import com.jaymospowers.core.Shakes;
@@ -327,7 +328,7 @@ public final class Titan extends XenoUltimate {
 		ServerLevel level = player.level();
 		player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		player.swing(InteractionHand.OFF_HAND, SwingAnimation.DEFAULT, true);
-		for (LivingEntity living : around(player, CLAP_RADIUS)) {
+		for (LivingEntity living : around(player, AbilityPower.size(player, CLAP_RADIUS))) {
 			if (living.getId() == live.grabbed || live.grips.contains(living.getId())) {
 				continue;
 			}
@@ -335,9 +336,9 @@ public final class Titan extends XenoUltimate {
 			shove(living, player.position(), 1.2, 0.6);
 		}
 		Vec3 feet = player.position();
-		ring(level, ParticleTypes.CLOUD, feet, CLAP_RADIUS * 0.5, 20);
-		ring(level, ParticleTypes.POOF, feet, CLAP_RADIUS, 32);
-		Debris.ring(level, player.blockPosition(), (int)CLAP_RADIUS, 1.2F);
+		ring(level, ParticleTypes.CLOUD, feet, AbilityPower.size(player, CLAP_RADIUS) * 0.5, 20);
+		ring(level, ParticleTypes.POOF, feet, AbilityPower.size(player, CLAP_RADIUS), 32);
+		Debris.ring(level, player.blockPosition(), (int)AbilityPower.size(player, CLAP_RADIUS), 1.2F);
 		sound(player, SoundEvents.ANVIL_LAND, 1.4F, 0.4F);
 		sound(player, SoundEvents.GENERIC_EXPLODE.value(), 0.8F, 1.0F);
 		Shakes.heavy(player, feet, CLAP_SHAKE_RANGE, CLAP_SHAKE);
@@ -512,15 +513,15 @@ public final class Titan extends XenoUltimate {
 
 	private static void slam(ServerPlayer player) {
 		ServerLevel level = player.level();
-		for (LivingEntity living : around(player, SLAM_RADIUS)) {
+		for (LivingEntity living : around(player, AbilityPower.size(player, SLAM_RADIUS))) {
 			living.hurtServer(level, player.damageSources().playerAttack(player), SLAM_DAMAGE);
 			com.jaymospowers.core.Crushing.mark(living);
 			shove(living, player.position(), 1.3, 0.8);
 		}
 		Vec3 feet = player.position();
 		Debris.smash(level, feet, 1.8, player);
-		ring(level, ParticleTypes.POOF, feet, SLAM_RADIUS, 32);
-		ring(level, ParticleTypes.CLOUD, feet, SLAM_RADIUS * 0.5, 16);
+		ring(level, ParticleTypes.POOF, feet, AbilityPower.size(player, SLAM_RADIUS), 32);
+		ring(level, ParticleTypes.CLOUD, feet, AbilityPower.size(player, SLAM_RADIUS) * 0.5, 16);
 		sound(player, SoundEvents.GENERIC_EXPLODE.value(), 1.2F, 0.8F);
 		sound(player, SoundEvents.IRON_GOLEM_HURT, 1.2F, 0.4F);
 		Shakes.heavy(player, feet, TITAN_SHAKE_RANGE, TITAN_SHAKE);
@@ -556,14 +557,14 @@ public final class Titan extends XenoUltimate {
 	/** The chunk landed (it shattered) at {@code at}: it bursts into debris and hits everything near. */
 	private static void land(ServerPlayer player, Vec3 at) {
 		ServerLevel level = player.level();
-		AABB box = new AABB(at, at).inflate(HURL_RADIUS);
+		AABB box = new AABB(at, at).inflate(AbilityPower.size(player, HURL_RADIUS));
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, box,
-			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && !spared(player, e) && e.distanceToSqr(at) <= HURL_RADIUS * HURL_RADIUS)) {
+			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && !spared(player, e) && e.distanceToSqr(at) <= AbilityPower.size(player, HURL_RADIUS) * AbilityPower.size(player, HURL_RADIUS))) {
 			living.hurtServer(level, player.damageSources().playerAttack(player), HURL_DAMAGE);
 			shove(living, at, 0.7, 0.4);
 		}
-		Debris.ring(level, BlockPos.containing(at), (int)HURL_RADIUS, 1.4F);
-		burst(level, ParticleTypes.POOF, at, 14, HURL_RADIUS * 0.5, 0.05);
+		Debris.ring(level, BlockPos.containing(at), (int)AbilityPower.size(player, HURL_RADIUS), 1.4F);
+		burst(level, ParticleTypes.POOF, at, 14, AbilityPower.size(player, HURL_RADIUS) * 0.5, 0.05);
 		sound(player, SoundEvents.GENERIC_EXPLODE.value(), 0.9F, 0.9F);
 		Shakes.heavy(player, at, 16.0, 1.0F);
 	}

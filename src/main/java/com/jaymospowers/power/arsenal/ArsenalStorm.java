@@ -257,6 +257,7 @@ public final class ArsenalStorm {
 				last.put(living.getId(), now);
 				living.setInvulnerableTime(0);
 				if (living.hurtServer(level, source, rock ? Math.min(damage, ArsenalWing.ROCK_DAMAGE) : damage)) {
+					com.jaymospowers.core.trials.PowerTrials.count(player, "arsenal.storm", 1);
 					if (corrupted) {
 						ArsenalVoid.voidHit(living, player, false);
 					}

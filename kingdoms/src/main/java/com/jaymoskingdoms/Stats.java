@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import com.mojang.serialization.Codec;
 import java.util.HashMap;
 import java.util.Locale;
@@ -61,6 +62,8 @@ import org.jspecify.annotations.Nullable;
 public final class Stats {
 	/** (0.7.540) New points per old point: what a heritage, class or story point is worth now, and what old saves are scaled by. */
 	public static final int STEP = 10;
+	/** What a heritage's gift or a story answer's point is worth (a class's is still {@link #STEP}). */
+	public static final int GIFT_STEP = 5;
 	/** (0.7.540) Attribute points per character level (all three pillars at their top: 75 levels, 375 points). */
 	public static final int POINTS_PER_LEVEL = 5;
 	/** An attribute's highest value, free points from heritage and class included. */
@@ -89,10 +92,18 @@ public final class Stats {
 	static final double WITS_LUCK = 0.1 / STEP * TOP_SHARE;
 	/** (0.7.540) The rank key that marks a player's points as already on the 0-100 scale. */
 	static final String SCALED_KEY = "stat_scale";
-	/** (0.7.540) Points a shift-click puts in at once. */
-	public static final int SHIFT_STEP = 10;
+	/** Points a shift-click puts in at once. */
+	public static final int SHIFT_STEP = 5;
+	/** What taking every spent point back costs (emeralds' worth, paid in the coin of the land): the Redistribute button on the Attributes tab. */
+	public static final int REDISTRIBUTE_FEE = 120;
 	/** Presence: the free points everyone starts with (it is the one attribute no heritage or story gives). */
 	public static final int BASE_PRESENCE = STEP;
+	/**
+	 * (Awakening pick) Ability Power, for those with a Jaymo's Powers power: per point, this share more harm from their
+	 * power's own moves, this share more reach where a move picks its target by aim, and this share longer on what a move
+	 * lays on others (100: +30%, +20%, +25%). Powers reads it by reflection ({@link #abilityShare}).
+	 */
+	public static final double ABILITY_DAMAGE = 0.003, ABILITY_REACH = 0.002, ABILITY_LENGTH = 0.0025;
 	/** The sparks' colour when a trained point of Might lands. */
 	static final int MIGHT_COLOR = 0xC0503A;
 
@@ -104,7 +115,8 @@ public final class Stats {
 		builder -> builder.persistent(Codec.DOUBLE).copyOnDeath().syncWith(ByteBufCodecs.DOUBLE, AttachmentSyncPredicate.targetOnly()));
 
 	public enum Stat {
-		MIGHT, AGILITY, FINESSE, ENDURANCE, GRIT, WITS, ARCANA, PRESENCE;
+		// (Awakening pick) Ability Power last, so no ordinal moves
+		MIGHT, AGILITY, FINESSE, ENDURANCE, GRIT, WITS, ARCANA, PRESENCE, POWER;
 
 		public String key() {
 			return name().toLowerCase(Locale.ROOT);
@@ -131,12 +143,25 @@ public final class Stats {
 		}
 	}
 
+	/** Player → server: take every point spent on attributes back, for {@link #REDISTRIBUTE_FEE}. */
+	public record Redistribute() implements CustomPacketPayload {
+		public static final Type<Redistribute> TYPE = new Type<>(JaymosKingdoms.id("stat_redistribute"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Redistribute> CODEC = StreamCodec.unit(new Redistribute());
+
+		@Override
+		public Type<Redistribute> type() {
+			return TYPE;
+		}
+	}
+
 	private Stats() {
 	}
 
 	static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(Raise.TYPE, Raise.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Raise.TYPE, (payload, context) -> raise(context.player(), payload.stat(), payload.count()));
+		PayloadTypeRegistry.serverboundPlay().register(Redistribute.TYPE, Redistribute.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Redistribute.TYPE, (payload, context) -> redistribute(context.player()));
 	}
 
 	// ---- reading -----------------------------------------------------------------------------------------------
@@ -172,8 +197,8 @@ public final class Stats {
 	 */
 	public static int earned(Player player, Skills.Progress p) {
 		Heritage.Kind kind = Heritage.of(player);
-		int free = (kind == null ? 0 : kind.freePoints) + WarriorZenkai.points(player) + LifeStory.freePoints(player);
-		return characterLevel(p) * POINTS_PER_LEVEL + free * STEP + TIER_POINTS[tier(player)];
+		int free = WarriorZenkai.points(player) + LifeStory.freePoints(player);
+		return characterLevel(p) * POINTS_PER_LEVEL + free * STEP + (kind == null ? 0 : kind.freePoints) * GIFT_STEP + SkillRenown.statPoints(p) + TIER_POINTS[tier(player)];
 	}
 
 	/** (0.7.540) The world tier that sets {@code player}'s caps (its ordinal): the highest they've opened, or the one they're in if higher. */
@@ -221,12 +246,12 @@ public final class Stats {
 	/** Free points in {@code stat} from {@code player}'s heritage. */
 	public static int fromHeritage(Player player, Stat stat) {
 		Heritage.Kind kind = Heritage.of(player);
-		return kind == null ? 0 : kind.bonus(stat) * STEP;
+		return kind == null ? 0 : kind.bonus(stat) * GIFT_STEP;
 	}
 
 	/** (0.7.216) Free points in {@code stat} from {@code player}'s life story ({@link LifeStory}). */
 	public static int fromStory(Player player, Stat stat) {
-		return LifeStory.points(player, stat) * STEP;
+		return LifeStory.points(player, stat) * GIFT_STEP;
 	}
 
 	/** Might trained in the weights so far, the fraction included (0 for none). */
@@ -260,6 +285,9 @@ public final class Stats {
 		if (stat == Stat.ARCANA && !Mana.hasMana(player)) {
 			return "gui.jaymoskingdoms.stats.blocked.unattuned";
 		}
+		if (stat == Stat.POWER && PowersCompat.power(player) == null) {
+			return "gui.jaymoskingdoms.stats.blocked.powerless";
+		}
 		if (total(player, p, stat) >= cap(player)) {
 			return cap(player) >= MAX ? "gui.jaymoskingdoms.stats.blocked.max" : "gui.jaymoskingdoms.stats.blocked.tier";
 		}
@@ -269,9 +297,29 @@ public final class Stats {
 		return null;
 	}
 
-	/** (0.7.212) Whether {@code stat}'s row shows for {@code player}: all of them, Arcana only once they have mana. */
+	/**
+	 * (0.7.212) Whether {@code stat}'s row shows for {@code player}: all of them, Arcana only once they have mana, (Awakening
+	 * pick) Ability Power only with a Jaymo's Powers power (or points already in it).
+	 */
 	public static boolean shown(Player player, Stat stat) {
+		if (stat == Stat.POWER) {
+			return PowersCompat.power(player) != null || spent(Skills.of(player), Stat.POWER) > 0;
+		}
 		return stat != Stat.ARCANA || Mana.hasMana(player);
+	}
+
+	/**
+	 * (Awakening pick) What {@code player}'s Ability Power gives as a share: {@code "damage"}, {@code "reach"} or
+	 * {@code "length"} (0 for anything else). Jaymo's Powers calls this by reflection; either side.
+	 */
+	public static double abilityShare(Player player, String what) {
+		int v = value(player, Stat.POWER);
+		return switch (what) {
+			case "damage" -> ABILITY_DAMAGE * v;
+			case "reach" -> ABILITY_REACH * v;
+			case "length" -> ABILITY_LENGTH * v;
+			default -> 0.0;
+		};
 	}
 
 	/** What {@code value} points of {@code stat} do (the K screen's line for it). */
@@ -287,6 +335,8 @@ public final class Stats {
 				num(Mana.REGEN_PER_POINT * value));
 			case PRESENCE -> Component.translatable("stat.jaymoskingdoms.presence.now", pct(Presence.TALK_PER_POINT * value),
 				pct(Presence.WARM_PER_POINT * value), pct(Presence.ORDERS_PER_POINT * value));
+			case POWER -> Component.translatable("stat.jaymoskingdoms.power.now", pct(ABILITY_DAMAGE * value), pct(ABILITY_REACH * value),
+				pct(ABILITY_LENGTH * value));
 		};
 	}
 
@@ -400,5 +450,32 @@ public final class Stats {
 		player.setAttached(Skills.PROGRESS, new Skills.Progress(p.xp(), Map.copyOf(ranks)));
 		attributes(player);
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.5F, 1.1F);
+	}
+
+	/**
+	 * Takes every point {@code player} spent on attributes back for {@link #REDISTRIBUTE_FEE}, to spend again (perks stay as they
+	 * are). Nothing happens if nothing is spent or the fee can't be paid; heritage, class, story and trained points aren't spent
+	 * points, so they stay.
+	 */
+	private static void redistribute(ServerPlayer player) {
+		migrate(player);
+		Skills.Progress p = Skills.of(player);
+		if (spent(p) == 0) {
+			return;
+		}
+		long fee = Money.worth(REDISTRIBUTE_FEE);
+		if (!Money.canPay(player, fee)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.stats.redistribute.poor", Money.text(player, fee)));
+			return;
+		}
+		Money.charge(player, fee);
+		Map<String, Integer> ranks = new HashMap<>(p.ranks());
+		for (Stat stat : Stat.values()) {
+			ranks.remove(stat.rankKey());
+		}
+		player.setAttached(Skills.PROGRESS, new Skills.Progress(p.xp(), Map.copyOf(ranks)));
+		attributes(player);
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 0.5F, 0.8F);
+		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.stats.redistribute.done", points(player, Skills.of(player))));
 	}
 }

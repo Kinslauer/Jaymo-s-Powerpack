@@ -577,7 +577,9 @@ public final class Trees {
 	 * one) takes an axe: without one it's slow, drops nothing ({@code PlayerLogToolMixin}) and won't chop.
 	 */
 	public static boolean needsAxe(Player player, BlockState state) {
-		return !player.isCreative() && (state.is(BlockTags.LOGS) || state.is(ChoppedLog.BLOCK)) && !isAxe(player.getMainHandItem());
+		return !player.isCreative() && (state.is(BlockTags.LOGS) || state.is(ChoppedLog.BLOCK)) && !isAxe(player.getMainHandItem())
+			// (class trees) a Monk's Iron Palm is axe enough
+			&& !FaithExtras.palm(player, state);
 	}
 
 	/** Anything that cuts wood faster than a hand: axes, the hand axe, mattocks. */
@@ -694,15 +696,13 @@ public final class Trees {
 	static final int METER = 12;
 
 	/**
-	 * (0.7.510) The chop meter on the action bar: {@code done} of {@code need} chops, as filled and empty squares (never the
-	 * {@code |...} charge bar, which would hold the mouse and stop the next swing).
+	 * (0.7.510) The chop meter: {@code done} of {@code need} chops, as filled and empty squares under the crosshair
+	 * ({@link HudBars#marks}, which never holds the mouse, so the next swing still lands).
 	 */
 	private static void showChops(ServerPlayer player, int done, int need) {
 		int marks = Math.min(METER, need);
 		int filled = need <= 0 ? marks : Math.round(marks * (float)done / need);
-		Component bar = Component.literal("\u25A0".repeat(filled)).withStyle(filled >= marks ? ChatFormatting.RED : ChatFormatting.GOLD)
-			.append(Component.literal("\u25A1".repeat(marks - filled)).withStyle(ChatFormatting.DARK_GRAY));
-		player.sendOverlayMessage(bar);
+		HudBars.marks(player, "chop", filled, marks, HudBars.GOLD, null);
 	}
 
 	/** (0.7.510) Wood chips flying off the face of {@code cut} toward whoever's chopping. */
@@ -1010,7 +1010,7 @@ public final class Trees {
 	}
 
 	/** The leaves these logs hold that no other wood does. */
-	private static List<BlockPos> leavesOf(ServerLevel level, List<BlockPos> logs) {
+	static List<BlockPos> leavesOf(ServerLevel level, List<BlockPos> logs) {
 		Set<BlockPos> wood = new HashSet<>(logs);
 		List<BlockPos> leaves = new ArrayList<>();
 		Set<BlockPos> looked = new HashSet<>();

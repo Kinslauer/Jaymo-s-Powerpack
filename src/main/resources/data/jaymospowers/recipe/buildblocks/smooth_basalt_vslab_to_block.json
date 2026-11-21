@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:smooth_basalt_vslab",
+    "jaymospowers:smooth_basalt_vslab"
+  ],
+  "result": {
+    "id": "minecraft:smooth_basalt"
+  }
+}

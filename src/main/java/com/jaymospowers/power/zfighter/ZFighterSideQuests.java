@@ -309,6 +309,8 @@ public final class ZFighterSideQuests {
 			default -> FOES_BASE_TP + FOES_TP * job.need();
 		};
 		ZFighterTraining.grant(player, tp);
+		// (Awakening pick) any quest done gives a power trial's swap back
+		com.jaymospowers.core.trials.PowerTrials.questDone(player);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_job_done", describe(job), tp).withStyle(ChatFormatting.GOLD));
 		if (player.level().getRandom().nextInt(BEAN_ONE_IN) == 0) {
 			ZFighterSagas.give(player, new ItemStack(ZFighterItems.HERMIT_BEAN));

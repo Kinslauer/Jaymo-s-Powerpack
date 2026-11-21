@@ -12,7 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 abstract class StanceScrollMixin {
 	@Inject(method = "onScroll", at = @At("HEAD"), cancellable = true)
 	private void jaymospowers$stanceScroll(long window, double xOffset, double yOffset, CallbackInfo ci) {
-		if (StanceScroll.scroll(yOffset)) {
+		// aiming down a gun's sights, the wheel is the scope's zoom (GunHandling), before the stances or the hotbar
+		if (com.jaymospowers.client.armory.GunHandling.scroll(yOffset) || StanceScroll.scroll(yOffset)) {
 			ci.cancel();
 		}
 	}

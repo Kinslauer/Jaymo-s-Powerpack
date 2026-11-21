@@ -58,7 +58,8 @@ import org.jspecify.annotations.Nullable;
 public final class Druids {
 	public static Item SPRIG;
 	public static final String WOLF = "wolf", BEAR = "bear", HAWK = "hawk", FISH = "fish";
-	public static final List<String> FORMS = List.of(WOLF, BEAR, HAWK, FISH);
+	/** (class trees) the fox and the stag are Fox and Stag's ({@link WildShapes}). */
+	public static final List<String> FORMS = List.of(WOLF, BEAR, HAWK, FISH, WildShapes.FOX, WildShapes.STAG);
 	/** How long a shape lasts (ticks), how many a short rest brings back, and the pause after letting one go (ticks). */
 	public static final int SHAPE_TICKS = 20 * 60 * 3;
 	static final int SHAPES = 2, AFTER_TICKS = 100;
@@ -72,7 +73,8 @@ public final class Druids {
 	static final double WOLF_HEALTH = 4.0, BEAR_HEALTH = 10.0, HAWK_HEALTH = -4.0, FISH_HEALTH = 0.0, BEAR_KNOCKBACK = 0.5;
 	/** The stand-in beasts' kin: the entity paths each shape is studied from. */
 	static final Map<String, List<String>> KIN = Map.of(WOLF, List.of("wolf", "feral_wolf", "coyote"), BEAR, List.of("polar_bear", "grizzly"),
-		HAWK, List.of("parrot", "pigeon", "bat"), FISH, List.of("cod", "salmon", "tropical_fish", "pufferfish"));
+		HAWK, List.of("parrot", "pigeon", "bat"), FISH, List.of("cod", "salmon", "tropical_fish", "pufferfish"), WildShapes.FOX, List.of("fox"),
+		WildShapes.STAG, List.of("deer"));
 
 	/** The beasts watched so far: kind → ticks. Saved, kept through death. */
 	static final AttachmentType<Map<String, Integer>> WATCHED = AttachmentRegistry.create(JaymosKingdoms.id("druid_watched"),
@@ -165,6 +167,12 @@ public final class Druids {
 		return !player.getAttachedOrElse(FORM, "").isEmpty();
 	}
 
+	/** The stand-in beast of the shape {@code player} wears, or null ({@link SizeArts} sizes it with the body). */
+	static @org.jspecify.annotations.Nullable Mob beast(Player player) {
+		Shape shape = SHAPES_WORN.get(player.getUUID());
+		return shape == null ? null : shape.beast;
+	}
+
 	/** Whether {@code player} has studied {@code form}. */
 	public static boolean knows(Player player, String form) {
 		if (player.isCreative()) {
@@ -181,13 +189,14 @@ public final class Druids {
 		return false;
 	}
 
+	/** (class trees) the shapes they may take: as many as their slots, in the order learned ({@link WildShapes#usable}). */
 	private static List<String> known(Player player) {
-		return FORMS.stream().filter(f -> knows(player, f)).toList();
+		return WildShapes.usable(player, FORMS.stream().filter(f -> knows(player, f)).toList());
 	}
 
 	// ---- the key ------------------------------------------------------------------------------------------------------------------
 
-	/** The class key: take the selected shape or let it go; with sneak, pick the next one studied. */
+	/** The class key: take the selected shape or let it go; with sneak, pick the next one studied (held: {@link #held}). */
 	static void key(ServerPlayer player, boolean sneak) {
 		if (!(player.level() instanceof ServerLevel level)) {
 			return;
@@ -202,6 +211,10 @@ public final class Druids {
 			String next = known.get((known.indexOf(now) + 1) % known.size());
 			player.setAttached(SELECTED, next);
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.druid.selected", Component.translatable("druid.jaymoskingdoms.form." + next)));
+			return;
+		}
+		// (class trees) sneak and the key in a shape: Barkskin
+		if (sneak && shaped(player) && WildShapes.bark(player, shapes(player))) {
 			return;
 		}
 		if (shaped(player)) {
@@ -223,31 +236,38 @@ public final class Druids {
 		if (Downed.isDowned(player) || player.isPassenger() && !player.isCreative()) {
 			return;
 		}
-		if (!Rests.spend(player, Rests.SHAPE, 1, shapes(player))) {
-			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.druid.tired"));
+		// the stand-in first: a shape that can't be made (its beast's mod is missing) costs no use
+		Mob beast = stand(level, form);
+		if (beast == null || !WildShapes.spend(player, form, shapes(player))) {
 			return;
 		}
-		take(player, level, form);
+		take(player, level, form, beast);
 	}
 
-	private static void take(ServerPlayer player, ServerLevel level, String form) {
-		Mob beast = stand(level, form);
-		if (beast == null) {
-			return;
-		}
+	/** (class trees) Sneak and the key held: Barkskin, in a shape or out of one. False when it isn't theirs. */
+	static boolean held(ServerPlayer player) {
+		return WildShapes.bark(player, shapes(player));
+	}
+
+	private static void take(ServerPlayer player, ServerLevel level, String form, Mob beast) {
+		// (class trees) Wild Heart remembers the health they take it with
+		FaithExtras.shapeTaken(player);
 		if (player.isPassenger()) {
 			player.stopRiding();
 		}
 		follow(player, beast);
 		level.addFreshEntity(beast);
-		SHAPES_WORN.put(player.getUUID(), new Shape(beast, level.getGameTime() + Paths.shapeTicks(player, SHAPE_TICKS)));
+		// practice and Long Shape: a shape lasts longer ({@link WildShapes#ticks})
+		long lasts = WildShapes.ticks(player, form, Paths.shapeTicks(player, SHAPE_TICKS));
+		SHAPES_WORN.put(player.getUUID(), new Shape(beast, level.getGameTime() + lasts));
 		player.setAttached(FORM, form);
 		AttributeInstance health = player.getAttribute(Attributes.MAX_HEALTH);
 		double extra = switch (form) {
 			case WOLF -> WOLF_HEALTH;
 			case BEAR -> BEAR_HEALTH;
 			case HAWK -> HAWK_HEALTH;
-			default -> FISH_HEALTH;
+			case FISH -> FISH_HEALTH;
+			default -> WildShapes.health(form);
 		};
 		if (health != null && extra != 0.0) {
 			health.removeModifier(HEALTH);
@@ -271,10 +291,11 @@ public final class Druids {
 			player.onUpdateAbilities();
 		}
 		buffs(player, form);
+		WildShapes.taken(player, beast, form);
 		level.sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY(0.5), player.getZ(), 24, 0.4, 0.6, 0.4, 0.05);
 		level.sendParticles(ParticleTypes.SPORE_BLOSSOM_AIR, player.getX(), player.getY(0.5), player.getZ(), 16, 0.5, 0.6, 0.5, 0.02);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ZOMBIE_VILLAGER_CONVERTED, SoundSource.PLAYERS, 0.8F, 1.3F);
-		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.druid.shaped", Component.translatable("druid.jaymoskingdoms.form." + form), SHAPE_TICKS / 1200));
+		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.druid.shaped", Component.translatable("druid.jaymoskingdoms.form." + form), Math.max(1L, lasts / 1200)));
 	}
 
 	private static @Nullable Mob stand(ServerLevel level, String form) {
@@ -282,7 +303,9 @@ public final class Druids {
 			case WOLF -> EntityTypes.WOLF.create(level, EntitySpawnReason.EVENT);
 			case BEAR -> EntityTypes.POLAR_BEAR.create(level, EntitySpawnReason.EVENT);
 			case HAWK -> EntityTypes.PARROT.create(level, EntitySpawnReason.EVENT);
-			default -> EntityTypes.COD.create(level, EntitySpawnReason.EVENT);
+			case FISH -> EntityTypes.COD.create(level, EntitySpawnReason.EVENT);
+			// (class trees) the fox, the stag and the elder shapes
+			default -> WildShapes.stand(level, form);
 		};
 		if (beast != null) {
 			beast.setNoAi(true);
@@ -325,7 +348,7 @@ public final class Druids {
 				player.addEffect(new MobEffectInstance(MobEffects.JUMP_BOOST, 60, 3, true, false, false));
 				player.addEffect(new MobEffectInstance(MobEffects.SPEED, 60, 0, true, false, false));
 			}
-			default -> {
+			case FISH -> {
 				player.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 60, 0, true, false, false));
 				if (wet) {
 					player.addEffect(new MobEffectInstance(MobEffects.DOLPHINS_GRACE, 60, 1, true, false, false));
@@ -335,6 +358,7 @@ public final class Druids {
 					player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60, 1, true, false, false));
 				}
 			}
+			default -> WildShapes.buffs(player, form);
 		}
 	}
 
@@ -369,7 +393,9 @@ public final class Druids {
 			kb.removeModifier(KNOCKBACK);
 		}
 		fold(player);
-		for (var effect : List.of(MobEffects.SPEED, MobEffects.STRENGTH, MobEffects.JUMP_BOOST, MobEffects.RESISTANCE, MobEffects.SLOWNESS, MobEffects.SLOW_FALLING,
+		WildShapes.shed(player);
+		SizeArts.shed(player);
+		for (var effect : List.of(MobEffects.HASTE, MobEffects.SPEED, MobEffects.STRENGTH, MobEffects.JUMP_BOOST, MobEffects.RESISTANCE, MobEffects.SLOWNESS, MobEffects.SLOW_FALLING,
 			MobEffects.WATER_BREATHING, MobEffects.DOLPHINS_GRACE, MobEffects.WEAKNESS, MobEffects.NIGHT_VISION)) {
 			MobEffectInstance on = player.getEffect(effect);
 			if (on != null && on.isAmbient() && !on.isVisible() && on.getDuration() <= 300) {
@@ -427,7 +453,7 @@ public final class Druids {
 		}
 		Map<String, Integer> watched = null;
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(STUDY_RANGE),
-			x -> x.isAlive() && x != player && !(x instanceof Player) && !isStandIn(x))) {
+			x -> x.isAlive() && x != player && !(x instanceof Player) && !standIn(x))) {
 			String path = FoeStudy.kind(e);
 			for (String form : FORMS) {
 				if (KIN.get(form).contains(path) && player.hasLineOfSight(e)) {
@@ -449,7 +475,7 @@ public final class Druids {
 		}
 	}
 
-	private static boolean isStandIn(LivingEntity e) {
+	static boolean standIn(LivingEntity e) {
 		for (Shape shape : SHAPES_WORN.values()) {
 			if (shape.beast == e) {
 				return true;
@@ -459,6 +485,8 @@ public final class Druids {
 	}
 
 	private static void learned(ServerPlayer player, ServerLevel level, String form) {
+		ClassTrees.give(player, PlayerClass.DRUID, ClassTrees.XP_STUDY);
+		WildShapes.learned(player, form);
 		level.sendParticles(ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY(1.0), player.getZ(), 14, 0.4, 0.5, 0.4, 0.02);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.5F, 1.6F);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.druid.learned", Component.translatable("druid.jaymoskingdoms.form." + form)));

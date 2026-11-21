@@ -14,7 +14,6 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -60,8 +59,6 @@ final class WillClash {
 	/** (0.7.401) How often a boom and a toll sound while the clash runs (ticks), and how loud at the least. */
 	static final int TOLL_TICKS = 20;
 	static final float BOOM_VOLUME = 1.2F, BELL_VOLUME = 2.0F;
-	/** The bar's length on the action bar (characters). */
-	static final int BAR = 30;
 
 	private static final class Session {
 		final UUID a, b;
@@ -173,8 +170,8 @@ final class WillClash {
 			root(a, s.spotA);
 			root(b, s.spotB);
 			if (t % 2 == 0) {
-				a.sendOverlayMessage(bar(s.score, b));
-				b.sendOverlayMessage(bar(-s.score, a));
+				bar(a, s.score, b);
+				bar(b, -s.score, a);
 			}
 			if (t % 5 == 0) {
 				float shake = SHAKE_MIN + (SHAKE_MAX - SHAKE_MIN) * Math.min(1.0F, Math.abs(s.score) / DECIDE);
@@ -193,13 +190,9 @@ final class WillClash {
 	}
 
 	/** The contest as {@code me} sees it ({@code score} is my lead): my side gold, theirs red. */
-	private static Component bar(float score, ServerPlayer them) {
+	private static void bar(ServerPlayer me, float score, ServerPlayer them) {
 		float lead = Math.clamp(score / DECIDE, -1.0F, 1.0F);
-		int mine = Math.round((lead + 1.0F) * 0.5F * BAR);
-		MutableComponent line = Component.translatable("message.jaymoskingdoms.will_clash.you").withStyle(ChatFormatting.GOLD).append(" ");
-		line.append(Component.literal("|".repeat(mine)).withStyle(ChatFormatting.GOLD));
-		line.append(Component.literal("|".repeat(BAR - mine)).withStyle(ChatFormatting.DARK_RED));
-		return line.append(" ").append(them.getDisplayName().copy().withStyle(ChatFormatting.DARK_RED));
+		HudBars.tug(me, "will_clash", (lead + 1.0F) * 0.5F, them.getDisplayName());
 	}
 
 	/**

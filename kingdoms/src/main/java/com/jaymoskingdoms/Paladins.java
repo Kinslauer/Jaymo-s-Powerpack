@@ -31,9 +31,11 @@ import net.minecraft.world.item.ItemStack;
  * <li><b>Lay on hands:</b> the key heals who you look at (or yourself) from a pool of {@link #HANDS_POOL} health a day.</li>
  * <li><b>Aura:</b> the Paladin and friends near them ({@link #AURA_RANGE}) save better ({@link #AURA_SAVE}, {@link Saves}) and the
  * Paladin is not afraid ({@link #fearless}).</li>
- * <li><b>Oath:</b> each oath has acts that break it. Mercy: killing the helpless (the held, the fleeing, the downed, folk and pets).
- * Justice: any crime ({@link Theft}). Honour: an unprovoked blow, or a theft or pickpocket. Broken, the oath takes smite, hands and aura
- * away until atoned for, by prayer at any shrine or by a priest's rite ({@link ClassTeachers}).</li>
+ * <li><b>Oath:</b> each oath forbids acts. Mercy: killing the helpless (the held, the fleeing, the downed, folk and pets).
+ * Justice: any crime ({@link Theft}). Honour: an unprovoked blow, or a theft or pickpocket. The oath binds: a forbidden act
+ * is refused, and only done again on purpose does it break the oath ({@link Vows}); a crime the refusal can't stop before
+ * the act still breaks it ({@link #crime}). Broken, the oath takes smite, hands and aura away until atoned for, by prayer
+ * at any shrine or by a priest's rite ({@link ClassTeachers}).</li>
  * </ul>
  */
 public final class Paladins {
@@ -70,6 +72,8 @@ public final class Paladins {
 	/** A new Paladin takes the oath they picked (and the symbol's making is a priest's to teach). */
 	static void begin(ServerPlayer player, String oath) {
 		player.removeAttached(BROKEN);
+		// (the written oath) the book it's kept in
+		VowBook.give(player);
 		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.paladin.sworn", Component.translatable("option.jaymoskingdoms.oath." + oath)));
 	}
 
@@ -77,6 +81,7 @@ public final class Paladins {
 	static void unmake(ServerPlayer player) {
 		player.removeAttached(BROKEN);
 		READY.remove(player.getUUID());
+		VowBook.unmake(player);
 	}
 
 	/** Whether {@code player} is a Paladin whose oath holds. */
@@ -86,11 +91,12 @@ public final class Paladins {
 
 	/** The smites a day {@code player} has, and the health of their hands (the second class has a share). */
 	static int smites(Player player) {
-		return Classes.scaled(player, PlayerClass.PALADIN, SMITES);
+		return Classes.scaled(player, PlayerClass.PALADIN, SMITES) + OathGifts.smites(player);
 	}
 
 	static int hands(Player player) {
-		return Classes.scaled(player, PlayerClass.PALADIN, (int) HANDS_POOL);
+		// practice: the pool grows with the Paladin's level; (class trees) Deep Wells and a Vigil
+		return OathGifts.hands(player, Classes.scaled(player, PlayerClass.PALADIN, (int) HANDS_POOL) * ClassTrees.practice(player, PlayerClass.PALADIN));
 	}
 
 	static String oath(Player player) {
@@ -108,8 +114,14 @@ public final class Paladins {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.paladin.broken"));
 			return;
 		}
+		LivingEntity target = Arcana.sighted(player);
 		if (sneak) {
-			if (Rests.left(player, Rests.SMITE, smites(player)) <= 0) {
+			// (class trees) Shield of Faith on a friend; the smite is a tree perk now
+			if (OathGifts.shield(player, target) || !ClassTrees.check(player, OathGifts.SMITE)) {
+				return;
+			}
+			// (class trees) an Avenger with a friend just fallen has one for nothing
+			if (Rests.left(player, Rests.SMITE, smites(player)) <= 0 && !FaithExtras.avenging(player)) {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.paladin.no_smite"));
 				return;
 			}
@@ -119,11 +131,18 @@ public final class Paladins {
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.8F, 1.5F);
 			return;
 		}
-		LivingEntity target = Arcana.sighted(player);
+		// (class trees) Honour's Challenge on a foe
+		if (OathGifts.challenge(player, target)) {
+			return;
+		}
 		LivingEntity who = target != null && player.distanceTo(target) <= HANDS_REACH && Restoration.friend(player, target) ? target : player;
 		float missing = who.getMaxHealth() - who.getHealth();
 		int left = Rests.left(player, Rests.HANDS, hands(player));
 		if (missing < 0.5F) {
+			// (class trees) no harm to mend: Divine Sense
+			if (OathGifts.sense(player)) {
+				return;
+			}
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.paladin.hands_whole"));
 			return;
 		}
@@ -133,6 +152,7 @@ public final class Paladins {
 			return;
 		}
 		who.heal(give);
+		ClassTrees.give(player, PlayerClass.PALADIN, ClassTrees.XP_HANDS);
 		Fx.beam(level, player.getEyePosition().add(0.0, -0.3, 0.0), who.getBoundingBox().getCenter(), 0.05F, 0xFFE9A0, 8);
 		level.sendParticles(ParticleTypes.HEART, who.getX(), who.getY(1.0), who.getZ(), 5, 0.3, 0.4, 0.3, 0.0);
 		level.playSound(null, who.getX(), who.getY(), who.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 1.4F);
@@ -143,7 +163,6 @@ public final class Paladins {
 
 	/** A Paladin's blow lands on {@code target}: a readied smite spends itself on it. Called from the class perks. */
 	static float struck(ServerPlayer player, LivingEntity target, ItemStack held, float amount) {
-		honourCheck(player, target);
 		if (!keeping(player)) {
 			return amount;
 		}
@@ -152,10 +171,11 @@ public final class Paladins {
 			return amount;
 		}
 		READY.remove(player.getUUID());
-		if (until < player.level().getGameTime() || !Rests.spend(player, Rests.SMITE, 1, smites(player))) {
+		if (until < player.level().getGameTime() || !FaithExtras.avenged(player) && !Rests.spend(player, Rests.SMITE, 1, smites(player))) {
 			return amount;
 		}
-		float extra = Restoration.undead(target) ? SMITE_BONUS * 2.0F : SMITE_BONUS;
+		float extra = OathGifts.smite(player, target, Restoration.undead(target) ? SMITE_BONUS * 2.0F : SMITE_BONUS);
+		ClassTrees.give(player, PlayerClass.PALADIN, ClassTrees.XP_SMITE);
 		if (player.level() instanceof ServerLevel level) {
 			Fx.blast(level, target.getBoundingBox().getCenter(), 1.4F, 0xFFE9A0);
 			level.sendParticles(ParticleTypes.END_ROD, target.getX(), target.getY(0.6), target.getZ(), 16, 0.3, 0.4, 0.3, 0.15);
@@ -171,23 +191,31 @@ public final class Paladins {
 		if (!(who.level() instanceof ServerLevel level) || level.players().isEmpty()) {
 			return 0.0F;
 		}
-		if (who instanceof Player p && keeping(p)) {
-			return AURA_SAVE;
+		// (class trees) the aura is a tree perk now; a Vigil makes it reach further and count for more
+		if (who instanceof Player p && aura(p)) {
+			return AURA_SAVE * OathGifts.auraScale(p);
 		}
 		if (who instanceof Enemy) {
 			return 0.0F;
 		}
 		for (Player p : level.players()) {
-			if (keeping(p) && p.distanceToSqr(who) <= AURA_RANGE * AURA_RANGE) {
-				return AURA_SAVE;
+			double r = AURA_RANGE * OathGifts.auraScale(p);
+			if (aura(p) && p.distanceToSqr(who) <= r * r) {
+				return AURA_SAVE * OathGifts.auraScale(p);
 			}
 		}
 		return 0.0F;
 	}
 
+	/** {@code p} is a Paladin with an oath that holds and the aura. */
+	private static boolean aura(Player p) {
+		return keeping(p) && ClassTrees.has(p, OathGifts.AURA) > 0;
+	}
+
 	/** Whether {@code who} is a Paladin whose oath holds: they do not know fear. */
 	public static boolean fearless(LivingEntity who) {
-		return who instanceof Player p && keeping(p);
+		// (class trees) the aura's; Aura of Courage spreads it to friends near
+		return who instanceof Player p && aura(p) || OathGifts.courage(who);
 	}
 
 	// ---- oath-breaking ------------------------------------------------------------------------------------------------
@@ -221,21 +249,21 @@ public final class Paladins {
 		}
 	}
 
-	/** Honour: a blow on something that has not noticed you and is no monster is no fair fight. */
-	private static void honourCheck(ServerPlayer player, LivingEntity target) {
-		if (keeping(player) && oath(player).equals("honour") && target instanceof Mob mob && !(mob instanceof Enemy) && mob.getTarget() != player
-			&& !(mob instanceof net.minecraft.world.entity.NeutralMob)) {
-			breakOath(player, "unprovoked");
-		}
+	/** Honour: a blow on something that has not noticed you and is no monster is no fair fight (refused, {@link Vows}). */
+	static boolean unprovoked(ServerPlayer player, LivingEntity target) {
+		return target instanceof Mob mob && !(mob instanceof Enemy) && mob.getTarget() != player && !(mob instanceof net.minecraft.world.entity.NeutralMob);
 	}
 
-	private static void died(LivingEntity victim, DamageSource source) {
-		if (!(source.getEntity() instanceof ServerPlayer player) || !keeping(player) || !oath(player).equals("mercy")) {
-			return;
-		}
+	/** Mercy: {@code victim} is helpless (folk and pets, the frightened, the held, the downed; a monster only frightened or held). */
+	static boolean helpless(ServerPlayer player, LivingEntity victim) {
 		boolean helpless = victim instanceof AbstractVillager || victim instanceof net.minecraft.world.entity.TamableAnimal || Fear.frightened(victim)
 			|| HeldFast.held(victim) || Downed.isDowned(victim);
-		if (helpless && !(victim instanceof Enemy && !Fear.frightened(victim) && !HeldFast.held(victim)) && victim != player) {
+		return helpless && !(victim instanceof Enemy && !Fear.frightened(victim) && !HeldFast.held(victim)) && victim != player;
+	}
+
+	/** A killing blow on the helpless the refusal didn't see (one that came round it): the oath breaks, as before. */
+	private static void died(LivingEntity victim, DamageSource source) {
+		if (source.getEntity() instanceof ServerPlayer player && keeping(player) && oath(player).equals("mercy") && helpless(player, victim)) {
 			breakOath(player, "helpless");
 		}
 	}
@@ -259,12 +287,18 @@ public final class Paladins {
 	/** Prayer at a shrine: a broken oath is mended. Called from {@link Patrons#prayed}. */
 	static void prayed(ServerPlayer player) {
 		atone(player);
+		// (class trees) a prayer by night: the Vigil
+		OathGifts.prayed(player);
 	}
 
 	/** A night's sleep: the smites and hands come back. */
 	static void rested(ServerPlayer player) {
 		if (Classes.is(player, PlayerClass.PALADIN)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.paladin.rested"));
+			if (keeping(player)) {
+				// (class trees) each day the oath holds
+				ClassTrees.give(player, PlayerClass.PALADIN, ClassTrees.XP_OATH_DAY);
+			}
 		}
 	}
 }

@@ -1,11 +1,11 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.brawl.Brawl;
 import com.jaymospowers.core.fx.MagicFx;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -80,20 +80,9 @@ public class ZFighterRogue extends Monster {
 	static final int[] REST_TICKS = {20, 14};
 	/** The strings each kind throws (one picked at random each time), from {@link ZFighterCombo#STRINGS}. */
 	static final int[][] KIND_STRINGS = {{1, 2}, {3, 4}};
-	/** He starts a string within this of his foe (centre to its edge), steps in after it within {@code LUNGE_GAP}, gives up past that. */
-	static final double REACH = 2.2;
-	static final double LUNGE_GAP = 4.5;
-	static final double LUNGE_SPEED = 0.3;
-	/** How much of a struck foe's sliding is left between blows (it reels on the spot, so the string lands). */
-	static final double REEL = 0.15;
-	/** The finisher throws the foe this far (horizontal, up). */
-	static final double FINISHER_PUSH = 2.2, FINISHER_LIFT = 0.55;
-	/** After a finisher: a beat, then a rush after the foe (blocks a tick, by kind; Super 2 faster) for at most {@code RUSH_TICKS}. */
-	static final int RUSH_DELAY = 6;
-	static final int RUSH_TICKS = 16;
+	/** (NPC fights 2) The reach, lunge, throw and rush are the shared runner's ({@link ZFighterStrings}); his rush speed is his own (blocks a tick, by kind; Super 2 faster). */
 	static final double[] RUSH_SPEED = {0.9, 1.3};
 	static final double SUPER_2_RUSH = 1.6;
-	static final double RUSH_RANGE = 20.0;
 	/** Base armour; the armour he wears adds the rest. */
 	static final double CHAMPION_ARMOR = 2.0, TYRANT_ARMOR = 6.0;
 	/** A champion's armour pieces: each is iron this often, else chainmail, else leather. */
@@ -110,6 +99,10 @@ public class ZFighterRogue extends Monster {
 	static final double BOSS_SEEN = 96.0;
 	static final int TYRANT_COLOR = 0xFFC830;
 	static final int CHAMPION_COLOR = 0x8FD3FF;
+	/** His rank for the fighter brain ({@link Brawl}), before the world tier: a tyrant, one of a raider band, a champion. */
+	static final Brawl.Profile TYRANT_BRAWL = Brawl.Profile.ki(0.85F, TYRANT_COLOR);
+	static final Brawl.Profile RAIDER_BRAWL = Brawl.Profile.ki(0.6F, TYRANT_COLOR);
+	static final Brawl.Profile CHAMPION_BRAWL = Brawl.Profile.ki(0.15F, CHAMPION_COLOR);
 
 	private static final EntityDataAccessor<Integer> DATA_KIND = SynchedEntityData.defineId(ZFighterRogue.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> DATA_FORM = SynchedEntityData.defineId(ZFighterRogue.class, EntityDataSerializers.INT);
@@ -123,16 +116,6 @@ public class ZFighterRogue extends Monster {
 	private int volleyLeft;
 	private int stepIn = STEP_EVERY;
 	// the string he's throwing (not saved: a reload starts him fresh)
-	private int @org.jspecify.annotations.Nullable [] string;
-	private int blow;
-	private long blowAt;
-	private int blowLength;
-	private boolean struck;
-	private long restUntil;
-	private int serial;
-	private long rushFrom = -1L;
-	private long rushUntil = -1L;
-	private @org.jspecify.annotations.Nullable LivingEntity chase;
 
 	public ZFighterRogue(EntityType<? extends ZFighterRogue> type, Level level) {
 		super(type, level);
@@ -170,9 +153,12 @@ public class ZFighterRogue extends Monster {
 		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
 		this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
 		// only a tyrant picks his own foes: the people of the kingdom, its golems, everyone
-		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true, (target, level) -> tyrant()));
-		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true, (target, level) -> tyrant()));
-		this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true, (target, level) -> tyrant()));
+		// sworn foes: a tyrant, or one of a raider band's men, goes for a Galactic Patrolman before anyone else
+		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, LivingEntity.class, true,
+			(target, level) -> (tyrant() || raider()) && ZFighterPatrol.patrolman(target)));
+		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Player.class, true, (target, level) -> tyrant()));
+		this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, IronGolem.class, true, (target, level) -> tyrant()));
+		this.targetSelector.addGoal(5, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true, (target, level) -> tyrant()));
 	}
 
 	/** (0.20.36) One of a raider band's men (on the ground by a town, or up in the high sky), not a tournament champion. */
@@ -249,8 +235,8 @@ public class ZFighterRogue extends Monster {
 				level.sendParticles(MagicFx.wisp(form() >= 2 ? 0xFFF080 : TYRANT_COLOR, 1.5F), this.getX(), this.getY() + 1.0, this.getZ(), 3,
 					0.4, 0.8, 0.4, 0.0);
 			}
-			if (form() < 2 && this.getHealth() < this.getMaxHealth() * 0.5F) {
-				// Super 2 at half health: a roar, a flash, faster and harder
+			if (form() < 2 && this.getHealth() < this.getMaxHealth() * 0.5F && com.jaymospowers.core.brawl.PowerUp.ready(this)) {
+				// Super 2 at half health, once he has built up to it (he backs off and flares first): a roar, a flash, faster and harder
 				this.entityData.set(DATA_FORM, 2);
 				this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.42);
 				this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(TYRANT_DAMAGE * 1.4);
@@ -260,13 +246,21 @@ public class ZFighterRogue extends Monster {
 			}
 			// he flies up to foes above him, and won't fall to his death
 			boolean above = target != null && target.getY() > this.getY() + 2.5;
-			this.setNoGravity(above);
-			if (above) {
+			boolean brawling = Brawl.flying(this);
+			this.setNoGravity(above || brawling);
+			if (above && !brawling) {
 				this.setDeltaMovement(this.getDeltaMovement().multiply(1.0, 0.0, 1.0).add(0.0, 0.25, 0.0));
 			}
 			this.resetFallDistance();
 		}
-		if (rushing(level)) {
+		// the fighter brain: flight round a foe in the air, dashes and sidesteps, the vanish dodge, guard and parry
+		Brawl.tick(level, this, target, tyrant ? TYRANT_BRAWL : raider() ? RAIDER_BRAWL : CHAMPION_BRAWL, ZFighterStrings.engaged(this),
+			ZFighterStrings.rushing(this) || ZFighterHighSky.airborne(this));
+		if (Brawl.takeVanish(this)) {
+			// he blinked behind whoever struck: the next string starts at once
+			ZFighterStrings.rested(this);
+		}
+		if (ZFighterStrings.rushing(this)) {
 			return;
 		}
 		if (ZFighterHighSky.airborne(this)) {
@@ -274,17 +268,21 @@ public class ZFighterRogue extends Monster {
 			ZFighterHighSky.steer(this, target);
 		}
 		if (target == null || !target.isAlive()) {
-			endString();
+			ZFighterStrings.release(this);
 			return;
 		}
-		combat(level, target, tyrant);
+		ZFighterStrings.engage(level, this, target, strings(tyrant));
+		if (tyrant) {
+			// (NPC fights 2) a tyrant's beam, seeking volley and charged blast
+			ZFighterNpcKi.decide(level, this, target, this.getAttributeValue(Attributes.ATTACK_DAMAGE), TYRANT_COLOR);
+		}
 		double distance = this.distanceTo(target);
 		if (this.volleyLeft > 0 && this.tickCount % BLAST_GAP == 0 && this.hasLineOfSight(target)) {
 			this.volleyLeft--;
 			blast(level, target, tyrant);
 		}
-		if (--this.blastIn <= 0 && this.string == null && distance > 4.0 && distance < BLAST_RANGE && this.hasLineOfSight(target)) {
-			this.blastIn = BLAST_EVERY + this.random.nextInt(30);
+		if (--this.blastIn <= 0 && !ZFighterStrings.engaged(this) && distance > 4.0 && distance < BLAST_RANGE && this.hasLineOfSight(target)) {
+			this.blastIn = Brawl.tempo(this, BLAST_EVERY + this.random.nextInt(30));
 			this.volleyLeft = BLAST_VOLLEY;
 		}
 		if (--this.stepIn <= 0 && distance > STEP_FAR && distance < BLAST_RANGE) {
@@ -293,147 +291,13 @@ public class ZFighterRogue extends Monster {
 		}
 	}
 
-	/** His strings: started in reach, stepped after a foe that backs off, given up on one that gets away. */
-	private void combat(ServerLevel level, LivingEntity target, boolean tyrant) {
-		long now = level.getGameTime();
-		double gap = this.distanceTo(target) - target.getBbWidth() * 0.5;
-		if (this.string == null) {
-			if (now < this.restUntil || gap > REACH || !this.hasLineOfSight(target)) {
-				return;
-			}
-			int[] picks = KIND_STRINGS[tyrant ? TYRANT : CHAMPION];
-			this.string = ZFighterCombo.STRINGS[picks[this.random.nextInt(picks.length)]];
-			beginBlow(level, 0);
-		}
-		if (gap > LUNGE_GAP) {
-			// it got away: the string's over
-			endString();
-			this.restUntil = now + REST_TICKS[kind()] / 2;
-			return;
-		}
-		this.getLookControl().setLookAt(target, 30.0F, 30.0F);
-		long age = now - this.blowAt;
-		if (age == 0 && gap > REACH * 0.7) {
-			// a step in after it
-			Vec3 to = target.position().subtract(this.position());
-			Vec3 flat = new Vec3(to.x, 0.0, to.z);
-			if (flat.lengthSqr() > 1.0E-4) {
-				flat = flat.normalize().scale(LUNGE_SPEED);
-				this.setDeltaMovement(this.getDeltaMovement().add(flat.x, 0.0, flat.z));
-			}
-		}
-		if (!this.struck && age >= this.blowLength / 2) {
-			this.struck = true;
-			strike(level, target, tyrant);
-		}
-		if (age >= this.blowLength && this.string != null) {
-			if (this.blow >= this.string.length - 1) {
-				endString();
-				this.restUntil = now + REST_TICKS[kind()];
-			} else {
-				beginBlow(level, this.blow + 1);
-			}
-		}
-	}
-
-	private void beginBlow(ServerLevel level, int blow) {
-		boolean finisher = blow == this.string.length - 1;
-		int ticks = tyrant() ? form() >= 2 ? SUPER_2_BLOW_TICKS : TYRANT_BLOW_TICKS : CHAMPION_BLOW_TICKS;
-		this.blow = blow;
-		this.blowAt = level.getGameTime();
-		this.blowLength = Math.max(2, Math.round(ticks * (finisher ? ZFighterCombo.FINISHER_LENGTH : 1.0F)));
-		this.struck = false;
-		this.serial = this.serial + 1 & 0x7FFF;
-		// everyone's client draws the move, as it does a player's
-		this.setAttached(ZFighterCombo.MOVE, this.serial << 16 | Math.min(255, this.blowLength) << 8 | this.string[blow]);
-	}
-
-	private void endString() {
-		this.string = null;
-		this.removeAttached(ZFighterCombo.MOVE);
-	}
-
-	/** The blow lands halfway through: light, the foe held reeling; the finisher throws it into whatever is behind it. */
-	private void strike(ServerLevel level, LivingEntity target, boolean tyrant) {
-		int move = this.string[this.blow];
-		boolean finisher = this.blow == this.string.length - 1;
-		Vec3 at = target.getBoundingBox().getCenter();
-		if (this.distanceTo(target) - target.getBbWidth() * 0.5 > REACH + 0.5) {
-			level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.HOSTILE, 0.6F,
-				ZFighterCombo.kick(move) ? 0.8F : 1.3F);
-			return;
-		}
+	/** What his strings are made of ({@link ZFighterStrings}, the runner a Patrolman and a gifted fighter share): by kind, his blow now. */
+	private ZFighterStrings.Cfg strings(boolean tyrant) {
 		int k = tyrant ? TYRANT : CHAMPION;
-		float fists = (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
-		float damage = fists * (finisher ? FINISHER_SHARE[k] : BLOW_SHARE[k] * ZFighterCombo.MOVE_WEIGHT[move]);
-		target.setInvulnerableTime(0);
-		if (!target.hurtServer(level, this.damageSources().mobAttack(this), damage)) {
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_WEAK, SoundSource.HOSTILE, 0.8F, 1.0F);
-			return;
-		}
-		this.setLastHurtMob(target);
-		Vec3 look = at.subtract(this.getEyePosition());
-		look = look.lengthSqr() < 1.0E-4 ? this.getLookAngle() : look.normalize();
-		ParticleOptions dust = MagicFx.wisp(tyrant ? form() >= 2 ? 0xFFF080 : TYRANT_COLOR : CHAMPION_COLOR, 1.2F);
-		if (finisher) {
-			Vec3 motion = target.getDeltaMovement();
-			target.setDeltaMovement(motion.x * REEL, Math.max(0.0, motion.y), motion.z * REEL);
-			ZFighterKi.push(target, look, FINISHER_PUSH, FINISHER_LIFT);
-			ZFighterImpact.launched(target, this, fists * SLAM_SHARE[k]);
-			level.sendParticles(ParticleTypes.EXPLOSION, true, false, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-			level.sendParticles(dust, true, false, at.x, at.y, at.z, 20, 0.3, 0.3, 0.3, 0.2);
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.HOSTILE, 1.0F, 0.7F);
-			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.HOSTILE, 0.4F, 1.6F);
-			com.jaymospowers.core.Shakes.around(level, at, 12.0, 0.6F);
-			this.chase = target;
-			this.rushFrom = level.getGameTime() + RUSH_DELAY;
-			this.rushUntil = this.rushFrom + RUSH_TICKS;
-			return;
-		}
-		Vec3 motion = target.getDeltaMovement();
-		target.setDeltaMovement(motion.x * REEL, Math.min(motion.y, 0.1), motion.z * REEL);
-		target.syncVelocity = true;
-		level.sendParticles(ParticleTypes.CRIT, true, false, at.x, at.y, at.z, 4, 0.2, 0.2, 0.2, 0.25);
-		if (tyrant) {
-			level.sendParticles(dust, true, false, at.x, at.y, at.z, 2, 0.15, 0.15, 0.15, 0.05);
-		}
-		level.playSound(null, at.x, at.y, at.z, ZFighterCombo.kick(move) ? SoundEvents.PLAYER_ATTACK_STRONG : SoundEvents.PLAYER_ATTACK_CRIT,
-			SoundSource.HOSTILE, 0.8F, 0.9F + this.random.nextFloat() * 0.2F);
-		if (target instanceof ServerPlayer player) {
-			com.jaymospowers.core.Shakes.send(player, 0.15F, this.position());
-		}
-	}
-
-	/** After a finisher: a beat, then a rush through the air after the foe he sent flying. True while it lasts. */
-	private boolean rushing(ServerLevel level) {
-		if (this.rushUntil < 0) {
-			return false;
-		}
-		long now = level.getGameTime();
-		LivingEntity foe = this.chase;
-		if (foe == null || !foe.isAlive() || foe.isRemoved() || now >= this.rushUntil || this.distanceTo(foe) > RUSH_RANGE) {
-			this.rushUntil = -1L;
-			this.chase = null;
-			this.setNoGravity(false);
-			return false;
-		}
-		if (now < this.rushFrom) {
-			return true;
-		}
-		if (now == this.rushFrom) {
-			ZFighterImpact.rushSound(this);
-		}
-		this.getLookControl().setLookAt(foe, 30.0F, 30.0F);
-		this.setNoGravity(true);
-		double speed = tyrant() && form() >= 2 ? SUPER_2_RUSH : RUSH_SPEED[kind()];
-		if (ZFighterImpact.rush(this, foe, speed, REACH * 0.7)) {
-			// there: the next string starts at once
-			this.rushUntil = -1L;
-			this.chase = null;
-			this.restUntil = now;
-			this.setNoGravity(false);
-		}
-		return true;
+		int ticks = tyrant ? form() >= 2 ? SUPER_2_BLOW_TICKS : TYRANT_BLOW_TICKS : CHAMPION_BLOW_TICKS;
+		double rush = tyrant && form() >= 2 ? SUPER_2_RUSH : RUSH_SPEED[k];
+		return new ZFighterStrings.Cfg(this.getAttributeValue(Attributes.ATTACK_DAMAGE), BLOW_SHARE[k], FINISHER_SHARE[k], SLAM_SHARE[k], ticks,
+			REST_TICKS[k], KIND_STRINGS[k], tyrant ? form() >= 2 ? 0xFFF080 : TYRANT_COLOR : CHAMPION_COLOR, rush, tyrant);
 	}
 
 	/** A ki blast from the palm, straight at his foe. */

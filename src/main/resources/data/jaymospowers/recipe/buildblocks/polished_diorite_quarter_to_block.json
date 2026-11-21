@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:polished_diorite_quarter",
+    "jaymospowers:polished_diorite_quarter",
+    "jaymospowers:polished_diorite_quarter",
+    "jaymospowers:polished_diorite_quarter"
+  ],
+  "result": {
+    "id": "minecraft:polished_diorite"
+  }
+}

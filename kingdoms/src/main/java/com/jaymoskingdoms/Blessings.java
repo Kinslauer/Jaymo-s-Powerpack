@@ -66,6 +66,8 @@ public final class Blessings {
 	static final int CLEAN_CUTS_EXTRA = 1;
 	static final double HUNTERS_EYE_RANGE = 1.5, HUNTERS_EYE_SENSE = 64.0;
 	static final int WILD_HUNT_TICKS = 2400;
+	/** Hunter's Trail (tier 2): the beast they last struck leaves prints that glow for them this long (ticks), shown this often (ticks). */
+	static final int HUNTERS_TRAIL_TICKS = 600, HUNTERS_TRAIL_EVERY = 10;
 	static final float WILD_HUNT_DAMAGE = 0.3F;
 	static final int WARDENS_EYE_LIGHT = 4, NIGHT_VISION_TICKS = 400, NIGHT_VISION_REFRESH = 220;
 	static final float GRAVE_BLOWS = 0.25F;
@@ -93,6 +95,8 @@ public final class Blessings {
 
 	/** The end times (game time) of the timed boons, and the hurt/mend clocks. Not saved. */
 	private static final Map<UUID, Long> FATHERS_FIRE = new HashMap<>(), WILD_HUNT = new HashMap<>(), SMOKE = new HashMap<>();
+	/** Huntsman to {the beast they last struck (entity id), until when (game time)}: its prints glow for them ({@link #huntersTrail}). */
+	private static final Map<UUID, long[]> HUNTED = new HashMap<>();
 	private static final Map<UUID, Long> HURT_AT = new HashMap<>(), NEXT_MEND = new HashMap<>(), NEXT_WHALE = new HashMap<>();
 	private static final Map<UUID, Float> LAST_HEALTH = new HashMap<>();
 
@@ -102,6 +106,7 @@ public final class Blessings {
 	static void forget(UUID id) {
 		FATHERS_FIRE.remove(id);
 		WILD_HUNT.remove(id);
+		HUNTED.remove(id);
 		SMOKE.remove(id);
 		HURT_AT.remove(id);
 		NEXT_MEND.remove(id);
@@ -112,6 +117,7 @@ public final class Blessings {
 	static void clear() {
 		FATHERS_FIRE.clear();
 		WILD_HUNT.clear();
+		HUNTED.clear();
 		SMOKE.clear();
 		HURT_AT.clear();
 		NEXT_MEND.clear();
@@ -356,6 +362,10 @@ public final class Blessings {
 			if (on(WILD_HUNT, attacker) && beast(target)) {
 				amount *= 1.0F + WILD_HUNT_DAMAGE;
 			}
+			// Hunter's Trail: the beast a sworn tier-2 Huntsman strikes is the one they hunt
+			if (has(attacker, Patron.GREEN_HUNTSMAN, 2) && beast(target)) {
+				HUNTED.put(attacker.getUUID(), new long[] {target.getId(), target.level().getGameTime() + HUNTERS_TRAIL_TICKS});
+			}
 		}
 		return amount;
 	}
@@ -398,6 +408,9 @@ public final class Blessings {
 					}
 				}
 				case GREEN_HUNTSMAN -> {
+					if (s.tier() >= 2 && count % HUNTERS_TRAIL_EVERY == 0) {
+						huntersTrail(sp, level, now);
+					}
 					if (s.tier() >= 3 && count % PLAIN_SIGHT_EVERY == 0) {
 						huntersEye(sp, level);
 					}
@@ -450,6 +463,20 @@ public final class Blessings {
 				level.sendParticles(sp, ParticleTypes.SOUL, true, false, e.getX(), e.getY(1.2), e.getZ(), 3, 0.2, 0.2, 0.2, 0.01);
 			}
 		}
+	}
+
+	/** Hunter's Trail (tier 2): for a while after they strike a beast, its prints show to them alone, large, as far as the best tracker reads ({@link TrailReading}). */
+	private static void huntersTrail(ServerPlayer sp, ServerLevel level, long now) {
+		long[] hunted = HUNTED.get(sp.getUUID());
+		if (hunted == null) {
+			return;
+		}
+		if (hunted[1] <= now) {
+			HUNTED.remove(sp.getUUID());
+			return;
+		}
+		int quarry = (int) hunted[0];
+		TrailReading.read(level, sp, 1, e -> e.getId() == quarry, true);
 	}
 
 	/** Hunter's Eye (tier 3): a legend within range shows a faint mark. */

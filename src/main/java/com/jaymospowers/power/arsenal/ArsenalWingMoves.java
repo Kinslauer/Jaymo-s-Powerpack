@@ -1,6 +1,7 @@
 package com.jaymospowers.power.arsenal;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.ground.FirstTools;
@@ -307,11 +308,11 @@ public final class ArsenalWingMoves {
 		boolean corrupted = Fate.isCorrupted(player);
 		Vec3 center = target.getBoundingBox().getCenter();
 		DamageSource source = player.damageSources().playerAttack(player);
-		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, AABB.ofSize(center, SWEEP_RADIUS * 2.0, 3.0, SWEEP_RADIUS * 2.0),
-			e -> e != target && ArsenalWing.fair(player, e) && ArsenalWing.foe(player, e) && e.distanceToSqr(target) <= SWEEP_RADIUS * SWEEP_RADIUS)) {
+		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, AABB.ofSize(center, AbilityPower.size(player, SWEEP_RADIUS) * 2.0, 3.0, AbilityPower.size(player, SWEEP_RADIUS) * 2.0),
+			e -> e != target && ArsenalWing.fair(player, e) && ArsenalWing.foe(player, e) && e.distanceToSqr(target) <= AbilityPower.size(player, SWEEP_RADIUS) * AbilityPower.size(player, SWEEP_RADIUS))) {
 			living.hurtServer(level, source, SWEEP_DAMAGE * (corrupted ? ArsenalVoid.DAMAGE_MULTIPLIER : 1.0F));
 		}
-		MagicFx.ring(level, center, null, (float) SWEEP_RADIUS, corrupted ? 0x2A1840 : MagicFx.VOID_COLOR, 8);
+		MagicFx.ring(level, center, null, (float) AbilityPower.size(player, SWEEP_RADIUS), corrupted ? 0x2A1840 : MagicFx.VOID_COLOR, 8);
 		level.playSound(null, center.x, center.y, center.z, SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.9F, 1.1F);
 	}
 

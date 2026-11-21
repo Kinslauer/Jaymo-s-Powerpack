@@ -1,0 +1,15 @@
+{
+	"replace": false,
+	"values": [
+		"minecraft:pig",
+		"minecraft:hoglin",
+		{
+			"id": "jaymoskingdoms:wild_boar",
+			"required": false
+		},
+		{
+			"id": "naturalist:boar",
+			"required": false
+		}
+	]
+}

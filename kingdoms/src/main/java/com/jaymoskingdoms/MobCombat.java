@@ -75,6 +75,13 @@ public final class MobCombat {
 	static final int MIN_SWING_TICKS = 10, MAX_SWING_TICKS = 40;
 	/** The blow lands no sooner than this into the swing (ticks). */
 	static final int MIN_UPSWING_TICKS = 4;
+	/**
+	 * Andy: "the barbarian that approached seemed unable to hit them himself". A spider small enough to squash
+	 * ({@link com.jaymoskingdoms.wild.SpiderSquash#squashable}) skitters a block or two in a slow swing's wind-up and was
+	 * out of reach when the blow fell, every time. At one the blow comes down at once ({@link #MIN_UPSWING_TICKS}), and
+	 * still finds it this much further off (blocks) than the reach (it dies to one blow).
+	 */
+	static final double SMALL_FOE_SLACK = 1.0;
 	/** A pause between swings (ticks), on top of the swing itself. */
 	static final int RECOVERY_TICKS = 4;
 	/** The combo starts over after this long without a swing (ticks). */
@@ -93,6 +100,12 @@ public final class MobCombat {
 	/** The sidestep's push (blocks a tick, sideways), a little back, and up; and the wait before another (ticks). */
 	static final double DODGE_SIDE = 0.55, DODGE_BACK = 0.2, DODGE_UP = 0.22;
 	static final int DODGE_COOLDOWN = 60;
+	/**
+	 * The sidestep for the MCA villagers who fight in leather (the Huntsman's rangers, ship crews): their chance. Anyone,
+	 * folk or villager, wearing a piece of plate (armour outside {@code #jaymoskingdoms:light_armor}) never sidesteps,
+	 * as a player in plate can't slip a blow stepping back.
+	 */
+	static final float DODGE_LIGHT_VILLAGER = 0.12F;
 
 	/**
 	 * (0.7.267) Attack tells: as a swing begins, a glint at the mob's weapon, white for a blow you can parry, red for a
@@ -246,7 +259,7 @@ public final class MobCombat {
 			length = Math.max(MIN_SWING_TICKS, (int) Math.round(length * QUICK_SWING));
 			swing.quickUntil = 0;
 		}
-		int upswing = Math.max(MIN_UPSWING_TICKS, (int) Math.round(length * move.upswing()));
+		int upswing = small(target) ? MIN_UPSWING_TICKS : Math.max(MIN_UPSWING_TICKS, (int) Math.round(length * move.upswing()));
 		tell(level, mob, heavy(moves, move));
 		swing.target = target;
 		swing.move = move;
@@ -337,7 +350,7 @@ public final class MobCombat {
 			return;
 		}
 		int length = swingTicks(mob);
-		int upswing = Math.max(MIN_UPSWING_TICKS, (int) Math.round(length * PLAIN_UPSWING));
+		int upswing = small(target) ? MIN_UPSWING_TICKS : Math.max(MIN_UPSWING_TICKS, (int) Math.round(length * PLAIN_UPSWING));
 		tell(level, mob, plainHeavy(mob));
 		swing.target = target;
 		swing.move = null;
@@ -371,7 +384,7 @@ public final class MobCombat {
 	/** (0.7.283) The plain blow lands on its one target, if it's still in reach and sight; a miss is heard. */
 	private static void plainStrike(ServerLevel level, Mob mob, @Nullable LivingEntity target) {
 		if (target == null || !target.isAlive() || target.level() != level
-			|| gap(mob, target) > BASE_REACH + 0.25 && !mob.isWithinMeleeAttackRange(target) || !mob.getSensing().hasLineOfSight(target)) {
+			|| gap(mob, target) > BASE_REACH + 0.25 + slack(target) && !mob.isWithinMeleeAttackRange(target) || !mob.getSensing().hasLineOfSight(target)) {
 			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, mob.getSoundSource(), 0.6F, 0.8F);
 			return;
 		}
@@ -498,6 +511,16 @@ public final class MobCombat {
 		return add[0] * (1.0 + add[1]) * add[2];
 	}
 
+	/** Whether {@code target} is a spider small enough to squash: struck quick ({@link #SMALL_FOE_SLACK}). */
+	private static boolean small(LivingEntity target) {
+		return com.jaymoskingdoms.wild.SpiderSquash.squashable(target);
+	}
+
+	/** How much further off than the reach a blow still finds {@code target}. */
+	private static double slack(LivingEntity target) {
+		return small(target) ? SMALL_FOE_SLACK : 0.0;
+	}
+
 	/** Distance from the mob's eyes to the nearest point of the target's box. */
 	static double gap(LivingEntity from, LivingEntity to) {
 		Vec3 eye = from.getEyePosition();
@@ -561,7 +584,7 @@ public final class MobCombat {
 		float yaw = mob.getYHeadRot();
 		Vec3 facing = Vec3.directionFromRotation(0.0F, yaw);
 		List<LivingEntity> hits = new ArrayList<>();
-		if (primary != null && primary.isAlive() && gap(mob, primary) <= reach + 0.25 && mob.getSensing().hasLineOfSight(primary)) {
+		if (primary != null && primary.isAlive() && gap(mob, primary) <= reach + 0.25 + slack(primary) && mob.getSensing().hasLineOfSight(primary)) {
 			hits.add(primary);
 		}
 		for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, mob.getBoundingBox().inflate(reach + 1.0),
@@ -664,34 +687,59 @@ public final class MobCombat {
 		}
 	}
 
-	/** The sidestep: fighting folk may dodge a player's blow. */
+	/** The sidestep: fighting folk, and rangers and crewmen in leather or mail, may dodge a player's blow. */
 	private static boolean allowDamage(LivingEntity entity, DamageSource source, float amount) {
-		if (!(entity instanceof Folk folk) || !folk.combatant() || !(entity.level() instanceof ServerLevel level)) {
+		if (!(entity instanceof Mob mob) || !(entity.level() instanceof ServerLevel level)) {
+			return true;
+		}
+		Folk folk = mob instanceof Folk f && f.combatant() ? f : null;
+		boolean villager = folk == null && !(mob instanceof Folk) && (mob.entityTags().contains(ForestRangers.TAG) || Crewmen.tagged(mob));
+		if (folk == null && !villager) {
 			return true;
 		}
 		if (!(source.getEntity() instanceof Player player) || source.getDirectEntity() != player || source.isCreativePlayer()) {
 			return true;
 		}
-		if (!folk.onGround() || folk.isPassenger() || swinging(folk) || folk.hurtTime > 0) {
+		if (!mob.onGround() || mob.isPassenger() || swinging(mob) || mob.hurtTime > 0 || !light(mob)) {
 			return true;
 		}
 		long now = level.getGameTime();
-		Long last = DODGED.get(folk);
+		Long last = DODGED.get(mob);
 		if (last != null && now - last < DODGE_COOLDOWN) {
 			return true;
 		}
-		if (folk.getRandom().nextFloat() >= dodgeChance(folk)) {
+		if (mob.getRandom().nextFloat() >= (folk != null ? dodgeChance(folk) : DODGE_LIGHT_VILLAGER)) {
 			return true;
 		}
-		DODGED.put(folk, now);
-		Vec3 away = new Vec3(folk.getX() - player.getX(), 0.0, folk.getZ() - player.getZ());
-		away = away.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, folk.getYRot()).reverse() : away.normalize();
-		Vec3 side = new Vec3(-away.z, 0.0, away.x).scale(folk.getRandom().nextBoolean() ? 1.0 : -1.0);
-		folk.setDeltaMovement(side.scale(DODGE_SIDE).add(away.scale(DODGE_BACK)).add(0.0, DODGE_UP, 0.0));
-		folk.syncVelocity = true;
-		folk.getLookControl().setLookAt(player, 30.0F, 30.0F);
-		level.playSound(null, folk.getX(), folk.getY(), folk.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.NEUTRAL, 1.0F, 1.2F);
-		level.sendParticles(ParticleTypes.POOF, folk.getX(), folk.getY() + 0.1, folk.getZ(), 6, 0.3, 0.05, 0.3, 0.02);
+		DODGED.put(mob, now);
+		Vec3 away = new Vec3(mob.getX() - player.getX(), 0.0, mob.getZ() - player.getZ());
+		away = away.lengthSqr() < 1.0E-4 ? Vec3.directionFromRotation(0.0F, mob.getYRot()).reverse() : away.normalize();
+		Vec3 side = new Vec3(-away.z, 0.0, away.x).scale(mob.getRandom().nextBoolean() ? 1.0 : -1.0);
+		mob.setDeltaMovement(side.scale(DODGE_SIDE).add(away.scale(DODGE_BACK)).add(0.0, DODGE_UP, 0.0));
+		mob.syncVelocity = true;
+		mob.getLookControl().setLookAt(player, 30.0F, 30.0F);
+		level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.NEUTRAL, 1.0F, 1.2F);
+		level.sendParticles(ParticleTypes.POOF, mob.getX(), mob.getY() + 0.1, mob.getZ(), 6, 0.3, 0.05, 0.3, 0.02);
+		return false;
+	}
+
+	/** Whether {@code body} wears no plate: every armour piece it has on (helmet, chest, legs, boots) is in {@code #jaymoskingdoms:light_armor}. */
+	static boolean light(LivingEntity body) {
+		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
+			ItemStack piece = body.getItemBySlot(slot);
+			if (!piece.isEmpty() && !piece.is(ClassPerks.LIGHT_ARMOR) && armoured(piece)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private static boolean armoured(ItemStack piece) {
+		for (ItemAttributeModifiers.Entry e : piece.getOrDefault(net.minecraft.core.component.DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY).modifiers()) {
+			if (e.attribute().is(Attributes.ARMOR) && e.modifier().amount() > 0.0) {
+				return true;
+			}
+		}
 		return false;
 	}
 

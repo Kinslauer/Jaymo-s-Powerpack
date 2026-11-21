@@ -264,13 +264,15 @@ public final class ZFighterFlightClient {
 	}
 
 	private static void cruise(LocalPlayer player, Input input, boolean charging, boolean slowed) {
-		double top = ZFighterPower.FORM_CRUISE[Mth.clamp(ZFighterPower.state(player).form(), 0, ZFighterPower.FORM_CRUISE.length - 1)];
+		// (in orbit, high in the high sky, a cruise carries far across the world below: HighSkyClient)
+		double boost = com.jaymospowers.client.power.zfighter.sky.HighSkyClient.cruiseBoost(player);
+		double top = ZFighterPower.FORM_CRUISE[Mth.clamp(ZFighterPower.state(player).form(), 0, ZFighterPower.FORM_CRUISE.length - 1)] * boost;
 		if (slowed) {
 			speed = Math.max(0.0, speed - CRUISE_BRAKE);
 		} else if (charging) {
 			// charging holds the speed he had
 		} else if (input.sprint() && speed < top) {
-			speed = Math.min(top, speed + CRUISE_ACCEL * (1.0 - CRUISE_ACCEL_TAPER * speed / top));
+			speed = Math.min(top, speed + CRUISE_ACCEL * boost * (1.0 - CRUISE_ACCEL_TAPER * speed / top));
 		} else if (!input.sprint()) {
 			speed -= CRUISE_DECEL;
 			if (input.backward()) {

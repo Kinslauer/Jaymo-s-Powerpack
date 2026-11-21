@@ -1,0 +1,7 @@
+{
+  "message.jaymospowers.seize.holding": "Holding %s",
+  "message.jaymospowers.stubborn.down": "Not dead yet. Hold on.",
+  "message.jaymospowers.stubborn.up": "You get up, stubborn as ever.",
+  "tooltip.jaymospowers.throwing_cards": "Throws three at a time in a narrow fan. Each card does one thing when it hits: burns, poisons, bursts small, or just cuts.",
+  "tooltip.jaymospowers.throwing_cards.left": "%s cards left"
+}

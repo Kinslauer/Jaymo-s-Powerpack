@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:cut_red_sandstone_vslab",
+  "result": {
+    "id": "jaymospowers:cut_red_sandstone_quarter",
+    "count": 2
+  }
+}

@@ -37,5 +37,6 @@ public final class Mortal {
 		MortalKit.init();
 		FallingAttacks.init();
 		AirCombo.init();
+		BattleRhythm.init();
 	}
 }

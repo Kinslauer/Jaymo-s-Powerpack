@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:sandstone_quarter",
+    "jaymospowers:sandstone_quarter",
+    "jaymospowers:sandstone_quarter",
+    "jaymospowers:sandstone_quarter"
+  ],
+  "result": {
+    "id": "minecraft:sandstone"
+  }
+}

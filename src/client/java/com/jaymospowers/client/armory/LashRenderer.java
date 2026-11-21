@@ -123,7 +123,12 @@ public final class LashRenderer {
 		});
 		// (0.19.73) every swing starts from where the head really is, and goes the way the mouse was moving
 		Lash.clientPress = (player, kind) -> press(player, kind == Lash.FLAIL);
+		FlailSwingClient.init();
 		net.fabricmc.fabric.api.event.client.player.ClientPreAttackCallback.EVENT.register((minecraft, player, clicks) -> {
+			if (FlailSwingClient.takes(player)) {
+				// Balkon's flail's left click is its wind-up and jab: no plain swing, hit or digging with it
+				return true;
+			}
 			if (clicks > 0 && !player.isUsingItem() && holding(player) != 0) {
 				Lash.State state = player.getAttached(Lash.STATE);
 				if (state == null || state.phase() == Lash.RETURN) {
@@ -136,6 +141,9 @@ public final class LashRenderer {
 			if (Lash.isFlail(stack)) {
 				lines.add(Component.translatable(Lash.isChainAxe(stack) ? "item.jaymospowers.chain_axe.whirl" : "item.jaymospowers.flail.whirl")
 					.withStyle(ChatFormatting.GRAY));
+				if (!Lash.isChainAxe(stack)) {
+					lines.add(Component.translatable("item.jaymospowers.flail.swing").withStyle(ChatFormatting.GRAY));
+				}
 				if (Lash.isChainAxe(stack)) {
 					lines.add(Component.translatable("item.jaymospowers.chain_axe.chop").withStyle(ChatFormatting.GRAY));
 					lines.add(Component.translatable("item.jaymospowers.chain_axe.buried").withStyle(ChatFormatting.GRAY));
@@ -178,7 +186,7 @@ public final class LashRenderer {
 	}
 
 	/** (0.19.73) Sends the server where your flail's or whip's head is and how the mouse has turned; what was sent. */
-	private static Lash.@Nullable Aim aim(Player player, boolean flail) {
+	static Lash.@Nullable Aim aim(Player player, boolean flail) {
 		Minecraft minecraft = Minecraft.getInstance();
 		if (player != minecraft.player) {
 			return null;
@@ -209,7 +217,8 @@ public final class LashRenderer {
 		}
 		double t = Math.max(0.0, time - state.since());
 		// (0.19.73) the whirling arm works up overhead and dips in front as the ball comes round
-		return state.phase() == Lash.WHIRL ? Lash.whirlArm(state, t) : new float[] {Lash.armRaise(state, t), Lash.ARM_OUT};
+		return state.phase() == Lash.WHIRL ? Lash.whirlArm(state, t)
+			: new float[] {Lash.armRaise(state, t), state.phase() == Lash.WIND ? Lash.WIND_OUT : Lash.ARM_OUT};
 	}
 
 	/** (0.16.11) A flail or whip out: where its head is held (null: free, the physics has it), and how long the line is. */
@@ -221,7 +230,7 @@ public final class LashRenderer {
 		Finishers.Finish finish = Finishers.of(player);
 		if (finish != null && finish.type() == (flail ? Finishers.Kind.FLAIL : Finishers.Kind.WHIP)
 			&& level.getEntity(finish.target()) instanceof LivingEntity body) {
-			double t = time - finish.start();
+			double t = time - finish.start() - finish.held();
 			if (flail) {
 				Vec3 ball = executionBall(player, body.getPosition(partialTick).add(0.0, 0.25, 0.0), t, partialTick);
 				return new Pull(ball, ball == null ? CHAIN_IDLE : Math.max(CHAIN_LENGTH * 0.6, handle.distanceTo(ball) + 0.1), null);

@@ -109,9 +109,10 @@ public final class ProneTransition {
 			} else {
 				LYING.remove(id);
 			}
-			// on the feet: standing or crouched on dry land, not sliding (a slide that ends prone is low already)
+			// on the feet: standing or crouched on dry land, not sliding (a slide that ends prone is low already); a dodge's
+			// roll counts, as it's drawn upright though its box is low, so a held roll going on into prone goes down gradually
 			Pose pose = player.getPose();
-			if ((pose == Pose.STANDING || pose == Pose.CROUCHING) && !player.hasAttached(Slide.SLIDING) && !player.isInWater()
+			if ((pose == Pose.STANDING || pose == Pose.CROUCHING || com.jaymospowers.stamina.Dodge.rollingLow(player)) && !player.hasAttached(Slide.SLIDING) && !player.isInWater()
 				&& !com.jaymospowers.freerun.moves.Leap.diving(player)) {
 				ON_FEET.add(id);
 			} else {

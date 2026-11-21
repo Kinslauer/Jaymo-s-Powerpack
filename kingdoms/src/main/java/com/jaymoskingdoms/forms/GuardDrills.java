@@ -221,7 +221,7 @@ public final class GuardDrills {
 	}
 
 	/** (0.7.385) Whether {@code id} (a player, or a veteran) is in a drill just now: a duel or a bout doesn't begin on them then. */
-	static boolean busy(UUID id) {
+	public static boolean busy(UUID id) {
 		if (RUNS.containsKey(id)) {
 			return true;
 		}
@@ -482,6 +482,7 @@ public final class GuardDrills {
 			complete(level, player, guard, run);
 			return;
 		}
+		guard.setAggressive(true);
 		guard.getLookControl().setLookAt(player);
 		if (guard.distanceTo(player) > REACH) {
 			guard.getNavigation().moveTo(player, 1.0);
@@ -497,6 +498,7 @@ public final class GuardDrills {
 	}
 
 	private static void tickSpar(ServerLevel level, ServerPlayer player, PathfinderMob guard, Run run, long now) {
+		guard.setAggressive(true);
 		guard.getLookControl().setLookAt(player);
 		if (guard.distanceTo(player) > REACH) {
 			guard.getNavigation().moveTo(player, 1.1);
@@ -590,6 +592,7 @@ public final class GuardDrills {
 	/** The veteran stops fighting. */
 	private static void stand(PathfinderMob guard) {
 		guard.setTarget(null);
+		guard.setAggressive(false);
 		guard.getNavigation().stop();
 		guard.removeEffect(MobEffects.RESISTANCE);
 	}

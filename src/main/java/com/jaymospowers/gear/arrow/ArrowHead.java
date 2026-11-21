@@ -42,7 +42,13 @@ public enum ArrowHead {
 	/** A broad forked head: tears bare flesh open, and mail and plate turn it. */
 	SWALLOWTAIL("swallowtail", 0xC4CAD4, false),
 	/** A pitch-soaked rag: lit from a flame as it's loosed, it carries the fire to what it hits. */
-	CLOTH("cloth", 0xD8C8A0, false);
+	CLOTH("cloth", 0xD8C8A0, false),
+	/** A padded head: heavy knockback, no bleeding, little damage. */
+	BLUNT("blunt", 0xC8B48C, false),
+	/** Copper wire: shocks what it hits still for a moment, and the shock jumps to the nearest other foe. */
+	SPARK("spark", 0xD08A50, false),
+	/** Herb-soaked: heals whoever it hits instead of hurting them (for shooting friends); used up. */
+	MENDING("mending", 0x6EC060, true);
 
 	public final String id;
 	/** The head's colour on its icon and in its effects. */

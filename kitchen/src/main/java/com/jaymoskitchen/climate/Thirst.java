@@ -109,6 +109,7 @@ public final class Thirst {
 	private static final Map<UUID, Long> LAST_HISS = new HashMap<>();
 	private static Predicate<Player> fireDrinker = player -> false;
 	private static Predicate<Player> ironGut = player -> false;
+	private static Predicate<Player> unthirsting = player -> false;
 
 	private Thirst() {
 	}
@@ -121,6 +122,11 @@ public final class Thirst {
 	/** (0.5.80) For other mods (by reflection): whose stomach dirty water never turns (Kingdoms' Iron Stomach). */
 	public static void setIronGut(Predicate<Player> gut) {
 		ironGut = gut;
+	}
+
+	/** For other mods (by reflection): who never thirsts (Kingdoms' Pallid Hollow): their water stays full. */
+	public static void setUnthirsting(Predicate<Player> never) {
+		unthirsting = never;
 	}
 
 	/** (0.5.80) Whether dirty water is as good as clean to {@code player}'s stomach. */
@@ -157,6 +163,11 @@ public final class Thirst {
 	static void second(ServerPlayer player, long seconds) {
 		UUID id = player.getUUID();
 		ServerLevel level = player.level();
+		if (unthirsting.test(player)) {
+			set(player, MAX);
+			DRAINED.remove(id);
+			return;
+		}
 		if (level.getDifficulty() == Difficulty.PEACEFUL) {
 			// as hunger does on peaceful: it comes back by itself
 			if (seconds % 5L == 0L) {

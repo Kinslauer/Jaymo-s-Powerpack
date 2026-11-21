@@ -51,6 +51,7 @@ public final class SmokeStep {
 		level.sendParticles(SmokeParticles.puff(player, ParticleTypes.LARGE_SMOKE), mid.x, mid.y, mid.z, 30, 0.3, 0.6, 0.3, 0.03);
 		level.playSound(null, mid.x, mid.y, mid.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.8F, 0.7F);
 		player.teleportTo(level, to.x, to.y, to.z, Set.of(), player.getYRot(), player.getXRot(), false);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "smoke.step", 1);
 		player.resetFallDistance();
 		SmokeMoves.begin(player, SmokeMoves.STEP);
 		Vec3 out = to.add(0.0, player.getBbHeight() * 0.5, 0.0);

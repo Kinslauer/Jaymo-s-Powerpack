@@ -1,0 +1,11 @@
+{
+  "type": "jaymospowers:ore_vein",
+  "target": {
+    "predicate_type": "minecraft:block_match",
+    "block": "minecraft:tuff"
+  },
+  "ore": "jaymospowers:tuff_coal_ore",
+  "size": 36,
+  "rare": "minecraft:coal_block",
+  "rare_chance": 0.05
+}

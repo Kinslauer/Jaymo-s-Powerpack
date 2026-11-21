@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:cracked_stone_bricks_quarter",
+    "jaymospowers:cracked_stone_bricks_quarter",
+    "jaymospowers:cracked_stone_bricks_quarter",
+    "jaymospowers:cracked_stone_bricks_quarter"
+  ],
+  "result": {
+    "id": "minecraft:cracked_stone_bricks"
+  }
+}

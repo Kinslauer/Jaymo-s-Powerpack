@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:blackstone_quarter",
+    "jaymospowers:blackstone_quarter",
+    "jaymospowers:blackstone_quarter",
+    "jaymospowers:blackstone_quarter"
+  ],
+  "result": {
+    "id": "minecraft:blackstone"
+  }
+}

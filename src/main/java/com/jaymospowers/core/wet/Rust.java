@@ -43,6 +43,9 @@ import net.minecraft.world.phys.AABB;
  * <p>
  * Andy: "nothing removes rust". It stays on the piece for good, on players' and folk's armour alike: no wash, scrub or
  * repair takes it off.
+ * <p>
+ * (Harness 5) The pieces of Jaymo's Kingdoms' harness rust as well, worn or lying wet ({@link ArmourKind#harness}). Plate
+ * kept oiled ({@link ArmourOil}) gathers no new rust until the oil wears off ({@link #OILED_UNTIL}); oil takes none off.
  */
 public final class Rust {
 	// ---- tuning ----
@@ -70,6 +73,8 @@ public final class Rust {
 		"crystal", "obsidian", "silver", "mithril", "dragon", "bone", "turtle", "scute", "chitin", "leather", "wood"};
 
 	public static DataComponentType<Integer> RUST;
+	/** On oiled armour: the game time its oil keeps the rust off until. */
+	public static DataComponentType<Long> OILED_UNTIL;
 
 	private Rust() {
 	}
@@ -77,6 +82,8 @@ public final class Rust {
 	public static void init() {
 		RUST = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("rust"),
 			DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.VAR_INT).build());
+		OILED_UNTIL = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosPowers.id("oiled_until"),
+			DataComponentType.<Long>builder().persistent(Codec.LONG).networkSynchronized(ByteBufCodecs.VAR_LONG).build());
 		ServerTickEvents.END_SERVER_TICK.register(Rust::tick);
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof Mob mob) {
@@ -128,10 +135,17 @@ public final class Rust {
 	/** Whether {@code stack} is armour that rusts: mail or plate, not of a metal (or anything) that doesn't. */
 	public static boolean rusts(ItemStack stack) {
 		ArmourKind kind = ArmourKind.of(stack);
+		if (kind == ArmourKind.NONE) {
+			// a harness piece, known by its tag alone
+			kind = ArmourKind.layer(stack);
+		}
 		if (kind != ArmourKind.MAIL && kind != ArmourKind.PLATE || stack.is(RUSTPROOF)) {
 			return false;
 		}
-		String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().toLowerCase(Locale.ROOT);
+		// Tinkering plate is one item id a piece: what it rusts as is its main (plating) material
+		String path = stack.getItem() instanceof com.jaymospowers.tinkering.TinkerTool
+			? com.jaymospowers.tinkering.ToolStats.materials(stack).getFirst().id.toLowerCase(Locale.ROOT)
+			: BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().toLowerCase(Locale.ROOT);
 		for (String word : RUSTPROOF_WORDS) {
 			if (path.contains(word)) {
 				return false;
@@ -142,6 +156,17 @@ public final class Rust {
 
 	private static void set(ItemStack stack, int rust) {
 		stack.set(RUST, Math.min(MAX, rust));
+	}
+
+	/** Whether {@code stack}'s oil still keeps the rust off at game time {@code now}. */
+	public static boolean oiled(ItemStack stack, long now) {
+		Long until = OILED_UNTIL == null ? null : stack.get(OILED_UNTIL);
+		return until != null && until > now;
+	}
+
+	/** Whether {@code stack} rusts now: it can, and no oil keeps it off. */
+	private static boolean rustsNow(ItemStack stack, long now) {
+		return rusts(stack) && !oiled(stack, now);
 	}
 
 	// ---- every check ----
@@ -159,7 +184,7 @@ public final class Rust {
 						weather(level, body);
 					}
 				}
-				for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class, around, e -> e.isInWaterOrRain() && rusts(e.getItem()))) {
+				for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class, around, e -> e.isInWaterOrRain() && rustsNow(e.getItem(), level.getGameTime()))) {
 					if (seen.add(item)) {
 						grow(item.getItem(), IN_WATER * sea(level, item), level.getRandom());
 					}
@@ -182,9 +207,16 @@ public final class Rust {
 		if (rate <= 0.0F || body instanceof Player p && p.isCreative()) {
 			return;
 		}
+		long now = level.getGameTime();
 		for (EquipmentSlot slot : ArmourGrime.SLOTS) {
 			ItemStack piece = body.getItemBySlot(slot);
-			if (rusts(piece)) {
+			if (rustsNow(piece, now)) {
+				grow(piece, rate, level.getRandom());
+			}
+		}
+		// and the harness worn under and round it (the pieces are the harness's own, so the rust stays on them)
+		for (ItemStack piece : ArmourKind.harness.apply(body, "all")) {
+			if (rustsNow(piece, now)) {
 				grow(piece, rate, level.getRandom());
 			}
 		}

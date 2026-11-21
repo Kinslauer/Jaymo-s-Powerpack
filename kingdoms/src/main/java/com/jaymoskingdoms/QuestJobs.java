@@ -719,7 +719,8 @@ public final class QuestJobs {
 		}
 		charge.setPermanentlyInvulnerable(false);
 		TaleCast.moved(charge);
-		if (flat(charge, at) <= TREK_ARRIVED) {
+		// (a tale's walk by night only ends by night: brought there by day, they wait there for the dark)
+		if (flat(charge, at) <= TREK_ARRIVED && Tales.atItsHour(player, q)) {
 			if (charge.getVehicle() != null) {
 				charge.stopRiding();
 			}

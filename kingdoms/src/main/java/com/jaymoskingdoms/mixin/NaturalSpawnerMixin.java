@@ -12,7 +12,8 @@ import org.spongepowered.asm.mixin.injection.At;
 /**
  * Now and then a mob vanilla spawns naturally is a loot goblin instead ({@link LootGoblins#replace}); a monster spawned
  * near a ward rope isn't spawned at all ({@code Wards}); and the moon's phase thins or thickens what comes out under
- * the open sky ({@code NightThings}).
+ * the open sky ({@code NightThings}). A spider in the dark deep may be a cave spider, and the humanoids below y 0 are
+ * better armed ({@code mobs.UnderMobs}).
  */
 @Mixin(NaturalSpawner.class)
 abstract class NaturalSpawnerMixin {
@@ -29,7 +30,7 @@ abstract class NaturalSpawnerMixin {
 			entity.discard();
 			return;
 		}
-		original.call(level, LootGoblins.replace(level, entity));
+		original.call(level, com.jaymoskingdoms.mobs.UnderMobs.natural(level, LootGoblins.replace(level, entity)));
 		com.jaymoskingdoms.blossomland.NightThings.darkMoonBrings(level, entity);
 	}
 }

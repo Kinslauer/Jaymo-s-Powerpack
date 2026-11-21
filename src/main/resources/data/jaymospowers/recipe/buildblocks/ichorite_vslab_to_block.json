@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:ichorite_vslab",
+    "jaymospowers:ichorite_vslab"
+  ],
+  "result": {
+    "id": "jaymospowers:ichorite"
+  }
+}

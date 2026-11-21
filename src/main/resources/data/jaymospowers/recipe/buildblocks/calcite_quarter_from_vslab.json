@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": "jaymospowers:calcite_vslab",
+  "result": {
+    "id": "jaymospowers:calcite_quarter",
+    "count": 2
+  }
+}

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.gravity;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.aether.AetherBlocks;
 import com.jaymospowers.compat.Stacked;
@@ -176,13 +177,13 @@ final class GravityMeteor {
 		/** Crater-ring blasts the wave has reached but that haven't gone off yet ({@code CRATER_BLASTS_PER_TICK} a tick). */
 		final java.util.ArrayDeque<Vec3> blasts = new java.util.ArrayDeque<>();
 
-		Wave(ResourceKey<Level> dimension, UUID owner, Vec3 at, long start, float charge) {
+		Wave(ResourceKey<Level> dimension, UUID owner, Vec3 at, long start, float charge, double radius) {
 			this.dimension = dimension;
 			this.owner = owner;
 			this.at = at;
 			this.start = start;
 			this.charge = charge;
-			this.radius = GravityMeteor.radius(charge);
+			this.radius = radius;
 			this.floatingBefore = new HashSet<>();
 		}
 	}
@@ -313,7 +314,7 @@ final class GravityMeteor {
 				impact(level, owner, ground, meteor.charge, meteor.floatingBefore);
 				// after the blast, so the wreck isn't caught in it
 				wreck(level, ground, meteor.charge);
-				burst(level, ground, meteor.charge, debris);
+				burst(level, ground, meteor.charge, debris, owner);
 				if (rock != null) {
 					rock.discard();
 				}
@@ -337,7 +338,7 @@ final class GravityMeteor {
 			level.sendParticles(ParticleTypes.LAVA, true, false, at.x, at.y + half * 0.5, at.z, more, spread, spread, spread, 0.0);
 			level.sendParticles(ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, true, false, was.x, was.y + half * 0.5, was.z, 1 + more / 2, spread * 0.5, spread * 0.5,
 				spread * 0.5, 0.01);
-			Flames.area(level, at, TRAIL_FIRE_RADIUS + half, TRAIL_FIRE_SECONDS, owner, e -> e != rock);
+			Flames.area(level, at, AbilityPower.size(owner, TRAIL_FIRE_RADIUS) + half, TRAIL_FIRE_SECONDS, owner, e -> e != rock);
 			double shadow = 1.0 + p * Math.max(radius(meteor.charge) * 0.35, half);
 			int points = 12 + Math.round(meteor.charge * 24);
 			for (int i = 0; i < points; i++) {
@@ -418,7 +419,7 @@ final class GravityMeteor {
 					spot.getX() + 0.5, spot.getY() + 1.0, spot.getZ() + 0.5, 4, 0.4, 0.2, 0.4, 0.0);
 			}
 		}
-		Flames.area(level, at, TRAIL_FIRE_RADIUS + half, TRAIL_FIRE_SECONDS, owner, e -> e != rock);
+		Flames.area(level, at, AbilityPower.size(owner, TRAIL_FIRE_RADIUS) + half, TRAIL_FIRE_SECONDS, owner, e -> e != rock);
 		if (sunk % Math.max(2, 6 - (int)(g * 4)) == 1) {
 			float loud = 1.0F + charge * 1.5F;
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 2.5F * loud, 0.35F + g * 0.2F);
@@ -443,8 +444,8 @@ final class GravityMeteor {
 	}
 
 	/** The burst, for everyone near: a storm of the rock's Aether blocks, and the dust and smoke that hang there after. */
-	private static void burst(ServerLevel level, Vec3 at, float charge, List<Integer> states) {
-		GravityMeteorBurst burst = new GravityMeteorBurst(at.x, at.y, at.z, charge, (float)radius(charge), states);
+	private static void burst(ServerLevel level, Vec3 at, float charge, List<Integer> states, ServerPlayer owner) {
+		GravityMeteorBurst burst = new GravityMeteorBurst(at.x, at.y, at.z, charge, (float)AbilityPower.size(owner, radius(charge)), states);
 		for (ServerPlayer player : level.players()) {
 			if (player.distanceToSqr(at) < BURST_SEEN * BURST_SEEN
 				&& net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.canSend(player, GravityMeteorBurst.TYPE)) {
@@ -556,9 +557,9 @@ final class GravityMeteor {
 
 	/** It lands: the blast and the hurt; the shockwave sets off from here (see {@link #wave}). */
 	private static void impact(ServerLevel level, ServerPlayer owner, Vec3 at, float charge, Set<Long> floatingBefore) {
-		double radius = radius(charge);
+		double radius = AbilityPower.size(owner, radius(charge));
 		float damageMax = Mth.lerp(charge, DAMAGE_MIN, DAMAGE_MAX);
-		Wave wave = new Wave(level.dimension(), owner == null ? new UUID(0L, 0L) : owner.getUUID(), at, level.getGameTime(), charge);
+		Wave wave = new Wave(level.dimension(), owner == null ? new UUID(0L, 0L) : owner.getUUID(), at, level.getGameTime(), charge, radius);
 		wave.floatingBefore.addAll(floatingBefore);
 		level.explode(owner, at.x, at.y, at.z, POWER, false, Level.ExplosionInteraction.TNT);
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(radius),

@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.forms.ultimate;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.api.PowerKey;
 import com.jaymospowers.power.xenoform.XenoForm;
@@ -184,7 +185,7 @@ public final class Nightfall extends XenoUltimate {
 		}
 		ServerLevel level = player.level();
 		st.night = new Night(level, level.getGameTime() + NIGHT_TICKS);
-		ring(level, ParticleTypes.SQUID_INK, player.position(), NIGHT_RADIUS, RING_POINTS * 2);
+		ring(level, ParticleTypes.SQUID_INK, player.position(), AbilityPower.size(player, NIGHT_RADIUS), RING_POINTS * 2);
 		burst(level, ParticleTypes.SQUID_INK, player.position().add(0.0, 1.2, 0.0), 60, 1.0, 0.06);
 		sound(player, SoundEvents.ELDER_GUARDIAN_CURSE, 1.5F, 0.4F);
 		sound(player, SoundEvents.WARDEN_HEARTBEAT, 1.5F, 0.5F);
@@ -355,7 +356,7 @@ public final class Nightfall extends XenoUltimate {
 
 	private static void terror(ServerPlayer player, ServerLevel level, State st) {
 		Set<LivingEntity> caught = new LinkedHashSet<>();
-		for (LivingEntity e : around(player, TERROR_RADIUS)) {
+		for (LivingEntity e : around(player, AbilityPower.size(player, TERROR_RADIUS))) {
 			Vec3 toMe = player.getEyePosition().subtract(e.getEyePosition()).normalize();
 			if (harmable(player, e) && e.getViewVector(1.0F).dot(toMe) >= TERROR_LOOK && e.hasLineOfSight(player)) {
 				caught.add(e);
@@ -378,7 +379,7 @@ public final class Nightfall extends XenoUltimate {
 			}
 		}
 		burst(level, ParticleTypes.SCULK_SOUL, player.getEyePosition(), 14 + caught.size() * 5, 0.8, 0.05);
-		ring(level, ParticleTypes.SQUID_INK, player.position(), TERROR_RADIUS * 0.4, 28);
+		ring(level, ParticleTypes.SQUID_INK, player.position(), AbilityPower.size(player, TERROR_RADIUS) * 0.4, 28);
 		sound(player, SoundEvents.WARDEN_HEARTBEAT, 1.6F, 0.5F);
 		sound(player, SoundEvents.WARDEN_ROAR, 1.0F, 1.4F);
 	}
@@ -397,7 +398,7 @@ public final class Nightfall extends XenoUltimate {
 			return;
 		}
 		if (player.tickCount % NIGHT_REFRESH == 0) {
-			for (LivingEntity e : around(player, NIGHT_RADIUS)) {
+			for (LivingEntity e : around(player, AbilityPower.size(player, NIGHT_RADIUS))) {
 				if (harmable(player, e)) {
 					e.addEffect(new MobEffectInstance(MobEffects.DARKNESS, NIGHT_EFFECT_TICKS, 0, false, false), player);
 					e.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, NIGHT_EFFECT_TICKS, 0, false, false), player);
@@ -409,14 +410,14 @@ public final class Nightfall extends XenoUltimate {
 			outline(player, level);
 		}
 		if (player.tickCount % RING_EVERY == 0) {
-			ring(level, ParticleTypes.SQUID_INK, player.position(), NIGHT_RADIUS, RING_POINTS);
+			ring(level, ParticleTypes.SQUID_INK, player.position(), AbilityPower.size(player, NIGHT_RADIUS), RING_POINTS);
 		}
 	}
 
 	/** Every creature inside outlined in pale violet points, sent to this player alone. */
 	private static void outline(ServerPlayer player, ServerLevel level) {
 		int drawn = 0;
-		for (LivingEntity e : around(player, NIGHT_RADIUS)) {
+		for (LivingEntity e : around(player, AbilityPower.size(player, NIGHT_RADIUS))) {
 			if (drawn++ >= OUTLINE_MAX) {
 				break;
 			}

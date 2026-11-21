@@ -121,6 +121,9 @@ public final class Recollections {
 		/** {@link HollowSighting}: saw them walking after death, one of the Hollow. */
 		SAW_TURNED(-3, 0, true, true, "You saw that %1$s had died and got up again, one of the Hollow: the walking dead.",
 			"%3$s saw that %1$s had died and got up again, one of the Hollow."),
+		/** {@link PallidHollows}: saw them die, or lie dead, and get up again where they fell (a Pallid). */
+		SAW_DEATHLESS(0, 90, true, true, "You saw %1$s, one of the Pallid, lie dead and get up again where they fell (%3$s times that day).",
+			"%3$s saw %1$s, one of the Pallid, lie dead and get up again."),
 		/** {@link BlightSpread}: cured them of the Hollow's blight before it turned them. */
 		CURED_BLIGHT(6, 240, true, true, "%1$s cured you of the Hollow's blight when it would have made you one of the dead.",
 			"%1$s cured %3$s of the Hollow's blight before it turned them.");
@@ -625,6 +628,10 @@ public final class Recollections {
 				if (k != null && k.tellable && !r.heard() && !forgotten(r, day) && Math.abs(k.weight) >= TELL_WEIGHT) {
 					said.add(Component.translatable("recall.jaymoskingdoms.about." + r.kind() + "." + random.nextInt(ABOUT_REMARKS),
 						e.getValue().name(), r.detail()));
+				} else if (k == Kind.CRIME && r.heard() && !forgotten(r, day)) {
+					// (CrimeWord) a crime they only heard of goes round as hearsay
+					said.add(Component.translatable("recall.jaymoskingdoms.about_heard.crime." + random.nextInt(ABOUT_REMARKS),
+						e.getValue().name(), r.detail(), r.from()));
 				}
 			}
 		}

@@ -114,6 +114,11 @@ final class DoorPounding {
 		if (goals.getAvailableGoals().stream().noneMatch(w -> w.getGoal() instanceof Pound)) {
 			goals.addGoal(1, new Pound(zombie));
 		}
+		if (zombie.canBreakDoors()) {
+			// vanilla's own Hard-only door breaker would pound alongside ours, ignoring locks: ours does it now
+			// (here at load, never from a goal: it removes a goal from the set the goal selector is walking)
+			zombie.setCanBreakDoors(false);
+		}
 		paths(zombie);
 	}
 
@@ -339,11 +344,6 @@ final class DoorPounding {
 		public boolean canUse() {
 			if (mob.tickCount % LOOK_EVERY != 0 || !allowed(mob)) {
 				return false;
-			}
-			if (mob instanceof Zombie zombie && zombie.canBreakDoors()) {
-				// vanilla's own Hard-only door breaker would pound alongside ours, ignoring locks: ours does it now
-				zombie.setCanBreakDoors(false);
-				paths(zombie);
 			}
 			if (!(mob instanceof Zombie) && !ZombieHordes.inHorde(mob)) {
 				return false;

@@ -216,6 +216,7 @@ public final class ArsenalPocket {
 			return;
 		}
 		boolean out = level.dimension() == POCKET;
+		com.jaymospowers.core.trials.PowerTrials.count(player, "arsenal.rift", 1);
 		// (0.13.35) rolled here, once, so whoever follows through goes the same way
 		boolean nether = !out && ArsenalEmber.netherRift(player, level);
 		int room = out || nether ? roomAt(player.blockPosition()) : room(player);

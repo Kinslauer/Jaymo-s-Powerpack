@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:end_stone_vslab",
+    "jaymospowers:end_stone_vslab"
+  ],
+  "result": {
+    "id": "minecraft:end_stone"
+  }
+}

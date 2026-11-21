@@ -1,0 +1,34 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:rabbit_hide",
+    {
+      "id": "jaymoskitchen:hide",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:raw_hide",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:wolf_fur",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:wild_fur",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:bear_fur",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:beast_pelt",
+      "required": false
+    },
+    {
+      "id": "naturalist:bear_fur",
+      "required": false
+    }
+  ]
+}

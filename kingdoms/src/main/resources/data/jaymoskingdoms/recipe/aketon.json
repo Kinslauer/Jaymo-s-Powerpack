@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "group": "jaymoskingdoms:harness",
+  "pattern": [
+    "W W",
+    "WSW",
+    "WSW"
+  ],
+  "key": {
+    "W": "#minecraft:wool",
+    "S": "minecraft:string"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:aketon"
+  }
+}

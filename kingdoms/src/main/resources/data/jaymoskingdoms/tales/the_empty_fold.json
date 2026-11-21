@@ -6,13 +6,15 @@
     "neighbour": { "if": "culprit=neighbour", "name": ["Odo Marrec", "Hale Brandt", "Tam Corwick"], "body": "villager", "job": "farmer", "at": "steading" },
     "herdboy": { "name": ["Pip", "Wren", "Jory"], "body": "villager", "job": "none", "at": "fold" },
     "collector": { "if": "culprit=neighbour", "name": ["Garrow Vane", "Silas Dunmore"], "body": "fighter", "at": "crossing", "health": 60, "damage": 6, "armor": 8, "hand": "minecraft:iron_sword", "chest": "minecraft:leather_chestplate", "men": 2 },
-    "denmother": { "if": "culprit=denfolk", "name": ["Ashka", "Merrow", "Senna"], "body": "villager", "job": "none", "female": true, "at": "den" },
+    "denmother": { "if": "culprit=denfolk", "name": ["Ashka", "Merrow", "Senna"], "body": "villager", "job": "none", "female": true, "at": "den", "hours": "night" },
     "packleader": { "if": "culprit=wolves", "name": "the grey one", "body": "minecraft:wolf", "at": "den", "health": 50, "damage": 7, "men": 4 }
   },
   "places": {
     "fold": { "at": "near", "from": "home", "dist": [40, 70], "name": "the fold" },
     "steading": { "at": "near", "from": "home", "dist": [50, 90], "name": "the neighbouring steading" },
     "den": { "at": "wild", "from": "home", "dist": [180, 320], "name": "the hollow in the hills" },
+    "trail": { "at": "near", "from": "fold", "dist": [50, 90], "name": "the pressed grass above the fold" },
+    "ridge": { "at": "near", "from": "den", "dist": [40, 70], "name": "the ridge over the hollow" },
     "crossing": { "at": "road", "from": "home", "dist": [120, 220], "name": "the crossing" }
   },
   "first": "ask",
@@ -66,14 +68,16 @@
       "do": "talk", "who": "herdboy",
       "say": {
         "?culprit=neighbour": "Down. Toward {neighbour}'s. But lots of things are down that way.",
+        "?culprit=denfolk": "Up. Past the stones, into the hills. There's a hollow up there nobody grazes. I've been up by day to look, and there's nobody. It only ever comes after dark, the little one.",
+        "?culprit=wolves": "Up. Past the stones, into the hills. There's a hollow up there nobody grazes. My gran says you don't walk up to wolves, you read them first. Tracks by day, when they're laid up. Then watch where they go at night, from somewhere they can't wind you.",
         "?": "Up. Past the stones, into the hills. There's a hollow up there nobody grazes."
       },
       "journal": {
         "?culprit=neighbour": "The boy says the dog knows the thief, and the trail goes down toward {neighbour}'s steading.",
-        "?culprit=denfolk": "The boy saw a small hooded thing with a tail carry off a lamb, gently. It went up into the hills.",
+        "?culprit=denfolk": "The boy saw a small hooded thing with a tail carry off a lamb, gently. It went up into the hills. He has only ever seen it after dark.",
         "?": "The boy heard the dog go quiet, and found the grass pressed flat toward the hills."
       },
-      "then": { "?culprit=neighbour": "to_steading", "?": "to_den" }
+      "then": { "?culprit=neighbour": "to_steading", "?culprit=wolves": "hunt_tracks", "?": "to_den" }
     },
 
     "to_steading": { "do": "go", "to": "steading", "goal": "Go to {neighbour}'s steading", "then": "confront" },
@@ -124,8 +128,32 @@
     },
 
     "to_den": { "do": "go", "to": "den", "goal": "Follow the trail to the hollow in the hills", "then": { "?culprit=denfolk": "den_talk", "?": "den_wolves" } },
+    "hunt_tracks": {
+      "do": "search", "at": "trail", "when": "day", "need": 3, "goal": "Read the pack's trail above the fold",
+      "clues": [
+        { "name": "Wool on the thorn", "item": "minecraft:white_wool", "lore": ["A tuft every few yards, going uphill, each one higher than a sheep stands.", "It was carried, not dragged. By the neck, by something tall."], "journal": "Wool hangs on the thorns all the way uphill, at the height a big wolf carries its kill." },
+        { "name": "A line of prints", "item": "minecraft:clay_ball", "lore": ["Five wolves, each treading in the last one's track, so the trail reads as one.", "The hindmost print is the largest, and it is short of a toe."], "journal": "Five wolves went up in one another's prints. The biggest goes last, and has lost a toe." },
+        { "name": "A charcoal burner's cold pit", "item": "minecraft:charcoal", "lore": ["An old burn, years dead, lying square across the trail.", "The prints leave the path here and go the long way round through the gorse. Every one of them."], "mark": "fold_grey_shies_fire", "journal": "The trail swings wide round a charcoal pit that has been cold for years. Whatever leads this pack will not cross where a fire has been." },
+        { "name": "Singed grey hair", "item": "minecraft:string", "lore": ["Coarse grey hair on a gorse stem, the ends crisped short.", "It was burned once, long ago, and has grown in white at the root."], "mark": "fold_grey_shies_fire", "journal": "Grey hair caught on the gorse, singed short and grown in white. The old one has been burned before, and remembers it." }
+      ],
+      "then": "hunt_night"
+    },
+    "hunt_night": {
+      "do": "vigil", "at": "ridge", "when": "night", "gap": 12, "goal": "Watch the pack move from {place:ridge}",
+      "lines": [
+        { "say": "Nothing on the hill but wind. Then, far below, the dog at the fold stops whining.", "sound": "minecraft:entity.wolf.whine" },
+        { "say": "They come down out of {place:den} in single file, five of them, without a sound. The old grey goes last." },
+        { "say": "Where the path meets the old charcoal pit the grey stops, and the rest stop with it. They go round by the gorse.", "mark": "fold_grey_shies_fire" },
+        { "say": "A long while of nothing. Then one short cry from the fold, cut off.", "sound": "minecraft:entity.sheep.ambient" },
+        { "say": "They come back up the same way with a ewe carried high, and go to ground in the hollow.", "sound": "minecraft:entity.wolf.growl" }
+      ],
+      "then": "to_den"
+    },
     "den_wolves": {
       "do": "foe", "who": "packleader", "goal": "Put an end to the pack",
+      "weak_to": [
+        { "know": "mark:fold_grey_shies_fire", "item": "minecraft:torch", "share": 0.7, "journal": "I went into the hollow with torches. The old grey would not close with the fire, and the young ones would not close without it.", "bestiary": "An old pack leader that has been burned once shies from flame. Carry torches into its den: it hangs back, and the pack loses heart with it." }
+      ],
       "journal": "It was wolves after all. An old grey one that had taught the pack to take them quietly, one a night.",
       "slain": "report_wolves"
     },
@@ -135,7 +163,7 @@
       "then": "end:wolves"
     },
     "den_talk": {
-      "do": "talk", "who": "denmother", "goal": "Speak with whoever lives in the hollow",
+      "do": "talk", "who": "denmother", "when": "night", "goal": "Speak with whoever lives in the hollow",
       "say": [
         "Stop there. That's far enough. You came for the sheep.",
         "Five are alive. Two we ate. I have four little ones and the town shut its gate on us at first frost, so tell me what you'd have done. I tell the children to take the old ewes, the ones that won't see spring. They take lambs because lambs are soft to carry. They're children."

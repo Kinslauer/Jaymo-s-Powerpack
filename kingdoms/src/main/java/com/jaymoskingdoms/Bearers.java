@@ -571,6 +571,11 @@ public final class Bearers {
 					// just let go of, or still tumbling: taken up next time round
 					return true;
 				}
+				// taken up, it's stripped first: its gear goes into the stores (Salvage)
+				Faction realm = d.royal ? null : Factions.get(level.getServer(), d.realm);
+				if (realm != null) {
+					Salvage.salvage(level, realm, corpse, bearer, d.dead.name(), d.dead.realm());
+				}
 				d.stage = Stage.HAUL;
 			}
 			case HAUL -> {

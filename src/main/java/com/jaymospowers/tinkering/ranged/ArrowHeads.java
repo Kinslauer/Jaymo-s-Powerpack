@@ -105,7 +105,7 @@ public final class ArrowHeads {
 		victim.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, DAZE_TICKS, 1), arrow.getOwner());
 		victim.addEffect(new MobEffectInstance(MobEffects.NAUSEA, DAZE_TICKS + 40, 0), arrow.getOwner());
 		level.playSound(null, victim.getX(), victim.getEyeY(), victim.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.NEUTRAL, 0.8F, 0.9F);
-		if (unsuspecting && victim.isAlive() && !Downed.passedOut(victim) && level.getRandom().nextFloat() < (head ? HEAD_CHANCE : BODY_CHANCE)) {
+		if (unsuspecting && victim.isAlive() && !Downed.passedOut(victim) && level.getRandom().nextFloat() < (head ? HEAD_CHANCE * Downed.headKnock(victim) : BODY_CHANCE)) {
 			int ticks = OUT_MIN + level.getRandom().nextInt(OUT_MAX - OUT_MIN + 1);
 			Downed.knockOut(level, victim, ticks, true, "message.jaymospowers.downed.knocked_rock");
 		}

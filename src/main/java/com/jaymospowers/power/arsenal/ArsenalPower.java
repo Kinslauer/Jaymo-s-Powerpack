@@ -62,6 +62,8 @@ import org.jspecify.annotations.Nullable;
  * <li>X - Cannon Battery ({@link ArsenalCannons}): hold to grow a fan of rift cannons, let go to fire them all.</li>
  * <li>Double tap Jump - Blade riding ({@link ArsenalRide}): a great blade under your feet carries you; again to step off and send it on.</li>
  * <li>Sneak + V (the Void Arsenal: Sneak + X) - Attendant Blades ({@link ArsenalWing}): weapons that stay out and hang round you, striking with you.</li>
+ * <li>The Void Arsenal's blinks ({@link ArsenalBlinks}): sprint + R Blink, sprint + B Blink Strike, sprint + Z Vanish, sprint + X Sky Drop,
+ * ascended Sneak + C Flicker.</li>
  * </ul>
  */
 public final class ArsenalPower implements Power {
@@ -173,6 +175,9 @@ public final class ArsenalPower implements Power {
 		ArsenalChains.init();
 		ArsenalStanding.init();
 		ArsenalVoid.init();
+		ArsenalFall.init();
+		ArsenalSeal.init();
+		ArsenalBlinks.init();
 		SwordStone.register();
 		RelicWeapons.register();
 		GlassGauntlet.register();
@@ -211,6 +216,21 @@ public final class ArsenalPower implements Power {
 	@Override
 	public void onKey(ServerPlayer player, PowerKey key, boolean down) {
 		boolean voided = com.jaymospowers.core.Fate.isCorrupted(player) && !com.jaymospowers.core.Mastery.starterOnly(player);
+		// the Void Arsenal's blinks: sprint + R Blink, sprint + B Blink Strike (ArsenalBlinks)
+		if (down && voided && ArsenalBlinks.key(player, key)) {
+			return;
+		}
+		// (Awakening picks) sprint + G: Surface; the Void Arsenal's sprint + V: Endless Fall
+		if (down && player.isSprinting() && !player.isShiftKeyDown() && !com.jaymospowers.core.Mastery.starterOnly(player)) {
+			if (key == PowerKey.ABILITY_2) {
+				ArsenalSurface.cast(player);
+				return;
+			}
+			if (key == PowerKey.ABILITY_3 && voided) {
+				ArsenalFall.cast(player);
+				return;
+			}
+		}
 		if (key == PowerKey.ABILITY_3 && !voided && ArsenalWing.key(player, down)) {
 			// Sneak + V: Attendant Blades (a short hold calls them, or opens their order wheel; a tap changes their formation);
 			// the Void Arsenal, whose Sneak + V is its gates, has them on Sneak + X (ArsenalCannons)
@@ -282,6 +302,10 @@ public final class ArsenalPower implements Power {
 	/** Z: the Pocket Dimension, once B (the ability it used to be) is unlocked. */
 	@Override
 	public void onMode(ServerPlayer player, boolean down) {
+		// the Void Arsenal's sprint + Z: Vanish (ArsenalBlinks)
+		if (down && ArsenalBlinks.mode(player)) {
+			return;
+		}
 		if (down && slotUnlocked(player, "mode")) {
 			// (0.13.35) an Emberborn who escaped the Nether: Sneak + Z flips where their rifts lead
 			if (player.isShiftKeyDown() && ArsenalEmber.flip(player)) {
@@ -299,15 +323,33 @@ public final class ArsenalPower implements Power {
 
 	@Override
 	public void onUltimate(ServerPlayer player, boolean down) {
-		if (down && player.isAlive()) {
+		// (Awakening pick) the Rift Seal, from the last rank: C, or sprint + C once ascended (whose C is the Hundred Blades)
+		if (ArsenalSeal.busy(player)
+			|| down && player.isAlive() && ArsenalSeal.unlocked(player) && (!com.jaymospowers.core.Fate.isAscended(player) || player.isSprinting())) {
+			ArsenalSeal.key(player, down);
+			return;
+		}
+		if (down && player.isAlive() && com.jaymospowers.core.Fate.isAscended(player)) {
+			// the ascended Void Arsenal's Sneak + C: Flicker (ArsenalBlinks)
+			if (ArsenalBlinks.ultimate(player)) {
+				return;
+			}
 			HundredBlades.cast(player);
 		}
+	}
+
+	/** C answers the Hundred Blades once ascended, and from the last rank the Rift Seal ({@link ArsenalSeal}). */
+	@Override
+	public boolean ultimateAnswers(net.minecraft.world.entity.player.Player player) {
+		return com.jaymospowers.core.Fate.isAscended(player) || ArsenalSeal.unlocked(player);
 	}
 
 	/** Out of the void: its gates close. */
 	@Override
 	public void onPurified(ServerPlayer player) {
 		ArsenalGates.close(player);
+		// the blinks end with the void
+		ArsenalBlinks.forget(player);
 	}
 
 	@Override
@@ -325,6 +367,7 @@ public final class ArsenalPower implements Power {
 		ArsenalChains.onLost(player);
 		ArsenalDamocles.cancelAim(player);
 		ArsenalRide.home(player);
+		ArsenalBlinks.forget(player);
 	}
 
 	/** Riding a blade ({@link ArsenalRide}): not kicked for floating. */
@@ -336,6 +379,9 @@ public final class ArsenalPower implements Power {
 	@Override
 	public void onLost(ServerPlayer player) {
 		ArsenalGates.close(player);
+		ArsenalFall.forget(player);
+		ArsenalBlinks.forget(player);
+		ArsenalSeal.lost(player);
 		ArsenalArmory.onLost(player);
 		GlassGauntlet.onLost(player);
 		ArsenalAnywhere.release(player);
@@ -363,6 +409,7 @@ public final class ArsenalPower implements Power {
 			ArsenalGates.tick(player);
 		}
 		ArsenalVoid.tick(player);
+		ArsenalBlinks.tick(player);
 		ArsenalEmber.tick(player);
 		ArsenalRelics.tick(player);
 		HundredBlades.tick(player);
@@ -477,6 +524,7 @@ public final class ArsenalPower implements Power {
 		player.setAttached(ArsenalReach.REACH, new ArsenalReach.Reach(now, shown));
 		Vec3 rift = ArsenalReach.portalCenter(player, 1.0F);
 		level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.7F, 0.55F);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "arsenal.reach", 1);
 		level.playSound(null, rift.x, rift.y, rift.z, SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.15F, 1.8F);
 	}
 
@@ -649,6 +697,7 @@ public final class ArsenalPower implements Power {
 			return;
 		}
 		Summoned sent = s;
+		com.jaymospowers.core.trials.PowerTrials.count(player, "arsenal.return", 1);
 		dissolveWhere(player, x -> x.batch() == sent.batch() && x.owner().equals(sent.owner()), true);
 		if (sent.ownedBy(player.getUUID())) {
 			long now = player.level().getGameTime();

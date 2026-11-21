@@ -36,6 +36,8 @@ public final class FinisherPose {
 	static final boolean CINEMATIC = true;
 	/** How far ahead the moves reach (blocks): someone lying further off is stepped in toward, up to {@link #STEP_MAX}. */
 	static final float REACH = 1.3F, STEP_MAX = 1.4F;
+	/** A stealth kill's reach: close behind the one taken. */
+	static final float STEALTH_REACH = 0.6F;
 	/** The hips over the feet (blocks): the bend and the turn are about them. */
 	static final float HIP = 0.75F;
 	/** How quick the move eases in and out (the weight's spring, times its usual), and how stiff the limbs follow it. */
@@ -435,6 +437,31 @@ public final class FinisherPose {
 		// (Quiet Word) The choke hold: stood close behind them, the right arm hooked round the throat, the left at their ribs
 		Key choke = k(0, 0.05F, 6, 0, -1.55F, 0.75F, 0.2F, -1.0F, -0.2F, -0.1F, -0.1F, 0.1F, 0.25F, 0);
 		KEYS.put(Finishers.Kind.Q_CHOKE, new Key[] {rest(0, 0), at(choke, 6), turned(choke, q * 0.5F, 3), at(choke, q - 8), rest(q, 0)});
+		// Stealth kills: stood close behind someone on their feet, then down on a knee as they're let down
+		// Silent Blade: the off hand over their mouth, the blade drawn back low and driven in under the skull
+		Key mouth = k(0, 0.05F, 8, -6, -0.5F, 0.0F, 0.35F, -1.9F, -0.55F, 0.0F, -0.15F, 0.15F, 0.2F, 90);
+		Key driven = k(0, 0.08F, 12, 6, -1.45F, 0.3F, 0.0F, -1.9F, -0.5F, 0.0F, -0.2F, 0.2F, 0.25F, 90);
+		Key letDown = k(0, 0.3F, 30, 0, -0.9F, 0.2F, 0.05F, -1.1F, -0.3F, 0.0F, -0.6F, 0.5F, 0.5F, 90);
+		KEYS.put(Finishers.Kind.S_BLADE, new Key[] {
+			rest(0, 0), at(mouth, 5),
+			k(11, 0.05F, 6, -12, -0.2F, 0.0F, 0.45F, -1.95F, -0.55F, 0.0F, -0.15F, 0.15F, 0.2F, 90),
+			at(driven, 14), turned(driven, 17, 8), at(letDown, 23), rest(28, 0)});
+		// Lights Out: a hand on their shoulder, the weapon up, and one blow to the back of the head
+		Key shoulder = k(0, 0.0F, -4, -8, -2.8F, -0.1F, 0.25F, -1.3F, -0.35F, 0.0F, -0.1F, 0.1F, 0.2F, 0);
+		Key struck = k(0, 0.1F, 22, 6, -1.0F, 0.0F, 0.05F, -1.25F, -0.3F, 0.0F, -0.4F, 0.35F, 0.45F, 40);
+		KEYS.put(Finishers.Kind.S_BLUNT, new Key[] {
+			rest(0, 0), at(shoulder, 6),
+			k(10, -0.02F, -8, -10, -3.0F, -0.1F, 0.3F, -1.3F, -0.35F, 0.0F, -0.1F, 0.1F, 0.15F, -10),
+			at(struck, 13), at(struck, 16),
+			k(21, 0.25F, 28, 0, -0.7F, 0.0F, 0.05F, -0.9F, -0.3F, 0.0F, -0.6F, 0.5F, 0.5F, 20), rest(26, 0)});
+		// Silent Snap: both hands on their head from behind, braced, and one sharp twist
+		Key hands = k(0, 0.05F, 6, 0, -1.75F, 0.45F, 0.1F, -1.75F, -0.45F, -0.1F, -0.1F, 0.1F, 0.25F, 0);
+		Key snapped = k(0, 0.05F, 8, 16, -1.7F, 0.1F, 0.1F, -1.85F, -0.7F, -0.1F, -0.15F, 0.15F, 0.3F, 0);
+		KEYS.put(Finishers.Kind.S_SNAP, new Key[] {
+			rest(0, 0), at(hands, 6),
+			k(12, 0.05F, 6, -10, -1.8F, 0.6F, 0.1F, -1.7F, -0.25F, -0.1F, -0.1F, 0.1F, 0.25F, 0),
+			at(snapped, 14), at(snapped, 17),
+			k(22, 0.3F, 28, 0, -0.9F, 0.2F, 0.05F, -0.9F, -0.2F, 0.0F, -0.6F, 0.5F, 0.5F, 0), rest(26, 0)});
 	}
 
 	/** {@code key} at {@code t} with the weapon turned {@code grip} degrees in the hand (a full circle twirls it). */
@@ -535,7 +562,7 @@ public final class FinisherPose {
 			return;
 		}
 		Finishers.Kind kind = finish.type();
-		float t = entity.level().getGameTime() - finish.start() + partialTicks;
+		float t = finish.at(entity.level().getGameTime(), partialTicks);
 		Key[] keys = KEYS.get(kind);
 		if (keys == null || t < 0.0F || t >= kind.length) {
 			state.setData(KEY, null);
@@ -558,7 +585,9 @@ public final class FinisherPose {
 			state.yRot = Mth.clamp(Mth.wrapDegrees(head - yaw), -50.0F, 50.0F);
 			// (a step in, over the first few ticks, if they lie further off than the move reaches)
 			float in = Mth.clamp(t / 5.0F, 0.0F, 1.0F);
-			step = Mth.clamp((float) Math.sqrt(dx * dx + dz * dz) - REACH, 0.0F, STEP_MAX) * in * in * (3.0F - 2.0F * in);
+			// (a stealth kill is done close behind them)
+			float reach = kind.stealth() ? STEALTH_REACH : REACH;
+			step = Mth.clamp((float) Math.sqrt(dx * dx + dz * dz) - reach, 0.0F, STEP_MAX) * in * in * (3.0F - 2.0F * in);
 		}
 		state.walkAnimationSpeed = 0.0F;
 		state.setData(KEY, new Pose(sample(keys, t), step, entity.getMainArm() == HumanoidArm.RIGHT));

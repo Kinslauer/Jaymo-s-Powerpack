@@ -18,6 +18,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.npc.villager.Villager;
 import org.jspecify.annotations.Nullable;
 
@@ -29,6 +31,10 @@ import org.jspecify.annotations.Nullable;
  * since they last saw anything takes a point off, so the strongest is forgotten in about three days. A villager with a
  * suspicion gossips about it by name ({@link #gossip}, {@link #LINES} vague lines for each kind), and a guard with a
  * strong one ({@link #STRONG}) turns to watch the player when they come close, with a wary word now and then.
+ *
+ * <p>A crime suspect who isn't wanted yet is watched too: by a guard who saw or heard of their crime in the last
+ * {@link #WATCH_DAYS} days, or, with no such guard about, by a golem of a realm whose people suspect them
+ * ({@link Approaches#suspected}). The nearest one follows them at a distance while they stay in sight.
  */
 public final class Suspicion {
 	// ---- tuning --------------------------------------------------------------------------------------------------------
@@ -51,6 +57,15 @@ public final class Suspicion {
 	/** A guard watches a suspect this close (blocks), and speaks up at most this often (ticks). */
 	static final double WARY_RANGE = 10.0;
 	static final long WARY_GAP = 600L;
+	/** How often the watch moves (ticks); how far a watcher sees a crime suspect from (blocks). */
+	static final int WATCH_EVERY = 10;
+	static final double WATCH_RANGE = 16.0;
+	/** A follower closes in past the far distance and stops inside the near one (blocks), at this speed. */
+	static final double FOLLOW_FAR = 8.0, FOLLOW_NEAR = 5.0, FOLLOW_SPEED = 0.7;
+	/** A guard keeps an eye on someone whose crime they saw or heard of this many days ago or less. */
+	static final long WATCH_DAYS = 3L;
+	/** The guards' words to a crime suspect. */
+	static final int WATCH_LINES = 3;
 
 	// ---- what's kept ---------------------------------------------------------------------------------------------------
 
@@ -132,37 +147,82 @@ public final class Suspicion {
 		ServerLevel overworld = server.overworld();
 		long now = overworld.getGameTime();
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-			if ((now + player.getId()) % 40 != 7 || !player.isAlive() || player.isSpectator() || player.isCreative()) {
+			if ((now + player.getId()) % WATCH_EVERY != 7 % WATCH_EVERY || !player.isAlive() || player.isSpectator() || player.isCreative()) {
 				continue;
 			}
 			ServerLevel level = player.level();
-			String kind = null;
-			if (Vampires.isVampire(player) && !VampirePlayers.dhampir(player) && Vampires.exposed(player)) {
-				kind = VAMPIRE;
-				witnessed(level, player, VAMPIRE, ADD_HUNT, HUNT_RANGE, false);
-			} else if (HiddenChange.tells(player) != 0 && Lycans.cursed(player)) {
-				kind = WOLF;
-				witnessed(level, player, WOLF, ADD_TELL, TELL_RANGE, false);
+			if ((now + player.getId()) % 40 == 7) {
+				if (Vampires.isVampire(player) && !VampirePlayers.dhampir(player) && Vampires.exposed(player)) {
+					witnessed(level, player, VAMPIRE, ADD_HUNT, HUNT_RANGE, false);
+				} else if (HiddenChange.tells(player) != 0 && Lycans.cursed(player)) {
+					witnessed(level, player, WOLF, ADD_TELL, TELL_RANGE, false);
+				}
 			}
-			if (kind != null || Lycans.cursed(player) || Vampires.isVampire(player)) {
-				wary(level, player, now);
-			}
+			wary(level, player, now);
 		}
 	}
 
-	/** A guard with a strong suspicion of {@code player} turns to watch them, and now and then says so. */
+	/**
+	 * A guard with a strong suspicion of {@code player}, or who knows of a recent crime of theirs they aren't wanted for
+	 * yet, turns to watch them, and now and then says so; the nearest free one follows them. With no guard on them, a golem
+	 * of the realm whose law holds here follows them if its people suspect them of a crime.
+	 */
 	private static void wary(ServerLevel level, ServerPlayer player, long now) {
-		for (Folk guard : level.getEntitiesOfClass(Folk.class, player.getBoundingBox().inflate(WARY_RANGE), g -> g.isAlive() && g.combatant())) {
-			if (strength(guard, player) < STRONG || !guard.hasLineOfSight(player)) {
+		Mob follower = null;
+		for (Folk guard : level.getEntitiesOfClass(Folk.class, player.getBoundingBox().inflate(WATCH_RANGE), g -> g.isAlive() && g.combatant())) {
+			boolean strong = strength(guard, player) >= STRONG && guard.distanceTo(player) <= WARY_RANGE;
+			boolean crime = !strong && !Theft.wanted(player, guard.factionId()) && knowsCrime(guard, player);
+			if (!(strong || crime) || guard.distanceTo(player) > WATCH_RANGE || !guard.hasLineOfSight(player)) {
 				continue;
 			}
 			guard.getLookControl().setLookAt(player);
+			if (Approaches.free(guard) && (follower == null || guard.distanceToSqr(player) < follower.distanceToSqr(player))) {
+				follower = guard;
+			}
 			if (now >= WARNED.getOrDefault(guard.getUUID(), 0L)) {
 				WARNED.put(guard.getUUID(), now + WARY_GAP);
-				Speech.say(level, guard, Component.translatable("talk.jaymoskingdoms.suspect.wary." + level.getRandom().nextInt(WARY_LINES),
-					Recollections.nameTo(player, guard)), Speech.YELLOW, WARY_RANGE);
+				String line = strong ? "talk.jaymoskingdoms.suspect.wary." + level.getRandom().nextInt(WARY_LINES)
+					: "talk.jaymoskingdoms.suspect.watch." + level.getRandom().nextInt(WATCH_LINES);
+				Speech.say(level, guard, Component.translatable(line, Recollections.nameTo(player, guard)), Speech.YELLOW, WARY_RANGE);
 			}
 		}
+		if (follower == null) {
+			Faction law = Theft.lawAt(level, player.blockPosition());
+			if (law != null && !Theft.wanted(player, law.id()) && Approaches.suspected(player, law.id(), now)) {
+				for (IronGolem golem : level.getEntitiesOfClass(IronGolem.class, player.getBoundingBox().inflate(WATCH_RANGE),
+					g -> g.isAlive() && !g.isPlayerCreated() && g.distanceTo(player) <= WATCH_RANGE && g.hasLineOfSight(player) && Approaches.free(g))) {
+					Faction theirs = Theft.lawAt(level, golem.blockPosition());
+					if (theirs != null && theirs.id() == law.id() && (follower == null || golem.distanceToSqr(player) < follower.distanceToSqr(player))) {
+						follower = golem;
+					}
+				}
+			}
+		}
+		if (follower != null) {
+			follow(follower, player);
+		}
+	}
+
+	/** {@code who} saw or heard of a crime of {@code player}'s in the last {@link #WATCH_DAYS} days. */
+	private static boolean knowsCrime(LivingEntity who, ServerPlayer player) {
+		long today = Deeds.today(player.level().getServer());
+		for (Recollections.Recollection r : Recollections.of(who, player)) {
+			if (r.kind().equals(Recollections.Kind.CRIME.key()) && today - r.day() <= WATCH_DAYS) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** {@code mob} keeps {@code player} in view: closes in past {@link #FOLLOW_FAR}, stops inside {@link #FOLLOW_NEAR}. */
+	private static void follow(Mob mob, ServerPlayer player) {
+		double d = mob.distanceTo(player);
+		if (d > FOLLOW_FAR) {
+			mob.getNavigation().moveTo(player, FOLLOW_SPEED);
+		} else if (d < FOLLOW_NEAR) {
+			mob.getNavigation().stop();
+		}
+		mob.getLookControl().setLookAt(player);
 	}
 
 	// ---- gossip --------------------------------------------------------------------------------------------------------

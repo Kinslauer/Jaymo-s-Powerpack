@@ -1,0 +1,36 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "age": "0"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/warped_vine_0"
+      }
+    },
+    {
+      "when": {
+        "age": "1"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/warped_vine_1"
+      }
+    },
+    {
+      "when": {
+        "age": "2"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/warped_vine_2"
+      }
+    },
+    {
+      "when": {
+        "age": "3"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/warped_vine_3"
+      }
+    }
+  ]
+}

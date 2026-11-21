@@ -1,0 +1,11 @@
+{
+  "parent": "minecraft:block/template_cauldron_level2",
+  "textures": {
+    "particle": "jaymospowers:block/bonding_vat_side",
+    "top": "jaymospowers:block/bonding_vat_top",
+    "bottom": "jaymospowers:block/bonding_vat_bottom",
+    "side": "jaymospowers:block/bonding_vat_side",
+    "inside": "jaymospowers:block/bonding_vat_inner",
+    "content": "jaymospowers:block/bonding_vat_brine"
+  }
+}

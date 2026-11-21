@@ -154,6 +154,7 @@ public final class ArsenalChains {
 		float angle = (float) Mth.atan2(-from.z, -from.x);
 		target.setAttached(CHAINED, new Chained(player.getId(), now, target.getX(), target.getY(), target.getZ(), angle, 0L));
 		BINDS.put(player.getUUID(), new Bind(level, target, now + (target instanceof ServerPlayer ? HOLD_PLAYER : HOLD)));
+		com.jaymospowers.core.trials.PowerTrials.count(player, "arsenal.chains", 1);
 		if (target instanceof LivingEntity living) {
 			slow(living, true);
 		}
@@ -199,6 +200,7 @@ public final class ArsenalChains {
 			slow(living, false);
 		}
 		BINDS.put(player.getUUID(), new Bind(bind.level, bind.target, now + YANK_MAX));
+		com.jaymospowers.core.trials.PowerTrials.count(player, "arsenal.chain_yank", 1);
 		bind.level.playSound(null, bind.target.getX(), bind.target.getY(), bind.target.getZ(), SoundEvents.CHAIN_BREAK, SoundSource.PLAYERS, 1.2F, 0.6F);
 		bind.level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.5F, 0.6F);
 	}

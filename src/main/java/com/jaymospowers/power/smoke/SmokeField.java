@@ -965,6 +965,8 @@ public final class SmokeField {
 			if (living.canFreeze()) {
 				living.setTicksFrozen(Math.min(living.getTicksRequiredToFreeze() + FOG_FREEZE_OVER, living.getTicksFrozen() + FOG_FREEZE));
 			}
+			// (Frostbite) the fog bites too
+			com.jaymospowers.power.cryo.CryoFrostbite.bite(living, null, 1);
 			if (level.getRandom().nextInt(3) == 0) {
 				level.sendParticles(ParticleTypes.SNOWFLAKE, living.getX(), living.getY() + living.getBbHeight() * 0.5, living.getZ(), 3, 0.3,
 					0.4, 0.3, 0.01);

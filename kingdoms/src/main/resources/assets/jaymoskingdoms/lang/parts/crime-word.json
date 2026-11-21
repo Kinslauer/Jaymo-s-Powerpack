@@ -1,0 +1,20 @@
+{
+  "message.jaymoskingdoms.crime_word.off.0": "I'm telling the guard!",
+  "message.jaymoskingdoms.crime_word.off.1": "Guards! I'll fetch the guards!",
+  "message.jaymoskingdoms.crime_word.off.2": "You'll not get away with that!",
+  "message.jaymoskingdoms.crime_word.running": "%1$s saw you and is running for the guard. Stop them before they get there.",
+  "message.jaymoskingdoms.crime_word.road": "Word of what you did in %1$s has come down the road to %2$s.",
+  "talk.jaymoskingdoms.crime_word.caught": "\"Let me by! I saw what you did, and the guard will hear of it.\"",
+  "talk.jaymoskingdoms.crime_word.plead": "Please. Don't tell anyone.",
+  "talk.jaymoskingdoms.crime_word.pay": "Here, %1$s. You saw nothing.",
+  "talk.jaymoskingdoms.crime_word.threaten": "Say a word and you'll regret it.",
+  "talk.jaymoskingdoms.crime_word.let_go": "Go on, then.",
+  "talk.jaymoskingdoms.crime_word.plead.yes": "...Fine. Just this once.",
+  "talk.jaymoskingdoms.crime_word.plead.no": "No. It's not right.",
+  "talk.jaymoskingdoms.crime_word.pay.yes": "I didn't see anything.",
+  "talk.jaymoskingdoms.crime_word.pay.no": "Keep your money!",
+  "talk.jaymoskingdoms.crime_word.threaten.yes": "A-all right! I won't say a thing.",
+  "talk.jaymoskingdoms.crime_word.threaten.no": "You don't scare me! Guards!",
+  "recall.jaymoskingdoms.about_heard.crime.0": "They say %1$s was at their %2$s. %3$s told me.",
+  "recall.jaymoskingdoms.about_heard.crime.1": "Word is %1$s is guilty of %2$s. Watch your things."
+}

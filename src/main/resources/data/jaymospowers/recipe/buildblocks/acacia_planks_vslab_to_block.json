@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:acacia_planks_vslab",
+    "jaymospowers:acacia_planks_vslab"
+  ],
+  "result": {
+    "id": "minecraft:acacia_planks"
+  }
+}

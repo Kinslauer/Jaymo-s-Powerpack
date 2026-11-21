@@ -1,5 +1,6 @@
 package com.jaymospowers.power.xenoform.nadir;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.mojang.serialization.Codec;
@@ -255,7 +256,7 @@ public final class NadirRules {
 		level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.sendParticles(MagicFx.VOID, at.x, at.y, at.z, 30, 0.6, 0.6, 0.6, 0.2);
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.7F, 1.3F);
-		for (LivingEntity e : NadirAim.around(player, at, BURST_RADIUS)) {
+		for (LivingEntity e : NadirAim.around(player, at, AbilityPower.size(player, BURST_RADIUS))) {
 			e.hurtServer(level, player.damageSources().playerAttack(player), BURST_DAMAGE);
 			Vec3 push = e.position().subtract(at).horizontal();
 			push = push.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : push.normalize();

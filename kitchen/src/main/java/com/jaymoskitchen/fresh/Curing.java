@@ -57,7 +57,10 @@ public final class Curing {
 		}
 		return switch (method) {
 			case "dried" -> 5;
-			default -> Freshness.PRESERVED_KEEPS;
+			default -> {
+				com.jaymoskitchen.vintner.Chip chip = com.jaymoskitchen.vintner.Chip.ofCured(method);
+				yield chip == null ? Freshness.PRESERVED_KEEPS : chip.keeps;
+			}
 		};
 	}
 }

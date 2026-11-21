@@ -1,6 +1,7 @@
 package com.jaymospowers.power.web;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.Soundscape;
 import com.jaymospowers.core.wounds.Downed;
@@ -99,6 +100,12 @@ public final class WebSymbiote {
 	 * before which it fetches on its own whenever its tendrils are out. At most once every {@code TENDRILS_TOGGLE_GAP}.
 	 */
 	public static final int COLLECT_TOGGLE = 9;
+	/**
+	 * Not abilities either: the menu's extra chips. {@link #WINGS_TOGGLE} spreads or folds the wings of a whole bond
+	 * ({@link WebSymbioteWings}), {@link #CLEANSE} is the anti strain's pale burst ({@link WebSymbioteCleanse}; its cooldown
+	 * is slot 11 of the cooldowns), {@link #STEED_TOGGLE} takes or lets go of the horse under you ({@link WebSymbioteSteed}).
+	 */
+	public static final int WINGS_TOGGLE = 10, CLEANSE = 11, STEED_TOGGLE = 12;
 	/** Cooldown of each ability after use, in ticks (toggles: after switching). */
 	public static final int[] COOLDOWN = {100, 200, 20, 160, 240, 600};
 	/** Satiety each ability costs. */
@@ -180,6 +187,8 @@ public final class WebSymbiote {
 	// ===== the bond meter (0.8.6) ===================================================================================
 	/** How far it trusts you, 0-{@code BOND_MAX}. A new bond starts anywhere from nothing to {@code BOND_START_MAX} (halfway). */
 	public static final int BOND_MAX = 100, BOND_START_MAX = 50;
+	/** The symbiote's own attacks hit this much harder at full bond, growing in step with the bond (x1.5 at 100). */
+	public static final float BOND_DAMAGE_AT_MAX = 0.5F;
 	/**
 	 * The bond each ability opens at (radial order: Tendril Grab, Living Armor, Wall Crawl, Consume, Spike Burst, Shroud).
 	 * Only the Shroud is there from the start. At {@link #BOND_MAX}, Living Armor brings the big body too, yours to drive.
@@ -1174,6 +1183,9 @@ public final class WebSymbiote {
 		});
 		// (0.13.4) nor lets a fall kill you: it pools over your legs and takes the landing
 		WebSymbioteCushion.register();
+		WebSymbioteWings.register();
+		WebSymbioteJar.register();
+		WebSymbioteSteed.register();
 		// it never dies with you: it pours out of your body and stays near it, looking for someone new
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer player && state(player).bonded()) {
@@ -1215,6 +1227,11 @@ public final class WebSymbiote {
 	}
 
 	// ---- shared queries (both sides: the bond is synced) -------------------------------------------------------------
+
+	/** What one of the symbiote's attacks deals once the bond has grown: {@code damage} x (1 + bond/200). */
+	static float bonded(ServerPlayer player, float damage) {
+		return damage * (1.0F + BOND_DAMAGE_AT_MAX * Mth.clamp(state(player).bond() / (float)BOND_MAX, 0.0F, 1.0F));
+	}
 
 	public static WebSymbioteState state(Player player) {
 		WebSymbioteState state = player.getAttached(STATE);
@@ -1345,7 +1362,7 @@ public final class WebSymbiote {
 
 	/** Wall Crawl is on: the server lets them hang on walls and ceilings without the flying kick. */
 	public static boolean allowsFloating(ServerPlayer player) {
-		return isToggled(player, WebSymbioteState.CRAWL);
+		return isToggled(player, WebSymbioteState.CRAWL) || WebSymbioteWings.out(player);
 	}
 
 	// ---- server ------------------------------------------------------------------------------------------------------
@@ -1612,6 +1629,7 @@ public final class WebSymbiote {
 		// settling in after the first bond (dormant), fighting you for the suit, a bare face (WebSymbioteBond)
 		WebSymbioteBond.tick(player, now);
 		WebSymbioteCushion.tick(player, now);
+		WebSymbioteMend.tick(player, now);
 		boolean dormant = WebSymbioteBond.dormant(player);
 		WebSymbioteState next = state;
 		boolean armor = state.has(WebSymbioteState.ARMOR) || state.has(WebSymbioteState.BULK);
@@ -1619,6 +1637,10 @@ public final class WebSymbiote {
 
 		// hunger (the big body eats three times as fast)
 		int drainTicks = bulk ? Math.max(1, SATIETY_DRAIN_TICKS / ARMOR_DRAIN_MULT) : SATIETY_DRAIN_TICKS;
+		// (holding a horse, it eats for two)
+		if (WebSymbioteSteed.held(player)) {
+			drainTicks = Math.max(1, drainTicks / WebSymbioteSteed.DRAIN_MULT);
+		}
 		// (0.15.31) the cold makes it hungrier: in winter, where there are seasons
 		if (com.jaymospowers.core.Seasons.is(player, com.jaymospowers.core.Seasons.Season.WINTER)) {
 			drainTicks = Math.max(1, Math.round(drainTicks / WINTER_HUNGER));
@@ -1628,7 +1650,8 @@ public final class WebSymbiote {
 			next = next.withSatiety(next.satiety() - 1);
 		}
 		// (0.15.147) its satiety is yours too: fed, it keeps your hunger bar up (and so your hearts), like food
-		if (!player.isCreative() && !dormant && player.tickCount % SHARE_TICKS == 0 && next.satiety() > SHARE_FLOOR
+		// (in a host it leaves when hungry, never down into its warning: WebSymbioteInfection.shareFloor)
+		if (!player.isCreative() && !dormant && player.tickCount % SHARE_TICKS == 0 && next.satiety() > WebSymbioteInfection.shareFloor(player, SHARE_FLOOR)
 			&& player.getFoodData().getFoodLevel() < SHARE_FULL) {
 			next = next.withSatiety(next.satiety() - 1);
 			player.getFoodData().eat(SHARE_FOOD, SHARE_SATURATION);
@@ -2343,6 +2366,8 @@ public final class WebSymbiote {
 			range = NOTE_RANGE;
 		} else if (event.is(GameEvent.BLOCK_CHANGE) && level.getBlockState(BlockPos.containing(pos)).is(Blocks.BELL)) {
 			range = BELL_RANGE;
+			// (a host holding a glass bottle, close by, is stunned instead of flinching: WebSymbioteJar)
+			WebSymbioteJar.onBell(level, pos);
 		} else {
 			return;
 		}
@@ -2355,7 +2380,8 @@ public final class WebSymbiote {
 	 */
 	public static void noise(ServerLevel level, Vec3 pos, double range) {
 		for (ServerPlayer player : level.players()) {
-			if (isBonded(player) && player.isAlive() && !player.isSpectator() && player.position().distanceToSqr(pos) <= range * range) {
+			if (isBonded(player) && player.isAlive() && !player.isSpectator() && player.position().distanceToSqr(pos) <= range * range
+				&& !WebSymbioteJar.stunned(player)) {
 				Live live = live(player);
 				long now = level.getGameTime();
 				if (now >= live.noiseReadyAt) {
@@ -3587,7 +3613,7 @@ public final class WebSymbiote {
 		}
 		if (player.getRandom().nextFloat() < CURIOUS_ATTACK && target instanceof LivingEntity living) {
 			// it didn't like what it saw
-			living.hurtServer(level, level.damageSources().playerAttack(player), STRIKE_DAMAGE);
+			living.hurtServer(level, level.damageSources().playerAttack(player), bonded(player, STRIKE_DAMAGE));
 			Vec3 away = living.position().subtract(player.position()).horizontal();
 			away = away.lengthSqr() < 1.0E-4 ? look : away.normalize();
 			living.setDeltaMovement(away.scale(0.9).add(0.0, 0.35, 0.0));
@@ -3710,7 +3736,7 @@ public final class WebSymbiote {
 			if (live.rampage && target instanceof LivingEntity living && living.isAlive()) {
 				if (living instanceof Player && ++live.rampageStrikes % RAMPAGE_BITE_EVERY == 0) {
 					// it bites: tearing into them (it feeds on nothing living: only on what it kills, carried)
-					living.hurtServer(player.level(), player.level().damageSources().playerAttack(player), RAMPAGE_BITE_DAMAGE);
+					living.hurtServer(player.level(), player.level().damageSources().playerAttack(player), bonded(player, RAMPAGE_BITE_DAMAGE));
 					ServerLevel level = player.level();
 					level.playSound(null, living.getX(), living.getY(), living.getZ(), SoundEvents.PHANTOM_BITE, SoundSource.PLAYERS, 1.2F, 0.4F);
 					level.sendParticles(ParticleTypes.SQUID_INK, living.getX(), living.getY() + 1.0, living.getZ(), 15, 0.3, 0.4, 0.3, 0.05);
@@ -3850,6 +3876,22 @@ public final class WebSymbiote {
 			// still settling in (or the white one asleep): nothing it has answers yet
 			// (asleep, a corpse fed to it wakes it: Consume still answers)
 			WebSymbioteBond.refuse(player);
+			return;
+		}
+		if (isBonded(player) && WebSymbioteJar.stunned(player)) {
+			// slack from a bell: nothing answers till it comes round (the glass bottle's moment)
+			return;
+		}
+		if (ability == WINGS_TOGGLE) {
+			WebSymbioteWings.toggle(player);
+			return;
+		}
+		if (ability == CLEANSE) {
+			WebSymbioteCleanse.burst(player);
+			return;
+		}
+		if (ability == STEED_TOGGLE) {
+			WebSymbioteSteed.toggle(player);
 			return;
 		}
 		// (0.19.69) (taking it off always answers: a sulk or a lockout only stops it coming up a form)
@@ -4583,7 +4625,7 @@ public final class WebSymbiote {
 				}
 				if (nearest != null) {
 					lash(player, nearest, level.getGameTime(), RETALIATE_LAG);
-					nearest.hurtServer(level, level.damageSources().playerAttack(player), FLINT_LASH_DAMAGE);
+					nearest.hurtServer(level, level.damageSources().playerAttack(player), bonded(player, FLINT_LASH_DAMAGE));
 				} else {
 					player.hurtServer(level, level.damageSources().magic(), FLINT_LASH_DAMAGE * 0.5F);
 				}
@@ -4671,12 +4713,12 @@ public final class WebSymbiote {
 		}
 		live.flailHitAt = now + FLAIL_HIT_EVERY;
 		ServerLevel level = player.level();
-		double radius = FLAIL_RADIUS * player.getScale();
+		double radius = AbilityPower.size(player, FLAIL_RADIUS) * player.getScale();
 		boolean hit = false;
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius),
 			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof net.minecraft.world.entity.decoration.ArmorStand)
 				&& !(e instanceof Player p && p.isCreative()) && e.distanceTo(player) <= radius + e.getBbWidth() * 0.5)) {
-			if (living.hurtServer(level, level.damageSources().playerAttack(player), FLAIL_DAMAGE)) {
+			if (living.hurtServer(level, level.damageSources().playerAttack(player), bonded(player, FLAIL_DAMAGE))) {
 				Vec3 away = living.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
 				away = away.lengthSqr() < 1.0E-4 ? new Vec3(0.0, 0.0, 1.0) : away.normalize();
 				living.push(away.x * FLAIL_KNOCK, FLAIL_LIFT, away.z * FLAIL_KNOCK);
@@ -4976,7 +5018,7 @@ public final class WebSymbiote {
 								abortFeeding(player, live);
 								return;
 							}
-							prey.hurtServer(level, level.damageSources().playerAttack(player), CONSUME_FINISH_DAMAGE);
+							prey.hurtServer(level, level.damageSources().playerAttack(player), bonded(player, CONSUME_FINISH_DAMAGE));
 							level.playSound(null, prey.getX(), prey.getY(), prey.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1.0F, 0.5F);
 							level.sendParticles(dust(1.4F), prey.getX(), prey.getY() + prey.getBbHeight() * 0.6, prey.getZ(), 14, 0.3, 0.3, 0.3, 0.0);
 						}
@@ -5264,7 +5306,7 @@ public final class WebSymbiote {
 			int pieces = debris instanceof com.jaymospowers.core.BlockCluster chunk ? chunk.pieces().size() : 1;
 			damage = HEAVY_STRIKE_DAMAGE * Mth.clamp(HEAVY_SIZE_BASE + HEAVY_SIZE_PER_PIECE * pieces, HEAVY_SIZE_MIN, HEAVY_SIZE_MAX);
 		}
-		living.hurtServer(level, level.damageSources().playerAttack(player), damage);
+		living.hurtServer(level, level.damageSources().playerAttack(player), bonded(player, damage));
 		Vec3 away = living.position().subtract(player.position()).horizontal();
 		if (away.lengthSqr() < 1.0E-4) {
 			away = player.getLookAngle().horizontal();
@@ -5639,7 +5681,7 @@ public final class WebSymbiote {
 	private static void roarBlast(ServerPlayer player) {
 		ServerLevel level = player.level();
 		boolean burst = WebFury.takeBurst(player);
-		double radius = burst ? ROAR_RADIUS * WebFury.BURST_RADIUS : ROAR_RADIUS;
+		double radius = burst ? AbilityPower.size(player, ROAR_RADIUS) * WebFury.BURST_RADIUS : AbilityPower.size(player, ROAR_RADIUS);
 		Vec3 center = player.position().add(0.0, player.getBbHeight() * 0.55, 0.0);
 		for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius),
 			e -> e != player && e.isAlive() && !e.isSpectator())) {
@@ -5648,7 +5690,7 @@ public final class WebSymbiote {
 				continue;
 			}
 			float before = living.getHealth();
-			living.hurtServer(level, level.damageSources().playerAttack(player), (burst ? ROAR_DAMAGE * WebFury.BURST_DAMAGE : ROAR_DAMAGE));
+			living.hurtServer(level, level.damageSources().playerAttack(player), bonded(player, (burst ? ROAR_DAMAGE * WebFury.BURST_DAMAGE : ROAR_DAMAGE)));
 			spikeHit(level, center, living, before - living.getHealth());
 			Vec3 flat = new Vec3(to.x, 0.0, to.z);
 			flat = flat.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : flat.normalize();
@@ -5755,7 +5797,7 @@ public final class WebSymbiote {
 				continue;
 			}
 			float before = living.getHealth();
-			living.hurtServer(level, level.damageSources().playerAttack(player), SPIKE_DAMAGE);
+			living.hurtServer(level, level.damageSources().playerAttack(player), bonded(player, SPIKE_DAMAGE));
 			if (strain == WebSymbioteStrain.RED && living.isAlive()) {
 				com.jaymospowers.core.BladeBlood.splash(living, before - living.getHealth());
 				WebMorph.bleed(player, living, WebSymbioteStrains.RED_BURST_BLEED_HITS);

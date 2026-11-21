@@ -1,6 +1,7 @@
 package com.jaymospowers.rig;
 
 import com.jaymospowers.combat.Guard;
+import com.jaymospowers.core.HudBar;
 import com.jaymospowers.core.PickKit;
 import com.jaymospowers.core.Shakes;
 import com.jaymospowers.core.fx.MagicFx;
@@ -97,7 +98,8 @@ public final class RigField {
 			ServerLevel level = player.level();
 			MagicFx.ring(level, player.position().add(0.0, 1.0, 0.0), null, 1.4F, CYAN, 14);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.9F, 0.8F);
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_picks.field.up", PickKit.gauge(0.0F, SLOTS)).withStyle(ChatFormatting.AQUA));
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_picks.field.up").withStyle(ChatFormatting.AQUA));
+			HudBar.marks(player, "rig_field", 0, SLOTS, HudBar.AQUA, Component.translatable("bar.jaymospowers.field"));
 			return;
 		}
 		if (field.blows > 0) {
@@ -120,8 +122,7 @@ public final class RigField {
 		Vec3 chest = player.position().add(0.0, 1.1, 0.0);
 		MagicFx.ring(level, chest, null, 0.9F + field.blows * 0.2F, CYAN, 8);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.8F, 0.8F + field.blows * 0.2F);
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.rig_picks.field.kept", PickKit.gauge(field.blows / (float)SLOTS, SLOTS), field.blows, SLOTS)
-			.withStyle(ChatFormatting.AQUA));
+		HudBar.marks(player, "rig_field", field.blows, SLOTS, HudBar.AQUA, Component.translatable("bar.jaymospowers.field"));
 	}
 
 	private static void release(ServerPlayer player, Field field, boolean vented) {

@@ -193,6 +193,8 @@ public final class CrawlPose {
 	 * body ({@link #BACK_PIVOT} blocks up it) so you end face up with your feet toward where you look, MGSV-style.
 	 */
 	static final float BACK_TURN_TICKS = 10.0F, BACK_PIVOT = 0.9F;
+	/** The log roll's arms (Snake's, from Metal Gear, as a motion reference): bent up across the chest (pitch) and turned in toward each other (radians). */
+	static final float ROLL_ARM_X = -1.35F, ROLL_ARM_IN = 0.6F;
 	/** On the back: the head up off the ground looking down past the feet; the arms at rest, or brought up to aim (radians). */
 	static final float BACK_HEAD = 0.95F, BACK_ARMS_REST = 0.15F, BACK_ARMS_OUT = 0.18F, BACK_ARMS_AIM = -0.45F;
 	/** On the back: one knee up, the other leg out straight (radians). */
@@ -338,6 +340,56 @@ public final class CrawlPose {
 		Vector3f eye = new Vector3f(0.0F, NECK + EYE_FROM_NECK * (c - s), -EYE_FROM_NECK * (s + c));
 		Matrix4f m = new Matrix4f().rotateX(-Mth.HALF_PI).translate(0.0F, -1.0F, 0.3F)
 			.translate(0.0F, BACK_PIVOT, 0.0F).rotateZ(Mth.PI * back).rotateY(Mth.PI * back).translate(0.0F, -BACK_PIVOT, 0.0F);
+		return m.transformPosition(eye);
+	}
+
+	/**
+	 * Andy (2026-11-20): "it should also follow the rising head as you get up from downed or wall sit, to provide another
+	 * visual indicator for fpv players". First person, getting up off the floor by themselves ({@link Downed#RISING}, or
+	 * dropping back from part way up): where the view goes, at the eyes of the body as {@link #rotate} turns it up about
+	 * the feet, moved over from where vanilla has it lying ({@code view}) as the push up starts, and at vanilla's standing
+	 * eyes once up. Null if they aren't rising. (Against a wall it's WallSit#eye.)
+	 */
+	public static @Nullable Vec3 riseEye(Player player, float partialTicks, Vec3 view) {
+		if (!Downed.isDowned(player) || player.isInWater()) {
+			return null;
+		}
+		long time = player.level().getGameTime();
+		Long rising = player.getAttached(Downed.RISING);
+		float rise = rising == null ? -1.0F : Mth.clamp((time - rising + partialTicks) / Downed.riseTicks(player), 0.0F, 1.0F);
+		if (rise >= 0.0F && Downed.standless(player)) {
+			rise *= PUSH_SHARE;
+		}
+		rise = sink(player.getId(), true, rise, time + partialTicks);
+		if (rise < 0.0F) {
+			return null;
+		}
+		// from the eyes stood up (where vanilla's view will be once they are), turned and sized with the body
+		Vector3f eye = risingEye(rise).sub(risingEye(1.0F));
+		float bodyRot = Mth.rotLerp(partialTicks, player.yBodyRotO, player.yBodyRot);
+		eye.rotateY((180.0F - bodyRot) * Mth.DEG_TO_RAD).mul(player.getScale());
+		Vec3 at = new Vec3(Mth.lerp(partialTicks, player.xo, player.getX()) + eye.x,
+			Mth.lerp(partialTicks, player.yo, player.getY()) + player.getEyeHeight(net.minecraft.world.entity.Pose.STANDING) + eye.y,
+			Mth.lerp(partialTicks, player.zo, player.getZ()) + eye.z);
+		return view.lerp(at, PoseBlend.smooth(PoseBlend.seg(rise, 0.0F, RISE_VIEW_IN)));
+	}
+
+	/** First person, rising: how far into the rise the view has moved over from vanilla's lying view onto the eyes. */
+	static final float RISE_VIEW_IN = 0.15F;
+
+	/**
+	 * Where the eyes are {@code t} through the rise, from the feet in the body's own frame (-Z ahead): up the body to the
+	 * neck and out from it as the head is pitched, through vanilla's crawl tilt and the turn up about the feet
+	 * ({@link #rotate}).
+	 */
+	private static Vector3f risingEye(float t) {
+		float degrees = riseDegrees(t);
+		float pitch = GETUP != null ? GETUP.partX("head", t) : HEAD_LOOK * (1.0F - degrees / 90.0F);
+		float s = Mth.sin(pitch), c = Mth.cos(pitch);
+		Vector3f eye = new Vector3f(0.0F, NECK + EYE_FROM_NECK * (c - s), -EYE_FROM_NECK * (s + c));
+		float up = degrees / 90.0F;
+		Matrix4f m = new Matrix4f().rotateX(-Mth.HALF_PI).translate(0.0F, -1.0F, 0.3F)
+			.translate(0.0F, up, -0.3F * up).rotateX(degrees * Mth.DEG_TO_RAD);
 		return m.transformPosition(eye);
 	}
 
@@ -498,9 +550,9 @@ public final class CrawlPose {
 			return;
 		}
 		if (crawl.roll() != null) {
-			// log roll: arms straight out past the head, legs together
-			f.set(PoseBlend.RIGHT_ARM, -Mth.PI, 0.0F, 0.12F);
-			f.set(PoseBlend.LEFT_ARM, -Mth.PI, 0.0F, -0.12F);
+			// log roll, Snake's way: the arms folded in to the chest (round a weapon), legs together
+			f.set(PoseBlend.RIGHT_ARM, ROLL_ARM_X, -ROLL_ARM_IN, 0.0F);
+			f.set(PoseBlend.LEFT_ARM, ROLL_ARM_X, ROLL_ARM_IN, 0.0F);
 			f.set(PoseBlend.RIGHT_LEG, 0.0F, 0.0F, 0.03F);
 			f.set(PoseBlend.LEFT_LEG, 0.0F, 0.0F, -0.03F);
 			f.set(PoseBlend.BODY + 1, 0.0F);

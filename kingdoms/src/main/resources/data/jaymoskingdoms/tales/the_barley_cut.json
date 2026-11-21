@@ -1,0 +1,296 @@
+{
+  "title": "The Barley Cut",
+  "start": {
+    "by": "letter",
+    "weight": 3,
+    "needs": [
+      "done:the_brother_who_stayed:mended",
+      "since:the_brother_who_stayed>=5"
+    ],
+    "letter": {
+      "from": "Corin",
+      "days": [
+        1,
+        3
+      ],
+      "lines": [
+        "I said I'd not ask, and I am not asking. I am telling you when it is. The barley stands ripe in the low field, and the glass is falling.",
+        "It is a two-man job. This year there is one of mine come back for it, which makes it a job for two and a half, and the half is the one who does the talking.",
+        "If you were passing. There is a scythe on the barn wall that fits nobody here."
+      ]
+    }
+  },
+  "cast": {
+    "brother": {
+      "name": "Corin",
+      "body": "villager",
+      "job": "farmer",
+      "female": false,
+      "at": "field"
+    }
+  },
+  "places": {
+    "village": {
+      "at": "other_town",
+      "name": "the old village"
+    },
+    "farm": {
+      "at": "near",
+      "from": "village",
+      "dist": [
+        80,
+        140
+      ],
+      "name": "the family farm"
+    },
+    "field": {
+      "at": "near",
+      "from": "farm",
+      "dist": [
+        20,
+        40
+      ],
+      "name": "the low field"
+    },
+    "barn": {
+      "at": "near",
+      "from": "farm",
+      "dist": [
+        10,
+        20
+      ],
+      "name": "Corin's barn"
+    }
+  },
+  "first": "to_farm",
+  "steps": {
+    "to_farm": {
+      "do": "go",
+      "to": "farm",
+      "goal": "Go up to {place:farm} for the harvest",
+      "clock": {
+        "weather": 3
+      },
+      "within": "weather",
+      "until": "before the weather breaks",
+      "late": "end:missed",
+      "then": "see_corin"
+    },
+    "see_corin": {
+      "do": "talk",
+      "who": "brother",
+      "goal": "Find Corin in {place:field}",
+      "within": "weather",
+      "until": "before the weather breaks",
+      "late": "end:missed",
+      "say": [
+        "You came. I told the ox you wouldn't. He's a poor judge of people, that ox. You'll have seen the gate. It's still the one hinge.",
+        "We began the top field yesterday, that one and me. I'll not say how it went. Nobody spoke and nothing was dropped, and I have had worse days in better company.",
+        "This is the low strip. Take the row beside mine. Sixteen sheaves cut and down in the barn before the weather breaks, and it breaks {in:weather}, by my knee, which has not been wrong since the fourth winter."
+      ],
+      "replies": [
+        {
+          "say": "Where's the scythe?",
+          "then": "cut",
+          "journal": "Corin wrote to say when his harvest was, which is as near as he comes to asking. I went up. He gave me the row beside his in the low field: sixteen sheaves cut and down in the barn before the weather breaks."
+        },
+        {
+          "say": "And if the weather wins?",
+          "then": "see_corin_more"
+        },
+        {
+          "say": "I only came to say that I can't stay for it.",
+          "then": "end:turned_back"
+        }
+      ]
+    },
+    "see_corin_more": {
+      "do": "talk",
+      "who": "brother",
+      "within": "weather",
+      "until": "before the weather breaks",
+      "late": "end:missed",
+      "say": "Then it lies flat and sprouts in the ear, and I thresh what I can and eat the rest as porridge until spring. The weather has won four years of the eleven. I'd take it kindly if this were not the fifth. I'm not asking.",
+      "replies": [
+        {
+          "say": "Where's the scythe?",
+          "then": "cut",
+          "journal": "Corin wrote to say when his harvest was, which is as near as he comes to asking. I went up. He gave me the row beside his in the low field: sixteen sheaves cut and down in the barn before the weather breaks."
+        },
+        {
+          "say": "I only came to say that I can't stay for it.",
+          "then": "end:turned_back"
+        }
+      ]
+    },
+    "cut": {
+      "do": "reap",
+      "at": "field",
+      "count": 16,
+      "crop": "minecraft:wheat",
+      "goal": "Cut the low strip beside Corin",
+      "within": "weather",
+      "until": "before the weather breaks",
+      "late": "rained",
+      "journal": "I cut my row of the low strip beside Corin. He cuts a row and a half to my one, and did not mention it more than twice.",
+      "then": "cut_done"
+    },
+    "cut_done": {
+      "do": "talk",
+      "who": "brother",
+      "goal": "Speak with Corin",
+      "within": "weather",
+      "until": "before the weather breaks",
+      "late": "rained",
+      "say": [
+        "That's a row. It isn't how I'd have laid the swathe. It'll bind.",
+        "Down to the barn with it, then. There's a chest inside the door, put yours in out of the wet. I'll walk down with you. I want to see the sky from the yard."
+      ],
+      "then": "carry"
+    },
+    "carry": {
+      "do": "escort",
+      "who": "brother",
+      "to": "barn",
+      "goal": "Walk down to {place:barn} with Corin",
+      "within": "weather",
+      "until": "before the weather breaks",
+      "late": "rained",
+      "then": "barn"
+    },
+    "barn": {
+      "do": "stash",
+      "at": "barn",
+      "item": "minecraft:wheat",
+      "count": 16,
+      "goal": "Leave your sixteen sheaves in the chest at {place:barn}",
+      "within": "weather",
+      "until": "before the weather breaks",
+      "late": "rained",
+      "journal": "I had my sixteen sheaves in Corin's barn before the weather broke.",
+      "then": "supper"
+    },
+    "rained": {
+      "do": "talk",
+      "who": "brother",
+      "goal": "Speak with Corin",
+      "say": [
+        "There it goes. Hear it coming over the top field. Leave the rest, you'll only tread it in.",
+        "It's what one man would have got in, near enough. So I am no worse off than any other year, and I had somebody to swear at through the worst of it. That's not nothing. Come in and get dry."
+      ],
+      "journal": "The weather broke before the low strip was cut and carried. Corin said it was what one man would have got in, and that he was no worse off.",
+      "then": "end:half_in"
+    },
+    "supper": {
+      "do": "talk",
+      "who": "brother",
+      "goal": "Go in to supper with Corin",
+      "say": [
+        "That's the door shut on it. Come up to the house. Boots off at the step. That's mother's rule, and she is not here to let you off it.",
+        "There'll be three bowls. They have not all three been down off that shelf since the first winter. I had to wash the dust out of one this morning.",
+        "The low strip has never once been in before the top field. I don't know what to do with the afternoon. I've forgiven nothing, mind. That's understood at my table."
+      ],
+      "replies": [
+        {
+          "say": "It was good barley.",
+          "then": "end:harvest_home",
+          "journal": "We ate at Corin's table, out of three bowls. I said it was good barley. He said it was middling, and looked pleased."
+        },
+        {
+          "say": "The same week next year?",
+          "then": "supper_next"
+        },
+        {
+          "say": "Nothing? Not yet?",
+          "then": "supper_forgive"
+        }
+      ]
+    },
+    "supper_next": {
+      "do": "talk",
+      "who": "brother",
+      "say": "It's the same week every year. It's barley. It doesn't move about. Whoever is passing. I'm not asking.",
+      "journal": "We ate at Corin's table, out of three bowls. I asked about next year. He said the barley is the same week every year, for whoever is passing.",
+      "mark": "barley_next_year",
+      "then": "end:harvest_home"
+    },
+    "supper_forgive": {
+      "do": "talk",
+      "who": "brother",
+      "say": "No. And don't ask it across my own table. I set three bowls, didn't I? Work that out for yourself, and don't tell me what you make it.",
+      "journal": "We ate at Corin's table, out of three bowls. I asked whether he had forgiven anything yet. He said no, and that he had set three bowls, and to work it out for myself.",
+      "then": "end:harvest_home"
+    }
+  },
+  "endings": {
+    "harvest_home": {
+      "text": "I cut my row of Corin's low strip beside him and had it in his barn before the weather broke. He set three bowls for supper. He says he has forgiven nothing.",
+      "reward": {
+        "coins": 4,
+        "items": [
+          "minecraft:bread*6",
+          "minecraft:wheat*8"
+        ],
+        "reputation": 4
+      },
+      "marks": [
+        "barley_cut_in"
+      ],
+      "town": [
+        "Corin's barley was all in before the rain this year. First time in a long while. He had hands up there.",
+        "Three at Corin's table for the harvest supper, I heard. He'll have had to find a third bowl."
+      ],
+      "later": [
+        {
+          "days": [
+            18,
+            28
+          ],
+          "letter": {
+            "from": "Corin",
+            "lines": [
+              "The gate is on two hinges. It took eleven years and one afternoon.",
+              "The barley threshed out better than middling. I'll not say good. There is a sack of it put by with nobody's name on it, should anybody be passing.",
+              "The corner post has held."
+            ]
+          }
+        }
+      ]
+    },
+    "half_in": {
+      "text": "The weather broke before Corin's low strip was cut and carried. He said it was what one man would have got in, and fed me all the same.",
+      "reward": {
+        "items": [
+          "minecraft:bread*3"
+        ],
+        "reputation": 2
+      },
+      "marks": [
+        "barley_half_in"
+      ],
+      "town": [
+        "Corin lost half his low field to the rain again. He had help this year, and it still beat them.",
+        "The barley's sprouting in the ear up at the old farm. Porridge till spring for that house."
+      ]
+    },
+    "turned_back": {
+      "text": "I went up to Corin's farm at harvest only to say that I could not stay. He nodded at the field, not at me.",
+      "marks": [
+        "barley_turned_back"
+      ],
+      "town": [
+        "Somebody walked all the way up to Corin's at harvest and walked straight down again. He never looked up from the scythe."
+      ]
+    },
+    "missed": {
+      "text": "Corin wrote to say when his harvest was. I was not there to cut it.",
+      "failed": true,
+      "marks": [
+        "barley_missed"
+      ],
+      "town": [
+        "Corin up at the old farm has stopped asking the carters what day it is. The barley's in, or what the rain left of it."
+      ]
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:crimson_stem_quarter",
+    "jaymospowers:crimson_stem_quarter",
+    "jaymospowers:crimson_stem_quarter",
+    "jaymospowers:crimson_stem_quarter"
+  ],
+  "result": {
+    "id": "minecraft:crimson_stem"
+  }
+}

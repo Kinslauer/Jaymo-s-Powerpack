@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.LockOn;
 import java.util.ArrayList;
@@ -163,7 +164,7 @@ final class ZFighterKiRain {
 		if (into < RAIN_TICKS && into % EVERY == 0) {
 			for (int i = 0; i < PER_VOLLEY; i++) {
 				double angle = random.nextDouble() * Math.PI * 2.0;
-				double r = Math.sqrt(random.nextDouble()) * RADIUS;
+				double r = Math.sqrt(random.nextDouble()) * AbilityPower.size(owner, RADIUS);
 				Vec3 start = new Vec3(rain.centre.x + Math.cos(angle) * r, rain.centre.y + HEIGHT, rain.centre.z + Math.sin(angle) * r);
 				rain.drops.add(new Drop(start, 0x58000000 | (nextId++ & 0xFFFFFF)));
 			}

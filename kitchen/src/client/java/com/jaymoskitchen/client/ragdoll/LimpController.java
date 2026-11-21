@@ -61,6 +61,12 @@ public final class LimpController {
 	private static final float TOPPLE_SHARE = 0.15F;
 	/** (0.5.74) Knocked limp by a hit: this share of the speed they had (the blow's knockback in it) carries the body on. */
 	private static final double KNOCK_CARRY = 0.7;
+	/**
+	 * Andy: "fall where you stand or a bit further if knocked back". Whatever shoves or knocks a body (a mutant's slam
+	 * throws 1-1.5 blocks a tick), the body takes at most this speed along the ground (blocks a tick) and this much lift:
+	 * a slide of a block or two and a small hop, never a flight across the field.
+	 */
+	private static final double MAX_CARRY = 0.45, MAX_LIFT = 0.1;
 	/** How long (ticks) before the server's word that they're not limp (a power took hold) counts. */
 	private static final int SYNC_GRACE = 10;
 
@@ -123,8 +129,9 @@ public final class LimpController {
 		Vec3 jump = startVelocity.subtract(lastEndVelocity);
 		kick = jump.length() >= KICK_SPEED ? jump : null;
 		if (body != null && kick != null && player == owner) {
-			// a blast or shove while down throws the body too
-			body.shove(kick.x, kick.y, kick.z);
+			// a blast or shove while down moves the body too, tamed (MAX_CARRY)
+			Vec3 push = tame(kick.x * KNOCK_CARRY, kick.y, kick.z * KNOCK_CARRY);
+			body.shove(push.x, push.y, push.z);
 			kick = null;
 		}
 	}
@@ -186,12 +193,14 @@ public final class LimpController {
 		Vec3 end = player.getDeltaMovement();
 		if (LivingRagdolls.held(player)) {
 			// (0.5.13) held limp (downed in water): down at once, cooldown or not
-			begin(minecraft, player, sent != null ? sent.add(end.x, 0.0, end.z) : end);
+			Vec3 own = tame(end.x, end.y, end.z);
+			begin(minecraft, player, sent != null ? sent.add(own.x, 0.0, own.z) : own);
 			return;
 		}
 		if (sent != null) {
 			// the server's topple, plus the way they were already going along the ground (the blow's real knockback in it)
-			begin(minecraft, player, sent.add(end.x * KNOCK_CARRY, 0.0, end.z * KNOCK_CARRY));
+			Vec3 own = tame(end.x * KNOCK_CARRY, 0.0, end.z * KNOCK_CARRY);
+			begin(minecraft, player, sent.add(own.x, 0.0, own.z));
 			return;
 		}
 		if (player.isInWater() || player.isSwimming()) {
@@ -208,6 +217,13 @@ public final class LimpController {
 				begin(minecraft, player, run.add(end));
 			}
 		}
+	}
+
+	/** A push as a body takes it: no faster than {@link #MAX_CARRY} along the ground, and no more than {@link #MAX_LIFT} up. */
+	private static Vec3 tame(double vx, double vy, double vz) {
+		double flat = Math.hypot(vx, vz);
+		double k = flat > MAX_CARRY ? MAX_CARRY / flat : 1.0;
+		return new Vec3(vx * k, Math.min(vy, MAX_LIFT), vz * k);
 	}
 
 	/** The fling from a boat, minecart, cart or ridden mob running into the player, if one is. */

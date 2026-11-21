@@ -221,6 +221,8 @@ public class RiftBlade extends AbstractArrow implements ItemSupplier {
 			entity.setInvulnerableTime(0);
 		}
 		boolean hurt = entity.hurtOrSimulate(source, impactDamage);
+		com.jaymospowers.core.trials.PowerTrials.reach(hurt ? this.getOwner() : null, "arsenal.barrage_far", this.getOwner() == null ? 0 : (int)this.getOwner().distanceTo(entity));
+		com.jaymospowers.core.trials.PowerTrials.count(hurt ? this.getOwner() : null, "arsenal.barrage", 1);
 		if (hurt && entity instanceof LivingEntity living && isVoid() && !this.level().isClientSide()) {
 			// a sky blade only darkens; a Barrage blade is a summoned weapon in void hands: darkness and wither
 			com.jaymospowers.power.arsenal.ArsenalVoid.voidHit(living, owner, !isSkyBlade());

@@ -1,0 +1,8 @@
+{
+  "parent": "jaymospowers:block/buildblocks/template_quarter_low_neg",
+  "textures": {
+    "top": "minecraft:block/acacia_planks",
+    "bottom": "minecraft:block/acacia_planks",
+    "side": "minecraft:block/acacia_planks"
+  }
+}

@@ -3,5 +3,9 @@
   "hud.jaymospowers.chrono_calc_full": "Weak points",
   "hud.jaymospowers.chrono_calc_run": "Dodging",
   "message.jaymospowers.chrono_calc.full": "Every blow finds a weak point. Sneak + G spends it to dodge.",
-  "message.jaymospowers.chrono_decoys.recharging": "Your afterimages are not ready."
+  "message.jaymospowers.chrono_decoys.recharging": "Your afterimages are not ready.",
+  "message.jaymospowers.chrono_mend.marked": "Marked. Sneak + R again to put it back as it was.",
+  "message.jaymospowers.chrono_mend.cooling": "Time is not ready to turn back again.",
+  "message.jaymospowers.chrono_mend.hungry": "You are too hungry to turn time back.",
+  "message.jaymospowers.chrono_mend.unchanged": "Nothing here has changed."
 }

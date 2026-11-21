@@ -30,7 +30,7 @@ import net.minecraft.world.phys.Vec3;
  * element's bolt). You blink along your look line, up to {@link #STEP_RANGE} blocks and stopping short of a wall, and
  * every foe you pass through is struck for {@link #STEP_DAMAGE}, with a flash of light on each. Your fall is untouched:
  * the blink never resets how far you have fallen.</li>
- * <li><b>Storm Ring</b>: {@code J} with no blade in your hand (with a blade it is still the Imbue). A ring of
+ * <li><b>Storm Ring</b>: sneak and {@code J} held. A ring of
  * {@link #RING_BOLTS} bolts of light falls round you at {@link #RING_RADIUS} blocks, hurting what stands in each and
  * throwing it back a little. It sets nothing alight and spares players and you.</li>
  * </ul>
@@ -129,8 +129,7 @@ public final class StormArts {
 	}
 
 	/**
-	 * {@code J} for a lightning Sorcerer with no blade in hand: the Storm Ring. Always handles the key (so the
-	 * "hold a blade" word is for the other elements).
+	 * Sneak and {@code J} held for a lightning Sorcerer: the Storm Ring. Always handles the key.
 	 */
 	static boolean ring(ServerPlayer player, ServerLevel level) {
 		if (!Knowledge.has(player, Knowledge.HIGHER_ARTS)) {

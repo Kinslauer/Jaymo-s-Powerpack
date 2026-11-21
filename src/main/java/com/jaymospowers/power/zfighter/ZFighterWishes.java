@@ -406,7 +406,9 @@ public final class ZFighterWishes {
 				yield true;
 			}
 			case BONDING -> {
-				give(player, new ItemStack(ZFighterFusionItems.BONDING_EARRING, 2));
+				ItemStack pair = new ItemStack(ZFighterFusionItems.BONDING_EARRING, 2);
+				ZFighterPartner.pair(pair);
+				give(player, pair);
 				yield true;
 			}
 			case REMAKE -> ZFighterWishExtras.remake(player, zfighter);

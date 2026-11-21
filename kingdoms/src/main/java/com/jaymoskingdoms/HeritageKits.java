@@ -592,7 +592,7 @@ public final class HeritageKits {
 				damage -= GROUNDED_DAMAGE;
 			}
 			if (kit.has(Perk.MOONSIGHT) && night(entity)) {
-				speed += MOON_SPEED;
+				speed += MOON_SPEED * Heritage.grow(entity);
 			}
 		}
 		put(entity, Attributes.ATTACK_DAMAGE, KIT_ID + "place_damage", damage, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
@@ -664,7 +664,7 @@ public final class HeritageKits {
 			f *= HUNGRY_HUNGER;
 		}
 		if (kit.has(Perk.UNDEAD_STOMACH)) {
-			f *= STOMACH_HUNGER;
+			f *= Heritage.saving(player, STOMACH_HUNGER);
 		}
 		if (kit.has(Perk.BOUND_TO_WATER) && dry(player)) {
 			f *= DRY_HUNGER;
@@ -692,13 +692,13 @@ public final class HeritageKits {
 			amount *= COLD_IRON_TAKEN;
 		}
 		if (magic && kit.has(Perk.WARDED)) {
-			amount *= WARDED_TAKEN;
+			amount *= Heritage.saving(target, WARDED_TAKEN);
 		}
 		if (magic && kit.has(Perk.SPIRIT_FRAIL)) {
 			amount *= SPIRIT_MAGIC_TAKEN;
 		}
 		if (kit.has(Perk.GLACIAL) && (cold(target) || target.getTicksFrozen() > 0)) {
-			amount *= GLACIAL_TAKEN;
+			amount *= Heritage.saving(target, GLACIAL_TAKEN);
 		}
 		if (kit.has(Perk.HOLLOW_BONES)) {
 			amount *= BONES_TAKEN;
@@ -729,13 +729,13 @@ public final class HeritageKits {
 			return amount;
 		}
 		if (kit.has(Perk.GLASS_CANNON)) {
-			amount *= GLASS_DEALT;
+			amount *= Heritage.boost(striker, GLASS_DEALT);
 		}
 		if (kit.has(Perk.BLOODSCENT) && target.getHealth() < target.getMaxHealth() * 0.5F) {
-			amount *= BLOODSCENT_DEALT;
+			amount *= Heritage.boost(striker, BLOODSCENT_DEALT);
 		}
 		if (kit.has(Perk.ARCHER) && source.is(DamageTypeTags.IS_PROJECTILE)) {
-			amount *= ARCHER_DEALT;
+			amount *= Heritage.boost(striker, ARCHER_DEALT);
 		}
 		if (melee(striker, target, source)) {
 			// (0.7.490) only the factor here: the pounce is spent by a blow that lands (landed)

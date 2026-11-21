@@ -59,6 +59,8 @@ public final class PickKit {
 
 	/** The nearest creature the player's crosshair is on within {@code reach}, or null. */
 	public static @Nullable LivingEntity aimed(ServerPlayer player, double reach) {
+		// (Awakening pick) Ability Power reaches further
+		reach = AbilityPower.reach(player, reach);
 		Vec3 eye = player.getEyePosition();
 		Vec3 end = eye.add(player.getLookAngle().scale(reach));
 		LivingEntity best = null;
@@ -79,11 +81,5 @@ public final class PickKit {
 
 	public static AABB around(Vec3 at, double radius) {
 		return new AABB(at, at).inflate(radius);
-	}
-
-	/** A gauge for the action bar: {@code [=====-----]}. */
-	public static String gauge(float fraction, int width) {
-		int full = Math.max(0, Math.min(width, Math.round(fraction * width)));
-		return "[" + "=".repeat(full) + "-".repeat(width - full) + "]";
 	}
 }

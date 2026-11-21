@@ -47,6 +47,13 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LightBlock;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -72,6 +79,14 @@ public final class GunGear {
 	static final float TRACER_WIDTH = 0.08F;
 	/** How far a player's shot is traced when the gun isn't one we know. */
 	static final double TRACER_RANGE = 64.0;
+	/** (ad_trail) Every other shot's wisp: pale grey, thin, and gone almost at once. */
+	static final int TRAIL_COLOR = 0xB8B8B8, TRAIL_TICKS = 5;
+	static final float TRAIL_WIDTH = 0.025F;
+	/** (ad_splash) A shot going into water: drops thrown up, the ring of ripples (radius, colour, ticks) and the splash's sound. */
+	static final int SPLASH_DROPS = 14, RIPPLE_COLOR = 0xDCEEFF, RIPPLE_TICKS = 16;
+	static final float RIPPLE_RADIUS = 0.9F, SPLASH_VOLUME = 0.35F;
+	/** (ad_splash) A gunner's shot into water stops this far under its surface (blocks). */
+	static final double UNDERWATER_REACH = 2.5;
 	/** The muzzle light a tracer gives: this bright, fading out over this many ticks. */
 	static final int LIGHT_LEVEL = 12, LIGHT_TICKS = 8;
 	/** Empty magazines stack this high; tracer rounds this high. */
@@ -180,14 +195,53 @@ public final class GunGear {
 		if (!FutureGuns.BY_ID.containsKey(TaczGuns.gunId(gun))) {
 			return;
 		}
+		splash(level, muzzle, end);
 		int tracers = intIn(gun, TRACERS);
 		if (tracers > 0) {
 			CustomData.update(DataComponents.CUSTOM_DATA, gun, tag -> tag.putInt(TRACERS, tracers - 1));
 		} else if (level.getRandom().nextFloat() >= TRACER_CHANCE) {
+			// (ad_trail) not a tracer: a thin grey wisp of disturbed air along the line, gone at once
+			MagicFx.stroke(level, muzzle, end, null, TRAIL_WIDTH, TRAIL_COLOR, TRAIL_TICKS);
 			return;
 		}
 		MagicFx.stroke(level, muzzle, end, null, TRACER_WIDTH, TRACER_COLOR, TRACER_TICKS);
 		light(level, muzzle);
+	}
+
+	/**
+	 * (ad_splash) A shot that goes into water on its way from {@code muzzle} to {@code end}: a splash and a ring of
+	 * ripples where it goes in. Nothing if it was fired from under water.
+	 */
+	static void splash(ServerLevel level, Vec3 muzzle, Vec3 end) {
+		if (!level.getFluidState(BlockPos.containing(muzzle)).isEmpty()) {
+			return;
+		}
+		BlockHitResult hit = level.clip(new ClipContext(muzzle, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.WATER, CollisionContext.empty()));
+		if (hit.getType() != HitResult.Type.BLOCK || !level.getFluidState(hit.getBlockPos()).is(FluidTags.WATER)) {
+			return;
+		}
+		Vec3 at = hit.getLocation();
+		level.sendParticles(ParticleTypes.SPLASH, at.x, at.y + 0.05, at.z, SPLASH_DROPS, 0.12, 0.05, 0.12, 0.25);
+		level.sendParticles(ParticleTypes.BUBBLE, at.x, at.y - 0.3, at.z, SPLASH_DROPS / 3, 0.1, 0.2, 0.1, 0.05);
+		MagicFx.ring(level, at.add(0.0, 0.02, 0.0), null, RIPPLE_RADIUS, RIPPLE_COLOR, RIPPLE_TICKS);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_SPLASH, SoundSource.NEUTRAL, SPLASH_VOLUME, 1.6F + level.getRandom().nextFloat() * 0.3F);
+	}
+
+	/**
+	 * (ad_splash) The end of a gunner's shot from {@code from} to {@code end}, cut short {@link #UNDERWATER_REACH} under the
+	 * water if it goes in: a bullet slows to nothing a few blocks down. Fired from under water, it isn't cut.
+	 */
+	static Vec3 underwater(ServerLevel level, Vec3 from, Vec3 end) {
+		if (!level.getFluidState(BlockPos.containing(from)).isEmpty()) {
+			return end;
+		}
+		BlockHitResult hit = level.clip(new ClipContext(from, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.WATER, CollisionContext.empty()));
+		if (hit.getType() != HitResult.Type.BLOCK || !level.getFluidState(hit.getBlockPos()).is(FluidTags.WATER)) {
+			return end;
+		}
+		Vec3 in = hit.getLocation();
+		Vec3 cut = in.add(end.subtract(from).normalize().scale(UNDERWATER_REACH));
+		return from.distanceToSqr(cut) < from.distanceToSqr(end) ? cut : end;
 	}
 
 	/** A light at the muzzle for a moment, if there's air there. */

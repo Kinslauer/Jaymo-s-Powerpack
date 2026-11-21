@@ -55,6 +55,8 @@ public class JaymosKitchen implements ModInitializer {
 		// payload types first: Fabric refuses a receiver for a payload it doesn't know yet (Butchers' butcher_deal
 		// crashed the game at startup in 0.4.32)
 		Payloads.register();
+		com.jaymoskitchen.cooking.PlacedSlabs.register();
+		com.jaymoskitchen.cooking.hands.HandsOn.register();
 		com.jaymoskitchen.ragdoll.RagdollNet.register();
 		// (0.5.1) living players going limp (its LIMP attachment is class-loaded here, on both sides)
 		com.jaymoskitchen.ragdoll.LivingRagdolls.register();
@@ -83,6 +85,8 @@ public class JaymosKitchen implements ModInitializer {
 		// echoes for the layered sounds
 		com.jaymoskitchen.sound.Soundscape.register();
 		Mill.register();
+		// grapes and the vintner's things first: the brews are made from them
+		com.jaymoskitchen.vintner.Vintner.register();
 		com.jaymoskitchen.brewing.Brewing.register();
 		com.jaymoskitchen.kitchen.KitchenBlocks.register();
 		com.jaymoskitchen.cooking.spit.SpitBlock.register();
@@ -114,6 +118,7 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.farm.TiredSoil.register();
 		// (GT New Horizons picks) slow herds and crowded pens; before Familiarity, so a milked cow gives no extra bucket
 		com.jaymoskitchen.farm.Herds.register();
+		com.jaymoskitchen.farmwater.FarmWater.register();
 		com.jaymoskitchen.farm.Familiarity.register();
 		// (GT New Horizons picks) farmland only near water, seeds scratched from dry grass
 		com.jaymoskitchen.farm.DryFields.register();
@@ -150,12 +155,18 @@ public class JaymosKitchen implements ModInitializer {
 			if (carried != null) {
 				if (!level.isClientSide()) {
 					BlockPos clicked = hit.getBlockPos();
-					if (com.jaymoskitchen.butchery.Butchery.isHook(level.getBlockState(clicked))) {
+					BlockPos hook = com.jaymoskitchen.corpse.Hanging.hookAt(level, clicked, hit.getLocation());
+					if (hook != null) {
 						// (0.5.51) hung up on a meat hook by its hind legs
-						com.jaymoskitchen.corpse.Hanging.hang(carried, player, clicked);
+						com.jaymoskitchen.corpse.Hanging.hang(carried, player, hook);
 						return InteractionResult.SUCCESS;
 					}
 					BlockState clickedState = level.getBlockState(clicked);
+					if (com.jaymoskitchen.cooking.spit.GreatSpitBlock.is(clickedState)) {
+						// a dressed carcass heaved onto the great spit, to turn there whole
+						com.jaymoskitchen.cooking.spit.GreatSpitBlock.skewer(carried, player, clicked);
+						return InteractionResult.SUCCESS;
+					}
 					if (clickedState.is(net.minecraft.tags.BlockTags.CAMPFIRES) && carried.oneHanded()) {
 						// (0.5.77) a small animal laid on the campfire to roast whole (see CorpseEntity#roast)
 						carried.putDown(Vec3.atBottomCenterOf(clicked).add(0.0, clickedState.getShape(level, clicked).max(net.minecraft.core.Direction.Axis.Y), 0.0),
@@ -239,6 +250,16 @@ public class JaymosKitchen implements ModInitializer {
 					serverPlayer.sendOverlayMessage(Component.translatable("message.jaymoskitchen.cookware_cold"));
 				}
 				return InteractionResult.SUCCESS;
+			}
+			// cooking by hand: no screen; sneaking empty-handed says what is on the station and what it would make
+			if (com.jaymoskitchen.cooking.hands.HandsOn.on(level)) {
+				if (sneakingEmptyHanded && (station != null || Prep.isPrepSurface(level, pos, state, hit.getDirection()))) {
+					if (player instanceof ServerPlayer serverPlayer) {
+						com.jaymoskitchen.cooking.hands.HandsOn.hintAt(serverPlayer, pos);
+					}
+					return InteractionResult.SUCCESS;
+				}
+				return InteractionResult.PASS;
 			}
 			// a cutting board opens the prep screen below, which has the chopping on it
 			if (station != null && station != Station.BOARD && sneakingEmptyHanded) {

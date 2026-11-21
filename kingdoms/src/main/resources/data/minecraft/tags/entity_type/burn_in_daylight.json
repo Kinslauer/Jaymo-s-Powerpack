@@ -1,6 +1,7 @@
 {
 	"replace": false,
 	"values": [
+		"minecraft:creeper",
 		"jaymoskingdoms:wraith",
 		"jaymoskingdoms:silver_skeleton",
 		"jaymoskingdoms:night_bleeder",

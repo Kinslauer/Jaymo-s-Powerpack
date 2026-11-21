@@ -95,6 +95,9 @@ public final class LureDepth {
 			Tackle.Rod rod = Tackle.rodOf(player);
 			Item onHook = HookBait.bait(player);
 			float sink = rod.bottom() ? LEDGER_SINK : Tackle.isLure(onHook) && rod.lures ? LURE_SINK : 0.0F;
+			if (FishTackle.weighted(player)) {
+				sink = Math.max(sink, LURE_SINK) * FishTackle.WEIGHTED_FASTER;
+			}
 			if (sink > 0.0F) {
 				float was = depth(hook);
 				double floor = top - bottom(level, BlockPos.containing(hook.getX(), top - 0.5, hook.getZ()));
@@ -120,6 +123,6 @@ public final class LureDepth {
 	/** Whether {@code player}'s line goes deep (a lure on a rod that works it, or a ledger rod). */
 	static boolean sinks(Player player) {
 		Tackle.Rod rod = Tackle.rodOf(player);
-		return rod.bottom() || rod.lures && Tackle.isLure(HookBait.bait(player));
+		return rod.bottom() || rod.lures && Tackle.isLure(HookBait.bait(player)) || FishTackle.weighted(player);
 	}
 }

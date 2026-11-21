@@ -1,6 +1,8 @@
 package com.jaymospowers.client.fishing.mixin;
 
 import com.jaymospowers.client.fishing.HookBaitState;
+import com.jaymospowers.client.fishing.RodTip;
+import com.jaymospowers.fishing.FishTackle;
 import com.jaymospowers.fishing.HookBait;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
@@ -15,6 +17,7 @@ import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -22,16 +25,32 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * (0.21.61, Andy: "you should have to manually and visually bait the hook") The bait on a hook ({@link HookBait}) hangs
- * just under the bobber, small, turned to the camera like a dropped item.
+ * just under the bobber, small, turned to the camera like a dropped item. The line starts at the rod's real tip
+ * ({@link RodTip}).
  */
 @Mixin(FishingHookRenderer.class)
 public abstract class FishingHookRendererMixin {
     /** How big the bait is drawn, and how far under the bobber. */
     private static final float BAIT_SCALE = 0.35F, BAIT_DROP = 0.3F;
+    /** How big the float's bead is drawn, and how far over the bobber. */
+    private static final float BEAD_SCALE = 0.3F, BEAD_RISE = 0.25F;
 
     @Inject(method = "extractRenderState(Lnet/minecraft/world/entity/projectile/FishingHook;Lnet/minecraft/client/renderer/entity/state/FishingHookRenderState;F)V",
             at = @At("TAIL"))
     private void jaymospowers$extractBait(FishingHook hook, FishingHookRenderState state, float partialTicks, CallbackInfo ci) {
+        // the line starts at the rod's real tip, not vanilla's fixed guess beside the eyes
+        Vec3 tip = hook.getPlayerOwner() == null ? null : RodTip.tip(hook.getPlayerOwner(), partialTicks);
+        if (tip != null) {
+            state.lineOriginOffset = tip.subtract(hook.getPosition(partialTicks).add(0.0D, 0.25D, 0.0D));
+        }
+        ItemStackRenderState bead = ((HookBaitState) state).jaymospowers$bead();
+        Item beadItem = hook.getPlayerOwner() == null ? null
+                : FishTackle.bead(FishTackle.fit(HookBait.rod(hook.getPlayerOwner())));
+        if (beadItem == null) {
+            bead.clear();
+        } else {
+            Minecraft.getInstance().getItemModelResolver().updateForNonLiving(bead, new ItemStack(beadItem), ItemDisplayContext.GROUND, hook);
+        }
         ItemStackRenderState bait = ((HookBaitState) state).jaymospowers$bait();
         Player owner = hook.getPlayerOwner();
         Item item = owner == null ? null : HookBait.bait(owner);
@@ -46,6 +65,15 @@ public abstract class FishingHookRendererMixin {
             at = @At("HEAD"))
     private void jaymospowers$submitBait(FishingHookRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera,
             CallbackInfo ci) {
+        ItemStackRenderState bead = ((HookBaitState) state).jaymospowers$bead();
+        if (!bead.isEmpty()) {
+            poseStack.pushPose();
+            poseStack.translate(0.0F, BEAD_RISE, 0.0F);
+            poseStack.scale(BEAD_SCALE, BEAD_SCALE, BEAD_SCALE);
+            poseStack.rotate(camera.orientation);
+            bead.submit(poseStack, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor);
+            poseStack.popPose();
+        }
         ItemStackRenderState bait = ((HookBaitState) state).jaymospowers$bait();
         if (bait.isEmpty()) {
             return;

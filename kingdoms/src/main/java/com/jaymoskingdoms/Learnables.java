@@ -189,6 +189,13 @@ public final class Learnables {
 				out.put(taughtKey(perk), 1);
 			}
 		}
+		// (class trees) and what a class could do before it was a tree perk, kept free
+		for (Map.Entry<String, Integer> e : ranks.entrySet()) {
+			if (e.getKey().endsWith(ClassTrees.KEPT_MARK)) {
+				out.put(e.getKey(), 1);
+				out.put(e.getKey().substring(0, e.getKey().length() - ClassTrees.KEPT_MARK.length()), 1);
+			}
+		}
 		return Map.copyOf(out);
 	}
 

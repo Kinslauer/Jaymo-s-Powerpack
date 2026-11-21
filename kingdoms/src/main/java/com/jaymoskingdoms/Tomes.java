@@ -130,8 +130,8 @@ public final class Tomes {
 	// ---- tuning: the bolt ----
 	/** A click let go in this many ticks or fewer is a quick bolt; the charge runs from there to {@link #FULL_TICKS}. */
 	static final int QUICK_TICKS = 5, FULL_TICKS = 30;
-	/** The bar's length (Jaymo's Powers' lock reads 8 or more), shown from this many ticks of holding. */
-	static final int BAR_LENGTH = 12, BAR_FROM = 2;
+	/** The bar shows from this many ticks of holding. */
+	static final int BAR_FROM = 2;
 	/** Damage (or healing, for restoration) of a quick bolt and a full charge, before who casts it. */
 	static final float QUICK_DAMAGE = 3.0F, FULL_DAMAGE = 9.0F, QUICK_HEAL = 3.0F, FULL_HEAL = 8.0F;
 	/** Mana of a quick bolt and a full charge. */
@@ -733,9 +733,8 @@ public final class Tomes {
 			}
 			if (held >= BAR_FROM) {
 				float f = charge((int) held);
-				int filled = Math.round(f * BAR_LENGTH);
-				String bar = off ? "=".repeat(filled) + "-".repeat(BAR_LENGTH - filled) : "|".repeat(filled) + ".".repeat(BAR_LENGTH - filled);
-				player.sendOverlayMessage(Component.literal(bar).withStyle(ChatFormatting.AQUA));
+				// (the off hand's charge leaves the main hand's weapon free to strike)
+				HudBars.hold(player, off ? "tome_off" : "tome", f, HudBars.AQUA, null, !off);
 				if (held % CHARGE_EVERY == 0 && player.level() instanceof ServerLevel level) {
 					shed(level, book(player, off), tome.element, glyphs(tome.element) * (CHARGE_MIN + f * CHARGE_GROWTH));
 				}

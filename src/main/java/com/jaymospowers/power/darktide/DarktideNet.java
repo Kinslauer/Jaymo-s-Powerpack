@@ -73,7 +73,61 @@ public final class DarktideNet {
 		}
 	}
 
+	/** Server → client: the soul menu opens. {@code names}: the entity type of each shadow held; {@code picked}: which are in the wave; {@code max}: the most a wave holds. */
+	public record Souls(java.util.List<String> names, java.util.List<Integer> picked, int max) implements CustomPacketPayload {
+		public static final Type<Souls> TYPE = new Type<>(JaymosPowers.id("darktide_souls"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, Souls> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> {
+				buf.writeVarInt(p.names.size());
+				for (String name : p.names) {
+					buf.writeUtf(name);
+				}
+				writeInts(buf, p.picked);
+				buf.writeVarInt(p.max);
+			}, buf -> {
+				java.util.List<String> names = new java.util.ArrayList<>();
+				for (int n = Math.min(buf.readVarInt(), 64); n > 0; n--) {
+					names.add(buf.readUtf());
+				}
+				return new Souls(names, readInts(buf), buf.readVarInt());
+			});
+
+		@Override
+		public Type<Souls> type() {
+			return TYPE;
+		}
+	}
+
+	/** Client → server: the soul menu closed with these shadows (their places in the list it was sent) picked as the wave. */
+	public record SetWave(java.util.List<Integer> picked) implements CustomPacketPayload {
+		public static final Type<SetWave> TYPE = new Type<>(JaymosPowers.id("darktide_set_wave"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, SetWave> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> writeInts(buf, p.picked), buf -> new SetWave(readInts(buf)));
+
+		@Override
+		public Type<SetWave> type() {
+			return TYPE;
+		}
+	}
+
+	private static void writeInts(RegistryFriendlyByteBuf buf, java.util.List<Integer> ints) {
+		buf.writeVarInt(ints.size());
+		for (int i : ints) {
+			buf.writeVarInt(i);
+		}
+	}
+
+	private static java.util.List<Integer> readInts(RegistryFriendlyByteBuf buf) {
+		java.util.List<Integer> ints = new java.util.ArrayList<>();
+		for (int n = Math.min(buf.readVarInt(), 64); n > 0; n--) {
+			ints.add(buf.readVarInt());
+		}
+		return ints;
+	}
+
 	static void register() {
+		PayloadTypeRegistry.clientboundPlay().register(Souls.TYPE, Souls.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(SetWave.TYPE, SetWave.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Guard.TYPE, Guard.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Skill.TYPE, Skill.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(NightKey.TYPE, NightKey.CODEC);

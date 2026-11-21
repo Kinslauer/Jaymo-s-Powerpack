@@ -21,3 +21,7 @@ __pycache__/
 docs/vault/.obsidian/
 docs/vault/.trash/
 docs/vault/Live/
+
+# build leftovers that were committed by mistake before
+javac.*.args
+genSources.log

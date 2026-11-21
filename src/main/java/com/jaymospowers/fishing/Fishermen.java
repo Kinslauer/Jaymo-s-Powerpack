@@ -43,7 +43,7 @@ import org.jspecify.annotations.Nullable;
  * (Kingdoms' "Talk about fishing", or hand a fisherman a fish), and their screen has:
  * <ul>
  * <li>the market: they buy fish by weight ({@link Species#pricePerKg}), a live one for more ({@link #ALIVE_PRICE}), a
- * legend for far more; but a village only eats so much, and the more fish sold there in a day the less each fetches
+ * legend for far more; but a village only eats so much, and the more fish one angler sells in a day, to any village, the less each fetches
  * ({@link #GLUT_KG}). Paid in the coin of the place with Kingdoms, else emeralds (the change kept toward the next).</li>
  * <li>the contest: every {@link #CONTEST_EVERY} days the village holds one from sunrise to noon. Enter before it ends,
  * fish within {@link #CONTEST_RANGE} blocks of the village, and your heaviest fish is your weight; the village's own
@@ -82,11 +82,19 @@ public final class Fishermen {
 			Codec.unboundedMap(Codec.STRING, Entry.CODEC).optionalFieldOf("entries", Map.of()).forGetter(Contest::entries)).apply(i, Contest::new));
 	}
 
-	/** Every village's contests, by "village:day"; and the kg of fish sold in each village today. Kept on the overworld. */
+	/** The kg of fish an angler has sold today, to every village's fishermen together (day is the in-game day it counts for). */
+	public record Sold(int day, float kg) {
+		public static final Codec<Sold> CODEC = RecordCodecBuilder.create(i -> i.group(
+			Codec.INT.optionalFieldOf("day", -1).forGetter(Sold::day),
+			Codec.FLOAT.optionalFieldOf("kg", 0.0F).forGetter(Sold::kg)).apply(i, Sold::new));
+	}
+
+	/** Every village's contests, by "village:day". Kept on the overworld. */
 	public static final AttachmentType<Map<String, Contest>> CONTESTS = AttachmentRegistry.create(JaymosPowers.id("fish_contests"),
 		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Contest.CODEC)));
-	public static final AttachmentType<Map<String, Float>> SOLD = AttachmentRegistry.create(JaymosPowers.id("fish_sold"),
-		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Codec.FLOAT)));
+	/** Per player, not per village: the glut follows the angler to every market. Kept through death. */
+	public static final AttachmentType<Sold> SOLD = AttachmentRegistry.create(JaymosPowers.id("fish_sold_today"),
+		builder -> builder.persistent(Sold.CODEC).copyOnDeath());
 	/** Without Kingdoms: the change (thousandths of an emerald) owed toward the next emerald. Kept through death. */
 	public static final AttachmentType<Long> CHANGE = AttachmentRegistry.create(JaymosPowers.id("fish_change"),
 		builder -> builder.persistent(Codec.LONG).copyOnDeath());
@@ -141,7 +149,7 @@ public final class Fishermen {
 	// ---- the market ----
 
 	/** What a fisherman pays for {@code stack} (thousandths of an emerald), or 0 if they won't take it. */
-	static long price(ServerLevel level, BlockPos at, ItemStack stack) {
+	static long price(ServerLevel level, ServerPlayer player, ItemStack stack) {
 		Species sp = speciesOf(stack);
 		Float kg = kgOf(stack);
 		if (sp == null || kg == null || sp.pricePerKg <= 0) {
@@ -155,7 +163,8 @@ public final class Fishermen {
 		if (info != null && !info.legend().isEmpty()) {
 			f *= LEGEND_PRICE;
 		}
-		float sold = level.getServer().overworld().getAttachedOrElse(SOLD, Map.of()).getOrDefault(village(at) + ":" + today(level), 0.0F);
+		Sold today = player.getAttachedOrElse(SOLD, new Sold(-1, 0.0F));
+		float sold = today.day() == today(level) ? today.kg() : 0.0F;
 		f /= 1.0F + sold / GLUT_KG;
 		return Math.max(1L, Math.round(sp.pricePerKg * kg * stack.getCount() * f));
 	}
@@ -203,18 +212,16 @@ public final class Fishermen {
 		if (!sellable(stack)) {
 			return;
 		}
-		long milli = price(level, villager.blockPosition(), stack);
+		long milli = price(level, player, stack);
 		Float kg = kgOf(stack);
 		if (milli <= 0L || kg == null) {
 			return;
 		}
 		float total = kg * stack.getCount();
 		player.getInventory().setItem(slot, ItemStack.EMPTY);
-		Map<String, Float> sold = new HashMap<>(level.getServer().overworld().getAttachedOrElse(SOLD, Map.of()));
+		Sold before = player.getAttachedOrElse(SOLD, new Sold(-1, 0.0F));
 		int day = today(level);
-		sold.keySet().removeIf(k -> !k.endsWith(":" + day));
-		sold.merge(village(villager.blockPosition()) + ":" + day, total, Float::sum);
-		level.getServer().overworld().setAttached(SOLD, sold);
+		player.setAttached(SOLD, new Sold(day, (before.day() == day ? before.kg() : 0.0F) + total));
 		Component paid = pay(player, villager.blockPosition(), milli);
 		level.playSound(null, villager.getX(), villager.getY(), villager.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 0.8F, 1.0F);
 		player.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.sold", paid).withStyle(ChatFormatting.GREEN));
@@ -363,7 +370,7 @@ public final class Fishermen {
 		for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
 			ItemStack stack = player.getInventory().getItem(i);
 			if (sellable(stack)) {
-				offers.add(new Offer(i, stack.copy(), price(level, villager.blockPosition(), stack)));
+				offers.add(new Offer(i, stack.copy(), price(level, player, stack)));
 			}
 		}
 		int today = today(level);

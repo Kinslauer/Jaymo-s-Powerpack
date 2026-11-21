@@ -1,0 +1,6 @@
+{
+  "menu.jaymoskingdoms.faction.withdraw": "Withdraw",
+  "menu.jaymoskingdoms.faction.withdraw.tip": "Draw silver from the treasury. A lord may take a tenth of it a day: %s left today. Leave the box empty to take all of it.",
+  "menu.jaymoskingdoms.faction.withdraw.hint": "Silver",
+  "message.jaymoskingdoms.withdraw_cap": "The treasury has given all it may today. Ask again tomorrow."
+}

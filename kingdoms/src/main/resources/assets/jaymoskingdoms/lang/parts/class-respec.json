@@ -1,0 +1,5 @@
+{
+  "message.jaymoskingdoms.class.respec.wait": "Not yet: you can change what you picked again in %s minutes.",
+  "message.jaymoskingdoms.class.respec.poor": "Changing your pick costs %s silver, and you do not have it.",
+  "message.jaymoskingdoms.class.respec.done": "Your %s now follows %s. What you earned is kept."
+}

@@ -134,6 +134,7 @@ final class ResonanceShatter {
 		int every = Math.max(4, STRIP_EVERY - HIGH_STRIP_FASTER * Math.max(0, tune));
 		if (hum.entityTicks % every == 0) {
 			strip(living);
+			com.jaymospowers.core.trials.PowerTrials.count(player, "resonance.strip", 1);
 			hum.did = true;
 			level.sendParticles(ParticleTypes.NOTE, living.getX(), living.getY() + living.getBbHeight() + 0.3, living.getZ(), 2, 0.3, 0.1, 0.3,
 				(tune + 2) / 4.0);
@@ -192,6 +193,7 @@ final class ResonanceShatter {
 		float hardness = state.getDestroySpeed(level, pos);
 		level.playSound(null, pos, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.BLOCKS, 1.0F, 1.2F);
 		ResonanceDamage.breakBlock(player, level, pos, state, hardness <= IRON_ORE_HARDNESS);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "resonance.shatter_block", 1);
 		hum.did = true;
 		return true;
 	}
@@ -226,6 +228,7 @@ final class ResonanceShatter {
 		if (finish && hum.entityId >= 0 && hum.entityTicks > 0 && level.getEntity(hum.entityId) instanceof LivingEntity living && living.isAlive()
 			&& living.distanceTo(player) <= RANGE + 2.0) {
 			living.hurtServer(level, ResonanceDamage.source(player, ResonanceDamage.PULSE), END_DAMAGE);
+			com.jaymospowers.core.trials.PowerTrials.count(player, "resonance.shatter_hit", 1);
 			hum.did = true;
 		}
 		ResonanceState state = ResonancePower.state(player).withHum(-1L);

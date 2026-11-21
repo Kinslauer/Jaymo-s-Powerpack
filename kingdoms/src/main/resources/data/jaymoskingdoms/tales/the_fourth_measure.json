@@ -27,7 +27,8 @@
     "seat": { "at": "town", "name": "the town" },
     "house": { "at": "near", "from": "seat", "dist": [30, 70], "name": "the hill house" },
     "crossways": { "at": "road", "from": "seat", "dist": [80, 160], "name": "the stump at the crossways" },
-    "hut": { "at": "wild", "from": "crossways", "dist": [160, 320], "name": "Ebba Thorn's hut in the fen" }
+    "hut": { "at": "wild", "from": "crossways", "dist": [160, 320], "name": "Ebba Thorn's hut in the fen" },
+    "carr": { "at": "near", "from": "hut", "dist": [30, 70], "name": "the alder carr behind the hut" }
   },
   "first": "to_stump",
   "steps": {
@@ -139,7 +140,23 @@
           "returns": { "who": "sister", "as": "warning", "days": [6, 10], "say": "I buried her by the alder with your coin, and then I sat in the hut and thought. Somebody at the door at night, she said. I found where they stood. Silver thread caught on the bramble by the window, and the print of town boots. The hand that pays wanted to be sure she would never tell. She is dead, so they have their wish. Watch that house.", "gift": ["minecraft:honey_bottle*2"] } },
         { "say": "I am sorry for her. I would not have had it so.", "then": "search_hut", "journal": "{sister} was told it was not wished. She let the jar go for the sick man's sake.",
           "returns": { "who": "sister", "as": "revenge", "days": [10, 16], "say": "Sorry. You were sorry. I said I would let the jar go for the old man's sake, and I did. I never said I would let you go. She was all I had." } },
-        { "say": "Stand aside, or lie down with her.", "then": "fight_sister" }
+        { "say": "Stand aside, or lie down with her.", "then": "fight_sister" },
+        { "say": "What would you take, to call it quits between us?", "then": "sister_bargain" }
+      ]
+    },
+    "sister_bargain": {
+      "do": "talk", "who": "sister",
+      "say": [
+        "Not coin. Coin is what she took, and look where it put her.",
+        "Somebody stood at her window at night for a month and frightened her out onto the road, and the road had you on it. That was the hand that pays. I want the name of that hand before the watch has it and before the hill house has it. Bring it to me first.",
+        "Do that, and the brown jar is yours with no blood and no burying money. Her test is on the shelf with it, if the house wants showing after. She never sold a measure without it: a buyer who swore a twist was not opened had to wet their fingers first. What it asks for grows in the carr behind this hut and shows only by night. But the name comes here before any bowl is filled. There is one measure left in the blue jar. A measure for a measure. That is my bargain."
+      ],
+      "voices": {"law": "A name carried to a witch's sister before the watch hears it is no kind of justice. Think what she means to do with it.", "vengeance": "She has the right of it. Somebody drove her sister onto that road. Let her have the name."},
+      "replies": [
+        {"say": "You'll have the name before anybody.", "then": "search_hut", "mark": "fm_bargain", "for": ["vengeance"], "irks": ["law", "mercy"], "journal": "{sister} let the brown jar go on a bargain: the name of the hand that pays, brought to her before the watch or the hill house have it. She means to see it paid, a measure for a measure."},
+        {"say": "The jar, for the sick man's sake. But the name goes where it is owed, and that is not the fen.", "try": {"how": "persuade", "odds": -1, "refuse": "Then we have no bargain, and you are back to coin or steel. Choose."}, "then": "search_hut", "for": ["law"], "journal": "{sister} let the brown jar go for the sick man's sake, and was promised nothing for it."},
+        {"say": "No bargain. Here is {coins:15} for her burying, and that is all.", "needs_coins": 15, "then": "search_hut", "mark": "fm_paid", "journal": "{coins:15} went to {sister} for her sister's burying.", "returns": {"who": "sister", "as": "warning", "days": [6, 10], "say": "I buried her by the alder with your coin, and then I sat in the hut and thought. Somebody at the door at night, she said. I found where they stood. Silver thread caught on the bramble by the window, and the print of town boots. The hand that pays wanted to be sure she would never tell. She is dead, so they have their wish. Watch that house.", "gift": ["minecraft:honey_bottle*2"]}},
+        {"say": "No bargain. Stand aside.", "then": "fight_sister"}
       ]
     },
     "fight_sister": {
@@ -156,6 +173,7 @@
       "clues": [
         { "name": "The brown jar", "item": "minecraft:honey_bottle", "lore": ["Brown clay, stoppered with wax. A finger's depth of something thick and bitter-sweet.", "Scratched in the wax with a pin: the answer."], "journal": "The brown jar was on Ebba's shelf. There was not much in it." },
         { "name": "The blue jar", "item": "minecraft:glass_bottle", "lore": ["Blue glaze, nearly empty. A fine grey dust in the bottom.", "Enough for one more measure. No more than that."], "journal": "The blue jar held enough of the grey for one more measure." },
+        { "name": "A receipt in Ebba's hand", "item": "minecraft:paper", "lore": ["'The tell. Galls off the fen alder, cut by night, when the ripe ones show pale. Steep them a day in strong spirit.'", "'A hand that has opened the grey goes black to the wrist in it and stays black a week. Wet every buyer's fingers. Take nobody's word.'"], "journal": "Ebba kept a receipt for a test she called the tell: galls cut by night from the fen alders and steeped in strong spirit. A hand that has touched the grey goes black in it." },
         { "name": "A letter in a careful hand", "item": "minecraft:paper", "lore": ["'You said there is a way that looks like a fever. I have three children and he has broken my arm twice. Name your price. M.'", "Folded small and kept, as if Ebba wanted something to show if it came to it."], "journal": "Ebba had kept a letter signed M.: a woman with three children whose husband had broken her arm twice, asking for a way that looks like a fever.", "if": "hand=wife" },
         { "name": "A note of hand", "item": "minecraft:paper", "lore": ["'Four measures, paid on the fourth. The house sells by spring or the dice men have my hands. H.'", "Kept under a jar, with the thread still tied round it."], "journal": "Ebba had kept a note signed H.: the house must sell by spring, or the dice men would have his hands.", "if": "hand=son" },
         { "name": "A letter in a shaking hand", "item": "minecraft:paper", "lore": ["'Make it slow, and make it look like the wasting. If I die of my own hand they will bury me outside the wall, and my wife gets nothing. The thread is from my own loom. A.'", "The letters climb the page like a man writing in bed."], "journal": "Ebba had kept a letter signed A.: a man who wanted to die slowly, of something that looked like a wasting, so that his wife would keep the house.", "if": "hand=elder" }
@@ -191,7 +209,53 @@
       },
       "replies": [
         { "say": "There is a fourth measure. If you want it, it is yours.", "if": "hand=elder", "then": "wait_after", "mark": "fm_eased", "journal": "The fourth measure went back to {elder}, at his own asking." },
-        { "say": "Let me speak with your household first.", "then": "confront" }
+        { "say": "Let me speak with your household first.", "then": "confront" },
+        { "say": "The witch kept a test for the grey. Give me two nights, and the whole house will see whose hand it was.", "if": "exists:jaymoskitchen:strong_spirits", "then": "gather", "journal": "I told {elder} of Ebba's test for the grey, and asked two nights to make it." },
+        { "say": "I have nothing to tell this house yet. The name is owed in the fen first.", "if": "mark:fm_bargain", "then": "to_sister", "mark": "fm_sister_named", "for": ["vengeance", "honour"], "irks": ["law", "mercy"], "journal": "I kept my bargain with {sister}. The name went to the fen before the watch or the house heard it from me." }
+      ]
+    },
+    "gather": {
+      "do": "search", "at": "carr", "when": "night", "goal": "Gather alder galls in {place:carr} by night", "then": "brew",
+      "clues": [
+        {"name": "Pale alder galls", "item": "minecraft:cocoa_beans", "lore": ["Hard little apples on the alder twigs. By day they are bark brown, and nobody would pick them out.", "By night the ripe ones show pale, like teeth. These are the ones she cut."], "journal": "By night the ripe galls on the fen alders showed pale as teeth. I cut a pocketful."},
+        {"name": "A gall knife on a cord", "item": "minecraft:shears", "lore": ["A hooked knife hung in the fork of the oldest alder, its cord gone green.", "The handle is worn to the shape of one hand. She came here on a great many nights."], "journal": "Ebba's gall knife still hung in the oldest alder, the handle worn to her hand."},
+        {"name": "Last year's galls", "item": "minecraft:charcoal", "lore": ["Under the tree lie the galls nobody cut, gone black and soft.", "Crushed between finger and thumb, one leaves a stain that will not rub off. It is the black that clerks make their ink from."], "journal": "The galls nobody cut lay black under the tree. Crushed, they stain like ink."}
+      ]
+    },
+    "brew": {
+      "do": "bring", "who": "healer", "item": "jaymoskitchen:strong_spirits", "count": 1, "goal": "Distil strong spirits at a still, and bring them to {healer} with the galls", "then": "test_house",
+      "give": [
+        {"item": "minecraft:cocoa_beans", "count": 3, "name": "A pocketful of pale galls", "lore": ["Cut by night in the carr behind Ebba Thorn's hut.", "To be steeped a day in strong spirit."]}
+      ],
+      "journal": "I fermented a cask and ran it through a still, and took the spirit and the galls to {healer}. She set them steeping in a bowl on the hearth and let nobody near it."
+    },
+    "test_house": {
+      "do": "talk", "who": "healer", "goal": "See the test made at {place:house}", "mark": "fm_tested",
+      "say": {
+        "?hand=wife": [
+          "It has gone the colour of sloes. I had the whole house in, and {elder} carried down in his chair. One at a time, I said, to the wrist, and hold it there while I count ten.",
+          "The children first, to show them it was only cold. Then {son}. Clean. Then her. She put her right hand in without being asked twice, and it came out black to the wrist, and she stood holding it out in front of her as if it were somebody else's.",
+          "Nobody spoke. The old man looked at that hand a long time. Then he looked at her other arm, the one that set crooked. She is in the braid room. Go gently, or do not go."
+        ],
+        "?hand=son": [
+          "It has gone the colour of sloes. I had the whole house in, and {elder} carried down in his chair. One at a time, I said, to the wrist, and hold it there while I count ten.",
+          "Her first. Clean. The children, clean. Then {son} said the watch does not put its hands in a witch's bowl, and his father said from the chair: put it in. It came out black to the wrist.",
+          "He said the bowl was dirty. I washed it in front of him and filled it again. He would not put the other hand in. He is on the stair. He has his sword on."
+        ],
+        "?": [
+          "It has gone the colour of sloes. I had the whole house in, and {elder} carried down in his chair. One at a time, I said, to the wrist, and hold it there while I count ten.",
+          "Her, clean. {son}, clean. I was reaching for the cloth when the old man said: and mine. I told him there was no need. He said it again.",
+          "Black to the knuckle, both hands. He held them up to the room like a man showing what he has caught. His wife did not look surprised. I shall be a long time thinking about that. She is in the braid room."
+        ]
+      },
+      "journal": {
+        "?hand=wife": "The test was made before the whole hill house. {wife}'s right hand came out of the bowl black to the wrist.",
+        "?hand=son": "The test was made before the whole hill house. {son}'s hand came out of the bowl black to the wrist, and he would not put the other in.",
+        "?": "The test was made before the whole hill house. {elder} asked to put his own hands in. They came out black to the knuckle."
+      },
+      "replies": [
+        { "say": "I'll go in and speak.", "then": "confront" },
+        { "say": "The whole house saw the bowl. Let the house judge its own. Not the watch, and not me.", "then": "wait_house", "for": ["mercy"], "irks": ["law"], "journal": "I left it to the hill house to judge its own, since the whole house had seen the hand come out of the bowl." }
       ]
     },
     "confront": {
@@ -212,10 +276,10 @@
       },
       "replies": [
         { "say": "The watch will hear of this.", "if": "hand=wife", "then": "wait_after", "mark": "fm_judged", "against": ["mercy"], "journal": "{wife}'s letter went to the watch." },
-        { "say": "Take the children and go tonight. I'll say it was a fever.", "if": "hand=wife", "then": "wait_after", "mark": "fm_fled", "against": ["vengeance"], "journal": "{wife} was let go in the night with her children, and the house was told it was a fever.",
+        { "say": "Take the children and go tonight. I'll say it was a fever.", "if": "hand=wife & !mark:fm_tested", "then": "wait_after", "mark": "fm_fled", "against": ["vengeance"], "journal": "{wife} was let go in the night with her children, and the house was told it was a fever.",
           "returns": { "who": "wife", "as": "thanks", "days": [7, 12], "say": "We are two valleys over, with my cousin, and the boy laughs now. He never laughed in that house. I do not know what you are owed for it. I only know nobody else in the whole town lifted a hand. I worked this on the road. It is the only thing I know how to make.", "gift": ["minecraft:string*8", "minecraft:white_wool*4"] } },
         { "say": "You'll go before the ruler for this.", "if": "hand=son", "then": "foe_son" },
-        { "say": "{coins:20}, and it was a fever.", "if": "hand=son", "then": "wait_after", "mark": "fm_bought", "against": ["law"], "journal": "{son} paid {coins:20} from the market chest, and it was called a fever." },
+        { "say": "{coins:20}, and it was a fever.", "if": "hand=son & !mark:fm_tested", "then": "wait_after", "mark": "fm_bought", "against": ["law"], "journal": "{son} paid {coins:20} from the market chest, and it was called a fever." },
         { "say": "Say it to him yourself, at his bedside.", "then": { "?hand=son": "son_yields", "?": "wait_after" }, "journal": { "?hand=son": "{son} was told to go to his father's bedside and say it.", "?": "{wife} was told to go to {elder}'s bedside and say it." } }
       ]
     },
@@ -276,6 +340,74 @@
         "The watch has called it what it was. There were dice men at the burying, at the back, who wanted to know who would pay what {son} owed. {elder} paid them. He lives. I do not think he is glad of it."
       ] },
       "then": "end:son_slain"
+    },
+    "wait_house": {
+      "do": "wait", "wake": "letter", "then": "end:house",
+      "days": [3, 6],
+      "letter": {
+        "from": "{healer}",
+        "lines": {
+          "?hand=wife": [
+            "The house sat on it two days with the door shut, {elder} in his chair, and {son} with his tag off and laid on the table, so that he sat as a son and not as the watch.",
+            "They have judged it between them. She goes to her cousin two valleys over with the children, and has a third of the braid money every quarter day for as long as she keeps away. He keeps the house. {son} carried her boxes down himself. Nobody said the word rope.",
+            "The old man asked to see her arm before she went. She showed him. He did not say he was sorry. He said: a third, every quarter day. I think it is the nearest he can come."
+          ],
+          "?hand=son": [
+            "The house sat on it two days with the door shut. {son} laid his tag on the table before anybody asked him to.",
+            "His father has paid the dice men every coin, in front of witnesses, and bound him to the loom for seven years to work it off. No watch, no market, no dice, and his bed in the braid loft. {wife} holds the paper. It was her notion. She said a rope pays nobody back.",
+            "He still brings the old man his milk. {elder} makes him drink from the cup first. They both seem to find that fair."
+          ],
+          "?": [
+            "There was nothing to judge in the end, only something to be said aloud. He said it: that he paid for his own death so that she should keep the house, and that he would do it again.",
+            "{wife} had the town book fetched up the hill, and stood beside her black-handed husband while it was written in that the house is hers, whatever he dies of and wherever they bury him. It cost her the good loom to have it written.",
+            "He has stopped asking after the blue jar. He sits in the sun. His hands are black yet, and he will not wear gloves."
+          ]
+        }
+      }
+    },
+    "to_sister": {
+      "do": "go", "to": "hut", "goal": "Take the name to {sister} in the fen", "then": "sister_name"
+    },
+    "sister_name": {
+      "do": "talk", "who": "sister", "goal": "Give {sister} the name", "journal": "{sister} took the name. She said we were quits.", "then": "wait_due",
+      "say": {
+        "?hand=wife": [
+          "The wife. So it was the one with the arm. Ebba said the hand shook.",
+          "I'll not send the grey after a woman with three children at her skirts. I am not my sister, and my sister would not have done it either. But she will find a twist tied with fen grass on her sill at the new moon, with nothing in it but ash. Let her open it, and think about windows.",
+          "Go on. We are quits, you and I. I did not think I would ever say that to you."
+        ],
+        "?hand=son": [
+          "The watchman. Town boots at her window. I knew they were town boots.",
+          "He frightened her out onto that road to save himself a debt. Then he has a debt in the fen as well, and the fen does not take a note of hand. There is one measure in the blue jar. He likes his dice. Let him wonder which cup.",
+          "Go on. We are quits, you and I. I did not think I would ever say that to you."
+        ],
+        "?": [
+          "Himself. He paid her to kill him slowly, and then somebody of his stood at her window to see that she kept her mouth shut.",
+          "Then there is nobody to pay. He has had three of his four already, and thanked her for each. I'll not waste the blue jar on a man who wants it. But I will stand at his gate at the new moon and tell him he still owes for the fourth, and that I shall be at his burying to collect, whenever it is.",
+          "Go on. We are quits, you and I. I did not think I would ever say that to you."
+        ]
+      }
+    },
+    "wait_due": {
+      "do": "wait", "wake": "letter", "then": "end:fen_paid",
+      "days": [4, 7],
+      "letter": {
+        "from": "{healer}",
+        "lines": {
+          "?hand=wife": [
+            "At the new moon there was a twist tied with fen grass on {wife}'s sill. She cried out so that I heard it from the hearth. There was nothing in it but ash.",
+            "She has told him everything since: the arm, the fen, the three measures. I think she believed the fourth had come for her. He has not raised his hand. The watch has not been told, and I am not going to be the one who tells it."
+          ],
+          "?hand=son": [
+            "{son} took sick at the new moon. Grey at the lips and cold in the hands. I know that sickness now, and so does he.",
+            "He has told his father all of it from his bed: the dice, the stump, the window in the fen. There is no more of the answer. You brought me the last, and it went into the old man. I am feeding the son honey and watching his cup. A man comes back from two, she wrote, and he has had one. I mean to hold her to that."
+          ],
+          "?": [
+            "A woman from the fen stood at the hill house gate at the new moon and would not come in. She said one thing to {elder} through the bars, and went.",
+            "He has not asked after the blue jar since. He asked me whether a man can owe the dead. I told him what the Hearthkeeper remembers is what the living keep tending. He is mending, and tending something. I told his wife the whole of it. Somebody had to."
+          ]
+        }
+      }
     }
   },
   "endings": {
@@ -284,19 +416,22 @@
       "text": "{wife} was named to the watch and hanged for the grey in her husband's milk. {elder} lives, and their children are his to raise.",
       "reward": { "coins": 10, "reputation": 6 },
       "marks": ["fm_named_wife"],
-      "town": ["They hanged the braid-woman from the hill house. Poisoner, they say. Her poor husband.", "Did you see her arm? Nobody looked at her arm."]
+      "town": ["They hanged the braid-woman from the hill house. Poisoner, they say. Her poor husband.", "Did you see her arm? Nobody looked at her arm."],
+      "later": [{ "days": [10, 16], "if": "mark:fm_bargain & !mark:fm_sister_named", "mark": "fm_broke_fen_bargain", "letter": { "from": "{sister}", "lines": ["I let the jar go on your word. The name first, you said, before the watch and before the house. I have it now from a drover, third hand, like everybody else in this country.", "I do not send the grey after oath-breakers. I only tell them what they are. You took a dead woman's shelf on a promise and did not keep it. The fen is shut to you. Do not come gathering here by night again."] } }]
     },
     "fled": {
       "text": "{wife} took her children and went in the night. {elder} lives, and the house was told it was a fever.",
       "reward": { "coins": 8, "hearts": 6 },
       "marks": ["fm_let_wife_go"],
-      "town": ["The old braid-master's wife ran off with the children and the good blankets. After all he gave her.", "A fever, the healer says. Long one. Broke, in the end."]
+      "town": ["The old braid-master's wife ran off with the children and the good blankets. After all he gave her.", "A fever, the healer says. Long one. Broke, in the end."],
+      "later": [{ "days": [10, 16], "if": "mark:fm_bargain & !mark:fm_sister_named", "mark": "fm_broke_fen_bargain", "letter": { "from": "{sister}", "lines": ["I let the jar go on your word. The name first, you said, before the watch and before the house. I have it now from a drover, third hand, like everybody else in this country.", "I do not send the grey after oath-breakers. I only tell them what they are. You took a dead woman's shelf on a promise and did not keep it. The fen is shut to you. Do not come gathering here by night again."] } }]
     },
     "bought": {
       "text": "{son} paid {coins:20} for it to have been a fever. {elder} mends, and his son brings him his milk every evening.",
       "reward": { "coins": 20 },
       "marks": ["fm_took_son_coin"],
-      "town": ["The old braid-master's on his feet again. That son of his never leaves his side. Good lad.", "The healer's taken to calling at the hill house at milk-time. Every evening. Odd, that."]
+      "town": ["The old braid-master's on his feet again. That son of his never leaves his side. Good lad.", "The healer's taken to calling at the hill house at milk-time. Every evening. Odd, that."],
+      "later": [{ "days": [10, 16], "if": "mark:fm_bargain & !mark:fm_sister_named", "mark": "fm_broke_fen_bargain", "letter": { "from": "{sister}", "lines": ["I let the jar go on your word. The name first, you said, before the watch and before the house. I have it now from a drover, third hand, like everybody else in this country.", "I do not send the grey after oath-breakers. I only tell them what they are. You took a dead woman's shelf on a promise and did not keep it. The fen is shut to you. Do not come gathering here by night again."] } }]
     },
     "told": {
       "text": {
@@ -307,20 +442,51 @@
       "reward": { "coins": 12, "hearts": 8, "reputation": 8 },
       "marks": ["fm_house_told"],
       "town": ["Something happened up at the hill house. They're all very quiet up there now.", "The braid-master's sitting out by his door in the sun. Never once saw him do that before."],
+      "later": [{ "days": [10, 16], "if": "mark:fm_bargain & !mark:fm_sister_named", "mark": "fm_broke_fen_bargain", "letter": { "from": "{sister}", "lines": ["I let the jar go on your word. The name first, you said, before the watch and before the house. I have it now from a drover, third hand, like everybody else in this country.", "I do not send the grey after oath-breakers. I only tell them what they are. You took a dead woman's shelf on a promise and did not keep it. The fen is shut to you. Do not come gathering here by night again."] } }],
       "returns": { "who": "healer", "as": "thanks", "days": [6, 10], "say": "I came to say the hill house is still standing, and everybody in it. I did not think it would be. I have kept the Hearthkeeper's hearth twenty years, and I have learned that most of what I do is watch a cup. You went into the fen instead. Take these, and keep them by you.", "gift": ["minecraft:honey_bottle*3", "minecraft:bread*4"] }
     },
     "son_slain": {
       "text": "{son} drew on the hill house stair and died of it. {elder} lives, and paid his son's debts to the dice men at the burying.",
       "reward": { "coins": 10, "reputation": 4 },
       "marks": ["fm_slew_son"],
-      "town": ["The braid-master's son, killed on his own father's stair. Watchman, too.", "Dice men at a burying. Bold as you like. The old man paid them, they say."]
+      "town": ["The braid-master's son, killed on his own father's stair. Watchman, too.", "Dice men at a burying. Bold as you like. The old man paid them, they say."],
+      "later": [{ "days": [10, 16], "if": "mark:fm_bargain & !mark:fm_sister_named", "mark": "fm_broke_fen_bargain", "letter": { "from": "{sister}", "lines": ["I let the jar go on your word. The name first, you said, before the watch and before the house. I have it now from a drover, third hand, like everybody else in this country.", "I do not send the grey after oath-breakers. I only tell them what they are. You took a dead woman's shelf on a promise and did not keep it. The fen is shut to you. Do not come gathering here by night again."] } }]
     },
     "eased": {
       "text": "{elder} had his fourth measure at the new moon. He was buried inside the wall as a man who died of a wasting, and his wife keeps the house.",
       "reward": { "coins": 12, "hearts": 4 },
       "marks": ["fm_eased_elder"],
       "town": ["Old braid-master's gone. Wasting, the healer says. Peaceful, at the end.", "His widow's kept the house and the loom. Good. She works harder than he ever did."],
+      "later": [{ "days": [10, 16], "if": "mark:fm_bargain & !mark:fm_sister_named", "mark": "fm_broke_fen_bargain", "letter": { "from": "{sister}", "lines": ["I let the jar go on your word. The name first, you said, before the watch and before the house. I have it now from a drover, third hand, like everybody else in this country.", "I do not send the grey after oath-breakers. I only tell them what they are. You took a dead woman's shelf on a promise and did not keep it. The fen is shut to you. Do not come gathering here by night again."] } }],
       "returns": { "who": "wife", "as": "thanks", "days": [6, 10], "say": "He went easy. He was holding my hand and he said the sea was a long way off now. I do not know what you gave him and I am not going to ask. The house is mine and the children's. This is the last braid he worked. He would want you to have it, I think. I would.", "gift": ["minecraft:string*6", "minecraft:gold_nugget*3"] }
+    },
+    "house": {
+      "text": {
+        "?hand=wife": "The test showed {wife}'s hand before the whole hill house, and the house judged its own. She went to her cousin's with the children and a third of the braid money. {elder} lives. Nobody said the word rope.",
+        "?hand=son": "The test showed {son}'s hand before the whole hill house, and the house judged its own. His father paid the dice men and bound him seven years to the loom. {elder} lives, and his son drinks from his cup first.",
+        "?": "The test showed {elder}'s own hands before the whole hill house. He said aloud what he had paid for, and his wife had it written in the town book that the house is hers whatever he dies of. He lives."
+      },
+      "reward": {"coins": 12, "hearts": 8, "reputation": 6},
+      "marks": ["fm_house_judged"],
+      "town": [
+        "They had the witch's bowl out at the hill house, and every hand in it. I'd not have put mine in, and I have nothing to hide.",
+        "The braid-master's house settled its own trouble with the door shut. The watch was never sent for. Make of that what you like."
+      ],
+      "later": [{ "days": [10, 16], "if": "mark:fm_bargain & !mark:fm_sister_named", "mark": "fm_broke_fen_bargain", "letter": { "from": "{sister}", "lines": ["I let the jar go on your word. The name first, you said, before the watch and before the house. I have it now from a drover, third hand, like everybody else in this country.", "I do not send the grey after oath-breakers. I only tell them what they are. You took a dead woman's shelf on a promise and did not keep it. The fen is shut to you. Do not come gathering here by night again."] } }]
+    },
+    "fen_paid": {
+      "text": {
+        "?hand=wife": "I took the name to the fen, as I had bargained. {sister} sent {wife} a twist of ash and nothing worse. The hill house knows the whole of it now, and the watch was never told.",
+        "?hand=son": "I took the name to the fen, as I had bargained. {son} took a measure of the grey at the new moon, and may yet come back from it. {elder} lives, and knows what his son did.",
+        "?": "I took the name to the fen, as I had bargained. {sister} would not spend the last of the grey on a man who wanted it. {elder} lives, and has been told what he owes."
+      },
+      "reward": {"coins": 8, "hearts": 4},
+      "marks": ["fm_kept_fen_bargain"],
+      "town": [
+        "There was a fen woman at the hill house gate at the new moon. Stood there like a post. Nobody asked her in.",
+        "Something came to the hill house off the fen, and it was not a fever. They are all very careful with their cups up there."
+      ],
+      "returns": {"who": "sister", "as": "thanks", "days": [8, 12], "say": "I poured the last of the blue jar into the bog and broke the jar after it. Ebba's trade ends with Ebba. I keep bees now. The fen is good for them, and nobody is afraid of honey. You kept your word to me when the watch and the house would both have paid you better. This is the first of it.", "gift": ["minecraft:honey_bottle*3"]}
     }
   }
 }

@@ -156,6 +156,10 @@ public record SkySpringFeature(SpringFeature spring) implements Feature {
 			}
 			for (Direction direction : Direction.Plane.HORIZONTAL) {
 				BlockPos side = pos.relative(direction);
+				if (Math.abs((side.getX() >> 4) - (origin.getX() >> 4)) > 1 || Math.abs((side.getZ() >> 4) - (origin.getZ() >> 4)) > 1) {
+					// past the 3x3 chunks a feature may touch: unknown, so a leak
+					return true;
+				}
 				if (!level.hasChunk(side.getX() >> 4, side.getZ() >> 4)) {
 					return true;
 				}

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:ichorite_bricks_quarter",
+    "jaymospowers:ichorite_bricks_quarter",
+    "jaymospowers:ichorite_bricks_quarter",
+    "jaymospowers:ichorite_bricks_quarter"
+  ],
+  "result": {
+    "id": "jaymospowers:ichorite_bricks"
+  }
+}

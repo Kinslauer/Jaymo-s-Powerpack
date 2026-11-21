@@ -1,6 +1,7 @@
 package com.jaymospowers.power.xenoform.forms;
 
 import com.jaymospowers.api.PowerKey;
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import net.minecraft.core.BlockPos;
@@ -120,13 +121,13 @@ public final class Blight extends XenoForm {
 			}
 			case ABILITY_4 -> {
 				if (ready(player, live, B)) {
-					for (LivingEntity e : around(player, PULSE_RADIUS)) {
+					for (LivingEntity e : around(player, AbilityPower.size(player, PULSE_RADIUS))) {
 						e.hurtServer(level, player.damageSources().playerAttack(player), PULSE_DAMAGE);
 						e.addEffect(new MobEffectInstance(MobEffects.WITHER, 80, 0), player);
 						shove(e, player.position(), 1.2, 0.4);
 					}
-					ring(level, ParticleTypes.SMOKE, player.position(), PULSE_RADIUS * 0.5, 20);
-					ring(level, ParticleTypes.SOUL, player.position(), PULSE_RADIUS, 28);
+					ring(level, ParticleTypes.SMOKE, player.position(), AbilityPower.size(player, PULSE_RADIUS) * 0.5, 20);
+					ring(level, ParticleTypes.SOUL, player.position(), AbilityPower.size(player, PULSE_RADIUS), 28);
 					rot(level, player.blockPosition());
 					sound(player, SoundEvents.WITHER_SPAWN, 0.6F, 1.4F);
 					cooldown(player, live, B, PULSE_COOLDOWN);

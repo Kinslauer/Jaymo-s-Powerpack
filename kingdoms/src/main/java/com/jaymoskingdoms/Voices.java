@@ -77,7 +77,22 @@ public final class Voices {
 	 */
 	public static final List<String> TONGUE_LINES = List.of("greet", "farewell", "celebrate", "scream");
 
+	/**
+	 * Andy (2026-11-19), on the Google voice samples: "they can be for MCA villagers instead of what we have now". MCA's
+	 * spoken words (its hello, yes, no and angry shout; {@link Languages#voice}) are said by one of these Google voices
+	 * instead, the same one every time for the same villager ({@link #villager}). {@code tools/voices/google_voices.py
+	 * --villagers} makes {@code voice.villager.<voice>.<line>}, a few lines each; its lists must match these. MCA's laughs,
+	 * cries and screams stay its own.
+	 */
+	static final List<String> VILLAGER_MEN = List.of("charon", "iapetus", "wavenet_d", "neural2_d", "neural2_j", "studio_q",
+		// (Andy, on the older-sounding narrator samples: "they can pass as mca voices")
+		"algenib", "algenib_old", "sadaltager_old", "enceladus_old", "charon_old", "wavenet_d_old");
+	static final List<String> VILLAGER_WOMEN = List.of("kore", "leda", "despina", "sulafat", "gacrux", "vindemiatrix");
+	static final List<String> VILLAGER_LINES = List.of("greet", "yes", "no", "angry");
+
 	private static final Map<String, Holder<SoundEvent>> SOUNDS = new HashMap<>();
+	/** {@code <voice>.<line>} -> its sound (villager voices with clips only). */
+	private static final Map<String, Holder<SoundEvent>> VILLAGERS = new HashMap<>();
 	/** (0.7.348) {@code <tongue>.<male|female>.<line>} -> its sound. */
 	private static final Map<String, Holder<SoundEvent>> TONGUES = new HashMap<>();
 
@@ -94,12 +109,10 @@ public final class Voices {
 	static List<String> voiced() {
 		List<String> out = new ArrayList<>(SPIRIT_LINES);
 		for (LifeStory.Question q : LifeStory.Question.values()) {
-			// (gb-faith) the faith page has no clips yet: its title and line are read in silence (its tales are checked below)
-			if (q != LifeStory.Question.FAITH) {
-				out.add("story.jaymoskingdoms." + q.key() + ".title");
-			}
+			// (the faith page is voiced like the rest once its clips are made: register() skips a line with no clip)
+			out.add("story.jaymoskingdoms." + q.key() + ".title");
 			// (0.7.360) a question's title and the line under it are read apart (the line only if the page waits)
-			if (q != LifeStory.Question.ROAD && q != LifeStory.Question.FAITH) {
+			if (q != LifeStory.Question.ROAD) {
 				out.add("story.jaymoskingdoms." + q.key() + ".sub");
 			}
 			for (LifeStory.Answer a : q.answers()) {
@@ -124,7 +137,16 @@ public final class Voices {
 		for (Heritage.Kind kind : Heritage.Kind.values()) {
 			String as = "story.jaymoskingdoms.as." + kind.key() + ".";
 			for (LifeStory.Question q : LifeStory.Question.values()) {
-				if (q == LifeStory.Question.BORN || q == LifeStory.Question.ROAD) {
+				if (q == LifeStory.Question.BORN) {
+					// who raised you can retell where you were born (LifeStoryScreen.story): as.<heritage>.from_<raised>.born.<answer>.tale
+					for (LifeStory.Answer raised : LifeStory.Question.RAISED.answers()) {
+						for (LifeStory.Answer a : q.answers()) {
+							out.add(as + "from_" + raised.key() + ".born." + a.key() + ".tale");
+						}
+					}
+					continue;
+				}
+				if (q == LifeStory.Question.ROAD) {
 					continue;
 				}
 				out.add(as + q.key() + ".title");
@@ -140,8 +162,9 @@ public final class Voices {
 	public static void register() {
 		for (String key : voiced()) {
 			String path = soundPath(key);
-			// (0.7.490) an answer's tale not yet recorded (born.den, raised.pack) is read in silence, not registered without a clip
-			if (key.startsWith("story.jaymoskingdoms.") && key.endsWith(".tale") && !hasNarratorClip(path)) {
+			// (0.7.490) a story line not yet recorded (born.den, raised.pack, the faith page) is read in silence, not registered
+			// without a clip
+			if (key.startsWith("story.jaymoskingdoms.") && !hasNarratorClip(path)) {
 				continue;
 			}
 			Identifier id = Identifier.fromNamespaceAndPath(JaymosKingdoms.MOD_ID, path);
@@ -168,7 +191,29 @@ public final class Voices {
 				}
 			}
 		}
+		for (String voice : concat(VILLAGER_MEN, VILLAGER_WOMEN)) {
+			for (String line : VILLAGER_LINES) {
+				if (Voices.class.getResource("/assets/jaymoskingdoms/sounds/voice/villager/" + voice + "_" + line + "_1.ogg") == null) {
+					continue;
+				}
+				Identifier id = JaymosKingdoms.id("voice.villager." + voice + "." + line);
+				VILLAGERS.put(voice + "." + line, Registry.registerForHolder(BuiltInRegistries.SOUND_EVENT, id, SoundEvent.createVariableRangeEvent(id)));
+			}
+		}
 		PayloadTypeRegistry.clientboundPlay().register(Spoken.TYPE, Spoken.CODEC);
+	}
+
+	private static List<String> concat(List<String> a, List<String> b) {
+		List<String> out = new ArrayList<>(a);
+		out.addAll(b);
+		return out;
+	}
+
+	/** {@code line} ({@link #VILLAGER_LINES}) in the Google voice that is {@code villager}'s own; null if it has no clip. */
+	public static @Nullable Holder<SoundEvent> villager(java.util.UUID villager, boolean female, String line) {
+		List<String> voices = female ? VILLAGER_WOMEN : VILLAGER_MEN;
+		String voice = voices.get(Math.floorMod(villager.getMostSignificantBits() ^ villager.getLeastSignificantBits(), voices.size()));
+		return VILLAGERS.get(voice + "." + line);
 	}
 
 	/** (0.7.490) Whether the narrator's clip for {@code path} ({@code voice.narrator.<rest>}) is in the jar. */

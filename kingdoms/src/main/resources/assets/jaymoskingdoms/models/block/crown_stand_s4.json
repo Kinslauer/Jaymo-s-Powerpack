@@ -1,0 +1,39 @@
+{
+  "textures": {
+    "shard": "jaymoskingdoms:block/crown_shard"
+  },
+  "elements": [
+    {
+      "from": [
+        6.5,
+        11,
+        9.5
+      ],
+      "to": [
+        9.5,
+        15,
+        12.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#shard"
+        },
+        "south": {
+          "texture": "#shard"
+        },
+        "east": {
+          "texture": "#shard"
+        },
+        "west": {
+          "texture": "#shard"
+        },
+        "up": {
+          "texture": "#shard"
+        },
+        "down": {
+          "texture": "#shard"
+        }
+      }
+    }
+  ]
+}

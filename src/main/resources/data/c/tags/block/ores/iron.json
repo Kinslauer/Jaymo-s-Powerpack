@@ -1,6 +1,10 @@
 {
   "values": [
     "jaymospowers:small_iron_ore",
-    "jaymospowers:deepslate_small_iron_ore"
+    "jaymospowers:deepslate_small_iron_ore",
+    "jaymospowers:andesite_iron_ore",
+    "jaymospowers:diorite_iron_ore",
+    "jaymospowers:granite_iron_ore",
+    "jaymospowers:tuff_iron_ore"
   ]
 }

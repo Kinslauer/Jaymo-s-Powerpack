@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:mud_bricks_quarter",
+    "jaymospowers:mud_bricks_quarter",
+    "jaymospowers:mud_bricks_quarter",
+    "jaymospowers:mud_bricks_quarter"
+  ],
+  "result": {
+    "id": "minecraft:mud_bricks"
+  }
+}

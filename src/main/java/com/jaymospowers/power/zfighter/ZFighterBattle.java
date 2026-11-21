@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.Fate;
 import com.jaymospowers.core.Mastery;
@@ -60,7 +61,9 @@ final class ZFighterBattle {
 	/**
 	 * Most a left-mouse blow (a punch, a hold-combo hit, a finisher) does: {@link #PUNCH_SOFT_CAP} for most of a fighter's
 	 * life, rising to {@link #PUNCH_MAX_CAP} only with every Z Fighter stat and Kingdoms attribute maxed (the rise follows
-	 * that progress to the power {@link #PUNCH_CAP_CURVE}, so it stays near the soft cap until the very end). Not the Great Ape.
+	 * that progress to the power {@link #PUNCH_CAP_CURVE}, so it stays near the soft cap until the very end). The cap is
+	 * times (1 + the current form's fist bonus, {@link ZFighterPower#FORM_FIST}): at the top, 9 in base form, about 10.8 in Super,
+	 * 13.8 in Super 3, 16.6 as a god. Not the Great Ape.
 	 */
 	static final float PUNCH_SOFT_CAP = 7.0F, PUNCH_MAX_CAP = 9.0F;
 	static final double PUNCH_CAP_CURVE = 3.0;
@@ -113,6 +116,9 @@ final class ZFighterBattle {
 			}
 			if (entity instanceof ServerPlayer hurt && Powers.has(hurt, ZFighterPower.INSTANCE)) {
 				ZFighterGrowth.took(hurt, source, damageTaken);
+				if (damageTaken > 0.0F && source.getEntity() instanceof LivingEntity) {
+					ZFighterFury.took(hurt);
+				}
 			}
 			if (damageTaken <= 0.0F || !(source.getEntity() instanceof ServerPlayer player) || entity == player
 				|| !Powers.has(player, ZFighterPower.INSTANCE)) {
@@ -120,6 +126,7 @@ final class ZFighterBattle {
 			}
 			ZFighterTraining.landed(player, ZFighterPower.live(player), damageTaken, entity.getMaxHealth());
 			ZFighterGrowth.dealt(player, entity, source, damageTaken);
+			ZFighterFury.dealt(player);
 			if (source.getDirectEntity() == player && source.is(DamageTypes.PLAYER_ATTACK)) {
 				punched(player, entity);
 			}
@@ -259,7 +266,8 @@ final class ZFighterBattle {
 		double stats = data.totalLevels() / (double)(ZFighterTraining.STATS * ZFighterTraining.STAT_CAP);
 		double attributes = ZFighterKingdoms.attributes(player);
 		double progress = Math.clamp(attributes < 0.0 ? stats : (stats + attributes) / 2.0, 0.0, 1.0);
-		return PUNCH_SOFT_CAP + (PUNCH_MAX_CAP - PUNCH_SOFT_CAP) * (float)Math.pow(progress, PUNCH_CAP_CURVE);
+		float cap = PUNCH_SOFT_CAP + (PUNCH_MAX_CAP - PUNCH_SOFT_CAP) * (float)Math.pow(progress, PUNCH_CAP_CURVE);
+		return cap * (1.0F + (float)ZFighterPower.FORM_FIST[ZFighterPower.live(player).form]);
 	}
 
 	/** A bare-fisted punch landed: ki, the combo, and every fifth hit a finisher. */
@@ -271,6 +279,7 @@ final class ZFighterBattle {
 		live.lastHit = now;
 		live.ki = Math.min(ZFighterPower.maxKi(player), live.ki + ZFighterPower.KI_PER_PUNCH);
 		Mastery.used(player);
+		com.jaymospowers.core.trials.PowerTrials.count(player, "zfighter.punch", player.getMainHandItem().isEmpty() ? 1 : 0);
 		if (live.combo % COMBO_FINISHER != 0 || !target.isAlive() || ZFighterCombo.running(player)) {
 			return;
 		}
@@ -408,7 +417,7 @@ final class ZFighterBattle {
 		ZFighterPower.addHardship(player, RAGE_HARDSHIP);
 		ServerLevel level = player.level();
 		Vec3 centre = player.position();
-		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(ZFighterPower.SUPER_BURST_RADIUS),
+		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(AbilityPower.size(player, ZFighterPower.SUPER_BURST_RADIUS)),
 			e -> e != player && e.isAlive() && !e.isSpectator())) {
 			ZFighterKi.push(near, near.position().subtract(centre), 1.2, 0.3);
 		}

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import com.jaymospowers.core.fx.MagicFx;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -14,11 +15,14 @@ import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -28,14 +32,21 @@ import net.minecraft.util.Prediction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.CombatRules;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.decoration.Mannequin;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.storage.TagValueInput;
@@ -65,6 +76,9 @@ final class PracticeDummy {
 	static final double NUMBER_RISE = 0.9, NUMBER_SPREAD = 0.35;
 	/** Blows at least this hard show gold, and this hard red. */
 	static final float BIG_BLOW = 10.0F, HUGE_BLOW = 20.0F;
+	/** Number colours by kind of damage (they win over the size colours): a crit, fire, lightning, magic, ki when its striker has no colour. */
+	static final int CRIT_COLOR = 0xFF3030, FIRE_COLOR = MagicFx.EMBER_COLOR, LIGHTNING_COLOR = MagicFx.CRACKLE_COLOR, MAGIC_COLOR = MagicFx.VOID_COLOR,
+		KI_COLOR = 0xFFD54A;
 
 	/** One dummy's bout: when it began, the last blow, the total so far. */
 	private static final class Bout {
@@ -149,6 +163,7 @@ final class PracticeDummy {
 
 	/** A blow of {@code amount} landed: it flinches, shows the number (after what it wears) and tells the striker the bout. */
 	private static void struck(ServerLevel level, Mannequin dummy, DamageSource source, float amount) {
+		amount += kindBonus(level, dummy, source, amount);
 		float dealt = CombatRules.getDamageAfterAbsorb(dummy, amount, source, dummy.getArmorValue(), (float)dummy.getAttributeValue(Attributes.ARMOR_TOUGHNESS));
 		level.broadcastDamageEvent(dummy, source);
 		long now = level.getGameTime();
@@ -159,11 +174,65 @@ final class PracticeDummy {
 		}
 		bout.last = now;
 		bout.total += dealt;
-		number(level, dummy, dealt, now);
+		number(level, dummy, dealt, now, colour(source));
 		if (source.getEntity() instanceof ServerPlayer striker) {
 			float seconds = Math.max(1.0F, (now - bout.start) / 20.0F);
 			striker.sendOverlayMessage(Component.translatable("message.jaymospowers.practice_dummy.bout", one(dealt), one(bout.total), one(bout.total / seconds)));
 		}
+	}
+
+	/** What kind of thing the dummy wears makes it: a skull undead, a turtle shell aquatic, an ominous banner an illager; null if none. */
+	private static EntityType<?> kindOf(Mannequin dummy) {
+		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND}) {
+			ItemStack worn = dummy.getItemBySlot(slot);
+			if (worn.is(Items.SKELETON_SKULL) || worn.is(Items.WITHER_SKELETON_SKULL) || worn.is(Items.ZOMBIE_HEAD)) {
+				return EntityTypes.ZOMBIE;
+			}
+			if (worn.is(Items.TURTLE_HELMET)) {
+				return EntityTypes.TURTLE;
+			}
+			if (worn.is(ItemTags.BANNERS) && worn.get(DataComponents.ITEM_NAME) != null
+				&& worn.get(DataComponents.ITEM_NAME).getContents() instanceof TranslatableContents name && name.getKey().equals("block.minecraft.ominous_banner")) {
+				return EntityTypes.PILLAGER;
+			}
+		}
+		return null;
+	}
+
+	/** The extra the striker's weapon enchantments (Smite, Impaling) do against the kind the dummy stands for, over what they do against a mannequin. */
+	private static float kindBonus(ServerLevel level, Mannequin dummy, DamageSource source, float amount) {
+		EntityType<?> kind = kindOf(dummy);
+		ItemStack weapon = source.getWeaponItem();
+		if (kind == null || weapon == null || weapon.isEmpty()) {
+			return 0.0F;
+		}
+		Entity standIn = kind.create(level, EntitySpawnReason.TRIGGERED);
+		if (standIn == null) {
+			return 0.0F;
+		}
+		standIn.snapTo(dummy.getX(), dummy.getY(), dummy.getZ(), 0.0F, 0.0F);
+		return Math.max(0.0F, EnchantmentHelper.modifyDamage(level, weapon, standIn, source, amount) - EnchantmentHelper.modifyDamage(level, weapon, dummy, source, amount));
+	}
+
+	/** The colour a blow's number takes from what it was (crit, fire, lightning, magic, ki), or -1 for the size colours. */
+	private static int colour(DamageSource source) {
+		if (source.is(ZFighterKi.KI)) {
+			return source.getEntity() instanceof ServerPlayer ki ? ZFighterPower.kiColor(ki) & 0xFFFFFF : KI_COLOR;
+		}
+		if (source.is(DamageTypes.LIGHTNING_BOLT)) {
+			return LIGHTNING_COLOR;
+		}
+		if (source.is(DamageTypeTags.IS_FIRE)) {
+			return FIRE_COLOR;
+		}
+		if (source.is(DamageTypes.MAGIC) || source.is(DamageTypes.INDIRECT_MAGIC)) {
+			return MAGIC_COLOR;
+		}
+		if (source.getDirectEntity() instanceof Player p && p == source.getEntity() && p.getAttackStrengthScale(0.5F) > 0.9F && p.fallDistance > 0.0 && !p.onGround()
+			&& !p.onClimbable() && !p.isInWater() && !p.isPassenger() && !p.isSprinting()) {
+			return CRIT_COLOR;
+		}
+		return -1;
 	}
 
 	private static String one(float value) {
@@ -171,12 +240,12 @@ final class PracticeDummy {
 	}
 
 	/** The number of a blow, floating up off the dummy for a moment (a text display, moved once so the client glides it). */
-	private static void number(ServerLevel level, Mannequin dummy, float dealt, long now) {
+	private static void number(ServerLevel level, Mannequin dummy, float dealt, long now, int typed) {
 		Display.TextDisplay display = EntityTypes.TEXT_DISPLAY.create(level, EntitySpawnReason.TRIGGERED);
 		if (display == null) {
 			return;
 		}
-		Component text = Component.literal(one(dealt)).withStyle(dealt >= HUGE_BLOW ? ChatFormatting.RED : dealt >= BIG_BLOW ? ChatFormatting.GOLD : ChatFormatting.WHITE);
+		Component text = typed >= 0 ? Component.literal(one(dealt)).withStyle(Style.EMPTY.withColor(typed)) : Component.literal(one(dealt)).withStyle(dealt >= HUGE_BLOW ? ChatFormatting.RED : dealt >= BIG_BLOW ? ChatFormatting.GOLD : ChatFormatting.WHITE);
 		CompoundTag tag = new CompoundTag();
 		ComponentSerialization.CODEC.encodeStart(level.registryAccess().createSerializationContext(NbtOps.INSTANCE), text).result().ifPresent(encoded -> tag.put("text", encoded));
 		tag.putString("billboard", "center");

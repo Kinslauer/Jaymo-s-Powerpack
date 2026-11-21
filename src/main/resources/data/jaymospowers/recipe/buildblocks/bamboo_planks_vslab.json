@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jaymospowers:saw",
+    "minecraft:bamboo_planks",
+    "minecraft:bamboo_planks",
+    "minecraft:bamboo_planks",
+    "minecraft:bamboo_planks"
+  ],
+  "result": {
+    "id": "jaymospowers:bamboo_planks_vslab",
+    "count": 8
+  }
+}

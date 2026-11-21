@@ -1,6 +1,52 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "jaymospowers:item/web_cartridge"
+    "type": "minecraft:select",
+    "property": "minecraft:component",
+    "component": "jaymospowers:web_kind",
+    "cases": [
+      {
+        "when": 1,
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/web_cartridge",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -1003408
+            }
+          ]
+        }
+      },
+      {
+        "when": 2,
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/web_cartridge",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -3974
+            }
+          ]
+        }
+      },
+      {
+        "when": 3,
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymospowers:item/web_cartridge",
+          "tints": [
+            {
+              "type": "minecraft:constant",
+              "value": -6627152
+            }
+          ]
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "jaymospowers:item/web_cartridge"
+    }
   }
 }

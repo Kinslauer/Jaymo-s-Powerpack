@@ -1,5 +1,6 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.core.HudBar;
 import com.jaymospowers.core.LockOn;
 import com.jaymospowers.core.Soundscape;
 import com.jaymospowers.core.fx.MagicFx;
@@ -15,7 +16,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
@@ -233,13 +233,10 @@ final class ZFighterEyeBeams {
 	}
 
 	private static void gauge(ServerPlayer player, Eyes eyes, boolean cold) {
-		// not the | and . charge-bar glyphs: those lock the mouse (HeldInput), and a punch must still land while the eyes burn
-		int filled = Mth.clamp(Math.round(eyes.heat / HEAT_MAX * 10.0F), 0, 10);
-		String bar = "[" + "=".repeat(filled) + "-".repeat(10 - filled) + "]";
-		if (cold && eyes.chill.progress() > 0.0F) {
-			bar += " " + Math.round(eyes.chill.progress() * 100.0F) + "%";
-		}
-		player.sendOverlayMessage(Component.literal(bar).withStyle(eyes.heat > 75.0F ? ChatFormatting.RED : cold ? ChatFormatting.AQUA : ChatFormatting.GOLD));
+		// a gauge never locks the mouse (HeldInput): a punch must still land while the eyes burn
+		Component chill = cold && eyes.chill.progress() > 0.0F ? Component.literal(Math.round(eyes.chill.progress() * 100.0F) + "%") : null;
+		HudBar.gauge(player, "eye_heat", eyes.heat / HEAT_MAX, eyes.heat > 75.0F ? HudBar.RED : cold ? HudBar.AQUA : HudBar.GOLD,
+			Component.translatable("bar.jaymospowers.eyes"), chill);
 	}
 
 	/** One tick of the spin: a ring of beams, turned a little further each tick. */
