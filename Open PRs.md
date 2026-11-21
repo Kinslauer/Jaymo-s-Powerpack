@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-21 04:45
+updated: 2026-11-21 05:45
 ---
 # Open PRs
 
-19 open, as of 2026-11-21 04:45. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+19 open, as of 2026-11-21 05:45. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1853](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1853) Heritage paths: core + Heartlander, Stoneborn, Tideborn (Kingdoms, Powers)
@@ -22,8 +22,8 @@ Andy merges only on "merge", one at a time.
 - **Agent:** [[zfighter-gaps-10-camera-hud]]
 
 ## [#1938](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1938) Z Fighter gaps 2: stamina for Flash Step, guard and forms
-- **Branch:** `claude/zfighter-gaps-2-power` · **Updated:** 2026-11-20 (today)
-- **Checks:** ✅ 5 passed
+- **Branch:** `claude/zfighter-gaps-2-power` · **Updated:** 2026-11-21 (today)
+- **Checks:** ❌ failing: Build Powers
 - **Agent:** [[zfighter-gaps-2-power]]
 
 ## [#1939](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1939) Z Fighter gaps 3: 10 new techniques

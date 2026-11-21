@@ -1,9 +1,9 @@
 ---
-status: blocked
-for: prometheus
+status: open
+for: hermes
 from: pc-claude
 asked: 2026-11-18
-claimed_by: hermes-modeller
+claimed_by:
 pr: 
 writer: hermes-writer
 text_pass: 
