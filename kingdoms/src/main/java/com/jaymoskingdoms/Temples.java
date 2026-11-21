@@ -52,8 +52,6 @@ public final class Temples {
 	/** A temple rises this far from the player, out of every player's sight (none within HIDE_RANGE). */
 	static final int SITE_MIN = 72, SITE_MAX = 144, SITE_TRIES = 10;
 	static final double HIDE_RANGE = 48.0;
-	/** The Truth's ruined cathedral is rarer than the others: its weight when a patron is drawn for a site. */
-	static final float RUIN_WEIGHT = 0.35F;
 	/** Shrine days after a kill before the champion stands at its altar again. */
 	static final int RETURN_DAYS = 3;
 	/** How often loaded temples are tended (ticks): re-forming, and players coming near. */
@@ -242,15 +240,11 @@ public final class Temples {
 		}
 	}
 
-	/** A patron drawn by weight from those whose rules fit the spot and who have no temple of their own near it. */
+	/** The patron whose temple fits this spot: the first whose site can be found nearby, so a site's patron is fixed
+	 * by the site (docs/Patrons-C-Plan.md section 4), not drawn at random. Skips any patron who already has a temple of
+	 * their own near {@code spot}. */
 	private static @Nullable Patron draw(MinecraftServer server, ServerLevel level, BlockPos spot, BlockPos playerPos, String world) {
-		List<Patron> fit = new ArrayList<>();
-		List<Float> weights = new ArrayList<>();
-		float total = 0.0F;
 		for (Patron p : Patron.values()) {
-			if (!TempleSites.fits(level, p, spot, playerPos)) {
-				continue;
-			}
 			boolean taken = false;
 			for (Temple t : all(server)) {
 				if (t.patron().equals(p.key) && t.world().equals(world) && t.center().closerThan(spot, SAME_SPACING)) {
@@ -258,25 +252,15 @@ public final class Temples {
 					break;
 				}
 			}
-			if (taken) {
+			if (taken || !TempleSites.fits(level, p, spot, playerPos)) {
 				continue;
 			}
-			float w = p == Patron.TRUTH ? RUIN_WEIGHT : 1.0F;
-			fit.add(p);
-			weights.add(w);
-			total += w;
-		}
-		if (fit.isEmpty()) {
-			return null;
-		}
-		float roll = level.getRandom().nextFloat() * total;
-		for (int i = 0; i < fit.size(); i++) {
-			roll -= weights.get(i);
-			if (roll <= 0.0F) {
-				return fit.get(i);
+			BlockPos site = TempleSites.find(level, p, spot, playerPos, false);
+			if (site != null) {
+				return p;
 			}
 		}
-		return fit.get(fit.size() - 1);
+		return null;
 	}
 
 	/** Builds {@code p}'s temple at {@code site} and sets its champion down asleep. */

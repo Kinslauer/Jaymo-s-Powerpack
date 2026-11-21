@@ -309,6 +309,10 @@ public final class OldRuins extends Structure {
 						case PILLARED -> b.columnedHall();
 						case MOUND -> b.barrow();
 						case COURT -> b.palace();
+						case ANVIL -> b.anvilHall();
+						case DEEP_FOLK -> b.deepCourt();
+						case GROVE -> b.groveShrine();
+						case TRUTH_FOLK -> b.truthHouse();
 					}
 					b.tomb();
 				}
@@ -692,6 +696,135 @@ public final class OldRuins extends Structure {
 					}
 				}
 			}
+		}
+
+		// ---- the ANVIL folk's mine hall: a vaulted deepslate chamber with a forge dais and the patron's altar at the back. */
+		void anvilHall() {
+			int r = 7;
+			this.ground(-r, r, -r, r, 9, this.p.floor());
+			for (int lx = -r; lx <= r; lx++) {
+				for (int lz = -r; lz <= r; lz++) {
+					boolean edge = Math.abs(lx) == r || Math.abs(lz) == r;
+					if (edge) {
+						for (int y = 1; y <= 6; y++) {
+							this.set(lx, y, lz, this.p.wall());
+						}
+					}
+				}
+			}
+			// four pillars round the dais
+			for (int[] c : new int[][] {{-3, -3}, {3, -3}, {-3, 3}, {3, 3}}) {
+				for (int y = 1; y <= 5; y++) {
+					this.set(c[0], y, c[1], this.p.column());
+				}
+			}
+			// the dais and altar
+			for (int lx = -2; lx <= 2; lx++) {
+				for (int lz = 2; lz <= 4; lz++) {
+					this.set(lx, 1, lz, Blocks.IRON_BLOCK.defaultBlockState());
+				}
+			}
+			this.set(0, 2, 3, OldAge.ALTAR.defaultBlockState().setValue(OldAltarBlock.PATRON, this.p.patron.ordinal()).setValue(OldAltarBlock.LIT, true));
+			// roof slabs
+			for (int lx = -r + 1; lx <= r - 1; lx++) {
+				for (int lz = -r + 1; lz <= r - 1; lz++) {
+					if (this.noise(lx, 7, lz, 5) < 0.6F) {
+						this.set(lx, 7, lz, this.p.roof());
+					}
+				}
+			}
+		}
+
+		// ---- the DEEP folk's drowned court: prismarine colonnades round a sunken pool, the altar at the water's edge. */
+		void deepCourt() {
+			int r = 7;
+			this.ground(-r, r, -r, r, 8, this.p.floor());
+			// the pool
+			for (int lx = -3; lx <= 3; lx++) {
+				for (int lz = -3; lz <= 3; lz++) {
+					this.set(lx, 0, lz, Blocks.WATER.defaultBlockState());
+				}
+			}
+			// columns round the pool
+			for (int lx = -5; lx <= 5; lx += 2) {
+				for (int lz = -5; lz <= 5; lz += 2) {
+					if (Math.abs(lx) == 5 || Math.abs(lz) == 5) {
+						for (int y = 1; y <= 4; y++) {
+							this.set(lx, y, lz, this.p.column());
+						}
+					}
+				}
+			}
+			// walls behind
+			for (int lx = -r; lx <= r; lx++) {
+				for (int y = 1; y <= 5; y++) {
+					this.set(lx, y, -r, this.p.wall());
+				}
+			}
+			// the altar at the back
+			this.set(0, 1, -r + 1, OldAge.ALTAR.defaultBlockState().setValue(OldAltarBlock.PATRON, this.p.patron.ordinal()).setValue(OldAltarBlock.LIT, true));
+		}
+
+		// ---- the GROVE folk's shrine: oak posts round a mossy glade, a hide awning over the altar. */
+		void groveShrine() {
+			int r = 6;
+			this.ground(-r, r, -r, r, 7, this.p.floor());
+			// four corner posts
+			for (int[] c : new int[][] {{-r, -r}, {r, -r}, {-r, r}, {r, r}}) {
+				for (int y = 1; y <= 4; y++) {
+					this.set(c[0], y, c[1], this.p.column());
+				}
+			}
+			// low walls between posts
+			for (int lx = -r + 1; lx <= r - 1; lx++) {
+				this.set(lx, 1, -r, this.p.wall());
+				this.set(lx, 1, r, this.p.wall());
+			}
+			for (int lz = -r + 1; lz <= r - 1; lz++) {
+				this.set(-r, 1, lz, this.p.wall());
+				this.set(r, 1, lz, this.p.wall());
+			}
+			// the awning over the altar
+			for (int lx = -2; lx <= 2; lx++) {
+				for (int lz = -2; lz <= 2; lz++) {
+					this.set(lx, 5, lz, this.p.roof());
+				}
+			}
+			// the altar under the awning
+			this.set(0, 4, 0, OldAge.ALTAR.defaultBlockState().setValue(OldAltarBlock.PATRON, this.p.patron.ordinal()).setValue(OldAltarBlock.LIT, true));
+		}
+
+		// ---- the TRUTH folk's bare old house: a simple stone cottage, the altar against the back wall. */
+		void truthHouse() {
+			int w = 5, d = 4;
+			this.ground(-w, w, -d, d, 6, this.p.floor());
+			BlockState side = this.p.wall();
+			for (int lx = -w; lx <= w; lx++) {
+				for (int lz = -d; lz <= d; lz++) {
+					boolean edge = Math.abs(lx) == w || Math.abs(lz) == d;
+					if (!edge) {
+						continue;
+					}
+					boolean post = Math.abs(lx) == w && Math.abs(lz) == d;
+					int high = 1 + (int) (this.noise(lx, 0, lz, 4) * 4.0F);
+					for (int y = 1; y <= high; y++) {
+						if (lz == -d && lx == 0 && y <= 2) {
+							continue;
+						}
+						this.set(lx, y, lz, post ? this.p.column() : side);
+					}
+				}
+			}
+			// roof slabs
+			for (int lx = -w + 1; lx <= w - 1; lx++) {
+				for (int lz = -d + 1; lz <= d - 1; lz++) {
+					if (this.noise(lx, 5, lz, 6) < 0.7F) {
+						this.set(lx, 5, lz, this.p.roof());
+					}
+				}
+			}
+			// the altar against the back wall
+			this.set(0, 1, -d + 1, OldAge.ALTAR.defaultBlockState().setValue(OldAltarBlock.PATRON, this.p.patron.ordinal()).setValue(OldAltarBlock.LIT, true));
 		}
 
 		// ---- the tomb ----

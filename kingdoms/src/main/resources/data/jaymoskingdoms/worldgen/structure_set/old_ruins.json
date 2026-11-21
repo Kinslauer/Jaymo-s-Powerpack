@@ -15,6 +15,22 @@
     {
       "structure": "jaymoskingdoms:court_ruins",
       "weight": 1
+    },
+    {
+      "structure": "jaymoskingdoms:anvil_ruins",
+      "weight": 1
+    },
+    {
+      "structure": "jaymoskingdoms:deep_ruins",
+      "weight": 1
+    },
+    {
+      "structure": "jaymoskingdoms:grove_ruins",
+      "weight": 1
+    },
+    {
+      "structure": "jaymoskingdoms:truth_ruins",
+      "weight": 1
     }
   ],
   "placement": {
