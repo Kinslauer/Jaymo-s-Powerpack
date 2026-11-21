@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: any
 from: coordinator
 asked: 2026-11-20
 thread: Claude project "Powerpack" (Claude app), Assassin's Creed Unity parkour overhaul
-claimed_by: 
+claimed_by: hermes-b
 pr: 
 suggested_owns:
   - src/client/java/com/jaymospowers/client/freerun/ (the pose classes: BalancePose, BarHangPose, RunPose, UpRunPose, ClimbFirstPerson)
