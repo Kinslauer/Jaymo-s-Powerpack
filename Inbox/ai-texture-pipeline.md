@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: prometheus
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-18)
 asked: 2026-11-18
 thread: 1573779807097983078
 claimed_by: hermes-modeller
-pr:
+pr: research
 suggested_owns: []
 ---
 
