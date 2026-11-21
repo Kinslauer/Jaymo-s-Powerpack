@@ -1,19 +1,20 @@
 ---
-status: stalled
+status: in-review
 task: zfighter-gaps-1-stats
 branch: claude/zfighter-gaps-1-stats
 with: 
-pr: 
+pr: 1958
 mods: powers
 versions: 
-started: 2026-11-19
+started: 2026-11-20
 owns:
   - power/zfighter/ZFighterTraining.java
-  - power/zfighter/ZFighterGrowth.java
   - client/power/zfighter/ZFighterTrainingScreen.java
   - power/zfighter/ZFighterRush.java
   - power/zfighter/ZFighterGrab.java
   - power/zfighter/ZFighterCombo.java
+  - power/zfighter/ZFighterBattle.java
+  - power/zfighter/ZFighterNet.java
 ---
 
 # Z Fighter gaps 1: stats
@@ -34,5 +35,5 @@ owns:
 - Every Minecraft API checked against 26.3 sources.
 
 ## Done
-What a player will see, and what wasn't tested.
-- 2026-11-19 23:37 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+What a player will see: a Strike stat on the training screen powering rushes, grab slams and hold-combo finishers (Strength stays for plain blows), plus Crit Chance and Crit Damage late TP buys that let landed blows crit for much heavier damage. Compile-checked and built, not played in game.
+- 2026-11-20 PR #1958 opened: Strike stat + critical blows; sh ./gradlew build BUILD SUCCESSFUL; tools/pr_checks.py passes; not tested in game.
