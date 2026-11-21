@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-21 08:16
+updated: 2026-11-21 08:45
 ---
 # Open PRs
 
-20 open, as of 2026-11-21 08:16. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+20 open, as of 2026-11-21 08:45. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1853](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1853) Heritage paths: core + Heartlander, Stoneborn, Tideborn (Kingdoms, Powers)
@@ -12,7 +12,7 @@ Andy merges only on "merge", one at a time.
 - **Agent:** [[heritage-paths]]
 
 ## [#1896](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1896) Scrying Orb: fix 26.3 API issues
-- **Branch:** `claude/scrying-orb` · **Updated:** 2026-11-20 (today)
+- **Branch:** `claude/scrying-orb` · **Updated:** 2026-11-20 (1 day ago)
 - **Checks:** ❌ failing: Build Kingdoms
 - **Agent:** [[scrying-orb-design-spec]]
 
