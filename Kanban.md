@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-21 23:32). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-21 23:33). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -29,6 +29,7 @@ kanban-plugin: board
 - [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
 - [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · for ☁️ Cloud · open
 - [ ] [[Inbox/village-mines-job-buildings|village-mines-job-buildings]] · for ☁️ Cloud · open
+- [ ] [[Inbox/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
@@ -66,7 +67,6 @@ kanban-plugin: board
 - [ ] [[Inbox/wither-model|wither-model]] · 🍇 Bacchus · blocked
 - [ ] [[Inbox/zfighter-gaps-2-power|zfighter-gaps-2-power]] · 🔨 Hephaestus · #1938 · blocked
 - [ ] [[Inbox/zfighter-gaps-5-training|zfighter-gaps-5-training]] · ☀️ Apollo · #1953 · blocked
-- [ ] [[Inbox/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]] · 🍇 Bacchus · blocked
 
 
 ## Done
