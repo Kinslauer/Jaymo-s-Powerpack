@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: blocked
 for: hermes
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-16)
 asked: 2026-11-16
