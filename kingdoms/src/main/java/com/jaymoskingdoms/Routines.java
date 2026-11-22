@@ -208,14 +208,15 @@ final class Routines {
 	}
 
 	/**
-	 * A trade whose job site is a block (a vanilla trade) but who has none just now isn't at work in work hours: the
-	 * brain has nothing for them there, and they'd stand about. Our own trades have no job-site block, and their own
+	 * A trade whose job site is a block (a vanilla trade) but who has none just now, nor one they're on their way to,
+	 * isn't at work in work hours, so they get their pastimes too. Our own trades have no job-site block, and their own
 	 * day (a cook's kitchen, a worker's shift), so they're left to it.
 	 */
 	private static boolean noWorkplace(Villager v) {
 		VillagerProfession job = v.getVillagerData().profession().value();
 		return job.acquirableJobSite() != net.minecraft.world.entity.ai.village.poi.PoiType.NONE && !Meals.cook(v)
-			&& v.getBrain().checkMemory(MemoryModuleType.JOB_SITE, net.minecraft.world.entity.ai.memory.MemoryStatus.VALUE_ABSENT);
+			&& v.getBrain().checkMemory(MemoryModuleType.JOB_SITE, net.minecraft.world.entity.ai.memory.MemoryStatus.VALUE_ABSENT)
+			&& !v.getBrain().checkMemory(MemoryModuleType.POTENTIAL_JOB_SITE, net.minecraft.world.entity.ai.memory.MemoryStatus.VALUE_PRESENT);
 	}
 
 	/**

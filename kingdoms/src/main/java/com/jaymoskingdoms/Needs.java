@@ -65,7 +65,7 @@ final class Needs {
 		return n == null ? 0F : n[need.ordinal()];
 	}
 
-	/** The highest of {@code v}'s needs if it's pressing, else null (boredom only counts once the others don't). */
+	/** The highest of {@code v}'s needs if it's pressing, else null (on a tie the later one, boredom last, wins). */
 	static @org.jspecify.annotations.Nullable Need pressing(Villager v) {
 		float[] n = NEEDS.get(v.getUUID());
 		if (n == null) {

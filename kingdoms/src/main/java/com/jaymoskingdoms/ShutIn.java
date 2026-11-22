@@ -140,7 +140,7 @@ public final class ShutIn {
 		return null;
 	}
 
-	private static boolean playerBuilt(ServerLevel level, BlockPos at) {
+	static boolean playerBuilt(ServerLevel level, BlockPos at) {
 		for (BlockPos p : BlockPos.betweenClosed(at.offset(-PLAYER_BUILT, -1, -PLAYER_BUILT), at.offset(PLAYER_BUILT, 2, PLAYER_BUILT))) {
 			if (Placed.any(level, p)) {
 				return true;
