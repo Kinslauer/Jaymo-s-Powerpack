@@ -128,9 +128,19 @@ public final class Hanging {
 		return corpse.kind() == CorpseKind.ANIMAL && !corpse.isFish() && !corpse.isMachine() && !corpse.isHeavy();
 	}
 
+	/**
+	 * Andy: "bodies should be hung so vampires that are squeamish can drain blood instead of directly feeding. it also makes
+	 * for a good deterrent". A person's body (a player's, a villager's, a raider's, a zombie's: anything on two legs that
+	 * isn't bare bones or a machine) hangs by its feet too. It's only bled ({@link #bleedPerson}), never butchered.
+	 */
+	static boolean hangsAsPerson(CorpseEntity corpse) {
+		return (corpse.kind() == CorpseKind.PLAYER || corpse.kind() == CorpseKind.OTHER || corpse.kind() == CorpseKind.ZOMBIE)
+			&& corpse.rigShape() == RagdollRig.Shape.HUMANOID && !corpse.isMachine() && !corpse.isHeavy();
+	}
+
 	/** {@code player} hangs {@code corpse} (carried or dragged) on the hook at {@code hook}. */
 	public static boolean hang(CorpseEntity corpse, Player player, BlockPos hook) {
-		if (!hangable(corpse)) {
+		if (!hangable(corpse) && !hangsAsPerson(corpse)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.wont_hang"));
 			return false;
 		}
@@ -368,6 +378,23 @@ public final class Hanging {
 				return InteractionResult.SUCCESS_SERVER;
 			}
 		}
+	}
+
+	/**
+	 * A right-click with a blade (a cleaver or a skinning knife) on a person's body hung on a hook: opened at the throat,
+	 * it drains into a grate under it like a carcass (bottled from there), and that's all. Null: not that.
+	 */
+	static @Nullable InteractionResult bleedPerson(CorpseEntity corpse, ServerLevel level, Player player, ItemStack held) {
+		if (corpse.hook() == null || corpse.kind() == CorpseKind.ANIMAL || !hangsAsPerson(corpse)
+			|| !held.is(Butchery.CLEAVERS) && !held.is(Butchery.SKINNING_KNIVES)) {
+			return null;
+		}
+		switch (corpse.butcherStage()) {
+			case FRESH -> startBleeding(corpse, level, player, held);
+			case BLEEDING -> player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.draining", (corpse.bleedLeft() + 19) / 20));
+			default -> player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.body_drained"));
+		}
+		return InteractionResult.SUCCESS_SERVER;
 	}
 
 	private static void startBleeding(CorpseEntity corpse, ServerLevel level, Player player, ItemStack tool) {

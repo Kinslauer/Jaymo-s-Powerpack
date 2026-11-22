@@ -1,6 +1,7 @@
 package com.jaymoskitchen.client.mixin;
 
 import com.jaymoskitchen.butchery.Butchery;
+import com.jaymoskitchen.cooking.spit.GreatSpitBlock;
 import com.jaymoskitchen.corpse.Butchers;
 import com.jaymoskitchen.corpse.CorpseEntity;
 import com.jaymoskitchen.corpse.Corpses;
@@ -10,8 +11,10 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -26,7 +29,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * Carrying a corpse, right-clicking anywhere (at the air too, which normally sends nothing with an empty hand) lets go
  * of it: it drops from the arms, or with sneak held it's thrown a little way ahead. Only a plain right-click on a
- * butcher block goes through as usual, to lay it on top, and one on a butcher villager, to offer it to them. Carried or
+ * butcher block goes through as usual, to lay it on top (the great spit and a campfire too), and one on a butcher villager, to offer it to them. Carried or
  * dragged, a click in a meat hook's block space hangs it on the hook.
  */
 @Mixin(Minecraft.class)
@@ -78,9 +81,9 @@ abstract class MinecraftUseMixin {
 			return;
 		}
 		if (dragging) {
-			// (0.5.31) a carcass dragged behind: a click on a butcher block goes through (onto the table), any other lets go
+			// (0.5.31) a carcass dragged behind: a click on a butcher block (onto the table) or the great spit goes through, any other lets go
 			if (hitResult instanceof BlockHitResult block && block.getType() == HitResult.Type.BLOCK
-				&& Corpses.isButcherBlock(player.level().getBlockState(block.getBlockPos()))) {
+				&& jaymoskitchen$takesBody(player.level().getBlockState(block.getBlockPos()), false)) {
 				return;
 			}
 			ClientPlayNetworking.send(new Payloads.DropCarried(false));
@@ -89,7 +92,7 @@ abstract class MinecraftUseMixin {
 		}
 		boolean toss = player.isShiftKeyDown();
 		if (!toss && hitResult instanceof BlockHitResult block && block.getType() == HitResult.Type.BLOCK
-			&& Corpses.isButcherBlock(player.level().getBlockState(block.getBlockPos()))) {
+			&& jaymoskitchen$takesBody(player.level().getBlockState(block.getBlockPos()), true)) {
 			return;
 		}
 		// (0.4.32) a plain right-click on a butcher villager offers them the body
@@ -103,6 +106,14 @@ abstract class MinecraftUseMixin {
 		// sneaking throws it a little way ahead (onto the ground, or into a cart); otherwise it just drops
 		ClientPlayNetworking.send(new Payloads.DropCarried(toss));
 		ci.cancel();
+	}
+
+	/**
+	 * Whether a click on this block goes through to the server, which puts the body there: a butcher block (laid on top),
+	 * the great spit (skewered whole), or, carried ({@code carried}), a campfire (a small one laid on it to roast).
+	 */
+	private static boolean jaymoskitchen$takesBody(BlockState state, boolean carried) {
+		return Corpses.isButcherBlock(state) || GreatSpitBlock.is(state) || carried && state.is(BlockTags.CAMPFIRES);
 	}
 
 	/**
