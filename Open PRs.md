@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-22 03:02
+updated: 2026-11-22 03:19
 ---
 # Open PRs
 
-23 open, as of 2026-11-22 03:02. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+23 open, as of 2026-11-22 03:19. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1853](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1853) Heritage paths: core + Heartlander, Stoneborn, Tideborn (Kingdoms, Powers)
@@ -116,7 +116,7 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 5 passed
 - **Agent:** [[every-trade-every-town]]
 
-## [#1981](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1981) Villagers always doing something: hunger, thirst, boredom, stall log and watchdog
+## [#1981](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1981) Villagers always doing something: hunger, thirst, boredom, stall log and watchdog (draft)
 - **Branch:** `claude/villagers-always-busy-3238b4` · **Updated:** 2026-11-22 (today)
 - **Checks:** ✅ 5 passed
-- **Agent:** [[villagers-always-busy]]
+- **Agent:** no agent note

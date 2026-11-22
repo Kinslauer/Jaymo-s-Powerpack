@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: villages plan, Track C
 branch: claude/every-trade-every-town-b12729
 with: Claude Code (Opus 5.5)
@@ -31,3 +31,9 @@ healer, cook, cleric, miner, woodcutter, farmer and tanner (fisher where there's
 - Deck server is the live world: no in-game test there without Andy's OK (refits are permanent).
 
 ## Done
+PR #1980. Every settlement keeps butcher, healer (new trade), cook, cleric, farmer, tanner, fisher by water; miner and
+woodcutter once a mine and tree farm exist. Epic towns are refitted the first time a player walks in: our butcher block
+and hooks, stoves, temple shrine, infirmary cot and mortar, soaking cauldron and drying rack, trough, chopping block;
+halls at the edge for trades with no house. Built on the Deck (7b7d4d3) and CI. Not run in game: the Deck server is the
+live world. Step 5 still to do after the merge (walk into a town per land, read the "Fitted the town" log line).
+- 2026-11-22 03:22 PR #1980 is merged into master; moved to Agents/Done.

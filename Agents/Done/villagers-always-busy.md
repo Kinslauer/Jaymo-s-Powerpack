@@ -1,9 +1,9 @@
 ---
-status: in-review
+status: done
 task: villagers-always-busy
 branch: claude/villagers-always-busy-3238b4
 with: Claude Code (PC, side session of the villages-plan session)
-pr: 1981
+pr: 1981 (draft), 1982 (merged)
 mods: kingdoms
 versions:
 started: 2026-11-22
@@ -38,6 +38,7 @@ watchdog and the needs.
 - The Deck restart to run the log was blocked by my permission check; asked the parent session for Andy's OK.
 
 ## Done
-PR #1981. Townsfolk get hunger/thirst/boredom (snack, drink, pastimes sooner), grumble when they go without, vanilla
+PR #1982 (stall log only) merged 2026-11-22; lore "A day's wants" approved. PR #1981 (draft). Townsfolk get hunger/thirst/boredom (snack, drink, pastimes sooner), grumble when they go without, vanilla
 tradesfolk with no job site get pastimes in work hours, and any villager still 2 min is logged `[stall]`, sent on at
 3 min (home / job / bell, door, hop). Built on the Deck; not played; the stall's cause not yet read from a log.
+- 2026-11-22 03:22 PR #1982 is merged into master; moved to Agents/Done.

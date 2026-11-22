@@ -855,3 +855,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-22 (Andy, cloud Claude): remove the duplicate MODLOG entries (Powers 0.26.26, Kingdoms 0.11.55) directly on master.
 
 - 2026-11-22: Classes start with a class-fitting skill free plus their pillar topped up to level 3 for points to learn another (Thief and Ranger: a Rogue's Arts kill and Stealth 3 for freerunning). Branch claude/class-starting-skills.
+- 2026-11-22 (Andy, PC Claude, villagers-always-busy): approved the Lore.md Daily life paragraph "A day's wants" (two meals a day, a bite between, water cauldrons by the beds drunk down until rain or a bucket refills them, the tavern or river otherwise, the idle go looking for something to do). PRs #1982 (stall log) and #1981 (needs + watchdog, draft).
