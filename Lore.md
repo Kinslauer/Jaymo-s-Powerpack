@@ -1817,6 +1817,10 @@ goblin's rags that every goblin and beast near it goes for when thrown. Goblin t
 **drunk goblins** staggering about the village ring, slow and quarrelsome. The **engineer's hammer** and the clanking
 **robot** it calls up are stolen Frostborn work, beaten back together by goblin hands: everyone loves Frostborn tech,
 goblins most of all, and theirs never runs quite right.
+(new, built) Each goblin village has one **engineer**: a common goblin who found a hammer and a Frostborn wreck and never put either down.
+He is not wise, only stubborn; the robot he beats together lasts a minute and a half before it falls apart, and the wandering
+goblin sells the hammers the engineers' failures left lying about. Drunk goblins come from the village tavern's brewing stand,
+where the mushroom ale is made.
 
 **Cannons for anyone** (new; same thread, Andy picked Old Cannons, its three kinds of shot and cannons on ships; Claude's
 placement, waiting on Andy). The field cannons the richest kingdoms set on their walls are cast by the same founders
