@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Camp guards (pirates, raiders) dress from their own pack, not MCA's iron guard set
 branch: camp-guards-own-gear
 with: Claude Code (desktop)
