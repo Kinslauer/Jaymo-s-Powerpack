@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-21 20:31). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 02:31). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -39,7 +39,6 @@ kanban-plugin: board
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · 🔨 Hephaestus · #1896 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-2-power|zfighter-gaps-2-power]] · 🔨 Hephaestus · #1938 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-5-training|zfighter-gaps-5-training]] · ☀️ Apollo · #1953 · changes · fixing review notes
-- [ ] [[Agents/chat-radial-wheel-ui|chat-radial-wheel-ui]] · 💻 Odysseus · running
 
 
 ## In review
@@ -56,7 +55,6 @@ kanban-plugin: board
 - [ ] [[Inbox/zfighter-gaps-8-raids|zfighter-gaps-8-raids]] · for 🪽 any Hermes bot · #1961 · in-review
 - [ ] [[Inbox/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]] · for 🪽 any Hermes bot · #1956 · in-review
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · 🔥 Prometheus · #research · in-review
-- [ ] [[Inbox/parkour-animations|parkour-animations]] · for any · #1959 · in-review
 - [ ] [[Inbox/zfighter-forms-animations|zfighter-forms-animations]] · for any · #1962 · in-review
 - [ ] [[Inbox/zfighter-forms-models|zfighter-forms-models]] · for any · #1960 · in-review
 - [ ] [[Inbox/zfighter-forms-textures|zfighter-forms-textures]] · for any · #1963 · in-review
@@ -68,11 +66,13 @@ kanban-plugin: board
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
 - [ ] [[Inbox/class-trees-plan|class-trees-plan]] · for 💻 Odysseus · blocked
 - [ ] [[Inbox/wither-model|wither-model]] · 🍇 Bacchus · blocked
+- [ ] [[Agents/chat-radial-wheel-ui|chat-radial-wheel-ui]] · 💻 Odysseus · stalled
 
 
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/parkour-animations|parkour-animations]]
 - [x] [[Inbox/Done/hint-tip-cards|hint-tip-cards]]
 - [x] [[Inbox/Done/zfighter-aura-rework|zfighter-aura-rework]]
 - [x] [[Inbox/Done/forest-fire-pack|forest-fire-pack]]
@@ -80,7 +80,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/harness-body-pieces|harness-body-pieces]]
 - [x] [[Inbox/Done/harness-upkeep|harness-upkeep]]
 - [x] [[Inbox/Done/medieval-deco-7-practice-dummy|medieval-deco-7-practice-dummy]]
-- [x] [[Inbox/Done/medieval-deco-5-farm-water|medieval-deco-5-farm-water]]
 
 
 %% kanban:settings
