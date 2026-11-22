@@ -2,6 +2,7 @@ package com.jaymospowers.core.gifted;
 
 import com.jaymospowers.core.brawl.Brawl;
 import com.jaymospowers.core.fx.MagicFx;
+import com.jaymospowers.core.wounds.LimbUse;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.IdentityHashMap;
@@ -22,6 +23,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
@@ -280,7 +282,7 @@ public final class GiftedAI {
 			return;
 		}
 		ECHOES.remove(mob);
-		if (fightable(mob, echo.foe)) {
+		if (fightable(mob, echo.foe) && LimbUse.usable(mob, need(echo.move)) && !LimbUse.wide(mob, need(echo.move))) {
 			mob.getLookControl().setLookAt(echo.foe, 30.0F, 30.0F);
 			if (echo.move.use().use(level, mob, echo.foe, gift)) {
 				flourish(level, mob);
@@ -330,6 +332,10 @@ public final class GiftedAI {
 			if (Brawl.flying(mob) && kit.groundOnly(move)) {
 				continue;
 			}
+			if (!LimbUse.usable(mob, need(move))) {
+				// the arm it's done with is gone
+				continue;
+			}
 			ready.add(move);
 		}
 		if (ready.isEmpty()) {
@@ -337,10 +343,18 @@ public final class GiftedAI {
 		}
 		GiftKit.Move pick = signature != null && ready.contains(signature) ? signature : pick(mob, gift.style(), ready, distance);
 		mob.getLookControl().setLookAt(foe, 30.0F, 30.0F);
+		long cooldown = now + (gift.master() ? (long)(pick.cooldown() * MASTER_COOLDOWN) : pick.cooldown());
+		if (LimbUse.wide(mob, need(pick))) {
+			// a broken arm threw it wide: the move is spent, nothing lands (and no strain on the power)
+			mob.swingForAttack(InteractionHand.MAIN_HAND);
+			cooling.put(pick.name(), cooldown);
+			NEXT.put(mob, now + gap(mob, gift));
+			return;
+		}
 		if (!pick.use().use(level, mob, foe, gift)) {
 			return;
 		}
-		cooling.put(pick.name(), now + (gift.master() ? (long)(pick.cooldown() * MASTER_COOLDOWN) : pick.cooldown()));
+		cooling.put(pick.name(), cooldown);
 		NEXT.put(mob, now + gap(mob, gift));
 		if (pick == signature) {
 			flourish(level, mob);
@@ -354,6 +368,14 @@ public final class GiftedAI {
 		if (!strained.corrupted() && strained.strain() >= STRAIN_MIN && mob.getRandom().nextFloat() < chance) {
 			corrupt(mob);
 		}
+	}
+
+	/**
+	 * What a move is done with (Andy, 2026-11-22: gifted fighters' arms gate their powers as a player's do,
+	 * {@link LimbUse}): a strike at range or a blow up close is the main arm's; fleeing and looking after folk need no arm.
+	 */
+	private static int need(GiftKit.Move move) {
+		return move.kind() == GiftKit.Kind.STRIKE || move.kind() == GiftKit.Kind.CLOSE ? LimbUse.MAIN_ARM : LimbUse.NONE;
 	}
 
 	/** The gap after a move: by how they fight, shorter for a master, longer for a hidden gift. */

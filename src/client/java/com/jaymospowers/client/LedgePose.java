@@ -1,5 +1,6 @@
 package com.jaymospowers.client;
 
+import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Ledge;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -12,6 +13,7 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
+import org.jspecify.annotations.Nullable;
 
 /**
  * How a player on a ledge looks, for everyone: hanging, the body square to the wall with both arms up on the edge and
@@ -24,6 +26,13 @@ import net.minecraft.world.entity.player.Player;
  * forward over the edge onto its belly, arms reaching ahead and legs straightening out behind, ending in vanilla's own
  * crawl tilt so the crawl ({@code CrawlPose}) takes over without a jump. The crawl's 0.6-high body is lifted at the start
  * (eyes kept level), so the model is let back down by as much until it has tipped over.
+ * <p>
+ * (Parkour animations, docs/CombatAnimations-Plan.md) The climb up over the edge is a keyed clip
+ * ({@code player_freerun_ledge_mantle}, written by tools/gen_freerun_clips.py, opened in Blockbench like any of the pack's
+ * animations): a pull-up with the elbows bending, the elbows over the edge into a straight-armed press, the right foot up
+ * onto the edge and the left knee after it. Hanging and shimmying keep their own motion (the catch, the sway, the hands
+ * off the edge in turn) with keyed elbow and knee folds over it ({@code player_freerun_ledge_hang},
+ * {@code player_freerun_shimmy}), drawn by {@link #bendLimbs}. A clip that won't load leaves the hand-written pose.
  */
 public final class LedgePose {
 	/** The catch: the swing in under the hands (degrees), how fast it swings (radians a second) and dies away (per second). */
@@ -65,6 +74,15 @@ public final class LedgePose {
 	 */
 	public record State(float climb, float time, boolean prone, float shuffle) {
 	}
+
+	/** The keyed clips (null if one won't load: the hand-written pose stays). */
+	private static final @Nullable KeyframeClip MANTLE = KeyframeClip.load(JaymosPowers.MOD_ID, "player_freerun_ledge_mantle",
+		"player_freerun_ledge_mantle");
+	private static final @Nullable KeyframeClip HANG = KeyframeClip.load(JaymosPowers.MOD_ID, "player_freerun_ledge_hang", "player_freerun_ledge_hang");
+	private static final @Nullable KeyframeClip SHIMMY = KeyframeClip.load(JaymosPowers.MOD_ID, "player_freerun_shimmy", "player_freerun_shimmy");
+	private static final String[] FOLDS = {"right_elbow", "left_elbow", "right_knee", "left_knee"};
+	/** Where the elbow folds: this many pixels down the arm from the shoulder (as SwingElbows). */
+	static final float ELBOW = 4.0F;
 
 	public static final RenderStateDataKey<State> KEY = RenderStateDataKey.create(() -> "jaymospowers:ledge");
 
@@ -197,6 +215,15 @@ public final class LedgePose {
 			set(h.leftLeg, DANGLE * Mth.sin(t * 0.09F + 2.1F) - 0.03F - legs * 0.8F, 0.0F, -0.05F);
 			return;
 		}
+		if (MANTLE != null) {
+			// the keyed climb (the lean in over the edge stays rotate's)
+			clip(MANTLE, h.head, "head", p);
+			clip(MANTLE, h.rightArm, "right_arm", p);
+			clip(MANTLE, h.leftArm, "left_arm", p);
+			clip(MANTLE, h.rightLeg, "right_leg", p);
+			clip(MANTLE, h.leftLeg, "left_leg", p);
+			return;
+		}
 		// the arms: pull down from overhead, press on the top, then come down to the sides as you stand
 		float pull = smooth(p / 0.55F);
 		float stand = smooth((p - 0.8F) / 0.2F);
@@ -209,6 +236,57 @@ public final class LedgePose {
 		float left = smooth((p - 0.55F) / 0.25F) * (1.0F - smooth((p - 0.82F) / 0.18F));
 		set(h.rightLeg, KNEE_UP * right + 0.1F * (1.0F - pull), 0.0F, 0.04F);
 		set(h.leftLeg, KNEE_UP * 0.6F * left - 0.1F * (1.0F - pull), 0.0F, -0.04F);
+	}
+
+	/** {@code part} as {@code clip} keys {@code bone} at {@code share} of it, if it does. */
+	private static void clip(KeyframeClip clip, ModelPart part, String bone, float share) {
+		if (clip.has(bone)) {
+			set(part, clip.partX(bone, share), clip.partY(bone, share), clip.partZ(bone, share));
+		}
+	}
+
+	/**
+	 * Last thing before the model is drawn: the elbows and knees the clips fold, climbing (the mantle's) or hanging (the
+	 * hang's, over to the shimmy's as they move along the edge), eased in and out with the rest of the pose.
+	 */
+	public static void bendLimbs(Model<?> model, Object renderState) {
+		if (!(renderState instanceof AvatarRenderState state) || !(model instanceof HumanoidModel<?> h)) {
+			return;
+		}
+		State ledge = state.getData(KEY);
+		PoseBlend.Track track = BLEND.peek(state.id);
+		if (ledge == null || track == null || ledge.prone() && ledge.climb() >= 0.0F) {
+			return;
+		}
+		float amount = track.amount();
+		float[] folds = new float[4];
+		if (ledge.climb() >= 0.0F) {
+			if (MANTLE == null) {
+				return;
+			}
+			for (int i = 0; i < 4; i++) {
+				folds[i] = MANTLE.partX(FOLDS[i], ledge.climb());
+			}
+		} else {
+			// the hang's loop, over to the shimmy's hand-over-hand as they move (its cycle the shimmy's own, SHUFFLE_RATE)
+			float moving = Math.abs(ledge.shuffle());
+			float hangShare = HANG == null ? 0.0F : (ledge.time() / 20.0F / HANG.length()) % 1.0F;
+			float shimmyShare = (ledge.time() * SHUFFLE_RATE / Mth.TWO_PI) % 1.0F;
+			if (ledge.shuffle() < 0.0F) {
+				// (to the left, the left hand leads: the cycle half a turn on)
+				shimmyShare = (shimmyShare + 0.5F) % 1.0F;
+			}
+			for (int i = 0; i < 4; i++) {
+				float hang = HANG == null ? 0.0F : HANG.partX(FOLDS[i], hangShare);
+				float shimmy = SHIMMY == null ? hang : SHIMMY.partX(FOLDS[i], shimmyShare);
+				folds[i] = Mth.lerp(moving, hang, shimmy);
+			}
+		}
+		// (KneeBend's + swings the lower half back: a forearm comes forward on a -, a shin goes back on a +)
+		KneeBend.bend(h.rightArm, -folds[0] * amount, ELBOW, false);
+		KneeBend.bend(h.leftArm, -folds[1] * amount, ELBOW, false);
+		KneeBend.bend(h.rightLeg, folds[2] * amount);
+		KneeBend.bend(h.leftLeg, folds[3] * amount);
 	}
 
 	/** (0.15.108) How far the body has tipped onto its belly (0-1) at {@code p} through the prone climb. */

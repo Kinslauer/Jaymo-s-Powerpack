@@ -30,10 +30,14 @@ import org.spongepowered.asm.mixin.injection.At;
 abstract class MonsterCapMixin {
 	/** The share of vanilla's monster cap that's left. */
 	private static final float MONSTER_SHARE = 0.5F;
-	/** The water caps. */
-	private static final int WATER_AMBIENT = 6, WATER_CREATURE = 3, UNDERGROUND_WATER = 2;
-	/** The open sea's water caps (vanilla 20 and 5 everywhere). */
-	private static final int OPEN_WATER_AMBIENT = 16, OPEN_WATER_CREATURE = 8;
+	/**
+	 * The water caps. Andy (2026-11-22): "NOTHING that swims other than dolphins jellyfish and whales show up. the water
+	 * should be teeming with life, within optimization requirements": fish back up from 6 (Powers' cave pool fish and
+	 * fish in underground aquifers had been taking these places out of sight; they no longer do).
+	 */
+	private static final int WATER_AMBIENT = 10, WATER_CREATURE = 3, UNDERGROUND_WATER = 2;
+	/** The open sea's water caps (vanilla 20 and 5 everywhere): fish at vanilla's own. */
+	private static final int OPEN_WATER_AMBIENT = 20, OPEN_WATER_CREATURE = 8;
 
 	@ModifyReturnValue(method = "getMaxInstancesPerChunk", at = @At("RETURN"))
 	private int jaymoskingdoms$fewerMonsters(int cap) {

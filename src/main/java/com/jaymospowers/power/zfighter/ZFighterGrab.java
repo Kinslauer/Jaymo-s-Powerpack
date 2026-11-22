@@ -228,7 +228,7 @@ public final class ZFighterGrab {
 			return;
 		}
 		ServerLevel level = player.level();
-		double fists = player.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		double fists = ZFighterTraining.strikeFists(player);
 		release(player);
 		Vec3 look = player.getViewVector(1.0F);
 		LivingEntity locked = LockOn.target(player);

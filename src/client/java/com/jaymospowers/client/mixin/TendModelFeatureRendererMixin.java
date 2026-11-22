@@ -41,8 +41,16 @@ abstract class TendModelFeatureRendererMixin {
 		com.jaymospowers.client.boxing.BoxingPoses.bendLimbs(submit.model(), submit.state());
 		// and the elbows of a Better Combat swing (the longsword trial's)
 		com.jaymospowers.client.combat.SwingElbows.bendLimbs(submit.model(), submit.state());
-		// and the dodge roll's tuck, knees to the chest
+		// and the dodge roll's tuck, knees to the chest (before the running knees: a roll's bends win)
 		com.jaymospowers.client.stamina.DodgeRollPose.bendLimbs(submit.model(), submit.state());
+		// and a ledge hang's and climb's elbows and knees (the freerun clips)
+		com.jaymospowers.client.LedgePose.bendLimbs(submit.model(), submit.state());
+		// and a bar swing's and a balance's (track 4)
+		com.jaymospowers.client.freerun.BarHangPose.bendLimbs(submit.model(), submit.state());
+		com.jaymospowers.client.freerun.BalancePose.bendLimbs(submit.model(), submit.state());
+		// and running knees, slides, long jumps, safety taps and sky dives (track 5)
+		com.jaymospowers.client.freerun.RunPose.bendLimbs(submit.model(), submit.state());
+		com.jaymospowers.client.freerun.moves.RunMovesPose.bendLimbs(submit.model(), submit.state());
 	}
 
 	/** (0.17.18) And the leg's own straight boxes back once it's drawn. */

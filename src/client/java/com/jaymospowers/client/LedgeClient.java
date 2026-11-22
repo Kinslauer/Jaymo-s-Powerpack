@@ -326,6 +326,15 @@ public final class LedgeClient {
 			castaway(player, at);
 			return;
 		}
+		if (at != null && backTicks > Ledge.CASTAWAY_WAIT_TICKS && !input.shift() && confirmed
+			&& com.jaymospowers.client.freerun.FreerunClient.climbDownFrom(player, at.face())) {
+			// (Parkour animations, track 2) Back held, not a castaway: down onto the wall below, to climb on down it
+			end();
+			if (ClientPlayNetworking.canSend(Ledge.Act.TYPE)) {
+				ClientPlayNetworking.send(new Ledge.Act(false));
+			}
+			return;
+		}
 		float away = Math.abs(Mth.wrapDegrees(player.getYRot() - (at == null ? 0.0F : at.face().toYRot())));
 		if (at == null || !Ledge.canHang(player)	|| !Ledge.holdable(player.level(), at.pos()) || input.shift() && !shiftLatch || backTicks > Ledge.CASTAWAY_WAIT_TICKS
 			|| away > Ledge.LOOK_AWAY_DEGREES || ticks > Ledge.HANG_MAX_TICKS || confirmed && !held || !confirmed && ticks > Ledge.CONFIRM_TICKS) {

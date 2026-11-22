@@ -46,6 +46,8 @@ abstract class McaEquipmentMixin {
 			: com.jaymoskingdoms.HeraldryWear.issue(villager, slot, com.jaymoskingdoms.Ranks.issue(villager, slot, FrontierWear.issue(villager, slot, lesser)));
 		// (but a recruit wears only what is in their pack: Ranks)
 		issued = com.jaymoskingdoms.Ranks.owned(villager, issued);
+		// (and a camp's raider or pirate only what their camp gave them, never MCA's guard iron: Ranks)
+		issued = com.jaymoskingdoms.Ranks.campOwned(villager, issued);
 		// a helm or breastplate their sea-shaped body can't take isn't put on, or it's shed and a new one issued every round
 		if (com.jaymoskingdoms.SeaBodies.fits(villager, slot, issued)) {
 			villager.setItemSlot(slot, issued);
