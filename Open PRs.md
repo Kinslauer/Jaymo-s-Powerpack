@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-22 02:31
+updated: 2026-11-22 02:35
 ---
 # Open PRs
 
-21 open, as of 2026-11-22 02:31. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+22 open, as of 2026-11-22 02:35. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1853](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1853) Heritage paths: core + Heartlander, Stoneborn, Tideborn (Kingdoms, Powers)
@@ -110,3 +110,8 @@ Andy merges only on "merge", one at a time.
 - **Branch:** `claude/project-thread-hag1a3` · **Updated:** 2026-11-22 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
+
+## [#1977](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1977) Talk wheel: answers on a wheel on the right, worded by your origin; chat hidden while talking
+- **Branch:** `claude/chat-radial-wheel-ui-2d7275` · **Updated:** 2026-11-22 (today)
+- **Checks:** ⏳ 2 of 4 running
+- **Agent:** [[chat-radial-wheel-ui]]

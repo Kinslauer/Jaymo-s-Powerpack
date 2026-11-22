@@ -3,7 +3,7 @@ status: stalled
 task: chat-radial-wheel-ui
 branch: claude/chat-radial-wheel-ui-2d7275
 with: Claude (PC desktop)
-pr: 
+pr: 1977
 mods: kingdoms
 versions: 
 started: 2026-11-21
@@ -27,4 +27,5 @@ owns:
 - 
 
 ## Done
+- PR #1977. Wheel on the right (4 arms, up to 8, scroll for more), origin-worded lines (20 bloods x 6 social answers, 4 class answers, plain lines for every main answer), chat hidden while talking. CI build pending; not played.
 - 2026-11-22 02:30 No sign of work for 30 min: marked stalled (whoever ran it stopped).
