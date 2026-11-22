@@ -189,6 +189,7 @@ public final class Mines {
 	static void clear() {
 		DntMine.clear();
 		DntBuildings.clear();
+		VpBuildings.clear();
 		DIGS.clear();
 		NEXT_LOOK.clear();
 		DIGGER_SET.clear();
