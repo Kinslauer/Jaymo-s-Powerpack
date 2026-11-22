@@ -16159,3 +16159,13 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - **Fish caps up**: coasts, rivers and lakes 6 -> 10 fish and other water ambients per player; open sea 16 -> 20 (vanilla's). Dolphins, sharks and whales are unchanged, as are the small groups. (`MonsterCapMixin`)
 - Goes with Powers' change that stops cave pool fish and fish in underground aquifers using up these places out of sight.
 - Built on CI; not played.
+
+## 0.11.63 (2026-11-22): camp guards wear their camp's gear, not MCA's iron (#1985)
+
+- **Camp guards**: a camp's raiders and pirates who have become MCA villagers (the pirates on the Illager Structures
+  balloon, cove deckhands and gunners, barbarian raiders) now dress only from their own pack: their camp's leather,
+  hides and coats. MCA used to fill every empty slot from its guards' iron set, so a pirate deckhand stood in full plate.
+  Ones already in plate take it off the next time they dress (`Ranks.campOwned`, `McaEquipmentMixin`).
+- **Raider pieces kept**: a raider's torn hood, torn cloak and horned crest (the Guard Wardrobe's Raiders column) stay on
+  when he becomes an MCA villager (`McaBridge.convertRaider`).
+- Built by CI; not played.
