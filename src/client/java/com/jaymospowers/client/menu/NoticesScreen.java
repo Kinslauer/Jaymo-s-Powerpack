@@ -2,24 +2,31 @@ package com.jaymospowers.client.menu;
 
 import com.jaymospowers.client.PowerScreen;
 import com.jaymospowers.client.UiStyle;
+import com.jaymospowers.client.hud.TipCard;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 
 /**
  * The menu's Notices page ({@link MenuTabs}): the last notices ({@link NoticeLog}), newest first, each with the time it
- * came, wrapped in full and scrolled with the wheel.
+ * came, wrapped in full and scrolled with the wheel. A button in its top right turns tip cards on and off ({@link TipCard#enabled}).
  */
 public class NoticesScreen extends Screen {
 	static final int W = 300, H = 196;
 	/** The time column's width, a row's padding and the wheel's step (px). */
 	static final int TIME_W = 28, PAD = 3, STEP = 12;
+	/** The tips button: its width and height (px). */
+	static final int TIPS_W = 64, TIPS_H = 12;
 	private static final DateTimeFormatter CLOCK = DateTimeFormatter.ofPattern("HH:mm").withZone(ZoneId.systemDefault());
 	private int scroll;
 
@@ -61,6 +68,24 @@ public class NoticesScreen extends Screen {
 		return lines * UiStyle.LINE + 2 * PAD;
 	}
 
+	private int tipsX() {
+		return left() + W - 8 - TIPS_W;
+	}
+
+	private int tipsY() {
+		return top() + 4;
+	}
+
+	@Override
+	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		if (event.button() == 0 && UiStyle.over((int)event.x(), (int)event.y(), tipsX(), tipsY(), TIPS_W, TIPS_H)) {
+			TipCard.setEnabled(!TipCard.enabled());
+			Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+			return true;
+		}
+		return super.mouseClicked(event, doubleClick);
+	}
+
 	@Override
 	public boolean mouseScrolled(double x, double y, double scrollX, double scrollY) {
 		this.scroll -= (int)Math.signum(scrollY) * STEP;
@@ -71,7 +96,10 @@ public class NoticesScreen extends Screen {
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int x = left(), y = top();
 		UiStyle.window(graphics, x, y, W, H);
-		UiStyle.line(graphics, this.font, Component.translatable("menu.jaymospowers.notices.title"), x + 8, y + 8, W - 16, PowerScreen.COLOR_GOLD);
+		UiStyle.line(graphics, this.font, Component.translatable("menu.jaymospowers.notices.title"), x + 8, y + 8, W - 24 - TIPS_W, PowerScreen.COLOR_GOLD);
+		UiStyle.button(graphics, this.font, tipsX(), tipsY(), TIPS_W, TIPS_H,
+			Component.translatable(TipCard.enabled() ? "menu.jaymospowers.notices.tips_on" : "menu.jaymospowers.notices.tips_off"), UiStyle.ACCENT,
+			UiStyle.over(mouseX, mouseY, tipsX(), tipsY(), TIPS_W, TIPS_H), true);
 		UiStyle.rule(graphics, x + 6, x + W - 6, y + 20);
 		UiStyle.recess(graphics, x + 6, listTop() - 2, W - 12, listHeight() + 4);
 		List<NoticeLog.Notice> notices = NoticeLog.all();

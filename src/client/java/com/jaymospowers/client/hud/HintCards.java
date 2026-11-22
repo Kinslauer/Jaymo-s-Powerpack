@@ -20,7 +20,8 @@ import net.minecraft.util.Util;
  * to revive, or skill not unlocked". An action-bar line whose key is listed in {@code assets/jaymospowers/hint_keys.txt}
  * (how to do something, what it needs first, something not learned yet; Kingdoms' and Kitchen's too) comes up as a
  * {@link TipCard} in the top right instead, and so is kept on the menu's Notices page. Any other line stays on the bar.
- * A hint sent again and again (while a hold goes on, or each try) makes one card, not a stack of them.
+ * A hint sent again and again (while a hold goes on, or each try) makes one card, not a stack of them. With tips turned off
+ * ({@link TipCard#enabled}) hints stay on the bar.
  */
 public final class HintCards {
 	/** A hint already showing, waiting, or shown this recently (ms) isn't carded again. */
@@ -54,7 +55,8 @@ public final class HintCards {
 
 	/** An action-bar line: true if it's a hint, carded here, so the bar doesn't show it. */
 	public static boolean take(Component message) {
-		if (!hint(message)) {
+		if (!TipCard.enabled() || !hint(message)) {
+			// (tips turned off: hints stay on the bar, as before)
 			return false;
 		}
 		String text = message.getString();

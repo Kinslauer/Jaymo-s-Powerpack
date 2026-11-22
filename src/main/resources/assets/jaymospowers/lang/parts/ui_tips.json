@@ -1,5 +1,9 @@
 {
   "tip.jaymospowers.hint.title": "Hint",
+  "menu.jaymospowers.notices.tips_on": "Tips: On",
+  "menu.jaymospowers.notices.tips_off": "Tips: Off",
+  "message.jaymospowers.tips.on": "Tip cards are on.",
+  "message.jaymospowers.tips.off": "Tip cards are off: no first-time tips, and hints show over the hotbar again.",
   "ui_tip.jaymospowers.body.title": "Your body",
   "ui_tip.jaymospowers.body": "Left of your hotbar: your stomach, your stance, your wounds and your body heat. Sneak and scroll to change stance. %1$s opens the full picture.",
   "ui_tip.jaymospowers.right.title": "Right of your hotbar",
