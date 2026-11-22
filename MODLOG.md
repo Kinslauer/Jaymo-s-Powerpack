@@ -7253,3 +7253,9 @@ following integration task).
 - Classes: `Wounds`, `BodyPlan`, `HitRouting`, new `PartStrain`, `Treatment`, `Herbal`, `Downed`, `PainHud`.
 - Built in CI; not played. Not checked in game: how often mob melee lands on the head, the headache haze's look, the
   broken-hearts max-health drop on mobs, the bandage's dressing count across relogs.
+
+## 0.26.53 (2026-11-22): trophy heads sit square on Kitchen's head mount (#1993)
+
+- A severed head set down on Jaymo's Kitchen's Head Mount goes up in the middle of the plaque, not wherever you happened to look on it.
+- `Carry` (wall trophy heads).
+- Built by CI; not played.
