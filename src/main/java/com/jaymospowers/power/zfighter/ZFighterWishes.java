@@ -124,9 +124,6 @@ public final class ZFighterWishes {
 		public static final Item[] VERDANT_ORB = new Item[ZFighterSites.ORBS];
 		public static Item RADAR;
 		/** Radar parts (3 parts needed to assemble the radar). */
-		public static Item RADAR_PART_1;
-		public static Item RADAR_PART_2;
-		public static Item RADAR_PART_3;
 
 	private record Summon(ServerLevel level, Vec3 at, long until) {
 	}
@@ -153,13 +150,7 @@ public final class ZFighterWishes {
 			}
 			ResourceKey<Item> radarKey = ResourceKey.create(Registries.ITEM, JaymosPowers.id("wish_radar"));
 			RADAR = Registry.register(BuiltInRegistries.ITEM, radarKey, new Radar(new Item.Properties().setId(radarKey).stacksTo(1).rarity(Rarity.RARE)));
-			// Radar parts - only registered, not in creative tab (found in world)
-			RADAR_PART_1 = Registry.register(BuiltInRegistries.ITEM, ResourceKey.create(Registries.ITEM, JaymosPowers.id("radar_part_1")),
-				new Item(new Item.Properties().setId(ResourceKey.create(Registries.ITEM, JaymosPowers.id("radar_part_1"))).stacksTo(1).rarity(Rarity.UNCOMMON)));
-			RADAR_PART_2 = Registry.register(BuiltInRegistries.ITEM, ResourceKey.create(Registries.ITEM, JaymosPowers.id("radar_part_2")),
-				new Item(new Item.Properties().setId(ResourceKey.create(Registries.ITEM, JaymosPowers.id("radar_part_2"))).stacksTo(1).rarity(Rarity.UNCOMMON)));
-			RADAR_PART_3 = Registry.register(BuiltInRegistries.ITEM, ResourceKey.create(Registries.ITEM, JaymosPowers.id("radar_part_3")),
-				new Item(new Item.Properties().setId(ResourceKey.create(Registries.ITEM, JaymosPowers.id("radar_part_3"))).stacksTo(1).rarity(Rarity.UNCOMMON)));
+			// (the radar parts are ZFighterItems', registered there once)
 			CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 				output.accept(RADAR);
 				for (Item orb : ORB) {
@@ -201,9 +192,9 @@ public final class ZFighterWishes {
 				boolean has1 = false, has2 = false, has3 = false;
 				for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
 					ItemStack stack = player.getInventory().getItem(i);
-					if (stack.is(RADAR_PART_1)) has1 = true;
-					if (stack.is(RADAR_PART_2)) has2 = true;
-					if (stack.is(RADAR_PART_3)) has3 = true;
+					if (stack.is(ZFighterItems.RADAR_PART_1)) has1 = true;
+					if (stack.is(ZFighterItems.RADAR_PART_2)) has2 = true;
+					if (stack.is(ZFighterItems.RADAR_PART_3)) has3 = true;
 				}
 				return has1 && has2 && has3;
 			}
@@ -222,7 +213,7 @@ public final class ZFighterWishes {
 		public static void assembleRadar(ServerPlayer player) {
 			for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
 				ItemStack stack = player.getInventory().getItem(i);
-				if (stack.is(RADAR_PART_1) || stack.is(RADAR_PART_2) || stack.is(RADAR_PART_3)) {
+				if (stack.is(ZFighterItems.RADAR_PART_1) || stack.is(ZFighterItems.RADAR_PART_2) || stack.is(ZFighterItems.RADAR_PART_3)) {
 					stack.shrink(1);
 				}
 			}
