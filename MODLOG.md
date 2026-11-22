@@ -7026,3 +7026,10 @@ Andy (2026-11-22): "NPCs should have all the same capabilities as the player ...
 - **Arms gate powers.** A gifted villager's strike (at range) and close blows are done with the main arm (`GiftedAI`, from the move's kind): with it gone the move is never picked; with it broken the move can be thrown wide (`LimbUse.wide`: the player's `AIM_SPREAD` error, a miss past `NPC_HIT_CONE`), spending the move and its cooldown with a whiff swing but no strain on the power. Brawl fighters (tyrants, patrolmen, Z Fighter rogues) with both arms gone raise no guard and fire no ki; a broken arm sometimes throws a ki attack away; the post-parry counter needs the main arm and goes wide the same way. Not covered: ultimates, fleeing and support moves.
 - **Crawling on bad legs.** A humanoid mob with both legs broken (not splinted, not on adrenaline), or a leg gone and no cane or crutch in hand (`Crutches.legless`, now for humanoid mobs too), is drawn crawling as a downed crawler is (`DownedPose.legless`), and stands again when the legs knit or a crutch is held. The drawing and `Breaks.crawlOnly` change; the mob's hitbox stays standing height, as for the existing legless-mob crawl.
 - Built by CI; not played.
+
+## 0.26.35 (2026-11-22): Z Fighter gaps 4: forms (foundation) (#1965)
+
+- Foundation for four heritage form lines: earthling (bulk, full power, overdrive), rubber-folk (stretch, giant), divine-born (light, dark) and bio-built (super perfect, xeno), plus a corrupted step — new form ids 11-20 and their stat arrays.
+- ZFighterForms: the new lines' constants, tiers, colours and Spirit Bomb handling.
+- Nothing the player can use yet: form effects, attribute hooks and lang keys are not implemented.
+- Built; not played in game.
