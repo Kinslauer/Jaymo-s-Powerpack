@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: Survival picks track 4 (minus From the Shadows): gauntlets, riding camera, wind sway, goblin extras, cannons
 branch: claude/confident-davinci-cf16f0 (+ one branch per PR)
 with: wounds-lso (track 1), butchery-hook (track 3), climate-lso (track 2, Kitchen climate: not touched here)
@@ -30,3 +30,4 @@ hammer and robot; Old Cannons in the pack, three kinds of shot, ship cannons.
   (the Fabric example template's leftover, like its "Me!" author). Modrinth lists CC-BY-NC-4.0.
 
 ## Done
+- 2026-11-22 14:17 No sign of work for 30 min: marked stalled (whoever ran it stopped).
