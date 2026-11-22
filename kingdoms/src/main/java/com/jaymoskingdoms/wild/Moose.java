@@ -33,7 +33,7 @@ import org.jspecify.annotations.Nullable;
  * A Cube moose with antlers is a young bull ({@link MooseHerds}), which he runs off his cows ({@link DriveOff}).
  */
 public class Moose extends WildBeast {
-	static final double HEALTH = 52.0, SPEED = 0.3, DAMAGE = 7.0, KNOCKBACK_RESISTANCE = 0.7, ATTACK_KNOCKBACK = 1.5;
+	static final double HEALTH = 52.0, SPEED = 0.3, DAMAGE = 4.5, KNOCKBACK_RESISTANCE = 0.7, ATTACK_KNOCKBACK = 1.5;
 	/** How close a player can come before it charges (blocks). */
 	static final double TEMPER_RANGE = 15.0;
 	/** Cube Animals' moose, the cows, and how many come with a bull. */
