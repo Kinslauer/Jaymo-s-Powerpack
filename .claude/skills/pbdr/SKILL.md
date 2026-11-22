@@ -94,10 +94,14 @@ Check whether it's running: `ss -ltn | grep -q ':25565 '`. If it is:
 
 ```bash
 cd "$SRV"
-rm -rf mods && cp -r "$REPO/modpack/mods" mods
+PACK=$(grep '^version=' "$REPO/gradle.properties" | cut -d= -f2)
+rm -rf mods && tar -xzf "$REPO/modpack/Deck-mods-$PACK.tar.gz"
 ```
 
-The mods folder is replaced whole so jars that left the pack leave the server too. The server's helper scripts come
+The mods folder is replaced whole so jars that left the pack leave the server too. It comes from the build's
+`Deck-mods-<pack>.tar.gz` (its paths start `mods/`), not from `modpack/mods`: the tarball leaves out the mods that say
+they run on both sides but break a dedicated server (`notOnServer` in `build.gradle`: SWAY API and Interactive
+Foliage). Copying `modpack/mods` whole put them back and the server crashed on start (2026-11-22, as on 2026-11-19). The server's helper scripts come
 along each time (they don't hold secrets): `cp "$REPO"/deck/rcon.py "$REPO"/deck/whitelist.py "$SRV"/`.
 
 **New world only:** set the old one aside, named like the earlier backups:
@@ -109,15 +113,21 @@ mv "$LEVEL" "world-backup-$(date +%Y-%m-%d-%H%M)"
 
 ## 5. Start
 
-Start it detached so it outlives this session:
+Start it detached so it outlives this session. The old `start.sh` keeps its lock (`.start.lock`) for up to a minute
+after the server stops (it waits at "Press Enter to close"), and a new one started meanwhile only says "The server is
+already starting or running" and quits, so wait for the lock first:
 
 ```bash
-cd "$SRV" && setsid nohup ./start.sh > server-console.log 2>&1 < /dev/null &
+cd "$SRV"
+for i in $(seq 1 20); do flock -n .start.lock true && break; sleep 5; done
+START=$(date +%s)
+setsid nohup ./start.sh > server-console.log 2>&1 < /dev/null &
 ```
 
 (`start.sh` starts the playit tunnel too. Started outside the desktop it may say it can't keep the Deck awake; that's
 fine, the Deck stays plugged in with sleep off.) Then watch `logs/latest.log` until `Done (` appears (a few minutes
-on the Deck). If it crashes instead, read the log and `crash-reports/`, report the cause, and don't loop restarting.
+on the Deck), in the new log only: until the new server writes it, `latest.log` is still the old run's and has the old
+`Done (` in it (check its time against `START`, or that the java process is running). If it crashes instead, read the log and `crash-reports/`, report the cause, and don't loop restarting.
 
 ## 6. Voice chat host (once, after the first start with Simple Voice Chat)
 
