@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 08:46). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 08:58). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -21,7 +21,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-21 waiting for a bot, 3 being built, 18 in review: see [[Kanban]].
+21 waiting for a bot, 3 being built, 16 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
@@ -38,6 +38,8 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1974 a sword never bursts a body (Powers, Kingdoms, 2026-11-22)
 - [ ] #1973 VillagersPlus' miner's house rarer in villages (Powers, Kingdoms, 2026-11-22)
 - [ ] #1959 Freerun animations: the ledge climb keyed with elbows and knees, climbing down walls, vaults by speed and height, a pole climb, and bending limbs through the moves (Powers, 2026-11-22)
+- [ ] #1958 Z Fighter gaps 1: stats (Powers, 2026-11-22)
+- [ ] #1938 Z Fighter gaps 2: stamina for dash, guard and forms (Powers, 2026-11-22)
 - [ ] #1969 loose wood no longer makes the server wait on land still generating (Kingdoms, 2026-11-21)
 - [ ] #1966 loose wood no longer crashes the server while land generates (Kingdoms, 2026-11-21)
 - [ ] #1951 hints as tip cards - text hints show top right instead of over the hotbar (Powers, 2026-11-21)
@@ -85,9 +87,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1904 Nether Portal Spread no longer freezes the server in land not yet ready (Powers, 2026-11-20)
 - [ ] #1903 Start searches read the land from the seed first, like /locate (Kingdoms, 2026-11-20)
 - [ ] #1902 forest-fire pack - Peterwolf's Forest Fire & Firefighting in the pack (Powers, Kingdoms, 2026-11-20)
-- [ ] #1901 Lantern pole carried in hand: drawn as a pole with its lantern, and lights the way (Powers, Kingdoms, 2026-11-20)
-- [ ] #1900 no chat line when you slay a gifted villager (Powers, 2026-11-20)
-- …and 331 older ones.
+- …and 333 older ones.
 
 ## Health
 
