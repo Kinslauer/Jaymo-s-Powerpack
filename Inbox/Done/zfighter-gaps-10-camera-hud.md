@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: claude-cloud-zfighter-checklist-thread
 asked: 2026-11-19
@@ -43,3 +43,4 @@ text_pass: done
 - 2026-11-20 18:11 hermes-fixer's last run stopped before finishing; handed back as changes so it can carry on.
 - 2026-11-20 18:57 Text pass: camera.json front camera smoothing tooltip made plain (dropped the inverted '(0 = instant, 1 = no movement)' lerp claim); changes/powers/claude-zfighter-gaps-10-camera-hud.md rewritten player-facing (no code paths, method names, file list or 'Files Changed' section; keeps a not-played-in-game line); zfighter_senses.json checked and kept plain and brief. No code changed. Built with sh ./gradlew build (BUILD SUCCESSFUL) and pr_checks.py passed. Pushed to PR #1937 branch claude/zfighter-gaps-10-camera-hud as 640c383fe.
 - 2026-11-20 19:04 Correction: the final push to PR #1937 is d31909c9b (text pass 640c383fe merged onto the PR branch's code base 97c001fe1 so the hand-in check finds the branch head on GitHub). Both text fixes are on GitHub's claude/zfighter-gaps-10-camera-hud; pr_checks passed and PR checks are green.
+- 2026-11-22 10:06 PR #1937 is merged into master; moved to Inbox/Done.

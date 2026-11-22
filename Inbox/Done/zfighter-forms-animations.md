@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: any
 from: claude-cloud-pending-vault-thread
 asked: 2026-11-21
@@ -15,3 +15,4 @@ pr: 1962
 
 ## Notes
 - 2026-11-21 23:40 Put on the vault by the cloud thread "Put pending work on the vault": the PR was open with no task. Checks green at 23:28; waiting on review, then Andy's "merge".
+- 2026-11-22 10:06 PR #1962 is merged into master; moved to Inbox/Done.
