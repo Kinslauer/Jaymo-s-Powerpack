@@ -180,6 +180,10 @@ public final class Planner {
 				// a chapel, windmill or barn: only where a pattern book suits the land
 				continue;
 			}
+			if (VpBuildings.unavailable(server, f, e.id())) {
+				// a VillagersPlus job house it has none of for this land
+				continue;
+			}
 			if (e.id().equals(TAVERN)) {
 				tavern = size >= e.minPopulation() && works.count(e.id()) < e.max() ? e : null;
 				continue;
@@ -206,7 +210,8 @@ public final class Planner {
 		for (Blueprint.Entry e : Blueprint.catalogue(f.type())) {
 			if (!e.id().equals("house") && !e.id().equals(TAVERN) && !Enclosure.piece(e.id()) && !HavenGrowth.isWork(e.id()) && e.minPopulation() < Integer.MAX_VALUE
 				&& !(e.id().equals(HavenBuildings.RING) && !HavenBuildings.ringFor(server, f))
-				&& !(e.id().equals(Temples.GREAT_TEMPLE) && !Temples.greatTempleFor(server, f)) && !Library.unavailable(server, f, e.id())) {
+				&& !(e.id().equals(Temples.GREAT_TEMPLE) && !Temples.greatTempleFor(server, f)) && !Library.unavailable(server, f, e.id())
+				&& !VpBuildings.isJob(e.id())) {
 				most.merge(e.id(), Focus.max(server, f, e.id(), e.max()), Math::max);
 			}
 		}
