@@ -38,6 +38,7 @@ kanban-plugin: board
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · 🔨 Hephaestus · #1896 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-2-power|zfighter-gaps-2-power]] · 🔨 Hephaestus · #1938 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-5-training|zfighter-gaps-5-training]] · ☀️ Apollo · #1953 · changes · fixing review notes
+- [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · changes · fixing review notes
 
 
 ## In review
@@ -58,7 +59,6 @@ kanban-plugin: board
 - [ ] [[Inbox/parkour-animations|parkour-animations]] · for any · #1959 · in-review
 - [ ] [[Inbox/zfighter-forms-animations|zfighter-forms-animations]] · for any · #1962 · in-review
 - [ ] [[Inbox/zfighter-forms-textures|zfighter-forms-textures]] · for any · #1963 · in-review
-- [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · in-review
 
 
 ## Needs Andy
