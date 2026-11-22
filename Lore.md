@@ -117,7 +117,7 @@ Warrior-born's ki and a priest's mana are not two forces in opposition; they are
 Sorcerer's Restoration element, the court wizards' staves and the spells read off scrolls are all the same well,
 shaped by hand. (Andy approved, 2026-11-22; Andy: "Only 30% of players and MCA can get it from amethyst and now they have to either punch it in the world or have it enter their inventory") Amethyst wakes it only in those who have the knack, about three in ten, and only at a touch: striking the stone, or carrying a piece of it. The rest can hold amethyst all their lives and feel nothing.
 
-**How power is seen** (new; Andy's rulings 2026-11-22 for Z Fighter round 3, Claude's wording, waiting on Andy). Everyone
+**How power is seen** (Andy approved, 2026-11-22; Andy's rulings for Z Fighter round 3, Claude's wording). Everyone
 who lives has an aura, the attuned and the plain alike, a villager as much as a king: how much of the well runs in a
 body, its strength, its training, its gifts and its blood all show in how big and bright it burns. The plain part of
 it, and a fighter's ki above all, since ki is the well pushed out raw, can be seen by anyone who looks: faint, but
@@ -470,8 +470,8 @@ has blessed: up there, under his blessing, friends can bring one another round a
 who falls past that back through the door, out of the fight. When the Chamber-Worn gathers his great wave he is spent
 after it, and his back is open.
 
-**The Chamber's door, and what fighters pass on** (new; Claude's placement for Andy's Z Fighter round 3 picks,
-2026-11-22, waiting on Andy). Since the Chamber-Worn the Keeper opens the Time Chamber's door to other fighters only once
+**The Chamber's door, and what fighters pass on** (Andy approved, 2026-11-22; Claude's placement for Andy's Z Fighter
+round 3 picks). Since the Chamber-Worn the Keeper opens the Time Chamber's door to other fighters only once
 a season each, and never for long: a day inside is a long stretch of training, in heavy air, heat and cold, and the
 Keeper has seen what too many white hours make of a man. What a fighter learns is passed on by hand: a fighter strong
 enough is asked by a gifted villager to take him as a student, and teaches him to spar and to shape his ki; a student
