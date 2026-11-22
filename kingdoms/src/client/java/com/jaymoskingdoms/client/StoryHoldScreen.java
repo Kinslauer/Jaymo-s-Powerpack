@@ -69,10 +69,16 @@ final class StoryHoldScreen extends Screen {
 	private static final int[] deck = new int[HINTS];
 	private static int dealt = HINTS, lastHint = -1;
 
-	/** The hint on screen (1..HINTS), the HINT_MS slot it was dealt for, and when the screen opened (ms). */
-	private int hint;
-	private long hintSlot = -1L;
-	private final long opened = System.currentTimeMillis();
+	/**
+	 * Andy: "load screen hints should be scrollable, too many times i've run out of time to read". The hints shown on this
+	 * screen, in order, so the wheel can go back to one (up) or on to the next (down); which is on screen, and since when
+	 * (ms). A hint stays HINT_MS, and LINE_MS more for each line past {@link #SHORT}, from when it came up or was scrolled to.
+	 */
+	private final java.util.List<Integer> shown = new java.util.ArrayList<>();
+	private int at = -1;
+	private long shownAt;
+	private static final long LINE_MS = 2500L;
+	private static final int SHORT = 2;
 
 	private StoryHoldScreen() {
 		super(Component.translatable("gui.jaymoskingdoms.story.hold.title"));
@@ -268,28 +274,30 @@ final class StoryHoldScreen extends Screen {
 		long now = System.currentTimeMillis();
 		String dots = ".".repeat((int)(now / DOT_MS % 4));
 		graphics.centeredText(this.font, this.title.copy().append(dots), cx, cy - 24, Ui.GOLD);
-		// (0.7.360) a hint at how something works, a new one every HINT_MS (what the hold is for is only heard);
-		// (0.7.499) dealt at random off the shared deck
-		long slot = (now - this.opened) / HINT_MS;
-		if (slot != this.hintSlot) {
-			this.hintSlot = slot;
-			this.hint = dealHint();
+		// (0.7.360) a hint at how something works, a new one when its time is up (what the hold is for is only heard);
+		// (0.7.499) dealt at random off the shared deck; the wheel steps back and on through those shown
+		if (this.at < 0) {
+			this.next(now);
 		}
-		int hint = this.hint;
-		java.util.List<FormattedCharSequence> lines = this.font.split(
-			Component.translatable("gui.jaymoskingdoms.story.hint." + hint), Math.min(HINT_W, this.width - 32));
+		java.util.List<FormattedCharSequence> lines = this.lines(this.shown.get(this.at));
+		long stay = stay(lines.size());
+		if (now - this.shownAt >= stay) {
+			this.next(now);
+			lines = this.lines(this.shown.get(this.at));
+			stay = stay(lines.size());
+		}
 		int textW = 0;
 		for (FormattedCharSequence line : lines) {
 			textW = Math.max(textW, this.font.width(line));
 		}
 		int top = cy - 6, ty = top, left = cx - textW / 2 - 2, right = cx + textW / 2 + 2;
-		// the hint wipes in from the left as it's dealt and off to the right before the next one
-		long into = (now - this.opened) % HINT_MS;
+		// the hint wipes in from the left as it comes up and off to the right before the next one
+		long into = now - this.shownAt;
 		int clipL = left, clipR = right, edge = -1;
 		if (into < WIPE_MS) {
 			clipR = edge = left + (int)((right - left) * ease(into / (double)WIPE_MS));
-		} else if (into > HINT_MS - WIPE_MS) {
-			clipL = edge = left + (int)((right - left) * ease((into - (HINT_MS - WIPE_MS)) / (double)WIPE_MS));
+		} else if (into > stay - WIPE_MS) {
+			clipL = edge = left + (int)((right - left) * ease(Math.min(1.0, (into - (stay - WIPE_MS)) / (double)WIPE_MS)));
 		}
 		int bottom = top + lines.size() * Ui.LINE;
 		if (clipR > clipL) {
@@ -304,6 +312,9 @@ final class StoryHoldScreen extends Screen {
 		if (edge >= 0) {
 			graphics.fill(edge, top - 1, edge + 1, bottom, Ui.GOLD);
 		}
+		// that the wheel goes back and on, and where in those shown this one is
+		graphics.centeredText(this.font, Component.translatable("gui.jaymoskingdoms.story.hint.scroll", this.at + 1, this.shown.size()), cx, ty + 4, Ui.HINT);
+		ty += Ui.LINE + 2;
 		// a bar that sweeps back and forth: something's happening, not how much is left
 		int x0 = cx - BAR_W / 2, y0 = ty + 8;
 		graphics.fill(x0, y0, x0 + BAR_W, y0 + BAR_H, BAR_BACK);
@@ -312,6 +323,39 @@ final class StoryHoldScreen extends Screen {
 		int seg = BAR_W / 4, sx = x0 + (int)((BAR_W - seg) * phase);
 		graphics.fill(sx, y0, sx + seg, y0 + BAR_H, Ui.GOLD);
 		super.extractRenderState(graphics, mouseX, mouseY, a);
+	}
+
+	/** The wheel: up goes back to the hint before, down on to the next (a new one off the deck past the last shown). */
+	@Override
+	public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+		long now = System.currentTimeMillis();
+		if (scrollY > 0.0 && this.at > 0) {
+			this.at--;
+			this.shownAt = now;
+		} else if (scrollY < 0.0) {
+			this.next(now);
+		}
+		return true;
+	}
+
+	/** On to the next hint: the one after this among those shown, or a new one off the deck. */
+	private void next(long now) {
+		if (this.at < this.shown.size() - 1) {
+			this.at++;
+		} else {
+			this.shown.add(dealHint());
+			this.at = this.shown.size() - 1;
+		}
+		this.shownAt = now;
+	}
+
+	private java.util.List<FormattedCharSequence> lines(int hint) {
+		return this.font.split(Component.translatable("gui.jaymoskingdoms.story.hint." + hint), Math.min(HINT_W, this.width - 32));
+	}
+
+	/** How long a hint of {@code lines} lines stays up (ms). */
+	private static long stay(int lines) {
+		return HINT_MS + Math.max(0, lines - SHORT) * LINE_MS;
 	}
 
 	/** Smoothstep: the wipe starts and ends gently. */
