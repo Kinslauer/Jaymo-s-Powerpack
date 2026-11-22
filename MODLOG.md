@@ -7259,3 +7259,9 @@ following integration task).
 - A severed head set down on Jaymo's Kitchen's Head Mount goes up in the middle of the plaque, not wherever you happened to look on it.
 - `Carry` (wall trophy heads).
 - Built by CI; not played.
+
+## 0.26.54 (2026-11-22): speedsters don't tire Kitchen's sprint wind (#1995)
+
+- An overclocked speedster (Chrono, Velox's Velocity) runs on its power: Jaymo's Kitchen's new sprint stamina isn't
+  spent while overclocked (`ChronoSpeed`, by reflection, only with Kitchen loaded).
+- Built; not played.
