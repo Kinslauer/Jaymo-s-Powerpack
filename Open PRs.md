@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-22 08:42
+updated: 2026-11-22 08:45
 ---
 # Open PRs
 
-22 open, as of 2026-11-22 08:42. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+23 open, as of 2026-11-22 08:45. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1853](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1853) Heritage paths: core + Heartlander, Stoneborn, Tideborn (Kingdoms, Powers)
@@ -114,4 +114,9 @@ Andy merges only on "merge", one at a time.
 ## [#1981](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1981) Villagers always doing something: hunger, thirst, boredom, stall log and watchdog (draft)
 - **Branch:** `claude/villagers-always-busy-3238b4` · **Updated:** 2026-11-22 (today)
 - **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#1986](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1986) Z Fighter gaps 7: the Keeper's trial, a set-piece boss on the Lookout
+- **Branch:** `claude/zfighter-gaps-7-bosses` · **Updated:** 2026-11-22 (today)
+- **Checks:** ⏳ 4 of 4 running
 - **Agent:** no agent note
