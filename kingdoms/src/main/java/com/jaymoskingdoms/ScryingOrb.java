@@ -21,12 +21,17 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.TicketType;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -47,9 +52,9 @@ import net.minecraft.world.phys.Vec3;
  * People: reuse Scrying's illusion save (orb only clouds), chill + sound for the target, their land must already be loaded.
  * Places: no save, no chill.
  * <p>
- * Packets: box of block states 17x17 wide, 11 tall round the target, cut to a sphere; first as palette + indices (~3 KB),
- * then changed blocks only, each second. Figures 4x a second (kind, pos, facing, walking), up to 32. Only to players
- * within 16 blocks of the orb.
+ * Packets: box of block states 17x17 wide, 11 tall round the target, cut to a sphere, as palette + indices (~3 KB),
+ * sent whole once a second with the figures (kind, pos, facing, walking), up to 32. A place's 3x3 chunks are kept
+ * loaded while it's watched by a portal ticket renewed each second, which lapses by itself when the watching ends.
  */
 public final class ScryingOrb {
 
@@ -151,9 +156,6 @@ public final class ScryingOrb {
             },
             Enum::name
         );
-        public static final StreamCodec<RegistryFriendlyByteBuf, TargetKind> STREAM_CODEC = ByteBufCodecs.STRING_UTF8.map(
-            s -> TargetKind.valueOf(s.toUpperCase(Locale.ROOT)), Enum::name
-        );
     }
 
     public record Target(TargetKind kind, UUID person, String dimension, BlockPos pos, String name) {
@@ -178,25 +180,10 @@ public final class ScryingOrb {
                 return place(dimension.orElse("minecraft:overworld"), pos.orElse(BlockPos.ZERO), name);
             }
         }));
-
-        public static final StreamCodec<RegistryFriendlyByteBuf, Target> STREAM_CODEC = StreamCodec.composite(
-                    TargetKind.STREAM_CODEC,
-                    Target::kind,
-                    // UUID encoded as string for compatibility with 26.3 ByteBufCodecs
-                    ByteBufCodecs.STRING_UTF8, (v) -> v.person.toString(),
-                    ByteBufCodecs.STRING_UTF8,
-                    Target::dimension,
-                    BlockPos.STREAM_CODEC,
-                    Target::pos,
-                    ByteBufCodecs.STRING_UTF8,
-                    (v) -> v.name,
-                    // UUID from string constructor
-                    java.util.UUID::new
-            );
     }
 
-    /** A ticket keeping a place's 3x3 chunks loaded while the orb is awake on it. */
-    private record Watch(ServerLevel from, Target target, long until, int lastRefresh, long[] lastPos, BlockState[] lastStates) {
+    /** A caster's watching: from where, of what, until when, and when the view was last sent (game time). */
+    private record Watch(ServerLevel from, Target target, long until, long lastRefresh) {
     }
 
     private static final Map<UUID, Watch> WATCHES = new HashMap<>();
@@ -209,10 +196,7 @@ public final class ScryingOrb {
         PayloadTypeRegistry.clientboundPlay().register(Close.TYPE, Close.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(Cloud.TYPE, Cloud.CODEC);
         ServerTickEvents.END_SERVER_TICK.register(ScryingOrb::tick);
-        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
-            WATCHES.clear();
-            releaseAllTickets();
-        });
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> WATCHES.clear());
     }
 
     /** Whether {@code caster} has a scrying orb block entity within reach that is idle. */
@@ -233,9 +217,6 @@ public final class ScryingOrb {
         Watch w = WATCHES.remove(caster.getUUID());
         if (w != null) {
             Concentration.drop(caster);
-            if (w.target().kind() == TargetKind.PLACE) {
-                releaseTicket(w.target());
-            }
             if (ServerPlayNetworking.canSend(caster, Close.TYPE)) {
                 ServerPlayNetworking.send(caster, new Close());
             }
@@ -288,7 +269,7 @@ public final class ScryingOrb {
 
     private static void startWatch(ServerLevel level, ServerPlayer caster, ScryingOrbBlockEntity orb, Target target, @org.jspecify.annotations.Nullable LivingEntity person) {
         orb.setActive(caster.getUUID());
-        WATCHES.put(caster.getUUID(), new Watch(level, target, level.getGameTime() + HOLD_TICKS, 0, new long[0], new BlockState[0]));
+        WATCHES.put(caster.getUUID(), new Watch(level, target, level.getGameTime() + HOLD_TICKS, level.getGameTime()));
         Concentration.hold(caster, "scrying_orb", HOLD_TICKS, () -> {
             WATCHES.remove(caster.getUUID());
             orb.setIdle();
@@ -299,9 +280,7 @@ public final class ScryingOrb {
         if (target.kind() == TargetKind.PERSON && person != null) {
             chill(person);
         }
-        if (target.kind() == TargetKind.PLACE) {
-            requestTicket(level.getServer(), target);
-        }
+        keepLoaded(level.getServer(), target);
         sendSnapshot(caster, target);
     }
 
@@ -322,9 +301,6 @@ public final class ScryingOrb {
             Watch w = e.getValue();
             if (caster == null || w.from().getGameTime() >= w.until() || !"scrying_orb".equals(Concentration.holding(caster))) {
                 WATCHES.remove(e.getKey());
-                if (w.target().kind() == TargetKind.PLACE) {
-                    releaseTicket(w.target());
-                }
                 if (caster != null) {
                     if (ServerPlayNetworking.canSend(caster, Close.TYPE)) {
                         ServerPlayNetworking.send(caster, new Close());
@@ -336,90 +312,84 @@ public final class ScryingOrb {
                 continue;
             }
             if (w.from().getGameTime() - w.lastRefresh() >= REFRESH) {
-                sendDelta(caster, w.target(), w.lastRefresh(), w.lastPos(), w.lastStates());
-                // Update the watch with new snapshot data
-                // (In a real implementation we'd capture the new pos/states here)
-                WATCHES.put(e.getKey(), new Watch(w.from(), w.target(), w.until(), w.from().getGameTime(), w.lastPos(), w.lastStates()));
+                keepLoaded(server, w.target());
+                sendSnapshot(caster, w.target());
+                WATCHES.put(e.getKey(), new Watch(w.from(), w.target(), w.until(), w.from().getGameTime()));
             }
         }
     }
 
+    /**
+     * The view of {@code target} as it is now, to {@code caster}: the blocks of a sphere round it (palette of block state
+     * ids, slot 0 always air, as the client reads them; an index of -1 is outside the sphere) and the figures in it. A
+     * target that can't be found (gone, or its land not loaded) clouds the orb.
+     */
     private static void sendSnapshot(ServerPlayer caster, Target target) {
-        if (!(caster.level() instanceof ServerLevel level)) {
+        if (!(caster.level() instanceof ServerLevel from)) {
             return;
         }
-        Vec3 centre = targetCentre(level, target);
+        ServerLevel level = targetLevel(from, target);
+        Vec3 centre = level == null ? null : targetCentre(level, target);
         if (centre == null) {
             if (ServerPlayNetworking.canSend(caster, Cloud.TYPE)) {
                 ServerPlayNetworking.send(caster, new Cloud());
             }
             return;
         }
-        int cx = (int) centre.x, cy = (int) centre.y, cz = (int) centre.z;
-        int diameter = SIZE;
-        int total = diameter * diameter * HEIGHT;
-        Map<Integer, Integer> paletteMap = new HashMap<>();
-        int[] palette = new int[256];
-        int paletteSize = 0;
-        byte[] indices = new byte[total];
+        int cx = Mth.floor(centre.x), cy = Mth.floor(centre.y), cz = Mth.floor(centre.z);
+        Map<Integer, Integer> slots = new HashMap<>();
+        java.util.List<Integer> palette = new java.util.ArrayList<>();
+        palette.add(Block.getId(Blocks.AIR.defaultBlockState()));
+        slots.put(palette.getFirst(), 0);
+        byte[] indices = new byte[SIZE * SIZE * HEIGHT];
         int idx = 0;
         for (int dy = 0; dy < HEIGHT; dy++) {
+            // the sphere is cut round the centre: the layers run from RADIUS below it upward
+            int oy = dy - RADIUS;
             for (int dz = -RADIUS; dz <= RADIUS; dz++) {
                 for (int dx = -RADIUS; dx <= RADIUS; dx++) {
-                    int x = cx + dx, y = cy - RADIUS + dy, z = cz + dz;
-                    double distSq = dx * dx + dy * dy + dz * dz;
-                    if (distSq > RADIUS * RADIUS) {
-                        indices[idx++] = -1; // outside sphere
+                    if (dx * dx + oy * oy + dz * dz > RADIUS * RADIUS) {
+                        indices[idx++] = -1;
                         continue;
                     }
-                    LevelChunk chunk = level.getChunk(x >> 4, z >> 4);
-                    if (chunk == null) {
-                        indices[idx++] = 0; // air
-                        continue;
-                    }
-                    BlockPos pos = new BlockPos(x, y, z);
-                    BlockState state = level.getBlockState(pos);
-                    int stateId = BuiltInRegistries.BLOCK.getId(state.getBlock());
-                    int paletteIdx = paletteMap.computeIfAbsent(stateId, id -> {
-                        if (paletteSize < 256) {
-                            palette[paletteSize] = id;
-                            return paletteSize++;
+                    BlockPos pos = new BlockPos(cx + dx, cy + oy, cz + dz);
+                    BlockState state = level.isLoaded(pos) ? level.getBlockState(pos) : Blocks.AIR.defaultBlockState();
+                    int id = Block.getId(state);
+                    Integer slot = slots.get(id);
+                    if (slot == null) {
+                        // (a byte holds 127 kinds besides "outside"; past that a block is drawn as air)
+                        slot = palette.size() < Byte.MAX_VALUE ? palette.size() : 0;
+                        if (slot != 0) {
+                            palette.add(id);
+                            slots.put(id, slot);
                         }
-                        return 0;
-                    });
-                    indices[idx++] = (byte) paletteIdx;
+                    }
+                    indices[idx++] = (byte) (int) slot;
                 }
             }
         }
-        int[] usedPalette = java.util.Arrays.copyOf(palette, paletteSize);
         int[] figures = gatherFigures(level, centre);
         boolean night = level.isDarkOutside();
         if (ServerPlayNetworking.canSend(caster, OrbView.TYPE)) {
-            ServerPlayNetworking.send(caster, new OrbView(Component.literal(target.name()), usedPalette, indices, new int[0], figures, night));
+            ServerPlayNetworking.send(caster, new OrbView(Component.literal(target.name()), palette.stream().mapToInt(Integer::intValue).toArray(),
+                indices, new int[0], figures, night));
         }
     }
 
-    private static void sendDelta(ServerPlayer caster, Target target, int lastRefresh, long[] lastPos, BlockState[] lastStates) {
-        // Simplified: just send a new snapshot each time for now
-        sendSnapshot(caster, target);
-    }
-
-    private static Vec3 targetCentre(ServerLevel level, Target target) {
+    /** The world {@code target} is in: a person's own (found from the caster's), a place's by its dimension; null if none. */
+    private static @org.jspecify.annotations.Nullable ServerLevel targetLevel(ServerLevel from, Target target) {
         if (target.kind() == TargetKind.PERSON) {
-            Entity e = Hair.find(level, target.person());
-            if (e instanceof LivingEntity who) {
-                return who.getEyePosition();
-            }
-            return null;
-        } else {
-                    ServerLevel targetLevel = level.getLevel(ResourceKey.create(
-                        net.minecraft.core.registries.Registries.DIMENSION,
-                        new net.minecraft.resources.ResourceLocation(target.dimension())));
-            if (targetLevel == null) {
-                return null;
-            }
-            return Vec3.atCenterOf(target.pos());
+            return Hair.find(from, target.person()) instanceof LivingEntity who && who.level() instanceof ServerLevel own ? own : null;
         }
+        Identifier id = Identifier.tryParse(target.dimension() == null ? "" : target.dimension());
+        return id == null ? null : from.getServer().getLevel(ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, id));
+    }
+
+    private static @org.jspecify.annotations.Nullable Vec3 targetCentre(ServerLevel level, Target target) {
+        if (target.kind() == TargetKind.PERSON) {
+            return Hair.find(level, target.person()) instanceof LivingEntity who ? who.getEyePosition() : null;
+        }
+        return target.pos() == null ? null : Vec3.atCenterOf(target.pos());
     }
 
     private static int[] gatherFigures(ServerLevel level, Vec3 centre) {
@@ -452,32 +422,19 @@ public final class ScryingOrb {
         return java.util.Arrays.copyOf(figures, n * 4);
     }
 
-    private static void requestTicket(MinecraftServer server, Target target) {
-        // Track place-sight count server-wide
-        // For now, just request the chunks directly
-        ServerLevel level = server.getLevel(ResourceKey.create(
-            net.minecraft.core.registries.Registries.DIMENSION, net.minecraft.resources.ResourceLocation.parse(target.dimension())));
-        if (level == null) {
+    /**
+     * A watched place's 3x3 chunks kept loaded: a portal ticket on them, renewed each refresh, which lapses by itself
+     * 15 s after the watching ends. A person's land is loaded or not as it is (the spell needs it loaded).
+     */
+    private static void keepLoaded(MinecraftServer server, Target target) {
+        if (target.kind() != TargetKind.PLACE || target.pos() == null) {
             return;
         }
-        BlockPos pos = target.pos();
-        // Force load 3x3 chunks around the pos
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dz = -1; dz <= 1; dz++) {
-                int cx = (pos.getX() >> 4) + dx;
-                int cz = (pos.getZ() >> 4) + dz;
-                level.getChunk(cx, cz); // This creates a ticket
-            }
+        Identifier id = Identifier.tryParse(target.dimension() == null ? "" : target.dimension());
+        ServerLevel level = id == null ? null : server.getLevel(ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION, id));
+        if (level != null) {
+            level.getChunkSource().addTicketWithRadius(TicketType.PORTAL, ChunkPos.containing(target.pos()), 1);
         }
-    }
-
-    private static void releaseTicket(Target target) {
-        // In a full implementation, we'd track and release the forced chunk tickets
-        // For now, the tickets will naturally expire when no longer needed
-    }
-
-    private static void releaseAllTickets() {
-        // Called on server stop
     }
 
     /** The point a view's centre sits over, for others to read. */

@@ -64,12 +64,11 @@ public final class SightedShard {
                 ItemStack stack = p.getItemInHand(hand);
                 if (SightedShard.targetOf(stack) != null) {
                     // Clear the target (shift-right-click in air to reset)
-                    CustomData.update(stack.get(DataComponents.CUSTOM_DATA), stack, tag -> {
+                    CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> {
                         tag.remove(TARGET);
                         tag.remove(NAME);
                     });
                     p.sendSystemMessage(Component.translatable("item.jaymoskingdoms.sighted_shard.cleared").withStyle(ChatFormatting.GRAY));
-                    p.swing(InteractionHand.MAIN_HAND);
                     return InteractionResult.SUCCESS;
                 }
             }
@@ -80,8 +79,8 @@ public final class SightedShard {
     /** A sighted shard storing {@code target}. */
     public static ItemStack of(ScryingOrb.Target target) {
         ItemStack stack = new ItemStack(ITEM);
-        CustomData.update(stack.get(DataComponents.CUSTOM_DATA), stack, tag -> {
-            tag.putString(TARGET, ScryingOrb.Target.CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, target).getOrThrow());
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> {
+            tag.store(TARGET, ScryingOrb.Target.CODEC, target);
             tag.putString(NAME, target.name());
         });
         stack.set(DataComponents.CUSTOM_NAME, Component.translatable("item.jaymoskingdoms.sighted_shard.of", target.name()).withStyle(s -> s.withItalic(false)));
