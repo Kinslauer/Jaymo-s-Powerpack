@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 16:25). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 18:12). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -47,7 +47,6 @@ kanban-plugin: board
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
 - [ ] [[Inbox/class-trees-plan|class-trees-plan]] · for 💻 Odysseus · blocked
 - [ ] [[Inbox/wither-model|wither-model]] · 🍇 Bacchus · blocked
-- [ ] [[Agents/survival-track4-gear-world|survival-track4-gear-world]] · 💻 Odysseus · stalled
 - [ ] [[Agents/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]] · 💻 Odysseus · stalled
 
 
