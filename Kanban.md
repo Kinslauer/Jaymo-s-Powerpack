@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 08:28). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 08:34). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -58,7 +58,6 @@ kanban-plugin: board
 - [ ] [[Inbox/zfighter-forms-animations|zfighter-forms-animations]] · for any · #1962 · in-review
 - [ ] [[Inbox/zfighter-forms-models|zfighter-forms-models]] · for any · #1960 · in-review
 - [ ] [[Inbox/zfighter-forms-textures|zfighter-forms-textures]] · for any · #1963 · in-review
-- [ ] [[Agents/camp-guards-own-gear|camp-guards-own-gear]] · 💻 Odysseus · #1985 · in-review
 
 
 ## Needs Andy
