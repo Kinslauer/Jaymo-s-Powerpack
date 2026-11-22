@@ -255,6 +255,12 @@ final class ZFighterBattle {
 			damage *= ZFighterHoldFast.factor(player, grudge(player, victim));
 			// and the bracers' paid-out bar (ZFighterBracers)
 			damage *= ZFighterBracers.boost(player, player.level().getGameTime());
+			// critical blows: a late TP buy, a chance of a much heavier blow
+			float critRate = ZFighterTraining.critChanceRate(player);
+			if (critRate > 0.0F && player.level().getRandom().nextFloat() < critRate) {
+				damage *= ZFighterTraining.critDamageMult(player);
+				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_crit").withStyle(ChatFormatting.GOLD));
+			}
 			return damage;
 		}
 		return damage;

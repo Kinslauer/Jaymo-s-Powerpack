@@ -19,6 +19,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 
 /**
@@ -43,9 +44,11 @@ public final class ZFighterTraining {
 	public static final int VITALITY = 2;
 	public static final int KI_POWER = 3;
 	public static final int ENERGY = 4;
-	public static final int STATS = 5;
+	/** (0.19.x) Blows that strike hard: rushes, grab slams and the hold combo's finisher. Strength stays for plain blows. */
+	public static final int STRIKE = 5;
+	public static final int STATS = 6;
 	public static final int STAT_CAP = 50;
-	public static final String[] STAT_KEYS = {"strength", "toughness", "vitality", "ki_power", "energy"};
+	public static final String[] STAT_KEYS = {"strength", "toughness", "vitality", "ki_power", "energy", "strike"};
 	/**
 	 * A stat level costs this, plus {@link #STAT_COST_STEP} for every level already bought (any stat; levels his own
 	 * training raised, {@link ZFighterGrowth}, don't count).
@@ -61,6 +64,8 @@ public final class ZFighterTraining {
 	public static final double VITALITY_PER_LEVEL = 0.134;
 	public static final float KI_POWER_PER_LEVEL = 0.005F;
 	public static final int ENERGY_PER_LEVEL = 1;
+	/** What the Strike stat adds per level to rushes, grab slams and hold-combo finishers (in place of Strength). */
+	public static final double STRIKE_PER_LEVEL = 0.067;
 
 	/** Forms: 1 Super (the breakthrough), 2 Super 2, 3 Super 3. Index 0 is base. */
 	public static final int FORMS = 3;
@@ -575,4 +580,84 @@ public final class ZFighterTraining {
 	static float toughness(Player player) {
 		return of(player).stat(TOUGHNESS) * TOUGHNESS_PER_LEVEL;
 	}
+
+// ---------------------------------------------------------------- critical blows
+
+/** A Z Fighter's bought critical-blow training: a chance to strike much harder, and how much harder. Not synced (server-side only). */
+public record CritData(int chance, int damage) {
+    public static final CritData NONE = new CritData(0, 0);
+    public static final Codec<CritData> CODEC = RecordCodecBuilder.create(i -> i.group(
+            Codec.INT.optionalFieldOf("chance", 0).forGetter(CritData::chance),
+            Codec.INT.optionalFieldOf("damage", 0).forGetter(CritData::damage))
+            .apply(i, CritData::new));
+}
+
+public static final AttachmentType<CritData> CRIT = AttachmentRegistry.create(JaymosPowers.id("zfighter_crit"),
+        builder -> builder.persistent(CritData.CODEC));
+
+public static CritData crit(Player player) {
+    CritData data = player.getAttached(CRIT);
+    return data == null ? CritData.NONE : data;
+}
+
+/** Crit chance per level (2% a level, up to {@link #CRIT_CHANCE_MAX}). */
+public static final int CRIT_CHANCE_MAX = 10;
+public static final int CRIT_CHANCE_COST = 800;
+public static final int CRIT_CHANCE_STEP = 400;
+public static float critChanceRate(Player player) {
+    return 0.02F * crit(player).chance();
+}
+/** Crit damage multiplier: 1.5x at level 1, +0.5 per level (up to {@link #CRIT_DAMAGE_MAX}). */
+public static final int CRIT_DAMAGE_MAX = 6;
+public static final int CRIT_DAMAGE_COST = 800;
+public static final int CRIT_DAMAGE_STEP = 400;
+public static float critDamageMult(Player player) {
+    return 1.5F + 0.5F * crit(player).damage();
+}
+
+static void buyCritChance(ServerPlayer player) {
+    CritData data = crit(player);
+    if (data.chance() >= CRIT_CHANCE_MAX) {
+        return;
+    }
+    int cost = CRIT_CHANCE_COST + CRIT_CHANCE_STEP * data.chance();
+    ZFighterTraining.Data training = of(player);
+    if (training.tp() < cost) {
+        return;
+    }
+    player.setAttached(DATA, training.withTp(training.tp() - cost));
+    player.setAttached(CRIT, new CritData(data.chance() + 1, data.damage()));
+    player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.5F, 1.6F);
+}
+
+static void buyCritDamage(ServerPlayer player) {
+    CritData data = crit(player);
+    if (data.damage() >= CRIT_DAMAGE_MAX) {
+        return;
+    }
+    int cost = CRIT_DAMAGE_COST + CRIT_DAMAGE_STEP * data.damage();
+    ZFighterTraining.Data training = of(player);
+    if (training.tp() < cost) {
+        return;
+    }
+    player.setAttached(DATA, training.withTp(training.tp() - cost));
+    player.setAttached(CRIT, new CritData(data.chance(), data.damage() + 1));
+    player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.5F, 1.6F);
+}
+
+/** The Strike stat's damage bonus for {@code player}, used in place of Strength for rushes, grab slams and finishers. */
+public static double strikeBonus(Player player) {
+    return STRIKE_PER_LEVEL * of(player).stat(STRIKE);
+}
+
+/**
+ * Fists for a rush, grab slam or finisher: the attack damage with Strength swapped for the Strike stat, so plain
+ * blows keep Strength while strikes use their own stat.
+ */
+public static double strikeFists(ServerPlayer player) {
+    ZFighterTraining.Data data = of(player);
+    return player.getAttributeValue(Attributes.ATTACK_DAMAGE)
+            - STRENGTH_PER_LEVEL * data.stat(STRENGTH)
+            + STRIKE_PER_LEVEL * data.stat(STRIKE);
+}
 }
