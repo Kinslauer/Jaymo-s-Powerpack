@@ -475,6 +475,7 @@ public final class ZFighterPower implements Power {
 		ZFighterRaiders.init();
 		ZFighterHighSky.init();
 		ZFighterCorruption.init();
+		ZFighterGapRaids.init();
 		// (0.17.50) branch forms, Ego, the android upgrade, the metal rebuild
 		ZFighterBranchForms.init();
 		ZFighterNet.register();
