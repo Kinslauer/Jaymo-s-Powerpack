@@ -42,6 +42,11 @@ public final class LimbUse {
 	public static final float AIM_SPREAD = 20.0F;
 	/** A held stream's sway (degrees, at no strength left) and how fast it sways (radians a tick). */
 	public static final float SWAY = 14.0F, SWAY_RATE = 0.23F;
+	/**
+	 * How far off the foe (degrees) an NPC's aimed blow may land and still hit: the same {@link #AIM_SPREAD} throws its aim
+	 * off as a player's, and a throw that ends up wider than this misses ({@link #wide}).
+	 */
+	public static final float NPC_HIT_CONE = 8.0F;
 
 	private LimbUse() {
 	}
@@ -291,6 +296,22 @@ public final class LimbUse {
 			player.setYHeadRot(head);
 			player.setXRot(xRot);
 		}
+	}
+
+	/**
+	 * Whether an NPC's aimed move needing {@code need} goes wide of its foe this time (Andy, 2026-11-22: a gifted or Brawl
+	 * fighter with a broken arm "aims its power wide", with the arm gone it won't fire at all, {@link #usable}). An NPC has no
+	 * look to throw off as a player's {@link #aimed} does: it throws the same {@link #spread} the same way (a random error in
+	 * yaw and pitch) and the move misses if that error is past {@link #NPC_HIT_CONE}. Never wide when everything it needs is sound.
+	 */
+	public static boolean wide(LivingEntity entity, int need) {
+		float spread = spread(entity, need);
+		if (spread <= 0.0F) {
+			return false;
+		}
+		float dy = (entity.getRandom().nextFloat() * 2.0F - 1.0F) * spread;
+		float dx = (entity.getRandom().nextFloat() * 2.0F - 1.0F) * spread;
+		return dy * dy + dx * dx > NPC_HIT_CONE * NPC_HIT_CONE;
 	}
 
 	/** A held stream's direction, swaying with the limbs it uses (smoothly, with the game time; unchanged when sound). */

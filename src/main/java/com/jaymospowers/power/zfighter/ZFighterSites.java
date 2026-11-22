@@ -448,6 +448,8 @@ public final class ZFighterSites {
 		Runnable back = () -> keeperTalk(player, keeper);
 		ZFighterNpcs.ask(player, keeper, Component.translatable(blessed ? "talk.jaymospowers.keeper.greet_blessed" : "talk.jaymospowers.keeper.greet"), List.of(
 			ZFighterNpcs.Option.of("talk.jaymospowers.keeper.bless", !blessed, () -> ZFighterNpcs.reply(player, keeper, () -> bless(player), back)),
+			ZFighterNpcs.Option.of("talk.jaymospowers.keeper.trial", ZFighterLookoutBoss.canAsk(player, blessed),
+				() -> ZFighterNpcs.reply(player, keeper, () -> ZFighterLookoutBoss.begin(player), back)),
 			// (gaps 2) the rite that wakes a fighter's potential, for the Keeper's own
 			ZFighterPotential.option(player, keeper, true, back),
 			ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.story", true,

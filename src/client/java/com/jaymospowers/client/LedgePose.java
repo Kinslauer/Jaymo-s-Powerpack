@@ -191,7 +191,7 @@ public final class LedgePose {
 		track.apply(h, frame);
 	}
 
-	private static void pose(HumanoidModel<?> h, State ledge, float age) {
+	static void pose(HumanoidModel<?> h, State ledge, float age) {
 		h.body.xRot = 0.0F;
 		h.body.yRot = 0.0F;
 		float p = ledge.climb();
