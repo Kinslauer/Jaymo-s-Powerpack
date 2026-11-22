@@ -446,6 +446,14 @@ champion in a blue gi. Tournaments
 are held in the open: bracket bouts, last-one-standing rings of light, and the tournament of the dead. When an army
 comes for a town, fighters hold the line at its wall of light and share the prize.
 
+**The Chamber-Worn** (new; Claude's placement for zfighter-gaps-7, after Andy's pick of a Z Fighter site, 2026-11-21).
+Long ago by the Time Chamber's clock, one of the Keeper's pupils went through its door and would not come out. He trained
+there for years upon years of its white hours until there was nothing left in him but the fight, and when he stepped
+out at last he wanted the Lookout. The Keeper keeps him behind the door now, and opens it only as a trial for fighters he
+has blessed: up there, under his blessing, friends can bring one another round a few times, and the Keeper pulls anyone
+who falls past that back through the door, out of the fight. When the Chamber-Worn gathers his great wave he is spent
+after it, and his back is open.
+
 **The Mad Tinkerer's operation.** The Tinkerer sets up workshops near towns and "rebuilds fighters": a fighter
 who beats his test unit wakes on his table an **android**, with endless ki that burns with no aura, no need for food,
 and wounds mended with iron or copper ingots rather than bandages. A wish can make them flesh again. (His Bio-built are
