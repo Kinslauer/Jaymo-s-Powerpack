@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-21 23:51). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 00:07). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -59,7 +59,6 @@ kanban-plugin: board
 - [ ] [[Inbox/parkour-animations|parkour-animations]] · for any · #1959 · in-review
 - [ ] [[Inbox/zfighter-forms-animations|zfighter-forms-animations]] · for any · #1962 · in-review
 - [ ] [[Inbox/zfighter-forms-textures|zfighter-forms-textures]] · for any · #1963 · in-review
-- [ ] [[Agents/drill-and-talk-fixes|drill-and-talk-fixes]] · 💻 Odysseus · #1974 · in-review
 
 
 ## Needs Andy
