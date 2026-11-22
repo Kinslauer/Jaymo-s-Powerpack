@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 08:57). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 09:02). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -36,8 +36,7 @@ kanban-plugin: board
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🔨 Hephaestus · #1957 · changes · fixing review notes
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · changes · fixing review notes
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · 🔨 Hephaestus · #1896 · changes · fixing review notes
-- [ ] [[Agents/npc-ledge-climb|npc-ledge-climb]] · 💻 Odysseus · running
-- [ ] [[Agents/survival-track3-hook-carry|survival-track3-hook-carry]] · 💻 Odysseus · running
+- [ ] [[Agents/survival-track3-hook-carry|survival-track3-hook-carry]] · 💻 Odysseus · #1989 · running
 - [ ] [[Agents/survival-wounds-track1|survival-wounds-track1]] · 💻 Odysseus · running
 
 
@@ -48,7 +47,6 @@ kanban-plugin: board
 - [ ] [[Inbox/enemy-damage-balance|enemy-damage-balance]] · for 🪽 any Hermes bot · #1970 · in-review
 - [ ] [[Inbox/mutant-zombie-reskin|mutant-zombie-reskin]] · for 🔥 Prometheus · #1968 · in-review
 - [ ] [[Inbox/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]] · for 🪽 any Hermes bot · #1937 · in-review
-- [ ] [[Inbox/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]] · for 🪽 any Hermes bot · #1939 · in-review
 - [ ] [[Inbox/zfighter-gaps-4-forms|zfighter-gaps-4-forms]] · for 🪽 any Hermes bot · #1965 · in-review
 - [ ] [[Inbox/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]] · for 🪽 any Hermes bot · #1955 · in-review
 - [ ] [[Inbox/zfighter-gaps-8-raids|zfighter-gaps-8-raids]] · for 🪽 any Hermes bot · #1961 · in-review
@@ -59,6 +57,7 @@ kanban-plugin: board
 - [ ] [[Inbox/zfighter-forms-textures|zfighter-forms-textures]] · for any · #1963 · in-review
 - [ ] [[Inbox/zfighter-gaps-5-training|zfighter-gaps-5-training]] · ☀️ Apollo · #1953 · in-review
 - [ ] [[Inbox/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]] · 💻 Odysseus · #1986 · in-review
+- [ ] [[Agents/npc-ledge-climb|npc-ledge-climb]] · 💻 Odysseus · #1988 (limbs half 1987) · in-review
 
 
 ## Needs Andy
@@ -72,6 +71,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]]
 - [x] [[Inbox/Done/zfighter-gaps-2-power|zfighter-gaps-2-power]]
 - [x] [[Inbox/Done/zfighter-gaps-1-stats|zfighter-gaps-1-stats]]
 - [x] [[Inbox/Done/parkour-animations|parkour-animations]]
@@ -79,7 +79,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/zfighter-aura-rework|zfighter-aura-rework]]
 - [x] [[Inbox/Done/forest-fire-pack|forest-fire-pack]]
 - [x] [[Inbox/Done/plan-ghosts-litematica-tools|plan-ghosts-litematica-tools]]
-- [x] [[Inbox/Done/harness-body-pieces|harness-body-pieces]]
 
 
 %% kanban:settings
