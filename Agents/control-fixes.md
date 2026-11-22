@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: control-fixes
-branch: claude/climb-parity, claude/flintlock-release, (afk-cam: TBD)
+branch: claude/climb-parity, claude/afk-cam-fishing, claude/flintlock-release
 with:
-pr:
+pr: 2008, 2009, 2011
 mods: powers, kingdoms
 versions:
 started: 2026-11-22
@@ -26,3 +26,7 @@ owns:
 - Builds on CI (PC runs only the game).
 
 ## Done
+- #2008 climb-parity (Powers): right-click grab and hold work from water; low banks climbed by the click; held right-click pulls up from a hang; with Climber, held right-click jumps/clings/climbs.
+- #2009 afk-cam-fishing (Powers): AfkCinematicFishing keeps Ji AFK Cinematic's fishing cinematic off and counts a line out as activity (its fishing mode can't keep the bobber in every shot).
+- #2011 flintlock-release (Powers + Kingdoms): Void flintlock, musketoon, arquebus, handgonne fire on release; WeaponMod's guns already did. No reload overlay / use bar for old guns; Q selects the next loaded gun on the hotbar.
+- None played in game; CI builds only.

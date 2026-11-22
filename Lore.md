@@ -1810,20 +1810,20 @@ three scouts ranging outside its ring: small even for goblins, hooded, a pack on
 see further than the village does. A scout that spots prey stops and cackles, and the village comes for what it saw; a
 traveller in a goblin mask is laughed past. With its village gone a scout runs wild and has nobody to call.
 
-**Goblin odd-jobs** (new; survival picks thread, Andy picked "goblin extras" 2026-11-22; Claude's placement, waiting on
-Andy). A **wandering goblin** walks alone between villages, the one goblin that sells instead of steals: he takes the
+**Goblin odd-jobs** (survival picks thread, Andy picked "goblin extras" 2026-11-22; Claude's placement, Andy approved
+2026-11-22). A **wandering goblin** walks alone between villages, the one goblin that sells instead of steals: he takes the
 gold coins goblins hoard and hands over what their raids brought home, among it the **decoy**, a stuffed sack in a
 goblin's rags that every goblin and beast near it goes for when thrown. Goblin taverns brew a mushroom ale that leaves
 **drunk goblins** staggering about the village ring, slow and quarrelsome. The **engineer's hammer** and the clanking
 **robot** it calls up are stolen Frostborn work, beaten back together by goblin hands: everyone loves Frostborn tech,
 goblins most of all, and theirs never runs quite right.
-(new, built) Each goblin village has one **engineer**: a common goblin who found a hammer and a Frostborn wreck and never put either down.
+(Built, PR #2007; Andy approved 2026-11-22.) Each goblin village has one **engineer**: a common goblin who found a hammer and a Frostborn wreck and never put either down.
 He is not wise, only stubborn; the robot he beats together lasts a minute and a half before it falls apart, and the wandering
 goblin sells the hammers the engineers' failures left lying about. Drunk goblins come from the village tavern's brewing stand,
 where the mushroom ale is made.
 
-**Cannons for anyone** (new; same thread, Andy picked Old Cannons, its three kinds of shot and cannons on ships; Claude's
-placement, waiting on Andy). The field cannons the richest kingdoms set on their walls are cast by the same founders
+**Cannons for anyone** (same thread, Andy picked Old Cannons, its three kinds of shot and cannons on ships; Claude's
+placement, Andy approved 2026-11-22). The field cannons the richest kingdoms set on their walls are cast by the same founders
 who sell smaller guns to anyone with the coin: a ship's master, a lord with a stubborn neighbour. An iron ball breaks
 stone, a cheap stone ball only timber, and a fire ball is the kingdoms' answer to the flame avatar's FireCannon.
 
