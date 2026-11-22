@@ -6993,3 +6993,9 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - **Fresh and sea fish, crabs and other critters only spawn in water the sky reaches** (rivers, lakes, the sea's upper layers and shallows), never in underground aquifers. A natural spawn picks its height anywhere from the world's bottom up, so river and lake species were mostly spawning in flooded caves under the land, where no one saw them, and filling each player's fish cap: the sea looked empty.
 - **Cave pool fish (cavefish, olm) are underground water creatures now**, as the glow squid is, so they have their own small cap and no longer take the fish places of the sea and rivers. (`FishSpecies`)
 - Built on CI; not played.
+
+## 0.26.31 (2026-11-22): Z Fighter gaps 1: stats (#1958)
+
+- **Strike stat**: a sixth stat (Strike) for rushes, grab slams and the hold-combo finisher, bought like the other five; Strength stays for plain punches.
+- **Critical blows**: late TP buys for crit chance (2% a level, up to 20%) and crit damage (1.5x base, +0.5 per level); a crit deals a much heavier blow and announces it.
+- Built; not played in game.
