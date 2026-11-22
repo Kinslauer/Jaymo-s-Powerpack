@@ -446,7 +446,7 @@ champion in a blue gi. Tournaments
 are held in the open: bracket bouts, last-one-standing rings of light, and the tournament of the dead. When an army
 comes for a town, fighters hold the line at its wall of light and share the prize.
 
-**The Chamber-Worn** (new; Claude's placement for zfighter-gaps-7, after Andy's pick of a Z Fighter site, 2026-11-21).
+**The Chamber-Worn** (Andy approved, 2026-11-22; Claude's placement for zfighter-gaps-7, after Andy's pick of a Z Fighter site, 2026-11-21).
 Long ago by the Time Chamber's clock, one of the Keeper's pupils went through its door and would not come out. He trained
 there for years upon years of its white hours until there was nothing left in him but the fight, and when he stepped
 out at last he wanted the Lookout. The Keeper keeps him behind the door now, and opens it only as a trial for fighters he
