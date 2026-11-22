@@ -1,13 +1,21 @@
 #!/usr/bin/env python3
-"""Writes freerun animation clips (Powers freerun / client pose classes) as GeckoLib .animation.json files.
+"""Writes the freerun animation clips as GeckoLib .animation.json files (Blockbench opens them; KeyframeClip plays them).
 
-The script is the source: change a pose here and run it again
-(`python3 tools/gen_freerun_clips.py`). Poses are vanilla ModelPart angles in degrees
-(xRot, yRot, zRot); the files take Blockbench's signs, x and y turned round
-(KeyframeClip.partX/partY turn them back). Each clip runs from share 0 to 1, so times
-here are shares of the clip.
+    python3 -I tools/gen_freerun_clips.py            # write the clips
+    python3 -I tools/freerun_clip_preview.py OUT_DIR  # draw them, to check a pose before it goes in game
 
-Bones: body, head, right_arm, left_arm, right_leg, left_leg.
+The script is the source (.claude/rules/blockbench-animation.md): change a key here and run it again. Poses are vanilla
+ModelPart angles in degrees (x, y, z); the files take Blockbench's signs, x and y turned round (KeyframeClip.partX/partY
+turn them back). Times are shares of the clip; each clip says how long it runs (seconds).
+
+Bones: body, head, right_arm, left_arm, right_leg, left_leg, and four folds drawn with KneeBend, keyed on x only:
+right_elbow, left_elbow (degrees, + brings the forearm forward) and right_knee, left_knee (degrees, + swings the shin
+back). A clip may key only some bones: the pose class keeps its own motion for the rest.
+
+Reference: Andy asked for Assassin's Creed Unity's freerun and real parkour footage as the inspiration (docs/
+CombatAnimations-Plan.md, "Parkour animations"). Nothing is taken from the game's files or traced off video: the moves
+are keyed by hand from how such moves are built (hands take the weight first, it drops through the arms, the legs follow
+a beat behind).
 """
 import json
 import os
@@ -15,265 +23,96 @@ import os
 OUT = os.path.join(os.path.dirname(__file__), "..", "src", "main", "resources", "assets",
                    "jaymospowers", "geckolib", "animations", "entity")
 
-STAND = {b: (0, 0, 0) for b in ("body", "head", "right_arm", "left_arm", "right_leg", "left_leg")}
+FOLDS = ("right_elbow", "left_elbow", "right_knee", "left_knee")
 
 
-def mirror(pose):
-    """The same pose from the other side: right and left swapped, y and z turned round."""
-    out = {}
-    for bone, (x, y, z) in pose.items():
-        other = bone.replace("right", "LEFT").replace("left", "right").replace("LEFT", "left")
-        out[other] = (x, -y, -z)
-    return out
+def key(t, **bones):
+    """One key at share t: bone=(x, y, z) for a part, bone=degrees for a fold."""
+    return t, bones
 
 
 # ---------------------------------------------------------------------------
-# Cling: clinging to a wall, hands on it in front, climbing up hand over hand.
-# Arms reach forward and slightly up, gripping; the body stays close to the wall;
-# legs push against it, one knee drawn up then the other.
+# Ledge mantle (LedgePose's climb up over the edge, 0 to 1). From the hang: a pull-up, chest to the edge, the elbows
+# coming over it; then the press, straight arms on the top, as the right foot comes up onto the edge, the left knee
+# after it; up to stand. The head looks up at the edge in the pull and down over the top in the press. The body's lean
+# in over the edge stays LedgePose's own.
 # ---------------------------------------------------------------------------
-CLING = [
-    (0.00, {
-        "body": (0, 0, 0),
-        "head": (-10, 0, 0),
-        "right_arm": (-20, 0, 10),
-        "left_arm": (-20, 0, -10),
-        "right_leg": (-25, 0, 8),
-        "left_leg": (-25, 0, -8),
-    }),
-    (0.25, {
-        "body": (0, 0, 0),
-        "head": (-10, 0, 0),
-        "right_arm": (-45, 0, 10),
-        "left_arm": (-10, 0, -10),
-        "right_leg": (-40, 0, 12),
-        "left_leg": (-15, 0, -8),
-    }),
-    (0.50, {
-        "body": (0, 0, 0),
-        "head": (-10, 0, 0),
-        "right_arm": (-20, 0, 10),
-        "left_arm": (-45, 0, -10),
-        "right_leg": (-15, 0, 8),
-        "left_leg": (-40, 0, -12),
-    }),
-    (0.75, {
-        "body": (0, 0, 0),
-        "head": (-10, 0, 0),
-        "right_arm": (-45, 0, 10),
-        "left_arm": (-10, 0, -10),
-        "right_leg": (-40, 0, 12),
-        "left_leg": (-15, 0, -8),
-    }),
-    (1.00, {
-        "body": (0, 0, 0),
-        "head": (-10, 0, 0),
-        "right_arm": (-20, 0, 10),
-        "left_arm": (-20, 0, -10),
-        "right_leg": (-25, 0, 8),
-        "left_leg": (-25, 0, -8),
-    }),
-]
+LEDGE_MANTLE = (0.9, [
+    key(0.00, head=(-15, 0, 0), right_arm=(-163, 0, 11), left_arm=(-163, 0, -11), right_leg=(6, 0, 3), left_leg=(-4, 0, -3),
+        right_elbow=15, left_elbow=15, right_knee=10, left_knee=14),
+    # the pull: the upper arms drop forward and down, the forearms kept up at the hands on the edge
+    key(0.15, head=(-20, 0, 0), right_arm=(-135, 0, 14), left_arm=(-135, 0, -14), right_leg=(-12, 0, 3), left_leg=(-6, 0, -3),
+        right_elbow=60, left_elbow=60, right_knee=35, left_knee=28),
+    key(0.30, head=(-8, 0, 0), right_arm=(-55, 0, 18), left_arm=(-55, 0, -18), right_leg=(-25, 0, 4), left_leg=(-8, 0, -3),
+        right_elbow=115, left_elbow=115, right_knee=55, left_knee=35),
+    # the elbows up over the edge and the hands under the chest: over into the press
+    key(0.42, head=(10, 0, 0), right_arm=(-35, 0, 20), left_arm=(-35, 0, -20), right_leg=(-50, 0, 4), left_leg=(-4, 0, -3),
+        right_elbow=80, left_elbow=80, right_knee=85, left_knee=32),
+    key(0.52, head=(20, 0, 0), right_arm=(-20, 0, 18), left_arm=(-20, 0, -18), right_leg=(-80, 0, 4), left_leg=(4, 0, -3),
+        right_elbow=30, left_elbow=30, right_knee=102, left_knee=30),
+    key(0.65, head=(18, 0, 0), right_arm=(-15, 0, 15), left_arm=(-15, 0, -15), right_leg=(-95, 0, 4), left_leg=(0, 0, -3),
+        right_elbow=8, left_elbow=8, right_knee=112, left_knee=40),
+    key(0.80, head=(8, 0, 0), right_arm=(-12, 0, 10), left_arm=(-12, 0, -10), right_leg=(-60, 0, 4), left_leg=(-55, 0, -4),
+        right_elbow=15, left_elbow=15, right_knee=78, left_knee=100),
+    key(0.92, head=(2, 0, 0), right_arm=(-5, 0, 5), left_arm=(-5, 0, -5), right_leg=(-14, 0, 2), left_leg=(-20, 0, -2),
+        right_elbow=12, left_elbow=12, right_knee=24, left_knee=34),
+    key(1.00, head=(0, 0, 0), right_arm=(0, 0, 3), left_arm=(0, 0, -3), right_leg=(0, 0, 1), left_leg=(0, 0, -1),
+        right_elbow=5, left_elbow=5, right_knee=0, left_knee=0),
+])
 
 # ---------------------------------------------------------------------------
-# Ledge hang: hanging from a ledge, both arms up on the edge, legs dangling,
-# swaying gently from the hands.
+# Ledge hang (a 2 second loop, laid over LedgePose's hang: its catch, sway and dangle stay). The arms take the weight in
+# turn, one elbow giving a little as the other straightens, and the knees bend and hang loose by turns.
 # ---------------------------------------------------------------------------
-LEDGE_HANG = [
-    (0.00, {
-        "body": (0, 0, 0),
-        "head": (0, 0, 0),
-        "right_arm": (-163, 0, 6),
-        "left_arm": (-163, 0, -6),
-        "right_leg": (20, 0, 4),
-        "left_leg": (20, 0, -4),
-    }),
-    (0.25, {
-        "body": (5, 0, 0),
-        "head": (0, 0, 0),
-        "right_arm": (-163, 0, 6),
-        "left_arm": (-163, 0, -6),
-        "right_leg": (20, 0, 8),
-        "left_leg": (20, 0, -8),
-    }),
-    (0.50, {
-        "body": (0, 0, 0),
-        "head": (0, 0, 0),
-        "right_arm": (-163, 0, 6),
-        "left_arm": (-163, 0, -6),
-        "right_leg": (20, 0, 4),
-        "left_leg": (20, 0, -4),
-    }),
-    (0.75, {
-        "body": (-5, 0, 0),
-        "head": (0, 0, 0),
-        "right_arm": (-163, 0, 6),
-        "left_arm": (-163, 0, -6),
-        "right_leg": (20, 0, 8),
-        "left_leg": (20, 0, -8),
-    }),
-    (1.00, {
-        "body": (0, 0, 0),
-        "head": (0, 0, 0),
-        "right_arm": (-163, 0, 6),
-        "left_arm": (-163, 0, -6),
-        "right_leg": (20, 0, 4),
-        "left_leg": (20, 0, -4),
-    }),
-]
+LEDGE_HANG = (2.0, [
+    key(0.00, right_elbow=16, left_elbow=24, right_knee=10, left_knee=20),
+    key(0.50, right_elbow=24, left_elbow=16, right_knee=20, left_knee=9),
+    key(1.00, right_elbow=16, left_elbow=24, right_knee=10, left_knee=20),
+])
 
 # ---------------------------------------------------------------------------
-# Ledge mantle: climbing up and over a ledge - pull up, knee onto the edge,
-# then stand. Runs from hanging (0) to standing on top (1).
+# Shimmy (one hand-over-hand cycle along the edge, laid over LedgePose's shimmy, which lifts each hand off the edge and
+# along it): the hand coming off bends at the elbow, the one holding takes the weight nearly straight; the knees swing
+# with the body's rock from hand to hand.
 # ---------------------------------------------------------------------------
-LEDGE_MANTLE = [
-    (0.00, {
-        "body": (0, 0, 0),
-        "head": (0, 0, 0),
-        "right_arm": (-163, 0, 6),
-        "left_arm": (-163, 0, -6),
-        "right_leg": (20, 0, 4),
-        "left_leg": (20, 0, -4),
-    }),
-    (0.30, {
-        "body": (-38, 0, 0),
-        "head": (-15, 0, 0),
-        "right_arm": (-26, 0, 10),
-        "left_arm": (-26, 0, -10),
-        "right_leg": (-86, 0, 2),
-        "left_leg": (20, 0, -4),
-    }),
-    (0.60, {
-        "body": (-38, 0, 0),
-        "head": (-15, 0, 0),
-        "right_arm": (-26, 0, 10),
-        "left_arm": (-26, 0, -10),
-        "right_leg": (-86, 0, 2),
-        "left_leg": (-52, 0, -2),
-    }),
-    (0.85, {
-        "body": (0, 0, 0),
-        "head": (0, 0, 0),
-        "right_arm": (-10, 0, 5),
-        "left_arm": (-10, 0, -5),
-        "right_leg": (-5, 0, 2),
-        "left_leg": (-5, 0, -2),
-    }),
-    (1.00, STAND),
-]
-
-# ---------------------------------------------------------------------------
-# Climb down (Part B): the reverse of climbing up - lower from standing on top,
-# one knee then the other down over the edge, then hang. Runs from standing (0)
-# to hanging (1).
-# ---------------------------------------------------------------------------
-CLIMB_DOWN = [
-    (0.00, STAND),
-    (0.20, {
-        "body": (0, 0, 0),
-        "head": (0, 0, 0),
-        "right_arm": (-10, 0, 5),
-        "left_arm": (-10, 0, -5),
-        "right_leg": (-40, 0, 2),
-        "left_leg": (-5, 0, -2),
-    }),
-    (0.50, {
-        "body": (-38, 0, 0),
-        "head": (-15, 0, 0),
-        "right_arm": (-26, 0, 10),
-        "left_arm": (-26, 0, -10),
-        "right_leg": (-86, 0, 2),
-        "left_leg": (-52, 0, -2),
-    }),
-    (0.80, {
-        "body": (0, 0, 0),
-        "head": (0, 0, 0),
-        "right_arm": (-163, 0, 6),
-        "left_arm": (-163, 0, -6),
-        "right_leg": (20, 0, 4),
-        "left_leg": (20, 0, -4),
-    }),
-    (1.00, {
-        "body": (0, 0, 0),
-        "head": (0, 0, 0),
-        "right_arm": (-163, 0, 6),
-        "left_arm": (-163, 0, -6),
-        "right_leg": (20, 0, 4),
-        "left_leg": (20, 0, -4),
-    }),
-]
-
-# ---------------------------------------------------------------------------
-# Shimmy (Part B - around corners): moving sideways along a wall, hand over hand.
-# The body rocks from hand to hand as the hands reach along the edge.
-# ---------------------------------------------------------------------------
-SHIMMY = [
-    (0.00, {
-        "body": (0, 0, 0),
-        "head": (0, 0, 0),
-        "right_arm": (-20, 0, 10),
-        "left_arm": (-20, 0, -10),
-        "right_leg": (-25, 0, 8),
-        "left_leg": (-25, 0, -8),
-    }),
-    (0.25, {
-        "body": (4, 0, 2),
-        "head": (0, 0, 0),
-        "right_arm": (-45, 0, 12),
-        "left_arm": (-10, 0, -8),
-        "right_leg": (-35, 0, 10),
-        "left_leg": (-18, 0, -6),
-    }),
-    (0.50, {
-        "body": (0, 0, -4),
-        "head": (0, 0, 0),
-        "right_arm": (-10, 0, 8),
-        "left_arm": (-45, 0, -12),
-        "right_leg": (-18, 0, 6),
-        "left_leg": (-35, 0, -10),
-    }),
-    (0.75, {
-        "body": (-4, 0, -2),
-        "head": (0, 0, 0),
-        "right_arm": (-45, 0, 12),
-        "left_arm": (-10, 0, -8),
-        "right_leg": (-35, 0, 10),
-        "left_leg": (-18, 0, -6),
-    }),
-    (1.00, {
-        "body": (0, 0, 0),
-        "head": (0, 0, 0),
-        "right_arm": (-20, 0, 10),
-        "left_arm": (-20, 0, -10),
-        "right_leg": (-25, 0, 8),
-        "left_leg": (-25, 0, -8),
-    }),
-]
+SHIMMY = (1.0, [
+    key(0.00, right_elbow=25, left_elbow=25, right_knee=12, left_knee=12),
+    key(0.25, right_elbow=65, left_elbow=14, right_knee=24, left_knee=8),
+    key(0.50, right_elbow=25, left_elbow=25, right_knee=12, left_knee=12),
+    key(0.75, right_elbow=14, left_elbow=65, right_knee=8, left_knee=24),
+    key(1.00, right_elbow=25, left_elbow=25, right_knee=12, left_knee=12),
+])
 
 CLIPS = {
-    "player_freerun_cling": CLING,
-    "player_freerun_ledge_hang": LEDGE_HANG,
     "player_freerun_ledge_mantle": LEDGE_MANTLE,
-    "player_freerun_climb_down": CLIMB_DOWN,
+    "player_freerun_ledge_hang": LEDGE_HANG,
     "player_freerun_shimmy": SHIMMY,
 }
 
 
-def to_blockbench(x, y, z):
+def to_blockbench(bone, v):
+    if bone in FOLDS:
+        return [round(-v, 2), 0.0, 0.0]
+    x, y, z = v
     return [round(-x, 2), round(-y, 2), round(z, 2)]
 
 
-def write(name, keys):
+def write(name, clip):
+    length, keys = clip
     bones = {}
-    for bone in STAND:
+    names = []
+    for _, pose in keys:
+        names += [b for b in pose if b not in names]
+    for bone in names:
         frames = {}
-        for i, (t, pose) in enumerate(keys):
-            ends = i == 0 or i == len(keys) - 1
-            frames[f"{t:.2f}"] = {"vector": to_blockbench(*pose[bone]),
-                                  "lerp_mode": "linear" if ends else "catmullrom"}
+        timed = [(t, pose[bone]) for t, pose in keys if bone in pose]
+        for i, (t, v) in enumerate(timed):
+            ends = i == 0 or i == len(timed) - 1
+            frames[f"{t * length:.3f}".rstrip("0").rstrip(".")] = {"vector": to_blockbench(bone, v),
+                                                                   "lerp_mode": "linear" if ends else "catmullrom"}
         bones[bone] = {"rotation": frames}
     data = {"format_version": "1.8.0",
-            "animations": {name: {"loop": False, "animation_length": 1.0, "bones": bones}}}
+            "animations": {name: {"loop": False, "animation_length": length, "bones": bones}}}
     path = os.path.join(OUT, f"{name}.animation.json")
     with open(path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(data, f, indent="\t")
@@ -282,5 +121,5 @@ def write(name, keys):
 
 
 if __name__ == "__main__":
-    for name, keys in CLIPS.items():
-        write(name, keys)
+    for name, clip in CLIPS.items():
+        write(name, clip)

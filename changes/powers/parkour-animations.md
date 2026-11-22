@@ -1,3 +1,5 @@
-# Freerun ledge hang and mantle keyframed animations
-- Hanging from a ledge and climbing up over it now moves more smoothly, with natural weight and limb motion instead of stiff, jerky jointed snapping.
-- Not tested in game.
+# Freerun animations, part 1: the ledge climb, hang and shimmy keyed with elbows and knees
+- **Climbing up over a ledge** is a keyed animation: a pull-up with the elbows bending (the hands stay up at the edge as the chest comes to it), the elbows coming over the edge into a straight-armed press, the right foot stepping up onto the edge and the left knee after it, then up to stand. The lean in over the edge is as before.
+- **Hanging** keeps its catch, sway and dangle, and now the elbows give and straighten in turn as each arm takes the weight, and the knees hang loose by turns. **Shimmying** bends the elbow of the hand coming off the edge while the holding arm stays nearly straight.
+- The clips are GeckoLib/Blockbench animation files written by `tools/gen_freerun_clips.py` (elbow and knee folds are new channels in them); `tools/freerun_clip_preview.py` draws any clip frame by frame. Unused clips from the first draft (cling, climb down) are gone until their moves are done. (`LedgePose`, `KeyframeClip`)
+- Built; poses checked in still renders, not played.
