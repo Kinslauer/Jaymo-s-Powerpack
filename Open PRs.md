@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-21 19:50
+updated: 2026-11-21 20:18
 ---
 # Open PRs
 
-23 open, as of 2026-11-21 19:50. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+23 open, as of 2026-11-21 20:18. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1853](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1853) Heritage paths: core + Heartlander, Stoneborn, Tideborn (Kingdoms, Powers)
@@ -47,7 +47,7 @@ Andy merges only on "merge", one at a time.
 - **Agent:** no agent note
 
 ## [#1956](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1956) Z Fighter gaps 9: borrowed time, spared masters' homes, themed tournaments
-- **Branch:** `claude/zfighter-gaps-9-afterlife-tourneys` · **Updated:** 2026-11-21 (today)
+- **Branch:** `claude/zfighter-gaps-9-afterlife-tourneys` · **Updated:** 2026-11-21 (1 day ago)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[zfighter-gaps-9-afterlife-tourneys]]
 
@@ -63,7 +63,7 @@ Andy merges only on "merge", one at a time.
 
 ## [#1959](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1959) Freerun: keyframe ledge hang and mantle via GeckoLib clips
 - **Branch:** `claude/parkour-animations` · **Updated:** 2026-11-22 (today)
-- **Checks:** ⏳ 1 of 4 running
+- **Checks:** ✅ 5 passed
 - **Agent:** [[parkour-animations]]
 
 ## [#1960](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1960) Blockbench models for the 4 Z Fighter form lines
@@ -112,11 +112,11 @@ Andy merges only on "merge", one at a time.
 - **Agent:** [[devils-hole-pupfish-writeup]]
 
 ## [#1972](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1972) Tips switch: /tips off, or a button on the Notices page
-- **Branch:** `claude/project-thread-hag1a3` · **Updated:** 2026-11-21 (today)
+- **Branch:** `claude/project-thread-hag1a3` · **Updated:** 2026-11-22 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#1973](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1973) Kingdoms rise without a visit, VillagersPlus job houses, forestry fiefs
-- **Branch:** `claude/project-thread-utfz5g` · **Updated:** 2026-11-21 (today)
+## [#1975](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1975) Roll stays on the ground, prone Sit key wall-sits only, wounded struggle up the wall, dive on Alt
+- **Branch:** `claude/sleepy-wozniak-h42ef1` · **Updated:** 2026-11-22 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
