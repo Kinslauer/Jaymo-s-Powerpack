@@ -7323,3 +7323,13 @@ following integration task).
 
 - Andy: "idle cam kicks in during fishing and throws you off your bobber. maybe it could swap shots but keep the bobber within them? disable it completely when fishing if not". The idle camera is the pack's Ji AFK Cinematic. Its fishing mode plays its usual shots (which leave the bobber) and only cuts to the bobber once a fish swims up, and none of its settings keeps the bobber in every shot, so it's off while fishing: with that mod loaded, its "Fishing Cinematic" stays switched off and a line out counts as activity, so the plain idle camera doesn't start either. Reel in and it works as before. `AfkCinematicFishing` (reflection on its public `AFKDetector.registerActivity`, `ConfigManager.getConfig` and `ModConfig.fishingCinematicEnabled`; nothing of it needed to build).
 - Built on CI; not played.
+
+## 0.26.60 (2026-11-22): Old guns: no loading bar, Q takes up the next loaded one, the Void flintlock fires as you let go (#2011)
+
+- Andy: "the flintlock weaponry, it should release the shot as you release right click, the next right click reloading as you hold and can be interrupted. the loading bar does not need to be there for any of this old age weaponry, also pressing q with flintlocks just swaps to the other loaded one on the hotbar, like arsenal's void flintlocks".
+- **Void Armory flintlock**: right-click holds it ready and the shot goes as you let go (it fired on the press). A spent one still comes back loaded when dropped. `ArsenalFlintlock.Flintlock#releaseUsing`.
+- **WeaponMod's flintlock, muskets and blunderbuss** already work this way (hold to reload, letting go early loses it; press again and the shot goes as you let go), so only the bar and Q change for them.
+- **No loading bar** for any black-powder gun: WeaponMod's reload gauge beside the hotbar isn't drawn (`WeaponModReloadOverlayMixin`), and our use bar under the crosshair leaves them out (`UseBar`, `OldGuns`).
+- **Q** with a black-powder gun in hand takes up the next loaded one on the hotbar instead of dropping it (`OldGunSwapMixin`). With no other loaded one there it drops as before, and a spent Void flintlock is still dropped so it comes back loaded.
+- **Quicker aim** (Andy: "flintlock should also have a quicker aim acquisition as in you need to hold right click for less time to get an accurate shot"): WeaponMod's flintlock pistol reaches its tightest spread after 0.4 s held ready instead of 1 s (`WeaponModFlintlockAimMixin`, `AIM_SPEED` 2.5). A Marksman's quicker wind-up comes on top. The Void flintlock already shoots dead straight, and the Kingdoms guns' spread doesn't depend on the hold.
+- Built on CI; not played.
