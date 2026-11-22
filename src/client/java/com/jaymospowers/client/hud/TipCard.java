@@ -58,6 +58,19 @@ public final class TipCard {
 		}
 	}
 
+	/** Whether a card with this text is up or waiting. */
+	public static boolean holds(String text) {
+		if (showing != null && showing.text().getString().equals(text)) {
+			return true;
+		}
+		for (Card card : WAITING) {
+			if (card.text().getString().equals(text)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** Whether a card is up or waiting. */
 	public static boolean busy() {
 		return showing != null || !WAITING.isEmpty();

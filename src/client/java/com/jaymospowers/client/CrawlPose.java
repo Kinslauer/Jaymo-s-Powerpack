@@ -978,6 +978,12 @@ public final class CrawlPose {
 	private static void bendArms(HumanoidModel<?> h, AvatarRenderState state, float right, float left) {
 		KneeBend.bend(h.rightArm, right + com.jaymospowers.client.wounds.WallSit.elbow(state, true), ELBOW, true);
 		KneeBend.bend(h.leftArm, left + com.jaymospowers.client.wounds.WallSit.elbow(state, false), ELBOW, true);
+		// (rising up a wall: the knees, the feet kept on the floor)
+		float knee = com.jaymospowers.client.wounds.WallSit.kneeFold(state);
+		if (knee > 0.0F) {
+			KneeBend.bend(h.rightLeg, knee);
+			KneeBend.bend(h.leftLeg, knee);
+		}
 	}
 
 	/**

@@ -74,7 +74,10 @@ How to work:
 
 Units: 16 per block, y up, the model faces north (-z), feet at y=0. A player is 32 tall, 8 wide.
 Make original designs only: never copy another game's or mod's characters or art.
-Finish with the list of files you wrote and one honest line on anything that still looks off."""
+Tool results are the truth. A result with "error" means that step did not happen: read the error, change the call,
+and never send the same failing call again. After 3 errors from one tool, stop and report the error instead.
+Finish with the list of files you wrote, copied only from "saved" or "files" in tool results (never a
+file no tool reported), and one honest line on anything that still looks off."""
 
 
 root_agent = Agent(

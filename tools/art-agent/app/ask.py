@@ -84,6 +84,7 @@ async def run(brief, files):
                 )
             )
     start = time.monotonic()
+    wall_start = time.time() - 2  # file times run a little behind the clock
     print("[0s] asking Gemini...", flush=True)
     async for ev in runner.run_async(
         user_id="ask",
@@ -103,6 +104,19 @@ async def run(brief, files):
                 print(f"{t} {p.text}", flush=True)
         if ev.error_message:
             print(f"{t} error: {ev.error_message}", flush=True)
+    # A small model can say it saved files it never saved, so list what this run really wrote.
+    from app.artkit import OUT
+
+    made = [
+        os.path.relpath(os.path.join(d, f), HERE)
+        for d, _, fs in os.walk(OUT)
+        for f in fs
+        if os.path.getmtime(os.path.join(d, f)) >= wall_start
+    ]
+    print(
+        "files this run really wrote: " + (", ".join(sorted(made)) or "none"),
+        flush=True,
+    )
 
 
 def main():
