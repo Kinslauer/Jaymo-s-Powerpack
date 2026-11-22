@@ -1,9 +1,9 @@
 ---
-status: stalled
+status: in-review
 task: survival-wounds-track1
-branch: claude/cranky-booth-e665ec
+branch: claude/survival-wounds
 with: survival picks track 3 (butchery) runs beside it
-pr: 
+pr: 1992
 mods: powers, kingdoms
 versions: 
 started: 2026-11-22
@@ -32,3 +32,6 @@ Ranger's arrows go through the helmet.
 
 ## Done
 - 2026-11-22 10:08 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- PR #1992 open, Auto-fix on, built by CI (not on the PC). Pools apart from health, head-blow kills (not from full
+  health), 20% debuffs, broken hearts, headshots (Ranger arrows through helmets), armour per part, LSO medicine numbers
+  on our kit, food cost, sleep heals every part. Readings taken are listed in the PR. Not played in game.

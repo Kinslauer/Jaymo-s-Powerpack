@@ -1,9 +1,9 @@
 ---
-status: running
+status: done
 task: defence-disciplines
 branch: claude/defence-disciplines
 with: 
-pr: 
+pr: 1991
 mods: powers, kingdoms
 versions: 
 started: 2026-11-22

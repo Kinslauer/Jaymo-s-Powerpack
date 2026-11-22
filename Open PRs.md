@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-22 10:07
+updated: 2026-11-22 13:19
 ---
 # Open PRs
 
-11 open, as of 2026-11-22 10:07. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+13 open, as of 2026-11-22 13:19. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1853](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1853) Heritage paths: core + Heartlander, Stoneborn, Tideborn (Kingdoms, Powers)
@@ -22,7 +22,7 @@ Andy merges only on "merge", one at a time.
 - **Agent:** no agent note
 
 ## [#1957](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1957) Hands-on cooking: CHOP and STIR in-world interactions (Phase 1+2)
-- **Branch:** `claude/hands-on-cooking-realtime` · **Updated:** 2026-11-21 (today)
+- **Branch:** `claude/hands-on-cooking-realtime` · **Updated:** 2026-11-21 (1 day ago)
 - **Checks:** ❌ failing: Build Kitchen
 - **Agent:** no agent note
 
@@ -37,12 +37,12 @@ Andy merges only on "merge", one at a time.
 - **Agent:** [[mutant-zombie-reskin]]
 
 ## [#1970](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1970) Enemy damage balance: reduce damage across Powers and Kingdoms enemies
-- **Branch:** `claude/enemy-damage-balance` · **Updated:** 2026-11-21 (1 day ago)
+- **Branch:** `claude/enemy-damage-balance` · **Updated:** 2026-11-22 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[enemy-damage-balance]]
 
 ## [#1971](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1971) Devil's Hole Pupfish lore write-up
-- **Branch:** `claude/devils-hole-pupfish-writeup` · **Updated:** 2026-11-21 (today)
+- **Branch:** `claude/devils-hole-pupfish-writeup` · **Updated:** 2026-11-22 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[devils-hole-pupfish-writeup]]
 
@@ -51,12 +51,22 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#1981](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1981) Villagers always doing something: hunger, thirst, boredom, stall log and watchdog (draft)
+## [#1981](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1981) Villagers always doing something: hunger, thirst, boredom, stall log and watchdog
 - **Branch:** `claude/villagers-always-busy-3238b4` · **Updated:** 2026-11-22 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#1989](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1989) Meat hooks take a carried or dragged carcass on any click; both arms for big lifts; Carry On blocks drawn again
+## [#1989](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1989) Meat hooks take any carried or dragged body on any click; both arms for big lifts; Carry On blocks drawn again
 - **Branch:** `claude/survival-hook-carry` · **Updated:** 2026-11-22 (today)
 - **Checks:** ✅ 5 passed
-- **Agent:** [[survival-track3-hook-carry]]
+- **Agent:** no agent note
+
+## [#1992](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1992) Survival picks track 1: wound pools, head-blow kills, headshots, armour per part, medicine over time
+- **Branch:** `claude/survival-wounds` · **Updated:** 2026-11-22 (today)
+- **Checks:** ⏳ 1 of 5 running
+- **Agent:** [[survival-wounds-track1]]
+
+## [#1993](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1993) Butcher's shop: step-by-step work on the butcher block, skin rack, mincer and mince, display, head mounts, barrel of bones
+- **Branch:** `claude/survival-butchery` · **Updated:** 2026-11-22 (today)
+- **Checks:** ⏳ 3 of 4 running
+- **Agent:** no agent note

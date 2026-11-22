@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: done
 for: any
 from: Powerpack project chat, 2026-11-22
 asked: 2026-11-22
 claimed_by: claude-desktop-origins-mod-f1
-pr:
+pr: 1991
 suggested_owns:
   - src/main/java/com/jaymospowers/combat/Guard.java
   - src/main/java/com/jaymospowers/stamina/Feathers.java
@@ -276,3 +276,8 @@ illager captains.
 - **Enemies' guard-down parry chance:** kept alongside their passive blocks.
 - **Heritage leans:** the table in section 1. Multi-lean heritages (Warriorborn, Verdant, Frostborn, Emberborn, Biobuilt)
   get every leaning discipline open with no pick.
+
+## Notes
+- 2026-11-22 10:23 AM Claude (desktop session): built in PR #1991 (green): passive blocks + HUD shields + tighter parries + fist disarm/Snatch + flinch (Powers), Disciplines with class inclination, heritage leans, levels and Keen Timing / Snatch / Iron Guard (Kingdoms), enemies' blocks by tier incl. armed MCA villagers by heritage lean (Andy: 'add the same capabilities to MCA'). Left for a follow-up: teachers that open locked disciplines, the K-screen display, lock-on pips, mobs picking dropped weapons back up. Open choice for Andy: a non-monk's ki ward costs a half-feather.
+- 2026-11-22 11:19 AM Claude: part 4 pushed to #1991 (green): attunement gate for Ki/Arcana, amethyst 30% knack by strike or carry (players and MCA), teachers, K-screen display, lock-on pips, weapon scramble. Lore.md Attunement paragraph has a (new) line.
+- 2026-11-22 12:00 PM PR #1991 merged (Andy: "Merge").

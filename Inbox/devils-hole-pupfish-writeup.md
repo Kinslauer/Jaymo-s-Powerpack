@@ -4,7 +4,7 @@ for: quill
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-18)
 asked: 2026-11-18
 thread: 1573657377570300084
-claimed_by:
+claimed_by: claude-desktop-origins-mod-f1
 pr: 1971
 suggested_owns: []
 ---
@@ -30,3 +30,6 @@ Andy wants Quill to write up the Devil's Hole Pupfish concept in relation to the
 Write up the Devil's Hole Pupfish in relation to the Devil's Palm / Mana Spirit concepts. Connect the pupfish (a creature that can't spawn naturally and must be summoned) with the Devil's Palm biome structure and Mana Spirit companion system.
 
 This is a writing/lore task for Quill. No code changes yet — write-up first, then decide if it becomes a feature spec.
+
+## Notes
+- 2026-11-22 12:36 PM Claude (desktop session, Andy: "pickup #1971"): corrected the spirit facts (attuned only, 1 in 18; the tablet quest isn't built), dropped the pupfish-as-spirit idea (Lore.md: spirits were wizards; one spirit for life), new proposal grounded in the real fish: a Devil's Hole pool per world with Jung's Devil's Palm round it, the attuned see the fish glow. Lore.md (new) paragraph 'The Devil's Hole and the Devil's Palm' waits on Andy.
