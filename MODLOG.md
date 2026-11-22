@@ -7312,3 +7312,14 @@ following integration task).
   head off a villager) is still the plain head.
 - Built by CI only; not played: the head's place and facing on a wearer, a block and an item, in the inventory
   too, and zombies' shade-seeking round a body, are unseen in game.
+
+## 0.26.58 (2026-11-22): Pull up onto shore from the water; right-click held climbs (#2008)
+
+- **Out of the water** (Andy: "i also tried to climb onto shore from the water and couldnt right click the ground to pull up like normal"): an empty-hand right-click at a shore's edge now catches it from the water, and the hang under the edge (which is in the water) isn't lost to it. A swim into a wall still doesn't catch it by itself; only the click does. Treading water, the feet are about 0.4 under the surface, so a low bank (its top 0.7 to 1.1 blocks over the feet, too low to hang from) is climbed straight onto by the same click, standing (not on the belly). Lower than that, vanilla's own step out of the water does it. `Ledge#canHang(Player, boolean)`, `LedgeClient`.
+- **Right-click parity** (Andy: "the keybind for climbing should also be a right click hold with empty hand when you unlock it"): holding right-click with an empty hand on a ledge pulls up as Jump does (a tap still only hangs). With Climber learned, holding it at a wall does what forward + Jump do: jumps onto it, clings and climbs up, and over the top. Falling, a held right-click is still the wall slide's. Only with both hands empty and nothing in use, and not with the crosshair on a mob, door, chest or the like. `FreerunClient#useClimb`, `LedgeClient#useHeld`.
+- Built on CI; not played.
+
+## 0.26.59 (2026-11-22): No idle camera while your fishing line is out (#2009)
+
+- Andy: "idle cam kicks in during fishing and throws you off your bobber. maybe it could swap shots but keep the bobber within them? disable it completely when fishing if not". The idle camera is the pack's Ji AFK Cinematic. Its fishing mode plays its usual shots (which leave the bobber) and only cuts to the bobber once a fish swims up, and none of its settings keeps the bobber in every shot, so it's off while fishing: with that mod loaded, its "Fishing Cinematic" stays switched off and a line out counts as activity, so the plain idle camera doesn't start either. Reel in and it works as before. `AfkCinematicFishing` (reflection on its public `AFKDetector.registerActivity`, `ConfigManager.getConfig` and `ModConfig.fishingCinematicEnabled`; nothing of it needed to build).
+- Built on CI; not played.
