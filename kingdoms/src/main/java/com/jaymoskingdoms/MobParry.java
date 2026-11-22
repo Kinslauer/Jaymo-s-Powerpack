@@ -54,6 +54,8 @@ public final class MobParry {
 		if (MobCombat.ENABLED) {
 			ServerLivingEntityEvents.ALLOW_DAMAGE.register(MobParry::allowDamage);
 		}
+		// (defence disciplines) enemies' passive blocks
+		MobBlocks.register();
 	}
 
 	private static boolean allowDamage(LivingEntity victim, DamageSource source, float amount) {
@@ -119,6 +121,8 @@ public final class MobParry {
 			player.needsSync = true;
 		}
 		FighterPosture.parried(level, mob);
+		// (defence disciplines) its own parry gives its blocks back
+		MobBlocks.parried(mob);
 		MobShields.drop(mob);
 		MobCombat.hasten(mob);
 	}

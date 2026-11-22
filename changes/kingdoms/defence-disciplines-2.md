@@ -1,0 +1,8 @@
+# Defence disciplines, part 2: Arms, Ki and Arcana by class, heritage and training
+- **Your passive blocks come from disciplines now** (Jaymo's Powers' passive blocks ask): Arms (the reflex block), Ki (the ki ward) and Arcana (the ward). Your class inclines you to one: Monks Ki; Mages, Sorcerers, Warlocks, Clerics and Druids Arcana; everyone else Arms. Z Fighters lean to Ki too, whatever their class.
+- **Heritage leans**: Heartlander, Stoneborn, Deepborn, Nightborn and the Hollow's zombie and skeleton looks to Arms; Stormborn, Beastfolk and Rubberfolk to Ki; Sylvan, Tideborn, Dragonblood, Dawnborn, Endborn, Divine, the Inkmarked Earthling and the Hollow's other looks to Arcana; Warriorborn, Verdant, Frostborn and Emberborn to Arms and Ki; Biobuilt to all three. A lean that matches your class starts that discipline at level 2; one that differs is open from the start and trains at half speed.
+- **Levels 0-10**, earned by blows your blocks catch. Blocks: inclined 1 (2 at level 5, 3 at 10), anything else 1 at level 3 and 2 at level 8; at most 5 in all. Disciplines you have no inclination or lean for stay locked (teachers come in a later part).
+- **What they cost**: a ward takes 2 mana; a monk's ki ward one ki; anyone else's ki ward a half-feather. Valor-coated (Armament) fists block at the full 60%.
+- **New skills** on Strength's Might: Keen Timing (3 ranks, level 5: the parry windows widen back to the old ones), Snatch (level 8: a perfect bare-fisted parry takes the foe's weapon into your hand; in the Thief's tree too, and every Monk has it), Iron Guard (level 10: a held guard costs 0.4 half-feathers a point instead of 0.6).
+- Classes: new Disciplines; Skills (three perks), SkillWeb, ThiefTree, Classes (registers it).
+- Built; not played in game.

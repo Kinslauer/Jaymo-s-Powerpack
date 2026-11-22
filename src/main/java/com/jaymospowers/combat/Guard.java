@@ -114,16 +114,21 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  */
 public final class Guard {
-	/** A blow in the first this-many ticks of a raise is a perfect parry; up to the second, a parry. */
-	public static final int PERFECT_TICKS = 5, PARRY_TICKS = 12;
-	/** Extra ticks on both windows against the one you're locked onto. */
-	public static final int LOCK_PERFECT_BONUS = 2, LOCK_PARRY_BONUS = 4;
+	/**
+	 * (defence disciplines) A blow in the first this-many ticks of a raise is a perfect parry; up to the second, a parry; by
+	 * Keen Timing's rank (0 untrained, 3 the old windows: {@link PassiveBlocks#keenTiming}).
+	 */
+	public static final int[] PERFECT_TICKS = {2, 3, 4, 5}, PARRY_TICKS = {6, 8, 10, 12};
+	/** Extra ticks on both windows against the one you're locked onto, by Keen Timing's rank. */
+	public static final int[] LOCK_PERFECT_BONUS = {1, 1, 2, 2}, LOCK_PARRY_BONUS = {2, 2, 3, 4};
 	/** A raise this soon after the last one's start, when that one parried nothing, has no parry window. */
 	public static final int EAGER_TICKS = 15;
 	/** The weapon guard's share of a frontal blow, and its reach round your front (degrees each side, as a shield's). */
 	public static final float GUARD_SHARE = 0.6F, GUARD_ANGLE = 90.0F;
 	/** Feathers (halves) a blocked blow costs per point of damage, at least {@link #BLOCK_COST_MIN}; shields cost none. */
 	public static final float BLOCK_COST_PER_DAMAGE = 0.6F;
+	/** (defence disciplines) With Iron Guard (a Strength skill), this instead. */
+	public static final float IRON_GUARD_COST = 0.4F;
 	public static final int BLOCK_COST_MIN = 1;
 	/** A broken guard: how long the weapon can't guard (seconds), and how long you reel (ticks). */
 	public static final float BREAK_SECONDS = 2.0F;
@@ -136,6 +141,8 @@ public final class Guard {
 	public static final float PERFECT_RIPOSTE = 1.5F;
 	/** Parry: the same, lighter. */
 	public static final int PARRY_STUN = 12, PARRY_RIPOSTE_TICKS = 25;
+	/** (defence disciplines) A plain parry's feathers back. */
+	public static final int PARRY_REFUND = 2;
 	public static final double PARRY_SHOVE = 0.45;
 	public static final float PARRY_RIPOSTE = 1.25F;
 	/**
@@ -184,12 +191,13 @@ public final class Guard {
 	 * power's own guard, its single parry {@code window} (ticks from the raise; 0 for a weapon or shield, which use this
 	 * class's windows) and when its parry is ready again after the last one ({@code readyAt}, game time).
 	 */
-	public record Shown(long start, boolean eager, int window, long readyAt) {
+	public record Shown(long start, boolean eager, int window, long readyAt, int keen) {
 		public static final StreamCodec<ByteBuf, Shown> CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, Shown::start,
 			ByteBufCodecs.BOOL, Shown::eager,
 			ByteBufCodecs.VAR_INT, Shown::window,
 			ByteBufCodecs.VAR_LONG, Shown::readyAt,
+			ByteBufCodecs.VAR_INT, Shown::keen,
 			Shown::new);
 	}
 
@@ -245,6 +253,7 @@ public final class Guard {
 		UseItemCallback.EVENT.register(Guard::use);
 		ServerTickEvents.END_SERVER_TICK.register(Guard::echoes);
 		Swat.init();
+		PassiveBlocks.init();
 		ShieldCraft.init();
 		BladeStyle.init();
 		TwoBlades.init();
@@ -391,7 +400,7 @@ public final class Guard {
 		raise.start = now;
 		raise.parried = false;
 		raise.up = true;
-		player.setAttached(SHOWN, new Shown(now, raise.eager, 0, 0L));
+		player.setAttached(SHOWN, new Shown(now, raise.eager, 0, 0L, PassiveBlocks.keenTiming(player)));
 		return raise;
 	}
 
@@ -401,7 +410,7 @@ public final class Guard {
 	 * moves {@code readyAt}.
 	 */
 	public static void showPower(ServerPlayer player, long start, int window, long readyAt) {
-		player.setAttached(SHOWN, new Shown(start, false, window, readyAt));
+		player.setAttached(SHOWN, new Shown(start, false, window, readyAt, PassiveBlocks.keenTiming(player)));
 	}
 
 	/** (0.18.24) A power's own guard came down. */
@@ -431,10 +440,11 @@ public final class Guard {
 			return Timing.BLOCK;
 		}
 		boolean watching = attacker != null && LockOn.target(player) == attacker;
-		if (held <= PERFECT_TICKS + (watching ? LOCK_PERFECT_BONUS : 0)) {
+		int keen = PassiveBlocks.keenTiming(player);
+		if (held <= PERFECT_TICKS[keen] + (watching ? LOCK_PERFECT_BONUS[keen] : 0)) {
 			return Timing.PERFECT;
 		}
-		if (!projectile && held <= PARRY_TICKS + (watching ? LOCK_PARRY_BONUS : 0)) {
+		if (!projectile && held <= PARRY_TICKS[keen] + (watching ? LOCK_PARRY_BONUS[keen] : 0)) {
 			return Timing.PARRY;
 		}
 		return Timing.BLOCK;
@@ -494,7 +504,8 @@ public final class Guard {
 		// (a boxer's block costs by the blow, not by its weight: Boxing.blockCost)
 		if (melee && weaponGuard(guard) && player.isBlocking() && !(com.jaymospowers.boxing.Boxing.boxing(player)
 			? com.jaymospowers.boxing.Boxing.spend(player, com.jaymospowers.boxing.Boxing.blockCost(player))
-			: Feathers.spend(player, Math.max(BLOCK_COST_MIN, Mth.ceil(amount * BLOCK_COST_PER_DAMAGE * BladeStyle.block(player)))))) {
+			: Feathers.spend(player, Math.max(BLOCK_COST_MIN, Mth.ceil(amount * (PassiveBlocks.ironGuard(player) ? IRON_GUARD_COST : BLOCK_COST_PER_DAMAGE)
+				* BladeStyle.block(player)))))) {
 			guardBreak(player, guard);
 		}
 		return false;
@@ -540,9 +551,7 @@ public final class Guard {
 		// ((0.21.20) turned to the next blow coming; a chain of parries makes the riposte harder, Crowds)
 		float chain = Crowds.counter(player, attacker);
 		Shakes.send(player, perfect ? 1.2F : 0.6F, from);
-		if (perfect) {
-			Feathers.refund(player, PERFECT_REFUND);
-		}
+		Feathers.refund(player, perfect ? PERFECT_REFUND : PARRY_REFUND);
 		if (attacker == null || !attacker.isAlive()) {
 			return;
 		}
@@ -555,6 +564,9 @@ public final class Guard {
 		}
 		attacker.needsSync = true;
 		stagger(attacker, perfect ? PERFECT_STUN : PARRY_STUN);
+		// (defence disciplines) a fist parry knocks the weapon out of the attacker's hand (Snatch: into yours)
+		PassiveBlocks.disarm(player, attacker, perfect);
+		PassiveBlocks.foeParried(attacker);
 		if (perfect && attacker instanceof Player foe && !foe.getMainHandItem().isEmpty()) {
 			foe.getCooldowns().addCooldown(foe.getMainHandItem(), PERFECT_DISARM_TICKS);
 		}
@@ -582,6 +594,8 @@ public final class Guard {
 		}
 		player.stopUsingItem();
 		stagger(player, BREAK_STAGGER);
+		// (defence disciplines) and no passive blocks until it mends
+		PassiveBlocks.broken(player, Math.round(BREAK_SECONDS * 20.0F));
 		player.level().sendParticles(ParticleTypes.CRIT, player.getX(), player.getEyeY() - 0.3, player.getZ(), 8, 0.3, 0.2, 0.3, 0.2);
 		ClashFx.sparks(player.level(), player.getEyePosition().add(player.getLookAngle().scale(0.6)).add(0.0, -0.3, 0.0), null, ClashFx.PARRY_SPARKS, ClashFx.BLOCK_SCALE);
 	}
@@ -603,6 +617,8 @@ public final class Guard {
 	 * striking lands harder, once.
 	 */
 	public static float riposte(LivingEntity victim, DamageSource source, float damage) {
+		// (defence disciplines) a passive block catches it first
+		damage = PassiveBlocks.caught(victim, source, damage);
 		damage = Stances.adjust(victim, source, damage);
 		if (!(source.getEntity() instanceof ServerPlayer player) || source.getDirectEntity() != player || RIPOSTES.isEmpty()) {
 			return damage;
