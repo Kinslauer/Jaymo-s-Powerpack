@@ -27,6 +27,7 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
@@ -49,8 +50,7 @@ public final class ScryingOrbRenderer implements BlockEntityRenderer<ScryingOrbB
 	static final int FULL_BRIGHT = 0xF000F0, DAY = 0xFFFFFFFF, NIGHT = 0xFF8C96C8;
 	/** How small a figure is beside a block, and the blocks that stand for them (kind 1 folk, 2 monsters, 3 animals). */
 	static final float FIGURE = 0.6F;
-	private static final BlockState[] FIGURES = {Blocks.WHITE_CONCRETE.defaultBlockState(), Blocks.LIGHT_BLUE_CONCRETE.defaultBlockState(),
-		Blocks.RED_CONCRETE.defaultBlockState(), Blocks.LIME_CONCRETE.defaultBlockState()};
+	private static final BlockState[] FIGURES = {figure(DyeColor.WHITE), figure(DyeColor.LIGHT_BLUE), figure(DyeColor.RED), figure(DyeColor.LIME)};
 	private static final Direction[] SIDES = {Direction.DOWN, Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST, null};
 
 	/** One orb's vision as last sent: each drawn block (position in the view, state) and the figures. */
@@ -94,7 +94,7 @@ public final class ScryingOrbRenderer implements BlockEntityRenderer<ScryingOrbB
 		poseStack.pushPose();
 		// over the orb's middle, turning, and shrunk: the view's centre column on the block's centre, its lowest layer at BASE
 		poseStack.translate(0.5F, BASE, 0.5F);
-		poseStack.mulPose(Axis.YP.rotationDegrees(state.angle));
+		poseStack.rotate(Axis.YP.rotationDegrees(state.angle));
 		poseStack.scale(SCALE, SCALE, SCALE);
 		collector.submitCustomGeometry(poseStack, RenderTypes.entityTranslucent(TextureAtlas.LOCATION_BLOCKS), (pose, consumer) -> {
 			QuadInstance instance = new QuadInstance();
@@ -128,6 +128,10 @@ public final class ScryingOrbRenderer implements BlockEntityRenderer<ScryingOrbB
 		return true;
 	}
 
+	private static BlockState figure(DyeColor colour) {
+		return Blocks.CONCRETE.pick(colour).defaultBlockState();
+	}
+
 	private static List<BakedQuad> quads(Minecraft minecraft, BlockState state) {
 		return QUADS.computeIfAbsent(state, s -> {
 			BlockStateModel model = minecraft.getModelManager().getBlockStateModelSet().get(s);
@@ -147,7 +151,7 @@ public final class ScryingOrbRenderer implements BlockEntityRenderer<ScryingOrbB
 	private static Vision vision(ScryingOrb.OrbView view, long now) {
 		BlockState[] palette = new BlockState[view.palette().length];
 		for (int i = 0; i < palette.length; i++) {
-			palette[i] = BlockState.stateById(view.palette()[i]);
+			palette[i] = net.minecraft.world.level.block.Block.stateById(view.palette()[i]);
 		}
 		List<Integer> cells = new ArrayList<>();
 		List<BlockState> states = new ArrayList<>();
