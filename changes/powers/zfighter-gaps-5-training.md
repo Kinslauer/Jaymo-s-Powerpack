@@ -19,7 +19,7 @@
 - Added translations for Pod Pilot, drill unlocked, challenge complete, pod crashed.
 
 ## Not tested in game
-- Client-side Pod Pilot drill rendering and input handling (ZFighterDrillScreen.java has syntax issues preventing full build).
+- Client-side Pod Pilot drill rendering and input handling.
 - Drill unlock progression near masters.
 - Mentor TP bonus and grade display.
 - Challenge mode flow.
