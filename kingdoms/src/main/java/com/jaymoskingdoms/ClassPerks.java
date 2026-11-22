@@ -582,7 +582,7 @@ public final class ClassPerks {
 			if (cls == PlayerClass.RANGER) {
 				// (survival picks) Andy: "rangers should go through the helmet now as long as you use an arrow": Jaymo's Powers
 				// reads the tag (a headshot through a helmet, and the helmet's own cut ignored); a thrown trident isn't an arrow
-				if (!(arrow instanceof ThrownTrident)) {
+				if (!(arrow instanceof net.minecraft.world.entity.projectile.arrow.ThrownTrident)) {
 					arrow.addTag(RANGER_THROUGH_HELMET);
 				}
 				amount *= (float) ARCHER_DAMAGE;
