@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-22 02:29
+updated: 2026-11-22 02:31
 ---
 # Open PRs
 
-22 open, as of 2026-11-22 02:29. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+21 open, as of 2026-11-22 02:31. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1853](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1853) Heritage paths: core + Heartlander, Stoneborn, Tideborn (Kingdoms, Powers)
@@ -60,11 +60,6 @@ Andy merges only on "merge", one at a time.
 - **Branch:** `claude/zfighter-gaps-1-stats` · **Updated:** 2026-11-21 (1 day ago)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[zfighter-gaps-1-stats]]
-
-## [#1959](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1959) Freerun animations: keyed ledge climb, climbing down, vaults by speed and height, pole climb, bending limbs through the moves
-- **Branch:** `claude/parkour-animations` · **Updated:** 2026-11-22 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** [[parkour-animations]]
 
 ## [#1960](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1960) Blockbench models for the 4 Z Fighter form lines
 - **Branch:** `claude/zfighter-forms-models` · **Updated:** 2026-11-21 (1 day ago)
