@@ -106,11 +106,14 @@ public final class Disciplines {
 
 	/** The disciplines {@code player}'s heritage takes to (Andy's table, drafts 6 and 7). */
 	static Set<Integer> leans(Player player) {
-		Heritage.Kind kind = Heritage.of(player);
+		return leans(Heritage.of(player), HeritageVariants.of(player));
+	}
+
+	/** The disciplines heritage {@code kind} (in look {@code variant}) takes to: a player's, or an MCA villager's. */
+	static Set<Integer> leans(Heritage.@Nullable Kind kind, HeritageVariants.@Nullable Variant variant) {
 		if (kind == null) {
 			return Set.of();
 		}
-		HeritageVariants.Variant variant = HeritageVariants.of(player);
 		return switch (kind) {
 			case HEARTLANDER, STONEBORN, DEEPBORN, NIGHTBORN -> Set.of(ARMS);
 			case STORMBORN, BEASTFOLK, RUBBERFOLK -> Set.of(KI);

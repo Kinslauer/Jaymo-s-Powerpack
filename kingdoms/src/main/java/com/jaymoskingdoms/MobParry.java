@@ -119,6 +119,8 @@ public final class MobParry {
 			player.needsSync = true;
 		}
 		FighterPosture.parried(level, mob);
+		// (defence disciplines) its own parry gives its blocks back
+		MobBlocks.parried(mob);
 		MobShields.drop(mob);
 		MobCombat.hasten(mob);
 	}

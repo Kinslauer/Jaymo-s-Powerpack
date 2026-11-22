@@ -566,6 +566,7 @@ public final class Guard {
 		stagger(attacker, perfect ? PERFECT_STUN : PARRY_STUN);
 		// (defence disciplines) a fist parry knocks the weapon out of the attacker's hand (Snatch: into yours)
 		PassiveBlocks.disarm(player, attacker, perfect);
+		PassiveBlocks.foeParried(attacker);
 		if (perfect && attacker instanceof Player foe && !foe.getMainHandItem().isEmpty()) {
 			foe.getCooldowns().addCooldown(foe.getMainHandItem(), PERFECT_DISARM_TICKS);
 		}

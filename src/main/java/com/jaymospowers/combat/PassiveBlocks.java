@@ -120,10 +120,10 @@ public final class PassiveBlocks {
 
 	// ---- Kingdoms (com.jaymoskingdoms.Disciplines), by reflection ---------------------------------------------------
 
-	private static final @Nullable Method BLOCKS, SPEND, VALOR_FISTS, KEEN, SNATCH, IRON_GUARD, TRAINED;
+	private static final @Nullable Method BLOCKS, SPEND, VALOR_FISTS, KEEN, SNATCH, IRON_GUARD, TRAINED, MOB_BROKEN;
 
 	static {
-		Method blocks = null, spend = null, valor = null, keen = null, snatch = null, iron = null, trained = null;
+		Method blocks = null, spend = null, valor = null, keen = null, snatch = null, iron = null, trained = null, mobBroken = null;
 		if (FabricLoader.getInstance().isModLoaded("jaymoskingdoms")) {
 			try {
 				Class<?> c = Class.forName("com.jaymoskingdoms.Disciplines");
@@ -134,6 +134,7 @@ public final class PassiveBlocks {
 				snatch = c.getMethod("snatch", ServerPlayer.class);
 				iron = c.getMethod("ironGuard", ServerPlayer.class);
 				trained = c.getMethod("trained", ServerPlayer.class, int.class);
+				mobBroken = Class.forName("com.jaymoskingdoms.MobBlocks").getMethod("broken", net.minecraft.world.entity.Mob.class);
 			} catch (ReflectiveOperationException | LinkageError e) {
 				// (an older Kingdoms: no disciplines; the defaults below)
 			}
@@ -145,6 +146,7 @@ public final class PassiveBlocks {
 		SNATCH = snatch;
 		IRON_GUARD = iron;
 		TRAINED = trained;
+		MOB_BROKEN = mobBroken;
 	}
 
 	private static @Nullable Object ask(@Nullable Method method, Object... args) {
@@ -388,6 +390,13 @@ public final class PassiveBlocks {
 	/** Whether slot {@code i} is used (a shield) in the synced state. */
 	public static boolean used(int packed, int i) {
 		return (packed >> 10 + i & 1) != 0;
+	}
+
+	/** A parry of a mob's blow takes all its passive blocks (Kingdoms' MobBlocks). */
+	static void foeParried(@Nullable LivingEntity attacker) {
+		if (attacker instanceof net.minecraft.world.entity.Mob mob) {
+			ask(MOB_BROKEN, mob);
+		}
 	}
 
 	// ---- fists: the disarm -----------------------------------------------------------------------------------------
