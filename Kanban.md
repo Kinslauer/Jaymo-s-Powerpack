@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 08:45). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 08:57). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -36,6 +36,9 @@ kanban-plugin: board
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🔨 Hephaestus · #1957 · changes · fixing review notes
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · changes · fixing review notes
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · 🔨 Hephaestus · #1896 · changes · fixing review notes
+- [ ] [[Agents/npc-ledge-climb|npc-ledge-climb]] · 💻 Odysseus · running
+- [ ] [[Agents/survival-track3-hook-carry|survival-track3-hook-carry]] · 💻 Odysseus · running
+- [ ] [[Agents/survival-wounds-track1|survival-wounds-track1]] · 💻 Odysseus · running
 
 
 ## In review
@@ -44,7 +47,6 @@ kanban-plugin: board
 - [ ] [[Inbox/devils-hole-pupfish-writeup|devils-hole-pupfish-writeup]] · for 🪶 Quill · #1971 · in-review
 - [ ] [[Inbox/enemy-damage-balance|enemy-damage-balance]] · for 🪽 any Hermes bot · #1970 · in-review
 - [ ] [[Inbox/mutant-zombie-reskin|mutant-zombie-reskin]] · for 🔥 Prometheus · #1968 · in-review
-- [ ] [[Inbox/zfighter-gaps-1-stats|zfighter-gaps-1-stats]] · for 🪽 any Hermes bot · #1958 · in-review
 - [ ] [[Inbox/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]] · for 🪽 any Hermes bot · #1937 · in-review
 - [ ] [[Inbox/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]] · for 🪽 any Hermes bot · #1939 · in-review
 - [ ] [[Inbox/zfighter-gaps-4-forms|zfighter-gaps-4-forms]] · for 🪽 any Hermes bot · #1965 · in-review
@@ -55,7 +57,6 @@ kanban-plugin: board
 - [ ] [[Inbox/zfighter-forms-animations|zfighter-forms-animations]] · for any · #1962 · in-review
 - [ ] [[Inbox/zfighter-forms-models|zfighter-forms-models]] · for any · #1960 · in-review
 - [ ] [[Inbox/zfighter-forms-textures|zfighter-forms-textures]] · for any · #1963 · in-review
-- [ ] [[Inbox/zfighter-gaps-2-power|zfighter-gaps-2-power]] · 🔨 Hephaestus · #1938 · in-review
 - [ ] [[Inbox/zfighter-gaps-5-training|zfighter-gaps-5-training]] · ☀️ Apollo · #1953 · in-review
 - [ ] [[Inbox/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]] · 💻 Odysseus · #1986 · in-review
 
@@ -71,14 +72,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/zfighter-gaps-2-power|zfighter-gaps-2-power]]
+- [x] [[Inbox/Done/zfighter-gaps-1-stats|zfighter-gaps-1-stats]]
 - [x] [[Inbox/Done/parkour-animations|parkour-animations]]
 - [x] [[Inbox/Done/hint-tip-cards|hint-tip-cards]]
 - [x] [[Inbox/Done/zfighter-aura-rework|zfighter-aura-rework]]
 - [x] [[Inbox/Done/forest-fire-pack|forest-fire-pack]]
 - [x] [[Inbox/Done/plan-ghosts-litematica-tools|plan-ghosts-litematica-tools]]
 - [x] [[Inbox/Done/harness-body-pieces|harness-body-pieces]]
-- [x] [[Inbox/Done/harness-upkeep|harness-upkeep]]
-- [x] [[Inbox/Done/medieval-deco-7-practice-dummy|medieval-deco-7-practice-dummy]]
 
 
 %% kanban:settings
