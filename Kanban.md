@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 10:08). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 13:20). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -36,16 +36,17 @@ kanban-plugin: board
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🔨 Hephaestus · #1957 · changes · fixing review notes
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · changes · fixing review notes
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · 🔨 Hephaestus · #1896 · changes · fixing review notes
-- [ ] [[Inbox/defence-disciplines|defence-disciplines]] · 💻 Odysseus · claimed
 
 
 ## In review
 
 - [ ] [[Inbox/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]] · 🍇 Bacchus · #1964 · in-review
-- [ ] [[Inbox/devils-hole-pupfish-writeup|devils-hole-pupfish-writeup]] · for 🪶 Quill · #1971 · in-review
-- [ ] [[Inbox/enemy-damage-balance|enemy-damage-balance]] · for 🪽 any Hermes bot · #1970 · in-review
 - [ ] [[Inbox/mutant-zombie-reskin|mutant-zombie-reskin]] · for 🔥 Prometheus · #1968 · in-review
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · 🔥 Prometheus · #research · in-review
+- [ ] [[Inbox/devils-hole-pupfish-writeup|devils-hole-pupfish-writeup]] · 💻 Odysseus · #1971 · in-review
+- [ ] [[Inbox/enemy-damage-balance|enemy-damage-balance]] · 💻 Odysseus · #1970 · in-review
+- [ ] [[Agents/survival-track3-hook-carry|survival-track3-hook-carry]] · 💻 Odysseus · #1989, 1993 · in-review
+- [ ] [[Agents/survival-wounds-track1|survival-wounds-track1]] · 💻 Odysseus · #1992 · in-review
 
 
 ## Needs Andy
@@ -54,8 +55,6 @@ kanban-plugin: board
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
 - [ ] [[Inbox/class-trees-plan|class-trees-plan]] · for 💻 Odysseus · blocked
 - [ ] [[Inbox/wither-model|wither-model]] · 🍇 Bacchus · blocked
-- [ ] [[Agents/survival-track3-hook-carry|survival-track3-hook-carry]] · 💻 Odysseus · #1989 · stalled
-- [ ] [[Agents/survival-wounds-track1|survival-wounds-track1]] · 💻 Odysseus · stalled
 - [ ] [[Agents/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]] · 💻 Odysseus · stalled
 - [ ] [[Agents/zfighter-gaps-8-raids|zfighter-gaps-8-raids]] · 💻 Odysseus · blocked
 
