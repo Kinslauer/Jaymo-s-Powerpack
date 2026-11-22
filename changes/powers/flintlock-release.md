@@ -4,4 +4,5 @@
 - **WeaponMod's flintlock, muskets and blunderbuss** already work this way (hold to reload, letting go early loses it; press again and the shot goes as you let go), so only the bar and Q change for them.
 - **No loading bar** for any black-powder gun: WeaponMod's reload gauge beside the hotbar isn't drawn (`WeaponModReloadOverlayMixin`), and our use bar under the crosshair leaves them out (`UseBar`, `OldGuns`).
 - **Q** with a black-powder gun in hand takes up the next loaded one on the hotbar instead of dropping it (`OldGunSwapMixin`). With no other loaded one there it drops as before, and a spent Void flintlock is still dropped so it comes back loaded.
+- **Quicker aim** (Andy: "flintlock should also have a quicker aim acquisition as in you need to hold right click for less time to get an accurate shot"): WeaponMod's flintlock pistol reaches its tightest spread after 0.4 s held ready instead of 1 s (`WeaponModFlintlockAimMixin`, `AIM_SPEED` 2.5). A Marksman's quicker wind-up comes on top. The Void flintlock already shoots dead straight, and the Kingdoms guns' spread doesn't depend on the hold.
 - Built on CI; not played.
