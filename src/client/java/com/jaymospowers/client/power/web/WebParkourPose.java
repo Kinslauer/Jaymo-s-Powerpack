@@ -466,6 +466,20 @@ public final class WebParkourPose {
 			poleBends(h, pose);
 			return;
 		}
+		if (pose != null && pose.kind() == WebParkour.SLIDE) {
+			// (track 5) baseball: the cocked leg folded aside; knee slide: kneeling, shins along the ground; hip slide: the
+			// stacked legs bent; head first: straight
+			float e = pose.in();
+			float[] knees = switch (pose.variant()) {
+				case 0 -> new float[] {0.1F, 1.5F};
+				case 1 -> new float[] {2.3F, 2.3F};
+				case 2 -> new float[] {1.0F, 1.2F};
+				default -> new float[] {0.15F, 0.15F};
+			};
+			com.jaymospowers.client.KneeBend.bend(h.rightLeg, knees[0] * e);
+			com.jaymospowers.client.KneeBend.bend(h.leftLeg, knees[1] * e);
+			return;
+		}
 		if (pose != null && pose.kind() == WebParkour.WALL_JUMP) {
 			// (track 4) the kick: the legs driving straight off the wall, then the knees tucking as it flies; elbows soft
 			float e = pose.in(), tuck = pose.p();

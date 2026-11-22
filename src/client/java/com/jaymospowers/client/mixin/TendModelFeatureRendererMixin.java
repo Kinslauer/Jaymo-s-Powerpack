@@ -46,6 +46,9 @@ abstract class TendModelFeatureRendererMixin {
 		// and a bar swing's and a balance's (track 4)
 		com.jaymospowers.client.freerun.BarHangPose.bendLimbs(submit.model(), submit.state());
 		com.jaymospowers.client.freerun.BalancePose.bendLimbs(submit.model(), submit.state());
+		// and running knees, slides, long jumps, safety taps and sky dives (track 5)
+		com.jaymospowers.client.freerun.RunPose.bendLimbs(submit.model(), submit.state());
+		com.jaymospowers.client.freerun.moves.RunMovesPose.bendLimbs(submit.model(), submit.state());
 	}
 
 	/** (0.17.18) And the leg's own straight boxes back once it's drawn. */
