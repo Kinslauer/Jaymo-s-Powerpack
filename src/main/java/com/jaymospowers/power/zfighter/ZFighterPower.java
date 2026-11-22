@@ -124,17 +124,17 @@ public final class ZFighterPower implements Power {
 	// (0.17.190) 4 is now Super Primal Super, and 10 Primal Super, the step before it (ApeRage.PRIMAL_SUPER): the branch forms' ids
 	// live in their own attachment, so 10 is free here
 	/** Fists (added to the damage multiplier), ki techniques (times), speed (added). A third of their bonus before the training slowdown. */
-	static final double[] FORM_FIST = {0.0, 0.2, 0.33, 0.53, 0.75, 0.4, 0.85, 0.5, 0.8, 1.1, 0.64};
-	static final float[] FORM_KI = {1.0F, 1.17F, 1.27F, 1.4F, 1.55F, 1.3F, 1.7F, 1.3F, 1.55F, 1.8F, 1.47F};
-	static final double[] FORM_SPEED = {0.0, 0.08, 0.12, 0.15, 0.18, 0.1, 0.22, 0.03, 0.05, 0.07, 0.16};
+	static final double[] FORM_FIST = {0.0, 0.2, 0.33, 0.53, 0.75, 0.4, 0.85, 0.5, 0.8, 1.1, 0.64, 0.5, 0.7, 0.9, 0.45, 0.65, 0.55, 0.75, 0.9, 1.1, 1.0};
+	static final float[] FORM_KI = {1.0F, 1.17F, 1.27F, 1.4F, 1.55F, 1.3F, 1.7F, 1.3F, 1.55F, 1.8F, 1.47F, 1.35F, 1.5F, 1.7F, 1.4F, 1.6F, 1.5F, 1.75F, 2.0F, 1.85F, 1.95F};
+	static final double[] FORM_SPEED = {0.0, 0.08, 0.12, 0.15, 0.18, 0.1, 0.22, 0.03, 0.05, 0.07, 0.16, -0.05, 0.04, 0.1, -0.08, 0.06, 0.03, 0.07, 0.12, 0.1, 0.14};
 	/** Top cruise speed in flight (blocks a tick; Wind's is 2.5 in a plain rainy sky). */
-	public static final double[] FORM_CRUISE = {1.2, 1.6, 1.9, 2.2, 2.4, 1.9, 2.7, 1.5, 1.7, 1.9, 2.3};
+	public static final double[] FORM_CRUISE = {1.2, 1.6, 1.9, 2.2, 2.4, 1.9, 2.7, 1.5, 1.7, 1.9, 2.3, 1.5, 1.8, 2.0, 1.4, 1.7, 1.6, 1.9, 2.1, 2.0, 2.2};
 	/** Ki per tick to hold the form (1.5, 3, 6 a second; Super 4, at peace with the ape, 4.4), and times the base appetite. */
-	static final float[] FORM_DRAIN = {0.0F, 0.075F, 0.15F, 0.3F, 0.22F, 0.06F, 0.15F, 0.2F, 0.3F, 0.45F, 0.18F};
-	static final float[] FORM_HUNGER = {1.0F, 2.5F, 3.5F, 5.0F, 4.5F, 3.0F, 4.0F, 4.5F, 6.0F, 8.0F, 4.0F};
+	static final float[] FORM_DRAIN = {0.0F, 0.075F, 0.15F, 0.3F, 0.22F, 0.06F, 0.15F, 0.2F, 0.3F, 0.45F, 0.18F, 0.1F, 0.15F, 0.25F, 0.08F, 0.12F, 0.1F, 0.18F, 0.3F, 0.25F, 0.4F};
+	static final float[] FORM_HUNGER = {1.0F, 2.5F, 3.5F, 5.0F, 4.5F, 3.0F, 4.0F, 4.5F, 6.0F, 8.0F, 4.0F, 3.0F, 4.5F, 6.5F, 2.5F, 4.0F, 3.5F, 5.5F, 7.0F, 6.0F, 5.0F};
 	/** Ki to go into the form (free from half mastery; Super 4 has no mastery: always). */
-	static final int[] FORM_ENTER_KI = {0, 30, 50, 80, 90, 0, 100, 70, 100, 130, 85};
-	static final int[] FORM_COLOR = {0xFFE6B0, 0xFFD54A, 0xFFE873, 0xFFC020, 0xE02818, 0xFFE9A0, 0xE0302A, 0xA6E64A, 0x72DA45, 0x45C83C, ApeRage.PRIMAL_SUPER_COLOR};
+	static final int[] FORM_ENTER_KI = {0, 30, 50, 80, 90, 0, 100, 70, 100, 130, 85, 60, 80, 100, 50, 70, 90, 110, 130, 120, 140};
+	static final int[] FORM_COLOR = {0xFFE6B0, 0xFFD54A, 0xFFE873, 0xFFC020, 0xE02818, 0xFFE9A0, 0xE0302A, 0xA6E64A, 0x72DA45, 0x45C83C, ApeRage.PRIMAL_SUPER_COLOR, 0xF2C14E, 0xF2C14E, 0xFFD700, 0x3A8FB7, 0x7A4FB8, 0xDCE6F5, 0x240838, 0xC8463C, 0x8A5A4A, 0xF2F2F2};
 	/** Super 4's fire: flames a tick each of two kinds, and one in this many ticks an ember spits off him. */
 	static final int SUPER_4_FLAMES = 2, SUPER_4_EMBER_ODDS = 12;
 	/** (0.17.190) Primal Super's fire: one small flame every this many ticks powering up; settled, this many times rarer than Super Primal Super's. */
