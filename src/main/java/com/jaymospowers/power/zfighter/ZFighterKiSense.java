@@ -123,28 +123,32 @@ public final class ZFighterKiSense {
 	}
 
 	private static void sense(ServerPlayer player) {
-		ServerLevel level = player.level();
-		double range = range(player);
-		long now = level.getGameTime();
-		int mine = Math.max(1, ZFighterScouter.powerLevel(player));
-		List<LivingEntity> near = level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(range),
-			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && !hidesKi(e)
-				&& e.distanceToSqr(player) <= range * range);
-		near.sort(Comparator.comparingDouble(e -> e.distanceToSqr(player)));
-		List<ZFighterSensesNet.Mark> marks = new ArrayList<>();
-		for (LivingEntity e : near) {
-			if (marks.size() < MAX_MARKS) {
-				float ratio = ZFighterScouter.powerLevel(e) / (float)mine;
-				marks.add(new ZFighterSensesNet.Mark(e.getId(), ratio < WEAKER_BELOW ? WEAKER : ratio > STRONGER_ABOVE ? STRONGER : EVEN));
+			ServerLevel level = player.level();
+			double range = range(player);
+			long now = level.getGameTime();
+			int mine = Math.max(1, ZFighterScouter.powerLevel(player));
+			List<LivingEntity> near = level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(range),
+				e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand) && !hidesKi(e)
+					&& e.distanceToSqr(player) <= range * range);
+			near.sort(Comparator.comparingDouble(e -> e.distanceToSqr(player)));
+			List<ZFighterSensesNet.Mark> marks = new ArrayList<>();
+			for (LivingEntity e : near) {
+				if (marks.size() < MAX_MARKS) {
+					float ratio = ZFighterScouter.powerLevel(e) / (float)mine;
+					int tier = ratio < WEAKER_BELOW ? WEAKER : ratio > STRONGER_ABOVE ? STRONGER : EVEN;
+					// Damage tally: how much health the entity has lost
+					int damageTaken = (int)Math.round(e.getMaxHealth() - e.getHealth());
+					int maxHealth = (int)Math.round(e.getMaxHealth());
+					marks.add(new ZFighterSensesNet.Mark(e.getId(), tier, damageTaken, maxHealth));
+				}
+				boolean master = e.entityTags().contains(ZFighterMasters.TAG) || e.entityTags().contains(ZFighterMasters.DARK_TAG);
+				if (e instanceof ServerPlayer || master) {
+					SEEN.computeIfAbsent(player.getUUID(), k -> new HashMap<>())
+						.put(e.getUUID(), new Seen(now, master, e.getName().getString(), level.dimension(), e.position()));
+				}
 			}
-			boolean master = e.entityTags().contains(ZFighterMasters.TAG) || e.entityTags().contains(ZFighterMasters.DARK_TAG);
-			if (e instanceof ServerPlayer || master) {
-				SEEN.computeIfAbsent(player.getUUID(), k -> new HashMap<>())
-					.put(e.getUUID(), new Seen(now, master, e.getName().getString(), level.dimension(), e.position()));
-			}
+			ZFighterSensesNet.send(player, new ZFighterSensesNet.Sense(true, marks));
 		}
-		ZFighterSensesNet.send(player, new ZFighterSensesNet.Sense(true, marks));
-	}
 
 	/** Friends and masters {@code player} has sensed within the last day, in the level they are in now. */
 	static Map<UUID, Seen> recent(ServerPlayer player) {

@@ -2,6 +2,7 @@ package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.core.brawl.Brawl;
 import com.jaymospowers.core.fx.MagicFx;
+import com.jaymospowers.core.wounds.LimbUse;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -37,17 +38,21 @@ import org.jspecify.annotations.Nullable;
  */
 public final class ZFighterNpcKi {
 	// ---- beam ----
-		static final int BEAM_GATHER = 12, BEAM_COOL_SLOW = 1000, BEAM_COOL_FAST = 600;
-		static final double BEAM_LENGTH = 20.0, BEAM_WIDTH = 1.2, BEAM_PUSH = 0.9, BEAM_LIFT = 0.3;
-		static final float BEAM_SHARE = 1.0F, BEAM_RADIUS = 0.8F;
-		// ---- seeking volley ----
-		static final int VOLLEY_BOLTS = 5, VOLLEY_GAP = 3, VOLLEY_COOL_SLOW = 520, VOLLEY_COOL_FAST = 300, BOLT_LIFE = 40;
-		static final double BOLT_SPEED = 0.75, BOLT_TURN = 0.22, BOLT_SPREAD = 0.6, BOLT_HIT = 0.9;
-		static final float BOLT_SHARE = 0.25F;
-		// ---- charged blast ----
+	static final int BEAM_GATHER = 12, BEAM_COOL_SLOW = 1000, BEAM_COOL_FAST = 600;
+	static final double BEAM_LENGTH = 20.0, BEAM_WIDTH = 1.2, BEAM_PUSH = 0.9, BEAM_LIFT = 0.3;
+	static final float BEAM_SHARE = 1.0F, BEAM_RADIUS = 0.8F;
+	// ---- seeking volley ----
+	static final int VOLLEY_BOLTS = 5, VOLLEY_GAP = 3, VOLLEY_COOL_SLOW = 520, VOLLEY_COOL_FAST = 300, BOLT_LIFE = 40;
+	static final double BOLT_SPEED = 0.75, BOLT_TURN = 0.22, BOLT_SPREAD = 0.6, BOLT_HIT = 0.9;
+	static final float BOLT_SHARE = 0.25F;
+	// ---- charged blast ----
 		static final int CHARGE_GATHER = 20, CHARGE_COOL_SLOW = 840, CHARGE_COOL_FAST = 520, BALL_LIFE = 45;
 		static final double BALL_SPEED = 0.8, BALL_RADIUS = 3.0, BALL_HIT = 1.2, BALL_PUSH = 1.2, BALL_ORB = 1.6;
 		static final float BALL_SHARE = 2.0F;
+		// ---- purging beam (patrolmen only) ----
+		static final int PURGE_GATHER = 25, PURGE_COOL_SLOW = 500, PURGE_COOL_FAST = 300, PURGE_LIFE = 60;
+		static final double PURGE_RANGE = 55.0, PURGE_WIDTH = 1.0, PURGE_SPEED = 3.0;
+		static final float PURGE_SHARE = 2.0F;
 	/** The range at which they use ki at all (blocks), and the checks' spacing (ticks). */
 	static final double RANGE_MIN = 6.0, RANGE_MAX = 24.0;
 	static final int DECIDE_EVERY = 10;
@@ -69,8 +74,8 @@ public final class ZFighterNpcKi {
 	public static volatile @Nullable BeamTaker taker;
 
 	private static final class Ki {
-		long beamAt, volleyAt, chargeAt, decideAt, busyUntil;
-	}
+			long beamAt, volleyAt, chargeAt, purgeAt, decideAt, busyUntil;
+		}
 
 	private static final class Bolt {
 		final ServerLevel level;
@@ -124,30 +129,37 @@ public final class ZFighterNpcKi {
 	 * which the attacks' damage is made of; {@code color}: its ki.
 	 */
 	public static void decide(ServerLevel level, Mob mob, LivingEntity foe, double fists, int color) {
-		long now = level.getGameTime();
-		Ki ki = KI.computeIfAbsent(mob, m -> new Ki());
-		if (now < ki.decideAt || now < ki.busyUntil || ZFighterStrings.busy(mob) || ZFighterStrings.rushing(mob)) {
-			return;
+			long now = level.getGameTime();
+			Ki ki = KI.computeIfAbsent(mob, m -> new Ki());
+			if (now < ki.decideAt || now < ki.busyUntil || ZFighterStrings.busy(mob) || ZFighterStrings.rushing(mob)) {
+				return;
+			}
+			ki.decideAt = now + DECIDE_EVERY;
+			double distance = mob.distanceTo(foe);
+			if (distance < RANGE_MIN || distance > RANGE_MAX || !mob.hasLineOfSight(foe)) {
+				return;
+			}
+			boolean isPatrolman = mob.entityTags().contains("jaymospowers.patrolman");
+			boolean beam = now >= ki.beamAt, volley = now >= ki.volleyAt, charge = now >= ki.chargeAt, purge = isPatrolman && now >= ki.purgeAt;
+			int ready = (beam ? 1 : 0) + (volley ? 1 : 0) + (charge ? 1 : 0) + (purge ? 1 : 0);
+			if (ready == 0 || mob.getRandom().nextInt(2) != 0) {
+				return;
+			}
+			if (!LimbUse.usable(mob, LimbUse.ANY_ARM) || LimbUse.wide(mob, LimbUse.ANY_ARM)) {
+				// (Andy, 2026-11-22) ki leaves the hands: with both arms gone none is fired, with a broken one it goes wide (not fired this time)
+				return;
+			}
+			int pick = mob.getRandom().nextInt(ready);
+			if (beam && pick-- == 0) {
+				fireBeam(level, mob, foe, fists, color);
+			} else if (volley && pick-- == 0) {
+				volley(level, mob, foe, fists, color);
+			} else if (charge && pick-- == 0) {
+				charge(level, mob, foe, fists, color);
+			} else {
+				firePurgingBeam(level, mob, foe, fists, color);
+			}
 		}
-		ki.decideAt = now + DECIDE_EVERY;
-		double distance = mob.distanceTo(foe);
-		if (distance < RANGE_MIN || distance > RANGE_MAX || !mob.hasLineOfSight(foe)) {
-			return;
-		}
-		boolean beam = now >= ki.beamAt, volley = now >= ki.volleyAt, charge = now >= ki.chargeAt;
-		int ready = (beam ? 1 : 0) + (volley ? 1 : 0) + (charge ? 1 : 0);
-		if (ready == 0 || mob.getRandom().nextInt(2) != 0) {
-			return;
-		}
-		int pick = mob.getRandom().nextInt(ready);
-		if (beam && pick-- == 0) {
-			fireBeam(level, mob, foe, fists, color);
-		} else if (volley && pick-- == 0) {
-			volley(level, mob, foe, fists, color);
-		} else {
-			charge(level, mob, foe, fists, color);
-		}
-	}
 
 	private static int cooldown(Mob mob, int slow, int fast) {
 		return Math.round(Mth.lerp(Brawl.rank(mob), (float)slow, (float)fast)) + mob.getRandom().nextInt(40);
@@ -296,13 +308,81 @@ public final class ZFighterNpcKi {
 			Vec3 aim = foe.getBoundingBox().getCenter().subtract(from);
 			Vec3 dir = aim.lengthSqr() < 1.0E-4 ? caster.getLookAngle() : aim.normalize();
 			ZFighterHands.thrust(caster, ZFighterHands.BOTH, ZFighterHands.PUSH);
-			ZFighterHands.shout(caster);
-			BOLTS.add(new Bolt(level, caster, foe, from, dir.scale(BALL_SPEED), BALL_LIFE, damage, color, true, ORB_ID - (serial++ & 0xFFFF)));
-		});
-		return true;
-	}
+						ZFighterHands.shout(caster);
+						BOLTS.add(new Bolt(level, caster, foe, from, dir.scale(BALL_SPEED), BALL_LIFE, damage, color, true, ORB_ID - (serial++ & 0xFFFF)));
+					});
+					return true;
+				}
 
-	// ================================================================ bolts and balls
+				// ---- purging beam (patrolmen only) ----
+
+				/** A purging beam: a needle-thin beam that deals extra damage to corrupted/dark entities. */
+				public static boolean firePurgingBeam(ServerLevel level, Mob caster, LivingEntity foe, double fists, int color) {
+					Ki ki = KI.computeIfAbsent(caster, m -> new Ki());
+					long now = level.getGameTime();
+					if (now < ki.busyUntil) {
+						return false;
+					}
+					ki.purgeAt = now + cooldown(caster, PURGE_COOL_SLOW, PURGE_COOL_FAST);
+					ki.busyUntil = now + PURGE_GATHER + AFTER;
+					ZFighterHands.pose(caster, ZFighterHands.POINT);
+					int id = ORB_ID - (serial++ & 0xFFFF);
+					for (int i = 0; i < PURGE_GATHER; i++) {
+						double size = 0.1 + 0.15 * i / (double)PURGE_GATHER;
+						ZFighterHands.later(caster, i, () -> {
+							if (caster.isAlive()) {
+								caster.getLookControl().setLookAt(foe, 30.0F, 30.0F);
+								ZFighterKi.orb(level, id, ZFighterHands.mainPalm(caster, caster.getLookAngle()), size, color);
+							}
+						});
+					}
+					ZFighterHands.later(caster, PURGE_GATHER, () -> {
+						ZFighterHands.pose(caster, ZFighterHands.NONE);
+						if (!caster.isAlive() || foe.level() != level) {
+							return;
+						}
+						shootPurgingBeam(level, caster, foe, fists, color);
+					});
+					return true;
+				}
+
+				private static void shootPurgingBeam(ServerLevel level, Mob caster, LivingEntity foe, double fists, int color) {
+					Vec3 aim = foe.getBoundingBox().getCenter().subtract(caster.getEyePosition());
+					if (aim.lengthSqr() < 1.0E-4) {
+						return;
+					}
+					Vec3 dir = aim.normalize();
+					Vec3 from = ZFighterHands.palm(caster, dir, false).lerp(ZFighterHands.palm(caster, dir, true), 0.5);
+					Vec3 to = from.add(dir.scale(PURGE_RANGE));
+					float damage = (float)(fists * PURGE_SHARE);
+					BeamTaker take = taker;
+					if (take != null && take.take(level, new NpcBeam(caster, foe, from, to, damage, color))) {
+						return;
+					}
+					ZFighterHands.thrust(caster, ZFighterHands.BOTH, ZFighterHands.PUSH);
+					ZFighterHands.shout(caster);
+					ZFighterKi.showBeam(level, from, to, (float)PURGE_WIDTH, color);
+					MagicFx.burst(level, to.x, to.y, to.z, color, 1.2F, 16, 0.3, 0.3, 0.3);
+					level.playSound(null, caster.getX(), caster.getY(), caster.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.HOSTILE, 1.2F, 1.1F);
+					level.playSound(null, caster.getX(), caster.getY(), caster.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.HOSTILE, 0.8F, 1.6F);
+					AABB box = new AABB(from, to).inflate(PURGE_WIDTH);
+					for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != caster && e.isAlive() && hittable(e, foe))) {
+						if (ZFighterKi.distanceToSegment(e.getBoundingBox().getCenter(), from, to) <= PURGE_WIDTH && caster.hasLineOfSight(e)) {
+							e.setInvulnerableTime(0);
+							// Purging beam deals extra damage to corrupted/dark/nightmare entities
+							float dmg = ZFighterPurgingBeam.isCorrupted(e) ? damage * ZFighterPurgingBeam.CORRUPTED_MULT : damage;
+							e.hurtServer(level, level.damageSources().mobAttack(caster), dmg);
+							ZFighterKi.push(e, dir, 1.2, 0.3);
+							if (ZFighterPurgingBeam.isCorrupted(e)) {
+								level.sendParticles(MagicFx.wisp(0xFFFFFF, 2.0F), true, false, e.getX(), e.getY() + e.getBbHeight() * 0.5, e.getZ(),
+									12, 0.4, 0.4, 0.4, 0.1);
+								level.playSound(null, e.getX(), e.getY(), e.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.HOSTILE, 0.8F, 2.0F);
+							}
+						}
+					}
+				}
+
+				// ================================================================ bolts and balls
 
 	private static void tick(MinecraftServer server) {
 		if (BOLTS.isEmpty()) {

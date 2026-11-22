@@ -72,7 +72,7 @@ public final class Directions {
 
 	/** What can be asked after. */
 	enum Place {
-		HEALER("healer", VillagerProfession.CLERIC),
+		HEALER("healer", ResourceKey.create(net.minecraft.core.registries.Registries.VILLAGER_PROFESSION, JaymosKingdoms.id("healer")), VillagerProfession.CLERIC),
 		BUTCHER("butcher", VillagerProfession.BUTCHER),
 		SMITH("smith", VillagerProfession.ARMORER, VillagerProfession.WEAPONSMITH, VillagerProfession.TOOLSMITH),
 		TAILOR("tailor", VillagerProfession.SHEPHERD),

@@ -260,7 +260,7 @@ public final class DownedLie {
 	 * if there's no wall to sit against.
 	 */
 	public static void prop(LivingEntity body, boolean fromFloor) {
-		double[] wall = Downed.isDowned(body) ? wall(body) : null;
+		double[] wall = Downed.isDowned(body) || proneSitter(body) ? wall(body) : null;
 		if (wall == null || !(body.level() instanceof ServerLevel level)) {
 			return;
 		}
@@ -296,6 +296,26 @@ public final class DownedLie {
 		} else if (!Downed.passedOut(player)) {
 			prop(player, true);
 		}
+	}
+
+	/**
+	 * (Andy, 2026-11-22: "using the sit key while prone ... it should only do something when against the wall and that is
+	 * play the wall sit animation") The Sit key, pressed by a player lying prone but not downed: beside a wall, they sit up
+	 * against it as the downed do ({@link #PROPPED}, drawn by WallSit); pressed again, back down onto the floor. Nothing
+	 * with no wall. Crawling off, or getting up, takes them off it ({@link #tickPropped}).
+	 */
+	public static void proneSitKey(ServerPlayer player) {
+		if (player.hasAttached(PROPPED)) {
+			player.removeAttached(PROPPED);
+			PROPPED_AT.remove(player);
+		} else if (com.jaymospowers.core.Crawl.crawling(player)) {
+			prop(player, true);
+		}
+	}
+
+	/** Whether {@code body} is a player lying prone (not downed), who may sit against a wall by the Sit key. */
+	public static boolean proneSitter(LivingEntity body) {
+		return body instanceof Player player && com.jaymospowers.core.Crawl.crawling(player);
 	}
 
 	/**
@@ -352,7 +372,7 @@ public final class DownedLie {
 		}
 		PROPPED_AT.entrySet().removeIf(spot -> {
 			LivingEntity body = spot.getKey();
-			if (!body.isRemoved() && Downed.isDowned(body) && !Carry.isCarried(body) && body.position().distanceToSqr(spot.getValue()) <= PROP_SLIP * PROP_SLIP) {
+			if (!body.isRemoved() && (Downed.isDowned(body) || proneSitter(body)) && !Carry.isCarried(body) && body.position().distanceToSqr(spot.getValue()) <= PROP_SLIP * PROP_SLIP) {
 				return false;
 			}
 			body.removeAttached(PROPPED);

@@ -39,6 +39,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ambient.Bat;
 import net.minecraft.world.entity.player.Player;
@@ -133,6 +134,9 @@ public final class Vampires {
 	static final int BAT_MAX_TICKS = 20 * 20, BAT_COOLDOWN = 20 * 30;
 	/** A blow to the bat: the Elder takes this many times it, and he's knocked out of the form. */
 	static final float BAT_HURT_FACTOR = 2.0F;
+	/** Whoever within this of the Elder (blocks) has him for a target loses him while he flies; looked over this often (ticks). */
+	static final double BAT_SHAKE_OFF = 64.0;
+	static final int BAT_SHAKE_EVERY = 10;
 	static final String BAT_TAG = "jaymoskingdoms_elder_bat";
 	/**
 	 * Once its prey is down, what the vampire does: drains them to the death, kills them with one blow, or leaves them where
@@ -927,6 +931,7 @@ public final class Vampires {
 		FLIGHTS.put(elder.getUUID(), new Flight(elder, bat, prey, to));
 		level.addFreshEntity(bat);
 		release(elder);
+		shakeOff(level, elder);
 		elder.setInvisible(true);
 		elder.setNoGravity(true);
 		elder.noPhysics = true;
@@ -971,6 +976,20 @@ public final class Vampires {
 		elder.fallDistance = 0.0;
 		if (f.ticks % 4 == 0 && bat.level() instanceof ServerLevel level) {
 			level.sendParticles(Fx.wisp(EYES, 0.4F), next.x, next.y + 0.2, next.z, 1, 0.05, 0.05, 0.05, 0.0);
+		}
+		if (f.ticks % BAT_SHAKE_EVERY == 0 && elder.level() instanceof ServerLevel level) {
+			shakeOff(level, elder);
+		}
+	}
+
+	/**
+	 * Andy (2026-11-22, a clip of guards at a tower): guards kept after an Elder who had fled as a bat, his body invisible
+	 * and unhurtable in the air beside it: crawling after a place they had no path to, swinging and shooting at nothing.
+	 * Whoever has him for a target lets go (the bat itself can still be struck); once he lands they find him again.
+	 */
+	private static void shakeOff(ServerLevel level, PathfinderMob elder) {
+		for (Mob m : level.getEntitiesOfClass(Mob.class, elder.getBoundingBox().inflate(BAT_SHAKE_OFF), m -> m != elder)) {
+			Downed.letGo(m, elder);
 		}
 	}
 

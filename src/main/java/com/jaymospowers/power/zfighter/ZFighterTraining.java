@@ -19,6 +19,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 
 /**
@@ -43,9 +44,11 @@ public final class ZFighterTraining {
 	public static final int VITALITY = 2;
 	public static final int KI_POWER = 3;
 	public static final int ENERGY = 4;
-	public static final int STATS = 5;
+	/** (0.19.x) Blows that strike hard: rushes, grab slams and the hold combo's finisher. Strength stays for plain blows. */
+	public static final int STRIKE = 5;
+	public static final int STATS = 6;
 	public static final int STAT_CAP = 50;
-	public static final String[] STAT_KEYS = {"strength", "toughness", "vitality", "ki_power", "energy"};
+	public static final String[] STAT_KEYS = {"strength", "toughness", "vitality", "ki_power", "energy", "strike"};
 	/**
 	 * A stat level costs this, plus {@link #STAT_COST_STEP} for every level already bought (any stat; levels his own
 	 * training raised, {@link ZFighterGrowth}, don't count).
@@ -61,6 +64,8 @@ public final class ZFighterTraining {
 	public static final double VITALITY_PER_LEVEL = 0.134;
 	public static final float KI_POWER_PER_LEVEL = 0.005F;
 	public static final int ENERGY_PER_LEVEL = 1;
+	/** What the Strike stat adds per level to rushes, grab slams and hold-combo finishers (in place of Strength). */
+	public static final double STRIKE_PER_LEVEL = 0.067;
 
 	/** Forms: 1 Super (the breakthrough), 2 Super 2, 3 Super 3. Index 0 is base. */
 	public static final int FORMS = 3;
@@ -107,24 +112,43 @@ public final class ZFighterTraining {
 	/** (0.17.56) Sonic Sway, a quick technique on G ({@link ZFighterSonicSway}). */
 	public static final int SONIC_SWAY = 22;
 	/** (0.18.94) Self-destruct, charged on V; only android, Bio-built and Rubber-folk bodies ({@link ZFighterSelfDestruct}). */
-	public static final int SELF_DESTRUCT = 23;
-	/** Eye Beams (sneak+V hold), Aerial Charge (G, in flight), Thunderclap (G) and Great Breath (sneak+V hold). */
-	public static final int EYE_BEAMS = 24, AERIAL_CHARGE = 25, THUNDERCLAP = 26, GREAT_BREATH = 27;
-	public static final int TECHNIQUES = 28;
+		public static final int SELF_DESTRUCT = 23;
+		/** Eye Beams (sneak+V hold), Aerial Charge (G, in flight), Thunderclap (G) and Great Breath (sneak+V hold). */
+		public static final int EYE_BEAMS = 24, AERIAL_CHARGE = 25, THUNDERCLAP = 26, GREAT_BREATH = 27;
+		/** (0.19.XX) Ki Shell: passive ki damage reduction when not guarding ({@link ZFighterKiShell}). */
+		public static final int KI_SHELL = 28;
+		/** (0.19.XX) Twin Discs: two discs at once ({@link ZFighterTwinDiscs}). */
+		public static final int TWIN_DISCS = 29;
+		/** (0.19.XX) Ring Beam: spinning ring that cuts along a line ({@link ZFighterRingBeam}). */
+		public static final int RING_BEAM = 30;
+		/** (0.19.XX) Sword Technique: blade flurry ending in ki burst ({@link ZFighterSwordTechnique}). */
+		public static final int SWORD_TECHNIQUE = 31;
+		/** (0.19.XX) Purging Beam: anti-corruption/dark damage, breaks possession ({@link ZFighterPurgingBeam}). */
+		public static final int PURGING_BEAM = 32;
+		/** (0.19.XX) Sticky Bind: rubber wad that sticks a foe ({@link ZFighterStickyBind}). */
+		public static final int STICKY_BIND = 33;
+		/** (0.19.XX) Rift Fist: punch into a rift to hit from behind ({@link ZFighterRiftMoves}). */
+		public static final int RIFT_FIST = 34;
+		/** (0.19.XX) Rift Step: step through a rift over a short gap ({@link ZFighterRiftMoves}). */
+		public static final int RIFT_STEP = 35;
+		/** (0.19.XX) Ki-Drinking Barrier: android's G; absorbs ki blasts to fill ki ({@link ZFighterKiDrinkingBarrier}). */
+		public static final int KI_DRINKING_BARRIER = 36;
+		public static final int TECHNIQUES = 37;
 	public static final String[] TECHNIQUE_KEYS = {"ki_blast", "ki_disc", "homing_volley", "solar_flash", "ki_barrier", "ki_wave", "ki_bomb",
-		"spirit_bomb", "dragon_rush", "pack_fang", "hammerlock_pummel", "skyward_chase", "ki_weapon", "instant_teleport",
-		"drill_beam", "ring_of_orbs", "triangle_cannon", "rising_dome", "ki_rain", "nova_sphere", "rage_scream", "afterimage", "sonic_sway", "self_destruct",
-		"eye_beams", "aerial_charge", "thunderclap", "great_breath"};
+			"spirit_bomb", "dragon_rush", "pack_fang", "hammerlock_pummel", "skyward_chase", "ki_weapon", "instant_teleport",
+			"drill_beam", "ring_of_orbs", "triangle_cannon", "rising_dome", "ki_rain", "nova_sphere", "rage_scream", "afterimage", "sonic_sway", "self_destruct",
+			"eye_beams", "aerial_charge", "thunderclap", "great_breath", "ki_shell", "twin_discs", "ring_beam", "sword_technique", "purging_beam", "sticky_bind", "rift_fist", "rift_step", "ki_drinking_barrier"};
 	/** Known from the start: Ki Blast and Ki Wave. */
 	public static final int STARTER_TECHNIQUES = 1 << KI_BLAST | 1 << KI_WAVE;
 	/** TP to learn each (index by technique). */
-	public static final int[] TECHNIQUE_TP = {0, 800, 1200, 600, 1500, 0, 2000, 20000, 2500, 1800, 2000, 3000, 2200, 10000,
-		2400, 2200, 2600, 2000, 1800, 3500, 1500, 1600, 1400, 3000, 2600, 2200, 1800, 2400};
+		public static final int[] TECHNIQUE_TP = {0, 800, 1200, 600, 1500, 0, 2000, 20000, 2500, 1800, 2000, 3000, 2200, 10000,
+			2400, 2200, 2600, 2000, 1800, 3500, 1500, 1600, 1400, 3000, 2600, 2200, 1800, 2400,
+			2200, 2800, 3000, 2500, 3200, 2000, 2600, 2800, 2400};
 	/** The Spirit Bomb also needs Super 3 a quarter mastered. */
 	public static final int SPIRIT_BOMB_MASTERY = 2500;
 
-	/** Limit Break's tiers: TP each (index by tier, 1-3). */
-	public static final int[] LIMIT_TP = {0, 1000, 3000, 8000};
+	/** Limit Break's tiers: TP each (index by tier, 1-6; 4-6 hold only in base or Super). */
+	public static final int[] LIMIT_TP = {0, 1000, 3000, 8000, 15000, 25000, 40000};
 
 	// ---- earning TP (a quarter of what it was before the training slowdown) ----
 	public static final float TP_PER_HIT = 0.5F;
@@ -575,4 +599,84 @@ public final class ZFighterTraining {
 	static float toughness(Player player) {
 		return of(player).stat(TOUGHNESS) * TOUGHNESS_PER_LEVEL;
 	}
+
+// ---------------------------------------------------------------- critical blows
+
+/** A Z Fighter's bought critical-blow training: a chance to strike much harder, and how much harder. Not synced (server-side only). */
+public record CritData(int chance, int damage) {
+    public static final CritData NONE = new CritData(0, 0);
+    public static final Codec<CritData> CODEC = RecordCodecBuilder.create(i -> i.group(
+            Codec.INT.optionalFieldOf("chance", 0).forGetter(CritData::chance),
+            Codec.INT.optionalFieldOf("damage", 0).forGetter(CritData::damage))
+            .apply(i, CritData::new));
+}
+
+public static final AttachmentType<CritData> CRIT = AttachmentRegistry.create(JaymosPowers.id("zfighter_crit"),
+        builder -> builder.persistent(CritData.CODEC));
+
+public static CritData crit(Player player) {
+    CritData data = player.getAttached(CRIT);
+    return data == null ? CritData.NONE : data;
+}
+
+/** Crit chance per level (2% a level, up to {@link #CRIT_CHANCE_MAX}). */
+public static final int CRIT_CHANCE_MAX = 10;
+public static final int CRIT_CHANCE_COST = 800;
+public static final int CRIT_CHANCE_STEP = 400;
+public static float critChanceRate(Player player) {
+    return 0.02F * crit(player).chance();
+}
+/** Crit damage multiplier: 1.5x at level 1, +0.5 per level (up to {@link #CRIT_DAMAGE_MAX}). */
+public static final int CRIT_DAMAGE_MAX = 6;
+public static final int CRIT_DAMAGE_COST = 800;
+public static final int CRIT_DAMAGE_STEP = 400;
+public static float critDamageMult(Player player) {
+    return 1.5F + 0.5F * crit(player).damage();
+}
+
+static void buyCritChance(ServerPlayer player) {
+    CritData data = crit(player);
+    if (data.chance() >= CRIT_CHANCE_MAX) {
+        return;
+    }
+    int cost = CRIT_CHANCE_COST + CRIT_CHANCE_STEP * data.chance();
+    ZFighterTraining.Data training = of(player);
+    if (training.tp() < cost) {
+        return;
+    }
+    player.setAttached(DATA, training.withTp(training.tp() - cost));
+    player.setAttached(CRIT, new CritData(data.chance() + 1, data.damage()));
+    player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.5F, 1.6F);
+}
+
+static void buyCritDamage(ServerPlayer player) {
+    CritData data = crit(player);
+    if (data.damage() >= CRIT_DAMAGE_MAX) {
+        return;
+    }
+    int cost = CRIT_DAMAGE_COST + CRIT_DAMAGE_STEP * data.damage();
+    ZFighterTraining.Data training = of(player);
+    if (training.tp() < cost) {
+        return;
+    }
+    player.setAttached(DATA, training.withTp(training.tp() - cost));
+    player.setAttached(CRIT, new CritData(data.chance(), data.damage() + 1));
+    player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.5F, 1.6F);
+}
+
+/** The Strike stat's damage bonus for {@code player}, used in place of Strength for rushes, grab slams and finishers. */
+public static double strikeBonus(Player player) {
+    return STRIKE_PER_LEVEL * of(player).stat(STRIKE);
+}
+
+/**
+ * Fists for a rush, grab slam or finisher: the attack damage with Strength swapped for the Strike stat, so plain
+ * blows keep Strength while strikes use their own stat.
+ */
+public static double strikeFists(ServerPlayer player) {
+    ZFighterTraining.Data data = of(player);
+    return player.getAttributeValue(Attributes.ATTACK_DAMAGE)
+            - STRENGTH_PER_LEVEL * data.stat(STRENGTH)
+            + STRIKE_PER_LEVEL * data.stat(STRIKE);
+}
 }

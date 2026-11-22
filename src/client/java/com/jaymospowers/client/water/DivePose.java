@@ -14,6 +14,10 @@ import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
+ * (Andy, 2026-11-22) Diving by the Dodge key ({@link Dives#DIVING}): in the air the body turns head first along the way
+ * it's going over {@link #TURN_TICKS}, arms forward over the head, and goes into the water so; the entry's turn starts
+ * from there, upright again as they go under ({@link #UNTURN_TICKS}).
+ * <p>
  * The pose a player's body takes when they hit the water - cannonball tucked into a ball, belly flop flat on
  * impact with a wince after, clean dive arms forward over the head - and eases out under water. Worked out from the
  * synced entry ({@link Dives#ENTRY}) so everyone in view sees the same pose, not only the player themselves.
@@ -21,10 +25,22 @@ import org.jspecify.annotations.Nullable;
 public final class DivePose {
     /** How long the entry pose shows (ticks), easing in on impact and easing out under water. */
     static final int DURATION = 40;
+    /** Diving: ticks to turn head first in the air; ticks under water to come back from head down. */
+    static final float TURN_TICKS = 7.0F, UNTURN_TICKS = 12.0F;
+    /** Diving, head down this far into the water at the most (degrees). */
+    static final float HEAD_DOWN = 160.0F;
+    /** Our own dive from the Dodge key, drawn at once (game time; Long.MIN_VALUE: none): the server's copy comes a moment later. */
+    public static long localDive = Long.MIN_VALUE;
+
+    /** In the air diving: how far the body is turned forward, head first (degrees). */
+    public record AirDive(float tilt, float arms) {
+    }
+
+    public static final RenderStateDataKey<AirDive> AIR = RenderStateDataKey.create(() -> "jaymospowers:air_dive");
 
     /** {@code entry}: 1 flop / 2 dive / 3 cannonball (ordinal of {@link Dives.Entry} plus one); {@code e}: how far
      *  into the pose (0-1); {@code time}: client tick it began. */
-    public record Dive(int entry, float strength, float time) {
+    public record Dive(int entry, float strength, float time, float age) {
     }
 
     public static final RenderStateDataKey<Dive> KEY = RenderStateDataKey.create(() -> "jaymospowers:dive");
@@ -32,7 +48,35 @@ public final class DivePose {
     private DivePose() {
     }
 
+    /** Whether {@code entity} is a player diving head first through the air by the Dodge key. */
+    public static boolean airDiving(LivingEntity entity) {
+        return entity instanceof Player player && !player.isInWater() && !player.onGround() && diveStart(player) != Long.MIN_VALUE;
+    }
+
+    private static long diveStart(Player player) {
+        Long at = player.getAttached(Dives.DIVING);
+        if (at != null) {
+            return at;
+        }
+        return player == net.minecraft.client.Minecraft.getInstance().player ? localDive : Long.MIN_VALUE;
+    }
+
     public static void extract(LivingEntity entity, LivingEntityRenderState state, float partialTicks) {
+        state.setData(AIR, null);
+        if (entity instanceof Player player && airDiving(player)) {
+            // head first along the way it's going: level out ahead is 90 degrees over, straight down 180
+            double dx = player.getX() - player.xo, dy = player.getY() - player.yo, dz = player.getZ() - player.zo;
+            float steep = (float) Math.toDegrees(Math.atan2(-dy, Math.sqrt(dx * dx + dz * dz)));
+            float aim = Math.min(HEAD_DOWN, 90.0F + Mth.clamp(steep, -20.0F, 90.0F));
+            float t = Mth.clamp((player.level().getGameTime() - diveStart(player) + partialTicks) / TURN_TICKS, 0.0F, 1.0F);
+            float e = t * t * (3.0F - 2.0F * t);
+            state.setData(AIR, new AirDive(aim * e, e));
+        }
+        if (entity instanceof Player player && (player.onGround() || player.isInWater())) {
+            if (player == net.minecraft.client.Minecraft.getInstance().player) {
+                localDive = Long.MIN_VALUE;
+            }
+        }
         if (!(entity instanceof Player player) || !player.isInWater()) {
             state.setData(KEY, null);
             return;
@@ -55,7 +99,7 @@ public final class DivePose {
         float s = age / (float) DURATION;
         float ease = s * s * (3.0F - 2.0F * s);
         float strength = ease * (1.0F - s) * 2.0F;
-        state.setData(KEY, new Dive(entry, strength, time));
+        state.setData(KEY, new Dive(entry, strength, time, age));
     }
 
     static @Nullable Dive dive(LivingEntityRenderState state) {
@@ -64,15 +108,23 @@ public final class DivePose {
 
     /** After the body faces its way: tucked, streamlined or laid flat, about the middle of the body. */
     public static void rotate(LivingEntityRenderState state, PoseStack poseStack, float entityScale) {
+        float middle = state.boundingBoxHeight / Math.max(entityScale, 0.01F) * 0.5F;
+        AirDive air = state.deathTime > 0.0F ? null : state.getData(AIR);
+        if (air != null) {
+            poseStack.translate(0.0F, middle, 0.0F);
+            poseStack.rotateDegrees(Axis.XP, -air.tilt());
+            poseStack.translate(0.0F, -middle, 0.0F);
+            return;
+        }
         Dive dive = dive(state);
         if (dive == null) {
             return;
         }
-        float middle = state.boundingBoxHeight / Math.max(entityScale, 0.01F) * 0.5F;
         poseStack.translate(0.0F, middle, 0.0F);
         switch (dive.entry()) {
             case 1 -> poseStack.rotateDegrees(Axis.XP, -70.0F * dive.strength()); // belly flop: almost flat
-            case 2 -> poseStack.rotateDegrees(Axis.XP, -20.0F * dive.strength()); // clean dive: head first
+            // clean dive: head first, in head down from the air and coming back up as they go under
+            case 2 -> poseStack.rotateDegrees(Axis.XP, -Math.max(20.0F * dive.strength(), HEAD_DOWN * (1.0F - Mth.clamp(dive.age() / UNTURN_TICKS, 0.0F, 1.0F)))); 
             case 3 -> poseStack.rotateDegrees(Axis.XP, -12.0F * dive.strength()); // cannonball: tucked forward
             default -> {
             }
@@ -83,6 +135,11 @@ public final class DivePose {
     /** After the model animates: the arms and legs of each entry. */
     public static void applyModel(Model<?> model, Object state) {
         if (!(state instanceof LivingEntityRenderState living) || !(model instanceof HumanoidModel<?> h)) {
+            return;
+        }
+        AirDive air = living.deathTime > 0.0F ? null : living.getData(AIR);
+        if (air != null) {
+            cleanDive(h, air.arms());
             return;
         }
         Dive dive = dive(living);

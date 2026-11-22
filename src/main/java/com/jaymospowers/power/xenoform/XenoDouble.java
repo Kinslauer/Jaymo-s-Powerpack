@@ -60,8 +60,8 @@ import org.jspecify.annotations.Nullable;
  */
 public class XenoDouble extends PathfinderMob {
 	// ---- tuning ----
-		public static final float MAX_HEALTH = 6.0F;
-		public static final double ATTACK_DAMAGE = 2.0, MOVE_SPEED = 0.3, CHASE_SPEED = 1.3, FOLLOW_SPEED = 1.25;
+	public static final float MAX_HEALTH = 6.0F;
+	public static final double ATTACK_DAMAGE = 2.0, MOVE_SPEED = 0.3, CHASE_SPEED = 1.3, FOLLOW_SPEED = 1.25;
 	/** It walks back to its owner past {@link #FOLLOW_START} blocks, stops at {@link #FOLLOW_STOP}, and blinks to them past {@link #FOLLOW_TELEPORT}. */
 	public static final double FOLLOW_START = 4.0, FOLLOW_STOP = 2.0, FOLLOW_TELEPORT = 24.0;
 	/** How often (ticks) it checks its owner is still there and still Duplex. */

@@ -347,7 +347,9 @@ public final class FreerunClient {
 			return;
 		}
 		boolean slipping = gripped > grip;
-		double vertical = slipping ? -Freerun.SLIP_SPEED : input.forward() ? Freerun.climbSpeed(player) : 0.0;
+		// (Parkour animations, track 2) Back climbs down hand under hand, as fast as you climb up
+		double vertical = slipping ? -Freerun.SLIP_SPEED : input.forward() ? Freerun.climbSpeed(player)
+			: input.backward() ? -Freerun.climbSpeed(player) : 0.0;
 		Direction left = face.getCounterClockWise();
 		double strafe = (input.left() ? 1.0 : 0.0) - (input.right() ? 1.0 : 0.0);
 		Vec3 into = new Vec3(face.getStepX(), 0.0, face.getStepZ()).scale(HUG);
@@ -358,6 +360,23 @@ public final class FreerunClient {
 			Vec3 at = player.position().add(face.getStepX() * 0.35, 1.2, face.getStepZ() * 0.35);
 			player.level().addParticle(ParticleTypes.CLOUD, at.x, at.y, at.z, 0.0, 0.02, 0.0);
 		}
+	}
+
+	/**
+	 * (Parkour animations, track 2: "climb down", docs/CombatAnimations-Plan.md) From a ledge hang, Back held past the
+	 * castaway's moment ({@code LedgeClient}): down onto the wall under the edge, clinging, to climb on down it hand under
+	 * hand. False if there's no wall to cling to there (then the hang lets go as before). Sent while the hang still holds,
+	 * so the server takes the cling from it ({@link Freerun#climbsDownFrom}).
+	 */
+	public static boolean climbDownFrom(LocalPlayer player, Direction face) {
+		if (kind != Freerun.NONE || cooldown > 0 || gripped >= Freerun.grip(player) || !Freerun.climbsDownFrom(player.level(), player, face, REACH)) {
+			return false;
+		}
+		player.setDeltaMovement(Vec3.ZERO);
+		player.resetFallDistance();
+		start(player, Freerun.CLING, face, BlockPos.ZERO);
+		clingBase = gripped;
+		return true;
 	}
 
 	/** The wall ran out (or a pole's top): up and over it, a scramble. */
