@@ -76,7 +76,8 @@ public final class Disciplines {
 	}
 
 	public static final AttachmentType<Data> DATA = AttachmentRegistry.create(JaymosKingdoms.id("disciplines"),
-		builder -> builder.persistent(Data.CODEC).copyOnDeath());
+		builder -> builder.persistent(Data.CODEC).copyOnDeath().syncWith(net.minecraft.network.codec.ByteBufCodecs.fromCodec(Data.CODEC),
+			net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate.targetOnly()));
 
 	private Disciplines() {
 	}
@@ -131,6 +132,19 @@ public final class Disciplines {
 		return inclined(player).contains(d) || leans(player).contains(d) || (of(player).taught() & 1 << d) != 0;
 	}
 
+	/**
+	 * Andy (2026-11-22): "A stoneborn warlord or anyone who has both affinities still needs to be attuned first". Ki and Arcana
+	 * work only for the attuned ({@link Mana#attuned}; for Arcana, anyone holding mana, as a Death Sorcerer does), whatever the
+	 * class, heritage or teacher. A Monk's ki is their own training, so a Monk's Ki needs no attuning. Arms needs none.
+	 */
+	public static boolean attuned(Player player, int d) {
+		return switch (d) {
+			case KI -> Mana.attuned(player) || Classes.is(player, PlayerClass.MONK);
+			case ARCANA -> Mana.hasMana(player);
+			default -> true;
+		};
+	}
+
 	/** How fast {@code d} trains for {@code player}: full when inclined, half on a lean, a quarter when taught; 0 locked. */
 	static float speed(Player player, int d) {
 		if (inclined(player).contains(d)) {
@@ -170,7 +184,7 @@ public final class Disciplines {
 		for (int pass = 0; pass < 2; pass++) {
 			for (int d = 0; d < KINDS; d++) {
 				boolean mine = inclined.contains(d);
-				if (mine != (pass == 0) || !open(player, d)) {
+				if (mine != (pass == 0) || !open(player, d) || !attuned(player, d)) {
 					continue;
 				}
 				int n = blocksAt(level(player, d), mine);
@@ -247,6 +261,29 @@ public final class Disciplines {
 	}
 
 	public static final String[] KEYS = {"arms", "ki", "arcana"};
+	/** Each discipline's colour on the K screen (as its shield on the feathers row). */
+	static final int[] COLORS = {0xB4B4BC, 0xE8B028, 0x9CC8FF};
+
+	/**
+	 * The K screen's line for discipline {@code d}: its level and how it came to {@code player} (class, heritage, a teacher),
+	 * or that it's locked (and who teaches it), or waits on attuning.
+	 */
+	public static net.minecraft.network.chat.Component describe(Player player, int d) {
+		net.minecraft.network.chat.Component name = net.minecraft.network.chat.Component.translatable("discipline.jaymoskingdoms." + KEYS[d]);
+		String how;
+		if (!open(player, d)) {
+			how = "locked." + KEYS[d];
+		} else if (!attuned(player, d)) {
+			how = "unattuned";
+		} else if (inclined(player).contains(d)) {
+			how = "inclined";
+		} else if (leans(player).contains(d)) {
+			how = "lean";
+		} else {
+			how = "taught";
+		}
+		return net.minecraft.network.chat.Component.translatable("gui.jaymoskingdoms.discipline." + how, name, level(player, d)).withColor(COLORS[d]);
+	}
 
 	/** A teacher opens discipline {@code d} for {@code player} (the drill yard's master-at-arms, a monk, a court wizard). */
 	static void teach(ServerPlayer player, int d) {

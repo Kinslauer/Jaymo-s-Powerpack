@@ -42,14 +42,63 @@ public final class MobBlocks {
 	/** A clean hit: it reels this long (ticks), its swing cut. */
 	static final int FLINCH = 8;
 	static final float BOSS_HEALTH = 100.0F;
+	/** After a parry or a broken guard, no blocks at all for this long (ticks). */
+	static final int BROKEN_TICKS = 40;
 	/** Only blows from this far round its front (degrees each side), as its parry. */
 	static final double FRONT_DEGREES = 90.0;
 
-	/** Per mob: blocks used, last hit, last given back, no blocks until (game time). */
+	/** Per mob: blocks used, last hit, last given back, no blocks until (game time), and how many it had at the last blow. */
 	private static final Map<Mob, long[]> STATE = new WeakHashMap<>();
-	private static final int USED = 0, HIT = 1, BACK = 2, BROKEN = 3;
+	private static final int USED = 0, HIT = 1, BACK = 2, BROKEN = 3, TOTAL = 4;
+
+	/**
+	 * What a locked-on player's pips show (Kingdoms' client, {@code MobBlocksHud}): blocks left (3 bits), how many it has
+	 * (3 bits), its discipline (2 bits). Synced to everyone near; missing until it's first struck.
+	 */
+	public static final net.fabricmc.fabric.api.attachment.v1.AttachmentType<Integer> SHOWN = net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry.create(
+		JaymosKingdoms.id("mob_blocks"), builder -> builder.syncWith(net.minecraft.network.codec.ByteBufCodecs.VAR_INT,
+			net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate.all()));
 
 	private MobBlocks() {
+	}
+
+	/** From {@link MobParry#register}: the calm gives blocks back, and the pips follow. */
+	static void register() {
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(server -> {
+			if (server.getTickCount() % 20 != 0 || STATE.isEmpty()) {
+				return;
+			}
+			for (Map.Entry<Mob, long[]> e : new java.util.ArrayList<>(STATE.entrySet())) {
+				Mob mob = e.getKey();
+				if (mob.isAlive() && mob.level() instanceof ServerLevel level) {
+					settle(e.getValue(), level.getGameTime());
+					sync(mob, e.getValue());
+				}
+			}
+		});
+	}
+
+	/** The calm since its last hit gives blocks back, one every {@link #RETURN_TICKS}. */
+	private static void settle(long[] s, long now) {
+		if (s[USED] <= 0) {
+			return;
+		}
+		long since = Math.max(s[HIT] + CALM_TICKS, s[BACK]);
+		long back = Math.max(0L, (now - since) / RETURN_TICKS);
+		if (back > 0) {
+			s[USED] = Math.max(0L, s[USED] - back);
+			s[BACK] = now;
+		}
+	}
+
+	private static void sync(Mob mob, long[] s) {
+		int total = (int)Math.min(7L, s[TOTAL]);
+		int left = (int)Math.clamp(s[TOTAL] - s[USED], 0L, 7L);
+		int packed = left | total << 3 | discipline(mob) << 6;
+		Integer was = mob.getAttached(SHOWN);
+		if (was == null || was != packed) {
+			mob.setAttached(SHOWN, packed);
+		}
 	}
 
 	/** Whether {@code mob} gets blocks at all: armed, not a boss. */
@@ -83,7 +132,7 @@ public final class MobBlocks {
 	}
 
 	private static long[] state(Mob mob) {
-		return STATE.computeIfAbsent(mob, m -> new long[] {0L, Long.MIN_VALUE / 2, Long.MIN_VALUE / 2, Long.MIN_VALUE / 2});
+		return STATE.computeIfAbsent(mob, m -> new long[] {0L, Long.MIN_VALUE / 2, Long.MIN_VALUE / 2, Long.MIN_VALUE / 2, ARMED[0]});
 	}
 
 	/** Last of the hurt chain ({@code LivingEntityHurtMixin}): a player's blow on an armed mob's front, caught or clean. */
@@ -97,21 +146,17 @@ public final class MobBlocks {
 		}
 		long now = level.getGameTime();
 		long[] s = state(mob);
-		// the calm since its last hit gives blocks back, one at a time
-		if (s[USED] > 0) {
-			long since = Math.max(s[HIT] + CALM_TICKS, s[BACK]);
-			long back = Math.max(0L, (now - since) / RETURN_TICKS);
-			if (back > 0) {
-				s[USED] = Math.max(0L, s[USED] - back);
-				s[BACK] = now;
-			}
-		}
+		settle(s, now);
 		s[HIT] = now;
-		if (now >= s[BROKEN] && s[USED] < count(mob, player)) {
+		s[TOTAL] = count(mob, player);
+		s[USED] = Math.min(s[USED], s[TOTAL]);
+		if (now >= s[BROKEN] && s[USED] < s[TOTAL]) {
 			s[USED]++;
+			sync(mob, s);
 			show(level, mob, player, discipline(mob));
 			return amount * (1.0F - SHARE);
 		}
+		sync(mob, s);
 		flinch(level, mob);
 		return amount;
 	}
@@ -121,14 +166,18 @@ public final class MobBlocks {
 		long[] s = STATE.get(mob);
 		if (s != null) {
 			s[USED] = 0L;
+			sync(mob, s);
 		}
 	}
 
 	/** A player's parry (or a broken guard): all its blocks gone until it's left alone. */
 	public static void broken(Mob mob) {
 		long[] s = state(mob);
-		s[USED] = Integer.MAX_VALUE;
+		s[USED] = s[TOTAL];
+		// none caught till its guard mends (as a player's broken guard)
+		s[BROKEN] = mob.level().getGameTime() + BROKEN_TICKS;
 		s[HIT] = mob.level().getGameTime();
+		sync(mob, s);
 	}
 
 	private static boolean inFront(Mob mob, Player player) {

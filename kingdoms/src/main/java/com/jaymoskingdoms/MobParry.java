@@ -54,6 +54,8 @@ public final class MobParry {
 		if (MobCombat.ENABLED) {
 			ServerLivingEntityEvents.ALLOW_DAMAGE.register(MobParry::allowDamage);
 		}
+		// (defence disciplines) enemies' passive blocks
+		MobBlocks.register();
 	}
 
 	private static boolean allowDamage(LivingEntity victim, DamageSource source, float amount) {

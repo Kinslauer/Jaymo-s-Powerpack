@@ -110,8 +110,12 @@ public final class PassiveBlocks {
 			return InteractionResult.PASS;
 		});
 		ServerTickEvents.END_SERVER_TICK.register(PassiveBlocks::tick);
+		ServerTickEvents.END_SERVER_TICK.register(PassiveBlocks::scramble);
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> STATES.remove(handler.player.getUUID()));
-		ServerLifecycleEvents.SERVER_STOPPING.register(server -> STATES.clear());
+		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+			STATES.clear();
+			SCRAMBLES.clear();
+		});
 	}
 
 	private static State state(ServerPlayer player) {
@@ -420,6 +424,10 @@ public final class PassiveBlocks {
 			if (item != null) {
 				item.setPickUpDelay(DROP_PICKUP_DELAY);
 				level.sendParticles(ParticleTypes.ENCHANTED_HIT, item.getX(), item.getY() + 0.3, item.getZ(), 8, 0.15, 0.15, 0.15, 0.1);
+				if (attacker instanceof net.minecraft.world.entity.Mob mob) {
+					// it scrambles to get it back
+					SCRAMBLES.add(new Scramble(mob, item, level.getGameTime() + SCRAMBLE_TICKS));
+				}
 			}
 		}
 		level.playSound(null, attacker.getX(), attacker.getY(), attacker.getZ(), SoundEvents.ITEM_BREAK.value(), SoundSource.PLAYERS, 0.4F, 1.6F);
@@ -427,4 +435,37 @@ public final class PassiveBlocks {
 
 	/** A dropped weapon can't be picked up for this long (ticks). */
 	static final int DROP_PICKUP_DELAY = 20;
+	/** A disarmed mob goes after its weapon this long (ticks), and takes it up within this reach (blocks). */
+	static final int SCRAMBLE_TICKS = 200;
+	static final double SCRAMBLE_REACH = 1.6;
+
+	/** A disarmed mob going after its dropped weapon. */
+	private record Scramble(net.minecraft.world.entity.Mob mob, ItemEntity item, long until) {
+	}
+
+	private static final java.util.List<Scramble> SCRAMBLES = new java.util.ArrayList<>();
+
+	/** Each tick: a disarmed mob runs to its weapon and takes it back up, if nobody got there first. */
+	private static void scramble(MinecraftServer server) {
+		if (SCRAMBLES.isEmpty()) {
+			return;
+		}
+		SCRAMBLES.removeIf(s -> {
+			net.minecraft.world.entity.Mob mob = s.mob();
+			ItemEntity item = s.item();
+			if (!mob.isAlive() || !item.isAlive() || Downed.isDowned(mob) || !mob.getMainHandItem().isEmpty() || mob.level() != item.level()
+				|| mob.level().getGameTime() > s.until()) {
+				return true;
+			}
+			if (mob.distanceTo(item) <= SCRAMBLE_REACH && !item.hasPickUpDelay()) {
+				mob.setItemInHand(InteractionHand.MAIN_HAND, item.getItem().copy());
+				item.discard();
+				return true;
+			}
+			if (mob.tickCount % 10 == 0) {
+				mob.getNavigation().moveTo(item, 1.2);
+			}
+			return false;
+		});
+	}
 }
