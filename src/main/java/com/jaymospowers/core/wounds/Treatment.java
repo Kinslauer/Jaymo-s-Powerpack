@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiConsumer;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -84,9 +86,16 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  */
 public final class Treatment {
-	/** (0.14.4) A linen bandage heals its part this much (health points) over this long (ticks); a rag half as much. */
-	public static final float BANDAGE_HEAL = 3.0F, RAG_HEAL = 1.5F;
-	public static final int BANDAGE_TICKS = 200;
+	/**
+	 * (Survival picks, lso-heal-time: LSO's bandage and plaster mapped onto ours) A linen bandage heals its part this much
+	 * (health points) over this long (ticks), and dresses {@link #BANDAGE_USES} wounds before it's used up; a rag, a clean
+	 * rag or a grass bandage (the plaster) this much over {@link #RAG_TICKS}.
+	 */
+	public static final float BANDAGE_HEAL = 3.0F, RAG_HEAL = 3.0F;
+	public static final int BANDAGE_TICKS = 300, RAG_TICKS = 400, BANDAGE_USES = 3;
+	/** (Survival picks) Dressings left in the linen bandage a player last cut into (the next {@code BANDAGE_USES - 1} take no new one). */
+	public static final AttachmentType<Integer> BANDAGE_LEFT = AttachmentRegistry.create(JaymosPowers.id("wounds_bandage_left"),
+		builder -> builder.persistent(com.mojang.serialization.Codec.INT));
 	/** (0.14.4) A stitch hurts its part this much; cautery burns it this much. */
 	public static final float NEEDLE_HURT = 1.0F, CAUTERY_BURN = 2.0F;
 	/**
@@ -456,7 +465,7 @@ public final class Treatment {
 			}
 			if (helps(dressing, body, part)) {
 				Bleeding.stop(body, part, false);
-				Bleeding.dress(body, part, rag ? RAG_HEAL : BANDAGE_HEAL, BANDAGE_TICKS, rag);
+				Bleeding.dress(body, part, rag ? RAG_HEAL : BANDAGE_HEAL, rag ? RAG_TICKS : BANDAGE_TICKS, rag);
 				seen++;
 			}
 		}
@@ -821,6 +830,24 @@ public final class Treatment {
 		}
 	}
 
+	/**
+	 * (Survival picks) A linen bandage dresses {@link #BANDAGE_USES} wounds: true when this dressing takes a new bandage off
+	 * the stack, false while the one already cut into has some left.
+	 */
+	private static boolean bandageSpent(ServerPlayer player) {
+		int left = player.getAttachedOrElse(BANDAGE_LEFT, 0);
+		if (left > 0) {
+			if (left == 1) {
+				player.removeAttached(BANDAGE_LEFT);
+			} else {
+				player.setAttached(BANDAGE_LEFT, left - 1);
+			}
+			return false;
+		}
+		player.setAttached(BANDAGE_LEFT, BANDAGE_USES - 1);
+		return true;
+	}
+
 	/** The treatment done: what the remedy does, and what it costs. */
 	private static void apply(ServerLevel level, ServerPlayer player, Session s, ItemStack stack) {
 		LivingEntity body = s.target;
@@ -833,11 +860,16 @@ public final class Treatment {
 				boolean rag = s.remedy != Remedy.BANDAGE;
 				Bleeding.stop(body, part, false);
 				// (0.15.49) Field Dresser: a better dressing. (0.19.24) a clean rag looks like a rag but is not dirty
-				Bleeding.dress(body, part, MedicineSkill.dressing(player, rag ? RAG_HEAL : BANDAGE_HEAL), BANDAGE_TICKS, s.remedy == Remedy.RAG, rag);
-				stack.consume(1, player);
+				Bleeding.dress(body, part, MedicineSkill.dressing(player, rag ? RAG_HEAL : BANDAGE_HEAL), rag ? RAG_TICKS : BANDAGE_TICKS,
+					s.remedy == Remedy.RAG, rag);
+				if (rag || bandageSpent(player)) {
+					stack.consume(1, player);
+				}
 			}
 			case YARROW -> {
 				Bleeding.stop(body, part, false);
+				// (survival picks: LSO's healing herbs) and the part heals a little over time
+				Herbal.mendOver(body, part, Herbal.HERB_HEAL, Herbal.HERB_TICKS);
 				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.GRASS_BREAK, SoundSource.PLAYERS, 0.7F, 1.2F);
 				stack.consume(1, player);
 			}

@@ -38,9 +38,50 @@ its code or art. Choices Andy made:
   drawn in (other mods' animations, MCA) instead of trailing it; limb dressings barely grow where they press on the
   body or the other leg, and splint ties sit just over a dressing.
 
+## Survival picks (2026-11-22): own pools on top of health
+
+Andy picked Legendary Survival Overhaul's wound rows (ideas and numbers only; no code). These replace the older rules
+below where they differ (`Wounds`, `BodyPlan`, `HitRouting`, `PartStrain`):
+
+- **Pools (lso-pools):** each part has its own pool on top of the health, apart from it, as a share of max health: head
+  0.4, body 0.6, each arm 0.4, each leg 0.6, each foot 0.4 (20 health: 8/12/8/12/8). Quadrupeds, arthropods and flyers
+  the same way (head 0.4, body 0.6, legs 0.6, wings 0.4). A hit takes its damage from the health as vanilla does and the
+  same from the part it lands on; vanilla health is untouched otherwise, so every mod that reads it still works. This
+  replaces "health stays real = the sum of the parts" and the 30% bruise curve (0.15.94): healing the health no longer
+  heals the parts.
+- **Downing (Andy, exact):** "the only time you arent downed is if a hit does enough damage to your head while you are
+  standing, even a blacked torso should down you first." Health at zero downs; a hit that blacks out the head or the body
+  downs; only a located blow (melee, a shot) that blacks out the head of one not already down kills outright
+  (`Wounds.headKilled`, read by `Downed.spared`). No one-hit deaths from full health still holds (`NoOneShot`): such a
+  head blow from full health downs. Limbs at zero break, as before (they don't down). Only the going black counts, so one
+  revived with a part still low isn't felled by the next scratch.
+- **What lands nowhere** (fire, magic, poison, drowning, suffocation, lightning, a blast) wears every pool by the share it
+  takes off the health, so none goes black before the health runs out. Falls land on the feet, spilling into the legs.
+- **The 20% line (lso-thresholds, `PartStrain`):** a part at 20% or less: one arm Mining Fatigue, both arms Weakness too,
+  a foot Slowness, the body takes 1.25x damage, a leg makes falls 1.5x, the head a headache (our own throbbing haze,
+  `PainHud`). Painkillers (`Pain.numb`) and adrenaline hold them off. Broken limbs are unchanged (Andy: "broken limbs
+  should still be unusable before a splint").
+- **Broken hearts (lso-brokenhearts):** every part at zero (not a severed one) takes 10% off max health until it heals
+  (at most 50%). The pools are measured without it (`Wounds.poolMax`).
+- **Headshots (lso-headshot):** a projectile on a head with no helmet does 2x damage, to the health and the head. A
+  Ranger's arrow (Kingdoms tags it `jaymospowers_through_helmet`; not a trident) goes through the helmet.
+- **Armour per part (lso-armour-parts):** each piece cuts what lands on its own part (helmet the head, chestplate the
+  body and arms, leggings the legs, boots the feet): 10% for diamond, scaled by the piece's armour against diamond's
+  (at most 20%); not for damage that bypasses armour.
+- **Medicine over time (lso-heal-time):** linen bandage 3 over 15 s, three dressings per bandage; rag, clean rag and
+  grass bandage (the plaster) 3 over 20 s; yarrow powder (the healing herbs) 2 over 30 s as well as stopping the
+  bleeding; bone broth (the tonic) 5 into every part over 10 s; the draught of vigour already does the medkit's job
+  (every part whole over 60 s). Medicine heals the health with the part.
+- **Food and sleep (lso-food-cost):** every point a part heals costs 0.5 food exhaustion. The parts mend by themselves
+  while fed (7 hunger or more): a whole part in 10 minutes, a quarter as fast until patched up (every part missing more
+  than 30% dressed or splinted, nothing bleeding, festering or unset). A night's sleep heals every part as far as it may.
+- **Painkiller (lso-painkiller):** poppy syrup already numbs longer than LSO's 90 s (6 minutes) with addiction and
+  withdrawal, so it stays; it now holds off the 20% debuffs too.
+
 ## Bodies
 
-`BodyPlan`: which parts a kind of creature has, each part's share of its max health, and how hits land on it.
+`BodyPlan`: which parts a kind of creature has, each part's share of its max health, and how hits land on it. (The
+shares below are the first ones; the survival picks above replaced them with own pools.)
 
 | Plan | Parts (share of max health) | Who |
 |---|---|---|
@@ -54,7 +95,7 @@ The plan is chosen by entity type tags (`jaymospowers:body/humanoid` and so on),
 (standing taller than wide → humanoid, wider → quadruped). Bosses (`c:bosses`) and the Ender Dragon or Wither keep
 vanilla health.
 
-**Health stays real.** Vanilla `getHealth()` is still the sum of the parts, so every mod that reads or heals health
+**Health stays real.** (Replaced by the survival picks: the parts are pools on top of it.) Vanilla `getHealth()` is still the sum of the parts, so every mod that reads or heals health
 keeps working. The parts are a `Wounds` attachment: one float per part, synced to the entity's own player
 (full detail) and to everyone tracking it (part states only, for limps and poses).
 
@@ -96,7 +137,7 @@ keeps working. The parts are a `Wounds` attachment: one float per part, synced t
 
 ## Healing
 
-- **Wounds first (0.15.94).** Andy (2026-10-22): "everything should go through the wounding system first ... if a
+- **Wounds first (0.15.94; the bruise curve replaced by the survival picks' own pools).** Andy (2026-10-22): "everything should go through the wounding system first ... if a
   certain threshold (30%) damage to your limb goes through, then it should affect your hearts". Every hit lands on the
   parts before vanilla touches the health (`WoundsHurtMixin`, `WoundsPlayerHurtMixin`). The first 30% of a part's own
   pool (`Wounds.HEART_SPILL_FROM`) is bruising and costs no hearts; past that the part's hearts drain faster, so a part at

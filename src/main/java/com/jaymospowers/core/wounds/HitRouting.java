@@ -8,15 +8,24 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
  * Where a hit lands, and how a part's overflow spills on. Works in health points on a creature's parts
- * ({@code points[i]} of {@code plan.share(i) * maxHealth}).
+ * ({@code points[i]} of {@code plan.share(i) * Wounds.poolMax}).
+ * <p>
+ * Survival picks (Andy, 2026-11-22): a shot to a head with no helmet does {@link #HEADSHOT} times the damage (a Ranger's
+ * arrow goes through the helmet: Jaymo's Kingdoms tags it {@link #THROUGH_HELMET}), and each armour piece cuts what lands
+ * on its own part ({@link #ARMOUR_CUT} for diamond, scaled by the piece's armour). What has no place to land (fire, magic,
+ * poison, drowning, a blast) wears every part by the share it takes off the health.
  */
 final class HitRouting {
 	/** Share of the box's height (from the feet) above which a hit is the head, and below which (humanoid) the legs, and below which the feet. */
@@ -29,6 +38,14 @@ final class HitRouting {
 	static final double LEGS_BELOW = 0.35, SMALL_HEAD_FROM = 0.7;
 	/** How far a mob's blow wanders up and down the body, as a share of the height either way. */
 	static final double MOB_AIM_SPREAD = 0.25;
+	/** (Survival picks, lso-headshot) A shot to the head with no helmet (or a Ranger's arrow through one) does this many times the damage. */
+	public static final float HEADSHOT = 2.0F;
+	/** (Survival picks) The scoreboard tag on a projectile that goes through the helmet (Jaymo's Kingdoms' Ranger arrows). */
+	public static final String THROUGH_HELMET = "jaymospowers_through_helmet";
+	/** (Survival picks, lso-armour-parts) A diamond piece cuts the damage to its own part by this share; others by their armour against diamond's, at most {@link #ARMOUR_CUT_MAX}. */
+	static final float ARMOUR_CUT = 0.1F, ARMOUR_CUT_MAX = 0.2F;
+	/** Diamond's armour on the head, chest, legs and feet. */
+	static final float DIAMOND_HEAD = 3.0F, DIAMOND_CHEST = 8.0F, DIAMOND_LEGS = 6.0F, DIAMOND_FEET = 3.0F;
 
 	private HitRouting() {
 	}
@@ -42,27 +59,87 @@ final class HitRouting {
 		if (source.is(DamageTypeTags.IS_FALL)) {
 			BodyPart[] feet = plan.fallParts();
 			for (BodyPart part : feet) {
-				damage(points, plan, part, loss / feet.length);
+				damage(points, plan, part, loss / feet.length * guard(victim, source, part));
 			}
-		} else if (source.is(DamageTypeTags.IS_EXPLOSION)) {
-			for (int i = 0; i < plan.size(); i++) {
-				damage(points, plan, plan.part(i), loss * plan.share(i));
-			}
-		} else if (source.is(DamageTypeTags.IS_DROWNING) || source.is(DamageTypes.IN_WALL)) {
-			damage(points, plan, BodyPart.HEAD, loss);
-		} else if (source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypes.MAGIC) || source.is(DamageTypes.INDIRECT_MAGIC)
+		} else if (source.is(DamageTypeTags.IS_EXPLOSION) || source.is(DamageTypeTags.IS_DROWNING) || source.is(DamageTypes.IN_WALL)
+			|| source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypes.MAGIC) || source.is(DamageTypes.INDIRECT_MAGIC)
 			|| source.is(DamageTypes.LIGHTNING_BOLT)) {
-			damage(points, plan, BodyPart.BODY, loss);
+			spread(victim, plan, points, max, loss);
 		} else if (source.getDirectEntity() != null || source.getEntity() != null) {
 			// a player locked onto it lands where the lock aims (LockOnRegions), else where the blow came
 			BodyPart aimed = LockOnRegions.aimedPart(victim, plan, source);
 			BodyPart landed = plan.resolve(aimed != null ? aimed : landed(victim, plan, source));
-			damage(points, plan, landed, loss);
+			damage(points, plan, landed, loss * guard(victim, source, landed) * (headshot(victim, source, landed) ? HEADSHOT : 1.0F));
 			return landed;
 		} else {
-			damage(points, plan, BodyPart.BODY, loss);
+			spread(victim, plan, points, max, loss);
 		}
 		return null;
+	}
+
+	/**
+	 * (Survival picks) {@code loss} of the health that lands nowhere in particular: every part loses the share of its pool
+	 * that the health loses of its most, so none of them goes black before the health runs out.
+	 */
+	private static void spread(LivingEntity victim, BodyPlan plan, float[] points, float max, float loss) {
+		float share = loss / Math.max(0.01F, victim.getMaxHealth());
+		for (int i = 0; i < points.length; i++) {
+			points[i] = Math.max(0.0F, points[i] - share * plan.share(i) * max);
+		}
+	}
+
+	/**
+	 * (Survival picks, lso-headshot) Whether a hit by {@code source} that {@code landed} is a headshot: a projectile on the
+	 * head, with no helmet on it or one that goes through the helmet ({@link #THROUGH_HELMET}).
+	 */
+	static boolean headshot(LivingEntity victim, DamageSource source, @Nullable BodyPart landed) {
+		Entity direct = source.getDirectEntity();
+		return landed == BodyPart.HEAD && direct != null && !(direct instanceof LivingEntity)
+			&& (victim.getItemBySlot(EquipmentSlot.HEAD).isEmpty() || direct.entityTags().contains(THROUGH_HELMET));
+	}
+
+	/**
+	 * (Survival picks, lso-armour-parts) What's left of a hit on {@code part} after the armour piece over it: 1 bare, less
+	 * {@link #ARMOUR_CUT} for diamond. Damage that goes round armour, and a Ranger's arrow on the head, aren't cut.
+	 */
+	static float guard(LivingEntity victim, DamageSource source, BodyPart part) {
+		if (source.is(DamageTypeTags.BYPASSES_ARMOR)) {
+			return 1.0F;
+		}
+		EquipmentSlot slot;
+		float diamond;
+		switch (part) {
+			case HEAD -> {
+				if (source.getDirectEntity() != null && source.getDirectEntity().entityTags().contains(THROUGH_HELMET)) {
+					return 1.0F;
+				}
+				slot = EquipmentSlot.HEAD;
+				diamond = DIAMOND_HEAD;
+			}
+			case LEFT_LEG, RIGHT_LEG, FRONT_LEGS, HIND_LEGS, LEGS -> {
+				slot = EquipmentSlot.LEGS;
+				diamond = DIAMOND_LEGS;
+			}
+			case LEFT_FOOT, RIGHT_FOOT -> {
+				slot = EquipmentSlot.FEET;
+				diamond = DIAMOND_FEET;
+			}
+			default -> {
+				slot = EquipmentSlot.CHEST;
+				diamond = DIAMOND_CHEST;
+			}
+		}
+		ItemStack worn = victim.getItemBySlot(slot);
+		if (worn.isEmpty()) {
+			return 1.0F;
+		}
+		double[] armour = {0.0};
+		worn.forEachModifier(slot, (attribute, modifier) -> {
+			if (attribute.is(Attributes.ARMOR) && modifier.operation() == AttributeModifier.Operation.ADD_VALUE) {
+				armour[0] += modifier.amount();
+			}
+		});
+		return 1.0F - Math.min(ARMOUR_CUT_MAX, ARMOUR_CUT * (float) armour[0] / diamond);
 	}
 
 	/**

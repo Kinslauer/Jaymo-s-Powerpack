@@ -721,7 +721,7 @@ public final class Breaks {
 				int index = plan.index(part);
 				float now = Wounds.fraction(entity, part);
 				if ((mask & bit(part)) != 0 && index >= 0 && now < REGROWN_SHARE) {
-					Wounds.healPart(entity, part, (REGROWN_SHARE - now) * plan.share(index) * entity.getMaxHealth(), false);
+					Wounds.healPart(entity, part, (REGROWN_SHARE - now) * Wounds.cap(entity, plan, index), false);
 				}
 			}
 		}
