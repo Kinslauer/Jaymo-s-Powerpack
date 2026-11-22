@@ -16169,3 +16169,35 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - **Raider pieces kept**: a raider's torn hood, torn cloak and horned crest (the Guard Wardrobe's Raiders column) stay on
   when he becomes an MCA villager (`McaBridge.convertRaider`).
 - Built by CI; not played.
+
+## 0.11.64 (2026-11-22): Defence disciplines, part 2: Arms, Ki and Arcana by class, heritage and training (#1991)
+
+- **Your passive blocks come from disciplines now** (Jaymo's Powers' passive blocks ask): Arms (the reflex block), Ki (the ki ward) and Arcana (the ward). Your class inclines you to one: Monks Ki; Mages, Sorcerers, Warlocks, Clerics and Druids Arcana; everyone else Arms. Z Fighters lean to Ki too, whatever their class.
+- **Heritage leans**: Heartlander, Stoneborn, Deepborn, Nightborn and the Hollow's zombie and skeleton looks to Arms; Stormborn, Beastfolk and Rubberfolk to Ki; Sylvan, Tideborn, Dragonblood, Dawnborn, Endborn, Divine, the Inkmarked Earthling and the Hollow's other looks to Arcana; Warriorborn, Verdant, Frostborn and Emberborn to Arms and Ki; Biobuilt to all three. A lean that matches your class starts that discipline at level 2; one that differs is open from the start and trains at half speed.
+- **Levels 0-10**, earned by blows your blocks catch. Blocks: inclined 1 (2 at level 5, 3 at 10), anything else 1 at level 3 and 2 at level 8; at most 5 in all. Disciplines you have no inclination or lean for stay locked (teachers come in a later part).
+- **What they cost**: a ward takes 2 mana; a monk's ki ward one ki; anyone else's ki ward a half-feather. Valor-coated (Armament) fists block at the full 60%.
+- **New skills** on Strength's Might: Keen Timing (3 ranks, level 5: the parry windows widen back to the old ones), Snatch (level 8: a perfect bare-fisted parry takes the foe's weapon into your hand; in the Thief's tree too, and every Monk has it), Iron Guard (level 10: a held guard costs 0.4 half-feathers a point instead of 0.6).
+- Classes: new Disciplines; Skills (three perks), SkillWeb, ThiefTree, Classes (registers it).
+- Built; not played in game.
+
+## 0.11.65 (2026-11-22): Defence disciplines, part 3: armed enemies block too, MCA villagers by their heritage (#1991)
+
+- **Armed enemies get passive blocks**, as you do: anything holding a weapon or shield (guards, bandits, orcs, duellists, illagers, armed skeletons and zombies, every armed MCA villager). Your blow on its front is caught and 60% of it stopped; once its blocks are spent your next blow lands clean and it flinches, its swing cut. Hitting it from behind or the side uses none.
+- **How many** goes by your world tier: an armed enemy 1 / 1 / 2 / 3 / 4 from Hearth to Legend, an experienced one (leaders, a ruler's escort, assassins, the richest realms' guards, folk grown 12+ days, illager captains) 2 / 2 / 3 / 4 / 5.
+- **Breaking through**: they come back one every 4 seconds once it hasn't been hit for 3, and all at once when it lands its own parry (still rolled first, as before). Your parry of its blow, or knocking its guard aside, takes all of them. Disarm it and it has none until it's armed again. Bosses (100+ health) and unarmed mobs get none.
+- **Their discipline** comes from what they are: evokers, illusioners and witches ward with Arcana (a ring of runes); an MCA villager takes its heritage's lean (Arms first, so a Warriorborn guard raises steel, a Sylvan one wards, a Stormborn one turns blows with ki); everyone else Arms.
+- Not in this part: the shield pips over a locked-on enemy's head, and the teachers who open a discipline you have no inclination for.
+- Classes: new MobBlocks; LivingEntityHurtMixin (last of the hurt chain), MobParry, MobShields, Disciplines (leans for villagers); Powers' Guard and PassiveBlocks (a parry takes a mob's blocks).
+- Built; not played in game.
+
+## 0.11.66 (2026-11-22): Defence disciplines, part 4: teachers, attunement, the K screen, enemies' pips (#1991)
+
+- **Ki and Arcana need attuning first**: whatever your class, heritage or teacher, a Ki ward or an Arcana ward only works once you're attuned (for Arcana, anyone holding mana). A Monk's Ki is their own training and needs none. Arms needs none.
+- **Amethyst attunes fewer, and by touch**: only about 3 in 10 players and MCA villagers have the knack for it, and they're attuned by striking amethyst in the world or carrying a piece of it (shards, blocks, clusters, buds), no longer by standing near a budding amethyst. A villager with the knack who carries amethyst is attuned too.
+- **Teachers**: "Teach me to defend myself" on MCA's menu opens a discipline you have no inclination or lean for, for 30 silver, once: a veteran guard of the drill yard teaches Arms, the Fist school's master Ki, a court wizard Arcana. It then trains at a quarter of the speed.
+- **The K screen** (stats tab) lists your three disciplines: level, and whether they come from your class, your blood's lean or a teacher, wait on attuning, or are locked (and who teaches them).
+- **Enemies' pips**: while you're locked onto an armed enemy, a row of small shield pips above the crosshair shows its blocks in its discipline's colour, greying as you break them.
+- **Disarmed enemies scramble** for their dropped weapon and take it back up, unless you grab it first.
+- Fixed: an enemy whose blocks a parry took got them back again once left alone (they never came back before).
+- Classes: new DisciplineTeachers, MobBlocksHud; Disciplines, Mana, ManaFolk, MobBlocks, MobParry, SkillScreen, the MCA answer and dialogue mixins, dialogues/main.json; Powers' PassiveBlocks (the scramble).
+- Built; not played in game.

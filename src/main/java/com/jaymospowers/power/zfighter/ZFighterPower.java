@@ -159,11 +159,13 @@ public final class ZFighterPower implements Power {
 	/** (0.16.24) A transformation's film (ticks): low and close, sweeping round your front. */
 	static final int SUPER_FILM_TICKS = 36;
 
-	// ---- Limit Break (index: tier 1-3) ----
-	static final double[] LIMIT_FIST = {0.0, 0.1, 0.2, 0.33};
-	static final double[] LIMIT_SPEED = {0.0, 0.03, 0.07, 0.1};
-	/** Health it burns per tick (0.4, 1, 2 a second); it ends before it would take the last heart. */
-	static final float[] LIMIT_HEALTH = {0.0F, 0.02F, 0.05F, 0.1F};
+	// ---- Limit Break (index: tier 1-6; 4-6 only in base or Super, LIMIT_HIGH_TIER) ----
+	static final double[] LIMIT_FIST = {0.0, 0.1, 0.2, 0.33, 0.5, 0.7, 1.0};
+	static final double[] LIMIT_SPEED = {0.0, 0.03, 0.07, 0.1, 0.13, 0.16, 0.2};
+	/** Health it burns per tick (0.4, 1, 2, 3, 4.4, 6 a second); it ends before it would take the last heart. */
+	static final float[] LIMIT_HEALTH = {0.0F, 0.02F, 0.05F, 0.1F, 0.15F, 0.22F, 0.3F};
+	/** The first tier that holds only in base form or Super (form 1). */
+	static final int LIMIT_HIGH_TIER = 4;
 	/** Stacked on a form, that form's ki drain is multiplied by this. */
 	static final float LIMIT_STACK_DRAIN = 2.0F;
 	static final int LIMIT_COLOR = 0xFF3A2A;
@@ -229,6 +231,7 @@ public final class ZFighterPower implements Power {
 	private static final Identifier SUPER_SPEED_ID = JaymosPowers.id("zfighter_super_speed");
 	private static final Identifier LIMIT_FIST_ID = JaymosPowers.id("zfighter_limit_fists");
 	private static final Identifier LIMIT_SPEED_ID = JaymosPowers.id("zfighter_limit_speed");
+	private static final Identifier RELEASE_ID = JaymosPowers.id("zfighter_release");
 	private static final Identifier VITALITY_ID = JaymosPowers.id("zfighter_vitality");
 	private static final Identifier RAGE_FIST_ID = JaymosPowers.id("zfighter_rage_fists");
 	private static final Identifier REACH_ID = JaymosPowers.id("zfighter_reach");
@@ -462,6 +465,9 @@ public final class ZFighterPower implements Power {
 		// (0.18.56) back home: Maw dust, the Starlit Lens, the far-world pantry's ingredients and trip buffs
 		com.jaymospowers.power.zfighter.backhome.BackHome.init();
 		ZFighterRaids.init();
+		ZFighterRelease.init();
+		ZFighterStyles.init();
+		ZFighterPotential.init();
 		ZFighterTournaments.init();
 		ZFighterAfterlife.init();
 		ZFighterDemonRealm.init();
@@ -475,6 +481,7 @@ public final class ZFighterPower implements Power {
 		ZFighterRaiders.init();
 		ZFighterHighSky.init();
 		ZFighterCorruption.init();
+		ZFighterGapRaids.init();
 		// (0.17.50) branch forms, Ego, the android upgrade, the metal rebuild
 		ZFighterBranchForms.init();
 		ZFighterNet.register();
@@ -618,7 +625,7 @@ public final class ZFighterPower implements Power {
 		ZFighterHands.drop(player);
 		ZFighterFury.drop(player);
 		landFlight(player);
-		for (Identifier id : new Identifier[] {FIST_ID, SUPER_FIST_ID, HUNGRY_ID, LIMIT_FIST_ID, RAGE_FIST_ID, APE_FIST_ID}) {
+		for (Identifier id : new Identifier[] {FIST_ID, SUPER_FIST_ID, HUNGRY_ID, LIMIT_FIST_ID, RAGE_FIST_ID, APE_FIST_ID, RELEASE_ID}) {
 			remove(player, Attributes.ATTACK_DAMAGE, id);
 		}
 		remove(player, Attributes.MOVEMENT_SPEED, SLOW_ID);
@@ -712,6 +719,7 @@ public final class ZFighterPower implements Power {
 				player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_starving").withStyle(ChatFormatting.RED));
 			} else {
 				live.ki += Mastery.starterOnly(player) ? STARTER_CHARGE_RATE : CHARGE_RATE;
+				ZFighterRelease.charge(player);
 				com.jaymospowers.core.trials.PowerTrials.count(player, "zfighter.charge", player.tickCount % 20 == 0 ? 1 : 0);
 				if (!creative) {
 					player.causeFoodExhaustion(CHARGE_EXHAUSTION);
@@ -790,6 +798,12 @@ public final class ZFighterPower implements Power {
 		} else if (!live.charging) {
 			faintAura(player, live, now, max);
 		}
+		if (live.limit >= LIMIT_HIGH_TIER && live.form > 1) {
+			// the high tiers hold only in base or Super
+			live.limit = LIMIT_HIGH_TIER - 1;
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_limit_high_form").withStyle(ChatFormatting.GRAY));
+			refresh(player, live);
+		}
 		if (live.limit > 0) {
 			float burn = LIMIT_HEALTH[live.limit] * ZFighterLineage.limitFactor(player);
 			if (player.getHealth() - burn <= 2.0F) {
@@ -867,6 +881,11 @@ public final class ZFighterPower implements Power {
 			case ABILITY_1 -> {
 				if (down && player.getFoodData().getFoodLevel() <= 0 && !player.isCreative()) {
 					player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_starving").withStyle(ChatFormatting.RED));
+					return;
+				}
+				if (down && player.isShiftKeyDown()) {
+					// sneak+R: hold back a quarter more of his power
+					ZFighterRelease.lower(player);
 					return;
 				}
 				live.charging = down;
@@ -1305,7 +1324,7 @@ public final class ZFighterPower implements Power {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_no_limit").withStyle(ChatFormatting.GRAY));
 			return;
 		}
-		int next = live.limit >= bought ? 0 : live.limit + 1;
+		int next = live.limit >= bought || live.limit + 1 >= LIMIT_HIGH_TIER && live.form > 1 ? 0 : live.limit + 1;
 		if (next > 0 && live.superOn() && ZFighterTraining.of(player).mastery(live.form) < ZFighterTraining.NEXT_FORM_MASTERY) {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_limit_unmastered").withStyle(ChatFormatting.GRAY));
 			return;
@@ -1721,8 +1740,12 @@ public final class ZFighterPower implements Power {
 	static void refresh(ServerPlayer player, Live live) {
 		boolean hungry = player.getFoodData().getFoodLevel() <= HUNGRY_FOOD && !player.isCreative();
 		set(player, Attributes.ATTACK_DAMAGE, FIST_ID, fistBonus(player), AttributeModifier.Operation.ADD_VALUE);
-		float power = 1.0F + MASTERY_POWER * ZFighterTraining.mastery(player, live.form);
-		set(player, Attributes.ATTACK_DAMAGE, SUPER_FIST_ID, FORM_FIST[live.form] * power, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		// (gaps 2) unlocked potential: in base, his strongest mastered form's strength; held back, a share of it all
+		int stat = ZFighterPotential.statForm(player, live);
+		float edge = ZFighterPotential.edge(player, live);
+		float power = 1.0F + MASTERY_POWER * ZFighterTraining.mastery(player, stat);
+		set(player, Attributes.ATTACK_DAMAGE, SUPER_FIST_ID, FORM_FIST[stat] * power * edge, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		set(player, Attributes.ATTACK_DAMAGE, RELEASE_ID, ZFighterRelease.factor(player) - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.ATTACK_DAMAGE, LIMIT_FIST_ID, LIMIT_FIST[live.limit], AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.ATTACK_DAMAGE, RAGE_FIST_ID, live.raging() ? ZFighterBattle.RAGE_FIST : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.MOVEMENT_SPEED, LIMIT_SPEED_ID, LIMIT_SPEED[live.limit], AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
@@ -1732,7 +1755,7 @@ public final class ZFighterPower implements Power {
 		set(player, Attributes.MOVEMENT_SPEED, SLOW_ID, live.charging || live.guarding || live.waveFrom >= 0 || live.barrageFrom >= 0 || live.spiritFrom >= 0
 			|| ZFighterDisc.throwing(player) || ZFighterWaveBeam.out(player) ? -CHARGE_SLOW : 0.0,
 			AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
-		set(player, Attributes.MOVEMENT_SPEED, SUPER_SPEED_ID, FORM_SPEED[live.form], AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		set(player, Attributes.MOVEMENT_SPEED, SUPER_SPEED_ID, FORM_SPEED[stat] * edge, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		// lineages: a Verdant's Giant forms (his long arm is the stretch punch, RaceMoves); the Great Ape
 		int lineage = ZFighterLineage.of(player);
 		boolean ape = ZFighterLineage.ape(player);
@@ -1831,7 +1854,7 @@ public final class ZFighterPower implements Power {
 	}
 
 	static void cooldown(ServerPlayer player, int slot, int ticks) {
-		set(player, state(player).withCooldown(slot, player.level().getGameTime(), ticks));
+		set(player, state(player).withCooldown(slot, player.level().getGameTime(), ZFighterStyles.cooldown(player, ticks)));
 	}
 
 	private static void sync(ServerPlayer player, Live live, int max) {
@@ -1904,9 +1927,10 @@ public final class ZFighterPower implements Power {
 
 	/** Ki techniques: stronger with mastery, trained Ki Power, and the form he's in (more as it's mastered). */
 	static float kiPower(ServerPlayer player, Live live) {
-		float form = 1.0F + (FORM_KI[live.form] - 1.0F) * (1.0F + MASTERY_POWER * ZFighterTraining.mastery(player, live.form));
+		int stat = ZFighterPotential.statForm(player, live);
+		float form = 1.0F + (FORM_KI[stat] - 1.0F) * (1.0F + MASTERY_POWER * ZFighterTraining.mastery(player, stat)) * ZFighterPotential.edge(player, live);
 		float trained = 1.0F + ZFighterTraining.KI_POWER_PER_LEVEL * ZFighterTraining.of(player).stat(ZFighterTraining.KI_POWER);
 		return ZFighterFusion.power(player, ((0.75F + 0.0625F * Mastery.unlocked(player)) * form + (Fate.isAscended(player) ? 0.1F : 0.0F)) * trained
-			* ZFighterCorruption.kiFactor(player, live) * ZFighterBranchForms.kiFactor(player, live));
+			* ZFighterCorruption.kiFactor(player, live) * ZFighterBranchForms.kiFactor(player, live)) * ZFighterRelease.factor(player);
 	}
 }

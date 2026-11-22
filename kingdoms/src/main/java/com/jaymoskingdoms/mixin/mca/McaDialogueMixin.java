@@ -423,6 +423,13 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.DisciplineTeachers.ANSWER.equals(answer)) {
+			// (defence disciplines) a teacher opens the discipline you lack, for a fee
+			com.jaymoskingdoms.DisciplineTeachers.teach(player, villager);
+			villager.getInteractions().stopInteracting();
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && com.jaymoskingdoms.BoxingTeachers.ANSWER.equals(answer)) {
 			// a boxing teacher: a task, a style learned, or how you stand (Jaymo's Powers' fist styles)
 			com.jaymoskingdoms.BoxingTeachers.teach(player, villager);
