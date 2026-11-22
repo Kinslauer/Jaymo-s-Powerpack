@@ -60,15 +60,19 @@ public final class ScryingOrb {
 
     /** The orb must be this near (blocks) to use; the view is this many columns across each way from the target; held this long (ticks). */
     static final double ORB_REACH = 4.0;
-    static final int RADIUS = 8, SIZE = RADIUS * 2 + 1, HEIGHT = 11, HOLD_TICKS = 20 * 30, REFRESH = 20;
+    public static final int RADIUS = 8, SIZE = RADIUS * 2 + 1, HEIGHT = 11;
+    static final int HOLD_TICKS = 20 * 30, REFRESH = 20;
     /** The most dots/figures drawn. */
     static final int FIGURES_MOST = 32;
+    /** How near an orb (blocks) its vision is seen. */
+    static final double VIEWERS = 16.0;
     static final int COLOUR = 0x4C8DFF;
 
-    /** Server to player: the snapshot (palette + indices) or a delta, and the figures. */
-    public record OrbView(Component who, int[] palette, byte[] indices, int[] changed, int[] figures, boolean night) implements CustomPacketPayload {
+    /** Server to the players by an orb: what the orb at {@code orb} shows (palette + indices, and the figures). */
+    public record OrbView(BlockPos orb, Component who, int[] palette, byte[] indices, int[] changed, int[] figures, boolean night) implements CustomPacketPayload {
         public static final Type<OrbView> TYPE = new Type<>(JaymosKingdoms.id("scrying_orb_view"));
         public static final StreamCodec<RegistryFriendlyByteBuf, OrbView> CODEC = CustomPacketPayload.codec((v, buf) -> {
+            BlockPos.STREAM_CODEC.encode(buf, v.orb);
             net.minecraft.network.chat.ComponentSerialization.STREAM_CODEC.encode(buf, v.who);
             buf.writeVarInt(v.palette.length);
             for (int c : v.palette) {
@@ -90,6 +94,7 @@ public final class ScryingOrb {
             }
             buf.writeBoolean(v.night);
         }, buf -> {
+            BlockPos orb = BlockPos.STREAM_CODEC.decode(buf);
             Component who = net.minecraft.network.chat.ComponentSerialization.STREAM_CODEC.decode(buf);
             int[] palette = new int[buf.readVarInt()];
             for (int i = 0; i < palette.length; i++) {
@@ -111,7 +116,7 @@ public final class ScryingOrb {
                 figures[i * 4 + 2] = buf.readVarInt() - 64;
                 figures[i * 4 + 3] = buf.readByte();
             }
-            return new OrbView(who, palette, indices, changed, figures, buf.readBoolean());
+            return new OrbView(orb, who, palette, indices, changed, figures, buf.readBoolean());
         });
 
         @Override
@@ -182,8 +187,8 @@ public final class ScryingOrb {
         }));
     }
 
-    /** A caster's watching: from where, of what, until when, and when the view was last sent (game time). */
-    private record Watch(ServerLevel from, Target target, long until, long lastRefresh) {
+    /** A caster's watching: from where (the world and the orb), of what, until when, and when the view was last sent (game time). */
+    private record Watch(ServerLevel from, BlockPos orb, Target target, long until, long lastRefresh) {
     }
 
     private static final Map<UUID, Watch> WATCHES = new HashMap<>();
@@ -217,6 +222,7 @@ public final class ScryingOrb {
         Watch w = WATCHES.remove(caster.getUUID());
         if (w != null) {
             Concentration.drop(caster);
+            idle(w);
             if (ServerPlayNetworking.canSend(caster, Close.TYPE)) {
                 ServerPlayNetworking.send(caster, new Close());
             }
@@ -269,7 +275,7 @@ public final class ScryingOrb {
 
     private static void startWatch(ServerLevel level, ServerPlayer caster, ScryingOrbBlockEntity orb, Target target, @org.jspecify.annotations.Nullable LivingEntity person) {
         orb.setActive(caster.getUUID());
-        WATCHES.put(caster.getUUID(), new Watch(level, target, level.getGameTime() + HOLD_TICKS, level.getGameTime()));
+        WATCHES.put(caster.getUUID(), new Watch(level, orb.getBlockPos(), target, level.getGameTime() + HOLD_TICKS, level.getGameTime()));
         Concentration.hold(caster, "scrying_orb", HOLD_TICKS, () -> {
             WATCHES.remove(caster.getUUID());
             orb.setIdle();
@@ -281,7 +287,14 @@ public final class ScryingOrb {
             chill(person);
         }
         keepLoaded(level.getServer(), target);
-        sendSnapshot(caster, target);
+        sendSnapshot(caster, orb.getBlockPos(), target);
+    }
+
+    /** The orb {@code w} was watched in goes still again, for anyone to use. */
+    private static void idle(Watch w) {
+        if (w.from().getBlockEntity(w.orb()) instanceof ScryingOrbBlockEntity orb) {
+            orb.setIdle();
+        }
     }
 
     /** The watched feel it: a chill at the ear, no words. */
@@ -301,6 +314,7 @@ public final class ScryingOrb {
             Watch w = e.getValue();
             if (caster == null || w.from().getGameTime() >= w.until() || !"scrying_orb".equals(Concentration.holding(caster))) {
                 WATCHES.remove(e.getKey());
+                idle(w);
                 if (caster != null) {
                     if (ServerPlayNetworking.canSend(caster, Close.TYPE)) {
                         ServerPlayNetworking.send(caster, new Close());
@@ -313,18 +327,18 @@ public final class ScryingOrb {
             }
             if (w.from().getGameTime() - w.lastRefresh() >= REFRESH) {
                 keepLoaded(server, w.target());
-                sendSnapshot(caster, w.target());
-                WATCHES.put(e.getKey(), new Watch(w.from(), w.target(), w.until(), w.from().getGameTime()));
+                sendSnapshot(caster, w.orb(), w.target());
+                WATCHES.put(e.getKey(), new Watch(w.from(), w.orb(), w.target(), w.until(), w.from().getGameTime()));
             }
         }
     }
 
     /**
-     * The view of {@code target} as it is now, to {@code caster}: the blocks of a sphere round it (palette of block state
+     * The view of {@code target} as it is now, to everyone within {@link #VIEWERS} of the orb at {@code orb}: the blocks of a sphere round it (palette of block state
      * ids, slot 0 always air, as the client reads them; an index of -1 is outside the sphere) and the figures in it. A
      * target that can't be found (gone, or its land not loaded) clouds the orb.
      */
-    private static void sendSnapshot(ServerPlayer caster, Target target) {
+    private static void sendSnapshot(ServerPlayer caster, BlockPos orb, Target target) {
         if (!(caster.level() instanceof ServerLevel from)) {
             return;
         }
@@ -370,9 +384,12 @@ public final class ScryingOrb {
         }
         int[] figures = gatherFigures(level, centre);
         boolean night = level.isDarkOutside();
-        if (ServerPlayNetworking.canSend(caster, OrbView.TYPE)) {
-            ServerPlayNetworking.send(caster, new OrbView(Component.literal(target.name()), palette.stream().mapToInt(Integer::intValue).toArray(),
-                indices, new int[0], figures, night));
+        OrbView view = new OrbView(orb, Component.literal(target.name()), palette.stream().mapToInt(Integer::intValue).toArray(), indices, new int[0],
+            figures, night);
+        for (ServerPlayer p : from.players()) {
+            if (p.blockPosition().closerThan(orb, VIEWERS) && ServerPlayNetworking.canSend(p, OrbView.TYPE)) {
+                ServerPlayNetworking.send(p, view);
+            }
         }
     }
 
