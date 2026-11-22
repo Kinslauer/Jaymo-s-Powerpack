@@ -1,11 +1,8 @@
 package com.jaymospowers.freerun.moves;
 
 import com.jaymospowers.JaymosPowers;
-import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.Ledge;
-import com.jaymospowers.core.wounds.BodyPart;
 import com.jaymospowers.core.wounds.BodyPlan;
-import com.jaymospowers.core.wounds.Breaks;
 import com.jaymospowers.core.wounds.Downed;
 import io.netty.buffer.ByteBuf;
 import java.util.IdentityHashMap;
@@ -42,8 +39,8 @@ import net.minecraft.world.phys.Vec3;
  * <li><b>The pull-up</b>: where the next step of the way is higher than a jump reaches ({@link #JUMP_REACH}), the body
  * goes up its own side of the wall and over onto the top in {@link Ledge#CLIMB_TICKS}, the player's mantle, instead of
  * jumping at it ({@code MoveControlClimbMixin}). One step or less is still the plain jump.</li>
- * <li><b>Limbs</b> (Andy's pick): a broken or lost arm or leg means no pull-up and no way planned up a wall (the jump
- * still works), and nor while downed. Babies are too small to reach the edge.</li>
+ * <li><b>Limbs</b>: broken or lost arms and legs don't stop it, as they don't stop a player (Andy: "players and NPCs
+ * should be able to struggle up like before"). Downed, they can't; babies are too small to reach the edge.</li>
  * </ul>
  * The climb is the server's (a mob's movement is); {@link #PULL} is synced so everyone sees the pose, the player's mantle
  * clip on the body ({@code client/NpcClimbPose}).
@@ -92,16 +89,12 @@ public final class NpcClimb {
 		});
 	}
 
-	/** Whether {@code mob} climbs as a player does (built like a person, grown, up, every arm and leg whole). */
+	/**
+	 * Whether {@code mob} climbs as a player does (built like a person, grown, up). Broken or lost limbs don't stop it:
+	 * Andy (2026-11-22) "players and NPCs should be able to struggle up like before".
+	 */
 	public static boolean climber(Mob mob) {
-		if (mob instanceof Player || mob.isBaby() || BodyPlan.of(mob) != BodyPlan.HUMANOID || mob.isPassenger() || Downed.isDowned(mob)) {
-			return false;
-		}
-		if ((Dismember.missing(mob) & (Dismember.RIGHT_ARM | Dismember.LEFT_ARM | Dismember.RIGHT_LEG | Dismember.LEFT_LEG)) != 0) {
-			return false;
-		}
-		return !Breaks.isBroken(mob, BodyPart.LEFT_ARM) && !Breaks.isBroken(mob, BodyPart.RIGHT_ARM)
-			&& !Breaks.isBroken(mob, BodyPart.LEFT_LEG) && !Breaks.isBroken(mob, BodyPart.RIGHT_LEG);
+		return !(mob instanceof Player) && !mob.isBaby() && BodyPlan.of(mob) == BodyPlan.HUMANOID && !mob.isPassenger() && !Downed.isDowned(mob);
 	}
 
 	/** Mid-climb (the server's own; the move control leaves it be). */
@@ -161,7 +154,7 @@ public final class NpcClimb {
 			Path path = entry.getValue();
 			float p = (now - path.start()) / (float)path.ticks();
 			if (mob.isRemoved() || !mob.isAlive() || !climber(mob) || p >= 1.0F) {
-				// done, or let go (dead, downed, a limb broken on the way): the body drops from where it is
+				// done, or let go (dead or downed on the way): the body drops from where it is
 				it.remove();
 				mob.removeAttached(PULL);
 				COOLDOWN.put(mob, now + COOLDOWN_TICKS);
