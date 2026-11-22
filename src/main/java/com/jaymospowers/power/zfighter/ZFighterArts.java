@@ -4,12 +4,10 @@ import com.jaymospowers.core.LockOn;
 import com.jaymospowers.core.wounds.Downed;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -306,11 +304,6 @@ public final class ZFighterArts {
 			}
 		}
 		return best;
-	}
-
-	/** Whether a mob could tear blocks up here (the mob griefing rule): what decides whether ki may break the ground. */
-	static boolean griefing(ServerLevel level) {
-		return level.getGameRules().get(GameRules.MOB_GRIEFING);
 	}
 
 	/** Tells him there was nothing to aim at. */
