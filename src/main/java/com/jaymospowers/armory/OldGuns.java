@@ -18,7 +18,8 @@ public final class OldGuns {
 
 	/** One of the black-powder guns. */
 	public static boolean is(ItemStack stack) {
-		return GunBlast.Gun.of(stack) != null;
+		// (not WeaponMod's musket parts, whose ids also start "musket")
+		return GunBlast.Gun.of(stack) != null && !BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().contains("part");
 	}
 
 	/** Loaded: WeaponMod's own reload state, the Void Armory's flintlock not spent, a Kingdoms gun charged. */
