@@ -66,6 +66,16 @@ public final class ZFighterHooks {
 		return spend(player, LIMIT_STAMINA);
 	}
 
+	/** A ki ward (combat.PassiveBlocks) takes {@code amount} ki; false (nothing taken) if he hasn't that much. */
+	public static boolean spendKi(ServerPlayer player, float amount) {
+		ZFighterPower.Live live = ZFighterPower.live(player);
+		if (live.ki < amount) {
+			return false;
+		}
+		live.ki -= amount;
+		return true;
+	}
+
 	/** Raising the guard needs stamina; false when empty. */
 	public static boolean raiseGuardStamina(ServerPlayer player) {
 		return Feathers.canSpend(player, 1);

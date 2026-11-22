@@ -136,10 +136,11 @@ public final class GuardClient {
 			held = player.getTicksUsingItem() + partial;
 			boolean eager = shown != null && shown.eager();
 			boolean locked = LockOnClient.locked() != null;
-			perfect = eager ? 0 : Guard.PERFECT_TICKS + (locked ? Guard.LOCK_PERFECT_BONUS : 0);
+			int keen = shown != null ? shown.keen() : 0;
+			perfect = eager ? 0 : Guard.PERFECT_TICKS[keen] + (locked ? Guard.LOCK_PERFECT_BONUS[keen] : 0);
 			from = perfect;
-			parry = eager ? 0 : Guard.PARRY_TICKS + (locked ? Guard.LOCK_PARRY_BONUS : 0);
-			span = Guard.PARRY_TICKS + (locked ? Guard.LOCK_PARRY_BONUS : 0) + BAR_LINGER;
+			parry = eager ? 0 : Guard.PARRY_TICKS[keen] + (locked ? Guard.LOCK_PARRY_BONUS[keen] : 0);
+			span = Guard.PARRY_TICKS[keen] + (locked ? Guard.LOCK_PARRY_BONUS[keen] : 0) + BAR_LINGER;
 		} else if (shown != null && shown.window() > 0 && (ZFighterGuard.guarding(player) || DarktideGuard.guarding(player))) {
 			// a power's own guard: one window, closed until its parry is ready again
 			held = player.level().getGameTime() - shown.start() + partial;
