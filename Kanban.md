@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 14:15). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 14:16). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -42,10 +42,10 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]] · 🍇 Bacchus · #1964 · in-review
-- [ ] [[Inbox/mutant-zombie-reskin|mutant-zombie-reskin]] · for 🔥 Prometheus · #1968 · in-review
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · 🔥 Prometheus · #research · in-review
 - [ ] [[Inbox/devils-hole-pupfish-writeup|devils-hole-pupfish-writeup]] · 💻 Odysseus · #1971 · in-review
 - [ ] [[Inbox/enemy-damage-balance|enemy-damage-balance]] · 💻 Odysseus · #1970 · in-review
+- [ ] [[Inbox/mutant-zombie-reskin|mutant-zombie-reskin]] · for 🔥 Prometheus · #1968 · in-review
 - [ ] [[Agents/survival-climate|survival-climate]] · 💻 Odysseus · #1995 · in-review
 - [ ] [[Agents/survival-track3-hook-carry|survival-track3-hook-carry]] · 💻 Odysseus · #1989, 1993 · in-review
 - [ ] [[Agents/survival-wounds-track1|survival-wounds-track1]] · 💻 Odysseus · #1992 · in-review
