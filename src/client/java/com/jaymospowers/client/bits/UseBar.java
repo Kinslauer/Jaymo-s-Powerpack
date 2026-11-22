@@ -19,6 +19,7 @@ import net.minecraft.world.item.ItemUseAnimation;
  * bar under the crosshair (the HUD's BELOW zone, the same flat frame, track and fill as every charge bar) that fills as the
  * use goes on. A drawn bow, a loaded crossbow and a wound-up trident turn it white. Holding a shield up, looking down a
  * spyglass and the other uses that go on as long as you hold them have no end to fill towards, so they show nothing.
+ * Nor do the black-powder guns, loading or held ready ({@code OldGuns}).
  */
 public final class UseBar {
 	// ===== the knobs ================================================================================================
@@ -44,6 +45,10 @@ public final class UseBar {
 			return;
 		}
 		ItemStack stack = player.getUseItem();
+		if (com.jaymospowers.armory.OldGuns.is(stack)) {
+			// (Andy: "the loading bar does not need to be there for any of this old age weaponry")
+			return;
+		}
 		ItemUseAnimation how = stack.getUseAnimation();
 		int total;
 		switch (how) {
