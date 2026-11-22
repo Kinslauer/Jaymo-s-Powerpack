@@ -255,7 +255,7 @@ public final class ZFighterRush {
 	}
 
 	private static float fists(ServerPlayer player) {
-		return (float)player.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		return (float)ZFighterTraining.strikeFists(player);
 	}
 
 	/** A blow of the ordinary kind (capped like a punch). */

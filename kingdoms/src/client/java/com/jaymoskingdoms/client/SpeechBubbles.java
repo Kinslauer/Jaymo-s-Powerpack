@@ -96,6 +96,10 @@ public final class SpeechBubbles {
 	static void add(int entityId, Component text, int color) {
 		// (an illager's line, as far as you know their tongue)
 		text = IllagerWords.resolve(text);
+		// (the villager you're talking with speaks in the talk's box, not over their head)
+		if (DialogueCinematic.said(entityId, text)) {
+			return;
+		}
 		Font font = Minecraft.getInstance().font;
 		long now = Util.getMillis();
 		long lasts = Math.min(MAX_MS, BASE_MS + PER_CHAR_MS * text.getString().length());

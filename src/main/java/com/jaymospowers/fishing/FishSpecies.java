@@ -104,7 +104,7 @@ public final class FishSpecies {
 		ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, JaymosPowers.id(sp.id));
 		EntityType<WildFish> type = Registry.register(BuiltInRegistries.ENTITY_TYPE, key,
 			(sp.lava() ? EntityType.Builder.<WildFish>of(LavaFish::new, MobCategory.WATER_AMBIENT).fireImmune()
-				: EntityType.Builder.<WildFish>of(WildFish::new, MobCategory.WATER_AMBIENT)).sized(size.width(), size.height())
+				: EntityType.Builder.<WildFish>of(WildFish::new, category(sp))).sized(size.width(), size.height())
 				.eyeHeight(size.height() * 0.6F).clientTrackingRange(sp.big() ? 8 : 4).build(key));
 		FabricDefaultAttributeRegistry.register(type, AbstractFish.createAttributes().add(Attributes.MAX_HEALTH, health(sp))
 			.add(Attributes.MOVEMENT_SPEED, sp.big() ? 1.1 : 0.8));
@@ -118,7 +118,7 @@ public final class FishSpecies {
 		SpeciesSizes.Size size = SpeciesSizes.ALL.get(sp.id);
 		ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, JaymosPowers.id(sp.id));
 		EntityType<Critter> type = Registry.register(BuiltInRegistries.ENTITY_TYPE, key,
-			EntityType.Builder.<Critter>of(Critter::new, MobCategory.WATER_AMBIENT).sized(size.width(), size.height())
+			EntityType.Builder.<Critter>of(Critter::new, category(sp)).sized(size.width(), size.height())
 				.eyeHeight(size.height() * 0.6F).clientTrackingRange(4).build(key));
 		FabricDefaultAttributeRegistry.register(type, Mob.createMobAttributes().add(Attributes.MAX_HEALTH, health(sp))
 			.add(Attributes.MOVEMENT_SPEED, 0.3));
@@ -133,12 +133,22 @@ public final class FishSpecies {
 
 	private static void spawns(Species sp, EntityType<? extends Mob> type) {
 		BiomeModifications.addSpawn(ctx -> ctx.canGenerateIn(sp.lava() ? LevelStem.NETHER : LevelStem.OVERWORLD) && sp.livesIn(ctx.getBiomeHolder()),
-			MobCategory.WATER_AMBIENT, type, sp.spawnWeight, Math.max(1, sp.schoolMin), Math.max(1, sp.schoolMax));
+			category(sp), type, sp.spawnWeight, Math.max(1, sp.schoolMin), Math.max(1, sp.schoolMax));
 	}
 
 	/**
-	 * Fresh water anywhere it's at least two deep (rivers, lakes, mountain tarns), the sea no deeper than vanilla's fish
-	 * go; walkers on the bed, everyone else in open water.
+	 * The spawn category a species counts against. Cave pool fish are underground water creatures, as the glow squid is, so
+	 * they don't take the sea's and rivers' fish places (each player's water-ambient cap counts every fish within eight
+	 * chunks, cave pools under the land included).
+	 */
+	private static MobCategory category(Species sp) {
+		return sp.water == Species.Water.CAVE ? MobCategory.UNDERGROUND_WATER_CREATURE : MobCategory.WATER_AMBIENT;
+	}
+
+	/**
+	 * Fresh water anywhere it's at least two deep and open to the sky (rivers, lakes, mountain tarns: never an aquifer
+	 * underground, where no one sees them and they'd fill the fish cap), the sea no deeper than vanilla's fish go and
+	 * still lit by the sky (a walker's bed in the shallows); walkers on the bed, everyone else in open water.
 	 */
 	private static <T extends Mob> boolean canSpawn(EntityType<T> type, ServerLevelAccessor level, EntitySpawnReason reason, BlockPos pos,
 		RandomSource random) {
@@ -153,6 +163,9 @@ public final class FishSpecies {
 			// cave pools only: deep under the sea's level, and no sky light reaches them
 			return level.getFluidState(pos.below()).is(FluidTags.WATER) && pos.getY() <= level.getSeaLevel() - CAVE_DEPTH
 				&& level.getBrightness(LightLayer.SKY, pos) == 0;
+		}
+		if (level.getBrightness(LightLayer.SKY, pos) == 0) {
+			return false;
 		}
 		if (sp.walker()) {
 			return !level.getFluidState(pos.below()).is(FluidTags.WATER) && level.getBlockState(pos.below()).isSolid();

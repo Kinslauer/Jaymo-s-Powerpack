@@ -172,12 +172,21 @@ public final class Fainting {
 			|| player.isSpectator() || Downed.isDowned(player) || is(player)) {
 			return InteractionResult.PASS;
 		}
-		if (player instanceof ServerPlayer shaker && lying instanceof ServerPlayer fainted && bringRound(fainted)) {
-			shaker.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
-			level.playSound(null, fainted.getX(), fainted.getY(), fainted.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS,
-				0.7F, 0.8F);
+		if (player instanceof ServerPlayer shaker && lying instanceof ServerPlayer fainted) {
+			shakeAwake(shaker, fainted);
 		}
 		return InteractionResult.SUCCESS;
+	}
+
+	/** {@code shaker} shakes {@code fainted} by the shoulder (sneak + use, or the body menu's choice): out cold, they come round. */
+	public static boolean shakeAwake(ServerPlayer shaker, ServerPlayer fainted) {
+		if (fainted == shaker || !bringRound(fainted)) {
+			return false;
+		}
+		shaker.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+		shaker.level().playSound(null, fainted.getX(), fainted.getY(), fainted.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.PLAYERS,
+			0.7F, 0.8F);
+		return true;
 	}
 
 	/**

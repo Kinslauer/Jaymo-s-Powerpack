@@ -158,21 +158,20 @@ public final class Downed {
 			if (!(entity instanceof Mob body) || !isDowned(body) || player.isSpectator() || player.isShiftKeyDown() || !disarmable(body)) {
 				return InteractionResult.PASS;
 			}
-			if (!world.isClientSide() && !ours(body) && !armed(body)) {
+			if (!world.isClientSide() && !ours(body) && !armed(body) || PowersCompat.bodyMenu()) {
+				// (with Powers, its catch-all swallows the click once its body menu has seen it)
 				return InteractionResult.PASS;
 			}
-			// (swallowed here, so a downed villager's screen doesn't open, and neither hand gets at their pockets; the weapons
-			// come out on the tap, below)
+			// (swallowed here, so a downed villager's screen doesn't open, and neither hand gets at their pockets)
 			return InteractionResult.SUCCESS;
 		});
-		// Andy (2026-11-20): "right click hold should always be drag, tap can loot". The weapons come out on a tap, once the
-		// press is let go (Powers tells of it), so a hold drags the body instead of emptying its hands first
-		PowersCompat.<LivingEntity>listen("com.jaymospowers.core.wounds.Downed", "TAPPED_LISTENERS", (player, entity) -> {
-			if (entity instanceof Mob body && isDowned(body) && !player.isSpectator() && !player.isShiftKeyDown() && disarmable(body)
-				&& (ours(body) || armed(body))) {
-				disarm(player, body);
-			}
-		});
+		// Andy (2026-11-20): "there needs to be a context menu on right click for lifting, pickpocketing, reviving, untying".
+		// The weapons come out from Powers' body menu (a tap of use on them), so a hold still drags the body
+		PowersCompat.bodyOption("disarm", 60, (player, entity) -> entity instanceof Mob body && isDowned(body) && disarmable(body)
+			&& (ours(body) || armed(body)), (player, entity) -> {
+				disarm(player, (Mob) entity);
+				return false;
+			});
 		ServerTickEvents.END_SERVER_TICK.register(Downed::tick);
 	}
 
@@ -334,7 +333,7 @@ public final class Downed {
 	}
 
 	/** {@code mob} lets go of downed {@code body}: no longer its target. */
-	private static void letGo(Mob mob, LivingEntity body) {
+	static void letGo(Mob mob, LivingEntity body) {
 		if (mob.getTarget() == body) {
 			mob.setTarget(null);
 		}

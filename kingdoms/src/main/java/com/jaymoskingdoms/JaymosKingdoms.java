@@ -258,6 +258,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Visitors.register();
 		// 0.7.483: every settlement keeps a butcher and a healer
 		TownTrades.register();
+		TownFitting.register();
 		LOGGER.debug("visitor attachment: {}", Visitors.VISIT);
 		Reforms.register();
 		LOGGER.debug("reform attachment: {}", Reforms.GRIEVANCES);
@@ -441,6 +442,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.films.BossIntros.register();
 		// great foes' themes (stems mixed on the player's own side) and the trophy stand
 		com.jaymoskingdoms.music.FoeThemes.register();
+		com.jaymoskingdoms.music.Skirmishes.register();
 		// the music of the places (Medieval Music pack tracks, played on the player's own side) and a tavern's bard
 		PlaceThemes.register();
 		Bards.register();
@@ -587,6 +589,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// kingdoms' seats the world generates whole: a castle with its square, garden, barracks and homes round it
 		SeatCompounds.register();
 		EpicTowns.register();
+		TownWakes.register();
 		// 0.5: seats in the world's buildings (and their attachment); fiefdoms and camps in Grim Kingdoms' ruins (only with
 		// Grim loaded), their builders clearing its rubble first (after Construction, whose brain it wraps)
 		LOGGER.debug("hold attachment: {}", Holds.HOLDS);
@@ -867,6 +870,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Tag.register();
 		Families.register();
 		Routines.register();
+		// villagers left standing still for minutes are written to the log (the stall Andy saw in their houses)
+		Unstick.register();
 		// 0.7.19: villagers' regard for one another, and the meetings it makes (fights to hugs) (and its attachment)
 		LOGGER.debug("regard attachment: {}", Neighbours.REGARD);
 		Neighbours.register();

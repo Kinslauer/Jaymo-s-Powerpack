@@ -6891,3 +6891,116 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - **A crushing blow has to land in reach** (`CRUSH_REACH`, 3.5 blocks between the two bodies' edges): another mod's spell or shot that counts as the caster's own hand no longer counts as a slam (no burst, no throw, no extra limb loss).
 - Unchanged: someone downed under a slam still bursts; blasts still gib by closeness (now also cut for big bodies); Stoneborn are never burst.
 - Built; not played. The server log for the mule clip wasn't reachable (it runs on the Deck), so which rule burst the mule wasn't confirmed: all three ways a single hit could burst it are covered.
+
+## 0.26.17 (2026-11-20): flail left click: hold to wind up a swing, tap to jab (#1947)
+
+- Andy: "the flail needs to wind up a swing on left click hold, and a short jab with the weight follwing the cursor direction on tap". Balkon's flails (not the chain axe, which keeps its overhead chop, and not the whip, which keeps its swipe) now take their left click for themselves (`armory/Lash`, new `client/armory/FlailSwingClient`):
+  - **Hold left click**: the arm goes up and back and the ball loops round behind your shoulder, faster and faster, fully wound up after about 1.2 s (`Lash.WIND`). Let go and it swings through in front of you (`Lash.SWING`) along the way you flicked the mouse (no flick: from your weapon shoulder down across you), hitting from 0.3x to 1.1x the flail's damage by how long you wound it up; wound up past halfway it comes round a raised shield. Something too heavy for the swing still stops it dead.
+  - **Tap left click** (under a quarter second): a short jab (`Lash.JAB`), the ball thrown 2.8 blocks straight out from your chest. It goes where you look as it flies, so moving the mouse drags the weight after it. The first creature it meets takes 0.5x the flail's damage and the ball stops there; a shield blocks it.
+  - Locked on, both go at the picked region of your foe. Neither puts the flail on cooldown, and a new press as the ball comes back carries on from where it is.
+  - No plain swing, hit, digging or Better Combat attack goes with the flail's left click any more (`ToolSwingGateMixin`, so region swings don't touch it). With Sneak held the click works as before (executions, shaking someone awake). Right-click whirl and slam unchanged. The flail's old charged left-click swipe is replaced by the wound-up swing.
+  - New tooltip line on flails.
+- Built; not played.
+
+## 0.26.18 (2026-11-20): hogtied captives ride over a horse (#1948)
+
+- **Hogtied captives on horseback** (Andy: "hogtied people can go on a horse too and stay there until they work free"): someone hogtied by a lasso, carried in your arms, is heaved over a horse's back with a right-click on it, the same as someone downed. They stay slung there until they work free of the knots (Kingdoms' lasso struggle), then they're set down beside the horse. Before, only the downed could go on a horse, and a downed captive was set down as soon as they came to.
+- Lifting a hogtied body back off (sneak + right-click the horse) needs Haul the Bound, as lifting one off the ground does; without it the body is set down beside the horse.
+- `Sling.heavable` and `Sling.tick` count `Carry.bound` bodies alongside the downed.
+- Built; not played.
+
+## 0.26.19 (2026-11-20): body menu - a tap of use on a body opens what you can do to it (#1949)
+
+- Andy (2026-11-20, hogtying with the lasso): "there needs to be a context menu on right click for lifting, pickpocketing, reviving, untying. I had way too many prompts come up just now".
+- **Body menu** (`core.BodyMenu`, client `bodymenu.BodyMenuScreen`/`BodyMenuClient`): a quick tap of use, standing, on someone downed, hogtied or out cold in a faint opens a small list beside the crosshair with only what can be done to them now: Revive, Shake awake, Untie or Cut them free, Hear them out, Drag, Lift, Pick their pockets, Take their weapons, Pull out the blade, Tear off the band. Click a row or press its number; right-click or Escape closes it.
+- What you pick is done with nothing held: a timed one (revive, untying, pockets) fills its usual bar and stops, keeping its progress, if you step away. Opening the menu again stops it too.
+- Unchanged: hold use still drags the downed, sneak + use still shakes a faint awake. Medicine, a limb to fit, a gag, a wrap, a carried body and the lasso's own rope keep their clicks.
+- The standing tap on the downed no longer takes their weapons or a stuck blade straight away (both are on the menu now); Xeno-Band tear-off moved to the menu (`XenoBands`); `Downed.TAPPED_LISTENERS` is gone, `Downed.CLAIMED_USES` added (a use another mod takes for itself starts no drag or revive: the lasso's tying).
+- Lift from the menu takes them straight into your arms (too heavy in armour: a piece comes off first, as before); Haul the Bound is still needed for someone hogtied.
+- Andy (2026-11-20): "Holding left click should execute period, ive found it isnt intuitive enough right now for new players. And the revive needs to be on knees. Also add tutorial tooltip popups for these mechanics along with wall sit recoveries."
+- **Executions**: holding left-click on anyone downed or helpless now executes them, no sneak needed (`Finishers`, `FinisherClient`); it still wins over a flail's wind-up. Choking someone from behind, the Quiet Word and the hit-streak quick kill still need sneak.
+- **Reviving on your knees** (Andy picked kneeling down for it): sneak + hold use revives only from a kneel at their side (the low crouch, Shift + scroll down, held still; it tells you if you're standing), and the menu's Revive kneels you itself. The reviver is drawn on both knees beside the body while the bar fills (`Downed`, `Tending`, `TendPose`).
+- **First-time tips** (`client.hud.BodyTips`): one card the first time each comes up, once per player: someone down in front of you (the menu, the drag, the revive), someone you can execute, a lasso in hand, being downed yourself (getting up), and downed beside a wall (sit up against it, then rise up it).
+- Built; not played.
+
+## 0.26.20 (2026-11-20): Z Fighter aura rework - flame shell and white core (#1911)
+
+- **Aura rework**: a Z Fighter charging up now shows a flame shell around his body with a bright white core at its heart. While charging, small lightning crackles over him from the second form up, glowing embers drift up from him, and a ring of dust rises at his feet; cracks open at a random spot in a small ring round his feet, throttled so a long charge doesn't keep re-cracking the same spot. Going into a form throws a transformation burst of light and flying ground, and hitting full charge blows out in a ring of ki.
+- Built; not played in game.
+
+## 0.26.21 (2026-11-20): bodies keep their facing prone, sat or crouched; the view rises with the head on get-ups (#1950)
+
+- **The body stays put** (Andy: "when players are prone or sitting or crouched they should stay in their orientation... only their head and pov should do that"): lying flat (prone by the gesture or a low ceiling, downed, on broken legs), sat on the ground or a seat, or crouched, a player standing still no longer swivels round with the camera. Only the head turns after it, as far as a neck goes (75°), and the view turns freely. Moving, the body swings round to the way you go at vanilla's pace and only catches up with the look past the neck's reach, eased, never vanilla's snap. Swinging or using an item (drawing a bow, aiming a crossbow, eating) still turns you, so your arms stay on what you aim at. Worked out the same on the server and every client (`core/StillBody`, `mixin/StillBodyMixin`, client `StillBodyHeadMixin`).
+- **First person follows the rising head** ("it should also follow the rising head as you get up from downed or wall sit"): getting up off the floor while downed, the view now rides up with the body's eyes as the get-up turns it up off the ground (and drops back with it if you let go part way), instead of staying on the floor until you pop up (`CrawlPose.riseEye`, `ProneCameraMixin`). Getting up against a wall already followed the head (`WallSit.eye`). Stood up from either, the view starts at the standing eyes at once, where it used to dip back toward the floor for a moment while vanilla's view caught up.
+- Built; not played.
+
+## 0.26.22 (2026-11-20): Stealth kills: sneak + hold attack behind someone who never saw you (#1952)
+
+- **Stealth kill, everyone's**: sneak and hold attack (1.5 s, the three bars) behind a monster or a person on their feet who hasn't noticed you, with a weapon in hand, and they die where they stand. A blade plays Silent Blade (a hand over the mouth, the blade in under the skull), anything else that finishes anyone plays Lights Out (one blow to the back of the head). Taken from behind (110 degrees round from where they look), awake, not riding, not a player, an animal, a boss or someone's pet; up to 40 health and about a tall man's size. It is a real kill, as an execution is. No sound but a soft one close by: they make no cry and the blow no hurt sound. A sneak + double click does it at once, as with executions.
+- **Taps still hit**: a press on someone you could take this way is held back for a moment; let go within a quarter second and it lands as an ordinary blow (your sneak attack, the hidden blade's assassination), so sneaking up and striking still works.
+- **Quiet Word split**: its choke hold from behind is the empty hand's now; with a weapon in hand the same hold is the stealth kill. Bare hands kill only with Kingdoms' Silent Snap (and Quiet Word's choke still comes first on someone who talks).
+- **Rogue's Arts** (Kingdoms) better it, read by key: Quick Work shortens the hold (1 s, then 0.5 s), Bigger Game takes bigger foes (80 health and 3.2 blocks, then 150 and 4.2), Silent Snap kills bare-handed (a twist of the head). Each kill tags the player for Kingdoms (`jaymospowers_stealth_kill`).
+- First-time tip card (top right) the first time you stand behind someone you could take.
+- Classes: `core/finisher/Finishers` (stealthKind, stealthKillable, stealthHold, the hold), `client/finisher/FinisherClient` (the held-back tap), `FinisherPose` (the three moves), `client/hud/BodyTips`, `client/wounds/ExecutionReact`.
+- Built; not played.
+
+## 0.26.23 (2026-11-21): hints as tip cards - text hints show top right instead of over the hotbar (#1951)
+
+- Andy (2026-11-20): "All hints in text should be reworked as tooltips in the new menu, top right. Hints like, you must kneel to revive, or skill not unlocked".
+- **Hint cards** (`client.hud.HintCards`): an action-bar line that is a hint (how to do something, what it needs first, a skill, perk or ability not learned yet) now comes up as a tip card in the top right, titled Hint, and is kept on the menu's Notices page like the other cards. 315 lines across Powers, Kingdoms and Kitchen are hints, listed by key in `assets/jaymospowers/hint_keys.txt`; every other line (what just happened, counts, cooldowns, gauges, callouts like "Sneak attack!") stays on the bar.
+- A hint sent again and again (each tick of a hold, each try) makes one card, and the same hint isn't carded again for 30 seconds.
+- Lines built from a key at run time (about 250 of them) and chat messages aren't covered yet.
+- Built; not played.
+
+## 0.26.24 (2026-11-22): a sword never bursts a body (#1974)
+
+- A blow from a sword or an axe cuts: it's never a crushing blow, however hard it lands, so it can't burst a body (downed or standing) the way a slam does. (`BlastGore.crushing`)
+- Built; not played.
+
+## 0.26.25 (2026-11-22): VillagersPlus' miner's house rarer in villages (#1973)
+
+- **Fewer mine heads in villages** (Andy, Morwick: "how does it justify having this many mines?"; he chose "just make them rarer"): VillagersPlus put its miner's house in plains, taiga and savanna villages at a weight of 25, so it was the likeliest house in every slot and big towns came out with a row of six to eight. Once per install its weight is set to 4 in `config/villagersplus/villagersplus-4.0-config.json5`, about a common vanilla house; its other job houses keep theirs. Only villages generated afterwards change. The server's file is the one that counts. Delete `config/jaymospowers-villagersplus-preset-v1` to apply it again. (`VillagersPlusPreset`)
+- Built; not played.
+
+## 0.26.27 (2026-11-22): the roll stays on the ground, the Sit key prone, a real struggle up the wall (#1975)
+
+- **Dodge roll**: the body no longer goes into the ground when it turns over: it turns round the middle of the tucked body and only drops as far as keeps it on the ground at each point of the turn. The legs stay on the hips as the back rounds, so leggings and chestplate no longer cut through each other; the knees fold to the chest and the elbows round the shins, arms outside the legs. (`DodgeRollPose`)
+- **Sit key while prone**: lying prone (not downed), the Sit key only sits you up against a wall beside you, with the downed wall-sit animation, and pressed again lays you back down; with no wall it does nothing. Crawling off or standing up takes you off the wall. (`Sitting`, `DownedLie.proneSitKey`, `WallSit`)
+- **Getting up the wall while downed**: no longer the slide down played backwards. You draw your feet in and put your hands down on the floor beside your hips, push off the floor hunched over your knees until you're crouched with your back on the wall, then one hand goes onto its knee and the other flat on the wall to push your legs straight, and you come upright with your head last. It goes in heaves, slipping back a little between them. A broken arm hangs and the other does the work. (`WallSit`, `WallSitArms.rise`, `CrawlPose`)
+- Built; poses checked in still renders, not played.
+
+## 0.26.28 (2026-11-22): dive into water with the Dodge key (#1975)
+
+- **Dive on Alt**: standing at an edge with deep water ahead and below (up to 2.5 blocks out and 14 down), the Dodge key (Alt) dives you straight off it head first, with no hop first. Falling over deep water, it turns the fall into a head-first dive. Either way you go in as a clean dive (the small neat splash, slipping deeper, no sting) from any height. Sneak no longer makes a dive: Sneak held as you hit the water is the cannonball. Looking steeply down (or Leap of Faith) still goes in head first. (`Dives`, `DodgeClient`)
+- **Everyone sees it**: in the air the body turns head first along the way it's going, arms over the head, and comes back upright as it goes under. The water-entry body turns (the clean dive's head-first tilt, the belly flop laid flat, the cannonball tucked forward) were never drawn before; they are now. (`DivePose`, `FreefallPose`)
+- Built; not played.
+
+## 0.26.29 (2026-11-22): Freerun animations: the ledge climb keyed with elbows and knees, climbing down walls, vaults by speed and height, a pole climb, and bending limbs through the moves (#1959)
+
+- **Climbing up over a ledge** is a keyed animation: a pull-up with the elbows bending (the hands stay up at the edge as the chest comes to it), the elbows coming over the edge into a straight-armed press, the right foot stepping up onto the edge and the left knee after it, then up to stand. The lean in over the edge is as before.
+- **Hanging** keeps its catch, sway and dangle, and now the elbows give and straighten in turn as each arm takes the weight, and the knees hang loose by turns. **Shimmying** bends the elbow of the hand coming off the edge while the holding arm stays nearly straight.
+- The clips are GeckoLib/Blockbench animation files written by `tools/gen_freerun_clips.py` (elbow and knee folds are new channels in them); `tools/freerun_clip_preview.py` draws any clip frame by frame. Unused clips from the first draft (cling, climb down) are gone until their moves are done. (`LedgePose`, `KeyframeClip`)
+- **Climbing down**: clinging to a wall, hold Back to climb down hand under hand, as fast as you climb up (the climb's hands and feet play backward). Hanging from a ledge, hold Back (past the castaway's moment) and you go down onto the wall below and climb on down it, where there's a wall to cling to; with none, you let go as before. With Climber, sneaking off a roof edge already turns you round to hang from it, so a roof can be climbed down all the way. The move hints show it. (`FreerunClient`, `LedgeClient`, `Freerun.climbsDownFrom`, `MoveHints`)
+- **Vaults chosen by how you take them** (no longer at random): at an angle (25 degrees or more off square), the lazy vault, side-on over one hand; anything over a block high, the kong, diving over on both hands; low at a fast run, the monkey flip; low at a sprint, the thief vault, the lead leg kicked over. A web slinger's vaults stay random. (`Freerun.vaultStyle`)
+- **Vault elbows and knees**: the kong's elbows give as the hands land and the shins fold under the tucked knees; the lazy vault's trailing leg bends as it follows over; the monkey flip balls up tight; the thief's trailing knee draws up behind the straight lead leg. (`WebParkourPose`)
+- **Pole climb** has its own look (it used to be drawn as climbing a flat wall, hands wide): arms wrapped round the pole in front, legs pinching it, climbing like an inchworm, both hands reaching up together while the legs grip, then the legs drawing up while the hands hold. (`WebParkourPose`, `Freerun.POLE_LOOK`)
+- **Elbows and knees** now bend in the wall kick (legs driving straight off the wall, then tucking as you fly), the bar swing (soft elbows, more on the hand coming off the bar; the knees whip bent on the back swing) and balancing on a narrow top (soft knees, more on the side you sway over). Wall runs already bent theirs. (`WebParkourPose`, `BarHangPose`, `BalancePose`)
+- **Running**: every player's trailing knee now folds the shin up behind them as the leg swings back, more the faster they run (elbows stay straight, so a held item stays in the hand). **Slides** bend their knees (the tucked leg in the freerun slide; the baseball slide's cocked leg, the knee slide kneeling on the shins, the hip slide's stacked legs). The **long jump** tucks its knees in flight and reaches out for the far side, the **safety tap** lands on bent knees, and the **sky dive** arches with soft knees and elbows. (`RunPose`, `RunMovesPose`, `WebParkourPose`)
+- Built; poses checked in still renders, not played.
+
+## 0.26.30 (2026-11-22): Fish spawn where you can see them (#1984)
+
+- **Fresh and sea fish, crabs and other critters only spawn in water the sky reaches** (rivers, lakes, the sea's upper layers and shallows), never in underground aquifers. A natural spawn picks its height anywhere from the world's bottom up, so river and lake species were mostly spawning in flooded caves under the land, where no one saw them, and filling each player's fish cap: the sea looked empty.
+- **Cave pool fish (cavefish, olm) are underground water creatures now**, as the glow squid is, so they have their own small cap and no longer take the fish places of the sea and rivers. (`FishSpecies`)
+- Built on CI; not played.
+
+## 0.26.31 (2026-11-22): Z Fighter gaps 1: stats (#1958)
+
+- **Strike stat**: a sixth stat (Strike) for rushes, grab slams and the hold-combo finisher, bought like the other five; Strength stays for plain punches.
+- **Critical blows**: late TP buys for crit chance (2% a level, up to 20%) and crit damage (1.5x base, +0.5 per level); a crit deals a much heavier blow and announces it.
+- Built; not played in game.
+
+## 0.26.32 (2026-11-22): Z Fighter gaps 2: stamina for dash, guard and forms (#1938)
+
+- **Stamina**: Flash Step, raising your guard, and going into a form or Limit Break now cost stamina - the pack's stamina row. At zero they can't be used until it regrows; meditation and rest refill it.
+- Built; not played in game.

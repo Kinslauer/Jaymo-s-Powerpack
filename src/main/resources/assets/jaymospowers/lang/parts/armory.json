@@ -154,6 +154,7 @@
   "item.jaymospowers.leather_whip": "Leather Whip",
   "item.jaymospowers.leather_whip.hint": "Right-click: crack it. Hold to wrap what it hits, let go to haul it over your head (or off its feet)",
   "item.jaymospowers.flail.whirl": "Hold right-click to whirl the ball overhead; let go to bring it down where you look",
+  "item.jaymospowers.flail.swing": "Left-click: tap to jab, the ball following your aim; hold to wind up a swing, let go to strike",
   "death.attack.jaymospowers.lash_wrap": "%1$s was struck round their guard",
   "death.attack.jaymospowers.lash_wrap.player": "%1$s was struck round their guard by %2$s",
   "item.jaymospowers.fang_gauntlets": "Fang Gauntlets",

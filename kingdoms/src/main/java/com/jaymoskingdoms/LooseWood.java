@@ -10,10 +10,13 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -50,6 +53,18 @@ public final class LooseWood {
 	static final float HURT_PER_BLOCK = 1.0F;
 	static final int HURT_MOST = 8;
 
+	/** The most block changes from other threads (world generation) waiting to be looked at; the rest are dropped. */
+	static final int OFF_THREAD_MOST = 4096;
+
+	/** A block change seen off the server thread: what the block was, and where. */
+	private record Pending(ServerLevel level, long pos, BlockState was) {
+	}
+
+	/** Block changes made off the server thread (the world generating), looked at on the server thread next tick. */
+	private static final ConcurrentLinkedQueue<Pending> OFF_THREAD = new ConcurrentLinkedQueue<>();
+	private static final AtomicInteger OFF_THREAD_SIZE = new AtomicInteger();
+	private static volatile boolean warnedFull;
+
 	/** Per world: where something that held wood up has gone since they were last looked at. */
 	private static final Map<ServerLevel, LongLinkedOpenHashSet> CHANGED = new IdentityHashMap<>();
 
@@ -58,11 +73,37 @@ public final class LooseWood {
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(LooseWood::tick);
-		ServerLifecycleEvents.SERVER_STOPPED.register(server -> CHANGED.clear());
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			CHANGED.clear();
+			OFF_THREAD.clear();
+			OFF_THREAD_SIZE.set(0);
+			warnedFull = false;
+		});
 	}
 
 	/** (from the world's block changes) The block at {@code pos} went from {@code was} to {@code now}. */
 	public static void changed(ServerLevel level, BlockPos pos, BlockState was, BlockState now) {
+		if (!level.getServer().isSameThread()) {
+			// (not the server thread: the world is not ours to read, nor CHANGED to touch; look at it at this tick's end.
+			// A log being placed takes no support away, and the world generating places a great many: those aren't queued)
+			if (was == now || now.is(BlockTags.LOGS)) {
+				return;
+			}
+			if (OFF_THREAD_SIZE.incrementAndGet() <= OFF_THREAD_MOST) {
+				OFF_THREAD.add(new Pending(level, pos.asLong(), was));
+			} else {
+				OFF_THREAD_SIZE.decrementAndGet();
+				if (!warnedFull) {
+					warnedFull = true;
+					JaymosKingdoms.LOGGER.warn("Loose wood: too many block changes from other threads at once; dropping the extra");
+				}
+			}
+			return;
+		}
+		note(level, pos, was, now);
+	}
+
+	private static void note(ServerLevel level, BlockPos pos, BlockState was, BlockState now) {
 		if (was == now || now.is(BlockTags.LOGS) || !(was.is(BlockTags.LOGS) || holds(level, pos, was)) || holds(level, pos, now)) {
 			return;
 		}
@@ -70,6 +111,14 @@ public final class LooseWood {
 	}
 
 	private static void tick(MinecraftServer server) {
+		for (Pending p; (p = OFF_THREAD.poll()) != null;) {
+			OFF_THREAD_SIZE.decrementAndGet();
+			BlockPos pos = BlockPos.of(p.pos());
+			// (it may have changed again since: what counts is the block now, and what it was then)
+			if (ready(p.level(), pos)) {
+				note(p.level(), pos, p.was(), p.level().getBlockState(pos));
+			}
+		}
 		if (CHANGED.isEmpty()) {
 			return;
 		}
@@ -85,11 +134,11 @@ public final class LooseWood {
 			}
 			Set<BlockPos> seen = new HashSet<>();
 			for (BlockPos pos : now) {
-				if (!level.isLoaded(pos)) {
+				if (!ready(level, pos)) {
 					continue;
 				}
 				for (BlockPos n : BlockPos.betweenClosed(pos.offset(-1, -1, -1), pos.offset(1, 1, 1))) {
-					if (!seen.contains(n) && level.isLoaded(n) && level.getBlockState(n).is(BlockTags.LOGS)) {
+					if (!seen.contains(n) && ready(level, n) && level.getBlockState(n).is(BlockTags.LOGS)) {
 						look(level, n.immutable(), seen);
 					}
 				}
@@ -113,7 +162,7 @@ public final class LooseWood {
 				}
 				for (Direction d : Direction.values()) {
 					BlockPos q = at.relative(d);
-					if (!level.isLoaded(q)) {
+					if (!ready(level, q)) {
 						return;
 					}
 					BlockState s = level.getBlockState(q);
@@ -122,7 +171,7 @@ public final class LooseWood {
 					}
 				}
 				for (BlockPos n : BlockPos.betweenClosed(at.offset(-1, -1, -1), at.offset(1, 1, 1))) {
-					if (piece.contains(n) || !level.isLoaded(n) || !level.getBlockState(n).is(BlockTags.LOGS)) {
+					if (piece.contains(n) || !ready(level, n) || !level.getBlockState(n).is(BlockTags.LOGS)) {
 						continue;
 					}
 					BlockPos q = n.immutable();
@@ -148,6 +197,15 @@ public final class LooseWood {
 	private static boolean holds(ServerLevel level, BlockPos pos, BlockState state) {
 		return !state.isAir() && !state.is(BlockTags.LOGS) && !(state.getBlock() instanceof LeavesBlock) && !state.is(BlockTags.BEEHIVES)
 			&& !state.is(Blocks.COCOA) && !state.getCollisionShape(level, pos).isEmpty();
+	}
+
+	/**
+	 * Whether {@code pos}'s chunk is fully there to read now. Level.isLoaded only asks whether the chunk has a ticket, and
+	 * is true for one still generating under a player's view: reading a block there made the server wait on it past the
+	 * watchdog (2026-11-21 8:10 and 8:16 AM). getChunkNow never schedules or waits; what isn't ready is left for later.
+	 */
+	private static boolean ready(ServerLevel level, BlockPos pos) {
+		return level.getChunkSource().getChunkNow(SectionPos.blockToSectionCoord(pos.getX()), SectionPos.blockToSectionCoord(pos.getZ())) != null;
 	}
 
 	/** The piece of {@code logs} held by nothing comes down: as a tree, or a few bare logs like sand. */

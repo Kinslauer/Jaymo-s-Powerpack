@@ -29,6 +29,12 @@ import net.minecraft.world.entity.player.Player;
  * body) and the lie-back is laid on here instead.
  */
 public final class RunPose {
+	/**
+	 * (Track 5) Running knees: the walk's speed where they start to fold and where they fold in full (vanilla's walk
+	 * animation speed; a sprint is near 1), how bent the knee always is running, and how much the shin folds per radian
+	 * the leg has swung back (radians). Sliding: the tucked leg's knee, and the lead leg's (radians).
+	 */
+	static final float RUN_FROM = 0.55F, RUN_FULL = 0.95F, RUN_KNEE = 0.2F, RUN_KNEE_BACK = 1.6F, SLIDE_TUCK_KNEE = 1.5F, SLIDE_LEAD_KNEE = 0.15F;
 	/** The fast run's forward lean (degrees), and how quick it eases (the weight's spring, times its usual). */
 	static final float LEAN_DEGREES = 14.0F, LEAN_SPEED = 0.8F;
 	/** The slide: how far the body lies back about the feet (degrees) and how far it drops (blocks). */
@@ -191,5 +197,31 @@ public final class RunPose {
 		f.set(PoseBlend.RIGHT_LEG, BELLY_LEG * in, 0.0F, BELLY_LEG_OUT * in);
 		f.set(PoseBlend.LEFT_LEG, BELLY_LEG * 1.4F * in, 0.0F, -BELLY_LEG_OUT * in);
 		track.apply(h, f);
+	}
+
+	/**
+	 * (Parkour animations, track 5) Last thing before the model is drawn. Running, for every player: the knee of the leg
+	 * swinging back folds the shin up behind it, more the faster the run, as a runner's does (the elbows are left straight:
+	 * a held item stays with a straight arm). Sliding: the tucked leg's knee folded under, the lead leg's nearly straight.
+	 * A belly slide's legs trail straight.
+	 */
+	public static void bendLimbs(Model<?> model, Object renderState) {
+		if (!(renderState instanceof AvatarRenderState state) || !(model instanceof HumanoidModel<?> h) || state.deathTime > 0.0F) {
+			return;
+		}
+		PoseBlend.Track slide = SLIDE_BLEND.peek(state.id);
+		if (slide != null && slide.amount() > 0.0F) {
+			if (!BELLY.contains(state.id)) {
+				com.jaymospowers.client.KneeBend.bend(h.leftLeg, SLIDE_TUCK_KNEE * slide.amount());
+				com.jaymospowers.client.KneeBend.bend(h.rightLeg, SLIDE_LEAD_KNEE * slide.amount());
+			}
+			return;
+		}
+		float run = Mth.clamp((state.walkAnimationSpeed - RUN_FROM) / (RUN_FULL - RUN_FROM), 0.0F, 1.0F);
+		if (run <= 0.0F || state.isCrouching || state.isVisuallySwimming || state.isPassenger || state.isFallFlying) {
+			return;
+		}
+		com.jaymospowers.client.KneeBend.bend(h.rightLeg, (RUN_KNEE + RUN_KNEE_BACK * Math.max(0.0F, h.rightLeg.xRot)) * run);
+		com.jaymospowers.client.KneeBend.bend(h.leftLeg, (RUN_KNEE + RUN_KNEE_BACK * Math.max(0.0F, h.leftLeg.xRot)) * run);
 	}
 }

@@ -16050,3 +16050,122 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - Cause: the knock-on reads how fast a Felled tree is moving from Felled's `trunkTop`, which is the tree's middle log. Chopping a log off a tree lying still moves that middle a block or so along the trunk in one tick, which read as the tree moving fast, so any natural tree within a block of its logs went over that way (and our falling trees hit whoever they pass, up to 7 hearts).
 - `FelledCompat` now counts the tree's logs; when it has fewer than when last counted, that tick's jump isn't motion and it starts again from where the middle is now. Real falls, leaning trees and blasts knock on as before.
 - Built; not played.
+
+## 0.11.48 (2026-11-20): strike a hogtied captive from the saddle (#1948)
+
+- **Strike your captive** (Andy: "add a button for the rider to hit the captive and reset their struggle progress, much like red dead redemption 2"): riding a horse with a hogtied captive slung across its back (Powers' Sling), the attack button hits them. No damage, but their struggle against the knots starts over from nothing and stalls for 1.5 s; one strike a second at most. A tied player sees "The blow knocks the fight out of you."
+- It's its own key in Controls ("Strike your captive (on horseback)", Jaymo's Lasso), on the left mouse button by default alongside Attack, and does nothing unless you're riding a horse with a hogtied body over it.
+- Loading hint 173 mentions slinging a captive and striking them.
+- `Lasso.StrikeCaptive` payload, `Lasso.strikeSlung`, `PowersCompat.slungOn`, client `LassoStrikeKey`.
+- Built; not played.
+
+## 0.11.49 (2026-11-20): body menu rows - untie, cut free, hear out, pick pockets, take weapons (#1949)
+
+- Andy (2026-11-20, hogtying with the lasso): "there needs to be a context menu on right click for lifting, pickpocketing, reviving, untying. I had way too many prompts come up just now".
+- With Jaymo's Powers, Kingdoms' actions on a body are rows on Powers' body menu (a tap of use on them) instead of clicks and holds of their own: **Untie** / **Cut them free** (a blade in hand) and **Hear them out** for the wanted (`Captures`), **Pick their pockets** on a downed or hogtied villager or settlement folk (`Pickpocket`: they can't turn and catch you, anyone watching still sees a theft; Light Fingers still needed), **Take their weapons** off the downed (`Downed`).
+- A plain hold of use on someone hogtied no longer starts untying (that bar came up over the others). Without Powers, the old click and hold still work.
+- The lasso: holding use to tie someone no longer has Powers' drag bar starting under it (`Lasso.claims`, through `PowersCompat.claimUse`); a click on someone already hogtied at your side is the menu's, not a spin of the lasso.
+- Hints 169 and 173 say so (169: a revive is from a kneel now); the story hint and the Executioner perk say a hold of attack finishes a downed enemy, with no sneak (Powers' executions no longer need it).
+- Built; not played.
+
+## 0.11.50 (2026-11-20): Rogue's Arts: four perks for the stealth kill (#1952)
+
+- **The Rogue's Arts page on Stealth is back** (its old perks moved into the Thief's tree, which left it empty), with four perks for Powers' stealth kill (sneak + hold attack behind someone on their feet who hasn't seen you, a weapon in hand), which everyone has without them:
+  - **Quick Work** (2 ranks, Stealth 5): the hold is 1 s, then 0.5 s (from 1.5 s).
+  - **Silent Snap** (Stealth 5): the stealth kill with empty hands, a twist of the head. Quiet Word's choke hold still comes first on someone who talks.
+  - **Bigger Game** (2 ranks, Stealth 9, after Quick Work): up to 80 health and 3.2 blocks tall, then 150 and 4.2 (from 40 and 2.5). Never bosses.
+  - **Into the Dark** (2 points, Stealth 13, after Bigger Game): for 8 s after a stealth kill mobs see you at 0.35 of the distance (`StealthKills.sight`, in `Senses`).
+- Every stealth kill gives an assassination's Stealth (and Thief) experience.
+- Quiet Word's description says the choke hold is the empty hand's now.
+- Classes: `Skills` (the four perks, the tag read), `StealthKills` (new), `Senses`, `client/SkillIcons`; lang part `rogues-arts.json`.
+- Built; not played.
+
+## 0.11.51 (2026-11-21): loose wood no longer crashes the server while land generates (#1966)
+
+- **Fix**: the server no longer crashes when trees come down while new land is generating. Block changes made by world generation threads are now queued (up to 4096 at a time) and looked at on the server thread the next tick, instead of touching the loose-wood lists from another thread.
+- Class: `LooseWood`.
+- Built by CI; not played.
+
+## 0.11.52 (2026-11-21): loose wood no longer makes the server wait on land still generating (#1969)
+
+- **Fix**: falling-wood checks no longer stop the server while new land generates near a player (two watchdog crashes on 2026-11-21, 8:10 and 8:16 AM). It only reads blocks in chunks that are fully there; the rest wait for a later tick.
+- Class: `LooseWood` (`ready`, in place of `Level.isLoaded`).
+- Built by CI; not played.
+
+## 0.11.53 (2026-11-22): drills wait for your weapon, spars on clear ground, the talk box (#1974)
+
+- **Drills draw your weapon**: asking a veteran for a Spar or Hold the Gate takes the first weapon on your hotbar into your hand. In a spar the veteran's first blow waits 1.5 s after a weapon is in your hand; with none drawn in 10 s they stand down ("I'll not strike an empty hand"). (`GuardDrills`)
+- **A spar is over when someone falls**: for 3 s after a spar ends, blows between you and that veteran land on nothing and are no crime, so a swing already on its way can't start a brawl with the guards. (`GuardDrills`)
+- **Spars on clear ground**: if anyone else (a villager, a player, an animal) is within 6 blocks, the veteran says "Follow me" and leads you to clear ground up to 20 blocks away before the spar starts, so a wide swing can't catch a passer-by. Blows between you on the way land on nothing. If he can't get there in 30 s, you spar where you stand. (`GuardDrills`)
+- **The talk box**: while you talk with a villager, their words appear in a box low on the left under their name, typed out, instead of over their head. MCA's dialogue answers sit in a list low on the right, and they and the button column show only once the villager has finished the line. (`DialogueCinematic`, `SpeechBubbles`, `McaDialogueBoxMixin`, `McaButtonColumnMixin`)
+- **The talk camera**: while the villager speaks you aren't drawn, so the shot over your shoulder sees them, not the back of your head (it's a cut, not a fade). Your own lines are shot side-on from outside the two of you, the other side each time, and the camera glides between shots instead of cutting. (`DialogueCinematic`, `FilmHidesViewerMixin`)
+- Built; not played.
+
+## 0.11.54 (2026-11-22): Kingdoms rise without a visit; VillagersPlus job houses; forestry fiefs (#1973)
+
+- **Kingdoms rise without a visit** (Andy: "load them otherwise, that way it is possible for more interaction within the world such as war and trade"): no one is teleported. In the background, one at a time, the nearest Epic towns of each land (plains, desert, savanna, snowy, taiga) round the world's spawn have their land made and are founded as kingdoms, until each land holds 2 or none is left within 8 village spacings. The usual spacing from other capitals and factions holds. Kingdoms far from every player still do most of their living (building, trade runs, war marches) only when someone is near, as before. (`TownWakes`)
+- **VillagersPlus job houses in the catalogue** (Andy: "when they have room and can afford it, they build a specific building for that occupation"): with VillagersPlus installed, kingdoms, fiefdoms and villages build its miner's (from 16 people; villages 12), horticulturist's (18; 14), oceanographer's (22; 18), alchemist's (26; 20) and occultist's (32; 24) houses from storage, in their land's version (plains where VillagersPlus has none). The house's workstation gives a villager the job. The miner's house goes up without the shaft under it. Each miner's house adds 16 stone and 3 ore a day to the town's storage. Job houses don't hold back the wall. (`VpBuildings`)
+- **Vassals set to work the land** ("a genuine reason to have multiple mines or lumberyards or farms"): a mining fiefdom builds up to 3 miner's houses (others 1). A new forestry focus, drawn for fiefdoms in forest, taiga and jungle, builds up to 4 tree farms and 2 sawmills (the sawmill is Dungeons and Taverns'), fells timber on top of what its woodcutters bring in, makes 160% materials, keeps one field and pen like a mining fief, and sends logs, planks and sticks to its overlord. Farming fiefs already build more farms. A fiefdom in forest, taiga or jungle that was mining or farming by chance now works timber. (`Focus`, `Production`, `Caravans`)
+- Built; not played.
+
+## 0.11.56 (2026-11-22): fight music for ordinary fights (#1976)
+
+- **Fight music**: a real fight now has its own music, one of the Medieval Music pack's war tracks (Behind the Sword, Might & Magic). It fades in as the fight starts and out about 8 seconds after the last blow, and comes back up if the fight flares again while it fades. A real fight is two or more foes after you at once, a fight with another player, or blows still being traded 5 seconds in; one stray zombie chasing you stays quiet. One track per fight, then at least 30 seconds before the next fight's music. A great foe's own theme still wins, and no fight music plays in the calm after it. Town, tavern and road music fades under a fight and rests its usual 10 to 20 minutes after one, so after a fight it goes back to the game's own sounds. The 3-minute cap on any track still applies. Needs the Medieval Music pack; without it nothing plays.
+- `music/Skirmishes` (server: who is in a real fight), `client/music/SkirmishMusic` (plays it), `PlaceMusic` (gives way to it).
+- Built; not played.
+
+## 0.11.57 (2026-11-22): Talk wheel: answers round a wheel on the right, worded by your blood and class; chat hidden while talking (#1977)
+
+- **Talk wheel**: a villager's answers now sit round a wheel on the right, under the button column (Introduce, Gift, Trade and the rest stay where they were). Up to four answers take the four arms; more are spaced evenly, eight at most, and scrolling over the wheel turns to the rest (the middle shows which page). Point at an arm (its label, or its direction from the middle) and the line your character would say shows under the wheel; click to say it.
+- **Your own words**: the line is worded by your heritage (chat, joke, flirt, rumours, asking a name, thanking someone: a line for each of the 20 player bloods), else by your class (training, magic, alchemy, honour duels), else a plain line. Every main-menu answer has a plain line. The picked line shows in the talk box under your name until the villager answers.
+- **Chat hidden while talking**: chat isn't drawn during a conversation; everything said is still in it afterwards.
+- Classes: McaDialogueBoxMixin, DialogueCinematic, TalkWheel (new), lang part talk-wheel.json.
+- Built by CI; not played. Answers in MCA's other question trees (chat topics, greetings) show their label with no line under the wheel.
+
+## 0.11.58 (2026-11-22): Classes start with a skill of their kind (#1978)
+
+- **Starting skills** (Andy: "the classes spawn with skills that pertain to their class"): picking a first class teaches one skill free, and brings that class's pillar up to level 3 if it was lower, so there are points to learn another (K). Thief: Silent Snap (Rogue's Arts), Ranger: Quick Work (Rogue's Arts); both get Stealth 3, enough for the freerunning page (Climber, Freerunner, Slide, Long Jump). Warlord: Command. Brute: Battle Rhythm. Paladin: Shieldbearer. Rider: Weapon Forms. Marksman: Called Shots. Monk: Sweep Kick. Mage: Meditation. Sorcerer: Absorbing. Cleric: Field Dresser. Druid: Forager. Warlock: Devotion. Tinkerer: Smith.
+- The free skill is a trainer's gift, so a respec keeps it. The pillar is topped up, not added to, so picking again after a Writ of Rebirth gives nothing twice. Characters who already have a class don't get it.
+- `StartingSkills` (new), called from `Classes.set`.
+- Built; not played.
+
+## 0.11.59 (2026-11-22): Log of villagers left standing still (#1982)
+
+- **Stall log** (`Unstick`): any loaded villager that stays awake within 2 blocks for 2 minutes of watching is written to the server log once as `[stall]`: name, MCA or vanilla, trade, where, time of day, open sky, light, whose land, its brain activity and running behaviours, home, job site, meeting point, walk target, MCA's stay order and home, and which of our own systems has it. Nothing acts on it: it's there to find why villagers stand still in their houses (Andy, 2026-11-21).
+- Built on the Deck; run on the Deck server around one village (see the PR).
+
+## 0.11.60 (2026-11-22): Every trade in every town (#1980)
+
+- **Every town keeps its trades** (Andy, 2026-11-21, villages plan Track C): each kingdom, fiefdom and village now keeps a butcher, a healer, a cook, a cleric, a farmer and a tanner (the game's leatherworker), plus a fisherman where there's water round its seat. A missing one is taken up by someone idle (then a nitwit, then the greenest of a common trade), or a newcomer moves in, as the butcher and cleric already were (`TownTrades`). A miner and a woodcutter are hired the usual way once the town has a mine (or quarry) and a tree farm: a miner with no mine isn't kept on.
+- **The healer** is a trade of its own now (`Professions.HEALER`, dressed as a cleric, no trades): sneak + use them for the healer's services (treatment, mending, scrolls), they tend an infirmary cot, do the cleric's rounds and throw healing splashes, and "where's a healer?" points to them. The cleric keeps the shrine; the cleric's speech lines now talk of the shrine, the healer's of the sick.
+- **Epic towns refitted** (`TownFitting`): the first time a player comes into an Epic town (new or already in the world; marked once in the Overworld's save), its job blocks are swapped for ours, no rooms added: the butcher's smoker becomes Kitchen's butcher block with meat hooks under the beam, other smokers and house furnaces (not smithies') become Kitchen's stove, a temple's brewing stand becomes the shrine (a temple without one gets a shrine; other brewing stands stay), one bed (by a brewing stand if it can) becomes an infirmary cot with Powers' mortar beside it, the tanner's cauldron is filled for soaking hides with Kitchen's drying rack beside it, the pen gets Kitchen's feeding trough, and Powers' chopping block stands outside a house. A butcher's shop or tannery built without its job block (the taiga's and snow's butchers, the desert's and plains' tanneries) gets ours indoors. Townsfolk already at those trades keep them. A mod that isn't loaded leaves the game's block.
+- **Job halls for trades with no house**: a butcher's shop, infirmary, the new tannery (`JobHalls.tannery`: soaking cauldrons, drying racks, bark barrel, the land's roof), a cookhouse, and a fishery where there's water, built just outside the town's edge facing in, with their own smokers and furnaces swapped the same way.
+- Lore: "Every great town keeps its trades" (new, for Andy) under Daily life.
+- Built (Deck and CI); not played: nothing was run in game, so the fitting itself is untested.
+
+## 0.11.61 (2026-11-22): guards let go of an Elder Vampire who flees as a bat (#1983)
+
+- **Elder Vampire's bat flight**: while the Elder flies as a bat, his body is invisible and can't be hurt. Guards (and
+  anyone else) who had him for a target kept after it: crawling toward a spot in the air they had no path to, swinging
+  and shooting at nothing that took a hit. Now everyone within 64 blocks who has him for a target lets go when he takes
+  off, and again every half second of the flight; the bat itself can still be struck, and once he lands they find him
+  again (`Vampires#shakeOff`, reusing `Downed#letGo`).
+- Built by CI only; not played. The daytime clip at the Red Company balloon (guard stuck at the tower grate, a guard
+  swinging inside) is not explained by this and stays open.
+
+## 0.11.62 (2026-11-22): Every crewed ship has a helm; more fish in the water (#1984)
+
+- **Moog's travel ship** now spawns with a ship's helm on deck, like the long ships, the hauling ship and the small ship, so her skipper has a wheel to steer by (and you can take her and sail her). A ship whose ends have no deck for the helm (a cabin aft, a forecastle) now gets it anywhere along her middle line instead of none. Only boats peopled from now on get it; one already met keeps what it has. The wanderer raft stays without one. (`SeaSites`)
+- **Fish caps up**: coasts, rivers and lakes 6 -> 10 fish and other water ambients per player; open sea 16 -> 20 (vanilla's). Dolphins, sharks and whales are unchanged, as are the small groups. (`MonsterCapMixin`)
+- Goes with Powers' change that stops cave pool fish and fish in underground aquifers using up these places out of sight.
+- Built on CI; not played.
+
+## 0.11.63 (2026-11-22): camp guards wear their camp's gear, not MCA's iron (#1985)
+
+- **Camp guards**: a camp's raiders and pirates who have become MCA villagers (the pirates on the Illager Structures
+  balloon, cove deckhands and gunners, barbarian raiders) now dress only from their own pack: their camp's leather,
+  hides and coats. MCA used to fill every empty slot from its guards' iron set, so a pirate deckhand stood in full plate.
+  Ones already in plate take it off the next time they dress (`Ranks.campOwned`, `McaEquipmentMixin`).
+- **Raider pieces kept**: a raider's torn hood, torn cloak and horned crest (the Guard Wardrobe's Raiders column) stay on
+  when he becomes an MCA villager (`McaBridge.convertRaider`).
+- Built by CI; not played.
