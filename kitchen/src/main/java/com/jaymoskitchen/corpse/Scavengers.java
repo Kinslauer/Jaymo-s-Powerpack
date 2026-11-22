@@ -15,9 +15,12 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -54,6 +57,8 @@ public final class Scavengers {
 	private static final float HEAL = 3.0F;
 	/** How often a scavenger with nothing else to do sniffs for a gut pile (ticks). */
 	private static final int GUTS_SNIFF_EVERY = 20;
+	/** How often a feeding sun-burner checks whether it stands in the sun (ticks; the check casts rays). */
+	private static final int SUN_CHECK_EVERY = 10;
 	/** Ticks before it gives up on a body or meat it can't reach. */
 	private static final int GIVE_UP = 300;
 
@@ -98,6 +103,36 @@ public final class Scavengers {
 		return mob.getTarget() != null && !feedingOver(mob, mob.getTarget())
 			|| mob.isVehicle() || mob.isPassenger() || mob.isLeashed() || mob.isBaby()
 			|| mob instanceof TamableAnimal tame && tame.isTame();
+	}
+
+	/**
+	 * Whether {@code mob} burns in the sun (a zombie) and {@code at} lies open to it while the sun burns, so it won't feed
+	 * there: by day it goes for shade (Jaymo's Powers' shelter search) instead of standing over a meal in the sun. Andy
+	 * (2026-11-22): "all these zombies should have ran for cover instead of crowding my already dead corpse". (A zombie's
+	 * gnawing runs at the same priority as the shelter search, and a goal is only cut off by a higher one, so the meal
+	 * held it.)
+	 */
+	static boolean sunlit(Mob mob, @Nullable Vec3 at) {
+		return mob.is(EntityTypeTags.BURN_IN_DAYLIGHT) && mob.getItemBySlot(EquipmentSlot.HEAD).isEmpty() && !mob.isInWaterOrRain()
+			&& mob.level().environmentAttributes().getValue(EnvironmentAttributes.MONSTERS_BURN, at != null ? at : mob.position())
+			&& sunReaches.test(mob, at);
+	}
+
+	/**
+	 * Whether the sun reaches {@code at} (null: any of the mob's own body). The game's own test (open sky) until Jaymo's
+	 * Powers sets its own ({@link #setSunTest}), the one its sun-burning goes by: leaves don't shade there.
+	 */
+	private static java.util.function.BiPredicate<Mob, @Nullable Vec3> sunReaches =
+		(mob, at) -> mob.level().canSeeSky(net.minecraft.core.BlockPos.containing(at != null ? at : mob.getEyePosition()));
+
+	/** (Jaymo's Powers) What decides whether the sun reaches a point, or (given null) any of a mob's body. */
+	public static void setSunTest(java.util.function.BiPredicate<Mob, @Nullable Vec3> test) {
+		sunReaches = test;
+	}
+
+	/** Whether {@code mob} stands in the burning sun: asked now and then while it feeds (every {@link #SUN_CHECK_EVERY} ticks). */
+	private static boolean sunCheck(Mob mob) {
+		return (mob.tickCount + mob.getId()) % SUN_CHECK_EVERY == 0 && sunlit(mob, null);
 	}
 
 	/** (0.5.5) Whether {@code mob} may feed with {@code target} about: a zombie leaves villagers be while it eats one. */
@@ -148,11 +183,11 @@ public final class Scavengers {
 
 		@Override
 		public boolean canUse() {
-			if (busy(mob) || hunger.full(mob) || mob.getRandom().nextInt(10) != 0) {
+			if (busy(mob) || hunger.full(mob) || mob.getRandom().nextInt(10) != 0 || sunlit(mob, null)) {
 				return false;
 			}
 			List<CorpseEntity> bodies = mob.level().getEntitiesOfClass(CorpseEntity.class, mob.getBoundingBox().inflate(SMELL),
-				corpse -> corpse.isCarrionFor(mob));
+				corpse -> corpse.isCarrionFor(mob) && !sunlit(mob, corpse.position().add(0.0, 0.5, 0.0)));
 			body = null;
 			double best = Double.MAX_VALUE;
 			for (CorpseEntity corpse : bodies) {
@@ -178,7 +213,7 @@ public final class Scavengers {
 
 		@Override
 		public boolean canContinueToUse() {
-			return body != null && body.isCarrionFor(mob) && giveUp > 0 && !busy(mob);
+			return body != null && body.isCarrionFor(mob) && giveUp > 0 && !busy(mob) && !sunCheck(mob);
 		}
 
 		@Override
@@ -321,7 +356,8 @@ public final class Scavengers {
 
 		@Override
 		public boolean canUse() {
-			if (unable()) {
+			// (a sun-burner looks only now and then, and not while it stands in the sun: the check casts rays)
+			if (unable() || mob.is(EntityTypeTags.BURN_IN_DAYLIGHT) && ((mob.tickCount + mob.getId()) % SUN_CHECK_EVERY != 0 || sunlit(mob, null))) {
 				return false;
 			}
 			meat = null;
@@ -332,7 +368,7 @@ public final class Scavengers {
 			if (!tame(mob) && (mob.tickCount + mob.getId()) % GUTS_SNIFF_EVERY == 0) {
 				// a gut pile (offal left lying, whoever dropped it) is smelt as far off as a body
 				for (ItemEntity guts : mob.level().getEntitiesOfClass(ItemEntity.class, mob.getBoundingBox().inflate(SMELL),
-					item -> item.getItem().is(com.jaymoskitchen.butchery.Butchery.OFFAL))) {
+					item -> item.getItem().is(com.jaymoskitchen.butchery.Butchery.OFFAL) && !sunlit(mob, item.position().add(0.0, 0.5, 0.0)))) {
 					double distance = guts.distanceToSqr(mob);
 					if (meat == null || distance < meat.distanceToSqr(mob)) {
 						meat = guts;
@@ -343,7 +379,7 @@ public final class Scavengers {
 				}
 			}
 			for (ItemEntity item : near) {
-				if (item.isAlive() && item.level() == mob.level()) {
+				if (item.isAlive() && item.level() == mob.level() && !sunlit(mob, item.position().add(0.0, 0.5, 0.0))) {
 					double distance = item.distanceToSqr(mob);
 					if (distance < best) {
 						best = distance;
@@ -365,7 +401,7 @@ public final class Scavengers {
 
 		@Override
 		public boolean canContinueToUse() {
-			return meat != null && meat.isAlive() && giveUp > 0 && !unable();
+			return meat != null && meat.isAlive() && giveUp > 0 && !unable() && !sunCheck(mob);
 		}
 
 		@Override
@@ -451,7 +487,7 @@ public final class Scavengers {
 
 		@Override
 		public boolean canUse() {
-			if ((mob.tickCount + mob.getId()) % GUTS_SNIFF_EVERY != 0 || busy(mob) || hunger.full(mob)) {
+			if ((mob.tickCount + mob.getId()) % GUTS_SNIFF_EVERY != 0 || busy(mob) || hunger.full(mob) || sunlit(mob, null)) {
 				return false;
 			}
 			Set<net.minecraft.core.BlockPos> piles = PILES.get(mob.level());
@@ -470,7 +506,7 @@ public final class Scavengers {
 					it.remove();
 					continue;
 				}
-				if (!isPile(pos)) {
+				if (!isPile(pos) || sunlit(mob, net.minecraft.world.phys.Vec3.atCenterOf(pos))) {
 					continue;
 				}
 				best = distance;
@@ -487,7 +523,7 @@ public final class Scavengers {
 
 		@Override
 		public boolean canContinueToUse() {
-			return pile != null && giveUp > 0 && !busy(mob) && !hunger.full(mob) && isPile(pile);
+			return pile != null && giveUp > 0 && !busy(mob) && !hunger.full(mob) && isPile(pile) && !sunCheck(mob);
 		}
 
 		@Override

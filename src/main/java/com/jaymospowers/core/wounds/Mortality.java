@@ -454,6 +454,16 @@ public final class Mortality {
 		return WAKES.containsKey(player.getUUID());
 	}
 
+	/**
+	 * Whether {@code player} is dead by our reckoning, though the game still counts them alive: lying left for dead (in
+	 * their body, or out of it as a ghost, {@link #waking}) or waiting in {@link Limbo}. Nothing living mends or grows back
+	 * on them then (Andy, 2026-11-22: "i was regrowing limbs as a ki ghost ... the game didnt understand i was long dead").
+	 * Kingdoms asks this by reflection. Server side.
+	 */
+	public static boolean dead(Player player) {
+		return waking(player) || Limbo.in(player);
+	}
+
 	/** Whether {@code player} was put down where they wake only moments ago ({@link #WOKE_GRACE}). */
 	public static boolean justWoke(Player player) {
 		Long until = WOKE.get(player.getUUID());

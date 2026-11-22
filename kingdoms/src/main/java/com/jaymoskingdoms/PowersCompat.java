@@ -2150,6 +2150,37 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code Mortality.dead(Player)}. */
+	private static java.lang.invoke.@Nullable MethodHandle dead;
+	private static boolean lookedForDead;
+
+	/**
+	 * Whether {@code player} is dead by Jaymo's Powers' reckoning though the game counts them alive: left for dead (in
+	 * their body or out of it as a ghost) or waiting in Limbo. Nothing living mends or grows back on them then. False
+	 * without Powers.
+	 */
+	public static boolean dead(Player player) {
+		if (!lookedForDead) {
+			lookedForDead = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					dead = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wounds.Mortality"), "dead",
+						java.lang.invoke.MethodType.methodType(boolean.class, Player.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mortality.dead (older Powers?)", e);
+				}
+			}
+		}
+		if (dead == null) {
+			return false;
+		}
+		try {
+			return (boolean)dead.invoke(player);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** (0.7.422) Powers' {@code Fractures.blunt(ItemStack)}. */
 	private static java.lang.invoke.@Nullable MethodHandle blunt;
 	private static boolean lookedForBlunt;

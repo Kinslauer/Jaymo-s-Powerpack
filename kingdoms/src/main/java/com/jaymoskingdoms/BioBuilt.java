@@ -204,7 +204,8 @@ public final class BioBuilt {
 			}
 			if (player.level() instanceof ServerLevel level) {
 				// (0.7.422) the blood of every heritage in them: a lost limb grows back, one at a time
-				if (server.getTickCount() % REGROW_EVERY == 0 && player.isAlive() && PowersCompat.regrow(player, false)) {
+				// (not on the dead: left for dead, a ghost, in Limbo)
+				if (server.getTickCount() % REGROW_EVERY == 0 && player.isAlive() && !PowersCompat.dead(player) && PowersCompat.regrow(player, false)) {
 					level.sendParticles(NODE, player.getX(), player.getY(0.6), player.getZ(), 16, 0.4, 0.6, 0.4, 0.02);
 					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.8F, 0.8F);
 					player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.bio.regrown"));
