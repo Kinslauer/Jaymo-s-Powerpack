@@ -318,8 +318,17 @@ public final class Ledge {
 	 * ({@link #powerMoving}).
 	 */
 	public static boolean canHang(Player player) {
+		return canHang(player, false);
+	}
+
+	/**
+	 * {@link #canHang}, with water allowed when {@code fromWater}: Andy: "i also tried to climb onto shore from the water
+	 * and couldnt right click the ground to pull up like normal". A right-click grab may be made from the water, and a
+	 * hold already taken isn't lost to it (the hang under a shore's edge is in the water). A jump-catch still isn't.
+	 */
+	public static boolean canHang(Player player, boolean fromWater) {
 		if (!player.isAlive() || player.isSpectator() || player.isPassenger() || player.isVehicle() || player.getAbilities().flying
-			|| player.isFallFlying() || player.isInWater() || player.isInLava() || player.isSwimming() || player.onClimbable()
+			|| player.isFallFlying() || !fromWater && (player.isInWater() || player.isSwimming()) || player.isInLava() || player.onClimbable()
 			|| player.isSleeping() || player.isAutoSpinAttack()) {
 			return false;
 		}
@@ -668,7 +677,7 @@ public final class Ledge {
 	private static void grab(ServerPlayer player, Grab grab) {
 		ServerLevel level = player.level();
 		BlockPos pos = grab.pos();
-		if (grab.face() < 0 || grab.face() > 3 || !canHang(player) || powerMoving(player)
+		if (grab.face() < 0 || grab.face() > 3 || !canHang(player, true) || powerMoving(player)
 			|| player.position().distanceToSqr(Vec3.atCenterOf(pos)) > 9.0 || !(grab.vault() ? vaultable(level, pos) : holdable(level, pos))) {
 			end(player);
 			return;
@@ -771,7 +780,7 @@ public final class Ledge {
 			boolean over = hold.climbing() ? age > hold.climbTicks() + CLIMB_SLACK_TICKS : age > HANG_MAX_TICKS + CONFIRM_TICKS;
 			boolean held = Loaded.made(level, entry.getValue())
 				&& (VAULTING.contains(entry.getKey()) ? vaultable(level, entry.getValue()) : holdable(level, entry.getValue()));
-			if (over || !canHang(player) || !hold.climbing() && !held) {
+			if (over || !canHang(player, true) || !hold.climbing() && !held) {
 				VAULTING.remove(entry.getKey());
 				it.remove();
 				GRACE.put(player.getUUID(), level.getGameTime() + RELEASE_GRACE_TICKS);
