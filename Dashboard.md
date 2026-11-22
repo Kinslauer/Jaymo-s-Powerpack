@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-21 23:36). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 00:07). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -28,6 +28,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1974 a sword never bursts a body (Powers, Kingdoms, 2026-11-22)
 - [ ] #1969 loose wood no longer makes the server wait on land still generating (Kingdoms, 2026-11-21)
 - [ ] #1966 loose wood no longer crashes the server while land generates (Kingdoms, 2026-11-21)
 - [ ] #1951 hints as tip cards - text hints show top right instead of over the hotbar (Powers, 2026-11-21)
@@ -87,8 +88,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1890 taken-in wake-ups bind your stumps (Powers, Kingdoms, 2026-11-19)
 - [ ] #1889 Regrown limbs come back unbroken, Verdant regrowth crunch (Powers, Kingdoms, 2026-11-19)
 - [ ] #1888 climbing onto and off mounts (SmoothMount-style, our own) (Powers, Kingdoms, 2026-11-19)
-- [ ] #1886 hit streak count off the action bar with Kingdoms (Powers, Kingdoms, 2026-11-19)
-- …and 320 older ones.
+- …and 321 older ones.
 
 ## Health
 
