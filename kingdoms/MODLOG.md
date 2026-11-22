@@ -16271,3 +16271,28 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
   `client/MutantDead` picks the skin through a mixin on Mutant Monsters' renderer that is skipped when the mod isn't
   there. A mutant with no mark keeps the plain skin from the built-in pack.
 - Built; not played.
+
+## 0.11.75 (2026-11-22): Scrying Orb: watch a far person or place as a living miniature over a crystal orb (#1896)
+
+- **Scrying Orb** (block): a glass sphere on a stand. An attuned player (one with mana) right-clicks it holding a
+  **Lock of Hair** (from the Scrying spell) to watch that person, or a **Sighted Shard** to watch a place. The orb lights
+  up and a 1/24-scale miniature of the land round the target hangs over it for 30 seconds: real blocks, a sphere 17
+  across and 11 high, turning slowly, dimmer when it's night there. People show as tiny blue blocks, monsters red,
+  animals green. Everyone within 16 blocks of the orb sees it, refreshed each second. A watched person gets the Scrying
+  spell's illusion save (if it holds, the orb only clouds over) and feels a chill. A place has no save. Its 3x3 chunks
+  stay loaded while it's watched and unload by themselves after.
+- **Sighted Shard**: sneak-use a plain amethyst shard on a block to mark that spot (its dimension and position). Sneak-use
+  a marked shard in the air to clear it.
+- **Getting one**: clerics sell the orb, and it's made on the infusion altar from glass, 4 amethyst shards, 2 eyes of
+  ender and 2 glass.
+- Classes: `ScryingOrb`, `ScryingOrbBlock`, `ScryingOrbBlockEntity`, `SightedShard`, client `ScryingOrbRenderer`.
+- Built; not played: the miniature, the figures and multiplayer viewing haven't been seen in game.
+
+## 0.11.76 (2026-11-22): Loading screen tips can be scrolled back and on, and long ones stay up longer (#1999)
+
+- **Loading screen tips**: on the "Your story is being written" screen, the mouse wheel steps through the tips: up goes
+  back to the last one, down on to the next. A tip you scroll to stays its full time from then. A faint line under the
+  tip says so and counts where you are among those shown ("3 of 5"). Longer tips stay up longer: 7 seconds, and 2.5
+  more for each line past the second.
+- Class: client `StoryHoldScreen`.
+- Built; not played.
