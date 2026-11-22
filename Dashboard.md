@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 09:03). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 09:06). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -26,6 +26,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1987 NPCs obey limb damage: arms gate their powers, bad legs put them on the ground (Powers, 2026-11-22)
 - [ ] #1985 camp guards wear their camp's gear, not MCA's iron (Kingdoms, 2026-11-22)
 - [ ] #1984 Fish spawn where you can see them (Powers, Kingdoms, 2026-11-22)
 - [ ] #1983 guards let go of an Elder Vampire who flees as a bat (Kingdoms, 2026-11-22)
@@ -36,6 +37,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1975 the roll stays on the ground, the Sit key prone, a real struggle up the wall (Powers, 2026-11-22)
 - [ ] #1974 a sword never bursts a body (Powers, Kingdoms, 2026-11-22)
 - [ ] #1973 VillagersPlus' miner's house rarer in villages (Powers, Kingdoms, 2026-11-22)
+- [ ] #1965 Z Fighter gaps 4: forms (foundation) (Powers, 2026-11-22)
 - [ ] #1959 Freerun animations: the ledge climb keyed with elbows and knees, climbing down walls, vaults by speed and height, a pole climb, and bending limbs through the moves (Powers, 2026-11-22)
 - [ ] #1958 Z Fighter gaps 1: stats (Powers, 2026-11-22)
 - [ ] #1939 zfighter gaps 3: techniques (Powers, 2026-11-22)
@@ -84,9 +86,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1907 long pitchfork (Powers, Kingdoms, 2026-11-20)
 - [ ] #1906 A new life no longer keeps the old body's lost-leg slowness (Powers, 2026-11-20)
 - [ ] #1905 Forest fire alert out of chat (Powers, Kingdoms, 2026-11-20)
-- [ ] #1904 Nether Portal Spread no longer freezes the server in land not yet ready (Powers, 2026-11-20)
-- [ ] #1903 Start searches read the land from the seed first, like /locate (Kingdoms, 2026-11-20)
-- …and 334 older ones.
+- …and 336 older ones.
 
 ## Health
 
