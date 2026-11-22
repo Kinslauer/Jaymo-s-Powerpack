@@ -55,6 +55,10 @@ import org.jspecify.annotations.Nullable;
  * left or right of both characters." While the villager speaks you aren't drawn ({@link #hidesPlayer}), so the shot over
  * your shoulder sees them clearly. Your own lines are shot side-on, from outside the two of you, the other side each time.
  * The camera glides from shot to shot ({@link #PAN_PER_SECOND}) instead of cutting.
+ *
+ * <p>Andy (2026-11-21): the answers as a wheel worded by your origin ({@link TalkWheel}), and "the chat should also be
+ * hidden for the duration of the interaction". The line you pick is what you say: it goes in the box under your own name
+ * ({@link #mine}) until the villager answers. Chat isn't drawn while the talk runs; what was said there is still in it after.
  */
 public final class DialogueCinematic {
 	/** Each bar's height, as a share of the screen; how much of the way they slide a tick. */
@@ -88,7 +92,8 @@ public final class DialogueCinematic {
 	private static final Identifier[] HIDDEN = { VanillaHudElements.CROSSHAIR, VanillaHudElements.HOTBAR,
 		VanillaHudElements.ARMOR_BAR, VanillaHudElements.HEALTH_BAR, VanillaHudElements.FOOD_BAR,
 		VanillaHudElements.AIR_BAR, VanillaHudElements.MOUNT_HEALTH, VanillaHudElements.INFO_BAR,
-		VanillaHudElements.EXPERIENCE_LEVEL, VanillaHudElements.HELD_ITEM_TOOLTIP, VanillaHudElements.MOB_EFFECTS };
+		VanillaHudElements.EXPERIENCE_LEVEL, VanillaHudElements.HELD_ITEM_TOOLTIP, VanillaHudElements.MOB_EFFECTS,
+		VanillaHudElements.CHAT };
 
 	private static boolean running;
 	private static @Nullable Speaker speaker;
@@ -105,6 +110,8 @@ public final class DialogueCinematic {
 	private static @Nullable Component line;
 	private static List<FormattedCharSequence> rows = List.of();
 	private static int letters, lineFrom, startedAt;
+	/** The box's line is the player's own (picked on the wheel), not the villager's. */
+	private static boolean lineMine;
 	/** Which side the player's side-on shot is from (flips each line); where the camera is and looks, eased (null: cut to the shot). */
 	private static boolean leftSide;
 	private static @Nullable Vec3 camAt, camLook;
@@ -158,7 +165,9 @@ public final class DialogueCinematic {
 			DialogueCinematic.speaker = speaker;
 			pending = null;
 			holdUntil = ticks + PLAYER_HOLD;
-			line = null; // their last line is answered: the box waits for the next
+			if (!lineMine) {
+				line = null; // their last line is answered: the box waits for the next (or shows yours)
+			}
 			leftSide = !leftSide;
 		} else if (ticks < holdUntil) {
 			pending = speaker;
@@ -187,6 +196,7 @@ public final class DialogueCinematic {
 		villager = -1;
 		viewBefore = null;
 		line = null;
+		lineMine = false;
 		rows = List.of();
 		camAt = null;
 		camLook = null;
@@ -205,10 +215,23 @@ public final class DialogueCinematic {
 		if (!running || entityId != villager) {
 			return false;
 		}
-		if (line != null && line.getString().equals(text.getString())) {
+		if (line != null && !lineMine && line.getString().equals(text.getString())) {
 			return true;
 		}
+		show(text, false);
+		return true;
+	}
+
+	/** The player picked a line on the wheel ({@link TalkWheel}): it's what they say, in the box under their name. */
+	public static void mine(Component text) {
+		if (running) {
+			show(text, true);
+		}
+	}
+
+	private static void show(Component text, boolean own) {
 		line = text;
+		lineMine = own;
 		rows = Minecraft.getInstance().font.split(text, BOX_WIDTH - BOX_PAD * 2);
 		int n = 0;
 		for (FormattedCharSequence row : rows) {
@@ -221,7 +244,6 @@ public final class DialogueCinematic {
 		}
 		letters = n;
 		lineFrom = ticks;
-		return true;
 	}
 
 	/** The tick the villager's line is all out. */
@@ -233,6 +255,10 @@ public final class DialogueCinematic {
 	public static boolean answersUp() {
 		if (!running) {
 			return true;
+		}
+		if (lineMine) {
+			// your own line: the villager's answer replaces it; should none come, the wheel comes back after a while
+			return ticks >= lineDoneAt() + PLAYER_HOLD;
 		}
 		return line == null ? ticks - startedAt >= OPEN_WAIT && speaker != Speaker.PLAYER : ticks >= lineDoneAt();
 	}
@@ -286,7 +312,7 @@ public final class DialogueCinematic {
 		if (ticks < shot + REPLY_MIN) {
 			return false;
 		}
-		return ticks >= shot + REPLY_MAX || line != null && ticks >= lineDoneAt() + READ_TICKS;
+		return ticks >= shot + REPLY_MAX || line != null && !lineMine && ticks >= lineDoneAt() + READ_TICKS;
 	}
 
 	@Nullable
@@ -398,7 +424,8 @@ public final class DialogueCinematic {
 		Minecraft minecraft = Minecraft.getInstance();
 		Font font = minecraft.font;
 		Entity them = minecraft.level == null ? null : minecraft.level.getEntity(villager);
-		Component name = them == null ? null : them.getDisplayName();
+		Entity speaking = lineMine ? minecraft.player : them;
+		Component name = speaking == null ? null : speaking.getDisplayName();
 		int rowHeight = font.lineHeight + 1;
 		int textWidth = 0;
 		for (FormattedCharSequence row : rows) {

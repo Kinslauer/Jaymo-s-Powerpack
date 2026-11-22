@@ -1,0 +1,6 @@
+# Talk wheel: answers round a wheel on the right, worded by your blood and class; chat hidden while talking
+- **Talk wheel**: a villager's answers now sit round a wheel on the right, under the button column (Introduce, Gift, Trade and the rest stay where they were). Up to four answers take the four arms; more are spaced evenly, eight at most, and scrolling over the wheel turns to the rest (the middle shows which page). Point at an arm (its label, or its direction from the middle) and the line your character would say shows under the wheel; click to say it.
+- **Your own words**: the line is worded by your heritage (chat, joke, flirt, rumours, asking a name, thanking someone: a line for each of the 20 player bloods), else by your class (training, magic, alchemy, honour duels), else a plain line. Every main-menu answer has a plain line. The picked line shows in the talk box under your name until the villager answers.
+- **Chat hidden while talking**: chat isn't drawn during a conversation; everything said is still in it afterwards.
+- Classes: McaDialogueBoxMixin, DialogueCinematic, TalkWheel (new), lang part talk-wheel.json.
+- Built by CI; not played. Answers in MCA's other question trees (chat topics, greetings) show their label with no line under the wheel.
