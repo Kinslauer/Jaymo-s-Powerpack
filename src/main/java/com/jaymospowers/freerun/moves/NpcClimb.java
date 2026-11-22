@@ -21,7 +21,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -82,7 +81,7 @@ public final class NpcClimb {
 	}
 
 	public static void init() {
-		ServerTickEvents.END_WORLD_TICK.register(NpcClimb::tick);
+		ServerTickEvents.END_LEVEL_TICK.register(NpcClimb::tick);
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			CLIMBING.clear();
 			COOLDOWN.clear();
@@ -94,7 +93,7 @@ public final class NpcClimb {
 	 * Andy (2026-11-22) "players and NPCs should be able to struggle up like before".
 	 */
 	public static boolean climber(Mob mob) {
-		return !(mob instanceof Player) && !mob.isBaby() && BodyPlan.of(mob) == BodyPlan.HUMANOID && !mob.isPassenger() && !Downed.isDowned(mob);
+		return !mob.isBaby() && BodyPlan.of(mob) == BodyPlan.HUMANOID && !mob.isPassenger() && !Downed.isDowned(mob);
 	}
 
 	/** Mid-climb (the server's own; the move control leaves it be). */
