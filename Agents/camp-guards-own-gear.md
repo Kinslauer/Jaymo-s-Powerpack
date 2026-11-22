@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: Camp guards (pirates, raiders) dress from their own pack, not MCA's iron guard set
 branch: camp-guards-own-gear
 with: Claude Code (desktop)
-pr: 
+pr: 1985
 mods: kingdoms
 versions: 
 started: 2026-11-22
@@ -26,3 +26,5 @@ MCA and follow the Guard Wardrobe (Raiders column), not MCA's own guard armour.
 - The balloon is template blocks (IllagerSites `illager_balloon` / `balloon_tower`), not a ship: it never moves.
 
 ## Done
+PR #1985. Camp raiders and pirates who became MCA wear only their pack's gear (no MCA guard iron); their raider harness
+pieces carry over. Not built locally (CI builds it); not played.

@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-22 08:26
+updated: 2026-11-22 08:28
 ---
 # Open PRs
 
-23 open, as of 2026-11-22 08:26. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+24 open, as of 2026-11-22 08:28. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1853](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1853) Heritage paths: core + Heartlander, Stoneborn, Tideborn (Kingdoms, Powers)
@@ -120,3 +120,8 @@ Andy merges only on "merge", one at a time.
 - **Branch:** `claude/ship-helm-fish-spawn-9fa89f` · **Updated:** 2026-11-22 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
+
+## [#1985](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1985) Camp guards wear their camp's gear, not MCA's iron
+- **Branch:** `camp-guards-own-gear` · **Updated:** 2026-11-22 (today)
+- **Checks:** ⏳ 3 of 4 running
+- **Agent:** [[camp-guards-own-gear]]
