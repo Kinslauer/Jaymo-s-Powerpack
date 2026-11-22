@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 02:42). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 03:05). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -39,8 +39,7 @@ kanban-plugin: board
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · 🔨 Hephaestus · #1896 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-2-power|zfighter-gaps-2-power]] · 🔨 Hephaestus · #1938 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-5-training|zfighter-gaps-5-training]] · ☀️ Apollo · #1953 · changes · fixing review notes
-- [ ] [[Agents/every-trade-every-town|every-trade-every-town]] · 💻 Odysseus · running
-- [ ] [[Agents/villagers-always-busy|villagers-always-busy]] · 💻 Odysseus · running
+- [ ] [[Agents/every-trade-every-town|every-trade-every-town]] · 💻 Odysseus · #1980 · running
 
 
 ## In review
@@ -60,6 +59,7 @@ kanban-plugin: board
 - [ ] [[Inbox/zfighter-forms-animations|zfighter-forms-animations]] · for any · #1962 · in-review
 - [ ] [[Inbox/zfighter-forms-models|zfighter-forms-models]] · for any · #1960 · in-review
 - [ ] [[Inbox/zfighter-forms-textures|zfighter-forms-textures]] · for any · #1963 · in-review
+- [ ] [[Agents/villagers-always-busy|villagers-always-busy]] · 💻 Odysseus · #1981 · in-review
 
 
 ## Needs Andy
