@@ -16259,3 +16259,15 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - Ship cannons were already there (gun blocks laid on a deck, a left click at the helm fires a broadside, crews fire them); the new shot kinds are wired in everywhere those take a shot. Crews and wall guns keep choosing from their old kinds, and stock no stone or fire shot.
 - New item models and textures in the round shot's style. Old Cannons (Shippy Ships' sailing mod, custom licence that allows modpacks with credit) was already in the pack.
 - Built by CI only; not played.
+
+## 0.11.74 (2026-11-22): Mutant zombies vary like the old dead: by where they rose, their land and their rot (#1998)
+
+- **Mutant zombie looks**: each mutant zombie now wears the old dead look of where it rose, as the zombies do:
+  - plain, dried (desert, badlands, savanna), bloated (swamp, river, beach), pale (caves, the deep dark) or frostbitten
+    (snow);
+  - in its land's clothes;
+  - at one of three stages of rot.
+  That's 63 skins (`kingdoms/tools/gen_mutant_dead.py`). `RisenLooks` marks mutants where they first stand, and
+  `client/MutantDead` picks the skin through a mixin on Mutant Monsters' renderer that is skipped when the mod isn't
+  there. A mutant with no mark keeps the plain skin from the built-in pack.
+- Built; not played.
