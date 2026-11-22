@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: drill-and-talk-fixes
 branch: claude/sleepy-wozniak-h42ef1
 with: cloud Claude
@@ -33,3 +33,4 @@ a spar turned into a brawl with bodies burst by a sword.
 - Both mods build; nothing played in game.
 - Added after Andy's go-ahead: spar leads to clear ground (no one within 6 blocks); talk camera hides the player on the villager's lines, side-on shots on the player's, eased between shots (Andy: "let me see that, if we dont like it, you take it out").
 - PR #1974. Both mods build; not played.
+- 2026-11-22 00:07 PR #1974 is merged into master; moved to Agents/Done.
