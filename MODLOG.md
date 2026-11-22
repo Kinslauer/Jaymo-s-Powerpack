@@ -6943,3 +6943,205 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - First-time tip card (top right) the first time you stand behind someone you could take.
 - Classes: `core/finisher/Finishers` (stealthKind, stealthKillable, stealthHold, the hold), `client/finisher/FinisherClient` (the held-back tap), `FinisherPose` (the three moves), `client/hud/BodyTips`, `client/wounds/ExecutionReact`.
 - Built; not played.
+
+## 0.26.23 (2026-11-21): hints as tip cards - text hints show top right instead of over the hotbar (#1951)
+
+- Andy (2026-11-20): "All hints in text should be reworked as tooltips in the new menu, top right. Hints like, you must kneel to revive, or skill not unlocked".
+- **Hint cards** (`client.hud.HintCards`): an action-bar line that is a hint (how to do something, what it needs first, a skill, perk or ability not learned yet) now comes up as a tip card in the top right, titled Hint, and is kept on the menu's Notices page like the other cards. 315 lines across Powers, Kingdoms and Kitchen are hints, listed by key in `assets/jaymospowers/hint_keys.txt`; every other line (what just happened, counts, cooldowns, gauges, callouts like "Sneak attack!") stays on the bar.
+- A hint sent again and again (each tick of a hold, each try) makes one card, and the same hint isn't carded again for 30 seconds.
+- Lines built from a key at run time (about 250 of them) and chat messages aren't covered yet.
+- Built; not played.
+
+## 0.26.24 (2026-11-22): a sword never bursts a body (#1974)
+
+- A blow from a sword or an axe cuts: it's never a crushing blow, however hard it lands, so it can't burst a body (downed or standing) the way a slam does. (`BlastGore.crushing`)
+- Built; not played.
+
+## 0.26.25 (2026-11-22): VillagersPlus' miner's house rarer in villages (#1973)
+
+- **Fewer mine heads in villages** (Andy, Morwick: "how does it justify having this many mines?"; he chose "just make them rarer"): VillagersPlus put its miner's house in plains, taiga and savanna villages at a weight of 25, so it was the likeliest house in every slot and big towns came out with a row of six to eight. Once per install its weight is set to 4 in `config/villagersplus/villagersplus-4.0-config.json5`, about a common vanilla house; its other job houses keep theirs. Only villages generated afterwards change. The server's file is the one that counts. Delete `config/jaymospowers-villagersplus-preset-v1` to apply it again. (`VillagersPlusPreset`)
+- Built; not played.
+
+## 0.26.27 (2026-11-22): the roll stays on the ground, the Sit key prone, a real struggle up the wall (#1975)
+
+- **Dodge roll**: the body no longer goes into the ground when it turns over: it turns round the middle of the tucked body and only drops as far as keeps it on the ground at each point of the turn. The legs stay on the hips as the back rounds, so leggings and chestplate no longer cut through each other; the knees fold to the chest and the elbows round the shins, arms outside the legs. (`DodgeRollPose`)
+- **Sit key while prone**: lying prone (not downed), the Sit key only sits you up against a wall beside you, with the downed wall-sit animation, and pressed again lays you back down; with no wall it does nothing. Crawling off or standing up takes you off the wall. (`Sitting`, `DownedLie.proneSitKey`, `WallSit`)
+- **Getting up the wall while downed**: no longer the slide down played backwards. You draw your feet in and put your hands down on the floor beside your hips, push off the floor hunched over your knees until you're crouched with your back on the wall, then one hand goes onto its knee and the other flat on the wall to push your legs straight, and you come upright with your head last. It goes in heaves, slipping back a little between them. A broken arm hangs and the other does the work. (`WallSit`, `WallSitArms.rise`, `CrawlPose`)
+- Built; poses checked in still renders, not played.
+
+## 0.26.28 (2026-11-22): dive into water with the Dodge key (#1975)
+
+- **Dive on Alt**: standing at an edge with deep water ahead and below (up to 2.5 blocks out and 14 down), the Dodge key (Alt) dives you straight off it head first, with no hop first. Falling over deep water, it turns the fall into a head-first dive. Either way you go in as a clean dive (the small neat splash, slipping deeper, no sting) from any height. Sneak no longer makes a dive: Sneak held as you hit the water is the cannonball. Looking steeply down (or Leap of Faith) still goes in head first. (`Dives`, `DodgeClient`)
+- **Everyone sees it**: in the air the body turns head first along the way it's going, arms over the head, and comes back upright as it goes under. The water-entry body turns (the clean dive's head-first tilt, the belly flop laid flat, the cannonball tucked forward) were never drawn before; they are now. (`DivePose`, `FreefallPose`)
+- Built; not played.
+
+## 0.26.29 (2026-11-22): Freerun animations: the ledge climb keyed with elbows and knees, climbing down walls, vaults by speed and height, a pole climb, and bending limbs through the moves (#1959)
+
+- **Climbing up over a ledge** is a keyed animation: a pull-up with the elbows bending (the hands stay up at the edge as the chest comes to it), the elbows coming over the edge into a straight-armed press, the right foot stepping up onto the edge and the left knee after it, then up to stand. The lean in over the edge is as before.
+- **Hanging** keeps its catch, sway and dangle, and now the elbows give and straighten in turn as each arm takes the weight, and the knees hang loose by turns. **Shimmying** bends the elbow of the hand coming off the edge while the holding arm stays nearly straight.
+- The clips are GeckoLib/Blockbench animation files written by `tools/gen_freerun_clips.py` (elbow and knee folds are new channels in them); `tools/freerun_clip_preview.py` draws any clip frame by frame. Unused clips from the first draft (cling, climb down) are gone until their moves are done. (`LedgePose`, `KeyframeClip`)
+- **Climbing down**: clinging to a wall, hold Back to climb down hand under hand, as fast as you climb up (the climb's hands and feet play backward). Hanging from a ledge, hold Back (past the castaway's moment) and you go down onto the wall below and climb on down it, where there's a wall to cling to; with none, you let go as before. With Climber, sneaking off a roof edge already turns you round to hang from it, so a roof can be climbed down all the way. The move hints show it. (`FreerunClient`, `LedgeClient`, `Freerun.climbsDownFrom`, `MoveHints`)
+- **Vaults chosen by how you take them** (no longer at random): at an angle (25 degrees or more off square), the lazy vault, side-on over one hand; anything over a block high, the kong, diving over on both hands; low at a fast run, the monkey flip; low at a sprint, the thief vault, the lead leg kicked over. A web slinger's vaults stay random. (`Freerun.vaultStyle`)
+- **Vault elbows and knees**: the kong's elbows give as the hands land and the shins fold under the tucked knees; the lazy vault's trailing leg bends as it follows over; the monkey flip balls up tight; the thief's trailing knee draws up behind the straight lead leg. (`WebParkourPose`)
+- **Pole climb** has its own look (it used to be drawn as climbing a flat wall, hands wide): arms wrapped round the pole in front, legs pinching it, climbing like an inchworm, both hands reaching up together while the legs grip, then the legs drawing up while the hands hold. (`WebParkourPose`, `Freerun.POLE_LOOK`)
+- **Elbows and knees** now bend in the wall kick (legs driving straight off the wall, then tucking as you fly), the bar swing (soft elbows, more on the hand coming off the bar; the knees whip bent on the back swing) and balancing on a narrow top (soft knees, more on the side you sway over). Wall runs already bent theirs. (`WebParkourPose`, `BarHangPose`, `BalancePose`)
+- **Running**: every player's trailing knee now folds the shin up behind them as the leg swings back, more the faster they run (elbows stay straight, so a held item stays in the hand). **Slides** bend their knees (the tucked leg in the freerun slide; the baseball slide's cocked leg, the knee slide kneeling on the shins, the hip slide's stacked legs). The **long jump** tucks its knees in flight and reaches out for the far side, the **safety tap** lands on bent knees, and the **sky dive** arches with soft knees and elbows. (`RunPose`, `RunMovesPose`, `WebParkourPose`)
+- Built; poses checked in still renders, not played.
+
+## 0.26.30 (2026-11-22): Fish spawn where you can see them (#1984)
+
+- **Fresh and sea fish, crabs and other critters only spawn in water the sky reaches** (rivers, lakes, the sea's upper layers and shallows), never in underground aquifers. A natural spawn picks its height anywhere from the world's bottom up, so river and lake species were mostly spawning in flooded caves under the land, where no one saw them, and filling each player's fish cap: the sea looked empty.
+- **Cave pool fish (cavefish, olm) are underground water creatures now**, as the glow squid is, so they have their own small cap and no longer take the fish places of the sea and rivers. (`FishSpecies`)
+- Built on CI; not played.
+
+## 0.26.31 (2026-11-22): Z Fighter gaps 1: stats (#1958)
+
+- **Strike stat**: a sixth stat (Strike) for rushes, grab slams and the hold-combo finisher, bought like the other five; Strength stays for plain punches.
+- **Critical blows**: late TP buys for crit chance (2% a level, up to 20%) and crit damage (1.5x base, +0.5 per level); a crit deals a much heavier blow and announces it.
+- Built; not played in game.
+
+## 0.26.32 (2026-11-22): Z Fighter gaps 2: stamina for dash, guard and forms (#1938)
+
+- **Stamina**: Flash Step, raising your guard, and going into a form or Limit Break now cost stamina - the pack's stamina row. At zero they can't be used until it regrows; meditation and rest refill it.
+- Built; not played in game.
+
+## 0.26.33 (2026-11-22): zfighter gaps 3: techniques (#1939)
+
+- **Ki Shell** (passive): a trained technique that soaks part of every ki blow when not guarding. Learned at the training screen, always on while known.
+- **Twin Discs** (charged, V): throws two Ki Discs at once in a spread, cutting through foes and blocks.
+- **Ring Beam** (charged, V): fires a spinning ring of ki that cuts a line through everything in its path.
+- **Sword Technique** (quick, G): requires a sword or spear; a rapid blade flurry ending in a ki burst.
+- **Purging Beam** (charged, V): a needle-thin beam that deals heavy damage to corrupted, dark, and nightmare entities, and cleanses their harmful effects. Taught by Galactic Patrolmen.
+- **Sticky Bind** (quick, G): throws a rubber-folk wad that sticks a foe in place; they must mash jump/sneak to tear free.
+- **Rift Fist** (quick, G): Divine-born punch into a small rift behind a target, striking from behind.
+- **Rift Step** (sneak+G): Divine-born step through a rift over a short gap, bypassing obstacles.
+- **Ki-Drinking Barrier** (quick, G): Android-only barrier that absorbs incoming ki projectiles and converts them to ki.
+- **Ki Cell** (item): a Tinkerer craft that restores a chunk of ki when consumed.
+
+Built; not played.
+
+## 0.26.34 (2026-11-22): NPCs obey limb damage: arms gate their powers, bad legs put them on the ground (#1987)
+
+Andy (2026-11-22): "NPCs should have all the same capabilities as the player ... limb damage/effects".
+- **Arms gate powers.** A gifted villager's strike (at range) and close blows are done with the main arm (`GiftedAI`, from the move's kind): with it gone the move is never picked; with it broken the move can be thrown wide (`LimbUse.wide`: the player's `AIM_SPREAD` error, a miss past `NPC_HIT_CONE`), spending the move and its cooldown with a whiff swing but no strain on the power. Brawl fighters (tyrants, patrolmen, Z Fighter rogues) with both arms gone raise no guard and fire no ki; a broken arm sometimes throws a ki attack away; the post-parry counter needs the main arm and goes wide the same way. Not covered: ultimates, fleeing and support moves.
+- **Crawling on bad legs.** A humanoid mob with both legs broken (not splinted, not on adrenaline), or a leg gone and no cane or crutch in hand (`Crutches.legless`, now for humanoid mobs too), is drawn crawling as a downed crawler is (`DownedPose.legless`), and stands again when the legs knit or a crutch is held. The drawing and `Breaks.crawlOnly` change; the mob's hitbox stays standing height, as for the existing legless-mob crawl.
+- Built by CI; not played.
+
+## 0.26.35 (2026-11-22): Z Fighter gaps 4: forms (foundation) (#1965)
+
+- Foundation for four heritage form lines: earthling (bulk, full power, overdrive), rubber-folk (stretch, giant), divine-born (light, dark) and bio-built (super perfect, xeno), plus a corrupted step — new form ids 11-20 and their stat arrays.
+- ZFighterForms: the new lines' constants, tiers, colours and Spirit Bomb handling.
+- Nothing the player can use yet: form effects, attribute hooks and lang keys are not implemented.
+- Built; not played in game.
+
+## 0.26.36 (2026-11-22): NPCs climb two-block walls and fences, as players do (#1988)
+
+- Andy: "NPCs should have all the same capabilities as the player, meaning they should be able to climb up one and two block heights". Every mob built like a person (MCA villagers, guards, illagers, zombies, skeletons, piglins and the rest of the humanoid body plan) now plans its way up edges two blocks high and over fences and walls, and pulls itself up a wall too high to jump: up its own side of the wall and over onto the top in the player's ledge-climb time, with the wall's own sound. One-block steps are still a plain jump. A 2-high wall no longer keeps zombies out of a base; a 3-high one does.
+- Limbs: broken or lost arms and legs don't stop the climb, as they don't stop a player (Andy: "players and NPCs should be able to struggle up like before"). Being downed or being a baby does.
+- Everyone sees it: squared to the wall, leaning in over the edge, and on a body built like a player's (villagers, zombies, skeletons, piglins) the player's own mantle clip on the arms and legs. Illagers only lean in (their arms are one crossed piece).
+- Classes: `freerun.moves.NpcClimb`, `WalkNodeClimbMixin`, `MoveControlClimbMixin`, client `NpcClimbPose`, `NpcClimbRendererMixin`.
+- Built by CI only; not played. Not checked in game: how often mobs now take wall routes, MCA villagers' own model taking the pose, and how Kingdoms' horde climbing (zombies over each other) looks next to this pull-up.
+
+## 0.26.37 (2026-11-22): zfighter gaps 5: training drills, grades, pod pilot, shadow dummy (#1953)
+
+## Drill unlocks & mentor bonus
+- Drills beyond Rhythm (Ki Control, Shadow Boxing, Precision, Memory, Pod Pilot) must be unlocked by completing them near a master (good or dark). Rhythm stays open.
+- Training near a master grants a 50% TP bonus (mentor bonus).
+- Each drill run earns a grade (S/A/B/C/D) based on score: S≥90, A≥75, B≥60, C≥40, D<40.
+
+## Challenge mode
+- Challenge mode strings drills together and restarts on a miss. Pays 50% more TP.
+
+## Pod Pilot drill
+- New 6th drill: fly a pod through gaps in rock pillars while gravity pulls it down. Tap Space to boost up.
+
+## Shadow dummy stat share
+- When placing a Sparring Dummy, the player's chosen shadow share (0-75%, via `zfighter_shadow_share` attachment) determines how much Strength the dummy gets and how much the player loses while it lives.
+- Dummy damage is multiplied by (1 + share). Player's Strength reduction is tracked and restored when the bout ends.
+
+## Lang
+- Added translations for Pod Pilot, drill unlocked, challenge complete, pod crashed.
+
+## Not tested in game
+- Client-side Pod Pilot drill rendering and input handling.
+- Drill unlock progression near masters.
+- Mentor TP bonus and grade display.
+- Challenge mode flow.
+- Shadow dummy stat share damage multiplier and strength reduction/restoration.
+
+Modified: ZFighterDrills.java, ZFighterSparring.java, ZFighterDrillScreen.java, zfighter.json
+
+## 0.26.38 (2026-11-22): Z Fighter gaps 6: items and wishes (#1955)
+
+## Items
+- **Medi-Bug**: A tiny living critter (mouse) found in the wild. Pick it up and eat it whole to heal fully, fill hunger, clear ailments, and restore a Z Fighter's ki. Also gives a herb boost (ki regen, cleared cooldowns, stamina, mastery boost, calm mind).
+- **Medi-Bug Pair**: Two Medi-Bugs used to fuse two fighters.
+- **Radar Parts**: Three fragments (Part 1, 2, 3) found in the world. When all three are held, using the Wish Radar assembles them into a complete radar. One radar per world's set.
+- **Verdant World Orbs**: A second set of seven orbs (One-Star through Seven-Star Verdant Orbs) found in the Verdant World. When gathered at night in the Verdant World, the Verdant Dragon rises and grants wishes from its own menu.
+
+## Herb Boosts
+- Eating a Hermit Bean or Medi-Bug now applies a "fighter's herb boost": 60 seconds of ki regeneration, all ability cooldowns cleared, ki filled to max, +5% mastery for current form, and resistance effect.
+
+## Wishes (6 new)
+- **Reset Story**: Resets your Kingdoms life story (requires Kingdoms). You recreate your character with all unlocked starts available.
+- **Revive Friends**: Brings back up to three fallen friends (players who died in the last hour) to your side with their items.
+- **Armor Set**: Grants a full set of Heavenly Mantle armor (Kingdoms).
+- **Fighter Weapon**: Grants a powerful ki-infused weapon (falls back to named netherite sword if custom item not found).
+- **Pod**: Grants a space pod for travel (falls back to named ender chest if custom item not found).
+- **Materials**: Grants a large supply of crafting materials (16 netherite ingots, 32 diamonds, 64 gold, 64 iron, 64 redstone, 16 amethyst shards).
+
+## Other
+- Wish Radar now auto-assembles from parts when used.
+- Updated wish screen with new wish entries and descriptions.
+
+## 0.26.39 (2026-11-22): Z Fighter gaps 7: the Keeper's trial, a set-piece boss on the Lookout (#1986)
+
+- **The Keeper's trial**: with the Keeper's blessing today, ask him for the trial and the Chamber-Worn, his old pupil, steps out of the Time Chamber door onto the Lookout. One trial at a time; each fighter can ask once a day. He is tougher for every fighter up there when he comes out.
+- **Phases**: he fights as a tyrant in Super; at half health he goes Super 2, and from then on every so often he rises and gathers a great wave (light pours up round him, a rising hum, a warning on screen). Meet it with your own beam to lock into a power clash, or get clear.
+- **Weak point**: after the wave he's spent for 5 seconds, hanging still with a mark of light on his back. Hits from behind do 2.5 times as much, hits from the front 1.25 times.
+- **Shared revives**: friends can bring each fighter round 3 times in the trial. Downed after that, the Keeper pulls you through the Chamber door, out of the fight.
+- **Prize**: 3000 TP shared by how much each fighter hurt him (silver and experience for one without ki); the top fighter's share is a quarter more, and they're named to everyone. With nobody left on the Lookout for 30 seconds he goes back through the door.
+- Classes: new ZFighterLookoutBoss; hooks in ZFighterRogue (holds and damage taken), ZFighterRaids (payout, init) and ZFighterSites (the Keeper's talk).
+- Built; not played in game.
+
+## 0.26.40 (2026-11-22): Z Fighter gaps 8: four themed raids (#1961)
+
+Four new raids:
+
+- **Crashed pod raid**: A warrior-born pod crashes near a kingdom; its pilot calls for reinforcements. Under the full moon, reinforcements have a chance to turn ape.
+- **Razed Verdant village**: A Verdant settlement burned by a tyrant's soldiers; the attackers remain and must be cleared.
+- **Demon army camp**: A camp in the demon realm (Nether); raising its alarm bell brings the demon army.
+- **Machine army and its bases**: In the future dimension, a base built from existing mechs and androids deploys a machine army.
+
+All raids use existing mobs — Rogue Fighters and vanilla mobs — no new original mobs added.
+
+## 0.26.41 (2026-11-22): Z Fighter gaps 9: borrowed time, spared masters' homes, themed tournaments (#1956)
+
+- **Borrowed time from the dead**: the fortune teller can lend you minutes among the living: 10 minutes for 24 silver or 400 TP, paid like a return. They burn down a minute at a time, twice as fast while you are in a form, and she tells you when they are up. The wish "Make borrowed time lasting" makes them last.
+- **Masters' homes are spared**: ki no longer breaks blocks in a master's home - a kingdom seat or a barbarian camp seat, out to 24 blocks - or inside a kept tournament ring. Mob griefing decides everywhere else, as before.
+- **Themed tournaments**: a tournament can open themed instead of plain - the tyrant's games (a tyrant takes a champion's place in the bracket, and the prize is double) or the fortune teller's five fighters (only five challengers may enter), beside the kingdom tournaments, last-one-standing and the tournament of the dead.
+- Built; not played in game.
+
+## 0.26.42 (2026-11-22): Z Fighter gaps 10: camera and HUD (#1937)
+
+- The F7 front camera can now be tuned: set its distance, height, side offset and smoothing in the client settings.
+- Z Fighter HUD options: hide the numbers, always show the HUD, HUD menu scale, and markers above party members when ki sense is on.
+- Ki sense can show how much damage a sensed foe has taken.
+- Flight has two modes: a faster travel mode and a nimble combat mode, with a lock to stop accidental switching.
+- Builds; not played in game yet.
+
+## 0.26.43 (2026-11-22): Z Fighter form models (#1960)
+
+Adds Blockbench sources and GeckoLib models for the four Z Fighter form
+lines defined in the forms requirements: the bulky Earthling full power /
+sun-gold overdrive silhouette, the towering Rubber-folk giant ladder top,
+the slender floating Divine-born with halo, and the insectoid Bio-built
+with back wings and curving tail. Each model has a distinct silhouette and
+a clean UV layout on a 128x128 texture.
+
+- art/zfighter/: editable Blockbench sources for all four forms
+- assets/jaymospowers/geckolib/models/entity/: compiled geo.json models
+- assets/jaymospowers/geckolib/animations/entity/: empty animation stubs (animation follows in a later task)
+- assets/jaymospowers/textures/entity/: placeholder colour sheets per form
+
+Built; not played. Textures are placeholders to be painted against these UVs in the texture task.

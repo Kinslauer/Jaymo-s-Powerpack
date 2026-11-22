@@ -21,6 +21,8 @@ abstract class WebLivingEntityRendererMixin {
 		WebArms.rotate(state, poseStack, entityScale);
 		WebRagdoll.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.FreefallPose.rotate(state, poseStack, entityScale);
+		// head first off an edge or out of a fall into water, and the entry
+		com.jaymospowers.client.water.DivePose.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.freerun.BalancePose.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.water.SwimStrokePose.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.freerun.RunPose.rotate(state, poseStack, entityScale);

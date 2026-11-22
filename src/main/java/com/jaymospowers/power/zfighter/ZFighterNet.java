@@ -21,6 +21,10 @@ public final class ZFighterNet {
 	public static final int AURA_STYLE = 12;
 	/** (0.17.46) The training screen's wheel button: puts technique {@code index} on the technique wheel or takes it off. */
 	public static final int WHEEL_SLOT = 13;
+	/** (0.19.x) Buy a level of critical-chance on the training screen. */
+	public static final int BUY_CRIT_CHANCE = 14;
+	/** (0.19.x) Buy a level of critical damage on the training screen. */
+	public static final int BUY_CRIT_DAMAGE = 15;
 	/** (0.17.61) The Story screen: start saga {@code index / 3} at difficulty {@code index % 3}; give up the saga; give up job {@code index}. */
 	public static final int SAGA_START = 20;
 	public static final int SAGA_ABANDON = 21;
@@ -328,6 +332,8 @@ public final class ZFighterNet {
 			case EQUIP_TECHNIQUE -> ZFighterTraining.equipTechnique(player, train.index());
 			case AURA_STYLE -> ZFighterAura.pick(player, train.index());
 			case WHEEL_SLOT -> ZFighterSlots.toggle(player, train.index());
+			case BUY_CRIT_CHANCE -> ZFighterTraining.buyCritChance(player);
+			case BUY_CRIT_DAMAGE -> ZFighterTraining.buyCritDamage(player);
 			case SAGA_START -> ZFighterSagas.start(player, train.index() / 3, train.index() % 3);
 			case SAGA_ABANDON -> ZFighterSagas.abandon(player);
 			case JOB_ABANDON -> ZFighterSideQuests.abandon(player, train.index());
