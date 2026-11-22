@@ -1,9 +1,9 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 14:29). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 16:29). Don't edit. -->
 # Vault health
 
 Problems in the live notes, found on every sync. Nothing here is fixed by itself: whoever reads it (the coordinator's hourly check, a bot, Andy) fixes the note, and the line goes away on the next sync. `python tools/vault_sync.py --health` prints the same list.
 
-**6 problems.**
+**7 problems.**
 
 ## Stalled agent notes
 
@@ -13,6 +13,10 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 
 ## Agent notes whose task is done
 
-- [[Agents/mutant-zombie-reskin|mutant-zombie-reskin]]: still `in-review`, but its task `mutant-zombie-reskin` is in Inbox/Done/.
 - [[Agents/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]]: still `stalled`, but its task `zfighter-gaps-6-items-wishes` is in Inbox/Done/.
-- [[Agents/zfighter-gaps-8-raids|zfighter-gaps-8-raids]]: still `blocked`, but its task `zfighter-gaps-8-raids` is in Inbox/Done/.
+
+## Questions waiting on Andy
+
+- [[Inbox/class-trees-plan|class-trees-plan]]: blocked since 2026-11-19: 2026-11-19 20:22 Parked (not for a bot): waits on Andy fleshing out the Monk/Paladin/Cleric/Druid/Warlock trees. Raised; don't raise again.
+- [[Inbox/narrator-missing-lines|narrator-missing-lines]]: blocked since 2026-11-19: 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
+- [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]]: blocked since 2026-11-19: 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.

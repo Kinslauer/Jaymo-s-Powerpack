@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 14:32). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 16:29). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -15,19 +15,18 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 - [[Agents/ai-texture-pipeline|ai-texture-pipeline]]: stalled, last change 2026-11-21. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hands-on-cooking-realtime|hands-on-cooking-realtime]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/mutant-zombie-reskin|mutant-zombie-reskin]]: still `in-review`, but its task `mutant-zombie-reskin` is in Inbox/Done/.
 - [[Agents/survival-track4-gear-world|survival-track4-gear-world]]: stalled, last change 2026-11-22. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]]: still `stalled`, but its task `zfighter-gaps-6-items-wishes` is in Inbox/Done/.
-- [[Agents/zfighter-gaps-8-raids|zfighter-gaps-8-raids]]: still `blocked`, but its task `zfighter-gaps-8-raids` is in Inbox/Done/.
 
 ## On the board
 
-21 waiting for a bot, 2 being built, 1 in review: see [[Kanban]].
+21 waiting for a bot, 1 being built, 1 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1999 Loading screen tips can be scrolled back and on, and long ones stay up longer (Kingdoms, 2026-11-22)
 - [ ] #1998 Mutant zombies vary like the old dead: by where they rose, their land and their rot (Kingdoms, 2026-11-22)
 - [ ] #1997 The mutant zombie wears the old dead's rags, not the game's cyan and blue (Kingdoms, 2026-11-22)
 - [ ] #1996 survival picks: one base gauntlet for every fist weapon, offhand punches, Crushing (Powers, 2026-11-22)
@@ -64,6 +63,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1939 zfighter gaps 3: techniques (Powers, 2026-11-22)
 - [ ] #1938 Z Fighter gaps 2: stamina for dash, guard and forms (Powers, 2026-11-22)
 - [ ] #1937 Z Fighter gaps 10: camera and HUD (Powers, 2026-11-22)
+- [ ] #1896 Scrying Orb: watch a far person or place as a living miniature over a crystal orb (Kingdoms, 2026-11-22)
 - [ ] #1853 Fishing: Kingdoms' Saltblood path makes fish keener (Powers, Kingdoms, 2026-11-22)
 - [ ] #1969 loose wood no longer makes the server wait on land still generating (Kingdoms, 2026-11-21)
 - [ ] #1966 loose wood no longer crashes the server while land generates (Kingdoms, 2026-11-21)
@@ -86,13 +86,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1933 Rig leg kick from the fitted leg (Powers, 2026-11-20)
 - [ ] #1932 another player shakes a fainted player awake (Powers, Kingdoms, 2026-11-20)
 - [ ] #1931 cleaning up blood - scrub stains off floors and walls, poured water washes them (Powers, Kingdoms, 2026-11-20)
-- [ ] #1930 downed wall sit: getting up stays on the wall (Powers, 2026-11-20)
-- [ ] #1928 H only opens the character menu (Auto HUD toggle unbound) (Powers, 2026-11-20)
-- …and 357 older ones.
+- …and 359 older ones.
 
 ## Health
 
-6 problems in the notes: [[Health]].
+7 problems in the notes: [[Health]].
 
 ## Last week
 
