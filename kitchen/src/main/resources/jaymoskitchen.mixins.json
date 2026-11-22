@@ -58,6 +58,7 @@
 		"StomachFoodMixin",
 		"StructureProcessorListAccessor",
 		"StructureTemplatePoolAccessor",
+		"SprintStaminaMixin",
 		"ThirstSprintMixin",
 		"VillageWindmillMixin",
 		"WaterBottleBackMixin"
