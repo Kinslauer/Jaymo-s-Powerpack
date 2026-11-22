@@ -528,13 +528,22 @@ public final class CarryPose {
 			}
 			return;
 		}
+		// a person takes both arms (Andy: "you should also use both arms when lifting anything other than small animals and mobs")
 		switch (holding.hold()) {
-			case Carry.FIREMAN -> set(h.rightArm, -1.35F, -0.25F, 0.05F);
+			case Carry.FIREMAN -> {
+				set(h.rightArm, -1.35F, -0.25F, 0.05F);
+				// the other hand up on their back, steadying them on the shoulder
+				set(h.leftArm, -2.3F, 0.55F, 0.1F);
+			}
 			case Carry.BRIDAL -> {
 				set(h.rightArm, -1.0F, -0.4F, 0.0F);
 				set(h.leftArm, -1.0F, 0.4F, 0.0F);
 			}
-			case Carry.SHOULDER -> set(h.rightArm, -0.15F, 0.0F, 0.4F);
+			case Carry.SHOULDER -> {
+				set(h.rightArm, -0.15F, 0.0F, 0.4F);
+				// the other hand across the body to them
+				set(h.leftArm, -0.75F, 0.7F, 0.0F);
+			}
 			default -> {
 				set(h.rightArm, 0.55F, 0.0F, 0.3F);
 				set(h.leftArm, 0.55F, 0.0F, -0.3F);
@@ -628,7 +637,21 @@ public final class CarryPose {
 			return true;
 		}
 		switch (animal ? -1 - hold : hold) {
-			case Carry.FIREMAN, -1 - Carry.FIREMAN, -1 - Carry.SHOULDER, Carry.SHOULDER -> {
+			case Carry.FIREMAN, Carry.SHOULDER -> {
+				// a person: Andy, "you should also use both arms when lifting anything other than small animals and mobs"
+				boolean low = hold == Carry.SHOULDER;
+				if (right) {
+					// up at the shoulder, steadying them (or low at your side, holding on)
+					poseStack.translate(0.05F, low ? -0.25F : 0.08F, 0.0F);
+					poseStack.rotateDegrees(Axis.XP, low ? 20.0F : -18.0F);
+				} else {
+					// the other hand across to them
+					poseStack.translate(0.12F, low ? -0.18F : 0.02F, -0.05F);
+					poseStack.rotateDegrees(Axis.YP, -14.0F);
+					poseStack.rotateDegrees(Axis.XP, low ? 14.0F : -8.0F);
+				}
+			}
+			case -1 - Carry.FIREMAN, -1 - Carry.SHOULDER -> {
 				if (!right) {
 					return false;
 				}

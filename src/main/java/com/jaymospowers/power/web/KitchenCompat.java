@@ -27,6 +27,11 @@ public final class KitchenCompat {
 		return carriedCorpse(player) != null;
 	}
 
+	/** Whether this player has a corpse in both arms: anything bigger than a small animal held by the neck in one hand. */
+	public static boolean corpseInBothArms(Player player) {
+		return LOADED && Kitchen.inBothArms(player);
+	}
+
 	/** A corpse drawn in by a power: pocketed if it fits, otherwise carried. */
 	public static void take(Player player, Entity corpse) {
 		if (LOADED) {
@@ -378,6 +383,11 @@ public final class KitchenCompat {
 
 		static @Nullable Entity carried(Player player) {
 			return com.jaymoskitchen.corpse.CorpseEntity.carriedBy(player);
+		}
+
+		static boolean inBothArms(Player player) {
+			com.jaymoskitchen.corpse.CorpseEntity corpse = com.jaymoskitchen.corpse.CorpseEntity.carriedBy(player);
+			return corpse != null && !corpse.oneHanded();
 		}
 
 		static @Nullable Entity dragged(Player player) {

@@ -127,6 +127,11 @@ public final class ZFighterRush {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_rush_nofoe").withStyle(ChatFormatting.GRAY));
 			return 0;
 		}
+		if (technique == ZFighterTraining.HAMMERLOCK && com.jaymospowers.core.ArmsFull.both(player)) {
+			// a lock taken with both arms: not with them full
+			com.jaymospowers.core.ArmsFull.refuse(player);
+			return 0;
+		}
 		float cost;
 		int cooldown;
 		switch (technique) {

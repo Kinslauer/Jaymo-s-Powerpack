@@ -238,7 +238,8 @@ public final class ZFighterCombo {
 
 		Run(ServerPlayer player) {
 			this.tier = tier(player);
-			int[] base = (Breaks.armless(player) ? KICK_STRINGS : STRINGS)[this.tier];
+			// no arms to strike with, or both full of what he's carrying (ArmsFull): his legs do it all
+			int[] base = (Breaks.armless(player) || com.jaymospowers.core.ArmsFull.both(player) ? KICK_STRINGS : STRINGS)[this.tier];
 			long now = player.level().getGameTime();
 			this.dash = player.isSprinting() && player.onGround() && this.tier >= 1 && now >= DASHED.getOrDefault(player.getUUID(), 0L);
 			if (this.dash) {
