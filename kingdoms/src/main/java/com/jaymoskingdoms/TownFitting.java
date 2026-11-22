@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -23,6 +24,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
@@ -38,6 +41,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
+import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -47,11 +51,13 @@ import org.jspecify.annotations.Nullable;
  * town's start is marked in the Overworld's {@link #FITTED} list). Nothing of Epic Structures' is copied or shipped: its
  * buildings stand as generated, and only the job blocks in them are changed after placement.
  * <ul>
- * <li>the butcher's smoker: Kitchen's butcher block, with meat hooks under the beams beside it;</li>
+ * <li>the butcher's smoker: Kitchen's butcher block, with meat hooks under the beams beside it (a butcher's shop built
+ * without a smoker, as the taiga's and the snow's are, gets the block indoors);</li>
  * <li>any other smoker or furnace in a house (not a smithy's): Kitchen's stove (a cook's, and a home cook's, heat);</li>
- * <li>the cleric's brewing stand: the shrine ({@link Shrine});</li>
- * <li>the healer: one bed, in the cleric's house if it has one, becomes an infirmary cot with Powers' mortar beside it;</li>
- * <li>the tanner's cauldron: filled with water to soak hides, with Kitchen's drying rack beside it;</li>
+ * <li>the temple's brewing stand: the shrine ({@link Shrine}), or a shrine indoors in a temple without one;</li>
+ * <li>the healer: one bed (an infirmary's, else one by a brewing stand) becomes an infirmary cot with Powers' mortar beside it;</li>
+ * <li>the tanner's cauldron: filled with water to soak hides, with Kitchen's drying rack beside it (a tannery without a
+ * cauldron, as the desert's and the plains' are, gets one indoors);</li>
  * <li>the farmer keeps the composter, and the animal pen gets Kitchen's feeding trough;</li>
  * <li>the woodcutters: Powers' chopping block outside a house.</li>
  * </ul>
@@ -72,11 +78,14 @@ public final class TownFitting {
 	static final int HALL_GAP = 4, HALL_STEP = 8, HALL_SLIDE = 48;
 	/** The most the ground under a hall may rise and fall (blocks). */
 	static final int HALL_SPREAD = 2;
+	/** How high above a piece's floor a spot is looked for indoors, and how far up its roof may be. */
+	static final int INDOORS_HIGH = 6;
 
 	private static final String[] SMITH = {"smith", "armor", "armour", "forge", "weapon", "tool"};
 	private static final String[] BUTCHER = {"butcher", "slaughter", "meat"};
 	private static final String[] TANNER = {"tann", "leather"};
-	private static final String[] HEALER = {"temple", "church", "chapel", "cleric", "infirm", "hospital", "healer", "shrine"};
+	private static final String[] TEMPLE = {"temple", "church", "chapel", "cleric", "shrine"};
+	private static final String[] HEALER = {"infirm", "hospital", "healer", "apothecar"};
 	private static final String[] FISHER = {"fisher", "fishing", "dock", "pier", "harbo"};
 
 	/** The towns fitted, by their start chunk (packed), in the Overworld. */
@@ -184,10 +193,14 @@ public final class TownFitting {
 		final Map<BlockPos, String> smokers = new LinkedHashMap<>(), furnaces = new LinkedHashMap<>(), stands = new LinkedHashMap<>(),
 			cauldrons = new LinkedHashMap<>(), composters = new LinkedHashMap<>(), beds = new LinkedHashMap<>();
 		final Set<String> names = new HashSet<>();
+		/** The loaded pieces' boxes, by name. */
+		final Map<String, List<BoundingBox>> boxes = new LinkedHashMap<>();
 	}
 
 	/** Swaps the job blocks in {@code start}'s houses for ours and builds a hall for any trade it has no house for. */
 	static void fit(ServerLevel level, StructureStart start) {
+		long began = System.nanoTime();
+		keepTrades(level, start);
 		Found found = new Found();
 		for (StructurePiece piece : start.getPieces()) {
 			BoundingBox box = piece.getBoundingBox();
@@ -196,6 +209,7 @@ public final class TownFitting {
 			if (!Loaded.made(level, box.minX(), box.minZ(), box.maxX(), box.maxZ())) {
 				continue;
 			}
+			found.boxes.computeIfAbsent(name, n -> new ArrayList<>()).add(box);
 			for (BlockPos p : BlockPos.betweenClosed(box.minX(), box.minY(), box.minZ(), box.maxX(), box.maxY(), box.maxZ())) {
 				BlockState state = level.getBlockState(p);
 				Map<BlockPos, String> into = state.is(Blocks.SMOKER) ? found.smokers : state.is(Blocks.FURNACE) ? found.furnaces
@@ -218,14 +232,7 @@ public final class TownFitting {
 		if (cook(level, found)) {
 			housed.add("cook");
 		}
-		boolean cleric = !found.stands.isEmpty();
-		BlockState shrine = Healing.SHRINE != null ? Healing.SHRINE.defaultBlockState() : null;
-		for (BlockPos stand : found.stands.keySet()) {
-			if (shrine != null) {
-				level.setBlock(stand, shrine, Block.UPDATE_CLIENTS);
-			}
-		}
-		if (cleric) {
+		if (cleric(level, found)) {
 			housed.add("cleric");
 		}
 		if (healer(level, found)) {
@@ -249,61 +256,134 @@ public final class TownFitting {
 		Buildings.Kit kit = Buildings.Kit.wild(land, start.getChunkPos().pack());
 		List<String> halls = new ArrayList<>();
 		if (!housed.contains("butcher")) {
-			halls.add(hall(level, start, JobHalls.butcher(kit), "butcher"));
+			halls.add(hall(level, start, JobHalls.butcher(kit), "butcher", wood));
 		}
 		if (!housed.contains("healer")) {
-			halls.add(hall(level, start, JobHalls.infirmary(kit), "infirmary"));
+			halls.add(hall(level, start, JobHalls.infirmary(kit), "infirmary", wood));
 		}
 		if (!housed.contains("tanner")) {
-			halls.add(hall(level, start, JobHalls.tannery(kit), "tannery"));
+			halls.add(hall(level, start, JobHalls.tannery(kit), "tannery", wood));
 		}
 		if (!housed.contains("cook")) {
-			halls.add(hall(level, start, Buildings.cookhouse(kit), "cookhouse"));
+			halls.add(hall(level, start, Buildings.cookhouse(kit), "cookhouse", wood));
 		}
 		if (water && !fishery) {
-			halls.add(hall(level, start, JobHalls.fishery(kit), "fishery"));
+			halls.add(hall(level, start, JobHalls.fishery(kit), "fishery", wood));
 		}
-		JaymosKingdoms.LOGGER.info("Fitted the town at {}: housed {}; halls {}", middle, housed, halls);
+		JaymosKingdoms.LOGGER.info("Fitted the town at {} in {} ms: housed {}; halls {}", middle, (System.nanoTime() - began) / 1_000_000L, housed,
+			halls);
 	}
 
-	/** The butcher's smoker (in a butcher's house, else the town's first) becomes a butcher block with hooks beside it. */
+	/**
+	 * The townsfolk at the game's trades whose job sites are swapped keep their trade (a little experience, as
+	 * {@link TownTrades} gives anyone it takes on): without it the game takes the trade off them for want of the site.
+	 */
+	private static void keepTrades(ServerLevel level, StructureStart start) {
+		BoundingBox b = start.getBoundingBox();
+		for (Villager v : level.getEntitiesOfClass(Villager.class, new AABB(b.minX(), b.minY(), b.minZ(), b.maxX() + 1, b.maxY() + 1, b.maxZ() + 1))) {
+			Holder<VillagerProfession> p = v.getVillagerData().profession();
+			if (p.is(VillagerProfession.BUTCHER) || p.is(VillagerProfession.CLERIC) || p.is(VillagerProfession.LEATHERWORKER)) {
+				v.setVillagerXp(Math.max(1, v.getVillagerXp()));
+			}
+		}
+	}
+
+	/**
+	 * The butcher's smoker becomes a butcher block with hooks beside it, and a butcher's shop built without a smoker gets
+	 * one indoors all the same. With no butcher's shop at all, the town's first smoker is the butcher's.
+	 */
 	private static boolean butcher(ServerLevel level, Found found, String wood) {
+		BlockState block = butcherBlock(wood);
+		boolean housed = false;
 		List<BlockPos> theirs = new ArrayList<>();
 		found.smokers.forEach((p, name) -> {
 			if (any(name, BUTCHER)) {
 				theirs.add(p);
 			}
 		});
-		if (theirs.isEmpty() && !found.smokers.isEmpty()) {
+		for (BoundingBox shop : boxes(found, BUTCHER)) {
+			if (block == null || theirs.stream().anyMatch(shop::isInside)) {
+				continue;
+			}
+			BlockPos spot = indoors(level, shop);
+			if (spot != null) {
+				level.setBlock(spot, block, Block.UPDATE_CLIENTS);
+				hooks(level, spot);
+				housed = true;
+			}
+		}
+		if (theirs.isEmpty() && !housed && !found.smokers.isEmpty()) {
 			theirs.add(found.smokers.keySet().iterator().next());
 		}
-		BlockState block = JobHalls.byId(wood.equals("oak") ? "jaymoskitchen:butcher_block" : "jaymoskitchen:" + wood + "_butcher_block");
-		if (block == null) {
-			block = JobHalls.byId("jaymoskitchen:butcher_block");
-		}
-		BlockState hook = JobHalls.byId("jaymoskitchen:meat_hook");
 		for (BlockPos p : theirs) {
 			found.smokers.remove(p);
-			if (block == null) {
-				continue;
+			housed = true;
+			if (block != null) {
+				level.setBlock(p, facing(block, level.getBlockState(p)), Block.UPDATE_CLIENTS);
+				hooks(level, p);
 			}
-			level.setBlock(p, facing(block, level.getBlockState(p)), Block.UPDATE_CLIENTS);
-			if (hook == null) {
-				continue;
+		}
+		return housed;
+	}
+
+	/** Kitchen's butcher block of {@code wood} (oak's where there's none of that wood), or null without Kitchen. */
+	private static @Nullable BlockState butcherBlock(String wood) {
+		BlockState block = JobHalls.byId(wood.equals("oak") ? "jaymoskitchen:butcher_block" : "jaymoskitchen:" + wood + "_butcher_block");
+		return block != null ? block : JobHalls.byId("jaymoskitchen:butcher_block");
+	}
+
+	/** Up to {@link #HOOKS} meat hooks near {@code p}, each under something solid with room under it to stand. */
+	private static void hooks(ServerLevel level, BlockPos p) {
+		BlockState hook = JobHalls.byId("jaymoskitchen:meat_hook");
+		if (hook == null) {
+			return;
+		}
+		int hung = 0;
+		for (BlockPos q : nearest(p.offset(-HOOK_REACH, 1, -HOOK_REACH), p.offset(HOOK_REACH, 3, HOOK_REACH), p)) {
+			if (hung >= HOOKS) {
+				return;
 			}
-			int hung = 0;
-			for (BlockPos q : nearest(p.offset(-HOOK_REACH, 1, -HOOK_REACH), p.offset(HOOK_REACH, 3, HOOK_REACH), p)) {
-				if (hung >= HOOKS) {
+			if (level.getBlockState(q).isAir() && level.getBlockState(q.below()).isAir() && hook.canSurvive(level, q)) {
+				level.setBlock(q, hook, Block.UPDATE_CLIENTS);
+				hung++;
+			}
+		}
+	}
+
+	/**
+	 * A temple's brewing stand becomes the shrine; a temple with none gets a shrine indoors; with no temple, the town's
+	 * first brewing stand is the shrine. Brewing stands elsewhere stay (an infirmary cot beside one treats you).
+	 */
+	private static boolean cleric(ServerLevel level, Found found) {
+		BlockState shrine = Healing.SHRINE != null ? Healing.SHRINE.defaultBlockState() : null;
+		List<BlockPos> theirs = new ArrayList<>();
+		found.stands.forEach((p, name) -> {
+			if (any(name, TEMPLE)) {
+				theirs.add(p);
+			}
+		});
+		boolean housed = false;
+		if (theirs.isEmpty() && shrine != null) {
+			for (BoundingBox temple : boxes(found, TEMPLE)) {
+				BlockPos spot = indoors(level, temple);
+				if (spot != null) {
+					level.setBlock(spot, shrine, Block.UPDATE_CLIENTS);
+					housed = true;
 					break;
-				}
-				// (under something solid, with room under it to stand)
-				if (level.getBlockState(q).isAir() && level.getBlockState(q.below()).isAir() && hook.canSurvive(level, q)) {
-					level.setBlock(q, hook, Block.UPDATE_CLIENTS);
-					hung++;
 				}
 			}
 		}
-		return !theirs.isEmpty();
+		if (theirs.isEmpty() && !housed && !found.stands.isEmpty()) {
+			theirs.add(found.stands.keySet().iterator().next());
+		}
+		for (BlockPos p : theirs) {
+			found.stands.remove(p);
+			housed = true;
+			if (shrine != null) {
+				level.setBlock(p, shrine, Block.UPDATE_CLIENTS);
+			}
+		}
+		return housed;
 	}
 
 	/** Every other smoker, and every furnace that isn't a smithy's, becomes Kitchen's stove. */
@@ -325,17 +405,20 @@ public final class TownFitting {
 		return any;
 	}
 
-	/** One bed (in the cleric's house, a temple's, else a house of several beds, else any) becomes an infirmary cot with a mortar beside it. */
+	/**
+	 * One bed becomes an infirmary cot with a mortar beside it: an infirmary's, else one in a house with a brewing stand
+	 * left (so the cot treats you with the healer away), a temple's, one in a house of several beds, any.
+	 */
 	private static boolean healer(ServerLevel level, Found found) {
 		if (found.beds.isEmpty() || Healing.COT == null) {
 			return false;
 		}
-		Set<String> clerics = new HashSet<>(found.stands.values());
+		Set<String> stands = new HashSet<>(found.stands.values());
 		Map<String, Integer> perHouse = new LinkedHashMap<>();
 		found.beds.values().forEach(n -> perHouse.merge(n, 1, Integer::sum));
 		BlockPos bed = found.beds.entrySet().stream()
-			.min(Comparator.comparingInt((Map.Entry<BlockPos, String> e) -> clerics.contains(e.getValue()) ? 0 : any(e.getValue(), HEALER) ? 1
-				: perHouse.get(e.getValue()) > 1 ? 2 : 3))
+			.min(Comparator.comparingInt((Map.Entry<BlockPos, String> e) -> any(e.getValue(), HEALER) ? 0 : stands.contains(e.getValue()) ? 1
+				: any(e.getValue(), TEMPLE) ? 2 : perHouse.get(e.getValue()) > 1 ? 3 : 4))
 			.map(Map.Entry::getKey).orElseThrow();
 		BlockState head = level.getBlockState(bed);
 		Direction facing = head.getValue(BedBlock.FACING);
@@ -357,7 +440,10 @@ public final class TownFitting {
 		return true;
 	}
 
-	/** The tanner's cauldrons (in a tannery, else the town's first) are filled to soak hides, a drying rack beside each. */
+	/**
+	 * The tanner's cauldrons are filled to soak hides, a drying rack beside each, and a tannery built without one gets one
+	 * indoors. With no tannery at all, the town's first cauldron outside a temple is the tanner's.
+	 */
 	private static boolean tanner(ServerLevel level, Found found) {
 		List<BlockPos> theirs = new ArrayList<>();
 		found.cauldrons.forEach((p, name) -> {
@@ -365,8 +451,16 @@ public final class TownFitting {
 				theirs.add(p);
 			}
 		});
+		for (BoundingBox tannery : boxes(found, TANNER)) {
+			if (theirs.stream().noneMatch(tannery::isInside)) {
+				BlockPos spot = indoors(level, tannery);
+				if (spot != null) {
+					theirs.add(spot);
+				}
+			}
+		}
 		if (theirs.isEmpty()) {
-			found.cauldrons.entrySet().stream().filter(e -> !any(e.getValue(), HEALER)).findFirst().ifPresent(e -> theirs.add(e.getKey()));
+			found.cauldrons.entrySet().stream().filter(e -> !any(e.getValue(), TEMPLE)).findFirst().ifPresent(e -> theirs.add(e.getKey()));
 		}
 		BlockState rack = JobHalls.byId("jaymoskitchen:drying_rack");
 		for (BlockPos p : theirs) {
@@ -447,7 +541,7 @@ public final class TownFitting {
 	 * {@code hall} built just outside the town, on a side nearest its middle that is dry, near level and clear of the
 	 * town's pieces, its front toward the town. Returns what was built and where, or why not.
 	 */
-	private static String hall(ServerLevel level, StructureStart start, Blueprint hall, String what) {
+	private static String hall(ServerLevel level, StructureStart start, Blueprint hall, String what, String wood) {
 		BoundingBox town = start.getBoundingBox();
 		BlockPos middle = town.getCenter();
 		List<BoundingBox> pieces = new ArrayList<>(start.getPieces().stream().map(StructurePiece::getBoundingBox).toList());
@@ -471,12 +565,39 @@ public final class TownFitting {
 				CampBuildings.Placer at = new CampBuildings.Placer(anchor.atY(floor), out.getOpposite(), hall.width());
 				clear(level, at, hall);
 				CampBuildings.place(level, hall, at);
+				refit(level, hall, at, what, wood);
 				BlockPos a = at.at(0, 0, 0), b = at.at(hall.width() - 1, hall.height(), hall.depth() - 1);
 				pieces.add(BoundingBox.fromCorners(a, b));
 				return what + " at " + anchor.atY(floor).toShortString();
 			}
 		}
 		return what + " (no ground for it)";
+	}
+
+	/**
+	 * A hall's own job blocks made ours as the town's are: a butcher's shop's smoker the butcher block, any other smoker
+	 * or furnace a stove, a mortar by an infirmary's first cot (its brewing stand stays, so its cots treat you).
+	 */
+	private static void refit(ServerLevel level, Blueprint hall, CampBuildings.Placer at, String what, String wood) {
+		BlockState stove = JobHalls.byId("jaymoskitchen:stove");
+		BlockState block = butcherBlock(wood);
+		BlockState mortar = what.equals("infirmary") ? JobHalls.byId("jaymospowers:mortar") : null;
+		for (Blueprint.Placement p : hall.blocks()) {
+			BlockPos pos = at.at(p.offset());
+			BlockState state = level.getBlockState(pos);
+			if (state.is(Blocks.SMOKER) && what.equals("butcher") && block != null) {
+				level.setBlock(pos, facing(block, state), Block.UPDATE_CLIENTS);
+				hooks(level, pos);
+			} else if ((state.is(Blocks.SMOKER) || state.is(Blocks.FURNACE)) && stove != null) {
+				level.setBlock(pos, facing(stove, state), Block.UPDATE_CLIENTS);
+			} else if (mortar != null && state.getBlock() instanceof InfirmaryCot && state.getValue(BedBlock.PART) == BedPart.HEAD) {
+				BlockPos spot = beside(level, pos);
+				if (spot != null) {
+					level.setBlock(spot, mortar, Block.UPDATE_CLIENTS);
+					mortar = null;
+				}
+			}
+		}
 	}
 
 	/** The floor's height (the ground's own, replaced) for {@code hall} at {@code placer}, or null if the land won't do. */
@@ -542,6 +663,51 @@ public final class TownFitting {
 		}
 		out.sort(Comparator.comparingDouble(p -> p.distSqr(to)));
 		return out;
+	}
+
+	/** The loaded boxes of the pieces whose names hold any of {@code words}. */
+	private static List<BoundingBox> boxes(Found found, String[] words) {
+		List<BoundingBox> out = new ArrayList<>();
+		found.boxes.forEach((name, boxes) -> {
+			if (any(name, words)) {
+				out.addAll(boxes);
+			}
+		});
+		return out;
+	}
+
+	/** An open spot on a floor inside {@code box}, under a roof and against a wall, lowest and nearest its middle first; or null. */
+	private static @Nullable BlockPos indoors(ServerLevel level, BoundingBox box) {
+		BlockPos c = box.getCenter();
+		BlockPos from = new BlockPos(box.minX() + 1, box.minY(), box.minZ() + 1);
+		BlockPos to = new BlockPos(box.maxX() - 1, Math.min(box.maxY(), box.minY() + INDOORS_HIGH), box.maxZ() - 1);
+		for (BlockPos q : nearest(from, to, new BlockPos(c.getX(), box.minY(), c.getZ()))) {
+			if (standable(level, q) && roofed(level, q) && walled(level, q)) {
+				return q;
+			}
+		}
+		return null;
+	}
+
+	/** Something over {@code p}'s head within {@link #INDOORS_HIGH} blocks. */
+	private static boolean roofed(ServerLevel level, BlockPos p) {
+		for (int y = 2; y <= INDOORS_HIGH; y++) {
+			if (!level.getBlockState(p.above(y)).isAir()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** A wall on one side of {@code p}. */
+	private static boolean walled(ServerLevel level, BlockPos p) {
+		for (Direction d : Direction.Plane.HORIZONTAL) {
+			BlockPos q = p.relative(d);
+			if (level.getBlockState(q).isFaceSturdy(level, q, d.getOpposite())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** An open spot beside {@code pos} (the same height, solid underfoot), or null. */
