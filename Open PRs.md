@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-21 20:18
+updated: 2026-11-21 20:23
 ---
 # Open PRs
 
-23 open, as of 2026-11-21 20:18. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+23 open, as of 2026-11-21 20:23. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1853](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1853) Heritage paths: core + Heartlander, Stoneborn, Tideborn (Kingdoms, Powers)
@@ -63,7 +63,7 @@ Andy merges only on "merge", one at a time.
 
 ## [#1959](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1959) Freerun: keyframe ledge hang and mantle via GeckoLib clips
 - **Branch:** `claude/parkour-animations` · **Updated:** 2026-11-22 (today)
-- **Checks:** ✅ 5 passed
+- **Checks:** ⏳ 3 of 4 running
 - **Agent:** [[parkour-animations]]
 
 ## [#1960](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1960) Blockbench models for the 4 Z Fighter form lines
