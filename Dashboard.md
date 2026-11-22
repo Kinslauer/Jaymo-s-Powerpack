@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 18:28). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 18:53). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -25,6 +25,8 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2010 Zombies leave the dead for shade by day; nothing regrows on the dead; player heads wear the MCA look (Powers, Kingdoms, Kitchen, 2026-11-22)
+- [ ] #2007 Goblin extras - the wandering goblin trader, the decoy, drunk goblins, the engineer's hammer and its robot (Kingdoms, 2026-11-22)
 - [ ] #2003 survival picks: free riding camera, plants and flames in the wind (Kingdoms, 2026-11-22)
 - [ ] #2002 Burning bodies only spread fire on wood, pat out with a right click, and leave ash in their shape that blows away (Kitchen, 2026-11-22)
 - [ ] #1999 Loading screen tips can be scrolled back and on, and long ones stay up longer (Kingdoms, 2026-11-22)
@@ -83,13 +85,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1940 corpse loot screen - take only what you want (Kitchen, 2026-11-20)
 - [ ] #1936 dodge rolls - back dodge only when locked on, one per press, hold to roll on into prone (Powers, 2026-11-20)
 - [ ] #1935 body controls - hold drags, tap loots, sneak revives (Powers, Kingdoms, Kitchen, 2026-11-20)
-- [ ] #1934 fishing line from the rod tip, bait on the first click (Powers, 2026-11-20)
-- [ ] #1933 Rig leg kick from the fitted leg (Powers, 2026-11-20)
-- …and 361 older ones.
+- …and 363 older ones.
 
 ## Health
 
-6 problems in the notes: [[Health]].
+7 problems in the notes: [[Health]].
 
 ## Last week
 
