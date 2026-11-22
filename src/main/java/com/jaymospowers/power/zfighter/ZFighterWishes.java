@@ -78,9 +78,11 @@ public final class ZFighterWishes {
 	public static final int UNDO_ANDROID = 11;
 	/** (0.17.62) Call back everyone who died and woke in the Other World ({@link ZFighterAfterlife}). */
 	public static final int CALL_BACK = 12;
-	public static final int WISHES = 13;
+	/** (gaps 2) Forget your fighting style, to learn another from a master. */
+	public static final int RESTYLE = 13;
+	public static final int WISHES = 14;
 	public static final String[] KEYS = {"power", "revive", "riches", "awaken", "rebirth", "blessing", "bonding", "remake", "racial", "restat", "difficulty",
-		"undo_android", "call_back"};
+		"undo_android", "call_back", "restyle"};
 
 	static final int WISH_TP = 1250;
 	static final int WISH_LEVELS = 30;
@@ -417,6 +419,7 @@ public final class ZFighterWishes {
 			case DIFFICULTY -> ZFighterWishExtras.difficulty(player);
 			case UNDO_ANDROID -> ZFighterWishExtras.android(player, zfighter);
 			case CALL_BACK -> ZFighterAfterlife.callBack(player);
+			case RESTYLE -> ZFighterStyles.forget(player);
 			default -> false;
 		};
 		if (!granted) {

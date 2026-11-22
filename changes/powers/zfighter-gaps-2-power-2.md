@@ -1,0 +1,7 @@
+# Z Fighter gaps 2, part 2: holding back, Limit Break 4-6, fighting styles, unlocked potential
+- **Hold back** (sneak + R): let out a quarter less of your power, down to 0%; charging lets out a quarter more each second. Fists and ki techniques scale with it, and while you hold back at all your blows never kill anything but a player: a foe is left at half a heart, to spar with, take alive or knock out.
+- **Limit Break tiers 4-6** (15000 / 25000 / 40000 TP on the training screen): fists +50/70/100%, speed +13/16/20%, burning 3/4.4/6 health a second. They hold only in base form or Super; in a higher form you drop to tier 3.
+- **Fighting styles**: learn one from a master ("Learn a fighting style"), on top of your Kingdoms class: Fury, Flowing Ki, Predator, Last Stand, Guardian, Mender, Ki and Fist or Bulwark. The dragon's new wish "A new style" forgets it so you can learn another.
+- **Unlocked potential**: a rite at night, once, after mastering a form to 50%. The Keeper holds it for the Warrior-born, Earthlings, Heartlanders and the Dawnborn; everyone else sits with a Verdant elder (a master the Verdant World's villages now have) on the Verdant World. In base form you then have your strongest mastered form's fists, speed and ki power, with no look and no drain; Heartlanders, the Dawnborn and Earthlings get 1.2 times that form's edge.
+- Classes: new ZFighterRelease, ZFighterStyles, ZFighterPotential; hooks in ZFighterPower, ZFighterBattle, ZFighterMasters, ZFighterSites, ZFighterWishes, ZFighterTraining.
+- Built; not played in game.
