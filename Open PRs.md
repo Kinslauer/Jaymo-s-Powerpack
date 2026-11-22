@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-22 09:02
+updated: 2026-11-22 09:05
 ---
 # Open PRs
 
-23 open, as of 2026-11-22 09:02. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+21 open, as of 2026-11-22 09:05. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1853](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1853) Heritage paths: core + Heartlander, Stoneborn, Tideborn (Kingdoms, Powers)
@@ -23,7 +23,7 @@ Andy merges only on "merge", one at a time.
 
 ## [#1953](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1953) Z Fighter gaps 5: training drills, grades, pod pilot, shadow dummy
 - **Branch:** `claude/zfighter-gaps-5-training` · **Updated:** 2026-11-22 (today)
-- **Checks:** ✅ 5 passed
+- **Checks:** ⏳ 3 of 4 running
 - **Agent:** no agent note
 
 ## [#1954](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1954) Plan: parkour animations
@@ -71,11 +71,6 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 5 passed
 - **Agent:** [[medieval-patch10-temple-patrons]]
 
-## [#1965](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1965) Z Fighter gaps 4: form foundation
-- **Branch:** `claude/zfighter-gaps-4-forms` · **Updated:** 2026-11-22 (today)
-- **Checks:** ⏳ 3 of 4 running
-- **Agent:** [[zfighter-gaps-4-forms]]
-
 ## [#1968](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1968) Mutant zombie reskin: cyan chestplate and blue pants
 - **Branch:** `claude/mutant-zombie-reskin` · **Updated:** 2026-11-21 (1 day ago)
 - **Checks:** ✅ 5 passed
@@ -106,17 +101,12 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 5 passed
 - **Agent:** [[zfighter-gaps-7-bosses]]
 
-## [#1987](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1987) NPC limb rules: arms gate powers, bad legs crawl
-- **Branch:** `npc-limb-rules` · **Updated:** 2026-11-22 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** no agent note
-
 ## [#1988](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1988) NPCs climb two-block walls and fences, as players do
 - **Branch:** `npc-ledge-climb` · **Updated:** 2026-11-22 (today)
-- **Checks:** ❌ failing: Build Powers
+- **Checks:** ⏳ 1 of 4 running
 - **Agent:** no agent note
 
 ## [#1989](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1989) Meat hooks take a carried or dragged carcass on any click; both arms for big lifts; Carry On blocks drawn again
 - **Branch:** `claude/survival-hook-carry` · **Updated:** 2026-11-22 (today)
-- **Checks:** ⏳ 3 of 4 running
-- **Agent:** no agent note
+- **Checks:** ✅ 5 passed
+- **Agent:** [[survival-track3-hook-carry]]
