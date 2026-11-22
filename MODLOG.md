@@ -7288,3 +7288,11 @@ following integration task).
   (armour) and the hidden blade are unchanged.
 - Built by CI only; not played: the worn sleeve's fit on wide and slim arms, the offhand punch, the armour and Crushing
   are unseen in game.
+
+## 0.26.56 (2026-11-22): The server starts again: the wish radar's parts were registered twice (#2006)
+
+- **Fix**: the server crashed on start ("Adding duplicate key ... jaymospowers:radar_part_1"). Two Z Fighter gaps PRs both
+  added the wish radar's three parts, one in `ZFighterItems` and one in `ZFighterWishes`. They are registered once now,
+  in `ZFighterItems`, and building the radar reads those.
+- Class: `ZFighterWishes`.
+- Built; the server was started with it.
