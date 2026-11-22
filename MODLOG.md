@@ -7033,3 +7033,11 @@ Andy (2026-11-22): "NPCs should have all the same capabilities as the player ...
 - ZFighterForms: the new lines' constants, tiers, colours and Spirit Bomb handling.
 - Nothing the player can use yet: form effects, attribute hooks and lang keys are not implemented.
 - Built; not played in game.
+
+## 0.26.36 (2026-11-22): NPCs climb two-block walls and fences, as players do (#1988)
+
+- Andy: "NPCs should have all the same capabilities as the player, meaning they should be able to climb up one and two block heights". Every mob built like a person (MCA villagers, guards, illagers, zombies, skeletons, piglins and the rest of the humanoid body plan) now plans its way up edges two blocks high and over fences and walls, and pulls itself up a wall too high to jump: up its own side of the wall and over onto the top in the player's ledge-climb time, with the wall's own sound. One-block steps are still a plain jump. A 2-high wall no longer keeps zombies out of a base; a 3-high one does.
+- Limbs: broken or lost arms and legs don't stop the climb, as they don't stop a player (Andy: "players and NPCs should be able to struggle up like before"). Being downed or being a baby does.
+- Everyone sees it: squared to the wall, leaning in over the edge, and on a body built like a player's (villagers, zombies, skeletons, piglins) the player's own mantle clip on the arms and legs. Illagers only lean in (their arms are one crossed piece).
+- Classes: `freerun.moves.NpcClimb`, `WalkNodeClimbMixin`, `MoveControlClimbMixin`, client `NpcClimbPose`, `NpcClimbRendererMixin`.
+- Built by CI only; not played. Not checked in game: how often mobs now take wall routes, MCA villagers' own model taking the pose, and how Kingdoms' horde climbing (zombies over each other) looks next to this pull-up.
