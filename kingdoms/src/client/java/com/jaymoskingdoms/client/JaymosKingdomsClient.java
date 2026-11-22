@@ -40,6 +40,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		IntroNames.register();
 		// great foes' themes, and the trophy stand's item
 		com.jaymoskingdoms.client.music.FoeMusicClient.register();
+		com.jaymoskingdoms.client.music.SkirmishMusic.register();
 		com.jaymoskingdoms.client.music.SceneMusic.register();
 		com.jaymoskingdoms.client.music.PlaceMusic.register();
 		com.jaymoskingdoms.client.trophies.TrophyStandRenderer.register();
@@ -191,6 +192,14 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		LoanScreen.register();
 		ClassKeys.register();
 		MagicKeys.register();
+		// Mutant Monsters' mutant zombie dressed as one of the present's old dead, not in the game's cyan and blue
+		// (kingdoms/tools/gen_mutant_dead.py; the pack's texture is drawn over the mod's own)
+		if (net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("mutantmonsters")) {
+			net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosKingdoms.id("mutant_dead"),
+				net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosKingdoms.MOD_ID).orElseThrow(),
+				net.minecraft.network.chat.Component.literal("Jaymo's Kingdoms: the mutant zombie as one of the old dead"),
+				net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.ALWAYS_ENABLED);
+		}
 		// whom a harness piece was fitted to (Fitting)
 		net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
 			java.util.UUID to = stack.get(com.jaymoskingdoms.Fitting.FITTED);
@@ -247,6 +256,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		ComposureHud.register();
 		OwnSpeechHud.register();
 		BloodReservoirHud.register();
+		// (defence disciplines) a locked-on enemy's passive blocks
+		MobBlocksHud.register();
 		// BWM batch 5: the gloom's whispers and dark edges
 		GloomClient.register();
 		FifthClient.register();

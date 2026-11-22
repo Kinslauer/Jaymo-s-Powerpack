@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "jaymoskitchen:mince",
     "minecraft:chicken",
     {
       "id": "naturalist:duck",

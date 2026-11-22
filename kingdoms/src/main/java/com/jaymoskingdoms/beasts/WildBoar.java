@@ -22,7 +22,7 @@ import org.jspecify.annotations.Nullable;
  * for pork and hide; Jaymo's Kitchen butchers it as any animal.
  */
 public class WildBoar extends WildBeast implements Acting {
-	static final double HEALTH = 24.0, SPEED = 0.28, DAMAGE = 5.0, ATTACK_KNOCKBACK = 1.2, KNOCKBACK_RESISTANCE = 0.3;
+	static final double HEALTH = 24.0, SPEED = 0.28, DAMAGE = 3.0, ATTACK_KNOCKBACK = 1.2, KNOCKBACK_RESISTANCE = 0.3;
 	/** How close a player can come before it charges (blocks). */
 	static final double TEMPER_RANGE = 8.0;
 	/** Its gore shows this long (ticks). */

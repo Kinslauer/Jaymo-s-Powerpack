@@ -2609,3 +2609,58 @@ Added a new **Cooking Block** to the Functional creative tab. The block has iron
 - A body with nothing left on it gives the old "Nothing left on it" line; a bare skeleton gives up its bones, a tap at a time, as before.
 - Gear's wear is put on once, the first time the body is looked at, so looking again doesn't wear it more. Several players can look at once (one shared view, nothing taken twice); a Kingdoms looter won't rob a body someone is going through. Taking counts as robbing the dead for Kingdoms, a piece at a time, as before.
 - `CorpseLoot`, `CorpseLootMenu`, `CorpseLootScreen`, `CorpseEntity#openLoot`. Compiled; not played.
+
+## 0.6.68 (2026-11-22): meat hooks take a carried or dragged body on any click, people's bodies too (#1989)
+
+- **Meat hooks**: right-clicking a meat hook while carrying or dragging a carcass now hangs it, wherever in the hook's block space you click (the hook, the air around it, the beam above). Before, your own game let go of the carcass before the click ever reached the server, unless you clicked a butcher block, so the hook never took it. Out of reach, you keep hold and are told to get under the hook.
+- **People's bodies hang too** (a player's, a villager's, a raider's, a zombie's): a warning to others, and a cleaver or skinning knife opens the throat so the blood drains into a blood grate under it, to be bottled (for a vampire who'd rather not bite). They're only bled, never butchered.
+- **Great spit and campfire**: a carried carcass can be heaved onto the great spit again, and a dragged one onto it; a small one carried can be laid on a campfire to roast. Those clicks were being turned into "let go" too.
+- `MinecraftUseMixin` (client: walks the view for a hook, sends `HangOn`; lets spit and campfire clicks through), `Payloads.HangOn`, `JaymosKitchen` (its receiver), `Hanging.hangsAsPerson`/`bleedPerson`, `CorpseEntity.interact`.
+- Built by CI; not played.
+
+## 0.6.69 (2026-11-22): the butcher's shop: table work, skin rack, mincer and mince, display, head mounts, barrel of bones (#1993)
+
+- **Butcher's block, step by step**: a carcass laid on a butcher block can be worked the way it is on a meat hook (by anyone a hook would let): a cleaver bleeds it there and takes the head; a skinning knife skins it (a whole, prime skin, as on the hook) and guts it; then three cleaver cuts. An axe on the block still chops it up in one go, as before.
+- **Skin rack**: raw hides hang on the drying rack now. Splash them with water (a water bucket, a water bottle or a waterskin's sip), then rub in a piece of salt: they're salted where they hang (two raw hides to a salted hide, as at the crafting table) and start drying into dried hides at once.
+- **Mincer** (iron ingots, a stick, planks): right-click it with raw meat of any kind, or offal, and mince comes out of its mouth, one piece at a time. **Mince** does for red meat, pork, mutton, poultry, small game and venison in the kitchen's dishes.
+- **Butcher's display** (smooth stone slabs over planks): lay up to four pieces of food on its cold stone top to show them; an empty hand takes the last one back.
+- **Head Mount** (planks and an iron nugget): a carved plaque for a wall. A severed head carried in the hand and set down looking at it goes up square in its middle.
+- **Barrel of Bones** (a barrel and a bone block): a barrel heaped with bones, for the shop.
+- The whole-carcass rotisserie is the great spit, already in: a carcass carried or dragged onto it works again (fixed with the meat hook clicks).
+- `butchery/ButcherShop`, `MincerBlock`, `HeadMountBlock`, `ButcherDisplayBlock`/`Entity`, `client/butchery/ButcherDisplayRenderer`, `Hanging.use` (the table), `DryingRackEntity.treat`, `Chopping` (mince isn't cut again); art from `tools/vanilla_style/butcher_shop.py`.
+- Built by CI; not played.
+
+## 0.6.70 (2026-11-22): survival picks: thirst per action, wetness, temperature sources, cold breath, sprint stamina (#1995)
+
+Andy's picks from Legendary Survival Overhaul (ideas and numbers only) and Walk Jog Run (LGPL, idea only).
+- **Thirst per action**: a jump, a block broken, an attack and each second of sprinting cost water, after LSO's
+  thirst (jump 0.15, block 0.07, attack 0.3, sprint 0.1 of its exhaustion; 4 make a point of water). This replaces the
+  old flat sprint drain. The hotter you are the faster all of it goes, and the cold already burns food (both were
+  there before).
+- **Wetness meter** (`Wetness`): every half second the rain adds 7, standing in water adds 10 times how deep you're in
+  it, and otherwise you dry 3 (100 is wet through). It's the one wet chill on body heat, up to 25 (10 LSO degrees)
+  at full; soaked through (80 and up) on cold land is worse, and soaked clothes keep half their warmth (wool all of
+  it). Jaymo's Powers' Wet and Soaked keep the meter at least 40 or full, and Kingdoms' downpours fill it. It shows
+  as a small blue glass beside the thermometer while you're wet. This replaces the old one-minute wet timer and the
+  separate in-water chill. About six seconds of rain makes you soaked through (clothes at half warmth, hides wearing as
+  soaked), sooner than Powers' own Soaked.
+- **Dousing**: sneak-use a water bottle, a bottle of clean water or a waterskin with water in it (not while aiming at
+  water, where it fills): you pour it over yourself, are wet through, and any fire on you goes out. A bottle gives its
+  glass back; a waterskin loses a sip. With Powers you're Soaked as well.
+- **Temperature**: one LSO degree counts as 2.5 body heat. Height now chills from sea level, 6 degrees every 64
+  blocks (it used to start 40 blocks up, so hills are a little colder). The day swings 2 degrees either side, warmest
+  at noon and coldest at midnight, on top of the sun and night sky. Fires, campfires, lava, magma and lit furnaces
+  warm you from up to 20 blocks away (was 5), less with distance, and half as much out under the sky as inside.
+  The Nether counts as out of doors. So a campfire three blocks off indoors now gives about 25 (was 12), and lava
+  in the Nether warms you from further off (heatstroke only right beside it, as before). For 90 seconds after joining
+  or respawning the world can't make your body heat any worse.
+- **Cold breath**: a small puff of breath at the mouth, drifting the way you face, every two seconds when the air is
+  cold (25 below comfortable) or you're chilly. Everyone sees it.
+- **Sprint stamina** (`Stamina`, game rule `jaymoskitchen:stamina`): sprinting spends wind instead of food. A full
+  hunger bar holds a full bar of wind (about 13 seconds of sprinting), half a hunger bar half of it. Run out and you're
+  winded: slowed for 3 seconds, and no sprinting until a quarter is back; it refills a second after you stop. The bar
+  shows in the focus band over the hotbar while it isn't full, the part you can't hold for hunger shaded off. Powers'
+  feathers stay what dodges, powers and fighting or running in armour spend. Powers' overclocked speedsters run
+  without spending wind (`Stamina.addTireless`). Switching the rule off clears the bar.
+- Built; not played. Not checked in game: the breath puff's look, the HUD placement of the wetness glass and wind bar,
+  the heat-source scan's cost on a busy server, how the sprint bar feels next to feathers.

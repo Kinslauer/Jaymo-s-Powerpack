@@ -50,6 +50,8 @@ public final class ShipShot extends Projectile implements ItemSupplier {
 	static final double STEP = 0.25;
 	/** A shell's second blast: how far out round where it strikes a ship it tears her planking (blocks). */
 	static final double SPLASH = 1.2;
+	/** How long a fire ball leaves those it hurts burning (seconds). */
+	public static final float FIRE_SECONDS = 6.0F;
 	/** How far under where it bursts (blocks) the ground it blasts may lie. */
 	static final int LAND_REACH = 3;
 
@@ -241,6 +243,9 @@ public final class ShipShot extends Projectile implements ItemSupplier {
 			}
 			float share = (float)(1.0 - d / radius);
 			victim.hurtServer(level, source, kind.damage * (BURST_SHARE + (1.0F - BURST_SHARE) * share));
+			if (kind == ShotKind.FIRE) {
+				victim.igniteForSeconds(FIRE_SECONDS);
+			}
 			double resist = 1.0 - victim.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
 			Vec3 away = victim.position().subtract(at);
 			if (resist > 0.0 && away.lengthSqr() > 1.0E-4) {

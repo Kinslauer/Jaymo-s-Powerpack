@@ -286,6 +286,7 @@ public final class Classes {
 		Clerics.register();
 		Druids.register();
 		Monks.register();
+		JaymosKingdoms.LOGGER.debug("disciplines attachments: {} {}", Disciplines.DATA, MobBlocks.SHOWN);
 		Paladins.register();
 		Rangers.register();
 		Warlocks.register();
@@ -562,6 +563,7 @@ public final class Classes {
 		player.setAttached(CLASS, new Chosen(cls.key(), option, startingSpells(cls, option), 0));
 		refresh(player);
 		begin(player, cls, option);
+		StartingSkills.give(player, cls);
 		// (no class starts with gear, Andy's word: a Mage gets the staff's recipe from a court wizard, or finds one)
 		if (cls == PlayerClass.MAGE) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.class.mage_staff").withStyle(ChatFormatting.GRAY));

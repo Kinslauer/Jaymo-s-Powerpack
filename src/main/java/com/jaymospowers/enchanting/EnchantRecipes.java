@@ -113,6 +113,9 @@ public final class EnchantRecipes {
 		RECIPES.put("jaymospowers:pummelling", new String[] {"redstone*12, piston*2, iron_ingot*4", "redstone*16, piston*4, iron_ingot*8",
 			"redstone*24, piston*6, iron_block*1, leather*4"});
 		RECIPES.put("jaymospowers:barbed", new String[] {"lapis_lazuli*16, pufferfish*3, cactus*8, iron_nugget*16"});
+		// the gauntlets' (boxing/OffhandPunch): a blow that crumples the armour it lands on
+		RECIPES.put("jaymospowers:crushing", new String[] {"redstone*12, iron_ingot*4, flint*8", "redstone*16, iron_ingot*8, flint*16",
+			"redstone*24, iron_block*1, flint*24, anvil*1"});
 	}
 
 	private EnchantRecipes() {

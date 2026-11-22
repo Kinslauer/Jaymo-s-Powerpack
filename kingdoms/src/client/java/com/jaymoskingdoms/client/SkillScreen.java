@@ -1237,6 +1237,13 @@ final class SkillScreen extends Screen {
 			text.add(Component.translatable("gui.jaymoskingdoms.stats.caps", caps).withColor(Ui.DIM));
 			text.add(Component.translatable("gui.jaymoskingdoms.stats.hint", Stats.POINTS_PER_LEVEL).withColor(Ui.DIM));
 			text.add(Component.translatable("gui.jaymoskingdoms.stats.legend").withColor(Ui.HINT));
+			if (player != null) {
+				// (defence disciplines) your three, how each came to you, and where to find a teacher for the locked
+				text.add(Component.translatable("gui.jaymoskingdoms.disciplines").withColor(accent));
+				for (int d = 0; d < com.jaymoskingdoms.Disciplines.KINDS; d++) {
+					text.add(com.jaymoskingdoms.Disciplines.describe(player, d));
+				}
+			}
 		}
 		sidePanel(graphics, name, accent, text);
 	}

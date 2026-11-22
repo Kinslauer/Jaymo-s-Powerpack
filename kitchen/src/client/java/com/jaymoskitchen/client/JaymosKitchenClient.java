@@ -108,6 +108,7 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		com.jaymoskitchen.client.delight.DelightHomeClient.register();
 		// (0.5.27) hides hanging on drying racks
 		BlockEntityRenderers.register(com.jaymoskitchen.tanning.Hides.DRYING_RACK_ENTITY, com.jaymoskitchen.client.tanning.DryingRackRenderer::new);
+		BlockEntityRenderers.register(com.jaymoskitchen.butchery.ButcherShop.BUTCHER_DISPLAY_ENTITY, com.jaymoskitchen.client.butchery.ButcherDisplayRenderer::new);
 		ModelLayerRegistry.registerModelLayer(SaddlebagModel.LAYER, SaddlebagModel::createLayer);
 
 		// the quiver worn on players' backs

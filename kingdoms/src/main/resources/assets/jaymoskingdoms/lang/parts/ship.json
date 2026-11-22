@@ -30,7 +30,7 @@
   "ship.jaymoskingdoms.keys.broadside": "click: broadside",
   "ship.jaymoskingdoms.no_guns_that_way": "No loaded guns on that side",
   "ship.jaymoskingdoms.cannon.powder_first": "Load gunpowder first",
-  "ship.jaymoskingdoms.cannon.wants_shot": "Powder's in: now shot (round, heavy, a shell, chain or grape)",
+  "ship.jaymoskingdoms.cannon.wants_shot": "Powder's in: now shot (round, stone, fire, heavy, a shell, chain or grape)",
   "ship.jaymoskingdoms.cannon.loaded": "Loaded: touch her off with flint and steel or a fire charge",
   "ship.jaymoskingdoms.cannon.not_loaded": "She's not loaded: gunpowder, then shot",
   "ship.jaymoskingdoms.sinking": "She's holed below the waterline and going down!",

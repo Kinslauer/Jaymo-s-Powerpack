@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "minecraft:barrel",
+    "minecraft:bone_block"
+  ],
+  "result": {
+    "id": "jaymoskitchen:bone_barrel"
+  }
+}

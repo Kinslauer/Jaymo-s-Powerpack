@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    " N ",
+    "PPP"
+  ],
+  "key": {
+    "N": "minecraft:iron_nugget",
+    "P": "#minecraft:planks"
+  },
+  "result": {
+    "id": "jaymoskitchen:head_mount",
+    "count": 2
+  }
+}

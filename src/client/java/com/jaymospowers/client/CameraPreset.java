@@ -18,10 +18,12 @@ import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
  * player, so powers that fire along your look (Web, Gravity, Z Fighter) still go where the crosshair points. Its
  * config is read by Forge Config API Port when it starts, so the file is written here, before any mod does; keys we
  * don't write are filled in with its defaults. After that, players' own changes are never touched.
+ * <p>
+ * The preset values can be overridden by the Z Fighter client settings (distance, height, side offset).
  */
 public final class CameraPreset implements PreLaunchEntrypoint {
 	/** Bump to set the preset again (for a new preset in a later pack version). */
-	private static final String MARKER = "jaymospowers-camera-preset-v2";
+	private static final String MARKER = "jaymospowers-camera-preset-v3";
 	/** TOML table → key → value, in Shoulder Surfing's client config. */
 	private static final Map<String, Map<String, String>> PRESET = new LinkedHashMap<>();
 
@@ -72,18 +74,66 @@ public final class CameraPreset implements PreLaunchEntrypoint {
 					// the table is there but lacks the key: put it straight after the header
 					int at = lines.indexOf(lines.stream().filter(l -> l.trim().equals("[" + entry.getKey() + "]")).findFirst().orElseThrow()) + 1;
 					for (Map.Entry<String, String> key : entry.getValue().entrySet()) {
-						lines.add(at++, "\t" + key.getKey() + " = " + key.getValue());
+						lines.add(at++, "	" + key.getKey() + " = " + key.getValue());
 					}
 					continue;
 				}
 				lines.add("[" + entry.getKey() + "]");
-				entry.getValue().forEach((key, value) -> lines.add("\t" + key + " = " + value));
+				entry.getValue().forEach((key, value) -> lines.add("	" + key + " = " + value));
 			}
 			Files.createDirectories(config.getParent());
 			Files.write(config, lines);
 			Files.writeString(marker, "Jaymo's Powers set Shoulder Surfing's view to the pack's preset. Delete this file to do it again.\n");
 		} catch (IOException e) {
 			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't set Shoulder Surfing's preset in {}", config, e);
+		}
+	}
+
+	/** Syncs the front camera settings to Shoulder Surfing's config at runtime. Called from FrontCamera.tick. */
+	public static void syncFrontCameraSettings(double side, double height, double distance) {
+		FabricLoader loader = FabricLoader.getInstance();
+		if (!loader.isModLoaded("shouldersurfing") || loader.getEnvironmentType() != EnvType.CLIENT) {
+			return;
+		}
+		Path config = loader.getConfigDir().resolve("shouldersurfing-client.toml");
+		try {
+			List<String> lines = Files.exists(config) ? new ArrayList<>(Files.readAllLines(config)) : new ArrayList<>();
+			String table = "";
+			boolean foundOffsetTable = false;
+			for (int i = 0; i < lines.size(); i++) {
+				String line = lines.get(i).trim();
+				if (line.startsWith("[") && line.endsWith("]")) {
+					table = line.substring(1, line.length() - 1).trim();
+					continue;
+				}
+				if (table.equals("camera.offset")) {
+					foundOffsetTable = true;
+					int eq = line.indexOf('=');
+					if (eq > 0 && !line.startsWith("#")) {
+						String key = line.substring(0, eq).trim();
+						String value = switch (key) {
+							case "offset_x" -> String.format(java.util.Locale.ROOT, "%.2f", side);
+							case "offset_y" -> String.format(java.util.Locale.ROOT, "%.2f", height);
+							case "offset_z" -> String.format(java.util.Locale.ROOT, "%.2f", distance);
+							default -> null;
+						};
+						if (value != null) {
+							lines.set(i, lines.get(i).substring(0, lines.get(i).indexOf('=')) + "= " + value);
+						}
+					}
+				}
+			}
+			// If the table wasn't found, add it (shouldn't happen after first launch)
+			if (!foundOffsetTable) {
+				lines.add("[camera.offset]");
+				lines.add("	offset_x = " + String.format(java.util.Locale.ROOT, "%.2f", side));
+				lines.add("	offset_y = " + String.format(java.util.Locale.ROOT, "%.2f", height));
+				lines.add("	offset_z = " + String.format(java.util.Locale.ROOT, "%.2f", distance));
+			}
+			Files.createDirectories(config.getParent());
+			Files.write(config, lines);
+		} catch (IOException e) {
+			com.jaymospowers.JaymosPowers.LOGGER.warn("Couldn't sync front camera settings to {}", config, e);
 		}
 	}
 }

@@ -40,8 +40,10 @@ import net.minecraft.world.level.block.Blocks;
  * non wizards and sorcerers to use spells, but only after some acquisition, and they will never be as strong as a natural
  * sorcerer or learned wizard."
  * <ul>
- * <li><b>Attuned:</b> a Mage or a Sorcerer the moment they take the class (a <i>natural</i>); anyone else who comes within
- * {@link #AMETHYST_RANGE} of a budding amethyst (a geode's heart). Attunement overloads them: their mana fills to
+ * <li><b>Attuned:</b> a Mage or a Sorcerer the moment they take the class (a <i>natural</i>); anyone else with the knack
+ * for it ({@link #apt}: Andy, 2026-11-22, "Only 30% of players and MCA can get it from amethyst and now they have to either
+ * punch it in the world or have it enter their inventory") who strikes amethyst in the world or carries it
+ * ({@link #AMETHYST_ITEMS}); an MCA villager with the knack carrying it ({@link ManaFolk}). Attunement overloads them: their mana fills to
  * {@link #OVERLOAD} times its most, their sight goes blue (the client's {@code ManaClient}), and the extra bleeds away.</li>
  * <li><b>Mana:</b> casting costs it ({@link #COST}, {@link #spend}); it comes back by itself. A natural holds
  * {@link #NATURAL_MAX} and gets it back faster; one who found it holds {@link #FOUND_MAX}. The Arcana attribute
@@ -82,8 +84,15 @@ public final class Mana {
 	static final float OVERLOAD = 1.5F, SPILL = 3.0F;
 	/** How long the blue overload lasts on screen and in the glow (ticks). */
 	public static final int OVERLOAD_TICKS = 200;
-	/** How near a budding amethyst attunes you (blocks), and how often it's looked for (ticks). */
-	static final int AMETHYST_RANGE = 3, AMETHYST_EVERY = 40;
+	/** How often an amethyst carried is looked for (ticks). */
+	static final int AMETHYST_EVERY = 40;
+	/** (Andy, 2026-11-22) The share of players and folk who can be attuned by amethyst at all ({@link #apt}). */
+	static final int APT_PERCENT = 30;
+	/** Amethyst that attunes the apt when carried, and the blocks that do when struck. */
+	static final java.util.Set<net.minecraft.world.item.Item> AMETHYST_ITEMS = java.util.Set.of(Items.AMETHYST_SHARD, Items.AMETHYST_BLOCK,
+		Items.AMETHYST_CLUSTER, Items.LARGE_AMETHYST_BUD, Items.MEDIUM_AMETHYST_BUD, Items.SMALL_AMETHYST_BUD, Items.BUDDING_AMETHYST);
+	static final java.util.Set<net.minecraft.world.level.block.Block> AMETHYST_BLOCKS = java.util.Set.of(Blocks.BUDDING_AMETHYST, Blocks.AMETHYST_BLOCK,
+		Blocks.AMETHYST_CLUSTER, Blocks.LARGE_AMETHYST_BUD, Blocks.MEDIUM_AMETHYST_BUD, Blocks.SMALL_AMETHYST_BUD);
 	/** How far off the attuned see another's magic (blocks). */
 	static final double SEEN_RANGE = 48.0;
 	/** The glow's steps (synced): 0 none ... {@code GLOW_STEPS} full. */
@@ -157,6 +166,14 @@ public final class Mana {
 		ManaWand.register();
 		// (their attachments, registered as the classes load)
 		JaymosKingdoms.LOGGER.debug("mana attachments: {} {}", ManaSickness.SICK, ManaAlchemy.ATTUNING);
+		// (Andy, 2026-11-22) amethyst struck in the world attunes one with the knack for it
+		net.fabricmc.fabric.api.event.player.AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) -> {
+			if (player instanceof ServerPlayer sp && !attuned(sp) && apt(sp) && !Necromancy.necromancer(sp) && !StoryGround.unseen(sp)
+				&& AMETHYST_BLOCKS.contains(world.getBlockState(pos).getBlock())) {
+				attune(sp);
+			}
+			return InteractionResult.PASS;
+		});
 		// (0.7.244) an amethyst shard crushed in the fist
 		UseItemCallback.EVENT.register((player, world, hand) -> {
 			ItemStack stack = player.getItemInHand(hand);
@@ -517,7 +534,7 @@ public final class Mana {
 				}
 			} else if ((now + player.getId()) % 20L == 0L && kiAttunes(player) && !StoryGround.unseen(player)) {
 				attune(player, "");
-			} else if ((now + player.getId()) % AMETHYST_EVERY == 0L && nearAmethyst(player) && !StoryGround.unseen(player)) {
+			} else if ((now + player.getId()) % AMETHYST_EVERY == 0L && apt(player) && carriesAmethyst(player) && !StoryGround.unseen(player)) {
 				attune(player);
 			} else {
 				// (0.7.244) or slowly, carrying alchemy's vis
@@ -553,11 +570,14 @@ public final class Mana {
 		return PowersCompat.meditating(player) ? Math.clamp(Skills.rank(player, "meditation"), 1, MEDITATE_REGEN.length - 1) : 0;
 	}
 
-	private static boolean nearAmethyst(ServerPlayer player) {
-		BlockPos at = player.blockPosition();
-		for (BlockPos pos : BlockPos.betweenClosed(at.offset(-AMETHYST_RANGE, -AMETHYST_RANGE, -AMETHYST_RANGE),
-			at.offset(AMETHYST_RANGE, AMETHYST_RANGE, AMETHYST_RANGE))) {
-			if (player.level().getBlockState(pos).is(Blocks.BUDDING_AMETHYST)) {
+	/** (Andy, 2026-11-22) Whether {@code e} has the knack for amethyst's attuning: {@link #APT_PERCENT} of players and folk, fixed by who they are. */
+	public static boolean apt(Entity e) {
+		return Math.floorMod(e.getUUID().hashCode() * 31 + 0x2B7E, 100) < APT_PERCENT;
+	}
+
+	private static boolean carriesAmethyst(ServerPlayer player) {
+		for (ItemStack stack : player.getInventory()) {
+			if (AMETHYST_ITEMS.contains(stack.getItem())) {
 				return true;
 			}
 		}

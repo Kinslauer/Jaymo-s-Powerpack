@@ -129,6 +129,11 @@ public final class DodgeClient {
 		// (0.20.74) Sneak + Alt is the zoom (SneakZoom), not a dodge
 		boolean wanted = (down || clicked) && !keyWasDown && !minecraft.options.keyShift.isDown();
 		keyWasDown = down;
+		if (wanted && dive(player)) {
+			// (Andy, 2026-11-22) at an edge over deep water, or falling over it: a dive, head first
+			wanted = false;
+			landingRoll = 0;
+		}
 		if (wanted && vault(player)) {
 			// (0.21.22) in the air over a raised shield: the vault, not a roll
 			wanted = false;
@@ -161,6 +166,22 @@ public final class DodgeClient {
 			}
 		}
 		tickHold(player, down);
+	}
+
+	/** The Dodge key over deep water: off the edge head first with no hop, or the fall turned into a dive (Dives). */
+	private static boolean dive(LocalPlayer player) {
+		int from = com.jaymospowers.water.Dives.diveFrom(player);
+		if (from == com.jaymospowers.water.Dives.NO_DIVE || !ClientPlayNetworking.canSend(com.jaymospowers.water.Dives.DiveKey.TYPE)) {
+			return false;
+		}
+		if (from == com.jaymospowers.water.Dives.EDGE) {
+			Vec3 out = Vec3.directionFromRotation(0.0F, player.getYRot());
+			player.setDeltaMovement(out.x * com.jaymospowers.water.Dives.LAUNCH_OUT, com.jaymospowers.water.Dives.LAUNCH_UP,
+				out.z * com.jaymospowers.water.Dives.LAUNCH_OUT);
+		}
+		com.jaymospowers.client.water.DivePose.localDive = player.level().getGameTime();
+		ClientPlayNetworking.send(new com.jaymospowers.water.Dives.DiveKey());
+		return true;
 	}
 
 	/**

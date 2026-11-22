@@ -38,6 +38,13 @@ public final class PainHud {
 	static final int BEAT_ALPHA = 0x50, BEAT_FADE_TICKS = 7;
 	/** Just joined (ticks): a drop from "whole" to what was saved isn't a hit. */
 	static final int JOIN_GRACE = 20;
+	/**
+	 * (Survival picks, lso-thresholds) A head at {@code PartStrain.LOW} or less aches: a pale haze over the view that swells
+	 * and ebbs with the throb (our own headache, held off by a painkiller like the rest). Its colour, how thick at the
+	 * swell (0-255), and how fast it throbs.
+	 */
+	static final int HEADACHE = 0xE8E0D8, HEADACHE_ALPHA = 0x70;
+	static final float HEADACHE_THROB = 0.12F;
 	/** The sides are drawn in this many fading bands (the top and bottom are smooth gradients). */
 	private static final int BANDS = 8;
 
@@ -119,6 +126,13 @@ public final class PainHud {
 		}
 		if (hitTicks > 0) {
 			edges(graphics, w, h, edge, (int) (HIT_ALPHA * hitStrength * hitTicks / (float) HIT_FLASH_TICKS), HIT);
+		}
+		float head = WoundsHud.part(0);
+		if (head <= com.jaymospowers.core.wounds.PartStrain.LOW && !Pain.dulled(player) && !Downed.isDowned(player)) {
+			float swell = 0.5F + 0.5F * Mth.sin(ticks * HEADACHE_THROB);
+			int alpha = (int) (HEADACHE_ALPHA * swell * swell);
+			graphics.fill(0, 0, w, h, alpha << 24 | HEADACHE);
+			edges(graphics, w, h, edge, alpha, HEADACHE);
 		}
 	}
 

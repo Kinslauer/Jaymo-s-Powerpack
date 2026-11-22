@@ -179,6 +179,8 @@ public final class MobShields {
 		blocks.disable(level, mob, seconds, shield);
 		long[] s = STATE.computeIfAbsent(mob, m -> new long[5]);
 		s[DISABLED] = level.getGameTime() + Math.round(seconds * blocks.disableCooldownScale() * 20.0F);
+		// (defence disciplines) a broken guard takes its passive blocks too
+		MobBlocks.broken(mob);
 		return true;
 	}
 

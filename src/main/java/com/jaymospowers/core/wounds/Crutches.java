@@ -20,6 +20,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -90,9 +91,9 @@ public final class Crutches {
 		return Integer.bitCount(bare);
 	}
 
-	/** Whether {@code player} holds a cane or a crutch in either hand. */
-	public static boolean supported(Player player) {
-		return support(player.getMainHandItem()) || support(player.getOffhandItem());
+	/** Whether {@code entity} holds a cane or a crutch in either hand. */
+	public static boolean supported(LivingEntity entity) {
+		return support(entity.getMainHandItem()) || support(entity.getOffhandItem());
 	}
 
 	private static boolean support(ItemStack stack) {
@@ -104,18 +105,26 @@ public final class Crutches {
 	}
 
 	/**
-	 * A player who can't stand for want of a leg: one gone and bare with no cane or crutch in hand, or both gone and
-	 * bare. Read the same on both sides (the missing parts, the fitted limbs and the hands are all synced).
+	 * A player (or a humanoid mob) who can't stand for want of a leg: one gone and bare with no cane or crutch in hand, or
+	 * both gone and bare. Read the same on both sides (the missing parts, the fitted limbs and the hands are all synced).
 	 */
 	public static boolean legless(Entity entity) {
-		if (!(entity instanceof Player player) || player.isCreative() || player.isSpectator()) {
+		if (!(entity instanceof LivingEntity living)) {
 			return false;
 		}
-		int bare = bareLegs(player);
-		if (bare == 0 || bare == 1 && supported(player)) {
+		if (living instanceof Player player) {
+			if (player.isCreative() || player.isSpectator()) {
+				return false;
+			}
+		} else if (BodyPlan.of(living) != BodyPlan.HUMANOID) {
+			// (Andy, 2026-11-22: "NPCs should have all the same capabilities as the player") a humanoid mob too is held to a crawl
 			return false;
 		}
-		return !com.jaymospowers.power.xenoform.XenoformState.transformed(player);
+		int bare = bareLegs(living);
+		if (bare == 0 || bare == 1 && supported(living)) {
+			return false;
+		}
+		return !(living instanceof Player p && com.jaymospowers.power.xenoform.XenoformState.transformed(p));
 	}
 
 	// ---- the tick ------------------------------------------------------------------------------------------------------

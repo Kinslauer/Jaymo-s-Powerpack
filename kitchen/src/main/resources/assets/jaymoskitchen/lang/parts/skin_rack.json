@@ -1,0 +1,7 @@
+{
+	"message.jaymoskitchen.drying_rack.hung_raw": "Stretched %s: dampen it, then rub in salt",
+	"message.jaymoskitchen.drying_rack.damp": "Dampened. Now rub in salt",
+	"message.jaymoskitchen.drying_rack.already_damp": "It's damp already. Rub in salt",
+	"message.jaymoskitchen.drying_rack.dampen_first": "Dampen the hides first (water)",
+	"message.jaymoskitchen.drying_rack.salted": "Salted: dry in about %s min"
+}

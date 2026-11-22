@@ -824,7 +824,10 @@ public final class Downed {
 	 * headless). And a totem in hand is left to do its work (this event comes before it).
 	 */
 	static boolean spared(LivingEntity entity, DamageSource source) {
+		// ((survival picks) Andy: "the only time you arent downed is if a hit does enough damage to your head while you are
+		// standing": a blow that blacked out the head, Wounds#headKilled)
 		return !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !source.is(Dismember.DECAPITATION) && !Dismember.headless(entity)
+			&& !Wounds.headKilled(entity)
 			&& !entity.entityTags().contains(Dismember.tag(Dismember.HEAD))
 			&& !entity.getMainHandItem().is(Items.TOTEM_OF_UNDYING) && !entity.getOffhandItem().is(Items.TOTEM_OF_UNDYING)
 			// (0.17.183) Kingdoms' Will: No Mercy for the weaker ({@link WillSkill#noMercy})
@@ -1133,7 +1136,6 @@ public final class Downed {
 			float health = entity.getHealth();
 			getUp(level, entity, false);
 			entity.setHealth(health);
-			Wounds.reconcile(entity);
 		}
 		return true;
 	}

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jaymoskingdoms:round_shot",
+    "jaymoskingdoms:round_shot",
+    "minecraft:fire_charge"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:fire_shot",
+    "count": 2
+  }
+}

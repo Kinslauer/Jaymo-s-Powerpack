@@ -16091,3 +16091,183 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - **Fix**: falling-wood checks no longer stop the server while new land generates near a player (two watchdog crashes on 2026-11-21, 8:10 and 8:16 AM). It only reads blocks in chunks that are fully there; the rest wait for a later tick.
 - Class: `LooseWood` (`ready`, in place of `Level.isLoaded`).
 - Built by CI; not played.
+
+## 0.11.53 (2026-11-22): drills wait for your weapon, spars on clear ground, the talk box (#1974)
+
+- **Drills draw your weapon**: asking a veteran for a Spar or Hold the Gate takes the first weapon on your hotbar into your hand. In a spar the veteran's first blow waits 1.5 s after a weapon is in your hand; with none drawn in 10 s they stand down ("I'll not strike an empty hand"). (`GuardDrills`)
+- **A spar is over when someone falls**: for 3 s after a spar ends, blows between you and that veteran land on nothing and are no crime, so a swing already on its way can't start a brawl with the guards. (`GuardDrills`)
+- **Spars on clear ground**: if anyone else (a villager, a player, an animal) is within 6 blocks, the veteran says "Follow me" and leads you to clear ground up to 20 blocks away before the spar starts, so a wide swing can't catch a passer-by. Blows between you on the way land on nothing. If he can't get there in 30 s, you spar where you stand. (`GuardDrills`)
+- **The talk box**: while you talk with a villager, their words appear in a box low on the left under their name, typed out, instead of over their head. MCA's dialogue answers sit in a list low on the right, and they and the button column show only once the villager has finished the line. (`DialogueCinematic`, `SpeechBubbles`, `McaDialogueBoxMixin`, `McaButtonColumnMixin`)
+- **The talk camera**: while the villager speaks you aren't drawn, so the shot over your shoulder sees them, not the back of your head (it's a cut, not a fade). Your own lines are shot side-on from outside the two of you, the other side each time, and the camera glides between shots instead of cutting. (`DialogueCinematic`, `FilmHidesViewerMixin`)
+- Built; not played.
+
+## 0.11.54 (2026-11-22): Kingdoms rise without a visit; VillagersPlus job houses; forestry fiefs (#1973)
+
+- **Kingdoms rise without a visit** (Andy: "load them otherwise, that way it is possible for more interaction within the world such as war and trade"): no one is teleported. In the background, one at a time, the nearest Epic towns of each land (plains, desert, savanna, snowy, taiga) round the world's spawn have their land made and are founded as kingdoms, until each land holds 2 or none is left within 8 village spacings. The usual spacing from other capitals and factions holds. Kingdoms far from every player still do most of their living (building, trade runs, war marches) only when someone is near, as before. (`TownWakes`)
+- **VillagersPlus job houses in the catalogue** (Andy: "when they have room and can afford it, they build a specific building for that occupation"): with VillagersPlus installed, kingdoms, fiefdoms and villages build its miner's (from 16 people; villages 12), horticulturist's (18; 14), oceanographer's (22; 18), alchemist's (26; 20) and occultist's (32; 24) houses from storage, in their land's version (plains where VillagersPlus has none). The house's workstation gives a villager the job. The miner's house goes up without the shaft under it. Each miner's house adds 16 stone and 3 ore a day to the town's storage. Job houses don't hold back the wall. (`VpBuildings`)
+- **Vassals set to work the land** ("a genuine reason to have multiple mines or lumberyards or farms"): a mining fiefdom builds up to 3 miner's houses (others 1). A new forestry focus, drawn for fiefdoms in forest, taiga and jungle, builds up to 4 tree farms and 2 sawmills (the sawmill is Dungeons and Taverns'), fells timber on top of what its woodcutters bring in, makes 160% materials, keeps one field and pen like a mining fief, and sends logs, planks and sticks to its overlord. Farming fiefs already build more farms. A fiefdom in forest, taiga or jungle that was mining or farming by chance now works timber. (`Focus`, `Production`, `Caravans`)
+- Built; not played.
+
+## 0.11.56 (2026-11-22): fight music for ordinary fights (#1976)
+
+- **Fight music**: a real fight now has its own music, one of the Medieval Music pack's war tracks (Behind the Sword, Might & Magic). It fades in as the fight starts and out about 8 seconds after the last blow, and comes back up if the fight flares again while it fades. A real fight is two or more foes after you at once, a fight with another player, or blows still being traded 5 seconds in; one stray zombie chasing you stays quiet. One track per fight, then at least 30 seconds before the next fight's music. A great foe's own theme still wins, and no fight music plays in the calm after it. Town, tavern and road music fades under a fight and rests its usual 10 to 20 minutes after one, so after a fight it goes back to the game's own sounds. The 3-minute cap on any track still applies. Needs the Medieval Music pack; without it nothing plays.
+- `music/Skirmishes` (server: who is in a real fight), `client/music/SkirmishMusic` (plays it), `PlaceMusic` (gives way to it).
+- Built; not played.
+
+## 0.11.57 (2026-11-22): Talk wheel: answers round a wheel on the right, worded by your blood and class; chat hidden while talking (#1977)
+
+- **Talk wheel**: a villager's answers now sit round a wheel on the right, under the button column (Introduce, Gift, Trade and the rest stay where they were). Up to four answers take the four arms; more are spaced evenly, eight at most, and scrolling over the wheel turns to the rest (the middle shows which page). Point at an arm (its label, or its direction from the middle) and the line your character would say shows under the wheel; click to say it.
+- **Your own words**: the line is worded by your heritage (chat, joke, flirt, rumours, asking a name, thanking someone: a line for each of the 20 player bloods), else by your class (training, magic, alchemy, honour duels), else a plain line. Every main-menu answer has a plain line. The picked line shows in the talk box under your name until the villager answers.
+- **Chat hidden while talking**: chat isn't drawn during a conversation; everything said is still in it afterwards.
+- Classes: McaDialogueBoxMixin, DialogueCinematic, TalkWheel (new), lang part talk-wheel.json.
+- Built by CI; not played. Answers in MCA's other question trees (chat topics, greetings) show their label with no line under the wheel.
+
+## 0.11.58 (2026-11-22): Classes start with a skill of their kind (#1978)
+
+- **Starting skills** (Andy: "the classes spawn with skills that pertain to their class"): picking a first class teaches one skill free, and brings that class's pillar up to level 3 if it was lower, so there are points to learn another (K). Thief: Silent Snap (Rogue's Arts), Ranger: Quick Work (Rogue's Arts); both get Stealth 3, enough for the freerunning page (Climber, Freerunner, Slide, Long Jump). Warlord: Command. Brute: Battle Rhythm. Paladin: Shieldbearer. Rider: Weapon Forms. Marksman: Called Shots. Monk: Sweep Kick. Mage: Meditation. Sorcerer: Absorbing. Cleric: Field Dresser. Druid: Forager. Warlock: Devotion. Tinkerer: Smith.
+- The free skill is a trainer's gift, so a respec keeps it. The pillar is topped up, not added to, so picking again after a Writ of Rebirth gives nothing twice. Characters who already have a class don't get it.
+- `StartingSkills` (new), called from `Classes.set`.
+- Built; not played.
+
+## 0.11.59 (2026-11-22): Log of villagers left standing still (#1982)
+
+- **Stall log** (`Unstick`): any loaded villager that stays awake within 2 blocks for 2 minutes of watching is written to the server log once as `[stall]`: name, MCA or vanilla, trade, where, time of day, open sky, light, whose land, its brain activity and running behaviours, home, job site, meeting point, walk target, MCA's stay order and home, and which of our own systems has it. Nothing acts on it: it's there to find why villagers stand still in their houses (Andy, 2026-11-21).
+- Built on the Deck; run on the Deck server around one village (see the PR).
+
+## 0.11.60 (2026-11-22): Every trade in every town (#1980)
+
+- **Every town keeps its trades** (Andy, 2026-11-21, villages plan Track C): each kingdom, fiefdom and village now keeps a butcher, a healer, a cook, a cleric, a farmer and a tanner (the game's leatherworker), plus a fisherman where there's water round its seat. A missing one is taken up by someone idle (then a nitwit, then the greenest of a common trade), or a newcomer moves in, as the butcher and cleric already were (`TownTrades`). A miner and a woodcutter are hired the usual way once the town has a mine (or quarry) and a tree farm: a miner with no mine isn't kept on.
+- **The healer** is a trade of its own now (`Professions.HEALER`, dressed as a cleric, no trades): sneak + use them for the healer's services (treatment, mending, scrolls), they tend an infirmary cot, do the cleric's rounds and throw healing splashes, and "where's a healer?" points to them. The cleric keeps the shrine; the cleric's speech lines now talk of the shrine, the healer's of the sick.
+- **Epic towns refitted** (`TownFitting`): the first time a player comes into an Epic town (new or already in the world; marked once in the Overworld's save), its job blocks are swapped for ours, no rooms added: the butcher's smoker becomes Kitchen's butcher block with meat hooks under the beam, other smokers and house furnaces (not smithies') become Kitchen's stove, a temple's brewing stand becomes the shrine (a temple without one gets a shrine; other brewing stands stay), one bed (by a brewing stand if it can) becomes an infirmary cot with Powers' mortar beside it, the tanner's cauldron is filled for soaking hides with Kitchen's drying rack beside it, the pen gets Kitchen's feeding trough, and Powers' chopping block stands outside a house. A butcher's shop or tannery built without its job block (the taiga's and snow's butchers, the desert's and plains' tanneries) gets ours indoors. Townsfolk already at those trades keep them. A mod that isn't loaded leaves the game's block.
+- **Job halls for trades with no house**: a butcher's shop, infirmary, the new tannery (`JobHalls.tannery`: soaking cauldrons, drying racks, bark barrel, the land's roof), a cookhouse, and a fishery where there's water, built just outside the town's edge facing in, with their own smokers and furnaces swapped the same way.
+- Lore: "Every great town keeps its trades" (new, for Andy) under Daily life.
+- Built (Deck and CI); not played: nothing was run in game, so the fitting itself is untested.
+
+## 0.11.61 (2026-11-22): guards let go of an Elder Vampire who flees as a bat (#1983)
+
+- **Elder Vampire's bat flight**: while the Elder flies as a bat, his body is invisible and can't be hurt. Guards (and
+  anyone else) who had him for a target kept after it: crawling toward a spot in the air they had no path to, swinging
+  and shooting at nothing that took a hit. Now everyone within 64 blocks who has him for a target lets go when he takes
+  off, and again every half second of the flight; the bat itself can still be struck, and once he lands they find him
+  again (`Vampires#shakeOff`, reusing `Downed#letGo`).
+- Built by CI only; not played. The daytime clip at the Red Company balloon (guard stuck at the tower grate, a guard
+  swinging inside) is not explained by this and stays open.
+
+## 0.11.62 (2026-11-22): Every crewed ship has a helm; more fish in the water (#1984)
+
+- **Moog's travel ship** now spawns with a ship's helm on deck, like the long ships, the hauling ship and the small ship, so her skipper has a wheel to steer by (and you can take her and sail her). A ship whose ends have no deck for the helm (a cabin aft, a forecastle) now gets it anywhere along her middle line instead of none. Only boats peopled from now on get it; one already met keeps what it has. The wanderer raft stays without one. (`SeaSites`)
+- **Fish caps up**: coasts, rivers and lakes 6 -> 10 fish and other water ambients per player; open sea 16 -> 20 (vanilla's). Dolphins, sharks and whales are unchanged, as are the small groups. (`MonsterCapMixin`)
+- Goes with Powers' change that stops cave pool fish and fish in underground aquifers using up these places out of sight.
+- Built on CI; not played.
+
+## 0.11.63 (2026-11-22): camp guards wear their camp's gear, not MCA's iron (#1985)
+
+- **Camp guards**: a camp's raiders and pirates who have become MCA villagers (the pirates on the Illager Structures
+  balloon, cove deckhands and gunners, barbarian raiders) now dress only from their own pack: their camp's leather,
+  hides and coats. MCA used to fill every empty slot from its guards' iron set, so a pirate deckhand stood in full plate.
+  Ones already in plate take it off the next time they dress (`Ranks.campOwned`, `McaEquipmentMixin`).
+- **Raider pieces kept**: a raider's torn hood, torn cloak and horned crest (the Guard Wardrobe's Raiders column) stay on
+  when he becomes an MCA villager (`McaBridge.convertRaider`).
+- Built by CI; not played.
+
+## 0.11.64 (2026-11-22): Defence disciplines, part 2: Arms, Ki and Arcana by class, heritage and training (#1991)
+
+- **Your passive blocks come from disciplines now** (Jaymo's Powers' passive blocks ask): Arms (the reflex block), Ki (the ki ward) and Arcana (the ward). Your class inclines you to one: Monks Ki; Mages, Sorcerers, Warlocks, Clerics and Druids Arcana; everyone else Arms. Z Fighters lean to Ki too, whatever their class.
+- **Heritage leans**: Heartlander, Stoneborn, Deepborn, Nightborn and the Hollow's zombie and skeleton looks to Arms; Stormborn, Beastfolk and Rubberfolk to Ki; Sylvan, Tideborn, Dragonblood, Dawnborn, Endborn, Divine, the Inkmarked Earthling and the Hollow's other looks to Arcana; Warriorborn, Verdant, Frostborn and Emberborn to Arms and Ki; Biobuilt to all three. A lean that matches your class starts that discipline at level 2; one that differs is open from the start and trains at half speed.
+- **Levels 0-10**, earned by blows your blocks catch. Blocks: inclined 1 (2 at level 5, 3 at 10), anything else 1 at level 3 and 2 at level 8; at most 5 in all. Disciplines you have no inclination or lean for stay locked (teachers come in a later part).
+- **What they cost**: a ward takes 2 mana; a monk's ki ward one ki; anyone else's ki ward a half-feather. Valor-coated (Armament) fists block at the full 60%.
+- **New skills** on Strength's Might: Keen Timing (3 ranks, level 5: the parry windows widen back to the old ones), Snatch (level 8: a perfect bare-fisted parry takes the foe's weapon into your hand; in the Thief's tree too, and every Monk has it), Iron Guard (level 10: a held guard costs 0.4 half-feathers a point instead of 0.6).
+- Classes: new Disciplines; Skills (three perks), SkillWeb, ThiefTree, Classes (registers it).
+- Built; not played in game.
+
+## 0.11.65 (2026-11-22): Defence disciplines, part 3: armed enemies block too, MCA villagers by their heritage (#1991)
+
+- **Armed enemies get passive blocks**, as you do: anything holding a weapon or shield (guards, bandits, orcs, duellists, illagers, armed skeletons and zombies, every armed MCA villager). Your blow on its front is caught and 60% of it stopped; once its blocks are spent your next blow lands clean and it flinches, its swing cut. Hitting it from behind or the side uses none.
+- **How many** goes by your world tier: an armed enemy 1 / 1 / 2 / 3 / 4 from Hearth to Legend, an experienced one (leaders, a ruler's escort, assassins, the richest realms' guards, folk grown 12+ days, illager captains) 2 / 2 / 3 / 4 / 5.
+- **Breaking through**: they come back one every 4 seconds once it hasn't been hit for 3, and all at once when it lands its own parry (still rolled first, as before). Your parry of its blow, or knocking its guard aside, takes all of them. Disarm it and it has none until it's armed again. Bosses (100+ health) and unarmed mobs get none.
+- **Their discipline** comes from what they are: evokers, illusioners and witches ward with Arcana (a ring of runes); an MCA villager takes its heritage's lean (Arms first, so a Warriorborn guard raises steel, a Sylvan one wards, a Stormborn one turns blows with ki); everyone else Arms.
+- Not in this part: the shield pips over a locked-on enemy's head, and the teachers who open a discipline you have no inclination for.
+- Classes: new MobBlocks; LivingEntityHurtMixin (last of the hurt chain), MobParry, MobShields, Disciplines (leans for villagers); Powers' Guard and PassiveBlocks (a parry takes a mob's blocks).
+- Built; not played in game.
+
+## 0.11.66 (2026-11-22): Defence disciplines, part 4: teachers, attunement, the K screen, enemies' pips (#1991)
+
+- **Ki and Arcana need attuning first**: whatever your class, heritage or teacher, a Ki ward or an Arcana ward only works once you're attuned (for Arcana, anyone holding mana). A Monk's Ki is their own training and needs none. Arms needs none.
+- **Amethyst attunes fewer, and by touch**: only about 3 in 10 players and MCA villagers have the knack for it, and they're attuned by striking amethyst in the world or carrying a piece of it (shards, blocks, clusters, buds), no longer by standing near a budding amethyst. A villager with the knack who carries amethyst is attuned too.
+- **Teachers**: "Teach me to defend myself" on MCA's menu opens a discipline you have no inclination or lean for, for 30 silver, once: a veteran guard of the drill yard teaches Arms, the Fist school's master Ki, a court wizard Arcana. It then trains at a quarter of the speed.
+- **The K screen** (stats tab) lists your three disciplines: level, and whether they come from your class, your blood's lean or a teacher, wait on attuning, or are locked (and who teaches them).
+- **Enemies' pips**: while you're locked onto an armed enemy, a row of small shield pips above the crosshair shows its blocks in its discipline's colour, greying as you break them.
+- **Disarmed enemies scramble** for their dropped weapon and take it back up, unless you grab it first.
+- Fixed: an enemy whose blocks a parry took got them back again once left alone (they never came back before).
+- Classes: new DisciplineTeachers, MobBlocksHud; Disciplines, Mana, ManaFolk, MobBlocks, MobParry, SkillScreen, the MCA answer and dialogue mixins, dialogues/main.json; Powers' PassiveBlocks (the scramble).
+- Built; not played in game.
+
+## 0.11.67 (2026-11-22): The mutant zombie wears the old dead's rags, not the game's cyan and blue (#1997)
+
+- **Mutant zombie**: Mutant Monsters' mutant zombie no longer wears the game's zombie colours (cyan shirt, blue
+  trousers). Like the present day's zombies it's one of the old dead: a long-dead villager in a dun robe gone to rags,
+  with bone at the hands and shins. Its texture is laid out from one of our old dead skins to fit the mutant's body
+  (`kingdoms/tools/gen_mutant_dead.py`). It's drawn from a built-in, always-on Kingdoms pack (`mutant_dead`) that turns on
+  only when Mutant Monsters is loaded. Nothing of Mutant Monsters' art is used.
+- Class: `client/JaymosKingdomsClient` (registers the pack).
+- Built; not played.
+
+## 0.11.68 (2026-11-22): Heritage paths: the core, and the Heartlander, Stoneborn and Tideborn paths (#1853)
+
+- **Paths open by deeds** (Andy's picks): each blood has paths its deeds open, counted as you live: mining stone and ore below Y 0, catching blows on a shield, setting lights down in the dark, bringing in crops near your bed and sleeping in it, travelling roads, living among folk of other bloods, swimming under water, time aboard ship and fish hooked, and favour won with the Deep Mother. The first path to open is yours for this life; another that opens later is "could have been". Hybrid looks open the paths of both bloods (`HeritagePaths`).
+- **Five steps with the ladder**: step k wakes once the kth great foe of Knowledge has fallen and you've done 1, 2, 4, 7 and 12 times the opening deeds. A chime and a chat line tell each step. A path never fades for being left; it only stops deepening.
+- **Lineage**: a child you live on as is born with your path opened (the first deed of it makes it theirs), but another may open first.
+- **Heartlander**: the Hearthkeeper (crops round your bed grow faster, folk there trust you sooner; at the end a bell used in a fight calls your home town's guards to you), the Wayfarer (on roads, sprinting costs less hunger, horses tire slower, golden half-feathers from Powers' stamina; at the end a compass in hand tells the way home), the Borrowed Blood (a small gift of the blood you've lived among most, growing; at the end a second blood's too).
+- **Stoneborn**: the Deepdelver (faster mining the deeper you are, ores glinting for you alone within 4 to 12 blocks; at the end stone breaks at a touch under a pickaxe), the Mountain's Shield (knockback resistance, more with the shield up; at the end nothing moves you crouched behind it), the Lanternkeeper (your torches and lanterns burn longer, the undead are pushed back from a lantern in your hand; at the end its light burns them).
+- **Tideborn**: the Reefwalker (more breath, faster swimming; at the end you breathe water), the Saltblood (fish keener to your bait, a ship with you aboard sails faster; at the end squalls don't shove her), the Deep Mother's Voice (drowned and guardians after you often let you be unless struck; at the end Tidal Breath also throws foes back with a surge of tide).
+- **Shown**: the heritage picker's Paths section has each path's five step icons (lit as they wake) and how far you are, plus a "How its paths open" section; the Character page lists each path of your blood with its progress.
+- Kept torches are remembered until the server restarts (after that they burn as any).
+- Built; not played.
+
+## 0.11.69 (2026-11-22): Patch 10: each old-age temple calls its patron's champion (#1964)
+
+- Old-age temples now raise the patron each site was built for, per Andy's pairings: Hearthkeeper at the Pillared columned temples on the plains, Lantern Warden at the Sunstep stepped tombs in the sands, Crowned Sun at the Mound long halls and burial mounds of the north, Ash Whisperer at the Court walled palace in Blossom, plus new sites for Anvil-Father (mine halls), Deep Mother (drowned courts), Green Huntsman (wooded grove shrine) and The Truth (bare old house).
+- An offering at a temple's altar calls that patron's champion (PatronChampion), the same multi-phase fight as a patron temple's.
+- New ruin structure variants for the Anvil, Deep, Grove and Truth peoples, each with its own temple layout and altar.
+- Built; not played.
+
+## 0.11.70 (2026-11-22): Enemy damage balance: beasts hit for less, armed fighters mostly swing plain (#1970)
+
+- **Wild beasts**: the grizzly 9 → 5 (its charge 11 → 7, its slam 10 → 6, a maul's bite 4 → 3, and a little longer between its moves), feral wolf 5 → 3, coyote 4 → 2.5, moose 7 → 4.5, wild boar 5 → 3.
+- **Armed fighters** (guards, bandits, orcs, duellists and anyone else swinging a weapon Better Combat's way): when an experienced fighter's combo comes round to a heavy move (the red glint), they throw it only 1 time in 4 and a plain blow otherwise. A two-handed weapon's blows are all heavy, so they stay as they were.
+- Classes: Grizzly, FeralWolf, Coyote, Moose, WildBoar, MobCombat.
+- Not tested in game.
+
+## 0.11.71 (2026-11-22): Villagers always doing something: hunger, thirst, boredom, and a stall watchdog (#1981)
+
+- **Needs** (`Needs`): every realm townsperson has hunger, thirst and boredom, 0 to 100, rising through the day (slowly while asleep; thirst faster in hot land). The highest pressing one (60+) picks what they do when free: a bite outside mealtimes, cooked at home or bought in town out of the storehouse like any meal (`Meals.snack`); a drink at a water cauldron by their bed (it goes down a level), the tavern, or open water (Routines' new drink pastime); boredom makes them take up a pastime sooner. A bite that finds nothing isn't counted as a missed meal, and nobody goes for one while the storehouse is empty or more often than every 2 minutes. A served meal clears hunger and takes some thirst (`TownHunger.ate`). Work hours still win; night is MCA's. Needs are kept while the server runs; after a restart they start again low.
+- **Grumbling** (`Spirits`): townsfolk whose own hunger or thirst is at 85+ say so, storehouse full or not (new lines).
+- **Tradesfolk between job sites** (`Routines.freeOf`): a vanilla trade with no job site just now (and none they're heading for) gets Routines' pastimes in work hours too, instead of only MCA's idle wander. Our own trades (no job-site block) keep their own day.
+- **Stall log and watchdog** (`Unstick`, which already unstuck mobs snagged on a path): any loaded villager awake and within 2 blocks for 2 minutes is written to the server log once as `[stall]`, with its brain activity, running behaviours, home, job site, walk target and which of our holds has it. At 3 minutes, if nothing has it (not at its job site, not one of our own trades at a stall, not in a player's pen, not held by a player, a talk, an MCA stay order or anything of ours), it's sent on: home at night (one with no home is left be), its job site in work hours, else the bell; a shut wooden door beside it is opened, and if it can't even reach the open ground nearby it hops out there in a puff.
+- Built on the Deck; not played. The cause of the indoor stall Andy saw isn't confirmed yet: grep the server log for `[stall]` after a session.
+
+## 0.11.72 (2026-11-22): Ranger arrows go through the helmet (#1992)
+
+- A Ranger's arrow (not a thrown trident) is tagged for Jaymo's Powers' wounds: a headshot doubles even through a helmet,
+  and the helmet's own cut doesn't apply (Andy: "rangers should go through the helmet now as long as you use an arrow").
+- `ClassPerks`. Built in CI; not played.
+
+## 0.11.73 (2026-11-22): Cannons: stone shot and fire shot (#1994)
+
+- **Stone Shot** (cobblestone, 5 -> 4): a cheap ball that breaks only timber where it lands (logs, planks, wooden doors, fences, gates, stairs, slabs, trapdoors), never masonry and not even loose ground. **Fire Shot** (2 Round Shot + a fire charge -> 2): breaks nothing; where it lands it sets fires on the free spots a fire can burn on (as flint and steel would), and sets those it hurts alight for 6 s. **Round Shot** (iron) is the unchanged ball that breaks stone; heavy shot, shells, chain and grape are as before.
+- Both are loaded like any shot: into a ship's gun (`ShipCannonBlock`, aboard or ashore, fired singly or in a broadside), into an airship's hold, or by a melded Rivet. Fires respect the world: a mob's gun lights nothing with mob griefing off, a wall gun spares its own realm's land and standing buildings as its other shot do, and nothing is lit where `fire_spread_radius_around_player` says fire doesn't burn.
+- Ship cannons were already there (gun blocks laid on a deck, a left click at the helm fires a broadside, crews fire them); the new shot kinds are wired in everywhere those take a shot. Crews and wall guns keep choosing from their old kinds, and stock no stone or fire shot.
+- New item models and textures in the round shot's style. Old Cannons (Shippy Ships' sailing mod, custom licence that allows modpacks with credit) was already in the pack.
+- Built by CI only; not played.
+
+## 0.11.74 (2026-11-22): Mutant zombies vary like the old dead: by where they rose, their land and their rot (#1998)
+
+- **Mutant zombie looks**: each mutant zombie now wears the old dead look of where it rose, as the zombies do:
+  - plain, dried (desert, badlands, savanna), bloated (swamp, river, beach), pale (caves, the deep dark) or frostbitten
+    (snow);
+  - in its land's clothes;
+  - at one of three stages of rot.
+  That's 63 skins (`kingdoms/tools/gen_mutant_dead.py`). `RisenLooks` marks mutants where they first stand, and
+  `client/MutantDead` picks the skin through a mixin on Mutant Monsters' renderer that is skipped when the mod isn't
+  there. A mutant with no mark keeps the plain skin from the built-in pack.
+- Built; not played.

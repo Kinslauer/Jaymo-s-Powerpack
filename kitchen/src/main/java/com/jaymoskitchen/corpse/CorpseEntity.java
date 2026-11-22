@@ -2000,6 +2000,11 @@ public class CorpseEntity extends Entity {
 		if (held.isEmpty() && !player.isShiftKeyDown() && hook() == null) {
 			return press(level, player);
 		}
+		// a person's body on a meat hook: a blade bleeds it into the grate under it (Hanging#bleedPerson)
+		InteractionResult bled = Hanging.bleedPerson(this, level, player, held);
+		if (bled != null) {
+			return bled;
+		}
 		// a fish is looted in one go, whatever's in your hand: out comes its loot and the body's gone
 		if (isFish()) {
 			return lootFish(level);
@@ -2933,6 +2938,11 @@ public class CorpseEntity extends Entity {
 		setCarrier(carrier);
 		this.entityData.set(TUMBLING, false);
 		grabCooldown = 0;
+	}
+
+	/** Whether it lies on a butcher block (worked there a step at a time: {@link Hanging#use}). */
+	boolean onTable() {
+		return onButcherBlock();
 	}
 
 	private boolean onButcherBlock() {

@@ -22,6 +22,8 @@ import net.minecraft.world.entity.LivingEntity;
  * Controls) sends the toggle, and the server's reports ({@link ZFighterSensesNet.Sense}, four a second) say who is in
  * range and how strong they are beside you. Those get the same through-the-wall outline Smoke Sight uses (two small
  * mixins ask {@link #color}): dim when weaker, pale when even, bright red when stronger.
+ * <p>
+ * When enabled in settings, also shows a damage tally for each sensed entity.
  */
 public final class ZFighterKiSenseClient {
 	/** Outline colours by tier ({@code ZFighterKiSense.WEAKER}, {@code EVEN}, {@code STRONGER}). */
@@ -31,7 +33,7 @@ public final class ZFighterKiSenseClient {
 
 	private static KeyMapping key;
 	private static boolean on;
-	/** Entity id → {tier, game time it lapses}. */
+	/** Entity id → {tier, damageTaken, maxHealth, game time it lapses}. */
 	private static final Map<Integer, long[]> MARKS = new HashMap<>();
 
 	private ZFighterKiSenseClient() {
@@ -47,7 +49,7 @@ public final class ZFighterKiSenseClient {
 			if (on && minecraft.level != null) {
 				long lapse = minecraft.level.getGameTime() + HOLD_TICKS;
 				for (ZFighterSensesNet.Mark mark : payload.marks()) {
-					MARKS.put(mark.id(), new long[] {Math.max(0, Math.min(COLORS.length - 1, mark.tier())), lapse});
+					MARKS.put(mark.id(), new long[] {Math.max(0, Math.min(COLORS.length - 1, mark.tier())), mark.damageTaken(), mark.maxHealth(), lapse});
 				}
 			}
 		});
@@ -88,10 +90,41 @@ public final class ZFighterKiSenseClient {
 		}
 		long[] mark = MARKS.get(entity.getId());
 		Minecraft minecraft = Minecraft.getInstance();
-		if (mark == null || minecraft.level == null || minecraft.level.getGameTime() > mark[1] || entity == minecraft.player) {
+		if (mark == null || minecraft.level == null || minecraft.level.getGameTime() > mark[3] || entity == minecraft.player) {
 			return 0;
 		}
 		return COLORS[(int)mark[0]];
+	}
+
+	/** Gets the damage taken by the entity, or 0 if not tracked. */
+	public static int getDamageTaken(Entity entity) {
+		if (!on || MARKS.isEmpty() || !(entity instanceof LivingEntity) || !entity.isAlive()) {
+			return 0;
+		}
+		long[] mark = MARKS.get(entity.getId());
+		Minecraft minecraft = Minecraft.getInstance();
+		if (mark == null || minecraft.level == null || minecraft.level.getGameTime() > mark[3] || entity == minecraft.player) {
+			return 0;
+		}
+		return (int)mark[1];
+	}
+
+	/** Gets the max health of the entity, or 0 if not tracked. */
+	public static int getMaxHealth(Entity entity) {
+		if (!on || MARKS.isEmpty() || !(entity instanceof LivingEntity) || !entity.isAlive()) {
+			return 0;
+		}
+		long[] mark = MARKS.get(entity.getId());
+		Minecraft minecraft = Minecraft.getInstance();
+		if (mark == null || minecraft.level == null || minecraft.level.getGameTime() > mark[3] || entity == minecraft.player) {
+			return 0;
+		}
+		return (int)mark[2];
+	}
+
+	/** Whether the damage tally feature is enabled. */
+	public static boolean isDamageTallyEnabled() {
+		return ZFighterClientConfig.getKiSenseDamageTally();
 	}
 
 	static String keyLabel() {

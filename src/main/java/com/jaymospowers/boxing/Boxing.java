@@ -228,6 +228,7 @@ public final class Boxing {
 
 	public static void init() {
 		BoxingGear.init();
+		OffhandPunch.init();
 		// the punch takes the left click only after every other rule has had its say (a downed or armless player, a
 		// finisher, Kingdoms' tag with a child, the fight pit, captives...), so in a later phase than theirs
 		Identifier late = JaymosPowers.id("boxing_punch");

@@ -67,6 +67,7 @@
 		{ "config": "jaymoskingdoms.occult.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.spookydoors.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.armorapi.client.mixins.json", "environment": "client" },
+		{ "config": "jaymoskingdoms.mutantmonsters.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.deadlooks.client.mixins.json", "environment": "client" }
 	],
 	"depends": {

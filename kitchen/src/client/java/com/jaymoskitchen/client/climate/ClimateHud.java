@@ -1,13 +1,16 @@
 package com.jaymoskitchen.client.climate;
 
+import com.jaymoskitchen.client.hud.HudStyle;
 import com.jaymoskitchen.client.hud.HudZones;
 import com.jaymoskitchen.JaymosKitchen;
 import com.jaymoskitchen.climate.BodyHeat;
 import com.jaymoskitchen.climate.Climate;
 import com.jaymoskitchen.climate.Lining;
+import com.jaymoskitchen.climate.Stamina;
 import com.jaymoskitchen.climate.Warmth;
 import com.jaymoskitchen.climate.Thirst;
 import com.jaymoskitchen.climate.WaterskinItem;
+import com.jaymoskitchen.climate.Wetness;
 import com.jaymoskitchen.net.Payloads;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
@@ -63,6 +66,7 @@ public final class ClimateHud {
 	public static void register() {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.FOOD_BAR, JaymosKitchen.id("thirst"), ClimateHud::thirst);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosKitchen.id("body_heat"), ClimateHud::heat);
+		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosKitchen.id("wind"), ClimateHud::wind);
 		ClientTickEvents.END_CLIENT_TICK.register(ClimateHud::tick);
 		// the hearth's and the icebox's screen, with its fuel bar
 		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(com.jaymoskitchen.net.Payloads.OpenHearth.TYPE,
@@ -197,6 +201,10 @@ public final class ClimateHud {
 		}
 		thermometer(graphics, body, heat.ambient());
 		LocalPlayer player = minecraft.player;
+		int wet = Wetness.meter(player);
+		if (wet > 0) {
+			wetness(graphics, wet);
+		}
 		if (player.getMainHandItem().is(Warmth.THERMOMETER) || player.getOffhandItem().is(Warmth.THERMOMETER)) {
 			air(graphics, heat.air());
 		}
@@ -224,6 +232,54 @@ public final class ClimateHud {
 		graphics.fill(cx - 2, bottom - 5, cx + 2, bottom - 1, colour);
 		int comfort = bottom - 5 - TUBE / 2;
 		graphics.fill(cx - 3, comfort, cx - 2, comfort + 1, 0xA0FFFFFF);
+	}
+
+	/**
+	 * How wet you are (Wetness), beside the thermometer in the body row while you're wet at all: a narrow glass filled
+	 * blue from the bottom, deeper blue once you're soaked through, with a drop on top.
+	 */
+	private static void wetness(GuiGraphicsExtractor graphics, int wet) {
+		int boxH = TUBE + 6;
+		int[] at = HudZones.place(HudZones.DOCK_LEFT, "jaymoskitchen:wetness", 30, 5, boxH);
+		if (at == null) {
+			return;
+		}
+		int x = at[0], bottom = at[1] + boxH;
+		int top = bottom - TUBE - 1;
+		int colour = wet >= Wetness.SOAKED_AT ? 0xFF2F5FD8 : 0xFF6FA8F0;
+		// a drop over the glass
+		graphics.fill(x + 2, at[1], x + 3, at[1] + 1, colour);
+		graphics.fill(x + 1, at[1] + 1, x + 4, at[1] + 3, colour);
+		// the glass and what's in it
+		graphics.fill(x, top - 1, x + 5, bottom, 0xFF1A1A1A);
+		graphics.fill(x + 1, top, x + 4, bottom - 1, 0xFF505050);
+		int filled = Math.max(1, Math.round(TUBE * wet / (float) Wetness.MAX));
+		graphics.fill(x + 1, bottom - 1 - filled, x + 4, bottom - 1, colour);
+	}
+
+	/**
+	 * Wind for sprinting (Stamina), in the focus band while it isn't full: a flat bar the width of a full stomach's
+	 * wind, the part past what you can hold now (how full you are) shaded off, red while you're winded.
+	 */
+	private static void wind(GuiGraphicsExtractor graphics, DeltaTracker delta) {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (!shown(minecraft) || !minecraft.player.hasAttached(Stamina.WIND)) {
+			return;
+		}
+		Stamina.Wind wind = Stamina.wind(minecraft.player);
+		if (!wind.winded() && wind.left() >= wind.cap()) {
+			return;
+		}
+		int w = HudStyle.CENTRE_BAR_W;
+		int[] at = HudZones.place(HudZones.FOCUS, "jaymoskitchen:wind", 5, w, HudStyle.BAR_H);
+		if (at == null) {
+			return;
+		}
+		HudStyle.bar(graphics, at[0], at[1], w, HudStyle.BAR_H, wind.left() / Stamina.MAX, wind.winded() ? HudStyle.WARN : 0xFFE8E0A0);
+		int held = Math.round(w * Mth.clamp(wind.cap() / Stamina.MAX, 0.0F, 1.0F));
+		if (held < w) {
+			graphics.fill(at[0] + held, at[1], at[0] + w, at[1] + HudStyle.BAR_H, HudStyle.LOCKED);
+		}
 	}
 
 	/** Red-orange edges creeping in as the heat climbs. */

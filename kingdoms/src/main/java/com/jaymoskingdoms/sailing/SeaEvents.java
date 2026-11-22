@@ -409,7 +409,8 @@ public final class SeaEvents {
 			}
 			for (Ship ship : Ships.in(level)) {
 				float at = s.at(ship.getX(), ship.getZ());
-				if (at <= 0.0F) {
+				// (a Saltblood at the end of the path aboard: the squall calms round her)
+				if (at <= 0.0F || com.jaymoskingdoms.HeritagePaths.calms(ship)) {
 					continue;
 				}
 				Hull h = ship.hull();
@@ -420,7 +421,8 @@ public final class SeaEvents {
 			}
 			for (ServerPlayer p : level.players()) {
 				float at = s.at(p.getX(), p.getZ());
-				if (at > 0.0F && level.canSeeSky(p.blockPosition().above()) && !p.isCreative()) {
+				Ship calm = Ships.aboard(p);
+				if (at > 0.0F && level.canSeeSky(p.blockPosition().above()) && !p.isCreative() && (calm == null || !com.jaymoskingdoms.HeritagePaths.calms(calm))) {
 					p.setDeltaMovement(p.getDeltaMovement().add(wx * GUST_PLAYER * at, 0.0, wz * GUST_PLAYER * at));
 					p.syncVelocity = true;
 				}

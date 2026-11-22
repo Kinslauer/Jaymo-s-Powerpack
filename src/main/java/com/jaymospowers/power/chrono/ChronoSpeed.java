@@ -118,6 +118,7 @@ public final class ChronoSpeed {
 		PayloadTypeRegistry.serverboundPlay().register(WallRun.TYPE, WallRun.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(WallRun.TYPE, (payload, ctx) -> wallRun(ctx.player(), payload.face()));
 		ChronoGears.register();
+		tireless();
 		ChronoRapid.register();
 		ChronoPhase.register();
 		ChronoSlowTime.register();
@@ -133,6 +134,19 @@ public final class ChronoSpeed {
 			player.resetFallDistance();
 		} else if (player.getAttached(WALL_RUN) != null) {
 			player.removeAttached(WALL_RUN);
+		}
+	}
+
+	/** Overclocked, a speedster runs on its power: Jaymo's Kitchen's sprint wind isn't spent (found by reflection). */
+	private static void tireless() {
+		if (!net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymoskitchen")) {
+			return;
+		}
+		try {
+			java.util.function.Predicate<Player> tireless = ChronoSpeed::overclocked;
+			Class.forName("com.jaymoskitchen.climate.Stamina").getMethod("addTireless", java.util.function.Predicate.class).invoke(null, tireless);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosPowers.LOGGER.debug("Jaymo's Kitchen has no sprint wind (older Kitchen?)", e);
 		}
 	}
 

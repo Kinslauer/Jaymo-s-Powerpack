@@ -63,6 +63,10 @@ public final class Chopping {
 			return List.of();
 		}
 		Item item = stack.getItem();
+		if (item == com.jaymoskitchen.butchery.ButcherShop.MINCE) {
+			// mince is in the meat groups (it does for meat in dishes), but there's nothing left to cut in it
+			return List.of();
+		}
 		if (item == Items.BEEF) {
 			return List.of(new ItemStack(Delight.MINCED_BEEF, MEAT_CUTS));
 		}
