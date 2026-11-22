@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": "minecraft:cobblestone"
+  },
+  "pattern": [
+    " C ",
+    "CCC",
+    " C "
+  ],
+  "result": {
+    "id": "jaymoskingdoms:stone_shot",
+    "count": 4
+  }
+}

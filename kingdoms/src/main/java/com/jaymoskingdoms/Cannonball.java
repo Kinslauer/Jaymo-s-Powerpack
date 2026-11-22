@@ -249,6 +249,9 @@ public final class Cannonball extends Projectile implements ItemSupplier {
 			}
 			float share = (float) (1.0 - d / radius);
 			victim.hurtServer(level, source, this.damage * (BURST_SHARE + (1.0F - BURST_SHARE) * share));
+			if (this.kind() == ShotKind.FIRE) {
+				victim.igniteForSeconds(com.jaymoskingdoms.sailing.ShipShot.FIRE_SECONDS);
+			}
 			double resist = 1.0 - victim.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
 			Vec3 away = victim.position().subtract(at);
 			if (resist > 0.0 && away.lengthSqr() > 1.0E-4) {
