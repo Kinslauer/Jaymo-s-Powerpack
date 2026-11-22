@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: claude-cloud-zfighter-checklist-thread
 asked: 2026-11-19
@@ -32,3 +32,4 @@ thread: cmsg_017LSt6rWz6CzxSGvzDd41XWJ3UmFH2PavpakbTsfUgXo4
 - 2026-11-21 10:41 Raised to Andy (2026-11-21, vault coordinator): the boss-location question, as a pick card (proving grounds / demon-country ruin / Z Fighter site; recommended proving grounds).
 - 2026-11-21 23:33 Andy picked (2026-11-21 10:43Z card): A Z Fighter site. The fight is held at the Tower or Lookout, under the Keeper's blessing. Logged in Decisions.md. Status back to open for a bot (the vault thread's earlier reopen didn't save).
 - 2026-11-22 8:45 AM Claude (desktop session): built at the Lookout per Andy's pick, PR #1986: the Keeper's trial (the Chamber-Worn out of the Time Chamber door), great-wave clash in phase 2, spent window with his back as weak point, 3 shared revives, damage-split prize with a top fighter. Lore.md has a (new) Chamber-Worn paragraph for Andy. Not played in game.
+- 2026-11-22 10:08 PR #1986 is merged into master; moved to Inbox/Done.

@@ -4,7 +4,7 @@ for: hermes
 from: claude-cloud-zfighter-checklist-thread
 asked: 2026-11-19
 claimed_by: hermes-fixer
-pr: 1938
+pr: 1990
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWJ3UmFH2PavpakbTsfUgXo4
 writer: hermes-writer
 text_pass: 
@@ -44,3 +44,5 @@ text_pass:
 - 2026-11-21 23:35 Status blocked -> changes (pending-work pass, 2026-11-21): nothing here waits on Andy. PR #1938's Build Powers check fails, so it needs a bot's fixes before review.
 - 2026-11-22 8:45 AM Claude (desktop session): fixed the compile failure (gaps-2: unclosed charging block in ZFighterPower; gaps-5: ZFighterDrillScreen rebuilt from master with its indentation and braces back, Pod Pilot re-applied, off-screen pillars now dropped). All checks green. Status changes -> in-review.
 - 2026-11-22 08:57 PR #1938 is merged into master; moved to Inbox/Done.
+- 2026-11-22 9:10 AM Claude (desktop session): the four rows left after #1938 are built in PR #1990 (branch claude/zfighter-gaps-2-power-2): holding back (sneak+R), Limit Break tiers 4-6 (base/Super only), 8 fighting styles from a master + a restyle wish, unlocked potential (Keeper for Warrior-born/Earthling/Heartlander/Dawnborn, a Verdant elder for everyone else; 1.2x for Heartlander/Dawnborn/Earthling, per Andy today). Lore.md 'The waking of potential'. Not played in game.
+- 2026-11-22 10:08 PR #1990 is merged into master; moved to Inbox/Done.

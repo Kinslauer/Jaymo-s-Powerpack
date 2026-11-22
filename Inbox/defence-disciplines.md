@@ -1,9 +1,9 @@
 ---
-status: open
+status: claimed
 for: any
 from: Powerpack project chat, 2026-11-22
 asked: 2026-11-22
-claimed_by: 
+claimed_by: claude-desktop-origins-mod-f1
 pr:
 suggested_owns:
   - src/main/java/com/jaymospowers/combat/Guard.java

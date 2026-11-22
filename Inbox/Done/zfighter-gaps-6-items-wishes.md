@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: claude-cloud-zfighter-checklist-thread
 asked: 2026-11-19
@@ -34,3 +34,4 @@ text_pass: done
 
 ## Notes
 - 2026-11-20 17:01 Text pass: zfighter.json dedented new entries and added missing item keys fighter_weapon and space_pod; charm_cannot not added since it already exists in zfighter_fusion.json; change note removed the bonding earrings analogy
+- 2026-11-22 10:08 PR #1955 is merged into master; moved to Inbox/Done.

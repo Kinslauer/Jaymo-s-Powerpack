@@ -446,6 +446,8 @@ champion in a blue gi. Tournaments
 are held in the open: bracket bouts, last-one-standing rings of light, and the tournament of the dead. When an army
 comes for a town, fighters hold the line at its wall of light and share the prize.
 
+**The waking of potential** (Andy, 2026-11-22: "the keeper and the verdant elder should be able to do it. but the keeper only for warrior born, earthling, hearthlander, and dawnborn z fighters. everyone else needs the verdant elder on his world", and the Heartlanders, Dawnborn and Earthlings wake stronger; wording new, Claude's). What a fighter's strongest form gives them was in them all along, and a rite can wake it, so that it stays without the form: no blaze of the hair, no drain. It is held at night, once, and only for a fighter who has mastered that form. The Keeper holds it on the Lookout for the Warrior-born, Earthlings, Heartlanders and the Dawnborn, the peoples he has watched since before the towns. Everyone else must go to the Verdant World and sit through the night with one of its elders, who say the wood is breathing and teach a fighter to breathe with it. The plain-blooded peoples, the Heartlanders, the Dawnborn and the Earthlings, wake to more of it than anyone: nothing else in their blood was ever in the way.
+
 **The Chamber-Worn** (Andy approved, 2026-11-22; Claude's placement for zfighter-gaps-7, after Andy's pick of a Z Fighter site, 2026-11-21).
 Long ago by the Time Chamber's clock, one of the Keeper's pupils went through its door and would not come out. He trained
 there for years upon years of its white hours until there was nothing left in him but the fight, and when he stepped

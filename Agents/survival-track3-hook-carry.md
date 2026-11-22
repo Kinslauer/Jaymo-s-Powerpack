@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: Survival picks track 3, part 1: meat hook click, two-arm lifting, carried block drawn
 branch: claude/survival-hook-carry
 with: wounds-lso (track 1, Powers core/wounds + Kingdoms Rangers; not touched here)
@@ -41,3 +41,4 @@ and third person. (Plan: `docs/Survival-Picks-Plan.md` track 3, in the minecraft
 PR #1989 (Kitchen + Powers), Auto-fix on, built by CI only. Not played: the hook click, the left-arm angles, the
 carried block under First-person Model. Butchery picks (bu-table, bu-skin-rack, bu-rotisserie, bu-mincer, bu-decor)
 not started: second PR.
+- 2026-11-22 10:08 No sign of work for 30 min: marked stalled (whoever ran it stopped).

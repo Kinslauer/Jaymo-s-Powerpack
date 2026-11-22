@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: claude-cloud-zfighter-checklist-thread
 asked: 2026-11-19
@@ -35,3 +35,4 @@ text_pass:
 - 2026-11-20 13:08 Text pass on PR #1953 zfighter-gaps-5-training: reviewed all player-visible text - lang/parts/zfighter.json (5 new keys: pod_pilot, pod_pilot.help, pod_crashed, zfighter_drill_unlocked, zfighter_challenge_done), changes/powers/zfighter-gaps-5-training.md, and the translatable chat/screen keys in ZFighterDrills.java, ZFighterSparring.java, ZFighterDrillScreen.java. All text is plain and in voice; no rewrites needed, no code changed (text-pass rule). BUILD BLOCKED: :compileClientJava fails with 4 errors in ZFighterDrillScreen.java - mouseClicked near line 496 is never closed, cascading into hitLane/progress/kiControl/precision. Pre-existing in the PR branch; nothing for a text pass to fix. Change note already flags the syntax issues. Tree left clean; nothing to commit or push. Unblock when the code compiles, then hand the pass in.
 - 2026-11-21 23:36 Status blocked -> changes (pending-work pass, 2026-11-21): nothing here waits on Andy. PR #1953's Build Powers check fails, so it needs a bot's fixes before review.
 - 2026-11-22 8:45 AM Claude (desktop session): fixed the compile failure (gaps-2: unclosed charging block in ZFighterPower; gaps-5: ZFighterDrillScreen rebuilt from master with its indentation and braces back, Pod Pilot re-applied, off-screen pillars now dropped). All checks green. Status changes -> in-review.
+- 2026-11-22 10:08 PR #1953 is merged into master; moved to Inbox/Done.

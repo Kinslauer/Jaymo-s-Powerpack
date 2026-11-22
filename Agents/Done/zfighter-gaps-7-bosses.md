@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: zfighter-gaps-7-bosses
 branch: claude/zfighter-gaps-7-bosses
 with: 
@@ -33,3 +33,4 @@ owns:
 
 ## Done
 - PR #1986: ZFighterLookoutBoss (new), hooks in ZFighterRogue, ZFighterRaids, ZFighterSites; lang in zfighter_lookout.json; Lore.md (new) paragraph. CI build only; not played in game.
+- 2026-11-22 10:08 PR #1986 is merged into master; moved to Agents/Done.

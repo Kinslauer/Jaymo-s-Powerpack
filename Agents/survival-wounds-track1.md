@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: survival-wounds-track1
 branch: claude/cranky-booth-e665ec
 with: survival picks track 3 (butchery) runs beside it
@@ -31,3 +31,4 @@ Ranger's arrows go through the helmet.
 - Track 3 owns Kitchen corpse/butchery and Powers carrying (LimbUse/DroppedArms left alone).
 
 ## Done
+- 2026-11-22 10:08 No sign of work for 30 min: marked stalled (whoever ran it stopped).

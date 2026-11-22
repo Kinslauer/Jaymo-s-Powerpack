@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: zfighter-gaps-4-forms
 branch: claude/zfighter-gaps-4-forms
 with: 
@@ -40,3 +40,4 @@ owns:
 ## Done
 What a player will see: new transformation forms for Earthling, Rubber-folk, Divine-born and Bio-built Z Fighters.
 Not tested in game.
+- 2026-11-22 10:08 PR #1965 is merged into master; moved to Agents/Done.

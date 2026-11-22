@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: NPCs climb 1-2 block heights like players (Andy 2026-11-22)
 branch: npc-ledge-climb
 with: PC Claude (Code tab); sister track npc-limb-rules (editor agent)
@@ -23,3 +23,6 @@ owns:
 
 ## Done
 Built by CI only, not played.
+
+## Notes
+- 2026-11-22 10:08 PR #1987 is merged into master; moved to Agents/Done.
