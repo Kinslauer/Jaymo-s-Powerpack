@@ -4,7 +4,11 @@ import com.jaymoskitchen.JaymosKitchen;
 import com.jaymoskitchen.net.Payloads;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.fabric.api.gamerule.v1.GameRuleBuilder;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -73,6 +77,8 @@ public final class Climate {
 	public static DataComponentType<WaterskinItem.Water> WATERSKIN_WATER;
 	public static GameRule<Boolean> THIRST;
 	public static GameRule<Boolean> BODY_HEAT;
+	/** Sprinting spends wind, not food ({@link Stamina}). */
+	public static GameRule<Boolean> STAMINA;
 
 	private Climate() {
 	}
@@ -80,6 +86,7 @@ public final class Climate {
 	public static void register() {
 		THIRST = GameRuleBuilder.forBoolean(true).category(GameRuleCategory.PLAYER).buildAndRegister(JaymosKitchen.id("thirst"));
 		BODY_HEAT = GameRuleBuilder.forBoolean(true).category(GameRuleCategory.PLAYER).buildAndRegister(JaymosKitchen.id("body_heat"));
+		STAMINA = GameRuleBuilder.forBoolean(true).category(GameRuleCategory.PLAYER).buildAndRegister(JaymosKitchen.id("stamina"));
 		WATERSKIN_WATER = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosKitchen.id("waterskin_water"),
 			DataComponentType.<WaterskinItem.Water>builder()
 				.persistent(WaterskinItem.Water.CODEC)
@@ -111,11 +118,43 @@ public final class Climate {
 		});
 
 		// class-load the synced attachments on both sides (a dedicated server's clients must know them)
-		JaymosKitchen.LOGGER.debug("climate attachments {} {}", Thirst.WATER.identifier(), BodyHeat.HEAT.identifier());
+		JaymosKitchen.LOGGER.debug("climate attachments {} {} {} {}", Thirst.WATER.identifier(), BodyHeat.HEAT.identifier(),
+			Wetness.METER.identifier(), Stamina.WIND.identifier());
 		ServerTickEvents.END_SERVER_TICK.register(Climate::tick);
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			Thirst.forget(handler.player.getUUID());
 			BodyHeat.forget(handler.player.getUUID());
+			Stamina.forget(handler.player.getUUID());
+		});
+		// 90 seconds' grace from the cold and heat on spawning into the world and on coming back from dying
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> BodyHeat.grace(handler.player));
+		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
+			if (!alive) {
+				BodyHeat.grace(newPlayer);
+			}
+		});
+		// thirst for what you do: a block broken, an attack (jumps and sprinting are counted each second)
+		PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, blockEntity) -> {
+			if (player instanceof ServerPlayer server && level.getGameRules().get(THIRST)) {
+				Thirst.exert(server, Thirst.BREAK);
+			}
+		});
+		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
+			if (player instanceof ServerPlayer server && server.level().getGameRules().get(THIRST)) {
+				Thirst.exert(server, Thirst.ATTACK);
+			}
+			return InteractionResult.PASS;
+		});
+		// sneak-using a filled water bottle or waterskin pours it over you (unless you're filling it at water)
+		UseItemCallback.EVENT.register((player, level, hand) -> {
+			ItemStack held = player.getItemInHand(hand);
+			if (!player.isShiftKeyDown() || player.isSpectator() || !douses(held) || lookingAtWater(player)) {
+				return InteractionResult.PASS;
+			}
+			if (player instanceof ServerPlayer server) {
+				douse(server, hand);
+			}
+			return InteractionResult.SUCCESS;
 		});
 		ServerPlayNetworking.registerGlobalReceiver(Payloads.Sip.TYPE, (payload, ctx) -> {
 			if (ctx.player().level().getGameRules().get(THIRST)) {
@@ -165,6 +204,30 @@ public final class Climate {
 	private static Item item(String id, java.util.function.Function<Item.Properties, Item> factory, Item.Properties properties) {
 		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, JaymosKitchen.id(id));
 		return Registry.register(BuiltInRegistries.ITEM, key, factory.apply(properties.setId(key)));
+	}
+
+	/** A bottle of water (unpurified or clean) or a waterskin with water in it: what can be poured over yourself. */
+	static boolean douses(ItemStack held) {
+		return Thirst.bottledWater(held) || chills(held);
+	}
+
+	/** Water in reach (a waterskin or bottle used there is being filled, not poured). */
+	private static boolean lookingAtWater(net.minecraft.world.entity.player.Player player) {
+		net.minecraft.world.phys.HitResult hit = player.pick(player.blockInteractionRange(), 0.0F, true);
+		return hit instanceof net.minecraft.world.phys.BlockHitResult block && hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK
+			&& player.level().getFluidState(block.getBlockPos()).is(net.minecraft.tags.FluidTags.WATER);
+	}
+
+	/** Poured over yourself: wet through, any fire on you put out; a bottle gives its glass back, a waterskin loses a sip. */
+	private static void douse(ServerPlayer player, InteractionHand hand) {
+		ItemStack held = player.getItemInHand(hand);
+		if (chills(held)) {
+			WaterskinItem.Water water = WaterskinItem.water(held);
+			held.set(WATERSKIN_WATER, new WaterskinItem.Water(water.sips() - 1, water.clean(), water.temp(), water.until()));
+		} else {
+			player.setItemInHand(hand, ItemUtils.createFilledResult(held, player, new ItemStack(Items.GLASS_BOTTLE)));
+		}
+		Wetness.douse(player);
 	}
 
 	/** A waterskin with water in it. */
@@ -259,6 +322,9 @@ public final class Climate {
 				continue;
 			}
 			ServerLevel level = player.level();
+			if (level.getGameRules().get(STAMINA)) {
+				Stamina.tick(player);
+			}
 			boolean thirst = level.getGameRules().get(THIRST);
 			boolean heat = level.getGameRules().get(BODY_HEAT);
 			if (heat) {
