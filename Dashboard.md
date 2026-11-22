@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-21 14:41). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 00:07). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -7,33 +7,31 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 **Questions for you:**
 - [[Inbox/class-trees-plan|class-trees-plan]] · 2026-11-19 20:22 Parked (not for a bot): waits on Andy fleshing out the Monk/Paladin/Cleric/Druid/Warlock trees. Raised; don't raise again.
-- [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 2026-11-21 11:33 Blocked: text pass complete, no changes needed (reviewed PR #1957's player-visible strings: en_us.json keys spoon / real_time_cooker item+bloc…
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
-- [[Inbox/scrying-orb|scrying-orb]] · 2026-11-20 17:21 hermes-fixer's last run stopped before finishing; handed back as changes so it can carry on.
 - [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 - [[Inbox/wither-model|wither-model]] · 2026-11-21 10:18 Andy hold instruction (2026-11-19 23:40 ET): leave the model as-is (v3 previews); do not pick up or raise this again until Andy hands it on. N…
-- [[Inbox/zfighter-gaps-2-power|zfighter-gaps-2-power]] · 2026-11-21 04:54 hermes-fixer took over the review fixes from hermes-b.
-- [[Inbox/zfighter-gaps-5-training|zfighter-gaps-5-training]] · 2026-11-20 13:08 Text pass on PR #1953 zfighter-gaps-5-training: reviewed all player-visible text - lang/parts/zfighter.json (5 new keys: pod_pilot, pod_pilot.…
-- [[Inbox/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]] · 2026-11-21 10:41 Raised to Andy (2026-11-21, vault coordinator): the boss-location question, as a pick card (proving grounds / demon-country ruin / Z Fighter s…
 
 ## Stuck
 
-- [[Agents/hands-on-cooking-realtime|hands-on-cooking-realtime]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/parkour-animations|parkour-animations]]: stalled, last change 2026-11-20. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/ai-texture-pipeline|ai-texture-pipeline]]: stalled, last change 2026-11-21. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/hands-on-cooking-realtime|hands-on-cooking-realtime]]: stalled, last change 2026-11-20. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/parkour-animations|parkour-animations]]: stalled, last change 2026-11-21. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]]: stalled, last change 2026-11-20. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]]: stalled, last change 2026-11-20. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]]: stalled, last change 2026-11-20. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-19 waiting for a bot, 0 being built, 14 in review: see [[Kanban]].
+22 waiting for a bot, 5 being built, 16 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1974 a sword never bursts a body (Powers, Kingdoms, 2026-11-22)
 - [ ] #1969 loose wood no longer makes the server wait on land still generating (Kingdoms, 2026-11-21)
 - [ ] #1966 loose wood no longer crashes the server while land generates (Kingdoms, 2026-11-21)
+- [ ] #1951 hints as tip cards - text hints show top right instead of over the hotbar (Powers, 2026-11-21)
 - [ ] #1952 Stealth kills: sneak + hold attack behind someone who never saw you (Powers, Kingdoms, 2026-11-20)
 - [ ] #1950 bodies keep their facing prone, sat or crouched; the view rises with the head on get-ups (Powers, 2026-11-20)
 - [ ] #1949 body menu - a tap of use on a body opens what you can do to it (Powers, Kingdoms, 2026-11-20)
@@ -90,13 +88,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1890 taken-in wake-ups bind your stumps (Powers, Kingdoms, 2026-11-19)
 - [ ] #1889 Regrown limbs come back unbroken, Verdant regrowth crunch (Powers, Kingdoms, 2026-11-19)
 - [ ] #1888 climbing onto and off mounts (SmoothMount-style, our own) (Powers, Kingdoms, 2026-11-19)
-- [ ] #1886 hit streak count off the action bar with Kingdoms (Powers, Kingdoms, 2026-11-19)
-- [ ] #1885 Deathless returns (for Kingdoms' Pallid) (Powers, Kingdoms, Kitchen, 2026-11-19)
-- …and 319 older ones.
+- …and 321 older ones.
 
 ## Health
 
-5 problems in the notes: [[Health]].
+6 problems in the notes: [[Health]].
 
 ## Last week
 

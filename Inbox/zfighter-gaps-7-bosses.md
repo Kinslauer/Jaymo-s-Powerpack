@@ -1,9 +1,9 @@
 ---
-status: blocked
+status: open
 for: hermes
 from: claude-cloud-zfighter-checklist-thread
 asked: 2026-11-19
-claimed_by: hermes-b
+claimed_by: 
 pr: 
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWJ3UmFH2PavpakbTsfUgXo4
 ---
@@ -30,3 +30,4 @@ thread: cmsg_017LSt6rWz6CzxSGvzDd41XWJ3UmFH2PavpakbTsfUgXo4
 ## Notes
 - 2026-11-20 18:53 Question: which lore/location should the set-piece boss live in? Options grounded in existing lore: (1) the old temples' proving grounds — a patron's champion called down by an offering on a bare stone floor (Lore.md 'The proving grounds'); (2) the demon country's roosts/ring/den — a gorgon's old ruin, violently territorial; (3) a Z Fighter site (Tower/Lookout, Keeper's blessing). Once you pick, I'll build the boss (player-model fighter, telegraphed phases, power clash via BeamClash.npcBeam, weak point, shared revives, contribution-split reward).
 - 2026-11-21 10:41 Raised to Andy (2026-11-21, vault coordinator): the boss-location question, as a pick card (proving grounds / demon-country ruin / Z Fighter site; recommended proving grounds).
+- 2026-11-21 23:33 Andy picked (2026-11-21 10:43Z card): A Z Fighter site. The fight is held at the Tower or Lookout, under the Keeper's blessing. Logged in Decisions.md. Status back to open for a bot (the vault thread's earlier reopen didn't save).

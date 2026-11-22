@@ -1,5 +1,5 @@
 ---
-status: blocked
+status: changes
 for: any
 from: coordinator
 asked: 2026-11-18
@@ -56,3 +56,4 @@ text_pass:
 - 2026-11-20 09:27 hermes-fixer's claim had no sign of work for 30 min: handed back as changes.
 - 2026-11-20 09:28 hermes-fixer's claim went stale (nothing changed for 126 min); handed back as changes so a bot can take it.
 - 2026-11-20 17:21 hermes-fixer's last run stopped before finishing; handed back as changes so it can carry on.
+- 2026-11-21 23:34 Status blocked -> changes (pending-work pass, 2026-11-21): nothing here waits on Andy. PR #1896's Build Kingdoms check fails, so it needs a bot's fixes before review.
