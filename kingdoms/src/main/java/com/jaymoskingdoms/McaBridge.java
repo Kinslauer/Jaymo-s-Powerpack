@@ -624,6 +624,8 @@ final class McaBridge {
 		}
 		// (0.7.299) a cook keeps the work (and trades: Meals sets its wares)
 		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.COOK).orElseThrow());
+		// and a healer (TownTrades takes one on)
+		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.HEALER).orElseThrow());
 		// (0.7.490) and a money-changer (Currencies sets its offers)
 		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.CHANGER).orElseThrow());
 		// and a sky village's cloudwright (SkyTrades sets its offers)
