@@ -1,15 +1,21 @@
 package com.jaymoskitchen.client.mixin;
 
+import com.jaymoskitchen.butchery.Butchery;
 import com.jaymoskitchen.corpse.Butchers;
 import com.jaymoskitchen.corpse.CorpseEntity;
 import com.jaymoskitchen.corpse.Corpses;
+import com.jaymoskitchen.corpse.Hanging;
 import com.jaymoskitchen.net.Payloads;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -20,7 +26,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * Carrying a corpse, right-clicking anywhere (at the air too, which normally sends nothing with an empty hand) lets go
  * of it: it drops from the arms, or with sneak held it's thrown a little way ahead. Only a plain right-click on a
- * butcher block goes through as usual, to lay it on top, and one on a butcher villager, to offer it to them.
+ * butcher block goes through as usual, to lay it on top, and one on a butcher villager, to offer it to them. Carried or
+ * dragged, a click in a meat hook's block space hangs it on the hook.
  */
 @Mixin(Minecraft.class)
 abstract class MinecraftUseMixin {
@@ -32,6 +39,8 @@ abstract class MinecraftUseMixin {
 
 	/** (0.5.31) Use repeats every 4 ticks while held (and a little slack): a call within this is the same hold. */
 	private static final int SAME_HOLD = 5;
+	/** The view is walked this far at a time looking for a meat hook's block space (blocks). */
+	private static final double HOOK_STEP = 0.05;
 
 	/** (0.5.31) When use last came (the player's tick count). */
 	private static int jaymoskitchen$lastUse = Integer.MIN_VALUE / 2;
@@ -55,6 +64,16 @@ abstract class MinecraftUseMixin {
 			return;
 		}
 		if (sameHold) {
+			ci.cancel();
+			return;
+		}
+		// Andy: "right clicking the hook while you are dragging or lifting a body should place it on the hook". A click
+		// anywhere in a meat hook's block space hangs it there (the server says why if it won't): the hook is thin, so
+		// the crosshair's own target is usually the beam above, the wall behind or nothing at all
+		BlockPos hook = jaymoskitchen$aimedHook(player);
+		if (hook != null) {
+			ClientPlayNetworking.send(new Payloads.HangOn(hook));
+			player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, false);
 			ci.cancel();
 			return;
 		}
@@ -84,5 +103,32 @@ abstract class MinecraftUseMixin {
 		// sneaking throws it a little way ahead (onto the ground, or into a cart); otherwise it just drops
 		ClientPlayNetworking.send(new Payloads.DropCarried(toss));
 		ci.cancel();
+	}
+
+	/**
+	 * The meat hook whose block space the view passes through within reach, nearest first (stopping at the block the
+	 * crosshair hits, so never through a wall), or, for a click on the beam or ceiling right by one, that one
+	 * ({@link Hanging#hookAt}). Null for none.
+	 */
+	private @Nullable BlockPos jaymoskitchen$aimedHook(LocalPlayer self) {
+		Level level = self.level();
+		Vec3 eye = self.getEyePosition();
+		Vec3 look = self.getViewVector(1.0F);
+		double reach = self.blockInteractionRange();
+		BlockHitResult block = hitResult instanceof BlockHitResult hit && hit.getType() == HitResult.Type.BLOCK ? hit : null;
+		if (block != null) {
+			reach = Math.min(reach, eye.distanceTo(block.getLocation()) + HOOK_STEP);
+		}
+		BlockPos last = null;
+		for (double along = 0.0; along <= reach; along += HOOK_STEP) {
+			BlockPos pos = BlockPos.containing(eye.add(look.scale(along)));
+			if (!pos.equals(last)) {
+				last = pos;
+				if (Butchery.isHook(level.getBlockState(pos))) {
+					return pos;
+				}
+			}
+		}
+		return block == null ? null : Hanging.hookAt(level, block.getBlockPos(), block.getLocation());
 	}
 }

@@ -840,6 +840,10 @@ public final class WebPower implements Power {
 			// (0.15.136) spread between the arms: not with one gone
 			return;
 		}
+		if (open && com.jaymospowers.core.ArmsFull.both(player)) {
+			// nor with both arms full of what you lift
+			return;
+		}
 		State state = state(player);
 		if (open) {
 			state.wingsTicks = 1;
