@@ -16201,3 +16201,13 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - Fixed: an enemy whose blocks a parry took got them back again once left alone (they never came back before).
 - Classes: new DisciplineTeachers, MobBlocksHud; Disciplines, Mana, ManaFolk, MobBlocks, MobParry, SkillScreen, the MCA answer and dialogue mixins, dialogues/main.json; Powers' PassiveBlocks (the scramble).
 - Built; not played in game.
+
+## 0.11.67 (2026-11-22): The mutant zombie wears the old dead's rags, not the game's cyan and blue (#1997)
+
+- **Mutant zombie**: Mutant Monsters' mutant zombie no longer wears the game's zombie colours (cyan shirt, blue
+  trousers). Like the present day's zombies it's one of the old dead: a long-dead villager in a dun robe gone to rags,
+  with bone at the hands and shins. Its texture is laid out from one of our old dead skins to fit the mutant's body
+  (`kingdoms/tools/gen_mutant_dead.py`). It's drawn from a built-in, always-on Kingdoms pack (`mutant_dead`) that turns on
+  only when Mutant Monsters is loaded. Nothing of Mutant Monsters' art is used.
+- Class: `client/JaymosKingdomsClient` (registers the pack).
+- Built; not played.
