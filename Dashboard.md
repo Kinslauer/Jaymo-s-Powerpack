@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 08:58). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 09:03). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -16,12 +16,11 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/ai-texture-pipeline|ai-texture-pipeline]]: stalled, last change 2026-11-21. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hands-on-cooking-realtime|hands-on-cooking-realtime]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]]: stalled, last change 2026-11-20. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]]: stalled, last change 2026-11-20. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]]: stalled, last change 2026-11-20. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-21 waiting for a bot, 3 being built, 16 in review: see [[Kanban]].
+21 waiting for a bot, 3 being built, 15 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
@@ -39,6 +38,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1973 VillagersPlus' miner's house rarer in villages (Powers, Kingdoms, 2026-11-22)
 - [ ] #1959 Freerun animations: the ledge climb keyed with elbows and knees, climbing down walls, vaults by speed and height, a pole climb, and bending limbs through the moves (Powers, 2026-11-22)
 - [ ] #1958 Z Fighter gaps 1: stats (Powers, 2026-11-22)
+- [ ] #1939 zfighter gaps 3: techniques (Powers, 2026-11-22)
 - [ ] #1938 Z Fighter gaps 2: stamina for dash, guard and forms (Powers, 2026-11-22)
 - [ ] #1969 loose wood no longer makes the server wait on land still generating (Kingdoms, 2026-11-21)
 - [ ] #1966 loose wood no longer crashes the server while land generates (Kingdoms, 2026-11-21)
@@ -86,12 +86,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1905 Forest fire alert out of chat (Powers, Kingdoms, 2026-11-20)
 - [ ] #1904 Nether Portal Spread no longer freezes the server in land not yet ready (Powers, 2026-11-20)
 - [ ] #1903 Start searches read the land from the seed first, like /locate (Kingdoms, 2026-11-20)
-- [ ] #1902 forest-fire pack - Peterwolf's Forest Fire & Firefighting in the pack (Powers, Kingdoms, 2026-11-20)
-- …and 333 older ones.
+- …and 334 older ones.
 
 ## Health
 
-5 problems in the notes: [[Health]].
+4 problems in the notes: [[Health]].
 
 ## Last week
 
