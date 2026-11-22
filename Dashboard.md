@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 01:31). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 07:29). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -22,12 +22,13 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-22 waiting for a bot, 5 being built, 16 in review: see [[Kanban]].
+22 waiting for a bot, 5 being built, 15 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1976 fight music for ordinary fights (Kingdoms, 2026-11-22)
 - [ ] #1975 a sword never bursts a body (Powers, Kingdoms, 2026-11-22)
 - [ ] #1974 a sword never bursts a body (Powers, Kingdoms, 2026-11-22)
 - [ ] #1973 VillagersPlus' miner's house rarer in villages (Powers, Kingdoms, 2026-11-22)
@@ -87,8 +88,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1893 Crawling into a block you can haul up doesn't sit you (Powers, 2026-11-20)
 - [ ] #1892 Crawling into a wall sits you up (Powers, 2026-11-20)
 - [ ] #1891 Z Fighter line message no longer claims your heritage (Powers, 2026-11-19)
-- [ ] #1890 taken-in wake-ups bind your stumps (Powers, Kingdoms, 2026-11-19)
-- …and 323 older ones.
+- …and 324 older ones.
 
 ## Health
 
