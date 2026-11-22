@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 14:16). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 14:17). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -36,7 +36,6 @@ kanban-plugin: board
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🔨 Hephaestus · #1957 · changes · fixing review notes
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · changes · fixing review notes
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · 🔨 Hephaestus · #1896 · changes · fixing review notes
-- [ ] [[Agents/survival-track4-gear-world|survival-track4-gear-world]] · 💻 Odysseus · running
 
 
 ## In review
@@ -57,6 +56,7 @@ kanban-plugin: board
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
 - [ ] [[Inbox/class-trees-plan|class-trees-plan]] · for 💻 Odysseus · blocked
 - [ ] [[Inbox/wither-model|wither-model]] · 🍇 Bacchus · blocked
+- [ ] [[Agents/survival-track4-gear-world|survival-track4-gear-world]] · 💻 Odysseus · stalled
 - [ ] [[Agents/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]] · 💻 Odysseus · stalled
 - [ ] [[Agents/zfighter-gaps-8-raids|zfighter-gaps-8-raids]] · 💻 Odysseus · blocked
 
