@@ -173,10 +173,10 @@ public final class Restoration {
 				lifebloom(level, player);
 			}
 		});
-		// a village cleric: sneak and use them (empty-handed, or with coins or a purse in hand) (0.7.498)
+		// a village cleric (or the town's healer): sneak and use them (empty-handed, or with coins or a purse in hand) (0.7.498)
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
 			if (world.isClientSide() || hand != InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer sp) || !sp.isShiftKeyDown()
-				|| !(entity instanceof Villager v) || !cleric(v) || CourtWizards.is(v)
+				|| !(entity instanceof Villager v) || !cleric(v) && !TownTrades.healer(v) || CourtWizards.is(v)
 				|| !(sp.getMainHandItem().isEmpty() || Coinage.isMoney(sp.getMainHandItem()))) {
 				return InteractionResult.PASS;
 			}
@@ -538,13 +538,13 @@ public final class Restoration {
 		}
 	}
 
-	/** Each cleric near a player, on their rounds: a downed villager brought round, else the most hurt mended. */
+	/** Each cleric (and healer) near a player, on their rounds: a downed villager brought round, else the most hurt mended. */
 	private static void clerics(MinecraftServer server) {
 		java.util.Set<Villager> seen = new java.util.HashSet<>();
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			ServerLevel level = player.level();
 			for (Villager cleric : level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(CLERIC_NEAR_PLAYER),
-				v -> v.isAlive() && cleric(v) && !v.isSleeping() && !Downed.isDowned(v))) {
+				v -> v.isAlive() && (cleric(v) || TownTrades.healer(v)) && !v.isSleeping() && !Downed.isDowned(v))) {
 				if (seen.add(cleric)) {
 					rounds(level, cleric);
 				}

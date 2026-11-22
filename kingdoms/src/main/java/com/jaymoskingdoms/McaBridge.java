@@ -624,6 +624,10 @@ final class McaBridge {
 		}
 		// (0.7.299) a cook keeps the work (and trades: Meals sets its wares)
 		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.COOK).orElseThrow());
+		// and a healer (TownTrades takes one on), who heals for coin (Restoration) and doesn't trade
+		ResourceKey<VillagerProfession> healer = BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.HEALER).orElseThrow();
+		ProfessionsMCA.IS_IMPORTANT.add(healer);
+		ProfessionsMCA.CAN_NOT_TRADE.add(healer);
 		// (0.7.490) and a money-changer (Currencies sets its offers)
 		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.CHANGER).orElseThrow());
 		// and a sky village's cloudwright (SkyTrades sets its offers)
@@ -1055,6 +1059,16 @@ final class McaBridge {
 		if (!offhand.isEmpty()) {
 			villager.setItemSlot(EquipmentSlot.OFFHAND, offhand.copy());
 			villager.setDropChance(EquipmentSlot.OFFHAND, 0.0F);
+		}
+		// and the raider's pieces over it (a torn hood or cloak, the horned crest: GuardKit#raider)
+		List<net.minecraft.world.item.ItemStack> harness = new java.util.ArrayList<>();
+		for (Harness.Slot slot : Harness.Slot.values()) {
+			if (!Harness.get(folk, slot).isEmpty()) {
+				harness.add(Harness.get(folk, slot).copy());
+			}
+		}
+		if (!harness.isEmpty()) {
+			Harness.dress(villager, harness.toArray(net.minecraft.world.item.ItemStack[]::new));
 		}
 		if (chief) {
 			// (0.7.293) his health, blows and toughness, on his throne's spot as the camp's leader

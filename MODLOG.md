@@ -6943,3 +6943,53 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - First-time tip card (top right) the first time you stand behind someone you could take.
 - Classes: `core/finisher/Finishers` (stealthKind, stealthKillable, stealthHold, the hold), `client/finisher/FinisherClient` (the held-back tap), `FinisherPose` (the three moves), `client/hud/BodyTips`, `client/wounds/ExecutionReact`.
 - Built; not played.
+
+## 0.26.23 (2026-11-21): hints as tip cards - text hints show top right instead of over the hotbar (#1951)
+
+- Andy (2026-11-20): "All hints in text should be reworked as tooltips in the new menu, top right. Hints like, you must kneel to revive, or skill not unlocked".
+- **Hint cards** (`client.hud.HintCards`): an action-bar line that is a hint (how to do something, what it needs first, a skill, perk or ability not learned yet) now comes up as a tip card in the top right, titled Hint, and is kept on the menu's Notices page like the other cards. 315 lines across Powers, Kingdoms and Kitchen are hints, listed by key in `assets/jaymospowers/hint_keys.txt`; every other line (what just happened, counts, cooldowns, gauges, callouts like "Sneak attack!") stays on the bar.
+- A hint sent again and again (each tick of a hold, each try) makes one card, and the same hint isn't carded again for 30 seconds.
+- Lines built from a key at run time (about 250 of them) and chat messages aren't covered yet.
+- Built; not played.
+
+## 0.26.24 (2026-11-22): a sword never bursts a body (#1974)
+
+- A blow from a sword or an axe cuts: it's never a crushing blow, however hard it lands, so it can't burst a body (downed or standing) the way a slam does. (`BlastGore.crushing`)
+- Built; not played.
+
+## 0.26.25 (2026-11-22): VillagersPlus' miner's house rarer in villages (#1973)
+
+- **Fewer mine heads in villages** (Andy, Morwick: "how does it justify having this many mines?"; he chose "just make them rarer"): VillagersPlus put its miner's house in plains, taiga and savanna villages at a weight of 25, so it was the likeliest house in every slot and big towns came out with a row of six to eight. Once per install its weight is set to 4 in `config/villagersplus/villagersplus-4.0-config.json5`, about a common vanilla house; its other job houses keep theirs. Only villages generated afterwards change. The server's file is the one that counts. Delete `config/jaymospowers-villagersplus-preset-v1` to apply it again. (`VillagersPlusPreset`)
+- Built; not played.
+
+## 0.26.27 (2026-11-22): the roll stays on the ground, the Sit key prone, a real struggle up the wall (#1975)
+
+- **Dodge roll**: the body no longer goes into the ground when it turns over: it turns round the middle of the tucked body and only drops as far as keeps it on the ground at each point of the turn. The legs stay on the hips as the back rounds, so leggings and chestplate no longer cut through each other; the knees fold to the chest and the elbows round the shins, arms outside the legs. (`DodgeRollPose`)
+- **Sit key while prone**: lying prone (not downed), the Sit key only sits you up against a wall beside you, with the downed wall-sit animation, and pressed again lays you back down; with no wall it does nothing. Crawling off or standing up takes you off the wall. (`Sitting`, `DownedLie.proneSitKey`, `WallSit`)
+- **Getting up the wall while downed**: no longer the slide down played backwards. You draw your feet in and put your hands down on the floor beside your hips, push off the floor hunched over your knees until you're crouched with your back on the wall, then one hand goes onto its knee and the other flat on the wall to push your legs straight, and you come upright with your head last. It goes in heaves, slipping back a little between them. A broken arm hangs and the other does the work. (`WallSit`, `WallSitArms.rise`, `CrawlPose`)
+- Built; poses checked in still renders, not played.
+
+## 0.26.28 (2026-11-22): dive into water with the Dodge key (#1975)
+
+- **Dive on Alt**: standing at an edge with deep water ahead and below (up to 2.5 blocks out and 14 down), the Dodge key (Alt) dives you straight off it head first, with no hop first. Falling over deep water, it turns the fall into a head-first dive. Either way you go in as a clean dive (the small neat splash, slipping deeper, no sting) from any height. Sneak no longer makes a dive: Sneak held as you hit the water is the cannonball. Looking steeply down (or Leap of Faith) still goes in head first. (`Dives`, `DodgeClient`)
+- **Everyone sees it**: in the air the body turns head first along the way it's going, arms over the head, and comes back upright as it goes under. The water-entry body turns (the clean dive's head-first tilt, the belly flop laid flat, the cannonball tucked forward) were never drawn before; they are now. (`DivePose`, `FreefallPose`)
+- Built; not played.
+
+## 0.26.29 (2026-11-22): Freerun animations: the ledge climb keyed with elbows and knees, climbing down walls, vaults by speed and height, a pole climb, and bending limbs through the moves (#1959)
+
+- **Climbing up over a ledge** is a keyed animation: a pull-up with the elbows bending (the hands stay up at the edge as the chest comes to it), the elbows coming over the edge into a straight-armed press, the right foot stepping up onto the edge and the left knee after it, then up to stand. The lean in over the edge is as before.
+- **Hanging** keeps its catch, sway and dangle, and now the elbows give and straighten in turn as each arm takes the weight, and the knees hang loose by turns. **Shimmying** bends the elbow of the hand coming off the edge while the holding arm stays nearly straight.
+- The clips are GeckoLib/Blockbench animation files written by `tools/gen_freerun_clips.py` (elbow and knee folds are new channels in them); `tools/freerun_clip_preview.py` draws any clip frame by frame. Unused clips from the first draft (cling, climb down) are gone until their moves are done. (`LedgePose`, `KeyframeClip`)
+- **Climbing down**: clinging to a wall, hold Back to climb down hand under hand, as fast as you climb up (the climb's hands and feet play backward). Hanging from a ledge, hold Back (past the castaway's moment) and you go down onto the wall below and climb on down it, where there's a wall to cling to; with none, you let go as before. With Climber, sneaking off a roof edge already turns you round to hang from it, so a roof can be climbed down all the way. The move hints show it. (`FreerunClient`, `LedgeClient`, `Freerun.climbsDownFrom`, `MoveHints`)
+- **Vaults chosen by how you take them** (no longer at random): at an angle (25 degrees or more off square), the lazy vault, side-on over one hand; anything over a block high, the kong, diving over on both hands; low at a fast run, the monkey flip; low at a sprint, the thief vault, the lead leg kicked over. A web slinger's vaults stay random. (`Freerun.vaultStyle`)
+- **Vault elbows and knees**: the kong's elbows give as the hands land and the shins fold under the tucked knees; the lazy vault's trailing leg bends as it follows over; the monkey flip balls up tight; the thief's trailing knee draws up behind the straight lead leg. (`WebParkourPose`)
+- **Pole climb** has its own look (it used to be drawn as climbing a flat wall, hands wide): arms wrapped round the pole in front, legs pinching it, climbing like an inchworm, both hands reaching up together while the legs grip, then the legs drawing up while the hands hold. (`WebParkourPose`, `Freerun.POLE_LOOK`)
+- **Elbows and knees** now bend in the wall kick (legs driving straight off the wall, then tucking as you fly), the bar swing (soft elbows, more on the hand coming off the bar; the knees whip bent on the back swing) and balancing on a narrow top (soft knees, more on the side you sway over). Wall runs already bent theirs. (`WebParkourPose`, `BarHangPose`, `BalancePose`)
+- **Running**: every player's trailing knee now folds the shin up behind them as the leg swings back, more the faster they run (elbows stay straight, so a held item stays in the hand). **Slides** bend their knees (the tucked leg in the freerun slide; the baseball slide's cocked leg, the knee slide kneeling on the shins, the hip slide's stacked legs). The **long jump** tucks its knees in flight and reaches out for the far side, the **safety tap** lands on bent knees, and the **sky dive** arches with soft knees and elbows. (`RunPose`, `RunMovesPose`, `WebParkourPose`)
+- Built; poses checked in still renders, not played.
+
+## 0.26.30 (2026-11-22): Fish spawn where you can see them (#1984)
+
+- **Fresh and sea fish, crabs and other critters only spawn in water the sky reaches** (rivers, lakes, the sea's upper layers and shallows), never in underground aquifers. A natural spawn picks its height anywhere from the world's bottom up, so river and lake species were mostly spawning in flooded caves under the land, where no one saw them, and filling each player's fish cap: the sea looked empty.
+- **Cave pool fish (cavefish, olm) are underground water creatures now**, as the glow squid is, so they have their own small cap and no longer take the fish places of the sea and rivers. (`FishSpecies`)
+- Built on CI; not played.
