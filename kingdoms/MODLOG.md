@@ -16333,3 +16333,11 @@ Andy picked "goblin extras" from the survival pick list (2026-11-22); the Goblin
 - **The engineer's hammer and the goblin robot** (`GoblinRobot`): each goblin village appoints one common goblin its engineer (a hammer in his hand, 15% to drop it when he dies). In a fight he strikes it (once a minute) and a robot stands up beside him. Players use the hammer too (right click: a robot in front of you, 30 s wait, 6 uses, at most 2 out). The robot is a patched, green clockwork golem (the golem's model, new skins `clockwork_golem_goblin*.png`): 45 health, 6 damage; it takes its summoner's foe for its own and follows them, but 1 blow in 5 misfires, it stalls in a shower of sparks every few seconds, wanders off now and then and falls apart after 90 seconds, leaving iron nuggets. Goblins don't attack their engineer's robots.
 - Art by `tools/gen_goblin_extras.py` (item textures and the robot's skins from the clockwork golem's).
 - Built (CI only); not played in game: the wandering goblin among human guards, the decoy's pull on MCA goblins and ranged mobs, the stagger and scuffles, and the robot's misfire pacing are untested.
+
+## 0.11.80 (2026-11-22): Nothing regrows or mends on the dead (#2010)
+
+- A Rubber-folk in Limbo (or left for dead, a ghost) kept regrowing limbs ("A lost limb stretches back into place"):
+  the game still counts them alive, so `player.isAlive()` let it through. Rubber-folk regrowth, its stretch sound and its
+  adopted gifts, Bio-built regrowth and the Dawnborn's sun healing now stop while Jaymo's Powers has the player dead
+  (`PowersCompat.dead`, by reflection to Powers' `Mortality.dead`).
+- Built by CI only; not played.
