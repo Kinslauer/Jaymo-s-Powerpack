@@ -180,7 +180,7 @@ public final class LedgeClient {
 	 */
 	private static void clickGrab(Minecraft minecraft, LocalPlayer player) {
 		if (cooldown > 0 || !player.getMainHandItem().isEmpty()
-			|| !Ledge.canHang(player) || CrawlTaps.prone() || com.jaymospowers.client.freerun.FreerunClient.active() || clickTaken(minecraft, player)) {
+			|| !Ledge.canHang(player, true) || CrawlTaps.prone() || com.jaymospowers.client.freerun.FreerunClient.active() || clickTaken(minecraft, player)) {
 			return;
 		}
 		Ledge.Spot found = Ledge.find(player);
@@ -192,6 +192,15 @@ public final class LedgeClient {
 		while (minecraft.options.keyUse.consumeClick()) {
 			// (the click was the grab's)
 		}
+	}
+
+	/**
+	 * Right-click held with an empty hand and no menu open: on a ledge it pulls up as Jump does (Andy: "right click will
+	 * do the same thing reliably"), so a held click grabs and climbs, and a tap only hangs.
+	 */
+	private static boolean useHeld(LocalPlayer player) {
+		Minecraft minecraft = Minecraft.getInstance();
+		return minecraft.options.keyUse.isDown() && player.getMainHandItem().isEmpty() && minecraft.gui.screen() == null;
 	}
 
 	/** (0.21.12) The crosshair is on something a right-click is for: a mob, or a block with a menu or a switch. */
@@ -211,12 +220,14 @@ public final class LedgeClient {
 	}
 
 	public static boolean scrollGrab(LocalPlayer player) {
-		if (phase != Phase.NONE || cooldown > 0 || !player.onGround() || player.isSprinting() || !Ledge.canHang(player)
-			|| !Crawl.canCrawl(player) || CrawlTaps.prone() || com.jaymospowers.client.freerun.FreerunClient.active()) {
+		// treading water by a low bank (its top under the reach of a hang, Ledge#find): this climbs out too, standing only
+		boolean wet = player.isInWater();
+		if (phase != Phase.NONE || cooldown > 0 || !player.onGround() && !wet || player.isSprinting() || !Ledge.canHang(player, true)
+			|| !wet && !Crawl.canCrawl(player) || CrawlTaps.prone() || com.jaymospowers.client.freerun.FreerunClient.active()) {
 			return false;
 		}
 		Ledge.Spot found = Ledge.crouchSpot(player);
-		if (found == null || !found.stand() && found.onBelly() == null) {
+		if (found == null || !found.stand() && (wet || found.onBelly() == null)) {
 			return false;
 		}
 		grab(player, found);
@@ -336,7 +347,7 @@ public final class LedgeClient {
 			return;
 		}
 		float away = Math.abs(Mth.wrapDegrees(player.getYRot() - (at == null ? 0.0F : at.face().toYRot())));
-		if (at == null || !Ledge.canHang(player)	|| !Ledge.holdable(player.level(), at.pos()) || input.shift() && !shiftLatch || backTicks > Ledge.CASTAWAY_WAIT_TICKS
+		if (at == null || !Ledge.canHang(player, true) || !Ledge.holdable(player.level(), at.pos()) || input.shift() && !shiftLatch || backTicks > Ledge.CASTAWAY_WAIT_TICKS
 			|| away > Ledge.LOOK_AWAY_DEGREES || ticks > Ledge.HANG_MAX_TICKS || confirmed && !held || !confirmed && ticks > Ledge.CONFIRM_TICKS) {
 			letGo(player);
 			return;
@@ -345,7 +356,7 @@ public final class LedgeClient {
 			// (waiting to see whether this is a castaway)
 			return;
 		}
-		if ((input.jump() && jumpReleased || autoClimb && confirmed && input.forward()) && ticks >= Ledge.GRAB_SETTLE_TICKS) {
+		if ((input.jump() && jumpReleased || useHeld(player) || autoClimb && confirmed && input.forward()) && ticks >= Ledge.GRAB_SETTLE_TICKS) {
 			if (at.stand()) {
 				startClimb(player, at, false);
 			} else if (confirmed && Crawl.canCrawl(player)) {
