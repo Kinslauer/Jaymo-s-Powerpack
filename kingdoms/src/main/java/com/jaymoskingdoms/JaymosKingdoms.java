@@ -872,7 +872,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Tag.register();
 		Families.register();
 		Routines.register();
-		// villagers left standing still for minutes are written to the log (the stall Andy saw in their houses)
+		// villagers' hunger, thirst and boredom, which pick what they do next
+		Needs.register();
+		// villagers left standing still for minutes: written to the log, then sent on their way
 		Unstick.register();
 		// 0.7.19: villagers' regard for one another, and the meetings it makes (fights to hugs) (and its attachment)
 		LOGGER.debug("regard attachment: {}", Neighbours.REGARD);

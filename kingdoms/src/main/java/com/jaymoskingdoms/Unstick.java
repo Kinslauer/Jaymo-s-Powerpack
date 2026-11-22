@@ -139,10 +139,17 @@ public final class Unstick {
 	 * Andy (2026-11-21) saw villagers standing still in their houses, not at work and not in bed. Before anything acts
 	 * on it, every loaded villager that stays within {@link #STILL} blocks for {@link #LOG_TICKS} of watching (awake) is
 	 * written to the server log once, with what its brain and our own holds say it's doing, so the cause can be read.
+	 * Still there at {@link #STUCK_TICKS}, and nothing has it (not asleep, not at its job site, not held by a player, a
+	 * talk or anything of ours), it's sent on: home at night, to its job site in work hours, else out to the bell; a
+	 * shut door beside it is opened, and if there's still no way there it hops out to the nearest open ground.
 	 */
 	static final int WATCH_EVERY = 100;
-	static final long LOG_TICKS = 2400L;
+	static final long LOG_TICKS = 2400L, STUCK_TICKS = 3600L;
 	static final double STILL = 2.0;
+	/** Standing this near its job site, it's at work. A shut door this near is opened. Its pace when sent on. */
+	static final double AT_WORK = 4.0;
+	static final int DOOR_REACH = 2;
+	static final float SEND_SPEED = 0.6F;
 
 	/** One villager under watch: where it stood, how long it has been seen about there, whether it was logged. */
 	private record Still(Vec3 at, long ticks, boolean logged) {
@@ -175,11 +182,102 @@ public final class Unstick {
 					JaymosKingdoms.LOGGER.info("[stall] {}", describe(server, level, v, ticks));
 					logged = true;
 				}
+				if (ticks >= STUCK_TICKS && free(level, v)) {
+					JaymosKingdoms.LOGGER.info("[stall] {} sent on: {}", v.getName().getString(), sendOn(server, level, v));
+					seen.put(v.getUUID(), new Still(v.position(), 0L, false));
+					continue;
+				}
 				seen.put(v.getUUID(), new Still(was.at(), ticks, logged));
 			}
 		}
 		STILLS.clear();
 		STILLS.putAll(seen);
+	}
+
+	/**
+	 * Nothing has {@code v}: awake, not at (or on its way to) its job site, not one of our own trades (they keep their
+	 * stalls and kitchens without a job-site block), not in a player's pen, and no player, talk, errand or order of
+	 * anyone's holding it there.
+	 */
+	private static boolean free(ServerLevel level, Villager v) {
+		if (!Routines.idle(v) || Attention.held(v) || Routines.busy(v) || Meals.eating(v) || Meals.cook(v) || Rulers.is(v) || v.isLeashed()
+			|| Downed.isDowned(v) || McaCompat.following(v) != null || (v instanceof Worker w && w.role() >= 0) || ShutIn.playerBuilt(level, v.blockPosition())) {
+			return false;
+		}
+		net.minecraft.world.entity.npc.villager.VillagerProfession job = v.getVillagerData().profession().value();
+		String name = net.minecraft.core.registries.BuiltInRegistries.VILLAGER_PROFESSION.getKey(job).getPath();
+		if (name.equals("guard") || name.equals("archer")
+			|| !v.getVillagerData().profession().is(net.minecraft.world.entity.npc.villager.VillagerProfession.NONE)
+			&& job.acquirableJobSite() == net.minecraft.world.entity.ai.village.poi.PoiType.NONE) {
+			return false;
+		}
+		net.minecraft.world.entity.ai.memory.MemoryModuleType<?> staying = net.minecraft.core.registries.BuiltInRegistries.MEMORY_MODULE_TYPE
+			.getValue(net.minecraft.resources.Identifier.fromNamespaceAndPath(McaCompat.MOD, "staying_memory"));
+		if (staying != null && v.getBrain().hasMemoryValue(staying)) {
+			// (a player told them to stay)
+			return false;
+		}
+		return memory(v, net.minecraft.world.entity.ai.memory.MemoryModuleType.JOB_SITE)
+			.filter(p -> p.dimension() == level.dimension() && p.pos().closerToCenterThan(v.position(), AT_WORK)).isEmpty();
+	}
+
+	/** {@code v}'s memory of {@code type}; empty if it has none, or its brain doesn't keep that kind. */
+	private static <U> java.util.Optional<U> memory(Villager v, net.minecraft.world.entity.ai.memory.MemoryModuleType<U> type) {
+		java.util.Optional<U> m = v.getBrain().getMemoryInternal(type);
+		return m == null ? java.util.Optional.empty() : m;
+	}
+
+	/** Sends {@code v} on (see {@link #STUCK_TICKS}); says where, for the log. */
+	private static String sendOn(net.minecraft.server.MinecraftServer server, ServerLevel level, Villager v) {
+		BlockPos at = v.blockPosition();
+		long t = Royals.timeOfDay(level);
+		BlockPos to = null;
+		String why;
+		if (Homes.bedtime(level)) {
+			to = McaCompat.home(v).filter(h -> h.dimension() == level.dimension()).map(net.minecraft.core.GlobalPos::pos)
+				.or(() -> memory(v, net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME).filter(h -> h.dimension() == level.dimension())
+					.map(net.minecraft.core.GlobalPos::pos)).orElse(null);
+			if (to == null) {
+				// (night is MCA's: one with no bed is left where it is)
+				return "night and no home, left be";
+			}
+			why = "home";
+		} else if (t >= Routines.WORK_FROM && t < Routines.WORK_TO) {
+			to = memory(v, net.minecraft.world.entity.ai.memory.MemoryModuleType.JOB_SITE).filter(p -> p.dimension() == level.dimension())
+				.map(net.minecraft.core.GlobalPos::pos).orElse(null);
+			why = "work";
+		} else {
+			why = "out";
+		}
+		BlockPos open = ShutIn.openGround(level, at);
+		if (to == null) {
+			Faction f = Factions.at(server, level, at);
+			to = f != null && f.seat().closerThan(at, Routines.WATCHED) ? f.seat() : open;
+			why += to == null ? ", nowhere" : f != null ? ", the bell" : ", open ground";
+		}
+		if (to == null) {
+			return why;
+		}
+		v.getNavigation().stop();
+		v.getBrain().eraseMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.WALK_TARGET);
+		for (BlockPos p : BlockPos.betweenClosed(at.offset(-DOOR_REACH, 0, -DOOR_REACH), at.offset(DOOR_REACH, 1, DOOR_REACH))) {
+			net.minecraft.world.level.block.state.BlockState state = level.getBlockState(p);
+			if (state.getBlock() instanceof net.minecraft.world.level.block.DoorBlock door && net.minecraft.world.level.block.DoorBlock.isWoodenDoor(state)
+				&& !door.isOpen(state)) {
+				door.setOpen(v, level, state, p.immutable(), true);
+				why += ", opened a door";
+			}
+		}
+		// (boxed in, as ShutIn reckons it: no way even to the open ground nearby; out there in a puff, and on from there)
+		Path out = open == null ? null : v.getNavigation().createPath(open, 1);
+		if (open != null && (out == null || !out.canReach()) && !Attention.held(v)) {
+			level.sendParticles(ParticleTypes.POOF, v.getX(), v.getY() + 1.0, v.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
+			v.teleportTo(open.getX() + 0.5, open.getY(), open.getZ() + 0.5);
+			level.sendParticles(ParticleTypes.POOF, open.getX() + 0.5, open.getY() + 1.0, open.getZ() + 0.5, 12, 0.3, 0.5, 0.3, 0.02);
+			why += ", hopped out to " + open.toShortString();
+		}
+		net.minecraft.world.entity.ai.behavior.BehaviorUtils.setWalkAndLookTargetMemories(v, to, SEND_SPEED, 1);
+		return why + " (" + to.toShortString() + ")";
 	}
 
 	/** Everything about {@code v} that could be keeping it where it is, on one line. */
@@ -202,7 +300,7 @@ public final class Unstick {
 		s.append(", home ").append(far(brain, net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME, level, at));
 		s.append(", job ").append(far(brain, net.minecraft.world.entity.ai.memory.MemoryModuleType.JOB_SITE, level, at));
 		s.append(", meeting ").append(far(brain, net.minecraft.world.entity.ai.memory.MemoryModuleType.MEETING_POINT, level, at));
-		s.append(", walk ").append(brain.getMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.WALK_TARGET)
+		s.append(", walk ").append(memory(v, net.minecraft.world.entity.ai.memory.MemoryModuleType.WALK_TARGET)
 			.map(w -> w.getTarget().currentBlockPosition().toShortString()).orElse("none"));
 		s.append(", nav ").append(v.getNavigation().isDone() ? "done" : "to " + v.getNavigation().getTargetPos());
 		net.minecraft.world.entity.ai.memory.MemoryModuleType<?> staying = net.minecraft.core.registries.BuiltInRegistries.MEMORY_MODULE_TYPE
