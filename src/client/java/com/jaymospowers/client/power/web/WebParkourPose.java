@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 /**
  * The parkour moves as everyone sees them ({@link WebParkour#MOVE}):
  * <ul>
- * <li><b>Vault</b>, one of four at random: a <b>kong</b> (dives over flat on both hands, knees tucked under), a
+ * <li><b>Vault</b>, one of four (a freerunner's chosen by speed and height, {@code Freerun#vaultStyle}; a web slinger's at random): a <b>kong</b> (dives over flat on both hands, knees tucked under), a
  * <b>lazy</b> vault (side-on over one hand, the legs scissoring over one after the other), a <b>monkey flip</b> (a tucked
  * front flip over it) or a <b>thief</b> vault (leaning back, the lead leg kicked high over it, a hand brushing the
  * top).</li>
@@ -63,6 +63,8 @@ public final class WebParkourPose {
 	static final float LAZY_TURN = 60.0F, LAZY_TILT = 30.0F;
 	/** Monkey flip: its height at the top (blocks), and where in the body it turns (blocks above the feet). */
 	static final float FLIP_LIFT = 0.5F, FLIP_PIVOT = 0.9F;
+	/** (Track 3) The kong's elbows giving as the hands land (radians), and how far a tucked knee folds the shin under (radians). */
+	static final float VAULT_ELBOW_GIVE = 0.7F, VAULT_TUCK_KNEE = 2.1F;
 	/** Thief vault: how far it leans back (degrees). */
 	static final float THIEF_LEAN = 28.0F;
 	/** Slides: the baseball slide's lean back, the hip slide's lean back and roll onto its side, the dive's pitch onto the chest (degrees). */
@@ -442,6 +444,10 @@ public final class WebParkourPose {
 			return;
 		}
 		Pose pose = living.getData(KEY);
+		if (pose != null && pose.kind() == WebParkour.VAULT) {
+			vaultBends(h, pose);
+			return;
+		}
 		if (pose == null || pose.kind() != WebParkour.CLING || pose.tendrils()) {
 			return;
 		}
@@ -548,6 +554,43 @@ public final class WebParkourPose {
 		float alpha = (float) Math.acos(Mth.clamp((upper * upper + d * d - lower * lower) / (2.0F * upper * d), -1.0F, 1.0F));
 		out[0] = at - alpha;
 		out[1] = bend;
+	}
+
+	/**
+	 * (Parkour animations, track 3) The vaults' elbows and knees (KneeBend: + folds a shin back, - brings a forearm
+	 * forward). Kong: the elbows give as the hands land and push off straight, the shins folded under the tucked knees.
+	 * Lazy: the planted arm's elbow soft, the trailing leg bent as it follows over. Monkey flip: balled up, knees and
+	 * elbows folded tight. Thief: the lead leg straight over, the trailing knee drawn up behind it, the brushing hand's
+	 * elbow soft.
+	 */
+	private static void vaultBends(HumanoidModel<?> h, Pose pose) {
+		float e = pose.in(), p = pose.p(), swing = Mth.sin(Mth.PI * p);
+		switch (pose.variant()) {
+			case 0 -> {
+				float give = VAULT_ELBOW_GIVE * (smooth((p - 0.15F) / 0.2F) - smooth((p - 0.45F) / 0.25F));
+				com.jaymospowers.client.KneeBend.bend(h.rightArm, -give * e, ELBOW, false);
+				com.jaymospowers.client.KneeBend.bend(h.leftArm, -give * e, ELBOW, false);
+				com.jaymospowers.client.KneeBend.bend(h.rightLeg, VAULT_TUCK_KNEE * swing * e);
+				com.jaymospowers.client.KneeBend.bend(h.leftLeg, VAULT_TUCK_KNEE * swing * e);
+			}
+			case 1 -> {
+				float trail = Mth.sin(Mth.PI * Mth.clamp(p * 1.4F - 0.4F, 0.0F, 1.0F));
+				com.jaymospowers.client.KneeBend.bend(h.leftArm, -0.3F * e, ELBOW, false);
+				com.jaymospowers.client.KneeBend.bend(h.rightLeg, 0.35F * swing * e);
+				com.jaymospowers.client.KneeBend.bend(h.leftLeg, 1.2F * trail * e);
+			}
+			case 2 -> {
+				com.jaymospowers.client.KneeBend.bend(h.rightArm, -1.3F * e, ELBOW, false);
+				com.jaymospowers.client.KneeBend.bend(h.leftArm, -1.3F * e, ELBOW, false);
+				com.jaymospowers.client.KneeBend.bend(h.rightLeg, (VAULT_TUCK_KNEE + 0.2F) * e);
+				com.jaymospowers.client.KneeBend.bend(h.leftLeg, (VAULT_TUCK_KNEE + 0.2F) * e);
+			}
+			default -> {
+				com.jaymospowers.client.KneeBend.bend(h.rightArm, -0.35F * e, ELBOW, false);
+				com.jaymospowers.client.KneeBend.bend(h.rightLeg, 0.1F * e);
+				com.jaymospowers.client.KneeBend.bend(h.leftLeg, 1.5F * swing * e);
+			}
+		}
 	}
 
 	private static void set(ModelPart part, float x, float y, float z, float e) {

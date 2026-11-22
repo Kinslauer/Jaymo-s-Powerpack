@@ -117,6 +117,13 @@ public final class Freerun {
 	/** Freerunner 1: the vault clears things up to these heights (blocks over your feet), found this far ahead (blocks). */
 	public static final double[] VAULT_HEIGHTS = {1.0, 1.5};
 	public static final double VAULT_REACH = 1.0;
+	/**
+	 * (Track 3) The vault's look ({@link #vaultStyle}): a high obstacle is over this (blocks over the feet); taken this
+	 * many degrees or more off square it's the lazy vault. The looks, as WebParkourPose numbers them.
+	 */
+	public static final double VAULT_LOW = 1.0;
+	public static final float LAZY_ANGLE = 25.0F;
+	public static final int VAULT_KONG = 0, VAULT_LAZY = 1, VAULT_FLIP = 2, VAULT_THIEF = 3;
 	/** Freerunner 1: the vault's upward kick for a low (to 1 block) and a high (to 1.5) obstacle, and the least speed ahead it keeps (blocks/tick). */
 	public static final double VAULT_UP_LOW = 0.45, VAULT_UP_HIGH = 0.6, VAULT_FORWARD = 0.42;
 	public static final int VAULT_COOLDOWN = 10;
@@ -289,8 +296,6 @@ public final class Freerun {
 	private static final Map<UUID, Integer> GRIPPED = new HashMap<>();
 	/** Server: until when (game time) a player just off a wall or bar isn't kicked for how they move. */
 	private static final Map<UUID, Long> GRACE = new HashMap<>();
-	/** Server: the last vault look, so the next differs. */
-	private static final Map<UUID, Integer> LAST_VARIANT = new HashMap<>();
 
 	private Freerun() {
 	}
@@ -319,7 +324,6 @@ public final class Freerun {
 			UP_RAN.clear();
 			GRIPPED.clear();
 			GRACE.clear();
-			LAST_VARIANT.clear();
 		});
 	}
 
@@ -330,7 +334,6 @@ public final class Freerun {
 		UP_RAN.remove(id);
 		GRIPPED.remove(id);
 		GRACE.remove(id);
-		LAST_VARIANT.remove(id);
 	}
 
 	// ---- ranks (both sides) -----------------------------------------------------------------------------------------
@@ -430,6 +433,25 @@ public final class Freerun {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * (Parkour animations, track 3; Andy's pick "adaptive speed": the vault chosen by speed and height, not at random) How
+	 * {@code player} goes over what's ahead (WebParkourPose's looks): taken at an angle ({@link #LAZY_ANGLE} or more off
+	 * square), the <b>lazy</b> vault, side-on over one hand; anything over {@link #VAULT_LOW} high, the <b>kong</b>, diving
+	 * over on both hands; low, at a fast run ({@code FastRun}), the <b>monkey flip</b>; low at a sprint, the <b>thief</b>
+	 * vault, the lead leg kicked over it.
+	 */
+	static int vaultStyle(Level level, Player player) {
+		Direction face = Direction.fromYRot(player.getYRot());
+		if (Math.abs(Mth.wrapDegrees(player.getYRot() - face.toYRot())) >= LAZY_ANGLE) {
+			return VAULT_LAZY;
+		}
+		double height = vaultHeight(level, player, Vec3.directionFromRotation(0.0F, player.getYRot()), VAULT_REACH + SERVER_REACH);
+		if (height > VAULT_LOW) {
+			return VAULT_KONG;
+		}
+		return FastRun.active(player) ? VAULT_FLIP : VAULT_THIEF;
 	}
 
 	/** Climber: the wall on side {@code face} is one you can cling to (and tall enough that it isn't the ledge grab's). */
@@ -633,12 +655,7 @@ public final class Freerun {
 		moved(player);
 		switch (kind) {
 			case VAULT -> {
-				int last = LAST_VARIANT.getOrDefault(player.getUUID(), -1);
-				int variant = player.getRandom().nextInt(last < 0 ? WebParkour.VARIANTS : WebParkour.VARIANTS - 1);
-				if (last >= 0 && variant >= last) {
-					variant++;
-				}
-				LAST_VARIANT.put(player.getUUID(), variant);
+				int variant = vaultStyle(level, player);
 				player.setAttached(MOVE, (variant * 8 + VAULT) * 8);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.3F, 1.6F);
 				WebParkour.dust(level, player, null, 4);
