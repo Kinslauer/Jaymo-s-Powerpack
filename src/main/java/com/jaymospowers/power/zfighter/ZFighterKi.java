@@ -236,7 +236,7 @@ public final class ZFighterKi {
 	static final int BOMB = 3;
 	static final int SPIRIT = 4;
 
-	private static final class Bolt {
+	public static final class Bolt {
 		final ServerLevel level;
 		final UUID owner;
 		Vec3 pos;
@@ -544,6 +544,12 @@ public final class ZFighterKi {
 			}
 		}
 		if (hit != null && hit.getEntity() instanceof LivingEntity target) {
+			// Check for Ki-Drinking Barrier absorption
+			if (bolt.kind == BOLT || bolt.kind == DISC || bolt.kind == HOMING) {
+				if (target instanceof ServerPlayer && ZFighterKiDrinkingBarrier.onKiHit((ServerPlayer)target, bolt)) {
+					return false;
+				}
+			}
 			if (bolt.kind == BOMB || bolt.kind == SPIRIT) {
 				burst(owner, bolt, hit.getLocation());
 				return false;
@@ -780,6 +786,7 @@ public final class ZFighterKi {
 		ServerLevel level = bolt.level;
 		DamageSource source = source(owner);
 		boolean spirit = bolt.kind == SPIRIT;
+		boolean griefing = bolt.griefing && PackRules.mayBreak(level, BlockPos.containing(at));
 		if (spirit) {
 			ZFighterSenses.impactFrame(level, at);
 		}
@@ -800,20 +807,20 @@ public final class ZFighterKi {
 			push(near, away, (spirit ? 2.0 : 1.2) * falloff, 0.5);
 		}
 		level.explode(owner, source, GROUND_ONLY, at.x, at.y, at.z, bolt.burst, false,
-			bolt.griefing ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
+			griefing ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
 		if (spirit) {
 			// and a ring of blasts round it, so the crater is as wide as the bomb was
 			for (int i = 0; i < SPIRIT_RING; i++) {
 				double a = i * Math.PI * 2.0 / SPIRIT_RING;
 				double r = bolt.size * SPIRIT_RING_AT;
 				level.explode(owner, source, GROUND_ONLY, at.x + Math.cos(a) * r, at.y, at.z + Math.sin(a) * r, bolt.burst * SPIRIT_RING_POWER, false,
-					bolt.griefing ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
+					griefing ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
 			}
 			for (int i = 0; i < SPIRIT_OUTER_RING; i++) {
 				double a = (i + 0.5) * Math.PI * 2.0 / SPIRIT_OUTER_RING;
 				double r = bolt.size * SPIRIT_OUTER_AT;
 				level.explode(owner, source, GROUND_ONLY, at.x + Math.cos(a) * r, at.y + bolt.size * 0.3, at.z + Math.sin(a) * r,
-					bolt.burst * SPIRIT_OUTER_POWER, false, bolt.griefing ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
+					bolt.burst * SPIRIT_OUTER_POWER, false, griefing ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE);
 			}
 		}
 		ParticleOptions dust = MagicFx.wisp(bolt.color, 3.0F);
@@ -942,21 +949,26 @@ public final class ZFighterKi {
 	}
 
 	/**
-	 * The Ki Disc leaves his hand at {@code from}, flying along {@code dir} (the ki was paid when the wind-up began,
-	 * {@code ZFighterDisc}).
-	 */
-	static void throwDisc(ServerPlayer player, ZFighterPower.Live live, Vec3 from, Vec3 dir) {
-		ServerLevel level = player.level();
-		Bolt bolt = new Bolt(level, player.getUUID(), from, dir.scale(DISC_SPEED), DISC_DAMAGE * ZFighterPower.kiPower(player, live),
-			formColor(live), DISC, Mth.ceil(DISC_RANGE / DISC_SPEED));
-		// flat and level: across it is his right, whichever way he looks (straight down too)
-		bolt.side = Vec3.directionFromRotation(0.0F, player.getYRot() + 90.0F);
-		BOLTS.add(bolt);
-		exhaust(player, BLAST_EXHAUSTION);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.8F, 1.6F);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 0.6F, 1.2F);
-		level.playSound(null, from.x, from.y, from.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.8F, 2.0F);
-	}
+		 * The Ki Disc leaves his hand at {@code from}, flying along {@code dir} (the ki was paid when the wind-up began,
+		 * {@code ZFighterDisc}).
+		 */
+		static void throwDisc(ServerPlayer player, ZFighterPower.Live live, Vec3 from, Vec3 dir) {
+			throwDisc(player, live, from, dir, ZFighterKi.DISC_DAMAGE * ZFighterPower.kiPower(player, live));
+		}
+
+		/** Throw a disc with custom damage. */
+		static void throwDisc(ServerPlayer player, ZFighterPower.Live live, Vec3 from, Vec3 dir, float damage) {
+			ServerLevel level = player.level();
+			Bolt bolt = new Bolt(level, player.getUUID(), from, dir.scale(DISC_SPEED), damage,
+				formColor(live), DISC, Mth.ceil(DISC_RANGE / DISC_SPEED));
+			// flat and level: across it is his right, whichever way he looks (straight down too)
+			bolt.side = Vec3.directionFromRotation(0.0F, player.getYRot() + 90.0F);
+			BOLTS.add(bolt);
+			exhaust(player, BLAST_EXHAUSTION);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.8F, 1.6F);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 0.6F, 1.2F);
+			level.playSound(null, from.x, from.y, from.z, SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.8F, 2.0F);
+		}
 
 	/** A Ki Disc {@code size} blocks across at {@code at} this tick, drawn flat and spinning (in the hand or in flight). */
 	static void discOrb(ServerLevel level, int id, Vec3 at, double size, int color) {
@@ -1190,7 +1202,7 @@ public final class ZFighterKi {
 		boolean super_ = live.superOn();
 		float power = Mth.lerp(charge, WAVE_BLAST_MIN, WAVE_BLAST_MAX) * sig.blast() * (super_ ? 1.3F : 1.0F);
 		// a full wave from a Super tears the ground (as a mob would: mob griefing decides); anything less only hurts
-		Level.ExplosionInteraction interaction = super_ && charge >= 1.0F ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE;
+		Level.ExplosionInteraction interaction = super_ && charge >= 1.0F && PackRules.mayBreak(level, BlockPos.containing(from)) ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE;
 		// the head travels out from the hands; the Spiral Lance bores through whatever stands in its way (ZFighterWaveBeam)
 		float pitch = switch (sig.style()) {
 			case NEEDLE -> 1.9F;
@@ -1249,8 +1261,8 @@ public final class ZFighterKi {
 		Vec3 look = player.getViewVector(1.0F);
 		Vec3 from = apeMouth(player, look);
 		float damage = APE_BEAM_DAMAGE * ZFighterPower.kiPower(player, live);
-		ZFighterWaveBeam.fire(player, from, look, new ZFighterWaveBeam.Spec(APE_BEAM_RANGE, APE_BEAM_SPEED, APE_BEAM_RADIUS, damage, 1.2, 0, false,
-			APE_BEAM_BLAST, Level.ExplosionInteraction.MOB, true, APE_BEAM_COLOR, WAVE, ZFighterWaveBeam.APE_CLASH_STRENGTH, true, 0.5F));
+			ZFighterWaveBeam.fire(player, from, look, new ZFighterWaveBeam.Spec(APE_BEAM_RANGE, APE_BEAM_SPEED, APE_BEAM_RADIUS, damage, 1.2, 0, false,
+				APE_BEAM_BLAST, PackRules.mayBreak(level, BlockPos.containing(from)) ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE, true, APE_BEAM_COLOR, WAVE, ZFighterWaveBeam.APE_CLASH_STRENGTH, true, 0.5F));
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 2.0F, 0.6F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 1.5F, 0.7F);
 		com.jaymospowers.core.Shakes.heavy(player, player.position(), 24.0, 1.8F);

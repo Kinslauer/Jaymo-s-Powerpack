@@ -255,7 +255,7 @@ public final class EpicTowns {
 	}
 
 	/** A new kingdom in {@code start}, a town made in its chunks, round its bell; null if no building there will do. */
-	private static @Nullable Faction crown(ServerLevel level, StructureStart start, String id) {
+	static @Nullable Faction crown(ServerLevel level, StructureStart start, String id) {
 		BoundingBox box = start.getBoundingBox();
 		BlockPos middle = box.getCenter();
 		PoiManager poi = level.getPoiManager();
@@ -365,7 +365,12 @@ public final class EpicTowns {
 
 	/** Whether the town stands in the Overworld's band (a One Dimension world's other bands share its town spots; in an ordinary world always). */
 	static boolean surface(ServerLevel level, StructureStart start) {
-		return Stacked.at(level, start.getBoundingBox().getCenter(), Level.OVERWORLD);
+		return surface(level, start.getBoundingBox().getCenter());
+	}
+
+	/** Whether {@code pos} is in the Overworld's band. */
+	static boolean surface(ServerLevel level, BlockPos pos) {
+		return Stacked.at(level, pos, Level.OVERWORLD);
 	}
 
 	/** Whether more than {@link #WET_MOST} of its pieces stand over water. */

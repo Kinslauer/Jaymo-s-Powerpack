@@ -3,7 +3,9 @@ package com.jaymoskingdoms.client.mixin.mca;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import com.jaymoskingdoms.client.DialogueCinematic;
 import net.conczin.mca.client.gui.AbstractDynamicScreen;
+import net.conczin.mca.client.gui.InteractScreen;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -26,6 +28,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * screen; a label still too long keeps its scroll and gets its full text as a tooltip), the shown ones stack with no
  * gaps from the top, the back arrow moves out to the left, and a dark panel sits behind the column. Every button keeps
  * its own press handler, so all options and chat interactions work as before.
+ * <p>Andy (2026-11-21): the list of responses "pops up after the villager finishes their sentence". On a villager's talk
+ * screen the column (and its panel) is hidden while the villager's words are still coming out in the talk's box
+ * ({@link DialogueCinematic#answersUp}), and comes back as they were once they're out.
  */
 @Mixin(value = AbstractDynamicScreen.class, priority = 1100)
 abstract class McaButtonColumnMixin extends Screen {
@@ -47,6 +52,9 @@ abstract class McaButtonColumnMixin extends Screen {
 	/** The column's buttons on this page, shown or not, for the panel. */
 	@Unique
 	private final List<AbstractWidget> jaymoskingdoms$column = new ArrayList<>();
+	/** The column's buttons hidden here while the villager is still speaking, to be shown again. */
+	@Unique
+	private final List<AbstractWidget> jaymoskingdoms$waiting = new ArrayList<>();
 
 	protected McaButtonColumnMixin(Component title) {
 		super(title);
@@ -55,6 +63,7 @@ abstract class McaButtonColumnMixin extends Screen {
 	@Inject(method = "setLayout", at = @At("TAIL"))
 	private void jaymoskingdoms$tidyColumn(String layout, CallbackInfo ci) {
 		this.jaymoskingdoms$column.clear();
+		this.jaymoskingdoms$waiting.clear();
 		int right = this.width - RIGHT_GAP;
 		List<AbstractWidget> arrows = new ArrayList<>();
 		for (GuiEventListener l : this.children()) {
@@ -104,6 +113,21 @@ abstract class McaButtonColumnMixin extends Screen {
 	/** The panel behind the column, drawn before the buttons. */
 	@Inject(method = "extractRenderState", at = @At("HEAD"))
 	private void jaymoskingdoms$panel(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick, CallbackInfo ci) {
+		if ((Object) this instanceof InteractScreen) {
+			if (!DialogueCinematic.answersUp()) {
+				for (AbstractWidget w : this.jaymoskingdoms$column) {
+					if (w.visible) {
+						w.visible = false;
+						this.jaymoskingdoms$waiting.add(w);
+					}
+				}
+				return;
+			}
+			for (AbstractWidget w : this.jaymoskingdoms$waiting) {
+				w.visible = true;
+			}
+			this.jaymoskingdoms$waiting.clear();
+		}
 		int x0 = Integer.MAX_VALUE, y0 = Integer.MAX_VALUE, x1 = Integer.MIN_VALUE, y1 = Integer.MIN_VALUE;
 		for (AbstractWidget w : this.jaymoskingdoms$column) {
 			if (w.visible) {

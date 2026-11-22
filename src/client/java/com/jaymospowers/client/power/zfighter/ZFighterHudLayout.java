@@ -17,44 +17,65 @@ import net.minecraft.util.Mth;
  */
 public final class ZFighterHudLayout {
 	/** The smallest and largest a piece can be scaled to, and the step of one notch of the wheel. */
-	public static final float MIN_SCALE = 0.5F, MAX_SCALE = 2.0F, SCALE_STEP = 0.1F;
-	/** The chips' size (mirrors {@code ZFighterPowerClient}) and the form name's width. */
-	private static final int CHIP = 20, FORM_W = 72;
-	private static final String PREFIX = "zfighter_hud.";
+		public static final float MIN_SCALE = 0.5F, MAX_SCALE = 2.0F, SCALE_STEP = 0.1F;
+		/** The chips' size (mirrors {@code ZFighterPowerClient}) and the form name's width. */
+		private static final int CHIP = 20, FORM_W = 72;
+		private static final String PREFIX = "zfighter_hud.";
 
-	/** The pieces of the HUD that can be moved. */
-	public enum Piece {
-		KI_BAR("ki_bar"), FORM_NAME("form_name"), COMBO("combo"), CHIPS("chips"), CHARGE("charge"), SPIRIT("spirit"), APE_RAGE("ape_rage"),
-		SCOUTER("scouter");
+		/** The pieces of the HUD that can be moved. */
+		public enum Piece {
+			KI_BAR("ki_bar"), FORM_NAME("form_name"), COMBO("combo"), CHIPS("chips"), CHARGE("charge"), SPIRIT("spirit"), APE_RAGE("ape_rage"),
+			SCOUTER("scouter");
 
-		public final String key;
+			public final String key;
 
-		Piece(String key) {
-			this.key = key;
+			Piece(String key) {
+				this.key = key;
+			}
 		}
-	}
 
-	/** How a piece is moved and scaled. */
-	public record Place(int dx, int dy, float scale) {
-		public static final Place DEFAULT = new Place(0, 0, 1.0F);
+		/** How a piece is moved and scaled. */
+		public record Place(int dx, int dy, float scale) {
+			public static final Place DEFAULT = new Place(0, 0, 1.0F);
 
-		public boolean isDefault() {
-			return this.dx == 0 && this.dy == 0 && this.scale == 1.0F;
+			public boolean isDefault() {
+				return this.dx == 0 && this.dy == 0 && this.scale == 1.0F;
+			}
 		}
-	}
 
-	/** A piece's usual place on screen: its box, and where along its top edge it pivots (0 left, 0.5 middle). */
-	public record Rect(int x, int y, int w, int h, float pivot) {
-		public float pivotX() {
-			return this.x + this.pivot * this.w;
+		/** A piece's usual place on screen: its box, and where along its top edge it pivots (0 left, 0.5 middle). */
+		public record Rect(int x, int y, int w, int h, float pivot) {
+			public float pivotX() {
+				return this.x + this.pivot * this.w;
+			}
 		}
-	}
 
-	private static final Map<Piece, Place> PLACES = new EnumMap<>(Piece.class);
-	private static boolean loaded;
+		private static final Map<Piece, Place> PLACES = new EnumMap<>(Piece.class);
+		private static boolean loaded;
 
-	private ZFighterHudLayout() {
-	}
+		private ZFighterHudLayout() {
+		}
+
+		// ---- HUD option getters ----
+		/** Whether to hide numbers on the HUD. */
+		public static boolean isHudHideNumbers() {
+			return ZFighterClientConfig.getHudHideNumbers();
+		}
+
+		/** Whether HUD values are always visible. */
+		public static boolean isHudAlwaysVisible() {
+			return ZFighterClientConfig.getHudAlwaysVisible();
+		}
+
+		/** The HUD menu scale multiplier. */
+		public static double getHudMenuScale() {
+			return ZFighterClientConfig.getHudMenuScale();
+		}
+
+		/** Whether to show markers over party members. */
+		public static boolean isHudPartyMarkers() {
+			return ZFighterClientConfig.getHudPartyMarkers();
+		}
 
 	private static void load() {
 		if (loaded) {

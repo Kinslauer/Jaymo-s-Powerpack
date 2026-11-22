@@ -77,6 +77,13 @@ final class ZFighterTournaments {
 	static final int RING_COLOR = 0xFFE070;
 	/** (0.17.60) The share of tournaments that open as a last-one-standing fight. */
 	static final float ROYALE_CHANCE = 0.3F;
+/** (0.21.37) The share of tournament openings that are themed instead of a plain kingdom tournament. */
+static final float THEMED_CHANCE = 0.25F;
+static final int THEME_NORMAL = 0;
+static final int THEME_TYRANT = 1;
+static final int THEME_FIVE = 2;
+/** Names the tyrant's games can be hosted by. */
+static final String[] TYRANTS = {"garrok", "vexa", "kural", "morrow", "saiza", "dren"};
 
 	/** When the next tournament may be held (overworld game time). */
 	public static final AttachmentType<Long> NEXT = AttachmentRegistry.create(JaymosPowers.id("zfighter_next_tournament"),
@@ -129,6 +136,8 @@ final class ZFighterTournaments {
 		long nextAt;
 		/** (0.17.60) A last-one-standing fight, not a bracket. */
 		boolean royale;
+		/** (0.21.37) The theme: none, a tyrant's games or the fortune teller's five fighters. */
+		int theme;
 		/** (0.17.60) The board: every round's bouts (later rounds fill as winners go through), and the bout being fought. */
 		final List<List<Row>> rounds = new ArrayList<>();
 		@Nullable Row row;
@@ -270,9 +279,23 @@ final class ZFighterTournaments {
 		}
 		current = new Tourney(level, kingdom, center, level.getGameTime() + SIGNUP_TICKS);
 		current.royale = royale;
+		// (0.21.37) sometimes the opening is a themed tournament instead of a plain kingdom one
+		current.theme = level.getRandom().nextFloat() < THEMED_CHANCE ? (level.getRandom().nextBoolean() ? THEME_TYRANT : THEME_FIVE) : THEME_NORMAL;
 		lastBoard = ZFighterBracketNet.Board.NONE;
-		level.getServer().getPlayerList().broadcastSystemMessage(Component.translatable(royale ? "message.jaymospowers.zfighter_royale_open"
-			: "message.jaymospowers.zfighter_tournament_open", kingdom, center.getX(), center.getZ(), SIGNUP_TICKS / 1200).withStyle(ChatFormatting.GOLD), false);
+		String key;
+		Object[] args;
+		if (current.theme == THEME_TYRANT) {
+			String tyrant = Component.translatable("entity.jaymospowers.rogue_fighter.tyrant." + TYRANTS[level.getRandom().nextInt(TYRANTS.length)]).getString();
+			key = "message.jaymospowers.zfighter_tournament_tyrant";
+			args = new Object[] {tyrant, kingdom, center.getX(), center.getZ(), SIGNUP_TICKS / 1200};
+		} else if (current.theme == THEME_FIVE) {
+			key = "message.jaymospowers.zfighter_tournament_five";
+			args = new Object[] {kingdom, center.getX(), center.getZ(), SIGNUP_TICKS / 1200};
+		} else {
+			key = royale ? "message.jaymospowers.zfighter_royale_open" : "message.jaymospowers.zfighter_tournament_open";
+			args = new Object[] {kingdom, center.getX(), center.getZ(), SIGNUP_TICKS / 1200};
+		}
+		level.getServer().getPlayerList().broadcastSystemMessage(Component.translatable(key, args).withStyle(ChatFormatting.GOLD), false);
 		level.playSound(null, center, SoundEvents.RAID_HORN.value(), SoundSource.NEUTRAL, 8.0F, 1.2F);
 		return true;
 	}
@@ -346,7 +369,7 @@ final class ZFighterTournaments {
 	/** Anyone in the ring is entered, once. */
 	private static void signUp(Tourney t) {
 		for (ServerPlayer player : t.level.players()) {
-			if (player.isSpectator() || !player.isAlive() || !inRing(t, player.position()) || t.entrants.size() >= MAX_ENTRANTS
+			if (player.isSpectator() || !player.isAlive() || !inRing(t, player.position()) || t.entrants.size() >= (t.theme == THEME_FIVE ? 5 : MAX_ENTRANTS)
 				|| t.entrants.stream().anyMatch(e -> player.getUUID().equals(e.player()))) {
 				continue;
 			}
@@ -381,6 +404,10 @@ final class ZFighterTournaments {
 			size *= 2;
 		}
 		List<Entry> bracket = new ArrayList<>(t.entrants);
+		if (t.theme == THEME_TYRANT && bracket.size() < size) {
+			// the tyrant himself takes a champion's place in his own games
+			bracket.add(new Entry(null, Component.translatable("entity.jaymospowers.rogue_fighter.tyrant." + TYRANTS[t.level.getRandom().nextInt(TYRANTS.length)])));
+		}
 		List<String> names = new ArrayList<>(List.of(CHAMPIONS));
 		Collections.shuffle(names, new java.util.Random(t.level.getRandom().nextLong()));
 		for (int i = 0; bracket.size() < size; i++) {
@@ -537,7 +564,8 @@ final class ZFighterTournaments {
 		t.level.playSound(null, t.center, SoundEvents.PLAYER_LEVELUP, SoundSource.NEUTRAL, 2.0F, 0.8F);
 		ServerPlayer winner = won.player() == null ? null : t.level.getServer().getPlayerList().getPlayer(won.player());
 		if (winner != null) {
-			pay(winner, BOUT_TP, BOUT_EMERALDS);
+			int mult = t.theme == THEME_TYRANT ? 2 : 1;
+			pay(winner, BOUT_TP * mult, BOUT_EMERALDS * mult);
 		}
 	}
 
@@ -561,7 +589,8 @@ final class ZFighterTournaments {
 		t.level.playSound(null, t.center, SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.NEUTRAL, 4.0F, 1.0F);
 		ServerPlayer winner = won.player() == null ? null : t.level.getServer().getPlayerList().getPlayer(won.player());
 		if (winner != null) {
-			pay(winner, WIN_TP, WIN_EMERALDS);
+			int mult = t.theme == THEME_TYRANT ? 2 : 1;
+			pay(winner, WIN_TP * mult, WIN_EMERALDS * mult);
 			t.level.sendParticles(ParticleTypes.FIREWORK, winner.getX(), winner.getY() + 1.5, winner.getZ(), 60, 0.6, 1.0, 0.6, 0.15);
 		}
 	}

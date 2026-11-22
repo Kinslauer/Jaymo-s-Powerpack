@@ -29,8 +29,8 @@ import org.jspecify.annotations.Nullable;
  * <li>the <b>travel ship</b>: a skipper and passengers;</li>
  * <li>the <b>wanderer raft</b>: one drifter, for hire like any other ({@link Drifters#adrift}), who never moves along.</li>
  * </ul>
- * The long ships, the hauling ship and the small ship also get a ship's helm ({@link #helm}), which makes each a ship a
- * player can take, sail, and draw plans of.
+ * Every boat with a crew (all but the raft) also gets a ship's helm ({@link #helm}), so whoever skippers her has a wheel
+ * to steer by, and a player can take her, sail her, and draw plans of her.
  */
 final class SeaSites {
 	static final String MOD = "mos", PREFIX = "mos/";
@@ -123,9 +123,13 @@ final class SeaSites {
 		return picked;
 	}
 
-	/** Whether the boat at {@code path} is one a helm goes on: a long ship, the hauling ship or the small ship. */
+	/**
+	 * Whether the boat at {@code path} is one a helm goes on: every one with a crew (a long ship, the hauling ship, the small
+	 * ship, the travel ship). Andy (2026-11-22), meeting a ship's folk at sea: the ship "should spawn with a helm placed, so
+	 * the villager i met out there has a realistic reason".
+	 */
 	static boolean sails(String path) {
-		return path.equals(LONG_SHIP) || path.equals(HAULER_SHIP) || path.equals(SMALL_SHIP);
+		return path.equals(LONG_SHIP) || path.equals(HAULER_SHIP) || path.equals(SMALL_SHIP) || path.equals(TRAVEL_SHIP);
 	}
 
 	/**
@@ -133,27 +137,32 @@ final class SeaSites {
 	 * a ship of blocks like any a player builds: cast off from the helm, or draw her with Ship's Plans and build more of
 	 * her from the kit. Nothing of hers is copied anywhere; she is Moog's own boat where the mod floated her. The helm
 	 * goes on her middle line within {@link #HELM_END} of one end of her length (the end with deck to stand it on),
-	 * facing the other, which is her bow from then on. False if she has no such deck.
+	 * facing the other, which is her bow from then on; if neither end has such deck (a cabin aft, a forecastle), anywhere
+	 * along her middle line, facing the further end. False if she has no such deck at all.
 	 */
 	static boolean helm(ServerLevel level, BoundingBox box) {
 		boolean alongX = box.getXSpan() >= box.getZSpan();
 		int length = alongX ? box.getXSpan() : box.getZSpan();
 		int lo = alongX ? box.minX() : box.minZ(), hi = alongX ? box.maxX() : box.maxZ();
 		int mid = alongX ? (box.minZ() + box.maxZ()) / 2 : (box.minX() + box.maxX()) / 2;
-		int sea = level.getSeaLevel(), reach = Math.max(2, (int) (length * HELM_END));
-		for (boolean fromLo : new boolean[] {true, false}) {
-			for (int step = 1; step <= reach; step++) {
-				int along = fromLo ? lo + step : hi - step;
-				for (int off : new int[] {0, 1, -1}) {
-					for (int y = sea + 1; y <= Math.min(box.maxY(), sea + 8); y++) {
-						BlockPos at = alongX ? new BlockPos(along, y, mid + off) : new BlockPos(mid + off, y, along);
-						BlockPos under = at.below();
-						if (clear(level, at) && clear(level, at.above()) && level.getBlockState(under).isFaceSturdy(level, under, Direction.UP)
-							&& level.getFluidState(under).isEmpty()) {
-							Direction bow = alongX ? (fromLo ? Direction.EAST : Direction.WEST) : (fromLo ? Direction.SOUTH : Direction.NORTH);
-							level.setBlockAndUpdate(at, com.jaymoskingdoms.sailing.Sailing.HELM.defaultBlockState()
-								.setValue(com.jaymoskingdoms.sailing.HelmBlock.FACING, bow));
-							return true;
+		int sea = level.getSeaLevel(), halfway = (lo + hi) / 2;
+		for (int reach : new int[] {Math.max(2, (int) (length * HELM_END)), length - 2}) {
+			for (boolean fromLo : new boolean[] {true, false}) {
+				for (int step = 1; step <= reach; step++) {
+					int along = fromLo ? lo + step : hi - step;
+					for (int off : new int[] {0, 1, -1}) {
+						for (int y = sea + 1; y <= Math.min(box.maxY(), sea + 8); y++) {
+							BlockPos at = alongX ? new BlockPos(along, y, mid + off) : new BlockPos(mid + off, y, along);
+							BlockPos under = at.below();
+							if (clear(level, at) && clear(level, at.above()) && level.getBlockState(under).isFaceSturdy(level, under, Direction.UP)
+								&& level.getFluidState(under).isEmpty()) {
+								// (she sails away from the end the helm stands nearer)
+								boolean aftLo = along <= halfway;
+								Direction bow = alongX ? (aftLo ? Direction.EAST : Direction.WEST) : (aftLo ? Direction.SOUTH : Direction.NORTH);
+								level.setBlockAndUpdate(at, com.jaymoskingdoms.sailing.Sailing.HELM.defaultBlockState()
+									.setValue(com.jaymoskingdoms.sailing.HelmBlock.FACING, bow));
+								return true;
+							}
 						}
 					}
 				}
