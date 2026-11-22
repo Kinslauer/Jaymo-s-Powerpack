@@ -411,6 +411,27 @@ public final class Freerun {
 		return 0.0;
 	}
 
+	/**
+	 * (Parkour animations, track 2) From a ledge hang, the wall under the edge on side {@code face} is one you can climb
+	 * down: there at the body's middle and below it, not one no one climbs. (The cling's own check wants wall over the
+	 * eyes, which under an edge there never is.)
+	 */
+	public static boolean climbsDownFrom(Level level, Player player, Direction face, double reach) {
+		if (!WebWallRun.wallAt(level, player, face, reach)) {
+			return false;
+		}
+		for (double up : new double[] {0.2, 0.9}) {
+			BlockPos pos = BlockPos.containing(player.getX() + face.getStepX() * (player.getBbWidth() * 0.5 + reach),
+				player.getY() + up, player.getZ() + face.getStepZ() * (player.getBbWidth() * 0.5 + reach));
+			BlockState state = level.getBlockState(pos);
+			if (state.getCollisionShape(level, pos).isEmpty() || state.is(NO_CLIMB) || state.is(BlockTags.ICE) || state.is(BlockTags.LEAVES)
+				|| state.getSoundType() == SoundType.GLASS) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	/** Climber: the wall on side {@code face} is one you can cling to (and tall enough that it isn't the ledge grab's). */
 	public static boolean climbable(Level level, Player player, Direction face, double reach) {
 		if (!WebWallRun.wallAt(level, player, face, reach)) {
@@ -674,7 +695,8 @@ public final class Freerun {
 					&& vaultHeight(level, player, Vec3.directionFromRotation(0.0F, player.getYRot()), VAULT_REACH + SERVER_REACH) > 0.0;
 			case CLING:
 				return side != null && GRIPPED.getOrDefault(player.getUUID(), 0) < grip(player)
-					&& climbable(level, player, side, SERVER_REACH);
+					&& (climbable(level, player, side, SERVER_REACH) || player.hasAttached(com.jaymospowers.core.Ledge.HOLD)
+						&& climbsDownFrom(level, player, side, SERVER_REACH));
 			case WALL_JUMP:
 				return side != null && rank(player, Perk.FREERUNNER) >= 2 && WebWallRun.wallAt(level, player, side, SERVER_REACH)
 					&& (current != null && current.kind == CLING || (KICKED.getOrDefault(player.getUUID(), 0) & 1 << side.get3DDataValue()) == 0);
