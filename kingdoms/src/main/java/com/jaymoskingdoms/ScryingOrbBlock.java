@@ -65,10 +65,7 @@ public final class ScryingOrbBlock extends BaseEntityBlock {
                 new BlockEntityType<>(ScryingOrbBlockEntity::new, java.util.Set.of(BLOCK)));
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS)
                 .register(output -> output.insertAfter(Items.END_CRYSTAL, ITEM));
-        // Packets are registered in ScryingOrb.register()
-        PayloadTypeRegistry.clientboundPlay().register(ScryingOrb.OrbView.TYPE, ScryingOrb.OrbView.CODEC);
-        PayloadTypeRegistry.clientboundPlay().register(ScryingOrb.Close.TYPE, ScryingOrb.Close.CODEC);
-        PayloadTypeRegistry.clientboundPlay().register(ScryingOrb.Cloud.TYPE, ScryingOrb.Cloud.CODEC);
+        // (its packets are registered in ScryingOrb.register(), once)
     }
 
     public static final net.minecraft.world.level.block.state.properties.BooleanProperty ACTIVE = net.minecraft.world.level.block.state.properties.BooleanProperty.create("active");
