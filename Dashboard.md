@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 02:38). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 02:43). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -27,6 +27,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1977 Talk wheel: answers round a wheel on the right, worded by your blood and class; chat hidden while talking (Kingdoms, 2026-11-22)
 - [ ] #1976 fight music for ordinary fights (Kingdoms, 2026-11-22)
 - [ ] #1975 the roll stays on the ground, the Sit key prone, a real struggle up the wall (Powers, 2026-11-22)
 - [ ] #1974 a sword never bursts a body (Powers, Kingdoms, 2026-11-22)
@@ -86,8 +87,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1895 No talk menu mid-fight: right click on a foe always blocks (Powers, Kingdoms, 2026-11-20)
 - [ ] #1894 shy deer keep away from people (Kingdoms, 2026-11-20)
 - [ ] #1893 Crawling into a block you can haul up doesn't sit you (Powers, 2026-11-20)
-- [ ] #1892 Crawling into a wall sits you up (Powers, 2026-11-20)
-- …and 325 older ones.
+- …and 326 older ones.
 
 ## Health
 
