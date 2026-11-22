@@ -16121,3 +16121,10 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - **Chat hidden while talking**: chat isn't drawn during a conversation; everything said is still in it afterwards.
 - Classes: McaDialogueBoxMixin, DialogueCinematic, TalkWheel (new), lang part talk-wheel.json.
 - Built by CI; not played. Answers in MCA's other question trees (chat topics, greetings) show their label with no line under the wheel.
+
+## 0.11.58 (2026-11-22): Classes start with a skill of their kind (#1978)
+
+- **Starting skills** (Andy: "the classes spawn with skills that pertain to their class"): picking a first class teaches one skill free, and brings that class's pillar up to level 3 if it was lower, so there are points to learn another (K). Thief: Silent Snap (Rogue's Arts), Ranger: Quick Work (Rogue's Arts); both get Stealth 3, enough for the freerunning page (Climber, Freerunner, Slide, Long Jump). Warlord: Command. Brute: Battle Rhythm. Paladin: Shieldbearer. Rider: Weapon Forms. Marksman: Called Shots. Monk: Sweep Kick. Mage: Meditation. Sorcerer: Absorbing. Cleric: Field Dresser. Druid: Forager. Warlock: Devotion. Tinkerer: Smith.
+- The free skill is a trainer's gift, so a respec keeps it. The pillar is topped up, not added to, so picking again after a Writ of Rebirth gives nothing twice. Characters who already have a class don't get it.
+- `StartingSkills` (new), called from `Classes.set`.
+- Built; not played.
