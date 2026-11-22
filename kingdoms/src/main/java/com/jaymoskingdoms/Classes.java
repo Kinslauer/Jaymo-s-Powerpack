@@ -286,6 +286,7 @@ public final class Classes {
 		Clerics.register();
 		Druids.register();
 		Monks.register();
+		JaymosKingdoms.LOGGER.debug("disciplines attachment: {}", Disciplines.DATA);
 		Paladins.register();
 		Rangers.register();
 		Warlocks.register();

@@ -1,0 +1,14 @@
+{
+  "skill.jaymoskingdoms.perk.keen_timing": "Keen Timing",
+  "skill.jaymoskingdoms.perk.keen_timing.desc": "Your parry windows widen, rank by rank, back to the old ones: perfect 0-3, 0-4, 0-5 ticks from the raise, a parry up to 8, 10, 12.",
+  "skill.jaymoskingdoms.perk.snatch": "Snatch",
+  "skill.jaymoskingdoms.perk.snatch.desc": "A perfect parry with bare fists takes the foe's weapon straight into your empty hand instead of dropping it. Every Monk has it; the Thief's tree has it too.",
+  "skill.jaymoskingdoms.perk.iron_guard": "Iron Guard",
+  "skill.jaymoskingdoms.perk.iron_guard.desc": "A held guard costs 0.4 half-feathers per point of damage instead of 0.6.",
+  "classtree.jaymoskingdoms.snatch": "Snatch",
+  "classtree.jaymoskingdoms.snatch.desc": "A perfect parry with bare fists lifts the foe's weapon straight into your empty hand. Counts as Strength's Snatch.",
+  "discipline.jaymoskingdoms.arms": "Arms",
+  "discipline.jaymoskingdoms.ki": "Ki",
+  "discipline.jaymoskingdoms.arcana": "Arcana",
+  "message.jaymoskingdoms.discipline_level": "%s rises to level %s."
+}
