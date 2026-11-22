@@ -74,6 +74,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		// biome name, use bar, chat mentions and Shift+T item sharing (client/bits)
 		com.jaymospowers.client.bits.BiomeTitle.init();
 		com.jaymospowers.client.bits.UseBar.init();
+		AfkCinematicFishing.init();
 		com.jaymospowers.client.bits.Mentions.init();
 		com.jaymospowers.client.bits.ItemShareClient.init();
 		// the Verdant World's sky: the blue giant and its ring
