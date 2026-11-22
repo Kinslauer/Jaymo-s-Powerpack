@@ -333,7 +333,7 @@ public final class Downed {
 	}
 
 	/** {@code mob} lets go of downed {@code body}: no longer its target. */
-	private static void letGo(Mob mob, LivingEntity body) {
+	static void letGo(Mob mob, LivingEntity body) {
 		if (mob.getTarget() == body) {
 			mob.setTarget(null);
 		}
