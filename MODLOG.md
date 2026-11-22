@@ -7204,3 +7204,8 @@ following integration task).
 - **Tighter parries**: perfect 0-2 ticks from the raise, a parry 3-6 (locked on +1/+2). Kingdoms' Keen Timing (part 2) widens them back to the old 0-5 / 6-12. A plain parry now gives back 2 half-feathers too. The timing bar and the incoming-blow rings show the new windows.
 - Classes: new PassiveBlocks; Guard (windows by Keen Timing, refunds, the disarm, a broken guard), FeathersHud (the shield icons, tools/gen_feathers.py), ZFighterHooks.spendKi, GuardClient, IncomingBlowsClient, BoxingEvades.
 - Built; not played in game.
+
+## 0.26.48 (2026-11-22): Fishing: Kingdoms' Saltblood path makes fish keener (#1853)
+
+- A Saltblood (the Tideborn heritage path's final step) draws fish up to 75% keener to your bait. Without Kingdoms nothing changes, and a rod pod's lines are never keener.
+- Built; not played.
