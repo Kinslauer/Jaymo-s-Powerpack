@@ -16223,3 +16223,10 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - **Shown**: the heritage picker's Paths section has each path's five step icons (lit as they wake) and how far you are, plus a "How its paths open" section; the Character page lists each path of your blood with its progress.
 - Kept torches are remembered until the server restarts (after that they burn as any).
 - Built; not played.
+
+## 0.11.69 (2026-11-22): Patch 10: each old-age temple calls its patron's champion (#1964)
+
+- Old-age temples now raise the patron each site was built for, per Andy's pairings: Hearthkeeper at the Pillared columned temples on the plains, Lantern Warden at the Sunstep stepped tombs in the sands, Crowned Sun at the Mound long halls and burial mounds of the north, Ash Whisperer at the Court walled palace in Blossom, plus new sites for Anvil-Father (mine halls), Deep Mother (drowned courts), Green Huntsman (wooded grove shrine) and The Truth (bare old house).
+- An offering at a temple's altar calls that patron's champion (PatronChampion), the same multi-phase fight as a patron temple's.
+- New ruin structure variants for the Anvil, Deep, Grove and Truth peoples, each with its own temple layout and altar.
+- Built; not played.
