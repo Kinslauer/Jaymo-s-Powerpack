@@ -23,7 +23,11 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * (0.7.483) Every settlement keeps a butcher and a healer (a cleric). Andy: "too many times i get to a kingdom and they
- * have no butcher or healer". Each kingdom, fiefdom and village (never a barbarian camp) is looked at every
+ * have no butcher or healer". Then (Andy, 2026-11-21, the villages plan) every town keeps every trade it lives by: a
+ * butcher, a healer ({@link Professions#HEALER}), a cook, a cleric, a farmer, a tanner (the game's leatherworker) and,
+ * where it has water, a fisherman ({@link #needed}); and a miner and a woodcutter as soon as it has a mine (or quarry) and
+ * a tree farm for them, through the hire every realm worker comes by ({@link Gatherers#hire}), since a miner with no mine
+ * isn't kept on. {@link TownFitting} gives the trades their blocks. Each kingdom, fiefdom and village (never a barbarian camp) is looked at every
  * {@link #EVERY} ticks while its seat is loaded, so the ones already in a world get theirs too. When it has none of a
  * trade, someone takes it up, in this order:
  * <ol>
@@ -32,8 +36,8 @@ import org.jspecify.annotations.Nullable;
  * <li>the greenest of a trade the town has {@link #SPARE_OF} or more of (a third farmer turns butcher);</li>
  * <li>nobody: a newcomer in the trade moves in, at most once a day for each trade.</li>
  * </ol>
- * Never a ruler, a guard, a realm worker, a cook, a visitor, a player's family or follower, nor one leaving town. A
- * new butcher or cleric gets a little experience so they keep the trade without a smoker or brewing stand nearby.
+ * Never a ruler, a guard, a realm worker, a cook, a visitor, a player's family or follower, nor one leaving town. Anyone
+ * taking up a trade gets a little experience so they keep it without the game's job site nearby (the town's are ours).
  */
 public final class TownTrades {
 	/** How often each settlement is looked at (ticks). */
@@ -45,8 +49,11 @@ public final class TownTrades {
 	static final int LINES = 3;
 	static final double SPEECH_RANGE = 10.0;
 
-	/** The trades every settlement keeps: by name (for the speech lines) and profession. */
-	private static final List<ResourceKey<VillagerProfession>> NEEDED = List.of(VillagerProfession.BUTCHER, VillagerProfession.CLERIC);
+	/** The game's trades every settlement keeps (the speech lines go by the profession's name). */
+	private static final List<ResourceKey<VillagerProfession>> NEEDED = List.of(VillagerProfession.BUTCHER, VillagerProfession.CLERIC,
+		VillagerProfession.FARMER, VillagerProfession.LEATHERWORKER);
+	/** A town has water to fish if this many of the columns looked at round its seat are water (every {@link #WATER_STEP} blocks within {@link #WATER_REACH}). */
+	static final int WATER_COLUMNS = 6, WATER_STEP = 4, WATER_REACH = 48;
 
 	/** When a newcomer last came, by settlement and trade (game time). */
 	private static final Map<Long, Long> NEWCOMERS = new HashMap<>();
@@ -77,9 +84,10 @@ public final class TownTrades {
 	static void staff(ServerLevel level, Faction f, long now) {
 		List<Villager> town = level.getEntitiesOfClass(Villager.class, new AABB(f.seat()).inflate(Economy.POPULATION_RANGE),
 			v -> v.isAlive() && !Visitors.is(v));
-		for (int i = 0; i < NEEDED.size(); i++) {
-			ResourceKey<VillagerProfession> trade = NEEDED.get(i);
-			if (town.stream().anyMatch(v -> v.getVillagerData().profession().is(trade))) {
+		List<ResourceKey<VillagerProfession>> needed = needed(level, f);
+		for (int i = 0; i < needed.size(); i++) {
+			ResourceKey<VillagerProfession> trade = needed.get(i);
+			if (town.stream().anyMatch(v -> has(v, trade))) {
 				continue;
 			}
 			Villager v = pick(level, f, town);
@@ -93,6 +101,54 @@ public final class TownTrades {
 				newcomer(level, f, trade);
 			}
 		}
+		// a miner and a woodcutter, once there's a mine (or quarry) and a tree farm to work
+		MinecraftServer server = level.getServer();
+		if (f.holdings().count(Folk.MINER) == 0 && (Mines.of(server, f.id()) != null || !Areas.quarries(server, f).isEmpty())) {
+			Gatherers.hire(level, f, Folk.MINER, 1);
+		}
+		if (f.holdings().count(Folk.WOODCUTTER) == 0 && !Gatherers.treeFarms(server, f).isEmpty()) {
+			Gatherers.hire(level, f, Folk.WOODCUTTER, 1);
+		}
+	}
+
+	/** The trades {@code f} keeps: the game's ({@link #NEEDED}), a healer and a cook, and a fisherman if it has water. */
+	static List<ResourceKey<VillagerProfession>> needed(ServerLevel level, Faction f) {
+		List<ResourceKey<VillagerProfession>> out = new ArrayList<>(NEEDED);
+		out.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.HEALER).orElseThrow());
+		out.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.COOK).orElseThrow());
+		if (watered(level, f.seat())) {
+			out.add(VillagerProfession.FISHERMAN);
+		}
+		return out;
+	}
+
+	/** {@code v} follows {@code trade} (a settlement's farmer counts as a farmer). */
+	private static boolean has(Villager v, ResourceKey<VillagerProfession> trade) {
+		Holder<VillagerProfession> p = v.getVillagerData().profession();
+		return p.is(trade) || trade == VillagerProfession.FARMER && p.value() == Professions.FARMER;
+	}
+
+	/** {@code v} is a town's healer. */
+	static boolean healer(Villager v) {
+		return !v.isBaby() && v.getVillagerData().profession().value() == Professions.HEALER;
+	}
+
+	/** Water to fish round {@code seat}: {@link #WATER_COLUMNS} or more of the loaded columns looked at have water on top. */
+	static boolean watered(ServerLevel level, BlockPos seat) {
+		int wet = 0;
+		for (int dx = -WATER_REACH; dx <= WATER_REACH; dx += WATER_STEP) {
+			for (int dz = -WATER_REACH; dz <= WATER_REACH; dz += WATER_STEP) {
+				BlockPos column = seat.offset(dx, 0, dz);
+				if (!level.isLoaded(column)) {
+					continue;
+				}
+				BlockPos top = level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, column);
+				if (level.getFluidState(top.below()).is(net.minecraft.tags.FluidTags.WATER) && ++wet >= WATER_COLUMNS) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/** Who in {@code town} takes up a missing trade: one without a trade, then a nitwit, then the greenest of a common one; null if nobody. */
