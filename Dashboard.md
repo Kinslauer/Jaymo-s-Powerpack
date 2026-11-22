@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 08:28). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 08:35). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -27,6 +27,8 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1985 camp guards wear their camp's gear, not MCA's iron (Kingdoms, 2026-11-22)
+- [ ] #1984 Fish spawn where you can see them (Powers, Kingdoms, 2026-11-22)
 - [ ] #1983 guards let go of an Elder Vampire who flees as a bat (Kingdoms, 2026-11-22)
 - [ ] #1980 Every trade in every town (Kingdoms, 2026-11-22)
 - [ ] #1978 Classes start with a skill of their kind (Kingdoms, 2026-11-22)
@@ -85,9 +87,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1902 forest-fire pack - Peterwolf's Forest Fire & Firefighting in the pack (Powers, Kingdoms, 2026-11-20)
 - [ ] #1901 Lantern pole carried in hand: drawn as a pole with its lantern, and lights the way (Powers, Kingdoms, 2026-11-20)
 - [ ] #1900 no chat line when you slay a gifted villager (Powers, 2026-11-20)
-- [ ] #1899 Busy villagers say so instead of opening their talk (Kingdoms, 2026-11-20)
-- [ ] #1898 Castle towns: a real Epic town round the castle, crowned in the castle (Kingdoms, 2026-11-20)
-- …and 329 older ones.
+- …and 331 older ones.
 
 ## Health
 
