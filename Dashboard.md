@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 14:29). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 14:32). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -28,7 +28,9 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1998 Mutant zombies vary like the old dead: by where they rose, their land and their rot (Kingdoms, 2026-11-22)
 - [ ] #1997 The mutant zombie wears the old dead's rags, not the game's cyan and blue (Kingdoms, 2026-11-22)
+- [ ] #1996 survival picks: one base gauntlet for every fist weapon, offhand punches, Crushing (Powers, 2026-11-22)
 - [ ] #1995 speedsters don't tire Kitchen's sprint wind (Powers, Kitchen, 2026-11-22)
 - [ ] #1994 Cannons: stone shot and fire shot (Kingdoms, 2026-11-22)
 - [ ] #1993 trophy heads sit square on Kitchen's head mount (Powers, Kitchen, 2026-11-22)
@@ -86,9 +88,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1931 cleaning up blood - scrub stains off floors and walls, poured water washes them (Powers, Kingdoms, 2026-11-20)
 - [ ] #1930 downed wall sit: getting up stays on the wall (Powers, 2026-11-20)
 - [ ] #1928 H only opens the character menu (Auto HUD toggle unbound) (Powers, 2026-11-20)
-- [ ] #1927 A leg or bagged corpse of a modded creature no longer crashes the game (Kitchen, 2026-11-20)
-- [ ] #1926 Fire is vanilla fire again (Powers, Kingdoms, 2026-11-20)
-- …and 355 older ones.
+- …and 357 older ones.
 
 ## Health
 
