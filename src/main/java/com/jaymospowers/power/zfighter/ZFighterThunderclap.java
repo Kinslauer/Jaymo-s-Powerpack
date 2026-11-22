@@ -73,6 +73,9 @@ public final class ZFighterThunderclap {
 		PayloadTypeRegistry.clientboundPlay().register(Deaf.TYPE, Deaf.CODEC);
 	}
 
+	static void clear() {
+	}
+
 	/** G: the clap. Returns the cooldown, or 0 if it did not go off. */
 	static int start(ServerPlayer player, ZFighterPower.Live live) {
 		if (!ZFighterPower.spend(player, live, KI)) {

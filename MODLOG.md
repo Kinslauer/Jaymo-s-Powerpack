@@ -6993,3 +6993,29 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - **Fresh and sea fish, crabs and other critters only spawn in water the sky reaches** (rivers, lakes, the sea's upper layers and shallows), never in underground aquifers. A natural spawn picks its height anywhere from the world's bottom up, so river and lake species were mostly spawning in flooded caves under the land, where no one saw them, and filling each player's fish cap: the sea looked empty.
 - **Cave pool fish (cavefish, olm) are underground water creatures now**, as the glow squid is, so they have their own small cap and no longer take the fish places of the sea and rivers. (`FishSpecies`)
 - Built on CI; not played.
+
+## 0.26.31 (2026-11-22): Z Fighter gaps 1: stats (#1958)
+
+- **Strike stat**: a sixth stat (Strike) for rushes, grab slams and the hold-combo finisher, bought like the other five; Strength stays for plain punches.
+- **Critical blows**: late TP buys for crit chance (2% a level, up to 20%) and crit damage (1.5x base, +0.5 per level); a crit deals a much heavier blow and announces it.
+- Built; not played in game.
+
+## 0.26.32 (2026-11-22): Z Fighter gaps 2: stamina for dash, guard and forms (#1938)
+
+- **Stamina**: Flash Step, raising your guard, and going into a form or Limit Break now cost stamina - the pack's stamina row. At zero they can't be used until it regrows; meditation and rest refill it.
+- Built; not played in game.
+
+## 0.26.33 (2026-11-22): zfighter gaps 3: techniques (#1939)
+
+- **Ki Shell** (passive): a trained technique that soaks part of every ki blow when not guarding. Learned at the training screen, always on while known.
+- **Twin Discs** (charged, V): throws two Ki Discs at once in a spread, cutting through foes and blocks.
+- **Ring Beam** (charged, V): fires a spinning ring of ki that cuts a line through everything in its path.
+- **Sword Technique** (quick, G): requires a sword or spear; a rapid blade flurry ending in a ki burst.
+- **Purging Beam** (charged, V): a needle-thin beam that deals heavy damage to corrupted, dark, and nightmare entities, and cleanses their harmful effects. Taught by Galactic Patrolmen.
+- **Sticky Bind** (quick, G): throws a rubber-folk wad that sticks a foe in place; they must mash jump/sneak to tear free.
+- **Rift Fist** (quick, G): Divine-born punch into a small rift behind a target, striking from behind.
+- **Rift Step** (sneak+G): Divine-born step through a rift over a short gap, bypassing obstacles.
+- **Ki-Drinking Barrier** (quick, G): Android-only barrier that absorbs incoming ki projectiles and converts them to ki.
+- **Ki Cell** (item): a Tinkerer craft that restores a chunk of ki when consumed.
+
+Built; not played.
