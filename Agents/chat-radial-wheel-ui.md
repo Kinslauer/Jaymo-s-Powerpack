@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: chat-radial-wheel-ui
 branch: claude/chat-radial-wheel-ui-2d7275
 with: Claude (PC desktop)
@@ -27,5 +27,5 @@ owns:
 - 
 
 ## Done
-- PR #1977. Wheel on the right (4 arms, up to 8, scroll for more), origin-worded lines (20 bloods x 6 social answers, 4 class answers, plain lines for every main answer), chat hidden while talking. CI build pending; not played.
+- PR #1977 merged 2026-11-22. Wheel on the right (4 arms, up to 8, scroll for more), origin-worded lines (20 bloods x 6 social answers, 4 class answers, plain lines for every main answer), chat hidden while talking. All CI checks passed (build and modpack start); not played.
 - 2026-11-22 02:30 No sign of work for 30 min: marked stalled (whoever ran it stopped).
