@@ -749,8 +749,6 @@ public final class Breaks {
 			return;
 		}
 		boolean crawled = crawlOnly(entity);
-		// (keeps vanilla health no higher than the capped parts hold)
-		Wounds.reconcile(entity);
 		int set = set(entity);
 		int healed = 0;
 		for (int i = 0; i < plan.size(); i++) {

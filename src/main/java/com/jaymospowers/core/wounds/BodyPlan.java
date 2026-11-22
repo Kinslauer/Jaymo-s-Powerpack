@@ -53,11 +53,18 @@ public enum BodyPlan {
 
 	private final BodyPart[] parts;
 	private final float[] shares;
+	/** The pools' shares added up (a humanoid's 3.8). */
+	private final float total;
 	private final BodyPart[] fallParts;
 
 	BodyPlan(BodyPart[] parts, float[] shares, BodyPart[] fallParts) {
 		this.parts = parts;
 		this.shares = shares.clone();
+		float sum = 0.0F;
+		for (float share : shares) {
+			sum += share;
+		}
+		this.total = sum;
 		this.fallParts = fallParts;
 	}
 
@@ -76,6 +83,11 @@ public enum BodyPlan {
 	/** The size of part {@code index}'s own pool, as a share of the creature's most health. */
 	public float share(int index) {
 		return this.shares[index];
+	}
+
+	/** Every pool's share added up: all of them healed from nothing is this many times the most health. */
+	public float total() {
+		return this.total;
 	}
 
 	/** This part's place, or -1 if the plan has none. */

@@ -93,7 +93,7 @@ public final class Treatment {
 	 */
 	public static final float BANDAGE_HEAL = 3.0F, RAG_HEAL = 3.0F;
 	public static final int BANDAGE_TICKS = 300, RAG_TICKS = 400, BANDAGE_USES = 3;
-	/** (Survival picks) Dressings left in the linen bandage a player last cut into (the next {@code BANDAGE_USES - 1} take no new one). */
+	/** (Survival picks) Dressings left in the linen bandage a player is using (it's used up when they run out). */
 	public static final AttachmentType<Integer> BANDAGE_LEFT = AttachmentRegistry.create(JaymosPowers.id("wounds_bandage_left"),
 		builder -> builder.persistent(com.mojang.serialization.Codec.INT));
 	/** (0.14.4) A stitch hurts its part this much; cautery burns it this much. */
@@ -831,21 +831,17 @@ public final class Treatment {
 	}
 
 	/**
-	 * (Survival picks) A linen bandage dresses {@link #BANDAGE_USES} wounds: true when this dressing takes a new bandage off
-	 * the stack, false while the one already cut into has some left.
+	 * (Survival picks) A linen bandage dresses {@link #BANDAGE_USES} wounds: true when this dressing uses the last of the
+	 * bandage in hand (take it off the stack), false while it has some left.
 	 */
 	private static boolean bandageSpent(ServerPlayer player) {
-		int left = player.getAttachedOrElse(BANDAGE_LEFT, 0);
-		if (left > 0) {
-			if (left == 1) {
-				player.removeAttached(BANDAGE_LEFT);
-			} else {
-				player.setAttached(BANDAGE_LEFT, left - 1);
-			}
-			return false;
+		int left = player.getAttachedOrElse(BANDAGE_LEFT, BANDAGE_USES) - 1;
+		if (left <= 0) {
+			player.removeAttached(BANDAGE_LEFT);
+			return true;
 		}
-		player.setAttached(BANDAGE_LEFT, BANDAGE_USES - 1);
-		return true;
+		player.setAttached(BANDAGE_LEFT, left);
+		return false;
 	}
 
 	/** The treatment done: what the remedy does, and what it costs. */

@@ -217,6 +217,8 @@ public final class Wounds {
 		// (0.15.98) finishing the downed off, one move for each kind of weapon
 		com.jaymospowers.core.finisher.Finishers.register();
 		Pain.register();
+		// (survival picks) a night's sleep heals every part
+		PartStrain.register();
 		// (0.19.24) rest by a campfire, soaking in a hot spring
 		Resting.register();
 		HotSprings.register();
@@ -361,8 +363,9 @@ public final class Wounds {
 			return 0.0F;
 		}
 		points[index] += add;
-		// (survival picks) medicine heals the health with the part, and the healing costs food
-		entity.setHealth(Math.min(entity.getMaxHealth(), entity.getHealth() + add));
+		// (survival picks) medicine heals the health with the part, each point its share (every pool healed from nothing
+		// is the whole health back, so healing every part never heals the health several times over); it costs food
+		entity.setHealth(Math.min(entity.getMaxHealth(), entity.getHealth() + add / plan.total()));
 		store(entity, plan, points);
 		payFood(entity, add);
 		return add;
@@ -750,6 +753,8 @@ public final class Wounds {
 	/** (0.15.94) Takes {@code loss} from the parts where {@code source} lands it; stores them. {@code health}: theirs as the blow began. */
 	private static Routed route(LivingEntity victim, BodyPlan plan, DamageSource source, float health, float loss) {
 		float max = poolMax(victim);
+		// (asked before the parts are stored: broken hearts may lower the most health)
+		boolean full = health >= victim.getMaxHealth() - NoOneShot.SLACK;
 		float[] points = load(victim, plan);
 		float[] was = points.clone();
 		// (0.14.2) a power's own cut (Dismember.cut) lands where it was aimed
@@ -769,7 +774,7 @@ public final class Wounds {
 			landed = HitRouting.route(victim, plan, source, points, max, loss);
 		}
 		store(victim, plan, points);
-		return new Routed(source, landed, was, points, loss, locked, health >= victim.getMaxHealth() - NoOneShot.SLACK);
+		return new Routed(source, landed, was, points, loss, locked, full);
 	}
 
 	private static void onDamage(LivingEntity victim, DamageSource source, float base, float taken, boolean blocked) {

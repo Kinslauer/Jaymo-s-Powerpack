@@ -44,6 +44,8 @@ final class HitRouting {
 	public static final String THROUGH_HELMET = "jaymospowers_through_helmet";
 	/** (Survival picks, lso-armour-parts) A diamond piece cuts the damage to its own part by this share; others by their armour against diamond's, at most {@link #ARMOUR_CUT_MAX}. */
 	static final float ARMOUR_CUT = 0.1F, ARMOUR_CUT_MAX = 0.2F;
+	/** (Survival picks) What lands nowhere never takes a part below this share of its pool: the health runs out first. */
+	static final float SPREAD_FLOOR = 0.05F;
 	/** Diamond's armour on the head, chest, legs and feet. */
 	static final float DIAMOND_HEAD = 3.0F, DIAMOND_CHEST = 8.0F, DIAMOND_LEGS = 6.0F, DIAMOND_FEET = 3.0F;
 
@@ -79,12 +81,15 @@ final class HitRouting {
 
 	/**
 	 * (Survival picks) {@code loss} of the health that lands nowhere in particular: every part loses the share of its pool
-	 * that the health loses of its most, so none of them goes black before the health runs out.
+	 * that the health loses of its most, never below {@link #SPREAD_FLOOR} of it (so fire or poison never blacks out or
+	 * breaks a part: the health runs out first).
 	 */
 	private static void spread(LivingEntity victim, BodyPlan plan, float[] points, float max, float loss) {
 		float share = loss / Math.max(0.01F, victim.getMaxHealth());
 		for (int i = 0; i < points.length; i++) {
-			points[i] = Math.max(0.0F, points[i] - share * plan.share(i) * max);
+			float cap = plan.share(i) * max;
+			float floor = Math.min(points[i], SPREAD_FLOOR * cap);
+			points[i] = Math.max(floor, points[i] - share * cap);
 		}
 	}
 

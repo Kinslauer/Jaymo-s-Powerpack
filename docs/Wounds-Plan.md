@@ -56,7 +56,7 @@ below where they differ (`Wounds`, `BodyPlan`, `HitRouting`, `PartStrain`):
   head blow from full health downs. Limbs at zero break, as before (they don't down). Only the going black counts, so one
   revived with a part still low isn't felled by the next scratch.
 - **What lands nowhere** (fire, magic, poison, drowning, suffocation, lightning, a blast) wears every pool by the share it
-  takes off the health, so none goes black before the health runs out. Falls land on the feet, spilling into the legs.
+  takes off the health, never below 5% of a pool, so it never blacks out or breaks a part: the health runs out first. Falls land on the feet, spilling into the legs.
 - **The 20% line (lso-thresholds, `PartStrain`):** a part at 20% or less: one arm Mining Fatigue, both arms Weakness too,
   a foot Slowness, the body takes 1.25x damage, a leg makes falls 1.5x, the head a headache (our own throbbing haze,
   `PainHud`). Painkillers (`Pain.numb`) and adrenaline hold them off. Broken limbs are unchanged (Andy: "broken limbs
@@ -71,10 +71,11 @@ below where they differ (`Wounds`, `BodyPlan`, `HitRouting`, `PartStrain`):
 - **Medicine over time (lso-heal-time):** linen bandage 3 over 15 s, three dressings per bandage; rag, clean rag and
   grass bandage (the plaster) 3 over 20 s; yarrow powder (the healing herbs) 2 over 30 s as well as stopping the
   bleeding; bone broth (the tonic) 5 into every part over 10 s; the draught of vigour already does the medkit's job
-  (every part whole over 60 s). Medicine heals the health with the part.
+  (every part whole over 60 s). Medicine heals the health with the part, each pool point worth its share of the
+  health (every pool healed from nothing is the whole health back), so healing every part never over-heals.
 - **Food and sleep (lso-food-cost):** every point a part heals costs 0.5 food exhaustion. The parts mend by themselves
   while fed (7 hunger or more): a whole part in 10 minutes, a quarter as fast until patched up (every part missing more
-  than 30% dressed or splinted, nothing bleeding, festering or unset). A night's sleep heals every part as far as it may.
+  than 30% dressed or splinted, nothing bleeding, festering or unset). A night's sleep (the clock jumping a night while you sleep) heals every part as far as it may.
 - **Painkiller (lso-painkiller):** poppy syrup already numbs longer than LSO's 90 s (6 minutes) with addiction and
   withdrawal, so it stays; it now holds off the 20% debuffs too.
 

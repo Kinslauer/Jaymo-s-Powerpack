@@ -1136,7 +1136,6 @@ public final class Downed {
 			float health = entity.getHealth();
 			getUp(level, entity, false);
 			entity.setHealth(health);
-			Wounds.reconcile(entity);
 		}
 		return true;
 	}

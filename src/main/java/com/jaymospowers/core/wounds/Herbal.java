@@ -142,8 +142,10 @@ public final class Herbal {
 	static void mendOver(LivingEntity body, BodyPart part, float amount, int ticks) {
 		float[][] salve = SALVE.computeIfAbsent(body, e -> new float[2][PARTS]);
 		int i = part.ordinal();
+		float rate = amount * EVERY / Math.max(EVERY, ticks);
+		// (a part done healing takes the new rate as it is; one still healing keeps the faster)
+		salve[1][i] = salve[0][i] > 0.0F ? Math.max(salve[1][i], rate) : rate;
 		salve[0][i] = Math.max(salve[0][i], amount);
-		salve[1][i] = Math.max(salve[1][i], amount * EVERY / Math.max(EVERY, ticks));
 		TRACKED.add(body);
 	}
 

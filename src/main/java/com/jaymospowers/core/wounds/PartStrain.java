@@ -1,9 +1,9 @@
 package com.jaymospowers.core.wounds;
 
 import com.jaymospowers.JaymosPowers;
-import java.util.Collections;
-import java.util.Set;
+import java.util.Map;
 import java.util.WeakHashMap;
+import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -45,10 +45,30 @@ public final class PartStrain {
 	public static final float BROKEN_HEART = 0.1F, BROKEN_HEARTS_MAX = 0.5F;
 	private static final Identifier BROKEN_HEARTS_ID = JaymosPowers.id("broken_hearts");
 
-	/** Players whose night's sleep has already healed them (until they're up again). */
-	private static final Set<ServerPlayer> SLEPT = Collections.newSetFromMap(new WeakHashMap<>());
+	/** A sleep the world's clock jumped at least this far over (ticks, a night skipped) heals every part. */
+	public static final long NIGHT_TICKS = 2000L;
+	/** The overworld clock when each sleeper lay down. */
+	private static final Map<ServerPlayer, Long> LAY_DOWN = new WeakHashMap<>();
 
 	private PartStrain() {
+	}
+
+	/** From {@link Wounds#init}: a night's sleep, seen as the sleeper wakes (vanilla wakes them a tick after the night is skipped). */
+	static void register() {
+		EntitySleepEvents.START_SLEEPING.register((entity, pos) -> {
+			if (entity instanceof ServerPlayer player) {
+				LAY_DOWN.put(player, player.level().getOverworldClockTime());
+			}
+		});
+		EntitySleepEvents.STOP_SLEEPING.register((entity, pos) -> {
+			if (entity instanceof ServerPlayer player) {
+				Long from = LAY_DOWN.remove(player);
+				if (from != null && player.isAlive() && player.level().getOverworldClockTime() - from >= NIGHT_TICKS
+					&& Wounds.mendEvery(player, 1.0F) > Wounds.EPS) {
+					player.sendOverlayMessage(Component.translatable("message.jaymospowers.wounds.slept_whole").withStyle(ChatFormatting.GREEN));
+				}
+			}
+		});
 	}
 
 	/** The most health without what broken hearts take off it: what every pool is a share of. */
@@ -121,20 +141,13 @@ public final class PartStrain {
 		return plan != null && plan.index(part) >= 0 && !(!part.vital() && Breaks.missing(entity, part)) && Wounds.fraction(entity, part) <= LOW;
 	}
 
-	/** Every {@link Wounds#PLAYER_RECONCILE_TICKS} for a living survival player: broken hearts, the 20% debuffs, a night's sleep. */
+	/** Every {@link Wounds#PLAYER_RECONCILE_TICKS} for a living survival player: broken hearts and the 20% debuffs. */
 	static void tick(ServerPlayer player) {
 		BodyPlan plan = BodyPlan.of(player);
 		if (plan == null || plan == BodyPlan.SIMPLE) {
 			return;
 		}
 		brokenHearts(player, plan);
-		if (player.isSleeping() && player.isSleepingLongEnough()) {
-			if (SLEPT.add(player) && Wounds.mendEvery(player, 1.0F) > Wounds.EPS) {
-				player.sendOverlayMessage(Component.translatable("message.jaymospowers.wounds.slept_whole").withStyle(ChatFormatting.GREEN));
-			}
-		} else if (!player.isSleeping()) {
-			SLEPT.remove(player);
-		}
 		if (player.getAttached(Wounds.PARTS) == null || eased(player) || Downed.isDowned(player)) {
 			return;
 		}
