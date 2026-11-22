@@ -16245,3 +16245,9 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - **Tradesfolk between job sites** (`Routines.freeOf`): a vanilla trade with no job site just now (and none they're heading for) gets Routines' pastimes in work hours too, instead of only MCA's idle wander. Our own trades (no job-site block) keep their own day.
 - **Stall log and watchdog** (`Unstick`, which already unstuck mobs snagged on a path): any loaded villager awake and within 2 blocks for 2 minutes is written to the server log once as `[stall]`, with its brain activity, running behaviours, home, job site, walk target and which of our holds has it. At 3 minutes, if nothing has it (not at its job site, not one of our own trades at a stall, not in a player's pen, not held by a player, a talk, an MCA stay order or anything of ours), it's sent on: home at night (one with no home is left be), its job site in work hours, else the bell; a shut wooden door beside it is opened, and if it can't even reach the open ground nearby it hops out there in a puff.
 - Built on the Deck; not played. The cause of the indoor stall Andy saw isn't confirmed yet: grep the server log for `[stall]` after a session.
+
+## 0.11.72 (2026-11-22): Ranger arrows go through the helmet (#1992)
+
+- A Ranger's arrow (not a thrown trident) is tagged for Jaymo's Powers' wounds: a headshot doubles even through a helmet,
+  and the helmet's own cut doesn't apply (Andy: "rangers should go through the helmet now as long as you use an arrow").
+- `ClassPerks`. Built in CI; not played.
