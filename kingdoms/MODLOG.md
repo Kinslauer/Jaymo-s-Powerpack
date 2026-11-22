@@ -16116,3 +16116,9 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - **The talk box**: while you talk with a villager, their words appear in a box low on the left under their name, typed out, instead of over their head. MCA's dialogue answers sit in a list low on the right, and they and the button column show only once the villager has finished the line. (`DialogueCinematic`, `SpeechBubbles`, `McaDialogueBoxMixin`, `McaButtonColumnMixin`)
 - **The talk camera**: while the villager speaks you aren't drawn, so the shot over your shoulder sees them, not the back of your head (it's a cut, not a fade). Your own lines are shot side-on from outside the two of you, the other side each time, and the camera glides between shots instead of cutting. (`DialogueCinematic`, `FilmHidesViewerMixin`)
 - Built; not played.
+
+## 0.11.56 (2026-11-22): fight music for ordinary fights (#1976)
+
+- **Fight music**: a real fight now has its own music, one of the Medieval Music pack's war tracks (Behind the Sword, Might & Magic). It fades in as the fight starts and out about 8 seconds after the last blow, and comes back up if the fight flares again while it fades. A real fight is two or more foes after you at once, a fight with another player, or blows still being traded 5 seconds in; one stray zombie chasing you stays quiet. One track per fight, then at least 30 seconds before the next fight's music. A great foe's own theme still wins, and no fight music plays in the calm after it. Town, tavern and road music fades under a fight and rests its usual 10 to 20 minutes after one, so after a fight it goes back to the game's own sounds. The 3-minute cap on any track still applies. Needs the Medieval Music pack; without it nothing plays.
+- `music/Skirmishes` (server: who is in a real fight), `client/music/SkirmishMusic` (plays it), `PlaceMusic` (gives way to it).
+- Built; not played.
