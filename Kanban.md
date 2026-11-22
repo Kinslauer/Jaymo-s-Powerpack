@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 02:31). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 02:37). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -39,6 +39,7 @@ kanban-plugin: board
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · 🔨 Hephaestus · #1896 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-2-power|zfighter-gaps-2-power]] · 🔨 Hephaestus · #1938 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-5-training|zfighter-gaps-5-training]] · ☀️ Apollo · #1953 · changes · fixing review notes
+- [ ] [[Agents/every-trade-every-town|every-trade-every-town]] · 💻 Odysseus · running
 
 
 ## In review
@@ -66,7 +67,7 @@ kanban-plugin: board
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
 - [ ] [[Inbox/class-trees-plan|class-trees-plan]] · for 💻 Odysseus · blocked
 - [ ] [[Inbox/wither-model|wither-model]] · 🍇 Bacchus · blocked
-- [ ] [[Agents/chat-radial-wheel-ui|chat-radial-wheel-ui]] · 💻 Odysseus · stalled
+- [ ] [[Agents/chat-radial-wheel-ui|chat-radial-wheel-ui]] · 💻 Odysseus · #1977 · stalled
 
 
 ## Done
