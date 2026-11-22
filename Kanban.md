@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 13:47). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 13:53). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -36,6 +36,7 @@ kanban-plugin: board
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🔨 Hephaestus · #1957 · changes · fixing review notes
 - [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · changes · fixing review notes
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · 🔨 Hephaestus · #1896 · changes · fixing review notes
+- [ ] [[Agents/survival-climate|survival-climate]] · 💻 Odysseus · running
 - [ ] [[Agents/survival-track4-gear-world|survival-track4-gear-world]] · 💻 Odysseus · running
 
 
