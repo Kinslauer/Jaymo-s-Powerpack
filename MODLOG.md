@@ -6951,3 +6951,8 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - A hint sent again and again (each tick of a hold, each try) makes one card, and the same hint isn't carded again for 30 seconds.
 - Lines built from a key at run time (about 250 of them) and chat messages aren't covered yet.
 - Built; not played.
+
+## 0.26.24 (2026-11-22): a sword never bursts a body (#1974)
+
+- A blow from a sword or an axe cuts: it's never a crushing blow, however hard it lands, so it can't burst a body (downed or standing) the way a slam does. (`BlastGore.crushing`)
+- Built; not played.
