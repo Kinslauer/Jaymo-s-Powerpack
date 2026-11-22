@@ -7217,3 +7217,10 @@ following integration task).
 - **Others**: the Xeno-Band rival 4 → 2.5 (its changed forms at 0.7 of the alien's fists), Duplex doubles 3 → 2, Chrono's echoes 5 → 3, the Unseeing 3 → 2 (zealots 5 → 3.5, their pulse 4 → 2.5).
 - Classes: ZFighterRogue, ZFighterNpcKi, RivalAlien, XenoDouble, ChronoEcho, Unseeing.
 - Not tested in game.
+
+## 0.26.50 (2026-11-22): tips switch - turn tip cards off and on (#1972)
+
+- Andy (2026-11-20): "Can you add a command to disable tips?"
+- **Tips off**: `/tips off` (and `/tips on`; `/tips` says which), or the new **Tips: On / Off** button in the top right of the menu's Notices page. Off, no tip cards come up: no first-time tips, and hints show over the hotbar again as they used to (`TipCard.enabled`, `HintCards`). A card already up goes when you turn them off.
+- It's kept on this computer (`config/jaymospowers-client.properties`, `tips.off`), not per world.
+- Built; not played.
