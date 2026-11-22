@@ -147,8 +147,8 @@ public final class ZFighterTraining {
 	/** The Spirit Bomb also needs Super 3 a quarter mastered. */
 	public static final int SPIRIT_BOMB_MASTERY = 2500;
 
-	/** Limit Break's tiers: TP each (index by tier, 1-3). */
-	public static final int[] LIMIT_TP = {0, 1000, 3000, 8000};
+	/** Limit Break's tiers: TP each (index by tier, 1-6; 4-6 hold only in base or Super). */
+	public static final int[] LIMIT_TP = {0, 1000, 3000, 8000, 15000, 25000, 40000};
 
 	// ---- earning TP (a quarter of what it was before the training slowdown) ----
 	public static final float TP_PER_HIT = 0.5F;

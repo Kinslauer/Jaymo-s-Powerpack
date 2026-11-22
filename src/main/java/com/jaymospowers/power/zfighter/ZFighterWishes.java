@@ -94,9 +94,11 @@ public final class ZFighterWishes {
 		public static final int MATERIALS = 18;
 		/** (0.21.37) A borrowed life made lasting: the borrowed minutes stop burning down. */
 		public static final int LASTING = 19;
-		public static final int WISHES = 20;
+		/** (gaps 2) Forget your fighting style, to learn another from a master. */
+		public static final int RESTYLE = 20;
+		public static final int WISHES = 21;
 		public static final String[] KEYS = {"power", "revive", "riches", "awaken", "rebirth", "blessing", "bonding", "remake", "racial", "restat", "difficulty",
-			"undo_android", "call_back", "reset_story", "revive_friends", "armor_set", "fighter_weapon", "pod", "materials", "lasting"};
+			"undo_android", "call_back", "reset_story", "revive_friends", "armor_set", "fighter_weapon", "pod", "materials", "lasting", "restyle"};
 
 		static final int WISH_TP = 1250;
 	static final int WISH_LEVELS = 30;
@@ -511,6 +513,7 @@ public final class ZFighterWishes {
 					case POD -> pod(player);
 					case MATERIALS -> materials(player);
 					case LASTING -> lasting(player);
+					case RESTYLE -> ZFighterStyles.forget(player);
 					default -> false;
 				};
 		if (!granted) {
