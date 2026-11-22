@@ -1,5 +1,6 @@
 package com.jaymospowers.client.stamina;
 
+import com.jaymospowers.client.KneeBend;
 import com.jaymospowers.client.power.web.FirstPersonCompat;
 import com.jaymospowers.client.power.wind.CombatAnimCompat;
 import com.jaymospowers.stamina.Dodge;
@@ -25,13 +26,35 @@ import org.jspecify.annotations.Nullable;
  * <p>Your own roll draws at once from {@link DodgeClient}; everyone else's from the synced {@link Dodge#ROLLING}. In
  * first person the view tumbles with it ({@link #applyCamera}) and dips toward the ground; your own body drawn there
  * (First-person Model) stays upright rather than swinging through the camera.
+ * <p>Andy (2026-11-22): "when players roll their bodies clip through the ground and their armor". The tumble turned the
+ * standing body round its waist and dropped it, so upside down its head went half a block into the ground; and the back
+ * rounded about the neck left the legs where they were, so the trousers and the chestplate ran through each other. Now
+ * the body turns round the middle of the tucked body ({@link #BALL_CENTRE}) and drops, turn by turn, only as far as
+ * keeps it on the ground: tucked, it's an oval longer head to hips ({@link #BALL_LONG}) than front to back
+ * ({@link #BALL_DEEP}). The legs stay on the hips as the back rounds; the knees fold to the chest and the elbows round
+ * the shins ({@link #bendLimbs}), with the arms outside the legs.
  */
 public final class DodgeRollPose {
 	// ===== the knobs ================================================================================================
-	/** How far the body's middle drops at the low point of the roll (blocks, before the entity's scale). */
-	static final float DROP = 0.45F;
-	/** The tuck: legs drawn up, arms forward round them, the back rounded and the chin down (radians). */
-	static final float LEG_TUCK = -1.6F, ARM_TUCK = -1.2F, ARM_IN = 0.25F, BODY_CURL = 0.45F, CHIN = 0.6F;
+	/**
+	 * The tucked body: its middle, which it turns round, and how far it reaches from there along the body (head to hips)
+	 * and front to back, as shares of the body's height (measured with tools/pose_preview.py). Tucked, it rests on the
+	 * ground: it drops till the oval's lowest point is there.
+	 */
+	static final float BALL_CENTRE = 0.72F, BALL_LONG = 0.42F, BALL_DEEP = 0.35F;
+	/** Standing, the body's reach front to back from its middle (a share of its height). */
+	static final float STANDING_DEEP = 0.12F;
+	/**
+	 * The tuck: thighs drawn up to the chest, arms forward round them (a little out, so they stay outside the legs), the
+	 * back rounded and the chin down (radians); then the knees and elbows folded ({@link #bendLimbs}).
+	 */
+	static final float LEG_TUCK = -1.9F, ARM_TUCK = -1.0F, ARM_OUT = 0.12F, BODY_CURL = 0.45F, CHIN = 0.6F;
+	/** How far the knees fold the shins back under the thighs, and the elbows bring the forearms round the shins (radians). */
+	static final float KNEE_FOLD = 2.2F, ELBOW_FOLD = 1.1F;
+	/** Where an arm folds: this many pixels down it from the shoulder (as SwingElbows). */
+	static final float ELBOW = 4.0F;
+	/** A leg's length (pixels): the hips move this far round the neck as the back rounds. */
+	static final float LEG_TOP = 12.0F;
 	/** Of the roll, the share spent tucking in at the start, and opening out at the end. */
 	static final float TUCK_IN = 0.15F, TUCK_OUT = 0.3F;
 	/** First person: how much of the full turn the view follows (1: all the way over), and how far it dips (blocks). */
@@ -130,10 +153,16 @@ public final class DodgeRollPose {
 			return;
 		}
 		float turn = t * t * (3.0F - 2.0F * t) * Mth.TWO_PI;
-		float middle = state.boundingBoxHeight / Math.max(entityScale, 0.01F) * 0.5F;
+		float height = state.boundingBoxHeight / Math.max(entityScale, 0.01F);
+		float middle = height * BALL_CENTRE;
 		if (!roll.flip()) {
-			// down into a ball near the ground, and back up to the feet (the flip turns where it is, in the air)
-			poseStack.translate(0.0F, -DROP * Mth.sin(Mth.PI * t), 0.0F);
+			// down into a ball resting on the ground, and back up to the feet as it opens (the flip turns where it is, in the air)
+			// (standing, the feet are as far below the middle as it is above the ground: no drop till the tuck comes on, and
+			// the feet only leave the ground late in it, hence the square)
+			float w = tuck(t);
+			float along = Mth.lerp(w * w, BALL_CENTRE, BALL_LONG) * Mth.cos(turn), across = Mth.lerp(w, STANDING_DEEP, BALL_DEEP) * Mth.sin(turn);
+			float reach = Mth.sqrt(along * along + across * across);
+			poseStack.translate(0.0F, -height * Math.max(0.0F, BALL_CENTRE - reach), 0.0F);
 		}
 		// the top tips toward the way of the dodge: about (up x way), round the body's middle
 		poseStack.rotateAround(new Quaternionf().rotateAxis(turn, -forward / length, 0.0F, -right / length), 0.0F, middle, 0.0F);
@@ -196,10 +225,34 @@ public final class DodgeRollPose {
 		float legs = roll.flip() ? w * FLIP_LEGS : w, arms = roll.flip() ? w * FLIP_ARMS : w, curl = roll.flip() ? w * FLIP_CURL : w;
 		set(h.rightLeg, LEG_TUCK, 0.0F, 0.05F, legs);
 		set(h.leftLeg, LEG_TUCK, 0.0F, -0.05F, legs);
-		set(h.rightArm, ARM_TUCK, 0.0F, -ARM_IN, arms);
-		set(h.leftArm, ARM_TUCK, 0.0F, ARM_IN, arms);
+		set(h.rightArm, ARM_TUCK, 0.0F, ARM_OUT, arms);
+		set(h.leftArm, ARM_TUCK, 0.0F, -ARM_OUT, arms);
 		h.body.xRot = Mth.lerp(curl, h.body.xRot, BODY_CURL);
 		h.head.xRot = Mth.lerp(curl, h.head.xRot, CHIN);
+		// the hips go where the rounded back takes them (it turns about the neck), so the legs stay on the body
+		float back = h.body.xRot;
+		h.rightLeg.y = Mth.lerp(legs, h.rightLeg.y, LEG_TOP * Mth.cos(back));
+		h.rightLeg.z = Mth.lerp(legs, h.rightLeg.z, LEG_TOP * Mth.sin(back));
+		h.leftLeg.y = Mth.lerp(legs, h.leftLeg.y, LEG_TOP * Mth.cos(back));
+		h.leftLeg.z = Mth.lerp(legs, h.leftLeg.z, LEG_TOP * Mth.sin(back));
+	}
+
+	/** Last thing before the model is drawn: the tuck's knees folded to the chest and elbows round the shins. */
+	public static void bendLimbs(Model<?> model, Object state) {
+		if (!(state instanceof LivingEntityRenderState living) || !(model instanceof HumanoidModel<?> h)) {
+			return;
+		}
+		Roll roll = living.getData(KEY);
+		if (roll == null || roll.stretch()) {
+			return;
+		}
+		float w = tuck(roll.t());
+		float legs = roll.flip() ? w * FLIP_LEGS : w, arms = roll.flip() ? w * FLIP_ARMS : w;
+		KneeBend.bend(h.rightLeg, KNEE_FOLD * legs);
+		KneeBend.bend(h.leftLeg, KNEE_FOLD * legs);
+		// (KneeBend's + swings the lower half back: a forearm comes forward on a -)
+		KneeBend.bend(h.rightArm, -ELBOW_FOLD * arms, ELBOW, false);
+		KneeBend.bend(h.leftArm, -ELBOW_FOLD * arms, ELBOW, false);
 	}
 
 	private static void set(ModelPart part, float x, float y, float z, float amount) {
