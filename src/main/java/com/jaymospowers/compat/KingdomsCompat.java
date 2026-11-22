@@ -408,6 +408,12 @@ public final class KingdomsCompat {
 		}
 	}
 
+	/** How much keener fish are for {@code player}'s bait: Kingdoms' Saltblood heritage path. 1 without Kingdoms. */
+	public static float fishKeen(net.minecraft.server.level.ServerPlayer player) {
+		Object keen = call("HeritagePaths", "fishKeen", new Class<?>[] {net.minecraft.server.level.ServerPlayer.class}, 1.0F, player);
+		return keen instanceof Float f ? f : 1.0F;
+	}
+
 	/**
 	 * {@code points} of Might trained by {@code player} (shadowboxing in Training Weights, {@code core.Training}): Kingdoms'
 	 * {@code Stats.trainMight} keeps them toward its Might attribute. Nothing without Kingdoms.
