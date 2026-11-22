@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: any
 from: coordinator
 asked: 2026-11-20
@@ -68,3 +68,4 @@ Library); `.claude/rules/blockbench-animation.md`; `KeyframeClip` and how `Crawl
 - 2026-11-20 23:07 Text pass: rewrote changes/powers/parkour-animations.md change note body from implementation jargon (GeckoLib clips, hand-coded joint math, resource ids) to a player-facing description of smoother ledge hang and mantle motion; LedgePose.java and the new animation JSONs carry no player-visible text.
 - 2026-11-21 23:36 Also open: PR #1954 (Plan: parkour animations, docs only, checks green) waits on review and Andy's 'merge' alongside #1959.
 - 2026-11-22 01:31 Finished in cloud Claude's session (Andy 2026-11-22: 'finish this PR, use the 1954 plan'): all five tracks on PR #1959 (keyed mantle with elbow/knee folds; climbing down walls; vaults by speed/height/angle; pole climb pose; limb bends through kick, bar, balance, run, slides, long jump, safety tap, sky dive). Built, PR checks green; not played. Andy asked to merge.
+- 2026-11-22 07:29 PR #1959 merged 2026-11-22 (squash 47c0bc0) at Andy's word.
