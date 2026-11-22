@@ -1,5 +1,16 @@
 # Z Fighter, round 2: Andy's picks from Dragon Block NOEA (2026-10-27)
 
+**Status: built.** Every item below is in the mods (checked against the code on master, 2026-11-22): patch 1 in
+Powers 0.17.45 (`ZFighterCombat`, `ZFighterRush`, `BeamClashTimingClient`, `ZFighterBank`, `ZFighterKiWeapon`,
+`ZFighterSidestep`, `ZFighterLendKi`), patch 2 in 0.17.46 (`ZFighterSlots` and one class per technique), patch 3 in
+0.17.50 (`ZFighterFalseSuper`, `ZFighterGoldenApe`, `ZFighterInstinct`, `ZFighterEgo`, `ZFighterAndroid`,
+`ZFighterVerdantForms`, `ZFighterFrostForms`), patch 4 in 0.17.53 (`ZFighterFusionItems`, `ZFighterFiveFusion`,
+`ZFighterMasterFusion`), patch 5's racial extras (`ZFighterFrostReserve`, `ZFighterVerdantMerge`, the zenkai), patch 6
+in 0.17.60 (`ZFighterLookout`, `ZFighterGravityMachine`, `ZFighterCapsules`, `ZFighterWeapons`, `ZFighterWishExtras`,
+`ZFighterRealism`), patch 7 in 0.17.61, patch 8 (`ZFighterSpaceMissions`, `ZFighterAfterlife`, `ZFighterDemonRealm`),
+and Self-Destruct and the technique creator in 0.18.94. The open questions at the end were settled while building.
+Round 3's pick list: https://claude.ai/artifact/5oVXAobms62dwpZhbNQeyn
+
 Andy ticked 63 of 78 items on the pick page (https://claude.ai/artifact/2aabiRQSzcUmacpkBXxdAN), plus a note: "our
 lookout structure is nice, but needs more". Dragon Block NOEA is All Rights Reserved; DragonMineZ, which it runs on, is
 GPL-3.0, and our mods are MIT. So both are ideas only: our own code, our own names (no Dragon Ball names), our own art,
