@@ -1,9 +1,9 @@
 ---
-status: blocked
+status: done
 task: zfighter-gaps-8-raids
 branch: claude/zfighter-gaps-8-raids
 with: 
-pr: 
+pr: 1961
 mods: powers
 versions: Powers 0.26.22
 started: 2026-11-20
@@ -32,3 +32,5 @@ owns:
 
 ## Done
 (nothing yet — queued behind #7 per the number-order rule; not compiled, not tested in game)
+
+- 2026-11-22 (PC Claude, on Andy's "tie those loose ends"): closed out: Z Fighter gaps 8 was built and merged as #1961 (the four themed raids, ZFighterGapRaids); this note had been left at "blocked".

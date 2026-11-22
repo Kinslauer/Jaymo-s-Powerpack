@@ -117,6 +117,18 @@ Warrior-born's ki and a priest's mana are not two forces in opposition; they are
 Sorcerer's Restoration element, the court wizards' staves and the spells read off scrolls are all the same well,
 shaped by hand. (Andy approved, 2026-11-22; Andy: "Only 30% of players and MCA can get it from amethyst and now they have to either punch it in the world or have it enter their inventory") Amethyst wakes it only in those who have the knack, about three in ten, and only at a touch: striking the stone, or carrying a piece of it. The rest can hold amethyst all their lives and feel nothing.
 
+**How power is seen** (new; Andy's rulings 2026-11-22 for Z Fighter round 3, Claude's wording, waiting on Andy). Everyone
+who lives has an aura, the attuned and the plain alike, a villager as much as a king: how much of the well runs in a
+body, its strength, its training, its gifts and its blood all show in how big and bright it burns. The plain part of
+it, and a fighter's ki above all, since ki is the well pushed out raw, can be seen by anyone who looks: faint, but
+there, so a stranger's strength can be read at a glance. Mana shaped by hand is subtler and shows only to the attuned,
+and only as far as their own attunement reaches: a beginner sees those near his own depth and no further, so his
+teacher's aura and the spirit at his own shoulder stay hidden from him until he grows into seeing them. Folk who come
+to the knack late are startled by what was there all along, and ask those who had it whether they could see that the
+whole time. Ki and mana burn differently too: ki as a raw flame round the body, mana as a quieter light, so the two
+are told apart at once, and a fighter pushing past his limit wears a red edge over whatever he burns. Only the
+Tinkerer's androids burn with no aura at all.
+
 **The Devil's Hole and the Devil's Palm** (new; Claude's placement for the Devil's Hole Pupfish write-up, PR #1971, from Jung's Devil's Palm idea; waiting on Andy). Somewhere in the deserts there is one deep, warm sinkhole, and on a single lit shelf of rock just under its surface live the last of the pupfish: a handful of tiny blue fish that are nowhere else in the world. Round the hole stands a ring of dead palms the desert folk call the Devil's Palm, and monsters come thicker there at night: the world is worn thin in that place, and too much comes through it. The warm water under it is the last of what was there before. The attuned see the fish glow faintly, as they see mana. Fished, muddied or left to cool, the pool empties; left alone and lit, it fills again, slowly.
 
 **What power looks like** (magic FX thread, 2026-11-11, Andy approved 2026-11-17). Because it is one well, power takes
@@ -457,6 +469,20 @@ out at last he wanted the Lookout. The Keeper keeps him behind the door now, and
 has blessed: up there, under his blessing, friends can bring one another round a few times, and the Keeper pulls anyone
 who falls past that back through the door, out of the fight. When the Chamber-Worn gathers his great wave he is spent
 after it, and his back is open.
+
+**The Chamber's door, and what fighters pass on** (new; Claude's placement for Andy's Z Fighter round 3 picks,
+2026-11-22, waiting on Andy). Since the Chamber-Worn the Keeper opens the Time Chamber's door to other fighters only once
+a season each, and never for long: a day inside is a long stretch of training, in heavy air, heat and cold, and the
+Keeper has seen what too many white hours make of a man. What a fighter learns is passed on by hand: a fighter strong
+enough is asked by a gifted villager to take him as a student, and teaches him to spar and to shape his ki; a student
+looked after grows, fights beside his teacher and stands for his own town, and one left alone trains on by himself. A
+fighter can write a technique of his own onto a **technique scroll**, and whoever reads it can learn it. Every fighter
+who grows draws a **rival** sooner or later, someone of his own age who keeps turning up as he climbs: at the
+tournaments, at the raids, at his door with a challenge, a friend in the end or a sneer that never stops. Fighters eat
+like three men while they train, and a good table after a hard day goes into the fists. At the highest forms the sky
+itself answers a fighter powering up: it darkens round him, the wind rises and lightning comes down near. And the
+legendary blood does not always wake at birth: now and then a Warrior-born brought to the edge of death wakes under a
+full moon with it burning in him.
 
 **The Mad Tinkerer's operation.** The Tinkerer sets up workshops near towns and "rebuilds fighters": a fighter
 who beats his test unit wakes on his table an **android**, with endless ki that burns with no aura, no need for food,

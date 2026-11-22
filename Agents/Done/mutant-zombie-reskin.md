@@ -1,9 +1,9 @@
 ---
-status: in-review
+status: done
 task: mutant-zombie-reskin
 branch: claude/mutant-zombie-reskin
 with: 
-pr: 1968
+pr: 1998
 mods: powers
 versions: 
 started: 2026-11-21
@@ -33,3 +33,5 @@ owns:
 
 ## Done
 What a player will see, and what wasn't tested.
+
+- 2026-11-22 (PC Claude, on Andy's "tie those loose ends"): closed out: #1968 was closed (its separate model was never drawn); the reskin was done as #1997 (old-dead skin on Mutant Monsters' mutant zombie) and #1998 (varied by place, land and rot), both merged.
