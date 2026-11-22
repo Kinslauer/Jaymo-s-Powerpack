@@ -47,6 +47,7 @@ public class ZFighterTrainingScreen extends Screen {
 	private static final int TECHNIQUES_PAGE = 2;
 
 	private final List<Button> statButtons = new ArrayList<>();
+	private final List<Button> critButtons = new ArrayList<>();
 	private final List<Button> formButtons = new ArrayList<>();
 	private final List<Button> techniqueButtons = new ArrayList<>();
 	/** (0.17.46) Each technique's wheel button: on the technique wheel (Y) or off it. */
@@ -108,6 +109,12 @@ public class ZFighterTrainingScreen extends Screen {
 			int stat = i;
 			statButtons.add(addRenderableWidget(FlatButton.builder(Component.literal("+"), b -> send(ZFighterNet.BUY_STAT, stat))
 				.bounds(left() + w - 26, contentY() + 12 + i * ROW - 3, 20, 14).build()));
+		}
+		// (0.19.x) critical blows: late TP buys for a chance of a much heavier blow
+		for (int i = 0; i < 2; i++) {
+			int crit = i;
+			critButtons.add(addRenderableWidget(FlatButton.builder(Component.empty(), b -> send(crit == 0 ? ZFighterNet.BUY_CRIT_CHANCE : ZFighterNet.BUY_CRIT_DAMAGE, 0))
+				.bounds(left() + 10, contentY() + 110 + i * 18, 110, 14).build()));
 		}
 		for (int form = 2; form <= ZFighterTraining.FORMS; form++) {
 			int f = form;
@@ -210,6 +217,7 @@ public class ZFighterTrainingScreen extends Screen {
 		graphics.centeredText(this.font, this.title, this.width / 2, y + 6, COLOR_ACCENT);
 		graphics.centeredText(this.font, Component.translatable("screen.jaymospowers.zfighter.tp", data.tp()), this.width / 2, y + 18, COLOR_TEXT);
 		show(statButtons, page == STATS_PAGE);
+		show(critButtons, page == STATS_PAGE);
 		show(formButtons, page == FORMS_PAGE);
 		limitButton.visible = page == FORMS_PAGE;
 		auraButton.visible = page == STATS_PAGE;
@@ -252,6 +260,14 @@ public class ZFighterTrainingScreen extends Screen {
 				detail = growthDetail(player, growth, i, level, fill);
 			}
 		}
+		// (0.19.x) critical blows: late TP buys
+		ZFighterTraining.CritData cd = ZFighterTraining.crit(player);
+		int ccost = ZFighterTraining.CRIT_CHANCE_COST + ZFighterTraining.CRIT_CHANCE_STEP * cd.chance();
+		int dcost = ZFighterTraining.CRIT_DAMAGE_COST + ZFighterTraining.CRIT_DAMAGE_STEP * cd.damage();
+		critButtons.get(0).setMessage(Component.translatable("screen.jaymospowers.zfighter.crit_chance").append(Component.literal(" (" + ccost + " TP)")));
+		critButtons.get(1).setMessage(Component.translatable("screen.jaymospowers.zfighter.crit_damage").append(Component.literal(" (" + dcost + " TP)")));
+		critButtons.get(0).active = cd.chance() < ZFighterTraining.CRIT_CHANCE_MAX && data.tp() >= ccost;
+		critButtons.get(1).active = cd.damage() < ZFighterTraining.CRIT_DAMAGE_MAX && data.tp() >= dcost;
 		// (0.17.46) the aura style row: what his ki looks like when it flares
 		int style = com.jaymospowers.power.zfighter.ZFighterAura.style(player);
 		int ay = auraY();
@@ -414,6 +430,7 @@ public class ZFighterTrainingScreen extends Screen {
 			case ZFighterTraining.TOUGHNESS -> String.format(Locale.ROOT, "%.1f", level * ZFighterTraining.TOUGHNESS_PER_LEVEL * 100.0);
 			case ZFighterTraining.VITALITY -> String.format(Locale.ROOT, "%.1f", level * ZFighterTraining.VITALITY_PER_LEVEL / 2.0);
 			case ZFighterTraining.KI_POWER -> String.format(Locale.ROOT, "%.1f", level * ZFighterTraining.KI_POWER_PER_LEVEL * 100.0);
+			case ZFighterTraining.STRIKE -> String.format(Locale.ROOT, "%.1f", level * ZFighterTraining.STRIKE_PER_LEVEL);
 			default -> Integer.toString(level * ZFighterTraining.ENERGY_PER_LEVEL);
 		};
 	}

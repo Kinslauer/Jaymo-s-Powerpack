@@ -31,7 +31,13 @@ import net.minecraft.world.entity.player.Player;
  */
 public final class ZFighterForms {
 	public static final int FALSE_SUPER = 5, GOD = 6, LEGEND_1 = 7, LEGEND_2 = 8, LEGEND_3 = 9;
-	public static final int FIRST = FALSE_SUPER, LAST = LEGEND_3;
+	// (0.17.200) new heritage form lines, ids after Primal Super (10): earthling 11-13, rubber-folk 14-15,
+	// divine-born 16-17, bio-built 18-19, corrupted 20
+	public static final int EARTHLING_BULK = 11, EARTHLING_FULL = 12, EARTHLING_OVERDRIVE = 13;
+	public static final int RUBBER_STRETCH = 14, RUBBER_GIANT = 15;
+	public static final int DIVINE_LIGHT = 16, DIVINE_DARK = 17;
+	public static final int BIO_SUPER_PERFECT = 18, BIO_XENO = 19, CORRUPTED = 20;
+	public static final int FIRST = FALSE_SUPER, LAST = CORRUPTED;
 	/** Colours of forms 5-9: a pale unsteady gold, the god's red, three greens (the legendary line grows darker, deeper). */
 	private static final int[] COLORS = {0xFFE9A0, 0xE0302A, 0xA6E64A, 0x72DA45, 0x45C83C};
 	/** How hard a form's particles, aura and shake play (the number of the Super it matches), by form 5-9. */
@@ -53,12 +59,46 @@ public final class ZFighterForms {
 			// (0.17.190) Primal Super plays a step under Super Primal Super
 			return PRIMAL_SUPER_TIER;
 		}
+		if (form >= FIRST && form <= LAST) {
+			// heritage forms: earthling 11-13 tier 2-3, rubber 14-15 tier 2-3, divine 16-17 tier 3-4, bio 18-20 tier 3-4
+			return switch (form) {
+				case EARTHLING_BULK -> 2;
+				case EARTHLING_FULL -> 3;
+				case EARTHLING_OVERDRIVE -> 3;
+				case RUBBER_STRETCH -> 2;
+				case RUBBER_GIANT -> 3;
+				case DIVINE_LIGHT -> 3;
+				case DIVINE_DARK -> 4;
+				case BIO_SUPER_PERFECT -> 3;
+				case BIO_XENO -> 4;
+				case CORRUPTED -> 4;
+				default -> 1;
+			};
+		}
 		return special(form) ? TIERS[form - FIRST] : Math.clamp(form, 0, ApeRage.SUPER_4);
 	}
 
 	/** The aura colour of a form past Super Primal Super (clamped). */
 	public static int color(int form) {
-		return form == ApeRage.PRIMAL_SUPER ? ApeRage.PRIMAL_SUPER_COLOR : COLORS[Mth.clamp(form - FIRST, 0, COLORS.length - 1)];
+		if (form == ApeRage.PRIMAL_SUPER) {
+			return ApeRage.PRIMAL_SUPER_COLOR;
+		}
+		if (form >= FIRST && form <= LAST) {
+			return switch (form) {
+				case EARTHLING_BULK -> 0xF2C14E;
+				case EARTHLING_FULL -> 0xF2C14E;
+				case EARTHLING_OVERDRIVE -> 0xFFD700;
+				case RUBBER_STRETCH -> 0x3A8FB7;
+				case RUBBER_GIANT -> 0x7A4FB8;
+				case DIVINE_LIGHT -> 0xDCE6F5;
+				case DIVINE_DARK -> 0x240838;
+				case BIO_SUPER_PERFECT -> 0xC8463C;
+				case BIO_XENO -> 0x8A5A4A;
+				case CORRUPTED -> 0xF2F2F2;
+				default -> 0xFFFFFF;
+			};
+		}
+		return COLORS[Mth.clamp(form - FIRST, 0, COLORS.length - 1)];
 	}
 
 	/**
@@ -71,7 +111,7 @@ public final class ZFighterForms {
 
 	/** Whether the Spirit Bomb can be raised from this form: Super 3, either primal form and the god form. */
 	public static boolean bombForm(int form) {
-		return form == ZFighterTraining.FORMS || form == ApeRage.SUPER_4 || form == ApeRage.PRIMAL_SUPER || form == GOD;
+		return form == ZFighterTraining.FORMS || form == ApeRage.SUPER_4 || form == ApeRage.PRIMAL_SUPER || form == GOD || form == EARTHLING_OVERDRIVE || form == DIVINE_DARK || form == BIO_XENO;
 	}
 
 	/**
@@ -111,6 +151,45 @@ public final class ZFighterForms {
 		}
 		if (ZFighterGod.unlocked(player)) {
 			forms.add(GOD);
+		}
+		// (0.17.200) heritage form lines: earthling, rubber-folk, divine-born, bio-built
+		int lineage = ZFighterLineage.of(player);
+		if (lineage == ZFighterLineage.EARTHLING || lineage == ZFighterLineage.NONE) {
+			// earthling line: any non-lineaged fighter can take earthling forms
+			if (ZFighterTraining.formsOpen(player) >= ZFighterTraining.FORMS) {
+				forms.add(EARTHLING_BULK);
+				if (ZFighterTraining.formsOpen(player) >= ZFighterTraining.FORMS + 1) {
+					forms.add(EARTHLING_FULL);
+					if (ZFighterTraining.formsOpen(player) >= ZFighterTraining.FORMS + 2) {
+						forms.add(EARTHLING_OVERDRIVE);
+					}
+				}
+			}
+		}
+		if (ZFighterRubberBody.is(player)) {
+			forms.add(RUBBER_STRETCH);
+			if (ZFighterTraining.formsOpen(player) >= ZFighterTraining.FORMS + 1) {
+				forms.add(RUBBER_GIANT);
+			}
+		}
+		if (ZFighterLineage.divine(player)) {
+			forms.add(DIVINE_LIGHT);
+			if (ZFighterTraining.formsOpen(player) >= ZFighterTraining.FORMS + 1) {
+				forms.add(DIVINE_DARK);
+			}
+		}
+		int bio = ZFighterBioForms.form(player);
+		if (bio >= 0) {
+			if (bio >= 2) {
+				forms.add(BIO_SUPER_PERFECT);
+				if (ZFighterTraining.formsOpen(player) >= ZFighterTraining.FORMS + 1) {
+					forms.add(BIO_XENO);
+				}
+			}
+			// corrupted: only from bio-built, past Perfect
+			if (bio == 2 && ZFighterTraining.formsOpen(player) >= ZFighterTraining.FORMS + 2) {
+				forms.add(CORRUPTED);
+			}
 		}
 		return forms;
 	}

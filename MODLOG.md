@@ -6993,3 +6993,80 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - **Fresh and sea fish, crabs and other critters only spawn in water the sky reaches** (rivers, lakes, the sea's upper layers and shallows), never in underground aquifers. A natural spawn picks its height anywhere from the world's bottom up, so river and lake species were mostly spawning in flooded caves under the land, where no one saw them, and filling each player's fish cap: the sea looked empty.
 - **Cave pool fish (cavefish, olm) are underground water creatures now**, as the glow squid is, so they have their own small cap and no longer take the fish places of the sea and rivers. (`FishSpecies`)
 - Built on CI; not played.
+
+## 0.26.31 (2026-11-22): Z Fighter gaps 1: stats (#1958)
+
+- **Strike stat**: a sixth stat (Strike) for rushes, grab slams and the hold-combo finisher, bought like the other five; Strength stays for plain punches.
+- **Critical blows**: late TP buys for crit chance (2% a level, up to 20%) and crit damage (1.5x base, +0.5 per level); a crit deals a much heavier blow and announces it.
+- Built; not played in game.
+
+## 0.26.32 (2026-11-22): Z Fighter gaps 2: stamina for dash, guard and forms (#1938)
+
+- **Stamina**: Flash Step, raising your guard, and going into a form or Limit Break now cost stamina - the pack's stamina row. At zero they can't be used until it regrows; meditation and rest refill it.
+- Built; not played in game.
+
+## 0.26.33 (2026-11-22): zfighter gaps 3: techniques (#1939)
+
+- **Ki Shell** (passive): a trained technique that soaks part of every ki blow when not guarding. Learned at the training screen, always on while known.
+- **Twin Discs** (charged, V): throws two Ki Discs at once in a spread, cutting through foes and blocks.
+- **Ring Beam** (charged, V): fires a spinning ring of ki that cuts a line through everything in its path.
+- **Sword Technique** (quick, G): requires a sword or spear; a rapid blade flurry ending in a ki burst.
+- **Purging Beam** (charged, V): a needle-thin beam that deals heavy damage to corrupted, dark, and nightmare entities, and cleanses their harmful effects. Taught by Galactic Patrolmen.
+- **Sticky Bind** (quick, G): throws a rubber-folk wad that sticks a foe in place; they must mash jump/sneak to tear free.
+- **Rift Fist** (quick, G): Divine-born punch into a small rift behind a target, striking from behind.
+- **Rift Step** (sneak+G): Divine-born step through a rift over a short gap, bypassing obstacles.
+- **Ki-Drinking Barrier** (quick, G): Android-only barrier that absorbs incoming ki projectiles and converts them to ki.
+- **Ki Cell** (item): a Tinkerer craft that restores a chunk of ki when consumed.
+
+Built; not played.
+
+## 0.26.34 (2026-11-22): NPCs obey limb damage: arms gate their powers, bad legs put them on the ground (#1987)
+
+Andy (2026-11-22): "NPCs should have all the same capabilities as the player ... limb damage/effects".
+- **Arms gate powers.** A gifted villager's strike (at range) and close blows are done with the main arm (`GiftedAI`, from the move's kind): with it gone the move is never picked; with it broken the move can be thrown wide (`LimbUse.wide`: the player's `AIM_SPREAD` error, a miss past `NPC_HIT_CONE`), spending the move and its cooldown with a whiff swing but no strain on the power. Brawl fighters (tyrants, patrolmen, Z Fighter rogues) with both arms gone raise no guard and fire no ki; a broken arm sometimes throws a ki attack away; the post-parry counter needs the main arm and goes wide the same way. Not covered: ultimates, fleeing and support moves.
+- **Crawling on bad legs.** A humanoid mob with both legs broken (not splinted, not on adrenaline), or a leg gone and no cane or crutch in hand (`Crutches.legless`, now for humanoid mobs too), is drawn crawling as a downed crawler is (`DownedPose.legless`), and stands again when the legs knit or a crutch is held. The drawing and `Breaks.crawlOnly` change; the mob's hitbox stays standing height, as for the existing legless-mob crawl.
+- Built by CI; not played.
+
+## 0.26.35 (2026-11-22): Z Fighter gaps 4: forms (foundation) (#1965)
+
+- Foundation for four heritage form lines: earthling (bulk, full power, overdrive), rubber-folk (stretch, giant), divine-born (light, dark) and bio-built (super perfect, xeno), plus a corrupted step — new form ids 11-20 and their stat arrays.
+- ZFighterForms: the new lines' constants, tiers, colours and Spirit Bomb handling.
+- Nothing the player can use yet: form effects, attribute hooks and lang keys are not implemented.
+- Built; not played in game.
+
+## 0.26.36 (2026-11-22): NPCs climb two-block walls and fences, as players do (#1988)
+
+- Andy: "NPCs should have all the same capabilities as the player, meaning they should be able to climb up one and two block heights". Every mob built like a person (MCA villagers, guards, illagers, zombies, skeletons, piglins and the rest of the humanoid body plan) now plans its way up edges two blocks high and over fences and walls, and pulls itself up a wall too high to jump: up its own side of the wall and over onto the top in the player's ledge-climb time, with the wall's own sound. One-block steps are still a plain jump. A 2-high wall no longer keeps zombies out of a base; a 3-high one does.
+- Limbs: broken or lost arms and legs don't stop the climb, as they don't stop a player (Andy: "players and NPCs should be able to struggle up like before"). Being downed or being a baby does.
+- Everyone sees it: squared to the wall, leaning in over the edge, and on a body built like a player's (villagers, zombies, skeletons, piglins) the player's own mantle clip on the arms and legs. Illagers only lean in (their arms are one crossed piece).
+- Classes: `freerun.moves.NpcClimb`, `WalkNodeClimbMixin`, `MoveControlClimbMixin`, client `NpcClimbPose`, `NpcClimbRendererMixin`.
+- Built by CI only; not played. Not checked in game: how often mobs now take wall routes, MCA villagers' own model taking the pose, and how Kingdoms' horde climbing (zombies over each other) looks next to this pull-up.
+
+## 0.26.37 (2026-11-22): zfighter gaps 5: training drills, grades, pod pilot, shadow dummy (#1953)
+
+## Drill unlocks & mentor bonus
+- Drills beyond Rhythm (Ki Control, Shadow Boxing, Precision, Memory, Pod Pilot) must be unlocked by completing them near a master (good or dark). Rhythm stays open.
+- Training near a master grants a 50% TP bonus (mentor bonus).
+- Each drill run earns a grade (S/A/B/C/D) based on score: S≥90, A≥75, B≥60, C≥40, D<40.
+
+## Challenge mode
+- Challenge mode strings drills together and restarts on a miss. Pays 50% more TP.
+
+## Pod Pilot drill
+- New 6th drill: fly a pod through gaps in rock pillars while gravity pulls it down. Tap Space to boost up.
+
+## Shadow dummy stat share
+- When placing a Sparring Dummy, the player's chosen shadow share (0-75%, via `zfighter_shadow_share` attachment) determines how much Strength the dummy gets and how much the player loses while it lives.
+- Dummy damage is multiplied by (1 + share). Player's Strength reduction is tracked and restored when the bout ends.
+
+## Lang
+- Added translations for Pod Pilot, drill unlocked, challenge complete, pod crashed.
+
+## Not tested in game
+- Client-side Pod Pilot drill rendering and input handling.
+- Drill unlock progression near masters.
+- Mentor TP bonus and grade display.
+- Challenge mode flow.
+- Shadow dummy stat share damage multiplier and strength reduction/restoration.
+
+Modified: ZFighterDrills.java, ZFighterSparring.java, ZFighterDrillScreen.java, zfighter.json
