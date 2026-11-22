@@ -35,7 +35,7 @@ final class ShipMagazine {
 	static final double HOME_WATERS = 80.0;
 	static final int RESUPPLY = 1200;
 	/** What a realm pays its treasury for a powder, a round, heavy, chain or grape shot (a shell is {@link Cannon#SHELL_COST}). */
-	static final long POWDER_COST = 2L, ROUND_COST = 2L, HEAVY_COST = 5L, CHAIN_COST = 4L, GRAPE_COST = 3L;
+	static final long POWDER_COST = 2L, ROUND_COST = 2L, HEAVY_COST = 5L, CHAIN_COST = 4L, GRAPE_COST = 3L, STONE_COST = 1L, FIRE_COST = 3L;
 	/** The gunpowder a pirate cove spends on a shell when it has no TNT (three kegs' worth), and what it keeps back besides. */
 	static final int SHELL_POWDER = 15, POWDER_RESERVE = 8;
 	/** The order a gun falls back through when the shot her gunner wants is spent. */
@@ -151,6 +151,8 @@ final class ShipMagazine {
 					case SHELL -> Cannon.SHELL_COST;
 					case CHAIN -> CHAIN_COST;
 					case GRAPE -> GRAPE_COST;
+					case STONE -> STONE_COST;
+					case FIRE -> FIRE_COST;
 				};
 			}
 		}

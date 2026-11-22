@@ -53,7 +53,9 @@ public final class ShipCannonBlock extends Block {
 	public enum Load implements StringRepresentable {
 		EMPTY, POWDER, SHOT,
 		/** (0.7.490) Loaded with heavy shot, an explosive shell, chain shot, grape. ({@code SHOT} is round shot.) */
-		HEAVY, SHELL, CHAIN, GRAPE;
+		HEAVY, SHELL, CHAIN, GRAPE,
+		/** Loaded with stone shot (timber only) or fire shot (sets fires). */
+		STONE, FIRE;
 
 		/** Whether a shot is in her. */
 		public boolean loaded() {

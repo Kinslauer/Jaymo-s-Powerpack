@@ -11,7 +11,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * (0.7.490) The kinds of shot a ship's gun (or a shore gun) fires, each its own item: round shot (the old reliable),
  * heavy shot (slower, punches through planking and strips the shore deeper), an explosive shell (bursts on contact,
- * blasts a wide crater), chain shot (tears sails and rigging, not planks) and grape (a spray against crews and
+ * blasts a wide crater), stone shot (breaks only timber), fire shot (sets fires), chain shot (tears sails and rigging, not planks) and grape (a spray against crews and
  * foliage). The numbers are all here; {@link Bombardment} reads the crater.
  */
 public enum ShotKind implements StringRepresentable {
@@ -19,7 +19,11 @@ public enum ShotKind implements StringRepresentable {
 	HEAVY(0.85, 1.3, 170, 24.0F, 2.6, 1.1, 2, false, new Bombardment.Crater(4.8, 3, 6, 10.0F, Bombardment.Strip.MASONRY, 16, true)),
 	SHELL(0.9, 1.2, 170, 20.0F, 4.6, 1.5, 0, true, new Bombardment.Crater(7.5, 4, 9, 14.0F, Bombardment.Strip.MASONRY, 18, true)),
 	CHAIN(1.05, 0.9, 120, 12.0F, 2.8, 0.6, 0, false, new Bombardment.Crater(1.6, 0, 3, 1.0F, Bombardment.Strip.SOFT, 30, false)),
-	GRAPE(1.0, 0.8, 14, 9.0F, 5.0, 0.5, 0, false, new Bombardment.Crater(2.6, 0, 3, 1.0F, Bombardment.Strip.SOFT, 30, false));
+	GRAPE(1.0, 0.8, 14, 9.0F, 5.0, 0.5, 0, false, new Bombardment.Crater(2.6, 0, 3, 1.0F, Bombardment.Strip.SOFT, 30, false)),
+	/** A cheap stone ball: breaks only timber (logs, planks, wooden doors and fences), never masonry. */
+	STONE(1.0, 1.1, 160, 10.0F, 2.0, 0.6, 0, false, new Bombardment.Crater(3.0, 2, 4, 6.0F, Bombardment.Strip.TIMBER, 10, false)),
+	/** A fire ball: breaks nothing, sets fires where it lands and sets those it hurts alight. */
+	FIRE(1.0, 1.0, 160, 8.0F, 2.2, 0.5, 0, false, new Bombardment.Crater(2.8, 1, 2, 1.0F, Bombardment.Strip.FIRE, 30, false));
 
 	/** Muzzle speed and fall as shares of {@link ShipShot}'s; how long it flies (ticks). */
 	public final double speed, gravity;
@@ -58,6 +62,8 @@ public enum ShotKind implements StringRepresentable {
 			case SHELL -> Sailing.SHELL;
 			case CHAIN -> Sailing.CHAIN_SHOT;
 			case GRAPE -> Sailing.GRAPE_SHOT;
+			case STONE -> Sailing.STONE_SHOT;
+			case FIRE -> Sailing.FIRE_SHOT;
 		};
 	}
 
@@ -80,6 +86,8 @@ public enum ShotKind implements StringRepresentable {
 			case SHELL -> SHELL;
 			case CHAIN -> CHAIN;
 			case GRAPE -> GRAPE;
+			case STONE -> STONE;
+			case FIRE -> FIRE;
 			default -> null;
 		};
 	}
@@ -92,6 +100,8 @@ public enum ShotKind implements StringRepresentable {
 			case SHELL -> ShipCannonBlock.Load.SHELL;
 			case CHAIN -> ShipCannonBlock.Load.CHAIN;
 			case GRAPE -> ShipCannonBlock.Load.GRAPE;
+			case STONE -> ShipCannonBlock.Load.STONE;
+			case FIRE -> ShipCannonBlock.Load.FIRE;
 		};
 	}
 }
