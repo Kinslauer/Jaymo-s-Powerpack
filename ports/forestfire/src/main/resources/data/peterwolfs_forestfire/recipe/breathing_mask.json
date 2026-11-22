@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "LLL",
+    "LGL",
+    "   "
+  ],
+  "key": {
+    "L": "minecraft:leather",
+    "G": "minecraft:glass_pane"
+  },
+  "result": {
+    "id": "peterwolfs_forestfire:breathing_mask",
+    "count": 1
+  }
+}

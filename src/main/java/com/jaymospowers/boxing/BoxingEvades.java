@@ -244,7 +244,8 @@ public final class BoxingEvades {
 			return true;
 		}
 		LivingEntity attacker = source.getEntity() instanceof LivingEntity living ? living : null;
-		int window = Guard.PERFECT_TICKS + (attacker != null && LockOn.target(player) == attacker ? Guard.LOCK_PERFECT_BONUS : 0);
+		int keen = com.jaymospowers.combat.PassiveBlocks.keenTiming(player);
+		int window = Guard.PERFECT_TICKS[keen] + (attacker != null && LockOn.target(player) == attacker ? Guard.LOCK_PERFECT_BONUS[keen] : 0);
 		boolean perfect = age <= window;
 		if (attacker instanceof ServerPlayer boxer) {
 			// slipping a boxer's punch ends their row

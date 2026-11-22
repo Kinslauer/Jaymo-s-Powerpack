@@ -1,0 +1,2860 @@
+{
+  "variants": {
+    "age=0,kind=heap,pats=1": [
+      {
+        "model": "jaymoskitchen:block/droppings/heap_1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_1",
+        "y": 270
+      }
+    ],
+    "age=1,kind=heap,pats=1": [
+      {
+        "model": "jaymoskitchen:block/droppings/heap_1_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_1_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_1_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_1_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=heap,pats=1": [
+      {
+        "model": "jaymoskitchen:block/droppings/heap_1_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_1_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_1_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_1_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=heap,pats=2": [
+      {
+        "model": "jaymoskitchen:block/droppings/heap_2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_2",
+        "y": 270
+      }
+    ],
+    "age=1,kind=heap,pats=2": [
+      {
+        "model": "jaymoskitchen:block/droppings/heap_2_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_2_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_2_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_2_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=heap,pats=2": [
+      {
+        "model": "jaymoskitchen:block/droppings/heap_2_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_2_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_2_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_2_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=heap,pats=3": [
+      {
+        "model": "jaymoskitchen:block/droppings/heap_3"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_3",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_3",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_3",
+        "y": 270
+      }
+    ],
+    "age=1,kind=heap,pats=3": [
+      {
+        "model": "jaymoskitchen:block/droppings/heap_3_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_3_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_3_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_3_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=heap,pats=3": [
+      {
+        "model": "jaymoskitchen:block/droppings/heap_3_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_3_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_3_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_3_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=heap,pats=4": [
+      {
+        "model": "jaymoskitchen:block/droppings/heap_4"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_4",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_4",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_4",
+        "y": 270
+      }
+    ],
+    "age=1,kind=heap,pats=4": [
+      {
+        "model": "jaymoskitchen:block/droppings/heap_4_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_4_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_4_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_4_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=heap,pats=4": [
+      {
+        "model": "jaymoskitchen:block/droppings/heap_4_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_4_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_4_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_4_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=heap,pats=5": [
+      {
+        "model": "jaymoskitchen:block/droppings/heap_5"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_5",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_5",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_5",
+        "y": 270
+      }
+    ],
+    "age=1,kind=heap,pats=5": [
+      {
+        "model": "jaymoskitchen:block/droppings/heap_5_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_5_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_5_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_5_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=heap,pats=5": [
+      {
+        "model": "jaymoskitchen:block/droppings/heap_5_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_5_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_5_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_5_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=heap,pats=6": [
+      {
+        "model": "jaymoskitchen:block/droppings/heap_6"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_6",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_6",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_6",
+        "y": 270
+      }
+    ],
+    "age=1,kind=heap,pats=6": [
+      {
+        "model": "jaymoskitchen:block/droppings/heap_6_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_6_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_6_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_6_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=heap,pats=6": [
+      {
+        "model": "jaymoskitchen:block/droppings/heap_6_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_6_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_6_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_6_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=heap,pats=7": [
+      {
+        "model": "jaymoskitchen:block/droppings/heap_7"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_7",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_7",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_7",
+        "y": 270
+      }
+    ],
+    "age=1,kind=heap,pats=7": [
+      {
+        "model": "jaymoskitchen:block/droppings/heap_7_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_7_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_7_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_7_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=heap,pats=7": [
+      {
+        "model": "jaymoskitchen:block/droppings/heap_7_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_7_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_7_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_7_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=heap,pats=8": [
+      {
+        "model": "jaymoskitchen:block/droppings/heap_8"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_8",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_8",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_8",
+        "y": 270
+      }
+    ],
+    "age=1,kind=heap,pats=8": [
+      {
+        "model": "jaymoskitchen:block/droppings/heap_8_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_8_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_8_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_8_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=heap,pats=8": [
+      {
+        "model": "jaymoskitchen:block/droppings/heap_8_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_8_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_8_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/heap_8_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=pats,pats=1": [
+      {
+        "model": "jaymoskitchen:block/droppings/pats_1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_1",
+        "y": 270
+      }
+    ],
+    "age=1,kind=pats,pats=1": [
+      {
+        "model": "jaymoskitchen:block/droppings/pats_1_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_1_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_1_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_1_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=pats,pats=1": [
+      {
+        "model": "jaymoskitchen:block/droppings/pats_1_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_1_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_1_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_1_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=pats,pats=2": [
+      {
+        "model": "jaymoskitchen:block/droppings/pats_2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_2",
+        "y": 270
+      }
+    ],
+    "age=1,kind=pats,pats=2": [
+      {
+        "model": "jaymoskitchen:block/droppings/pats_2_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_2_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_2_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_2_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=pats,pats=2": [
+      {
+        "model": "jaymoskitchen:block/droppings/pats_2_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_2_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_2_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_2_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=pats,pats=3": [
+      {
+        "model": "jaymoskitchen:block/droppings/pats_3"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_3",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_3",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_3",
+        "y": 270
+      }
+    ],
+    "age=1,kind=pats,pats=3": [
+      {
+        "model": "jaymoskitchen:block/droppings/pats_3_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_3_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_3_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_3_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=pats,pats=3": [
+      {
+        "model": "jaymoskitchen:block/droppings/pats_3_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_3_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_3_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_3_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=pats,pats=4": [
+      {
+        "model": "jaymoskitchen:block/droppings/pats_4"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_4",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_4",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_4",
+        "y": 270
+      }
+    ],
+    "age=1,kind=pats,pats=4": [
+      {
+        "model": "jaymoskitchen:block/droppings/pats_4_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_4_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_4_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_4_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=pats,pats=4": [
+      {
+        "model": "jaymoskitchen:block/droppings/pats_4_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_4_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_4_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_4_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=pats,pats=5": [
+      {
+        "model": "jaymoskitchen:block/droppings/pats_5"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_5",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_5",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_5",
+        "y": 270
+      }
+    ],
+    "age=1,kind=pats,pats=5": [
+      {
+        "model": "jaymoskitchen:block/droppings/pats_5_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_5_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_5_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_5_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=pats,pats=5": [
+      {
+        "model": "jaymoskitchen:block/droppings/pats_5_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_5_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_5_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_5_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=pats,pats=6": [
+      {
+        "model": "jaymoskitchen:block/droppings/pats_6"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_6",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_6",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_6",
+        "y": 270
+      }
+    ],
+    "age=1,kind=pats,pats=6": [
+      {
+        "model": "jaymoskitchen:block/droppings/pats_6_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_6_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_6_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_6_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=pats,pats=6": [
+      {
+        "model": "jaymoskitchen:block/droppings/pats_6_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_6_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_6_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_6_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=pats,pats=7": [
+      {
+        "model": "jaymoskitchen:block/droppings/pats_7"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_7",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_7",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_7",
+        "y": 270
+      }
+    ],
+    "age=1,kind=pats,pats=7": [
+      {
+        "model": "jaymoskitchen:block/droppings/pats_7_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_7_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_7_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_7_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=pats,pats=7": [
+      {
+        "model": "jaymoskitchen:block/droppings/pats_7_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_7_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_7_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_7_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=pats,pats=8": [
+      {
+        "model": "jaymoskitchen:block/droppings/pats_8"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_8",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_8",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_8",
+        "y": 270
+      }
+    ],
+    "age=1,kind=pats,pats=8": [
+      {
+        "model": "jaymoskitchen:block/droppings/pats_8_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_8_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_8_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_8_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=pats,pats=8": [
+      {
+        "model": "jaymoskitchen:block/droppings/pats_8_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_8_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_8_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pats_8_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=apples,pats=1": [
+      {
+        "model": "jaymoskitchen:block/droppings/apples_1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_1",
+        "y": 270
+      }
+    ],
+    "age=1,kind=apples,pats=1": [
+      {
+        "model": "jaymoskitchen:block/droppings/apples_1_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_1_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_1_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_1_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=apples,pats=1": [
+      {
+        "model": "jaymoskitchen:block/droppings/apples_1_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_1_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_1_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_1_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=apples,pats=2": [
+      {
+        "model": "jaymoskitchen:block/droppings/apples_2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_2",
+        "y": 270
+      }
+    ],
+    "age=1,kind=apples,pats=2": [
+      {
+        "model": "jaymoskitchen:block/droppings/apples_2_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_2_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_2_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_2_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=apples,pats=2": [
+      {
+        "model": "jaymoskitchen:block/droppings/apples_2_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_2_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_2_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_2_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=apples,pats=3": [
+      {
+        "model": "jaymoskitchen:block/droppings/apples_3"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_3",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_3",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_3",
+        "y": 270
+      }
+    ],
+    "age=1,kind=apples,pats=3": [
+      {
+        "model": "jaymoskitchen:block/droppings/apples_3_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_3_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_3_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_3_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=apples,pats=3": [
+      {
+        "model": "jaymoskitchen:block/droppings/apples_3_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_3_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_3_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_3_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=apples,pats=4": [
+      {
+        "model": "jaymoskitchen:block/droppings/apples_4"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_4",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_4",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_4",
+        "y": 270
+      }
+    ],
+    "age=1,kind=apples,pats=4": [
+      {
+        "model": "jaymoskitchen:block/droppings/apples_4_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_4_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_4_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_4_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=apples,pats=4": [
+      {
+        "model": "jaymoskitchen:block/droppings/apples_4_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_4_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_4_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_4_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=apples,pats=5": [
+      {
+        "model": "jaymoskitchen:block/droppings/apples_5"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_5",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_5",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_5",
+        "y": 270
+      }
+    ],
+    "age=1,kind=apples,pats=5": [
+      {
+        "model": "jaymoskitchen:block/droppings/apples_5_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_5_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_5_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_5_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=apples,pats=5": [
+      {
+        "model": "jaymoskitchen:block/droppings/apples_5_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_5_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_5_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_5_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=apples,pats=6": [
+      {
+        "model": "jaymoskitchen:block/droppings/apples_6"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_6",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_6",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_6",
+        "y": 270
+      }
+    ],
+    "age=1,kind=apples,pats=6": [
+      {
+        "model": "jaymoskitchen:block/droppings/apples_6_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_6_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_6_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_6_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=apples,pats=6": [
+      {
+        "model": "jaymoskitchen:block/droppings/apples_6_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_6_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_6_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_6_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=apples,pats=7": [
+      {
+        "model": "jaymoskitchen:block/droppings/apples_7"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_7",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_7",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_7",
+        "y": 270
+      }
+    ],
+    "age=1,kind=apples,pats=7": [
+      {
+        "model": "jaymoskitchen:block/droppings/apples_7_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_7_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_7_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_7_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=apples,pats=7": [
+      {
+        "model": "jaymoskitchen:block/droppings/apples_7_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_7_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_7_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_7_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=apples,pats=8": [
+      {
+        "model": "jaymoskitchen:block/droppings/apples_8"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_8",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_8",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_8",
+        "y": 270
+      }
+    ],
+    "age=1,kind=apples,pats=8": [
+      {
+        "model": "jaymoskitchen:block/droppings/apples_8_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_8_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_8_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_8_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=apples,pats=8": [
+      {
+        "model": "jaymoskitchen:block/droppings/apples_8_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_8_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_8_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/apples_8_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=pellets,pats=1": [
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_1",
+        "y": 270
+      }
+    ],
+    "age=1,kind=pellets,pats=1": [
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_1_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_1_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_1_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_1_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=pellets,pats=1": [
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_1_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_1_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_1_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_1_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=pellets,pats=2": [
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_2",
+        "y": 270
+      }
+    ],
+    "age=1,kind=pellets,pats=2": [
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_2_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_2_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_2_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_2_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=pellets,pats=2": [
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_2_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_2_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_2_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_2_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=pellets,pats=3": [
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_3"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_3",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_3",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_3",
+        "y": 270
+      }
+    ],
+    "age=1,kind=pellets,pats=3": [
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_3_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_3_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_3_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_3_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=pellets,pats=3": [
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_3_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_3_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_3_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_3_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=pellets,pats=4": [
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_4"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_4",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_4",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_4",
+        "y": 270
+      }
+    ],
+    "age=1,kind=pellets,pats=4": [
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_4_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_4_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_4_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_4_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=pellets,pats=4": [
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_4_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_4_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_4_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_4_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=pellets,pats=5": [
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_5"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_5",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_5",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_5",
+        "y": 270
+      }
+    ],
+    "age=1,kind=pellets,pats=5": [
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_5_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_5_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_5_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_5_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=pellets,pats=5": [
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_5_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_5_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_5_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_5_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=pellets,pats=6": [
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_6"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_6",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_6",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_6",
+        "y": 270
+      }
+    ],
+    "age=1,kind=pellets,pats=6": [
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_6_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_6_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_6_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_6_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=pellets,pats=6": [
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_6_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_6_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_6_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_6_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=pellets,pats=7": [
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_7"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_7",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_7",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_7",
+        "y": 270
+      }
+    ],
+    "age=1,kind=pellets,pats=7": [
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_7_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_7_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_7_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_7_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=pellets,pats=7": [
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_7_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_7_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_7_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_7_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=pellets,pats=8": [
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_8"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_8",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_8",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_8",
+        "y": 270
+      }
+    ],
+    "age=1,kind=pellets,pats=8": [
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_8_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_8_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_8_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_8_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=pellets,pats=8": [
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_8_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_8_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_8_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/pellets_8_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=logs,pats=1": [
+      {
+        "model": "jaymoskitchen:block/droppings/logs_1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_1",
+        "y": 270
+      }
+    ],
+    "age=1,kind=logs,pats=1": [
+      {
+        "model": "jaymoskitchen:block/droppings/logs_1_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_1_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_1_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_1_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=logs,pats=1": [
+      {
+        "model": "jaymoskitchen:block/droppings/logs_1_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_1_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_1_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_1_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=logs,pats=2": [
+      {
+        "model": "jaymoskitchen:block/droppings/logs_2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_2",
+        "y": 270
+      }
+    ],
+    "age=1,kind=logs,pats=2": [
+      {
+        "model": "jaymoskitchen:block/droppings/logs_2_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_2_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_2_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_2_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=logs,pats=2": [
+      {
+        "model": "jaymoskitchen:block/droppings/logs_2_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_2_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_2_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_2_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=logs,pats=3": [
+      {
+        "model": "jaymoskitchen:block/droppings/logs_3"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_3",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_3",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_3",
+        "y": 270
+      }
+    ],
+    "age=1,kind=logs,pats=3": [
+      {
+        "model": "jaymoskitchen:block/droppings/logs_3_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_3_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_3_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_3_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=logs,pats=3": [
+      {
+        "model": "jaymoskitchen:block/droppings/logs_3_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_3_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_3_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_3_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=logs,pats=4": [
+      {
+        "model": "jaymoskitchen:block/droppings/logs_4"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_4",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_4",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_4",
+        "y": 270
+      }
+    ],
+    "age=1,kind=logs,pats=4": [
+      {
+        "model": "jaymoskitchen:block/droppings/logs_4_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_4_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_4_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_4_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=logs,pats=4": [
+      {
+        "model": "jaymoskitchen:block/droppings/logs_4_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_4_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_4_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_4_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=logs,pats=5": [
+      {
+        "model": "jaymoskitchen:block/droppings/logs_5"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_5",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_5",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_5",
+        "y": 270
+      }
+    ],
+    "age=1,kind=logs,pats=5": [
+      {
+        "model": "jaymoskitchen:block/droppings/logs_5_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_5_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_5_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_5_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=logs,pats=5": [
+      {
+        "model": "jaymoskitchen:block/droppings/logs_5_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_5_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_5_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_5_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=logs,pats=6": [
+      {
+        "model": "jaymoskitchen:block/droppings/logs_6"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_6",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_6",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_6",
+        "y": 270
+      }
+    ],
+    "age=1,kind=logs,pats=6": [
+      {
+        "model": "jaymoskitchen:block/droppings/logs_6_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_6_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_6_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_6_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=logs,pats=6": [
+      {
+        "model": "jaymoskitchen:block/droppings/logs_6_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_6_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_6_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_6_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=logs,pats=7": [
+      {
+        "model": "jaymoskitchen:block/droppings/logs_7"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_7",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_7",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_7",
+        "y": 270
+      }
+    ],
+    "age=1,kind=logs,pats=7": [
+      {
+        "model": "jaymoskitchen:block/droppings/logs_7_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_7_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_7_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_7_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=logs,pats=7": [
+      {
+        "model": "jaymoskitchen:block/droppings/logs_7_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_7_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_7_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_7_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=logs,pats=8": [
+      {
+        "model": "jaymoskitchen:block/droppings/logs_8"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_8",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_8",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_8",
+        "y": 270
+      }
+    ],
+    "age=1,kind=logs,pats=8": [
+      {
+        "model": "jaymoskitchen:block/droppings/logs_8_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_8_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_8_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_8_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=logs,pats=8": [
+      {
+        "model": "jaymoskitchen:block/droppings/logs_8_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_8_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_8_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/logs_8_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=bird,pats=1": [
+      {
+        "model": "jaymoskitchen:block/droppings/bird_1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_1",
+        "y": 270
+      }
+    ],
+    "age=1,kind=bird,pats=1": [
+      {
+        "model": "jaymoskitchen:block/droppings/bird_1_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_1_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_1_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_1_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=bird,pats=1": [
+      {
+        "model": "jaymoskitchen:block/droppings/bird_1_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_1_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_1_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_1_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=bird,pats=2": [
+      {
+        "model": "jaymoskitchen:block/droppings/bird_2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_2",
+        "y": 270
+      }
+    ],
+    "age=1,kind=bird,pats=2": [
+      {
+        "model": "jaymoskitchen:block/droppings/bird_2_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_2_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_2_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_2_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=bird,pats=2": [
+      {
+        "model": "jaymoskitchen:block/droppings/bird_2_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_2_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_2_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_2_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=bird,pats=3": [
+      {
+        "model": "jaymoskitchen:block/droppings/bird_3"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_3",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_3",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_3",
+        "y": 270
+      }
+    ],
+    "age=1,kind=bird,pats=3": [
+      {
+        "model": "jaymoskitchen:block/droppings/bird_3_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_3_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_3_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_3_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=bird,pats=3": [
+      {
+        "model": "jaymoskitchen:block/droppings/bird_3_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_3_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_3_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_3_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=bird,pats=4": [
+      {
+        "model": "jaymoskitchen:block/droppings/bird_4"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_4",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_4",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_4",
+        "y": 270
+      }
+    ],
+    "age=1,kind=bird,pats=4": [
+      {
+        "model": "jaymoskitchen:block/droppings/bird_4_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_4_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_4_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_4_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=bird,pats=4": [
+      {
+        "model": "jaymoskitchen:block/droppings/bird_4_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_4_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_4_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_4_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=bird,pats=5": [
+      {
+        "model": "jaymoskitchen:block/droppings/bird_5"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_5",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_5",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_5",
+        "y": 270
+      }
+    ],
+    "age=1,kind=bird,pats=5": [
+      {
+        "model": "jaymoskitchen:block/droppings/bird_5_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_5_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_5_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_5_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=bird,pats=5": [
+      {
+        "model": "jaymoskitchen:block/droppings/bird_5_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_5_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_5_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_5_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=bird,pats=6": [
+      {
+        "model": "jaymoskitchen:block/droppings/bird_6"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_6",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_6",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_6",
+        "y": 270
+      }
+    ],
+    "age=1,kind=bird,pats=6": [
+      {
+        "model": "jaymoskitchen:block/droppings/bird_6_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_6_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_6_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_6_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=bird,pats=6": [
+      {
+        "model": "jaymoskitchen:block/droppings/bird_6_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_6_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_6_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_6_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=bird,pats=7": [
+      {
+        "model": "jaymoskitchen:block/droppings/bird_7"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_7",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_7",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_7",
+        "y": 270
+      }
+    ],
+    "age=1,kind=bird,pats=7": [
+      {
+        "model": "jaymoskitchen:block/droppings/bird_7_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_7_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_7_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_7_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=bird,pats=7": [
+      {
+        "model": "jaymoskitchen:block/droppings/bird_7_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_7_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_7_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_7_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=bird,pats=8": [
+      {
+        "model": "jaymoskitchen:block/droppings/bird_8"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_8",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_8",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_8",
+        "y": 270
+      }
+    ],
+    "age=1,kind=bird,pats=8": [
+      {
+        "model": "jaymoskitchen:block/droppings/bird_8_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_8_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_8_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_8_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=bird,pats=8": [
+      {
+        "model": "jaymoskitchen:block/droppings/bird_8_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_8_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_8_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/bird_8_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=scat,pats=1": [
+      {
+        "model": "jaymoskitchen:block/droppings/scat_1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_1",
+        "y": 270
+      }
+    ],
+    "age=1,kind=scat,pats=1": [
+      {
+        "model": "jaymoskitchen:block/droppings/scat_1_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_1_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_1_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_1_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=scat,pats=1": [
+      {
+        "model": "jaymoskitchen:block/droppings/scat_1_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_1_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_1_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_1_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=scat,pats=2": [
+      {
+        "model": "jaymoskitchen:block/droppings/scat_2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_2",
+        "y": 270
+      }
+    ],
+    "age=1,kind=scat,pats=2": [
+      {
+        "model": "jaymoskitchen:block/droppings/scat_2_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_2_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_2_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_2_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=scat,pats=2": [
+      {
+        "model": "jaymoskitchen:block/droppings/scat_2_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_2_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_2_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_2_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=scat,pats=3": [
+      {
+        "model": "jaymoskitchen:block/droppings/scat_3"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_3",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_3",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_3",
+        "y": 270
+      }
+    ],
+    "age=1,kind=scat,pats=3": [
+      {
+        "model": "jaymoskitchen:block/droppings/scat_3_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_3_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_3_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_3_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=scat,pats=3": [
+      {
+        "model": "jaymoskitchen:block/droppings/scat_3_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_3_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_3_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_3_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=scat,pats=4": [
+      {
+        "model": "jaymoskitchen:block/droppings/scat_4"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_4",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_4",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_4",
+        "y": 270
+      }
+    ],
+    "age=1,kind=scat,pats=4": [
+      {
+        "model": "jaymoskitchen:block/droppings/scat_4_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_4_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_4_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_4_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=scat,pats=4": [
+      {
+        "model": "jaymoskitchen:block/droppings/scat_4_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_4_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_4_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_4_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=scat,pats=5": [
+      {
+        "model": "jaymoskitchen:block/droppings/scat_5"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_5",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_5",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_5",
+        "y": 270
+      }
+    ],
+    "age=1,kind=scat,pats=5": [
+      {
+        "model": "jaymoskitchen:block/droppings/scat_5_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_5_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_5_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_5_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=scat,pats=5": [
+      {
+        "model": "jaymoskitchen:block/droppings/scat_5_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_5_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_5_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_5_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=scat,pats=6": [
+      {
+        "model": "jaymoskitchen:block/droppings/scat_6"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_6",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_6",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_6",
+        "y": 270
+      }
+    ],
+    "age=1,kind=scat,pats=6": [
+      {
+        "model": "jaymoskitchen:block/droppings/scat_6_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_6_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_6_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_6_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=scat,pats=6": [
+      {
+        "model": "jaymoskitchen:block/droppings/scat_6_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_6_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_6_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_6_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=scat,pats=7": [
+      {
+        "model": "jaymoskitchen:block/droppings/scat_7"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_7",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_7",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_7",
+        "y": 270
+      }
+    ],
+    "age=1,kind=scat,pats=7": [
+      {
+        "model": "jaymoskitchen:block/droppings/scat_7_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_7_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_7_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_7_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=scat,pats=7": [
+      {
+        "model": "jaymoskitchen:block/droppings/scat_7_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_7_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_7_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_7_age2",
+        "y": 270
+      }
+    ],
+    "age=0,kind=scat,pats=8": [
+      {
+        "model": "jaymoskitchen:block/droppings/scat_8"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_8",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_8",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_8",
+        "y": 270
+      }
+    ],
+    "age=1,kind=scat,pats=8": [
+      {
+        "model": "jaymoskitchen:block/droppings/scat_8_age1"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_8_age1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_8_age1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_8_age1",
+        "y": 270
+      }
+    ],
+    "age=2,kind=scat,pats=8": [
+      {
+        "model": "jaymoskitchen:block/droppings/scat_8_age2"
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_8_age2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_8_age2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/droppings/scat_8_age2",
+        "y": 270
+      }
+    ]
+  }
+}

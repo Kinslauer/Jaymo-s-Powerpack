@@ -53,12 +53,12 @@ import net.minecraft.world.level.storage.ValueOutput;
  * </ul>
  */
 public class Unseeing extends PathfinderMob {
-	static final double HEALTH = 20.0, DAMAGE = 3.0, ZEALOT_DAMAGE = 5.0, SPEED = 0.25;
+	static final double HEALTH = 20.0, DAMAGE = 2.0, ZEALOT_DAMAGE = 3.5, SPEED = 0.25;
 	/** How far they hear a player, and a sneaking one (blocks). */
 	static final double HEAR = 10.0, HEAR_SNEAKING = 3.0;
 	/** A zealot's Pulse: from how near to how far it screams (blocks), what it does, how hard it throws, how often (ticks). */
 	static final double PULSE_MIN = 2.5, PULSE_RANGE = 7.0, PULSE_PUSH = 0.9;
-	static final float PULSE_DAMAGE = 4.0F;
+	static final float PULSE_DAMAGE = 2.5F;
 	static final int PULSE_EVERY = 100;
 	/** Ticks after the gouging before madness takes a gouged one (a Minecraft day or two). */
 	static final int MADNESS_MIN = 24000, MADNESS_MAX = 48000;

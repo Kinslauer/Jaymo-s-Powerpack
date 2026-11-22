@@ -23,6 +23,25 @@ abstract class AetherAnimalModel extends EntityModel<AetherAnimalRenderer.State>
 		b.xRot = Mth.cos(state.walkAnimationPos * 0.6662F + Mth.PI) * amount * speed;
 	}
 
+	/** How far a winged mount lowers the wing on the side a rider climbs up (radians from upright, each way). */
+	static final float WING_RAMP = 75.0F * Mth.DEG_TO_RAD;
+
+	/**
+	 * A winged mount being climbed lowers the wing on the climber's side out to the ground like a ramp. The wings'
+	 * resting angles are (left) negative and (right) positive about z, so the lowered ones go further the same way.
+	 */
+	static void lowerWing(ModelPart left, ModelPart right, AetherAnimalRenderer.State state) {
+		if (state.climb <= 0.0F) {
+			return;
+		}
+		if (state.climbSide <= 0) {
+			left.zRot = Mth.lerp(state.climb, left.zRot, -WING_RAMP);
+		}
+		if (state.climbSide >= 0) {
+			right.zRot = Mth.lerp(state.climb, right.zRot, WING_RAMP);
+		}
+	}
+
 	/** The head following where the mob looks. */
 	static void look(ModelPart head, AetherAnimalRenderer.State state) {
 		head.xRot = state.xRot * DEG;

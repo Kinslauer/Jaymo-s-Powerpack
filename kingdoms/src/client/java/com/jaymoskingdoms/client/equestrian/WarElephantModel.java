@@ -21,6 +21,21 @@ final class WarElephantModel extends EntityModel<WarElephantRenderer.State> {
 	/** How often the ears flap, the tail swishes and the trunk swings (ticks), and for how long. */
 	private static final int EAR_EVERY = 100, EAR_FOR = 30, TAIL_EVERY = 140, TAIL_FOR = 40, TRUNK_EVERY = 220, TRUNK_FOR = 32;
 
+	/**
+	 * Kneeling (Bonding.kneelAmount): the whole elephant sits this many px lower (Bonding.KNEEL_DROP), the forelegs fold (the
+	 * thigh a little forward, the lower leg back along the ground) and the hind legs tuck under, as the horses' do.
+	 */
+	private static final float KNEEL_DROP_PX = (float)(com.jaymoskingdoms.equestrian.Bonding.KNEEL_DROP * 16.0), KNEEL_HEAD = 12.0F * DEG;
+	private static final float KNEEL_FORE_UPPER = -15.0F * DEG, KNEEL_FORE_LOWER = 105.0F * DEG;
+	private static final float KNEEL_HIND_UPPER = -50.0F * DEG, KNEEL_HIND_LOWER = 95.0F * DEG;
+	/**
+	 * A trunk lift, by how far through the climb it is: the trunk reaches down and out for the rider (to this many degrees of
+	 * trunk swing, negative: straighter) over the first {@code LIFT_REACH} of it, curls up and over to the howdah (the trunk swing
+	 * the rear's trumpet uses is 25) until {@code LIFT_CURLED}, and lets go over the rest. The head dips for the grasp and lifts for the curl.
+	 */
+	private static final float LIFT_REACH = 0.3F, LIFT_CURLED = 0.85F, LIFT_GRASP_X = -10.0F, LIFT_CURL_X = 38.0F;
+	private static final float LIFT_GRASP_HEAD = 10.0F * DEG, LIFT_CURL_HEAD = -6.0F * DEG;
+
 	private final ModelPart head, neck, headBump, chin, lowerLip, back, hump, body, skirt;
 	private final ModelPart leftSmallEar, leftBigEar, rightSmallEar, rightBigEar;
 	private final ModelPart rightTuskA, rightTuskB, rightTuskC, rightTuskD, leftTuskA, leftTuskB, leftTuskC, leftTuskD;
@@ -173,6 +188,17 @@ final class WarElephantModel extends EntityModel<WarElephantRenderer.State> {
 			headX = Mth.lerp(state.standAnimation, headX, 0.0F);
 			trunkX = Mth.lerp(state.standAnimation, trunkX, 25.0F);
 		}
+		if (state.kneel > 0.0F) {
+			// it bows its head a little
+			headX += KNEEL_HEAD * state.kneel;
+		}
+		if (state.lift >= 0.0F) {
+			float reach = smooth(0.0F, LIFT_REACH, state.lift);
+			float curl = smooth(LIFT_REACH, LIFT_CURLED - 0.05F, state.lift);
+			float let = 1.0F - smooth(LIFT_CURLED, 1.0F, state.lift);
+			trunkX = Mth.lerp(curl, LIFT_GRASP_X * reach, LIFT_CURL_X) * let;
+			headX = Mth.lerp(curl, LIFT_GRASP_HEAD * reach, LIFT_CURL_HEAD) * let;
+		}
 
 		this.head.xRot = -10.0F * DEG + headX;
 		this.head.yRot = headY;
@@ -229,20 +255,22 @@ final class WarElephantModel extends EntityModel<WarElephantRenderer.State> {
 		this.trunkE.yRot = headY;
 		this.trunkE.xRot = (145.0F - trunkX * 6.0F) * DEG + headX;
 
-		this.frontRightUpperLeg.xRot = rLeg;
-		this.frontLeftUpperLeg.xRot = lLeg;
-		this.backLeftUpperLeg.xRot = rLeg;
-		this.backRightUpperLeg.xRot = lLeg;
+		this.root.y = this.root.getInitialPose().y() + KNEEL_DROP_PX * state.kneel;
+		float k = state.kneel;
+		this.frontRightUpperLeg.xRot = Mth.lerp(k, rLeg, KNEEL_FORE_UPPER);
+		this.frontLeftUpperLeg.xRot = Mth.lerp(k, lLeg, KNEEL_FORE_UPPER);
+		this.backLeftUpperLeg.xRot = Mth.lerp(k, rLeg, KNEEL_HIND_UPPER);
+		this.backRightUpperLeg.xRot = Mth.lerp(k, lLeg, KNEEL_HIND_UPPER);
 		knee(this.frontRightLowerLeg, this.frontRightUpperLeg);
 		knee(this.backRightLowerLeg, this.backRightUpperLeg);
 		knee(this.frontLeftLowerLeg, this.frontLeftUpperLeg);
 		knee(this.backLeftLowerLeg, this.backLeftUpperLeg);
 		float lBend = lLeg > 0.0F ? lLeg * 2.0F : lLeg;
 		float rBend = rLeg > 0.0F ? rLeg * 2.0F : rLeg;
-		this.frontLeftLowerLeg.xRot = lBend;
-		this.frontRightLowerLeg.xRot = rBend;
-		this.backLeftLowerLeg.xRot = rBend;
-		this.backRightLowerLeg.xRot = lBend;
+		this.frontLeftLowerLeg.xRot = Mth.lerp(k, lBend, KNEEL_FORE_LOWER);
+		this.frontRightLowerLeg.xRot = Mth.lerp(k, rBend, KNEEL_FORE_LOWER);
+		this.backLeftLowerLeg.xRot = Mth.lerp(k, rBend, KNEEL_HIND_LOWER);
+		this.backRightLowerLeg.xRot = Mth.lerp(k, lBend, KNEEL_HIND_LOWER);
 
 		for (ModelPart tusk : new ModelPart[] {this.leftTuskB, this.leftTuskC, this.leftTuskD, this.rightTuskB, this.rightTuskC, this.rightTuskD}) {
 			tusk.yRot = headY;
@@ -287,6 +315,11 @@ final class WarElephantModel extends EntityModel<WarElephantRenderer.State> {
 			this.fortFloor1, this.fortFloor2, this.fortFloor3, this.fortBackWall, this.fortBackLeftWall, this.fortBackRightWall, this.bannerPole, this.bannerFlag}) {
 			p.visible = state.saddled;
 		}
+	}
+
+	private static float smooth(float from, float to, float s) {
+		float t = Mth.clamp((s - from) / (to - from), 0.0F, 1.0F);
+		return t * t * (3.0F - 2.0F * t);
 	}
 
 	/** A lower leg hangs from the end of its upper leg, wherever that's swung (the original's adjustXRotationPoints). */

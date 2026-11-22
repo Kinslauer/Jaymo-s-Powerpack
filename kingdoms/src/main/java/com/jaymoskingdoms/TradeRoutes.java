@@ -312,7 +312,8 @@ final class TradeRoutes {
 				int carts = wagons ? 1 : Math.min(MOST_HANDCARTS, 1 + folk / 16);
 				yield new Profile(wagons ? CART : HAND, carts + (haven ? HAVEN_CARTS : 0), wagons ? Caravans.CART_LOAD : HAND_LOAD,
 					(wagons ? 1 : 0) + (haven ? HAVEN_GUARDS : 0), false, EnumSet.of(Ware.FOOD, Ware.CLOTH, Ware.HIDE, Ware.TIMBER),
-					EnumSet.of(Ware.STONE, Ware.METAL, Ware.TIMBER, Ware.FOOD),
+					// (hides too, for a town that has no hunters of its own: Andy, 2026-11-19)
+					EnumSet.of(Ware.STONE, Ware.METAL, Ware.TIMBER, Ware.FOOD, Ware.HIDE),
 					new Item[] {Items.WHEAT, Items.BREAD, Items.CARROT, Items.POTATO, Items.STRING, Items.LEATHER});
 			}
 			case HUMAN -> new Profile(HAND, HUMAN_HANDCARTS, HAND_LOAD, CAMP_GUARDS, false, EnumSet.of(Ware.HIDE, Ware.FOOD, Ware.METAL),
@@ -534,12 +535,33 @@ final class TradeRoutes {
 				back = levy(level, fit, most, cap);
 			}
 		}
+		if (Storage.loaded(level, lord) && wants.contains(Ware.FOOD) && hungry(level, home)) {
+			// (Andy, 2026-11-19: "the same way they have caravans of material, there should also be food and hides traded") a home
+			// going short of food buys more of the partner's spare food than its own load paid for, as far as its purse goes: the
+			// carts come home with it, and it's paid for in the settling
+			long room = (long)c.carts().size() * cap - back.stream().mapToInt(m -> m.values().stream().mapToInt(Integer::intValue).sum()).sum();
+			long afford = purse(level, home) * COPPER_PER_EMERALD / Ware.FOOD.worth;
+			int buy = (int)Math.min(Math.min(room, afford), Integer.MAX_VALUE);
+			if (buy > 0) {
+				List<Map<String, Integer>> food = Caravans.loadUp(level, lord, Ware.FOOD::test, ls == null ? Sort.REALM.keep : ls.keep, buy, cap);
+				if (!food.isEmpty()) {
+					List<Map<String, Integer>> both = new ArrayList<>(back);
+					both.addAll(food);
+					back = both;
+				}
+			}
+		}
 		long in = 0L;
 		for (Map<String, Integer> cart : back) {
 			in += worth(cart);
 		}
 		settle(level, home, lord, out, in);
 		return c.turned(fit(back, c.carts().size()), now + Caravans.STOP_TICKS);
+	}
+
+	/** {@code home}'s storehouse holds less food than its people want ({@link Meals#want}). */
+	static boolean hungry(ServerLevel level, Faction home) {
+		return Storage.loaded(level, home) && Storage.food(level, home) < Meals.want(home);
 	}
 
 	/** The goods {@code home} asks for: those of its wants that it holds little of (all of them while its storehouse is out of reach, or if it is well stocked in every one). */

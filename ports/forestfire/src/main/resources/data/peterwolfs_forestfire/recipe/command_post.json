@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "WWW",
+    "WRW",
+    "WWW"
+  ],
+  "key": {
+    "W": "minecraft:oak_planks",
+    "R": "minecraft:red_banner"
+  },
+  "result": {
+    "id": "peterwolfs_forestfire:command_post",
+    "count": 1
+  }
+}

@@ -127,6 +127,8 @@ public final class Skills {
 	static final String TREATED_TAG = "jaymospowers_treated";
 	/** (0.7.102) The entity tag Jaymo's Powers puts on a player for each freerun move ({@code Freerun.XP_TAG}); taken off as it's read. */
 	static final String FREERUN_TAG = "jaymospowers_freerun";
+	/** Put on a player with the Stubborn perk, for Jaymo's Powers (its downed save once a day). */
+	static final String STUBBORN_TAG = "jaymospowers_stubborn";
 	/** Practice: each Stealth level takes this share off how long your hand must stay in a pocket. */
 	static final float PRACTICE_PER_LEVEL = 0.03F;
 	/** Light Fingers: this share off the hold per rank. */
@@ -425,7 +427,24 @@ public final class Skills {
 		SIXTH_SENSE(Pillar.STEALTH, 1, 1, 5, 9, 1, SHADOWED),
 		// the standing backflip (Jaymo's Powers' Acrobatics): the dodge key with Back held alone flips you over backwards in place
 		// of the back roll. On Freerunning under Freerunner; last, so no ordinal moves
-		BACKFLIP(Pillar.STEALTH, 1, 1, 5, 5, 1, FREERUNNER);
+		BACKFLIP(Pillar.STEALTH, 1, 1, 5, 5, 1, FREERUNNER),
+		// Might: the battle rhythm (Jaymo's Powers' BattleRhythm), attacks quickening a step at a time while you keep fighting. Last, so no ordinal moves
+		BATTLE_RHYTHM(Pillar.STRENGTH, 1, 1, 3, 2, 1),
+		// Stubborn: once a day a killing blow leaves you downed, mending fast for 40 s (Jaymo's Powers' Stubborn reads the tag); last, so no ordinal moves
+		STUBBORN(Pillar.SURVIVAL, 1, 2, 8, 4, 1, STEADY_HANDS, FIELD_DRESSER),
+		// the Rogue's Arts, Stealth's fourth page again (its first perks moved into the Thief's tree): the stealth kill, everyone's
+		// (Jaymo's Powers' Finishers, sneak + hold attack behind one who never saw you), made quicker, bare-handed and able
+		// to take bigger foes, and Into the Dark after it ({@link StealthKills}). Last, so no ordinal moves
+		QUICK_WORK(Pillar.STEALTH, 2, 1, 5, 12, 0),
+		SILENT_SNAP(Pillar.STEALTH, 1, 1, 5, 12, 2),
+		BIGGER_GAME(Pillar.STEALTH, 2, 1, 9, 13, 1, QUICK_WORK),
+		INTO_THE_DARK(Pillar.STEALTH, 1, 2, 13, 14, 1, BIGGER_GAME),
+		// (defence disciplines, Andy 2026-11-22) Might: Keen Timing widens the parry windows back to the old ones, Snatch takes
+		// a disarmed foe's weapon into your empty hand (the Thief's tree has it too; every Monk has it), Iron Guard makes a held
+		// guard cheaper (Jaymo's Powers' Guard and PassiveBlocks ask Disciplines). Last, so no ordinal moves
+		KEEN_TIMING(Pillar.STRENGTH, 3, 1, 5, 1, 0),
+		SNATCH(Pillar.STRENGTH, 1, 1, 8, 2, 0),
+		IRON_GUARD(Pillar.STRENGTH, 1, 1, 10, 3, 0);
 
 		/** Tiers this deep and deeper are on a pillar's second page in the tree's screen. */
 		public static final int PAGE_TIERS = 4;
@@ -653,6 +672,7 @@ public final class Skills {
 			NEXT_SNEAK_XP.clear();
 			NEXT_TREAT_XP.clear();
 			RESPEC_OFFERS.clear();
+			StealthKills.clear();
 		});
 		// (0.7.102) freerun moves (Jaymo's Powers tags the player for each one): a little Stealth experience
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
@@ -668,6 +688,11 @@ public final class Skills {
 				if (player.entityTags().contains(TREATED_TAG)) {
 					player.removeTag(TREATED_TAG);
 					treated(player, player.level().getGameTime());
+				}
+				// stealth kills (Powers' Finishers tags the killer): an assassination's experience, and Into the Dark
+				if (player.entityTags().contains(StealthKills.TAG)) {
+					player.removeTag(StealthKills.TAG);
+					StealthKills.killed(player);
 				}
 			}
 		});
@@ -818,7 +843,7 @@ public final class Skills {
 		}
 		int price = respecPrice(player);
 		RESPEC_OFFERS.put(player.getUUID(), wizard.getId());
-		ServerPlayNetworking.send(player, new TalkNet.Ask(wizard.getId(), wizard.getDisplayName(),
+		ServerPlayNetworking.send(player, new TalkNet.Ask(wizard.getId(), Introductions.called(player, wizard),
 			Component.translatable("talk.jaymoskingdoms.wizard.respec", Money.text(player, Money.worth(price))),
 			List.of(Component.translatable("talk.jaymoskingdoms.wizard.respec.yes", Money.text(player, Money.worth(price))), Component.translatable("talk.jaymoskingdoms.wizard.respec.no")),
 			List.of(Money.canPay(player, Money.worth(price)), true)));

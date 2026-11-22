@@ -129,6 +129,8 @@ public final class BossShare {
 				names.add(fight.names.getOrDefault(order.get(pick).getKey(), "?"));
 				harm.add(order.get(pick).getValue());
 			}
+			// (Powerborne picks) a fighter who did a tenth of the harm may be given a costume pattern
+			com.jaymospowers.costume.CostumePatterns.bossReward(player, total > 0.0F ? order.get(me).getValue() / total : 0.0F);
 			int you = Math.min(me, shown - 1);
 			ServerPlayNetworking.send(player, new Card(name, total, names, harm, you));
 		}

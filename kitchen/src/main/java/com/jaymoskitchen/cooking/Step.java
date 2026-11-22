@@ -61,7 +61,7 @@ public enum Step {
 	// optional mods' food (air without the mod; see OptionalItems): Pantry for Blockheads' fruit and vegetables
 	LEMON(() -> pantry("lemon"), null),
 	PEACH(() -> pantry("peach"), null),
-	GRAPES(() -> pantry("grapes"), null),
+	GRAPES(() -> own("grapes"), null, () -> pantry("grapes")),
 	// (0.5.33) the Kitchen's own tomato and onion (delight, looked up by id) come first, Pantry's work as well
 	TOMATO(() -> own("tomato"), null, () -> pantry("tomato")),
 	ONION(() -> own("onion"), null, () -> pantry("onion")),
@@ -145,6 +145,8 @@ public enum Step {
 	LEGEND_FILLET(() -> powers("legend_fillet"), null),
 	// the kettle's tea (hands-on cooking): any of the herbs in the tag
 	TEA_HERB(() -> Items.FERN, null, "tea_herb"),
+	// the Nether's grapes (crimson and warped) for the black wine
+	BLACK_GRAPES(() -> own("crimson_grapes"), null, "black_grape"),
 	// actions: cost nothing, icon is just for the button
 	STIR(() -> Items.STICK, null),
 	FLIP(() -> Items.WOODEN_SHOVEL, null),

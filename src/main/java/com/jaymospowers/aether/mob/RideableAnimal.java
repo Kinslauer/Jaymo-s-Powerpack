@@ -1,5 +1,6 @@
 package com.jaymospowers.aether.mob;
 
+import com.jaymospowers.core.MountClimb;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
@@ -79,6 +80,11 @@ public abstract class RideableAnimal extends Animal {
 	/** How high the rider sits above its feet (blocks). */
 	protected abstract double seatHeight();
 
+	/** How high the rider sits above its feet (blocks), for a climb to aim at ({@code MountClimbPose}). */
+	public final double seatY() {
+		return this.seatHeight();
+	}
+
 	/** The item that calms it: a player holding it can climb on without a saddle (null for none). */
 	protected @Nullable Item calmItem() {
 		return null;
@@ -120,7 +126,7 @@ public abstract class RideableAnimal extends Animal {
 		}
 		Item calm = this.calmItem();
 		if (calm != null && held.is(calm) && !this.isBaby() && !this.isVehicle() && !player.isSecondaryUseActive()) {
-			if (!this.level().isClientSide()) {
+			if (!this.level().isClientSide() && !MountClimb.begin(player, this)) {
 				player.startRiding(this);
 			}
 			return InteractionResult.SUCCESS;
@@ -134,7 +140,7 @@ public abstract class RideableAnimal extends Animal {
 			return InteractionResult.SUCCESS;
 		}
 		if (this.isSaddled() && !this.isBaby() && !this.isVehicle() && !player.isSecondaryUseActive()) {
-			if (!this.level().isClientSide()) {
+			if (!this.level().isClientSide() && !MountClimb.begin(player, this)) {
 				player.startRiding(this);
 			}
 			return InteractionResult.SUCCESS;

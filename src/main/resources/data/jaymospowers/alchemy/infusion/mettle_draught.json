@@ -1,0 +1,22 @@
+{
+  "centre": "minecraft:glass_bottle",
+  "components": [
+    "minecraft:rabbit_foot",
+    "minecraft:phantom_membrane",
+    "minecraft:sugar",
+    "jaymospowers:ichor"
+  ],
+  "essences": {
+    "air": 16,
+    "spirit": 12,
+    "water": 8,
+    "salt": 8
+  },
+  "instability": 6,
+  "result": {
+    "item": "jaymospowers:mettle_draught",
+    "count": 1
+  },
+  "research": "mettle",
+  "flux": 6
+}

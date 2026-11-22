@@ -25,7 +25,7 @@ import net.minecraft.world.entity.player.Player;
 
 /**
  * (0.20.26) What one left for dead carries for the rest of that life ({@link Mortality}, Jungxvv: "permanent character injuries
- * that forever hinder your gameplay"). Nothing cures a scar; a new life ({@link Mortality#endLife}) starts without them.
+ * that forever hinder your gameplay"). Nothing cures a scar (but a symbiote cords a lost eye back: {@link #remove}); a new life ({@link Mortality#endLife}) starts without them.
  * <ul>
  * <li><b>Burns</b> (fire): the skin is thin and tight, so blows and cuts go deeper: less armour and toughness.</li>
  * <li><b>Weak lungs</b> (drowned): {@link #LUNG_FEATHERS} half-feathers of stamina held back for good.</li>
@@ -87,6 +87,24 @@ public final class Scars {
 		player.setAttached(SCARS, List.copyOf(list));
 		apply(player);
 		player.sendSystemMessage(Component.translatable("message.jaymospowers.scar." + kind.key()).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+	}
+
+	/**
+	 * {@code kind} is gone after all, quietly. Only a lost eye has ever been taken back, by a symbiote that cords it
+	 * whole again (WebSymbioteMend); every other scar stays for life.
+	 */
+	public static void remove(ServerPlayer player, Kind kind) {
+		if (!has(player, kind)) {
+			return;
+		}
+		List<String> list = new ArrayList<>(of(player));
+		list.remove(kind.key());
+		if (list.isEmpty()) {
+			player.removeAttached(SCARS);
+		} else {
+			player.setAttached(SCARS, List.copyOf(list));
+		}
+		apply(player);
 	}
 
 	static void clear(ServerPlayer player) {

@@ -1,0 +1,11 @@
+{
+	"required": false,
+	"package": "com.jaymospowers.mixin.tacz",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"TaczLootLookupMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}

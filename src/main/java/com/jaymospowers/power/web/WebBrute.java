@@ -291,8 +291,8 @@ public final class WebBrute {
 	// ===== the keys ==================================================================================================
 
 	private static boolean able(ServerPlayer player) {
-		return player.isAlive() && !player.isSpectator() && WebSymbiote.bulked(player) && !WebSymbiote.driving(player)
-			&& com.jaymospowers.core.Powers.has(player, WebPower.INSTANCE);
+		// (the big body's, whoever wears it: a symbiote host who isn't a web slinger too)
+		return player.isAlive() && !player.isSpectator() && WebSymbiote.bulked(player) && !WebSymbiote.driving(player);
 	}
 
 	private static void press(ServerPlayer player) {

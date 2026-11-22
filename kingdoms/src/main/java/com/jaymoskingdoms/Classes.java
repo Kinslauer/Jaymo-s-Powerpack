@@ -286,6 +286,7 @@ public final class Classes {
 		Clerics.register();
 		Druids.register();
 		Monks.register();
+		JaymosKingdoms.LOGGER.debug("disciplines attachments: {} {}", Disciplines.DATA, MobBlocks.SHOWN);
 		Paladins.register();
 		Rangers.register();
 		Warlocks.register();
@@ -476,8 +477,8 @@ public final class Classes {
 			SecondClass.chosen(player, cls, option);
 			return;
 		}
-		// (Andy, 2026-11-17) a first-class Cleric serves the patron their life story raised them to, if it names one
-		String raised = clericPatron(player, cls);
+		// (Andy, 2026-11-17) a first-class Cleric serves the patron their life story raised them to, if it names one; a Warlock's pact is with it too
+		String raised = storyPatron(player, cls);
 		if (raised != null) {
 			option = raised;
 		}
@@ -535,10 +536,13 @@ public final class Classes {
 			Component.translatable("class.jaymoskingdoms.option." + option)).withStyle(ChatFormatting.GOLD));
 	}
 
-	/** The patron a first-class Cleric must serve: the one their life story says they grew up praying to; null for any other class or no faith. */
-	public static @Nullable String clericPatron(Player player, PlayerClass cls) {
+	/**
+	 * The patron a first-class Cleric serves or a first-class Warlock is pacted to: the one their life story says they grew up
+	 * praying to; null for any other class, no faith, or one the class can't take (a Cleric never serves the Ash Whisperer).
+	 */
+	public static @Nullable String storyPatron(Player player, PlayerClass cls) {
 		String faith = player.getAttached(LifeStory.FAITH);
-		return cls == PlayerClass.CLERIC && faith != null && cls.options.contains(faith) ? faith : null;
+		return (cls == PlayerClass.CLERIC || cls == PlayerClass.WARLOCK) && faith != null && cls.options.contains(faith) ? faith : null;
 	}
 
 	/** The spells a new {@code cls} starts with (a Mage's first, a Cleric's prayer, a Druid's rites, a Warlock's pact). */
@@ -559,6 +563,7 @@ public final class Classes {
 		player.setAttached(CLASS, new Chosen(cls.key(), option, startingSpells(cls, option), 0));
 		refresh(player);
 		begin(player, cls, option);
+		StartingSkills.give(player, cls);
 		// (no class starts with gear, Andy's word: a Mage gets the staff's recipe from a court wizard, or finds one)
 		if (cls == PlayerClass.MAGE) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.class.mage_staff").withStyle(ChatFormatting.GRAY));
@@ -767,7 +772,7 @@ public final class Classes {
 		}
 		Component words = staff ? Component.translatable("talk.jaymoskingdoms.wizard.staff", WRIT_SILVER)
 			: writ ? Component.translatable("talk.jaymoskingdoms.wizard.writ", WRIT_SILVER) : Component.translatable("talk.jaymoskingdoms.healer.ask");
-		ServerPlayNetworking.send(player, new TalkNet.Ask(wizard.getId(), wizard.getDisplayName(), words, options, enabled));
+		ServerPlayNetworking.send(player, new TalkNet.Ask(wizard.getId(), Introductions.called(player, wizard), words, options, enabled));
 	}
 
 	/** An answer to the wizard's offer; false when it wasn't one (0.7.212: then perhaps a cleric's, {@link Restoration#answer}). */

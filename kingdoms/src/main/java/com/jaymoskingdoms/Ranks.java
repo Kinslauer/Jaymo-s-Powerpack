@@ -197,8 +197,10 @@ public final class Ranks {
 	}
 
 	/**
-	 * (Learners, Veterans) {@code v}'s wins may have earned them a rank: if so they take it, with the realm's kit for it
-	 * and (unless {@code quiet}) a few words. One who gets to knight with a bow in hand goes the archers' way.
+	 * (Learners, Veterans) {@code v}'s wins may have earned them a rank: if so they take it and (unless {@code quiet}) say
+	 * a few words. Only a new recruit is issued the realm's kit for their rank, the stock they were taken on in; after
+	 * that they wear what their employer puts in their pack (Andy: "you need to give them what you want them to equip").
+	 * One who gets to knight with a bow in hand goes the archers' way.
 	 */
 	static void rise(VillagerEntityMCA v, boolean quiet) {
 		if (!(v.level() instanceof ServerLevel level)) {
@@ -221,7 +223,9 @@ public final class Ranks {
 		}
 		int code = step | (bow ? BOW : 0);
 		v.setAttached(RANK, code);
-		kit(level, v, code);
+		if (had == null) {
+			kit(level, v, code);
+		}
 		apply(v);
 		if (!quiet && had != null) {
 			level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.ARMOR_EQUIP_IRON.value(), SoundSource.NEUTRAL, 1.0F, 0.9F);
@@ -435,6 +439,31 @@ public final class Ranks {
 		v.setItemSlot(slot, own != null ? own : piece.copy());
 	}
 
+	/**
+	 * From {@code McaEquipmentMixin}: what a recruit ({@link #RANK} given) puts in {@code slot} when MCA dresses or arms
+	 * them with {@code stack}: only what is in their pack (their stock kit and what they were given). Nothing is handed
+	 * out of thin air: what isn't in their pack is nothing. Anyone else's {@code stack} is returned unchanged.
+	 */
+	public static ItemStack owned(LivingEntity villager, ItemStack stack) {
+		if (stack.isEmpty() || !villager.hasAttached(RANK) || !(villager instanceof VillagerEntityMCA v)) {
+			return stack;
+		}
+		return holds(v.getInventory(), stack) ? stack : ItemStack.EMPTY;
+	}
+
+	/**
+	 * From {@code McaEquipmentMixin}: the armour a camp's own villager (a raider, a pirate: {@link Barbarians#isCampVillager})
+	 * puts in a slot when MCA dresses them with {@code stack}: only what is in their pack, their camp's gear. MCA would fill an
+	 * empty slot from its guards' iron set, and a camp doesn't issue plate (Andy, 2026-11-22: "theres no good reason a
+	 * PIRATE's guard is in full plate"). Anyone else's {@code stack} is returned unchanged.
+	 */
+	public static ItemStack campOwned(LivingEntity villager, ItemStack stack) {
+		if (stack.isEmpty() || !Barbarians.isCampVillager(villager) || !(villager instanceof VillagerEntityMCA v)) {
+			return stack;
+		}
+		return holds(v.getInventory(), stack) ? stack : ItemStack.EMPTY;
+	}
+
 	/** The stack in {@code pack} the same as {@code stack}, or null. */
 	private static @Nullable ItemStack held(SimpleContainer pack, ItemStack stack) {
 		for (int i = 0; i < pack.getContainerSize(); i++) {
@@ -502,7 +531,7 @@ public final class Ranks {
 	}
 
 	/** A shield bearing {@code arms}. */
-	private static ItemStack shield(ServerLevel level, Outfits.Heraldry arms) {
+	static ItemStack shield(ServerLevel level, Outfits.Heraldry arms) {
 		ItemStack stack = new ItemStack(Items.SHIELD);
 		stack.set(DataComponents.BASE_COLOR, arms.field());
 		stack.set(DataComponents.BANNER_PATTERNS, Outfits.layers(level.registryAccess(), arms));
@@ -590,8 +619,8 @@ public final class Ranks {
 				continue;
 			}
 			apply(m);
-			if (m.hasAttached(RANK) && !(m instanceof Folk)) {
-				// (a recruit's kit is their own; a party's leader already has his banner)
+			if (m.hasAttached(RANK) && !(m instanceof Folk) || m.entityTags().contains(Downed.DISARMED_TAG)) {
+				// (a recruit's kit is their own; a party's leader already has his banner; one a player disarmed isn't handed a new shield or banner to take again)
 				continue;
 			}
 			if (step(code) == LEADER) {
@@ -599,8 +628,10 @@ public final class Ranks {
 			} else if (!bow(code) && step(code) <= SOLDIER && m.getOffhandItem().isEmpty() && !(m.getMainHandItem().getItem() instanceof ProjectileWeaponItem)
 				&& !net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(m.getMainHandItem().getItem()).getPath().contains("double_axe")) {
 				Faction realm = realm(level, m);
-				if (realm != null) {
-					m.setItemSlot(EquipmentSlot.OFFHAND, shield(level, Outfits.heraldry(realm, level.getServer())));
+				// (a settlement's guard carries the shield it paid for, or none: GuardKit)
+				ItemStack shield = realm == null ? ItemStack.EMPTY : GuardKit.shield(m, shield(level, Outfits.heraldry(realm, level.getServer())));
+				if (!shield.isEmpty()) {
+					m.setItemSlot(EquipmentSlot.OFFHAND, shield);
 					m.setDropChance(EquipmentSlot.OFFHAND, 0.0F);
 				}
 			}

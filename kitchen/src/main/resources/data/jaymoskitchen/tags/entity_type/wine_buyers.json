@@ -1,0 +1,23 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:villager",
+    "minecraft:wandering_trader",
+    {
+      "id": "jaymoskingdoms:folk",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:hornkin",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:hornkin_hurler",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:hornkin_brute",
+      "required": false
+    }
+  ]
+}

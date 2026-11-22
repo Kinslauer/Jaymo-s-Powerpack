@@ -50,7 +50,7 @@ import org.jspecify.annotations.Nullable;
  */
 public final class Outfits {
 	/** Bumped when the looks change enough that folk already in the world should be dressed again. */
-	public static final int VERSION = 3;
+	public static final int VERSION = 4;
 
 	/** A guard's chance of a spear instead of a sword (jungle realms: {@link #JUNGLE_SPEAR_CHANCE}). */
 	static final float GUARD_SPEAR_CHANCE = 0.3F, JUNGLE_SPEAR_CHANCE = 0.7F;

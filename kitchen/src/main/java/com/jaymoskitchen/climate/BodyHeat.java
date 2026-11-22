@@ -48,6 +48,9 @@ import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * (0.5.25) Body heat, our own take on Frostiful and Scorchful (LGPL, no 26.3 builds, so nothing is taken from them).
@@ -86,21 +89,36 @@ public final class BodyHeat {
 	/** Under a roof the land counts this much; a cave far underground sits near {@code CAVE}. */
 	static final float SHELTER = 0.5F, CAVE = 5.0F, CAVE_PULL = 0.75F;
 	static final int CAVE_DEPTH = 10;
-	/** Thin air: this much colder a block above {@code HEIGHT_FROM} over the sea. */
-	static final int HEIGHT_FROM = 40;
-	static final float HEIGHT_COLD = 0.25F;
+	/**
+	 * One of Legendary Survival Overhaul's degrees in body heat, for the numbers taken from it (height, time of day, wet).
+	 * Set so its height cold (6 degrees every 64 blocks) matches what ours was (16 a 64 blocks), and its wet (10 degrees)
+	 * what standing in water was (25).
+	 */
+	static final float LSO_DEGREE = 2.5F;
+	/** Thin air: 6 degrees colder every 64 blocks over the sea. */
+	static final float HEIGHT_COLD = 6.0F * LSO_DEGREE / 64.0F;
+	/** The day's swing in the overworld: this much warmer at noon, as much colder at midnight, smoothly between. */
+	static final float TIME_SWING = 2.0F * LSO_DEGREE;
 	/** Jaymo's Powers' Aether (its own dimension, or its band of a One Dimension world): no thin-air cold there. */
 	static final ResourceKey<Level> AETHER = ResourceKey.create(Registries.DIMENSION, Identifier.fromNamespaceAndPath("jaymospowers", "aether"));
-	static final float RAIN = -15.0F, SNOW = -20.0F, IN_WATER = -25.0F, WET = -10.0F, POWDER_SNOW = -40.0F;
-	/** Soaked through (Jaymo's Powers): this many times the wet chill, and this many times that again on cold land. */
-	static final float SOAKED_CHILL = 2.0F, COLD_SOAK = 1.5F;
+	static final float RAIN = -15.0F, SNOW = -20.0F, POWDER_SNOW = -40.0F;
+	/** Wet through ({@link Wetness}): 10 degrees colder, less as you dry; soaked on cold land, this many times that. */
+	static final float WET = -10.0F * LSO_DEGREE, COLD_SOAK = 1.5F;
 	/** Soaked clothes keep this share of their warmth; wool keeps all of it. */
 	static final float SOAKED_WARMTH = 0.5F;
-	/** Ticks you stay wet after getting out of the water or the rain. */
-	static final int WET_TICKS = 1200;
-	/** Warmth from what's burning close by (at the source; nothing {@link #FIRE_RANGE} blocks off). */
-	static final float FIRE = 30.0F, SOUL_FIRE = 25.0F, LAVA = 45.0F, MAGMA = 12.0F, FURNACE = 18.0F;
-	static final int FIRE_RANGE = 5;
+	/**
+	 * Warmth from what's burning near you (at the source; nothing {@link #FIRE_RANGE} blocks off), and the share of it
+	 * that reaches you under the open sky rather than indoors.
+	 */
+	static final float FIRE = 30.0F, SOUL_FIRE = 25.0F, LAVA = 45.0F, MAGMA = 12.0F, FURNACE = 18.0F, OUTDOORS = 0.5F;
+	static final int FIRE_RANGE = 20;
+	/**
+	 * Looked for every second this close (and {@link #NEAR_HEIGHT} up and down); the rest of {@link #FIRE_RANGE} every
+	 * {@link #FAR_EVERY} seconds ({@link #FIRE_HEIGHT} up and down).
+	 */
+	static final int NEAR_RANGE = 5, NEAR_HEIGHT = 2, FAR_EVERY = 5, FIRE_HEIGHT = 4;
+	/** After spawning or dying, this many ticks in which the world can't push your body further from comfortable. */
+	static final int GRACE_TICKS = 90 * 20;
 	/** Clothes: a warm piece against the cold, the same piece in the heat, a cool piece in the heat. */
 	static final float WARM_PIECE = 9.0F, STUFFY_PIECE = 4.0F, COOL_PIECE = 8.0F;
 	/** Metal in the sun: this much per point of armour. */
@@ -121,8 +139,9 @@ public final class BodyHeat {
 	static final float HURT = 1.0F;
 	/** Heatstroke's sick spells: this long, every this many seconds. */
 	static final int STROKE_NAUSEA = 120, STROKE_EVERY = 20;
-	/** How often (seconds) breath and sweat show. */
+	/** How often (seconds) breath and sweat show; breath shows when the air is this cold, or you are chilly. */
 	static final int PUFF_EVERY = 2;
+	static final float BREATH_AIR = -10.0F * LSO_DEGREE;
 
 	/** Tag for worn clothing that keeps the sun off (robes, turbans; empty until a mod fills it). */
 	public static final TagKey<Item> COOL_CLOTHING = TagKey.create(Registries.ITEM, JaymosKitchen.id("cool_clothing"));
@@ -157,7 +176,12 @@ public final class BodyHeat {
 	/** (0.5.60) Places other mods say the weather never reaches (Powers' Other World): body heat held neutral there. */
 	private static final List<Predicate<Player>> TEMPERATE = new CopyOnWriteArrayList<>();
 
+	/** Held wet through until this game time ({@link #soak}). */
 	private static final Map<UUID, Long> WET_UNTIL = new HashMap<>();
+	/** Spawn and death grace ({@link #GRACE_TICKS}) runs to this game time. */
+	private static final Map<UUID, Long> GRACE_UNTIL = new HashMap<>();
+	/** The far fires' warmth, looked for every {@link #FAR_EVERY} seconds. */
+	private static final Map<UUID, Float> FAR_FIRE = new HashMap<>();
 	private static final Map<UUID, Integer> STATE = new HashMap<>();
 	/** (Hardrock picks) The place's own push on each player, from the last {@link #ambient}: see {@link Heat#air}. */
 	private static final Map<UUID, Float> BARE = new HashMap<>();
@@ -171,11 +195,17 @@ public final class BodyHeat {
 	}
 
 	/**
-	 * For other mods (by reflection): {@code player} is soaked through, and stays wet for {@code ticks} from now if that
-	 * is longer than they would have (Kingdoms' downpours: plain rain leaves you wet for {@link #WET_TICKS}).
+	 * For other mods (by reflection): {@code player} is soaked through ({@link Wetness}), and stays so for {@code ticks}
+	 * from now before drying starts (Kingdoms' downpours).
 	 */
 	public static void soak(ServerPlayer player, int ticks) {
+		Wetness.set(player, Wetness.MAX);
 		WET_UNTIL.merge(player.getUUID(), player.level().getGameTime() + ticks, Math::max);
+	}
+
+	/** Spawned or come back from dying: {@link #GRACE_TICKS} of the world not making your body heat any worse. */
+	static void grace(ServerPlayer player) {
+		GRACE_UNTIL.put(player.getUUID(), player.level().getGameTime() + GRACE_TICKS);
 	}
 
 	/** For other mods (by reflection): more weather on players, in body heat. */
@@ -214,6 +244,8 @@ public final class BodyHeat {
 
 	static void forget(UUID id) {
 		WET_UNTIL.remove(id);
+		GRACE_UNTIL.remove(id);
+		FAR_FIRE.remove(id);
 		STATE.remove(id);
 		BARE.remove(id);
 		Warmth.forget(id);
@@ -254,8 +286,11 @@ public final class BodyHeat {
 
 	static void tick(ServerPlayer player) {
 		long now = player.level().getGameTime();
-		if (player.isInWaterOrRain()) {
-			WET_UNTIL.put(player.getUUID(), now + WET_TICKS);
+		if (now % Wetness.STEP == 0L) {
+			Wetness.step(player);
+			if (WET_UNTIL.getOrDefault(player.getUUID(), 0L) > now) {
+				Wetness.set(player, Wetness.MAX);
+			}
 		}
 		float body = body(player);
 		if (body <= FREEZING && !temperate(player)) {
@@ -285,18 +320,25 @@ public final class BodyHeat {
 		if (ambient < body && body <= 0.0F) {
 			drift *= Math.max(0.2F, 1.0F - WARM_SLOWS * warmPieces(player));
 		}
-		body = Mth.clamp(body + (ambient - body) * drift, MIN, MAX);
+		float next = Mth.clamp(body + (ambient - body) * drift, MIN, MAX);
+		if (Math.abs(next) > Math.abs(body) && GRACE_UNTIL.getOrDefault(player.getUUID(), 0L) > level.getGameTime()) {
+			// just spawned or back from dying: the world can't make it worse yet, only better
+			next = body;
+		}
+		body = next;
 		set(player, new Heat(body, ambient, BARE.getOrDefault(player.getUUID(), ambient)));
 		announce(player, body);
 
 		boolean downed = player.entityTags().contains(DOWNED_TAG);
+		if ((body <= CHILLY || BARE.getOrDefault(player.getUUID(), 0.0F) <= BREATH_AIR) && seconds % PUFF_EVERY == 0L
+			&& !player.isUnderWater()) {
+			// breath steaming in the cold: a small puff from the mouth, drifting the way you face (seen by everyone)
+			Vec3 look = player.getLookAngle();
+			level.sendParticles(ParticleTypes.WHITE_SMOKE, player.getX() + look.x * 0.3, player.getEyeY() - 0.15 + look.y * 0.3,
+				player.getZ() + look.z * 0.3, 0, look.x, look.y * 0.5 + 0.1, look.z, 0.04);
+		}
 		if (body <= CHILLY) {
 			player.causeFoodExhaustion(body <= FREEZING ? CHILL_EXHAUSTION * 2.0F : CHILL_EXHAUSTION);
-			if (seconds % PUFF_EVERY == 0L) {
-				// breath steaming in the cold
-				level.sendParticles(ParticleTypes.CLOUD, player.getX() + player.getLookAngle().x * 0.4, player.getEyeY() - 0.1,
-					player.getZ() + player.getLookAngle().z * 0.4, 1, 0.05, 0.02, 0.05, 0.005);
-			}
 			if (body <= FROSTBITE && !downed && seconds % HURT_EVERY == 0L) {
 				player.hurtServer(level, player.damageSources().freeze(), HURT);
 			}
@@ -378,7 +420,12 @@ public final class BodyHeat {
 			} else {
 				land *= SHELTER;
 			}
-			int above = at.getY() - level.getSeaLevel() - HEIGHT_FROM;
+			if (realm == Level.OVERWORLD && (sky || at.getY() >= level.getSeaLevel() - CAVE_DEPTH)) {
+				// warmest at noon, coldest at midnight (the clock's noon is 6000)
+				long time = level.getOverworldClockTime() % 24000L;
+				land += TIME_SWING * (float) Math.cos((time - 6000L) / 24000.0 * Math.PI * 2.0);
+			}
+			int above = at.getY() - level.getSeaLevel();
 			// the Aether's islands keep their own weather: its height is the sky's, not thin air over the Overworld's sea
 			// (stacked over the Overworld it stands hundreds of blocks up, which read as deep frostbite)
 			if (above > 0 && realm != AETHER) {
@@ -402,23 +449,14 @@ public final class BodyHeat {
 		} else if (falling == Biome.Precipitation.SNOW) {
 			air += SNOW;
 		}
-		if (player.isInWater()) {
-			air += IN_WATER;
-		} else if (Wetness.known()) {
-			// Jaymo's Powers' Wet and Soaked: soaked through is twice the chill, and worse again on cold land
-			if (Wetness.soaked(player)) {
-				air += WET * SOAKED_CHILL * (land < 0.0F ? COLD_SOAK : 1.0F);
-			} else if (Wetness.wet(player)) {
-				air += WET;
-			}
-		} else if (WET_UNTIL.getOrDefault(player.getUUID(), 0L) > level.getGameTime()) {
-			air += WET;
-		}
+		// the one wet term, in the water or out of it: the meter (Jaymo's Powers' Wet and Soaked feed it), worse soaked on cold land
+		air += WET * Wetness.share(player) * (Wetness.soaked(player) && land < 0.0F ? COLD_SOAK : 1.0F);
 		if (player.isInPowderSnow) {
 			air += POWDER_SNOW;
 		}
 
-		air += fire(level, at);
+		// the Nether's open caverns count as out of doors: it's no building, and lava is everywhere
+		air += fire(player, sky || realm == Level.NETHER);
 		// (Hardrock picks) a lit hearth's or icebox's room
 		air = Warmth.room(player, air);
 
@@ -452,29 +490,77 @@ public final class BodyHeat {
 		return Mth.clamp(air, MIN - 10.0F, MAX + 10.0F);
 	}
 
-	/** Warmth from the fires, lava and lit furnaces close by: the strongest, less with distance. */
-	static float fire(ServerLevel level, BlockPos at) {
+	/**
+	 * Warmth from the fires, lava and lit furnaces within {@link #FIRE_RANGE}: the strongest, less with distance, and
+	 * less again out under the sky ({@link #OUTDOORS}). The near ones are looked for every second, the far ones every
+	 * {@link #FAR_EVERY} seconds, skipping whole chunk sections with nothing hot in them.
+	 */
+	static float fire(ServerPlayer player, boolean outdoors) {
+		ServerLevel level = player.level();
+		BlockPos at = player.blockPosition();
+		UUID id = player.getUUID();
+		if (level.getGameTime() / 20L % FAR_EVERY == 0L || !FAR_FIRE.containsKey(id)) {
+			FAR_FIRE.put(id, fire(level, at, FIRE_RANGE, FIRE_HEIGHT));
+		}
+		float best = Math.max(fire(level, at, NEAR_RANGE, NEAR_HEIGHT), FAR_FIRE.get(id));
+		return outdoors ? best * OUTDOORS : best;
+	}
+
+	/** The strongest warmth reaching {@code at} from within {@code range} across and {@code height} up and down. */
+	private static float fire(ServerLevel level, BlockPos at, int range, int height) {
 		float best = 0.0F;
-		for (BlockPos pos : BlockPos.betweenClosed(at.offset(-FIRE_RANGE + 1, -1, -FIRE_RANGE + 1), at.offset(FIRE_RANGE - 1, 2, FIRE_RANGE - 1))) {
-			BlockState state = level.getBlockState(pos);
-			float strength;
-			if (state.is(Blocks.LAVA)) {
-				strength = LAVA;
-			} else if (state.is(Blocks.SOUL_FIRE) || state.is(Blocks.SOUL_CAMPFIRE) && CampfireBlock.isLitCampfire(state)) {
-				strength = SOUL_FIRE;
-			} else if (state.is(BlockTags.FIRE) || state.is(BlockTags.CAMPFIRES) && CampfireBlock.isLitCampfire(state)) {
-				strength = FIRE;
-			} else if (state.is(Blocks.MAGMA_BLOCK)) {
-				strength = MAGMA;
-			} else if (state.getBlock() instanceof AbstractFurnaceBlock && state.getValue(AbstractFurnaceBlock.LIT)) {
-				strength = FURNACE;
-			} else {
-				continue;
+		int minY = Math.max(level.getMinY(), at.getY() - height), maxY = Math.min(level.getMaxY(), at.getY() + height);
+		for (int cx = (at.getX() - range) >> 4; cx <= (at.getX() + range) >> 4; cx++) {
+			for (int cz = (at.getZ() - range) >> 4; cz <= (at.getZ() + range) >> 4; cz++) {
+				LevelChunk chunk = level.getChunkSource().getChunkNow(cx, cz);
+				if (chunk == null) {
+					continue;
+				}
+				for (int sy = minY >> 4; sy <= maxY >> 4; sy++) {
+					int index = chunk.getSectionIndexFromSectionY(sy);
+					if (index < 0 || index >= chunk.getSectionsCount()) {
+						continue;
+					}
+					LevelChunkSection section = chunk.getSection(index);
+					if (section.hasOnlyAir() || !section.maybeHas(state -> heatOf(state) > 0.0F)) {
+						continue;
+					}
+					int x0 = Math.max(cx << 4, at.getX() - range), x1 = Math.min((cx << 4) + 15, at.getX() + range);
+					int z0 = Math.max(cz << 4, at.getZ() - range), z1 = Math.min((cz << 4) + 15, at.getZ() + range);
+					int y0 = Math.max(sy << 4, minY), y1 = Math.min((sy << 4) + 15, maxY);
+					for (int y = y0; y <= y1; y++) {
+						for (int x = x0; x <= x1; x++) {
+							for (int z = z0; z <= z1; z++) {
+								float strength = heatOf(section.getBlockState(x & 15, y & 15, z & 15));
+								if (strength <= best) {
+									continue;
+								}
+								double dx = x - at.getX(), dy = y - at.getY(), dz = z - at.getZ();
+								float near = 1.0F - (float) Math.sqrt(dx * dx + dy * dy + dz * dz) / FIRE_RANGE;
+								best = Math.max(best, strength * near);
+							}
+						}
+					}
+				}
 			}
-			float near = 1.0F - (float) Math.sqrt(pos.distSqr(at)) / FIRE_RANGE;
-			best = Math.max(best, strength * near);
 		}
 		return best;
+	}
+
+	/** How much warmth a block gives off at its source (0 for none). */
+	private static float heatOf(BlockState state) {
+		if (state.is(Blocks.LAVA)) {
+			return LAVA;
+		} else if (state.is(Blocks.SOUL_FIRE) || state.is(Blocks.SOUL_CAMPFIRE) && CampfireBlock.isLitCampfire(state)) {
+			return SOUL_FIRE;
+		} else if (state.is(BlockTags.FIRE) || state.is(BlockTags.CAMPFIRES) && CampfireBlock.isLitCampfire(state)) {
+			return FIRE;
+		} else if (state.is(Blocks.MAGMA_BLOCK)) {
+			return MAGMA;
+		} else if (state.getBlock() instanceof AbstractFurnaceBlock && state.getValue(AbstractFurnaceBlock.LIT)) {
+			return FURNACE;
+		}
+		return 0.0F;
 	}
 
 	/** Jaymo's Powers' studded leather (optional: an unknown tag matches nothing): all four pieces worn count as one warm piece. */

@@ -1,0 +1,6 @@
+{
+  "parent": "jaymoskitchen:block/template_crop_cross",
+  "textures": {
+    "cross": "jaymoskitchen:block/grape_vine_2_netted"
+  }
+}

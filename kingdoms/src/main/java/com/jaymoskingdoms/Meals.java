@@ -58,8 +58,9 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  * The <b>price of a meal</b> follows the larder ({@link #index}): food short for the town's size makes it dear (and
  * the townsfolk grumble and sour), plenty makes it cheap (and they're content). A realm with a full larder sells its
- * surplus to the merchants, and one running short buys bread in out of its treasury ({@link #trade}). Nothing to be had
- * at all, and they go without.
+ * surplus to the merchants, and one running short sends its carts out at once to buy food from a trading partner
+ * ({@link #trade}, {@link TradeRoutes#arrive}). Nothing to be had
+ * at all, and they go without, and a town that keeps going without starves ({@link TownHunger}).
  * <p>
  * Each cookhouse and tavern takes on a <b>cook</b> ({@link Professions#COOK}) from the town's idle villagers. By day
  * the cook works there turning the storehouse's raw food into dishes (bread, baked potatoes, cooked meat, soups and
@@ -93,8 +94,6 @@ public final class Meals {
 	static final int DEAR_MOOD = -1, CHEAP_MOOD = 1, TAVERN_MOOD = 1, WENT_WITHOUT_MOOD = -2;
 	/** The food trade (realms, once a day): surplus over this many times the want sold, this many items at most, this many to an emerald. */
 	static final int SURPLUS_TIMES = 3, TRADE_MOST = 32, SELL_PER_EMERALD = 8;
-	/** ...and short below half the want: bread bought in, this many loaves to an emerald. */
-	static final int BUY_PER_EMERALD = 4;
 	/** The food trade's hour (time of day). */
 	static final long TRADE_AT = 1000L;
 	/** A cook: their hours (time of day), a batch per this many ticks, how near the eatery they're at work, how far they're sought. */
@@ -141,6 +140,8 @@ public final class Meals {
 		Item dish = Items.BREAD;
 		boolean served;
 		final boolean tavern;
+		/** (Needs) a bite between meals: if nothing can be had, it isn't counted as a meal missed. */
+		boolean snack;
 
 		Meal(int faction, Way way, BlockPos to, BlockPos at, long started, int length, boolean tavern) {
 			this.faction = faction;
@@ -158,6 +159,9 @@ public final class Meals {
 	}
 
 	private static final Map<UUID, Meal> EATING = new HashMap<>();
+	/** (Needs) When each last went for a bite between meals, and how long before they try again (ticks). */
+	private static final Map<UUID, Long> SNACKED = new HashMap<>();
+	static final long SNACK_GAP = 2400L;
 	/** Who's had which meal (day * 2 + the meal). */
 	private static final Map<UUID, Long> FED = new HashMap<>();
 	/** A home cook's portions left of the last item they took. */
@@ -181,6 +185,7 @@ public final class Meals {
 		ServerTickEvents.END_SERVER_TICK.register(Meals::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			EATING.clear();
+			SNACKED.clear();
 			FED.clear();
 			PANTRY.clear();
 			STOVES.clear();
@@ -278,6 +283,7 @@ public final class Meals {
 				if (Festivals.going(v)) {
 					// (a festival's table feeds them)
 					FED.put(v.getUUID(), day * 2 + slot);
+					TownHunger.ate(v);
 					continue;
 				}
 				FED.put(v.getUUID(), day * 2 + slot);
@@ -298,6 +304,27 @@ public final class Meals {
 		}
 		String job = BuiltInRegistries.VILLAGER_PROFESSION.getKey(v.getVillagerData().profession().value()).getPath();
 		return !job.equals("guard") && !job.equals("archer");
+	}
+
+	/**
+	 * ({@link Needs}) {@code v} is hungry outside mealtimes: a bite, had the way a meal is (cooked at home from the
+	 * storehouse, or bought in town). False if they can't just now.
+	 */
+	static boolean snack(ServerLevel level, Faction f, Villager v) {
+		long now = level.getGameTime();
+		if (EATING.containsKey(v.getUUID()) || f.type() == FactionType.BARBARIAN || v.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(f.seat())) > WATCHED * WATCHED
+			|| now - SNACKED.getOrDefault(v.getUUID(), Long.MIN_VALUE / 2) < SNACK_GAP || !fit(v, Royals.timeOfDay(level))
+			|| f.type().isRealm() && Spirits.hungry(level, f)) {
+			// (nothing in the storehouse: no use going for a bite)
+			return false;
+		}
+		SNACKED.put(v.getUUID(), now);
+		start(level, f, v, eateries(level, f), Festivals.day(level), now);
+		Meal m = EATING.get(v.getUUID());
+		if (m != null) {
+			m.snack = true;
+		}
+		return true;
 	}
 
 	/** {@code v} goes for their meal: home to their stove if they've one and food to cook, else to buy one. */
@@ -342,9 +369,13 @@ public final class Meals {
 			m.arrived = now;
 			if (!serve(level, f, v, m)) {
 				say(level, v, "none", random);
-				McaCompat.cheer(v, WENT_WITHOUT_MOOD);
+				if (!m.snack) {
+					McaCompat.cheer(v, WENT_WITHOUT_MOOD);
+					TownHunger.wentWithout(level, v);
+				}
 				return false;
 			}
+			TownHunger.ate(v);
 		}
 		v.getNavigation().stop();
 		v.getLookControl().setLookAt(m.at.getX() + 0.5, m.at.getY() + 0.5, m.at.getZ() + 0.5);
@@ -793,16 +824,12 @@ public final class Meals {
 				Factions.update(server, f.id(), x -> x.withTreasury(x.treasury() + emeralds));
 			}
 			JaymosKingdoms.LOGGER.debug("{} sold {} food for {} emeralds", f.name(), sold, emeralds);
-		} else if (stock < want / 2 && f.treasury() > 0) {
-			int need = Math.min(TRADE_MOST, want - stock);
-			long cost = Math.min(f.treasury(), (need + BUY_PER_EMERALD - 1) / BUY_PER_EMERALD);
-			int bought = (int)Math.min(need, cost * BUY_PER_EMERALD);
-			int lost = Storage.put(level, f, Items.BREAD, bought);
-			long paid = (bought - lost + BUY_PER_EMERALD - 1) / BUY_PER_EMERALD;
-			if (paid > 0) {
-				Factions.update(server, f.id(), x -> x.withTreasury(Math.max(0L, x.treasury() - paid)));
-			}
-			JaymosKingdoms.LOGGER.debug("{} bought {} bread for {} emeralds", f.name(), bought - lost, paid);
+		} else if (stock < want / 2 && f.treasury() > 0
+			&& Caravans.ledger(server).caravans().values().stream().noneMatch(c -> c.home() == f.id() && !c.smuggle())) {
+			// (Andy, 2026-11-19: no food out of nowhere) it sends its carts out now to buy food from a trading partner, paid for out of
+			// its treasury when they get there (TradeRoutes#arrive): it comes in on the road, or not at all if the partner has none
+			// to spare or the carts are robbed
+			TradeRoutes.start(level, f, true);
 		}
 	}
 

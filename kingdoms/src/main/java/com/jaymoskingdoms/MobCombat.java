@@ -75,6 +75,13 @@ public final class MobCombat {
 	static final int MIN_SWING_TICKS = 10, MAX_SWING_TICKS = 40;
 	/** The blow lands no sooner than this into the swing (ticks). */
 	static final int MIN_UPSWING_TICKS = 4;
+	/**
+	 * Andy: "the barbarian that approached seemed unable to hit them himself". A spider small enough to squash
+	 * ({@link com.jaymoskingdoms.wild.SpiderSquash#squashable}) skitters a block or two in a slow swing's wind-up and was
+	 * out of reach when the blow fell, every time. At one the blow comes down at once ({@link #MIN_UPSWING_TICKS}), and
+	 * still finds it this much further off (blocks) than the reach (it dies to one blow).
+	 */
+	static final double SMALL_FOE_SLACK = 1.0;
 	/** A pause between swings (ticks), on top of the swing itself. */
 	static final int RECOVERY_TICKS = 4;
 	/** The combo starts over after this long without a swing (ticks). */
@@ -106,6 +113,8 @@ public final class MobCombat {
 	 * those. The tag Jaymo's Powers' guard reads while a heavy blow lands.
 	 */
 	static final double HEAVY_DAMAGE = 1.4;
+	/** (enemy damage balance) When a combo comes round to a heavy move, the chance it's thrown (else a plain one is). */
+	static final float HEAVY_PICK_CHANCE = 0.25F;
 	static final int TELL_COLOR = 0xFFFFFF, HEAVY_TELL_COLOR = 0xE02020;
 	static final float TELL_SIZE = 1.2F;
 	public static final String UNPARRYABLE_TAG = "jaymospowers.unparryable";
@@ -252,7 +261,7 @@ public final class MobCombat {
 			length = Math.max(MIN_SWING_TICKS, (int) Math.round(length * QUICK_SWING));
 			swing.quickUntil = 0;
 		}
-		int upswing = Math.max(MIN_UPSWING_TICKS, (int) Math.round(length * move.upswing()));
+		int upswing = small(target) ? MIN_UPSWING_TICKS : Math.max(MIN_UPSWING_TICKS, (int) Math.round(length * move.upswing()));
 		tell(level, mob, heavy(moves, move));
 		swing.target = target;
 		swing.move = move;
@@ -343,7 +352,7 @@ public final class MobCombat {
 			return;
 		}
 		int length = swingTicks(mob);
-		int upswing = Math.max(MIN_UPSWING_TICKS, (int) Math.round(length * PLAIN_UPSWING));
+		int upswing = small(target) ? MIN_UPSWING_TICKS : Math.max(MIN_UPSWING_TICKS, (int) Math.round(length * PLAIN_UPSWING));
 		tell(level, mob, plainHeavy(mob));
 		swing.target = target;
 		swing.move = null;
@@ -377,7 +386,7 @@ public final class MobCombat {
 	/** (0.7.283) The plain blow lands on its one target, if it's still in reach and sight; a miss is heard. */
 	private static void plainStrike(ServerLevel level, Mob mob, @Nullable LivingEntity target) {
 		if (target == null || !target.isAlive() || target.level() != level
-			|| gap(mob, target) > BASE_REACH + 0.25 && !mob.isWithinMeleeAttackRange(target) || !mob.getSensing().hasLineOfSight(target)) {
+			|| gap(mob, target) > BASE_REACH + 0.25 + slack(target) && !mob.isWithinMeleeAttackRange(target) || !mob.getSensing().hasLineOfSight(target)) {
 			level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, mob.getSoundSource(), 0.6F, 0.8F);
 			return;
 		}
@@ -473,7 +482,17 @@ public final class MobCombat {
 		if (!WeaponForms.experienced(mob)) {
 			usable = WeaponForms.basic(usable, Move::animation);
 		}
-		return usable.get(Math.floorMod(combo, usable.size()));
+		Move move = usable.get(Math.floorMod(combo, usable.size()));
+		if (!moves.twoHanded() && heavy(moves, move) && mob.getRandom().nextFloat() >= HEAVY_PICK_CHANCE) {
+			// (enemy damage balance, Andy: basic attacks most of the time, the heavy ones only now and then) a heavy move in
+			// the combo is mostly swapped for a plain one; a two-handed weapon's every blow is heavy, so it keeps them
+			for (Move plain : usable) {
+				if (!heavy(moves, plain)) {
+					return plain;
+				}
+			}
+		}
+		return move;
 	}
 
 	/** A swing's length (ticks): the weapon's attack speed, slowed for mobs. */
@@ -502,6 +521,16 @@ public final class MobCombat {
 				}
 			});
 		return add[0] * (1.0 + add[1]) * add[2];
+	}
+
+	/** Whether {@code target} is a spider small enough to squash: struck quick ({@link #SMALL_FOE_SLACK}). */
+	private static boolean small(LivingEntity target) {
+		return com.jaymoskingdoms.wild.SpiderSquash.squashable(target);
+	}
+
+	/** How much further off than the reach a blow still finds {@code target}. */
+	private static double slack(LivingEntity target) {
+		return small(target) ? SMALL_FOE_SLACK : 0.0;
 	}
 
 	/** Distance from the mob's eyes to the nearest point of the target's box. */
@@ -567,7 +596,7 @@ public final class MobCombat {
 		float yaw = mob.getYHeadRot();
 		Vec3 facing = Vec3.directionFromRotation(0.0F, yaw);
 		List<LivingEntity> hits = new ArrayList<>();
-		if (primary != null && primary.isAlive() && gap(mob, primary) <= reach + 0.25 && mob.getSensing().hasLineOfSight(primary)) {
+		if (primary != null && primary.isAlive() && gap(mob, primary) <= reach + 0.25 + slack(primary) && mob.getSensing().hasLineOfSight(primary)) {
 			hits.add(primary);
 		}
 		for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class, mob.getBoundingBox().inflate(reach + 1.0),

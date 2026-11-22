@@ -20,10 +20,15 @@ Inbox tasks (each syncs first and after, so everyone sees the change at once):
     python tools/vault_sync.py --reviewer-seen         # the PC reviewer, every round: "I'm here" (Reviewer.md)
     python tools/vault_sync.py --reviewer-away [30]    # in-review tasks, but only if the reviewer hasn't been seen
                                                        # for 30 minutes: the coordinator then reviews them itself
+    python tools/vault_sync.py --next hermes-a         # a bot's next job in one command: resume its own claim or take
+                                                       # the next task, then print the steps for it (exit 3 if none)
+    python tools/vault_sync.py --health                # print what's wrong in the live notes (detect only)
+    python tools/vault_sync.py --weekly [days]         # print a review of the last 7 (or N) days
 
 Task statuses: open -> claimed -> in-review -> (changes -> in-review)* -> ready -> sent -> done; blocked = waiting on Andy (moved to Inbox/Done/).
 Kanban.md: every sync rewrites a board of the Inbox (Waiting / Being built / In review / Needs Andy / Done) for
 Obsidian's Kanban plugin. It is read-only: change tasks with --set, not by dragging cards.
+Dashboard.md, Health.md and Weekly/ are written after the Kanban by tools/vault_reports.py (see its docstring).
 Stale work: a claim or running agent note with no sign of work for 30 minutes is handed back or marked stalled, and a running
 note whose task is done is moved to Done (tidy_stale), so dead runs don't sit in Being built.
 Merged PRs: every sync marks an agent note or Inbox task whose pr: is merged into master as done and moves it to
@@ -48,7 +53,8 @@ import sys
 import time
 
 BRANCH = "vault-live"
-TASK_COMMANDS = ("--claim", "--review-queue", "--tasks", "--show", "--set", "--note", "--send", "--new", "--reviewer-seen", "--reviewer-away")
+TASK_COMMANDS = ("--claim", "--review-queue", "--tasks", "--show", "--set", "--note", "--send", "--new", "--reviewer-seen", "--reviewer-away",
+                 "--next", "--health", "--weekly")
 REVIEWER_AWAY_MINUTES = 30  # no reviewer round for this long: the coordinator reviews in-review tasks itself
 SEED = {  # written by --setup when the branch doesn't exist yet
     ".gitattributes": "Decisions.md merge=union\n*.md text eol=lf\n",
@@ -399,6 +405,14 @@ def sync(live):
                     git(live, "commit", "-q", "-m", "Kanban board")
             except Exception as e:
                 print(f"(kanban skipped: {e})", file=sys.stderr)
+            try:  # Dashboard, Health and the weekly review (tools/vault_reports.py)
+                changed = reports().write_all(live, sys.modules[__name__])
+                if changed:
+                    git(live, "add", "--", *changed)
+                    if git(live, "diff", "--cached", "--quiet", check=False).returncode != 0:
+                        git(live, "commit", "-q", "-m", "Vault reports")
+            except Exception as e:
+                print(f"(reports skipped: {e})", file=sys.stderr)
             if git(live, "push", "-q", "origin", f"HEAD:refs/heads/{BRANCH}", check=False).returncode == 0:
                 break
             time.sleep(2 ** attempt)
@@ -410,6 +424,12 @@ def sync(live):
             os.remove(lock)
         except OSError:
             pass
+
+
+def reports():
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import vault_reports
+    return vault_reports
 
 
 def frontmatter(path):
@@ -570,6 +590,7 @@ def claim(live, agent, fixes=False):
     sys.stdout.reconfigure(encoding="utf-8")
     print(f"Task: {pick[1]}  ({path})\n")
     print(open(path, encoding="utf-8").read())
+    return pick[1]
 
 
 def new_task(live, name, props, body):
@@ -606,6 +627,21 @@ def task_command(live):
         for _, name, _ in review_queue(live):
             print(name)
         return
+    if cmd == "--next":
+        names = [a for a in rest if not a.startswith("--")]
+        return reports().next_job(live, sys.modules[__name__], names[0] if names else "any")
+    if cmd == "--health":
+        sys.stdout.reconfigure(encoding="utf-8")
+        r = reports()
+        return print(r.health_text(r.health(live, sys.modules[__name__])))
+    if cmd == "--weekly":
+        import datetime
+        days = int(rest[0]) if rest and rest[0].isdigit() else 7
+        until = datetime.date.today()
+        since = until - datetime.timedelta(days=days - 1)
+        sys.stdout.reconfigure(encoding="utf-8")
+        return print(reports().weekly_text(live, sys.modules[__name__], since.isoformat(), until.isoformat(),
+                                           f"The last {days} days"))
     if cmd == "--review-queue":
         for _, name, _ in review_queue(live):
             print(name)

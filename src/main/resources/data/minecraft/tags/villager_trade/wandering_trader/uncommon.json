@@ -13,6 +13,17 @@
     "jaymospowers:tinkering/wandering_trader/blueprint_ring_frame",
     "jaymospowers:tinkering/wandering_trader/blueprint_amulet_frame",
     "jaymospowers:tinkering/wandering_trader/blueprint_bracelet_frame",
-    "jaymospowers:tinkering/wandering_trader/blueprint_circlet_frame"
+    "jaymospowers:tinkering/wandering_trader/blueprint_circlet_frame",
+    "jaymospowers:costume/wandering_trader/pattern_cut_striped",
+    "jaymospowers:costume/wandering_trader/pattern_cut_harlequin",
+    "jaymospowers:costume/wandering_trader/pattern_cut_scaled",
+    "jaymospowers:costume/wandering_trader/pattern_mask_domino",
+    "jaymospowers:costume/wandering_trader/pattern_mask_masquerade",
+    "jaymospowers:costume/wandering_trader/pattern_mask_scarf",
+    "jaymospowers:costume/wandering_trader/pattern_mask_cowl",
+    "jaymospowers:costume/wandering_trader/pattern_mask_skull",
+    "jaymospowers:costume/wandering_trader/pattern_mask_visored",
+    "jaymospowers:costume/wandering_trader/pattern_cape_scalloped",
+    "jaymospowers:costume/wandering_trader/pattern_cape_trailing"
   ]
 }

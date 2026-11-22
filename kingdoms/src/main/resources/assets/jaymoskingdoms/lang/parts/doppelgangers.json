@@ -1,0 +1,17 @@
+{
+  "gui.jaymoskingdoms.story.fate_all": "Leave it all to fate",
+  "gui.jaymoskingdoms.story.fate_all.desc": "Nothing more is asked or shown. Your blood, your past, your face and name, your calling and where you wake are all left to fate, and you begin at once.",
+  "gui.jaymoskingdoms.story.past_face": "Wear a kept face: %s",
+  "gui.jaymoskingdoms.story.past_face.desc": "Skip the story with the face and life you kept from one that ended. You can still change any of it in the creator. Some who knew that face may look at you twice.",
+  "gui.jaymoskingdoms.doppel.ask": "%s is gone. Keep the face?",
+  "gui.jaymoskingdoms.doppel.desc": "A face can walk the world again on someone else. Keep %s's look, name and life as a preset, and a later life can be born wearing it: a doppelganger, who never lived what that face did. Those who knew it may look twice.",
+  "gui.jaymoskingdoms.doppel.keep": "Keep the face",
+  "gui.jaymoskingdoms.doppel.drop": "Let it go",
+  "gui.jaymoskingdoms.doppel.unnamed": "Your old self",
+  "doppel.jaymoskingdoms.familiar.0": "Have we met? ...No. No, we can't have.",
+  "doppel.jaymoskingdoms.familiar.1": "You have a face I know. Never mind.",
+  "doppel.jaymoskingdoms.familiar.2": "For a moment I took you for someone else.",
+  "doppel.jaymoskingdoms.familiar.3": "You look like... no. Forget I said it.",
+  "doppel.jaymoskingdoms.familiar.4": "Strange. I'd have sworn I knew you once.",
+  "doppel.jaymoskingdoms.familiar.5": "That face... It's nothing. Go on."
+}

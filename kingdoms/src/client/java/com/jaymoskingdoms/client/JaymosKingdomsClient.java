@@ -36,14 +36,20 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.wild.nest.SilkDeeps.place();
 		// (0.7.180) whose names this client's player knows
 		com.jaymoskingdoms.Introductions.viewer = () -> net.minecraft.client.Minecraft.getInstance().player;
+		// and lines naming someone they don't know call them what they are
+		IntroNames.register();
 		// great foes' themes, and the trophy stand's item
 		com.jaymoskingdoms.client.music.FoeMusicClient.register();
+		com.jaymoskingdoms.client.music.SkirmishMusic.register();
 		com.jaymoskingdoms.client.music.SceneMusic.register();
+		com.jaymoskingdoms.client.music.PlaceMusic.register();
 		com.jaymoskingdoms.client.trophies.TrophyStandRenderer.register();
 		EntityRenderers.register(JaymosKingdoms.FOLK, FolkRenderer::new);
 		// (Andy, 2026-11-06) what is beyond this player's tier, off JEI and the recipe book
 		TierHidingClient.register();
 		LocksClient.register();
+		// (ff-kit) Peterwolf's firefighter readout on our HUD layout, only while carrying the kit
+		ForestFireHud.register();
 		// (0.7.329) the second batch of Blockbench Workshop creatures
 		com.jaymoskingdoms.client.beasts.BeastsClient.register();
 		EntityRenderers.register(com.jaymoskingdoms.FallingTree.TYPE, FallingTreeRenderer::new);
@@ -145,6 +151,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		PartyClient.register();
 		// 0.5.50: the traveller's journal on M
 		JournalClient.register();
+		AimPageClient.register();
 		// 0.7.649: Kingdoms' tabs on Jaymo's Powers' character menu (H), when Powers is loaded
 		MenuCompat.register();
 		// (0.7.490) Hordes, Orc war journals: the Lore Codex screen
@@ -163,6 +170,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		SignInScreen.register();
 		// 0.7.238: black over the world from the story until MCA's creator
 		StoryCurtain.register();
+		KeptMusicSetting.register();
 		LineageScreen.register();
 		// (0.7.519) an envoy's offer, and the sovereign's desk
 		EnvoyScreen.register();
@@ -186,6 +194,23 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		LoanScreen.register();
 		ClassKeys.register();
 		MagicKeys.register();
+		// Mutant Monsters' mutant zombie dressed as one of the present's old dead, not in the game's cyan and blue
+		// (kingdoms/tools/gen_mutant_dead.py; the pack's texture is drawn over the mod's own)
+		if (net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("mutantmonsters")) {
+			net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosKingdoms.id("mutant_dead"),
+				net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosKingdoms.MOD_ID).orElseThrow(),
+				net.minecraft.network.chat.Component.literal("Jaymo's Kingdoms: the mutant zombie as one of the old dead"),
+				net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.ALWAYS_ENABLED);
+		}
+		// whom a harness piece was fitted to (Fitting)
+		net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
+			java.util.UUID to = stack.get(com.jaymoskingdoms.Fitting.FITTED);
+			net.minecraft.client.player.LocalPlayer me = net.minecraft.client.Minecraft.getInstance().player;
+			if (to != null) {
+				lines.add(net.minecraft.network.chat.Component.translatable(me != null && me.getUUID().equals(to) ? "tooltip.jaymoskingdoms.fitted.you"
+					: "tooltip.jaymoskingdoms.fitted.other").withStyle(net.minecraft.ChatFormatting.GRAY));
+			}
+		});
 		FamiliarClient.register();
 		CombatArtKey.register();
 		// (0.7.381) Weapon Forms: the belt strip, the chain counter, the belt screen
@@ -205,6 +230,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		WerewolfKey.register();
 		PaceKey.register();
 		FrostPrisonKey.register();
+		SorcererJumpClient.register();
 		LeanClient.register();
 		NightGiftsClient.register();
 		BloodVision.register();
@@ -232,6 +258,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		ComposureHud.register();
 		OwnSpeechHud.register();
 		BloodReservoirHud.register();
+		// (defence disciplines) a locked-on enemy's passive blocks
+		MobBlocksHud.register();
 		// BWM batch 5: the gloom's whispers and dark edges
 		GloomClient.register();
 		FifthClient.register();
@@ -343,6 +371,9 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.disasters.LastBellClient.register();
 		// downpours, morning mist, sand winds, auroras and livelier fire
 		com.jaymoskingdoms.client.disasters.SkiesClient.register();
+		com.jaymoskingdoms.client.disasters.WindSigns.register();
+		com.jaymoskingdoms.client.disasters.WindFeel.register();
+		com.jaymoskingdoms.client.disasters.WindSounds.register();
 		com.jaymoskingdoms.client.disasters.SunShade.register();
 		// layered clouds instead of the game's single sheet
 		com.jaymoskingdoms.client.disasters.CloudDecks.register();

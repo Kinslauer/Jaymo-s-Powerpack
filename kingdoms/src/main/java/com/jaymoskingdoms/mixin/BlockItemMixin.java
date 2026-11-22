@@ -28,6 +28,8 @@ abstract class BlockItemMixin {
 			Placed.placed(player, server, pos, state);
 			// (0.7.220) a builder's work in town (and a Journeyman's block from the town's stock)
 			Careers.placed(player, server, pos, stack);
+			// a light set down in the dark (the Lanternkeeper's path)
+			com.jaymoskingdoms.HeritagePaths.placed(player, server, pos, state);
 		}
 	}
 }

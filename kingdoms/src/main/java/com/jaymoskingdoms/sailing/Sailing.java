@@ -25,7 +25,7 @@ import net.minecraft.world.level.material.MapColor;
  */
 public final class Sailing {
 	public static Block HELM, SAIL, OAR, CANNON, FRAME, BOMB_HATCH;
-	public static Item HELM_ITEM, SAIL_ITEM, OAR_ITEM, CANNON_ITEM, ROUND_SHOT, HEAVY_SHOT, SHELL, CHAIN_SHOT, GRAPE_SHOT, ROWBOAT_KIT, SLOOP_KIT, BRIG_KIT, SHIP_PLANS;
+	public static Item HELM_ITEM, SAIL_ITEM, OAR_ITEM, CANNON_ITEM, ROUND_SHOT, HEAVY_SHOT, SHELL, CHAIN_SHOT, GRAPE_SHOT, STONE_SHOT, FIRE_SHOT, ROWBOAT_KIT, SLOOP_KIT, BRIG_KIT, SHIP_PLANS;
 	/** More blueprints: the cog, frigate, fishing smack and galley kits. */
 	public static Item COG_KIT, FRIGATE_KIT, SMACK_KIT, GALLEY_KIT;
 	/** (medieval picks) A bomb hatch for a balloon's deck. */
@@ -67,6 +67,8 @@ public final class Sailing {
 		SHELL = item("explosive_shell", Item::new, new Item.Properties().stacksTo(16));
 		CHAIN_SHOT = item("chain_shot", Item::new, new Item.Properties().stacksTo(16));
 		GRAPE_SHOT = item("grape_shot", Item::new, new Item.Properties().stacksTo(16));
+		STONE_SHOT = item("stone_shot", Item::new, new Item.Properties().stacksTo(16));
+		FIRE_SHOT = item("fire_shot", Item::new, new Item.Properties().stacksTo(16));
 		ROWBOAT_KIT = item(ShipKits.Kind.ROWBOAT.id(), p -> new ShipKits.KitItem(ShipKits.Kind.ROWBOAT, p), new Item.Properties().stacksTo(1));
 		SLOOP_KIT = item(ShipKits.Kind.SLOOP.id(), p -> new ShipKits.KitItem(ShipKits.Kind.SLOOP, p), new Item.Properties().stacksTo(1));
 		BRIG_KIT = item(ShipKits.Kind.BRIG.id(), p -> new ShipKits.KitItem(ShipKits.Kind.BRIG, p), new Item.Properties().stacksTo(1));
@@ -88,7 +90,9 @@ public final class Sailing {
 			output.insertAfter(HEAVY_SHOT, SHELL);
 			output.insertAfter(SHELL, CHAIN_SHOT);
 			output.insertAfter(CHAIN_SHOT, GRAPE_SHOT);
-			output.insertAfter(GRAPE_SHOT, ROWBOAT_KIT);
+			output.insertAfter(GRAPE_SHOT, STONE_SHOT);
+			output.insertAfter(STONE_SHOT, FIRE_SHOT);
+			output.insertAfter(FIRE_SHOT, ROWBOAT_KIT);
 			output.insertAfter(ROWBOAT_KIT, SLOOP_KIT);
 			output.insertAfter(SLOOP_KIT, BRIG_KIT);
 			output.insertAfter(BRIG_KIT, COG_KIT);
@@ -98,6 +102,7 @@ public final class Sailing {
 			output.insertAfter(GALLEY_KIT, SHIP_PLANS);
 			output.insertAfter(SHIP_PLANS, BOMB_HATCH_ITEM);
 		});
+		Figureheads.register();
 		ShipNet.register();
 	}
 

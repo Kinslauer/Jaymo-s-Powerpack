@@ -49,6 +49,7 @@ final class AetherionDragonRenderer extends GeoEntityRenderer<AetherionDragon, L
 	@Override
 	public void addRenderData(AetherionDragon dragon, Void related, LivingEntityRenderState state, float partialTick) {
 		super.addRenderData(dragon, related, state, partialTick);
+		DragonBoarding.extract(dragon, state, partialTick);
 		state.addGeckolibData(LOOK, dragon.look());
 		state.addGeckolibData(FLY, Mth.lerp(partialTick, dragon.flyAnimO, dragon.flyAnim));
 		state.addGeckolibData(BREATH, Mth.lerp(partialTick, dragon.breathAnimO, dragon.breathAnim));
@@ -65,6 +66,7 @@ final class AetherionDragonRenderer extends GeoEntityRenderer<AetherionDragon, L
 	@Override
 	public void adjustModelBonesForRender(RenderPassInfo<LivingEntityRenderState> info, BoneSnapshots snapshots) {
 		super.adjustModelBonesForRender(info, snapshots);
+		DragonBoarding.apply(info, snapshots, new String[] {"neck0", "neck1", "neck2", "neck3"}, "head", new DragonBoarding.Wing("wing_l", 1.0F), new DragonBoarding.Wing("wing_r", -1.0F));
 		LivingEntityRenderState state = info.renderState();
 		float fly = info.getOrDefaultGeckolibData(FLY, 0.0F);
 		float pitch = info.getOrDefaultGeckolibData(PITCH, 0.0F);

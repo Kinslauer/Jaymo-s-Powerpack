@@ -79,6 +79,7 @@ final class SkillIcons {
 		put(Skills.Perk.SWEEP_KICK, Items.LEATHER_BOOTS);
 		put(Skills.Perk.AIR_COMBO, Items.WIND_CHARGE);
 		put(Skills.Perk.BOXER, Items.LEATHER);
+		put(Skills.Perk.BATTLE_RHYTHM, Items.GOAT_HORN);
 		put(Skills.Perk.HAUL_BOUND, Items.LEAD);
 		put(Skills.Perk.COMMAND, Items.BELL);
 		put(Skills.Perk.TWO_BLADES, Items.IRON_SWORD);
@@ -124,6 +125,7 @@ final class SkillIcons {
 		put(Skills.Perk.PLAGUE_DOCTOR, Items.FERMENTED_SPIDER_EYE);
 		put(Skills.Perk.LIFESAVER, Items.GOLDEN_APPLE);
 		put(Skills.Perk.SELF_REVIVE, Items.GOLDEN_APPLE);
+		put(Skills.Perk.STUBBORN, Items.TOTEM_OF_UNDYING);
 		put(Skills.Perk.MAKE_DO, Items.CRAFTING_TABLE);
 		put(Skills.Perk.DREAD_PRESENCE, Items.SKELETON_SKULL);
 		put(Skills.Perk.GROUNDED, Items.ANVIL);
@@ -146,6 +148,11 @@ final class SkillIcons {
 		put(Skills.Perk.INTERROGATION, Items.WRITABLE_BOOK);
 		put(Skills.Perk.ROUGH_QUESTIONS, Items.STICK);
 		put(Skills.Perk.QUIET_WORD, Items.BOOK);
+		// the Rogue's Arts: the stealth kill made quicker, bare-handed, bigger, and the dark after it
+		put(Skills.Perk.QUICK_WORK, Items.FEATHER);
+		put(Skills.Perk.SILENT_SNAP, Items.STRING);
+		put(Skills.Perk.BIGGER_GAME, Items.BONE);
+		put(Skills.Perk.INTO_THE_DARK, Items.INK_SAC);
 		put(Skills.Perk.DEVOTION, Items.CANDLE);
 		put(Skills.Perk.AMBUSHER, Items.SPIDER_EYE);
 		put(Skills.Perk.CUTTHROAT, Items.FLINT);

@@ -12,17 +12,18 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 /**
- * (0.7.608, 0.7.633) Fewer deer, in whole herds, none in the Nether and none round a home they've been scared off
- * ({@link ShyDeer#mayGraze}). Only Naturalist's deer spawning on their own (naturally or with a new chunk); spawn eggs,
- * spawners and commands are untouched.
+ * (0.7.608, 0.7.633) Fewer deer, in whole herds, none in the Nether ({@link ShyDeer#mayGraze}, Naturalist's deer), and
+ * every shy deer only out in the wild, away from people and their places and round no home they've been scared off
+ * ({@link ShyDeer#wild}). Only deer spawning on their own (naturally or with a new chunk); spawn eggs, spawners and
+ * commands are untouched.
  */
 @Mixin(SpawnPlacements.class)
 abstract class DeerSpawnMixin {
 	@ModifyReturnValue(method = "checkSpawnRules", at = @At("RETURN"))
 	private static boolean jaymoskingdoms$fewerDeer(boolean ok, EntityType<?> type, ServerLevelAccessor level, EntitySpawnReason reason, BlockPos pos, RandomSource random) {
-		if (!ok || reason != EntitySpawnReason.NATURAL && reason != EntitySpawnReason.CHUNK_GENERATION || !ShyDeer.isDeer(type)) {
+		if (!ok || reason != EntitySpawnReason.NATURAL && reason != EntitySpawnReason.CHUNK_GENERATION || !ShyDeer.shy(type)) {
 			return ok;
 		}
-		return ShyDeer.mayGraze(level, reason, pos);
+		return (!ShyDeer.isDeer(type) || ShyDeer.mayGraze(level, reason, pos)) && ShyDeer.wild(level, reason, pos);
 	}
 }

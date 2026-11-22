@@ -30,6 +30,8 @@
 	"item.jaymoskingdoms.harness.over": "Worn over armour",
 	"item.jaymoskingdoms.harness.hood": "Hood: goes over a helm",
 	"item.jaymoskingdoms.harness.crest": "Crest: stands on a helm",
+	"item.jaymoskingdoms.harness.neck": "Neck",
+	"item.jaymoskingdoms.harness.waist": "Waist and hips",
 	"harness.jaymoskingdoms.slot.padding": "Padding",
 	"harness.jaymoskingdoms.slot.mail": "Mail",
 	"harness.jaymoskingdoms.slot.shoulders": "Shoulders",
@@ -40,5 +42,12 @@
 	"harness.jaymoskingdoms.slot.over": "Over armour",
 	"harness.jaymoskingdoms.slot.hood": "Hood",
 	"harness.jaymoskingdoms.slot.crest": "Crest",
-	"message.jaymoskingdoms.gilded_refused": "Gilded plate is for royals and lords."
+	"harness.jaymoskingdoms.slot.neck": "Neck",
+	"harness.jaymoskingdoms.slot.waist": "Waist",
+	"message.jaymoskingdoms.gilded_refused": "Gilded plate is for royals and lords.",
+	"message.jaymoskingdoms.fitting.fitted": "The armourer fits %s pieces of your plate to you for %s emeralds. They sit lighter and guard better, on you and nobody else.",
+	"message.jaymoskingdoms.fitting.short": "The armourer wants %s emeralds a piece.",
+	"message.jaymoskingdoms.fitting.nothing": "The armourer looks you over. Nothing you're wearing needs fitting.",
+	"tooltip.jaymoskingdoms.fitted.you": "Fitted to you",
+	"tooltip.jaymoskingdoms.fitted.other": "Fitted to someone else"
 }

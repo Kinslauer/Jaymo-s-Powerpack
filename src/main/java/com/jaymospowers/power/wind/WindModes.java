@@ -662,6 +662,7 @@ public final class WindModes {
 		player.removeAttached(DRIFTING);
 		player.removeAttached(WOBBLY);
 		NEXT_FLASH.remove(player.getUUID());
+		StormNet.forget(player);
 		cloak(player, false);
 	}
 }

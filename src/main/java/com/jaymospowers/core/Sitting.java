@@ -211,6 +211,12 @@ public final class Sitting {
 			DownedLie.sitKey(player);
 			return;
 		}
+		if (Crawl.crawling(player) || player.getPose() == net.minecraft.world.entity.Pose.SWIMMING && !player.isInWater()) {
+			// (Andy, 2026-11-22) prone, the Sit key does one thing only: sat up against a wall beside them (or back down
+			// off it); with no wall, nothing
+			DownedLie.proneSitKey(player);
+			return;
+		}
 		if (Meditate.sitting(player)) {
 			Meditate.nextPose(player);
 			Meditate.State state = Meditate.of(player);

@@ -1,0 +1,22 @@
+{
+  "values": [
+    "#minecraft:leaves",
+    "#minecraft:sand",
+    "#minecraft:dirt",
+    "#minecraft:snow",
+    "#minecraft:ice",
+    "#minecraft:small_flowers",
+    "minecraft:gravel",
+    "minecraft:short_grass",
+    "minecraft:tall_grass",
+    "minecraft:fern",
+    "minecraft:large_fern",
+    "minecraft:dead_bush",
+    "minecraft:snow_block",
+    "minecraft:glass",
+    "minecraft:glass_pane",
+    "minecraft:tinted_glass",
+    {"id": "#c:glass_blocks", "required": false},
+    {"id": "#c:glass_panes", "required": false}
+  ]
+}

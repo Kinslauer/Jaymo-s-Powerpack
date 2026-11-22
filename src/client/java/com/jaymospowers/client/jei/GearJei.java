@@ -64,6 +64,7 @@ public final class GearJei implements IModPlugin {
 		registration.addIngredientInfo(com.jaymospowers.tinkering.GreatParts.STORM_BONE, Component.translatable("jei.jaymospowers.storm_dragon_bone"));
 		registration.addIngredientInfo(com.jaymospowers.tinkering.GreatParts.HIDE, Component.translatable("jei.jaymospowers.dragon_hide"));
 		registration.addIngredientInfo(com.jaymospowers.tinkering.GreatParts.SHIELD, Component.translatable("jei.jaymospowers.dragonhide_round_shield"));
+		registration.addIngredientInfo(com.jaymospowers.gear.SeekingChip.ITEM, Component.translatable("jei.jaymospowers.lodestone_chip"));
 		registration.addIngredientInfo(GearPicks.STEEL_BELT, Component.translatable("jei.jaymospowers.thrower_belt"));
 	}
 }

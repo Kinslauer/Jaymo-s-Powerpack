@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 abstract class ZFighterKiSenseGlowMixin {
 	@Inject(method = "shouldEntityAppearGlowing", at = @At("RETURN"), cancellable = true)
 	private void jaymospowers$kiSense(Entity entity, CallbackInfoReturnable<Boolean> cir) {
-		if (!cir.getReturnValueZ() && ZFighterKiSenseClient.color(entity) != 0) {
+		if (!cir.getReturnValueZ() && (ZFighterKiSenseClient.color(entity) != 0 || com.jaymospowers.client.power.zfighter.ZFighterPartnerClient.color(entity) != 0)) {
 			cir.setReturnValue(true);
 		}
 	}

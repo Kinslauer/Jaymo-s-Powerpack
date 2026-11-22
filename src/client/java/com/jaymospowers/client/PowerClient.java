@@ -5,6 +5,7 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The client-side half of a power. Only called while the local player holds the power. Movement powers
@@ -50,6 +51,21 @@ public interface PowerClient {
 	 */
 	default boolean screenMode(LocalPlayer player) {
 		return false;
+	}
+
+	/**
+	 * The powers screen's optional fourth slot, a switch of this power's own: its name (null: no slot), what it says on
+	 * hover (and whether it is on now), and what pressing it does (the screen stays open).
+	 */
+	default net.minecraft.network.chat.@Nullable Component extraToggleName(LocalPlayer player) {
+		return null;
+	}
+
+	default net.minecraft.network.chat.Component extraToggleDesc(LocalPlayer player) {
+		return net.minecraft.network.chat.Component.empty();
+	}
+
+	default void extraToggle(LocalPlayer player) {
 	}
 
 	/** The local player just gained (true) or lost (false) this power. Reset client state here. */

@@ -81,6 +81,8 @@ public final class Armory {
 	static final float MACHETE_CUT_SPEED = 10.0F;
 	/** Round shield: seconds to raise it (vanilla shield 0.25), and how wide it covers (degrees). */
 	static final float SHIELD_RAISE = 0.15F, SHIELD_ARC = 90.0F;
+	/** Fang Gauntlets: the armour each one gives in the hand holding it, a pair of iron boots' (boxing/BoxingGear#gauntlet). */
+	static final float FANG_ARMOUR = 2.0F;
 
 	/** How a weapon is built: a blade or club ({@code sword}), or an axe ({@code axe}: chops wood too). */
 	enum Style { SWORD, AXE, SHIELD }
@@ -212,7 +214,7 @@ public final class Armory {
 		// (medieval picks) the old age's peoples' arms, found in their ruins and forged from their patterns
 		OldAgeArms.init();
 		// (0.18.47) the Fang Gauntlets: claws for Weapon Forms' Claw family (Kingdoms' form_claws tag); forged only (tinkering/WeaponParts)
-		FANG_GAUNTLETS = item("fang_gauntlets", Item::new, p -> p.sword(ToolMaterial.IRON, 2.5F, -1.6F));
+		FANG_GAUNTLETS = item("fang_gauntlets", Item::new, p -> com.jaymospowers.boxing.BoxingGear.gauntlet(p, ToolMaterial.IRON, 2.5F, -1.6F, FANG_ARMOUR));
 		// (Havens patch 5) the kings' weapons: from the iron heads Kingdoms drops off fallen kings, at the Tool Station only
 		KingWeapons.GUTTING_HOOK = item("gutting_hook", p -> new KingWeapons.KingWeapon(p, KingWeapons.Kind.HOOK), KingWeapons::hook);
 		KingWeapons.WARCHIEF_CLEAVER = item("warchief_cleaver", p -> new KingWeapons.KingWeapon(p, KingWeapons.Kind.CLEAVER), KingWeapons::cleaver);

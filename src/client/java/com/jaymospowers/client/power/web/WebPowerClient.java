@@ -29,7 +29,7 @@ import org.jspecify.annotations.Nullable;
 public final class WebPowerClient implements PowerClient {
 	public static final WebPowerClient INSTANCE = new WebPowerClient();
 
-	final WebSwing swing = new WebSwing();
+	public final WebSwing swing = new WebSwing();
 	private final WebWallRunClient wallRun = new WebWallRunClient();
 	private final WebParkourClient parkour = new WebParkourClient();
 	/** What the swing key would stick to right now, for the reticle (refreshed every other tick). */
@@ -92,6 +92,10 @@ public final class WebPowerClient implements PowerClient {
 				ClientPlayNetworking.send(new com.jaymospowers.power.web.WebTendrils.Smash(WebNet.MAIN));
 				return true;
 			}
+			if (clicks > 0 && isActive(player) && WebAirStrikesClient.onAttack(player, INSTANCE.swing, INSTANCE.swing.tricks())) {
+				// (after the tendrils' own clicks) let go of a swing and still in the air: the click is a rising blow, a spinning strike or a dive kick
+				return true;
+			}
 			// (a Verdant's or Frost-born's race move is sneak + left hold here: RaceHoldClient.secondary)
 			if (com.jaymospowers.power.web.WebMorph.usable(player) && !com.jaymospowers.client.power.zfighter.RaceHoldClient.first(minecraft, player)
 				&& (grips == null || grips.get(WebNet.MAIN) < 0 && grips.get(WebNet.OFF) < 0)) {
@@ -100,6 +104,12 @@ public final class WebPowerClient implements PowerClient {
 				net.minecraft.world.entity.LivingEntity aimed = com.jaymospowers.power.web.WebMorph.aim(player);
 				boolean block = hit != null && hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK
 					&& (aimed == null || hit.getLocation().distanceToSqr(player.getEyePosition()) < aimed.distanceToSqr(player.getEyePosition()));
+				if (block && !player.isShiftKeyDown() && hit instanceof net.minecraft.world.phys.BlockHitResult blockHit
+					&& player.level().getBlockState(blockHit.getBlockPos()).is(net.minecraft.tags.BlockTags.LOGS)
+					&& hit.getLocation().distanceToSqr(player.getEyePosition()) <= com.jaymospowers.power.web.WebMorph.REACH * com.jaymospowers.power.web.WebMorph.REACH) {
+					// a tree under the crosshair: the arm forms its axe on it (sneak to still mine the log by hand)
+					block = false;
+				}
 				if (!block && clicks > 0 && !morphHeld) {
 					// pressed: it gathers into the arm while held, and strikes when let go (see below)
 					morphHeld = true;
@@ -164,8 +174,9 @@ public final class WebPowerClient implements PowerClient {
 		// a tendril holding a corpse: plain right click takes it into your arms
 		ClientTickEvents.START_CLIENT_TICK.register(minecraft -> {
 			LocalPlayer player = minecraft.player;
-			if (!isActive(player) || minecraft.gui.screen() != null || WebSymbioteClient.inputLocked()
-				|| com.jaymospowers.power.web.KitchenCompat.isCarryingCorpse(player)) {
+			// (any symbiote host's tendrils, web slinger or not)
+			if (player == null || !isActive(player) && !com.jaymospowers.power.web.WebSymbiote.isBonded(player) || minecraft.gui.screen() != null
+				|| WebSymbioteClient.inputLocked() || com.jaymospowers.power.web.KitchenCompat.isCarryingCorpse(player)) {
 				return;
 			}
 			int hand = holdsCorpse(player, WebNet.MAIN) ? WebNet.MAIN : holdsCorpse(player, WebNet.OFF) ? WebNet.OFF : -1;
@@ -195,11 +206,13 @@ public final class WebPowerClient implements PowerClient {
 		});
 		PowerClients.register(WebPower.ID, INSTANCE);
 		WebSymbioteClient.init();
+		WebSkimClient.init();
 		WebBehemothClient.init();
 		EntityRenderers.register(com.jaymospowers.power.web.WebSymbioteBlob.TYPE, WebBlobRenderer::new);
 		EntityRenderers.register(WebPower.WEB_BALL, context -> new ThrownItemRenderer<>(context, 0.85F, false));
 		LevelRenderEvents.COLLECT_SUBMITS.register(WebLineRenderer::render);
 		WebShootersClient.init();
+		WebShieldClient.init();
 		WebMeetingClient.init();
 		LevelRenderEvents.COLLECT_SUBMITS.register(WebSenseBolts::render);
 		WebSenseGlance.init();
@@ -248,6 +261,22 @@ public final class WebPowerClient implements PowerClient {
 
 	static boolean isActive(@Nullable LocalPlayer player) {
 		return player != null && Powers.has(player, WebPower.INSTANCE);
+	}
+
+	@Override
+	public net.minecraft.network.chat.@Nullable Component extraToggleName(LocalPlayer player) {
+		return net.minecraft.network.chat.Component.translatable("screen.jaymospowers.toggle.web_dark_sense");
+	}
+
+	@Override
+	public net.minecraft.network.chat.Component extraToggleDesc(LocalPlayer player) {
+		return net.minecraft.network.chat.Component.translatable("screen.jaymospowers.toggle.web_dark_sense."
+			+ (com.jaymospowers.power.web.WebDarkSense.on(player) ? "on" : "off"));
+	}
+
+	@Override
+	public void extraToggle(LocalPlayer player) {
+		ClientPlayNetworking.send(new com.jaymospowers.power.web.WebDarkSense.Toggle());
 	}
 
 	@Override
@@ -365,11 +394,47 @@ public final class WebPowerClient implements PowerClient {
 			net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.send(new com.jaymospowers.power.web.WebTendrils.Grab(hand, -1));
 			return;
 		}
+		if (!isActive(player)) {
+			// a symbiote host who isn't a web slinger has the tendrils, not the swing webs
+			return;
+		}
 		if (down) {
 			swing.press(player, hand);
 		} else {
 			swing.releaseKey(player, hand);
 		}
+	}
+
+	/** R and G held by a symbiote host's tendrils ({@link #routeHostKey}), and whether each was down last tick. */
+	private static final boolean[] HOST_HELD = new boolean[2], HOST_WAS = new boolean[2];
+
+	/**
+	 * From the power keys' tick, before they're reported (as {@code FlameAvatarClient.route}): a symbiote host who isn't a
+	 * web slinger (Andy: "if the symbiote attaches to you, you should still get that whole suite. just no specific web
+	 * powers") has R and G as the tendrils' keys while they're out, as a web slinger does: grab, seize, throw, tear.
+	 * {@code physical} is whether the key is down, {@code powerHeld} whether their own power already holds it. Returns
+	 * whether the tendrils hold it now (then their power is told it's up).
+	 */
+	public static boolean routeHostKey(LocalPlayer player, PowerKey key, boolean physical, boolean powerHeld) {
+		if (key != PowerKey.ABILITY_1 && key != PowerKey.ABILITY_2) {
+			return false;
+		}
+		int i = key == PowerKey.ABILITY_1 ? 0 : 1;
+		boolean pressed = physical && !HOST_WAS[i];
+		HOST_WAS[i] = physical;
+		if (HOST_HELD[i]) {
+			if (!physical) {
+				HOST_HELD[i] = false;
+				INSTANCE.onKey(player, key, false);
+			}
+			return HOST_HELD[i];
+		}
+		if (pressed && !powerHeld && !isActive(player) && !player.isSpectator() && com.jaymospowers.power.web.WebSymbiote.isBonded(player)
+			&& com.jaymospowers.power.web.WebSymbiote.tendrilKeys(player)) {
+			HOST_HELD[i] = true;
+			INSTANCE.onKey(player, key, true);
+		}
+		return HOST_HELD[i];
 	}
 
 	/** Which tendril is holding something (so its key's release throws instead of ending a swing). */
@@ -452,6 +517,19 @@ public final class WebPowerClient implements PowerClient {
 		}
 	}
 
+	/**
+	 * Each tick for a symbiote host who isn't a web slinger (whose own power's ticks run instead of {@link #tick}): the
+	 * symbiote's side of it still runs, or a takeover locks their keys and never steers them nor counts down, and they
+	 * stand frozen till it's over. The red mark on what the tendrils would grab too.
+	 */
+	public static void hostTick(Minecraft minecraft, LocalPlayer player) {
+		if (isActive(player) || !com.jaymospowers.power.web.WebSymbiote.isBonded(player)) {
+			return;
+		}
+		INSTANCE.grabAim = com.jaymospowers.power.web.WebSymbiote.tendrilKeys(player) ? grabTarget(player) : null;
+		WebSymbioteClient.tick(minecraft, player, INSTANCE.swing);
+	}
+
 	// ---- HUD --------------------------------------------------------------------------------------------------------
 
 	private static final int RETICLE_LIVE = 0xFFFFFFFF;
@@ -460,6 +538,27 @@ public final class WebPowerClient implements PowerClient {
 	private static final int RETICLE_ATTACHED = 0xFFE0303A;
 	/** A creature, player or corpse an R/G web would stick to. */
 	private static final int RETICLE_TARGET = 0xFFFFD040;
+
+	/** Something the tendrils can take: the crosshair goes red. */
+	private static void grabMark(GuiGraphicsExtractor graphics, int cx, int cy) {
+		graphics.fill(cx - 5, cy, cx + 6, cy + 1, 0xFFE02020);
+		graphics.fill(cx, cy - 5, cx + 1, cy + 6, 0xFFE02020);
+		graphics.outline(cx - 3, cy - 3, 7, 7, 0xC0E02020);
+	}
+
+	/**
+	 * The HUD for a symbiote host who isn't a web slinger ({@link #hostTick}): a takeover's dark and its struggle bar,
+	 * the fight for the suit, and the red mark on what the tendrils would grab.
+	 */
+	public static void hostHud(GuiGraphicsExtractor graphics, LocalPlayer player) {
+		if (isActive(player) || !com.jaymospowers.power.web.WebSymbiote.isBonded(player)) {
+			return;
+		}
+		if (INSTANCE.grabAim != null) {
+			grabMark(graphics, graphics.guiWidth() / 2, graphics.guiHeight() / 2);
+		}
+		WebSymbioteClient.renderHud(graphics, player);
+	}
 
 	@Override
 	public void renderHud(GuiGraphicsExtractor graphics, DeltaTracker delta, LocalPlayer player) {
@@ -498,10 +597,7 @@ public final class WebPowerClient implements PowerClient {
 			}
 		}
 		if (grabAim != null) {
-			// something the tendrils can take: the crosshair goes red
-			graphics.fill(cx - 5, cy, cx + 6, cy + 1, 0xFFE02020);
-			graphics.fill(cx, cy - 5, cx + 1, cy + 6, 0xFFE02020);
-			graphics.outline(cx - 3, cy - 3, 7, 7, 0xC0E02020);
+			grabMark(graphics, cx, cy);
 		}
 
 		// cooldown chips right of the hotbar (same corner and style as Wind Control's)
@@ -515,6 +611,7 @@ public final class WebPowerClient implements PowerClient {
 		int height = graphics.guiHeight();
 		WebSymbioteClient.renderHud(graphics, player);
 		WebFuryClient.renderHud(graphics, player);
+		WebSkimClient.renderHud(graphics, player);
 		WebSenseBolts.renderHud(graphics, player);
 		// the ascended ability (Web Strike) joins the end of the row once you have it
 		boolean ascended = com.jaymospowers.core.Fate.isAscended(player);

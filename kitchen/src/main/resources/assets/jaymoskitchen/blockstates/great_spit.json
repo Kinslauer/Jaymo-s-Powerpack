@@ -1,0 +1,11 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "jaymoskitchen:block/great_spit"
+    },
+    "axis=z": {
+      "model": "jaymoskitchen:block/great_spit",
+      "y": 90
+    }
+  }
+}

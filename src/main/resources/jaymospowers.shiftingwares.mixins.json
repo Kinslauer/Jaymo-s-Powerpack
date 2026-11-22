@@ -1,0 +1,11 @@
+{
+	"required": false,
+	"package": "com.jaymospowers.mixin.shiftingwares",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"TradeShufflerMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}

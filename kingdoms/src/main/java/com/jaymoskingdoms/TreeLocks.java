@@ -72,6 +72,7 @@ public final class TreeLocks {
 		AIR_COMBO(Perk.AIR_COMBO, 1),
 		SECOND_WIND(Perk.SECOND_WIND, 1),
 		BATTLE_CRY(Perk.WAR_CRY, 1),
+		BATTLE_RHYTHM(Perk.BATTLE_RHYTHM, 1),
 		BOXING(Perk.BOXER, 1),
 		// carrying, crime and people
 		HAUL_BOUND(Perk.HAUL_BOUND, 1),

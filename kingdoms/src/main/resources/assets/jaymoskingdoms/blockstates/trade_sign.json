@@ -1,0 +1,169 @@
+{
+  "variants": {
+    "facing=north,mark=anvil": {
+      "model": "jaymoskingdoms:block/trade_sign_anvil"
+    },
+    "facing=north,mark=chisel": {
+      "model": "jaymoskingdoms:block/trade_sign_chisel"
+    },
+    "facing=north,mark=loaf": {
+      "model": "jaymoskingdoms:block/trade_sign_loaf"
+    },
+    "facing=north,mark=mug": {
+      "model": "jaymoskingdoms:block/trade_sign_mug"
+    },
+    "facing=north,mark=needle": {
+      "model": "jaymoskingdoms:block/trade_sign_needle"
+    },
+    "facing=north,mark=scales": {
+      "model": "jaymoskingdoms:block/trade_sign_scales"
+    },
+    "facing=north,mark=cleaver": {
+      "model": "jaymoskingdoms:block/trade_sign_cleaver"
+    },
+    "facing=north,mark=fish": {
+      "model": "jaymoskingdoms:block/trade_sign_fish"
+    },
+    "facing=north,mark=horseshoe": {
+      "model": "jaymoskingdoms:block/trade_sign_horseshoe"
+    },
+    "facing=north,mark=bow": {
+      "model": "jaymoskingdoms:block/trade_sign_bow"
+    },
+    "facing=north,mark=sword": {
+      "model": "jaymoskingdoms:block/trade_sign_sword"
+    },
+    "facing=east,mark=anvil": {
+      "model": "jaymoskingdoms:block/trade_sign_anvil",
+      "y": 90
+    },
+    "facing=east,mark=chisel": {
+      "model": "jaymoskingdoms:block/trade_sign_chisel",
+      "y": 90
+    },
+    "facing=east,mark=loaf": {
+      "model": "jaymoskingdoms:block/trade_sign_loaf",
+      "y": 90
+    },
+    "facing=east,mark=mug": {
+      "model": "jaymoskingdoms:block/trade_sign_mug",
+      "y": 90
+    },
+    "facing=east,mark=needle": {
+      "model": "jaymoskingdoms:block/trade_sign_needle",
+      "y": 90
+    },
+    "facing=east,mark=scales": {
+      "model": "jaymoskingdoms:block/trade_sign_scales",
+      "y": 90
+    },
+    "facing=east,mark=cleaver": {
+      "model": "jaymoskingdoms:block/trade_sign_cleaver",
+      "y": 90
+    },
+    "facing=east,mark=fish": {
+      "model": "jaymoskingdoms:block/trade_sign_fish",
+      "y": 90
+    },
+    "facing=east,mark=horseshoe": {
+      "model": "jaymoskingdoms:block/trade_sign_horseshoe",
+      "y": 90
+    },
+    "facing=east,mark=bow": {
+      "model": "jaymoskingdoms:block/trade_sign_bow",
+      "y": 90
+    },
+    "facing=east,mark=sword": {
+      "model": "jaymoskingdoms:block/trade_sign_sword",
+      "y": 90
+    },
+    "facing=south,mark=anvil": {
+      "model": "jaymoskingdoms:block/trade_sign_anvil",
+      "y": 180
+    },
+    "facing=south,mark=chisel": {
+      "model": "jaymoskingdoms:block/trade_sign_chisel",
+      "y": 180
+    },
+    "facing=south,mark=loaf": {
+      "model": "jaymoskingdoms:block/trade_sign_loaf",
+      "y": 180
+    },
+    "facing=south,mark=mug": {
+      "model": "jaymoskingdoms:block/trade_sign_mug",
+      "y": 180
+    },
+    "facing=south,mark=needle": {
+      "model": "jaymoskingdoms:block/trade_sign_needle",
+      "y": 180
+    },
+    "facing=south,mark=scales": {
+      "model": "jaymoskingdoms:block/trade_sign_scales",
+      "y": 180
+    },
+    "facing=south,mark=cleaver": {
+      "model": "jaymoskingdoms:block/trade_sign_cleaver",
+      "y": 180
+    },
+    "facing=south,mark=fish": {
+      "model": "jaymoskingdoms:block/trade_sign_fish",
+      "y": 180
+    },
+    "facing=south,mark=horseshoe": {
+      "model": "jaymoskingdoms:block/trade_sign_horseshoe",
+      "y": 180
+    },
+    "facing=south,mark=bow": {
+      "model": "jaymoskingdoms:block/trade_sign_bow",
+      "y": 180
+    },
+    "facing=south,mark=sword": {
+      "model": "jaymoskingdoms:block/trade_sign_sword",
+      "y": 180
+    },
+    "facing=west,mark=anvil": {
+      "model": "jaymoskingdoms:block/trade_sign_anvil",
+      "y": 270
+    },
+    "facing=west,mark=chisel": {
+      "model": "jaymoskingdoms:block/trade_sign_chisel",
+      "y": 270
+    },
+    "facing=west,mark=loaf": {
+      "model": "jaymoskingdoms:block/trade_sign_loaf",
+      "y": 270
+    },
+    "facing=west,mark=mug": {
+      "model": "jaymoskingdoms:block/trade_sign_mug",
+      "y": 270
+    },
+    "facing=west,mark=needle": {
+      "model": "jaymoskingdoms:block/trade_sign_needle",
+      "y": 270
+    },
+    "facing=west,mark=scales": {
+      "model": "jaymoskingdoms:block/trade_sign_scales",
+      "y": 270
+    },
+    "facing=west,mark=cleaver": {
+      "model": "jaymoskingdoms:block/trade_sign_cleaver",
+      "y": 270
+    },
+    "facing=west,mark=fish": {
+      "model": "jaymoskingdoms:block/trade_sign_fish",
+      "y": 270
+    },
+    "facing=west,mark=horseshoe": {
+      "model": "jaymoskingdoms:block/trade_sign_horseshoe",
+      "y": 270
+    },
+    "facing=west,mark=bow": {
+      "model": "jaymoskingdoms:block/trade_sign_bow",
+      "y": 270
+    },
+    "facing=west,mark=sword": {
+      "model": "jaymoskingdoms:block/trade_sign_sword",
+      "y": 270
+    }
+  }
+}

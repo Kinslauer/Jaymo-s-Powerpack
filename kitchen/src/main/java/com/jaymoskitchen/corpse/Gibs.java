@@ -330,20 +330,27 @@ public final class Gibs {
 			spots.add(BlockPos.containing(at.x + away.x * reach + (random.nextDouble() - 0.5) * 2.0 * reach, at.y + 1.0,
 				at.z + away.z * reach + (random.nextDouble() - 0.5) * 2.0 * reach));
 		}
+		// (Andy, 2026-11-19: "intestines and offal should fall from gibs") turn about, so two pieces or more are both
+		boolean guts = random.nextBoolean();
 		level.getServer().schedule(new TickTask(level.getServer().getTickCount() + 1, () -> {
+			boolean rope = guts;
 			for (BlockPos spot : spots) {
-				layEntrails(level, spot);
+				layPile(level, spot, rope ? Butchery.INTESTINES_PILE : Butchery.OFFAL_PILE);
+				rope = !rope;
 			}
 		}));
 	}
 
-	/** One piece of entrails falls from {@code from} onto the first ground under it: a new gut pile, or onto one lying there. */
-	private static void layEntrails(ServerLevel level, BlockPos from) {
-		BlockState pile = Butchery.OFFAL_PILE.defaultBlockState();
+	/**
+	 * One piece of {@code kind} (offal, intestines, brain matter: an {@link OffalPileBlock}) falls from {@code from} onto the
+	 * first ground under it: a new pile, or onto one of its kind lying there.
+	 */
+	private static void layPile(ServerLevel level, BlockPos from, Block kind) {
+		BlockState pile = kind.defaultBlockState();
 		BlockPos.MutableBlockPos pos = from.mutable();
 		for (int fallen = 0; fallen <= ENTRAILS_DROP && level.isLoaded(pos); fallen++, pos.move(Direction.DOWN)) {
 			BlockState there = level.getBlockState(pos);
-			if (there.is(Butchery.OFFAL_PILE)) {
+			if (there.is(kind)) {
 				int pieces = there.getValue(OffalPileBlock.PIECES);
 				if (pieces < OffalPileBlock.MAX) {
 					level.setBlock(pos, there.setValue(OffalPileBlock.PIECES, pieces + 1), Block.UPDATE_ALL);
@@ -358,6 +365,54 @@ public final class Gibs {
 				return;
 			}
 		}
+	}
+
+	/** A crushed skull's pieces of bone and lumps of brain thrown (for a man's head; a bigger or smaller one more or fewer). */
+	static final int SKULL_PIECES_MIN = 2, SKULL_PIECES_MAX = 3, BRAIN_LUMPS_MIN = 2, BRAIN_LUMPS_MAX = 4;
+	/** Brain matter a man's crushed head leaves on the ground (pieces), how far round it, and how gently the pieces fly. */
+	static final int BRAIN_MATTER_MIN = 1, BRAIN_MATTER_MAX = 2;
+	static final double BRAIN_REACH = 0.9, CRUSH_SPEED = 0.45;
+
+	/**
+	 * Andy (2026-11-19): "maces and blunt weapons should crush skulls upon a blow that connects on [the head] and kills.
+	 * crushing should leave white debris and smaller offal like pebbles called brain matter". Jaymo's Powers calls this
+	 * (by reflection) when a blunt killing blow crushes {@code body}'s head at {@code head}: pieces of skull and jaw and a
+	 * few lumps of brain fly a little way and lie about as a blast's do, a puff of white bone dust, and the brain matter
+	 * lands on the ground under it as small piles ({@link com.jaymoskitchen.butchery.BrainMatterBlock}). A body with no
+	 * blood or no innards (a machine, a slime) leaves only the bone; one with no bones nothing. True if anything was left.
+	 */
+	public static boolean skullCrushed(LivingEntity body, Vec3 head) {
+		if (!(body.level() instanceof ServerLevel level)) {
+			return false;
+		}
+		Insides insides = Insides.of(body, CorpseKind.of(body), body.getType(), body instanceof Player, false, "", "");
+		if (insides == Insides.NONE && Corpses.isMachine(body.getType())) {
+			return false;
+		}
+		RandomSource random = level.getRandom();
+		double width = body.getBbWidth();
+		float size = goreSize(width);
+		Vec3 away = body.getLastDamageSource() != null && body.getLastDamageSource().getSourcePosition() != null
+			? head.subtract(body.getLastDamageSource().getSourcePosition()).multiply(1.0, 0.0, 1.0) : Vec3.ZERO;
+		away = away.lengthSqr() < 1.0E-4 ? Vec3.ZERO : away.normalize();
+		for (int i = scaled(SKULL_PIECES_MIN + random.nextInt(SKULL_PIECES_MAX - SKULL_PIECES_MIN + 1), width); i > 0; i--) {
+			throwPiece(level, head, away, width, Gib.SKULL, insides, size, life(random), CRUSH_SPEED);
+		}
+		// the white debris: dust and chips of bone
+		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BONE_BLOCK.defaultBlockState()), head.x, head.y, head.z, 40,
+			0.2, 0.15, 0.2, 0.25);
+		if (!insides.soft()) {
+			return true;
+		}
+		for (int i = scaled(BRAIN_LUMPS_MIN + random.nextInt(BRAIN_LUMPS_MAX - BRAIN_LUMPS_MIN + 1), width); i > 0; i--) {
+			throwPiece(level, head, away, width, Gib.BRAIN, insides, size, life(random), CRUSH_SPEED);
+		}
+		for (int i = scaled(BRAIN_MATTER_MIN + random.nextInt(BRAIN_MATTER_MAX - BRAIN_MATTER_MIN + 1), width); i > 0; i--) {
+			layPile(level, BlockPos.containing(head.x + away.x * BRAIN_REACH + (random.nextDouble() - 0.5) * 2.0 * BRAIN_REACH, head.y,
+				head.z + away.z * BRAIN_REACH + (random.nextDouble() - 0.5) * 2.0 * BRAIN_REACH), Butchery.BRAIN_MATTER_PILE);
+		}
+		level.playSound(null, head.x, head.y, head.z, SoundEvents.SLIME_SQUISH, SoundSource.HOSTILE, 1.0F, 0.7F);
+		return true;
 	}
 
 	/** How many chunks a body this wide breaks into. */

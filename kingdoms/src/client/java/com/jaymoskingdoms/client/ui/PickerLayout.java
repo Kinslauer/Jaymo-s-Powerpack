@@ -480,20 +480,21 @@ public final class PickerLayout {
 	private static int paragraphs(GuiGraphicsExtractor graphics, Font font, Component text, int x, int y, int w, int color, int clipTop, int clipBottom,
 		boolean draw) {
 		String all = text.getString();
-		if (all.length() <= PARA_SPLIT) {
+		// (Andy: "the semicolons are unnecesary, just start the new paragraph")
+		if (all.length() <= PARA_SPLIT && splitTop(all, "; ", false).size() < 2) {
 			return paragraph(graphics, font, text, x, y, w, color, clipTop, clipBottom, draw);
 		}
 		List<String> paras = new java.util.ArrayList<>();
 		StringBuilder group = new StringBuilder();
 		int inGroup = 0;
 		for (String sentence : splitTop(all, ". ", true)) {
-			if (sentence.length() > PARA_SPLIT) {
+			if (sentence.length() > PARA_SPLIT || splitTop(sentence, "; ", false).size() > 1) {
 				if (!group.isEmpty()) {
 					paras.add(group.toString());
 					group.setLength(0);
 					inGroup = 0;
 				}
-				paras.addAll(splitTop(sentence, "; ", true));
+				paras.addAll(splitTop(sentence, "; ", false));
 				continue;
 			}
 			if (!group.isEmpty()) {
@@ -519,7 +520,7 @@ public final class PickerLayout {
 	}
 
 	/** {@code s} cut at each {@code sep} outside brackets, the separator's mark kept on the left piece when {@code keep}. */
-	static List<String> splitTop(String s, String sep, boolean keep) {
+	public static List<String> splitTop(String s, String sep, boolean keep) {
 		List<String> out = new java.util.ArrayList<>();
 		int depth = 0, from = 0;
 		for (int i = 0; i < s.length(); i++) {

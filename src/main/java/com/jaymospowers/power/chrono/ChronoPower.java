@@ -61,6 +61,7 @@ import net.minecraft.world.phys.Vec3;
  * <li>B, Time Bloom: 5 s of fast-forward for crops, saplings, furnaces, smokers and ovens within 5 blocks, and for
  * your own wounds and those of every creature within {@code BLOOM_HEAL_RADIUS} (they mend {@code BLOOM_HEAL} every
  * {@code BLOOM_HEAL_EVERY} ticks meanwhile).</li>
+ * <li>Sneak+R, Put it back as it was (all four abilities unlocked): mark a space, then turn it back ({@link ChronoMend}).</li>
  * <li>Sneak+B, Fast Forward (0.10.111): you and everyone close by leap to the ruined future and back
  * ({@link com.jaymospowers.power.chrono.future.Future}).</li>
  * </ul>
@@ -176,6 +177,8 @@ public final class ChronoPower implements Power {
 		ChronoTimeStop.init();
 		com.jaymospowers.power.chrono.future.Future.init();
 		ChronoRoad.init();
+		// Sneak + R: mark a space and later put it back as it was
+		ChronoMend.init();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ChronoDebugCommand.register(dispatcher));
 		PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, blockEntity) -> {
 			if (player instanceof ServerPlayer serverPlayer && Powers.has(serverPlayer, INSTANCE)) {
@@ -512,6 +515,11 @@ public final class ChronoPower implements Power {
 			&& (!com.jaymospowers.core.Mastery.starterOnly(player) || com.jaymospowers.power.chrono.future.Future.wakesEarly(player))) {
 			// sneak+B, Fast Forward: a leap into the ruined future (or back), with its own recharge
 			com.jaymospowers.power.chrono.future.Future.leap(player);
+			return;
+		}
+		if (ability == REWIND && sneaking && ChronoMend.able(player)) {
+			// sneak+R, Put it back as it was: mark a space, then turn it back (its own recharge)
+			ChronoMend.key(player);
 			return;
 		}
 		if (ability == STASIS && sneaking && !com.jaymospowers.core.Mastery.starterOnly(player) && ChronoCalculation.spend(player)) {

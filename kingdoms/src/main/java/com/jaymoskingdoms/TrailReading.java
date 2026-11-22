@@ -81,6 +81,21 @@ public final class TrailReading {
 			} catch (ReflectiveOperationException | LinkageError e) {
 				JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old to keep corpses' names to trackers: {}", e.toString());
 			}
+			// Andy: "can different land animals drop different piles? so rangers have a new way to track?" Spoor (Kitchen's
+			// droppings) is read by a Ranger or anyone with Read the Ground: what left it, how old, and that animal's trail
+			try {
+				Class<?> droppings = Class.forName("com.jaymoskitchen.farm.ManurePileBlock");
+				java.util.function.Predicate<Player> reads = player -> Skills.rank(player, Skills.Perk.READ_THE_GROUND) > 0
+					|| Classes.is(player, Classes.PlayerClass.RANGER);
+				java.util.function.BiConsumer<ServerPlayer, net.minecraft.world.entity.Entity> trail = (player, maker) -> {
+					read(player.level(), player, READ_RANGE.length - 1, e -> e == maker, true);
+					ClassTrees.giveEvery(player, Classes.PlayerClass.RANGER, ClassTrees.XP_TRACK, "spoor", 200L);
+				};
+				droppings.getMethod("setReader", java.util.function.Predicate.class).invoke(null, reads);
+				droppings.getMethod("setTrail", java.util.function.BiConsumer.class).invoke(null, trail);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for trackers to read droppings: {}", e.toString());
+			}
 		}
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			PRINTS.clear();

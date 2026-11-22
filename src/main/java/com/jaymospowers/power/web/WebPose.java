@@ -53,6 +53,12 @@ public record WebPose(int kind, long start, int side) {
 	public static final int STAND_BACKFLIP = 19, SIDE_FLIP = 20, AIR_SPIN = 21, TOE_TOUCH = 22, SWAN = 23, LAYOUT_TWIST = 24,
 		DOUBLE_FRONT = 25, DOUBLE_BACK = 26, BUTTERFLY = 27;
 	public static final int FIRST_ACRO = STAND_BACKFLIP, LAST_ACRO = BUTTERFLY;
+	/**
+	 * Strikes out of a swing ({@link WebAirStrikes}), thrown in the air after a web is let go: a rising blow that sends
+	 * the foe up, a two-footed dive kick that slams the ground where it lands, and a spinning strike that hits all round.
+	 * Not tricks, so nothing cuts them short and they hold off the next trick while they play.
+	 */
+	public static final int RISING_BLOW = 28, DIVE_KICK = 29, SPIN_STRIKE = 30;
 
 	/** How long each kind lasts (ticks). */
 	public static final int DODGE_TICKS = 12;
@@ -78,6 +84,8 @@ public record WebPose(int kind, long start, int side) {
 			case AIR_SPIN, TOE_TOUCH -> 10;
 			case DOUBLE_FRONT, DOUBLE_BACK -> 22;
 			case BUTTERFLY -> 16;
+			case RISING_BLOW, SPIN_STRIKE -> 14;
+			case DIVE_KICK -> 40;
 			case ROAR -> WebSymbiote.ROAR_TICKS;
 			case SPIKES -> WebSymbiote.SPIKE_POSE_TICKS;
 			default -> DODGE_TICKS;

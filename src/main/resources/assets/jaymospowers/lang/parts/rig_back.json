@@ -1,0 +1,10 @@
+{
+  "gui.jaymospowers.rig_menu.wingslash": "Wing Slash",
+  "gui.jaymospowers.rig_menu.spears": "Spear Legs",
+  "gui.jaymospowers.rig_menu.pincer": "Pincers (grab, throw)",
+  "gui.jaymospowers.rig_menu.grapple": "Grapple Claw",
+  "gui.jaymospowers.rig_menu.horns": "Horn Lightning",
+  "rig.jaymospowers.mind.loyal.pincer_none": "Nothing there I can lift.",
+  "rig.jaymospowers.mind.dry.pincer_none": "Grab what, exactly?",
+  "rig.jaymospowers.mind.grim.pincer_none": "Nothing to hold."
+}

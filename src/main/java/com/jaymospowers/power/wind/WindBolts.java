@@ -179,12 +179,12 @@ final class WindBolts {
 	// ---------------------------------------------------------------- shared
 
 	/** How hard a bolt hits under today's sky. */
-	private static float sky(ServerLevel level) {
+	static float sky(ServerLevel level) {
 		return level.isThundering() ? 1.3F : level.isRaining() ? 1.0F : 0.8F;
 	}
 
 	/** One bolt at {@code at}: a visual-only strike and lightning damage to the creatures at its foot. */
-	private static void strike(ServerPlayer caster, Vec3 at, float damage, double reach) {
+	static void strike(ServerPlayer caster, Vec3 at, float damage, double reach) {
 		ServerLevel level = caster.level();
 		LightningBolt bolt = EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.TRIGGERED);
 		if (bolt != null) {
@@ -203,7 +203,7 @@ final class WindBolts {
 		Shakes.around(level, at, 16.0, 0.8F);
 	}
 
-	private static void zap(ServerLevel level, Vec3 from, Vec3 to) {
+	static void zap(ServerLevel level, Vec3 from, Vec3 to) {
 		MagicFx.beam(level, from, to, 0.12F, BOLT, 5);
 		Vec3 mid = from.add(to).scale(0.5);
 		level.sendParticles(MagicFx.spark(BOLT, 0.9F), mid.x, mid.y, mid.z, 4, 0.3, 0.3, 0.3, 0.0);

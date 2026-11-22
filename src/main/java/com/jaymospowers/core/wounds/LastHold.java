@@ -21,6 +21,9 @@ import net.minecraft.server.level.ServerPlayer;
  * without taking any damage. A beheading, a gib, a cut in half or anything that skips the downed state ignores it, as do the
  * downed and the executed. It is kept for the session only (a relog gives it back).
  * <p>
+ * Andy (2026-11-19, held on half a heart and downed by the next blast two and a half seconds later: "there was no one health
+ * mercy"): once it holds, they get a breather, {@link #HOLD_GRACE_TICKS} in which no attack lands on them, to get away.
+ * <p>
  * It decides before every other save, so Kingdoms' Last Stand only answers a blow once the hold is spent, and the two never
  * answer the same one.
  */
@@ -28,6 +31,8 @@ public final class LastHold {
 	/** The health the hold leaves them on (half a heart), and how long without damage it takes to come back (ticks). */
 	static final float HOLD_HEALTH = 1.0F;
 	static final long HOLD_RECHARGE_TICKS = 600L;
+	/** The breather after the hold: how long no attack lands on them (ticks). */
+	static final long HOLD_GRACE_TICKS = 60L;
 
 	/** Game time the hold was spent at; absent while it stands. Synced to its owner, whose screen pulses (DownedHud). */
 	public static final AttachmentType<Long> SPENT = AttachmentRegistry.create(JaymosPowers.id("last_hold_spent"),
@@ -46,6 +51,12 @@ public final class LastHold {
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
 			if (entity instanceof ServerPlayer player && amount > 0.0F) {
 				long now = player.level().getGameTime();
+				Long spent = player.getAttached(SPENT);
+				if (spent != null && now - spent < HOLD_GRACE_TICKS && Downed.attack(source)
+					&& !source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY) && !Downed.isDowned(player)) {
+					// the breather: the hold just caught them, and nothing that attacks them lands yet
+					return false;
+				}
 				Long last = LAST_DAMAGE.put(player, now);
 				if (last != null && now - last >= HOLD_RECHARGE_TICKS) {
 					player.removeAttached(SPENT);

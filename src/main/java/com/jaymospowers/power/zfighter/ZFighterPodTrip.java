@@ -146,7 +146,8 @@ public final class ZFighterPodTrip {
 		builder -> builder.persistent(Codec.INT).copyOnDeath());
 
 	/** Server → client: the flight is under way; show it. {@code to} is a destination index or Home. */
-	public record Flight(int to, int ticks, boolean skippable, boolean lens) implements CustomPacketPayload {
+	/** (Lanterns) {@code ki}: flown on the fighter's own ki ({@link KiVoyage}), no pod. */
+	public record Flight(int to, int ticks, boolean skippable, boolean lens, boolean ki) implements CustomPacketPayload {
 		public static final Type<Flight> TYPE = new Type<>(JaymosPowers.id("zfighter_space_flight"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Flight> CODEC = CustomPacketPayload.codec(
 			(p, buf) -> {
@@ -154,8 +155,9 @@ public final class ZFighterPodTrip {
 				buf.writeVarInt(p.ticks);
 				buf.writeBoolean(p.skippable);
 				buf.writeBoolean(p.lens);
+				buf.writeBoolean(p.ki);
 			},
-			buf -> new Flight(buf.readVarInt() - 1, buf.readVarInt(), buf.readBoolean(), buf.readBoolean()));
+			buf -> new Flight(buf.readVarInt() - 1, buf.readVarInt(), buf.readBoolean(), buf.readBoolean(), buf.readBoolean()));
 
 		@Override
 		public Type<Flight> type() {
@@ -175,7 +177,9 @@ public final class ZFighterPodTrip {
 	static void init() {
 		PayloadTypeRegistry.clientboundPlay().register(Flight.TYPE, Flight.CODEC);
 		// (0.20.36) nothing hurts you on a trip, but in an ambush you are out of the pod and fair game
-		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> hurting || !(entity instanceof ServerPlayer player && shielded(player)));
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> hurting
+			|| !(entity instanceof ServerPlayer player && (shielded(player) || KiVoyage.voyaging(player))));
+		KiVoyage.init();
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer player) {
 				Trip trip = TRIPS.get(player.getUUID());
@@ -245,6 +249,9 @@ public final class ZFighterPodTrip {
 	static final double BOARD_RANGE = 2.5;
 
 	/** The flight's length for a trip that burns {@code cost} fuel. */
+	/** A trip that skirts the Hollow ({@link ZFighterSpace#skirtsHollow}) lasts this much longer. */
+	static final float HOLLOW_STRETCH = 1.35F;
+
 	public static int flightTicks(int cost) {
 		return FLIGHT_BASE_TICKS + FLIGHT_PER_FUEL * cost;
 	}
@@ -452,10 +459,14 @@ public final class ZFighterPodTrip {
 		int cost = ZFighterSpace.cost(trip.dest, trip.from);
 		trip.phase = Phase.FLIGHT;
 		trip.ticks = flightTicks(cost);
-		ServerPlayNetworking.send(player, new Flight(trip.dest, trip.ticks, player.getAttachedOrElse(FLIGHTS, 0) > 1, trip.lens));
+		if (ZFighterSpace.skirtsHollow(ZFighterSpace.indexOf(trip.from), trip.dest)) {
+			// the Hollow's pull drags the pod off course: the trip runs long
+			trip.ticks = Math.round(trip.ticks * HOLLOW_STRETCH);
+		}
+		ServerPlayNetworking.send(player, new Flight(trip.dest, trip.ticks, player.getAttachedOrElse(FLIGHTS, 0) > 1, trip.lens, false));
 		ServerPlayer guest = guest(player.level().getServer(), trip);
 		if (guest != null) {
-			ServerPlayNetworking.send(guest, new Flight(trip.dest, trip.ticks, false, trip.lens));
+			ServerPlayNetworking.send(guest, new Flight(trip.dest, trip.ticks, false, trip.lens, false));
 		}
 	}
 

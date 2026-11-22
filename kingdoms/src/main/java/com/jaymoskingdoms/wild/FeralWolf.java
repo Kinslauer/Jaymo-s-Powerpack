@@ -23,7 +23,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
  */
 public class FeralWolf extends WildBeast {
 	public static final String[] COATS = {"black", "snowy", "timber", "arctic", "brown", "red"};
-	static final double HEALTH = 14.0, SPEED = 0.32, DAMAGE = 5.0;
+	static final double HEALTH = 14.0, SPEED = 0.32, DAMAGE = 3.0;
 
 	public FeralWolf(EntityType<? extends FeralWolf> type, Level level) {
 		super(type, level);

@@ -55,6 +55,7 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		com.jaymoskitchen.client.climate.DryVeins.register();
 		com.jaymoskitchen.client.climate.ParasiteHud.register();
 		com.jaymoskitchen.client.herb.PmehTooltip.register();
+		com.jaymoskitchen.client.vintner.VintageTooltip.register();
 		// (0.5.1) ragdolls: the bodies the server (or this client, for its own limp player) simulates, drawn here
 		com.jaymoskitchen.client.ragdoll.ClientRagdolls.register();
 		// (0.5.45) a dragged body follows the hand this client draws
@@ -84,6 +85,9 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		com.jaymoskitchen.stomach.FoodJournalItem.openScreen = com.jaymoskitchen.client.stomach.FoodJournalScreen::open;
 		net.minecraft.client.gui.screens.MenuScreens.register(com.jaymoskitchen.stomach.LunchBox.MENU,
 			com.jaymoskitchen.client.stomach.LunchBoxScreen::new);
+		// a body's loot screen
+		net.minecraft.client.gui.screens.MenuScreens.register(com.jaymoskitchen.corpse.Corpses.LOOT_MENU,
+			com.jaymoskitchen.client.corpse.CorpseLootScreen::new);
 		// the mill machines' moving parts, loads and leads
 		BlockEntityRenderers.register(Mill.MACHINE_ENTITY, MachineRenderer::new);
 		// windmills and waterwheels turning
@@ -106,6 +110,7 @@ public class JaymosKitchenClient implements ClientModInitializer {
 		com.jaymoskitchen.client.delight.DelightHomeClient.register();
 		// (0.5.27) hides hanging on drying racks
 		BlockEntityRenderers.register(com.jaymoskitchen.tanning.Hides.DRYING_RACK_ENTITY, com.jaymoskitchen.client.tanning.DryingRackRenderer::new);
+		BlockEntityRenderers.register(com.jaymoskitchen.butchery.ButcherShop.BUTCHER_DISPLAY_ENTITY, com.jaymoskitchen.client.butchery.ButcherDisplayRenderer::new);
 		ModelLayerRegistry.registerModelLayer(SaddlebagModel.LAYER, SaddlebagModel::createLayer);
 
 		// the quiver worn on players' backs
@@ -161,6 +166,7 @@ public class JaymosKitchenClient implements ClientModInitializer {
 			net.minecraft.client.multiplayer.ClientLevel level = net.minecraft.client.Minecraft.getInstance().level;
 			if (level != null) {
 				com.jaymoskitchen.client.spit.SpitBlockEntityRenderer.ripAt(payload.pos(), level.getGameTime());
+				com.jaymoskitchen.client.spit.TearPose.start(payload.by(), payload.pos(), level.getGameTime());
 			}
 		});
 		}

@@ -1,0 +1,76 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "age": "0",
+        "netted": "false"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/grape_vine_0"
+      }
+    },
+    {
+      "when": {
+        "age": "0",
+        "netted": "true"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/grape_vine_0_netted"
+      }
+    },
+    {
+      "when": {
+        "age": "1",
+        "netted": "false"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/grape_vine_1"
+      }
+    },
+    {
+      "when": {
+        "age": "1",
+        "netted": "true"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/grape_vine_1_netted"
+      }
+    },
+    {
+      "when": {
+        "age": "2",
+        "netted": "false"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/grape_vine_2"
+      }
+    },
+    {
+      "when": {
+        "age": "2",
+        "netted": "true"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/grape_vine_2_netted"
+      }
+    },
+    {
+      "when": {
+        "age": "3",
+        "netted": "false"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/grape_vine_3"
+      }
+    },
+    {
+      "when": {
+        "age": "3",
+        "netted": "true"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/grape_vine_3_netted"
+      }
+    }
+  ]
+}

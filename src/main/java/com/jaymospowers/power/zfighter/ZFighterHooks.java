@@ -1,9 +1,15 @@
 package com.jaymospowers.power.zfighter;
 
+import com.jaymospowers.stamina.Feathers;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 
-/** What the Z Fighter's mixins ask (the rest of the power stays package-private). */
+/**
+ * What the Z Fighter's mixins ask (the rest of the power stays package-private).
+ */
 public final class ZFighterHooks {
 	private ZFighterHooks() {
 	}
@@ -12,7 +18,81 @@ public final class ZFighterHooks {
 		// (0.17.60) then the difficulty he wished for
 		// (Awakening pick) a body left airborne, flat or pinned takes a Z Fighter's or a boxer's next hit harder (past the punch cap)
 		// (Awakening pick) Ability Power: a power's own moves hit harder
-		return com.jaymospowers.core.AbilityPower.damage(victim, source,
-			ZFighterWishExtras.scaled(victim, ZFighterStates.apply(victim, source, ZFighterBattle.modifyDamage(victim, source, damage))));
+		float dmg = com.jaymospowers.core.AbilityPower.damage(victim, source,
+			ZFighterWishExtras.scaled(victim, ZFighterStates.apply(victim, source,
+				ZFighterBattle.modifyDamage(victim, source, com.jaymospowers.core.brawl.Brawl.guard(victim, source, damage)))));
+		
+		// Ki Shell: soak part of every blow from ki when not guarding, paid from ki
+		if (victim instanceof ServerPlayer player && com.jaymospowers.core.Powers.has(player, ZFighterPower.INSTANCE)) {
+			ZFighterPower.Live live = ZFighterPower.live(player);
+			if (ZFighterKiShell.has(player) && !live.guarding) {
+				if (ZFighterKiShell.isKiDamage(source)) {
+					float reduction = ZFighterKiShell.reduction(player);
+					if (reduction > 0.0F) {
+						float soaked = damage * reduction;
+						// Pay ki for what we soak
+						float kiCost = soaked * 0.5F; // 0.5 ki per damage soaked
+						if (live.ki >= kiCost) {
+							live.ki -= kiCost;
+							return damage - soaked;
+						}
+					}
+				}
+			}
+		}
+		return dmg;
+	}
+
+	/** Guarding holds stamina: one feather every eight ticks while it is up. */
+	public static boolean guardStamina(ServerPlayer player) {
+		if (!player.isCreative() && !player.isSpectator()) {
+			return spend(player, 1);
+		}
+		return true;
+	}
+
+	/** Flash Step costs stamina; false when empty. */
+	public static boolean flashStepStamina(ServerPlayer player) {
+		return spend(player, STEP_STAMINA);
+	}
+
+	/** Entering a form costs stamina; false when empty. */
+	public static boolean enterFormStamina(ServerPlayer player) {
+		return spend(player, FORM_STAMINA);
+	}
+
+	/** Entering Limit Break costs stamina; false when empty. */
+	public static boolean enterLimitStamina(ServerPlayer player) {
+		return spend(player, LIMIT_STAMINA);
+	}
+
+	/** A ki ward (combat.PassiveBlocks) takes {@code amount} ki; false (nothing taken) if he hasn't that much. */
+	public static boolean spendKi(ServerPlayer player, float amount) {
+		ZFighterPower.Live live = ZFighterPower.live(player);
+		if (live.ki < amount) {
+			return false;
+		}
+		live.ki -= amount;
+		return true;
+	}
+
+	/** Raising the guard needs stamina; false when empty. */
+	public static boolean raiseGuardStamina(ServerPlayer player) {
+		return Feathers.canSpend(player, 1);
+	}
+
+	private static final int STEP_STAMINA = 4;
+	private static final int FORM_STAMINA = 12;
+	private static final int LIMIT_STAMINA = 20;
+
+	private static boolean spend(ServerPlayer player, int cost) {
+		if (player.isCreative() || player.isSpectator()) {
+			return true;
+		}
+		if (!Feathers.canSpend(player, cost)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_stamina_empty").withStyle(ChatFormatting.GRAY));
+			return false;
+		}
+		return Feathers.spend(player, cost);
 	}
 }

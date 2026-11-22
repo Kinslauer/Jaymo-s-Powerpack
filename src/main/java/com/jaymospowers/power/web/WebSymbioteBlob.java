@@ -125,6 +125,8 @@ public class WebSymbioteBlob extends PathfinderMob {
 	/** It runs until this far from the fire (blocks), or for this long at most (ticks). */
 	static final double FLEE_DISTANCE = 40.0, FLEE_SPEED = 2.2;
 	static final int FLEE_TICKS = 400;
+	/** One it has left (alive) this close, and it runs from them too ({@link #shun}). */
+	static final double SHUN_RANGE = 16.0;
 	/** The red one: it goes for anything living this close, and this share of its lashes at a mob it could take take it instead. */
 	static final double RED_AGGRO_RANGE = 10.0;
 	static final float RED_TAKE_CHANCE = 0.3F;
@@ -268,11 +270,29 @@ public class WebSymbioteBlob extends PathfinderMob {
 		this.setHomeTo(BlockPos.containing(ahead), ROAM_RADIUS);
 	}
 
-	/** It has just left {@code host} (rejected, or dead): it won't go back, and rests a moment first. */
+	/**
+	 * It has just left {@code host} (rejected, or dead): it won't go back, and rests a moment first. One it left alive
+	 * it runs from (Andy: "if it wont posess you, it should run away"), and from then on whenever they come near
+	 * ({@link #shun}).
+	 */
 	WebSymbioteBlob spurn(Entity host) {
 		this.spurned.add(host.getUUID());
 		this.mobRest = MOB_REST_TICKS;
+		if (host instanceof Player player && player.isAlive() && this.remains == null && this.rampageSite == null) {
+			this.flee(player.position());
+		}
 		return this;
+	}
+
+	/** One it has left (alive) is near and it isn't fighting them: it runs from them (wherever they are now), as from fire. */
+	private void shun(ServerLevel level) {
+		if (this.spurned.isEmpty() || this.grudge != null || this.remains != null || this.rampageSite != null || this.isOnFire()) {
+			return;
+		}
+		level.getEntitiesOfClass(Player.class, this.getBoundingBox().inflate(SHUN_RANGE),
+				p -> p.isAlive() && !p.isSpectator() && this.spurned.contains(p.getUUID()) && p.distanceTo(this) <= SHUN_RANGE).stream()
+			.min(Comparator.comparingDouble(p -> p.distanceToSqr(this)))
+			.ifPresent(p -> this.flee(p.position()));
 	}
 
 	/** No host found: it sinks into a puddle of goo where it lies (Black Ooze), if there's room for one. */
@@ -419,6 +439,9 @@ public class WebSymbioteBlob extends PathfinderMob {
 			if (foe != null) {
 				this.marks(foe);
 			}
+		}
+		if (this.tickCount % SCAN_EVERY == 0) {
+			this.shun(level);
 		}
 		if (this.tickCount % SCAN_EVERY == 0 && this.grudge == null && this.pursuing == null) {
 			this.quarry = findHost(level);
@@ -757,12 +780,17 @@ public class WebSymbioteBlob extends PathfinderMob {
 	protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
 		super.addAdditionalSaveData(output);
 		WebSymbioteLife.save(this, output);
+		// (saved: one it left, it never takes again, across a reload too)
+		if (!this.spurned.isEmpty()) {
+			output.store("spurned", net.minecraft.core.UUIDUtil.CODEC.listOf(), java.util.List.copyOf(this.spurned));
+		}
 	}
 
 	@Override
 	protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
 		super.readAdditionalSaveData(input);
 		WebSymbioteLife.load(this, input);
+		input.read("spurned", net.minecraft.core.UUIDUtil.CODEC.listOf()).ifPresent(this.spurned::addAll);
 	}
 
 	// ---- (0.17.150) remains, feasting, rampaging: see WebSymbioteLife ----

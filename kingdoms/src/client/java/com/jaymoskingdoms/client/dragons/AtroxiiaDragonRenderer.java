@@ -42,6 +42,7 @@ final class AtroxiiaDragonRenderer extends GeoEntityRenderer<AtroxiiaDragon, Liv
 	@Override
 	public void addRenderData(AtroxiiaDragon dragon, Void related, LivingEntityRenderState state, float partialTick) {
 		super.addRenderData(dragon, related, state, partialTick);
+		DragonBoarding.extract(dragon, state, partialTick);
 		state.addGeckolibData(LOOK, dragon.look());
 		state.addGeckolibData(SADDLED, dragon.saddled());
 	}
@@ -55,6 +56,7 @@ final class AtroxiiaDragonRenderer extends GeoEntityRenderer<AtroxiiaDragon, Liv
 	@Override
 	public void adjustModelBonesForRender(RenderPassInfo<LivingEntityRenderState> info, BoneSnapshots snapshots) {
 		super.adjustModelBonesForRender(info, snapshots);
+		DragonBoarding.apply(info, snapshots, new String[] {"neck0", "neck1", "neck2"}, "head");
 		LivingEntityRenderState state = info.renderState();
 		float yaw = Mth.clamp(state.yRot, -LOOK_YAW, LOOK_YAW) * Mth.DEG_TO_RAD;
 		float tip = Mth.clamp(state.xRot, -LOOK_PITCH, LOOK_PITCH) * Mth.DEG_TO_RAD;

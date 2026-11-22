@@ -73,6 +73,8 @@ public class JaymosKitchen implements ModInitializer {
 		// echoes for the layered sounds
 		com.jaymoskitchen.sound.Soundscape.register();
 		Mill.register();
+		// grapes and the vintner's things first: the brews are made from them
+		com.jaymoskitchen.vintner.Vintner.register();
 		com.jaymoskitchen.brewing.Brewing.register();
 		com.jaymoskitchen.kitchen.KitchenBlocks.register();
 		com.jaymoskitchen.cooking.spit.SpitBlock.register();
@@ -97,6 +99,8 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.tanning.Hides.register();
 		// (0.5.51) meat hooks, blood grates and bottled blood (corpse/Hanging does the butchering)
 		com.jaymoskitchen.butchery.Butchery.register();
+		// (Butchery picks) the mincer and mince, the butcher's display, head mounts, the barrel of bones
+		com.jaymoskitchen.butchery.ButcherShop.register();
 		com.jaymoskitchen.butchery.Skeletons.register();
 		// rats after food left out, and the traps for them
 		com.jaymoskitchen.rats.Rats.register();
@@ -104,6 +108,7 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.farm.TiredSoil.register();
 		// (GT New Horizons picks) slow herds and crowded pens; before Familiarity, so a milked cow gives no extra bucket
 		com.jaymoskitchen.farm.Herds.register();
+		com.jaymoskitchen.farmwater.FarmWater.register();
 		com.jaymoskitchen.farm.Familiarity.register();
 		// (GT New Horizons picks) farmland only near water, seeds scratched from dry grass
 		com.jaymoskitchen.farm.DryFields.register();
@@ -140,12 +145,18 @@ public class JaymosKitchen implements ModInitializer {
 			if (carried != null) {
 				if (!level.isClientSide()) {
 					BlockPos clicked = hit.getBlockPos();
-					if (com.jaymoskitchen.butchery.Butchery.isHook(level.getBlockState(clicked))) {
+					BlockPos hook = com.jaymoskitchen.corpse.Hanging.hookAt(level, clicked, hit.getLocation());
+					if (hook != null) {
 						// (0.5.51) hung up on a meat hook by its hind legs
-						com.jaymoskitchen.corpse.Hanging.hang(carried, player, clicked);
+						com.jaymoskitchen.corpse.Hanging.hang(carried, player, hook);
 						return InteractionResult.SUCCESS;
 					}
 					BlockState clickedState = level.getBlockState(clicked);
+					if (com.jaymoskitchen.cooking.spit.GreatSpitBlock.is(clickedState)) {
+						// a dressed carcass heaved onto the great spit, to turn there whole
+						com.jaymoskitchen.cooking.spit.GreatSpitBlock.skewer(carried, player, clicked);
+						return InteractionResult.SUCCESS;
+					}
 					if (clickedState.is(net.minecraft.tags.BlockTags.CAMPFIRES) && carried.oneHanded()) {
 						// (0.5.77) a small animal laid on the campfire to roast whole (see CorpseEntity#roast)
 						carried.putDown(Vec3.atBottomCenterOf(clicked).add(0.0, clickedState.getShape(level, clicked).max(net.minecraft.core.Direction.Axis.Y), 0.0),
@@ -257,6 +268,23 @@ public class JaymosKitchen implements ModInitializer {
 					carried.drop(ctx.player());
 				}
 			}
+		});
+		ServerPlayNetworking.registerGlobalReceiver(Payloads.HangOn.TYPE, (payload, ctx) -> {
+			// a meat hook clicked while carrying or dragging a carcass: hung there, never let go of
+			net.minecraft.server.level.ServerPlayer player = ctx.player();
+			CorpseEntity body = CorpseEntity.draggedBy(player);
+			if (body == null) {
+				body = CorpseEntity.carriedBy(player);
+			}
+			BlockPos hook = payload.pos();
+			if (body == null || !com.jaymoskitchen.butchery.Butchery.isHook(player.level().getBlockState(hook))) {
+				return;
+			}
+			if (!player.isWithinBlockInteractionRange(hook, 1.0)) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.closer"));
+				return;
+			}
+			com.jaymoskitchen.corpse.Hanging.hang(body, player, hook);
 		});
 		ServerPlayNetworking.registerGlobalReceiver(Payloads.StartCooking.TYPE,
 			(payload, ctx) -> Kitchen.start(ctx.player(), payload.pos(), payload.dish(), payload.station()));

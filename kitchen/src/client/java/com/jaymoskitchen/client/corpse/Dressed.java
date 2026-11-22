@@ -46,6 +46,18 @@ public final class Dressed {
 	private Dressed() {
 	}
 
+	/**
+	 * A whole beast roasting on the great spit: browning, cooked through, charred (bits beside the dressing's, client-only),
+	 * from its doneness ({@code SpitBlockEntity}: 1 cooked, 2 burnt). The flesh is painted toward a roast's browns.
+	 */
+	public static final int ROAST_BROWNING = 1 << 8, ROAST_COOKED = 1 << 9, ROAST_CHARRED = 1 << 10;
+	/** How far the flesh goes toward each roast's colour. */
+	private static final int ROAST = 0x9A5A24, CHAR = 0x2E1A10;
+
+	public static int roasted(float doneness) {
+		return doneness >= 1.6F ? ROAST_CHARRED : doneness >= 1.0F ? ROAST_COOKED : doneness >= 0.4F ? ROAST_BROWNING : 0;
+	}
+
 	public static void mark(EntityRenderState state, int dressed) {
 		state.setData(KEY, dressed == 0 ? null : dressed);
 	}
@@ -70,6 +82,13 @@ public final class Dressed {
 		if ((dressed & CorpseEntity.DRESSED_GUTTED) != 0) {
 			ribs(painted, trunkFaces(model.root()));
 		}
+		if ((dressed & ROAST_CHARRED) != 0) {
+			roast(painted, CHAR, 0.8F);
+		} else if ((dressed & ROAST_COOKED) != 0) {
+			roast(painted, ROAST, 0.7F);
+		} else if ((dressed & ROAST_BROWNING) != 0) {
+			roast(painted, ROAST, 0.35F);
+		}
 		Identifier id = JaymosKitchen.id("dressed/" + texture.getNamespace() + "/" + texture.getPath().replace(".png", "") + "_" + made++);
 		Minecraft.getInstance().getTextureManager().register(id, new DynamicTexture(id::toString, painted));
 		return id;
@@ -93,6 +112,20 @@ public final class Dressed {
 				int colour = hash(x / 2, y, 1) % FAT_ONE_IN == 0 ? FAT : hash(x, y / 2, 2) % DARK_ONE_IN == 0 ? DARK_MUSCLE : MUSCLE;
 				image.setPixel(x, y, ARGB.color(ARGB.alpha(argb), Math.min(255, (int) ((colour >> 16 & 0xFF) * shade)),
 					Math.min(255, (int) ((colour >> 8 & 0xFF) * shade)), Math.min(255, (int) ((colour & 0xFF) * shade))));
+			}
+		}
+	}
+
+	private static void roast(NativeImage image, int colour, float amount) {
+		for (int y = 0; y < image.getHeight(); y++) {
+			for (int x = 0; x < image.getWidth(); x++) {
+				int argb = image.getPixel(x, y);
+				if (ARGB.alpha(argb) == 0) {
+					continue;
+				}
+				float a = amount + (hash(x, y, 4) % 7 - 3) * 0.03F;
+				image.setPixel(x, y, ARGB.color(ARGB.alpha(argb), (int) net.minecraft.util.Mth.lerp(a, ARGB.red(argb), colour >> 16 & 0xFF),
+					(int) net.minecraft.util.Mth.lerp(a, ARGB.green(argb), colour >> 8 & 0xFF), (int) net.minecraft.util.Mth.lerp(a, ARGB.blue(argb), colour & 0xFF)));
 			}
 		}
 	}

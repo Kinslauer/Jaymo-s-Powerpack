@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jaymoskingdoms:item/hide_armor_fur_lined"
+  }
+}

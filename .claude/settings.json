@@ -23,6 +23,11 @@
             "command": "e=$(cat); d=\"$CLAUDE_PROJECT_DIR/tools\"; [ -f \"$d/vault_prs.py\" ] && printf %s \"$e\" | python \"$d/vault_prs.py\" --hook --if-older 60; [ -f \"$d/vault_sync.py\" ] && printf %s \"$e\" | python \"$d/vault_sync.py\" --hook --if-older 5; true",
             "async": true,
             "timeout": 60
+          },
+          {
+            "type": "command",
+            "command": "p=python; command -v python >/dev/null 2>&1 || p=python3; \"$p\" \"$CLAUDE_PROJECT_DIR/tools/no_touch_check.py\"; true",
+            "timeout": 15
           }
         ]
       }

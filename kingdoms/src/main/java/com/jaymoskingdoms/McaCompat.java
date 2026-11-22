@@ -59,6 +59,11 @@ public final class McaCompat {
 	private McaCompat() {
 	}
 
+	/** Whether MCA's talk menu on {@code entity} is open for {@code player} (false without MCA). */
+	static boolean interactingWith(net.minecraft.world.entity.Entity entity, ServerPlayer player) {
+		return LOADED && McaBridge.interactingWith(entity, player);
+	}
+
 	/**
 	 * (0.7.87) A player's MCA look as it's saved ({@code McaPlayerSizeMixin}): (0.7.290) its Size and Width are kept to
 	 * their heritage's body ({@link BodySizes}).
@@ -178,6 +183,23 @@ public final class McaCompat {
 	static void setLook(ServerPlayer player, net.minecraft.nbt.CompoundTag data) {
 		if (LOADED) {
 			McaBridge.setLook(player, data);
+		}
+	}
+
+	/** {@link McaBridge#fateLook}; false without MCA. */
+	static boolean fateLook(ServerPlayer player, int gender, Heritage.@Nullable Kind kind) {
+		return LOADED && McaBridge.fateLook(player, gender, kind);
+	}
+
+	/** {@link McaBridge#faceOf}; null without MCA. */
+	static net.minecraft.nbt.@Nullable CompoundTag faceOf(ServerPlayer player) {
+		return LOADED ? McaBridge.faceOf(player) : null;
+	}
+
+	/** {@link McaBridge#wearFace}; nothing without MCA. */
+	static void wearFace(ServerPlayer player, net.minecraft.nbt.CompoundTag face) {
+		if (LOADED) {
+			McaBridge.wearFace(player, face);
 		}
 	}
 
@@ -578,6 +600,11 @@ public final class McaCompat {
 		return level.addFreshEntity(v) ? v : null;
 	}
 
+	/** A grown woman villager of no job at {@code at} (the night burglar, {@link NightBurglars}): MCA's, else the game's; already in the world, or null. */
+	static @Nullable Villager woman(ServerLevel level, net.minecraft.world.phys.Vec3 at) {
+		return LOADED ? McaBridge.woman(level, at) : visitor(level, at, null, false);
+	}
+
 	/** (0.7.294) With MCA, a guard of {@code f}'s for a caravan ({@link Caravans}) at {@code at} on {@code task}, or null. */
 	static @Nullable Worker escort(ServerLevel level, Faction f, net.minecraft.core.BlockPos at, float yaw, String task, int radius) {
 		return LOADED ? McaBridge.escort(level, f, at, yaw, task, radius) : null;
@@ -723,6 +750,11 @@ public final class McaCompat {
 	/** (0.7.424) The opening of one held down for questioning ({@link McaBridge#questioningOpening}). */
 	public static boolean questioningOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
 		return LOADED && McaBridge.questioningOpening(villager, player);
+	}
+
+	/** (2026-11-19) An old druid's own opening: who she is, her grove, her want ({@link McaBridge#druidOpening}). */
+	public static boolean druidOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
+		return LOADED && McaBridge.druidOpening(villager, player);
 	}
 
 	/** (0.7.405) A Z Fighter character's own opening, never MCA's stranger's welcome ({@link McaBridge#zfighterOpening}). */

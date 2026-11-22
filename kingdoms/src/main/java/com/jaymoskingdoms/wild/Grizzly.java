@@ -61,7 +61,7 @@ import org.jspecify.annotations.Nullable;
  * you use rea for models"): the client's {@code GrizzlyModel}, the coat painted by {@code tools/gen_grizzly.py}.
  */
 public class Grizzly extends WildBeast implements Acting {
-	static final double HEALTH = 120.0, ARMOR = 6.0, DAMAGE = 9.0, SPEED = 0.3, KNOCKBACK_RESISTANCE = 0.75;
+	static final double HEALTH = 120.0, ARMOR = 6.0, DAMAGE = 5.0, SPEED = 0.3, KNOCKBACK_RESISTANCE = 0.75;
 	/** How far it notices a player (blocks), and how much of that a sneaking one is seen at. */
 	static final double NOTICE = 24.0, SNEAK_NOTICE = 0.5;
 	/** How near a villager may come before it goes for them (blocks). */
@@ -73,18 +73,18 @@ public class Grizzly extends WildBeast implements Acting {
 	/** Its rear-up: how long (ticks), when the forepaws come down, how far the slam reaches, how hard, how often. */
 	static final int REAR_TICKS = 34, REAR_SLAM = 26, REAR_COOLDOWN = 160;
 	static final double SLAM_REACH = 3.5;
-	static final float SLAM_DAMAGE = 10.0F;
+	static final float SLAM_DAMAGE = 6.0F;
 	/** Its paw swipe: how long, when it lands, its reach. */
 	static final int SWIPE_TICKS = 14, SWIPE_HIT = 7;
 	static final double SWIPE_REACH = 2.6;
 	/** Its charge: the most it runs (ticks), how fast (blocks a tick), its blow, how often, and the range it charges from. */
 	static final int CHARGE_TICKS = 30, CHARGE_COOLDOWN = 180;
 	static final double CHARGE_SPEED = 0.5, CHARGE_MIN = 5.0, CHARGE_MAX = 18.0;
-	static final float CHARGE_DAMAGE = 11.0F;
+	static final float CHARGE_DAMAGE = 7.0F;
 	/** Its maul: how long (ticks), when it bites, how hard, how much damage frees its victim, its chance after a charge. */
 	static final int MAUL_TICKS = 46, MAUL_COOLDOWN = 240;
 	static final int[] MAUL_BITES = {10, 22, 34};
-	static final float MAUL_BITE = 4.0F, MAUL_BREAK = 8.0F, MAUL_CHANCE = 0.6F;
+	static final float MAUL_BITE = 3.0F, MAUL_BREAK = 8.0F, MAUL_CHANCE = 0.6F;
 	/** How long its victim must lie still (crouched, not striking it) to be left for dead (ticks), and how long it stays calm. */
 	static final int PLAY_DEAD_TICKS = 30, CALM_TICKS = 1200;
 	/** Its enraged roar: below this share of its health, how long the roar runs, and how far it frightens players. */
@@ -94,7 +94,7 @@ public class Grizzly extends WildBeast implements Acting {
 	/** Staggered after a broken maul or a charge into a wall (ticks). */
 	static final int STAGGER_TICKS = 24;
 	/** Ticks between blows, and enraged. */
-	static final int GAP = 14, GAP_ENRAGED = 8;
+	static final int GAP = 20, GAP_ENRAGED = 12;
 	/** How far off a player can be and it still hunts them (blocks). */
 	static final double LOSE_RANGE = 48.0;
 	/** Spawning: no other grizzly this near (blocks), none near a settlement, and its share of tries that come to anything. */

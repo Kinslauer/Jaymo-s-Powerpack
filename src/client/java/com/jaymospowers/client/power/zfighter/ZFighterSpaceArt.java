@@ -246,6 +246,36 @@ final class ZFighterSpaceArt {
 		}
 	}
 
+	/**
+	 * The Hollow, the black hole past the outer worlds: a faint glow, the far half of its burning disc, the dark itself with a
+	 * thin bright rim where the light is bent round it, and the near half of the disc across its face, turning slowly.
+	 */
+	static void hollow(GuiGraphicsExtractor graphics, float cx, float cy, float r, float time) {
+		for (int k = 3; k >= 1; k--) {
+			disc(graphics, cx, cy, r * (1.0F + 0.45F * k), ((0x12 * (4 - k)) << 24) | 0xFF9040);
+		}
+		hollowDisc(graphics, cx, cy, r, time, false);
+		disc(graphics, cx, cy, r, 0xFF000000);
+		ring(graphics, cx, cy, r + 0.5F, 0xFFFFE6B8, 1);
+		hollowDisc(graphics, cx, cy, r, time, true);
+	}
+
+	/** One half of the Hollow's burning disc, tilted flat: the near half ({@code front}) or the far one. */
+	private static void hollowDisc(GuiGraphicsExtractor graphics, float cx, float cy, float r, float time, boolean front) {
+		int count = Math.max(24, Math.round(r * 10.0F));
+		int size = Math.max(1, Math.round(r / 6.0F));
+		for (int k = 0; k < count; k++) {
+			double a = Math.PI * 2.0 * k / count + time * 0.6;
+			if ((Math.sin(a) > 0.0) != front) {
+				continue;
+			}
+			float rr = r * (1.4F + (hash(k, 6, 4031) % 60) / 100.0F);
+			int x = Math.round(cx + (float)Math.cos(a) * rr * 1.3F), y = Math.round(cy + (float)Math.sin(a) * rr * 0.28F);
+			int shade = hash(k, 7, 4031) % 3;
+			graphics.fill(x, y, x + size, y + size, shade == 0 ? 0xFFFFF0C0 : shade == 1 ? 0xFFFFA040 : 0xFFE05A18);
+		}
+	}
+
 	/** A filled disc in one colour (rows of fills). */
 	static void disc(GuiGraphicsExtractor graphics, float cx, float cy, float r, int colour) {
 		int top = Math.round(cy - r), bottom = Math.round(cy + r);

@@ -24,6 +24,11 @@ public final class BladeSounds {
 		SoundEvent.createVariableRangeEvent(JaymosPowers.id("armed.swing.medium")),
 		SoundEvent.createVariableRangeEvent(JaymosPowers.id("armed.swing.heavy"))};
 	private static final SoundEvent CLASH = SoundEvent.createVariableRangeEvent(JaymosPowers.id("armed.clash"));
+	/** A blow on plate rings, on mail rasps, on padding thuds, and steel on stone chips. */
+	private static final SoundEvent PLATE = SoundEvent.createVariableRangeEvent(JaymosPowers.id("armed.hit.plate")),
+		MAIL = SoundEvent.createVariableRangeEvent(JaymosPowers.id("armed.hit.mail")),
+		PADDING = SoundEvent.createVariableRangeEvent(JaymosPowers.id("armed.hit.padding")),
+		STONE = SoundEvent.createVariableRangeEvent(JaymosPowers.id("armed.hit.stone"));
 
 	private BladeSounds() {
 	}
@@ -45,6 +50,17 @@ public final class BladeSounds {
 	/** Steel meeting steel at {@code at}. */
 	public static void clash(ServerLevel level, Vec3 at, float volume, float pitch) {
 		level.playSound(null, at.x, at.y, at.z, CLASH, SoundSource.PLAYERS, volume, bend(level, pitch));
+	}
+
+	/** A blow landing on armour of {@code kind} at {@code at}: plate rings, mail rasps, padding thuds. */
+	public static void armour(ServerLevel level, Vec3 at, com.jaymospowers.core.ArmourKind kind, float volume, float pitch) {
+		SoundEvent sound = kind == com.jaymospowers.core.ArmourKind.PLATE ? PLATE : kind == com.jaymospowers.core.ArmourKind.MAIL ? MAIL : PADDING;
+		level.playSound(null, at.x, at.y, at.z, sound, SoundSource.PLAYERS, volume, bend(level, pitch));
+	}
+
+	/** Steel on stone at {@code at}: a dry chip. */
+	public static void stone(ServerLevel level, Vec3 at, float volume, float pitch) {
+		level.playSound(null, at.x, at.y, at.z, STONE, SoundSource.PLAYERS, volume, bend(level, pitch));
 	}
 
 	private static float bend(ServerLevel level, float pitch) {

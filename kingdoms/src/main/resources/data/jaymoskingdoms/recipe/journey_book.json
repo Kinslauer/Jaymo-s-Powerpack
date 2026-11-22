@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:book",
+    "minecraft:compass"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:journey_book"
+  }
+}

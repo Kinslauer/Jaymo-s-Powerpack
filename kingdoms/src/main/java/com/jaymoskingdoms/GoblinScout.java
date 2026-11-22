@@ -239,6 +239,11 @@ public class GoblinScout extends ActingMonster {
 
 	// ---- sending them out ------------------------------------------------------------------------------------------------
 
+	/** The goblin village this scout ranges for, or -1 (run wild). */
+	public int camp() {
+		return this.camp;
+	}
+
 	/**
 	 * Goblin village {@code camp} (fire at {@code fire}) sends out scouts: {@code count} of them, never past {@link #MAX}
 	 * about it. Only while the fire's ground is loaded.

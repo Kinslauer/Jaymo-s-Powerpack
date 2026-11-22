@@ -223,6 +223,8 @@ public class CorpseEntity extends Entity {
 	 * still counts as the same hold.
 	 */
 	public static final int LIFT_TICKS = 12, USE_REPEAT = 4, HOLD_GRACE = 8;
+	/** A plain press of an empty hand let go within this many ticks is a tap: the search, not the drag. */
+	public static final int TAP_TICKS = 4;
 	/**
 	 * (0.5.31) Andy: "for those larger animals that can't be picked up, they are butchered instead with a knife on the spot,
 	 * and the meat/ hide etc, slowly gathered". A big carcass ({@link #tooBigToLift}) is cut up where it lies with a
@@ -261,10 +263,21 @@ public class CorpseEntity extends Entity {
 	private List<ItemStack> loot = new ArrayList<>();
 	private int bones;
 	private boolean searched;
+	/** Its gear has had its wear put on already ({@link #wornGear}), so it isn't worn again. */
+	private boolean gearWorn;
+	/** Server: the loot screen open on it (shared by everyone looking), or null. Never saved. */
+	private @Nullable CorpseLoot looting;
 	private int chops;
 	/** (0.5.31) A lift being held on it: by whom, since when, and when use last came (game time). Never saved. */
 	private java.util.@Nullable UUID liftBy;
 	private long liftStart, liftLast;
+	/**
+	 * Andy (2026-11-20): "right click hold should always be drag, tap can loot". A plain press of an empty hand on it: by
+	 * whom, since when, and when use last came (game time). Let go within {@link #TAP_TICKS} it's a tap ({@link #tapped});
+	 * held on, it's taken hold of ({@link #takeHold}). Never saved.
+	 */
+	private java.util.@Nullable UUID pressBy;
+	private long pressStart, pressLast;
 	/** (0.5.31) A big carcass being cut up where it lies: by whom, when use last came, and how far into the next piece (ticks). */
 	private java.util.@Nullable UUID cutBy;
 	private long cutLast;
@@ -424,7 +437,7 @@ public class CorpseEntity extends Entity {
 			ItemStack stack = ItemStack.CODEC.parse(registryAccess().createSerializationContext(NbtOps.INSTANCE), gear.get(slot))
 				.result().orElse(ItemStack.EMPTY);
 			gear.remove(slot);
-			if (!stack.isEmpty() && stack.isDamageableItem() && !preserved(tag, slot)) {
+			if (!stack.isEmpty() && stack.isDamageableItem() && !preserved(tag, slot) && !gearWorn) {
 				wear(stack, kind == CorpseKind.SKELETON && slot.equals("mainhand"));
 			}
 			if (gear.isEmpty()) {
@@ -469,7 +482,7 @@ public class CorpseEntity extends Entity {
 	 */
 	public List<ItemStack> robBy(Entity robber) {
 		List<ItemStack> taken = new ArrayList<>();
-		if (!(level() instanceof ServerLevel level) || isRemoved() || !robbable()) {
+		if (!(level() instanceof ServerLevel level) || isRemoved() || !robbable() || looting != null) {
 			return taken;
 		}
 		if (!searched) {
@@ -1043,6 +1056,56 @@ public class CorpseEntity extends Entity {
 				ragdoll.body.wake();
 			}
 		}
+	}
+
+	/**
+	 * Can go on the great spit whole once it's dressed ({@link com.jaymoskitchen.cooking.spit.GreatSpitBlock}): an animal's
+	 * body a hook would take, lying loose (not hung, carried by someone else or dragged), with no cut made in it yet.
+	 */
+	public boolean spitWholeable() {
+		return Hanging.hangable(this) && butcherStage != Hanging.BLEEDING && butcherStage <= Hanging.SKINNED && hook == null;
+	}
+
+	/**
+	 * Cut up where it lies by someone who isn't a player (Jaymo's Kingdoms: a town's hunter, after working at it a while):
+	 * the body is gone, and everything a butcher block would get out of it ({@link #butcheredDrops}) is returned for them
+	 * to carry home. Empty, and the body left be, if it isn't a beast fit to butcher ({@link #isButcherable}).
+	 */
+	public List<ItemStack> butcherWhereLies() {
+		if (!(level() instanceof ServerLevel level) || isRemoved() || !isButcherable() || carrier() != null) {
+			return List.of();
+		}
+		List<ItemStack> cuts = butcheredDrops();
+		play(level, SoundEvents.SLIME_SQUISH, 0.7F);
+		discard();
+		return cuts;
+	}
+
+	/** Skinned and gutted, and nothing cut off it yet: ready to go on the great spit whole. */
+	public boolean dressedWhole() {
+		return Hanging.hangable(this) && butcherStage == Hanging.SKINNED && gutted;
+	}
+
+	/**
+	 * Skinned and gutted where it lies by someone who isn't a player (Jaymo's Kingdoms: a camp's cook readying a beast for
+	 * the great spit, after working at it a while): its skin and offal drop beside it. False if it can't go on the spit
+	 * whole ({@link #spitWholeable}).
+	 */
+	public boolean dressForSpit() {
+		if (!(level() instanceof ServerLevel level) || !spitWholeable()) {
+			return false;
+		}
+		for (ItemStack skin : takeLoot(stack -> stack.is(com.jaymoskitchen.butchery.Butchery.SKINS))) {
+			spawnAtLocation(level, skin, 0.3F);
+		}
+		if (!gutted) {
+			spawnAtLocation(level, new ItemStack(com.jaymoskitchen.butchery.Butchery.OFFAL, oneHanded() ? 1 : 2), 0.3F);
+		}
+		butcherStage = Hanging.SKINNED;
+		addDressed(DRESSED_SKINNED);
+		setGutted();
+		play(level, SoundEvents.SLIME_SQUISH, 0.7F);
+		return true;
 	}
 
 	public int butcherStage() {
@@ -1731,6 +1794,7 @@ public class CorpseEntity extends Entity {
 	}
 
 	private void serverTick(ServerLevel level) {
+		tickPress(level);
 		age++;
 		if (Keeping.kept(this, level)) {
 			// kept fresh (a priest's rite, a salt-and-herb wrap): its clock stands still, so it neither rots nor gets up
@@ -1930,10 +1994,16 @@ public class CorpseEntity extends Entity {
 			// (0.5.31) being dragged: let go of first
 			return InteractionResult.SUCCESS_SERVER;
 		}
-
-		// (0.5.23) arrows still in it come out first, one a click, to an empty hand
-		if (held.isEmpty() && !player.isShiftKeyDown() && com.jaymoskitchen.archery.StuckArrows.total(arrows()) > 0) {
-			return pullArrow(level, player);
+		// Andy (2026-11-20): "right click hold should always be drag, tap can loot". A plain empty hand on a body lying
+		// loose: held, it's taken hold of (dragged, or a small one taken up by the neck); a tap is the search, the arrows or
+		// the loot, worked out once the press is let go (tickPress). Sneak + a hold still lifts it into your arms (below)
+		if (held.isEmpty() && !player.isShiftKeyDown() && hook() == null) {
+			return press(level, player);
+		}
+		// a person's body on a meat hook: a blade bleeds it into the grate under it (Hanging#bleedPerson)
+		InteractionResult bled = Hanging.bleedPerson(this, level, player, held);
+		if (bled != null) {
+			return bled;
 		}
 		// a fish is looted in one go, whatever's in your hand: out comes its loot and the body's gone
 		if (isFish()) {
@@ -1973,10 +2043,6 @@ public class CorpseEntity extends Entity {
 		if (isMachine()) {
 			return search(level, player);
 		}
-		// an empty hand on anything small enough (whatever it was): (0.5.50) taken up in one hand, by the neck
-		if (held.isEmpty() && kind != CorpseKind.PLAYER && fitsInPocket()) {
-			return carry(level, player);
-		}
 
 		switch (kind) {
 			case ANIMAL -> {
@@ -1996,6 +2062,227 @@ public class CorpseEntity extends Entity {
 			default -> {
 				return search(level, player);
 			}
+		}
+	}
+
+	/** Andy (2026-11-20): a plain press of an empty hand: a tap so far, or, held on past {@link #TAP_TICKS}, taken hold of. */
+	private InteractionResult press(ServerLevel level, Player player) {
+		long now = level.getGameTime();
+		if (!player.getUUID().equals(pressBy) || now - pressLast > HOLD_GRACE) {
+			pressBy = player.getUUID();
+			pressStart = now;
+		}
+		pressLast = now;
+		if (now - pressStart < TAP_TICKS) {
+			// (maybe a tap: told once it's let go)
+			return InteractionResult.SUCCESS_SERVER;
+		}
+		return takeHold(level, player);
+	}
+
+	/**
+	 * Andy (2026-11-20): "right click hold should always be drag". An empty hand held on it: anything small enough (whatever
+	 * it was, never a player's) is taken up in one hand by the neck, (0.5.50) as a tap used to; anything else is taken by the
+	 * legs and dragged once the bar fills. Solid iron (an iron golem) won't budge.
+	 */
+	private InteractionResult takeHold(ServerLevel level, Player player) {
+		if (isHeavy()) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.too_heavy"));
+			return InteractionResult.SUCCESS_SERVER;
+		}
+		if (kind != CorpseKind.PLAYER && fitsInPocket()) {
+			pressBy = null;
+			return carry(level, player);
+		}
+		return grab(level, player, true);
+	}
+
+	/** Server, each tick: a plain press let go, if it was a tap, is the search ({@link #tapped}). */
+	private void tickPress(ServerLevel level) {
+		if (pressBy == null || level.getGameTime() - pressLast <= HOLD_GRACE) {
+			return;
+		}
+		java.util.UUID by = pressBy;
+		boolean tap = pressLast - pressStart < TAP_TICKS;
+		pressBy = null;
+		Player player = tap ? level.getPlayerByUUID(by) : null;
+		if (player == null || !player.isAlive() || player.isSpectator() || !player.getMainHandItem().isEmpty() || carrier() != null || dragger() != null
+			|| hook() != null || !player.isWithinEntityInteractionRange(this, 1.0)) {
+			return;
+		}
+		tapped(level, player);
+	}
+
+	/**
+	 * Andy (2026-11-20): "tap can loot". A tap of an empty hand: (0.5.23) arrows still in it come out first, one a tap; a
+	 * fish's loot comes out and the body's gone; a machine is stripped; a player's body gives back what they carried; a
+	 * skeleton's gear comes off, then its bones; anything else is searched. An animal's carcass has nothing to take by hand:
+	 * where it is in its bleeding, or how to move it.
+	 */
+	private void tapped(ServerLevel level, Player player) {
+		if (com.jaymoskitchen.archery.StuckArrows.total(arrows()) > 0) {
+			pullArrow(level, player);
+			return;
+		}
+		if (isFish()) {
+			lootFish(level);
+			return;
+		}
+		if (isMachine()) {
+			search(level, player);
+			return;
+		}
+		switch (kind) {
+			case ANIMAL -> {
+				if (Hanging.use(this, level, player, ItemStack.EMPTY) == null) {
+					player.sendOverlayMessage(Component.translatable(tooBigToLift() ? "message.jaymoskitchen.corpse.too_big" : "message.jaymoskitchen.corpse.lift_hint"));
+				}
+			}
+			case PLAYER -> PlayerCorpses.restore(this, player, hotbar, selected);
+			case SKELETON -> {
+				if (!openLoot(level, player)) {
+					pullBone(level);
+				}
+			}
+			default -> {
+				if (!openLoot(level, player)) {
+					search(level, player);
+				}
+			}
+		}
+	}
+
+	// ---- the loot screen ---------------------------------------------------------------------------------------------
+
+	/**
+	 * Andy (2026-11-20): "there should be a screen that opens like a chest when you loot enemies, after tapping to remove
+	 * arrows, a window showing their corpse in the inventory slot, and all their gear should open. this way you dont always
+	 * need to take everything." A tap (once the arrows are out) opens {@link CorpseLootMenu}: the body drawn in the middle,
+	 * what it wears and holds beside it, its pockets on the right; take only what you want, the rest stays on it. Everyone
+	 * looking shares one {@link CorpseLoot}. False (nothing opened) if it has nothing left on it.
+	 */
+	private boolean openLoot(ServerLevel level, Player player) {
+		if (!(player instanceof net.minecraft.server.level.ServerPlayer server)) {
+			return false;
+		}
+		loot.removeIf(ItemStack::isEmpty);
+		if (looting == null && loot.isEmpty() && !hasGear()) {
+			searched = true;
+			return false;
+		}
+		if (looting == null) {
+			looting = new CorpseLoot(this, wornGear());
+		}
+		CorpseLoot shared = looting;
+		server.openMenu(new net.fabricmc.fabric.api.menu.v1.ExtendedMenuProvider<Integer>() {
+			@Override
+			public Integer getScreenOpeningData(net.minecraft.server.level.ServerPlayer p) {
+				return getId();
+			}
+
+			@Override
+			public Component getDisplayName() {
+				return CorpseEntity.this.getDisplayName();
+			}
+
+			@Override
+			public net.minecraft.world.inventory.AbstractContainerMenu createMenu(int id, net.minecraft.world.entity.player.Inventory inventory, Player p) {
+				return new CorpseLootMenu(id, inventory, shared);
+			}
+		});
+		jolt(false);
+		play(level, SoundEvents.BUNDLE_DROP_CONTENTS, 1.0F);
+		return true;
+	}
+
+	/** Whether it still wears or holds anything. */
+	private boolean hasGear() {
+		CompoundTag tag = parse(look());
+		return tag != null && !tag.getCompoundOrEmpty("equipment").isEmpty();
+	}
+
+	/**
+	 * What it wears and holds, slot by slot in {@link #GEAR} order (empty where nothing), worn the way {@link #takeGear}
+	 * wears it. The wear is put on once, the first time it's looked at, and kept on the body, so looking again (or taking
+	 * it off some other way later) doesn't wear it a second time.
+	 */
+	ItemStack[] wornGear() {
+		ItemStack[] out = new ItemStack[GEAR.length];
+		java.util.Arrays.fill(out, ItemStack.EMPTY);
+		CompoundTag tag = parse(look());
+		if (tag == null) {
+			return out;
+		}
+		CompoundTag gear = tag.getCompoundOrEmpty("equipment");
+		var ops = registryAccess().createSerializationContext(NbtOps.INSTANCE);
+		for (int i = 0; i < GEAR.length; i++) {
+			String slot = GEAR[i];
+			if (!gear.contains(slot)) {
+				continue;
+			}
+			ItemStack stack = ItemStack.CODEC.parse(ops, gear.get(slot)).result().orElse(ItemStack.EMPTY);
+			if (!stack.isEmpty() && stack.isDamageableItem() && !preserved(tag, slot) && !gearWorn) {
+				wear(stack, kind == CorpseKind.SKELETON && slot.equals("mainhand"));
+			}
+			out[i] = stack;
+		}
+		if (!gearWorn) {
+			gearWorn = true;
+			putGear(out);
+		}
+		return out;
+	}
+
+	/** Puts {@code gear} (in {@link #GEAR} order) back on it as what it wears and holds, so it's drawn wearing just that. */
+	void putGear(ItemStack[] gear) {
+		CompoundTag tag = parse(look());
+		if (tag == null) {
+			return;
+		}
+		var ops = registryAccess().createSerializationContext(NbtOps.INSTANCE);
+		CompoundTag equipment = new CompoundTag();
+		for (int i = 0; i < GEAR.length && i < gear.length; i++) {
+			if (gear[i].isEmpty()) {
+				continue;
+			}
+			net.minecraft.nbt.Tag saved = ItemStack.CODEC.encodeStart(ops, gear[i]).result().orElse(null);
+			if (saved != null) {
+				equipment.put(GEAR[i], saved);
+			}
+		}
+		if (equipment.isEmpty()) {
+			tag.remove("equipment");
+		} else {
+			tag.put("equipment", equipment);
+		}
+		String look = tag.toString();
+		if (!look.equals(look())) {
+			this.entityData.set(LOOK, look);
+		}
+	}
+
+	/** Its pockets, as they are (the loot screen reads and takes from this list itself). */
+	List<ItemStack> pockets() {
+		return loot;
+	}
+
+	/** A player took something off it in the loot screen. */
+	void lootTaken(Player player, boolean gear) {
+		if (level() instanceof ServerLevel level) {
+			jolt(false);
+			play(level, gear ? SoundEvents.ARMOR_EQUIP_GENERIC.value() : SoundEvents.BUNDLE_REMOVE_ONE, 0.9F);
+		}
+		robbed(player);
+	}
+
+	/** The last one looking has closed the loot screen: what's left stays on it. */
+	void lootClosed(CorpseLoot closed) {
+		if (looting == closed) {
+			looting = null;
+		}
+		loot.removeIf(ItemStack::isEmpty);
+		if (loot.isEmpty()) {
+			searched = true;
 		}
 	}
 
@@ -2279,10 +2566,21 @@ public class CorpseEntity extends Entity {
 	 * needs a 2x2), else it's let go.
 	 */
 	public void dragOnto(Player player, BlockPos clicked, Vec3 hit) {
-		// (0.5.51) heaved up onto a meat hook near enough
-		if (com.jaymoskitchen.butchery.Butchery.isHook(level().getBlockState(clicked))
-			&& position().distanceTo(Vec3.atCenterOf(clicked)) <= Hanging.DRAG_TO_HOOK + getBbHeight()) {
-			if (Hanging.hang(this, player, clicked)) {
+		// heaved up onto a meat hook you're standing near. A click on or right by a hook never lets go: it
+		// hangs, or says why it won't
+		BlockPos hook = Hanging.hookAt(level(), clicked, hit);
+		if (hook != null) {
+			if (player.position().distanceTo(Vec3.atCenterOf(hook)) > Hanging.DRAG_TO_HOOK + player.getBbHeight()) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.closer"));
+			} else {
+				Hanging.hang(this, player, hook);
+			}
+			return;
+		}
+		// a dressed carcass dragged up onto the great spit near enough
+		if (com.jaymoskitchen.cooking.spit.GreatSpitBlock.is(level().getBlockState(clicked))
+			&& position().distanceTo(Vec3.atCenterOf(clicked)) <= com.jaymoskitchen.cooking.spit.GreatSpitBlock.DRAG_ONTO + getBbHeight()) {
+			if (com.jaymoskitchen.cooking.spit.GreatSpitBlock.skewer(this, player, clicked)) {
 				return;
 			}
 		}
@@ -2640,6 +2938,11 @@ public class CorpseEntity extends Entity {
 		setCarrier(carrier);
 		this.entityData.set(TUMBLING, false);
 		grabCooldown = 0;
+	}
+
+	/** Whether it lies on a butcher block (worked there a step at a time: {@link Hanging#use}). */
+	boolean onTable() {
+		return onButcherBlock();
 	}
 
 	private boolean onButcherBlock() {
@@ -3133,7 +3436,12 @@ public class CorpseEntity extends Entity {
 		}
 		Entity entity = type.get().create(level(), EntitySpawnReason.LOAD);
 		if (entity != null) {
-			entity.load(TagValueInput.create(ProblemReporter.DISCARDING, level().registryAccess(), tag));
+			try {
+				entity.load(TagValueInput.create(ProblemReporter.DISCARDING, level().registryAccess(), tag));
+			} catch (RuntimeException e) {
+				// another mod's own saved part that won't load here (see rebuild()): it keeps what was read before it
+				com.jaymoskitchen.JaymosKitchen.LOGGER.warn("A {} corpse only partly loaded: {}", type.get(), e.toString());
+			}
 		}
 		return entity;
 	}
@@ -3776,7 +4084,7 @@ public class CorpseEntity extends Entity {
 		}
 		ItemStack stack = ItemStack.CODEC.parse(registryAccess().createSerializationContext(NbtOps.INSTANCE), gear.get(slot))
 			.result().orElse(ItemStack.EMPTY);
-		if (!stack.isEmpty() && stack.isDamageableItem() && !preserved(tag, slot)) {
+		if (!stack.isEmpty() && stack.isDamageableItem() && !preserved(tag, slot) && !gearWorn) {
 			wear(stack, kind == CorpseKind.SKELETON && slot.equals("mainhand"));
 		}
 		gear.remove(slot);
@@ -3883,6 +4191,7 @@ public class CorpseEntity extends Entity {
 		this.loot = new ArrayList<>(input.read("Loot", ItemStack.CODEC.listOf()).orElse(List.of()));
 		this.bones = input.getIntOr("Bones", 0);
 		this.searched = input.getBooleanOr("Searched", false);
+		this.gearWorn = input.getBooleanOr("GearWorn", false);
 		this.chops = input.getIntOr("Chops", 0);
 		this.burnTicks = input.getIntOr("Burned", 0);
 		this.firesLit = input.getIntOr("FiresLit", 0);
@@ -3952,9 +4261,11 @@ public class CorpseEntity extends Entity {
 	protected void addAdditionalSaveData(ValueOutput output) {
 		output.putString("Look", look());
 		output.putString("Kind", kind.name());
-		output.store("Loot", ItemStack.CODEC.listOf(), loot);
+		// (a stack taken out in the loot screen leaves an empty one in the list until it's closed: never saved)
+		output.store("Loot", ItemStack.CODEC.listOf(), loot.stream().filter(stack -> !stack.isEmpty()).toList());
 		output.putInt("Bones", bones);
 		output.putBoolean("Searched", searched);
+		output.putBoolean("GearWorn", gearWorn);
 		output.putInt("Chops", chops);
 		output.putInt("Burned", burnTicks);
 		output.putInt("FiresLit", firesLit);

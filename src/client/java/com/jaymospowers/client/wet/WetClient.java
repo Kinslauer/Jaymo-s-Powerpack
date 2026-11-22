@@ -113,6 +113,10 @@ public final class WetClient {
 				String how = rust >= com.jaymospowers.core.wet.Rust.CORRODED ? "corroded" : rust >= com.jaymospowers.core.wet.Rust.RUSTY ? "rusty" : "spotted";
 				lines.add(Component.translatable("tooltip.jaymospowers.rust." + how).withStyle(ChatFormatting.RED));
 			}
+			net.minecraft.client.multiplayer.ClientLevel level = net.minecraft.client.Minecraft.getInstance().level;
+			if (level != null && com.jaymospowers.core.wet.Rust.oiled(stack, level.getGameTime())) {
+				lines.add(Component.translatable("tooltip.jaymospowers.oiled").withStyle(ChatFormatting.YELLOW));
+			}
 		});
 	}
 

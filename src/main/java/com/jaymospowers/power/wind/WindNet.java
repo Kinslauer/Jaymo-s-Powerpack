@@ -144,6 +144,7 @@ public final class WindNet {
 	}
 
 	static void register() {
+		StormNet.register();
 		PayloadTypeRegistry.serverboundPlay().register(Flight.TYPE, Flight.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Impact.TYPE, Impact.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Ram.TYPE, Ram.CODEC);

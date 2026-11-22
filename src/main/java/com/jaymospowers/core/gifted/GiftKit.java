@@ -51,6 +51,40 @@ public interface GiftKit {
 	default void corrupted(ServerLevel level, PathfinderMob mob) {
 	}
 
+	/**
+	 * Whether this power flies for players, so its gifted folk fly in a fight and on the way to one in the power's own
+	 * flavour ({@code core/brawl/Brawl}: they take off for a foe in the air, hover, circle, dive, and travel with
+	 * {@code Brawl.flyTo}). Wind rides gusts, Smoke goes to vapour, a Z Fighter flies on ki.
+	 */
+	default boolean flies() {
+		return false;
+	}
+
+	/** The power's colour (0xRRGGBB) for what the fighting brain draws: trails, dashes, the afterimage of a vanish. */
+	default int color() {
+		return 0xDDE8F0;
+	}
+
+	/** The power's own mark in the air at {@code at}, now and then, while {@code mob} flies or dashes. */
+	default void trail(ServerLevel level, PathfinderMob mob, net.minecraft.world.phys.Vec3 at) {
+		level.sendParticles(com.jaymospowers.core.fx.MagicFx.wisp(color(), 0.8F), at.x, at.y, at.z, 2, 0.15, 0.2, 0.15, 0.01);
+	}
+
+	/** The power's own look for a vanish dodge: gone from {@code from}, in at {@code to}. The default is a ki blink. */
+	default void vanishFx(ServerLevel level, PathfinderMob mob, net.minecraft.world.phys.Vec3 from, net.minecraft.world.phys.Vec3 to) {
+		com.jaymospowers.core.brawl.Brawl.blink(level, from, to, color());
+	}
+
+	/** Whether the kit is flying {@code mob} itself just now (the fighting brain then leaves the steering to it). */
+	default boolean flyingBy(PathfinderMob mob) {
+		return false;
+	}
+
+	/** A move that makes no sense in the air (a take-off, say): not picked while the brain has them flying. */
+	default boolean groundOnly(Move move) {
+		return false;
+	}
+
 	/** What a move is for, so the AI knows when it fits. */
 	enum Kind {
 		/** At range, with a clear line to the foe. */

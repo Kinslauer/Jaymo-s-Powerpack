@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "group": "jaymoskingdoms:harness",
+  "pattern": [
+    "W W",
+    "WLW",
+    "WWW"
+  ],
+  "key": {
+    "W": "#minecraft:wool",
+    "L": "minecraft:leather"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:giornea"
+  }
+}

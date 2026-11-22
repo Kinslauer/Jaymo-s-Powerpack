@@ -1007,7 +1007,7 @@ public final class Approaches {
 				}
 				if (said == null) {
 					// the horn nobody was blowing (the Reaper's host), never more than a hint
-					said = ReapedHost.gossip(level);
+					said = ReapedHost.gossip(level, a.mob.blockPosition());
 				}
 				if (said == null && level.getRandom().nextFloat() < Sightings.GOSSIP_CHANCE) {
 					said = Sightings.gossip(level, a.mob);
@@ -1047,12 +1047,12 @@ public final class Approaches {
 			a.mob.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		}
 		if (a.foreign) {
-			player.sendOverlayMessage((asks(a.topic) ? Component.translatable("language.jaymoskingdoms.gesture.hint", a.gesture, a.mob.getDisplayName())
+			player.sendOverlayMessage((asks(a.topic) ? Component.translatable("language.jaymoskingdoms.gesture.hint", a.gesture, Introductions.called(player, a.mob))
 				: a.gesture.copy()).withStyle(ChatFormatting.GOLD));
 		} else if (asks(a.topic)) {
-			player.sendOverlayMessage(Component.translatable("talk.jaymoskingdoms.hint", a.mob.getDisplayName()).withStyle(ChatFormatting.GOLD));
+			player.sendOverlayMessage(Component.translatable("talk.jaymoskingdoms.hint", Introductions.called(player, a.mob)).withStyle(ChatFormatting.GOLD));
 		} else {
-			player.sendOverlayMessage(Component.translatable("talk.jaymoskingdoms.hint.pardon", a.mob.getDisplayName()).withStyle(ChatFormatting.GRAY));
+			player.sendOverlayMessage(Component.translatable("talk.jaymoskingdoms.hint.pardon", Introductions.called(player, a.mob)).withStyle(ChatFormatting.GRAY));
 		}
 	}
 
@@ -1064,7 +1064,7 @@ public final class Approaches {
 			options.add(new Option(Component.translatable("talk.jaymoskingdoms.pardon.more"), true));
 		}
 		if (ServerPlayNetworking.canSend(player, TalkNet.Ask.TYPE)) {
-			ServerPlayNetworking.send(player, new TalkNet.Ask(a.mob.getId(), a.mob.getDisplayName(), heard(player, a),
+			ServerPlayNetworking.send(player, new TalkNet.Ask(a.mob.getId(), Introductions.called(player, a.mob), heard(player, a),
 				options.stream().map(Option::label).toList(), options.stream().map(Option::enabled).toList()));
 		}
 	}
@@ -1074,7 +1074,12 @@ public final class Approaches {
 		if (a.foreign) {
 			return Component.translatable("language.jaymoskingdoms.gist", Languages.heard(player, a.mob, a.line), a.gesture);
 		}
-		return a.elaborated ? Component.translatable("talk.jaymoskingdoms.pardon.both", a.line, a.more) : a.line;
+		// (a goblin's in its broken English: Dialects.broken)
+		return a.elaborated ? Component.translatable("talk.jaymoskingdoms.pardon.both", goblin(a, a.line), goblin(a, a.more)) : goblin(a, a.line);
+	}
+
+	private static Component goblin(Approach a, Component words) {
+		return words != null && Dialects.goblin(a.mob) ? Dialects.broken(words) : words;
 	}
 
 	// ---- (0.6.2) begging their pardon --------------------------------------------------------------------------------
@@ -1096,14 +1101,14 @@ public final class Approaches {
 			buttons.add(Button.MORE);
 		}
 		buttons.add(Button.BYE);
-		Component words = repeated || a.elaborated ? heard(player, a) : Component.translatable("talk.jaymoskingdoms.pardon.prompt", a.mob.getDisplayName());
+		Component words = repeated || a.elaborated ? heard(player, a) : Component.translatable("talk.jaymoskingdoms.pardon.prompt", Introductions.called(player, a.mob));
 		List<Component> labels = buttons.stream().map(b -> (Component) Component.translatable(switch (b) {
 			case PARDON -> "talk.jaymoskingdoms.pardon.again";
 			case MORE -> "talk.jaymoskingdoms.pardon.more";
 			case BYE -> repeated || a.elaborated ? "talk.jaymoskingdoms.pardon.thanks" : "talk.jaymoskingdoms.pardon.never_mind";
 		})).toList();
 		PARDONING.put(player.getUUID(), new Pardon(a, buttons));
-		ServerPlayNetworking.send(player, new TalkNet.Ask(a.mob.getId(), a.mob.getDisplayName(), words, labels,
+		ServerPlayNetworking.send(player, new TalkNet.Ask(a.mob.getId(), Introductions.called(player, a.mob), words, labels,
 			labels.stream().map(l -> true).toList()));
 	}
 

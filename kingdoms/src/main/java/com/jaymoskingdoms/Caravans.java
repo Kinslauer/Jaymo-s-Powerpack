@@ -30,6 +30,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
@@ -652,7 +653,9 @@ final class Caravans {
 	/** A levy of {@code f}'s production, sent while its storehouse is out of reach (nothing is taken from it). */
 	private static List<Map<String, Integer>> levy(ServerLevel level, Faction f, Focus.Kind focus) {
 		int n = LEVY_BASE + f.holdings().population() * LEVY_PER_VILLAGER;
-		Item[] goods = focus == Focus.Kind.MINING
+		Item[] goods = focus == Focus.Kind.FORESTRY
+			? new Item[] {Production.logItem(level, f), Production.logItem(level, f), Production.logItem(level, f), Items.STICK}
+			: focus == Focus.Kind.MINING
 			? new Item[] {Items.COBBLESTONE, Items.COBBLESTONE, Items.COBBLESTONE, Items.STONE, Items.COAL, Items.RAW_IRON, Items.RAW_COPPER, Items.ANDESITE,
 				// (GTNH picks) Jaymo's Powers' raw tin, or more copper without it
 				BuiltInRegistries.ITEM.getOptional(Identifier.fromNamespaceAndPath("jaymospowers", "raw_tin")).orElse(Items.RAW_COPPER)}
@@ -790,7 +793,7 @@ final class Caravans {
 			List<Map<String, Integer>> back = List.of();
 			Focus.Kind focus = home == null ? null : Focus.of(server, home);
 			if (lord != null && focus != null && Storage.loaded(level, lord)) {
-				Predicate<ItemStack> wants = focus == Focus.Kind.MINING ? Storage::isFood
+				Predicate<ItemStack> wants = focus != Focus.Kind.FARMING ? Storage::isFood
 					: x -> x.is(ItemTags.LOGS) || x.is(Items.COAL) || x.is(Items.IRON_INGOT) || x.is(Items.COBBLESTONE);
 				back = loadUp(level, lord, wants, KINGDOM_KEEPS, Math.min(c.carts().size() * CART_LOAD, Math.max(0, load * RETURN_SHARE / 100)));
 			}
@@ -1081,7 +1084,8 @@ final class Caravans {
 	 * his horse wades after him.
 	 */
 	static void remount(Entity rider, Entity horse) {
-		if (rider.getVehicle() == horse) {
+		if (rider.getVehicle() == horse || rider instanceof LivingEntity l && l.isSleeping() || Downed.isDowned(rider) || PowersCompat.isCarried(rider)) {
+			// (one down, asleep or carried off is left be: put back on as he was, he'd lie across his horse)
 			return;
 		}
 		if (rider.isInWater() || horse.isInWater()) {

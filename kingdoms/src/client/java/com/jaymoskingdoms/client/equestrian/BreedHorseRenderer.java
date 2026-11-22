@@ -2,6 +2,7 @@ package com.jaymoskingdoms.client.equestrian;
 
 import com.jaymoskingdoms.HeraldryArmour;
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.equestrian.Bonding;
 import com.jaymoskingdoms.equestrian.Breed;
 import com.jaymoskingdoms.equestrian.Equestrian;
 import com.jaymoskingdoms.equestrian.Equine;
@@ -65,6 +66,8 @@ public final class BreedHorseRenderer extends AbstractHorseRenderer<AbstractHors
 		float fade = 1.0F, headDip;
 		/** (0.7.445) Its own offset in ticks, so a grazing herd doesn't shuffle its feet all at once. */
 		float phase;
+		/** Kneeling for an armoured rider: how far down, 0 to 1. */
+		float kneel;
 		/** (0.7.322) Caparison: cloth cover over barding, in realm colour. */
 		@Nullable DyeColor caparisonColor;
 		@Nullable BannerPatternLayers caparisonPatterns;
@@ -96,6 +99,7 @@ public final class BreedHorseRenderer extends AbstractHorseRenderer<AbstractHors
 			: horse instanceof ZombieHorse ? HorseLooks.FALLBACK_ZOMBIE : HorseLooks.FALLBACK;
 		state.build = HorseLooks.build(state);
 		state.phase = Math.floorMod(horse.getId() * 37, 997);
+		state.kneel = Bonding.kneelAmount(horse, horse.level().getGameTime() + partialTicks);
 		ItemStack armor = state.bodyArmorItem;
 		Equippable equippable = armor.isEmpty() ? null : armor.get(DataComponents.EQUIPPABLE);
 		Identifier asset = equippable == null ? null : equippable.assetId().map(k -> k.identifier()).orElse(null);

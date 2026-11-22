@@ -55,6 +55,12 @@ final class WebGift implements GiftKit {
 		return WebPower.ID;
 	}
 
+	/** The fighter brain's trails, dashes and vanishes in this power's colour (silk). */
+	@Override
+	public int color() {
+		return 0xEDEDED;
+	}
+
 	@Override
 	public List<Move> moves() {
 		return List.of(

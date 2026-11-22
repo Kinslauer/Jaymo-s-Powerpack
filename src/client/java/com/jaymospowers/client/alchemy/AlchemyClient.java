@@ -13,5 +13,6 @@ public final class AlchemyClient {
 		GearClient.init();
 		BrewingClient.init(); // (0.20.13)
 		SkinLayer.init();
+		MettleJump.init();
 	}
 }

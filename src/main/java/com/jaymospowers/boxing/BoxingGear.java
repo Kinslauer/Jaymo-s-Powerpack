@@ -11,11 +11,15 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ToolMaterial;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 
 /**
  * (Jung) Fist gear: what a boxer wraps or straps on. A boxing style ({@link Boxing}) only works with fist gear in the
@@ -49,6 +53,12 @@ public final class BoxingGear {
 	static final float LEATHER_CESTUS_PUNCH = 0.5F, IRON_CESTUS_PUNCH = 1.0F, STEEL_CESTUS_PUNCH = 1.5F;
 	/** Without a style, on top of the material's own bonus (iron 2, steel {@link #STEEL_BONUS}): a cestus, and bracers. */
 	static final float CESTUS_DAMAGE = 1.0F, IRON_CESTUS_DAMAGE = 0.0F, BRACERS_DAMAGE = 0.5F, METAL_BRACERS_DAMAGE = -1.0F;
+	/**
+	 * Gallant Gauntlets' idea ({@link OffhandPunch}): each piece, in either hand, gives the armour of a pair of boots of
+	 * what guards the hand: none for the wraps' cloth, leather's 1, iron's 2; steel a step past iron's. The cestus's
+	 * studs are only on the knuckles, so a cestus is leather whatever its studs; a bracer is its metal.
+	 */
+	static final float WRAPS_ARMOUR = 0.0F, LEATHER_ARMOUR = 1.0F, IRON_ARMOUR = 2.0F, STEEL_ARMOUR = 3.0F;
 	/** How many punches leather gear lasts (iron and steel: their material's). */
 	static final int LEATHER_DURABILITY = 400;
 	/** Steel as a material: durability and the damage it adds (iron: 250 and 2). */
@@ -81,16 +91,16 @@ public final class BoxingGear {
 	}
 
 	static void init() {
-		HAND_WRAPS = item("hand_wraps", new Item.Properties().sword(ToolMaterial.WOOD, WRAPS_DAMAGE, WRAPS_SPEED)
+		HAND_WRAPS = item("hand_wraps", gauntlet(new Item.Properties(), ToolMaterial.WOOD, WRAPS_DAMAGE, WRAPS_SPEED, WRAPS_ARMOUR)
 			.durability(WRAPS_DURABILITY).repairable(Items.STRING));
-		LEATHER_CESTUS = item("leather_cestus", new Item.Properties().sword(ToolMaterial.WOOD, CESTUS_DAMAGE, WRAPS_SPEED)
+		LEATHER_CESTUS = item("leather_cestus", gauntlet(new Item.Properties(), ToolMaterial.WOOD, CESTUS_DAMAGE, WRAPS_SPEED, LEATHER_ARMOUR)
 			.durability(LEATHER_DURABILITY).repairable(Items.LEATHER));
-		IRON_CESTUS = item("iron_cestus", new Item.Properties().sword(ToolMaterial.IRON, IRON_CESTUS_DAMAGE, WRAPS_SPEED));
-		STEEL_CESTUS = item("steel_cestus", new Item.Properties().sword(STEEL, IRON_CESTUS_DAMAGE, WRAPS_SPEED));
-		LEATHER_BRACERS = item("leather_bracers", new Item.Properties().sword(ToolMaterial.WOOD, BRACERS_DAMAGE, WRAPS_SPEED)
+		IRON_CESTUS = item("iron_cestus", gauntlet(new Item.Properties(), ToolMaterial.IRON, IRON_CESTUS_DAMAGE, WRAPS_SPEED, LEATHER_ARMOUR));
+		STEEL_CESTUS = item("steel_cestus", gauntlet(new Item.Properties(), STEEL, IRON_CESTUS_DAMAGE, WRAPS_SPEED, LEATHER_ARMOUR));
+		LEATHER_BRACERS = item("leather_bracers", gauntlet(new Item.Properties(), ToolMaterial.WOOD, BRACERS_DAMAGE, WRAPS_SPEED, LEATHER_ARMOUR)
 			.durability(LEATHER_DURABILITY).repairable(Items.LEATHER));
-		IRON_BRACERS = item("iron_bracers", new Item.Properties().sword(ToolMaterial.IRON, METAL_BRACERS_DAMAGE, WRAPS_SPEED));
-		STEEL_BRACERS = item("steel_bracers", new Item.Properties().sword(STEEL, METAL_BRACERS_DAMAGE, WRAPS_SPEED));
+		IRON_BRACERS = item("iron_bracers", gauntlet(new Item.Properties(), ToolMaterial.IRON, METAL_BRACERS_DAMAGE, WRAPS_SPEED, IRON_ARMOUR));
+		STEEL_BRACERS = item("steel_bracers", gauntlet(new Item.Properties(), STEEL, METAL_BRACERS_DAMAGE, WRAPS_SPEED, STEEL_ARMOUR));
 		PUNCH.put(LEATHER_CESTUS, LEATHER_CESTUS_PUNCH);
 		PUNCH.put(IRON_CESTUS, IRON_CESTUS_PUNCH);
 		PUNCH.put(STEEL_CESTUS, STEEL_CESTUS_PUNCH);
@@ -109,6 +119,26 @@ public final class BoxingGear {
 			output.accept(IRON_BRACERS);
 			output.accept(STEEL_BRACERS);
 		});
+	}
+
+	/**
+	 * A gauntlet's numbers: a sword's damage and speed in the main hand ({@code ToolMaterial#applySwordProperties}, whose
+	 * attributes this replaces with the same two), and {@code armour} in each hand it's held in, the main and the off
+	 * (each its own modifier, as one id can't be applied twice). The Fang Gauntlets use it too.
+	 */
+	public static Item.Properties gauntlet(Item.Properties props, ToolMaterial material, float damage, float speed, float armour) {
+		ItemAttributeModifiers.Builder attributes = ItemAttributeModifiers.builder()
+			.add(Attributes.ATTACK_DAMAGE, new AttributeModifier(Item.BASE_ATTACK_DAMAGE_ID, damage + material.attackDamageBonus(),
+				AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND)
+			.add(Attributes.ATTACK_SPEED, new AttributeModifier(Item.BASE_ATTACK_SPEED_ID, speed, AttributeModifier.Operation.ADD_VALUE),
+				EquipmentSlotGroup.MAINHAND);
+		if (armour > 0.0F) {
+			attributes.add(Attributes.ARMOR, new AttributeModifier(JaymosPowers.id("gauntlet_armour_mainhand"), armour, AttributeModifier.Operation.ADD_VALUE),
+				EquipmentSlotGroup.MAINHAND);
+			attributes.add(Attributes.ARMOR, new AttributeModifier(JaymosPowers.id("gauntlet_armour_offhand"), armour, AttributeModifier.Operation.ADD_VALUE),
+				EquipmentSlotGroup.OFFHAND);
+		}
+		return props.sword(material, damage, speed).attributes(attributes.build());
 	}
 
 	private static Item item(String id, Item.Properties props) {

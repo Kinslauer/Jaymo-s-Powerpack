@@ -297,6 +297,7 @@ public final class RigSuit {
 		state.setData(FLY, null);
 		state.setData(BODY, null);
 		state.setData(PARENT, null);
+		state.setData(RigBackClient.BACK, null);
 		if (!(entity instanceof Player player)) {
 			return;
 		}
@@ -379,6 +380,10 @@ public final class RigSuit {
 		state.setData(FACE, ages == null ? null : face(player, (float)time));
 		state.setData(GLOW, ages == null ? null : glow(ages[Rig.Piece.CORE.ordinal()], (float)time));
 		state.setData(CHARGE, ages == null ? null : charge(player, (float)time));
+		if (ages != null) {
+			// the back rig's vanes, legs and pincers (RigBackClient)
+			RigBackClient.extract(player, state, partialTicks);
+		}
 	}
 
 	private static ItemStack equipment(AvatarRenderState state, Rig.Piece piece) {
@@ -644,6 +649,7 @@ public final class RigSuit {
 				collector.order(1).submitModel(suit, state, poseStack, RenderTypes.eyes(TRIM_TEXTURE), lightCoords, OverlayTexture.NO_OVERLAY,
 					0xFF000000 | trim, null, 0);
 			}
+			RigBackClient.submit(poseStack, collector, lightCoords, state, parent);
 		}
 
 		private static boolean same(int[] colors) {

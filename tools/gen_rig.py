@@ -854,9 +854,36 @@ def suit():
     suit_paint()
     suit_java()
 
+def back():
+    """The back rig's metal (client `rig/RigBackClient`): one 32x32 sheet the vanes, spear legs and pincers all take their
+    cubes from (every cube at UV 0,0), gunmetal plating with darker seams every few pixels and a lit cyan edge, and its
+    glow pass (only the lit pixels)."""
+    im = Image.new("RGBA", (32, 32), PLATE + (255,))
+    glow = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    rnd = random.Random(31)
+    for y in range(32):
+        for x in range(32):
+            c = PLATE
+            if x % 6 == 0 or y % 7 == 0:
+                c = SEAM
+            elif x % 6 == 1 or y % 7 == 1:
+                c = PLATE_HI
+            elif rnd.random() < 0.08:
+                c = PLATE_LO
+            im.putpixel((x, y), c + (255,))
+    for x in range(32):
+        # the lit edge along the bottom rows: the vanes' trailing edge and the legs' tips
+        for y in (29, 30):
+            im.putpixel((x, y), GLOW + (255,))
+            glow.putpixel((x, y), GLOW + (255,))
+    save(im, os.path.join(ASSETS, "textures", "entity", "rig", "back.png"))
+    save(glow, os.path.join(ASSETS, "textures", "entity", "rig", "back_glow.png"))
+
+
 if __name__ == "__main__":
     armour()
     suit()
+    back()
     items()
     blocks()
     data()

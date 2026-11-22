@@ -1,0 +1,57 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "jaymoskingdoms:block/crown_stand"
+      }
+    },
+    {
+      "when": {
+        "s0": "true"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/crown_stand_s0"
+      }
+    },
+    {
+      "when": {
+        "s1": "true"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/crown_stand_s1"
+      }
+    },
+    {
+      "when": {
+        "s2": "true"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/crown_stand_s2"
+      }
+    },
+    {
+      "when": {
+        "s3": "true"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/crown_stand_s3"
+      }
+    },
+    {
+      "when": {
+        "s4": "true"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/crown_stand_s4"
+      }
+    },
+    {
+      "when": {
+        "s5": "true"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/crown_stand_s5"
+      }
+    }
+  ]
+}

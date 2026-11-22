@@ -66,7 +66,7 @@ import org.jspecify.annotations.Nullable;
 public final class WebMorph {
 	/** The weapons. */
 	public static final int MACE = 0, SCYTHE = 1, SPEAR = 2, WHIP = 3, HAMMER = 4, HOOK = 5, PALM = 6, AXE = 7, WEAPONS = 8;
-	/** What each strain forms: black every weapon but the palm and the axe; white blunt only; red blades only. */
+	/** What each strain forms: black every weapon but the palm and the axe; white blunt only; red blades only. Looking at a log, any strain forms the axe ({@link WebSymbioteFell}). */
 	static final int[] BLACK_WEAPONS = {MACE, SCYTHE, SPEAR, WHIP, HAMMER, HOOK};
 	static final int[] WHITE_WEAPONS = {MACE, PALM};
 	static final int[] RED_WEAPONS = {SCYTHE, SPEAR, AXE};
@@ -333,9 +333,14 @@ public final class WebMorph {
 			default -> BLACK_WEAPONS;
 		};
 		int weapon;
-		do {
-			weapon = pool[player.getRandom().nextInt(pool.length)];
-		} while (weapon == live.lastWeapon && pool.length > 1);
+		if (WebSymbioteFell.lookingAtLog(player)) {
+			// (at a tree, whatever the strain: always the axe)
+			weapon = AXE;
+		} else {
+			do {
+				weapon = pool[player.getRandom().nextInt(pool.length)];
+			} while (weapon == live.lastWeapon && pool.length > 1);
+		}
 		live.lastWeapon = weapon;
 		live.side = -live.side;
 		live.pending = NONE;
@@ -429,6 +434,9 @@ public final class WebMorph {
 		if (found instanceof LivingEntity target && target.isAlive()
 			&& player.getEyePosition().distanceTo(target.getBoundingBox().getCenter()) <= reach(morph.weapon(), morph.armor()) + REACH_SLACK + 1.0 + target.getBbWidth() * 0.5) {
 			land(player, level, morph, target);
+		} else if (morph.weapon() == AXE && WebSymbioteFell.chop(player)) {
+			// a tree: bitten, and felled on the last blow (WebSymbioteFell)
+			return;
 		} else {
 			// the air: a crack of the whip, nothing more
 			sound(level, player, SoundEvents.PLAYER_ATTACK_NODAMAGE, 0.8F, 0.7F);

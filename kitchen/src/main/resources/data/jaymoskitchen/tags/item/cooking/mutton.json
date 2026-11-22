@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "jaymoskitchen:mince",
     "minecraft:mutton",
     {
       "id": "jaymospowers:kirrid_loin",

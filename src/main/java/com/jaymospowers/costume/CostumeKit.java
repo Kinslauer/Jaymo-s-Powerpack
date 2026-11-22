@@ -18,11 +18,11 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * Every enum here only ever grows at the end (saved designs keep their names, and the network sends the ordinal).
  */
-public record CostumeKit(int trim, Gloves gloves, Boots boots, Belt belt, Helm helm, Fins fins) {
+public record CostumeKit(int trim, Gloves gloves, Boots boots, Belt belt, Helm helm, Fins fins, CostumePlates plates) {
 	/** {@link #trim} when the trim follows the secondary colour. */
 	public static final int TRIM_FOLLOWS = -1;
 	/** A kit with nothing on it. */
-	public static final CostumeKit NONE = new CostumeKit(TRIM_FOLLOWS, Gloves.NONE, Boots.NONE, Belt.NONE, Helm.NONE, Fins.NONE);
+	public static final CostumeKit NONE = new CostumeKit(TRIM_FOLLOWS, Gloves.NONE, Boots.NONE, Belt.NONE, Helm.NONE, Fins.NONE, CostumePlates.NONE);
 
 	/** The hands: wraps round the wrists, fingerless gloves, or armoured gauntlets. */
 	public enum Gloves implements StringRepresentable {
@@ -99,7 +99,9 @@ public record CostumeKit(int trim, Gloves gloves, Boots boots, Belt belt, Helm h
 		Boots.CODEC.optionalFieldOf("boots", Boots.NONE).forGetter(CostumeKit::boots),
 		Belt.CODEC.optionalFieldOf("belt", Belt.NONE).forGetter(CostumeKit::belt),
 		Helm.CODEC.optionalFieldOf("helm", Helm.NONE).forGetter(CostumeKit::helm),
-		Fins.CODEC.optionalFieldOf("fins", Fins.NONE).forGetter(CostumeKit::fins)
+		Fins.CODEC.optionalFieldOf("fins", Fins.NONE).forGetter(CostumeKit::fins),
+		// metal plates sewn in; a kit saved before them has none
+		CostumePlates.CODEC.optionalFieldOf("plates", CostumePlates.NONE).forGetter(CostumeKit::plates)
 	).apply(i, CostumeKit::new)).xmap(CostumeKit::sanitized, k -> k);
 
 	public static final StreamCodec<ByteBuf, CostumeKit> STREAM_CODEC = StreamCodec.composite(
@@ -109,12 +111,13 @@ public record CostumeKit(int trim, Gloves gloves, Boots boots, Belt belt, Helm h
 		Belt.STREAM_CODEC, CostumeKit::belt,
 		Helm.STREAM_CODEC, CostumeKit::helm,
 		Fins.STREAM_CODEC, CostumeKit::fins,
+		CostumePlates.STREAM_CODEC, CostumeKit::plates,
 		CostumeKit::new).map(CostumeKit::sanitized, k -> k);
 
 	/** The same kit with a trim that is a real dye (or follows the secondary). */
 	public CostumeKit sanitized() {
 		int clean = this.trim < 0 || this.trim >= DyeColor.values().length ? TRIM_FOLLOWS : this.trim;
-		return clean == this.trim ? this : new CostumeKit(clean, gloves, boots, belt, helm, fins);
+		return clean == this.trim ? this : new CostumeKit(clean, gloves, boots, belt, helm, fins, plates);
 	}
 
 	/** The trim's dye: its own, or {@code secondary} when it follows it. */
@@ -133,26 +136,30 @@ public record CostumeKit(int trim, Gloves gloves, Boots boots, Belt belt, Helm h
 	}
 
 	public CostumeKit withTrim(@Nullable DyeColor colour) {
-		return new CostumeKit(colour == null ? TRIM_FOLLOWS : colour.getId(), gloves, boots, belt, helm, fins);
+		return new CostumeKit(colour == null ? TRIM_FOLLOWS : colour.getId(), gloves, boots, belt, helm, fins, plates);
 	}
 
 	public CostumeKit withGloves(Gloves gloves) {
-		return new CostumeKit(trim, gloves, boots, belt, helm, fins);
+		return new CostumeKit(trim, gloves, boots, belt, helm, fins, plates);
 	}
 
 	public CostumeKit withBoots(Boots boots) {
-		return new CostumeKit(trim, gloves, boots, belt, helm, fins);
+		return new CostumeKit(trim, gloves, boots, belt, helm, fins, plates);
 	}
 
 	public CostumeKit withBelt(Belt belt) {
-		return new CostumeKit(trim, gloves, boots, belt, helm, fins);
+		return new CostumeKit(trim, gloves, boots, belt, helm, fins, plates);
 	}
 
 	public CostumeKit withHelm(Helm helm) {
-		return new CostumeKit(trim, gloves, boots, belt, helm, fins);
+		return new CostumeKit(trim, gloves, boots, belt, helm, fins, plates);
 	}
 
 	public CostumeKit withFins(Fins fins) {
-		return new CostumeKit(trim, gloves, boots, belt, helm, fins);
+		return new CostumeKit(trim, gloves, boots, belt, helm, fins, plates);
+	}
+
+	public CostumeKit withPlates(CostumePlates plates) {
+		return new CostumeKit(trim, gloves, boots, belt, helm, fins, plates);
 	}
 }

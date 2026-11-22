@@ -80,7 +80,8 @@ public final class Post {
 		"news.jaymoskingdoms.ogre_king.", "news.jaymoskingdoms.captain.betrayed.king",
 		// (0.7.519) great treaties, broken faith, a treaty of aid joining a war, and a ruler's death where successors are chosen
 		"message.jaymoskingdoms.treaty.great.", "message.jaymoskingdoms.treaty.great_broken", "message.jaymoskingdoms.treaty.great_war",
-		"message.jaymoskingdoms.treaty.great_aid", "message.jaymoskingdoms.old_age.king.elect");
+		"message.jaymoskingdoms.treaty.great_aid", "message.jaymoskingdoms.old_age.king.elect",
+		"news.jaymoskingdoms.sketch.great");
 
 	/** On the Overworld: every player's character name as last seen, by their id. Saved. */
 	static final AttachmentType<Map<String, String>> NAMES = AttachmentRegistry.create(JaymosKingdoms.id("post_names"),

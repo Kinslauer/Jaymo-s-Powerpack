@@ -1,0 +1,454 @@
+{
+  "variants": {
+    "kind=0,pose=0,facing=north": {
+      "model": "jaymoskingdoms:block/remains_snow_0"
+    },
+    "kind=0,pose=0,facing=east": {
+      "model": "jaymoskingdoms:block/remains_snow_0",
+      "y": 90
+    },
+    "kind=0,pose=0,facing=south": {
+      "model": "jaymoskingdoms:block/remains_snow_0",
+      "y": 180
+    },
+    "kind=0,pose=0,facing=west": {
+      "model": "jaymoskingdoms:block/remains_snow_0",
+      "y": 270
+    },
+    "kind=0,pose=1,facing=north": {
+      "model": "jaymoskingdoms:block/remains_snow_1"
+    },
+    "kind=0,pose=1,facing=east": {
+      "model": "jaymoskingdoms:block/remains_snow_1",
+      "y": 90
+    },
+    "kind=0,pose=1,facing=south": {
+      "model": "jaymoskingdoms:block/remains_snow_1",
+      "y": 180
+    },
+    "kind=0,pose=1,facing=west": {
+      "model": "jaymoskingdoms:block/remains_snow_1",
+      "y": 270
+    },
+    "kind=0,pose=2,facing=north": {
+      "model": "jaymoskingdoms:block/remains_snow_2"
+    },
+    "kind=0,pose=2,facing=east": {
+      "model": "jaymoskingdoms:block/remains_snow_2",
+      "y": 90
+    },
+    "kind=0,pose=2,facing=south": {
+      "model": "jaymoskingdoms:block/remains_snow_2",
+      "y": 180
+    },
+    "kind=0,pose=2,facing=west": {
+      "model": "jaymoskingdoms:block/remains_snow_2",
+      "y": 270
+    },
+    "kind=1,pose=0,facing=north": {
+      "model": "jaymoskingdoms:block/remains_jungle_0"
+    },
+    "kind=1,pose=0,facing=east": {
+      "model": "jaymoskingdoms:block/remains_jungle_0",
+      "y": 90
+    },
+    "kind=1,pose=0,facing=south": {
+      "model": "jaymoskingdoms:block/remains_jungle_0",
+      "y": 180
+    },
+    "kind=1,pose=0,facing=west": {
+      "model": "jaymoskingdoms:block/remains_jungle_0",
+      "y": 270
+    },
+    "kind=1,pose=1,facing=north": {
+      "model": "jaymoskingdoms:block/remains_jungle_1"
+    },
+    "kind=1,pose=1,facing=east": {
+      "model": "jaymoskingdoms:block/remains_jungle_1",
+      "y": 90
+    },
+    "kind=1,pose=1,facing=south": {
+      "model": "jaymoskingdoms:block/remains_jungle_1",
+      "y": 180
+    },
+    "kind=1,pose=1,facing=west": {
+      "model": "jaymoskingdoms:block/remains_jungle_1",
+      "y": 270
+    },
+    "kind=1,pose=2,facing=north": {
+      "model": "jaymoskingdoms:block/remains_jungle_2"
+    },
+    "kind=1,pose=2,facing=east": {
+      "model": "jaymoskingdoms:block/remains_jungle_2",
+      "y": 90
+    },
+    "kind=1,pose=2,facing=south": {
+      "model": "jaymoskingdoms:block/remains_jungle_2",
+      "y": 180
+    },
+    "kind=1,pose=2,facing=west": {
+      "model": "jaymoskingdoms:block/remains_jungle_2",
+      "y": 270
+    },
+    "kind=2,pose=0,facing=north": {
+      "model": "jaymoskingdoms:block/remains_river_0"
+    },
+    "kind=2,pose=0,facing=east": {
+      "model": "jaymoskingdoms:block/remains_river_0",
+      "y": 90
+    },
+    "kind=2,pose=0,facing=south": {
+      "model": "jaymoskingdoms:block/remains_river_0",
+      "y": 180
+    },
+    "kind=2,pose=0,facing=west": {
+      "model": "jaymoskingdoms:block/remains_river_0",
+      "y": 270
+    },
+    "kind=2,pose=1,facing=north": {
+      "model": "jaymoskingdoms:block/remains_river_1"
+    },
+    "kind=2,pose=1,facing=east": {
+      "model": "jaymoskingdoms:block/remains_river_1",
+      "y": 90
+    },
+    "kind=2,pose=1,facing=south": {
+      "model": "jaymoskingdoms:block/remains_river_1",
+      "y": 180
+    },
+    "kind=2,pose=1,facing=west": {
+      "model": "jaymoskingdoms:block/remains_river_1",
+      "y": 270
+    },
+    "kind=2,pose=2,facing=north": {
+      "model": "jaymoskingdoms:block/remains_river_2"
+    },
+    "kind=2,pose=2,facing=east": {
+      "model": "jaymoskingdoms:block/remains_river_2",
+      "y": 90
+    },
+    "kind=2,pose=2,facing=south": {
+      "model": "jaymoskingdoms:block/remains_river_2",
+      "y": 180
+    },
+    "kind=2,pose=2,facing=west": {
+      "model": "jaymoskingdoms:block/remains_river_2",
+      "y": 270
+    },
+    "kind=3,pose=0,facing=north": {
+      "model": "jaymoskingdoms:block/remains_dripstone_0"
+    },
+    "kind=3,pose=0,facing=east": {
+      "model": "jaymoskingdoms:block/remains_dripstone_0",
+      "y": 90
+    },
+    "kind=3,pose=0,facing=south": {
+      "model": "jaymoskingdoms:block/remains_dripstone_0",
+      "y": 180
+    },
+    "kind=3,pose=0,facing=west": {
+      "model": "jaymoskingdoms:block/remains_dripstone_0",
+      "y": 270
+    },
+    "kind=3,pose=1,facing=north": {
+      "model": "jaymoskingdoms:block/remains_dripstone_1"
+    },
+    "kind=3,pose=1,facing=east": {
+      "model": "jaymoskingdoms:block/remains_dripstone_1",
+      "y": 90
+    },
+    "kind=3,pose=1,facing=south": {
+      "model": "jaymoskingdoms:block/remains_dripstone_1",
+      "y": 180
+    },
+    "kind=3,pose=1,facing=west": {
+      "model": "jaymoskingdoms:block/remains_dripstone_1",
+      "y": 270
+    },
+    "kind=3,pose=2,facing=north": {
+      "model": "jaymoskingdoms:block/remains_dripstone_2"
+    },
+    "kind=3,pose=2,facing=east": {
+      "model": "jaymoskingdoms:block/remains_dripstone_2",
+      "y": 90
+    },
+    "kind=3,pose=2,facing=south": {
+      "model": "jaymoskingdoms:block/remains_dripstone_2",
+      "y": 180
+    },
+    "kind=3,pose=2,facing=west": {
+      "model": "jaymoskingdoms:block/remains_dripstone_2",
+      "y": 270
+    },
+    "kind=4,pose=0,facing=north": {
+      "model": "jaymoskingdoms:block/remains_cliff_0"
+    },
+    "kind=4,pose=0,facing=east": {
+      "model": "jaymoskingdoms:block/remains_cliff_0",
+      "y": 90
+    },
+    "kind=4,pose=0,facing=south": {
+      "model": "jaymoskingdoms:block/remains_cliff_0",
+      "y": 180
+    },
+    "kind=4,pose=0,facing=west": {
+      "model": "jaymoskingdoms:block/remains_cliff_0",
+      "y": 270
+    },
+    "kind=4,pose=1,facing=north": {
+      "model": "jaymoskingdoms:block/remains_cliff_1"
+    },
+    "kind=4,pose=1,facing=east": {
+      "model": "jaymoskingdoms:block/remains_cliff_1",
+      "y": 90
+    },
+    "kind=4,pose=1,facing=south": {
+      "model": "jaymoskingdoms:block/remains_cliff_1",
+      "y": 180
+    },
+    "kind=4,pose=1,facing=west": {
+      "model": "jaymoskingdoms:block/remains_cliff_1",
+      "y": 270
+    },
+    "kind=4,pose=2,facing=north": {
+      "model": "jaymoskingdoms:block/remains_cliff_2"
+    },
+    "kind=4,pose=2,facing=east": {
+      "model": "jaymoskingdoms:block/remains_cliff_2",
+      "y": 90
+    },
+    "kind=4,pose=2,facing=south": {
+      "model": "jaymoskingdoms:block/remains_cliff_2",
+      "y": 180
+    },
+    "kind=4,pose=2,facing=west": {
+      "model": "jaymoskingdoms:block/remains_cliff_2",
+      "y": 270
+    },
+    "kind=5,pose=0,facing=north": {
+      "model": "jaymoskingdoms:block/remains_desert_0"
+    },
+    "kind=5,pose=0,facing=east": {
+      "model": "jaymoskingdoms:block/remains_desert_0",
+      "y": 90
+    },
+    "kind=5,pose=0,facing=south": {
+      "model": "jaymoskingdoms:block/remains_desert_0",
+      "y": 180
+    },
+    "kind=5,pose=0,facing=west": {
+      "model": "jaymoskingdoms:block/remains_desert_0",
+      "y": 270
+    },
+    "kind=5,pose=1,facing=north": {
+      "model": "jaymoskingdoms:block/remains_desert_1"
+    },
+    "kind=5,pose=1,facing=east": {
+      "model": "jaymoskingdoms:block/remains_desert_1",
+      "y": 90
+    },
+    "kind=5,pose=1,facing=south": {
+      "model": "jaymoskingdoms:block/remains_desert_1",
+      "y": 180
+    },
+    "kind=5,pose=1,facing=west": {
+      "model": "jaymoskingdoms:block/remains_desert_1",
+      "y": 270
+    },
+    "kind=5,pose=2,facing=north": {
+      "model": "jaymoskingdoms:block/remains_desert_2"
+    },
+    "kind=5,pose=2,facing=east": {
+      "model": "jaymoskingdoms:block/remains_desert_2",
+      "y": 90
+    },
+    "kind=5,pose=2,facing=south": {
+      "model": "jaymoskingdoms:block/remains_desert_2",
+      "y": 180
+    },
+    "kind=5,pose=2,facing=west": {
+      "model": "jaymoskingdoms:block/remains_desert_2",
+      "y": 270
+    },
+    "kind=6,pose=0,facing=north": {
+      "model": "jaymoskingdoms:block/remains_cave_0"
+    },
+    "kind=6,pose=0,facing=east": {
+      "model": "jaymoskingdoms:block/remains_cave_0",
+      "y": 90
+    },
+    "kind=6,pose=0,facing=south": {
+      "model": "jaymoskingdoms:block/remains_cave_0",
+      "y": 180
+    },
+    "kind=6,pose=0,facing=west": {
+      "model": "jaymoskingdoms:block/remains_cave_0",
+      "y": 270
+    },
+    "kind=6,pose=1,facing=north": {
+      "model": "jaymoskingdoms:block/remains_cave_1"
+    },
+    "kind=6,pose=1,facing=east": {
+      "model": "jaymoskingdoms:block/remains_cave_1",
+      "y": 90
+    },
+    "kind=6,pose=1,facing=south": {
+      "model": "jaymoskingdoms:block/remains_cave_1",
+      "y": 180
+    },
+    "kind=6,pose=1,facing=west": {
+      "model": "jaymoskingdoms:block/remains_cave_1",
+      "y": 270
+    },
+    "kind=6,pose=2,facing=north": {
+      "model": "jaymoskingdoms:block/remains_cave_2"
+    },
+    "kind=6,pose=2,facing=east": {
+      "model": "jaymoskingdoms:block/remains_cave_2",
+      "y": 90
+    },
+    "kind=6,pose=2,facing=south": {
+      "model": "jaymoskingdoms:block/remains_cave_2",
+      "y": 180
+    },
+    "kind=6,pose=2,facing=west": {
+      "model": "jaymoskingdoms:block/remains_cave_2",
+      "y": 270
+    },
+    "kind=7,pose=0,facing=north": {
+      "model": "jaymoskingdoms:block/remains_sky_0"
+    },
+    "kind=7,pose=0,facing=east": {
+      "model": "jaymoskingdoms:block/remains_sky_0",
+      "y": 90
+    },
+    "kind=7,pose=0,facing=south": {
+      "model": "jaymoskingdoms:block/remains_sky_0",
+      "y": 180
+    },
+    "kind=7,pose=0,facing=west": {
+      "model": "jaymoskingdoms:block/remains_sky_0",
+      "y": 270
+    },
+    "kind=7,pose=1,facing=north": {
+      "model": "jaymoskingdoms:block/remains_sky_1"
+    },
+    "kind=7,pose=1,facing=east": {
+      "model": "jaymoskingdoms:block/remains_sky_1",
+      "y": 90
+    },
+    "kind=7,pose=1,facing=south": {
+      "model": "jaymoskingdoms:block/remains_sky_1",
+      "y": 180
+    },
+    "kind=7,pose=1,facing=west": {
+      "model": "jaymoskingdoms:block/remains_sky_1",
+      "y": 270
+    },
+    "kind=7,pose=2,facing=north": {
+      "model": "jaymoskingdoms:block/remains_sky_2"
+    },
+    "kind=7,pose=2,facing=east": {
+      "model": "jaymoskingdoms:block/remains_sky_2",
+      "y": 90
+    },
+    "kind=7,pose=2,facing=south": {
+      "model": "jaymoskingdoms:block/remains_sky_2",
+      "y": 180
+    },
+    "kind=7,pose=2,facing=west": {
+      "model": "jaymoskingdoms:block/remains_sky_2",
+      "y": 270
+    },
+    "kind=8,pose=0,facing=north": {
+      "model": "jaymoskingdoms:block/remains_nether_0"
+    },
+    "kind=8,pose=0,facing=east": {
+      "model": "jaymoskingdoms:block/remains_nether_0",
+      "y": 90
+    },
+    "kind=8,pose=0,facing=south": {
+      "model": "jaymoskingdoms:block/remains_nether_0",
+      "y": 180
+    },
+    "kind=8,pose=0,facing=west": {
+      "model": "jaymoskingdoms:block/remains_nether_0",
+      "y": 270
+    },
+    "kind=8,pose=1,facing=north": {
+      "model": "jaymoskingdoms:block/remains_nether_1"
+    },
+    "kind=8,pose=1,facing=east": {
+      "model": "jaymoskingdoms:block/remains_nether_1",
+      "y": 90
+    },
+    "kind=8,pose=1,facing=south": {
+      "model": "jaymoskingdoms:block/remains_nether_1",
+      "y": 180
+    },
+    "kind=8,pose=1,facing=west": {
+      "model": "jaymoskingdoms:block/remains_nether_1",
+      "y": 270
+    },
+    "kind=8,pose=2,facing=north": {
+      "model": "jaymoskingdoms:block/remains_nether_2"
+    },
+    "kind=8,pose=2,facing=east": {
+      "model": "jaymoskingdoms:block/remains_nether_2",
+      "y": 90
+    },
+    "kind=8,pose=2,facing=south": {
+      "model": "jaymoskingdoms:block/remains_nether_2",
+      "y": 180
+    },
+    "kind=8,pose=2,facing=west": {
+      "model": "jaymoskingdoms:block/remains_nether_2",
+      "y": 270
+    },
+    "kind=9,pose=0,facing=north": {
+      "model": "jaymoskingdoms:block/remains_end_0"
+    },
+    "kind=9,pose=0,facing=east": {
+      "model": "jaymoskingdoms:block/remains_end_0",
+      "y": 90
+    },
+    "kind=9,pose=0,facing=south": {
+      "model": "jaymoskingdoms:block/remains_end_0",
+      "y": 180
+    },
+    "kind=9,pose=0,facing=west": {
+      "model": "jaymoskingdoms:block/remains_end_0",
+      "y": 270
+    },
+    "kind=9,pose=1,facing=north": {
+      "model": "jaymoskingdoms:block/remains_end_1"
+    },
+    "kind=9,pose=1,facing=east": {
+      "model": "jaymoskingdoms:block/remains_end_1",
+      "y": 90
+    },
+    "kind=9,pose=1,facing=south": {
+      "model": "jaymoskingdoms:block/remains_end_1",
+      "y": 180
+    },
+    "kind=9,pose=1,facing=west": {
+      "model": "jaymoskingdoms:block/remains_end_1",
+      "y": 270
+    },
+    "kind=9,pose=2,facing=north": {
+      "model": "jaymoskingdoms:block/remains_end_2"
+    },
+    "kind=9,pose=2,facing=east": {
+      "model": "jaymoskingdoms:block/remains_end_2",
+      "y": 90
+    },
+    "kind=9,pose=2,facing=south": {
+      "model": "jaymoskingdoms:block/remains_end_2",
+      "y": 180
+    },
+    "kind=9,pose=2,facing=west": {
+      "model": "jaymoskingdoms:block/remains_end_2",
+      "y": 270
+    }
+  }
+}

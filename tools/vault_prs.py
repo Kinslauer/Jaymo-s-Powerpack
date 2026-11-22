@@ -138,9 +138,13 @@ def main():
 
 
 def open_vault():
-    """Open the main checkout's vault in Obsidian at its Home note (used by tools/open-vault.bat)."""
+    """Open the main checkout's vault in Obsidian at the Dashboard (Live/Dashboard.md, which every vault sync
+    rebuilds), or at its Home note before the first sync has written one (used by tools/open-vault.bat)."""
     from urllib.parse import quote
-    home = os.path.join(main_checkout(), "docs", "vault", "Home.md")
+    vault = os.path.join(main_checkout(), "docs", "vault")
+    home = os.path.join(vault, "Live", "Dashboard.md")
+    if not os.path.exists(home):
+        home = os.path.join(vault, "Home.md")
     os.startfile("obsidian://open?path=" + quote(os.path.normpath(home), safe=""))
 
 

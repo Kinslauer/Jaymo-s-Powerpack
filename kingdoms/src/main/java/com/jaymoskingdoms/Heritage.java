@@ -365,6 +365,10 @@ public final class Heritage {
 			if (shunned > 0) {
 				// (0.7.490) the Beastfolk and the Hollow have a line each (their degrees repeat another blood's)
 				out.add(Component.translatable("heritage.jaymoskingdoms.shunned." + (this == BEASTFOLK || this == HOLLOW ? key() : String.valueOf(shunned))));
+			} else if (this == VERDANT) {
+				// Andy: "verdants should also have the weakness shunned, but people dont necessarily show it": folk deal with
+				// them anyway, so it's the card's line only, no worse prices or trust (Prejudice)
+				out.add(Component.translatable("heritage.jaymoskingdoms.shunned.verdant"));
 			}
 			return out;
 		}
@@ -887,6 +891,15 @@ public final class Heritage {
 	/** The heritage key: a Warrior-born's tail, a Bio-built's or Rubber-folk's engulfing, else the kit's ability ({@link HeritageKits#press}). */
 	static void gift(ServerPlayer player) {
 		Kind kind = of(player);
+		// (Powerborne picks) sprinting: a Divine-born's healing ward, an Emberborn's rise and crash (Jaymo's Powers)
+		if (player.isSprinting() && !player.isShiftKeyDown()) {
+			if ((kind == Kind.DIVINE || PowersCompat.stayedDivine(player)) && PowersCompat.sprintMove("com.jaymospowers.divine.DivineWard", "ward", player)) {
+				return;
+			}
+			if (kind == Kind.EMBERBORN && PowersCompat.sprintMove("com.jaymospowers.power.ember.EmberCrash", "crash", player)) {
+				return;
+			}
+		}
 		// one who stayed at the Judge: Alight when there are feathers to bring back, else their own heritage's key
 		if (kind != Kind.DIVINE && !player.isShiftKeyDown() && PowersCompat.stayedDivine(player) && PowersCompat.alight(player)) {
 			return;

@@ -30,6 +30,8 @@ public final class Professions {
 	public static VillagerProfession NECROMANCER, SHAMAN, BLOOD_WITCH;
 	/** (0.7.299) A town's cook, at its cookhouse or tavern ({@link Meals}): taken on by the town, never a player's pick. Trades meals. */
 	public static VillagerProfession COOK;
+	/** A town's healer, at the infirmary cot and the mortar ({@link TownTrades}, {@link Healing}): taken on by the town, never a player's pick. */
+	public static VillagerProfession HEALER;
 	/** (0.7.490) A town's money-changer ({@link Currencies}): taken on by the town, never a player's pick. Trades coin for coin. */
 	public static VillagerProfession CHANGER;
 	/** A sky village's trader, in sky goods ({@link SkyTrades}): taken on by the village, never a player's pick. */
@@ -62,6 +64,7 @@ public final class Professions {
 		BLOOD_WITCH = register("blood_witch", SoundEvents.VILLAGER_WORK_CLERIC);
 		// (0.7.299)
 		COOK = register("cook", SoundEvents.VILLAGER_WORK_BUTCHER);
+		HEALER = register("healer", SoundEvents.VILLAGER_WORK_CLERIC);
 		// (0.7.490)
 		CHANGER = register("changer", SoundEvents.VILLAGER_WORK_CARTOGRAPHER);
 		CLOUDWRIGHT = register("cloudwright", SoundEvents.VILLAGER_WORK_SHEPHERD);
@@ -131,6 +134,7 @@ public final class Professions {
 			case "jaymoskingdoms:farrier" -> "minecraft:armorer";
 			case "jaymoskingdoms:wizard" -> "minecraft:cleric";
 			case "jaymoskingdoms:cook" -> "minecraft:butcher";
+			case "jaymoskingdoms:healer" -> "minecraft:cleric";
 			case "jaymoskingdoms:tinker" -> "minecraft:toolsmith";
 			case "jaymoskingdoms:engineer" -> "minecraft:armorer";
 			case "jaymoskingdoms:aeronaut" -> "minecraft:cartographer";

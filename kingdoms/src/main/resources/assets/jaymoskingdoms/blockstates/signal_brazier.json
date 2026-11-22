@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "jaymoskingdoms:block/signal_brazier"
+    },
+    "lit=true": {
+      "model": "jaymoskingdoms:block/signal_brazier_lit"
+    }
+  }
+}

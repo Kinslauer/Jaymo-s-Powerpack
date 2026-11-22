@@ -54,6 +54,8 @@ public final class MobParry {
 		if (MobCombat.ENABLED) {
 			ServerLivingEntityEvents.ALLOW_DAMAGE.register(MobParry::allowDamage);
 		}
+		// (defence disciplines) enemies' passive blocks
+		MobBlocks.register();
 	}
 
 	private static boolean allowDamage(LivingEntity victim, DamageSource source, float amount) {
@@ -61,7 +63,7 @@ public final class MobParry {
 			|| source.getDirectEntity() != player || source.isCreativePlayer() || amount <= 0.0F || CombatArts.striking()) {
 			return true;
 		}
-		if (!mob.isAlive() || mob.isPassenger() || Downed.isDowned(mob) || MobCombat.swinging(mob) || MobShields.guardHand(mob) == null
+		if (!mob.isAlive() || mob.isPassenger() || Downed.isDowned(mob) || FighterPosture.reeling(mob) || MobCombat.swinging(mob) || MobShields.guardHand(mob) == null
 			|| !MobCombat.handles(mob)) {
 			return true;
 		}
@@ -118,6 +120,9 @@ public final class MobParry {
 			player.push(back.x, 0.1, back.z);
 			player.needsSync = true;
 		}
+		FighterPosture.parried(level, mob);
+		// (defence disciplines) its own parry gives its blocks back
+		MobBlocks.parried(mob);
 		MobShields.drop(mob);
 		MobCombat.hasten(mob);
 	}

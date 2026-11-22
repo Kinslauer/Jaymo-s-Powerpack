@@ -536,6 +536,8 @@ public final class Patrons {
 		if (p == null || n <= 0) {
 			return;
 		}
+		// (the Deep Mother's Voice counts what her faithful win of her)
+		HeritagePaths.favour(sp, p, n);
 		long today = today(sp.level().getServer());
 		int favour = Math.min(FAVOUR_MAX, s.favour + n);
 		retier(sp, s.withFavour(favour, s.tier, today, s.decayDay), p);

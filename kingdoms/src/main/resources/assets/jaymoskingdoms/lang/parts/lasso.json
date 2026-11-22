@@ -4,5 +4,7 @@
   "message.jaymoskingdoms.lasso.you_hogtied": "You're hogtied. Mash sneak to work the knots loose.",
   "message.jaymoskingdoms.lasso.stalled": "The blow knocks the fight out of you.",
   "message.jaymoskingdoms.lasso.free": "You work free of the rope.",
-  "gui.jaymoskingdoms.story.hint.173": "Hold use to whirl a lasso over your head, and let go once it's up to speed. Back away to drag what you caught, walk in to wind the rope, and hold use at a person's side to hogtie them."
+  "gui.jaymoskingdoms.story.hint.173": "Hold use to whirl a lasso over your head, and let go once it's up to speed. Back away to drag what you caught, walk in to wind the rope, and hold use at a person's side to hogtie them. Carry a hogtied captive to a horse to sling them over its back, and hit them from the saddle (the attack button) to knock the fight back out of them. Once they're tied, tap use on them to untie, lift them or go through their pockets.",
+  "key.jaymoskingdoms.strike_captive": "Strike your captive (on horseback)",
+  "key.category.jaymoskingdoms.lasso": "Jaymo's Lasso"
 }

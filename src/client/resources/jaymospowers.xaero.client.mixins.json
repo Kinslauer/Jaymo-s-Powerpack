@@ -3,7 +3,9 @@
 	"package": "com.jaymospowers.client.mixin.xaero",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
-		"XaeroMinimapBandMixin"
+		"XaeroMinimapBandMixin",
+		"XaeroWorldMapBandMixin",
+		"XaeroWorldMapCaveMixin"
 	],
 	"injectors": {
 		"defaultRequire": 0

@@ -52,8 +52,14 @@ public class GibRenderer extends EntityRenderer<Gib, GibRenderer.State> {
 	/** How deep it has sunk at the end (blocks, for a man's size). */
 	static final float SINK_DEPTH = 0.25F;
 
-	/** The insides' bones in the Blockbench model, by {@link Gib#piece} (none for a chunk). */
-	static final String[] GORE_BONES = {"", "organ", "guts", "ribs", "spine", "bone", "tatters"};
+	/**
+	 * The insides' bones in the Blockbench model, by {@link Gib#piece} (none for a chunk): each piece's looks, one picked by
+	 * the gib's id. Andy (2026-11-19): "there should be more entrail variations": a heart, a liver, a lung and kidneys among
+	 * the organs, and a long trailing rope, a loop and a heap of gut beside the coil. Brain matter and pieces of skull are a
+	 * crushed head's ({@code Gibs#skullCrushed}).
+	 */
+	static final String[][] GORE_BONES = {{}, {"organ", "heart", "liver", "lung", "kidney"}, {"guts", "guts_rope", "guts_loop", "guts_skein"},
+		{"ribs"}, {"spine"}, {"bone"}, {"tatters"}, {"brain"}, {"skull", "jaw"}};
 	/**
 	 * Where clothes lie on a skin laid out as a player's (64x64; x, y, width, height): the front and back of the trunk,
 	 * an arm and a leg of each side. A scrap is a {@link #PATCH}-pixel square of one of them (smaller on a limb).
@@ -66,7 +72,7 @@ public class GibRenderer extends EntityRenderer<Gib, GibRenderer.State> {
 
 	private static @Nullable ModelPart meat;
 	/** The insides by {@link Gib#piece} (none for a chunk), and their sheet. */
-	private static Inside @Nullable [] gore;
+	private static Inside @Nullable [][] gore;
 	private static @Nullable Identifier goreTexture;
 
 	/** One of the insides: its bone, drawn about its own middle; half its height at rest (pixels); the rectangle of the sheet its faces use. */
@@ -143,7 +149,8 @@ public class GibRenderer extends EntityRenderer<Gib, GibRenderer.State> {
 		int inside = gib.piece();
 		if (inside != Gib.CHUNK) {
 			build();
-			Inside which = gore[Mth.clamp(inside, 1, gore.length - 1)];
+			Inside[] looks = gore[Mth.clamp(inside, 1, gore.length - 1)];
+			Inside which = looks[Math.floorMod(gib.getId() * 31 + 7, looks.length)];
 			UvMapping cut = null;
 			Identifier texture = goreTexture;
 			if (inside == Gib.TATTERS) {
@@ -307,29 +314,35 @@ public class GibRenderer extends EntityRenderer<Gib, GibRenderer.State> {
 		}
 		BbModel model = BbModel.load(JaymosKitchen.MOD_ID, "gore");
 		goreTexture = model.texture;
-		gore = new Inside[GORE_BONES.length];
+		gore = new Inside[GORE_BONES.length][];
 		for (int i = 1; i < GORE_BONES.length; i++) {
-			ModelPart part = model.part(GORE_BONES[i]);
-			// drawn alone, about its own middle: not where it stands in the Blockbench file
-			part.setPos(0.0F, 0.0F, 0.0F);
-			float[] bounds = {Float.MAX_VALUE, -Float.MAX_VALUE, 1.0F, 1.0F, 0.0F, 0.0F};
-			part.visit(new PoseStack(), (pose, path, index, cube) -> {
-				bounds[0] = Math.min(bounds[0], cube.minY);
-				bounds[1] = Math.max(bounds[1], cube.maxY);
-				for (ModelPart.Polygon polygon : cube.polygons) {
-					for (ModelPart.Vertex vertex : polygon.vertices()) {
-						bounds[2] = Math.min(bounds[2], vertex.u());
-						bounds[3] = Math.min(bounds[3], vertex.v());
-						bounds[4] = Math.max(bounds[4], vertex.u());
-						bounds[5] = Math.max(bounds[5], vertex.v());
-					}
-				}
-			});
-			gore[i] = new Inside(part, (bounds[1] - bounds[0]) / 2.0F, bounds[2], bounds[3], bounds[4], bounds[5]);
+			gore[i] = new Inside[GORE_BONES[i].length];
+			for (int look = 0; look < GORE_BONES[i].length; look++) {
+				gore[i][look] = inside(model.part(GORE_BONES[i][look]));
+			}
 		}
 		MeshDefinition mesh = new MeshDefinition();
 		mesh.getRoot().addOrReplaceChild("meat", CubeListBuilder.create().texOffs(0, 0).addBox(-2.0F, -1.5F, -2.0F, 4.0F, 3.0F, 4.0F),
 			PartPose.ZERO);
 		meat = LayerDefinition.create(mesh, 16, 16).bakeRoot().getChild("meat");
+	}
+
+	/** One of the insides' looks, off its bone: drawn alone, about its own middle (not where it stands in the Blockbench file). */
+	private static Inside inside(ModelPart part) {
+		part.setPos(0.0F, 0.0F, 0.0F);
+		float[] bounds = {Float.MAX_VALUE, -Float.MAX_VALUE, 1.0F, 1.0F, 0.0F, 0.0F};
+		part.visit(new PoseStack(), (pose, path, index, cube) -> {
+			bounds[0] = Math.min(bounds[0], cube.minY);
+			bounds[1] = Math.max(bounds[1], cube.maxY);
+			for (ModelPart.Polygon polygon : cube.polygons) {
+				for (ModelPart.Vertex vertex : polygon.vertices()) {
+					bounds[2] = Math.min(bounds[2], vertex.u());
+					bounds[3] = Math.min(bounds[3], vertex.v());
+					bounds[4] = Math.max(bounds[4], vertex.u());
+					bounds[5] = Math.max(bounds[5], vertex.v());
+				}
+			}
+		});
+		return new Inside(part, (bounds[1] - bounds[0]) / 2.0F, bounds[2], bounds[3], bounds[4], bounds[5]);
 	}
 }

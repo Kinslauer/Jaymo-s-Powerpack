@@ -1,0 +1,16 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:porkchop",
+    "minecraft:cod",
+    "minecraft:salmon",
+    {
+      "id": "jaymoskingdoms:whale_oil",
+      "required": false
+    },
+    {
+      "id": "jaymoskitchen:cooking_oil",
+      "required": false
+    }
+  ]
+}

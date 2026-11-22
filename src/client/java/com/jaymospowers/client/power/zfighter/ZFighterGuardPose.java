@@ -7,7 +7,6 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
 
 /**
@@ -28,8 +27,9 @@ public final class ZFighterGuardPose {
 	private ZFighterGuardPose() {
 	}
 
-	static void extract(Avatar entity, AvatarRenderState state) {
-		state.setData(KEY, entity instanceof Player player && ZFighterGuard.guarding(player));
+	static void extract(net.minecraft.world.entity.LivingEntity entity, AvatarRenderState state) {
+		// a player's guard, or a fighting NPC's (the brain sets the same attachment)
+		state.setData(KEY, entity instanceof Player player ? ZFighterGuard.guarding(player) : Boolean.TRUE.equals(entity.getAttached(ZFighterGuard.GUARD)));
 	}
 
 	static void applyModel(Model<?> model, Object state) {

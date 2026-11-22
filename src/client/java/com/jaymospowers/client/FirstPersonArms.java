@@ -20,7 +20,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -486,7 +485,8 @@ public final class FirstPersonArms {
 	public static PoseBlend.@Nullable Track carry(LocalPlayer self, Carry.@Nullable Carrying carrying) {
 		PoseBlend.Track track = CARRY.track(self.getId(), carrying != null);
 		if (track != null && carrying != null) {
-			track.memo = new CarryHold(carrying.hold(), !(self.level().getEntity(carrying.target()) instanceof Player));
+			// held as a person (both arms) or cradled as an animal, as the third-person pose has it
+			track.memo = new CarryHold(carrying.hold(), !Carry.person(self.level().getEntity(carrying.target())));
 		}
 		if (track == null || !(track.memo instanceof CarryHold)) {
 			carrySink = 0.0F;

@@ -201,7 +201,7 @@ public final class RigForms {
 			case AF_LASH -> state.lashReady = (int) (now + cooldown);
 			case AF_MIMIC -> state.mimicReady = (int) (now + cooldown);
 		}
-		RigMoves.start(player, form);
+		RigMoves.start(player, RigMoves.ARM_BLADE + (form - AF_BLADE));
 		switch (form) {
 			case AF_BLADE -> blade(player, state);
 			case AF_MACE -> mace(player, state);

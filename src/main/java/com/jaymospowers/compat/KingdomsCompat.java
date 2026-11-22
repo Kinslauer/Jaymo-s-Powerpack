@@ -68,6 +68,15 @@ public final class KingdomsCompat {
 		}
 	}
 
+	/**
+	 * What Kingdoms' world wind does to a cape on {@code wearer}'s back, client side: {streams back, to the side, flutters} in
+	 * radians, less behind a wall; null in still air or without Kingdoms.
+	 */
+	public static float @Nullable [] capeInWind(net.minecraft.world.entity.Entity wearer) {
+		return call("client.disasters.WindCloth", "cape", new Class<?>[] {net.minecraft.world.entity.Entity.class}, null, wearer) instanceof float[] cape
+			? cape : null;
+	}
+
 	/** Lays {@code stacks} of the Ash's rot (Kingdoms' {@code AshRot.rot}) on {@code target}; false without Kingdoms. */
 	public static boolean rot(LivingEntity target, @Nullable LivingEntity by, int stacks) {
 		return call("AshRot", "rot", new Class<?>[] {LivingEntity.class, LivingEntity.class, int.class}, Boolean.FALSE, target, by, stacks) == null;
@@ -397,6 +406,12 @@ public final class KingdomsCompat {
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			// (an older Kingdoms, or one that threw: the fishing goes on)
 		}
+	}
+
+	/** How much keener fish are for {@code player}'s bait: Kingdoms' Saltblood heritage path. 1 without Kingdoms. */
+	public static float fishKeen(net.minecraft.server.level.ServerPlayer player) {
+		Object keen = call("HeritagePaths", "fishKeen", new Class<?>[] {net.minecraft.server.level.ServerPlayer.class}, 1.0F, player);
+		return keen instanceof Float f ? f : 1.0F;
 	}
 
 	/**

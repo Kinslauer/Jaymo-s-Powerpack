@@ -318,6 +318,26 @@ public final class ZFighterSpace {
 	}
 
 	/** What a trip to {@code index} (or Home) burns from {@code from}. */
+	/** The worlds out past the Hollow (the black hole beyond the outer orbits): a trip between them and the rest skirts it. */
+	public static boolean pastHollow(int index) {
+		return index == GLACIA || index == VERDANT || index == GIANT;
+	}
+
+	/** A trip from world {@code from} to world {@code to} (indices; {@link #HOME_INDEX} for home) passes the Hollow and is dragged off course. */
+	public static boolean skirtsHollow(int from, int to) {
+		return pastHollow(from) != pastHollow(to);
+	}
+
+	/** The index of the far world {@code level} is, or {@link #HOME_INDEX}. */
+	public static int indexOf(ResourceKey<Level> level) {
+		for (int i = 0; i < DESTS.length; i++) {
+			if (DESTS[i].level() == level) {
+				return i;
+			}
+		}
+		return HOME_INDEX;
+	}
+
 	public static int cost(int index, ResourceKey<Level> from) {
 		if (index == GIANT && from == DESTS[VERDANT].level()) {
 			return GIANT_HOP_COST;

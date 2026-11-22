@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "II",
+    "IS",
+    " S"
+  ],
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "S": "minecraft:stick"
+  },
+  "result": {
+    "id": "peterwolfs_forestfire:fire_axe",
+    "count": 1
+  }
+}

@@ -60,6 +60,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.npc.Npc;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.Item;
@@ -113,16 +114,21 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  */
 public final class Guard {
-	/** A blow in the first this-many ticks of a raise is a perfect parry; up to the second, a parry. */
-	public static final int PERFECT_TICKS = 5, PARRY_TICKS = 12;
-	/** Extra ticks on both windows against the one you're locked onto. */
-	public static final int LOCK_PERFECT_BONUS = 2, LOCK_PARRY_BONUS = 4;
+	/**
+	 * (defence disciplines) A blow in the first this-many ticks of a raise is a perfect parry; up to the second, a parry; by
+	 * Keen Timing's rank (0 untrained, 3 the old windows: {@link PassiveBlocks#keenTiming}).
+	 */
+	public static final int[] PERFECT_TICKS = {2, 3, 4, 5}, PARRY_TICKS = {6, 8, 10, 12};
+	/** Extra ticks on both windows against the one you're locked onto, by Keen Timing's rank. */
+	public static final int[] LOCK_PERFECT_BONUS = {1, 1, 2, 2}, LOCK_PARRY_BONUS = {2, 2, 3, 4};
 	/** A raise this soon after the last one's start, when that one parried nothing, has no parry window. */
 	public static final int EAGER_TICKS = 15;
 	/** The weapon guard's share of a frontal blow, and its reach round your front (degrees each side, as a shield's). */
 	public static final float GUARD_SHARE = 0.6F, GUARD_ANGLE = 90.0F;
 	/** Feathers (halves) a blocked blow costs per point of damage, at least {@link #BLOCK_COST_MIN}; shields cost none. */
 	public static final float BLOCK_COST_PER_DAMAGE = 0.6F;
+	/** (defence disciplines) With Iron Guard (a Strength skill), this instead. */
+	public static final float IRON_GUARD_COST = 0.4F;
 	public static final int BLOCK_COST_MIN = 1;
 	/** A broken guard: how long the weapon can't guard (seconds), and how long you reel (ticks). */
 	public static final float BREAK_SECONDS = 2.0F;
@@ -135,8 +141,18 @@ public final class Guard {
 	public static final float PERFECT_RIPOSTE = 1.5F;
 	/** Parry: the same, lighter. */
 	public static final int PARRY_STUN = 12, PARRY_RIPOSTE_TICKS = 25;
+	/** (defence disciplines) A plain parry's feathers back. */
+	public static final int PARRY_REFUND = 2;
 	public static final double PARRY_SHOVE = 0.45;
 	public static final float PARRY_RIPOSTE = 1.25F;
+	/**
+	 * A riposte lands by the weapon in hand (Hackers 'n Slashers' idea, ours): a great weapon staggers and slows ({@code RIPOSTE_STAGGER},
+	 * {@code RIPOSTE_SLOW} ticks), a one-handed blade cuts deeper (a bleed), a knife lands a second hit {@code KNIFE_ECHO_TICKS} later for
+	 * {@code KNIFE_ECHO_SHARE} of the blow, a polearm shoves {@code POLE_SHOVE} back.
+	 */
+	public static final int RIPOSTE_STAGGER = 24, RIPOSTE_SLOW = 40, KNIFE_ECHO_TICKS = 4;
+	public static final float KNIFE_ECHO_SHARE = 0.6F;
+	public static final double POLE_SHOVE = 0.9;
 	/**
 	 * (0.17.67) An attacker carrying this tag while its blow lands can't be parried, only blocked or dodged (Kingdoms puts
 	 * it on a fighter's heavy blows, the ones its red glint warns of).
@@ -175,12 +191,13 @@ public final class Guard {
 	 * power's own guard, its single parry {@code window} (ticks from the raise; 0 for a weapon or shield, which use this
 	 * class's windows) and when its parry is ready again after the last one ({@code readyAt}, game time).
 	 */
-	public record Shown(long start, boolean eager, int window, long readyAt) {
+	public record Shown(long start, boolean eager, int window, long readyAt, int keen) {
 		public static final StreamCodec<ByteBuf, Shown> CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_LONG, Shown::start,
 			ByteBufCodecs.BOOL, Shown::eager,
 			ByteBufCodecs.VAR_INT, Shown::window,
 			ByteBufCodecs.VAR_LONG, Shown::readyAt,
+			ByteBufCodecs.VAR_INT, Shown::keen,
 			Shown::new);
 	}
 
@@ -209,6 +226,11 @@ public final class Guard {
 	private record Riposte(UUID target, long until, float factor) {
 	}
 
+	/** A knife's second hit owed: by whom, on whom, when, how hard. */
+	private record Echo(UUID attacker, UUID victim, long at, float damage) {
+	}
+
+	private static final List<Echo> ECHOES = new java.util.ArrayList<>();
 	private static final Map<UUID, Raise> RAISES = new HashMap<>();
 	private static final Map<UUID, Riposte> RIPOSTES = new HashMap<>();
 
@@ -229,7 +251,9 @@ public final class Guard {
 		// (a sneaking join or parting of a Twinblade comes before a raised guard)
 		com.jaymospowers.armory.Twinblade.init();
 		UseItemCallback.EVENT.register(Guard::use);
+		ServerTickEvents.END_SERVER_TICK.register(Guard::echoes);
 		Swat.init();
+		PassiveBlocks.init();
 		ShieldCraft.init();
 		BladeStyle.init();
 		TwoBlades.init();
@@ -334,15 +358,26 @@ public final class Guard {
 
 	/**
 	 * (0.20.76) Right click on {@code mob} (both sides) should raise {@code player}'s guard rather than reach the mob
-	 * (MCA's chat, a trade): a guarding weapon in the main hand and a foe under the crosshair. Sneaking talks as before.
+	 * (MCA's chat, a trade): a foe under the crosshair, and either something that blocks in hand (a guarding weapon, a
+	 * shield in either hand) or a foe who talks (an {@link Npc}: its talk menu never opens mid-fight, so a mid-duel click
+	 * never lands in the chat). Sneaking talks as before.
 	 */
 	public static boolean guardsAgainst(Player player, Mob mob) {
 		if (player.isSpectator() || player.isShiftKeyDown() || !mob.isAlive() || Downed.isDowned(mob)) {
 			return false;
 		}
+		if (!foe(player, mob)) {
+			return false;
+		}
+		// someone who talks (MCA's villagers, guards, orcs, bandits) never opens their talk mid-fight, whatever is in
+		// hand: the click goes to the hand (a guard, a shield, a fist), and sneak still talks
+		if (mob instanceof Npc) {
+			return true;
+		}
 		ItemStack main = player.getMainHandItem();
-		boolean guards = KnifeGuard.guards(main.getItem()) || weaponGuard(main) && !HammerSlam.isWarhammer(main.getItem());
-		return guards && foe(player, mob);
+		// a guarding weapon or a shield in the main hand (not a warhammer: its right click is the smash), a shield in the off
+		return KnifeGuard.guards(main.getItem()) || main.has(DataComponents.BLOCKS_ATTACKS) && !HammerSlam.isWarhammer(main.getItem())
+			|| player.getOffhandItem().has(DataComponents.BLOCKS_ATTACKS);
 	}
 
 	/**
@@ -361,11 +396,11 @@ public final class Guard {
 	private static Raise raise(ServerPlayer player) {
 		Raise raise = RAISES.computeIfAbsent(player.getUUID(), id -> new Raise());
 		long now = player.level().getGameTime();
-		raise.eager = now - raise.start < EAGER_TICKS && !raise.parried;
+		raise.eager = now - raise.start < EAGER_TICKS / CombatAttrs.of(player, CombatAttrs.PARRY_RECHARGE) && !raise.parried;
 		raise.start = now;
 		raise.parried = false;
 		raise.up = true;
-		player.setAttached(SHOWN, new Shown(now, raise.eager, 0, 0L));
+		player.setAttached(SHOWN, new Shown(now, raise.eager, 0, 0L, PassiveBlocks.keenTiming(player)));
 		return raise;
 	}
 
@@ -375,7 +410,7 @@ public final class Guard {
 	 * moves {@code readyAt}.
 	 */
 	public static void showPower(ServerPlayer player, long start, int window, long readyAt) {
-		player.setAttached(SHOWN, new Shown(start, false, window, readyAt));
+		player.setAttached(SHOWN, new Shown(start, false, window, readyAt, PassiveBlocks.keenTiming(player)));
 	}
 
 	/** (0.18.24) A power's own guard came down. */
@@ -405,10 +440,11 @@ public final class Guard {
 			return Timing.BLOCK;
 		}
 		boolean watching = attacker != null && LockOn.target(player) == attacker;
-		if (held <= PERFECT_TICKS + (watching ? LOCK_PERFECT_BONUS : 0)) {
+		int keen = PassiveBlocks.keenTiming(player);
+		if (held <= PERFECT_TICKS[keen] + (watching ? LOCK_PERFECT_BONUS[keen] : 0)) {
 			return Timing.PERFECT;
 		}
-		if (!projectile && held <= PARRY_TICKS + (watching ? LOCK_PARRY_BONUS : 0)) {
+		if (!projectile && held <= PARRY_TICKS[keen] + (watching ? LOCK_PARRY_BONUS[keen] : 0)) {
 			return Timing.PARRY;
 		}
 		return Timing.BLOCK;
@@ -468,7 +504,8 @@ public final class Guard {
 		// (a boxer's block costs by the blow, not by its weight: Boxing.blockCost)
 		if (melee && weaponGuard(guard) && player.isBlocking() && !(com.jaymospowers.boxing.Boxing.boxing(player)
 			? com.jaymospowers.boxing.Boxing.spend(player, com.jaymospowers.boxing.Boxing.blockCost(player))
-			: Feathers.spend(player, Math.max(BLOCK_COST_MIN, Mth.ceil(amount * BLOCK_COST_PER_DAMAGE * BladeStyle.block(player)))))) {
+			: Feathers.spend(player, Math.max(BLOCK_COST_MIN, Mth.ceil(amount * (PassiveBlocks.ironGuard(player) ? IRON_GUARD_COST : BLOCK_COST_PER_DAMAGE)
+				* BladeStyle.block(player)))))) {
 			guardBreak(player, guard);
 		}
 		return false;
@@ -505,12 +542,16 @@ public final class Guard {
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), PARRY_SOUND, SoundSource.PLAYERS, perfect ? 1.0F : 0.8F, (perfect ? 1.1F : 0.95F) + (player.getRandom().nextFloat() - 0.5F) * 0.1F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 0.35F, perfect ? 1.5F : 1.2F);
 		cue(player, attacker, perfect);
+		if (perfect) {
+			Vec3 eye = player.getEyePosition();
+			Vec3 toward = from.subtract(eye);
+			toward = toward.lengthSqr() > 1.0E-4 ? toward.normalize() : player.getLookAngle();
+			CritCue.cue(level, eye.add(toward.scale(0.7)).add(0.0, -0.3, 0.0), null);
+		}
 		// ((0.21.20) turned to the next blow coming; a chain of parries makes the riposte harder, Crowds)
 		float chain = Crowds.counter(player, attacker);
 		Shakes.send(player, perfect ? 1.2F : 0.6F, from);
-		if (perfect) {
-			Feathers.refund(player, PERFECT_REFUND);
-		}
+		Feathers.refund(player, perfect ? PERFECT_REFUND : PARRY_REFUND);
 		if (attacker == null || !attacker.isAlive()) {
 			return;
 		}
@@ -523,6 +564,9 @@ public final class Guard {
 		}
 		attacker.needsSync = true;
 		stagger(attacker, perfect ? PERFECT_STUN : PARRY_STUN);
+		// (defence disciplines) a fist parry knocks the weapon out of the attacker's hand (Snatch: into yours)
+		PassiveBlocks.disarm(player, attacker, perfect);
+		PassiveBlocks.foeParried(attacker);
 		if (perfect && attacker instanceof Player foe && !foe.getMainHandItem().isEmpty()) {
 			foe.getCooldowns().addCooldown(foe.getMainHandItem(), PERFECT_DISARM_TICKS);
 		}
@@ -550,6 +594,8 @@ public final class Guard {
 		}
 		player.stopUsingItem();
 		stagger(player, BREAK_STAGGER);
+		// (defence disciplines) and no passive blocks until it mends
+		PassiveBlocks.broken(player, Math.round(BREAK_SECONDS * 20.0F));
 		player.level().sendParticles(ParticleTypes.CRIT, player.getX(), player.getEyeY() - 0.3, player.getZ(), 8, 0.3, 0.2, 0.3, 0.2);
 		ClashFx.sparks(player.level(), player.getEyePosition().add(player.getLookAngle().scale(0.6)).add(0.0, -0.3, 0.0), null, ClashFx.PARRY_SPARKS, ClashFx.BLOCK_SCALE);
 	}
@@ -571,6 +617,8 @@ public final class Guard {
 	 * striking lands harder, once.
 	 */
 	public static float riposte(LivingEntity victim, DamageSource source, float damage) {
+		// (defence disciplines) a passive block catches it first
+		damage = PassiveBlocks.caught(victim, source, damage);
 		damage = Stances.adjust(victim, source, damage);
 		if (!(source.getEntity() instanceof ServerPlayer player) || source.getDirectEntity() != player || RIPOSTES.isEmpty()) {
 			return damage;
@@ -588,6 +636,59 @@ public final class Guard {
 		level.sendParticles(ParticleTypes.ENCHANTED_HIT, at.x, at.y, at.z, 16, 0.3, 0.4, 0.3, 0.4);
 		level.sendParticles(ParticleTypes.CRIT, at.x, at.y, at.z, 12, 0.3, 0.4, 0.3, 0.5);
 		level.playSound(null, victim.getX(), victim.getY(), victim.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1.0F, 0.8F);
-		return damage * owed.factor();
+		CritCue.cue(level, at, player);
+		riposteKind(level, player, victim, damage);
+		return damage * owed.factor() * (float) CombatAttrs.of(player, CombatAttrs.RIPOSTE_POWER);
+	}
+
+	/** What the weapon in {@code player}'s hand adds to a riposte (see {@link #RIPOSTE_STAGGER}). */
+	private static void riposteKind(ServerLevel level, ServerPlayer player, LivingEntity victim, float damage) {
+		ItemStack weapon = player.getMainHandItem();
+		Armed.Kind kind = Armed.kind(weapon);
+		if (kind == null) {
+			return;
+		}
+		if (isKnife(weapon)) {
+			ECHOES.add(new Echo(player.getUUID(), victim.getUUID(), level.getGameTime() + KNIFE_ECHO_TICKS, damage * KNIFE_ECHO_SHARE));
+		} else if (kind == Armed.Kind.TWO_HAND) {
+			stagger(victim, RIPOSTE_STAGGER);
+			if (!Stances.immovable(victim)) {
+				victim.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, RIPOSTE_SLOW, 1, false, false));
+			}
+		} else if (kind == Armed.Kind.POLE) {
+			Vec3 away = victim.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
+			if (away.lengthSqr() > 1.0E-4 && !Stances.immovable(victim)) {
+				away = away.normalize().scale(POLE_SHOVE);
+				victim.push(away.x, 0.2, away.z);
+				victim.needsSync = true;
+			}
+		} else {
+			com.jaymospowers.core.wounds.Bleeding.open(victim, com.jaymospowers.core.wounds.BodyPart.BODY, false);
+		}
+	}
+
+	/** A knife or dagger, ours or WeaponMod's. */
+	private static boolean isKnife(ItemStack weapon) {
+		String path = BuiltInRegistries.ITEM.getKey(weapon.getItem()).getPath();
+		return KnifeGuard.isKnife(weapon.getItem()) || path.endsWith("_dagger") || path.equals("dagger");
+	}
+
+	/** The second hits knives owe, once their moment comes. */
+	private static void echoes(net.minecraft.server.MinecraftServer server) {
+		if (ECHOES.isEmpty()) {
+			return;
+		}
+		for (Echo echo : List.copyOf(ECHOES)) {
+			ServerPlayer player = server.getPlayerList().getPlayer(echo.attacker());
+			if (player == null) {
+				ECHOES.remove(echo);
+			} else if (player.level().getGameTime() >= echo.at()) {
+				ECHOES.remove(echo);
+				if (player.level().getEntity(echo.victim()) instanceof LivingEntity victim && victim.isAlive()) {
+					victim.setInvulnerableTime(0);
+					victim.hurtServer(player.level(), player.damageSources().playerAttack(player), echo.damage());
+				}
+			}
+		}
 	}
 }

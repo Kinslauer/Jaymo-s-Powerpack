@@ -8,6 +8,7 @@ import java.util.List;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -18,6 +19,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EntityBlock;
@@ -61,8 +63,16 @@ public final class Bombardment {
 		/** An explosion: anything whose blast resistance its blast still beats where it stands. */
 		STRUCTURES,
 		/** The same, for the heavy shot and shells (kept apart for their names in {@code ShotKind}). */
-		MASONRY
+		MASONRY,
+		/** Only timber: logs, planks and wooden doors, fences, stairs and slabs (the stone ball: nothing else, not even loose ground). */
+		TIMBER,
+		/** Breaks nothing: where it lands it sets fires (the fire ball). */
+		FIRE
 	}
+
+	/** A fire ball lights each free spot within its radius with this chance, at most {@link #MOST_FIRES} of them. */
+	static final float FIRE_CHANCE = 0.4F;
+	static final int MOST_FIRES = 10;
 
 	/**
 	 * A crater's shape: its radius, how far it goes down and up (blocks), its blast strength at the middle (the blast
@@ -114,6 +124,10 @@ public final class Bombardment {
 		if (!(by instanceof Player) && !level.getGameRules().get(GameRules.MOB_GRIEFING)) {
 			return;
 		}
+		if (crater.strip() == Strip.FIRE) {
+			ignite(level, at, crater.radius());
+			return;
+		}
 		boolean near = false;
 		for (ServerPlayer p : level.players()) {
 			near |= p.distanceToSqr(at) <= NEAR * NEAR;
@@ -139,6 +153,33 @@ public final class Bombardment {
 		columns.sort(Comparator.comparingDouble(c -> Math.hypot(c[0] - centre.getX(), c[1] - centre.getZ())));
 		JOBS.add(new Job(level, centre, crater, columns));
 		pending += columns.size();
+	}
+
+	/**
+	 * A fire ball's landing at {@code at}: fires are set on the free spots within {@code radius} that a fire can burn on
+	 * (as a flint and steel would), only where the game lets fire spread ({@code fire_spread_radius_around_player}: 0 is
+	 * vanilla's no fire tick).
+	 */
+	private static void ignite(ServerLevel level, Vec3 at, double radius) {
+		BlockPos centre = BlockPos.containing(at);
+		int reach = (int)Math.ceil(radius);
+		int lit = 0;
+		for (int dy = -1; dy <= 2 && lit < MOST_FIRES; dy++) {
+			for (int dx = -reach; dx <= reach && lit < MOST_FIRES; dx++) {
+				for (int dz = -reach; dz <= reach && lit < MOST_FIRES; dz++) {
+					BlockPos pos = centre.offset(dx, dy, dz);
+					if (dx * dx + dz * dz > radius * radius || level.getRandom().nextFloat() >= FIRE_CHANCE
+						|| !com.jaymoskingdoms.Loaded.made(level, pos) || !level.canSpreadFireAround(pos)
+						|| !BaseFireBlock.canBePlacedAt(level, pos, Direction.UP)) {
+						continue;
+					}
+					level.setBlock(pos, BaseFireBlock.getState(level, pos), Block.UPDATE_ALL);
+					lit++;
+				}
+			}
+		}
+		level.sendParticles(ParticleTypes.FLAME, at.x, at.y + 0.5, at.z, 20, radius * 0.4, 0.3, radius * 0.4, 0.04);
+		level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 1.2F, 0.8F);
 	}
 
 	private static void tick() {
@@ -260,6 +301,9 @@ public final class Bombardment {
 		if (state.isAir() || state.getBlock() instanceof LiquidBlock || !allowed(level, pos, state)) {
 			return false;
 		}
+		if (c.strip() == Strip.TIMBER) {
+			return timber(state) && state.getBlock().getExplosionResistance() <= c.reach();
+		}
 		if (soft(level, pos, state)) {
 			return true;
 		}
@@ -274,6 +318,13 @@ public final class Bombardment {
 	private static boolean allowed(Level level, BlockPos pos, BlockState state) {
 		return state.getDestroySpeed(level, pos) >= 0.0F && state.getBlock().getExplosionResistance() < TOUGHEST
 			&& !(state.getBlock() instanceof EntityBlock);
+	}
+
+	/** Timber: logs, planks and the wooden doors, fences, gates, stairs, slabs and trapdoors (the stone ball takes only these). */
+	private static boolean timber(BlockState state) {
+		return state.is(BlockTags.LOGS) || state.is(BlockTags.PLANKS) || state.is(BlockTags.WOODEN_DOORS) || state.is(BlockTags.WOODEN_FENCES)
+			|| state.is(BlockTags.FENCE_GATES) || state.is(BlockTags.WOODEN_STAIRS) || state.is(BlockTags.WOODEN_SLABS)
+			|| state.is(BlockTags.WOODEN_TRAPDOORS);
 	}
 
 	/** Loose ground and growth: soil, sand, gravel, snow, plants, leaves. */

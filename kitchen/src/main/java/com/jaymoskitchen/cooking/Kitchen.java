@@ -255,6 +255,10 @@ public final class Kitchen {
 		if ((quality == Quality.GOOD || quality == Quality.PERFECT)
 			&& player.level().getBlockState(pos).is(net.minecraft.world.level.block.Blocks.SMOKER)) {
 			com.jaymoskitchen.fresh.Freshness.preserve(stack);
+			if (stack.has(com.jaymoskitchen.fresh.Freshness.PRESERVED)) {
+				// a wood chip from the cook's pockets goes on the coals: it keeps the food longer and fills more
+				com.jaymoskitchen.vintner.Chip.smoke(player, stack);
+			}
 		}
 		// (0.5.71) the "Jaymo's Powerpack" advancement tab (Powers' data): a dish cooked, and a perfect one
 		advance(player, "cooked");

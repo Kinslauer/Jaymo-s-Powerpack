@@ -235,6 +235,10 @@ public final class IllagerTongue {
 				return stack;
 			}
 			int before = points(player);
+			if (this == LEDGER) {
+				// (village mods 1) a ledger carries a muster page: the nearest camp, its size, its warlord, what it is mustering against
+				IllagerHolds.muster(player);
+			}
 			if (before >= this.to) {
 				// (nothing in it you don't already know: kept)
 				player.sendOverlayMessage(Component.translatable("illager_tongue.jaymoskingdoms.read.known").withStyle(ChatFormatting.GRAY));
@@ -482,7 +486,7 @@ public final class IllagerTongue {
 		}
 		Identifier id = key.get().identifier();
 		return id.getNamespace().equals(JaymosKingdoms.MOD_ID) ? id.getPath().startsWith(IllagerSites.PREFIX)
-			: id.equals(IllagerSites.ILLAGER_ARENA_ID) || id.getNamespace().equals("minecraft") && (id.getPath().equals("pillager_outpost") || id.getPath().equals("mansion"));
+			: SharedPools.ctovOutpost(id) || id.equals(IllagerSites.ILLAGER_ARENA_ID) || id.getNamespace().equals("minecraft") && (id.getPath().equals("pillager_outpost") || id.getPath().equals("mansion"));
 	}
 
 	/** The structure of theirs {@code player} stands in, or null. */

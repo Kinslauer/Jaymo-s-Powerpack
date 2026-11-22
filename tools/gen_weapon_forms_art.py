@@ -2,7 +2,7 @@
 
     python -I tools/gen_weapon_forms_art.py
 
-Kingdoms: the bolas. Powers: the Fang Gauntlets and their forged head (stone and iron, drawn in weapon_parts_assets.py), the Clockwork Hornet Hive and the
+Kingdoms: the bolas. Powers: the Fang Gauntlets' forged head (stone and iron, drawn in weapon_parts_assets.py), the Clockwork Hornet Hive and the
 Clockwork Hornet it looses. '.' is clear; the letters pick from each picture's palette.
 """
 import os
@@ -33,28 +33,6 @@ BOLAS = [
     "................",
 ]
 BOLAS_PAL = {"o": (40, 40, 44), "G": (126, 128, 132), "g": (176, 178, 182), "c": (176, 140, 84)}
-
-# the gauntlet: a leather-and-iron glove with three iron fangs along the knuckles
-GAUNTLETS = [
-    "................",
-    "..f..f..f.......",
-    "..F..F..F.......",
-    "..FffFffF.......",
-    "..oIIIIIIo......",
-    ".oIiiIIiiIo.....",
-    ".oIIIIIIIIo.....",
-    ".oLLLLLLLLo.....",
-    ".oLlLLLLlLLo....",
-    "..oLLLLLLLLo....",
-    "..oLLLLLLLLo....",
-    "...oKKKKKKo.....",
-    "...oKkKKkKo.....",
-    "...oKKKKKKo.....",
-    "....oooooo......",
-    "................",
-]
-GAUNTLETS_PAL = {"o": (36, 30, 28), "f": (236, 236, 228), "F": (200, 200, 192), "I": (118, 120, 126), "i": (170, 172, 178),
-                 "L": (122, 78, 44), "l": (160, 108, 66), "K": (90, 58, 34), "k": (124, 84, 52)}
 
 HIVE = [
     "................",
@@ -124,7 +102,7 @@ def as_stone(img):
 
 def main():
     draw(BOLAS, BOLAS_PAL, os.path.join(KINGDOMS, "bolas.png"))
-    draw(GAUNTLETS, GAUNTLETS_PAL, os.path.join(POWERS, "armory", "fang_gauntlets.png"))
+    # (the Fang Gauntlets' icon is the reskinned base gauntlet: tools/gauntlet_assets.py)
     # the forged head is drawn in tools/weapon_parts_assets.py (DRAWN); its textures are written here for the one part
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     import weapon_parts_assets

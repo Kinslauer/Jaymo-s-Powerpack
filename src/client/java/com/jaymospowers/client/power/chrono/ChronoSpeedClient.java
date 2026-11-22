@@ -20,6 +20,9 @@ import org.jspecify.annotations.Nullable;
 public final class ChronoSpeedClient {
 	/** The wall being run up (into it), or null. */
 	private static @Nullable Direction wall;
+	/** Air-run strides taken since the ground was last touched, and the tick of the last one. */
+	private static int strides;
+	private static int lastStride;
 
 	private ChronoSpeedClient() {
 	}
@@ -32,6 +35,31 @@ public final class ChronoSpeedClient {
 		ChronoMomentumClient.reset();
 		ChronoSpeedKeys.reset();
 		ChronoSpeed.clientOverclockedAt = Long.MIN_VALUE;
+	}
+
+	/**
+	 * Run up the air: in top gear, holding Jump off the ground gives a kick up every {@link ChronoSpeed#AIR_GAP} ticks or so
+	 * (as the last one fades), {@link ChronoSpeed#AIR_STRIDES} of them to a ground touch, like invisible steps. It starts
+	 * from a sprint, and goes on once started.
+	 */
+	private static void airRun(LocalPlayer player, boolean able) {
+		if (player.onGround() || player.isInWater() || player.onClimbable() || player.getAbilities().flying || player.isFallFlying()) {
+			strides = 0;
+			return;
+		}
+		if (!able || strides >= ChronoSpeed.AIR_STRIDES || !player.input.keyPresses.jump() || player.isPassenger()
+			|| com.jaymospowers.power.chrono.ChronoGears.gear(player) < com.jaymospowers.power.chrono.ChronoGears.GEARS
+			|| strides == 0 && !player.isSprinting() || player.tickCount - lastStride < ChronoSpeed.AIR_GAP
+			|| player.getDeltaMovement().y > 0.2 || player.isSpectator() || com.jaymospowers.core.wounds.Downed.isDowned(player)) {
+			return;
+		}
+		strides++;
+		lastStride = player.tickCount;
+		player.setDeltaMovement(player.getDeltaMovement().x, ChronoSpeed.AIR_KICK, player.getDeltaMovement().z);
+		player.resetFallDistance();
+		player.level().addParticle(MagicFx.CRACKLE, player.getX(), player.getY(), player.getZ(), 0.0, 0.05, 0.0);
+		player.level().playLocalSound(player.getX(), player.getY(), player.getZ(), net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_STEP,
+			net.minecraft.sounds.SoundSource.PLAYERS, 0.5F, 1.4F + strides * 0.1F, false);
 	}
 
 	public static void tick(LocalPlayer player, boolean overclocked) {
@@ -55,6 +83,7 @@ public final class ChronoSpeedClient {
 			player.setDeltaMovement(was.getStepX() * ChronoSpeed.WALL_TOP_IN, ChronoSpeed.WALL_TOP_UP, was.getStepZ() * ChronoSpeed.WALL_TOP_IN);
 		}
 		wall = now;
+		airRun(player, overclocked && now == null);
 		ChronoMomentumClient.tick(player, overclocked && now == null);
 		ChronoRapidClient.tick(player, overclocked);
 		ChronoSpeedKeys.tick(player, overclocked);

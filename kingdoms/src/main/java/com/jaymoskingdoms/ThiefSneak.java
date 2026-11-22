@@ -68,6 +68,8 @@ public final class ThiefSneak {
 		}
 		// (class trees) an Assassin's on a foe that never knew they were there
 		float burst = unaware && ClassTrees.has(thief, ClassForks.ASSASSIN) > 0 ? amount * ClassForks.ASSASSIN_MULT + ClassForks.ASSASSIN_FLAT : amount * MULT + FLAT;
+		// (hs_attrs) Jaymo's Powers' sneak attack power multiplies the burst
+		burst *= CritPower.sneak(thief);
 		// (scaling audit) with the Sneak Attack perk on the same blow the two don't multiply: the bigger one is dealt, and a share of the smaller one's extra
 		float perk = stabbed(target, thief, source) ? 0.0F : Senses.sneakAttack(target, source);
 		LAST.put(thief.getUUID(), now);
@@ -76,6 +78,7 @@ public final class ThiefSneak {
 		}
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 0.9F, 1.3F);
 		level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY(0.6), target.getZ(), 12, 0.25, 0.3, 0.25, 0.3);
+		PowersCompat.critCue(level, target.position().add(0.0, target.getBbHeight() * 0.6, 0.0), thief);
 		if (perk > 0.0F) {
 			float sneak = amount * perk;
 			float both = Math.max(burst, sneak) + BOTH_SHARE * Math.max(0.0F, Math.min(burst, sneak) - amount);

@@ -19,6 +19,62 @@
         }
       },
       {
+        "when": "spiked",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/savoyard_helm_spiked"
+        }
+      },
+      {
+        "when": "gilt_banded",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/savoyard_helm_gilt_banded"
+        }
+      },
+      {
+        "when": "fur_lined",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/savoyard_helm_fur_lined"
+        }
+      },
+      {
+        "when": "quilted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/savoyard_helm_quilted"
+        }
+      },
+      {
+        "when": "brine_soaked",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/savoyard_helm_brine_soaked"
+        }
+      },
+      {
+        "when": "hide",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/savoyard_helm_hide"
+        }
+      },
+      {
+        "when": "bronze",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/savoyard_helm_bronze"
+        }
+      },
+      {
+        "when": "lamellar",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/savoyard_helm_lamellar"
+        }
+      },
+      {
         "when": "russeted",
         "model": {
           "type": "minecraft:model",

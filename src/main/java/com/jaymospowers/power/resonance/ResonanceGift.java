@@ -59,6 +59,12 @@ final class ResonanceGift implements GiftKit {
 		return ResonancePower.ID;
 	}
 
+	/** The fighter brain's trails, dashes and vanishes in this power's colour (a ringing violet). */
+	@Override
+	public int color() {
+		return 0xE0B0FF;
+	}
+
 	@Override
 	public List<Move> moves() {
 		return List.of(

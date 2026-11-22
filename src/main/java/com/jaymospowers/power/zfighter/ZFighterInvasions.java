@@ -627,6 +627,7 @@ public final class ZFighterInvasions {
 		inv.boss = tyrant.getUUID();
 		inv.invaders.add(tyrant.getUUID());
 		inv.level.addFreshEntity(tyrant);
+		ZFighterPatrol.showdown(inv.level, tyrant.blockPosition(), tyrant.getUUID(), null);
 		LightningBolt bolt = EntityTypes.LIGHTNING_BOLT.create(inv.level, EntitySpawnReason.TRIGGERED);
 		if (bolt != null) {
 			bolt.snapTo(at.x, at.y, at.z);

@@ -135,6 +135,10 @@ final class OwnWants {
 
 	/** {@code v}'s own want, the same every time they're asked. */
 	static Want of(Villager v) {
+		if (Groves.is(v)) {
+			// (an old druid wants a growing thing of other woods: Groves#want)
+			return new Want(Groves.want(v), 1, 5, 4);
+		}
 		wants();
 		long seed = v.getUUID().getLeastSignificantBits() ^ v.getUUID().getMostSignificantBits();
 		java.util.Random pick = new java.util.Random(seed);

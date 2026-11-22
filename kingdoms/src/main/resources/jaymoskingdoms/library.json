@@ -1,0 +1,3972 @@
+{
+ "_comment": "Written by tools/library_import.py (docs/BuildingLibrary-Plan.md); edit the script, not this file.",
+ "books": [
+  {
+   "id": "cinch_fancy_brick_house",
+   "name": "Cinch's fancy brick house",
+   "source": "jaymoskingdoms:library/cinchs/cinch_fancy_brick_house",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Cinchtail",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/cinchs-abandoned-houses",
+   "from": "Cinch's Abandoned Houses 2.1.0",
+   "ruin": true
+  },
+  {
+   "id": "cinch_farm_house",
+   "name": "Cinch's farm house",
+   "source": "jaymoskingdoms:library/cinchs/cinch_farm_house",
+   "kinds": [
+    "farmhouse"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Cinchtail",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/cinchs-abandoned-houses",
+   "from": "Cinch's Abandoned Houses 2.1.0",
+   "ruin": true
+  },
+  {
+   "id": "cinch_furnace_house",
+   "name": "Cinch's furnace house",
+   "source": "jaymoskingdoms:library/cinchs/cinch_furnace_house",
+   "kinds": [
+    "smithy"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Cinchtail",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/cinchs-abandoned-houses",
+   "from": "Cinch's Abandoned Houses 2.1.0",
+   "ruin": true
+  },
+  {
+   "id": "cinch_house_basic_1",
+   "name": "Cinch's house basic 1",
+   "source": "jaymoskingdoms:library/cinchs/cinch_house_basic_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Cinchtail",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/cinchs-abandoned-houses",
+   "from": "Cinch's Abandoned Houses 2.1.0",
+   "ruin": true
+  },
+  {
+   "id": "cinch_house_basic_2",
+   "name": "Cinch's house basic 2",
+   "source": "jaymoskingdoms:library/cinchs/cinch_house_basic_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Cinchtail",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/cinchs-abandoned-houses",
+   "from": "Cinch's Abandoned Houses 2.1.0",
+   "ruin": true
+  },
+  {
+   "id": "cinch_house_small_ruined",
+   "name": "Cinch's house small ruined",
+   "source": "jaymoskingdoms:library/cinchs/cinch_house_small_ruined",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Cinchtail",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/cinchs-abandoned-houses",
+   "from": "Cinch's Abandoned Houses 2.1.0",
+   "ruin": true
+  },
+  {
+   "id": "cinch_masons_house",
+   "name": "Cinch's masons house",
+   "source": "jaymoskingdoms:library/cinchs/cinch_masons_house",
+   "kinds": [
+    "mason"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Cinchtail",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/cinchs-abandoned-houses",
+   "from": "Cinch's Abandoned Houses 2.1.0",
+   "ruin": true
+  },
+  {
+   "id": "cinch_taiga_house_1",
+   "name": "Cinch's taiga house 1",
+   "source": "jaymoskingdoms:library/cinchs/cinch_taiga_house_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Cinchtail",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/cinchs-abandoned-houses",
+   "from": "Cinch's Abandoned Houses 2.1.0",
+   "ruin": true
+  },
+  {
+   "id": "cinch_taiga_house_2",
+   "name": "Cinch's taiga house 2",
+   "source": "jaymoskingdoms:library/cinchs/cinch_taiga_house_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Cinchtail",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/cinchs-abandoned-houses",
+   "from": "Cinch's Abandoned Houses 2.1.0",
+   "ruin": true
+  },
+  {
+   "id": "cinch_taiga_house_3",
+   "name": "Cinch's taiga house 3",
+   "source": "jaymoskingdoms:library/cinchs/cinch_taiga_house_3",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Cinchtail",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/cinchs-abandoned-houses",
+   "from": "Cinch's Abandoned Houses 2.1.0",
+   "ruin": true
+  },
+  {
+   "id": "cinch_birch_house_1",
+   "name": "Cinch's birch house 1",
+   "source": "jaymoskingdoms:library/cinchs/cinch_birch_house_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Cinchtail",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/cinchs-abandoned-houses",
+   "from": "Cinch's Abandoned Houses 2.1.0",
+   "biomes": [
+    "birch"
+   ],
+   "ruin": true
+  },
+  {
+   "id": "cinch_birch_house_2",
+   "name": "Cinch's birch house 2",
+   "source": "jaymoskingdoms:library/cinchs/cinch_birch_house_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Cinchtail",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/cinchs-abandoned-houses",
+   "from": "Cinch's Abandoned Houses 2.1.0",
+   "biomes": [
+    "birch"
+   ],
+   "ruin": true
+  },
+  {
+   "id": "cinch_birch_house_3",
+   "name": "Cinch's birch house 3",
+   "source": "jaymoskingdoms:library/cinchs/cinch_birch_house_3",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Cinchtail",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/cinchs-abandoned-houses",
+   "from": "Cinch's Abandoned Houses 2.1.0",
+   "biomes": [
+    "birch"
+   ],
+   "ruin": true
+  },
+  {
+   "id": "cinch_birch_house_4",
+   "name": "Cinch's birch house 4",
+   "source": "jaymoskingdoms:library/cinchs/cinch_birch_house_4",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Cinchtail",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/cinchs-abandoned-houses",
+   "from": "Cinch's Abandoned Houses 2.1.0",
+   "biomes": [
+    "birch"
+   ],
+   "ruin": true
+  },
+  {
+   "id": "cinch_birch_house_5",
+   "name": "Cinch's birch house 5",
+   "source": "jaymoskingdoms:library/cinchs/cinch_birch_house_5",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Cinchtail",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/cinchs-abandoned-houses",
+   "from": "Cinch's Abandoned Houses 2.1.0",
+   "biomes": [
+    "birch"
+   ],
+   "ruin": true
+  },
+  {
+   "id": "lone_house_1",
+   "name": "Lone house 1",
+   "source": "jaymoskingdoms:library/lone_houses/lone_house_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ],
+   "author": "Andper",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/lone-houses",
+   "from": "Lone Houses 1.0.2",
+   "ruin": true
+  },
+  {
+   "id": "lone_house_2",
+   "name": "Lone house 2",
+   "source": "jaymoskingdoms:library/lone_houses/lone_house_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ],
+   "author": "Andper",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/lone-houses",
+   "from": "Lone Houses 1.0.2",
+   "ruin": true
+  },
+  {
+   "id": "lone_house_3",
+   "name": "Lone house 3",
+   "source": "jaymoskingdoms:library/lone_houses/lone_house_3",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ],
+   "author": "Andper",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/lone-houses",
+   "from": "Lone Houses 1.0.2",
+   "ruin": true
+  },
+  {
+   "id": "lone_ruin_1",
+   "name": "Lone ruin 1",
+   "source": "jaymoskingdoms:library/lone_houses/lone_ruin_1",
+   "kinds": [],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ],
+   "author": "Andper",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/lone-houses",
+   "from": "Lone Houses 1.0.2"
+  },
+  {
+   "id": "lone_ruin_2",
+   "name": "Lone ruin 2",
+   "source": "jaymoskingdoms:library/lone_houses/lone_ruin_2",
+   "kinds": [],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ],
+   "author": "Andper",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/lone-houses",
+   "from": "Lone Houses 1.0.2"
+  },
+  {
+   "id": "berezka_villagers",
+   "name": "Berezka's castle",
+   "source": "jaymoskingdoms:library/berezka/berezka_villagers",
+   "kinds": [],
+   "lands": [
+    "PLAINS",
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Berezka",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/berezkas-castle",
+   "from": "Berezka's Castle 1.0.1",
+   "ruin": true,
+   "castle": true
+  },
+  {
+   "id": "berezka_evil",
+   "name": "Berezka's dark castle",
+   "source": "jaymoskingdoms:library/berezka/berezka_evil",
+   "kinds": [],
+   "lands": [
+    "PLAINS",
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Berezka",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/berezkas-castle",
+   "from": "Berezka's Castle 1.0.1",
+   "ruin": true,
+   "castle": true
+  },
+  {
+   "id": "berezka_ruins",
+   "name": "Berezka's castle, ruined",
+   "source": "jaymoskingdoms:library/berezka/berezka_ruins",
+   "kinds": [],
+   "lands": [
+    "PLAINS",
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Berezka",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/berezkas-castle",
+   "from": "Berezka's Castle 1.0.1",
+   "ruin": true,
+   "castle": true
+  },
+  {
+   "id": "berezka_ruins2",
+   "name": "Berezka's castle, ruined (2)",
+   "source": "jaymoskingdoms:library/berezka/berezka_ruins2",
+   "kinds": [],
+   "lands": [
+    "PLAINS",
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Berezka",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/berezkas-castle",
+   "from": "Berezka's Castle 1.0.1",
+   "ruin": true,
+   "castle": true
+  },
+  {
+   "id": "tangled_castle",
+   "name": "Tangled castle",
+   "source": "jaymoskingdoms:library/castles_outposts/tangled_castle",
+   "kinds": [],
+   "lands": [
+    "PLAINS",
+    "TAIGA",
+    "SWAMP"
+   ],
+   "author": "kilkavakilka",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/castles-and-outposts",
+   "from": "Castles and Outposts 1.0.1",
+   "ruin": true,
+   "castle": true
+  },
+  {
+   "id": "battle_castle",
+   "name": "Battle castle",
+   "source": "jaymoskingdoms:library/battle_castles/battle_castle",
+   "kinds": [],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ],
+   "author": "Creamers inc. (mautip, creamtip)",
+   "licence": "Apache-2.0 (Modrinth page; the jar says AFL-3.0)",
+   "link": "https://modrinth.com/mod/battle-castles",
+   "from": "Battle Castles 1.0.0",
+   "castle": true
+  },
+  {
+   "id": "knight_statue",
+   "name": "Knight statue",
+   "source": "jaymoskingdoms:library/little_structures/knight_statue",
+   "kinds": [],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ],
+   "author": "MatBayern, SumiiRing",
+   "licence": "LGPL-3.0",
+   "link": "https://modrinth.com/mod/little-structures",
+   "from": "Little Structures 2.1"
+  },
+  {
+   "id": "little_graveyard",
+   "name": "Little graveyard",
+   "source": "jaymoskingdoms:library/little_structures/little_graveyard",
+   "kinds": [
+    "graveyard"
+   ],
+   "lands": [
+    "PLAINS",
+    "TAIGA",
+    "SNOWY",
+    "SWAMP"
+   ],
+   "author": "MatBayern, SumiiRing",
+   "licence": "LGPL-3.0",
+   "link": "https://modrinth.com/mod/little-structures",
+   "from": "Little Structures 2.1",
+   "ruin": true
+  },
+  {
+   "id": "sohatuy_tavern_plains",
+   "name": "Sohatuy's plains tavern",
+   "source": "jaymoskingdoms:library/sohatuy/sohatuy_tavern_plains",
+   "kinds": [
+    "tavern"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Sohatuy",
+   "licence": "Apache-2.0",
+   "link": "https://modrinth.com/mod/sohatuys-medieval-structures",
+   "from": "Sohatuy's Medieval Structures 1.1.4"
+  },
+  {
+   "id": "sohatuy_tavern_taiga",
+   "name": "Sohatuy's taiga tavern",
+   "source": "jaymoskingdoms:library/sohatuy/sohatuy_tavern_taiga",
+   "kinds": [
+    "tavern"
+   ],
+   "lands": [
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Sohatuy",
+   "licence": "Apache-2.0",
+   "link": "https://modrinth.com/mod/sohatuys-medieval-structures",
+   "from": "Sohatuy's Medieval Structures 1.1.4"
+  },
+  {
+   "id": "sohatuy_tavern_jungle",
+   "name": "Sohatuy's jungle tavern",
+   "source": "jaymoskingdoms:library/sohatuy/sohatuy_tavern_jungle",
+   "kinds": [
+    "tavern"
+   ],
+   "lands": [
+    "JUNGLE"
+   ],
+   "author": "Sohatuy",
+   "licence": "Apache-2.0",
+   "link": "https://modrinth.com/mod/sohatuys-medieval-structures",
+   "from": "Sohatuy's Medieval Structures 1.1.4"
+  },
+  {
+   "id": "sohatuy_tavern_savanna",
+   "name": "Sohatuy's savanna tavern",
+   "source": "jaymoskingdoms:library/sohatuy/sohatuy_tavern_savanna",
+   "kinds": [
+    "tavern"
+   ],
+   "lands": [
+    "SAVANNA"
+   ],
+   "author": "Sohatuy",
+   "licence": "Apache-2.0",
+   "link": "https://modrinth.com/mod/sohatuys-medieval-structures",
+   "from": "Sohatuy's Medieval Structures 1.1.4"
+  },
+  {
+   "id": "sohatuy_castle_plains",
+   "name": "Sohatuy's plains castle",
+   "source": "jaymoskingdoms:library/sohatuy/sohatuy_castle_plains",
+   "kinds": [],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Sohatuy",
+   "licence": "Apache-2.0",
+   "link": "https://modrinth.com/mod/sohatuys-medieval-structures",
+   "from": "Sohatuy's Medieval Structures 1.1.4",
+   "castle": true
+  },
+  {
+   "id": "sohatuy_castle_taiga",
+   "name": "Sohatuy's taiga castle",
+   "source": "jaymoskingdoms:library/sohatuy/sohatuy_castle_taiga",
+   "kinds": [],
+   "lands": [
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Sohatuy",
+   "licence": "Apache-2.0",
+   "link": "https://modrinth.com/mod/sohatuys-medieval-structures",
+   "from": "Sohatuy's Medieval Structures 1.1.4",
+   "castle": true
+  },
+  {
+   "id": "towny_square_1",
+   "name": "Town house (square) 1",
+   "source": "jaymoskingdoms:library/towny/towny_square_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_square_2",
+   "name": "Town house (square) 2",
+   "source": "jaymoskingdoms:library/towny/towny_square_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_square_3",
+   "name": "Town house (square) 3",
+   "source": "jaymoskingdoms:library/towny/towny_square_3",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_three_1",
+   "name": "Town house (three) 1",
+   "source": "jaymoskingdoms:library/towny/towny_three_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_three_2",
+   "name": "Town house (three) 2",
+   "source": "jaymoskingdoms:library/towny/towny_three_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_three_3",
+   "name": "Town house (three) 3",
+   "source": "jaymoskingdoms:library/towny/towny_three_3",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_two_1",
+   "name": "Town house (two) 1",
+   "source": "jaymoskingdoms:library/towny/towny_two_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_two_2",
+   "name": "Town house (two) 2",
+   "source": "jaymoskingdoms:library/towny/towny_two_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_two_3",
+   "name": "Town house (two) 3",
+   "source": "jaymoskingdoms:library/towny/towny_two_3",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_square_thirdes_1",
+   "name": "Town house (square thirdes) 1",
+   "source": "jaymoskingdoms:library/towny/towny_square_thirdes_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_square_thirdes_2",
+   "name": "Town house (square thirdes) 2",
+   "source": "jaymoskingdoms:library/towny/towny_square_thirdes_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_square_thirdes_3",
+   "name": "Town house (square thirdes) 3",
+   "source": "jaymoskingdoms:library/towny/towny_square_thirdes_3",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_three_medium_1",
+   "name": "Town house (three medium) 1",
+   "source": "jaymoskingdoms:library/towny/towny_three_medium_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_three_medium_2",
+   "name": "Town house (three medium) 2",
+   "source": "jaymoskingdoms:library/towny/towny_three_medium_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_three_medium_3",
+   "name": "Town house (three medium) 3",
+   "source": "jaymoskingdoms:library/towny/towny_three_medium_3",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_two_medium_1",
+   "name": "Town house (two medium) 1",
+   "source": "jaymoskingdoms:library/towny/towny_two_medium_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_two_medium_2",
+   "name": "Town house (two medium) 2",
+   "source": "jaymoskingdoms:library/towny/towny_two_medium_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_two_medium_3",
+   "name": "Town house (two medium) 3",
+   "source": "jaymoskingdoms:library/towny/towny_two_medium_3",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_square_smallerth_1",
+   "name": "Town house (square smallerth) 1",
+   "source": "jaymoskingdoms:library/towny/towny_square_smallerth_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_square_smallerth_2",
+   "name": "Town house (square smallerth) 2",
+   "source": "jaymoskingdoms:library/towny/towny_square_smallerth_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_square_smallerth_3",
+   "name": "Town house (square smallerth) 3",
+   "source": "jaymoskingdoms:library/towny/towny_square_smallerth_3",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_two_small_1",
+   "name": "Town house (two small) 1",
+   "source": "jaymoskingdoms:library/towny/towny_two_small_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_two_small_2",
+   "name": "Town house (two small) 2",
+   "source": "jaymoskingdoms:library/towny/towny_two_small_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_two_small_3",
+   "name": "Town house (two small) 3",
+   "source": "jaymoskingdoms:library/towny/towny_two_small_3",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_three_small_1",
+   "name": "Town house (three small) 1",
+   "source": "jaymoskingdoms:library/towny/towny_three_small_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_three_small_2",
+   "name": "Town house (three small) 2",
+   "source": "jaymoskingdoms:library/towny/towny_three_small_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_three_small_3",
+   "name": "Town house (three small) 3",
+   "source": "jaymoskingdoms:library/towny/towny_three_small_3",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_corner_square_1",
+   "name": "Town house (corner square) 1",
+   "source": "jaymoskingdoms:library/towny/towny_corner_square_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_corner_square_2",
+   "name": "Town house (corner square) 2",
+   "source": "jaymoskingdoms:library/towny/towny_corner_square_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_corner_square_3",
+   "name": "Town house (corner square) 3",
+   "source": "jaymoskingdoms:library/towny/towny_corner_square_3",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_longer_medium_1",
+   "name": "Town house (longer medium) 1",
+   "source": "jaymoskingdoms:library/towny/towny_longer_medium_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_longer_medium_2",
+   "name": "Town house (longer medium) 2",
+   "source": "jaymoskingdoms:library/towny/towny_longer_medium_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_longer_medium_3",
+   "name": "Town house (longer medium) 3",
+   "source": "jaymoskingdoms:library/towny/towny_longer_medium_3",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_longer_1",
+   "name": "Town house (longer) 1",
+   "source": "jaymoskingdoms:library/towny/towny_longer_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_longer_2",
+   "name": "Town house (longer) 2",
+   "source": "jaymoskingdoms:library/towny/towny_longer_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_longer_3",
+   "name": "Town house (longer) 3",
+   "source": "jaymoskingdoms:library/towny/towny_longer_3",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "towny_market_well",
+   "name": "Market square well",
+   "source": "jaymoskingdoms:library/towny/towny_market_well",
+   "kinds": [
+    "well"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "kogtyv",
+   "licence": "MIT",
+   "link": "https://modrinth.com/mod/kogtyv-tav",
+   "from": "Towny and Village 1.8"
+  },
+  {
+   "id": "lost_castle",
+   "name": "The Lost Castle",
+   "source": "jaymoskingdoms:library/lost_castle/lost_castle",
+   "kinds": [],
+   "lands": [
+    "PLAINS",
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "jack-bagel",
+   "licence": "LGPL-3.0",
+   "link": "https://modrinth.com/mod/the-lost-castle",
+   "from": "The Lost Castle 2.1.1",
+   "castle": true
+  },
+  {
+   "id": "tt_tudor_butcher_and_armorer_1",
+   "name": "Tudor butcher and armorer",
+   "source": "kaisyn:village/exclusives/tudor/houses/tudor_butcher_and_armorer_1",
+   "kinds": [
+    "butcher"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_tudor_cartographer_and_fletcher_1",
+   "name": "Tudor cartographer and fletcher",
+   "source": "kaisyn:village/exclusives/tudor/houses/tudor_cartographer_and_fletcher_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_tudor_farmer_1",
+   "name": "Tudor farmer",
+   "source": "kaisyn:village/exclusives/tudor/houses/tudor_farmer_1",
+   "kinds": [
+    "farmhouse"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_tudor_fisher_1",
+   "name": "Tudor fisher",
+   "source": "kaisyn:village/exclusives/tudor/houses/tudor_fisher_1",
+   "kinds": [
+    "fishery"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_tudor_large_house_1",
+   "name": "Tudor large house",
+   "source": "kaisyn:village/exclusives/tudor/houses/tudor_large_house_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_tudor_leatherworker_1",
+   "name": "Tudor leatherworker",
+   "source": "kaisyn:village/exclusives/tudor/houses/tudor_leatherworker_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_tudor_library_1",
+   "name": "Tudor library",
+   "source": "kaisyn:village/exclusives/tudor/houses/tudor_library_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_tudor_mason_1",
+   "name": "Tudor mason",
+   "source": "kaisyn:village/exclusives/tudor/houses/tudor_mason_1",
+   "kinds": [
+    "mason"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_tudor_shepherd_1",
+   "name": "Tudor shepherd",
+   "source": "kaisyn:village/exclusives/tudor/houses/tudor_shepherd_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_tudor_small_house_1",
+   "name": "Tudor small house",
+   "source": "kaisyn:village/exclusives/tudor/houses/tudor_small_house_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_tudor_small_house_2",
+   "name": "Tudor small house 2",
+   "source": "kaisyn:village/exclusives/tudor/houses/tudor_small_house_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_tudor_small_house_3",
+   "name": "Tudor small house 3",
+   "source": "kaisyn:village/exclusives/tudor/houses/tudor_small_house_3",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_tudor_small_house_4",
+   "name": "Tudor small house 4",
+   "source": "kaisyn:village/exclusives/tudor/houses/tudor_small_house_4",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_tudor_temple_1",
+   "name": "Tudor temple",
+   "source": "kaisyn:village/exclusives/tudor/houses/tudor_temple_1",
+   "kinds": [
+    "chapel"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_tudor_toolsmith_and_weaponsmith_1",
+   "name": "Tudor toolsmith and weaponsmith",
+   "source": "kaisyn:village/exclusives/tudor/houses/tudor_toolsmith_and_weaponsmith_1",
+   "kinds": [
+    "smithy"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_swedish_armorer_1",
+   "name": "Swedish armorer",
+   "source": "kaisyn:village/exclusives/swedish/houses/swedish_armorer_1",
+   "kinds": [
+    "smithy"
+   ],
+   "lands": [
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_swedish_butcher_1",
+   "name": "Swedish butcher",
+   "source": "kaisyn:village/exclusives/swedish/houses/swedish_butcher_1",
+   "kinds": [
+    "butcher"
+   ],
+   "lands": [
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_swedish_cartographer_1",
+   "name": "Swedish cartographer",
+   "source": "kaisyn:village/exclusives/swedish/houses/swedish_cartographer_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_swedish_farmer_and_fisher_1",
+   "name": "Swedish farmer and fisher",
+   "source": "kaisyn:village/exclusives/swedish/houses/swedish_farmer_and_fisher_1",
+   "kinds": [
+    "farmhouse"
+   ],
+   "lands": [
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_swedish_fletcher_1",
+   "name": "Swedish fletcher",
+   "source": "kaisyn:village/exclusives/swedish/houses/swedish_fletcher_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_swedish_leatherworker_1",
+   "name": "Swedish leatherworker",
+   "source": "kaisyn:village/exclusives/swedish/houses/swedish_leatherworker_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_swedish_library_and_temple_1",
+   "name": "Swedish library and temple",
+   "source": "kaisyn:village/exclusives/swedish/houses/swedish_library_and_temple_1",
+   "kinds": [
+    "chapel"
+   ],
+   "lands": [
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_swedish_mason_1",
+   "name": "Swedish mason",
+   "source": "kaisyn:village/exclusives/swedish/houses/swedish_mason_1",
+   "kinds": [
+    "mason"
+   ],
+   "lands": [
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_swedish_shepherd_1",
+   "name": "Swedish shepherd",
+   "source": "kaisyn:village/exclusives/swedish/houses/swedish_shepherd_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_swedish_small_house_1",
+   "name": "Swedish small house",
+   "source": "kaisyn:village/exclusives/swedish/houses/swedish_small_house_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_swedish_small_house_2",
+   "name": "Swedish small house 2",
+   "source": "kaisyn:village/exclusives/swedish/houses/swedish_small_house_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_swedish_small_house_3",
+   "name": "Swedish small house 3",
+   "source": "kaisyn:village/exclusives/swedish/houses/swedish_small_house_3",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_swedish_small_house_4",
+   "name": "Swedish small house 4",
+   "source": "kaisyn:village/exclusives/swedish/houses/swedish_small_house_4",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_swedish_small_house_5",
+   "name": "Swedish small house 5",
+   "source": "kaisyn:village/exclusives/swedish/houses/swedish_small_house_5",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_swedish_small_house_6",
+   "name": "Swedish small house 6",
+   "source": "kaisyn:village/exclusives/swedish/houses/swedish_small_house_6",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_swedish_small_house_7",
+   "name": "Swedish small house 7",
+   "source": "kaisyn:village/exclusives/swedish/houses/swedish_small_house_7",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_swedish_toolsmith_1",
+   "name": "Swedish toolsmith",
+   "source": "kaisyn:village/exclusives/swedish/houses/swedish_toolsmith_1",
+   "kinds": [
+    "smithy"
+   ],
+   "lands": [
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_swedish_weaponsmith_1",
+   "name": "Swedish weaponsmith",
+   "source": "kaisyn:village/exclusives/swedish/houses/swedish_weaponsmith_1",
+   "kinds": [
+    "smithy"
+   ],
+   "lands": [
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_iberian_large_house_1",
+   "name": "Iberian large house",
+   "source": "kaisyn:village/exclusives/iberian/houses/iberian_large_house_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "SAVANNA",
+    "DESERT",
+    "BADLANDS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_iberian_large_house_2",
+   "name": "Iberian large house 2",
+   "source": "kaisyn:village/exclusives/iberian/houses/iberian_large_house_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "SAVANNA",
+    "DESERT",
+    "BADLANDS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_iberian_medium_house_1",
+   "name": "Iberian medium house",
+   "source": "kaisyn:village/exclusives/iberian/houses/iberian_medium_house_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "SAVANNA",
+    "DESERT",
+    "BADLANDS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_iberian_medium_house_2",
+   "name": "Iberian medium house 2",
+   "source": "kaisyn:village/exclusives/iberian/houses/iberian_medium_house_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "SAVANNA",
+    "DESERT",
+    "BADLANDS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_iberian_medium_house_3",
+   "name": "Iberian medium house 3",
+   "source": "kaisyn:village/exclusives/iberian/houses/iberian_medium_house_3",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "SAVANNA",
+    "DESERT",
+    "BADLANDS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_iberian_medium_house_4",
+   "name": "Iberian medium house 4",
+   "source": "kaisyn:village/exclusives/iberian/houses/iberian_medium_house_4",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "SAVANNA",
+    "DESERT",
+    "BADLANDS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_iberian_medium_house_5",
+   "name": "Iberian medium house 5",
+   "source": "kaisyn:village/exclusives/iberian/houses/iberian_medium_house_5",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "SAVANNA",
+    "DESERT",
+    "BADLANDS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_iberian_medium_house_6",
+   "name": "Iberian medium house 6",
+   "source": "kaisyn:village/exclusives/iberian/houses/iberian_medium_house_6",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "SAVANNA",
+    "DESERT",
+    "BADLANDS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_iberian_medium_house_7",
+   "name": "Iberian medium house 7",
+   "source": "kaisyn:village/exclusives/iberian/houses/iberian_medium_house_7",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "SAVANNA",
+    "DESERT",
+    "BADLANDS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_iberian_medium_house_8",
+   "name": "Iberian medium house 8",
+   "source": "kaisyn:village/exclusives/iberian/houses/iberian_medium_house_8",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "SAVANNA",
+    "DESERT",
+    "BADLANDS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_iberian_small_house_1",
+   "name": "Iberian small house",
+   "source": "kaisyn:village/exclusives/iberian/houses/iberian_small_house_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "SAVANNA",
+    "DESERT",
+    "BADLANDS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_iberian_small_house_2",
+   "name": "Iberian small house 2",
+   "source": "kaisyn:village/exclusives/iberian/houses/iberian_small_house_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "SAVANNA",
+    "DESERT",
+    "BADLANDS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_iberian_small_house_3",
+   "name": "Iberian small house 3",
+   "source": "kaisyn:village/exclusives/iberian/houses/iberian_small_house_3",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "SAVANNA",
+    "DESERT",
+    "BADLANDS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_iberian_temple_1",
+   "name": "Iberian temple",
+   "source": "kaisyn:village/exclusives/iberian/houses/iberian_temple_1",
+   "kinds": [
+    "chapel"
+   ],
+   "lands": [
+    "SAVANNA",
+    "DESERT",
+    "BADLANDS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_old_growth_taiga_armorer_and_butcher_1",
+   "name": "Old growth taiga armorer and butcher",
+   "source": "kaisyn:village/old_growth_taiga_polish/houses/old_growth_taiga_armorer_and_butcher_1",
+   "kinds": [
+    "butcher"
+   ],
+   "lands": [
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "old_growth"
+   ]
+  },
+  {
+   "id": "tt_old_growth_taiga_cartographer_1",
+   "name": "Old growth taiga cartographer",
+   "source": "kaisyn:village/old_growth_taiga_polish/houses/old_growth_taiga_cartographer_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "old_growth"
+   ]
+  },
+  {
+   "id": "tt_old_growth_taiga_fisher_1",
+   "name": "Old growth taiga fisher",
+   "source": "kaisyn:village/old_growth_taiga_polish/houses/old_growth_taiga_fisher_1",
+   "kinds": [
+    "fishery"
+   ],
+   "lands": [
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "old_growth"
+   ]
+  },
+  {
+   "id": "tt_old_growth_taiga_fletcher_1",
+   "name": "Old growth taiga fletcher",
+   "source": "kaisyn:village/old_growth_taiga_polish/houses/old_growth_taiga_fletcher_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "old_growth"
+   ]
+  },
+  {
+   "id": "tt_old_growth_taiga_leatherworker_1",
+   "name": "Old growth taiga leatherworker",
+   "source": "kaisyn:village/old_growth_taiga_polish/houses/old_growth_taiga_leatherworker_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "old_growth"
+   ]
+  },
+  {
+   "id": "tt_old_growth_taiga_library_1",
+   "name": "Old growth taiga library",
+   "source": "kaisyn:village/old_growth_taiga_polish/houses/old_growth_taiga_library_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "old_growth"
+   ]
+  },
+  {
+   "id": "tt_old_growth_taiga_mason_1",
+   "name": "Old growth taiga mason",
+   "source": "kaisyn:village/old_growth_taiga_polish/houses/old_growth_taiga_mason_1",
+   "kinds": [
+    "mason"
+   ],
+   "lands": [
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "old_growth"
+   ]
+  },
+  {
+   "id": "tt_old_growth_taiga_medium_house_1",
+   "name": "Old growth taiga medium house",
+   "source": "kaisyn:village/old_growth_taiga_polish/houses/old_growth_taiga_medium_house_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "old_growth"
+   ]
+  },
+  {
+   "id": "tt_old_growth_taiga_medium_house_2",
+   "name": "Old growth taiga medium house 2",
+   "source": "kaisyn:village/old_growth_taiga_polish/houses/old_growth_taiga_medium_house_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "old_growth"
+   ]
+  },
+  {
+   "id": "tt_old_growth_taiga_shepherd_1",
+   "name": "Old growth taiga shepherd",
+   "source": "kaisyn:village/old_growth_taiga_polish/houses/old_growth_taiga_shepherd_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "old_growth"
+   ]
+  },
+  {
+   "id": "tt_old_growth_taiga_small_house_1",
+   "name": "Old growth taiga small house",
+   "source": "kaisyn:village/old_growth_taiga_polish/houses/old_growth_taiga_small_house_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "old_growth"
+   ]
+  },
+  {
+   "id": "tt_old_growth_taiga_small_house_2",
+   "name": "Old growth taiga small house 2",
+   "source": "kaisyn:village/old_growth_taiga_polish/houses/old_growth_taiga_small_house_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "old_growth"
+   ]
+  },
+  {
+   "id": "tt_old_growth_taiga_small_house_3",
+   "name": "Old growth taiga small house 3",
+   "source": "kaisyn:village/old_growth_taiga_polish/houses/old_growth_taiga_small_house_3",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "old_growth"
+   ]
+  },
+  {
+   "id": "tt_old_growth_taiga_small_house_4",
+   "name": "Old growth taiga small house 4",
+   "source": "kaisyn:village/old_growth_taiga_polish/houses/old_growth_taiga_small_house_4",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "old_growth"
+   ]
+  },
+  {
+   "id": "tt_old_growth_taiga_small_house_5",
+   "name": "Old growth taiga small house 5",
+   "source": "kaisyn:village/old_growth_taiga_polish/houses/old_growth_taiga_small_house_5",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "old_growth"
+   ]
+  },
+  {
+   "id": "tt_old_growth_taiga_small_house_6",
+   "name": "Old growth taiga small house 6",
+   "source": "kaisyn:village/old_growth_taiga_polish/houses/old_growth_taiga_small_house_6",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "old_growth"
+   ]
+  },
+  {
+   "id": "tt_old_growth_taiga_temple_1",
+   "name": "Old growth taiga temple",
+   "source": "kaisyn:village/old_growth_taiga_polish/houses/old_growth_taiga_temple_1",
+   "kinds": [
+    "chapel"
+   ],
+   "lands": [
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "old_growth"
+   ]
+  },
+  {
+   "id": "tt_old_growth_taiga_toolsmith_and_weaponsmith_1",
+   "name": "Old growth taiga toolsmith and weaponsmith",
+   "source": "kaisyn:village/old_growth_taiga_polish/houses/old_growth_taiga_toolsmith_and_weaponsmith_1",
+   "kinds": [
+    "smithy"
+   ],
+   "lands": [
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "old_growth"
+   ]
+  },
+  {
+   "id": "tt_birch_forest_armorer_and_toolsmith_1",
+   "name": "Birch forest armorer and toolsmith",
+   "source": "kaisyn:village/birch_forest_romanian/houses/birch_forest_armorer_and_toolsmith_1",
+   "kinds": [
+    "smithy"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "birch"
+   ]
+  },
+  {
+   "id": "tt_birch_forest_butcher_and_leatherworker_1",
+   "name": "Birch forest butcher and leatherworker",
+   "source": "kaisyn:village/birch_forest_romanian/houses/birch_forest_butcher_and_leatherworker_1",
+   "kinds": [
+    "butcher"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "birch"
+   ]
+  },
+  {
+   "id": "tt_birch_forest_cartographer_and_library_1",
+   "name": "Birch forest cartographer and library",
+   "source": "kaisyn:village/birch_forest_romanian/houses/birch_forest_cartographer_and_library_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "birch"
+   ]
+  },
+  {
+   "id": "tt_birch_forest_fisher_1",
+   "name": "Birch forest fisher",
+   "source": "kaisyn:village/birch_forest_romanian/houses/birch_forest_fisher_1",
+   "kinds": [
+    "fishery"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "birch"
+   ]
+  },
+  {
+   "id": "tt_birch_forest_fletcher_1",
+   "name": "Birch forest fletcher",
+   "source": "kaisyn:village/birch_forest_romanian/houses/birch_forest_fletcher_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "birch"
+   ]
+  },
+  {
+   "id": "tt_birch_forest_large_house_1",
+   "name": "Birch forest large house",
+   "source": "kaisyn:village/birch_forest_romanian/houses/birch_forest_large_house_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "birch"
+   ]
+  },
+  {
+   "id": "tt_birch_forest_mason_1",
+   "name": "Birch forest mason",
+   "source": "kaisyn:village/birch_forest_romanian/houses/birch_forest_mason_1",
+   "kinds": [
+    "mason"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "birch"
+   ]
+  },
+  {
+   "id": "tt_birch_forest_medium_house_1",
+   "name": "Birch forest medium house",
+   "source": "kaisyn:village/birch_forest_romanian/houses/birch_forest_medium_house_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "birch"
+   ]
+  },
+  {
+   "id": "tt_birch_forest_medium_house_2",
+   "name": "Birch forest medium house 2",
+   "source": "kaisyn:village/birch_forest_romanian/houses/birch_forest_medium_house_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "birch"
+   ]
+  },
+  {
+   "id": "tt_birch_forest_shepherd_1",
+   "name": "Birch forest shepherd",
+   "source": "kaisyn:village/birch_forest_romanian/houses/birch_forest_shepherd_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "birch"
+   ]
+  },
+  {
+   "id": "tt_birch_forest_small_house_1",
+   "name": "Birch forest small house",
+   "source": "kaisyn:village/birch_forest_romanian/houses/birch_forest_small_house_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "birch"
+   ]
+  },
+  {
+   "id": "tt_birch_forest_small_house_2",
+   "name": "Birch forest small house 2",
+   "source": "kaisyn:village/birch_forest_romanian/houses/birch_forest_small_house_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "birch"
+   ]
+  },
+  {
+   "id": "tt_birch_forest_small_house_3",
+   "name": "Birch forest small house 3",
+   "source": "kaisyn:village/birch_forest_romanian/houses/birch_forest_small_house_3",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "birch"
+   ]
+  },
+  {
+   "id": "tt_birch_forest_small_house_4",
+   "name": "Birch forest small house 4",
+   "source": "kaisyn:village/birch_forest_romanian/houses/birch_forest_small_house_4",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "birch"
+   ]
+  },
+  {
+   "id": "tt_birch_forest_small_house_5",
+   "name": "Birch forest small house 5",
+   "source": "kaisyn:village/birch_forest_romanian/houses/birch_forest_small_house_5",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "birch"
+   ]
+  },
+  {
+   "id": "tt_birch_forest_small_house_6",
+   "name": "Birch forest small house 6",
+   "source": "kaisyn:village/birch_forest_romanian/houses/birch_forest_small_house_6",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "birch"
+   ]
+  },
+  {
+   "id": "tt_birch_forest_weaponsmith_1",
+   "name": "Birch forest weaponsmith",
+   "source": "kaisyn:village/birch_forest_romanian/houses/birch_forest_weaponsmith_1",
+   "kinds": [
+    "smithy"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "birch"
+   ]
+  },
+  {
+   "id": "tt_meadow_armorer_and_leatherworker_1",
+   "name": "Meadow armorer and leatherworker",
+   "source": "kaisyn:village/meadow_swiss/houses/meadow_armorer_and_leatherworker_1",
+   "kinds": [
+    "smithy"
+   ],
+   "lands": [
+    "PLAINS",
+    "SNOWY",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "meadow"
+   ]
+  },
+  {
+   "id": "tt_meadow_butcher_and_mason_1",
+   "name": "Meadow butcher and mason",
+   "source": "kaisyn:village/meadow_swiss/houses/meadow_butcher_and_mason_1",
+   "kinds": [
+    "butcher"
+   ],
+   "lands": [
+    "PLAINS",
+    "SNOWY",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "meadow"
+   ]
+  },
+  {
+   "id": "tt_meadow_cartographer_and_library_1",
+   "name": "Meadow cartographer and library",
+   "source": "kaisyn:village/meadow_swiss/houses/meadow_cartographer_and_library_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS",
+    "SNOWY",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "meadow"
+   ]
+  },
+  {
+   "id": "tt_meadow_farmer_1",
+   "name": "Meadow farmer",
+   "source": "kaisyn:village/meadow_swiss/houses/meadow_farmer_1",
+   "kinds": [
+    "farmhouse"
+   ],
+   "lands": [
+    "PLAINS",
+    "SNOWY",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "meadow"
+   ]
+  },
+  {
+   "id": "tt_meadow_fisher_1",
+   "name": "Meadow fisher",
+   "source": "kaisyn:village/meadow_swiss/houses/meadow_fisher_1",
+   "kinds": [
+    "fishery"
+   ],
+   "lands": [
+    "PLAINS",
+    "SNOWY",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "meadow"
+   ]
+  },
+  {
+   "id": "tt_meadow_fletcher_1",
+   "name": "Meadow fletcher",
+   "source": "kaisyn:village/meadow_swiss/houses/meadow_fletcher_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS",
+    "SNOWY",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "meadow"
+   ]
+  },
+  {
+   "id": "tt_meadow_large_house_1",
+   "name": "Meadow large house",
+   "source": "kaisyn:village/meadow_swiss/houses/meadow_large_house_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS",
+    "SNOWY",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "meadow"
+   ]
+  },
+  {
+   "id": "tt_meadow_medium_house_1",
+   "name": "Meadow medium house",
+   "source": "kaisyn:village/meadow_swiss/houses/meadow_medium_house_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS",
+    "SNOWY",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "meadow"
+   ]
+  },
+  {
+   "id": "tt_meadow_medium_house_2",
+   "name": "Meadow medium house 2",
+   "source": "kaisyn:village/meadow_swiss/houses/meadow_medium_house_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS",
+    "SNOWY",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "meadow"
+   ]
+  },
+  {
+   "id": "tt_meadow_medium_house_3",
+   "name": "Meadow medium house 3",
+   "source": "kaisyn:village/meadow_swiss/houses/meadow_medium_house_3",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS",
+    "SNOWY",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "meadow"
+   ]
+  },
+  {
+   "id": "tt_meadow_medium_house_4",
+   "name": "Meadow medium house 4",
+   "source": "kaisyn:village/meadow_swiss/houses/meadow_medium_house_4",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS",
+    "SNOWY",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "meadow"
+   ]
+  },
+  {
+   "id": "tt_meadow_medium_house_5",
+   "name": "Meadow medium house 5",
+   "source": "kaisyn:village/meadow_swiss/houses/meadow_medium_house_5",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS",
+    "SNOWY",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "meadow"
+   ]
+  },
+  {
+   "id": "tt_meadow_shepherd_1",
+   "name": "Meadow shepherd",
+   "source": "kaisyn:village/meadow_swiss/houses/meadow_shepherd_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS",
+    "SNOWY",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "meadow"
+   ]
+  },
+  {
+   "id": "tt_meadow_small_house_1",
+   "name": "Meadow small house",
+   "source": "kaisyn:village/meadow_swiss/houses/meadow_small_house_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS",
+    "SNOWY",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "meadow"
+   ]
+  },
+  {
+   "id": "tt_meadow_small_house_2",
+   "name": "Meadow small house 2",
+   "source": "kaisyn:village/meadow_swiss/houses/meadow_small_house_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS",
+    "SNOWY",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "meadow"
+   ]
+  },
+  {
+   "id": "tt_meadow_temple_1",
+   "name": "Meadow temple",
+   "source": "kaisyn:village/meadow_swiss/houses/meadow_temple_1",
+   "kinds": [
+    "chapel"
+   ],
+   "lands": [
+    "PLAINS",
+    "SNOWY",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "meadow"
+   ]
+  },
+  {
+   "id": "tt_meadow_toolsmith_and_weaponsmith_1",
+   "name": "Meadow toolsmith and weaponsmith",
+   "source": "kaisyn:village/meadow_swiss/houses/meadow_toolsmith_and_weaponsmith_1",
+   "kinds": [
+    "smithy"
+   ],
+   "lands": [
+    "PLAINS",
+    "SNOWY",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "biomes": [
+    "meadow"
+   ]
+  },
+  {
+   "id": "tt_rustic_barn_professions_1",
+   "name": "Rustic barn professions",
+   "source": "kaisyn:village/exclusives/rustic/houses/rustic_barn_professions_1",
+   "kinds": [
+    "barn"
+   ],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_rustic_large_house_1",
+   "name": "Rustic large house",
+   "source": "kaisyn:village/exclusives/rustic/houses/rustic_large_house_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_rustic_large_house_2",
+   "name": "Rustic large house 2",
+   "source": "kaisyn:village/exclusives/rustic/houses/rustic_large_house_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_rustic_large_house_3",
+   "name": "Rustic large house 3",
+   "source": "kaisyn:village/exclusives/rustic/houses/rustic_large_house_3",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_rustic_large_house_4",
+   "name": "Rustic large house 4",
+   "source": "kaisyn:village/exclusives/rustic/houses/rustic_large_house_4",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_rustic_small_house_1",
+   "name": "Rustic small house",
+   "source": "kaisyn:village/exclusives/rustic/houses/rustic_small_house_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_rustic_small_house_2",
+   "name": "Rustic small house 2",
+   "source": "kaisyn:village/exclusives/rustic/houses/rustic_small_house_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_rustic_small_house_3",
+   "name": "Rustic small house 3",
+   "source": "kaisyn:village/exclusives/rustic/houses/rustic_small_house_3",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_rustic_small_house_4",
+   "name": "Rustic small house 4",
+   "source": "kaisyn:village/exclusives/rustic/houses/rustic_small_house_4",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_rustic_temple_1",
+   "name": "Rustic temple",
+   "source": "kaisyn:village/exclusives/rustic/houses/rustic_temple_1",
+   "kinds": [
+    "chapel"
+   ],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_classic_blacksmith_1",
+   "name": "Classic blacksmith",
+   "source": "kaisyn:village/exclusives/classic/houses/classic_blacksmith_1",
+   "kinds": [
+    "smithy"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_classic_butcher_1",
+   "name": "Classic butcher",
+   "source": "kaisyn:village/exclusives/classic/houses/classic_butcher_1",
+   "kinds": [
+    "butcher"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_classic_church_1",
+   "name": "Classic church",
+   "source": "kaisyn:village/exclusives/classic/houses/classic_church_1",
+   "kinds": [
+    "chapel"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_classic_large_farm_1",
+   "name": "Classic large farm",
+   "source": "kaisyn:village/exclusives/classic/houses/classic_large_farm_1",
+   "kinds": [
+    "farmhouse"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_classic_large_house_1",
+   "name": "Classic large house",
+   "source": "kaisyn:village/exclusives/classic/houses/classic_large_house_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_classic_library_1",
+   "name": "Classic library",
+   "source": "kaisyn:village/exclusives/classic/houses/classic_library_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_classic_medium_house_1",
+   "name": "Classic medium house",
+   "source": "kaisyn:village/exclusives/classic/houses/classic_medium_house_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_classic_medium_house_2",
+   "name": "Classic medium house 2",
+   "source": "kaisyn:village/exclusives/classic/houses/classic_medium_house_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_classic_small_farm_1",
+   "name": "Classic small farm",
+   "source": "kaisyn:village/exclusives/classic/houses/classic_small_farm_1",
+   "kinds": [
+    "farmhouse"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_classic_small_house_1",
+   "name": "Classic small house",
+   "source": "kaisyn:village/exclusives/classic/houses/classic_small_house_1",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_classic_small_house_2",
+   "name": "Classic small house 2",
+   "source": "kaisyn:village/exclusives/classic/houses/classic_small_house_2",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_sunflower_windmill",
+   "name": "Sunflower farm windmill",
+   "source": "kaisyn:village/sunflower_plains_farm/side/sunflower_plains_windmill_1",
+   "kinds": [
+    "windmill"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_mountain_inn",
+   "name": "Mountain inn",
+   "source": "kaisyn:village/snowy_slopes_inn/town_centers/snowy_slopes_meeting_point_1",
+   "kinds": [
+    "tavern"
+   ],
+   "lands": [
+    "SNOWY"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true
+  },
+  {
+   "id": "tt_tudor_watchtower",
+   "name": "Tudor watchtower",
+   "source": "kaisyn:outpost/towers/exclusives/tudor/base_plate",
+   "kinds": [
+    "firewatch_tower"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "outpost": true
+  },
+  {
+   "id": "tt_swedish_watchtower",
+   "name": "Swedish watchtower",
+   "source": "kaisyn:outpost/towers/exclusives/swedish/base_plate",
+   "kinds": [
+    "firewatch_tower"
+   ],
+   "lands": [
+    "TAIGA",
+    "SNOWY"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "outpost": true
+  },
+  {
+   "id": "tt_classic_fort",
+   "name": "Classic palisade fort",
+   "source": "kaisyn:outpost/forts/exclusives/classic/base_plate",
+   "kinds": [],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "outpost": true
+  },
+  {
+   "id": "tt_iberian_fort",
+   "name": "Iberian palisade fort",
+   "source": "kaisyn:outpost/forts/exclusives/iberian/base_plate",
+   "kinds": [],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "outpost": true
+  },
+  {
+   "id": "tt_mediterranean_fort",
+   "name": "Mediterranean palisade fort",
+   "source": "kaisyn:outpost/forts/exclusives/mediterranean/base_plate",
+   "kinds": [],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "outpost": true
+  },
+  {
+   "id": "tt_rustic_fort",
+   "name": "Rustic palisade fort",
+   "source": "kaisyn:outpost/forts/exclusives/rustic/base_plate",
+   "kinds": [],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "Kubek, Biban_Auriu, Cristelknight999 (Towns and Towers)",
+   "licence": "CC BY-NC-ND 4.0 (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/towns-and-towers",
+   "in_pack": true,
+   "outpost": true
+  },
+  {
+   "id": "mvs_cottage",
+   "name": "Timber cottage",
+   "source": "mvs:1_21_5/houses/house",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "FinnDog, Phantax (Moog's Voyager Structures)",
+   "licence": "MIT (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/moogs-voyager-structures",
+   "in_pack": true
+  },
+  {
+   "id": "mvs_tall_cottage",
+   "name": "Tall timber cottage",
+   "source": "mvs:1_21_4/houses/tall_house",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ],
+   "author": "FinnDog, Phantax (Moog's Voyager Structures)",
+   "licence": "MIT (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/moogs-voyager-structures",
+   "in_pack": true
+  },
+  {
+   "id": "mvs_azalea_cottage",
+   "name": "Azalea cottage",
+   "source": "mvs:1_21_4/houses/azelea_house",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "FinnDog, Phantax (Moog's Voyager Structures)",
+   "licence": "MIT (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/moogs-voyager-structures",
+   "in_pack": true
+  },
+  {
+   "id": "mvs_deepslate_hall",
+   "name": "Deepslate hall",
+   "source": "mvs:1_21_9/houses/deepslate_house",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA",
+    "SNOWY",
+    "PLAINS"
+   ],
+   "author": "FinnDog, Phantax (Moog's Voyager Structures)",
+   "licence": "MIT (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/moogs-voyager-structures",
+   "in_pack": true
+  },
+  {
+   "id": "mvs_barn",
+   "name": "Barn",
+   "source": "mvs:1_21_9/houses/barn",
+   "kinds": [
+    "barn"
+   ],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ],
+   "author": "FinnDog, Phantax (Moog's Voyager Structures)",
+   "licence": "MIT (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/moogs-voyager-structures",
+   "in_pack": true
+  },
+  {
+   "id": "mvs_stone_tower",
+   "name": "Stone tower house",
+   "source": "mvs:1_21_9/houses/diorite_tower",
+   "kinds": [
+    "firewatch_tower"
+   ],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "FinnDog, Phantax (Moog's Voyager Structures)",
+   "licence": "MIT (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/moogs-voyager-structures",
+   "in_pack": true
+  },
+  {
+   "id": "mvs_castle_ruins",
+   "name": "Castle ruins",
+   "source": "mvs:1_21_0/ruins/castle_ruins",
+   "kinds": [],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ],
+   "author": "FinnDog, Phantax (Moog's Voyager Structures)",
+   "licence": "MIT (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/moogs-voyager-structures",
+   "in_pack": true,
+   "ruin": true
+  },
+  {
+   "id": "mvs_cartographer_tower",
+   "name": "Cartographer tower",
+   "source": "mvs:1_21_9/cartographer_tower/base",
+   "kinds": [],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "FinnDog, Phantax (Moog's Voyager Structures)",
+   "licence": "MIT (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/moogs-voyager-structures",
+   "in_pack": true
+  },
+  {
+   "id": "mvs_red_tower",
+   "name": "Red tower",
+   "source": "mvs:1_21_0/houses/red_tower",
+   "kinds": [],
+   "lands": [
+    "PLAINS"
+   ],
+   "author": "FinnDog, Phantax (Moog's Voyager Structures)",
+   "licence": "MIT (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/moogs-voyager-structures",
+   "in_pack": true
+  },
+  {
+   "id": "mvs_walled_keep",
+   "name": "Walled keep",
+   "source": "mvs:1_21_9/cathedral/base/base",
+   "kinds": [],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ],
+   "author": "FinnDog, Phantax (Moog's Voyager Structures)",
+   "licence": "MIT (in the pack, read unchanged)",
+   "link": "https://modrinth.com/mod/moogs-voyager-structures",
+   "in_pack": true,
+   "castle": true
+  }
+ ],
+ "world": [
+  {
+   "match": "half-timbered",
+   "id": "half_timbered_house",
+   "name": "Half-Timbered House",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "spruce-dark-oak-starter",
+   "id": "spruce_dark_oak_starter_house",
+   "name": "Medieval Spruce & Dark Oak Starter House",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA",
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "spruce-and-stone-house",
+   "id": "spruce_and_stone_house",
+   "name": "Medieval Spruce And Stone House",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA",
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "house-model-3",
+   "id": "medieval_house_model_3",
+   "name": "Medieval House Model 3",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "small-decorated-medieval-house",
+   "id": "small_decorated_house",
+   "name": "Small Decorated Medieval House",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "village-dwelling",
+   "id": "village_dwelling",
+   "name": "Medieval Village Dwelling",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "fisherman-house",
+   "id": "fisherman_house",
+   "name": "Medieval Fisherman House",
+   "kinds": [
+    "fishery"
+   ],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ]
+  },
+  {
+   "match": "compact-medieval-house",
+   "id": "compact_house",
+   "name": "Compact Medieval House",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "spruce-and-brick",
+   "id": "spruce_and_brick_house",
+   "name": "Spruce and Brick Medieval House",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "TAIGA",
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "double-storag",
+   "id": "double_storage_house",
+   "name": "Medium Medieval House with Double Storage",
+   "kinds": [],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "town-building-1",
+   "id": "town_building_1",
+   "name": "Medieval Town Building 1",
+   "kinds": [],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "town-building-5",
+   "id": "town_building_5",
+   "name": "Medieval Town Building 5",
+   "kinds": [],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "rustic-medieval-blacksmith",
+   "id": "rustic_blacksmith_house",
+   "name": "Rustic Medieval Blacksmith House",
+   "kinds": [
+    "smithy"
+   ],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ]
+  },
+  {
+   "match": "blacksmith-house-minimalist",
+   "id": "blacksmith_minimalist",
+   "name": "Village Blacksmith House Minimalist",
+   "kinds": [
+    "smithy"
+   ],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "medieval-blacksmith-house",
+   "id": "blacksmith_house",
+   "name": "Medieval Blacksmith House",
+   "kinds": [
+    "smithy"
+   ],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "metal-smithing-shop",
+   "id": "smithing_shop",
+   "name": "Metal Smithing Shop Building",
+   "kinds": [
+    "smithy"
+   ],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "bakery",
+   "id": "bakery_house",
+   "name": "Rustic Medieval Bakery House",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "village-shop",
+   "id": "village_shop",
+   "name": "Medieval Village Shop",
+   "kinds": [
+    "stall"
+   ],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "market-stall",
+   "id": "market_stall",
+   "name": "Medieval Market Stall",
+   "kinds": [
+    "market"
+   ],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "storage-house",
+   "id": "storage_house",
+   "name": "Medieval Storage House",
+   "kinds": [
+    "house"
+   ],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "rustic-crane",
+   "id": "rustic_crane",
+   "name": "Medieval Rustic Crane",
+   "kinds": [],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "tavern-and-inn",
+   "id": "villager_tavern_inn",
+   "name": "Villager Tavern and Inn",
+   "kinds": [
+    "tavern"
+   ],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "fantasy-tavern",
+   "id": "fantasy_tavern",
+   "name": "Fantasy Tavern Build",
+   "kinds": [
+    "tavern"
+   ],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "tavern-building-2",
+   "id": "small_tavern",
+   "name": "Small Medieval Tavern",
+   "kinds": [],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "medieval-tavern-building",
+   "id": "tavern_building",
+   "name": "Medieval Tavern Building",
+   "kinds": [
+    "tavern"
+   ],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "spruce-medieval-tavern",
+   "id": "spruce_tavern_house",
+   "name": "Spruce Medieval Tavern House",
+   "kinds": [
+    "tavern"
+   ],
+   "lands": [
+    "TAIGA",
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "inn-and-farmhou",
+   "id": "colorful_inn_farmhouse",
+   "name": "Rustic Colorful Medieval Inn and Farmhouse",
+   "kinds": [],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "barn-house",
+   "id": "barn_house",
+   "name": "Medieval Barn House",
+   "kinds": [
+    "barn"
+   ],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "horse-stable",
+   "id": "horse_stable",
+   "name": "Medieval Horse Stable",
+   "kinds": [],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "windmill-structure-2",
+   "id": "rustic_windmill",
+   "name": "Rustic Medieval Windmill Build",
+   "kinds": [
+    "windmill"
+   ],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "windmill-structure-3",
+   "id": "cobblestone_windmill",
+   "name": "Medieval Windmill With Cobblestone Accents",
+   "kinds": [
+    "windmill"
+   ],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "decorative-medieval-windmill",
+   "id": "decorative_windmill",
+   "name": "Decorative Medieval Windmill",
+   "kinds": [
+    "windmill"
+   ],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "deepslate-village-church",
+   "id": "deepslate_church",
+   "name": "Medieval Deepslate Village Church",
+   "kinds": [
+    "chapel"
+   ],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ]
+  },
+  {
+   "match": "town-church",
+   "id": "town_church",
+   "name": "Medieval Town Church Building",
+   "kinds": [],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "ruined-church",
+   "id": "ruined_church",
+   "name": "Medieval Ruined Church Structure",
+   "kinds": [],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "bell-tower",
+   "id": "church_bell_tower",
+   "name": "Village Church Bell Tower",
+   "kinds": [
+    "chapel"
+   ],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "medieval-village-church",
+   "id": "village_church",
+   "name": "Medieval Village Church",
+   "kinds": [
+    "chapel"
+   ],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "dark-oak-deepslate-tower",
+   "id": "dark_oak_deepslate_tower",
+   "name": "Dark Oak Deepslate Tower",
+   "kinds": [
+    "firewatch_tower"
+   ],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ]
+  },
+  {
+   "match": "stone-brick-watchtower",
+   "id": "stone_brick_watchtower",
+   "name": "Medieval Stone Brick Watchtower",
+   "kinds": [],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "small-medieval-castle",
+   "id": "small_castle",
+   "name": "Small Medieval Castle",
+   "kinds": [],
+   "lands": [
+    "PLAINS"
+   ],
+   "castle": true
+  },
+  {
+   "match": "compact-cobblestone-castle",
+   "id": "compact_cobblestone_castle",
+   "name": "Compact Cobblestone Castle",
+   "kinds": [],
+   "lands": [
+    "PLAINS",
+    "TAIGA"
+   ],
+   "castle": true
+  },
+  {
+   "match": "gatehouse",
+   "id": "great_gatehouse",
+   "name": "Great Gatehouse Fortress Entrance",
+   "kinds": [],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "castle-base",
+   "id": "castle_base",
+   "name": "Medieval Castle Base",
+   "kinds": [],
+   "lands": [
+    "PLAINS"
+   ],
+   "castle": true
+  },
+  {
+   "match": "stone-bridge",
+   "id": "stone_bridge",
+   "name": "Medieval Stone Bridge",
+   "kinds": [],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "castle-structure-12",
+   "id": "classic_stone_castle",
+   "name": "Classic Medieval Stone Castle",
+   "kinds": [],
+   "lands": [
+    "PLAINS"
+   ],
+   "castle": true
+  },
+  {
+   "match": "fantastic-medieval-castle",
+   "id": "fantastic_castle",
+   "name": "Fantastic Medieval Castle",
+   "kinds": [],
+   "lands": [
+    "PLAINS"
+   ],
+   "castle": true
+  },
+  {
+   "match": "ivoryfalls",
+   "id": "ivoryfalls_tavern",
+   "name": "Ivoryfalls Tavern",
+   "kinds": [
+    "tavern"
+   ],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "windmill",
+   "id": "planet_windmill",
+   "name": "Medieval Windmill",
+   "kinds": [
+    "windmill"
+   ],
+   "lands": [
+    "PLAINS"
+   ]
+  },
+  {
+   "match": "tavern",
+   "id": "medieval_tavern",
+   "name": "Medieval Tavern",
+   "kinds": [
+    "tavern"
+   ],
+   "lands": [
+    "PLAINS"
+   ]
+  }
+ ]
+}

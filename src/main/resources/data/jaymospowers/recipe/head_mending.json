@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:fern",
+    "minecraft:sweet_berries",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "jaymospowers:head_mending",
+    "count": 2
+  }
+}

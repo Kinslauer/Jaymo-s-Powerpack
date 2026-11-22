@@ -49,13 +49,18 @@ final class RigHelmView {
 	static final float ARROW_RING = 0.36F;
 	static final int ARROW_SIZE = 9;
 	/** The figure: its size in pixels (a plate cell), and its distance from the right edge and the middle of the screen. */
-	static final int CELL = 4, FIGURE_EDGE = 44;
-	/** The target’s health bar: width in pixels. */
-	static final int HEALTH_WIDTH = 34;
-	/** The target's card: its gap from the bracket, a line's height, the widest its text runs (pixels) and its backing. */
-	static final int CARD_GAP = 6, CARD_LINE = 9, CARD_MAX = 90, CARD_BACK = 0x70081018;
-	/** The overcharge frame’s colour. */
-	static final int OVER = 0xFFFFE88A;
+		static final int CELL = 4, FIGURE_EDGE = 44;
+		/** The target's health bar: width in pixels. */
+		static final int HEALTH_WIDTH = 34;
+		/** The Mind's verdict on a hostile: "melt it" from this many times the wearer's health, or this much armour; else "kill it". */
+		static final float MELT_HEALTH = 2.0F;
+		static final int MELT_ARMOR = 10;
+		/** The target's card: its gap from the bracket, a line's height, the widest its text runs (pixels) and its backing. */
+		static final int CARD_GAP = 6, CARD_LINE = 9, CARD_MAX = 90, CARD_BACK = 0x70081018;
+		/** The overcharge frame's colour. */
+		static final int OVER = 0xFFFFE88A;
+		/** (0.12.x) Pull-up warning: time-to-impact threshold (ticks), flash rate. */
+		static final int PULLUP_TTI = 60, PULLUP_FLASH = 4;
 
 	private RigHelmView() {
 	}
@@ -66,20 +71,24 @@ final class RigHelmView {
 	}
 
 	static void render(GuiGraphicsExtractor g, Minecraft minecraft, LocalPlayer player, float partial) {
-		int w = g.guiWidth(), h = g.guiHeight();
-		Font font = minecraft.font;
-		horizon(g, minecraft, player, w, h);
-		readout(g, minecraft, player, font, w, h);
-		threats(g, minecraft, player, w, h, partial);
-		LivingEntity looked = RigHud.target(minecraft, player);
-		if (looked != null) {
-			bracket(g, minecraft, looked, 0xFF000000 | 0x5FE6FF, partial, true, font, null);
+			int w = g.guiWidth(), h = g.guiHeight();
+			Font font = minecraft.font;
+			horizon(g, minecraft, player, w, h);
+			readout(g, minecraft, player, font, w, h);
+			threats(g, minecraft, player, w, h, partial);
+			LivingEntity looked = RigHud.target(minecraft, player);
+			if (looked != null) {
+				bracket(g, minecraft, looked, 0xFF000000 | 0x5FE6FF, partial, true, font, null);
+			}
+			// (0.12.x) Pull-up warning
+			if (RigClient.pullup()) {
+				pullupWarning(g, minecraft, player, w, h, partial);
+			}
+			figure(g, player, font, w, h);
+			if (RigClient.status.overcharge() > 0) {
+				overcharge(g, w, h, player);
+			}
 		}
-		figure(g, player, font, w, h);
-		if (RigClient.status.overcharge() > 0) {
-			overcharge(g, w, h, player);
-		}
-	}
 
 	// ---- the horizon, height and speed ------------------------------------------------------------------------------
 
@@ -228,7 +237,14 @@ final class RigHelmView {
 			lines.add(held.getHoverName());
 		}
 		boolean hostile = entity instanceof Enemy || entity instanceof Mob mob && mob.getTarget() != null;
-		lines.add(Component.translatable(hostile ? "rig.jaymospowers.view.hostile" : "rig.jaymospowers.view.calm"));
+		Component standing = Component.translatable(hostile ? "rig.jaymospowers.view.hostile" : "rig.jaymospowers.view.calm");
+		// the Mind's verdict, in its own words
+		String mind = com.jaymospowers.rig.Rig.core(player).get(com.jaymospowers.rig.Rig.MIND);
+		if (mind != null) {
+			String verdict = !hostile ? "ignore" : entity.getMaxHealth() >= player.getMaxHealth() * MELT_HEALTH || entity.getArmorValue() >= MELT_ARMOR ? "melt" : "kill";
+			standing = standing.copy().append(" · ").append(Component.translatable("rig.jaymospowers.mind." + mind + ".verdict." + verdict));
+		}
+		lines.add(standing);
 		boolean tagged = RigScanClient.color(entity) != 0;
 		if (tagged) {
 			lines.add(Component.translatable("rig.jaymospowers.view.tagged"));
@@ -314,8 +330,46 @@ final class RigHelmView {
 		}
 	}
 
-	/** The frame the worn suit is (for the HUD’s other readers). */
-	static RigFrame frame(LocalPlayer player) {
-		return Rig.frame(player);
+	/** The frame the worn suit is (for the HUD's other readers). */
+		static RigFrame frame(LocalPlayer player) {
+			return Rig.frame(player);
+		}
+
+		/** (0.12.x) Pull-up warning: flashes the visor and shows time-to-impact when diving at the ground. */
+			private static void pullupWarning(GuiGraphicsExtractor g, Minecraft minecraft, LocalPlayer player, int w, int h, float partial) {
+				if (!player.onGround() && player.getDeltaMovement().y < -0.5) {
+					// calculate time to impact
+					Vec3 eye = player.getEyePosition(partial);
+					Vec3 motion = player.getDeltaMovement();
+					BlockHitResult below = player.level().clip(new ClipContext(eye, eye.add(0.0, -256.0, 0.0), ClipContext.Block.COLLIDER,
+						ClipContext.Fluid.NONE, player));
+					if (below.getType() != HitResult.Type.MISS) {
+						double height = eye.y - below.getLocation().y;
+						double vv = -motion.y;
+						if (vv > 0.1) {
+							int tti = (int)(height / vv);
+							if (tti <= PULLUP_TTI) {
+								boolean flash = (player.tickCount / PULLUP_FLASH) % 2 == 0;
+								int color = flash ? 0xFFFF3030 : 0xFF801010;
+								// flash the visor edges
+								g.fill(0, 0, w, 4, color);
+								g.fill(0, h - 4, w, h, color);
+								g.fill(0, 4, 4, h - 4, color);
+								g.fill(w - 4, 4, w, h - 4, color);
+								// time to impact text
+								Font font = minecraft.font;
+								String text = Component.translatable("rig.jaymospowers.view.pullup", tti).getString();
+								int tx = w / 2 - font.width(text) / 2;
+								int ty = h / 2 - 20;
+								g.text(font, text, tx, ty, color);
+								// warning arrow down
+								int cx = w / 2, cy = h / 2 + 30;
+								g.fill(cx - 6, cy, cx + 6, cy + 2, color);
+								g.fill(cx - 4, cy + 2, cx + 4, cy + 4, color);
+								g.fill(cx - 2, cy + 4, cx + 2, cy + 6, color);
+							}
+						}
+					}
+				}
+			}
 	}
-}

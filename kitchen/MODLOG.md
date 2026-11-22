@@ -2472,3 +2472,195 @@ Andy's scaling pick "feasts": a late food tier. Three feast dishes from Legend-a
 ## 0.6.51 (2026-11-18): Add Cooking Block (#1687)
 
 Added a new **Cooking Block** to the Functional creative tab. The block has iron-like properties (metal sound, hardness 5.0, resistance 6.0) and uses a single cube_all texture for both block and item models.
+
+## 0.6.52 (2026-11-19): drinks and kitchen - vines, press, vintage, tea, smoke chips, black wine (#1797)
+
+- **Grape vines**: a vine on a trellis (Grape Vine; crafted from grapes and two sticks), wild ones on the edges of plains, savanna and flower forests. Prune it with shears in winter and it bears three bunches; a vine bears one crop a year (after picking it stays bare until it has been through a winter), and one left unpruned bears one fewer each year, down to one. Ripe bunches in the open are stripped by birds now and then; a net (string) keeps them off and adds a bunch. Pick with an empty hand.
+- **Treading tub and apple press**: load grapes (or crimson and warped grapes) into the tub and jump in it, or apples into the press and turn the screw with an empty hand; draw the juice into glass bottles. Three bottles of juice fill a cask on their own. Our grapes make Grape Wine alongside Pantry's.
+- **Vintage**: wine drawn from a cask carries the year it was made. Left in a cask in a cool cellar (`Freshness#cellar`) it improves each in-game year, up to five. Sneak and use a bottle on a villager, wandering trader or (with Kingdoms) its folk and Hornkin to sell it; older wine pays up to 3.5 times as much (`KingdomsMoney`).
+- **Tea**: tea bushes in jungles, cherry groves and windswept hills; they grow in rain and shade. Fresh leaves dry on the drying rack, only with the sun on them, into Dried Tea Leaves, which the tea kettle brews like any tea herb. A tea pot on a table, filled with cups of tea, serves everyone sitting on a cushion nearby with a short calm and a little warmth.
+- **Smoke chips**: oak, birch, cherry, apple and dark oak wood chips (crafted from logs). One from your pockets goes on the coals when the smoker's minigame ends well: each keeps the food a different time (oak 5x, birch 4x, cherry 5x, apple 4x, dark oak 7x; plain smoke 4x) and fills a little more.
+- **Black wine**: crimson and warped vines grow along the Nether's lava shores and only near lava; their grapes make juice and Black Wine, which sells for a lord's price.
+- JEI: a Tub and Press page, a Cask page, tea leaves on the Drying Rack page, and notes on the vines, tea bush, pot and wood chips.
+- Classes: `vintner/Vintner`, `GrapeVineBlock`, `TeaBushBlock`, `JuiceBlock`, `JuiceEntity`, `TeaPotBlock`, `Juice`, `Vintage`, `WineTrade`, `Chip`; `CaskEntity`, `Brew`, `Brewing`, `Curing`, `Kitchen#award`, `Hides#dried`, `DryingRackEntity`, `MillJei`.
+- Built; not played.
+
+## 0.6.53 (2026-11-19): farm, field and water: barrels, trough, watering can, fish trap, scarecrow (#1799)
+
+- **Water barrel**: a glass bottle takes a level as clean water (Thirst), a bucket takes the lot, a water bucket or bottle tips water in, a waterskin or watering can fills from it, and an empty hand drinks a sip. Rain under the open sky refills it, slowly.
+- **Fish barrel**: a barrel (barrel and two salt); fish kept in it age at half speed (counted when it's opened, like a cold cellar), and its top shows none, a few or a good many fish.
+- **Feeding trough** (planks; hay, wheat, seeds or carrots in it): farm animals within 8 blocks come to it, eat, heal and stay fed for 5 minutes; a fed adult may fall in love. Bites slowly use it up; empty, they graze as before. A fed sheep leaves the grass alone (`EatBlockGoalMixin`), so a fed herd crops the ground less.
+- **Watering can** (5 iron ingots, 16 waterings, filled at water or a water barrel): on a crop on a dry day it gives the crop and the ones touching it a few more chances to grow, as random ticks (so season and slow farms still count), and wets the farmland. Never needed.
+- **Fish trap** (sticks and string; set in water, baited with Fish Bait or offal): fills over a day, emptied with an empty hand. What it holds comes from the water's stock (`WaterStock`): per chunk, set by how much water is round the trap, drawn down by every catch and recovering a fish every ~3 minutes, so a trap in a puddle, or in water already trapped out, comes up near empty. Setting and emptying one counts as fishing to the Tideborn (`TideCompat` into Kingdoms' `TideFishing`).
+- **Scarecrow** (hay and sticks; set a carved pumpkin on its head, sneak with an empty hand to take it back): rabbits won't raid carrots within 8 blocks of it (`RaidGardenGoalMixin`) and crop eaters (`#jaymoskitchen:crop_eaters`, rabbits and rats) nearby run from it. Hook for the vine birds and the Practice Dummy: `Scarecrows.guarded(level, cropPos)`, `Scarecrows.addGuard(...)` and `Scarecrows.scare(level, at)`.
+- Classes: `farmwater/` (`FarmWater`, `WaterBarrelBlock`, `FishBarrelBlock`/`Entity`, `TroughBlock`, `Troughs`, `WateringCanItem`, `FishTrapBlock`/`Entity`, `WaterStock`, `ScarecrowBlock`, `Scarecrows`), `compat/TideCompat`. Art: `tools/gen_farm_water.py` (own textures, the rest vanilla block textures).
+- Not built: fish barrels in Kingdoms' fishers' huts and market stalls. Built by CI only; not played.
+
+## 0.6.54 (2026-11-19): scarecrows keep the birds off the vines (#1807)
+
+- **Vine birds**: a scarecrow wearing a carved pumpkin (`Scarecrows.guarded`) now keeps the birds off ripe grape vines within its reach, as it already kept rabbits off the crops. A net still works anywhere.
+- Built by CI; not played.
+
+## 0.6.55 (2026-11-19): Droppings: dung lands on the ground, piles up, and differs by animal (#1822)
+
+- Andy: "the dung should drop on ground and be visible and pile high like offal and rocks do", then "can different land
+  animals drop different piles? so rangers have a new way to track?"
+- **Droppings on the ground**: an animal's manure lands as droppings at its feet. If droppings are already there, the new
+  pat goes on top. Up to 8 pats fit in a block: they spread out first, then heap up.
+- **Each animal leaves its own kind**, shaped like the real thing:
+  - cow pats: cows, mooshrooms, musk oxen
+  - horse apples: horses, donkeys, mules, war elephants
+  - pellets: sheep, goats, rabbits, llamas, camels, armadillos, moose, serow, shrine deer, great goats
+  - lumpy logs: pigs, hoglins, wild boar
+  - bird splashes with white caps: chickens, cranes
+  - twisted scat full of fur and bone: wolves, foxes, cats, ocelots, polar bears, pandas, coyotes, feral wolves,
+    raccoon dogs
+
+  Kingdoms beasts and other mods' deer and boar go by tag (`jaymoskitchen:droppings/*`). Manure set down by hand is a
+  plain dung heap.
+- **They age**: fresh droppings crust over within minutes and dry out over most of a day, turning paler each time. Flies
+  hang over fresh droppings, fewer once they're crusted, and none once they're dry. Dry droppings under the open sky
+  weather away a pat at a time, while a heap under a roof keeps.
+- **Wild animals leave them too**: any grown animal near a player now and then leaves droppings on open ground, at most
+  once every three days. Tamed pets don't. Fed or bred farm animals still go once a day. A fed animal's manure drops
+  loose where there's no room or on a nitre bed, which works it in by itself.
+- **Reading spoor** (with Jaymo's Kingdoms): a Ranger, or anyone with Read the Ground, can sneak and right-click
+  droppings with nothing in either hand. The hint line says what left them ("Deer droppings", or by their look after a
+  restart) and how old they are. If the animal that left them is still about, its trail shows to them, as far and as old
+  as the best tracker reads. Rangers earn class experience for it now and then. Anyone else takes a pat as usual.
+- Manure in hand sets down a dung heap or adds to whatever droppings are there. Sneak to put it beside them instead.
+  Right click takes one pat back, a punch drops one manure a pat, you can walk through them, and they pop off if the
+  ground under them goes. Scavengers leave them alone. Composting, tanning, fertilizer and nitre beds work as before.
+- Code: `farm/ManurePileBlock` (kinds, ages, spoor), `farm/Manure` (who drops what, where). Textures, models, blockstate
+  and the outline table come from `tools/gen_manure_pile.py`.
+- Built; not played.
+
+## 0.6.56 (2026-11-19): the spit can be used by camp cooks (#1858)
+
+- SpitBlockEntity.skewer and tear: something that isn't a player (Kingdoms' camp cooks round their fire) can put a piece on the spit and tear a cooked chunk off, as a player's hands do.
+- Built; not played.
+
+## 0.6.57 (2026-11-19): entrail variety, intestines on the ground, crushed skulls
+
+- **Why intestines never showed**: a body blown apart threw its gut ropes only as short coils that tumbled and sank away in 20-45 s (and looked much like an organ), while its entrails landed on the ground only ever as gut piles (offal). Now a blast's entrails land as **Intestines** piles and gut piles in turn (two pieces or more give both), and a body a predator ate leaves one or the other.
+- **Intestines** (new block + item, `Butchery.INTESTINES_PILE`): ropes of gut lying in 1-4 coils, set down, taken back, smelled by scavengers and rotting away as a gut pile does (an `OffalPileBlock`); raw meat, wolf food.
+- **More entrail looks** (`tools/bbmodels/gore-pieces.bbmodel`, from `kitchen/tools/gen_gore.py`): an organ is now a lump, a heart, a liver, a lung or a pair of kidneys, and a gut piece a coil, a long trailing rope, a loop or a heap folded on itself. Each thrown piece picks one by its id (`GibRenderer.GORE_BONES`).
+- **Crushed skulls** (`Gibs.skullCrushed`, called by Jaymo's Powers): pieces of skull and jaw (`Gib.SKULL`) and lumps of brain (`Gib.BRAIN`) fly a little way, a puff of white bone dust, and **Brain Matter** (new block + item, `BrainMatterBlock`) lands under the head: small pale pebbles with white chips of skull, 1-4 to a block, rotting away like offal. Bodies with no blood leave only the bone, machines nothing.
+- Art and models from `kitchen/tools/gen_gut_piles.py`.
+- Built; not played.
+
+## 0.6.58 (2026-11-19): gut piles, intestines and brain matter lie at eight facings
+
+- Andy: "the drops should randomly rotate orientation like item frames". Gut piles, Intestines and Brain Matter now lie at one of eight facings (45 degree steps), picked at random by where they lie, not four: each pile size has an eighth-turned copy of its model (`*_turned.json`, every element rotated 45 degrees about the block's middle) beside the quarter turns. Written by `kitchen/tools/gen_gut_piles.py`.
+- Not played.
+
+## 0.6.59 (2026-11-19): great spit for whole beasts, 3D roasts, tearing pieces off (#1881)
+
+- **Great spit** (Andy: "yes", to a big-game spit for whole gutted carcasses): crafted from three sticks over two logs, set on a lit campfire like the spit, its bar running across the way you face. Carry or drag a carcass that's been skinned and gutted on the hook (a sheep, a pig, a calf, a deer...) onto it and it turns there whole, lying along the bar, drawn skinned and gutted and browning as it roasts (3 min to cooked, 2 more to burnt). Done, an empty hand tears off a piece at a time, as many pieces as there was meat in it, cooked; its bones fall away with the last. Sneak + right-click takes all that's left. Not dressed yet: "Skin and gut it first."
+- **The spit holds five** (Andy: "they could put maybe 5 steaks on that thing"): pieces of meat take places along the bar, each cooking at its own pace. A tear takes the most done one off; a burnt one is thrown out first. Drawn in 3D (kitchen/tools/gen_great_spit.py): mutton, chicken and rabbit as a shank on its bone, other meat as a steak with a rim of fat, raw to browning to cooked to charred; fish as before.
+- **Tearing** (Andy: "animate ripping chunks off, for both them and players"): whoever tears a piece off either spit (a player, a camp's cook) is seen by everyone near reaching in with both hands and ripping it away (TearPose), and the roast shakes.
+- Nobody stands on a spit any more (no collision): a camp cook was stood on top of it in the smoke.
+- Kingdoms' camp cooks use it all through `SpitBlockEntity.skewerWhole`, `tear(ServerLevel, Entity)`, `full` and `CorpseEntity.dressForSpit` / `spitWholeable` / `dressedWhole`.
+- The roasting piece was passed as the item's outline colour; now pieces draw with none.
+- Built (Gradle compile); not played. The 3D shank and steak are new models nobody has looked at in game.
+
+## 0.6.60 (2026-11-19): Any hide stands in for rabbit hide (#1883)
+
+- A loom lining takes any hide or pelt (`c:hides`) as it takes rabbit hide; the furs keep their own warmer linings (`Lining`).
+- Built; not played.
+
+## 0.6.61 (2026-11-19): Thirst can be switched off for some players (#1885)
+
+- `Thirst.setUnthirsting`: another mod (Kingdoms, for its Pallid Hollow) names players who never thirst; their water stays full.
+- Built; not played.
+
+## 0.6.62 (2026-11-19): Bodies can be cut up where they lie (#1887)
+
+- A beast's body can be cut up where it lies by someone who isn't a player (`CorpseEntity.butcherWhereLies`). Jaymo's Kingdoms' town hunters use it to carry their kills home as cuts, the same cuts a butcher block gets.
+
+## 0.6.63 (2026-11-20): meat hooks easier to hang a dragged carcass on (#1910)
+
+- **Meat hooks**: right-clicking a meat hook while dragging a big carcass (a cow, a horse) used to drop it without a word when the body lagged too far behind you, or when the click just missed the thin hook and hit the beam or ceiling behind it. Now a click on the hook, or right by it, heaves the carcass up as long as you're standing near the hook; too far away, you keep hold and are told to get under the hook. The same forgiving click works when carrying a smaller carcass.
+- The dragging prompt now names the Meat Hook alongside the Butcher Block.
+- `Hanging.hookAt`, `CorpseEntity.dragOnto`, `JaymosKitchen` (carried branch).
+- Built; not played.
+
+## 0.6.64 (2026-11-20): ragdolls no longer flung across the field (#1922)
+
+- Andy (bear clip, 2026-11-19): "the super knockback ragdolls are back. can we tame them". A blow or shove on a body lying limp, or one that knocks it limp, now carries it at most 0.45 blocks a tick along the ground with at most 0.1 lift, for players (`LimpController`: shoves while limp went in at full strength before, with no lift cap) and mobs (`MobRagdolls`). You slide a block or two, never across the field. Throws a power means to make (being thrown by a carrier, a crash) are untouched.
+- Built; not played.
+
+## 0.6.65 (2026-11-20): A leg or bagged corpse of a modded creature no longer crashes the game (#1927)
+
+- **Fix**: drawing a severed leg (`SpiderLeg`) whose creature another mod adds saved data to (Re:Animal's wolves) crashed the game: that mod's part of the save isn't set up on a body rebuilt only to be drawn. The leg now keeps what was read before it (as corpses already did), and a corpse taken out of a body bag does the same (`CorpseEntity.rebuildFrom`). A warning is logged instead.
+- Built by CI; not played.
+
+## 0.6.66 (2026-11-20): body controls - hold drags a body, tap searches it (#1935)
+
+- Andy: "right click hold should always be drag, tap can loot". An empty hand on a body lying loose (not on a hook):
+  - **Hold use**: drags it by the legs (bar "Taking hold"), any kind, a player's body too; anything pocket-sized is taken up in one hand by the neck. Solid iron says it's too heavy.
+  - **Tap use** (worked out once use is let go, `CorpseEntity.press/tickPress/tapped`): arrows come out first, one a tap; a fish is looted; a machine is stripped; a player's body gives back what they carried; a skeleton gives its gear, then bones; anything else is searched. An animal carcass tells you its bleeding, or how to move it.
+  - Sneak + hold still lifts it into your arms; tools, hooks and flint work as before.
+- Built; not played.
+
+## 0.6.67 (2026-11-20): corpse loot screen - take only what you want (#1940)
+
+- **Loot screen**: once the arrows are out, a tap on a monster's or a person's body (zombies, skeletons, villagers, Kingdoms folk, anything that isn't an animal, a fish, a machine or a player's body) opens a chest-like screen instead of spilling everything: the body itself in the middle, drawn as it lies (its own ragdoll, wounds, arrows and shut eyes, seen from above and turning a little with the mouse), its helmet, chestplate, leggings and boots down the left, its main hand, off hand (and body armour, if any) beside it, its pockets (up to 12 stacks) on the right. Click or shift-click to take a piece; whatever you leave stays on the body (and is drawn on it), for later or for someone else. Nothing can be put on a body.
+- A body with nothing left on it gives the old "Nothing left on it" line; a bare skeleton gives up its bones, a tap at a time, as before.
+- Gear's wear is put on once, the first time the body is looked at, so looking again doesn't wear it more. Several players can look at once (one shared view, nothing taken twice); a Kingdoms looter won't rob a body someone is going through. Taking counts as robbing the dead for Kingdoms, a piece at a time, as before.
+- `CorpseLoot`, `CorpseLootMenu`, `CorpseLootScreen`, `CorpseEntity#openLoot`. Compiled; not played.
+
+## 0.6.68 (2026-11-22): meat hooks take a carried or dragged body on any click, people's bodies too (#1989)
+
+- **Meat hooks**: right-clicking a meat hook while carrying or dragging a carcass now hangs it, wherever in the hook's block space you click (the hook, the air around it, the beam above). Before, your own game let go of the carcass before the click ever reached the server, unless you clicked a butcher block, so the hook never took it. Out of reach, you keep hold and are told to get under the hook.
+- **People's bodies hang too** (a player's, a villager's, a raider's, a zombie's): a warning to others, and a cleaver or skinning knife opens the throat so the blood drains into a blood grate under it, to be bottled (for a vampire who'd rather not bite). They're only bled, never butchered.
+- **Great spit and campfire**: a carried carcass can be heaved onto the great spit again, and a dragged one onto it; a small one carried can be laid on a campfire to roast. Those clicks were being turned into "let go" too.
+- `MinecraftUseMixin` (client: walks the view for a hook, sends `HangOn`; lets spit and campfire clicks through), `Payloads.HangOn`, `JaymosKitchen` (its receiver), `Hanging.hangsAsPerson`/`bleedPerson`, `CorpseEntity.interact`.
+- Built by CI; not played.
+
+## 0.6.69 (2026-11-22): the butcher's shop: table work, skin rack, mincer and mince, display, head mounts, barrel of bones (#1993)
+
+- **Butcher's block, step by step**: a carcass laid on a butcher block can be worked the way it is on a meat hook (by anyone a hook would let): a cleaver bleeds it there and takes the head; a skinning knife skins it (a whole, prime skin, as on the hook) and guts it; then three cleaver cuts. An axe on the block still chops it up in one go, as before.
+- **Skin rack**: raw hides hang on the drying rack now. Splash them with water (a water bucket, a water bottle or a waterskin's sip), then rub in a piece of salt: they're salted where they hang (two raw hides to a salted hide, as at the crafting table) and start drying into dried hides at once.
+- **Mincer** (iron ingots, a stick, planks): right-click it with raw meat of any kind, or offal, and mince comes out of its mouth, one piece at a time. **Mince** does for red meat, pork, mutton, poultry, small game and venison in the kitchen's dishes.
+- **Butcher's display** (smooth stone slabs over planks): lay up to four pieces of food on its cold stone top to show them; an empty hand takes the last one back.
+- **Head Mount** (planks and an iron nugget): a carved plaque for a wall. A severed head carried in the hand and set down looking at it goes up square in its middle.
+- **Barrel of Bones** (a barrel and a bone block): a barrel heaped with bones, for the shop.
+- The whole-carcass rotisserie is the great spit, already in: a carcass carried or dragged onto it works again (fixed with the meat hook clicks).
+- `butchery/ButcherShop`, `MincerBlock`, `HeadMountBlock`, `ButcherDisplayBlock`/`Entity`, `client/butchery/ButcherDisplayRenderer`, `Hanging.use` (the table), `DryingRackEntity.treat`, `Chopping` (mince isn't cut again); art from `tools/vanilla_style/butcher_shop.py`.
+- Built by CI; not played.
+
+## 0.6.70 (2026-11-22): survival picks: thirst per action, wetness, temperature sources, cold breath, sprint stamina (#1995)
+
+Andy's picks from Legendary Survival Overhaul (ideas and numbers only) and Walk Jog Run (LGPL, idea only).
+- **Thirst per action**: a jump, a block broken, an attack and each second of sprinting cost water, after LSO's
+  thirst (jump 0.15, block 0.07, attack 0.3, sprint 0.1 of its exhaustion; 4 make a point of water). This replaces the
+  old flat sprint drain. The hotter you are the faster all of it goes, and the cold already burns food (both were
+  there before).
+- **Wetness meter** (`Wetness`): every half second the rain adds 7, standing in water adds 10 times how deep you're in
+  it, and otherwise you dry 3 (100 is wet through). It's the one wet chill on body heat, up to 25 (10 LSO degrees)
+  at full; soaked through (80 and up) on cold land is worse, and soaked clothes keep half their warmth (wool all of
+  it). Jaymo's Powers' Wet and Soaked keep the meter at least 40 or full, and Kingdoms' downpours fill it. It shows
+  as a small blue glass beside the thermometer while you're wet. This replaces the old one-minute wet timer and the
+  separate in-water chill. About six seconds of rain makes you soaked through (clothes at half warmth, hides wearing as
+  soaked), sooner than Powers' own Soaked.
+- **Dousing**: sneak-use a water bottle, a bottle of clean water or a waterskin with water in it (not while aiming at
+  water, where it fills): you pour it over yourself, are wet through, and any fire on you goes out. A bottle gives its
+  glass back; a waterskin loses a sip. With Powers you're Soaked as well.
+- **Temperature**: one LSO degree counts as 2.5 body heat. Height now chills from sea level, 6 degrees every 64
+  blocks (it used to start 40 blocks up, so hills are a little colder). The day swings 2 degrees either side, warmest
+  at noon and coldest at midnight, on top of the sun and night sky. Fires, campfires, lava, magma and lit furnaces
+  warm you from up to 20 blocks away (was 5), less with distance, and half as much out under the sky as inside.
+  The Nether counts as out of doors. So a campfire three blocks off indoors now gives about 25 (was 12), and lava
+  in the Nether warms you from further off (heatstroke only right beside it, as before). For 90 seconds after joining
+  or respawning the world can't make your body heat any worse.
+- **Cold breath**: a small puff of breath at the mouth, drifting the way you face, every two seconds when the air is
+  cold (25 below comfortable) or you're chilly. Everyone sees it.
+- **Sprint stamina** (`Stamina`, game rule `jaymoskitchen:stamina`): sprinting spends wind instead of food. A full
+  hunger bar holds a full bar of wind (about 13 seconds of sprinting), half a hunger bar half of it. Run out and you're
+  winded: slowed for 3 seconds, and no sprinting until a quarter is back; it refills a second after you stop. The bar
+  shows in the focus band over the hotbar while it isn't full, the part you can't hold for hunger shaded off. Powers'
+  feathers stay what dodges, powers and fighting or running in armour spend. Powers' overclocked speedsters run
+  without spending wind (`Stamina.addTireless`). Switching the rule off clears the bar.
+- Built; not played. Not checked in game: the breath puff's look, the HUD placement of the wetness glass and wind bar,
+  the heat-source scan's cost on a busy server, how the sprint bar feels next to feathers.

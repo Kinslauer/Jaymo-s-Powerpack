@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "peterwolfs_forestfire:firefighter"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "peterwolfs_forestfire:firefighter"
+      }
+    ]
+  }
+}

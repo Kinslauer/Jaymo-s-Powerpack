@@ -27,6 +27,11 @@ public final class KitchenCompat {
 		return carriedCorpse(player) != null;
 	}
 
+	/** Whether this player has a corpse in both arms: anything bigger than a small animal held by the neck in one hand. */
+	public static boolean corpseInBothArms(Player player) {
+		return LOADED && Kitchen.inBothArms(player);
+	}
+
 	/** A corpse drawn in by a power: pocketed if it fits, otherwise carried. */
 	public static void take(Player player, Entity corpse) {
 		if (LOADED) {
@@ -271,6 +276,37 @@ public final class KitchenCompat {
 		return true;
 	}
 
+	private static java.lang.reflect.@Nullable Method skullCrushedMethod;
+	private static boolean skullCrushedLooked;
+
+	/**
+	 * A blunt killing blow crushed {@code body}'s head at {@code head} ({@code Dismember#crushSkull}): Kitchen throws pieces
+	 * of skull and lumps of brain and leaves brain matter on the ground ({@code Gibs.skullCrushed}, by reflection, so an older
+	 * Kitchen without it is fine). True if it did.
+	 */
+	public static boolean skullCrushed(net.minecraft.world.entity.LivingEntity body, net.minecraft.world.phys.Vec3 head) {
+		if (!LOADED) {
+			return false;
+		}
+		if (!skullCrushedLooked) {
+			skullCrushedLooked = true;
+			try {
+				skullCrushedMethod = Class.forName("com.jaymoskitchen.corpse.Gibs").getMethod("skullCrushed",
+					net.minecraft.world.entity.LivingEntity.class, net.minecraft.world.phys.Vec3.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				skullCrushedMethod = null;
+			}
+		}
+		if (skullCrushedMethod == null) {
+			return false;
+		}
+		try {
+			return (boolean) skullCrushedMethod.invoke(null, body, head);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
 	/** (0.14.4) Wounds: how drunk a player is (Kitchen's {@code Drunk} points), 0 without Kitchen. */
 	public static int drunk(Player player) {
 		return LOADED ? Kitchen.drunk(player) : 0;
@@ -347,6 +383,11 @@ public final class KitchenCompat {
 
 		static @Nullable Entity carried(Player player) {
 			return com.jaymoskitchen.corpse.CorpseEntity.carriedBy(player);
+		}
+
+		static boolean inBothArms(Player player) {
+			com.jaymoskitchen.corpse.CorpseEntity corpse = com.jaymoskitchen.corpse.CorpseEntity.carriedBy(player);
+			return corpse != null && !corpse.oneHanded();
 		}
 
 		static @Nullable Entity dragged(Player player) {

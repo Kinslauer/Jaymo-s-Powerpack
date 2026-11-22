@@ -178,7 +178,7 @@ public final class Illagers {
 		if (role == WARLORD) {
 			outfitWarlord(level, mob, camp);
 			if (reaped) {
-				mob.setCustomName(Component.translatable("entity.jaymoskingdoms.reaped_warlord_of", camp.name()));
+				mob.setCustomName(IllagerHolds.warlordTitle(camp, true));
 			}
 		}
 		mob.setAttached(TAG, new Tag(camp.id(), role, raid, false));
@@ -201,7 +201,7 @@ public final class Illagers {
 		mob.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
 		mob.setItemSlot(EquipmentSlot.HEAD, Raid.getOminousBannerInstance(level.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN)));
 		mob.setDropChance(EquipmentSlot.HEAD, LOAD_DROP);
-		mob.setCustomName(Component.translatable("entity.jaymoskingdoms.warlord_of", camp.name()));
+		mob.setCustomName(IllagerHolds.warlordTitle(camp, false));
 	}
 
 	/** Seats a new warlord at {@code spot} and makes him the camp's leader. Returns the camp as stored. */

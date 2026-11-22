@@ -287,6 +287,22 @@ public final class Commandments {
 		}
 	}
 
+	/** Whether {@code player} is sworn to a patron whose law holds {@code act} (so it is theirs to break, and nothing new may reward it). */
+	public static boolean forbids(Player player, String act) {
+		Patron p = Patrons.of(player);
+		if (p == null) {
+			return false;
+		}
+		for (String[] commandment : LAWS[p.ordinal()]) {
+			for (String a : commandment) {
+				if (a.equals(act)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	private static void broke(ServerPlayer sp, Patron p, int n) {
 		Kept k = state(sp);
 		if (!k.patron.equals(p.key)) {

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "minecraft:gunpowder",
+    "minecraft:snowball",
+    "minecraft:snowball"
+  ],
+  "result": {
+    "id": "jaymospowers:frost_bomb",
+    "count": 1
+  }
+}

@@ -356,6 +356,7 @@ public final class Crowns {
 		}
 		Faction founded = Factions.update(server, k.id(), f -> f.withTreasury(f.treasury() + FOUND_COST));
 		crown(server, founded == null ? k : founded, player.getUUID());
+		Firsts.founded(player);
 		Faction done = Factions.get(server, k.id());
 		KingdomEvents.announce(server, Component.translatable("message.jaymoskingdoms.crown.founded", player.getDisplayName(),
 			done == null ? k.name() : done.name()).withStyle(ChatFormatting.GOLD));

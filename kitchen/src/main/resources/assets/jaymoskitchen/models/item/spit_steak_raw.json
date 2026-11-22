@@ -1,0 +1,302 @@
+{
+  "credit": "Made by kitchen/tools/gen_great_spit.py",
+  "textures": {
+    "shank": "jaymoskitchen:block/spit_shank_raw",
+    "particle": "jaymoskitchen:block/spit_shank_raw"
+  },
+  "elements": [
+    {
+      "from": [
+        2,
+        6.5,
+        3
+      ],
+      "to": [
+        14,
+        9.5,
+        13
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            12,
+            12
+          ],
+          "texture": "#shank"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            12,
+            12
+          ],
+          "texture": "#shank"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            12,
+            12
+          ],
+          "texture": "#shank"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            12,
+            12
+          ],
+          "texture": "#shank"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            12,
+            12
+          ],
+          "texture": "#shank"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            12,
+            12
+          ],
+          "texture": "#shank"
+        }
+      }
+    },
+    {
+      "from": [
+        2,
+        6.5,
+        13
+      ],
+      "to": [
+        14,
+        9.5,
+        14.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#shank"
+        },
+        "east": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#shank"
+        },
+        "south": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#shank"
+        },
+        "west": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#shank"
+        },
+        "up": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#shank"
+        },
+        "down": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#shank"
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        6.5,
+        2
+      ],
+      "to": [
+        13,
+        9.5,
+        3
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#shank"
+        },
+        "east": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#shank"
+        },
+        "south": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#shank"
+        },
+        "west": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#shank"
+        },
+        "up": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#shank"
+        },
+        "down": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#shank"
+        }
+      }
+    },
+    {
+      "from": [
+        7.5,
+        6.4,
+        4
+      ],
+      "to": [
+        8.5,
+        9.6,
+        12
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#shank"
+        },
+        "east": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#shank"
+        },
+        "south": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#shank"
+        },
+        "west": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#shank"
+        },
+        "up": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#shank"
+        },
+        "down": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#shank"
+        }
+      }
+    }
+  ],
+  "display": {
+    "fixed": {
+      "scale": [
+        0.7,
+        0.7,
+        0.7
+      ]
+    },
+    "gui": {
+      "rotation": [
+        30,
+        45,
+        0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ]
+    }
+  }
+}

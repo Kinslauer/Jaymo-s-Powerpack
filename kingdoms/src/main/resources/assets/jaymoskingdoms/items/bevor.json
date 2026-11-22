@@ -1,0 +1,118 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:component",
+    "component": "jaymoskingdoms:finish",
+    "cases": [
+      {
+        "when": "blackened",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/bevor_blackened"
+        }
+      },
+      {
+        "when": "gilded",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/bevor_gilded"
+        }
+      },
+      {
+        "when": "spiked",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/bevor_spiked"
+        }
+      },
+      {
+        "when": "gilt_banded",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/bevor_gilt_banded"
+        }
+      },
+      {
+        "when": "fur_lined",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/bevor_fur_lined"
+        }
+      },
+      {
+        "when": "quilted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/bevor_quilted"
+        }
+      },
+      {
+        "when": "brine_soaked",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/bevor_brine_soaked"
+        }
+      },
+      {
+        "when": "hide",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/bevor_hide"
+        }
+      },
+      {
+        "when": "bronze",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/bevor_bronze"
+        }
+      },
+      {
+        "when": "lamellar",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/bevor_lamellar"
+        }
+      },
+      {
+        "when": "russeted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/bevor_russeted"
+        }
+      },
+      {
+        "when": "blued",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/bevor_blued"
+        }
+      },
+      {
+        "when": "painted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/bevor_painted"
+        }
+      },
+      {
+        "when": "etched",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/bevor_etched"
+        }
+      },
+      {
+        "when": "rusted",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/bevor_rusted"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "jaymoskingdoms:item/bevor"
+    }
+  }
+}

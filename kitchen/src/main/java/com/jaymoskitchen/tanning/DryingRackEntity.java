@@ -37,6 +37,8 @@ public class DryingRackEntity extends BlockEntity {
 	private int left;
 	/** Ticks a dried Pmeh has hung on past drying (it loses a grade each {@link PmehFarming#OVERDRY_TICKS}). */
 	private int overdry;
+	/** Raw hides hanging here have been dampened ({@link #treat}): salt rubbed in now salts them. */
+	private boolean damp;
 
 	public DryingRackEntity(BlockPos pos, BlockState state) {
 		super(Hides.DRYING_RACK_ENTITY, pos, state);
@@ -53,6 +55,10 @@ public class DryingRackEntity extends BlockEntity {
 			return;
 		}
 		if (stack.isEmpty() || Hides.dried(stack) == null || level.isRainingAt(pos.above())) {
+			return;
+		}
+		// tea leaves dry only with the sun on them
+		if (stack.is(com.jaymoskitchen.vintner.Vintner.TEA_LEAVES) && !com.jaymoskitchen.vintner.Vintner.sunny(level, pos)) {
 			return;
 		}
 		rack.left--;
@@ -100,7 +106,8 @@ public class DryingRackEntity extends BlockEntity {
 
 	/** Hangs up as many of the held item as fit, or says why not. */
 	public InteractionResult hang(Player player, ItemStack stack) {
-		if (Hides.dried(stack) == null) {
+		// (raw hides hang too, to be dampened and salted there: treat)
+		if (Hides.dried(stack) == null && !stack.is(Hides.RAW_HIDE)) {
 			return InteractionResult.PASS;
 		}
 		ItemStack there = held();
@@ -122,9 +129,85 @@ public class DryingRackEntity extends BlockEntity {
 		held.set(0, hung);
 		left = Hides.DRY_TICKS;
 		level.playSound(null, worldPosition, SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.BLOCKS, 0.7F, 0.9F);
-		player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.drying_rack.hung", hung.getHoverName(), (Hides.DRY_TICKS + 1199) / 1200));
+		player.sendOverlayMessage(hung.is(Hides.RAW_HIDE) ? Component.translatable("message.jaymoskitchen.drying_rack.hung_raw", hung.getHoverName())
+			: Component.translatable("message.jaymoskitchen.drying_rack.hung", hung.getHoverName(), (Hides.DRY_TICKS + 1199) / 1200));
 		markUpdated();
 		return InteractionResult.SUCCESS;
+	}
+
+	/**
+	 * Andy's Butchery pick (bu-skin-rack, ideas only): raw hides stretched on the rack are dampened (a water bucket, a
+	 * water bottle or a sip from a waterskin), then salt is rubbed in: they're salted where they hang, two raw hides to a
+	 * salted hide (as at the crafting table) for one salt, and start drying at once into dried hides. PASS: not that.
+	 */
+	public InteractionResult treat(Player player, net.minecraft.world.InteractionHand hand, ItemStack stack) {
+		boolean water = isWater(stack), salt = stack.is(Hides.SALT);
+		if (!held().is(Hides.RAW_HIDE) || !water && !salt) {
+			return InteractionResult.PASS;
+		}
+		if (level == null || level.isClientSide()) {
+			return InteractionResult.SUCCESS;
+		}
+		if (water) {
+			if (damp) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.drying_rack.already_damp"));
+				return InteractionResult.SUCCESS;
+			}
+			if (!player.hasInfiniteMaterials()) {
+				player.setItemInHand(hand, pourOut(stack));
+			}
+			damp = true;
+			level.playSound(null, worldPosition, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 0.5F, 1.3F);
+			if (level instanceof ServerLevel server) {
+				server.sendParticles(ParticleTypes.SPLASH, worldPosition.getX() + 0.5, worldPosition.getY() + 0.6, worldPosition.getZ() + 0.5,
+					12, 0.3, 0.2, 0.3, 0.0);
+			}
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.drying_rack.damp"));
+			markUpdated();
+			return InteractionResult.SUCCESS;
+		}
+		if (!damp) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.drying_rack.dampen_first"));
+			return InteractionResult.SUCCESS;
+		}
+		if (!player.hasInfiniteMaterials()) {
+			stack.shrink(1);
+		}
+		ItemStack raw = held();
+		held.set(0, HideOrigin.carry(raw, new ItemStack(Hides.SALTED_HIDE, (raw.getCount() + 1) / 2)));
+		damp = false;
+		left = Hides.DRY_TICKS;
+		level.playSound(null, worldPosition, SoundEvents.SAND_HIT, SoundSource.BLOCKS, 0.8F, 1.1F);
+		player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.drying_rack.salted", (Hides.DRY_TICKS + 1199) / 1200));
+		markUpdated();
+		return InteractionResult.SUCCESS;
+	}
+
+	/** Water to dampen hides with: a water bucket, a water bottle, or a waterskin with a sip in it. */
+	private static boolean isWater(ItemStack stack) {
+		if (stack.is(net.minecraft.world.item.Items.WATER_BUCKET)) {
+			return true;
+		}
+		if (stack.is(net.minecraft.world.item.Items.POTION)) {
+			net.minecraft.world.item.alchemy.PotionContents contents = stack.get(net.minecraft.core.component.DataComponents.POTION_CONTENTS);
+			return contents != null && contents.is(net.minecraft.world.item.alchemy.Potions.WATER);
+		}
+		return stack.getItem() instanceof com.jaymoskitchen.climate.WaterskinItem
+			&& com.jaymoskitchen.climate.WaterskinItem.water(stack).sips() > 0;
+	}
+
+	/** What's left in the hand once the water's poured on: the bucket, the bottle, the waterskin a sip lighter. */
+	private static ItemStack pourOut(ItemStack stack) {
+		if (stack.is(net.minecraft.world.item.Items.WATER_BUCKET)) {
+			return new ItemStack(net.minecraft.world.item.Items.BUCKET);
+		}
+		if (stack.is(net.minecraft.world.item.Items.POTION)) {
+			return new ItemStack(net.minecraft.world.item.Items.GLASS_BOTTLE);
+		}
+		com.jaymoskitchen.climate.WaterskinItem.Water water = com.jaymoskitchen.climate.WaterskinItem.water(stack);
+		stack.set(com.jaymoskitchen.climate.Climate.WATERSKIN_WATER, water.sips() <= 1 ? com.jaymoskitchen.climate.WaterskinItem.Water.EMPTY
+			: new com.jaymoskitchen.climate.WaterskinItem.Water(water.sips() - 1, water.clean()));
+		return stack;
 	}
 
 	/** Takes everything down, dry or not (wet things say how long they've got). */
@@ -140,6 +223,7 @@ public class DryingRackEntity extends BlockEntity {
 			return InteractionResult.SUCCESS;
 		}
 		player.getInventory().placeItemBackInInventory(held().copy(), Prediction.SERVER_ONLY);
+		damp = false;
 		held.set(0, ItemStack.EMPTY);
 		left = 0;
 		overdry = 0;
@@ -169,6 +253,7 @@ public class DryingRackEntity extends BlockEntity {
 		ContainerHelper.loadAllItems(input, held);
 		left = (int) input.getLongOr("left", 0L);
 		overdry = (int) input.getLongOr("overdry", 0L);
+		damp = input.getBooleanOr("damp", false);
 	}
 
 	@Override
@@ -177,6 +262,7 @@ public class DryingRackEntity extends BlockEntity {
 		ContainerHelper.saveAllItems(output, held, true);
 		output.putLong("left", left);
 		output.putLong("overdry", overdry);
+		output.putBoolean("damp", damp);
 	}
 
 	@Override

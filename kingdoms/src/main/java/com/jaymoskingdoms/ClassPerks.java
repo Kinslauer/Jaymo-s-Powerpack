@@ -77,6 +77,8 @@ public final class ClassPerks {
 	/** (0.7.184) Archer's boon, Headshot: an arrow or bolt that strikes at the head (within this far below the eyes) hits this many times as hard. */
 	static final float ARCHER_HEADSHOT = 1.5F;
 	static final double HEADSHOT_BELOW_EYES = 0.35;
+	/** (Survival picks) The tag Jaymo's Powers reads on a projectile that goes through the helmet (its {@code HitRouting.THROUGH_HELMET}): a Ranger's arrow. */
+	static final String RANGER_THROUGH_HELMET = "jaymospowers_through_helmet";
 	/**
 	 * (0.7.184) Andy: "archer headshots can pin enemies to the wall, sometimes decapitating them first", then "add it to
 	 * players, and a beheading pin just takes the head off and pins that... whole body pins should only come from extremely
@@ -578,11 +580,18 @@ public final class ClassPerks {
 		}
 		if (source.getDirectEntity() instanceof AbstractArrow arrow) {
 			if (cls == PlayerClass.RANGER) {
+				// (survival picks) Andy: "rangers should go through the helmet now as long as you use an arrow": Jaymo's Powers
+				// reads the tag (a headshot through a helmet, and the helmet's own cut ignored); a thrown trident isn't an arrow
+				if (!(arrow instanceof net.minecraft.world.entity.projectile.arrow.ThrownTrident)) {
+					arrow.addTag(RANGER_THROUGH_HELMET);
+				}
 				amount *= (float) ARCHER_DAMAGE;
 				double hitY = arrow.getY() + arrow.getBbHeight() * 0.5;
 				boolean head = hitY >= target.getEyeY() - HEADSHOT_BELOW_EYES;
 				if (head) {
-					amount *= ARCHER_HEADSHOT;
+					// (hs_attrs) Jaymo's Powers' headshot power (a recurve bow) multiplies it
+					amount *= ARCHER_HEADSHOT * CritPower.headshot(sp);
+					PowersCompat.critCue(sp.level(), new net.minecraft.world.phys.Vec3(arrow.getX(), hitY, arrow.getZ()), sp);
 				}
 				pin(sp, target, arrow, amount, head, hitY);
 			} else if (cls == PlayerClass.MARKSMAN && arrow.getWeaponItem() != null && arrow.getWeaponItem().getItem() instanceof net.minecraft.world.item.CrossbowItem) {

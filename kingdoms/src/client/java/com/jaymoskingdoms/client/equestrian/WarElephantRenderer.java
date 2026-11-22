@@ -1,6 +1,8 @@
 package com.jaymoskingdoms.client.equestrian;
 
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.client.PowersClimbClient;
+import com.jaymoskingdoms.equestrian.Bonding;
 import com.jaymoskingdoms.equestrian.Breed;
 import com.jaymoskingdoms.equestrian.Equestrian;
 import com.jaymoskingdoms.equestrian.Equine;
@@ -26,6 +28,8 @@ final class WarElephantRenderer extends MobRenderer<WarElephant, WarElephantRend
 		Identifier hide = FALLBACK;
 		boolean saddled, mammoth, bigEars, royal;
 		float standAnimation;
+		/** Kneeling for a rider (0 to 1), and how far through a trunk lift they are (0 to 1; negative: none). */
+		float kneel, lift = -1.0F;
 	}
 
 	private static Identifier hide(String coat) {
@@ -52,6 +56,9 @@ final class WarElephantRenderer extends MobRenderer<WarElephant, WarElephantRend
 		state.royal = coat.equals("royal");
 		state.saddled = !elephant.getItemBySlot(EquipmentSlot.SADDLE).isEmpty();
 		state.standAnimation = elephant.getStandAnim(partialTicks);
+		state.kneel = Bonding.kneelAmount(elephant, elephant.level().getGameTime() + partialTicks);
+		PowersClimbClient.Pose boarding = PowersClimbClient.on(elephant.getId(), partialTicks);
+		state.lift = boarding != null && boarding.style() == PowersClimbClient.TRUNK ? boarding.share() : -1.0F;
 	}
 
 	@Override

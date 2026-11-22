@@ -20,6 +20,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -49,9 +51,11 @@ public final class Hanging {
 	static final int BLOOD_SMALL = 250, BLOOD = 1000, BLOOD_BIG = 2000;
 	/** A drop falls every this many ticks; blood with no grate under it pools on the ground every this many. */
 	static final int DRIP_EVERY = 4, SPILL_EVERY = 20;
-	/** How far below the carcass a grate can be (blocks), and how far a dragged carcass can be heaved onto a hook. */
+	/** How far below the carcass a grate can be (blocks), and how far from a hook (past your own height) you can heave a dragged carcass onto it. */
 	static final int GRATE_DEPTH = 4;
 	public static final double DRAG_TO_HOOK = 3.0;
+	/** A click this close to a hook's middle (blocks) counts as on it: the beam it hangs from, the ceiling behind it. */
+	static final double HOOK_SLACK = 1.25;
 	/** Bones left over after the last cut (at least one, up to this many more). */
 	static final int BONES_MORE = 2;
 	/** Skinned on the hook: this many more of each skin (a clean, whole one), and leather scraps (at least one, up to this many more). */
@@ -124,9 +128,19 @@ public final class Hanging {
 		return corpse.kind() == CorpseKind.ANIMAL && !corpse.isFish() && !corpse.isMachine() && !corpse.isHeavy();
 	}
 
+	/**
+	 * Andy: "bodies should be hung so vampires that are squeamish can drain blood instead of directly feeding. it also makes
+	 * for a good deterrent". A person's body (a player's, a villager's, a raider's, a zombie's: anything on two legs that
+	 * isn't bare bones or a machine) hangs by its feet too. It's only bled ({@link #bleedPerson}), never butchered.
+	 */
+	static boolean hangsAsPerson(CorpseEntity corpse) {
+		return (corpse.kind() == CorpseKind.PLAYER || corpse.kind() == CorpseKind.OTHER || corpse.kind() == CorpseKind.ZOMBIE)
+			&& corpse.rigShape() == RagdollRig.Shape.HUMANOID && !corpse.isMachine() && !corpse.isHeavy();
+	}
+
 	/** {@code player} hangs {@code corpse} (carried or dragged) on the hook at {@code hook}. */
 	public static boolean hang(CorpseEntity corpse, Player player, BlockPos hook) {
-		if (!hangable(corpse)) {
+		if (!hangable(corpse) && !hangsAsPerson(corpse)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.wont_hang"));
 			return false;
 		}
@@ -138,6 +152,30 @@ public final class Hanging {
 		player.sendOverlayMessage(Component.translatable(corpse.butcherStage() == FRESH ? "message.jaymoskitchen.hook.hung"
 			: "message.jaymoskitchen.hook.hung_again"));
 		return true;
+	}
+
+	/**
+	 * The meat hook a right-click with a carcass in hand meant: the one clicked, or (a hook is thin, and easy to miss
+	 * looking up at it) the nearest one right by the click. Null for none, or a click on a butcher block.
+	 */
+	public static @Nullable BlockPos hookAt(Level level, BlockPos clicked, Vec3 hit) {
+		BlockState state = level.getBlockState(clicked);
+		if (Butchery.isHook(state)) {
+			return clicked;
+		}
+		if (Corpses.isButcherBlock(state)) {
+			return null;
+		}
+		BlockPos best = null;
+		double bestDist = HOOK_SLACK * HOOK_SLACK;
+		for (BlockPos pos : BlockPos.betweenClosed(clicked.offset(-1, -1, -1), clicked.offset(1, 1, 1))) {
+			double dist = Vec3.atCenterOf(pos).distanceToSqr(hit);
+			if (dist <= bestDist && Butchery.isHook(level.getBlockState(pos))) {
+				best = pos.immutable();
+				bestDist = dist;
+			}
+		}
+		return best;
 	}
 
 	/** Where the hook holds the legs. */
@@ -235,7 +273,7 @@ public final class Hanging {
 		if (left <= 0) {
 			corpse.setButcherStage(DRAINED);
 			level.playSound(null, corpse.getX(), corpse.getY(), corpse.getZ(), SoundEvents.POINTED_DRIPSTONE_DRIP_WATER, SoundSource.NEUTRAL, 1.0F, 0.6F);
-			if (corpse.tooBigToLift() && corpse.hook() == null) {
+			if (corpse.tooBigToLift() && corpse.hook() == null && !corpse.onTable()) {
 				// bled where it lies: the proper job's extras go on it, and it's cut up there as before
 				corpse.addLoot(corpse.blockExtras());
 			}
@@ -267,7 +305,10 @@ public final class Hanging {
 			}
 			return null;
 		}
-		if (!hung) {
+		// Andy's Butchery pick (bu-table, ideas only): laid on a butcher block, it's worked a step at a time as on the hook
+		// (bled there, head, skin, guts, cuts); an axe on the block still chops it up in one go, as ever
+		boolean table = !hung && hangable(corpse) && corpse.onTable();
+		if (!hung && !table) {
 			if (stage == BLEEDING) {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.draining", (corpse.bleedLeft() + 19) / 20));
 				return InteractionResult.SUCCESS_SERVER;
@@ -282,6 +323,10 @@ public final class Hanging {
 			}
 		}
 		if (!cleaver && !knife) {
+			if (table) {
+				// (on the table anything else, an axe above all, is the old way)
+				return null;
+			}
 			player.sendOverlayMessage(Component.translatable(stage == FRESH ? "message.jaymoskitchen.hook.need_cleaver_bleed"
 				: "message.jaymoskitchen.hook.need_tools"));
 			return InteractionResult.SUCCESS_SERVER;
@@ -342,6 +387,23 @@ public final class Hanging {
 		}
 	}
 
+	/**
+	 * A right-click with a blade (a cleaver or a skinning knife) on a person's body hung on a hook: opened at the throat,
+	 * it drains into a grate under it like a carcass (bottled from there), and that's all. Null: not that.
+	 */
+	static @Nullable InteractionResult bleedPerson(CorpseEntity corpse, ServerLevel level, Player player, ItemStack held) {
+		if (corpse.hook() == null || corpse.kind() == CorpseKind.ANIMAL || !hangsAsPerson(corpse)
+			|| !held.is(Butchery.CLEAVERS) && !held.is(Butchery.SKINNING_KNIVES)) {
+			return null;
+		}
+		switch (corpse.butcherStage()) {
+			case FRESH -> startBleeding(corpse, level, player, held);
+			case BLEEDING -> player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.draining", (corpse.bleedLeft() + 19) / 20));
+			default -> player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.body_drained"));
+		}
+		return InteractionResult.SUCCESS_SERVER;
+	}
+
 	private static void startBleeding(CorpseEntity corpse, ServerLevel level, Player player, ItemStack tool) {
 		tool.hurtAndBreak(1, player, InteractionHand.MAIN_HAND);
 		int ticks = bleedTicks(corpse);
@@ -397,7 +459,8 @@ public final class Hanging {
 			return;
 		}
 		List<ItemStack> skins = corpse.takeLoot(stack -> stack.is(Butchery.SKINS));
-		boolean prime = corpse.hook() != null;
+		// (or skinned on a butcher block, done as properly)
+		boolean prime = corpse.hook() != null || corpse.onTable();
 		for (ItemStack skin : skins) {
 			if (prime && skin.getMaxStackSize() > 1) {
 				// hung and skinned with a knife, it comes off whole: a prime skin, one more than a rough job gets

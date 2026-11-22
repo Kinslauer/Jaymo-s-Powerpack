@@ -25,6 +25,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
@@ -70,8 +71,15 @@ public final class Thirst {
 	public static final int MAX = 20;
 	/** Points of water lost a second at rest (one every 75 s: a full bar lasts most of a day). */
 	static final float DRAIN = 1.0F / 75.0F;
-	/** On top of that, as a share of {@link #DRAIN}: sprinting, swimming, being in the Nether. */
-	static final float SPRINT_DRAIN = 1.5F, SWIM_DRAIN = 0.5F, NETHER_DRAIN = 0.5F;
+	/** On top of that, as a share of {@link #DRAIN}: swimming, being in the Nether. */
+	static final float SWIM_DRAIN = 0.5F, NETHER_DRAIN = 0.5F;
+	/**
+	 * What things cost, after Legendary Survival Overhaul's thirst (ideas and numbers only): its exhaustion, of which 4
+	 * make a point of water as with hunger ({@link #EXHAUSTION_POINT}). A jump, a block broken, an attack, a second of
+	 * sprinting. All of it goes faster the hotter you are ({@link BodyHeat#thirstFactor}).
+	 */
+	static final float JUMP = 0.15F, BREAK = 0.07F, ATTACK = 0.3F, SPRINT = 0.1F;
+	static final float EXHAUSTION_POINT = 4.0F;
 	/** At or below this you can't sprint, and at or below this you're parched (weakness). */
 	public static final int NO_SPRINT = 6, PARCHED = 3;
 	/** Seconds between hurts at no water, and how much each takes. */
@@ -105,10 +113,14 @@ public final class Thirst {
 	static final ResourceKey<DamageType> DEHYDRATION = ResourceKey.create(Registries.DAMAGE_TYPE, JaymosKitchen.id("dehydration"));
 
 	private static final Map<UUID, Float> DRAINED = new HashMap<>();
+	/** Exhaustion from things done since the last second ({@link #exert}), and the jumps counted so far. */
+	private static final Map<UUID, Float> EXERTED = new HashMap<>();
+	private static final Map<UUID, Integer> JUMPS = new HashMap<>();
 	private static final Map<UUID, Long> LAST_SIP = new HashMap<>();
 	private static final Map<UUID, Long> LAST_HISS = new HashMap<>();
 	private static Predicate<Player> fireDrinker = player -> false;
 	private static Predicate<Player> ironGut = player -> false;
+	private static Predicate<Player> unthirsting = player -> false;
 
 	private Thirst() {
 	}
@@ -121,6 +133,11 @@ public final class Thirst {
 	/** (0.5.80) For other mods (by reflection): whose stomach dirty water never turns (Kingdoms' Iron Stomach). */
 	public static void setIronGut(Predicate<Player> gut) {
 		ironGut = gut;
+	}
+
+	/** For other mods (by reflection): who never thirsts (Kingdoms' Pallid Hollow): their water stays full. */
+	public static void setUnthirsting(Predicate<Player> never) {
+		unthirsting = never;
 	}
 
 	/** (0.5.80) Whether dirty water is as good as clean to {@code player}'s stomach. */
@@ -148,6 +165,8 @@ public final class Thirst {
 
 	static void forget(UUID id) {
 		DRAINED.remove(id);
+		EXERTED.remove(id);
+		JUMPS.remove(id);
 		LAST_SIP.remove(id);
 		LAST_HISS.remove(id);
 	}
@@ -157,6 +176,13 @@ public final class Thirst {
 	static void second(ServerPlayer player, long seconds) {
 		UUID id = player.getUUID();
 		ServerLevel level = player.level();
+		float exerted = EXERTED.getOrDefault(id, 0.0F);
+		EXERTED.remove(id);
+		if (unthirsting.test(player)) {
+			set(player, MAX);
+			DRAINED.remove(id);
+			return;
+		}
 		if (level.getDifficulty() == Difficulty.PEACEFUL) {
 			// as hunger does on peaceful: it comes back by itself
 			if (seconds % 5L == 0L) {
@@ -165,8 +191,14 @@ public final class Thirst {
 			return;
 		}
 		float rate = 1.0F;
+		// jumps, from the game's own count of them
+		int jumps = player.getStats().getValue(Stats.CUSTOM.get(Stats.JUMP));
+		Integer before = JUMPS.put(id, jumps);
+		if (before != null && jumps > before) {
+			exerted += (jumps - before) * JUMP;
+		}
 		if (player.isSprinting()) {
-			rate += SPRINT_DRAIN;
+			exerted += SPRINT;
 		}
 		if (player.isSwimming()) {
 			rate += SWIM_DRAIN;
@@ -179,8 +211,7 @@ public final class Thirst {
 			// (0.5.48) the core soaks it up
 			set(player, water(player) + 1);
 		}
-		rate *= BodyHeat.thirstFactor(player);
-		float drained = DRAINED.getOrDefault(id, 0.0F) + DRAIN * rate;
+		float drained = DRAINED.getOrDefault(id, 0.0F) + (DRAIN * rate + exerted / EXHAUSTION_POINT) * BodyHeat.thirstFactor(player);
 		if (drained >= 1.0F) {
 			set(player, water(player) - 1);
 			drained -= 1.0F;
@@ -201,6 +232,13 @@ public final class Thirst {
 				DamageSource source = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(DEHYDRATION));
 				player.hurtServer(level, source, HURT);
 			}
+		}
+	}
+
+	/** A block broken or an attack made: its cost in water ({@link #BREAK}, {@link #ATTACK}), taken at the next second. */
+	static void exert(ServerPlayer player, float exhaustion) {
+		if (!player.isCreative() && !player.isSpectator()) {
+			EXERTED.merge(player.getUUID(), exhaustion, Float::sum);
 		}
 	}
 

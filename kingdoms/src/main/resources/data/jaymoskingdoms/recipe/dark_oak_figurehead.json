@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "jaymoskingdoms:figurehead",
+  "pattern": [
+    " ##",
+    "###",
+    "|  "
+  ],
+  "key": {
+    "#": "minecraft:dark_oak_planks",
+    "|": "minecraft:stick"
+  },
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:dark_oak_figurehead"
+  }
+}

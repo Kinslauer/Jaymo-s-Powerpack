@@ -825,7 +825,7 @@
   "message.jaymoskingdoms.hard.chains.picked": "The shackle springs open.",
   "message.jaymoskingdoms.hard.chains.slipped": "You slip the shackle in the dark.",
   "message.jaymoskingdoms.hard.chains.no_pick": "Hold a lockpick to try the shackle.",
-  "message.jaymoskingdoms.hard.chains.hunted": "The camp will know you are gone. Its raiders hunt you until the day is out.",
+  "message.jaymoskingdoms.hard.chains.hunted": "They have seen you are gone. The camp's raiders hunt you until the day is out.",
   "message.jaymoskingdoms.hard.cell.locked": "The door is locked. Hold a lockpick to try it, or hold silver to pay the fine of %s.",
   "message.jaymoskingdoms.hard.cell.short": "The fine is %s silver, and you do not have it.",
   "message.jaymoskingdoms.hard.cell.paid": "You pay the fine of %s silver, and the jailer lets you out.",

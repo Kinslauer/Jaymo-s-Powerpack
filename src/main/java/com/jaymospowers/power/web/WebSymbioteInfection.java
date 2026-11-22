@@ -2,6 +2,9 @@ package com.jaymospowers.power.web;
 
 import com.jaymospowers.core.Powers;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.level.ServerPlayer;
 import org.jspecify.annotations.Nullable;
@@ -21,6 +24,11 @@ import org.jspecify.annotations.Nullable;
  * slinger comes within {@link #WEB_SENSE_RANGE} (and make for them: {@link WebSymbioteBlob#pursue}), or when they get
  * hungry (under {@link #LEAVE_HUNGRY_BELOW}, before they'd ever hunt with that body). Either way it pours out alive as a
  * blob that won't take that host again.</li>
+ * <li><b>Warning:</b> Andy, of a clip where it left him minutes after settling in and wouldn't come back:
+ * "why doesnt the symbiote want to rebind here?" It had been feeding his hunger bar out of its own satiety (its
+ * share with the hunger bar, every two seconds) straight down past the leave line. In a host it can leave, it now keeps
+ * {@link #WARN_HUNGRY_AT} back from that share and says once that it's hungry when it gets there (raw meat feeds it),
+ * so it leaves only when the host has let it go hungry, not because it fed them.</li>
  * </ul>
  * A web slinger's own bond is untouched by all of this.
  */
@@ -36,6 +44,14 @@ public final class WebSymbioteInfection {
 	public static final int LEAVE_HUNGRY_BELOW = WebSymbiote.HUNGRY_HUNT_BELOW;
 	/** Lines it has on leaving, of each kind. */
 	public static final int LEAVE_LINES = 3;
+	/**
+	 * In a host it can leave, it stops feeding their hunger bar at this satiety, and tells them it's hungry
+	 * ({@code WARN_LINES} lines, once each time it sinks here): about three minutes of its own hunger before it goes.
+	 */
+	public static final int WARN_HUNGRY_AT = LEAVE_HUNGRY_BELOW + 15;
+	public static final int WARN_LINES = 3;
+	/** Hosts it has warned this hunger (not saved: a reload warns again). */
+	private static final Set<UUID> WARNED = new HashSet<>();
 
 	private WebSymbioteInfection() {
 	}
@@ -59,9 +75,24 @@ public final class WebSymbioteInfection {
 		return WebSymbiote.state(player).bonded() && !Powers.has(player, WebPower.INSTANCE) && !WebSymbioteBond.dormant(player);
 	}
 
+	/**
+	 * How low the share with {@code player}'s hunger bar may take it ({@code floor}, the usual floor): in a host
+	 * it will leave when hungry, never into the warning, so feeding them can't starve it out of them.
+	 */
+	static int shareFloor(ServerPlayer player, int floor) {
+		return leavesWhenHungry(player) ? Math.max(floor, WARN_HUNGRY_AT) : floor;
+	}
+
+	/** Bonded to someone who isn't a web slinger, and not the anti one (white): it leaves them when it's hungry. */
+	private static boolean leavesWhenHungry(ServerPlayer player) {
+		WebSymbioteState state = WebSymbiote.state(player);
+		return state.bonded() && state.kind() != WebSymbioteStrain.WHITE && !Powers.has(player, WebPower.INSTANCE);
+	}
+
 	private static void tick(ServerPlayer player) {
 		WebSymbioteState state = WebSymbiote.state(player);
 		if (!state.bonded() || !player.isAlive() || player.isSpectator()) {
+			WARNED.remove(player.getUUID());
 			return;
 		}
 		boolean acclimating = WebSymbioteBond.dormant(player);
@@ -74,8 +105,15 @@ public final class WebSymbioteInfection {
 			return;
 		}
 		if (!acclimating && state.satiety() < LEAVE_HUNGRY_BELOW) {
+			WARNED.remove(player.getUUID());
 			WebSymbiote.leave(player, "infection.hungry." + (1 + player.getRandom().nextInt(LEAVE_LINES)));
 			return;
+		}
+		if (state.satiety() > WARN_HUNGRY_AT) {
+			WARNED.remove(player.getUUID());
+		} else if (!acclimating && WARNED.add(player.getUUID())) {
+			// a chance to feed it before it goes
+			WebSymbiote.whisper(player, "infection.warn." + (1 + player.getRandom().nextInt(WARN_LINES)));
 		}
 		if (player.tickCount % SENSE_EVERY == 0) {
 			ServerPlayer slinger = slinger(player);

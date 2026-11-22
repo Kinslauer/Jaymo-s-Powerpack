@@ -56,6 +56,10 @@ public final class WindFall {
 		if (damage <= 0 || !Powers.has(player, WindPower.INSTANCE)) {
 			return damage;
 		}
+		// (the storm's leaps, rides and flights: fall damage always applies)
+		if (StormNet.hardFall(player)) {
+			return damage;
+		}
 		if (Mastery.unlocked(player) >= SAFE_MASTERY) {
 			return 0;
 		}

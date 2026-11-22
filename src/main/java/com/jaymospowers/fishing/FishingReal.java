@@ -130,6 +130,7 @@ public final class FishingReal {
         FishLegends.init();
         // Track B's leftovers and Track D: ice holes, rod pods, crab pots, keepnets, plaques, the journal, the market
         IceFishing.init();
+        Flotsam.init();
         FishingBlocks.init();
         CatchRelease.init();
         FishLog.init();

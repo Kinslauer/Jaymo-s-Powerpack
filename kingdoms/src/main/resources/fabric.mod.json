@@ -46,6 +46,7 @@
 		"jaymoskingdoms.tinker.mixins.json",
 		"jaymoskingdoms.classtrees.mixins.json",
 		"jaymoskingdoms.awakened.mixins.json",
+		"jaymoskingdoms.forestfire.mixins.json",
 		{ "config": "jaymoskingdoms.combat.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.mca.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.equestrian.client.mixins.json", "environment": "client" },
@@ -66,6 +67,7 @@
 		{ "config": "jaymoskingdoms.occult.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.spookydoors.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.armorapi.client.mixins.json", "environment": "client" },
+		{ "config": "jaymoskingdoms.mutantmonsters.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.deadlooks.client.mixins.json", "environment": "client" }
 	],
 	"depends": {

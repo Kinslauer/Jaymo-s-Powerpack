@@ -58,6 +58,12 @@ final class GravityGift implements GiftKit {
 		return GravityPower.ID;
 	}
 
+	/** The fighter brain's trails, dashes and vanishes in this power's colour (violet pull). */
+	@Override
+	public int color() {
+		return 0x7A5CFF;
+	}
+
 	@Override
 	public List<Move> moves() {
 		return List.of(

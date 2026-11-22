@@ -29,6 +29,8 @@ final class WebTrickClient {
 	static final int MIN_AIR_TICKS = 8;
 
 	private int busyUntil;
+	/** When (the player's tick count) the last web was let go of; a strike out of the swing needs it recent. */
+	private int releasedAt = Integer.MIN_VALUE / 2;
 	private int lastKind = -1;
 	private int airTicks;
 	/** Off the ground on a web, a release or the wings: the next touchdown may get a landing. */
@@ -77,6 +79,7 @@ final class WebTrickClient {
 
 	/** The last web let go of, in the air. */
 	void released(LocalPlayer player) {
+		releasedAt = player.tickCount;
 		Vec3 v = player.getDeltaMovement();
 		if (v.length() < RELEASE_SPEED || !free(player)) {
 			return;
@@ -89,6 +92,15 @@ final class WebTrickClient {
 			kind = pick(player, WebPose.CORKSCREW, WebPose.CARTWHEEL, WebPose.FRONT_FLIP);
 		}
 		send(player, kind);
+	}
+
+	int releasedAt() {
+		return releasedAt;
+	}
+
+	/** A strike out of the swing was thrown: no trick starts over it. */
+	void strikeSent(LocalPlayer player) {
+		busyUntil = player.tickCount + 20;
 	}
 
 	/** A web just caught while you were already in the air. */

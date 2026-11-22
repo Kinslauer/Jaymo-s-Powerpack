@@ -17,6 +17,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
@@ -68,6 +69,15 @@ public final class RubberFolk {
 	static final float BOUNCE = 0.6F;
 	/** A lost limb grows back this often (ticks), one at a time. */
 	static final int REGROW_EVERY = 400;
+	/**
+	 * Andy (2026-11-19): "there should be a sound like a stretching balloon when a rubber limb regrows, and then a pop at the
+	 * end". The stretch starts this long (ticks, about the sound's length) before the limb is back; the pop lands with it.
+	 */
+	static final int STRETCH_TICKS = 27;
+	static final SoundEvent STRETCH = SoundEvent.createVariableRangeEvent(JaymosKingdoms.id("rubber.stretch"));
+	static final SoundEvent POP = SoundEvent.createVariableRangeEvent(JaymosKingdoms.id("rubber.pop"));
+	/** A swallow's regrowth: the stretch plays at once, and the pop is due at this game time (by player). */
+	private static final Map<UUID, Long> POP_DUE = new HashMap<>();
 	/** (0.7.552) Jaymo's Powers' tags on one cut in half: waiting on a swallow, and mending after it (Dismember.SPLIT_TAG...). */
 	static final String SPLIT_TAG = "jaymospowers_rubber_split", MENDING_TAG = "jaymospowers_rubber_mending";
 	/**
@@ -250,10 +260,20 @@ public final class RubberFolk {
 			}
 			// a lost limb grows back, one at a time
 			// ((0.7.552) not while cut in half and waiting on a swallow: that one has to come first)
+			if (server.getTickCount() % REGROW_EVERY == REGROW_EVERY - STRETCH_TICKS && player.isAlive() && !player.entityTags().contains(SPLIT_TAG)
+				&& PowersCompat.missingLimbs(player) != 0) {
+				// the limb starts stretching back: a balloon pulled tight
+				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), STRETCH, SoundSource.PLAYERS, 1.0F, 1.0F);
+			}
 			if (server.getTickCount() % REGROW_EVERY == 0 && player.isAlive() && !player.entityTags().contains(SPLIT_TAG) && PowersCompat.regrow(player, false) && player.level() instanceof ServerLevel level) {
 				level.sendParticles(PINK, player.getX(), player.getY(0.6), player.getZ(), 16, 0.4, 0.6, 0.4, 0.02);
-				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.8F, 1.4F);
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), POP, SoundSource.PLAYERS, 1.0F, 1.0F);
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.rubber.regrown"));
+			}
+			Long due = POP_DUE.get(id);
+			if (due != null && player.level().getGameTime() >= due) {
+				POP_DUE.remove(id);
+				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), POP, SoundSource.PLAYERS, 1.0F, 1.0F);
 			}
 			// a sweet finished (seen eating it last tick, with next to nothing left)
 			if (player.isUsingItem() && sweet(player.getUseItem())) {
@@ -359,6 +379,8 @@ public final class RubberFolk {
 		} else if (PowersCompat.regrow(player, false)) {
 			// (0.7.422) every swallow stretches one lost limb back into place
 			level.sendParticles(PINK, player.getX(), player.getY(0.6), player.getZ(), 16, 0.4, 0.6, 0.4, 0.02);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), STRETCH, SoundSource.PLAYERS, 1.0F, 1.0F);
+			POP_DUE.put(player.getUUID(), level.getGameTime() + STRETCH_TICKS);
 			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.rubber.regrown"));
 		}
 		// (0.7.312) Andy: "it should add their mass to the user": the last of its bulk goes in (the rest went with each pulse, grow)

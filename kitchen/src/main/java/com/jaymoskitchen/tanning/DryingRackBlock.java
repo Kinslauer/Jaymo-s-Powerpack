@@ -73,6 +73,11 @@ public class DryingRackBlock extends BaseEntityBlock {
 	protected InteractionResult useItemOn(ItemStack held, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
 		BlockHitResult hit) {
 		if (level.getBlockEntity(pos) instanceof DryingRackEntity rack) {
+			// raw hides on it: water dampens them, then salt salts them
+			InteractionResult treated = rack.treat(player, hand, held);
+			if (treated != InteractionResult.PASS) {
+				return treated;
+			}
 			InteractionResult result = rack.hang(player, held);
 			return result == InteractionResult.PASS ? InteractionResult.TRY_WITH_EMPTY_HAND : result;
 		}

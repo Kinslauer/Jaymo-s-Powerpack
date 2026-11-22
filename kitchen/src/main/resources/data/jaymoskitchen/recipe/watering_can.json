@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "I I",
+    "III"
+  ],
+  "result": {
+    "id": "jaymoskitchen:watering_can"
+  }
+}

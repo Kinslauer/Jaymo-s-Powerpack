@@ -221,7 +221,8 @@ final class HeritageScreen extends Screen {
 				this.pickedVariant + 1, HeritageVariants.of(kind).size() + 1) : null);
 
 		// the info panel
-		this.layout.info(graphics, this.font, info(kind, hidden), kind, mouseX, mouseY);
+		// (Andy: "all bio built info should be hidden except unlock method") the Bio-built's panel only says how it wakes
+		this.layout.info(graphics, this.font, info(kind, hidden || kind == Heritage.Kind.BIOBUILT), kind, mouseX, mouseY);
 
 		if (this.choose != null) {
 			int[] b = this.layout.button(0);
@@ -268,40 +269,10 @@ final class HeritageScreen extends Screen {
 		}
 		int looks = HeritageVariants.of(kind).size() + 1;
 		HeritageVariants.Variant look = HeritageVariants.at(kind, kind == this.picked ? this.pickedVariant : 0);
-		if (kind.freePoints > 0) {
-			pills.add(new PickerLayout.Pill(Component.translatable("gui.jaymoskingdoms.picker.free").getString(), "+" + kind.freePoints * Stats.GIFT_STEP, Ui.GOLD));
-		}
-		for (Stats.Stat stat : Stats.Stat.values()) {
-			int n = kind.bonus(stat);
-			if (n > 0) {
-				pills.add(new PickerLayout.Pill(Component.translatable("stat.jaymoskingdoms." + stat.key()).getString(), "+" + n * Stats.GIFT_STEP, Ui.GOLD));
-			}
-		}
+		pills.addAll(statPills(kind));
 		pills.add(new PickerLayout.Pill(Component.translatable("gui.jaymoskingdoms.picker.looks").getString(), String.valueOf(looks), Ui.DIM));
 
-		// the card's rows by what they are: the gift is its own, kit gifts are strengths, flaws and the shunning weaknesses, the rest intrinsic
-		List<Component> intrinsic = new ArrayList<>(), strengths = new ArrayList<>(), weaknesses = new ArrayList<>();
-		for (Component row : kind.card(look)) {
-			String key = row.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t ? t.getKey() : "";
-			if (key.endsWith(".free") || key.endsWith(".bonus")) {
-				continue;
-			}
-			int color = rowColor(row);
-			boolean ownGift = key.equals("heritage.jaymoskingdoms." + kind.key() + ".gift") || key.equals("heritage.jaymoskingdoms." + kind.key() + ".gift_rimewyrm");
-			Component text = stripLabel(row);
-			if (ownGift) {
-				intrinsic.add(text);
-			} else if (color == Ui.BAD || key.contains(".shunned.")) {
-				weaknesses.add(color == Ui.BAD ? text : row);
-			} else if (color == Ui.GOOD) {
-				strengths.add(text);
-			} else {
-				intrinsic.add(text);
-			}
-		}
-		sections.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.intrinsic"), Ui.GOLD, intrinsic));
-		sections.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.strengths"), Ui.GOOD, strengths));
-		sections.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.weaknesses"), Ui.BAD, weaknesses));
+		sections.addAll(kitSections(kind, look));
 		// the look: the picked one's own, else every look's name
 		List<Component> lookLines = new ArrayList<>();
 		if (kind == this.picked) {
@@ -319,6 +290,17 @@ final class HeritageScreen extends Screen {
 			lookLines.add(Component.translatable("gui.jaymoskingdoms.heritage.variants", looks, names));
 		}
 		sections.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.look"), Ui.TEXT, lookLines));
+		// how each of its heritage paths opens (HeritagePaths)
+		List<Component> howLines = new ArrayList<>();
+		for (com.jaymoskingdoms.HeritagePaths.Path p : com.jaymoskingdoms.HeritagePaths.Path.values()) {
+			if (p.blood == kind) {
+				howLines.add(Component.translatable("gui.jaymoskingdoms.path.how_row", Component.translatable("path.jaymoskingdoms." + p.key()),
+					Component.translatable("path.jaymoskingdoms." + p.key() + ".deeds")));
+			}
+		}
+		if (!howLines.isEmpty()) {
+			sections.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.path.how"), Ui.TEXT, howLines));
+		}
 
 		// the paths: the looks it can be born in, and the blood a look leans toward
 		for (int i = 0; i < looks; i++) {
@@ -330,11 +312,103 @@ final class HeritageScreen extends Screen {
 			}
 			paths.add(new PickerLayout.Path(icons, HeritageVariants.title(kind, i), -1));
 		}
+		// and the heritage paths its deeds open: five steps each, lit as they wake (HeritagePaths)
+		paths.addAll(heritagePaths(kind));
 		return new PickerLayout.Info(new ItemStack(kind.icon), null, name(kind), tag, kind == this.picked ? ACCENT : rim(kind), pills, story, sections,
 			Component.translatable("gui.jaymoskingdoms.picker.paths_heritage", name(kind)), paths, -1);
 	}
 
+	/** {@code kind}'s heritage paths as picker rows: five step icons (lit as they wake) and the path's name with how far you are on it. */
+	static List<PickerLayout.Path> heritagePaths(Heritage.Kind kind) {
+		List<PickerLayout.Path> rows = new ArrayList<>();
+		net.minecraft.client.player.LocalPlayer player = net.minecraft.client.Minecraft.getInstance().player;
+		for (com.jaymoskingdoms.HeritagePaths.Path p : com.jaymoskingdoms.HeritagePaths.Path.values()) {
+			if (p.blood != kind) {
+				continue;
+			}
+			int steps = player == null ? 0 : com.jaymoskingdoms.HeritagePaths.stepsShown(player, p);
+			List<ItemStack> icons = new ArrayList<>();
+			for (int i = 0; i < 5; i++) {
+				icons.add(new ItemStack(i < steps ? p.icon : net.minecraft.world.item.Items.BARRIER));
+			}
+			Component name = Component.translatable("path.jaymoskingdoms." + p.key());
+			rows.add(new PickerLayout.Path(icons, player == null ? name : Component.translatable("gui.jaymoskingdoms.path.row", name,
+				com.jaymoskingdoms.HeritagePaths.status(player, p)), -1));
+		}
+		return rows;
+	}
+
 	/** A card row without its leading "Gift: " or "Flaw: " (the section already says which). */
+	/** {@code kind}'s free points and stat bonuses, a pill each (also the life story's birthplace page, {@link LifeStoryScreen}). */
+	static List<PickerLayout.Pill> statPills(Heritage.Kind kind) {
+		List<PickerLayout.Pill> pills = new ArrayList<>();
+		if (kind.freePoints > 0) {
+			pills.add(new PickerLayout.Pill(Component.translatable("gui.jaymoskingdoms.picker.free").getString(), "+" + kind.freePoints * Stats.GIFT_STEP, Ui.GOLD));
+		}
+		for (Stats.Stat stat : Stats.Stat.values()) {
+			int n = kind.bonus(stat);
+			if (n > 0) {
+				pills.add(new PickerLayout.Pill(Component.translatable("stat.jaymoskingdoms." + stat.key()).getString(), "+" + n * Stats.GIFT_STEP, Ui.GOLD));
+			}
+		}
+		return pills;
+	}
+
+	/**
+	 * {@code kind}'s whole kit as the panel's Intrinsic, Strengths and Weaknesses, sorted from its card ({@link Heritage.Kind#card}),
+	 * so a gift or flaw added to the heritage shows here and on the life story's birthplace page without more work.
+	 */
+	static List<PickerLayout.Section> kitSections(Heritage.Kind kind, HeritageVariants.@Nullable Variant look) {
+		List<PickerLayout.Section> out = new ArrayList<>();
+		// the card's rows by what they are: the gift is its own, kit gifts are strengths, flaws and the shunning weaknesses, the rest intrinsic
+		List<Component> intrinsic = new ArrayList<>(), strengths = new ArrayList<>(), weaknesses = new ArrayList<>();
+		for (Component row : kind.card(look)) {
+			String key = row.getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t ? t.getKey() : "";
+			if (key.endsWith(".free") || key.endsWith(".bonus")) {
+				continue;
+			}
+			int color = rowColor(row);
+			// (Andy: "remove all z fighter info from these screens") a Z Fighter's extras are left out, a row with nothing else dropped
+			row = withoutZFighter(row);
+			if (row == null) {
+				continue;
+			}
+			boolean ownGift = key.equals("heritage.jaymoskingdoms." + kind.key() + ".gift") || key.equals("heritage.jaymoskingdoms." + kind.key() + ".gift_rimewyrm");
+			Component text = stripLabel(row);
+			if (ownGift) {
+				intrinsic.add(text);
+			} else if (color == Ui.BAD || key.contains(".shunned.")) {
+				weaknesses.add(color == Ui.BAD ? text : row);
+			} else if (color == Ui.GOOD) {
+				strengths.add(text);
+			} else {
+				intrinsic.add(text);
+			}
+		}
+		out.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.intrinsic"), Ui.GOLD, intrinsic));
+		out.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.strengths"), Ui.GOOD, strengths));
+		out.add(new PickerLayout.Section(Component.translatable("gui.jaymoskingdoms.picker.weaknesses"), Ui.BAD, weaknesses));
+		return out;
+	}
+
+	/** {@code row} without its clauses about Z Fighters (cut at its semicolons, outside brackets); null if nothing else is left. */
+	private static @Nullable Component withoutZFighter(Component row) {
+		String s = row.getString();
+		if (!s.contains("Z Fighter")) {
+			return row;
+		}
+		List<String> kept = new ArrayList<>();
+		for (String clause : PickerLayout.splitTop(s, "; ", false)) {
+			if (!clause.contains("Z Fighter")) {
+				kept.add(clause);
+			}
+		}
+		if (kept.isEmpty()) {
+			return null;
+		}
+		return Component.literal(String.join("; ", kept)).withStyle(row.getStyle());
+	}
+
 	private static Component stripLabel(Component row) {
 		String s = row.getString();
 		for (String label : new String[] {"Gift: ", "Flaw: "}) {

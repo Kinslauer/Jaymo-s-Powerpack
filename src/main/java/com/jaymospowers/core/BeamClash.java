@@ -29,10 +29,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -152,6 +155,12 @@ public final class BeamClash {
 	public static final int KIND_FIRE = 4;
 	/** Fire overwhelms: the loser is set alight this long (ticks). */
 	public static final int FIRE_BURN_TICKS = 120;
+	// ---- NPC beams (NPC fights 3) ----
+	/** An NPC pushes on its own: the chance each tick of a surge (a tap's worth) at rank 0 and 1, and how far the knot must be past its middle on it for its last stand. */
+	public static final float NPC_TAP_CHANCE_MIN = 0.12F, NPC_TAP_CHANCE_MAX = 0.3F, NPC_LAST_STAND = 0.6F;
+	/** A struggle with an NPC in it is felt (degrees, blocks) by everyone near, and one with no player in it is drawn this big. */
+	public static final float NPC_SHAKE = 0.6F, NPC_KNOT_SIZE = 1.1F;
+	public static final double NPC_SHAKE_RANGE = 24.0;
 	// ---- ki ----
 	/** Ki overwhelms: the loser is also burned this much more and set alight this long (ticks). */
 	public static final float KI_OVERWHELM_DAMAGE = 4.0F;
@@ -237,9 +246,24 @@ public final class BeamClash {
 	private static final Identifier JUMP_ID = JaymosPowers.id("beam_clash_jump");
 	private static final List<Beam> BEAMS = new ArrayList<>();
 
+	/**
+	 * (NPC fights 3) A fighting NPC's beam, as its owner reports it each tick it is firing ({@link #npcBeam}): where it leaves, which
+	 * way it runs, how far it reaches, how hard it pushes in a struggle (times the steady push), how high its owner's rank is (0 to 1:
+	 * how often it surges), what it is ({@code KIND_*}) and what to do when the struggle ends it ({@code stop}).
+	 */
+	private record NpcStream(Vec3 from, Vec3 dir, double reach, float power, float rank, int kind, Consumer<Mob> stop, long at) {
+	}
+
+	/** The latest report of each NPC's beam. */
+	private static final Map<UUID, NpcStream> NPC = new HashMap<>();
+	/** An NPC beam reported this many ticks ago still counts as out. */
+	private static final int NPC_FRESH = 2;
+
 	private static final class Side {
 		final UUID id;
-		final Beam beam;
+		final @Nullable Beam beam;
+		/** A fighting NPC's beam (null for a player's); it holds for the whole struggle, whatever its owner does. */
+		final @Nullable NpcStream npc;
 		float surge;
 		long lastTap = Long.MIN_VALUE / 2;
 		/** When X was let go (a tap in progress), or -1 while held. */
@@ -248,10 +272,21 @@ public final class BeamClash {
 		/** This side's power level (its steady push over {@link #BASE_PUSH}) as of last tick; 0 before the first. */
 		float power;
 		int kind;
+		/** An NPC side has had its surge of desperation. */
+		boolean jumped;
 
-		Side(UUID id, Beam beam) {
+		Side(UUID id, @Nullable Beam beam, @Nullable NpcStream npc) {
 			this.id = id;
 			this.beam = beam;
+			this.npc = npc;
+		}
+
+		boolean fired() {
+			return this.npc != null || this.beam.fired();
+		}
+
+		double range() {
+			return this.npc != null ? this.npc.reach() : this.beam.range();
 		}
 	}
 
@@ -279,7 +314,7 @@ public final class BeamClash {
 
 	private static final List<Clash> CLASHES = new ArrayList<>();
 	private static final Map<UUID, Clash> BY_PLAYER = new HashMap<>();
-	/** Player → the game time their streams rest until (after losing or a detonation). */
+	/** Player (or NPC) → the game time their streams rest until (after losing or a detonation). */
 	private static final Map<UUID, Long> RESTING = new HashMap<>();
 
 	private BeamClash() {
@@ -293,6 +328,7 @@ public final class BeamClash {
 			CLASHES.clear();
 			BY_PLAYER.clear();
 			RESTING.clear();
+			NPC.clear();
 		});
 	}
 
@@ -301,9 +337,61 @@ public final class BeamClash {
 		BEAMS.add(beam);
 	}
 
+	/**
+	 * (NPC fights 3) A fighting NPC's beam is out this tick (call it every tick the beam is out): from {@code from} along
+	 * {@code dir} for {@code reach} blocks, pushing {@code power} times the steady push in a struggle (1 is a player's
+	 * unascended push), {@code rank} (0 to 1) deciding how often it surges. Meeting another beam head-on (a player's or another
+	 * NPC's) locks the two into a struggle: the NPC is rooted, pushes on its own and may surge, and {@code stop} runs when
+	 * the struggle ends it (cut your beam there). False if it is resting after a loss or already in a struggle; keep your
+	 * beam short of {@link #clampNpc} while {@link #clashing} is true.
+	 */
+	public static boolean npcBeam(Mob owner, Vec3 from, Vec3 dir, double reach, float power, float rank, int kind, Consumer<Mob> stop) {
+		if (resting(owner) || BY_PLAYER.containsKey(owner.getUUID()) || dir.lengthSqr() < 1.0E-6) {
+			return false;
+		}
+		NPC.put(owner.getUUID(), new NpcStream(from, dir.normalize(), reach, power, Math.clamp(rank, 0.0F, 1.0F), kind, stop, owner.level().getGameTime()));
+		return true;
+	}
+
+	/** Whether {@code e} (a player or an NPC) is locked in a beam struggle now. */
+	public static boolean clashing(LivingEntity e) {
+		return BY_PLAYER.containsKey(e.getUUID());
+	}
+
+	/** {@code reach} of an NPC's beam from {@code from}, cut short at the knot while it struggles. */
+	public static double clampNpc(Mob owner, Vec3 from, double reach) {
+		Clash clash = BY_PLAYER.get(owner.getUUID());
+		return clash == null ? reach : Math.max(0.0, Math.min(reach, from.distanceTo(clash.knot) - KNOT_GAP));
+	}
+
+	/** An NPC lets its beam go (it died, was knocked out, changed its mind): its struggle, if any, ends with the other's stream rolling through. */
+	public static void npcCease(Mob owner) {
+		NPC.remove(owner.getUUID());
+		Clash clash = BY_PLAYER.get(owner.getUUID());
+		if (clash != null) {
+			Side side = clash.side(owner.getUUID());
+			CEASED.add(side);
+		}
+	}
+
+	/** NPC sides that were let go this tick: their struggle ends at the next step. */
+	private static final java.util.Set<Side> CEASED = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+
 	/** Both sides: whether this player is locked in a clash. */
 	public static boolean isClashing(Player player) {
 		return player.getAttached(CLASH) != null;
+	}
+
+	private static boolean resting(Mob owner) {
+		Long until = RESTING.get(owner.getUUID());
+		if (until == null) {
+			return false;
+		}
+		if (owner.level().getGameTime() >= until) {
+			RESTING.remove(owner.getUUID());
+			return false;
+		}
+		return true;
 	}
 
 	/** True while a lost clash or a detonation still rests this player's streams (their starts are refused). */
@@ -331,7 +419,7 @@ public final class BeamClash {
 		}
 		Side side = clash.side(player.getUUID());
 		long now = player.level().getGameTime();
-		if (side.beam.fired()) {
+		if (side.fired()) {
 			// a fired beam runs on by itself: every press is a tap
 			if (down) {
 				tap(player, clash, side, now);
@@ -398,7 +486,8 @@ public final class BeamClash {
 
 	// ---- the tick ----------------------------------------------------------------------------------------------
 
-	private record Stream(ServerPlayer player, Beam beam, Vec3 from, Vec3 look, double reach) {
+	/** One stream out this tick: whose it is, what it is (a player's {@code beam} or an NPC's {@code npc} report), and where it runs. */
+	private record Stream(LivingEntity user, @Nullable Beam beam, @Nullable NpcStream npc, Vec3 from, Vec3 look, double reach) {
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -408,13 +497,15 @@ public final class BeamClash {
 				it.remove();
 			}
 		}
-		if (BEAMS.isEmpty()) {
+		CEASED.clear();
+		if (BEAMS.isEmpty() && NPC.isEmpty()) {
 			return;
 		}
 		for (ServerLevel level : server.getAllLevels()) {
+			long now = level.getGameTime();
 			List<Stream> streams = null;
 			for (ServerPlayer player : level.players()) {
-				if (BY_PLAYER.containsKey(player.getUUID()) || !player.isAlive() || player.isSpectator()) {
+				if (BEAMS.isEmpty() || BY_PLAYER.containsKey(player.getUUID()) || !player.isAlive() || player.isSpectator()) {
 					continue;
 				}
 				Beam beam = beamOf(player);
@@ -437,19 +528,37 @@ public final class BeamClash {
 				if (streams == null) {
 					streams = new ArrayList<>();
 				}
-				streams.add(new Stream(player, beam, from, look, reach));
+				streams.add(new Stream(player, beam, null, from, look, reach));
+			}
+			if (!NPC.isEmpty()) {
+				for (Iterator<Map.Entry<UUID, NpcStream>> it = NPC.entrySet().iterator(); it.hasNext(); ) {
+					Map.Entry<UUID, NpcStream> entry = it.next();
+					NpcStream n = entry.getValue();
+					if (now - n.at() > NPC_FRESH * 4L) {
+						it.remove();
+						continue;
+					}
+					if (now - n.at() > NPC_FRESH || BY_PLAYER.containsKey(entry.getKey())
+						|| !(level.getEntity(entry.getKey()) instanceof Mob mob) || !mob.isAlive()) {
+						continue;
+					}
+					if (streams == null) {
+						streams = new ArrayList<>();
+					}
+					streams.add(new Stream(mob, null, n, n.from(), n.dir(), n.reach()));
+				}
 			}
 			if (streams == null || streams.size() < 2) {
 				continue;
 			}
 			for (int i = 0; i < streams.size(); i++) {
 				Stream s = streams.get(i);
-				if (BY_PLAYER.containsKey(s.player.getUUID())) {
+				if (BY_PLAYER.containsKey(s.user.getUUID())) {
 					continue;
 				}
 				for (int j = i + 1; j < streams.size(); j++) {
 					Stream t = streams.get(j);
-					if (!BY_PLAYER.containsKey(t.player.getUUID()) && meet(s, t)) {
+					if (!BY_PLAYER.containsKey(t.user.getUUID()) && meet(s, t)) {
 						start(level, s, t);
 						break;
 					}
@@ -518,54 +627,93 @@ public final class BeamClash {
 		// where the two streams overlap, the knot starts in the middle of it
 		double mid = (apart - t.reach + s.reach) * 0.5;
 		double share = Math.clamp(mid / apart, START_SHARE_MIN, 1.0 - START_SHARE_MIN);
-		Clash clash = new Clash(new Side(s.player.getUUID(), s.beam), new Side(t.player.getUUID(), t.beam), (float)(share * 2.0 - 1.0));
+		Clash clash = new Clash(new Side(s.user.getUUID(), s.beam, s.npc), new Side(t.user.getUUID(), t.beam, t.npc), (float)(share * 2.0 - 1.0));
 		clash.knot = s.from.add(t.from.subtract(s.from).scale(share));
 		CLASHES.add(clash);
 		BY_PLAYER.put(clash.a.id, clash);
 		BY_PLAYER.put(clash.b.id, clash);
-		root(s.player, true);
-		root(t.player, true);
+		root(s.user, true);
+		root(t.user, true);
 		Vec3 k = clash.knot;
 		level.playSound(null, k.x, k.y, k.z, SoundEvents.WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 1.2F, 0.6F);
 		level.playSound(null, k.x, k.y, k.z, SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.PLAYERS, 0.8F, 1.6F);
 		level.sendParticles(ParticleTypes.GUST_EMITTER_SMALL, k.x, k.y, k.z, 1, 0.0, 0.0, 0.0, 0.0);
-		Shakes.send(s.player, LOCK_SHAKE, k);
-		Shakes.send(t.player, LOCK_SHAKE, k);
-		s.player.sendOverlayMessage(lockedMessage(s.beam));
-		t.player.sendOverlayMessage(lockedMessage(t.beam));
+		shake(s.user, LOCK_SHAKE, k);
+		shake(t.user, LOCK_SHAKE, k);
+		say(s.user, lockedMessage(s.beam));
+		say(t.user, lockedMessage(t.beam));
 	}
 
-	private static Component lockedMessage(Beam beam) {
-		return beam.shape() == null ? Component.translatable("message.jaymospowers.beam_clash.locked")
+	private static Component lockedMessage(@Nullable Beam beam) {
+		return beam == null || beam.shape() == null ? Component.translatable("message.jaymospowers.beam_clash.locked")
 			: Component.translatable("message.jaymospowers.beam_clash.locked_key", Component.keybind(beam.shape().pushKey()));
+	}
+
+	/** A shake for a player (an NPC feels nothing). */
+	private static void shake(LivingEntity e, float strength, Vec3 from) {
+		if (e instanceof ServerPlayer player) {
+			Shakes.send(player, strength, from);
+		}
+	}
+
+	private static void shake(LivingEntity e, float strength, int ticks, Vec3 from) {
+		if (e instanceof ServerPlayer player) {
+			Shakes.send(player, strength, ticks, from);
+		}
+	}
+
+	/** A line over a player's action bar (an NPC is told nothing). */
+	private static void say(LivingEntity e, Component line) {
+		if (e instanceof ServerPlayer player) {
+			player.sendOverlayMessage(line);
+		}
+	}
+
+	/** {@code by}'s blow as the damage it deals: a player's attack or a mob's. */
+	private static DamageSource hit(LivingEntity by) {
+		return by instanceof Player player ? by.damageSources().playerAttack(player) : by.damageSources().mobAttack(by);
+	}
+
+	/** The user of a side: its player, or the NPC (alive, in whichever world it is). */
+	private static @Nullable LivingEntity resolve(MinecraftServer server, Side side) {
+		ServerPlayer player = server.getPlayerList().getPlayer(side.id);
+		if (player != null || side.npc == null) {
+			return player;
+		}
+		for (ServerLevel level : server.getAllLevels()) {
+			if (level.getEntity(side.id) instanceof LivingEntity e && e.isAlive()) {
+				return e;
+			}
+		}
+		return null;
 	}
 
 	/** One tick of a clash; false once it has ended. */
 	private static boolean step(MinecraftServer server, Clash clash) {
-		ServerPlayer a = server.getPlayerList().getPlayer(clash.a.id);
-		ServerPlayer b = server.getPlayerList().getPlayer(clash.b.id);
+		LivingEntity a = resolve(server, clash.a);
+		LivingEntity b = resolve(server, clash.b);
 		boolean aOn = holding(a, clash.a), bOn = holding(b, clash.b);
 		if (a == null || b == null || a.level() != b.level()) {
 			end(clash, a, b);
 			return false;
 		}
-		ServerLevel level = a.level();
+		ServerLevel level = (ServerLevel)a.level();
 		long now = level.getGameTime();
 		// a release that outlasts the grace is letting go (a fired beam isn't held)
-		aOn &= clash.a.beam.fired() || clash.a.releasedAt < 0 || now - clash.a.releasedAt <= GRACE_TICKS;
-		bOn &= clash.b.beam.fired() || clash.b.releasedAt < 0 || now - clash.b.releasedAt <= GRACE_TICKS;
+		aOn &= clash.a.fired() || clash.a.releasedAt < 0 || now - clash.a.releasedAt <= GRACE_TICKS;
+		bOn &= clash.b.fired() || clash.b.releasedAt < 0 || now - clash.b.releasedAt <= GRACE_TICKS;
 		Vec3 ea = a.getEyePosition(), eb = b.getEyePosition();
 		Vec3 ab = eb.subtract(ea);
 		double apart = ab.length();
-		if (apart > clash.a.beam.range() + clash.b.beam.range() + BREAK_SLACK || apart < 0.5) {
+		if (apart > clash.a.range() + clash.b.range() + BREAK_SLACK || apart < 0.5) {
 			// pulled apart: the streams part with nothing
 			end(clash, a, b);
 			return false;
 		}
 		Vec3 dir = ab.scale(1.0 / apart);
-		// looking away from the knot is letting go
-		aOn &= a.getLookAngle().dot(dir) >= AIM_BREAK_COS;
-		bOn &= b.getLookAngle().dot(dir.scale(-1.0)) >= AIM_BREAK_COS;
+		// a player looking away from the knot is letting go (an NPC's beam holds until it is let go)
+		aOn &= clash.a.npc != null || a.getLookAngle().dot(dir) >= AIM_BREAK_COS;
+		bOn &= clash.b.npc != null || b.getLookAngle().dot(dir.scale(-1.0)) >= AIM_BREAK_COS;
 		if (!aOn || !bOn) {
 			if (aOn) {
 				rollThrough(clash, a, b);
@@ -579,8 +727,8 @@ public final class BeamClash {
 			return false;
 		}
 		clash.age++;
-		clash.a.kind = clash.a.beam.kind().applyAsInt(a);
-		clash.b.kind = clash.b.beam.kind().applyAsInt(b);
+		clash.a.kind = kindOf(clash.a, a);
+		clash.b.kind = kindOf(clash.b, b);
 		clash.a.push = push(a, b, clash, clash.a);
 		clash.b.push = push(b, a, clash, clash.b);
 		clash.balance = Math.clamp(clash.balance + clash.a.push - clash.b.push, -1.0F, 1.0F);
@@ -597,23 +745,67 @@ public final class BeamClash {
 			detonate(clash, a, b);
 			return false;
 		}
-		a.causeFoodExhaustion(EXHAUSTION);
-		b.causeFoodExhaustion(EXHAUSTION);
+		for (LivingEntity user : new LivingEntity[] {a, b}) {
+			if (user instanceof Player player) {
+				player.causeFoodExhaustion(EXHAUSTION);
+			} else {
+				// an NPC in the air stays where it is (the fighter brain lets it be while it struggles)
+				user.setDeltaMovement(Vec3.ZERO);
+				user.syncVelocity = true;
+				if (user instanceof Mob mob) {
+					mob.getNavigation().stop();
+					Vec3 face = user == a ? eb : ea;
+					mob.getLookControl().setLookAt(face.x, face.y, face.z);
+				}
+			}
+		}
 		knot(level, clash, a, b);
 		if (clash.age % SHAKE_EVERY == 0) {
-			Shakes.send(a, SHAKE + SHAKE_LOSING * Math.max(0.0F, clash.balance), SHAKE_EVERY + 2, clash.knot);
-			Shakes.send(b, SHAKE + SHAKE_LOSING * Math.max(0.0F, -clash.balance), SHAKE_EVERY + 2, clash.knot);
+			shake(a, SHAKE + SHAKE_LOSING * Math.max(0.0F, clash.balance), SHAKE_EVERY + 2, clash.knot);
+			shake(b, SHAKE + SHAKE_LOSING * Math.max(0.0F, -clash.balance), SHAKE_EVERY + 2, clash.knot);
+			if (!(a instanceof Player) || !(b instanceof Player)) {
+				// an NPC in it: whoever is near feels it too, and the knot is drawn here (no client draws a struggle with no one in it)
+				Shakes.around(level, clash.knot, NPC_SHAKE_RANGE, NPC_SHAKE, SHAKE_EVERY + 2, null);
+			}
+		}
+		if (!(a instanceof Player) && !(b instanceof Player)) {
+			npcKnot(level, clash);
 		}
 		sync(clash, a, b);
 		return true;
 	}
 
-	private static boolean holding(@Nullable ServerPlayer player, Side side) {
-		return player != null && player.isAlive() && !player.isSpectator() && side.beam.active().test(player);
+	/** What a side is: its beam's kind for a player, the kind its owner reported for an NPC. */
+	private static int kindOf(Side side, LivingEntity user) {
+		return side.npc != null ? side.npc.kind() : side.beam.kind().applyAsInt((ServerPlayer)user);
 	}
 
-	/** A side's power level: ascension, mastery, and a fired beam's own (live) strength. */
-	private static float power(ServerPlayer player, Side side) {
+	private static boolean holding(@Nullable LivingEntity user, Side side) {
+		if (user == null || !user.isAlive()) {
+			return false;
+		}
+		if (side.npc != null) {
+			return !CEASED.contains(side);
+		}
+		return user instanceof ServerPlayer player && !player.isSpectator() && side.beam.active().test(player);
+	}
+
+	/** A struggle with no player in it is drawn from the server: a glowing knot and sparks. */
+	private static void npcKnot(ServerLevel level, Clash clash) {
+		Vec3 k = clash.knot;
+		if (clash.age % 4 == 0) {
+			MagicFx.blast(level, k, NPC_KNOT_SIZE + 0.5F * Math.abs(clash.balance), MagicFx.CRACKLE_COLOR);
+		}
+		level.sendParticles(MagicFx.CRACKLE, k.x, k.y, k.z, 4, 0.4, 0.4, 0.4, 0.3);
+		level.sendParticles(MagicFx.LIGHT, k.x, k.y, k.z, 2, 0.3, 0.3, 0.3, 0.1);
+	}
+
+	/** A side's power level: ascension, mastery, and a fired beam's own (live) strength; an NPC's is what its owner reported. */
+	private static float power(LivingEntity user, Side side) {
+		if (side.npc != null) {
+			return side.npc.power();
+		}
+		ServerPlayer player = (ServerPlayer)user;
 		return (1.0F + (Fate.isAscended(player) ? ASCENDED_BONUS : 0.0F) + MASTERY_BONUS * Mastery.unlocked(player))
 			* (side.beam.shape() == null ? 1.0F : Math.max(0.0F, side.beam.shape().strength(player)));
 	}
@@ -627,30 +819,45 @@ public final class BeamClash {
 	}
 
 	/** This tick's push: the steady base (by power), the surge from taps, and a waver. Powering up surges at once. */
-	private static float push(ServerPlayer player, ServerPlayer other, Clash clash, Side side) {
-		float power = power(player, side);
+	private static float push(LivingEntity user, LivingEntity other, Clash clash, Side side) {
+		float power = power(user, side);
 		boolean poweredUp = side.power > 0.0F && power > side.power * (1.0F + POWER_UP_JUMP);
 		side.power = power;
 		side.surge *= SURGE_DECAY;
+		if (side.npc != null) {
+			// an NPC pushes on its own: random surges (more often the higher its rank) and, when the knot is nearly on it, one last great surge
+			float weight = weight(side, clash.other(side));
+			if (user.getRandom().nextFloat() < Mth.lerp(side.npc.rank(), NPC_TAP_CHANCE_MIN, NPC_TAP_CHANCE_MAX)) {
+				side.surge = Math.min(SURGE_MAX * weight, side.surge + TAP_PUSH * weight);
+			}
+			float mine = side == clash.a ? clash.balance : -clash.balance;
+			if (!side.jumped && mine <= -NPC_LAST_STAND) {
+				side.jumped = true;
+				poweredUp = true;
+			}
+		}
 		if (poweredUp) {
 			// powered up mid-clash: it pours straight into the knot
 			side.surge = SURGE_MAX * weight(side, clash.other(side));
 			Vec3 k = clash.knot;
-			player.level().playSound(null, k.x, k.y, k.z, SoundEvents.WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 1.0F, 0.8F);
-			Shakes.send(player, POWER_UP_SHAKE, k);
-			Shakes.send(other, POWER_UP_SHAKE, k);
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.beam_clash.power_up"));
-			other.sendOverlayMessage(Component.translatable("message.jaymospowers.beam_clash.they_power_up"));
+			user.level().playSound(null, k.x, k.y, k.z, SoundEvents.WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 1.0F, 0.8F);
+			if (side.npc != null && user.level() instanceof ServerLevel level) {
+				MagicFx.ring(level, user.position().add(0.0, 0.1, 0.0), null, 2.5F, side.npc.kind() == KIND_KI ? MagicFx.LIGHT_COLOR : MagicFx.CRACKLE_COLOR, MagicFx.RING_TICKS);
+			}
+			shake(user, POWER_UP_SHAKE, k);
+			shake(other, POWER_UP_SHAKE, k);
+			say(user, Component.translatable("message.jaymospowers.beam_clash.power_up"));
+			say(other, Component.translatable("message.jaymospowers.beam_clash.they_power_up"));
 		}
-		return BASE_PUSH * power + side.surge + (player.getRandom().nextFloat() - 0.5F) * JITTER;
+		return BASE_PUSH * power + side.surge + (user.getRandom().nextFloat() - 0.5F) * JITTER;
 	}
 
 	/** What happens in and around the knot: smoke churned in, soot blinding, bystanders thrown out. */
-	private static void knot(ServerLevel level, Clash clash, ServerPlayer a, ServerPlayer b) {
+	private static void knot(ServerLevel level, Clash clash, LivingEntity a, LivingEntity b) {
 		Vec3 k = clash.knot;
 		for (Side side : new Side[] {clash.a, clash.b}) {
-			ServerPlayer owner = side == clash.a ? a : b;
-			ServerPlayer other = side == clash.a ? b : a;
+			LivingEntity owner = side == clash.a ? a : b;
+			LivingEntity other = side == clash.a ? b : a;
 			if (smoky(side.kind)) {
 				com.jaymospowers.power.smoke.SmokeField.puff(level, k, KNOT_SMOKE, owner);
 			}
@@ -672,7 +879,7 @@ public final class BeamClash {
 				e.setDeltaMovement(e.getDeltaMovement().add(out.scale(KNOT_THROW)).add(0.0, KNOT_THROW * 0.5, 0.0));
 				e.syncVelocity = true;
 				if (e instanceof LivingEntity living) {
-					living.hurtServer(level, a.damageSources().playerAttack(a), KNOT_DAMAGE);
+					living.hurtServer(level, hit(a), KNOT_DAMAGE);
 				}
 			}
 		}
@@ -681,24 +888,30 @@ public final class BeamClash {
 		}
 	}
 
-	private static void sync(Clash clash, ServerPlayer a, ServerPlayer b) {
-		a.setAttached(CLASH, new State(b.getId(), clash.a.kind, clash.b.kind, clash.knot, clash.balance, clash.a.push, clash.b.push, clash.age, true));
-		b.setAttached(CLASH, new State(a.getId(), clash.b.kind, clash.a.kind, clash.knot, -clash.balance, clash.b.push, clash.a.push, clash.age, false));
+	private static void sync(Clash clash, LivingEntity a, LivingEntity b) {
+		if (a instanceof ServerPlayer player) {
+			player.setAttached(CLASH, new State(b.getId(), clash.a.kind, clash.b.kind, clash.knot, clash.balance, clash.a.push, clash.b.push, clash.age, true));
+		}
+		if (b instanceof ServerPlayer player) {
+			player.setAttached(CLASH, new State(a.getId(), clash.b.kind, clash.a.kind, clash.knot, -clash.balance, clash.b.push, clash.a.push, clash.age, false));
+		}
 	}
 
 	// ---- endings -----------------------------------------------------------------------------------------------
 
 	/** The knot reached {@code loser}: they're blasted back, and how depends on what beat them. */
-	private static void overwhelm(Clash clash, ServerPlayer winner, ServerPlayer loser) {
-		ServerLevel level = winner.level();
+	private static void overwhelm(Clash clash, LivingEntity winner, LivingEntity loser) {
+		ServerLevel level = (ServerLevel)winner.level();
 		Side win = clash.side(winner.getUUID());
 		Side lose = clash.side(loser.getUUID());
 		Vec3 at = loser.position().add(0.0, 1.0, 0.0);
 		throwBack(loser, winner.position(), OVERWHELM_THROW, OVERWHELM_LIFT);
-		loser.hurtServer(level, winner.damageSources().playerAttack(winner), OVERWHELM_DAMAGE);
+		loser.hurtServer(level, hit(winner), OVERWHELM_DAMAGE);
 		if (win.kind == KIND_WIND) {
 			// thrown and spun
-			ServerPlayNetworking.send(loser, new Spin(SPIN_DEGREES * (level.getRandom().nextBoolean() ? 1.0F : -1.0F), SPIN_TICKS));
+			if (loser instanceof ServerPlayer player) {
+				ServerPlayNetworking.send(player, new Spin(SPIN_DEGREES * (level.getRandom().nextBoolean() ? 1.0F : -1.0F), SPIN_TICKS));
+			}
 			level.sendParticles(ParticleTypes.GUST_EMITTER_LARGE, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
 			level.sendParticles(ParticleTypes.CLOUD, at.x, at.y, at.z, 30, 0.6, 0.8, 0.6, 0.15);
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.BREEZE_WIND_CHARGE_BURST.value(), SoundSource.PLAYERS, 1.4F, 0.8F);
@@ -712,7 +925,7 @@ public final class BeamClash {
 			screen(loser, 0xFFB060);
 		} else if (win.kind == KIND_KI) {
 			// the ki rolls over them and bursts: burned and set alight
-			loser.hurtServer(level, winner.damageSources().playerAttack(winner), KI_OVERWHELM_DAMAGE);
+			loser.hurtServer(level, hit(winner), KI_OVERWHELM_DAMAGE);
 			loser.igniteForTicks(KI_BURN_TICKS);
 			level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y, at.z, 3, 0.6, 0.6, 0.6, 0.0);
 			level.sendParticles(MagicFx.CRACKLE, at.x, at.y, at.z, 40, 0.6, 0.8, 0.6, 0.5);
@@ -734,25 +947,25 @@ public final class BeamClash {
 			level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 1.2F, 0.5F);
 			screen(loser, soot ? 0x0A0A0A : 0x505050);
 		}
-		Shakes.send(loser, OVERWHELM_SHAKE, clash.knot);
-		Shakes.send(winner, WINNER_SHAKE, clash.knot);
+		shake(loser, OVERWHELM_SHAKE, clash.knot);
+		shake(winner, WINNER_SHAKE, clash.knot);
 		stopBeam(lose, loser);
 		if (win.releasedAt >= 0) {
 			stopBeam(win, winner);
 		}
 		rest(loser, LOSER_COOLDOWN);
-		loser.sendOverlayMessage(Component.translatable("message.jaymospowers.beam_clash.overwhelmed"));
-		winner.sendOverlayMessage(Component.translatable("message.jaymospowers.beam_clash.won"));
+		say(loser, Component.translatable("message.jaymospowers.beam_clash.overwhelmed"));
+		say(winner, Component.translatable("message.jaymospowers.beam_clash.won"));
 		end(clash, winner, loser);
 	}
 
 	/** {@code quitter} let go: the other's stream rolls straight through onto them. */
-	private static void rollThrough(Clash clash, ServerPlayer holder, ServerPlayer quitter) {
-		ServerLevel level = holder.level();
+	private static void rollThrough(Clash clash, LivingEntity holder, LivingEntity quitter) {
+		ServerLevel level = (ServerLevel)holder.level();
 		Side hold = clash.side(holder.getUUID());
 		stopBeam(clash.side(quitter.getUUID()), quitter);
 		throwBack(quitter, holder.position(), ROLL_THROW, ROLL_THROW * 0.3);
-		quitter.hurtServer(level, holder.damageSources().playerAttack(holder), ROLL_DAMAGE);
+		quitter.hurtServer(level, hit(holder), ROLL_DAMAGE);
 		// the stream rushing on, all the way
 		Vec3 from = clash.knot, to = quitter.getEyePosition();
 		Vec3 dir = to.subtract(from);
@@ -765,13 +978,13 @@ public final class BeamClash {
 		}
 		level.playSound(null, to.x, to.y, to.z, hold.kind == KIND_WIND ? SoundEvents.BREEZE_SHOOT : hold.kind == KIND_KI ? SoundEvents.BEACON_DEACTIVATE
 			: SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 1.0F, 0.6F);
-		Shakes.send(quitter, ROLL_SHAKE, from);
+		shake(quitter, ROLL_SHAKE, from);
 		end(clash, holder, quitter);
 	}
 
 	/** A stalemate: the knot bursts, throwing both back, and both streams rest a while. */
-	private static void detonate(Clash clash, ServerPlayer a, ServerPlayer b) {
-		ServerLevel level = a.level();
+	private static void detonate(Clash clash, LivingEntity a, LivingEntity b) {
+		ServerLevel level = (ServerLevel)a.level();
 		Vec3 k = clash.knot;
 		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, k.x, k.y, k.z, 1, 0.0, 0.0, 0.0, 0.0);
 		level.sendParticles(ParticleTypes.GUST_EMITTER_LARGE, k.x, k.y, k.z, 1, 0.0, 0.0, 0.0, 0.0);
@@ -787,13 +1000,13 @@ public final class BeamClash {
 			e -> e != a && e != b && e.isAlive() && !e.isSpectator() && !e.noPhysics)) {
 			throwBack(e, k, DETONATE_THROW * (1.0 - e.position().distanceTo(k) / (DETONATE_RADIUS * 1.8)), DETONATE_LIFT);
 		}
-		for (ServerPlayer player : new ServerPlayer[] {a, b}) {
-			throwBack(player, k, DETONATE_THROW, DETONATE_LIFT);
-			player.hurtServer(level, level.damageSources().explosion(null, null), DETONATE_DAMAGE);
-			stopBeam(clash.side(player.getUUID()), player);
-			rest(player, DETONATE_COOLDOWN);
-			screen(player, 0xFFFFFF);
-			player.sendOverlayMessage(Component.translatable("message.jaymospowers.beam_clash.detonated"));
+		for (LivingEntity user : new LivingEntity[] {a, b}) {
+			throwBack(user, k, DETONATE_THROW, DETONATE_LIFT);
+			user.hurtServer(level, level.damageSources().explosion(null, null), DETONATE_DAMAGE);
+			stopBeam(clash.side(user.getUUID()), user);
+			rest(user, DETONATE_COOLDOWN);
+			screen(user, 0xFFFFFF);
+			say(user, Component.translatable("message.jaymospowers.beam_clash.detonated"));
 		}
 		Shakes.around(level, k, DETONATE_SHAKE_RANGE, DETONATE_SHAKE);
 		end(clash, a, b);
@@ -812,40 +1025,50 @@ public final class BeamClash {
 		e.syncVelocity = true;
 	}
 
-	private static void screen(ServerPlayer player, int color) {
-		ServerPlayNetworking.send(player, new com.jaymospowers.power.wind.WindNet.ScreenFx(com.jaymospowers.power.wind.WindNet.ScreenFx.VIGNETTE, color, FX_TICKS));
+	private static void screen(LivingEntity user, int color) {
+		if (user instanceof ServerPlayer player) {
+			ServerPlayNetworking.send(player, new com.jaymospowers.power.wind.WindNet.ScreenFx(com.jaymospowers.power.wind.WindNet.ScreenFx.VIGNETTE, color, FX_TICKS));
+		}
 	}
 
-	private static void stopBeam(Side side, @Nullable ServerPlayer player) {
-		if (player != null) {
+	private static void stopBeam(Side side, @Nullable LivingEntity user) {
+		if (user == null) {
+			return;
+		}
+		if (side.npc != null) {
+			NPC.remove(side.id);
+			if (user instanceof Mob mob) {
+				side.npc.stop().accept(mob);
+			}
+		} else if (user instanceof ServerPlayer player) {
 			side.beam.stop().accept(player);
 		}
 	}
 
-	private static void rest(ServerPlayer player, int ticks) {
-		RESTING.merge(player.getUUID(), player.level().getGameTime() + ticks, Math::max);
+	private static void rest(LivingEntity user, int ticks) {
+		RESTING.merge(user.getUUID(), user.level().getGameTime() + ticks, Math::max);
 	}
 
 	/** Forgets the clash and frees both users; any stream still let go (mid-tap) stops. */
-	private static void end(Clash clash, @Nullable ServerPlayer a, @Nullable ServerPlayer b) {
+	private static void end(Clash clash, @Nullable LivingEntity a, @Nullable LivingEntity b) {
 		BY_PLAYER.remove(clash.a.id);
 		BY_PLAYER.remove(clash.b.id);
-		for (ServerPlayer player : new ServerPlayer[] {a, b}) {
-			if (player == null) {
+		for (LivingEntity user : new LivingEntity[] {a, b}) {
+			if (user == null) {
 				continue;
 			}
-			Side side = clash.side(player.getUUID());
-			if (side.releasedAt >= 0) {
-				stopBeam(side, player);
+			Side side = clash.side(user.getUUID());
+			if (side.npc == null && side.releasedAt >= 0) {
+				stopBeam(side, user);
 			}
-			player.removeAttached(CLASH);
-			root(player, false);
+			user.removeAttached(CLASH);
+			root(user, false);
 		}
 	}
 
-	private static void root(ServerPlayer player, boolean on) {
-		AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
-		AttributeInstance jump = player.getAttribute(Attributes.JUMP_STRENGTH);
+	private static void root(LivingEntity user, boolean on) {
+		AttributeInstance speed = user.getAttribute(Attributes.MOVEMENT_SPEED);
+		AttributeInstance jump = user.getAttribute(Attributes.JUMP_STRENGTH);
 		if (speed != null) {
 			speed.removeModifier(SLOW_ID);
 			if (on) {

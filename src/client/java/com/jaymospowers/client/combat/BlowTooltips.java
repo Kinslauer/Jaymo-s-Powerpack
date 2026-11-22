@@ -17,6 +17,10 @@ public final class BlowTooltips {
 
 	public static void init() {
 		ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
+			String edge = com.jaymospowers.combat.Edge.key(stack);
+			if (edge != null) {
+				lines.add(Component.translatable(edge).withStyle(ChatFormatting.GRAY));
+			}
 			ArmourKind armour = ArmourKind.of(stack);
 			if (armour != ArmourKind.NONE) {
 				lines.add(Component.translatable(armour.key()).withStyle(ChatFormatting.GRAY));

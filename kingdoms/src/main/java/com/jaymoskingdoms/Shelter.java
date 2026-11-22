@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -18,6 +19,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
@@ -50,6 +52,10 @@ public final class Shelter {
 	static final int ROOF_HEIGHT = 8;
 	/** How long (ticks) to wait for them to come round before laying them in the bed is given up. */
 	static final int LAY_WAIT = 20 * 60;
+	/** How far (blocks) from the bed one of the village's folk is looked for to tell them they were seen to. */
+	static final double CARER_RANGE = 24.0;
+	/** How many lines a carer has, for every wake and for one who lost a limb. */
+	static final int CARER_LINES = 4, STUMP_LINES = 3;
 
 	/** Who was carried to a bed: the bed's head, and the tick it was found. */
 	private record Waiting(BlockPos bed, long since) {
@@ -166,6 +172,33 @@ public final class Shelter {
 		return false;
 	}
 
+	/**
+	 * Andy (2026-11-19: "these good people took me in and im bleeding all over they bed ... i should have been bandaged no?"):
+	 * Powers dresses their wounds as they're laid down ({@code Mortality.tendTaken}); as they come round, the nearest of the
+	 * village's folk awake turns to them and says so, with a word for a stump bound where a limb was. Nobody near, no word.
+	 */
+	private static void carer(ServerPlayer player) {
+		ServerLevel level = player.level();
+		Villager carer = null;
+		double best = Double.MAX_VALUE;
+		for (Villager v : level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(CARER_RANGE),
+			v -> v.isAlive() && !v.isBaby() && !v.isSleeping() && !v.isNoAi() && v.getTarget() == null && !Downed.isDowned(v))) {
+			double d = v.distanceToSqr(player);
+			if (d < best) {
+				best = d;
+				carer = v;
+			}
+		}
+		if (carer == null) {
+			return;
+		}
+		carer.getLookControl().setLookAt(player, 30.0F, 30.0F);
+		boolean stump = (PowersCompat.missingLimbs(player) & ~PowersCompat.fittedLimbs(player)) != 0;
+		String key = stump ? "shelter.jaymoskingdoms.carer.stump." + level.getRandom().nextInt(STUMP_LINES)
+			: "shelter.jaymoskingdoms.carer." + level.getRandom().nextInt(CARER_LINES);
+		Speech.tell(level, carer, player, Component.translatable(key), Speech.WHITE);
+	}
+
 	/** Those carried to a bed, once they've come round where they were put: laid in it, resting. */
 	private static void tick(MinecraftServer server) {
 		if (WAITING.isEmpty()) {
@@ -189,6 +222,7 @@ public final class Shelter {
 			if (state.getBlock() instanceof BedBlock && !state.getValue(BedBlock.OCCUPIED)) {
 				BedRest.lay(player, w.bed());
 			}
+			carer(player);
 		}
 	}
 }

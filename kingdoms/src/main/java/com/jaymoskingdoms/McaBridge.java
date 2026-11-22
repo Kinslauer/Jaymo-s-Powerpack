@@ -109,6 +109,11 @@ final class McaBridge {
 		return villager instanceof VillagerEntityMCA;
 	}
 
+	/** {@link McaCompat#interactingWith}. */
+	static boolean interactingWith(net.minecraft.world.entity.Entity entity, ServerPlayer player) {
+		return entity instanceof VillagerEntityMCA m && m.getInteractions().getInteractingPlayer().filter(p -> p == player).isPresent();
+	}
+
 	// ---- borrowed faces (BorrowedFaces, Doubles) -----------------------------------------------------------------------
 
 	/** What of an MCA look is the face and body someone is known by (with every gene, saved as {@code Gene...}). */
@@ -148,6 +153,83 @@ final class McaBridge {
 		}
 		setLook(player, worn);
 		return own;
+	}
+
+	// ---- a story left to fate, and a face kept for another life (Doppelgangers) --------------------------------------
+
+	/**
+	 * Andy: "TRULY randomize, everything else. then you start." {@code player}'s MCA look and name are drawn as a new
+	 * villager's would be ({@code gender}: 0 male, 1 female; the skin kept in {@code kind}'s range), shown to everyone, and
+	 * MCA's creator counts as done and is closed as MCA closes it. The villager drawn is never put in the world, nor in
+	 * the family tree. False if it couldn't be done.
+	 */
+	static boolean fateLook(ServerPlayer player, int gender, Heritage.@Nullable Kind kind) {
+		ServerLevel level = player.level();
+		Gender g = gender == 1 ? Gender.FEMALE : Gender.MALE;
+		VillagerEntityMCA drawn = VillagerFactory.newVillager(level).withGender(g).withPosition(player.position()).withAge(0).build(EntitySpawnReason.EVENT);
+		drawn.initialize(EntitySpawnReason.EVENT);
+		if (kind != null) {
+			keepSkin(drawn, kind);
+		}
+		net.minecraft.world.level.storage.TagValueOutput out = net.minecraft.world.level.storage.TagValueOutput.createWithContext(
+			net.minecraft.util.ProblemReporter.DISCARDING, level.registryAccess());
+		if (!drawn.saveAsPassenger(out)) {
+			return false;
+		}
+		CompoundTag patch = net.conczin.mca.network.c2s.VillagerEditorSyncRequest.createEditorPatch(out.buildResult());
+		PlayerSaveData save = PlayerSaveData.get(player);
+		CompoundTag look = net.conczin.mca.network.c2s.VillagerEditorSyncRequest.mergeAllowedEditorPatch(save.getEntityData(), patch);
+		save.setEntityData(look);
+		save.setEntityDataSet(true);
+		FamilyTree tree = FamilyTree.get(level);
+		tree.getOrCreate(player).setGender(g);
+		String name = drawn.getCustomName() == null ? randomName(player) : drawn.getCustomName().getString();
+		if (name != null && !name.isBlank()) {
+			tree.getOrCreate(player).setName(name.strip());
+		}
+		tree.setDirty();
+		for (ServerPlayer other : level.getServer().getPlayerList().getPlayers()) {
+			Network.sendToPlayer(new PlayerDataMessage(player.getUUID(), look), other);
+		}
+		// (MCA's own close: what its creator put on the newcomer comes off)
+		new net.conczin.mca.network.c2s.DestinyMessage(java.util.Optional.empty()).handle(player);
+		return true;
+	}
+
+	/** {@code player}'s MCA look and name as its creator would edit them (null: no look of their own yet). */
+	static @Nullable CompoundTag faceOf(ServerPlayer player) {
+		PlayerSaveData save = PlayerSaveData.get(player);
+		if (!save.isEntityDataSet()) {
+			return null;
+		}
+		CompoundTag patch = net.conczin.mca.network.c2s.VillagerEditorSyncRequest.createEditorPatch(save.getEntityData());
+		patch.putString("FamilyTreeName", name(player));
+		return patch;
+	}
+
+	/**
+	 * {@code player}, still making their character, takes a face kept from an old life ({@link #faceOf}): MCA's look and
+	 * name become it, as MCA's own editor would set them (only what the editor may change), shown to everyone and to the
+	 * creator if it is open. MCA's creator stays owed: they finish making their character as ever.
+	 */
+	static void wearFace(ServerPlayer player, CompoundTag face) {
+		PlayerSaveData save = PlayerSaveData.get(player);
+		CompoundTag look = net.conczin.mca.network.c2s.VillagerEditorSyncRequest.mergeAllowedEditorPatch(save.getEntityData(), face);
+		save.setEntityData(look);
+		FamilyTree tree = FamilyTree.get(player.level());
+		String name = face.getStringOr("FamilyTreeName", "");
+		if (!name.isBlank()) {
+			tree.getOrCreate(player).setName(name.strip());
+			tree.setDirty();
+		}
+		for (ServerPlayer other : player.level().getServer().getPlayerList().getPlayers()) {
+			Network.sendToPlayer(new PlayerDataMessage(player.getUUID(), look), other);
+		}
+		CompoundTag shown = look.copy();
+		if (!name.isBlank()) {
+			shown.putString("FamilyTreeName", name.strip());
+		}
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.GetVillagerResponse(shown), player);
 	}
 
 	/** {@code player}'s MCA look becomes {@code data}, shown to everyone. */
@@ -542,6 +624,10 @@ final class McaBridge {
 		}
 		// (0.7.299) a cook keeps the work (and trades: Meals sets its wares)
 		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.COOK).orElseThrow());
+		// and a healer (TownTrades takes one on), who heals for coin (Restoration) and doesn't trade
+		ResourceKey<VillagerProfession> healer = BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.HEALER).orElseThrow();
+		ProfessionsMCA.IS_IMPORTANT.add(healer);
+		ProfessionsMCA.CAN_NOT_TRADE.add(healer);
 		// (0.7.490) and a money-changer (Currencies sets its offers)
 		ProfessionsMCA.IS_IMPORTANT.add(BuiltInRegistries.VILLAGER_PROFESSION.getResourceKey(Professions.CHANGER).orElseThrow());
 		// and a sky village's cloudwright (SkyTrades sets its offers)
@@ -881,6 +967,11 @@ final class McaBridge {
 		return make.spawn(EntitySpawnReason.EVENT);
 	}
 
+	/** {@link McaCompat#woman}: a grown woman of no job at {@code at}, already in the world. */
+	static @Nullable Villager woman(ServerLevel level, Vec3 at) {
+		return VillagerFactory.newVillager(level).withPosition(at).withAge(0).withGender(Gender.FEMALE).spawn(EntitySpawnReason.EVENT);
+	}
+
 	/** (0.7.294) {@link McaCompat#vanish}: an MCA villager out of MCA's family tree. */
 	static void forgetVillager(net.minecraft.world.entity.Entity e) {
 		if (e instanceof VillagerEntityMCA v && e.level() instanceof ServerLevel level) {
@@ -968,6 +1059,16 @@ final class McaBridge {
 		if (!offhand.isEmpty()) {
 			villager.setItemSlot(EquipmentSlot.OFFHAND, offhand.copy());
 			villager.setDropChance(EquipmentSlot.OFFHAND, 0.0F);
+		}
+		// and the raider's pieces over it (a torn hood or cloak, the horned crest: GuardKit#raider)
+		List<net.minecraft.world.item.ItemStack> harness = new java.util.ArrayList<>();
+		for (Harness.Slot slot : Harness.Slot.values()) {
+			if (!Harness.get(folk, slot).isEmpty()) {
+				harness.add(Harness.get(folk, slot).copy());
+			}
+		}
+		if (!harness.isEmpty()) {
+			Harness.dress(villager, harness.toArray(net.minecraft.world.item.ItemStack[]::new));
 		}
 		if (chief) {
 			// (0.7.293) his health, blows and toughness, on his throne's spot as the camp's leader
@@ -1310,6 +1411,38 @@ final class McaBridge {
 			return false;
 		}
 		Component line = Component.translatable("dialogue.chat.jaymoskingdoms.zfighter_opening." + kind + "." + villager.getRandom().nextInt(ZFIGHTER_OPENINGS));
+		met(villager, player);
+		Introductions.learn(player, villager);
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueQuestionResponse(line, false), player);
+		return true;
+	}
+
+	/**
+	 * (2026-11-19) Andy, of an old druid ({@link Groves}) by a lake: "what is she doing here? she wont tell me anything".
+	 * MCA's menu opening on one: who she is and what her grove is for (a body laid at her feet, the dead for good given a
+	 * new one), and, until you've brought it today, the one thing she wants ({@link Groves#want}); on to the main menu,
+	 * never MCA's stranger's welcome or a wary villager's cold word. You know her by her title from then. A Druid never
+	 * gets here: speaking to her, they're told the rite ({@link Rebirths#use}). True if so.
+	 */
+	static boolean druidOpening(LivingEntity mob, ServerPlayer player) {
+		if (!(mob instanceof VillagerEntityMCA villager) || !Groves.is(villager) || Introductions.wary(player, villager)) {
+			return false;
+		}
+		var main = net.conczin.mca.resources.Dialogues.getInstance().getQuestion("main");
+		if (main == null) {
+			return false;
+		}
+		Component line;
+		if (Languages.understands(player, villager)) {
+			line = Component.translatable("dialogue.chat.jaymoskingdoms.druid_opening." + villager.getRandom().nextInt(Groves.OPENINGS));
+			if (!Groves.givenToday(player, villager)) {
+				line = line.copy().append(" ").append(Component.translatable("dialogue.chat.jaymoskingdoms.druid_wants",
+					new net.minecraft.world.item.ItemStack(Groves.want(villager)).getHoverName()));
+			}
+		} else {
+			line = Component.translatable("dialogue.chat.jaymoskingdoms.druid_opening.wordless");
+		}
 		met(villager, player);
 		Introductions.learn(player, villager);
 		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);
@@ -2323,6 +2456,8 @@ final class McaBridge {
 	private static void forget(VillagerEntityMCA v, java.util.UUID id, long at) {
 		VillagerBrain<?> brain = v.getVillagerBrain();
 		if (brain.getMemories().containsKey(id)) {
+			// (Doppelgangers) the face they knew stays with them, though the one who wore it is forgotten
+			Doppelgangers.knew(v, id);
 			brain.updateMemories(new Memories(brain, v.level().getGameTime(), id));
 		}
 		EntityRelationship r = v.getRelationships();

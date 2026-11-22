@@ -164,7 +164,8 @@ public final class KingdomEvents {
 					Component rep = Component.translatable("reputation.jaymoskingdoms." + Reputation.word(Reputation.get(player, here.id())));
 					// ((0.7.475) a greenskin camp by its tier: "Entering Skullmaw, Horde town")
 					String tier = Hordes.tierKey(server, here);
-					player.sendOverlayMessage((tier != null
+					net.minecraft.network.chat.MutableComponent illager = IllagerHolds.campEntering(server, player, here, rep);
+					player.sendOverlayMessage((illager != null ? illager : tier != null
 						? Component.translatable("message.jaymoskingdoms.entering_camp", here.name(), Component.translatable(tier), rep)
 						: Component.translatable("message.jaymoskingdoms.entering", here.name(), rep))
 						.withStyle(here.color().getTextColor() == 0 ? ChatFormatting.WHITE : ChatFormatting.GOLD));
@@ -208,7 +209,7 @@ public final class KingdomEvents {
 		Faction founded;
 		// (0.7.598) only an Epic town becomes a capital; any other mod's village is a village, allied to the nearest kingdom
 		if (SeatCompounds.is(village.id())) {
-			// a seat compound: a fiefdom of the kingdom near, or a village ({@link SeatCompounds#found})
+			// a seat compound: a kingdom in its castle far from any realm, else a fiefdom of the kingdom near, or a village ({@link SeatCompounds#found})
 			founded = SeatCompounds.found(level, bell.get(), village.start());
 		} else if (Seats.epic(village.id()) && Factions.realmNear(server, bell.get(), CAPITAL_SPACING) == null) {
 			founded = foundIn(level, bell.get(), village.start());

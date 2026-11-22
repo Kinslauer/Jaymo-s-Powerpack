@@ -95,7 +95,7 @@ for _name in SYMBIOTE_STRAINS.values():
 NAMESPACE = {"symbiote": "jaymospowers", **{"symbiote_" + n: "jaymospowers" for n in SYMBIOTE_STRAINS.values()}}
 SYMBIOTE = "message.jaymospowers.web_symbiote."
 
-QUESTIONS = ["born", "raised", "childhood", "youth", "turn", "road"]
+QUESTIONS = ["born", "raised", "childhood", "youth", "turn", "road", "faith"]
 SPIRIT_LINES = [f"spirit.jaymoskingdoms.{s}.summon.{n}" for s in ("grimsby", "varro", "ambrose", "thessaly") for n in (1, 2, 3)] \
     + ["spirit.jaymoskingdoms.quiet.word.1"]
 STORY_END = "story.jaymoskingdoms.summary.end"
@@ -130,7 +130,9 @@ def lines(lang, powers):
     # titles and lines and its answers' tales. Kingdoms only voices these once their clip is made (`Voices.heritageVoiced`).
     for key in lang:
         parts = key.split(".")
-        if key.startswith(s + "as.") and (len(parts) == 6 and parts[5] in ("title", "sub") or len(parts) == 7 and parts[6] == "tale"):
+        # (and who raised you retelling where you were born: as.<heritage>.from_<raised>.born.<answer>.tale)
+        if key.startswith(s + "as.") and (len(parts) == 6 and parts[5] in ("title", "sub") or len(parts) == 7 and parts[6] == "tale"
+                                          or len(parts) == 8 and parts[4].startswith("from_") and parts[7] == "tale"):
             out.append(("narrator", key, realm_free(lang[key])))
     out.append(("narrator", STORY_END, lang["gui.jaymoskingdoms.story.summary_sub"]))
     for key in INTRO_LINES:
@@ -173,24 +175,30 @@ def clip_path(voice, key):
 
 
 def write_sounds(all_lines):
-    """Each mod's sounds.json. Kingdoms registers its list in code, so it lists every line (a tongue's only once made); Powers lists only the clips
-    made so far, since what it lists is what the symbiote says aloud."""
+    """The voice lines in each mod's sounds.json. Kingdoms registers a tongue's line and a story line (Voices.register)
+    only once its clip exists; Powers lists only the clips made so far, since what it lists is what the symbiote says
+    aloud. Every other sound in the file is kept as it is: only the entries for these lines are added, changed or
+    dropped (a line whose clip is gone)."""
     for ns, assets in ASSETS_OF.items():
+        path = os.path.join(assets, "sounds.json")
         sounds = {}
+        if os.path.exists(path):
+            with open(path, encoding="utf-8") as f:
+                sounds = json.load(f)
+        before = dict(sounds)
         for voice, key, _ in all_lines:
             if NAMESPACE.get(voice, "jaymoskingdoms") != ns:
                 continue
-            if (ns == "jaymospowers" or "tongue" in VOICES.get(voice, {}) or key.startswith("story.jaymoskingdoms.as.")) \
-                    and not os.path.exists(clip_path(voice, key)):
-                # (Kingdoms registers a tongue's line, and a blood's own telling, only once its clip exists)
-                continue
             sid, file = sound_name(key)
+            if (ns == "jaymospowers" or "tongue" in VOICES.get(voice, {}) or key.startswith("story.jaymoskingdoms.")) \
+                    and not os.path.exists(clip_path(voice, key)):
+                sounds.pop(sid, None)
+                continue
             entry = {"name": ns + ":voice/" + file}
             if voice == "narrator":
                 entry["stream"] = True
             sounds[sid] = {"sounds": [entry]}
-        path = os.path.join(assets, "sounds.json")
-        if not sounds and not os.path.exists(path):
+        if sounds == before:
             continue
         with open(path, "w", encoding="utf-8", newline="\n") as f:
             f.write(json.dumps(sounds, indent="\t") + "\n")
@@ -368,17 +376,21 @@ def seeded(seed):
     np.random.seed(seed)
 
 
+def load_lang():
+    """Kingdoms' and Powers' lang parts, merged: (kingdoms, powers)."""
+    out = []
+    for folder in (LANG, POWERS_LANG):
+        lang = {}
+        for name in sorted(os.listdir(folder)):
+            if name.endswith(".json"):
+                with open(os.path.join(folder, name), encoding="utf-8") as f:
+                    lang.update(json.load(f))
+        out.append(lang)
+    return tuple(out)
+
+
 def main():
-    lang = {}
-    for name in sorted(os.listdir(LANG)):
-        if name.endswith(".json"):
-            with open(os.path.join(LANG, name), encoding="utf-8") as f:
-                lang.update(json.load(f))
-    powers = {}
-    for name in sorted(os.listdir(POWERS_LANG)):
-        if name.endswith(".json"):
-            with open(os.path.join(POWERS_LANG, name), encoding="utf-8") as f:
-                powers.update(json.load(f))
+    lang, powers = load_lang()
     all_lines = lines(lang, powers)
     write_sounds(all_lines)
     if "--sounds" in sys.argv:

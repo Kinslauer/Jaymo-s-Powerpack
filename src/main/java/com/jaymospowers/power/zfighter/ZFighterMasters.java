@@ -157,10 +157,17 @@ final class ZFighterMasters {
 		boolean today = last != null && last >= player.level().getGameTime() / DAY && !player.isCreative();
 		Runnable back = () -> talk(player, master);
 		boolean fighter = Powers.has(player, ZFighterPower.INSTANCE);
-		ZFighterNpcs.ask(player, master, Component.translatable((dark ? "talk.jaymospowers.dark_master." : "talk.jaymospowers.master.")
-			+ (!fighter ? "no_spark" : today ? "greet_today" : "greet")), java.util.List.of(
+		java.util.List<ZFighterNpcs.Option> options = new java.util.ArrayList<>(java.util.List.of(
 			ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.lesson", fighter && !today, () -> ZFighterNpcs.reply(player, master, () -> teach(player, master, dark), back)),
-			ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.story", fighter, () -> ZFighterNpcs.reply(player, master, () -> ZFighterSagas.speak(player, master, false), back))));
+			ZFighterNpcs.Option.of("talk.jaymospowers.zfighter.story", fighter, () -> ZFighterNpcs.reply(player, master, () -> ZFighterSagas.speak(player, master, false), back)),
+			// (gaps 2) a fighting style, learned once
+			ZFighterNpcs.Option.of("talk.jaymospowers.master.learn_style", fighter && !ZFighterStyles.learned(player), () -> ZFighterStyles.offer(player, master, back))));
+		if (ZFighterPotential.verdantElder(master)) {
+			// (gaps 2) a Verdant elder's rite
+			options.add(ZFighterPotential.option(player, master, false, back));
+		}
+		ZFighterNpcs.ask(player, master, Component.translatable((dark ? "talk.jaymospowers.dark_master." : "talk.jaymospowers.master.")
+			+ (!fighter ? "no_spark" : today ? "greet_today" : "greet")), options);
 	}
 
 	private static void teach(ServerPlayer player, Entity master, boolean dark) {

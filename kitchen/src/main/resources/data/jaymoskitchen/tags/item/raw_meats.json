@@ -1,5 +1,6 @@
 {
   "values": [
+    "jaymoskitchen:mince",
     "minecraft:beef",
     "minecraft:porkchop",
     "minecraft:mutton",
@@ -22,6 +23,7 @@
     "#jaymoskitchen:cooking/white_fish",
     "#jaymoskitchen:cooking/oily_fish",
     "#jaymoskitchen:cooking/reptile",
-    "jaymoskitchen:offal"
+    "jaymoskitchen:offal",
+    "jaymoskitchen:intestines"
   ]
 }

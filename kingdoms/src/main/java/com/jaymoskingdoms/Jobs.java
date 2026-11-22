@@ -32,7 +32,7 @@ import net.minecraft.world.phys.Vec3;
  * own buildings (its smithy, mason's yard, farm, stall, stable...), and takes that trade. By day, one at its job site
  * is seen working there (its trade's sound, smoke from a forge) and turns what's in the storehouse into goods: smiths
  * smelt the miners' raw ore with coal, the butcher cooks the farmer's meat, the mason cuts spare cobblestone into
- * bricks, the fletcher makes arrows, the fisherman brings in fish, and a farmer hands over the harvest it doesn't need.
+ * bricks, the fletcher makes arrows, the fisherman fishes the water by their barrel (none near, no fish), and a farmer hands over the harvest it doesn't need.
  */
 final class Jobs {
 	/** How often the villagers are looked over (ticks). */
@@ -47,6 +47,8 @@ final class Jobs {
 	static final int SITE_RANGE = 96;
 	/** A batch: raw ore smelted (with one coal), meat cooked, cobblestone cut, fish caught. */
 	static final int SMELT = 8, COOK = 8, CUT = 8, FISH = 2;
+	/** A fisherman fishes open water this near them (blocks across). */
+	static final int FISH_WATER = 10;
 	/** The mason cuts only cobblestone over this (the builders' share is kept). */
 	static final int MASON_KEEP = 256;
 	/**
@@ -158,6 +160,19 @@ final class Jobs {
 		return trade.is(VillagerProfession.FARMER) ? ParticleTypes.COMPOSTER : ParticleTypes.CRIT;
 	}
 
+	/** Open water (a water block under open air) within {@link #FISH_WATER} of {@code at}: the nearest, or null. */
+	private static @org.jspecify.annotations.Nullable BlockPos water(ServerLevel level, BlockPos at) {
+		BlockPos best = null;
+		double bestD = Double.MAX_VALUE;
+		for (BlockPos p : BlockPos.betweenClosed(at.offset(-FISH_WATER, -4, -FISH_WATER), at.offset(FISH_WATER, 1, FISH_WATER))) {
+			if (level.getFluidState(p).is(net.minecraft.tags.FluidTags.WATER) && level.getBlockState(p.above()).isAir() && p.distSqr(at) < bestD) {
+				bestD = p.distSqr(at);
+				best = p.immutable();
+			}
+		}
+		return best;
+	}
+
 	/** Its trade's batch of goods (true if it made any). */
 	private static boolean batch(ServerLevel level, Faction f, Villager v, Holder<VillagerProfession> trade) {
 		if (trade.is(VillagerProfession.WEAPONSMITH) && f.type().isRealm() && powder(level, f)) {
@@ -199,6 +214,17 @@ final class Jobs {
 			return false;
 		}
 		if (trade.is(VillagerProfession.FISHERMAN)) {
+			// (Andy, 2026-11-19: no food out of nowhere) only with open water by their barrel to fish: they cast into it and
+			// land what bites; a barrel with no water near catches nothing
+			BlockPos water = water(level, v.blockPosition());
+			if (water == null) {
+				return false;
+			}
+			v.getLookControl().setLookAt(water.getX() + 0.5, water.getY() + 0.9, water.getZ() + 0.5);
+			v.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+			level.playSound(null, water, net.minecraft.sounds.SoundEvents.FISHING_BOBBER_SPLASH, net.minecraft.sounds.SoundSource.NEUTRAL, 0.6F, 1.0F);
+			level.sendParticles(ParticleTypes.SPLASH, water.getX() + 0.5, water.getY() + 1.0, water.getZ() + 0.5, 12, 0.3, 0.05, 0.3, 0.1);
+			level.sendParticles(ParticleTypes.FISHING, water.getX() + 0.5, water.getY() + 1.0, water.getZ() + 0.5, 6, 0.3, 0.0, 0.3, 0.05);
 			Storage.put(level, f, level.getRandom().nextInt(3) == 0 ? Items.SALMON : Items.COD, 1 + level.getRandom().nextInt(FISH));
 			return true;
 		}

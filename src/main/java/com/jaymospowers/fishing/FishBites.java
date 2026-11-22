@@ -77,7 +77,8 @@ public final class FishBites {
 	}
 
 	/** A line in the water: whose (a hook's uuid, or a rod pod's slot), where its bait is, on what rod, with what on it. */
-	public record Line(Object key, ServerLevel level, Vec3 bait, Tackle.Rod rod, Item onHook, boolean trolling, boolean bottom) {
+	/** A line in the water. {@code keen}: how much keener fish are for its angler (Kingdoms' Saltblood path; 1 for none). */
+	public record Line(Object key, ServerLevel level, Vec3 bait, Tackle.Rod rod, Item onHook, boolean trolling, boolean bottom, float keen) {
 	}
 
 	/** What a line's fish did this check. */
@@ -147,7 +148,7 @@ public final class FishBites {
 		FishLegends.stir(level, hook.blockPosition(), player);
 		Tackle.Rod rod = Tackle.rodOf(player);
 		Line line = new Line(hook.getUUID(), level, baitAt(hook, rod, onHook), rod, onHook, FishingGear.trolling(player),
-			rod.bottom() || LureDepth.onBottom(hook));
+			rod.bottom() || LureDepth.onBottom(hook), com.jaymospowers.compat.KingdomsCompat.fishKeen(player));
 		switch (step(line)) {
 			case NIBBLE -> dip(level, hook, NIBBLE_DIP, 0.15F, 1.6F);
 			case TAKEN -> {
@@ -241,7 +242,7 @@ public final class FishBites {
 			return null;
 		}
 		BlockPos at = BlockPos.containing(line.bait());
-		float keen = rod.keen * FishingGear.groundbait(level, at) * FishSchools.keen(level, at) * IceFishing.keen(level, at);
+		float keen = rod.keen * FishingGear.groundbait(level, at) * FishSchools.keen(level, at) * IceFishing.keen(level, at) * line.keen();
 		if (line.trolling()) {
 			keen *= line.onHook() == Tackle.TROLLING_SQUID ? FishingGear.TROLL_LURE_KEEN : FishingGear.TROLL_KEEN;
 		}

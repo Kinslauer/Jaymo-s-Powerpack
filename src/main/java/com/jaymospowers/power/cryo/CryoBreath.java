@@ -13,6 +13,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -20,6 +21,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -29,7 +31,7 @@ import net.minecraft.world.phys.Vec3;
  * stops it), for as long as you hold G, up to {@link #MAX_TICKS}. What it catches is slowed and freezes the way powder
  * snow freezes you ({@code ticksFrozen}); held in it long enough a creature is frozen through and stands stiff (barely
  * moving, too numb to strike). Water it breathes on freezes over (melting back after {@link #ICE_TICKS}), burning things
- * stop burning, and smoke it touches turns to freezing fog. Snow mode: a gust of snow that slows and blinds and never
+ * stop burning, lava it reaches sets to obsidian (still) or basalt (flowing) in a hiss of steam, and smoke it touches turns to freezing fog. Snow mode: a gust of snow that slows and blinds and never
  * freezes or hurts. The cooldown grows with how long you blew.
  */
 public final class CryoBreath {
@@ -146,6 +148,7 @@ public final class CryoBreath {
 				}
 				if (!snow) {
 					BlockPos at = BlockPos.containing(p);
+					coolLava(level, at);
 					for (int down = 0; down <= 2; down++) {
 						if (CryoIce.place(level, at.below(down), Blocks.ICE.defaultBlockState(), (int)(ICE_TICKS * strength), CryoIce.Mode.WATER)) {
 							com.jaymospowers.core.trials.PowerTrials.count(player, "cryo.freeze_water", 1);
@@ -156,6 +159,21 @@ public final class CryoBreath {
 			}
 		}
 		player.causeFoodExhaustion(EXHAUSTION);
+	}
+
+	/** Lava the breath reaches around {@code centre}: still lava sets to obsidian, flowing lava to basalt, with a hiss of steam and smoke. */
+	static void coolLava(ServerLevel level, BlockPos centre) {
+		for (BlockPos pos : BlockPos.betweenClosed(centre.offset(-1, -1, -1), centre.offset(1, 1, 1))) {
+			FluidState fluid = level.getFluidState(pos);
+			if (!fluid.is(FluidTags.LAVA)) {
+				continue;
+			}
+			BlockPos at = pos.immutable();
+			level.setBlockAndUpdate(at, (fluid.isSource() ? Blocks.OBSIDIAN : Blocks.BASALT).defaultBlockState());
+			level.sendParticles(ParticleTypes.CLOUD, at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5, 4, 0.3, 0.2, 0.3, 0.02);
+			level.sendParticles(ParticleTypes.LARGE_SMOKE, at.getX() + 0.5, at.getY() + 1.0, at.getZ() + 0.5, 3, 0.3, 0.2, 0.3, 0.02);
+			level.playSound(null, at, SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 0.6F, 1.0F + level.getRandom().nextFloat() * 0.3F);
+		}
 	}
 
 	/** The cold on one creature: slowed and freezing (frozen through, held stiff); in snow mode slowed and blinded only. */

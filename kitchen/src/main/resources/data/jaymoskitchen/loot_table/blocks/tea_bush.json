@@ -1,0 +1,42 @@
+{
+  "type": "minecraft:block",
+  "modifier": {
+    "type": "minecraft:explosion_decay"
+  },
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskitchen:tea_bush"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "jaymoskitchen:tea_bush",
+        "state": {
+          "age": "3"
+        }
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskitchen:tea_leaves",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 2
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymoskitchen:blocks/tea_bush"
+}

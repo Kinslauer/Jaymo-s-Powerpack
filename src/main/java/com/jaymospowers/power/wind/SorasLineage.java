@@ -33,8 +33,8 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * The found stone blade, the gold cast poured over it, the iron blade cast in that, and every stage of the dagger made
  * from it carry the line's mark ({@link #MARK} in custom data, the line's serial). While no line is out, the stone blade
- * waits to be found two ways: a village child plays with it ({@link SorasBladeChild}) and a blacksmith shows it off
- * ({@link SorasBladeDisplay}). The first time a marked blade reaches a player, the line is out and the other find goes
+ * waits to be found three ways: a village child plays with it ({@link SorasBladeChild}), a blacksmith shows it off
+ * ({@link SorasBladeDisplay}) and it stands in a stone by a fallen star's crater, drawn only by the worthy ({@link SorasStone}). The first time a marked blade reaches a player, the line is out and the other find goes
  * away (cleared when its entity is next loaded, if not now). The line is gone, and the finds come back, when a marked
  * item is destroyed: a dropped one despawns, burns or falls out of the world, or the dagger breaks
  * ({@code mixin/SorasBreakMixin}). Marked things never melt in the smeltery, and the marked cast is used up by its one
@@ -154,10 +154,12 @@ public final class SorasLineage {
 			return;
 		}
 		set(server, new State(state.serial(), true, Optional.empty(), 0L, Optional.empty(), 0L));
+		SorasStone.claimed(server);
 		List<Entity> finds = new ArrayList<>();
 		for (ServerLevel level : server.getAllLevels()) {
 			for (Entity entity : level.getAllEntities()) {
-				if (entity.entityTags().contains(SorasBladeChild.TAG) || entity.entityTags().contains(SorasBladeDisplay.TAG)) {
+				if (entity.entityTags().contains(SorasBladeChild.TAG) || entity.entityTags().contains(SorasBladeDisplay.TAG)
+					|| entity.entityTags().contains(SorasStone.TAG)) {
 					finds.add(entity);
 				}
 			}
@@ -191,6 +193,10 @@ public final class SorasLineage {
 					child.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 				}
 				child.removeTag(SorasBladeChild.TAG);
+			}
+		} else if (entity instanceof ItemFrame frame && frame.entityTags().contains(SorasStone.TAG)) {
+			if (state.out() || SorasStone.stale(server, frame)) {
+				frame.discard();
 			}
 		} else if (entity instanceof ItemFrame frame && frame.entityTags().contains(SorasBladeDisplay.TAG)) {
 			if (state.out() || state.display().filter(entity.getUUID()::equals).isEmpty()) {

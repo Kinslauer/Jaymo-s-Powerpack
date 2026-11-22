@@ -2,11 +2,13 @@ package com.jaymospowers.client.costume;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.gifted.GiftedCostume;
+import com.jaymospowers.costume.Costume;
 import com.jaymospowers.costume.CostumeDesign;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.client.renderer.entity.state.ArmorStandRenderState;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
@@ -14,6 +16,7 @@ import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
@@ -30,6 +33,8 @@ public final class GiftedCostumeClient {
 	/** The fields copied off a villager's state, from {@link EntityRenderState} down to {@link HumanoidRenderState}. */
 	private static @Nullable List<Field> fields;
 	private static boolean broken;
+	/** A small armour stand's body is drawn this size. */
+	private static final float SMALL_STAND = 0.5F;
 
 	private GiftedCostumeClient() {
 	}
@@ -39,7 +44,9 @@ public final class GiftedCostumeClient {
 		if (broken || entity instanceof Player || !(state instanceof HumanoidRenderState humanoid) || state instanceof AvatarRenderState) {
 			return state;
 		}
-		CostumeDesign design = GiftedCostume.shown(entity);
+		// (an armour stand dressed in someone's costume is drawn the same way: CostumeStand)
+		boolean stand = entity instanceof ArmorStand;
+		CostumeDesign design = stand ? entity.getAttached(Costume.STAND) : GiftedCostume.shown(entity);
 		if (design == null) {
 			return state;
 		}
@@ -57,6 +64,13 @@ public final class GiftedCostumeClient {
 					broken = true;
 					return state;
 				}
+			}
+		}
+		if (stand && state instanceof ArmorStandRenderState armour) {
+			// the stand's own turn and size; its limbs' poses aren't carried over (it stands as a plain body)
+			avatar.bodyRot = armour.yRot;
+			if (armour.isSmall) {
+				avatar.scale *= SMALL_STAND;
 			}
 		}
 		avatar.id = entity.getId();
@@ -78,7 +92,7 @@ public final class GiftedCostumeClient {
 		}
 		avatar.legsEquipment = ItemStack.EMPTY;
 		avatar.feetEquipment = ItemStack.EMPTY;
-		if (avatar.nameTag != null) {
+		if (avatar.nameTag != null && !stand) {
 			avatar.nameTag = Component.literal(design.name());
 			avatar.scoreText = null;
 		}

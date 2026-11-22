@@ -99,6 +99,11 @@ public final class Bleeding {
 	public static final int CLEAN_TICKS = 6000;
 	/** (0.14.4) Dressings heal this often (ticks). */
 	static final int DRESS_STEP = 20;
+	/**
+	 * How long a stump bound by those who tended someone ({@link #bindStumps}) keeps its binding on show (ticks; a Minecraft
+	 * day). Not saved: a reload takes it off, as it does a dressing's heal.
+	 */
+	public static final int STUMP_BINDING_TICKS = 24000;
 	/** (0.14.4) Put on a body by Kingdoms' tending villagers: its bleeding stops, with a bandage's heal. */
 	public static final String BANDAGED_TAG = "jaymospowers_bandaged";
 	/**
@@ -147,6 +152,8 @@ public final class Bleeding {
 	private static final Map<LivingEntity, float[][]> DRESSING = new WeakHashMap<>();
 	/** Until when each part stays clean (game time, by ordinal). Not saved. */
 	private static final Map<LivingEntity, long[]> CLEANED = new WeakHashMap<>();
+	/** Until when each bound stump keeps its binding on ({@link #STUMP_BINDING_TICKS}; game time, by ordinal). Not saved. */
+	private static final Map<LivingEntity, long[]> BOUND = new WeakHashMap<>();
 
 	private Bleeding() {
 	}
@@ -163,6 +170,7 @@ public final class Bleeding {
 			CUT_SINCE.clear();
 			DRESSING.clear();
 			CLEANED.clear();
+			BOUND.clear();
 		});
 	}
 
@@ -346,6 +354,45 @@ public final class Bleeding {
 	}
 
 	/**
+	 * Andy (2026-11-19, woken in a village bed with both legs gone: "these good people took me in and im bleeding all over
+	 * they bed ... i should have been bandaged no?"): every bleeding stump on {@code entity} bound tight by someone tending
+	 * them, linen or (a rough job) {@code rag}. The bleeding stops and the binding shows on the stump's end
+	 * ({@link #WRAPPED}; the client's {@code WoundMarksLayer}) for {@link #STUMP_BINDING_TICKS}, or until a limb is fitted
+	 * over it. Only someone else does this: a player still closes their own stump with a hot blade. How many were bound.
+	 */
+	public static int bindStumps(LivingEntity entity, boolean rag) {
+		if (!(entity.level() instanceof ServerLevel level)) {
+			return 0;
+		}
+		int stumps = stumps(entity);
+		if (stumps == 0) {
+			return 0;
+		}
+		long until = level.getGameTime() + STUMP_BINDING_TICKS;
+		long[] bound = BOUND.computeIfAbsent(entity, e -> new long[PARTS]);
+		int wrap = wrapped(entity);
+		int n = 0;
+		for (BodyPart part : BodyPart.values()) {
+			int bit = Breaks.bit(part);
+			if ((stumps & bit) == 0 || !stop(entity, part, true)) {
+				continue;
+			}
+			bound[part.ordinal()] = until;
+			wrap = wrap & ~(bit << RAG_SHIFT) | bit | (rag ? bit << RAG_SHIFT : 0);
+			n++;
+		}
+		set(entity, WRAPPED, wrap);
+		TRACKED.add(entity);
+		return n;
+	}
+
+	/** Whether {@code part}, a stump, is still bound ({@link #bindStumps}) and has no limb fitted over it. */
+	private static boolean bound(LivingEntity entity, BodyPart part, long now) {
+		long[] bound = BOUND.get(entity);
+		return bound != null && bound[part.ordinal()] > now && (com.jaymospowers.core.Prosthetics.fitted(entity) & Breaks.limb(part)) == 0;
+	}
+
+	/**
 	 * (0.14.4) A dressing on {@code part}: {@code heal} health points over {@code ticks}, the part dressed ({@link #BANDAGED})
 	 * till then; {@code dirty} (a rag): it may fester while it's on.
 	 */
@@ -468,6 +515,8 @@ public final class Bleeding {
 			return;
 		}
 		entity.removeTag(BANDAGED_TAG);
+		// (stumps bound tight, and it shows: Andy, 2026-11-19)
+		bindStumps(entity, false);
 		stopAll(entity, true);
 		BodyPlan plan = BodyPlan.of(entity);
 		if (plan == null) {
@@ -551,16 +600,21 @@ public final class Bleeding {
 		set(body, BANDAGED, mask);
 	}
 
-	/** (0.15.90) A dressing comes off once its part is whole and clean (no cut, no festering), or the part is gone. */
+	/**
+	 * (0.15.90) A dressing comes off once its part is whole and clean (no cut, no festering), or the part is gone (unless
+	 * it's a stump still bound, {@link #bindStumps}).
+	 */
 	private static void unwrap(LivingEntity body) {
 		int mask = wrapped(body);
 		if (mask == 0) {
 			return;
 		}
 		int open = bleeding(body) | festering(body) | bandaged(body);
+		long now = body.level().getGameTime();
 		for (BodyPart part : BodyPart.values()) {
 			int bit = Breaks.bit(part);
-			if ((mask & bit) != 0 && (Breaks.missing(body, part) || (open & bit) == 0 && Wounds.fraction(body, part) >= 0.999F)) {
+			boolean gone = Breaks.missing(body, part);
+			if ((mask & bit) != 0 && (gone ? !bound(body, part, now) : (open & bit) == 0 && Wounds.fraction(body, part) >= 0.999F)) {
 				mask &= ~(bit | bit << RAG_SHIFT);
 			}
 		}

@@ -1,0 +1,21 @@
+{
+  "centre": "minecraft:glass_bottle",
+  "components": [
+    "minecraft:bone",
+    "minecraft:slime_ball",
+    "minecraft:iron_ingot",
+    "jaymospowers:ichor"
+  ],
+  "essences": {
+    "earth": 10,
+    "spirit": 8,
+    "water": 6
+  },
+  "instability": 5,
+  "result": {
+    "item": "jaymospowers:great_draught",
+    "count": 1
+  },
+  "research": "growing",
+  "flux": 5
+}
