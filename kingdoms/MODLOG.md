@@ -16251,3 +16251,11 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - A Ranger's arrow (not a thrown trident) is tagged for Jaymo's Powers' wounds: a headshot doubles even through a helmet,
   and the helmet's own cut doesn't apply (Andy: "rangers should go through the helmet now as long as you use an arrow").
 - `ClassPerks`. Built in CI; not played.
+
+## 0.11.73 (2026-11-22): Cannons: stone shot and fire shot (#1994)
+
+- **Stone Shot** (cobblestone, 5 -> 4): a cheap ball that breaks only timber where it lands (logs, planks, wooden doors, fences, gates, stairs, slabs, trapdoors), never masonry and not even loose ground. **Fire Shot** (2 Round Shot + a fire charge -> 2): breaks nothing; where it lands it sets fires on the free spots a fire can burn on (as flint and steel would), and sets those it hurts alight for 6 s. **Round Shot** (iron) is the unchanged ball that breaks stone; heavy shot, shells, chain and grape are as before.
+- Both are loaded like any shot: into a ship's gun (`ShipCannonBlock`, aboard or ashore, fired singly or in a broadside), into an airship's hold, or by a melded Rivet. Fires respect the world: a mob's gun lights nothing with mob griefing off, a wall gun spares its own realm's land and standing buildings as its other shot do, and nothing is lit where `fire_spread_radius_around_player` says fire doesn't burn.
+- Ship cannons were already there (gun blocks laid on a deck, a left click at the helm fires a broadside, crews fire them); the new shot kinds are wired in everywhere those take a shot. Crews and wall guns keep choosing from their old kinds, and stock no stone or fire shot.
+- New item models and textures in the round shot's style. Old Cannons (Shippy Ships' sailing mod, custom licence that allows modpacks with credit) was already in the pack.
+- Built by CI only; not played.
