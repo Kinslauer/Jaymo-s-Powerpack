@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 10:08). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 13:20). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -15,19 +15,18 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 - [[Agents/ai-texture-pipeline|ai-texture-pipeline]]: stalled, last change 2026-11-21. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hands-on-cooking-realtime|hands-on-cooking-realtime]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/survival-track3-hook-carry|survival-track3-hook-carry]]: stalled, last change 2026-11-22. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/survival-wounds-track1|survival-wounds-track1]]: stalled, last change 2026-11-22. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]]: still `stalled`, but its task `zfighter-gaps-6-items-wishes` is in Inbox/Done/.
 - [[Agents/zfighter-gaps-8-raids|zfighter-gaps-8-raids]]: still `blocked`, but its task `zfighter-gaps-8-raids` is in Inbox/Done/.
 
 ## On the board
 
-21 waiting for a bot, 4 being built, 5 in review: see [[Kanban]].
+21 waiting for a bot, 3 being built, 5 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1991 Defence disciplines, part 1: passive blocks, tighter parries, fist disarms (Powers, Kingdoms, 2026-11-22)
 - [ ] #1990 Z Fighter gaps 2, part 2: holding back, Limit Break 4-6, fighting styles, unlocked potential (Powers, 2026-11-22)
 - [ ] #1988 NPCs climb two-block walls and fences, as players do (Powers, 2026-11-22)
 - [ ] #1987 NPCs obey limb damage: arms gate their powers, bad legs put them on the ground (Powers, 2026-11-22)
@@ -87,12 +86,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1917 Guards' gold plate costs gold (Kingdoms, 2026-11-20)
 - [ ] #1916 spiders leave webbed and lair-kept players be (Kingdoms, 2026-11-20)
 - [ ] #1915 Everyone who speaks to you needs introducing first (Kingdoms, 2026-11-20)
-- [ ] #1914 Guards' gold helms gone (Kingdoms, 2026-11-20)
-- …and 344 older ones.
+- …and 345 older ones.
 
 ## Health
 
-6 problems in the notes: [[Health]].
+4 problems in the notes: [[Health]].
 
 ## Last week
 
