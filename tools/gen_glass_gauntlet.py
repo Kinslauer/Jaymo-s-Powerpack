@@ -57,9 +57,15 @@ def main():
     models = {}
     for mode, rows in (("fight", FIGHT), ("work", WORK)):
         rel = "item/glass_gauntlet" + ("" if mode == "fight" else "_work")
-        paint(rows, rel)
+        if mode == "work":
+            # (the claws-out icon is the reskinned base gauntlet: tools/gauntlet_assets.py)
+            paint(rows, rel)
         write(os.path.join(ASSETS, "models", rel + ".json"), {"parent": "minecraft:item/handheld", "textures": {"layer0": "jaymospowers:" + rel}})
         models[mode] = {"type": "minecraft:model", "model": "jaymospowers:" + rel}
+    # claws out, in the hands: the base gauntlet's 3D sleeve round the fist (tools/gauntlet_assets.py writes it)
+    models["fight"] = {"type": "minecraft:select", "property": "minecraft:display_context", "cases": [{
+        "when": ["firstperson_righthand", "firstperson_lefthand", "thirdperson_righthand", "thirdperson_lefthand"],
+        "model": {"type": "minecraft:model", "model": "jaymospowers:item/glass_gauntlet_held"}}], "fallback": models["fight"]}
     write(os.path.join(ASSETS, "items", "glass_gauntlet.json"), {"model": {
         "type": "minecraft:select", "property": "minecraft:custom_model_data", "index": 0,
         "cases": [{"when": "work", "model": models["work"]}], "fallback": models["fight"]}})

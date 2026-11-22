@@ -38,29 +38,38 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 /**
- * (0.18.75) The Fang Gauntlets worn on the hands, not held: a leather cuff round each wrist, an iron plate over the back
- * of the hand and three fang claws running past the knuckles, always out (modelled on Kingdoms' hidden blade, without the
- * spring). Held in the main hand they're drawn on both arms (the off hand's only while it's empty) and the held item is
- * hidden, in third person ({@link Layer}, {@code FangGauntletsItemInHandLayerMixin}) and first person
- * ({@code FangGauntletsFirstPersonMixin}, {@link #firstPersonGuard}).
+ * (0.18.75) The Fang Gauntlets worn on the hands, not held: the base gauntlet (below) with three fang spikes running past
+ * the knuckles, always out. Held in the main hand they're drawn on both arms (the off hand's only while it's empty) and
+ * the held item is hidden, in third person ({@link Layer}, {@code FangGauntletsItemInHandLayerMixin}) and first person
+ * ({@code FangGauntletsFirstPersonMixin}, {@link #firstPersonGuard}). A gauntlet in the off hand is worn on that arm,
+ * its own piece whatever the main hand holds, and punches with a right click ({@code boxing/OffhandPunch}).
  * <p>
  * Idle, both arms are held up ahead in a fighting guard ({@link #applyModel}), laid over whatever animated the model (it's
  * in {@code ModelPoses}, and as each model is finally drawn), and a pose of ours, so Entity Model Features pauses for it
  * ({@code PoseTakeover}). While an attack swings, vanilla's or Better Combat's (their combo animations are untouched),
- * the guard lets go and they drive the arms; there is no custom swing.
+ * the guard lets go and they drive the arms; there is no custom swing. Only a gauntlet in the main hand brings the guard.
  * <p>
- * Boxing's fist gear ({@link BoxingGear}: Hand Wraps, the cestus, the bracers) is worn the same way, through the same
- * mixins: wound round the hand, a studded band over the knuckles for a cestus, a guard up the forearm for bracers
- * ({@link #buildBoxing}), each with its own texture, and the same fists-up guard.
+ * <b>The base gauntlet</b> (Andy, 2026-11-22: "reskin a copy, and use that base for all our gauntlet or fist weapons.
+ * except the hidden blade"): every piece here is one shape, the sleeve round the fist of Gallant Gauntlets' gauntlet
+ * (by Joshieman, CC BY-NC 4.0, https://modrinth.com/mod/gauntlets; credits and our changes in
+ * {@code art/gallant_gauntlets/CREDITS.md}, the licence in {@code docs/licenses/}), its textures reskinned in our
+ * colours by {@code tools/gauntlet_assets.py}. Each piece adds its own to it: the Fang Gauntlets' spikes, a cestus's
+ * knuckle band, a bracer's guard over the wrist; boxing's Hand Wraps ({@link BoxingGear}) are it in bandage.
  */
 public final class FangGauntletsClient {
 	// ===== the knobs ================================================================================================
-	/** The cuff: from this far down the arm (pixels below the shoulder pivot), this tall, this far out round the arm, and this far proud of it. */
-	static final float CUFF_TOP = 5.0F, CUFF_HEIGHT = 3.0F, CUFF_HALF = 2.5F, CUFF_GROW = 0.4F;
-	/** The plate over the back of the hand: from this far down, this long, this wide, this thick, and its inner face this far out from the arm's middle. */
-	static final float PLATE_TOP = 7.6F, PLATE_LENGTH = 2.8F, PLATE_WIDTH = 3.0F, PLATE_THICK = 0.4F, PLATE_OUT = 2.45F;
-	/** The claws: from this far down to their tips (the hand ends at 10), the outer two a little shorter; this wide, this thick, this far apart. */
-	static final float CLAW_TOP = 8.8F, CLAW_TIP = 15.5F, CLAW_SIDE_SHORTER = 1.0F, CLAW_WIDTH = 0.8F, CLAW_THICK = 0.5F, CLAW_GAP = 1.25F;
+	/**
+	 * The base gauntlet's sleeve (Gallant's 4x6x4, round the fist): from this far down the arm (pixels below the shoulder
+	 * pivot) to the hand's end at 10, and this far proud of the arm: clear of a skin's sleeve layer (a quarter pixel proud
+	 * itself), which it would sink into, so it showed in patches.
+	 */
+	static final float SLEEVE_TOP = 4.0F, SLEEVE_GROW = 0.55F;
+	/**
+	 * The Fang Gauntlets' spikes: from this far down to their tips (the hand ends at 10), the outer two a little shorter;
+	 * this wide, this thick, this far apart, and their inner face this far out from the arm's middle (on the sleeve).
+	 */
+	static final float CLAW_TOP = 8.8F, CLAW_TIP = 15.5F, CLAW_SIDE_SHORTER = 1.0F, CLAW_WIDTH = 0.8F, CLAW_THICK = 0.5F, CLAW_GAP = 1.25F,
+		CLAW_OUT = 2.45F;
 	/** The middle of a wide arm, and of a slim one, off the shoulder pivot (pixels, toward the body's outside). */
 	static final float WIDE_ARM_MIDDLE = 1.0F, SLIM_ARM_MIDDLE = 0.5F;
 	/** The guard: the arm raised ahead this far (radians, 0 hanging, -pi/2 straight out), plus this share of where you look; turned in this far; this much of the walk's arm swing kept; the extra when crouched. */
@@ -69,32 +78,27 @@ public final class FangGauntletsClient {
 	static final float FIRST_IN = 0.16F, FIRST_UP = 0.1F, FIRST_FORWARD = 0.05F, FIRST_RAISE = 12.0F, FIRST_TURN = 10.0F, FIRST_TIP = 4.0F;
 	/** First person: the shoulder the arm turns about (right arm; x right, y up, z toward you), and how far below the view the empty off hand starts. */
 	static final float FIRST_SHOULDER_X = 0.75F, FIRST_SHOULDER_Y = -0.85F, FIRST_ENTRY_DROP = 0.6F;
-	/**
-	 * Boxing's wrap round the hand: from this far down the arm to the hand's end, and this far proud of it: clear of a
-	 * skin's sleeve layer (a quarter pixel proud itself), which it sank into, so it showed in patches.
-	 */
-	static final float WRAP_TOP = 6.0F, WRAP_GROW = 0.55F;
-	/** Boxing's gear is shaped for a 4 pixel arm: on a slim one (3 pixels) it is this much narrower across, to sit as close. */
+	/** The gear is shaped for a 4 pixel arm: on a slim one (3 pixels) it is this much narrower across, to sit as close. */
 	static final float SLIM_GEAR = 0.8F;
 	/** A cestus's band over the knuckles: from this far down, and this far proud. */
 	static final float KNUCKLE_TOP = 9.0F, KNUCKLE_GROW = 0.8F;
-	/** Bracers: worn as a glove, from the wrist (this far down the arm) over the rest of the hand to its end, and this far proud. */
-	static final float BRACER_TOP = 7.0F, BRACER_GROW = 0.6F;
+	/** A bracer's guard over the sleeve's wrist end: from this far down the arm, this long, and this far proud. */
+	static final float BRACER_TOP = 4.0F, BRACER_GROW = 0.9F;
 	static final int BRACER_LENGTH = 3;
 	// ================================================================================================================
 
 	/** Bits on a render state: the right arm wears a gauntlet, the left does, and (4) they're in the guard (no attack swinging). */
 	private static final int RIGHT = 1, LEFT = 2, GUARD = 4;
-	static final Identifier TEXTURE = JaymosPowers.id("textures/entity/fang_gauntlets.png");
 	public static final RenderStateDataKey<Integer> KEY = RenderStateDataKey.create(() -> "jaymospowers:fang_gauntlets");
 
-	private static ModelPart rightGauntlet, leftGauntlet;
-	/** Boxing's shapes (the same on either arm): the wrap, the wrap under a cestus's knuckle band, and the bracer. */
-	private static ModelPart wrap, cestus, bracer;
-	/** Boxing's textures, by {@link BoxingGear#wornIndex}. */
-	private static final Identifier[] BOXING_TEXTURES = new Identifier[BoxingGear.WORN.length];
-	/** On a render state, above the arm bits: which of boxing's gear it is, plus one (0: the Fang Gauntlets). */
-	private static final int KIND_SHIFT = 8;
+	/** The Fang Gauntlets' shapes: the spikes are on the back of the hand, so one for each arm. */
+	private static ModelPart rightFangs, leftFangs;
+	/** The other shapes (the same on either arm): the sleeve alone, with a cestus's knuckle band, with a bracer's guard. */
+	private static ModelPart sleeve, cestus, bracer;
+	/** Each kind's texture, by {@link #wornKind} less one: the Fang Gauntlets, then boxing's gear by {@link BoxingGear#wornIndex}. */
+	private static final Identifier[] TEXTURES = new Identifier[BoxingGear.WORN.length + 1];
+	/** On a render state, above the arm bits: the kind ({@link #wornKind}) on the right arm, and on the left. */
+	private static final int RIGHT_SHIFT = 8, LEFT_SHIFT = 16, KIND_MASK = 0xFF;
 
 	private FangGauntletsClient() {
 	}
@@ -109,32 +113,41 @@ public final class FangGauntletsClient {
 
 	/** Whether {@code stack} is worn on the hands when held: the Fang Gauntlets, or boxing's fist gear. */
 	public static boolean isGauntlets(ItemStack stack) {
-		return Armory.FANG_GAUNTLETS != null && stack.is(Armory.FANG_GAUNTLETS) || BoxingGear.wornIndex(stack) >= 0;
+		return wornKind(stack) != 0;
 	}
 
-	/** 0 for the Fang Gauntlets, else boxing's gear: its {@link BoxingGear#wornIndex} plus one. */
-	private static int kind(ItemStack stack) {
-		return BoxingGear.wornIndex(stack) + 1;
+	/** Which piece {@code stack} is worn as: 0 not worn, 1 the Fang Gauntlets, else boxing's gear (its {@link BoxingGear#wornIndex} plus two). */
+	private static int wornKind(ItemStack stack) {
+		if (Armory.FANG_GAUNTLETS != null && stack.is(Armory.FANG_GAUNTLETS)) {
+			return 1;
+		}
+		int boxing = BoxingGear.wornIndex(stack);
+		return boxing < 0 ? 0 : boxing + 2;
 	}
 
-	/** From the avatar renderer's extractRenderState: which arms wear a gauntlet, and whether they're in the guard. */
+	/** The kinds worn on the main hand's arm and the off hand's: the off hand's own piece, else the main hand's while it's empty. */
+	private static int[] kinds(ItemStack main, ItemStack off) {
+		int mainKind = wornKind(main), offKind = wornKind(off);
+		return new int[] {mainKind, offKind == 0 && off.isEmpty() ? mainKind : offKind};
+	}
+
+	/** From the avatar renderer's extractRenderState: which arms wear a gauntlet, which one, and whether they're in the guard. */
 	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
 		// (a boxer's style, punch, evade and tiredness ride along: boxing/BoxingPoses)
 		com.jaymospowers.client.boxing.BoxingPoses.extract(entity, state, partialTicks);
-		if (!isGauntlets(entity.getMainHandItem())) {
+		int[] kinds = kinds(entity.getMainHandItem(), entity.getOffhandItem());
+		if (kinds[0] == 0 && kinds[1] == 0) {
 			state.setData(KEY, null);
 			return;
 		}
 		boolean mainRight = entity.getMainArm() == HumanoidArm.RIGHT;
-		int bits = mainRight ? RIGHT : LEFT;
-		if (entity.getOffhandItem().isEmpty()) {
-			bits |= mainRight ? LEFT : RIGHT;
-		}
+		int right = mainRight ? kinds[0] : kinds[1], left = mainRight ? kinds[1] : kinds[0];
+		int bits = (right != 0 ? RIGHT : 0) | (left != 0 ? LEFT : 0);
 		boolean swinging = state.currentSwing != null && state.swingAnimation > 0.0F;
-		if (!swinging && CombatAnimCompat.attack(entity) == null && !entity.isUsingItem()) {
+		if (kinds[0] != 0 && !swinging && CombatAnimCompat.attack(entity) == null && !entity.isUsingItem()) {
 			bits |= GUARD;
 		}
-		state.setData(KEY, bits | kind(entity.getMainHandItem()) << KIND_SHIFT);
+		state.setData(KEY, bits | right << RIGHT_SHIFT | left << LEFT_SHIFT);
 	}
 
 	/** Whether the guard is on this state (for PoseTakeover: Entity Model Features pauses so it holds). */
@@ -143,9 +156,15 @@ public final class FangGauntletsClient {
 		return bits != null && (bits & GUARD) != 0;
 	}
 
-	/** Whether this state wears gauntlets (the main-hand item is then not drawn; PoseTakeover pauses Entity Model Features for it). */
+	/** Whether this state wears gauntlets on either arm (PoseTakeover pauses Entity Model Features for it). */
 	public static boolean worn(AvatarRenderState state) {
 		return state.getData(KEY) != null;
+	}
+
+	/** Whether the arm {@code arm} wears a gauntlet on this state (what that hand holds is then not drawn). */
+	public static boolean wornOn(AvatarRenderState state, HumanoidArm arm) {
+		Integer bits = state.getData(KEY);
+		return bits != null && (bits & (arm == HumanoidArm.RIGHT ? RIGHT : LEFT)) != 0;
 	}
 
 	/**
@@ -182,14 +201,15 @@ public final class FangGauntletsClient {
 	}
 
 	/**
-	 * First person, before the game draws your bare arm for {@code hand}: with a gauntlet on it, moves the arm into the
-	 * guard and returns true. Not while a swing runs ({@code attack} above 0, or a Better Combat animation): then the
-	 * arm is left to the swing, drawn bare where the game puts it. A boxer's arms stay in the guard through a punch,
-	 * and the one that throws it goes out from there ({@code BoxingPoses.firstPerson}).
+	 * First person, before the game draws your bare arm for {@code hand}: with a gauntlet in the main hand, moves the arm
+	 * into the guard and returns true. Not while a swing runs ({@code attack} above 0, or a Better Combat animation): then
+	 * the arm is left to the swing, drawn bare where the game puts it. A boxer's arms stay in the guard through a punch,
+	 * and the one that throws it goes out from there ({@code BoxingPoses.firstPerson}). A gauntlet only in the off hand
+	 * brings no guard: that arm is drawn where the game puts an empty hand.
 	 */
 	public static boolean firstPersonGuard(PoseStack poseStack, AvatarRenderState avatar, InteractionHand hand, float attack, float inverseArmHeight) {
 		LocalPlayer player = Minecraft.getInstance().player;
-		if (player == null || avatar.id != player.getId()) {
+		if (player == null || avatar.id != player.getId() || !isGauntlets(player.getMainHandItem())) {
 			return false;
 		}
 		boolean main = hand == InteractionHand.MAIN_HAND;
@@ -215,71 +235,63 @@ public final class FangGauntletsClient {
 		return true;
 	}
 
-	/** Whether your own hand {@code hand}, showing {@code shown}, wears a gauntlet in first person (main hand holding them; the off hand empty). */
+	/** Whether your own hand {@code hand}, showing {@code shown}, wears a gauntlet in first person. */
 	public static boolean wornInHand(InteractionHand hand, ItemStack shown) {
 		LocalPlayer player = Minecraft.getInstance().player;
-		if (player == null || !isGauntlets(player.getMainHandItem())) {
+		if (player == null) {
 			return false;
 		}
-		return hand == InteractionHand.MAIN_HAND ? isGauntlets(shown) : shown.isEmpty();
+		int[] kinds = kinds(player.getMainHandItem(), player.getOffhandItem());
+		return hand == InteractionHand.MAIN_HAND ? kinds[0] != 0 && isGauntlets(shown) : kinds[1] != 0 && (shown.isEmpty() || isGauntlets(shown));
 	}
 
+	/** The shapes and textures, made once. */
 	private static void build() {
-		if (rightGauntlet != null) {
+		if (sleeve != null) {
 			return;
 		}
 		MeshDefinition mesh = new MeshDefinition();
 		PartDefinition root = mesh.getRoot();
-		float clawX = PLATE_OUT + PLATE_THICK - CLAW_THICK * 0.2F;
-		float[] tips = {CLAW_TIP - CLAW_SIDE_SHORTER, CLAW_TIP, CLAW_TIP - CLAW_SIDE_SHORTER};
+		float sleeveHeight = 10.0F - SLEEVE_TOP;
+		CubeDeformation grow = new CubeDeformation(SLEEVE_GROW);
 		// about the arm's middle; the right arm's back of hand faces -x (out from the body)
-		CubeListBuilder right = CubeListBuilder.create()
-			.texOffs(0, 0).addBox(-CUFF_HALF, CUFF_TOP, -CUFF_HALF, CUFF_HALF * 2.0F, CUFF_HEIGHT, CUFF_HALF * 2.0F, new CubeDeformation(CUFF_GROW))
-			.texOffs(0, 10).addBox(-PLATE_OUT - PLATE_THICK, PLATE_TOP, -PLATE_WIDTH / 2.0F, PLATE_THICK, PLATE_LENGTH, PLATE_WIDTH);
-		CubeListBuilder left = CubeListBuilder.create().mirror()
-			.texOffs(0, 0).addBox(-CUFF_HALF, CUFF_TOP, -CUFF_HALF, CUFF_HALF * 2.0F, CUFF_HEIGHT, CUFF_HALF * 2.0F, new CubeDeformation(CUFF_GROW))
-			.texOffs(0, 10).addBox(PLATE_OUT, PLATE_TOP, -PLATE_WIDTH / 2.0F, PLATE_THICK, PLATE_LENGTH, PLATE_WIDTH);
+		CubeListBuilder right = CubeListBuilder.create().texOffs(0, 0).addBox(-2.0F, SLEEVE_TOP, -2.0F, 4.0F, sleeveHeight, 4.0F, grow);
+		CubeListBuilder left = CubeListBuilder.create().texOffs(0, 0).addBox(-2.0F, SLEEVE_TOP, -2.0F, 4.0F, sleeveHeight, 4.0F, grow);
+		float[] tips = {CLAW_TIP - CLAW_SIDE_SHORTER, CLAW_TIP, CLAW_TIP - CLAW_SIDE_SHORTER};
 		for (int claw = 0; claw < 3; claw++) {
 			float z = (claw - 1) * CLAW_GAP - CLAW_WIDTH / 2.0F;
-			right.texOffs(claw * 8, 18).addBox(-clawX - CLAW_THICK, CLAW_TOP, z, CLAW_THICK, tips[claw] - CLAW_TOP, CLAW_WIDTH);
-			left.texOffs(claw * 8, 18).addBox(clawX, CLAW_TOP, z, CLAW_THICK, tips[claw] - CLAW_TOP, CLAW_WIDTH);
+			right.texOffs(32 + claw * 8, 0).addBox(-CLAW_OUT - CLAW_THICK, CLAW_TOP, z, CLAW_THICK, tips[claw] - CLAW_TOP, CLAW_WIDTH);
+			left.texOffs(32 + claw * 8, 0).mirror().addBox(CLAW_OUT, CLAW_TOP, z, CLAW_THICK, tips[claw] - CLAW_TOP, CLAW_WIDTH).mirror(false);
 		}
-		root.addOrReplaceChild("right_gauntlet", right, PartPose.ZERO);
-		root.addOrReplaceChild("left_gauntlet", left, PartPose.ZERO);
-		ModelPart baked = LayerDefinition.create(mesh, 32, 32).bakeRoot();
-		rightGauntlet = baked.getChild("right_gauntlet");
-		leftGauntlet = baked.getChild("left_gauntlet");
-	}
-
-	/** Boxing's shapes, about the arm's middle: boxes round the arm, so one of each serves both arms. */
-	private static void buildBoxing() {
-		if (wrap != null) {
-			return;
-		}
-		MeshDefinition mesh = new MeshDefinition();
-		PartDefinition root = mesh.getRoot();
-		float wrapHeight = 10.0F - WRAP_TOP;
-		root.addOrReplaceChild("wrap", CubeListBuilder.create()
-			.texOffs(0, 0).addBox(-2.0F, WRAP_TOP, -2.0F, 4.0F, wrapHeight, 4.0F, new CubeDeformation(WRAP_GROW)), PartPose.ZERO);
+		root.addOrReplaceChild("right_fangs", right, PartPose.ZERO);
+		root.addOrReplaceChild("left_fangs", left, PartPose.ZERO);
+		root.addOrReplaceChild("sleeve", CubeListBuilder.create()
+			.texOffs(0, 0).addBox(-2.0F, SLEEVE_TOP, -2.0F, 4.0F, sleeveHeight, 4.0F, grow), PartPose.ZERO);
 		root.addOrReplaceChild("cestus", CubeListBuilder.create()
-			.texOffs(0, 0).addBox(-2.0F, WRAP_TOP, -2.0F, 4.0F, wrapHeight, 4.0F, new CubeDeformation(WRAP_GROW))
-			.texOffs(0, 8).addBox(-2.0F, KNUCKLE_TOP, -2.0F, 4.0F, 1.0F, 4.0F, new CubeDeformation(KNUCKLE_GROW)), PartPose.ZERO);
+			.texOffs(0, 0).addBox(-2.0F, SLEEVE_TOP, -2.0F, 4.0F, sleeveHeight, 4.0F, grow)
+			.texOffs(0, 12).addBox(-2.0F, KNUCKLE_TOP, -2.0F, 4.0F, 1.0F, 4.0F, new CubeDeformation(KNUCKLE_GROW)), PartPose.ZERO);
 		root.addOrReplaceChild("bracer", CubeListBuilder.create()
-			.texOffs(0, 16).addBox(-2.0F, BRACER_TOP, -2.0F, 4.0F, BRACER_LENGTH, 4.0F, new CubeDeformation(BRACER_GROW)), PartPose.ZERO);
-		ModelPart baked = LayerDefinition.create(mesh, 32, 32).bakeRoot();
-		wrap = baked.getChild("wrap");
+			.texOffs(0, 0).addBox(-2.0F, SLEEVE_TOP, -2.0F, 4.0F, sleeveHeight, 4.0F, grow)
+			.texOffs(0, 18).addBox(-2.0F, BRACER_TOP, -2.0F, 4.0F, BRACER_LENGTH, 4.0F, new CubeDeformation(BRACER_GROW)), PartPose.ZERO);
+		ModelPart baked = LayerDefinition.create(mesh, 64, 32).bakeRoot();
+		rightFangs = baked.getChild("right_fangs");
+		leftFangs = baked.getChild("left_fangs");
+		sleeve = baked.getChild("sleeve");
 		cestus = baked.getChild("cestus");
 		bracer = baked.getChild("bracer");
-		for (int i = 0; i < BOXING_TEXTURES.length; i++) {
-			BOXING_TEXTURES[i] = JaymosPowers.id("textures/entity/boxing/" + BoxingGear.WORN[i] + ".png");
+		TEXTURES[0] = JaymosPowers.id("textures/entity/fang_gauntlets.png");
+		for (int i = 0; i < BoxingGear.WORN.length; i++) {
+			TEXTURES[i + 1] = JaymosPowers.id("textures/entity/boxing/" + BoxingGear.WORN[i] + ".png");
 		}
 	}
 
-	/** One gauntlet (or, {@code kind} above 0, one of boxing's), on the arm the pose stack is at (its pivot). */
+	/** One piece of {@code kind} ({@link #wornKind}), on the arm the pose stack is at (its pivot). */
 	private static void submit(PoseStack poseStack, SubmitNodeCollector collector, int light, boolean right, boolean slim, int kind, float fold,
 		boolean across) {
+		if (kind <= 0 || kind > TEXTURES.length) {
+			return;
+		}
 		build();
-		buildBoxing();
 		poseStack.pushPose();
 		float middle = slim ? SLIM_ARM_MIDDLE : WIDE_ARM_MIDDLE;
 		poseStack.translate((right ? -middle : middle) / 16.0F, 0.0F, 0.0F);
@@ -290,33 +302,36 @@ public final class FangGauntletsClient {
 			poseStack.rotateDegrees(across ? Axis.ZP : Axis.XP, fold * Mth.RAD_TO_DEG);
 			poseStack.translate(0.0F, -elbow, 0.0F);
 		}
-		if (kind <= 0 || kind > BOXING_TEXTURES.length) {
-			collector.submitModelPart(right ? rightGauntlet : leftGauntlet, poseStack, RenderTypes.entityCutout(TEXTURE), light, OverlayTexture.NO_OVERLAY, null);
-		} else {
-			if (slim) {
-				poseStack.scale(SLIM_GEAR, 1.0F, 1.0F);
-			}
-			String shape = BoxingGear.WORN[kind - 1];
-			ModelPart part = shape.endsWith("bracers") ? bracer : shape.endsWith("cestus") ? cestus : wrap;
-			collector.submitModelPart(part, poseStack, RenderTypes.entityCutout(BOXING_TEXTURES[kind - 1]), light, OverlayTexture.NO_OVERLAY, null);
+		if (slim) {
+			poseStack.scale(SLIM_GEAR, 1.0F, 1.0F);
 		}
+		ModelPart part;
+		if (kind == 1) {
+			part = right ? rightFangs : leftFangs;
+		} else {
+			String shape = BoxingGear.WORN[kind - 2];
+			part = shape.endsWith("bracers") ? bracer : shape.endsWith("cestus") ? cestus : sleeve;
+		}
+		collector.submitModelPart(part, poseStack, RenderTypes.entityCutout(TEXTURES[kind - 1]), light, OverlayTexture.NO_OVERLAY, null);
 		poseStack.popPose();
 	}
 
 	/** First person: after the game draws your own arm, your gauntlet on it. */
 	public static void firstPersonHand(PoseStack poseStack, SubmitNodeCollector collector, int light, ModelPart arm, PlayerModel source) {
 		LocalPlayer player = Minecraft.getInstance().player;
-		if (player == null || !isGauntlets(player.getMainHandItem())) {
+		if (player == null) {
 			return;
 		}
+		int[] kinds = kinds(player.getMainHandItem(), player.getOffhandItem());
 		boolean right = arm == source.rightArm;
 		boolean mainArm = right == (player.getMainArm() == HumanoidArm.RIGHT);
-		if (!mainArm && !player.getOffhandItem().isEmpty()) {
+		int kind = kinds[mainArm ? 0 : 1];
+		if (kind == 0) {
 			return;
 		}
 		poseStack.pushPose();
 		arm.translateAndRotate(poseStack);
-		submit(poseStack, collector, light, right, player.getSkin().model() == PlayerModelType.SLIM, kind(player.getMainHandItem()), 0.0F, false);
+		submit(poseStack, collector, light, right, player.getSkin().model() == PlayerModelType.SLIM, kind, 0.0F, false);
 		poseStack.popPose();
 	}
 
@@ -346,7 +361,8 @@ public final class FangGauntletsClient {
 				com.jaymospowers.client.boxing.BoxingPoses.Bends bends = state.getData(com.jaymospowers.client.boxing.BoxingPoses.BENDS);
 				float fold = bends == null ? 0.0F : right ? bends.right() : bends.left();
 				boolean across = bends != null && (right ? bends.rightAcross() : bends.leftAcross());
-				FangGauntletsClient.submit(poseStack, collector, lightCoords, right, slim, bits >> KIND_SHIFT, fold, across);
+				int kind = bits >> (right ? RIGHT_SHIFT : LEFT_SHIFT) & KIND_MASK;
+				FangGauntletsClient.submit(poseStack, collector, lightCoords, right, slim, kind, fold, across);
 				poseStack.popPose();
 			}
 		}
