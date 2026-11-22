@@ -135,7 +135,7 @@ public final class Climate {
 		});
 		// thirst for what you do: a block broken, an attack (jumps and sprinting are counted each second)
 		PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, blockEntity) -> {
-			if (player instanceof ServerPlayer server && level.getGameRules().get(THIRST)) {
+			if (player instanceof ServerPlayer server && server.level().getGameRules().get(THIRST)) {
 				Thirst.exert(server, Thirst.BREAK);
 			}
 		});
@@ -324,6 +324,8 @@ public final class Climate {
 			ServerLevel level = player.level();
 			if (level.getGameRules().get(STAMINA)) {
 				Stamina.tick(player);
+			} else if (player.hasAttached(Stamina.WIND)) {
+				Stamina.clear(player);
 			}
 			boolean thirst = level.getGameRules().get(THIRST);
 			boolean heat = level.getGameRules().get(BODY_HEAT);

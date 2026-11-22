@@ -9,7 +9,8 @@ Andy's picks from Legendary Survival Overhaul (ideas and numbers only) and Walk 
   at full; soaked through (80 and up) on cold land is worse, and soaked clothes keep half their warmth (wool all of
   it). Jaymo's Powers' Wet and Soaked keep the meter at least 40 or full, and Kingdoms' downpours fill it. It shows
   as a small blue glass beside the thermometer while you're wet. This replaces the old one-minute wet timer and the
-  separate in-water chill.
+  separate in-water chill. About six seconds of rain makes you soaked through (clothes at half warmth, hides wearing as
+  soaked), sooner than Powers' own Soaked.
 - **Dousing**: sneak-use a water bottle, a bottle of clean water or a waterskin with water in it (not while aiming at
   water, where it fills): you pour it over yourself, are wet through, and any fire on you goes out. A bottle gives its
   glass back; a waterskin loses a sip. With Powers you're Soaked as well.
@@ -17,13 +18,16 @@ Andy's picks from Legendary Survival Overhaul (ideas and numbers only) and Walk 
   blocks (it used to start 40 blocks up, so hills are a little colder). The day swings 2 degrees either side, warmest
   at noon and coldest at midnight, on top of the sun and night sky. Fires, campfires, lava, magma and lit furnaces
   warm you from up to 20 blocks away (was 5), less with distance, and half as much out under the sky as inside.
-  For 90 seconds after joining or respawning the world can't make your body heat any worse.
+  The Nether counts as out of doors. So a campfire three blocks off indoors now gives about 25 (was 12), and lava
+  in the Nether warms you from further off (heatstroke only right beside it, as before). For 90 seconds after joining
+  or respawning the world can't make your body heat any worse.
 - **Cold breath**: a small puff of breath at the mouth, drifting the way you face, every two seconds when the air is
   cold (25 below comfortable) or you're chilly. Everyone sees it.
 - **Sprint stamina** (`Stamina`, game rule `jaymoskitchen:stamina`): sprinting spends wind instead of food. A full
   hunger bar holds a full bar of wind (about 13 seconds of sprinting), half a hunger bar half of it. Run out and you're
   winded: slowed for 3 seconds, and no sprinting until a quarter is back; it refills a second after you stop. The bar
   shows in the focus band over the hotbar while it isn't full, the part you can't hold for hunger shaded off. Powers'
-  feathers stay what dodges, powers and fighting or running in armour spend.
+  feathers stay what dodges, powers and fighting or running in armour spend. Powers' overclocked speedsters run
+  without spending wind (`Stamina.addTireless`). Switching the rule off clears the bar.
 - Built; not played. Not checked in game: the breath puff's look, the HUD placement of the wetness glass and wind bar,
   the heat-source scan's cost on a busy server, how the sprint bar feels next to feathers.

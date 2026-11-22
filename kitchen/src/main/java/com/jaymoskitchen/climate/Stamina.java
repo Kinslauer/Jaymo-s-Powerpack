@@ -3,8 +3,11 @@ package com.jaymoskitchen.climate;
 import com.jaymoskitchen.JaymosKitchen;
 import io.netty.buffer.ByteBuf;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Predicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
@@ -25,7 +28,8 @@ import net.minecraft.world.entity.player.Player;
  * of it. Run it out and you're winded: slowed for {@link #WINDED_TICKS}, no sprinting until it's back to
  * {@link #RECOVER_SHARE}. It comes back once you've stopped sprinting for {@link #REFILL_DELAY}.
  * <p>
- * Only sprinting: Jaymo's Powers' feathers are still what dodges, powers and fighting in armour spend.
+ * Only sprinting: Jaymo's Powers' feathers are still what dodges, powers and fighting in armour spend, and its
+ * overclocked speedsters run on their power ({@link #addTireless}).
  */
 public final class Stamina {
 	/** A full bar. */
@@ -58,8 +62,21 @@ public final class Stamina {
 	}
 
 	private static final Map<UUID, State> STATES = new HashMap<>();
+	/** Who sprints without spending wind (Jaymo's Powers' overclocked speedsters); other mods add by reflection. */
+	private static final List<Predicate<Player>> TIRELESS = new CopyOnWriteArrayList<>();
 
 	private Stamina() {
+	}
+
+	/** For other mods (by reflection): who runs without tiring. */
+	public static void addTireless(Predicate<Player> tireless) {
+		TIRELESS.add(tireless);
+	}
+
+	/** The rule switched off: no wind kept, nothing winded. */
+	static void clear(ServerPlayer player) {
+		STATES.remove(player.getUUID());
+		player.removeAttached(WIND);
 	}
 
 	public static Wind wind(Player player) {
@@ -75,11 +92,20 @@ public final class Stamina {
 		STATES.remove(id);
 	}
 
+	private static boolean tireless(Player player) {
+		for (Predicate<Player> t : TIRELESS) {
+			if (t.test(player)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** Every tick, survival and adventure. */
 	static void tick(ServerPlayer player) {
 		State state = STATES.computeIfAbsent(player.getUUID(), id -> new State());
 		float cap = MAX * player.getFoodData().getFoodLevel() / 20.0F;
-		if (player.isSprinting() && !player.getAbilities().mayfly && !player.isPassenger()) {
+		if (player.isSprinting() && !player.getAbilities().mayfly && !player.isPassenger() && !tireless(player)) {
 			state.rested = 0;
 			state.left -= SPRINT_COST;
 			if (state.left <= 0.0F) {

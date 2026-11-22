@@ -220,8 +220,6 @@ public final class Dodge {
 		PayloadTypeRegistry.serverboundPlay().register(Extend.TYPE, Extend.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Extend.TYPE, (payload, ctx) -> extend(ctx.player()));
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !(entity instanceof ServerPlayer player && evades(player, source)));
-		// stop, drop and roll: the same tumble puts out a fire
-		FireRoll.init();
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			LAST.remove(handler.player.getUUID());
 			BACKWARD.remove(handler.player.getUUID());

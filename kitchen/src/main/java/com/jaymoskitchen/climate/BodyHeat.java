@@ -455,7 +455,8 @@ public final class BodyHeat {
 			air += POWDER_SNOW;
 		}
 
-		air += fire(player, sky);
+		// the Nether's open caverns count as out of doors: it's no building, and lava is everywhere
+		air += fire(player, sky || realm == Level.NETHER);
 		// (Hardrock picks) a lit hearth's or icebox's room
 		air = Warmth.room(player, air);
 
@@ -494,7 +495,7 @@ public final class BodyHeat {
 	 * less again out under the sky ({@link #OUTDOORS}). The near ones are looked for every second, the far ones every
 	 * {@link #FAR_EVERY} seconds, skipping whole chunk sections with nothing hot in them.
 	 */
-	static float fire(ServerPlayer player, boolean sky) {
+	static float fire(ServerPlayer player, boolean outdoors) {
 		ServerLevel level = player.level();
 		BlockPos at = player.blockPosition();
 		UUID id = player.getUUID();
@@ -502,7 +503,7 @@ public final class BodyHeat {
 			FAR_FIRE.put(id, fire(level, at, FIRE_RANGE, FIRE_HEIGHT));
 		}
 		float best = Math.max(fire(level, at, NEAR_RANGE, NEAR_HEIGHT), FAR_FIRE.get(id));
-		return sky ? best * OUTDOORS : best;
+		return outdoors ? best * OUTDOORS : best;
 	}
 
 	/** The strongest warmth reaching {@code at} from within {@code range} across and {@code height} up and down. */
