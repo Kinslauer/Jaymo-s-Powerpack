@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 00:57). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 01:17). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -21,7 +21,6 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-l-carts-check|vanilla-plus-l-carts-check]] · for 💻 Odysseus · open
-- [ ] [[Inbox/village-mines-job-buildings|village-mines-job-buildings]] · for ☁️ Cloud · open
 - [ ] [[Inbox/village-mods-4-board-work|village-mods-4-board-work]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-5-town-life-hats|village-mods-5-town-life-hats]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-6-small-structures|village-mods-6-small-structures]] · for 💻 Odysseus · open
@@ -29,16 +28,17 @@ kanban-plugin: board
 - [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
 - [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · for ☁️ Cloud · open
+- [ ] [[Inbox/village-mines-job-buildings|village-mines-job-buildings]] · for ☁️ Cloud · open
 - [ ] [[Inbox/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
 
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🔨 Hephaestus · #1957 · changes · fixing review notes
-- [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · changes · fixing review notes
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · 🔨 Hephaestus · #1896 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-2-power|zfighter-gaps-2-power]] · 🔨 Hephaestus · #1938 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-5-training|zfighter-gaps-5-training]] · ☀️ Apollo · #1953 · changes · fixing review notes
+- [ ] [[Inbox/heritage-paths|heritage-paths]] · 🔨 Hephaestus · #1853 · changes · fixing review notes
 
 
 ## In review
@@ -48,10 +48,6 @@ kanban-plugin: board
 - [ ] [[Inbox/enemy-damage-balance|enemy-damage-balance]] · for 🪽 any Hermes bot · #1970 · in-review
 - [ ] [[Inbox/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]] · 🍇 Bacchus · #1964 · in-review
 - [ ] [[Inbox/mutant-zombie-reskin|mutant-zombie-reskin]] · for 🔥 Prometheus · #1968 · in-review
-- [ ] [[Inbox/parkour-animations|parkour-animations]] · for any · #1959 · in-review
-- [ ] [[Inbox/zfighter-forms-animations|zfighter-forms-animations]] · for any · #1962 · in-review
-- [ ] [[Inbox/zfighter-forms-models|zfighter-forms-models]] · for any · #1960 · in-review
-- [ ] [[Inbox/zfighter-forms-textures|zfighter-forms-textures]] · for any · #1963 · in-review
 - [ ] [[Inbox/zfighter-gaps-1-stats|zfighter-gaps-1-stats]] · for 🪽 any Hermes bot · #1958 · in-review
 - [ ] [[Inbox/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]] · for 🪽 any Hermes bot · #1937 · in-review
 - [ ] [[Inbox/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]] · for 🪽 any Hermes bot · #1939 · in-review
@@ -59,6 +55,10 @@ kanban-plugin: board
 - [ ] [[Inbox/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]] · for 🪽 any Hermes bot · #1955 · in-review
 - [ ] [[Inbox/zfighter-gaps-8-raids|zfighter-gaps-8-raids]] · for 🪽 any Hermes bot · #1961 · in-review
 - [ ] [[Inbox/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]] · for 🪽 any Hermes bot · #1956 · in-review
+- [ ] [[Inbox/zfighter-forms-models|zfighter-forms-models]] · for any · #1960 · in-review
+- [ ] [[Inbox/parkour-animations|parkour-animations]] · for any · #1959 · in-review
+- [ ] [[Inbox/zfighter-forms-animations|zfighter-forms-animations]] · for any · #1962 · in-review
+- [ ] [[Inbox/zfighter-forms-textures|zfighter-forms-textures]] · for any · #1963 · in-review
 
 
 ## Needs Andy
@@ -72,6 +72,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/hint-tip-cards|hint-tip-cards]]
 - [x] [[Inbox/Done/zfighter-aura-rework|zfighter-aura-rework]]
 - [x] [[Inbox/Done/zephyrus-geckolib|zephyrus-geckolib]]
 - [x] [[Inbox/Done/youth-wisp-idle-behaviors|youth-wisp-idle-behaviors]]
@@ -79,7 +80,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/xeno-ultimates-patch-2|xeno-ultimates-patch-2]]
 - [x] [[Inbox/Done/xeno-minotaur-scan|xeno-minotaur-scan]]
 - [x] [[Inbox/Done/worldbound-gap-pass|worldbound-gap-pass]]
-- [x] [[Inbox/Done/wither-reincarnated-fight|wither-reincarnated-fight]]
 
 
 %% kanban:settings
