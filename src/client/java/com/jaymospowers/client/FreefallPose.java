@@ -227,6 +227,10 @@ public final class FreefallPose {
 			|| entity.hasEffect(MobEffects.SLOW_FALLING) || entity.hasEffect(MobEffects.LEVITATION)) {
 			return true;
 		}
+		// diving head first by the Dodge key (DivePose draws it)
+		if (com.jaymospowers.client.water.DivePose.airDiving(entity)) {
+			return true;
+		}
 		// downed (DownedPose lays them out as they go), carried, thrown (ThrownFlight tumbles them), limp (Kitchen's ragdoll)
 		if (com.jaymospowers.core.wounds.Downed.isDowned(entity) || com.jaymospowers.core.Carry.isCarried(entity)
 			|| com.jaymospowers.core.Carry.isThrown(entity) || com.jaymospowers.power.web.KitchenCompat.isLimp(entity)) {

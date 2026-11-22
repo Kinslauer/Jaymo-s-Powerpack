@@ -105,6 +105,8 @@ final class Buildings {
 			dnt(FactionType.VILLAGE, "farmhouse", 1, 16);
 			dnt(FactionType.VILLAGE, "sawmill", 1, 20);
 		}
+		// VillagersPlus' job houses, when it's installed ({@link VpBuildings})
+		VpBuildings.register();
 		// the buildings only the masons' pattern books have: the chapel, the windmill and the barn ({@link Library})
 		Library.registerOwn();
 		// the song stone, where a capital's firsts are cut ({@link Firsts})

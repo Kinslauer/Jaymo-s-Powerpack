@@ -16079,3 +16079,31 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - Quiet Word's description says the choke hold is the empty hand's now.
 - Classes: `Skills` (the four perks, the tag read), `StealthKills` (new), `Senses`, `client/SkillIcons`; lang part `rogues-arts.json`.
 - Built; not played.
+
+## 0.11.51 (2026-11-21): loose wood no longer crashes the server while land generates (#1966)
+
+- **Fix**: the server no longer crashes when trees come down while new land is generating. Block changes made by world generation threads are now queued (up to 4096 at a time) and looked at on the server thread the next tick, instead of touching the loose-wood lists from another thread.
+- Class: `LooseWood`.
+- Built by CI; not played.
+
+## 0.11.52 (2026-11-21): loose wood no longer makes the server wait on land still generating (#1969)
+
+- **Fix**: falling-wood checks no longer stop the server while new land generates near a player (two watchdog crashes on 2026-11-21, 8:10 and 8:16 AM). It only reads blocks in chunks that are fully there; the rest wait for a later tick.
+- Class: `LooseWood` (`ready`, in place of `Level.isLoaded`).
+- Built by CI; not played.
+
+## 0.11.53 (2026-11-22): drills wait for your weapon, spars on clear ground, the talk box (#1974)
+
+- **Drills draw your weapon**: asking a veteran for a Spar or Hold the Gate takes the first weapon on your hotbar into your hand. In a spar the veteran's first blow waits 1.5 s after a weapon is in your hand; with none drawn in 10 s they stand down ("I'll not strike an empty hand"). (`GuardDrills`)
+- **A spar is over when someone falls**: for 3 s after a spar ends, blows between you and that veteran land on nothing and are no crime, so a swing already on its way can't start a brawl with the guards. (`GuardDrills`)
+- **Spars on clear ground**: if anyone else (a villager, a player, an animal) is within 6 blocks, the veteran says "Follow me" and leads you to clear ground up to 20 blocks away before the spar starts, so a wide swing can't catch a passer-by. Blows between you on the way land on nothing. If he can't get there in 30 s, you spar where you stand. (`GuardDrills`)
+- **The talk box**: while you talk with a villager, their words appear in a box low on the left under their name, typed out, instead of over their head. MCA's dialogue answers sit in a list low on the right, and they and the button column show only once the villager has finished the line. (`DialogueCinematic`, `SpeechBubbles`, `McaDialogueBoxMixin`, `McaButtonColumnMixin`)
+- **The talk camera**: while the villager speaks you aren't drawn, so the shot over your shoulder sees them, not the back of your head (it's a cut, not a fade). Your own lines are shot side-on from outside the two of you, the other side each time, and the camera glides between shots instead of cutting. (`DialogueCinematic`, `FilmHidesViewerMixin`)
+- Built; not played.
+
+## 0.11.54 (2026-11-22): Kingdoms rise without a visit; VillagersPlus job houses; forestry fiefs (#1973)
+
+- **Kingdoms rise without a visit** (Andy: "load them otherwise, that way it is possible for more interaction within the world such as war and trade"): no one is teleported. In the background, one at a time, the nearest Epic towns of each land (plains, desert, savanna, snowy, taiga) round the world's spawn have their land made and are founded as kingdoms, until each land holds 2 or none is left within 8 village spacings. The usual spacing from other capitals and factions holds. Kingdoms far from every player still do most of their living (building, trade runs, war marches) only when someone is near, as before. (`TownWakes`)
+- **VillagersPlus job houses in the catalogue** (Andy: "when they have room and can afford it, they build a specific building for that occupation"): with VillagersPlus installed, kingdoms, fiefdoms and villages build its miner's (from 16 people; villages 12), horticulturist's (18; 14), oceanographer's (22; 18), alchemist's (26; 20) and occultist's (32; 24) houses from storage, in their land's version (plains where VillagersPlus has none). The house's workstation gives a villager the job. The miner's house goes up without the shaft under it. Each miner's house adds 16 stone and 3 ore a day to the town's storage. Job houses don't hold back the wall. (`VpBuildings`)
+- **Vassals set to work the land** ("a genuine reason to have multiple mines or lumberyards or farms"): a mining fiefdom builds up to 3 miner's houses (others 1). A new forestry focus, drawn for fiefdoms in forest, taiga and jungle, builds up to 4 tree farms and 2 sawmills (the sawmill is Dungeons and Taverns'), fells timber on top of what its woodcutters bring in, makes 160% materials, keeps one field and pen like a mining fief, and sends logs, planks and sticks to its overlord. Farming fiefs already build more farms. A fiefdom in forest, taiga or jungle that was mining or farming by chance now works timber. (`Focus`, `Production`, `Caravans`)
+- Built; not played.
