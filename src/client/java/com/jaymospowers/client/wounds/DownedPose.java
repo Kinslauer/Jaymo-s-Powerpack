@@ -193,11 +193,19 @@ public final class DownedPose {
 		if (entity instanceof Player || entity.isDeadOrDying() || entity.isPassenger()) {
 			return false;
 		}
+		if (BodyPlan.of(entity) != BodyPlan.HUMANOID) {
+			return false;
+		}
+		// (Andy, 2026-11-22: "NPCs should have all the same capabilities as the player") held to the ground as a player is: both
+		// legs broken, or a leg gone with no cane or crutch in hand
+		if (com.jaymospowers.core.wounds.Breaks.crawlOnly(entity)) {
+			return true;
+		}
 		int legs = Dismember.RIGHT_LEG | Dismember.LEFT_LEG;
 		if ((Dismember.missing(entity) & ~com.jaymospowers.core.Prosthetics.fitted(entity) & legs) != legs) {
 			return false;
 		}
-		return Dismember.canLoseParts(entity) && BodyPlan.of(entity) == BodyPlan.HUMANOID;
+		return Dismember.canLoseParts(entity);
 	}
 
 	/** The kind of body: a machine, a person, a bug, a bird, anything that lives in water, a slime, a beast, or a lump. */

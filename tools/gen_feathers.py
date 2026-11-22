@@ -7,6 +7,8 @@ Run from the project root:  python -I tools/gen_feathers.py
 Sheet layout (99x9, assets/jaymospowers/textures/gui/feathers.png), each icon 9x9 at x = 9 * column:
   0 container (empty)   1 feather   2 half feather   3 golden   4 half golden   5 strain   6 half strain
   7 held back by armour   8 exhausted   9 half exhausted   10 container, flashing (just spent)
+  11-13 a passive block used (the defence disciplines): Arms (iron grey), Ki (gold), Arcana (pale blue, a glyph)
+  14-16 the same three as faint outlines (a block still free, drawn over its feather)
 A half keeps the quill end (the left five columns), as vanilla's half shank keeps its bone.
 Also writes a 4x preview to build/feathers-preview.png.
 """
@@ -42,6 +44,24 @@ RAMPS = {
 QUILL = {"blue": ((236, 226, 196), (170, 156, 120)), "gold": ((255, 240, 200), (196, 150, 70)),
          "red": ((240, 214, 196), (170, 120, 104)), "iron": ((210, 210, 214), (140, 140, 146)),
          "pale": ((214, 214, 210), (150, 150, 146))}
+# a heater shield: o outline, b body, l lit edge, g glyph (Arcana only), k glow (Ki only)
+SHIELD = [
+    ".ooooooo.",
+    "olllllbbo",
+    "olbbbbbbo",
+    "olbbgbbbo",
+    "olbgggbbo",
+    ".obbgbbo.",
+    ".obbbbbo.",
+    "..obbbo..",
+    "...ooo...",
+]
+SHIELDS = {
+    #          outline          body             lit              glyph
+    "arms":   ((30, 30, 34),   (128, 128, 136), (196, 196, 204), (128, 128, 136)),
+    "ki":     ((90, 56, 8),    (232, 176, 40),  (255, 230, 120), (232, 176, 40)),
+    "arcana": ((24, 44, 84),   (120, 168, 232), (196, 222, 255), (240, 250, 255)),
+}
 CONTAINER = ((16, 16, 18), (52, 52, 58))
 FLASH = ((240, 240, 255), (96, 104, 128))
 
@@ -64,6 +84,23 @@ def icon(ramp=None, half=False, container=None):
     return img
 
 
+def shield(kind, faint=False):
+    img = Image.new("RGBA", (9, 9), (0, 0, 0, 0))
+    o, b, l, g = SHIELDS[kind]
+    for y, row in enumerate(SHIELD):
+        for x, c in enumerate(row):
+            if c == ".":
+                continue
+            if faint:
+                # a block still free: only its outline, half seen, over the feather
+                if c == "o":
+                    img.putpixel((x, y), l + (150,))
+                continue
+            rgb = {"o": o, "b": b, "l": l, "g": g}[c]
+            img.putpixel((x, y), rgb + (255,))
+    return img
+
+
 def main():
     icons = [
         icon(container=CONTAINER),
@@ -73,6 +110,8 @@ def main():
         icon("iron"),
         icon("pale"), icon("pale", half=True),
         icon(container=FLASH),
+        shield("arms"), shield("ki"), shield("arcana"),
+        shield("arms", True), shield("ki", True), shield("arcana", True),
     ]
     sheet = Image.new("RGBA", (9 * len(icons), 9), (0, 0, 0, 0))
     for i, im in enumerate(icons):
