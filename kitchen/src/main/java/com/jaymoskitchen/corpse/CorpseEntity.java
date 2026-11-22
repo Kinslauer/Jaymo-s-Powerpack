@@ -1639,28 +1639,49 @@ public class CorpseEntity extends Entity {
 	private static final float SPREAD_CHANCE = 0.4F;
 	/** (0.5.32) At most this many fires from one body over its whole burn. */
 	private static final int MAX_FIRES = 2;
+	/** After a body is patted out (a right click), how long before the daylight can set it alight again (ticks; 10 s). */
+	private static final int PAT_GRACE = 200;
+	private int patGrace;
 
 	/**
 	 * (0.5.32) Near the end of its burn a body lights one or two things beside it, then goes out: an empty spot in or
 	 * around it (a block out, a block up) next to something that really burns (planks, logs, wool, hay; not grass or
 	 * flowers) takes fire. Only the first try is sure; the rest are chances. Follows the fire-spread game rules.
+	 * Andy: fire from a burning body should "no longer catch non flammable blocks like dirt on fire, it should only spread
+	 * if they are burning on wood". So a body only spreads fire while it lies on something that burns, and only onto
+	 * spots that sit on something that burns: one burning on dirt, grass or stone lights nothing.
 	 */
 	private void spreadFire(ServerLevel level) {
 		if (firesLit >= MAX_FIRES || firesLit > 0 && random.nextFloat() >= SPREAD_CHANCE) {
 			return;
 		}
 		BlockPos at = blockPosition();
-		if (!level.canSpreadFireAround(at)) {
+		if (!level.canSpreadFireAround(at) || !burnable(level, at.below()) && !burnable(level, at)) {
 			return;
 		}
 		for (int i = 0; i < 4; i++) {
 			BlockPos pos = at.offset(random.nextInt(3) - 1, random.nextInt(2), random.nextInt(3) - 1);
-			if (com.jaymoskitchen.Loaded.made(level, pos) && level.getBlockState(pos).isAir() && flammableBeside(level, pos)) {
+			if (com.jaymoskitchen.Loaded.made(level, pos) && level.getBlockState(pos).isAir() && burnable(level, pos.below())
+				&& flammableBeside(level, pos)) {
 				level.setBlockAndUpdate(pos, net.minecraft.world.level.block.BaseFireBlock.getState(level, pos));
 				firesLit++;
 				return;
 			}
 		}
+	}
+
+	/** A whole block that burns under the game's fire rules (planks, logs, wool, hay), not a plant or carpet. */
+	private static boolean burnable(ServerLevel level, BlockPos pos) {
+		if (!com.jaymoskitchen.Loaded.made(level, pos)) {
+			return false;
+		}
+		net.minecraft.world.level.block.state.BlockState state = level.getBlockState(pos);
+		if (state.canBeReplaced() || !state.isCollisionShapeFullBlock(level, pos)) {
+			return false;
+		}
+		net.fabricmc.fabric.api.registry.FlammableBlockRegistry.Entry burn
+			= net.fabricmc.fabric.api.registry.FlammableBlockRegistry.getDefaultInstance().get(state.getBlock());
+		return burn != null && burn.getIgniteOdds() > 0;
 	}
 
 	/** Beside a block that burns: catches fire in the game's fire rules, and isn't a plant or carpet you'd walk through. */
@@ -1756,16 +1777,15 @@ public class CorpseEntity extends Entity {
 	}
 
 	/**
-	 * A body burned away by fire leaves a pile of ash where it lay (snow-style, 1-8 layers): a zombie a small heap,
-	 * a horse or bear more, a ghast or giant a big pile across several blocks. Lava burns leave nothing - it falls
-	 * into the lava. Only air where the body lay is taken, and the block below has to hold the pile.
+	 * A body burned away by fire leaves its ash where it lay, in its shape (Andy: the ash piles "should be larger, more
+	 * in the shape of whatever mob just died"): laid out along the way the body lay, as long as the creature and as broad,
+	 * deepest over the trunk and thinner at the ends (a zombie a body-long streak, a spider a broad patch, a ghast or giant
+	 * a long mound). Each cell is an ash pile of 1-8 layers on solid ground, over air or a plant it covers. Lava burns
+	 * leave nothing: it falls into the lava. Ash in the open blows away in the wind unless it's gathered
+	 * ({@link AshPileBlock}).
 	 */
 	private void leaveAshPile(ServerLevel level) {
 		if (isInLava()) {
-			return;
-		}
-		BlockPos at = blockPosition();
-		if (!Loaded.made(level, at) || !level.getBlockState(at).isAir()) {
 			return;
 		}
 		EntityType<?> type = sourceType();
@@ -1773,23 +1793,47 @@ public class CorpseEntity extends Entity {
 		float height = type == null ? 1.8F : type.getDimensions().height();
 		boolean huge = width >= HUGE || height >= HUGE_LONG;
 		boolean big = width >= BIG_WIDTH || height >= BIG_HEIGHT;
-		int layers = huge ? 8 : big ? 6 : width < 0.5F && height < 0.9F ? 2 : 4;
-		BlockPos[] spots = {at, at.north(), at.east(), at.south(), at.west()};
-		int count = huge ? 5 : big ? 2 : 1;
-		int placed = 0;
-		for (BlockPos spot : spots) {
-			if (placed >= count) {
-				break;
+		int deepest = huge ? 8 : big ? 6 : width < 0.5F && height < 0.9F ? 2 : 4;
+		// lying down, its longest side runs along the ground the way it faced
+		int length = Mth.clamp(Math.round(Math.max(width, height)), 1, ASH_LONGEST);
+		int breadth = Mth.clamp(Math.round(Math.min(width, height)), 1, ASH_LONGEST);
+		float yaw = getYRot() * Mth.DEG_TO_RAD;
+		double ax = -Mth.sin(yaw), az = Mth.cos(yaw);
+		java.util.Set<BlockPos> done = new java.util.HashSet<>();
+		for (int s = 0; s < length; s++) {
+			// fullest at the middle of the body, thinner at the head and the feet
+			double along = s - (length - 1) / 2.0;
+			float f = length == 1 ? 1.0F : 1.0F - 0.5F * (float) Math.abs(along / ((length - 1) / 2.0));
+			for (int b = 0; b < breadth; b++) {
+				double across = b - (breadth - 1) / 2.0;
+				float g = breadth == 1 ? 1.0F : 1.0F - 0.3F * (float) Math.abs(across / ((breadth - 1) / 2.0));
+				BlockPos spot = BlockPos.containing(getX() + ax * along - az * across, getY() + 0.1, getZ() + az * along + ax * across);
+				if (done.add(spot)) {
+					ash(level, spot, Math.max(1, Math.round(deepest * f * g)));
+				}
 			}
-			if (!Loaded.made(level, spot) || !level.getBlockState(spot).isAir()) {
+		}
+	}
+
+	/** The longest a body's ash runs (blocks). */
+	private static final int ASH_LONGEST = 12;
+
+	/** One cell of a body's ash: on solid ground at {@code spot}, or a block lower if it lay on a step. */
+	private static void ash(ServerLevel level, BlockPos spot, int layers) {
+		for (BlockPos at : new BlockPos[] {spot, spot.below()}) {
+			if (!Loaded.made(level, at)) {
 				continue;
 			}
-			BlockPos below = spot.below();
+			net.minecraft.world.level.block.state.BlockState here = level.getBlockState(at);
+			if (!(here.isAir() || here.canBeReplaced() && here.getFluidState().isEmpty())) {
+				continue;
+			}
+			BlockPos below = at.below();
 			if (!level.getBlockState(below).isCollisionShapeFullBlock(level, below)) {
 				continue;
 			}
-			level.setBlockAndUpdate(spot, Corpses.ASH_PILE.defaultBlockState().setValue(AshPileBlock.LAYERS, layers));
-			placed++;
+			level.setBlockAndUpdate(at, Corpses.ASH_PILE.defaultBlockState().setValue(AshPileBlock.LAYERS, Mth.clamp(layers, 1, 8)));
+			return;
 		}
 	}
 
@@ -1808,7 +1852,10 @@ public class CorpseEntity extends Entity {
 		} else if (burns() && !isOnFire() && tickCount % FLAME_CHECK_TICKS == 0 && touchesFlame(level)) {
 			igniteForSeconds(8.0F);
 		}
-		if (kind == CorpseKind.ZOMBIE && carrier() == null && tickCount % 20 == 0 && inSunlight(level)) {
+		if (patGrace > 0) {
+			patGrace--;
+		}
+		if (kind == CorpseKind.ZOMBIE && carrier() == null && tickCount % 20 == 0 && patGrace <= 0 && inSunlight(level)) {
 			// left out in the daylight, the undead burn as they would alive
 			igniteForSeconds(8.0F);
 		}
@@ -1971,6 +2018,18 @@ public class CorpseEntity extends Entity {
 	public InteractionResult interact(Player player, InteractionHand hand, Vec3 location) {
 		if (hand != InteractionHand.MAIN_HAND) {
 			return InteractionResult.PASS;
+		}
+		if (isOnFire() && burns()) {
+			// Andy: "a right click should put the fire out": patted out, and given a while before the sun can catch it
+			// again, time enough to drag it into the shade. Put out like a dunked one: its burn starts over if it catches
+			if (level() instanceof ServerLevel level) {
+				clearFire();
+				burnTicks = 0;
+				patGrace = PAT_GRACE;
+				play(level, SoundEvents.FIRE_EXTINGUISH, 0.6F);
+				level.sendParticles(ParticleTypes.SMOKE, getX(), getY() + 0.3, getZ(), 12, 0.3, 0.1, 0.3, 0.02);
+			}
+			return InteractionResult.SUCCESS;
 		}
 		if (grabCooldown > 0) {
 			// just let go of (thrown, dropped, tipped out): not caught again in the same click
