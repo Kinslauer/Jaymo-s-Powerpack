@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: claude-cloud-zfighter-checklist-thread
 asked: 2026-11-19
@@ -43,3 +43,4 @@ text_pass:
 - 2026-11-21 04:54 hermes-fixer took over the review fixes from hermes-b.
 - 2026-11-21 23:35 Status blocked -> changes (pending-work pass, 2026-11-21): nothing here waits on Andy. PR #1938's Build Powers check fails, so it needs a bot's fixes before review.
 - 2026-11-22 8:45 AM Claude (desktop session): fixed the compile failure (gaps-2: unclosed charging block in ZFighterPower; gaps-5: ZFighterDrillScreen rebuilt from master with its indentation and braces back, Pod Pilot re-applied, off-screen pillars now dropped). All checks green. Status changes -> in-review.
+- 2026-11-22 08:57 PR #1938 is merged into master; moved to Inbox/Done.

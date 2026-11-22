@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-22 08:51
+updated: 2026-11-22 08:56
 ---
 # Open PRs
 
-23 open, as of 2026-11-22 08:51. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+22 open, as of 2026-11-22 08:56. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1853](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1853) Heritage paths: core + Heartlander, Stoneborn, Tideborn (Kingdoms, Powers)
@@ -21,14 +21,9 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 5 passed
 - **Agent:** [[zfighter-gaps-10-camera-hud]]
 
-## [#1938](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1938) Z Fighter gaps 2: stamina for Flash Step, guard and forms
-- **Branch:** `claude/zfighter-gaps-2-power` · **Updated:** 2026-11-22 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** [[zfighter-gaps-2-power]]
-
 ## [#1939](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1939) Z Fighter gaps 3: 10 new techniques
-- **Branch:** `claude/zfighter-gaps-3-techniques` · **Updated:** 2026-11-20 (1 day ago)
-- **Checks:** ✅ 5 passed
+- **Branch:** `claude/zfighter-gaps-3-techniques` · **Updated:** 2026-11-22 (today)
+- **Checks:** ⏳ 4 of 4 running
 - **Agent:** [[zfighter-gaps-3-techniques]]
 
 ## [#1953](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1953) Z Fighter gaps 5: training drills, grades, pod pilot, shadow dummy
@@ -55,11 +50,6 @@ Andy merges only on "merge", one at a time.
 - **Branch:** `claude/hands-on-cooking-realtime` · **Updated:** 2026-11-21 (today)
 - **Checks:** ❌ failing: Build Kitchen
 - **Agent:** no agent note
-
-## [#1958](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1958) Z Fighter gaps 1: Strike stat and critical blows
-- **Branch:** `claude/zfighter-gaps-1-stats` · **Updated:** 2026-11-22 (today)
-- **Checks:** ⏳ 2 of 4 running
-- **Agent:** [[zfighter-gaps-1-stats]]
 
 ## [#1960](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1960) Blockbench models for the 4 Z Fighter form lines
 - **Branch:** `claude/zfighter-forms-models` · **Updated:** 2026-11-21 (1 day ago)
@@ -120,3 +110,8 @@ Andy merges only on "merge", one at a time.
 - **Branch:** `claude/zfighter-gaps-7-bosses` · **Updated:** 2026-11-22 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[zfighter-gaps-7-bosses]]
+
+## [#1987](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1987) NPC limb rules: arms gate powers, bad legs crawl
+- **Branch:** `npc-limb-rules` · **Updated:** 2026-11-22 (today)
+- **Checks:** ⏳ 1 of 5 running
+- **Agent:** no agent note

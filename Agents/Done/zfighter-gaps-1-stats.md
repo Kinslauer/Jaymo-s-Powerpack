@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: zfighter-gaps-1-stats
 branch: claude/zfighter-gaps-1-stats
 with: 
@@ -37,3 +37,4 @@ owns:
 ## Done
 What a player will see: a Strike stat on the training screen powering rushes, grab slams and hold-combo finishers (Strength stays for plain blows), plus Crit Chance and Crit Damage late TP buys that let landed blows crit for much heavier damage. Compile-checked and built, not played in game.
 - 2026-11-20 PR #1958 opened: Strike stat + critical blows; sh ./gradlew build BUILD SUCCESSFUL; tools/pr_checks.py passes; not tested in game.
+- 2026-11-22 08:57 PR #1958 is merged into master; moved to Agents/Done.
