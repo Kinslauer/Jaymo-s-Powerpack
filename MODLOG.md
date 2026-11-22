@@ -6956,3 +6956,8 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 
 - A blow from a sword or an axe cuts: it's never a crushing blow, however hard it lands, so it can't burst a body (downed or standing) the way a slam does. (`BlastGore.crushing`)
 - Built; not played.
+
+## 0.26.25 (2026-11-22): VillagersPlus' miner's house rarer in villages (#1973)
+
+- **Fewer mine heads in villages** (Andy, Morwick: "how does it justify having this many mines?"; he chose "just make them rarer"): VillagersPlus put its miner's house in plains, taiga and savanna villages at a weight of 25, so it was the likeliest house in every slot and big towns came out with a row of six to eight. Once per install its weight is set to 4 in `config/villagersplus/villagersplus-4.0-config.json5`, about a common vanilla house; its other job houses keep theirs. Only villages generated afterwards change. The server's file is the one that counts. Delete `config/jaymospowers-villagersplus-preset-v1` to apply it again. (`VillagersPlusPreset`)
+- Built; not played.
