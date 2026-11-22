@@ -7194,3 +7194,13 @@ following integration task).
 - **Unlocked potential**: a rite at night, once, after mastering a form to 50%. The Keeper holds it for the Warrior-born, Earthlings, Heartlanders and the Dawnborn; everyone else sits with a Verdant elder (a master the Verdant World's villages now have) on the Verdant World. In base form you then have your strongest mastered form's fists, speed and ki power, with no look and no drain; Heartlanders, the Dawnborn and Earthlings get 1.2 times that form's edge.
 - Classes: new ZFighterRelease, ZFighterStyles, ZFighterPotential; hooks in ZFighterPower, ZFighterBattle, ZFighterMasters, ZFighterSites, ZFighterWishes, ZFighterTraining.
 - Built; not played in game.
+
+## 0.26.47 (2026-11-22): Defence disciplines, part 1: passive blocks, tighter parries, fist disarms (#1991)
+
+- **Passive blocks**: a blow from in front of you (or from anywhere while you're locked on), arrows included, is caught by itself and 60% of it stopped. One feather icon turns into a shield to show it: grey for Arms (your weapon or shield snaps up, with the usual sparks and splinters), gold for a Ki ward, blue for an Arcana ward. Free blocks show as a faint shield outline over the top of the row. Once every block is a shield, blows land in full and make you flinch (no sprinting, your swing cut short) unless you guard or parry by hand. A held guard never uses up a passive block. A broken guard means no passive blocks until it mends.
+- **Getting them back**: a perfect parry turns every shield back into feathers, a plain parry one; or 6 seconds without being hit or swinging, one a second.
+- **How many**: for now everyone has one Arms block, and a Z Fighter one Ki ward (it takes 3 ki). Jaymo's Kingdoms will decide this by class, heritage and training in part 2.
+- **Bare hands**: an Arms block with empty hands stops only 10% (Valor-coated fists, once Kingdoms says so, the full 60%). Parrying bare-handed knocks the attacker's weapon out of its hand onto the floor, players' too.
+- **Tighter parries**: perfect 0-2 ticks from the raise, a parry 3-6 (locked on +1/+2). Kingdoms' Keen Timing (part 2) widens them back to the old 0-5 / 6-12. A plain parry now gives back 2 half-feathers too. The timing bar and the incoming-blow rings show the new windows.
+- Classes: new PassiveBlocks; Guard (windows by Keen Timing, refunds, the disarm, a broken guard), FeathersHud (the shield icons, tools/gen_feathers.py), ZFighterHooks.spendKi, GuardClient, IncomingBlowsClient, BoxingEvades.
+- Built; not played in game.

@@ -1,8 +1,0 @@
-# Defence disciplines, part 3: armed enemies block too, MCA villagers by their heritage
-- **Armed enemies get passive blocks**, as you do: anything holding a weapon or shield (guards, bandits, orcs, duellists, illagers, armed skeletons and zombies, every armed MCA villager). Your blow on its front is caught and 60% of it stopped; once its blocks are spent your next blow lands clean and it flinches, its swing cut. Hitting it from behind or the side uses none.
-- **How many** goes by your world tier: an armed enemy 1 / 1 / 2 / 3 / 4 from Hearth to Legend, an experienced one (leaders, a ruler's escort, assassins, the richest realms' guards, folk grown 12+ days, illager captains) 2 / 2 / 3 / 4 / 5.
-- **Breaking through**: they come back one every 4 seconds once it hasn't been hit for 3, and all at once when it lands its own parry (still rolled first, as before). Your parry of its blow, or knocking its guard aside, takes all of them. Disarm it and it has none until it's armed again. Bosses (100+ health) and unarmed mobs get none.
-- **Their discipline** comes from what they are: evokers, illusioners and witches ward with Arcana (a ring of runes); an MCA villager takes its heritage's lean (Arms first, so a Warriorborn guard raises steel, a Sylvan one wards, a Stormborn one turns blows with ki); everyone else Arms.
-- Not in this part: the shield pips over a locked-on enemy's head, and the teachers who open a discipline you have no inclination for.
-- Classes: new MobBlocks; LivingEntityHurtMixin (last of the hurt chain), MobParry, MobShields, Disciplines (leans for villagers); Powers' Guard and PassiveBlocks (a parry takes a mob's blocks).
-- Built; not played in game.
