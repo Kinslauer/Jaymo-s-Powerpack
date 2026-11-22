@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: survival-wounds-track1
 branch: claude/survival-wounds
 with: survival picks track 3 (butchery) runs beside it
@@ -35,3 +35,4 @@ Ranger's arrows go through the helmet.
 - PR #1992 open, Auto-fix on, built by CI (not on the PC). Pools apart from health, head-blow kills (not from full
   health), 20% debuffs, broken hearts, headshots (Ranger arrows through helmets), armour per part, LSO medicine numbers
   on our kit, food cost, sleep heals every part. Readings taken are listed in the PR. Not played in game.
+- 2026-11-22 14:29 PR #1992 is merged into master; moved to Agents/Done.

@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: enemy-damage-balance
 branch: claude/enemy-damage-balance
 with: 
@@ -44,3 +44,4 @@ owns:
 - Created change notes for both Powers and Kingdoms
 - PR #1970 opened for review
 - Compiles but hasn't been played yet
+- 2026-11-22 14:29 PR #1970 is merged into master; moved to Agents/Done.

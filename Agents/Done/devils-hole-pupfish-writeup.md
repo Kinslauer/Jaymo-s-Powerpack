@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: devils-hole-pupfish-writeup
 branch: claude/devils-hole-pupfish-writeup
 pr: 1971
@@ -25,3 +25,4 @@ owns:
 
 ## Done
 What a player will see, and what wasn't tested.
+- 2026-11-22 14:29 PR #1971 is merged into master; moved to Agents/Done.

@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: survival picks track 2 (Kitchen climate and stamina)
 branch: claude/survival-climate
 with: Claude (desktop session, started by the survival picks coordinator)
@@ -39,3 +39,4 @@ PR #1995. Thirst costs per jump/block/attack/sprint; wetness meter (HUD glass) i
 to douse; height from sea level, day curve, heat sources to 20 blocks (halved outdoors), 90 s grace; breath puffs at
 the mouth; sprint wind bar in the focus band; stop-drop-roll already existed (Crawl), speedsters tireless. Not played: HUD
 placement, breath look, heat-scan cost.
+- 2026-11-22 14:29 PR #1995 is merged into master; moved to Agents/Done.

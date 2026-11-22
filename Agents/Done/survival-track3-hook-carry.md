@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Survival picks track 3: meat hook click, two-arm lifting, carried block drawn; butchery picks
 branch: claude/survival-hook-carry, claude/survival-butchery
 with: wounds-lso (track 1, Powers core/wounds + Kingdoms Rangers; not touched here)
@@ -39,3 +39,4 @@ too (vampires drain them, a deterrent); spit/campfire clicks and Z Fighter two-a
 - PR #1993 (Kitchen + Powers): butcher block step-by-step, skin rack, mincer + mince, display, head mount, barrel of
   bones. Lore (new) "The butcher's shop". CI running at hand-off.
 - Not played: any of it.
+- 2026-11-22 14:29 PR #1989 is merged into master; moved to Agents/Done.

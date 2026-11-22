@@ -1,5 +1,5 @@
 ---
-status: changes
+status: done
 for: claude-cloud
 from: claude-cloud-menu-redesign-thread
 asked: 2026-11-18
@@ -146,3 +146,4 @@ writer: hermes-writer
 - 2026-11-20 10:39 Review (PR #1853 head 89298dd, vault coordinator, reviewer away): changes needed; checks green. 1) HeritagePaths.java:614 (ward): the fix commit 8376b5b dropped the undead check, so a Lanternkeeper holding a lantern now pushes and slows every mob in reach (villagers, guards, horses, pets) and at step 5 burns them all. The compile error was only the lambda's 'm' shadowing the loop variable: use 'e -> e.isAlive() && e.getType().is(EntityTypeTags.UNDEAD)' (the tag exists in 26.3, used in PatronWeaponHits.java:170). 2) HeritageScreen.java:332: unlit step icons became Paper (89298dd); pick an icon that reads as an empty step (a gray pane or barrier-free glyph), or say why Paper. 3) Still waits on Andy's yes to the four (new) Lore.md paragraphs: quote them in this task's Notes so the coordinator can ask him; it can't be sent to merge before that.
 - 2026-11-20 13:50 Text pass: kingdoms/lang/parts/heritage-paths.json (89 new path/deed/step/message/gui/direction keys — plain second-person voice, %s placeholders and %% literals match pack convention, no rewrite needed); changes/kingdoms/heritage-paths.md and changes/powers/heritage-paths.md (player-facing, title plus bullets, end 'Built; not played.'). All player-visible Java strings in HeritagePaths.java, HeritageScreen, MenuCompat and AlarmBells use existing lang keys via Component.translatable; no hardcoded strings, no code changes. heraldry-armour-items.json is byte-identical to master (arrived via a master merge), so it is not this PR's text. Nothing rewritten.
 - 2026-11-22 00:07 Review (head fca2616, Andy 2026-11-22): sent back to finish the rest of the heritages. Add the picked paths for every heritage still missing (this PR has Heartlander, Stoneborn, Tideborn only) in this same PR #1853, each with its (new) Lore.md paragraph for Andy. Also confirm the earlier (new) paragraphs are all approved.
+- 2026-11-22 14:29 PR #1853 is merged into master; moved to Inbox/Done.

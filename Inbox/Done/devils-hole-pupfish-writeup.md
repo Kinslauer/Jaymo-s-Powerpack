@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: quill
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-18)
 asked: 2026-11-18
@@ -33,3 +33,4 @@ This is a writing/lore task for Quill. No code changes yet — write-up first, t
 
 ## Notes
 - 2026-11-22 12:36 PM Claude (desktop session, Andy: "pickup #1971"): corrected the spirit facts (attuned only, 1 in 18; the tablet quest isn't built), dropped the pupfish-as-spirit idea (Lore.md: spirits were wizards; one spirit for life), new proposal grounded in the real fish: a Devil's Hole pool per world with Jung's Devil's Palm round it, the attuned see the fish glow. Lore.md (new) paragraph 'The Devil's Hole and the Devil's Palm' waits on Andy.
+- 2026-11-22 14:29 PR #1971 is merged into master; moved to Inbox/Done.
