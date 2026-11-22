@@ -22,15 +22,17 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-22 waiting for a bot, 5 being built, 16 in review: see [[Kanban]].
+22 waiting for a bot, 5 being built, 15 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
-- [ ] #1975 a sword never bursts a body (Powers, Kingdoms, 2026-11-22)
+- [ ] #1976 fight music for ordinary fights (Kingdoms, 2026-11-22)
+- [ ] #1975 the roll stays on the ground, the Sit key prone, a real struggle up the wall (Powers, 2026-11-22)
 - [ ] #1974 a sword never bursts a body (Powers, Kingdoms, 2026-11-22)
 - [ ] #1973 VillagersPlus' miner's house rarer in villages (Powers, Kingdoms, 2026-11-22)
+- [ ] #1959 Freerun animations: the ledge climb keyed with elbows and knees, climbing down walls, vaults by speed and height, a pole climb, and bending limbs through the moves (Powers, 2026-11-22)
 - [ ] #1969 loose wood no longer makes the server wait on land still generating (Kingdoms, 2026-11-21)
 - [ ] #1966 loose wood no longer crashes the server while land generates (Kingdoms, 2026-11-21)
 - [ ] #1951 hints as tip cards - text hints show top right instead of over the hotbar (Powers, 2026-11-21)
@@ -86,13 +88,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1894 shy deer keep away from people (Kingdoms, 2026-11-20)
 - [ ] #1893 Crawling into a block you can haul up doesn't sit you (Powers, 2026-11-20)
 - [ ] #1892 Crawling into a wall sits you up (Powers, 2026-11-20)
-- [ ] #1891 Z Fighter line message no longer claims your heritage (Powers, 2026-11-19)
-- [ ] #1890 taken-in wake-ups bind your stumps (Powers, Kingdoms, 2026-11-19)
-- …and 323 older ones.
+- …and 325 older ones.
 
 ## Health
 
-6 problems in the notes: [[Health]].
+5 problems in the notes: [[Health]].
 
 ## Last week
 

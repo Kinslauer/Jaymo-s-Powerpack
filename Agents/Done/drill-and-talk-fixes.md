@@ -34,3 +34,7 @@ a spar turned into a brawl with bodies burst by a sword.
 - Added after Andy's go-ahead: spar leads to clear ground (no one within 6 blocks); talk camera hides the player on the villager's lines, side-on shots on the player's, eased between shots (Andy: "let me see that, if we dont like it, you take it out").
 - PR #1974. Both mods build; not played.
 - 2026-11-22 00:07 PR #1974 is merged into master; moved to Agents/Done.
+- #1974 merged 2026-11-22.
+- Same session, 2026-11-22: PR #1975 (roll clipping fixed, prone Sit key wall-sits only, staged struggle up the wall, water dive on the Dodge key) merged; PR #1959 finished in five parkour tracks (see Inbox/parkour-animations) and merged at Andy's word. Not played in game.
+- Slip: merging the old (already squashed) branch tip into the restarted branch brought #1974's change notes back, so #1975's release logged them again: duplicate entries Powers 0.26.26 and Kingdoms 0.11.55, each version one step extra. Code unaffected; MODLOG edits need Andy's say (PRs may not touch MODLOGs).
+- 2026-11-22: Andy said remove the duplicates; Powers 0.26.26 and Kingdoms 0.11.55 entries removed on master (0f505d2). Version numbers left as they are.
