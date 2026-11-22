@@ -44,6 +44,8 @@ public final class RunMovesPose {
 	// ================================================================================================================
 
 	public static final int SKY = 100;
+	/** (Track 5) The knees and elbows: the long jump's tuck at its height, the safety tap's landing, the sky dive's arch (radians). */
+	static final float LONG_JUMP_KNEE = 1.3F, SAFETY_KNEE = 1.1F, SKY_KNEE = 0.5F, SKY_ELBOW = 0.6F;
 
 	/** {@code kind}: {@link RunMoves#LONG_JUMP}, {@link RunMoves#SAFETY_TAP} or {@link #SKY}; {@code e}: how far in (0-1). */
 	public record Move(int kind, float age, float time, float e) {
@@ -179,6 +181,37 @@ public final class RunMovesPose {
 			}
 		}
 		h.hat.xRot = h.head.xRot;
+	}
+
+	/**
+	 * (Parkour animations, track 5) Last thing before the model is drawn: the long jump's knees tucking in flight and
+	 * reaching out again for the far side; the safety tap's knees bent as it lands low; the sky dive's arched spread,
+	 * knees and elbows a little bent.
+	 */
+	public static void bendLimbs(Model<?> model, Object state) {
+		if (!(state instanceof LivingEntityRenderState living) || !(model instanceof HumanoidModel<?> h) || living.deathTime > 0.0F) {
+			return;
+		}
+		Move m = living.getData(KEY);
+		if (m == null) {
+			return;
+		}
+		float knee, elbow = 0.0F;
+		switch (m.kind()) {
+			case RunMoves.LONG_JUMP -> knee = LONG_JUMP_KNEE * Mth.sin(Mth.clamp(m.age() / LongJump.POSE_TICKS, 0.0F, 1.0F) * Mth.PI) * m.e();
+			case RunMoves.SAFETY_TAP -> knee = SAFETY_KNEE * m.e();
+			case SKY -> {
+				knee = SKY_KNEE * m.e();
+				elbow = SKY_ELBOW * m.e();
+			}
+			default -> {
+				return;
+			}
+		}
+		com.jaymospowers.client.KneeBend.bend(h.rightLeg, knee);
+		com.jaymospowers.client.KneeBend.bend(h.leftLeg, knee);
+		com.jaymospowers.client.KneeBend.bend(h.rightArm, -elbow, 4.0F, false);
+		com.jaymospowers.client.KneeBend.bend(h.leftArm, -elbow, 4.0F, false);
 	}
 
 	private static void set(ModelPart part, float x, float y, float z, float amount) {

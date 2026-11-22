@@ -28,6 +28,8 @@ public final class BalancePose {
 	static final float SWAY_SPEED = 0.11F, BODY_SWAY_DEGREES = 2.5F;
 	/** Ticks it takes to settle in once on the beam. */
 	static final float EASE_IN = 4.0F;
+	/** (Track 4) The knees soft, and bent this much more on the side the body sways over; the elbows a little bent (radians); where they fold. */
+	static final float KNEE_SOFT = 0.25F, KNEE_SWAY = 0.2F, ELBOW_SOFT = 0.2F, ELBOW = 4.0F;
 	// ================================================================================================================
 
 	/** {@code time}: ticks, for the sway; {@code in}: how settled into the pose (0-1). */
@@ -77,6 +79,25 @@ public final class BalancePose {
 		set(h.rightArm, ARM_FORWARD, 0.0F, ARM_OUT + seesaw, e);
 		set(h.leftArm, ARM_FORWARD, 0.0F, -ARM_OUT + seesaw, e);
 		h.head.zRot = Mth.lerp(e, h.head.zRot, -Mth.sin(balance.time() * SWAY_SPEED) * BODY_SWAY_DEGREES * Mth.DEG_TO_RAD);
+	}
+
+	/**
+	 * (Parkour animations, track 4) Last thing before the model is drawn: knees soft for balance, the one taking more
+	 * weight as the body sways bending more, and the elbows a little bent.
+	 */
+	public static void bendLimbs(Model<?> model, Object state) {
+		if (!(state instanceof LivingEntityRenderState living) || !(model instanceof HumanoidModel<?> h) || living.deathTime > 0.0F) {
+			return;
+		}
+		Balance balance = living.getData(KEY);
+		if (balance == null) {
+			return;
+		}
+		float e = balance.in(), sway = Mth.sin(balance.time() * SWAY_SPEED);
+		com.jaymospowers.client.KneeBend.bend(h.rightLeg, (KNEE_SOFT + KNEE_SWAY * Math.max(0.0F, sway)) * e);
+		com.jaymospowers.client.KneeBend.bend(h.leftLeg, (KNEE_SOFT + KNEE_SWAY * Math.max(0.0F, -sway)) * e);
+		com.jaymospowers.client.KneeBend.bend(h.rightArm, -ELBOW_SOFT * e, ELBOW, false);
+		com.jaymospowers.client.KneeBend.bend(h.leftArm, -ELBOW_SOFT * e, ELBOW, false);
 	}
 
 	private static void set(ModelPart part, float x, float y, float z, float e) {
