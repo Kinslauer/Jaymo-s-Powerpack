@@ -99,6 +99,8 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.tanning.Hides.register();
 		// (0.5.51) meat hooks, blood grates and bottled blood (corpse/Hanging does the butchering)
 		com.jaymoskitchen.butchery.Butchery.register();
+		// (Butchery picks) the mincer and mince, the butcher's display, head mounts, the barrel of bones
+		com.jaymoskitchen.butchery.ButcherShop.register();
 		com.jaymoskitchen.butchery.Skeletons.register();
 		// rats after food left out, and the traps for them
 		com.jaymoskitchen.rats.Rats.register();

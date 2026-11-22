@@ -2940,6 +2940,11 @@ public class CorpseEntity extends Entity {
 		grabCooldown = 0;
 	}
 
+	/** Whether it lies on a butcher block (worked there a step at a time: {@link Hanging#use}). */
+	boolean onTable() {
+		return onButcherBlock();
+	}
+
 	private boolean onButcherBlock() {
 		// (0.5.24) pinned to a table it's on one, even with its legs hanging over the edge
 		if (ragdoll != null && ragdoll.body.pinned()) {
