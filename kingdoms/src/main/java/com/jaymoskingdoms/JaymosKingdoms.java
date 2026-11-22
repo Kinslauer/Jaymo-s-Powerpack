@@ -124,6 +124,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.astronomy.ArmillarySphereBlock.register();
 		// the scrying orb: a crystal orb on a stand for place-scrying
 		ScryingOrbBlock.register();
+		// its packets, and the watchings it keeps (refreshed each second, ended when the time or the spell runs out)
+		ScryingOrb.register();
 		// the sighted shard: marks a place for the scrying orb
 		SightedShard.register();
 		// the stars each player has discovered, kept on the server (the sky, armillary and journal read them)
