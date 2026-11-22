@@ -1529,7 +1529,7 @@ public final class Mortality {
 				BodyPart part = plan.part(i);
 				if (!Breaks.missing(player, part) && Treatment.helps(Treatment.Remedy.RAG, player, part)) {
 					Bleeding.stop(player, part, false);
-					Bleeding.dress(player, part, Treatment.RAG_HEAL, Treatment.BANDAGE_TICKS, true);
+					Bleeding.dress(player, part, Treatment.RAG_HEAL, Treatment.RAG_TICKS, true);
 				}
 			}
 			Bleeding.bindStumps(player, true);

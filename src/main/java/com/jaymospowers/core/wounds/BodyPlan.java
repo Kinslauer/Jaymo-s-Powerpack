@@ -15,15 +15,28 @@ import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import org.jspecify.annotations.Nullable;
 
-/** Which parts a kind of creature has, and each one's share of its most health (the shares are normalised to sum to 1). */
+/**
+ * Which parts a kind of creature has, and the size of each one's own pool as a share of its most health. (Survival picks,
+ * lso-pools) The pools sit on top of the health, apart from it: a humanoid's head 0.4, body 0.6, each arm 0.4, each leg
+ * 0.6, each foot 0.4 (8/12/8/12/8 on 20 health). The other plans are scaled the same way: head 0.4, body 0.6, legs 0.6,
+ * wings 0.4 (as arms). A simple body's one part is its health.
+ */
 public enum BodyPlan {
 	HUMANOID(new BodyPart[] {HEAD, BODY, LEFT_ARM, RIGHT_ARM, LEFT_LEG, RIGHT_LEG, LEFT_FOOT, RIGHT_FOOT},
-		new float[] {0.15F, 0.30F, 0.10F, 0.10F, 0.12F, 0.12F, 0.055F, 0.055F}, new BodyPart[] {LEFT_FOOT, RIGHT_FOOT}),
-	QUADRUPED(new BodyPart[] {HEAD, BODY, FRONT_LEGS, HIND_LEGS}, new float[] {0.2F, 0.4F, 0.2F, 0.2F}, new BodyPart[] {FRONT_LEGS, HIND_LEGS}),
-	ARTHROPOD(new BodyPart[] {HEAD, BODY, LEGS}, new float[] {0.25F, 0.45F, 0.3F}, new BodyPart[] {LEGS}),
-	FLYER(new BodyPart[] {HEAD, BODY, WINGS}, new float[] {0.25F, 0.45F, 0.3F}, new BodyPart[] {WINGS}),
+		new float[] {Pools.HEAD, Pools.BODY, Pools.ARM, Pools.ARM, Pools.LEG, Pools.LEG, Pools.FOOT, Pools.FOOT}, new BodyPart[] {LEFT_FOOT, RIGHT_FOOT}),
+	QUADRUPED(new BodyPart[] {HEAD, BODY, FRONT_LEGS, HIND_LEGS}, new float[] {Pools.HEAD, Pools.BODY, Pools.LEG, Pools.LEG}, new BodyPart[] {FRONT_LEGS, HIND_LEGS}),
+	ARTHROPOD(new BodyPart[] {HEAD, BODY, LEGS}, new float[] {Pools.HEAD, Pools.BODY, Pools.LEG}, new BodyPart[] {LEGS}),
+	FLYER(new BodyPart[] {HEAD, BODY, WINGS}, new float[] {Pools.HEAD, Pools.BODY, Pools.ARM}, new BodyPart[] {WINGS}),
 	/** One part, so no locational damage: left to vanilla health. */
 	SIMPLE(new BodyPart[] {BODY}, new float[] {1.0F}, new BodyPart[] {BODY});
+
+	/** (Survival picks, lso-pools) Each pool's size as a share of the most health; tuning lives here. */
+	public static final class Pools {
+		public static final float HEAD = 0.4F, BODY = 0.6F, ARM = 0.4F, LEG = 0.6F, FOOT = 0.4F;
+
+		private Pools() {
+		}
+	}
 
 	public static final TagKey<EntityType<?>> BOSSES = TagKey.create(Registries.ENTITY_TYPE, net.minecraft.resources.Identifier.fromNamespaceAndPath("c", "bosses"));
 	private static final TagKey<EntityType<?>> HUMANOID_TAG = tag("body/humanoid");
@@ -40,18 +53,18 @@ public enum BodyPlan {
 
 	private final BodyPart[] parts;
 	private final float[] shares;
+	/** The pools' shares added up (a humanoid's 3.8). */
+	private final float total;
 	private final BodyPart[] fallParts;
 
 	BodyPlan(BodyPart[] parts, float[] shares, BodyPart[] fallParts) {
 		this.parts = parts;
+		this.shares = shares.clone();
 		float sum = 0.0F;
 		for (float share : shares) {
 			sum += share;
 		}
-		this.shares = new float[shares.length];
-		for (int i = 0; i < shares.length; i++) {
-			this.shares[i] = shares[i] / sum;
-		}
+		this.total = sum;
 		this.fallParts = fallParts;
 	}
 
@@ -67,9 +80,14 @@ public enum BodyPlan {
 		return this.parts[index];
 	}
 
-	/** Share of the creature's most health that part {@code index} holds. */
+	/** The size of part {@code index}'s own pool, as a share of the creature's most health. */
 	public float share(int index) {
 		return this.shares[index];
+	}
+
+	/** Every pool's share added up: all of them healed from nothing is this many times the most health. */
+	public float total() {
+		return this.total;
 	}
 
 	/** This part's place, or -1 if the plan has none. */

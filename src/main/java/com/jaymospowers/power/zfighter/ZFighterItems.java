@@ -267,8 +267,8 @@ public final class ZFighterItems {
 					// the healing, and Wounds would refuse it)
 					com.jaymospowers.core.Dismember.regrow(entity, true);
 					com.jaymospowers.core.Fractures.heal(entity);
-					entity.setHealth(entity.getMaxHealth());
-					com.jaymospowers.core.wounds.Wounds.reconcile(entity);
+					// (the parts keep their own pools apart from the health now: all of it whole, cuts and breaks too)
+					com.jaymospowers.core.wounds.Wounds.healAll(entity);
 					List<MobEffectInstance> ailments = new ArrayList<>();
 					for (MobEffectInstance effect : entity.getActiveEffects()) {
 						if (effect.getEffect().value().getCategory() == MobEffectCategory.HARMFUL) {
