@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-22 08:34
+updated: 2026-11-22 08:40
 ---
 # Open PRs
 
-22 open, as of 2026-11-22 08:34. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+22 open, as of 2026-11-22 08:40. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1853](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1853) Heritage paths: core + Heartlander, Stoneborn, Tideborn (Kingdoms, Powers)
@@ -22,8 +22,8 @@ Andy merges only on "merge", one at a time.
 - **Agent:** [[zfighter-gaps-10-camera-hud]]
 
 ## [#1938](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1938) Z Fighter gaps 2: stamina for Flash Step, guard and forms
-- **Branch:** `claude/zfighter-gaps-2-power` · **Updated:** 2026-11-21 (1 day ago)
-- **Checks:** ❌ failing: Build Powers
+- **Branch:** `claude/zfighter-gaps-2-power` · **Updated:** 2026-11-22 (today)
+- **Checks:** ✅ 5 passed
 - **Agent:** [[zfighter-gaps-2-power]]
 
 ## [#1939](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1939) Z Fighter gaps 3: 10 new techniques
@@ -32,8 +32,8 @@ Andy merges only on "merge", one at a time.
 - **Agent:** [[zfighter-gaps-3-techniques]]
 
 ## [#1953](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1953) Z Fighter gaps 5: training drills, grades, pod pilot, shadow dummy
-- **Branch:** `claude/zfighter-gaps-5-training` · **Updated:** 2026-11-20 (1 day ago)
-- **Checks:** ❌ failing: Build Powers
+- **Branch:** `claude/zfighter-gaps-5-training` · **Updated:** 2026-11-22 (today)
+- **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
 ## [#1954](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1954) Plan: parkour animations
