@@ -118,8 +118,9 @@ public final class FreerunClient {
 	 */
 	private static boolean useClimb(LocalPlayer player) {
 		Minecraft minecraft = Minecraft.getInstance();
-		return minecraft.options.keyUse.isDown() && player.getMainHandItem().isEmpty() && minecraft.gui.screen() == null
-			&& Freerun.perk(player, Freerun.Perk.CLIMBER) >= 1 && !LedgeClient.clickTaken(minecraft, player);
+		// (both hands empty and nothing in use: a shield raised or food eaten from the off hand isn't a climb)
+		return minecraft.options.keyUse.isDown() && player.getMainHandItem().isEmpty() && player.getOffhandItem().isEmpty()
+			&& !player.isUsingItem() && minecraft.gui.screen() == null && Freerun.perk(player, Freerun.Perk.CLIMBER) >= 1 && !LedgeClient.clickTaken(minecraft, player);
 	}
 
 	/** Clinging to a wall, hanging from a bar or from a pole (Sneak lets go: no zoom from it, see SneakZoom). */

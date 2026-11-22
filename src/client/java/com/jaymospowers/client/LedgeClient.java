@@ -220,12 +220,14 @@ public final class LedgeClient {
 	}
 
 	public static boolean scrollGrab(LocalPlayer player) {
-		if (phase != Phase.NONE || cooldown > 0 || !player.onGround() || player.isSprinting() || !Ledge.canHang(player, true)
-			|| !Crawl.canCrawl(player) || CrawlTaps.prone() || com.jaymospowers.client.freerun.FreerunClient.active()) {
+		// treading water by a low bank (its top under the reach of a hang, Ledge#find): this climbs out too, standing only
+		boolean wet = player.isInWater();
+		if (phase != Phase.NONE || cooldown > 0 || !player.onGround() && !wet || player.isSprinting() || !Ledge.canHang(player, true)
+			|| !wet && !Crawl.canCrawl(player) || CrawlTaps.prone() || com.jaymospowers.client.freerun.FreerunClient.active()) {
 			return false;
 		}
 		Ledge.Spot found = Ledge.crouchSpot(player);
-		if (found == null || !found.stand() && found.onBelly() == null) {
+		if (found == null || !found.stand() && (wet || found.onBelly() == null)) {
 			return false;
 		}
 		grab(player, found);
