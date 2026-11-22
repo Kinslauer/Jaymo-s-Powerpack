@@ -1,17 +1,5 @@
-# Enemy Damage Balance
-
-Reduces enemy damage across the board and makes heavy moves less frequent.
-
-## Wild Beasts
-- Grizzly: base damage 9.0 → 5.0; charge 11.0 → 7.0; slam 10.0 → 6.0; maul bite 4.0 → 3.0; attack gap 14/8 → 20/12 ticks
-- Feral Wolf: 5.0 → 3.0
-- Coyote: 4.0 → 2.5
-- Moose: 7.0 → 4.5
-- Wild Boar: 5.0 → 3.0
-
-## Player Experience
-- Basic melee attacks are now the primary threat, dealing low damage per hit
-- Heavy moves (charges, slams, mauls) hit harder but are used much less often
-- Wild beasts are threatening but not lethal in a single mistake
-
-Not tested in game.
+# Enemy damage balance: beasts hit for less, armed fighters mostly swing plain
+- **Wild beasts**: the grizzly 9 → 5 (its charge 11 → 7, its slam 10 → 6, a maul's bite 4 → 3, and a little longer between its moves), feral wolf 5 → 3, coyote 4 → 2.5, moose 7 → 4.5, wild boar 5 → 3.
+- **Armed fighters** (guards, bandits, orcs, duellists and anyone else swinging a weapon Better Combat's way): when an experienced fighter's combo comes round to a heavy move (the red glint), they throw it only 1 time in 4 and a plain blow otherwise. A two-handed weapon's blows are all heavy, so they stay as they were.
+- Classes: Grizzly, FeralWolf, Coyote, Moose, WildBoar, MobCombat.
+- Not tested in game.
