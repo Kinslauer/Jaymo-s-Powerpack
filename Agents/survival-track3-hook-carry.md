@@ -1,9 +1,9 @@
 ---
 status: running
 task: Survival picks track 3, part 1: meat hook click, two-arm lifting, carried block drawn
-branch: claude/interesting-villani-4ea779
+branch: claude/survival-hook-carry
 with: wounds-lso (track 1, Powers core/wounds + Kingdoms Rangers; not touched here)
-pr: 
+pr: 1989
 mods: kitchen, powers
 versions: 
 started: 2026-11-22
@@ -32,6 +32,12 @@ and third person. (Plan: `docs/Survival-Picks-Plan.md` track 3, in the minecraft
 
 ## Notes
 - Hooks still take only animals' carcasses (Hanging.hangable); a person's body isn't hung.
-- Great spit / campfire clicks while carrying were swallowed by the same client mixin; the fix lets them through too.
+- Great spit / campfire clicks while carrying are still swallowed by the same client mixin (server branches in
+  JaymosKitchen's UseBlockCallback look unreachable); not changed here, reported.
+- Two-arm reading (unconfirmed): a person over the shoulder (FIREMAN) or at a web slinger's side (SHOULDER) gets the
+  left arm too; small = non-person no bigger than 0.6 x 0.8 (Kitchen's one-hand size). ZFighter's two-arm moves untouched.
 
 ## Done
+PR #1989 (Kitchen + Powers), Auto-fix on, built by CI only. Not played: the hook click, the left-arm angles, the
+carried block under First-person Model. Butchery picks (bu-table, bu-skin-rack, bu-rotisserie, bu-mincer, bu-decor)
+not started: second PR.
