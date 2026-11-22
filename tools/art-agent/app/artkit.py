@@ -80,27 +80,41 @@ def paint_texture(
         width: texture width in pixels (16, 32, 64 or 128 for Minecraft art).
         height: texture height in pixels.
         palette: maps one character to a colour, "#rrggbb" or "#rrggbbaa". "." is always fully transparent.
-        rows: exactly `height` strings of exactly `width` characters each, top row first.
+        rows: `height` strings of `width` characters each, top row first.
 
     Returns:
-        The saved path, plus the texture itself as an image to check.
+        The saved path, plus the texture itself as an image to check. "fixed" lists rows that had to be padded or
+        cut; look at the image and repaint if they matter.
     """
     _check_name(name)
-    if len(rows) != height or any(len(r) != width for r in rows):
-        bad = [i for i, r in enumerate(rows) if len(r) != width]
-        return {
-            "error": f"need {height} rows of {width} characters; got {len(rows)} rows, wrong lengths at rows {bad[:10]}"
-        }
+    width, height = int(width), int(height)
+    # Small models often miscount one row by a pixel and then repeat the same call forever. Pad short rows with
+    # ".", cut long ones, add or drop rows, save anyway, and say what was changed so the picture can be checked.
+    fixes = []
+    bad = [i for i, r in enumerate(rows[:height]) if len(r) != width]
+    if bad:
+        fixes.append(f"rows {bad[:10]} were not {width} wide; padded with '.' or cut")
+    if len(rows) != height:
+        fixes.append(
+            f"got {len(rows)} rows, not {height}; blank rows added or extra rows dropped"
+        )
+    rows = [r[:width].ljust(width, ".") for r in rows[:height]]
+    rows += ["." * width] * (height - len(rows))
     colours = {k: _hex(v) for k, v in palette.items()}
     colours["."] = (0, 0, 0, 0)
     missing = sorted({ch for r in rows for ch in r} - set(colours))
     if missing:
-        return {"error": f"characters not in the palette: {''.join(missing)}"}
+        fixes.append(
+            f"characters not in the palette, left transparent: {''.join(missing)}"
+        )
     img = Image.new("RGBA", (width, height))
-    img.putdata([colours[ch] for r in rows for ch in r])
+    img.putdata([colours.get(ch, (0, 0, 0, 0)) for r in rows for ch in r])
     path = _path("textures", name + ".png")
     img.save(path)
-    return {"saved": path, "size": [width, height], "image": _png_part(path)}
+    res = {"saved": path, "size": [width, height], "image": _png_part(path)}
+    if fixes:
+        res["fixed"] = fixes
+    return res
 
 
 def look_at(path: str) -> dict:

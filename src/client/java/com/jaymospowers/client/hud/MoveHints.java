@@ -90,6 +90,7 @@ public final class MoveHints {
 		int move = FreerunClient.move();
 		if (LedgeClient.hanging()) {
 			list.add(new Hint(options.keyJump, "pull_up"));
+			list.add(new Hint(options.keyDown, "climb_down"));
 			list.add(new Hint(options.keyShift, "let_go"));
 		} else if (LedgeClient.active()) {
 			// the pull-up itself: nothing to press
@@ -97,6 +98,7 @@ public final class MoveHints {
 			if (Freerun.perk(player, Freerun.Perk.FREERUNNER) >= 2) {
 				list.add(new Hint(options.keyJump, "wall_kick"));
 			}
+			list.add(new Hint(options.keyDown, "climb_down"));
 			list.add(new Hint(options.keyShift, "let_go"));
 		} else if (move == Freerun.WALL_RUN) {
 			list.add(new Hint(options.keyJump, "kick_off"));

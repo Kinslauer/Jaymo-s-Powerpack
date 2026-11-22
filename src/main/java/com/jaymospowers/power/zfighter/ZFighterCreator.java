@@ -48,26 +48,29 @@ public final class ZFighterCreator {
 	public static final int NAME_MAX = 20;
 	/** TP per point of strength, and the strongest it can be made. */
 	public static final int TP_PER_POWER = 1000, POWER_MAX = 5;
-	/** The quick shapes: one bolt, a fan of bolts, seeking bolts, a burst all round. */
-	public static final int BOLT = 0, SPREAD = 1, HOMING = 2, BURST = 3;
-	/** The charged shapes: a wave, a boring lance, a needle, a great ball thrown. */
-	public static final int BEAM = 0, LANCE = 1, NEEDLE = 2, BALL = 3;
-	public static final int SHAPES = 4;
-	public static final String[] QUICK_SHAPE_KEYS = {"bolt", "spread", "homing", "burst"};
-	public static final String[] CHARGED_SHAPE_KEYS = {"beam", "lance", "needle", "ball"};
+	/** The quick shapes: one bolt, a fan of bolts, seeking bolts, a burst all round, a heal ball/touch. */
+		public static final int BOLT = 0, SPREAD = 1, HOMING = 2, BURST = 3, HEAL = 4;
+		/** The charged shapes: a wave, a boring lance, a needle, a great ball thrown. */
+		public static final int BEAM = 0, LANCE = 1, NEEDLE = 2, BALL = 3;
+		public static final int SHAPES = 5;
+		public static final String[] QUICK_SHAPE_KEYS = {"bolt", "spread", "homing", "burst", "heal"};
+		public static final String[] CHARGED_SHAPE_KEYS = {"beam", "lance", "needle", "ball"};
 	/** The colours to pick from. */
 	public static final int[] COLORS = {0xFFD84A, 0x5AC8FF, 0xFF4A4A, 0x7CFF6A, 0xC070FF, 0xFFFFFF, 0xFF8A2A, 0xFF70C8};
 	/** Ticks of gathering to a full charge, for every made charged technique. */
 	public static final int FULL_TICKS = 50;
 
 	// ---- quick (G): ki, damage, cooldown, by strength ----
-	static final float QUICK_KI = 6.0F, QUICK_KI_PER = 4.0F;
-	static final float BOLT_DAMAGE = 4.0F, BOLT_DAMAGE_PER = 2.5F;
-	static final float SPREAD_DAMAGE = 3.0F, SPREAD_DAMAGE_PER = 1.2F;
-	static final float HOMING_DAMAGE = 2.5F, HOMING_DAMAGE_PER = 1.2F;
-	static final float BURST_DAMAGE = 4.0F, BURST_DAMAGE_PER = 2.0F;
-	static final double BURST_RADIUS = 3.0, BURST_RADIUS_PER = 0.6;
-	static final int QUICK_COOLDOWN = 20, QUICK_COOLDOWN_PER = 10;
+		static final float QUICK_KI = 6.0F, QUICK_KI_PER = 4.0F;
+		static final float BOLT_DAMAGE = 4.0F, BOLT_DAMAGE_PER = 2.5F;
+		static final float SPREAD_DAMAGE = 3.0F, SPREAD_DAMAGE_PER = 1.2F;
+		static final float HOMING_DAMAGE = 2.5F, HOMING_DAMAGE_PER = 1.2F;
+		static final float BURST_DAMAGE = 4.0F, BURST_DAMAGE_PER = 2.0F;
+		static final double BURST_RADIUS = 3.0, BURST_RADIUS_PER = 0.6;
+		/** Heal: amount per power, radius per power. */
+		static final float HEAL_AMOUNT = 6.0F, HEAL_AMOUNT_PER = 4.0F;
+		static final double HEAL_RADIUS = 4.0, HEAL_RADIUS_PER = 0.8;
+		static final int QUICK_COOLDOWN = 20, QUICK_COOLDOWN_PER = 10;
 	// ---- charged (V) ----
 	static final float CHARGED_MIN_KI = 15.0F, CHARGED_MIN_KI_PER = 10.0F;
 	static final float CHARGED_MAX_KI = 40.0F, CHARGED_MAX_KI_PER = 25.0F;
@@ -284,32 +287,33 @@ public final class ZFighterCreator {
 		int color = made.color();
 		Vec3 palm = ZFighterKi.palm(player, look);
 		switch (made.shape()) {
-			case SPREAD -> {
-				int bolts = 2 + p;
-				for (int i = 0; i < bolts; i++) {
-					double turn = (i - (bolts - 1) * 0.5) * 0.14;
-					Vec3 dir = look.yRot((float)turn).normalize();
-					ZFighterKi.shoot(player, palm, dir.scale(ZFighterKi.BLAST_SPEED), (SPREAD_DAMAGE + SPREAD_DAMAGE_PER * p) * kiPower, color, false,
-						ZFighterKi.BLAST_LIFE);
+					case SPREAD -> {
+						int bolts = 2 + p;
+						for (int i = 0; i < bolts; i++) {
+							double turn = (i - (bolts - 1) * 0.5) * 0.14;
+							Vec3 dir = look.yRot((float)turn).normalize();
+							ZFighterKi.shoot(player, palm, dir.scale(ZFighterKi.BLAST_SPEED), (SPREAD_DAMAGE + SPREAD_DAMAGE_PER * p) * kiPower, color, false,
+									ZFighterKi.BLAST_LIFE);
+						}
+						level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.7F, 1.5F);
+					}
+					case HOMING -> {
+						var random = level.getRandom();
+						for (int i = 0; i < 2 + p; i++) {
+							Vec3 dir = look.add((random.nextDouble() - 0.5) * 0.7, random.nextDouble() * 0.4, (random.nextDouble() - 0.5) * 0.7).normalize();
+							ZFighterKi.shoot(player, palm, dir.scale(ZFighterKi.VOLLEY_SPEED), (HOMING_DAMAGE + HOMING_DAMAGE_PER * p) * kiPower, color, true,
+									ZFighterKi.VOLLEY_LIFE);
+						}
+						level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.7F, 1.3F);
+					}
+					case BURST -> burst(player, made, kiPower);
+					case HEAL -> heal(player, made, kiPower);
+					default -> {
+						ZFighterKi.shoot(player, palm, look.scale(ZFighterKi.BLAST_SPEED * 1.2), (BOLT_DAMAGE + BOLT_DAMAGE_PER * p) * kiPower, color, false,
+								ZFighterKi.BLAST_LIFE);
+						level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 0.8F, 1.4F);
+					}
 				}
-				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.7F, 1.5F);
-			}
-			case HOMING -> {
-				var random = level.getRandom();
-				for (int i = 0; i < 2 + p; i++) {
-					Vec3 dir = look.add((random.nextDouble() - 0.5) * 0.7, random.nextDouble() * 0.4, (random.nextDouble() - 0.5) * 0.7).normalize();
-					ZFighterKi.shoot(player, palm, dir.scale(ZFighterKi.VOLLEY_SPEED), (HOMING_DAMAGE + HOMING_DAMAGE_PER * p) * kiPower, color, true,
-						ZFighterKi.VOLLEY_LIFE);
-				}
-				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.7F, 1.3F);
-			}
-			case BURST -> burst(player, made, kiPower);
-			default -> {
-				ZFighterKi.shoot(player, palm, look.scale(ZFighterKi.BLAST_SPEED * 1.2), (BOLT_DAMAGE + BOLT_DAMAGE_PER * p) * kiPower, color, false,
-					ZFighterKi.BLAST_LIFE);
-				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREEZE_SHOOT, SoundSource.PLAYERS, 0.8F, 1.4F);
-			}
-		}
 		// (0.19.60) thrown out of the palm with a thrust (ZFighterHands)
 		ZFighterHands.thrust(player, ZFighterHands.hand(player, true), ZFighterHands.JAB);
 		if (!player.isCreative()) {
@@ -319,24 +323,46 @@ public final class ZFighterCreator {
 	}
 
 	/** A burst of ki all round them: everyone close is hurt and thrown back. */
-	private static void burst(ServerPlayer player, Made made, float kiPower) {
-		ServerLevel level = player.level();
-		int p = made.power();
-		double radius = AbilityPower.size(player, BURST_RADIUS) + AbilityPower.size(player, BURST_RADIUS_PER) * p;
-		Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
-		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius), e -> ZFighterArts.valid(player, e))) {
-			Vec3 to = near.getBoundingBox().getCenter().subtract(at);
-			if (to.length() > radius) {
-				continue;
+		private static void burst(ServerPlayer player, Made made, float kiPower) {
+			ServerLevel level = player.level();
+			int p = made.power();
+			double radius = AbilityPower.size(player, BURST_RADIUS) + AbilityPower.size(player, BURST_RADIUS_PER) * p;
+			Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
+			for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius), e -> ZFighterArts.valid(player, e))) {
+				Vec3 to = near.getBoundingBox().getCenter().subtract(at);
+				if (to.length() > radius) {
+					continue;
+				}
+				near.hurtServer(level, ZFighterKi.source(player), (BURST_DAMAGE + BURST_DAMAGE_PER * p) * kiPower);
+				ZFighterKi.push(near, to, 0.8 + 0.2 * p, 0.35);
 			}
-			near.hurtServer(level, ZFighterKi.source(player), (BURST_DAMAGE + BURST_DAMAGE_PER * p) * kiPower);
-			ZFighterKi.push(near, to, 0.8 + 0.2 * p, 0.35);
+			MagicFx.burst(level, at.x, at.y, at.z, made.color(), 2.0F, 40 + 10 * p, radius * 0.4, 0.4, radius * 0.4);
+			level.sendParticles(ParticleTypes.EXPLOSION, true, false, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.6F, 1.5F);
+			Shakes.send(player, 0.3F + 0.1F * p, at);
 		}
-		MagicFx.burst(level, at.x, at.y, at.z, made.color(), 2.0F, 40 + 10 * p, radius * 0.4, 0.4, radius * 0.4);
-		level.sendParticles(ParticleTypes.EXPLOSION, true, false, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
-		level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.6F, 1.5F);
-		Shakes.send(player, 0.3F + 0.1F * p, at);
-	}
+
+		/** A heal ball: thrown at a friend or at feet to heal allies in radius. */
+		private static void heal(ServerPlayer player, Made made, float kiPower) {
+			ServerLevel level = player.level();
+			int p = made.power();
+			float amount = HEAL_AMOUNT + HEAL_AMOUNT_PER * p;
+			double radius = HEAL_RADIUS + HEAL_RADIUS_PER * p;
+			Vec3 look = LockOn.aim(player);
+			Vec3 from = ZFighterKi.palm(player, look);
+			// Shoot a slow heal orb that heals on impact
+			ZFighterKi.shoot(player, from, look.scale(0.8), amount * kiPower, made.color(), false, 60);
+			// Also heal nearby allies immediately
+			Vec3 at = player.position().add(0.0, player.getBbHeight() * 0.5, 0.0);
+			for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius),
+					e -> e != player && e.isAlive() && !e.isSpectator() && !ZFighterArts.valid(player, e))) {
+				near.heal(amount * kiPower);
+				level.sendParticles(net.minecraft.core.particles.ParticleTypes.HAPPY_VILLAGER, true, false, near.getX(), near.getY() + 1.0, near.getZ(),
+						6, 0.2, 0.2, 0.2, 0.05);
+			}
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.7F, 1.4F);
+			MagicFx.burst(level, at.x, at.y, at.z, made.color(), 1.5F, 20 + 5 * p, (float)radius * 0.3F, 0.3F, (float)radius * 0.3F);
+		}
 
 	// ---------------------------------------------------------------- V: the charged ones
 

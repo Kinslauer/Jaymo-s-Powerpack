@@ -35,18 +35,28 @@ public final class ZFighterArts {
 	}
 
 	public static void init() {
-		ZFighterRingOfOrbs.init();
-		ZFighterRisingDome.init();
-		ZFighterKiRain.init();
-		ZFighterAfterimage.init();
-		ZFighterSonicSway.init();
-		ZFighterCreator.init();
-		ZFighterEyeBeams.init();
-		ZFighterGreatBreath.init();
-		ZFighterAerialCharge.init();
-		ZFighterThunderclap.init();
-		ZFighterBracers.init();
-	}
+			ZFighterRingOfOrbs.init();
+			ZFighterRisingDome.init();
+			ZFighterKiRain.init();
+			ZFighterAfterimage.init();
+			ZFighterSonicSway.init();
+			ZFighterCreator.init();
+			ZFighterEyeBeams.init();
+			ZFighterGreatBreath.init();
+			ZFighterAerialCharge.init();
+			ZFighterThunderclap.init();
+			ZFighterBracers.init();
+			// Patch 3 techniques
+			ZFighterKiShell.init();
+			ZFighterTwinDiscs.init();
+			ZFighterRingBeam.init();
+			ZFighterSwordTechnique.init();
+			ZFighterPurgingBeam.init();
+			ZFighterStickyBind.init();
+			ZFighterRiftMoves.init();
+			ZFighterKiDrinkingBarrier.init();
+			ZFighterKiCell.init();
+		}
 
 	public static void clear() {
 		ZFighterRingOfOrbs.clear();
@@ -58,20 +68,32 @@ public final class ZFighterArts {
 		ZFighterEyeBeams.clear();
 		ZFighterGreatBreath.clear();
 		ZFighterAerialCharge.clear();
+		ZFighterThunderclap.clear();
 		ZFighterBracers.clear();
+		// Patch 3 techniques
+		ZFighterKiShell.clear();
+		ZFighterTwinDiscs.clear();
+		ZFighterRingBeam.clear();
+		ZFighterSwordTechnique.clear();
+		ZFighterPurgingBeam.clear();
+		ZFighterStickyBind.clear();
+		ZFighterRiftMoves.clear();
+		ZFighterKiDrinkingBarrier.clear();
+		ZFighterKiCell.clear();
 	}
 
 	// ---------------------------------------------------------------- the dispatch
 
 	/** Whether {@code index} is one of this patch's techniques. */
 	public static boolean art(int index) {
-		return index >= ZFighterTraining.DRILL_BEAM && index <= ZFighterTraining.GREAT_BREATH || ZFighterCreator.custom(index);
+		return index >= ZFighterTraining.DRILL_BEAM && index <= ZFighterTraining.KI_DRINKING_BARRIER || ZFighterCreator.custom(index);
 	}
 
 	/** Whether {@code index} is one of this patch's techniques that is held and let go on V. */
 	public static boolean charged(int index) {
 		return index == ZFighterTraining.DRILL_BEAM || index == ZFighterTraining.TRIANGLE_CANNON || index == ZFighterTraining.NOVA_SPHERE
 			|| index == ZFighterTraining.SELF_DESTRUCT || index == ZFighterTraining.EYE_BEAMS || index == ZFighterTraining.GREAT_BREATH
+			|| index == ZFighterTraining.TWIN_DISCS || index == ZFighterTraining.RING_BEAM || index == ZFighterTraining.PURGING_BEAM
 			|| ZFighterCreator.chargedPlace(index);
 	}
 
@@ -95,6 +117,12 @@ public final class ZFighterArts {
 			case ZFighterTraining.AFTERIMAGE -> ZFighterAfterimage.start(player, live);
 			case ZFighterTraining.AERIAL_CHARGE -> ZFighterAerialCharge.start(player, live);
 			case ZFighterTraining.THUNDERCLAP -> ZFighterThunderclap.start(player, live);
+			case ZFighterTraining.KI_SHELL -> 0; // passive, no cooldown
+			case ZFighterTraining.SWORD_TECHNIQUE -> ZFighterSwordTechnique.start(player, live);
+			case ZFighterTraining.STICKY_BIND -> ZFighterStickyBind.start(player, live);
+			case ZFighterTraining.RIFT_FIST -> ZFighterRiftMoves.riftFist(player, live);
+			case ZFighterTraining.RIFT_STEP -> ZFighterRiftMoves.riftStep(player, live);
+			case ZFighterTraining.KI_DRINKING_BARRIER -> ZFighterKiDrinkingBarrier.start(player, live);
 			default -> ZFighterSonicSway.start(player, live);
 		};
 		if (cooldown > 0) {
@@ -114,6 +142,9 @@ public final class ZFighterArts {
 			case ZFighterTraining.SELF_DESTRUCT -> ZFighterSelfDestruct.MIN_KI;
 			case ZFighterTraining.EYE_BEAMS -> ZFighterEyeBeams.MIN_KI;
 			case ZFighterTraining.GREAT_BREATH -> ZFighterGreatBreath.MIN_KI;
+			case ZFighterTraining.TWIN_DISCS -> ZFighterTwinDiscs.min(player);
+			case ZFighterTraining.RING_BEAM -> ZFighterRingBeam.min(player);
+			case ZFighterTraining.PURGING_BEAM -> ZFighterPurgingBeam.min(player);
 			default -> ZFighterNovaSphere.MIN_KI;
 		};
 	}
@@ -128,6 +159,9 @@ public final class ZFighterArts {
 			case ZFighterTraining.SELF_DESTRUCT -> ZFighterSelfDestruct.MAX_KI;
 			case ZFighterTraining.EYE_BEAMS -> ZFighterEyeBeams.MAX_KI;
 			case ZFighterTraining.GREAT_BREATH -> ZFighterGreatBreath.MAX_KI;
+			case ZFighterTraining.TWIN_DISCS -> ZFighterTwinDiscs.max(player);
+			case ZFighterTraining.RING_BEAM -> ZFighterRingBeam.max(player);
+			case ZFighterTraining.PURGING_BEAM -> ZFighterPurgingBeam.max(player);
 			default -> ZFighterNovaSphere.MAX_KI;
 		};
 	}
@@ -141,6 +175,9 @@ public final class ZFighterArts {
 			case ZFighterTraining.SELF_DESTRUCT -> ZFighterSelfDestruct.FULL_TICKS;
 			case ZFighterTraining.EYE_BEAMS -> ZFighterEyeBeams.FULL_TICKS;
 			case ZFighterTraining.GREAT_BREATH -> ZFighterGreatBreath.FULL_TICKS;
+			case ZFighterTraining.TWIN_DISCS -> ZFighterTwinDiscs.FULL_TICKS;
+			case ZFighterTraining.RING_BEAM -> ZFighterRingBeam.FULL_TICKS;
+			case ZFighterTraining.PURGING_BEAM -> ZFighterPurgingBeam.FULL_TICKS;
 			default -> ZFighterCreator.custom(index) ? ZFighterCreator.FULL_TICKS : fallback;
 		};
 	}
@@ -154,6 +191,9 @@ public final class ZFighterArts {
 			case ZFighterTraining.SELF_DESTRUCT -> NOVA_COOLDOWN;
 			case ZFighterTraining.EYE_BEAMS -> ZFighterEyeBeams.COOLDOWN;
 			case ZFighterTraining.GREAT_BREATH -> ZFighterGreatBreath.COOLDOWN;
+			case ZFighterTraining.TWIN_DISCS -> ZFighterTwinDiscs.cooldown(player);
+			case ZFighterTraining.RING_BEAM -> ZFighterRingBeam.cooldown(player);
+			case ZFighterTraining.PURGING_BEAM -> ZFighterPurgingBeam.cooldown(player);
 			default -> ZFighterCreator.custom(ZFighterTraining.of(player).charged())
 				? ZFighterCreator.cooldown(player, ZFighterTraining.of(player).charged()) : ZFighterKi.WAVE_COOLDOWN;
 		};
@@ -166,6 +206,9 @@ public final class ZFighterArts {
 			case ZFighterTraining.SELF_DESTRUCT -> ZFighterSelfDestruct.blocker(player);
 			case ZFighterTraining.EYE_BEAMS -> ZFighterEyeBeams.blocker(player);
 			case ZFighterTraining.GREAT_BREATH -> ZFighterGreatBreath.blocker(player);
+			case ZFighterTraining.TWIN_DISCS -> ZFighterTwinDiscs.blocker(live);
+			case ZFighterTraining.RING_BEAM -> ZFighterRingBeam.blocker(live);
+			case ZFighterTraining.PURGING_BEAM -> ZFighterPurgingBeam.blocker(live);
 			default -> ZFighterCreator.custom(index) ? ZFighterCreator.blocker(player, index) : null;
 		};
 	}
@@ -189,6 +232,9 @@ public final class ZFighterArts {
 			case ZFighterTraining.SELF_DESTRUCT -> ZFighterSelfDestruct.gather(player, live, charge);
 			case ZFighterTraining.EYE_BEAMS -> ZFighterEyeBeams.gather(player, live, charge);
 			case ZFighterTraining.GREAT_BREATH -> ZFighterGreatBreath.gather(player, live, charge);
+			case ZFighterTraining.TWIN_DISCS -> ZFighterTwinDiscs.gather(player, live, charge);
+			case ZFighterTraining.RING_BEAM -> ZFighterRingBeam.gather(player, live, charge);
+			case ZFighterTraining.PURGING_BEAM -> ZFighterPurgingBeam.gather(player, live, charge);
 			default -> {
 				if (ZFighterCreator.custom(index)) {
 					ZFighterCreator.gather(player, live, index, charge);
@@ -207,6 +253,9 @@ public final class ZFighterArts {
 			case ZFighterTraining.SELF_DESTRUCT -> ZFighterSelfDestruct.fire(player, live, charge);
 			case ZFighterTraining.EYE_BEAMS -> ZFighterEyeBeams.release(player, live, charge);
 			case ZFighterTraining.GREAT_BREATH -> ZFighterGreatBreath.release(player, live, charge);
+			case ZFighterTraining.TWIN_DISCS -> ZFighterTwinDiscs.fire(player, live, charge);
+			case ZFighterTraining.RING_BEAM -> ZFighterRingBeam.fire(player, live, charge);
+			case ZFighterTraining.PURGING_BEAM -> ZFighterPurgingBeam.fire(player, live, charge);
 			default -> {
 				if (ZFighterCreator.custom(index)) {
 					ZFighterCreator.fire(player, live, index, charge);

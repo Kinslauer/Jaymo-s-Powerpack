@@ -66,6 +66,15 @@ public class ZFighterDrillScreen extends Screen {
 	private static final int[] MEM_ARROWS = {InputConstants.KEY_UP, InputConstants.KEY_RIGHT, InputConstants.KEY_DOWN, InputConstants.KEY_LEFT};
 	private static final int[] MEM_COLORS = {0xFFE05050, 0xFF4A90E0, 0xFF50C878, 0xFFE8C040};
 
+	/** Pod Pilot: gravity minigame constants. */
+	private static final int POD_TICKS = 600;
+	private static final float POD_GRAVITY = 0.08F;
+	private static final float POD_BOOST = -0.55F;
+	private static final int POD_GAP_EVERY = 90;
+	private static final int POD_GAP_HEIGHT = 40;
+	private static final int POD_PILLAR_WIDTH = 30;
+	private static final int POD_SPEED = 3;
+
 	private final RandomSource random = RandomSource.create();
 	/** -1: the menu; otherwise the drill being played. */
 	private int drill = -1;
@@ -102,6 +111,14 @@ public class ZFighterDrillScreen extends Screen {
 	private int memLit = -1;
 	private int memLitUntil;
 	private int memDone;
+	// pod pilot: pod y position and velocity, pillars (x position, gap y), score
+	private float podY;
+	private float podVy;
+	private final int[] pillarX = new int[10];
+	private final int[] pillarGapY = new int[10];
+	private int pillarCount;
+	private int nextPillarAt;
+	private boolean podCrashed;
 
 	public ZFighterDrillScreen() {
 		super(Component.translatable("screen.jaymospowers.zfighter.drills"));
@@ -156,6 +173,11 @@ public class ZFighterDrillScreen extends Screen {
 		memStep = 0;
 		memLit = -1;
 		memDone = 0;
+		podY = ARENA_H / 2.0F;
+		podVy = 0.0F;
+		pillarCount = 0;
+		nextPillarAt = POD_GAP_EVERY;
+		podCrashed = false;
 		for (int i = 0; i < memSeq.length; i++) {
 			memSeq[i] = random.nextInt(4);
 		}
@@ -216,6 +238,7 @@ public class ZFighterDrillScreen extends Screen {
 				}
 			}
 			case ZFighterDrills.MEMORY -> memoryTick();
+			case ZFighterDrills.POD_PILOT -> podPilotTick();
 			case ZFighterDrills.PRECISION -> {
 				if (ticks - targetAt >= TARGET_LIFE) {
 					if (targets >= COUNT) {
@@ -275,6 +298,49 @@ public class ZFighterDrillScreen extends Screen {
 					finish();
 				}
 			}
+		}
+	}
+
+	private void podPilotTick() {
+		if (podCrashed) {
+			return;
+		}
+		podVy += POD_GRAVITY;
+		podY += podVy;
+		if (podY <= 0 || podY >= ARENA_H) {
+			podCrashed = true;
+			finish();
+			return;
+		}
+		// move the pillars; a pillar at the pod with the pod outside its gap is a crash
+		int podX = W / 2;
+		for (int i = 0; i < pillarCount; i++) {
+			pillarX[i] -= POD_SPEED;
+			if (pillarX[i] <= podX + 10 && pillarX[i] + POD_PILLAR_WIDTH >= podX - 10
+				&& (podY < pillarGapY[i] || podY > pillarGapY[i] + POD_GAP_HEIGHT)) {
+				podCrashed = true;
+				finish();
+				return;
+			}
+		}
+		// drop pillars that have gone off the left edge
+		while (pillarCount > 0 && pillarX[0] + POD_PILLAR_WIDTH < 0) {
+			System.arraycopy(pillarX, 1, pillarX, 0, pillarCount - 1);
+			System.arraycopy(pillarGapY, 1, pillarGapY, 0, pillarCount - 1);
+			pillarCount--;
+		}
+		if (--nextPillarAt <= 0) {
+			if (pillarCount < pillarX.length) {
+				pillarX[pillarCount] = W;
+				pillarGapY[pillarCount] = 20 + random.nextInt(ARENA_H - POD_GAP_HEIGHT - 40);
+				pillarCount++;
+			}
+			nextPillarAt = POD_GAP_EVERY;
+		}
+		// points for time survived
+		score = Math.round(100.0F * ticks / POD_TICKS);
+		if (ticks >= POD_TICKS) {
+			finish();
 		}
 	}
 
@@ -363,6 +429,9 @@ public class ZFighterDrillScreen extends Screen {
 					return true;
 				}
 			}
+		} else if (drill == ZFighterDrills.POD_PILOT && key == InputConstants.KEY_SPACE) {
+			podVy = POD_BOOST;
+			return true;
 		}
 		return super.keyPressed(event);
 	}
@@ -439,6 +508,7 @@ public class ZFighterDrillScreen extends Screen {
 			case ZFighterDrills.SHADOW_BOXING -> prompts / (float)COUNT;
 			case ZFighterDrills.PRECISION -> targets / (float)COUNT;
 			case ZFighterDrills.MEMORY -> memRound / (float)MEM_ROUNDS;
+			case ZFighterDrills.POD_PILOT -> ticks / (float)POD_TICKS;
 			default -> 0.0F;
 		};
 	}
@@ -488,6 +558,7 @@ public class ZFighterDrillScreen extends Screen {
 			case ZFighterDrills.SHADOW_BOXING -> boxing(graphics, x, ay);
 			case ZFighterDrills.PRECISION -> precision(graphics, x, ay, a);
 			case ZFighterDrills.MEMORY -> memory(graphics, x, ay);
+			case ZFighterDrills.POD_PILOT -> podPilot(graphics, x, ay);
 			default -> {
 			}
 		}
@@ -578,5 +649,33 @@ public class ZFighterDrillScreen extends Screen {
 			graphics.fill(cx - inner, cy - inner, cx + inner, cy + inner, 0xFFFFFFFF);
 		}
 		graphics.text(this.font, targets + "/" + COUNT, x + 12, ay + 6, UiStyle.DIM);
+	}
+
+	private void podPilot(GuiGraphicsExtractor graphics, int x, int ay) {
+		for (int i = 0; i < pillarCount; i++) {
+			// only pillars wholly inside the arena are drawn
+			if (pillarX[i] < 6 || pillarX[i] + POD_PILLAR_WIDTH > W - 6) {
+				continue;
+			}
+			int px = x + pillarX[i];
+			int gapTop = ay + pillarGapY[i];
+			int gapBottom = gapTop + POD_GAP_HEIGHT;
+			graphics.fill(px, ay, px + POD_PILLAR_WIDTH, gapTop, 0xFF8B4513);
+			graphics.fill(px, gapBottom, px + POD_PILLAR_WIDTH, ay + ARENA_H, 0xFF8B4513);
+			graphics.outline(px, ay, POD_PILLAR_WIDTH, pillarGapY[i], 0xFF5D3A1A);
+			graphics.outline(px, gapBottom, POD_PILLAR_WIDTH, ay + ARENA_H - gapBottom, 0xFF5D3A1A);
+		}
+		int podX = x + W / 2;
+		int podYScreen = ay + Math.round(podY);
+		int half = 5;
+		graphics.fill(podX - half, podYScreen - half, podX + half, podYScreen + half, 0xFFE0E0E0);
+		graphics.outline(podX - half, podYScreen - half, half * 2, half * 2, 0xFF808080);
+		if (podVy < -0.2F) {
+			graphics.fill(podX - 4, podYScreen + half, podX + 4, podYScreen + half + 4, 0xFFFFFF00);
+		}
+		graphics.text(this.font, Math.max(0, POD_TICKS - ticks) / 20 + "s", x + 12, ay + 6, UiStyle.DIM);
+		if (podCrashed) {
+			graphics.centeredText(this.font, Component.translatable("drill.jaymospowers.zfighter.pod_crashed"), x + W / 2, ay + ARENA_H / 2, 0xFFFF6A50);
+		}
 	}
 }

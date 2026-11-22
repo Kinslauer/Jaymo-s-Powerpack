@@ -35,6 +35,7 @@
   "warden.jaymoskingdoms.lord": "a lord of the realm",
   "focus.jaymoskingdoms.mining": "mining: it sends stone and ore to its overlord",
   "focus.jaymoskingdoms.farming": "farming: it sends food to its overlord",
+  "focus.jaymoskingdoms.forestry": "forestry: it sends timber to its overlord",
   "wealth.jaymoskingdoms.poor": "of modest means",
   "wealth.jaymoskingdoms.prosperous": "prosperous (mounted guards)",
   "wealth.jaymoskingdoms.wealthy": "wealthy (mounted guards and archers, the king's carriage)",
