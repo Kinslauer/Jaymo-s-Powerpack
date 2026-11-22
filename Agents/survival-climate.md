@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: survival picks track 2 (Kitchen climate and stamina)
-branch: claude/gracious-mcnulty-af085e
+branch: claude/survival-climate
 with: Claude (desktop session, started by the survival picks coordinator)
-pr: 
+pr: 1995
 mods: kitchen, powers
 versions: 
 started: 2026-11-22
@@ -29,9 +29,13 @@ owns:
 - Thirst: per-action costs into Thirst's drain (LSO exhaustion / 4 per point); hot thirst and cold hunger already there.
 - Wetness: one Kitchen meter (0-100) replaces BodyHeat's wet timer; Powers' Wet/Soaked feed it; crouch-use water douses.
 - Temperature: one LSO degree = 2.5 body heat; height from sea level, a smooth day curve, heat sources out to 20 blocks.
-- Breath at the mouth when the air or body is cold. Stamina bar in the focus band. Stop-drop-roll in Powers (crouch while burning).
+- Breath at the mouth when the air or body is cold. Stamina bar in the focus band. Stop-drop-roll: already in Powers (Crawl rolls).
 
 ## Notes
 - Builds go through CI / the Deck (Andy's PC runs only the game).
 
 ## Done
+PR #1995. Thirst costs per jump/block/attack/sprint; wetness meter (HUD glass) is the one wet chill, sneak-use water
+to douse; height from sea level, day curve, heat sources to 20 blocks (halved outdoors), 90 s grace; breath puffs at
+the mouth; sprint wind bar in the focus band; stop-drop-roll already existed (Crawl), speedsters tireless. Not played: HUD
+placement, breath look, heat-scan cost.
