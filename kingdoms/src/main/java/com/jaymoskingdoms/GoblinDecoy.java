@@ -90,7 +90,7 @@ public final class GoblinDecoy {
 
 	/** Whether {@code m} goes for a decoy: a monster, a wild wolf or polar bear, a goblin (not the wandering one). */
 	static boolean drawn(Mob m) {
-		if (!m.isAlive() || m.isNoAi() || Pedlars.party(m) || m instanceof Dummy) {
+		if (!m.isAlive() || m.isNoAi() || Pedlars.party(m)) {
 			return false;
 		}
 		return m instanceof Enemy || m instanceof Wolf wolf && !wolf.isTame() || m instanceof PolarBear || Goblins.isGoblin(m);
