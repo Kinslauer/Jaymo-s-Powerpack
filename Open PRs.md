@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-22 03:19
+updated: 2026-11-22 08:03
 ---
 # Open PRs
 
-23 open, as of 2026-11-22 03:19. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+22 open, as of 2026-11-22 08:03. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1853](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1853) Heritage paths: core + Heartlander, Stoneborn, Tideborn (Kingdoms, Powers)
@@ -22,7 +22,7 @@ Andy merges only on "merge", one at a time.
 - **Agent:** [[zfighter-gaps-10-camera-hud]]
 
 ## [#1938](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1938) Z Fighter gaps 2: stamina for Flash Step, guard and forms
-- **Branch:** `claude/zfighter-gaps-2-power` · **Updated:** 2026-11-21 (today)
+- **Branch:** `claude/zfighter-gaps-2-power` · **Updated:** 2026-11-21 (1 day ago)
 - **Checks:** ❌ failing: Build Powers
 - **Agent:** [[zfighter-gaps-2-power]]
 
@@ -92,7 +92,7 @@ Andy merges only on "merge", one at a time.
 - **Agent:** [[zfighter-gaps-4-forms]]
 
 ## [#1968](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1968) Mutant zombie reskin: cyan chestplate and blue pants
-- **Branch:** `claude/mutant-zombie-reskin` · **Updated:** 2026-11-21 (today)
+- **Branch:** `claude/mutant-zombie-reskin` · **Updated:** 2026-11-21 (1 day ago)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[mutant-zombie-reskin]]
 
@@ -110,11 +110,6 @@ Andy merges only on "merge", one at a time.
 - **Branch:** `claude/project-thread-hag1a3` · **Updated:** 2026-11-22 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
-
-## [#1980](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1980) Every trade in every town (villages plan, Track C)
-- **Branch:** `claude/every-trade-every-town-b12729` · **Updated:** 2026-11-22 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** [[every-trade-every-town]]
 
 ## [#1981](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1981) Villagers always doing something: hunger, thirst, boredom, stall log and watchdog (draft)
 - **Branch:** `claude/villagers-always-busy-3238b4` · **Updated:** 2026-11-22 (today)
