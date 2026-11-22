@@ -73,6 +73,7 @@
 		"LedgeAvatarRendererMixin",
 		"LedgeFirstPersonMixin",
 		"LedgeModelFeatureRendererMixin",
+		"NpcClimbRendererMixin",
 		"LedgePlayerMixin",
 		"MeditateAvatarRendererMixin",
 		"MeditateModelFeatureRendererMixin",
