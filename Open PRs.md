@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-22 00:01
+updated: 2026-11-22 01:16
 ---
 # Open PRs
 
-24 open, as of 2026-11-22 00:01. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+23 open, as of 2026-11-22 01:16. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1853](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1853) Heritage paths: core + Heartlander, Stoneborn, Tideborn (Kingdoms, Powers)
@@ -17,7 +17,7 @@ Andy merges only on "merge", one at a time.
 - **Agent:** [[scrying-orb-design-spec]]
 
 ## [#1937](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1937) Z Fighter gaps 10: front camera settings, HUD options, ki sense damage tally, travel/combat flight
-- **Branch:** `claude/zfighter-gaps-10-camera-hud` · **Updated:** 2026-11-21 (today)
+- **Branch:** `claude/zfighter-gaps-10-camera-hud` · **Updated:** 2026-11-21 (1 day ago)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[zfighter-gaps-10-camera-hud]]
 
@@ -47,7 +47,7 @@ Andy merges only on "merge", one at a time.
 - **Agent:** no agent note
 
 ## [#1956](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1956) Z Fighter gaps 9: borrowed time, spared masters' homes, themed tournaments
-- **Branch:** `claude/zfighter-gaps-9-afterlife-tourneys` · **Updated:** 2026-11-21 (today)
+- **Branch:** `claude/zfighter-gaps-9-afterlife-tourneys` · **Updated:** 2026-11-21 (1 day ago)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[zfighter-gaps-9-afterlife-tourneys]]
 
@@ -62,7 +62,7 @@ Andy merges only on "merge", one at a time.
 - **Agent:** [[zfighter-gaps-1-stats]]
 
 ## [#1959](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1959) Freerun: keyframe ledge hang and mantle via GeckoLib clips
-- **Branch:** `claude/parkour-animations` · **Updated:** 2026-11-21 (today)
+- **Branch:** `claude/parkour-animations` · **Updated:** 2026-11-22 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[parkour-animations]]
 
@@ -112,16 +112,11 @@ Andy merges only on "merge", one at a time.
 - **Agent:** [[devils-hole-pupfish-writeup]]
 
 ## [#1972](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1972) Tips switch: /tips off, or a button on the Notices page
-- **Branch:** `claude/project-thread-hag1a3` · **Updated:** 2026-11-21 (today)
+- **Branch:** `claude/project-thread-hag1a3` · **Updated:** 2026-11-22 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#1973](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1973) Kingdoms rise without a visit, VillagersPlus job houses, forestry fiefs
-- **Branch:** `claude/project-thread-utfz5g` · **Updated:** 2026-11-21 (today)
+## [#1975](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1975) Roll stays on the ground, prone Sit key wall-sits only, wounded struggle up the wall, dive on Alt
+- **Branch:** `claude/sleepy-wozniak-h42ef1` · **Updated:** 2026-11-22 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
-
-## [#1974](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1974) Drills wait for your weapon, spars on clear ground, talk box and camera, swords never burst bodies
-- **Branch:** `claude/sleepy-wozniak-h42ef1` · **Updated:** 2026-11-21 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** [[drill-and-talk-fixes]]
