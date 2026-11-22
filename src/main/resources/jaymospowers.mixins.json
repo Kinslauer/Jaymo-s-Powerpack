@@ -112,6 +112,7 @@
 		"WorldGenReadMixin",
 		"WeaponModDualFlintlockMixin",
 		"WeaponModGunBlastMixin",
+		"WeaponModFlintlockAimMixin",
 		"WeaponModFlailMixin",
 		"WeaponModMeleeUseMixin",
 		"WeaponModWarhammerMixin",

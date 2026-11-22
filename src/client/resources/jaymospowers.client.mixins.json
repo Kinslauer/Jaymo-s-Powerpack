@@ -110,6 +110,8 @@
 		"UltimateCinematicFovMixin",
 		"CarryFirstPersonMixin",
 		"MusketSightsMixin",
+		"OldGunSwapMixin",
+		"WeaponModReloadOverlayMixin",
 		"PowerArmsFirstPersonMixin",
 		"CarryLivingEntityRendererMixin",
 		"CarryModelFeatureRendererMixin",

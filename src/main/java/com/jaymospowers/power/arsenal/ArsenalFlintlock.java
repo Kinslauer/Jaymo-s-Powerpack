@@ -40,7 +40,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * The Void Armory's flintlocks (ascended and corrupted): a pair of single-shot pistols out of the rift. Reach sometimes
  * brings the pair ({@link #PAIR_CHANCE}; always the first time). Pinned (Sneak + Reach holding one), they're the only
- * thing the rift gives you, a pair every Reach. Fire one (right click), drop it spent, and a fresh loaded one is
+ * thing the rift gives you, a pair every Reach. Fire one (right-click, and it goes off as you let go), drop it spent, and a fresh loaded one is
  * already in your hand: no Reach, no wait.
  * <p>(0.10.43) With TaCZ installed the pair were TaCZ guns ({@code jaymospowers:void_flintlock}); (0.15.118) Andy
  * didn't like the TaCZ flintlocks, so it's always this item now.
@@ -164,13 +164,28 @@ public final class ArsenalFlintlock {
 				level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.DISPENSER_FAIL, SoundSource.PLAYERS, 0.6F, 1.6F);
 				return InteractionResult.FAIL;
 			}
-			if (!(level instanceof ServerLevel server)) {
-				return InteractionResult.SUCCESS;
+			// held ready: the shot goes as the click is let go (Andy: "it should release the shot as you release right click")
+			player.startUsingItem(hand);
+			return InteractionResult.CONSUME;
+		}
+
+		@Override
+		public int getUseDuration(ItemStack stack, net.minecraft.world.entity.LivingEntity user) {
+			return 72000;
+		}
+
+		@Override
+		public boolean releaseUsing(ItemStack stack, Level level, net.minecraft.world.entity.LivingEntity user, int remaining) {
+			if (!(user instanceof Player player) || Boolean.TRUE.equals(stack.get(SPENT))) {
+				return false;
 			}
-			stack.set(SPENT, true);
-			fire(server, player, hand);
-			player.swing(hand, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
-			return InteractionResult.SUCCESS;
+			if (level instanceof ServerLevel server) {
+				InteractionHand hand = player.getUsedItemHand();
+				stack.set(SPENT, true);
+				fire(server, player, hand);
+				player.swing(hand, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+			}
+			return true;
 		}
 
 		private static void fire(ServerLevel level, Player player, InteractionHand hand) {
