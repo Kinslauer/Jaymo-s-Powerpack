@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-21 23:47
+updated: 2026-11-22 00:01
 ---
 # Open PRs
 
-23 open, as of 2026-11-21 23:47. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+24 open, as of 2026-11-22 00:01. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1853](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1853) Heritage paths: core + Heartlander, Stoneborn, Tideborn (Kingdoms, Powers)
@@ -120,3 +120,8 @@ Andy merges only on "merge", one at a time.
 - **Branch:** `claude/project-thread-utfz5g` · **Updated:** 2026-11-21 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
+
+## [#1974](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1974) Drills wait for your weapon, spars on clear ground, talk box and camera, swords never burst bodies
+- **Branch:** `claude/sleepy-wozniak-h42ef1` · **Updated:** 2026-11-21 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[drill-and-talk-fixes]]
