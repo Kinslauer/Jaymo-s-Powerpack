@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 10:06). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 10:08). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -15,11 +15,14 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 - [[Agents/ai-texture-pipeline|ai-texture-pipeline]]: stalled, last change 2026-11-21. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hands-on-cooking-realtime|hands-on-cooking-realtime]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]]: stalled, last change 2026-11-20. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/survival-track3-hook-carry|survival-track3-hook-carry]]: stalled, last change 2026-11-22. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/survival-wounds-track1|survival-wounds-track1]]: stalled, last change 2026-11-22. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]]: still `stalled`, but its task `zfighter-gaps-6-items-wishes` is in Inbox/Done/.
+- [[Agents/zfighter-gaps-8-raids|zfighter-gaps-8-raids]]: still `blocked`, but its task `zfighter-gaps-8-raids` is in Inbox/Done/.
 
 ## On the board
 
-22 waiting for a bot, 3 being built, 11 in review: see [[Kanban]].
+21 waiting for a bot, 4 being built, 5 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
@@ -89,7 +92,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 ## Health
 
-3 problems in the notes: [[Health]].
+6 problems in the notes: [[Health]].
 
 ## Last week
 
