@@ -566,7 +566,10 @@ final class JobHalls {
 		BlockState hide = byId("jaymoskitchen:hide_rug");
 		s.set(2, 1, 2, hide != null ? hide : carpet("brown_carpet", k));
 		s.set(3, 3, 3, Buildings.Sketch.hanging(Blocks.LANTERN));
-		beam(s, k, 1, 5, 3);
+		if (region != Region.DRY) {
+			// (under a pitched roof the lantern hangs from a beam; the flat roof holds it itself)
+			beam(s, k, 1, 5, 3);
+		}
 		return s.done();
 	}
 
