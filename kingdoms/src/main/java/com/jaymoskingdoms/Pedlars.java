@@ -22,6 +22,7 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.phys.Vec3;
@@ -33,6 +34,10 @@ import org.jspecify.annotations.Nullable;
  * the king's seat, a truce token ({@link Tribes#token}) and the bestiary ({@link Bestiary}); he'll take tribute toward
  * the tribe's grudge and tell you how the tribe takes to you. His party strikes no one who hasn't struck them first, and
  * no greenskin of any tribe sets on them. Killing him raises the tribe's grudge by {@link #GRUDGE}.
+ * <p>The <b>wandering goblin</b> is the same thing alone: one goblin of a goblin village, no guards, walking from village
+ * to village (the human ones too), who sells for gold ingots (the goblins' hoard, {@link Currency#GOLD}) the odd things
+ * goblin raids brought home, the decoy ({@link GoblinDecoy}) and an engineer's hammer ({@link GoblinRobot}). He is a pedlar
+ * in everything else (the tag, no greenskin sets on him, guards of human settlements leave him be: {@link #wanderer}).
  * <p>The party isn't saved: one left over from before a restart is gone when it loads.
  */
 public final class Pedlars {
@@ -56,11 +61,18 @@ public final class Pedlars {
 	static final double PACE = 0.55, GUARD_PACE = 0.7, GUARD_SLACK = 5.0;
 	/** Prices ((0.7.490) in bent worth, BentIngots): his odd wares (each), the mask, a seat map, the bestiary. */
 	static final int WARES = 3, WARE_PRICE_MIN = 2, WARE_PRICE_MAX = 8, MASK_PRICE = 20, MAP_PRICE = 16, BESTIARY_PRICE = 12;
+	/** The wandering goblin: how likely a player out in the open meets him at each check ({@link Tribes#EVERY}), and the wait after (ticks). */
+	static final float WANDER_CHANCE = 0.015F;
+	static final long WANDER_COOLDOWN = 36000L;
+	/** A goblin village must stand this near (blocks) for him to turn up, and the villages he walks to are this near each other. */
+	static final double WANDER_COUNTRY = 1500.0;
+	/** What he sells: raid loot (how many wares, their price in gold ingots, least and most), the decoys' price, the hammer's. */
+	static final int LOOT_WARES = 4, LOOT_PRICE_MIN = 1, LOOT_PRICE_MAX = 5, DECOY_PRICE = 2, HAMMER_PRICE = 14;
 	// ================================================================================================================
 
 	/** MCA's talk answers: his wares, the tribe's mood (the pedlar's), tribute (a chief's or the pedlar's). */
 	public static final String WARES_ANSWER = "jaymoskingdoms_pedlar_wares", MOOD_ANSWER = "jaymoskingdoms_tribe_mood", TRIBUTE_ANSWER = "jaymoskingdoms_tribute";
-	static final String PEDLAR_TAG = "jaymoskingdoms.pedlar", GUARD_TAG = "jaymoskingdoms.pedlar_guard";
+	static final String PEDLAR_TAG = "jaymoskingdoms.pedlar", GUARD_TAG = "jaymoskingdoms.pedlar_guard", WANDERER_TAG = "jaymoskingdoms.wandering_goblin";
 
 	/** Odd things a pedlar may carry (item, how many). */
 	private record Ware(Item item, int count) {
@@ -71,6 +83,12 @@ public final class Pedlars {
 		new Ware(Items.SADDLE, 1), new Ware(Items.AMETHYST_SHARD, 4), new Ware(Items.TURTLE_SCUTE, 1), new Ware(Items.BONE_BLOCK, 2),
 		new Ware(Items.SUSPICIOUS_STEW, 1), new Ware(Items.FIRE_CHARGE, 3), new Ware(Items.SLIME_BALL, 4)};
 
+	/** What goblin raids bring home: things worth taking from a realm's stores and storehouses (item, how many). */
+	private static final Ware[] LOOT = {new Ware(Items.IRON_INGOT, 6), new Ware(Items.BREAD, 8), new Ware(Items.COOKED_BEEF, 6),
+		new Ware(Items.ARROW, 16), new Ware(Items.SHIELD, 1), new Ware(Items.CLOCK, 1), new Ware(Items.COMPASS, 1), new Ware(Items.SPYGLASS, 1),
+		new Ware(Items.LANTERN, 2), new Ware(Items.CAKE, 1), new Ware(Items.GOLDEN_CARROT, 3), new Ware(Items.IRON_AXE, 1),
+		new Ware(Items.CROSSBOW, 1), new Ware(Items.BELL, 1), new Ware(Items.EMERALD, 3), new Ware(Items.BOOK, 3)};
+
 	/** One pedlar's party: his tribe, the camp he's walking to, him and his guards, when it set out, who struck them. */
 	private static final class Party {
 		final String tribe;
@@ -79,6 +97,9 @@ public final class Pedlars {
 		final List<UUID> guards;
 		final long started;
 		final Set<UUID> struck = new HashSet<>();
+		/** The wandering goblin: the villages he has been to (ids). */
+		final Set<Integer> seen = new HashSet<>();
+		boolean wanderer;
 
 		Party(String tribe, int goal, UUID pedlar, List<UUID> guards, long started) {
 			this.tribe = tribe;
@@ -95,7 +116,7 @@ public final class Pedlars {
 
 	private static final List<Party> PARTIES = new ArrayList<>();
 	/** Player → when they last met one (game time). */
-	private static final Map<UUID, Long> MET = new HashMap<>();
+	private static final Map<UUID, Long> MET = new HashMap<>(), WANDER_MET = new HashMap<>();
 
 	private Pedlars() {
 	}
@@ -137,6 +158,11 @@ public final class Pedlars {
 		return e.entityTags().contains(PEDLAR_TAG);
 	}
 
+	/** {@code e} is the wandering goblin (a pedlar who walks alone between villages). */
+	public static boolean wanderer(Entity e) {
+		return e.entityTags().contains(WANDERER_TAG);
+	}
+
 	/** {@code e} is a pedlar or one of his guards. */
 	public static boolean party(Entity e) {
 		return e.entityTags().contains(PEDLAR_TAG) || e.entityTags().contains(GUARD_TAG);
@@ -174,6 +200,91 @@ public final class Pedlars {
 				MET.put(player.getUUID(), now);
 			}
 		}
+		for (ServerPlayer player : level.players()) {
+			if (player.isCreative() || player.isSpectator() || !player.isAlive() || now - WANDER_MET.getOrDefault(player.getUUID(), -WANDER_COOLDOWN) < WANDER_COOLDOWN
+				|| level.getRandom().nextFloat() >= WANDER_CHANCE || Factions.around(server, level, player.blockPosition(), Post.TOWN_RANGE) != null
+				|| PARTIES.stream().anyMatch(p -> members(level, p).stream().anyMatch(m -> m.distanceTo(player) < GONE_RANGE))) {
+				continue;
+			}
+			Faction home = nearestGoblinVillage(server, player.position());
+			if (home != null && wander(level, player, home)) {
+				WANDER_MET.put(player.getUUID(), now);
+			}
+		}
+	}
+
+	/** The nearest standing goblin village within {@link #WANDER_COUNTRY} of {@code at}, or null. */
+	private static @Nullable Faction nearestGoblinVillage(MinecraftServer server, Vec3 at) {
+		Faction best = null;
+		double bestD = WANDER_COUNTRY * WANDER_COUNTRY;
+		for (Faction f : Factions.all(server, FactionType.BARBARIAN)) {
+			double d = f.seat().distToCenterSqr(at);
+			if (!f.fallen() && d < bestD && GoblinVillages.is(server, f.id()) && Tribes.of(server, f.id()) != null) {
+				best = f;
+				bestD = d;
+			}
+		}
+		return best;
+	}
+
+	/** The wandering goblin of {@code home}, out of sight of {@code player}: alone, on his way to the nearest village he hasn't been to. */
+	private static boolean wander(ServerLevel level, ServerPlayer player, Faction home) {
+		RandomSource random = level.getRandom();
+		double angle = random.nextDouble() * Math.PI * 2.0;
+		int r = SPAWN_NEAR + random.nextInt(SPAWN_FAR - SPAWN_NEAR);
+		BlockPos column = BlockPos.containing(player.getX() + Math.cos(angle) * r, player.getY(), player.getZ() + Math.sin(angle) * r);
+		if (!com.jaymoskingdoms.Loaded.made(level, column)) {
+			return false;
+		}
+		BlockPos ground = level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column);
+		if (!level.getFluidState(ground.below()).isEmpty()) {
+			return false;
+		}
+		PathfinderMob goblin = Tribes.muster(level, home, Goblins.GOBLIN, ground, ground);
+		if (goblin == null) {
+			return false;
+		}
+		goblin.addTag(PEDLAR_TAG);
+		goblin.addTag(WANDERER_TAG);
+		McaCompat.rename(goblin, Goblins.commonName(goblin.getUUID().getLeastSignificantBits()) + " the Wanderer");
+		stockWanderer(level, goblin);
+		Party p = new Party(Tribes.of(level.getServer(), home.id()), home.id(), goblin.getUUID(), new ArrayList<>(), level.getGameTime());
+		p.wanderer = true;
+		p.seen.add(home.id());
+		p.goal = onward(level.getServer(), p, goblin.position());
+		PARTIES.add(p);
+		JaymosKingdoms.LOGGER.info("A wandering goblin turns up near {}", player.getName().getString());
+		return true;
+	}
+
+	/** The village a wandering goblin walks to next: the nearest he hasn't been to ({@code seen} starts over when he has been to all near). */
+	private static int onward(MinecraftServer server, Party p, Vec3 at) {
+		for (int round = 0; round < 2; round++) {
+			Faction best = null;
+			double bestD = WANDER_COUNTRY * WANDER_COUNTRY;
+			for (Faction f : Factions.all(server)) {
+				double d = f.seat().distToCenterSqr(at);
+				boolean village = f.type() != FactionType.BARBARIAN || GoblinVillages.is(server, f.id());
+				if (village && !f.fallen() && !p.seen.contains(f.id()) && d < bestD) {
+					best = f;
+					bestD = d;
+				}
+			}
+			if (best != null) {
+				return best.id();
+			}
+			p.seen.clear();
+		}
+		return p.goal;
+	}
+
+	/** The next village for {@code p}: his tribe's next camp, or (the wandering goblin) the nearest village he hasn't been to. */
+	private static int nextGoal(MinecraftServer server, Party p, Vec3 at) {
+		if (!p.wanderer) {
+			return next(server, p.tribe, p.goal, at);
+		}
+		p.seen.add(p.goal);
+		return onward(server, p, at);
 	}
 
 	/** The nearest standing goblin village or orc camp within {@link #COUNTRY} of {@code at}, or null. */
@@ -270,6 +381,31 @@ public final class Pedlars {
 		}
 	}
 
+	/** The wandering goblin's goods, for gold ingots: the decoys, an engineer's hammer, and a few things from the raids. */
+	private static void stockWanderer(ServerLevel level, PathfinderMob goblin) {
+		if (!(goblin instanceof Villager v)) {
+			return;
+		}
+		RandomSource random = level.getRandom();
+		MerchantOffers offers = v.getOffers();
+		offers.clear();
+		if (GoblinDecoy.ITEM != null) {
+			offers.add(gold(DECOY_PRICE, new ItemStack(GoblinDecoy.ITEM, 2), 6));
+		}
+		if (GoblinRobot.HAMMER != null) {
+			offers.add(gold(HAMMER_PRICE, new ItemStack(GoblinRobot.HAMMER), 1));
+		}
+		List<Ware> loot = new ArrayList<>(List.of(LOOT));
+		for (int i = 0; i < LOOT_WARES && !loot.isEmpty(); i++) {
+			Ware w = loot.remove(random.nextInt(loot.size()));
+			offers.add(gold(LOOT_PRICE_MIN + random.nextInt(LOOT_PRICE_MAX - LOOT_PRICE_MIN + 1), new ItemStack(w.item(), w.count()), 3));
+		}
+	}
+
+	private static MerchantOffer gold(int ingots, ItemStack what, int uses) {
+		return new MerchantOffer(new ItemCost(Currency.GOLD.item(), ingots), what, uses, 0, 0.05F);
+	}
+
 	private static MerchantOffer sell(ItemStack what, int bent, int uses) {
 		return BentIngots.offer(bent, what, uses, 0, 0.05F);
 	}
@@ -326,13 +462,13 @@ public final class Pedlars {
 		}
 		Faction goal = Factions.get(level.getServer(), p.goal);
 		if (goal == null || goal.fallen()) {
-			p.goal = next(level.getServer(), p.tribe, p.goal, mob.position());
+			p.goal = nextGoal(level.getServer(), p, mob.position());
 			return true;
 		}
 		BlockPos to = goal.seat();
 		if (to.distToCenterSqr(mob.position()) < ARRIVE * ARRIVE) {
 			// (there: on to the next)
-			p.goal = next(level.getServer(), p.tribe, p.goal, mob.position());
+			p.goal = nextGoal(level.getServer(), p, mob.position());
 			return true;
 		}
 		if (mob.tickCount % 40 == 0 || mob.getNavigation().isDone()) {
@@ -351,7 +487,7 @@ public final class Pedlars {
 		if (pedlar instanceof Villager v && v.getTradingPlayer() == null) {
 			// ((0.7.490) what he's paid goes into his tribe's seat's hoard when the trading ends)
 			String tribe = Tribes.of(pedlar);
-			Faction keeper = tribe == null ? null : HordeEconomy.treasury(player.level().getServer(), tribe);
+			Faction keeper = tribe == null || wanderer(pedlar) ? null : HordeEconomy.treasury(player.level().getServer(), tribe);
 			if (keeper != null) {
 				GreenMarket.watch(v, keeper.id(), false);
 			}

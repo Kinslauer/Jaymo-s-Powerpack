@@ -77,6 +77,10 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.SiegeStone.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.6F, false));
 		// (0.7.326) the clockwork golem
 		EntityRenderers.register(com.jaymoskingdoms.ClockworkGolem.TYPE, ClockworkGolemRenderer::new);
+		// (goblin extras) the goblins' robot (a patched clockwork golem), and the decoy: the sack in the air, the scarecrow on the ground
+		EntityRenderers.register(com.jaymoskingdoms.GoblinRobot.ROBOT, ClockworkGolemRenderer::new);
+		EntityRenderers.register(com.jaymoskingdoms.GoblinDecoy.SACK, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 0.9F, false));
+		EntityRenderers.register(com.jaymoskingdoms.GoblinDecoy.DUMMY, net.minecraft.client.renderer.entity.ArmorStandRenderer::new);
 		// (0.7.529) town golems
 		EntityRenderers.register(com.jaymoskingdoms.TownGolem.TYPE, TownGolemRenderer::new);
 		// GeckoLib mobs: the barrow beetle, the draugr, the silver skeleton and the Skeleton Lord
