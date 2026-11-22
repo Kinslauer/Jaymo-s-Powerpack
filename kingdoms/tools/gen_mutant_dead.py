@@ -18,9 +18,13 @@ Run from the project root: python3 -I kingdoms/tools/gen_mutant_dead.py   (needs
 import os
 from PIL import Image
 
+import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from gen_old_dead import PLACE_LANDS, STAGES  # noqa: E402
+
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-SKIN = os.path.join(ROOT, "kingdoms", "src", "main", "resources", "assets", "jaymoskingdoms", "textures", "entity", "old_dead",
-	"risen", "plain", "plains_1_0.png")
+OLD_DEAD = os.path.join(ROOT, "kingdoms", "src", "main", "resources", "assets", "jaymoskingdoms", "textures", "entity", "old_dead")
+SKIN = os.path.join(OLD_DEAD, "risen", "plain", "plains_1_0.png")
 OUT = os.path.join(ROOT, "kingdoms", "src", "main", "resources", "resourcepacks", "mutant_dead", "assets", "mutantmonsters", "textures",
 	"entity", "mutant_zombie.png")
 SHEET = 128
@@ -57,6 +61,21 @@ def lay(src, rect, dst, into):
 
 def main():
 	skin = Image.open(SKIN).convert("RGBA")
+	dress(skin, OUT)
+	# and one for each place and land the old dead rise in, at each stage of rot (client/MutantDead picks by where the
+	# mutant rose and its id; the pack's skin above is for one with no mark)
+	n = 0
+	for place, lands in PLACE_LANDS.items():
+		for land in lands:
+			for stage in range(STAGES):
+				src = os.path.join(OLD_DEAD, "risen", place, "%s_%d_0.png" % (land, stage))
+				dress(Image.open(src).convert("RGBA"), os.path.join(OLD_DEAD, "mutant", place, "%s_%d.png" % (land, stage)))
+				n += 1
+	print("wrote the pack's skin and", n, "mutant skins")
+
+
+def dress(skin, path):
+	"""The mutant's sheet laid out from {skin}, saved to {path}."""
 	out = Image.new("RGBA", (SHEET, SHEET), (0, 0, 0, 0))
 	for box, part, (a, b) in MUTANT:
 		to, of = faces(*box), faces(*part)
@@ -66,9 +85,8 @@ def main():
 			x0, y0, x1, y1 = of[name]
 			ya, yb = y0 + round((y1 - y0) * a), y0 + round((y1 - y0) * b)
 			lay(skin, (x0, ya, x1, max(yb, ya + 1)), out, to[name])
-	os.makedirs(os.path.dirname(OUT), exist_ok=True)
-	out.save(OUT)
-	print("wrote", os.path.relpath(OUT, ROOT))
+	os.makedirs(os.path.dirname(path), exist_ok=True)
+	out.save(path)
 
 
 if __name__ == "__main__":

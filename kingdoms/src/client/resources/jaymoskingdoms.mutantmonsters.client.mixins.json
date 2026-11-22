@@ -1,0 +1,7 @@
+{
+	"required": false,
+	"package": "com.jaymoskingdoms.client.mixin.mutantmonsters",
+	"compatibilityLevel": "JAVA_25",
+	"client": ["MutantDeadMixin"],
+	"injectors": { "defaultRequire": 0 }
+}
