@@ -66,7 +66,7 @@ public final class ZFighterGuard {
 	static void set(ServerPlayer player, boolean up) {
 		ZFighterPower.Live live = ZFighterPower.live(player);
 		up = up && player.isAlive() && !player.isSpectator() && player.getMainHandItem().isEmpty() && !Powers.silenced(player)
-			&& !ZFighterLineage.ape(player);
+			&& !ZFighterLineage.ape(player) && ZFighterHooks.raiseGuardStamina(player);
 		if (up == live.guarding) {
 			return;
 		}

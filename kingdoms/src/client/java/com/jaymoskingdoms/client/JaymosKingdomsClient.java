@@ -40,6 +40,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		IntroNames.register();
 		// great foes' themes, and the trophy stand's item
 		com.jaymoskingdoms.client.music.FoeMusicClient.register();
+		com.jaymoskingdoms.client.music.SkirmishMusic.register();
 		com.jaymoskingdoms.client.music.SceneMusic.register();
 		com.jaymoskingdoms.client.music.PlaceMusic.register();
 		com.jaymoskingdoms.client.trophies.TrophyStandRenderer.register();

@@ -109,9 +109,11 @@ public final class Production {
 		int materials = Focus.materials(server, f, Tempers.materials(f, Math.min(MATERIALS_MOST, labour * MATERIALS_PER_LABOUR) * share / 100 * days));
 		// (0.5.2) what its own gatherers bring in by hand isn't counted twice: no logs with a woodcutter, no rock with a
 		// miner, half the food with a farmer
-		int logs = h.count(Folk.WOODCUTTER) > 0 ? 0 : materials * h.forest() / 100;
+		// (a forestry fiefdom fells besides what its woodcutters bring in, and all its materials are timber)
+		int forest = Focus.forest(server, f, h.forest());
+		int logs = h.count(Folk.WOODCUTTER) > 0 && !Focus.fells(server, f) ? 0 : materials * forest / 100;
 		// (0.5.14) a mining fiefdom quarries besides what its miners dig
-		int rock = h.count(Folk.MINER) > 0 && Focus.of(server, f) != Focus.Kind.MINING ? 0 : materials - materials * h.forest() / 100;
+		int rock = h.count(Folk.MINER) > 0 && Focus.of(server, f) != Focus.Kind.MINING ? 0 : materials - materials * forest / 100;
 		int stone = rock / STONE_ONE_IN;
 		int food = Focus.food(server, f, Math.min(Focus.foodMost(server, f, FOOD_MOST), FOOD_BASE + h.population() * FOOD_PER_VILLAGER + h.farms() / CROPS_PER_FOOD)) * share / 100 * days
 			/ (h.count(Folk.FARMER) > 0 ? 2 : 1);
@@ -168,6 +170,8 @@ public final class Production {
 		}
 		// (0.7.490) a haven's works make their goods besides
 		HavenGrowth.produce(level, f, days);
+		// and VillagersPlus' miner's houses their mines' stone and ore
+		VpBuildings.produce(level, f, days);
 		JaymosKingdoms.LOGGER.debug("{} produced {} logs, {} rock, {} food, {} emeralds ({} days; {} lost for want of room)", f.name(), logs, rock, food,
 			taxes, days, lost);
 	}

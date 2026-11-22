@@ -25,6 +25,9 @@ how to build, hard-won 26.3 API facts, the user's preferences, and what to do ne
   version). After the merge the Release workflow (`tools/release.py`) bumps the version, appends the MODLOG entry and
   deletes the note. `changes/README.md` explains; `tools/pr_checks.py` enforces it. MODLOGs hold only recent entries;
   older ones are in `docs/modlog/`.
+- **Auto-fix is always on** (Andy, 2026-11-22: "turn auto fix on period"). Right after opening a PR, turn on the app's
+  Auto-fix for it (Claude desktop: `ccd_pr` `set_monitor` with `auto_fix`), without asking. Where there's no Auto-fix,
+  watch the PR's CI yourself and fix what fails.
 - **Lore first.** Everything new (features, mobs, items, structures, dialogue, art) must fit the lore canon, `Lore.md`
   in the live vault (`E:/Jaymo Vault Live/Lore.md`; cloud: `python3 tools/vault_sync.py --setup`, then `docs/vault/Live/Lore.md`).
   Read it before planning, place the new thing in it (who made it, where it lives, whose people or faith), and reshape

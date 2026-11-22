@@ -231,6 +231,9 @@ public class ZFighterRogue extends Monster {
 		LivingEntity target = this.getTarget();
 		if (tyrant) {
 			bar(level);
+			if (ZFighterLookoutBoss.holding(this)) {
+				return;
+			}
 			if (this.tickCount % 4 == 0) {
 				level.sendParticles(MagicFx.wisp(form() >= 2 ? 0xFFF080 : TYRANT_COLOR, 1.5F), this.getX(), this.getY() + 1.0, this.getZ(), 3,
 					0.4, 0.8, 0.4, 0.0);
@@ -338,7 +341,7 @@ public class ZFighterRogue extends Monster {
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
 		float before = this.getHealth();
-		boolean hurt = super.hurtServer(level, source, damage);
+		boolean hurt = super.hurtServer(level, source, damage * ZFighterLookoutBoss.taken(this, source));
 		Entity attacker = source.getEntity();
 		if (hurt && attacker instanceof ServerPlayer player) {
 			this.hurtBy.merge(player.getUUID(), Math.max(0.0F, before - this.getHealth()), Float::sum);
