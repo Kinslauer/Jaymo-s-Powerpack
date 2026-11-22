@@ -117,6 +117,10 @@ public final class Grades {
 	public static @Nullable EquipmentSlotGroup gearSlot(ItemStack stack) {
 		DataComponentMap proto = stack.getPrototype();
 		ItemAttributeModifiers base = proto.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+		// a gauntlet is a weapon that also guards the hand holding it (boxing/BoxingGear#gauntlet): a weapon first
+		if (proto.has(DataComponents.WEAPON)) {
+			return EquipmentSlotGroup.MAINHAND;
+		}
 		EquipmentSlotGroup armorSlot = null;
 		for (ItemAttributeModifiers.Entry entry : base.modifiers()) {
 			if (entry.attribute().equals(Attributes.ARMOR)) {
@@ -126,7 +130,7 @@ public final class Grades {
 		if (armorSlot != null) {
 			return armorSlot;
 		}
-		boolean melee = proto.has(DataComponents.WEAPON) || base.modifiers().stream().anyMatch(e -> e.attribute().equals(Attributes.ATTACK_DAMAGE));
+		boolean melee = base.modifiers().stream().anyMatch(e -> e.attribute().equals(Attributes.ATTACK_DAMAGE));
 		return melee ? EquipmentSlotGroup.MAINHAND : null;
 	}
 

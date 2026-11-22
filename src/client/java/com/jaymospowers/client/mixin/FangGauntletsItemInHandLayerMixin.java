@@ -14,13 +14,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** (0.18.75) Fang Gauntlets in the main hand aren't held in third person: they're worn (FangGauntletsClient.Layer). */
+/** (0.18.75) Fang Gauntlets (and every other gauntlet, in either hand) aren't held in third person: they're worn (FangGauntletsClient.Layer). */
 @Mixin(ItemInHandLayer.class)
 abstract class FangGauntletsItemInHandLayerMixin {
 	@Inject(method = "submitArmWithItem", at = @At("HEAD"), cancellable = true)
 	private void jaymospowers$gauntletsNotHeld(ArmedEntityRenderState state, ItemStackRenderState item, ItemStack stack, HumanoidArm arm, PoseStack poseStack,
 		SubmitNodeCollector collector, int light, CallbackInfo ci) {
-		if (state instanceof AvatarRenderState avatar && arm == avatar.mainArm && FangGauntletsClient.worn(avatar) && FangGauntletsClient.isGauntlets(stack)) {
+		if (state instanceof AvatarRenderState avatar && FangGauntletsClient.wornOn(avatar, arm) && FangGauntletsClient.isGauntlets(stack)) {
 			ci.cancel();
 		}
 	}

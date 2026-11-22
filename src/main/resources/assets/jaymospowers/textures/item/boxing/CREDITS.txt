@@ -1,0 +1,6 @@
+The gauntlet art of the Fang Gauntlets, Hand Wraps, cestus, bracers and the Glass Gauntlet (textures/item/boxing/,
+textures/item/armory/fang_gauntlets.png, textures/item/glass_gauntlet*.png, textures/entity/boxing/,
+textures/entity/fang_gauntlets.png, models/item/glass_gauntlet_held.json) is adapted from Gallant Gauntlets by
+Joshieman (https://modrinth.com/mod/gauntlets), licensed CC BY-NC 4.0
+(https://creativecommons.org/licenses/by-nc/4.0/). Changes: recoloured and reskinned, with spikes, studs, straps and
+bandage turns added, and laid out for worn gear.
