@@ -7114,3 +7114,55 @@ Four new raids:
 - **Machine army and its bases**: In the future dimension, a base built from existing mechs and androids deploys a machine army.
 
 All raids use existing mobs — Rogue Fighters and vanilla mobs — no new original mobs added.
+
+## 0.26.41 (2026-11-22): Z Fighter gaps 9: borrowed time, spared masters' homes, themed tournaments (#1956)
+
+- **Borrowed time from the dead**: the fortune teller can lend you minutes among the living: 10 minutes for 24 silver or 400 TP, paid like a return. They burn down a minute at a time, twice as fast while you are in a form, and she tells you when they are up. The wish "Make borrowed time lasting" makes them last.
+- **Masters' homes are spared**: ki no longer breaks blocks in a master's home - a kingdom seat or a barbarian camp seat, out to 24 blocks - or inside a kept tournament ring. Mob griefing decides everywhere else, as before.
+- **Themed tournaments**: a tournament can open themed instead of plain - the tyrant's games (a tyrant takes a champion's place in the bracket, and the prize is double) or the fortune teller's five fighters (only five challengers may enter), beside the kingdom tournaments, last-one-standing and the tournament of the dead.
+- Built; not played in game.
+
+## 0.26.42 (2026-11-22): Z Fighter gaps 10: camera and HUD (#1937)
+
+- The F7 front camera can now be tuned: set its distance, height, side offset and smoothing in the client settings.
+- Z Fighter HUD options: hide the numbers, always show the HUD, HUD menu scale, and markers above party members when ki sense is on.
+- Ki sense can show how much damage a sensed foe has taken.
+- Flight has two modes: a faster travel mode and a nimble combat mode, with a lock to stop accidental switching.
+- Builds; not played in game yet.
+
+## 0.26.43 (2026-11-22): Z Fighter form models (#1960)
+
+Adds Blockbench sources and GeckoLib models for the four Z Fighter form
+lines defined in the forms requirements: the bulky Earthling full power /
+sun-gold overdrive silhouette, the towering Rubber-folk giant ladder top,
+the slender floating Divine-born with halo, and the insectoid Bio-built
+with back wings and curving tail. Each model has a distinct silhouette and
+a clean UV layout on a 128x128 texture.
+
+- art/zfighter/: editable Blockbench sources for all four forms
+- assets/jaymospowers/geckolib/models/entity/: compiled geo.json models
+- assets/jaymospowers/geckolib/animations/entity/: empty animation stubs (animation follows in a later task)
+- assets/jaymospowers/textures/entity/: placeholder colour sheets per form
+
+Built; not played. Textures are placeholders to be painted against these UVs in the texture task.
+
+## 0.26.44 (2026-11-22): Z Fighter form textures (#1963)
+
+Paints the four Z Fighter form models (PR #1960) with 128x128 textures in the
+pack's pixel-art style, replacing the placeholder colour sheets:
+
+- zfighter_form_earthling: bulky Earthling full-power silhouette — orange gi,
+  tan skin, dark hair, blue pants and boots
+- zfighter_form_rubberfolk: towering Rubber-folk giant — pink rubbery skin,
+  white gi and grey-blue pants
+- zfighter_form_divine: slender floating Divine-born — cream robes with a
+  purple sash, pale skin, and a gold halo
+- zfighter_form_bio: insectoid Bio-built — green chitin body with a cream face
+  patch, dark green limbs, translucent blue wings and a segmented tail
+
+- assets/jaymospowers/textures/entity/zfighter_form_*.png: painted textures
+  drawn against the form models' clean 128x128 UV layouts
+
+Built; not played. UVs line up on the form models from PR #1960 (verified with
+Blockbench UV renders); not tested in game — form entity wiring is a follow-up
+task.
