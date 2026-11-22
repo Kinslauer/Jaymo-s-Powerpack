@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 14:17). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 14:29). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -15,26 +15,34 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 - [[Agents/ai-texture-pipeline|ai-texture-pipeline]]: stalled, last change 2026-11-21. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hands-on-cooking-realtime|hands-on-cooking-realtime]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/mutant-zombie-reskin|mutant-zombie-reskin]]: still `in-review`, but its task `mutant-zombie-reskin` is in Inbox/Done/.
 - [[Agents/survival-track4-gear-world|survival-track4-gear-world]]: stalled, last change 2026-11-22. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]]: still `stalled`, but its task `zfighter-gaps-6-items-wishes` is in Inbox/Done/.
 - [[Agents/zfighter-gaps-8-raids|zfighter-gaps-8-raids]]: still `blocked`, but its task `zfighter-gaps-8-raids` is in Inbox/Done/.
 
 ## On the board
 
-21 waiting for a bot, 3 being built, 5 in review: see [[Kanban]].
+21 waiting for a bot, 2 being built, 1 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1997 The mutant zombie wears the old dead's rags, not the game's cyan and blue (Kingdoms, 2026-11-22)
+- [ ] #1995 speedsters don't tire Kitchen's sprint wind (Powers, Kitchen, 2026-11-22)
+- [ ] #1994 Cannons: stone shot and fire shot (Kingdoms, 2026-11-22)
+- [ ] #1993 trophy heads sit square on Kitchen's head mount (Powers, Kitchen, 2026-11-22)
+- [ ] #1992 Survival picks: wound pools, head blows, headshots, armour per part, medicine over time (Powers, Kingdoms, 2026-11-22)
 - [ ] #1991 Defence disciplines, part 1: passive blocks, tighter parries, fist disarms (Powers, Kingdoms, 2026-11-22)
 - [ ] #1990 Z Fighter gaps 2, part 2: holding back, Limit Break 4-6, fighting styles, unlocked potential (Powers, 2026-11-22)
+- [ ] #1989 both arms for anything bigger than a small animal; carried blocks are seen (Powers, Kitchen, 2026-11-22)
 - [ ] #1988 NPCs climb two-block walls and fences, as players do (Powers, 2026-11-22)
 - [ ] #1987 NPCs obey limb damage: arms gate their powers, bad legs put them on the ground (Powers, 2026-11-22)
 - [ ] #1986 Z Fighter gaps 7: the Keeper's trial, a set-piece boss on the Lookout (Powers, 2026-11-22)
 - [ ] #1985 camp guards wear their camp's gear, not MCA's iron (Kingdoms, 2026-11-22)
 - [ ] #1984 Fish spawn where you can see them (Powers, Kingdoms, 2026-11-22)
 - [ ] #1983 guards let go of an Elder Vampire who flees as a bat (Kingdoms, 2026-11-22)
+- [ ] #1981 Villagers always doing something: hunger, thirst, boredom, and a stall watchdog (Kingdoms, 2026-11-22)
 - [ ] #1980 Every trade in every town (Kingdoms, 2026-11-22)
 - [ ] #1978 Classes start with a skill of their kind (Kingdoms, 2026-11-22)
 - [ ] #1977 Talk wheel: answers round a wheel on the right, worded by your blood and class; chat hidden while talking (Kingdoms, 2026-11-22)
@@ -42,7 +50,9 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1975 the roll stays on the ground, the Sit key prone, a real struggle up the wall (Powers, 2026-11-22)
 - [ ] #1974 a sword never bursts a body (Powers, Kingdoms, 2026-11-22)
 - [ ] #1973 VillagersPlus' miner's house rarer in villages (Powers, Kingdoms, 2026-11-22)
+- [ ] #1972 tips switch - turn tip cards off and on (Powers, 2026-11-22)
 - [ ] #1965 Z Fighter gaps 4: forms (foundation) (Powers, 2026-11-22)
+- [ ] #1964 Patch 10: each old-age temple calls its patron's champion (Kingdoms, 2026-11-22)
 - [ ] #1963 Z Fighter form textures (Powers, 2026-11-22)
 - [ ] #1962 Z Fighter form animations (Powers, 2026-11-22)
 - [ ] #1960 Z Fighter form models (Powers, 2026-11-22)
@@ -52,6 +62,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1939 zfighter gaps 3: techniques (Powers, 2026-11-22)
 - [ ] #1938 Z Fighter gaps 2: stamina for dash, guard and forms (Powers, 2026-11-22)
 - [ ] #1937 Z Fighter gaps 10: camera and HUD (Powers, 2026-11-22)
+- [ ] #1853 Fishing: Kingdoms' Saltblood path makes fish keener (Powers, Kingdoms, 2026-11-22)
 - [ ] #1969 loose wood no longer makes the server wait on land still generating (Kingdoms, 2026-11-21)
 - [ ] #1966 loose wood no longer crashes the server while land generates (Kingdoms, 2026-11-21)
 - [ ] #1951 hints as tip cards - text hints show top right instead of over the hotbar (Powers, 2026-11-21)
@@ -77,21 +88,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1928 H only opens the character menu (Auto HUD toggle unbound) (Powers, 2026-11-20)
 - [ ] #1927 A leg or bagged corpse of a modded creature no longer crashes the game (Kitchen, 2026-11-20)
 - [ ] #1926 Fire is vanilla fire again (Powers, Kingdoms, 2026-11-20)
-- [ ] #1924 Rig arm blast from the fitted arm (Powers, 2026-11-20)
-- [ ] #1923 predators eat the downed, and finish them once full (Powers, 2026-11-20)
-- [ ] #1922 crushing blows throw a few blocks, not across the field (Powers, Kitchen, 2026-11-20)
-- [ ] #1921 Warlock patron from the story, not "element" (Kingdoms, 2026-11-20)
-- [ ] #1920 downed wall sit: no more sinking into the ground (Powers, 2026-11-20)
-- [ ] #1919 Knight armour set removed (Powers, 2026-11-20)
-- [ ] #1918 throne room and gate guards keep their posts, and a night watch (Kingdoms, 2026-11-20)
-- [ ] #1917 Guards' gold plate costs gold (Kingdoms, 2026-11-20)
-- [ ] #1916 spiders leave webbed and lair-kept players be (Kingdoms, 2026-11-20)
-- [ ] #1915 Everyone who speaks to you needs introducing first (Kingdoms, 2026-11-20)
-- …and 345 older ones.
+- …and 355 older ones.
 
 ## Health
 
-5 problems in the notes: [[Health]].
+6 problems in the notes: [[Health]].
 
 ## Last week
 
