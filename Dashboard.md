@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 16:29). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 18:14). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -15,7 +15,6 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 - [[Agents/ai-texture-pipeline|ai-texture-pipeline]]: stalled, last change 2026-11-21. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hands-on-cooking-realtime|hands-on-cooking-realtime]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/survival-track4-gear-world|survival-track4-gear-world]]: stalled, last change 2026-11-22. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]]: still `stalled`, but its task `zfighter-gaps-6-items-wishes` is in Inbox/Done/.
 
 ## On the board
@@ -90,7 +89,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 ## Health
 
-7 problems in the notes: [[Health]].
+6 problems in the notes: [[Health]].
 
 ## Last week
 
