@@ -1,4 +1,0 @@
-# dive into water with the Dodge key
-- **Dive on Alt**: standing at an edge with deep water ahead and below (up to 2.5 blocks out and 14 down), the Dodge key (Alt) dives you straight off it head first, with no hop first. Falling over deep water, it turns the fall into a head-first dive. Either way you go in as a clean dive (the small neat splash, slipping deeper, no sting) from any height. Sneak no longer makes a dive: Sneak held as you hit the water is the cannonball. Looking steeply down (or Leap of Faith) still goes in head first. (`Dives`, `DodgeClient`)
-- **Everyone sees it**: in the air the body turns head first along the way it's going, arms over the head, and comes back upright as it goes under. The water-entry body turns (the clean dive's head-first tilt, the belly flop laid flat, the cannonball tucked forward) were never drawn before; they are now. (`DivePose`, `FreefallPose`)
-- Built; not played.
