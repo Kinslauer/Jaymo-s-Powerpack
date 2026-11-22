@@ -5,6 +5,7 @@ import com.jaymospowers.core.BeamClash;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.core.gifted.Gifted;
 import com.jaymospowers.core.gifted.GiftKit;
+import com.jaymospowers.core.wounds.LimbUse;
 import com.jaymospowers.power.zfighter.ZFighterCombo;
 import com.jaymospowers.power.zfighter.ZFighterGuard;
 import com.jaymospowers.power.zfighter.ZFighterKingdoms;
@@ -519,7 +520,7 @@ public final class Brawl {
 		if (s.guardStart >= 0L || now < s.guardAt || s.engaged || now < s.drivenUntil || mob.distanceTo(foe) > GUARD_NEAR || !attacking(mob, foe)) {
 			return;
 		}
-		if (mob.getRandom().nextFloat() < Mth.lerp(s.rank, RAISE_MIN, RAISE_MAX)) {
+		if (LimbUse.usable(mob, LimbUse.ANY_ARM) && mob.getRandom().nextFloat() < Mth.lerp(s.rank, RAISE_MIN, RAISE_MAX)) {
 			raise(mob, s, now);
 		}
 	}
@@ -879,6 +880,10 @@ public final class Brawl {
 		LivingEntity foe = s.counterFoe;
 		s.counterFoe = null;
 		if (!foe.isAlive() || mob.distanceTo(foe) > GUARD_NEAR) {
+			return;
+		}
+		if (!LimbUse.usable(mob, LimbUse.MAIN_ARM) || LimbUse.wide(mob, LimbUse.MAIN_ARM)) {
+			// (Andy, 2026-11-22) the main arm is gone, or a broken one throws the counter wide
 			return;
 		}
 		float blow = mob.getAttributes().hasAttribute(Attributes.ATTACK_DAMAGE) ? (float)mob.getAttributeValue(Attributes.ATTACK_DAMAGE) : COUNTER_FALLBACK;

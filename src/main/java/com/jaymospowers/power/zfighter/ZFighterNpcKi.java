@@ -2,6 +2,7 @@ package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.core.brawl.Brawl;
 import com.jaymospowers.core.fx.MagicFx;
+import com.jaymospowers.core.wounds.LimbUse;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -142,6 +143,10 @@ public final class ZFighterNpcKi {
 			boolean beam = now >= ki.beamAt, volley = now >= ki.volleyAt, charge = now >= ki.chargeAt, purge = isPatrolman && now >= ki.purgeAt;
 			int ready = (beam ? 1 : 0) + (volley ? 1 : 0) + (charge ? 1 : 0) + (purge ? 1 : 0);
 			if (ready == 0 || mob.getRandom().nextInt(2) != 0) {
+				return;
+			}
+			if (!LimbUse.usable(mob, LimbUse.ANY_ARM) || LimbUse.wide(mob, LimbUse.ANY_ARM)) {
+				// (Andy, 2026-11-22) ki leaves the hands: with both arms gone none is fired, with a broken one it goes wide (not fired this time)
 				return;
 			}
 			int pick = mob.getRandom().nextInt(ready);
