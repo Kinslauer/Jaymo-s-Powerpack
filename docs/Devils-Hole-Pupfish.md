@@ -1,31 +1,60 @@
 # Devil's Hole Pupfish — write-up
 
-## What it is now
+Asked by tiv for Andy (Discord, 2026-11-18): the Devil's Hole Pupfish in relation to Jung's Devil's Palm and Mana Spirit
+ideas. A write-up to decide whether it becomes a feature; nothing is built.
 
-The Devil's Hole Pupfish is an Alex's Mobs entity (`alexsmobs:devils_hole_pupfish`). It is harmless and does not affect any other mod feature. It cannot spawn naturally: world generation fails to find a valid spawn chunk for it because the desert terrain and cave generation are altered, so "this world will have no pupfish." The only way to get one is to summon it with `/summon alexsmobs:devils_hole_pupfish`.
+## What's in the pack today (checked)
 
-Kitchen already knows the pupfish as a fish corpse (MODLOG 0.4.29): click a dead one with anything in hand and it drops its loot and vanishes with a splash.
+- **The fish**: `alexsmobs:devils_hole_pupfish` (Alex's Mobs). Harmless. Alex's Mobs only places it at world
+  generation, in one spot it looks for in a desert; when our altered desert and cave generation leave no valid spot it
+  says "this world will have no pupfish", and the only way to get one is `/summon alexsmobs:devils_hole_pupfish`.
+- **Kitchen** already treats it as a fish corpse (Kitchen 0.4.29: one click loots it and the body vanishes with a splash).
+- **The Devil's Palm** is not in the code (searched for `devils_palm` / "Devil's Palm" across all three mods and the docs).
+  It is Jung's idea from his forum post (2026-10-26): a biome structure where monster spawn rates go up.
+- **Mana spirits** are built (Kingdoms `spirits/`, `docs/Spirits-Plan.md`): an *attuned* player with no spirit who is
+  left at a fifth of their health or less, or downed, has a 1 in 18 chance of a spirit taking notice; spirit sickness
+  follows for up to 5 days (sooner with meditating, casting, another brush with death), and the spirit's waking cures it.
+  One spirit for life. Jung's "ancient tablet of inscribed runes" quest is **not** built: today the spirit wakes by itself.
 
-## Devil's Palm
+## The real fish (the sympathy rule)
 
-The Devil's Palm is a biome structure concept from a forum post by "Jung": a structure that increases monster spawn rates. It is not in the code yet. The idea is a place where the world is worn thin and more monsters come through.
+The real Devil's Hole pupfish lives in one place on Earth: a single water-filled limestone cavern in the Nevada desert,
+on one shallow shelf of rock where the light reaches and algae grows. Its whole species has numbered from a few dozen to
+a few hundred; it is counted by divers every year, and the shelf is fenced and watched. It needs warm, still water and
+that one shelf to spawn on. Anything we build should teach that: one pool, a tiny count, easily lost, and kept alive by
+whoever looks after it.
 
-## Mana Spirit
+## The canon, and what doesn't fit
 
-A mana spirit is a companion a player earns after a brush with death — dropped to a fifth of their health or put down — followed by up to five days of spirit sickness, then one spirit for life. Each spirit has a personality and combat abilities, and they speak like old wizards looking after a child (docs/Spirits-Plan.md). An NPC quest, the ancient tablet of inscribed runes, unlocks a spirit once the five-day sickness timer runs down.
+- **Not a mana spirit.** Lore.md ("The long defence") says the mana spirits were great wizards once (Ambrose, Grimsby,
+  Thessaly, Varro, the Quiet One). A fish can't be one of them, and "one spirit for life" stays as it is. The first draft's
+  idea (call a pupfish from the tablet instead of a spirit) would break both, so it is dropped.
+- **Mana and the attuned** are canon: the attuned see what others can't. That is the honest link between the fish and
+  the spirits: both belong to the attuned's side of the world.
 
-## The connection
+## Proposal (for Andy to pick from)
 
-The pupfish are what remains of the Devil's Palm's waters. The Palm reshaped the desert and its caves so completely that the pupfish's spawning grounds are gone — which is exactly why they can't spawn naturally. The Palm is a place where too much spawns (monsters); the pupfish is a creature that can't spawn at all. Same cause, opposite result.
-
-An attuned player whose spirit has woken can read the same ancient tablet that calls a mana spirit and call a pupfish instead: a small, harmless companion that follows and remembers the Palm. It does not fight. It is a sign that the player has been somewhere the world has forgotten.
+1. **The Devil's Hole** (the fish's home, sympathy first): one deep, warm sinkhole pool in a desert per world, a single
+   lit shelf near the surface where the fish spawn, a handful of pupfish and no more. We place it ourselves, so a world
+   always has one (Alex's Mobs' own placement keeps failing in ours).
+   - *Feedback loop*: the pool's count rises slowly while the shelf is lit and the water left alone, and falls when it's
+     fished, muddied (blocks broken on the shelf) or the water cools (snow or ice near it).
+   - *Stewardship*: a player who keeps the count up (no fishing it, the shelf left lit) gets a small reward over time;
+     nobody is punished for never finding it.
+2. **The Devil's Palm** (Jung's structure, placed by the Hole): a ring of dead desert palms round the sinkhole where
+   monsters come thicker at night (his higher spawn rate). The fish and the monsters share a cause: the Palm is a thin
+   place in the world, where too much comes through, and the warm water under it is the last of what was there before.
+3. **The attuned's link** (instead of a spirit): an attuned player who looks into the pool sees the pupfish glow faintly
+   (as they see mana), and a player with a mana spirit hears it say something about the place. No new companion, no
+   change to the spirit rules.
+4. **Jung's tablet** stays a separate pick: whether waking a spirit should need a quest at all is its own question.
 
 ## Open questions
 
-- Is the pupfish a minor mana spirit, or something outside the "one spirit for life" rule?
-- Does calling it cost mana, use the tablet, or stay a summon command?
-- Where does the Devil's Palm generate, and what does it look like?
+- Build 1-3 (the Hole, the Palm round it, the attuned's glow), or only the Hole?
+- What's the stewardship reward? (A pupfish to keep in a tank the player builds, a mark in the Fisher's Journal, Survival
+  experience.)
+- Does the Devil's Palm raise spawns only at night, and by how much?
+- Should the tablet quest be added to how a mana spirit wakes?
 
-## Not decided
-
-No code yet. This is a write-up to decide whether it becomes a feature spec.
+Lore placement for the Hole and the Palm is in Lore.md as a `(new)` paragraph, waiting on Andy.
