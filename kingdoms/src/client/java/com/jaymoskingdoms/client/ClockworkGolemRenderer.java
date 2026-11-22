@@ -26,12 +26,16 @@ public final class ClockworkGolemRenderer extends MobRenderer<ClockworkGolem, Cl
 	/** A rogue's lit texture (its lights red), and those lights alone, drawn bright ({@code tools/gen_clockwork_golem.py}). */
 	static final Identifier ROGUE_LIT = JaymosKingdoms.id("textures/entity/bb/clockwork_golem_rogue.png");
 	static final Identifier ROGUE_GLOW = JaymosKingdoms.id("textures/entity/bb/clockwork_golem_rogue_glow.png");
+	/** The goblins' robot ({@link com.jaymoskingdoms.GoblinRobot}): the same golem patched green with rust ({@code tools/gen_goblin_extras.py}). */
+	static final Identifier PATCHED_LIT = JaymosKingdoms.id("textures/entity/bb/clockwork_golem_goblin.png");
+	static final Identifier PATCHED_DARK = JaymosKingdoms.id("textures/entity/bb/clockwork_golem_goblin_1.png");
 	/** The Mech Golem stands 2.86 blocks: drawn to the golem's 2.7. */
 	static final float SCALE = 0.94F;
 
 	public static final class State extends LivingEntityRenderState {
 		boolean folded;
 		boolean rogue;
+		boolean patched;
 		float sinceChanged;
 		/** How far its blow has run (ticks, counting down from 10), 0 for none. */
 		float attack;
@@ -54,6 +58,7 @@ public final class ClockworkGolemRenderer extends MobRenderer<ClockworkGolem, Cl
 		super.extractRenderState(golem, state, partialTicks);
 		state.folded = golem.folded();
 		state.rogue = golem.rogue();
+		state.patched = golem instanceof com.jaymoskingdoms.GoblinRobot;
 		state.sinceChanged = golem.sinceChanged() + partialTicks;
 		int tick = golem.getAttackAnimationTick();
 		state.attack = tick > 0 ? tick - partialTicks : 0.0F;
@@ -67,6 +72,9 @@ public final class ClockworkGolemRenderer extends MobRenderer<ClockworkGolem, Cl
 
 	@Override
 	public Identifier getTextureLocation(State state) {
+		if (state.patched) {
+			return dark(state) ? PATCHED_DARK : PATCHED_LIT;
+		}
 		return dark(state) ? DARK : state.rogue ? ROGUE_LIT : LIT;
 	}
 

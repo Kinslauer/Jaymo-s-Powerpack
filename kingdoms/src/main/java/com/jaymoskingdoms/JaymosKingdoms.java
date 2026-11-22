@@ -658,6 +658,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.64: the richest kingdoms' cannons (their musketeers are Muskets, ticked by each guard)
 		Cannon.register();
 		ClockworkGolem.register();
+		// (goblin extras) the engineer's hammer and its robot, the decoy, the mushroom ale
+		GoblinRobot.init();
+		GoblinDecoy.register();
+		DrunkGoblins.register();
 		Golemworks.register();
 		// (0.7.351) the Skeleton Lord, asleep in some of the rogue golems' lairs
 		SkeletonLord.register();

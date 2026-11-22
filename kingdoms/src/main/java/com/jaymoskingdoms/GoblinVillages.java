@@ -254,6 +254,8 @@ final class GoblinVillages {
 		}
 		// ((0.7.490) its market merchants stand about their stalls)
 		GreenMarket.tick(level, village, data);
+		// (goblin extras) its engineer, and a round at its tavern
+		DrunkGoblins.look(level, village, data);
 		// (0.7.475) past its first stockade: its tier's wall and band
 		if (Hordes.tick(level, village, data, force)) {
 			return;
