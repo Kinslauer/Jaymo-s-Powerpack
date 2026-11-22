@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 09:06). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 10:06). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -15,18 +15,20 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 - [[Agents/ai-texture-pipeline|ai-texture-pipeline]]: stalled, last change 2026-11-21. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/hands-on-cooking-realtime|hands-on-cooking-realtime]]: stalled, last change 2026-11-19. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/zfighter-gaps-10-camera-hud|zfighter-gaps-10-camera-hud]]: stalled, last change 2026-11-20. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]]: stalled, last change 2026-11-20. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-21 waiting for a bot, 3 being built, 15 in review: see [[Kanban]].
+22 waiting for a bot, 3 being built, 11 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #1990 Z Fighter gaps 2, part 2: holding back, Limit Break 4-6, fighting styles, unlocked potential (Powers, 2026-11-22)
+- [ ] #1988 NPCs climb two-block walls and fences, as players do (Powers, 2026-11-22)
 - [ ] #1987 NPCs obey limb damage: arms gate their powers, bad legs put them on the ground (Powers, 2026-11-22)
+- [ ] #1986 Z Fighter gaps 7: the Keeper's trial, a set-piece boss on the Lookout (Powers, 2026-11-22)
 - [ ] #1985 camp guards wear their camp's gear, not MCA's iron (Kingdoms, 2026-11-22)
 - [ ] #1984 Fish spawn where you can see them (Powers, Kingdoms, 2026-11-22)
 - [ ] #1983 guards let go of an Elder Vampire who flees as a bat (Kingdoms, 2026-11-22)
@@ -38,10 +40,15 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1974 a sword never bursts a body (Powers, Kingdoms, 2026-11-22)
 - [ ] #1973 VillagersPlus' miner's house rarer in villages (Powers, Kingdoms, 2026-11-22)
 - [ ] #1965 Z Fighter gaps 4: forms (foundation) (Powers, 2026-11-22)
+- [ ] #1963 Z Fighter form textures (Powers, 2026-11-22)
+- [ ] #1962 Z Fighter form animations (Powers, 2026-11-22)
+- [ ] #1960 Z Fighter form models (Powers, 2026-11-22)
 - [ ] #1959 Freerun animations: the ledge climb keyed with elbows and knees, climbing down walls, vaults by speed and height, a pole climb, and bending limbs through the moves (Powers, 2026-11-22)
 - [ ] #1958 Z Fighter gaps 1: stats (Powers, 2026-11-22)
+- [ ] #1956 Z Fighter gaps 9: borrowed time, spared masters' homes, themed tournaments (Powers, 2026-11-22)
 - [ ] #1939 zfighter gaps 3: techniques (Powers, 2026-11-22)
 - [ ] #1938 Z Fighter gaps 2: stamina for dash, guard and forms (Powers, 2026-11-22)
+- [ ] #1937 Z Fighter gaps 10: camera and HUD (Powers, 2026-11-22)
 - [ ] #1969 loose wood no longer makes the server wait on land still generating (Kingdoms, 2026-11-21)
 - [ ] #1966 loose wood no longer crashes the server while land generates (Kingdoms, 2026-11-21)
 - [ ] #1951 hints as tip cards - text hints show top right instead of over the hotbar (Powers, 2026-11-21)
@@ -78,19 +85,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1916 spiders leave webbed and lair-kept players be (Kingdoms, 2026-11-20)
 - [ ] #1915 Everyone who speaks to you needs introducing first (Kingdoms, 2026-11-20)
 - [ ] #1914 Guards' gold helms gone (Kingdoms, 2026-11-20)
-- [ ] #1913 Speakeasy ladder loop: climbers no longer pulled back into the den (Kingdoms, 2026-11-20)
-- [ ] #1912 Taken weapons stay taken: no more shields duplicating off downed villagers (Kingdoms, 2026-11-20)
-- [ ] #1911 Z Fighter aura rework - flame shell and white core (Powers, 2026-11-20)
-- [ ] #1910 meat hooks easier to hang a dragged carcass on (Kitchen, 2026-11-20)
-- [ ] #1909 Sitting cats no longer stand on end under Fresh Animations (Powers, 2026-11-20)
-- [ ] #1907 long pitchfork (Powers, Kingdoms, 2026-11-20)
-- [ ] #1906 A new life no longer keeps the old body's lost-leg slowness (Powers, 2026-11-20)
-- [ ] #1905 Forest fire alert out of chat (Powers, Kingdoms, 2026-11-20)
-- …and 336 older ones.
+- …and 344 older ones.
 
 ## Health
 
-4 problems in the notes: [[Health]].
+3 problems in the notes: [[Health]].
 
 ## Last week
 
