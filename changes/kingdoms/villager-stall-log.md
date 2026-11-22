@@ -1,3 +1,0 @@
-# Log of villagers left standing still
-- **Stall log** (`Unstick`): any loaded villager that stays awake within 2 blocks for 2 minutes of watching is written to the server log once as `[stall]`: name, MCA or vanilla, trade, where, time of day, open sky, light, whose land, its brain activity and running behaviours, home, job site, meeting point, walk target, MCA's stay order and home, and which of our own systems has it. Nothing acts on it: it's there to find why villagers stand still in their houses (Andy, 2026-11-21).
-- Built on the Deck; run on the Deck server around one village (see the PR).

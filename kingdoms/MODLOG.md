@@ -16128,3 +16128,8 @@ Andy's picks from the village mods list (ideas only, our own code), plus better 
 - The free skill is a trainer's gift, so a respec keeps it. The pillar is topped up, not added to, so picking again after a Writ of Rebirth gives nothing twice. Characters who already have a class don't get it.
 - `StartingSkills` (new), called from `Classes.set`.
 - Built; not played.
+
+## 0.11.59 (2026-11-22): Log of villagers left standing still (#1982)
+
+- **Stall log** (`Unstick`): any loaded villager that stays awake within 2 blocks for 2 minutes of watching is written to the server log once as `[stall]`: name, MCA or vanilla, trade, where, time of day, open sky, light, whose land, its brain activity and running behaviours, home, job site, meeting point, walk target, MCA's stay order and home, and which of our own systems has it. Nothing acts on it: it's there to find why villagers stand still in their houses (Andy, 2026-11-21).
+- Built on the Deck; run on the Deck server around one village (see the PR).
