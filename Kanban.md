@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 18:20). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 18:32). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -34,6 +34,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🔨 Hephaestus · #1957 · changes · fixing review notes
+- [ ] [[Agents/control-fixes|control-fixes]] · 💻 Odysseus · running
 - [ ] [[Agents/death-clip-bugs|death-clip-bugs]] · 💻 Odysseus · running
 
 
