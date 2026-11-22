@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 18:14). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 18:21). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -25,6 +25,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2003 survival picks: free riding camera, plants and flames in the wind (Kingdoms, 2026-11-22)
 - [ ] #1999 Loading screen tips can be scrolled back and on, and long ones stay up longer (Kingdoms, 2026-11-22)
 - [ ] #1998 Mutant zombies vary like the old dead: by where they rose, their land and their rot (Kingdoms, 2026-11-22)
 - [ ] #1997 The mutant zombie wears the old dead's rags, not the game's cyan and blue (Kingdoms, 2026-11-22)
@@ -84,8 +85,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1934 fishing line from the rod tip, bait on the first click (Powers, 2026-11-20)
 - [ ] #1933 Rig leg kick from the fitted leg (Powers, 2026-11-20)
 - [ ] #1932 another player shakes a fainted player awake (Powers, Kingdoms, 2026-11-20)
-- [ ] #1931 cleaning up blood - scrub stains off floors and walls, poured water washes them (Powers, Kingdoms, 2026-11-20)
-- …and 359 older ones.
+- …and 360 older ones.
 
 ## Health
 
