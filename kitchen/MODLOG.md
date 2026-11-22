@@ -2609,3 +2609,11 @@ Added a new **Cooking Block** to the Functional creative tab. The block has iron
 - A body with nothing left on it gives the old "Nothing left on it" line; a bare skeleton gives up its bones, a tap at a time, as before.
 - Gear's wear is put on once, the first time the body is looked at, so looking again doesn't wear it more. Several players can look at once (one shared view, nothing taken twice); a Kingdoms looter won't rob a body someone is going through. Taking counts as robbing the dead for Kingdoms, a piece at a time, as before.
 - `CorpseLoot`, `CorpseLootMenu`, `CorpseLootScreen`, `CorpseEntity#openLoot`. Compiled; not played.
+
+## 0.6.68 (2026-11-22): meat hooks take a carried or dragged body on any click, people's bodies too (#1989)
+
+- **Meat hooks**: right-clicking a meat hook while carrying or dragging a carcass now hangs it, wherever in the hook's block space you click (the hook, the air around it, the beam above). Before, your own game let go of the carcass before the click ever reached the server, unless you clicked a butcher block, so the hook never took it. Out of reach, you keep hold and are told to get under the hook.
+- **People's bodies hang too** (a player's, a villager's, a raider's, a zombie's): a warning to others, and a cleaver or skinning knife opens the throat so the blood drains into a blood grate under it, to be bottled (for a vampire who'd rather not bite). They're only bled, never butchered.
+- **Great spit and campfire**: a carried carcass can be heaved onto the great spit again, and a dragged one onto it; a small one carried can be laid on a campfire to roast. Those clicks were being turned into "let go" too.
+- `MinecraftUseMixin` (client: walks the view for a hook, sends `HangOn`; lets spit and campfire clicks through), `Payloads.HangOn`, `JaymosKitchen` (its receiver), `Hanging.hangsAsPerson`/`bleedPerson`, `CorpseEntity.interact`.
+- Built by CI; not played.

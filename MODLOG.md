@@ -7224,3 +7224,10 @@ following integration task).
 - **Tips off**: `/tips off` (and `/tips on`; `/tips` says which), or the new **Tips: On / Off** button in the top right of the menu's Notices page. Off, no tip cards come up: no first-time tips, and hints show over the hotbar again as they used to (`TipCard.enabled`, `HintCards`). A card already up goes when you turn them off.
 - It's kept on this computer (`config/jaymospowers-client.properties`, `tips.off`), not per world.
 - Built; not played.
+
+## 0.26.51 (2026-11-22): both arms for anything bigger than a small animal; carried blocks are seen (#1989)
+
+- **Carrying**: anyone or anything bigger than a small animal now takes both arms: a person over your shoulder or at your side gets your other hand on them too, first and third person. With both arms full (that, a Kitchen corpse in your arms, or a block in Carry On's arms) the web wings won't spread (and fold if you take something up mid-glide), and the aercloud glider and paraglider won't open ("Your arms are full"). A Z Fighter with both arms full fights with kicks only, and can't take a Hammerlock.
+- **Carried blocks**: a block picked up with Carry On is drawn in your arms again, first and third person. Carry On draws nothing while First-person Model is installed; it now draws anyway, except in your own first-person hands while First-person Model is drawing your body (which already shows it).
+- `core/ArmsFull`, `CarryPose`, `FirstPersonArms`, `KitchenCompat.corpseInBothArms`, `WebSwing`/`WebPower` (wings), `AercloudGliderItem`, `ParagliderItem`, `ZFighterCombo`, `ZFighterRush`, `client/mixin/carryon/CarryOnDrawMixin`.
+- Built by CI; not played.
