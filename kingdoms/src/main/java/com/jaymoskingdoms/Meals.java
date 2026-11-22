@@ -300,6 +300,19 @@ public final class Meals {
 		return !job.equals("guard") && !job.equals("archer");
 	}
 
+	/**
+	 * ({@link Needs}) {@code v} is hungry outside mealtimes: a bite, had the way a meal is (cooked at home from the
+	 * storehouse, or bought in town). False if they can't just now.
+	 */
+	static boolean snack(ServerLevel level, Faction f, Villager v) {
+		if (EATING.containsKey(v.getUUID()) || f.type() == FactionType.BARBARIAN || v.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(f.seat())) > WATCHED * WATCHED
+			|| !fit(v, Royals.timeOfDay(level))) {
+			return false;
+		}
+		start(level, f, v, eateries(level, f), Festivals.day(level), level.getGameTime());
+		return true;
+	}
+
 	/** {@code v} goes for their meal: home to their stove if they've one and food to cook, else to buy one. */
 	private static void start(ServerLevel level, Faction f, Villager v, List<Eatery> eateries, long day, long now) {
 		RandomSource random = level.getRandom();

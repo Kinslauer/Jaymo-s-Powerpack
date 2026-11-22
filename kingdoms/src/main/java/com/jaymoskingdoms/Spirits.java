@@ -18,7 +18,8 @@ import net.minecraft.world.phys.AABB;
  * (0.7.46) Hunger and weariness, after Village Life's (remade, not copied: that mod is All Rights Reserved). When a
  * realm's storehouse has no food left, its townsfolk go hungry: their bellies rumble, they grumble about it and their
  * spirits sink (MCA mood) until it's stocked again. And a day's end tells: of an evening the townsfolk yawn and say
- * they're for bed; at dawn they stretch.
+ * they're for bed; at dawn they stretch. And each one's own hunger and thirst ({@link Needs}) tell when they've gone
+ * too long without: they say so, storehouse full or not.
  */
 final class Spirits {
 	/** How often spirits are thought about (ticks); how far round a seat; how often a storehouse's larder is looked in again (ticks). */
@@ -27,6 +28,8 @@ final class Spirits {
 	static final long LARDER_TICKS = 1200L;
 	/** The chance each think that a hungry villager grumbles (and their mood's fall, MCA), or a weary one yawns. */
 	static final float HUNGRY_CHANCE = 0.01F, WEARY_CHANCE = 0.02F, STRETCH_CHANCE = 0.02F;
+	/** The chance each think that someone whose own hunger or thirst is at {@link Needs#GRUMBLE} says so. */
+	static final float NEED_CHANCE = 0.02F;
 	static final int HUNGER = -2;
 	/** When they're weary (time of day), and stretching. */
 	static final long WEARY_FROM = 10500L, WEARY_TO = 12000L, STRETCH_TO = 1000L;
@@ -72,15 +75,16 @@ final class Spirits {
 			boolean hungry = hungry(level, f);
 			boolean weary = t >= WEARY_FROM && t < WEARY_TO;
 			boolean waking = t < STRETCH_TO;
-			if (!hungry && !weary && !waking) {
-				continue;
-			}
 			for (Villager v : level.getEntitiesOfClass(Villager.class, new AABB(f.seat()).inflate(WATCHED),
 				v -> v.isAlive() && !v.isSleeping() && !Festivals.going(v) && Routines.free(v, t))) {
 				if (hungry && random.nextFloat() < HUNGRY_CHANCE) {
 					McaCompat.cheer(v, HUNGER);
 					level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.PLAYER_BURP, SoundSource.NEUTRAL, 0.2F, 0.5F);
 					say(level, v, v.isBaby() ? "hungry_child" : "hungry", random);
+				} else if (Needs.get(v, Needs.Need.THIRST) >= Needs.GRUMBLE && random.nextFloat() < NEED_CHANCE) {
+					say(level, v, "thirsty", random);
+				} else if (Needs.get(v, Needs.Need.HUNGER) >= Needs.GRUMBLE && random.nextFloat() < NEED_CHANCE) {
+					say(level, v, v.isBaby() ? "hungry_child" : "peckish", random);
 				} else if (weary && random.nextFloat() < WEARY_CHANCE) {
 					say(level, v, "weary", random);
 				} else if (waking && random.nextFloat() < STRETCH_CHANCE) {
