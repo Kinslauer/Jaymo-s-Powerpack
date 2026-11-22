@@ -49,8 +49,8 @@ public final class ShipClient {
 			return;
 		}
 		if (you.getVehicle() == ship) {
-			you.setYRot(you.getYRot() + turned);
-			you.setYHeadRot(you.getYHeadRot() + turned);
+			// at the helm (or riding her otherwise) a free camera: your look isn't turned with her (BoatFreeLookMixin);
+			// walking her deck you're still carried round with it, as you stand on it
 			return;
 		}
 		if (you.isPassenger() || you.isSpectator()) {
