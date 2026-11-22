@@ -441,6 +441,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.films.BossIntros.register();
 		// great foes' themes (stems mixed on the player's own side) and the trophy stand
 		com.jaymoskingdoms.music.FoeThemes.register();
+		com.jaymoskingdoms.music.Skirmishes.register();
 		// the music of the places (Medieval Music pack tracks, played on the player's own side) and a tavern's bard
 		PlaceThemes.register();
 		Bards.register();
