@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 03:22). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 08:27). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -39,6 +39,7 @@ kanban-plugin: board
 - [ ] [[Inbox/scrying-orb|scrying-orb]] · 🔨 Hephaestus · #1896 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-2-power|zfighter-gaps-2-power]] · 🔨 Hephaestus · #1938 · changes · fixing review notes
 - [ ] [[Inbox/zfighter-gaps-5-training|zfighter-gaps-5-training]] · ☀️ Apollo · #1953 · changes · fixing review notes
+- [ ] [[Agents/camp-guards-own-gear|camp-guards-own-gear]] · 💻 Odysseus · running
 
 
 ## In review
