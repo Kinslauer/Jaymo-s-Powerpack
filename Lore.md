@@ -1772,6 +1772,19 @@ three scouts ranging outside its ring: small even for goblins, hooded, a pack on
 see further than the village does. A scout that spots prey stops and cackles, and the village comes for what it saw; a
 traveller in a goblin mask is laughed past. With its village gone a scout runs wild and has nobody to call.
 
+**Goblin odd-jobs** (new; survival picks thread, Andy picked "goblin extras" 2026-11-22; Claude's placement, waiting on
+Andy). A **wandering goblin** walks alone between villages, the one goblin that sells instead of steals: he takes the
+gold coins goblins hoard and hands over what their raids brought home, among it the **decoy**, a stuffed sack in a
+goblin's rags that every goblin and beast near it goes for when thrown. Goblin taverns brew a mushroom ale that leaves
+**drunk goblins** staggering about the village ring, slow and quarrelsome. The **engineer's hammer** and the clanking
+**robot** it calls up are stolen Frostborn work, beaten back together by goblin hands: everyone loves Frostborn tech,
+goblins most of all, and theirs never runs quite right.
+
+**Cannons for anyone** (new; same thread, Andy picked Old Cannons, its three kinds of shot and cannons on ships; Claude's
+placement, waiting on Andy). The field cannons the richest kingdoms set on their walls are cast by the same founders
+who sell smaller guns to anyone with the coin: a ship's master, a lord with a stubborn neighbour. An iron ball breaks
+stone, a cheap stone ball only timber, and a fire ball is the kingdoms' answer to the flame avatar's FireCannon.
+
 **Goblin talk** (Andy approved, 2026-11-19; goblin speech thread; Andy: goblins "should speak very broken but intelligible english, unlike orcs who you really cant tell"; the rest Claude's placement). Goblins never kept a tongue of their own. They live off other people's goods, so they live off other people's words too: every goblin picks up the traders' common speech from the folk it robs and sells to, and mangles it the same way wherever it was hatched. "Me" for I, "da" for the, no little words, everything shiny is shinies. Anyone can follow a goblin, which is half of why nobody trusts one: it will tell you to your face what it means to take. Orcs are the other way: their war camps talk only among themselves, in the land's own speech chewed past knowing, and a stranger hears noise.
 
 **Heritage looks.** Each heritage has three looks of its own, and bloods marry and mix; a child can lean toward a

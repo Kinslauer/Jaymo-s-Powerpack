@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-22 08:08
+updated: 2026-11-22 08:26
 ---
 # Open PRs
 
-22 open, as of 2026-11-22 08:08. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+23 open, as of 2026-11-22 08:26. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1853](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1853) Heritage paths: core + Heartlander, Stoneborn, Tideborn (Kingdoms, Powers)
@@ -12,7 +12,7 @@ Andy merges only on "merge", one at a time.
 - **Agent:** [[heritage-paths]]
 
 ## [#1896](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1896) Scrying Orb: fix 26.3 API issues
-- **Branch:** `claude/scrying-orb` · **Updated:** 2026-11-20 (1 day ago)
+- **Branch:** `claude/scrying-orb` · **Updated:** 2026-11-20 (2 days ago)
 - **Checks:** ❌ failing: Build Kingdoms
 - **Agent:** [[scrying-orb-design-spec]]
 
@@ -113,5 +113,10 @@ Andy merges only on "merge", one at a time.
 
 ## [#1981](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1981) Villagers always doing something: hunger, thirst, boredom, stall log and watchdog (draft)
 - **Branch:** `claude/villagers-always-busy-3238b4` · **Updated:** 2026-11-22 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#1984](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1984) Crewed ships spawn with a helm; fish come back to the water
+- **Branch:** `claude/ship-helm-fish-spawn-9fa89f` · **Updated:** 2026-11-22 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
