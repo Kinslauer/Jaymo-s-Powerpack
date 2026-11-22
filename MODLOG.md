@@ -7121,3 +7121,11 @@ All raids use existing mobs — Rogue Fighters and vanilla mobs — no new origi
 - **Masters' homes are spared**: ki no longer breaks blocks in a master's home - a kingdom seat or a barbarian camp seat, out to 24 blocks - or inside a kept tournament ring. Mob griefing decides everywhere else, as before.
 - **Themed tournaments**: a tournament can open themed instead of plain - the tyrant's games (a tyrant takes a champion's place in the bracket, and the prize is double) or the fortune teller's five fighters (only five challengers may enter), beside the kingdom tournaments, last-one-standing and the tournament of the dead.
 - Built; not played in game.
+
+## 0.26.42 (2026-11-22): Z Fighter gaps 10: camera and HUD (#1937)
+
+- The F7 front camera can now be tuned: set its distance, height, side offset and smoothing in the client settings.
+- Z Fighter HUD options: hide the numbers, always show the HUD, HUD menu scale, and markers above party members when ki sense is on.
+- Ki sense can show how much damage a sensed foe has taken.
+- Flight has two modes: a faster travel mode and a nimble combat mode, with a lock to stop accidental switching.
+- Builds; not played in game yet.
