@@ -24,7 +24,7 @@ import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.phys.AABB;
 
 /**
- * (gv_cleric_heal, after Guard Villagers' clerics: its idea only) The town healer throws healing splashes. A cleric of a
+ * (gv_cleric_heal, after Guard Villagers' clerics: its idea only) The town healer throws healing splashes. A cleric (or healer) of a
  * settlement with nothing else to do, who sees a guard or a villager badly hurt ({@link #BADLY} of their health or less)
  * within {@link #REACH}, throws a splash potion of healing at their feet, a few times a day ({@link #PER_DAY}) so the
  * cleric's stock runs short: the same splash heals whoever stands in it. The fallen ({@link Downed}) are the town's tending
@@ -63,7 +63,7 @@ public final class ClericHeals {
 				continue;
 			}
 			for (Villager cleric : level.getEntitiesOfClass(Villager.class, new AABB(f.seat()).inflate(WATCHED),
-				v -> v.isAlive() && !v.isBaby() && v.getVillagerData().profession().is(VillagerProfession.CLERIC))) {
+				v -> v.isAlive() && !v.isBaby() && (v.getVillagerData().profession().is(VillagerProfession.CLERIC) || TownTrades.healer(v)))) {
 				if (!Routines.idle(cleric)) {
 					continue;
 				}

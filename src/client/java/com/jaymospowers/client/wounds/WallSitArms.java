@@ -377,6 +377,86 @@ final class WallSitArms {
 		return new float[] {x, y, z, fold};
 	}
 
+	// ---- rising up the wall (Andy, 2026-11-22: "a wounded struggle up the wall, using your arms")
+
+	/**
+	 * When the hands do what rising (shares of the rise): both put down on the floor beside the hips by {@code PLANT}, pushing
+	 * till the push is done; one moves onto its knee ({@code KNEE_FROM}..{@code KNEE_AT}) and the other flat onto the wall
+	 * beside the shoulder ({@code WALL_FROM}..{@code WALL_AT}); both let go from {@code LET_GO} and hang by {@code HANG}.
+	 */
+	static final float RISE_PLANT = 0.12F, RISE_KNEE_FROM = 0.42F, RISE_KNEE_AT = 0.5F, RISE_WALL_FROM = 0.47F, RISE_WALL_AT = 0.56F,
+		RISE_LET_GO = 0.86F, RISE_HANG = 0.97F;
+	/** A hand on the floor: this far out to the side of the hips and back toward the wall (blocks). On the wall: out, and down from the shoulder. */
+	static final float RISE_FLOOR_OUT = 0.3F, RISE_FLOOR_BACK = 0.05F, RISE_WALL_OUT = 0.22F, RISE_WALL_DOWN = 0.12F;
+
+	/**
+	 * Both arms rising {@code u} of the way up the wall ({@code WallSit#riseBody}), as {@link #pose} gives them. An arm
+	 * that's broken or gone, or out cold, hangs; with one arm, it pushes off the floor and then its knee alone.
+	 */
+	static float[] rise(Room room, float u, int broken, boolean out, float[] rest) {
+		Matrix4f m = room.body().at(1.0F - u);
+		boolean rightWorks = !out && (broken & com.jaymospowers.core.Dismember.RIGHT_ARM) == 0;
+		boolean leftWorks = !out && (broken & com.jaymospowers.core.Dismember.LEFT_ARM) == 0;
+		int kneeArm = rightWorks ? RIGHT : LEFT;
+		float[] res = new float[8];
+		for (int arm = RIGHT; arm <= LEFT; arm++) {
+			boolean works = arm == RIGHT ? rightWorks : leftWorks;
+			float[] angles;
+			if (!works) {
+				angles = POSES[LIMP][arm].clone();
+			} else {
+				angles = riseArm(room, arm, arm == kneeArm, u, m, new float[] {rest[arm * 4], rest[arm * 4 + 1], rest[arm * 4 + 2], rest[arm * 4 + 3]});
+			}
+			System.arraycopy(angles, 0, res, arm * 4, 4);
+		}
+		return res;
+	}
+
+	private static float[] riseArm(Room room, int arm, boolean toKnee, float u, Matrix4f m, float[] rest) {
+		// down on the floor beside the hips, where they were as the hand went down: it stays there as the body rises
+		Matrix4f plantedAt = room.body().at(1.0F - RISE_PLANT * 0.5F);
+		Axes was = axes(plantedAt);
+		float side = was.side(plantedAt, arm);
+		Vector3f floor = new Vector3f(was.hips()).add(new Vector3f(was.across()).mul(RISE_FLOOR_OUT * side))
+			.add(new Vector3f(was.back()).mul(RISE_FLOOR_BACK));
+		floor.y = HAND_Y;
+		Axes now = axes(m);
+		float[] onFloor = reach(m, arm, keepOut(m, arm, floor), new Vector3f(now.across()).mul(0.7F * side).add(now.back()));
+		float[] held;
+		float from, to;
+		if (toKnee) {
+			// the top of its knee: the thigh as the hips' height has it
+			// (the thigh's turn in the world: on the body, plus the body's lean)
+			float forward = WallSit.riseLegs(u)[0] + WallSit.riseLean(u);
+			float thigh = 6.0F * WallSit.PX;
+			Vector3f knee = new Vector3f(now.hips()).add(new Vector3f(now.back()).mul(-Mth.sin(forward) * thigh))
+				.add(0.0F, -Mth.cos(forward) * thigh + 2.5F * WallSit.PX, 0.0F).add(new Vector3f(now.across()).mul(1.9F * WallSit.PX * side));
+			held = reach(m, arm, keepOut(m, arm, knee), new Vector3f(now.across()).mul(0.6F * side).add(0.0F, 1.0F, 0.0F));
+			from = RISE_KNEE_FROM;
+			to = RISE_KNEE_AT;
+		} else {
+			// flat on the wall beside the shoulder
+			Vector3f wall = shoulder(m, arm).add(new Vector3f(now.across()).mul(RISE_WALL_OUT * side)).add(0.0F, -RISE_WALL_DOWN, 0.0F);
+			float gap = room.gap(wall) - 0.03F;
+			wall.sub(room.nx() * gap, 0.0F, room.nz() * gap);
+			held = reach(m, arm, keepOut(m, arm, wall), new Vector3f(now.across()).mul(side).add(0.0F, -0.5F, 0.0F));
+			from = RISE_WALL_FROM;
+			to = RISE_WALL_AT;
+		}
+		float[] out = mix(rest, onFloor, PoseBlend.seg(u, 0.0F, RISE_PLANT));
+		out = mix(out, held, PoseBlend.seg(u, from, to));
+		return mix(out, rest, PoseBlend.seg(u, RISE_LET_GO, RISE_HANG));
+	}
+
+	/** {@code a} turned toward {@code b} by {@code s}, each angle the short way round. */
+	private static float[] mix(float[] a, float[] b, float s) {
+		float[] out = new float[4];
+		for (int i = 0; i < 4; i++) {
+			out[i] = a[i] + wrap(b[i] - a[i]) * s;
+		}
+		return out;
+	}
+
 	/** {@code a} wrapped into -pi..pi. */
 	static float wrap(float a) {
 		float d = a % Mth.TWO_PI;
