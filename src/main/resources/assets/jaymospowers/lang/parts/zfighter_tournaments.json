@@ -57,5 +57,24 @@
   "message.jaymospowers.zfighter_invasion_paid": "Your share: %s levels of experience, %s, %s x %s and %s hermit beans.",
   "message.jaymospowers.zfighter_invasion_won": "The %s is broken at %s! %s defenders share the prize.",
   "message.jaymospowers.zfighter_invasion_fell": "%s has fallen to the %s! The invaders withdraw with their plunder.",
-  "message.jaymospowers.zfighter_invasion_standing": "You failed to hold %s. You lost standing with its realm."
-}
+  "message.jaymospowers.zfighter_invasion_standing": "You failed to hold %s. You lost standing with its realm.",
+    "gap_raid.jaymospowers.pod_crash": "Crashed Pod Raid",
+    "gap_raid.jaymospowers.razed_verdant": "Razed Verdant Village",
+    "gap_raid.jaymospowers.demon_camp": "Demon Army Camp",
+    "gap_raid.jaymospowers.machine_army": "Machine Army",
+    "message.jaymospowers.gap_raid.pod_crash": "A warrior-born pod has crashed near %s! Its pilot calls for help!",
+    "message.jaymospowers.gap_raid.pod_crash_call": "%s: %s is calling for reinforcements!",
+    "message.jaymospowers.gap_raid.razed_verdant": "A Verdant village near %s has been razed! The tyrant's soldiers remain!",
+    "message.jaymospowers.gap_raid.demon_camp": "A demon army camp has been spotted near %s! Its alarm bell waits to be rung!",
+    "message.jaymospowers.gap_raid.machine_army": "A machine army has deployed near %s in the future! Its bases hum with power!",
+    "message.jaymospowers.gap_raid.won": "The %s has been defeated!",
+    "message.jaymospowers.gap_raid.fled": "The %s retreats, its forces spent.",
+    "message.jaymospowers.gap_raid.none": "No gap raid is active.",
+    "message.jaymospowers.gap_raid.state": "The %s at (%s, %s): %s combatants remaining.",
+    "entity.jaymospowers.gap_raid.razed_tyrant": "Razed Village Tyrant",
+    "entity.jaymospowers.gap_raid.razed_soldier": "Tyrant's Soldier",
+    "entity.jaymospowers.gap_raid.demon_captain": "Demon Camp Captain",
+    "entity.jaymospowers.gap_raid.demon_soldier": "Demon Camp Soldier",
+    "entity.jaymospowers.gap_raid.machine_commander": "Machine Commander",
+    "entity.jaymospowers.gap_raid.machine_unit": "Machine Unit"
+  }

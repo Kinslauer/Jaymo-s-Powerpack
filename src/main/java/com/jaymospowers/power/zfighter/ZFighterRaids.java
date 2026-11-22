@@ -76,6 +76,7 @@ public final class ZFighterRaids {
 		ServerTickEvents.END_SERVER_TICK.register(ZFighterRaids::tick);
 		// (0.17.60) the themed invasion a raid is now
 		ZFighterInvasions.init();
+		ZFighterLookoutBoss.init();
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -151,6 +152,10 @@ public final class ZFighterRaids {
 		}
 		// (0.17.62) a planet mission's fighters pay through the mission
 		if (tyrant.entityTags().contains(ZFighterSpaceMissions.FOE_TAG)) {
+			return;
+		}
+		// the Keeper's trial pays out on the Lookout
+		if (ZFighterLookoutBoss.fell(level, tyrant)) {
 			return;
 		}
 		// (0.17.60) the head of an invasion: the invasion pays out

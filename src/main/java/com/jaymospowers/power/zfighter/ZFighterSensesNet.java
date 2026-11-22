@@ -35,37 +35,39 @@ public final class ZFighterSensesNet {
 		}
 	}
 
-	/** One living thing sensed: its entity id and how strong it is next to you ({@code ZFighterKiSense.WEAKER} etc.). */
-	public record Mark(int id, int tier) {
-	}
+	/** One living thing sensed: its entity id, how strong it is next to you ({@code ZFighterKiSense.WEAKER} etc.), and damage taken. */
+		public record Mark(int id, int tier, int damageTaken, int maxHealth) {
+		}
 
 	/** Server → the sensing player only, a few times a second: whether the sense is on and who is in range. */
-	public record Sense(boolean on, List<Mark> marks) implements CustomPacketPayload {
-		public static final Type<Sense> TYPE = new Type<>(JaymosPowers.id("zfighter_sense"));
-		public static final StreamCodec<RegistryFriendlyByteBuf, Sense> CODEC = CustomPacketPayload.codec(
-			(p, buf) -> {
-				buf.writeBoolean(p.on);
-				buf.writeVarInt(p.marks.size());
-				for (Mark mark : p.marks) {
-					buf.writeVarInt(mark.id());
-					buf.writeByte(mark.tier());
-				}
-			},
-			buf -> {
-				boolean on = buf.readBoolean();
-				int count = Math.min(buf.readVarInt(), 256);
-				List<Mark> marks = new ArrayList<>(count);
-				for (int i = 0; i < count; i++) {
-					marks.add(new Mark(buf.readVarInt(), buf.readByte()));
-				}
-				return new Sense(on, marks);
-			});
+		public record Sense(boolean on, List<Mark> marks) implements CustomPacketPayload {
+			public static final Type<Sense> TYPE = new Type<>(JaymosPowers.id("zfighter_sense"));
+			public static final StreamCodec<RegistryFriendlyByteBuf, Sense> CODEC = CustomPacketPayload.codec(
+				(p, buf) -> {
+					buf.writeBoolean(p.on);
+					buf.writeVarInt(p.marks.size());
+					for (Mark mark : p.marks) {
+						buf.writeVarInt(mark.id());
+						buf.writeByte(mark.tier());
+						buf.writeVarInt(mark.damageTaken());
+						buf.writeVarInt(mark.maxHealth());
+					}
+				},
+				buf -> {
+					boolean on = buf.readBoolean();
+					int count = Math.min(buf.readVarInt(), 256);
+					List<Mark> marks = new ArrayList<>(count);
+					for (int i = 0; i < count; i++) {
+						marks.add(new Mark(buf.readVarInt(), buf.readByte(), buf.readVarInt(), buf.readVarInt()));
+					}
+					return new Sense(on, marks);
+				});
 
-		@Override
-		public Type<Sense> type() {
-			return TYPE;
+			@Override
+			public Type<Sense> type() {
+				return TYPE;
+			}
 		}
-	}
 
 	/** Client → server: the scouter wearer is looking at this living thing. */
 	public record ScouterRead(int id) implements CustomPacketPayload {

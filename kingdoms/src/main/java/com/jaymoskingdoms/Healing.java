@@ -136,13 +136,13 @@ public final class Healing {
 
 	// ---- the infirmary ----------------------------------------------------------------------------------------------
 
-	/** Someone who tends the sick near {@code pos}: a village cleric or a court wizard, or null. */
+	/** Someone who tends the sick near {@code pos}: a town's healer, a village cleric or a court wizard, or null. */
 	static @Nullable LivingEntity healerNear(ServerLevel level, BlockPos pos) {
 		AABB box = new AABB(pos).inflate(HEALER_NEAR);
 		LivingEntity best = null;
 		double bestDistance = Double.MAX_VALUE;
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box,
-			e -> e.isAlive() && (e instanceof Villager v && Restoration.cleric(v) || CourtWizards.is(e)))) {
+			e -> e.isAlive() && (e instanceof Villager v && (Restoration.cleric(v) || TownTrades.healer(v)) || CourtWizards.is(e)))) {
 			double d = e.distanceToSqr(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
 			if (d < bestDistance) {
 				best = e;
