@@ -7103,3 +7103,14 @@ Modified: ZFighterDrills.java, ZFighterSparring.java, ZFighterDrillScreen.java, 
 - **Prize**: 3000 TP shared by how much each fighter hurt him (silver and experience for one without ki); the top fighter's share is a quarter more, and they're named to everyone. With nobody left on the Lookout for 30 seconds he goes back through the door.
 - Classes: new ZFighterLookoutBoss; hooks in ZFighterRogue (holds and damage taken), ZFighterRaids (payout, init) and ZFighterSites (the Keeper's talk).
 - Built; not played in game.
+
+## 0.26.40 (2026-11-22): Z Fighter gaps 8: four themed raids (#1961)
+
+Four new raids:
+
+- **Crashed pod raid**: A warrior-born pod crashes near a kingdom; its pilot calls for reinforcements. Under the full moon, reinforcements have a chance to turn ape.
+- **Razed Verdant village**: A Verdant settlement burned by a tyrant's soldiers; the attackers remain and must be cleared.
+- **Demon army camp**: A camp in the demon realm (Nether); raising its alarm bell brings the demon army.
+- **Machine army and its bases**: In the future dimension, a base built from existing mechs and androids deploys a machine army.
+
+All raids use existing mobs — Rogue Fighters and vanilla mobs — no new original mobs added.
