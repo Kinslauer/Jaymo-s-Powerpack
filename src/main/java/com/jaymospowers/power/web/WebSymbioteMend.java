@@ -102,7 +102,8 @@ public final class WebSymbioteMend {
 	static void tick(ServerPlayer player, long now) {
 		UUID id = player.getUUID();
 		expire(player, now);
-		if (!WebSymbiote.isBonded(player) || !player.isAlive() || player.isSpectator() || WebSymbioteBond.dormant(player)) {
+		if (!WebSymbiote.isBonded(player) || !player.isAlive() || player.isSpectator() || WebSymbioteBond.dormant(player)
+			|| com.jaymospowers.core.wounds.Mortality.dead(player)) {
 			JOBS.remove(id);
 			return;
 		}

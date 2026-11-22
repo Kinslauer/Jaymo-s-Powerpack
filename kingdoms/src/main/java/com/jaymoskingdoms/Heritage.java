@@ -717,7 +717,7 @@ public final class Heritage {
 				boolean sun = inSun(player);
 				Skills.modifier(player, Attributes.ATTACK_DAMAGE, "heritage_sun", sun ? DAWN_SUN_DAMAGE * grow(player) : dark(player) ? -DAWN_DARK_WEAK : 0.0,
 					AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
-				if (sun && server.getTickCount() % DAWN_HEAL_EVERY == 0 && player.getHealth() < player.getMaxHealth()) {
+				if (sun && server.getTickCount() % DAWN_HEAL_EVERY == 0 && player.getHealth() < player.getMaxHealth() && !PowersCompat.dead(player)) {
 					player.heal(DAWN_HEAL);
 				}
 			} else if (kind == Kind.ENDBORN) {

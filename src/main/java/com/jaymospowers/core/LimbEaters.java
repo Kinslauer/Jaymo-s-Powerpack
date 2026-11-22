@@ -156,6 +156,27 @@ public final class LimbEaters {
 			|| mob instanceof TamableAnimal tame && tame.isTame();
 	}
 
+	/**
+	 * Whether {@code mob} burns in the sun (a zombie) and {@code at} lies open to it while the sun burns: it won't feed
+	 * there, so by day it goes for shade (SeekShelterGoal) instead of crowding the dead in the sun (Andy, 2026-11-22: "all
+	 * these zombies should have ran for cover instead of crowding my already dead corpse").
+	 */
+	static boolean sunlit(Mob mob, @Nullable Vec3 at) {
+		return mob.is(net.minecraft.tags.EntityTypeTags.BURN_IN_DAYLIGHT) && mob.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD).isEmpty()
+			&& !mob.isInWaterOrRain()
+			&& mob.level().environmentAttributes().getValue(net.minecraft.world.attribute.EnvironmentAttributes.MONSTERS_BURN, at != null ? at : mob.position())
+			// the test the sun burns by (SunBurnMixin): leaves don't shade
+			&& (at != null ? com.jaymospowers.core.sun.SunExposure.exposedToSun(mob.level(), at) : com.jaymospowers.core.sun.SunExposure.bodyExposed(mob.level(), mob));
+	}
+
+	/** Whether {@code mob}, feeding, stands in the burning sun: asked every {@link #SUN_CHECK_EVERY} ticks (the check casts rays). */
+	private static boolean sunCheck(Mob mob) {
+		return (mob.tickCount + mob.getId()) % SUN_CHECK_EVERY == 0 && sunlit(mob, null);
+	}
+
+	/** How often a feeding sun-burner checks whether it stands in the sun (ticks). */
+	private static final int SUN_CHECK_EVERY = 10;
+
 	/** Goes to a severed part and eats it. */
 	private static final class EatLimbGoal extends Goal {
 		private final Mob mob;
@@ -169,13 +190,13 @@ public final class LimbEaters {
 
 		@Override
 		public boolean canUse() {
-			if (busy(mob) || full(mob) || mob.getRandom().nextInt(LOOK_ODDS) != 0) {
+			if (busy(mob) || full(mob) || mob.getRandom().nextInt(LOOK_ODDS) != 0 || sunlit(mob, null)) {
 				return false;
 			}
 			part = null;
 			double best = Double.MAX_VALUE;
 			for (SeveredPart near : mob.level().getEntitiesOfClass(SeveredPart.class, mob.getBoundingBox().inflate(SMELL, SMELL_UP, SMELL),
-				SeveredPart::edible)) {
+				p -> p.edible() && !sunlit(mob, p.position().add(0.0, 0.3, 0.0)))) {
 				double distance = near.distanceToSqr(mob);
 				if (distance < best) {
 					best = distance;
@@ -196,7 +217,7 @@ public final class LimbEaters {
 
 		@Override
 		public boolean canContinueToUse() {
-			return part != null && part.edible() && giveUp > 0 && !busy(mob);
+			return part != null && part.edible() && giveUp > 0 && !busy(mob) && !sunCheck(mob);
 		}
 
 		@Override
@@ -389,13 +410,13 @@ public final class LimbEaters {
 		@Override
 		public boolean canUse() {
 			if (busy(mob) && !(mob.getTarget() != null && prey(mob.getTarget())) || circles && !circled(mob)
-				|| !mob.getPassengers().isEmpty() || mob.getRandom().nextInt(LOOK_ODDS) != 0) {
+				|| !mob.getPassengers().isEmpty() || mob.getRandom().nextInt(LOOK_ODDS) != 0 || sunlit(mob, null)) {
 				return false;
 			}
 			body = null;
 			double best = Double.MAX_VALUE;
 			for (net.minecraft.world.entity.LivingEntity near : mob.level().getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,
-				mob.getBoundingBox().inflate(SMELL, SMELL_UP, SMELL), e -> e != mob && prey(e))) {
+				mob.getBoundingBox().inflate(SMELL, SMELL_UP, SMELL), e -> e != mob && prey(e) && !sunlit(mob, e.position().add(0.0, 0.5, 0.0)))) {
 				double distance = near.distanceToSqr(mob);
 				if (distance < best) {
 					best = distance;
@@ -418,7 +439,7 @@ public final class LimbEaters {
 
 		@Override
 		public boolean canContinueToUse() {
-			return body != null && prey(body) && giveUp > 0 && mob.getPassengers().isEmpty();
+			return body != null && prey(body) && giveUp > 0 && mob.getPassengers().isEmpty() && !sunCheck(mob);
 		}
 
 		@Override

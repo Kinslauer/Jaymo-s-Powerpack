@@ -449,6 +449,9 @@ public final class ZFighterLineage {
 
 	/** A Verdant's body mends itself: health back while fed, breaks knit at once, lost limbs grow back one at a time. */
 	private static void mend(ServerPlayer player, long now) {
+		if (com.jaymospowers.core.wounds.Mortality.dead(player)) {
+			return; // nothing mends on the dead (left for dead, a ghost, in Limbo)
+		}
 		// Andy (2026-11-19): green blood spurts from the stump until the limb grows in
 		if (now % STUMP_SPURT_EVERY == 0 && player.isAlive() && player.level() instanceof net.minecraft.server.level.ServerLevel level) {
 			com.jaymospowers.core.Dismember.spurtStumps(level, player);

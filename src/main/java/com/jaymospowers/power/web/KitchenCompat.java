@@ -813,6 +813,15 @@ public final class KitchenCompat {
 			// an older Kitchen with no meat hooks
 		}
 		try {
+			// a zombie won't feed on the dead where the sun burns it: Kitchen asks the same rays the sun burns by (SunExposure)
+			java.util.function.BiPredicate<net.minecraft.world.entity.Mob, net.minecraft.world.phys.Vec3> sun = (mob, at) -> at != null
+				? com.jaymospowers.core.sun.SunExposure.exposedToSun(mob.level(), at)
+				: com.jaymospowers.core.sun.SunExposure.bodyExposed(mob.level(), mob);
+			Class.forName("com.jaymoskitchen.corpse.Scavengers").getMethod("setSunTest", java.util.function.BiPredicate.class).invoke(null, sun);
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			// an older Kitchen whose scavengers don't mind the sun
+		}
+		try {
 			// a body that hits the ground or a wall hard (thrown, blown, dropped) leaves a smear where it struck
 			Class<?> impacts = Class.forName("com.jaymoskitchen.corpse.CorpseImpacts");
 			java.util.function.BiConsumer<Entity, double[]> impact = (corpse, at) -> {
