@@ -263,7 +263,7 @@ public final class Hanging {
 		if (left <= 0) {
 			corpse.setButcherStage(DRAINED);
 			level.playSound(null, corpse.getX(), corpse.getY(), corpse.getZ(), SoundEvents.POINTED_DRIPSTONE_DRIP_WATER, SoundSource.NEUTRAL, 1.0F, 0.6F);
-			if (corpse.tooBigToLift() && corpse.hook() == null) {
+			if (corpse.tooBigToLift() && corpse.hook() == null && !corpse.onTable()) {
 				// bled where it lies: the proper job's extras go on it, and it's cut up there as before
 				corpse.addLoot(corpse.blockExtras());
 			}
@@ -295,7 +295,10 @@ public final class Hanging {
 			}
 			return null;
 		}
-		if (!hung) {
+		// Andy's Butchery pick (bu-table, ideas only): laid on a butcher block, it's worked a step at a time as on the hook
+		// (bled there, head, skin, guts, cuts); an axe on the block still chops it up in one go, as ever
+		boolean table = !hung && hangable(corpse) && corpse.onTable();
+		if (!hung && !table) {
 			if (stage == BLEEDING) {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.draining", (corpse.bleedLeft() + 19) / 20));
 				return InteractionResult.SUCCESS_SERVER;
@@ -310,6 +313,10 @@ public final class Hanging {
 			}
 		}
 		if (!cleaver && !knife) {
+			if (table) {
+				// (on the table anything else, an axe above all, is the old way)
+				return null;
+			}
 			player.sendOverlayMessage(Component.translatable(stage == FRESH ? "message.jaymoskitchen.hook.need_cleaver_bleed"
 				: "message.jaymoskitchen.hook.need_tools"));
 			return InteractionResult.SUCCESS_SERVER;
@@ -425,7 +432,8 @@ public final class Hanging {
 			return;
 		}
 		List<ItemStack> skins = corpse.takeLoot(stack -> stack.is(Butchery.SKINS));
-		boolean prime = corpse.hook() != null;
+		// (or skinned on a butcher block, done as properly)
+		boolean prime = corpse.hook() != null || corpse.onTable();
 		for (ItemStack skin : skins) {
 			if (prime && skin.getMaxStackSize() > 1) {
 				// hung and skinned with a knife, it comes off whole: a prime skin, one more than a rough job gets

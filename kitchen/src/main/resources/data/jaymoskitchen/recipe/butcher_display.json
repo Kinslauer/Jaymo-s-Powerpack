@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "SSS",
+    "PPP",
+    "PPP"
+  ],
+  "key": {
+    "S": "minecraft:smooth_stone_slab",
+    "P": "#minecraft:planks"
+  },
+  "result": {
+    "id": "jaymoskitchen:butcher_display"
+  }
+}

@@ -182,6 +182,8 @@ public final class Carry {
 	static final double DROP_AHEAD = 0.12, DROP_UP = 0.08;
 	/** (0.19.62) How far a carried head reaches a wall to be mounted on it, and how far out from the face it hangs. */
 	static final double TROPHY_REACH = 3.0, TROPHY_OFF_WALL = 0.18;
+	/** Jaymo's Kitchen's head mount (a plaque for a trophy head), by name so Kitchen isn't needed. */
+	private static final net.minecraft.resources.Identifier HEAD_MOUNT = net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymoskitchen", "head_mount");
 	/** One jump frees a carried player: they spring off up and back (b/t). */
 	static final double ESCAPE_UP = 0.42, ESCAPE_BACK = 0.3;
 	/** A struggle that can't work (stunned, say) can't be retried for this long (ticks). */
@@ -1107,8 +1109,14 @@ public final class Carry {
 				net.minecraft.world.level.ClipContext.Fluid.NONE, carrier));
 			if (wall.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK && wall.getDirection().getAxis().isHorizontal()) {
 				Vec3 out = Vec3.atLowerCornerOf(wall.getDirection().getUnitVec3i());
+				Vec3 at = wall.getLocation();
+				if (HEAD_MOUNT.equals(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(carrier.level().getBlockState(wall.getBlockPos()).getBlock()))) {
+					// (Andy's Butchery picks) on Jaymo's Kitchen's head mount: square in the middle of the plaque
+					Vec3 middle = Vec3.atCenterOf(wall.getBlockPos());
+					at = new Vec3(out.x != 0.0 ? at.x : middle.x, middle.y, out.z != 0.0 ? at.z : middle.z);
+				}
 				end(carrier, entry, Let.SET_DOWN);
-				head.mountOn(wall.getLocation().add(out.scale(TROPHY_OFF_WALL)), (float) Math.toDegrees(Math.atan2(-out.x, out.z)));
+				head.mountOn(at.add(out.scale(TROPHY_OFF_WALL)), (float) Math.toDegrees(Math.atan2(-out.x, out.z)));
 				carrier.level().playSound(null, head.getX(), head.getY(), head.getZ(), SoundEvents.WOOD_PLACE, SoundSource.PLAYERS, 0.8F, 0.8F);
 				return;
 			}
