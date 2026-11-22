@@ -1060,6 +1060,16 @@ final class McaBridge {
 			villager.setItemSlot(EquipmentSlot.OFFHAND, offhand.copy());
 			villager.setDropChance(EquipmentSlot.OFFHAND, 0.0F);
 		}
+		// and the raider's pieces over it (a torn hood or cloak, the horned crest: GuardKit#raider)
+		List<net.minecraft.world.item.ItemStack> harness = new java.util.ArrayList<>();
+		for (Harness.Slot slot : Harness.Slot.values()) {
+			if (!Harness.get(folk, slot).isEmpty()) {
+				harness.add(Harness.get(folk, slot).copy());
+			}
+		}
+		if (!harness.isEmpty()) {
+			Harness.dress(villager, harness.toArray(net.minecraft.world.item.ItemStack[]::new));
+		}
 		if (chief) {
 			// (0.7.293) his health, blows and toughness, on his throne's spot as the camp's leader
 			keepBuild(folk, villager);
