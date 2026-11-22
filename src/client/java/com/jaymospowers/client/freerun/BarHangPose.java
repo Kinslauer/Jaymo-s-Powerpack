@@ -35,6 +35,11 @@ public final class BarHangPose {
 	 * off the bar (radians), and how much of the pendulum swing is left while moving (share).
 	 */
 	static final float SHUFFLE_RATE = 0.55F, SHUFFLE_LIFT = 0.5F, MOVING_SWING = 0.3F;
+	/**
+	 * (Track 4) The elbows: soft under the weight, and bent this much more on the hand coming off the bar (radians);
+	 * where they fold (pixels down the arm). The knees: soft, and whipped this much more on the back swing (radians).
+	 */
+	static final float ELBOW_SOFT = 0.15F, ELBOW_OFF = 0.9F, ELBOW = 4.0F, KNEE_SOFT = 0.12F, KNEE_WHIP = 0.6F;
 	// ================================================================================================================
 
 	/** {@code time}: ticks, for the swing; {@code in}: how far the swing has built up (0-1); {@code moving}: (ParCool track A) going along the bar (0-1). */
@@ -102,6 +107,28 @@ public final class BarHangPose {
 		set(h.leftArm, ARM_UP + Math.max(0.0F, -hand) * SHUFFLE_LIFT, 0.0F, -ARM_SPREAD);
 		set(h.rightLeg, trail + 0.05F, 0.0F, 0.03F);
 		set(h.leftLeg, trail - 0.05F, 0.0F, -0.03F);
+	}
+
+	/**
+	 * (Parkour animations, track 4) Last thing before the model is drawn: the elbows soft under the weight (the one coming
+	 * off the bar bent more), the knees whipping bent as the swing comes back through and straightening out ahead of it.
+	 */
+	public static void bendLimbs(Model<?> model, Object renderState) {
+		if (!(renderState instanceof AvatarRenderState state) || !(model instanceof HumanoidModel<?> h)) {
+			return;
+		}
+		Hang hang = state.getData(KEY);
+		if (hang == null) {
+			return;
+		}
+		float swing = Mth.lerp(hang.moving(), 1.0F, MOVING_SWING) * hang.in();
+		float hand = Mth.sin(hang.time() * SHUFFLE_RATE) * hang.moving();
+		com.jaymospowers.client.KneeBend.bend(h.rightArm, -(ELBOW_SOFT + Math.max(0.0F, hand) * ELBOW_OFF), ELBOW, false);
+		com.jaymospowers.client.KneeBend.bend(h.leftArm, -(ELBOW_SOFT + Math.max(0.0F, -hand) * ELBOW_OFF), ELBOW, false);
+		// (the knees bend most as the body swings back, the legs trailing; they straighten as it swings on through)
+		float whip = KNEE_SOFT + KNEE_WHIP * Math.max(0.0F, -Mth.cos(hang.time() * SWING_SPEED)) * swing;
+		com.jaymospowers.client.KneeBend.bend(h.rightLeg, whip);
+		com.jaymospowers.client.KneeBend.bend(h.leftLeg, whip * 0.9F);
 	}
 
 	private static void set(ModelPart part, float x, float y, float z) {

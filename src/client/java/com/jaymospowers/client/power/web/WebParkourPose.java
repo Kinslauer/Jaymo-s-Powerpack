@@ -65,6 +65,16 @@ public final class WebParkourPose {
 	static final float FLIP_LIFT = 0.5F, FLIP_PIVOT = 0.9F;
 	/** (Track 3) The kong's elbows giving as the hands land (radians), and how far a tucked knee folds the shin under (radians). */
 	static final float VAULT_ELBOW_GIVE = 0.7F, VAULT_TUCK_KNEE = 2.1F;
+	/** (Track 4) The wall kick's tuck: how far the knees fold as it flies (radians). */
+	static final float KICK_TUCK_KNEE = 1.5F;
+	/**
+	 * (Track 4) The pole climb: blocks climbed per inchworm; the arms' angle with the hands low (at the chest) and reached
+	 * up, and how far in they wrap; the thighs' angle gripping low and drawn up, and how far in they pinch; the elbows'
+	 * and the knees' folds low and high (radians).
+	 */
+	static final float POLE_CYCLE = 0.8F, POLE_ARM_LOW = -1.5F, POLE_ARM_HIGH = -2.6F, POLE_ARM_IN = 0.35F;
+	static final float POLE_THIGH_LOW = -0.35F, POLE_THIGH_HIGH = -1.25F, POLE_LEG_IN = 0.12F;
+	static final float POLE_ELBOW_LOW = 1.5F, POLE_ELBOW_HIGH = 0.6F, POLE_KNEE_LOW = 0.7F, POLE_KNEE_HIGH = 1.9F;
 	/** Thief vault: how far it leans back (degrees). */
 	static final float THIEF_LEAN = 28.0F;
 	/** Slides: the baseball slide's lean back, the hip slide's lean back and roll onto its side, the dive's pitch onto the chest (degrees). */
@@ -351,6 +361,10 @@ public final class WebParkourPose {
 					set(h.leftLeg, -0.2F + sway, 0.0F, -0.12F, e);
 					break;
 				}
+				if (pose.variant() == com.jaymospowers.freerun.Freerun.POLE_LOOK) {
+					polePose(h, pose, e);
+					break;
+				}
 				// hand over hand: each hand grips up beside the head and the body rises past it, the elbow folding out to the
 				// side, then it lets go and reaches up again; each foot steps up with the opposite hand and pushes down. Elbows
 				// and knees: bendLimbs.
@@ -446,6 +460,19 @@ public final class WebParkourPose {
 		Pose pose = living.getData(KEY);
 		if (pose != null && pose.kind() == WebParkour.VAULT) {
 			vaultBends(h, pose);
+			return;
+		}
+		if (pose != null && pose.kind() == WebParkour.CLING && pose.variant() == com.jaymospowers.freerun.Freerun.POLE_LOOK) {
+			poleBends(h, pose);
+			return;
+		}
+		if (pose != null && pose.kind() == WebParkour.WALL_JUMP) {
+			// (track 4) the kick: the legs driving straight off the wall, then the knees tucking as it flies; elbows soft
+			float e = pose.in(), tuck = pose.p();
+			com.jaymospowers.client.KneeBend.bend(h.rightLeg, Mth.lerp(tuck, 0.15F, KICK_TUCK_KNEE) * e);
+			com.jaymospowers.client.KneeBend.bend(h.leftLeg, Mth.lerp(tuck, 0.3F, KICK_TUCK_KNEE * 0.85F) * e);
+			com.jaymospowers.client.KneeBend.bend(h.rightArm, -0.3F * e, ELBOW, false);
+			com.jaymospowers.client.KneeBend.bend(h.leftArm, -0.3F * e, ELBOW, false);
 			return;
 		}
 		if (pose == null || pose.kind() != WebParkour.CLING || pose.tendrils()) {
@@ -591,6 +618,31 @@ public final class WebParkourPose {
 				com.jaymospowers.client.KneeBend.bend(h.leftLeg, 1.5F * swing * e);
 			}
 		}
+	}
+
+	/**
+	 * (Parkour animations, track 4) Climbing a pole (Freerun's pole climb): arms wrapped round it in front, the legs
+	 * pinching it, and the climb an inchworm, keyed to how far you've climbed ({@link #POLE_CYCLE}): both hands reach up
+	 * the pole together while the legs grip, then the legs draw up under the body while the hands hold. Elbows and knees:
+	 * {@link #poleBends}.
+	 */
+	private static void polePose(HumanoidModel<?> h, Pose pose, float e) {
+		float u = pose.travel() / POLE_CYCLE, reach = 0.5F - 0.5F * Mth.cos(u * Mth.TWO_PI), draw = 1.0F - reach;
+		set(h.rightArm, Mth.lerp(reach, POLE_ARM_LOW, POLE_ARM_HIGH), 0.0F, -POLE_ARM_IN, e);
+		set(h.leftArm, Mth.lerp(reach, POLE_ARM_LOW, POLE_ARM_HIGH), 0.0F, POLE_ARM_IN, e);
+		set(h.rightLeg, Mth.lerp(draw, POLE_THIGH_LOW, POLE_THIGH_HIGH), 0.0F, -POLE_LEG_IN, e);
+		set(h.leftLeg, Mth.lerp(draw, POLE_THIGH_LOW, POLE_THIGH_HIGH), 0.0F, POLE_LEG_IN, e);
+		h.head.xRot = Mth.lerp(e, h.head.xRot, Math.min(h.head.xRot, CLIMB_LOOK_UP));
+	}
+
+	/** The pole climb's elbows (folded round the pole, more as the hands come down to the chest) and knees (gripping, more as they draw up). */
+	private static void poleBends(HumanoidModel<?> h, Pose pose) {
+		float e = pose.in(), u = pose.travel() / POLE_CYCLE, reach = 0.5F - 0.5F * Mth.cos(u * Mth.TWO_PI);
+		float elbow = Mth.lerp(reach, POLE_ELBOW_LOW, POLE_ELBOW_HIGH), knee = Mth.lerp(1.0F - reach, POLE_KNEE_LOW, POLE_KNEE_HIGH);
+		com.jaymospowers.client.KneeBend.bend(h.rightArm, -elbow * e, ELBOW, false);
+		com.jaymospowers.client.KneeBend.bend(h.leftArm, -elbow * e, ELBOW, false);
+		com.jaymospowers.client.KneeBend.bend(h.rightLeg, knee * e);
+		com.jaymospowers.client.KneeBend.bend(h.leftLeg, knee * e);
 	}
 
 	private static void set(ModelPart part, float x, float y, float z, float e) {

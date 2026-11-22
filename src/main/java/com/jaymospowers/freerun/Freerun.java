@@ -124,6 +124,8 @@ public final class Freerun {
 	public static final double VAULT_LOW = 1.0;
 	public static final float LAZY_ANGLE = 25.0F;
 	public static final int VAULT_KONG = 0, VAULT_LAZY = 1, VAULT_FLIP = 2, VAULT_THIEF = 3;
+	/** (Track 4) A pole climb is drawn as a cling's second look. */
+	public static final int POLE_LOOK = 1;
 	/** Freerunner 1: the vault's upward kick for a low (to 1 block) and a high (to 1.5) obstacle, and the least speed ahead it keeps (blocks/tick). */
 	public static final double VAULT_UP_LOW = 0.45, VAULT_UP_HIGH = 0.6, VAULT_FORWARD = 0.42;
 	public static final int VAULT_COOLDOWN = 10;
@@ -679,7 +681,8 @@ public final class Freerun {
 				WebParkour.dust(level, player, side, 6);
 			}
 			case POLE -> {
-				player.setAttached(MOVE, CLING * 8 + side.get3DDataValue() + 1);
+				// (track 4) a cling, its second look: wrapped round a pole (WebParkourPose), not flat on a wall
+				player.setAttached(MOVE, (POLE_LOOK * 8 + CLING) * 8 + side.get3DDataValue() + 1);
 				player.resetFallDistance();
 			}
 			case HOP -> {
