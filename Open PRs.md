@@ -1,13 +1,13 @@
 ---
-updated: 2026-11-22 13:19
+updated: 2026-11-22 13:43
 ---
 # Open PRs
 
-13 open, as of 2026-11-22 13:19. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+13 open, as of 2026-11-22 13:43. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#1853](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1853) Heritage paths: core + Heartlander, Stoneborn, Tideborn (Kingdoms, Powers)
-- **Branch:** `claude/heritage-paths` · **Updated:** 2026-11-20 (1 day ago)
+- **Branch:** `claude/heritage-paths` · **Updated:** 2026-11-20 (2 days ago)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[heritage-paths]]
 
@@ -63,10 +63,10 @@ Andy merges only on "merge", one at a time.
 
 ## [#1992](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1992) Survival picks track 1: wound pools, head-blow kills, headshots, armour per part, medicine over time
 - **Branch:** `claude/survival-wounds` · **Updated:** 2026-11-22 (today)
-- **Checks:** ⏳ 1 of 5 running
+- **Checks:** ✅ 5 passed
 - **Agent:** [[survival-wounds-track1]]
 
 ## [#1993](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/1993) Butcher's shop: step-by-step work on the butcher block, skin rack, mincer and mince, display, head mounts, barrel of bones
 - **Branch:** `claude/survival-butchery` · **Updated:** 2026-11-22 (today)
-- **Checks:** ⏳ 3 of 4 running
+- **Checks:** ✅ 5 passed
 - **Agent:** no agent note
