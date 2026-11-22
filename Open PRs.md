@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-22 18:11
+updated: 2026-11-22 18:20
 ---
 # Open PRs
 
-6 open, as of 2026-11-22 18:11. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+6 open, as of 2026-11-22 18:20. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2000](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2000) Z Fighter round 2 plan: marked built
@@ -21,17 +21,17 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#2003](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2003) Free riding camera; plants and flames in the wind
-- **Branch:** `claude/survival-cam-wind` · **Updated:** 2026-11-22 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** no agent note
-
 ## [#2004](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2004) pbdr: deploy the Deck tarball, wait for the start lock, read Done from the new log
 - **Branch:** `claude/pbdr-server-mods` · **Updated:** 2026-11-22 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#2005](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2005) The server starts again: the Scrying Orb registered its packets twice (Kingdoms)
+## [#2005](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2005) The server starts again: Scrying Orb packets registered twice, ruins naming removed biomes (Kingdoms)
 - **Branch:** `claude/scrying-orb-double-register` · **Updated:** 2026-11-22 (today)
-- **Checks:** ✅ 5 passed
+- **Checks:** ⏳ 1 of 4 running
+- **Agent:** no agent note
+
+## [#2006](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2006) The server starts again: the wish radar's parts were registered twice (Powers)
+- **Branch:** `claude/radar-parts-double-register` · **Updated:** 2026-11-22 (today)
+- **Checks:** ⏳ 3 of 4 running
 - **Agent:** no agent note
