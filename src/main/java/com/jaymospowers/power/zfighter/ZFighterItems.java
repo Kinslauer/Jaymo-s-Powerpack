@@ -2,6 +2,8 @@ package com.jaymospowers.power.zfighter;
 
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.core.Powers;
+import com.jaymospowers.power.zfighter.ZFighterFusion.Kind;
+import com.jaymospowers.power.zfighter.ZFighterFusionItems;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
@@ -11,14 +13,19 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.EntityTypes;
@@ -59,11 +66,16 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCon
  * <ul>
  * <li><b>Hermit Beans</b>: a slow, rare crop (seeds turn up in jungle temple chests). One bean heals you fully, fills your
  * stomach and a Z Fighter's ki, and clears what ails you. Anyone can eat one.</li>
+ * <li><b>Medi-Bugs</b>: tiny living critters (mice) found in the wild. Pick one up and eat it whole: heals, fills hunger,
+ * clears ailments, and restores a Z Fighter's ki. A pair of them can fuse two fighters.</li>
+ * <li><b>Fighter's Herbs</b>: existing plants in the pack (Hermit Beans, Kitchen's wild crops) that give short boosts when
+ * eaten: ki regeneration, cleared cooldowns, stamina, mastery, calm mind.</li>
  * <li><b>Training Weights</b>, worn on the feet (ankle weights and wristbands): slower, lower jumps; a Z Fighter
  * wearing them trains faster ({@link #LIGHT_RATE}, heavy {@link #HEAVY_RATE}). Either pair turns anyone's Meditate key into
  * shadowboxing, which builds Might in Jaymo's Kingdoms ({@code core.Training#weightsMight}).</li>
  * <li>The <b>Sparring Dummy</b> ({@link ZFighterSparring}) and the <b>Training Post</b>, whose drills are played on the
  * client and paid for by {@link ZFighterDrills}.</li>
+ * <li><b>Radar Parts</b>: fragments of the Wish Radar found in the world; assemble all three to craft the radar.</li>
  * </ul>
  */
 public final class ZFighterItems {
@@ -74,68 +86,93 @@ public final class ZFighterItems {
 	static final int BEAN_COOLDOWN_SECONDS = 5;
 
 	public static final float LIGHT_RATE = 1.5F;
-	static final float HEAVY_RATE = 2.0F;
-	static final double LIGHT_SLOW = -0.12;
-	static final double HEAVY_SLOW = -0.25;
-	static final double LIGHT_JUMP = -0.1;
-	static final double HEAVY_JUMP = -0.2;
+		static final float HEAVY_RATE = 2.0F;
+		static final double LIGHT_SLOW = -0.12;
+		static final double HEAVY_SLOW = -0.25;
+		static final double LIGHT_JUMP = -0.1;
+		static final double HEAVY_JUMP = -0.2;
 
-	public static final ResourceKey<EquipmentAsset> WEIGHTS_ASSET = ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosPowers.id("training_weights"));
+		public static final ResourceKey<EquipmentAsset> WEIGHTS_ASSET = ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosPowers.id("training_weights"));
 
-	public static Block HERMIT_BEANS;
-	public static Item HERMIT_BEAN_SEEDS;
-	public static Item HERMIT_BEAN;
-	public static Item TRAINING_WEIGHTS;
-	public static Item HEAVY_TRAINING_WEIGHTS;
-	public static Item SPARRING_DUMMY;
-	public static Block TRAINING_POST;
-	public static Item TRAINING_POST_ITEM;
+		public static Block HERMIT_BEANS;
+		public static Item HERMIT_BEAN_SEEDS;
+		public static Item HERMIT_BEAN;
+		public static Item MEDI_BUG;
+		public static Item MEDI_BUG_PAIR;
+		public static Item RADAR_PART_1;
+		public static Item RADAR_PART_2;
+		public static Item RADAR_PART_3;
+		public static Item TRAINING_WEIGHTS;
+		public static Item HEAVY_TRAINING_WEIGHTS;
+		public static Item SPARRING_DUMMY;
+		public static Block TRAINING_POST;
+		public static Item TRAINING_POST_ITEM;
 
 	private ZFighterItems() {
 	}
 
 	static void init() {
-		ResourceKey<Block> cropKey = ResourceKey.create(Registries.BLOCK, JaymosPowers.id("hermit_beans"));
-		HERMIT_BEANS = Registry.register(BuiltInRegistries.BLOCK, cropKey, new HermitBeansBlock(BlockBehaviour.Properties.of()
-			.mapColor(MapColor.PLANT).noCollision().randomTicks().instabreak().sound(SoundType.CROP).pushReaction(PushReaction.POPPED).setId(cropKey)));
-		ResourceKey<Item> seedsKey = item("hermit_bean_seeds");
-		HERMIT_BEAN_SEEDS = Registry.register(BuiltInRegistries.ITEM, seedsKey, new BlockItem(HERMIT_BEANS, new Item.Properties().setId(seedsKey)
-			.useItemDescriptionPrefix().rarity(Rarity.UNCOMMON)));
-		ResourceKey<Item> beanKey = item("hermit_bean");
-		HERMIT_BEAN = Registry.register(BuiltInRegistries.ITEM, beanKey, new HermitBean(new Item.Properties().setId(beanKey).rarity(Rarity.RARE)
-			.food(new FoodProperties.Builder().nutrition(20).saturationModifier(1.0F).alwaysEdible().build(),
-				Consumables.defaultFood().consumeSeconds(0.6F).build())
-			.useCooldown(BEAN_COOLDOWN_SECONDS)));
-		TRAINING_WEIGHTS = weights("training_weights", LIGHT_SLOW, LIGHT_JUMP, Rarity.COMMON);
-		HEAVY_TRAINING_WEIGHTS = weights("heavy_training_weights", HEAVY_SLOW, HEAVY_JUMP, Rarity.UNCOMMON);
-		ResourceKey<Item> dummyKey = item("sparring_dummy");
-		SPARRING_DUMMY = Registry.register(BuiltInRegistries.ITEM, dummyKey, new ZFighterSparring.DummyItem(new Item.Properties().setId(dummyKey)
-			.stacksTo(1).rarity(Rarity.UNCOMMON)));
-		ResourceKey<Block> postKey = ResourceKey.create(Registries.BLOCK, JaymosPowers.id("training_post"));
-		TRAINING_POST = Registry.register(BuiltInRegistries.BLOCK, postKey, new TrainingPostBlock(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
-			.strength(2.0F).sound(SoundType.WOOD).noOcclusion().setId(postKey)));
-		ResourceKey<Item> postItemKey = item("training_post");
-		TRAINING_POST_ITEM = Registry.register(BuiltInRegistries.ITEM, postItemKey, new BlockItem(TRAINING_POST, new Item.Properties().setId(postItemKey)
-			.useBlockDescriptionPrefix()));
+			ResourceKey<Block> cropKey = ResourceKey.create(Registries.BLOCK, JaymosPowers.id("hermit_beans"));
+			HERMIT_BEANS = Registry.register(BuiltInRegistries.BLOCK, cropKey, new HermitBeansBlock(BlockBehaviour.Properties.of()
+				.mapColor(MapColor.PLANT).noCollision().randomTicks().instabreak().sound(SoundType.CROP).pushReaction(PushReaction.POPPED).setId(cropKey)));
+			ResourceKey<Item> seedsKey = item("hermit_bean_seeds");
+			HERMIT_BEAN_SEEDS = Registry.register(BuiltInRegistries.ITEM, seedsKey, new BlockItem(HERMIT_BEANS, new Item.Properties().setId(seedsKey)
+				.useItemDescriptionPrefix().rarity(Rarity.UNCOMMON)));
+			ResourceKey<Item> beanKey = item("hermit_bean");
+			HERMIT_BEAN = Registry.register(BuiltInRegistries.ITEM, beanKey, new HermitBean(new Item.Properties().setId(beanKey).rarity(Rarity.RARE)
+				.food(new FoodProperties.Builder().nutrition(20).saturationModifier(1.0F).alwaysEdible().build(),
+					Consumables.defaultFood().consumeSeconds(0.6F).build())
+				.useCooldown(BEAN_COOLDOWN_SECONDS)));
+			ResourceKey<Item> mediBugKey = item("medi_bug");
+			MEDI_BUG = Registry.register(BuiltInRegistries.ITEM, mediBugKey, new MediBug(new Item.Properties().setId(mediBugKey).rarity(Rarity.RARE)
+				.food(new FoodProperties.Builder().nutrition(10).saturationModifier(0.8F).alwaysEdible().build(),
+					Consumables.defaultFood().consumeSeconds(0.5F).build())
+				.useCooldown(BEAN_COOLDOWN_SECONDS)));
+			ResourceKey<Item> mediBugPairKey = item("medi_bug_pair");
+			MEDI_BUG_PAIR = Registry.register(BuiltInRegistries.ITEM, mediBugPairKey, new MediBugPair(new Item.Properties().setId(mediBugPairKey).stacksTo(1).rarity(Rarity.EPIC)));
+			ResourceKey<Item> radarPart1Key = item("radar_part_1");
+			RADAR_PART_1 = Registry.register(BuiltInRegistries.ITEM, radarPart1Key, new Item(new Item.Properties().setId(radarPart1Key).stacksTo(1).rarity(Rarity.UNCOMMON)));
+			ResourceKey<Item> radarPart2Key = item("radar_part_2");
+			RADAR_PART_2 = Registry.register(BuiltInRegistries.ITEM, radarPart2Key, new Item(new Item.Properties().setId(radarPart2Key).stacksTo(1).rarity(Rarity.UNCOMMON)));
+			ResourceKey<Item> radarPart3Key = item("radar_part_3");
+			RADAR_PART_3 = Registry.register(BuiltInRegistries.ITEM, radarPart3Key, new Item(new Item.Properties().setId(radarPart3Key).stacksTo(1).rarity(Rarity.UNCOMMON)));
+			TRAINING_WEIGHTS = weights("training_weights", LIGHT_SLOW, LIGHT_JUMP, Rarity.COMMON);
+			HEAVY_TRAINING_WEIGHTS = weights("heavy_training_weights", HEAVY_SLOW, HEAVY_JUMP, Rarity.UNCOMMON);
+			ResourceKey<Item> dummyKey = item("sparring_dummy");
+			SPARRING_DUMMY = Registry.register(BuiltInRegistries.ITEM, dummyKey, new ZFighterSparring.DummyItem(new Item.Properties().setId(dummyKey)
+				.stacksTo(1).rarity(Rarity.UNCOMMON)));
+			ResourceKey<Block> postKey = ResourceKey.create(Registries.BLOCK, JaymosPowers.id("training_post"));
+			TRAINING_POST = Registry.register(BuiltInRegistries.BLOCK, postKey, new TrainingPostBlock(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().setId(postKey)));
+			ResourceKey<Item> postItemKey = item("training_post");
+			TRAINING_POST_ITEM = Registry.register(BuiltInRegistries.ITEM, postItemKey, new BlockItem(TRAINING_POST, new Item.Properties().setId(postItemKey)
+				.useBlockDescriptionPrefix()));
 
-		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> output.accept(HERMIT_BEAN));
-		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> output.accept(HERMIT_BEAN_SEEDS));
-		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
-			output.accept(TRAINING_WEIGHTS);
-			output.accept(HEAVY_TRAINING_WEIGHTS);
-			output.accept(SPARRING_DUMMY);
-		});
-		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.accept(TRAINING_POST_ITEM));
-		LootTableEvents.MODIFY.register((table, builder, source, registries) -> {
-			if (!source.isBuiltin() || !table.equals(BuiltInLootTables.JUNGLE_TEMPLE)) {
-				return;
-			}
-			builder.withPool(LootPool.lootPool().when(LootItemRandomChanceCondition.randomChance(SEEDS_TEMPLE_CHANCE))
-				.add(LootItem.lootTableItem(HERMIT_BEAN_SEEDS)));
-			builder.withPool(LootPool.lootPool().when(LootItemRandomChanceCondition.randomChance(BEAN_TEMPLE_CHANCE))
-				.add(LootItem.lootTableItem(HERMIT_BEAN)));
-		});
-	}
+			CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> {
+				output.accept(HERMIT_BEAN);
+				output.accept(MEDI_BUG);
+			});
+			CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> output.accept(HERMIT_BEAN_SEEDS));
+			CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
+				output.accept(TRAINING_WEIGHTS);
+				output.accept(HEAVY_TRAINING_WEIGHTS);
+				output.accept(SPARRING_DUMMY);
+				output.accept(MEDI_BUG_PAIR);
+				output.accept(RADAR_PART_1);
+				output.accept(RADAR_PART_2);
+				output.accept(RADAR_PART_3);
+			});
+			CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.accept(TRAINING_POST_ITEM));
+			LootTableEvents.MODIFY.register((table, builder, source, registries) -> {
+				if (!source.isBuiltin() || !table.equals(BuiltInLootTables.JUNGLE_TEMPLE)) {
+					return;
+				}
+				builder.withPool(LootPool.lootPool().when(LootItemRandomChanceCondition.randomChance(SEEDS_TEMPLE_CHANCE))
+					.add(LootItem.lootTableItem(HERMIT_BEAN_SEEDS)));
+				builder.withPool(LootPool.lootPool().when(LootItemRandomChanceCondition.randomChance(BEAN_TEMPLE_CHANCE))
+					.add(LootItem.lootTableItem(HERMIT_BEAN)));
+			});
+		}
 
 	private static ResourceKey<Item> item(String name) {
 		return ResourceKey.create(Registries.ITEM, JaymosPowers.id(name));
@@ -217,42 +254,130 @@ public final class ZFighterItems {
 	}
 
 	/** A Hermit Bean: everything back at once. */
-	static final class HermitBean extends Item {
-		HermitBean(Properties properties) {
-			super(properties);
+		static final class HermitBean extends Item {
+			HermitBean(Properties properties) {
+				super(properties);
+			}
+
+			@Override
+			public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
+				ItemStack left = super.finishUsingItem(stack, level, entity);
+				if (level instanceof ServerLevel server) {
+					// lost limbs grown back and bones set, then whole ((0.14.2) in that order: a part still missing or unset can't take
+					// the healing, and Wounds would refuse it)
+					com.jaymospowers.core.Dismember.regrow(entity, true);
+					com.jaymospowers.core.Fractures.heal(entity);
+					entity.setHealth(entity.getMaxHealth());
+					com.jaymospowers.core.wounds.Wounds.reconcile(entity);
+					List<MobEffectInstance> ailments = new ArrayList<>();
+					for (MobEffectInstance effect : entity.getActiveEffects()) {
+						if (effect.getEffect().value().getCategory() == MobEffectCategory.HARMFUL) {
+							ailments.add(effect);
+						}
+					}
+					for (MobEffectInstance effect : ailments) {
+						entity.removeEffect(effect.getEffect());
+					}
+					entity.clearFire();
+					if (entity instanceof ServerPlayer player) {
+						player.getFoodData().setFoodLevel(20);
+						player.getFoodData().setSaturation(20.0F);
+						if (Powers.has(player, ZFighterPower.INSTANCE)) {
+							ZFighterPower.live(player).ki = ZFighterPower.maxKi(player);
+						}
+						// Fighter's herb boost: ki regen for 60s, clear cooldowns, stamina, mastery boost, calm mind
+						applyHerbBoost(player);
+					}
+					server.sendParticles(ParticleTypes.HAPPY_VILLAGER, entity.getX(), entity.getY() + 1.0, entity.getZ(), 16, 0.4, 0.6, 0.4, 0.05);
+					server.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6F, 1.8F);
+				}
+				return left;
+			}
 		}
 
-		@Override
-		public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
-			ItemStack left = super.finishUsingItem(stack, level, entity);
-			if (level instanceof ServerLevel server) {
-				// lost limbs grown back and bones set, then whole ((0.14.2) in that order: a part still missing or unset can't take
-				// the healing, and Wounds would refuse it)
-				com.jaymospowers.core.Dismember.regrow(entity, true);
-				com.jaymospowers.core.Fractures.heal(entity);
-				entity.setHealth(entity.getMaxHealth());
-				com.jaymospowers.core.wounds.Wounds.reconcile(entity);
-				List<MobEffectInstance> ailments = new ArrayList<>();
-				for (MobEffectInstance effect : entity.getActiveEffects()) {
-					if (effect.getEffect().value().getCategory() == MobEffectCategory.HARMFUL) {
-						ailments.add(effect);
-					}
-				}
-				for (MobEffectInstance effect : ailments) {
-					entity.removeEffect(effect.getEffect());
-				}
-				entity.clearFire();
-				if (entity instanceof ServerPlayer player) {
-					player.getFoodData().setFoodLevel(20);
-					player.getFoodData().setSaturation(20.0F);
-					if (Powers.has(player, ZFighterPower.INSTANCE)) {
-						ZFighterPower.live(player).ki = ZFighterPower.maxKi(player);
-					}
-				}
-				server.sendParticles(ParticleTypes.HAPPY_VILLAGER, entity.getX(), entity.getY() + 1.0, entity.getZ(), 16, 0.4, 0.6, 0.4, 0.05);
-				server.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6F, 1.8F);
+		/** A Medi-Bug: a tiny living critter (mouse) you eat whole. Heals, fills hunger, clears ailments, restores ki. */
+		static final class MediBug extends Item {
+			MediBug(Properties properties) {
+				super(properties);
 			}
-			return left;
+
+			@Override
+			public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
+				ItemStack left = super.finishUsingItem(stack, level, entity);
+				if (level instanceof ServerLevel server) {
+					com.jaymospowers.core.Dismember.regrow(entity, true);
+					com.jaymospowers.core.Fractures.heal(entity);
+					entity.setHealth(entity.getMaxHealth());
+					com.jaymospowers.core.wounds.Wounds.reconcile(entity);
+					List<MobEffectInstance> ailments = new ArrayList<>();
+					for (MobEffectInstance effect : entity.getActiveEffects()) {
+						if (effect.getEffect().value().getCategory() == MobEffectCategory.HARMFUL) {
+							ailments.add(effect);
+						}
+					}
+					for (MobEffectInstance effect : ailments) {
+						entity.removeEffect(effect.getEffect());
+					}
+					entity.clearFire();
+					if (entity instanceof ServerPlayer player) {
+						player.getFoodData().setFoodLevel(20);
+						player.getFoodData().setSaturation(20.0F);
+						if (Powers.has(player, ZFighterPower.INSTANCE)) {
+							ZFighterPower.live(player).ki = ZFighterPower.maxKi(player);
+						}
+						applyHerbBoost(player);
+					}
+					server.sendParticles(ParticleTypes.HAPPY_VILLAGER, entity.getX(), entity.getY() + 1.0, entity.getZ(), 16, 0.4, 0.6, 0.4, 0.05);
+					server.playSound(null, entity.getX(), entity.getY(), entity.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6F, 1.8F);
+				}
+				return left;
+			}
 		}
+
+		/** A pair of Medi-Bugs: can fuse two fighters (like the bonding earrings but for Medi-Bugs). */
+		static final class MediBugPair extends Item {
+			MediBugPair(Properties properties) {
+				super(properties);
+			}
+
+			@Override
+			public InteractionResult use(Level level, Player player, InteractionHand hand) {
+				if (level.isClientSide()) {
+					return InteractionResult.SUCCESS;
+				}
+				ServerPlayer server = (ServerPlayer) player;
+				if (ZFighterFusion.fusable(server)) {
+					ZFighterFusionItems.offer(server, hand, ZFighterFusion.Kind.EARRING);
+				} else {
+					server.sendOverlayMessage(Component.translatable("message.jaymospowers.zfighter_charm_cannot").withStyle(ChatFormatting.GRAY));
+				}
+				return InteractionResult.SUCCESS;
+			}
+		}
+
+		/** Apply the fighter's herb boost: ki regen for 60s, clear cooldowns, stamina, mastery boost, calm mind. */
+				private static void applyHerbBoost(ServerPlayer player) {
+					// Ki regeneration boost for 60 seconds (1200 ticks)
+					player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 1200, 0, false, true));
+					// Clear all ability cooldowns
+					if (Powers.has(player, ZFighterPower.INSTANCE)) {
+						ZFighterPower.Live live = ZFighterPower.live(player);
+						live.waveFrom = -1L;
+						live.barrageFrom = -1L;
+						live.barrageReady = 0L;
+						live.spiritFrom = -1L;
+						// Stamina: fill ki to max
+						live.ki = ZFighterPower.maxKi(player);
+						// Mastery boost: small mastery gain for current form
+						ZFighterTraining.Data data = ZFighterTraining.of(player);
+						if (data.form() > 0) {
+							int idx = data.form() - 1;
+							int current = data.mastery(idx);
+							player.setAttached(ZFighterTraining.DATA, data.withMastery(data.form(), Math.min(ZFighterTraining.MASTERY_MAX, current + 500))); // +5% mastery
+						}
+						// Calm mind: resistance
+						player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 1200, 0, false, true));
+					}
+					player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.0F, 1.2F);
+				}
 	}
-}

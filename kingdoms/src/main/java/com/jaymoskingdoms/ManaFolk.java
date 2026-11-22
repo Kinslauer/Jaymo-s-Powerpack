@@ -46,6 +46,7 @@ public final class ManaFolk {
 			for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(RANGE),
 				e -> e.isAlive() && !(e instanceof net.minecraft.world.entity.player.Player) && !Mana.attuned(e))) {
 				attuneIfMagic(e);
+				attuneByAmethyst(e);
 			}
 		}
 	}
@@ -90,6 +91,37 @@ public final class ManaFolk {
 		e.setAttached(Mana.ATTUNED, true);
 		e.setAttached(Mana.POWER, power);
 		giveSpirit(e, power);
+	}
+
+	/** (Andy, 2026-11-22) The power one of the folk wakes to from amethyst: small, as a player's who found it. */
+	static final int AMETHYST_POWER = 2;
+
+	/**
+	 * (Andy, 2026-11-22: "Only 30% of players and MCA can get it from amethyst") One of the folk with the knack
+	 * ({@link Mana#apt}) carrying amethyst, in hand or in their pack, is attuned by it.
+	 */
+	static void attuneByAmethyst(LivingEntity e) {
+		if (Mana.attuned(e) || !Mana.apt(e) || !carries(e)) {
+			return;
+		}
+		int power = Math.clamp(AMETHYST_POWER + Math.floorMod(e.getUUID().hashCode(), 3) - 1, 1, Mana.MAX_POWER);
+		e.setAttached(Mana.ATTUNED, true);
+		e.setAttached(Mana.POWER, power);
+	}
+
+	private static boolean carries(LivingEntity e) {
+		if (Mana.AMETHYST_ITEMS.contains(e.getMainHandItem().getItem()) || Mana.AMETHYST_ITEMS.contains(e.getOffhandItem().getItem())) {
+			return true;
+		}
+		if (e instanceof net.minecraft.world.entity.npc.InventoryCarrier carrier) {
+			net.minecraft.world.SimpleContainer pack = carrier.getInventory();
+			for (int i = 0; i < pack.getContainerSize(); i++) {
+				if (Mana.AMETHYST_ITEMS.contains(pack.getItem(i).getItem())) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**

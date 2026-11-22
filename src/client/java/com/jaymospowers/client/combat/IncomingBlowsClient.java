@@ -143,7 +143,9 @@ public final class IncomingBlowsClient {
 			float elapsed = now - cue.start() + partial;
 			float share = Mth.clamp(elapsed / cue.ticks(), 0.0F, 1.0F);
 			float radius = Mth.lerp(share, START_RADIUS, END_RADIUS);
-			int perfect = Guard.PERFECT_TICKS + (locked != null && locked.getId() == cue.attacker() ? Guard.LOCK_PERFECT_BONUS : 0);
+			Guard.Shown shown = player.getAttached(Guard.SHOWN);
+			int keen = shown != null ? shown.keen() : 0;
+			int perfect = Guard.PERFECT_TICKS[keen] + (locked != null && locked.getId() == cue.attacker() ? Guard.LOCK_PERFECT_BONUS[keen] : 0);
 			boolean landed = elapsed >= cue.ticks();
 			int rgb;
 			if (cue.heavy()) {

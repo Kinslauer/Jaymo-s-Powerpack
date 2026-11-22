@@ -5,6 +5,7 @@ import static com.jaymoskingdoms.Classes.PlayerClass.THIEF;
 
 import com.jaymoskingdoms.ClassForks;
 import com.jaymoskingdoms.ClassTrees;
+import com.jaymoskingdoms.Disciplines;
 import com.jaymoskingdoms.RogueExtras;
 import com.jaymoskingdoms.Skills.Perk;
 import java.util.List;
@@ -32,6 +33,8 @@ final class ThiefTree {
 		ClassTrees.add(RogueExtras.FINGERS, Set.of(THIEF), 3, 2, 0, 0, 1, List.of(), List.of());
 		ClassTrees.add(RogueExtras.CASE, Set.of(THIEF), 1, 2, 3, 0, 3, List.of(), List.of());
 		ClassTrees.add(RogueExtras.FENCE, Set.of(THIEF), 1, 2, 8, 2, 1, List.of(), List.of());
+		// (defence disciplines) Snatch, as on Strength's Might: lifting a blade out of a hand is pickpocketing in a fight
+		ClassTrees.add(Disciplines.SNATCH_NODE, Set.of(THIEF), 1, 2, 8, 1, 2, List.of(), List.of());
 		ClassTrees.add(RogueExtras.STOREY, Set.of(THIEF), 1, 2, 12, 3, 2, List.of(), List.of());
 		ClassTrees.add(RogueExtras.CUTPURSE, Set.of(THIEF), 1, 3, 18, 5, 1, List.of(), List.of(RogueExtras.SHADOW_BLADE));
 		ClassTrees.add(RogueExtras.SHADOW_BLADE, Set.of(THIEF), 1, 3, 18, 5, 3, List.of(), List.of(RogueExtras.CUTPURSE));

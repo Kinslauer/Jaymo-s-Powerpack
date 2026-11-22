@@ -517,6 +517,62 @@ final class JobHalls {
 		return s.done();
 	}
 
+	// ---- the tanner's yard -------------------------------------------------------------------------------------------
+
+	/**
+	 * A tannery (7 x 7, {@link TownFitting} builds one in a town with no tanner's house): a shed open to the front for the
+	 * smell, a back wall, two cauldrons of water to soak the hides with bark (Jaymo's Kitchen's tanning; the cauldron is the
+	 * tanner's job site), a drying rack (Kitchen's where it is loaded, else a fence rail), a barrel of bark, a hide on the
+	 * floor. Its roof is the land's: flat in the dry, hipped in the wet and among the cherry trees, a gable elsewhere.
+	 */
+	static Blueprint tannery(Buildings.Kit k) {
+		Buildings.Sketch s = new Buildings.Sketch("tannery", 7, 7, 12);
+		Palette p = k.p;
+		Region region = Region.of(k);
+		for (int x = 0; x < 7; x++) {
+			for (int z = 0; z < 7; z++) {
+				s.set(x, 0, z, p.floor());
+				boolean corner = (x == 0 || x == 6) && (z == 0 || z == 6);
+				if (corner) {
+					for (int y = 1; y <= 3; y++) {
+						s.set(x, y, z, p.log());
+					}
+				} else if (z == 6) {
+					for (int y = 1; y <= 3; y++) {
+						s.set(x, y, z, Buildings.Sketch.weathered(p, x, y, z, k.salt));
+					}
+				} else if (x == 0 || x == 6) {
+					s.set(x, 1, z, p.fence());
+				}
+			}
+		}
+		switch (region) {
+			case DRY -> s.flat(0, 6, 0, 6, 4, p.wall(), p.slab());
+			case WET, BLOSSOM -> s.hip(0, 6, 0, 6, 4, k.roofStairs, k.roofSlab);
+			default -> s.gable(0, 6, 0, 6, 4, k.roofStairs, k.roofSlab, p.planks());
+		}
+		BlockState soak = Blocks.WATER_CAULDRON.defaultBlockState().setValue(BlockStateProperties.LEVEL_CAULDRON, 3);
+		s.set(2, 1, 5, soak);
+		s.set(4, 1, 5, soak);
+		s.set(1, 1, 5, Blocks.BARREL.defaultBlockState());
+		BlockState rack = byId("jaymoskitchen:drying_rack");
+		if (rack != null) {
+			s.set(5, 1, 3, rack);
+			s.set(5, 1, 1, rack);
+		} else {
+			s.set(5, 2, 3, p.fence());
+			s.set(5, 1, 3, p.fence());
+		}
+		BlockState hide = byId("jaymoskitchen:hide_rug");
+		s.set(2, 1, 2, hide != null ? hide : carpet("brown_carpet", k));
+		s.set(3, 3, 3, Buildings.Sketch.hanging(Blocks.LANTERN));
+		if (region != Region.DRY) {
+			// (under a pitched roof the lantern hangs from a beam; the flat roof holds it itself)
+			beam(s, k, 1, 5, 3);
+		}
+		return s.done();
+	}
+
 	/** Walls round {@code w} x {@code d} at y 1 to 3: logs at the corners, the stonework (weathered) or planks between; the floor inside. */
 	private static void shell(Buildings.Sketch s, Buildings.Kit k, int w, int d, boolean stone) {
 		Palette p = k.p;
@@ -581,6 +637,12 @@ final class JobHalls {
 	static BlockState trainingPost() {
 		Block post = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.parse("jaymospowers:training_post"));
 		return (post == Blocks.AIR ? Blocks.HAY_BLOCK : post).defaultBlockState();
+	}
+
+	/** Another mod's block by its full id, or null where it isn't loaded. */
+	static @Nullable BlockState byId(String id) {
+		Block b = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.parse(id));
+		return b == Blocks.AIR ? null : b.defaultBlockState();
 	}
 
 	private static @Nullable BlockState named(String name) {

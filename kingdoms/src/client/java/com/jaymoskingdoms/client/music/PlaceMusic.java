@@ -33,8 +33,8 @@ import org.jspecify.annotations.Nullable;
  * and the game's own music is left alone.</li>
  * <li>Every track is {@link SoundSource#MUSIC}, so the Music slider rules it. While one sounds, the game's own music is
  * stopped every {@link #DUCK_EVERY} ticks.</li>
- * <li>A great foe's theme ({@link FoeMusicClient}) and a scene's music ({@link SceneMusic}) win: this fades out under
- * either.</li>
+ * <li>A great foe's theme ({@link FoeMusicClient}), a fight's music ({@link SkirmishMusic}) and a scene's music
+ * ({@link SceneMusic}) win: this fades out under any of them, and rests after a fight's as after its own.</li>
  * <li>The festival's square plays its tracks louder close to the fire ({@link #FIRE_LOUDER}).</li>
  * </ul>
  */
@@ -71,6 +71,7 @@ public final class PlaceMusic {
 	private static long gameSongSince;
 	private static boolean gameSongFading;
 	private static String lastTrack = "";
+	private static boolean fightWas;
 
 	private PlaceMusic() {
 	}
@@ -110,6 +111,12 @@ public final class PlaceMusic {
 		}
 		age++;
 		capGameSong(minecraft);
+		// a fight's music counts as a song: the next track rests after it as after one of ours
+		boolean fight = SkirmishMusic.sounding();
+		if (fightWas && !fight) {
+			nextAt = Math.max(nextAt, age + rest(minecraft));
+		}
+		fightWas = fight;
 		if (!place.isEmpty() && age - lastTold > SILENCE) {
 			place = "";
 		}
@@ -122,8 +129,8 @@ public final class PlaceMusic {
 		}
 		if (current != null) {
 			// a track of another place that is still sounding as you leave it fades out; the place's own runs on
-			current.wanted = group(place).equals(current.group) && !FoeMusicClient.sounding() && SceneMusic.cover() <= 0.0F
-				&& age - current.born < LONGEST;
+			current.wanted = group(place).equals(current.group) && !FoeMusicClient.sounding() && !SkirmishMusic.sounding()
+				&& SceneMusic.cover() <= 0.0F && age - current.born < LONGEST;
 			current.fadeTicks = age - current.born < LONGEST ? FADE_OUT : LONGEST_FADE;
 			if (age % DUCK_EVERY == 0 && minecraft.getMusicManager() != null) {
 				minecraft.getMusicManager().stopPlaying();
@@ -131,7 +138,7 @@ public final class PlaceMusic {
 			return;
 		}
 		String[] tracks = TRACKS.get(place);
-		if (tracks == null || age < nextAt || FoeMusicClient.sounding() || SceneMusic.cover() > 0.0F) {
+		if (tracks == null || age < nextAt || FoeMusicClient.sounding() || SkirmishMusic.sounding() || SceneMusic.cover() > 0.0F) {
 			return;
 		}
 		if (minecraft.getMusicManager() != null && minecraft.getMusicManager().getCurrentMusicTranslationKey() != null) {

@@ -214,8 +214,11 @@ final class ZFighterBattle {
 			return damage;
 		}
 		Entity attacker = source.getEntity();
+		// (gaps 2) a Guardian near a hurt player takes his share of it
+		damage = ZFighterStyles.soak(victim, source, damage);
 		if (victim instanceof ServerPlayer player && Powers.has(player, ZFighterPower.INSTANCE)) {
 			damage *= 1.0F - ZFighterTraining.toughness(player);
+			damage = ZFighterStyles.taken(player, damage);
 			damage = ZFighterFusion.toughness(player, damage);
 			// (0.17.56) a Frost-born's ki-hardened body
 			damage = ZFighterFrostReserve.harden(player, source, damage);
@@ -255,7 +258,14 @@ final class ZFighterBattle {
 			damage *= ZFighterHoldFast.factor(player, grudge(player, victim));
 			// and the bracers' paid-out bar (ZFighterBracers)
 			damage *= ZFighterBracers.boost(player, player.level().getGameTime());
-			return damage;
+			// critical blows: a late TP buy, a chance of a much heavier blow
+			float critRate = ZFighterTraining.critChanceRate(player);
+			if (critRate > 0.0F && player.level().getRandom().nextFloat() < critRate) {
+				damage *= ZFighterTraining.critDamageMult(player);
+				player.sendSystemMessage(Component.translatable("message.jaymospowers.zfighter_crit").withStyle(ChatFormatting.GOLD));
+			}
+			// (gaps 2) his fighting style
+			return ZFighterStyles.dealt(player, victim, source, damage);
 		}
 		return damage;
 	}

@@ -1,0 +1,123 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"player_freerun_ledge_hang": {
+			"loop": false,
+			"animation_length": 2.0,
+			"bones": {
+				"right_elbow": {
+					"rotation": {
+						"0": {
+							"vector": [
+								-16,
+								0.0,
+								0.0
+							],
+							"lerp_mode": "linear"
+						},
+						"1": {
+							"vector": [
+								-24,
+								0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						},
+						"2": {
+							"vector": [
+								-16,
+								0.0,
+								0.0
+							],
+							"lerp_mode": "linear"
+						}
+					}
+				},
+				"left_elbow": {
+					"rotation": {
+						"0": {
+							"vector": [
+								-24,
+								0.0,
+								0.0
+							],
+							"lerp_mode": "linear"
+						},
+						"1": {
+							"vector": [
+								-16,
+								0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						},
+						"2": {
+							"vector": [
+								-24,
+								0.0,
+								0.0
+							],
+							"lerp_mode": "linear"
+						}
+					}
+				},
+				"right_knee": {
+					"rotation": {
+						"0": {
+							"vector": [
+								-10,
+								0.0,
+								0.0
+							],
+							"lerp_mode": "linear"
+						},
+						"1": {
+							"vector": [
+								-20,
+								0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						},
+						"2": {
+							"vector": [
+								-10,
+								0.0,
+								0.0
+							],
+							"lerp_mode": "linear"
+						}
+					}
+				},
+				"left_knee": {
+					"rotation": {
+						"0": {
+							"vector": [
+								-20,
+								0.0,
+								0.0
+							],
+							"lerp_mode": "linear"
+						},
+						"1": {
+							"vector": [
+								-9,
+								0.0,
+								0.0
+							],
+							"lerp_mode": "catmullrom"
+						},
+						"2": {
+							"vector": [
+								-20,
+								0.0,
+								0.0
+							],
+							"lerp_mode": "linear"
+						}
+					}
+				}
+			}
+		}
+	}
+}

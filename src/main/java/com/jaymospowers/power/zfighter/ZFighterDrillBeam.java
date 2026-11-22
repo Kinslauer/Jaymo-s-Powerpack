@@ -92,9 +92,8 @@ final class ZFighterDrillBeam {
 		int color = ZFighterArts.color(live);
 		float kiPower = ZFighterPower.kiPower(player, live);
 		float damage = Mth.lerp(charge, DAMAGE_MIN, DAMAGE_MAX) * kiPower;
-		boolean griefing = ZFighterArts.griefing(level);
 
-		// walk the line: soft blocks are bored through (and broken where griefing allows), a hard one ends it
+		// walk the line: soft blocks are bored through (and broken where the pack's rules allow), a hard one ends it
 		double length = RANGE;
 		List<BlockPos> breaks = new ArrayList<>();
 		for (double d = STEP; d <= RANGE; d += STEP) {
@@ -112,7 +111,7 @@ final class ZFighterDrillBeam {
 				length = d;
 				break;
 			}
-			if (griefing && breaks.size() < MAX_BREAKS && !breaks.contains(pos) && mayBreak(player, level, pos, state)) {
+			if (PackRules.mayBreak(level, pos) && breaks.size() < MAX_BREAKS && !breaks.contains(pos) && mayBreak(player, level, pos, state)) {
 				breaks.add(pos.immutable());
 			}
 		}
