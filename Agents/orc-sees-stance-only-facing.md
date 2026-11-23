@@ -3,7 +3,7 @@ status: in-review
 task: orc-sees-stance-only-facing
 branch: orc-sees-stance-only-facing
 with: 
-pr: 
+pr: 2053
 mods: kingdoms
 versions: 
 started: 2026-11-23
