@@ -101,8 +101,9 @@ Code: `Finishing` (entry point, polish, hone), `CastRules`, `Quenching`, `SmithT
   `weapon/claymore_blade`, `part/broad_blade`) and goes in your inventory (anywhere, the highest level counts). Each finished,
   non-Poor forging of its shape adds 1 xp; 5 xp Expert, 15 Perfect, 40 Master. Its level is your cap, never below Expert. A
   Masterwork needs a Master blueprint.
-- Drafting Table (paper x2 over planks x4): use it holding a blueprint with paper in your pack; you get a copy one level lower
-  (Well-level copies are as low as it goes and are worth no more than having none).
+- Drafting Table (paper x2 over planks x4): use it to open its screen (`DraftingTableMenu`). A blueprint and a sheet of paper
+  give a copy one level lower, and the blueprint stays (Well-level copies are as low as it goes and are worth no more than
+  having none). A forged piece and a sheet of paper show its pattern (`Patterns`); taking it destroys the piece.
 - Wandering traders sometimes sell a blueprint (16 emeralds): data in `villager_trade/tinkering/wandering_trader`, added to the
   trader's uncommon pool. The creative tab has a blueprint for each hammer-only shape. Armour blueprints name the piece
   (`armour/helmet`, any metal), and traders sell those too.

@@ -199,5 +199,6 @@
   "block.jaymospowers.undershale_vslab": "Undershale Vertical Slab",
   "block.jaymospowers.undershale_quarter": "Undershale Quarter Step",
   "block.jaymospowers.undershale_bricks_vslab": "Undershale Brick Vertical Slab",
-  "block.jaymospowers.undershale_bricks_quarter": "Undershale Brick Quarter Step"
+  "block.jaymospowers.undershale_bricks_quarter": "Undershale Brick Quarter Step",
+  "message.jaymospowers.trapdoor_again": "Use the trapdoor again (or hold use) to open or shut it."
 }
