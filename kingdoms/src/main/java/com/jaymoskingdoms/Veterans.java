@@ -154,6 +154,11 @@ public final class Veterans {
 		}
 	}
 
+	/** Whether {@code v} pitched their sword to {@code player} (and wasn't taken on). */
+	static boolean pitchedTo(Villager v, Player player) {
+		return v.getAttachedOrElse(SPURNED, List.of()).contains(player.getUUID().toString());
+	}
+
 	/** (Drifters) an old hand nobody hired sells their sword to a camp near, if there is one. True if they did. */
 	static boolean sell(ServerLevel level, Villager v) {
 		if (grade(v) == GREEN) {

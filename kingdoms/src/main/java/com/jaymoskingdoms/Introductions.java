@@ -333,6 +333,10 @@ public final class Introductions {
 	 * asking their name don't each draw a different cold word (and the bubbles showing it at once show it once).
 	 */
 	public static Component waryLine(Villager villager, ServerPlayer player) {
+		if (Veterans.pitchedTo(villager, player)) {
+			// (Andy, 2026-11-23: a sellsword who called out to you, then kept you off: "she should mention she couldnt tell before i got close")
+			return Component.translatable("dialogue.chat.jaymoskingdoms.name_wary.pitched");
+		}
 		long day = Deeds.today(player.level().getServer());
 		int variant = Math.floorMod(java.util.Objects.hash(villager.getUUID(), player.getUUID(), day), WARY_LINES);
 		return Dialects.trShared(villager, "dialogue.chat.jaymoskingdoms.name_wary." + variant);
