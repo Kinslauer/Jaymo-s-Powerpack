@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 11:11). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 15:09). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -13,7 +13,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## Stuck
 
-Nothing stuck.
+- [[Inbox/ai-texture-pipeline|ai-texture-pipeline]]: in review since 2026-11-21 (PR #research).
 
 ## On the board
 
@@ -23,12 +23,17 @@ Nothing stuck.
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2045 small hunters don't eat the living, full ones leave the downed be (Powers, Kingdoms, 2026-11-23)
+- [ ] #2044 Weapons in set places on the body: swords at the hips, four flintlocks, guns on the back (Powers, 2026-11-23)
+- [ ] #2043 A sellsword doesn't call out to you and then turn you away (Kingdoms, 2026-11-23)
+- [ ] #2042 Enemies telegraph their blows longer and walk in before swinging (Powers, Kingdoms, 2026-11-23)
 - [ ] #2041 The stolen crown: the copy gives itself away, and the realm on alert (Kingdoms, 2026-11-23)
 - [ ] #2040 Dodge: a tap dashes, a hold rolls; adrenaline runs on wind; no climb cooldown (Powers, Kitchen, 2026-11-23)
 - [ ] #2039 The stolen crown: a ruler carried off and a shapeshifter on the throne (Kingdoms, 2026-11-23)
 - [ ] #2038 Drafting Table screen; trapdoors take a second use (Powers, Kingdoms, 2026-11-23)
 - [ ] #2037 The flanged mace is a blunt weapon: no more stabbing (Powers, Kingdoms, 2026-11-23)
 - [ ] #2036 Talking with an illager looks and works like MCA's villager screen (Kingdoms, 2026-11-23)
+- [ ] #2035 Sneak-clicking a cooking block opens it instead of lifting it (Powers, 2026-11-23)
 - [ ] #2034 A queen is no longer found in chains under her own market stall (Kingdoms, 2026-11-23)
 - [ ] #2033 Humanoids see in a cone and hear at their sides; busy mobs notice less (Kingdoms, Kitchen, 2026-11-23)
 - [ ] #2032 A dead player's baubles and web shooters stay on their body (Powers, Kingdoms, Kitchen, 2026-11-23)
@@ -78,16 +83,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1974 a sword never bursts a body (Powers, Kingdoms, 2026-11-22)
 - [ ] #1973 VillagersPlus' miner's house rarer in villages (Powers, Kingdoms, 2026-11-22)
 - [ ] #1972 tips switch - turn tip cards off and on (Powers, 2026-11-22)
-- [ ] #1965 Z Fighter gaps 4: forms (foundation) (Powers, 2026-11-22)
-- [ ] #1964 Patch 10: each old-age temple calls its patron's champion (Kingdoms, 2026-11-22)
-- [ ] #1963 Z Fighter form textures (Powers, 2026-11-22)
-- [ ] #1962 Z Fighter form animations (Powers, 2026-11-22)
-- [ ] #1960 Z Fighter form models (Powers, 2026-11-22)
-- …and 388 older ones.
+- …and 393 older ones.
 
 ## Health
 
-7 problems in the notes: [[Health]].
+6 problems in the notes: [[Health]].
 
 ## Last week
 
