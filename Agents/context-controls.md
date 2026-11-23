@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: context keys by the crosshair (stealth kill, bodies, greeting, pickpocketing)
 branch: context-controls
 with: Claude (cloud)
