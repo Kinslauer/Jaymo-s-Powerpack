@@ -16582,3 +16582,9 @@ Andy picked "goblin extras" from the survival pick list (2026-11-22); the Goblin
 - **Its own people notice**: the real ruler's spouse, kin or court wizard tells you the ruler isn't themself. Now and then a guard near the copy, while a player watches, asks it something only the real one would know; the second time, its face slips.
 - **The realm on alert**, from the unmasking until the ruler is home: every settlement of the realm doubts every face (the town in doubt, held until then); its guards tell strangers near the seat the gates are shut; its people won't trade with strangers; no caravans leave it or its vassals; by day a few of its guards set out searching toward where the trail points (follow them). The ruler's blood keeps the throne meanwhile (already so). Sworn members and householders aren't strangers.
 - Not played.
+
+## 0.12.4 (2026-11-23): Fighters close in before swinging (#2042)
+
+- Andy: "enemies should telegraph attacks more and get closer before swinging." Better Combat fighters (soldiers, guards, armed zombies, illagers, skeletons, MCA villagers) start a swing only with you within 70% of their weapon's reach, down from 90%: no more swings started from nearly 3 blocks off. The swing itself (animation, glint, timing, damage) is unchanged, and it still lands anywhere in the full reach.
+- `MobCombat.START_REACH_SHARE`.
+- Built; not played.
