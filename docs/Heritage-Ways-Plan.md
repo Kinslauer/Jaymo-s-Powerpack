@@ -1,7 +1,7 @@
 # Heritage ways of living: plan (every blood, one at a time)
 
-Andy, 2026-11-23: "lets plan them all first before any builds". Planned so far: **Tideborn** (settled), **Frostborn**
-(waiting on answers). The rest follow, one section each, in the order Andy picks.
+Andy, 2026-11-23: "lets plan them all first before any builds". Planned so far: **Tideborn** (settled), **Frostborn** (Overworld
+hunting, and Hail with its city Vein; waiting on answers). The rest follow, one section each, in the order Andy picks.
 
 # Tideborn
 
@@ -210,142 +210,222 @@ The Tideborn plan is settled.
 
 # Frostborn
 
-Drafted 2026-11-23 with the `draft-addition` skill. The draft line from the table: "Ice fishing through holes, traps
-(their tech)."
+Drafted 2026-11-23 with the `draft-addition` skill; Andy's answers the same day are below and in `Decisions.md`. Two
+parts: how the Frostborn on the Overworld hunt (small), and **Hail**, their home planet, with its city **Vein**
+(large).
 
-## F1. Examine, place it, plan
+## Andy's answers (2026-11-23)
 
-**The problem.** The Frostborn are the people of the snowfields with technology nobody else has. Today you never see
-them living that way: there is no Frostborn haven at all (`Havens.draw` gives island and shore seats to the Tideborn,
-mountains and badlands to the Stoneborn, forests and taiga to the Sylvan, and the rest to Stoneborn, Warrior-born or
-Sylvan; no branch for snow). Frostborn only turn up mixed into other villages. So the first job is to give them a place,
-then a way of eating there that only they could have.
+- Overworld Frostborn "will stay as they are, only adopting their futiristic hunting techniques and ice fishing". So:
+  no Frostborn havens, no Frostborn building style, no muskox keeping, no ice cellar. They stay mixed in other
+  villages, as now.
+- "is it possible to add their planet? ... a new planet mega city using los perrito's map since that has been changed.
+  is it possible to make them inhabit the entire planet and live in a high tech enviornment?" Yes: see Part 2.
+- "The planet is Hail, the city's name is Vein."
+- Players reach Hail on a Frostborn ship boarded at their Overworld settlements, after earning their trust ("correct").
+- Non-Frostborn freeze outside heated places on Hail ("yes").
+- This lifts the 2026-11-11 decision "Hail is lore only for now".
 
-**Who it's for.** Players who go north into the harsh cold (*The middle lands and the harsh lands*: harder a step at a
-time away from the middle); Frostborn players; anyone after Frostborn tech.
+## Part 1: the Overworld Frostborn hunt
+
+### F1. Examine, place it, plan
+
+**The problem.** Frostborn live among other peoples' villages (no haven is ever drawn Frostborn: `Havens.draw` has no
+branch for snow). When one of them goes out for food (`Hunters.java`), they do it the same way as everyone. Andy wants
+them to hunt the way a tech people would, and to fish through the ice.
 
 **What we have to build with** (seen):
-- `Havens.java:110-150`: how a settlement's blood is drawn from its seat's biome; no cold branch.
-- `Heritage.java:834`: a Frostborn's hunger is saved in the cold (`THRIVE_HUNGER`) and worse in the heat
-  (`WILT_HUNGER`); `HeritageKits.java:242`: `FROSTBIND`, `GLACIAL` (hit harder on cold or frozen foes),
-  `FIRE_FRAIL`. `HeritagePaths.java:780`: a Frostborn gift of walking speed; no Frostborn paths yet (only Heartlander,
-  Stoneborn and Tideborn have them).
-- Powers' `fishing/IceFishing.java`: an auger bores a hole through ice (`DRILL_TICKS = 50`), the hole stays open
+- `Hunters.java`: the one place a settlement's folk feed it (only near a watching player).
+- Powers' `fishing/IceFishing.java`: an auger bores a hole through ice (`DRILL_TICKS = 50`), it stays open
   `OPEN_DAYS = 3` days, fish crowd to an open hole (`KEEN = 1.5`). Players only today.
-- `wild/Muskox` (built from `docs/Tundra-Plan.md`): grazes glow lichen, sheds wool by comfort, herds, recovers from a
-  loss; the tundra plan says "Frostborn villages in the cold lands may keep muskox". `FedPredators`: a fed predator
-  stops hunting animals for two days.
-- `FrostTech.java`: Frostborn wear scouters and made limbs; villagers who lose a limb are fitted at a smith.
-- Kitchen's freshness (`fresh/`, `butchery/Spoilage.java`): food goes stale; a cold cellar ages cheese
-  (`Freshness#cellar`).
-- `Hunters.java` (as for the Tideborn): the one place a settlement's folk feed it.
+- `FrostTech.java`: Frostborn wear scouters (about one in ten of those not raised here) and made limbs.
+- `Heritage.java:834`: a Frostborn's hunger is saved in the cold and worse in the heat; `HeritageKits.java:242`:
+  `FROSTBIND`, `GLACIAL`, `FIRE_FRAIL`. No Frostborn heritage paths yet.
+
+**Lore.** "They brought with them technology the Overworld has never seen ... They settled the snowfields and peaks."
+The placement paragraph is in F6.
+
+**Three rules.**
+- *Sympathy*: ice fishing as real Arctic fishers do: drill, fish, move on when it's frozen or fished out. A trap line
+  walked each morning, as real trappers do; Frostborn traps are made, not twigs.
+- *Feedback loops*: a hole gives less the more it's fished (Powers' per-spot stock) and freezes over in three days, so
+  they move along the ice. A trap line empties the ground round it, so the line moves. A hunter with a scouter finds
+  game farther off, so their ground empties faster and they range wider.
+- *Stewardship*: a player who leaves their traps alone may share their ice holes; robbing a trap is theft. Ignoring
+  them costs nothing.
+
+**Roadmap:**
+
+| # | Step | What it achieves | Check |
+|---|------|------------------|-------|
+| 1 | **Ice fishing**: a Frostborn villager who goes out for food, with frozen water in range, bores holes with an auger and fishes them (the same holes players use); catch to the storehouse; they move along the ice. | Their way of fishing, seen at work. | Village with Frostborn near frozen water: holes along the ice, fish in the storehouse. |
+| 2 | **Made traps**: Frostborn set spring traps of their own make (a metal jaw on a plate) out on the hunting ground; one walks the line each morning and brings back rabbit, fox or nothing; the line moves when the ground empties. A player who steps in one is caught and hurt, as by a bear trap. | Their futuristic hunting. | Traps placed, checked daily, catch falls off, line moves. |
+| 3 | **Scouter hunting**: a Frostborn hunter wearing a scouter spots game twice as far off and goes straight to it, no creeping. | Tech you can see in use. | Scouter hunter picks game from farther than others. |
+| 4 | **Stewardship**: robbing a Frostborn trap is theft; sharing a hole is welcome. | Third rule. | Take from a trap: crime. |
+
+### F2. The sceptic
+
+- **No Frostborn villages means the ship has nowhere obvious to land** (Andy: "boarded at their Overworld
+  settlements"). Frostborn live scattered in other peoples' villages. See question 2.
+- **Ice is seasonal and northern.** Most villages with Frostborn may have no frozen water near; they fall back to traps
+  and scouter hunting. That's fine.
+- **Traps hurting players** in a shared village could annoy friends: they sit out on the hunting ground, not in the
+  streets.
+
+### F3. Keep what works
+
+Keep `Hunters`' rules; `IceFishing`'s holes and refreezing (villagers use the same holes); `FrostTech` as it is.
+Change: a Frostborn branch in `Hunters`' pick (`IceHunts`, beside the Tideborn's `SeaHunts`); a new trap block and
+`TrapLines`; scouter range in the hunter's search.
+
+### F4. Decisions
+
+- Traps: made metal spring traps (Andy's "futuristic", taken as yes).
+- Frostborn heritage paths: still open, their own task (question 6).
+
+### F5. Self-check (Part 1)
+
+**Confirmed**: `Havens.draw` has no snow branch; `IceFishing.java` header and constants; `FrostTech.java` header;
+`HeritageKits.java:242`; `Heritage.java:834`. **Assumed**: Kingdoms can reach Powers' ice holes; a hunter's villager
+data says whether it wears a scouter. **Not checked**: no game run.
+
+### F6. Lore placement (new)
+
+**How the Frostborn hunt** (new) (Claude's placement, 2026-11-23; for Andy to approve). Frostborn living among other
+peoples hunt as their own people do. They bore the ice with augers of their own make and fish the hole until it
+freezes over, then bore another along the lake. They set made traps, metal jaws on plates, out on the hunting ground
+and walk the line every morning, and move it when the ground goes empty. One with a scouter sees game a long way off
+and walks straight to it. Robbing a Frostborn trap is theft.
+
+## Part 2: Hail and Vein
+
+### H1. Examine, place it, plan
+
+**The problem.** The Frostborn's home, Hail, is spoken of everywhere and seen nowhere. Andy wants it as a planet you
+can travel to, the whole of it theirs, with **Vein**, a high-tech city, built from the Los Perrito City map.
+
+**What we have to build with** (seen):
+- `LosPerrito.java` (Powers): `PERRITO`, Uospag's **Los Perrito City** 2.0.1, CC BY 4.0 (credit kept in
+  `message.jaymospowers.future.credit`). About 800 MB, so it is fetched from CurseForge the first time it's needed (or
+  taken from a zip dropped in the server or world folder) and unpacked into a dimension's folder; map art is copied in
+  above the world's map ids. Its region files run r.-7.-7 to r.10.6: the city spans about **9,200 x 7,200 blocks**
+  (x -3584 to 5631, z -3584 to 3583). New futures use `MOSSLORN` instead, so Los Perrito is free; a world whose
+  future was built from Los Perrito keeps it until `/future swap`.
+- `FutureRuins.java`: our pass that changes each chunk of the city the first time it loads (ruins, overgrowth, dead
+  lights, biome, loot). The same kind of pass can freeze Vein and dress it in Frostborn tech.
+- `Future.java`: how a dimension of ours is declared (`ResourceKey<Level> FUTURE`) and how a player is sent there and
+  back (`Return`).
+- Powers' `frost/Freezing.java` (the freezing effect) and vanilla freezing (`getTicksFrozen`).
+- `FrostTech.java` (scouters, made limbs), Powers' rigs and mechs, Galactic Patrolmen (`core/brawl/Brawl.java`).
 
 **Where it lives in the lore.**
-- The heritage list: "they came to the Overworld from far past our sun, and brought with them technology the
-  Overworld has never seen ... They settled the snowfields and peaks, and the heat wears them thin." Hail, their
-  frozen home world, "and they love it".
-- *Emberborn and Frostborn*: "Each flourishes where the other starves."
-- *The middle lands and the harsh lands*: the cold gets harder a step at a time.
-- The tundra plan's line that Frostborn villages may keep muskox; its "(new) The tundra" lore paragraph isn't in
-  `Lore.md` now (not found by search), so nothing in the canon says it yet.
-- The placement paragraph is in F6, marked `(new)`.
+- The heritage list: "**Hail** ... is their home world, constantly frozen and unwelcoming, and they love it. (It is a
+  place in the lore only, not a world you can travel to.)" That bracket goes (Andy, 2026-11-23).
+- *Travellers from Hail*: some "come down from Hail alone, on one of their people's ships". *The pods*: the Mad
+  Tinkerer worked "from the Frostborn's own void-ships". The ship fits the canon.
+- Crossing the void "was theirs first: the Warrior-born learned it from them".
+- *What happened to Los Perrito*: "Los Perrito was the largest city on Earth". Vein is built from the same map: see
+  H2.
+- The placement paragraph is in H6.
 
-**Three rules for living things.**
-- *Sympathy*: they live as real Arctic peoples do: fish through the ice, run a trap line for fox and hare and check it
-  each morning, keep muskox for their wool (qiviut, as Alaska's muskox farms do), and store food frozen.
-- *Feedback loops*: a fishing hole gives less the more it is fished (Powers' per-spot stock) and freezes over in three
-  days, so they move along the lake. A trap line empties the ground round it; they move the line. A herd that eats
-  the lichen bare sheds less wool and must be walked to new ground (the muskox already works this way). Frozen food
-  keeps, so a Frostborn village is never short in winter; in a warm spell their stores go stale.
-- *Stewardship*: a player who leaves the traps alone, brings them glow lichen for the herd, or helps move the herd gets
-  wool, traded tech and standing. Robbing a trap line is theft (like poaching); ignoring them costs nothing.
+**Three rules.** Hail is a people's world, but Vein lives by them too:
+- *Sympathy*: a city on a frozen world lives as one would: sealed and heated inside, food grown in lit greenhouse
+  towers and fished from under the ice.
+- *Feedback loops*: Vein's districts are warm only where their heat runs; a district whose heat fails freezes, and its
+  people move inward. Players who bring fuel or parts keep a district warm.
+- *Stewardship*: a visitor who helps (fuel, parts, trade) is trusted further into the city; one who doesn't is left in
+  the cold, never punished.
 
 **Obstacles.**
-- New havens change worldgen draws for new worlds only; old worlds keep their villages as they are.
-- Villagers using an auger and fishing through a hole: new behaviour, as `SeaHunts` is for the Tideborn.
-- Traps need a block (a snare or a made trap) that catches small game while nobody is near: keep it cheap (a catch is
-  rolled when the trap is checked, not ticked every tick).
+- **An Earth city on another planet**: Los Perrito has roads, cars, shop signs and billboards in English. Vein must not
+  read as Earth. The freeze-and-dress pass has to turn the Earth things (cars into frozen hulks or transports,
+  billboards into Frostborn panels).
+- **The same map twice**: worlds whose Chrono future is still Los Perrito would have the same streets in the future
+  and on Hail. See H2.
+- **Size and cost**: an 800 MB download per server (once), and a dimension that size. People only spawn and act near
+  players, as `Hunters` does.
+- **Powers or Kingdoms?** The map loader and dimensions live in Powers; the Frostborn, villagers, trade and standing
+  live in Kingdoms. See H4.
+- **Beyond the city**: the rest of the planet must be generated (frozen terrain, ice seas), since the map ends at its
+  edges.
 
 **Roadmap, by impact:**
 
 | # | Step | What it achieves | Check |
 |---|------|------------------|-------|
-| 1 | **Frostborn havens**: a haven whose seat is in a snowy or frozen biome is Frostborn, with its own building style (snow-banked stone and dark timber, metal fittings of their own make). | There are Frostborn places to find. | New world: a village in snowy plains is a Frostborn haven with Frostborn folk. |
-| 2 | **Ice fishing**: Frostborn hunters bore holes with an auger on frozen water near the haven and fish them; catch to the storehouse; holes freeze over, they move. | Their main food, seen at work. | Haven near frozen water: folk at holes, fish in the storehouse, holes along the ice. |
-| 3 | **Trap line**: Frostborn set made traps round the haven; one walks the line each morning and brings back fox, hare, or nothing. The ground round a line empties; the line moves. | The tech people's way of hunting. | Traps placed, checked daily, catch falls off over days, line moves. |
-| 4 | **Muskox herds**: a Frostborn haven keeps muskox near it, combs their wool, and drives them to fresh lichen. | Uses the muskox already built. | Muskox near a haven; wool in the storehouse; herd moves when lichen runs out. |
-| 5 | **Ice cellar**: a Frostborn storehouse keeps food fresh as a cold cellar does; in a warm spell it goes stale. | Why they're never short in winter. | Food in their storehouse stays fresh longer than elsewhere. |
-| 6 | **Helping them** (stewardship): lichen for the herd, help moving it, leaving traps alone: wool, traded tech, standing. Robbing a trap is theft. | Third rule. | Give lichen: standing; rob a trap: crime. |
+| 1 | **The Hail dimension**: frozen sky (a small, cold sun; aurora), snow and ice terrain round a space for the city. | A planet to go to. | Teleport in: snow under a dim sun. |
+| 2 | **Vein**: the Los Perrito map fetched and unpacked into Hail's middle (the `LosPerrito` loader), credit to Uospag. | The city exists. | Arrive in Vein's streets; credit shown. |
+| 3 | **Frozen and dressed**: the first-load pass covers Vein in snow and ice outside, keeps its lights on, turns cars, signs and billboards into Frostborn tech and frozen hulks, and seals the buildings warm inside. | Reads as a Frostborn city, not Earth. | Walk five streets: nothing reads as Earth. |
+| 4 | **The cold**: outside a heated place, a non-Frostborn freezes (Powers' `Freezing`, then vanilla frost damage); inside a building, near a heat source, or in warm Frostborn gear, they don't. Frostborn never freeze there. | The trip means something. | Non-Frostborn outside: freezing within a minute; inside: fine; Frostborn: fine. |
+| 5 | **The ship**: a Frostborn ship takes trusted travellers to Vein's port and back. | How you get there. | With trust: board, arrive; without: refused. |
+| 6 | **Vein's people**: Frostborn citizens, patrolmen with scouters, workers in rigs, spawned near players; tech everywhere. | A living city. | Busy streets near you, empty far from players. |
+| 7 | **Vein's trade**: shops selling what the Overworld only scavenges (scouters, made limbs, rig parts, warm gear). | A reason to go. | Buy a scouter in Vein. |
+| 8 | **The rest of Hail**: Frostborn outposts, mines and stations across the frozen planet. | "inhabit the entire planet". | Travel out from Vein: outposts with Frostborn. |
+| 9 | **Heat and districts** (the feedback loop above). | Vein reacts to what happens to it. | A district's heat fails: it freezes, people move. |
 
-## F2. The sceptic
+### H2. The sceptic
 
-- **Snow havens take seats from others.** Snowy taiga is "forest" today and goes to the Sylvan; snowy slopes are
-  "mountain" and go to the Stoneborn. Which wins? Recommend: snow first (the cold is the Frostborn's above all), then
-  the rest as now (FQ1).
-- **Frostborn are a tech people, not hunter-gatherers.** Augers and made traps fit that; a whole village living off
-  snares could feel primitive for them. Their traps should look made (metal, springs), not twigs.
-- **Travellers from Hail** (*Travellers from Hail*) are lone arrivals, not villagers; they shouldn't live in havens.
-- **The muskox step depends on muskox spawning near the havens.** If they're rare in that biome, a haven needs a
-  starting herd.
-- **A Frostborn haven near a Tideborn one** (frozen ocean shores are both "shore" and "snow"): which blood? Recommend
-  Tideborn on the shore stays as is (FQ1).
-- **Opportunity**: Frostborn smiths could be where villagers everywhere come for made limbs (`FrostTech` already sends
-  them to a smith); a Frostborn haven's smith could be the best.
+- **Same streets as the future.** On worlds still on Los Perrito for the Chrono future, a player could stand in the
+  same street a lifetime on (ruined, Earth) and on Hail (Vein). Options: Vein only on worlds whose future is Mosslorn
+  (all new worlds), an older world keeping Vein off until `/future swap`; or accept it and explain it in the lore.
+  Recommend the first (question 1).
+- **"Constantly frozen" vs a city of glass and lights.** The pass seals and heats the inside; outside stays deadly
+  cold. That keeps both.
+- **The map isn't ours.** CC BY 4.0 lets us change and share it with credit; show the credit on arrival in Vein as the
+  future does.
+- **Too big for one PR.** Steps 1 to 4 are a track (the place), 5 to 7 another (getting there and the people), 8 and 9
+  later.
+- **Danger on Hail** besides the cold is unasked (question 4).
 
-## F3. Keep what works
+### H3. Keep what works
 
-Keep: `Havens`' shore rule and island rule for the Tideborn; `IceFishing`'s holes, keen fish and refreezing (villagers
-use the same holes, so a player sees and can share them); the muskox's grazing, herd pull and recovery; `FedPredators`;
-`FrostTech` as it is; Kitchen's freshness rules.
+Keep `LosPerrito`'s fetch-and-unpack, credit and map-id offset; `FutureRuins`' way of changing a chunk once on first
+load (a new pass of its own for Vein, never mixed into the future's); `Future`'s way of sending a player somewhere and
+back; `Freezing`; `FrostTech`'s looks.
 
-Change, by impact:
-1. `Havens.draw`: before the mountain/forest checks, a snowy or frozen biome (`BiomeTags` or the biome's temperature)
-   is Frostborn. Shore still Tideborn first.
-2. `HavenBuildings`: a Frostborn style.
-3. New `IceHunts` beside `Hunters` (as `SeaHunts`), using Powers' `IceFishing` holes through the compat path.
-4. New trap block and `TrapLines` for the morning walk.
-5. Muskox keeping: a haven claims muskox within range as its herd; a herder drives them toward lichen.
-6. Kitchen compat: a Frostborn storehouse counts as a cold cellar.
+### H4. Decisions
 
-## F4. Decisions
+**A. Which mod holds Hail** (question 5). Factors: where the loader is, where the people are, each mod must run without
+the other. (a) **Hail's place (dimension, map, the cold) in Powers, beside the future; its people, trade and the
+ship's trust in Kingdoms, which fills Vein when it's loaded** (recommended); (b) all in Kingdoms, copying the loader.
 
-**A. Their traps (FQ2).** Factors: fits a tech people, readable to players, cost. (a) **made spring traps of their
-own design** (a metal jaw on a plate; catches small game, hurts a player who steps in, as a bear trap does)
-(recommended); (b) plain snares like anyone's.
+**B. The same-map problem** (question 1). (a) **Vein only where the future is Mosslorn** (recommended); (b) both,
+explained in lore.
 
-**B. Frostborn paths (FQ3).** They have no heritage paths yet; Tideborn, Stoneborn and Heartlander do. Planning their
-way of living is a good moment to draft them, or leave paths to their own task. Recommend: leave them for their own
-task, so this stays about living.
+### H5. Self-check (Part 2)
 
-## F5. Self-check
+**Confirmed**: `LosPerrito.java` lines 41-51 (the `CityMap` record, `PERRITO`'s bounds, download, credit) and its
+header (fetch, unpack, map art, `/future swap`); `Future.java:67` dimension key; `FutureRuins` and `Freezing` in the
+codemap; the lore lines quoted; Decisions 2026-11-11 and 2026-11-15 on Hail and Mosslorn.
 
-**Confirmed** (seen): `Havens.draw` has no snow branch; `Heritage.java:834` hunger in cold and heat;
-`HeritageKits.java:242`; `HeritagePaths.java:780` (no Frostborn paths found); `IceFishing.java`'s header and constants;
-`Muskox` and `FedPredators` in the tundra plan and codemap; `FrostTech.java`'s header; Kitchen's `Spoilage`,
-`FreshTooltip`, `CheeseWheelBlock` (cold cellar) in the codemap; the Frostborn lore lines quoted.
+**Assumed**: that the loader can unpack into a second dimension with small changes; that the city can be offset into
+Hail's middle; that most of the map's buildings can be entered (so "inside" works for the cold).
 
-**Assumed or inferred**: that Kingdoms can reach Powers' `IceFishing` holes; that muskox spawn in the biomes the havens
-would sit in; that Kitchen's cold cellar can be made to count a storehouse; that Alaska's muskox farms comb qiviut
-(real-world, from memory).
+**Not checked**: no game run; how Earth-like the map's streets look up close; the map's height range; how a dimension
+this size performs.
 
-**Not checked**: no game run; the muskox's spawn biomes (`jaymoskingdoms:muskox_home`); how many snowy villages a new
-world gets; the tundra plan's lore paragraph (only that it isn't in `Lore.md` now).
+### H6. Lore placement (new)
 
-## F6. Lore placement (new)
-
-**How the Frostborn live** (new) (Claude's placement for Andy's heritage ways, 2026-11-23; for Andy to approve). The
-Frostborn keep the cold places because they love them, as they loved Hail. Their villages stand on the snowfields and
-the frozen shores away from the sea's edge, stone banked with snow and roofed in dark timber, with fittings of their
-own make. They eat from under the ice: a hunter bores a hole with one of their augers, fishes it till it freezes over,
-and bores another along the lake. They run trap lines of their own make, metal jaws on plates, walked every morning,
-and move the line when the ground goes empty. They keep muskox for the wool and walk the herd to fresh lichen. What
-they catch they store frozen, so a Frostborn village is the one place never short in winter, and the one place a warm
-spell frightens. Robbing a Frostborn trap is theft; a traveller who brings lichen for their herd is welcome.
+**Hail and Vein** (new) (Claude's placement, 2026-11-23; Andy: "The planet is Hail, the city's name is Vein"; for Andy
+to approve; it replaces the bracket in the heritage list that says Hail is lore only). Hail lies far past our sun,
+under a small cold one of its own, frozen from pole to pole, and the Frostborn hold all of it. Their capital is
+**Vein**, a city of towers and lit streets under snow that never melts, sealed and warm inside, killing cold outside.
+Their ships cross the void between Hail and the Overworld, as they did before anyone else knew how. They carry only
+those the Frostborn trust; a traveller who goes must earn it first among the Frostborn living here. On Hail anyone not
+of the blood freezes in the open, and only a warm room, warm gear or a Frostborn's help keeps them alive. In Vein the
+scouters, made limbs and rigs the Overworld treasures are everyday things, sold in shops.
 
 ## Frostborn questions for Andy
 
-1. **Which blood wins a snowy seat**: Frostborn over Sylvan (snowy taiga) and Stoneborn (snowy slopes), with Tideborn
-   keeping frozen shores? *Recommend: yes.*
-2. **Their traps**: made metal spring traps (recommended), or plain snares?
-3. **Frostborn paths**: draft them now with this, or in their own task? *Recommend: their own task.*
-4. **Next blood to plan** after the Frostborn? *Recommend: Emberborn, their opposite (fire and the badlands).*
+1. **The same map twice**: build Vein only on worlds whose Chrono future is Mosslorn (all new ones), or allow both and
+   explain it in the lore? *Recommend: Mosslorn worlds only.*
+2. **Where the ship lands**: there are no Frostborn villages to board at. A landing pad by any village where Frostborn
+   live, or a ship that comes now and then to the snowfields? *Recommend: a pad by any village with Frostborn folk,
+   the ship calling every few days.*
+3. **How trust is earned**: trade with Frostborn, help them, or a quest from a Frostborn elder? *Recommend: standing
+   with the Frostborn you live among, from trade and help.*
+4. **Danger on Hail** besides the cold: none, raiders, or creatures of the ice? *Recommend: Vein safe, the wilds
+   beyond with creatures of the ice.*
+5. **Which mod holds Hail**: split as H4 A recommends?
+6. **Frostborn heritage paths**: their own task later? *Recommend: yes.*
+7. **Next blood to plan**? *Recommend: Emberborn.*
