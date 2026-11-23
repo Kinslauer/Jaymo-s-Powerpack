@@ -14,7 +14,7 @@ import net.minecraft.world.item.ItemStack;
  * <p>
  * A player's body carries everything they had ({@link CorpseEntity#inventory}, laid out as their own inventory): its
  * armour and off hand in the gear slots, the rest in {@link #PLAYER_POCKETS} pockets (main inventory, then the hotbar),
- * then what other mods left on it (Jaymo's Kingdoms' harness: {@link CorpseEntity#EXTRA_SLOTS}).
+ * then what other mods left on it (harness, baubles and the like: {@link CorpseEntity#EXTRA_SLOTS}).
  */
 final class CorpseLoot implements Container {
 	static final int GEAR = 7, POCKETS = 12, PLAYER_POCKETS = 36, SIZE = GEAR + PLAYER_POCKETS + CorpseEntity.EXTRA_SLOTS;

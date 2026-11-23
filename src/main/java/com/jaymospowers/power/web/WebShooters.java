@@ -163,9 +163,10 @@ public final class WebShooters {
 		ServerPlayNetworking.registerGlobalReceiver(TakeOff.TYPE, (payload, context) -> takeOffIntoHand(context.player()));
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer player && !player.level().getGameRules().get(GameRules.KEEP_INVENTORY)) {
-				// dropped like armour (kept with keepInventory: the attachment is copied over)
+				// left on their body (Jaymo's Kitchen, shed with the arms), else dropped like armour (kept with keepInventory:
+				// the attachment is copied over)
 				ItemStack stack = takeOff(player);
-				if (stack != null) {
+				if (stack != null && !KitchenCompat.keepOnBody(player, stack, 2 | 4)) {
 					Containers.dropItemStack(player.level(), player.getX(), player.getY(), player.getZ(), stack);
 				}
 			}

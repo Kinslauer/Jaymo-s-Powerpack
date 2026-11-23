@@ -178,9 +178,9 @@ public final class HiddenBlade {
 					// (kept, the attachment copied over, but sheathed)
 					player.setAttached(WORN, bits(player) & 3);
 				} else {
-					// dropped like armour
+					// left on their body (Jaymo's Kitchen, shed with the arm), else dropped like armour
 					for (int hand = MAIN; hand <= OFF; hand++) {
-						if (worn(player, hand)) {
+						if (worn(player, hand) && !KitchenCompat.keepOnBody(player, new ItemStack(ITEM), 2 | 4)) {
 							Containers.dropItemStack(player.level(), player.getX(), player.getY(), player.getZ(), new ItemStack(ITEM));
 						}
 					}

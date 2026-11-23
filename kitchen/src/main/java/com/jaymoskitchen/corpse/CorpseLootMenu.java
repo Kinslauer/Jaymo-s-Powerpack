@@ -18,14 +18,15 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * Andy: "when players are killed, they should keep the loot on their corpse like npcs do, now accessed with a right
  * click". A player's body has all they carried: the screen is wider, their armour and off hand where a mob's are, and
- * their inventory in a 9 by 4 grid beside the body (the hotbar its bottom row), then what else it was left wearing (Jaymo's
- * Kingdoms' harness) in a block like a mob's pockets, your own inventory centred below.
+ * their inventory in a 9 by 4 grid beside the body (the hotbar its bottom row), then what else it was left wearing (harness,
+ * baubles, web shooters, hidden blades) in a block beside that, your own inventory centred below.
  */
 public class CorpseLootMenu extends AbstractContainerMenu {
 	/** Where the slots sit (as the screen draws them). */
 	public static final int ARMOUR_X = 8, HANDS_X = 98, POCKETS_X = 118, TOP = 18, INVENTORY_Y = 106;
 	/** A player's body: the screen's width, and where its inventory grid and your own inventory start. */
-	public static final int PLAYER_POCKETS_X = 120, PLAYER_EXTRAS_X = PLAYER_POCKETS_X + 162 + 4, PLAYER_WIDTH = PLAYER_EXTRAS_X + 54 + 8,
+	public static final int PLAYER_POCKETS_X = 120, PLAYER_EXTRAS_X = PLAYER_POCKETS_X + 162 + 4, PLAYER_EXTRAS_COLUMNS = 6,
+		PLAYER_WIDTH = PLAYER_EXTRAS_X + PLAYER_EXTRAS_COLUMNS * 18 + 8,
 		PLAYER_INVENTORY_X = (PLAYER_WIDTH - 162) / 2;
 	/** The body's well, between the armour and the hands. */
 	public static final int BODY_X = 26, BODY_Y = 17, BODY_W = 70, BODY_H = 72;
@@ -76,8 +77,8 @@ public class CorpseLootMenu extends AbstractContainerMenu {
 			}
 		}
 		for (int i = 0; i < com.jaymoskitchen.corpse.CorpseEntity.EXTRA_SLOTS; i++) {
-			addSlot(new Taken(container, CorpseLoot.GEAR + CorpseLoot.PLAYER_POCKETS + i, PLAYER_EXTRAS_X + (i % POCKET_COLUMNS) * ROW,
-				TOP + (i / POCKET_COLUMNS) * ROW, null, false, player));
+			addSlot(new Taken(container, CorpseLoot.GEAR + CorpseLoot.PLAYER_POCKETS + i, PLAYER_EXTRAS_X + (i % PLAYER_EXTRAS_COLUMNS) * ROW,
+				TOP + (i / PLAYER_EXTRAS_COLUMNS) * ROW, null, false, player));
 		}
 		addStandardInventorySlots(inventory, player ? PLAYER_INVENTORY_X : 8, INVENTORY_Y);
 	}

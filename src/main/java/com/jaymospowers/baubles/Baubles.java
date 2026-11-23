@@ -451,12 +451,24 @@ public final class Baubles {
 	private static void dropAll(ServerPlayer player) {
 		List<ItemStack> worn = worn(player);
 		player.removeAttached(WORN);
-		for (ItemStack stack : worn) {
-			if (!stack.isEmpty()) {
+		for (int i = 0; i < worn.size(); i++) {
+			ItemStack stack = worn.get(i);
+			// left on their body with the rest of what they carried (Jaymo's Kitchen), shed with the part it's worn on
+			if (!stack.isEmpty() && !com.jaymospowers.power.web.KitchenCompat.keepOnBody(player, stack, i < SIZE ? parts(SLOTS[i]) : 0)) {
 				Containers.dropItemStack(player.level(), player.getX(), player.getY(), player.getZ(), stack);
 			}
 		}
 		refresh(player);
+	}
+
+	/** The body parts a bauble of {@code kind} is worn on, as Jaymo's Kitchen counts them (head 1, arms 2 and 4, legs 8 and 16; 0 the torso). */
+	private static int parts(Kind kind) {
+		return switch (kind) {
+			case RING, WRIST -> 2 | 4;
+			case HEAD -> 1;
+			case FEET -> 8 | 16;
+			default -> 0;
+		};
 	}
 
 	/** Opens this player's bauble slots (the inventory tab or the Baubles key). */

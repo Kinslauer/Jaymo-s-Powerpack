@@ -165,6 +165,37 @@ public final class KitchenCompat {
 		return LOADED ? Kitchen.ownerName(entity) : "";
 	}
 
+	private static java.lang.reflect.@Nullable Method keepWith;
+	private static boolean keepWithLooked;
+
+	/**
+	 * A player who just died keeps {@code stack} on their body with the rest of what they carried (Kitchen's
+	 * {@code PlayerCorpses.keepWith}, by name), worn on {@code parts} (head 1, arms 2 and 4, legs 8 and 16; 0 the torso)
+	 * and shed with any of them the body lacks. False (drop it yourself) without Kitchen or a body to hold it.
+	 */
+	public static boolean keepOnBody(net.minecraft.server.level.ServerPlayer player, net.minecraft.world.item.ItemStack stack, int parts) {
+		if (!LOADED) {
+			return false;
+		}
+		if (!keepWithLooked) {
+			keepWithLooked = true;
+			try {
+				keepWith = Class.forName("com.jaymoskitchen.corpse.PlayerCorpses").getMethod("keepWith",
+					net.minecraft.server.level.ServerPlayer.class, net.minecraft.world.item.ItemStack.class, int.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				keepWith = null;
+			}
+		}
+		if (keepWith == null) {
+			return false;
+		}
+		try {
+			return Boolean.TRUE.equals(keepWith.invoke(null, player, stack, parts));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
 	/** (0.15.33) Players leave a body when they die (only with Jaymo's Kitchen): the symbiote hunts them for it. */
 	static boolean playersLeaveCorpses() {
 		return LOADED;

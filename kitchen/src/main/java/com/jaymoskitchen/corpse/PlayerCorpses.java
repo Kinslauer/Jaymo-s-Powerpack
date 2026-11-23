@@ -76,10 +76,10 @@ public final class PlayerCorpses {
 	}
 
 	/**
-	 * For other mods (Jaymo's Kingdoms' harness, by name): a player who has just died and leaves a body keeps
-	 * {@code stack} on it with the rest of what they carried, worn on {@code parts} ({@code CorpseEntity.PART_} bits; 0 for
-	 * the torso), so it's torn off with any of those parts the body lacks. False (keep it yourself) if no body will hold
-	 * it: kept inventory, no body left, or no room.
+	 * For other mods (by name: Kingdoms' harness and hidden blades, Powers' baubles and web shooters): a player who has
+	 * just died and leaves a body keeps {@code stack} on it with the rest of what they carried, worn on {@code parts}
+	 * ({@code CorpseEntity.PART_} bits; 0 for the torso), so it's torn off with any of those parts the body lacks. False
+	 * (keep it yourself) if no body will hold it: kept inventory, no body left, or no room.
 	 */
 	public static boolean keepWith(ServerPlayer player, ItemStack stack, int parts) {
 		Holder holder = (Holder) player;
@@ -103,6 +103,8 @@ public final class PlayerCorpses {
 		corpse.setSlim(slim(player));
 		// (0.5.37) the look they died in (a Bio-built's form), kept for good
 		corpse.keepLookTags(player);
+		// what was worn on a head or limb they died without (a blast takes every one) comes off (CorpseEntity#tearOff); the
+		// rest stays on the torso
 		corpse.setMissing(Corpses.missingParts(player));
 		holder.jaymoskitchen$setHotbar(List.of(), 0);
 		corpse.markJustDied();
@@ -110,8 +112,6 @@ public final class PlayerCorpses {
 		// (0.5.1) a player who died limp leaves exactly that body; otherwise they crumple like any mob
 		RagdollBody limp = LivingRagdolls.lastBody(player);
 		corpse.startRagdoll(limp != null ? limp : Corpses.deathBody(player));
-		// what was worn on a head or limb they died without (a blast takes every one) comes off; the rest stays on the torso
-		corpse.tearOff(level);
 		Corpses.pinFrom(player, corpse);
 		Corpses.tellBody(player, corpse);
 		level.addFreshEntity(corpse);

@@ -307,13 +307,14 @@ public class CorpseEntity extends Entity {
 	/**
 	 * A player's corpse: everything they carried when they died, slot for slot as their inventory had it (the hotbar,
 	 * the main inventory, then feet, legs, chest, head and off hand: {@link #INVENTORY_SLOTS}), then what other mods
-	 * handed over to stay on the body ({@link #EXTRA_SLOTS}: Jaymo's Kingdoms' harness, see {@link PlayerCorpses#keepWith}),
+	 * handed over to stay on the body ({@link #EXTRA_SLOTS}: Kingdoms' harness and hidden blades, Powers' baubles and web
+	 * shooters, see {@link PlayerCorpses#keepWith}),
 	 * and the hotbar slot they had selected. Still called the hotbar, as it once was only that (Jaymo's Powers reads it by
 	 * that name).
 	 */
 	private final List<ItemStack> hotbar = new ArrayList<>(java.util.Collections.nCopies(PLAYER_SLOTS, ItemStack.EMPTY));
 	/** A player's inventory slots that stay on their body: the 36 of the inventory, the four of armour and the off hand. */
-	public static final int INVENTORY_SLOTS = 41, EXTRA_SLOTS = 12, PLAYER_SLOTS = INVENTORY_SLOTS + EXTRA_SLOTS;
+	public static final int INVENTORY_SLOTS = 41, EXTRA_SLOTS = 24, PLAYER_SLOTS = INVENTORY_SLOTS + EXTRA_SLOTS;
 	/** For each handed-over piece ({@link #EXTRA_SLOTS}), the parts it's worn on ({@code PART_} bits; 0: the torso). */
 	private final int[] extraParts = new int[EXTRA_SLOTS];
 	/** Client: the hanging limbs' swing (see {@link #swingLimbs}). */
@@ -960,6 +961,10 @@ public class CorpseEntity extends Entity {
 
 	public void setMissing(int missing) {
 		this.entityData.set(MISSING, missing);
+		if (level() instanceof ServerLevel level) {
+			// what a player's body wore on a part it's lost comes off with it, however the part went
+			tearOff(level);
+		}
 	}
 
 	@Override
@@ -4150,7 +4155,6 @@ public class CorpseEntity extends Entity {
 		Vec3 at = partPosition(part);
 		setMissing(missing() | part);
 		dropHeld(level, part, at);
-		tearOff(level);
 		java.util.function.BiConsumer<Entity, Object[]> hook = onPart;
 		if (hook != null) {
 			try {
@@ -4174,7 +4178,8 @@ public class CorpseEntity extends Entity {
 	 * Andy: "as long as the torso is there, the loot should be as well, the leggings and arm harness armor should be
 	 * ripped off as limbs go". What a player's body wore on a part it no longer has comes off and falls there: the helmet
 	 * with the head, the boots with a leg and the leggings with both (as Jaymo's Powers takes them off the living), and
-	 * each handed-over piece (Kingdoms' arm, leg and head harness) with the part it's worn on. The rest stays on the torso.
+	 * each handed-over piece (Kingdoms' arm, leg and head harness, a ring or bracelet...) with the part it's worn on. The
+	 * rest stays on the torso.
 	 */
 	void tearOff(ServerLevel level) {
 		if (!isPlayerCorpse()) {
