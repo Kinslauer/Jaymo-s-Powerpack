@@ -295,6 +295,14 @@ public final class FinisherPose {
 		zfighter();
 		powers();
 		drops();
+		// (2026-11-23) Cut Down, a blade's on a small body: drawn back to the right, one quick slice down and across it, and up
+		KEYS.put(Finishers.Kind.SLICE, new Key[] {
+			rest(0, 0),
+			k(4, 0.15F, 10, -25, -2.4F, -0.3F, 0.6F, -0.6F, 0.0F, -0.2F, -0.2F, 0.2F, 0.45F, 20),
+			k(8, 0.3F, 35, 25, -0.6F, 0.7F, -0.2F, -0.3F, 0.0F, -0.3F, -0.5F, 0.4F, 0.6F, 90),
+			k(11, 0.28F, 33, 30, -0.4F, 0.9F, -0.3F, -0.3F, 0.0F, -0.3F, -0.5F, 0.4F, 0.6F, 80),
+			k(15, 0.1F, 12, 5, -0.5F, 0.2F, 0.05F, -0.3F, 0.0F, -0.1F, -0.2F, 0.2F, 0.45F, 30),
+			rest(18, 0)});
 	}
 
 	/**
