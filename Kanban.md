@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 23:57). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 04:20). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -41,7 +41,6 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · 🔥 Prometheus · #research · in-review
-- [ ] [[Inbox/realm-armor-matching|realm-armor-matching]] · realm-armor-matching · #2022 · in-review
 
 
 ## Needs Andy
@@ -56,6 +55,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/realm-armor-matching|realm-armor-matching]]
 - [x] [[Inbox/Done/scrying-orb|scrying-orb]]
 - [x] [[Inbox/Done/mutant-zombie-reskin|mutant-zombie-reskin]]
 - [x] [[Inbox/Done/medieval-patch10-temple-patrons|medieval-patch10-temple-patrons]]
@@ -63,7 +63,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/enemy-damage-balance|enemy-damage-balance]]
 - [x] [[Inbox/Done/devils-hole-pupfish-writeup|devils-hole-pupfish-writeup]]
 - [x] [[Inbox/Done/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]]
-- [x] [[Inbox/Done/zfighter-gaps-8-raids|zfighter-gaps-8-raids]]
 
 
 %% kanban:settings
