@@ -206,6 +206,8 @@ public final class Finishers {
 	static final String QUICK_WORK = "quick_work", BIGGER_GAME = "bigger_game", SILENT_SNAP = "silent_snap";
 	/** Put on the player for each stealth kill, for Kingdoms (its Stealth experience and Into the Dark); taken off as it's read. */
 	public static final String STEALTH_KILL_TAG = "jaymospowers_stealth_kill";
+	/** A small body, finished with a blade, is sliced ({@link Kind#SLICE}): at most this tall and this wide standing (blocks, at its scale). */
+	static final float SMALL_HEIGHT = 1.2F, SMALL_WIDTH = 1.0F;
 
 	/** How a blow lands: what it sounds and looks like. */
 	public enum Strike { CUT, STAB, CRUSH, PIERCE, SHOT, BOLT, BLAST, SNAP, KI, POWER,
@@ -362,7 +364,13 @@ public final class Finishers {
 		 * The Hidden Blade's (Kingdoms): arms flung wide on landing astride their back, the off hand pinning the shoulders,
 		 * the blade plunged into the neck, a beat held over them, and up again.
 		 */
-		D_HIDDEN_BLADE(40, new int[] {4, 18}, Strike.STAB);
+		D_HIDDEN_BLADE(40, new int[] {4, 18}, Strike.STAB),
+		/**
+		 * (Andy, 2026-11-23, "small mob chop": "you wont need to stab through something like that when a small slice ... shows")
+		 * Cut Down, a blade's on a small body ({@link Finishers#small}: a digger, a fox, a chicken): one quick slice across it,
+		 * no stabbing through and wrenching free.
+		 */
+		SLICE(18, new int[] {8}, Strike.CUT);
 
 		/** (0.15.148) The tick the whip's crack lands round the neck. */
 		public static final int WHIP_CRACK = 8;
@@ -401,7 +409,7 @@ public final class Finishers {
 
 		/** One of the drop attacks ({@link DropAttacks}): played astride one just landed on. */
 		public boolean drop() {
-			return this.ordinal() >= D_BLADE.ordinal();
+			return this.name().startsWith("D_");
 		}
 
 		public static Kind of(int ordinal) {
@@ -1207,9 +1215,31 @@ public final class Finishers {
 		}
 		// (0.15.146) without Executioner, everyone's basic move; (0.15.114) with it, a bow with nothing to shoot slams
 		Kind kind = move(player, stack);
+		if (kind != null && small(body) && sliced(kind)) {
+			// (2026-11-23) a small body isn't stabbed through: one quick slice
+			kind = Kind.SLICE;
+		}
 		if (kind != null) {
 			begin(level, player, body, kind);
 		}
+	}
+
+	/** Whether {@code body} is small: at most {@link #SMALL_HEIGHT} tall and {@link #SMALL_WIDTH} wide standing, at its scale (never a player). */
+	static boolean small(LivingEntity body) {
+		if (body instanceof Player) {
+			return false;
+		}
+		net.minecraft.world.entity.EntityDimensions size = body.getType().getDimensions();
+		float scale = body.getScale();
+		return size.height() * scale <= SMALL_HEIGHT && size.width() * scale <= SMALL_WIDTH;
+	}
+
+	/** Whether {@code kind} is a blade's stab or cut, which a small body takes as a slice instead. */
+	static boolean sliced(Kind kind) {
+		return switch (kind) {
+			case IMPALE, SWORD, DAGGER, GREATSWORD -> true;
+			default -> false;
+		};
 	}
 
 	// ---- (0.18.97) question or kill ---------------------------------------------------------------------------------------
