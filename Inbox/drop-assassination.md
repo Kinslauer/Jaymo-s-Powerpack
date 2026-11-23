@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: any
 from: coordinator
 asked: 2026-11-23
 thread: 
-claimed_by: 
+claimed_by: drop-assassination
 pr: 
 suggested_owns:
   - src/main/java/com/jaymospowers/core/finisher/Finishers.java (new D_* kinds + the landing start)
