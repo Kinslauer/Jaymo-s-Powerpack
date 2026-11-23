@@ -31,10 +31,10 @@
 					}
 				},
 				"requirements": {
-					"condition": "minecraft:entity_properties",
+					"type": "minecraft:entity_properties",
 					"entity": "this",
 					"predicate": {
-						"type": "#jaymoskingdoms:demon"
+						"minecraft:entity_type": "#jaymoskingdoms:demon"
 					}
 				}
 			}
