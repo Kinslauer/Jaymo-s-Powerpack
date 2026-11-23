@@ -16595,3 +16595,15 @@ Andy picked "goblin extras" from the survival pick list (2026-11-22); the Goblin
 - A drifter or old hand no longer pitches their sword to a player they'd keep at arm's length (`Introductions.wary`: minds your blood, their people think ill of you, or they remember you coldly). That also keeps you off their list of those who turned them down, whom a sold sword later raids. `Drifters.look`.
 - One who did pitch to you and turned wary since owns up when they keep their name: "Couldn't tell who you were from over there. Now I can..." (`Veterans.pitchedTo`, `Introductions.waryLine`).
 - Not played.
+
+## 0.12.6 (2026-11-23): bloodshed - guards defend anyone, witnesses flee, bands rout, fed predators leave people be (#2045)
+
+- **Whatever hurts a person is a foe** (Andy, 2026-11-23, finished by an ocelot that then walked past a guard): any mob that strikes a player, a villager (MCA's too) or one of the realms' folk, an animal as much as a monster, is a foe to the guards for 30 seconds (MCA guards through `McaGuardFoesMixin`, the folk's guards through their monster target) and a fright to everyone else (`Frights`). Pets, golems and people fighting people (spars, arrests, wars) don't count.
+- **Witnesses**: villagers within 16 blocks who see a person struck or killed react at once. A guard who can't see the attacker walks to the spot; everyone else runs from it, and on a kill one cries out.
+- **The scene**: a person killed by a beast or a monster leaves the spot frightening for two minutes. Villagers who come on it later run from it; guards go to look, and a killer still within 24 blocks of its kill is their foe again.
+- **Big beasts are feared on sight**: bears (every mod's), the big cats, crocodiles and alligators, komodo dragons, hyenas, feral wolves, the grizzly, the snow giant and the moose frighten villagers as monsters do (`jaymoskingdoms:feared_beasts`).
+- **Routs**: when a side's fighters (guards, archers, soldiers, a camp's raiders) within 20 blocks have lost at least 2 and 40% of the band (downed or dead) within a minute, the rest may each break and run for 12 seconds, by temperament: the timid always, the gloomy mostly, the dutiful seldom, the proud and hotheaded rarely, the brave never. One shouts to fall back. A routed MCA guard goes for nobody till it's over.
+- **Fed predators leave people be**: a hunter in `sated_predators` that has eaten lately no longer goes for a player or a villager its own search finds, unless they hurt it, anger it or come near its young (`FedPredators#leaves`, `PredatorTargetMixin`).
+- **Stalkers hunt villagers like players**: the big cats, bears and coyotes that stalk players also go for a grown villager on the same terms: hungry, at night or in mist, or the villager hurt (`FedPredators#huntsVillager`).
+- New `Bloodshed`; changed `Frights`, `Folk`, `FedPredators`, `PredatorTargetMixin`, `McaGuardFoesMixin`; lines in `lang/parts/bloodshed.json`.
+- Not built in this session (the cloud session couldn't reach the Gradle and Fabric hosts; CI builds it). Not played.
