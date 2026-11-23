@@ -65,6 +65,17 @@ final class GrowthScreen extends Screen {
 
 	@Override
 	protected void init() {
+		// (Andy: H after a hint goes to exactly what it named) the Paths list on the class whose path is ready, or the Feats
+		HintLinks.Link link = HintLinks.take(HintLinks.Page.GROWTH);
+		if (link != null && this.minecraft.player != null) {
+			this.feats = !HintLinks.PATHS.equals(link.target());
+			this.scroll = 0;
+			List<PlayerClass> owed = this.feats ? List.of() : Paths.owed(this.minecraft.player);
+			if (!owed.isEmpty()) {
+				this.pickedClass = owed.getFirst();
+				this.pickedPath = -1;
+			}
+		}
 		int y = top() + panelH() - FOOTER + 4;
 		this.featsTab = addRenderableWidget(FlatButton.builder(Component.translatable("gui.jaymoskingdoms.growth.feats"), b -> {
 			this.feats = true;

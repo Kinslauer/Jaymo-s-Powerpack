@@ -1624,6 +1624,8 @@ public final class LifeStory {
 				return false;
 			}
 			StartPerks.landed(player, landed);
+			// (Andy 2026-11-23: nobody starts under attack) no enemy to mobs until they move
+			PowersCompat.spawnCalm(player);
 		} finally {
 			OTHERS = java.util.Map.of();
 			DEATH = null;

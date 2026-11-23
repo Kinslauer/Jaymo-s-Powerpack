@@ -118,6 +118,35 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code SpawnCalm.calm(ServerPlayer)}. */
+	private static java.lang.invoke.@Nullable MethodHandle spawnCalm;
+	private static boolean lookedForSpawnCalm;
+
+	/**
+	 * Andy (2026-11-23): "all the starts have a problem right now where you can spawn under attack". {@code player} has just
+	 * been put down at a story start: Jaymo's Powers makes them no enemy to mobs until they move. Nothing without Powers.
+	 */
+	public static void spawnCalm(net.minecraft.server.level.ServerPlayer player) {
+		if (!lookedForSpawnCalm) {
+			lookedForSpawnCalm = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					spawnCalm = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wounds.SpawnCalm"), "calm",
+						java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' SpawnCalm (older Powers?)", e);
+				}
+			}
+		}
+		if (spawnCalm != null) {
+			try {
+				spawnCalm.invoke(player);
+			} catch (Throwable e) {
+				// (a start without it: as before)
+			}
+		}
+	}
+
 	/** Powers' {@code GunBlast.weaponModFired(LivingEntity, ItemStack)}. */
 	private static java.lang.invoke.@Nullable MethodHandle gunFired;
 	private static boolean lookedForGunFired;

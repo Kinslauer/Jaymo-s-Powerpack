@@ -416,6 +416,7 @@ public final class Mortality {
 			EXECUTED.clear();
 		});
 		OutOfBody.register();
+		SpawnCalm.register();
 		Afflictions.register();
 		Scars.register();
 		Karma.register();
@@ -1469,6 +1470,8 @@ public final class Mortality {
 		player.setAttached(WAKE_LINE, woke);
 		Downed.knockOut(level, player, OUT_AFTER, false, woke, false);
 		WOKE.put(player.getUUID(), (long) level.getServer().getTickCount() + WOKE_GRACE);
+		// (nobody wakes under attack: no enemy to mobs until they move)
+		SpawnCalm.calm(player);
 		level.playSound(null, at, wake.turn != null ? SoundEvents.ZOMBIE_VILLAGER_CURE : SoundEvents.PLAYER_BREATH, SoundSource.PLAYERS, 0.8F,
 			wake.turn != null ? 0.6F : 0.8F);
 		if (wake.turn != null) {

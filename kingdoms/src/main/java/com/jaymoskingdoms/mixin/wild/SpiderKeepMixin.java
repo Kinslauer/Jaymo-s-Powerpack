@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** A spider can't be set on one it leaves be ({@link SpiderKeep#spares}: webbed up, or kept by a lair), whoever sets it on. */
+/** A spider (or another monster, for one kept by a lair) can't be set on one it leaves be ({@link SpiderKeep#spares}), whoever sets it on. */
 @Mixin(Mob.class)
 abstract class SpiderKeepMixin {
 	@Inject(method = "setTarget", at = @At("HEAD"), cancellable = true)

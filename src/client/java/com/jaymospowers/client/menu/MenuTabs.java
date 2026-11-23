@@ -102,6 +102,8 @@ public final class MenuTabs {
 	private static final List<Map.Entry<Supplier<Component>, Runnable>> CHARACTER_LINKS = new ArrayList<>();
 	/** Extra pins for the Map page: a name (its colour the pin's) and a place in the world you stand in. */
 	private static final List<Supplier<List<Map.Entry<Component, BlockPos>>>> PINS = new ArrayList<>();
+	/** Pages H may open instead of the last one (see {@link #landing}). */
+	private static final List<Supplier<String>> LANDINGS = new ArrayList<>();
 	/** Screens the menu is already hooked onto (a resize inits a screen again). */
 	private static final Set<Screen> HOOKED = Collections.newSetFromMap(new WeakHashMap<>());
 	private static final String FILE = "jaymospowers-menulook.properties";
@@ -313,8 +315,30 @@ public final class MenuTabs {
 		Minecraft.getInstance().gui.setScreen(new CharacterScreen());
 	}
 
-	/** H: the tab you had open last. */
+	/**
+	 * Adds a page H opens instead of the last one: {@code page} gives a tab id, or null to leave H be (Andy: "pressing H or K
+	 * should take you to exactly what was mentioned", Kingdoms' hint links). Called by reflection from Kingdoms.
+	 */
+	public static void landing(Supplier<String> page) {
+		LANDINGS.add(page);
+	}
+
+	/** H: the page a fresh hint named ({@link #landing}), else the tab you had open last. */
 	public static void openLast() {
+		for (Supplier<String> landing : LANDINGS) {
+			String id;
+			try {
+				id = landing.get();
+			} catch (RuntimeException | LinkageError e) {
+				continue;
+			}
+			for (Tab t : shown()) {
+				if (t.id().equals(id)) {
+					t.open().run();
+					return;
+				}
+			}
+		}
 		open(last);
 	}
 
