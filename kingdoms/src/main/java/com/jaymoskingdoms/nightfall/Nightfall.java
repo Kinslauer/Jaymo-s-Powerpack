@@ -192,11 +192,13 @@ public final class Nightfall {
 
 	/** Whether the plague can take hold in {@code mob}: not with Immunity in it, not in the undead or a vampire. */
 	static boolean catches(LivingEntity mob) {
-		return !mob.hasEffect(IMMUNITY) && !Immunity.unholy(mob) && !(mob instanceof Player p && (p.isCreative() || p.isSpectator()));
+		return !mob.hasEffect(IMMUNITY) && !Immunity.unholy(mob) && !(mob instanceof Player p && (p.isCreative() || p.isSpectator()))
+			// a plague doctor's mask (the Plague Bearer's rags) keeps it out, as it did in From the Shadows Reborn
+			&& !mob.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD).is(com.jaymoskingdoms.inhabitants.fts.Fts.PLAGUE_DOCTOR_MASK);
 	}
 
 	/** Gives {@code mob} the plague, if it can catch it. (0.7.136) A Plague Doctor catches it for half as long, and never worse than level I. */
-	static void infect(LivingEntity mob, int ticks, int amplifier) {
+	public static void infect(LivingEntity mob, int ticks, int amplifier) {
 		if (catches(mob)) {
 			if (plagueDoctor(mob)) {
 				ticks = Math.max(1, Math.round(ticks * PLAGUE_DOCTOR_TICKS));

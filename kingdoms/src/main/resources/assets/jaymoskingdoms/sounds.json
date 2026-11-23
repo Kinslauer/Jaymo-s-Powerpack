@@ -3711,6 +3711,45 @@
 			}
 		]
 	},
+	"plague_bearer.idle": {
+		"subtitle": "subtitles.jaymoskingdoms.plague_bearer.idle",
+		"sounds": [
+			"jaymoskingdoms:plague_bearer/idle_1",
+			"jaymoskingdoms:plague_bearer/idle_2",
+			"jaymoskingdoms:plague_bearer/idle_3",
+			"jaymoskingdoms:plague_bearer/idle_4"
+		]
+	},
+	"plague_bearer.hurt": {
+		"subtitle": "subtitles.jaymoskingdoms.plague_bearer.hurt",
+		"sounds": [
+			"jaymoskingdoms:plague_bearer/hurt_1",
+			"jaymoskingdoms:plague_bearer/hurt_2",
+			"jaymoskingdoms:plague_bearer/hurt_3"
+		]
+	},
+	"plague_bearer.death": {
+		"subtitle": "subtitles.jaymoskingdoms.plague_bearer.death",
+		"sounds": [
+			"jaymoskingdoms:plague_bearer/death_1",
+			"jaymoskingdoms:plague_bearer/death_2",
+			"jaymoskingdoms:plague_bearer/death_3"
+		]
+	},
+	"plague_bearer.preattack": {
+		"subtitle": "subtitles.jaymoskingdoms.plague_bearer.preattack",
+		"sounds": [
+			"jaymoskingdoms:plague_bearer/preattack_1",
+			"jaymoskingdoms:plague_bearer/preattack_2"
+		]
+	},
+	"plague_bearer.attack": {
+		"subtitle": "subtitles.jaymoskingdoms.plague_bearer.attack",
+		"sounds": [
+			"jaymoskingdoms:plague_bearer/attack_1",
+			"jaymoskingdoms:plague_bearer/attack_2"
+		]
+	},
 	"impaler.attack": {
 		"subtitle": "subtitles.jaymoskingdoms.impaler.attack",
 		"sounds": [

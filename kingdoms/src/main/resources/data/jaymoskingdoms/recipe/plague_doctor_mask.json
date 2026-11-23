@@ -1,0 +1,15 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"category": "equipment",
+	"pattern": [
+		"iii",
+		"i i"
+	],
+	"key": {
+		"i": "jaymoskingdoms:suspicious_cloth"
+	},
+	"result": {
+		"id": "jaymoskingdoms:plague_doctor_mask",
+		"count": 1
+	}
+}
