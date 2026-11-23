@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: control-fixes
 branch: claude/climb-parity, claude/afk-cam-fishing, claude/flintlock-release
 with:

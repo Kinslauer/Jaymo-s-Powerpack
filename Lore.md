@@ -1828,13 +1828,14 @@ who sell smaller guns to anyone with the coin: a ship's master, a lord with a st
 stone, a cheap stone ball only timber, and a fire ball is the kingdoms' answer to the flame avatar's FireCannon.
 
 **What the shadows keep** (new; survival picks thread, Andy picked all of From the Shadows Reborn 2026-11-22; the
-froglin and plague bearer homes are Andy's, the rest Claude's placement, waiting on Andy). **Froglins** live among the
+froglin and plague bearer homes are Andy's; the demons' country for the Nehemoth and Bulldrogioth Andy approved 2026-11-22). **Froglins** live among the
 goblins and the orcs (Andy: "should live among goblins and orc"): squat, wet, frog-legged things kept about the camps
 like dogs, spitting sick at strangers, and eaten when the raids go badly. The **Plague Bearer** is an orc camp's asset
 or its exile (Andy: "an orc camp asset/ exile"): a sick orc the camp keeps at its edge to walk into enemy towns and
 spread the plague, or one it drove out to wander with it. Whoever survives his rags finds the plague doctor's mask.
 The **Nehemoth**, which roars, leaps and spits a beam of souls, and the **Bulldrogioth**, under its crimson shell,
-are beasts out of the demons' country below, come up where the world is thin; diabolium, the red metal of their dens,
+are beasts out of the demons' country below, come up where the world is thin. They hate every living thing down there,
+the demons included (Andy: "hostile to any life down there"); diabolium, the red metal of their dens,
 and the weapons and armour made of it come from them.
 
 **Goblin talk** (Andy approved, 2026-11-19; goblin speech thread; Andy: goblins "should speak very broken but intelligible english, unlike orcs who you really cant tell"; the rest Claude's placement). Goblins never kept a tongue of their own. They live off other people's goods, so they live off other people's words too: every goblin picks up the traders' common speech from the folk it robs and sells to, and mangles it the same way wherever it was hatched. "Me" for I, "da" for the, no little words, everything shiny is shinies. Anyone can follow a goblin, which is half of why nobody trusts one: it will tell you to your face what it means to take. Orcs are the other way: their war camps talk only among themselves, in the land's own speech chewed past knowing, and a stranger hears noise.
