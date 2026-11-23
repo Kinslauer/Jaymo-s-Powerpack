@@ -6,4 +6,9 @@
 - The landing roll, the flip, the backflip, boxing's evades and the dives are unchanged.
 - Classes: `stamina/Dodge` (`DASH_SPEED`, `DASH_UP`, `DASH_TICKS`; `Start.dash`, `Rolling.dash`), `client/stamina/DodgeClient`,
   `client/stamina/DodgeRollPose`.
-- Built; not played. The dash has no pose of its own yet (the body just skims upright).
+- **The dash's pose**, seen by everyone: the feet plant and the hips drop (wide and straight-legged for a side dash, a
+  lunge with the front shin upright for a forward or back one), the upper body leans into the way, both arms come up
+  to a guard (left alone while you swing or use an item, so a counter shows), and the head stays level, on the foe. In
+  first person the view dips a little and leans into a side dash. Rubber-folk and Verdants dash with their stretch.
+- Classes for the pose: `client/stamina/DodgeRollPose` (`DASH_*` knobs, `stance`).
+- Built; not played. The pose was checked frame by frame in a scratch run of `tools/pose_preview.py`, not in game.

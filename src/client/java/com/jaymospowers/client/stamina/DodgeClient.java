@@ -55,12 +55,15 @@ public final class DodgeClient {
 	private static boolean holdPending, proneAtEnd;
 	/** Client game time our own dash started (it may still go on into the roll), or MIN_VALUE when there's none. */
 	private static long dashStart = Long.MIN_VALUE;
+	/** Client game time our own last dash started, drawn at once ({@link DodgeRollPose}), the way {@link #rollX}, {@link #rollZ}. */
+	static long dashDrawStart = Long.MIN_VALUE;
 	/** The Dodge key was down last tick: a press is the key going down, once, however long it's held. */
 	private static boolean keyWasDown;
 	/** Forgets our last own roll, so the next roll drawn for us is the server's copy (a leap off a mount ends in one the server throws). */
 	public static void forgetRoll() {
 		rollStart = Long.MIN_VALUE;
 		dashStart = Long.MIN_VALUE;
+		dashDrawStart = Long.MIN_VALUE;
 		rollLong = false;
 		holdPending = false;
 		proneAtEnd = false;
@@ -390,6 +393,7 @@ public final class DodgeClient {
 			player.setDeltaMovement(dir.x * Dodge.DASH_SPEED + motion.x * 0.2, Dodge.DASH_UP, dir.z * Dodge.DASH_SPEED + motion.z * 0.2);
 			rollStart = Long.MIN_VALUE;
 			dashStart = now;
+			dashDrawStart = now;
 		}
 		if (ClientPlayNetworking.canSend(Dodge.Start.TYPE)) {
 			ClientPlayNetworking.send(new Dodge.Start((float)dir.x, (float)dir.z, !landing));
