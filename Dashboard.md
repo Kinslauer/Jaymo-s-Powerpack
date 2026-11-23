@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 10:53). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 11:01). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -23,6 +23,8 @@ Nothing stuck.
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2040 Dodge: a tap dashes, a hold rolls; adrenaline runs on wind; no climb cooldown (Powers, Kitchen, 2026-11-23)
+- [ ] #2039 The stolen crown: a ruler carried off and a shapeshifter on the throne (Kingdoms, 2026-11-23)
 - [ ] #2038 Drafting Table screen; trapdoors take a second use (Powers, Kingdoms, 2026-11-23)
 - [ ] #2037 The flanged mace is a blunt weapon: no more stabbing (Powers, Kingdoms, 2026-11-23)
 - [ ] #2036 Talking with an illager looks and works like MCA's villager screen (Kingdoms, 2026-11-23)
@@ -81,9 +83,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1962 Z Fighter form animations (Powers, 2026-11-22)
 - [ ] #1960 Z Fighter form models (Powers, 2026-11-22)
 - [ ] #1959 Freerun animations: the ledge climb keyed with elbows and knees, climbing down walls, vaults by speed and height, a pole climb, and bending limbs through the moves (Powers, 2026-11-22)
-- [ ] #1958 Z Fighter gaps 1: stats (Powers, 2026-11-22)
-- [ ] #1956 Z Fighter gaps 9: borrowed time, spared masters' homes, themed tournaments (Powers, 2026-11-22)
-- …and 385 older ones.
+- …and 387 older ones.
 
 ## Health
 
