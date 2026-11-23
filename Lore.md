@@ -1597,6 +1597,8 @@ The graveyards, crypts and burnt-out villages are ground the Lantern Warden's ke
 candle on any more, so the dead in them walk. They are not the barrow knights, who keep their own oath. The mod's own
 book, the Chronicle, tells its own tale of a champion and a lich; in the pack that is one parish's telling, not canon.
 
+**The Nightmare's smoke** (new, Claude's placement, 2026-11-23, for Andy's clip "invulnerable nightmare"). The tall shadow of the untended graves is not wholly in the world: a ball, a bolt or an arrow goes through it like smoke, and it takes harm only from steel held in a hand that comes close enough for it to reach back. Gravediggers' wisdom: you don't shoot a Nightmare, you meet it.
+
 **The Echo Bow** (Andy, 2026-11-12: "the echo bow should be a weapon that spawns for arsenal"; Claude's
 placement). The Arsenal's reach pulls from anywhere, and now and then it comes back with a pale bow nobody here
 strung. Two bows of light hang at its holder's shoulders and answer every arrow with the same shot. Nobody knows where
