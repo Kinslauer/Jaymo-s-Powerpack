@@ -27,7 +27,8 @@ Built on what's there: `Doubles` (stolen lives: the real one held, a copy in the
 - **Court slips**: like a village copy's, but about its court and more often: its heir's or spouse's name, its realm's
   crest beast, the name of its own seat.
 - **Odd decrees**: each day there's a chance it decrees something a ruler never would: a sudden toll on its own people,
-  guards pulled off the walls, the day's feast cancelled. Townsfolk grumble about it and the news carries it.
+  guards pulled off the walls, the day's feast cancelled. Townsfolk grumble about it and the news carries it. (Built as
+  the news and the grumbling only: the toll, the walls and the feast aren't really changed.)
 - **Its own people notice**: the real ruler's spouse, heir or court wizard tells a player near them that "the
   king isn't himself", and now and then a sharp-eyed guard challenges it to its face; challenged twice, the face slips.
 - **Moonlight, a heavy blow, downing it**: the village copies' unmasks, unchanged.
@@ -39,7 +40,9 @@ From the unmasking until the ruler is home ("the whole kingdom is on alert till 
 - **The town in doubt, realm-wide and until found**: every settlement of the realm keeps asking the small things
   (`Doubts`, held rather than timed).
 - **Search parties**: a few guards ride out by day toward where the trail points; a player may join one (follow it).
-- **Gates shut, trade stops**: strangers aren't let in by its guards, stalls don't sell, caravans don't leave.
+- **Gates shut, trade stops**: its guards tell strangers near the seat the gates are shut (nobody is pushed out or
+  attacked: there are no real gates to close, and a stranger may be the one searching); its people won't trade with
+  strangers (the trade closes as it opens); no caravans leave it or its vassals.
 
 ## Track 4: the trail, the homecoming and the reward (PR 1)
 - **The trail**: the unmasked imposter, fleeing, runs toward the vault, and whoever saw it is told which way it

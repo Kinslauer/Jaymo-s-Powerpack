@@ -21,6 +21,10 @@ abstract class VillagerCoinMixin {
 	private void jaymoskingdoms$moneyTalk(net.minecraft.world.entity.player.@org.jspecify.annotations.Nullable Player player, CallbackInfo ci) {
 		AbstractVillager self = (AbstractVillager)(Object)this;
 		if (player instanceof ServerPlayer sp && self.getTradingPlayer() != player) {
+			// (a realm on alert, its ruler missing, trades with none but its own: the trade closes as it opens)
+			if (self instanceof Villager v && com.jaymoskingdoms.StolenCrowns.refusesTrade(v, sp)) {
+				return;
+			}
 			if (!(self instanceof Villager)) {
 				com.jaymoskingdoms.Currencies.localize(self, sp);
 			}

@@ -502,6 +502,11 @@ public final class Doubles {
 		}
 	}
 
+	/** (StolenCrowns) {@code player} heard {@code copy} slip: sneak and speak to it, and its face comes off. */
+	static void heard(Villager copy, ServerPlayer player) {
+		HEARD.computeIfAbsent(copy.getUUID(), k -> new HashSet<>()).add(player.getUUID());
+	}
+
 	/** The copy says a wrong thing in {@code player}'s hearing. */
 	private static void slip(ServerLevel level, Villager copy, ServerPlayer player, UUID real, long now) {
 		Long last = SLIPPED.get(copy.getUUID());

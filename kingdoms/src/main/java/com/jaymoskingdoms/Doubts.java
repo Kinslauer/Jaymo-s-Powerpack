@@ -89,7 +89,8 @@ final class Doubts {
 	static boolean doubting(ServerLevel level, Faction home) {
 		ServerLevel over = level.getServer().overworld();
 		Long until = over.getAttachedOrElse(UNTIL, Map.of()).get(Integer.toString(home.id()));
-		return until != null && over.getGameTime() < until;
+		// (a realm whose ruler's face came off on its throne doubts every face until they're home: StolenCrowns)
+		return until != null && over.getGameTime() < until || StolenCrowns.alert(level.getServer(), home);
 	}
 
 	private static void tick(MinecraftServer server) {
