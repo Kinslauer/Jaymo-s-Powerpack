@@ -7361,3 +7361,9 @@ following integration task).
   burnt them away, leaving pits. When a server starts with Inferno loaded and its scorched earth off, the two are set to
   0, 0 in Fabric's flammable-block registry. Plants, leaves and logs burn as before; turn scorched earth on and grass
   scorches the Inferno way again. `core/InfernoPreset`.
+
+## 0.26.64 (2026-11-23): Safe starts: no enemy to mobs until you move; H goes to the page a hint named (#2028)
+
+- **Safe starts** (Andy: "all the starts have a problem right now where you can spawn under attack. maybe player should be invisible to enemies while they spawn until they move"): waking after being left for dead (every wake, the spiders' lair included), a Kingdoms story start and a respawn now leave you no enemy to any mob until you press a movement key or jump, or strike something. Mobs already on you let go (goal and brain mobs). Being put somewhere, lying out cold, wearing web, being carried or shoved doesn't count as moving, and sneak doesn't either (it's how you come to). `core.wounds.SpawnCalm`, `SpawnCalmMixin` (Player.canBeSeenAsEnemy), called from `Mortality.wakeAt`.
+- **Hint links** (Andy: "pressing H or K should take you to exactly what was mentioned"): `MenuTabs.landing`, which Kingdoms fills: H right after a hint that names an H page (Feats and Paths, Rewards) opens that page, not the last one.
+- Not built on the PC (CI builds it); not played.
