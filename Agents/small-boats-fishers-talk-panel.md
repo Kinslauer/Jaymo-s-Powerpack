@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: Moog's small boats crewed by a realm's fishermen who sail home; talk screen's empty purple panel hidden
 branch: claude/competent-cori-d667a2
 with: Claude Code (Opus 5.5), side session of local_2bfd1f34
-pr:
+pr: 2018
 mods: kingdoms
 versions:
 started: 2026-11-22
@@ -28,3 +28,8 @@ screen "needs to disappear when not in use. right now its layered behind the whe
 - Cause 1: SeaSites.helm searched sea+1..sea+8, her deck stands at sea+9 (y 72 in the clip); people were a FISHERMAN
   visitor (job lost with no workstation) and a plain stranger (no job: Nitwit).
 - Cause 2: MCA's Talk button calls clearWidgets() without setLayout, so the column list kept the old buttons.
+
+## Done
+PR #2018. A small boat met at sea casts off as the nearest harbour realm's fishing smack, crewed by its fishermen, and
+sails home with the catch; old ones are refitted when nobody is near. The talk screen's empty purple panel is gone.
+Not tested in game; not built on the PC (Andy's game running), CI builds it.
