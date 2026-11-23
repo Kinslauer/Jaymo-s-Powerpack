@@ -87,6 +87,7 @@ public final class InhabitantsClient {
 		EntityRenderers.register(SkeletonLord.TYPE, LordRenderer::new);
 		EntityRenderers.register(Inhabitants.YOUTH_WISP, YouthWispRenderer::new);
 		YouthWispRenderer.registerFlash();
+		com.jaymoskingdoms.client.inhabitants.fts.FtsClient.register();
 	}
 
 	/**
