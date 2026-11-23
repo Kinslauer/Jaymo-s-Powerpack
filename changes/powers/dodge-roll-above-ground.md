@@ -1,4 +1,5 @@
-# The dodge roll stays above the ground
+# The dodge roll stays above the ground and is half as long; sitting against a wall no longer sinks in
 - Andy: "the combat dodge roll currently clips through the ground ... make it stay above ground for now". The roll lowered the tucked body until an estimated ball shape rested on the ground, but the arms, the armour and the half-tucked moments at the start and end reach past that ball, so they sank in. It now stops a sixth of the body's height short (about a quarter of a block): the roll hovers a little at its middle instead of going into the ground. `DodgeRollPose.GROUND_CLEARANCE`.
-- The roll's length isn't changed yet.
+- Andy: "reduce it by half maybe to test": the roll takes 5 ticks (was 10) and the long roll, with the key held into it, 9 (was 18), so it also covers about half the ground. `Dodge.ROLL_TICKS`, `LONG_ROLL_TICKS`.
+- Andy: "a few different scenarios had me sink into the ground upon sitting on the wall, same thing with sit poses while prone or downed". A player getting up against a wall (from the floor, set there, or rising up it) was only kept out of the floor by the torso; the flat legs sat right on it and the hands went in. The sit is now kept a little higher (1.5 pixels, growing in as they sit and fading out as they stand), and a downed mob or body's sink against a wall stops 3% of its height short. `WallSit.SIT_CLEARANCE`, `SINK_CLEARANCE`.
 - Not seen in game.

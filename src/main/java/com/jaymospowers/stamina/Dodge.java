@@ -74,14 +74,14 @@ public final class Dodge {
 	/** The server lets a dodge through this many ticks early (client and server clocks differ a little). */
 	static final int COOLDOWN_SLACK = 3;
 	/** How long the drawn roll takes (ticks): one full tumble. */
-	public static final int ROLL_TICKS = 10;
+	public static final int ROLL_TICKS = 5;
 	/**
 	 * Andy: "holding the button should make you cover a bit more ground, then gradually transition to prone". The Dodge
 	 * key still held this many ticks into a ground roll makes it the long roll: the tumble slows to last
 	 * {@link #LONG_ROLL_TICKS} in all, carried along the ground at {@link #LONG_SPEED_START} easing to {@link #LONG_SPEED_END}
 	 * (blocks/tick), and if the key is still held as it ends you go on down into prone ({@code DodgeClient}).
 	 */
-	public static final int HOLD_TICKS = 4, LONG_ROLL_TICKS = 18;
+	public static final int HOLD_TICKS = 4, LONG_ROLL_TICKS = 9;
 	public static final double LONG_SPEED_START = 0.24, LONG_SPEED_END = 0.08;
 	/**
 	 * Andy (2026-11-23): "pressing the alt key and a direction should make you do a short dash, saving the hold for our

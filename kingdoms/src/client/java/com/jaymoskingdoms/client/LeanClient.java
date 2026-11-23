@@ -30,8 +30,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 /**
- * The client's half of leaning ({@link Lean}): the two keys (Q and E, only while sneaking: without Shift Q still drops and E
- * still opens the inventory), what the server is told, and how far each player has leaned just now, eased so the body and the
+ * The client's half of leaning ({@link Lean}): the two keys (Q and E, only while sneaking, crouched or kneeling with Shift held:
+ * without it Q still drops and E still opens the inventory), what the server is told, and how far each player has leaned just now, eased so the body and the
  * view swing out and back. The camera ({@code CameraLeanMixin}) and every player's model ({@code AvatarLeanMixin}) read it.
  * <p>
  * The local player's lean follows the keys at once; everyone else's follows the attachment the server syncs.
@@ -94,10 +94,19 @@ public final class LeanClient {
 		});
 	}
 
-	/** Sneaking, a lean key press is the lean's: the drop and the inventory don't hear it (before the game reads its keys). */
+	/**
+	 * Andy (2026-11-23): "while kneeling and not holding shift you cant lean, e goes back to inventory key and q to drop. Only
+	 * lean from sneak or crouch or kneel while holding shift". Kneeling and the low crouch keep you sneaking without the key,
+	 * so it's the sneak key itself, held, that makes Q and E the lean's.
+	 */
+	static boolean shiftHeld(Minecraft minecraft) {
+		return minecraft.options.keyShift.isDown();
+	}
+
+	/** Shift held, a lean key press is the lean's: the drop and the inventory don't hear it (before the game reads its keys). */
 	private static void claimKeys(Minecraft minecraft) {
 		LocalPlayer player = minecraft.player;
-		if (player == null || minecraft.gui.screen() != null || !player.isShiftKeyDown()) {
+		if (player == null || minecraft.gui.screen() != null || !player.isShiftKeyDown() || !shiftHeld(minecraft)) {
 			return;
 		}
 		boolean used = left.isDown() || right.isDown();
@@ -123,7 +132,7 @@ public final class LeanClient {
 			return;
 		}
 		int want = 0;
-		if (minecraft.gui.screen() == null && Lean.can(me)) {
+		if (minecraft.gui.screen() == null && Lean.can(me) && shiftHeld(minecraft)) {
 			want = (right.isDown() ? 1 : 0) - (left.isDown() ? 1 : 0);
 		}
 		if (want != sent && ClientPlayNetworking.canSend(Lean.Want.TYPE)) {
