@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 23:21). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 23:25). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -30,6 +30,7 @@ kanban-plugin: board
 - [ ] [[Inbox/village-mines-job-buildings|village-mines-job-buildings]] · for ☁️ Cloud · open
 - [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · for ☁️ Cloud · open
 - [ ] [[Inbox/from-the-shadows-port|from-the-shadows-port]] · for any · open
+- [ ] [[Inbox/realm-armor-matching|realm-armor-matching]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
@@ -40,7 +41,6 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · 🔥 Prometheus · #research · in-review
-- [ ] [[Agents/small-boats-fishers-talk-panel|small-boats-fishers-talk-panel]] · 💻 Odysseus · #2018 · in-review
 
 
 ## Needs Andy
