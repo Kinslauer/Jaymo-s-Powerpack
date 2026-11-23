@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: scavengers eat limb by limb, distracted mobs, humanoid vision cones
 branch: scavengers-and-sight
 with: Claude (desktop, Opus)
