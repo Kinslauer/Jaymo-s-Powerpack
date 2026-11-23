@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 09:49). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 09:59). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -41,7 +41,6 @@ kanban-plugin: board
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · 🔥 Prometheus · #research · in-review
 - [ ] [[Agents/heritage-ways-draft|heritage-ways-draft]] · 💻 Odysseus · #2027 · in-review
-- [ ] [[Agents/player-corpse-loot-ash-piles|player-corpse-loot-ash-piles]] · 💻 Odysseus · #2032 · in-review
 
 
 ## Needs Andy
