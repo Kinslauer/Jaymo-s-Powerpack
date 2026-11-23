@@ -303,6 +303,14 @@ public final class FinisherPose {
 			k(11, 0.28F, 33, 30, -0.4F, 0.9F, -0.3F, -0.3F, 0.0F, -0.3F, -0.5F, 0.4F, 0.6F, 80),
 			k(15, 0.1F, 12, 5, -0.5F, 0.2F, 0.05F, -0.3F, 0.0F, -0.1F, -0.2F, 0.2F, 0.45F, 30),
 			rest(18, 0)});
+		// (2026-11-23) Smashed, a club's on a small body: raised high in both hands, and one blow straight down onto it
+		KEYS.put(Finishers.Kind.SMASH, new Key[] {
+			rest(0, 0),
+			k(4, -0.04F, -10, 0, -3.0F, -0.3F, 0.0F, -3.0F, 0.3F, 0.0F, -0.3F, 0.3F, 0.35F, 0),
+			k(7, 0.32F, 42, 0, -0.5F, -0.35F, 0.0F, -0.5F, 0.35F, 0.0F, -0.8F, 0.7F, 0.6F, 60),
+			k(10, 0.32F, 42, 0, -0.5F, -0.35F, 0.0F, -0.5F, 0.35F, 0.0F, -0.8F, 0.7F, 0.6F, 60),
+			k(13, 0.1F, 15, 0, -0.8F, -0.2F, 0.0F, -0.7F, 0.2F, 0.0F, -0.3F, 0.3F, 0.45F, 20),
+			rest(16, 0)});
 	}
 
 	/**

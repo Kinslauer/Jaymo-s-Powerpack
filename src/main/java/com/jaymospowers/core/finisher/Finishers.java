@@ -370,7 +370,9 @@ public final class Finishers {
 		 * Cut Down, a blade's on a small body ({@link Finishers#small}: a digger, a fox, a chicken): one quick slice across it,
 		 * no stabbing through and wrenching free.
 		 */
-		SLICE(18, new int[] {8}, Strike.CUT);
+		SLICE(18, new int[] {8}, Strike.CUT),
+		/** (Andy, 2026-11-23: the single smash) Smashed, a club's or a staff's on a small body: one blow straight down on it. */
+		SMASH(16, new int[] {7}, Strike.CRUSH);
 
 		/** (0.15.148) The tick the whip's crack lands round the neck. */
 		public static final int WHIP_CRACK = 8;
@@ -1218,6 +1220,9 @@ public final class Finishers {
 		if (kind != null && small(body) && sliced(kind)) {
 			// (2026-11-23) a small body isn't stabbed through: one quick slice
 			kind = Kind.SLICE;
+		} else if (kind != null && small(body) && smashed(kind)) {
+			// (2026-11-23) nor beaten again and again: one blow
+			kind = Kind.SMASH;
 		}
 		if (kind != null) {
 			begin(level, player, body, kind);
@@ -1238,6 +1243,14 @@ public final class Finishers {
 	static boolean sliced(Kind kind) {
 		return switch (kind) {
 			case IMPALE, SWORD, DAGGER, GREATSWORD -> true;
+			default -> false;
+		};
+	}
+
+	/** Whether {@code kind} is a club's, a staff's or everyone's wild slam, which a small body takes as a single smash instead. */
+	static boolean smashed(Kind kind) {
+		return switch (kind) {
+			case BLUNT, SLAM, STAFF -> true;
 			default -> false;
 		};
 	}
@@ -1726,7 +1739,7 @@ public final class Finishers {
 				player.getMainHandItem().shrink(1);
 			}
 		}
-		if (kind == Kind.SLAM || kind == Kind.IMPALE) {
+		if (kind == Kind.SLAM || kind == Kind.IMPALE || kind == Kind.SMASH) {
 			// (0.15.146) Andy: "using tools like a bow or fishing rod heavily damages them"
 			wear(player);
 		}
@@ -1840,7 +1853,7 @@ public final class Finishers {
 			case BOW -> SoundEvents.ARROW_SHOOT;
 			case CROSSBOW -> SoundEvents.CROSSBOW_LOADING_END.value();
 			case FIST, S_SNAP -> SoundEvents.ARMOR_EQUIP_LEATHER.value();
-			case BLUNT, STAFF, SLAM, FLAIL -> SoundEvents.ARMOR_EQUIP_CHAIN.value();
+			case BLUNT, STAFF, SLAM, FLAIL, SMASH -> SoundEvents.ARMOR_EQUIP_CHAIN.value();
 			case ROCK -> SoundEvents.STONE_HIT;
 			case STOMP, HEAD_SMASH -> SoundEvents.ZOMBIE_AMBIENT;
 			case WHIP -> SoundEvents.FISHING_BOBBER_THROW;
