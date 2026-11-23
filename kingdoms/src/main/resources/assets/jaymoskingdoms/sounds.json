@@ -3849,6 +3849,28 @@
 			"jaymoskingdoms:nehemoth/gore"
 		]
 	},
+	"bulldrogioth.attack": {
+		"subtitle": "subtitles.jaymoskingdoms.bulldrogioth.attack",
+		"sounds": [
+			"jaymoskingdoms:bulldrogioth/attack_1",
+			"jaymoskingdoms:bulldrogioth/attack_2",
+			"jaymoskingdoms:bulldrogioth/attack_3"
+		]
+	},
+	"bulldrogioth.hurt": {
+		"subtitle": "subtitles.jaymoskingdoms.bulldrogioth.hurt",
+		"sounds": [
+			"jaymoskingdoms:bulldrogioth/hurt_1",
+			"jaymoskingdoms:bulldrogioth/hurt_2",
+			"jaymoskingdoms:bulldrogioth/hurt_3"
+		]
+	},
+	"bulldrogioth.idle": {
+		"subtitle": "subtitles.jaymoskingdoms.bulldrogioth.idle",
+		"sounds": [
+			"jaymoskingdoms:bulldrogioth/idle_1"
+		]
+	},
 	"impaler.attack": {
 		"subtitle": "subtitles.jaymoskingdoms.impaler.attack",
 		"sounds": [

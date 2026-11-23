@@ -17,3 +17,13 @@ Files copied (all under `kingdoms/src/main/resources/assets/jaymoskingdoms/`), o
 - sounds `nehemoth_roar`, `nehemoth_attack`, `bite_warn`, `nehemoth_death`, `soul_laser`, `soul_laser_ready`, `goresound`, `critical_hit`,
   `nehemoth_bite_1..6`, `nehemoth_charge_1..4`, `stomp_1..4`, `nehemoth_hurt4..6`, `nehemoth_idle{1,2,5,6,7,8,11,12,13}`
   -> `sounds/nehemoth/*.ogg`
+
+## Bulldrogioth
+- `geo/bulldrogioth.geo.json` -> `geckolib/models/entity/bulldrogioth.geo.json`
+- `animations/bulldrogioth.animation.json` -> `geckolib/animations/entity/bulldrogioth.animation.json` (sound keys removed)
+- `textures/entity/bulldrogioth.png` -> `textures/entity/bulldrogioth/crimson.png`
+- `textures/entity/bulldrogioth_blue.png` -> `textures/entity/bulldrogioth/warped.png`
+- `textures/entity/bulldrogioth_swamp.png` -> `textures/entity/bulldrogioth/basalt.png`
+- `textures/entity/bulldrogioth_eyes.png` -> `textures/entity/bulldrogioth/{crimson,warped,basalt}_glowmask.png`
+- `textures/item/crimson_shell.png` -> `textures/item/crimson_shell.png`
+- sounds `bulldrogioth_attack1..3`, `bulldrogioth_hurt_1..3`, `bulldrogioth_idle_1` -> `sounds/bulldrogioth/*.ogg`
