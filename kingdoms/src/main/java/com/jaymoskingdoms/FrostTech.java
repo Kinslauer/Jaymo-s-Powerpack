@@ -296,6 +296,43 @@ public final class FrostTech {
 		}
 	}
 
+	// ---- a limb asked for, and given -----------------------------------------------------------------------------------
+
+	private static final int ARMS = RIGHT_ARM | LEFT_ARM, LEGS = RIGHT_LEG | LEFT_LEG;
+	/** Jaymo's Powers' stand-in limbs a body can be handed: the limbs each goes on, and its make here. */
+	private static final Map<String, int[]> STAND_INS = Map.of("jaymospowers:wooden_arm", new int[] {ARMS, WOOD},
+		"jaymospowers:wooden_leg", new int[] {LEGS, WOOD}, "jaymospowers:iron_arm", new int[] {ARMS, IRON},
+		"jaymospowers:iron_leg", new int[] {LEGS, IRON}, "jaymospowers:rig_arm", new int[] {ARMS, IRON},
+		"jaymospowers:rig_leg", new int[] {LEGS, IRON});
+
+	/** The lost limbs {@code body} has nothing on (no stand-in of ours, no Powers prosthetic): limb bits, 0 without Powers. */
+	public static int bare(LivingEntity body) {
+		return PowersCompat.missingLimbs(body) & LIMBS & ~of(body) & ~PowersCompat.fittedLimbs(body);
+	}
+
+	/**
+	 * What someone missing limbs wants before anything else: a wooden leg while a leg is bare, else a wooden arm (any
+	 * make of either will do, {@link #fitGiven}); empty when nothing is bare, or without Powers.
+	 */
+	public static ItemStack wantedLimb(LivingEntity body) {
+		int bare = bare(body);
+		return (bare & LEGS) != 0 ? item("jaymospowers:wooden_leg") : (bare & ARMS) != 0 ? item("jaymospowers:wooden_arm") : ItemStack.EMPTY;
+	}
+
+	/** {@code body} is handed {@code stack}: if it's a stand-in for one of their bare limbs, it's fitted there (true). */
+	public static boolean fitGiven(LivingEntity body, ItemStack stack) {
+		int[] fit = STAND_INS.get(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
+		int open = fit == null ? 0 : bare(body) & fit[0];
+		if (open == 0) {
+			return false;
+		}
+		int limb = Integer.lowestOneBit(open);
+		store(body, fitted(body) | (fit[1] == IRON ? limb << IRON_SHIFT : limb));
+		body.level().playSound(null, body.getX(), body.getY(), body.getZ(), fit[1] == WOOD ? SoundEvents.WOOD_PLACE : SoundEvents.ANVIL_USE,
+			SoundSource.NEUTRAL, 0.7F, fit[1] == WOOD ? 0.9F : 1.4F);
+		return true;
+	}
+
 	// ---- the player raised among the starwrights -----------------------------------------------------------------------
 
 	/** The scouter a starwright's child leaves home with (empty without Jaymo's Powers), and the spare arm in their pack. */
