@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: realm-armor-matching
 branch: claude/gifted-kalam-84de98
 with: Claude Code (desktop session, started from local_2bfd1f34)
-pr: 
+pr: 2022
 mods: kingdoms
 versions: 
 started: 2026-11-22
@@ -28,3 +28,8 @@ realms should wear identical armour; the page and the realm's people in the worl
 - No builds on the PC (memory): CI builds the PR.
 
 ## Done
+PR #2022. Each realm has a livery (Liveries): its own trim on every plain piece its guards are issued, and its own levy
+cloth (hood / leather tassets / padded cuisses), unique among realms of its colour; a kingdom's soldiers keep one of
+the kettle hat or lobster tail. The realm page shows the harness (tabard, cloth), and its figure no longer spends the
+realm's stores. Dev check: Liveries.check throws on a clash. CI build only; not played (how it reads on the page's
+small figure, whether the harness draws there, Morstead).
