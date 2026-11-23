@@ -16607,3 +16607,16 @@ Andy picked "goblin extras" from the survival pick list (2026-11-22); the Goblin
 - **Stalkers hunt villagers like players**: the big cats, bears and coyotes that stalk players also go for a grown villager on the same terms: hungry, at night or in mist, or the villager hurt (`FedPredators#huntsVillager`).
 - New `Bloodshed`; changed `Frights`, `Folk`, `FedPredators`, `PredatorTargetMixin`, `McaGuardFoesMixin`; lines in `lang/parts/bloodshed.json`.
 - Not built in this session (the cloud session couldn't reach the Gradle and Fabric hosts; CI builds it). Not played.
+
+## 0.12.7 (2026-11-23): Villagers talk to each other again (#2046)
+
+- **What broke it**: since villagers got hunger, thirst and boredom (`Needs`, PR #1981), a bored villager takes up a pastime (`Routines`) up to seven times sooner, and vanilla tradesfolk with no job site take them up in work hours too. Neighbours' meetings (`Neighbours`: greetings, small talk, jokes, spats) only ever paired two villagers with no pastime at all, so they almost never met; and an overheard scene (`Overheard`) walked its two together with plain navigation, which a pastime's walk target overrode, so the pair drifted apart and the scene ended before a line was said.
+- **Now**: a meeting takes a villager out of their pastime instead of waiting for them to have none (`Neighbours.free`). A scene holds both of its pair: Routines leaves them be while it runs (`Overheard.inScene` in `Routines.idle`), they walk to each other through their walk targets, and they stand still once together.
+- Unchanged: meetings still keep to the day (since they were made, night is MCA's), and scenes come about once every four minutes near a player.
+- Built in CI; not played. The cause is from reading the code, not seen in a game.
+
+## 0.12.8 (2026-11-23): The Nightmare shows that shots go through it (#2048)
+
+- Andy: "is the nightmare supposed to be invulnerable?" Yes, against what he used. The Graveyard's Nightmare takes no harm from anything shot or thrown (arrows, bolts, WeaponMod's musket and flintlock balls, whose damage WeaponMod tags as a projectile's). That is the mod's own design, like an enderman's. A blow in hand (sword, axe, WeaponMod's melee weapons) hurts it as usual. Until now a shot just did nothing, so it looked like a bug.
+- **Now** (`NightmareTell`, `mixin.graveyard.NightmareShotMixin`, skipped without The Graveyard): a shot goes through it as a puff of smoke with a soul's sigh. The shooter is told above the hotbar, at most every 10 seconds, "The shot goes through it like smoke. Only steel, up close, will bite."
+- Built in CI; not played.

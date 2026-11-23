@@ -1,4 +1,0 @@
-# The Nightmare shows that shots go through it
-- Andy: "is the nightmare supposed to be invulnerable?" Yes, against what he used. The Graveyard's Nightmare takes no harm from anything shot or thrown (arrows, bolts, WeaponMod's musket and flintlock balls, whose damage WeaponMod tags as a projectile's). That is the mod's own design, like an enderman's. A blow in hand (sword, axe, WeaponMod's melee weapons) hurts it as usual. Until now a shot just did nothing, so it looked like a bug.
-- **Now** (`NightmareTell`, `mixin.graveyard.NightmareShotMixin`, skipped without The Graveyard): a shot goes through it as a puff of smoke with a soul's sigh. The shooter is told above the hotbar, at most every 10 seconds, "The shot goes through it like smoke. Only steel, up close, will bite."
-- Built in CI; not played.

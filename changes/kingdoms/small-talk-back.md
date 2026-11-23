@@ -1,5 +1,0 @@
-# Villagers talk to each other again
-- **What broke it**: since villagers got hunger, thirst and boredom (`Needs`, PR #1981), a bored villager takes up a pastime (`Routines`) up to seven times sooner, and vanilla tradesfolk with no job site take them up in work hours too. Neighbours' meetings (`Neighbours`: greetings, small talk, jokes, spats) only ever paired two villagers with no pastime at all, so they almost never met; and an overheard scene (`Overheard`) walked its two together with plain navigation, which a pastime's walk target overrode, so the pair drifted apart and the scene ended before a line was said.
-- **Now**: a meeting takes a villager out of their pastime instead of waiting for them to have none (`Neighbours.free`). A scene holds both of its pair: Routines leaves them be while it runs (`Overheard.inScene` in `Routines.idle`), they walk to each other through their walk targets, and they stand still once together.
-- Unchanged: meetings still keep to the day (since they were made, night is MCA's), and scenes come about once every four minutes near a player.
-- Built in CI; not played. The cause is from reading the code, not seen in a game.
