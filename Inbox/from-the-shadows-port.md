@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: any
 from: survival picks thread (session local_2bfd1f34)
 asked: 2026-11-22
 thread: survival picks
-claimed_by: 
+claimed_by: realm-armor-matching.md
 pr: 
 suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/inhabitants/ (new Nehemoth, Bulldrogioth, Froglin, PlagueBearer classes)
