@@ -26,6 +26,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.component.SwingAnimation;
 import org.jspecify.annotations.Nullable;
@@ -203,6 +205,16 @@ final class Overheard {
 		}
 	}
 
+	/** {@code v} is in a scene just now: {@link Routines} leaves them to it (a pastime is dropped, none taken up). */
+	static boolean inScene(Villager v) {
+		for (Scene s : SCENES) {
+			if (s.a == v || s.b == v) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private static boolean free(Villager v) {
 		return v.isAlive() && !v.isBaby() && !v.isSleeping() && !v.isTrading() && !Downed.isDowned(v) && !McaCompat.busy(v) && TaleCast.cast(v) == null
 			&& Rulers.target(v) == null && v.getVehicle() == null;
@@ -364,15 +376,18 @@ final class Overheard {
 					return false;
 				}
 				if (tick % 20 == 0) {
-					s.a.getNavigation().moveTo(s.b, 0.6);
-					s.b.getNavigation().moveTo(s.a, 0.6);
+					// (through their walk targets, so a pastime's walk (Routines) doesn't pull them on past each other)
+					BehaviorUtils.setWalkAndLookTargetMemories(s.a, s.b, 0.6F, 1);
+					BehaviorUtils.setWalkAndLookTargetMemories(s.b, s.a, 0.6F, 1);
 				}
 				return true;
 			}
 			s.next = tick;
 		}
-		s.a.getNavigation().stop();
-		s.b.getNavigation().stop();
+		for (Villager v : new Villager[] {s.a, s.b}) {
+			v.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+			v.getNavigation().stop();
+		}
 		Gestures.look(s.a, s.b.getEyePosition());
 		Gestures.look(s.b, s.a.getEyePosition());
 		if (tick < s.next) {
