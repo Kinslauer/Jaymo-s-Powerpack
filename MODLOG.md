@@ -7333,3 +7333,9 @@ following integration task).
 - **Q** with a black-powder gun in hand takes up the next loaded one on the hotbar instead of dropping it (`OldGunSwapMixin`). With no other loaded one there it drops as before, and a spent Void flintlock is still dropped so it comes back loaded.
 - **Quicker aim** (Andy: "flintlock should also have a quicker aim acquisition as in you need to hold right click for less time to get an accurate shot"): WeaponMod's flintlock pistol reaches its tightest spread after 0.4 s held ready instead of 1 s (`WeaponModFlintlockAimMixin`, `AIM_SPEED` 2.5). A Marksman's quicker wind-up comes on top. The Void flintlock already shoots dead straight, and the Kingdoms guns' spread doesn't depend on the hold.
 - Built on CI; not played.
+
+## 0.26.61 (2026-11-23): spark in the pack, for finding what slows the game (#2017)
+
+- **spark** (GPL-3.0, lucko), the profiler, is in the pack for everyone and on the server. It does nothing until asked: in
+  game `/sparkc profiler start`, play a minute or two where it's slow, then `/sparkc profiler stop`, and it gives a link
+  showing what took the time (`/spark profiler` does the same for the server).
