@@ -7529,3 +7529,8 @@ following integration task).
 - Andy: "reduce it by half maybe to test": the roll takes 5 ticks (was 10) and the long roll, with the key held into it, 9 (was 18), so it also covers about half the ground. `Dodge.ROLL_TICKS`, `LONG_ROLL_TICKS`.
 - Andy: "a few different scenarios had me sink into the ground upon sitting on the wall, same thing with sit poses while prone or downed". A player getting up against a wall (from the floor, set there, or rising up it) was only kept out of the floor by the torso; the flat legs sat right on it and the hands went in. The sit is now kept a little higher (1.5 pixels, growing in as they sit and fading out as they stand), and a downed mob or body's sink against a wall stops 3% of its height short. `WallSit.SIT_CLEARANCE`, `SINK_CLEARANCE`.
 - Not seen in game.
+
+## 0.26.79 (2026-11-23): A small creature is finished with one quick slice (#2052)
+
+- Andy (a clip, "small mob chop", 2026-11-23): finishing a downed Digger with a sword played Stabbed Through, the blade driven down through it and tugged free: "that should be an execution variable for small animals and mobs, as you wont need to stab through something like that when a small slice like the beginning of the clip shows". A blade's finisher (Stabbed Through, Run Through, Mercy Stroke, Headsman's Stroke) on a small body now plays **Cut Down**: drawn back to the right and one quick slice down and across it (under a second). Small: at most 1.2 blocks tall and 1 wide standing, at its scale (a digger, a fox, a chicken, a rabbit, a wolf, a cat); never a player. `Finishers.Kind.SLICE`, `Finishers.small`, `SMALL_HEIGHT`, `SMALL_WIDTH`.
+- Not seen in game.
