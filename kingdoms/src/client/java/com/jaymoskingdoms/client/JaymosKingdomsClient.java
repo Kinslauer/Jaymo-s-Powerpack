@@ -36,6 +36,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.wild.nest.SilkDeeps.place();
 		// (0.7.180) whose names this client's player knows
 		com.jaymoskingdoms.Introductions.viewer = () -> net.minecraft.client.Minecraft.getInstance().player;
+		// (Andy, 2026-11-23) greeting, bowing, talking and pickpocketing in Powers' list of keys by the crosshair
+		com.jaymoskingdoms.ContextLines.register();
 		// and lines naming someone they don't know call them what they are
 		IntroNames.register();
 		// great foes' themes, and the trophy stand's item
