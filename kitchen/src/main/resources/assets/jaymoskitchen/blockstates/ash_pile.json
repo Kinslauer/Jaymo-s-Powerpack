@@ -1,12 +1,300 @@
 {
   "variants": {
-    "layers=1": { "model": "jaymoskitchen:block/ash_pile_1" },
-    "layers=2": { "model": "jaymoskitchen:block/ash_pile_2" },
-    "layers=3": { "model": "jaymoskitchen:block/ash_pile_3" },
-    "layers=4": { "model": "jaymoskitchen:block/ash_pile_4" },
-    "layers=5": { "model": "jaymoskitchen:block/ash_pile_5" },
-    "layers=6": { "model": "jaymoskitchen:block/ash_pile_6" },
-    "layers=7": { "model": "jaymoskitchen:block/ash_pile_7" },
-    "layers=8": { "model": "jaymoskitchen:block/ash_pile_8" }
+    "blown=false,layers=1": [
+      {
+        "model": "jaymoskitchen:block/ash_mound_1",
+        "y": 0
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_1",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_1",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_1",
+        "y": 270
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_1_turned",
+        "y": 0
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_1_turned",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_1_turned",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_1_turned",
+        "y": 270
+      }
+    ],
+    "blown=true,layers=1": {
+      "model": "jaymoskitchen:block/ash_pile_1"
+    },
+    "blown=false,layers=2": [
+      {
+        "model": "jaymoskitchen:block/ash_mound_2",
+        "y": 0
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_2",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_2",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_2",
+        "y": 270
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_2_turned",
+        "y": 0
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_2_turned",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_2_turned",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_2_turned",
+        "y": 270
+      }
+    ],
+    "blown=true,layers=2": {
+      "model": "jaymoskitchen:block/ash_pile_2"
+    },
+    "blown=false,layers=3": [
+      {
+        "model": "jaymoskitchen:block/ash_mound_3",
+        "y": 0
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_3",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_3",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_3",
+        "y": 270
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_3_turned",
+        "y": 0
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_3_turned",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_3_turned",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_3_turned",
+        "y": 270
+      }
+    ],
+    "blown=true,layers=3": {
+      "model": "jaymoskitchen:block/ash_pile_3"
+    },
+    "blown=false,layers=4": [
+      {
+        "model": "jaymoskitchen:block/ash_mound_4",
+        "y": 0
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_4",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_4",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_4",
+        "y": 270
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_4_turned",
+        "y": 0
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_4_turned",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_4_turned",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_4_turned",
+        "y": 270
+      }
+    ],
+    "blown=true,layers=4": {
+      "model": "jaymoskitchen:block/ash_pile_4"
+    },
+    "blown=false,layers=5": [
+      {
+        "model": "jaymoskitchen:block/ash_mound_5",
+        "y": 0
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_5",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_5",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_5",
+        "y": 270
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_5_turned",
+        "y": 0
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_5_turned",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_5_turned",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_5_turned",
+        "y": 270
+      }
+    ],
+    "blown=true,layers=5": {
+      "model": "jaymoskitchen:block/ash_pile_5"
+    },
+    "blown=false,layers=6": [
+      {
+        "model": "jaymoskitchen:block/ash_mound_6",
+        "y": 0
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_6",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_6",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_6",
+        "y": 270
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_6_turned",
+        "y": 0
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_6_turned",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_6_turned",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_6_turned",
+        "y": 270
+      }
+    ],
+    "blown=true,layers=6": {
+      "model": "jaymoskitchen:block/ash_pile_6"
+    },
+    "blown=false,layers=7": [
+      {
+        "model": "jaymoskitchen:block/ash_mound_7",
+        "y": 0
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_7",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_7",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_7",
+        "y": 270
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_7_turned",
+        "y": 0
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_7_turned",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_7_turned",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_7_turned",
+        "y": 270
+      }
+    ],
+    "blown=true,layers=7": {
+      "model": "jaymoskitchen:block/ash_pile_7"
+    },
+    "blown=false,layers=8": [
+      {
+        "model": "jaymoskitchen:block/ash_mound_8",
+        "y": 0
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_8",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_8",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_8",
+        "y": 270
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_8_turned",
+        "y": 0
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_8_turned",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_8_turned",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/ash_mound_8_turned",
+        "y": 270
+      }
+    ],
+    "blown=true,layers=8": {
+      "model": "jaymoskitchen:block/ash_pile_8"
+    }
   }
 }

@@ -141,8 +141,11 @@ public class ZombiePlayer extends Zombie {
 		setSprinting(sprint);
 	}
 
-	/** Gives it what was in the dead player's hand, and the rest of their hotbar to carry. */
+	/** Gives it what was in the dead player's hand, and the rest of what they carried. It never despawns with any of it. */
 	public void arm(ItemStack held, List<ItemStack> rest) {
+		if (!held.isEmpty() || rest.stream().anyMatch(stack -> !stack.isEmpty())) {
+			setPersistenceRequired();
+		}
 		if (!held.isEmpty()) {
 			setItemSlot(EquipmentSlot.MAINHAND, held);
 			setDropChance(EquipmentSlot.MAINHAND, 2.0F);

@@ -297,8 +297,6 @@
 	"message.jaymoskitchen.mill.tank": "%s: %s / %s mB. Use a bucket or bottle to draw it off.",
 	"message.jaymoskitchen.table.busy": "Someone else is using this table.",
 	"entity.jaymoskitchen.zombie_player": "Zombie Player",
-	"message.jaymoskitchen.corpse.player_restored": "You take back what they were carrying.",
-	"message.jaymoskitchen.corpse.player_no_room": "No room for the rest. It stays on the body.",
 	"item.jaymoskitchen.spruce_wagon": "Spruce Wagon",
 	"item.jaymoskitchen.birch_wagon": "Birch Wagon",
 	"item.jaymoskitchen.acacia_wagon": "Acacia Wagon",

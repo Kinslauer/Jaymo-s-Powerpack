@@ -341,14 +341,31 @@ public final class Harness {
 		}
 	}
 
-	/** {@code player} died without keeping their inventory: the harness falls where they did. */
+	/**
+	 * {@code player} died without keeping their inventory: the harness stays on their body with the rest of what they
+	 * carried (Jaymo's Kitchen; Andy: "as long as the torso is there, the loot should be as well, the leggings and arm
+	 * harness armor should be ripped off as limbs go": each piece is handed over with the parts it's worn on, and the
+	 * body sheds it with them). Without a body to hold it, it falls where they did.
+	 */
 	private static void spill(ServerPlayer player) {
-		for (ItemStack stack : worn(player)) {
-			if (!stack.isEmpty()) {
+		List<ItemStack> worn = worn(player);
+		for (Slot slot : Slot.values()) {
+			ItemStack stack = worn.get(slot.ordinal());
+			if (!stack.isEmpty() && !KitchenCompat.keepOnBody(player, stack, partsOf(slot))) {
 				player.spawnAtLocation(player.level(), stack.copy());
 			}
 		}
 		clear(player);
+	}
+
+	/** The body parts {@code slot}'s piece is worn on, as Kitchen counts them (head 1, arms 2 and 4, legs 8 and 16; 0 the torso). */
+	private static int partsOf(Slot slot) {
+		return switch (slot) {
+			case ARMS, HANDS -> 2 | 4;
+			case THIGHS, SHINS -> 8 | 16;
+			case HOOD, CREST -> 1;
+			default -> 0;
+		};
 	}
 
 	/** Pieces that no longer fit how {@code player} is dressed (spaulders without a chest piece, a crest without a helm) or that they may not wear come off into the inventory. */

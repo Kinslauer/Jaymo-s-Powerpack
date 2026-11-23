@@ -1,0 +1,166 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "all": "jaymoskitchen:block/ash_pile",
+    "particle": "jaymoskitchen:block/ash_pile"
+  },
+  "elements": [
+    {
+      "from": [
+        4.45,
+        0.0,
+        4.98
+      ],
+      "to": [
+        11.55,
+        1.4,
+        11.02
+      ],
+      "faces": {
+        "north": {
+          "texture": "#all",
+          "uv": [
+            0,
+            14.6,
+            7.1000000000000005,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#all",
+          "uv": [
+            0,
+            14.6,
+            7.1000000000000005,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#all",
+          "uv": [
+            0,
+            14.6,
+            6.039999999999999,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#all",
+          "uv": [
+            0,
+            14.6,
+            6.039999999999999,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#all",
+          "uv": [
+            4.45,
+            4.98,
+            11.55,
+            11.02
+          ]
+        },
+        "down": {
+          "texture": "#all",
+          "uv": [
+            4.45,
+            4.98,
+            11.55,
+            11.02
+          ],
+          "cullface": "down"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          0,
+          8
+        ],
+        "axis": "y",
+        "angle": 45
+      }
+    },
+    {
+      "from": [
+        5.87,
+        1.4,
+        6.19
+      ],
+      "to": [
+        10.13,
+        2.8,
+        9.81
+      ],
+      "faces": {
+        "north": {
+          "texture": "#all",
+          "uv": [
+            0,
+            14.6,
+            4.260000000000001,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#all",
+          "uv": [
+            0,
+            14.6,
+            4.260000000000001,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#all",
+          "uv": [
+            0,
+            14.6,
+            3.62,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#all",
+          "uv": [
+            0,
+            14.6,
+            3.62,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#all",
+          "uv": [
+            5.87,
+            6.19,
+            10.13,
+            9.81
+          ]
+        },
+        "down": {
+          "texture": "#all",
+          "uv": [
+            5.87,
+            6.19,
+            10.13,
+            9.81
+          ],
+          "cullface": "down"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          0,
+          8
+        ],
+        "axis": "y",
+        "angle": 45
+      }
+    }
+  ]
+}

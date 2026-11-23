@@ -10,11 +10,12 @@ import java.util.Base64;
 import java.util.List;
 import com.jaymoskitchen.ragdoll.LivingRagdolls;
 import com.jaymoskitchen.ragdoll.RagdollBody;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,15 +24,14 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.monster.zombie.Zombie;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Player corpses. When a player dies, everything but their hotbar drops as usual; the hotbar stays with their body,
- * which falls in a heap where they died. Right-click it to take the hotbar back: into the same slots when they're
- * free, anywhere in the inventory otherwise (whatever doesn't fit stays on the body). Burn it, or after a while it
- * gets up as a {@link ZombiePlayer}.
+ * Player corpses. When a player dies, their body falls in a heap where they died with everything they carried on it
+ * (Andy: "they should keep the loot on their corpse like npcs do, now accessed with a right click. the only time loot
+ * should burst like the video is when the body is gibbed"): nothing drops. Right-click it to open its loot screen
+ * ({@link CorpseLootMenu}) and take what you want. Blown apart, it all bursts out; burned away, it's left lying in the
+ * ash; left long enough, it gets up as a {@link ZombiePlayer} carrying it (dropped when that's killed).
  */
 public final class PlayerCorpses {
 	public static EntityType<ZombiePlayer> ZOMBIE_PLAYER;
@@ -50,27 +50,61 @@ public final class PlayerCorpses {
 				.clientTrackingRange(8)
 				.build(key));
 		FabricDefaultAttributeRegistry.register(ZOMBIE_PLAYER, ZombiePlayer.createZombiePlayerAttributes());
+		// what a dying player carried waits on them until their body appears on the first tick of dying
+		// (LivingEntityMixin); respawning or leaving the game before that tick leaves the body then, so none of it is lost
+		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> leftBehind(oldPlayer));
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> leftBehind(handler.player));
 	}
 
-	/** What a player had on their hotbar when they died, set aside before the rest of the inventory drops. */
+	/** A player gone before their body appeared: it appears now, with what they carried. */
+	private static void leftBehind(ServerPlayer player) {
+		if (((Holder) player).jaymoskitchen$hotbar().stream().anyMatch(stack -> !stack.isEmpty())) {
+			spawn(player);
+		}
+	}
+
+	/** What a player carried when they died (inventory, armour, off hand: see {@code CorpseEntity#hotbar}), set aside for their body. */
 	public interface Holder {
 		void jaymoskitchen$setHotbar(List<ItemStack> hotbar, int selected);
 
 		List<ItemStack> jaymoskitchen$hotbar();
 
 		int jaymoskitchen$selected();
+
+		/** For each piece handed over after the inventory ({@link #keepWith}), the parts it's worn on. */
+		List<Integer> jaymoskitchen$parts();
 	}
 
-	/** The player has started to die: their body appears, with their hotbar. */
+	/**
+	 * For other mods (by name: Kingdoms' harness and hidden blades, Powers' baubles and web shooters): a player who has
+	 * just died and leaves a body keeps {@code stack} on it with the rest of what they carried, worn on {@code parts}
+	 * ({@code CorpseEntity.PART_} bits; 0 for the torso), so it's torn off with any of those parts the body lacks. False
+	 * (keep it yourself) if no body will hold it: kept inventory, no body left, or no room.
+	 */
+	public static boolean keepWith(ServerPlayer player, ItemStack stack, int parts) {
+		Holder holder = (Holder) player;
+		List<ItemStack> held = holder.jaymoskitchen$hotbar();
+		if (held.size() < CorpseEntity.INVENTORY_SLOTS || held.size() >= CorpseEntity.PLAYER_SLOTS) {
+			return false;
+		}
+		held.add(stack.copy());
+		holder.jaymoskitchen$parts().add(parts);
+		return true;
+	}
+
+	/** The player has started to die: their body appears, with everything they carried. */
 	public static void spawn(ServerPlayer player) {
 		ServerLevel level = player.level();
 		CorpseEntity corpse = new CorpseEntity(Corpses.CORPSE, level);
 		corpse.snapTo(player.getX(), player.getY(), player.getZ(), player.yBodyRot, 0.0F);
 		Holder holder = (Holder) player;
-		corpse.setUpPlayer(player.getUUID(), player.getGameProfile().name(), holder.jaymoskitchen$hotbar(), holder.jaymoskitchen$selected());
+		corpse.setUpPlayer(player.getUUID(), player.getGameProfile().name(), holder.jaymoskitchen$hotbar(), holder.jaymoskitchen$selected(),
+			holder.jaymoskitchen$parts());
 		corpse.setSlim(slim(player));
 		// (0.5.37) the look they died in (a Bio-built's form), kept for good
 		corpse.keepLookTags(player);
+		// what was worn on a head or limb they died without (a blast takes every one) comes off (CorpseEntity#tearOff); the
+		// rest stays on the torso
 		corpse.setMissing(Corpses.missingParts(player));
 		holder.jaymoskitchen$setHotbar(List.of(), 0);
 		corpse.markJustDied();
@@ -103,43 +137,6 @@ public final class PlayerCorpses {
 		}
 		// the default skins: the first nine of eighteen are slim
 		return Math.floorMod(player.getUUID().hashCode(), 18) < 9;
-	}
-
-	/** Right-clicked: hands the hotbar back, slot for slot where it can. */
-	static void restore(CorpseEntity corpse, Player player, List<ItemStack> hotbar, int selected) {
-		Inventory inventory = player.getInventory();
-		boolean moved = false;
-		boolean left = false;
-		for (int i = 0; i < hotbar.size(); i++) {
-			ItemStack stack = hotbar.get(i);
-			if (stack.isEmpty()) {
-				continue;
-			}
-			if (i < Inventory.getSelectionSize() && inventory.getItem(i).isEmpty()) {
-				inventory.setItem(i, stack);
-				hotbar.set(i, ItemStack.EMPTY);
-				moved = true;
-				continue;
-			}
-			int before = stack.getCount();
-			inventory.add(stack);
-			moved |= stack.getCount() != before;
-			if (stack.isEmpty()) {
-				hotbar.set(i, ItemStack.EMPTY);
-			} else {
-				left = true;
-			}
-		}
-		if (moved) {
-			corpse.jolt(false);
-		}
-		if (moved && player.getUUID().toString().equals(corpse.ownerId())) {
-			inventory.setSelectedSlot(selected);
-		}
-		player.level().playSound(null, corpse.getX(), corpse.getY(), corpse.getZ(), SoundEvents.ARMOR_EQUIP_LEATHER.value(),
-			SoundSource.PLAYERS, 1.0F, 0.8F);
-		player.sendOverlayMessage(Component.translatable(left ? "message.jaymoskitchen.corpse.player_no_room"
-			: moved ? "message.jaymoskitchen.corpse.player_restored" : "message.jaymoskitchen.corpse.burn_zombie"));
 	}
 
 	/** Left too long: the body gets up as a zombie wearing their face, with what was left on it. */

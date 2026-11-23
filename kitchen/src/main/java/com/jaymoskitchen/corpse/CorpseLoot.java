@@ -11,9 +11,15 @@ import net.minecraft.world.item.ItemStack;
  * {@link #GEAR} slots, written back onto the body on every change so it's drawn without what's been taken) and its
  * pockets (the first {@link #POCKETS} stacks of its loot, read from the body's own list, so two people looking at once
  * see the same thing and nothing is taken twice). Only taken from, never put into. One per body while anyone's looking.
+ * <p>
+ * A player's body carries everything they had ({@link CorpseEntity#inventory}, laid out as their own inventory): its
+ * armour and off hand in the gear slots, the rest in {@link #PLAYER_POCKETS} pockets (main inventory, then the hotbar),
+ * then what other mods left on it (harness, baubles and the like: {@link CorpseEntity#EXTRA_SLOTS}).
  */
 final class CorpseLoot implements Container {
-	static final int GEAR = 7, POCKETS = 12, SIZE = GEAR + POCKETS;
+	static final int GEAR = 7, POCKETS = 12, PLAYER_POCKETS = 36, SIZE = GEAR + PLAYER_POCKETS + CorpseEntity.EXTRA_SLOTS;
+	/** A player's body: the inventory slot each gear slot shows (head, chest, legs, feet, off hand), -1 for none. */
+	private static final int[] PLAYER_GEAR = {39, 38, 37, 36, -1, -1, 40};
 	/** How far away (blocks) the screen stays open. */
 	private static final double REACH = 8.0;
 
@@ -46,6 +52,10 @@ final class CorpseLoot implements Container {
 
 	@Override
 	public ItemStack getItem(int slot) {
+		if (corpse.isPlayerCorpse()) {
+			int at = inventorySlot(slot);
+			return at >= 0 ? corpse.inventory().get(at) : ItemStack.EMPTY;
+		}
 		if (slot < GEAR) {
 			return slot >= 0 ? gear[slot] : ItemStack.EMPTY;
 		}
@@ -80,6 +90,13 @@ final class CorpseLoot implements Container {
 		if (slot < 0) {
 			return;
 		}
+		if (corpse.isPlayerCorpse()) {
+			int at = inventorySlot(slot);
+			if (at >= 0) {
+				corpse.inventory().set(at, stack);
+			}
+			return;
+		}
 		if (slot < GEAR) {
 			gear[slot] = stack;
 		} else {
@@ -92,8 +109,24 @@ final class CorpseLoot implements Container {
 		setChanged();
 	}
 
+	/** A player's body: where in its inventory {@code slot} is (pockets: main inventory, then hotbar), or -1. */
+	private static int inventorySlot(int slot) {
+		if (slot < 0 || slot >= SIZE) {
+			return -1;
+		}
+		if (slot < GEAR) {
+			return PLAYER_GEAR[slot];
+		}
+		int i = slot - GEAR;
+		return i < 27 ? 9 + i : i < PLAYER_POCKETS ? i - 27 : CorpseEntity.INVENTORY_SLOTS + i - PLAYER_POCKETS;
+	}
+
 	@Override
 	public void setChanged() {
+		if (corpse.isPlayerCorpse()) {
+			// (a player's things aren't drawn from its look)
+			return;
+		}
 		corpse.putGear(gear);
 		look = corpse.look();
 	}
