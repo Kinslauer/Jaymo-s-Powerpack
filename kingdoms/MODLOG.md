@@ -16521,3 +16521,10 @@ Andy picked "goblin extras" from the survival pick list (2026-11-22); the Goblin
   with an arm). Without Kitchen (or with kept inventory) nothing changes.
 - Classes: `Harness` (`spill`, `partsOf`), `HiddenBlade`, `KitchenCompat.keepOnBody`.
 - Built by CI; not played.
+
+## 0.11.99 (2026-11-23): Spears and the pitchfork pierce (#2037)
+
+- A spear or the pitchfork from Jaymo's Powers counts as a piercing blow, not a slashing one (they sit in the swords
+  tag, which came first; `DamageKinds.ofWeapon`). That covers the primitive spear, the leaf spear and the Huntsman's
+  spear too. The pitchfork also works under water like a spear (`UnderWater`).
+- Built by CI; not played.
