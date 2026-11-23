@@ -900,3 +900,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 
 - 2026-11-23 (Andy, clip of vultures eating his body in Limbo): vultures land and pick at a body limb from limb until disturbed by other mobs or players; all scavengers and body eaters go a limb at a time (time to recover party members or revive a fallen MCA); mobs busy with another task (eating) notice sneaking players later and may fly off with a limb in their mouth. Branch scavengers-and-sight.
 - 2026-11-23 (Andy, stalking a pillager caravan): all MCA and humanoids see in a vision cone and rely on hearing for their peripheral vision. Branch scavengers-and-sight.
+- 2026-11-23 (context-controls): Andy: "to reduce confusion maybe a low profile floating menu with all the possible controls when in context, for example corpse lifting looting, villager greetings and pickpocketing along with the aforementioned stealth kills." Built as a list right of the crosshair (PR #2030).
+- 2026-11-23 (context-controls): Andy said "Merge" for PR #2030; squash-merged.
