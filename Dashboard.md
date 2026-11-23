@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 15:09). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 16:26). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -23,6 +23,10 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2049 Fishing: read the fish's moods, tire it out, watch your line (Powers, 2026-11-23)
+- [ ] #2048 The Nightmare shows that shots go through it (Kingdoms, 2026-11-23)
+- [ ] #2047 Wounded NPCs want their limbs before gold (Kingdoms, 2026-11-23)
+- [ ] #2046 Villagers talk to each other again (Kingdoms, 2026-11-23)
 - [ ] #2045 small hunters don't eat the living, full ones leave the downed be (Powers, Kingdoms, 2026-11-23)
 - [ ] #2044 Weapons in set places on the body: swords at the hips, four flintlocks, guns on the back (Powers, 2026-11-23)
 - [ ] #2043 A sellsword doesn't call out to you and then turn you away (Kingdoms, 2026-11-23)
@@ -79,11 +83,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1978 Classes start with a skill of their kind (Kingdoms, 2026-11-22)
 - [ ] #1977 Talk wheel: answers round a wheel on the right, worded by your blood and class; chat hidden while talking (Kingdoms, 2026-11-22)
 - [ ] #1976 fight music for ordinary fights (Kingdoms, 2026-11-22)
-- [ ] #1975 the roll stays on the ground, the Sit key prone, a real struggle up the wall (Powers, 2026-11-22)
-- [ ] #1974 a sword never bursts a body (Powers, Kingdoms, 2026-11-22)
-- [ ] #1973 VillagersPlus' miner's house rarer in villages (Powers, Kingdoms, 2026-11-22)
-- [ ] #1972 tips switch - turn tip cards off and on (Powers, 2026-11-22)
-- …and 393 older ones.
+- …and 397 older ones.
 
 ## Health
 
