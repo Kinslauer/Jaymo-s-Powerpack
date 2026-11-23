@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 07:44). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 07:57). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -23,6 +23,7 @@ Nothing stuck.
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2028 Safe starts: no enemy to mobs until you move; H goes to the page a hint named (Powers, Kingdoms, 2026-11-23)
 - [ ] #2023 From the Shadows: the Devil Splitter, Thirst for Blood, the crystallized dagger and the Horn of Apocalypse (Kingdoms, 2026-11-23)
 - [ ] #2022 Realms never wear the same armour: each keeps its own livery (Kingdoms, 2026-11-23)
 - [ ] #2021 Wounds shown like potions; bandages wrap several limbs at once; splints by two, from plant string too (Powers, 2026-11-23)
@@ -82,12 +83,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1966 loose wood no longer crashes the server while land generates (Kingdoms, 2026-11-21)
 - [ ] #1951 hints as tip cards - text hints show top right instead of over the hotbar (Powers, 2026-11-21)
 - [ ] #1952 Stealth kills: sneak + hold attack behind someone who never saw you (Powers, Kingdoms, 2026-11-20)
-- [ ] #1950 bodies keep their facing prone, sat or crouched; the view rises with the head on get-ups (Powers, 2026-11-20)
-- …and 375 older ones.
+- …and 376 older ones.
 
 ## Health
 
-5 problems in the notes: [[Health]].
+4 problems in the notes: [[Health]].
 
 ## Last week
 
