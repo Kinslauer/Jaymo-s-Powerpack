@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 10:03). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 10:48). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -23,6 +23,8 @@ Nothing stuck.
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2038 Drafting Table screen; trapdoors take a second use (Powers, Kingdoms, 2026-11-23)
+- [ ] #2037 The flanged mace is a blunt weapon: no more stabbing (Powers, Kingdoms, 2026-11-23)
 - [ ] #2034 A queen is no longer found in chains under her own market stall (Kingdoms, 2026-11-23)
 - [ ] #2033 Humanoids see in a cone and hear at their sides; busy mobs notice less (Kingdoms, Kitchen, 2026-11-23)
 - [ ] #2032 A dead player's baubles and web shooters stay on their body (Powers, Kingdoms, Kitchen, 2026-11-23)
@@ -81,9 +83,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1958 Z Fighter gaps 1: stats (Powers, 2026-11-22)
 - [ ] #1956 Z Fighter gaps 9: borrowed time, spared masters' homes, themed tournaments (Powers, 2026-11-22)
 - [ ] #1939 zfighter gaps 3: techniques (Powers, 2026-11-22)
-- [ ] #1938 Z Fighter gaps 2: stamina for dash, guard and forms (Powers, 2026-11-22)
-- [ ] #1937 Z Fighter gaps 10: camera and HUD (Powers, 2026-11-22)
-- …and 382 older ones.
+- …and 384 older ones.
 
 ## Health
 
