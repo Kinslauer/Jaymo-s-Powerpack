@@ -290,7 +290,7 @@ public class Froglin extends Monster implements GeoEntity {
 			if (!player.isCreative()) {
 				stack.shrink(1);
 			}
-			this.playSound(SoundEvents.GENERIC_EAT, this.getSoundVolume(), this.getVoicePitch());
+			this.playSound(SoundEvents.GENERIC_EAT.value(), this.getSoundVolume(), this.getVoicePitch());
 			this.gameEvent(GameEvent.EAT);
 			this.fed = FED_TICKS;
 			this.setFull(true);
@@ -521,7 +521,7 @@ public class Froglin extends Monster implements GeoEntity {
 			if (tick >= 14 && Froglin.this.distanceTo(target) <= SWALLOW_RANGE && smallGame(target)) {
 				Froglin.this.setFull(true);
 				Froglin.this.gameEvent(GameEvent.EAT);
-				Froglin.this.playSound(SoundEvents.GENERIC_EAT, Froglin.this.getSoundVolume(), Froglin.this.getVoicePitch());
+				Froglin.this.playSound(SoundEvents.GENERIC_EAT.value(), Froglin.this.getSoundVolume(), Froglin.this.getVoicePitch());
 				target.discard();
 				Froglin.this.setTarget(null);
 			}
