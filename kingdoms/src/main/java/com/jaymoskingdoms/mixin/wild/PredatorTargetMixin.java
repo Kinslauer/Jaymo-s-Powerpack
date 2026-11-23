@@ -19,7 +19,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * A hunter's own search for quarry, once it has found an animal, goes through {@link FedPredators#choose}: a fed
- * predator takes none, a hungry one takes the young first. Searches that found a player, a villager or a monster, and
+ * predator takes none, a hungry one takes the young first. A fed one lets a player or a villager be as well
+ * ({@link FedPredators#leaves}). Searches that found a player, a villager or a monster, and
  * hunters outside the {@code sated_predators} tag, are left exactly as they were.
  * <p>A stalker ({@link WolfStalkers#holdsBack}) whose search found a player it would stalk doesn't charge them: it takes
  * up the stalk.
@@ -44,7 +45,10 @@ abstract class PredatorTargetMixin extends TargetGoal {
 
 	@Inject(method = "findTarget", at = @At("TAIL"))
 	private void jaymoskingdoms$fedOrYoungFirst(CallbackInfo ci) {
-		if (this.target instanceof Player player && WolfStalkers.holdsBack(this.mob, player)) {
+		if (this.target != null && FedPredators.leaves(this.mob, this.target)) {
+			// a fed hunter leaves people be (players and villagers alike)
+			this.target = null;
+		} else if (this.target instanceof Player player && WolfStalkers.holdsBack(this.mob, player)) {
 			// a stalker that found a player it would stalk keeps out of sight and stalks them instead
 			this.target = null;
 		} else if (this.target instanceof Animal) {

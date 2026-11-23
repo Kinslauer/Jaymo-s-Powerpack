@@ -10,7 +10,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** (0.5.21) A realm's MCA guards also go for its foes: players it counts hostile, barbarians, its enemies' folk in a war ({@link McaCompat#foe}). */
+/**
+ * (0.5.21) A realm's MCA guards also go for its foes: players it counts hostile, barbarians, its enemies' folk in a war
+ * ({@link McaCompat#foe}), and whatever has just hurt someone ({@link com.jaymoskingdoms.Bloodshed#attacker}).
+ */
 @Mixin(GuardEnemiesSensor.class)
 abstract class McaGuardFoesMixin {
 	/** As keen as on a monster that's after them (MCA's 9), just under. */
@@ -30,7 +33,13 @@ abstract class McaGuardFoesMixin {
 			cir.setReturnValue(-1);
 			return;
 		}
-		if (cir.getReturnValueI() < FOE_PRIORITY && guard != null && McaCompat.foe(guard, entity)) {
+		if (guard != null && com.jaymoskingdoms.Bloodshed.routed(guard)) {
+			// a guard whose band broke and ran goes for nobody till it's over
+			cir.setReturnValue(-1);
+			return;
+		}
+		// (Andy, 2026-11-23) and anything that has just hurt someone, a beast as much as a monster (Bloodshed#attacker)
+		if (cir.getReturnValueI() < FOE_PRIORITY && guard != null && (McaCompat.foe(guard, entity) || com.jaymoskingdoms.Bloodshed.attacker(entity))) {
 			cir.setReturnValue(FOE_PRIORITY);
 		}
 	}
