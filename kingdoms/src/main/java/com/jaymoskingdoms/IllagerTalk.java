@@ -114,8 +114,6 @@ public final class IllagerTalk {
 	static final double YIELD_RANGE = 10.0, WATCH_RANGE = 32.0;
 	/** How long the players who struck an illager are remembered for its sparing (ticks since the last blow). */
 	static final int DOWNERS_TICKS = 20 * 60 * 5;
-	/** Their colour on the card's head. */
-	static final int HEAD_COLOR = 0xB8C4A0;
 	/** A conversation lapses this long after it opened (ticks). */
 	static final int TALK_TICKS = 20 * 90;
 	/**
@@ -395,12 +393,18 @@ public final class IllagerTalk {
 		return s != null && atPeace(illager, s, player);
 	}
 
-	/** The card's head: their name if you know it (else what they are), their nature, how they take you, their mood. */
-	private static Component head(AbstractIllager illager, Self s, ServerPlayer player, Attitude attitude) {
-		Component who = Introductions.knows(player, illager) && named(illager) ? Component.literal(s.name()) : illager.getType().getDescription();
-		return Component.translatable("illager_talk.jaymoskingdoms.head", who, Component.translatable("illager_talk.jaymoskingdoms.nature." + s.nature()),
-			Component.translatable("illager_talk.jaymoskingdoms.attitude." + attitude.key()),
-			Component.translatable("illager_talk.jaymoskingdoms.mood." + moodStep(s.mood()))).withColor(HEAD_COLOR);
+	/**
+	 * Shows {@code player} the talk card ({@link IllagerCard}, drawn like MCA's villager screen): their name if you know it
+	 * (else what they are), what they are, their nature, how they take you, their mood and hearts, {@code words} (in their
+	 * tongue as far as you know it) and {@code options}.
+	 */
+	private static void card(ServerPlayer player, AbstractIllager illager, Self s, Attitude attitude, Component words, List<IllagerCard.Option> options) {
+		Component kind = illager.getType().getDescription();
+		Component who = Introductions.knows(player, illager) && named(illager) ? Component.literal(s.name()) : kind;
+		int step = moodStep(s.mood());
+		IllagerCard.send(player, illager, List.of(who, kind, Component.translatable("illager_talk.jaymoskingdoms.nature." + s.nature()),
+			Component.translatable("illager_talk.jaymoskingdoms.attitude." + attitude.key()), Component.translatable("illager_talk.jaymoskingdoms.mood." + step)),
+			step, s.heartsOf(player.getUUID()), IllagerTongue.heard(player, illager, words), options);
 	}
 
 	/** Mood in five steps: 0 spiteful .. 4 pleased. */
@@ -473,47 +477,58 @@ public final class IllagerTalk {
 		int price = price(illager, s);
 		long milli = Money.worth(price);
 		boolean canBluff = IllagerTongue.points(player) >= IllagerTongue.BLUFF_FROM;
-		List<Menus.Choice> choices = new ArrayList<>();
-		choices.add(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.parley.calm"), p -> calm(p, illager)));
-		choices.add(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.parley.pay", Money.text(player, milli)), Money.canPay(player, milli),
-			p -> pay(p, illager, price)));
-		choices.add(Menus.Choice.of(Component.translatable(canBluff ? "illager_talk.jaymoskingdoms.parley.bluff" : "illager_talk.jaymoskingdoms.parley.bluff_cant"),
-			canBluff, p -> bluff(p, illager)));
-		choices.add(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.parley.walk"), p -> walk(p, illager)));
-		Menus.ask(player, illager, head(illager, s, player, Attitude.HOSTILE), IllagerTongue.heard(player, illager, line("parley." + s.nature(), random)), choices);
+		// (every way out of a parley ends the talk: won, they leave you be; lost, they come for you)
+		List<IllagerCard.Option> options = new ArrayList<>();
+		options.add(IllagerCard.Option.ending(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.parley.calm"), p -> calm(p, illager)),
+			IllagerCard.LIST));
+		options.add(IllagerCard.Option.ending(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.parley.pay", Money.text(player, milli)),
+			Money.canPay(player, milli), p -> pay(p, illager, price)), IllagerCard.LIST));
+		options.add(IllagerCard.Option.ending(Menus.Choice.of(Component.translatable(canBluff ? "illager_talk.jaymoskingdoms.parley.bluff"
+			: "illager_talk.jaymoskingdoms.parley.bluff_cant"), canBluff, p -> bluff(p, illager)), IllagerCard.LIST));
+		options.add(IllagerCard.Option.ending(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.parley.walk"), p -> walk(p, illager)),
+			IllagerCard.LIST));
+		card(player, illager, s, Attitude.HOSTILE, line("parley." + s.nature(), random), options);
 		level.playSound(null, illager.getX(), illager.getY(), illager.getZ(), SoundEvents.VINDICATOR_AMBIENT, SoundSource.HOSTILE, 0.8F, 0.9F);
 	}
 
-	/** The card at peace. */
+	/**
+	 * The card at peace, laid out as MCA's villager screen: Talk (their name, a chat, what they want, word of their hold,
+	 * goodbye), Interact (a gift in MCA's gift mode, Talk Them Round, buying off the posters) and Trade.
+	 */
 	private static void main(ServerPlayer player, AbstractIllager illager, Self s, Attitude attitude) {
 		ServerLevel level = (ServerLevel)illager.level();
 		RandomSource random = level.getRandom();
 		long day = level.getGameTime() / 24000L;
-		List<Menus.Choice> choices = new ArrayList<>();
+		List<IllagerCard.Option> options = new ArrayList<>();
 		if (!(Introductions.knows(player, illager) && named(illager))) {
-			choices.add(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.ask_name"), p -> askName(p, illager)));
+			options.add(IllagerCard.Option.of(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.ask_name"), p -> askName(p, illager)),
+				IllagerCard.TALK));
 		}
 		Long chatted = s.chatted().get(player.getUUID().toString());
-		choices.add(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.chat"), chatted == null || chatted < day, p -> chat(p, illager)));
-		choices.add(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.ask_want"), p -> askWant(p, illager)));
-		ItemStack held = player.getMainHandItem();
-		choices.add(Menus.Choice.of(held.isEmpty() ? Component.translatable("illager_talk.jaymoskingdoms.give_none")
-			: Component.translatable("illager_talk.jaymoskingdoms.give", held.getHoverName()), !held.isEmpty(), p -> give(p, illager)));
-		choices.add(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.trade"), p -> trade(p, illager)));
-		choices.add(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.hold"), p -> hold(p, illager)));
-		choices.add(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.round"), p -> round(p, illager)));
+		options.add(IllagerCard.Option.of(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.chat"), chatted == null || chatted < day,
+			p -> chat(p, illager)), IllagerCard.TALK));
+		options.add(IllagerCard.Option.of(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.ask_want"), p -> askWant(p, illager)),
+			IllagerCard.TALK));
+		options.add(IllagerCard.Option.of(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.hold"), p -> hold(p, illager)), IllagerCard.TALK));
+		options.add(IllagerCard.Option.ending(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.leave"), p -> leave(p, illager)),
+			IllagerCard.TALK));
+		// (what you hold when you give is picked on the screen, as in MCA's gift mode: scroll the hotbar, click to give)
+		options.add(IllagerCard.Option.of(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.gift"), p -> give(p, illager)), IllagerCard.GIFT));
+		options.add(IllagerCard.Option.of(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.round"), p -> round(p, illager)),
+			IllagerCard.INTERACT));
 		if (RaiderGear.mark(player) > 0) {
 			// wanted by the illagers: he'll see the posters come down, for a price
 			long price = RaiderGear.price(player);
-			choices.add(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.buy_off", Money.text(player, price)), Money.canPay(player, price), p -> {
-				if (RaiderGear.buyOff(p)) {
-					say(level, illager, p, line("bought_off", random), Speech.WHITE);
-				}
-				back(p, illager);
-			}));
+			options.add(IllagerCard.Option.of(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.buy_off", Money.text(player, price)),
+				Money.canPay(player, price), p -> {
+					if (RaiderGear.buyOff(p)) {
+						say(level, illager, p, line("bought_off", random), Speech.WHITE);
+					}
+					back(p, illager);
+				}), IllagerCard.INTERACT));
 		}
-		choices.add(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.leave"), p -> leave(p, illager)));
-		Menus.ask(player, illager, head(illager, s, player, attitude), IllagerTongue.heard(player, illager, line("greet." + attitude.key(), random)), choices);
+		options.add(IllagerCard.Option.of(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.trade"), p -> trade(p, illager)), IllagerCard.MAIN));
+		card(player, illager, s, attitude, line("greet." + attitude.key(), random), options);
 	}
 
 	/** Back to the card at peace, in the same conversation (same attitude). */
@@ -847,24 +862,23 @@ public final class IllagerTalk {
 			return;
 		}
 		Self s = self(illager);
-		List<Menus.Choice> choices = new ArrayList<>();
+		List<IllagerCard.Option> options = new ArrayList<>();
 		for (Offer o : offers(illager)) {
 			int price = cost(player, illager, s, o);
 			Component goods = Component.translatable("illager_talk.jaymoskingdoms.goods", o.count(), new ItemStack(o.item()).getHoverName());
 			if (price < 0) {
 				boolean has = count(player.getInventory(), st -> st.is(o.item())) >= o.count();
-				choices.add(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.sell", goods, Money.text(player, Money.worth(-price))), has,
-					p -> sell(p, illager, o)));
+				options.add(IllagerCard.Option.of(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.sell", goods,
+					Money.text(player, Money.worth(-price))), has, p -> sell(p, illager, o)), IllagerCard.LIST));
 			} else {
 				long milli = Money.worth(price);
-				choices.add(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.buy", goods, Money.text(player, milli)), Money.canPay(player, milli),
-					p -> buy(p, illager, o)));
+				options.add(IllagerCard.Option.of(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.buy", goods, Money.text(player, milli)),
+					Money.canPay(player, milli), p -> buy(p, illager, o)), IllagerCard.LIST));
 			}
 		}
-		choices.add(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.back"), p -> back(p, illager)));
+		options.add(IllagerCard.Option.of(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.back"), p -> back(p, illager)), IllagerCard.BACK));
 		Talk t = talk(player, illager);
-		Menus.ask(player, illager, head(illager, s, player, t == null ? Attitude.WARY : t.attitude()),
-			IllagerTongue.heard(player, illager, line("trade", illager.getRandom())), choices);
+		card(player, illager, s, t == null ? Attitude.WARY : t.attitude(), line("trade", illager.getRandom()), options);
 	}
 
 	private static void buy(ServerPlayer player, AbstractIllager illager, Offer o) {
@@ -978,17 +992,17 @@ public final class IllagerTalk {
 		long day = level.getGameTime() / 24000L;
 		Self s = self(illager);
 		boolean canBluff = IllagerTongue.points(player) >= IllagerTongue.BLUFF_FROM;
-		List<Menus.Choice> choices = new ArrayList<>();
+		List<IllagerCard.Option> options = new ArrayList<>();
 		for (String move : new String[] {"persuade", "bluff", "threaten"}) {
 			boolean fresh = TRIED.getOrDefault(illager.getUUID() + "|" + player.getUUID() + "|" + move, -1L) < day;
 			boolean able = fresh && (!move.equals("bluff") || canBluff);
-			choices.add(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.round." + move + (move.equals("bluff") && !canBluff ? "_cant" : "")),
-				able, p -> move(p, illager, move)));
+			// (a threat ends the talk, won or lost; the others come back to the card)
+			options.add(new IllagerCard.Option(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.round." + move
+				+ (move.equals("bluff") && !canBluff ? "_cant" : "")), able, p -> move(p, illager, move)), IllagerCard.LIST, move.equals("threaten")));
 		}
-		choices.add(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.back"), p -> back(p, illager)));
+		options.add(IllagerCard.Option.of(Menus.Choice.of(Component.translatable("illager_talk.jaymoskingdoms.back"), p -> back(p, illager)), IllagerCard.BACK));
 		Talk t = talk(player, illager);
-		Menus.ask(player, illager, head(illager, s, player, t == null ? Attitude.WARY : t.attitude()),
-			IllagerTongue.heard(player, illager, line("round", level.getRandom())), choices);
+		card(player, illager, s, t == null ? Attitude.WARY : t.attitude(), line("round", level.getRandom()), options);
 	}
 
 	private static void move(ServerPlayer player, AbstractIllager illager, String move) {

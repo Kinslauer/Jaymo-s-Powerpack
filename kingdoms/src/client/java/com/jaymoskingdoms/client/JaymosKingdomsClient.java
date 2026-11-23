@@ -283,6 +283,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		VampireLooks.register();
 		StakeLayer.register();
 		TalkScreen.register();
+		IllagerTalkScreen.register();
 		GameScreen.register();
 		RecallScreen.register();
 		RenegeScreen.register();

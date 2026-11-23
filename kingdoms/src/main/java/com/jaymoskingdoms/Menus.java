@@ -51,17 +51,24 @@ final class Menus {
 		}
 		List<Component> labels = new ArrayList<>();
 		List<Boolean> enabled = new ArrayList<>();
-		List<Consumer<ServerPlayer>> actions = new ArrayList<>();
 		for (Choice c : choices) {
 			labels.add(c.label());
 			enabled.add(c.enabled());
+		}
+		open(player, speaker, choices);
+		// (a goblin says it in its broken English: Dialects.broken)
+		ServerPlayNetworking.send(player, new TalkNet.Ask(speaker.getId(), title, Dialects.goblin(speaker) ? Dialects.broken(words) : words,
+			labels, enabled));
+	}
+
+	/** {@code choices} are now what {@code player}'s next answer to {@code speaker} picks from (a talk card, or IllagerCard). */
+	static void open(ServerPlayer player, LivingEntity speaker, List<Choice> choices) {
+		List<Consumer<ServerPlayer>> actions = new ArrayList<>();
+		for (Choice c : choices) {
 			actions.add(c.enabled() ? c.action() : p -> {
 			});
 		}
 		OPEN.put(player.getUUID(), new Open(speaker.getId(), actions));
-		// (a goblin says it in its broken English: Dialects.broken)
-		ServerPlayNetworking.send(player, new TalkNet.Ask(speaker.getId(), title, Dialects.goblin(speaker) ? Dialects.broken(words) : words,
-			labels, enabled));
 	}
 
 	/** An answer to one of these menus; false when it was not. */
