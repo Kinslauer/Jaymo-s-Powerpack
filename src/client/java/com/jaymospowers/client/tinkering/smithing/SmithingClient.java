@@ -73,6 +73,7 @@ public final class SmithingClient {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.CROSSHAIR, JaymosPowers.id("smithing_bar"), SmithingClient::bar);
 		ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> tooltip(stack, lines));
 		BlockEntityRenderers.register(Smithing.SMITHING_ANVIL_ENTITY, SmithingAnvilRenderer::new);
+		net.minecraft.client.gui.screens.MenuScreens.register(com.jaymospowers.tinkering.smithing.DraftingTableMenu.TYPE, DraftingTableScreen::new);
 		BlockEntityRenderers.register(Smithing.HEARTH_ENTITY, HearthRenderer::new);
 		WiderSmithingClient.init();
 	}
