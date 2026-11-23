@@ -7391,3 +7391,13 @@ following integration task).
 - Andy: "rocks should have an increased chance to critically strike, flying faster and dealing triple damage". A thrown rock is a crit one time in four (`ThrownRocks.CRIT_CHANCE`): it leaves the hand 1.5 times as fast (`CRIT_SPEED`) and hits for three times its damage (`CRIT_DAMAGE`: 9 instead of 3; 1.5 instead of 0.5 on the zombies and Hornkin that shrug rocks off), with crit sparks and the pack's crit cue (ring, flash, your camera punch) where it lands.
 - A speedster's quickened rock is unchanged (no crit on top). The knock-out chance on the unsuspecting is unchanged.
 - Not played.
+
+## 0.26.68 (2026-11-23): A dead player's baubles and web shooters stay on their body (#2032)
+
+- With Jaymo's Kitchen, a player who dies keeps their baubles and web shooters on their body with the rest of what they
+  carried (Andy: "they should keep the loot on their corpse like npcs do"), taken off it in its loot screen, instead of
+  them bursting onto the ground. Rings, bracelets and web shooters come off with a lost arm, foot baubles with a lost
+  leg, head baubles with the head (Andy: "... should be ripped off as limbs go"). Without Kitchen, or with kept
+  inventory, nothing changes.
+- Classes: `Baubles` (`dropAll`, `parts`), `WebShooters`, `power/web/KitchenCompat.keepOnBody`.
+- Built by CI; not played.
