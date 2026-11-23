@@ -1,11 +1,11 @@
 ---
-status: running
+status: done
 task: drop-assassination
 branch: claude/drop-assassination
 with: 
-pr: 
+pr: 2029
 mods: powers, kingdoms
-versions: 
+versions: Powers + Kingdoms (bumped at merge)
 started: 2026-11-23
 owns:
   - src/main/java/com/jaymospowers/core/finisher/Finishers.java
@@ -24,3 +24,5 @@ owns:
 - 
 
 ## Done
+Everyone's drop (4+ blocks onto a foe) downs it, with a move per weapon; Stealth 5+ or the hidden blade kills. Bosses/big take a heavy blow. Built on the Deck (Powers + Kingdoms); nothing played, no pose seen in game. PR #2029.
+- 2026-11-23 09:33 PR #2029 is merged into master; moved to Agents/Done.

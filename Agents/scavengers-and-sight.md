@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: scavengers eat limb by limb, distracted mobs, humanoid vision cones
 branch: scavengers-and-sight
 with: Claude (desktop, Opus)
-pr: 
+pr: 2033
 mods: kitchen, kingdoms
 versions: 
 started: 2026-11-23
@@ -28,3 +28,7 @@ outside their sight: MCA and humanoids see in a cone and hear what's at their si
 - 
 
 ## Done
+PR #2033 (Kitchen + Kingdoms change notes). Bodies are eaten a part at a time; fliers land; 2 eaters at once; driven
+off by monsters/bigger scavengers, skittish ones by players (feeding sight 40%, 1 s reaction), maybe with a part in
+the mouth. Humanoids see nothing outside the cone past 2 blocks (hearing only); busy mobs see/hear half as far.
+Not built on the PC (CI builds); not played.

@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: done
 for: any
 from: coordinator
 asked: 2026-11-23
 thread: 
 claimed_by: drop-assassination
-pr: 
+pr: 2029
 suggested_owns:
   - src/main/java/com/jaymospowers/core/finisher/Finishers.java (new D_* kinds + the landing start)
   - src/client/java/com/jaymospowers/client/finisher/FinisherPose.java (D_* keys)
@@ -45,3 +45,4 @@ About 2 seconds from landing to standing.
 - Lore: it's the Stealth tree's art, the hidden blade's. Add a `(new)` paragraph to Lore.md placing the drop assassination with whoever the hidden blade's makers are in canon.
 - Check every new pose in game; say plainly which ones haven't been seen.
 - Open question for Andy if it matters to the builder: should the plain (non-hidden-blade) drop attack need any skill at all, or truly every player? Built as "every player" per his words.
+- 2026-11-23 09:33 PR #2029 is merged into master; moved to Inbox/Done.
