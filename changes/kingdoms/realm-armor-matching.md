@@ -10,11 +10,15 @@
   next free one (18 trims times 8 cloth mixes, 144 to a colour). A fiefdom keeps its overlord's colour and arms, with a
   livery of its own.
 - A kingdom's soldiers wear its own one of the kettle hat and the lobster-tailed pot (before, every kingdom's wore the
-  lobster tail).
+  lobster tail). Soldiers already wearing a lobster tail keep it unless the kettle hat guards better, so an old
+  kingdom may show both for a while.
 - Guards already in the world are re-marked and given their levy cloth at their next daily look-over.
 - **The realm page** now shows the realm's guard with the harness over his armour (tabard, levy cloth), as he stands
-  in the world, and dressing that figure no longer spends the realm's stores, gold or treasury.
+  in the world, and dressing that figure no longer spends the realm's stores, gold or treasury: it's kitted with what
+  the realm could pay for, counted piece by piece, but nothing is taken.
 - **The check**: whenever the realms change, `Liveries` makes sure no two realms of one colour have one livery; in the
-  dev game a clash stops the game, in a real one it's logged.
+  dev game a clash stops the game, in a real one it's logged as an error. It checks the liveries, not every worn
+  piece: a guard in a full set that takes no trim (a Templar's) shows only his levy cloth, and where militia and archers
+  buy a hood anyway (the plains and the cold) the livery's hood doesn't show on them.
 - Built by CI; not played. Not checked in game: how the trims and levy cloth read on the realm page's small figure, and
   that the harness draws on that figure.

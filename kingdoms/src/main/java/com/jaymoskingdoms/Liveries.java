@@ -30,6 +30,8 @@ public final class Liveries {
 
 	private static String known = "";
 	private static Map<Integer, Integer> liveries = Map.of();
+	private static int lookedAt = -1;
+	private static int lookedOn;
 
 	private Liveries() {
 	}
@@ -41,6 +43,16 @@ public final class Liveries {
 
 	/** {@code f}'s livery (0 to {@link #count}): its own among the world's realms. */
 	static synchronized int of(MinecraftServer server, Faction f) {
+		if (System.identityHashCode(server) != lookedOn || server.getTickCount() != lookedAt || !liveries.containsKey(f.id())) {
+			// (a realm founded this tick is looked for at once)
+			refresh(server);
+		}
+		Integer own = liveries.get(f.id());
+		return own != null ? own : pick(f.id(), count());
+	}
+
+	/** Looks the realms over again (once a tick at most): their liveries are given afresh if a realm or its colour changed. */
+	private static void refresh(MinecraftServer server) {
 		List<Faction> realms = new ArrayList<>();
 		for (Faction r : Factions.all(server)) {
 			if (r.type().isRealm()) {
@@ -56,12 +68,14 @@ public final class Liveries {
 			key.append(ids[i]).append(':').append(colours[i]).append(';');
 		}
 		if (!known.contentEquals(key)) {
-			liveries = assign(ids, colours, count());
+			Map<Integer, Integer> given = assign(ids, colours, count());
+			// (checked before it's kept, so in the dev game a clash goes on stopping it rather than passing once)
+			check(ids, colours, given);
+			liveries = given;
 			known = key.toString();
-			check(ids, colours, liveries);
 		}
-		Integer own = liveries.get(f.id());
-		return own != null ? own : pick(f.id(), count());
+		lookedAt = server.getTickCount();
+		lookedOn = System.identityHashCode(server);
 	}
 
 	/** The trim pattern a livery's smiths work in (an index of {@link Outfits}' patterns). */
@@ -111,7 +125,7 @@ public final class Liveries {
 				if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
 					throw new IllegalStateException(msg);
 				}
-				JaymosKingdoms.LOGGER.warn(msg);
+				JaymosKingdoms.LOGGER.error(msg);
 			}
 		}
 	}

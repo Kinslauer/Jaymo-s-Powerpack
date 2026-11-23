@@ -86,9 +86,26 @@ public final class GuardKit {
 
 	/**
 	 * While a figure is dressed only to be shown (the life story's realm page, {@link LifeStory}): it is kitted with what
-	 * the realm could pay for, but nothing is taken from its stores or treasury. Server thread only.
+	 * the realm could pay for, kept count of as it goes, but nothing is taken from its stores or treasury. Server thread only.
 	 */
 	static boolean preview;
+	/** What the figure being shown has been kitted with so far (items, materials, {@link #EMERALDS}), as if paid. */
+	private static final java.util.Map<Object, Integer> PREVIEW_USED = new java.util.HashMap<>();
+	private static final Object EMERALDS = new Object();
+
+	/** Starts ({@code on}) or ends dressing a figure that is only shown. */
+	static void preview(boolean on) {
+		preview = on;
+		PREVIEW_USED.clear();
+	}
+
+	private static int used(Object what) {
+		return PREVIEW_USED.getOrDefault(what, 0);
+	}
+
+	private static void use(Object what, int count) {
+		PREVIEW_USED.merge(what, count, Integer::sum);
+	}
 
 	/** Who: a rank of the troop ladder, an archer, a gunner. */
 	static final int MIL = 1, SOL = 2, KN = 4, VET = 8, LEAD = 16, ARCH = 32, GUN = 64;
@@ -530,13 +547,22 @@ public final class GuardKit {
 		if (cost.material() == null && cost.count() == 0 && cost.emeralds() == 0) {
 			return gold(c, o.stack().copy());
 		}
-		ItemStack own = !preview ? Storage.take(c.level(), c.f(), s -> s.is(o.stack().getItem()), 1)
-			: Storage.count(c.level(), c.f(), o.stack().getItem()) > 0 ? o.stack().copy() : ItemStack.EMPTY;
+		ItemStack own = ItemStack.EMPTY;
+		if (!preview) {
+			own = Storage.take(c.level(), c.f(), s -> s.is(o.stack().getItem()), 1);
+		} else if (Storage.count(c.level(), c.f(), o.stack().getItem()) - used(o.stack().getItem()) > 0) {
+			use(o.stack().getItem(), 1);
+			own = o.stack().copy();
+		}
 		if (!own.isEmpty()) {
 			return own;
 		}
-		if (cost.material() != null && cost.count() > 0 && Storage.count(c.level(), c.f(), cost.material()) >= cost.count()) {
-			int left = preview ? 0 : cost.count();
+		if (cost.material() != null && cost.count() > 0 && Storage.count(c.level(), c.f(), cost.material()) - used(cost.material()) >= cost.count()) {
+			int left = cost.count();
+			if (preview) {
+				use(cost.material(), left);
+				left = 0;
+			}
 			while (left > 0) {
 				ItemStack taken = Storage.take(c.level(), c.f(), cost.material(), left);
 				if (taken.isEmpty()) {
@@ -549,8 +575,10 @@ public final class GuardKit {
 		if (cost.emeralds() > 0) {
 			MinecraftServer server = c.level().getServer();
 			Faction now = Factions.get(server, c.f().id());
-			if (now != null && now.treasury() >= TREASURY_KEPT + cost.emeralds()) {
-				if (!preview) {
+			if (now != null && now.treasury() - used(EMERALDS) >= TREASURY_KEPT + cost.emeralds()) {
+				if (preview) {
+					use(EMERALDS, cost.emeralds());
+				} else {
 					Factions.update(server, now.id(), x -> x.withTreasury(Math.max(0L, x.treasury() - cost.emeralds())));
 				}
 				return gold(c, o.stack().copy());
@@ -565,8 +593,14 @@ public final class GuardKit {
 	 * (the Crown's) or bright instead.
 	 */
 	private static ItemStack gold(Ctx c, ItemStack made) {
-		if (!HeraldryWear.gilt(made) || (preview ? Storage.count(c.level(), c.f(), Items.GOLD_INGOT) >= HeraldryWear.GILD_GOLD
-			: HeraldryWear.payGold(c.level(), c.f(), 1))) {
+		if (!HeraldryWear.gilt(made)) {
+			return made;
+		}
+		if (preview && Storage.count(c.level(), c.f(), Items.GOLD_INGOT) - used(Items.GOLD_INGOT) >= HeraldryWear.GILD_GOLD) {
+			use(Items.GOLD_INGOT, HeraldryWear.GILD_GOLD);
+			return made;
+		}
+		if (!preview && HeraldryWear.payGold(c.level(), c.f(), 1)) {
 			return made;
 		}
 		return HeraldryWear.refinished(made, HeraldryWear.helmFinish(HeraldryArmour.finish(made)));

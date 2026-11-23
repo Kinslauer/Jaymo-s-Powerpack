@@ -796,7 +796,7 @@ public final class LifeStory {
 		Climate climate = Climate.at(level, f.seat());
 		List<ItemStack> dress = new ArrayList<>(), harness = new ArrayList<>();
 		// (kitted as the realm's guards are, but the figure is only shown: the realm pays nothing for it)
-		GuardKit.preview = true;
+		GuardKit.preview(true);
 		try {
 			Folk folk = JaymosKingdoms.FOLK.create(level, net.minecraft.world.entity.EntitySpawnReason.LOAD);
 			if (folk != null) {
@@ -814,7 +814,7 @@ public final class LifeStory {
 			dress.clear();
 			harness.clear();
 		} finally {
-			GuardKit.preview = false;
+			GuardKit.preview(false);
 		}
 		Realm r = new Realm(f.id(), f.name(), climate.ordinal(), colour, List.copyOf(dress), List.copyOf(harness));
 		DRESSED.put(key, r);
