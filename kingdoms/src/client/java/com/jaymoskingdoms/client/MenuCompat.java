@@ -148,6 +148,8 @@ public final class MenuCompat {
 			reflect(menu, "group", new Class<?>[] {String.class, String.class}, g[0], g[1]);
 		}
 		reflect(menu, "wide", new Class<?>[] {String.class}, "skills");
+		// H after a hint naming one of Kingdoms' pages opens that page (HintLinks)
+		reflect(menu, "landing", new Class<?>[] {Supplier.class}, (Supplier<String>)HintLinks::landing);
 		reflect(menu, "locked", new Class<?>[] {String.class, Supplier.class}, "forms",
 			(Supplier<Component>)() -> Component.translatable("menu.jaymoskingdoms.locked.forms"));
 		reflect(menu, "locked", new Class<?>[] {String.class, Supplier.class}, "boons",

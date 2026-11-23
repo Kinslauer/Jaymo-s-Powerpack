@@ -221,6 +221,20 @@ final class ClassTreeTab {
 		scroll = Math.clamp(scroll - (int) Math.signum(by) * (TILE + GAP_Y), 0, most);
 	}
 
+	/** Shows the tree of {@code player}'s class that holds {@code node}, picked, its row near the top. False: neither class has it. */
+	static boolean aim(Player player, ClassTrees.Node node) {
+		List<PlayerClass> both = Classes.both(player);
+		for (int i = 0; i < both.size(); i++) {
+			if (node.of(both.get(i))) {
+				which = i;
+				selected = node.key();
+				scroll = Math.max(0, (node.row() - 1) * (TILE + GAP_Y));
+				return true;
+			}
+		}
+		return false;
+	}
+
 	static void flip() {
 		which = 1 - which;
 		selected = null;

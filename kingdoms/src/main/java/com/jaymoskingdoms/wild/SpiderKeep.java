@@ -15,6 +15,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.spider.Spider;
 import net.minecraft.world.entity.projectile.Projectile;
 import org.jspecify.annotations.Nullable;
@@ -29,6 +30,10 @@ import org.jspecify.annotations.Nullable;
  * get {@link #LAIR_REACH} out of it (they've got away) or {@link #KEPT_TICKS} pass.</li>
  * <li><b>Roused:</b> striking a spider (a blow or a shot; not a squash underfoot) sets them on you for {@link #ROUSED_TICKS},
  * webbed or kept, and a lair's keeping ends there.</li>
+ * <li><b>The rest of the dark:</b> Andy (2026-11-23, diggers at him in a lair: "that specific start is supposed to have you lie
+ * in wait, and the mobs stop attacking until you escape"). No other hostile takes from the brood's larder either: one kept
+ * by a lair is left be by every monster until they get out of it, or strike one (that ends the keeping, without rousing
+ * the spiders).</li>
  * </ul>
  * A spider can't be set on one it spares ({@code SpiderKeepMixin}), and any already on them lets go. The brood queen isn't a
  * spider here: they keep you for her.
@@ -63,12 +68,18 @@ public final class SpiderKeep {
 		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
 			if (entity instanceof Spider && player instanceof ServerPlayer sp) {
 				rouse(sp);
+			} else if (entity instanceof Enemy && player instanceof ServerPlayer sp) {
+				sp.removeAttached(KEPT);
 			}
 			return InteractionResult.PASS;
 		});
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
-			if (entity instanceof Spider && source.getDirectEntity() instanceof Projectile && source.getEntity() instanceof ServerPlayer sp) {
-				rouse(sp);
+			if (source.getDirectEntity() instanceof Projectile && source.getEntity() instanceof ServerPlayer sp) {
+				if (entity instanceof Spider) {
+					rouse(sp);
+				} else if (entity instanceof Enemy) {
+					sp.removeAttached(KEPT);
+				}
 			}
 		});
 		ServerTickEvents.END_SERVER_TICK.register(SpiderKeep::tick);
@@ -80,10 +91,15 @@ public final class SpiderKeep {
 		player.setAttached(KEPT, new Kept(lair, player.level().getGameTime() + KEPT_TICKS));
 	}
 
-	/** Whether {@code mob}, a spider, leaves {@code target} be: webbed up, or kept by a lair, and not roused. */
+	/** Whether {@code mob} leaves {@code target} be: a spider one webbed up or kept by a lair, any other monster one kept; never one roused. */
 	public static boolean spares(Mob mob, @Nullable LivingEntity target) {
-		return mob instanceof Spider && target instanceof ServerPlayer player && !player.isSpectator() && !roused(player)
-			&& (PowersCompat.webbed(player) || kept(player));
+		if (!(target instanceof ServerPlayer player) || player.isSpectator() || roused(player)) {
+			return false;
+		}
+		if (mob instanceof Spider) {
+			return PowersCompat.webbed(player) || kept(player);
+		}
+		return mob instanceof Enemy && kept(player);
 	}
 
 	private static boolean roused(ServerPlayer player) {
@@ -102,7 +118,7 @@ public final class SpiderKeep {
 		player.removeAttached(KEPT);
 	}
 
-	/** Each tick: a spent anger or a keeping they've got out of is cleared; spiders on one they spare let go. */
+	/** Each tick: a spent anger or a keeping they've got out of is cleared; spiders (and monsters) on one they spare let go. */
 	private static void tick(MinecraftServer server) {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			long now = player.level().getGameTime();
@@ -116,10 +132,10 @@ public final class SpiderKeep {
 			if (now % CALM_EVERY != 0L || !player.isAlive()) {
 				continue;
 			}
-			for (Spider spider : player.level().getEntitiesOfClass(Spider.class, player.getBoundingBox().inflate(CALM_RANGE),
-				s -> s.isAlive() && (s.getTarget() == player || s.getLastHurtByMob() == player))) {
+			for (Mob spider : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(CALM_RANGE),
+				s -> s instanceof Enemy && s.isAlive() && (s.getTarget() == player || s.getLastHurtByMob() == player))) {
 				if (!spares(spider, player)) {
-					break;
+					continue;
 				}
 				if (spider.getTarget() == player) {
 					spider.setTarget(null);
