@@ -3246,6 +3246,9 @@ final class LifeStoryScreen extends Screen {
 				// (another mod's equip hook; the figure is dressed all the same)
 			}
 		}
+		// and the harness the realm's guards wear over it: its tabard, and its livery's levy cloth
+		com.jaymoskingdoms.Harness.dress(folk, r.harness().stream().filter(s -> !s.isEmpty()).map(net.minecraft.world.item.ItemStack::copy)
+			.toArray(net.minecraft.world.item.ItemStack[]::new));
 		REALM_FOLK.put(r.id(), folk);
 		return folk;
 	}
