@@ -1,9 +1,9 @@
 ---
-status: in-progress
+status: done
 task: safe-spawns-hint-links
 branch: claude/safe-spawns-hint-links-5754ea
 with: Claude (PC desktop, side session)
-pr:
+pr: 2028
 mods: powers, kingdoms
 versions:
 started: 2026-11-23
@@ -25,4 +25,4 @@ owns:
 - SpiderKeep: kept by a lair = every monster spares you, until 32 blocks out or you strike one.
 
 ## Done
--
+- PR #2028 merged 2026-11-23 (squash 7249afe). All 5 CI checks passed (build included); not played.

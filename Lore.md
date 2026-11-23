@@ -2023,6 +2023,8 @@ you"): dice, bookies, fight pits, and goods the watch would rather not see. Assa
 a tavern window is the guild's mark that someone has been paid for. Looters and bandits do not give their names.
 Barbarian camps take raiders and captives, and spare those the realms have outlawed.
 
+**From above** (new; drop-assassination task, 2026-11-23, Claude's placement for Andy to approve; Andy: "everyone is capable of it for an instant down, stealth stat and the hidden blade allow for an instant kill"). Anyone who has fought knows that a body falling from a wall or a beam puts a man on the ground: land on a foe and he goes down under you. Killing him in the same breath is the assassins' guild's art. The guild keeps the hidden blade, teaches its hands to come down astride a back with the arms flung wide, pin the shoulders and put the blade in the neck before he knows he has been found, and its contracts are often closed this way, from a rafter or a rooftop. Those who have walked far enough in the guild's ways (the Stealth tree) can do it with any blade or none; with the hidden blade itself it never fails.
+
 **Paid For** (Retaking, the Thief's Road, 2026-11-11). Now and then a locked chest holds a contract left under a
 black candle: a book is in the chest, do not read it, put it in the ground where no road goes, "nobody sent you"; and
 "whoever pays for this has paid for it before. The book keeps turning up again. Bury it deeper this time." The book
