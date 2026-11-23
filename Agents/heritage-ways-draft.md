@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: draft-addition skill from Andy's five prompt screenshots, and a plan draft for heritage ways of living (Tideborn spear hunts, courts in the drowned temples)
-branch: claude/interesting-mclean-1eb1e5
+branch: claude/draft-addition-skill
 with: Claude Code desktop session
-pr: 
+pr: 2027
 mods: Kingdoms (plan only)
 versions: 
 started: 2026-11-23
