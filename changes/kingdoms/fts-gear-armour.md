@@ -1,8 +1,0 @@
-# From the Shadows: diabolium, the crust armour and the Nehemoth's blood
-- **Diabolium**, the red metal of the demons' dens, from From the Shadows Reborn (Sonmok14 and L_Ender, AGPL v3): nugget, ingot and block (pickaxe, needs an iron one), recipes as the original (nine nuggets/ingots, nuggets back from smelting or blasting a worn helmet, chestplate or leggings). The original brews its ingots; here a Bottle of Blood and three iron ingots make three diabolium ingots, and a Crystallized Blood with three glass bottles makes three Bottles of Blood.
-- **Diabolium armour** (4 pieces, 3/8/6/3, fireproof) and **crust armour** (helmet, chestplate, leggings, 4/9/7, made of Bulldrogioth crimson shells), worn as the original's 3D GeckoLib models. Full diabolium: your blows tear (Powers' wounds) and give back a sixth of their damage as health. Full crust, crouching: half damage, ten wear on each piece per blow (not against the void or commands).
-- Family and tier: both sets are heavy armour and dread-tier for merchants. Toughness and knockback resistance are lowered from the original (diabolium 2, crust 3, 10% a piece; original 3 and 6, 20% and 40%).
-- The **Nehemoth** drops Crystallized Blood (1, up to +1 with Looting) and, 10% when a player kills it (+1% per Looting level above the first), a Corrupted Heart.
-- New items: Crystallized Fragment (9 from a blood and back), Crystallized Blood, Bottle of Blood, Corrupted Heart.
-- **Frenzy**: a Strength potion and a Bottle of Blood brew Frenzy in the brewing stand (potion, splash and lingering). Needs the effects PR (#2019, which registers the Frenzy potion) merged first.
-- Built; not played.
