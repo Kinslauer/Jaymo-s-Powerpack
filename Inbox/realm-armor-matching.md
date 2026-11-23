@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: hermes
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-22)
 asked: 2026-11-22
 thread: 1574253955569942619
-claimed_by:
+claimed_by: realm-armor-matching
 pr:
 suggested_owns: []
 ---
