@@ -31,10 +31,10 @@
 					}
 				},
 				"requirements": {
-					"condition": "minecraft:entity_properties",
+					"type": "minecraft:entity_properties",
 					"entity": "this",
 					"predicate": {
-						"type": "#minecraft:illager"
+						"minecraft:entity_type": "#minecraft:illager"
 					}
 				}
 			}
