@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: player-corpse-loot-ash-piles
 branch: claude/player-corpse-loot-ash-piles-b519e2
 with: Claude Code (PC side session of local_a2db0385)
@@ -30,4 +30,4 @@ limb); fire still burning dirt; ash piles mounded, punch to dust, more for bigge
   (takeHotbar), Powers' symbiote spill (field by name), zombies and gibs all carry the whole kit.
 
 ## Done
-- PR #2032 (Auto-fix on). Built by CI only; nothing seen in game.
+- PR #2032 merged (squash c42d255d48) after all 5 CI checks passed. Not on the Deck until the next pbdr; nothing seen in game.
