@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 08:17). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 09:37). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -17,12 +17,14 @@ Nothing stuck.
 
 ## On the board
 
-23 waiting for a bot, 1 being built, 1 in review: see [[Kanban]].
+23 waiting for a bot, 0 being built, 1 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2031 Thrown rocks can crit: faster, and triple damage (Powers, 2026-11-23)
+- [ ] #2030 context keys by the crosshair (Powers, Kingdoms, 2026-11-23)
 - [ ] #2029 Drop attacks: land on a foe from 4+ blocks and they're down (Powers, Kingdoms, 2026-11-23)
 - [ ] #2028 Safe starts: no enemy to mobs until you move; H goes to the page a hint named (Powers, Kingdoms, 2026-11-23)
 - [ ] #2023 From the Shadows: the Devil Splitter, Thirst for Blood, the crystallized dagger and the Horn of Apocalypse (Kingdoms, 2026-11-23)
@@ -81,9 +83,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1896 Scrying Orb: watch a far person or place as a living miniature over a crystal orb (Kingdoms, 2026-11-22)
 - [ ] #1853 Fishing: Kingdoms' Saltblood path makes fish keener (Powers, Kingdoms, 2026-11-22)
 - [ ] #1969 loose wood no longer makes the server wait on land still generating (Kingdoms, 2026-11-21)
-- [ ] #1966 loose wood no longer crashes the server while land generates (Kingdoms, 2026-11-21)
-- [ ] #1951 hints as tip cards - text hints show top right instead of over the hotbar (Powers, 2026-11-21)
-- …and 377 older ones.
+- …and 379 older ones.
 
 ## Health
 
