@@ -1,5 +1,6 @@
 package com.jaymospowers.client.mixin.weaponmaster;
 
+import com.jaymospowers.armory.BodyWeapons;
 import com.jaymospowers.compat.ToolBeltCompat;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -20,6 +21,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * <p>(0.21.43) Andy: "players should animate up to 3 weapons on them by default, and wearing the toolbelt animates
  * everything like before. it should go in the baubles slot." Up to {@link #MAX_SHOWN} items (the lowest slots), and
  * every one while a Traveler Tool Belt is worn in the Baubles belt slot ({@code ToolBeltCompat.wears}).
+ * <p>Andy: "weapons should always go to a specific place on the body unless the player toggles otherwise". Weapon Master
+ * draws only for a player who picked free placement ({@code BodyWeapons.free}); everyone else's weapons are in their set
+ * places ({@code client/armory/BodyWeaponsLayer}).
  */
 @Pseudo
 @Mixin(targets = "yourdailymodder.weaponmaster.itemlayers.HumanoidItemLayer", remap = false)
@@ -56,6 +60,11 @@ abstract class WeaponMasterShownMixin {
 
 	@Unique
 	private static void jaymospowers$gate(net.minecraft.world.entity.LivingEntity entity, ItemStack stack, CallbackInfo ci) {
+		// set places (the default): our own layer draws the weapons, Weapon Master none (BodyWeapons)
+		if (entity instanceof Player player && !BodyWeapons.free(player)) {
+			ci.cancel();
+			return;
+		}
 		if (stack.isEmpty() || entity instanceof Player player && ToolBeltCompat.wears(player)) {
 			return;
 		}

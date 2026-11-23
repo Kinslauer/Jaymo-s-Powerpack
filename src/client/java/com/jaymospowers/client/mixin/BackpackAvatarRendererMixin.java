@@ -23,5 +23,7 @@ abstract class BackpackAvatarRendererMixin {
 		com.jaymospowers.client.baubles.WornLooks.extract(entity, state);
 		// (0.21.41) the archer hood's cloak, and its hood down on the back
 		com.jaymospowers.client.costume.HoodedCloakLayer.extract(entity, state);
+		// weapons in their set places on the body
+		com.jaymospowers.client.armory.BodyWeaponsLayer.extract(entity, state);
 	}
 }

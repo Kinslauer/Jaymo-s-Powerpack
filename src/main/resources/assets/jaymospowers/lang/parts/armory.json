@@ -170,5 +170,7 @@
   "message.jaymospowers.lodged.stuck": "Your %s is stuck fast in them. Go and take it.",
   "subtitles.jaymospowers.helm.breath": "Breath inside a helm",
   "message.jaymospowers.helm_view.is_on": "Great helms narrow your view to the visor's slit. /helmview off to see clearly.",
-  "message.jaymospowers.helm_view.is_off": "Great helms leave your view clear. /helmview on for the visor's slit."
+  "message.jaymospowers.helm_view.is_off": "Great helms leave your view clear. /helmview on for the visor's slit.",
+  "menu.jaymospowers.body_weapons.set": "Weapons: set places",
+  "menu.jaymospowers.body_weapons.free": "Weapons: free"
 }
