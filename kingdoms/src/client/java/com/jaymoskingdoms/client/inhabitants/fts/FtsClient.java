@@ -1,7 +1,14 @@
 package com.jaymoskingdoms.client.inhabitants.fts;
 
 import com.geckolib.constant.dataticket.DataTicket;
+import com.geckolib.animatable.client.GeoRenderProvider;
 import com.geckolib.model.DefaultedEntityGeoModel;
+import com.geckolib.model.DefaultedItemGeoModel;
+import com.geckolib.renderer.GeoArmorRenderer;
+import com.jaymoskingdoms.inhabitants.fts.PlagueDoctorMask;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
 import com.geckolib.renderer.base.BoneSnapshots;
 import com.geckolib.renderer.base.GeoRenderState;
 import com.geckolib.renderer.base.RenderPassInfo;
@@ -39,6 +46,30 @@ public final class FtsClient {
 		EntityRenderers.register(Fts.FROG_VOMIT, ThrownItemRenderer::new);
 		EntityRenderers.register(Fts.PLAGUE_BEARER, PlagueBearerRenderer::new);
 		EntityRenderers.register(Fts.PLAGUE_KNIFE, ThrownItemRenderer::new);
+		// the mask, worn, is the original's 3D model drawn by GeckoLib's armour renderer
+		PlagueDoctorMask.PROVIDER = new GeoRenderProvider() {
+			private GeoArmorRenderer<?, ?> renderer;
+
+			@Override
+			public GeoArmorRenderer<?, ?> getGeoArmorRenderer(ItemStack stack, EquipmentSlot slot) {
+				if (this.renderer == null) {
+					this.renderer = new GeoArmorRenderer<PlagueDoctorMask, HumanoidRenderState>(new MaskModel());
+				}
+				return this.renderer;
+			}
+		};
+	}
+
+	/** The mask's model and animations by name (geckolib/models/item/plague_doctor_mask.geo.json), its texture the original's armour sheet. */
+	static final class MaskModel extends DefaultedItemGeoModel<PlagueDoctorMask> {
+		MaskModel() {
+			super(JaymosKingdoms.id("plague_doctor_mask"));
+		}
+
+		@Override
+		public Identifier getTextureResource(GeoRenderState state) {
+			return JaymosKingdoms.id("textures/armor/plague_doctor_mask.png");
+		}
 	}
 
 	static final class PlagueBearerRenderer extends InhabitantRenderer<PlagueBearer> {

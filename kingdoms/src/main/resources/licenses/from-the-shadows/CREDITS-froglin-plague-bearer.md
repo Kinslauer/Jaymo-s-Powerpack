@@ -33,7 +33,8 @@ The spawn egg's texture is our own.
 | `textures/entity/plague_bearer_glow.png` | `textures/entity/plague_bearer_layer.png` |
 | `textures/item/plague_doctor_mask.png` | `textures/item/plague_doctor_mask.png` |
 | `textures/item/suspicious_cloth.png` | `textures/item/suspicious_cloth.png` |
-| `textures/entity/equipment/humanoid/plague_doctor_mask.png` | cut from `textures/armor/plague.png` (the head's faces laid out as a humanoid head; the original's beak-and-brim model `geo/plague.geo.json` is not used) |
+| `geckolib/models/item/plague_doctor_mask.geo.json` | `geo/plague.geo.json` (the worn mask's 3D model, beak and brim) |
+| `textures/armor/plague_doctor_mask.png` | `textures/armor/plague.png` |
 | `sounds/plague_bearer/idle_1..4.ogg` | `sounds/cultistidle_1..4.ogg` |
 | `sounds/plague_bearer/hurt_1..3.ogg` | `sounds/cultisthurt_1..3.ogg` |
 | `sounds/plague_bearer/death_1..3.ogg` | `sounds/cultistdeath_1..3.ogg` |

@@ -4,6 +4,7 @@ import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.beasts.Beasts;
 import java.util.function.Function;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.minecraft.core.Registry;
@@ -88,7 +89,7 @@ public final class Fts {
 			.noSummon().sized(0.4F, 0.4F).clientTrackingRange(6).updateInterval(10).build(knife));
 		SUSPICIOUS_CLOTH = item("suspicious_cloth", Item::new);
 		Identifier maskId = JaymosKingdoms.id("plague_doctor_mask");
-		PLAGUE_DOCTOR_MASK = item("plague_doctor_mask", p -> new Item(p.durability(MASK_DURABILITY).enchantable(MASK_ENCHANTABILITY)
+		PLAGUE_DOCTOR_MASK = item("plague_doctor_mask", p -> new PlagueDoctorMask(p.durability(MASK_DURABILITY).enchantable(MASK_ENCHANTABILITY)
 			.attributes(ItemAttributeModifiers.builder().add(Attributes.ARMOR,
 				new AttributeModifier(maskId, MASK_ARMOR, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.HEAD).build())
 			.component(DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.HEAD).setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER)
@@ -101,6 +102,7 @@ public final class Fts {
 		PLAGUE_BEARER_DEATH = sound("plague_bearer.death");
 		PLAGUE_BEARER_PREATTACK = sound("plague_bearer.preattack");
 		PLAGUE_BEARER_ATTACK = sound("plague_bearer.attack");
+		ServerTickEvents.END_SERVER_TICK.register(PlagueBearer::tickClouds);
 		// an exile, now and then, in the open; a camp's own are put there by CampBeasts
 		SpawnPlacements.register(PLAGUE_BEARER, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, PlagueBearer::checkSpawn);
 		BiomeModifications.addSpawn(BiomeSelectors.tag(HAS_PLAGUE_BEARER), MobCategory.MONSTER, PLAGUE_BEARER, PlagueBearer.SPAWN_WEIGHT, 1, 1);

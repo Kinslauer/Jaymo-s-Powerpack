@@ -12,7 +12,14 @@ import com.jaymoskingdoms.Loaded;
 import com.jaymoskingdoms.nightfall.Nightfall;
 import java.util.EnumSet;
 import net.minecraft.core.BlockPos;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -60,10 +67,10 @@ import org.jspecify.annotations.Nullable;
  * (Andy: "An orc camp asset/ exile"). Ported from PlagueBearerEntity in From the Shadows Reborn by Sonmok14 and L_Ender
  * (AGPL v3; model, textures, animations and sounds are theirs, the code is our own, see licenses/from-the-shadows/).
  *
- * <p>He cleaves with a heavy blow, and hops back to throw three knives ({@link PlagueKnife}) that give the plague. Wherever
- * he walks, what he is hostile to catches it from his breath: the plague is Nightfall's (Atrophy, {@link Nightfall#infect}),
- * never a second one of its own; a plague doctor's mask, and Immunity, keep it out. He is immune to it himself and the
- * camp's own never catch it. His mask drops now and then.
+ * <p>He cleaves with a heavy blow, and hops back to throw three knives ({@link PlagueKnife}) that give the plague; and
+ * where he dies he leaves a cloud of it hanging (Andy: "he should only spread it with knives or a cloud upon his death").
+ * The plague is Nightfall's (Atrophy, {@link Nightfall#infect}), never a second one of its own; a plague doctor's mask, and
+ * Immunity, keep it out. He is immune to it himself. His mask drops now and then.
  */
 public class PlagueBearer extends Monster implements GeoEntity {
 	static final double HEALTH = 30.0, DAMAGE = 7.0, ARMOR = 2.0, SPEED = 0.3, FOLLOW = 32.0;
@@ -72,9 +79,10 @@ public class PlagueBearer extends Monster implements GeoEntity {
 	static final double COUNT_RANGE = 80.0;
 	/** The chance a new orc camp keeps one, and a camp without one takes one in each day it grows. */
 	static final float RISE_CHANCE = 0.5F, GROW_CHANCE = 0.15F;
-	/** His breath: whom it reaches (blocks), how often (ticks), and how long the plague it gives lasts (ticks). */
-	static final double BREATH_RADIUS = 3.5;
-	static final int BREATH_EVERY = 60, BREATH_PLAGUE_TICKS = 200;
+	/** The cloud he leaves in dying: how wide (blocks), how high, how long it hangs (ticks), how often it infects, the plague it gives (ticks), its puffs a tick, its colour. */
+	static final double CLOUD_RADIUS = 3.0, CLOUD_HEIGHT = 2.5;
+	static final int CLOUD_TICKS = 20 * 8, CLOUD_EVERY = 10, CLOUD_PLAGUE_TICKS = 20 * 15, CLOUD_PUFFS = 6;
+	static final int CLOUD_COLOUR = 0xFF8A9A2B;
 	/** The knife volley: wait between (ticks), how far he throws, the spread (degrees), the speed. */
 	static final int KNIFE_COOLDOWN = 200;
 	static final double KNIFE_RANGE = 20.0;
@@ -248,21 +256,55 @@ public class PlagueBearer extends Monster implements GeoEntity {
 				}
 			}
 		}
-		if (this.tickCount % BREATH_EVERY == 0) {
-			this.breathe(level);
+	}
+
+	/** His death: a cloud of the plague is left where he fell. */
+	@Override
+	public void die(DamageSource source) {
+		super.die(source);
+		if (this.level() instanceof ServerLevel level) {
+			CLOUDS.add(new Cloud(level, this.position(), CLOUD_TICKS));
+			level.playSound(null, this.blockPosition(), SoundEvents.SPLASH_POTION_BREAK, SoundSource.HOSTILE, 0.8F, 0.6F);
 		}
 	}
 
-	/** What he is hostile to, near him, catches the plague. */
-	private void breathe(ServerLevel level) {
-		AABB near = this.getBoundingBox().inflate(BREATH_RADIUS);
-		boolean any = false;
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, near, e -> e != this && this.prey(level, e))) {
-			Nightfall.infect(e, BREATH_PLAGUE_TICKS, 0);
-			any = true;
+	/** The plague clouds hanging where bearers fell. They are not kept across a restart. */
+	private static final List<Cloud> CLOUDS = new ArrayList<>();
+
+	private static final class Cloud {
+		final ServerLevel level;
+		final Vec3 at;
+		int left;
+
+		Cloud(ServerLevel level, Vec3 at, int left) {
+			this.level = level;
+			this.at = at;
+			this.left = left;
 		}
-		if (any) {
-			level.sendParticles(ParticleTypes.SNEEZE, this.getX(), this.getY() + 1.6, this.getZ(), 6, 0.3, 0.2, 0.3, 0.02);
+	}
+
+	/** Hangs the clouds in the air, and gives the plague to the living things standing in them (not past a mask, or Immunity). */
+	public static void tickClouds(MinecraftServer server) {
+		for (Iterator<Cloud> it = CLOUDS.iterator(); it.hasNext();) {
+			Cloud cloud = it.next();
+			if (--cloud.left <= 0 || cloud.level.getServer() != server) {
+				it.remove();
+				continue;
+			}
+			// (it thins as it fades)
+			double radius = CLOUD_RADIUS * (0.5 + 0.5 * cloud.left / CLOUD_TICKS);
+			RandomSource random = cloud.level.getRandom();
+			for (int i = 0; i < CLOUD_PUFFS; i++) {
+				double a = random.nextDouble() * Math.PI * 2.0, r = Math.sqrt(random.nextDouble()) * radius;
+				cloud.level.sendParticles(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, CLOUD_COLOUR), cloud.at.x + Math.cos(a) * r,
+					cloud.at.y + 0.2 + random.nextDouble() * CLOUD_HEIGHT * 0.5, cloud.at.z + Math.sin(a) * r, 1, 0.05, 0.05, 0.05, 0.0);
+			}
+			if (cloud.left % CLOUD_EVERY == 0) {
+				AABB box = new AABB(cloud.at.x - radius, cloud.at.y - 0.5, cloud.at.z - radius, cloud.at.x + radius, cloud.at.y + CLOUD_HEIGHT, cloud.at.z + radius);
+				for (LivingEntity e : cloud.level.getEntitiesOfClass(LivingEntity.class, box, e -> !(e instanceof PlagueBearer))) {
+					Nightfall.infect(e, CLOUD_PLAGUE_TICKS, 0);
+				}
+			}
 		}
 	}
 
