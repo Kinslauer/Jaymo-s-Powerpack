@@ -113,6 +113,10 @@ abstract class McaButtonColumnMixin extends Screen {
 	/** The panel behind the column, drawn before the buttons. */
 	@Inject(method = "extractRenderState", at = @At("HEAD"))
 	private void jaymoskingdoms$panel(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick, CallbackInfo ci) {
+		// (MCA's Talk button clears the screen's buttons without a new layout: the old column's are gone, and so is the
+		// panel, which otherwise stood empty behind the talk wheel)
+		this.jaymoskingdoms$column.removeIf(w -> !this.children().contains(w));
+		this.jaymoskingdoms$waiting.removeIf(w -> !this.children().contains(w));
 		if ((Object) this instanceof InteractScreen) {
 			if (!DialogueCinematic.answersUp()) {
 				for (AbstractWidget w : this.jaymoskingdoms$column) {

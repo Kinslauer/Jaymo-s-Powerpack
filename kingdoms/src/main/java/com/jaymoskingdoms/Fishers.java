@@ -143,6 +143,42 @@ final class Fishers {
 		return ship;
 	}
 
+	/** The nearest standing realm whose harbour is within {@link Navies#MERCHANT_RANGE} of {@code at} (a smack met at sea is its), or null. */
+	static @Nullable Faction harbourRealm(MinecraftServer server, BlockPos at) {
+		Faction best = null;
+		double bestD = Navies.MERCHANT_RANGE * Navies.MERCHANT_RANGE;
+		for (Faction f : Factions.all(server)) {
+			Navies.Harbour h = f.type().isRealm() && !f.fallen() ? Navies.harbour(server, f.id()) : null;
+			double d = h == null ? Double.MAX_VALUE : Raids.horizontal(h.mooring(), at);
+			if (d < bestD) {
+				best = f;
+				bestD = d;
+			}
+		}
+		return best;
+	}
+
+	/**
+	 * A boat already afloat at sea with her helm at {@code helm} ({@link SeaSites#smack}), cast off as {@code f}'s smack and
+	 * manned by its fishermen: found fishing at {@code at}, she fishes her spell out and sails home with the catch. Not
+	 * counted as the realm's own smack ({@link #BOATS}), so its harbour still sends its own. The ship, or null.
+	 */
+	static @Nullable Ship atSea(ServerLevel level, Faction f, BlockPos helm, BlockPos at) {
+		Navies.Harbour h = Navies.harbour(level.getServer(), f.id());
+		if (h == null) {
+			return null;
+		}
+		Crew crew = new Crew(Crew.Side.FISHER, f.id(), Pirates.merchantShip(level.getRandom()), h.mooring());
+		crew.bound = at;
+		crew.mode = "fishing";
+		Ship ship = Fleet.castOff(level, helm, crew);
+		if (ship != null) {
+			Corsairs.man(level, ship, crew, f, new Corsairs.Complement(Pirates.SEA_CAPTAIN, Folk.GUARD, Folk.GUARD, HANDS, 0));
+			JaymosKingdoms.LOGGER.info("{} of {} is fishing at {}", crew.name, f.name(), at);
+		}
+		return ship;
+	}
+
 	/** A fishing ground off the harbour: open sea well out (by the land's lie, nothing loaded), or straight out if none is found. */
 	private static BlockPos grounds(ServerLevel level, Navies.Harbour h, RandomSource random) {
 		int y = level.getSeaLevel() - 1;
