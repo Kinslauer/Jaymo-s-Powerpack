@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 19:16). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 19:55). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -29,12 +29,12 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-l-carts-check|vanilla-plus-l-carts-check]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mines-job-buildings|village-mines-job-buildings]] · for ☁️ Cloud · open
 - [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · for ☁️ Cloud · open
+- [ ] [[Inbox/from-the-shadows-port|from-the-shadows-port]] · for any · open
 
 
 ## Being built
 
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🔨 Hephaestus · #1957 · changes · fixing review notes
-- [ ] [[Inbox/from-the-shadows-port|from-the-shadows-port]] · Agents/from-the-shadows-port.md (desktop session, 2026-11-22) · claimed
 
 
 ## In review
