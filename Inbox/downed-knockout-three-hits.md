@@ -43,8 +43,9 @@ around for 30s"
   (Decisions 2026-10-29, `KILL_BLOW`): weak hits now count toward the 3, and passed-out bodies are no longer spared.
   Andy's 2026-11-22 survival ruling (only a big head blow while standing kills outright; everything else downs first)
   still stands: this task is only about what happens after the down.
-- Unclear, ask Andy (or take the reading above and say so): does any hit count (a zombie's, an arrow, fire ticks,
-  falls), or only attacks (`Downed.attack(source)`)? Can someone passed out still be revived by a friend (today: yes,
-  sneak + hold use)? Do the hits reset if they're revived and go down again (likely yes)?
+- **Andy's answers (2026-11-22):** any damage counts as a hit ("any damage": arrows, fire, falls, not only
+  `Downed.attack(source)`; mind fire and bleeding ticks, which would count per damage event); a friend can still revive
+  someone passed out ("yes", sneak + hold use as today); the count of three resets when they're revived and go down
+  again ("yes").
 - Change note in `changes/powers/<branch>.md`; also update the Wounds rows in `docs/Abilities.md`.
 - Nothing started: this note is the whole brief.
