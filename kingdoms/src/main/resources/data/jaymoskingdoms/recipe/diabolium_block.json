@@ -1,0 +1,16 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"category": "building",
+	"pattern": [
+		"###",
+		"###",
+		"###"
+	],
+	"key": {
+		"#": "jaymoskingdoms:diabolium_ingot"
+	},
+	"result": {
+		"id": "jaymoskingdoms:diabolium_block",
+		"count": 1
+	}
+}

@@ -1,0 +1,11 @@
+{
+	"type": "minecraft:crafting_shapeless",
+	"category": "misc",
+	"ingredients": [
+		"jaymoskingdoms:crystallized_blood"
+	],
+	"result": {
+		"id": "jaymoskingdoms:crystallized_fragment",
+		"count": 9
+	}
+}

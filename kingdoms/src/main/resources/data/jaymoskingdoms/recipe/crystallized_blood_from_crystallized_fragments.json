@@ -1,0 +1,16 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"category": "misc",
+	"pattern": [
+		"###",
+		"###",
+		"###"
+	],
+	"key": {
+		"#": "jaymoskingdoms:crystallized_fragment"
+	},
+	"result": {
+		"id": "jaymoskingdoms:crystallized_blood",
+		"count": 1
+	}
+}
