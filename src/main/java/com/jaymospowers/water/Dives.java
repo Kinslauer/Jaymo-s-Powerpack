@@ -61,6 +61,10 @@ public final class Dives {
 	public static final double LAUNCH_OUT = 0.42, LAUNCH_UP = 0.06;
 	/** A dive keyed with the Dodge key counts from any height above this (blocks). */
 	static final double DIVE_MIN_FALL = 0.8;
+	/** (Andy, 2026-11-23) The Dodge key in mid air over land, when no flip or trick fits: a head-first dive, pushed this
+	 *  far along the movement keys (blocks a tick) with at least this lift, ending in a landing roll held this many ticks. */
+	public static final double AIR_DIVE_PUSH = 0.55, AIR_DIVE_LIFT = 0.12;
+	public static final int AIR_DIVE_ROLL_TICKS = 40;
 	/** A belly flop from this far (blocks) stings for real: {@link #FLOP_PER_BLOCK} HP per block fallen past
 	 *  {@link #MIN_FALL}, plus {@link #FLOP_SPEED} HP per block a tick of downward impact speed, capped at
 	 *  {@link #FLOP_MAX}. A cannonball (feet first, tucked) is the middle case. */
@@ -119,7 +123,7 @@ public final class Dives {
 		ServerPlayNetworking.registerGlobalReceiver(DiveKey.TYPE, (payload, ctx) -> {
 			ServerPlayer player = ctx.player();
 			// (the client launched itself off the edge already: a step behind, it may be just off the ground here)
-			if (!player.isSpectator() && !player.isPassenger() && !player.isInWater() && diveFrom(player) != NO_DIVE) {
+			if (!player.isSpectator() && !player.isPassenger() && !player.isInWater() && (diveFrom(player) != NO_DIVE || canAirDive(player))) {
 				player.setAttached(DIVING, player.level().getGameTime());
 			}
 		});
@@ -150,6 +154,12 @@ public final class Dives {
 			}
 		}
 		return NO_DIVE;
+	}
+
+	/** The Dodge key's dive over land: in the air, not flying, gliding, riding or swimming. Both sides ask it. */
+	public static boolean canAirDive(Player player) {
+		return !player.onGround() && !player.isInWater() && !player.isPassenger() && !player.isSpectator()
+			&& !player.getAbilities().flying && !player.isFallFlying();
 	}
 
 	/** Deep water (at least {@link #MIN_DEPTH}) straight below ({@code x}, {@code y}, {@code z}) within {@code reach}, with only air on the way. */
