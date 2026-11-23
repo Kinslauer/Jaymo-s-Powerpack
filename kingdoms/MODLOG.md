@@ -16628,3 +16628,8 @@ Andy picked "goblin extras" from the survival pick list (2026-11-22); the Goblin
 - `FrostTech.bare`, `wantedLimb` and `fitGiven` work for any body, not only illagers. Villagers already fit their own: they go to a smith once they've lost a limb (`FrostTech.tick`).
 - Not changed: paying a hostile one off (Talk them round) is still coin. A limb fitted on an illager counts (they stop asking for it), but it isn't drawn: the fitted-limb layer is only on humanoid models, and illagers' isn't one.
 - Built in CI; not played.
+
+## 0.12.10 (2026-11-23): Leaning takes Shift held (#2050)
+
+- Andy: "while kneeling and not holding shift you cant lean, e goes back to inventory key and q to drop. Only lean from sneak or crouch or kneel while holding shift". Kneeling and the low crouch keep you sneaking without the key, so Q and E leaned there (and didn't drop or open the inventory). Now Q and E lean only while the sneak key is held; otherwise Q drops and E opens the inventory as always. `LeanClient.shiftHeld`.
+- Not played.
