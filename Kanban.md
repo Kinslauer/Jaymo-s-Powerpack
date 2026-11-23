@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 09:59). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 10:03). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -35,6 +35,7 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Agents/illager-talk-mca-screen|illager-talk-mca-screen]] · 💻 Odysseus · running
 
 
 ## In review
