@@ -1,6 +1,16 @@
 {
   "replace": false,
   "values": [
-    "jaymospowers:bec_de_corbin"
+    "jaymospowers:bec_de_corbin",
+    "jaymospowers:wooden_flanged_mace",
+    "jaymospowers:stone_flanged_mace",
+    "jaymospowers:iron_flanged_mace",
+    "jaymospowers:golden_flanged_mace",
+    "jaymospowers:diamond_flanged_mace",
+    "jaymospowers:netherite_flanged_mace",
+    "jaymospowers:wooden_cudgel",
+    "jaymospowers:stone_cudgel",
+    "jaymospowers:anvil_fathers_hammer",
+    "jaymospowers:ogre_kings_maul"
   ]
 }

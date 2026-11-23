@@ -253,7 +253,7 @@ public final class BlastGore {
 	/** Whether {@code source}'s blow was struck with a blade (a sword or an axe), which cuts and never crushes. */
 	private static boolean blade(DamageSource source) {
 		net.minecraft.world.item.ItemStack weapon = source.getWeaponItem();
-		return weapon != null && (weapon.is(net.minecraft.tags.ItemTags.SWORDS) || weapon.is(net.minecraft.tags.ItemTags.AXES));
+		return weapon != null && !Fractures.blunt(weapon) && (weapon.is(net.minecraft.tags.ItemTags.SWORDS) || weapon.is(net.minecraft.tags.ItemTags.AXES));
 	}
 
 	/** Whether {@code by} stands close enough to {@code target} to have struck it by hand or body ({@link #CRUSH_REACH} between their edges). */
