@@ -190,6 +190,8 @@ public final class Wounds {
 		// bleeding, broken bones and lost limbs shown like potions
 		WoundSigns.register();
 		WoundMarks.register();
+		// what hurt you when nothing did it to you
+		HurtCause.register();
 		// (0.17.54) the Potion of Cleansing: festering cured
 		Cleansing.register();
 		MedicineItems.register();
