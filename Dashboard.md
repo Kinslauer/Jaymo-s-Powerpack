@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 11:01). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 11:11). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -23,6 +23,7 @@ Nothing stuck.
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2041 The stolen crown: the copy gives itself away, and the realm on alert (Kingdoms, 2026-11-23)
 - [ ] #2040 Dodge: a tap dashes, a hold rolls; adrenaline runs on wind; no climb cooldown (Powers, Kitchen, 2026-11-23)
 - [ ] #2039 The stolen crown: a ruler carried off and a shapeshifter on the throne (Kingdoms, 2026-11-23)
 - [ ] #2038 Drafting Table screen; trapdoors take a second use (Powers, Kingdoms, 2026-11-23)
@@ -82,12 +83,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1963 Z Fighter form textures (Powers, 2026-11-22)
 - [ ] #1962 Z Fighter form animations (Powers, 2026-11-22)
 - [ ] #1960 Z Fighter form models (Powers, 2026-11-22)
-- [ ] #1959 Freerun animations: the ledge climb keyed with elbows and knees, climbing down walls, vaults by speed and height, a pole climb, and bending limbs through the moves (Powers, 2026-11-22)
-- …and 387 older ones.
+- …and 388 older ones.
 
 ## Health
 
-6 problems in the notes: [[Health]].
+7 problems in the notes: [[Health]].
 
 ## Last week
 
