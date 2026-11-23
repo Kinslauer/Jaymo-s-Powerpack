@@ -7352,3 +7352,12 @@ following integration task).
 - **Splints**: two sticks and string *or plant string* make 2 splints (and with leather, 2).
 - **New bandage recipe**: any colour of wool and string or plant string make 4 linen bandages.
 - Built on CI; not played.
+
+## 0.26.63 (2026-11-23): Fire no longer burns grass blocks away (#2026)
+
+- **Grass blocks and podzol aren't fuel**: Inferno always lists them as very flammable (60, 100) and, with its scorched
+  earth off (Andy's pick), meant to zero that at the end of `FireBlock.getIgniteOdds`/`getBurnOdds`. Fabric API answers
+  those methods early for any block it has flammability for, so the zeroing never ran: fire caught on grass blocks and
+  burnt them away, leaving pits. When a server starts with Inferno loaded and its scorched earth off, the two are set to
+  0, 0 in Fabric's flammable-block registry. Plants, leaves and logs burn as before; turn scorched earth on and grass
+  scorches the Inferno way again. `core/InfernoPreset`.
