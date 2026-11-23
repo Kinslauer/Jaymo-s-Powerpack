@@ -93,10 +93,11 @@ public final class Menace {
 
 	/**
 	 * The stance is seen, not heard: Andy's clip had an orc guard, his back turned, warn him the moment he drew. So only a
-	 * villager facing them sees it ({@link Senses#inCone}), or one they're right behind ({@link Senses#BEHIND_CLOSE}).
+	 * villager facing them sees it ({@link Senses#inCone}); the stance is a crouch, so even right behind them it goes unseen
+	 * (Andy: "if you sneak you can get right up for the takedown").
 	 */
 	private static boolean seesStance(Villager v, ServerPlayer player) {
-		return v.distanceToSqr(player) <= Senses.BEHIND_CLOSE * Senses.BEHIND_CLOSE || Senses.inCone(v, player);
+		return Senses.inCone(v, player);
 	}
 
 	private static boolean guard(Villager v) {
