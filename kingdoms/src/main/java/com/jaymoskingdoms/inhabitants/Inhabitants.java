@@ -82,6 +82,7 @@ public final class Inhabitants {
 		YOUTH_WISP = Registry.register(BuiltInRegistries.ENTITY_TYPE, wisp, EntityType.Builder.of(YouthWisp::new, MobCategory.MISC)
 			.sized(0.5F, 0.9F).clientTrackingRange(8).updateInterval(2).build(wisp));
 		FabricDefaultAttributeRegistry.register(YOUTH_WISP, YouthWisp.createAttributes());
+		com.jaymoskingdoms.inhabitants.fts.NetherBeasts.register();
 		YouthCommand.register();
 		YouthEars.register();
 		net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.clientboundPlay().register(YouthWisp.HomeFlash.TYPE, YouthWisp.HomeFlash.CODEC);

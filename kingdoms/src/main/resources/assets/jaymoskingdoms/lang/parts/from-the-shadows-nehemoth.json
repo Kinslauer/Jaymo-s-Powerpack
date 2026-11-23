@@ -1,0 +1,16 @@
+{
+  "entity.jaymoskingdoms.nehemoth": "Nehemoth",
+  "item.jaymoskingdoms.nehemoth_spawn_egg": "Nehemoth Spawn Egg",
+  "subtitles.jaymoskingdoms.nehemoth.roar": "Nehemoth roars",
+  "subtitles.jaymoskingdoms.nehemoth.attack": "Nehemoth swipes",
+  "subtitles.jaymoskingdoms.nehemoth.bite": "Nehemoth bites",
+  "subtitles.jaymoskingdoms.nehemoth.bite_warn": "Nehemoth snarls",
+  "subtitles.jaymoskingdoms.nehemoth.charge": "Nehemoth leaps",
+  "subtitles.jaymoskingdoms.nehemoth.death": "Nehemoth dies",
+  "subtitles.jaymoskingdoms.nehemoth.hurt": "Nehemoth hurts",
+  "subtitles.jaymoskingdoms.nehemoth.idle": "Nehemoth growls",
+  "subtitles.jaymoskingdoms.nehemoth.stomp": "Nehemoth stomps",
+  "subtitles.jaymoskingdoms.nehemoth.beam": "Nehemoth breathes souls",
+  "subtitles.jaymoskingdoms.nehemoth.beam_ready": "Nehemoth gathers souls",
+  "subtitles.jaymoskingdoms.nehemoth.gore": "Nehemoth tears flesh"
+}
