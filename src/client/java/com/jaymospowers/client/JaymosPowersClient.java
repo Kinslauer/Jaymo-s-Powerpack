@@ -67,6 +67,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.hud.TitleCard.init();
 		com.jaymospowers.client.hud.DreadVignette.init();
 		com.jaymospowers.client.hud.MoveHints.init();
+		// (Andy, 2026-11-23) what the keys do to whoever's under the crosshair: stealth kill, a body, Kingdoms' lines
+		com.jaymospowers.client.hud.ContextHints.init();
 		// (Andy, 2026-11-20) a tap of use on a body: the body menu
 		com.jaymospowers.client.bodymenu.BodyMenuClient.init();
 		// (Andy, 2026-11-20) first-time cards for the body menu, executions, the lasso, being downed and the wall sit
