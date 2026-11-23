@@ -149,7 +149,7 @@ public final class FtsWeapons {
 		// a kill with the dagger may leave a fragment
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (source.getEntity() instanceof ServerPlayer player && player.getMainHandItem().is(CRYSTALLIZED_DAGGER) && entity.level() instanceof ServerLevel level
-				&& !entity.getType().is(NO_FRAGMENTS) && !(entity instanceof Animal) && !(entity instanceof AbstractFish) && !(entity instanceof AbstractVillager)
+				&& !entity.getType().builtInRegistryHolder().is(NO_FRAGMENTS) && !(entity instanceof Animal) && !(entity instanceof AbstractFish) && !(entity instanceof AbstractVillager)
 				&& !(entity instanceof AbstractGolem)) {
 				int looting = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).get(Enchantments.LOOTING)
 					.map(holder -> EnchantmentHelper.getItemEnchantmentLevel(holder, player.getMainHandItem())).orElse(0);
@@ -198,7 +198,7 @@ public final class FtsWeapons {
 			if (!(attacker.level() instanceof ServerLevel level)) {
 				return;
 			}
-			LivingEntity body = target instanceof NehemothPart part ? part.parent : target;
+			LivingEntity body = target;
 			float strength = attacker instanceof Player player ? player.getAttackStrengthScale(0.5F) : 1.0F;
 			float blow = (float)attacker.getAttributeValue(Attributes.ATTACK_DAMAGE) * (0.2F + strength * strength * 0.8F);
 			if (attacker instanceof Player player && sixth(attacker, body, level.getGameTime())) {
@@ -206,7 +206,7 @@ public final class FtsWeapons {
 				Fx.burst(level, body.getX(), body.getY() + body.getBbHeight() / 2.0, body.getZ(), 0xC81E1E, 1.0F, 12, 0.0, 0.0, 0.0);
 				level.playSound(null, attacker.blockPosition(), SoundEvents.ENDER_DRAGON_HURT, SoundSource.PLAYERS, 1.0F, 1.0F);
 			}
-			if (body.getType().is(DEMON)) {
+			if (body.getType().builtInRegistryHolder().is(DEMON)) {
 				if (twice(level, attacker, body, blow) && !body.isAlive()) {
 					stack.setDamageValue(Math.max(0, stack.getDamageValue() - SPLITTER_MEND));
 				}
@@ -215,10 +215,10 @@ public final class FtsWeapons {
 
 		/** The extra blow of a doubling: another of the same size, gone through the foe's guard of invulnerability. */
 		private static boolean twice(ServerLevel level, LivingEntity attacker, LivingEntity body, float blow) {
-			body.invulnerableTime = 0;
+			body.setInvulnerableTime(0);
 			boolean hurt = body.hurtServer(level, attacker instanceof Player player ? level.damageSources().playerAttack(player) : level.damageSources().mobAttack(attacker),
 				blow);
-			if (hurt && body.getType().is(DEMON)) {
+			if (hurt && body.getType().builtInRegistryHolder().is(DEMON)) {
 				attacker.heal(blow * SPLITTER_HEAL);
 			}
 			return hurt;
