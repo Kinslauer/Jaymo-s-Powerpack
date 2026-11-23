@@ -178,7 +178,7 @@ public final class FtsGear {
 		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS}) {
 			player.getItemBySlot(slot).hurtAndBreak(CRUST_WEAR, player, slot);
 		}
-		player.level().playSound(null, player.blockPosition(), SoundEvents.SHIELD_BLOCK, net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 1.0F);
+		player.level().playSound(null, player.blockPosition(), SoundEvents.SHIELD_BLOCK.value(), net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 1.0F);
 		return amount * CRUST_SHARE;
 	}
 }
