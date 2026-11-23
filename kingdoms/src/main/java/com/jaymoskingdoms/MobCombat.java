@@ -67,8 +67,11 @@ public final class MobCombat {
 
 	/** A mob's reach before its weapon's bonus (a player's is 3). */
 	static final double BASE_REACH = 3.0;
-	/** A swing starts only when the target is within this share of the reach (so the blow lands as it steps in). */
-	static final double START_REACH_SHARE = 0.9;
+	/**
+	 * A swing starts only when the target is within this share of the reach (so the blow lands as it steps in). Andy:
+	 * "enemies should ... get closer before swinging": at 0.9 a fighter started its swing from almost 3 blocks off.
+	 */
+	static final double START_REACH_SHARE = 0.7;
 	/** Mobs swing this much slower than a player with the same weapon (time to see it coming). */
 	static final double MOB_TEMPO = 1.35;
 	/** The shortest and longest swing (ticks). */
