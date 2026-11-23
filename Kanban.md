@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 16:24). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 17:15). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -40,6 +40,7 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · 🔥 Prometheus · #research · in-review
+- [ ] [[Agents/orc-sees-stance-only-facing|orc-sees-stance-only-facing]] · 💻 Odysseus · in-review
 
 
 ## Needs Andy
