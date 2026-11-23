@@ -744,8 +744,16 @@ public final class IllagerTalk {
 			return;
 		}
 		Self s = self(illager);
-		Item want = want(illager, s, level.getGameTime() / 24000L);
 		RandomSource random = level.getRandom();
+		// (Andy: "the pillager doesnt need gold he needs two prosthetics": lost limbs come before what their nature wants)
+		ItemStack limb = FrostTech.wantedLimb(illager);
+		if (!limb.isEmpty()) {
+			int missing = Integer.bitCount(FrostTech.bare(illager));
+			say(level, illager, player, missing > 1 ? line("want_limbs", random, limb.getHoverName(), missing) : line("want_limb", random, limb.getHoverName()), Speech.WHITE);
+			back(player, illager);
+			return;
+		}
+		Item want = want(illager, s, level.getGameTime() / 24000L);
 		say(level, illager, player, want == Items.AIR ? line("want_none", random) : line("want", random, new ItemStack(want).getHoverName()), Speech.WHITE);
 		back(player, illager);
 	}
@@ -764,7 +772,16 @@ public final class IllagerTalk {
 		Item want = want(illager, s, day);
 		s = self(illager);
 		Item gift = held.getItem();
-		if (want != Items.AIR && gift == want) {
+		if (FrostTech.fitGiven(illager, held)) {
+			// (a limb for one they lost: the want that comes first; the last of them is thanked as a want met)
+			s = s.withHearts(player.getUUID(), WANT_HEARTS).withMood(3);
+			boolean whole = FrostTech.bare(illager) == 0;
+			say(level, illager, player, line(whole ? "limb_done" : "limb_fitted", random), whole ? Speech.GOLD : Speech.WHITE);
+			if (whole) {
+				Money.pay(player, Money.worth(WANT_REWARD));
+				Sparks.act(player, Sparks.Act.GIFT, false);
+			}
+		} else if (want != Items.AIR && gift == want) {
 			s = s.withHearts(player.getUUID(), WANT_HEARTS).withMood(3).withWant("", day + WANT_DAYS);
 			say(level, illager, player, line("want_met", random), Speech.GOLD);
 			Money.pay(player, Money.worth(WANT_REWARD));
