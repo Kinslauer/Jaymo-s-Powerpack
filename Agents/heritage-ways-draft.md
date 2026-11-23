@@ -1,5 +1,5 @@
 ---
-status: done
+status: running
 task: draft-addition skill from Andy's five prompt screenshots, and a plan draft for heritage ways of living (Tideborn spear hunts, courts in the drowned temples)
 branch: claude/interesting-mclean-1eb1e5
 with: Claude Code desktop session
@@ -20,4 +20,4 @@ owns:
 - Plan doc with six questions for Andy; "The deep courts" (new) appended to Lore.md.
 
 ## Done
-Draft only, no code, no commit. Waiting on Andy's answers (water breathing, which temples, glass halls, how many courts, other bloods).
+Draft only, no code, no commit yet. Waiting on Andy's answers (water breathing, which temples, glass halls, how many courts, other bloods).

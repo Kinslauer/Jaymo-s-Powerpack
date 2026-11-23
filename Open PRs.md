@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-23 05:46
+updated: 2026-11-23 06:07
 ---
 # Open PRs
 
-0 open, as of 2026-11-23 05:46. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+0 open, as of 2026-11-23 06:07. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 Nothing open.
