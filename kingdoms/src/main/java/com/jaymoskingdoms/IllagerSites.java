@@ -454,7 +454,14 @@ final class IllagerSites {
 							continue;
 						}
 						for (long ref : e.getValue()) {
-							if (!looked.add(ref) || settled.containsKey(Long.toString(ref))) {
+							if (!looked.add(ref)) {
+								continue;
+							}
+							Site old = settled.get(Long.toString(ref));
+							if (old != null) {
+								if (old.path().equals(SeaSites.SMALL_SHIP) && old.dweller().equals(plan.dwellers())) {
+									refit(level, ref, old, now);
+								}
 								continue;
 							}
 							ChunkPos from = ChunkPos.unpack(ref);
@@ -540,6 +547,11 @@ final class IllagerSites {
 			}
 		}
 		boolean boat = SeaSites.is(path);
+		if (path.equals(SeaSites.SMALL_SHIP)) {
+			// a realm's fishing smack, not a place anyone lives (looked at again until a realm's harbour is in reach)
+			smack(level, ref, path, box, now);
+			return;
+		}
 		if (boat) {
 			// Moog's boats come without posts: their people stand about the deck
 			for (BlockPos at : SeaSites.deck(level, box, random)) {
@@ -595,6 +607,32 @@ final class IllagerSites {
 		List<Long> packed = posts.stream().map(BlockPos::asLong).toList();
 		put(server, ref, new Site(path, seat, box, dweller, faction, realm == null ? -1 : realm.id(), crew, packed, kinds.toString(), now, Production.day(server)));
 		JaymosKingdoms.LOGGER.info("{} moved into the {} at {} ({} of them)", dweller, path, center, crew);
+	}
+
+	/** A small ship made a realm's smack ({@link SeaSites#smack}) and her site put down as done, unless nothing came of it yet. */
+	private static void smack(ServerLevel level, long ref, String path, BoundingBox box, long now) {
+		String what = SeaSites.smack(level, box);
+		if (what != null) {
+			MinecraftServer server = level.getServer();
+			put(server, ref, new Site(path, box.getCenter(), box, what, -1, -1, 0, List.of(), "", now, Production.day(server)));
+			JaymosKingdoms.LOGGER.info("the {} at {}: {}", path, box.getCenter(), what);
+		}
+	}
+
+	/**
+	 * A small ship settled before she was a realm's smack, with the two jobless villagers she was given then: when nobody
+	 * is near, they go and she puts to sea as one ({@link #smack}). Left as she is while no realm's harbour is in reach.
+	 */
+	private static void refit(ServerLevel level, long ref, Site s, long now) {
+		BoundingBox box = s.box();
+		if (Raids.playerNear(level, box.getCenter(), HIDE_RANGE + Math.max(box.getXSpan(), box.getZSpan()) / 2.0)
+			|| !level.isPositionEntityTicking(box.getCenter()) || Fishers.harbourRealm(level.getServer(), box.getCenter()) == null) {
+			return;
+		}
+		for (Villager v : level.getEntitiesOfClass(Villager.class, AABB.of(box).inflate(1.0))) {
+			McaCompat.vanish(v);
+		}
+		smack(level, ref, s.path(), box, now);
 	}
 
 	/** Where someone standing at {@code at} in the template stands now: there if there's room, else the nearest room. */
