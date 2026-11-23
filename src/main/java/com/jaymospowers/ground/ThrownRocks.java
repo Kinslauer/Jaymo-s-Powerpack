@@ -109,6 +109,11 @@ public final class ThrownRocks {
 	static final float SHRUGGED_DAMAGE = 0.5F;
 	/** How hard it's thrown, and how wide it may stray. */
 	static final float SPEED = 1.5F, SPREAD = 1.0F;
+	/**
+	 * Andy (2026-11-23): "rocks should have an increased chance to critically strike, flying faster and dealing triple
+	 * damage". The chance a thrown rock is a crit; a crit leaves the hand this many times faster and hits this many times as hard.
+	 */
+	static final float CRIT_CHANCE = 0.25F, CRIT_SPEED = 1.5F, CRIT_DAMAGE = 3.0F;
 	/** (0.21.8) A gravity user's rock: weighs no more than a pebble to them, so it goes at once, this hard and this straight. */
 	static final float GRAVITY_SPEED = 3.0F, GRAVITY_SPREAD = 0.3F;
 	/** Ticks between throws. */
@@ -174,6 +179,8 @@ public final class ThrownRocks {
 		boolean quick;
 		float damage;
 		Vec3 last;
+		/** A crit ({@link #CRIT_CHANCE}): thrown faster, and hits {@link #CRIT_DAMAGE} times as hard. */
+		boolean crit;
 
 		Rock(Snowball ball, ItemStack stone, boolean creative) {
 			this.ball = ball;
@@ -457,9 +464,16 @@ public final class ThrownRocks {
 			speed = ChronoRapid.ROCK_SPEED;
 			spread = 0.0F;
 		}
+		// (a speedster's rock is already a bullet: no crit on top)
+		boolean crit = !quick && server.getRandom().nextFloat() < CRIT_CHANCE;
+		if (crit) {
+			speed *= CRIT_SPEED;
+		}
 		Snowball ball = Projectile.spawnProjectileFromRotation((l, owner, s) -> new Snowball(l, owner, s), server, stone, player, 0.0F, speed,
 			spread);
-		FLYING.add(new Rock(ball, stone, player.getAbilities().instabuild));
+		Rock thrown = new Rock(ball, stone, player.getAbilities().instabuild);
+		thrown.crit = crit;
+		FLYING.add(thrown);
 		if (quick) {
 			ChronoRapid.quickened(player, ball);
 		}
@@ -510,9 +524,14 @@ public final class ThrownRocks {
 		boolean hurt;
 		redealing = true;
 		try {
-			hurt = victim.hurtServer(level, source, rock.quick ? rock.damage : shrugs ? SHRUGGED_DAMAGE : DAMAGE);
+			hurt = victim.hurtServer(level, source, rock.quick ? rock.damage : (shrugs ? SHRUGGED_DAMAGE : DAMAGE) * (rock.crit ? CRIT_DAMAGE : 1.0F));
 		} finally {
 			redealing = false;
+		}
+		if (hurt && rock.crit) {
+			// the pack's crit cue at the hit: the ring, the flash, the thrower's camera punch
+			level.sendParticles(net.minecraft.core.particles.ParticleTypes.CRIT, ball.getX(), ball.getY(), ball.getZ(), 12, 0.15, 0.15, 0.15, 0.3);
+			com.jaymospowers.combat.CritCue.cue(level, ball.position(), source.getEntity() instanceof ServerPlayer thrower ? thrower : null);
 		}
 		if (hurt && unsuspecting && victim.isAlive() && !Downed.passedOut(victim)
 			&& level.getRandom().nextFloat() < (head ? HEAD_CHANCE * Downed.headKnock(victim) : BODY_CHANCE)) {
