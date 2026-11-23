@@ -22,9 +22,9 @@ public final class Severed {
 	public static final RenderStateDataKey<Integer> KEY = RenderStateDataKey.create(() -> "jaymoskitchen:missing_parts");
 	/** By bit (head, right arm, left arm, right leg, left leg): the model parts that make it up. */
 	private static final String[][] NAMES = {
-		{"head", "hat", "nose", "hi_head", "neck"}, {"right_arm", "right_sleeve", "arm_right", "armR0"},
-		{"left_arm", "left_sleeve", "arm_left", "armL0"}, {"right_leg", "right_pants", "leg_right", "legR0"},
-		{"left_leg", "left_pants", "leg_left", "legL0"}};
+		{"head", "hat", "nose", "hi_head", "neck"}, {"right_arm", "right_sleeve", "arm_right", "armR0", "right_front_leg"},
+		{"left_arm", "left_sleeve", "arm_left", "armL0", "left_front_leg"}, {"right_leg", "right_pants", "leg_right", "legR0", "right_hind_leg"},
+		{"left_leg", "left_pants", "leg_left", "legL0", "left_hind_leg"}};
 	private static final Map<ModelPart, Function<String, ModelPart>> LOOKUPS = new WeakHashMap<>();
 	private static final List<ModelPart> HIDDEN = new ArrayList<>();
 

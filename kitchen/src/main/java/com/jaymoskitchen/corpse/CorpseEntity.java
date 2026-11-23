@@ -2947,6 +2947,47 @@ public class CorpseEntity extends Entity {
 	}
 
 	/**
+	 * Andy (2026-11-23): "all scavengers and body eaters should go limb at a time, giving players more time to recover
+	 * their party members". The part a scavenger tears off next, as a {@code PART_} bit: an arm or a leg it still has (any),
+	 * then the head; 0 once only the trunk is left, or for a body not built with limbs (a fish, a critter, a slime, a
+	 * snake), which is torn open whole.
+	 */
+	int nextPart() {
+		RagdollRig.Shape shape = rig().shape;
+		if (isFish() || shape != RagdollRig.Shape.HUMANOID && shape != RagdollRig.Shape.QUADRUPED) {
+			return 0;
+		}
+		int left = LIMBS & ~missing();
+		if (left == 0) {
+			left = PART_HEAD & ~missing();
+		}
+		if (left == 0) {
+			return 0;
+		}
+		int part = Integer.lowestOneBit(left);
+		for (int skip = random.nextInt(Integer.bitCount(left)); skip > 0; skip--) {
+			left &= ~part;
+			part = Integer.lowestOneBit(left);
+		}
+		return part;
+	}
+
+	/**
+	 * {@code part} torn off and eaten by a scavenger (no severed part is left lying: it's in the eater's mouth): no longer
+	 * drawn on the body, an arm lets go of what it held, and the bites start over for the next part.
+	 */
+	/** Bites taken toward the part being torn at now. */
+	int biteCount() {
+		return bites;
+	}
+
+	void eatPart(ServerLevel level, int part) {
+		setMissing(missing() | part);
+		dropHeld(level, part, partPosition(part));
+		bites = 0;
+	}
+
+	/**
 	 * (0.4.35) Torn open at last: what it carried spills on the ground (the meat for the scavengers, leather and the
 	 * like for whoever comes by), with a bone or two, what it wore and held, and the body is gone. Returns the dropped meat.
 	 */
