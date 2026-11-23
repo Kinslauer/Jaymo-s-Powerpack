@@ -3750,6 +3750,105 @@
 			"jaymoskingdoms:plague_bearer/attack_2"
 		]
 	},
+	"nehemoth.roar": {
+		"subtitle": "subtitles.jaymoskingdoms.nehemoth.roar",
+		"sounds": [
+			"jaymoskingdoms:nehemoth/roar"
+		]
+	},
+	"nehemoth.attack": {
+		"subtitle": "subtitles.jaymoskingdoms.nehemoth.attack",
+		"sounds": [
+			"jaymoskingdoms:nehemoth/attack"
+		]
+	},
+	"nehemoth.bite": {
+		"subtitle": "subtitles.jaymoskingdoms.nehemoth.bite",
+		"sounds": [
+			"jaymoskingdoms:nehemoth/bite_1",
+			"jaymoskingdoms:nehemoth/bite_2",
+			"jaymoskingdoms:nehemoth/bite_3",
+			"jaymoskingdoms:nehemoth/bite_4",
+			"jaymoskingdoms:nehemoth/bite_5",
+			"jaymoskingdoms:nehemoth/bite_6"
+		]
+	},
+	"nehemoth.bite_warn": {
+		"subtitle": "subtitles.jaymoskingdoms.nehemoth.bite_warn",
+		"sounds": [
+			"jaymoskingdoms:nehemoth/bite_warn"
+		]
+	},
+	"nehemoth.charge": {
+		"subtitle": "subtitles.jaymoskingdoms.nehemoth.charge",
+		"sounds": [
+			"jaymoskingdoms:nehemoth/charge_1",
+			"jaymoskingdoms:nehemoth/charge_2",
+			"jaymoskingdoms:nehemoth/charge_3",
+			"jaymoskingdoms:nehemoth/charge_4"
+		]
+	},
+	"nehemoth.death": {
+		"subtitle": "subtitles.jaymoskingdoms.nehemoth.death",
+		"sounds": [
+			"jaymoskingdoms:nehemoth/death"
+		]
+	},
+	"nehemoth.hurt": {
+		"subtitle": "subtitles.jaymoskingdoms.nehemoth.hurt",
+		"sounds": [
+			"jaymoskingdoms:nehemoth/hurt_4",
+			"jaymoskingdoms:nehemoth/hurt_5",
+			"jaymoskingdoms:nehemoth/hurt_6"
+		]
+	},
+	"nehemoth.idle": {
+		"subtitle": "subtitles.jaymoskingdoms.nehemoth.idle",
+		"sounds": [
+			"jaymoskingdoms:nehemoth/idle_1",
+			"jaymoskingdoms:nehemoth/idle_2",
+			"jaymoskingdoms:nehemoth/idle_5",
+			"jaymoskingdoms:nehemoth/idle_6",
+			"jaymoskingdoms:nehemoth/idle_7",
+			"jaymoskingdoms:nehemoth/idle_8",
+			"jaymoskingdoms:nehemoth/idle_11",
+			"jaymoskingdoms:nehemoth/idle_12",
+			"jaymoskingdoms:nehemoth/idle_13"
+		]
+	},
+	"nehemoth.stomp": {
+		"subtitle": "subtitles.jaymoskingdoms.nehemoth.stomp",
+		"sounds": [
+			"jaymoskingdoms:nehemoth/stomp_1",
+			"jaymoskingdoms:nehemoth/stomp_2",
+			"jaymoskingdoms:nehemoth/stomp_3",
+			"jaymoskingdoms:nehemoth/stomp_4"
+		]
+	},
+	"nehemoth.beam": {
+		"subtitle": "subtitles.jaymoskingdoms.nehemoth.beam",
+		"sounds": [
+			"jaymoskingdoms:nehemoth/soul_beam"
+		]
+	},
+	"nehemoth.beam_ready": {
+		"subtitle": "subtitles.jaymoskingdoms.nehemoth.beam_ready",
+		"sounds": [
+			"jaymoskingdoms:nehemoth/soul_beam_ready"
+		]
+	},
+	"nehemoth.critical": {
+		"subtitle": "subtitles.jaymoskingdoms.nehemoth.critical",
+		"sounds": [
+			"jaymoskingdoms:nehemoth/critical_hit"
+		]
+	},
+	"nehemoth.gore": {
+		"subtitle": "subtitles.jaymoskingdoms.nehemoth.gore",
+		"sounds": [
+			"jaymoskingdoms:nehemoth/gore"
+		]
+	},
 	"impaler.attack": {
 		"subtitle": "subtitles.jaymoskingdoms.impaler.attack",
 		"sounds": [

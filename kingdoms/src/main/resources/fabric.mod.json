@@ -47,6 +47,7 @@
 		"jaymoskingdoms.classtrees.mixins.json",
 		"jaymoskingdoms.awakened.mixins.json",
 		"jaymoskingdoms.forestfire.mixins.json",
+		"jaymoskingdoms.fts.mixins.json",
 		{ "config": "jaymoskingdoms.combat.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.mca.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.equestrian.client.mixins.json", "environment": "client" },
