@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: forest fire burning grass blocks
 branch: inferno-grass-not-fuel
 with: Claude Code (PC side session)
@@ -24,6 +24,6 @@ owns:
 - Fix: when Inferno is loaded and its scorched earth is off, set the two registry entries to 0, 0 at server start.
 
 ## Done
-PR #2026 is open with Auto-fix on; CI was still building when the session ended. Once it merges and the server
+PR #2026 merged (squash) after all 5 CI checks passed. Not on the Deck until the next pbdr. Once it merges and the server
 restarts, fire on a grass lawn burns the plants on top and goes out, and grass blocks and podzol stay. Not tested in
 game.
