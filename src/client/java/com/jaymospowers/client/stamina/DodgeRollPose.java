@@ -108,7 +108,8 @@ public final class DodgeRollPose {
 			extended = DodgeClient.rollLong;
 		} else {
 			Dodge.Rolling rolling = player.getAttached(Dodge.ROLLING);
-			if (rolling == null) {
+			if (rolling == null || rolling.dash()) {
+				// (the dash is upright: nothing to draw)
 				return null;
 			}
 			start = rolling.start();
