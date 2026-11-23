@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 06:09). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 07:16). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -35,12 +35,12 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Agents/heritage-ways-draft|heritage-ways-draft]] · 💻 Odysseus · running
 
 
 ## In review
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · 🔥 Prometheus · #research · in-review
+- [ ] [[Agents/heritage-ways-draft|heritage-ways-draft]] · 💻 Odysseus · #2027 · in-review
 
 
 ## Needs Andy
