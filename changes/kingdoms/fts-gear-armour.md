@@ -4,4 +4,5 @@
 - Family and tier: both sets are heavy armour and dread-tier for merchants. Toughness and knockback resistance are lowered from the original (diabolium 2, crust 3, 10% a piece; original 3 and 6, 20% and 40%).
 - The **Nehemoth** drops Crystallized Blood (1, up to +1 with Looting) and, 10% when a player kills it (+1% per Looting level above the first), a Corrupted Heart.
 - New items: Crystallized Fragment (9 from a blood and back), Crystallized Blood, Bottle of Blood, Corrupted Heart.
+- **Frenzy**: a Strength potion and a Bottle of Blood brew Frenzy in the brewing stand (potion, splash and lingering). Needs the effects PR (#2019, which registers the Frenzy potion) merged first.
 - Built; not played.
