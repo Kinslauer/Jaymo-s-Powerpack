@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 23:25). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 23:34). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -31,6 +31,7 @@ kanban-plugin: board
 - [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · for ☁️ Cloud · open
 - [ ] [[Inbox/from-the-shadows-port|from-the-shadows-port]] · for any · open
 - [ ] [[Inbox/realm-armor-matching|realm-armor-matching]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/downed-knockout-three-hits|downed-knockout-three-hits]] · for any · open
 
 
 ## Being built
