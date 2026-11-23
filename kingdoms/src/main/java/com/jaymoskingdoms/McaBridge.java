@@ -759,7 +759,9 @@ final class McaBridge {
 	private static List<VillagerEntityMCA> candidates(ServerLevel level, Faction f, java.util.@Nullable UUID house) {
 		return level.getEntitiesOfClass(VillagerEntityMCA.class, new AABB(f.seat()).inflate(Economy.POPULATION_RANGE),
 			v -> v.isAlive() && v.getAgeState() == AgeState.ADULT && (worker(v).role() < 0 || worker(v).role() == Folk.GUARD) && !Hermits.is(worker(v))
-				&& !Envoys.is(v) && !v.getUUID().equals(house));
+				&& !Envoys.is(v) && !v.getUUID().equals(house)
+				// (never a captive, a stolen life, or the copy walking in one's place: Laila, crowned in her chains)
+				&& !v.hasAttached(Captives.CAPTIVE) && !v.hasAttached(Doubles.STOLEN) && !v.hasAttached(Doubles.COPY));
 	}
 
 	/** {@link McaCompat#notables}. */

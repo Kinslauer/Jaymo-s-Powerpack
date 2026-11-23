@@ -540,6 +540,10 @@ public final class Captives {
 			Captive c = v.getAttached(CAPTIVE);
 			if (c == null) {
 				LOADED.remove(v);
+			} else if (Rulers.is(v)) {
+				// (a ruler held as a captive is a mistake: Laila, crowned in her chains under her own market stall) out of it
+				walkFree(v);
+				Doubles.unsteal(level, v);
 			} else if (c.rescuer().isEmpty()) {
 				if (bound(v) && v.isNoAi()) {
 					plead(level, v, now);

@@ -1,0 +1,7 @@
+# A queen is no longer found in chains under her own market stall
+- **Why** (Andy's clips, 2026-11-23, Fenholm): Laila stood at a market stall when Andy came near. The stall's tall roof made her look "buried" to the stolen-lives check (`Haunts.buried`: no sky, 4+ blocks under the top block, inside a village), so she was chained in place as a stolen life of Dunmarch, the nearest settlement then. Two minutes later Fenholm became a kingdom and crowned her, in her chains, and dressed her in the royal armour.
+- **Only the truly shut in**: a villager counts as buried now only if no way leads from them to open sky within 8 blocks, through open air, a door, a gate, a window or bars (`Haunts.shutIn`). Graves, sealed cellars (a closed trapdoor) and buried ruins still count; a stall roof, a porch or a house at night don't.
+- **Never crowned in chains**: a captive, a stolen life or the copy walking in one's place is never picked for a throne (`McaBridge.candidates`).
+- **Put right in old saves**: a ruler still carrying a captive's marks is let go of them as they load: unchained, no longer led home, and no copy of them is sent to take their place (`Captives` tick, `Doubles.unsteal`). That frees Laila.
+- Captive royalty done on purpose (the ruler truly hidden, a kidnapper in their place, the kingdom on alert, a great reward) is Andy's wish for later; this only stops the accident.
+- Not played.
