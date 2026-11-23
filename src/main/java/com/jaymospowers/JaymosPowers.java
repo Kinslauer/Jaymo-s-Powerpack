@@ -130,6 +130,7 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.LeafSpiders.init();
 		com.jaymospowers.core.LimbEaters.init();
 		com.jaymospowers.core.PortalSpreadQuiet.init();
+		com.jaymospowers.core.InfernoPreset.init();
 		// (0.15.143) giants (the Great Ape, a Behemoth...) reach as far as they've grown
 		com.jaymospowers.core.GiantReach.init();
 		// (0.17.3) gifted villagers: powers held by those who aren't players (who awakens is Kingdoms')
