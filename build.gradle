@@ -1262,7 +1262,10 @@ tasks.register("serverMods", Sync) {
 // the user's own CurseForge profile (imported from the pack zip): swap in the new Jaymo's Powers jar, the current
 // Jaymo's Kitchen jar and the local pack mods (each replacing older versions of itself). Skipped while the game is
 // running (its jars are locked).
-def profileMods = new File(System.getProperty("user.home"), "curseforge/minecraft/Instances/Jaymo's Powers/mods")
+// Andy's CurseForge keeps its instances in E:\CurseForge\Instances now; the home-folder place is the fallback.
+def profileMods = [new File("E:/CurseForge/Instances/Jaymo's Powers/mods"),
+	new File(System.getProperty("user.home"), "curseforge/minecraft/Instances/Jaymo's Powers/mods")].find { it.isDirectory() } ?:
+	new File(System.getProperty("user.home"), "curseforge/minecraft/Instances/Jaymo's Powers/mods")
 tasks.register("profileMods") {
 	dependsOn "jar", "buildKitchen", "buildKingdoms", "buildTrmt", "buildDynamicWaters", "buildForestFire"
 	onlyIf { profileMods.isDirectory() }
