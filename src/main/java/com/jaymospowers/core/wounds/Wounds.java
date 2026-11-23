@@ -187,6 +187,8 @@ public final class Wounds {
 		UndeadFortitude.register();
 		// (0.14.4) phase 4: cuts and festering, the medieval kit, pain and the poppy
 		Bleeding.register();
+		// bleeding, broken bones and lost limbs shown like potions
+		WoundSigns.register();
 		WoundMarks.register();
 		// (0.17.54) the Potion of Cleansing: festering cured
 		Cleansing.register();

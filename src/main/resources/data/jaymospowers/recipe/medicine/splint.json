@@ -4,10 +4,13 @@
   "ingredients": [
     "minecraft:stick",
     "minecraft:stick",
-    "minecraft:string"
+    [
+      "minecraft:string",
+      "jaymospowers:plant_string"
+    ]
   ],
   "result": {
     "id": "jaymospowers:splint",
-    "count": 1
+    "count": 2
   }
 }
