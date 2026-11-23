@@ -1,17 +1,13 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 17:16). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 18:19). Don't edit. -->
 # Vault health
 
 Problems in the live notes, found on every sync. Nothing here is fixed by itself: whoever reads it (the coordinator's hourly check, a bot, Andy) fixes the note, and the line goes away on the next sync. `python tools/vault_sync.py --health` prints the same list.
 
-**7 problems.**
+**6 problems.**
 
 ## Statuses the pipeline doesn't know
 
 - [[Agents/corpse-limbs-drag-arm-digger-pits|corpse-limbs-drag-arm-digger-pits]]: `status: stopped` (known: blocked, done, in-review, merged, ready, running, sent, stalled)
-
-## Missing PR numbers
-
-- [[Agents/orc-sees-stance-only-facing|orc-sees-stance-only-facing]]: in review with no `pr:`.
 
 ## Questions waiting on Andy
 
