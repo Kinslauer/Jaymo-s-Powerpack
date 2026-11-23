@@ -118,6 +118,11 @@ public final class TitleChoice {
 				out.add(new Entry(JOB + job.key, Careers.title(job, career.rank(job.key)), 0xC8A060));
 			}
 		}
+		// (a ruler brought home, unsworn: the realm's Saviour)
+		Component saviour = StolenCrowns.saviour(player);
+		if (saviour != null) {
+			out.add(new Entry("crown_saviour", saviour, 0xF0D060));
+		}
 		Component aim = LifeAims.title(player);
 		if (aim != null) {
 			out.add(new Entry(AIM, aim, 0xE8C860));

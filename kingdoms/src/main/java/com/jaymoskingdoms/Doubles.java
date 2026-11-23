@@ -527,6 +527,8 @@ public final class Doubles {
 			return;
 		}
 		Doubts.raise(level, copy.blockPosition());
+		// (a copy on a throne: off it, the ruler's blood keeps it, and the realm hears of it)
+		StolenCrowns.unmasked(level, copy, by);
 		if (Math.floorMod((int) (copy.getAttached(COPY).getMostSignificantBits() >>> 13), CHANGELING_IN) == 0 && stealable(copy)) {
 			changeling(level, copy, by);
 			return;

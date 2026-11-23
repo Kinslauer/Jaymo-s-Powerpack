@@ -98,19 +98,21 @@ public final class Captives {
 	static final int FAR_ROUND = 50;
 	/** (0.7.100) Who a captive is at home: one of its folk, one of its guards, or kin of its ruler (rolled when they're taken). */
 	static final int FOLK = 0, GUARD = 1, KIN = 2;
+	/** A realm's own ruler, their life stolen and their face worn on the throne ({@link StolenCrowns}): never rolled, only set. */
+	static final int ROYAL = 3;
 	/** The chance a captive is one of the guards, and the ruler's own kin (a settlement with no ruler has none to lose). */
 	static final float GUARD_CHANCE = 0.2F, KIN_CHANCE = 0.1F;
 	/** Silver coins the family give from their own purse for their return, by standing. */
-	static final int[] PURSE_LEAST = {6, 8, 12}, PURSE_MOST = {12, 16, 24};
+	static final int[] PURSE_LEAST = {6, 8, 12, 60}, PURSE_MOST = {12, 16, 24, 120};
 	/**
 	 * What the settlement adds from its treasury, by standing: this much, plus this share of its worth ({@link Wealth#worth}),
 	 * up to this; never leaving it with less than {@link #TREASURY_KEPT}. A rich realm pays far more for its own.
 	 */
-	static final int[] BOUNTY_BASE = {8, 16, 40}, BOUNTY_MOST = {30, 60, 150};
-	static final float[] BOUNTY_SHARE = {0.02F, 0.04F, 0.08F};
+	static final int[] BOUNTY_BASE = {8, 16, 40, 600}, BOUNTY_MOST = {30, 60, 150, 6000};
+	static final float[] BOUNTY_SHARE = {0.02F, 0.04F, 0.08F, 0.3F};
 	static final long TREASURY_KEPT = 20L;
 	/** Reputation with the settlement, the one brought home's hearts (MCA), and standing in it for its own members, by standing. */
-	static final int[] HOME_REP = {60, 90, 150}, HOME_HEARTS = {50, 60, 80}, HOME_STANDING = {10, 25, 60};
+	static final int[] HOME_REP = {60, 90, 150, 500}, HOME_HEARTS = {50, 60, 80, 100}, HOME_STANDING = {10, 25, 60, 200};
 	/** How many of their family come running to thank you, and the hearts each gives. */
 	static final int FAMILY = 2, FAMILY_HEARTS = 20;
 	static final double FAMILY_RANGE = 24.0;
@@ -121,7 +123,7 @@ public final class Captives {
 	 * Favours the settlement owes you for each brought home, by standing, and the most it owes at once. While it owes you
 	 * one, its guards neither toll nor search you, and the next time they'd arrest you they let it go (that spends one).
 	 */
-	static final int[] FAVOURS_GIVEN = {1, 1, 2};
+	static final int[] FAVOURS_GIVEN = {1, 1, 2, 3};
 	static final int FAVOURS_MOST = 3;
 	/** (0.7.340) How near (blocks) a guard of theirs must be to tell you they're letting an arrest go. */
 	static final double PARDON_RANGE = 24.0;
@@ -141,7 +143,7 @@ public final class Captives {
 			.apply(i, Captive::new));
 
 		int standingIndex() {
-			return Mth.clamp(standing, FOLK, KIN);
+			return Mth.clamp(standing, FOLK, ROYAL);
 		}
 	}
 
@@ -264,7 +266,12 @@ public final class Captives {
 	 * to be brought home.
 	 */
 	static void hold(ServerLevel level, Villager v, Faction home) {
-		v.setAttached(CAPTIVE, new Captive(home.id(), Optional.empty(), level.getGameTime(), FOLK));
+		hold(level, v, home, FOLK);
+	}
+
+	/** As above, as one of {@code standing} at home ({@link #ROYAL}: their own ruler, {@link StolenCrowns}). */
+	static void hold(ServerLevel level, Villager v, Faction home, int standing) {
+		v.setAttached(CAPTIVE, new Captive(home.id(), Optional.empty(), level.getGameTime(), standing));
 		bind(v, true);
 		v.setPersistenceRequired();
 		LOADED.add(v);
@@ -448,6 +455,7 @@ public final class Captives {
 			String who = switch (c.standingIndex()) {
 				case GUARD -> "guard";
 				case KIN -> "kin";
+				case ROYAL -> "royal";
 				default -> "folk";
 			};
 			words = Component.translatable("talk.jaymoskingdoms.captive.ask." + who, home.name(), far(v, home), Directions.heading(v.position(), Vec3.atCenterOf(home.seat())));
@@ -628,6 +636,10 @@ public final class Captives {
 	private static void arrive(ServerLevel level, ServerPlayer player, Villager v, Faction home, int standing) {
 		v.removeAttached(CAPTIVE);
 		Doubles.arrived(level, v, player);
+		// (a ruler whose life was stolen: their throne back, and the title and land that go with bringing them home)
+		if (standing == ROYAL) {
+			StolenCrowns.home(level, player, v, home);
+		}
 		// (0.7.439) a haven's child carried off by raiders: home, and the rescue asked for is done
 		BorderClashes.home(level.getServer(), v.getUUID());
 		Quests.rescued(player, v);
@@ -649,6 +661,9 @@ public final class Captives {
 		} else if (standing == KIN) {
 			rewards.add(new ItemStack(Items.GOLDEN_APPLE));
 			rewards.add(new ItemStack(Items.DIAMOND, Mth.nextInt(random, KIN_DIAMONDS_LEAST, KIN_DIAMONDS_MOST)));
+		} else if (standing == ROYAL && known && EstateCharters.CHARTER != null) {
+			// (Andy's pick: land) a manor in the realm, granted by the crown
+			rewards.add(new ItemStack(EstateCharters.CHARTER));
 		}
 		Deeds.broughtHome(level, player, v, home, rewards, HOME_REP[standing], HOME_HEARTS[standing]);
 		Deeds.family(level, player, v, FAMILY, FAMILY_RANGE, FAMILY_HEARTS);
