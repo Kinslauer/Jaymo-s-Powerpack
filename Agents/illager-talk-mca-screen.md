@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: illager-talk-mca-screen
 branch: illager-talk-mca-screen
 with: Claude Code (Opus 5.5), side session of local_2e1ecf8a
