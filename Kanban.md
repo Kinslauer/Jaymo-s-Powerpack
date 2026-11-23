@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 04:36). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 05:24). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -35,7 +35,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🔨 Hephaestus · #1957 · changes · fixing review notes
 
 
 ## In review
@@ -49,12 +48,12 @@ kanban-plugin: board
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
 - [ ] [[Inbox/class-trees-plan|class-trees-plan]] · for 💻 Odysseus · blocked
 - [ ] [[Inbox/wither-model|wither-model]] · 🍇 Bacchus · blocked
-- [ ] [[Agents/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]] · 💻 Odysseus · stalled
 
 
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/hands-on-cooking-realtime|hands-on-cooking-realtime]]
 - [x] [[Inbox/Done/realm-armor-matching|realm-armor-matching]]
 - [x] [[Inbox/Done/scrying-orb|scrying-orb]]
 - [x] [[Inbox/Done/mutant-zombie-reskin|mutant-zombie-reskin]]
@@ -62,7 +61,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/heritage-paths|heritage-paths]]
 - [x] [[Inbox/Done/enemy-damage-balance|enemy-damage-balance]]
 - [x] [[Inbox/Done/devils-hole-pupfish-writeup|devils-hole-pupfish-writeup]]
-- [x] [[Inbox/Done/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]]
 
 
 %% kanban:settings
