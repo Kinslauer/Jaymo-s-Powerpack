@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-23 11:14
+updated: 2026-11-23 11:17
 ---
 # Open PRs
 
-4 open, as of 2026-11-23 11:14. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+5 open, as of 2026-11-23 11:17. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2027](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2027) draft-addition skill and the heritage ways plan (Tideborn first)
@@ -23,5 +23,10 @@ Andy merges only on "merge", one at a time.
 
 ## [#2043](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2043) A sellsword doesn't pitch to someone she'd refuse (Kingdoms)
 - **Branch:** `seller-no-pitch-to-refused` · **Updated:** 2026-11-23 (today)
-- **Checks:** ⏳ 3 of 4 running
+- **Checks:** ✅ 5 passed
 - **Agent:** no agent note
+
+## [#2044](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2044) Weapons in set places on the body: swords at the hips, four flintlocks, guns on the back
+- **Branch:** `claude/body-weapon-homes` · **Updated:** 2026-11-23 (today)
+- **Checks:** ⏳ 3 of 4 running
+- **Agent:** [[body-weapon-homes]]
