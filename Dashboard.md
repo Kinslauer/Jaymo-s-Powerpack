@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 19:17). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 19:57). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -19,12 +19,13 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-21 waiting for a bot, 2 being built, 1 in review: see [[Kanban]].
+22 waiting for a bot, 1 being built, 1 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2012 Crocodiles take monsters too (Kingdoms, 2026-11-23)
 - [ ] #2011 Old guns: no loading bar, Q takes up the next loaded one, the Void flintlock fires as you let go (Powers, Kingdoms, 2026-11-22)
 - [ ] #2010 Zombies leave the dead for shade by day; nothing regrows on the dead; player heads wear the MCA look (Powers, Kingdoms, Kitchen, 2026-11-22)
 - [ ] #2009 No idle camera while your fishing line is out (Powers, 2026-11-22)
@@ -84,8 +85,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1944 Downed airships' dead crew are steam-town people, not plain villagers (Kingdoms, 2026-11-20)
 - [ ] #1943 drivers never lie across their horses (Kingdoms, 2026-11-20)
 - [ ] #1942 no floating trees: unsupported wood falls (Kingdoms, 2026-11-20)
-- [ ] #1941 stance wheel: a second on the knee before prone (Powers, 2026-11-20)
-- …and 366 older ones.
+- …and 367 older ones.
 
 ## Health
 
