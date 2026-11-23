@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: realm-armor-matching
 branch: claude/gifted-kalam-84de98
 with: Claude Code (desktop session, started from local_2bfd1f34)
@@ -33,3 +33,4 @@ cloth (hood / leather tassets / padded cuisses), unique among realms of its colo
 the kettle hat or lobster tail. The realm page shows the harness (tabard, cloth), and its figure no longer spends the
 realm's stores. Dev check: Liveries.check throws on a clash. CI build only; not played (how it reads on the page's
 small figure, whether the harness draws there, Morstead).
+- 2026-11-23 04:19 PR #2022 is merged into master; moved to Agents/Done.
