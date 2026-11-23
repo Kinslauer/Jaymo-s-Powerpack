@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 05:44). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 05:46). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -35,7 +35,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Agents/inferno-grass-not-fuel|inferno-grass-not-fuel]] · 💻 Odysseus · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2026 · running
 
 
 ## In review
