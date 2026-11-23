@@ -1,0 +1,16 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"category": "misc",
+	"pattern": [
+		"###",
+		"###",
+		"###"
+	],
+	"key": {
+		"#": "jaymoskingdoms:diabolium_nugget"
+	},
+	"result": {
+		"id": "jaymoskingdoms:diabolium_ingot",
+		"count": 1
+	}
+}

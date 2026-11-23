@@ -1,0 +1,14 @@
+{
+	"type": "minecraft:crafting_shapeless",
+	"category": "misc",
+	"ingredients": [
+		"jaymoskingdoms:bottle_of_blood",
+		"minecraft:iron_ingot",
+		"minecraft:iron_ingot",
+		"minecraft:iron_ingot"
+	],
+	"result": {
+		"id": "jaymoskingdoms:diabolium_ingot",
+		"count": 3
+	}
+}

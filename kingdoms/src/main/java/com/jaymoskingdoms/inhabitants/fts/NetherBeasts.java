@@ -39,7 +39,7 @@ public final class NetherBeasts {
 	public static EntityType<Bulldrogioth> BULLDROGIOTH;
 	/** The thorns a Bulldrogioth throws off its shell. */
 	public static EntityType<CoralThorn> CORAL_THORN;
-	/** What a Bulldrogioth's shell is made into; the crust armour's material (made by a later track). */
+	/** What a Bulldrogioth's shell is made into; the crust armour's material ({@link FtsGear}). */
 	public static Item CRIMSON_SHELL;
 
 	public static SoundEvent NEHEMOTH_ROAR, NEHEMOTH_ATTACK, NEHEMOTH_BITE, NEHEMOTH_BITE_WARN, NEHEMOTH_CHARGE, NEHEMOTH_DEATH,
@@ -51,15 +51,6 @@ public final class NetherBeasts {
 
 	/** Where Bulldrogioths come up: the Nether's crimson, warped and basalt country (its colour follows the biome). */
 	static final TagKey<Biome> HAS_BULLDROGIOTH = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_bulldrogioth"));
-
-	/**
-	 * What the Nehemoth's loot table (data/.../loot_table/entities/nehemoth.json) leaves out until the gear is ported: the
-	 * original's crystallized blood (1, up to +1 with looting) and its Corrupted Heart (10% when killed by a player, +1% a
-	 * Looting level above the first). TODO: add both to the loot table once those items exist.
-	 */
-	@SuppressWarnings("unused")
-	static final String[] NEHEMOTH_LOOT_TODO = {"fromtheshadows:crystallized_blood x1 (+0..1 per Looting level)",
-		"fromtheshadows:corrupted_heart 10% when killed by a player (+1% per Looting level above the first)"};
 
 	private NetherBeasts() {
 	}
@@ -85,6 +76,7 @@ public final class NetherBeasts {
 		ResourceKey<Item> shell = ResourceKey.create(Registries.ITEM, JaymosKingdoms.id("crimson_shell"));
 		CRIMSON_SHELL = Registry.register(BuiltInRegistries.ITEM, shell, new Item(new Item.Properties().setId(shell)));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> output.accept(CRIMSON_SHELL));
+		FtsGear.register();
 		ResourceKey<EntityType<?>> thorn = ResourceKey.create(Registries.ENTITY_TYPE, JaymosKingdoms.id("coral_thorn"));
 		CORAL_THORN = Registry.register(BuiltInRegistries.ENTITY_TYPE, thorn, EntityType.Builder.<CoralThorn>of(CoralThorn::new, MobCategory.MISC)
 			.sized(0.4F, 0.4F).clientTrackingRange(6).updateInterval(10).build(thorn));

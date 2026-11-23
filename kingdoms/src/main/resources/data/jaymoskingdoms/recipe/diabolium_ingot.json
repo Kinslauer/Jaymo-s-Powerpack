@@ -1,0 +1,11 @@
+{
+	"type": "minecraft:crafting_shapeless",
+	"category": "misc",
+	"ingredients": [
+		"jaymoskingdoms:diabolium_block"
+	],
+	"result": {
+		"id": "jaymoskingdoms:diabolium_ingot",
+		"count": 9
+	}
+}

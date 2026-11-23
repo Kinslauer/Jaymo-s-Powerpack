@@ -46,6 +46,7 @@ public final class FtsClient {
 		EntityRenderers.register(Fts.FROG_VOMIT, ThrownItemRenderer::new);
 		EntityRenderers.register(Fts.PLAGUE_BEARER, PlagueBearerRenderer::new);
 		EntityRenderers.register(Fts.PLAGUE_KNIFE, ThrownItemRenderer::new);
+		FtsGearClient.register();
 		// the mask, worn, is the original's 3D model drawn by GeckoLib's armour renderer
 		PlagueDoctorMask.PROVIDER = new GeoRenderProvider() {
 			private GeoArmorRenderer<?, ?> renderer;
