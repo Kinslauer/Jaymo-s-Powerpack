@@ -1,4 +1,9 @@
-# Heritage ways of living: plan (Tideborn first)
+# Heritage ways of living: plan (every blood, one at a time)
+
+Andy, 2026-11-23: "lets plan them all first before any builds". Planned so far: **Tideborn** (settled), **Frostborn**
+(waiting on answers). The rest follow, one section each, in the order Andy picks.
+
+# Tideborn
 
 Drafted 2026-11-23 with the `draft-addition` skill; Andy answered the first questions the same day (in
 `Decisions.md`). Nothing is built yet.
@@ -181,18 +186,166 @@ place things in its structure, we don't copy it); how the monument's stages spaw
 mother and their people's ways"; for Andy to approve). Not every Tideborn came up to the coves. Some houses stayed
 below and took the great trident monuments of the open sea, prismarine halls joined by bridges of glass, and kept the
 air in them dry so that their gardens grow. They are rogues: they turned from the Deep Mother and from their people's
-ways, and that is why the island Tideborn won't say why the old courts were left, or speak of those below to
-strangers. A rogue court is a realm like any on land. It trades, keeps its own law, and takes the monuments round it
+ways, keep no god at all, and live by their court's law alone. That is why the island Tideborn won't say why the old
+courts were left, or speak of those below to strangers. The two don't speak, and where they meet, on land or at sea,
+they fight. A rogue court is a realm like any on land. It trades, keeps its own law, and takes the monuments round it
 that are still held by the guardians and the drowned, as land realms take ground. All Tideborn are as at home in the
 water as out of it. They eat from the sea like anyone: they fish with line and net, and they hunt in packs with
 spears, driving a shoal and striking one at a time. Sharks leave a hunting pack alone; it's the lone swimmer and the
 bleeding one they follow.
 
-## Questions for Andy
+## Tideborn: Andy's second answers (2026-11-23)
 
-1. **Reefwalker's new end step**: sight and sense in dark water (recommended), faster than any fish, or remove it?
-2. **Fishing**: Tideborn fish too and only overfishing a haven's water is a crime (recommended), or no crime at all?
-3. **The rogues' god**: do they keep another god, or none? *Recommend: none; they keep the old court's law instead.*
-4. **Island Tideborn and the rogue courts**: at war, or cold silence and no trade? *Recommend: cold silence; a
-   Tideborn player is turned away at a court's door unless they've turned too.*
-5. **The other bloods**: after the Tideborn, which next? *Recommend: Frostborn (ice fishing is close to this work).*
+1. Reefwalker's end step: sight in dark water and sensing nearby fish and foes ("works for me").
+2. Overfishing a haven's waters stays a crime ("keep").
+3. The rogue courts keep no god: "none, court law".
+4. Island Tideborn and rogue courts are "not speaking, hostile if ever they encounter on land or at sea". So step 6
+   adds: rogue court folk and haven Tideborn fight on sight, at sea and ashore; a Tideborn player loyal to the Deep
+   Mother is turned away at a court's door.
+5. "lets plan them all first before any builds, next can be frostborn": no building until every heritage is planned.
+
+The Tideborn plan is settled.
+
+---
+
+# Frostborn
+
+Drafted 2026-11-23 with the `draft-addition` skill. The draft line from the table: "Ice fishing through holes, traps
+(their tech)."
+
+## F1. Examine, place it, plan
+
+**The problem.** The Frostborn are the people of the snowfields with technology nobody else has. Today you never see
+them living that way: there is no Frostborn haven at all (`Havens.draw` gives island and shore seats to the Tideborn,
+mountains and badlands to the Stoneborn, forests and taiga to the Sylvan, and the rest to Stoneborn, Warrior-born or
+Sylvan; no branch for snow). Frostborn only turn up mixed into other villages. So the first job is to give them a place,
+then a way of eating there that only they could have.
+
+**Who it's for.** Players who go north into the harsh cold (*The middle lands and the harsh lands*: harder a step at a
+time away from the middle); Frostborn players; anyone after Frostborn tech.
+
+**What we have to build with** (seen):
+- `Havens.java:110-150`: how a settlement's blood is drawn from its seat's biome; no cold branch.
+- `Heritage.java:834`: a Frostborn's hunger is saved in the cold (`THRIVE_HUNGER`) and worse in the heat
+  (`WILT_HUNGER`); `HeritageKits.java:242`: `FROSTBIND`, `GLACIAL` (hit harder on cold or frozen foes),
+  `FIRE_FRAIL`. `HeritagePaths.java:780`: a Frostborn gift of walking speed; no Frostborn paths yet (only Heartlander,
+  Stoneborn and Tideborn have them).
+- Powers' `fishing/IceFishing.java`: an auger bores a hole through ice (`DRILL_TICKS = 50`), the hole stays open
+  `OPEN_DAYS = 3` days, fish crowd to an open hole (`KEEN = 1.5`). Players only today.
+- `wild/Muskox` (built from `docs/Tundra-Plan.md`): grazes glow lichen, sheds wool by comfort, herds, recovers from a
+  loss; the tundra plan says "Frostborn villages in the cold lands may keep muskox". `FedPredators`: a fed predator
+  stops hunting animals for two days.
+- `FrostTech.java`: Frostborn wear scouters and made limbs; villagers who lose a limb are fitted at a smith.
+- Kitchen's freshness (`fresh/`, `butchery/Spoilage.java`): food goes stale; a cold cellar ages cheese
+  (`Freshness#cellar`).
+- `Hunters.java` (as for the Tideborn): the one place a settlement's folk feed it.
+
+**Where it lives in the lore.**
+- The heritage list: "they came to the Overworld from far past our sun, and brought with them technology the
+  Overworld has never seen ... They settled the snowfields and peaks, and the heat wears them thin." Hail, their
+  frozen home world, "and they love it".
+- *Emberborn and Frostborn*: "Each flourishes where the other starves."
+- *The middle lands and the harsh lands*: the cold gets harder a step at a time.
+- The tundra plan's line that Frostborn villages may keep muskox; its "(new) The tundra" lore paragraph isn't in
+  `Lore.md` now (not found by search), so nothing in the canon says it yet.
+- The placement paragraph is in F6, marked `(new)`.
+
+**Three rules for living things.**
+- *Sympathy*: they live as real Arctic peoples do: fish through the ice, run a trap line for fox and hare and check it
+  each morning, keep muskox for their wool (qiviut, as Alaska's muskox farms do), and store food frozen.
+- *Feedback loops*: a fishing hole gives less the more it is fished (Powers' per-spot stock) and freezes over in three
+  days, so they move along the lake. A trap line empties the ground round it; they move the line. A herd that eats
+  the lichen bare sheds less wool and must be walked to new ground (the muskox already works this way). Frozen food
+  keeps, so a Frostborn village is never short in winter; in a warm spell their stores go stale.
+- *Stewardship*: a player who leaves the traps alone, brings them glow lichen for the herd, or helps move the herd gets
+  wool, traded tech and standing. Robbing a trap line is theft (like poaching); ignoring them costs nothing.
+
+**Obstacles.**
+- New havens change worldgen draws for new worlds only; old worlds keep their villages as they are.
+- Villagers using an auger and fishing through a hole: new behaviour, as `SeaHunts` is for the Tideborn.
+- Traps need a block (a snare or a made trap) that catches small game while nobody is near: keep it cheap (a catch is
+  rolled when the trap is checked, not ticked every tick).
+
+**Roadmap, by impact:**
+
+| # | Step | What it achieves | Check |
+|---|------|------------------|-------|
+| 1 | **Frostborn havens**: a haven whose seat is in a snowy or frozen biome is Frostborn, with its own building style (snow-banked stone and dark timber, metal fittings of their own make). | There are Frostborn places to find. | New world: a village in snowy plains is a Frostborn haven with Frostborn folk. |
+| 2 | **Ice fishing**: Frostborn hunters bore holes with an auger on frozen water near the haven and fish them; catch to the storehouse; holes freeze over, they move. | Their main food, seen at work. | Haven near frozen water: folk at holes, fish in the storehouse, holes along the ice. |
+| 3 | **Trap line**: Frostborn set made traps round the haven; one walks the line each morning and brings back fox, hare, or nothing. The ground round a line empties; the line moves. | The tech people's way of hunting. | Traps placed, checked daily, catch falls off over days, line moves. |
+| 4 | **Muskox herds**: a Frostborn haven keeps muskox near it, combs their wool, and drives them to fresh lichen. | Uses the muskox already built. | Muskox near a haven; wool in the storehouse; herd moves when lichen runs out. |
+| 5 | **Ice cellar**: a Frostborn storehouse keeps food fresh as a cold cellar does; in a warm spell it goes stale. | Why they're never short in winter. | Food in their storehouse stays fresh longer than elsewhere. |
+| 6 | **Helping them** (stewardship): lichen for the herd, help moving it, leaving traps alone: wool, traded tech, standing. Robbing a trap is theft. | Third rule. | Give lichen: standing; rob a trap: crime. |
+
+## F2. The sceptic
+
+- **Snow havens take seats from others.** Snowy taiga is "forest" today and goes to the Sylvan; snowy slopes are
+  "mountain" and go to the Stoneborn. Which wins? Recommend: snow first (the cold is the Frostborn's above all), then
+  the rest as now (FQ1).
+- **Frostborn are a tech people, not hunter-gatherers.** Augers and made traps fit that; a whole village living off
+  snares could feel primitive for them. Their traps should look made (metal, springs), not twigs.
+- **Travellers from Hail** (*Travellers from Hail*) are lone arrivals, not villagers; they shouldn't live in havens.
+- **The muskox step depends on muskox spawning near the havens.** If they're rare in that biome, a haven needs a
+  starting herd.
+- **A Frostborn haven near a Tideborn one** (frozen ocean shores are both "shore" and "snow"): which blood? Recommend
+  Tideborn on the shore stays as is (FQ1).
+- **Opportunity**: Frostborn smiths could be where villagers everywhere come for made limbs (`FrostTech` already sends
+  them to a smith); a Frostborn haven's smith could be the best.
+
+## F3. Keep what works
+
+Keep: `Havens`' shore rule and island rule for the Tideborn; `IceFishing`'s holes, keen fish and refreezing (villagers
+use the same holes, so a player sees and can share them); the muskox's grazing, herd pull and recovery; `FedPredators`;
+`FrostTech` as it is; Kitchen's freshness rules.
+
+Change, by impact:
+1. `Havens.draw`: before the mountain/forest checks, a snowy or frozen biome (`BiomeTags` or the biome's temperature)
+   is Frostborn. Shore still Tideborn first.
+2. `HavenBuildings`: a Frostborn style.
+3. New `IceHunts` beside `Hunters` (as `SeaHunts`), using Powers' `IceFishing` holes through the compat path.
+4. New trap block and `TrapLines` for the morning walk.
+5. Muskox keeping: a haven claims muskox within range as its herd; a herder drives them toward lichen.
+6. Kitchen compat: a Frostborn storehouse counts as a cold cellar.
+
+## F4. Decisions
+
+**A. Their traps (FQ2).** Factors: fits a tech people, readable to players, cost. (a) **made spring traps of their
+own design** (a metal jaw on a plate; catches small game, hurts a player who steps in, as a bear trap does)
+(recommended); (b) plain snares like anyone's.
+
+**B. Frostborn paths (FQ3).** They have no heritage paths yet; Tideborn, Stoneborn and Heartlander do. Planning their
+way of living is a good moment to draft them, or leave paths to their own task. Recommend: leave them for their own
+task, so this stays about living.
+
+## F5. Self-check
+
+**Confirmed** (seen): `Havens.draw` has no snow branch; `Heritage.java:834` hunger in cold and heat;
+`HeritageKits.java:242`; `HeritagePaths.java:780` (no Frostborn paths found); `IceFishing.java`'s header and constants;
+`Muskox` and `FedPredators` in the tundra plan and codemap; `FrostTech.java`'s header; Kitchen's `Spoilage`,
+`FreshTooltip`, `CheeseWheelBlock` (cold cellar) in the codemap; the Frostborn lore lines quoted.
+
+**Assumed or inferred**: that Kingdoms can reach Powers' `IceFishing` holes; that muskox spawn in the biomes the havens
+would sit in; that Kitchen's cold cellar can be made to count a storehouse; that Alaska's muskox farms comb qiviut
+(real-world, from memory).
+
+**Not checked**: no game run; the muskox's spawn biomes (`jaymoskingdoms:muskox_home`); how many snowy villages a new
+world gets; the tundra plan's lore paragraph (only that it isn't in `Lore.md` now).
+
+## F6. Lore placement (new)
+
+**How the Frostborn live** (new) (Claude's placement for Andy's heritage ways, 2026-11-23; for Andy to approve). The
+Frostborn keep the cold places because they love them, as they loved Hail. Their villages stand on the snowfields and
+the frozen shores away from the sea's edge, stone banked with snow and roofed in dark timber, with fittings of their
+own make. They eat from under the ice: a hunter bores a hole with one of their augers, fishes it till it freezes over,
+and bores another along the lake. They run trap lines of their own make, metal jaws on plates, walked every morning,
+and move the line when the ground goes empty. They keep muskox for the wool and walk the herd to fresh lichen. What
+they catch they store frozen, so a Frostborn village is the one place never short in winter, and the one place a warm
+spell frightens. Robbing a Frostborn trap is theft; a traveller who brings lichen for their herd is welcome.
+
+## Frostborn questions for Andy
+
+1. **Which blood wins a snowy seat**: Frostborn over Sylvan (snowy taiga) and Stoneborn (snowy slopes), with Tideborn
+   keeping frozen shores? *Recommend: yes.*
+2. **Their traps**: made metal spring traps (recommended), or plain snares?
+3. **Frostborn paths**: draft them now with this, or in their own task? *Recommend: their own task.*
+4. **Next blood to plan** after the Frostborn? *Recommend: Emberborn, their opposite (fire and the badlands).*
