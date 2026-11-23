@@ -29,6 +29,9 @@
     {
       "id": "weaponmod:katana.netherite",
       "required": false
-    }
+    },
+    "jaymoskingdoms:devil_splitter",
+    "jaymoskingdoms:thirst_for_blood",
+    "jaymoskingdoms:crystallized_dagger"
   ]
 }

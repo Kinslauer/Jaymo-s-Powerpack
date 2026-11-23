@@ -1,0 +1,52 @@
+{
+	"model": {
+		"type": "minecraft:condition",
+		"property": "minecraft:using_item",
+		"on_true": {
+			"type": "jaymoskingdoms:geo_weapon",
+			"weapon": "thirst_for_blood",
+			"base": "jaymoskingdoms:item/thirst_for_blood_using",
+			"transformation": [
+				1,
+				0,
+				0,
+				0.5,
+				0,
+				1,
+				0,
+				0.51,
+				0,
+				0,
+				1,
+				0.5,
+				0,
+				0,
+				0,
+				1
+			]
+		},
+		"on_false": {
+			"type": "jaymoskingdoms:geo_weapon",
+			"weapon": "thirst_for_blood",
+			"base": "jaymoskingdoms:item/thirst_for_blood",
+			"transformation": [
+				1,
+				0,
+				0,
+				0.5,
+				0,
+				1,
+				0,
+				0.51,
+				0,
+				0,
+				1,
+				0.5,
+				0,
+				0,
+				0,
+				1
+			]
+		}
+	}
+}

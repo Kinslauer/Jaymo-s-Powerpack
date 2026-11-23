@@ -1,0 +1,10 @@
+# From the Shadows: the Devil Splitter, Thirst for Blood, the crystallized dagger and the Horn of Apocalypse
+- From From the Shadows Reborn (Sonmok14 and L_Ender, AGPL v3). **Devil Splitter** and **Thirst for Blood** are held as the original's 3D GeckoLib models (a new item model type, `jaymoskingdoms:geo_weapon`); the **crystallized dagger** and the **Horn of Apocalypse** are flat items.
+- **Devil Splitter** (blade, +1 reach, damage 8, iron-level, 350 uses, mended with Bottles of Blood): the sixth blow on one foe within twenty seconds is doubled; on a Nehemoth every blow is doubled, heals you a sixth of the extra, and killing one mends the blade by 20.
+- **Thirst for Blood** (blade, +0.5 reach, damage 9, unbreakable, 12 blood charges): a kill of a foe with 10 or more health loads a charge; right-click spends one on a red laser (9 damage, 5 seconds of fire, 24 blocks, 2 seconds' wait). The original's laser is an entity with its own model; here it is a line like the Nehemoth's own beam.
+- **Crystallized dagger** (blade, short, damage 7): swings faster below 5 hearts; a kill may leave a Crystallized Fragment (25%, +15% a Looting level; not from animals, fish, villagers, golems, skeletons, players, bosses or slimes).
+- **Horn of Apocalypse**: blown, it cuts everything alive within 10 blocks (a tearing blow, so Powers' wounds bleed) and blocks its healing for 10 seconds (Heal Block, from the effects PR; skipped if absent). 20 seconds' wait. The original's once-per-world message and screen shake are left out.
+- Recipes as the original's. Family: all three blades are in the blade forms; all of it is dread tier for merchants.
+- The Plague Bearer's thrown knife is now drawn as the original's throwing dagger model, still giving the plague. The original has no dagger a player throws, no Horn of Purification and no Apocrypha item (only their pictures are in the jar), so none were added.
+- Needs the armour PR (fts-gear-armour) merged first, and the effects PR for Heal Block.
+- Built; not played. The held models' placement (a translation to the middle of the item) and the laser are unchecked in game.

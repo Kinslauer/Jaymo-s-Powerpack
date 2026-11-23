@@ -1,0 +1,18 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"category": "equipment",
+	"pattern": [
+		"  #",
+		" / ",
+		"n  "
+	],
+	"key": {
+		"#": "jaymoskingdoms:corrupted_heart",
+		"/": "minecraft:blaze_rod",
+		"n": "jaymoskingdoms:diabolium_ingot"
+	},
+	"result": {
+		"id": "jaymoskingdoms:thirst_for_blood",
+		"count": 1
+	}
+}
