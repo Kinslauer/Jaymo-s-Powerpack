@@ -348,7 +348,21 @@ public final class Finishers {
 		/** Lights Out: a hand on the shoulder, the weapon raised, one blow to the back of the head, and them let down. */
 		S_BLUNT(26, new int[] {13}, Strike.SILENT),
 		/** (Silent Snap) Bare hands: both on the head from behind, one sharp twist, and them let down. */
-		S_SNAP(26, new int[] {14}, Strike.SILENT);
+		S_SNAP(26, new int[] {14}, Strike.SILENT),
+		// ---- drop attacks ({@link DropAttacks}): a player who falls onto a foe lands on them, and they're down -----------------
+		/** Driven Down, a blade's: landed on one knee on their back, arms out, the blade raised point down and driven through. */
+		D_BLADE(36, new int[] {3, 16}, Strike.STAB),
+		/** Brought Down, a club's or an axe's: landed with it high in both hands, down on the back of the head, and once more. */
+		D_BLUNT(34, new int[] {3, 14}, Strike.CRUSH),
+		/** Pinned From Above, a spear's: landed point first through them, leant on, and wrenched out. */
+		D_SPEAR(36, new int[] {2, 20}, Strike.PIERCE),
+		/** Kneed Down, bare hands: a knee into the back as you land, then the head taken in both hands and slammed on the ground. */
+		D_FIST(38, new int[] {3, 20}, Strike.CRUSH),
+		/**
+		 * The Hidden Blade's (Kingdoms): arms flung wide on landing astride their back, the off hand pinning the shoulders,
+		 * the blade plunged into the neck, a beat held over them, and up again.
+		 */
+		D_HIDDEN_BLADE(40, new int[] {4, 18}, Strike.STAB);
 
 		/** (0.15.148) The tick the whip's crack lands round the neck. */
 		public static final int WHIP_CRACK = 8;
@@ -383,6 +397,11 @@ public final class Finishers {
 		/** One of the stealth kills: taken standing, from behind. */
 		public boolean stealth() {
 			return this.strike == Strike.SILENT;
+		}
+
+		/** One of the drop attacks ({@link DropAttacks}): played astride one just landed on. */
+		public boolean drop() {
+			return this.ordinal() >= D_BLADE.ordinal();
 		}
 
 		public static Kind of(int ordinal) {
@@ -589,6 +608,8 @@ public final class Finishers {
 	private static final Map<UUID, UUID> TARGETED = new HashMap<>();
 	/** The bodies a stealth kill made silent (no cry, no hurt sound), to be given their voices back if they live through it. */
 	private static final java.util.Set<UUID> SILENCED = new java.util.HashSet<>();
+	/** Players whose drop attack only puts them down: its last beat is a blow, not their death ({@link #drop}). */
+	private static final java.util.Set<UUID> DROP_SPARED = new java.util.HashSet<>();
 
 	private Finishers() {
 	}
@@ -600,6 +621,8 @@ public final class Finishers {
 		com.jaymospowers.power.zfighter.ZFighterExecutions.register();
 		// the timed keys of a prompted finisher
 		Prompts.register();
+		// landing on a foe from a height
+		DropAttacks.register();
 		// (0.17.7) the hold is attack's: the client says when it's held on someone and when it's let go
 		PayloadTypeRegistry.serverboundPlay().register(Execute.TYPE, Execute.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Execute.TYPE, (payload, ctx) -> {
@@ -1252,6 +1275,34 @@ public final class Finishers {
 		};
 	}
 
+	/**
+	 * The drop attack {@code player}'s main hand makes ({@link DropAttacks}): a blade's {@link Kind#D_BLADE}, a spear's or
+	 * a polearm's {@link Kind#D_SPEAR}, bare hands {@link Kind#D_FIST}, and anything else (a club, an axe, a bow, a torch)
+	 * {@link Kind#D_BLUNT}. The hidden blade's is Kingdoms' to ask for.
+	 */
+	public static Kind dropKind(Player player) {
+		ItemStack stack = player.getMainHandItem();
+		if (stack.isEmpty()) {
+			return Kind.D_FIST;
+		}
+		return switch (kind(stack)) {
+			case SWORD, GREATSWORD, DAGGER -> Kind.D_BLADE;
+			case SPEAR, POLEARM -> Kind.D_SPEAR;
+			default -> stack.is(ItemTags.SWORDS) ? Kind.D_BLADE : Kind.D_BLUNT;
+		};
+	}
+
+	/**
+	 * {@code player} has just landed on {@code body}, already laid out ({@link DropAttacks}): {@code kind} plays on them,
+	 * and its last beat is their death if {@code kill}, else only a blow (they stay down).
+	 */
+	public static void drop(ServerLevel level, ServerPlayer player, LivingEntity body, Kind kind, boolean kill) {
+		begin(level, player, body, kind);
+		if (!kill) {
+			DROP_SPARED.add(player.getUUID());
+		}
+	}
+
 	/** {@code player}'s rank of a Kingdoms perk by key (0 without Kingdoms). */
 	static int perkRank(Player player, String key) {
 		if (KINGDOMS_RANK == null) {
@@ -1504,7 +1555,7 @@ public final class Finishers {
 			}
 			for (int beat : kind.beats) {
 				if (t == beat && present) {
-					blow(level, player, body, kind, beat == kind.kill());
+					blow(level, player, body, kind, beat == kind.kill() && !DROP_SPARED.contains(player.getUUID()));
 				}
 			}
 			for (int i = 0; i < kind.after.length; i++) {
@@ -1658,8 +1709,8 @@ public final class Finishers {
 			Dismember.sever(body, Dismember.HEAD, player);
 		}
 		Downed.execute(level, body, player);
-		if (kind.stealth()) {
-			// (Kingdoms' Stealth experience, and Into the Dark)
+		if (kind.stealth() || kind == Kind.D_HIDDEN_BLADE) {
+			// (Kingdoms' Stealth experience, and Into the Dark; the hidden blade's drop kill is an assassination too)
 			player.addTag(STEALTH_KILL_TAG);
 		}
 		// (0.18.118) now and then the blade stays in them (less, the more you've done this)
@@ -1769,6 +1820,7 @@ public final class Finishers {
 			com.jaymospowers.power.zfighter.ZFighterExecutions.end(body);
 		}
 		player.removeAttached(FINISHING);
+		DROP_SPARED.remove(player.getUUID());
 		Prompts.end(player);
 		root(player, false);
 		TARGETED.remove(body.getUUID());
