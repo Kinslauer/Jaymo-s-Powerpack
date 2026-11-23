@@ -18,6 +18,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -146,6 +147,9 @@ public class Nehemoth extends Monster implements GeoEntity, NetherBeast {
 	/** (Server) the yaw it holds through a roar, and who it has already roared at. */
 	private float roarYaw;
 	private final Set<UUID> met = new HashSet<>();
+	/** Its targetable parts (never in the world: the level hands them out near it), and whether the blow now landing came through one. */
+	private final NehemothPart[] parts;
+	private boolean viaPart;
 
 	public Nehemoth(EntityType<? extends Nehemoth> type, Level level) {
 		super(type, level);
@@ -153,6 +157,30 @@ public class Nehemoth extends Monster implements GeoEntity, NetherBeast {
 		this.setPathfindingMalus(PathType.LAVA, 8.0F);
 		this.setPathfindingMalus(PathType.FIRE, 0.0F);
 		this.setPathfindingMalus(PathType.FIRE_IN_NEIGHBOR, 0.0F);
+		NehemothPart.Kind[] kinds = NehemothPart.Kind.values();
+		this.parts = new NehemothPart[kinds.length];
+		for (int i = 0; i < kinds.length; i++) {
+			this.parts[i] = new NehemothPart(this, kinds[i]);
+		}
+	}
+
+	public NehemothPart[] parts() {
+		return this.parts;
+	}
+
+	/** Its parts take the ids just after its own, as the ender dragon's do, so the client and the server name the same one. */
+	@Override
+	public void recreateFromPacket(ClientboundAddEntityPacket packet) {
+		super.recreateFromPacket(packet);
+		for (int i = 0; i < this.parts.length; i++) {
+			this.parts[i].setId(packet.getId() + 1 + i);
+		}
+	}
+
+	/** Its own body takes no aim (a crosshair and an arrow find its parts instead). */
+	@Override
+	public boolean isPickable() {
+		return false;
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
@@ -247,6 +275,9 @@ public class Nehemoth extends Monster implements GeoEntity, NetherBeast {
 		super.tick();
 		if (this.act() != Act.NONE) {
 			this.actAge++;
+		}
+		for (NehemothPart part : this.parts) {
+			part.place(this.getX(), this.getY(), this.getZ(), this.yBodyRot);
 		}
 	}
 
@@ -529,8 +560,38 @@ public class Nehemoth extends Monster implements GeoEntity, NetherBeast {
 		}
 	}
 
+	/** A blow that landed on one of its parts: it counts for that part's share (the head twice, the neck one and a half, the rest half). */
+	boolean hurtFromPart(NehemothPart part, ServerLevel level, DamageSource source, float amount) {
+		this.viaPart = true;
+		try {
+			boolean hit = this.hurtServer(level, source, amount * part.kind.damageMultiplier);
+			if (hit && part.kind == NehemothPart.Kind.HEAD) {
+				this.playSound(NetherBeasts.NEHEMOTH_CRITICAL, 3.0F, 1.0F + this.random.nextFloat() * 0.1F);
+			}
+			return hit;
+		} finally {
+			this.viaPart = false;
+		}
+	}
+
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
+		Vec3 origin = source.getSourcePosition();
+		if (!this.viaPart && origin != null && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+			// not through a part (an explosion, a mob's blow): it counts for the part nearest where it came from, as in the original
+			NehemothPart nearest = null;
+			double best = Double.MAX_VALUE;
+			for (NehemothPart part : this.parts) {
+				double d = part.position().distanceToSqr(origin);
+				if (d < best) {
+					best = d;
+					nearest = part;
+				}
+			}
+			if (nearest != null) {
+				return this.hurtFromPart(nearest, level, source, amount);
+			}
+		}
 		if (this.act() == Act.GUARD && source.getEntity() instanceof LivingEntity attacker && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
 			Vec3 toAttacker = attacker.position().subtract(this.position()).normalize();
 			if (toAttacker.dot(this.getLookAngle().normalize()) > 0.5) {

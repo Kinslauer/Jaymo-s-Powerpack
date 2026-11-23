@@ -34,7 +34,7 @@ public final class NetherBeasts {
 	public static EntityType<Nehemoth> NEHEMOTH;
 
 	public static SoundEvent NEHEMOTH_ROAR, NEHEMOTH_ATTACK, NEHEMOTH_BITE, NEHEMOTH_BITE_WARN, NEHEMOTH_CHARGE, NEHEMOTH_DEATH,
-		NEHEMOTH_HURT, NEHEMOTH_IDLE, NEHEMOTH_STOMP, NEHEMOTH_BEAM, NEHEMOTH_BEAM_READY, NEHEMOTH_GORE;
+		NEHEMOTH_HURT, NEHEMOTH_IDLE, NEHEMOTH_STOMP, NEHEMOTH_BEAM, NEHEMOTH_BEAM_READY, NEHEMOTH_GORE, NEHEMOTH_CRITICAL;
 
 	/** Where Nehemoths come up: the soul sand valleys and the demon realm (Powers' biomes, named in the tag as optional). */
 	static final TagKey<Biome> HAS_NEHEMOTH = TagKey.create(Registries.BIOME, JaymosKingdoms.id("has_nehemoth"));
@@ -64,6 +64,7 @@ public final class NetherBeasts {
 		NEHEMOTH_BEAM = sound("nehemoth.beam");
 		NEHEMOTH_BEAM_READY = sound("nehemoth.beam_ready");
 		NEHEMOTH_GORE = sound("nehemoth.gore");
+		NEHEMOTH_CRITICAL = sound("nehemoth.critical");
 
 		NEHEMOTH = Beasts.type("nehemoth", EntityType.Builder.of(Nehemoth::new, MobCategory.MONSTER).sized(1.25F, 3.65F).fireImmune()
 			.clientTrackingRange(9), Nehemoth.createAttributes());

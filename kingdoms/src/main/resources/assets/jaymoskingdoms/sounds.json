@@ -3837,6 +3837,12 @@
 			"jaymoskingdoms:nehemoth/soul_beam_ready"
 		]
 	},
+	"nehemoth.critical": {
+		"subtitle": "subtitles.jaymoskingdoms.nehemoth.critical",
+		"sounds": [
+			"jaymoskingdoms:nehemoth/critical_hit"
+		]
+	},
 	"nehemoth.gore": {
 		"subtitle": "subtitles.jaymoskingdoms.nehemoth.gore",
 		"sounds": [

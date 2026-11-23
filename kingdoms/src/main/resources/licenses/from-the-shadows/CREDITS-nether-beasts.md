@@ -14,6 +14,6 @@ Files copied (all under `kingdoms/src/main/resources/assets/jaymoskingdoms/`), o
 - `textures/entity/nehemoth_eye.png` -> `textures/entity/nehemoth/fire_glowmask.png`
 - `textures/entity/soul_retexture.png` -> `textures/entity/nehemoth/soul.png`
 - `textures/entity/nehemoth_eye_2.png` -> `textures/entity/nehemoth/soul_glowmask.png`
-- sounds `nehemoth_roar`, `nehemoth_attack`, `bite_warn`, `nehemoth_death`, `soul_laser`, `soul_laser_ready`, `goresound`,
+- sounds `nehemoth_roar`, `nehemoth_attack`, `bite_warn`, `nehemoth_death`, `soul_laser`, `soul_laser_ready`, `goresound`, `critical_hit`,
   `nehemoth_bite_1..6`, `nehemoth_charge_1..4`, `stomp_1..4`, `nehemoth_hurt4..6`, `nehemoth_idle{1,2,5,6,7,8,11,12,13}`
   -> `sounds/nehemoth/*.ogg`
