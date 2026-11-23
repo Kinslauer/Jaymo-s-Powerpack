@@ -1,5 +1,5 @@
 ---
-status: changes
+status: done
 for: hermes
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-16)
 asked: 2026-11-16
@@ -42,3 +42,4 @@ Research/investigation first — determine what stations exist in our mods and h
 - 2026-11-21 11:32 Text pass: reviewed PR #1957 player-visible strings. kitchen/src/main/resources/assets/jaymoskitchen/lang/en_us.json — item.jaymoskitchen.spoon 'Spoon', item.jaymoskitchen.real_time_cooker 'Realtime Cooker', block.jaymoskitchen.real_time_cooker 'Realtime Cooker', message.jaymoskitchen.already_cooking 'You're already cooking somewhere.' (all plain, brief, player-voiced, consistent with existing kitchen strings; no placeholders to keep beyond keys). changes/kitchen/claude-hands-on-cooking-realtime.md — player-facing 'What a player will see' bullets plus a 'Not tested in game' list; reads well. PR's new Java (HandsOnClient, HandsOnInputHandler, RealTimeCookingBlockEntity, HandsOnSession/Station/Ticker, payloads) contains no player strings; all translatable keys it references already exist in en_us.json. No rewrites needed, no files changed.
 - 2026-11-21 11:33 Blocked: text pass complete, no changes needed (reviewed PR #1957's player-visible strings: en_us.json keys spoon / real_time_cooker item+block / already_cooking, and changes/kitchen/claude-hands-on-cooking-realtime.md — all plain, player-voiced, keys and placeholders kept; PR's new Java has no player strings and references only existing lang keys). Cannot hand in: vault --set status=in-review text_pass=done refused (exit 4) because PR #1957's GitHub 'Build Kitchen' check is failing from pre-existing Kitchen compile errors, not from text. Re-hand in once hermes-fixer's build fixes land and checks go green.
 - 2026-11-21 23:34 Status blocked -> changes (pending-work pass, 2026-11-21): nothing here waits on Andy. PR #1957's Build Kitchen check fails, so it needs a bot's fixes before review.
+- 2026-11-23 05:24 Done (2026-11-23): PR #1957 closed unmerged on 2026-11-22 because master already does hands-on cooking in the world (kitchen cooking/hands: HandsOn, ChopRun, StirRun, CookTools, the hands_on_cooking game rule). Superseded; nothing to fix.
