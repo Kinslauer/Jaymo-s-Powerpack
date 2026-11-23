@@ -172,10 +172,12 @@ public class DraftingTableMenu extends AbstractContainerMenu {
 		ItemStack moved = stack.copy();
 		int end = this.slots.size();
 		if (index == RESULT) {
-			if (!this.moveItemStackTo(stack, RESULT + 1, end, true)) {
-				return ItemStack.EMPTY;
+			// one at a time: a copied blueprint stays on the table, so the result would refill and spend every sheet
+			if (this.moveItemStackTo(stack, RESULT + 1, end, true)) {
+				slot.onQuickCraft(stack, moved);
+				slot.onTake(who, moved);
 			}
-			slot.onQuickCraft(stack, moved);
+			return ItemStack.EMPTY;
 		} else if (index < INPUTS) {
 			if (!this.moveItemStackTo(stack, RESULT + 1, end, false)) {
 				return ItemStack.EMPTY;
