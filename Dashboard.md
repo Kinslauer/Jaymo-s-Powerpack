@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 16:26). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 17:01). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -23,6 +23,8 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2051 Alt in mid air dives: jump + Alt is a dive-roll evade (Powers, 2026-11-23)
+- [ ] #2050 The dodge roll stays above the ground and is half as long; sitting against a wall no longer sinks in (Powers, Kingdoms, 2026-11-23)
 - [ ] #2049 Fishing: read the fish's moods, tire it out, watch your line (Powers, 2026-11-23)
 - [ ] #2048 The Nightmare shows that shots go through it (Kingdoms, 2026-11-23)
 - [ ] #2047 Wounded NPCs want their limbs before gold (Kingdoms, 2026-11-23)
@@ -81,9 +83,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1981 Villagers always doing something: hunger, thirst, boredom, and a stall watchdog (Kingdoms, 2026-11-22)
 - [ ] #1980 Every trade in every town (Kingdoms, 2026-11-22)
 - [ ] #1978 Classes start with a skill of their kind (Kingdoms, 2026-11-22)
-- [ ] #1977 Talk wheel: answers round a wheel on the right, worded by your blood and class; chat hidden while talking (Kingdoms, 2026-11-22)
-- [ ] #1976 fight music for ordinary fights (Kingdoms, 2026-11-22)
-- …and 397 older ones.
+- …and 399 older ones.
 
 ## Health
 
