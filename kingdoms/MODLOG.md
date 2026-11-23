@@ -16347,3 +16347,11 @@ Andy picked "goblin extras" from the survival pick list (2026-11-22); the Goblin
 - Andy: "the flintlock weaponry, it should release the shot as you release right click, the next right click reloading as you hold and can be interrupted". A loaded musketoon or arquebus used to fire on the press; now the right-click holds it ready and the shot goes as you let go. The handgonne fires as you let go once its match is down (held its touch time, quicker for a Gunslinger just after the draw); let go sooner and it doesn't fire. Reloading is the same hold as before: let go early and nothing is loaded. A wet match still fizzles. The musketoon's ramrod sounds no longer play while it's held ready. `Musketoon.Gun`, `EarlyGuns.Gun`.
 - The loading bar and Q swap for these guns are in Jaymo's Powers.
 - Built on CI; not played.
+
+## 0.11.82 (2026-11-23): Crocodiles take monsters too (#2012)
+
+- **Crocodiles**: a crocodile (Cube Animals') with nothing in its jaws goes for the nearest monster it can see within its
+  notice range (6 blocks basking by day, 16 in water or at night), so a zombie or skeleton that comes down to its river
+  is attacked like anything else. Andy: "crocodiles in the overworld should also be hostile to other hostile mobs".
+- Class: `wild/Crocodiles`.
+- Not played: whether Cube Animals' crocodile keeps a target it was given (its own attack goal) is unseen in game.
