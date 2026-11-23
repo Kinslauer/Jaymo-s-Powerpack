@@ -16481,3 +16481,10 @@ Andy picked "goblin extras" from the survival pick list (2026-11-22); the Goblin
 - **Safe story starts**: every story start leaves you no enemy to mobs until you move (Powers' SpawnCalm, by reflection; nothing without Powers). `PowersCompat.spawnCalm`, `LifeStory.arrive`.
 - `feat.owed` and `tree_lock.rank` still aren't in Powers' hint list, so they stay on the action bar, but their links work.
 - Not built on the PC (CI builds it); not played.
+
+## 0.11.94 (2026-11-23): The hidden blade's leap becomes its drop assassination (#2029)
+
+- With Jaymo's Powers, the hidden blade's leap is now its drop assassination, **From Above**: land on a foe from 4+ blocks with a blade on an empty hand's wrist and it springs out as you land, the leap's Stealth experience is yours, and Powers plays the move: astride their back, the shoulders pinned, the blade into the neck. It always kills, and counts as an assassination. Stealth 5 or more makes any weapon's drop attack a kill too (`HiddenBlade.DROP_KILL_LEVEL`). `HiddenBlade.drop`, read by Powers.
+- Without Jaymo's Powers the leap is as it was (the fall dealt as your blow, Crippled).
+- Lore: a `(new)` paragraph in Lore.md places the drop kill with the assassins' guild, for Andy to approve.
+- Not played.
