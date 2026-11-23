@@ -1,0 +1,22 @@
+{
+  "effect.jaymoskingdoms.heal_block": "Heal Block",
+  "effect.jaymoskingdoms.blessing_of_gluttony": "Blessing of Gluttony",
+  "item.minecraft.potion.effect.frenzy": "Potion of the Frenzy",
+  "item.minecraft.splash_potion.effect.frenzy": "Splash Potion of Frenzy",
+  "item.minecraft.lingering_potion.effect.frenzy": "Lingering Potion of Frenzy",
+  "item.minecraft.tipped_arrow.effect.frenzy": "Arrow of Frenzy",
+  "item.minecraft.potion.effect.hardshell": "Potion of the Hardshell",
+  "item.minecraft.splash_potion.effect.hardshell": "Splash Potion of Hardshell",
+  "item.minecraft.lingering_potion.effect.hardshell": "Lingering Potion of Hardshell",
+  "item.minecraft.tipped_arrow.effect.hardshell": "Arrow of Hardshell",
+  "item.minecraft.potion.effect.terrible_plague": "Potion of the Terrible Plague",
+  "item.minecraft.splash_potion.effect.terrible_plague": "Splash Potion of Terrible Plague",
+  "item.minecraft.lingering_potion.effect.terrible_plague": "Lingering Potion of Terrible Plague",
+  "item.minecraft.tipped_arrow.effect.terrible_plague": "Arrow of Terrible Plague",
+  "enchantment.jaymoskingdoms.divinity": "Divinity",
+  "enchantment.jaymoskingdoms.freezing": "Freezing",
+  "enchantment.jaymoskingdoms.retribution": "Retribution",
+  "enchantment.jaymoskingdoms.divinity.desc": "Increases damage against demon mobs such as the Nehemoth.",
+  "enchantment.jaymoskingdoms.retribution.desc": "Increases damage against illager mobs such as Pillagers and Vindicators.",
+  "enchantment.jaymoskingdoms.freezing.desc": "Freezes a mob you strike."
+}

@@ -1,0 +1,23 @@
+{
+	"description": {
+		"translate": "enchantment.jaymoskingdoms.freezing"
+	},
+	"anvil_cost": 4,
+	"weight": 2,
+	"max_level": 3,
+	"min_cost": {
+		"base": 10,
+		"per_level_above_first": 20
+	},
+	"max_cost": {
+		"base": 60,
+		"per_level_above_first": 20
+	},
+	"slots": [
+		"mainhand"
+	],
+	"primary_items": "#minecraft:enchantable/melee_weapon",
+	"supported_items": "#minecraft:enchantable/weapon",
+	"exclusive_set": "#jaymoskingdoms:exclusive_set/freezing",
+	"effects": {}
+}

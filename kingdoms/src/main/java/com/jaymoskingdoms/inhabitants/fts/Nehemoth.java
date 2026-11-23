@@ -442,7 +442,7 @@ public class Nehemoth extends Monster implements GeoEntity, NetherBeast {
 			float damage = (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
 			for (Entity rider : new ArrayList<>(this.getPassengers())) {
 				if (rider instanceof LivingEntity victim && NetherBeasts.tear(level, this, victim, damage)) {
-					// the original also puts Heal Block on it; that effect is a later track's (see the change note)
+					FtsEffects.healBlock(victim, FtsEffects.HEAL_BLOCK_TICKS);
 					this.heal(damage / 2.0F);
 				}
 			}

@@ -67,6 +67,7 @@ public final class Fts {
 	}
 
 	public static void register() {
+		FtsEffects.register();
 		FROGLIN = Beasts.type("froglin", EntityType.Builder.of(Froglin::new, MobCategory.MONSTER).sized(0.6F, 1.95F).clientTrackingRange(9),
 			Froglin.createAttributes());
 		ResourceKey<EntityType<?>> vomit = ResourceKey.create(Registries.ENTITY_TYPE, JaymosKingdoms.id("froglin_vomit"));
@@ -76,7 +77,8 @@ public final class Fts {
 			Consumables.defaultFood().onConsume(new ApplyStatusEffectsConsumeEffect(new MobEffectInstance(MobEffects.HUNGER, RAW_HUNGER_TICKS, 0),
 				RAW_HUNGER_CHANCE)).build())));
 		COOKED_FROGLIN_LEG = item("cooked_froglin_leg", p -> new Item(p.food(new FoodProperties.Builder().nutrition(COOKED_NUTRITION)
-			.saturationModifier(COOKED_SATURATION).build())));
+			.saturationModifier(COOKED_SATURATION).build(), Consumables.defaultFood().onConsume(new ApplyStatusEffectsConsumeEffect(
+				new MobEffectInstance(FtsEffects.BLESSING_OF_GLUTTONY, FtsEffects.GLUTTONY_TICKS, FtsEffects.GLUTTONY_AMPLIFIER))).build())));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> {
 			output.insertAfter(Items.CHICKEN, FROGLIN_LEG);
 			output.insertAfter(Items.COOKED_CHICKEN, COOKED_FROGLIN_LEG);

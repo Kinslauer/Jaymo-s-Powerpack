@@ -1048,6 +1048,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.129: the Nightfall Plague (our own after the Forge mod): the plague and its cure, Night Bleeders, vampire bats,
 		// the vampires' callings, nightmares and the Nightfall (and their attachments)
 		com.jaymoskingdoms.nightfall.Nightfall.register();
+		// the From the Shadows potions, one of which carries Nightfall's plague
+		com.jaymoskingdoms.inhabitants.fts.FtsEffects.registerPotions();
 		com.jaymoskingdoms.reaped.Reaped.register();
 		// 0.7.131: the Nether's faction, stage 1: the Hornkin and their gold feud with the piglins (our own after Just-In NETHER)
 		com.jaymoskingdoms.nether.Nether.register();

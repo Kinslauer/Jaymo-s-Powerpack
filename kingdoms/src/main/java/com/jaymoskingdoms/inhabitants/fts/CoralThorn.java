@@ -45,8 +45,11 @@ public class CoralThorn extends ThrowableItemProjectile {
 		Entity target = hit.getEntity();
 		if (this.level() instanceof ServerLevel level && !(target instanceof NetherBeast)) {
 			Entity owner = this.getOwner();
-			target.hurtServer(level, owner instanceof LivingEntity living ? this.damageSources().mobProjectile(this, living)
+			boolean hurt = target.hurtServer(level, owner instanceof LivingEntity living ? this.damageSources().mobProjectile(this, living)
 				: this.damageSources().thrown(this, owner), DAMAGE);
+			if (hurt && target instanceof LivingEntity struck) {
+				FtsEffects.healBlock(struck, FtsEffects.HEAL_BLOCK_TICKS);
+			}
 		}
 	}
 
