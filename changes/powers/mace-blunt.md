@@ -12,3 +12,7 @@
   `Dismember.blade` passes over crushing weapons with no flanges, `BlastGore` doesn't take a blunt weapon for a blade,
   and `Finishers` treats a crushing weapon in the swords tag as no sword.
 - Built by CI; not played.
+- **The pitchfork fights like a spear**: Better Combat gives it the spear's moveset and reach (two-handed thrusts, the
+  polearm stance), it counts as a polearm for guards and parries, its blow is a thrust (best at a spear's distance,
+  finding the gaps in mail), and its finisher is the spear's Pinned. It was a sword before. (`weapon_attributes/pitchfork.json`,
+  "pitchfork" added to the spear words in `WeaponKind`, `Finishers` and `Armed`.)

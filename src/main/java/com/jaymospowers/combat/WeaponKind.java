@@ -94,7 +94,7 @@ public enum WeaponKind {
 		FIST_WORDS = {"cestus", "knuckle", "gauntlet"},
 		RAPIER_WORDS = {"rapier", "estoc", "skewer", "foil"},
 		GREAT_WORDS = {"claymore", "greatsword", "great_sword", "zweihander", "longsword", "bastardsword"},
-		SPEAR_WORDS = {"spear", "lance", "javelin", "trident", "harpoon"},
+		SPEAR_WORDS = {"spear", "lance", "javelin", "trident", "harpoon", "pitchfork"},
 		HAMMER_WORDS = {"hammer", "maul", "sledge", "anchor"},
 		AXE_WORDS = {"axe", "hatchet", "cleaver"},
 		POLEHAMMER_WORDS = {"bec_de_corbin", "polehammer", "pole_hammer", "lucerne"};

@@ -414,7 +414,7 @@ public final class Finishers {
 	private static final String[] POLEARM_WORDS = {"glaive", "halberd", "scythe", "naginata", "bardiche", "poleaxe", "pole_axe", "partisan",
 		"guisarme", "voulge", "billhook"};
 	private static final String[] STAFF_WORDS = {"staff", "quarterstaff", "bo_staff"};
-	private static final String[] SPEAR_WORDS = {"spear", "lance", "pike", "trident", "javelin", "pilum"};
+	private static final String[] SPEAR_WORDS = {"spear", "lance", "pike", "trident", "javelin", "pilum", "pitchfork"};
 	private static final String[] DAGGER_WORDS = {"dagger", "knife", "kunai", "tanto", "dirk", "stiletto", "misericorde", "shiv", "athame", "kama"};
 	private static final String[] GREATSWORD_WORDS = {"claymore", "longsword", "greatsword", "great_sword", "broadsword", "zweihander", "flamberge",
 		"bastard_sword"};
