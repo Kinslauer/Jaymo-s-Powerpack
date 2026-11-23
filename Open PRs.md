@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-23 11:03
+updated: 2026-11-23 11:10
 ---
 # Open PRs
 
-2 open, as of 2026-11-23 11:03. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+2 open, as of 2026-11-23 11:10. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2027](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2027) draft-addition skill and the heritage ways plan (Tideborn first)
