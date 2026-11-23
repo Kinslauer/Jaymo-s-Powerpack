@@ -64,7 +64,7 @@ public final class FtsClient {
 		}
 	}
 
-	static final class FroglinRendererextends InhabitantRenderer<Froglin> {
+	static final class FroglinRenderer extends InhabitantRenderer<Froglin> {
 		FroglinRenderer(EntityRendererProvider.Context context) {
 			super(context, new DefaultedEntityGeoModel<Froglin>(JaymosKingdoms.id("froglin")) {
 				@Override
