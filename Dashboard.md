@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 09:37). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 09:52). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -23,6 +23,7 @@ Nothing stuck.
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2033 Humanoids see in a cone and hear at their sides; busy mobs notice less (Kingdoms, Kitchen, 2026-11-23)
 - [ ] #2031 Thrown rocks can crit: faster, and triple damage (Powers, 2026-11-23)
 - [ ] #2030 context keys by the crosshair (Powers, Kingdoms, 2026-11-23)
 - [ ] #2029 Drop attacks: land on a foe from 4+ blocks and they're down (Powers, Kingdoms, 2026-11-23)
@@ -82,8 +83,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1937 Z Fighter gaps 10: camera and HUD (Powers, 2026-11-22)
 - [ ] #1896 Scrying Orb: watch a far person or place as a living miniature over a crystal orb (Kingdoms, 2026-11-22)
 - [ ] #1853 Fishing: Kingdoms' Saltblood path makes fish keener (Powers, Kingdoms, 2026-11-22)
-- [ ] #1969 loose wood no longer makes the server wait on land still generating (Kingdoms, 2026-11-21)
-- …and 379 older ones.
+- …and 380 older ones.
 
 ## Health
 
