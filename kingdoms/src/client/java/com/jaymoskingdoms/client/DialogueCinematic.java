@@ -272,7 +272,8 @@ public final class DialogueCinematic {
 		}
 		LocalPlayer self = minecraft.player;
 		Screen screen = minecraft.gui.screen();
-		boolean talking = self != null && minecraft.level != null && screen instanceof InteractScreen;
+		// (an illager's talk screen too: it is laid out as MCA's and gets the same camera, IllagerTalkScreen)
+		boolean talking = self != null && minecraft.level != null && (screen instanceof InteractScreen || screen instanceof IllagerTalkScreen);
 		if (talking && !running) {
 			Entity v = villagerOf(screen);
 			if (v != null) {
@@ -319,6 +320,9 @@ public final class DialogueCinematic {
 	private static Entity villagerOf(Screen screen) {
 		if (screen instanceof McaInteractScreenAccessor accessor) {
 			return accessor.jaymoskingdoms$villager().asEntity();
+		}
+		if (screen instanceof IllagerTalkScreen talk && Minecraft.getInstance().level != null) {
+			return Minecraft.getInstance().level.getEntity(talk.speaker());
 		}
 		return null;
 	}

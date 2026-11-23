@@ -96,6 +96,8 @@ public final class SpeechBubbles {
 	static void add(int entityId, Component text, int color) {
 		// (an illager's line, as far as you know their tongue)
 		text = IllagerWords.resolve(text);
+		// (an illager you are talking with: its words box has it too)
+		IllagerTalkScreen.heard(entityId, text);
 		// (the villager you're talking with speaks in the talk's box, not over their head)
 		if (DialogueCinematic.said(entityId, text)) {
 			return;
