@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 00:02). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 04:34). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -19,12 +19,16 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-23 waiting for a bot, 1 being built, 2 in review: see [[Kanban]].
+23 waiting for a bot, 1 being built, 1 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2023 From the Shadows: the Devil Splitter, Thirst for Blood, the crystallized dagger and the Horn of Apocalypse (Kingdoms, 2026-11-23)
+- [ ] #2022 Realms never wear the same armour: each keeps its own livery (Kingdoms, 2026-11-23)
+- [ ] #2021 Wounds shown like potions; bandages wrap several limbs at once; splints by two, from plant string too (Powers, 2026-11-23)
+- [ ] #2020 From the Shadows: diabolium, the crust armour and the Nehemoth's blood (Kingdoms, 2026-11-23)
 - [ ] #2016 plague bearer: the orc camps' sick walker (From the Shadows Reborn) (Kingdoms, 2026-11-23)
 - [ ] #2015 the Bulldrogioth, a shelled beast out of the demons' country (From the Shadows Reborn port) (Kingdoms, 2026-11-23)
 - [ ] #2014 the Nehemoth, a beast out of the demons' country (From the Shadows Reborn port) (Kingdoms, 2026-11-23)
@@ -81,11 +85,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1951 hints as tip cards - text hints show top right instead of over the hotbar (Powers, 2026-11-21)
 - [ ] #1952 Stealth kills: sneak + hold attack behind someone who never saw you (Powers, Kingdoms, 2026-11-20)
 - [ ] #1950 bodies keep their facing prone, sat or crouched; the view rises with the head on get-ups (Powers, 2026-11-20)
-- [ ] #1949 body menu - a tap of use on a body opens what you can do to it (Powers, Kingdoms, 2026-11-20)
-- [ ] #1948 hogtied captives ride over a horse (Powers, Kingdoms, 2026-11-20)
-- [ ] #1947 flail left click: hold to wind up a swing, tap to jab (Powers, 2026-11-20)
-- [ ] #1946 Gibs toned down: only overwhelming force bursts a body (Powers, 2026-11-20)
-- …and 371 older ones.
+- …and 375 older ones.
 
 ## Health
 
