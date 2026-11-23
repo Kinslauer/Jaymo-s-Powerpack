@@ -1,7 +1,7 @@
 # Heritage ways of living: plan (every blood, one at a time)
 
-Andy, 2026-11-23: "lets plan them all first before any builds". Planned so far: **Tideborn** (settled), **Frostborn** (Overworld
-hunting, and Hail with its city Vein; waiting on answers). The rest follow, one section each, in the order Andy picks.
+Andy, 2026-11-23: "lets plan them all first before any builds". Planned so far: **Tideborn** (settled), **Frostborn** (settled:
+Overworld hunting, and Hail with its city Vein), **Emberborn** (waiting on answers). The rest follow, one section each, in the order Andy picks.
 
 # Tideborn
 
@@ -226,6 +226,20 @@ parts: how the Frostborn on the Overworld hunt (small), and **Hail**, their home
 - Non-Frostborn freeze outside heated places on Hail ("yes").
 - This lifts the 2026-11-11 decision "Hail is lore only for now".
 
+Second answers, the same day:
+- The muskox herds and the ice cellar "are still viable": back in Part 1 (steps 5 and 6), kept by the Frostborn living
+  in other peoples' villages.
+- Vein only on worlds whose Chrono future is Mosslorn ("yes").
+- The ship lands at a pad by any village with Frostborn folk, calling every few days, "but only after the second world
+  tier": read as from **Wildlands** on (Hearth, Borderlands, then Wildlands; `WorldTiers.Tier`).
+- Trust is standing with the Frostborn you live among, from trade and help ("yup").
+- Vein is safe; creatures of the ice roam the wilds, "if they wander in they get dealt with by patrolmen".
+- Hail's place (dimension, map, cold) in Powers; its people, shops and trust in Kingdoms ("sounds good").
+- Frostborn heritage paths "later on".
+- Next blood: Emberborn ("lets go!").
+
+The Frostborn plan is settled.
+
 ## Part 1: the Overworld Frostborn hunt
 
 ### F1. Examine, place it, plan
@@ -261,7 +275,9 @@ The placement paragraph is in F6.
 | 1 | **Ice fishing**: a Frostborn villager who goes out for food, with frozen water in range, bores holes with an auger and fishes them (the same holes players use); catch to the storehouse; they move along the ice. | Their way of fishing, seen at work. | Village with Frostborn near frozen water: holes along the ice, fish in the storehouse. |
 | 2 | **Made traps**: Frostborn set spring traps of their own make (a metal jaw on a plate) out on the hunting ground; one walks the line each morning and brings back rabbit, fox or nothing; the line moves when the ground empties. A player who steps in one is caught and hurt, as by a bear trap. | Their futuristic hunting. | Traps placed, checked daily, catch falls off, line moves. |
 | 3 | **Scouter hunting**: a Frostborn hunter wearing a scouter spots game twice as far off and goes straight to it, no creeping. | Tech you can see in use. | Scouter hunter picks game from farther than others. |
-| 4 | **Stewardship**: robbing a Frostborn trap is theft; sharing a hole is welcome. | Third rule. | Take from a trap: crime. |
+| 4 | **Stewardship**: robbing a Frostborn trap is theft; sharing a hole is welcome; bringing glow lichen for the herd or helping move it earns wool, traded tech and standing. | Third rule. | Take from a trap: crime; give lichen: standing. |
+| 5 | **Muskox herds**: a village with Frostborn folk in a cold biome keeps the muskox near it as its herd (the `Muskox` already built); a Frostborn herder combs their wool into the storehouse and walks them to fresh glow lichen when it runs out. | Andy: "still viable". | Muskox near such a village; wool in the storehouse; the herd moves when the lichen's gone. |
+| 6 | **Ice cellar**: a village with Frostborn folk digs an ice cellar by its storehouse; food in it keeps as in Kitchen's cold cellar (`Freshness#cellar`); in a warm spell it goes stale. | Never short in winter. | Food in the cellar stays fresh longer than in the storehouse. |
 
 ### F2. The sceptic
 
@@ -295,7 +311,9 @@ data says whether it wears a scouter. **Not checked**: no game run.
 peoples hunt as their own people do. They bore the ice with augers of their own make and fish the hole until it
 freezes over, then bore another along the lake. They set made traps, metal jaws on plates, out on the hunting ground
 and walk the line every morning, and move it when the ground goes empty. One with a scouter sees game a long way off
-and walks straight to it. Robbing a Frostborn trap is theft.
+and walks straight to it. Where Frostborn live in the cold they keep muskox for the wool and walk the herd to fresh
+lichen, and dig an ice cellar by the storehouse, so their village is never short in winter and a warm spell frightens
+it. Robbing a Frostborn trap is theft; a traveller who brings lichen for their herd is welcome.
 
 ## Part 2: Hail and Vein
 
@@ -415,7 +433,7 @@ those the Frostborn trust; a traveller who goes must earn it first among the Fro
 of the blood freezes in the open, and only a warm room, warm gear or a Frostborn's help keeps them alive. In Vein the
 scouters, made limbs and rigs the Overworld treasures are everyday things, sold in shops.
 
-## Frostborn questions for Andy
+## Frostborn questions for Andy (answered 2026-11-23: see "Second answers" at the top of this section)
 
 1. **The same map twice**: build Vein only on worlds whose Chrono future is Mosslorn (all new ones), or allow both and
    explain it in the lore? *Recommend: Mosslorn worlds only.*
@@ -429,3 +447,152 @@ scouters, made limbs and rigs the Overworld treasures are everyday things, sold 
 5. **Which mod holds Hail**: split as H4 A recommends?
 6. **Frostborn heritage paths**: their own task later? *Recommend: yes.*
 7. **Next blood to plan**? *Recommend: Emberborn.*
+
+---
+
+# Emberborn
+
+Drafted 2026-11-23 with the `draft-addition` skill. The draft line from the table: "Hunt the badlands and burning
+places, cook over open flame; never into deep water."
+
+## E1. Examine, place it, plan
+
+**The problem.** The Emberborn are the fire people: "born of the badlands and the burning places. Flame cannot touch
+them; the frost saps them." Like the Frostborn, they have no haven of their own (`Havens.draw` gives badlands to the
+Stoneborn) and live in other peoples' villages, where they hunt like everyone. Andy wants each blood to live its own
+way. Theirs should use the one thing nobody else can: fire, which can't hurt them.
+
+**Who it's for.** Players in the hot lands (savanna, badlands, desert: *The middle lands and the harsh lands*);
+Emberborn players; anyone who meets a grass fire on the plains and wonders who lit it.
+
+**What we have to build with** (seen):
+- `VillagerHeritage.java:131-133`: an Emberborn villager is never hurt by fire, lava or burning; `:217` they lean to
+  hot lands (`LEAN`) and shun cold ones (`SHUN`); `W_EMBERBORN = 35` of every thousand-ish villagers.
+- `Heritage.java:832`: an Emberborn's hunger is saved in the heat and worse in the cold; `:153` frost and freezing
+  weaken and slow them. `HeritageKits`: `FORGE_BLESSING`, flaw `HEAVY_WATER` (they sink).
+- Powers' `power/ember/EmberCook.java`: an Emberborn player sneaking with raw food in the off hand cooks it in the
+  hand, no fire, no fuel. Players only.
+- Peterwolf's Forest Fire, our 26.3 port, is in the pack (`peterwolfs-forest-fire-1.1.11-26.3-jaymo.3.jar`): fire
+  throws embers, climbs, runs uphill and with the wind, smoulders and relights (*The fire crews*). A fire set on
+  purpose behaves like a real one.
+- `Hunters.java`: the one place a settlement's folk feed it; game is the `camp_game` tag (cow, pig, sheep, chicken,
+  rabbit, goat, Naturalist deer, boar, duck and more).
+- Kitchen's smoker (`SmokerView`: a heat gauge with a curing band) and drying racks: smoked, cured meat.
+- *Water that comes back* (lore): desert travellers press cactus for "the Mother's thin milk", which turns the stomach
+  unless boiled.
+- `nether/AvatarCamps.java`, `nether/CinderForge.java`: the Emberborn the fire consumed (Flame Avatars) camp in the
+  Nether; the oldest Emberborn smith keeps a forge there.
+
+**Where it lives in the lore.**
+- The heritage list (quoted above). *Emberborn and Verdant*: "The Emberborn are the people of the burning places.
+  Nothing is forgiven there." *Emberborn and Frostborn*: each flourishes where the other starves.
+- *The Flame Avatar*: an Emberborn who holds fire too long is taken by it. Living by fire has a cost in the canon
+  already.
+- *The fire crews*: villagers fight wildfires with bottles and beaters, and Frostborn pumps.
+- *Notus*, the south wind dragon (fire, the badlands and basalt), takes most kindly to the Emberborn.
+- The Emberborn expedition at the Nether's edge paid the Hornkin off in gold.
+- The placement paragraph is in E6.
+
+**Three rules for living things.**
+- *Sympathy*: real peoples of dry grass country have hunted with fire for as long as there have been people: a line
+  of fire set downwind drives game into waiting hunters (fire-drive hunting), and burning the old grass brings up a
+  green flush that the grazers come back to (Aboriginal fire-stick farming, the Plains peoples' burns). Meat is
+  smoked and dried to keep in the heat, as in every hot country.
+- *Feedback loops*: a burnt patch regrows as fresh grass within days and draws grazers back, so a burn feeds the next
+  hunt; burn the same ground too often and it stays bare and the game leaves. Fire on a windy day jumps the line and
+  runs, and the fire crews and the Emberborn have to beat it out; set too near trees, it takes the woods.
+- *Stewardship*: a player who helps beat out a burn's edges, or brings flint and dry meat racks, gets a share and
+  standing. Nobody is punished for staying away. An Emberborn who lets a burn reach a farm or a house answers for it
+  (arson), so they burn carefully.
+
+**Obstacles.**
+- **Fire is dangerous on a shared server.** A villager setting grass fires near friends' builds is griefing. Burns
+  must stay in open grass and badlands scrub, far from any building, never in forest, never on a windy day, and the
+  hunters stamp out the edges after.
+- **Cost**: Forest Fire's spread is already ticking in the world; a burn adds one fire, not a new system.
+- **Hot lands aren't everywhere**: Emberborn in a cold or forested village can't burn; they fall back to ordinary
+  hunting, with meat cooked in the hand.
+
+**Roadmap, by impact:**
+
+| # | Step | What it achieves | Check |
+|---|------|------------------|-------|
+| 1 | **Cooked in the hand**: an Emberborn villager cooks raw food in their hands, as an Emberborn player already can (`EmberCook`); a village with Emberborn sends its raw meat to them, no fuel burned. | Their gift used daily; easy, first. | Raw meat in the storehouse turns cooked when an Emberborn is home. |
+| 2 | **The fire drive**: on a calm day, in open grass or savanna in range, two to four Emberborn hunters set a line of fire downwind of a herd and wait where it runs; they walk through the flames to strike. Then they beat out the edges. | You see the fire people hunt with fire. | Herd in grassland, calm: a burn, game driven, kills; burn put out after; no building within the safe distance. |
+| 3 | **The green flush**: burnt grass regrows as fresh grass after a few days, and grazers in range drift to it; burning the same patch again within the rest time leaves it bare. | Feedback loop: a burn feeds the next hunt. | Burnt patch: fresh grass in days, deer/cows come; reburnt too soon: bare. |
+| 4 | **Smoked and dried**: Emberborn villagers cure meat in a smoker without fuel (they are the heat) and hang it on drying racks; cured meat keeps longer in the storehouse. | Food that keeps in the heat. | Cured meat in the storehouse; it outlasts fresh. |
+| 5 | **The desert's water**: Emberborn boil cactus water in their hands, so it's safe to drink; a village with Emberborn in the desert has water. | Uses *Water that comes back*. | Emberborn hands boiled cactus water to the storehouse. |
+| 6 | **Stewardship**: helping beat out a burn's edges earns a share and standing; an Emberborn whose burn reaches a farm or house is charged with arson. | Third rule. | Help: share and standing; burn reaches a house: crime. |
+
+## E2. The sceptic
+
+- **Setting fires is griefing waiting to happen.** Even with rules, Forest Fire is realistic: embers jump. Keep a
+  wide safe distance (EQ2), only calm days, only grass and badlands scrub, and the hunters always put it out.
+- **No Emberborn villages**: same question as the Frostborn. Andy kept the Frostborn mixed; recommend the same here
+  (EQ1).
+- **The Flame Avatar's warning**: an Emberborn who plays with fire too much is taken by it. A village burner who
+  burns too often could be the one who goes over (an Avatar walking out of the smoke). That's a hook, not a must
+  (EQ3).
+- **Nether hunting** (hoglins, striders) at the Nether's edge would fit the expedition lore, but it's a different place
+  and a big step. Leave for later (EQ4).
+- **Opportunity**: Notus, the south wind, "takes most kindly to the Emberborn": a burn on a day Notus blows could run
+  faster and further, a risk they read the sky for.
+
+## E3. Keep what works
+
+Keep: `VillagerHeritage`'s fire immunity and hot-land lean; `EmberCook` as the players' version (the villagers' is
+the same idea, in Kingdoms); Forest Fire's spread as it is (a burn is just a fire); `Hunters`' rules; Kitchen's smoker
+and racks.
+
+Change, by impact:
+1. Kingdoms: Emberborn villagers cook the storehouse's raw food in hand (a small tick beside `Hunters`).
+2. New `FireDrives` beside `Hunters` (as `SeaHunts`, `IceHunts`): the burn, the drive, the putting out, the safe
+   distance.
+3. The green flush: a burnt grass block remembers when it burnt and regrows (check whether Forest Fire already
+   regrows burnt ground before adding anything).
+4. Kitchen compat: an Emberborn at a smoker is its heat.
+5. Cactus water boiled in hand: Kitchen compat with the cactus water item.
+
+## E4. Decisions
+
+**A. Havens (EQ1).** (a) **Stay mixed in other villages, as the Frostborn** (recommended: consistent, and Emberborn
+are rare, 35 in roughly a thousand); (b) badlands Emberborn havens, taking badlands from the Stoneborn.
+
+**B. Safe distance for a burn (EQ2).** Factors: friends' builds, Forest Fire's ember jumps. (a) **64 blocks from any
+building or farm, never in forest, never when it rains or the wind is up** (recommended); (b) 32 blocks; (c) no
+burns at all, only cooking and smoking.
+
+## E5. Self-check
+
+**Confirmed** (seen): `VillagerHeritage.java:131-133`, `:217`, `W_EMBERBORN = 35`; `Heritage.java:832`, `:153`;
+`EmberCook.java`'s header; the Forest Fire jar in the pack's mods; `camp_game` tag contents; Kitchen's `SmokerView`
+and drying racks in the codemap; `AvatarCamps`, `CinderForge`; the lore lines quoted.
+
+**Assumed or inferred**: that Forest Fire's spread can be read for "is the wind up" and whether it regrows burnt
+ground (not opened); that a villager can stand in as a smoker's heat; fire-drive hunting and fire-stick farming as
+described (real-world, from memory).
+
+**Not checked**: no game run; Forest Fire's own code; how often grass country lies within a village's hunting range;
+the cactus water item's id.
+
+## E6. Lore placement (new)
+
+**How the Emberborn hunt** (new) (Claude's placement for Andy's heritage ways, 2026-11-23; for Andy to approve).
+Emberborn living among other peoples hunt the way their people always have in the burning places: with fire. On a
+still day in open grass they set a line of flame downwind of a herd and wait where it runs, and walk through the burn
+to strike, because it cannot touch them. Then they beat out its edges. The burnt ground comes up green in a few days
+and the grazers come back to it, so a good burn feeds the next hunt; burn it too often and it stays bare. They cook in
+their hands and cure meat without a fire, and in the desert they boil the Mother's thin milk in their palms. An
+Emberborn whose burn reaches a farm or a roof answers for it, and their elders say the one who burns too often is the
+one the fire takes.
+
+## Emberborn questions for Andy
+
+1. **Their own villages**: stay mixed in other peoples' villages like the Frostborn, or badlands Emberborn villages?
+   *Recommend: stay mixed.*
+2. **Fire drives**: how far from buildings and farms must a burn be? *Recommend: 64 blocks, never in forest, never in
+   rain or wind.* Or no burns at all?
+3. **The Flame Avatar hook**: should a villager who burns too often be at risk of going over and walking out of the
+   smoke as a Flame Avatar? *Recommend: yes, rarely.*
+4. **Nether hunting** (hoglins at the Nether's edge): plan it now or leave it? *Recommend: leave it for later.*
+5. **Next blood to plan**? *Recommend: Stoneborn (they're in the most villages after Heartlanders).*
