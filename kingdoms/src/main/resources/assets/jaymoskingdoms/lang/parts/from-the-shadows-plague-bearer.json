@@ -1,0 +1,12 @@
+{
+  "entity.jaymoskingdoms.plague_bearer": "Plague Bearer",
+  "entity.jaymoskingdoms.plague_knife": "Plague Knife",
+  "item.jaymoskingdoms.plague_bearer_spawn_egg": "Plague Bearer Spawn Egg",
+  "item.jaymoskingdoms.plague_doctor_mask": "Plague Doctor Mask",
+  "item.jaymoskingdoms.suspicious_cloth": "Suspicious Cloth",
+  "subtitles.jaymoskingdoms.plague_bearer.idle": "Plague Bearer mumbles",
+  "subtitles.jaymoskingdoms.plague_bearer.hurt": "Plague Bearer hurts",
+  "subtitles.jaymoskingdoms.plague_bearer.death": "Plague Bearer dies",
+  "subtitles.jaymoskingdoms.plague_bearer.preattack": "Plague Bearer winds up",
+  "subtitles.jaymoskingdoms.plague_bearer.attack": "Plague Bearer strikes"
+}

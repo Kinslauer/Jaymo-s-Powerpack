@@ -1,6 +1,7 @@
 package com.jaymoskingdoms;
 
 import com.jaymoskingdoms.inhabitants.fts.Froglin;
+import com.jaymoskingdoms.inhabitants.fts.PlagueBearer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -50,6 +51,9 @@ public final class CampBeasts {
 	/** A new camp's creatures: called as a goblin village or an orc camp rises. */
 	public static void rise(ServerLevel level, int camp, BlockPos fire) {
 		Froglin.hire(level, camp, fire, Froglin.START);
+		if (Camps.orc(level.getServer(), camp)) {
+			PlagueBearer.rise(level, camp, fire);
+		}
 	}
 
 	/** A day's growth ({@code days}) of camp {@code camp}: it may take more creatures on. */
@@ -57,6 +61,9 @@ public final class CampBeasts {
 		BlockPos fire = fire(level.getServer(), camp);
 		if (fire != null) {
 			Froglin.grow(level, camp, fire, days);
+			if (Camps.orc(level.getServer(), camp)) {
+				PlagueBearer.grow(level, camp, fire, days);
+			}
 		}
 	}
 }
