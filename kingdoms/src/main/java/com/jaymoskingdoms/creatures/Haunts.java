@@ -60,6 +60,11 @@ public final class Haunts {
 	static final int PIERCERS_MOST = 5, FLIERS_MOST = 1, HARPIES_MOST = 2;
 	/** A settlement's quiet ground: nearer than this (blocks) to its seat no warren is dug; a stolen life's grave or cellar is dug between these. */
 	static final double WARREN_CLEAR = 110.0, GRAVE_FROM = 50.0, GRAVE_TO = 140.0;
+	/**
+	 * A villager is shut in (a stolen life) only if no way through open air leads from them to the sky within this many
+	 * blocks, looking at no more than this many spaces: a roof over a market stall or a porch is not being buried.
+	 */
+	static final int SHUT_IN_REACH = 8, SHUT_IN_LOOK = 300;
 
 	static final AttachmentType<List<Long>> ROLLED = AttachmentRegistry.create(com.jaymoskingdoms.JaymosKingdoms.id("haunts_rolled"),
 		b -> b.persistent(Codec.LONG.listOf()));
@@ -333,7 +338,8 @@ public final class Haunts {
 			BlockPos p = v.blockPosition();
 			// (shut in under solid ground: water over them is a lake, not a ruin (Andy: "anything but being spawned out in the water"))
 			if (v.isInWater() || !level.getFluidState(p).isEmpty() || !level.getFluidState(p.above()).isEmpty() || level.canSeeSky(p)
-				|| p.getY() > level.getHeight(Heightmap.Types.OCEAN_FLOOR, p.getX(), p.getZ()) - 4 || level.structureManager().getAllStructuresAt(p).isEmpty()) {
+				|| p.getY() > level.getHeight(Heightmap.Types.OCEAN_FLOOR, p.getX(), p.getZ()) - 4 || level.structureManager().getAllStructuresAt(p).isEmpty()
+				|| !shutIn(level, p)) {
 				continue;
 			}
 			boolean grim = false;
@@ -346,6 +352,38 @@ public final class Haunts {
 				Doubles.markBuried(level, v);
 			}
 		}
+	}
+
+	/**
+	 * Whether {@code at} is truly shut in: no open space that sees the sky can be reached from it through open air, a door, a
+	 * gate, a window or bars within {@link #SHUT_IN_REACH} blocks (earth, a ruin's walls or a closed trapdoor stop the way).
+	 */
+	private static boolean shutIn(ServerLevel level, BlockPos at) {
+		Set<BlockPos> seen = new HashSet<>();
+		java.util.ArrayDeque<BlockPos> todo = new java.util.ArrayDeque<>();
+		todo.add(at);
+		seen.add(at);
+		while (!todo.isEmpty() && seen.size() <= SHUT_IN_LOOK) {
+			BlockPos p = todo.poll();
+			if (level.canSeeSky(p)) {
+				return false;
+			}
+			for (net.minecraft.core.Direction d : net.minecraft.core.Direction.values()) {
+				BlockPos n = p.relative(d);
+				if (n.distManhattan(at) > SHUT_IN_REACH || !seen.add(n) || !level.isLoaded(n)) {
+					continue;
+				}
+				var state = level.getBlockState(n);
+				// (a door, a gate, a window or bars lead somewhere: someone indoors at night is at home, not buried; a
+				// closed trapdoor is how a cellar is shut, so it stops the way)
+				boolean through = state.is(net.minecraft.tags.BlockTags.DOORS) || state.is(net.minecraft.tags.BlockTags.FENCE_GATES)
+					|| state.is(net.minecraft.tags.BlockTags.IMPERMEABLE) || state.getBlock() instanceof net.minecraft.world.level.block.IronBarsBlock;
+				if ((through || state.getCollisionShape(level, n).isEmpty()) && level.getFluidState(n).isEmpty()) {
+					todo.add(n);
+				}
+			}
+		}
+		return true;
 	}
 
 	// ---- helpers ------------------------------------------------------------------------------------------------------------------

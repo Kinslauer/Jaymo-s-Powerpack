@@ -218,6 +218,15 @@ public final class Doubles {
 		home.setAttached(PENDING, list);
 	}
 
+	/** {@code v} was never a stolen life after all (a ruler taken by mistake): no longer one, and no copy goes to take their place. */
+	static void unsteal(ServerLevel level, Villager v) {
+		v.removeAttached(STOLEN);
+		ServerLevel home = level.getServer().overworld();
+		List<Pending> list = new ArrayList<>(home.getAttachedOrElse(PENDING, List.of()));
+		if (list.removeIf(p -> p.real().equals(v.getUUID()))) {
+			home.setAttached(PENDING, list);
+		}
+	}
 
 	/** On a stolen life buried in a shallow grave ({@link #grave}): freed, they climb out of it ({@link #unearth}). Saved. */
 	static final AttachmentType<Boolean> BURIED = AttachmentRegistry.create(JaymosKingdoms.id("stolen_grave"), b -> b.persistent(Codec.BOOL));
