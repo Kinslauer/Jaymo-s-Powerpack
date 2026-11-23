@@ -33,8 +33,20 @@ public record FishingPayloads() {
         }
     }
 
+    /** (2026-11-23) Let the fish on the line go (sneak + use while fighting it). */
+    public record ReleaseFish() implements CustomPacketPayload {
+        public static final Type<ReleaseFish> TYPE = new Type<>(JaymosPowers.id("release_fish"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, ReleaseFish> CODEC = StreamCodec.unit(new ReleaseFish());
+
+        @Override
+        public Type<ReleaseFish> type() {
+            return TYPE;
+        }
+    }
+
     public static void register() {
         PayloadTypeRegistry.serverboundPlay().register(ReelInput.TYPE, ReelInput.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(SetDrag.TYPE, SetDrag.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(ReleaseFish.TYPE, ReleaseFish.CODEC);
     }
 }

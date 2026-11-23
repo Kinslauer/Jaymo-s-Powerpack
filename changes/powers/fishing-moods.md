@@ -1,0 +1,8 @@
+# Fishing: read the fish's moods, tire it out, watch your line
+- Andy (a fishing gif, 2026-11-23): "thats what i want our fishing to be like". The fight now shows, under the crosshair, the fish and its weight and what it's doing: **TAKING THE LURE**, **CALM - REEL**, **RUNNING**, **JUMPING** or **THRASHING - EASE OFF**, and **LANDING**; the tension bar (green while you should reel, amber while you should ease off, with the drag's slip point and which way it runs); then *Tension*, the fish's *Energy*, the *Line* out in metres of the spool, and the drag; and one line on what to do. `FishFight` (mood, energy, line, weight), `FishingRealClient`.
+- **Thrashing** (new): instead of a run, a fish may shake its head where it is: reeling into it spikes the tension like a run, but it takes no line. A run that begins with a leap clear of the water shows as JUMPING. `FishRun`.
+- **Energy**: a fish starts fresh and tires as it fights (more during runs, leaps and thrashing, and while you hold it hard); a tired fish pulls less, rests longer between runs and comes in up to 1.6 times faster. `FishingReal.ENERGY_*`, `TIRED_PULL`, `TIRED_REEL`, `FishRun.TIRED_GAP`.
+- **Line in metres**: 26 m on a plain line, 30 weighted, 40 braided, half as much again on a sea rod. A run that takes all of it parts the line at the reel (Andy's pick), and the fish is gone with the hook. `FishingReal.LINE_M*`.
+- **Let it go**: sneak + use while a fish is on the line (Andy's pick: R stays Ability 1).
+- The drag (sneak + scroll) and the left/right runs are kept (Andy's pick).
+- Not played: the numbers (how fast energy drains, how often a fish thrashes) want a try on the water.
