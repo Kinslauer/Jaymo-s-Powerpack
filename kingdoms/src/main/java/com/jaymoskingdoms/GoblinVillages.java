@@ -120,6 +120,8 @@ final class GoblinVillages {
 		}
 		// (0.7.329) and scalebane sellswords
 		ScalebaneArcher.hire(level, id, fire, ScalebaneArcher.START);
+		// and the froglins it keeps
+		CampBeasts.rise(level, id, fire);
 		// (0.7.339) and its war barrel by the gate
 		WarBarrel.hire(level, id);
 		// and scouts ranging outside the ring

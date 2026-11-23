@@ -573,11 +573,13 @@ public final class Camps {
 				ScalebaneArcher.grow(level, camp.id(), goblins.center(), days);
 				WarBarrel.grow(level, camp.id(), days);
 				GoblinScout.grow(level, camp.id(), goblins.center(), days);
+				CampBeasts.grow(level, camp.id(), days);
 			}
 			return;
 		}
 		if (orc(server, camp.id())) {
 			OrcCamps.grow(level, camp, days);
+			CampBeasts.grow(level, camp.id(), days);
 			return;
 		}
 		if (pirate(server, camp.id())) {
