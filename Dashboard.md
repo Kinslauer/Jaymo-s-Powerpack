@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 23:57). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 00:02). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -93,4 +93,4 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 ## Last week
 
-[[Weekly/2026-W46|2026-W46]]
+[[Weekly/2026-W47|2026-W47]]
