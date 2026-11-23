@@ -381,7 +381,8 @@ final class TradeRoutes {
 		for (Faction f : Factions.all(server)) {
 			Sort sort = sortOf(server, f);
 			// ((0.7.490) a haven trading on its own account sends its output by Caravans.startHaven, not from here)
-			if (sort == null || Caravans.tradingHaven(server, f)) {
+			// (a realm on alert, its ruler missing, sends nothing out: StolenCrowns)
+			if (sort == null || Caravans.tradingHaven(server, f) || StolenCrowns.alert(server, f)) {
 				continue;
 			}
 			String key = Integer.toString(f.id());

@@ -72,6 +72,31 @@ public final class StolenCrowns {
 	static final double VAULT_PLACE = 56.0;
 	/** How deep its floor is under the ground, its room's half width, and how many shapeshifters keep it. */
 	static final int VAULT_DEPTH = 12, ROOM_HALF = 2, KEEPERS_LEAST = 2, KEEPERS_MOST = 3;
+	// ---- the tells (track 2) ----
+	/** The copy slips on its own court this near a player (blocks), with this chance a look, at most this often (ticks). */
+	static final double SLIP_RANGE = 5.0;
+	static final float SLIP_CHANCE = 0.4F;
+	static final long SLIP_GAP = 300L;
+	/** The chance each dawn that the copy hands down an odd decree; how near a player its people grumble about it (blocks), how often (ticks). */
+	static final float DECREE_CHANCE = 0.5F;
+	static final double GRUMBLE_RANGE = 8.0;
+	static final long GRUMBLE_GAP = 2400L;
+	/** The real one's spouse, kin or court wizard tells a player this near (blocks) that the ruler isn't themself, once a day to each. */
+	static final double NOTICE_RANGE = 6.0;
+	static final long NOTICE_GAP = 24000L;
+	/** A guard this near the copy (blocks), a player within this of it, challenges it with this chance a look; this many challenges and its face slips. */
+	static final double CHALLENGE_RANGE = 6.0, CHALLENGE_SEEN = 16.0;
+	static final float CHALLENGE_CHANCE = 0.03F;
+	static final int CHALLENGES = 2;
+	/** Crest beasts a copy may name for its own, wrongly. */
+	static final java.util.List<String> BEASTS = java.util.List.of("dragon", "lion", "stag", "boar", "eagle", "pegasus", "unicorn", "serpent");
+	// ---- the realm on alert (track 3) ----
+	/** A stranger this near the seat (blocks) is warned by a guard that the gates are shut, at most this often (ticks). */
+	static final double WARN_RANGE = 48.0;
+	static final long WARN_GAP = 1200L;
+	/** By day, this many guards set out searching this far toward the trail (blocks), this often (ticks). */
+	static final int SEARCHERS = 3, SEARCH_OUT = 70;
+	static final long SEARCH_GAP = 2400L;
 
 	/** A taken ruler: who, the copy on the throne, their saved body until the vault is dug, its spot, since when, found out yet, the last day a hint went out, the day it was found out. */
 	record Taken(UUID real, UUID copy, CompoundTag body, int x, int z, boolean placed, long since, boolean unmasked, long hinted, long found) {
@@ -113,6 +138,12 @@ public final class StolenCrowns {
 	static final AttachmentType<String> HONOURED = AttachmentRegistry.create(JaymosKingdoms.id("crown_saviour"),
 		b -> b.persistent(Codec.STRING).copyOnDeath());
 
+	/** This session: when each copy last slipped, when each player was last told, grumbled at or warned, each copy's challenges, each realm's last search, the day's decree. */
+	private static final Map<UUID, Long> SLIPPED = new HashMap<>(), NOTICED = new HashMap<>(), GRUMBLED = new HashMap<>(), WARNED = new HashMap<>();
+	private static final Map<UUID, Integer> CHALLENGED = new HashMap<>();
+	private static final Map<Integer, Long> SEARCHED = new HashMap<>();
+	private static final Map<Integer, long[]> DECREED = new HashMap<>();
+
 	private StolenCrowns() {
 	}
 
@@ -149,6 +180,8 @@ public final class StolenCrowns {
 		if (!taken(server).isEmpty()) {
 			vaults(level);
 			hints(level);
+			tells(level);
+			onAlert(level);
 		}
 		if (server.getTickCount() % CHECK != 0) {
 			return;
@@ -449,7 +482,228 @@ public final class StolenCrowns {
 		return realm == null ? null : Component.translatable("title.jaymoskingdoms.crown_saviour", realm);
 	}
 
-	// ---- testing -----------------------------------------------------------------------------------------------------
+	// ---- the tells (track 2) --------------------------------------------------------------------------------------
+
+	/** The copies on thrones give themselves away: court slips, odd decrees, the ruler's own people, the guards. */
+	private static void tells(ServerLevel level) {
+		MinecraftServer server = level.getServer();
+		long now = server.overworld().getGameTime(), day = Production.day(server);
+		for (Map.Entry<String, Taken> e : Map.copyOf(taken(server)).entrySet()) {
+			Taken t = e.getValue();
+			Faction f = Factions.get(server, Integer.parseInt(e.getKey()));
+			if (t.unmasked() || f == null || f.fallen() || !(level.getEntity(t.copy()) instanceof Villager copy) || !copy.isAlive()) {
+				continue;
+			}
+			decree(level, f, copy, day);
+			for (ServerPlayer player : level.players()) {
+				if (player.isSpectator() || player.distanceToSqr(copy) > 48.0 * 48.0) {
+					continue;
+				}
+				if (player.distanceTo(copy) <= SLIP_RANGE) {
+					slip(level, copy, player, f, t, now);
+				}
+				notice(level, player, t, f, now);
+				grumble(level, player, f, day, now);
+			}
+			challenge(level, copy);
+		}
+	}
+
+	/** The copy gets its own court wrong in {@code player}'s hearing: its heir, its crest, the name of its own seat. Heard, sneak and speak to it. */
+	private static void slip(ServerLevel level, Villager copy, ServerPlayer player, Faction f, Taken t, long now) {
+		Long last = SLIPPED.get(copy.getUUID());
+		if (last != null && now - last < SLIP_GAP || level.getRandom().nextFloat() > SLIP_CHANCE) {
+			return;
+		}
+		SLIPPED.put(copy.getUUID(), now);
+		Component line = switch (level.getRandom().nextInt(3)) {
+			case 0 -> Component.translatable("talk.jaymoskingdoms.stolen_crown.slip.heir", Doubles.wrongWife(t.real()));
+			case 1 -> Component.translatable("talk.jaymoskingdoms.stolen_crown.slip.crest",
+				Component.translatable("crest.jaymoskingdoms.stolen_crown." + BEASTS.get(level.getRandom().nextInt(BEASTS.size()))));
+			default -> Component.translatable("talk.jaymoskingdoms.stolen_crown.slip.seat", wrongRealm(level, f));
+		};
+		Speech.say(level, copy, line, Speech.WHITE, SLIP_RANGE + 6.0);
+		Doubles.heard(copy, player);
+	}
+
+	/** Another realm's name (or a made-up one), for the copy to call its own seat. */
+	private static String wrongRealm(ServerLevel level, Faction f) {
+		java.util.List<Faction> others = Factions.all(level.getServer()).stream().filter(o -> o.id() != f.id() && !o.fallen()
+			&& o.type() != FactionType.BARBARIAN).toList();
+		return others.isEmpty() ? f.name() + "shire" : others.get(level.getRandom().nextInt(others.size())).name();
+	}
+
+	/** Once a day the copy may hand down a decree no ruler of the house would; the realm's news carries it. */
+	private static void decree(ServerLevel level, Faction f, Villager copy, long day) {
+		long[] d = DECREED.get(f.id());
+		if (d != null && d[0] == day) {
+			return;
+		}
+		int kind = level.getRandom().nextFloat() < DECREE_CHANCE ? level.getRandom().nextInt(3) : -1;
+		DECREED.put(f.id(), new long[] {day, kind});
+		if (kind >= 0) {
+			Post.news(level.getServer(), Component.translatable("news.jaymoskingdoms.stolen_crown.decree." + kind, copy.getDisplayName(), f.name()));
+		}
+	}
+
+	/** On a day the copy decreed something, its people near {@code player} grumble about it. */
+	private static void grumble(ServerLevel level, ServerPlayer player, Faction f, long day, long now) {
+		long[] d = DECREED.get(f.id());
+		Long last = GRUMBLED.get(player.getUUID());
+		if (d == null || d[0] != day || d[1] < 0 || last != null && now - last < GRUMBLE_GAP) {
+			return;
+		}
+		for (Villager v : level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(GRUMBLE_RANGE), v -> v.isAlive() && !v.isBaby()
+			&& !v.isSleeping() && !Doubles.isCopy(v) && !Rulers.is(v) && !Captives.bound(v))) {
+			GRUMBLED.put(player.getUUID(), now);
+			Speech.say(level, v, Component.translatable("talk.jaymoskingdoms.stolen_crown.grumble." + d[1]), Speech.YELLOW, GRUMBLE_RANGE + 4.0);
+			return;
+		}
+	}
+
+	/** The real one's spouse, kin or court wizard, near {@code player}, says the ruler isn't themself. */
+	private static void notice(ServerLevel level, ServerPlayer player, Taken t, Faction f, long now) {
+		Long last = NOTICED.get(player.getUUID());
+		if (last != null && now - last < NOTICE_GAP) {
+			return;
+		}
+		for (Villager v : level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(NOTICE_RANGE), v -> v.isAlive() && !v.isBaby()
+			&& !v.isSleeping() && !Doubles.isCopy(v))) {
+			int kin = McaCompat.kinOf(v, t.real());
+			boolean wizard = CourtWizards.is(v);
+			if (kin == McaCompat.STRANGERS && !wizard) {
+				continue;
+			}
+			NOTICED.put(player.getUUID(), now);
+			String who = kin == McaCompat.PARTNER ? "spouse" : kin == McaCompat.KIN ? "kin" : "wizard";
+			Speech.say(level, v, Component.translatable("talk.jaymoskingdoms.stolen_crown.notice." + who, f.name()), Speech.YELLOW, NOTICE_RANGE + 6.0);
+			return;
+		}
+	}
+
+	/** Now and then a sharp-eyed guard near the copy, a player watching, challenges it; {@link #CHALLENGES} of them and its face slips. */
+	private static void challenge(ServerLevel level, Villager copy) {
+		if (level.getRandom().nextFloat() > CHALLENGE_CHANCE || level.getNearestPlayer(copy, CHALLENGE_SEEN) == null) {
+			return;
+		}
+		for (PathfinderMob guard : level.getEntitiesOfClass(PathfinderMob.class, copy.getBoundingBox().inflate(CHALLENGE_RANGE),
+			g -> g.isAlive() && g != copy && McaCompat.isGuard(g))) {
+			Speech.say(level, guard, Component.translatable("talk.jaymoskingdoms.stolen_crown.challenge"), Speech.YELLOW, CHALLENGE_SEEN);
+			int times = CHALLENGED.merge(copy.getUUID(), 1, Integer::sum);
+			if (times >= CHALLENGES) {
+				CHALLENGED.remove(copy.getUUID());
+				Doubles.expose(level, copy, null);
+			} else {
+				Speech.say(level, copy, Component.translatable("talk.jaymoskingdoms.stolen_crown.stammer"), Speech.WHITE, CHALLENGE_SEEN);
+			}
+			return;
+		}
+	}
+
+	// ---- the realm on alert (track 3) -------------------------------------------------------------------------------
+
+	/**
+	 * Whether {@code f} (or the realm above it) is on alert: its ruler's face came off on the throne and they aren't home yet.
+	 * Its people doubt every face ({@link Doubts}), its caravans stay in ({@link Caravans}, {@link TradeRoutes}), it doesn't
+	 * trade with strangers ({@link #refusesTrade}), and its guards warn strangers off and ride out searching.
+	 */
+	public static boolean alert(MinecraftServer server, @Nullable Faction f) {
+		if (f == null) {
+			return false;
+		}
+		Map<String, Taken> all = taken(server);
+		if (all.isEmpty()) {
+			return false;
+		}
+		Taken t = all.get(Integer.toString(f.id()));
+		if (t == null) {
+			Faction top = Wars.top(server, f);
+			t = top == null ? null : all.get(Integer.toString(top.id()));
+		}
+		return t != null && t.unmasked();
+	}
+
+	/** Whether {@code player} is one of {@code f}'s own: sworn to it (or the realm above it), or a householder there. */
+	private static boolean ofTheRealm(MinecraftServer server, ServerPlayer player, Faction f) {
+		Faction top = Wars.top(server, f);
+		return f.member(player.getUUID()) != null || top != null && top.member(player.getUUID()) != null || ForgedPapers.householder(player, f);
+	}
+
+	/** The realms on alert: their guards warn strangers off, and by day ride out searching toward the trail. */
+	private static void onAlert(ServerLevel level) {
+		MinecraftServer server = level.getServer();
+		long now = server.overworld().getGameTime();
+		for (Map.Entry<String, Taken> e : Map.copyOf(taken(server)).entrySet()) {
+			Taken t = e.getValue();
+			Faction f = Factions.get(server, Integer.parseInt(e.getKey()));
+			if (!t.unmasked() || f == null || f.fallen()) {
+				continue;
+			}
+			for (ServerPlayer player : level.players()) {
+				Long last = WARNED.get(player.getUUID());
+				if (player.isSpectator() || player.blockPosition().distSqr(f.seat()) > WARN_RANGE * WARN_RANGE || last != null && now - last < WARN_GAP
+					|| ofTheRealm(server, player, f)) {
+					continue;
+				}
+				for (PathfinderMob guard : level.getEntitiesOfClass(PathfinderMob.class, player.getBoundingBox().inflate(16.0), g -> g.isAlive() && McaCompat.isGuard(g))) {
+					WARNED.put(player.getUUID(), now);
+					Speech.say(level, guard, Component.translatable("talk.jaymoskingdoms.stolen_crown.gates_shut", f.name()), Speech.YELLOW, 20.0);
+					break;
+				}
+			}
+			search(level, f, t, now);
+		}
+	}
+
+	/** By day, a few of {@code f}'s guards set out toward where the trail points (a player may follow them). */
+	private static void search(ServerLevel level, Faction f, Taken t, long now) {
+		Long last = SEARCHED.get(f.id());
+		if (!Royals.daytime(level) || last != null && now - last < SEARCH_GAP
+			|| level.getNearestPlayer(f.seat().getX() + 0.5, f.seat().getY(), f.seat().getZ() + 0.5, Economy.POPULATION_RANGE + 32.0, p -> !p.isSpectator()) == null) {
+			return;
+		}
+		SEARCHED.put(f.id(), now);
+		Vec3 seat = Vec3.atCenterOf(f.seat());
+		Vec3 toward = new Vec3(t.x() + 0.5 - seat.x, 0.0, t.z() + 0.5 - seat.z).normalize();
+		BlockPos out = BlockPos.containing(seat.add(toward.scale(SEARCH_OUT)));
+		if (!level.isLoaded(out)) {
+			return;
+		}
+		BlockPos ground = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, out);
+		int sent = 0;
+		for (PathfinderMob guard : level.getEntitiesOfClass(PathfinderMob.class, new net.minecraft.world.phys.AABB(f.seat()).inflate(Economy.POPULATION_RANGE),
+			g -> g.isAlive() && McaCompat.isGuard(g) && g.getTarget() == null)) {
+			if (sent == 0) {
+				Speech.say(level, guard, Component.translatable("talk.jaymoskingdoms.stolen_crown.search", Directions.heading(seat, Vec3.atCenterOf(out))),
+					Speech.YELLOW, 24.0);
+			}
+			net.minecraft.world.entity.ai.behavior.BehaviorUtils.setWalkAndLookTargetMemories(guard, ground, 0.6F, 4);
+			if (++sent >= SEARCHERS) {
+				break;
+			}
+		}
+	}
+
+	/**
+	 * ({@code VillagerCoinMixin}, a trade opening) Whether {@code villager}, one of a realm on alert, won't trade with
+	 * {@code player}, a stranger to it: they say so, and the trade is closed again as it opens.
+	 */
+	public static boolean refusesTrade(Villager villager, ServerPlayer player) {
+		if (!(villager.level() instanceof ServerLevel level) || taken(level.getServer()).isEmpty()) {
+			return false;
+		}
+		MinecraftServer server = level.getServer();
+		Faction f = Captives.nearestSettlement(server, villager.blockPosition());
+		if (f == null || f.seat().distSqr(villager.blockPosition()) > Economy.POPULATION_RANGE * Economy.POPULATION_RANGE || !alert(server, f)
+			|| ofTheRealm(server, player, f) || Captives.bound(villager)) {
+			return false;
+		}
+		Speech.say(level, villager, Component.translatable("talk.jaymoskingdoms.stolen_crown.no_trade"), Speech.YELLOW, 10.0);
+		server.execute(player::closeContainer);
+		return true;
+	}
+
+// ---- testing -----------------------------------------------------------------------------------------------------
 
 	/** {@code /kingdom stolencrown} (ops): the ruler of the realm whose seat is nearest is taken now, and where the vault will be is said. */
 	static com.mojang.brigadier.builder.LiteralArgumentBuilder<net.minecraft.commands.CommandSourceStack> command() {

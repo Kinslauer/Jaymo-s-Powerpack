@@ -272,7 +272,8 @@ final class Caravans {
 		}
 		Ledger l = ledger(server);
 		for (Faction f : Factions.all(server, FactionType.FIEFDOM)) {
-			if (l.caravans().values().stream().anyMatch(c -> c.home() == f.id() && !c.smuggle()) || now < l.next().getOrDefault(Integer.toString(f.id()), 0L)) {
+			if (l.caravans().values().stream().anyMatch(c -> c.home() == f.id() && !c.smuggle()) || now < l.next().getOrDefault(Integer.toString(f.id()), 0L)
+				|| StolenCrowns.alert(server, f)) {
 				continue;
 			}
 			start(level, f, false);
