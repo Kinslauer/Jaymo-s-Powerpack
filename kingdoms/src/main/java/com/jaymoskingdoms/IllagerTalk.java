@@ -944,25 +944,28 @@ public final class IllagerTalk {
 		RandomSource random = level.getRandom();
 		Illagers.Tag tag = Illagers.tag(illager);
 		Faction camp = tag == null ? null : Factions.get(server, tag.camp());
+		// (said as one line, so the talk's words box shows all of it, not only the last part)
+		net.minecraft.network.chat.MutableComponent words = Component.empty();
 		if (camp == null || camp.fallen()) {
-			say(level, illager, player, line("hold.none", random), Speech.WHITE);
+			words.append(line("hold.none", random));
 		} else if (tag.role() == Illagers.WARLORD) {
-			say(level, illager, player, line("hold.mine", random), Speech.WHITE);
+			words.append(line("hold.mine", random));
 		} else {
 			Entity leader = camp.leader().map(level::getEntity).orElse(null);
 			Component who = leader instanceof AbstractIllager l && l.isAlive() && Introductions.knows(player, l) && named(l)
 				? Component.literal(self(l).name()) : Component.translatable("illager_talk.jaymoskingdoms.the_warlord");
-			say(level, illager, player, leader != null && leader.isAlive() ? line("hold.leader", random, who) : line("hold.leaderless", random), Speech.WHITE);
+			words.append(leader != null && leader.isAlive() ? line("hold.leader", random, who) : line("hold.leaderless", random));
 			int captives = level.getEntitiesOfClass(LivingEntity.class, new net.minecraft.world.phys.AABB(camp.seat()).inflate(48.0), Captives::bound).size();
 			if (captives > 0) {
-				say(level, illager, player, line("hold.captives", random, captives), Speech.WHITE);
+				words.append(" ").append(line("hold.captives", random, captives));
 			}
 		}
 		BlockPos other = otherHold(server, illager.blockPosition(), tag == null ? -1 : tag.camp());
 		if (other != null) {
-			say(level, illager, player, line("hold.other", random, Directions.heading(illager.position(), Vec3.atCenterOf(other)),
-				Directions.distance(Math.sqrt(other.distSqr(illager.blockPosition())))), Speech.WHITE);
+			words.append(" ").append(line("hold.other", random, Directions.heading(illager.position(), Vec3.atCenterOf(other)),
+				Directions.distance(Math.sqrt(other.distSqr(illager.blockPosition())))));
 		}
+		say(level, illager, player, words, Speech.WHITE);
 		back(player, illager);
 	}
 

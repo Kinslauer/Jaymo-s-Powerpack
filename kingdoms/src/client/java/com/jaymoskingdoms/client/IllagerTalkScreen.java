@@ -85,6 +85,8 @@ final class IllagerTalkScreen extends Screen {
 	private IllagerCard card;
 	private Page page = Page.MAIN;
 	private boolean gift;
+	/** Ticks until a gift asked for goes out, so the hotbar slot scrolled to reaches the server first (-1: none). */
+	private int giftIn = -1;
 	/** Ticks since an answer went out with no card back yet (-1: not waiting). */
 	private int waiting = -1;
 	/** Something they said since the last answer, for the box (it stands over the card's own words). */
@@ -274,10 +276,12 @@ final class IllagerTalkScreen extends Screen {
 	private void pick(int option) {
 		ClientPlayNetworking.send(new TalkNet.Answer(this.card.entityId(), option));
 		this.heard = false;
-		if (MCA) {
+		boolean ends = this.card.ends().get(option);
+		// (no camera hold after a parley's way out or a threat: lost, they come for you at once)
+		if (MCA && !(ends && !paged(this.card))) {
 			DialogueCinematic.cue(Minecraft.getInstance(), this.card.entityId(), Speaker.PLAYER);
 		}
-		if (this.card.ends().get(option)) {
+		if (ends) {
 			shut();
 			return;
 		}
@@ -285,8 +289,14 @@ final class IllagerTalkScreen extends Screen {
 		rebuildWidgets();
 	}
 
-	/** In gift mode: give what's held now, if anything. */
+	/** In gift mode: give what's held, once the hotbar slot has gone to the server (it goes on the game's tick). */
 	private void give() {
+		if (this.giftIn < 0) {
+			this.giftIn = 2;
+		}
+	}
+
+	private void giveNow() {
 		Player self = Minecraft.getInstance().player;
 		if (self == null || self.getMainHandItem().isEmpty() || this.waiting >= 0) {
 			return;
@@ -301,6 +311,9 @@ final class IllagerTalkScreen extends Screen {
 
 	@Override
 	public void tick() {
+		if (this.giftIn >= 0 && --this.giftIn < 0) {
+			giveNow();
+		}
 		if (this.waiting >= 0 && ++this.waiting > WAIT_TICKS) {
 			shut();
 		}
@@ -311,6 +324,7 @@ final class IllagerTalkScreen extends Screen {
 		// (as MCA's: the scroll wheel walks the hotbar, so a gift can be picked with the screen up)
 		Player self = Minecraft.getInstance().player;
 		if (self != null && dy != 0.0) {
+			this.giftIn = this.giftIn >= 0 ? 2 : -1; // (a gift on its way waits for the new slot)
 			int slot = self.getInventory().getSelectedSlot();
 			self.getInventory().setSelectedSlot(dy < 0.0 ? (slot + 1) % 9 : (slot + 8) % 9);
 		}

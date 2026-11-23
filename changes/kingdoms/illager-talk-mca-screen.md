@@ -17,6 +17,11 @@
 - Not done like MCA: MCA's real screen can't be opened for an illager (it is made for MCA's villagers and asks MCA's
   server about them), so this one is rebuilt to match; Trade is still the buy/sell list (coin prices, not a vanilla
   trade window); Talk's answers are a column, not the answer wheel on a villager's dialogue.
+- Ask about their hold now says its parts (who leads, captives, another hold) as one line, so the words box shows all
+  of it. A parley's way out and a threat shut the screen without the camera's reply hold, so a lost one doesn't attack
+  you under the letterbox.
 - Classes: `IllagerCard` (new payload), `IllagerTalk` (`card`), `Menus.open`, client `IllagerTalkScreen`;
   `DialogueCinematic` and `SpeechBubbles` know the new screen.
+- Not played: every other answer (Trade, `<<`, buy/sell) gives the player's camera shot a moment, as a villager talk
+  does; a talk still lapses 90 seconds after it opened (later answers then get no reply and the screen shuts).
 - Built by CI; not played.
