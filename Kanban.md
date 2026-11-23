@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 23:14). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 23:21). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -35,12 +35,12 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/hands-on-cooking-realtime|hands-on-cooking-realtime]] · 🔨 Hephaestus · #1957 · changes · fixing review notes
-- [ ] [[Agents/small-boats-fishers-talk-panel|small-boats-fishers-talk-panel]] · 💻 Odysseus · running
 
 
 ## In review
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · 🔥 Prometheus · #research · in-review
+- [ ] [[Agents/small-boats-fishers-talk-panel|small-boats-fishers-talk-panel]] · 💻 Odysseus · #2018 · in-review
 
 
 ## Needs Andy
