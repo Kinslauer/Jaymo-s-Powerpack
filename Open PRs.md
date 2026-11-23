@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-23 10:09
+updated: 2026-11-23 10:47
 ---
 # Open PRs
 
-2 open, as of 2026-11-23 10:09. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+3 open, as of 2026-11-23 10:47. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2027](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2027) draft-addition skill and the heritage ways plan (Tideborn first)
@@ -13,5 +13,10 @@ Andy merges only on "merge", one at a time.
 
 ## [#2035](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2035) Sneak-clicking a cooking block opens it instead of lifting it
 - **Branch:** `no-lift-cooking-blocks` · **Updated:** 2026-11-23 (today)
-- **Checks:** ⏳ 4 of 4 running
+- **Checks:** ✅ 5 passed
 - **Agent:** [[no-lift-cooking-blocks]]
+
+## [#2036](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2036) Illager talk looks and works like MCA's villager screen
+- **Branch:** `illager-talk-mca-screen` · **Updated:** 2026-11-23 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[illager-talk-mca-screen]]

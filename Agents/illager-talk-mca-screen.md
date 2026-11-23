@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: illager-talk-mca-screen
 branch: illager-talk-mca-screen
 with: Claude Code (Opus 5.5), side session of local_2e1ecf8a
-pr:
+pr: 2036
 mods: kingdoms
 versions:
 started: 2026-11-23
@@ -33,3 +33,4 @@ should look and work just like MCA".
 -
 
 ## Done
+PR #2036. Illager talk opens an MCA-style screen (info lines, heart, right column, << back, Talk/Interact/Trade pages, MCA gift mode, stays open across answers, talk camera with MCA). Trade stays a buy/sell list; Talk answers are a column, not the wheel. Built by CI only; not played.
