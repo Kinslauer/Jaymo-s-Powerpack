@@ -16381,3 +16381,11 @@ Andy picked "goblin extras" from the survival pick list (2026-11-22); the Goblin
 - From the original: model, textures, animations and sounds (AGPL v3, credit in `licenses/from-the-shadows/CREDITS-nether-beasts.md`). Left out: ground-rupture entities, the stone statue by day, climbing, the tunnel-blur shader, the doom-breath renderer (the beam is drawn with `Fx.beam` and soul particles) and the warning eye glows.
 - Drops still to come with the gear tracks (`NetherBeasts.NEHEMOTH_LOOT_TODO`): crystallized blood and the Corrupted Heart. Heal Block on its bite waits for the effects track.
 - Built by CI only; not played.
+
+## 0.11.86 (2026-11-23): the Bulldrogioth, a shelled beast out of the demons' country (From the Shadows Reborn port) (#2015)
+
+- **Bulldrogioth**: a 100-health, 15-armour beast under a crimson shell (spawn egg), come up into the Nether's crimson forests, warped forests and basalt deltas (its shell is crimson, blue-green or dark by where it was born). It slams, claws, combos with its great claws, bites, breaks the soft rock about its feet (not where mobs may not grief, and nothing harder than 5), and, once hurt below half, throws fans of thorns off its shell (a few thorns any time, a big volley hurt). Slams knock a shield down and shake your view. Its blows tear (Powers' Wounds' Bleeding, through its "tearing" mark). Arrows hurt it half, explosions a quarter, lightning four times; fire does not (it is a Nether beast).
+- **Crimson shell**: new item, its drop (1-3, +1 per Looting level, with a few bones); the material of the crust armour (a later track).
+- **Hostile to all life in the Nether**, like the Nehemoth, and never fights its own kin. Rare (spawn weight 2, a spawn goes ahead one time in three, none within 96 blocks of another), tag `has_bulldrogioth`.
+- From the original: model, textures (three colours), animations, sounds and the shell item's texture (AGPL v3, credit in `licenses/from-the-shadows/CREDITS-nether-beasts.md`). Changed: no swimming/beach AI (the Nether has no sea), the cod and nautilus drops are a few bones, the thorn is drawn as a thrown pointed stone, one hitbox instead of its multipart one, and its Heal Block on a thorn waits for the effects track.
+- Built by CI only; not played.
