@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Andy's three clips (interpersonal convo, invulnerable nightmare, bigger priorities)
 branch: claude/small-talk-back, claude/nightmare-shot-tell, claude/wounded-want-limbs
 with: Claude Code (side session)
@@ -21,3 +21,6 @@ owns:
 - **Nightmare (PR #2048):** The Graveyard's Nightmare ignores all projectile damage (WeaponMod's flintlock ball is tagged is_projectile). By design; now a shot puffs smoke through it and the shooter is told only steel up close will bite. Lore.md (new) paragraph added.
 - **Limbs first (PR #2047):** illagers missing limbs ask for a wooden leg/arm (and say how many) before their nature's want; any Powers stand-in limb handed over is fitted (not drawn on illagers).
 - All built in CI only; none played.
+
+## Notes
+- 2026-11-23 16:24 PR #2046 is merged into master; moved to Agents/Done.

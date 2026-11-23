@@ -912,3 +912,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-23 (Andy): approved the lore paragraphs "From above" (drop assassination) and "The stolen crown" (imposter ruler).
 
 - 2026-11-23 (Andy): merge PR #2044, weapons in set places on the body (swords at hips, 4 flintlocks: 2 chest, 2 sash; toggle on the Character page).
+- 2026-11-23 (Andy, desktop session, a fishing gif in E:\Gifs\fishing.gif: "thats what i want our fishing to be like"): the fish fight reads the fish's moods (taking the lure, calm: reel, running/jumping/thrashing: ease off, landing), with tension, the fish's energy that tires, and line out in metres of the spool, a centered readout and a one-line hint; the fish leaps from the water when jumping. Picks: release a fish mid-fight with sneak + use (R is Ability 1); keep the drag setting and the left/right runs; a run that takes all the line snaps it.
