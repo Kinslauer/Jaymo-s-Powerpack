@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-22 18:54). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-22 19:17). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -19,13 +19,16 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-22 waiting for a bot, 1 being built, 1 in review: see [[Kanban]].
+21 waiting for a bot, 2 being built, 1 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2011 Old guns: no loading bar, Q takes up the next loaded one, the Void flintlock fires as you let go (Powers, Kingdoms, 2026-11-22)
 - [ ] #2010 Zombies leave the dead for shade by day; nothing regrows on the dead; player heads wear the MCA look (Powers, Kingdoms, Kitchen, 2026-11-22)
+- [ ] #2009 No idle camera while your fishing line is out (Powers, 2026-11-22)
+- [ ] #2008 Pull up onto shore from the water; right-click held climbs (Powers, 2026-11-22)
 - [ ] #2007 Goblin extras - the wandering goblin trader, the decoy, drunk goblins, the engineer's hammer and its robot (Kingdoms, 2026-11-22)
 - [ ] #2003 survival picks: free riding camera, plants and flames in the wind (Kingdoms, 2026-11-22)
 - [ ] #2002 Burning bodies only spread fire on wood, pat out with a right click, and leave ash in their shape that blows away (Kitchen, 2026-11-22)
@@ -82,10 +85,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1943 drivers never lie across their horses (Kingdoms, 2026-11-20)
 - [ ] #1942 no floating trees: unsupported wood falls (Kingdoms, 2026-11-20)
 - [ ] #1941 stance wheel: a second on the knee before prone (Powers, 2026-11-20)
-- [ ] #1940 corpse loot screen - take only what you want (Kitchen, 2026-11-20)
-- [ ] #1936 dodge rolls - back dodge only when locked on, one per press, hold to roll on into prone (Powers, 2026-11-20)
-- [ ] #1935 body controls - hold drags, tap loots, sneak revives (Powers, Kingdoms, Kitchen, 2026-11-20)
-- …and 363 older ones.
+- …and 366 older ones.
 
 ## Health
 
