@@ -16528,3 +16528,8 @@ Andy picked "goblin extras" from the survival pick list (2026-11-22); the Goblin
   tag, which came first; `DamageKinds.ofWeapon`). That covers the primitive spear, the leaf spear and the Huntsman's
   spear too. The pitchfork also works under water like a spear (`UnderWater`).
 - Built by CI; not played.
+
+## 0.12.0 (2026-11-23): Drafting Table hint wording (#2038)
+
+- The story hint about taking old pieces apart says to set a sheet of paper beside the piece at the Drafting Table (its new screen, in Jaymo's Powers), not to carry paper in your pack.
+- Not played.
