@@ -16465,3 +16465,11 @@ Andy picked "goblin extras" from the survival pick list (2026-11-22); the Goblin
 - The Plague Bearer's thrown knife is now drawn as the original's throwing dagger model, still giving the plague. The original has no dagger a player throws, no Horn of Purification and no Apocrypha item (only their pictures are in the jar), so none were added.
 - Needs the armour PR (fts-gear-armour) merged first, and the effects PR for Heal Block.
 - Built; not played. The held models' placement (a translation to the middle of the item) and the laser are unchecked in game.
+
+## 0.11.92 (2026-11-23): Divinity and Retribution no longer stop the server starting (#2024)
+
+- The From the Shadows enchantments **Divinity** and **Retribution** were written in the old requirement format
+  (`"condition"` and a `"type"` entity predicate), which 26.3 can't read, so the server refused to load its datapacks and
+  wouldn't start. They now use 26.3's format, as vanilla Smite does (`"type": "minecraft:entity_properties"`,
+  `"minecraft:entity_type"`).
+- Checked against the 26.3 server jar's `smite.json`; not yet started on a server with the fix.
