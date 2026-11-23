@@ -16488,3 +16488,9 @@ Andy picked "goblin extras" from the survival pick list (2026-11-22); the Goblin
 - Without Jaymo's Powers the leap is as it was (the fall dealt as your blow, Crippled).
 - Lore: a `(new)` paragraph in Lore.md places the drop kill with the assassins' guild, for Andy to approve.
 - Not played.
+
+## 0.11.95 (2026-11-23): greeting, bowing and pickpocketing in the context keys (#2030)
+
+- Jaymo's Powers' list of keys by the crosshair now shows Kingdoms' lines: looking at a villager, "Right Button: greet" for one you've not met (your hand goes out), "bow" for a ruler you've not met, "talk" for one you know; sneaking up behind a villager or one of a settlement's folk empty handed, once you've learned Light Fingers, "Shift + hold Right Button: pick their pocket".
+- `ContextLines`, handed to Powers through Fabric Loader's object share (no dependency); `lang/parts/context.json`.
+- Not built here (the cloud sandbox can't reach cdn.modrinth.com; CI builds it); not played.
