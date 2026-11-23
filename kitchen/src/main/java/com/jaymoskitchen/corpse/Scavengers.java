@@ -203,7 +203,7 @@ public final class Scavengers {
 	 * (2026-11-23) Whether {@code mob} is feeding: tearing at a body, eating a part it tore off, or eating meat or a pile
 	 * where it lies. Its mind is on its meal, so it notices less ({@link #FEEDING_SIGHT}).
 	 */
-	public static boolean feeding(@Nullable net.minecraft.world.entity.Entity mob) {
+	public static boolean feeding(net.minecraft.world.entity.@Nullable Entity mob) {
 		Hunger hunger = mob == null ? null : HUNGERS.get(mob);
 		return hunger != null && (hunger.eating || hunger.chewing());
 	}
