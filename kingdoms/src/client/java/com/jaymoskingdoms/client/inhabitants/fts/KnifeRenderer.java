@@ -36,7 +36,7 @@ final class KnifeRenderer extends GeoEntityRenderer<PlagueKnife, EntityRenderSta
 	public void adjustRenderPose(RenderPassInfo<EntityRenderState> info) {
 		super.adjustRenderPose(info);
 		PoseStack poseStack = info.poseStack();
-		poseStack.mulPose(Axis.YP.rotationDegrees(info.getOrDefaultGeckolibData(YAW, 0.0F) - 90.0F));
-		poseStack.mulPose(Axis.ZP.rotationDegrees(info.getOrDefaultGeckolibData(PITCH, 0.0F) + 90.0F));
+		poseStack.mulPose(new org.joml.Matrix4f().rotation(Axis.YP.rotationDegrees(info.getOrDefaultGeckolibData(YAW, 0.0F) - 90.0F)));
+		poseStack.mulPose(new org.joml.Matrix4f().rotation(Axis.ZP.rotationDegrees(info.getOrDefaultGeckolibData(PITCH, 0.0F) + 90.0F)));
 	}
 }
