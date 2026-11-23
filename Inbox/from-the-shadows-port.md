@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: any
 from: survival picks thread (session local_2bfd1f34)
 asked: 2026-11-22
 thread: survival picks
-claimed_by: Agents/from-the-shadows-port.md (desktop session, 2026-11-22)
+claimed_by: 
 pr: 
 suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/inhabitants/ (new Nehemoth, Bulldrogioth, Froglin, PlagueBearer classes)
@@ -53,3 +53,4 @@ builds pass, Auto-fix on, "ready to merge as PR #N" each, listing what wasn't ch
   `E:/Downloads/fromtheshadows-3.0.jar`, but on 2026-11-22 it was **not there** (no `*shadow*` file in `E:/Downloads`
   or `C:/Users/toopo/Downloads`, nor `fromtheshadows*` within 3 levels of `E:/`). Ask Andy where it is first.
 - Nothing was built or branched yet: the first session only read the handoff, rules, plan and lore before Andy stopped it.
+- 2026-11-22 19:55 Agents/from-the-shadows-port.md (desktop session, 2026-11-22)'s claim had no sign of work for 30 min: handed back as open.

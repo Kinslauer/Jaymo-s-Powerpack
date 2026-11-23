@@ -1,5 +1,5 @@
 ---
-status: running
+status: done
 task: From the Shadows Reborn port into Kingdoms (Inbox/from-the-shadows-port.md)
 branch: claude/fts-froglin-plague (track A), claude/fts-nether-beasts (track B), claude/crocs-hunt-monsters (#2012)
 with: 
@@ -31,3 +31,4 @@ there". Also: "crocodiles in the overworld should also be hostile to other hosti
 - Demons' country = the Nether's depths (Powers' `ZFighterDemonRealm` biomes; Lore.md "The demons' country").
 
 ## Done
+- 2026-11-22 19:55 PR #2012 is merged into master; moved to Agents/Done.
