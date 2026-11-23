@@ -22,6 +22,7 @@ final class FtsGearClient {
 	}
 
 	static void register() {
+		GeoWeaponModel.init();
 		set("diabolium_armor", FtsGear.DIABOLIUM_HELMET, FtsGear.DIABOLIUM_CHEST, FtsGear.DIABOLIUM_LEGGINGS, FtsGear.DIABOLIUM_BOOTS);
 		set("crust_armor", FtsGear.CRUST_HELMET, FtsGear.CRUST_CHEST, FtsGear.CRUST_LEGGINGS);
 	}

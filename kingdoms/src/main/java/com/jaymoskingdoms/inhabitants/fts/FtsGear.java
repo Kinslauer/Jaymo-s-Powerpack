@@ -122,6 +122,8 @@ public final class FtsGear {
 			output.insertAfter(CRUST_CHEST, CRUST_LEGGINGS);
 		});
 
+		FtsWeapons.register();
+
 		// the diabolium set gives back a sixth of the damage its wearer's blows do
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
 			if (taken > 0.0F && !blocked && source.getEntity() instanceof ServerPlayer player && player != entity && diaboliumSet(player)) {

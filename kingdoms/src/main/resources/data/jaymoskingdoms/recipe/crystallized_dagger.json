@@ -1,0 +1,17 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"category": "equipment",
+	"pattern": [
+		"###",
+		"#B#",
+		"###"
+	],
+	"key": {
+		"#": "jaymoskingdoms:crystallized_fragment",
+		"B": "minecraft:iron_sword"
+	},
+	"result": {
+		"id": "jaymoskingdoms:crystallized_dagger",
+		"count": 1
+	}
+}
