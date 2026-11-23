@@ -1,0 +1,9 @@
+{
+  "talk.jaymoskingdoms.captive.ask.royal": "Look at me. I am the rightful ruler of %1$s, and something wears my face on my throne. It's %2$s to the %3$s. Break these chains and take me home, and you'll be rewarded as no one ever was.",
+  "news.jaymoskingdoms.stolen_crown.found_out": "The thing on the throne of %2$s was not %1$s! Its face came off, and it fled to the %3$s. The true ruler is missing.",
+  "news.jaymoskingdoms.stolen_crown.keeper": "%1$s keeps the throne of %2$s until its ruler is found.",
+  "news.jaymoskingdoms.stolen_crown.hint.far": "%1$s searches for its ruler. A herder swears he saw strangers digging %3$s off to the %2$s.",
+  "news.jaymoskingdoms.stolen_crown.hint.cairn": "%1$s still searches. Look for a fresh cairn of stones on open ground, %3$s to the %2$s.",
+  "message.jaymoskingdoms.stolen_crown.home": "%1$s is home in %2$s and crowned again! %3$s brought them back.",
+  "title.jaymoskingdoms.crown_saviour": "Saviour of %s"
+}

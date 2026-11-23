@@ -763,6 +763,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.61: villagers react to your deeds (fires put out, lives saved, captives brought home)
 		Deeds.register();
 		Captives.register();
+		StolenCrowns.register();
 		// 0.7.381: veteran guards set drills that teach or rank up a Weapon Form (and its attachment)
 		LOGGER.debug("guard drills attachment: {}", com.jaymoskingdoms.forms.GuardDrills.DRILLS);
 		com.jaymoskingdoms.forms.GuardDrills.register();
