@@ -52,6 +52,12 @@ public final class DodgeRollPose {
 	/** Standing, the body's reach front to back from its middle (a share of its height). */
 	static final float STANDING_DEEP = 0.12F;
 	/**
+	 * (Andy, 2026-11-23: "the combat dodge roll currently clips through the ground ... make it stay above ground for now")
+	 * The drop stops this share of the body's height short of resting the ball on the ground: the arms, the armour and the
+	 * half-tucked moments reach past the oval, and sank into the ground. It hovers a little at the middle of the roll instead.
+	 */
+	static final float GROUND_CLEARANCE = 0.15F;
+	/**
 	 * The tuck: thighs drawn up to the chest, arms forward round them (a little out, so they stay outside the legs), the
 	 * back rounded and the chin down (radians); then the knees and elbows folded ({@link #bendLimbs}).
 	 */
@@ -237,7 +243,7 @@ public final class DodgeRollPose {
 			float w = tuck(t);
 			float along = Mth.lerp(w * w, BALL_CENTRE, BALL_LONG) * Mth.cos(turn), across = Mth.lerp(w, STANDING_DEEP, BALL_DEEP) * Mth.sin(turn);
 			float reach = Mth.sqrt(along * along + across * across);
-			poseStack.translate(0.0F, -height * Math.max(0.0F, BALL_CENTRE - reach), 0.0F);
+			poseStack.translate(0.0F, -height * Math.max(0.0F, BALL_CENTRE - reach - GROUND_CLEARANCE), 0.0F);
 		}
 		// the top tips toward the way of the dodge: about (up x way), round the body's middle
 		poseStack.rotateAround(new Quaternionf().rotateAxis(turn, -forward / length, 0.0F, -right / length), 0.0F, middle, 0.0F);
