@@ -30,6 +30,10 @@ import net.minecraft.world.entity.player.Player;
  * <p>
  * Only sprinting: Jaymo's Powers' feathers are still what dodges, powers and fighting in armour spend, and its
  * overclocked speedsters run on their power ({@link #addTireless}).
+ * <p>Andy (2026-11-23): adrenaline "should fill the new stamina 'wind' meter, when it depletes you lose the adrenaline".
+ * Jaymo's Powers fills the wind as adrenaline kicks in ({@link #fill}) and, while it lasts, the wind burns
+ * ({@link #addBurning}): it doesn't come back, and it runs down by {@link #BURN} a tick on top of what sprinting spends.
+ * Run dry, you're winded as from a sprint, and Powers ends the adrenaline.
  */
 public final class Stamina {
 	/** A full bar. */
@@ -40,6 +44,8 @@ public final class Stamina {
 	static final int REFILL_DELAY = 20, WINDED_TICKS = 60;
 	/** Winded until it's refilled to this share of what you can hold. */
 	static final float RECOVER_SHARE = 0.25F;
+	/** Burning (adrenaline): spent a tick even at rest (a full bar lasts about 30 seconds standing, 11 sprinting). */
+	static final float BURN = MAX / 600.0F;
 
 	/** What you have, what you can hold now, and whether you're winded. */
 	public record Wind(float left, float cap, boolean winded) {
@@ -64,6 +70,8 @@ public final class Stamina {
 	private static final Map<UUID, State> STATES = new HashMap<>();
 	/** Who sprints without spending wind (Jaymo's Powers' overclocked speedsters); other mods add by reflection. */
 	private static final List<Predicate<Player>> TIRELESS = new CopyOnWriteArrayList<>();
+	/** Whose wind burns and doesn't come back (Jaymo's Powers' adrenaline); other mods add by reflection. */
+	private static final List<Predicate<Player>> BURNING = new CopyOnWriteArrayList<>();
 
 	private Stamina() {
 	}
@@ -71,6 +79,33 @@ public final class Stamina {
 	/** For other mods (by reflection): who runs without tiring. */
 	public static void addTireless(Predicate<Player> tireless) {
 		TIRELESS.add(tireless);
+	}
+
+	/** For other mods (by reflection): whose wind burns ({@link #BURN} a tick) and doesn't come back. */
+	public static void addBurning(Predicate<Player> burning) {
+		BURNING.add(burning);
+	}
+
+	/**
+	 * For other mods (by reflection): the wind filled to all {@code player} can hold now, and no longer winded. False (and
+	 * nothing done) while the stamina rule is off, when no wind is kept.
+	 */
+	public static boolean fill(ServerPlayer player) {
+		if (!player.level().getGameRules().get(Climate.STAMINA)) {
+			return false;
+		}
+		State state = STATES.computeIfAbsent(player.getUUID(), id -> new State());
+		state.left = MAX * player.getFoodData().getFoodLevel() / 20.0F;
+		state.winded = false;
+		state.windedFor = 0;
+		state.rested = 0;
+		// (synced now, so whoever reads it this tick sees it full)
+		if (state.left >= MAX) {
+			player.removeAttached(WIND);
+		} else {
+			player.setAttached(WIND, new Wind(state.left, state.left, false));
+		}
+		return true;
 	}
 
 	/** The rule switched off: no wind kept, nothing winded. */
@@ -93,7 +128,11 @@ public final class Stamina {
 	}
 
 	private static boolean tireless(Player player) {
-		for (Predicate<Player> t : TIRELESS) {
+		return any(TIRELESS, player);
+	}
+
+	private static boolean any(List<Predicate<Player>> list, Player player) {
+		for (Predicate<Player> t : list) {
 			if (t.test(player)) {
 				return true;
 			}
@@ -101,21 +140,29 @@ public final class Stamina {
 		return false;
 	}
 
+	/** Run dry: winded, slowed, the sprint stopped, a gasp. */
+	private static void windOut(ServerPlayer player, State state) {
+		state.left = 0.0F;
+		state.winded = true;
+		state.windedFor = WINDED_TICKS;
+		player.setSprinting(false);
+		player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, WINDED_TICKS, 0, false, false, true));
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_BREATH, SoundSource.PLAYERS, 0.8F, 0.9F);
+		player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.stamina.winded").withStyle(ChatFormatting.GRAY));
+	}
+
 	/** Every tick, survival and adventure. */
 	static void tick(ServerPlayer player) {
 		State state = STATES.computeIfAbsent(player.getUUID(), id -> new State());
 		float cap = MAX * player.getFoodData().getFoodLevel() / 20.0F;
-		if (player.isSprinting() && !player.getAbilities().mayfly && !player.isPassenger() && !tireless(player)) {
+		boolean sprinting = player.isSprinting() && !player.getAbilities().mayfly && !player.isPassenger() && !tireless(player);
+		// (adrenaline: it burns even at rest, and nothing comes back while it lasts)
+		boolean burning = !state.winded && any(BURNING, player);
+		if (sprinting || burning) {
 			state.rested = 0;
-			state.left -= SPRINT_COST;
+			state.left -= (sprinting ? SPRINT_COST : 0.0F) + (burning ? BURN : 0.0F);
 			if (state.left <= 0.0F) {
-				state.left = 0.0F;
-				state.winded = true;
-				state.windedFor = WINDED_TICKS;
-				player.setSprinting(false);
-				player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, WINDED_TICKS, 0, false, false, true));
-				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_BREATH, SoundSource.PLAYERS, 0.8F, 0.9F);
-				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.stamina.winded").withStyle(ChatFormatting.GRAY));
+				windOut(player, state);
 			}
 		} else if (state.windedFor > 0) {
 			state.windedFor--;

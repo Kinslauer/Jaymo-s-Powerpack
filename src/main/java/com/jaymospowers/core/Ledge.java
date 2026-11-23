@@ -101,7 +101,7 @@ public final class Ledge {
 	public static final float LOOK_AWAY_DEGREES = 100.0F;
 	/** Letting go: pushed off the wall this fast (blocks/tick). */
 	public static final double LET_GO_PUSH = 0.06;
-	/** Ticks after letting go (or landing a climb) before another edge can be caught. */
+	/** Ticks after letting go before another edge can be caught (none after landing a climb: the next one goes at once). */
 	public static final int REGRAB_COOLDOWN_TICKS = 10;
 
 	/** The climb (pull up, knee on the edge, stand) takes this long (ticks). */
