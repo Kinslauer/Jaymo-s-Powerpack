@@ -165,6 +165,8 @@ public final class Downed {
 	public static final int GIVE_UP_TICKS = 100;
 	/** (0.18.5) A blow this hard (health points: three hearts) on anyone downed kills them outright. */
 	public static final float KILL_BLOW = 6.0F;
+	/** The weaker blow on a downed player that kills them all the same, counted from when they went down ({@link #lastBlow}). */
+	public static final int PLAYER_BLOWS = 3;
 	/** (0.18.5) How long a downed player holds sneak to get up by themselves (ticks), and the share of their most health they rise with. */
 	public static final int RISE_TICKS = 160;
 	/** Sat against a wall too wounded to rise otherwise, the rise takes this many times as long. */
@@ -282,6 +284,8 @@ public final class Downed {
 
 	/** The blow that put each down: whose kill it is when it dies (not saved; after a reload it dies unclaimed). */
 	private static final Map<LivingEntity, DamageSource> FELLED_BY = new WeakHashMap<>();
+	/** Weaker blows on each downed player: when they went down ({@link #since}) and how many since. */
+	private static final Map<LivingEntity, long[]> BLOWS = new WeakHashMap<>();
 	/** Those being finished off just now (their death let through as it comes). */
 	static final Set<LivingEntity> FINISHING = Collections.newSetFromMap(new WeakHashMap<>());
 	/** A downed player → how long they've held sneak to give up (ticks). */
@@ -487,7 +491,8 @@ public final class Downed {
 			// (Andy, 2026-11-18) a crushing blow (a mutant's slam) on the downed: "theres just simply no place else for that
 			// force to go, so obviously they get gibbed"; knocked out cold or not
 			boolean crushed = isDowned(entity) && com.jaymospowers.core.BlastGore.crushedNow(entity);
-			if (isDowned(entity) && !FINISHING.contains(entity) && amount >= KILL_BLOW && attack(source) && (!outCold(entity) || crushed)
+			if (isDowned(entity) && !FINISHING.contains(entity) && attack(source) && (!outCold(entity) || crushed)
+				&& (amount >= KILL_BLOW || entity instanceof Player && lastBlow(entity))
 				&& !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && entity.level() instanceof ServerLevel level) {
 				boolean burst = crushed && com.jaymospowers.core.BlastGore.gibs(entity, source, amount);
 				if (burst && Dismember.rubber(entity) && com.jaymospowers.core.BlastGore.tearLimbs(entity, source)) {
@@ -526,6 +531,9 @@ public final class Downed {
 		// (0.18.5) a hit breaks off a held action: rising, a revive, Second Wind's eating
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
 			if (entity instanceof ServerPlayer player && taken > 0.0F && attack(source) && player.isAlive()) {
+				if (isDowned(player) && !outCold(player)) {
+					blowLanded(player);
+				}
 				struck(player);
 			}
 		});
@@ -745,6 +753,23 @@ public final class Downed {
 	public static boolean adrift(Entity entity) {
 		return entity.isInWater() || entity.level().getFluidState(entity.blockPosition().below()).is(net.minecraft.tags.FluidTags.WATER)
 			&& entity.level().getFluidState(entity.blockPosition()).isEmpty() && !entity.onGround();
+	}
+
+	/**
+	 * Whether the blow coming is the {@link #PLAYER_BLOWS}th on a downed player since they went down (the weaker ones that
+	 * landed are counted by {@link #blowLanded}), which kills as a {@link #KILL_BLOW} does. Andy (2026-11-23), cut down on
+	 * the ground in a fight: "either one blow of 3 hearts or more, or 3 weaker blows total, not this infinite cap."
+	 */
+	private static boolean lastBlow(LivingEntity entity) {
+		long[] had = BLOWS.get(entity);
+		return had != null && had[0] == since(entity) && had[1] >= PLAYER_BLOWS - 1;
+	}
+
+	/** A weaker blow landed on a downed player: counted toward {@link #lastBlow}. */
+	private static void blowLanded(LivingEntity entity) {
+		long since = since(entity);
+		long[] had = BLOWS.get(entity);
+		BLOWS.put(entity, new long[] {since, had != null && had[0] == since ? had[1] + 1 : 1});
 	}
 
 	/** (0.18.5) A blow someone or something dealt (a swing, an arrow, a bite, a blast), not fire, a fall, hunger or drowning. */
