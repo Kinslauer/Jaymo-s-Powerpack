@@ -88,12 +88,21 @@ import org.jspecify.annotations.Nullable;
 public final class Treatment {
 	/**
 	 * (Survival picks, lso-heal-time: LSO's bandage and plaster mapped onto ours) A linen bandage heals its part this much
-	 * (health points) over this long (ticks), and dresses {@link #BANDAGE_USES} wounds before it's used up; a rag, a clean
-	 * rag or a grass bandage (the plaster) this much over {@link #RAG_TICKS}.
+	 * (health points) over this long (ticks); a rag, a clean rag or a grass bandage (the plaster) this much over
+	 * {@link #RAG_TICKS}.
 	 */
 	public static final float BANDAGE_HEAL = 3.0F, RAG_HEAL = 3.0F;
-	public static final int BANDAGE_TICKS = 300, RAG_TICKS = 400, BANDAGE_USES = 3;
-	/** (Survival picks) Dressings left in the linen bandage a player is using (it's used up when they run out). */
+	public static final int BANDAGE_TICKS = 300, RAG_TICKS = 400;
+	/**
+	 * How many parts one dressing wraps at once (Andy, 2026-11-23: "one can bandage multiple limbs. and it can do so at
+	 * the same time"): the part picked, then the worst others it can help ({@link #worst}). A linen bandage, a grass
+	 * bandage, a rag.
+	 */
+	public static final int BANDAGE_LIMBS = 4, GRASS_BANDAGE_LIMBS = 2, RAG_LIMBS = 1;
+	/**
+	 * No longer used (a linen bandage was once spread over three separate dressings); kept registered so players saved
+	 * with it still load cleanly.
+	 */
 	public static final AttachmentType<Integer> BANDAGE_LEFT = AttachmentRegistry.create(JaymosPowers.id("wounds_bandage_left"),
 		builder -> builder.persistent(com.mojang.serialization.Codec.INT));
 	/** (0.14.4) A stitch hurts its part this much; cautery burns it this much. */
@@ -830,20 +839,6 @@ public final class Treatment {
 		}
 	}
 
-	/**
-	 * (Survival picks) A linen bandage dresses {@link #BANDAGE_USES} wounds: true when this dressing uses the last of the
-	 * bandage in hand (take it off the stack), false while it has some left.
-	 */
-	private static boolean bandageSpent(ServerPlayer player) {
-		int left = player.getAttachedOrElse(BANDAGE_LEFT, BANDAGE_USES) - 1;
-		if (left <= 0) {
-			player.removeAttached(BANDAGE_LEFT);
-			return true;
-		}
-		player.setAttached(BANDAGE_LEFT, left);
-		return false;
-	}
-
 	/** The treatment done: what the remedy does, and what it costs. */
 	private static void apply(ServerLevel level, ServerPlayer player, Session s, ItemStack stack) {
 		LivingEntity body = s.target;
@@ -854,13 +849,15 @@ public final class Treatment {
 		switch (s.remedy) {
 			case BANDAGE, RAG, CLEAN_RAG -> {
 				boolean rag = s.remedy != Remedy.BANDAGE;
-				Bleeding.stop(body, part, false);
-				// (0.15.49) Field Dresser: a better dressing. (0.19.24) a clean rag looks like a rag but is not dirty
-				Bleeding.dress(body, part, MedicineSkill.dressing(player, rag ? RAG_HEAL : BANDAGE_HEAL), rag ? RAG_TICKS : BANDAGE_TICKS,
-					s.remedy == Remedy.RAG, rag);
-				if (rag || bandageSpent(player)) {
-					stack.consume(1, player);
+				int limbs = !rag ? BANDAGE_LIMBS : used == MedicineItems.GRASS_BANDAGE ? GRASS_BANDAGE_LIMBS : RAG_LIMBS;
+				// the part picked first, then the worst others this dressing can help, all in the one go
+				for (BodyPart next = part != null ? part : worst(s.remedy, body); next != null && limbs-- > 0; next = limbs > 0 ? worst(s.remedy, body) : null) {
+					Bleeding.stop(body, next, false);
+					// (0.15.49) Field Dresser: a better dressing. (0.19.24) a clean rag looks like a rag but is not dirty
+					Bleeding.dress(body, next, MedicineSkill.dressing(player, rag ? RAG_HEAL : BANDAGE_HEAL), rag ? RAG_TICKS : BANDAGE_TICKS,
+						s.remedy == Remedy.RAG, rag);
 				}
+				stack.consume(1, player);
 			}
 			case YARROW -> {
 				Bleeding.stop(body, part, false);
