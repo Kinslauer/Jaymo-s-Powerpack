@@ -30,8 +30,8 @@ kanban-plugin: board
 - [ ] [[Inbox/village-mines-job-buildings|village-mines-job-buildings]] · for ☁️ Cloud · open
 - [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · for ☁️ Cloud · open
 - [ ] [[Inbox/realm-armor-matching|realm-armor-matching]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/downed-knockout-three-hits|downed-knockout-three-hits]] · for any · open
 - [ ] [[Inbox/from-the-shadows-port|from-the-shadows-port]] · for any · open
+- [ ] [[Inbox/downed-knockout-three-hits|downed-knockout-three-hits]] · for any · open
 
 
 ## Being built
