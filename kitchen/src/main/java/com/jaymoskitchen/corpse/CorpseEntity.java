@@ -304,8 +304,18 @@ public class CorpseEntity extends Entity {
 	private int age;
 	/** Ticks since it started falling apart (both sides count; see {@link #CRUMBLING}). */
 	private int crumbleTicks;
-	/** A player's corpse: their hotbar when they died, and the slot they had selected. */
-	private final List<ItemStack> hotbar = new ArrayList<>(java.util.Collections.nCopies(9, ItemStack.EMPTY));
+	/**
+	 * A player's corpse: everything they carried when they died, slot for slot as their inventory had it (the hotbar,
+	 * the main inventory, then feet, legs, chest, head and off hand: {@link #INVENTORY_SLOTS}), then what other mods
+	 * handed over to stay on the body ({@link #EXTRA_SLOTS}: Jaymo's Kingdoms' harness, see {@link PlayerCorpses#keepWith}),
+	 * and the hotbar slot they had selected. Still called the hotbar, as it once was only that (Jaymo's Powers reads it by
+	 * that name).
+	 */
+	private final List<ItemStack> hotbar = new ArrayList<>(java.util.Collections.nCopies(PLAYER_SLOTS, ItemStack.EMPTY));
+	/** A player's inventory slots that stay on their body: the 36 of the inventory, the four of armour and the off hand. */
+	public static final int INVENTORY_SLOTS = 41, EXTRA_SLOTS = 12, PLAYER_SLOTS = INVENTORY_SLOTS + EXTRA_SLOTS;
+	/** For each handed-over piece ({@link #EXTRA_SLOTS}), the parts it's worn on ({@code PART_} bits; 0: the torso). */
+	private final int[] extraParts = new int[EXTRA_SLOTS];
 	/** Client: the hanging limbs' swing (see {@link #swingLimbs}). */
 	private float swingBack, swingBackO, swingBackVel, swingLeft, swingLeftO, swingLeftVel;
 	private double lastVx, lastVz;
@@ -343,8 +353,11 @@ public class CorpseEntity extends Entity {
 		refreshDimensions();
 	}
 
-	/** A dead player's body, with their hotbar. */
-	void setUpPlayer(java.util.UUID owner, String name, List<ItemStack> hotbar, int selected) {
+	/** A dead player's body, with everything they carried (see {@link #hotbar}) and, for the handed-over pieces, the parts they're worn on. */
+	void setUpPlayer(java.util.UUID owner, String name, List<ItemStack> hotbar, int selected, List<Integer> parts) {
+		for (int i = 0; i < EXTRA_SLOTS; i++) {
+			this.extraParts[i] = i < parts.size() ? parts.get(i) : 0;
+		}
 		this.entityData.set(POSE, random.nextInt());
 		this.entityData.set(LOOK, "{id:\"minecraft:player\"}");
 		this.entityData.set(OWNER, owner.toString());
@@ -876,7 +889,7 @@ public class CorpseEntity extends Entity {
 		swingLeft = Mth.clamp(swingLeft + swingLeftVel, -1.4F, 1.4F);
 	}
 
-	/** A dead player's hotbar, taken off the body for them to have again (a rebirth); the body keeps none. */
+	/** Everything a dead player carried, taken off the body for them to have again (a rebirth); the body keeps none. */
 	public List<ItemStack> takeHotbar() {
 		List<ItemStack> taken = new ArrayList<>();
 		for (int i = 0; i < this.hotbar.size(); i++) {
@@ -1910,6 +1923,13 @@ public class CorpseEntity extends Entity {
 					spawnAtLocation(level, new ItemStack(Items.BONE, bones), 0.2F);
 				}
 				leaveAshPile(level);
+				// a player's things don't burn with them: left lying in the ash for good (as when the body's eaten)
+				for (ItemStack stack : takeHotbar()) {
+					net.minecraft.world.entity.item.ItemEntity dropped = spawnAtLocation(level, stack, 0.3F);
+					if (dropped != null) {
+						dropped.setUnlimitedLifetime();
+					}
+				}
 				discard();
 				return;
 			}
@@ -2108,7 +2128,7 @@ public class CorpseEntity extends Entity {
 				return interactAnimal(level, player, held);
 			}
 			case PLAYER -> {
-				PlayerCorpses.restore(this, player, hotbar, selected);
+				lootPlayer(level, player);
 				return InteractionResult.SUCCESS_SERVER;
 			}
 			case SKELETON -> {
@@ -2197,7 +2217,7 @@ public class CorpseEntity extends Entity {
 					player.sendOverlayMessage(Component.translatable(tooBigToLift() ? "message.jaymoskitchen.corpse.too_big" : "message.jaymoskitchen.corpse.lift_hint"));
 				}
 			}
-			case PLAYER -> PlayerCorpses.restore(this, player, hotbar, selected);
+			case PLAYER -> lootPlayer(level, player);
 			case SKELETON -> {
 				if (!openLoot(level, player)) {
 					pullBone(level);
@@ -2225,7 +2245,7 @@ public class CorpseEntity extends Entity {
 			return false;
 		}
 		loot.removeIf(ItemStack::isEmpty);
-		if (looting == null && loot.isEmpty() && !hasGear()) {
+		if (looting == null && loot.isEmpty() && !hasGear() && hotbar.stream().allMatch(ItemStack::isEmpty)) {
 			searched = true;
 			return false;
 		}
@@ -2252,6 +2272,17 @@ public class CorpseEntity extends Entity {
 		jolt(false);
 		play(level, SoundEvents.BUNDLE_DROP_CONTENTS, 1.0F);
 		return true;
+	}
+
+	/**
+	 * Andy: "when players are killed, they should keep the loot on their corpse like npcs do, now accessed with a right
+	 * click". A player's body opens the loot screen on everything they carried, for anyone; with nothing left on it, a
+	 * reminder that it gets up unless it's burned.
+	 */
+	private void lootPlayer(ServerLevel level, Player player) {
+		if (!openLoot(level, player)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.burn_zombie"));
+		}
 	}
 
 	/** Whether it still wears or holds anything. */
@@ -2331,7 +2362,10 @@ public class CorpseEntity extends Entity {
 			jolt(false);
 			play(level, gear ? SoundEvents.ARMOR_EQUIP_GENERIC.value() : SoundEvents.BUNDLE_REMOVE_ONE, 0.9F);
 		}
-		robbed(player);
+		if (!isPlayerCorpse()) {
+			// (taking a player's things off their body isn't robbing the dead, as it never was)
+			robbed(player);
+		}
 	}
 
 	/** The last one looking has closed the loot screen: what's left stays on it. */
@@ -3094,7 +3128,14 @@ public class CorpseEntity extends Entity {
 	List<ItemStack> takeLoot() {
 		List<ItemStack> taken = new ArrayList<>(loot);
 		loot.clear();
+		// a player's body blown apart: everything they carried goes with the rest
+		taken.addAll(takeHotbar());
 		return taken;
+	}
+
+	/** A player's body: what it carries, slot for slot as their inventory had it (the loot screen reads and takes from this list itself). */
+	List<ItemStack> inventory() {
+		return hotbar;
 	}
 
 	private void dropLoot(ServerLevel level) {
@@ -4109,6 +4150,7 @@ public class CorpseEntity extends Entity {
 		Vec3 at = partPosition(part);
 		setMissing(missing() | part);
 		dropHeld(level, part, at);
+		tearOff(level);
 		java.util.function.BiConsumer<Entity, Object[]> hook = onPart;
 		if (hook != null) {
 			try {
@@ -4128,6 +4170,46 @@ public class CorpseEntity extends Entity {
 	 * An arm come off lets go of what its hand held (the main hand is the right, unless the mob was left-handed): it falls
 	 * loose at the hand, worn as gear taken off a body is, rather than hanging in the air where the hand was.
 	 */
+	/**
+	 * Andy: "as long as the torso is there, the loot should be as well, the leggings and arm harness armor should be
+	 * ripped off as limbs go". What a player's body wore on a part it no longer has comes off and falls there: the helmet
+	 * with the head, the boots with a leg and the leggings with both (as Jaymo's Powers takes them off the living), and
+	 * each handed-over piece (Kingdoms' arm, leg and head harness) with the part it's worn on. The rest stays on the torso.
+	 */
+	void tearOff(ServerLevel level) {
+		if (!isPlayerCorpse()) {
+			return;
+		}
+		int missing = missing();
+		if ((missing & PART_HEAD) != 0) {
+			tearOff(level, 39, PART_HEAD);
+		}
+		int legs = missing & (PART_RIGHT_LEG | PART_LEFT_LEG);
+		if (legs != 0) {
+			tearOff(level, 36, Integer.lowestOneBit(legs));
+		}
+		if (legs == (PART_RIGHT_LEG | PART_LEFT_LEG)) {
+			tearOff(level, 37, PART_LEFT_LEG);
+		}
+		for (int i = 0; i < EXTRA_SLOTS; i++) {
+			int lost = extraParts[i] & missing;
+			if (lost != 0) {
+				tearOff(level, INVENTORY_SLOTS + i, Integer.lowestOneBit(lost));
+			}
+		}
+	}
+
+	/** The thing in a player's body's {@code slot} ({@link #hotbar}) falls where {@code part} was. */
+	private void tearOff(ServerLevel level, int slot, int part) {
+		ItemStack stack = hotbar.get(slot);
+		if (stack.isEmpty()) {
+			return;
+		}
+		hotbar.set(slot, ItemStack.EMPTY);
+		Vec3 at = partPosition(part);
+		level.addFreshEntity(new net.minecraft.world.entity.item.ItemEntity(level, at.x, at.y + 0.1, at.z, stack));
+	}
+
 	private void dropHeld(ServerLevel level, int part, Vec3 at) {
 		if (part != PART_RIGHT_ARM && part != PART_LEFT_ARM) {
 			return;
@@ -4264,6 +4346,10 @@ public class CorpseEntity extends Entity {
 			this.hotbar.set(i, i < savedHotbar.size() ? savedHotbar.get(i) : ItemStack.EMPTY);
 		}
 		this.selected = input.getIntOr("Selected", 0);
+		int[] savedParts = input.getIntArray("ExtraParts").orElse(new int[0]);
+		for (int i = 0; i < EXTRA_SLOTS; i++) {
+			this.extraParts[i] = i < savedParts.length ? savedParts[i] : 0;
+		}
 		this.killer = input.getStringOr("Killer", "");
 		this.killedByPlayer = input.getBooleanOr("KilledByPlayer", false);
 		this.bites = input.getIntOr("Bites", 0);
@@ -4334,6 +4420,7 @@ public class CorpseEntity extends Entity {
 		output.putString("LookTags", this.entityData.get(LOOK_TAGS));
 		output.store("Hotbar", ItemStack.OPTIONAL_CODEC.listOf(), hotbar);
 		output.putInt("Selected", selected);
+		output.putIntArray("ExtraParts", extraParts);
 		output.putString("Killer", killer);
 		output.putBoolean("KilledByPlayer", killedByPlayer);
 		if (!death.isEmpty()) {

@@ -512,6 +512,10 @@ public final class Hanging {
 			for (ItemStack stack : corpse.takeLoot(stack -> true)) {
 				corpse.spawnAtLocation(level, stack, 0.3F);
 			}
+			// (a player's body: what they carried falls out too)
+			for (ItemStack stack : corpse.takeHotbar()) {
+				corpse.spawnAtLocation(level, stack, 0.3F);
+			}
 			corpse.spawnAtLocation(level, new ItemStack(Items.BONE, 1 + level.getRandom().nextInt(BONES_MORE + 1)), 0.3F);
 			if (!corpse.oneHanded() && com.jaymoskitchen.tanning.Tanning.ANIMAL_FAT != null) {
 				// the fat cut away along the way (for tallow, and the tanner)
