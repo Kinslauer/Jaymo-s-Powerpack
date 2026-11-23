@@ -408,9 +408,10 @@ public final class LedgeClient {
 			return;
 		}
 		if (ticks >= climbTicks()) {
-			// standing on top
+			// standing on top; Andy (2026-11-23): "there also should be no cooldown between lifting yourself up blocks", so the
+			// next edge can be caught at once (letting go still waits, so the edge dropped from isn't caught again)
 			end();
-			cooldown = Ledge.REGRAB_COOLDOWN_TICKS;
+			cooldown = 0;
 			if (ClientPlayNetworking.canSend(Ledge.Act.TYPE)) {
 				ClientPlayNetworking.send(new Ledge.Act(false));
 			}

@@ -50,6 +50,12 @@ Sources: github.com/ElenaiDev/Feathers, github.com/ElenaiDev/ElenaiDodge2.0, git
   Now: one move per press (the key going down, not its repeats); back only while locked on (unlocked, Back is dropped,
   nothing held rolls forward, Back alone does nothing); the key held 4 ticks into a ground roll makes the long roll
   (`Dodge.HOLD_TICKS`, `LONG_ROLL_TICKS`, synced as `Rolling.extended`), and held to its end it goes on into prone.
+  Andy (2026-11-23), to make heavy (red-glint) blows easier to slip and answer on your feet: a tap on the ground is
+  now an upright dash (`Dodge.DASH_SPEED` 0.7 along, `DASH_UP` 0.08 up, no tumble, same cost and evasion window,
+  `Rolling.dash`); held `HOLD_TICKS` the dash goes on into the long roll; let go before the roll ends to come up on
+  your feet, still held at its end and you go prone. The landing roll is still a roll.
+  The dash's pose is `DodgeRollPose`'s (`Roll.dash`, `stance`): planted feet with the hips dropped to match, the upper
+  body leaned into the way about the hips (`PoseBlend.bend`), a guard, the head level.
 - `client/stamina/FeathersHud`: the row, right above hunger, moved up for air bubbles and a mount's hearts. Art
   `textures/gui/feathers.png` from `tools/gen_feathers.py` (9x9 icons on vanilla's HUD grid).
 - Powers (Andy: the powers that had extra dodges get extra feathers): Darktide +12 golden (`DarktideDodges`; dashes cost a dodge's feathers, a landed flurry refunds them; the
