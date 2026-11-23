@@ -552,6 +552,10 @@ def packModsNoCf = [
 	[dep: "maven.modrinth:badoptimizations:Sp0ctspw", cf: null],
 	// Cull Leaves (MIT, Motschen): culls hidden leaf faces. Client-only. 4.1.2+26.3-fabric for 26.3.
 	[dep: "maven.modrinth:cull-leaves:jqOVPlQ8", cf: null],
+	// spark (GPL-3.0-only, lucko): a profiler that sits idle until asked. In game, /sparkc profiler start, play a minute,
+	// /sparkc profiler stop, and it gives a link to what took the frames (/spark for the server). Andy's FPS hunt,
+	// 2026-11-22. Client and server. 1.10.187-fabric for 26.3.
+	[dep: "maven.modrinth:spark:e3hsPc1o", cf: null],
 	// Particle Core (MIT, fzzyhmstrs): particle culling and cheaper particle rendering. Needs Fabric Language Kotlin and
 	// Fzzy Config (packMods). Client-only. 0.3.3+fix1+26.2 for 26.3.
 	[dep: "maven.modrinth:particle-core:NPLw1nMG", cf: null],

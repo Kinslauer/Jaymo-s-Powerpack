@@ -113,7 +113,9 @@ mv "$LEVEL" "world-backup-$(date +%Y-%m-%d-%H%M)"
 
 ## 5. Start
 
-Start it detached so it outlives this session. The old `start.sh` keeps its lock (`.start.lock`) for up to a minute
+Start it in a Konsole window on the Deck's desktop, where Andy can see and type into its console (Andy, 2026-11-22:
+"i also dont see the terminal on the deck. that is still a requirement. it shouldnt run in the background").
+`systemd-run --user` puts it in the desktop session, so it outlives this shell too. The old `start.sh` keeps its lock (`.start.lock`) for up to a minute
 after the server stops (it waits at "Press Enter to close"), and a new one started meanwhile only says "The server is
 already starting or running" and quits, so wait for the lock first:
 
@@ -121,11 +123,13 @@ already starting or running" and quits, so wait for the lock first:
 cd "$SRV"
 for i in $(seq 1 20); do flock -n .start.lock true && break; sleep 5; done
 START=$(date +%s)
-setsid nohup ./start.sh > server-console.log 2>&1 < /dev/null &
+systemctl --user show-environment | grep -qE '^(WAYLAND_DISPLAY|DISPLAY)='   && systemd-run --user --collect --quiet bash -c 'cd ~/jaymos-server && exec konsole --workdir ~/jaymos-server -e ./start.sh'
 ```
 
-(`start.sh` starts the playit tunnel too. Started outside the desktop it may say it can't keep the Deck awake; that's
-fine, the Deck stays plugged in with sleep off.) Then watch `logs/latest.log` until `Done (` appears (a few minutes
+Only if there's no desktop session (the Deck in Game Mode) start it in the background instead
+(`setsid nohup ./start.sh > server-console.log 2>&1 < /dev/null &`) and tell Andy it has no window.
+
+(`start.sh` starts the playit tunnel too.) Then watch `logs/latest.log` until `Done (` appears (a few minutes
 on the Deck), in the new log only: until the new server writes it, `latest.log` is still the old run's and has the old
 `Done (` in it (check its time against `START`, or that the java process is running). If it crashes instead, read the log and `crash-reports/`, report the cause, and don't loop restarting.
 
