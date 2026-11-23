@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: handed-over
 task: no-lift-cooking-blocks
 branch: no-lift-cooking-blocks
 with:
@@ -24,3 +24,6 @@ because shift clicking picks up the block, even campfires."
   to the block's own use (checked in its 2.12.1 bytecode).
 - These blocks can't be carried with contents by Carry On any more (Andy's call if he wants another way).
 - Built in CI only; not played.
+
+## Handed over (2026-11-23)
+Andy asked for a sneak-click choice box (Use (verb) / Lift) in PR 2035, then handed it to another bot. Notes: side-session-notes/local_2e1ecf8a-.../block-choice-box-handover.md. No code written for it.
