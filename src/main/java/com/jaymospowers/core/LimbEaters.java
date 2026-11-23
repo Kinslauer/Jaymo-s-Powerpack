@@ -45,13 +45,20 @@ import org.jspecify.annotations.Nullable;
  * you now need a new one." The downed (players too, once they're down and nobody's standing over them) are eaten alive
  * ({@link TearGoal}): an arm or a leg at a time, worried at until it comes off ({@link Dismember#sever}, lost as any
  * severed part is, to grow back or be replaced), then eaten. With no limbs left it's the body, bite by bite, until
- * they die. A player on their feet within {@link #GUARD} blocks keeps them off; carried, they're safe.
+ * they die. A player (or a grown villager) on their feet within {@link #GUARD} blocks keeps them off; carried, they're
+ * safe. A full eater leaves the downed be, and the small hunters ({@link #SMALL}) never eat the living.
  */
 public final class LimbEaters {
 	/** Animals that eat severed parts (data/jaymospowers/tags/entity_type/limb_eaters.json). */
 	public static final TagKey<EntityType<?>> EATERS = TagKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("limb_eaters"));
 	/** Birds that carry parts off to eat (data/jaymospowers/tags/entity_type/limb_carriers.json). */
 	public static final TagKey<EntityType<?>> CARRIERS = TagKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("limb_carriers"));
+	/**
+	 * Hunters too small to take on a person (Andy, 2026-11-23, finished by an ocelot: "it shouldnt have attacked if it
+	 * wasnt hungry"): ocelots, cats, foxes, lynxes. They eat the dead and what's torn off, never the living
+	 * (data/jaymospowers/tags/entity_type/small_hunters.json).
+	 */
+	public static final TagKey<EntityType<?>> SMALL = TagKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("small_hunters"));
 	/** How far a carrion bird spots a part (sideways, and down from the sky); how far off it takes it (blocks, at least and at most). */
 	static final double SPOT = 32.0, SPOT_DOWN = 32.0, CARRY_MIN = 20.0, CARRY_MAX = 40.0;
 	/** It keeps this far from anyone when it chooses where to eat; it gives up flying there after this long (ticks). */
@@ -304,6 +311,7 @@ public final class LimbEaters {
 	/** A meat-eating animal that eats the downed alive: not a monster, a carrion bird, a pet, the young or the leashed. */
 	public static boolean eatsAlive(Mob mob) {
 		return mob instanceof Animal && !(mob instanceof net.minecraft.world.entity.monster.Enemy) && !mob.getType().builtInRegistryHolder().is(CARRIERS)
+			&& !mob.getType().builtInRegistryHolder().is(SMALL)
 			&& eats(mob) && !mob.isBaby() && !mob.isLeashed() && !mob.isNoAi() && !(mob instanceof TamableAnimal tame && tame.isTame());
 	}
 
@@ -376,7 +384,9 @@ public final class LimbEaters {
 				return false;
 			}
 		}
-		return true;
+		// (2026-11-23) a grown villager on their feet keeps them off as a player does
+		return body.level().getEntitiesOfClass(net.minecraft.world.entity.npc.villager.AbstractVillager.class, body.getBoundingBox().inflate(GUARD),
+			v -> v != body && v.isAlive() && !v.isBaby() && !com.jaymospowers.core.wounds.Downed.isDowned(v)).isEmpty();
 	}
 
 	/** The limbs {@code body} still has that can be torn off (none for what can't lose parts). */
@@ -409,6 +419,11 @@ public final class LimbEaters {
 
 		@Override
 		public boolean canUse() {
+			// (2026-11-23) a full one leaves the downed be (it only finishes one it was feeding on: MobExecutions), and a
+			// small hunter never goes for a person
+			if (full(mob) || mob.getType().builtInRegistryHolder().is(SMALL)) {
+				return false;
+			}
 			if (busy(mob) && !(mob.getTarget() != null && prey(mob.getTarget())) || circles && !circled(mob)
 				|| !mob.getPassengers().isEmpty() || mob.getRandom().nextInt(LOOK_ODDS) != 0 || sunlit(mob, null)) {
 				return false;

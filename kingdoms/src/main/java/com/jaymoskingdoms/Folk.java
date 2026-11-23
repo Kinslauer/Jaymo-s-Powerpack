@@ -527,7 +527,9 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 				// (0.6.11) and whatever the symbiote has got into (Oddities)
 				|| Oddities.hunted(target)
 				// (0.7.0) and a vampire that's shown itself tonight (Vampires)
-				|| Vampires.exposed(target))));
+				|| Vampires.exposed(target)
+				// and anything that has just hurt someone, a beast too (Bloodshed)
+				|| Bloodshed.attacker(target))));
 		// barbarians hunt everyone else's people, and realms' folk hunt barbarians
 		Barbarians.addGoals(this, this.goalSelector, this.targetSelector);
 		// (0.5.27) goblins hunt everyone but those passing for one of them

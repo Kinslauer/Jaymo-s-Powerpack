@@ -1,0 +1,23 @@
+{
+	"values": [
+		"minecraft:polar_bear",
+		"jaymoskingdoms:feral_wolf",
+		"jaymoskingdoms:grizzly",
+		{ "id": "jaymoskingdoms:snow_giant", "required": false },
+		{ "id": "jaymoskingdoms:moose", "required": false },
+		{ "id": "naturalist:bear", "required": false },
+		{ "id": "naturalist:black_bear", "required": false },
+		{ "id": "naturalist:lion", "required": false },
+		{ "id": "naturalist:tiger", "required": false },
+		{ "id": "naturalist:alligator", "required": false },
+		{ "id": "naturalist:komodo_dragon", "required": false },
+		{ "id": "naturalist:hyena", "required": false },
+		{ "id": "cubeanimals:snowleopard", "required": false },
+		{ "id": "cubeanimals:tiger", "required": false },
+		{ "id": "cubeanimals:blackbear", "required": false },
+		{ "id": "cubeanimals:crocodile", "required": false },
+		{ "id": "cubeanimals:komododragon", "required": false },
+		{ "id": "bearminimum:brown_bear", "required": false },
+		{ "id": "bearminimum:black_bear", "required": false }
+	]
+}

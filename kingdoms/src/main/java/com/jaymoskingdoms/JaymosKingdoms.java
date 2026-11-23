@@ -851,6 +851,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Temperaments.register();
 		// (0.7.622, Rivals patch 7) brutal kills scare the rest
 		Dread.register();
+		Bloodshed.register();
 		PlayerTemperaments.register();
 		// (0.7.509) the eight patrons, favour and blessings
 		LOGGER.debug("patron attachment: {}", Patrons.STATE);

@@ -100,6 +100,10 @@ public final class Frights {
 
 	/** {@code v} doesn't run from monsters: it keeps a post or is fighting, or it's one of a camp's people and not timid. */
 	static boolean standsFirm(MinecraftServer server, Villager v) {
+		if (Bloodshed.routed(v)) {
+			// (a guard whose band broke runs with the rest)
+			return false;
+		}
 		if (BlastFright.standsGround(v)) {
 			return true;
 		}
@@ -146,7 +150,9 @@ public final class Frights {
 			// (0.7.292) a camp's orc, an MCA villager now; (0.7.293) a barbarian chief
 			return true;
 		}
-		return m instanceof Enemy && !(m instanceof PatronChampion) || Vampires.exposed(m);
+		// (Andy, 2026-11-23: "running from large animals") and whatever has just hurt someone, a beast as much as a
+		// monster, and the big beasts on sight (Bloodshed)
+		return m instanceof Enemy && !(m instanceof PatronChampion) || Vampires.exposed(m) || Bloodshed.attacker(m) || Bloodshed.feared(m);
 	}
 
 	/** (0.6.11) Something came down at {@code at} (a meteor, a star): it runs from the spot and hides a while. */
