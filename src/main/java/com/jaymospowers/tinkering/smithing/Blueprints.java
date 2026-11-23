@@ -66,6 +66,7 @@ public final class Blueprints {
 		BLUEPRINT_ITEM = Smithing.item("blueprint", BlueprintItem::new, p -> p.stacksTo(1));
 		DRAFTING_TABLE = Kiln.blockWithTooltip("drafting_table", DraftingTableBlock::new, BlockBehaviour.Properties.of()
 			.mapColor(MapColor.WOOD).strength(2.5F).sound(SoundType.WOOD));
+		DraftingTableMenu.init();
 
 		Forging.CAPS.add((smith, anvil, option) -> {
 			ItemStack blueprint = find(smith, option);

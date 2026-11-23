@@ -7401,3 +7401,30 @@ following integration task).
   inventory, nothing changes.
 - Classes: `Baubles` (`dropAll`, `parts`), `WebShooters`, `power/web/KitchenCompat.keepOnBody`.
 - Built by CI; not played.
+
+## 0.26.69 (2026-11-23): The flanged mace is a blunt weapon: no more stabbing (#2037)
+
+- **Flanged mace** (every tier): it sat in the swords tag, so it fought like a sword. Now it's a mace. Its finisher is
+  Skull Crusher (not Run Through), an untrained player slams with it (not Impale), its drop attack and stealth kill are
+  the club's, and holding someone for questioning with it doesn't put a blade to them. It never gets left stuck in a
+  body the way a run-through sword can. It breaks bones, crushes skulls, wears armour like a mace and counts as a blunt
+  blow against padding, mail and plate (and as bludgeoning in Kingdoms). Its flanges still cut, so its blood spray and
+  limb cuts are unchanged.
+- **Same fix** for the other blunt weapons in the swords tag: the wooden and stone cudgels, the Anvil Father's hammer
+  and the Ogre King's maul. Those have no edge, so they also stop spraying and cutting like a blade: their blood is a
+  heavy blunt blow's splatter, and a killing blow tears a limb off at a blunt weapon's (lower) chance.
+- How: they join the `jaymospowers:crushing` tag; `Fractures.blunt` reads that tag before the blade test,
+  `Dismember.blade` passes over crushing weapons with no flanges, `BlastGore` doesn't take a blunt weapon for a blade,
+  and `Finishers` treats a crushing weapon in the swords tag as no sword.
+- Built by CI; not played.
+- **The pitchfork fights like a spear**: Better Combat gives it the spear's moveset and reach (two-handed thrusts, the
+  polearm stance), it counts as a polearm for guards and parries, its blow is a thrust (best at a spear's distance,
+  finding the gaps in mail), and its finisher is the spear's Pinned. It was a sword before. (`weapon_attributes/pitchfork.json`,
+  "pitchfork" added to the spear words in `WeaponKind`, `Finishers` and `Armed`.)
+
+## 0.26.70 (2026-11-23): Drafting Table screen; trapdoors take a second use (#2038)
+
+- **Drafting Table** (Andy: "it should have a GUI like the other tables"): using it now opens a screen in the Tinkering stations' look. Put a blueprint and a sheet of paper on it for a copy one level lower (the blueprint stays), or a forged weapon, head or armour piece and a sheet of paper to see its pattern; taking the pattern destroys the piece. No paper needed in creative. Taking the pattern replaces the old "use the table again" warning.
+- **Trapdoors** (Andy: "too easy to flip them and alot of the world gen uses them as detail"): a hand works a trapdoor on the second use in a row: double-click it, or hold use a moment (the held key repeats after 0.2 s, so a slow single click counts too: `TrapdoorUse.AGAIN_TICKS` and the repeat are the numbers to play-test). The first use only shows a tip card ("Use the trapdoor again (or hold use) to open or shut it"). Every trapdoor a hand can open (wood, copper, other mods' that extend the vanilla trapdoor); iron is left to redstone as before. Redstone, villagers, wind charges and the lock checks (which sit on the trapdoor's own toggle) aren't affected. Sneaking with something in hand still places it against a trapdoor.
+- Classes: `DraftingTableMenu` (new), `DraftingTableBlock`, `Patterns` (the hold-and-click take-apart and its warning are gone, `refused` keeps the gates), `client.tinkering.smithing.DraftingTableScreen` (new), `buildblocks.TrapdoorUse` (new), `buildblocks.mixin.TrapdoorTypeAccessor` (new). Shift-clicking the copy takes one at a time, so it doesn't spend every sheet.
+- Built on CI; not played.

@@ -226,11 +226,7 @@ message.jaymospowers.slider.too_far
 message.jaymospowers.smeltery.unformed
 message.jaymospowers.smithing.burns
 message.jaymospowers.smithing.cold
-message.jaymospowers.smithing.drafting_hint
-message.jaymospowers.smithing.drafting_no_paper
 message.jaymospowers.smithing.empty
-message.jaymospowers.smithing.pattern_ask
-message.jaymospowers.smithing.pattern_no_paper
 message.jaymospowers.smithing.take_result
 message.jaymospowers.smithing.too_worn
 message.jaymospowers.smoke_vapour_on
@@ -250,6 +246,7 @@ message.jaymospowers.trade.asked
 message.jaymospowers.trade.face
 message.jaymospowers.trade.failed
 message.jaymospowers.trade.waiting
+message.jaymospowers.trapdoor_again
 message.jaymospowers.twinblade.learned
 message.jaymospowers.web_brute.carried
 message.jaymospowers.web_fists_suit
