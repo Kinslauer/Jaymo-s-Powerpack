@@ -130,11 +130,15 @@ public final class Fractures {
 
 	/** Whether {@code stack} breaks bones: maces, hammers, clubs and the like (never a blade). */
 	public static boolean blunt(ItemStack stack) {
-		if (stack.isEmpty() || Dismember.blade(stack)) {
+		if (stack.isEmpty()) {
 			return false;
 		}
+		// before the blade test: a flanged mace sits in the swords tag (for its enchantments and its blood), but it's a mace
 		if (stack.is(Items.MACE) || stack.is(CRUSHING)) {
 			return true;
+		}
+		if (Dismember.blade(stack)) {
+			return false;
 		}
 		String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
 		for (String word : BLUNT_WORDS) {

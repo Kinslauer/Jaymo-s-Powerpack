@@ -748,7 +748,7 @@ public final class Finishers {
 		if (any(path, GREATSWORD_WORDS)) {
 			return Kind.GREATSWORD;
 		}
-		if (stack.is(ItemTags.SWORDS) || any(path, SWORD_WORDS)) {
+		if (sword(stack) || any(path, SWORD_WORDS)) {
 			return Kind.SWORD;
 		}
 		if (stack.is(ItemTags.PICKAXES)) {
@@ -761,6 +761,14 @@ public final class Finishers {
 			return Kind.BLUNT;
 		}
 		return Kind.FIST;
+	}
+
+	/**
+	 * A sword by its tag, but not a crushing weapon that sits in the swords tag (the flanged mace, the cudgels, the Anvil
+	 * Father's hammer, the Ogre King's maul): those are blunt, and never stab anyone through.
+	 */
+	private static boolean sword(ItemStack stack) {
+		return stack.is(ItemTags.SWORDS) && !stack.is(com.jaymospowers.core.Fractures.CRUSHING);
 	}
 
 	/** (0.15.114) A gun: TaCZ's (any with a gun id), the Void Armory's flintlock, or another mod's by name. */
@@ -1271,7 +1279,7 @@ public final class Finishers {
 		}
 		return switch (kind) {
 			case SWORD, GREATSWORD, DAGGER, AXE, SPEAR, POLEARM -> Kind.S_BLADE;
-			default -> stack.is(ItemTags.SWORDS) || stack.is(ItemTags.AXES) ? Kind.S_BLADE : Kind.S_BLUNT;
+			default -> sword(stack) || stack.is(ItemTags.AXES) ? Kind.S_BLADE : Kind.S_BLUNT;
 		};
 	}
 
@@ -1288,7 +1296,7 @@ public final class Finishers {
 		return switch (kind(stack)) {
 			case SWORD, GREATSWORD, DAGGER -> Kind.D_BLADE;
 			case SPEAR, POLEARM -> Kind.D_SPEAR;
-			default -> stack.is(ItemTags.SWORDS) ? Kind.D_BLADE : Kind.D_BLUNT;
+			default -> sword(stack) ? Kind.D_BLADE : Kind.D_BLUNT;
 		};
 	}
 
@@ -1387,7 +1395,7 @@ public final class Finishers {
 		return switch (kind(stack)) {
 			case BOW, CROSSBOW, GUN, FUTURE_SHOT, FUTURE_BURST, FUTURE_AUTO, FUTURE_WILD -> Kind.Q_AIM;
 			case SWORD, GREATSWORD, DAGGER, AXE, SPEAR, POLEARM -> Kind.Q_BLADE;
-			default -> stack.is(ItemTags.SWORDS) || stack.is(ItemTags.AXES) ? Kind.Q_BLADE : Kind.Q_BLUNT;
+			default -> sword(stack) || stack.is(ItemTags.AXES) ? Kind.Q_BLADE : Kind.Q_BLUNT;
 		};
 	}
 
