@@ -74,6 +74,8 @@ public final class DodgeClient {
 	static final double JUMP_RISE = 0.1;
 	/** We were on the ground last tick; we're in the air off a jump; this jump's flip is spent. */
 	private static boolean wasOnGround = true, jumped, flipped;
+	/** This time in the air's dive over land is spent (one a jump). */
+	private static boolean airDived;
 
 	private DodgeClient() {
 	}
@@ -126,6 +128,7 @@ public final class DodgeClient {
 		if (ground) {
 			jumped = false;
 			flipped = false;
+			airDived = false;
 		} else if (wasOnGround && player.getDeltaMovement().y > JUMP_RISE) {
 			jumped = true;
 		}
@@ -159,6 +162,12 @@ public final class DodgeClient {
 			wanted = false;
 			landingRoll = 0;
 		}
+		if (wanted && !airDived && airDive(player)) {
+			// (Andy, 2026-11-23) in the air over land with no flip or trick to throw: the head-first dive, then the roll as you land
+			wanted = false;
+			airDived = true;
+			landingRoll = com.jaymospowers.water.Dives.AIR_DIVE_ROLL_TICKS;
+		}
 		if (wanted && !player.onGround() && player.getDeltaMovement().y < 0.0) {
 			// falling: held until you land
 			landingRoll = LandingRoll.EARLY_TICKS;
@@ -176,6 +185,37 @@ public final class DodgeClient {
 			}
 		}
 		tickHold(player, down);
+	}
+
+	/**
+	 * (Andy, 2026-11-23) "The dive should be activated upon using alt in mid air. That way a quick space + alt gets you the
+	 * dive everytime. And it can also be used to evade on the ground this way." Over land, in the air: thrown head first
+	 * the way the movement keys point (forward with none, or Back alone unless locked on, as the roll), with a little
+	 * lift; the landing roll that follows is the evade. Everyone sees it ({@code Dives#DIVING}, drawn by DivePose).
+	 */
+	private static boolean airDive(LocalPlayer player) {
+		if (cooldown > 0 || !com.jaymospowers.water.Dives.canAirDive(player) || !Dodge.canDodge(player) || FreerunClient.active()
+			|| !ClientPlayNetworking.canSend(com.jaymospowers.water.Dives.DiveKey.TYPE)) {
+			return false;
+		}
+		Input input = player.input.keyPresses;
+		float forward = (input.forward() ? 1.0F : 0.0F) - (input.backward() ? 1.0F : 0.0F);
+		float strafe = (input.left() ? 1.0F : 0.0F) - (input.right() ? 1.0F : 0.0F);
+		if (com.jaymospowers.client.LockOnClient.locked() == null && forward < 0.0F) {
+			forward = 0.0F;
+		}
+		if (forward == 0.0F && strafe == 0.0F) {
+			forward = 1.0F;
+		}
+		float yaw = player.getYRot() * Mth.DEG_TO_RAD;
+		double len = Math.sqrt(forward * forward + strafe * strafe);
+		double x = (strafe * Mth.cos(yaw) - forward * Mth.sin(yaw)) / len, z = (forward * Mth.cos(yaw) + strafe * Mth.sin(yaw)) / len;
+		double push = com.jaymospowers.water.Dives.AIR_DIVE_PUSH;
+		player.setDeltaMovement(x * push, Math.max(player.getDeltaMovement().y, com.jaymospowers.water.Dives.AIR_DIVE_LIFT), z * push);
+		com.jaymospowers.client.water.DivePose.localDive = player.level().getGameTime();
+		ClientPlayNetworking.send(new com.jaymospowers.water.Dives.DiveKey());
+		sinceDodge = 0;
+		return true;
 	}
 
 	/** The Dodge key over deep water: off the edge head first with no hop, or the fall turned into a dive (Dives). */
