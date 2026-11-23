@@ -1,5 +1,5 @@
 ---
-status: handed-over
+status: done
 task: no-lift-cooking-blocks
 branch: no-lift-cooking-blocks
 with:
@@ -27,3 +27,6 @@ because shift clicking picks up the block, even campfires."
 
 ## Handed over (2026-11-23)
 Andy asked for a sneak-click choice box (Use (verb) / Lift) in PR 2035, then handed it to another bot. Notes: side-session-notes/local_2e1ecf8a-.../block-choice-box-handover.md. No code written for it.
+
+## Notes
+- 2026-11-23 15:08 PR #2035 is merged into master; moved to Agents/Done.

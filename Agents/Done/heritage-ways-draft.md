@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: draft-addition skill from Andy's five prompt screenshots, and a plan draft for heritage ways of living (Tideborn spear hunts, courts in the drowned temples)
 branch: claude/draft-addition-skill
 with: Claude Code desktop session
@@ -21,3 +21,6 @@ owns:
 
 ## Done
 Draft only, no code, no commit yet. Waiting on Andy's answers (water breathing, which temples, glass halls, how many courts, other bloods).
+
+## Notes
+- 2026-11-23 15:08 PR #2027 is merged into master; moved to Agents/Done.

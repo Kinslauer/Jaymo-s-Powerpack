@@ -910,3 +910,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-23 (Andy): merge PR #2036 (illager talk like MCA's screen).
 - 2026-11-23: Sneak + right-click on any block Carry On could lift should open a small choice box ("Use (bake)", "Lift", oven also "Open door"); goes into PR 2035; labels as proposed accepted. Handed to another bot.
 - 2026-11-23 (Andy): approved the lore paragraphs "From above" (drop assassination) and "The stolen crown" (imposter ruler).
+
+- 2026-11-23 (Andy): merge PR #2044, weapons in set places on the body (swords at hips, 4 flintlocks: 2 chest, 2 sash; toggle on the Character page).

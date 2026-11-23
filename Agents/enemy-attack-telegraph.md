@@ -1,9 +1,9 @@
 ---
-status: working
+status: done
 task: enemy-attack-telegraph
-branch: claude/youthful-villani-f039c2
+branch: claude/enemy-attack-telegraph
 with: local_29ede7b7-7e11-4e20-8506-df7674edc787
-pr: 
+pr: 2042 (merged 2026-11-23)
 mods: powers, kingdoms
 versions: 
 started: 2026-11-23
@@ -20,3 +20,6 @@ owns:
 ## Plan
 - Vanilla/modded melee (AttackTells): longer wind-up, arms held up through it, the arm swing on the blow, a short lunge in, and the wind-up only starts from closer than vanilla reach.
 - Better Combat humanoids (Kingdoms MobCombat): start their swing from closer.
+
+## Result
+Merged as PR #2042 on Andy's word ("merge"). CI built all three mods and the pack-start check passed. Standalone dev boots on the Deck failed for reasons unrelated to this change: Powers' dev run rejects Stormie's Spiders (loader/fabric-api not seen), and Kingdoms' alone lacks Powers' items. Not played in game.

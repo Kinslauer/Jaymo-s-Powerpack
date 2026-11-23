@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: weapons on the body in fixed places; four flintlocks (two hips, two chest); Kenway loadout
 branch: claude/body-weapon-homes
 with: 
