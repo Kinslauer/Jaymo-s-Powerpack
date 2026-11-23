@@ -3,7 +3,7 @@ status: done
 task: From the Shadows Reborn port into Kingdoms (Inbox/from-the-shadows-port.md)
 branch: claude/fts-froglin-plague (track A), claude/fts-nether-beasts (track B), claude/crocs-hunt-monsters (#2012)
 with: 
-pr: 2012, 2013, 2014, 2015, 2016 (all merged)
+pr: 2012, 2013, 2014, 2015, 2016, 2019, 2020, 2023 (all merged)
 mods: kingdoms
 versions: 
 started: 2026-11-22
@@ -35,3 +35,4 @@ there". Also: "crocodiles in the overworld should also be hostile to other hosti
 - Waiting: track C (gear) and track D (effects, potions, enchants). Andy: start them "at 11 when usage resets". Heal Block id `jaymoskingdoms:heal_block`, Blessing of Gluttony `jaymoskingdoms:blessing_of_gluttony`. Agent calls need context-mode off or auto mode off.
 - 2026-11-22 19:55 PR #2012 is merged into master; moved to Agents/Done.
 - 2026-11-22 20:54 PR #2012 is merged into master; moved to Agents/Done.
+- 2026-11-23: track D (effects, potions, enchants) #2019, track C gear #2020 (diabolium, diabolium + crust armour in 3D, blood, Corrupted Heart, Frenzy brewing) and weapons #2023 (Devil Splitter, Thirst for Blood, dagger, horn, Plague Bearer knife as the real model) merged; Kingdoms 0.11.91. Not played. Not ported (the original never made them items): Horn of Purification, Apocrypha, player throwing daggers.
