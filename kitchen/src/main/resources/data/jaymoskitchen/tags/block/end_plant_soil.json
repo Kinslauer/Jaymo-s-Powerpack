@@ -1,0 +1,13 @@
+{
+  "values": [
+    "minecraft:end_stone",
+    {
+      "id": "#enderscape:base_stone_end",
+      "required": false
+    },
+    {
+      "id": "#enderscape:overgrowth_blocks",
+      "required": false
+    }
+  ]
+}

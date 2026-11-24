@@ -1,4 +1,4 @@
-Item textures from three MIT-licensed Farmer's Delight add-ons, used unchanged (one renamed):
+Art from three MIT-licensed Farmer's Delight add-ons, used unchanged (some renamed):
 
 Ocean's Delight by Scouter456 (MIT):
   honey_fried_kelp.png, braised_sea_pickle.png, kelp_encrusted_cod.png, seagrass_salad.png, fugu_roll.png,
@@ -6,7 +6,12 @@ Ocean's Delight by Scouter456 (MIT):
 Nether's Delight by Umpaz and SoyTutta (MIT):
   magma_gelatin.png, warped_moldy_meat.png
 Ender's Delight by Ax3dGaming (MIT, as its Modrinth page gives it):
-  strange_eclair.png
+  strange_eclair.png, and all of its other item, block and effect art, block models, item models and blockstates
+  (textures/item, textures/block, textures/mob_effect/phasing.png, models, items, blockstates: every file named for
+  one of its plants, dishes or blocks), its end_house structure (data/jaymoskitchen/structure/end_house.nbt) and the
+  numbers its dishes and plants are built on. A few files were renamed (chorus_crate_bottom, ender_pie_bottom,
+  ender_pie_side, endstone_stove_*), the chorus pie's block models are built on the Kitchen's own pie model, and the
+  end house's Farmer's Delight skillet is the Kitchen's frying pan; their ids were moved to the Kitchen's.
 
 chanterelle_stew.png and drift_jelly_pudding.png are our own (tools/gen_end_dishes.py): Ender's Delight has no such dishes.
 
