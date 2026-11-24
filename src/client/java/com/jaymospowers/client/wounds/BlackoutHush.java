@@ -1,5 +1,6 @@
 package com.jaymospowers.client.wounds;
 
+import com.jaymospowers.client.UltimateCinematic;
 import com.jaymospowers.core.wounds.Downed;
 import com.jaymospowers.core.wounds.Mortality;
 import java.util.Set;
@@ -66,8 +67,9 @@ public final class BlackoutHush {
 
 	private static void tick(Minecraft minecraft) {
 		boolean wasDead = dead;
+		// (Andy, 2026-11-23: a film after your death plays first, with its sound; the silence comes after it)
 		dead = minecraft.player != null && minecraft.level != null && Mortality.isFinal(minecraft.player)
-			&& (minecraft.gui.screen() instanceof DeathScreen || minecraft.player.isDeadOrDying());
+			&& (minecraft.gui.screen() instanceof DeathScreen || minecraft.player.isDeadOrDying()) && !UltimateCinematic.deathFilm();
 		float target = target(minecraft);
 		hush = dead ? 1.0F : target > hush ? Math.min(target, hush + QUIET_STEP) : Math.max(target, hush - RETURN_STEP);
 		if (hush == refreshed && dead == wasDead || minecraft.getSoundManager() == null) {
@@ -87,7 +89,7 @@ public final class BlackoutHush {
 		if (player == null || minecraft.level == null) {
 			return 0.0F;
 		}
-		if (minecraft.gui.screen() instanceof DeathScreen) {
+		if (minecraft.gui.screen() instanceof DeathScreen && !UltimateCinematic.deathFilm()) {
 			return 1.0F;
 		}
 		float dark = DownedHud.darkness();
