@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: any
 from: coordinator
 asked: 2026-11-24
 thread: Hermes Training (cloud vault coordinator)
-claimed_by: 
+claimed_by: changeling-voice-mimic
 pr: 
 suggested_owns:
   - kingdoms new ChangelingVoices.java (Simple Voice Chat server plugin, beside VoiceRange.java)
