@@ -50,7 +50,7 @@ import org.jspecify.annotations.Nullable;
  * stand-in beast takes the body's place for everyone's eyes and a blow to it is a blow to the Druid. Each shape gives its
  * strengths and a price: the wolf is quick and keen-nosed, the bear tough and strong but slow, the hawk flies, light
  * and slow-falling but frail, the fish swift and breathing in water but helpless on land. A beast casts nothing (no focus, no
- * scroll). {@link #SHAPES} shapes come back with each short rest ({@link Rests}). A Druid downed or dead is themselves again.</li>
+ * scroll), until the last rank of the tree ({@link WildShapes#RITES}) lets it cast nature's rites. {@link #SHAPES} shapes come back with each short rest ({@link Rests}). A Druid downed or dead is themselves again.</li>
  * <li><b>Rites.</b> The sprig casts the spell it is turned to (plant growth, moonbeam, and the rest of nature's rites from
  * scrolls, {@link ClassCasters}); control weather and speak with animals are the Druid's own rituals ({@link NatureRites}).</li>
  * </ul>
@@ -75,6 +75,26 @@ public final class Druids {
 	static final Map<String, List<String>> KIN = Map.of(WOLF, List.of("wolf", "feral_wolf", "coyote"), BEAR, List.of("polar_bear", "grizzly"),
 		HAWK, List.of("parrot", "pigeon", "bat"), FISH, List.of("cod", "salmon", "tropical_fish", "pufferfish"), WildShapes.FOX, List.of("fox"),
 		WildShapes.STAG, List.of("deer"));
+
+	/** The entity paths a form is studied from: a shape's kin, or the one beast of a {@code "mob:"} form. */
+	static List<String> kin(String form) {
+		List<String> kin = KIN.get(form);
+		if (kin != null) {
+			return kin;
+		}
+		var type = BeastForms.typeOf(form);
+		return type == null ? List.of() : List.of(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(type).getPath());
+	}
+
+	/** What a shape is called: a {@code "mob:"} form is its beast's own name. */
+	public static Component formName(String form) {
+		var type = BeastForms.typeOf(form);
+		return type != null ? type.getDescription() : Component.translatable("druid.jaymoskingdoms.form." + form);
+	}
+
+	/** The shapes {@code player} has marked as favourites (they sit at the top of the wheel). Saved, kept through death. */
+	static final AttachmentType<List<String>> FAVOURITES = AttachmentRegistry.create(JaymosKingdoms.id("druid_favourites"),
+		b -> b.persistent(Codec.STRING.listOf()).copyOnDeath());
 
 	/** The beasts watched so far: kind → ticks. Saved, kept through death. */
 	static final AttachmentType<Map<String, Integer>> WATCHED = AttachmentRegistry.create(JaymosKingdoms.id("druid_watched"),
@@ -110,8 +130,14 @@ public final class Druids {
 		SPRIG = Arcana.item("druid_sprig", p -> new CastingFocus(p.stacksTo(1), false));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> output.accept(SPRIG));
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(Druids::tick);
-		// a beast casts nothing: no focus, no scroll, no staff
+		BeastForms.register();
+		ShapeFx.register();
+		Spores.register();
+		BeastCall.register();
+		ShapeWheel.register();
+		// a beast casts nothing (no focus, no scroll, no staff), until the last rank of the tree
 		UseItemCallback.EVENT.register((player, level, hand) -> player instanceof ServerPlayer sp && shaped(sp) && casts(player.getItemInHand(hand))
+			&& !WildShapes.has(sp, WildShapes.RITES)
 			? InteractionResult.FAIL : InteractionResult.PASS);
 		// a blow to the stand-in is a blow to the Druid
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
@@ -119,7 +145,7 @@ public final class Druids {
 				return true;
 			}
 			for (Map.Entry<UUID, Shape> e : SHAPES_WORN.entrySet()) {
-				if (e.getValue().beast == mob) {
+				if (e.getValue().beast == mob || BeastForms.isTail(e.getKey(), mob)) {
 					if (mob.level().getServer().getPlayerList().getPlayer(e.getKey()) instanceof ServerPlayer owner && source.getEntity() != owner
 						&& owner.level() instanceof ServerLevel level) {
 						owner.hurtServer(level, source, amount);
@@ -142,6 +168,7 @@ public final class Druids {
 	static void clear() {
 		SHAPES_WORN.clear();
 		RESTING.clear();
+		BeastForms.clear();
 	}
 
 	/** How many shapes a day {@code player} has: the second class's is a share, and the Moon path one more. */
@@ -181,7 +208,7 @@ public final class Druids {
 		if (player.getAttachedOrElse(WATCHED, Map.<String, Integer>of()).getOrDefault(form, 0) >= STUDY_TICKS) {
 			return true;
 		}
-		for (String kind : KIN.get(form)) {
+		for (String kind : kin(form)) {
 			if (FoeStudy.stars(player, kind) >= 1) {
 				return true;
 			}
@@ -191,7 +218,16 @@ public final class Druids {
 
 	/** (class trees) the shapes they may take: as many as their slots, in the order learned ({@link WildShapes#usable}). */
 	private static List<String> known(Player player) {
-		return WildShapes.usable(player, FORMS.stream().filter(f -> knows(player, f)).toList());
+		List<String> out = new java.util.ArrayList<>(allKnown(player));
+		out.removeIf(f -> !BeastForms.allowed(player, f));
+		return out;
+	}
+
+	/** (any studied beast) every shape {@code player} has: the tree's own, then each animal studied, wearable now or not. */
+	static List<String> allKnown(Player player) {
+		List<String> out = new java.util.ArrayList<>(WildShapes.usable(player, FORMS.stream().filter(f -> knows(player, f)).toList()));
+		out.addAll(BeastForms.studied(player));
+		return out;
 	}
 
 	// ---- the key ------------------------------------------------------------------------------------------------------------------
@@ -210,7 +246,7 @@ public final class Druids {
 			String now = player.getAttachedOrElse(SELECTED, "");
 			String next = known.get((known.indexOf(now) + 1) % known.size());
 			player.setAttached(SELECTED, next);
-			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.druid.selected", Component.translatable("druid.jaymoskingdoms.form." + next)));
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.druid.selected", formName(next)));
 			return;
 		}
 		// (class trees) sneak and the key in a shape: Barkskin
@@ -244,6 +280,19 @@ public final class Druids {
 		take(player, level, form, beast);
 	}
 
+	/** The wheel's pick: the shape becomes the selected one and is taken, as a tap of the key does. */
+	static void pick(ServerPlayer player, String form) {
+		if (shaped(player) || !allKnown(player).contains(form)) {
+			return;
+		}
+		if (!BeastForms.allowed(player, form)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.druid.too_great"));
+			return;
+		}
+		player.setAttached(SELECTED, form);
+		key(player, false);
+	}
+
 	/** (class trees) Sneak and the key held: Barkskin, in a shape or out of one. False when it isn't theirs. */
 	static boolean held(ServerPlayer player) {
 		return WildShapes.bark(player, shapes(player));
@@ -267,7 +316,7 @@ public final class Druids {
 			case BEAR -> BEAR_HEALTH;
 			case HAWK -> HAWK_HEALTH;
 			case FISH -> FISH_HEALTH;
-			default -> WildShapes.health(form);
+			default -> BeastForms.isMob(form) ? BeastForms.health(form) : WildShapes.health(form);
 		};
 		if (health != null && extra != 0.0) {
 			health.removeModifier(HEALTH);
@@ -283,7 +332,7 @@ public final class Druids {
 				kb.addTransientModifier(new AttributeModifier(KNOCKBACK, BEAR_KNOCKBACK, AttributeModifier.Operation.ADD_VALUE));
 			}
 		}
-		if (form.equals(HAWK)) {
+		if (form.equals(HAWK) || BeastForms.flies(form)) {
 			// a hawk flies
 			player.addTag(WINGS_TAG);
 			player.getAbilities().mayfly = true;
@@ -292,20 +341,23 @@ public final class Druids {
 		}
 		buffs(player, form);
 		WildShapes.taken(player, beast, form);
-		level.sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY(0.5), player.getZ(), 24, 0.4, 0.6, 0.4, 0.05);
-		level.sendParticles(ParticleTypes.SPORE_BLOSSOM_AIR, player.getX(), player.getY(0.5), player.getZ(), 16, 0.5, 0.6, 0.5, 0.02);
+		if (BeastForms.isMob(form)) {
+			BeastForms.taken(player, level, form, beast);
+		}
+		// winding vines close over them (not a puff of smoke)
+		ShapeFx.vines(player, true);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ZOMBIE_VILLAGER_CONVERTED, SoundSource.PLAYERS, 0.8F, 1.3F);
-		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.druid.shaped", Component.translatable("druid.jaymoskingdoms.form." + form), Math.max(1L, lasts / 1200)));
+		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.druid.shaped", formName(form), Math.max(1L, lasts / 1200)));
 	}
 
-	private static @Nullable Mob stand(ServerLevel level, String form) {
+	static @Nullable Mob stand(ServerLevel level, String form) {
 		Mob beast = switch (form) {
 			case WOLF -> EntityTypes.WOLF.create(level, EntitySpawnReason.EVENT);
 			case BEAR -> EntityTypes.POLAR_BEAR.create(level, EntitySpawnReason.EVENT);
 			case HAWK -> EntityTypes.PARROT.create(level, EntitySpawnReason.EVENT);
 			case FISH -> EntityTypes.COD.create(level, EntitySpawnReason.EVENT);
 			// (class trees) the fox, the stag and the elder shapes
-			default -> WildShapes.stand(level, form);
+			default -> BeastForms.isMob(form) ? BeastForms.standIn(level, form) : WildShapes.stand(level, form);
 		};
 		if (beast != null) {
 			beast.setNoAi(true);
@@ -358,7 +410,13 @@ public final class Druids {
 					player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60, 1, true, false, false));
 				}
 			}
-			default -> WildShapes.buffs(player, form);
+			default -> {
+				if (BeastForms.isMob(form)) {
+					BeastForms.buffs(player, form);
+				} else {
+					WildShapes.buffs(player, form);
+				}
+			}
 		}
 	}
 
@@ -394,16 +452,18 @@ public final class Druids {
 		}
 		fold(player);
 		WildShapes.shed(player);
+		BeastForms.shed(player);
 		SizeArts.shed(player);
 		for (var effect : List.of(MobEffects.HASTE, MobEffects.SPEED, MobEffects.STRENGTH, MobEffects.JUMP_BOOST, MobEffects.RESISTANCE, MobEffects.SLOWNESS, MobEffects.SLOW_FALLING,
-			MobEffects.WATER_BREATHING, MobEffects.DOLPHINS_GRACE, MobEffects.WEAKNESS, MobEffects.NIGHT_VISION)) {
+			MobEffects.WATER_BREATHING, MobEffects.DOLPHINS_GRACE, MobEffects.WEAKNESS, MobEffects.NIGHT_VISION, MobEffects.HASTE,
+			MobEffects.FIRE_RESISTANCE)) {
 			MobEffectInstance on = player.getEffect(effect);
 			if (on != null && on.isAmbient() && !on.isVisible() && on.getDuration() <= 300) {
 				player.removeEffect(effect);
 			}
 		}
 		if (player.level() instanceof ServerLevel level) {
-			level.sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY(0.5), player.getZ(), 16, 0.4, 0.6, 0.4, 0.04);
+			ShapeFx.vines(player, false);
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ZOMBIE_VILLAGER_CURE, SoundSource.PLAYERS, 0.6F, 1.5F);
 			if (pause) {
 				RESTING.put(player.getUUID(), level.getGameTime() + AFTER_TICKS);
@@ -455,8 +515,13 @@ public final class Druids {
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(STUDY_RANGE),
 			x -> x.isAlive() && x != player && !(x instanceof Player) && !standIn(x))) {
 			String path = FoeStudy.kind(e);
-			for (String form : FORMS) {
-				if (KIN.get(form).contains(path) && player.hasLineOfSight(e)) {
+			List<String> forms = new java.util.ArrayList<>(FORMS.stream().filter(f -> KIN.get(f).contains(path)).toList());
+			String any = BeastForms.watchForm(e);
+			if (any != null) {
+				forms.add(any);
+			}
+			for (String form : forms) {
+				if (player.hasLineOfSight(e)) {
 					if (watched == null) {
 						watched = new HashMap<>(player.getAttachedOrElse(WATCHED, Map.<String, Integer>of()));
 					}
@@ -464,7 +529,7 @@ public final class Druids {
 					if (before < STUDY_TICKS) {
 						watched.put(form, Math.min(STUDY_TICKS, before + 20));
 						if (before + 20 >= STUDY_TICKS) {
-							learned(player, level, form);
+							learned(player, level, form, e.position().add(0.0, e.getBbHeight() * 0.5, 0.0), e.getType());
 						}
 					}
 				}
@@ -485,10 +550,15 @@ public final class Druids {
 		}
 		Map<String, Integer> watched = new HashMap<>(player.getAttachedOrElse(WATCHED, Map.<String, Integer>of()));
 		boolean fresh = false;
-		for (String form : FORMS) {
-			if (KIN.get(form).contains(kind) && watched.getOrDefault(form, 0) < STUDY_TICKS) {
+		java.util.List<String> forms = new java.util.ArrayList<>(FORMS.stream().filter(f -> KIN.get(f).contains(kind)).toList());
+		net.minecraft.world.entity.EntityType<?> type = ShapeFx.typeOfKind(kind);
+		if (type != null && BeastForms.eligible(type)) {
+			forms.add(BeastForms.form(type));
+		}
+		for (String form : forms) {
+			if (watched.getOrDefault(form, 0) < STUDY_TICKS) {
 				watched.put(form, STUDY_TICKS);
-				learned(player, level, form);
+				learned(player, level, form, null, type);
 				fresh = true;
 			}
 		}
@@ -504,15 +574,15 @@ public final class Druids {
 				return true;
 			}
 		}
-		return false;
+		return BeastForms.isTail(e);
 	}
 
-	private static void learned(ServerPlayer player, ServerLevel level, String form) {
+	/** A beast is mastered for the first time: a green wisp drifts from it into the Druid and its call is heard. No chat text. */
+	private static void learned(ServerPlayer player, ServerLevel level, String form, net.minecraft.world.phys.@Nullable Vec3 at,
+		net.minecraft.world.entity.@Nullable EntityType<?> type) {
 		ClassTrees.give(player, PlayerClass.DRUID, ClassTrees.XP_STUDY);
 		WildShapes.learned(player, form);
-		level.sendParticles(ParticleTypes.HAPPY_VILLAGER, player.getX(), player.getY(1.0), player.getZ(), 14, 0.4, 0.5, 0.4, 0.02);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.5F, 1.6F);
-		player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.druid.learned", Component.translatable("druid.jaymoskingdoms.form." + form)));
+		ShapeFx.learned(player, level, at, type);
 		if (player.getAttachedOrElse(SELECTED, "").isEmpty()) {
 			player.setAttached(SELECTED, form);
 		}
