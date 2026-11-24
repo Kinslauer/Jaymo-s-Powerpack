@@ -894,6 +894,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Languages.register();
 		// the illager tongue, learned from their writings, banners, paintings and holds, and talking with illagers once you know it
 		IllagerTongue.register();
+		// Alex's Caves: its cave biomes mostly under Mohknee, and cave maps that reach that far
+		AlexsCavesCompat.register();
 		IllagerHolds.register();
 		BlastMend.register();
 		Craters.register();

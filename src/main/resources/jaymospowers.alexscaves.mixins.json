@@ -1,0 +1,13 @@
+{
+	"required": false,
+	"package": "com.jaymospowers.mixin.alexscaves",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"FerrocaveStoneMixin",
+		"MagneticCaveStoneMixin",
+		"UndergroundRuinsStoneMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}
