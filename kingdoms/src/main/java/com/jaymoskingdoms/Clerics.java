@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -24,7 +26,10 @@ import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.WritableBookContent;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -73,6 +78,21 @@ public final class Clerics {
 		HOLY_SYMBOL = Arcana.item("holy_symbol", p -> new CastingFocus(p.stacksTo(1), true));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> output.accept(HOLY_SYMBOL));
 		ServerTickEvents.END_SERVER_TICK.register(Clerics::tick);
+		// a Truth Cleric's book casts as the symbol's tap does (and keeps the book and quill's writing screen shut)
+		UseItemCallback.EVENT.register((player, level, hand) -> {
+			ItemStack stack = player.getItemInHand(hand);
+			if (!prayerBook(player, stack)) {
+				return InteractionResult.PASS;
+			}
+			if (player instanceof ServerPlayer sp && level instanceof ServerLevel server) {
+				if (player.isShiftKeyDown()) {
+					Spellcraft.turnFocus(sp);
+				} else {
+					Spellcraft.castFocus(sp, server, stack);
+				}
+			}
+			return InteractionResult.SUCCESS;
+		});
 	}
 
 	static void clear() {
@@ -107,7 +127,7 @@ public final class Clerics {
 	}
 
 	private static boolean holds(ServerPlayer player) {
-		return player.getMainHandItem().is(HOLY_SYMBOL) || player.getOffhandItem().is(HOLY_SYMBOL);
+		return focus(player, player.getMainHandItem()) || focus(player, player.getOffhandItem());
 	}
 
 	/** The symbol is raised and has been held {@code held} ticks. */
@@ -318,5 +338,26 @@ public final class Clerics {
 	/** Whether {@code stack} is a holy symbol. */
 	public static boolean isSymbol(ItemStack stack) {
 		return stack.is(HOLY_SYMBOL);
+	}
+
+	/**
+	 * (Andy, 2026-11-23) The Truth needs no idols and takes the written word: a Cleric sworn to it prays from a book, the one
+	 * they start with or any blank one (a plain book, or a book and quill with nothing written in it), as others do from the
+	 * holy symbol: the medallion board, a tap to cast the bound spell, sneaking to turn it, the class key.
+	 */
+	public static boolean prayerBook(LivingEntity who, ItemStack stack) {
+		if (!(who instanceof Player player) || !Classes.is(player, PlayerClass.CLERIC) || Patrons.of(player) != Patron.TRUTH) {
+			return false;
+		}
+		if (stack.is(Items.BOOK)) {
+			return true;
+		}
+		return stack.is(Items.WRITABLE_BOOK) && stack.getOrDefault(DataComponents.WRITABLE_BOOK_CONTENT, WritableBookContent.EMPTY).pages().stream()
+			.allMatch(page -> page.raw().isBlank());
+	}
+
+	/** Whether {@code stack} is {@code who}'s focus for a Cleric's prayers: a holy symbol, or a Truth Cleric's book ({@link #prayerBook}). */
+	public static boolean focus(LivingEntity who, ItemStack stack) {
+		return isSymbol(stack) || prayerBook(who, stack);
 	}
 }

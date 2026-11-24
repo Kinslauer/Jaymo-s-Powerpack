@@ -106,7 +106,8 @@ public final class SpellParts {
 			return false;
 		}
 		ItemStack main = who.getMainHandItem(), off = who.getOffhandItem();
-		return main.isEmpty() || off.isEmpty() || focus(main) || focus(off) || casting != null && (casting == main || casting == off);
+		return main.isEmpty() || off.isEmpty() || focus(main) || focus(off) || Clerics.prayerBook(who, main) || Clerics.prayerBook(who, off)
+			|| casting != null && (casting == main || casting == off);
 	}
 
 	/**
