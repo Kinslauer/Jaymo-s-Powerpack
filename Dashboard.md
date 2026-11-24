@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 16:13). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 16:31). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -16,16 +16,16 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/red-symbiote-body|red-symbiote-body]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-30 waiting for a bot, 2 being built, 11 in review: see [[Kanban]].
+30 waiting for a bot, 2 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2104 patron colossus brings a natural disaster on each walk (Kingdoms, 2026-11-24)
 - [ ] #2103 patron colossus: the strike and the hunt for commandment breakers (Kingdoms, 2026-11-24)
 - [ ] #2101 Ruin Keepers tell their city's story (Kingdoms, 2026-11-24)
 - [ ] #2098 Illagers speak the Cave Tablets' tongue (Kingdoms, 2026-11-24)
@@ -66,10 +66,8 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2058 bandages give a short regen; rags fester less (Powers, 2026-11-24)
 - [ ] #2057 The thermometer burns when heat is a danger, and freezes and shakes in the cold (Kitchen, 2026-11-24)
 - [ ] #2056 Three blows on the ground and you're finished (Powers, 2026-11-24)
-- [ ] #2055 A small creature takes one smash from a club (Powers, 2026-11-24)
 - [ ] #2054 Says what hurt you when nobody did (Powers, 2026-11-24)
 - [ ] #2053 Guards only see a drawn blade in front of them; sneak right up behind anyone (Kingdoms, 2026-11-24)
-- [ ] #2052 A small creature is finished with one quick slice (Powers, 2026-11-23)
 - [ ] #2051 Alt in mid air dives: jump + Alt is a dive-roll evade (Powers, 2026-11-23)
 - [ ] #2050 The dodge roll stays above the ground and is half as long; sitting against a wall no longer sinks in (Powers, Kingdoms, 2026-11-23)
 - [ ] #2049 Fishing: read the fish's moods, tire it out, watch your line (Powers, 2026-11-23)
@@ -87,11 +85,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2037 The flanged mace is a blunt weapon: no more stabbing (Powers, Kingdoms, 2026-11-23)
 - [ ] #2036 Talking with an illager looks and works like MCA's villager screen (Kingdoms, 2026-11-23)
 - [ ] #2035 Sneak-clicking a cooking block opens it instead of lifting it (Powers, 2026-11-23)
-- …and 494 older ones.
+- …and 442 older ones.
 
 ## Health
 
-14 problems in the notes: [[Health]].
+13 problems in the notes: [[Health]].
 
 ## Last week
 
