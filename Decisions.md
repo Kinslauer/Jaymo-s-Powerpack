@@ -947,3 +947,9 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Decided:** "I DONT want the venom model, but JUST the head, and the dinos should be found on the verdant planet".
 - **Applies to:** Desktop Reference Mods (Dino-26.3-1.2.0.jar and symbiote-1.20.1-1.0.1.jar); proposed Powers integration. Compatibility assessment only so far.
 - **Agent:** codex-reference-dinos-venom.
+
+### 2026-11-24: Otherworld comparison and Fabric request
+- **Decided:** Andy asked: port Otherworld DnD to Fabric, then create a picklist of what it has and our pack does not; he will move differing models and textures himself.
+- **Applies to:** Otherworld research; target clarification pending, assumed existing 26.3 pack.
+- **Agent:** otherworld-fabric-picklist
+
