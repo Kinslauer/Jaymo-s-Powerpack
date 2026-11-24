@@ -61,6 +61,7 @@
 		{ "config": "jaymoskingdoms.tierhiding.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.heritage.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.shouldersurfing.client.mixins.json", "environment": "client" },
+		{ "config": "jaymoskingdoms.horseexpert.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.foliage.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.xaero.client.mixins.json", "environment": "client" },
 		{ "config": "jaymoskingdoms.iris.client.mixins.json", "environment": "client" },
