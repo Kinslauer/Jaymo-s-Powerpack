@@ -13,7 +13,6 @@ kanban-plugin: board
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for any · open
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · for any · open
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/refmods-05-hoverboard|refmods-05-hoverboard]] · for any · open
 - [ ] [[Inbox/refmods-06-horses|refmods-06-horses]] · for any · open
 - [ ] [[Inbox/refmods-07-mocreatures-beasts|refmods-07-mocreatures-beasts]] · for any · open
 - [ ] [[Inbox/refmods-08-vampire-villager|refmods-08-vampire-villager]] · for any · open
@@ -42,6 +41,7 @@ kanban-plugin: board
 - [ ] [[Inbox/refmods-02-druid-wild-shape|refmods-02-druid-wild-shape]] · project-thread-ojz7uj · claimed
 - [ ] [[Inbox/refmods-03-scouter|refmods-03-scouter]] · project-thread-ojz7uj · claimed
 - [ ] [[Inbox/refmods-04-umbrellas-take-cover|refmods-04-umbrellas-take-cover]] · project-thread-ojz7uj · claimed
+- [ ] [[Inbox/refmods-05-hoverboard|refmods-05-hoverboard]] · project-thread-ojz7uj · claimed
 - [ ] [[Agents/project-thread-ojz7uj|project-thread-ojz7uj]] · 💻 Odysseus · running
 
 
