@@ -16644,3 +16644,14 @@ Andy picked "goblin extras" from the survival pick list (2026-11-22); the Goblin
 - While the board is up, every other numpad binding is off: the pad's presses reach only the medallion's marks (`MedallionNumpadMixin`); letting a key go still reaches everything, so nothing sticks.
 - **Key clashes** (`KeyClashes`, for everyone): on joining a world, if any two key bindings share a key (e.g. Y: the medallion and the Z-Fighter wheel), a pop-up names up to three clashes and asks to rebind one in Controls. It shows on two joins at most, ever (counted in `config/jaymoskingdoms-key-clashes.txt`); a join with no clash doesn't count. Keys our own mods share on purpose (the class key and the horse trick on J, the Web power's keys over Kingdoms keys, dragon breath on R, a plan's layers on numpad 8 and 2, and the like) are left out while both are on their defaults.
 - The board drops after 15 s with no mark, on death, or when the symbol leaves your hands. Not played in game.
+
+## 0.12.12 (2026-11-24): Guards only see a drawn blade in front of them; sneak right up behind anyone (#2053)
+
+- **The blade stance is seen, not heard**: a guard (or any villager) now reacts to your drawn, crouched sword stance
+  only when it faces you (the view cone `Senses` gives humanoids). Andy's clip: an orc guard with his back to him
+  warned "Halt. Sheathe that blade" the moment he drew. `Menace` checked only a clear line between them, not which way
+  the guard was looking. Drawing a weapon still makes no sound mobs hear.
+- **Sneak up for the takedown**: the two blocks behind a mob where it noticed you anyway now count only while you're
+  walking. Sneaking, you can get right up behind anyone (Andy: "while not sneaking, if you sneak you can get right up
+  for the takedown"). `Senses#close`.
+- Built on CI only; not played.

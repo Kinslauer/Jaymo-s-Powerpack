@@ -7540,3 +7540,12 @@ following integration task).
 - Andy (after the slice, 2026-11-23): "did you add the single smash?" A club's, a staff's or everyone's wild slam finisher (Skull Crusher, the staff's, Wild Slam) on a small body (a digger, a fox, a chicken: as the slice, at most 1.2 tall and 1 wide) now plays **Smashed**: raised high in both hands and one blow straight down (under a second), instead of beating it again and again. A tool used as a club still wears, once. `Finishers.Kind.SMASH`, `Finishers.smashed`.
 - Axes still take the head; a rock keeps its own move.
 - Not seen in game.
+
+## 0.26.81 (2026-11-24): Says what hurt you when nobody did (#2054)
+
+- **"Hurt: heatstroke"**: when something with no attacker hurts you (heatstroke, thirst, bleeding, a parasite, the
+  cold, smoke, starving, an unseen "generic" hurt), a red line under the crosshair names it, once per cause and again
+  after 10 seconds. Falls aren't named, nor anything while you're downed. Andy's clip "stop hitting me": his hearts
+  fell every two seconds with nobody near and nothing said why. The server log also notes each one with the damage
+  type's id, so a cause without a name of its own can still be traced. `HurtCause`, `lang/parts/hurt_cause.json`.
+- Built on CI only; not played.
