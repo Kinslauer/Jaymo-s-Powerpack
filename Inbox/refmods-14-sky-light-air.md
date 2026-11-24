@@ -32,3 +32,4 @@ Owns: client particles/effects.
 ## Notes
 - 2026-11-24 18:00 2026-11-24 Andy: "finish here": cloud Claude finishes this in thread cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR; bots leave it.
 - 2026-11-24 19:24 PR #2094: X2, X3, X6, X7, X9, X10, X11 built (X4, X5, X8 were already in); compiles, not played.
+- 2026-11-24 19:29 X11 left out of #2094: the pack's A Good Place (MIT) already grows placed blocks into place.
