@@ -563,6 +563,8 @@ public final class Trees {
 		if (felled > 0 && player instanceof net.minecraft.server.level.ServerPlayer sp) {
 			// (0.7.220) a woodcutter's felling, for their orders
 			Careers.felled(server, sp, pos, felled);
+			// an old forest cut hard wakes its eldest tree (ClearCuts)
+			ClearCuts.cut(server, sp, pos, state, felled);
 		}
 		// (a chop costs what breaking the log would: a point of the axe's wear, and a little hunger)
 		if (!tool.isEmpty() && tool.isDamageableItem()) {

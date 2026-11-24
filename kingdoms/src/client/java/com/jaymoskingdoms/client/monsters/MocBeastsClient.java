@@ -3,7 +3,13 @@ package com.jaymoskingdoms.client.monsters;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.monsters.BigGolem;
 import com.jaymoskingdoms.monsters.GolemRock;
+import com.jaymoskingdoms.monsters.Critter;
+import com.jaymoskingdoms.monsters.Ent;
+import com.jaymoskingdoms.monsters.Jellyfish;
+import com.jaymoskingdoms.monsters.Liger;
 import com.jaymoskingdoms.monsters.Manticore;
+import com.jaymoskingdoms.monsters.MocWild;
+import com.jaymoskingdoms.monsters.SeaRay;
 import com.jaymoskingdoms.monsters.MocBeasts;
 import com.jaymoskingdoms.monsters.Scorpion;
 import com.jaymoskingdoms.monsters.Zebra;
@@ -57,8 +63,51 @@ public final class MocBeastsClient {
 		EntityRenderers.register(MocBeasts.ZEBRA, c -> zebra(c, "zebra"));
 		EntityRenderers.register(MocBeasts.ZORSE, c -> zebra(c, "zorse"));
 		com.jaymoskingdoms.client.dragons.WyvernClient.register();
+		wild();
 		EntityRenderers.register(MocBeasts.BIG_GOLEM, GolemRenderer::new);
 		EntityRenderers.register(MocBeasts.GOLEM_ROCK, RockRenderer::new);
+	}
+
+
+	/** The ent, the small life, the rays and jellyfish and the liger (Reference Mods patch 7, second half). */
+	private static void wild() {
+		EntityRenderers.register(MocWild.ENT, c -> new Beast<Ent>(c, new EntModel(EntModel.createBodyLayer().bakeRoot()), 1.2F, 1.0F,
+			s -> texture(s.variant == 1 ? "ent_birch" : "ent_oak"), (ent, state) -> state.variant = ent.birch() ? 1 : 0, ent -> 1.0F));
+		critter(MocWild.CRICKET, c -> new CricketModel(CricketModel.createBodyLayer().bakeRoot()), 1.0F, s -> texture("cricket_" + (char) ('a' + s.variant % 2)));
+		critter(MocWild.SNAIL, c -> new SnailModel(SnailModel.createBodyLayer().bakeRoot()), 1.0F, s -> texture("snail_" + (char) ('a' + s.variant % 6)));
+		critter(MocWild.FLY, c -> new FlyModel(FlyModel.createBodyLayer().bakeRoot()), 1.0F, s -> texture("fly"));
+		critter(MocWild.MAGGOT, c -> new MaggotModel(MaggotModel.createBodyLayer().bakeRoot()), 1.0F, s -> texture("maggot"));
+		critter(MocWild.ROACH, c -> new RoachModel(RoachModel.createBodyLayer().bakeRoot()), 0.5F, s -> texture("roach"));
+		critter(MocWild.MOUSE, c -> new MouseModel(MouseModel.createBodyLayer().bakeRoot()), 0.5F, s -> texture(new String[] {"mouse_white", "mouse_brown", "mouse_grey"}[s.variant % 3]));
+		critter(MocWild.MOLE, c -> new MoleModel(MoleModel.createBodyLayer().bakeRoot()), 1.0F, s -> texture("mole"));
+		EntityRenderers.register(MocWild.MANTA_RAY, c -> ray(c, true));
+		EntityRenderers.register(MocWild.STINGRAY, c -> ray(c, false));
+		EntityRenderers.register(MocWild.JELLYFISH, c -> new Beast<Jellyfish>(c, new JellyfishModel(JellyfishModel.createBodyLayer().bakeRoot()), 0.2F, 1.0F,
+			s -> texture("jellyfish_" + (char) ('a' + s.variant % Jellyfish.COATS)), (jelly, state) -> state.variant = jelly.coat(), jelly -> 1.0F));
+		EntityRenderers.register(MocWild.LIGER, c -> new Beast<Liger>(c, new ManticoreModel(ManticoreModel.createBodyLayer().bakeRoot()), 0.9F, 1.2F,
+			s -> texture(s.variant == 0 ? "liger" : "tigon"), (liger, state) -> {
+				state.variant = liger.coat();
+				state.plain = true;
+				state.maneless = liger.coat() != 0 || liger.isBaby();
+			}, liger -> liger.isBaby() ? 0.5F : 1.0F));
+	}
+
+	private static void critter(net.minecraft.world.entity.EntityType<Critter> type, Function<Critter, EntityModel<BeastState>> model, float scale,
+		Function<BeastState, Identifier> texture) {
+		EntityRenderers.register(type, c -> new Beast<Critter>(c, model.apply(null), 0.1F, scale, texture, (critter, state) -> {
+			state.variant = critter.coat();
+			state.hiding = critter.hiding();
+			state.airborne = !critter.onGround();
+		}, critter -> 1.0F));
+	}
+
+	private static Beast<SeaRay> ray(EntityRendererProvider.Context context, boolean manta) {
+		return new Beast<SeaRay>(context, new RayModel(RayModel.createBodyLayer().bakeRoot()), manta ? 0.6F : 0.3F, manta ? 1.6F : 1.0F, s -> texture(s.manta ? "manta_ray" : "stingray"),
+			(ray, state) -> {
+				state.manta = manta;
+				state.stinging = ray.stinging();
+				state.sink = ray.buried() ? 0.12F : 0.0F;
+			}, ray -> 1.0F);
 	}
 
 	private static Beast<Zebra> zebra(EntityRendererProvider.Context context, String coat) {
@@ -106,6 +155,9 @@ public final class MocBeastsClient {
 		@Override
 		protected void scale(BeastState state, PoseStack poseStack) {
 			float s = this.scale * state.tick;
+			if (state.sink != 0.0F) {
+				poseStack.translate(0.0F, -state.sink, 0.0F);
+			}
 			poseStack.scale(s, s, s);
 		}
 
