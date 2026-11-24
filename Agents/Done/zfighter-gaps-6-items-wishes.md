@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: zfighter-gaps-6-items-wishes
 branch: claude/zfighter-gaps-6-items-wishes
 with:
@@ -48,3 +48,4 @@ owns:
 - Updated wish screen and lang entries
 - PR #1955 created, compiles and passes pr_checks, but hasn't been played in game
 - 2026-11-20 18:11 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-23 05:24 Closed out (2026-11-23): PR #1955 merged and its task is in Inbox/Done; only this note was left stalled.

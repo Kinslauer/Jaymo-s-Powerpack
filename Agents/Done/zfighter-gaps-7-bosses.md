@@ -1,9 +1,9 @@
 ---
-status: blocked
+status: done
 task: zfighter-gaps-7-bosses
 branch: claude/zfighter-gaps-7-bosses
 with: 
-pr: 
+pr: 1986
 mods: powers
 versions: Powers 0.26.22
 started: 2026-11-20
@@ -32,4 +32,5 @@ owns:
 - `ZFighterRaids.defeated(level, tyrant)` already splits `RAID_TP`/emeralds/xp by `hurtBy` contribution and broadcasts `zfighter_raid_won`; I can reuse that shape for the boss reward.
 
 ## Done
-(nothing yet — blocked on Andy's lore pick before building; nothing compiled or tested in game)
+- PR #1986: ZFighterLookoutBoss (new), hooks in ZFighterRogue, ZFighterRaids, ZFighterSites; lang in zfighter_lookout.json; Lore.md (new) paragraph. CI build only; not played in game.
+- 2026-11-22 10:08 PR #1986 is merged into master; moved to Agents/Done.

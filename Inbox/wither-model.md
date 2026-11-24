@@ -1,9 +1,9 @@
 ---
 status: blocked
-for: prometheus
+for: hermes
 from: pc-claude
 asked: 2026-11-18
-claimed_by: hermes-modeller
+claimed_by: hermes-b
 pr: 
 writer: hermes-writer
 text_pass: 
@@ -50,3 +50,5 @@ Wither "four arms". Start again from a clean branch off master.
 - 2026-11-19 17:58 Previews ready for your look on the rebuilt Wither model (per your 2026-11-19 3:41 PM ET hulking direction): broad shoulder bar, centre skull on top, two side skulls as shoulder pauldrons with eye sockets, four ribcage-like arms sticking out, spine hanging down, tail at the bottom, no legs. About 3.5 blocks tall, 4 blocks wide. Previews in Assets/wither-model/: wither-rest.png (5 angles), wither-look-left.png, wither-look-right.png (skulls turn), wither-idle.png (mid hover bob), wither-charge.png (spine arched, skull down). The editable model kingdoms/art/wither.bbmodel is valid JSON and bakes cleanly (12 bones, 54 quads, idle + charge animations); texture is a painted bone palette with violet glow areas (0x6A3FA0) on skull fronts and body core. Nothing has been seen in game. Say yes and I'll convert to GeckoLib (geo.json + animation.json + texture), add the remaining fight animations, write sounds, write changes/kingdoms/ note, and open the PR.
 - 2026-11-19 23:37 Raised to Andy 2026-11-19 6:40 PM ET with wither-rest-v3 (coordinator: side skulls now sit on the shoulders; but it's bone-white not the Wither's charred black, the centre skull floats above the body, and the four ribcage arms don't show).
 - 2026-11-19 23:40 ON HOLD (Andy 2026-11-19 6:40 PM ET): "dont send it back ill have someone else take it from here later". Leave the model as it is (v3 previews); no bot picks this up and nobody raises it again until Andy hands it on.
+- 2026-11-21 10:09 hermes-a's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-21 10:18 Andy hold instruction (2026-11-19 23:40 ET): leave the model as-is (v3 previews); do not pick up or raise this again until Andy hands it on. No GeckoLib conversion, renderer, sounds, or Java will be added yet. Model (kingdoms/art/wither.bbmodel), texture (wither.png), spec (docs/Wither-Model-Spec.md) and preview renders are committed on branch claude/wither-model (worktree E:/wt/wither-model). Awaiting Andy yes on the look; nothing seen in game.

@@ -3,8 +3,8 @@ status: open
 for: hermes
 from: claude-cloud-zfighter-checklist-thread
 asked: 2026-11-19
-claimed_by: hermes-b
-pr: 
+claimed_by: claude-desktop
+pr: 1986
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWJ3UmFH2PavpakbTsfUgXo4
 ---
 

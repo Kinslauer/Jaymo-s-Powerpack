@@ -1,0 +1,38 @@
+---
+status: done
+task: survival-wounds-track1
+branch: claude/survival-wounds
+with: survival picks track 3 (butchery) runs beside it
+pr: 1992
+mods: powers, kingdoms
+versions: 
+started: 2026-11-22
+owns:
+  - src/main/java/com/jaymospowers/core/wounds/Wounds.java
+  - src/main/java/com/jaymospowers/core/wounds/BodyPlan.java
+  - src/main/java/com/jaymospowers/core/wounds/HitRouting.java
+  - src/main/java/com/jaymospowers/core/wounds/PartStrain.java (new)
+  - src/main/java/com/jaymospowers/core/wounds/ (Treatment, Herbal, Bleeding, Downed, MedicineItems: small edits)
+  - kingdoms/src/main/java/com/jaymoskingdoms/ClassPerks.java (ranger arrow tag only)
+  - docs/Wounds-Plan.md
+---
+# Survival picks, track 1: Wounds
+
+**Task:** Andy's LSO picks (docs/Survival-Picks-Plan.md track 1): own part pools on top of health, downing rule, 20%
+debuffs, broken hearts, headshots, armour per part, medicine over time, food cost and sleep, painkiller check; the
+Ranger's arrows go through the helmet.
+
+## Plan
+- Pools apart from health; head blow while standing kills, any other blacked vital downs.
+- Headshot and armour per part in HitRouting; broken hearts as a max-health modifier.
+- Medicine over time onto our kit; food cost; sleep heals every part.
+
+## Notes
+- Track 3 owns Kitchen corpse/butchery and Powers carrying (LimbUse/DroppedArms left alone).
+
+## Done
+- 2026-11-22 10:08 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- PR #1992 open, Auto-fix on, built by CI (not on the PC). Pools apart from health, head-blow kills (not from full
+  health), 20% debuffs, broken hearts, headshots (Ranger arrows through helmets), armour per part, LSO medicine numbers
+  on our kit, food cost, sleep heals every part. Readings taken are listed in the PR. Not played in game.
+- 2026-11-22 14:29 PR #1992 is merged into master; moved to Agents/Done.
