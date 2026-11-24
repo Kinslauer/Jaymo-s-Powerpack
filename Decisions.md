@@ -984,3 +984,6 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Asked:** after the clip "the last consul" (a Pillared ruins city whose huts generated inside Structory's outcast-villager horse barn, -1157 73 234 on the Deck world): "there should be an algorithm or something written that runs checks like this before anything is generated. something that consults the lore, and logic giving everything a reason to be there ... it should still be procedural just fostering linear or story based progression from the enviornment". And on the Ruin Keepers: "they should explain the lore behind all this." Earlier related ruling: 2026-11-22 ship helm (a crewed ship's skipper needs a reason to be there).
 - **Status:** plan offered to Andy in the "Port Otherworld DnD to Fabric" thread; waiting on his picks.
 - **Agent:** claude (PC).
+### 2026-11-24: Ruin Keepers tell the lore in talk
+- **Decided:** "Yes, hints in their talk" (decision card): the Keepers tell their people, why the city fell, the consul in the tomb, why they stay and take emeralds, and the map to the next city, as hints in talk. A (new) Lore.md paragraph goes to Andy first.
+- **Agent:** claude-cloud.
