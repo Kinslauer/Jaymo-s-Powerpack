@@ -26,7 +26,6 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for any · open
 - [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · for any · open
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for any · open
-- [ ] [[Inbox/refmods-01-felling|refmods-01-felling]] · for any · open
 - [ ] [[Inbox/refmods-02-druid-wild-shape|refmods-02-druid-wild-shape]] · for any · open
 - [ ] [[Inbox/refmods-03-scouter|refmods-03-scouter]] · for any · open
 - [ ] [[Inbox/refmods-04-umbrellas-take-cover|refmods-04-umbrellas-take-cover]] · for any · open
