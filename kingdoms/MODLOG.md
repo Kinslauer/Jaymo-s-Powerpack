@@ -16941,3 +16941,8 @@ Andy: "can i have you work on npc pathing? they get stuck in water or on buildin
 - **Atonement**: an offering at your patron's shrine (once a day) forgives the last commandment broken and sends the figure away; the walks start again from afar. `Commandments.forgive`.
 - One entity per haunted player while it is out, moved from the server tick; players checked once a second.
 - Built (compileJava + compileClientJava); not played.
+
+## 0.12.38 (2026-11-24): patron colossus brings a natural disaster on each walk (#2104)
+
+- A hunting patron's colossus now brings one random natural disaster down on the hunted player 10 seconds into each of its walks: a tornado 60 blocks ahead under a supercell coming their way, an earthquake under them, or a tsunami on the nearest shore (only with a sea in reach). Overworld only. Andy: "It should also summon a random natural disaster as it chases, like tornado earthquake or tsunami." Unlike the figure, the disaster is real and everyone sees it. `Disasters.wrath` (the `/kingdom disaster tornado` code now shared through `tornadoAt`); `Colossi.DISASTER_AFTER`, `DISASTER_CHANCE` (1.0).
+- Built (compileJava + compileClientJava); not played.
