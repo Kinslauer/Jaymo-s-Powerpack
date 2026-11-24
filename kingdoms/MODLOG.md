@@ -16868,3 +16868,48 @@ Andy: "can i have you work on npc pathing? they get stuck in water or on buildin
   a part by our code: `own_reason` holds Grim Kingdoms' holds and camps). That's the list to give roles to next.
 - Settlements are `#minecraft:village` (every mod's villages) and Dungeons and Taverns' hamlet (tag `settlements`).
 - Built in CI; not played. How much rarer each kind gets wasn't measured in a world.
+
+## 0.12.31 (2026-11-24): Bandit camps by the trade roads (#2087)
+
+- The structure placement plan's bandit camp ("beside a busy road between two settlements, in cover; keeps away from
+  watchtowers"). Now and then, while a player travels a road whose two ends both stand, a band of masked bandits pitches
+  a camp 14 to 26 blocks off it: in a clearing with trees round it, far from both settlements and every other camp, out of
+  sight. None where a watchtower (`towers_on_borders`) may stand within 12 chunks, and at most 2 near any one settlement.
+- The camp is a barbarian camp's tents, fire and loot pile with a chief and 4 bandits in masks, leather and blades (the
+  bandit holds' own dress), growing by one every 2 days up to 9 and bringing in bread, leather, arrows and a little coin.
+  They stand with the other bandits; killing the chief clears it with the bandit holds' message.
+- `BanditCamps` (new), from `Camps`' spawn check and daily growth; camps of kind `bandit` that aren't in an Illager
+  Structures place.
+- Built in CI; not played.
+
+## 0.12.32 (2026-11-24): Villagers seen at their jobs: tools in hand, the smith at the forge, the cook at the stove, the butcher at the hook (#2090)
+
+- Andy: "Tools, forge, stove, hook (1-4)". You can watch a villager work instead of a puff of smoke (`WorkScenes`).
+- **Tools in hand** at work for every vanilla trade and the cook: a smith's hammer, a butcher's cleaver, a cook's knife,
+  a fletcher's flint knife, a mason's pick, a librarian's book, and so on. They're marked as the work's, so they're never
+  dropped or lost, and they go away when the work ends.
+- **The smith at the forge**: heats the metal at a furnace by their workstation (lit only while it's empty, so nobody's
+  smelting is touched), hammers at the anvil with clangs and sparks, and quenches in a water cauldron.
+- **The cook at the stove** (`Meals.cookAt`): cuts at the counter, cooks at the lit smoker, and sets the dish on the
+  counter as a plate for a while. Home cooks hold the food they're making.
+- **The butcher at the hook** (with Jaymo's Kitchen): a farmer thinning a herd now slaughters the surplus beast cleanly
+  when a butcher with a free meat hook is near, leaving the carcass for them, instead of the old puff and meat in arms.
+  The cuts the butcher takes off it go into the town's stores. Butchers at work aren't given the trade's stand-in scene.
+- Built in CI; not played.
+
+## 0.12.33 (2026-11-24): Sky, light and air - embers, lit smoke, shooting stars, fireworks over a far city (Reference Mods patch 14) (#2094)
+
+- **Embers** (X3): fires and lit campfires throw glowing embers that ride the hot air up, drift downwind as they climb, wink and cool from yellow to dull red before they go out (`EmberParticle`, `SkiesClient`).
+- **Smoke lit from below** (X3): a lone fire puffs small smoke that is lit warm by the flames at its foot and greys as it climbs; the big plumes and ground banks over a burning wood are lit the same way at their foot (`StormParticle.lit`, `FireSmoke`).
+- **Shooting stars** (X6): on a dark night a streak now and then crosses the sky, a bright head and a fading tail, gone in a second; one in thirty is a slower, warmer fireball. Meteor showers come on their real nights of the year (Quadrantids 3 Jan, Lyrids 22 Apr, Eta Aquariids 6 May, Perseids 12 Aug, Orionids 21 Oct, Leonids 17 Nov, Geminids 14 Dec, weaker the night before and after), every meteor flying out from the shower's real radiant, so tracing them back finds its constellation. None near a settlement's lights, in rain or behind the skyline (`astronomy/Meteors`).
+- **Fireworks over a far city** (X7): when a realm celebrates, a war won, a festival bout won, a wedding in its town, fireworks go up over its seat that night (from dusk if it's day) in its colour, seen from up to 1024 blocks away; a festival's dusk fireworks are seen from afar the same way (`Celebrations`, `CelebrationsClient`).
+- Built; not played.
+
+## 0.12.34 (2026-11-24): Where things came from, stolen goods, heirlooms, collectors' prices and a strongbox (Reference Mods patch 15) (#2097)
+
+- **Every item remembers where it came from** (G1, after Chest DNA, Apache 2.0, our own code): the first time a thing comes into the world it is stamped with how (a chest, a kill, a great foe, the pick, the hook, the brush, a bench, a furnace, a smithing table, a trade, a gift, a barter), the dimension and place, the biome, the structure it lay in, the day and who found or made it. The tooltip shows one small line ("Found in a chest", "Made by Ada", "From a sunken ship"), the rest on Shift. A stamp is never written over and doesn't stop stacking: the stack kept is the first one's. Coins are never stamped (`Provenance`, `mixin/provenance/ItemStackOriginMixin`, `client/ProvenanceTooltips`).
+- **Stolen goods are known** (G2): what you take from a realm's storehouse, from a chest in someone's home (one by a bed inside a realm's law, now a theft too) or from a pocket carries that realm's mark, and stolen and clean things stack apart so you can tell them. Put a marked thing in a trade with one of that realm's merchants and the deal is off: they keep it for the stores and cry thief. A guard's search finds marked goods and takes them back to the stores. A fence in a speakeasy cleans the marks off for a cut (Clean the Goods, on their Interact page) (`StolenGoods`, `Theft`, `Pickpocket`, `Approaches`).
+- **Heirlooms** (G3): when your life goes on in your child, every piece of gear you carry (a single piece that wears or is worn) gets your name on it, "Heirloom of ...", whether it goes on with the child or stays with the elder; names add up down the line. Gear you made shows "Made by" you as well (`Heirlooms`, `Lineage`).
+- **Famous finds fetch more** (G4): sell a merchant something from a dragon's hoard, a sunken ship (wrecks, buried treasure, pirate wreck treasure) or an old city (our old-age ruins, ancient cities, trail ruins) for coin and a collector's price comes on top, half again (`Provenance.famousBonus`, `mixin/provenance/MerchantResultSlotFindsMixin`).
+- **A strongbox** (G7): an iron-bound box of nine slots that takes only coin and coin purses, made from iron, planks and a forged lock. Whoever sets it down opens it at a touch; anyone else must pick its lock (a fine rotary lock), and picking one in town where folk see is burglary. It's slow to break for anyone but its owner and hoppers can't reach in. Night burglars go for a strongbox first and take half the coin in a slot (`Strongbox`, `NightBurglars`).
+- Built; not played.
