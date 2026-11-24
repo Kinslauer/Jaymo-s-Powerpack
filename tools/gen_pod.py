@@ -16,10 +16,15 @@ from PIL import Image, ImageDraw
 OUT = "src/main/resources/assets/jaymospowers/textures/entity/space_pod.png"
 JAVA = "src/client/java/com/jaymospowers/client/power/zfighter/pod/PodModel.java"
 random.seed(1809)
+# (the submarine look) wider, for the back and left plates' own portholes; PodModel bakes at the same size
+SHEET_W = 256
 
-IRON = (74, 78, 86)
+# (Andy, 2026-11-24: Alex's Caves' submarine "interpolated into the space pod"; docs/Space-Pod-Model-Spec.md) the frame is
+# the submarine's slate panelling, the hull its riveted copper plating with round portholes, a stern propeller on the back
+# plate and a periscope's eyepiece on the mast
+IRON = (78, 82, 104)
 BRASS = (176, 134, 62)
-BONE = (226, 222, 210)
+BONE = (194, 112, 86)
 GLASS = (120, 190, 230)
 RED = (170, 46, 40)
 SCORCH = (58, 46, 40)
@@ -46,8 +51,12 @@ CUBES = [
     ("tank", "brass_band", -8, 11, -8, 16, 18, 16),
     ("plate_f", "bone_front", -10, 10, 10, 20, 20, 2),
     ("plate_r", "bone_right", 10, 10, -10, 2, 20, 20),
-    ("plate_b", "bone", -10, 10, -12, 20, 20, 2),
-    ("plate_l", "bone", -12, 10, -10, 2, 20, 20),
+    ("plate_b", "bone_back", -10, 10, -12, 20, 20, 2),
+    ("plate_l", "bone_left", -12, 10, -10, 2, 20, 20),
+    # the stern propeller on the back plate: a hub and a cross of brass blades
+    ("plate_b", "iron", -1, 19, -14, 2, 2, 2),
+    ("plate_b", "brass", -5, 19.5, -13.5, 10, 1, 1),
+    ("plate_b", "brass", -0.5, 15, -13.5, 1, 10, 1),
     ("gash_f", "scorch", -4, 15, 11.5, 6, 8, 1),
     ("gash_b", "scorch", 0, 17, -12.5, 6, 8, 1),
     ("gash_r", "scorch", 11.5, 14, -3, 1, 8, 6),
@@ -56,6 +65,8 @@ CUBES = [
     ("canopy", "glass", -8, 30, -8, 16, 6, 16),
     ("canopy", "glass", -5, 36, -5, 10, 5, 10),
     ("mast", "iron", -1, 41, -1, 2, 7, 2),
+    # the periscope's eyepiece, looking forward
+    ("mast", "iron", -1, 45, 1, 2, 2, 3),
     ("mast", "brass", -2, 48, -2, 4, 2, 4),
     # (0.18.51) the beacon lamp above the mast cap: drawn (full bright) only once a hammer has finished the pod
     ("mast_lit", "beacon", -1, 50, -1, 2, 2, 2),
@@ -85,6 +96,7 @@ def face(img, x, y, w, h, c, edge=True):
 
 MATERIALS = {
     "iron": IRON, "brass": BRASS, "brass_band": BRASS, "bone": BONE, "bone_front": BONE, "bone_right": BONE,
+    "bone_back": BONE, "bone_left": BONE,
     "glass": GLASS, "scorch": SCORCH, "beacon": BEACON,
 }
 
@@ -104,7 +116,8 @@ def family(mat):
 
 def key_of(c):
     """Cubes of the same size and look share one area of the sheet (the left fin is the right fin, the back plate the front)."""
-    return (family(c[1]), ceil(c[5]), ceil(c[6]), ceil(c[7]))
+    mat = c[1] if c[1] in ("bone_back", "bone_left") else family(c[1])
+    return (mat, ceil(c[5]), ceil(c[6]), ceil(c[7]))
 
 
 def pack():
@@ -115,7 +128,7 @@ def pack():
         if key in spots:
             continue
         fw, fh = footprint(c)
-        if x + fw > 128:
+        if x + fw > SHEET_W:
             x, y, shelf = 0, y + shelf, 0
         spots[key] = (x, y)
         x += fw
@@ -125,12 +138,12 @@ def pack():
 
 
 def paint():
-    img = Image.new("RGBA", (128, 128), (0, 0, 0, 0))
+    img = Image.new("RGBA", (SHEET_W, 128), (0, 0, 0, 0))
     spots = pack()
     groups = {}
     for c in CUBES:
         best = groups.get(key_of(c))
-        if best is None or c[1] in ("bone_front", "bone_right"):
+        if best is None or c[1] in ("bone_front", "bone_right", "bone_back", "bone_left"):
             groups[key_of(c)] = c
     dr = ImageDraw.Draw(img)
     for key, c in groups.items():
@@ -170,12 +183,18 @@ def paint():
                 for rx in range(ox + 2, ox + ow - 1, 4):
                     for ry in (oy + 2, oy + oh - 3):
                         img.putpixel((rx, ry), shade(IRON, 1.5) + (255,))
-            if mat == "bone_front":
-                ox, oy, ow, oh = south
-                cx, cy = ox + ow // 2, oy + oh // 2
-                dr.ellipse((cx - 4, cy - 4, cx + 4, cy + 4), fill=shade(IRON, 1.2) + (255,))
-                dr.ellipse((cx - 3, cy - 3, cx + 3, cy + 3), fill=shade(GLASS, 0.9) + (255,))
-                dr.point((cx - 1, cy - 1), fill=(240, 250, 255, 255))
+            # a panel seam across every outer face, as the submarine's plating has
+            for ox, oy, ow, oh in outers:
+                for i in range(1, ow - 1):
+                    img.putpixel((ox + i, oy + oh // 2 + 3), shade(BONE, 0.72) + (255,))
+            # round portholes: a big one on the front, smaller ones on the left and back (the back's above its propeller)
+            ports = {"bone_front": (south, 5), "bone_left": (west, 3), "bone_back": (north, 3)}
+            if mat in ports:
+                (ox, oy, ow, oh), r = ports[mat]
+                cx, cy = ox + ow // 2, oy + oh // 2 - (4 if mat == "bone_back" else 1)
+                dr.ellipse((cx - r - 1, cy - r - 1, cx + r + 1, cy + r + 1), fill=shade(IRON, 1.2) + (255,))
+                dr.ellipse((cx - r, cy - r, cx + r, cy + r), fill=shade(GLASS, 0.9) + (255,))
+                dr.point((cx - r // 2, cy - r // 2), fill=(240, 250, 255, 255))
             if mat == "bone_right":
                 ox, oy, ow, oh = east
                 cx, cy = ox + ow // 2, oy + oh // 2
