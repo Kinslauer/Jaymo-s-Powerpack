@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 06:15). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 06:36). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -40,6 +40,7 @@ kanban-plugin: board
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · for any · open
 - [ ] [[Inbox/structure-spawn-rate-wooden-hut|structure-spawn-rate-wooden-hut]] · for coordinator · open
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/alexs-caves-integration|alexs-caves-integration]] · for coordinator · open
 
 
 ## Being built
