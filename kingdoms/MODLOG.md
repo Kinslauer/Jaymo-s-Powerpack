@@ -16993,3 +16993,14 @@ Andy: "can i have you work on npc pathing? they get stuck in water or on buildin
 - Cause: the shared village pool (about 60 villages from every mod in one set) draws one village per spot in a seeded weighted order, and the first that really starts wins. The search only asked "could an Epic town stand here?", true where another mod's village then won the draw.
 - PoolPick.winner: the game's own draw (ChunkGenerator.createStructures) worked out from the seed, each village tested with Structure.generate as the game does (its place and biome alone said yes for the vanilla plains village at spots where it laid no pieces and Moog's villager statue started instead). PoolPick.starts: a chunk made only to its structure-starts step, off the server thread. StoryGround.VillageSearch looks at each spot once for its winner; Scout.find counts an unmade spot only if a wanted structure wins it; TownWakes checks the starts before making land.
 - Built and run on a full-pack server (seed 1337): the foreseen winner and the starts step matched the made chunks at every spot logged; not played, not run on the Deck.
+
+## 0.12.45 (2026-11-24): The Toxic Caves' air and the Abyssal Chasm's wild Tideborn (#2112)
+
+- Alex's Toxic Caves can only be stood by the Obsidian-hided Stoneborn and the legendary Warrior-born. Anyone else
+  breathing the air there stays Irradiated while they're down (unless sealed in a full hazmat suit, the future's gear).
+- The Obsidian-hided Stoneborn were made by it: they shrug off Irradiated wherever it comes from.
+- Wild Tideborn in Alex's Abyssal Chasm: while you're down there, eel-shaped and manta-winged Tideborn come up out of the
+  dark (up to four near you), bare but for a trident and tougher than a guard. They go for anyone from above on sight,
+  players and villagers alike, Tideborn or not, and swim straight at you (the mantas faster). They keep to the chasm.
+  They ease up as you win the Deep Ones' trust by trading with them or defending them: once they think well of you the
+  wild ones only go for you up close, and once they think highly of you they leave you be unless you strike one first.
