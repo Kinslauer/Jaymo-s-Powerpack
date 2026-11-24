@@ -51,6 +51,7 @@ kanban-plugin: board
 - [ ] [[Inbox/reference-mods-picklist-2026-11-24|reference-mods-picklist-2026-11-24]] · for any (needs Andy's PC: the folder is local) · open
 - [ ] [[Inbox/scouter-bio-scanner-tracking|scouter-bio-scanner-tracking]] · for any · open
 - [ ] [[Inbox/tensura-neo-otherworld-picklist|tensura-neo-otherworld-picklist]] · for any · open
+- [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for any · open
 
 
 ## Being built
