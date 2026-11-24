@@ -1,6 +1,16 @@
 # Gear Talk plan (draft, for Andy's picks)
 
-Status: draft, nothing built. Thread "Draft gear-based reactions from people you meet", 2026-11-24.
+Status: Andy picked 2026-11-24 (below); step 1 built (`kingdoms/.../GearTalk.java`). Thread "Draft gear-based reactions from people you meet".
+
+**Andy's picks (2026-11-24, 11:13 AM ET):** every tag family in, all six two-tag lines kept. Q1 plain folk say "more
+Frostborn work than flesh", only androids, the Mad Tinkerer, Bio-built and Frostborn troopers say "cyborg". Q2 Rig limbs
+only. Q3 armour, harness and crest count too. Q4 armour hides a limb unless the villager notices. Q5 masked gear is
+talked about, never the blood, and gossip never ties the look to the face. Q6 yes, folk call strangers by their look in
+lines and gossip only. Q7 step 1 first. Lore paragraph approved.
+
+**Step 1 as built:** android villagers don't exist as talkable MCA villagers and troopers are mobs, so the "cyborg"
+sayers today are the Mad Tinkerer (part `tinkerer`), the future's pilots (`omen_pilot`) and Bio-built villagers.
+Sharp-eyed is a fixed roll per villager and player (20%, suspicious 50%), not `Notice` (that is the player's perception).
 
 ## 1. The ask, placed
 
@@ -270,10 +280,9 @@ exclamation); "a large flowchart" (yes, rule table with fallbacks, section 4).
    their lines and gossip? *(recommended yes, lines only, never over your head)*
 7. **First patch**: Frostborn work + limbs *(recommended)*, or all tag families at once?
 
-## Lore placement (new)
+## Lore placement (Andy approved 2026-11-24)
 
-**What folk see on you** (new) (Claude's placement for Andy's gear talk, 2026-11-24, `docs/Gear-Talk-Plan.md`; for
-Andy to approve). Folk read a stranger by what they wear long before they ask a name. Frostborn work is the first thing
+**What folk see on you** (Claude's placement for Andy's gear talk, Andy approved 2026-11-24). Folk read a stranger by what they wear long before they ask a name. Frostborn work is the first thing
 anyone sees: a scouter's glass over one eye, an arm that moves like flesh and isn't. Everyone wants some, nobody outside
 the Frostborn can say how it works, and a stranger wearing a great deal of it is talked about at the well for days
 ("more Frostborn work than flesh"). The Frostborn look at it as one smith looks at another's blade: whose hand made it,
