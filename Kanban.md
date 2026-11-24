@@ -39,7 +39,6 @@ kanban-plugin: board
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/realm-banks-finish|realm-banks-finish]] · for any · open
 - [ ] [[Inbox/structure-spawn-rate-wooden-hut|structure-spawn-rate-wooden-hut]] · for coordinator · open
-- [ ] [[Inbox/tree-chop-through-trunk|tree-chop-through-trunk]] · for any · open
 - [ ] [[Inbox/village-mines-job-buildings|village-mines-job-buildings]] · for ☁️ Cloud · open
 - [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · for any · open
 - [ ] [[Inbox/structures-2-placement-reasons|structures-2-placement-reasons]] · for any · open
@@ -65,6 +64,7 @@ kanban-plugin: board
 - [ ] [[Inbox/refmods-14-sky-light-air|refmods-14-sky-light-air]] · for any · open
 - [ ] [[Inbox/refmods-15-provenance-coins|refmods-15-provenance-coins]] · for any · open
 - [ ] [[Inbox/refmods-16-titles-bloods-tensura|refmods-16-titles-bloods-tensura]] · for any · open
+- [ ] [[Inbox/tree-chop-through-trunk|tree-chop-through-trunk]] · for any · open
 
 
 ## Being built
