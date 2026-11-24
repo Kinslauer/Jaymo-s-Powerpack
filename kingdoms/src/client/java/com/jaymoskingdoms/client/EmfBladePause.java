@@ -6,7 +6,7 @@ import traben.entity_model_features.EMFAnimationApi;
  * (0.7.135) The only class that touches Entity Model Features for the hidden blade (loaded only when EMF is): its
  * animations (Fresh Animations' idle arms) pause for a player whose blade is springing or out, so the guard holds;
  * (0.7.246) and for a ship's crew at their stations; (0.7.472) and for you while the life story draws you ({@link StoryFigure#drawingYou});
- * and for a horde's dead while they're posed ({@link HordePoses#posed}).
+ * and for a horde's dead while they're posed ({@link HordePoses#posed}), or down gnawing a body ({@link KitchenGnaw}).
  */
 final class EmfBladePause {
 	private EmfBladePause() {
@@ -21,6 +21,8 @@ final class EmfBladePause {
 			EMFAnimationApi.registerPauseCondition(StoryFigure::drawingYou);
 			// and for a horde's dead while they reach as they walk or act (HordePoses)
 			EMFAnimationApi.registerPauseCondition(HordePoses::posed);
+			// and for a zombie down on its knees gnawing a body (Jaymo's Kitchen's GnawPose)
+			EMFAnimationApi.registerPauseCondition(KitchenGnaw::posed);
 		} catch (Exception e) {
 			com.jaymoskingdoms.JaymosKingdoms.LOGGER.warn("Couldn't hook into Entity Model Features; its player animations may hide the hidden blade's guard", e);
 		}

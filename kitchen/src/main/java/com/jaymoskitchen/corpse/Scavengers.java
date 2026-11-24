@@ -81,6 +81,8 @@ public final class Scavengers {
 	private static final int LOOK_ABOUT = 5;
 	/** How hard it lunges in and yanks back, and how far each yank drags the body (blocks). */
 	private static final double LUNGE = 0.18, YANK = 0.22, DRAG = 0.07;
+	/** How high off the ground of a lying body a bite closes (blocks). */
+	private static final double BITE_HEIGHT = 0.2;
 	/** Pieces of meat until it's full, and how long it stays full (ticks; 2400 is two days' quarter). */
 	private static final int FULL_AFTER = 3, FULL_TICKS = 4800;
 	/** Health back per piece eaten. */
@@ -143,8 +145,9 @@ public final class Scavengers {
 	}
 
 	private static boolean busy(Mob mob) {
+		// (a cub is fed by its mother; a baby zombie is as hungry as the rest)
 		return mob.getTarget() != null && !feedingOver(mob, mob.getTarget())
-			|| mob.isVehicle() || mob.isPassenger() || mob.isLeashed() || mob.isBaby()
+			|| mob.isVehicle() || mob.isPassenger() || mob.isLeashed() || mob.isBaby() && !(mob instanceof net.minecraft.world.entity.monster.Enemy)
 			|| mob instanceof TamableAnimal tame && tame.isTame();
 	}
 
@@ -350,6 +353,7 @@ public final class Scavengers {
 			double dx = body.getX() - mob.getX(), dz = body.getZ() - mob.getZ();
 			if (dx * dx + dz * dz > reach()) {
 				hunger.eating = false;
+				Gnawing.feed(mob, body, Gnawing.UP);
 				giveUp--;
 				ticks = 0;
 				mob.getLookControl().setLookAt(body, 30.0F, 30.0F);
@@ -361,6 +365,7 @@ public final class Scavengers {
 			mob.getNavigation().stop();
 			if (!mob.onGround() && !mob.isInWater() && !mob.isInLava()) {
 				// a flier comes down onto the ground beside it to eat
+				Gnawing.feed(mob, body, Gnawing.UP);
 				Vec3 v = mob.getDeltaMovement();
 				mob.setDeltaMovement(v.x * 0.5, Math.min(v.y, -LAND), v.z * 0.5);
 				mob.getLookControl().setLookAt(body, 30.0F, 30.0F);
@@ -379,6 +384,7 @@ public final class Scavengers {
 			if (hunger.chewing()) {
 				// eating the part it tore off, head down over it
 				hunger.eating = true;
+				Gnawing.feed(mob, body, Gnawing.CHEW);
 				mob.getLookControl().setLookAt(body.getX(), body.getY() - 0.3, body.getZ(), 30.0F, 30.0F);
 				if (ticks % 10 == 0) {
 					com.jaymoskitchen.sound.KitchenSounds.chew(mob, 0.7F, 0.85F);
@@ -388,6 +394,7 @@ public final class Scavengers {
 			}
 			if (!hunger.eating && waiting(level)) {
 				// its turn hasn't come: it stands by and watches the ones at it
+				Gnawing.feed(mob, body, Gnawing.UP);
 				giveUp--;
 				mob.getLookControl().setLookAt(body, 30.0F, 30.0F);
 				return;
@@ -400,6 +407,8 @@ public final class Scavengers {
 			mob.getLookControl().setLookAt(body.getX() + side.x * shake, body.getY() - 0.3, body.getZ() + side.z * shake, 90.0F, 90.0F);
 			int phase = ticks % BITE_EVERY;
 			Vec3 in = toBody.lengthSqr() < 1.0E-4 ? Vec3.ZERO : toBody.normalize();
+			// down over it (bent double, a zombie: GnawPose), each bite drawn from the lunge to the rip back
+			Gnawing.feed(mob, body, phase == 1 ? Gnawing.BITE : Gnawing.DOWN);
 			if (phase == 1) {
 				// lunge in, jaws first
 				mob.setDeltaMovement(mob.getDeltaMovement().add(in.scale(LUNGE)));
@@ -472,6 +481,7 @@ public final class Scavengers {
 			}
 			hunger.scaredUntil = level.getGameTime() + SCARED_TICKS;
 			hunger.eating = false;
+			Gnawing.feed(mob, null, Gnawing.UP);
 			body = null;
 			if (mob.is(SKITTISH)) {
 				fled = true;
@@ -488,6 +498,7 @@ public final class Scavengers {
 		public void stop() {
 			body = null;
 			hunger.eating = false;
+			Gnawing.feed(mob, null, Gnawing.UP);
 			if (!fled) {
 				mob.getNavigation().stop();
 			}
@@ -537,6 +548,11 @@ public final class Scavengers {
 		if (level.noCollision(body, body.getBoundingBox().move(drag))) {
 			body.setPos(body.getX() + drag.x, body.getY(), body.getZ() + drag.z);
 		}
+		// (Andy, 2026-11-24) where the jaws closed: its near side, which jerks after them as they rip back and throws chunks
+		Vec3 at = body.position().add(-in.x * body.getBbWidth() * 0.4, BITE_HEIGHT, -in.z * body.getBbWidth() * 0.4);
+		boolean partOff = bites >= needed;
+		body.tug(at, in, partOff);
+		Gibs.bitten(body, level, at, in.scale(-1.0), partOff);
 		com.jaymoskitchen.KitchenBlood.send(level, body, body.getX(), body.getY() + 0.25, body.getZ(), 10, 0.2, 0.1, 0.2, 0.15);
 		level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, body.getX(), body.getY() + 0.3, body.getZ(), 2, 0.2, 0.1, 0.2, 0.05);
 		float pitch = 0.6F + eater.getRandom().nextFloat() * 0.3F;

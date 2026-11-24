@@ -30,6 +30,8 @@ abstract class LivingEntityRendererMixin {
 		com.jaymoskitchen.client.corpse.ReanimatePose.extract(entity, state, partialTicks);
 		// tearing a piece off a spit
 		com.jaymoskitchen.client.spit.TearPose.extract(entity, state, partialTicks);
+		// bent down over a body it's gnawing
+		com.jaymoskitchen.client.corpse.GnawPose.extract(entity, state, partialTicks);
 		// knocked limp by a heavy blow: drawn as its ragdoll (players have their own, RagdollAvatarRendererMixin)
 		if (!(entity instanceof net.minecraft.world.entity.player.Player)) {
 			com.jaymoskitchen.client.ragdoll.LimpMobs.extract(entity, state, partialTicks);
