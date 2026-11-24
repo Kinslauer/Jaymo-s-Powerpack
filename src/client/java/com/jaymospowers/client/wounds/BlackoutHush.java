@@ -67,9 +67,9 @@ public final class BlackoutHush {
 
 	private static void tick(Minecraft minecraft) {
 		boolean wasDead = dead;
-		// (Andy, 2026-11-23: a film after your death plays first, with its sound; the silence comes after it)
+		// (Andy, 2026-11-23: a film after your death plays with its sound, silent only on its opening black; the silence comes after it)
 		dead = minecraft.player != null && minecraft.level != null && Mortality.isFinal(minecraft.player)
-			&& (minecraft.gui.screen() instanceof DeathScreen || minecraft.player.isDeadOrDying()) && !UltimateCinematic.deathFilm();
+			&& (minecraft.gui.screen() instanceof DeathScreen || minecraft.player.isDeadOrDying()) && (!UltimateCinematic.deathFilm() || UltimateCinematic.deathBlack());
 		float target = target(minecraft);
 		hush = dead ? 1.0F : target > hush ? Math.min(target, hush + QUIET_STEP) : Math.max(target, hush - RETURN_STEP);
 		if (hush == refreshed && dead == wasDead || minecraft.getSoundManager() == null) {

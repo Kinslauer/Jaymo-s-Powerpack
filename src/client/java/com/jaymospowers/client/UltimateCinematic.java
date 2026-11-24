@@ -36,6 +36,11 @@ import org.jspecify.annotations.Nullable;
 public final class UltimateCinematic {
 	/** Each bar's height, as a share of the screen's; how much of the way they slide a tick. */
 	static final float BAR_SHARE = 0.11F, BAR_EASE = 0.3F;
+	/**
+	 * Andy: "upon the killing blow it should still cut to black, but cut back in for the scene, then back out". A film after
+	 * your death opens on this many ticks of black; it ends on the death screen's black.
+	 */
+	static final int DEATH_BLACK = 30;
 	/** (0.20.60) How far every shot is brought down (blocks, times the caster's size), and the lowest it goes over their feet. */
 	static final double SHOT_DROP = 0.6, SHOT_FLOOR = 0.5;
 	/** Kept this far off a wall the camera would otherwise sink into (blocks). */
@@ -151,6 +156,11 @@ public final class UltimateCinematic {
 	 */
 	public static boolean deathFilm() {
 		return running && !witness && afterDeath;
+	}
+
+	/** Your film after your death is still on its opening black ({@link #DEATH_BLACK}). */
+	public static boolean deathBlack() {
+		return deathFilm() && age < DEATH_BLACK;
 	}
 
 	private static void start(Minecraft minecraft, UltimateFilm.Play play) {
@@ -576,6 +586,10 @@ public final class UltimateCinematic {
 
 	/** The bars. */
 	private static void render(GuiGraphicsExtractor graphics, DeltaTracker delta) {
+		if (deathBlack()) {
+			graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), 0xFF000000);
+			return;
+		}
 		float shown = Mth.lerp(delta.getGameTimeDeltaPartialTick(false), barsO, bars);
 		if (shown <= 0.0F) {
 			return;
