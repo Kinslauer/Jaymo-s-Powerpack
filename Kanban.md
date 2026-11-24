@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 16:23). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 16:30). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -62,14 +62,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/patron-colossus-and-commandment-hunt|patron-colossus-and-commandment-hunt]]
-- [x] [[Inbox/Done/villagers-visible-jobs|villagers-visible-jobs]]
-- [x] [[Inbox/Done/structures-2-placement-reasons|structures-2-placement-reasons]]
-- [x] [[Inbox/Done/refmods-15-provenance-coins|refmods-15-provenance-coins]]
-- [x] [[Inbox/Done/refmods-14-sky-light-air|refmods-14-sky-light-air]]
-- [x] [[Inbox/Done/refmods-12-fishing|refmods-12-fishing]]
-- [x] [[Inbox/Done/tree-chop-through-trunk|tree-chop-through-trunk]]
-- [x] [[Inbox/Done/refmods-01-felling|refmods-01-felling]]
+- [x] [[Inbox/Done/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]]
+- [x] [[Inbox/Done/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]]
+- [x] [[Inbox/Done/vanilla-plus-i-settlement-roads|vanilla-plus-i-settlement-roads]]
+- [x] [[Inbox/Done/vanilla-plus-h-advancement-tracker|vanilla-plus-h-advancement-tracker]]
+- [x] [[Inbox/Done/vanilla-plus-g-illager-invasion|vanilla-plus-g-illager-invasion]]
+- [x] [[Inbox/Done/vanilla-plus-f-delight-dishes|vanilla-plus-f-delight-dishes]]
+- [x] [[Inbox/Done/vanilla-plus-e-soul-reaping-spawners|vanilla-plus-e-soul-reaping-spawners]]
+- [x] [[Inbox/Done/vanilla-plus-d-horse-expert-skill|vanilla-plus-d-horse-expert-skill]]
 
 
 %% kanban:settings
