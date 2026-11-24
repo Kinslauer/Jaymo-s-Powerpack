@@ -30,4 +30,4 @@ owns:
 ## Done
 Player will see: guarding and Flash Step cost stamina each tick/cast; entering a form checks stamina before spending ki; empty stamina shows "Running on empty: your stamina is spent." and a held guard drops when it runs out.
 Not tested in game: sh ./gradlew clean build passes against master 0.26.16 and tools/pr_checks.py is green (5 changed files, Powers only); the pack has not been booted in game.
-- 2026-11-22 08:57 PR #1938 is merged into master; moved to Agents/Done.
+- 2026-11-24 16:02 PR #1938 is merged into master; moved to Agents/Done.

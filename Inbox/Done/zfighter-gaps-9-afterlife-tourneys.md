@@ -32,4 +32,4 @@ text_pass: done
 
 ## Notes
 - 2026-11-20 20:11 Text pass: rewrote changes/powers/zfighter-gaps-9-afterlife-tourneys.md into player-facing patch notes (facts unchanged: 10 minutes for 24 silver or 400 TP, 24-block master-home radius, tyrant double prize, five-fighter cap); fixed message.jaymospowers.zfighter_tournament_tyrant in zfighter.json ('opens his games' -> 'opens the games'; tyrant Vexa is female); added missing talk.jaymospowers.teller.borrow option label ('Borrow time') in zfighter_afterlife.json so the teller's borrow menu option shows translated text instead of the raw key. No code changed.
-- 2026-11-22 10:08 PR #1956 is merged into master; moved to Inbox/Done.
+- 2026-11-24 16:02 PR #1956 is merged into master; moved to Inbox/Done.

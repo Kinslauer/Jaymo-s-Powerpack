@@ -42,4 +42,4 @@ owns:
 ## Done
 What a player will see, and what wasn't tested.
 - 2026-11-20 12:36 No sign of work for 30 min: marked stalled (whoever ran it stopped).
-- 2026-11-22 09:02 PR #1939 is merged into master; moved to Agents/Done.
+- 2026-11-24 16:02 PR #1939 is merged into master; moved to Agents/Done.
