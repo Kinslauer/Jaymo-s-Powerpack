@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 15:26). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 15:30). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -50,17 +50,17 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-h-advancement-tracker|vanilla-plus-h-advancement-tracker]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · for 💻 Odysseus · open
+- [ ] [[Inbox/vanilla-plus-i-settlement-roads|vanilla-plus-i-settlement-roads]] · for 💻 Odysseus · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/vanilla-plus-i-settlement-roads|vanilla-plus-i-settlement-roads]] · ☁️ Cloud · claimed
-- [ ] [[Agents/implement-verdant-dinosaurs|implement-verdant-dinosaurs]] · 💻 Odysseus · #2099 · running
 
 
 ## In review
 
+- [ ] [[Agents/implement-verdant-dinosaurs|implement-verdant-dinosaurs]] · 💻 Odysseus · #2099 · in-review
 - [ ] [[Agents/venom-head-adaptation|venom-head-adaptation]] · 💻 Odysseus · #2080 · in-review
 
 
