@@ -414,6 +414,23 @@ public final class MasonTable {
 	}
 
 	/**
+	 * The plot a written plan takes, for the client's outline: {@code width} and {@code depth} are the footprint as turned,
+	 * {@code turns} is how many quarter turns clockwise it's turned, {@code anchor} its lowest corner (null until laid).
+	 */
+	public record Plot(int width, int height, int depth, int turns, @Nullable BlockPos anchor, String dimension) {
+	}
+
+	/** The plot of the written plan {@code stack}; null if it isn't one. */
+	public static @Nullable Plot plot(ItemStack stack) {
+		Laid laid = stack.is(PLAN) ? Laid.of(stack) : null;
+		if (laid == null) {
+			return null;
+		}
+		int[] f = laid.footprint();
+		return new Plot(f[0], laid.h(), f[1], laid.rotation().ordinal(), laid.anchor(), laid.dimension());
+	}
+
+	/**
 	 * Sends {@code player} plan {@code laid}'s full material list: every block it still needs (what's already in place where
 	 * it's laid isn't counted), how many they carry and how many they're short, short first. Counted as the build counts:
 	 * the second half of a door or bed comes with the first, and dirt does for grass and paths. {@code table}: the table
