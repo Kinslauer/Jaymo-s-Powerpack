@@ -1,5 +1,5 @@
 ---
-status: sent
+status: done
 for: any (needs Andy's PC: the folder is local)
 from: coordinator
 asked: 2026-11-24
