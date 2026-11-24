@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 15:34). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 15:40). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -26,6 +26,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2101 Ruin Keepers tell their city's story (Kingdoms, 2026-11-24)
 - [ ] #2098 Illagers speak the Cave Tablets' tongue (Kingdoms, 2026-11-24)
 - [ ] #2097 Where things came from, stolen goods, heirlooms, collectors' prices and a strongbox (Reference Mods patch 15) (Kingdoms, 2026-11-24)
 - [ ] #2095 sit from the knee smoothly, sit still to ride an earthboard (Powers, 2026-11-24)
@@ -85,8 +86,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2034 A queen is no longer found in chains under her own market stall (Kingdoms, 2026-11-23)
 - [ ] #2033 Humanoids see in a cone and hear at their sides; busy mobs notice less (Kingdoms, Kitchen, 2026-11-23)
 - [ ] #2032 A dead player's baubles and web shooters stay on their body (Powers, Kingdoms, Kitchen, 2026-11-23)
-- [ ] #2031 Thrown rocks can crit: faster, and triple damage (Powers, 2026-11-23)
-- …and 438 older ones.
+- …and 439 older ones.
 
 ## Health
 
