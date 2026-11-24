@@ -1421,6 +1421,28 @@ final class McaBridge {
 	}
 
 	/**
+	 * Andy, 2026-11-24: the Ruin Keepers "should explain the lore", as hints in their talk. MCA's menu opening on a ruin
+	 * keeper ({@link com.jaymoskingdoms.oldage.RuinFolk}): the next tale of their city, if you speak the old tongue
+	 * ({@link com.jaymoskingdoms.oldage.RuinFolk#tell}: one at first, another each time you come back having traded at their
+	 * stall), else a look and words you don't follow; on to the main menu. Not for one wary of you. True if so.
+	 */
+	static boolean keeperOpening(LivingEntity mob, ServerPlayer player) {
+		if (!(mob instanceof VillagerEntityMCA villager) || !com.jaymoskingdoms.oldage.RuinFolk.is(villager) || Introductions.wary(player, villager)) {
+			return false;
+		}
+		var main = net.conczin.mca.resources.Dialogues.getInstance().getQuestion("main");
+		if (main == null) {
+			return false;
+		}
+		Component line = Languages.understands(player, villager) ? com.jaymoskingdoms.oldage.RuinFolk.tell(villager, player)
+			: Component.translatable("dialogue.chat.jaymoskingdoms.keeper_wordless");
+		met(villager, player);
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueQuestionResponse(line, false), player);
+		return true;
+	}
+
+	/**
 	 * (2026-11-19) Andy, of an old druid ({@link Groves}) by a lake: "what is she doing here? she wont tell me anything".
 	 * MCA's menu opening on one: who she is and what her grove is for (a body laid at her feet, the dead for good given a
 	 * new one), and, until you've brought it today, the one thing she wants ({@link Groves#want}); on to the main menu,
