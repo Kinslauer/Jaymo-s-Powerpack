@@ -969,3 +969,7 @@ Andy: "any feature that requires another PR to work as intended should be held a
 ### 2026-11-24: Crippled is not downed
 - **Decided:** "downed and crippled should be two different things, a suffienct blow, to the legs forces you into a ragdoll then prone, but you can roll to recover. downed is what happens after losing your hearts".
 - **Agent:** claude-cloud.
+
+### 2026-11-24: Ruin Keepers tell the lore in talk
+- **Decided:** "Yes, hints in their talk" (decision card): the Keepers tell their people, why the city fell, the consul in the tomb, why they stay and take emeralds, and the map to the next city, as hints in talk. A (new) Lore.md paragraph goes to Andy first.
+- **Agent:** claude-cloud.
