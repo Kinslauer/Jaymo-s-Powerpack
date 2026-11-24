@@ -26,6 +26,9 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2115 Takeovers dig straight to their prey and never stand stuck (Powers, 2026-11-24)
+- [ ] #2114 The first capital is found in seconds, not after an 11-minute wait (Kingdoms, 2026-11-24)
+- [ ] #2113 Village mods 4: board work (Kingdoms, 2026-11-24)
 - [ ] #2108 The Silk Deeps no longer generate (Kingdoms, 2026-11-24)
 - [ ] #2107 T opens chat again (Powers, Kingdoms, 2026-11-24)
 - [ ] #2106 A new host can struggle out of the red one's hunt (Powers, 2026-11-24)
@@ -58,6 +61,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2076 Thick fire smoke starts on the ground, not up at the flames (Kingdoms, 2026-11-24)
 - [ ] #2075 The last bowl or bottle comes back (Powers, 2026-11-24)
 - [ ] #2074 gear talk - folk remark on your Frostborn work and stand-in limbs (Kingdoms, 2026-11-24)
+- [ ] #2072 Pillagers carry lanterns at night, and take one down when they have none (Kingdoms, 2026-11-24)
 - [ ] #2070 Lock-on names the part only with Called Shots; what hurts you is said in your own voice (Powers, Kitchen, 2026-11-24)
 - [ ] #2069 A dead player's severed head can be taken as a trophy (Powers, Kingdoms, 2026-11-24)
 - [ ] #2067 A Truth Cleric prays from a book, not a holy symbol (Kingdoms, 2026-11-24)
@@ -72,10 +76,8 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2058 bandages give a short regen; rags fester less (Powers, 2026-11-24)
 - [ ] #2057 The thermometer burns when heat is a danger, and freezes and shakes in the cold (Kitchen, 2026-11-24)
 - [ ] #2056 Three blows on the ground and you're finished (Powers, 2026-11-24)
-- [ ] #2055 A small creature takes one smash from a club (Powers, 2026-11-24)
 - [ ] #2054 Says what hurt you when nobody did (Powers, 2026-11-24)
 - [ ] #2053 Guards only see a drawn blade in front of them; sneak right up behind anyone (Kingdoms, 2026-11-24)
-- [ ] #2052 A small creature is finished with one quick slice (Powers, 2026-11-23)
 - [ ] #2051 Alt in mid air dives: jump + Alt is a dive-roll evade (Powers, 2026-11-23)
 - [ ] #2050 The dodge roll stays above the ground and is half as long; sitting against a wall no longer sinks in (Powers, Kingdoms, 2026-11-23)
 - [ ] #2049 Fishing: read the fish's moods, tire it out, watch your line (Powers, 2026-11-23)
@@ -84,13 +86,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2046 Villagers talk to each other again (Kingdoms, 2026-11-23)
 - [ ] #2045 small hunters don't eat the living, full ones leave the downed be (Powers, Kingdoms, 2026-11-23)
 - [ ] #2044 Weapons in set places on the body: swords at the hips, four flintlocks, guns on the back (Powers, 2026-11-23)
-- [ ] #2043 A sellsword doesn't call out to you and then turn you away (Kingdoms, 2026-11-23)
-- [ ] #2042 Enemies telegraph their blows longer and walk in before swinging (Powers, Kingdoms, 2026-11-23)
-- …and 501 older ones.
+- …and 451 older ones.
 
 ## Health
 
-13 problems in the notes: [[Health]].
+11 problems in the notes: [[Health]].
 
 ## Last week
 
