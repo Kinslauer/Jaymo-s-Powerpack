@@ -973,3 +973,7 @@ Andy: "any feature that requires another PR to work as intended should be held a
 ### 2026-11-24: Ruin Keepers tell the lore in talk
 - **Decided:** "Yes, hints in their talk" (decision card): the Keepers tell their people, why the city fell, the consul in the tomb, why they stay and take emeralds, and the map to the next city, as hints in talk. A (new) Lore.md paragraph goes to Andy first.
 - **Agent:** claude-cloud.
+
+### 2026-11-24: Coins patch: strongbox yes, shop stall no
+- **Decided:** From Reference Mods patch 15, build the strongbox at home (G7) but not the shop stall (G6), keeping the 2026-11-23 "no shop block" ruling.
+- **Agent:** claude-cloud.
