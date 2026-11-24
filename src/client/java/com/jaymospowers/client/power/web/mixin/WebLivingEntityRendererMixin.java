@@ -54,6 +54,8 @@ abstract class WebLivingEntityRendererMixin {
 		at = @At("TAIL"))
 	private void jaymospowers$webRagdoll(LivingEntity entity, LivingEntityRenderState state, float partialTicks, CallbackInfo ci) {
 		WebRagdoll.extract(entity, state, partialTicks);
+		// (a humanoid the symbiote rides is drawn as the strain's own body, its own model hidden)
+		com.jaymospowers.client.power.web.WebHostBody.extract(entity, state);
 		com.jaymospowers.client.BodyMotion.extract(entity, state, partialTicks);
 		com.jaymospowers.client.FreefallPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.freerun.BalancePose.extract(entity, state, partialTicks);

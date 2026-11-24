@@ -165,10 +165,14 @@ public final class WebBehemothClient {
 
 		@Override
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, float yRot, float xRot) {
-			if (state.isInvisible) {
+			net.minecraft.client.renderer.entity.state.AvatarRenderState body = state.getData(WebHostBody.BODY);
+			if (body != null) {
+				// a humanoid it rides: the strain's own body in its place (its own model hidden, WebHostBody)
+				WebHostBody.submit(poseStack, collector, lightCoords, body);
+			} else if (state.isInvisible) {
 				return;
 			}
-			if (state.getData(INHABITED) != null) {
+			if (state.getData(INHABITED) != null && body == null) {
 				renderColoredCutoutModel(this.getParentModel(), WebStrainLook.texture(GOO, state), poseStack, collector, lightCoords, state, -1, 1);
 			}
 			com.jaymospowers.power.web.WebSymbioteStrain steed = state.getData(STEED);
@@ -185,7 +189,12 @@ public final class WebBehemothClient {
 				float size = Mth.clamp(height / SIZE_HEIGHT, SIZE_MIN, SIZE_MAX);
 				float rootZ = fourLegs ? 0.0F : Math.max(0.0F, width * 16.0F * BACK_DEPTH - 2.0F * size)
 					+ (state.getData(HOST) != null ? BEHEMOTH_DEPTH : 0.0F);
-				WebTendrilLayer.submitOnMob(poseStack, collector, lightCoords, state, tendrils, rootY, rootZ, size);
+				if (body != null && WebSuitGrowth.slender(body)) {
+					// in the slender body: off its own back and shoulders (its neck's height), as on a web slinger
+					WebTendrilLayer.submitOnMob(poseStack, collector, lightCoords, state, tendrils, WebSlender.NECK, 0.0F, 1.0F, true);
+				} else {
+					WebTendrilLayer.submitOnMob(poseStack, collector, lightCoords, state, tendrils, rootY, rootZ, size, false);
+				}
 			}
 		}
 	}
@@ -217,7 +226,8 @@ public final class WebBehemothClient {
 		@Override
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords,
 			com.jaymoskitchen.client.corpse.ZombiePlayerRenderer.State state, float yRot, float xRot) {
-			if (state.getData(HOST) == null) {
+			if (state.getData(HOST) == null || state.getData(WebHostBody.BODY) != null) {
+				// (in the strain's own body now: WebHostBody)
 				return;
 			}
 			coloredCutoutModelCopyLayerRender(this.bulk, WebStrainLook.texture(TEXTURE, state), poseStack, collector, lightCoords, state, -1, 1);
