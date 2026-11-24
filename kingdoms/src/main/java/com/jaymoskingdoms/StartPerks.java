@@ -112,6 +112,7 @@ public final class StartPerks {
 		PERKS.put(Start.MAW, Perk.of(Circle.UNDERWORLD, Boon.NEWS));
 		PERKS.put(Start.DEMON, Perk.of(Circle.UNDERWORLD, Boon.DISCOUNT));
 		PERKS.put(Start.AFTERLIFE, Perk.of(Circle.PRIESTS, Boon.LORE));
+		PERKS.put(Start.MONSTERBORN, Perk.of(Circle.GREENSKINS, Boon.FEED));
 	}
 
 	private StartPerks() {

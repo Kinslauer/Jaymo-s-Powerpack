@@ -352,7 +352,7 @@ public final class Heritage {
 				}
 			}
 			// (0.7.490) a Rimewyrm takes no halving from fire (dealt), so its card leaves that out
-			out.add(Component.translatable("heritage.jaymoskingdoms." + key() + (this == DRAGONBLOOD && variant == HeritageVariants.Variant.RIMEWYRM ? ".gift_rimewyrm" : ".gift")));
+			out.add(Component.translatable("heritage.jaymoskingdoms." + key() + (this == DRAGONBLOOD && HeritageKits.ownBreath(variant) ? ".gift_" + variant.key() : ".gift")));
 			out.add(Component.translatable("heritage.jaymoskingdoms." + key() + ".flaw"));
 			// (0.7.490) the kit: its ability, its gift, its flaw (the look's own once a look is picked, see card(Variant))
 			out.addAll(HeritageKits.card(HeritageKits.kit(this, variant)));
@@ -1014,7 +1014,7 @@ public final class Heritage {
 	 */
 	public static float dealt(LivingEntity target, DamageSource source, float amount) {
 		Kind mine = VillagerHeritage.of(target);
-		if (mine == Kind.DRAGONBLOOD && HeritageVariants.of(target) != HeritageVariants.Variant.RIMEWYRM && (source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypes.DRAGON_BREATH))) {
+		if (mine == Kind.DRAGONBLOOD && !HeritageKits.ownBreath(HeritageVariants.of(target)) && (source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypes.DRAGON_BREATH))) {
 			amount *= saving(target, DRAGON_FIRE_TAKEN);
 		} else if (mine == Kind.BIOBUILT && (source.is(DamageTypeTags.IS_LIGHTNING) || source.is(DamageTypes.MAGIC) || source.is(DamageTypes.INDIRECT_MAGIC))) {
 			// (0.7.262) a made body is brittle to lightning and magic

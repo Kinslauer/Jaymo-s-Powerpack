@@ -66,6 +66,7 @@ public final class SecondClass {
 		MASTERS.put(PlayerClass.WARLOCK, Set.of(VillagerProfession.LIBRARIAN));
 		// (an element is woken, not taught: the keeper of the old books knows the rite that wakes it)
 		MASTERS.put(PlayerClass.SORCERER, Set.of(VillagerProfession.LIBRARIAN));
+		MASTERS.put(PlayerClass.ARTIFICER, Set.of(VillagerProfession.ARMORER, VillagerProfession.CLERIC));
 		MASTERS.put(PlayerClass.TINKERER, Set.of(VillagerProfession.TOOLSMITH, VillagerProfession.WEAPONSMITH, VillagerProfession.ARMORER));
 	}
 

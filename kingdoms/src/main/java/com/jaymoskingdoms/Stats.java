@@ -227,7 +227,7 @@ public final class Stats {
 			case RANGER -> Stat.AGILITY;
 			case CLERIC, DRUID, WARLOCK -> Stat.ARCANA;
 			case PALADIN -> Stat.GRIT;
-			case TINKERER -> Stat.WITS;
+			case TINKERER, ARTIFICER -> Stat.WITS;
 			case BRUTE -> Stat.GRIT;
 		};
 	}
