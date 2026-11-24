@@ -7,6 +7,8 @@ Writes (all in OUT_DIR):
                             out of its back (the red strain's: hooked blades on every tip) and the weapon arm's spear on the right
   slender-body-lifted.png   the same brightened, to read the dark art by
   slender-vs-big.png        the slender body beside the black big body (#2080's) and a plain player, to scale
+  slender-stance.png        its hunch (WebSlender.hunch): standing, and curled over while its tendrils work (three-quarter, side)
+  big-body-tendrils.png     the black big body with its own crown of tendrils and strands (WebHulk.TENDRIL_REST, STRANDS), brightened
 
 What it draws is read from what the game will use, not retyped:
   * the body: tools/data/slender_geometry.json, checked cube for cube against the generated WebSlenderMesh.java, placed by
@@ -200,27 +202,37 @@ def chain(polys, tex, start, m, segs, seg_len, tip, curl):
     return pos, m
 
 
-def tendril_polys(frame, tex, sw, strands=True):
-    """Our tendrils at rest, grown, off the body's pivot (the slender neck) as WebSlender.TENDRIL_REST poses them, with
-    hooked tips; then WebSlender.STRANDS, the thin ones that only sway."""
+def grown(rows):
+    """WebSlender.grown with WebHulk's TENDRIL_WIDE, _DEEP, _THICK, _LONG: the big body's crown."""
+    wide, deep, thick, length = (jfloat("WebHulk.java", n) for n in ("TENDRIL_WIDE", "TENDRIL_DEEP", "TENDRIL_THICK", "TENDRIL_LONG"))
+    return [[r[0] * wide, r[1], r[2] + deep, r[3], r[4], r[5], r[6] * thick, r[7] * length] for r in rows]
+
+
+def tendril_polys(frame, tex, sw, strands=True, big=False, neck=None):
+    """Our tendrils at rest, grown, off the body's pivot (the neck) as WebSlender.TENDRIL_REST poses them (WebHulk's on the
+    big body), with hooked tips on the red ones (sw given); then the strands, the thin ones that only sway."""
     text = (WEB / "WebTendrilLayer.java").read_text(encoding="utf-8")
     segs = int(re.search(r"SEGMENTS = (\d+)", text).group(1))
     seg_len = jfloat("WebTendrilLayer.java", "SEGMENT_LENGTH")
     tip = [float(x) for x in re.findall(pb.FLOAT, re.search(r"TIP = \{([^}]*)\}", text).group(1))]
     width, hook_len, curve = (jfloat("WebTendrilLayer.java", n) for n in ("BLADE_WIDTH", "BLADE_HOOK", "BLADE_CURVE"))
-    grown = 1.3  # WebTendrilLayer: grown thickness and length
+    full = 1.3  # WebTendrilLayer: grown thickness and length
     polys = []
-    body_at = np.array((0.0, frame.neck[1], 0.0))
-    for r in jarray("WebSlender.java", "TENDRIL_REST"):
-        m = pb.rot_matrix(r[4], r[3], 0.0) @ np.diag((grown * r[6], grown * r[6], grown * r[7]))
+    body_at = np.array((0.0, frame.neck[1] if neck is None else neck, 0.0))
+    rest, strand_rows = jarray("WebSlender.java", "TENDRIL_REST"), jarray("WebSlender.java", "STRANDS")
+    if big:
+        rest, strand_rows = grown(rest), grown(strand_rows)
+    for r in rest:
+        m = pb.rot_matrix(r[4], r[3], 0.0) @ np.diag((full * r[6], full * r[6], full * r[7]))
         pos, m = chain(polys, tex, body_at + np.array(r[:3]), m, segs, seg_len, tip, r[5])
         end = m @ np.array((0.0, 0.0, seg_len - 0.6)) + pos
         d = m @ np.array((0.0, 0.0, 1.0))
         up = m @ np.array((0.0, -1.0, 0.0))
-        hook(polys, sw, end, d / np.linalg.norm(d), up / np.linalg.norm(up), width, hook_len, curve)
+        if sw is not None:
+            hook(polys, sw, end, d / np.linalg.norm(d), up / np.linalg.norm(up), width, hook_len, curve)
     if strands:
-        for r in jarray("WebSlender.java", "STRANDS"):
-            m = pb.rot_matrix(r[4], r[3], 0.0) @ np.diag((grown * r[6], grown * r[6], grown * r[7]))
+        for r in strand_rows:
+            m = pb.rot_matrix(r[4], r[3], 0.0) @ np.diag((full * r[6], full * r[6], full * r[7]))
             chain(polys, tex, body_at + np.array(r[:3]), m, segs, seg_len, tip, r[5])
     return polys
 
@@ -238,6 +250,85 @@ def scene(frame, tex, glow=False, tendrils=True, weapon=True):
         hand = np.array((-frame.shoulder[0], frame.shoulder[1] + (10.5 + 12.5) * frame.s, 0.0))
         spear(polys, tex["flesh"], hand, np.array((0.0, 1.0, -0.35)) / math.hypot(1.0, 0.35), jfloat("WebMorphLayer.java", "WEAPON_SCALE_ARMOR"))
     return polys
+
+
+def groups(frame, tex, elbow=0.0, thigh=0.0, knee=0.0, drop=0.0):
+    """The slender scene in groups that move apart in the hunch: the upper body (with the tendrils), the head, each arm
+    (the spear on the right), the legs; the elbows bent {@code elbow}, the thighs raised {@code thigh} and the knees folded
+    {@code knee} (radians), all of it sunk {@code drop} pixels."""
+    out = {}
+    for part in body_tree(frame):
+        for name in ("right_forearm", "left_forearm"):
+            if find(part, name):
+                find(part, name).rot[0] -= elbow
+        if part.name in ("right_leg", "left_leg"):
+            part.rot[0] -= thigh
+            find(part, part.name.split("_")[0] + "_shin").rot[0] += knee
+        part.pos[1] += drop
+        polys = []
+        collect(part, tex["body"], polys)
+        out[part.name] = polys
+    out["body"] += tendril_polys(frame, tex["tendril"], tex["flesh"])
+    hand = np.array((-frame.shoulder[0], frame.shoulder[1] + (10.5 + 12.5) * frame.s, 0.0))
+    if not elbow:
+        spear(out["right_arm"], tex["flesh"], hand, np.array((0.0, 1.0, -0.35)) / math.hypot(1.0, 0.35), jfloat("WebMorphLayer.java", "WEAPON_SCALE_ARMOR"))
+    return out
+
+
+def turned(polys, about, angle):
+    m = pb.rot_matrix(angle, 0.0, 0.0)
+    about = np.array(about, float)
+    return [([m @ (np.array(v) - about) + about for v in verts], uvs, t) for verts, uvs, t in polys]
+
+
+def hunched(frame, tex, curl):
+    """WebSlender.hunch standing (curl 0) or curled over for its tendrils (curl 1): the back bent from the hips, the head
+    craned up again, the arms hanging forward, the elbows crooked, the thighs forward and the knees folded, sunk on them.
+    (The spear is left off here, the arm crooked.)"""
+    bend = (lambda a, b: a + (b - a) * curl)(jfloat("WebSlender.java", "HUNCH"), jfloat("WebSlender.java", "HUNCH_TENDRILS"))
+    head_up, arms = jfloat("WebSlender.java", "HEAD_UP"), jfloat("WebSlender.java", "ARMS_FORWARD")
+    # the elbows: WebHulk's rest bend and WebSlender.ELBOWS; the knees: twice the thighs' raise (WebHulk.limbs, KNEE_CROUCH)
+    thigh = jfloat("WebSlender.java", "THIGHS")
+    drop = jfloat("WebSlender.java", "CROUCH_DROP")
+    g = groups(frame, tex, jfloat("WebHulk.java", "ELBOW_REST") + jfloat("WebSlender.java", "ELBOWS"), thigh,
+               thigh * jfloat("WebHulk.java", "KNEE_CROUCH"), drop)
+    hip = (0.0, frame.hip[1] + drop, 0.0)
+    rot = pb.rot_matrix(bend, 0.0, 0.0)
+    def carried(point):
+        return rot @ (np.array(point, float) - np.array(hip)) + np.array(hip)
+    polys = turned(g["body"], hip, bend)
+    polys += turned(turned(g["head"], hip, bend), carried((0.0, frame.neck[1] + drop, 0.0)), -bend * head_up)
+    for side, name in ((-1, "right_arm"), (1, "left_arm")):
+        shoulder = carried((side * frame.shoulder[0], frame.shoulder[1] + drop, 0.0))
+        polys += turned(turned(g[name], hip, bend), shoulder, -(bend + arms))
+    polys += g["right_leg"] + g["left_leg"]
+    return polys
+
+
+def stance_sheet(frame, tex, lift):
+    size, zoom, centre = (440, 640), 10.5, (0, 1)
+    tiles = []
+    for curl, name in ((0.0, "standing, hunched"), (1.0, "tendrils at work, curled over")):
+        for yaw in (35, 90):
+            img = render(hunched(frame, tex, curl), yaw, size, zoom, centre, lift=lift)
+            tiles.append(label(img, "red slender body, %s (%s)" % (name, "three-quarter" if yaw == 35 else "side")))
+    return sheet(tiles, *size)
+
+
+def big_sheet(lift):
+    """The black big body (#2080's, its head too) with its new crown of tendrils and strands (WebHulk.TENDRIL_REST, STRANDS)."""
+    game = pb.Game()
+    btex = pb.textures()
+    tendril = Tex(Image.open(ENTITY / "web_symbiote_tendril.png"), (32, 32))
+    size, zoom, centre = (440, 700), 9.5, (0, -2)
+    tiles = []
+    for yaw, name in ((0, "front"), (35, "three-quarter"), (90, "side"), (180, "back")):
+        polys = pb.body_polys(game, btex, game.jaw_rest) + tendril_polys(None, tendril, None, big=True, neck=-game.body_lift)
+        img = render(polys, yaw, size, zoom, centre, lift=lift)
+        if yaw != 180:
+            img = add_glow(img, pb.body_polys(game, btex, game.jaw_rest, glow=True), yaw, size, zoom, centre)
+        tiles.append(label(img, "black big body, its new tendrils, %s" % name))
+    return sheet(tiles, *size)
 
 
 def textures():
@@ -276,6 +367,8 @@ def main(out_dir):
     tex = textures()
     views(frame, tex).save(out_dir / "slender-body.png")
     views(frame, tex, lift=2.2, note=", brightened").save(out_dir / "slender-body-lifted.png")
+    stance_sheet(frame, tex, 1.6).save(out_dir / "slender-stance.png")
+    big_sheet(2.4).save(out_dir / "big-body-tendrils.png")
     # to scale: a plain player (the 1.8-block box outline), the slender body, the big body
     size, zoom, centre = (360, 620), 11.0, (0, 2)
     tiles = []

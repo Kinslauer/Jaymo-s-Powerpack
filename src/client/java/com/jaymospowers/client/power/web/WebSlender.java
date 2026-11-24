@@ -141,7 +141,13 @@ final class WebSlender {
 	 * between the two over {@code CURL_TICKS}. On the move it straightens only to {@code HUNCH_MOVING} of that, and stays
 	 * loose: the head and the arms lag and loll with the stride ({@code LOLL}, radians), the slight ragdoll it always had.
 	 */
-	static final float HUNCH = 0.5F, HUNCH_TENDRILS = 0.85F, HUNCH_MOVING = 0.7F, HEAD_UP = 0.85F, ARMS_FORWARD = 0.35F, THIGHS = 0.22F;
+	static final float HUNCH = 0.7F, HUNCH_TENDRILS = 1.1F, HUNCH_MOVING = 0.7F, HEAD_UP = 0.85F, ARMS_FORWARD = 0.35F, THIGHS = 0.45F;
+	/**
+	 * Never stiff (Andy: "the arms and knees should bend too"): the elbows crooked {@code ELBOWS} more than the big body's
+	 * (radians, the claws held out in front), the knees folding with the bent thighs (WebHulk#limbs folds a raised thigh's
+	 * shin back twice as far), the whole of it sunk {@code CROUCH_DROP} pixels so the feet stay on the ground.
+	 */
+	static final float ELBOWS = 0.7F, CROUCH_DROP = 1.8F;
 	static final float CURL_TICKS = 6.0F, LOLL = 0.12F;
 	/** Entity id → how far curled over for its tendrils (0-1). */
 	private static final WebEase CURL = new WebEase();
@@ -166,7 +172,7 @@ final class WebSlender {
 		float loll = Mth.sin(s.walkAnimationPos * 0.6662F - 0.8F) * LOLL * speed * k;
 		// the back curled over from the hips (the head and arms carried with it, PoseBlend.bend), the head craned up again,
 		// the arms let hang (straight down, a little forward) and lolling with the stride
-		com.jaymospowers.client.PoseBlend.bend(h, bend, 0.0F, 0.0F, 0.0F, 0.0F);
+		com.jaymospowers.client.PoseBlend.bend(h, bend, 0.0F, 0.0F, CROUCH_DROP * k, 0.0F);
 		h.head.xRot -= bend * HEAD_UP - loll * 0.5F;
 		h.head.zRot += loll * 0.6F;
 		h.rightArm.xRot -= bend + ARMS_FORWARD * k - loll;
@@ -175,6 +181,9 @@ final class WebSlender {
 		h.leftArm.zRot += loll * 0.5F;
 		h.rightLeg.xRot -= THIGHS * k;
 		h.leftLeg.xRot -= THIGHS * k;
+		// (sunk on its bent knees)
+		h.rightLeg.y += CROUCH_DROP * k;
+		h.leftLeg.y += CROUCH_DROP * k;
 		HUNCHED.put(h.body, h.body.xRot);
 	}
 
@@ -327,6 +336,9 @@ final class WebSlender {
 				}
 			}
 			WebHulk.limbs(state, this, this.elbowRight, this.elbowLeft, this.kneeRight, this.kneeLeft);
+			// (crooked further: never stiff, ELBOWS)
+			this.elbowRight.xRot -= ELBOWS;
+			this.elbowLeft.xRot -= ELBOWS;
 		}
 	}
 }
