@@ -7854,3 +7854,10 @@ Andy: "baby zombies are unfightable" (clip: an axe locked onto baby zombies' tor
 
 - Andy: "4 rocks should craft into 1 cobble and vice versa". 4 stone rocks already made 1 cobblestone; now 1 cobblestone alone in the crafting grid gives 4 stone rocks. Only cobblestone goes back (the other rock kinds still only go one way).
 - `stone_rocks_from_cobblestone` recipe (tools/gen_ground_rocks.py). Built by CI only; not crafted in game.
+
+## 0.27.12 (2026-11-24): Blood Awakening upgrades your blood's held move; a Verdant's regrowth key (#2117)
+
+- **Everyone starts with their blood's held move** (Andy, 2026-11-23): Thunderclap, Sunflare, Kindle, the Verdant's stretch and the Frost-born's hold no longer need Blood Awakening (`TreeLocks.BLOOD` removed; gates gone from `HeritageMoves`, `EmberKindle`, `RaceMoves`, `RaceHoldClient`).
+- **Learned, Blood Awakening upgrades them** (`TreeLocks.awakened` / `TreeLocks.wait`, read from Kingdoms): Thunderclap's and Sunflare's cooldowns halve, Kindle heats to full in half the time, the stretching arm is ready again in half the time, and a Frost-born's beam bites twice as often (a Z Fighter's keeps its own pace).
+- **Push-button limb regrowth for an awakened Verdant**: the heritage key grows one lost limb back now with the fleshy crunch (`ZFighterLineage.regrowNow`), every 2 minutes (`REGROW_KEY_EVERY`) for 3 food (`REGROW_KEY_FOOD`), not while hungry; on top of the slow regrowth every 30 s. Not on the dead.
+- Built; not played.

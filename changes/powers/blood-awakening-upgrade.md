@@ -1,5 +1,0 @@
-# Blood Awakening upgrades your blood's held move; a Verdant's regrowth key
-- **Everyone starts with their blood's held move** (Andy, 2026-11-23): Thunderclap, Sunflare, Kindle, the Verdant's stretch and the Frost-born's hold no longer need Blood Awakening (`TreeLocks.BLOOD` removed; gates gone from `HeritageMoves`, `EmberKindle`, `RaceMoves`, `RaceHoldClient`).
-- **Learned, Blood Awakening upgrades them** (`TreeLocks.awakened` / `TreeLocks.wait`, read from Kingdoms): Thunderclap's and Sunflare's cooldowns halve, Kindle heats to full in half the time, the stretching arm is ready again in half the time, and a Frost-born's beam bites twice as often (a Z Fighter's keeps its own pace).
-- **Push-button limb regrowth for an awakened Verdant**: the heritage key grows one lost limb back now with the fleshy crunch (`ZFighterLineage.regrowNow`), every 2 minutes (`REGROW_KEY_EVERY`) for 3 food (`REGROW_KEY_FOOD`), not while hungry; on top of the slow regrowth every 30 s. Not on the dead.
-- Built; not played.
