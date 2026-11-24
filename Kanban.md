@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 23:29). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 23:32). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -46,6 +46,7 @@ kanban-plugin: board
 
 ## In review
 
+- [ ] [[Agents/Spiders by day|Spiders by day]] · 💻 Odysseus · #2118 · in-review
 
 
 ## Needs Andy
