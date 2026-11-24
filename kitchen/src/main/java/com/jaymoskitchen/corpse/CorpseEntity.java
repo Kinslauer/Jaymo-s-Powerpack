@@ -764,8 +764,12 @@ public class CorpseEntity extends Entity {
 		this.entityData.set(TUMBLING, tumbling);
 	}
 
-	/** Entity events: the body jolts, hard (an axe blow) or lightly (rummaged through). */
-	private static final byte JOLT_HARD = 70, JOLT_LIGHT = 71;
+	/** Entity events: the body jolts, hard (an axe blow) or lightly (rummaged through); or jerks with a bite torn out of it. */
+	private static final byte JOLT_HARD = 70, JOLT_LIGHT = 71, JOLT_TUG = 72;
+	/** A bite's tug (blocks a tick at the part bitten, toward the eater), a part tearing off's, and how much of it lifts. */
+	private static final double TUG = 0.09, TUG_HARD = 0.16, TUG_LIFT = 0.45;
+	/** How hard a bite's tug flops the body as drawn (an axe blow's 1). */
+	private static final float TUG_DRAWN = 0.6F;
 
 	/** Server: the body jolts with the blow (an axe) or the rummaging (looting it). */
 	public void jolt(boolean hard) {
@@ -776,11 +780,23 @@ public class CorpseEntity extends Entity {
 		}
 	}
 
+	/**
+	 * Server: a bite torn out of it at {@code at} by jaws that came in along {@code in} (flat, unit length): as they rip back
+	 * the body jerks after them, the part bitten pulled up toward the eater; harder when a part comes away
+	 * ({@code partOff}).
+	 */
+	public void tug(Vec3 at, Vec3 in, boolean partOff) {
+		level().broadcastEntityEvent(this, partOff ? JOLT_HARD : JOLT_TUG);
+		if (ragdoll != null && !level().isClientSide()) {
+			ragdoll.smack(at, new Vec3(-in.x, TUG_LIFT, -in.z), partOff ? TUG_HARD : TUG);
+		}
+	}
+
 	@Override
 	public void handleEntityEvent(byte id) {
-		if (id == JOLT_HARD || id == JOLT_LIGHT) {
+		if (id == JOLT_HARD || id == JOLT_LIGHT || id == JOLT_TUG) {
 			joltTicks = joltTicksO = JOLT_TICKS;
-			joltStrength = id == JOLT_HARD ? 1.0F : 0.3F;
+			joltStrength = id == JOLT_HARD ? 1.0F : id == JOLT_TUG ? TUG_DRAWN : 0.3F;
 			joltSide = random.nextBoolean() ? 1.0F : -1.0F;
 		} else {
 			super.handleEntityEvent(id);
@@ -2958,6 +2974,11 @@ public class CorpseEntity extends Entity {
 	/** (0.4.32) A passive animal's body, the only kind a butcher villager will take: no monsters, nothing heavy. */
 	public boolean isButcherable() {
 		return kind == CorpseKind.ANIMAL && !isHostile() && !isMachine();
+	}
+
+	/** Whether a player made this kill (a villager butcher leaves a player's kill for them). */
+	public boolean killedByPlayer() {
+		return killedByPlayer;
 	}
 
 	/** (0.4.35) Records who killed it, for {@link Scavengers}. */

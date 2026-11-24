@@ -49,6 +49,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		Professions.register();
 		// (0.7.498) the copper bit and the coin purse (the realms' coins are Currencies')
 		com.jaymoskingdoms.money.MoneyItems.register();
+		// banks: accounts, loans and letters of credit at a realm's counting house (Banks)
+		LetterOfCredit.register();
+		Banks.register();
+		PlacementReasons.register();
 		McaCompat.register();
 		// offline accounts sign in (EasyAuth, server only) before their character creation starts
 		SignIn.register();
@@ -197,7 +201,13 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("falling tree attachments: {} {}", FallingTree.PIECES, FallingTree.HEADING);
 		// 0.5.25: trees take chops to fell (TreeChop's way), the chopped logs narrowing
 		ChoppedLog.register();
+		// what a tree cut through leaves: a carved stump to sit on, dig out or leave to rot
+		TreeStump.register();
 		Trees.register();
+		// felling: cut through the trunk, cracks and creaks, the ground's thump, half-cut trees that give way
+		Felling.register();
+		// blasts that undercut a building bring down what's over the hole (chests ride down whole)
+		Collapse.register();
 		LooseWood.register();
 		// 0.7.588: mob griefing always on (Andy)
 		PackRules.register();
@@ -252,6 +262,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Meals.register();
 		// smiths sharpen the guards' dull blades at a grindstone
 		Whetting.register();
+		WorkScenes.register();
 		// village mods 3: guards that fight and mend
 		ClericHeals.register();
 		SmithMending.register();
@@ -290,6 +301,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("identity attachments: {} {} {}", Identities.ALL, Identities.SIGHTINGS, Identities.MASKED_AS);
 		Identities.register();
 		MaskedFaces.register();
+		Celebrations.register();
 		// 0.7.149: the name picked in MCA's creator shows in place of the username (and its attachment)
 		CharacterNames.register();
 		// 0.7.180: names over heads only once you've been told them (and its attachments)
@@ -381,6 +393,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.497) locks and keys: fitted locks, night locks on townsfolk's homes and shops, the key ring (and their attachments)
 		LOGGER.debug("locks attachments: {} {} {}", Locks.LOCKS, Locks.WORN_KEYS, NightLocks.INDEX);
 		Locks.register();
+		// (where things came from, stolen marks, heirlooms, the strongbox)
+		Provenance.register();
+		StolenGoods.register();
+		Heirlooms.register();
+		Strongbox.register();
 		NightLocks.register();
 		// 0.7.126: crooks among the villagers (theft, muggings, arson, pickpockets, scams) and their attachments
 		LOGGER.debug("crook attachments: {} {} {}", Crooks.CROOK, Crooks.NOTORIETY, Crooks.HOME);
@@ -426,6 +443,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("world tier attachments: {} {} {} {} {}", WorldTiers.TIER, WorldTiers.PROGRESS, WorldTiers.CHANGED, WorldTiers.MOB_TIER,
 			WorldTiers.FLOOR);
 		WorldTiers.register();
+		Rematches.register();
 		HarshLands.register();
 		// Hostile Mobs Improve Over Time's levels follow the world tier, not play time
 		HostileMobsTiers.register();
@@ -838,6 +856,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("promise attachment: {}", Promises.PROMISES);
 		Bearings.register();
 		Talks.register();
+		GearTalk.register();
 		Promises.register();
 		// (0.7.454) asking the way in town
 		Directions.register();
@@ -867,6 +886,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.518) patron gods, part (c): the champions and their temples
 		PatronChampions.register();
 		Temples.register();
+		// the patrons' colossi: the three sworn callings' strike, and the hunt for commandment breakers
+		com.jaymoskingdoms.colossus.Colossi.register();
 		// 0.7.218: villagers who awaken to a power (Jaymo's Powers fights with it)
 		GiftedFolk.register();
 		CostumedFolk.register();
@@ -876,6 +897,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Languages.register();
 		// the illager tongue, learned from their writings, banners, paintings and holds, and talking with illagers once you know it
 		IllagerTongue.register();
+		// Alex's Caves: its cave biomes mostly under Mohknee, and cave maps that reach that far
+		AlexsCavesCompat.register();
 		IllagerHolds.register();
 		BlastMend.register();
 		Craters.register();
@@ -888,6 +911,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Needs.register();
 		// villagers left standing still for minutes: written to the log, then sent on their way
 		Unstick.register();
+		// humanoids stranded on a roof or a ledge climb down
+		Stranded.register();
 		// 0.7.19: villagers' regard for one another, and the meetings it makes (fights to hugs) (and its attachment)
 		LOGGER.debug("regard attachment: {}", Neighbours.REGARD);
 		Neighbours.register();
@@ -921,6 +946,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Spirits.register();
 		// 0.5.37: sorcery: camps' shamans and necromancers, courts' wizards, the risen dead, spell scrolls (and the thralls' attachment)
 		Arcana.register();
+		SoulJars.register();
 		// the elemental spell tomes: left-click bolts, a loaded page on right click
 		Tomes.register();
 		// a forbidden rite of blood magic: a captive made into a great foe (and its attachment)
@@ -1093,6 +1119,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		RoyalDress.register();
 		LOGGER.debug("bounty attachments: {} {} {} {}", Bounties.ALL, Bounties.BOARDS, Bounties.BOARDS_AT, Bounties.ARMED);
 		Bounties.register();
+		BoardTerms.register(); // (village mods 4) notice terms, the held notice, hand-in at the board
 		MerchantOrders.register();
 		// BWM batch 5: the gloom of the dark (and its attachment)
 		Gloom.register();
@@ -1122,6 +1149,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// the magic rules and the first spells (patch 6): parts, gags, rituals, counterspell, dispel, cantrips, fields, the new scrolls
 		NewSpells.register();
 		com.jaymoskingdoms.traps.Traps.register();
+		HiddenSwitches.register();
+		com.jaymoskingdoms.illagers.ModEntityTypes.register();
 		DeathRites.register();
 		// the gone-before: remains in the wild, their last camps, the ruins' traps, the headless rider
 		Remains.register();

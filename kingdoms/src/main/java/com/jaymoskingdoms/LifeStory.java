@@ -3506,6 +3506,8 @@ public final class LifeStory {
 		Skills.refresh(player);
 		// the old life's companions live on, lost (docs/Pawn-Plan.md H3); before MCA forgets who they followed
 		Masterless.forsaken(player);
+		// their next of kin, asked of MCA's family tree before it forgets them (the bank pays out to them)
+		java.util.UUID heir = McaCompat.heir(player);
 		// Tiv: "EVERYTHING should be reset on a reincarnate". MCA's villagers forget the player (hearts, memories,
 		// relationships), the player leaves their party, and no captain remembers having met them. This runs before
 		// MCA's creator opens, so the reset can't wipe the new character being made in it.
@@ -3516,6 +3518,7 @@ public final class LifeStory {
 		Tales.reborn(player);
 		QuestPast.reborn(player);
 		Overheard.reborn(player);
+		Banks.reborn(player, heir);
 		Captains.forgetPlayer(player.level().getServer(), player);
 		// our own villagers and folk forget them too: whatever they remembered, suspected or swore against the old life
 		Recollections.bornAnew(player);

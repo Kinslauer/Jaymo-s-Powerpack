@@ -9,7 +9,8 @@ import net.minecraft.world.entity.player.Player;
  * a Cleric blesses the band, a Druid takes a shape or leaves it, a Monk readies a stunning blow or catches an arrow, a
  * Paladin lays on hands, a Ranger reads the ground, a Warlock settles with the patron, a Tinkerer reads its infusions. With sneak
  * held each does its other thing. The press arrives as {@link Spellcraft.Imbue}; this is where it is told apart. Sneak and the
- * key held ({@link #HOLD_TICKS}) is a third thing for a Druid and a Sorcerer ({@link #held}).
+ * key held ({@link #HOLD_TICKS}) is a third thing for a Druid and a Sorcerer ({@link #held}), and for a far-along Paladin,
+ * Cleric or Warlock it calls the patron's colossus ({@link com.jaymoskingdoms.colossus.Colossi#call}).
  */
 public final class Abilities {
 	/** Sneak and the class key held this long (ticks) is a hold ({@link #held}); let go sooner, it was sneak and a tap. */
@@ -24,7 +25,9 @@ public final class Abilities {
 	 */
 	public static boolean holds(Player player, boolean second) {
 		PlayerClass cls = second ? Classes.second(player) : Classes.classOf(player);
-		return cls == PlayerClass.DRUID || cls == PlayerClass.SORCERER && Spellcraft.hasWorking(Classes.optionOf(player, PlayerClass.SORCERER));
+		return cls == PlayerClass.DRUID || cls == PlayerClass.SORCERER && Spellcraft.hasWorking(Classes.optionOf(player, PlayerClass.SORCERER))
+			// a far-along Paladin, Cleric or Warlock calls the patron's colossus on the hold
+			|| com.jaymoskingdoms.colossus.Colossi.callable(player, cls);
 	}
 
 	/** Sneak and the class key held ({@link Spellcraft.Held}); answered as sneak and a tap when the class has nothing on the hold. */
@@ -33,7 +36,8 @@ public final class Abilities {
 			return;
 		}
 		PlayerClass cls = second ? Classes.second(player) : Classes.classOf(player);
-		if (cls == PlayerClass.DRUID && Druids.held(player) || cls == PlayerClass.SORCERER && Spellcraft.working(player)) {
+		if (cls == PlayerClass.DRUID && Druids.held(player) || cls == PlayerClass.SORCERER && Spellcraft.working(player)
+			|| com.jaymoskingdoms.colossus.Colossi.call(player, cls)) {
 			return;
 		}
 		if (second) {

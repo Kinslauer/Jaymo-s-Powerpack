@@ -35,6 +35,12 @@ final class PalMobAnimator {
 	private static final String[] BONES = {"head", "torso", "right_arm", "left_arm", "right_leg", "left_leg"};
 	/** Set if the library can't be used as expected (then nothing is animated). */
 	private static boolean broken;
+	/** Mobs holding a two-handed weapon in both hands between swings ({@link #hold}), by entity id. */
+	private static final Map<Integer, Held> HOLDING = new HashMap<>();
+	/** A hold not drawn for this long (client ticks: off screen, or a swing playing) is let go. */
+	private static final int HOLD_FORGET_TICKS = 100;
+	/** Client ticks counted, for {@link #HOLD_FORGET_TICKS}. */
+	private static long ticks;
 
 	private PalMobAnimator() {
 	}
@@ -51,6 +57,18 @@ final class PalMobAnimator {
 			for (int i = 0; i < BONES.length; i++) {
 				this.bones[i] = new PlayerAnimBone(BONES[i]);
 			}
+		}
+	}
+
+	/** A two-handed hold: its own controller looping the weapon's pose, which pose, and when it was last drawn. */
+	private static final class Held {
+		final Playing playing;
+		final String pose;
+		long seen;
+
+		Held(Playing playing, String pose) {
+			this.playing = playing;
+			this.pose = pose;
 		}
 	}
 
@@ -104,12 +122,55 @@ final class PalMobAnimator {
 		playing.controller.triggerAnimation(anim);
 	}
 
-	static void tick(@Nullable ClientLevel level) {
-		if (PLAYING.isEmpty()) {
-			return;
+	/**
+	 * This frame's two-handed hold for the mob ({@code pose}, Better Combat's pose for its weapon, looped on a controller
+	 * of its own), or null if the library can't play it.
+	 */
+	static @Nullable Object hold(LivingEntity entity, String pose, float partialTicks) {
+		if (broken) {
+			return null;
 		}
+		Held held = HOLDING.get(entity.getId());
+		if (held == null || !held.pose.equals(pose) || !held.playing.controller.isActive()) {
+			Identifier id = Identifier.tryParse(pose);
+			Animation anim = id == null ? null : PlayerAnimResources.getAnimation(id);
+			if (anim == null) {
+				return null;
+			}
+			Playing playing;
+			try {
+				playing = new Playing();
+			} catch (RuntimeException e) {
+				broken = true;
+				com.jaymoskingdoms.JaymosKingdoms.LOGGER.warn("Can't animate mobs' two-handed holds", e);
+				return null;
+			}
+			playing.controller.triggerAnimation(anim);
+			held = new Held(playing, pose);
+			HOLDING.put(entity.getId(), held);
+		}
+		held.seen = ticks;
+		held.playing.controller.setupAnim(new AnimationData(velocity(entity), partialTicks, false));
+		return held.playing;
+	}
+
+	static void tick(@Nullable ClientLevel level) {
+		ticks++;
 		if (level == null) {
 			PLAYING.clear();
+			HOLDING.clear();
+			return;
+		}
+		for (Iterator<Map.Entry<Integer, Held>> it = HOLDING.entrySet().iterator(); it.hasNext();) {
+			Map.Entry<Integer, Held> entry = it.next();
+			Entity entity = level.getEntity(entry.getKey());
+			if (!(entity instanceof LivingEntity living) || !living.isAlive() || ticks - entry.getValue().seen > HOLD_FORGET_TICKS) {
+				it.remove();
+				continue;
+			}
+			entry.getValue().playing.controller.tick(new AnimationData(velocity(living), 1.0F, false));
+		}
+		if (PLAYING.isEmpty()) {
 			return;
 		}
 		for (Iterator<Map.Entry<Integer, Playing>> it = PLAYING.entrySet().iterator(); it.hasNext();) {

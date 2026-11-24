@@ -70,10 +70,22 @@ def read_note(f):
 
 
 def pr_number(f):
-    """The PR that added the note, from its squash-merge subject `... (#1136)`."""
-    m = re.search(r"\(#(\d+)\)\s*$", git("log", "--diff-filter=A", "--format=%s", "-1", "--",
-                                          f.relative_to(ROOT).as_posix()))
-    return m.group(1) if m else None
+    """The PR that added the note, from its squash-merge subject `... (#1136)`. A PR merged with a merge commit added the
+    note in one of its own commits, which has no number: then it's the first merge after that commit that brought it
+    in (`... (#2073)` or `Merge pull request #2073 ...`)."""
+    path = f.relative_to(ROOT).as_posix()
+    added = git("log", "--diff-filter=A", "--format=%H%x09%s", "-1", "--", path)
+    if not added:
+        return None
+    sha, _, subject = added.partition("\t")
+    m = re.search(r"\(#(\d+)\)\s*$", subject)
+    if m:
+        return m.group(1)
+    for line in git("log", "--merges", "--ancestry-path", "--reverse", "--format=%s", f"{sha}..HEAD").splitlines():
+        m = re.search(r"\(#(\d+)\)\s*$", line) or re.match(r"Merge pull request #(\d+)", line)
+        if m:
+            return m.group(1)
+    return None
 
 
 def bump(v, level="patch"):

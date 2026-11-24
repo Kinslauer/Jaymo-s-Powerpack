@@ -1,0 +1,35 @@
+Art from three MIT-licensed Farmer's Delight add-ons, used unchanged (some renamed):
+
+Ocean's Delight by Scouter456 (MIT):
+  honey_fried_kelp.png, braised_sea_pickle.png, kelp_encrusted_cod.png, seagrass_salad.png, fugu_roll.png,
+  stuffed_cod.png (its cooked_stuffed_cod.png)
+Nether's Delight by Umpaz and SoyTutta (MIT):
+  magma_gelatin.png, warped_moldy_meat.png
+Ender's Delight by Ax3dGaming (MIT, as its Modrinth page gives it):
+  strange_eclair.png, and all of its other item, block and effect art, block models, item models and blockstates
+  (textures/item, textures/block, textures/mob_effect/phasing.png, models, items, blockstates: every file named for
+  one of its plants, dishes or blocks), its end_house structure (data/jaymoskitchen/structure/end_house.nbt) and the
+  numbers its dishes and plants are built on. A few files were renamed (chorus_crate_bottom, ender_pie_bottom,
+  ender_pie_side, endstone_stove_*), the chorus pie's block models are built on the Kitchen's own pie model, and the
+  end house's Farmer's Delight skillet is the Kitchen's frying pan; their ids were moved to the Kitchen's.
+
+chanterelle_stew.png and drift_jelly_pudding.png are our own (tools/gen_end_dishes.py): Ender's Delight has no such dishes.
+
+MIT License
+
+Copyright (c) Scouter456 (Ocean's Delight)
+Copyright (c) Umpaz, SoyTutta (Nether's Delight)
+Copyright (c) Ax3dGaming (Ender's Delight)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

@@ -57,7 +57,7 @@ public final class BaublesQuickEquip {
 			return false;
 		}
 		for (int i = 0; i < Baubles.SIZE; i++) {
-			if (Baubles.fits(i, stack)) {
+			if (Baubles.quickFits(i, stack)) {
 				return true;
 			}
 		}
@@ -68,7 +68,7 @@ public final class BaublesQuickEquip {
 	static boolean hasFreeSlot(Player player, ItemStack stack) {
 		List<ItemStack> worn = Baubles.worn(player);
 		for (int i = 0; i < Baubles.SIZE; i++) {
-			if (worn.get(i).isEmpty() && Baubles.fits(i, stack)) {
+			if (worn.get(i).isEmpty() && Baubles.quickFits(i, stack)) {
 				return true;
 			}
 		}

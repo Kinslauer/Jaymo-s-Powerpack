@@ -1,0 +1,31 @@
+# How the triceratops moves. Lengths are blocks, angles radians, times seconds.
+# Every key is a field of com.amberage.rig.DinoSpec; anything left out keeps its default.
+quadruped = true
+stride = 4.2
+hipHeight = 2.35
+lieHeight = 1.20
+sitDrop = 0.97
+thighSwing = 0.36
+shinFlex = 0.5
+ankleFlex = 0.3
+footFlex = 0.3
+armSwing = 0.36
+forearmFlex = 0.5
+bob = 0.05
+sway = 0.035
+runLean = 0.0
+tailIdle = 0.04
+tailWalk = 0.06
+jawMax = 0.4
+attackStyle = 1
+biteTime = 0.8
+biteHit = 0.4
+roarTime = 2.0
+specialStyle = 3
+specialTime = 1.0
+restNeck = 0.12
+sitArm = -0.9
+sitForearm = 2.4
+sitHand = -1.45
+lieNeck = 0.15
+headLift = 0.6

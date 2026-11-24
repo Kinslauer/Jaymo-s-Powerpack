@@ -1,0 +1,21 @@
+{
+  "values": [
+    "jaymospowers:raw_dino_meat",
+    "jaymospowers:cooked_dino_meat",
+    "jaymospowers:raw_prime_meat",
+    "jaymospowers:cooked_prime_meat",
+    "minecraft:beef",
+    "minecraft:cooked_beef",
+    "minecraft:porkchop",
+    "minecraft:cooked_porkchop",
+    "minecraft:mutton",
+    "minecraft:cooked_mutton",
+    "minecraft:chicken",
+    "minecraft:cooked_chicken",
+    "minecraft:rabbit",
+    "minecraft:cooked_rabbit",
+    "minecraft:cod",
+    "minecraft:salmon",
+    "minecraft:rotten_flesh"
+  ]
+}

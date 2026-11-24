@@ -92,6 +92,10 @@ public final class Classes {
 	/** Enderscape's stronghold library (optional; matched by id, never linked): its strongholds replace the vanilla ones. */
 	private static final ResourceKey<LootTable> ENDERSCAPE_LIBRARY = ResourceKey.create(Registries.LOOT_TABLE,
 		Identifier.fromNamespaceAndPath("enderscape", "stronghold/chest/library"));
+	/** Stellarity's stronghold libraries, the halls' and the portal room's (optional; by id): its strongholds are the pack's. */
+	private static final ResourceKey<LootTable> STELLARITY_LIBRARY = ResourceKey.create(Registries.LOOT_TABLE,
+		Identifier.fromNamespaceAndPath("stellarity", "stronghold/library")), STELLARITY_PORTAL_LIBRARY = ResourceKey.create(Registries.LOOT_TABLE,
+		Identifier.fromNamespaceAndPath("stellarity", "stronghold/portal_room/library"));
 	/** The chance a rare chest holds a wizard's staff (a Mage's "find one"); a slain court wizard drops his this often. */
 	static final float STAFF_LOOT_CHANCE = 0.1F, STAFF_DROP_CHANCE = 0.5F;
 
@@ -312,7 +316,7 @@ public final class Classes {
 		});
 		// a writ, or a wizard's staff, in the rarest chests
 		LootTableEvents.MODIFY_DROPS.register((table, context, drops) -> {
-			if (table.unwrapKey().filter(k -> k.equals(BuiltInLootTables.STRONGHOLD_LIBRARY) || k.equals(ENDERSCAPE_LIBRARY) || k.equals(BuiltInLootTables.ANCIENT_CITY)
+			if (table.unwrapKey().filter(k -> k.equals(BuiltInLootTables.STRONGHOLD_LIBRARY) || k.equals(ENDERSCAPE_LIBRARY) || k.equals(STELLARITY_LIBRARY) || k.equals(STELLARITY_PORTAL_LIBRARY) || k.equals(BuiltInLootTables.ANCIENT_CITY)
 				|| k.equals(BuiltInLootTables.WOODLAND_MANSION)).isPresent()) {
 				if (context.getRandom().nextFloat() < WRIT_LOOT_CHANCE) {
 					drops.add(new ItemStack(WRIT));

@@ -140,6 +140,8 @@ public final class Wounds {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register(Wounds::onDamage);
 		// a blast close by knocks you out cold
 		BlastOut.register();
+		// a hard blow to the legs fells you (ragdoll, prone, roll up)
+		LegFell.register();
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			if (++tickCounter < PLAYER_RECONCILE_TICKS) {
 				return;
@@ -824,6 +826,11 @@ public final class Wounds {
 		// the last of its legs gone black: a giant can't stand (Giants), the Great Ape goes down
 		if (!blocked) {
 			Giants.afterHit(victim, plan, was, points);
+		}
+		// a hard blow to a leg takes it off its feet: crippled, not downed (LegFell)
+		if (!blocked && landed != null && plan.index(landed) >= 0) {
+			int leg = plan.index(landed);
+			LegFell.struck(level, victim, source, landed, loss, max, was[leg] > EPS && points[leg] <= EPS);
 		}
 		// a heavy blow to a bare head may take an eye
 		if (!blocked && landed == BodyPart.HEAD && victim instanceof ServerPlayer struck && victim.isAlive()) {

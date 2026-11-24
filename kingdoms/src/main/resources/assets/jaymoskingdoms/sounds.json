@@ -5329,5 +5329,243 @@
 				"name": "jaymoskingdoms:rubber/pop_3"
 			}
 		]
+	},
+	"illager.surrendered.ambient": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/surrendered/ambient1",
+			"jaymoskingdoms:illagers/mob/surrendered/ambient2",
+			"jaymoskingdoms:illagers/mob/surrendered/ambient3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.surrendered.ambient"
+	},
+	"illager.surrendered.hurt": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/surrendered/hurt1",
+			"jaymoskingdoms:illagers/mob/surrendered/hurt2",
+			"jaymoskingdoms:illagers/mob/surrendered/hurt3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.surrendered.hurt"
+	},
+	"illager.surrendered.charge": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/surrendered/charge"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.surrendered.charge"
+	},
+	"illager.surrendered.death": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/surrendered/death"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.surrendered.death"
+	},
+	"illager.archivist.ambient": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/archivist/idle1",
+			"jaymoskingdoms:illagers/mob/archivist/idle2",
+			"jaymoskingdoms:illagers/mob/archivist/idle3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.archivist.ambient"
+	},
+	"illager.archivist.hurt": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/archivist/hurt1",
+			"jaymoskingdoms:illagers/mob/archivist/hurt2",
+			"jaymoskingdoms:illagers/mob/archivist/hurt3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.archivist.hurt"
+	},
+	"illager.archivist.death": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/archivist/death1",
+			"jaymoskingdoms:illagers/mob/archivist/death2",
+			"jaymoskingdoms:illagers/mob/archivist/death3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.archivist.death"
+	},
+	"illager.invoker.fangs": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/invoker/fangs"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.invoker.fangs"
+	},
+	"illager.invoker.hurt": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/invoker/hurt1",
+			"jaymoskingdoms:illagers/mob/invoker/hurt2"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.invoker.hurt"
+	},
+	"illager.invoker.death": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/invoker/death"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.invoker.death"
+	},
+	"illager.invoker.ambient": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/invoker/idle1",
+			"jaymoskingdoms:illagers/mob/invoker/idle2",
+			"jaymoskingdoms:illagers/mob/invoker/idle3",
+			"jaymoskingdoms:illagers/mob/invoker/idle4"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.invoker.ambient"
+	},
+	"illager.invoker.complete_cast": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/invoker/completecast"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.invoker.complete_cast"
+	},
+	"illager.invoker.teleport_cast": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/invoker/teleport_cast"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.invoker.teleport_cast"
+	},
+	"illager.invoker.fangs_cast": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/invoker/fangs_cast"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.invoker.fangs_cast"
+	},
+	"illager.invoker.big_cast": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/invoker/big_cast"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.invoker.big_cast"
+	},
+	"illager.invoker.summon_cast": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/invoker/summon_cast"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.invoker.summon_cast"
+	},
+	"illager.invoker.shield_break": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/invoker/shield_break"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.invoker.shield_break"
+	},
+	"illager.illager_brute.ambient": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/illager_brute/idle1",
+			"jaymoskingdoms:illagers/mob/illager_brute/idle2",
+			"jaymoskingdoms:illagers/mob/illager_brute/idle3",
+			"jaymoskingdoms:illagers/mob/illager_brute/idle4",
+			"jaymoskingdoms:illagers/mob/illager_brute/idle5"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.illager_brute.ambient"
+	},
+	"illager.illager_brute.hurt": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/illager_brute/hurt1",
+			"jaymoskingdoms:illagers/mob/illager_brute/hurt2",
+			"jaymoskingdoms:illagers/mob/illager_brute/hurt3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.illager_brute.hurt"
+	},
+	"illager.illager_brute.death": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/illager_brute/death1"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.illager_brute.death"
+	},
+	"illager.provoker.idle": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/provoker/idle1",
+			"jaymoskingdoms:illagers/mob/provoker/idle2",
+			"jaymoskingdoms:illagers/mob/provoker/idle3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.provoker.idle"
+	},
+	"illager.provoker.hurt": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/provoker/hurt1",
+			"jaymoskingdoms:illagers/mob/provoker/hurt2",
+			"jaymoskingdoms:illagers/mob/provoker/hurt3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.provoker.hurt"
+	},
+	"illager.provoker.death": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/provoker/death"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.provoker.death"
+	},
+	"illager.provoker.celebrate": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/provoker/celebrate"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.provoker.celebrate"
+	},
+	"illager.basher.idle": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/basher/idle1",
+			"jaymoskingdoms:illagers/mob/basher/idle2",
+			"jaymoskingdoms:illagers/mob/basher/idle3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.basher.idle"
+	},
+	"illager.basher.hurt": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/basher/hurt1",
+			"jaymoskingdoms:illagers/mob/basher/hurt2",
+			"jaymoskingdoms:illagers/mob/basher/hurt3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.basher.hurt"
+	},
+	"illager.basher.death": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/basher/death"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.basher.death"
+	},
+	"illager.basher.celebrate": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/basher/celebrate"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.basher.celebrate"
+	},
+	"illager.firecaller.idle": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/firecaller/idle1",
+			"jaymoskingdoms:illagers/mob/firecaller/idle2",
+			"jaymoskingdoms:illagers/mob/firecaller/idle3",
+			"jaymoskingdoms:illagers/mob/firecaller/idle4"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.firecaller.idle"
+	},
+	"illager.firecaller.hurt": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/firecaller/hurt1",
+			"jaymoskingdoms:illagers/mob/firecaller/hurt2",
+			"jaymoskingdoms:illagers/mob/firecaller/hurt3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.firecaller.hurt"
+	},
+	"illager.firecaller.death": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/firecaller/death1",
+			"jaymoskingdoms:illagers/mob/firecaller/death2"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.firecaller.death"
+	},
+	"illager.firecaller.cast": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/firecaller/cast"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.firecaller.cast"
+	},
+	"illager.sorcerer.cast": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/sorcerer/cast"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.sorcerer.cast"
+	},
+	"illager.sorcerer.complete_cast": {
+		"sounds": [
+			"jaymoskingdoms:illagers/mob/sorcerer/completecast"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.illager.sorcerer.complete_cast"
 	}
 }

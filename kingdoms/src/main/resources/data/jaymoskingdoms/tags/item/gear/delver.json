@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymospowers:delvers_ring",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:divers_circlet",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:reed_breather",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:frogskin_flippers",
+      "required": false
+    }
+  ]
+}

@@ -202,6 +202,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.cloudbottle.CloudBottle.init();
 		// the Verdant World's strange growth: mycotic and pulse forests, the stone garden
 		com.jaymospowers.eden.Eden.init();
+		// Amber Age's dinosaurs, living in the Verdant World's countries
+		com.jaymospowers.dino.Dino.init();
 		com.jaymospowers.ground.Panning.init();
 		com.jaymospowers.rough.SleepingBag.init();
 		com.jaymospowers.rough.ParagliderItem.init();
@@ -270,6 +272,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.compat.HomesteadsCompat.init();
 		// (0.15.58) the Aether's blocks and items (its dimension and the way in are Wind's, power/wind/aether)
 		com.jaymospowers.aether.Aether.init();
+		// Alex's Caves: its Magnetic Caves in the Aether's magnetic stone (needs the Aether's blocks)
+		com.jaymospowers.compat.AlexsCavesCompat.init();
 		// (0.19.87) jewellery: the lapidary wheel, the jeweller's bench, forged frames and gem baubles
 		com.jaymospowers.jewellery.Jewellery.init();
 		// (0.17.115) the 26.4 snapshots' ice: Freezing and its potion, ice balls, the Frostbite, icicles and the ice blocks
@@ -291,6 +295,7 @@ public class JaymosPowers implements ModInitializer {
 		// Kitchen's ragdolls (a crash, a blast...) leave alone anyone a power has hold of
 		// (0.19.63) armour gets dirty and washes clean; wet weather's puddles and underwater light (client/wet)
 		com.jaymospowers.core.wet.WetParticles.init();
+		com.jaymospowers.core.air.AirParticles.init();
 		com.jaymospowers.core.wet.ArmourGrime.init();
 		// wet and soaked, rust on metal armour, scrubbing with a straw wisp or sand
 		com.jaymospowers.core.wet.Wet.init();
@@ -322,7 +327,7 @@ public class JaymosPowers implements ModInitializer {
 		String[] holders = {
 			"boxing.PressurePoints", "core.wounds.LastHold", "mutation.ConjoinedTwins", "fishing.LureDepth",
 			"core.OneHolder", "costume.MaskMotion",
-			"core.Affinity", "divine.DivineSense", "dogs.Dogs", "core.wet.Smell", "compat.HomesteadsCompat", "core.BeamClash", "core.BlockCluster", "core.Callings", "core.Carry", "core.Sling", "core.CarryBlock", "core.Perch", "core.Crawl", "core.Dismember", "core.Prosthetics", "core.FlightRoll", "core.Fate", "core.HiddenArmor", "core.Ledge", "core.ProneHaul", "core.LockOn", "core.Mastery", "core.Meditate", "core.Powers", "core.Stance", "core.SwallowedPower", "core.wounds.Wounds", "core.wounds.Downed", "core.wounds.Stubborn", "core.wounds.DownedLie", "core.wounds.DownedStruggle", "core.wounds.Mortality", "core.wounds.Revival", "core.wounds.Limbo", "core.wounds.OutOfBody", "core.wounds.Karma", "core.wounds.Afflictions", "core.wounds.Scars", "core.wounds.Breaks", "core.wounds.Adrenaline", "core.wounds.Fainting", "core.wounds.Exhaustion", "core.wounds.SpinDizzy", "core.wounds.Bleeding", "core.wounds.Treatment", "core.wounds.WoundMarks", "core.wounds.Pain", "core.wounds.SelfRevive", "core.wounds.Battered", "core.wounds.Tripped", "core.wounds.Tending", "core.wounds.HeartCrystals", "core.blood.Bloodied", "core.wet.ArmourGrime", "core.wet.Wet", "core.blood.BleedOut", "core.finisher.Finishers", "core.finisher.Prompts", "core.gifted.Gifted", "core.gifted.GiftedCostume", "core.mobs.BlightMobs", "combat.Guard", "combat.PassiveBlocks", "combat.HitStreak", "combat.Armed", "combat.BladeStyle", "armory.Twinblade",
+			"core.Affinity", "divine.DivineSense", "dogs.Dogs", "core.wet.Smell", "compat.HomesteadsCompat", "core.BeamClash", "core.BlockCluster", "core.Callings", "core.Carry", "core.Sling", "core.CarryBlock", "core.Perch", "core.Crawl", "core.Dismember", "core.Prosthetics", "core.FlightRoll", "core.Fate", "core.HiddenArmor", "core.Ledge", "core.ProneHaul", "core.LockOn", "core.Mastery", "core.Meditate", "core.Powers", "core.Stance", "core.SwallowedPower", "core.wounds.Wounds", "core.wounds.Downed", "core.wounds.Stubborn", "core.wounds.DownedLie", "core.wounds.DownedStruggle", "core.wounds.Mortality", "core.wounds.Revival", "core.wounds.Limbo", "core.wounds.OutOfBody", "core.wounds.Karma", "core.wounds.Afflictions", "core.wounds.Scars", "core.wounds.Breaks", "core.wounds.Adrenaline", "core.wounds.Fainting", "core.wounds.Exhaustion", "core.wounds.SpinDizzy", "core.wounds.Bleeding", "core.wounds.Treatment", "core.wounds.WoundMarks", "core.wounds.Pain", "core.wounds.SelfRevive", "core.wounds.Battered", "core.wounds.Tripped", "core.wounds.LegFell", "core.wounds.Tending", "core.wounds.HeartCrystals", "core.blood.Bloodied", "core.wet.ArmourGrime", "core.wet.Wet", "core.blood.BleedOut", "core.finisher.Finishers", "core.finisher.Prompts", "core.gifted.Gifted", "core.gifted.GiftedCostume", "core.mobs.BlightMobs", "combat.Guard", "combat.PassiveBlocks", "combat.HitStreak", "combat.Armed", "combat.BladeStyle", "armory.Twinblade",
 			"power.arsenal.ArsenalArmory", "power.arsenal.GlassGauntlet", "power.arsenal.ArsenalAnywhere", "power.arsenal.ArsenalPower", "power.arsenal.ArsenalReach", "power.arsenal.ArsenalRelics",
 			"power.arsenal.ArsenalStash", "power.arsenal.ArsenalPocket", "power.arsenal.ArsenalEmber", "power.arsenal.HundredBlades", "power.arsenal.ArsenalGates", "power.arsenal.ArsenalVoid",
 			"power.arsenal.ArsenalFlintlock", "power.arsenal.ArsenalDamocles", "power.arsenal.ArsenalCannons", "power.arsenal.ArsenalWing", "power.arsenal.ArsenalWingMoves", "power.arsenal.ArsenalGift", "power.arsenal.ArsenalStorm", "power.arsenal.ArsenalRide", "power.arsenal.ArsenalChains", "power.arsenal.ArsenalPlaces", "power.arsenal.ArsenalStanding",

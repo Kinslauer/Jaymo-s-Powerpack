@@ -1426,7 +1426,8 @@ public final class Approaches {
 				a.mob.setTarget(player);
 			}
 		} else if (option == 1) {
-			if (suspected(player, f.id(), now)) {
+			// (| not ||: marked goods are taken back whether or not they were suspected)
+			if (suspected(player, f.id(), now) | StolenGoods.confiscate(level, player, f) > 0) {
 				// (0.7.490) in the town's coin first, then emeralds
 				int fine = Currencies.fine(level.getServer(), player, f, FINE);
 				toTreasury(level, f, fine);
@@ -1469,8 +1470,9 @@ public final class Approaches {
 				if (option == 0) {
 					// (0.7.535) the Ash Whisperer's tenth: a pack opened to a guard
 					Commandments.act(player, "searched");
-					if (suspected(player, f.id(), now)) {
-						// (what was taken turns up: it goes back, with a fine)
+					// (| not ||: marked goods are taken back whether or not they were suspected)
+					if (suspected(player, f.id(), now) | StolenGoods.confiscate(level, player, f) > 0) {
+						// (what was taken turns up: what carries the realm's mark goes back, with a fine)
 						// (0.7.490) in the town's coin first, then emeralds
 						int fine = Currencies.fine(level.getServer(), player, f, FINE);
 						toTreasury(level, f, fine);

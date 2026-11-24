@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "jaymoskitchen:stuffed_shulker",
+        "state": {
+          "servings": "4"
+        }
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskitchen:stuffed_shulker"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymoskitchen:blocks/stuffed_shulker"
+}

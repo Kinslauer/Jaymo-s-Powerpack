@@ -131,6 +131,13 @@ public final class BodyWeapons {
 		int cap = ToolBeltCompat.wears(player) ? Home.values().length : MAX_SHOWN;
 		Home[] taken = new Home[Inventory.getSelectionSize()];
 		boolean[] used = new boolean[Home.values().length];
+		// (Vanilla+) the back slot's weapon or tool first: its kind's first home on the back (a pistol, its first home), the
+		// hotbar's taking the rest round it; it isn't on the hotbar, so it never shows twice
+		ItemStack back = com.jaymospowers.baubles.Baubles.back(player);
+		Home backHome = backHome(kind(back));
+		if (backHome != null) {
+			used[backHome.ordinal()] = true;
+		}
 		for (int slot = 0; slot < taken.length; slot++) {
 			Kind kind = kind(inventory.getItem(slot));
 			if (kind == null) {
@@ -146,6 +153,10 @@ public final class BodyWeapons {
 		}
 		List<ItemStack> homes = new ArrayList<>(Collections.nCopies(Home.values().length, ItemStack.EMPTY));
 		int shown = 0;
+		if (backHome != null) {
+			homes.set(backHome.ordinal(), back.copyWithCount(1));
+			shown++;
+		}
 		for (int slot = 0; slot < taken.length && shown < cap; slot++) {
 			if (taken[slot] != null && slot != selected) {
 				homes.set(taken[slot].ordinal(), inventory.getItem(slot).copyWithCount(1));
@@ -153,6 +164,24 @@ public final class BodyWeapons {
 			}
 		}
 		return shown == 0 ? null : homes;
+	}
+
+	/** The home the back slot's item of {@code kind} takes: its first on the back, else its first; null for none. */
+	private static @Nullable Home backHome(@Nullable Kind kind) {
+		if (kind == null) {
+			return null;
+		}
+		for (Home home : kind.homes) {
+			if (home.name().startsWith("BACK")) {
+				return home;
+			}
+		}
+		return kind.homes[0];
+	}
+
+	/** Whether {@code stack} is a weapon or tool the body carries (what the Baubles back slot takes). */
+	public static boolean carriedOnBody(ItemStack stack) {
+		return kind(stack) != null;
 	}
 
 	/** Which kind of carried thing {@code stack} is, or null if it isn't shown on the body. */

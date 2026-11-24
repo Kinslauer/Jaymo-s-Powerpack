@@ -124,6 +124,14 @@ public final class ZFighterStarts {
 	/** Spots tried for the portal. */
 	static final int PORTAL_TRIES = 16;
 	/**
+	 * The Forbidden Castle (Incendium): how many rings of its spacing round the Gloam are looked at (a prediction, no chunk
+	 * made), the Nether height its biome is read at (its fixed start height), and how far round the throne hall's middle a
+	 * floor is looked for (blocks).
+	 */
+	static final int CASTLE_RINGS = 2, CASTLE_Y = 33, HALL_REACH = 6;
+	static final ResourceKey<net.minecraft.world.level.levelgen.structure.Structure> FORBIDDEN_CASTLE = ResourceKey.create(Registries.STRUCTURE,
+		net.minecraft.resources.Identifier.fromNamespaceAndPath("incendium", "forbidden_castle"));
+	/**
 	 * (Tiv: every player's start their own) A Verdant village someone else started in is looked past this many times, each
 	 * from this much further off (blocks); a demon hall someone else started in, for a new one this far off (blocks, each try).
 	 */
@@ -635,6 +643,21 @@ public final class ZFighterStarts {
 			gloam = demonBiome(nether, from, b -> ZFighterDemonRealm.BIOMES.stream().anyMatch(b::is));
 		}
 		BlockPos near = gloam != null ? gloam : from;
+		// Andy (2026-11-19): "place our demon king in one of its new structures and make us spawn there with that start". With
+		// Incendium, the Master of the Gloam keeps his court in the Forbidden Castle (its castles rise in the Gloam too):
+		// you start in its throne hall, beside him. Without one near, the demon hall as before.
+		BlockPos hall = gloam == null ? null : throneHall(nether, gloam, free);
+		if (hall != null) {
+			JaymosPowers.LOGGER.info("Demon master start for {}: the Forbidden Castle's throne hall at {}", player.getGameProfile().name(), hall);
+			ZFighterDemonRealm.keepPost(nether, hall);
+			put(player, nether, hall);
+			player.setAttached(WARD, true);
+			ZFighterDemonRealm.master(nether, hall);
+			ItemStack potion = new ItemStack(Items.POTION);
+			potion.set(DataComponents.POTION_CONTENTS, new PotionContents(Potions.FIRE_RESISTANCE));
+			give(player, potion);
+			return true;
+		}
 		// (Tiv) a hall nobody else was raised in: one someone else's is passed over for the next, or a new one raised
 		BlockPos village = gloam == null ? null : ZFighterDemonRealm.raiseHome(nether, near, DEMON_CELLS, false, free);
 		if (village == null) {
@@ -662,6 +685,76 @@ public final class ZFighterStarts {
 		potion.set(DataComponents.POTION_CONTENTS, new PotionContents(Potions.FIRE_RESISTANCE));
 		give(player, potion);
 		return true;
+	}
+
+	/**
+	 * The throne hall of the Forbidden Castle nearest {@code gloam} that stands in the Gloam and is nobody else's start: a
+	 * floor in the hall with another two blocks east of it (where his master stands, {@code ZFighterDemonRealm.masterSpot}).
+	 * Null without Incendium, without a castle in {@link #CASTLE_RINGS} rings, or without a floor in its hall. The castle is
+	 * found by prediction ({@code Scout}); only its own chunks are made.
+	 */
+	private static @Nullable BlockPos throneHall(ServerLevel nether, BlockPos gloam, java.util.function.BiPredicate<ServerLevel, BlockPos> free) {
+		Optional<net.minecraft.core.Holder.Reference<net.minecraft.world.level.levelgen.structure.Structure>> castle =
+			nether.registryAccess().lookupOrThrow(Registries.STRUCTURE).get(FORBIDDEN_CASTLE);
+		if (castle.isEmpty()) {
+			return null;
+		}
+		long started = System.nanoTime();
+		com.mojang.datafixers.util.Pair<BlockPos, net.minecraft.core.Holder<net.minecraft.world.level.levelgen.structure.Structure>> found =
+			com.jaymospowers.core.Scout.find(nether, Level.NETHER, net.minecraft.core.HolderSet.direct(castle.get()), gloam, CASTLE_RINGS, CASTLE_Y);
+		JaymosPowers.LOGGER.info("Demon master start: castle search from {} took {} ms, found {}", gloam, (System.nanoTime() - started) / 1_000_000L,
+			found == null ? "nothing" : found.getFirst());
+		if (found == null) {
+			return null;
+		}
+		net.minecraft.world.level.ChunkPos chunk = net.minecraft.world.level.ChunkPos.containing(found.getFirst());
+		net.minecraft.world.level.levelgen.structure.StructureStart start = nether.getChunk(chunk.x(), chunk.z(),
+			net.minecraft.world.level.chunk.status.ChunkStatus.STRUCTURE_STARTS, true).getStartForStructure(castle.get().value());
+		if (start == null || !start.isValid()) {
+			return null;
+		}
+		for (net.minecraft.world.level.levelgen.structure.StructurePiece piece : start.getPieces()) {
+			// a jigsaw piece's element names its template: Single[Left[incendium:castle/rooms/2x2/throne_room]]
+			if (!(piece instanceof net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece pool)
+				|| !pool.getElement().toString().contains("throne_room")) {
+				continue;
+			}
+			net.minecraft.world.level.levelgen.structure.BoundingBox box = piece.getBoundingBox();
+			BlockPos middle = box.getCenter();
+			if (ZFighterDemonRealm.layerAt(nether, middle) != 0 || !free.test(nether, middle)) {
+				return null;
+			}
+			// the hall's chunks made in full, so the castle's blocks are there to stand on
+			for (int cx = box.minX() >> 4; cx <= box.maxX() >> 4; cx++) {
+				for (int cz = box.minZ() >> 4; cz <= box.maxZ() >> 4; cz++) {
+					nether.getChunk(cx, cz);
+				}
+			}
+			for (int r = 0; r <= HALL_REACH; r++) {
+				for (int dx = -r; dx <= r; dx++) {
+					for (int dz = -r; dz <= r; dz++) {
+						if (Math.max(Math.abs(dx), Math.abs(dz)) != r) {
+							continue;
+						}
+						for (int y = box.minY() + 1; y <= box.maxY() - 2; y++) {
+							BlockPos at = new BlockPos(middle.getX() + dx, y, middle.getZ() + dz);
+							if (box.isInside(at.east(2)) && standable(nether, at) && standable(nether, at.east(2))) {
+								return at;
+							}
+						}
+					}
+				}
+			}
+			return null;
+		}
+		return null;
+	}
+
+	/** Solid ground under {@code at} and two blocks of air from it up. */
+	private static boolean standable(ServerLevel level, BlockPos at) {
+		return level.getBlockState(at.below()).isFaceSturdy(level, at.below(), Direction.UP)
+			&& level.getBlockState(at).getCollisionShape(level, at).isEmpty() && level.getBlockState(at).getFluidState().isEmpty()
+			&& level.getBlockState(at.above()).getCollisionShape(level, at.above()).isEmpty();
 	}
 
 	/** (0.20.114) The nearest spot round {@code from}, at its height, whose biome {@code want}s; null if none within {@link #DEMON_SEARCH}. */

@@ -296,6 +296,14 @@ public final class WebSymbioteClient {
 	static final double TAKEOVER_STOP = 1.5;
 	/** Held still while the tendrils rip: horizontal speed kept per tick. */
 	static final double RIP_HOLD = 0.5;
+	/**
+	 * A waypoint more than {@code GAP_SPAN} blocks across from the one before it is a gap the server planned a jump over:
+	 * it bounds there at once ({@link #startBound}). The red one's pounce takes in a prey this close in height
+	 * ({@code POUNCE_MAX_DY} blocks).
+	 */
+	static final double GAP_SPAN = 1.5, POUNCE_MAX_DY = 1.5;
+	/** When a gap's bound may next be tried (player tick), and when the red one last pounced. */
+	private static int gapRetryAt, pounceAt = -1000;
 	/** The straight-line fallback: how far ahead it looks for a way (blocks), and the turns it tries, nearest first (degrees). */
 	private static final double TAKEOVER_LOOK = 0.7;
 	private static final float[] TAKEOVER_DETOURS = {0.0F, 30.0F, -30.0F, 60.0F, -60.0F, 90.0F, -90.0F, 125.0F, -125.0F};
@@ -1139,11 +1147,13 @@ public final class WebSymbioteClient {
 				wet[i] = water;
 				prev = at;
 			}
-			double min = stuck ? BOUND_STUCK_RANGE : BOUND_MIN_RANGE;
 			for (int j = n - 1; j >= pathIndex && plan == null; j--) {
 				Vec3 at = pathNodes.get(j);
 				double d = at.subtract(player.position()).horizontalDistance();
-				if (d < min || d > BOUND_MAX_RANGE || !away && !far && walk[j] < d * BOUND_SHORTCUT && !wet[j]) {
+				// (a waypoint across a gap is always one to bound for, from close by: no walking round it)
+				boolean gap = gapAt(player, j);
+				double min = stuck || gap ? BOUND_STUCK_RANGE : BOUND_MIN_RANGE;
+				if (d < min || d > BOUND_MAX_RANGE || !away && !far && !gap && walk[j] < d * BOUND_SHORTCUT && !wet[j]) {
 					continue;
 				}
 				if (far && chased.position().distanceTo(at) < TAKEOVER_STOP) {
@@ -1166,15 +1176,60 @@ public final class WebSymbioteClient {
 				stuckSince = player.tickCount;
 			} else {
 				boundReadyAt = player.tickCount + BOUND_RETRY;
+				gapRetryAt = boundReadyAt;
 			}
 			return false;
 		}
+		beginBound(player, plan);
+		return true;
+	}
+
+	/** Coils for {@code plan}: the crouch shown to everyone, held still but for a little give. */
+	private static void beginBound(LocalPlayer player, Bound plan) {
 		bound = plan;
 		boundCoil = 0;
 		if (ClientPlayNetworking.canSend(WebNet.ChargeHold.TYPE)) {
 			ClientPlayNetworking.send(new WebNet.ChargeHold(true));
 		}
 		holdCoiled(player);
+	}
+
+	/** Waypoint {@code j} is more than {@code GAP_SPAN} blocks across from the one before it (or from you), level or lower: a gap the server planned a jump over. */
+	private static boolean gapAt(LocalPlayer player, int j) {
+		if (j < 0 || j >= pathNodes.size()) {
+			return false;
+		}
+		Vec3 at = pathNodes.get(j);
+		Vec3 before = j > 0 ? pathNodes.get(j - 1) : player.position();
+		return at.subtract(before).horizontalDistance() > GAP_SPAN && at.y <= before.y + 1.0;
+	}
+
+	/**
+	 * The red one's pounce (see {@code WebRedHunt}): the last stretch at its prey in one bound, {@code LUNGE_MIN} to
+	 * {@code LUNGE_MAX} blocks out, about level with it and in sight, every {@code LUNGE_EVERY} ticks at most, landing
+	 * {@link #TAKEOVER_STOP} short of its feet. The coil, the sounds and the screen kick are the bound's. True if it began.
+	 */
+	private static boolean pounce(LocalPlayer player, Entity target, boolean away) {
+		if (away || target == player || !player.onGround() || player.isInWater() || leapCoil >= 0 || boundCoil >= 0 || boundFlight >= 0
+			|| player.tickCount - pounceAt < com.jaymospowers.power.web.WebRedHunt.LUNGE_EVERY
+			|| com.jaymospowers.power.web.WebSymbioteStrains.of(player) != com.jaymospowers.power.web.WebSymbioteStrain.RED) {
+			return false;
+		}
+		Vec3 to = target.position().subtract(player.position());
+		double d = to.horizontalDistance();
+		if (d < com.jaymospowers.power.web.WebRedHunt.LUNGE_MIN || d > com.jaymospowers.power.web.WebRedHunt.LUNGE_MAX
+			|| Math.abs(to.y) > POUNCE_MAX_DY || !player.hasLineOfSight(target)) {
+			return false;
+		}
+		Vec3 stop = target.position().subtract(new Vec3(to.x, 0.0, to.z).scale(TAKEOVER_STOP / d));
+		Bound plan = planBound(player, new Vec3(stop.x, target.getY(), stop.z));
+		if (plan == null) {
+			// (no clear arc from here: it looks again in a moment)
+			pounceAt = player.tickCount - com.jaymospowers.power.web.WebRedHunt.LUNGE_EVERY + BOUND_RETRY;
+			return false;
+		}
+		pounceAt = player.tickCount;
+		beginBound(player, plan);
 		return true;
 	}
 
@@ -1438,7 +1493,8 @@ public final class WebSymbioteClient {
 			resyncPath(player);
 		}
 		// no headway for a while (and not where it wants to be, or busy): it leaps for it
-		boolean settled = boundCoil >= 0 || boundFlight >= 0 || leapCoil >= 0 || target == player || pathMode == WebNet.TakeoverPath.RIP
+		boolean countering = player.getAttached(com.jaymospowers.power.web.WebCounter.ACTIVE) != null;
+		boolean settled = boundCoil >= 0 || boundFlight >= 0 || leapCoil >= 0 || target == player || pathMode == WebNet.TakeoverPath.RIP || countering
 			|| !takeoverFlee && target.position().subtract(player.position()).horizontalDistance() < BOUND_STUCK_NEAR
 			// (0.15.69) near but up a ledge or behind a wall isn't there: that's stuck too
 			&& Math.abs(target.getY() - player.getY()) < BOUND_STUCK_NEAR_Y && player.hasLineOfSight(target);
@@ -1458,9 +1514,17 @@ public final class WebSymbioteClient {
 		} else if (pathMode == WebNet.TakeoverPath.RIP) {
 			endBound();
 			holdForRip(player);
+		} else if (countering) {
+			// a counter's running (the tendrils seize, haul, strike): still, eyes on it, so it doesn't fight the counter's own shove
+			endBound();
+			sprint(player, false);
+			turnToward(player, target.getBoundingBox().getCenter().subtract(player.getEyePosition()), TAKEOVER_TURN, true);
 		} else if (tickBound(player, target)) {
 			// coiled, or in the air
-		} else if (pathMode == WebNet.TakeoverPath.PATH && player.tickCount >= boundReadyAt && startBound(player, away, false)) {
+		} else if (pounce(player, target, away)) {
+			// the red one's last stretch, in one bound
+		} else if (pathMode == WebNet.TakeoverPath.PATH && (player.tickCount >= boundReadyAt || player.tickCount >= gapRetryAt && gapAt(player, pathIndex))
+			&& startBound(player, away, false)) {
 			// off on a bound along the way
 		} else if (stuck && startBound(player, true, true)) {
 			// stuck: a leap for it

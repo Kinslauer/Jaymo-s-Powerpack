@@ -1,0 +1,53 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymospowers:smithing_gloves",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:smelters_bracer",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:fishers_hat",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:alewife_cap",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:riders_hat",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:villager_hat",
+      "required": false
+    },
+    {
+      "id": "travelertoolbelt:belt",
+      "required": false
+    },
+    {
+      "id": "travelertoolbelt:copper_belt",
+      "required": false
+    },
+    {
+      "id": "travelertoolbelt:iron_belt",
+      "required": false
+    },
+    {
+      "id": "travelertoolbelt:gold_belt",
+      "required": false
+    },
+    {
+      "id": "travelertoolbelt:diamond_belt",
+      "required": false
+    },
+    {
+      "id": "travelertoolbelt:netherite_belt",
+      "required": false
+    }
+  ]
+}

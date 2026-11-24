@@ -110,6 +110,7 @@ public final class Scout {
 		spots.sort(Comparator.comparingInt(Spot::distance));
 		ChunkGenerator generator = ground.generator();
 		RandomState random = ground.randomState();
+		net.minecraft.world.level.biome.Climate.Sampler climate = null;
 		for (Spot spot : spots) {
 			if (skip.test(spot.chunk())) {
 				continue;
@@ -125,9 +126,25 @@ public final class Scout {
 					continue;
 				}
 				StructureCheckResult result = structures.checkStructurePresence(spot.chunk(), structure.value(), spot.placement(), false);
-				// START_PRESENT: made already; CHUNK_LOAD_NEEDED: vanilla's check says one is made there (the chunk isn't made yet)
-				if (result != StructureCheckResult.START_NOT_PRESENT) {
+				// START_PRESENT: made already; CHUNK_LOAD_NEEDED: vanilla's check says one could be made there (the chunk isn't
+				// made yet), which in a set of many (the shared village pool) only means it's in the draw: it counts only if it
+				// wins it (PoolPick; at the Deck's first start most woken villages had "no town started there")
+				if (result == StructureCheckResult.START_PRESENT) {
 					return Pair.of(spot.placement().getLocatePos(spot.chunk()), structure);
+				}
+				if (result == StructureCheckResult.CHUNK_LOAD_NEEDED) {
+					if (climate == null) {
+						climate = random.createClimateSampler(net.minecraft.world.level.levelgen.densityfunction.SamplerContext.builder().enableCaches().build());
+					}
+					Holder<Structure> winner = PoolPick.winner(level.registryAccess(), level.getServer().getStructureTemplateManager(), ground, climate,
+						spot.chunk(), spot.placement());
+					for (Holder<Structure> wantedHere : spot.structures()) {
+						if (winner != null && winner.value() == wantedHere.value()) {
+							return Pair.of(spot.placement().getLocatePos(spot.chunk()), wantedHere);
+						}
+					}
+					// a structure not asked for wins this spot's draw
+					break;
 				}
 			}
 		}

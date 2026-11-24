@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "powered=false": {
+      "model": "minecraft:block/bookshelf"
+    },
+    "powered=true": {
+      "model": "minecraft:block/bookshelf"
+    }
+  }
+}

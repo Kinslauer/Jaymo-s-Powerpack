@@ -278,6 +278,20 @@ public final class KitchenCompat {
 			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for Butcher's Hand (needs clean kills and skinning pulls): {}", e.toString());
 		}
 		HunterBow.kitchenHooks();
+		// a butcher's work on the town's carcasses (on the meat hook) goes into their town's stores
+		try {
+			Class.forName("com.jaymoskitchen.corpse.Butchers").getMethod("setStock", java.util.function.BiFunction.class)
+				.invoke(null, (java.util.function.BiFunction<net.minecraft.world.entity.npc.villager.Villager, net.minecraft.world.item.ItemStack,
+					net.minecraft.world.item.ItemStack>) (butcher, stack) -> {
+					if (!(butcher.level() instanceof net.minecraft.server.level.ServerLevel level)) {
+						return stack;
+					}
+					Faction f = Factions.around(level.getServer(), level, butcher.blockPosition(), Economy.POPULATION_RANGE);
+					return f == null || f.fallen() ? stack : Storage.put(level, f, stack);
+				});
+		} catch (ReflectiveOperationException e) {
+			JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for butchers to work the town's carcasses: {}", e.toString());
+		}
 		// (0.7.123) winter's cold doesn't touch a Frostborn
 		if (SEASON_NAME != null) {
 			try {
@@ -822,6 +836,55 @@ public final class KitchenCompat {
 		} catch (ReflectiveOperationException | RuntimeException e) {
 			JaymosKingdoms.LOGGER.debug("Kitchen butcher gossip failed: {}", e.toString());
 			return null;
+		}
+	}
+
+	// ---- butchers at the meat hook for the town ---------------------------------------------------------------------
+
+	private static @Nullable Method butchering, wantsCarcass;
+	private static boolean lookedForHookWork;
+
+	private static void hookWork() {
+		if (lookedForHookWork) {
+			return;
+		}
+		lookedForHookWork = true;
+		if (CORPSE == null) {
+			return;
+		}
+		try {
+			Class<?> butchers = Class.forName("com.jaymoskitchen.corpse.Butchers");
+			butchering = butchers.getMethod("butchering", Entity.class);
+			wantsCarcass = butchers.getMethod("wantsCarcass", net.minecraft.server.level.ServerLevel.class, net.minecraft.core.BlockPos.class);
+		} catch (ReflectiveOperationException e) {
+			butchering = null;
+			wantsCarcass = null;
+		}
+	}
+
+	/** {@code villager} is a butcher at work on a job of Kitchen's (a customer's body, or the town's carcass on the hook). */
+	static boolean butchering(Entity villager) {
+		hookWork();
+		if (butchering == null) {
+			return false;
+		}
+		try {
+			return Boolean.TRUE.equals(butchering.invoke(null, villager));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
+	}
+
+	/** A carcass left at {@code at} now would be fetched by a butcher with a free meat hook and worked for the town. */
+	static boolean wantsCarcass(net.minecraft.server.level.ServerLevel level, net.minecraft.core.BlockPos at) {
+		hookWork();
+		if (wantsCarcass == null) {
+			return false;
+		}
+		try {
+			return Boolean.TRUE.equals(wantsCarcass.invoke(null, level, at));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
 		}
 	}
 

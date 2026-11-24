@@ -18,6 +18,39 @@ public final class KitchenCompat {
 	private KitchenCompat() {
 	}
 
+	/** Kitchen's {@code Gnawing.feed}: what a mob eating at a body is doing, so it's drawn down over it ({@code GnawPose}). */
+	private static java.lang.invoke.@Nullable MethodHandle gnawFeed;
+	private static boolean gnawLooked;
+	/** {@link #gnaw}: up off the body; down over it; a bite starting now (Kitchen's {@code Gnawing.UP}, {@code DOWN}, {@code BITE}). */
+	public static final int GNAW_UP = 0, GNAW_DOWN = 1, GNAW_BITE = 2;
+
+	/**
+	 * Andy (2026-11-24): "zombies should also bend over and down to gnaw on bodies". {@code mob} eating at {@code body} (one
+	 * of the downed, LimbEaters): drawn by Kitchen bent down over them, each bite from the lunge to the rip back. Nothing
+	 * without Kitchen (or with one too old to know it).
+	 */
+	public static void gnaw(net.minecraft.world.entity.Mob mob, @Nullable Entity body, int what) {
+		if (!LOADED) {
+			return;
+		}
+		if (!gnawLooked) {
+			gnawLooked = true;
+			try {
+				gnawFeed = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymoskitchen.corpse.Gnawing"), "feed",
+					java.lang.invoke.MethodType.methodType(void.class, net.minecraft.world.entity.Mob.class, Entity.class, int.class));
+			} catch (ReflectiveOperationException | LinkageError e) {
+				gnawFeed = null;
+			}
+		}
+		if (gnawFeed != null) {
+			try {
+				gnawFeed.invoke(mob, body, what);
+			} catch (Throwable e) {
+				gnawFeed = null;
+			}
+		}
+	}
+
 	static @Nullable Entity carriedCorpse(Player player) {
 		return LOADED ? Kitchen.carried(player) : null;
 	}

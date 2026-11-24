@@ -68,6 +68,8 @@ final class Buildings {
 			hall(type, "butcher", JobHalls::butcher, 1, 10);
 			realm(type, "infirmary", JobHalls::infirmary, 1, 12);
 			realm(type, "market", Buildings::market, 1, 24);
+			// a counting house, once the realm has the trade for it ({@link Banks#mayBuild}, {@link Planner#eligible})
+			realm(type, Banks.ID, Banks::draw, 1, Banks.FROM_SIZE);
 			hall(type, "fishery", JobHalls::fishery, 1, 26);
 			realm(type, "stable", Buildings::stable, 1, 28);
 			hall(type, "hunting_lodge", JobHalls::huntingLodge, 1, 30);

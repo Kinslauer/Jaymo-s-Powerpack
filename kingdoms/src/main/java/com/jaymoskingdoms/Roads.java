@@ -58,7 +58,7 @@ import org.jspecify.annotations.Nullable;
  * Nothing of either is copied.
  *
  * <p><b>Planned.</b> Every so often each kingdom, fiefdom and village is linked to its {@link #LINKS} nearest neighbours
- * within {@link #LINK_RANGE} (and a fiefdom to its overlord). The route is found off the server thread on the world
+ * within {@link #LINK_RANGE} (and a fiefdom to its overlord, and every town of a realm to its capital, {@link #capital}). The route is found off the server thread on the world
  * generator's own terrain heights (so it can be planned through land nobody has seen yet): an A* search over a grid of
  * {@link #CELL}-block cells that dislikes climbing, cliffs and water, then smoothed and graded. Roads are saved on the
  * Overworld.
@@ -78,6 +78,8 @@ public final class Roads {
 	/** Settlements this far apart (blocks) may be linked; each to its nearest this many (and a fiefdom to its overlord). */
 	static final double LINK_RANGE = 700.0;
 	static final int LINKS = 2;
+	/** Every town of a realm also has a road to the realm's capital (Andy, 2026-11-24), if it's no further than this (blocks). */
+	static final double CAPITAL_RANGE = 1600.0;
 	/** How often (ticks) the links are looked over (one new road planned at a time). */
 	static final int PLAN_TICKS = 600;
 	/** The planning grid (blocks a cell), how far beyond the two ends it may stray, and the most cells it may look at. */
@@ -329,6 +331,11 @@ public final class Roads {
 					links.putIfAbsent(key(f.id(), lord.id()), new Faction[] {f, lord});
 				}
 			}
+			// and to the realm's capital, at the top of its overlords
+			Faction capital = capital(server, f);
+			if (capital != null && capital.seat().closerThan(f.seat(), CAPITAL_RANGE)) {
+				links.putIfAbsent(key(f.id(), capital.id()), new Faction[] {f, capital});
+			}
 		}
 		// ((0.7.490) greenskin camps are joined to the nearest other camp of their tribe, for their carts: Caravans.startGreen)
 		for (Faction f : Factions.all(server, FactionType.BARBARIAN)) {
@@ -342,6 +349,19 @@ public final class Roads {
 		List<Faction[]> out = new ArrayList<>(links.values());
 		out.sort(Comparator.comparingDouble(l -> l[0].seat().distSqr(l[1].seat())));
 		return out;
+	}
+
+	/** The capital of {@code town}'s realm: the top of its overlords, still standing; null when it is its own (or none stands). */
+	static @Nullable Faction capital(MinecraftServer server, Faction town) {
+		Faction top = town;
+		for (int hop = 0; hop < 8 && top.overlord() >= 0; hop++) {
+			Faction lord = Factions.get(server, top.overlord());
+			if (lord == null || lord.fallen() || lord.id() == town.id()) {
+				break;
+			}
+			top = lord;
+		}
+		return top == town ? null : top;
 	}
 
 	/** Starts planning the next missing road (one at a time). {@code all}: every missing one is waited for in turn. */

@@ -60,6 +60,7 @@ public final class ZFighterLegendary {
 
 	static void init() {
 		ZFighterLegendHeart.init();
+		ZFighterRadiance.init();
 	}
 
 	static void clear() {
@@ -152,7 +153,8 @@ public final class ZFighterLegendary {
 		ServerLevel level = player.level();
 		int step = chain(live.form);
 		double radius = AbilityPower.size(player, SURGE_RADIUS) + AbilityPower.size(player, SURGE_RADIUS_STEP) * step;
-		float damage = SURGE_DAMAGE + SURGE_DAMAGE_STEP * step;
+		// (Toxic Caves) hotter with the radiation he holds, and it leaves them Irradiated (ZFighterRadiance)
+		float damage = ZFighterRadiance.surge(player, SURGE_DAMAGE + SURGE_DAMAGE_STEP * step);
 		Vec3 c = player.position();
 		for (LivingEntity near : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(radius),
 			e -> e != player && e.isAlive() && !(e instanceof ArmorStand) && !(e instanceof Player other && (other.isCreative() || other.isSpectator())))) {
@@ -160,6 +162,7 @@ public final class ZFighterLegendary {
 				continue;
 			}
 			near.hurtServer(level, ZFighterKi.source(player), damage);
+			ZFighterRadiance.struck(player, near);
 			ZFighterKi.push(near, near.position().subtract(c), SURGE_PUSH, 0.4);
 		}
 		live.ki = Math.min(ZFighterPower.maxKi(player), live.ki + SURGE_KI);

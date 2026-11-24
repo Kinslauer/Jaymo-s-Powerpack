@@ -1,6 +1,14 @@
 {
 	"replace": false,
 	"values": [
-		"jaymoskingdoms:night_bleeder"
+		"jaymoskingdoms:night_bleeder",
+		"jaymoskingdoms:alchemist",
+		"jaymoskingdoms:archivist",
+		"jaymoskingdoms:basher",
+		"jaymoskingdoms:firecaller",
+		"jaymoskingdoms:illager_inquisitor",
+		"jaymoskingdoms:invoker",
+		"jaymoskingdoms:marauder",
+		"jaymoskingdoms:provoker"
 	]
 }

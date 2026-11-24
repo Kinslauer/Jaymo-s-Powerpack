@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymospowers:gem_amulet",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:gem_circlet",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:gem_ring",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:gem_bracelet",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:golden_hook",
+      "required": false
+    }
+  ]
+}

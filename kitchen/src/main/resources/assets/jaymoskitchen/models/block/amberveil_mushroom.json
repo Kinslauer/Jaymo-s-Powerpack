@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "jaymoskitchen:block/amberveil"
+  },
+  "render_type": "minecraft:cutout"
+}

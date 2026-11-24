@@ -140,6 +140,7 @@ public final class DelightDishes {
 		return switch (dish) {
 			case APPLE_PIE -> APPLE_PIE_SLICE;
 			case SWEET_BERRY_CHEESECAKE -> SWEET_BERRY_CHEESECAKE_SLICE;
+			case CHORUS_PIE -> EnderDelight.CHORUS_PIE_SLICE;
 			default -> CHOCOLATE_PIE_SLICE;
 		};
 	}
