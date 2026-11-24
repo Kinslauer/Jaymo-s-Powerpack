@@ -1020,3 +1020,9 @@ Andy: "any feature that requires another PR to work as intended should be held a
 
 - 2026-11-24 (Andy, patron colossus thread): approved the lore paragraph "The patrons' colossi" (PR #2103, merged); asked for the hunt to bring a random tornado, earthquake or tsunami (PR #2104).
 - 2026-11-24 (Andy, Vanilla+ thread): approved the Lore paragraph "The End's larder" (Ender's Delight port).
+- **Added (same day):** on whether a new host (not yet able to break takeovers) can fight the red's forced hunt: "yeah let them struggle". And the forced-hunt lore sentence: "approved".
+
+### 2026-11-24: Takeovers use everything they have; the black digs straight to its prey
+- **Decided:** "i need the pathing improved. last time i tested the black suit would constantly get stuck during takeovers, despite having access to extreme mobility and destruction. if it sees something underground or in a building or otherwise behind blocks, it can dig STRAIGHT there, using its tendril rip, it is extremely strong and should act like it. that means the AI should use all of its abilities to the best of it's ability".
+- **Applies to:** Powers, web symbiote takeovers (WebTakeoverPath and the takeover drive), all strains.
+- **Agent:** codex-reference-dinos-venom (coordinator), takeover-pathing workflow.

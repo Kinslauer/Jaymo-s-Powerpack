@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-24 16:32
+updated: 2026-11-24 16:40
 ---
 # Open PRs
 
-3 open, as of 2026-11-24 16:32. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+4 open, as of 2026-11-24 16:40. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2071](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2071) One cobblestone crafts back into 4 stone rocks
@@ -16,7 +16,12 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#2105](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2105) Alex's Caves joins the pack: cave biomes under Mohknee, Magnetic Caves in Aether stone
+## [#2105](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2105) Alex's Caves joins the pack: cave biomes under Mohknee, Magnetic Caves and neodymium in our palette
 - **Branch:** `claude/project-thread-dzutw2` · **Updated:** 2026-11-24 (today)
-- **Checks:** ✅ 5 passed
+- **Checks:** ⏳ 1 of 5 running
 - **Agent:** [[alexs-caves-worldgen]]
+
+## [#2106](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2106) A new host can struggle out of the red one's forced hunt
+- **Branch:** `claude/red-hunt-struggle` · **Updated:** 2026-11-24 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note
