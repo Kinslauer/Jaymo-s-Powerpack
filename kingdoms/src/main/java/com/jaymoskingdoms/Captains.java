@@ -1019,8 +1019,6 @@ public final class Captains {
 		} catch (IllegalArgumentException e) {
 			return;
 		}
-		// (their real head, if it was cut off and lies near: picked up, not copied)
-		PowersCompat.takeHead(mob, UUID.fromString(c.trophy()), HEAD_REACH);
 		mob.setItemSlot(EquipmentSlot.HEAD, head);
 		if (mob instanceof Mob m) {
 			m.setDropChance(EquipmentSlot.HEAD, 1.0F);
@@ -1865,16 +1863,13 @@ public final class Captains {
 		}
 		List<String> slain = new ArrayList<>(c.slain());
 		slain.add(player.getDisplayName().getString());
-		boolean takes = Rivals.side(c.tribe()) == Rivals.Side.ORC || random.nextFloat() < HEAD_TAKING;
-		c = c.climbed(c.rank(), c.traits(), takes ? player.getStringUUID() : c.trophy(), List.copyOf(slain));
+		c = c.climbed(c.rank(), c.traits(), c.trophy(), List.copyOf(slain));
 		Meeting m = c.met().get(player.getStringUUID());
 		c = c.met(player.getUUID(), new Meeting(m == null ? 1 : m.times() + 1, "killed", now));
-		if (takes && killer.getItemBySlot(EquipmentSlot.HEAD).is(Items.PLAYER_HEAD)) {
-			// (the new head goes on in place of the old)
-			killer.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
-		}
 		bind(level, c, killer, false);
-		scene(level, killer, player, c.id(), risen);
+		// (his head, at the height of the scene: orcs always, anyone else now and then)
+		boolean takes = Rivals.side(c.tribe()) == Rivals.Side.ORC || random.nextFloat() < HEAD_TAKING;
+		scene(level, killer, player, c.id(), risen, takes ? player.getUUID() : null);
 		// (a captain who has just risen has no fights yet: Map.of() would throw on remove and take the server down)
 		Map<UUID, Fight> fights = FIGHTS.get(c.id());
 		if (fights != null) {
@@ -1931,21 +1926,34 @@ public final class Captains {
 	 * before their death screen (Powers' film after death): he stands over the body and gloats, and halfway through he's
 	 * raised (a roar, the head put on, his own cheering him by name). Without Powers' film it all still happens in the world.
 	 */
-	private static void scene(ServerLevel level, LivingEntity killer, ServerPlayer player, String id, boolean risen) {
+	private static void scene(ServerLevel level, LivingEntity killer, ServerPlayer player, String id, boolean risen, @Nullable UUID head) {
 		long now = level.getGameTime();
 		SCENE.put(killer.getUUID(), now + SCENE_TICKS);
 		SCENE_AT.put(killer.getUUID(), player.position());
 		PowersCompat.deathFilm(player, PowersCompat.FILM_SPEAKER, SCENE_TICKS, killer);
 		int due = level.getServer().getTickCount() + SCENE_RAISED;
 		UUID killerId = killer.getUUID();
-		LATER.add(new Later(due, () -> raised(level, killerId, id, risen)));
+		LATER.add(new Later(due, () -> raised(level, killerId, id, risen, head)));
 	}
 
-	/** The height of his scene: the head goes on, a roar, and his own near cheer him by name. */
-	private static void raised(ServerLevel level, UUID killerId, String id, boolean risen) {
+	/**
+	 * The height of his scene: the head goes on ({@code head}'s, the player he killed, if he takes it), a roar, and his own
+	 * near cheer him by name.
+	 */
+	private static void raised(ServerLevel level, UUID killerId, String id, boolean risen, @Nullable UUID head) {
 		Captain c = get(level.getServer(), id);
 		if (!(level.getEntity(killerId) instanceof LivingEntity killer) || !killer.isAlive() || c == null || c.fallen()) {
 			return;
+		}
+		// (Andy: "if they wear it, they have to cut it": the real head, lying cut off or cut from the body now; never a copy)
+		if (head != null && (PowersCompat.takeHead(killer, head, HEAD_REACH)
+			|| KitchenCompat.cutHead(level, killer.position(), HEAD_REACH, head.toString()))) {
+			if (killer.getItemBySlot(EquipmentSlot.HEAD).is(Items.PLAYER_HEAD)) {
+				// (the new head goes on in place of the old)
+				killer.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
+			}
+			c = c.climbed(c.rank(), c.traits(), head.toString(), c.slain());
+			put(level.getServer(), c);
 		}
 		trophy(killer, c);
 		level.playSound(null, killer.getX(), killer.getY(), killer.getZ(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 1.4F, killer.getRandom().nextFloat() * 0.2F + 0.9F);
