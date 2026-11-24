@@ -41,6 +41,8 @@
 		"GrindstoneMenuAccessor",
 		"ResultSlotAccessor",
 		"AfflictionCureMixin",
+		"UseLeftoverStackMixin",
+		"UseLeftoverHandMixin",
 		"StackedHeightMixin",
 		"DroppedArmsDeathMixin",
 		"YoungLivingMixin",
