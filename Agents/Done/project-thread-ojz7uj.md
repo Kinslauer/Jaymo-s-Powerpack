@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: done
 task: refmods-02-druid-wild-shape, refmods-03-scouter, refmods-04-umbrellas-take-cover, refmods-05-hoverboard, refmods-06-horses, refmods-07-mocreatures-beasts, refmods-08-vampire-villager, refmods-09-village-styles, refmods-10-outlying-buildings-camps, refmods-11-tectonic-terrain, refmods-13-body-anim-stations, refmods-16-titles-bloods-tensura
 branch: claude/project-thread-ojz7uj
 with: 

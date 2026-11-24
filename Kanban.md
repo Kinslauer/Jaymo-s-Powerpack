@@ -40,18 +40,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/refmods-02-druid-wild-shape|refmods-02-druid-wild-shape]] · for any · #2120 · in-review
-- [ ] [[Inbox/refmods-03-scouter|refmods-03-scouter]] · for any · #2120 · in-review
-- [ ] [[Inbox/refmods-04-umbrellas-take-cover|refmods-04-umbrellas-take-cover]] · for any · #2120 · in-review
-- [ ] [[Inbox/refmods-05-hoverboard|refmods-05-hoverboard]] · for any · #2120 · in-review
-- [ ] [[Inbox/refmods-06-horses|refmods-06-horses]] · for any · #2120 · in-review
-- [ ] [[Inbox/refmods-07-mocreatures-beasts|refmods-07-mocreatures-beasts]] · for any · #2120 · in-review
-- [ ] [[Inbox/refmods-08-vampire-villager|refmods-08-vampire-villager]] · for any · #2120 · in-review
-- [ ] [[Inbox/refmods-09-village-styles|refmods-09-village-styles]] · for any · #2120 · in-review
-- [ ] [[Inbox/refmods-10-outlying-buildings-camps|refmods-10-outlying-buildings-camps]] · for any · #2120 · in-review
-- [ ] [[Inbox/refmods-11-tectonic-terrain|refmods-11-tectonic-terrain]] · for any · #2120 · in-review
-- [ ] [[Inbox/refmods-13-body-anim-stations|refmods-13-body-anim-stations]] · for any · #2120 · in-review
-- [ ] [[Inbox/refmods-16-titles-bloods-tensura|refmods-16-titles-bloods-tensura]] · for any · #2120 · in-review
 
 
 ## Needs Andy
