@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: claude-cloud
 from: survival picks thread (session intelligent-montalcini-982486)
 asked: 2026-11-22
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR
 claimed_by: claude-cloud
-pr: 
+pr: 2079
 suggested_owns:
   - src/main/java/com/jaymospowers/core/wounds/Downed.java
   - changes/powers/<branch>.md
