@@ -63,8 +63,8 @@ import org.jspecify.annotations.Nullable;
  * way back.
  * <p>
  * Survival picks (Andy, 2026-11-22, after Legendary Survival Overhaul's ideas; none of its code): every part has its own
- * pool on top of the health, apart from it ({@link BodyPlan}: a humanoid's head 8, body 12, arms 16, legs 24, feet 16 on 20
- * health). This replaces the bruise curve above: a hit takes its damage from the health as vanilla does and the same from
+ * pool on top of the health, apart from it ({@link BodyPlan}: a humanoid's head 8, body 12, arms 8, legs 12, feet 8 on 20
+ * health; a player's limbs twice that, {@link BodyPlan.Pools#PLAYER_LIMBS}). This replaces the bruise curve above: a hit takes its damage from the health as vanilla does and the same from
  * the part it lands on; healing the health no longer heals the parts. The parts mend by themselves while fed
  * ({@link #PART_MEND_TICKS}, a quarter as fast until patched up, {@link #PATCH_FROM} now being the share a part may be
  * missing before it wants a dressing), by medicine and by a night's sleep ({@link PartStrain}), and every point a part
@@ -294,7 +294,7 @@ public final class Wounds {
 
 	/** Part {@code index}'s whole pool, in health points. */
 	public static float cap(LivingEntity entity, BodyPlan plan, int index) {
-		return plan.share(index) * poolMax(entity);
+		return plan.share(index, entity) * poolMax(entity);
 	}
 
 	/**
@@ -373,7 +373,7 @@ public final class Wounds {
 		points[index] += add;
 		// (survival picks) medicine heals the health with the part, each point its share (every pool healed from nothing
 		// is the whole health back, so healing every part never heals the health several times over); it costs food
-		entity.setHealth(Math.min(entity.getMaxHealth(), entity.getHealth() + add / plan.total()));
+		entity.setHealth(Math.min(entity.getMaxHealth(), entity.getHealth() + add / plan.total(entity)));
 		store(entity, plan, points);
 		payFood(entity, add);
 		return add;
@@ -537,7 +537,7 @@ public final class Wounds {
 		if (index < 0 || limb == 0) {
 			return false;
 		}
-		float most = Dismember.SEVER_OVERKILL * plan.share(index) * max;
+		float most = Dismember.SEVER_OVERKILL * plan.share(index, victim) * max;
 		boolean overkill = landed == BodyPart.HEAD
 			? was[index] > EPS && now[index] <= EPS && loss - was[index] > most
 			: !landed.vital() && Breaks.isBroken(victim, landed) && loss > most;
@@ -893,7 +893,7 @@ public final class Wounds {
 		float[] points = new float[plan.size()];
 		for (int i = 0; i < points.length; i++) {
 			float fraction = fractions != null && fractions.size() == points.length ? Mth.clamp(fractions.get(i), 0.0F, 1.0F) : 1.0F;
-			points[i] = fraction * plan.share(i) * base;
+			points[i] = fraction * plan.share(i, entity) * base;
 		}
 		return points;
 	}
@@ -907,7 +907,7 @@ public final class Wounds {
 		List<Float> fractions = new ArrayList<>(points.length);
 		boolean whole = true;
 		for (int i = 0; i < points.length; i++) {
-			float cap = plan.share(i) * max;
+			float cap = plan.share(i, entity) * max;
 			float fraction = cap <= 0.0F ? 1.0F : Mth.clamp(points[i] / cap, 0.0F, 1.0F);
 			whole &= fraction >= WHOLE;
 			fractions.add(fraction);
