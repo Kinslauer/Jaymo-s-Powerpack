@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: patron-colossus-and-commandment-hunt
 branch: claude/project-thread-61agx0
 with: Claude (cloud project thread "Build the patron colossus")
@@ -23,3 +23,4 @@ owns:
 
 ## Done
 PR #2103. An 80-block patron colossus: sneak+hold class key strike (Paladin/Cleric/Warlock, class lvl 20, favour tier 4, once a day); omens at 3-6 broken commandments, a slow hunt from 7 that kills on reaching you; offering at your shrine forgives one. Lore paragraph "The patrons' colossi" (new) added. Compiled; not played.
+- 2026-11-24 21:23 PR #2103 is merged into master; moved to Agents/Done.
