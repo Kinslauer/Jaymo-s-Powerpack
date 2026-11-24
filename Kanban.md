@@ -64,7 +64,6 @@ kanban-plugin: board
 - [ ] [[Inbox/refmods-14-sky-light-air|refmods-14-sky-light-air]] · for any · open
 - [ ] [[Inbox/refmods-15-provenance-coins|refmods-15-provenance-coins]] · for any · open
 - [ ] [[Inbox/refmods-16-titles-bloods-tensura|refmods-16-titles-bloods-tensura]] · for any · open
-- [ ] [[Inbox/tree-chop-through-trunk|tree-chop-through-trunk]] · for any · open
 
 
 ## Being built
