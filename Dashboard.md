@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 12:35). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 12:39). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -24,6 +24,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2078 gear talk - bauble themes, knights and colours, two-tag lines, changes and gossip (Kingdoms, 2026-11-24)
 - [ ] #2077 gear talk - folk remark on masks, hoods and the symbiote's suit (Kingdoms, 2026-11-24)
 - [ ] #2076 Thick fire smoke starts on the ground, not up at the flames (Kingdoms, 2026-11-24)
 - [ ] #2075 The last bowl or bottle comes back (Powers, 2026-11-24)
@@ -83,8 +84,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2008 Pull up onto shore from the water; right-click held climbs (Powers, 2026-11-22)
 - [ ] #2007 Goblin extras - the wandering goblin trader, the decoy, drunk goblins, the engineer's hammer and its robot (Kingdoms, 2026-11-22)
 - [ ] #2003 survival picks: free riding camera, plants and flames in the wind (Kingdoms, 2026-11-22)
-- [ ] #2002 Burning bodies only spread fire on wood, pat out with a right click, and leave ash in their shape that blows away (Kitchen, 2026-11-22)
-- …and 419 older ones.
+- …and 420 older ones.
 
 ## Health
 
