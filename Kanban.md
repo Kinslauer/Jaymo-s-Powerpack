@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 22:47). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 05:42). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -38,6 +38,7 @@ kanban-plugin: board
 - [ ] [[Inbox/tree-chop-through-trunk|tree-chop-through-trunk]] · for any · open
 - [ ] [[Inbox/blood-awakening-passive-upgrade|blood-awakening-passive-upgrade]] · for any · open
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · for any · open
+- [ ] [[Inbox/structure-spawn-rate-wooden-hut|structure-spawn-rate-wooden-hut]] · for coordinator · open
 
 
 ## Being built
