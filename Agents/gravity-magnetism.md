@@ -1,0 +1,26 @@
+---
+status: running
+task: Work the X-Men mod's Magnetism power into Gravity
+branch: claude/project-thread-m8uaao
+with: Claude (project thread)
+pr: 
+mods: powers
+versions: 
+started: 2026-11-24
+owns:
+  - src/main/java/com/jaymospowers/power/gravity/GravityMagnet*.java
+  - src/client/java/com/jaymospowers/client/power/gravity/GravityMagnet*.java
+---
+# Gravity: magnetism
+
+**Task:** Andy: "C:\Users\toopo\Videos\Clips\Video DLs 16:30 is where the magnetism power is shown, i'd like to work that into gravity". The video is "This Is the BEST X-Men Mod EVER.mp4"; Magnetism runs 16:38 to 19:50.
+
+## Plan
+- Watch the Magnetism section, list its abilities.
+- Map Gravity's keys and free slots, place magnetism in the lore.
+- Build the metal kit into Gravity, open a PR.
+
+## Notes
+- Magnetism in the video: Magnetic Bolt, Force Field, Magnetic Shockwave, Magnetic Cannon, Rip Away, Gravity Squeeze (ult), Metal Grasp, Disarm, Polarity, Magnetic Flight, Metallic Curtain, Magnetic Forge, Metal Prison, Collapse, Scrap Barrage.
+
+## Done
