@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 16:13). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 16:15). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -69,7 +69,6 @@ kanban-plugin: board
 - [ ] [[Inbox/wither-model|wither-model]] · 🍇 Bacchus · blocked
 - [ ] [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]] · 💻 Odysseus · stalled
 - [ ] [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]] · 💻 Odysseus · stalled
-- [ ] [[Agents/red-symbiote-body|red-symbiote-body]] · 💻 Odysseus · #2096 · stalled
 
 
 ## Done
