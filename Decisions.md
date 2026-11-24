@@ -984,3 +984,6 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-24 (Andy): approved Lore "What the keepers tell" and "What goods remember".
 - 2026-11-24 (Andy, Vanilla+ thread): approved the "camps' other hands" lore paragraph (patch G). Ender's Delight "is NOT ARR": its Modrinth page gives MIT (the jar's mods.toml says All Rights Reserved, a template default), so its strange eclair texture is used with the MIT notice.
 - 2026-11-24 (Andy, Alex's Caves thread): "i want to target world gen first": the world-gen track (biome placement under Mohknee, Magnetic Caves in Aether stone) goes first, as its own PR.
+- 2026-11-24 (Andy, Vanilla+ thread): port Ender's Delight's crops and dishes ("port them"), chorus dishes too (card: "Port all of it, chorus too"), past the old "except chorus fruit" rule.
+
+- 2026-11-24 (Andy, patron colossus thread): approved the lore paragraph "The patrons' colossi" (PR #2103, merged); asked for the hunt to bring a random tornado, earthquake or tsunami (PR #2104).

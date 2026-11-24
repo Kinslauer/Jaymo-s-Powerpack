@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 21:08). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 21:22). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -48,7 +48,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/patron-colossus-and-commandment-hunt|patron-colossus-and-commandment-hunt]] · 💻 Odysseus · #2103 · in-review
 - [ ] [[Inbox/vanilla-plus-a-incendium-castle-start|vanilla-plus-a-incendium-castle-start]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
 - [ ] [[Inbox/vanilla-plus-b-stellarity-end-enderscape-band|vanilla-plus-b-stellarity-end-enderscape-band]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
 - [ ] [[Inbox/vanilla-plus-c-back-slot|vanilla-plus-c-back-slot]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
@@ -72,6 +71,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/patron-colossus-and-commandment-hunt|patron-colossus-and-commandment-hunt]]
 - [x] [[Inbox/Done/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]]
 - [x] [[Inbox/Done/zfighter-gaps-8-raids|zfighter-gaps-8-raids]]
 - [x] [[Inbox/Done/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]]
@@ -79,7 +79,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/zfighter-gaps-5-training|zfighter-gaps-5-training]]
 - [x] [[Inbox/Done/zfighter-gaps-4-forms|zfighter-gaps-4-forms]]
 - [x] [[Inbox/Done/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]]
-- [x] [[Inbox/Done/zfighter-gaps-2-power|zfighter-gaps-2-power]]
 
 
 %% kanban:settings
