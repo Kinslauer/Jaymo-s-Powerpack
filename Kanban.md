@@ -4,13 +4,14 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 20:27). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 20:42). Don't edit. -->
 
 ## Waiting for a bot
 
 - [ ] [[Inbox/alexs-caves-integration|alexs-caves-integration]] · for coordinator · open
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
 - [ ] [[Inbox/blood-awakening-passive-upgrade|blood-awakening-passive-upgrade]] · for any · open
+- [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for any · open
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · for any · open
 - [ ] [[Inbox/patron-colossus-and-commandment-hunt|patron-colossus-and-commandment-hunt]] · for any · open
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · for 🪽 any Hermes bot · open
@@ -38,18 +39,6 @@ kanban-plugin: board
 - [ ] [[Inbox/village-mods-7-ctov-tidal-towns|village-mods-7-ctov-tidal-towns]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
-- [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for any · open
-- [ ] [[Inbox/vanilla-plus-a-incendium-castle-start|vanilla-plus-a-incendium-castle-start]] · for 💻 Odysseus · open
-- [ ] [[Inbox/vanilla-plus-b-stellarity-end-enderscape-band|vanilla-plus-b-stellarity-end-enderscape-band]] · for 💻 Odysseus · open
-- [ ] [[Inbox/vanilla-plus-c-back-slot|vanilla-plus-c-back-slot]] · for 💻 Odysseus · open
-- [ ] [[Inbox/vanilla-plus-d-horse-expert-skill|vanilla-plus-d-horse-expert-skill]] · for 💻 Odysseus · open
-- [ ] [[Inbox/vanilla-plus-e-soul-reaping-spawners|vanilla-plus-e-soul-reaping-spawners]] · for 💻 Odysseus · open
-- [ ] [[Inbox/vanilla-plus-f-delight-dishes|vanilla-plus-f-delight-dishes]] · for 💻 Odysseus · open
-- [ ] [[Inbox/vanilla-plus-g-illager-invasion|vanilla-plus-g-illager-invasion]] · for 💻 Odysseus · open
-- [ ] [[Inbox/vanilla-plus-h-advancement-tracker|vanilla-plus-h-advancement-tracker]] · for 💻 Odysseus · open
-- [ ] [[Inbox/vanilla-plus-i-settlement-roads|vanilla-plus-i-settlement-roads]] · for 💻 Odysseus · open
-- [ ] [[Inbox/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]] · for 💻 Odysseus · open
-- [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · for 💻 Odysseus · open
 
 
 ## Being built
@@ -59,6 +48,17 @@ kanban-plugin: board
 
 ## In review
 
+- [ ] [[Inbox/vanilla-plus-a-incendium-castle-start|vanilla-plus-a-incendium-castle-start]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
+- [ ] [[Inbox/vanilla-plus-b-stellarity-end-enderscape-band|vanilla-plus-b-stellarity-end-enderscape-band]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
+- [ ] [[Inbox/vanilla-plus-c-back-slot|vanilla-plus-c-back-slot]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
+- [ ] [[Inbox/vanilla-plus-d-horse-expert-skill|vanilla-plus-d-horse-expert-skill]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
+- [ ] [[Inbox/vanilla-plus-e-soul-reaping-spawners|vanilla-plus-e-soul-reaping-spawners]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
+- [ ] [[Inbox/vanilla-plus-f-delight-dishes|vanilla-plus-f-delight-dishes]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
+- [ ] [[Inbox/vanilla-plus-g-illager-invasion|vanilla-plus-g-illager-invasion]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
+- [ ] [[Inbox/vanilla-plus-h-advancement-tracker|vanilla-plus-h-advancement-tracker]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
+- [ ] [[Inbox/vanilla-plus-i-settlement-roads|vanilla-plus-i-settlement-roads]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
+- [ ] [[Inbox/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
+- [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
 
 
 ## Needs Andy
@@ -72,14 +72,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/refmods-15-provenance-coins|refmods-15-provenance-coins]]
 - [x] [[Inbox/Done/villagers-visible-jobs|villagers-visible-jobs]]
 - [x] [[Inbox/Done/structures-2-placement-reasons|structures-2-placement-reasons]]
-- [x] [[Inbox/Done/refmods-15-provenance-coins|refmods-15-provenance-coins]]
 - [x] [[Inbox/Done/refmods-14-sky-light-air|refmods-14-sky-light-air]]
 - [x] [[Inbox/Done/refmods-12-fishing|refmods-12-fishing]]
-- [x] [[Inbox/Done/tree-chop-through-trunk|tree-chop-through-trunk]]
-- [x] [[Inbox/Done/refmods-01-felling|refmods-01-felling]]
-- [x] [[Inbox/Done/realm-banks-finish|realm-banks-finish]]
+- [x] [[Inbox/Done/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]]
+- [x] [[Inbox/Done/zfighter-gaps-8-raids|zfighter-gaps-8-raids]]
+- [x] [[Inbox/Done/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]]
 
 
 %% kanban:settings
