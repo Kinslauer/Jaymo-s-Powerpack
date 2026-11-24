@@ -998,3 +998,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-24 5:05 PM ET (Andy, Alex's Caves thread): cave band Warrior-born get their own look later: "they should vary, not all shirtless but all in primitive hide".
 
 - 2026-11-24 5:38 PM ET (Andy, Alex's Caves thread): chasm wild Tideborn "should ease up on you as you build relation with the lurkers who stalk you, either through trades or defense": tied to Alex's Deep One reputation.
+- 2026-11-24 (Andy, decision card): Candy Cavity Rubber-folk = "Home ground + newborns": now and then a newborn Rubber-folk villager climbs out of the Candy Cavity and walks to the nearest town (Kingdoms RubberNewborns). No Tinkerer vat ruins.
