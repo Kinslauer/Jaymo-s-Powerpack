@@ -186,56 +186,6 @@ class Site:
 SITES = []
 
 
-def site(fn):
-    SITES.append(fn)
-    return fn
-
-
-STONES = ["cobblestone", "cobblestone", "mossy_cobblestone", "stone", "andesite", "tuff"]
-
-
-def cairn(seed, radius, height, long=False):
-    """A pile of field stones over a buried chest. Layers: 0 under the chest, 1 the chest, 2 the earth over it, 3 the
-    ground (the base stones replace its top), then the pile, narrowing, a single stone on top."""
-    rnd = random.Random(seed)
-    w = 2 * radius + 1 + (2 if long else 0)
-    d = 2 * radius + 1
-    g = Grid(w, 5 + height, d)
-    cx, cz = w // 2, d // 2
-    g.chest(cx, 1, cz, "chests/cairn", rnd.choice(["north", "south", "east", "west"]))
-    g.put(cx, 2, cz, "coarse_dirt")
-    # the ground layer is set stones flush with the turf; the heap rises over it, narrowing
-    for layer in range(height + 1):
-        r = radius + 0.5 - layer * (radius + 0.5) / (height + 0.5)
-        for x in range(w):
-            for z in range(d):
-                dx = x - cx
-                if long:
-                    dx = max(0, abs(dx) - 1)
-                if math.hypot(dx, z - cz) <= r + 0.15 - rnd.random() * 0.3:
-                    g.put(x, 3 + layer, z, rnd.choice(STONES))
-    top = 4 + height
-    g.put(cx, top, cz, rnd.choice(["cobblestone_wall", "mossy_cobblestone_wall"]),
-          {"up": "true", "north": "none", "south": "none", "east": "none", "west": "none", "waterlogged": "false"})
-    return g
-
-
-@site
-def cairns():
-    return Site("cairn", {
-        "cairn_round": cairn(11, 2, 3),
-        "cairn_tall": cairn(23, 2, 4),
-        "cairn_long": cairn(37, 2, 3, long=True),
-        "cairn_small": cairn(41, 1, 2),
-    }, ground=3, worldgen={
-        "step": "surface_structures", "terrain_adaptation": "none",
-        "biomes": ["#minecraft:is_hill", "#minecraft:is_mountain", "#minecraft:is_taiga", "minecraft:plains",
-                   "minecraft:meadow", "minecraft:snowy_plains", "minecraft:sunflower_plains", "minecraft:windswept_hills",
-                   "minecraft:windswept_gravelly_hills", "minecraft:stony_shore", "minecraft:savanna", "minecraft:savanna_plateau"],
-        "spacing": 26, "separation": 9, "salt": 618204733,
-    })
-
-
 # ---- writing ----------------------------------------------------------------------------------------------------------
 
 def write_site(s, known, previews):
@@ -277,6 +227,18 @@ def write_site(s, known, previews):
                    {"replace": False, "values": wg["biomes"]})
 
 
+def load_designs():
+    """Every design file in tools/small_designs/ (one per row): each has sites(api) giving its Site(s), api being this module."""
+    here = os.path.join(os.path.dirname(os.path.abspath(__file__)), "small_designs")
+    me = sys.modules[__name__]
+    for f in sorted(os.listdir(here)):
+        if f.endswith(".py") and not f.startswith("_"):
+            spec = importlib.util.spec_from_file_location("small_designs_" + f[:-3], os.path.join(here, f))
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            SITES.extend(mod.sites(me))
+
+
 def main():
     previews = sys.argv[1] if len(sys.argv) > 1 else PREVIEWS
     try:
@@ -288,8 +250,8 @@ def main():
     known = known_blocks()
     if known is None:
         print("26.3 sources not found: block names not checked")
-    for fn in SITES:
-        s = fn()
+    load_designs()
+    for s in SITES:
         print(s.name)
         write_site(s, known, previews)
 
