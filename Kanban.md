@@ -48,8 +48,8 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · for any · open
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for any · open
 - [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · for any · open
-- [ ] [[Inbox/scouter-bio-scanner-tracking|scouter-bio-scanner-tracking]] · for any · open
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for any · open
+- [ ] [[Inbox/scouter-bio-scanner-tracking|scouter-bio-scanner-tracking]] · for any · open
 
 
 ## Being built
