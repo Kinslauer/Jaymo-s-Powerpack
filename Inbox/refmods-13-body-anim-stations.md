@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: any
 from: coordinator
 asked: 2026-11-24
 thread: Build Reference Mods pick list (cloud); queued by Hermes Training
-claimed_by: project-thread-ojz7uj
+claimed_by: 
 pr: 
 suggested_owns: []
 ---
@@ -29,3 +29,6 @@ Owns: powers client animation; C3/C4 block renderers.
   - Andy's note: "mostly for MCA"
 - **B7 The shield arm takes the hit** (Punchy Moves, size S). A blocked blow jolts the shield arm back. We have: Shield bangs.
 - **B8 Hands on the reins** (Punchy Moves, size S). Riders sway with the gait and hold the reins.
+
+## Notes
+- 2026-11-24 17:21 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.

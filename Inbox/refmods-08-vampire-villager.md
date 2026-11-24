@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: any
 from: coordinator
 asked: 2026-11-24
 thread: Build Reference Mods pick list (cloud); queued by Hermes Training
-claimed_by: project-thread-ojz7uj
+claimed_by: 
 pr: 
 suggested_owns: []
 ---
@@ -26,3 +26,6 @@ Owns: kingdoms villagers, vampires, Senses, journal.
 - **P5 The taker's cellar** (Psycho Villagers, size L). Instead of a dimension: a maze dug under a house. He drags you down; a cache with a blade and two draughts is somewhere in it; other captives are in side rooms. We have: Your call: a new scripted kidnap. Kidnapping and captives exist.
 - **P6 A night when anger spills over** (Psycho Villagers, size M). When a realm's mood sinks low, one night windows get smashed, old scores get settled, and the guards look away. We have: Your call: villager violence among themselves.
 - **P7 A rope to lead people** (Psycho Villagers, size S). A rope lead for a hogtied or collared captive, tied off on a fence post. We have: Hogties, collars, Stretchy Leash.
+
+## Notes
+- 2026-11-24 17:21 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.

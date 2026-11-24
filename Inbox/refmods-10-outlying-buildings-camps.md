@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: any
 from: coordinator
 asked: 2026-11-24
 thread: Build Reference Mods pick list (cloud); queued by Hermes Training
-claimed_by: project-thread-ojz7uj
+claimed_by: 
 pr: 
 suggested_owns: []
 ---
@@ -29,3 +29,6 @@ Same placement rule.
 - **V22 Pens where orcs train on captives** (The Orcs!, size M). A pit where captured villagers are made to fight, so the orcs learn how they move. Free them and they go home grateful. We have: Captives, kidnapping.
 - **V23 Ground they claim** (The Orcs!, size S). Skull totems mark the edge of a camp. Step past them and the guards come; stay outside and they only watch.
 - **V24 Four orc roles** (The Orcs!, size M). Our greenskin ranks: a chief with a long hammer, a shaman lobbing poison pots, a ranger switching bow and crossbow by range, and grunts that rush.
+
+## Notes
+- 2026-11-24 17:21 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.

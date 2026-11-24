@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: claude
 from: claude-cloud-village-mods-thread
 asked: 2026-11-19
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BXraqSPmYUB5h3b9yUHxHtb
-claimed_by: claude (PC coordinator thread, worker)
+claimed_by: 
 pr: 
 ---
 # Village mods patch 4: Board work (Kingdoms)
@@ -30,3 +30,6 @@ pr:
 - Compile check against the 26.3 jars; every Minecraft API checked against 26.3 sources.
 - `python3 tools/pr_checks.py` passes.
 - Lore: no new paragraph expected; if one is needed, quote it in full to Andy in the thread for approval first.
+
+## Notes
+- 2026-11-24 17:21 claude (PC coordinator thread, worker)'s claim had no sign of work for 30 min: handed back as open.

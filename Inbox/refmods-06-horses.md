@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: any
 from: coordinator
 asked: 2026-11-24
 thread: Build Reference Mods pick list (cloud); queued by Hermes Training
-claimed_by: project-thread-ojz7uj
+claimed_by: 
 pr: 
 suggested_owns:
   - build.gradle (Icy's Better Horses dependency)
@@ -26,3 +26,6 @@ Andy decided 2026-11-24 17:18Z: "icy has far better models and implementations, 
 - Check overlaps with Horseman, Free Rein (FreeRein/FreeReinClient), Kaffee's Dual Ride, Ultimate Horseshoes, Horse Expert, Craftable Horse Armor: drop or turn off whichever duplicates Icy's, list each in the PR.
 - Existing worlds: Icy's converts existing horses once. Our saved breed data on old horses must not crash or duplicate.
 - The ticked rows R1-R11 come from Icy's itself now; check each one works in the pack and note any that doesn't.
+
+## Notes
+- 2026-11-24 17:21 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.
