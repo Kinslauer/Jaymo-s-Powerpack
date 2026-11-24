@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 16:31). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 16:33). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -27,6 +27,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 - [ ] #2104 patron colossus brings a natural disaster on each walk (Kingdoms, 2026-11-24)
 - [ ] #2103 patron colossus: the strike and the hunt for commandment breakers (Kingdoms, 2026-11-24)
+- [ ] #2102 Vanilla+ picks: Incendium back, demon start in the Forbidden Castle, back slot, pinned advancements, Stellarity End and the Beneath (Powers, Kingdoms, Kitchen, 2026-11-24)
 - [ ] #2101 Ruin Keepers tell their city's story (Kingdoms, 2026-11-24)
 - [ ] #2098 Illagers speak the Cave Tablets' tongue (Kingdoms, 2026-11-24)
 - [ ] #2097 Where things came from, stolen goods, heirlooms, collectors' prices and a strongbox (Reference Mods patch 15) (Kingdoms, 2026-11-24)
@@ -84,8 +85,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2038 Drafting Table screen; trapdoors take a second use (Powers, Kingdoms, 2026-11-23)
 - [ ] #2037 The flanged mace is a blunt weapon: no more stabbing (Powers, Kingdoms, 2026-11-23)
 - [ ] #2036 Talking with an illager looks and works like MCA's villager screen (Kingdoms, 2026-11-23)
-- [ ] #2035 Sneak-clicking a cooking block opens it instead of lifting it (Powers, 2026-11-23)
-- …and 442 older ones.
+- …and 443 older ones.
 
 ## Health
 
