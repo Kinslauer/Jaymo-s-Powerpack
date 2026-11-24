@@ -36,6 +36,8 @@ public class ZFighterRogueRenderer extends MobRenderer<ZFighterRogue, AvatarRend
 	public ZFighterRogueRenderer(EntityRendererProvider.Context context) {
 		super(context, new PlayerModel(context.bakeLayer(ModelLayers.PLAYER), false), 0.5F);
 		this.addLayer(new ZFighterHair.Layer(this));
+		// the Primordial Caves' fighters are Warrior-born, tail out (ZFighterCaveBand)
+		this.addLayer(new ZFighterTail.Layer(this));
 		this.addLayer(new HumanoidArmorLayer<>(this, ArmorModelSet.bake(ModelLayers.PLAYER_ARMOR, context.getModelSet(), HumanoidModel::new),
 			context.getEquipmentRenderer()));
 		this.addLayer(new ItemInHandLayer<>(this));
@@ -58,6 +60,9 @@ public class ZFighterRogueRenderer extends MobRenderer<ZFighterRogue, AvatarRend
 		state.id = entity.getId();
 		state.setData(ZFighterRogueRenderer.KIND, entity.kind());
 		state.skin = entity.kind() == ZFighterRogue.TYRANT ? TYRANT_SKIN : CHAMPION_SKIN;
+		boolean brute = com.jaymospowers.power.zfighter.ZFighterCaveBand.brute(entity);
+		state.setData(ZFighterTail.KEY, brute ? 1 : 0);
+		state.setData(ZFighterTail.STYLE, brute ? WarriorLooks.tail(entity) : null);
 		int form = entity.form();
 		state.setData(ZFighterHair.KEY, form <= 0 ? null : new ZFighterHair.Hair(form, form >= 2 ? SUPER_2_HAIR : SUPER_HAIR,
 			ZFighterHair.style(entity.getUUID())));

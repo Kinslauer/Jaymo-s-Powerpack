@@ -5,6 +5,7 @@
 	"mixins": [
 		"FerrocaveStoneMixin",
 		"MagneticCaveStoneMixin",
+		"NuclearBombFutureMixin",
 		"UndergroundRuinsStoneMixin"
 	],
 	"injectors": {
