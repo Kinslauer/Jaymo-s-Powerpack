@@ -239,7 +239,19 @@ public final class Vampires {
 	}
 
 	/** Once the prey is down: drain them dead, kill them, or leave them. */
-	enum Outcome { DRAIN, KILL, LEAVE }
+	enum Outcome { DRAIN, KILL, LEAVE,
+		/** A taker's ({@link Takers}): drag them down to its cellar. */
+		DRAG }
+
+	/** (Takers) {@code mob} stops what it was hunting and stands down: it was seen. */
+	static void standDown(PathfinderMob mob) {
+		if (HUNTS.remove(mob.getUUID()) != null) {
+			release(mob);
+		}
+		FLEES.remove(mob.getUUID());
+		EXPOSED.remove(mob.getUUID());
+		speed(mob, false);
+	}
 
 	/** A vampire running from the scene: from where, until when (game time). */
 	private record Flee(Vec3 from, long until) {
@@ -577,9 +589,9 @@ public final class Vampires {
 			return;
 		}
 		if (prey == null && hungry(v, kind, nightNo, now)) {
-			prey = findPrey(level, mob, kind);
+			prey = mob.hasAttached(Takers.TAKER) ? Takers.sleptOn(mob, nightNo) ? null : Takers.vampirePrey(level, mob) : findPrey(level, mob, kind);
 			if (prey != null) {
-				hunt = new Hunt(prey.getUUID(), now, outcome(level.getRandom(), kind));
+				hunt = new Hunt(prey.getUUID(), now, TakersCellar.hasRoom(mob) ? Outcome.DRAG : outcome(level.getRandom(), kind));
 				HUNTS.put(mob.getUUID(), hunt);
 			}
 		}
@@ -590,13 +602,22 @@ public final class Vampires {
 			}
 			return;
 		}
-		// on the hunt: it shows itself
+		// on the hunt: it shows itself (a taker, creeping up on its prey, shows nothing till it's near, and gives up when a guard sees)
 		if (mob.isSleeping()) {
 			mob.stopSleeping();
 		}
-		expose(mob, nightNo);
-		speed(mob, true);
-		eyes(level, mob);
+		if (Takers.abort(level, mob, prey)) {
+			HUNTS.remove(mob.getUUID());
+			release(mob);
+			speed(mob, false);
+			return;
+		}
+		boolean hidden = Takers.stalking(mob, prey);
+		if (!hidden) {
+			expose(mob, nightNo);
+			eyes(level, mob);
+		}
+		speed(mob, !hidden);
 		if (kind == Kind.ELDER && foe == null && mob.distanceTo(prey) > BAT_MIN && batReady(mob, now)) {
 			takeOff(level, mob, prey, prey.position());
 			return;
@@ -611,6 +632,9 @@ public final class Vampires {
 		if (mob.distanceTo(prey) <= BITE_REACH && now - hunt.lastBite >= BITE_EVERY && mob.hasLineOfSight(prey)) {
 			hunt.lastBite = now;
 			strike(level, mob, v, kind, prey, nightNo, now, foe == prey);
+			if (mob.hasAttached(Takers.TAKER)) {
+				Takers.stained(mob);
+			}
 			// whoever sees it feed cries out, runs or fights (VampireAlarm)
 			VampireAlarm.seen(level, mob, prey);
 			if (!prey.isAlive()) {
@@ -660,6 +684,17 @@ public final class Vampires {
 			case LEAVE -> {
 				fed(mob, v, nightNo, now);
 				flee(level, mob, prey, nightNo, now);
+			}
+			case DRAG -> {
+				// (a taker takes them down to its cellar, and goes home unseen)
+				if (TakersCellar.drag(level, mob, prey)) {
+					fed(mob, v, nightNo, now);
+					HUNTS.remove(mob.getUUID());
+					release(mob);
+				} else {
+					fed(mob, v, nightNo, now);
+					flee(level, mob, prey, nightNo, now);
+				}
 			}
 		}
 	}
