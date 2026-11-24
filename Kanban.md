@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 11:09). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 11:11). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -42,6 +42,12 @@ kanban-plugin: board
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for 🪶 Quill · open
 - [ ] [[Inbox/ping-t3code-11am|ping-t3code-11am]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · for any · open
+- [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · for any · open
+- [ ] [[Inbox/structures-2-placement-reasons|structures-2-placement-reasons]] · for any · open
+- [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · for any · open
+- [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for any · open
+- [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · for any · open
+- [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for any · open
 
 
 ## Being built
