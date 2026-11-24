@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 16:03). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 16:13). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -19,7 +19,6 @@ kanban-plugin: board
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · for any · open
 - [ ] [[Inbox/structure-spawn-rate-wooden-hut|structure-spawn-rate-wooden-hut]] · for coordinator · open
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/alexs-caves-integration|alexs-caves-integration]] · for coordinator · open
 - [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · for any · open
 - [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · for any · open
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for any · open
@@ -44,6 +43,8 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
+- [ ] [[Inbox/alexs-caves-integration|alexs-caves-integration]] · alexs-caves-worldgen · claimed
+- [ ] [[Agents/alexs-caves-worldgen|alexs-caves-worldgen]] · 💻 Odysseus · running
 
 
 ## In review
@@ -59,7 +60,6 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-i-settlement-roads|vanilla-plus-i-settlement-roads]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
 - [ ] [[Inbox/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
-- [ ] [[Inbox/patron-colossus-and-commandment-hunt|patron-colossus-and-commandment-hunt]] · 💻 Odysseus · #2103 · in-review
 
 
 ## Needs Andy
@@ -75,6 +75,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/patron-colossus-and-commandment-hunt|patron-colossus-and-commandment-hunt]]
 - [x] [[Inbox/Done/villagers-visible-jobs|villagers-visible-jobs]]
 - [x] [[Inbox/Done/structures-2-placement-reasons|structures-2-placement-reasons]]
 - [x] [[Inbox/Done/refmods-15-provenance-coins|refmods-15-provenance-coins]]
@@ -82,7 +83,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/refmods-12-fishing|refmods-12-fishing]]
 - [x] [[Inbox/Done/tree-chop-through-trunk|tree-chop-through-trunk]]
 - [x] [[Inbox/Done/refmods-01-felling|refmods-01-felling]]
-- [x] [[Inbox/Done/realm-banks-finish|realm-banks-finish]]
 
 
 %% kanban:settings
