@@ -1,0 +1,6 @@
+# gear talk - folk remark on masks, hoods and the symbiote's suit
+- Step 2 of `docs/Gear-Talk-Plan.md`: a costume mask, a hood with no mask, and the symbiote's black suit (or its big body) are now among what villagers see on you and remark on. The order is "more made than flesh", then the suit, then a mask, ahead of the Frostborn work and limbs. A hood comes last.
+- A mask marks a vigilante, and folk treat it the way the canon says (Lore.md "Costumes and masks"). The watch wants it off ("Masks off in town."), kind folk thank you if you're one of the good ones, the suspicious ask what you're hiding, the timid fear for their windows, the greedy wonder what your face would fetch, and the hotheaded and proud tell you to go home. The black suit frightens the timid, the devout call it unclean, and the brave won't be cowed. 14 new reactions, each with a bubble and a "Have a word" talk.
+- A costume's suit or the symbiote's covers every limb, so stand-in limbs under it go unseen unless the villager is sharp-eyed. A masked player's blood is still never used, and what folk remember of a masked look is kept apart from your face.
+- `PowersCompat.symbioteSuit` and `costumeShown` read Powers' `WebSymbiote.suitShown`/`bulked` and `Costume.shown`.
+- Built and compiled; not played.
