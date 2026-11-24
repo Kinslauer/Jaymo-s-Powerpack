@@ -34,8 +34,8 @@ import org.jspecify.annotations.Nullable;
  * like they have forever", and "there should also be barbaric warrior born found training by fighting the dinos";
  * Lore.md, "The old fighters under the ferns"). Now and then, while a player is down in Alex's Primordial Caves
  * ({@link Dino#PRIMORDIAL_CAVES}), a band of two to four comes out beside one of the beasts there (ours, {@link Dinosaur},
- * or Alex's) and fights it bare-handed: the Z Fighter rogue's strings ({@link ZFighterRogue}), bare-chested in hide
- * leggings, with a Warrior-born's tail.
+ * or Alex's) and fights it bare-handed: the Z Fighter rogue's strings ({@link ZFighterRogue}), in odd pieces of
+ * caveman gear and hide ({@link #dress}), with a Warrior-born's tail.
  * <p>
  * They train, they don't hunt: a beast beaten down to {@link #SPARE} of its health is let go, so a band never empties
  * the caves of the herds it trains on. Nobody's tamed beast is touched. They leave players alone unless one walks
@@ -58,6 +58,11 @@ public final class ZFighterCaveBand {
 	/** Health and blows against a raider's (a champion's base: 80 health, 2 damage). */
 	static final double HEALTH = 120.0, DAMAGE = 2.6;
 	static final String TAG = "jaymospowers.cave_brute";
+	/** Head, chest, legs, feet: the chance of the caveman piece, then of a plain leather one; otherwise bare. */
+	static final EquipmentSlot[] WORN = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
+	static final float[][] WEAR = {{0.3F, 0.1F}, {0.4F, 0.2F}, {0.6F, 0.4F}, {0.4F, 0.2F}};
+	static final String[] CAVEMAN = {"caveman_helmet", "caveman_chestplate", "caveman_leggings", "caveman_boots"};
+	static final net.minecraft.world.item.Item[] LEATHER = {Items.LEATHER_HELMET, Items.LEATHER_CHESTPLATE, Items.LEATHER_LEGGINGS, Items.LEATHER_BOOTS};
 	/** Alex's Caves' primordial beasts, by id (nothing of Alex's is needed to load). */
 	static final Set<String> CAVE_BEASTS = Set.of("alexscaves:grottoceratops", "alexscaves:vallumraptor", "alexscaves:tremorsaurus",
 		"alexscaves:relicheirus", "alexscaves:atlatitan", "alexscaves:subterranodon");
@@ -148,17 +153,31 @@ public final class ZFighterCaveBand {
 		return null;
 	}
 
-	/** Bare-chested and barefoot in hide leggings, a cave fighter's health and blows, his name, his mark. */
+	/**
+	 * Primitive hide, never metal (Andy: "not all shirtless but all in primitive hide", "they can use the caveman gear as
+	 * well as hide pieces"): each piece is the Armory's caveman gear, plain leather or nothing, rolled by
+	 * {@link #WEAR}, so no two look the same; legs are always covered. Then a cave fighter's health and blows, his name, his mark.
+	 */
 	private static void dress(ZFighterRogue brute) {
 		brute.setAttached(BRUTE, true);
-		brute.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
-		brute.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
-		brute.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.LEATHER_LEGGINGS));
-		brute.setItemSlot(EquipmentSlot.FEET, ItemStack.EMPTY);
+		RandomSource random = brute.getRandom();
+		for (int i = 0; i < WORN.length; i++) {
+			float roll = random.nextFloat();
+			ItemStack piece = roll < WEAR[i][0] ? caveman(CAVEMAN[i]) : roll < WEAR[i][0] + WEAR[i][1] ? new ItemStack(LEATHER[i]) : ItemStack.EMPTY;
+			if (piece.isEmpty() && WORN[i] == EquipmentSlot.LEGS) {
+				piece = new ItemStack(LEATHER[i]);
+			}
+			brute.setItemSlot(WORN[i], piece);
+			brute.setDropChance(WORN[i], 0.0F);
+		}
 		brute.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(HEALTH);
 		brute.setHealth((float)HEALTH);
 		brute.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE).setBaseValue(DAMAGE);
 		brute.setCustomName(Component.translatable("entity.jaymospowers.cave_brute"));
+	}
+
+	private static ItemStack caveman(String id) {
+		return BuiltInRegistries.ITEM.getOptional(JaymosPowers.id(id)).map(ItemStack::new).orElse(ItemStack.EMPTY);
 	}
 
 	/** Every second: a player who comes right up is fought; a beaten beast is let go; a free fighter finds the next beast. */

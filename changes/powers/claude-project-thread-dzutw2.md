@@ -10,5 +10,5 @@
   caves beside Alex's, in the dark, and Alex's grottoceratops, vallumraptors, relicheirus, tremorsaurus, atlatitan and
   subterranodons roam the Verdant countries that suit them.
 - Barbaric Warrior-born in the Primordial Caves: now and then a band of two to four comes out beside a beast near you and
-  fights it bare-handed (bare-chested, hide leggings, tail out). They train, they don't hunt: a beast beaten down to 30%
+  fights it bare-handed, tail out, each in a different mix of caveman gear and hide (some bare-chested). They train, they don't hunt: a beast beaten down to 30%
   is let go, and tamed ones are never touched. They leave you alone unless you walk right up to one or hit one.
