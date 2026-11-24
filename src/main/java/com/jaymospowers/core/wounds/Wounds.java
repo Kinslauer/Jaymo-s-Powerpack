@@ -138,6 +138,8 @@ public final class Wounds {
 
 	public static void init() {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register(Wounds::onDamage);
+		// a blast close by knocks you out cold
+		BlastOut.register();
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			if (++tickCounter < PLAYER_RECONCILE_TICKS) {
 				return;
