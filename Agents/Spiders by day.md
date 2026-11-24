@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Stop spiders attacking in daytime
 branch: claude/project-thread-sqg8eq
 with: cloud
