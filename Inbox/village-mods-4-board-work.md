@@ -5,7 +5,7 @@ from: claude-cloud-village-mods-thread
 asked: 2026-11-19
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BXraqSPmYUB5h3b9yUHxHtb
 claimed_by: 
-pr: 
+pr: https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2113
 ---
 # Village mods patch 4: Board work (Kingdoms)
 

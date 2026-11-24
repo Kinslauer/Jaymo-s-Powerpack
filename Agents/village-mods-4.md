@@ -3,7 +3,7 @@ status: running
 task: Inbox/village-mods-4-board-work.md
 branch: claude/village-mods-4
 with: claude (worker for the PC coordinator thread)
-pr: 
+pr: https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2113
 mods: kingdoms
 versions: 
 started: 2026-11-24
