@@ -103,6 +103,11 @@ final class Upkeep {
 		return level.getAttachedOrElse(QUEUE, Map.of()).getOrDefault(Integer.toString(id), List.of());
 	}
 
+	/** (village mods 4) How many weathered blocks settlement {@code id}'s builders have waiting ({@link Decrees}: a smiths' decree). */
+	static int waiting(MinecraftServer server, int id) {
+		return queue(Factions.level(server), id).size();
+	}
+
 	private static void remove(ServerLevel level, int id, BlockPos at) {
 		Map<String, List<Long>> all = new HashMap<>(level.getAttachedOrElse(QUEUE, Map.of()));
 		List<Long> queue = new ArrayList<>(all.getOrDefault(Integer.toString(id), List.of()));

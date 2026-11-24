@@ -821,6 +821,1134 @@
         "model": "jaymoskingdoms:block/bounty_board_town_2_1",
         "y": 270
       }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "0",
+        "row": "0",
+        "notice": "3"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_sealed_0_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "0",
+        "row": "0",
+        "notice": "4"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_vellum_0_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "0",
+        "row": "0",
+        "notice": "5"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_gilt_0_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "0",
+        "row": "0",
+        "notice": "6"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_decree_0_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "0",
+        "row": "0",
+        "notice": "3"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_sealed_0_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "0",
+        "row": "0",
+        "notice": "4"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_vellum_0_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "0",
+        "row": "0",
+        "notice": "5"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_gilt_0_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "0",
+        "row": "0",
+        "notice": "6"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_decree_0_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "0",
+        "row": "0",
+        "notice": "3"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_sealed_0_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "0",
+        "row": "0",
+        "notice": "4"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_vellum_0_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "0",
+        "row": "0",
+        "notice": "5"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_gilt_0_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "0",
+        "row": "0",
+        "notice": "6"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_decree_0_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "0",
+        "row": "0",
+        "notice": "3"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_sealed_0_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "0",
+        "row": "0",
+        "notice": "4"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_vellum_0_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "0",
+        "row": "0",
+        "notice": "5"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_gilt_0_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "0",
+        "row": "0",
+        "notice": "6"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_decree_0_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "0",
+        "row": "1",
+        "notice": "3"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_sealed_0_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "0",
+        "row": "1",
+        "notice": "4"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_vellum_0_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "0",
+        "row": "1",
+        "notice": "5"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_gilt_0_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "0",
+        "row": "1",
+        "notice": "6"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_decree_0_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "0",
+        "row": "1",
+        "notice": "3"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_sealed_0_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "0",
+        "row": "1",
+        "notice": "4"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_vellum_0_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "0",
+        "row": "1",
+        "notice": "5"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_gilt_0_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "0",
+        "row": "1",
+        "notice": "6"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_decree_0_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "0",
+        "row": "1",
+        "notice": "3"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_sealed_0_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "0",
+        "row": "1",
+        "notice": "4"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_vellum_0_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "0",
+        "row": "1",
+        "notice": "5"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_gilt_0_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "0",
+        "row": "1",
+        "notice": "6"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_decree_0_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "0",
+        "row": "1",
+        "notice": "3"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_sealed_0_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "0",
+        "row": "1",
+        "notice": "4"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_vellum_0_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "0",
+        "row": "1",
+        "notice": "5"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_gilt_0_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "0",
+        "row": "1",
+        "notice": "6"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_decree_0_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "1",
+        "row": "0",
+        "notice": "3"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_sealed_1_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "1",
+        "row": "0",
+        "notice": "4"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_vellum_1_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "1",
+        "row": "0",
+        "notice": "5"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_gilt_1_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "1",
+        "row": "0",
+        "notice": "6"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_decree_1_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "1",
+        "row": "0",
+        "notice": "3"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_sealed_1_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "1",
+        "row": "0",
+        "notice": "4"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_vellum_1_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "1",
+        "row": "0",
+        "notice": "5"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_gilt_1_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "1",
+        "row": "0",
+        "notice": "6"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_decree_1_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "1",
+        "row": "0",
+        "notice": "3"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_sealed_1_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "1",
+        "row": "0",
+        "notice": "4"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_vellum_1_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "1",
+        "row": "0",
+        "notice": "5"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_gilt_1_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "1",
+        "row": "0",
+        "notice": "6"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_decree_1_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "1",
+        "row": "0",
+        "notice": "3"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_sealed_1_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "1",
+        "row": "0",
+        "notice": "4"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_vellum_1_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "1",
+        "row": "0",
+        "notice": "5"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_gilt_1_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "1",
+        "row": "0",
+        "notice": "6"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_decree_1_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "1",
+        "row": "1",
+        "notice": "3"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_sealed_1_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "1",
+        "row": "1",
+        "notice": "4"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_vellum_1_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "1",
+        "row": "1",
+        "notice": "5"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_gilt_1_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "1",
+        "row": "1",
+        "notice": "6"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_decree_1_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "1",
+        "row": "1",
+        "notice": "3"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_sealed_1_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "1",
+        "row": "1",
+        "notice": "4"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_vellum_1_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "1",
+        "row": "1",
+        "notice": "5"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_gilt_1_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "1",
+        "row": "1",
+        "notice": "6"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_decree_1_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "1",
+        "row": "1",
+        "notice": "3"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_sealed_1_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "1",
+        "row": "1",
+        "notice": "4"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_vellum_1_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "1",
+        "row": "1",
+        "notice": "5"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_gilt_1_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "1",
+        "row": "1",
+        "notice": "6"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_decree_1_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "1",
+        "row": "1",
+        "notice": "3"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_sealed_1_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "1",
+        "row": "1",
+        "notice": "4"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_vellum_1_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "1",
+        "row": "1",
+        "notice": "5"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_gilt_1_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "1",
+        "row": "1",
+        "notice": "6"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_decree_1_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "2",
+        "row": "0",
+        "notice": "3"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_sealed_2_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "2",
+        "row": "0",
+        "notice": "4"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_vellum_2_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "2",
+        "row": "0",
+        "notice": "5"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_gilt_2_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "2",
+        "row": "0",
+        "notice": "6"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_decree_2_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "2",
+        "row": "0",
+        "notice": "3"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_sealed_2_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "2",
+        "row": "0",
+        "notice": "4"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_vellum_2_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "2",
+        "row": "0",
+        "notice": "5"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_gilt_2_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "2",
+        "row": "0",
+        "notice": "6"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_decree_2_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "2",
+        "row": "0",
+        "notice": "3"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_sealed_2_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "2",
+        "row": "0",
+        "notice": "4"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_vellum_2_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "2",
+        "row": "0",
+        "notice": "5"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_gilt_2_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "2",
+        "row": "0",
+        "notice": "6"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_decree_2_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "2",
+        "row": "0",
+        "notice": "3"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_sealed_2_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "2",
+        "row": "0",
+        "notice": "4"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_vellum_2_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "2",
+        "row": "0",
+        "notice": "5"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_gilt_2_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "2",
+        "row": "0",
+        "notice": "6"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_decree_2_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "2",
+        "row": "1",
+        "notice": "3"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_sealed_2_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "2",
+        "row": "1",
+        "notice": "4"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_vellum_2_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "2",
+        "row": "1",
+        "notice": "5"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_gilt_2_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "column": "2",
+        "row": "1",
+        "notice": "6"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_decree_2_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "2",
+        "row": "1",
+        "notice": "3"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_sealed_2_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "2",
+        "row": "1",
+        "notice": "4"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_vellum_2_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "2",
+        "row": "1",
+        "notice": "5"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_gilt_2_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "column": "2",
+        "row": "1",
+        "notice": "6"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_decree_2_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "2",
+        "row": "1",
+        "notice": "3"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_sealed_2_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "2",
+        "row": "1",
+        "notice": "4"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_vellum_2_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "2",
+        "row": "1",
+        "notice": "5"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_gilt_2_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "column": "2",
+        "row": "1",
+        "notice": "6"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_decree_2_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "2",
+        "row": "1",
+        "notice": "3"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_sealed_2_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "2",
+        "row": "1",
+        "notice": "4"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_vellum_2_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "2",
+        "row": "1",
+        "notice": "5"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_gilt_2_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "column": "2",
+        "row": "1",
+        "notice": "6"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/bounty_board_decree_2_1",
+        "y": 270
+      }
     }
   ]
 }
