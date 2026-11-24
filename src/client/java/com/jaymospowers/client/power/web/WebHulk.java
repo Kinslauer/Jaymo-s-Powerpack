@@ -56,6 +56,15 @@ final class WebHulk {
 	 * {@code TORSO / 12}, the legs by {@code LEG / 12} (the player model's are 12 long).
 	 */
 	static final float TORSO_STRETCH = WebHulkMesh.TORSO / 12.0F, LEG_STRETCH = WebHulkMesh.LEG / 12.0F;
+	/**
+	 * Its tendrils (Andy, after the red body's: "black should get a similar treatment"): the slender body's crown off the
+	 * back and shoulders ({@link WebSlender#TENDRIL_REST}, its strands too), grown to this frame: the roots
+	 * {@code TENDRIL_WIDE} times as far out and {@code TENDRIL_DEEP} pixels further back, each tendril {@code TENDRIL_THICK}
+	 * times as thick and {@code TENDRIL_LONG} times as long.
+	 */
+	static final float TENDRIL_WIDE = 1.6F, TENDRIL_DEEP = 1.5F, TENDRIL_THICK = 1.3F, TENDRIL_LONG = 1.15F;
+	static final float[][] TENDRIL_REST = WebSlender.grown(WebSlender.TENDRIL_REST, TENDRIL_WIDE, TENDRIL_DEEP, TENDRIL_THICK, TENDRIL_LONG);
+	static final float[][] STRANDS = WebSlender.grown(WebSlender.STRANDS, TENDRIL_WIDE, TENDRIL_DEEP, TENDRIL_THICK, TENDRIL_LONG);
 	/** The jaw: how far it hangs open at rest (radians), how much it breathes, and a snarl's gape. */
 	static final float JAW_REST = 0.22F, JAW_BREATH = 0.08F, JAW_SNARL = 0.5F;
 	/** How it moves: drooping this much more each piece, rippling this hard, swaying, and its tip fluttering in a flick. */

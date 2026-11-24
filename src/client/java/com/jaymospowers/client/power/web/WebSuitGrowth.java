@@ -297,6 +297,8 @@ public final class WebSuitGrowth {
 		boolean slender = slender(avatar);
 		if (model instanceof net.minecraft.client.model.HumanoidModel<?> humanoid) {
 			if (slender) {
+				// (hunched over first, so its frame follows the bent back)
+				WebSlender.hunch(humanoid, avatar, k);
 				WebSlender.shift(humanoid, k);
 			} else {
 				WebHulk.shift(humanoid, k);
@@ -364,6 +366,7 @@ public final class WebSuitGrowth {
 	/** Moves a model drawn outside the usual passes (a layer reading the body's parts) out to the big body's frame. */
 	static void shift(net.minecraft.client.model.HumanoidModel<?> model, AvatarRenderState state) {
 		if (slender(state)) {
+			WebSlender.hunch(model, state, hulkness(state));
 			WebSlender.shift(model, hulkness(state));
 		} else {
 			WebHulk.shift(model, hulkness(state));

@@ -74,6 +74,24 @@ final class WebSlender {
 		{-3.4F, 0.2F, 1.8F, -0.6F, 1.35F, -0.5F, 0.22F, 0.55F},
 		{3.3F, 0.1F, 1.8F, 0.7F, 1.4F, -0.45F, 0.2F, 0.5F},
 	};
+	/**
+	 * {@code rows} (columns as {@link #TENDRIL_REST}'s) for a bigger body: the roots {@code wide} times as far out and
+	 * {@code deep} pixels further back, each {@code thick} times as thick and {@code length} times as long (the big body's
+	 * crown is this one's, grown to its frame: WebHulk).
+	 */
+	static float[][] grown(float[][] rows, float wide, float deep, float thick, float length) {
+		float[][] out = new float[rows.length][];
+		for (int i = 0; i < rows.length; i++) {
+			float[] r = rows[i].clone();
+			r[0] *= wide;
+			r[2] += deep;
+			r[6] *= thick;
+			r[7] *= length;
+			out[i] = r;
+		}
+		return out;
+	}
+
 	/** The weapon arm's hand, this far down the arm from the shoulder (pixels), and the arm's half-width there. */
 	static final float HAND_Y = 15.0F, ARM_HALF = 1.2F;
 	/** Flowing on: the chest first, then the arms, the legs, and the head last (WebHulk's order, 0 to WebHulkMesh.LAST_ORDER). */
@@ -114,6 +132,52 @@ final class WebSlender {
 		WebHulk.move(h.head, nx, ny, nz);
 	}
 
+	/**
+	 * Its stance (Andy, from his reference of it crouched: "the idle pose needs more of an exaggerated hunch like the
+	 * reference, and even more curled while using tendrils, retaining the slight ragdoll on movement"): it stands hunched
+	 * right over, the back curled {@code HUNCH} forward from the hips (radians) and the head craned back up {@code HEAD_UP} of that to
+	 * look ahead, the arms hanging forward {@code ARMS_FORWARD} and the thighs bent {@code THIGHS} (the knees fold with them,
+	 * WebHulk#limbs); curled further, to {@code HUNCH_TENDRILS}, while its tendrils strike, hold, stab or walk it, easing
+	 * between the two over {@code CURL_TICKS}. On the move it straightens only to {@code HUNCH_MOVING} of that, and stays
+	 * loose: the head and the arms lag and loll with the stride ({@code LOLL}, radians), the slight ragdoll it always had.
+	 */
+	static final float HUNCH = 0.5F, HUNCH_TENDRILS = 0.85F, HUNCH_MOVING = 0.7F, HEAD_UP = 0.85F, ARMS_FORWARD = 0.35F, THIGHS = 0.22F;
+	static final float CURL_TICKS = 6.0F, LOLL = 0.12F;
+	/** Entity id → how far curled over for its tendrils (0-1). */
+	private static final WebEase CURL = new WebEase();
+	/** What each body was last hunched to (so hunching it twice in a frame hunches it once). */
+	private static final java.util.Map<ModelPart, Float> HUNCHED = new java.util.WeakHashMap<>();
+
+	/** Hunches a model drawn for the slender body, {@code k} of the way (before {@link #shift}, so the shoulders and neck follow). */
+	static void hunch(HumanoidModel<?> h, AvatarRenderState s, float k) {
+		if (k <= 0.0F || s.isPassenger || s.isFallFlying || s.swimAmount > 0.0F) {
+			return;
+		}
+		Float was = HUNCHED.get(h.body);
+		if (was != null && was == h.body.xRot) {
+			return;
+		}
+		WebSymbioteClient.Tendrils tendrils = s.getData(WebSymbioteClient.TENDRILS);
+		boolean working = tendrils != null && (tendrils.strike() >= 0.0F || tendrils.combo() >= 0 || tendrils.held() != 0 || tendrils.legs() != null
+			|| tendrils.tethers() != null);
+		float curl = CURL.to(s.id, working ? 1.0F : 0.0F, CURL_TICKS);
+		float speed = Mth.clamp(s.walkAnimationSpeed, 0.0F, 1.0F);
+		float bend = Mth.lerp(curl, HUNCH, HUNCH_TENDRILS) * Mth.lerp(speed, 1.0F, HUNCH_MOVING) * k;
+		float loll = Mth.sin(s.walkAnimationPos * 0.6662F - 0.8F) * LOLL * speed * k;
+		// the back curled over from the hips (the head and arms carried with it, PoseBlend.bend), the head craned up again,
+		// the arms let hang (straight down, a little forward) and lolling with the stride
+		com.jaymospowers.client.PoseBlend.bend(h, bend, 0.0F, 0.0F, 0.0F, 0.0F);
+		h.head.xRot -= bend * HEAD_UP - loll * 0.5F;
+		h.head.zRot += loll * 0.6F;
+		h.rightArm.xRot -= bend + ARMS_FORWARD * k - loll;
+		h.leftArm.xRot -= bend + ARMS_FORWARD * k + loll;
+		h.rightArm.zRot += loll * 0.5F;
+		h.leftArm.zRot += loll * 0.5F;
+		h.rightLeg.xRot -= THIGHS * k;
+		h.leftLeg.xRot -= THIGHS * k;
+		HUNCHED.put(h.body, h.body.xRot);
+	}
+
 	/** Stretches a model laid under it (the suit, the goo) to its torso and legs, {@code k} of the way (not the body itself). */
 	static void stretch(HumanoidModel<?> h, float k, float frame) {
 		if (k <= 0.0F || h instanceof Model) {
@@ -125,17 +189,21 @@ final class WebSlender {
 	}
 
 	/**
-	 * The thin strands ({@link #STRANDS}), drawn off the body as the tendrils are (WebTendrilLayer, the same mesh and
+	 * Thin strands ({@link #STRANDS} on this body, WebHulk's on the big body), drawn off the body as the tendrils are (WebTendrilLayer, the same mesh and
 	 * texture): grown in with the tendrils, swaying and rippling, streaming back as it runs. They never strike or hold.
 	 */
 	static final class Strands extends net.minecraft.client.model.Model<AvatarRenderState> {
 		/** How fast they sway, and how far (radians), and how hard each segment ripples. */
 		static final float SWAY_RATE = 0.09F, SWAY = 0.22F, RIPPLE = 0.16F;
-		private final ModelPart[][] parts = new ModelPart[STRANDS.length][WebTendrilLayer.SEGMENTS];
+		private final float[][] rows;
+		private final ModelPart[][] parts;
 
-		Strands() {
-			super(mesh().bakeRoot(), net.minecraft.client.renderer.rendertype.RenderTypes::entityCutout);
-			for (int t = 0; t < STRANDS.length; t++) {
+		/** The strands of {@code rows} (columns as {@link #TENDRIL_REST}'s): the slender body's {@link #STRANDS}, or the big body's. */
+		Strands(float[][] rows) {
+			super(mesh(rows).bakeRoot(), net.minecraft.client.renderer.rendertype.RenderTypes::entityCutout);
+			this.rows = rows;
+			this.parts = new ModelPart[rows.length][WebTendrilLayer.SEGMENTS];
+			for (int t = 0; t < rows.length; t++) {
 				ModelPart part = this.root().getChild("strand" + t);
 				this.parts[t][0] = part;
 				for (int k = 1; k < WebTendrilLayer.SEGMENTS; k++) {
@@ -146,15 +214,15 @@ final class WebSlender {
 		}
 
 		/** WebTendrilLayer's tendril mesh, once for each strand. */
-		private static net.minecraft.client.model.geom.builders.LayerDefinition mesh() {
+		private static net.minecraft.client.model.geom.builders.LayerDefinition mesh(float[][] rows) {
 			net.minecraft.client.model.geom.builders.MeshDefinition mesh = new net.minecraft.client.model.geom.builders.MeshDefinition();
 			net.minecraft.client.model.geom.builders.PartDefinition root = mesh.getRoot();
 			int segments = WebTendrilLayer.SEGMENTS, tips = WebTendrilLayer.TIP.length;
 			float length = WebTendrilLayer.SEGMENT_LENGTH;
-			for (int t = 0; t < STRANDS.length; t++) {
+			for (int t = 0; t < rows.length; t++) {
 				net.minecraft.client.model.geom.builders.PartDefinition parent = root.addOrReplaceChild("strand" + t,
 					net.minecraft.client.model.geom.builders.CubeListBuilder.create().texOffs(0, 0).addBox(-1.5F, -1.5F, 0.0F, 3.0F, 3.0F, length),
-					net.minecraft.client.model.geom.PartPose.offset(STRANDS[t][0], STRANDS[t][1], STRANDS[t][2]));
+					net.minecraft.client.model.geom.PartPose.offset(rows[t][0], rows[t][1], rows[t][2]));
 				for (int k = 1; k < segments; k++) {
 					float thick = k < segments - tips ? 3.0F : WebTendrilLayer.TIP[k - (segments - tips)];
 					parent = parent.addOrReplaceChild("s" + k, net.minecraft.client.model.geom.builders.CubeListBuilder.create().texOffs(0, (k % 2) * 8)
@@ -175,8 +243,8 @@ final class WebSlender {
 			float thick = Mth.lerp(Mth.sqrt(growth), 0.3F, 1.3F), length = Mth.lerp(eased, 0.04F, 1.3F);
 			// running, they stream back
 			float drag = Mth.clamp(state.walkAnimationSpeed / 0.4F, 0.0F, 1.0F);
-			for (int t = 0; t < STRANDS.length; t++) {
-				float[] r = STRANDS[t];
+			for (int t = 0; t < this.rows.length; t++) {
+				float[] r = this.rows[t];
 				ModelPart base = this.parts[t][0];
 				base.visible = growth > 0.02F;
 				float sway = Mth.sin(time * SWAY_RATE + t * 1.7F) * SWAY;

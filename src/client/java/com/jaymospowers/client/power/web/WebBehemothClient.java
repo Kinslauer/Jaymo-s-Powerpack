@@ -189,9 +189,10 @@ public final class WebBehemothClient {
 				float size = Mth.clamp(height / SIZE_HEIGHT, SIZE_MIN, SIZE_MAX);
 				float rootZ = fourLegs ? 0.0F : Math.max(0.0F, width * 16.0F * BACK_DEPTH - 2.0F * size)
 					+ (state.getData(HOST) != null ? BEHEMOTH_DEPTH : 0.0F);
-				if (body != null && WebSuitGrowth.slender(body)) {
-					// in the slender body: off its own back and shoulders (its neck's height), as on a web slinger
-					WebTendrilLayer.submitOnMob(poseStack, collector, lightCoords, state, tendrils, WebSlender.NECK, 0.0F, 1.0F, true);
+				if (body != null) {
+					// in the strain's own body: off its back and shoulders (from its neck), as on a web slinger
+					float neck = WebSuitGrowth.slender(body) ? WebSlender.NECK : -WebHulkMesh.BODY_LIFT;
+					WebTendrilLayer.submitOnMob(poseStack, collector, lightCoords, state, tendrils, neck, 0.0F, 1.0F, true);
 				} else {
 					WebTendrilLayer.submitOnMob(poseStack, collector, lightCoords, state, tendrils, rootY, rootZ, size, false);
 				}
