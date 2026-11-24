@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: claude-cloud-zfighter-checklist-thread
 asked: 2026-11-19
@@ -37,3 +37,4 @@ text_pass: done
 - 2026-11-20 11:40 hermes-a's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-20 22:32 hermes-b's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-21 00:36 Text pass: reworded changes/powers/claude-zfighter-gaps-4-forms.md into player-facing patch-note language (dropped dev jargon/array names, kept the title and build status). The PR's Java changes add form ids 11-20 and stat-array rows only - no new lang keys, dialogue, hints, item text or chat lines - so no other player-visible strings existed to rewrite.
+- 2026-11-24 16:02 PR #1965 is merged into master; moved to Inbox/Done.

@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: any
 from: coordinator
 asked: 2026-11-20
@@ -66,3 +66,4 @@ Library); `.claude/rules/blockbench-animation.md`; `KeyframeClip` and how `Crawl
 - 2026-11-20 22:53 hermes-b's last text pass stopped before finishing; handed back so it can carry on.
 - 2026-11-20 23:02 Text pass: PR #1959 parkour-animations (freerun ledge hang/mantle keyframed clips). Only player-visible string is changes/powers/parkour-animations.md; LedgePose.java edits and animation JSONs are code/data with no player-facing text. Change note already plain, brief, player-facing and states testing status; no rewrite needed.
 - 2026-11-20 23:07 Text pass: rewrote changes/powers/parkour-animations.md change note body from implementation jargon (GeckoLib clips, hand-coded joint math, resource ids) to a player-facing description of smoother ledge hang and mantle motion; LedgePose.java and the new animation JSONs carry no player-visible text.
+- 2026-11-24 16:02 PR #1959 is merged into master; moved to Inbox/Done.

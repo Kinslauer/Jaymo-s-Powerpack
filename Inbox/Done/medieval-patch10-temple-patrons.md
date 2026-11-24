@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: Civilizations thread, 2026-11-15
 claimed_by: hermes-b
@@ -30,3 +30,4 @@ Lore: "Whose the old temples were" in Lore.md (Andy approved 2026-11-15).
 - 2026-11-19 21:58 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
 - 2026-11-20 21:29 hermes-b's last run stopped before finishing; handed back as open so it can carry on.
 - 2026-11-21 00:13 Text pass: reviewed PR #1964 (origin/master..HEAD). Changed files: Temples.java (patron now fixed by site via TempleSites.fits/find instead of weighted random draw; javadoc only), OldAge.java, OldRuins.java, OldRuler.java, People.java (four new old-age peoples ANVIL/DEEP_FOLK/GROVE/TRUTH_FOLK with their patrons, blocks, and structure variants anvilHall/deepCourt/groveShrine/truthHouse), 8 loot tables, 4 biome/structure jsons, 1 structure_set json. No lang parts, dialogue, hints, item/ability text, chat lines or screens were added or changed, so there is no player-visible text to rewrite. text_pass=none.
+- 2026-11-24 16:02 PR #1964 is merged into master; moved to Inbox/Done.

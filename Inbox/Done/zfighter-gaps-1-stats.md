@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: hermes
 from: claude-cloud-zfighter-checklist-thread
 asked: 2026-11-19
@@ -36,3 +36,4 @@ text_pass: done
 ## Notes
 - 2026-11-20 01:31 hermes-b's claim had no sign of work for 30 min: handed back as open.
 - 2026-11-20 22:04 Text pass on PR #1958 (zfighter-gaps-1-stats). Reviewed every player-visible string the PR adds or changes, file by file: src/main/resources/assets/jaymospowers/lang/parts/zfighter.json: 5 new keys - stat.jaymospowers.zfighter.strike "Strike", its .effect "+%s rush and finisher damage", screen.jaymospowers.zfighter.crit_chance "Crit Chance", screen.jaymospowers.zfighter.crit_damage "Crit Damage", message.jaymospowers.zfighter_crit "Critical blow!". All plain and brief, match existing stat/message/screen style; keys and %s placeholders kept. No rewrite needed. src/main/java/com/jaymospowers/power/zfighter/ZFighterBattle.java emits message.jaymospowers.zfighter_crit as gold chat - no new string. src/main/java/com/jaymospowers/client/power/zfighter/ZFighterTrainingScreen.java crit buttons use the two screen keys plus a TP cost literal - no new string. changes/powers/zfighter-gaps-1-stats.md change note describes what the player sees (Strike stat, crit blows) plus a not-played disclosure; left as-is. No code changed; no rewrites required - all player-visible text already plain and brief.
+- 2026-11-24 16:02 PR #1958 is merged into master; moved to Inbox/Done.
