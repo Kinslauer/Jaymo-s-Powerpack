@@ -1,10 +1,11 @@
 ---
-status: open
-for: any
+status: done
+for: claude-cloud
 from: Andy (Claude chat, 2026-11-23)
 asked: 2026-11-23
-claimed_by: 
-pr: 
+claimed_by: claude-cloud
+pr: 2117
+thread: cmsg_017LSt6rWz6CzxSGvzDd41XWKNxU3D2FFpE1DbB4tCch4W
 ---
 
 # Blood Awakening: everyone starts with it, the node upgrades it; Verdant gets push-button limb regrowth
@@ -42,3 +43,6 @@ verdant should unlock their push button limb regrowth with this."
 2. **The regrowth key.** Which key (the heritage key, the held move's key, or its own binding), its cooldown, and whether
    it costs anything (ki, hunger, health).
 3. Whether players who already learned the node get their point back, since the node now does something new.
+
+## Notes
+- 2026-11-24 23:27 PR #2117 is merged into master; moved to Inbox/Done.

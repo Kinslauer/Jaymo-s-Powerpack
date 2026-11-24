@@ -28,4 +28,4 @@ Andy (L6) wants Tectonic tried and swapped back if it is worse. Tectonic 3.0.32 
   - Andy's note: "which one is more stable? we seem to have alot of world gen issues right now, can we test this then swap back if not?"
 
 ## Notes
-- 2026-11-24 22:39 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-24 22:40 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.

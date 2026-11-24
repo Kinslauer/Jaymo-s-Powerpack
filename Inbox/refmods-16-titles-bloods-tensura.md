@@ -44,4 +44,4 @@ ourselves), and what it overlaps in our pack. Skip mods Andy ruled out (see stan
 
 ## Notes
 - 2026-11-24 16:54 Built in the cloud thread 'Build Reference Mods pick list' (Andy: 'no, build it here'): https://claude.ai/artifact/Fu1jDwywXNKSGj6mmU65fg (148 rows, db picks/andy). Not for the PC.
-- 2026-11-24 22:39 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-24 22:40 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.

@@ -31,4 +31,4 @@ Same placement rule.
 - **V24 Four orc roles** (The Orcs!, size M). Our greenskin ranks: a chief with a long hammer, a shaman lobbing poison pots, a ranger switching bow and crossbow by range, and grunts that rush.
 
 ## Notes
-- 2026-11-24 22:39 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-24 22:40 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.

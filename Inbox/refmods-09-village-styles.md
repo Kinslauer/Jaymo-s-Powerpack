@@ -35,4 +35,4 @@ Every structure says where it generates and why (placement plan https://claude.a
 - **V14 Rebuilt illager outposts** (Luki's Grand Capitals, size M). Pillager outposts with palisades, cages and a tower. Where and why: on roads into realms they raid. We have: Illager camp picks.
 
 ## Notes
-- 2026-11-24 22:39 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-24 22:40 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.

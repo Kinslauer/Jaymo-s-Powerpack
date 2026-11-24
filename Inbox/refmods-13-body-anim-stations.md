@@ -31,4 +31,4 @@ Owns: powers client animation; C3/C4 block renderers.
 - **B8 Hands on the reins** (Punchy Moves, size S). Riders sway with the gait and hold the reins.
 
 ## Notes
-- 2026-11-24 22:39 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-24 22:40 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.

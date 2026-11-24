@@ -34,4 +34,4 @@ Owns: kingdoms monsters (GPL, licenses/mocreatures).
 - **M13 Amulets that carry a beast** (Mo' Creatures, size M). A bone charm a beast-tamer makes: a bonded beast rests in it and comes out where you call it.
 
 ## Notes
-- 2026-11-24 22:39 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-24 22:40 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.
