@@ -333,6 +333,8 @@ final class WebSlender {
 		private final int[] order = {ORDER_HEAD, ORDER_BODY, ORDER_ARMS, ORDER_ARMS, ORDER_LEGS, ORDER_LEGS};
 		private final ModelPart elbowRight, elbowLeft, kneeRight, kneeLeft;
 		private final ModelPart jaw;
+		/** Each hand's fingers and thumb (right, left): they sink away when that arm becomes the weapon. */
+		private final ModelPart[][] fingers = new ModelPart[2][5];
 		private final ModelPart[] tongue = new ModelPart[3];
 
 		Model() {
@@ -344,6 +346,12 @@ final class WebSlender {
 			this.kneeRight = this.holders[4].getChild("right_leg").getChild("right_shin");
 			this.kneeLeft = this.holders[5].getChild("left_leg").getChild("left_shin");
 			this.jaw = this.holders[0].getChild("head").getChild("jaw");
+			for (int f = 0; f < 4; f++) {
+				this.fingers[0][f] = this.elbowRight.getChild("r_fin" + f);
+				this.fingers[1][f] = this.elbowLeft.getChild("l_fin" + f);
+			}
+			this.fingers[0][4] = this.elbowRight.getChild("r_thumb");
+			this.fingers[1][4] = this.elbowLeft.getChild("l_thumb");
 			ModelPart segment = this.jaw;
 			for (int i = 0; i < this.tongue.length; i++) {
 				segment = segment.getChild("tongue" + i);
@@ -391,9 +399,21 @@ final class WebSlender {
 				}
 			}
 			WebHulk.limbs(state, this, this.elbowRight, this.elbowLeft, this.kneeRight, this.kneeLeft);
-			// (crooked further: never stiff, ELBOWS)
-			this.elbowRight.xRot -= ELBOWS;
-			this.elbowLeft.xRot -= ELBOWS;
+			// the weapon arm (WebMorphLayer) isn't held in a hand: the arm becomes it (Andy's concept-art reference of the two
+			// strains' fight), so that hand's fingers sink away into the forearm the blade grows out of, its elbow held straight
+			WebMorphLayer.Strike strike = state.getData(WebMorphLayer.KEY);
+			WebMorphLayer.Gather gather = state.getData(WebMorphLayer.GATHER);
+			int side = strike != null && !strike.tendril() ? strike.side() : gather != null && !gather.tendril() ? gather.side() : 0;
+			for (int hand = 0; hand < 2; hand++) {
+				boolean weapon = hand == 0 ? side > 0 : side < 0;
+				for (ModelPart finger : this.fingers[hand]) {
+					finger.visible = !weapon;
+				}
+				// (crooked further otherwise: never stiff, ELBOWS)
+				if (!weapon) {
+					(hand == 0 ? this.elbowRight : this.elbowLeft).xRot -= ELBOWS;
+				}
+			}
 		}
 	}
 }
