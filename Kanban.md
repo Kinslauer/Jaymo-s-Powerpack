@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:30). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:39). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,10 +22,6 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for any · open
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for any · open
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for ☁️ Cloud · open
-- [ ] [[Inbox/refmods-02-druid-wild-shape|refmods-02-druid-wild-shape]] · for any · open
-- [ ] [[Inbox/refmods-03-scouter|refmods-03-scouter]] · for any · open
-- [ ] [[Inbox/refmods-04-umbrellas-take-cover|refmods-04-umbrellas-take-cover]] · for any · open
-- [ ] [[Inbox/refmods-05-hoverboard|refmods-05-hoverboard]] · for any · open
 - [ ] [[Inbox/refmods-06-horses|refmods-06-horses]] · for any · open
 - [ ] [[Inbox/refmods-07-mocreatures-beasts|refmods-07-mocreatures-beasts]] · for any · open
 - [ ] [[Inbox/refmods-08-vampire-villager|refmods-08-vampire-villager]] · for any · open
