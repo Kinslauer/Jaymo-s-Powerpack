@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 23:41). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 05:48). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -17,12 +17,13 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-30 waiting for a bot, 0 being built, 1 in review: see [[Kanban]].
+31 waiting for a bot, 0 being built, 1 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2070 Lock-on names the part only with Called Shots; what hurts you is said in your own voice (Powers, Kitchen, 2026-11-24)
 - [ ] #2069 A dead player's severed head can be taken as a trophy (Powers, Kingdoms, 2026-11-24)
 - [ ] #2067 A Truth Cleric prays from a book, not a holy symbol (Kingdoms, 2026-11-24)
 - [ ] #2066 JEI shows stone tools, hammer and light armour recipes on a server (Powers, Kingdoms, Kitchen, 2026-11-24)
@@ -82,12 +83,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1998 Mutant zombies vary like the old dead: by where they rose, their land and their rot (Kingdoms, 2026-11-22)
 - [ ] #1997 The mutant zombie wears the old dead's rags, not the game's cyan and blue (Kingdoms, 2026-11-22)
 - [ ] #1996 survival picks: one base gauntlet for every fist weapon, offhand punches, Crushing (Powers, 2026-11-22)
-- [ ] #1995 speedsters don't tire Kitchen's sprint wind (Powers, Kitchen, 2026-11-22)
-- …and 414 older ones.
+- …and 415 older ones.
 
 ## Health
 
-7 problems in the notes: [[Health]].
+8 problems in the notes: [[Health]].
 
 ## Last week
 
