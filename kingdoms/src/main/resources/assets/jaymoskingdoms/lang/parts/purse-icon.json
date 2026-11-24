@@ -1,0 +1,5 @@
+{
+  "gui.jaymoskingdoms.purse_icon": "Your coin",
+  "gui.jaymoskingdoms.purse_icon.empty": "Not a coin on you.",
+  "gui.jaymoskingdoms.purse_icon.line": "%s %s"
+}

@@ -13,6 +13,7 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 import com.jaymoskingdoms.money.Money;
+import com.jaymoskingdoms.money.PurseContents;
 
 /**
  * (0.7.498) Coins for emeralds in the loot of the world. Emeralds are a gem now and the kingdoms' money is the coin, so
@@ -26,6 +27,9 @@ import com.jaymoskingdoms.money.Money;
 public final class LootSwap {
 	/** The loot-table folders whose emeralds become coins. */
 	static final List<String> FOLDERS = List.of("chests/", "entities/", "gameplay/hero_of_the_village/");
+	/** A chest's chance of a money bag (a filled coin purse), and its worth in emeralds: from MIN to MIN + MORE. */
+	static final float MONEY_BAG_CHANCE = 0.08F;
+	static final int MONEY_BAG_MIN = 2, MONEY_BAG_MORE = 8;
 
 	private LootSwap() {
 	}
@@ -58,6 +62,19 @@ public final class LootSwap {
 				out.addAll(origin == null ? Money.stacks(milli) : Money.stacks(context.getLevel(), BlockPos.containing(origin), milli));
 			} else {
 				out.add(drop);
+			}
+		}
+		// (Andy's pick from Numismatic Overhaul) now and then a chest holds someone's money bag: a coin purse with the
+		// coin of the land in it
+		if (origin != null && table.unwrapKey().get().identifier().getPath().startsWith("chests/")
+			&& context.getRandom().nextFloat() < MONEY_BAG_CHANCE) {
+			BlockPos at = BlockPos.containing(origin);
+			Currency coin = Currencies.at(context.getLevel(), at);
+			long milli = Money.worth(MONEY_BAG_MIN + context.getRandom().nextInt(MONEY_BAG_MORE + 1));
+			if (coin.money()) {
+				out.add(PurseContents.filled(coin, milli));
+			} else {
+				out.addAll(Money.stacks(context.getLevel(), at, milli));
 			}
 		}
 		drops.clear();
