@@ -1015,3 +1015,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Also:** Andy approved the Lore.md paragraph "The red one's own shape, and its hunt".
 - **Applies to:** Powers, web symbiote (red strain, takeovers, PR #2096).
 - **Agent:** codex-reference-dinos-venom → red-symbiote-body.
+- 2026-11-24 (Andy, Vanilla+ thread): port Ender's Delight's crops and dishes ("port them"), chorus dishes too (card: "Port all of it, chorus too"), past the old "except chorus fruit" rule.

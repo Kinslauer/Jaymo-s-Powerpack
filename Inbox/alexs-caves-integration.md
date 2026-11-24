@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: coordinator
 from: Claude on the PC (Andy, 2026-11-24)
 asked: 2026-11-24
-thread:
-claimed_by:
+thread: cmsg_01638ouFWZKwEZ1ET74kBk9B9wdspKGshZpLSrKtbnnfck
+claimed_by: alexs-caves-worldgen
 pr:
 suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/compat/AlexsCavesCompat.java (new)
