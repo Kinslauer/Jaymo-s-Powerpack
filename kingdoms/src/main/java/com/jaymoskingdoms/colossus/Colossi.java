@@ -52,7 +52,9 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Omens:</b> with {@link #OMEN_FROM} or more of their own patron's commandments broken, now and then the patron's
  * colossus stands far off and watches them, nearer and more often the more are broken.</li>
  * <li><b>The hunt:</b> from {@link #HUNT_FROM}, it walks at them instead, very slowly, for a minute, and comes back a few
- * minutes later, nearer each time. If it reaches them it lifts its foot (the last chance to run) and stamps, and they die.
+ * minutes later, nearer each time, and on each walk brings a tornado, a quake or a tsunami down on them (Overworld only,
+ * {@link com.jaymoskingdoms.disasters.Disasters#wrath}). If it reaches them it lifts its foot (the last chance to run) and
+ * stamps, and they die.
  * The patron has had its due then: every broken commandment is forgiven.</li>
  * <li><b>Atonement:</b> an offering at the patron's shrine (once a day, as ever) forgives the last commandment broken and
  * sends the figure away.</li>
@@ -81,6 +83,9 @@ public final class Colossi {
 	static final int HUNT_GAP = 3600, HUNT_TICKS = 1200;
 	/** How fast it walks (blocks a tick: a block a second), how near it stamps, how near the foot kills (blocks). */
 	static final double HUNT_SPEED = 0.05, HUNT_REACH = 10.0, STAMP_KILL = 6.0;
+	/** Ticks into each walk before it brings its disaster (a tornado, a quake or a tsunami), and the chance it does. */
+	static final int DISASTER_AFTER = 200;
+	static final float DISASTER_CHANCE = 1.0F;
 	/** Ticks between its footfalls (heard only by the hunted). */
 	static final int STRIDE_TICKS = 40;
 	/** How far either side of where they look an omen or a walk begins (degrees). */
@@ -345,6 +350,10 @@ public final class Colossi {
 		if (c.age >= PatronColossus.FADE_IN + HUNT_TICKS) {
 			c.leave();
 			return true;
+		}
+		// (Andy, 2026-11-24) it brings a natural disaster down on them as it comes
+		if (c.age == PatronColossus.FADE_IN + DISASTER_AFTER && sp.getRandom().nextFloat() < DISASTER_CHANCE) {
+			com.jaymoskingdoms.disasters.Disasters.wrath(sp);
 		}
 		Vec3 to = sp.position().subtract(c.position()).multiply(1.0, 0.0, 1.0);
 		double distance = to.length();
