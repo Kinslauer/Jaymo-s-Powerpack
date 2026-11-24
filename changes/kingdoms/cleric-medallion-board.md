@@ -1,0 +1,7 @@
+# Cleric's medallion board: patterns on the number keys cast spells, sneak to bind
+- **Raise the medallion** (new key, default Y, under the class keys): a Cleric with the holy symbol in either hand lifts it, and while it is up the number keys 1 to 9 are a 3x3 board of sigils (1 2 3 on top, 7 8 9 below) instead of hotbar slots. Combat mode's forms and art keys wait while it is up.
+- Each key lays a mark; every spell has a pattern of four marks (`MedallionBoard.PATTERNS`), e.g. Mending 2-5-8-6, Sanctuary 1-3-9-7, Restoration 2-4-8-6. A finished pattern casts that spell at once (same mana, cooldown and parts as the symbol's tap) and lowers the board; marks that begin no pattern you know fizzle and the board stays up. Finishing a pattern while sneaking binds that spell to the medallion instead.
+- **Quick cast**: unchanged, a tap of the symbol in either hand (the offhand too) casts the bound spell; sneak-use still turns it.
+- On screen: the medallion's face with a rim of marks, the nine sigils, the laid ones lit and joined by crackling strokes, and beside it every prayer you know with its pattern (the ones still possible bright). Others see the arms raised, the medallion as a small sigil before the chest, a circle at the feet, a rune at each mark in the air and strokes joining them.
+- The board drops after 15 s with no mark, on death, or when the symbol leaves your hands (`MedallionBoard`, `MedallionClient`; tuning at the top of both).
+- Built on CI; not played in game.

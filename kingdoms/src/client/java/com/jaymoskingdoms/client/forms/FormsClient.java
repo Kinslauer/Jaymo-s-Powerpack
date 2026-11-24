@@ -5,6 +5,7 @@ import com.jaymoskingdoms.client.hud.HudZones;
 import com.jaymoskingdoms.CombatArts;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.PowersCompat;
+import com.jaymoskingdoms.client.MedallionClient;
 import com.jaymoskingdoms.client.Ui;
 import com.jaymoskingdoms.forms.Forms;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -139,7 +140,7 @@ public final class FormsClient {
 					: "message.jaymoskingdoms.combat_mode.off"), false);
 			}
 			LocalPlayer player = minecraft.player;
-			if (!combat || player == null || minecraft.gui.screen() != null || !Forms.book(player).stance()
+			if (!combat || MedallionClient.up() || player == null || minecraft.gui.screen() != null || !Forms.book(player).stance()
 				|| !ClientPlayNetworking.canSend(Forms.Pick.TYPE) || !ClientPlayNetworking.canSend(Forms.Fire.TYPE)) {
 				return;
 			}

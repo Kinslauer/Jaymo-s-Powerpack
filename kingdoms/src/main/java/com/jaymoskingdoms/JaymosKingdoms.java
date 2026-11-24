@@ -1172,6 +1172,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		HushWard.register();
 		AshRot.register();
 		ArtKeys.register();
+		// the Cleric's medallion board (the medallion key and the number keys as its marks)
+		MedallionBoard.register();
 		// (Awakening picks) the Cordon, who hunt the awakened (and its courts' attachment), and awakened strangers on the road
 		Cordon.register();
 		AwakenedStrangers.register();

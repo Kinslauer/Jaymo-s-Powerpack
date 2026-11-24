@@ -1,0 +1,7 @@
+{
+  "key.jaymoskingdoms.medallion": "Raise the medallion board (Cleric)",
+  "message.jaymoskingdoms.medallion.bound": "%s is bound to the medallion",
+  "message.jaymoskingdoms.medallion.cooling": "The medallion is still warm from the last prayer",
+  "message.jaymoskingdoms.medallion.fizzle": "The marks fade: no prayer you know begins so",
+  "message.jaymoskingdoms.medallion.none": "You know no prayer that has a pattern yet"
+}

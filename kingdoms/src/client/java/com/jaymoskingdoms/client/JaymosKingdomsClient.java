@@ -390,6 +390,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		PatronKeys.register();
 		// the four art keys (Soul, Claw, Wild, Sun)
 		ArtKeysClient.register();
+		// the Cleric's medallion board
+		MedallionClient.register();
 		// 0.5.47: stablehands' and farriers' screens (the scroll kept when one comes again after a button)
 		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(com.jaymoskingdoms.StableNet.Open.TYPE, (payload, context) -> {
 			int scroll = context.client().gui.screen() instanceof StableScreen was && was.workerId() == payload.workerId() ? was.scroll() : 0;
