@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-24 14:30
+updated: 2026-11-24 14:38
 ---
 # Open PRs
 
-11 open, as of 2026-11-24 14:30. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+11 open, as of 2026-11-24 14:38. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2071](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2071) One cobblestone crafts back into 4 stone rocks
@@ -53,10 +53,10 @@ Andy merges only on "merge", one at a time.
 
 ## [#2094](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2094) Sky, light and air: embers, scorch, lava crust, leaves on water, shooting stars, far fireworks, coloured light
 - **Branch:** `claude/sky-light-air` · **Updated:** 2026-11-24 (today)
-- **Checks:** ⏳ 1 of 4 running
+- **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#2095](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2095) Sit from the knee smoothly; sitting holds you still and rides an earthboard
-- **Branch:** `claude/project-thread-fdlmpx` · **Updated:** 2026-11-24 (today)
-- **Checks:** ⏳ 1 of 5 running
-- **Agent:** no agent note
+## [#2096](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2096) The red symbiote's slender body; taken humanoids fight in the strain's body; the red one hunts (draft)
+- **Branch:** `claude/red-symbiote-body` · **Updated:** 2026-11-24 (today)
+- **Checks:** ⏳ 4 of 4 running
+- **Agent:** [[red-symbiote-body]]

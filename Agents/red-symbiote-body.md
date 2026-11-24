@@ -1,9 +1,9 @@
 ---
-status: stalled
+status: running
 task: Red strain gets the slender body from Andy's symbiote jar; humanoid hosts fight in the strain's form; the red one hunts within 500 blocks
 branch: claude/red-symbiote-body
 with: codex-reference-dinos-venom (parent); stacks on venom-head-adaptation (#2080)
-pr:
+pr: 2096
 mods: powers
 versions:
 started: 2026-11-24
@@ -29,8 +29,10 @@ terrain for pursuit and releasing every ticket when the hunt ends. Movement feel
 - Hunt: server-side, bounded chunk tickets, released on every end.
 
 ## Notes
--
+- Previews: E:/Jaymo Vault Live/Assets/red-symbiote/ (slender-body.png, -lifted, slender-vs-big.png), tools/preview_slender.py.
+- Andy mid-task (2026-11-24): tendrils a cage not a cape; then "retain them all ... abundance ... differ in size thickness and length ... stay on the back/rear and shoulders, never out the front" (done: TENDRIL_REST + 14 STRANDS); "adapt them well to the climb and walk" (walls walk from slender roots; low two skitter on the ground at a run); "when done, black should get a similar treatment" (to do).
+- Black-strain update via parent: kills only for its needs, seeks a web host; no 500-block hunt.
+- Question for Andy: a red host wastes away in 20-90 s today, too short for a 500-block hunt. Default taken: while it hunts it wastes far slower, and each kill (fed on as a corpse) buys it more time.
 
 ## Done
 (pending)
-- 2026-11-24 14:31 No sign of work for 30 min: marked stalled (whoever ran it stopped).
