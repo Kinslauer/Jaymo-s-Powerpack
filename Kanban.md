@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 18:27). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 20:18). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -36,12 +36,13 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Agents/cleric-medallion-board|cleric-medallion-board]] · 💻 Odysseus · #2060 · running
 
 
 ## In review
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · 🔥 Prometheus · #research · in-review
-- [ ] [[Agents/orc-sees-stance-only-facing|orc-sees-stance-only-facing]] · 💻 Odysseus · #2053 · in-review
+- [ ] [[Agents/orc-sees-stance-only-facing|orc-sees-stance-only-facing]] · 💻 Odysseus · #2053, 2054, 2056, 2057 · in-review
 
 
 ## Needs Andy
