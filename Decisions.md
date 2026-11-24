@@ -947,3 +947,17 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Decided:** "I DONT want the venom model, but JUST the head, and the dinos should be found on the verdant planet".
 - **Applies to:** Desktop Reference Mods (Dino-26.3-1.2.0.jar and symbiote-1.20.1-1.0.1.jar); proposed Powers integration. Compatibility assessment only so far.
 - **Agent:** codex-reference-dinos-venom.
+
+### 2026-11-24: Downed fire and blows (after #2056)
+- **Decided:** "revert to falls and bleeding dont count, fire knocks unconcious instantly. any corpse. they die after burning for 6s"
+- **Applies to:** Inbox downed-knockout-three-hits (Powers `Downed`): falls and bleeding stay out of the three blows; anyone downed who burns passes out at once and dies after 6 s of burning.
+- **Agent:** claude-cloud (thread "Check vault tasks against master").
+
+### 2026-11-24: Back weapon slot follows #2044
+- **Decided:** "use the latest ruling" (vanilla-plus-c back slot vs #2044's weapons in set places on the body).
+- **Applies to:** Inbox vanilla-plus-c-back-slot: drop the "YDM shows only the back-slot item without a tool belt" part; #2044's placements stand.
+- **Agent:** claude-cloud.
+
+### 2026-11-24: Vault sync pass
+- **Decided:** close arsenal-pulls-anything, from-the-shadows-port, village-mines-job-buildings, class-trees-plan and ping-t3code-11am (already on master or past); "finish here" for the nine partly done tasks (cloud thread builds them).
+- **Agent:** claude-cloud.
