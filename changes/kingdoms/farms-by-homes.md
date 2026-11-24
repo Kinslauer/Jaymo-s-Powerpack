@@ -1,3 +1,0 @@
-# Farms spawn by villages and homes
-
-Andy (2026-11-24, a screenshot of a lone wheat field on a desert shore): "these should spawn near villages or the single homes, they are farms and provide food somewhere, remember the genereation needs a reason". Moog's Voyager Structures' wheat farm, grain bin, haystack, windmill, barn and horse pen (structure tag `jaymoskingdoms:farms_by_homes`) now generate only within 6 chunks of where a village or a lone home or homestead will stand (tag `jaymoskingdoms:farm_neighbours`: `#minecraft:village`, Homesteads, Moog's houses, Grim Kingdoms' cabins and the like). The neighbour is found the way the world places it (its structure set's spread and the land it stands in), so nothing extra is generated to check. Only new chunks change.
