@@ -1,9 +1,11 @@
 package com.jaymospowers.client.power.zfighter.pod;
 
+import com.jaymospowers.client.compat.PodSubmarine;
 import com.jaymospowers.power.zfighter.pod.PodEntity;
 import com.jaymospowers.power.zfighter.pod.PodPart;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -26,6 +28,8 @@ import net.minecraft.world.phys.AABB;
 public class PodRenderer extends EntityRenderer<PodEntity, PodRenderer.State> {
 	/** How far a damaged fin is bent (degrees). */
 	static final float BEND = 35.0F;
+	/** Alex's Caves is loaded, so the pod is drawn as his submarine (only then is PodSubmarine touched). */
+	static final boolean SUBMARINE = FabricLoader.getInstance().isModLoaded("alexscaves");
 	private static final String[] FINS = {"fin_l", "fin_r", "fin_b"};
 	private static final String[] PLATES = {"plate_f", "plate_r", "plate_b", "plate_l"};
 	private static final String[] GASHES = {"gash_f", "gash_r", "gash_b", "gash_l"};
@@ -51,7 +55,7 @@ public class PodRenderer extends EntityRenderer<PodEntity, PodRenderer.State> {
 	@Override
 	protected AABB getBoundingBoxForCulling(PodEntity entity, float partialTicks) {
 		// the fins reach past its box
-		return entity.getBoundingBox().inflate(0.6, 0.2, 0.6);
+		return entity.getBoundingBox().inflate(SUBMARINE ? 1.2 : 0.6, 0.2, SUBMARINE ? 1.2 : 0.6);
 	}
 
 	@Override
@@ -69,6 +73,13 @@ public class PodRenderer extends EntityRenderer<PodEntity, PodRenderer.State> {
 		poseStack.pushPose();
 		poseStack.rotateDegrees(Axis.YP, -state.yaw);
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
+		if (SUBMARINE) {
+			// Alex's submarine, taken apart into the pod's pieces (PodSubmarine)
+			PodSubmarine.submit(collector, poseStack, state.lightCoords, state.filled, state.damaged, state.finished);
+			poseStack.popPose();
+			super.submit(state, poseStack, collector, camera);
+			return;
+		}
 		RenderType solid = RenderTypes.entityCutout(PodModel.TEXTURE);
 		RenderType glass = RenderTypes.entityTranslucent(PodModel.TEXTURE);
 		if ((state.filled & PodPart.KEEL.bit(0)) != 0) {
