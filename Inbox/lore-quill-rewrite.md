@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: quill
 from: tiv (Discord, Hotspot / parthenon / Airstrip thread, 2026-11-23)
 asked: 2026-11-23
 thread: 1573655548874985533
-claimed_by:
+claimed_by: quill
 pr:
 suggested_owns:
   - E:/Jaymo Vault Live/Lore.md
