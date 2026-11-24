@@ -17017,3 +17017,22 @@ Andy: "can i have you work on npc pathing? they get stuck in water or on buildin
 - **Hand in at the board**: use the town's board with your copy or the goods in hand to hand finished work in there when its poster is away (no hearts with them that way; a criminal still has to be brought to the poster).
 - New: BoardTerms, Decrees, BoardTermsClient, the decree item and papers (our own art), lang part board-terms. Changed: Economy, TownNotices, BoardWork, Bounties, BountyBoard (notice looks 3-6), Quests (turn-in shared with the board), Upkeep.
 - Built by CI only; not played.
+
+## 0.12.47 (2026-11-24): Pillagers carry lanterns at night, and take one down when they have none (#2072)
+
+- Andy: "pillagers should also use their lanterns at night, or break them in the world and take them with if they run out". At night, where it's dark, a pillager now carries a light in its off hand (its crossbow stays in the main), as villagers and folk do: a light from its own inventory, else a lantern (or torch) from its camp's loot pile. With none of those, it walks to the nearest lit lantern set in the world within 16 blocks (its camp's fence posts, a village's, a player's), breaks it and carries it off with the fuel it had left. Not with mob griefing off. At dawn the lantern is put away and kept for the next night, so each pillager takes down at most one.
+- Pillagers still see in the dark as before; the lantern lights them up (with LambDynamicLights) so they're seen coming.
+- `NightLights.bearer`, `fromPocket`, `faction` (a camp illager's camp), `Source.HUNG`, `hung`, `unhang`. Built by CI only; not played in game.
+
+## 0.12.48 (2026-11-24): Cobblestone siding is cut in the stonecutter, not crafted from one cobblestone (#2071)
+
+- One cobblestone alone in the crafting grid is now Jaymo's Powers' 4 stone rocks (Andy's pick), so it no longer gives 2 cobblestone siding. Cut siding from cobblestone in the stonecutter (2 per block, as before), or craft it from 2 cobblestone slabs.
+- `cobblestone_siding` recipe removed (tools/gen_carpentry.py skips it). Built by CI only; not crafted in game.
+
+## 0.12.49 (2026-11-24): Blood Awakening upgrades your blood's move; a Verdant's regrowth key (#2117)
+
+- **Everyone starts with their blood's move** (Andy, 2026-11-23): the skill-tree lock on a blood's heritage-key move and its held move is gone (`TreeLocks.Lock.BLOOD` removed; the gates in `HeritageKits.press`, `FrostPrison.cast`, `BioBuilt.press`, `RubberFolk.press` taken out).
+- **Blood Awakening now upgrades it** (Andy's pick: one shared rule now, per-blood upgrades later). Learned, every wait on a blood's move is halved and what a heritage-key move gives lasts half again as long (`TreeLocks.awakened`, `TreeLocks.wait`, `AWAKENED_WAIT` 0.5, `AWAKENED_LONGER` 1.5): heritage-key cooldowns halve and their buffs, snares and slows (`HeritageKits.fx` during a cast) last 1.5x; a Frost-born's ice prison comes back twice a day; a Bio-built's or Rubber-folk's taking-in runs in half the time (new synced `HeritageHold.ABSORB_NEED` keeps the engulfing animations in step); a Bio-built's budding cooldown halves. The node's description and the Heritage page line say so.
+- **A Verdant's regrowth key**: an awakened Verdant presses the heritage key to grow one lost limb back at once (Jaymo's Powers' `ZFighterLineage.regrowNow`, through `PowersCompat.sprintMove`); with nothing lost the key does what it did. The Heritage page tells a Verdant so.
+- Players who already learned the node keep it and get the upgrade; no point is refunded (old worlds don't matter).
+- Built; not played.

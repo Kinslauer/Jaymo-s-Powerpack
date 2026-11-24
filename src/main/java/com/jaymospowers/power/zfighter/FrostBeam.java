@@ -232,7 +232,8 @@ public final class FrostBeam {
 		}
 		boolean fighter = com.jaymospowers.core.Powers.has(player, ZFighterPower.INSTANCE);
 		Long last = LAST.get(player.getUUID());
-		if (last != null && now - last < (fighter ? Z_COOLDOWN : COOLDOWN) && now >= last) {
+		// (Blood Awakening) awakened, a Frost-born's beam bites in half the time (a Z Fighter's has its own pace)
+		if (last != null && now - last < (fighter ? Z_COOLDOWN : com.jaymospowers.core.TreeLocks.wait(player, COOLDOWN)) && now >= last) {
 			return;
 		}
 		LAST.put(player.getUUID(), now);
