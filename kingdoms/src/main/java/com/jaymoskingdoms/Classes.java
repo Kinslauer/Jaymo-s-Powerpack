@@ -114,7 +114,7 @@ public final class Classes {
 		CLERIC("hearthkeeper", "anvil_father", "deep_mother", "green_huntsman", "lantern_warden", "crowned_sun", "truth"),
 		DRUID, MONK, PALADIN("mercy", "justice", "honour"), RANGER("undead", "raiders", "beasts", "spiders", "greenskins", "monsters"),
 		WARLOCK("hearthkeeper", "anvil_father", "deep_mother", "green_huntsman", "lantern_warden", "crowned_sun", "ash_whisperer", "truth", "reaper"),
-		TINKERER;
+		TINKERER, ARTIFICER;
 
 		public final List<String> options;
 
@@ -295,6 +295,7 @@ public final class Classes {
 		Rangers.register();
 		Warlocks.register();
 		Tinkerers.register();
+		Artificers.register();
 		ClassTeachers.register();
 		Rests.register();
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
@@ -305,6 +306,7 @@ public final class Classes {
 			Vows.clear();
 			Rangers.clear();
 			Tinkerers.clear();
+			Artificers.clear();
 			ClassTeachers.clear();
 			SecondClass.clear();
 			Feats.clear();
@@ -598,6 +600,7 @@ public final class Classes {
 			case MONK -> Monks.begin(player);
 			case DRUID -> Druids.begin(player);
 			case TINKERER -> Tinkerers.begin(player);
+			case ARTIFICER -> Artificers.begin(player);
 			default -> {
 			}
 		}
@@ -669,6 +672,8 @@ public final class Classes {
 				new ItemStack(Items.BOOK), new ItemStack(Items.AMETHYST_SHARD));
 			case TINKERER -> List.of(any(1, "jaymospowers:tool_station", "minecraft:crafting_table"), any(1, "jaymospowers:iron_dagger", "minecraft:iron_pickaxe"),
 				new ItemStack(Items.GOLDEN_BOOTS), new ItemStack(Items.SHIELD), new ItemStack(Items.REDSTONE));
+			case ARTIFICER -> List.of(any(1, "jaymospowers:iron_dagger", "minecraft:iron_sword"), new ItemStack(Items.AMETHYST_SHARD, 8), new ItemStack(Items.GLASS_BOTTLE, 6),
+				new ItemStack(Items.BLAZE_POWDER, 2), new ItemStack(Items.FEATHER, 4), new ItemStack(Items.LEATHER_CHESTPLATE));
 			case BRUTE -> List.of(any(1, "jaymospowers:iron_flanged_mace", "minecraft:iron_axe"), new ItemStack(Items.SHIELD),
 				RpgKit.or("rogues:berserker_armor_chest", "minecraft:chainmail_chestplate"));
 			// Andy (2026-11-15): "Marksmen should get a flintlock not a musket" (WeaponMod's flintlock pistol; it fires the

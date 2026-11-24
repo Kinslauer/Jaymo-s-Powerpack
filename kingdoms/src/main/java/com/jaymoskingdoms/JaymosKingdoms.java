@@ -1150,6 +1150,15 @@ public final class JaymosKingdoms implements ModInitializer {
 		FeatsBody.register();
 		FeatsFight.register();
 		FeatsTrade.register();
+		// reference mods patch 16: titles, worn gear that asks for skill, found gear's quality, salvage, named followers, monster-born
+		DeedTitles.register();
+		FoundQuality.register();
+		GearSalvage.register();
+		NamedFollowers.register();
+		MonsterBorn.register();
+		Feasting.register();
+		DemonThrone.register();
+		Shades.register();
 		// patch 8, magic items: bonds, curses, unknown properties, wills, wands, gadgets, the deck, potion clashes
 		Gadgets.register();
 		RelicCurses.register();

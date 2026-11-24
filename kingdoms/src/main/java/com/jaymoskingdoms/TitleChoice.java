@@ -123,6 +123,9 @@ public final class TitleChoice {
 		if (saviour != null) {
 			out.add(new Entry("crown_saviour", saviour, 0xF0D060));
 		}
+		out.addAll(DeedTitles.earned(player));
+		out.addAll(MonsterBorn.earned(player));
+		out.addAll(DemonThrone.earned(player));
 		Component aim = LifeAims.title(player);
 		if (aim != null) {
 			out.add(new Entry(AIM, aim, 0xE8C860));
@@ -170,6 +173,15 @@ public final class TitleChoice {
 		if (id.startsWith(JOB)) {
 			Job job = Job.of(id.substring(JOB.length()));
 			return job == null ? null : Careers.title(job, Careers.of(player).rank(job.key));
+		}
+		if (id.startsWith(MonsterBorn.PREFIX)) {
+			return MonsterBorn.shown(player, id);
+		}
+		if (id.equals(DemonThrone.TITLE)) {
+			return DemonThrone.earned(player).isEmpty() ? null : DemonThrone.earned(player).get(0).name();
+		}
+		if (id.startsWith(DeedTitles.PREFIX)) {
+			return DeedTitles.shown(id);
 		}
 		return id.equals(AIM) ? LifeAims.title(player) : null;
 	}

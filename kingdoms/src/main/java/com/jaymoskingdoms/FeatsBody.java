@@ -54,7 +54,43 @@ public final class FeatsBody {
 	private FeatsBody() {
 	}
 
+	/** Skybound: in the Aether a body has this much more room to fall and this share of a shove's push left off. */
+	static final double SKYBOUND_FALL = 12.0, SKYBOUND_STEADY = 0.4;
+	/** Lucky's second chance: the odds a killing blow leaves {@link #SECOND_CHANCE_HEALTH} health instead, and the ticks before it can again. */
+	static final float SECOND_CHANCE_ODDS = 0.2F;
+	static final float SECOND_CHANCE_HEALTH = 4.0F;
+	static final long SECOND_CHANCE_GAP = 24000L * 3L;
+	/** The game time of a Lucky player's last second chance. Saved. */
+	private static final AttachmentType<Long> SECOND_CHANCE = AttachmentRegistry.create(JaymosKingdoms.id("feat_second_chance"), b -> b.persistent(Codec.LONG));
+
 	static void register() {
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(server -> {
+			if (server.getTickCount() % 20 == 0) {
+				for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+					boolean sky = Feats.has(p, Feat.SKYBOUND) && SkyFolk.in(p);
+					Skills.modifier(p, net.minecraft.world.entity.ai.attributes.Attributes.SAFE_FALL_DISTANCE, "feat_skybound", sky ? SKYBOUND_FALL : 0.0,
+						net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE);
+					Skills.modifier(p, net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE, "feat_skybound", sky ? SKYBOUND_STEADY : 0.0,
+						net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE);
+				}
+			}
+		});
+		// Lucky: now and then a blow that would kill leaves a sliver of health instead
+		net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, amount) -> {
+			if (!(entity instanceof ServerPlayer p) || !Feats.has(p, Feat.LUCKY)) {
+				return true;
+			}
+			long now = p.level().getGameTime();
+			long last = p.getAttachedOrElse(SECOND_CHANCE, -SECOND_CHANCE_GAP);
+			if (now - last < SECOND_CHANCE_GAP && now >= last || p.getRandom().nextFloat() >= SECOND_CHANCE_ODDS) {
+				return true;
+			}
+			p.setAttached(SECOND_CHANCE, now);
+			p.setHealth(SECOND_CHANCE_HEALTH);
+			p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 0.6F, 1.4F);
+			Fx.burst(p.level(), p.getX(), p.getY(1.2), p.getZ(), Sparks.COLOR, 0.8F, 20, 0.4, 0.5, 0.4);
+			return false;
+		});
 		Surprise.addImmunity(who -> who instanceof ServerPlayer p && Feats.has(p, Feat.ALERT));
 		Notice.add(FeatsBody::traps);
 	}

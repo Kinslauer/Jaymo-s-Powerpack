@@ -81,6 +81,7 @@ public final class Abilities {
 			case RANGER -> Rangers.key(player, sneak);
 			case WARLOCK -> Warlocks.key(player, sneak);
 			case TINKERER -> Tinkerers.key(player, sneak);
+			case ARTIFICER -> Artificers.key(player, sneak);
 			// (class trees) the Marksman's Field Kit
 			case MARKSMAN -> Workshop.key(player, sneak);
 			// (class trees) Perfect Form and the Rampage

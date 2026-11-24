@@ -40,7 +40,7 @@ final class StartingSkills {
 			case CLERIC -> Perk.FIELD_DRESSER;
 			case DRUID -> Perk.FORAGER;
 			case WARLOCK -> Perk.DEVOTION;
-			case TINKERER -> Perk.SMITH;
+			case TINKERER, ARTIFICER -> Perk.SMITH;
 		};
 	}
 

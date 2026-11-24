@@ -656,6 +656,7 @@ public final class KingdomEvents {
 		if (killer != null) {
 			// (0.7.519) whoever slew the ruler does not stand at the election after
 			Elections.killed(faction.id(), killer.getUUID());
+			DeedTitles.add(killer, DeedTitles.Deed.KEEPS, 1);
 			Reputation.change(killer, faction, lord ? REP_KILL_LORD : REP_KILL_KING);
 			// the realm's rivals are glad of it (every other standing realm that isn't its vassal or overlord)
 			for (Faction other : Factions.all(server)) {

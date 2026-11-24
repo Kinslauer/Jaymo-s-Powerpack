@@ -16,6 +16,7 @@ public final class TreeLayout {
 		WarfareTrees.build();
 		MarksmanTree.build();
 		TinkererTree.build();
+		ArtificerTree.build();
 		RiderTree.build();
 		MonkTree.build();
 		PaladinTree.build();
