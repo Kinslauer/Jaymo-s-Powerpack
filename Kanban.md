@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 13:26). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 13:30). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -62,7 +62,6 @@ kanban-plugin: board
 - [ ] [[Inbox/refmods-12-fishing|refmods-12-fishing]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/refmods-14-sky-light-air|refmods-14-sky-light-air]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/refmods-15-provenance-coins|refmods-15-provenance-coins]] · ☁️ Cloud · claimed
-- [ ] [[Agents/implement-verdant-dinosaurs|implement-verdant-dinosaurs]] · 💻 Odysseus · running
 
 
 ## In review
@@ -76,6 +75,7 @@ kanban-plugin: board
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
 - [ ] [[Inbox/wither-model|wither-model]] · 🍇 Bacchus · blocked
 - [ ] [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]] · 💻 Odysseus · stalled
+- [ ] [[Agents/implement-verdant-dinosaurs|implement-verdant-dinosaurs]] · 💻 Odysseus · stalled
 - [ ] [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]] · 💻 Odysseus · stalled
 
 
