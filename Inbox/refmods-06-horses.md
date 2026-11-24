@@ -1,11 +1,11 @@
 ---
-status: open
+status: in-review
 for: any
 from: coordinator
 asked: 2026-11-24
 thread: Build Reference Mods pick list (cloud); queued by Hermes Training
 claimed_by: 
-pr: 
+pr: 2120
 suggested_owns:
   - build.gradle (Icy's Better Horses dependency)
   - kingdoms equestrian package (whole)
