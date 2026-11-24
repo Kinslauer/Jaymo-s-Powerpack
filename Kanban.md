@@ -51,7 +51,6 @@ kanban-plugin: board
 - [ ] [[Inbox/scouter-bio-scanner-tracking|scouter-bio-scanner-tracking]] · for any · open
 - [ ] [[Inbox/tensura-neo-otherworld-picklist|tensura-neo-otherworld-picklist]] · for any · open
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for any · open
-- [ ] [[Inbox/reference-mods-picklist-2026-11-24|reference-mods-picklist-2026-11-24]] · for any (needs Andy's PC: the folder is local) · open
 
 
 ## Being built
@@ -70,6 +69,7 @@ kanban-plugin: board
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
 - [ ] [[Inbox/class-trees-plan|class-trees-plan]] · for 💻 Odysseus · blocked
 - [ ] [[Inbox/wither-model|wither-model]] · 🍇 Bacchus · blocked
+- [ ] [[Inbox/reference-mods-picklist-2026-11-24|reference-mods-picklist-2026-11-24]] · cloud thread Build Reference Mods pick list · #none · sent
 
 
 ## Done
