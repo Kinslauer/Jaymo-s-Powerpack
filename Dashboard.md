@@ -23,6 +23,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2089 tree felling - cut through the trunk, carved stumps, blasts bring buildings down (Kingdoms, 2026-11-24)
 - [ ] #2084 Red (unparryable) mob blows rarer and slower (Powers, Kingdoms, 2026-11-24)
 - [ ] #2082 Realm banks: deposits, interest, loans and letters of credit at the counting house (Kingdoms, 2026-11-24)
 - [ ] #2079 Downed: a blow knocks you out, red blows kill, no tossing, fire kills after 6 s (Powers, 2026-11-24)
@@ -82,8 +83,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2012 Crocodiles take monsters too (Kingdoms, 2026-11-23)
 - [ ] #2011 Old guns: no loading bar, Q takes up the next loaded one, the Void flintlock fires as you let go (Powers, Kingdoms, 2026-11-22)
 - [ ] #2010 Zombies leave the dead for shade by day; nothing regrows on the dead; player heads wear the MCA look (Powers, Kingdoms, Kitchen, 2026-11-22)
-- [ ] #2009 No idle camera while your fishing line is out (Powers, 2026-11-22)
-- …and 423 older ones.
+- …and 424 older ones.
 
 ## Health
 
