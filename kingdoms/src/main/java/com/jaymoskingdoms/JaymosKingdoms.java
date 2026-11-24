@@ -85,6 +85,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		BlossomVillages.register();
 		VillageStyles.register();
 		RoadOutposts.register();
+		Outliers.register();
+		CampExtras.register();
 		// 0.7.101: the hidden blade (Stealth 5), its leap and the Crippled status
 		HiddenBlade.register();
 		// (0.7.111) mob senses (light, sneaking, view cone; losing track; the awareness gauge) and unaware blows
