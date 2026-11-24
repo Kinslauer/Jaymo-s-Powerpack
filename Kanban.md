@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 17:21). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 17:34). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -36,14 +36,14 @@ kanban-plugin: board
 - [ ] [[Inbox/refmods-11-tectonic-terrain|refmods-11-tectonic-terrain]] · for any · open
 - [ ] [[Inbox/refmods-13-body-anim-stations|refmods-13-body-anim-stations]] · for any · open
 - [ ] [[Inbox/refmods-16-titles-bloods-tensura|refmods-16-titles-bloods-tensura]] · for any · open
-- [ ] [[Inbox/village-mods-4-board-work|village-mods-4-board-work]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-6-small-structures|village-mods-6-small-structures]] · for 💻 Odysseus · open
+- [ ] [[Inbox/village-mods-4-board-work|village-mods-4-board-work]] · for 💻 Odysseus · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2113 · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Agents/village-mods-4|village-mods-4]] · 💻 Odysseus · running
+- [ ] [[Agents/deck-deploy-watch-1124|deck-deploy-watch-1124]] · 💻 Odysseus · running
 
 
 ## In review
