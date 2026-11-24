@@ -1,9 +1,9 @@
 ---
-status: running
+status: done
 task: truth-prayer-book
 branch: claude/truth-prayer-book
 with: local_29ede7b7-7e11-4e20-8506-df7674edc787
-pr: 2067
+pr: 2067 (merged 2026-11-23)
 mods: kingdoms
 versions:
 started: 2026-11-23
