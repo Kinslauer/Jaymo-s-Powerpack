@@ -93,6 +93,8 @@ public final class Treatment {
 	 */
 	public static final float BANDAGE_HEAL = 3.0F, RAG_HEAL = 3.0F;
 	public static final int BANDAGE_TICKS = 300, RAG_TICKS = 400;
+	/** (Andy, 2026-11-23) How long the short Regeneration from a fresh dressing lasts: I for a grass bandage, II for linen, none for a rag. */
+	public static final int DRESSING_REGEN_TICKS = 160;
 	/**
 	 * How many parts one dressing wraps at once (Andy, 2026-11-23: "one can bandage multiple limbs. and it can do so at
 	 * the same time"): the part picked, then the worst others it can help ({@link #worst}). A linen bandage, a grass
@@ -478,7 +480,22 @@ public final class Treatment {
 				seen++;
 			}
 		}
+		if (seen > 0) {
+			dressingRegen(body, rag ? -1 : 1);
+		}
 		return seen;
+	}
+
+	/**
+	 * (Andy, 2026-11-23) "while bandaged you should get a short regen effect. none for rags, with less chance of infection,
+	 * regen 1 for grass bandages and regen 2 for clean bandages": Regeneration at {@code amplifier} (0 = I, 1 = II) for
+	 * {@link #DRESSING_REGEN_TICKS}; below 0, none.
+	 */
+	private static void dressingRegen(LivingEntity body, int amplifier) {
+		if (amplifier >= 0) {
+			body.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.REGENERATION,
+				DRESSING_REGEN_TICKS, amplifier));
+		}
 	}
 
 	/** (0.14.4) Downed's revive steps aside: sneak + use with a remedy that can help this downed one (server side). */
@@ -857,6 +874,7 @@ public final class Treatment {
 					Bleeding.dress(body, next, MedicineSkill.dressing(player, rag ? RAG_HEAL : BANDAGE_HEAL), rag ? RAG_TICKS : BANDAGE_TICKS,
 						s.remedy == Remedy.RAG, rag);
 				}
+				dressingRegen(body, used == MedicineItems.LINEN_BANDAGE ? 1 : used == MedicineItems.GRASS_BANDAGE ? 0 : -1);
 				stack.consume(1, player);
 			}
 			case YARROW -> {
