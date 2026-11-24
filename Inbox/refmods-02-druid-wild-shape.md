@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: any
 from: coordinator
 asked: 2026-11-24
 thread: Build Reference Mods pick list (cloud); queued by Hermes Training
-claimed_by: project-thread-ojz7uj
+claimed_by: 
 pr: 
 suggested_owns: []
 ---
@@ -28,3 +28,6 @@ Owns: kingdoms WildShapes, Druids, Druid tree.
 - **W7 Casting in a shape, at the very top** (Otherworld Origins, size S). At the last rank of the tree, a Druid can cast nature's rites while in a shape. We have: Your call: Druids.java says a beast casts nothing.
 - **W8 Circle of Spores** (Otherworld Origins, size M). A third circle beside Moon and Land: a haze of spores that rots what stands in it, mushrooms bursting from corpses you pass (Kitchen corpses), and the fungus-stitched dead rising briefly to fight for you. We have: Moon and Land circles only.
 - **W9 Call a beast to your side** (Otherworld Origins, size S). Call a wild beast of a kind you've studied out of the brush to fight beside you for a while, even when none is about. We have: Pack Leader gathers beasts already nearby.
+
+## Notes
+- 2026-11-24 22:39 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.

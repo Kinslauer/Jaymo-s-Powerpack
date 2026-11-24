@@ -993,3 +993,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-24 4:44 PM ET (Andy, Alex's Caves thread): "the same dinos in the prehistoric cave should spawn on verdant and vice versa. there should also be barbaric warrior born found training by fighting the dinos": Alex's Primordial Caves dinos also on the Verdant World, the Verdant World's dinos (PR #2099) also in the Primordial Caves, and wild barbaric Warrior-born there train by fighting them.
 
 - 2026-11-24: Silk Deeps removed (Andy: "remove these caves and their abandoned buildings"): the biome no longer generates, so no watcher huts or brood lairs either; registered still for old saves. PR #2108.
+
+- 2026-11-24 5:39 PM ET (Andy, refmods thread, decision card): Tectonic trial goes in as is ("Trial as is, Mohknee waits"): with Tectonic loaded our continent shape is off and Mohknee's continent doesn't generate; rebuilding Mohknee on Tectonic's land is a follow-up only if he keeps Tectonic.

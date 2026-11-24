@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: any
 from: coordinator
 asked: 2026-11-24
 thread: Build Reference Mods pick list (cloud); queued by Hermes Training
-claimed_by: project-thread-ojz7uj
+claimed_by: 
 pr: 
 suggested_owns: []
 ---
@@ -25,3 +25,6 @@ Andy (H1): the hoverboard uses the arsenal's bomb glider model.
 - **H3 Tricks off a jump** (Hoverboards, size S). Spin and flip on the board off a ramp, borrowing our acrobatics; land badly and you're thrown. We have: Acrobatics and backflips.
 - **H4 It runs on charge** (Hoverboards, size S). A power cell charged with redstone, so it isn't free flight. Flat, it drops to the ground and you push it like a skateboard. We have: No free projectiles rule, applied to free flight.
 - **H5 Crash at speed** (Hoverboards, size S). Hit a wall fast and you're flung off, ragdolled, and the board skids away. We have: Ragdolls with capped flings.
+
+## Notes
+- 2026-11-24 22:39 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.

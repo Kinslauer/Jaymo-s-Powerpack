@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: any
 from: coordinator
 asked: 2026-11-24
 thread: Build Reference Mods pick list (cloud); queued by Hermes Training
-claimed_by: project-thread-ojz7uj
+claimed_by: 
 pr: 
 suggested_owns: []
 ---
@@ -42,3 +42,4 @@ commands, no discovery chat text. Change note under changes/powers/<branch>.md.
 
 ## Notes
 - 2026-11-24 16:54 Pick-list rows S1-S8 for the bio scanner and tracking are on https://claude.ai/artifact/Fu1jDwywXNKSGj6mmU65fg; build from Andy's ticks there.
+- 2026-11-24 22:39 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.

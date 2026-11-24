@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: any
 from: coordinator
 asked: 2026-11-24
 thread: Build Reference Mods pick list (cloud); queued by Hermes Training
-claimed_by: project-thread-ojz7uj
+claimed_by: 
 pr: 
 suggested_owns: []
 ---
@@ -26,3 +26,6 @@ Owns: kingdoms wardrobe/MCA outfits, Mohknee; powers item.
 - **U6 Umbrella stands** (Umbrellas, size S). A stand by doors and market stalls. An open umbrella in it keeps rain off that spot.
 - **U7 Everyone opens one when it pours** (Umbrellas, size S). When heavy rain comes, villagers who own an umbrella open it on their way, and the rest pull hoods up or run for cover.
   - Andy's note: "villagers also need to run for cover at night, near fire, or monsters. only the brave and guards should ever fight"
+
+## Notes
+- 2026-11-24 22:39 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.
