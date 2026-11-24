@@ -179,8 +179,9 @@ def picture(g, path, title, ground_layer, scale=12):
 # worldgen (None: placed by our own code).
 
 class Site:
-    def __init__(self, name, variants, ground, worldgen=None):
-        self.name, self.variants, self.ground, self.worldgen = name, variants, ground, worldgen
+    def __init__(self, name, variants, ground, worldgen=None, template=True):
+        """template False: a picture only (a design our own code lays out each time, like the mazes: one sample)."""
+        self.name, self.variants, self.ground, self.worldgen, self.template = name, variants, ground, worldgen, template
 
 
 SITES = []
@@ -192,8 +193,9 @@ def write_site(s, known, previews):
     for vname, g in s.variants.items():
         bad = sorted({v[0].split(":")[1] for v in g.b.values()} - known) if known else []
         assert not bad, f"{vname}: not 26.3 blocks: {bad}"
-        nbt.save(os.path.join(DATA, "structure", "smalls", vname + ".nbt"), template(g))
-        print("  template", vname, f"{g.w}x{g.h}x{g.d}", len(g.b), "blocks")
+        if s.template:
+            nbt.save(os.path.join(DATA, "structure", "smalls", vname + ".nbt"), template(g))
+            print("  template", vname, f"{g.w}x{g.h}x{g.d}", len(g.b), "blocks")
         if previews:
             picture(g, os.path.join(previews, vname + ".png"), f"{vname} ({g.w} x {g.d}, {g.h} high)", s.ground)
     wg = s.worldgen
