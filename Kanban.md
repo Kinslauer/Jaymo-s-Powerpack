@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 13:21). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 13:26). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -67,7 +67,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/realm-banks-finish|realm-banks-finish]] · ☁️ Cloud · #2082 · in-review
 - [ ] [[Agents/venom-head-adaptation|venom-head-adaptation]] · 💻 Odysseus · #2080 · in-review
 
 
