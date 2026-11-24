@@ -506,6 +506,8 @@ public final class Patrons {
 		set(sp, s.withDaily(new Daily(d.day, d.deeds, true)));
 		gain(sp, FAVOUR_OFFERING);
 		sp.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.shrine.offered", coloured(p)));
+		// an offering while haunted by the patron's colossus forgives a commandment and sends it away
+		com.jaymoskingdoms.colossus.Colossi.offered(sp);
 	}
 
 	/** A deed of {@code p}'s kind, if {@code player} is sworn to them. Quiet: only a tier change speaks. */

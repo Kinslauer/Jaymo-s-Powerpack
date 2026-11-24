@@ -128,6 +128,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.client.nether.ImpRenderer.register();
 		// (0.7.518) the patron champions
 		com.jaymoskingdoms.client.champions.ChampionRenderer.register();
+		// the patrons' colossi (the strike and the hunt)
+		com.jaymoskingdoms.client.champions.ColossusRenderer.register();
 		GreatNecromancerRenderer.register();
 		// medieval picks: the old age's rulers and their guard
 		com.jaymoskingdoms.client.oldage.OldAgeClient.register();
