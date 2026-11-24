@@ -1,0 +1,34 @@
+---
+status: open
+for: any
+from: Andy (Claude chat, 2026-11-23)
+asked: 2026-11-23
+claimed_by: 
+pr: 
+---
+
+# Court wizards ward their kingdom against creepers
+
+## What's wanted
+
+Andy: "court wizards should be able to cast a spell around their kingdom's plot to prevent or rewind any creeper
+explosions, and weaken them within the field, some feel the disturbance and are repelled by the magic, not entering in
+the first place."
+
+A kingdom's court wizard casts (and keeps up) a ward over the kingdom's plot. Inside it:
+1. **Creeper blasts are stopped or undone**: a creeper going off inside the ward either fizzles before it blows, or its
+   blast is rewound (the broken blocks put back, the way they were, with a visible rewind effect). Pick per case
+   (e.g. prevented while the wizard is fresh, rewound if it went off anyway) and say which.
+2. **Creepers are weakened inside**: slower, a smaller or weaker blast if one gets through (propose the numbers).
+3. **Some are repelled**: a share of creepers feel the disturbance at the ward's edge and turn away, never entering.
+   Pick the share (or make it depend on the wizard's strength) and keep it readable: a shimmer or a recoil at the edge.
+
+## Notes
+
+- Find the court wizard (Kingdoms; grep `docs/codemap/kingdoms.md` for court, wizard, mage, realm plot, claim) and the
+  kingdom's plot bounds. Say how the ward is kept up (always on while the wizard lives and is home? a cost? a cooldown?)
+  and what breaks it (wizard killed, away, siege): propose and ask Andy.
+- Rewinding a blast: record the blocks an explosion inside the ward would destroy (ExplosionEvent / the detonate hook
+  in 26.3; check the sources) and restore them over a few seconds. Never restore into a block a player has since placed.
+- Effects through Kingdoms `Fx` (sigil/ring/wave), never recoloured redstone dust. Keep it cheap on the Deck server:
+  creepers checked only near warded plots, not every creeper every tick.
