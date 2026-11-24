@@ -200,7 +200,13 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("falling tree attachments: {} {}", FallingTree.PIECES, FallingTree.HEADING);
 		// 0.5.25: trees take chops to fell (TreeChop's way), the chopped logs narrowing
 		ChoppedLog.register();
+		// what a tree cut through leaves: a carved stump to sit on, dig out or leave to rot
+		TreeStump.register();
 		Trees.register();
+		// felling: cut through the trunk, cracks and creaks, the ground's thump, half-cut trees that give way
+		Felling.register();
+		// blasts that undercut a building bring down what's over the hole (chests ride down whole)
+		Collapse.register();
 		LooseWood.register();
 		// 0.7.588: mob griefing always on (Andy)
 		PackRules.register();

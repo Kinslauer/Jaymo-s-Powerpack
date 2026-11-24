@@ -37,6 +37,9 @@ public final class CalamitiesClient {
 	public static float ash, sign;
 	/** (Stage 3) How hard the ground shakes at the camera, in degrees of rattle (eased); {@code CalamityShakeMixin}. */
 	public static float quake;
+	/** A felled tree's thump through the ground (degrees of rattle, {@code Felling.Thump}), and how fast it dies away a tick. */
+	public static float thump;
+	static final float THUMP_FADE = 0.1F;
 	/** A quake's rattle per magnitude (degrees), and how fast it rattles. */
 	static final float QUAKE_DEGREES = 0.9F, QUAKE_SPEED = 2.2F;
 	private static int clock;
@@ -72,9 +75,12 @@ public final class CalamitiesClient {
 		ClientPlayNetworking.registerGlobalReceiver(Calamities.Sync.TYPE, (payload, context) -> {
 			Calamities.CLIENT = new ArrayList<>(payload.calamities());
 		});
+		ClientPlayNetworking.registerGlobalReceiver(com.jaymoskingdoms.Felling.Thump.TYPE, (payload, context) -> {
+			thump = Math.max(thump, payload.strength());
+		});
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			Calamities.CLIENT = List.of();
-			sand = snow = hail = quake = ash = sign = 0.0F;
+			sand = snow = hail = quake = ash = sign = thump = 0.0F;
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(CalamitiesClient::tick);
 	}
@@ -84,13 +90,15 @@ public final class CalamitiesClient {
 		if (level == null || minecraft.isPaused()) {
 			return;
 		}
+		float felt = thump;
+		thump = Math.max(0.0F, thump - THUMP_FADE);
 		if (level.dimension() != Level.OVERWORLD || Calamities.CLIENT.isEmpty()) {
 			sand = ease(sand, 0.0F);
 			snow = ease(snow, 0.0F);
 			hail = ease(hail, 0.0F);
 			ash = ease(ash, 0.0F);
 			sign = ease(sign, 0.0F);
-			quake = Math.max(LastBellClient.shake, quake - 0.1F);
+			quake = Math.max(Math.max(LastBellClient.shake, felt), quake - 0.1F);
 			around = ease(around, 0.0F);
 			gust = Math.max(0.0F, gust - 0.02F);
 			if (Calamities.CLIENT.isEmpty() || level.dimension() != Level.OVERWORLD) {
@@ -108,7 +116,7 @@ public final class CalamitiesClient {
 		ash = ease(ash, Calamities.cover(level, Calamity.ASH, eye.x, eye.z) * open);
 		sign = ease(sign, Calamities.cover(level, Calamity.SIGN, eye.x, eye.z));
 		clock++;
-		float shaking = LastBellClient.shake;
+		float shaking = Math.max(LastBellClient.shake, felt);
 		int hailMagnitude = Magnitude.MODERATE;
 		for (Calamity c : Calamities.CLIENT) {
 			if (c.kind == Calamity.QUAKE) {

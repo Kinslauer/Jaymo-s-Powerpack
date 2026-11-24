@@ -79,6 +79,24 @@ public final class WoodVolume {
 		return this.wood.cardinality();
 	}
 
+	/** A copy of it, to carve or cut apart without changing this one (ours). */
+	public WoodVolume copy() {
+		return new WoodVolume(data());
+	}
+
+	/** Whether nothing has been cut from row {@code y} (ours). */
+	public boolean wholeRow(int y) {
+		int from = index(0, y, 0);
+		return this.wood.nextClearBit(from) >= from + N * N;
+	}
+
+	/** What's left of it below row {@code rows}, all above cut away: a stump's (ours). */
+	public WoodVolume below(int rows) {
+		WoodVolume out = copy();
+		out.wood.clear(index(0, Math.max(0, Math.min(N, rows)), 0), SIZE);
+		return out;
+	}
+
 	/** Whether nothing has been cut from it. */
 	public boolean whole() {
 		return count() >= SIZE;

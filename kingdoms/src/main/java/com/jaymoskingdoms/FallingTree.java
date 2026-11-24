@@ -229,6 +229,8 @@ public final class FallingTree extends Entity {
 		ItemStack tool, @Nullable Consumer<ItemStack> sink) {
 		FallingTree tree = new FallingTree(TYPE, level);
 		tree.setPos(cut.getX() + 0.5, cut.getY(), cut.getZ() + 0.5);
+		// the birds in its crown burst out as it goes
+		Felling.flush(level, leaves);
 		int top = take(level, tree, cut, logs, leaves);
 		if (top <= 0) {
 			return null;
@@ -343,6 +345,20 @@ public final class FallingTree extends Entity {
 	 * less than {@link #TIPS} off the trunk), away from {@code cutter}.
 	 */
 	static float heavier(ServerLevel level, BlockPos cut, List<BlockPos> logs, List<BlockPos> leaves, @Nullable Entity cutter) {
+		double[] off = offset(level, cut, logs, leaves);
+		double x = off[0], z = off[1];
+		if (Math.max(Math.abs(x), Math.abs(z)) >= TIPS) {
+			return Math.abs(x) >= Math.abs(z) ? (x > 0 ? 0.0F : Mth.PI) : (z > 0 ? Mth.HALF_PI : -Mth.HALF_PI);
+		}
+		float away = away(cutter, cut, level);
+		return Math.round(away / Mth.HALF_PI) * Mth.HALF_PI;
+	}
+
+	/**
+	 * How far (blocks, east and south) the weight of the tree of {@code logs} and {@code leaves} on {@code cut} lies off
+	 * it, a log weighing {@link #LOG_WEIGHT} and a leaf 1 ({@link Felling#way} reads it too).
+	 */
+	static double[] offset(ServerLevel level, BlockPos cut, List<BlockPos> logs, List<BlockPos> leaves) {
 		double x = 0.0, z = 0.0, total = 0.0;
 		for (List<BlockPos> part : List.of(logs, leaves)) {
 			for (BlockPos p : part) {
@@ -353,11 +369,7 @@ public final class FallingTree extends Entity {
 				total += w;
 			}
 		}
-		if (total > 0.0 && Math.max(Math.abs(x), Math.abs(z)) / total >= TIPS) {
-			return Math.abs(x) >= Math.abs(z) ? (x > 0 ? 0.0F : Mth.PI) : (z > 0 ? Mth.HALF_PI : -Mth.HALF_PI);
-		}
-		float away = away(cutter, cut, level);
-		return Math.round(away / Mth.HALF_PI) * Mth.HALF_PI;
+		return total > 0.0 ? new double[] {x / total, z / total} : new double[] {0.0, 0.0};
 	}
 
 	/**
@@ -760,13 +772,22 @@ public final class FallingTree extends Entity {
 		Quaternionf turn = turn(lean, this.heading());
 		Vec3 middle = Vec3.ZERO;
 		int count = 0;
+		List<Vec3> wood = new ArrayList<>();
+		BlockState leaf = null;
 		for (Piece p : pieces) {
 			if (!p.blockState().is(BlockTags.LOGS)) {
+				if (leaf == null && p.blockState().getBlock() instanceof LeavesBlock) {
+					leaf = p.blockState();
+				}
 				continue;
 			}
-			middle = middle.add(this.where(p, turn));
+			Vec3 at = this.where(p, turn);
+			wood.add(at);
+			middle = middle.add(at);
 			count++;
 		}
+		// the ground answers: dust and leaves, the thump, flattened grass and snow, the animals bolting
+		Felling.landed(level, wood, leaf);
 		if (count > 0) {
 			middle = middle.scale(1.0 / count);
 			level.playSound(null, middle.x, middle.y, middle.z, SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.BLOCKS, 1.2F, 0.5F);

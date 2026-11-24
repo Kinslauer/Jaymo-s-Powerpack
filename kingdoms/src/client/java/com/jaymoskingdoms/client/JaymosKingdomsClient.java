@@ -60,6 +60,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.sailing.ShipShot.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.2F, false));
 		ShipClient.init();
 		BlockEntityRenderers.register(com.jaymoskingdoms.ChoppedLog.ENTITY, ChoppedLogRenderer::new);
+		BlockEntityRenderers.register(com.jaymoskingdoms.TreeStump.ENTITY, ChoppedLogRenderer::new);
 		// the armillary sphere's animated rings and its screen
 		BlockEntityRenderers.register(com.jaymoskingdoms.astronomy.ArmillarySphereBlock.ENTITY, com.jaymoskingdoms.client.astronomy.ArmillaryBlockEntityRenderer::new);
 		// the scrying orb's living miniature

@@ -26,6 +26,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.material.MapColor;
@@ -43,20 +44,24 @@ import org.jspecify.annotations.Nullable;
  * after Timber Tales: it no longer thins; it keeps the whole log's size and its cracks run deeper with every chop
  * ({@link #CHOPS}), while the chopper sees how far the tree is from coming down ({@link Trees#chop}). It's one of the game's logs (the {@code logs} tag), so leaves
  * keep to it and the tree is still a tree. See {@link Trees#chop}. Andy (2026-11-16): the trunk carves out where the
- * axe lands, the wood's own grain showing inside the cut ({@link WoodVolume}, from Immersive Tree Chop, MIT).
+ * axe lands, the wood's own grain showing inside the cut ({@link WoodVolume}, from Immersive Tree Chop, MIT). Andy
+ * (Timber Tales): the trunk is cut through where it's struck, log by log round it ({@link Felling}); a log cut clean
+ * through is {@link #THROUGH}, and remembers the side its first stroke came from (the notch) and its latest.
  */
 public final class ChoppedLog extends BaseEntityBlock {
-	/** The most chops one log shows; more go into the log above ({@link Trees#chop}). */
-	public static final int MOST = 6;
+	/** The most chops one log takes before it's cut through ({@link Trees#chop}). */
+	public static final int MOST = 12;
 	public static final IntegerProperty CHOPS = IntegerProperty.create("chops", 1, MOST);
 	public static final EnumProperty<Direction.Axis> AXIS = RotatedPillarBlock.AXIS;
+	/** Cut clean through: it no longer joins the trunk above to the one below ({@link Trees#chop}). */
+	public static final BooleanProperty THROUGH = BooleanProperty.create("through");
 
 	public static ChoppedLog BLOCK;
 	public static BlockEntityType<Entity> ENTITY;
 
 	public ChoppedLog(BlockBehaviour.Properties properties) {
 		super(properties);
-		registerDefaultState(stateDefinition.any().setValue(CHOPS, 1).setValue(AXIS, Direction.Axis.Y));
+		registerDefaultState(stateDefinition.any().setValue(CHOPS, 1).setValue(AXIS, Direction.Axis.Y).setValue(THROUGH, false));
 	}
 
 	static void register() {
@@ -68,16 +73,21 @@ public final class ChoppedLog extends BaseEntityBlock {
 			.ignitedByLava()
 			.noOcclusion()
 			.noLootTable()
+			.randomTicks()
 			.setId(key)));
 		ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, JaymosKingdoms.id("chopped_log"),
 			new BlockEntityType<>(Entity::new, java.util.Set.of(BLOCK)));
 	}
 
-	/** {@code log} with {@code chops} cut into it, standing at {@code pos} (the log it was is kept). */
-	static void set(Level level, BlockPos pos, BlockState log, int chops) {
+	/**
+	 * {@code log} with {@code chops} cut into it, standing at {@code pos} (the log it was is kept); {@code through}: cut
+	 * clean through.
+	 */
+	static void set(Level level, BlockPos pos, BlockState log, int chops, boolean through) {
 		BlockState original = log.is(BLOCK) && level.getBlockEntity(pos) instanceof Entity e ? e.log : log;
 		Direction.Axis axis = original.hasProperty(AXIS) ? original.getValue(AXIS) : Direction.Axis.Y;
-		BlockState chopped = BLOCK.defaultBlockState().setValue(CHOPS, Math.max(1, Math.min(MOST, chops))).setValue(AXIS, axis);
+		BlockState chopped = BLOCK.defaultBlockState().setValue(CHOPS, Math.max(1, Math.min(MOST, chops))).setValue(AXIS, axis)
+			.setValue(THROUGH, through);
 		level.setBlock(pos, chopped, Block.UPDATE_ALL);
 		if (level.getBlockEntity(pos) instanceof Entity e) {
 			e.log = original;
@@ -96,6 +106,15 @@ public final class ChoppedLog extends BaseEntityBlock {
 	static void carve(Level level, BlockPos pos, Vec3 point, Direction face) {
 		if (level.getBlockEntity(pos) instanceof Entity e) {
 			e.wood.carve(point, face, CARVE_POWER, e.strokes++);
+			// (the side the first stroke came from is the notch, the way it's meant to fall; the last is the stroke now)
+			if (e.notch == null && face.getAxis().isHorizontal()) {
+				e.notch = face;
+				e.firstAt = level.getGameTime();
+			}
+			if (face.getAxis().isHorizontal()) {
+				e.last = face;
+			}
+			e.lastAt = level.getGameTime();
 			e.setChanged();
 			BlockState state = level.getBlockState(pos);
 			level.sendBlockUpdated(pos, state, state, Block.UPDATE_ALL);
@@ -107,6 +126,11 @@ public final class ChoppedLog extends BaseEntityBlock {
 		return state.is(BLOCK) ? state.getValue(CHOPS) : 0;
 	}
 
+	/** Whether the log is cut clean through. */
+	static boolean through(BlockState state) {
+		return state.is(BLOCK) && state.getValue(THROUGH);
+	}
+
 	/** What really stands at {@code pos}: the log a chopped one was, else the block itself. */
 	public static BlockState real(BlockGetter level, BlockPos pos, BlockState state) {
 		return state.is(BLOCK) && level.getBlockEntity(pos) instanceof Entity e ? e.log : state;
@@ -114,7 +138,7 @@ public final class ChoppedLog extends BaseEntityBlock {
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-		builder.add(CHOPS, AXIS);
+		builder.add(CHOPS, AXIS, THROUGH);
 	}
 
 	@Override
@@ -132,27 +156,50 @@ public final class ChoppedLog extends BaseEntityBlock {
 		return List.of();
 	}
 
+	/** A half-cut tree is a danger to whoever walks under it: watched again after a restart ({@link Felling#remember}). */
+	@Override
+	protected void randomTick(BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos, net.minecraft.util.RandomSource random) {
+		Felling.remember(level, pos);
+	}
+
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
 		return new Entity(pos, state);
 	}
 
+	/** Wood carved by the axe, drawn as the log it was with its cuts ({@code ChoppedLogRenderer}): a chopped log or a stump. */
+	public interface Carved {
+		BlockState log();
+
+		WoodVolume wood();
+
+		/** How dark it's drawn (1 as the log was): a stump darkens as it rots. */
+		default float shade() {
+			return 1.0F;
+		}
+	}
+
 	/** Which log it was, and the wood the axe has left of it. */
-	public static final class Entity extends BlockEntity {
+	public static final class Entity extends BlockEntity implements Carved {
 		private BlockState log = Blocks.OAK_LOG.defaultBlockState();
 		private WoodVolume wood = new WoodVolume();
 		/** How many strokes have bitten into it (each slants the other way from the last). */
 		private int strokes;
+		/** The side its first stroke came in from (the notch) and when, the side of the latest, and when that was. */
+		@Nullable Direction notch, last;
+		long firstAt, lastAt;
 
 		public Entity(BlockPos pos, BlockState state) {
 			super(ENTITY, pos, state);
 		}
 
+		@Override
 		public BlockState log() {
 			return log;
 		}
 
 		/** The wood left of it ({@link WoodVolume}). */
+		@Override
 		public WoodVolume wood() {
 			return wood;
 		}
@@ -165,6 +212,10 @@ public final class ChoppedLog extends BaseEntityBlock {
 			wood = input.read("wood", WOOD).map(cells -> new WoodVolume(cells.stream().mapToLong(Long::longValue).toArray()))
 				.orElseGet(WoodVolume::new);
 			strokes = input.read("strokes", Codec.INT).orElse(0);
+			notch = input.read("notch", Direction.CODEC).orElse(null);
+			last = input.read("last", Direction.CODEC).orElse(null);
+			firstAt = input.read("first_at", Codec.LONG).orElse(0L);
+			lastAt = input.read("last_at", Codec.LONG).orElse(0L);
 		}
 
 		@Override
@@ -179,6 +230,14 @@ public final class ChoppedLog extends BaseEntityBlock {
 				output.store("wood", WOOD, java.util.Arrays.stream(wood.data()).boxed().toList());
 				output.store("strokes", Codec.INT, strokes);
 			}
+			if (notch != null) {
+				output.store("notch", Direction.CODEC, notch);
+				output.store("first_at", Codec.LONG, firstAt);
+			}
+			if (last != null) {
+				output.store("last", Direction.CODEC, last);
+			}
+			output.store("last_at", Codec.LONG, lastAt);
 		}
 
 		private static final Codec<List<Long>> WOOD = Codec.LONG.listOf();
