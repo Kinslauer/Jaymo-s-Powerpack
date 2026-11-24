@@ -59,7 +59,7 @@ import org.jspecify.annotations.Nullable;
  * so. Used on the town's board with the notice or the goods in hand, it is handed in there when its poster is away
  * ({@link #handIn}).
  */
-final class BoardTerms {
+public final class BoardTerms {
 	// ---- tuning ----
 	/** The chance a notice gives a deadline; the days it gives, at least, and one more for every this many stars. */
 	static final float DEADLINE_CHANCE = 0.35F;
@@ -79,7 +79,7 @@ final class BoardTerms {
 	/** How often (ticks) the held notice and the deadlines are looked at; how often the papers' looks are. */
 	static final int TICKS = 10, LOOK_TICKS = 100;
 	/** How long the "work's done" toast shows (ms). */
-	static final long TOAST_MS = 5000L;
+	public static final long TOAST_MS = 5000L;
 
 	/** Paper looks, by stars: plain, sealed, vellum, gilt ({@link #paper}); a yellowed copy adds this. */
 	static final String OLD = "_old";
@@ -99,8 +99,8 @@ final class BoardTerms {
 		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Terms.CODEC)).copyOnDeath());
 
 	/** Server → client: a toast, the work on a notice done. */
-	record Toast(Component title, Component text) implements CustomPacketPayload {
-		static final Type<Toast> TYPE = new Type<>(JaymosKingdoms.id("board_toast"));
+	public record Toast(Component title, Component text) implements CustomPacketPayload {
+		public static final Type<Toast> TYPE = new Type<>(JaymosKingdoms.id("board_toast"));
 		static final StreamCodec<RegistryFriendlyByteBuf, Toast> CODEC = StreamCodec.composite(ComponentSerialization.STREAM_CODEC, Toast::title,
 			ComponentSerialization.STREAM_CODEC, Toast::text, Toast::new);
 

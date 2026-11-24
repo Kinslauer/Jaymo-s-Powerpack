@@ -1,5 +1,6 @@
 package com.jaymoskingdoms;
 
+import com.jaymoskingdoms.money.Money;
 import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
@@ -46,6 +48,9 @@ final class BoardWork {
 		Map.entry("incursion", 6), Map.entry("lamps", 3), Map.entry("build", 4), Map.entry("blast", 5), Map.entry("stash", 3), Map.entry("hostage", 7),
 		Map.entry("capture", 8), Map.entry("cure_sick", 6), Map.entry("burn_dead", 4));
 	static final int HEARTS = 2, REPUTATION = 3;
+	/** (village mods 4, fair pay) Up to this much (milli) over the rate; work that has you bring the goods (build, stash, lamps) pays what they're worth too. */
+	static final int PAY_JITTER = 3000;
+	private static final List<String> SUPPLIED = List.of("build", "stash", "lamps");
 	/** The board level a kind is first posted at. */
 	private static final Map<String, Integer> FROM = Map.ofEntries(Map.entry("pack", 1), Map.entry("lamps", 1), Map.entry("build", 1), Map.entry("stash", 1),
 		Map.entry("trek", 1), Map.entry("blast", 2), Map.entry("incursion", 2), Map.entry("hostage", 2), Map.entry("capture", 2), Map.entry("elite", 3),
@@ -124,6 +129,8 @@ final class BoardWork {
 		if (kind == null) {
 			return;
 		}
+		// (village mods 4) hard work done may earn a decree of its trade
+		Decrees.earned(level, player, f, kind, stars(q.template()));
 		if (kind.equals("defend")) {
 			// (a town held through the night talks of who held it)
 			List<Component> thanks = new ArrayList<>();
@@ -149,8 +156,11 @@ final class BoardWork {
 
 	// ---- posting -----------------------------------------------------------------------------------------------------------
 
-	/** A work notice for {@code poster}'s town that isn't up already, or null: a kind its board has the level for, as hard as the level lets it be. */
-	static @Nullable String pick(ServerLevel level, Villager poster, Set<String> up, long now, RandomSource random) {
+	/**
+	 * A work notice for {@code poster}'s town that isn't up already, or null: a kind its board has the level for, as hard as
+	 * the level lets it be; (village mods 4) the kinds of the trades of the {@code decrees} on the board likelier.
+	 */
+	static @Nullable String pick(ServerLevel level, Villager poster, Set<String> up, long now, RandomSource random, Set<String> decrees) {
 		Faction f = Quests.settlement(level, poster);
 		if (f == null) {
 			return null;
@@ -177,7 +187,19 @@ final class BoardWork {
 		if (free.isEmpty()) {
 			return null;
 		}
-		String kind = free.get(random.nextInt(free.size()));
+		int total = 0;
+		for (String k : free) {
+			total += Decrees.weight(decrees, Decrees.ofWork(k));
+		}
+		int roll = random.nextInt(total);
+		String kind = free.get(free.size() - 1);
+		for (String k : free) {
+			roll -= Decrees.weight(decrees, Decrees.ofWork(k));
+			if (roll < 0) {
+				kind = k;
+				break;
+			}
+		}
 		// (the lower of two throws, so the hardest work a board can post is its rarest; a kind is never easier than the level it comes at)
 		int most = Math.min(5, board + 1);
 		int stars = Math.max(Math.min(1 + random.nextInt(most), 1 + random.nextInt(most)), Math.min(most, FROM.get(kind)));
@@ -211,10 +233,11 @@ final class BoardWork {
 	}
 
 	/**
-	 * {@code player} pulls the work notice {@code template} off {@code f}'s board: it's a quest from {@code giver}, who
+	 * {@code player} pulls the work notice {@code key} off {@code f}'s board: it's a quest from {@code giver}, who
 	 * posted it. False if it stays up (their log is full, or the work can't be set out).
 	 */
-	static boolean take(ServerLevel level, ServerPlayer player, LivingEntity giver, Faction f, String template) {
+	static boolean take(ServerLevel level, ServerPlayer player, LivingEntity giver, Faction f, String key) {
+		String template = key.split("\\|")[1];
 		String kind = kind(template);
 		if (kind == null) {
 			return true;
@@ -341,18 +364,28 @@ final class BoardWork {
 			}
 		}
 		String job = giver instanceof Villager v ? BuiltInRegistries.VILLAGER_PROFESSION.getKey(v.getVillagerData().profession().value()).getPath() : "";
-		// (a board with a name for itself pays a little over the rate)
-		int pay = PAY.get(kind) * stars + level(level, f) - 1 + random.nextInt(3);
+		// (a board with a name for itself pays a little over the rate; village mods 4: goods you bring are paid what they're
+		// worth, and some work asks for goods besides, paid part in goods)
+		MinecraftServer server = level.getServer();
+		String also = OUTBREAK.contains(kind) ? null : BoardTerms.also(TownNotices.goodsPool(giver), "", random);
+		long milli = Money.worth(PAY.get(kind) * stars + level(level, f) - 1) + random.nextInt(PAY_JITTER)
+			+ (SUPPLIED.contains(kind) ? Economy.worth(server, target) * count : 0L)
+			+ Math.round(BoardTerms.alsoWorth(server, also) * TownNotices.ERRAND_SHARE);
+		String goods = also == null ? null : BoardTerms.goods(server, milli);
+		if (goods != null) {
+			milli -= BoardTerms.alsoWorth(server, goods);
+		}
 		Quest q = new Quest(id, questKind, template,
 			new Quest.Giver(giver.getUUID(), giver.getName().getString(), f.id(), false, job),
 			new Quest.Objective(target, count, 0, Optional.of(pos), other, otherName, place, false),
-			new Quest.Reward(pay, List.of(), Optional.empty(), Optional.empty(), HEARTS * stars, REPUTATION * stars, 0), 0L);
+			Economy.pay(milli, goods == null ? List.of() : List.of(goods), HEARTS * stars, REPUTATION * stars), 0L);
 		if (!Quests.takeFromBoard(level, player, q)) {
 			if (other.isPresent() && level.getEntity(other.get()) instanceof Villager charge) {
 				charge.discard();
 			}
 			return false;
 		}
+		BoardTerms.taken(level, player, q, key, BoardTerms.paper(stars), also);
 		return true;
 	}
 }
