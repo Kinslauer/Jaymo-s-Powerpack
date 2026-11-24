@@ -6,3 +6,7 @@
   out (about half an hour from full).
 - The space pod takes on the look of Alex's Caves' submarine: riveted copper plating on a slate frame, round portholes
   front, left and back, a brass stern propeller on the back plate and a periscope eyepiece on the mast.
+- With Alex's Caves in the pack, a pod whose hull is whole (keel and all four plates) is drawn as Alex's own submarine
+  model and textures: its side fins are the two thrusters, its back fin the motor and propeller, its mast the periscope.
+  Damaged parts show his scuffed-hull overlays and a finished pod lights his control buttons. While the hull is still
+  going together it shows the pod pieces above.
