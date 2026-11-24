@@ -7534,3 +7534,9 @@ following integration task).
 
 - Andy (a clip, "small mob chop", 2026-11-23): finishing a downed Digger with a sword played Stabbed Through, the blade driven down through it and tugged free: "that should be an execution variable for small animals and mobs, as you wont need to stab through something like that when a small slice like the beginning of the clip shows". A blade's finisher (Stabbed Through, Run Through, Mercy Stroke, Headsman's Stroke) on a small body now plays **Cut Down**: drawn back to the right and one quick slice down and across it (under a second). Small: at most 1.2 blocks tall and 1 wide standing, at its scale (a digger, a fox, a chicken, a rabbit, a wolf, a cat); never a player. `Finishers.Kind.SLICE`, `Finishers.small`, `SMALL_HEIGHT`, `SMALL_WIDTH`.
 - Not seen in game.
+
+## 0.26.80 (2026-11-24): A small creature takes one smash from a club (#2055)
+
+- Andy (after the slice, 2026-11-23): "did you add the single smash?" A club's, a staff's or everyone's wild slam finisher (Skull Crusher, the staff's, Wild Slam) on a small body (a digger, a fox, a chicken: as the slice, at most 1.2 tall and 1 wide) now plays **Smashed**: raised high in both hands and one blow straight down (under a second), instead of beating it again and again. A tool used as a club still wears, once. `Finishers.Kind.SMASH`, `Finishers.smashed`.
+- Axes still take the head; a rock keeps its own move.
+- Not seen in game.
