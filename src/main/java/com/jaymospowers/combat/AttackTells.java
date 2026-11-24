@@ -60,10 +60,17 @@ import net.minecraft.world.phys.Vec3;
  * glint, so the arm was down again before the hit). It starts the wind-up only from {@link #START_REACH_SHARE} of its
  * reach ({@link #closeEnough}, checked by the mixins before the attack cooldown is spent), so it walks up to you instead
  * of glinting from the edge of its reach and whiffing; the blow still lands anywhere in its full reach.
+ * <p>
+ * Andy (2026-11-24): "armed enemies should [not] attack with unblockables EVERY attack anymore, it should be closer to
+ * 20%. and the windup should be longer so players can react". A heavy hitter's blow ({@link #HEAVY_DAMAGE}) is red only
+ * {@link #RED_CHANCE} of the time ({@link #red}; a body {@link #HEAVY_WIDTH} wide still always is), and a red blow
+ * winds up {@link #HEAVY_WINDUP} ticks instead of {@link #WINDUP}, its star held as long.
  */
 public final class AttackTells {
-	/** Ticks from the glint to the blow. */
-	public static final int WINDUP = 10;
+	/** Ticks from the glint to the blow; for a red blow, longer, so there's time to see it and roll, step or block. */
+	public static final int WINDUP = 10, HEAVY_WINDUP = 20;
+	/** The share of a heavy hitter's blows that are red (can't be parried); the rest glint white. */
+	public static final float RED_CHANCE = 0.2F;
 	/** The wind-up starts only with the target inside this share of the mob's reach (past its own body). */
 	static final double START_REACH_SHARE = 0.55;
 	/** Vanilla's reach past the body for a mob holding nothing with an attack range (Mob.DEFAULT_ATTACK_REACH). */
@@ -86,15 +93,22 @@ public final class AttackTells {
 
 	/**
 	 * (0.20.4) The tell's star: this colour (0xRRGGBB), this size. The star has a dark rim so it reads on pale skin and
-	 * bright sky; its white heart ({@code core}, {@link #GLINT_CORE}) has none.
+	 * bright sky; its white heart ({@code core}, {@link #GLINT_CORE}) has none. It holds through a wind-up of
+	 * {@code windup} ticks (0: {@link #WINDUP}).
 	 */
-	public record Glint(int color, float scale, boolean core) implements ParticleOptions {
+	public record Glint(int color, float scale, boolean core, int windup) implements ParticleOptions {
 		public static final MapCodec<Glint> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
 			Codec.INT.optionalFieldOf("color", TELL_COLOR).forGetter(Glint::color),
 			Codec.FLOAT.optionalFieldOf("scale", 1.0F).forGetter(Glint::scale),
-			Codec.BOOL.optionalFieldOf("core", false).forGetter(Glint::core)).apply(i, Glint::new));
+			Codec.BOOL.optionalFieldOf("core", false).forGetter(Glint::core),
+			Codec.INT.optionalFieldOf("windup", 0).forGetter(Glint::windup)).apply(i, Glint::new));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Glint> STREAM_CODEC = StreamCodec.composite(
-			ByteBufCodecs.INT, Glint::color, ByteBufCodecs.FLOAT, Glint::scale, ByteBufCodecs.BOOL, Glint::core, Glint::new);
+			ByteBufCodecs.INT, Glint::color, ByteBufCodecs.FLOAT, Glint::scale, ByteBufCodecs.BOOL, Glint::core,
+			ByteBufCodecs.VAR_INT, Glint::windup, Glint::new);
+
+		public Glint(int color, float scale, boolean core) {
+			this(color, scale, core, 0);
+		}
 
 		@Override
 		public ParticleType<?> getType() {
@@ -107,7 +121,7 @@ public final class AttackTells {
 	public static final ParticleType<Glint> GLINT_CORE = Registry.register(BuiltInRegistries.PARTICLE_TYPE, JaymosPowers.id("tell_glint_core"),
 		FabricParticleTypes.complex(true, Glint.CODEC, Glint.STREAM_CODEC));
 
-	private record Pending(LivingEntity target, long hitAt) {
+	private record Pending(LivingEntity target, long hitAt, boolean heavy) {
 	}
 
 	private static final Map<Mob, Pending> PENDING = new IdentityHashMap<>();
@@ -133,10 +147,11 @@ public final class AttackTells {
 			// ((0.21.20) one waiting its turn holds its blow, Crowds)
 			return false;
 		}
-		boolean heavy = heavy(mob);
-		tell(level, mob, heavy);
-		IncomingBlows.aimed(mob, living, WINDUP, heavy);
-		PENDING.put(mob, new Pending(living, level.getGameTime() + WINDUP));
+		boolean heavy = red(mob);
+		int windup = heavy ? HEAVY_WINDUP : WINDUP;
+		tell(level, mob, heavy, windup);
+		IncomingBlows.aimed(mob, living, windup, heavy);
+		PENDING.put(mob, new Pending(living, level.getGameTime() + windup, heavy));
 		mob.setAggressive(true);
 		return false;
 	}
@@ -163,8 +178,21 @@ public final class AttackTells {
 			&& mob.getAttributeValue(Attributes.ATTACK_DAMAGE) >= HEAVY_DAMAGE;
 	}
 
+	/**
+	 * Whether this blow of {@code mob}'s is red: always from a body {@link #HEAVY_WIDTH} wide, and {@link #RED_CHANCE} of
+	 * the time from a heavy hitter ({@link #HEAVY_DAMAGE}); never otherwise.
+	 */
+	static boolean red(Mob mob) {
+		return mob.getBbWidth() >= HEAVY_WIDTH || heavy(mob) && mob.getRandom().nextFloat() < RED_CHANCE;
+	}
+
 	/** The glint: at the weapon hand for something with arms, at the head for anything else. */
 	public static void tell(ServerLevel level, LivingEntity mob, boolean heavy) {
+		tell(level, mob, heavy, 0);
+	}
+
+	/** {@link #tell(ServerLevel, LivingEntity, boolean)}, the star held through a {@code windup} of this many ticks (0: {@link #WINDUP}). */
+	public static void tell(ServerLevel level, LivingEntity mob, boolean heavy, int windup) {
 		Vec3 facing = Vec3.directionFromRotation(0.0F, mob.getYHeadRot());
 		Vec3 at;
 		if (!mob.getMainHandItem().isEmpty()) {
@@ -173,7 +201,7 @@ public final class AttackTells {
 		} else {
 			at = mob.getEyePosition().add(facing.scale(mob.getBbWidth() * 0.5 + 0.15));
 		}
-		glint(level, at, heavy);
+		glint(level, at, heavy, windup);
 	}
 
 	/**
@@ -181,10 +209,15 @@ public final class AttackTells {
 	 * and the warning ping. Public for Kingdoms (its {@code PowersCompat}) and our own monsters' wind-ups.
 	 */
 	public static void glint(ServerLevel level, Vec3 at, boolean heavy) {
+		glint(level, at, heavy, 0);
+	}
+
+	/** {@link #glint(ServerLevel, Vec3, boolean)}, the star held through a {@code windup} of this many ticks (0: {@link #WINDUP}). Kingdoms' red swings use it. */
+	public static void glint(ServerLevel level, Vec3 at, boolean heavy, int windup) {
 		int color = heavy ? HEAVY_TELL_COLOR : TELL_COLOR;
 		float size = heavy ? HEAVY_GLINT_SIZE : GLINT_SIZE;
-		Glint star = new Glint(color, size * (0.95F + level.getRandom().nextFloat() * 0.1F), false);
-		Glint core = new Glint(0xFFFFFF, size * CORE_SHARE, true);
+		Glint star = new Glint(color, size * (0.95F + level.getRandom().nextFloat() * 0.1F), false, windup);
+		Glint core = new Glint(0xFFFFFF, size * CORE_SHARE, true, windup);
 		for (ServerPlayer player : level.players()) {
 			if (player.distanceToSqr(at) > GLINT_RANGE * GLINT_RANGE) {
 				continue;
@@ -224,7 +257,7 @@ public final class AttackTells {
 				level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, mob.getSoundSource(), 0.6F, 0.8F);
 				continue;
 			}
-			boolean heavy = heavy(mob);
+			boolean heavy = pending.heavy();
 			if (heavy) {
 				mob.addTag(Guard.UNPARRYABLE_TAG);
 			}

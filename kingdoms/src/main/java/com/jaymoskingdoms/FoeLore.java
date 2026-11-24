@@ -45,7 +45,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Camps, bands and realms</b> keep stars on each player ({@link #KNOWN}, on the player): how often they've met
  * you ({@link #MEETING_GAP} apart), how you hurt them (shot, blade, blunt, magic, fire) and how often you parry them
  * (Powers' guard). From the third meeting on they come ready for it: shields against a shooter, footing against a
- * brawler, speed against a caster, fire cloth against fire; against a parrier their blows go past the guard and they
+ * brawler, speed against a caster, fire cloth against fire; against a parrier more of their blows come red (past the guard) and they
  * feint, showing a blow that never comes ({@link #FEINT_EVERY}) to draw your guard early ("knows.*"). A band that has never met you but met someone who fights like you says so, naming them
  * ("knows.other").</li>
  * </ul>
@@ -95,8 +95,16 @@ public final class FoeLore {
 
 	/** Side and player -> when they last met (game time). Server memory. */
 	private static final Map<String, Long> MET = new HashMap<>();
-	/** Band members reading a player's guard: their blows go past it until then (game time). */
+	/** Band members reading a player's guard: more of their blows go past it until then (game time). */
 	private static final Map<Mob, Long> READING = new java.util.IdentityHashMap<>();
+
+	/**
+	 * Whether {@code m} is reading a parrier's guard: more of its blows come red ({@link MobCombat#READ_RED_CHANCE}).
+	 * Andy (2026-11-24) wanted no fighter's every blow unparryable, so it no longer puts the unparryable tag on them all.
+	 */
+	static boolean reading(Mob m) {
+		return READING.containsKey(m);
+	}
 	/** Mobs already readied against a player this fight (mob uuid + player uuid). */
 	private static final Set<String> READIED = new HashSet<>();
 	private static final Map<UUID, Long> SAID_KNOW = new HashMap<>();
@@ -345,7 +353,6 @@ public final class FoeLore {
 				var e = it.next();
 				Mob m = e.getKey();
 				if (time >= e.getValue() || !m.isAlive() || m.isRemoved()) {
-					m.removeTag(MobCombat.UNPARRYABLE_TAG);
 					it.remove();
 				} else if (Comrades.target(m) instanceof ServerPlayer p && (m.getId() + server.getTickCount()) % FEINT_EVERY == 0
 					&& m.distanceToSqr(p) < 16.0) {
@@ -383,7 +390,7 @@ public final class FoeLore {
 	private static void counter(Mob m, Way way, long now) {
 		switch (way) {
 			case PARRY -> {
-				m.addTag(MobCombat.UNPARRYABLE_TAG);
+				// more of their blows come red (MobCombat.READ_RED_CHANCE), each shown as it winds up; not every one
 				READING.put(m, now + COUNTER_TICKS);
 			}
 			case SHOT -> {

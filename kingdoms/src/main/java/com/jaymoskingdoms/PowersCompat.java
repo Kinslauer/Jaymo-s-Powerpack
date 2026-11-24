@@ -118,6 +118,38 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code AttackTells.glint(ServerLevel, Vec3, boolean, int)}: a glint held through a wind-up of its own. */
+	private static java.lang.invoke.@Nullable MethodHandle tellGlintHeld;
+	private static boolean lookedForGlintHeld;
+
+	/**
+	 * {@link #tellGlint(net.minecraft.server.level.ServerLevel, net.minecraft.world.phys.Vec3, boolean)}, the star held
+	 * for a {@code windup} of this many ticks (a red swing's longer one); 0, or an older Powers, the usual.
+	 */
+	public static boolean tellGlint(net.minecraft.server.level.ServerLevel level, net.minecraft.world.phys.Vec3 at, boolean heavy, int windup) {
+		if (windup > 0 && !lookedForGlintHeld) {
+			lookedForGlintHeld = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					tellGlintHeld = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.combat.AttackTells"), "glint",
+						java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerLevel.class,
+							net.minecraft.world.phys.Vec3.class, boolean.class, int.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' held attack tell glint", e);
+				}
+			}
+		}
+		if (windup <= 0 || tellGlintHeld == null) {
+			return tellGlint(level, at, heavy);
+		}
+		try {
+			tellGlintHeld.invoke(level, at, heavy, windup);
+			return true;
+		} catch (Throwable e) {
+			return tellGlint(level, at, heavy);
+		}
+	}
+
 	/** Powers' {@code SpawnCalm.calm(ServerPlayer)}. */
 	private static java.lang.invoke.@Nullable MethodHandle spawnCalm;
 	private static boolean lookedForSpawnCalm;
