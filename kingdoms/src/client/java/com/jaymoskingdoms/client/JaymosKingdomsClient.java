@@ -234,6 +234,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// the spell tomes left click (press and release go to the server)
 		TomeClient.register();
 		PurseCoins.register();
+		// the worn purse's icon in the inventory, with every coin you carry
+		PurseIcon.init();
 		TomeFloat.register();
 		WerewolfKey.register();
 		PaceKey.register();

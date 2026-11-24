@@ -423,6 +423,45 @@ public final class Money {
 		return n - left;
 	}
 
+	/**
+	 * Every coin {@code player} carries, of every currency (the emerald, the greenskins' and the pirates' too): loose, in
+	 * any coin purse (the worn one with the rest), in bundles. Reads the items only, so it works on the client as well
+	 * (the purse icon in the inventory, {@code PurseIcon}).
+	 */
+	public static java.util.Map<Currency, Integer> held(net.minecraft.world.entity.player.Player player) {
+		java.util.Map<Currency, Integer> out = new java.util.EnumMap<>(Currency.class);
+		Inventory inv = player.getInventory();
+		List<ItemStack> stacks = new ArrayList<>();
+		for (int i = 0; i < inv.getContainerSize(); i++) {
+			stacks.add(inv.getItem(i));
+		}
+		ItemStack belt = PowersCompat.belt(player);
+		if (!stacks.contains(belt)) {
+			stacks.add(belt);
+		}
+		for (ItemStack stack : stacks) {
+			if (stack.is(MoneyItems.COIN_PURSE)) {
+				PurseContents.of(stack).held().forEach((c, n) -> out.merge(c, n, Integer::sum));
+				continue;
+			}
+			BundleContents bundle = stack.get(DataComponents.BUNDLE_CONTENTS);
+			if (bundle != null) {
+				bundle.itemCopies().forEach(inner -> countLoose(out, inner));
+				continue;
+			}
+			countLoose(out, stack);
+		}
+		out.values().removeIf(n -> n <= 0);
+		return out;
+	}
+
+	private static void countLoose(java.util.Map<Currency, Integer> out, ItemStack stack) {
+		Currency c = stack.isEmpty() ? null : Currency.byItem(stack.getItem());
+		if (c != null) {
+			out.merge(c, stack.getCount(), Integer::sum);
+		}
+	}
+
 	private static boolean isCoin(ItemStack stack) {
 		return !stack.isEmpty() && Currency.byItem(stack.getItem()) != null;
 	}
