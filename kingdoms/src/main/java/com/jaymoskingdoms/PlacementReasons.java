@@ -40,6 +40,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Ruins</b> ({@code ruins_with_heirs}: castle ruins, ruined towns, remnants): where an old realm stood, so either a
  * living village (its heir) within {@link #RUIN_NEAR} chunks (about 300 blocks), or alone in land at least
  * {@link #RUIN_HARSH} steps harsh ({@link HarshLands}), where the cold or the heat drove its people out.</li>
+ * <li><b>Cairns</b> ({@code cairns_by_ways}): heaps of stones marking the ways out of a town, so a settlement within
+ * {@link #CAIRN_NEAR} chunks (about 500 blocks) and none within {@link #CAIRN_CLEAR} (not in its streets).</li>
  * </ul>
  * A neighbour is found the way the world places it, without generating anything: each structure set holding one is asked
  * where its spread puts one near here, and whether the land there is one it stands in. A neighbour that later fails for
@@ -59,6 +61,7 @@ public final class PlacementReasons {
 	static final int RUIN_NEAR = 19;
 	static final int HOMESTEAD_NEAR = 32;
 	static final int OLD_CLEAR = 4;
+	static final int CAIRN_NEAR = 32, CAIRN_CLEAR = 3;
 	/** Land this harsh explains a ruin with no heir. */
 	static final int RUIN_HARSH = 2;
 
@@ -77,7 +80,8 @@ public final class PlacementReasons {
 		new Rule(tag("towers_on_borders"), SETTLEMENTS, TOWER_NEAR, TOWER_CLEAR, 0),
 		new Rule(tag("ruins_with_heirs"), SETTLEMENTS, RUIN_NEAR, 0, RUIN_HARSH),
 		new Rule(tag("homesteads_by_towns"), SETTLEMENTS, HOMESTEAD_NEAR, 0, 0),
-		new Rule(tag("old_cities"), tag("lived_in"), 0, OLD_CLEAR, 0));
+		new Rule(tag("old_cities"), tag("lived_in"), 0, OLD_CLEAR, 0),
+		new Rule(tag("cairns_by_ways"), SETTLEMENTS, CAIRN_NEAR, CAIRN_CLEAR, 0));
 
 	/** Given a part to play by our own code once they stand (Grim Kingdoms' holds and camps), so not reported. */
 	public static final TagKey<Structure> OWN_REASON = tag("own_reason");
