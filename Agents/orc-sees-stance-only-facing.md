@@ -3,7 +3,7 @@ status: in-review
 task: orc-sees-stance-only-facing
 branch: orc-sees-stance-only-facing
 with: 
-pr: 2053, 2054, 2056, 2057
+pr: 2053, 2054, 2056, 2057, 2059, 2061, 2062
 mods: kingdoms, powers, kitchen
 versions: 
 started: 2026-11-23
@@ -22,4 +22,4 @@ owns:
 - (Un)fair fight: log says downed by Sir Edmund Rot-Knight (zombie), final. Andy's four points asked about, not fixed.
 - Andy's follow-ups: sneaking right behind a mob goes unnoticed (#2053), "Hurt: <cause>" line (#2054), downed die on
   the 3rd weaker blow (#2056), thermometer flames and frost (#2057). All built on CI, none played.
-- Still open from "(un)fair fight": too much blood, a blast while downed not knocking out, adrenaline twice.
+- "(un)fair fight" rest: finite blood on hits (#2059), near blast knocks out (#2061), adrenaline once incl. going down (#2062); downed mobs on 3 blows too (#2056).

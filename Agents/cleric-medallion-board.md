@@ -30,4 +30,4 @@ owns:
 -
 
 ## Done
-PR #2060 (Auto-fix on). A Cleric presses Y with the holy symbol in a hand: a medallion board shows mid-screen, 1-9 lay marks, a 4-mark pattern casts (sneak = bind to the symbol's tap). Others see raised arms, sigils and runes. Built on CI only; not played. Board-only powerful spells proposed, waiting for Andy.
+PR #2060 (Auto-fix on). A Cleric presses Y with the holy symbol in a hand: a medallion board shows mid-screen, 1-9 lay marks, a 4-mark pattern casts (sneak = bind to the symbol's tap). Others see raised arms, sigils and runes. Not played. Board-only powerful spells proposed, waiting for Andy.
