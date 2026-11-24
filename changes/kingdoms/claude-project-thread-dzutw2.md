@@ -1,4 +1,0 @@
-# Alex's Caves' cave biomes lie mostly under Mohknee
-- Alex's Caves' six cave biomes (Andy: "the cave maps should lead to places like mohknee") now sit under Mohknee and the deep sea round it, where every one of Alex's biome cells keeps its biome; the home continent has none within 24000 blocks of the world's middle, and past that one cell in two keeps its biome (`AlexsCavesCompat`, `mixin/alexscaves/CaveBiomePlacementMixin`; tune `HOME` and `FAR_KEEP`). The Abyssal Chasm lies under the crossing sea, the other five under the land and its islands where Alex's own climate rules allow.
-- Cave maps search further: while Alex's `cave_map_search_attempts` is still its default (128000, about 23000 blocks), it is raised to 300000 (about 35000 blocks) when the server starts, so a map from home can reach Mohknee.
-- Built; not played. Only new chunks change.
