@@ -6,7 +6,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 ## Waiting on you
 
 **Questions for you:**
-- [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · 2026-11-24 20:00 claude-cloud's claim had no sign of work for 30 min: handed back as open.
+- [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · 2026-11-24 20:01 Rewrite done for Andy's review: Live/Lore-rewritten.md (Lore.md untouched; fresh copy in Lore-before-quill-rewrite.md). A careful line edit, a…
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 - [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 - [[Inbox/wither-model|wither-model]] · 2026-11-21 10:18 Andy hold instruction (2026-11-19 23:40 ET): leave the model as-is (v3 previews); do not pick up or raise this again until Andy hands it on. N…
