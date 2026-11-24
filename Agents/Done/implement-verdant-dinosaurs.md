@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Verdant dinosaurs (from the Dino-26.3 Amber Age jar), spawned by codex-reference-dinos-venom
 branch: t3/implement-verdant-dinosaurs
 with: 
@@ -43,3 +43,4 @@ Andy confirmed the jar is his own mod made with Claude and GPT ("yes they were m
 - Provenance recorded in `src/main/resources/licenses/PROVENANCE_amber_age_dinosaurs`
 - Change note: `changes/powers/implement-verdant-dinosaurs.md`
 - PR #2099 updated after merging origin/master; CI checks pass (master has since advanced with unrelated changes)
+- 2026-11-24 15:54 PR #2099 is merged into master; moved to Agents/Done.

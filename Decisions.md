@@ -1009,3 +1009,9 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-24 (Andy, illager tongue): illagers speak the tongue uncovered in Alex's Caves: unknown words in the Cave Tablets' glyphs (minecraft:alt), and translating a tablet at a Spelunkery Table teaches it (PR #2098, merged). Lore "The tablets' tongue" approved.
 - 2026-11-24 (Andy): approved Lore "What the keepers tell" and "What goods remember".
 - 2026-11-24 (Andy, Vanilla+ thread): approved the "camps' other hands" lore paragraph (patch G). Ender's Delight "is NOT ARR": its Modrinth page gives MIT (the jar's mods.toml says All Rights Reserved, a template default), so its strange eclair texture is used with the MIT notice.
+
+### 2026-11-24: A red-bonded web slinger is hunted from inside until bond 30
+- **Decided:** on "a player bonded to the red strain controls their own body and doesn't [hunt]": "only after achieving 30 or higher bond, you have to fight the hunts off as more powerful takeovers till then". Below bond 30 the red strain drives its web-slinger host out on hunts as stronger takeovers that the player must fight off; from 30 up the player keeps control.
+- **Also:** Andy approved the Lore.md paragraph "The red one's own shape, and its hunt".
+- **Applies to:** Powers, web symbiote (red strain, takeovers, PR #2096).
+- **Agent:** codex-reference-dinos-venom → red-symbiote-body.
