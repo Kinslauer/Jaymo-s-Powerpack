@@ -4,8 +4,8 @@ the ownership on 2026-11-24 and authorised reusing it here, whatever the jar's A
 The jar has no .bbmodel or GeckoLib JSON: its model is built in code (com/symbiote/client/model/FormGeometry.venom()).
 This tool reads that method's bytecode with `javap` and replays the builder calls (CubeListBuilder.texOffs/addBox/mirror,
 PartPose.offset/offsetAndRotation, PartDefinition.addOrReplaceChild), the way a decompiler would, so the numbers are the
-original's and nothing is retyped. It keeps only the head and the jaw (and their fang parts; the tongue is left out, our
-big body has its own, see WebHulk) and writes:
+original's and nothing is retyped. It keeps only the head and the jaw, with their fang parts and the four tongue segments
+(no body), and writes:
 
     tools/data/bighead_geometry.json   the parts, cubes, UVs, and the rest-pose anchors (mouth, eyes) of the head
     tools/data/bighead_source.png      the jar's venom.png, kept only inside the UV rectangles of those cubes (the body
@@ -169,10 +169,10 @@ def main(jar):
         root = p["name"]
         while by_name[root]["parent"] in by_name and root not in PARTS_KEPT_ROOTS:
             root = by_name[root]["parent"]
-        if root in PARTS_KEPT_ROOTS and not p["name"].startswith("tongue"):
+        if root in PARTS_KEPT_ROOTS:
             kept.append(p)
     kept_names = {p["name"] for p in kept}
-    assert len(kept) == 26 and sum(len(p["cubes"]) for p in kept) == 76, (len(kept), sum(len(p["cubes"]) for p in kept))
+    assert len(kept) == 30 and sum(len(p["cubes"]) for p in kept) == 80, (len(kept), sum(len(p["cubes"]) for p in kept))
     for p in kept:
         assert p["parent"] in kept_names or p["name"] == "head", p["name"]
     jaw_parent = by_name["jaw"]["parent"]

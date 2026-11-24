@@ -90,7 +90,6 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 			if (high == 2) {
 				coloredCutoutModelCopyLayerRender(this.hulk, WebStrainLook.texture(WebHulk.TEXTURE, state), poseStack, collector, lightCoords, state, -1, 1);
 				WebBigHead.submit(poseStack, collector, lightCoords, state, this.getParentModel(), this.bigHead);
-				tongue(poseStack, collector, state, WebSuitGrowth.hulkBuilt(state));
 			}
 			return;
 		}
@@ -103,7 +102,6 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 			// the big body, whether or not the suit was showing
 			coloredCutoutModelCopyLayerRender(this.hulk, WebStrainLook.texture(WebHulk.TEXTURE, state), poseStack, collector, lightCoords, state, -1, 1);
 			WebBigHead.submit(poseStack, collector, lightCoords, state, this.getParentModel(), this.bigHead);
-			tongue(poseStack, collector, state, WebSuitGrowth.peeledHulk(state));
 			return;
 		}
 		if (state.getData(WebSymbioteClient.SUIT) == null) {
@@ -126,18 +124,6 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 			// still feral: its veins show through the suit
 			coloredCutoutModelCopyLayerRender(slim ? this.suitVeinsSlim : this.suitVeinsWide, veins(state), poseStack, collector, lightCoords, state, -1, 1);
 		}
-	}
-
-	/** The big body's tongue, flicking out of its jaws now and then (it comes in with the head, the last thing built). */
-	private void tongue(PoseStack poseStack, SubmitNodeCollector collector, AvatarRenderState state, float built) {
-		if (state.isInvisible || WebSymbioteClient.ownFirstPerson(state) || state.getData(WebSymbioteClient.EATING) != null
-			|| state.getData(WebSymbioteClient.COUNTER_MAW) != null || state.getData(WebSymbioteClient.ROAR) != null) {
-			// (the maw has the head)
-			return;
-		}
-		PlayerModel parent = this.getParentModel();
-		WebSuitGrowth.shift(parent, state);
-		WebHulk.submitTongue(poseStack, collector, state, parent, net.minecraft.util.Mth.clamp((built - 0.85F) / 0.15F, 0.0F, 1.0F));
 	}
 
 	/** The veins' frame now: cycling, so they pulse and writhe. */

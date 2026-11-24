@@ -1,15 +1,22 @@
-"""Draws the big body's new head beside the old head and the head it came from, for checking it before it goes in game.
+"""Draws the big body's new head and the whole big body, for checking them before they go in game.
 
-    python3 -I tools/preview_bighead.py OUT.png
+    python3 -I tools/preview_bighead.py OUT_DIR
 
-A small z-buffer box renderer of Minecraft's model parts (a part's pivot, its Z-Y-X rotation and its scale, each cube's
-box unwrap and mirror, as ModelPart.Cube builds them). Three things are read from what the game will use, not retyped:
-  * the SOURCE head: tools/data/bighead_geometry.json (the original's cubes, recovered from the jar) and its texture;
-  * the NEW head: client/power/web/WebBigHeadMesh.java (the generated Java), placed with WebBigHead's SCALE, OFFSET_Y and
-    OFFSET_Z, and the texture in assets;
-  * the OLD head and the body: WebHulkMesh.java (the big body, in WebHulk.shift's frame at full growth).
-Columns: source head | old head | new head, each from the front and the side, jaw closed and open; then the new head on
-the whole big body, front and side. (A preview, not the game: no lighting but a fixed shade, no first-person.)
+Writes (all in OUT_DIR):
+  bighead-heads.png        the original's head | our old head | the new head, front and side, jaw hanging and open
+  bighead-fullbody.png     the whole big body with the new head, front, three-quarter, side and back, in the textures' own colours
+  bighead-fullbody-lifted.png   the same brightened, to read the dark art by
+  bighead-tongue.png       the tongue in the mouth, half out, all the way out and whipping (front and side)
+  bighead-tongue.gif       one flick: out, held, back in, and the long pause between (the pause is shown shortened)
+
+A small z-buffer box renderer of Minecraft's model parts (a part's pivot, its Z-Y-X rotation and its scale, each cube's box
+unwrap and mirror, as ModelPart.Cube builds them). What it draws is read from what the game will use, not retyped:
+  * the original's head: tools/data/bighead_geometry.json (recovered from the jar) and its texture;
+  * the new head: client/power/web/WebBigHeadMesh.java (the generated Java; checked cube for cube against that data),
+    placed with WebBigHead's SCALE, OFFSET_Y, OFFSET_Z, with the tongue laid out by the same formulas as
+    WebBigHead.HeadModel.setupAnim (ported here: keep the two in step) from WebHulk's flick timing constants;
+  * the old head and the body: client/power/web/WebHulkMesh.java in WebHulk.shift's frame at full growth, with the
+    textures in assets. Standing straight (the game bends the elbows and knees with the walk) and lit by a fixed shade only.
 """
 import json
 import math
@@ -25,7 +32,8 @@ PROJECT = TOOLS.parent
 WEB = PROJECT / "src" / "client" / "java" / "com" / "jaymospowers" / "client" / "power" / "web"
 ENTITY = PROJECT / "src" / "main" / "resources" / "assets" / "jaymospowers" / "textures" / "entity"
 DATA = TOOLS / "data"
-JAW_OPEN = 0.5  # radians, for the "open" pictures (the big body hangs it 0.22 at rest, 0.72 in a snarl)
+BACKGROUND = (46, 48, 58)
+FLOAT = r"(-?[\d.]+)F"
 
 
 class Part:
@@ -36,16 +44,22 @@ class Part:
         self.visible = True
 
 
-# ---- reading the Java meshes -----------------------------------------------------------------------------------------
-FLOAT = r"(-?[\d.]+)F"
+class Tex:
+    def __init__(self, image, uv_size):
+        self.array = np.asarray(image.convert("RGBA"))
+        self.uv_size = uv_size
 
 
+def jconst(path, name):
+    """A float constant of a Java file: NAME = 0.22F."""
+    return float(re.search(r"\b" + name + r" = " + FLOAT, (WEB / path).read_text(encoding="utf-8")).group(1))
+
+
+# ---- reading the Java meshes -----------------------------------------------------------------------------------------------
 def parse_java(path):
-    """The parts of a generated mesh: {name: Part}, in the tree the Java builds (parent chain by variable name)."""
+    """The parts of a generated mesh, in the tree the Java builds (parent by variable name)."""
     text = path.read_text(encoding="utf-8")
-    parts, variables = {}, {}
-    root = Part("root", [], (0, 0, 0), (0, 0, 0))
-    variables["root"] = root
+    variables = {"root": Part("root", [], (0, 0, 0), (0, 0, 0))}
     for m in re.finditer(r'(?:PartDefinition (\w+) = )?(\w+)\.addOrReplaceChild\("(\w+)", (CubeListBuilder\.create\(\).*?), (PartPose\.[^;]*?)\);', text):
         var, parent, name, cubes_src, pose_src = m.groups()
         cubes, mirror = [], False
@@ -62,20 +76,15 @@ def parse_java(path):
         elif "offset" in pose_src:
             pos = nums
         part = Part(name, cubes, pos, rot)
-        # a name can repeat under different parents (elbow, knee): the variable names the one that's meant
-        owner = variables[parent]
-        owner.children.append(part)
+        variables[parent].children.append(part)
         if var:
             variables[var] = part
-        parts[(owner.name, name)] = part
-    return root
+    return variables["root"]
 
 
 def parse_source(path):
     data = json.loads(path.read_text(encoding="utf-8"))
-    by = {}
-    for p in data["parts"]:
-        by[p["name"]] = Part(p["name"], p["cubes"], p["pos"] if p["name"] != "head" else (0, 0, 0), p["rot"])
+    by = {p["name"]: Part(p["name"], p["cubes"], p["pos"] if p["name"] != "head" else (0, 0, 0), p["rot"]) for p in data["parts"]}
     root = Part("root", [], (0, 0, 0), (0, 0, 0))
     for p in data["parts"]:
         (by[p["parent"]] if p["parent"] else root).children.append(by[p["name"]])
@@ -92,7 +101,14 @@ def find(part, name):
     return None
 
 
-# ---- drawing -------------------------------------------------------------------------------------------------------------
+def cubes_of(part):
+    out = [(tuple(c["uv"]), tuple(c["box"]), bool(c["mirror"])) for c in part.cubes]
+    for child in part.children:
+        out += cubes_of(child)
+    return out
+
+
+# ---- drawing -----------------------------------------------------------------------------------------------------------------
 def rot_matrix(x, y, z):
     cx, sx, cy, sy, cz, sz = math.cos(x), math.sin(x), math.cos(y), math.sin(y), math.cos(z), math.sin(z)
     rx = np.array([[1, 0, 0], [0, cx, -sx], [0, sx, cx]])
@@ -102,7 +118,7 @@ def rot_matrix(x, y, z):
 
 
 def cube_quads(c):
-    """ModelPart.Cube's six polygons: (vertices, (u0, v0, u1, v1) in texels), in the order the game builds them."""
+    """ModelPart.Cube's six polygons: (vertices, four (u, v) texels), as the game builds them."""
     x, y, z, w, h, d = c["box"]
     g = c["grow"]
     x0, y0, z0, x1, y1, z1 = x - g, y - g, z - g, x + w + g, y + h + g, z + d + g
@@ -114,12 +130,8 @@ def cube_quads(c):
     f4, f5, f6, f7, f8, f9 = u, u + d, u + d + w, u + d + w + w, u + d + w + d, u + d + w + d + w
     f10, f11, f12 = v, v + d, v + d + h
     quads = [
-        ([v4, v0_, v1_, v5], (f6, f11, f8, f12)),  # east
-        ([v7, v3, v6, v2], (f4, f11, f5, f12)),  # west
-        ([v4, v3, v7, v0_], (f5, f10, f6, f11)),  # down
-        ([v1_, v2, v6, v5], (f6, f11, f7, f10)),  # up
-        ([v0_, v7, v2, v1_], (f5, f11, f6, f12)),  # north
-        ([v3, v4, v5, v6], (f8, f11, f9, f12)),  # south
+        ([v4, v0_, v1_, v5], (f6, f11, f8, f12)), ([v7, v3, v6, v2], (f4, f11, f5, f12)), ([v4, v3, v7, v0_], (f5, f10, f6, f11)),
+        ([v1_, v2, v6, v5], (f6, f11, f7, f10)), ([v0_, v7, v2, v1_], (f5, f11, f6, f12)), ([v3, v4, v5, v6], (f8, f11, f9, f12)),
     ]
     out = []
     for verts, (a, b, c2, d2) in quads:
@@ -130,84 +142,85 @@ def cube_quads(c):
     return out
 
 
-def collect(part, parent_m, parent_t, out, skip=()):
-    if not part.visible or part.name in skip:
+def collect(part, tex, out, parent_m=None, parent_t=None):
+    """Appends (vertices, uvs, texture) for the part and its children."""
+    parent_m = np.eye(3) if parent_m is None else parent_m
+    parent_t = np.zeros(3) if parent_t is None else parent_t
+    if not part.visible:
         return
     m = parent_m @ rot_matrix(*part.rot) @ np.diag(part.scale)
     t = parent_m @ np.array(part.pos) + parent_t
     for c in part.cubes:
         for verts, uvs in cube_quads(c):
-            out.append(([m @ np.array(v) + t for v in verts], uvs))
+            out.append(([m @ np.array(v) + t for v in verts], uvs, tex))
     for child in part.children:
-        collect(child, m, t, out, skip)
+        collect(child, tex, out, m, t)
 
 
-def render(polys, tex, tex_size, view, size=300, zoom=10.0, centre=(0, 0)):
-    """Orthographic. view 'front': screen x = model x, depth -z toward the viewer; 'side': screen x = -z, depth x."""
-    img = np.zeros((size, size, 4), np.uint8)
-    img[:] = (46, 48, 58, 255)
-    zbuf = np.full((size, size), 1e9)
-    tw, th = tex.size
-    texa = np.asarray(tex)
-    for verts, uvs in polys:
+def render(polys, yaw, size, zoom, centre, shade=True, lift=0.0, background=BACKGROUND):
+    """Orthographic, turned {@code yaw} degrees about the vertical: 0 the front (the viewer in front of the model, -z), 90 the side."""
+    a = math.radians(yaw)
+    ca, sa = math.cos(a), math.sin(a)
+    w, h = size
+    img = np.zeros((h, w, 4), np.uint8)
+    img[:] = tuple(background) + (255,)
+    zbuf = np.full((h, w), 1e9)
+    light = np.array([-0.35, -0.75, -0.55])
+    light /= np.linalg.norm(light)
+    for verts, uvs, tex in polys:
         pts = []
         for p in verts:
-            sx, sy = (p[0], p[1]) if view == "front" else (-p[2], p[1])
-            depth = p[2] if view == "front" else p[0]
-            pts.append((size / 2 + (sx - centre[0]) * zoom, size / 2 + (sy - centre[1]) * zoom, depth))
+            pts.append((w / 2 + (p[0] * ca - p[2] * sa - centre[0]) * zoom, h / 2 + (p[1] - centre[1]) * zoom, p[0] * sa + p[2] * ca))
+        n = np.cross(np.array(verts[1]) - np.array(verts[0]), np.array(verts[2]) - np.array(verts[1]))
+        nl = np.linalg.norm(n)
+        shade_k = 1.0
+        if shade and nl > 1e-9:
+            n = n / nl
+            # the face looks at the viewer (its outward side): orient the normal the way the model is seen from
+            toward = np.array([-sa, 0.0, -ca]) * 1.0
+            if n @ toward < 0:
+                n = -n
+            shade_k = 0.6 + 0.4 * max(0.0, float(n @ -light) * 0.5 + 0.5)
+        tw, th = tex.array.shape[1], tex.array.shape[0]
         for tri in ((0, 1, 2), (0, 2, 3)):
-            a, b, c = (pts[i] for i in tri)
+            pa, pb, pc = (pts[i] for i in tri)
             ua, ub, uc = (uvs[i] for i in tri)
-            minx, maxx = int(max(0, min(a[0], b[0], c[0]))), int(min(size - 1, max(a[0], b[0], c[0])))
-            miny, maxy = int(max(0, min(a[1], b[1], c[1]))), int(min(size - 1, max(a[1], b[1], c[1])))
+            minx, maxx = int(max(0, min(pa[0], pb[0], pc[0]))), int(min(w - 1, max(pa[0], pb[0], pc[0])))
+            miny, maxy = int(max(0, min(pa[1], pb[1], pc[1]))), int(min(h - 1, max(pa[1], pb[1], pc[1])))
             if minx > maxx or miny > maxy:
                 continue
-            den = (b[1] - c[1]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[1] - c[1])
+            den = (pb[1] - pc[1]) * (pa[0] - pc[0]) + (pc[0] - pb[0]) * (pa[1] - pc[1])
             if abs(den) < 1e-9:
                 continue
             xs, ys = np.meshgrid(np.arange(minx, maxx + 1) + 0.5, np.arange(miny, maxy + 1) + 0.5)
-            l1 = ((b[1] - c[1]) * (xs - c[0]) + (c[0] - b[0]) * (ys - c[1])) / den
-            l2 = ((c[1] - a[1]) * (xs - c[0]) + (a[0] - c[0]) * (ys - c[1])) / den
+            l1 = ((pb[1] - pc[1]) * (xs - pc[0]) + (pc[0] - pb[0]) * (ys - pc[1])) / den
+            l2 = ((pc[1] - pa[1]) * (xs - pc[0]) + (pa[0] - pc[0]) * (ys - pc[1])) / den
             l3 = 1 - l1 - l2
             inside = (l1 >= -0.01) & (l2 >= -0.01) & (l3 >= -0.01)
             if not inside.any():
                 continue
-            depth = l1 * a[2] + l2 * b[2] + l3 * c[2]
+            depth = l1 * pa[2] + l2 * pb[2] + l3 * pc[2]
             u = l1 * ua[0] + l2 * ub[0] + l3 * uc[0]
             v = l1 * ua[1] + l2 * ub[1] + l3 * uc[1]
-            px = np.clip((u / tex_size[0] * tw).astype(int), 0, tw - 1)
-            py = np.clip((v / tex_size[1] * th).astype(int), 0, th - 1)
-            colour = texa[py, px]
+            px = np.clip((u / tex.uv_size[0] * tw).astype(int), 0, tw - 1)
+            py = np.clip((v / tex.uv_size[1] * th).astype(int), 0, th - 1)
+            colour = tex.array[py, px]
             ok = inside & (colour[..., 3] > 20) & (depth < zbuf[miny:maxy + 1, minx:maxx + 1])
             sub = img[miny:maxy + 1, minx:maxx + 1]
-            sub[ok] = colour[ok]
+            rgb = colour[..., :3].astype(float) * shade_k
+            if lift:
+                rgb = np.clip(rgb * lift + 12, 0, 255)
+            sub[ok, :3] = rgb[ok].astype(np.uint8)
             zbuf[miny:maxy + 1, minx:maxx + 1][ok] = depth[ok]
     return Image.fromarray(img)
 
 
-def lit(tex):
-    """The head's art lies in near-black: lift it for the picture (the game's lighting would brighten it too)."""
-    a = np.asarray(tex.convert("RGBA")).astype(float)
-    a[..., :3] = np.clip(a[..., :3] * 1.0 + 28, 0, 255)
-    return Image.fromarray(a.astype(np.uint8))
-
-
-def head_polys(root, jaw_open, scale=1.0, offset=(0, 0, 0), skip=()):
-    jaw = find(root, "jaw")
-    if jaw:
-        jaw.rot[0] = jaw_open
-    top = find(root, "head") or root
-    top.scale = [scale] * 3
-    top.pos = list(offset)
-    out = []
-    collect(top, np.eye(3), np.zeros(3), out, skip)
-    return out
-
-
-def constants():
-    text = (WEB / "WebBigHead.java").read_text(encoding="utf-8")
-    m = re.search(r"SCALE = " + FLOAT + r", OFFSET_Y = " + FLOAT + r", OFFSET_Z = " + FLOAT, text)
-    return [float(x) for x in m.groups()]
+def add_glow(img, polys_glow, yaw, size, zoom, centre):
+    """The eyes render type adds the glow texture over the head at full brightness."""
+    g = np.asarray(render(polys_glow, yaw, size, zoom, centre, shade=False, background=(0, 0, 0))).astype(int)
+    base = np.asarray(img).astype(int)
+    base[..., :3] = np.clip(base[..., :3] + g[..., :3] * 2, 0, 255)
+    return Image.fromarray(base.astype(np.uint8))
 
 
 def label(img, text):
@@ -215,85 +228,185 @@ def label(img, text):
     return img
 
 
-def main(out_path):
-    scale, oy, oz = constants()
-    source = parse_source(DATA / "bighead_geometry.json")
-    new = parse_java(WEB / "WebBigHeadMesh.java")
-    # the generated Java must be the recovered geometry, cube for cube
-    src_cubes = [(c["uv"], tuple(c["box"]), c["mirror"]) for p in json.loads((DATA / "bighead_geometry.json").read_text())["parts"] for c in p["cubes"]]
-    java_cubes = []
+# ---- the head, posed the way the game poses it ------------------------------------------------------------------------------
+class Game:
+    """The constants the Java uses, read from the Java."""
 
-    def walk(p):
-        java_cubes.extend((c["uv"], tuple(c["box"]), c["mirror"]) for c in p.cubes)
-        for c in p.children:
-            walk(c)
-    walk(new)
-    assert len(java_cubes) == len(src_cubes) == 76
-    assert sorted((tuple(uv), tuple(b), m) for uv, b, m in java_cubes) == sorted((tuple(uv), tuple(b), m) for uv, b, m in src_cubes),         "generated Java differs from the recovered cubes"
-    old_root = parse_java(WEB / "WebHulkMesh.java")
-    tex_new = lit(Image.open(ENTITY / "web_symbiote_bighead.png"))
-    tex_hulk = lit(Image.open(ENTITY / "web_symbiote_hulk.png"))
-    tex_src = lit(Image.open(DATA / "bighead_source.png"))
-    glow = Image.open(ENTITY / "web_symbiote_bighead_glow.png").convert("RGBA")
-    tiles = []
-    for jaw_open in (0.22, 0.72):
-        for view in ("front", "side"):
-            row = []
-            # source head: the original's own size and pivot (units x0.6, the same as ours, to compare shapes)
-            polys = head_polys(parse_source(DATA / "bighead_geometry.json"), jaw_open, scale)
-            row.append(label(render(polys, tex_src, (256, 192), view, zoom=11, centre=(0, 0)), "source %s jaw %.2f" % (view, jaw_open)))
-            old = parse_java(WEB / "WebHulkMesh.java")
-            hh = find(old, "head")
-            find(old, "jaw").rot[0] = jaw_open
-            polys = []
-            keep = {"skull", "cranium", "muzzle", "fangs", "fangs_r", "fangs_l", "throat", "jaw"}
-            for c in hh.children:
-                if c.name in keep:
-                    collect(c, np.eye(3), np.zeros(3), polys)
-            row.append(label(render(polys, tex_hulk, (256, 128), view, zoom=11, centre=(0, -2)), "old head %s" % view))
-            polys = head_polys(parse_java(WEB / "WebBigHeadMesh.java"), jaw_open, scale, (0, oy, oz))
-            img = render(polys, tex_new, (256, 192), view, zoom=11, centre=(0, -2))
-            # (the glow: eyes and fang glints, drawn bright over it)
-            img2 = render(polys, glow, (256, 192), view, zoom=11, centre=(0, -2))
-            g = np.asarray(img2).astype(int)
-            base = np.asarray(img).astype(int)
-            mask = (g[..., :3].sum(axis=2) > 120) & (g[..., :3].sum(axis=2) != 46 + 48 + 58)
-            base[mask] = np.clip(base[mask] + g[mask] * 2, 0, 255)  # additive, as the eyes render type is
-            row.append(label(Image.fromarray(base.astype(np.uint8)), "new head %s (scale %.2f)" % (view, scale)))
-            tiles.append(row)
-    # the whole big body in WebHulk.shift's frame, with the new head on the neck
-    body = parse_java(WEB / "WebHulkMesh.java")
-    h_pos = (0.0, -6.0 - 1.5, -4.0)  # the neck (BODY_LIFT up) and the head HEAD_DOWN/HEAD_FORWARD from it
-    shift = {"body": (0, -6, 0), "right_arm": (-10, -4, 0), "left_arm": (10, -4, 0), "right_leg": (-4.1, 8, 0), "left_leg": (4.1, 8, 0)}
+    def __init__(self):
+        self.scale, self.oy, self.oz = (jconst("WebBigHead.java", n) for n in ("SCALE", "OFFSET_Y", "OFFSET_Z"))
+        self.lead, self.rest, self.segment = (jconst("WebBigHead.java", n) for n in ("TONGUE_LEAD", "TONGUE_REST", "SEGMENT"))
+        self.droop, self.ripple, self.sway, self.flutter = (jconst("WebHulk.java", n) for n in ("TONGUE_DROOP", "TONGUE_RIPPLE", "TONGUE_SWAY", "TONGUE_FLUTTER"))
+        self.jaw_rest, self.jaw_breath, self.jaw_flick = (jconst("WebHulk.java", n) for n in ("JAW_REST", "JAW_BREATH", "JAW_FLICK"))
+        self.flick_ticks, self.flick_out, self.flick_back, self.every = (jconst("WebHulk.java", n) for n in ("FLICK_TICKS", "FLICK_OUT", "FLICK_BACK", "TONGUE_EVERY"))
+        self.body_lift, self.leg_lift = jconst("WebHulkMesh.java", "BODY_LIFT"), jconst("WebHulkMesh.java", "LEG_LIFT")
+        self.arm_out, self.leg_out, self.head_down, self.head_forward = (jconst("WebHulk.java", n) for n in ("ARM_OUT", "LEG_OUT", "HEAD_DOWN", "HEAD_FORWARD"))
+
+    def flick_out_at(self, f):
+        """WebHulk.flickOut."""
+        if f < 0:
+            return 0.0
+        out = f / self.flick_out if f < self.flick_out else (1 - (f - self.flick_back) / (1 - self.flick_back) if f > self.flick_back else 1.0)
+        out = min(max(out, 0.0), 1.0)
+        return out * out * (3 - 2 * out)
+
+    def pose_head(self, root, jaw, out=0.0, whip=0.0, age=0.0):
+        """WebBigHead.HeadModel.setupAnim for a built, full-grown head (the tongue ported from tongueOut)."""
+        head = find(root, "head")
+        head.scale = [self.scale] * 3
+        head.pos = [0.0, self.oy, self.oz]
+        find(root, "jaw").rot[0] = jaw
+        t = [find(root, "tongue%d" % i) for i in range(4)]
+        t[0].visible = out > 0.02
+        if out > 0.02:
+            t[0].scale[2] = out
+            t[0].rot[0] = self.rest - jaw * self.lead
+            for i in range(1, 4):
+                f = i / 3.0
+                t[i].rot[0] = self.segment * (self.droop * (1 - whip * 0.5) + math.sin(age * 0.23 - i * 0.6) * self.ripple * f)
+                t[i].rot[1] = self.segment * (math.sin(age * 0.13 - i * 0.45) * self.sway * (0.3 + f) * 0.5 + math.sin(age * 1.9 - i * 0.7) * self.flutter * f * whip)
+        return head
+
+
+def textures():
+    return dict(
+        hulk=Tex(Image.open(ENTITY / "web_symbiote_hulk.png"), (256, 128)),
+        head=Tex(Image.open(ENTITY / "web_symbiote_bighead.png"), (256, 192)),
+        glow=Tex(Image.open(ENTITY / "web_symbiote_bighead_glow.png"), (256, 192)),
+        source=Tex(Image.open(DATA / "bighead_source.png"), (256, 192)),
+    )
+
+
+def new_head_polys(game, tex, jaw, out=0.0, whip=0.0, age=0.0, at=(0.0, 0.0, 0.0), glow=False):
+    root = parse_java(WEB / "WebBigHeadMesh.java")
+    head = game.pose_head(root, jaw, out, whip, age)
     polys = []
-    for c in body.children:
-        if c.name == "head":
+    collect(head, tex["glow"] if glow else tex["head"], polys, np.eye(3), np.array(at, float))
+    return polys
+
+
+def head_tile(game, tex, which, yaw, jaw, size=(300, 300), zoom=11.0, lift=0.0):
+    if which == "source":
+        root = parse_source(DATA / "bighead_geometry.json")
+        find(root, "jaw").rot[0] = jaw
+        find(root, "tongue0").visible = False
+        head = find(root, "head")
+        head.scale = [game.scale] * 3
+        polys = []
+        collect(head, tex["source"], polys)
+        return render(polys, yaw, size, zoom, (0, 0), lift=lift)
+    if which == "old":
+        old = parse_java(WEB / "WebHulkMesh.java")
+        find(old, "jaw").rot[0] = jaw
+        polys = []
+        for name in ("skull", "cranium", "muzzle", "fangs", "fangs_r", "fangs_l", "throat", "jaw"):
+            collect(find(find(old, "head"), name), tex["hulk"], polys)
+        return render(polys, yaw, size, zoom, (0, -2), lift=lift)
+    polys = new_head_polys(game, tex, jaw)
+    img = render(polys, yaw, size, zoom, (0, -2), lift=lift)
+    return add_glow(img, new_head_polys(game, tex, jaw, glow=True), yaw, size, zoom, (0, -2))
+
+
+def body_polys(game, tex, head_jaw, out=0.0, whip=0.0, age=0.0, glow=False):
+    """The big body in WebHulk.shift's frame (full growth, standing straight) with the new head on its neck."""
+    body = parse_java(WEB / "WebHulkMesh.java")
+    shifts = {"body": (0, -game.body_lift, 0), "right_arm": (-game.arm_out, -game.body_lift, 0), "left_arm": (game.arm_out, -game.body_lift, 0),
+              "right_leg": (-game.leg_out, -game.leg_lift, 0), "left_leg": (game.leg_out, -game.leg_lift, 0)}
+    polys = []
+    for part in body.children:
+        if part.name == "head":
             continue
-        c.pos = list(shift.get(c.name, c.pos))
-        if c.name == "body":
-            c.scale = [1, 1, 1]
-        collect(c, np.eye(3), np.zeros(3), polys)
-    head = head_polys(parse_java(WEB / "WebBigHeadMesh.java"), 0.22, scale, (0, oy, oz))
-    moved = [([np.array(v) + np.array(h_pos) for v in verts], uvs) for verts, uvs in head]
-    bodies = []
-    for view in ("front", "side"):
-        a = render(polys, tex_hulk, (256, 128), view, size=420, zoom=9, centre=(0, 2))
-        b = render(moved, tex_new, (256, 192), view, size=420, zoom=9, centre=(0, 2))
-        arr = np.asarray(a).copy()
-        barr = np.asarray(b)
-        # the head over the body (a z-buffer of one: head wins where it has pixels that aren't the background)
-        mask = (barr[..., :3] != (46, 48, 58)).any(axis=2)
-        arr[mask] = barr[mask]
-        bodies.append(label(Image.fromarray(arr), "new head on the big body, %s" % view))
-    w = 300 * 3
-    sheet = Image.new("RGBA", (max(w, 420 * 2), 300 * 4 + 420), (20, 20, 24, 255))
-    for r, row in enumerate(tiles):
-        for c, tile in enumerate(row):
-            sheet.paste(tile, (c * 300, r * 300))
-    for i, b in enumerate(bodies):
-        sheet.paste(b, (i * 420, 1200))
-    sheet.convert("RGB").save(out_path)
-    print("wrote", out_path)
+        d = shifts.get(part.name, (0, 0, 0))
+        part.pos = [part.pos[0] + d[0], part.pos[1] + d[1], part.pos[2] + d[2]]
+        if not glow:
+            collect(part, tex["hulk"], polys)
+    neck = (0.0, -game.body_lift + game.head_down, -game.head_forward)
+    polys += new_head_polys(game, tex, head_jaw, out, whip, age, at=neck, glow=glow)
+    return polys
+
+
+def full_body(game, tex, lift=0.0):
+    jaw = game.jaw_rest
+    tiles = []
+    size = (400, 600)
+    for yaw, name in ((0, "front"), (35, "three-quarter"), (90, "side"), (180, "back")):
+        img = render(body_polys(game, tex, jaw), yaw, size, 12.0, (0, 4), lift=lift)
+        if yaw != 180:
+            img = add_glow(img, body_polys(game, tex, jaw, glow=True), yaw, size, 12.0, (0, 4))
+        tiles.append(label(img, "big body + new head, %s%s" % (name, ", brightened" if lift else "")))
+    sheet = Image.new("RGB", (400 * 4, 600), BACKGROUND)
+    for i, t in enumerate(tiles):
+        sheet.paste(t.convert("RGB"), (i * 400, 0))
+    return sheet
+
+
+def tongue_frame(game, tex, f, tick, yaw, size=(340, 340), zoom=17.0):
+    jaw = game.jaw_rest + game.jaw_flick * math.sin(math.pi * f if f >= 0 else 0)
+    out = game.flick_out_at(f)
+    whip = math.sin(math.pi * f) if f >= 0 else 0.0
+    polys = new_head_polys(game, tex, jaw, out, whip, tick)
+    img = render(polys, yaw, size, zoom, (0, 0))
+    return add_glow(img, new_head_polys(game, tex, jaw, out, whip, tick, glow=True), yaw, size, zoom, (0, 0)), out
+
+
+def tongue_assets(game, tex, out_dir):
+    cells = []
+    for f, name in ((-1.0, "in the mouth"), (0.15, "shooting out"), (0.45, "out"), (0.8, "drawing back")):
+        row = []
+        for yaw in (0, 90):
+            img, out = tongue_frame(game, tex, f, 5.0 + f * 12, yaw)
+            row.append(label(img, "%s (flick %.2f, out %.2f) %s" % (name, f, out, "front" if yaw == 0 else "side")))
+        cells.append(row)
+    sheet = Image.new("RGB", (340 * 4, 340 * 2), BACKGROUND)
+    for c, row in enumerate(cells):
+        for r, t in enumerate(row):
+            sheet.paste(t.convert("RGB"), (c * 340, r * 340))
+    sheet.save(out_dir / "bighead-tongue.png")
+    # one flick, tick by tick (two frames a tick), then the pause (the real one is TONGUE_EVERY - FLICK_TICKS ticks long)
+    frames, durations = [], []
+    n = int(game.flick_ticks)
+    for step in range(n * 2 + 1):
+        f = step / (n * 2.0)
+        a, _ = tongue_frame(game, tex, f, step / 2.0, 20, size=(300, 300), zoom=15.0)
+        b, _ = tongue_frame(game, tex, f, step / 2.0, 90, size=(300, 300), zoom=15.0)
+        frame = Image.new("RGB", (600, 300), BACKGROUND)
+        frame.paste(a.convert("RGB"), (0, 0))
+        frame.paste(b.convert("RGB"), (300, 0))
+        ImageDraw.Draw(frame).text((6, 4), "tick %.1f of %d" % (step / 2.0, n), fill=(235, 235, 240))
+        frames.append(frame)
+        durations.append(25)
+    pause_ticks = int(game.every - game.flick_ticks)
+    held = frames[0].copy()
+    ImageDraw.Draw(held).rectangle((0, 280, 600, 300), fill=BACKGROUND)
+    ImageDraw.Draw(held).text((6, 284), "pause: %d ticks (%.1f s), shown shortened" % (pause_ticks, pause_ticks / 20.0), fill=(235, 235, 240))
+    frames.append(held)
+    durations.append(1500)
+    frames[0].save(out_dir / "bighead-tongue.gif", save_all=True, append_images=frames[1:], duration=durations, loop=0, optimize=False)
+
+
+def main(out_dir):
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    game = Game()
+    tex = textures()
+    # the generated Java must be the recovered geometry, cube for cube
+    source = sorted(cubes_of(parse_source(DATA / "bighead_geometry.json")))
+    java = sorted(cubes_of(parse_java(WEB / "WebBigHeadMesh.java")))
+    assert len(source) == len(java) == 80 and source == java, "generated Java differs from the recovered cubes"
+    for lift, name in ((0.0, "bighead-heads.png"), (2.6, "bighead-heads-lifted.png")):
+        rows = []
+        for jaw in (game.jaw_rest, 0.72):
+            for yaw in (0, 90):
+                rows.append([label(head_tile(game, tex, w, yaw, jaw, lift=lift), "%s %s jaw %.2f%s" % (w, "front" if yaw == 0 else "side", jaw, ", brightened" if lift else ""))
+                             for w in ("source", "old", "new")])
+        sheet = Image.new("RGB", (900, 1200), BACKGROUND)
+        for r, row in enumerate(rows):
+            for c, t in enumerate(row):
+                sheet.paste(t.convert("RGB"), (c * 300, r * 300))
+        sheet.save(out_dir / name)
+    full_body(game, tex).save(out_dir / "bighead-fullbody.png")
+    full_body(game, tex, lift=2.6).save(out_dir / "bighead-fullbody-lifted.png")
+    tongue_assets(game, tex, out_dir)
+    print("wrote the previews in", out_dir)
 
 
 if __name__ == "__main__":

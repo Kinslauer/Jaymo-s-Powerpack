@@ -27,7 +27,7 @@ import net.minecraft.world.phys.Vec3;
  * shoulders and down the legs and swallows the head last, hugging the body, then every mass swells out into the brute
  * while the wearer grows inside it. The jaw hangs open
  * and breathes, now and then drawing back in a snarl; a long red tongue stays in the mouth and flicks out quickly every
- * {@code TONGUE_EVERY} ticks, and once just after a meal ({@link #submitTongue}; the maw's own tongue lashes out for
+ * {@code TONGUE_EVERY} ticks, and once just after a meal ({@link WebBigHead}'s tongue; the maw's own tongue lashes out for
  * the last bite, WebMouthLayer). The forearms and shins hang off elbows and knees of their own ({@link Model#limbs}):
  * they bend with the stride, the forearms trailing the swing, the knees folding as each leg comes through, and sway a
  * little standing. Everything keeps the player model's pivots, so every pose drives it; on top of them the
@@ -58,9 +58,6 @@ final class WebHulk {
 	static final float TORSO_STRETCH = WebHulkMesh.TORSO / 12.0F, LEG_STRETCH = WebHulkMesh.LEG / 12.0F;
 	/** The jaw: how far it hangs open at rest (radians), how much it breathes, and a snarl's gape. */
 	static final float JAW_REST = 0.22F, JAW_BREATH = 0.08F, JAW_SNARL = 0.5F;
-	/** The tongue: pieces, each one's length (pixels), its width and thickness at the root (tapering to the tip). */
-	static final int TONGUE_PIECES = 12;
-	static final float TONGUE_PIECE = 1.7F, TONGUE_WIDTH = 1.6F, TONGUE_THICK = 0.55F;
 	/** How it moves: drooping this much more each piece, rippling this hard, swaying, and its tip fluttering in a flick. */
 	static final float TONGUE_DROOP = 0.1F, TONGUE_RIPPLE = 0.28F, TONGUE_SWAY = 0.22F, TONGUE_FLUTTER = 0.35F;
 	/**
@@ -548,31 +545,6 @@ final class WebHulk {
 		part.y += dy;
 		part.z += dz;
 		MOVED.put(part, new float[] {part.x, part.y, part.z});
-	}
-
-	/**
-	 * The tongue: in the mouth, and every so often ({@link #flick}) flicked out between the jaws over the fangs, its tip
-	 * fluttering, and drawn back in. Drawn off the head ({@code head}, already posed and moved to the big body's frame),
-	 * {@code grown} of its length (it comes in with the head as the big body is built).
-	 */
-	static void submitTongue(PoseStack poseStack, SubmitNodeCollector collector, AvatarRenderState state, PlayerModel parent, float grown) {
-		float flick = flick(state);
-		float out = flickOut(flick) * grown;
-		if (out <= 0.02F) {
-			// in the mouth
-			return;
-		}
-		float age = state.ageInTicks;
-		float jawAngle = jaw(state);
-		float whip = Mth.sin(flick * Mth.PI);
-		poseStack.pushPose();
-		parent.root().translateAndRotate(poseStack);
-		parent.head.translateAndRotate(poseStack);
-		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebStrainLook.texture(WebTubes.TEXTURE, state)), (pose, buffer) ->
-			// out from between the jaws, riding down with the lower one (sliding back into the mouth as it's drawn in)
-			tongue(buffer, pose, new Vec3(0.0, WebBigHead.MOUTH_Y + Mth.sin(jawAngle) * 2.0, WebBigHead.MOUTH_Z + 1.5 + (1.0F - out) * 3.0), 0.15F + jawAngle * 0.6F, TONGUE_PIECES,
-				TONGUE_PIECE, TONGUE_WIDTH, TONGUE_THICK, age, out, whip, TONGUE_DROOP, state.lightCoords));
-		poseStack.popPose();
 	}
 
 	/**
