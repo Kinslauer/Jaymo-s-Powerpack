@@ -25,6 +25,8 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2106 A new host can struggle out of the red one's hunt (Powers, 2026-11-24)
+- [ ] #2105 Alex's Caves joins the pack; its Magnetic Caves in the Aether's magnetic stone, its neodymium in our colours (Powers, Kingdoms, 2026-11-24)
 - [ ] #2104 patron colossus brings a natural disaster on each walk (Kingdoms, 2026-11-24)
 - [ ] #2103 patron colossus: the strike and the hunt for commandment breakers (Kingdoms, 2026-11-24)
 - [ ] #2102 Vanilla+ picks: Incendium back, demon start in the Forbidden Castle, back slot, pinned advancements, Stellarity End and the Beneath (Powers, Kingdoms, Kitchen, 2026-11-24)
@@ -89,7 +91,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 ## Health
 
-13 problems in the notes: [[Health]].
+12 problems in the notes: [[Health]].
 
 ## Last week
 

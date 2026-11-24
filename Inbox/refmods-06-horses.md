@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: any
 from: coordinator
 asked: 2026-11-24
 thread: Build Reference Mods pick list (cloud); queued by Hermes Training
-claimed_by: 
+claimed_by: project-thread-ojz7uj
 pr: 
 suggested_owns:
   - build.gradle (Icy's Better Horses dependency)

@@ -62,6 +62,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/alexs-caves-integration|alexs-caves-integration]]
 - [x] [[Inbox/Done/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]]
 - [x] [[Inbox/Done/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]]
 - [x] [[Inbox/Done/vanilla-plus-i-settlement-roads|vanilla-plus-i-settlement-roads]]
@@ -69,7 +70,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/vanilla-plus-g-illager-invasion|vanilla-plus-g-illager-invasion]]
 - [x] [[Inbox/Done/vanilla-plus-f-delight-dishes|vanilla-plus-f-delight-dishes]]
 - [x] [[Inbox/Done/vanilla-plus-e-soul-reaping-spawners|vanilla-plus-e-soul-reaping-spawners]]
-- [x] [[Inbox/Done/vanilla-plus-d-horse-expert-skill|vanilla-plus-d-horse-expert-skill]]
 
 
 %% kanban:settings
