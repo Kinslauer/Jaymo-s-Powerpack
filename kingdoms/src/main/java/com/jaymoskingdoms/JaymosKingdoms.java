@@ -246,7 +246,6 @@ public final class JaymosKingdoms implements ModInitializer {
 		Meals.register();
 		// smiths sharpen the guards' dull blades at a grindstone
 		Whetting.register();
-		WorkScenes.register();
 		// village mods 3: guards that fight and mend
 		ClericHeals.register();
 		SmithMending.register();
