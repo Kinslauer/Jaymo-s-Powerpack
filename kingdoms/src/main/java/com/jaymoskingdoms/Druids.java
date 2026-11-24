@@ -475,6 +475,29 @@ public final class Druids {
 		}
 	}
 
+	/**
+	 * A full scan of a beast by a Druid's scouter counts as the long calm looking: every shape whose kin it is is studied
+	 * through, as if {@link #STUDY_TICKS} had passed. True if a shape was newly learned.
+	 */
+	static boolean scanned(ServerPlayer player, ServerLevel level, String kind) {
+		if (!Classes.is(player, PlayerClass.DRUID)) {
+			return false;
+		}
+		Map<String, Integer> watched = new HashMap<>(player.getAttachedOrElse(WATCHED, Map.<String, Integer>of()));
+		boolean fresh = false;
+		for (String form : FORMS) {
+			if (KIN.get(form).contains(kind) && watched.getOrDefault(form, 0) < STUDY_TICKS) {
+				watched.put(form, STUDY_TICKS);
+				learned(player, level, form);
+				fresh = true;
+			}
+		}
+		if (fresh) {
+			player.setAttached(WATCHED, watched);
+		}
+		return fresh;
+	}
+
 	static boolean standIn(LivingEntity e) {
 		for (Shape shape : SHAPES_WORN.values()) {
 			if (shape.beast == e) {

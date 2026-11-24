@@ -42,7 +42,8 @@ import net.minecraft.world.item.equipment.Equippable;
  * from his health, fists and ki, his trained stats, his form, Limit Break and mastery; anyone else's from max health and
  * attack damage. The basic scouter reads up to {@link #CAP}; a number past {@link #OVERLOAD_RATIO} times that overloads it:
  * the readout glitches, the lens cracks and the scouter breaks. Something hiding its ki ({@link ZFighterKiSense#hidesKi})
- * reads {@code ???}.
+ * reads {@code ???}. It reads for anyone: a wearer without ki gets everything but the power level, and {@link ZFighterScan}
+ * holds the rest (the full scan, marks and tracking).
  */
 public final class ZFighterScouter {
 	/** What the basic scouter reads up to, and how many times that it takes to burn it out. */
@@ -164,7 +165,12 @@ public final class ZFighterScouter {
 			return;
 		}
 		int number = powerLevel(target);
-		int flags = 0;
+		// no ki, no power level: the scouter still reads the rest for anyone (ZFighterScan)
+		int flags = Powers.has(player, ZFighterPower.INSTANCE) ? 0 : ZFighterSensesNet.NO_LEVEL;
+		if ((flags & ZFighterSensesNet.NO_LEVEL) != 0) {
+			ZFighterSensesNet.send(player, new ZFighterSensesNet.Reading(id, -1, flags));
+			return;
+		}
 		if (number > CAP * OVERLOAD_RATIO) {
 			flags = ZFighterSensesNet.OVERLOADED;
 			overload(player, level);
