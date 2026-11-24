@@ -5,7 +5,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
@@ -14,19 +17,20 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 /**
- * (Andy, 2026-11-23: "the pop up should rise for any clash, to help the player resolve them. it should only play twice ever")
- * On joining a world, when any two key bindings share a key, a pop-up names the clashes and asks to rebind one in Controls.
- * It shows on {@link #TIMES} joins at most, ever: the count is kept in a file in the config folder, so someone happy with
- * their clashes isn't asked again. A join with no clash doesn't count. Keys our own mods share on purpose ({@link #ON_PURPOSE},
- * each used only in its own moment: a power's key and a class's, riding and not) are left out while both are on their defaults.
+ * (Andy, 2026-11-23: "the pop up should rise for any clash, to help the player resolve them. it should only play twice ever";
+ * then: "the bind clashing tool tip should appear per bind and only when you first press it after you spawn")
+ * The first time in a visit that you press a key two bindings share, a pop-up names that key and what's bound to it and
+ * asks to rebind one in Controls. Each key's pop-up shows {@link #TIMES} times at most, ever: the counts are kept in a file
+ * in the config folder, so someone happy with their clashes isn't asked again. Keys our own mods share on purpose
+ * ({@link #ON_PURPOSE}, each used only in its own moment: a power's key and a class's, riding and not) are left out while
+ * both are on their defaults.
  */
 public final class KeyClashes {
-	/** How many joins the pop-up may show on, ever. */
+	/** How many times each key's pop-up may show, ever. */
 	static final int TIMES = 2;
-	/** How many clashes the pop-up names before "and N more". */
-	static final int NAMED = 3;
 	/** How long the pop-up stays (ms). */
 	static final long SHOWN_MS = 12000L;
 	private static final String FILE = "jaymoskingdoms-key-clashes.txt";
@@ -50,71 +54,99 @@ public final class KeyClashes {
 		pair("key.jaymoskingdoms.medallion_mark_8", "key.jaymoskingdoms.plan_layer_up"),
 		pair("key.jaymoskingdoms.medallion_mark_2", "key.jaymoskingdoms.plan_layer_down"));
 	private static final SystemToast.SystemToastId TOAST = new SystemToast.SystemToastId(SHOWN_MS);
-	/** Whether this visit has been checked. */
-	private static boolean checked;
+	/** Keys already pressed this visit (shown or not), by {@link KeyMapping#saveString()}. */
+	private static final Set<String> PRESSED = new HashSet<>();
 
 	private KeyClashes() {
 	}
 
 	static void register() {
-		ClientPlayConnectionEvents.DISCONNECT.register((handler, minecraft) -> checked = false);
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, minecraft) -> PRESSED.clear());
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
-			if (checked || minecraft.player == null) {
+			if (minecraft.player == null) {
 				return;
 			}
-			checked = true;
-			check(minecraft);
+			for (KeyMapping mapping : minecraft.options.keyMappings) {
+				if (mapping.isDown() && !mapping.isUnbound() && PRESSED.add(mapping.saveString())) {
+					pressed(minecraft, mapping);
+				}
+			}
 		});
 	}
 
-	private static void check(Minecraft minecraft) {
+	/** The first press this visit of {@code pressed}'s key: a pop-up if that key clashes and its pop-up hasn't shown twice yet. */
+	private static void pressed(Minecraft minecraft, KeyMapping pressed) {
+		List<KeyMapping> onKey = new ArrayList<>();
+		for (KeyMapping mapping : minecraft.options.keyMappings) {
+			if (mapping.same(pressed)) {
+				onKey.add(mapping);
+			}
+		}
+		if (!clashes(onKey)) {
+			return;
+		}
 		Path file = FabricLoader.getInstance().getConfigDir().resolve(FILE);
-		int shown = shown(file);
-		if (shown >= TIMES) {
+		Map<String, Integer> shown = shown(file);
+		String key = pressed.saveString();
+		int times = shown.getOrDefault(key, 0);
+		if (times >= TIMES) {
 			return;
 		}
-		List<Component> clashes = new ArrayList<>();
-		KeyMapping[] all = minecraft.options.keyMappings;
-		for (int i = 0; i < all.length; i++) {
-			if (all[i].isUnbound()) {
-				continue;
+		MutableComponent names = Component.empty();
+		for (int i = 0; i < onKey.size(); i++) {
+			if (i > 0) {
+				names.append(Component.literal(i == onKey.size() - 1 ? " and " : ", "));
 			}
-			for (int j = i + 1; j < all.length; j++) {
-				if (all[i].same(all[j]) && !(all[i].isDefault() && all[j].isDefault() && ON_PURPOSE.contains(pair(all[i].getName(), all[j].getName())))) {
-					clashes.add(Component.translatable("message.jaymoskingdoms.key_clash.pair", all[i].getTranslatedKeyMessage(),
-						Component.translatable(all[i].getName()), Component.translatable(all[j].getName())));
-				}
-			}
+			names.append(Component.translatable(onKey.get(i).getName()));
 		}
-		if (clashes.isEmpty()) {
-			return;
-		}
-		net.minecraft.network.chat.MutableComponent message = Component.empty();
-		for (int i = 0; i < Math.min(NAMED, clashes.size()); i++) {
-			message.append(i == 0 ? Component.empty() : Component.literal(" ")).append(clashes.get(i));
-		}
-		if (clashes.size() > NAMED) {
-			message.append(Component.literal(" ")).append(Component.translatable("message.jaymoskingdoms.key_clash.more", clashes.size() - NAMED));
-		}
-		message.append(Component.literal(" ")).append(Component.translatable("message.jaymoskingdoms.key_clash.how"));
-		SystemToast.addOrUpdate(minecraft.gui.toastManager(), TOAST, Component.translatable("message.jaymoskingdoms.key_clash.title"), message);
+		SystemToast.addOrUpdate(minecraft.gui.toastManager(), TOAST,
+			Component.translatable("message.jaymoskingdoms.key_clash.title", pressed.getTranslatedKeyMessage()),
+			Component.translatable("message.jaymoskingdoms.key_clash.bound", names)
+				.append(Component.literal(" ")).append(Component.translatable("message.jaymoskingdoms.key_clash.how")));
+		shown.put(key, times + 1);
+		StringBuilder text = new StringBuilder("# Jaymo's Kingdoms: how many times each key's clash pop-up has shown (it stops at "
+			+ TIMES + "). Delete this file to see them again.\n");
+		shown.forEach((k, n) -> text.append(k).append('=').append(n).append('\n'));
 		try {
-			Files.writeString(file, (shown + 1) + "\n# Jaymo's Kingdoms: how many times the key clash pop-up has shown (it stops at " + TIMES
-				+ "). Delete this file to see it again.\n");
+			Files.writeString(file, text);
 		} catch (IOException e) {
 			JaymosKingdoms.LOGGER.warn("Couldn't write {}", file, e);
 		}
+	}
+
+	/** Whether any two of the bindings on one key clash (not a pair of ours that share it on purpose). */
+	private static boolean clashes(List<KeyMapping> onKey) {
+		for (int i = 0; i < onKey.size(); i++) {
+			for (int j = i + 1; j < onKey.size(); j++) {
+				KeyMapping a = onKey.get(i);
+				KeyMapping b = onKey.get(j);
+				if (!(a.isDefault() && b.isDefault() && ON_PURPOSE.contains(pair(a.getName(), b.getName())))) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	private static String pair(String a, String b) {
 		return a.compareTo(b) < 0 ? a + "|" + b : b + "|" + a;
 	}
 
-	private static int shown(Path file) {
+	/** Each key's count from the file; the old single-count file reads as none. */
+	private static Map<String, Integer> shown(Path file) {
+		Map<String, Integer> shown = new LinkedHashMap<>();
 		try {
-			return Files.exists(file) ? Integer.parseInt(Files.readAllLines(file).get(0).trim()) : 0;
+			if (Files.exists(file)) {
+				for (String line : Files.readAllLines(file)) {
+					int eq = line.indexOf('=');
+					if (eq > 0 && !line.startsWith("#")) {
+						shown.put(line.substring(0, eq).trim(), Integer.parseInt(line.substring(eq + 1).trim()));
+					}
+				}
+			}
 		} catch (IOException | RuntimeException e) {
-			return 0;
+			JaymosKingdoms.LOGGER.warn("Couldn't read {}", file, e);
 		}
+		return shown;
 	}
 }
