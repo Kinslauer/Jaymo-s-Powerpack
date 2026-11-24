@@ -1734,6 +1734,8 @@ hundred years. All the others (Ambrose, Thessaly, Varro and the Quiet One) were 
   horse goes glossy black, needs no saddle, leaps like a deer and lands from any height, and the symbiote eats for two
   while it holds it.
 
+  **Its own face** (Claude's placement, Andy's head pick for the big suit, 2026-11-24; for Andy to approve) (new). A symbiote has no shape of its own beyond the plain suit, except one. When the big suit is up, the head it raises over its host's is not a host's face drawn tight. It is the face the black symbiote wore in its own world, long before any host: a heavy brow over a long muzzle, a white eye slanted down each side, and a jaw hinged wide, set with rows of fangs that never draw back into the gums, a green thread of spit hanging from the chin. The goo raises it last of all, after the arms and the legs, and draws it in first. The tongue is the same long red tongue it always had. The anti and the red strain wear the same face in their own colours. The plain suit never grows it: it only ever shows the host's own.
+
 **Mana spirits in the world.** A spirit fights beside you as arms of aura. Yours wakes on a brush with death
 (about one in eighteen), and its waking leaves you sick for days. It can be released at a cost, and no new one comes.
 Attuned folk (court wizards, hermits) have spirits you can see and fight.

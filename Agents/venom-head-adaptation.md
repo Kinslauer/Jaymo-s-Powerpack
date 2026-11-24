@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: Venom head only, adapted to our existing symbiote (child of codex-reference-dinos-venom)
 branch: t3/venom-head-adaptation
 with: codex-reference-dinos-venom (parent), dinosaur track (separate)
-pr:
+pr: 2080
 mods: powers
 versions:
 started: 2026-11-24
@@ -38,4 +38,5 @@ That lifts the "nothing copied from any other mod" line the older symbiote tools
 - Lore placement is a `(new)` paragraph in Lore.md for Andy to approve.
 
 ## Done
-(filled in when finished)
+PR #2080. The big suit (WebHulk) now wears the recovered head (head + jaw + fang parts, 76 cubes, 6x texture, white/red twins, eye glow); body, plain suit and Consume's maw unchanged; tongue is ours, re-anchored. Fangs now always show (as in the original). Comparison picture: `E:/Jaymo Vault Live/Assets/bighead-preview.png` (source | old | new head, front/side, jaw closed/open, plus the new head on the big body; made by tools/preview_bighead.py from the generated Java).
+Not checked: a build (CI only: PC runs only the game), any game run (glow, head pose while crawling/climbing/executions, SCALE/OFFSET constants). Lore.md has a `(new)` paragraph "Its own face" for Andy to approve.
