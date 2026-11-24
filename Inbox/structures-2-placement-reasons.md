@@ -19,3 +19,6 @@ Build 2 placement tracks at a time; tracks 1 and 2 first.
 **Andy's words:** farms "should spawn near villages or the single homes, they are farms and provide food somewhere, remember the generation needs a reason."
 
 Build the placement-rule layer from the plan's section 3 tables: farms near villages or single homes; mines on ore and near a buyer; stables on roads near towns; watchtowers on realm borders; bandit camps by trade roads (no bandit camp structure exists yet); ruins tied to a nearby village that inherits them. Use the HarshLands heatmap and realm wealth/relations as inputs.
+
+## Notes
+- 2026-11-24 17:59 2026-11-24 Andy: "finish here": cloud Claude finishes this in thread cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR; bots leave it.
