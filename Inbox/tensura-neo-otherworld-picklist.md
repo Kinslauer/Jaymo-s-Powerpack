@@ -1,11 +1,11 @@
 ---
-status: open
+status: sent
 for: any
 from: coordinator
 asked: 2026-11-24
 thread: Hermes Training (cloud vault coordinator)
-claimed_by: 
-pr: 
+claimed_by: cloud thread Build Reference Mods pick list
+pr: none
 suggested_owns: []
 ---
 # Tensura Neo Otherworld pick list
