@@ -1,9 +1,9 @@
 ---
-status: done
+status: in-review
 task: gear-talk-draft
 branch: claude/project-thread-spowdq
 with: cloud Claude (Reason Art project thread)
-pr: 
+pr: 2074
 mods: kingdoms (planned)
 versions: 
 started: 2026-11-24
@@ -22,4 +22,4 @@ owns:
 - Engine: TalkBook gates + new GearTags, first-sight bubbles via Speech, once per tag via Recollections.
 
 ## Done
-Draft only; nothing built or tested. Waiting on Andy's 7 answers.
+Andy picked 2026-11-24. Step 1 (Frostborn work + limbs) in PR #2074: compiled, not played. Steps 2-5 next.
