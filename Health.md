@@ -7,7 +7,6 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 
 ## Statuses the pipeline doesn't know
 
-- [[Inbox/refmods-01-felling|refmods-01-felling]]: `status: in-progress` (known: blocked, changes, claimed, done, in-review, open, ready, sent, writing)
 - [[Agents/corpse-limbs-drag-arm-digger-pits|corpse-limbs-drag-arm-digger-pits]]: `status: stopped` (known: blocked, done, in-review, merged, ready, running, sent, stalled)
 
 ## Stalled agent notes

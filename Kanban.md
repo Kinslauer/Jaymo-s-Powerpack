@@ -40,6 +40,7 @@ kanban-plugin: board
 - [ ] [[Inbox/refmods-06-horses|refmods-06-horses]] · for any · open
 - [ ] [[Inbox/vanilla-plus-a-incendium-castle-start|vanilla-plus-a-incendium-castle-start]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-b-stellarity-end-enderscape-band|vanilla-plus-b-stellarity-end-enderscape-band]] · for 💻 Odysseus · open
+- [ ] [[Inbox/vanilla-plus-c-back-slot|vanilla-plus-c-back-slot]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-d-horse-expert-skill|vanilla-plus-d-horse-expert-skill]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-e-soul-reaping-spawners|vanilla-plus-e-soul-reaping-spawners]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-f-delight-dishes|vanilla-plus-f-delight-dishes]] · for 💻 Odysseus · open
@@ -61,6 +62,7 @@ kanban-plugin: board
 - [ ] [[Inbox/refmods-12-fishing|refmods-12-fishing]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/refmods-14-sky-light-air|refmods-14-sky-light-air]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/refmods-15-provenance-coins|refmods-15-provenance-coins]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/structures-2-placement-reasons|structures-2-placement-reasons]] · ☁️ Cloud · #2085 · claimed
 - [ ] [[Agents/implement-verdant-dinosaurs|implement-verdant-dinosaurs]] · 💻 Odysseus · running
 

@@ -1,11 +1,11 @@
 ---
-status: in-progress
+status: in-review
 for: claude-cloud
 from: coordinator
 asked: 2026-11-24
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XW84yJWoLAAvdc9WzrgnCHQL
 claimed_by: claude-cloud
-pr: 
+pr: 2089
 suggested_owns: []
 ---
 # Reference Mods Patch 1: Felling: cut through the trunk, carved stump, collapse

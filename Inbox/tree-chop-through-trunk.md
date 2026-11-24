@@ -28,3 +28,4 @@ then it leaves a carved stump."
   replaces the current rule cleanly and doesn't fight another mod's tree capitator.
 - Cheap on the Deck server: the connectivity check runs only when a cut finishes a ring, not every tick.
 - 2026-11-24 17:12 Folded into Inbox/refmods-01-felling.md (Reference Mods patch plan, 2026-11-24).
+- 2026-11-24 18:46 Covered by PR #2089 (refmods-01 felling, rows T1/T2).
