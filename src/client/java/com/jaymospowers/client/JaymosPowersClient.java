@@ -142,6 +142,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.tundra.SnowMote.register();
 		com.jaymospowers.client.tundra.TundraGrass.register();
 		com.jaymospowers.client.combat.ShieldBangClient.init();
+		com.jaymospowers.client.body.BodyClient.init();
 		com.jaymospowers.client.combat.ShoveClient.init();
 		com.jaymospowers.client.combat.NetheriteShieldRenderer.init(); // (medieval picks) the netherite shield and its trims
 		com.jaymospowers.client.collide.CollisionsClient.init();

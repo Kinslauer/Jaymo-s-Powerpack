@@ -33,6 +33,7 @@ public final class ModelPoses {
 
 	public static void apply(Model<?> model, Object state) {
 		BodyMotion.applyModel(model, state);
+		com.jaymospowers.client.body.BodyAnim.applyModel(model, state);
 		CrawlPose.applyModel(model, state);
 		LedgePose.applyModel(model, state);
 		MountClimbPose.applyModel(model, state);
