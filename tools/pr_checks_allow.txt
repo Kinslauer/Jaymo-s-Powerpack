@@ -6,3 +6,4 @@ kitchen/src/main/resources/assets/jaymoskitchen/items/clean_water.json  # shared
 kitchen/src/main/resources/assets/jaymoskitchen/items/blood_bottle.json  # shared a model before the check existed (2026-11-07)
 kitchen/src/main/resources/assets/jaymoskitchen/items/press.json  # shared a model before the check existed (2026-11-07)
 kitchen/src/main/resources/assets/jaymoskitchen/items/horse_press.json  # shared a model before the check existed (2026-11-07)
+kingdoms/src/main/resources/assets/jaymoskingdoms/items/letter_of_credit.json  # a letter of credit is a sealed letter: same look on purpose (realm banks, 2026-11-24)
