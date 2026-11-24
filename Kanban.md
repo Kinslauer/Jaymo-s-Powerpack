@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 23:49). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 23:54). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -34,18 +34,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/refmods-02-druid-wild-shape|refmods-02-druid-wild-shape]] · for any · #2120 · in-review
-- [ ] [[Inbox/refmods-03-scouter|refmods-03-scouter]] · for any · #2120 · in-review
-- [ ] [[Inbox/refmods-04-umbrellas-take-cover|refmods-04-umbrellas-take-cover]] · for any · #2120 · in-review
-- [ ] [[Inbox/refmods-05-hoverboard|refmods-05-hoverboard]] · for any · #2120 · in-review
-- [ ] [[Inbox/refmods-06-horses|refmods-06-horses]] · for any · #2120 · in-review
-- [ ] [[Inbox/refmods-07-mocreatures-beasts|refmods-07-mocreatures-beasts]] · for any · #2120 · in-review
-- [ ] [[Inbox/refmods-08-vampire-villager|refmods-08-vampire-villager]] · for any · #2120 · in-review
-- [ ] [[Inbox/refmods-09-village-styles|refmods-09-village-styles]] · for any · #2120 · in-review
-- [ ] [[Inbox/refmods-10-outlying-buildings-camps|refmods-10-outlying-buildings-camps]] · for any · #2120 · in-review
-- [ ] [[Inbox/refmods-11-tectonic-terrain|refmods-11-tectonic-terrain]] · for any · #2120 · in-review
-- [ ] [[Inbox/refmods-13-body-anim-stations|refmods-13-body-anim-stations]] · for any · #2120 · in-review
-- [ ] [[Inbox/refmods-16-titles-bloods-tensura|refmods-16-titles-bloods-tensura]] · for any · #2120 · in-review
 
 
 ## Needs Andy
@@ -58,14 +46,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/blood-awakening-passive-upgrade|blood-awakening-passive-upgrade]]
-- [x] [[Inbox/Done/alexs-caves-integration|alexs-caves-integration]]
-- [x] [[Inbox/Done/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]]
-- [x] [[Inbox/Done/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]]
-- [x] [[Inbox/Done/vanilla-plus-i-settlement-roads|vanilla-plus-i-settlement-roads]]
-- [x] [[Inbox/Done/vanilla-plus-h-advancement-tracker|vanilla-plus-h-advancement-tracker]]
-- [x] [[Inbox/Done/vanilla-plus-g-illager-invasion|vanilla-plus-g-illager-invasion]]
-- [x] [[Inbox/Done/vanilla-plus-f-delight-dishes|vanilla-plus-f-delight-dishes]]
+- [x] [[Inbox/Done/refmods-16-titles-bloods-tensura|refmods-16-titles-bloods-tensura]]
+- [x] [[Inbox/Done/refmods-13-body-anim-stations|refmods-13-body-anim-stations]]
+- [x] [[Inbox/Done/refmods-11-tectonic-terrain|refmods-11-tectonic-terrain]]
+- [x] [[Inbox/Done/refmods-10-outlying-buildings-camps|refmods-10-outlying-buildings-camps]]
+- [x] [[Inbox/Done/refmods-09-village-styles|refmods-09-village-styles]]
+- [x] [[Inbox/Done/refmods-08-vampire-villager|refmods-08-vampire-villager]]
+- [x] [[Inbox/Done/refmods-07-mocreatures-beasts|refmods-07-mocreatures-beasts]]
+- [x] [[Inbox/Done/refmods-06-horses|refmods-06-horses]]
 
 
 %% kanban:settings
