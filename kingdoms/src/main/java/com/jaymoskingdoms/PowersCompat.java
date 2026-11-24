@@ -118,6 +118,35 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code SpawnCalm.calm(ServerPlayer)}. */
+	private static java.lang.invoke.@Nullable MethodHandle spawnCalm;
+	private static boolean lookedForSpawnCalm;
+
+	/**
+	 * Andy (2026-11-23): "all the starts have a problem right now where you can spawn under attack". {@code player} has just
+	 * been put down at a story start: Jaymo's Powers makes them no enemy to mobs until they move. Nothing without Powers.
+	 */
+	public static void spawnCalm(net.minecraft.server.level.ServerPlayer player) {
+		if (!lookedForSpawnCalm) {
+			lookedForSpawnCalm = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					spawnCalm = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wounds.SpawnCalm"), "calm",
+						java.lang.invoke.MethodType.methodType(void.class, net.minecraft.server.level.ServerPlayer.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' SpawnCalm (older Powers?)", e);
+				}
+			}
+		}
+		if (spawnCalm != null) {
+			try {
+				spawnCalm.invoke(player);
+			} catch (Throwable e) {
+				// (a start without it: as before)
+			}
+		}
+	}
+
 	/** Powers' {@code GunBlast.weaponModFired(LivingEntity, ItemStack)}. */
 	private static java.lang.invoke.@Nullable MethodHandle gunFired;
 	private static boolean lookedForGunFired;
@@ -445,6 +474,36 @@ public final class PowersCompat {
 		}
 		try {
 			return (boolean)beheadPinned.invoke(target, by, wall, yaw);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** Powers' {@code SeveredPart.takeHead(LivingEntity, UUID, double)}. */
+	private static java.lang.invoke.@Nullable MethodHandle takeHead;
+	private static boolean lookedForTakeHead;
+
+	/**
+	 * {@code taker} picks up player {@code owner}'s own severed head lying loose within {@code reach} (it's gone from the
+	 * ground). False if there's none, or without Powers.
+	 */
+	public static boolean takeHead(LivingEntity taker, java.util.UUID owner, double reach) {
+		if (!lookedForTakeHead) {
+			lookedForTakeHead = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					takeHead = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.SeveredPart"), "takeHead",
+						java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class, java.util.UUID.class, double.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' severed heads", e);
+				}
+			}
+		}
+		if (takeHead == null) {
+			return false;
+		}
+		try {
+			return (boolean)takeHead.invoke(taker, owner, reach);
 		} catch (Throwable e) {
 			return false;
 		}
@@ -2145,6 +2204,37 @@ public final class PowersCompat {
 		}
 		try {
 			return (boolean)regrow.invoke(body, all);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** Powers' {@code Mortality.dead(Player)}. */
+	private static java.lang.invoke.@Nullable MethodHandle dead;
+	private static boolean lookedForDead;
+
+	/**
+	 * Whether {@code player} is dead by Jaymo's Powers' reckoning though the game counts them alive: left for dead (in
+	 * their body or out of it as a ghost) or waiting in Limbo. Nothing living mends or grows back on them then. False
+	 * without Powers.
+	 */
+	public static boolean dead(Player player) {
+		if (!lookedForDead) {
+			lookedForDead = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					dead = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.wounds.Mortality"), "dead",
+						java.lang.invoke.MethodType.methodType(boolean.class, Player.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Mortality.dead (older Powers?)", e);
+				}
+			}
+		}
+		if (dead == null) {
+			return false;
+		}
+		try {
+			return (boolean)dead.invoke(player);
 		} catch (Throwable e) {
 			return false;
 		}

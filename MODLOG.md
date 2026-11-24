@@ -6943,3 +6943,684 @@ Andy (2026-11-19), of a faint's black: "a screen like this where you go unconsci
 - First-time tip card (top right) the first time you stand behind someone you could take.
 - Classes: `core/finisher/Finishers` (stealthKind, stealthKillable, stealthHold, the hold), `client/finisher/FinisherClient` (the held-back tap), `FinisherPose` (the three moves), `client/hud/BodyTips`, `client/wounds/ExecutionReact`.
 - Built; not played.
+
+## 0.26.23 (2026-11-21): hints as tip cards - text hints show top right instead of over the hotbar (#1951)
+
+- Andy (2026-11-20): "All hints in text should be reworked as tooltips in the new menu, top right. Hints like, you must kneel to revive, or skill not unlocked".
+- **Hint cards** (`client.hud.HintCards`): an action-bar line that is a hint (how to do something, what it needs first, a skill, perk or ability not learned yet) now comes up as a tip card in the top right, titled Hint, and is kept on the menu's Notices page like the other cards. 315 lines across Powers, Kingdoms and Kitchen are hints, listed by key in `assets/jaymospowers/hint_keys.txt`; every other line (what just happened, counts, cooldowns, gauges, callouts like "Sneak attack!") stays on the bar.
+- A hint sent again and again (each tick of a hold, each try) makes one card, and the same hint isn't carded again for 30 seconds.
+- Lines built from a key at run time (about 250 of them) and chat messages aren't covered yet.
+- Built; not played.
+
+## 0.26.24 (2026-11-22): a sword never bursts a body (#1974)
+
+- A blow from a sword or an axe cuts: it's never a crushing blow, however hard it lands, so it can't burst a body (downed or standing) the way a slam does. (`BlastGore.crushing`)
+- Built; not played.
+
+## 0.26.25 (2026-11-22): VillagersPlus' miner's house rarer in villages (#1973)
+
+- **Fewer mine heads in villages** (Andy, Morwick: "how does it justify having this many mines?"; he chose "just make them rarer"): VillagersPlus put its miner's house in plains, taiga and savanna villages at a weight of 25, so it was the likeliest house in every slot and big towns came out with a row of six to eight. Once per install its weight is set to 4 in `config/villagersplus/villagersplus-4.0-config.json5`, about a common vanilla house; its other job houses keep theirs. Only villages generated afterwards change. The server's file is the one that counts. Delete `config/jaymospowers-villagersplus-preset-v1` to apply it again. (`VillagersPlusPreset`)
+- Built; not played.
+
+## 0.26.27 (2026-11-22): the roll stays on the ground, the Sit key prone, a real struggle up the wall (#1975)
+
+- **Dodge roll**: the body no longer goes into the ground when it turns over: it turns round the middle of the tucked body and only drops as far as keeps it on the ground at each point of the turn. The legs stay on the hips as the back rounds, so leggings and chestplate no longer cut through each other; the knees fold to the chest and the elbows round the shins, arms outside the legs. (`DodgeRollPose`)
+- **Sit key while prone**: lying prone (not downed), the Sit key only sits you up against a wall beside you, with the downed wall-sit animation, and pressed again lays you back down; with no wall it does nothing. Crawling off or standing up takes you off the wall. (`Sitting`, `DownedLie.proneSitKey`, `WallSit`)
+- **Getting up the wall while downed**: no longer the slide down played backwards. You draw your feet in and put your hands down on the floor beside your hips, push off the floor hunched over your knees until you're crouched with your back on the wall, then one hand goes onto its knee and the other flat on the wall to push your legs straight, and you come upright with your head last. It goes in heaves, slipping back a little between them. A broken arm hangs and the other does the work. (`WallSit`, `WallSitArms.rise`, `CrawlPose`)
+- Built; poses checked in still renders, not played.
+
+## 0.26.28 (2026-11-22): dive into water with the Dodge key (#1975)
+
+- **Dive on Alt**: standing at an edge with deep water ahead and below (up to 2.5 blocks out and 14 down), the Dodge key (Alt) dives you straight off it head first, with no hop first. Falling over deep water, it turns the fall into a head-first dive. Either way you go in as a clean dive (the small neat splash, slipping deeper, no sting) from any height. Sneak no longer makes a dive: Sneak held as you hit the water is the cannonball. Looking steeply down (or Leap of Faith) still goes in head first. (`Dives`, `DodgeClient`)
+- **Everyone sees it**: in the air the body turns head first along the way it's going, arms over the head, and comes back upright as it goes under. The water-entry body turns (the clean dive's head-first tilt, the belly flop laid flat, the cannonball tucked forward) were never drawn before; they are now. (`DivePose`, `FreefallPose`)
+- Built; not played.
+
+## 0.26.29 (2026-11-22): Freerun animations: the ledge climb keyed with elbows and knees, climbing down walls, vaults by speed and height, a pole climb, and bending limbs through the moves (#1959)
+
+- **Climbing up over a ledge** is a keyed animation: a pull-up with the elbows bending (the hands stay up at the edge as the chest comes to it), the elbows coming over the edge into a straight-armed press, the right foot stepping up onto the edge and the left knee after it, then up to stand. The lean in over the edge is as before.
+- **Hanging** keeps its catch, sway and dangle, and now the elbows give and straighten in turn as each arm takes the weight, and the knees hang loose by turns. **Shimmying** bends the elbow of the hand coming off the edge while the holding arm stays nearly straight.
+- The clips are GeckoLib/Blockbench animation files written by `tools/gen_freerun_clips.py` (elbow and knee folds are new channels in them); `tools/freerun_clip_preview.py` draws any clip frame by frame. Unused clips from the first draft (cling, climb down) are gone until their moves are done. (`LedgePose`, `KeyframeClip`)
+- **Climbing down**: clinging to a wall, hold Back to climb down hand under hand, as fast as you climb up (the climb's hands and feet play backward). Hanging from a ledge, hold Back (past the castaway's moment) and you go down onto the wall below and climb on down it, where there's a wall to cling to; with none, you let go as before. With Climber, sneaking off a roof edge already turns you round to hang from it, so a roof can be climbed down all the way. The move hints show it. (`FreerunClient`, `LedgeClient`, `Freerun.climbsDownFrom`, `MoveHints`)
+- **Vaults chosen by how you take them** (no longer at random): at an angle (25 degrees or more off square), the lazy vault, side-on over one hand; anything over a block high, the kong, diving over on both hands; low at a fast run, the monkey flip; low at a sprint, the thief vault, the lead leg kicked over. A web slinger's vaults stay random. (`Freerun.vaultStyle`)
+- **Vault elbows and knees**: the kong's elbows give as the hands land and the shins fold under the tucked knees; the lazy vault's trailing leg bends as it follows over; the monkey flip balls up tight; the thief's trailing knee draws up behind the straight lead leg. (`WebParkourPose`)
+- **Pole climb** has its own look (it used to be drawn as climbing a flat wall, hands wide): arms wrapped round the pole in front, legs pinching it, climbing like an inchworm, both hands reaching up together while the legs grip, then the legs drawing up while the hands hold. (`WebParkourPose`, `Freerun.POLE_LOOK`)
+- **Elbows and knees** now bend in the wall kick (legs driving straight off the wall, then tucking as you fly), the bar swing (soft elbows, more on the hand coming off the bar; the knees whip bent on the back swing) and balancing on a narrow top (soft knees, more on the side you sway over). Wall runs already bent theirs. (`WebParkourPose`, `BarHangPose`, `BalancePose`)
+- **Running**: every player's trailing knee now folds the shin up behind them as the leg swings back, more the faster they run (elbows stay straight, so a held item stays in the hand). **Slides** bend their knees (the tucked leg in the freerun slide; the baseball slide's cocked leg, the knee slide kneeling on the shins, the hip slide's stacked legs). The **long jump** tucks its knees in flight and reaches out for the far side, the **safety tap** lands on bent knees, and the **sky dive** arches with soft knees and elbows. (`RunPose`, `RunMovesPose`, `WebParkourPose`)
+- Built; poses checked in still renders, not played.
+
+## 0.26.30 (2026-11-22): Fish spawn where you can see them (#1984)
+
+- **Fresh and sea fish, crabs and other critters only spawn in water the sky reaches** (rivers, lakes, the sea's upper layers and shallows), never in underground aquifers. A natural spawn picks its height anywhere from the world's bottom up, so river and lake species were mostly spawning in flooded caves under the land, where no one saw them, and filling each player's fish cap: the sea looked empty.
+- **Cave pool fish (cavefish, olm) are underground water creatures now**, as the glow squid is, so they have their own small cap and no longer take the fish places of the sea and rivers. (`FishSpecies`)
+- Built on CI; not played.
+
+## 0.26.31 (2026-11-22): Z Fighter gaps 1: stats (#1958)
+
+- **Strike stat**: a sixth stat (Strike) for rushes, grab slams and the hold-combo finisher, bought like the other five; Strength stays for plain punches.
+- **Critical blows**: late TP buys for crit chance (2% a level, up to 20%) and crit damage (1.5x base, +0.5 per level); a crit deals a much heavier blow and announces it.
+- Built; not played in game.
+
+## 0.26.32 (2026-11-22): Z Fighter gaps 2: stamina for dash, guard and forms (#1938)
+
+- **Stamina**: Flash Step, raising your guard, and going into a form or Limit Break now cost stamina - the pack's stamina row. At zero they can't be used until it regrows; meditation and rest refill it.
+- Built; not played in game.
+
+## 0.26.33 (2026-11-22): zfighter gaps 3: techniques (#1939)
+
+- **Ki Shell** (passive): a trained technique that soaks part of every ki blow when not guarding. Learned at the training screen, always on while known.
+- **Twin Discs** (charged, V): throws two Ki Discs at once in a spread, cutting through foes and blocks.
+- **Ring Beam** (charged, V): fires a spinning ring of ki that cuts a line through everything in its path.
+- **Sword Technique** (quick, G): requires a sword or spear; a rapid blade flurry ending in a ki burst.
+- **Purging Beam** (charged, V): a needle-thin beam that deals heavy damage to corrupted, dark, and nightmare entities, and cleanses their harmful effects. Taught by Galactic Patrolmen.
+- **Sticky Bind** (quick, G): throws a rubber-folk wad that sticks a foe in place; they must mash jump/sneak to tear free.
+- **Rift Fist** (quick, G): Divine-born punch into a small rift behind a target, striking from behind.
+- **Rift Step** (sneak+G): Divine-born step through a rift over a short gap, bypassing obstacles.
+- **Ki-Drinking Barrier** (quick, G): Android-only barrier that absorbs incoming ki projectiles and converts them to ki.
+- **Ki Cell** (item): a Tinkerer craft that restores a chunk of ki when consumed.
+
+Built; not played.
+
+## 0.26.34 (2026-11-22): NPCs obey limb damage: arms gate their powers, bad legs put them on the ground (#1987)
+
+Andy (2026-11-22): "NPCs should have all the same capabilities as the player ... limb damage/effects".
+- **Arms gate powers.** A gifted villager's strike (at range) and close blows are done with the main arm (`GiftedAI`, from the move's kind): with it gone the move is never picked; with it broken the move can be thrown wide (`LimbUse.wide`: the player's `AIM_SPREAD` error, a miss past `NPC_HIT_CONE`), spending the move and its cooldown with a whiff swing but no strain on the power. Brawl fighters (tyrants, patrolmen, Z Fighter rogues) with both arms gone raise no guard and fire no ki; a broken arm sometimes throws a ki attack away; the post-parry counter needs the main arm and goes wide the same way. Not covered: ultimates, fleeing and support moves.
+- **Crawling on bad legs.** A humanoid mob with both legs broken (not splinted, not on adrenaline), or a leg gone and no cane or crutch in hand (`Crutches.legless`, now for humanoid mobs too), is drawn crawling as a downed crawler is (`DownedPose.legless`), and stands again when the legs knit or a crutch is held. The drawing and `Breaks.crawlOnly` change; the mob's hitbox stays standing height, as for the existing legless-mob crawl.
+- Built by CI; not played.
+
+## 0.26.35 (2026-11-22): Z Fighter gaps 4: forms (foundation) (#1965)
+
+- Foundation for four heritage form lines: earthling (bulk, full power, overdrive), rubber-folk (stretch, giant), divine-born (light, dark) and bio-built (super perfect, xeno), plus a corrupted step — new form ids 11-20 and their stat arrays.
+- ZFighterForms: the new lines' constants, tiers, colours and Spirit Bomb handling.
+- Nothing the player can use yet: form effects, attribute hooks and lang keys are not implemented.
+- Built; not played in game.
+
+## 0.26.36 (2026-11-22): NPCs climb two-block walls and fences, as players do (#1988)
+
+- Andy: "NPCs should have all the same capabilities as the player, meaning they should be able to climb up one and two block heights". Every mob built like a person (MCA villagers, guards, illagers, zombies, skeletons, piglins and the rest of the humanoid body plan) now plans its way up edges two blocks high and over fences and walls, and pulls itself up a wall too high to jump: up its own side of the wall and over onto the top in the player's ledge-climb time, with the wall's own sound. One-block steps are still a plain jump. A 2-high wall no longer keeps zombies out of a base; a 3-high one does.
+- Limbs: broken or lost arms and legs don't stop the climb, as they don't stop a player (Andy: "players and NPCs should be able to struggle up like before"). Being downed or being a baby does.
+- Everyone sees it: squared to the wall, leaning in over the edge, and on a body built like a player's (villagers, zombies, skeletons, piglins) the player's own mantle clip on the arms and legs. Illagers only lean in (their arms are one crossed piece).
+- Classes: `freerun.moves.NpcClimb`, `WalkNodeClimbMixin`, `MoveControlClimbMixin`, client `NpcClimbPose`, `NpcClimbRendererMixin`.
+- Built by CI only; not played. Not checked in game: how often mobs now take wall routes, MCA villagers' own model taking the pose, and how Kingdoms' horde climbing (zombies over each other) looks next to this pull-up.
+
+## 0.26.37 (2026-11-22): zfighter gaps 5: training drills, grades, pod pilot, shadow dummy (#1953)
+
+## Drill unlocks & mentor bonus
+- Drills beyond Rhythm (Ki Control, Shadow Boxing, Precision, Memory, Pod Pilot) must be unlocked by completing them near a master (good or dark). Rhythm stays open.
+- Training near a master grants a 50% TP bonus (mentor bonus).
+- Each drill run earns a grade (S/A/B/C/D) based on score: S≥90, A≥75, B≥60, C≥40, D<40.
+
+## Challenge mode
+- Challenge mode strings drills together and restarts on a miss. Pays 50% more TP.
+
+## Pod Pilot drill
+- New 6th drill: fly a pod through gaps in rock pillars while gravity pulls it down. Tap Space to boost up.
+
+## Shadow dummy stat share
+- When placing a Sparring Dummy, the player's chosen shadow share (0-75%, via `zfighter_shadow_share` attachment) determines how much Strength the dummy gets and how much the player loses while it lives.
+- Dummy damage is multiplied by (1 + share). Player's Strength reduction is tracked and restored when the bout ends.
+
+## Lang
+- Added translations for Pod Pilot, drill unlocked, challenge complete, pod crashed.
+
+## Not tested in game
+- Client-side Pod Pilot drill rendering and input handling.
+- Drill unlock progression near masters.
+- Mentor TP bonus and grade display.
+- Challenge mode flow.
+- Shadow dummy stat share damage multiplier and strength reduction/restoration.
+
+Modified: ZFighterDrills.java, ZFighterSparring.java, ZFighterDrillScreen.java, zfighter.json
+
+## 0.26.38 (2026-11-22): Z Fighter gaps 6: items and wishes (#1955)
+
+## Items
+- **Medi-Bug**: A tiny living critter (mouse) found in the wild. Pick it up and eat it whole to heal fully, fill hunger, clear ailments, and restore a Z Fighter's ki. Also gives a herb boost (ki regen, cleared cooldowns, stamina, mastery boost, calm mind).
+- **Medi-Bug Pair**: Two Medi-Bugs used to fuse two fighters.
+- **Radar Parts**: Three fragments (Part 1, 2, 3) found in the world. When all three are held, using the Wish Radar assembles them into a complete radar. One radar per world's set.
+- **Verdant World Orbs**: A second set of seven orbs (One-Star through Seven-Star Verdant Orbs) found in the Verdant World. When gathered at night in the Verdant World, the Verdant Dragon rises and grants wishes from its own menu.
+
+## Herb Boosts
+- Eating a Hermit Bean or Medi-Bug now applies a "fighter's herb boost": 60 seconds of ki regeneration, all ability cooldowns cleared, ki filled to max, +5% mastery for current form, and resistance effect.
+
+## Wishes (6 new)
+- **Reset Story**: Resets your Kingdoms life story (requires Kingdoms). You recreate your character with all unlocked starts available.
+- **Revive Friends**: Brings back up to three fallen friends (players who died in the last hour) to your side with their items.
+- **Armor Set**: Grants a full set of Heavenly Mantle armor (Kingdoms).
+- **Fighter Weapon**: Grants a powerful ki-infused weapon (falls back to named netherite sword if custom item not found).
+- **Pod**: Grants a space pod for travel (falls back to named ender chest if custom item not found).
+- **Materials**: Grants a large supply of crafting materials (16 netherite ingots, 32 diamonds, 64 gold, 64 iron, 64 redstone, 16 amethyst shards).
+
+## Other
+- Wish Radar now auto-assembles from parts when used.
+- Updated wish screen with new wish entries and descriptions.
+
+## 0.26.39 (2026-11-22): Z Fighter gaps 7: the Keeper's trial, a set-piece boss on the Lookout (#1986)
+
+- **The Keeper's trial**: with the Keeper's blessing today, ask him for the trial and the Chamber-Worn, his old pupil, steps out of the Time Chamber door onto the Lookout. One trial at a time; each fighter can ask once a day. He is tougher for every fighter up there when he comes out.
+- **Phases**: he fights as a tyrant in Super; at half health he goes Super 2, and from then on every so often he rises and gathers a great wave (light pours up round him, a rising hum, a warning on screen). Meet it with your own beam to lock into a power clash, or get clear.
+- **Weak point**: after the wave he's spent for 5 seconds, hanging still with a mark of light on his back. Hits from behind do 2.5 times as much, hits from the front 1.25 times.
+- **Shared revives**: friends can bring each fighter round 3 times in the trial. Downed after that, the Keeper pulls you through the Chamber door, out of the fight.
+- **Prize**: 3000 TP shared by how much each fighter hurt him (silver and experience for one without ki); the top fighter's share is a quarter more, and they're named to everyone. With nobody left on the Lookout for 30 seconds he goes back through the door.
+- Classes: new ZFighterLookoutBoss; hooks in ZFighterRogue (holds and damage taken), ZFighterRaids (payout, init) and ZFighterSites (the Keeper's talk).
+- Built; not played in game.
+
+## 0.26.40 (2026-11-22): Z Fighter gaps 8: four themed raids (#1961)
+
+Four new raids:
+
+- **Crashed pod raid**: A warrior-born pod crashes near a kingdom; its pilot calls for reinforcements. Under the full moon, reinforcements have a chance to turn ape.
+- **Razed Verdant village**: A Verdant settlement burned by a tyrant's soldiers; the attackers remain and must be cleared.
+- **Demon army camp**: A camp in the demon realm (Nether); raising its alarm bell brings the demon army.
+- **Machine army and its bases**: In the future dimension, a base built from existing mechs and androids deploys a machine army.
+
+All raids use existing mobs — Rogue Fighters and vanilla mobs — no new original mobs added.
+
+## 0.26.41 (2026-11-22): Z Fighter gaps 9: borrowed time, spared masters' homes, themed tournaments (#1956)
+
+- **Borrowed time from the dead**: the fortune teller can lend you minutes among the living: 10 minutes for 24 silver or 400 TP, paid like a return. They burn down a minute at a time, twice as fast while you are in a form, and she tells you when they are up. The wish "Make borrowed time lasting" makes them last.
+- **Masters' homes are spared**: ki no longer breaks blocks in a master's home - a kingdom seat or a barbarian camp seat, out to 24 blocks - or inside a kept tournament ring. Mob griefing decides everywhere else, as before.
+- **Themed tournaments**: a tournament can open themed instead of plain - the tyrant's games (a tyrant takes a champion's place in the bracket, and the prize is double) or the fortune teller's five fighters (only five challengers may enter), beside the kingdom tournaments, last-one-standing and the tournament of the dead.
+- Built; not played in game.
+
+## 0.26.42 (2026-11-22): Z Fighter gaps 10: camera and HUD (#1937)
+
+- The F7 front camera can now be tuned: set its distance, height, side offset and smoothing in the client settings.
+- Z Fighter HUD options: hide the numbers, always show the HUD, HUD menu scale, and markers above party members when ki sense is on.
+- Ki sense can show how much damage a sensed foe has taken.
+- Flight has two modes: a faster travel mode and a nimble combat mode, with a lock to stop accidental switching.
+- Builds; not played in game yet.
+
+## 0.26.43 (2026-11-22): Z Fighter form models (#1960)
+
+Adds Blockbench sources and GeckoLib models for the four Z Fighter form
+lines defined in the forms requirements: the bulky Earthling full power /
+sun-gold overdrive silhouette, the towering Rubber-folk giant ladder top,
+the slender floating Divine-born with halo, and the insectoid Bio-built
+with back wings and curving tail. Each model has a distinct silhouette and
+a clean UV layout on a 128x128 texture.
+
+- art/zfighter/: editable Blockbench sources for all four forms
+- assets/jaymospowers/geckolib/models/entity/: compiled geo.json models
+- assets/jaymospowers/geckolib/animations/entity/: empty animation stubs (animation follows in a later task)
+- assets/jaymospowers/textures/entity/: placeholder colour sheets per form
+
+Built; not played. Textures are placeholders to be painted against these UVs in the texture task.
+
+## 0.26.44 (2026-11-22): Z Fighter form textures (#1963)
+
+Paints the four Z Fighter form models (PR #1960) with 128x128 textures in the
+pack's pixel-art style, replacing the placeholder colour sheets:
+
+- zfighter_form_earthling: bulky Earthling full-power silhouette — orange gi,
+  tan skin, dark hair, blue pants and boots
+- zfighter_form_rubberfolk: towering Rubber-folk giant — pink rubbery skin,
+  white gi and grey-blue pants
+- zfighter_form_divine: slender floating Divine-born — cream robes with a
+  purple sash, pale skin, and a gold halo
+- zfighter_form_bio: insectoid Bio-built — green chitin body with a cream face
+  patch, dark green limbs, translucent blue wings and a segmented tail
+
+- assets/jaymospowers/textures/entity/zfighter_form_*.png: painted textures
+  drawn against the form models' clean 128x128 UV layouts
+
+Built; not played. UVs line up on the form models from PR #1960 (verified with
+Blockbench UV renders); not tested in game — form entity wiring is a follow-up
+task.
+
+## 0.26.45 (2026-11-22): Z Fighter form animations (#1962)
+
+Adds GeckoLib animations for the four Z Fighter form models: idle, walk and
+attack for the bulky Earthling full power, the towering Rubber-folk giant, the
+slender floating Divine-born with halo, and the insectoid Bio-built with back
+wings and curving tail. Each animation targets its form's bones (legs, torso,
+head, arms, plus halo for Divine-born and wings/tail for Bio-built) with motion
+matched to the silhouette: heavy and grounded for the Earthling, slow and
+stretchy for the Rubber-folk giant, floating with a spinning halo for the
+Divine-born, and wing flutter with tail whips for the Bio-built.
+
+- assets/jaymospowers/geckolib/animations/entity/: zfighter_form_earthling,
+  zfighter_form_rubberfolk, zfighter_form_divine and zfighter_form_bio
+  animation files (idle, walk, attack in each)
+
+Built; not played. The forms reuse the player model/aura and are not yet wired
+to entities, so the animations are not tested in game (entity wiring is the
+following integration task).
+
+## 0.26.46 (2026-11-22): Z Fighter gaps 2, part 2: holding back, Limit Break 4-6, fighting styles, unlocked potential (#1990)
+
+- **Hold back** (sneak + R): let out a quarter less of your power, down to 0%; charging lets out a quarter more each second. Fists and ki techniques scale with it, and while you hold back at all your blows never kill anything but a player: a foe is left at half a heart, to spar with, take alive or knock out.
+- **Limit Break tiers 4-6** (15000 / 25000 / 40000 TP on the training screen): fists +50/70/100%, speed +13/16/20%, burning 3/4.4/6 health a second. They hold only in base form or Super; in a higher form you drop to tier 3.
+- **Fighting styles**: learn one from a master ("Learn a fighting style"), on top of your Kingdoms class: Fury, Flowing Ki, Predator, Last Stand, Guardian, Mender, Ki and Fist or Bulwark. The dragon's new wish "A new style" forgets it so you can learn another.
+- **Unlocked potential**: a rite at night, once, after mastering a form to 50%. The Keeper holds it for the Warrior-born, Earthlings, Heartlanders and the Dawnborn; everyone else sits with a Verdant elder (a master the Verdant World's villages now have) on the Verdant World. In base form you then have your strongest mastered form's fists, speed and ki power, with no look and no drain; Heartlanders, the Dawnborn and Earthlings get 1.2 times that form's edge.
+- Classes: new ZFighterRelease, ZFighterStyles, ZFighterPotential; hooks in ZFighterPower, ZFighterBattle, ZFighterMasters, ZFighterSites, ZFighterWishes, ZFighterTraining.
+- Built; not played in game.
+
+## 0.26.47 (2026-11-22): Defence disciplines, part 1: passive blocks, tighter parries, fist disarms (#1991)
+
+- **Passive blocks**: a blow from in front of you (or from anywhere while you're locked on), arrows included, is caught by itself and 60% of it stopped. One feather icon turns into a shield to show it: grey for Arms (your weapon or shield snaps up, with the usual sparks and splinters), gold for a Ki ward, blue for an Arcana ward. Free blocks show as a faint shield outline over the top of the row. Once every block is a shield, blows land in full and make you flinch (no sprinting, your swing cut short) unless you guard or parry by hand. A held guard never uses up a passive block. A broken guard means no passive blocks until it mends.
+- **Getting them back**: a perfect parry turns every shield back into feathers, a plain parry one; or 6 seconds without being hit or swinging, one a second.
+- **How many**: for now everyone has one Arms block, and a Z Fighter one Ki ward (it takes 3 ki). Jaymo's Kingdoms will decide this by class, heritage and training in part 2.
+- **Bare hands**: an Arms block with empty hands stops only 10% (Valor-coated fists, once Kingdoms says so, the full 60%). Parrying bare-handed knocks the attacker's weapon out of its hand onto the floor, players' too.
+- **Tighter parries**: perfect 0-2 ticks from the raise, a parry 3-6 (locked on +1/+2). Kingdoms' Keen Timing (part 2) widens them back to the old 0-5 / 6-12. A plain parry now gives back 2 half-feathers too. The timing bar and the incoming-blow rings show the new windows.
+- Classes: new PassiveBlocks; Guard (windows by Keen Timing, refunds, the disarm, a broken guard), FeathersHud (the shield icons, tools/gen_feathers.py), ZFighterHooks.spendKi, GuardClient, IncomingBlowsClient, BoxingEvades.
+- Built; not played in game.
+
+## 0.26.48 (2026-11-22): Fishing: Kingdoms' Saltblood path makes fish keener (#1853)
+
+- A Saltblood (the Tideborn heritage path's final step) draws fish up to 75% keener to your bait. Without Kingdoms nothing changes, and a rod pod's lines are never keener.
+- Built; not played.
+
+## 0.26.49 (2026-11-22): Enemy damage balance: Powers' enemies hit for less, their big ki moves come far less often (#1970)
+
+- **Tyrants and champions** (and the Chamber-Worn, a tyrant too): base damage 7 → 4 and 3 → 2, so a tyrant's blow is about 1.4 (2 in Super 2, was 2.5 / 3.4), its finisher about 3.6 (was 6.3), a champion's blow 1 (was 1.5). Their ki blasts 4 → 2.5 and 2 → 1.5.
+- **Their ki moves** hit softer (beam 1.4 → 1 times the blow, a volley's bolts 0.35 → 0.25, the charged blast 3 → 2) and come half as often (beam every 30-50 s, volley 15-30 s, charged blast 25-40 s).
+- **Others**: the Xeno-Band rival 4 → 2.5 (its changed forms at 0.7 of the alien's fists), Duplex doubles 3 → 2, Chrono's echoes 5 → 3, the Unseeing 3 → 2 (zealots 5 → 3.5, their pulse 4 → 2.5).
+- Classes: ZFighterRogue, ZFighterNpcKi, RivalAlien, XenoDouble, ChronoEcho, Unseeing.
+- Not tested in game.
+
+## 0.26.50 (2026-11-22): tips switch - turn tip cards off and on (#1972)
+
+- Andy (2026-11-20): "Can you add a command to disable tips?"
+- **Tips off**: `/tips off` (and `/tips on`; `/tips` says which), or the new **Tips: On / Off** button in the top right of the menu's Notices page. Off, no tip cards come up: no first-time tips, and hints show over the hotbar again as they used to (`TipCard.enabled`, `HintCards`). A card already up goes when you turn them off.
+- It's kept on this computer (`config/jaymospowers-client.properties`, `tips.off`), not per world.
+- Built; not played.
+
+## 0.26.51 (2026-11-22): both arms for anything bigger than a small animal; carried blocks are seen (#1989)
+
+- **Carrying**: anyone or anything bigger than a small animal now takes both arms: a person over your shoulder or at your side gets your other hand on them too, first and third person. With both arms full (that, a Kitchen corpse in your arms, or a block in Carry On's arms) the web wings won't spread (and fold if you take something up mid-glide), and the aercloud glider and paraglider won't open ("Your arms are full"). A Z Fighter with both arms full fights with kicks only, and can't take a Hammerlock.
+- **Carried blocks**: a block picked up with Carry On is drawn in your arms again, first and third person. Carry On draws nothing while First-person Model is installed; it now draws anyway, except in your own first-person hands while First-person Model is drawing your body (which already shows it).
+- `core/ArmsFull`, `CarryPose`, `FirstPersonArms`, `KitchenCompat.corpseInBothArms`, `WebSwing`/`WebPower` (wings), `AercloudGliderItem`, `ParagliderItem`, `ZFighterCombo`, `ZFighterRush`, `client/mixin/carryon/CarryOnDrawMixin`.
+- Built by CI; not played.
+
+## 0.26.52 (2026-11-22): Survival picks: wound pools, head blows, headshots, armour per part, medicine over time (#1992)
+
+- **Own pools on top of health** (Andy's LSO picks): head 8, body 12, each arm 8, each leg 12, each foot 8 on 20 health
+  (shares 0.4/0.6/0.4/0.6/0.4; animals, bugs and fliers the same way). A hit takes its damage from your health and the
+  same from the part it lands on; food and potions heal the health, not the parts. Fire, magic, poison, drowning and
+  blasts wear every part by the share they take off your health (never below 5%, so they never black out or break a part).
+- **Downing:** health at zero, or a hit that blacks out your head or body, downs you. Only a blow that lands on your head
+  and blacks it out while you're up kills outright (not from full health: that still downs). Limbs at zero break as before.
+- **20% left:** one arm Mining Fatigue, both arms Weakness, a foot Slowness, the body takes 1.25x damage, a leg makes falls
+  1.5x, the head aches (a throbbing pale haze). Painkillers (willow bark, poppy, leeches, drink) and adrenaline hold them off.
+- **Broken hearts:** every part at zero takes 10% off your max health until it heals (at most 50%).
+- **Headshots:** an arrow or other shot to a bare head does double damage (a Ranger's arrow goes through the helmet).
+- **Armour per part:** each piece cuts what lands on its own part, 10% for diamond, scaled by its armour.
+- **Medicine over time:** linen bandage 3 over 15 s and dresses three wounds per bandage; rag, clean rag and grass
+  bandage 3 over 20 s; yarrow powder also heals 2 over 30 s; bone broth heals 5 into every part over 10 s. Medicine heals your health
+  by each point's share (all pools from nothing = full health). Healing a part costs 0.5 food exhaustion per point. Parts mend by themselves while fed (7 hunger or more), a whole part in 10 minutes
+  (a quarter as fast until patched up). A night's sleep heals every part as far as it can.
+- The Hermit Bean heals the parts too. Poppy syrup kept as it was (6 minutes, addiction).
+- Classes: `Wounds`, `BodyPlan`, `HitRouting`, new `PartStrain`, `Treatment`, `Herbal`, `Downed`, `PainHud`.
+- Built in CI; not played. Not checked in game: how often mob melee lands on the head, the headache haze's look, the
+  broken-hearts max-health drop on mobs, the bandage's dressing count across relogs.
+
+## 0.26.53 (2026-11-22): trophy heads sit square on Kitchen's head mount (#1993)
+
+- A severed head set down on Jaymo's Kitchen's Head Mount goes up in the middle of the plaque, not wherever you happened to look on it.
+- `Carry` (wall trophy heads).
+- Built by CI; not played.
+
+## 0.26.54 (2026-11-22): speedsters don't tire Kitchen's sprint wind (#1995)
+
+- An overclocked speedster (Chrono, Velox's Velocity) runs on its power: Jaymo's Kitchen's new sprint stamina isn't
+  spent while overclocked (`ChronoSpeed`, by reflection, only with Kitchen loaded).
+- Built; not played.
+
+## 0.26.55 (2026-11-22): survival picks: one base gauntlet for every fist weapon, offhand punches, Crushing (#1996)
+
+- **One gauntlet for all** (Andy: "reskin a copy, and use that base for all our gauntlet or fist weapons. except the
+  hidden blade"): Gallant Gauntlets' gauntlet (by Joshieman, CC BY-NC 4.0, credited in `art/gallant_gauntlets/` and the
+  jar) reskinned is now the icon and the worn shape of the Fang Gauntlets (with three bone spikes over the knuckles),
+  the Hand Wraps (in our bandage linen), the leather, iron and steel cestus (studs over the knuckles) and bracers (a
+  metal guard over the wrist), and the Glass Gauntlet's claws-out form (black glass, three glass claws; in the hand it
+  is the gauntlet's 3D sleeve). Worn, each is the same sleeve round the fist (`FangGauntletsClient`); the old cuff,
+  plate and wrap shapes are gone. Art from `tools/gauntlet_assets.py` (the older generators no longer write it).
+- **Offhand gauntlets**: a gauntlet in the off hand is worn on that arm, whatever the main hand holds, and a right
+  click at a monster, a player or a creature after you punches with it, on its own cooldown, with its own damage and
+  enchantments (`boxing/OffhandPunch`). Not while the main hand's right click does something (a weapon's guard, food, a
+  bow), so a boxer's block is unchanged; a villager or a horse still gets the right click as before.
+- **Armour**: each gauntlet in either hand gives a pair of boots' worth: Fang Gauntlets and iron bracers 2, steel
+  bracers 3, a cestus or leather bracers 1, Hand Wraps none.
+- **Crushing** (gauntlets, I-III): every blow wears 3/5/7 durability off each piece of armour the one hit has on. At
+  the enchanting table for redstone, iron and flint.
+- Forged gauntlets count as weapons for grades and sockets, not armour (`Grades.gearSlot`).
+- Kingdoms' Parry Gauntlet and Climbing Claws, the Fire Gauntlet (an Artifacts trinket), plate and fur-lined gauntlets
+  (armour) and the hidden blade are unchanged.
+- Built by CI only; not played: the worn sleeve's fit on wide and slim arms, the offhand punch, the armour and Crushing
+  are unseen in game.
+
+## 0.26.56 (2026-11-22): The server starts again: the wish radar's parts were registered twice (#2006)
+
+- **Fix**: the server crashed on start ("Adding duplicate key ... jaymospowers:radar_part_1"). Two Z Fighter gaps PRs both
+  added the wish radar's three parts, one in `ZFighterItems` and one in `ZFighterWishes`. They are registered once now,
+  in `ZFighterItems`, and building the radar reads those.
+- Class: `ZFighterWishes`.
+- Built; the server was started with it.
+
+## 0.26.57 (2026-11-22): Zombies leave the dead for shade by day; nothing regrows on the dead; player heads wear the MCA look (#2010)
+
+- **Zombies by day**: a zombie (anything that burns in the sun) no longer eats severed parts or tears at the downed
+  out in the sun while the sun burns; it goes for shade instead (`LimbEaters.sunlit`). "In the sun" is the same ray test
+  the burning goes by (`SunExposure`: leaves don't shade), and Kitchen's scavengers are handed it too
+  (`KitchenCompat`, `Scavengers.setSunTest`). Andy saw a crowd of burning zombies stay round his torn-up body at dawn.
+- **The dead don't mend**: new `Mortality.dead` (left for dead, in the body or out of it as a ghost, or waiting in
+  Limbo), which the game still counts as alive. A Verdant's mending (`ZFighterLineage.mend`) and the symbiote's
+  (`WebSymbioteMend`) stop on the dead; Kingdoms' heritages ask it too.
+- **Player heads**: a player's head (worn, like a captain's trophy; set down as a block; held, framed or on a trophy
+  stand) is drawn as the villager MCA draws that player as, not in the account's skin (`McaPlayerHeads`, mixins on
+  `CustomHeadLayer`, `SkullBlockRenderer`, `PlayerHeadSpecialRenderer`). A head with no player behind it (a bounty
+  head off a villager) is still the plain head.
+- Built by CI only; not played: the head's place and facing on a wearer, a block and an item, in the inventory
+  too, and zombies' shade-seeking round a body, are unseen in game.
+
+## 0.26.58 (2026-11-22): Pull up onto shore from the water; right-click held climbs (#2008)
+
+- **Out of the water** (Andy: "i also tried to climb onto shore from the water and couldnt right click the ground to pull up like normal"): an empty-hand right-click at a shore's edge now catches it from the water, and the hang under the edge (which is in the water) isn't lost to it. A swim into a wall still doesn't catch it by itself; only the click does. Treading water, the feet are about 0.4 under the surface, so a low bank (its top 0.7 to 1.1 blocks over the feet, too low to hang from) is climbed straight onto by the same click, standing (not on the belly). Lower than that, vanilla's own step out of the water does it. `Ledge#canHang(Player, boolean)`, `LedgeClient`.
+- **Right-click parity** (Andy: "the keybind for climbing should also be a right click hold with empty hand when you unlock it"): holding right-click with an empty hand on a ledge pulls up as Jump does (a tap still only hangs). With Climber learned, holding it at a wall does what forward + Jump do: jumps onto it, clings and climbs up, and over the top. Falling, a held right-click is still the wall slide's. Only with both hands empty and nothing in use, and not with the crosshair on a mob, door, chest or the like. `FreerunClient#useClimb`, `LedgeClient#useHeld`.
+- Built on CI; not played.
+
+## 0.26.59 (2026-11-22): No idle camera while your fishing line is out (#2009)
+
+- Andy: "idle cam kicks in during fishing and throws you off your bobber. maybe it could swap shots but keep the bobber within them? disable it completely when fishing if not". The idle camera is the pack's Ji AFK Cinematic. Its fishing mode plays its usual shots (which leave the bobber) and only cuts to the bobber once a fish swims up, and none of its settings keeps the bobber in every shot, so it's off while fishing: with that mod loaded, its "Fishing Cinematic" stays switched off and a line out counts as activity, so the plain idle camera doesn't start either. Reel in and it works as before. `AfkCinematicFishing` (reflection on its public `AFKDetector.registerActivity`, `ConfigManager.getConfig` and `ModConfig.fishingCinematicEnabled`; nothing of it needed to build).
+- Built on CI; not played.
+
+## 0.26.60 (2026-11-22): Old guns: no loading bar, Q takes up the next loaded one, the Void flintlock fires as you let go (#2011)
+
+- Andy: "the flintlock weaponry, it should release the shot as you release right click, the next right click reloading as you hold and can be interrupted. the loading bar does not need to be there for any of this old age weaponry, also pressing q with flintlocks just swaps to the other loaded one on the hotbar, like arsenal's void flintlocks".
+- **Void Armory flintlock**: right-click holds it ready and the shot goes as you let go (it fired on the press). A spent one still comes back loaded when dropped. `ArsenalFlintlock.Flintlock#releaseUsing`.
+- **WeaponMod's flintlock, muskets and blunderbuss** already work this way (hold to reload, letting go early loses it; press again and the shot goes as you let go), so only the bar and Q change for them.
+- **No loading bar** for any black-powder gun: WeaponMod's reload gauge beside the hotbar isn't drawn (`WeaponModReloadOverlayMixin`), and our use bar under the crosshair leaves them out (`UseBar`, `OldGuns`).
+- **Q** with a black-powder gun in hand takes up the next loaded one on the hotbar instead of dropping it (`OldGunSwapMixin`). With no other loaded one there it drops as before, and a spent Void flintlock is still dropped so it comes back loaded.
+- **Quicker aim** (Andy: "flintlock should also have a quicker aim acquisition as in you need to hold right click for less time to get an accurate shot"): WeaponMod's flintlock pistol reaches its tightest spread after 0.4 s held ready instead of 1 s (`WeaponModFlintlockAimMixin`, `AIM_SPEED` 2.5). A Marksman's quicker wind-up comes on top. The Void flintlock already shoots dead straight, and the Kingdoms guns' spread doesn't depend on the hold.
+- Built on CI; not played.
+
+## 0.26.61 (2026-11-23): spark in the pack, for finding what slows the game (#2017)
+
+- **spark** (GPL-3.0, lucko), the profiler, is in the pack for everyone and on the server. It does nothing until asked: in
+  game `/sparkc profiler start`, play a minute or two where it's slow, then `/sparkc profiler stop`, and it gives a link
+  showing what took the time (`/spark profiler` does the same for the server).
+
+## 0.26.62 (2026-11-23): Wounds shown like potions; bandages wrap several limbs at once; splints by two, from plant string too (#2021)
+
+- **Wound icons**: bleeding, a broken bone and a lost limb now show like potion effects (top-right of the screen and in the
+  inventory): Bleeding, Broken Bone, Lost Limb, the level counting the parts (two broken limbs: Broken Bone II). They only
+  show the state and go when it heals; milk can't hide them. `core/wounds/WoundSigns`, icons from
+  `tools/vanilla_style/wound_signs.py`.
+- **Bandages**: one linen bandage wraps up to 4 hurt parts at once (the one you pick, then the worst others), a grass
+  bandage up to 2; each is used up in the one go (a linen bandage used to be three separate dressings). Rags still do one.
+  `Treatment.BANDAGE_LIMBS`, `GRASS_BANDAGE_LIMBS`.
+- **Splints**: two sticks and string *or plant string* make 2 splints (and with leather, 2).
+- **New bandage recipe**: any colour of wool and string or plant string make 4 linen bandages.
+- Built on CI; not played.
+
+## 0.26.63 (2026-11-23): Fire no longer burns grass blocks away (#2026)
+
+- **Grass blocks and podzol aren't fuel**: Inferno always lists them as very flammable (60, 100) and, with its scorched
+  earth off (Andy's pick), meant to zero that at the end of `FireBlock.getIgniteOdds`/`getBurnOdds`. Fabric API answers
+  those methods early for any block it has flammability for, so the zeroing never ran: fire caught on grass blocks and
+  burnt them away, leaving pits. When a server starts with Inferno loaded and its scorched earth off, the two are set to
+  0, 0 in Fabric's flammable-block registry. Plants, leaves and logs burn as before; turn scorched earth on and grass
+  scorches the Inferno way again. `core/InfernoPreset`.
+
+## 0.26.64 (2026-11-23): Safe starts: no enemy to mobs until you move; H goes to the page a hint named (#2028)
+
+- **Safe starts** (Andy: "all the starts have a problem right now where you can spawn under attack. maybe player should be invisible to enemies while they spawn until they move"): waking after being left for dead (every wake, the spiders' lair included), a Kingdoms story start and a respawn now leave you no enemy to any mob until you press a movement key or jump, or strike something. Mobs already on you let go (goal and brain mobs). Being put somewhere, lying out cold, wearing web, being carried or shoved doesn't count as moving, and sneak doesn't either (it's how you come to). `core.wounds.SpawnCalm`, `SpawnCalmMixin` (Player.canBeSeenAsEnemy), called from `Mortality.wakeAt`.
+- **Hint links** (Andy: "pressing H or K should take you to exactly what was mentioned"): `MenuTabs.landing`, which Kingdoms fills: H right after a hint that names an H page (Feats and Paths, Rewards) opens that page, not the last one.
+- Not built on the PC (CI builds it); not played.
+
+## 0.26.65 (2026-11-23): Drop attacks: land on a foe from 4+ blocks and they're down (#2029)
+
+- **Everyone's drop attack** (Andy: "everyone is capable of it for an instant down"): fall at least 4 blocks onto a foe (a monster, anything after you, or another player) and you take no fall damage; they're down at once. People and other humanoids are felled as by a killing blow (crimes and witnesses follow); anything else small enough to lay out (a wolf, a spider) is knocked out cold for 20 seconds. Then a move plays astride them, by what's in hand: **Driven Down** (a blade, point down through the back), **Brought Down** (a club, an axe, anything else, two-handed onto the head), **Pinned From Above** (a spear or polearm, landed point first), **Kneed Down** (bare hands: a knee in the back, the head slammed on the ground). They stay down after it, for finishing. `core/finisher/DropAttacks`, `Finishers.dropKind/drop`, kinds `D_BLADE`, `D_BLUNT`, `D_SPEAR`, `D_FIST`.
+- **The kill** (Andy: "stealth stat and the hidden blade allow for an instant kill"): with Jaymo's Kingdoms, Stealth 5 or more makes any drop attack a kill on its last beat; the hidden blade plays its own move, **From Above** (`D_HIDDEN_BLADE`: arms flung wide astride the back, the off hand pinning the shoulders, the blade plunged into the neck, a beat held, up again), and always kills. A hidden-blade drop kill counts as a stealth kill for Kingdoms. Aware or not, landing on them is the ambush.
+- Bosses and anything too big to lay out aren't pinned: the fall lands on them as a heavy blow (twice what it would have hurt you) and they fight on.
+- You can't be hurt while a drop attack plays (only `/kill` and the like get through). The camera goes behind you as for every finisher; the one you landed on lies in the downed pose and jolts on each blow.
+- Not on pets, nor on villagers, folk or animals that aren't after you; not while riding, gliding, flying or in water.
+- Not played. None of the five new poses has been seen in game yet (the landing kneel, the arms-wide balance, where the body sits on top of the one landed on), nor the knocked-out timing on a wolf or spider.
+
+## 0.26.66 (2026-11-23): context keys by the crosshair (#2030)
+
+- **What can I do here?** With the crosshair on someone or something you can act on, a small see-through list right of the crosshair says what each key does to them now, in your own bindings ("Shift + hold Left Button: stealth kill"). It settles for a moment before showing and fades when you look away, so glancing past people shows nothing.
+- **Stealth kill**: shown while you sneak behind someone you could take, with a weapon in hand, who isn't after you.
+- **Bodies** (Jaymo's Kitchen's corpses, empty hand): tap to search the body (not an animal's carcass), hold to drag or pick up, sneak + hold to lift into your arms (not iron golems or anything too big), or tap to pat out the flames on a burning one.
+- Jaymo's Kingdoms adds its own lines through the object share (`jaymos:context_hints`, as with the body menu).
+- `client/hud/ContextHints` (inspect zone, row 40; `lang/parts/context_hints.json`).
+- Not built here (the cloud sandbox can't reach cdn.modrinth.com; CI builds it); not played.
+
+## 0.26.67 (2026-11-23): Thrown rocks can crit: faster, and triple damage (#2031)
+
+- Andy: "rocks should have an increased chance to critically strike, flying faster and dealing triple damage". A thrown rock is a crit one time in four (`ThrownRocks.CRIT_CHANCE`): it leaves the hand 1.5 times as fast (`CRIT_SPEED`) and hits for three times its damage (`CRIT_DAMAGE`: 9 instead of 3; 1.5 instead of 0.5 on the zombies and Hornkin that shrug rocks off), with crit sparks and the pack's crit cue (ring, flash, your camera punch) where it lands.
+- A speedster's quickened rock is unchanged (no crit on top). The knock-out chance on the unsuspecting is unchanged.
+- Not played.
+
+## 0.26.68 (2026-11-23): A dead player's baubles and web shooters stay on their body (#2032)
+
+- With Jaymo's Kitchen, a player who dies keeps their baubles and web shooters on their body with the rest of what they
+  carried (Andy: "they should keep the loot on their corpse like npcs do"), taken off it in its loot screen, instead of
+  them bursting onto the ground. Rings, bracelets and web shooters come off with a lost arm, foot baubles with a lost
+  leg, head baubles with the head (Andy: "... should be ripped off as limbs go"). Without Kitchen, or with kept
+  inventory, nothing changes.
+- Classes: `Baubles` (`dropAll`, `parts`), `WebShooters`, `power/web/KitchenCompat.keepOnBody`.
+- Built by CI; not played.
+
+## 0.26.69 (2026-11-23): The flanged mace is a blunt weapon: no more stabbing (#2037)
+
+- **Flanged mace** (every tier): it sat in the swords tag, so it fought like a sword. Now it's a mace. Its finisher is
+  Skull Crusher (not Run Through), an untrained player slams with it (not Impale), its drop attack and stealth kill are
+  the club's, and holding someone for questioning with it doesn't put a blade to them. It never gets left stuck in a
+  body the way a run-through sword can. It breaks bones, crushes skulls, wears armour like a mace and counts as a blunt
+  blow against padding, mail and plate (and as bludgeoning in Kingdoms). Its flanges still cut, so its blood spray and
+  limb cuts are unchanged.
+- **Same fix** for the other blunt weapons in the swords tag: the wooden and stone cudgels, the Anvil Father's hammer
+  and the Ogre King's maul. Those have no edge, so they also stop spraying and cutting like a blade: their blood is a
+  heavy blunt blow's splatter, and a killing blow tears a limb off at a blunt weapon's (lower) chance.
+- How: they join the `jaymospowers:crushing` tag; `Fractures.blunt` reads that tag before the blade test,
+  `Dismember.blade` passes over crushing weapons with no flanges, `BlastGore` doesn't take a blunt weapon for a blade,
+  and `Finishers` treats a crushing weapon in the swords tag as no sword.
+- Built by CI; not played.
+- **The pitchfork fights like a spear**: Better Combat gives it the spear's moveset and reach (two-handed thrusts, the
+  polearm stance), it counts as a polearm for guards and parries, its blow is a thrust (best at a spear's distance,
+  finding the gaps in mail), and its finisher is the spear's Pinned. It was a sword before. (`weapon_attributes/pitchfork.json`,
+  "pitchfork" added to the spear words in `WeaponKind`, `Finishers` and `Armed`.)
+
+## 0.26.70 (2026-11-23): Drafting Table screen; trapdoors take a second use (#2038)
+
+- **Drafting Table** (Andy: "it should have a GUI like the other tables"): using it now opens a screen in the Tinkering stations' look. Put a blueprint and a sheet of paper on it for a copy one level lower (the blueprint stays), or a forged weapon, head or armour piece and a sheet of paper to see its pattern; taking the pattern destroys the piece. No paper needed in creative. Taking the pattern replaces the old "use the table again" warning.
+- **Trapdoors** (Andy: "too easy to flip them and alot of the world gen uses them as detail"): a hand works a trapdoor on the second use in a row: double-click it, or hold use a moment (the held key repeats after 0.2 s, so a slow single click counts too: `TrapdoorUse.AGAIN_TICKS` and the repeat are the numbers to play-test). The first use only shows a tip card ("Use the trapdoor again (or hold use) to open or shut it"). Every trapdoor a hand can open (wood, copper, other mods' that extend the vanilla trapdoor); iron is left to redstone as before. Redstone, villagers, wind charges and the lock checks (which sit on the trapdoor's own toggle) aren't affected. Sneaking with something in hand still places it against a trapdoor.
+- Classes: `DraftingTableMenu` (new), `DraftingTableBlock`, `Patterns` (the hold-and-click take-apart and its warning are gone, `refused` keeps the gates), `client.tinkering.smithing.DraftingTableScreen` (new), `buildblocks.TrapdoorUse` (new), `buildblocks.mixin.TrapdoorTypeAccessor` (new). Shift-clicking the copy takes one at a time, so it doesn't spend every sheet.
+- Built on CI; not played.
+
+## 0.26.71 (2026-11-23): Dodge: a tap dashes, a hold rolls; adrenaline runs on wind; no climb cooldown (#2040)
+
+- **Dodge key (Left Alt) on the ground**: a tap is now a short dash that keeps you on your feet (about 2-3 blocks,
+  the way you hold, with the dodge's usual evasion window and feather cost), so a heavy red-glint blow can be slipped
+  and answered straight away. Hold the key and the dash goes on into the combat roll; let go before the roll ends to
+  come up standing, or keep holding to go down into prone as before. Others see the dash upright and the roll tumble.
+- The landing roll, the flip, the backflip, boxing's evades and the dives are unchanged.
+- Classes: `stamina/Dodge` (`DASH_SPEED`, `DASH_UP`, `DASH_TICKS`; `Start.dash`, `Rolling.dash`), `client/stamina/DodgeClient`,
+  `client/stamina/DodgeRollPose`.
+- **The dash's pose**, seen by everyone: the feet plant and the hips drop (wide and straight-legged for a side dash, a
+  lunge with the front shin upright for a forward or back one), the upper body leans into the way, both arms come up
+  to a guard (left alone while you swing or use an item, so a counter shows), and the head stays level, on the foe. In
+  first person the view dips a little and leans into a side dash. Rubber-folk and Verdants dash with their stretch.
+- Classes for the pose: `client/stamina/DodgeRollPose` (`DASH_*` knobs, `stance`).
+- Built; not played. The pose was checked frame by frame in a scratch run of `tools/pose_preview.py`, not in game.
+- **Adrenaline** kicks in at most once every 15 minutes (kept through relogging and death). As it kicks in it fills
+  Jaymo's Kitchen's wind bar, the wind burns while it lasts (about 30 s standing, 11 sprinting, nothing comes back),
+  and when the wind runs dry the adrenaline is gone (a rise from the downed begun on it still finishes). Hits while it
+  runs no longer start it again. Without the wind (Kitchen's stamina rule off, or an older Kitchen) it lasts 10 s as
+  before. `core/wounds/Adrenaline` (`COOLDOWN`, `READY`, `WIND_LONGEST`).
+- **Climbing**: no wait after pulling yourself up over an edge; the next edge can be caught at once (letting go still
+  waits 10 ticks so you don't catch the edge you dropped from). `client/LedgeClient`.
+
+## 0.26.72 (2026-11-23): Weapons in set places on the body: swords at the hips, four flintlocks, guns on the back (#2044)
+
+- Andy: "weapons should always go to a specific place on the body unless the player toggles otherwise ... I want to look
+  like edward kenway with all his weapons visible". Each kind of weapon on your hotbar now always shows in the same place,
+  whatever slot it's in:
+  - **Swords** (and maces, other weapons): left hip, then right hip, then crossed on the back.
+  - **Flintlock pistols** (WeaponMod's and the Void Armory's): two on the chest strap, barrels angled down across the
+    chest, then two more tucked in the sash at the front of the belt. Four pistols and two swords show together.
+  - **Muskets, blunderbusses, Kingdoms' long guns, bows, crossbows, tridents, spears**: crossed on the back, muzzle up.
+  - **Shield**: on the back, over the guns. **Axe**: small of the back, else a free hip. **Pickaxe, shovel, hoe**: small
+    of the back.
+  - The item in your hand leaves its place empty; drawing one pistol never moves the others. Up to 6 show (was 3), all
+    of them with a tool belt worn. Over a chestplate, leggings or a costume they sit further out; back ones clear a backpack.
+  - A hidden blade (Jaymo's Kingdoms) is worn on the wrist as before.
+- **Toggle**: the link "Weapons: set places" on the Character page (H), right of the Record's title, switches to "Weapons:
+  free": YDM's Weapon Master places them by hotbar slot as before (its Wardrobe tab settings). Saved per player, seen by
+  everyone.
+- Classes: `armory/BodyWeapons` (homes, synced list, toggle), `client/armory/BodyWeaponsLayer` (the drawing; every place is
+  a row in `HOMES`), `client/mixin/weaponmaster/WeaponMasterShownMixin` (Weapon Master draws only in free mode).
+- Not played: every position and angle is set from the model's numbers, not seen. No screenshot. Banners are not shown in
+  set places (Weapon Master's banner on the back is free mode only).
+
+## 0.26.73 (2026-11-23): Enemies telegraph their blows longer and walk in before swinging (#2042)
+
+- Andy: "enemies should telegraph attacks more and get closer before swinging." Every goal- or brain-driven melee mob (zombies and their kin, spiders, wolves, piglins, hoglins, unarmed or vanilla-goal illagers and skeletons, and modded mobs that attack through vanilla's melee goal) now:
+  - **winds up longer**: the glint and ping come 10 ticks (half a second) before the blow, up from 6;
+  - **holds its arms up** through the wind-up (zombies, skeletons, illagers show their raised-arms pose) and **swings its arm when the blow falls**, not with the glint (it used to finish its swing before the hit);
+  - **steps in** a little 3 ticks before the blow;
+  - **starts the wind-up only from close in** (55% of its reach past its body), so it walks up to you instead of glinting from the edge of its reach and whiffing. The blow still lands anywhere in its full reach; a spear-like weapon with a near limit keeps vanilla's reach, and so do riders.
+- Damage, attack rate (the cooldown still starts with the glint) and the parry/heavy rules are unchanged.
+- `AttackTells` (`WINDUP`, `START_REACH_SHARE`, `LUNGE_LEAD`, `LUNGE_SPEED`), `AttackTellGoalMixin`, `AttackTellBrainMixin`.
+- Built; not played.
+
+## 0.26.74 (2026-11-23): Sneak-clicking a cooking block opens it instead of lifting it (#2035)
+
+- **Carry On no longer lifts cooking blocks** (Andy: shift-clicking picked up every cooking block, campfires too, so no
+  cooking screen could be opened). Added to `#jaymospowers:carry_on_no_lift`: campfires (`#minecraft:campfires`),
+  furnace, smoker, blast furnace, Cooking for Blockheads' ovens, counters (their top is a prep surface), cooking tables
+  and cutting board, and Kitchen's stove, cutting board, cooking pot, frying pan, spit, great spit, hearth, brewing
+  keg, cask, still, tea kettle and sushi mat. Carry On passes a refused lift on, so sneak + right-click there opens Kitchen's cooking screen
+  or does the block's own use. These blocks can still be mined and placed as before; only Carry On's lift is gone.
+- Data only (the tag); `docs/carry.md` updated. Built in CI; not played.
+
+## 0.26.75 (2026-11-23): small hunters don't eat the living, full ones leave the downed be (#2045)
+
+- **Small hunters** (Andy, 2026-11-23, finished by an ocelot: "it shouldnt have attacked if it wasnt hungry"): ocelots, cats, foxes and Cube Animals' lynx no longer eat the downed alive (so never finish anyone). They still eat the dead and what's been torn off (`jaymospowers:small_hunters`).
+- **A full eater leaves the downed be**: a predator that has eaten its fill doesn't start on a downed body. It still finishes one it filled up on (Andy, 2026-11-20: "only finish you if they are full"), but no longer walks up full and finishes a stranger.
+- **Villagers keep them off too**: a grown villager on their feet within 6 blocks of the downed keeps the animals off them, as a player does.
+- Changed `LimbEaters`.
+- Not built in this session (CI builds it). Not played.
+
+## 0.26.76 (2026-11-23): Fishing: read the fish's moods, tire it out, watch your line (#2049)
+
+- Andy (a fishing gif, 2026-11-23): "thats what i want our fishing to be like". The fight now shows, under the crosshair, the fish and its weight and what it's doing: **TAKING THE LURE**, **CALM - REEL**, **RUNNING**, **JUMPING** or **THRASHING - EASE OFF**, and **LANDING**; the tension bar (green while you should reel, amber while you should ease off, with the drag's slip point and which way it runs); then *Tension*, the fish's *Energy*, the *Line* out in metres of the spool, and the drag; and one line on what to do. `FishFight` (mood, energy, line, weight), `FishingRealClient`.
+- **Thrashing** (new): instead of a run, a fish may shake its head where it is: reeling into it spikes the tension like a run, but it takes no line. A run that begins with a leap clear of the water shows as JUMPING. `FishRun`.
+- **Energy**: a fish starts fresh and tires as it fights (more during runs, leaps and thrashing, and while you hold it hard); a tired fish pulls less, rests longer between runs and comes in up to 1.6 times faster. `FishingReal.ENERGY_*`, `TIRED_PULL`, `TIRED_REEL`, `FishRun.TIRED_GAP`.
+- **Line in metres**: 26 m on a plain line, 30 weighted, 40 braided, half as much again on a sea rod. A run that takes all of it parts the line at the reel (Andy's pick), and the fish is gone with the hook. `FishingReal.LINE_M*`.
+- **Let it go**: sneak + use while a fish is on the line (Andy's pick: R stays Ability 1).
+- The drag (sneak + scroll) and the left/right runs are kept (Andy's pick).
+- Not played: the numbers (how fast energy drains, how often a fish thrashes) want a try on the water.
+
+## 0.26.77 (2026-11-23): Alt in mid air dives: jump + Alt is a dive-roll evade (#2051)
+
+- **The dive on Alt in the air**: press the Dodge key (Alt) in mid air over land and you throw yourself head first the
+  way your movement keys point (forward with none held), with a little lift, and land in a roll. A quick Space + Alt is a
+  dive every time, so it doubles as an evade on the ground. One dive per jump. Flips, air tricks, the shield vault and the
+  water dive still come first when they fit (Andy's pick); the dive fills in when none of them does.
+- `DodgeClient.airDive`, `Dives.canAirDive` (the server accepts the dive key in the air over land too, so everyone sees the
+  head-first pose). Push, lift and how long the landing roll stays armed are constants at the top of `Dives`.
+- Built by CI; not played.
+
+## 0.26.78 (2026-11-23): The dodge roll stays above the ground and is half as long; sitting against a wall no longer sinks in (#2050)
+
+- Andy: "the combat dodge roll currently clips through the ground ... make it stay above ground for now". The roll lowered the tucked body until an estimated ball shape rested on the ground, but the arms, the armour and the half-tucked moments at the start and end reach past that ball, so they sank in. It now stops a sixth of the body's height short (about a quarter of a block): the roll hovers a little at its middle instead of going into the ground. `DodgeRollPose.GROUND_CLEARANCE`.
+- Andy: "reduce it by half maybe to test": the roll takes 5 ticks (was 10) and the long roll, with the key held into it, 9 (was 18), so it also covers about half the ground. `Dodge.ROLL_TICKS`, `LONG_ROLL_TICKS`.
+- Andy: "a few different scenarios had me sink into the ground upon sitting on the wall, same thing with sit poses while prone or downed". A player getting up against a wall (from the floor, set there, or rising up it) was only kept out of the floor by the torso; the flat legs sat right on it and the hands went in. The sit is now kept a little higher (1.5 pixels, growing in as they sit and fading out as they stand), and a downed mob or body's sink against a wall stops 3% of its height short. `WallSit.SIT_CLEARANCE`, `SINK_CLEARANCE`.
+- Not seen in game.
+
+## 0.26.79 (2026-11-23): A small creature is finished with one quick slice (#2052)
+
+- Andy (a clip, "small mob chop", 2026-11-23): finishing a downed Digger with a sword played Stabbed Through, the blade driven down through it and tugged free: "that should be an execution variable for small animals and mobs, as you wont need to stab through something like that when a small slice like the beginning of the clip shows". A blade's finisher (Stabbed Through, Run Through, Mercy Stroke, Headsman's Stroke) on a small body now plays **Cut Down**: drawn back to the right and one quick slice down and across it (under a second). Small: at most 1.2 blocks tall and 1 wide standing, at its scale (a digger, a fox, a chicken, a rabbit, a wolf, a cat); never a player. `Finishers.Kind.SLICE`, `Finishers.small`, `SMALL_HEIGHT`, `SMALL_WIDTH`.
+- Not seen in game.
+
+## 0.26.80 (2026-11-24): A small creature takes one smash from a club (#2055)
+
+- Andy (after the slice, 2026-11-23): "did you add the single smash?" A club's, a staff's or everyone's wild slam finisher (Skull Crusher, the staff's, Wild Slam) on a small body (a digger, a fox, a chicken: as the slice, at most 1.2 tall and 1 wide) now plays **Smashed**: raised high in both hands and one blow straight down (under a second), instead of beating it again and again. A tool used as a club still wears, once. `Finishers.Kind.SMASH`, `Finishers.smashed`.
+- Axes still take the head; a rock keeps its own move.
+- Not seen in game.
+
+## 0.26.81 (2026-11-24): Says what hurt you when nobody did (#2054)
+
+- **"Hurt: heatstroke"**: when something with no attacker hurts you (heatstroke, thirst, bleeding, a parasite, the
+  cold, smoke, starving, an unseen "generic" hurt), a red line under the crosshair names it, once per cause and again
+  after 10 seconds. Falls aren't named, nor anything while you're downed. Andy's clip "stop hitting me": his hearts
+  fell every two seconds with nobody near and nothing said why. The server log also notes each one with the damage
+  type's id, so a cause without a name of its own can still be traced. `HurtCause`, `lang/parts/hurt_cause.json`.
+- Built on CI only; not played.
+
+## 0.26.82 (2026-11-24): Three blows on the ground and you're finished (#2056)
+
+- **Anyone downed dies on the third blow**: besides one blow of three hearts or more, the third weaker blow (a swing,
+  an arrow, a bite, a blast) since they went down now kills them too, as the killing blow always has. Andy, cut down on
+  the ground by a zombie captain: "either one blow of 3 hearts or more, or 3 weaker blows total, not this infinite cap."
+  The same goes for downed mobs ("they should follow the rule"): a player's blows on one are its wounds, now three, not
+  ten. Fire, falls and bleeding don't count; knocked out cold from standing, blows land as before.
+  `Downed#DOWNED_BLOWS`, `Downed#lastBlow`.
+- Built on CI only; not played.
+
+## 0.26.83 (2026-11-24): bandages give a short regen; rags fester less (#2058)
+
+- **Fresh dressings heal you a little faster for a moment**: a linen (clean) bandage gives Regeneration II and a grass
+  bandage Regeneration I, each for 8 seconds after it's put on (yourself, someone else, or the fight-pit attendant's
+  linen). A rag, washed or not, gives none.
+- **Rags fester less**: a dirty cut under a rag now festers at half the old chance (2.5% each bleed tick instead of 5%);
+  a zombie's dirty cut left open is unchanged.
+- `Treatment.dressingRegen` (`DRESSING_REGEN_TICKS`), `Bleeding.RAG_FESTER_CHANCE`. Built by CI; not played.
+
+## 0.26.84 (2026-11-24): A body only spills the blood it holds (#2059)
+
+- **Blood runs out**: every stain a living body leaves (a blow's spray, a cut's drip, a stump, a dragged smear) now comes
+  out of its own blood, the same store the downed pool and a corpse pour from (a man's is 3 stain-sizes). Once it's
+  empty, blows bring no more spray and no more stains. Andy, of being hacked at on the ground: "if there is still finite
+  blood, that seemed to be way more than could fit in one body". On your feet it comes back over ten minutes, as before.
+  `BleedOut#spill`, `BleedOut#dry`.
+- A side effect: someone badly cut up in a fight can now be bled dry before they go down, and then a bed or a
+  campfire doesn't heal them while downed (the rule for the bled-dry). Tell Andy if that's too harsh.
+- Built on CI only; not played.
+
+## 0.26.85 (2026-11-24): A blast close by knocks you out cold (#2061)
+
+- **Blasts knock you out**: an explosion that hits you for two hearts or more (that near) lays you out cold for ten
+  seconds: standing, you drop; downed, you pass out. Sneak mashes you round sooner, as from any knock-out. Mobs that
+  can go down are laid out too. A blast of three hearts or more on someone already down still kills them. Andy: "the
+  explosion that happened while i was downed should have knocked me unconscious, like any blast at that proximity
+  should". `BlastOut`, tuning at its top.
+- Built on CI only; not played.
+
+## 0.26.86 (2026-11-24): Adrenaline kicks in once, going down included (#2062)
+
+- **Once means once**: going down is now one of the ways adrenaline kicks in, under the same once-every-15-minutes
+  rule as a hit that leaves you low. Before, the rush on going down didn't check the rule, so in Andy's fight it hit
+  once on a blow and again as he went down, and would start again each time he came round on the ground
+  ("andrenaline should have only kicked in once"). A downed mob's first rush is as it was. `Adrenaline#wentDown`.
+- Built on CI only; not played.
+
+## 0.26.87 (2026-11-24): JEI shows stone tools, hammer and light armour recipes on a server (#2066)
+
+- **Missing recipes in JEI**: the stone-age tool recipes, the hammer recipes (crushing ore) and light armour now show
+  in JEI on a server. JEI only asks the server for Minecraft's own kinds of recipe, so these never reached the players;
+  `StoneAge`, `OreWashing` and `LightArmour` now have the server send them (`RecipeSynchronization`).
+- Built on CI only; not played.
+
+## 0.26.88 (2026-11-24): A dead player's severed head can be taken as a trophy (#2069)
+
+- `SeveredPart.takeHead`: something picks up a player's own loose severed head (not carried, nailed up or kept as a trophy) and it's gone from the ground. Jaymo's Kingdoms' captains use it to wear the real head of a player they killed instead of a copy.
+- A dead player looking out of their own severed head goes back to their normal view if the head is taken, instead of staring from where it was. Built by CI only; not played in game.
+- Andy: "you never see the scene because it cuts to black when you die. from now on if you die in this fashion and someone is promoted or otherwise, the cutscene should play before you respawn or are allowed to reincarnate." A film after your death (a Kingdoms captain's scene over your body) now plays on a death that ends the character too, with its sound; the silent black hold and the death screen (Reincarnate, Limbo) come after it, their buttons held until it ends. Before, a final death cut the film and went straight to black. `UltimateCinematic.deathFilm`, `BlackoutHush`, `DeathScreenBlackMixin`. Not played in game.
+- Andy: "upon the killing blow it should still cut to black, but cut back in for the scene, then back out". A film after your death opens on 1.5 seconds of black (silent too on a death that ends the character), cuts in to the scene, and cuts out to the death screen's black. The death screen and its buttons (Reincarnate, Limbo) aren't drawn at all while the film plays. `UltimateCinematic.DEATH_BLACK`. Not played in game.
+
+## 0.26.89 (2026-11-24): Lock-on names the part only with Called Shots; what hurts you is said in your own voice (#2070)
+
+- **Lock-on**: the name of the body part you're aimed at ("Torso" and the rest) shows under the bracket only once you've
+  learned Called Shots (the skill-tree perk that lets you scroll the aim between parts). Before that, no label at all
+  (`LockOnClient.marker`).
+- **What hurt you, said as you'd say it**: the line under the crosshair for a hurt with no attacker is the character
+  reacting, not a label: "That BURNS!" instead of "Hurt: fire", "Too hot... I'm cooking", "So thirsty...", "I'm bleeding
+  out", "Something's moving under my skin", "Freezing...", "Can't breathe!", "Need food...", "What was that?!" and the
+  rest (`HurtCause`, `lang/parts/hurt_cause.json`). Same timing: once per cause, again after 10 seconds. A cause without
+  a line of its own reads "Ugh... <cause>!".
+- **Wounds in your own voice**: "Left arm's bleeding! I need to bind it, or stitch it", and the same for broken,
+  sprained, festering, rotted and both arms broken (`lang/parts/wounds.json`).
+- Built; not played.

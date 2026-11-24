@@ -19,7 +19,7 @@ import net.minecraft.world.level.Level;
  * twos and threes.
  */
 public class Coyote extends WildBeast {
-	static final double HEALTH = 10.0, SPEED = 0.33, DAMAGE = 4.0;
+	static final double HEALTH = 10.0, SPEED = 0.33, DAMAGE = 2.5;
 
 	public Coyote(EntityType<? extends Coyote> type, Level level) {
 		super(type, level);

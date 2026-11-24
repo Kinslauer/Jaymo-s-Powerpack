@@ -27,8 +27,18 @@ public final class WindSigns {
 	static final float WHITECAPS_FROM = 0.62F, WHITECAPS_HARDEST = 1.2F;
 	static final int WHITECAPS = 6, CAP_NEAR = 10, CAP_FAR = 56;
 
+	/** Flames lean along the wind this share of the smoke's drift (FlameWindMixin). */
+	public static final double FLAME_SHARE = 0.5;
+	/**
+	 * Plants (FoliageWindMixin, through Interactive Foliage's rain wind): they start to lean from this strength of wind
+	 * (a breeze), lean their hardest at this one (a gale), and from this one on gust as in a thunderstorm.
+	 */
+	static final float PLANTS_FROM = 0.3F, PLANTS_HARDEST = 1.1F, PLANTS_GALE = 0.9F;
+
 	/** This tick's drift of smoke under open sky (blocks), along the wind. */
 	public static volatile double pushX, pushZ;
+	/** How hard plants lean in the wind now (0 to 1, counted as rain), and how hard they gust (0 to 1, as thunder). */
+	public static volatile float plantWind, plantGale;
 
 	private WindSigns() {
 	}
@@ -41,6 +51,7 @@ public final class WindSigns {
 		ClientLevel level = minecraft.level;
 		if (level == null || minecraft.isPaused() || level.dimension() != Level.OVERWORLD) {
 			pushX = pushZ = 0.0;
+			plantWind = plantGale = 0.0F;
 			return;
 		}
 		Vec3 eye = minecraft.gameRenderer.mainCamera().position();
@@ -48,6 +59,8 @@ public final class WindSigns {
 		double push = SMOKE_DRIFT * strength;
 		pushX = Math.cos(Storms.clientWindAngle) * push;
 		pushZ = Math.sin(Storms.clientWindAngle) * push;
+		plantWind = Mth.clamp((strength - PLANTS_FROM) / (PLANTS_HARDEST - PLANTS_FROM), 0.0F, 1.0F);
+		plantGale = Mth.clamp((strength - PLANTS_GALE) / (PLANTS_HARDEST - PLANTS_GALE), 0.0F, 1.0F);
 		whitecaps(minecraft, level, eye, strength, level.getRandom());
 	}
 

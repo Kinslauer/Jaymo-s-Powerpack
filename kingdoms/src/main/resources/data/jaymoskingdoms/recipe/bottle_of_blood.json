@@ -1,0 +1,14 @@
+{
+	"type": "minecraft:crafting_shapeless",
+	"category": "misc",
+	"ingredients": [
+		"jaymoskingdoms:crystallized_blood",
+		"minecraft:glass_bottle",
+		"minecraft:glass_bottle",
+		"minecraft:glass_bottle"
+	],
+	"result": {
+		"id": "jaymoskingdoms:bottle_of_blood",
+		"count": 3
+	}
+}

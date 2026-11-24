@@ -206,6 +206,8 @@ public final class Finishers {
 	static final String QUICK_WORK = "quick_work", BIGGER_GAME = "bigger_game", SILENT_SNAP = "silent_snap";
 	/** Put on the player for each stealth kill, for Kingdoms (its Stealth experience and Into the Dark); taken off as it's read. */
 	public static final String STEALTH_KILL_TAG = "jaymospowers_stealth_kill";
+	/** A small body, finished with a blade, is sliced ({@link Kind#SLICE}): at most this tall and this wide standing (blocks, at its scale). */
+	static final float SMALL_HEIGHT = 1.2F, SMALL_WIDTH = 1.0F;
 
 	/** How a blow lands: what it sounds and looks like. */
 	public enum Strike { CUT, STAB, CRUSH, PIERCE, SHOT, BOLT, BLAST, SNAP, KI, POWER,
@@ -348,7 +350,29 @@ public final class Finishers {
 		/** Lights Out: a hand on the shoulder, the weapon raised, one blow to the back of the head, and them let down. */
 		S_BLUNT(26, new int[] {13}, Strike.SILENT),
 		/** (Silent Snap) Bare hands: both on the head from behind, one sharp twist, and them let down. */
-		S_SNAP(26, new int[] {14}, Strike.SILENT);
+		S_SNAP(26, new int[] {14}, Strike.SILENT),
+		// ---- drop attacks ({@link DropAttacks}): a player who falls onto a foe lands on them, and they're down -----------------
+		/** Driven Down, a blade's: landed on one knee on their back, arms out, the blade raised point down and driven through. */
+		D_BLADE(36, new int[] {3, 16}, Strike.STAB),
+		/** Brought Down, a club's or an axe's: landed with it high in both hands, down on the back of the head, and once more. */
+		D_BLUNT(34, new int[] {3, 14}, Strike.CRUSH),
+		/** Pinned From Above, a spear's: landed point first through them, leant on, and wrenched out. */
+		D_SPEAR(36, new int[] {2, 20}, Strike.PIERCE),
+		/** Kneed Down, bare hands: a knee into the back as you land, then the head taken in both hands and slammed on the ground. */
+		D_FIST(38, new int[] {3, 20}, Strike.CRUSH),
+		/**
+		 * The Hidden Blade's (Kingdoms): arms flung wide on landing astride their back, the off hand pinning the shoulders,
+		 * the blade plunged into the neck, a beat held over them, and up again.
+		 */
+		D_HIDDEN_BLADE(40, new int[] {4, 18}, Strike.STAB),
+		/**
+		 * (Andy, 2026-11-23, "small mob chop": "you wont need to stab through something like that when a small slice ... shows")
+		 * Cut Down, a blade's on a small body ({@link Finishers#small}: a digger, a fox, a chicken): one quick slice across it,
+		 * no stabbing through and wrenching free.
+		 */
+		SLICE(18, new int[] {8}, Strike.CUT),
+		/** (Andy, 2026-11-23: the single smash) Smashed, a club's or a staff's on a small body: one blow straight down on it. */
+		SMASH(16, new int[] {7}, Strike.CRUSH);
 
 		/** (0.15.148) The tick the whip's crack lands round the neck. */
 		public static final int WHIP_CRACK = 8;
@@ -385,6 +409,11 @@ public final class Finishers {
 			return this.strike == Strike.SILENT;
 		}
 
+		/** One of the drop attacks ({@link DropAttacks}): played astride one just landed on. */
+		public boolean drop() {
+			return this.name().startsWith("D_");
+		}
+
 		public static Kind of(int ordinal) {
 			Kind[] all = values();
 			return all[Math.floorMod(ordinal, all.length)];
@@ -395,7 +424,7 @@ public final class Finishers {
 	private static final String[] POLEARM_WORDS = {"glaive", "halberd", "scythe", "naginata", "bardiche", "poleaxe", "pole_axe", "partisan",
 		"guisarme", "voulge", "billhook"};
 	private static final String[] STAFF_WORDS = {"staff", "quarterstaff", "bo_staff"};
-	private static final String[] SPEAR_WORDS = {"spear", "lance", "pike", "trident", "javelin", "pilum"};
+	private static final String[] SPEAR_WORDS = {"spear", "lance", "pike", "trident", "javelin", "pilum", "pitchfork"};
 	private static final String[] DAGGER_WORDS = {"dagger", "knife", "kunai", "tanto", "dirk", "stiletto", "misericorde", "shiv", "athame", "kama"};
 	private static final String[] GREATSWORD_WORDS = {"claymore", "longsword", "greatsword", "great_sword", "broadsword", "zweihander", "flamberge",
 		"bastard_sword"};
@@ -589,6 +618,8 @@ public final class Finishers {
 	private static final Map<UUID, UUID> TARGETED = new HashMap<>();
 	/** The bodies a stealth kill made silent (no cry, no hurt sound), to be given their voices back if they live through it. */
 	private static final java.util.Set<UUID> SILENCED = new java.util.HashSet<>();
+	/** Players whose drop attack only puts them down: its last beat is a blow, not their death ({@link #drop}). */
+	private static final java.util.Set<UUID> DROP_SPARED = new java.util.HashSet<>();
 
 	private Finishers() {
 	}
@@ -600,6 +631,8 @@ public final class Finishers {
 		com.jaymospowers.power.zfighter.ZFighterExecutions.register();
 		// the timed keys of a prompted finisher
 		Prompts.register();
+		// landing on a foe from a height
+		DropAttacks.register();
 		// (0.17.7) the hold is attack's: the client says when it's held on someone and when it's let go
 		PayloadTypeRegistry.serverboundPlay().register(Execute.TYPE, Execute.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Execute.TYPE, (payload, ctx) -> {
@@ -725,7 +758,7 @@ public final class Finishers {
 		if (any(path, GREATSWORD_WORDS)) {
 			return Kind.GREATSWORD;
 		}
-		if (stack.is(ItemTags.SWORDS) || any(path, SWORD_WORDS)) {
+		if (sword(stack) || any(path, SWORD_WORDS)) {
 			return Kind.SWORD;
 		}
 		if (stack.is(ItemTags.PICKAXES)) {
@@ -738,6 +771,14 @@ public final class Finishers {
 			return Kind.BLUNT;
 		}
 		return Kind.FIST;
+	}
+
+	/**
+	 * A sword by its tag, but not a crushing weapon that sits in the swords tag (the flanged mace, the cudgels, the Anvil
+	 * Father's hammer, the Ogre King's maul): those are blunt, and never stab anyone through.
+	 */
+	private static boolean sword(ItemStack stack) {
+		return stack.is(ItemTags.SWORDS) && !stack.is(com.jaymospowers.core.Fractures.CRUSHING);
 	}
 
 	/** (0.15.114) A gun: TaCZ's (any with a gun id), the Void Armory's flintlock, or another mod's by name. */
@@ -1176,9 +1217,42 @@ public final class Finishers {
 		}
 		// (0.15.146) without Executioner, everyone's basic move; (0.15.114) with it, a bow with nothing to shoot slams
 		Kind kind = move(player, stack);
+		if (kind != null && small(body) && sliced(kind)) {
+			// (2026-11-23) a small body isn't stabbed through: one quick slice
+			kind = Kind.SLICE;
+		} else if (kind != null && small(body) && smashed(kind)) {
+			// (2026-11-23) nor beaten again and again: one blow
+			kind = Kind.SMASH;
+		}
 		if (kind != null) {
 			begin(level, player, body, kind);
 		}
+	}
+
+	/** Whether {@code body} is small: at most {@link #SMALL_HEIGHT} tall and {@link #SMALL_WIDTH} wide standing, at its scale (never a player). */
+	static boolean small(LivingEntity body) {
+		if (body instanceof Player) {
+			return false;
+		}
+		net.minecraft.world.entity.EntityDimensions size = body.getType().getDimensions();
+		float scale = body.getScale();
+		return size.height() * scale <= SMALL_HEIGHT && size.width() * scale <= SMALL_WIDTH;
+	}
+
+	/** Whether {@code kind} is a blade's stab or cut, which a small body takes as a slice instead. */
+	static boolean sliced(Kind kind) {
+		return switch (kind) {
+			case IMPALE, SWORD, DAGGER, GREATSWORD -> true;
+			default -> false;
+		};
+	}
+
+	/** Whether {@code kind} is a club's, a staff's or everyone's wild slam, which a small body takes as a single smash instead. */
+	static boolean smashed(Kind kind) {
+		return switch (kind) {
+			case BLUNT, SLAM, STAFF -> true;
+			default -> false;
+		};
 	}
 
 	// ---- (0.18.97) question or kill ---------------------------------------------------------------------------------------
@@ -1248,8 +1322,36 @@ public final class Finishers {
 		}
 		return switch (kind) {
 			case SWORD, GREATSWORD, DAGGER, AXE, SPEAR, POLEARM -> Kind.S_BLADE;
-			default -> stack.is(ItemTags.SWORDS) || stack.is(ItemTags.AXES) ? Kind.S_BLADE : Kind.S_BLUNT;
+			default -> sword(stack) || stack.is(ItemTags.AXES) ? Kind.S_BLADE : Kind.S_BLUNT;
 		};
+	}
+
+	/**
+	 * The drop attack {@code player}'s main hand makes ({@link DropAttacks}): a blade's {@link Kind#D_BLADE}, a spear's or
+	 * a polearm's {@link Kind#D_SPEAR}, bare hands {@link Kind#D_FIST}, and anything else (a club, an axe, a bow, a torch)
+	 * {@link Kind#D_BLUNT}. The hidden blade's is Kingdoms' to ask for.
+	 */
+	public static Kind dropKind(Player player) {
+		ItemStack stack = player.getMainHandItem();
+		if (stack.isEmpty()) {
+			return Kind.D_FIST;
+		}
+		return switch (kind(stack)) {
+			case SWORD, GREATSWORD, DAGGER -> Kind.D_BLADE;
+			case SPEAR, POLEARM -> Kind.D_SPEAR;
+			default -> sword(stack) ? Kind.D_BLADE : Kind.D_BLUNT;
+		};
+	}
+
+	/**
+	 * {@code player} has just landed on {@code body}, already laid out ({@link DropAttacks}): {@code kind} plays on them,
+	 * and its last beat is their death if {@code kill}, else only a blow (they stay down).
+	 */
+	public static void drop(ServerLevel level, ServerPlayer player, LivingEntity body, Kind kind, boolean kill) {
+		begin(level, player, body, kind);
+		if (!kill) {
+			DROP_SPARED.add(player.getUUID());
+		}
 	}
 
 	/** {@code player}'s rank of a Kingdoms perk by key (0 without Kingdoms). */
@@ -1336,7 +1438,7 @@ public final class Finishers {
 		return switch (kind(stack)) {
 			case BOW, CROSSBOW, GUN, FUTURE_SHOT, FUTURE_BURST, FUTURE_AUTO, FUTURE_WILD -> Kind.Q_AIM;
 			case SWORD, GREATSWORD, DAGGER, AXE, SPEAR, POLEARM -> Kind.Q_BLADE;
-			default -> stack.is(ItemTags.SWORDS) || stack.is(ItemTags.AXES) ? Kind.Q_BLADE : Kind.Q_BLUNT;
+			default -> sword(stack) || stack.is(ItemTags.AXES) ? Kind.Q_BLADE : Kind.Q_BLUNT;
 		};
 	}
 
@@ -1504,7 +1606,7 @@ public final class Finishers {
 			}
 			for (int beat : kind.beats) {
 				if (t == beat && present) {
-					blow(level, player, body, kind, beat == kind.kill());
+					blow(level, player, body, kind, beat == kind.kill() && !DROP_SPARED.contains(player.getUUID()));
 				}
 			}
 			for (int i = 0; i < kind.after.length; i++) {
@@ -1637,7 +1739,7 @@ public final class Finishers {
 				player.getMainHandItem().shrink(1);
 			}
 		}
-		if (kind == Kind.SLAM || kind == Kind.IMPALE) {
+		if (kind == Kind.SLAM || kind == Kind.IMPALE || kind == Kind.SMASH) {
 			// (0.15.146) Andy: "using tools like a bow or fishing rod heavily damages them"
 			wear(player);
 		}
@@ -1658,8 +1760,8 @@ public final class Finishers {
 			Dismember.sever(body, Dismember.HEAD, player);
 		}
 		Downed.execute(level, body, player);
-		if (kind.stealth()) {
-			// (Kingdoms' Stealth experience, and Into the Dark)
+		if (kind.stealth() || kind == Kind.D_HIDDEN_BLADE) {
+			// (Kingdoms' Stealth experience, and Into the Dark; the hidden blade's drop kill is an assassination too)
 			player.addTag(STEALTH_KILL_TAG);
 		}
 		// (0.18.118) now and then the blade stays in them (less, the more you've done this)
@@ -1751,7 +1853,7 @@ public final class Finishers {
 			case BOW -> SoundEvents.ARROW_SHOOT;
 			case CROSSBOW -> SoundEvents.CROSSBOW_LOADING_END.value();
 			case FIST, S_SNAP -> SoundEvents.ARMOR_EQUIP_LEATHER.value();
-			case BLUNT, STAFF, SLAM, FLAIL -> SoundEvents.ARMOR_EQUIP_CHAIN.value();
+			case BLUNT, STAFF, SLAM, FLAIL, SMASH -> SoundEvents.ARMOR_EQUIP_CHAIN.value();
 			case ROCK -> SoundEvents.STONE_HIT;
 			case STOMP, HEAD_SMASH -> SoundEvents.ZOMBIE_AMBIENT;
 			case WHIP -> SoundEvents.FISHING_BOBBER_THROW;
@@ -1769,6 +1871,7 @@ public final class Finishers {
 			com.jaymospowers.power.zfighter.ZFighterExecutions.end(body);
 		}
 		player.removeAttached(FINISHING);
+		DROP_SPARED.remove(player.getUUID());
 		Prompts.end(player);
 		root(player, false);
 		TARGETED.remove(body.getUUID());

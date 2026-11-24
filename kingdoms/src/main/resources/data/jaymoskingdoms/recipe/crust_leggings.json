@@ -1,0 +1,16 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"category": "equipment",
+	"pattern": [
+		"iii",
+		"i i",
+		"i i"
+	],
+	"key": {
+		"i": "jaymoskingdoms:crimson_shell"
+	},
+	"result": {
+		"id": "jaymoskingdoms:crust_leggings",
+		"count": 1
+	}
+}

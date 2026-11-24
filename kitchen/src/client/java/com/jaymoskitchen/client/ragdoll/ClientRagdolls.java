@@ -12,6 +12,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.Entity;
 
 /**
  * (0.5.1) Every ragdoll this client knows, by entity id: the last two sets of points it was sent (or simulated itself,
@@ -268,8 +269,10 @@ public final class ClientRagdolls {
 		while (it.hasNext()) {
 			Int2ObjectMap.Entry<Track> entry = it.next();
 			Track track = entry.getValue();
-			track.settle(DragSim.active(entry.getIntKey()),
-				minecraft.level.getEntity(entry.getIntKey()) instanceof CorpseEntity corpse && corpse.keeling());
+			Entity entity = minecraft.level.getEntity(entry.getIntKey());
+			// (held up by a meat hook too: hung still, with its head on the floor, it was drawn lying flat on the ground)
+			track.settle(DragSim.active(entry.getIntKey()) || entity instanceof CorpseEntity hung && hung.onHook(),
+				entity instanceof CorpseEntity corpse && corpse.keeling());
 			if (!track.fresh) {
 				System.arraycopy(track.now, 0, track.before, 0, track.now.length);
 				if (++track.unseen > FORGET_TICKS && minecraft.level.getEntity(entry.getIntKey()) == null) {

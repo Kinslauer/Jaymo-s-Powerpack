@@ -342,8 +342,8 @@ public final class LockOnClient {
 				graphics.fill(cx, Math.min(cy, cy - sideY * ARM), cx + 1, Math.max(cy, cy - sideY * ARM) + 1, color);
 			}
 		}
-		// the region's name under it, where there's a choice of more than one
-		if (LockOnRegions.regions(target).size() > 1) {
+		// the region's name under it, where there's a choice of more than one and he has learned Called Shots to pick one
+		if (LockOnRegions.regions(target).size() > 1 && com.jaymospowers.core.TreeLocks.has(player, com.jaymospowers.core.TreeLocks.AIM_PARTS)) {
 			Component name = picked.displayName(BodyPlan.of(target));
 			graphics.centeredText(minecraft.font, name, sx, sy + s + 3, color);
 		}

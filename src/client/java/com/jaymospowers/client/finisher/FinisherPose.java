@@ -38,6 +38,8 @@ public final class FinisherPose {
 	static final float REACH = 1.3F, STEP_MAX = 1.4F;
 	/** A stealth kill's reach: close behind the one taken. */
 	static final float STEALTH_REACH = 0.6F;
+	/** A drop attack's reach (on top of them), and how far off their middle it may land before it turns to face them (blocks). */
+	static final float DROP_REACH = 0.0F, DROP_TURN = 0.6F;
 	/** The hips over the feet (blocks): the bend and the turn are about them. */
 	static final float HIP = 0.75F;
 	/** How quick the move eases in and out (the weight's spring, times its usual), and how stiff the limbs follow it. */
@@ -292,6 +294,23 @@ public final class FinisherPose {
 			rest(46, 0)});
 		zfighter();
 		powers();
+		drops();
+		// (2026-11-23) Cut Down, a blade's on a small body: drawn back to the right, one quick slice down and across it, and up
+		KEYS.put(Finishers.Kind.SLICE, new Key[] {
+			rest(0, 0),
+			k(4, 0.15F, 10, -25, -2.4F, -0.3F, 0.6F, -0.6F, 0.0F, -0.2F, -0.2F, 0.2F, 0.45F, 20),
+			k(8, 0.3F, 35, 25, -0.6F, 0.7F, -0.2F, -0.3F, 0.0F, -0.3F, -0.5F, 0.4F, 0.6F, 90),
+			k(11, 0.28F, 33, 30, -0.4F, 0.9F, -0.3F, -0.3F, 0.0F, -0.3F, -0.5F, 0.4F, 0.6F, 80),
+			k(15, 0.1F, 12, 5, -0.5F, 0.2F, 0.05F, -0.3F, 0.0F, -0.1F, -0.2F, 0.2F, 0.45F, 30),
+			rest(18, 0)});
+		// (2026-11-23) Smashed, a club's on a small body: raised high in both hands, and one blow straight down onto it
+		KEYS.put(Finishers.Kind.SMASH, new Key[] {
+			rest(0, 0),
+			k(4, -0.04F, -10, 0, -3.0F, -0.3F, 0.0F, -3.0F, 0.3F, 0.0F, -0.3F, 0.3F, 0.35F, 0),
+			k(7, 0.32F, 42, 0, -0.5F, -0.35F, 0.0F, -0.5F, 0.35F, 0.0F, -0.8F, 0.7F, 0.6F, 60),
+			k(10, 0.32F, 42, 0, -0.5F, -0.35F, 0.0F, -0.5F, 0.35F, 0.0F, -0.8F, 0.7F, 0.6F, 60),
+			k(13, 0.1F, 15, 0, -0.8F, -0.2F, 0.0F, -0.7F, 0.2F, 0.0F, -0.3F, 0.3F, 0.45F, 20),
+			rest(16, 0)});
 	}
 
 	/**
@@ -464,6 +483,57 @@ public final class FinisherPose {
 			k(22, 0.3F, 28, 0, -0.9F, 0.2F, 0.05F, -0.9F, -0.2F, 0.0F, -0.6F, 0.5F, 0.5F, 0), rest(26, 0)});
 	}
 
+	/**
+	 * Drop attacks ({@code DropAttacks}): each starts where the fall ends, down on one knee astride their back with the arms
+	 * flung out, and stands back up at the end. The first beat is the landing's.
+	 */
+	private static void drops() {
+		Key landed = k(0, 0.55F, 20, 0, -0.3F, 0, 1.35F, -0.3F, 0, -1.35F, -1.15F, 1.35F, 0.5F, 0);
+		Key braced = k(0, 0.6F, 30, 0, -0.2F, 0, 1.2F, -0.2F, 0, -1.2F, -1.15F, 1.35F, 0.6F, 0);
+		// From Above (the hidden blade): arms wide for balance, the off hand down onto the shoulders, the blade hand up,
+		// plunged into the neck, held there a beat, and up off them
+		Key bladeUp = k(0, 0.5F, 15, -8, -2.9F, 0, 0.3F, -0.9F, 0.3F, -0.1F, -1.15F, 1.35F, 0.45F, 0);
+		Key plunged = k(0, 0.62F, 45, 4, -0.35F, -0.2F, 0, -0.5F, 0.35F, -0.1F, -1.15F, 1.35F, 0.75F, 0);
+		KEYS.put(Finishers.Kind.D_HIDDEN_BLADE, new Key[] {
+			at(landed, 0), at(braced, 4),
+			k(9, 0.52F, 22, 0, -0.4F, 0, 1.35F, -0.5F, 0, -1.3F, -1.15F, 1.35F, 0.55F, 0),
+			at(bladeUp, 14), at(plunged, 18), at(plunged, 22), turned(plunged, 26, 8),
+			k(32, 0.3F, 20, 0, -0.6F, -0.1F, 0.1F, -0.4F, 0.1F, -0.1F, -0.7F, 0.8F, 0.5F, 0),
+			rest(40, 0)});
+		// Driven Down (a blade): the blade raised point down in both hands, driven through, and drawn out
+		Key raisedDown = k(0, 0.5F, -5, 0, -2.9F, 0, 0.3F, -2.9F, 0, -0.3F, -1.15F, 1.35F, 0.4F, 165);
+		Key driven = k(0, 0.62F, 40, 0, -0.4F, -0.4F, 0, -0.4F, 0.4F, 0, -1.15F, 1.35F, 0.7F, 90);
+		KEYS.put(Finishers.Kind.D_BLADE, new Key[] {
+			at(landed, 0), at(braced, 3), at(raisedDown, 10), at(driven, 16), at(driven, 22),
+			k(28, 0.3F, 15, 0, -0.8F, -0.1F, 0.05F, -0.5F, 0, -0.05F, -0.6F, 0.7F, 0.45F, 30),
+			rest(36, 0)});
+		// Brought Down (a club, an axe, anything else): landed with it coming down two-handed on the back of the head,
+		// heaved up again, and down once more
+		Key overhead = k(0, 0.3F, -10, 0, -3.0F, -0.3F, 0, -3.0F, 0.3F, 0, -0.9F, 0.9F, 0.3F, 0);
+		Key smashed = k(0, 0.58F, 45, 0, -0.45F, -0.35F, 0, -0.45F, 0.35F, 0, -1.15F, 1.35F, 0.7F, 65);
+		KEYS.put(Finishers.Kind.D_BLUNT, new Key[] {
+			at(overhead, 0), at(smashed, 3), at(smashed, 6), at(overhead, 11), at(smashed, 14), at(smashed, 20),
+			k(26, 0.3F, 20, 0, -0.9F, -0.3F, 0, -0.9F, 0.3F, 0, -0.7F, 0.8F, 0.45F, 30),
+			rest(34, 0)});
+		// Pinned From Above (a spear): landed point first through them, leant on with all the weight, wrenched out
+		Key pointDown = k(0, 0.35F, 30, 0, -0.5F, -0.35F, 0, -0.5F, 0.35F, 0, -0.9F, 0.8F, 0.6F, 180);
+		Key leant = k(0, 0.62F, 48, 0, -0.35F, -0.35F, 0, -0.35F, 0.35F, 0, -1.15F, 1.35F, 0.7F, 180);
+		KEYS.put(Finishers.Kind.D_SPEAR, new Key[] {
+			at(pointDown, 0), at(leant, 2), at(leant, 10), turned(leant, 16, 6), at(leant, 20),
+			k(26, 0.2F, 10, 0, -1.4F, -0.35F, 0, -1.4F, 0.35F, 0, -0.6F, 0.6F, 0.4F, 150),
+			rest(36, 0)});
+		// Kneed Down (bare hands): a knee driven into the back on landing, the head taken in both hands, lifted, and
+		// slammed on the ground
+		Key knee = k(0, 0.6F, 25, 0, -0.3F, 0, 1.3F, -0.3F, 0, -1.3F, -1.6F, 1.35F, 0.5F, 0);
+		Key gripped = k(0, 0.55F, 40, 0, -0.9F, -0.3F, -0.05F, -0.9F, 0.3F, 0.05F, -1.15F, 1.35F, 0.6F, 0);
+		Key hoisted = k(0, 0.45F, 26, 0, -1.25F, -0.3F, -0.05F, -1.25F, 0.3F, 0.05F, -1.15F, 1.35F, 0.55F, 0);
+		Key slammed = k(0, 0.6F, 52, 0, -0.25F, -0.3F, -0.05F, -0.25F, 0.3F, 0.05F, -1.15F, 1.35F, 0.8F, 0);
+		KEYS.put(Finishers.Kind.D_FIST, new Key[] {
+			at(knee, 0), at(knee, 3), at(gripped, 10), at(hoisted, 16), at(slammed, 20), at(slammed, 24),
+			k(30, 0.3F, 18, 0, -0.6F, -0.1F, 0.1F, -0.6F, 0.1F, -0.1F, -0.7F, 0.8F, 0.45F, 0),
+			rest(38, 0)});
+	}
+
 	/** {@code key} at {@code t} with the weapon turned {@code grip} degrees in the hand (a full circle twirls it). */
 	/**
 	 * (0.20.100) A one-handed blast for {@code kind}'s beats: the gun swung up in the gun hand, the arm straight down at them,
@@ -579,14 +649,17 @@ public final class FinisherPose {
 				|| kind == Finishers.Kind.FUTURE_AUTO || kind == Finishers.Kind.FUTURE_WILD) && body instanceof net.minecraft.world.entity.LivingEntity living
 				? Finishers.headAt(living) : body.position();
 			double dx = at.x - entity.getX(), dz = at.z - entity.getZ();
-			float yaw = (float) (Mth.atan2(dz, dx) * Mth.RAD_TO_DEG) - 90.0F;
-			float head = state.bodyRot + state.yRot;
-			state.bodyRot = yaw;
-			state.yRot = Mth.clamp(Mth.wrapDegrees(head - yaw), -50.0F, 50.0F);
+			// (a drop attack is astride them, on top: it keeps the way it came down facing, unless it landed off to one side)
+			if (!kind.drop() || dx * dx + dz * dz > DROP_TURN * DROP_TURN) {
+				float yaw = (float) (Mth.atan2(dz, dx) * Mth.RAD_TO_DEG) - 90.0F;
+				float head = state.bodyRot + state.yRot;
+				state.bodyRot = yaw;
+				state.yRot = Mth.clamp(Mth.wrapDegrees(head - yaw), -50.0F, 50.0F);
+			}
 			// (a step in, over the first few ticks, if they lie further off than the move reaches)
 			float in = Mth.clamp(t / 5.0F, 0.0F, 1.0F);
-			// (a stealth kill is done close behind them)
-			float reach = kind.stealth() ? STEALTH_REACH : REACH;
+			// (a stealth kill is done close behind them, a drop attack on top of them)
+			float reach = kind.drop() ? DROP_REACH : kind.stealth() ? STEALTH_REACH : REACH;
 			step = Mth.clamp((float) Math.sqrt(dx * dx + dz * dz) - reach, 0.0F, STEP_MAX) * in * in * (3.0F - 2.0F * in);
 		}
 		state.walkAnimationSpeed = 0.0F;

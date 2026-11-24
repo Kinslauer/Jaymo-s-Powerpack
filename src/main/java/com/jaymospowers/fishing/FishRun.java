@@ -64,12 +64,24 @@ public final class FishRun {
     /** Chance a run starts with a jump clear of the water, and how high. */
     static final float JUMP_CHANCE = 0.35F;
     static final double JUMP_UP = 0.55;
+    /** (2026-11-23) How long a run that began with a leap counts as {@link FishFight#JUMPING} (ticks). */
+    static final int JUMP_TICKS = 14;
+    /**
+     * (2026-11-23) Instead of a run, the chance the fish thrashes where it is (shaking its head against the hook: reeling into
+     * it spikes the tension, but it takes no line), and how long it lasts (ticks).
+     */
+    static final float THRASH_CHANCE = 0.3F;
+    static final int THRASH_TICKS_LEAST = 12, THRASH_TICKS_MOST = 25;
+    /** A tired fish fights less often: the gaps between its runs are stretched by this much at no energy left. */
+    static final float TIRED_GAP = 1.5F;
 
     private static final class Run {
         long fightStart;
         int dir;
         long endsAt;
         long nextAt;
+        long jumpUntil;
+        long thrashUntil;
     }
 
     /** Server side: each fight's run, keyed by player uuid. */
@@ -103,18 +115,37 @@ public final class FishRun {
         }
         RandomSource random = player.getRandom();
         boolean held = fish instanceof Mob mob && mob.isNoAi();
+        // (2026-11-23) a tired fish rests longer between its runs
+        float tired = 1.0F + TIRED_GAP * (1.0F - Mth.clamp(state.energy(), 0.0F, 1.0F));
         if (run.dir != 0 && now >= run.endsAt) {
             run.dir = 0;
-            run.nextAt = now + Math.round(Mth.nextInt(random, RUN_GAP_LEAST, RUN_GAP_MOST) / (0.5F + state.strength()));
+            run.nextAt = now + Math.round(Mth.nextInt(random, RUN_GAP_LEAST, RUN_GAP_MOST) * tired / (0.5F + state.strength()));
         }
-        if (run.dir == 0 && now >= run.nextAt) {
-            run.dir = random.nextBoolean() ? 1 : -1;
-            run.endsAt = now + Mth.nextInt(random, RUN_TICKS_LEAST, RUN_TICKS_MOST);
-            if (!held && fish.isInWater() && random.nextFloat() < JUMP_CHANCE) {
-                fish.setDeltaMovement(fish.getDeltaMovement().add(0.0D, JUMP_UP, 0.0D));
-                player.level().playSound(null, fish.getX(), fish.getY(), fish.getZ(),
-                        SoundEvents.FISHING_BOBBER_SPLASH, SoundSource.NEUTRAL, 0.8F, 0.8F);
+        if (run.thrashUntil > 0L && now >= run.thrashUntil) {
+            run.thrashUntil = 0L;
+            run.nextAt = now + Math.round(Mth.nextInt(random, RUN_GAP_LEAST, RUN_GAP_MOST) * tired / (0.5F + state.strength()));
+        }
+        if (run.dir == 0 && run.thrashUntil == 0L && now >= run.nextAt) {
+            if (random.nextFloat() < THRASH_CHANCE) {
+                // (2026-11-23) it thrashes where it is instead of running
+                run.thrashUntil = now + Mth.nextInt(random, THRASH_TICKS_LEAST, THRASH_TICKS_MOST);
+            } else {
+                run.dir = random.nextBoolean() ? 1 : -1;
+                run.endsAt = now + Mth.nextInt(random, RUN_TICKS_LEAST, RUN_TICKS_MOST);
+                if (!held && fish.isInWater() && random.nextFloat() < JUMP_CHANCE) {
+                    fish.setDeltaMovement(fish.getDeltaMovement().add(0.0D, JUMP_UP, 0.0D));
+                    player.level().playSound(null, fish.getX(), fish.getY(), fish.getZ(),
+                            SoundEvents.FISHING_BOBBER_SPLASH, SoundSource.NEUTRAL, 0.8F, 0.8F);
+                    run.jumpUntil = now + JUMP_TICKS;
+                }
             }
+        }
+        if (run.thrashUntil > 0L && now % 4L == 0L) {
+            // shaking its head at the surface: a splash and a jolt
+            if (!held) {
+                fish.setDeltaMovement(fish.getDeltaMovement().add((random.nextDouble() - 0.5D) * 0.2D, 0.05D, (random.nextDouble() - 0.5D) * 0.2D));
+            }
+            player.level().playSound(null, fish.getX(), fish.getY(), fish.getZ(), SoundEvents.GENERIC_SPLASH, SoundSource.NEUTRAL, 0.5F, 1.2F);
         }
         if (run.dir == 0) {
             return 0;
@@ -134,6 +165,18 @@ public final class FishRun {
             }
         }
         return run.dir;
+    }
+
+    /** (2026-11-23) Whether {@code player}'s fish is thrashing where it is just now. */
+    static boolean thrashing(ServerPlayer player, long now) {
+        Run run = RUNS.get(player.getUUID());
+        return run != null && run.thrashUntil > now;
+    }
+
+    /** (2026-11-23) Whether {@code player}'s fish is in the first moments of a run that began with a leap. */
+    static boolean jumping(ServerPlayer player, long now) {
+        Run run = RUNS.get(player.getUUID());
+        return run != null && run.dir != 0 && run.jumpUntil > now;
     }
 
     /** The drag lets line slip past its setting: returns the tension it holds, and takes line off {@code progress[0]}. */

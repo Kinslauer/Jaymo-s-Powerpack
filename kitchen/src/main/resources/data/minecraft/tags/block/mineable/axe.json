@@ -1,6 +1,9 @@
 {
   "replace": false,
   "values": [
+    "jaymoskitchen:bone_barrel",
+    "jaymoskitchen:head_mount",
+    "jaymoskitchen:butcher_display",
     "jaymoskitchen:butcher_block",
     "jaymoskitchen:spruce_butcher_block",
     "jaymoskitchen:birch_butcher_block",

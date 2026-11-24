@@ -1,0 +1,14 @@
+{
+	"type": "minecraft:smelting",
+	"category": "misc",
+	"cookingtime": 200,
+	"experience": 0.1,
+	"ingredient": [
+		"jaymoskingdoms:diabolium_helmet",
+		"jaymoskingdoms:diabolium_chest",
+		"jaymoskingdoms:diabolium_leggings"
+	],
+	"result": {
+		"id": "jaymoskingdoms:diabolium_nugget"
+	}
+}

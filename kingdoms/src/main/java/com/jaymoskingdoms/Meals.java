@@ -140,6 +140,8 @@ public final class Meals {
 		Item dish = Items.BREAD;
 		boolean served;
 		final boolean tavern;
+		/** (Needs) a bite between meals: if nothing can be had, it isn't counted as a meal missed. */
+		boolean snack;
 
 		Meal(int faction, Way way, BlockPos to, BlockPos at, long started, int length, boolean tavern) {
 			this.faction = faction;
@@ -157,6 +159,9 @@ public final class Meals {
 	}
 
 	private static final Map<UUID, Meal> EATING = new HashMap<>();
+	/** (Needs) When each last went for a bite between meals, and how long before they try again (ticks). */
+	private static final Map<UUID, Long> SNACKED = new HashMap<>();
+	static final long SNACK_GAP = 2400L;
 	/** Who's had which meal (day * 2 + the meal). */
 	private static final Map<UUID, Long> FED = new HashMap<>();
 	/** A home cook's portions left of the last item they took. */
@@ -180,6 +185,7 @@ public final class Meals {
 		ServerTickEvents.END_SERVER_TICK.register(Meals::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			EATING.clear();
+			SNACKED.clear();
 			FED.clear();
 			PANTRY.clear();
 			STOVES.clear();
@@ -300,6 +306,27 @@ public final class Meals {
 		return !job.equals("guard") && !job.equals("archer");
 	}
 
+	/**
+	 * ({@link Needs}) {@code v} is hungry outside mealtimes: a bite, had the way a meal is (cooked at home from the
+	 * storehouse, or bought in town). False if they can't just now.
+	 */
+	static boolean snack(ServerLevel level, Faction f, Villager v) {
+		long now = level.getGameTime();
+		if (EATING.containsKey(v.getUUID()) || f.type() == FactionType.BARBARIAN || v.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(f.seat())) > WATCHED * WATCHED
+			|| now - SNACKED.getOrDefault(v.getUUID(), Long.MIN_VALUE / 2) < SNACK_GAP || !fit(v, Royals.timeOfDay(level))
+			|| f.type().isRealm() && Spirits.hungry(level, f)) {
+			// (nothing in the storehouse: no use going for a bite)
+			return false;
+		}
+		SNACKED.put(v.getUUID(), now);
+		start(level, f, v, eateries(level, f), Festivals.day(level), now);
+		Meal m = EATING.get(v.getUUID());
+		if (m != null) {
+			m.snack = true;
+		}
+		return true;
+	}
+
 	/** {@code v} goes for their meal: home to their stove if they've one and food to cook, else to buy one. */
 	private static void start(ServerLevel level, Faction f, Villager v, List<Eatery> eateries, long day, long now) {
 		RandomSource random = level.getRandom();
@@ -342,8 +369,10 @@ public final class Meals {
 			m.arrived = now;
 			if (!serve(level, f, v, m)) {
 				say(level, v, "none", random);
-				McaCompat.cheer(v, WENT_WITHOUT_MOOD);
-				TownHunger.wentWithout(level, v);
+				if (!m.snack) {
+					McaCompat.cheer(v, WENT_WITHOUT_MOOD);
+					TownHunger.wentWithout(level, v);
+				}
 				return false;
 			}
 			TownHunger.ate(v);

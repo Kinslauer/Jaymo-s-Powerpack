@@ -129,6 +129,8 @@ public final class Outfits {
 		TrimPatterns.WILD, TrimPatterns.WARD, TrimPatterns.EYE, TrimPatterns.VEX, TrimPatterns.TIDE, TrimPatterns.SNOUT, TrimPatterns.RIB,
 		TrimPatterns.SPIRE, TrimPatterns.WAYFINDER, TrimPatterns.SHAPER, TrimPatterns.SILENCE, TrimPatterns.RAISER, TrimPatterns.HOST,
 		TrimPatterns.FLOW, TrimPatterns.BOLT);
+	/** How many {@link #PATTERNS} there are ({@link Liveries} counts on it without loading the trims). */
+	static final int PATTERN_COUNT = 18;
 
 	/** Tinctures that stand out against a field (a field never gets its own colour back). */
 	private static final List<DyeColor> TINCTURES = List.of(DyeColor.WHITE, DyeColor.YELLOW, DyeColor.BLACK, DyeColor.RED, DyeColor.BLUE,
@@ -162,6 +164,12 @@ public final class Outfits {
 		DyeColor color = server == null ? faction.color() : faction.styleColor(server);
 		boolean vassal = faction.type() == FactionType.FIEFDOM && faction.overlord() >= 0;
 		Heraldry arms = Heraldry.of(vassal ? faction.overlord() : faction.id(), color, vassal);
+		if (server != null && faction.type().isRealm()) {
+			// (Andy, 2026-11-22: realms should never wear the same armour) a realm's trim is its livery's, its own
+			// among the realms of its colour (a fiefdom's too, under its overlord's arms)
+			arms = new Heraldry(arms.field(), arms.charge(), arms.ordinary(), arms.bordered(),
+				PATTERNS.get(Liveries.pattern(Liveries.of(server, faction))), arms.material(), arms.harness(), arms.armoury());
+		}
 		String haven = server == null ? "" : Havens.of(server, faction);
 		for (int i = 0; i < HAVEN_ARMS.size(); i++) {
 			HavenArms h = HAVEN_ARMS.get(i);

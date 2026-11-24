@@ -55,20 +55,30 @@ import org.jspecify.annotations.Nullable;
  * (0.15.94) Wounds first, hearts after. Andy (2026-10-22): "everything should go through the wounding system first ... if
  * a certain threshold (30%) damage to your limb goes through, then it should affect your hearts". Every hit lands on the
  * parts before vanilla takes any health ({@code WoundsHurtMixin}); the hearts are worked out from the parts
- * ({@link #hearts}): the first {@link #HEART_SPILL_FROM} of a part's own pool is bruising and costs no hearts, past that
+ * (until the survival picks below): the first 30% of a part's own pool is bruising and costs no hearts, past that
  * its hearts drain faster, so a part at zero has cost its whole share. Health still adds up to the parts, only through
  * that curve. Meals and food bring the deep wounds back to the bruise line; the bruises mend by themselves
- * ({@link #BRUISE_MEND_TICKS}); and both run at {@link #UNPATCHED_REGEN} of their speed until every wound past the bruise
+ * (three minutes); and both run at {@link #UNPATCHED_REGEN} of their speed until every wound past the bruise
  * line is dressed or splinted and nothing bleeds, festers or sits broken unset ({@link #patchedUp}). Treatment is the
  * way back.
+ * <p>
+ * Survival picks (Andy, 2026-11-22, after Legendary Survival Overhaul's ideas; none of its code): every part has its own
+ * pool on top of the health, apart from it ({@link BodyPlan}: a humanoid's head 8, body 12, arms 8, legs 12, feet 8 on 20
+ * health). This replaces the bruise curve above: a hit takes its damage from the health as vanilla does and the same from
+ * the part it lands on; healing the health no longer heals the parts. The parts mend by themselves while fed
+ * ({@link #PART_MEND_TICKS}, a quarter as fast until patched up, {@link #PATCH_FROM} now being the share a part may be
+ * missing before it wants a dressing), by medicine and by a night's sleep ({@link PartStrain}), and every point a part
+ * heals costs {@link #FOOD_PER_POINT} food exhaustion. Downing (Andy: "the only time you arent downed is if a hit does
+ * enough damage to your head while you are standing, even a blacked torso should down you first"): health at zero, or a
+ * hit that blacks out the head or body, downs; only a located blow that blacks out the head of one not already down kills
+ * outright ({@link #headKilled}), and even that downs one it found at full health ({@link NoOneShot}). Damage with no
+ * place to land (fire, magic, poison, drowning, a blast) wears every pool by the share it takes off the health.
  */
 public final class Wounds {
 	/** Smaller than this many health points is nothing. */
 	static final float EPS = 1.0E-4F;
 	/** A death something cancelled ({@link Downed}, Xenoform reverts): head and body get at least this fraction back. */
 	public static final float MIN_VITAL_AFTER_SAVE = 0.1F;
-	/** A health drop nobody routed (some other mod's setHealth) never takes head or body below this fraction: it never kills. */
-	public static final float MIN_VITAL_UNROUTED = 0.05F;
 	/** Players have their parts brought in line with their health this often (ticks), so the HUD follows healing. */
 	public static final int PLAYER_RECONCILE_TICKS = 10;
 	/** A fraction this full counts as whole. */
@@ -77,12 +87,16 @@ public final class Wounds {
 	public static final float UNDEAD_FIGHT_ON = 0.6F;
 	/** (0.14.1) The scoreboard tag on an undead fighting on with its body gone. */
 	public static final String FIGHTS_ON_TAG = "jaymospowers_fights_on";
-	/** (0.15.94) Share of a part's pool a hit has to take before it costs hearts (the bruising before it is the part's alone). */
-	public static final float HEART_SPILL_FROM = 0.3F;
-	/** (0.15.94) Natural healing (meals, food, bruises mending) runs at this share of its speed until you're patched up ({@link #patchedUp}). */
+	/** A part missing more than this share of its pool wants a dressing or a splint before you count as patched up ({@link #patchedUp}). */
+	public static final float PATCH_FROM = 0.3F;
+	/** (0.15.94) Natural healing (meals, food, the parts mending) runs at this share of its speed until you're patched up ({@link #patchedUp}). */
 	public static final float UNPATCHED_REGEN = 0.25F;
-	/** (0.15.94) Ticks a part takes to mend a full bruise (from {@link #HEART_SPILL_FROM} down back to whole), patched up. */
-	public static final int BRUISE_MEND_TICKS = 3600;
+	/** (Survival picks) Ticks a part takes to mend from nothing to whole by itself, patched up and fed. */
+	public static final int PART_MEND_TICKS = 12000;
+	/** (Survival picks) The parts mend by themselves only on at least this much food (hunger points). */
+	public static final int MEND_FOOD_MIN = 7;
+	/** (Survival picks, lso-food-cost) Food exhaustion each health point a part heals costs (4 is a hunger point). */
+	public static final float FOOD_PER_POINT = 0.5F;
 	/** (0.15.94) The scoreboard tag on a player not patched up yet (Jaymo's Kitchen reads it to slow its meals' healing). */
 	public static final String UNPATCHED_TAG = "jaymospowers_unpatched";
 	public static final ResourceKey<DamageType> WOUNDS_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, JaymosPowers.id("wounds"));
@@ -109,9 +123,12 @@ public final class Wounds {
 	private static final Identifier KILLING_PHASE = JaymosPowers.id("wounds_killing_blow");
 	private static int tickCounter;
 
-	/** (0.15.94) A hit already taken from the parts as it landed ({@link #takeHit}), waiting for the after-damage event. */
-	private record Routed(DamageSource source, @Nullable BodyPart landed, float[] was, float[] now, float loss, boolean aimed) {
+	/** (0.15.94) A hit already taken from the parts as it landed ({@link #takeHit}), waiting for the after-damage event. {@code full}: it found them at full health. */
+	private record Routed(DamageSource source, @Nullable BodyPart landed, float[] was, float[] now, float loss, boolean aimed, boolean full) {
 	}
+
+	/** (Survival picks) Creatures being finished by a blow that blacked out their head while they stood: no downing ({@link Downed#spared}). */
+	private static final Set<LivingEntity> HEAD_KILLS = Collections.newSetFromMap(new WeakHashMap<>());
 
 	/** (0.15.94) Hits {@link #takeHit} routed, picked up by {@link #onDamage} in the same blow. */
 	private static final Map<LivingEntity, Routed> ROUTED = new WeakHashMap<>();
@@ -121,6 +138,8 @@ public final class Wounds {
 
 	public static void init() {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register(Wounds::onDamage);
+		// a blast close by knocks you out cold
+		BlastOut.register();
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			if (++tickCounter < PLAYER_RECONCILE_TICKS) {
 				return;
@@ -136,7 +155,9 @@ public final class Wounds {
 					} else {
 						player.addTag(UNPATCHED_TAG);
 					}
-					mendBruises(player, patched);
+					mendParts(player, patched);
+					// (survival picks) the 20% debuffs, broken hearts and a night's sleep
+					PartStrain.tick(player);
 				} else {
 					player.removeTag(UNPATCHED_TAG);
 					if (player.isAlive() && player.isCreative()) {
@@ -168,7 +189,11 @@ public final class Wounds {
 		UndeadFortitude.register();
 		// (0.14.4) phase 4: cuts and festering, the medieval kit, pain and the poppy
 		Bleeding.register();
+		// bleeding, broken bones and lost limbs shown like potions
+		WoundSigns.register();
 		WoundMarks.register();
+		// what hurt you when nothing did it to you
+		HurtCause.register();
 		// (0.17.54) the Potion of Cleansing: festering cured
 		Cleansing.register();
 		MedicineItems.register();
@@ -198,6 +223,8 @@ public final class Wounds {
 		// (0.15.98) finishing the downed off, one move for each kind of weapon
 		com.jaymospowers.core.finisher.Finishers.register();
 		Pain.register();
+		// (survival picks) a night's sleep heals every part
+		PartStrain.register();
 		// (0.19.24) rest by a campfire, soaking in a hot spring
 		Resting.register();
 		HotSprings.register();
@@ -235,11 +262,17 @@ public final class Wounds {
 		if (index < 0) {
 			return 1.0F;
 		}
-		float max = entity.getMaxHealth();
 		float[] points = load(entity, plan);
-		reconcile(points, plan, max, entity.getHealth(), Breaks.caps(entity, plan));
-		float cap = plan.share(index) * max;
+		float cap = cap(entity, plan, index);
 		return cap <= 0.0F ? 1.0F : Mth.clamp(points[index] / cap, 0.0F, 1.0F);
+	}
+
+	/**
+	 * (Survival picks) The most health the pools are measured against: the most health, without what broken hearts
+	 * ({@link PartStrain}) take off it, so a part going black doesn't shrink every other pool with it.
+	 */
+	public static float poolMax(LivingEntity entity) {
+		return PartStrain.poolMax(entity);
 	}
 
 	/** {@code part}'s health in points, and its most. */
@@ -249,32 +282,23 @@ public final class Wounds {
 		return index < 0 ? 0.0F : fraction(entity, part) * cap(entity, plan, index);
 	}
 
-	/** Whether any part of {@code entity} is below what it may heal to now ({@link Breaks#caps}): healing would take. */
+	/**
+	 * Whether healing {@code entity}'s health would take. (Survival picks) The health heals apart from the parts now, so
+	 * this is only whether it is below its most.
+	 */
 	public static boolean canHealMore(LivingEntity entity) {
-		BodyPlan plan = BodyPlan.of(entity);
-		if (plan == null || plan == BodyPlan.SIMPLE) {
-			return entity.getHealth() < entity.getMaxHealth();
-		}
-		float max = entity.getMaxHealth();
-		float[] points = load(entity, plan);
-		float[] caps = Breaks.caps(entity, plan);
-		reconcile(points, plan, max, entity.getHealth(), caps);
-		for (int i = 0; i < points.length; i++) {
-			float most = plan.share(i) * max * (caps == null ? 1.0F : caps[i]);
-			if (points[i] < most - 0.01F) {
-				return true;
-			}
-		}
-		return false;
+		return entity.getHealth() < entity.getMaxHealth();
 	}
 
+	/** Part {@code index}'s whole pool, in health points. */
 	public static float cap(LivingEntity entity, BodyPlan plan, int index) {
-		return plan.share(index) * entity.getMaxHealth();
+		return plan.share(index) * poolMax(entity);
 	}
 
 	/**
-	 * Wounds {@code part} by {@code amount} (health points): lowers the creature's health by what the parts could
-	 * give, spilling over as a hit would. Head or body at zero kills (by {@code by}, if any).
+	 * Wounds {@code part} by {@code amount} (health points): its pool takes it (spilling over as a hit would) and the
+	 * health takes it too. Health at zero, or head or body blacked out by it, downs or kills (by {@code by}, if any); it is
+	 * no blow to the head, so it never kills outright.
 	 */
 	public static void hurtPart(LivingEntity entity, BodyPart part, float amount, @Nullable Entity by) {
 		hurtPart(entity, part, amount, by, null);
@@ -286,24 +310,24 @@ public final class Wounds {
 		if (plan == null || !(entity.level() instanceof ServerLevel level) || !entity.isAlive() || amount <= 0.0F || Downed.isDowned(entity)) {
 			return;
 		}
-		float max = entity.getMaxHealth();
 		float health = entity.getHealth();
-		float[] points = load(entity, plan);
-		reconcile(points, plan, max, health, Breaks.caps(entity, plan));
-		// (0.14.2) health the broken parts couldn't hold isn't there to lose
-		health = Math.min(health, hearts(points, plan, max));
-		float[] was = points.clone();
-		float before = hearts(points, plan, max);
-		HitRouting.damage(points, plan, part, amount);
-		// (0.15.94) only what goes past the bruising costs hearts
-		float removed = before - hearts(points, plan, max);
+		boolean out = health - amount <= EPS;
 		// (not to zero: a dead creature has to die through its events)
-		entity.setHealth(Math.max(0.01F, health - removed));
+		entity.setHealth(Math.max(0.01F, health - amount));
+		if (plan == BodyPlan.SIMPLE) {
+			if (out) {
+				finish(level, entity, plan, by, type, false);
+			}
+			return;
+		}
+		float[] points = load(entity, plan);
+		float[] was = points.clone();
+		HitRouting.damage(points, plan, part, amount);
 		store(entity, plan, points);
 		// (0.14.2) a limb this took to zero breaks
 		markBreaks(entity, plan, was, points, by);
-		if (lethal(entity, points, plan)) {
-			finish(level, entity, plan, by, type);
+		if (out || blacked(entity, was, points, plan)) {
+			finish(level, entity, plan, by, type, false);
 		}
 	}
 
@@ -337,22 +361,55 @@ public final class Wounds {
 		if (index < 0) {
 			return 0.0F;
 		}
-		float max = entity.getMaxHealth();
 		float[] caps = Breaks.caps(entity, plan);
 		float[] points = load(entity, plan);
-		reconcile(points, plan, max, entity.getHealth(), caps);
-		float health = Math.min(entity.getHealth(), hearts(points, plan, max));
-		float most = plan.share(index) * max * (caps == null ? 1.0F : caps[index]);
+		float most = cap(entity, plan, index) * (caps == null ? 1.0F : caps[index]);
 		float add = Math.min(amount, Math.max(0.0F, most - points[index]));
 		if (add <= EPS) {
 			return 0.0F;
 		}
-		float before = hearts(points, plan, max);
 		points[index] += add;
-		// (0.15.94) the hearts come back as the part climbs to the bruise line; a bruise's own healing costs none
-		entity.setHealth(Math.min(max, health + hearts(points, plan, max) - before));
+		// (survival picks) medicine heals the health with the part, each point its share (every pool healed from nothing
+		// is the whole health back, so healing every part never heals the health several times over); it costs food
+		entity.setHealth(Math.min(entity.getMaxHealth(), entity.getHealth() + add / plan.total()));
 		store(entity, plan, points);
+		payFood(entity, add);
 		return add;
+	}
+
+	/**
+	 * (Survival picks) {@code entity}'s parts mend by {@code share} of each pool (only the pools, not the health), no part
+	 * past what it may heal to ({@link Breaks#caps}), and the food it costs is paid. Returns the points mended in all.
+	 */
+	static float mendEvery(LivingEntity entity, float share) {
+		BodyPlan plan = BodyPlan.of(entity);
+		if (plan == null || plan == BodyPlan.SIMPLE || entity.getAttached(PARTS) == null || share <= 0.0F) {
+			return 0.0F;
+		}
+		float[] points = load(entity, plan);
+		float[] caps = Breaks.caps(entity, plan);
+		float mended = 0.0F;
+		for (int i = 0; i < points.length; i++) {
+			float cap = cap(entity, plan, i);
+			float most = cap * (caps == null ? 1.0F : caps[i]);
+			if (cap > 0.0F && points[i] < most - EPS) {
+				float add = Math.min(most - points[i], share * cap);
+				points[i] += add;
+				mended += add;
+			}
+		}
+		if (mended > EPS) {
+			store(entity, plan, points);
+			payFood(entity, mended);
+		}
+		return mended;
+	}
+
+	/** (Survival picks, lso-food-cost) Healing {@code points} of the parts costs a player {@link #FOOD_PER_POINT} exhaustion each. */
+	private static void payFood(LivingEntity entity, float points) {
+		if (entity instanceof Player player && !player.isCreative() && points > 0.0F) {
+			player.causeFoodExhaustion(points * FOOD_PER_POINT);
+		}
 	}
 
 	/**
@@ -382,13 +439,19 @@ public final class Wounds {
 		return add;
 	}
 
-	/** (0.21.49) The health a body's parts hold together (what a rested downed player rises with). */
+	/** (0.21.49) The health a rested downed player rises with: (survival picks) as much of their most as their pools hold together. */
 	static float restedHealth(LivingEntity entity) {
 		BodyPlan plan = BodyPlan.of(entity);
 		if (plan == null || plan == BodyPlan.SIMPLE) {
 			return 0.0F;
 		}
-		return hearts(load(entity, plan), plan, entity.getMaxHealth());
+		float[] points = load(entity, plan);
+		float held = 0.0F, whole = 0.0F;
+		for (int i = 0; i < points.length; i++) {
+			held += points[i];
+			whole += cap(entity, plan, i);
+		}
+		return whole <= 0.0F ? 0.0F : entity.getMaxHealth() * held / whole;
 	}
 
 	/**
@@ -405,16 +468,9 @@ public final class Wounds {
 			return false;
 		}
 		if (!Downed.isDowned(entity)) {
-			float max = entity.getMaxHealth();
-			float health = entity.getHealth();
+			// (survival picks) its pool is emptied; the health is the blow's to take, so it stays as it is
 			float[] points = load(entity, plan);
-			reconcile(points, plan, max, health, Breaks.caps(entity, plan));
-			health = Math.min(health, hearts(points, plan, max));
-			float before = hearts(points, plan, max);
 			points[index] = 0.0F;
-			float lost = before - hearts(points, plan, max);
-			// (a limb alone never kills: what's left is the rest of the parts)
-			entity.setHealth(Math.max(0.01F, health - lost));
 			store(entity, plan, points);
 		}
 		return Breaks.mark(entity, part, by);
@@ -512,7 +568,7 @@ public final class Wounds {
 			HitRouting.damage(points, plan, aimed, loss);
 			landed = aimed;
 		} else {
-			landed = HitRouting.route(victim, plan, blow.source(), points, victim.getMaxHealth(), loss);
+			landed = HitRouting.route(victim, plan, blow.source(), points, poolMax(victim), loss);
 		}
 		// (0.20.61) a heavy chop to the torso may cut the body in half (Downed already tried it on the downable)
 		if (Dismember.halve(victim, blow.source(), loss, landed == BodyPart.BODY)) {
@@ -523,7 +579,7 @@ public final class Wounds {
 			Dismember.lethalBlow(victim, blow.source(), landed);
 			return;
 		}
-		sever(victim, plan, blow.source(), landed, was, points, loss, victim.getMaxHealth(), loss);
+		sever(victim, plan, blow.source(), landed, was, points, loss, poolMax(victim), loss);
 	}
 
 	/** (0.14.2) Notes a death about to go through: the blow, how hard, and the parts as they were, when (game time). */
@@ -551,6 +607,12 @@ public final class Wounds {
 		entity.removeAttached(PARTS);
 		entity.removeAttached(PARTS_MAX);
 		entity.removeTag(FIGHTS_ON_TAG);
+		// (survival picks) and the broken hearts with them
+		BodyPlan plan = BodyPlan.of(entity);
+		if (plan != null) {
+			PartStrain.brokenHearts(entity, plan);
+		}
+		entity.setHealth(entity.getMaxHealth());
 	}
 
 	/**
@@ -580,46 +642,44 @@ public final class Wounds {
 		creativeHeal(player);
 	}
 
-	/** Brings the parts in line with the health (healing fills the most hurt part, an unrouted loss comes off the limbs first). */
+	/**
+	 * (Survival picks) The parts keep their own pools apart from the health now, so ordinary healing (food, potions)
+	 * doesn't move them. This is for the callers that set the health on purpose (a revive, getting up, a rewind, a
+	 * lifesaver): every part below the health's share of its most is lifted to it (as far as it may heal,
+	 * {@link Breaks#caps}); none is ever lowered. A full heal is {@link #healAll}.
+	 */
 	public static void reconcile(LivingEntity entity) {
 		BodyPlan plan = BodyPlan.of(entity);
-		if (plan == null || plan == BodyPlan.SIMPLE) {
+		if (plan == null || plan == BodyPlan.SIMPLE || entity.getAttached(PARTS) == null) {
 			return;
 		}
-		Float known = entity.getAttached(PARTS_MAX);
-		if (entity.getAttached(PARTS) == null && (entity.getHealth() < entity.getMaxHealth()
-			|| known == null || known >= entity.getMaxHealth())) {
-			// no parts saved: a gap below the max (e.g. after a raised max) is no unrouted loss, so no phantom wounds
-			return;
-		}
+		float share = Mth.clamp(entity.getHealth() / Math.max(0.01F, entity.getMaxHealth()), 0.0F, 1.0F);
+		float[] caps = Breaks.caps(entity, plan);
 		float[] points = load(entity, plan);
-		float refused = reconcile(points, plan, entity.getMaxHealth(), entity.getHealth(), Breaks.caps(entity, plan));
-		store(entity, plan, points);
-		if (refused > EPS && entity.isAlive()) {
-			// (0.14.2) healing the broken and severed parts can't take: health stays what the parts hold
-			entity.setHealth(Math.max(0.01F, hearts(points, plan, entity.getMaxHealth())));
+		for (int i = 0; i < points.length; i++) {
+			float most = cap(entity, plan, i) * Math.min(share, caps == null ? 1.0F : caps[i]);
+			points[i] = Math.max(points[i], most);
 		}
+		store(entity, plan, points);
 	}
 
 	/**
-	 * (0.14.1) After a death was cancelled ({@link Downed}): the parts follow the health, and head and body hold on to at
-	 * least {@link #MIN_VITAL_AFTER_SAVE} of themselves.
+	 * (0.14.1) After a death was cancelled ({@link Downed}): head and body hold on to at least {@link #MIN_VITAL_AFTER_SAVE}
+	 * of themselves, so nobody is up (or down) with a blacked-out head or body.
 	 */
 	public static void settle(LivingEntity entity) {
 		BodyPlan plan = BodyPlan.of(entity);
 		if (plan == null || plan == BodyPlan.SIMPLE) {
 			return;
 		}
-		float max = entity.getMaxHealth();
 		float[] points = load(entity, plan);
-		reconcile(points, plan, max, entity.getHealth(), Breaks.caps(entity, plan));
-		ensureVital(points, plan, max);
+		ensureVital(entity, points, plan);
 		store(entity, plan, points);
 	}
 
 	/**
-	 * (0.15.94) Patched up: nothing bleeding or festering, no break left unset, and every part hurt past the bruise line
-	 * ({@link #HEART_SPILL_FROM}) wearing a dressing or a splint. Until then natural healing runs at {@link #UNPATCHED_REGEN}.
+	 * (0.15.94) Patched up: nothing bleeding or festering, no break left unset, and every part missing more than
+	 * {@link #PATCH_FROM} of its pool wearing a dressing or a splint. Until then natural healing runs at {@link #UNPATCHED_REGEN}.
 	 */
 	public static boolean patchedUp(LivingEntity entity) {
 		BodyPlan plan = BodyPlan.of(entity);
@@ -633,12 +693,11 @@ public final class Wounds {
 			return true;
 		}
 		int dressed = Bleeding.wrapped(entity) | Breaks.splinted(entity);
-		float max = entity.getMaxHealth();
 		float[] points = load(entity, plan);
 		for (int i = 0; i < points.length; i++) {
 			BodyPart part = plan.part(i);
-			float cap = plan.share(i) * max;
-			if (cap > 0.0F && points[i] < (1.0F - HEART_SPILL_FROM) * cap - EPS && !Breaks.missing(entity, part)
+			float cap = cap(entity, plan, i);
+			if (cap > 0.0F && points[i] < (1.0F - PATCH_FROM) * cap - EPS && !Breaks.missing(entity, part)
 				&& (dressed & Breaks.bit(part)) == 0) {
 				return false;
 			}
@@ -646,37 +705,30 @@ public final class Wounds {
 		return true;
 	}
 
-	/** (0.15.94) Bruised parts (above the bruise line, not broken, cut or festering) mend a little, every {@link #PLAYER_RECONCILE_TICKS}. */
-	private static void mendBruises(LivingEntity entity, boolean patched) {
-		BodyPlan plan = BodyPlan.of(entity);
-		if (plan == null || plan == BodyPlan.SIMPLE || entity.getAttached(PARTS) == null || Downed.isDowned(entity)) {
+	/**
+	 * (Survival picks) Every {@link #PLAYER_RECONCILE_TICKS}, a fed player's parts mend a little by themselves (a whole
+	 * part in {@link #PART_MEND_TICKS}, at {@link #UNPATCHED_REGEN} of that until patched up), paying food for it.
+	 */
+	private static void mendParts(ServerPlayer player, boolean patched) {
+		if (Downed.isDowned(player) || player.getFoodData().getFoodLevel() < MEND_FOOD_MIN) {
 			return;
 		}
-		float max = entity.getMaxHealth();
-		float[] points = load(entity, plan);
-		float[] caps = Breaks.caps(entity, plan);
-		float step = HEART_SPILL_FROM * PLAYER_RECONCILE_TICKS / (float) BRUISE_MEND_TICKS * (patched ? 1.0F : UNPATCHED_REGEN);
-		boolean changed = false;
-		for (int i = 0; i < points.length; i++) {
-			float cap = plan.share(i) * max;
-			float most = cap * (caps == null ? 1.0F : caps[i]);
-			if (cap > 0.0F && points[i] >= (1.0F - HEART_SPILL_FROM) * cap - EPS && points[i] < most - EPS) {
-				points[i] = Math.min(most, points[i] + step * cap);
-				changed = true;
-			}
-		}
-		if (changed) {
-			store(entity, plan, points);
-		}
+		mendEvery(player, PLAYER_RECONCILE_TICKS / (float) PART_MEND_TICKS * (patched ? 1.0F : UNPATCHED_REGEN));
+	}
+
+	/** (Survival picks) Whether {@code entity} is being finished by a blow that blacked out its head while it stood (so it isn't downed). */
+	public static boolean headKilled(LivingEntity entity) {
+		return HEAD_KILLS.contains(entity);
 	}
 
 	// ---- hits -------------------------------------------------------------------------------------------------------------
 
 	/**
 	 * (0.15.94) A hit as vanilla is about to take it from the health ({@code WoundsHurtMixin}, around {@code setHealth} in
-	 * {@code actuallyHurt}): {@code amount} (after armour and absorption) lands on the parts first, and the health it
-	 * leaves is what the parts' hearts come to ({@link #hearts}), not {@code health - amount}. Returns the health to set.
-	 * The rest of the blow (breaks, cuts, severing, death of wounds) follows in {@link #onDamage}.
+	 * {@code actuallyHurt}): {@code amount} (after armour and absorption) lands on the parts too. (Survival picks) The health
+	 * takes the hit as vanilla does, made harder by a headshot ({@link HitRouting#HEADSHOT}) and by the 20% debuffs
+	 * ({@link PartStrain#hitScale}). Returns the health to set. The rest of the blow (breaks, cuts, severing, downing)
+	 * follows in {@link #onDamage}.
 	 */
 	public static float takeHit(LivingEntity victim, DamageSource source, float amount, float vanilla) {
 		if (amount <= EPS || FINISHING.contains(victim) || !(victim.level() instanceof ServerLevel) || !victim.isAlive()
@@ -687,12 +739,15 @@ public final class Wounds {
 		if (plan == null || plan == BodyPlan.SIMPLE || victim instanceof Player player && (player.isCreative() || player.isSpectator())) {
 			return vanilla;
 		}
-		float max = victim.getMaxHealth();
 		float before = victim.getHealth();
-		Routed hit = route(victim, plan, source, before, amount);
+		float scale = PartStrain.hitScale(victim, source);
+		Routed hit = route(victim, plan, source, before, amount * scale);
 		ROUTED.put(victim, hit);
+		if (HitRouting.headshot(victim, source, hit.landed())) {
+			scale *= HitRouting.HEADSHOT;
+		}
 		// (never above what vanilla had: the hit only ever takes)
-		return Math.min(before, hearts(hit.now(), plan, max));
+		return Math.min(before, before - amount * scale);
 	}
 
 	/** The part {@code source}'s hit on {@code victim} landed on, while it lands (before its after-damage), or null if not known. */
@@ -701,11 +756,12 @@ public final class Wounds {
 		return hit != null && hit.source() == source ? hit.landed() : null;
 	}
 
-	/** (0.15.94) Takes {@code loss} from the parts as they stand at {@code health}, where {@code source} lands it; stores them. */
+	/** (0.15.94) Takes {@code loss} from the parts where {@code source} lands it; stores them. {@code health}: theirs as the blow began. */
 	private static Routed route(LivingEntity victim, BodyPlan plan, DamageSource source, float health, float loss) {
-		float max = victim.getMaxHealth();
+		float max = poolMax(victim);
+		// (asked before the parts are stored: broken hearts may lower the most health)
+		boolean full = health >= victim.getMaxHealth() - NoOneShot.SLACK;
 		float[] points = load(victim, plan);
-		reconcile(points, plan, max, health, Breaks.caps(victim, plan));
 		float[] was = points.clone();
 		// (0.14.2) a power's own cut (Dismember.cut) lands where it was aimed
 		BodyPart aimed = Dismember.cutAim(victim);
@@ -724,7 +780,7 @@ public final class Wounds {
 			landed = HitRouting.route(victim, plan, source, points, max, loss);
 		}
 		store(victim, plan, points);
-		return new Routed(source, landed, was, points, loss, locked);
+		return new Routed(source, landed, was, points, loss, locked, full);
 	}
 
 	private static void onDamage(LivingEntity victim, DamageSource source, float base, float taken, boolean blocked) {
@@ -737,32 +793,21 @@ public final class Wounds {
 		if (plan == null || plan == BodyPlan.SIMPLE || victim instanceof Player player && (player.isCreative() || player.isSpectator())) {
 			return;
 		}
-		float max = victim.getMaxHealth();
-		float health = victim.getHealth();
-		float[] caps = Breaks.caps(victim, plan);
 		if (Downed.isDowned(victim)) {
-			// (0.14.1) down: the parts only follow the health (head and body kept), so only the health running out ends them
-			float[] points = load(victim, plan);
-			reconcile(points, plan, max, health, caps);
-			ensureVital(points, plan, max);
-			store(victim, plan, points);
+			// (0.14.1) down: the hits are the health's alone (head and body kept), so only the health running out ends them
+			settle(victim);
 			return;
 		}
 		if (hit == null || hit.source() != source) {
 			// (0.15.94) a hit the mixin never saw (an entity that takes its health its own way): vanilla took it from the
-			// hearts, so it's routed now and the hearts the bruising didn't cost are given back
-			float before = Math.min(max, health + taken);
-			hit = route(victim, plan, source, before, before - health);
-			victim.setHealth(Math.max(0.01F, Math.min(before, hearts(hit.now(), plan, max))));
+			// health, so the parts take it now
+			hit = route(victim, plan, source, victim.getHealth() + taken, taken);
 		}
+		float max = poolMax(victim);
 		float[] was = hit.was();
 		float[] points = hit.now();
 		float loss = hit.loss();
 		BodyPart landed = hit.landed();
-		if (hearts(points, plan, max) < victim.getHealth() - EPS && caps != null) {
-			// (0.14.2) health the broken and severed parts couldn't hold (healed in since the last look) is refused
-			victim.setHealth(Math.max(0.01F, hearts(points, plan, max)));
-		}
 		Entity by = source.getEntity();
 		// (0.20.61) a zombie cut in half at the waist by a heavy chop crawls on as its upper half
 		if (!blocked && Dismember.zombie(victim) && Dismember.halve(victim, source, loss, landed == BodyPart.BODY)) {
@@ -794,31 +839,38 @@ public final class Wounds {
 			// a mark of what made it, where it landed
 			WoundMarks.onHit(victim, plan, source, landed, loss);
 		}
-		if (victim.isAlive() && lethal(victim, points, plan)) {
-			finish(level, victim, plan, by, null);
+		if (victim.isAlive() && blacked(victim, was, points, plan)) {
+			// (survival picks) only a blow that landed on the head and blacked it out kills outright, and not from full health
+			int head = plan.index(BodyPart.HEAD);
+			boolean headKill = landed == BodyPart.HEAD && head >= 0 && was[head] > EPS && points[head] <= EPS && !hit.full();
+			finish(level, victim, plan, by, null, headKill);
 		}
 	}
 
-	/** Head or body is gone: the creature dies of its wounds, through its death events (so {@link Downed} can down them instead). */
-	private static void finish(ServerLevel level, LivingEntity victim, BodyPlan plan, @Nullable Entity by, @Nullable ResourceKey<DamageType> type) {
+	/**
+	 * Head or body went black: the creature goes down, through its death events ({@link Downed} downs the downable; the rest
+	 * die). {@code headKill}: a blow to the head of one standing, which ends them outright ({@link #headKilled}).
+	 */
+	private static void finish(ServerLevel level, LivingEntity victim, BodyPlan plan, @Nullable Entity by, @Nullable ResourceKey<DamageType> type,
+		boolean headKill) {
 		if (FINISHING.contains(victim)) {
 			return;
 		}
 		DamageSource source = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(type == null ? WOUNDS_DAMAGE : type), by);
 		FINISHING.add(victim);
+		if (headKill) {
+			HEAD_KILLS.add(victim);
+		}
 		try {
 			victim.setInvulnerableTime(0);
 			victim.hurtServer(level, source, Float.MAX_VALUE);
 		} finally {
 			FINISHING.remove(victim);
+			HEAD_KILLS.remove(victim);
 		}
 		if (victim.isAlive() && victim.getHealth() > 0.0F) {
-			// something cancelled the death: the parts follow the health, and head and body get a little back
-			float max = victim.getMaxHealth();
-			float[] points = load(victim, plan);
-			reconcile(points, plan, max, victim.getHealth(), Breaks.caps(victim, plan));
-			ensureVital(points, plan, max);
-			store(victim, plan, points);
+			// something cancelled the death: head and body get a little back
+			settle(victim);
 		}
 	}
 
@@ -826,7 +878,7 @@ public final class Wounds {
 
 	/** The parts in health points. A creature with no attachment is whole. */
 	static float[] load(LivingEntity entity, BodyPlan plan) {
-		float max = entity.getMaxHealth();
+		float max = poolMax(entity);
 		// a raised max is added capacity, not a loss: the fractions still mean their old max
 		Float known = entity.getAttached(PARTS_MAX);
 		float base = known != null && known > 0.0F && known < max ? known : max;
@@ -844,7 +896,7 @@ public final class Wounds {
 		if (plan == BodyPlan.SIMPLE) {
 			return;
 		}
-		float max = entity.getMaxHealth();
+		float max = poolMax(entity);
 		List<Float> fractions = new ArrayList<>(points.length);
 		boolean whole = true;
 		for (int i = 0; i < points.length; i++) {
@@ -865,57 +917,29 @@ public final class Wounds {
 		} else if (!fractions.equals(old)) {
 			entity.setAttached(PARTS, List.copyOf(fractions));
 		}
+		// (survival picks) every part at zero takes a share off the most health
+		PartStrain.brokenHearts(entity, plan);
 	}
 
 	/**
-	 * (0.15.94) The hearts a part's {@code points} (of its {@code cap}) are worth: all of its share while only bruised (down
-	 * to {@link #HEART_SPILL_FROM} taken), then falling to nothing as the part does.
+	 * (Survival picks) Whether this hit ({@code was} before it, {@code now} after) blacked out the head or the body, which
+	 * downs (or kills what can't be downed). A zombie or skeleton whose body gave out may fight on instead
+	 * ({@link #UNDEAD_FIGHT_ON}, rolled once; then only its head counts), and one that never needed its head counts only its
+	 * body. Only the going black counts, so one up again with a part still at nothing isn't felled by the next scratch.
 	 */
-	static float heart(float points, float cap) {
-		return cap <= 0.0F ? 0.0F : Mth.clamp(points / (1.0F - HEART_SPILL_FROM), 0.0F, cap);
-	}
-
-	/** (0.15.94) A part's points for {@code hearts} of its {@code cap}; whole hearts leave a bruise as it was ({@code points}), up to the bruise line. */
-	static float unheart(float hearts, float cap, float points) {
-		if (cap <= 0.0F) {
-			return 0.0F;
-		}
-		float line = (1.0F - HEART_SPILL_FROM) * cap;
-		return hearts >= cap - EPS ? Mth.clamp(points, line, cap) : Math.max(0.0F, hearts) * (1.0F - HEART_SPILL_FROM);
-	}
-
-	/** (0.15.94) The health {@code points} come to: each part's {@link #heart}. */
-	static float hearts(float[] points, BodyPlan plan, float max) {
-		float total = 0.0F;
-		for (int i = 0; i < points.length; i++) {
-			total += heart(points[i], plan.share(i) * max);
-		}
-		return total;
-	}
-
-	static float sum(float[] points) {
-		float total = 0.0F;
-		for (float point : points) {
-			total += point;
-		}
-		return total;
-	}
-
-	/**
-	 * (0.14.1) Whether these parts kill: head or body at zero, except a zombie or skeleton whose body gave out and that
-	 * fights on ({@link #UNDEAD_FIGHT_ON}, rolled once; then only its head counts).
-	 */
-	static boolean lethal(LivingEntity entity, float[] points, BodyPlan plan) {
-		if (!vitalGone(points, plan)) {
+	static boolean blacked(LivingEntity entity, float[] was, float[] now, BodyPlan plan) {
+		int head = plan.index(BodyPart.HEAD);
+		int body = plan.index(BodyPart.BODY);
+		boolean headOut = head >= 0 && was[head] > EPS && now[head] <= EPS;
+		boolean bodyOut = body >= 0 && was[body] > EPS && now[body] <= EPS;
+		if (!headOut && !bodyOut) {
 			return false;
 		}
-		int head = plan.index(BodyPart.HEAD);
 		if (head >= 0 && Dismember.headless(entity) && entity.getType().builtInRegistryHolder().is(Dismember.HEADLESS_UNDEAD)) {
 			// (0.14.2) it never needed its head (Dismember): only its body counts
-			int body = plan.index(BodyPart.BODY);
-			return body >= 0 && points[body] <= EPS;
+			return bodyOut;
 		}
-		if (head < 0 || points[head] <= EPS || !(entity instanceof Zombie || entity.getType().builtInRegistryHolder().is(EntityTypeTags.SKELETONS))) {
+		if (headOut || !(entity instanceof Zombie || entity.getType().builtInRegistryHolder().is(EntityTypeTags.SKELETONS))) {
 			return true;
 		}
 		if (entity.entityTags().contains(FIGHTS_ON_TAG)) {
@@ -928,129 +952,11 @@ public final class Wounds {
 		return true;
 	}
 
-	/** Head or body at zero. */
-	static boolean vitalGone(float[] points, BodyPlan plan) {
+	/** Head and body hold at least {@link #MIN_VITAL_AFTER_SAVE} of their pools. */
+	private static void ensureVital(LivingEntity entity, float[] points, BodyPlan plan) {
 		for (int i = 0; i < points.length; i++) {
-			if (plan.part(i).vital() && points[i] <= EPS) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Makes the parts' hearts ({@link #hearts}) add up to {@code health}: a gain goes to the most hurt part first, filling it
-	 * before the next; a loss nobody routed comes off the limbs, then the body, then the head, and never takes head or body
-	 * to zero. (0.14.2) A gain fills each part only up to its fraction in {@code caps} ({@link Breaks#caps}: a broken part
-	 * to {@link Breaks#BROKEN_CAP}, a severed one not at all; null: no caps). Returns the gain nothing could take.
-	 * (0.15.94) Worked on the hearts: a gain brings a part back up to the bruise line, never into it (bruises mend on their
-	 * own, {@link #mendBruises}); a part still bruised keeps its bruise.
-	 */
-	static float reconcile(float[] points, BodyPlan plan, float max, float health, float @Nullable [] caps) {
-		float[] hearts = new float[points.length];
-		float[] most = new float[points.length];
-		float[] floor = new float[points.length];
-		for (int i = 0; i < points.length; i++) {
-			float cap = plan.share(i) * max;
-			hearts[i] = heart(points[i], cap);
-			most[i] = heart(caps == null ? cap : cap * caps[i], cap);
-			floor[i] = plan.part(i).vital() ? heart(MIN_VITAL_UNROUTED * cap, cap) : 0.0F;
-		}
-		float refused = reconcileHearts(hearts, plan, max, health, most, floor);
-		for (int i = 0; i < points.length; i++) {
-			points[i] = unheart(hearts[i], plan.share(i) * max, points[i]);
-		}
-		return refused;
-	}
-
-	/** (0.15.94) {@link #reconcile}'s arithmetic, on each part's hearts ({@code most}: as far as each may heal; {@code floor}: what an unrouted loss leaves). */
-	private static float reconcileHearts(float[] points, BodyPlan plan, float max, float health, float[] mostOf, float[] floorOf) {
-		float diff = Mth.clamp(health, 0.0F, max) - sum(points);
-		if (diff > EPS) {
-			float gain = diff;
-			while (gain > EPS) {
-				int worst = -1;
-				float lowest = Float.MAX_VALUE;
-				for (int i = 0; i < points.length; i++) {
-					float cap = plan.share(i) * max;
-					if (cap > 0.0F && points[i] < mostOf[i] - EPS && points[i] / cap < lowest) {
-						lowest = points[i] / cap;
-						worst = i;
-					}
-				}
-				if (worst < 0) {
-					return gain;
-				}
-				float add = Math.min(gain, mostOf[worst] - points[worst]);
-				points[worst] += add;
-				gain -= add;
-			}
-		} else if (diff < -EPS) {
-			float loss = -diff;
-			// limbs first, then the body, then the head
-			for (int pass = 0; pass < 3 && loss > EPS; pass++) {
-				for (int i = 0; i < points.length && loss > EPS; i++) {
-					BodyPart part = plan.part(i);
-					boolean mine = pass == 0 ? !part.vital() : pass == 1 ? part == BodyPart.BODY : part == BodyPart.HEAD;
-					if (!mine) {
-						continue;
-					}
-					float take = Math.min(loss, Math.max(0.0F, points[i] - floorOf[i]));
-					points[i] -= take;
-					loss -= take;
-				}
-			}
-			// health below the floors: the parts still have to add up (this never kills, only hits and wounds do)
-			for (int i = 0; i < points.length && loss > EPS; i++) {
-				if (plan.part(i).vital()) {
-					float take = Math.min(loss, points[i]);
-					points[i] -= take;
-					loss -= take;
-				}
-			}
-		}
-		return 0.0F;
-	}
-
-	/**
-	 * Head and body hold at least {@link #MIN_VITAL_AFTER_SAVE} of themselves, the rest taken from the other parts (the
-	 * largest first). (0.15.94) Moved as hearts, so the hearts still add up to the health.
-	 */
-	private static void ensureVital(float[] points, BodyPlan plan, float max) {
-		float[] hearts = new float[points.length];
-		for (int i = 0; i < points.length; i++) {
-			hearts[i] = heart(points[i], plan.share(i) * max);
-		}
-		ensureVitalHearts(hearts, plan, max);
-		for (int i = 0; i < points.length; i++) {
-			points[i] = unheart(hearts[i], plan.share(i) * max, points[i]);
-		}
-	}
-
-	private static void ensureVitalHearts(float[] points, BodyPlan plan, float max) {
-		for (int i = 0; i < points.length; i++) {
-			if (!plan.part(i).vital()) {
-				continue;
-			}
-			float want = heart(MIN_VITAL_AFTER_SAVE * plan.share(i) * max, plan.share(i) * max);
-			float need = want - points[i];
-			while (need > EPS) {
-				int donor = -1;
-				float most = EPS;
-				for (int j = 0; j < points.length; j++) {
-					float spare = points[j] - (plan.part(j).vital() ? heart(MIN_VITAL_AFTER_SAVE * plan.share(j) * max, plan.share(j) * max) : 0.0F);
-					if (j != i && spare > most) {
-						most = spare;
-						donor = j;
-					}
-				}
-				if (donor < 0) {
-					break;
-				}
-				float move = Math.min(need, most);
-				points[donor] -= move;
-				points[i] += move;
-				need -= move;
+			if (plan.part(i).vital()) {
+				points[i] = Math.max(points[i], MIN_VITAL_AFTER_SAVE * cap(entity, plan, i));
 			}
 		}
 	}

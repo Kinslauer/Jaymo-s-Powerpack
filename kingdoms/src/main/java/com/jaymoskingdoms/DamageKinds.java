@@ -229,6 +229,11 @@ public final class DamageKinds {
 		if (weapon.is(ItemTags.SPEARS) || weapon.is(Items.TRIDENT) || weapon.is(ItemTags.PICKAXES) || weapon.is(Items.CROSSBOW) || weapon.is(Items.BOW)) {
 			return Kind.PIERCING;
 		}
+		// spears and the pitchfork sit in the swords tag, but they thrust
+		String path = BuiltInRegistries.ITEM.getKey(weapon.getItem()).getPath();
+		if (path.contains("spear") || path.contains("pitchfork")) {
+			return Kind.PIERCING;
+		}
 		if (weapon.is(ItemTags.SWORDS) || weapon.is(ItemTags.AXES) || weapon.is(ItemTags.HOES)) {
 			return Kind.SLASHING;
 		}

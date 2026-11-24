@@ -151,7 +151,11 @@ How the two get along (`core/CarryOnCompat`, `mixin/carryon/CarryOnPickupMixin` 
 - Carry On's `tryPickupEntity` always says no; its `canCarryGeneral` and `tryPickUpBlock` say no while our carry, a
   Kitchen corpse, being carried, a throw's tumble or being downed has your arms, and for any block in
   `#jaymospowers:carry_on_no_lift` (pod parts, salvage rack, smeltery controller and drain, kiln load, sentry spawner,
-  infusion matrix, Kingdoms' bounty board, pulley and plot stake, Kitchen's windmill and waterwheel).
+  infusion matrix, Kingdoms' bounty board, pulley and plot stake, Kitchen's windmill and waterwheel, and every cooking
+  block: campfires, furnace, smoker, blast furnace, Cooking for Blockheads' ovens, counters, cooking tables and cutting
+  board, Kitchen's stove, cutting board, cooking pot, frying pan, spits, hearth, brewing keg, cask, still, tea
+  kettle and sushi mat). A refused lift passes the click on, so sneak + right-click there opens the cooking screen or
+  does the block's own use.
 - With a block in Carry On's arms (`CarryOnCompat.isCarrying`, read by reflection from its synced data, both sides): no
   picking up a body or a corpse (a `UseEntityCallback` phase that runs first), no ledge grab, no taking a part off a
   salvage rack, and `FirstPersonArms` leaves the hands to Carry On. It counts as carrying for Z Fighter training.
@@ -159,9 +163,11 @@ How the two get along (`core/CarryOnCompat`, `mixin/carryon/CarryOnPickupMixin` 
 
 ## Testing (blocks)
 1. Empty hands, sneak + right-click a chest with items in it: it's lifted in Carry On's hold; set it down elsewhere and
-   the items are still in it. A furnace mid-smelt, a barrel, Kitchen's cabinet: the same.
+   the items are still in it. A barrel, Kitchen's cabinet: the same.
 2. A crafting table lifts too (Kitchen gives it a block entity, with its grid). An anvil or stone: nothing lifts (Carry
    On only takes blocks with a block entity).
+2b. Sneak + right-click a lit campfire, a furnace, a lit oven or a cutting board, empty hands: nothing lifts; the
+   cooking screen opens (or the block's own sneak use).
 3. Pod parts: sneak + right-click a part, it goes into our hold; set it onto a pod. Carry On never takes one, nor a
    salvage rack, a smeltery controller, a bounty board.
 4. Carry a player, then sneak + right-click a chest: you let the player go (no chest lifted). Carry a Kitchen corpse:

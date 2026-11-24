@@ -1,0 +1,16 @@
+{
+  "item.jaymoskingdoms.devil_splitter": "Devil Splitter",
+  "item.jaymoskingdoms.thirst_for_blood": "Thirst for Blood",
+  "item.jaymoskingdoms.crystallized_dagger": "Crystallized Dagger",
+  "item.jaymoskingdoms.horn_of_apocalypse": "Horn of Apocalypse",
+  "tooltip.jaymoskingdoms.devil_splitter.1": "Deals double damage to the Nehemoth,",
+  "tooltip.jaymoskingdoms.devil_splitter.2": "and killing one mends it a little.",
+  "tooltip.jaymoskingdoms.devil_splitter.3": "Strike the same foe six times within twenty seconds:",
+  "tooltip.jaymoskingdoms.devil_splitter.4": "the sixth blow is doubled.",
+  "tooltip.jaymoskingdoms.thirst_for_blood.charges": "Blood Charges: %s / %s",
+  "tooltip.jaymoskingdoms.thirst_for_blood.1": "Each foe of size you kill with it loads a charge.",
+  "tooltip.jaymoskingdoms.thirst_for_blood.2": "Use it to fire a laser that burns what it crosses.",
+  "tooltip.jaymoskingdoms.crystallized_dagger.1": "The lower your health, the faster it strikes.",
+  "tooltip.jaymoskingdoms.crystallized_dagger.2": "Some kills may leave a crystallized fragment.",
+  "tooltip.jaymoskingdoms.horn_of_apocalypse": "Cuts everything alive nearby and blocks its healing."
+}

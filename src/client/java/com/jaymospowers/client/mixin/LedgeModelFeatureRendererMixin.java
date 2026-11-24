@@ -14,6 +14,7 @@ abstract class LedgeModelFeatureRendererMixin {
 		shift = At.Shift.AFTER))
 	private void jaymospowers$ledgeLimbs(ModelFeatureRenderer.Submit<?> submit, CallbackInfo ci) {
 		LedgePose.applyModel(submit.model(), submit.state());
+		com.jaymospowers.client.NpcClimbPose.applyModel(submit.model(), submit.state());
 		com.jaymospowers.client.freerun.BarHangPose.applyModel(submit.model(), submit.state());
 	}
 }

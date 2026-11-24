@@ -65,7 +65,9 @@ import org.jspecify.annotations.Nullable;
  * happened to face them. Now the creatures of the night and the dark ({@link #DARKVISION}, the undead among them) see in
  * the dark as in dim light ({@link #DARKVISION_LIGHT}); anyone walking about within {@link #HEARD} blocks who isn't sneaking
  * is heard whatever the light or the way the mob faces (a Ranger's quiet tread, {@link Rangers#quiet}, makes that nearer); and whatever shows a boss bar
- * ({@link BossBars#boss}, the Unburied and the Snow Widow among them) senses as a boss.</li>
+ * ({@link BossBars#boss}, the Unburied and the Snow Widow among them) senses as a boss. (2026-11-23) A humanoid (illagers,
+ * zombies, skeletons, piglins, the folk, MCA's villagers) sees nothing outside its cone past {@link #BEHIND_CLOSE}: there it
+ * only hears ({@link #HUMANOID_BEHIND}); and a mob busy with something else, eating above all, notices half as far ({@link #DISTRACTED}).</li>
  * <li><b>Losing track</b> ({@link WatchGoal}, {@link SearchGoal}): a mob that has not had line of sight to its player target
  * for {@link #LOSE_TRACK_TICKS} drops them, walks to where they were last seen and looks around for
  * {@link #LOOK_TICKS}. Bosses never lose track, and the kingdoms' own folk are exempt. State lives in {@link #TRACKS}, one per mob (not an attachment: Fabric would copy it onto a converted mob). Spiders keep their own memory ({@code wild.SpiderMinds}).</li>
@@ -96,7 +98,7 @@ public final class Senses {
 	static final double[] QUIET_STEP_SNEAK = {0.5, 0.4};
 	/** Shadowed: per rank, this much less sight, in proportion to how dark it is where you stand. */
 	static final double SHADOWED_PER_RANK = 0.1;
-	/** A mob sees in front of it within this cosine of its look (0.5: a 120 degree cone); outside, this share, unless closer than {@link #BEHIND_CLOSE} blocks. */
+	/** A mob sees in front of it within this cosine of its look (0.5: a 120 degree cone); outside, this share, unless closer than {@link #BEHIND_CLOSE} blocks and not sneaking ({@link #close}). */
 	static final double VIEW_COS = 0.5, BEHIND = 0.3, BEHIND_CLOSE = 2.0;
 	/** A mob with darkvision sees in the dark as in this much light (0 dark, 1 full light). */
 	static final double DARKVISION_LIGHT = 0.6;
@@ -109,6 +111,17 @@ public final class Senses {
 	static final double ABOVE_FROM = 4.0, ABOVE = 0.5, UP_LIMIT = 40.0;
 	/** A player walking about (moving, not sneaking) this near (blocks) is heard, whatever the light or where the mob looks. */
 	static final double HEARD = 8.0;
+	/**
+	 * Andy (2026-11-23, stalking a pillager caravan): "all MCA and humanoids should operate on a vision cone, and rely on
+	 * hearing for peripheral vision." A humanoid ({@link #humanoid}) sees this share of its range outside its view cone
+	 * (none: beyond {@link #BEHIND_CLOSE} it only hears you, {@link #HEARD} and {@link Hearing}); other mobs keep {@link #BEHIND}.
+	 */
+	static final double HUMANOID_BEHIND = 0.0;
+	/**
+	 * Andy (2026-11-23): "all mobs should have reduced visibility while focused on another task, for example if they are
+	 * eating". A mob busy with something else ({@link #distracted}) sees and hears this share as far.
+	 */
+	static final double DISTRACTED = 0.5;
 	/** Creatures of the night and the dark, that see in it: {@code jaymoskingdoms:darkvision}. */
 	static final TagKey<EntityType<?>> DARKVISION = TagKey.create(Registries.ENTITY_TYPE, JaymosKingdoms.id("darkvision"));
 	/** The least a mob's sight may be cut to. */
@@ -382,10 +395,56 @@ public final class Senses {
 	 * creative or spectator player, or anything that isn't a hostile or neutral mob. A boss's never drops below {@link #BOSS_SIGHT_MIN}.
 	 */
 	public static double factor(LivingEntity self, ServerLevel level, Entity looking) {
-		if (!(self instanceof ServerPlayer player) || !(looking instanceof Mob looker) || touched(player) || !sighted(looker) || locked(looker, player)) {
+		if (!(self instanceof ServerPlayer player) || !(looking instanceof Mob looker) || touched(player) || locked(looker, player)) {
 			return 1.0;
 		}
+		if (!sighted(looker)) {
+			// (2026-11-23) MCA's other villagers keep their own sight, but only in front of them: at their sides and back they hear you
+			return McaCompat.isMca(looker) && !close(looker, player) && (!inCone(looker, player) || steeplyAbove(looker, player))
+				? Math.max(MIN_FACTOR, heard(player, level, looker, 0.0)) : 1.0;
+		}
 		return sight(player, level, looker);
+	}
+
+	/**
+	 * Close enough ({@link #BEHIND_CLOSE}) to be noticed outside the view cone: only walking up, not sneaking (Andy: "while
+	 * not sneaking, if you sneak you can get right up for the takedown").
+	 */
+	static boolean close(LivingEntity looker, ServerPlayer player) {
+		return player.distanceTo(looker) <= BEHIND_CLOSE && !player.isShiftKeyDown();
+	}
+
+	/** (2026-11-23) Whose sight stops at the edge of its view cone ({@link #HUMANOID_BEHIND}): the people of the world. */
+	static boolean humanoid(Mob mob) {
+		return MobCombat.humanoid(mob) || Temperaments.humanoid(mob);
+	}
+
+	/**
+	 * (2026-11-23) {@code mob} has its mind on something else, so it notices less ({@link #DISTRACTED}): eating (a camp at
+	 * supper, a villager at a meal; a scavenger at a body is Jaymo's Kitchen's own, {@code ScavengerSightMixin}), robbing or carrying off the dead, grabbing loot, or fighting
+	 * someone other than {@code player}.
+	 */
+	static boolean distracted(Mob mob, ServerPlayer player) {
+		LivingEntity target = mob.getTarget();
+		return target != null && target != player && target.isAlive()
+			|| CampSuppers.eating(mob) || mob instanceof net.minecraft.world.entity.npc.villager.Villager v && Meals.eating(v)
+			|| Scavengers.busy(mob) || Looters.busy(mob) || Bearers.busy(mob) || Undertakers.busy(mob);
+	}
+
+	/**
+	 * The sight share at which {@code player} is heard by {@code looker} rather than seen: someone walking about close by, not
+	 * sneaking, is noticed in the dark or behind its back (0 for someone sneaking or standing still). At least {@code f}.
+	 */
+	private static double heard(ServerPlayer player, ServerLevel level, Mob looker, double f) {
+		if (!player.isCrouching() && MOVING.getOrDefault(player.getUUID(), true) && looker.getAttributes().hasAttribute(Attributes.FOLLOW_RANGE)) {
+			double range = looker.getAttributeValue(Attributes.FOLLOW_RANGE);
+			if (range > 0.0) {
+				// (Hearing) quiet or loud ground, wet ground, and soft boots and leggings carry it less or further (ordinary ground as before)
+				// (class trees) and Muffled boots (a Tinkerer's infusion) carry it half as far, a Second Storey Thief's tread too
+				f = Math.max(f, HEARD * Rangers.quiet(player) * TinkerPerks.footfall(player) * RogueExtras.steps(player) * Footsteps.heardFloor(level, player) / range);
+			}
+		}
+		return f;
 	}
 
 	/**
@@ -431,11 +490,12 @@ public final class Senses {
 		if (looker.getLastHurtByMob() == player && looker.tickCount - looker.getLastHurtByMobTimestamp() < REVENGE_TICKS) {
 			f *= REVENGE;
 		}
-		if (player.distanceTo(looker) > BEHIND_CLOSE) {
+		if (!close(looker, player)) {
 			// (2026-11-19) well above it, and steeply up out of its sight, as if behind it
 			double rise = player.getEyeY() - looker.getEyeY();
 			if (!inCone(looker, player) || steeplyAbove(looker, player)) {
-				f *= BEHIND;
+				// (2026-11-23) a person sees nothing out there: only what it hears (below)
+				f *= humanoid(looker) ? HUMANOID_BEHIND : BEHIND;
 			}
 			if (rise > ABOVE_FROM) {
 				f *= ABOVE;
@@ -461,13 +521,10 @@ public final class Senses {
 		// (class trees) a Stalker Ranger, crouched and still in grass or leaves, isn't seen past six blocks
 		f = RogueExtras.stalked(player, looker, !MOVING.getOrDefault(player.getUUID(), true), f);
 		// heard: someone walking about close by, not sneaking, is noticed in the dark or behind its back
-		if (!player.isCrouching() && MOVING.getOrDefault(player.getUUID(), true) && looker.getAttributes().hasAttribute(Attributes.FOLLOW_RANGE)) {
-			double range = looker.getAttributeValue(Attributes.FOLLOW_RANGE);
-			if (range > 0.0) {
-				// (Hearing) quiet or loud ground, wet ground, and soft boots and leggings carry it less or further (ordinary ground as before)
-				// (class trees) and Muffled boots (a Tinkerer's infusion) carry it half as far, a Second Storey Thief's tread too
-				f = Math.max(f, HEARD * Rangers.quiet(player) * TinkerPerks.footfall(player) * RogueExtras.steps(player) * Footsteps.heardFloor(level, player) / range);
-			}
+		f = heard(player, level, looker, f);
+		// (2026-11-23) its mind on its meal (or its fight, or its loot): it sees and hears half as far
+		if (distracted(looker, player)) {
+			f = Math.max(boss(looker) ? BOSS_SIGHT_MIN : MIN_FACTOR, f * DISTRACTED);
 		}
 		return f;
 	}

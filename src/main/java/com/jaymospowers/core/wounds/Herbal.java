@@ -51,9 +51,15 @@ public final class Herbal {
 	public static final net.minecraft.world.food.FoodProperties GARLIC_FOOD = new net.minecraft.world.food.FoodProperties.Builder().nutrition(1)
 		.saturationModifier(0.1F).alwaysEdible().build();
 	public static final int GARLIC_PURGE_TICKS = 16000;
-	/** (0.19.24) Bone broth: heals this much (health points) over the worst parts, and cools a fever this long (ticks). */
-	public static final float BROTH_HEAL = 3.0F;
-	public static final int BROTH_COOL_TICKS = 6000;
+	/**
+	 * (0.19.24) Bone broth cools a fever this long (ticks). (Survival picks, lso-heal-time: LSO's tonic) It heals this much
+	 * (health points) into every part, over this long (ticks).
+	 */
+	public static final float BROTH_HEAL = 5.0F;
+	public static final int BROTH_COOL_TICKS = 6000, BROTH_TICKS = 200;
+	/** (Survival picks, lso-heal-time: LSO's healing herbs) Yarrow powder packed into a cut heals its part this much over this long (ticks). */
+	public static final float HERB_HEAL = 2.0F;
+	public static final int HERB_TICKS = 600;
 	/** (0.19.24) Posset: heals this much (health points) over the worst parts. */
 	public static final float POSSET_HEAL = 2.0F;
 	/** (0.19.24) Chamomile tea: weaker than willow-bark's, this share of its length. */
@@ -126,10 +132,20 @@ public final class Herbal {
 		body.clearFire();
 		body.setTicksFrozen(0);
 		body.removeEffect(Freezing.FREEZING);
+		mendOver(body, part, SALVE_HEAL, SALVE_TICKS);
+	}
+
+	/**
+	 * (Survival picks) {@code part} heals {@code amount} (health points) over {@code ticks}: a salve, packed herbs, a tonic.
+	 * A second one on a part still healing tops up what's left; the faster rate wins.
+	 */
+	static void mendOver(LivingEntity body, BodyPart part, float amount, int ticks) {
 		float[][] salve = SALVE.computeIfAbsent(body, e -> new float[2][PARTS]);
 		int i = part.ordinal();
-		salve[0][i] = SALVE_HEAL;
-		salve[1][i] = SALVE_HEAL * EVERY / Math.max(EVERY, SALVE_TICKS);
+		float rate = amount * EVERY / Math.max(EVERY, ticks);
+		// (a part done healing takes the new rate as it is; one still healing keeps the faster)
+		salve[1][i] = salve[0][i] > 0.0F ? Math.max(salve[1][i], rate) : rate;
+		salve[0][i] = Math.max(salve[0][i], amount);
 		TRACKED.add(body);
 	}
 
@@ -163,9 +179,14 @@ public final class Herbal {
 		return until != null && until > body.level().getGameTime();
 	}
 
-	/** Bone broth drunk: a small heal over the worst parts, and the fever cooled. */
+	/** Bone broth drunk: (survival picks) {@link #BROTH_HEAL} into every part over {@link #BROTH_TICKS}, and the fever cooled. */
 	static void broth(LivingEntity body) {
-		Mending.mend(body, BROTH_HEAL);
+		BodyPlan plan = BodyPlan.of(body);
+		for (int i = 0; plan != null && i < plan.size(); i++) {
+			if (!Breaks.missing(body, plan.part(i))) {
+				mendOver(body, plan.part(i), BROTH_HEAL, BROTH_TICKS);
+			}
+		}
 		if (Bleeding.festering(body) != 0) {
 			coolFever(body);
 		}

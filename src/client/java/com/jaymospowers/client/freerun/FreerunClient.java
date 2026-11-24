@@ -6,6 +6,7 @@ import com.jaymospowers.freerun.FastRun;
 import com.jaymospowers.freerun.Freerun;
 import com.jaymospowers.freerun.FreerunWalls;
 import com.jaymospowers.freerun.Slide;
+import com.jaymospowers.freerun.WallSlide;
 import com.jaymospowers.power.web.WebParkour;
 import com.jaymospowers.power.web.WebWallRun;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -109,6 +110,19 @@ public final class FreerunClient {
 			|| kind == Freerun.SLIDE;
 	}
 
+	/**
+	 * Right-click held with an empty hand, once Climber is learned: at a wall it does what forward and Jump do, the jump
+	 * onto it, the cling and the climb up (Andy: "the keybind for climbing should also be a right click hold with empty
+	 * hand when you unlock it ... right click will do the same thing reliably"). Not with the crosshair on something a
+	 * click is for (LedgeClient#clickTaken).
+	 */
+	private static boolean useClimb(LocalPlayer player) {
+		Minecraft minecraft = Minecraft.getInstance();
+		// (both hands empty and nothing in use: a shield raised or food eaten from the off hand isn't a climb)
+		return minecraft.options.keyUse.isDown() && player.getMainHandItem().isEmpty() && player.getOffhandItem().isEmpty()
+			&& !player.isUsingItem() && minecraft.gui.screen() == null && Freerun.perk(player, Freerun.Perk.CLIMBER) >= 1 && !LedgeClient.clickTaken(minecraft, player);
+	}
+
 	/** Clinging to a wall, hanging from a bar or from a pole (Sneak lets go: no zoom from it, see SneakZoom). */
 	public static boolean holding() {
 		return kind == Freerun.CLING || kind == Freerun.BAR || kind == Freerun.POLE;
@@ -206,6 +220,11 @@ public final class FreerunClient {
 			return;
 		}
 		if (player.onGround()) {
+			// right-click held at a wall to climb: the jump up onto it that Jump would make
+			if (useClimb(player) && !input.shift() && Freerun.canMove(player, Freerun.CLING)
+				&& Freerun.climbable(player.level(), player, player.getDirection(), REACH)) {
+				player.jumpFromGround();
+			}
 			return;
 		}
 		double vy = player.getDeltaMovement().y;
@@ -224,8 +243,9 @@ public final class FreerunClient {
 		if (input.forward() && !input.shift() && player.isSprinting() && Freerun.perk(player, Freerun.Perk.WALL_RUNNER) >= 1 && tryRun(player)) {
 			return;
 		}
-		if (input.forward() && input.jump() && !input.shift() && Freerun.canMove(player, Freerun.CLING)
-			&& tryCling(player)) {
+		// (a right-click only while rising or at the top of the jump: falling, it's the wall slide's, WallSlideClient)
+		if ((input.forward() && input.jump() || useClimb(player) && vy > -WallSlide.MIN_FALL) && !input.shift()
+			&& Freerun.canMove(player, Freerun.CLING) && tryCling(player)) {
 			return;
 		}
 		if (jumpPressed && airTicks > 2 && Freerun.perk(player, Freerun.Perk.FREERUNNER) >= 2) {
@@ -305,7 +325,9 @@ public final class FreerunClient {
 			letGo(player);
 			return;
 		}
-		if (input.forward()) {
+		// right-click held climbs as forward does
+		boolean upHeld = input.forward() || useClimb(player);
+		if (upHeld) {
 			// at the top: the ledge grab takes over and pulls you up and over
 			Ledge.Spot spot = Ledge.find(player);
 			if (spot != null) {
@@ -338,7 +360,7 @@ public final class FreerunClient {
 			}
 		}
 		if (!WebWallRun.wallAt(player.level(), player, face, REACH)) {
-			if (input.forward() && player.level().noCollision(player, player.getBoundingBox().move(0.0, 0.6, 0.0))) {
+			if (upHeld && player.level().noCollision(player, player.getBoundingBox().move(0.0, 0.6, 0.0))) {
 				// the wall ran out under the hands with no ledge to catch: a scramble up and over it
 				scramble(player, face);
 				return;
@@ -347,7 +369,9 @@ public final class FreerunClient {
 			return;
 		}
 		boolean slipping = gripped > grip;
-		double vertical = slipping ? -Freerun.SLIP_SPEED : input.forward() ? Freerun.climbSpeed(player) : 0.0;
+		// (Parkour animations, track 2) Back climbs down hand under hand, as fast as you climb up
+		double vertical = slipping ? -Freerun.SLIP_SPEED : upHeld ? Freerun.climbSpeed(player)
+			: input.backward() ? -Freerun.climbSpeed(player) : 0.0;
 		Direction left = face.getCounterClockWise();
 		double strafe = (input.left() ? 1.0 : 0.0) - (input.right() ? 1.0 : 0.0);
 		Vec3 into = new Vec3(face.getStepX(), 0.0, face.getStepZ()).scale(HUG);
@@ -358,6 +382,23 @@ public final class FreerunClient {
 			Vec3 at = player.position().add(face.getStepX() * 0.35, 1.2, face.getStepZ() * 0.35);
 			player.level().addParticle(ParticleTypes.CLOUD, at.x, at.y, at.z, 0.0, 0.02, 0.0);
 		}
+	}
+
+	/**
+	 * (Parkour animations, track 2: "climb down", docs/CombatAnimations-Plan.md) From a ledge hang, Back held past the
+	 * castaway's moment ({@code LedgeClient}): down onto the wall under the edge, clinging, to climb on down it hand under
+	 * hand. False if there's no wall to cling to there (then the hang lets go as before). Sent while the hang still holds,
+	 * so the server takes the cling from it ({@link Freerun#climbsDownFrom}).
+	 */
+	public static boolean climbDownFrom(LocalPlayer player, Direction face) {
+		if (kind != Freerun.NONE || cooldown > 0 || gripped >= Freerun.grip(player) || !Freerun.climbsDownFrom(player.level(), player, face, REACH)) {
+			return false;
+		}
+		player.setDeltaMovement(Vec3.ZERO);
+		player.resetFallDistance();
+		start(player, Freerun.CLING, face, BlockPos.ZERO);
+		clingBase = gripped;
+		return true;
 	}
 
 	/** The wall ran out (or a pole's top): up and over it, a scramble. */

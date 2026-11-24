@@ -875,6 +875,10 @@ public final class McaCompat {
 			// (0.7.295) a realm's at war: its guards, archers and soldiers, villagers now as its own are
 			return true;
 		}
+		if (Pedlars.wanderer(target)) {
+			// (goblin extras) the wandering goblin walks through every settlement unharmed
+			return false;
+		}
 		// (0.7.148) a barbarian camp's MCA villager
 		return Barbarians.isCampVillager(target);
 	}

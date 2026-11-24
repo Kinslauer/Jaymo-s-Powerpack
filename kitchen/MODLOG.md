@@ -2609,3 +2609,160 @@ Added a new **Cooking Block** to the Functional creative tab. The block has iron
 - A body with nothing left on it gives the old "Nothing left on it" line; a bare skeleton gives up its bones, a tap at a time, as before.
 - Gear's wear is put on once, the first time the body is looked at, so looking again doesn't wear it more. Several players can look at once (one shared view, nothing taken twice); a Kingdoms looter won't rob a body someone is going through. Taking counts as robbing the dead for Kingdoms, a piece at a time, as before.
 - `CorpseLoot`, `CorpseLootMenu`, `CorpseLootScreen`, `CorpseEntity#openLoot`. Compiled; not played.
+
+## 0.6.68 (2026-11-22): meat hooks take a carried or dragged body on any click, people's bodies too (#1989)
+
+- **Meat hooks**: right-clicking a meat hook while carrying or dragging a carcass now hangs it, wherever in the hook's block space you click (the hook, the air around it, the beam above). Before, your own game let go of the carcass before the click ever reached the server, unless you clicked a butcher block, so the hook never took it. Out of reach, you keep hold and are told to get under the hook.
+- **People's bodies hang too** (a player's, a villager's, a raider's, a zombie's): a warning to others, and a cleaver or skinning knife opens the throat so the blood drains into a blood grate under it, to be bottled (for a vampire who'd rather not bite). They're only bled, never butchered.
+- **Great spit and campfire**: a carried carcass can be heaved onto the great spit again, and a dragged one onto it; a small one carried can be laid on a campfire to roast. Those clicks were being turned into "let go" too.
+- `MinecraftUseMixin` (client: walks the view for a hook, sends `HangOn`; lets spit and campfire clicks through), `Payloads.HangOn`, `JaymosKitchen` (its receiver), `Hanging.hangsAsPerson`/`bleedPerson`, `CorpseEntity.interact`.
+- Built by CI; not played.
+
+## 0.6.69 (2026-11-22): the butcher's shop: table work, skin rack, mincer and mince, display, head mounts, barrel of bones (#1993)
+
+- **Butcher's block, step by step**: a carcass laid on a butcher block can be worked the way it is on a meat hook (by anyone a hook would let): a cleaver bleeds it there and takes the head; a skinning knife skins it (a whole, prime skin, as on the hook) and guts it; then three cleaver cuts. An axe on the block still chops it up in one go, as before.
+- **Skin rack**: raw hides hang on the drying rack now. Splash them with water (a water bucket, a water bottle or a waterskin's sip), then rub in a piece of salt: they're salted where they hang (two raw hides to a salted hide, as at the crafting table) and start drying into dried hides at once.
+- **Mincer** (iron ingots, a stick, planks): right-click it with raw meat of any kind, or offal, and mince comes out of its mouth, one piece at a time. **Mince** does for red meat, pork, mutton, poultry, small game and venison in the kitchen's dishes.
+- **Butcher's display** (smooth stone slabs over planks): lay up to four pieces of food on its cold stone top to show them; an empty hand takes the last one back.
+- **Head Mount** (planks and an iron nugget): a carved plaque for a wall. A severed head carried in the hand and set down looking at it goes up square in its middle.
+- **Barrel of Bones** (a barrel and a bone block): a barrel heaped with bones, for the shop.
+- The whole-carcass rotisserie is the great spit, already in: a carcass carried or dragged onto it works again (fixed with the meat hook clicks).
+- `butchery/ButcherShop`, `MincerBlock`, `HeadMountBlock`, `ButcherDisplayBlock`/`Entity`, `client/butchery/ButcherDisplayRenderer`, `Hanging.use` (the table), `DryingRackEntity.treat`, `Chopping` (mince isn't cut again); art from `tools/vanilla_style/butcher_shop.py`.
+- Built by CI; not played.
+
+## 0.6.70 (2026-11-22): survival picks: thirst per action, wetness, temperature sources, cold breath, sprint stamina (#1995)
+
+Andy's picks from Legendary Survival Overhaul (ideas and numbers only) and Walk Jog Run (LGPL, idea only).
+- **Thirst per action**: a jump, a block broken, an attack and each second of sprinting cost water, after LSO's
+  thirst (jump 0.15, block 0.07, attack 0.3, sprint 0.1 of its exhaustion; 4 make a point of water). This replaces the
+  old flat sprint drain. The hotter you are the faster all of it goes, and the cold already burns food (both were
+  there before).
+- **Wetness meter** (`Wetness`): every half second the rain adds 7, standing in water adds 10 times how deep you're in
+  it, and otherwise you dry 3 (100 is wet through). It's the one wet chill on body heat, up to 25 (10 LSO degrees)
+  at full; soaked through (80 and up) on cold land is worse, and soaked clothes keep half their warmth (wool all of
+  it). Jaymo's Powers' Wet and Soaked keep the meter at least 40 or full, and Kingdoms' downpours fill it. It shows
+  as a small blue glass beside the thermometer while you're wet. This replaces the old one-minute wet timer and the
+  separate in-water chill. About six seconds of rain makes you soaked through (clothes at half warmth, hides wearing as
+  soaked), sooner than Powers' own Soaked.
+- **Dousing**: sneak-use a water bottle, a bottle of clean water or a waterskin with water in it (not while aiming at
+  water, where it fills): you pour it over yourself, are wet through, and any fire on you goes out. A bottle gives its
+  glass back; a waterskin loses a sip. With Powers you're Soaked as well.
+- **Temperature**: one LSO degree counts as 2.5 body heat. Height now chills from sea level, 6 degrees every 64
+  blocks (it used to start 40 blocks up, so hills are a little colder). The day swings 2 degrees either side, warmest
+  at noon and coldest at midnight, on top of the sun and night sky. Fires, campfires, lava, magma and lit furnaces
+  warm you from up to 20 blocks away (was 5), less with distance, and half as much out under the sky as inside.
+  The Nether counts as out of doors. So a campfire three blocks off indoors now gives about 25 (was 12), and lava
+  in the Nether warms you from further off (heatstroke only right beside it, as before). For 90 seconds after joining
+  or respawning the world can't make your body heat any worse.
+- **Cold breath**: a small puff of breath at the mouth, drifting the way you face, every two seconds when the air is
+  cold (25 below comfortable) or you're chilly. Everyone sees it.
+- **Sprint stamina** (`Stamina`, game rule `jaymoskitchen:stamina`): sprinting spends wind instead of food. A full
+  hunger bar holds a full bar of wind (about 13 seconds of sprinting), half a hunger bar half of it. Run out and you're
+  winded: slowed for 3 seconds, and no sprinting until a quarter is back; it refills a second after you stop. The bar
+  shows in the focus band over the hotbar while it isn't full, the part you can't hold for hunger shaded off. Powers'
+  feathers stay what dodges, powers and fighting or running in armour spend. Powers' overclocked speedsters run
+  without spending wind (`Stamina.addTireless`). Switching the rule off clears the bar.
+- Built; not played. Not checked in game: the breath puff's look, the HUD placement of the wetness glass and wind bar,
+  the heat-source scan's cost on a busy server, how the sprint bar feels next to feathers.
+
+## 0.6.71 (2026-11-22): Burning bodies only spread fire on wood, pat out with a right click, and leave ash in their shape that blows away (#2002)
+
+- **Fire from burning bodies**: a body burning in the daylight (or any fire) only spreads fire while it lies on
+  something that burns (planks, logs, wool, hay), and only onto spots that sit on burnable blocks. One burning on dirt,
+  grass or stone sets nothing alight.
+- **Pat it out**: right-click a burning body to put it out. The sun can't set it alight again for 10 seconds, so you can
+  drag it into the shade. Its burn starts over, as when it's dunked.
+- **Ash in its shape**: a body burned away leaves its ash along where it lay, as long and broad as the creature, deepest
+  over the trunk and thinner at the ends: a zombie leaves a body-long streak, a spider a broad patch, a ghast or giant a
+  long mound (up to 12 blocks).
+- **Ash blows away**: ash under the open sky loses a layer now and then, sooner in a strong wind (Jaymo's Kingdoms'
+  wind, read when it's loaded) and in rain, and puffs of it drift off downwind until none is left. Ash under a roof
+  stays. Break it to gather it as an ash pile, as before.
+- Classes: `corpse/CorpseEntity` (`spreadFire`, `interact`, `leaveAshPile`), `corpse/AshPileBlock`.
+- Built; not played.
+
+## 0.6.72 (2026-11-22): Zombies go for shade by day instead of feeding on the dead (#2010)
+
+- A zombie (anything that burns in the sun) no longer gnaws a body, eats torn meat or gut piles out in the sun while
+  the sun burns; it goes for shade (Jaymo's Powers' shelter search). Its gnawing ran at the same goal priority as the
+  shelter search, and a running goal is only cut off by a higher one, so a body held it there burning
+  (`Scavengers.sunlit`). In shade, or with a helmet on, or in rain, it still eats. With Jaymo's Powers, "in the sun" is
+  Powers' own ray test, the one the sun burns by (leaves don't shade: `Scavengers.setSunTest`); without it, open sky.
+- Built by CI only; not played.
+
+## 0.6.73 (2026-11-23): Scavengers eat a body a limb at a time; vultures land; feeding animals notice less (#2033)
+
+- Andy (2026-11-23, a clip of vultures eating his body while he was in Limbo): "vultures should land and pick at the body limb from limb, until disturbed by other mobs or players ... all scavengers and body eaters should go limb at a time".
+- **A limb at a time** (`Scavengers`, `CorpseEntity#nextPart`/`eatPart`): a scavenger tears off one arm or leg at a time, then the head, and eats each beside the body (about 5 s, a mouthful showing in a vulture's beak). Only after that does it tear the trunk open (the old spill of meat, bones and gear, and the emptied MCA grave). Each part takes 5 bites plus 3 per block of the body's width. A scavenger that's full (3 parts) leaves the rest. Fish, critters and bodies with no limbs are still torn open whole. Werewolves (`devourBite`) eat a part at a time too.
+- **Landing and turns**: a flier at the body comes down onto the ground before it eats. Only 2 tear at one body at once; the others stand by and wait their turn, so a flock no longer strips a body in seconds.
+- **Disturbed**: a monster, or a scavenger half as big again, coming within 3 blocks drives a feeding scavenger off. A vulture, fox or coyote (`skittish_scavengers` tag) also bolts from a player it notices within 12 blocks, about 1 s after first noticing them. A vulture leaps up with Naturalist's own startle. One driven off halfway through tearing a part takes it with it, still in its mouth, and eats it elsewhere. A scavenger that's been driven off leaves the bodies alone for 20 s. Monsters (zombies, ogres) aren't driven off.
+- **Feeding animals notice less** (`ScavengerSightMixin`): a scavenger tearing at a body or eating meat or a gut pile, and game at a salt lick, notices anyone at 40% of the usual distance. That counts for every goal that looks for someone, including a vulture's own flight from players, so a sneaking player can get close.
+- Dead quadrupeds are now drawn without the legs they've lost (`Severed`: front and hind leg names).
+- Not built on the PC (CI builds it); not played.
+
+## 0.6.74 (2026-11-23): Players' bodies keep everything they carried, heaped ash that crumbles when punched (#2032)
+
+- **A dead player's things stay on their body** (Andy: "when players are killed, they should keep the loot on their corpse
+  like npcs do, now accessed with a right click. the only time loot should burst like the video is when the body is
+  gibbed"). Nothing drops on death any more: the whole inventory, armour and off hand stay on the body (it used to keep
+  only the hotbar; the rest burst onto the ground). Right-click (tap) the body to open its loot screen, a wider one for a
+  player: their armour and off hand down the left, the body in the middle, their inventory in a 9 by 4 grid beside it
+  (hotbar on the bottom row), anything else left on them (Kingdoms' harness and hidden blades, Powers' baubles and web
+  shooters, up to 24 pieces) in a block on the right. Anyone can take from it; it isn't robbing the dead. The old one-tap "take your hotbar back" is gone.
+- Where it all goes if the body goes: **blown apart** (a strong enough blast), it bursts out with the gore; **burned
+  away**, it's left lying in the ash and never despawns (in lava it burns with the body); **eaten**, left lying as
+  before; **gets up** as a zombie player, that zombie carries all of it (dropped when it's killed) and no longer despawns while carrying anything; a rebirth or
+  Limbo's return gives it all back; a body butchered on a meat hook drops it.
+- **Lost limbs shed their armour** (Andy: "as long as the torso is there, the loot should be as well, the leggings and arm
+  harness armor should be ripped off as limbs go"): a body that died without its head drops the helmet, without a leg the
+  boots, without both legs the leggings, and the harness pieces worn on the lost part (arm and hand plate with the arms,
+  thigh and shin plate with the legs, hood and crest with the head; rings, bracelets, web shooters and hidden blades with
+  the arms; foot baubles with the legs). A player torn apart by a blast leaves their torso with everything else on it. A
+  part taken off the body later (cut, or a head taken on the meat hook) sheds its piece the same way. The body isn't
+  drawn wearing the armour it holds (as before).
+- Nothing is lost if a player respawns or leaves the game before their body appears: the body appears then.
+- **Ash piles lie heaped** (Andy: "ashpiles should disintegrate into dust if you punch them, and they should resemble
+  mounded piles, adding more for larger burned bodies. like the entrails, not sheets, until it starts to blow away and
+  flatten out"): fresh ash is a mound, taller with more little heaps round it the deeper it is (a big body leaves more,
+  deeper mounds), in one of eight turns. Once the wind takes its first layer it lies flat as before, and keeps blowing
+  away. Punch it (anything but a shovel) and it crumbles into dust and is gone; a shovel still gathers it. Loose heaped
+  ash has nothing to stand on.
+- Classes: `PlayerMixin`, `PlayerCorpses` (`keepWith`, respawn/disconnect safety), `CorpseEntity` (`tearOff`,
+  `lootPlayer`), `CorpseLoot`, `CorpseLootMenu`, `CorpseLootScreen`, `ZombiePlayer`, `Hanging`, `AshPileBlock`; models from
+  `kitchen/tools/gen_ash_piles.py`.
+- Built by CI; not played. The wide loot screen, the mound models and the punch-to-dust haven't been seen in game.
+
+## 0.6.75 (2026-11-23): Wind for Jaymo's Powers' adrenaline (#2040)
+
+- The wind bar is what Jaymo's Powers' adrenaline runs on: it's filled as adrenaline kicks in, and while it lasts it
+  burns (about 30 s standing, 11 sprinting) and nothing comes back; run dry, you're winded as from a sprint.
+- `climate/Stamina`: `fill`, `addBurning`, `BURN` (for other mods, by reflection).
+- Built; not played.
+
+## 0.6.76 (2026-11-24): The thermometer burns when heat is a danger, and freezes and shakes in the cold (#2057)
+
+- **On fire**: from overheating up, the body-heat thermometer burns, flames licking up round the top of the tube,
+  taller and wilder the hotter you get (Andy: "whenever heat is a danger the thermometer should be animated on fire with
+  the flames growing near the top of the meter").
+- **Frozen**: from freezing down, frost crusts the glass from the bulb up, icicles hang off the bulb, and the
+  thermometer shakes, harder and faster as it drops. `ClimateHud#flames`, `ClimateHud#frost`, tuning at the top.
+- Built on CI only; not played, so the look and size haven't been seen on screen.
+
+## 0.6.77 (2026-11-24): JEI shows how to make hides on a server (#2066)
+
+- **Tanning recipes in JEI**: raw hide, salted hide, wet tanned hide, leather scraps and string from wool (the crafting
+  recipes that keep your knife or waterskin) now show in JEI on a server. Andy's clip: wet tanned hide had no recipe.
+  JEI only asks the server for Minecraft's own kinds of recipe, so ours never reached the players;
+  `Hides` now has the server send them (`RecipeSynchronization`).
+- Built on CI only; not played.
+
+## 0.6.78 (2026-11-24): A bear stays on the meat hook (#2068)
+
+Andy: "why doesnt the bear stay on the hook?" It did stay, but it didn't look like it. Clients draw a four-legged body that has stopped moving as lying flat on its side at its lowest point, and they didn't know the body was on a hook. A bear hung from a hook two blocks up rests its head on the floor, stops moving at once, and was drawn tipping over onto the floor within half a second. A small animal that had stopped swinging was drawn lying flat in mid-air the same way. Clients now know when a body is on a meat hook (a synced flag, `CorpseEntity#onHook`), and a hung body is always drawn hanging as its points have it.
+
+## 0.6.79 (2026-11-24): Feeling too hot or too cold is said in your own voice (#2070)
+
+- The action-bar lines when your body heat changes read as the character: "Brr... I'm shivering.", "I'm freezing. Need a
+  fire, or warmer clothes.", "The cold's biting into me!", "Phew... I'm sweating.", "I'm overheating. Need shade, or
+  water.", "Heatstroke... my head's swimming." (lang `message.jaymoskitchen.body_heat.*`).
+- Built; not played.

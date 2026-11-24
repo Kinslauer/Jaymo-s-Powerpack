@@ -173,6 +173,21 @@ public class SeveredPart extends Entity {
 	}
 
 	/**
+	 * Andy: "it should take the real one". {@code taker} picks up player {@code owner}'s own severed head, lying loose within
+	 * {@code reach} (not carried, nailed up or kept as a trophy), to wear it (Jaymo's Kingdoms' captains): the head on the
+	 * ground is gone. False if there's none.
+	 */
+	public static boolean takeHead(LivingEntity taker, UUID owner, double reach) {
+		String id = owner.toString();
+		for (SeveredPart head : taker.level().getEntitiesOfClass(SeveredPart.class, taker.getBoundingBox().inflate(reach),
+			p -> p.part() == Dismember.HEAD && id.equals(p.entityData.get(OWNER)) && !p.pinned() && !p.trophy && !Carry.isCarried(p))) {
+			head.discard();
+			return true;
+		}
+		return false;
+	}
+
+	/**
 	 * A part come off a body already lying dead (Jaymo's Kitchen: a skeleton falling to pieces, a rotten limb torn away,
 	 * a corpse struck where it lies): drawn from the corpse's {@code look}, at {@code at}, flung with {@code velocity};
 	 * {@code blood} is the body's blood colour, or {@code BladeBlood.NO_BLOOD}.

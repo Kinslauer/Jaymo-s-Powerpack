@@ -64,6 +64,10 @@ public final class OldAge {
 		relic(People.PILLARED, "marble_bust");
 		relic(People.MOUND, "barrow_brooch");
 		relic(People.COURT, "jade_seal");
+		relic(People.ANVIL, "forge_token");
+		relic(People.DEEP_FOLK, "tide_token");
+		relic(People.GROVE, "antler_token");
+		relic(People.TRUTH_FOLK, "truth_token");
 		RULER = Beasts.type("old_ruler", EntityType.Builder.of(OldRuler::new, MobCategory.MONSTER).sized(0.75F, 2.45F).clientTrackingRange(10),
 			OldRuler.createAttributes());
 		GUARD = Beasts.type("tomb_guard", EntityType.Builder.of(TombGuard::new, MobCategory.MONSTER).sized(0.6F, 1.95F).clientTrackingRange(8),

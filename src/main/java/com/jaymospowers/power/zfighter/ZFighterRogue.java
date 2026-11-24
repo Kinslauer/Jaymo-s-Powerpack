@@ -65,11 +65,11 @@ public class ZFighterRogue extends Monster {
 	static final double CHAMPION_HEALTH = 80.0;
 	static final double TYRANT_HEALTH = 600.0;
 	/** Bare-hand damage (his attack attribute): each blow of a string is a share of it ({@link #BLOW_SHARE}). */
-	static final double CHAMPION_DAMAGE = 3.0;
-	static final double TYRANT_DAMAGE = 7.0;
+	static final double CHAMPION_DAMAGE = 2.0;
+	static final double TYRANT_DAMAGE = 4.0;
 	/**
-	 * A string's blows: this share of his damage each (a tyrant about 2.5, 3.4 in Super 2; a champion 1.5), the finisher
-	 * this share (6 / 8.5 / 3.9), and the slam into the wall or ground after it this share more. By kind.
+	 * A string's blows: this share of his damage each (a tyrant about 1.4, 2 in Super 2; a champion 1), the finisher
+	 * this share (3.6 / 5 / 2.6), and the slam into the wall or ground after it this share more. By kind.
 	 */
 	static final float[] BLOW_SHARE = {0.5F, 0.35F};
 	static final float[] FINISHER_SHARE = {1.3F, 0.9F};
@@ -88,8 +88,8 @@ public class ZFighterRogue extends Monster {
 	/** A champion's armour pieces: each is iron this often, else chainmail, else leather. */
 	static final float CHAMPION_IRON = 0.5F, CHAMPION_CHAIN = 0.35F;
 	/** (0.16.10) A volley of small blasts, {@code BLAST_GAP} ticks apart (was one 14-damage blast from a tyrant). */
-	static final float CHAMPION_BLAST = 2.0F;
-	static final float TYRANT_BLAST = 4.0F;
+	static final float CHAMPION_BLAST = 1.5F;
+	static final float TYRANT_BLAST = 2.5F;
 	static final int BLAST_VOLLEY = 3;
 	static final int BLAST_GAP = 5;
 	static final int BLAST_EVERY = 70;
@@ -231,6 +231,9 @@ public class ZFighterRogue extends Monster {
 		LivingEntity target = this.getTarget();
 		if (tyrant) {
 			bar(level);
+			if (ZFighterLookoutBoss.holding(this)) {
+				return;
+			}
 			if (this.tickCount % 4 == 0) {
 				level.sendParticles(MagicFx.wisp(form() >= 2 ? 0xFFF080 : TYRANT_COLOR, 1.5F), this.getX(), this.getY() + 1.0, this.getZ(), 3,
 					0.4, 0.8, 0.4, 0.0);
@@ -338,7 +341,7 @@ public class ZFighterRogue extends Monster {
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
 		float before = this.getHealth();
-		boolean hurt = super.hurtServer(level, source, damage);
+		boolean hurt = super.hurtServer(level, source, damage * ZFighterLookoutBoss.taken(this, source));
 		Entity attacker = source.getEntity();
 		if (hurt && attacker instanceof ServerPlayer player) {
 			this.hurtBy.merge(player.getUUID(), Math.max(0.0F, before - this.getHealth()), Float::sum);

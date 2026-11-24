@@ -167,7 +167,8 @@ public final class Drifters {
 				continue;
 			}
 			Player near = level.getNearestPlayer(v, PITCH_RANGE);
-			if (!PITCHED.contains(v.getUUID()) && near != null) {
+			// (Andy, 2026-11-23: "she shouldnt call out to me then refuse me": never to someone they'd keep at arm's length)
+			if (!PITCHED.contains(v.getUUID()) && near != null && !(near instanceof ServerPlayer sp && Introductions.wary(sp, v))) {
 				PITCHED.add(v.getUUID());
 				int grade = Veterans.grade(v);
 				Speech.say(level, v, Component.translatable(grade == Veterans.GREEN ? "speech.jaymoskingdoms.drifter.pitch." + level.getRandom().nextInt(LINES)

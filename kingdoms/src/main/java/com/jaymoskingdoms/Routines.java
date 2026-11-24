@@ -91,7 +91,9 @@ final class Routines {
 		/** (0.6.9) calling on a tradesperson at their work, seeing to the animals, eyeing a stranger, dancing round the fire. */
 		SHOP, ANIMALS, WATCH, DANCE,
 		/** (0.6.9) children: hide and seek, skipping stones, tagging along after a grown-up. */
-		HIDE, STONES, TAGALONG;
+		HIDE, STONES, TAGALONG,
+		/** a drink when they're thirsty ({@link Needs}): a water cauldron by their bed, the tavern, open water. */
+		DRINK;
 
 		String key() {
 			return name().toLowerCase(java.util.Locale.ROOT);
@@ -169,7 +171,7 @@ final class Routines {
 					continue;
 				}
 				if (d == null) {
-					if (t < NIGHT && level.getRandom().nextFloat() < START_CHANCE) {
+					if (t < NIGHT && level.getRandom().nextFloat() < Needs.startChance(v)) {
 						start(level, f, marks, v, folk, t, now);
 					}
 				} else if (!step(level, v, d, now) || t >= NIGHT) {
@@ -202,7 +204,19 @@ final class Routines {
 		}
 		boolean trade = !v.isBaby() && !v.getVillagerData().profession().is(VillagerProfession.NONE)
 			&& !v.getVillagerData().profession().is(VillagerProfession.NITWIT);
-		return !trade || t < WORK_FROM || t >= WORK_TO;
+		return !trade || t < WORK_FROM || t >= WORK_TO || noWorkplace(v);
+	}
+
+	/**
+	 * A trade whose job site is a block (a vanilla trade) but who has none just now, nor one they're on their way to,
+	 * isn't at work in work hours, so they get their pastimes too. Our own trades have no job-site block, and their own
+	 * day (a cook's kitchen, a worker's shift), so they're left to it.
+	 */
+	private static boolean noWorkplace(Villager v) {
+		VillagerProfession job = v.getVillagerData().profession().value();
+		return job.acquirableJobSite() != net.minecraft.world.entity.ai.village.poi.PoiType.NONE && !Meals.cook(v)
+			&& v.getBrain().checkMemory(MemoryModuleType.JOB_SITE, net.minecraft.world.entity.ai.memory.MemoryStatus.VALUE_ABSENT)
+			&& !v.getBrain().checkMemory(MemoryModuleType.POTENTIAL_JOB_SITE, net.minecraft.world.entity.ai.memory.MemoryStatus.VALUE_PRESENT);
 	}
 
 	/**
@@ -210,7 +224,7 @@ final class Routines {
 	 * ({@link Meals} asks this of a meal, which a trade breaks off for).
 	 */
 	static boolean idle(Villager v) {
-		return !(Neighbours.meeting(v) || Couriers.carrying(v) || Envoys.is(v) || Grudges.busy(v) || v.isSleeping() || v.isPassenger() || v.isNoAi() || v.getTarget() != null || v.hurtTime > 0 || Frights.afraid(v.getUUID())
+		return !(Neighbours.meeting(v) || Overheard.inScene(v) || Couriers.carrying(v) || Envoys.is(v) || Grudges.busy(v) || v.isSleeping() || v.isPassenger() || v.isNoAi() || v.getTarget() != null || v.hurtTime > 0 || Frights.afraid(v.getUUID())
 			|| Theft.rioting(v) || Approaches.talking(v) || Quests.listening(v) || Tag.playing(v) || Trespass.watching(v) || McaCompat.busy(v)
 			|| McaCompat.panicking(v) || Hermits.is(v) || Rickshaws.onDuty(v) || WarAlert.carrying(v) || Downed.helping(v)
 			// (0.7.454) walking someone to where they asked, or pointing the way
@@ -221,6 +235,19 @@ final class Routines {
 	private static void start(ServerLevel level, Faction f, Landmarks marks, Villager v, List<Villager> folk, long t, long now) {
 		RandomSource random = level.getRandom();
 		int linger = LINGER_MIN + random.nextInt(LINGER_MORE);
+		// (a pressing need comes first: a bite outside mealtimes, or a drink; boredom is the pastimes below)
+		Needs.Need need = Needs.pressing(v);
+		if (need == Needs.Need.HUNGER && !v.isBaby() && Meals.snack(level, f, v)) {
+			return;
+		}
+		if (need == Needs.Need.THIRST) {
+			Doing drink = drink(level, f, marks, v, now);
+			if (drink != null) {
+				DOING.put(v.getUUID(), drink);
+				walk(v, drink.to, WALK);
+				return;
+			}
+		}
 		if (v.isBaby()) {
 			kid(level, marks, v, folk, t, now, linger);
 			return;
@@ -312,7 +339,7 @@ final class Routines {
 				dance.to = Construction.standable(level, dance.at.offset(random.nextInt(5) - 2, 0, random.nextInt(5) - 2), 3);
 				yield dance;
 			}
-			case PLAY, HIDE, STONES, TAGALONG -> null;
+			case PLAY, HIDE, STONES, TAGALONG, DRINK -> null;
 		};
 		if (d != null) {
 			DOING.put(v.getUUID(), d);
@@ -387,6 +414,9 @@ final class Routines {
 				d.with.getNavigation().stop();
 			}
 			say(level, v, d.kind, random);
+			if (d.kind == Kind.DRINK) {
+				sip(level, v, d);
+			}
 		}
 		if (now - d.arrived > d.linger) {
 			return false;
@@ -553,6 +583,39 @@ final class Routines {
 
 	private static void say(ServerLevel level, Villager v, Kind kind, RandomSource random) {
 		Speech.say(level, v, Component.translatable("routine.jaymoskingdoms." + kind.key() + "." + random.nextInt(LINES)), Speech.WHITE, SPEECH_RANGE);
+	}
+
+	/** ({@link Needs}) Somewhere to drink: a water cauldron by their bed, the tavern, else the nearest open water; null if none. */
+	private static @Nullable Doing drink(ServerLevel level, Faction f, Landmarks marks, Villager v, long now) {
+		int linger = LINGER_MIN / 3;
+		GlobalPos home = McaCompat.home(v).orElse(null);
+		if (home != null && home.dimension() == level.dimension()) {
+			for (BlockPos p : BlockPos.betweenClosed(home.pos().offset(-CHORE_REACH, -2, -CHORE_REACH), home.pos().offset(CHORE_REACH, 2, CHORE_REACH))) {
+				if (level.getBlockState(p).is(Blocks.WATER_CAULDRON)) {
+					return at(level, Kind.DRINK, p.immutable(), now, linger);
+				}
+			}
+		}
+		BlockPos tavern = Meals.tavern(level, f);
+		if (tavern != null) {
+			return new Doing(Kind.DRINK, Construction.standable(level, tavern, 3), now, linger);
+		}
+		return at(level, Kind.DRINK, pick(marks.water(), v, level.getRandom()), now, linger);
+	}
+
+	/** A drink, once there: a cauldron goes down a level (rain or a bucket fills it again); one found dry gives nothing. */
+	private static void sip(ServerLevel level, Villager v, Doing d) {
+		if (d.at != null) {
+			BlockState state = level.getBlockState(d.at);
+			if (state.is(Blocks.WATER_CAULDRON)) {
+				net.minecraft.world.level.block.LayeredCauldronBlock.lowerFillLevel(state, level, d.at);
+			} else if (!level.getFluidState(d.at).is(net.minecraft.tags.FluidTags.WATER)) {
+				return;
+			}
+		}
+		v.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+		level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.GENERIC_DRINK.value(), SoundSource.NEUTRAL, 0.5F, 1.0F);
+		Needs.drank(v);
 	}
 
 	// ---- (0.6.9) more to do ------------------------------------------------------------------------------------------

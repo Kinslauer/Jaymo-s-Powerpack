@@ -27,6 +27,11 @@ public final class KitchenCompat {
 		return carriedCorpse(player) != null;
 	}
 
+	/** Whether this player has a corpse in both arms: anything bigger than a small animal held by the neck in one hand. */
+	public static boolean corpseInBothArms(Player player) {
+		return LOADED && Kitchen.inBothArms(player);
+	}
+
 	/** A corpse drawn in by a power: pocketed if it fits, otherwise carried. */
 	public static void take(Player player, Entity corpse) {
 		if (LOADED) {
@@ -158,6 +163,37 @@ public final class KitchenCompat {
 	/** (0.19.49) The name of the player a corpse was ("" if it isn't one). */
 	public static String corpseOwnerName(Entity entity) {
 		return LOADED ? Kitchen.ownerName(entity) : "";
+	}
+
+	private static java.lang.reflect.@Nullable Method keepWith;
+	private static boolean keepWithLooked;
+
+	/**
+	 * A player who just died keeps {@code stack} on their body with the rest of what they carried (Kitchen's
+	 * {@code PlayerCorpses.keepWith}, by name), worn on {@code parts} (head 1, arms 2 and 4, legs 8 and 16; 0 the torso)
+	 * and shed with any of them the body lacks. False (drop it yourself) without Kitchen or a body to hold it.
+	 */
+	public static boolean keepOnBody(net.minecraft.server.level.ServerPlayer player, net.minecraft.world.item.ItemStack stack, int parts) {
+		if (!LOADED) {
+			return false;
+		}
+		if (!keepWithLooked) {
+			keepWithLooked = true;
+			try {
+				keepWith = Class.forName("com.jaymoskitchen.corpse.PlayerCorpses").getMethod("keepWith",
+					net.minecraft.server.level.ServerPlayer.class, net.minecraft.world.item.ItemStack.class, int.class);
+			} catch (ReflectiveOperationException | LinkageError e) {
+				keepWith = null;
+			}
+		}
+		if (keepWith == null) {
+			return false;
+		}
+		try {
+			return Boolean.TRUE.equals(keepWith.invoke(null, player, stack, parts));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return false;
+		}
 	}
 
 	/** (0.15.33) Players leave a body when they die (only with Jaymo's Kitchen): the symbiote hunts them for it. */
@@ -378,6 +414,11 @@ public final class KitchenCompat {
 
 		static @Nullable Entity carried(Player player) {
 			return com.jaymoskitchen.corpse.CorpseEntity.carriedBy(player);
+		}
+
+		static boolean inBothArms(Player player) {
+			com.jaymoskitchen.corpse.CorpseEntity corpse = com.jaymoskitchen.corpse.CorpseEntity.carriedBy(player);
+			return corpse != null && !corpse.oneHanded();
 		}
 
 		static @Nullable Entity dragged(Player player) {
@@ -801,6 +842,15 @@ public final class KitchenCompat {
 			hanging.getMethod("setOnHead", java.util.function.BiConsumer.class).invoke(null, head);
 		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
 			// an older Kitchen with no meat hooks
+		}
+		try {
+			// a zombie won't feed on the dead where the sun burns it: Kitchen asks the same rays the sun burns by (SunExposure)
+			java.util.function.BiPredicate<net.minecraft.world.entity.Mob, net.minecraft.world.phys.Vec3> sun = (mob, at) -> at != null
+				? com.jaymospowers.core.sun.SunExposure.exposedToSun(mob.level(), at)
+				: com.jaymospowers.core.sun.SunExposure.bodyExposed(mob.level(), mob);
+			Class.forName("com.jaymoskitchen.corpse.Scavengers").getMethod("setSunTest", java.util.function.BiPredicate.class).invoke(null, sun);
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			// an older Kitchen whose scavengers don't mind the sun
 		}
 		try {
 			// a body that hits the ground or a wall hard (thrown, blown, dropped) leaves a smear where it struck

@@ -48,9 +48,9 @@ import org.jspecify.annotations.Nullable;
  * <b>arquebus</b> (a matchlock: a lever drops the match into the pan), then Balkon's WeaponMod musket.
  * <ul>
  * <li><b>In a player's hands</b> ({@link Gun}): hold use to load ({@link Rung#load} ticks, then let go); it takes one
- * pinch of gunpowder and one ball ({@link #SHOT}) out of the pack, and nothing loads without both. Use it again to fire:
- * the arquebus at once, the handgonne after the match has been held to the touch-hole for {@link Rung#touch} ticks
- * (let go before and it doesn't fire). Its {@link GunBall} hits for {@link Rung#damage}. Both are fired by a burning
+ * pinch of gunpowder and one ball ({@link #SHOT}) out of the pack, and nothing loads without both. Use it again and let go
+ * to fire: the shot goes as the click is let go, the handgonne's once the match has been held to the touch-hole for
+ * {@link Rung#touch} ticks (let go before and it doesn't fire). Its {@link GunBall} hits for {@link Rung#damage}. Both are fired by a burning
  * match, so neither fires in the rain or under water: it fizzles and stays loaded.</li>
  * <li><b>The ladder</b>: each barrel is forged on Jaymo's Tinkering's Smithing Anvil and put on its stock at the Tool
  * Station ({@code tinkering/WeaponParts}); the anvil refuses the handgonne's below the {@link Rung#tier} world tier
@@ -401,7 +401,7 @@ public final class EarlyGuns {
 
 	// ---- the gun -----------------------------------------------------------------------------------------------------------
 
-	/** The item: loaded with powder and ball by holding use, fired by using it loaded. */
+	/** The item: loaded with powder and ball by holding use (let go early and it is not), fired as the click on it loaded is let go. */
 	static final class Gun extends Item {
 		private final Rung rung;
 
@@ -441,8 +441,13 @@ public final class EarlyGuns {
 
 		@Override
 		public int getUseDuration(ItemStack stack, LivingEntity user) {
+			return 72000;
+		}
+
+		/** Ticks the handgonne's match takes to come down to the touch-hole (none for the arquebus's lock). */
+		private int touch(LivingEntity user) {
 			// (class trees) a Gunslinger's match comes down twice as fast just after the draw
-			return loaded(stack) ? Math.round(this.rung.touch * WarExtras.draw(user)) : 72000;
+			return Math.round(this.rung.touch * WarExtras.draw(user));
 		}
 
 		@Override
@@ -462,16 +467,13 @@ public final class EarlyGuns {
 				player.getCooldowns().addCooldown(gun, SETTLE);
 				return InteractionResult.FAIL;
 			}
-			if (this.rung.touch > 0) {
+			if (this.rung.touch > 0 && level instanceof ServerLevel) {
 				// the match comes down to the touch-hole
-				if (level instanceof ServerLevel) {
-					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TNT_PRIMED, SoundSource.PLAYERS, 0.5F, 1.6F);
-				}
-				player.startUsingItem(hand);
-				return InteractionResult.CONSUME;
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.TNT_PRIMED, SoundSource.PLAYERS, 0.5F, 1.6F);
 			}
-			this.shoot(level, player, gun, hand);
-			return InteractionResult.SUCCESS;
+			// held ready: the shot goes as the click is let go (releaseUsing)
+			player.startUsingItem(hand);
+			return InteractionResult.CONSUME;
 		}
 
 		private void shoot(Level level, Player player, ItemStack gun, InteractionHand hand) {
@@ -489,21 +491,6 @@ public final class EarlyGuns {
 				}
 			}
 			player.getCooldowns().addCooldown(gun, SETTLE);
-		}
-
-		/** The touch held long enough: the handgonne goes off. */
-		@Override
-		public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity user) {
-			if (user instanceof Player player && loaded(stack)) {
-				if (wet(player)) {
-					if (level instanceof ServerLevel server) {
-						fizzle(server, player);
-					}
-				} else {
-					this.shoot(level, player, stack, player.getUsedItemHand());
-				}
-			}
-			return stack;
 		}
 
 		@Override
@@ -530,6 +517,23 @@ public final class EarlyGuns {
 
 		@Override
 		public boolean releaseUsing(ItemStack stack, Level level, LivingEntity user, int remaining) {
+			if (user instanceof Player shooter && loaded(stack)) {
+				// (Andy: "it should release the shot as you release right click") the shot goes as the click is let go,
+				// the handgonne's once its match is down (let go sooner and the match is lifted away unfired)
+				if (this.getUseDuration(stack, user) - remaining < this.touch(user)) {
+					return false;
+				}
+				if (wet(shooter)) {
+					if (level instanceof ServerLevel server) {
+						fizzle(server, shooter);
+					}
+					shooter.getCooldowns().addCooldown(stack, SETTLE);
+					return false;
+				}
+				this.shoot(level, shooter, stack, shooter.getUsedItemHand());
+				return true;
+			}
+			// unloaded: the reload hold, which a let-go before it's done throws away
 			if (!(user instanceof Player player) || loaded(stack) || this.getUseDuration(stack, user) - remaining < Workshop.reload(user, FrontierPerks.reload(user, this.rung.load))) {
 				return false;
 			}

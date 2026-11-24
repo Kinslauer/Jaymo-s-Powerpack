@@ -1,0 +1,16 @@
+{
+  "replace": false,
+  "values": [
+    "#jaymoskitchen:cooking/red_meat",
+    "#jaymoskitchen:cooking/pork",
+    "#jaymoskitchen:cooking/mutton",
+    "#jaymoskitchen:cooking/poultry",
+    "#jaymoskitchen:cooking/small_game",
+    "#jaymoskitchen:cooking/venison",
+    "jaymoskitchen:minced_beef",
+    "jaymoskitchen:raw_bacon",
+    "jaymoskitchen:chicken_cuts",
+    "jaymoskitchen:mutton_chops",
+    "jaymoskitchen:offal"
+  ]
+}

@@ -27,11 +27,19 @@ abstract class PlayerMixin implements PlayerCorpses.Holder {
 	private List<ItemStack> jaymoskitchen$hotbar = List.of();
 	@Unique
 	private int jaymoskitchen$selected;
+	@Unique
+	private List<Integer> jaymoskitchen$parts = new ArrayList<>();
 
 	@Override
 	public void jaymoskitchen$setHotbar(List<ItemStack> hotbar, int selected) {
 		jaymoskitchen$hotbar = hotbar;
 		jaymoskitchen$selected = selected;
+		jaymoskitchen$parts = new ArrayList<>();
+	}
+
+	@Override
+	public List<Integer> jaymoskitchen$parts() {
+		return jaymoskitchen$parts;
 	}
 
 	@Override
@@ -44,19 +52,22 @@ abstract class PlayerMixin implements PlayerCorpses.Holder {
 		return jaymoskitchen$selected;
 	}
 
-	/** Dying: the hotbar stays with the body (see {@link PlayerCorpses}); everything else drops as usual. */
+	/**
+	 * Dying: everything they carry stays with the body (see {@link PlayerCorpses}), slot for slot (inventory, armour, off
+	 * hand), and nothing drops; it comes loose only if the body is blown apart.
+	 */
 	@Inject(method = "dropEquipment", at = @At("HEAD"))
 	private void jaymoskitchen$keepHotbarOnBody(ServerLevel level, CallbackInfo ci) {
 		Player self = (Player) (Object) this;
 		if (level.getGameRules().get(GameRules.KEEP_INVENTORY) || self.isSpectator()
 			|| self.entityTags().contains(com.jaymoskitchen.corpse.Corpses.NO_CORPSE_TAG)
 			|| com.jaymoskitchen.corpse.Corpses.inNoCorpseZone(self)) {
-			// (no body to keep it: a tagged player's hotbar drops with everything else)
+			// (no body to keep it: a tagged player's things drop as usual)
 			return;
 		}
 		Inventory inventory = self.getInventory();
 		List<ItemStack> hotbar = new ArrayList<>();
-		for (int i = 0; i < Inventory.getSelectionSize(); i++) {
+		for (int i = 0; i < com.jaymoskitchen.corpse.CorpseEntity.INVENTORY_SLOTS; i++) {
 			ItemStack stack = inventory.getItem(i);
 			if (!stack.isEmpty() && EnchantmentHelper.has(stack, EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
 				// curse of vanishing: gone, as it would be

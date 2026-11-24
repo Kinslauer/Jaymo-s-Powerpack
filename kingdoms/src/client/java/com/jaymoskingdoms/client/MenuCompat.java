@@ -148,6 +148,8 @@ public final class MenuCompat {
 			reflect(menu, "group", new Class<?>[] {String.class, String.class}, g[0], g[1]);
 		}
 		reflect(menu, "wide", new Class<?>[] {String.class}, "skills");
+		// H after a hint naming one of Kingdoms' pages opens that page (HintLinks)
+		reflect(menu, "landing", new Class<?>[] {Supplier.class}, (Supplier<String>)HintLinks::landing);
 		reflect(menu, "locked", new Class<?>[] {String.class, Supplier.class}, "forms",
 			(Supplier<Component>)() -> Component.translatable("menu.jaymoskingdoms.locked.forms"));
 		reflect(menu, "locked", new Class<?>[] {String.class, Supplier.class}, "boons",
@@ -304,6 +306,12 @@ public final class MenuCompat {
 		Component none = none();
 		Component career = Careers.title(player);
 		rows.add(row("menu.jaymoskingdoms.character.career", career == null ? none : career));
+		// the heritage paths open to your blood, and how far you are on each (HeritagePaths)
+		for (com.jaymoskingdoms.HeritagePaths.Path p : com.jaymoskingdoms.HeritagePaths.Path.values()) {
+			if (com.jaymoskingdoms.HeritagePaths.ofBlood(player, p)) {
+				rows.add(new Component[] {Component.translatable("path.jaymoskingdoms." + p.key()), com.jaymoskingdoms.HeritagePaths.status(player, p)});
+			}
+		}
 		Skills.Progress skills = Skills.of(player);
 		for (Skills.Pillar p : Skills.Pillar.values()) {
 			rows.add(row("skill.jaymoskingdoms." + p.key(), Component.translatable("menu.jaymoskingdoms.character.level", skills.level(p))));

@@ -74,6 +74,9 @@ import org.jspecify.annotations.Nullable;
  * (another mod's damage with no projectile) is never one.</li>
  * </ul>
  * Someone downed under a slam still bursts as before: the ground takes what the body can't.
+ * <p>Andy (2026-11-21, a guard burst in a fight at a drill): "bodies should not be exploding like that especially not
+ * from a sword slice". A blow from a blade ({@link #blade}: a sword or an axe in hand) cuts; it is never a crushing blow,
+ * however hard it lands.
  */
 public final class BlastGore {
 	/** A blast this big (radius; TNT's is 4) counts in full; a smaller one's closeness is scaled by the root of its share. */
@@ -241,10 +244,16 @@ public final class BlastGore {
 		if (source.is(CRUSHING_TYPES)) {
 			return true;
 		}
-		if (amount < CRUSH_DAMAGE || !(source.getEntity() instanceof LivingEntity by) || source.getDirectEntity() != by || !inReach(by, target)) {
+		if (amount < CRUSH_DAMAGE || blade(source) || !(source.getEntity() instanceof LivingEntity by) || source.getDirectEntity() != by || !inReach(by, target)) {
 			return false;
 		}
 		return amount >= CRUSH_ANY || bulk(by) >= CRUSH_BULK * bulk(target);
+	}
+
+	/** Whether {@code source}'s blow was struck with a blade (a sword or an axe), which cuts and never crushes. */
+	private static boolean blade(DamageSource source) {
+		net.minecraft.world.item.ItemStack weapon = source.getWeaponItem();
+		return weapon != null && !Fractures.blunt(weapon) && (weapon.is(net.minecraft.tags.ItemTags.SWORDS) || weapon.is(net.minecraft.tags.ItemTags.AXES));
 	}
 
 	/** Whether {@code by} stands close enough to {@code target} to have struck it by hand or body ({@link #CRUSH_REACH} between their edges). */

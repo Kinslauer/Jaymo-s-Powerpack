@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiConsumer;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -84,9 +86,27 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  */
 public final class Treatment {
-	/** (0.14.4) A linen bandage heals its part this much (health points) over this long (ticks); a rag half as much. */
-	public static final float BANDAGE_HEAL = 3.0F, RAG_HEAL = 1.5F;
-	public static final int BANDAGE_TICKS = 200;
+	/**
+	 * (Survival picks, lso-heal-time: LSO's bandage and plaster mapped onto ours) A linen bandage heals its part this much
+	 * (health points) over this long (ticks); a rag, a clean rag or a grass bandage (the plaster) this much over
+	 * {@link #RAG_TICKS}.
+	 */
+	public static final float BANDAGE_HEAL = 3.0F, RAG_HEAL = 3.0F;
+	public static final int BANDAGE_TICKS = 300, RAG_TICKS = 400;
+	/** (Andy, 2026-11-23) How long the short Regeneration from a fresh dressing lasts: I for a grass bandage, II for linen, none for a rag. */
+	public static final int DRESSING_REGEN_TICKS = 160;
+	/**
+	 * How many parts one dressing wraps at once (Andy, 2026-11-23: "one can bandage multiple limbs. and it can do so at
+	 * the same time"): the part picked, then the worst others it can help ({@link #worst}). A linen bandage, a grass
+	 * bandage, a rag.
+	 */
+	public static final int BANDAGE_LIMBS = 4, GRASS_BANDAGE_LIMBS = 2, RAG_LIMBS = 1;
+	/**
+	 * No longer used (a linen bandage was once spread over three separate dressings); kept registered so players saved
+	 * with it still load cleanly.
+	 */
+	public static final AttachmentType<Integer> BANDAGE_LEFT = AttachmentRegistry.create(JaymosPowers.id("wounds_bandage_left"),
+		builder -> builder.persistent(com.mojang.serialization.Codec.INT));
 	/** (0.14.4) A stitch hurts its part this much; cautery burns it this much. */
 	public static final float NEEDLE_HURT = 1.0F, CAUTERY_BURN = 2.0F;
 	/**
@@ -456,11 +476,26 @@ public final class Treatment {
 			}
 			if (helps(dressing, body, part)) {
 				Bleeding.stop(body, part, false);
-				Bleeding.dress(body, part, rag ? RAG_HEAL : BANDAGE_HEAL, BANDAGE_TICKS, rag);
+				Bleeding.dress(body, part, rag ? RAG_HEAL : BANDAGE_HEAL, rag ? RAG_TICKS : BANDAGE_TICKS, rag);
 				seen++;
 			}
 		}
+		if (seen > 0) {
+			dressingRegen(body, rag ? -1 : 1);
+		}
 		return seen;
+	}
+
+	/**
+	 * (Andy, 2026-11-23) "while bandaged you should get a short regen effect. none for rags, with less chance of infection,
+	 * regen 1 for grass bandages and regen 2 for clean bandages": Regeneration at {@code amplifier} (0 = I, 1 = II) for
+	 * {@link #DRESSING_REGEN_TICKS}; below 0, none.
+	 */
+	private static void dressingRegen(LivingEntity body, int amplifier) {
+		if (amplifier >= 0) {
+			body.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.REGENERATION,
+				DRESSING_REGEN_TICKS, amplifier));
+		}
 	}
 
 	/** (0.14.4) Downed's revive steps aside: sneak + use with a remedy that can help this downed one (server side). */
@@ -831,13 +866,21 @@ public final class Treatment {
 		switch (s.remedy) {
 			case BANDAGE, RAG, CLEAN_RAG -> {
 				boolean rag = s.remedy != Remedy.BANDAGE;
-				Bleeding.stop(body, part, false);
-				// (0.15.49) Field Dresser: a better dressing. (0.19.24) a clean rag looks like a rag but is not dirty
-				Bleeding.dress(body, part, MedicineSkill.dressing(player, rag ? RAG_HEAL : BANDAGE_HEAL), BANDAGE_TICKS, s.remedy == Remedy.RAG, rag);
+				int limbs = !rag ? BANDAGE_LIMBS : used == MedicineItems.GRASS_BANDAGE ? GRASS_BANDAGE_LIMBS : RAG_LIMBS;
+				// the part picked first, then the worst others this dressing can help, all in the one go
+				for (BodyPart next = part != null ? part : worst(s.remedy, body); next != null && limbs-- > 0; next = limbs > 0 ? worst(s.remedy, body) : null) {
+					Bleeding.stop(body, next, false);
+					// (0.15.49) Field Dresser: a better dressing. (0.19.24) a clean rag looks like a rag but is not dirty
+					Bleeding.dress(body, next, MedicineSkill.dressing(player, rag ? RAG_HEAL : BANDAGE_HEAL), rag ? RAG_TICKS : BANDAGE_TICKS,
+						s.remedy == Remedy.RAG, rag);
+				}
+				dressingRegen(body, used == MedicineItems.LINEN_BANDAGE ? 1 : used == MedicineItems.GRASS_BANDAGE ? 0 : -1);
 				stack.consume(1, player);
 			}
 			case YARROW -> {
 				Bleeding.stop(body, part, false);
+				// (survival picks: LSO's healing herbs) and the part heals a little over time
+				Herbal.mendOver(body, part, Herbal.HERB_HEAL, Herbal.HERB_TICKS);
 				level.playSound(null, body.getX(), body.getY(), body.getZ(), SoundEvents.GRASS_BREAK, SoundSource.PLAYERS, 0.7F, 1.2F);
 				stack.consume(1, player);
 			}

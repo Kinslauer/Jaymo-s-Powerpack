@@ -446,6 +446,32 @@ public final class KitchenCompat {
 	}
 
 	/**
+	 * Andy: "if they wear it, they have to cut it". The head of player {@code owner}'s body, lying within {@code range} of
+	 * {@code at}, is cut off and taken (the body is drawn without it, and what it wore on it falls off; nothing is left
+	 * lying). False if there's no such body with its head still on, or without Kitchen.
+	 */
+	static boolean cutHead(net.minecraft.server.level.ServerLevel level, Vec3 at, double range, String owner) {
+		if (CORPSE == null) {
+			return false;
+		}
+		for (Entity e : level.getEntities((Entity)null, new net.minecraft.world.phys.AABB(at, at).inflate(range),
+			e -> CORPSE.isInstance(e) && !e.isRemoved() && owner.equals(corpseOwner(e)))) {
+			try {
+				int missing = (int)CORPSE.getMethod("missing").invoke(e);
+				if ((missing & 1) == 0) {
+					// (bit 1: the head)
+					CORPSE.getMethod("setMissing", int.class).invoke(e, missing | 1);
+					return true;
+				}
+			} catch (ReflectiveOperationException | RuntimeException ex) {
+				JaymosKingdoms.LOGGER.debug("Kitchen cutHead failed: {}", ex.toString());
+				return false;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * The unburied dead within {@code range} of {@code at}: free corpses of people and monsters (not animals, never a
 	 * player's). Empty without Kitchen.
 	 */
@@ -502,6 +528,36 @@ public final class KitchenCompat {
 	}
 
 	/** (0.7.132) A player's body (never buried, burned or robbed: their things stay theirs). */
+	private static @Nullable Method keepWith;
+	private static boolean keepWithLooked;
+
+	/**
+	 * Kitchen's {@code PlayerCorpses.keepWith}: a player who just died keeps {@code stack} on their body, worn on
+	 * {@code parts} (shed with any of them it lacks). False (drop it yourself) without Kitchen or a body to hold it.
+	 */
+	static boolean keepOnBody(net.minecraft.server.level.ServerPlayer player, net.minecraft.world.item.ItemStack stack, int parts) {
+		if (!keepWithLooked) {
+			keepWithLooked = true;
+			if (CORPSE != null) {
+				try {
+					keepWith = Class.forName("com.jaymoskitchen.corpse.PlayerCorpses").getMethod("keepWith",
+						net.minecraft.server.level.ServerPlayer.class, net.minecraft.world.item.ItemStack.class, int.class);
+				} catch (ReflectiveOperationException | LinkageError e) {
+					keepWith = null;
+				}
+			}
+		}
+		if (keepWith == null) {
+			return false;
+		}
+		try {
+			return Boolean.TRUE.equals(keepWith.invoke(null, player, stack, parts));
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Kitchen keepWith failed: {}", e.toString());
+			return false;
+		}
+	}
+
 	static boolean isPlayerCorpse(Entity corpse) {
 		return Boolean.TRUE.equals(call(PLAYER_CORPSE, corpse));
 	}

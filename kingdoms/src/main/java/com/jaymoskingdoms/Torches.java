@@ -170,7 +170,7 @@ public final class Torches {
 	public static void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
 		boolean out = level.isRainingAt(pos) ? random.nextInt(RAIN_DOUSE_CHANCE) == 0
 			: FieldWeather.blowsOut(level, pos, random) || random.nextInt((int) (BURN_TICKS / RANDOM_TICK_EVERY)) == 0;
-		if (out) {
+		if (out && !HeritagePaths.keeps(level, pos, random)) {
 			goOut(level, pos, state);
 		}
 	}
@@ -180,6 +180,7 @@ public final class Torches {
 			? BURNT_WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, state.getValue(WallTorchBlock.FACING))
 			: BURNT_TORCH.defaultBlockState();
 		level.setBlockAndUpdate(pos, burnt);
+		HeritagePaths.forgetLight(level, pos);
 		level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.4F, 1.6F);
 		level.sendParticles(ParticleTypes.SMOKE, pos.getX() + 0.5, pos.getY() + 0.7, pos.getZ() + 0.5, 6, 0.05, 0.05, 0.05, 0.01);
 		remember(level, pos);

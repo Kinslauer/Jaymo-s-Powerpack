@@ -79,7 +79,9 @@ public final class RisenLooks {
 	}
 
 	private static void loaded(Entity entity, ServerLevel level) {
-		if (entity.getType() != EntityTypes.ZOMBIE || entity.hasAttached(ROSE) || level.dimension() == FUTURE) {
+		// (Mutant Monsters' mutant zombie is marked too: it is drawn as one of the old dead, client/MutantDead)
+		boolean mutant = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).equals(MutantRampage.MUTANT_ZOMBIE);
+		if (entity.getType() != EntityTypes.ZOMBIE && !mutant || entity.hasAttached(ROSE) || level.dimension() == FUTURE) {
 			return;
 		}
 		BlockPos at = entity.blockPosition();

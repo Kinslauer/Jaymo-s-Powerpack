@@ -88,6 +88,21 @@ public final class Payloads {
 	}
 
 	/**
+	 * Client → server: the meat hook at {@code pos} was right-clicked (anywhere in its block space) while carrying or
+	 * dragging a carcass: hang it there.
+	 */
+	public record HangOn(BlockPos pos) implements CustomPacketPayload {
+		public static final Type<HangOn> TYPE = new Type<>(JaymosKitchen.id("hang_on"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, HangOn> CODEC = CustomPacketPayload.codec(
+			(p, buf) -> buf.writeBlockPos(p.pos), buf -> new HangOn(buf.readBlockPos()));
+
+		@Override
+		public Type<HangOn> type() {
+			return TYPE;
+		}
+	}
+
+	/**
 	 * Server → client: the state of the player's cooking session.
 	 * {@code status} is one of the STATUS_ constants; {@code quality} is only meaningful once finished.
 	 */
@@ -596,6 +611,7 @@ public final class Payloads {
 		PayloadTypeRegistry.serverboundPlay().register(SearFinish.TYPE, SearFinish.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(MinigameFinish.TYPE, MinigameFinish.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(DropCarried.TYPE, DropCarried.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(HangOn.TYPE, HangOn.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(FinishRoll.TYPE, FinishRoll.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(SimUpdate.TYPE, SimUpdate.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(SmokeFinish.TYPE, SmokeFinish.CODEC);

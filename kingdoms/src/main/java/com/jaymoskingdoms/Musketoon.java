@@ -163,7 +163,7 @@ public final class Musketoon {
 
 	// ---- the gun -----------------------------------------------------------------------------------------------------------
 
-	/** The item: loaded by holding use, fired by using it loaded. */
+	/** The item: loaded by holding use (let go early and it isn't), fired as the click on it loaded is let go. */
 	static final class Gun extends Item {
 		Gun(Item.Properties properties) {
 			super(properties);
@@ -212,6 +212,13 @@ public final class Musketoon {
 				player.startUsingItem(hand);
 				return InteractionResult.CONSUME;
 			}
+			// loaded: held ready, and the shot goes as the click is let go (releaseUsing)
+			player.startUsingItem(hand);
+			return InteractionResult.CONSUME;
+		}
+
+		/** The shot, as the click on a loaded gun is let go (Andy: "it should release the shot as you release right click"). */
+		private void shoot(Level level, Player player, ItemStack gun) {
 			if (level instanceof ServerLevel server) {
 				gun.set(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.EMPTY);
 				fire(server, player, gun, player.getLookAngle());
@@ -220,14 +227,17 @@ public final class Musketoon {
 				player.push(back.x, 0.05, back.z);
 				player.syncVelocity = true;
 				player.awardStat(Stats.ITEM_USED.get(this));
-				gun.hurtAndBreak(1, player, hand);
+				gun.hurtAndBreak(1, player, player.getUsedItemHand());
 			}
 			player.getCooldowns().addCooldown(gun, SETTLE);
-			return InteractionResult.SUCCESS;
 		}
 
 		@Override
 		public void onUseTick(Level level, LivingEntity user, ItemStack stack, int remaining) {
+			if (loaded(stack)) {
+				// (held ready to fire, not loading)
+				return;
+			}
 			int held = this.getUseDuration(stack, user) - remaining;
 			// (quicker in the Ranger's harness: FrontierPerks)
 			int load = FrontierPerks.reload(user, RELOAD);
@@ -241,6 +251,11 @@ public final class Musketoon {
 
 		@Override
 		public boolean releaseUsing(ItemStack stack, Level level, LivingEntity user, int remaining) {
+			if (user instanceof Player shooter && loaded(stack)) {
+				shoot(level, shooter, stack);
+				return true;
+			}
+			// unloaded: the reload hold, which a let-go before it's done throws away
 			if (!(user instanceof Player player) || loaded(stack) || this.getUseDuration(stack, user) - remaining < FrontierPerks.reload(user, RELOAD)) {
 				return false;
 			}

@@ -1,0 +1,14 @@
+{
+	"layers": {
+		"humanoid": [
+			{
+				"texture": "jaymoskingdoms:diabolium"
+			}
+		],
+		"humanoid_leggings": [
+			{
+				"texture": "jaymoskingdoms:diabolium"
+			}
+		]
+	}
+}

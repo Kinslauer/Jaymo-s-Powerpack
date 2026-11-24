@@ -121,6 +121,8 @@ public final class Greenskins {
 		PathfinderMob mob = w.mob();
 		if (!mob.isSleeping() && !Downed.isDowned(mob)) {
 			Orcs.tick(level, mob, w.role(), w.factionId());
+			// (goblin extras) a village's engineer strikes his hammer in a fight
+			GoblinRobot.engineer(level, mob);
 		}
 	}
 

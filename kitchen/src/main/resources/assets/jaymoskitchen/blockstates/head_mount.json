@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "jaymoskitchen:block/head_mount" },
+    "facing=east": { "model": "jaymoskitchen:block/head_mount", "y": 90 },
+    "facing=south": { "model": "jaymoskitchen:block/head_mount", "y": 180 },
+    "facing=west": { "model": "jaymoskitchen:block/head_mount", "y": 270 }
+  }
+}

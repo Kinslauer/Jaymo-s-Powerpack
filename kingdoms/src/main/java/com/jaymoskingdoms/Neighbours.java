@@ -279,9 +279,13 @@ final class Neighbours {
 		}
 	}
 
-	/** Free to meet someone: grown, awake, out of their routines and work, not resting from the last meeting. */
+	/**
+	 * Free to meet someone: grown, awake, out of work, not resting from the last meeting. A pastime ({@link Routines}) is
+	 * dropped for a meeting: since boredom has them take one up within seconds ({@link Needs}), waiting for two with none
+	 * meant they hardly ever met.
+	 */
 	private static boolean free(Villager v, long t) {
-		return !v.isBaby() && !MEETING.containsKey(v.getUUID()) && !RESTING.containsKey(v.getUUID()) && !Routines.busy(v) && Routines.free(v, t);
+		return !v.isBaby() && !MEETING.containsKey(v.getUUID()) && !RESTING.containsKey(v.getUUID()) && Routines.free(v, t);
 	}
 
 	/** What {@code a} and {@code b} do, meeting: it hangs on what they think of each other (and {@code a}'s mood). */

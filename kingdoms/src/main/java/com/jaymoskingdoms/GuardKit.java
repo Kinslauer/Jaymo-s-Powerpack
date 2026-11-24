@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -31,6 +32,7 @@ import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.item.equipment.Equippable;
+import net.minecraft.world.item.equipment.trim.ArmorTrim;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -81,6 +83,29 @@ public final class GuardKit {
 	static final int WAR_ARM = 6, SHIELD = 2;
 	/** A camp raider's torn hood, his torn cloak and his horned crest: the share who have each. */
 	static final float RAIDER_HOOD = 0.5F, RAIDER_CLOAK = 0.25F, RAIDER_HORNS = 0.33F;
+
+	/**
+	 * While a figure is dressed only to be shown (the life story's realm page, {@link LifeStory}): it is kitted with what
+	 * the realm could pay for, kept count of as it goes, but nothing is taken from its stores or treasury. Server thread only.
+	 */
+	static boolean preview;
+	/** What the figure being shown has been kitted with so far (items, materials, {@link #EMERALDS}), as if paid. */
+	private static final java.util.Map<Object, Integer> PREVIEW_USED = new java.util.HashMap<>();
+	private static final Object EMERALDS = new Object();
+
+	/** Starts ({@code on}) or ends dressing a figure that is only shown. */
+	static void preview(boolean on) {
+		preview = on;
+		PREVIEW_USED.clear();
+	}
+
+	private static int used(Object what) {
+		return PREVIEW_USED.getOrDefault(what, 0);
+	}
+
+	private static void use(Object what, int count) {
+		PREVIEW_USED.merge(what, count, Integer::sum);
+	}
 
 	/** Who: a rank of the troop ladder, an archer, a gunner. */
 	static final int MIL = 1, SOL = 2, KN = 4, VET = 8, LEAD = 16, ARCH = 32, GUN = 64;
@@ -434,7 +459,7 @@ public final class GuardKit {
 		for (int i = 0; i < SIZE; i++) {
 			ItemStack held = keep ? had.piece(i) : ItemStack.EMPTY;
 			if (i < ARMOUR.length) {
-				ItemStack piece = choose(c, armour(c, i, given[i]), held, given[i], spoils, leather(c, i, given[i]));
+				ItemStack piece = marked(c, choose(c, armour(c, i, given[i]), held, given[i], spoils, leather(c, i, given[i])));
 				// (no gold helm on a guard, kept or taken from the spoils: HeraldryWear.helmFinish)
 				out.set(i, i == 0 ? HeraldryWear.ungilded(piece) : piece);
 			} else if (i == MAINHAND) {
@@ -510,7 +535,7 @@ public final class GuardKit {
 
 	/** {@code now} takes the place of {@code held}, which goes back into the stores. */
 	private static ItemStack back(Ctx c, ItemStack held, ItemStack now) {
-		if (!held.isEmpty()) {
+		if (!held.isEmpty() && !preview) {
 			Storage.put(c.level(), c.f(), held.copy());
 		}
 		return now;
@@ -522,12 +547,22 @@ public final class GuardKit {
 		if (cost.material() == null && cost.count() == 0 && cost.emeralds() == 0) {
 			return gold(c, o.stack().copy());
 		}
-		ItemStack own = Storage.take(c.level(), c.f(), s -> s.is(o.stack().getItem()), 1);
+		ItemStack own = ItemStack.EMPTY;
+		if (!preview) {
+			own = Storage.take(c.level(), c.f(), s -> s.is(o.stack().getItem()), 1);
+		} else if (Storage.count(c.level(), c.f(), o.stack().getItem()) - used(o.stack().getItem()) > 0) {
+			use(o.stack().getItem(), 1);
+			own = o.stack().copy();
+		}
 		if (!own.isEmpty()) {
 			return own;
 		}
-		if (cost.material() != null && cost.count() > 0 && Storage.count(c.level(), c.f(), cost.material()) >= cost.count()) {
+		if (cost.material() != null && cost.count() > 0 && Storage.count(c.level(), c.f(), cost.material()) - used(cost.material()) >= cost.count()) {
 			int left = cost.count();
+			if (preview) {
+				use(cost.material(), left);
+				left = 0;
+			}
 			while (left > 0) {
 				ItemStack taken = Storage.take(c.level(), c.f(), cost.material(), left);
 				if (taken.isEmpty()) {
@@ -540,8 +575,12 @@ public final class GuardKit {
 		if (cost.emeralds() > 0) {
 			MinecraftServer server = c.level().getServer();
 			Faction now = Factions.get(server, c.f().id());
-			if (now != null && now.treasury() >= TREASURY_KEPT + cost.emeralds()) {
-				Factions.update(server, now.id(), x -> x.withTreasury(Math.max(0L, x.treasury() - cost.emeralds())));
+			if (now != null && now.treasury() - used(EMERALDS) >= TREASURY_KEPT + cost.emeralds()) {
+				if (preview) {
+					use(EMERALDS, cost.emeralds());
+				} else {
+					Factions.update(server, now.id(), x -> x.withTreasury(Math.max(0L, x.treasury() - cost.emeralds())));
+				}
 				return gold(c, o.stack().copy());
 			}
 		}
@@ -554,7 +593,14 @@ public final class GuardKit {
 	 * (the Crown's) or bright instead.
 	 */
 	private static ItemStack gold(Ctx c, ItemStack made) {
-		if (!HeraldryWear.gilt(made) || HeraldryWear.payGold(c.level(), c.f(), 1)) {
+		if (!HeraldryWear.gilt(made)) {
+			return made;
+		}
+		if (preview && Storage.count(c.level(), c.f(), Items.GOLD_INGOT) - used(Items.GOLD_INGOT) >= HeraldryWear.GILD_GOLD) {
+			use(Items.GOLD_INGOT, HeraldryWear.GILD_GOLD);
+			return made;
+		}
+		if (!preview && HeraldryWear.payGold(c.level(), c.f(), 1)) {
 			return made;
 		}
 		return HeraldryWear.refinished(made, HeraldryWear.helmFinish(HeraldryArmour.finish(made)));
@@ -584,7 +630,7 @@ public final class GuardKit {
 	}
 
 	private static ItemStack takeSpoil(Ctx c, @Nullable List<ItemStack> spoils, ItemStack spoil) {
-		ItemStack taken = Storage.take(c.level(), c.f(), s -> ItemStack.isSameItemSameComponents(s, spoil), 1);
+		ItemStack taken = preview ? spoil.copyWithCount(1) : Storage.take(c.level(), c.f(), s -> ItemStack.isSameItemSameComponents(s, spoil), 1);
 		if (spoils != null) {
 			spoils.remove(spoil);
 		}
@@ -730,6 +776,27 @@ public final class GuardKit {
 	}
 
 	/**
+	 * (Liveries) A plain piece a realm's smiths make (mail, leather, bronze, iron) carries the realm's own trim, as
+	 * {@link Outfits} puts it on, so two realms' guards are told apart even in the levy's gear (a plain one they already
+	 * hold is marked at their next look-over). One with a trim already (a spoil in another realm's) keeps it.
+	 */
+	private static ItemStack marked(Ctx c, ItemStack stack) {
+		if (!c.realm() || stack.has(DataComponents.TRIM) || !stack.is(ItemTags.TRIMMABLE_ARMOR)) {
+			return stack;
+		}
+		Outfits.Heraldry arms = Outfits.heraldry(c.f(), c.level().getServer());
+		var access = c.level().registryAccess();
+		var pattern = access.lookupOrThrow(Registries.TRIM_PATTERN).get(arms.pattern());
+		var material = access.lookupOrThrow(Registries.TRIM_MATERIAL).get(arms.material());
+		if (pattern.isEmpty() || material.isEmpty()) {
+			return stack;
+		}
+		ItemStack out = stack.copy();
+		out.set(DataComponents.TRIM, new ArmorTrim(material.get(), pattern.get()));
+		return out;
+	}
+
+	/**
 	 * The harness helm {@code c}'s guard may wear: one shape for each rank of a realm. Where his creed has a helm (a Coin
 	 * realm's barbute, Old Blood's spangenhelm in the cold, a Chivalry leader's great helm, a Conquest leader's grotesque
 	 * visor) it's that; else his land's (the veiled helm in the desert, the morion in dry realms that keep guns); else one
@@ -759,7 +826,8 @@ public final class GuardKit {
 			}
 		}
 		if (by.isEmpty()) {
-			if (c.is(MIL | SOL | ARCH | GUN) && c.kind(VILLAGE | HAVEN | FIEF)) {
+			// (a kingdom's soldiers too: its own of the kettle hat and the lobster tail, so not every realm's are alike)
+			if (c.is(MIL | SOL | ARCH | GUN) && c.kind(VILLAGE | HAVEN | FIEF) || c.is(SOL) && c.kind(KINGDOM)) {
 				by.add("kettle_hat");
 			}
 			if (c.is(KN | VET)) {
@@ -887,11 +955,19 @@ public final class GuardKit {
 		return out;
 	}
 
-	/** The harness's free floor: a quilted coat for everyone, and (but for a gunner's lamp) the tabard in the realm's colours. */
+	/**
+	 * The harness's free floor: a quilted coat for everyone, and (but for a gunner's lamp) the tabard in the realm's colours;
+	 * and in a realm the levy's cloth its livery gives ({@link Liveries}): a hood in its colour (fur in the cold), leather
+	 * tassets, padded cuisses.
+	 */
 	private static @Nullable ItemStack cloth(Ctx c, Harness.Slot slot) {
+		int levy = c.realm() ? Liveries.cloth(Liveries.of(c.level().getServer(), c.f())) : 0;
 		return switch (slot) {
 			case MAIL -> HeraldryArmour.stack("quilted_coat");
 			case OVER -> c.is(GUN) ? null : HeraldryWear.withArms(dyed(HeraldryArmour.stack("tabard"), c.field()), c.level().getServer(), c.f());
+			case HOOD -> (levy & Liveries.HOOD) == 0 ? null : c.in(COLD) ? HeraldryArmour.stack("fur_hood") : dyed(HeraldryArmour.stack("hood"), c.field());
+			case WAIST -> (levy & Liveries.TASSETS) == 0 ? null : HeraldryArmour.stack("leather_tassets");
+			case THIGHS -> (levy & Liveries.CUISSES) == 0 ? null : HeraldryArmour.stack("padded_cuisses");
 			default -> null;
 		};
 	}

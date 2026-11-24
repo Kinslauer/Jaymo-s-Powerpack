@@ -1,5 +1,6 @@
 package com.jaymospowers.client.mixin;
 
+import com.jaymospowers.client.UltimateCinematic;
 import com.jaymospowers.core.wounds.Mortality;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -43,6 +44,10 @@ abstract class DeathScreenBlackMixin {
 
 	@Inject(method = "tick", at = @At("HEAD"))
 	private void jaymospowers$age(CallbackInfo ci) {
+		if (UltimateCinematic.deathFilm()) {
+			// (Andy, 2026-11-23: a film after your death plays first; the black hold starts when it ends)
+			return;
+		}
 		jaymospowers$age++;
 	}
 

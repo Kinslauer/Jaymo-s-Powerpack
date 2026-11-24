@@ -24,6 +24,18 @@
     {
       "id": "weaponmod:musketbayonet.diamond",
       "required": false
-    }
+    },
+    "jaymoskingdoms:diabolium_helmet",
+    "jaymoskingdoms:diabolium_chest",
+    "jaymoskingdoms:diabolium_leggings",
+    "jaymoskingdoms:diabolium_boots",
+    "jaymoskingdoms:crust_helmet",
+    "jaymoskingdoms:crust_chest",
+    "jaymoskingdoms:crust_leggings",
+    "jaymoskingdoms:devil_splitter",
+    "jaymoskingdoms:thirst_for_blood",
+    "jaymoskingdoms:crystallized_dagger",
+    "jaymoskingdoms:horn_of_apocalypse",
+    "jaymoskingdoms:corrupted_heart"
   ]
 }

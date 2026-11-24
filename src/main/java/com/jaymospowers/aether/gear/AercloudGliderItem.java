@@ -92,6 +92,13 @@ public class AercloudGliderItem extends Item {
 			}
 			return InteractionResult.FAIL;
 		}
+		if (com.jaymospowers.core.ArmsFull.both(player)) {
+			// nor with both arms full of what you lift
+			if (level.isClientSide()) {
+				com.jaymospowers.core.ArmsFull.refuse(player);
+			}
+			return InteractionResult.FAIL;
+		}
 		if (!level.isClientSide() && player instanceof ServerPlayer sp) {
 			stack.hurtAndBreak(1, sp, hand);
 			if (stack.isEmpty()) {

@@ -12,6 +12,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
@@ -25,11 +26,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.component.AttackRange;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -50,10 +53,24 @@ import net.minecraft.world.phys.Vec3;
  * wind-up, a small white-hot star at its heart, and a ring of dust in the colour. It's sent to everyone near even on
  * reduced particles. With it comes Time Flow's warning ping (a high note-block bell; a heavy blow's rings low, with a
  * drum under it), heard from the mob. Kingdoms' fighters and gunners use the same glint ({@link #glint}).
+ * <p>
+ * Andy: "enemies should telegraph attacks more and get closer before swinging". The wind-up is longer, and the mob
+ * holds its arms up through it ({@link #hold}: zombies, skeletons, illagers raise them), steps in
+ * {@link #LUNGE_LEAD} ticks before the blow, and only throws its arm when the blow falls (vanilla swung it with the
+ * glint, so the arm was down again before the hit). It starts the wind-up only from {@link #START_REACH_SHARE} of its
+ * reach ({@link #closeEnough}, checked by the mixins before the attack cooldown is spent), so it walks up to you instead
+ * of glinting from the edge of its reach and whiffing; the blow still lands anywhere in its full reach.
  */
 public final class AttackTells {
 	/** Ticks from the glint to the blow. */
-	public static final int WINDUP = 6;
+	public static final int WINDUP = 10;
+	/** The wind-up starts only with the target inside this share of the mob's reach (past its own body). */
+	static final double START_REACH_SHARE = 0.55;
+	/** Vanilla's reach past the body for a mob holding nothing with an attack range (Mob.DEFAULT_ATTACK_REACH). */
+	static final double DEFAULT_REACH = Math.sqrt(2.04F) - 0.6F;
+	/** The step in: this many ticks before the blow, this fast (blocks a tick) toward the target. */
+	static final int LUNGE_LEAD = 3;
+	static final double LUNGE_SPEED = 0.25;
 	/** A blow this heavy (attack damage), or from a body this wide (blocks), can't be parried. */
 	public static final double HEAVY_DAMAGE = 10.0, HEAVY_WIDTH = 1.35;
 	public static final int TELL_COLOR = 0xFFFFFF, HEAVY_TELL_COLOR = 0xE02020;
@@ -109,6 +126,7 @@ public final class AttackTells {
 	 */
 	public static boolean windUp(Mob mob, ServerLevel level, Entity target) {
 		if (!(target instanceof LivingEntity living)) {
+			mob.swingForAttack(InteractionHand.MAIN_HAND);
 			return mob.doHurtTarget(level, target);
 		}
 		if (PENDING.containsKey(mob) || Crowds.waiting(mob)) {
@@ -119,7 +137,24 @@ public final class AttackTells {
 		tell(level, mob, heavy);
 		IncomingBlows.aimed(mob, living, WINDUP, heavy);
 		PENDING.put(mob, new Pending(living, level.getGameTime() + WINDUP));
+		mob.setAggressive(true);
 		return false;
+	}
+
+	/**
+	 * Whether {@code target} is close enough for {@code mob} to start a wind-up: inside {@link #START_REACH_SHARE} of its
+	 * reach. A weapon with a near limit to its reach (a spear) keeps vanilla's check, and so does a rider.
+	 */
+	public static boolean closeEnough(Mob mob, LivingEntity target) {
+		if (mob.isPassenger()) {
+			return true;
+		}
+		AttackRange range = mob.getActiveItem().get(DataComponents.ATTACK_RANGE);
+		if (range != null && range.effectiveMinRange(mob) > 0.0F) {
+			return true;
+		}
+		double reach = (range == null ? DEFAULT_REACH : range.effectiveMaxRange(mob)) * START_REACH_SHARE;
+		return mob.getBoundingBox().inflate(reach, 0.0, reach).intersects(target.getBoundingBox());
 	}
 
 	/** Whether {@code mob}'s blows are too heavy to parry. */
@@ -177,10 +212,13 @@ public final class AttackTells {
 				PENDING.remove(mob);
 				continue;
 			}
-			if (level.getGameTime() < pending.hitAt()) {
+			long now = level.getGameTime();
+			if (now < pending.hitAt()) {
+				hold(mob, pending.target(), pending.hitAt() - now);
 				continue;
 			}
 			PENDING.remove(mob);
+			mob.swingForAttack(InteractionHand.MAIN_HAND);
 			LivingEntity target = pending.target();
 			if (!target.isAlive() || target.level() != level || !inReach(mob, target) || !mob.getSensing().hasLineOfSight(target)) {
 				level.playSound(null, mob.getX(), mob.getY(), mob.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, mob.getSoundSource(), 0.6F, 0.8F);
@@ -197,6 +235,22 @@ public final class AttackTells {
 					mob.removeTag(Guard.UNPARRYABLE_TAG);
 				}
 			}
+		}
+	}
+
+	/**
+	 * Mid wind-up: arms kept up (a zombie's goal lowers them each tick by its cooldown), and the step in
+	 * {@link #LUNGE_LEAD} ticks before the blow, on the ground and not already touching.
+	 */
+	private static void hold(Mob mob, LivingEntity target, long left) {
+		mob.setAggressive(true);
+		if (left != LUNGE_LEAD || !mob.onGround() || mob.isPassenger()
+			|| mob.getBoundingBox().inflate(REACH_SLACK).intersects(target.getBoundingBox())) {
+			return;
+		}
+		Vec3 toward = new Vec3(target.getX() - mob.getX(), 0.0, target.getZ() - mob.getZ());
+		if (toward.lengthSqr() > 1.0E-4) {
+			mob.push(toward.normalize().scale(LUNGE_SPEED));
 		}
 	}
 

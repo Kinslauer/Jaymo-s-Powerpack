@@ -1,0 +1,7 @@
+{
+	"required": false,
+	"package": "com.jaymoskingdoms.client.mixin.foliage",
+	"compatibilityLevel": "JAVA_25",
+	"client": ["FoliageWindMixin"],
+	"injectors": { "defaultRequire": 0 }
+}

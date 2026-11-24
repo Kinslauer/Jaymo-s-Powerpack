@@ -60,6 +60,25 @@ public final class WallSit {
 	 * wall it would go into it otherwise.
 	 */
 	static final float HEAD_FORWARD = 2.0F;
+	/**
+	 * Andy (2026-11-22): rising up the wall "looks like a levitating rise rather than a wounded struggle up the wall, using
+	 * your arms and any way to generate the force". It was the slide down the wall played backwards. Now ({@link #riseBody},
+	 * {@link #riseLegs}, {@link WallSitArms#rise}): the feet drawn in and the hands put down on the floor beside the hips
+	 * ({@code RISE_GATHER}); a push off the floor and the feet, hunched over the knees, the back up the wall to a crouch
+	 * ({@code RISE_PUSH}); one hand onto its knee and the other flat on the wall, pushing the legs straight
+	 * ({@code RISE_CLIMB}); upright, the head last. It goes in heaves, slipping back a little between them.
+	 * Shares of the rise where each stage ends.
+	 */
+	static final float RISE_GATHER = 0.2F, RISE_PUSH = 0.55F, RISE_CLIMB = 0.88F;
+	/** The hips above the floor (model pixels): sat, crouched after the push, stood. */
+	static final float RISE_SAT_HIPS = 2.0F, RISE_CROUCH_HIPS = 7.0F, RISE_STAND_HIPS = 11.8F;
+	/** The feet ahead of the hips (model pixels): out along the floor sat, drawn in, under them stood. */
+	static final float RISE_FEET_OUT = 11.5F, RISE_FEET_IN = 4.5F, RISE_FEET_STAND = 0.5F;
+	/** The heaves: how many, and how far each slips back (a share of the rise). */
+	static final int RISE_HEAVES = 3;
+	static final float RISE_SLIP = 0.03F;
+	/** Hunched forward over the knees in the push (radians, off the lean back), and stood, barely leaning on the wall. */
+	static final float RISE_HUNCH = 0.4F, RISE_STOOD_LEAN = 0.04F;
 	/** Hard breathing: beats per tick and depth (radians, on the arms and head). */
 	static final float BREATH_RATE = 0.18F, BREATH_DEPTH = 0.05F;
 
@@ -107,6 +126,13 @@ public final class WallSit {
 	 * meets the floor. Sat on thin air a thigh's thickness up, the bare torso read as sunk into the ground.
 	 */
 	static final float STUMPS = 2.0F / 32.0F * Mth.sin(LEAN);
+	/**
+	 * (Andy, 2026-11-23: "a few different scenarios had me sink into the ground upon sitting on the wall, same thing with sit
+	 * poses while prone or downed") Sat, the body is kept this far above the floor (model blocks, a player's;
+	 * {@link #floored} only measures the torso, and the flat legs sat exactly on it, so they and the hands went in), and a
+	 * downed mob's sink stops this share of its height short.
+	 */
+	static final float SIT_CLEARANCE = 1.5F * PX, SINK_CLEARANCE = 0.03F;
 	/** The torso's corners (model pixels: x, y down from the neck, z out of the back), kept above the floor. */
 	private static final float[][] TORSO = {{4, 0, -2}, {-4, 0, -2}, {4, 0, 2}, {-4, 0, 2}, {4, 12, -2}, {-4, 12, -2}, {4, 12, 2}, {-4, 12, 2}};
 
@@ -233,7 +259,7 @@ public final class WallSit {
 		// turned to face out of the wall
 		poseStack.rotate(Axis.YP.rotationDegrees(Mth.wrapDegrees(bodyRot - sit.yaw()) * t));
 		// down onto the floor (on the stumps, with no legs), then leaned back (+x turns the top back) about the hips
-		float sink = (sit.stumps() ? height * (0.375F - STUMPS) : height * SINK) * t;
+		float sink = (sit.stumps() ? height * (0.375F - STUMPS - SINK_CLEARANCE) : height * (SINK - SINK_CLEARANCE)) * t;
 		float hips = height * 0.375F - sink;
 		poseStack.translate(0.0F, -sink, 0.0F);
 		poseStack.translate(0.0F, hips, 0.0F);
@@ -283,7 +309,11 @@ public final class WallSit {
 	 */
 	private static @Nullable Seat seat(Player player, float partialTicks, boolean rising) {
 		int id = player.getId();
-		if (!Downed.isDowned(player) || player.isInWater() || player.isPassenger() || Carry.isCarried(player)) {
+		// (a player lying prone, not downed, sits against a wall by the Sit key too, DownedLie#proneSitKey; and slides back
+		// down off it as they crawl away)
+		boolean sitter = Downed.isDowned(player)
+			|| com.jaymospowers.core.Crawl.crawling(player) && (player.hasAttached(DownedLie.PROPPED) || SEATS.containsKey(id));
+		if (!sitter || player.isInWater() || player.isPassenger() || Carry.isCarried(player)) {
 			LAST_MOVED.remove(id);
 			TAKEN.remove(id);
 			SEATS.remove(id);
@@ -417,6 +447,9 @@ public final class WallSit {
 		// no legs: down on the stumps
 		float seated = sit.stumps() ? STUMPS * 32.0F * PX : SEAT;
 		Matrix4f m = new Matrix4f();
+		if (seat.up >= 0.0F && !sit.stumps()) {
+			return riseBody(m, seat, 1.0F - p, bodyRot, move);
+		}
 		if (seat.placed) {
 			float t = PoseBlend.smooth(p);
 			// the legs swing out from straight down to along the floor, the hips riding down on them
@@ -426,7 +459,7 @@ public final class WallSit {
 			m.translate(0.0F, sit.stumps() ? seated : LEG * Mth.cos(legs) + LEG_HALF * Mth.sin(legs), 0.0F);
 			m.rotateX(LEAN * t);
 			m.translate(0.0F, -HIP, 0.0F);
-			return floored(m, seat);
+			return floored(m, seat, t);
 		}
 		float roll = PoseBlend.seg(p, ROLL_FROM, ROLL_END), up = PoseBlend.seg(p, SIT_FROM, SIT_END), turn = PoseBlend.seg(p, TURN_FROM, TURN_END);
 		float hips = PoseBlend.seg(p, HIPS_FROM, HIPS_END);
@@ -440,7 +473,58 @@ public final class WallSit {
 		m.rotateX(pitch(p, move));
 		m.rotateY(Mth.PI * roll * seat.roll);
 		m.translate(0.0F, -HIP, 0.0F);
-		return floored(m, seat);
+		return floored(m, seat, up);
+	}
+
+	/** The rise as it goes, {@code u} of the way (0 sat, 1 stood): slipping back a little between its heaves. */
+	static float riseEffort(float u) {
+		float s = PoseBlend.seg(u, RISE_GATHER, RISE_CLIMB);
+		float slip = Mth.sin(Mth.PI * RISE_HEAVES * s);
+		return Mth.clamp(u - RISE_SLIP * slip * slip, 0.0F, 1.0F);
+	}
+
+	/** The hips' height above the floor rising {@code u} of the way (model pixels). */
+	private static float riseHips(float u) {
+		float e = riseEffort(u);
+		return e < RISE_PUSH ? Mth.lerp(PoseBlend.seg(e, RISE_GATHER, RISE_PUSH), RISE_SAT_HIPS, RISE_CROUCH_HIPS)
+			: Mth.lerp(PoseBlend.seg(e, RISE_PUSH, RISE_CLIMB), RISE_CROUCH_HIPS, RISE_STAND_HIPS);
+	}
+
+	/** The feet's way ahead of the hips rising {@code u} of the way (model pixels). */
+	private static float riseFeet(float u) {
+		float e = riseEffort(u);
+		return e < RISE_PUSH ? Mth.lerp(PoseBlend.seg(e, 0.0F, RISE_GATHER), RISE_FEET_OUT, RISE_FEET_IN)
+			: Mth.lerp(PoseBlend.seg(e, RISE_PUSH, RISE_CLIMB), RISE_FEET_IN, RISE_FEET_STAND);
+	}
+
+	/**
+	 * The legs rising {@code u} of the way, hips to feet on the floor: the thigh's turn forward from straight down on the
+	 * body (which leans, {@link #riseLean}, and the legs with it) and the knee's fold (radians). Two halves of six pixels
+	 * each, so the knee folds as far as the hips are short of a leg's length from the feet.
+	 */
+	static float[] riseLegs(float u) {
+		float h = riseHips(u), f = riseFeet(u);
+		float d = Math.min(11.99F, Mth.sqrt(h * h + f * f));
+		float knee = 2.0F * (float) Math.acos(d / 12.0F);
+		return new float[] {(float) Math.atan2(f, h) + knee * 0.5F - riseLean(u), knee};
+	}
+
+	/** How far the body leans back rising {@code u} of the way (radians, + the top back): hunched over the knees in the push. */
+	static float riseLean(float u) {
+		float e = riseEffort(u);
+		return Mth.lerp(PoseBlend.seg(e, RISE_PUSH, 1.0F), LEAN, RISE_STOOD_LEAN)
+			- RISE_HUNCH * PoseBlend.bump(e, RISE_GATHER * 0.5F, RISE_GATHER + 0.1F, RISE_PUSH, RISE_CLIMB);
+	}
+
+	/** The body rising {@code u} of the way up the wall: its back to it, the hips at {@link #riseHips}, hunched in the push. */
+	private static Matrix4f riseBody(Matrix4f m, Seat seat, float u, float bodyRot, float move) {
+		slide(m, seat.sit, bodyRot, move);
+		m.rotateY(Mth.wrapDegrees(bodyRot - seat.sit.yaw()) * Mth.DEG_TO_RAD);
+		m.translate(0.0F, riseHips(u) * LEG / 12.0F, 0.0F);
+		m.rotateX(riseLean(u));
+		m.translate(0.0F, -HIP, 0.0F);
+		// (the clearance fades as they stand: on their feet, the feet are on the floor)
+		return floored(m, seat, 1.0F - u);
 	}
 
 	/** How far out from the wall the hips sit (model blocks): {@link #SEAT_BACK}, and a worn backpack's depth behind the back. */
@@ -449,11 +533,12 @@ public final class WallSit {
 	}
 
 	/**
-	 * (Andy, 2026-11-20) {@code m} lifted as far as it takes to keep the torso, and a worn backpack, out of the floor:
+	 * (Andy, 2026-11-20) {@code m} lifted as far as it takes to keep the torso, and a worn backpack, out of the floor
+	 * (and {@link #SIT_CLEARANCE} more, {@code sat} of the way into the sit):
 	 * rolling over onto the back, the bag under it, and sitting on the stumps. Lying face down (vanilla's crawl) nothing is
 	 * under the floor, so the start is untouched.
 	 */
-	private static Matrix4f floored(Matrix4f m, Seat seat) {
+	private static Matrix4f floored(Matrix4f m, Seat seat, float sat) {
 		Vector3f at = new Vector3f();
 		float low = 0.0F;
 		for (float[] c : TORSO) {
@@ -464,7 +549,9 @@ public final class WallSit {
 				low = Math.min(low, m.transformPosition(at.set(-c[0] * PX, NECK - c[1] * PX, (c[2] + seat.bag) * PX)).y);
 			}
 		}
-		return low < 0.0F ? new Matrix4f().translation(0.0F, -low, 0.0F).mul(m) : m;
+		// (2026-11-23) and a little more as it sits, for the legs and hands that sat right on the floor
+		float lift = Math.max(0.0F, -low) + SIT_CLEARANCE * sat;
+		return lift > 0.0F ? new Matrix4f().translation(0.0F, lift, 0.0F).mul(m) : m;
 	}
 
 	/** How far back to the wall it's pushed itself getting up (0-1): two pushes. */
@@ -540,8 +627,11 @@ public final class WallSit {
 			sat.get(PoseBlend.LEFT_ARM + 1), sat.get(PoseBlend.LEFT_ARM + 2),
 			out || cradle || (broken & Dismember.LEFT_ARM) != 0 ? 0.0F : -WallSitArms.FOLD};
 		float move = (seat.sit.distance() - seatBack(seat) * state.scale) / state.scale;
+		boolean upWall = seat.up >= 0.0F && !seat.sit.stumps();
+		float[] arms = upWall ? WallSitArms.rise(room(seat, state.bodyRot, state.scale), seat.up, broken, out, rest)
+			: WallSitArms.pose(room(seat, state.bodyRot, state.scale), seat.plan, p, rest);
 		state.setData(KEY, new PlayerSit(body(seat, p, state.bodyRot, state.scale), p, seat.placed, seat.up >= 0.0F, player.getId(), out, broken,
-			seat.placed ? 0.0F : pitch(p, move), WallSitArms.pose(room(seat, state.bodyRot, state.scale), seat.plan, p, rest)));
+			seat.placed ? 0.0F : pitch(p, move), arms));
 	}
 
 	/**
@@ -597,8 +687,16 @@ public final class WallSit {
 			int arm = i == 0 ? PoseBlend.RIGHT_ARM : PoseBlend.LEFT_ARM;
 			f.mix(arm, near(arms[i * 4], f.get(arm)), near(arms[i * 4 + 1], f.get(arm + 1)), near(arms[i * 4 + 2], f.get(arm + 2)), k);
 		}
-		for (int leg : new int[] {PoseBlend.RIGHT_LEG, PoseBlend.LEFT_LEG}) {
-			f.mix(leg, legs, sat.get(leg + 1) * up, sat.get(leg + 2), k);
+		if (sitting.up() && (sitting.broken() & (Dismember.RIGHT_LEG | Dismember.LEFT_LEG)) == 0) {
+			// rising: the feet planted on the floor, the thighs as the hips' height has them (the knees fold in kneeBend)
+			float[] rise = riseLegs(1.0F - p);
+			for (int leg : new int[] {PoseBlend.RIGHT_LEG, PoseBlend.LEFT_LEG}) {
+				f.mix(leg, -rise[0], sat.get(leg + 1) * (1.0F - rise[1]), sat.get(leg + 2) * 0.5F, k);
+			}
+		} else {
+			for (int leg : new int[] {PoseBlend.RIGHT_LEG, PoseBlend.LEFT_LEG}) {
+				f.mix(leg, legs, sat.get(leg + 1) * up, sat.get(leg + 2), k);
+			}
 		}
 		f.mix(PoseBlend.HIP_PITCH, 0.0F, 0.0F, 0.0F, k);
 		f.set(PoseBlend.DROP, Mth.lerp(k, f.get(PoseBlend.DROP), 0.0F));
@@ -610,6 +708,15 @@ public final class WallSit {
 	public static float headForward(AvatarRenderState state) {
 		PlayerSit sitting = state.getData(KEY);
 		return sitting == null ? 0.0F : HEAD_FORWARD * lolled(sitting.placed(), sitting.up(), sitting.p());
+	}
+
+	/** Rising up the wall: how far this player's knees fold (radians, as {@code KneeBend} folds a knee); 0 otherwise. */
+	public static float kneeFold(AvatarRenderState state) {
+		PlayerSit sitting = state.getData(KEY);
+		if (sitting == null || !sitting.up() || (sitting.broken() & (Dismember.RIGHT_LEG | Dismember.LEFT_LEG)) != 0) {
+			return 0.0F;
+		}
+		return riseLegs(1.0F - sitting.p())[1] * sitting.taken();
 	}
 
 	/** {@code a} turned the short way round from {@code from} (radians). */

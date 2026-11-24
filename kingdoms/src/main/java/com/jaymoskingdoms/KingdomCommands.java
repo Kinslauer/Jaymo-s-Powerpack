@@ -104,6 +104,7 @@ final class KingdomCommands {
 			.then(com.jaymoskingdoms.remnants.Monoliths.command())
 			.then(SkillCommands.command())
 			.then(Captives.command())
+			.then(StolenCrowns.command())
 			.then(Commands.literal("storage").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(c -> storage(c, null))
 				.then(Commands.argument("name", StringArgumentType.word()).executes(c -> storage(c, StringArgumentType.getString(c, "name")))))
 			.then(Commands.literal("produce").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).executes(c -> produce(c, null))

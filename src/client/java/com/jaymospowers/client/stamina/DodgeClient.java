@@ -31,6 +31,10 @@ import org.jspecify.annotations.Nullable;
  * ({@code LockOnClient}): otherwise the back of the movement keys is dropped, so Back with Left or Right rolls to that
  * side, nothing held rolls forward, and Back alone doesn't roll. Held into a ground roll, the roll goes long
  * ({@link Dodge#HOLD_TICKS}) and, still held as it ends, you go on down into prone ({@code CrawlTaps.goProne}).
+ * <p>Andy (2026-11-23): "pressing the alt key and a direction should make you do a short dash, saving the hold for our
+ * current combat roll". On the ground a tap is the upright dash ({@link Dodge#DASH_SPEED}); held {@link Dodge#HOLD_TICKS}
+ * the dash goes on into the long roll; let go before the roll ends and you come up on your feet, still held as it ends
+ * and you go prone. A landing roll is still a roll (held, it goes long as before).
  */
 public final class DodgeClient {
 	private static @Nullable KeyMapping dodgeKey;
@@ -47,13 +51,19 @@ public final class DodgeClient {
 	static boolean rollFlip;
 	/** Whether our own last roll is the long one (the key held into it, {@link Dodge#HOLD_TICKS}). */
 	static boolean rollLong;
-	/** Our own ground roll may still go long (not yet {@link Dodge#HOLD_TICKS} in); its end may still take us prone. */
+	/** Our own dash or landing roll may still be held on (not yet {@link Dodge#HOLD_TICKS} in); our long roll's end may still take us prone. */
 	private static boolean holdPending, proneAtEnd;
+	/** Client game time our own dash started (it may still go on into the roll), or MIN_VALUE when there's none. */
+	private static long dashStart = Long.MIN_VALUE;
+	/** Client game time our own last dash started, drawn at once ({@link DodgeRollPose}), the way {@link #rollX}, {@link #rollZ}. */
+	static long dashDrawStart = Long.MIN_VALUE;
 	/** The Dodge key was down last tick: a press is the key going down, once, however long it's held. */
 	private static boolean keyWasDown;
 	/** Forgets our last own roll, so the next roll drawn for us is the server's copy (a leap off a mount ends in one the server throws). */
 	public static void forgetRoll() {
 		rollStart = Long.MIN_VALUE;
+		dashStart = Long.MIN_VALUE;
+		dashDrawStart = Long.MIN_VALUE;
 		rollLong = false;
 		holdPending = false;
 		proneAtEnd = false;
@@ -64,6 +74,8 @@ public final class DodgeClient {
 	static final double JUMP_RISE = 0.1;
 	/** We were on the ground last tick; we're in the air off a jump; this jump's flip is spent. */
 	private static boolean wasOnGround = true, jumped, flipped;
+	/** This time in the air's dive over land is spent (one a jump). */
+	private static boolean airDived;
 
 	private DodgeClient() {
 	}
@@ -116,6 +128,7 @@ public final class DodgeClient {
 		if (ground) {
 			jumped = false;
 			flipped = false;
+			airDived = false;
 		} else if (wasOnGround && player.getDeltaMovement().y > JUMP_RISE) {
 			jumped = true;
 		}
@@ -129,6 +142,11 @@ public final class DodgeClient {
 		// (0.20.74) Sneak + Alt is the zoom (SneakZoom), not a dodge
 		boolean wanted = (down || clicked) && !keyWasDown && !minecraft.options.keyShift.isDown();
 		keyWasDown = down;
+		if (wanted && dive(player)) {
+			// (Andy, 2026-11-22) at an edge over deep water, or falling over it: a dive, head first
+			wanted = false;
+			landingRoll = 0;
+		}
 		if (wanted && vault(player)) {
 			// (0.21.22) in the air over a raised shield: the vault, not a roll
 			wanted = false;
@@ -143,6 +161,12 @@ public final class DodgeClient {
 			// in the air with time to spare before the ground: a trick (Acrobatics); nearer the ground the press is the landing roll's
 			wanted = false;
 			landingRoll = 0;
+		}
+		if (wanted && !airDived && airDive(player)) {
+			// (Andy, 2026-11-23) in the air over land with no flip or trick to throw: the head-first dive, then the roll as you land
+			wanted = false;
+			airDived = true;
+			landingRoll = com.jaymospowers.water.Dives.AIR_DIVE_ROLL_TICKS;
 		}
 		if (wanted && !player.onGround() && player.getDeltaMovement().y < 0.0) {
 			// falling: held until you land
@@ -164,30 +188,90 @@ public final class DodgeClient {
 	}
 
 	/**
-	 * Our own ground roll with the key held: {@link Dodge#HOLD_TICKS} in it goes long (the server's told, so everyone
-	 * draws it so), carried on along the ground, slowing; still held as it ends, we go on down into prone, which
-	 * {@code ProneTransition} draws as a gradual crouch and lowering onto the hands.
+	 * (Andy, 2026-11-23) "The dive should be activated upon using alt in mid air. That way a quick space + alt gets you the
+	 * dive everytime. And it can also be used to evade on the ground this way." Over land, in the air: thrown head first
+	 * the way the movement keys point (forward with none, or Back alone unless locked on, as the roll), with a little
+	 * lift; the landing roll that follows is the evade. Everyone sees it ({@code Dives#DIVING}, drawn by DivePose).
+	 */
+	private static boolean airDive(LocalPlayer player) {
+		if (cooldown > 0 || !com.jaymospowers.water.Dives.canAirDive(player) || !Dodge.canDodge(player) || FreerunClient.active()
+			|| !ClientPlayNetworking.canSend(com.jaymospowers.water.Dives.DiveKey.TYPE)) {
+			return false;
+		}
+		Input input = player.input.keyPresses;
+		float forward = (input.forward() ? 1.0F : 0.0F) - (input.backward() ? 1.0F : 0.0F);
+		float strafe = (input.left() ? 1.0F : 0.0F) - (input.right() ? 1.0F : 0.0F);
+		if (com.jaymospowers.client.LockOnClient.locked() == null && forward < 0.0F) {
+			forward = 0.0F;
+		}
+		if (forward == 0.0F && strafe == 0.0F) {
+			forward = 1.0F;
+		}
+		float yaw = player.getYRot() * Mth.DEG_TO_RAD;
+		double len = Math.sqrt(forward * forward + strafe * strafe);
+		double x = (strafe * Mth.cos(yaw) - forward * Mth.sin(yaw)) / len, z = (forward * Mth.cos(yaw) + strafe * Mth.sin(yaw)) / len;
+		double push = com.jaymospowers.water.Dives.AIR_DIVE_PUSH;
+		player.setDeltaMovement(x * push, Math.max(player.getDeltaMovement().y, com.jaymospowers.water.Dives.AIR_DIVE_LIFT), z * push);
+		com.jaymospowers.client.water.DivePose.localDive = player.level().getGameTime();
+		ClientPlayNetworking.send(new com.jaymospowers.water.Dives.DiveKey());
+		sinceDodge = 0;
+		return true;
+	}
+
+	/** The Dodge key over deep water: off the edge head first with no hop, or the fall turned into a dive (Dives). */
+	private static boolean dive(LocalPlayer player) {
+		int from = com.jaymospowers.water.Dives.diveFrom(player);
+		if (from == com.jaymospowers.water.Dives.NO_DIVE || !ClientPlayNetworking.canSend(com.jaymospowers.water.Dives.DiveKey.TYPE)) {
+			return false;
+		}
+		if (from == com.jaymospowers.water.Dives.EDGE) {
+			Vec3 out = Vec3.directionFromRotation(0.0F, player.getYRot());
+			player.setDeltaMovement(out.x * com.jaymospowers.water.Dives.LAUNCH_OUT, com.jaymospowers.water.Dives.LAUNCH_UP,
+				out.z * com.jaymospowers.water.Dives.LAUNCH_OUT);
+		}
+		com.jaymospowers.client.water.DivePose.localDive = player.level().getGameTime();
+		ClientPlayNetworking.send(new com.jaymospowers.water.Dives.DiveKey());
+		return true;
+	}
+
+	/**
+	 * The key held {@link Dodge#HOLD_TICKS} into our own dash: it goes on into the long roll from here, the way the dash
+	 * went (the server's told, so everyone draws it). Held into a landing roll: it goes long. A long roll carries on along
+	 * the ground, slowing; still held as it ends, we go on down into prone, which {@code ProneTransition} draws as a
+	 * gradual crouch and lowering onto the hands. Let go before then and we come up on our feet.
 	 */
 	private static void tickHold(LocalPlayer player, boolean down) {
-		if (rollStart == Long.MIN_VALUE || rollFlip) {
-			return;
-		}
-		long elapsed = player.level().getGameTime() - rollStart;
-		if (holdPending && elapsed >= Dodge.HOLD_TICKS) {
-			holdPending = false;
-			if (down && elapsed < Dodge.LONG_ROLL_TICKS) {
-				rollLong = true;
-				proneAtEnd = true;
-				Dodge.localRollTicks = Dodge.LONG_ROLL_TICKS;
-				cooldown = Math.max(cooldown, (int)(Dodge.LONG_ROLL_TICKS - elapsed));
-				if (ClientPlayNetworking.canSend(Dodge.Extend.TYPE)) {
-					ClientPlayNetworking.send(new Dodge.Extend());
+		long now = player.level().getGameTime();
+		if (holdPending) {
+			boolean dash = dashStart != Long.MIN_VALUE;
+			long held = now - (dash ? dashStart : rollStart);
+			if (held >= Dodge.HOLD_TICKS) {
+				holdPending = false;
+				dashStart = Long.MIN_VALUE;
+				if (down && dash && player.onGround() && !player.isInWater()) {
+					rollStart = now;
+					rollFlip = false;
+					rollLong = true;
+					proneAtEnd = true;
+					Dodge.localRollTicks = Dodge.LONG_ROLL_TICKS;
+					// the body is the low one for the roll (Dodge#rollingLow), at once
+					Dodge.localRollId = player.getId();
+					Dodge.localRollStart = now;
+					cooldown = Math.max(cooldown, Dodge.LONG_ROLL_TICKS);
+					sendExtend();
+				} else if (down && !dash && rollStart != Long.MIN_VALUE && !rollFlip && held < Dodge.LONG_ROLL_TICKS) {
+					rollLong = true;
+					proneAtEnd = true;
+					Dodge.localRollTicks = Dodge.LONG_ROLL_TICKS;
+					cooldown = Math.max(cooldown, (int)(Dodge.LONG_ROLL_TICKS - held));
+					sendExtend();
 				}
 			}
 		}
-		if (!rollLong) {
+		if (rollStart == Long.MIN_VALUE || rollFlip || !rollLong) {
 			return;
 		}
+		long elapsed = now - rollStart;
 		if (elapsed < Dodge.LONG_ROLL_TICKS) {
 			if (player.onGround() && !player.isInWater()) {
 				// carried on the way of the roll, easing off toward its end (never slowed below what the hop still gives)
@@ -204,6 +288,12 @@ public final class DodgeClient {
 			if (down && player.onGround() && !com.jaymospowers.client.CrawlTaps.prone()) {
 				com.jaymospowers.client.CrawlTaps.goProne(player, false);
 			}
+		}
+	}
+
+	private static void sendExtend() {
+		if (ClientPlayNetworking.canSend(Dodge.Extend.TYPE)) {
+			ClientPlayNetworking.send(new Dodge.Extend());
 		}
 	}
 
@@ -264,6 +354,7 @@ public final class DodgeClient {
 		rollFlip = true;
 		rollLong = false;
 		holdPending = false;
+		dashStart = Long.MIN_VALUE;
 		proneAtEnd = false;
 		if (ClientPlayNetworking.canSend(Dodge.Flip.TYPE)) {
 			ClientPlayNetworking.send(new Dodge.Flip((float)dir.x, (float)dir.z));
@@ -318,23 +409,34 @@ public final class DodgeClient {
 		float sin = Mth.sin(yaw), cos = Mth.cos(yaw);
 		Vec3 dir = new Vec3(strafe * cos - forward * sin, 0.0, forward * cos + strafe * sin).normalize();
 		Vec3 motion = player.getDeltaMovement();
-		player.setDeltaMovement(dir.x * Dodge.SPEED + motion.x * 0.2, Dodge.UP, dir.z * Dodge.SPEED + motion.z * 0.2);
+		long now = player.level().getGameTime();
 		player.setSprinting(false);
 		cooldown = Dodge.COOLDOWN;
 		sinceDodge = 0;
-		rollStart = player.level().getGameTime();
 		rollX = (float)dir.x;
 		rollZ = (float)dir.z;
 		rollFlip = false;
 		rollLong = false;
 		holdPending = true;
 		proneAtEnd = false;
-		Dodge.localRollTicks = Dodge.ROLL_TICKS;
-		// the body is the low one for the roll (Dodge#rollingLow), at once
-		Dodge.localRollId = player.getId();
-		Dodge.localRollStart = player.level().getGameTime();
+		if (landing) {
+			// the landing roll stays a roll (it takes the fall)
+			player.setDeltaMovement(dir.x * Dodge.SPEED + motion.x * 0.2, Dodge.UP, dir.z * Dodge.SPEED + motion.z * 0.2);
+			rollStart = now;
+			dashStart = Long.MIN_VALUE;
+			Dodge.localRollTicks = Dodge.ROLL_TICKS;
+			// the body is the low one for the roll (Dodge#rollingLow), at once
+			Dodge.localRollId = player.getId();
+			Dodge.localRollStart = now;
+		} else {
+			// a tap is the upright dash; held, it goes on into the roll (tickHold)
+			player.setDeltaMovement(dir.x * Dodge.DASH_SPEED + motion.x * 0.2, Dodge.DASH_UP, dir.z * Dodge.DASH_SPEED + motion.z * 0.2);
+			rollStart = Long.MIN_VALUE;
+			dashStart = now;
+			dashDrawStart = now;
+		}
 		if (ClientPlayNetworking.canSend(Dodge.Start.TYPE)) {
-			ClientPlayNetworking.send(new Dodge.Start((float)dir.x, (float)dir.z));
+			ClientPlayNetworking.send(new Dodge.Start((float)dir.x, (float)dir.z, !landing));
 		}
 	}
 }

@@ -44,6 +44,7 @@
 		"OvenMenuMixin",
 		"PlayerMixin",
 		"ProjectileWeaponItemMixin",
+		"ScavengerSightMixin",
 		"SignBlockEntityMixin",
 		"SlowGrowthMixin",
 		"RaidGardenGoalMixin",
@@ -58,6 +59,7 @@
 		"StomachFoodMixin",
 		"StructureProcessorListAccessor",
 		"StructureTemplatePoolAccessor",
+		"SprintStaminaMixin",
 		"ThirstSprintMixin",
 		"VillageWindmillMixin",
 		"WaterBottleBackMixin"

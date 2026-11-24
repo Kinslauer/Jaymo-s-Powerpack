@@ -451,6 +451,19 @@ public final class Ranks {
 		return holds(v.getInventory(), stack) ? stack : ItemStack.EMPTY;
 	}
 
+	/**
+	 * From {@code McaEquipmentMixin}: the armour a camp's own villager (a raider, a pirate: {@link Barbarians#isCampVillager})
+	 * puts in a slot when MCA dresses them with {@code stack}: only what is in their pack, their camp's gear. MCA would fill an
+	 * empty slot from its guards' iron set, and a camp doesn't issue plate (Andy, 2026-11-22: "theres no good reason a
+	 * PIRATE's guard is in full plate"). Anyone else's {@code stack} is returned unchanged.
+	 */
+	public static ItemStack campOwned(LivingEntity villager, ItemStack stack) {
+		if (stack.isEmpty() || !Barbarians.isCampVillager(villager) || !(villager instanceof VillagerEntityMCA v)) {
+			return stack;
+		}
+		return holds(v.getInventory(), stack) ? stack : ItemStack.EMPTY;
+	}
+
 	/** The stack in {@code pack} the same as {@code stack}, or null. */
 	private static @Nullable ItemStack held(SimpleContainer pack, ItemStack stack) {
 		for (int i = 0; i < pack.getContainerSize(); i++) {

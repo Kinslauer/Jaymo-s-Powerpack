@@ -238,7 +238,8 @@ public final class ZFighterCombo {
 
 		Run(ServerPlayer player) {
 			this.tier = tier(player);
-			int[] base = (Breaks.armless(player) ? KICK_STRINGS : STRINGS)[this.tier];
+			// no arms to strike with, or both full of what he's carrying (ArmsFull): his legs do it all
+			int[] base = (Breaks.armless(player) || com.jaymospowers.core.ArmsFull.both(player) ? KICK_STRINGS : STRINGS)[this.tier];
 			long now = player.level().getGameTime();
 			this.dash = player.isSprinting() && player.onGround() && this.tier >= 1 && now >= DASHED.getOrDefault(player.getUUID(), 0L);
 			if (this.dash) {
@@ -501,6 +502,9 @@ public final class ZFighterCombo {
 		if (finisher && com.jaymospowers.core.BlowClash.meets(player, target.position().subtract(player.position()), (float)fists * FINISHER_SHARE[run.tier] * CLASH_STRENGTH)) {
 			// met by another great blow (BlowClash)
 			return;
+		}
+		if (finisher) {
+			fists = ZFighterTraining.strikeFists(player);
 		}
 		float damage = (float)fists * (finisher ? FINISHER_SHARE[run.tier] : HIT_SHARE[run.tier] * MOVE_WEIGHT[move]);
 		if (stretched && !finisher) {

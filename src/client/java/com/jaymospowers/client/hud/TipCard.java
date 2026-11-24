@@ -1,9 +1,14 @@
 package com.jaymospowers.client.hud;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.client.power.zfighter.ZFighterClientConfig;
+import com.mojang.brigadier.Command;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.minecraft.client.DeltaTracker;
@@ -33,6 +38,8 @@ public final class TipCard {
 	/** The chime: vanilla's toast, pitched low and kept quiet (as the experience meter's). */
 	static final float CHIME_PITCH = 0.7F, CHIME_VOLUME = 0.5F;
 	static final int QUEUE_MAX = 6;
+	/** The setting that turns tip cards off, in {@code config/jaymospowers-client.properties}. */
+	static final String OFF = "tips.off";
 
 	private record Card(Component title, Component text) {
 	}
@@ -47,15 +54,56 @@ public final class TipCard {
 
 	public static void init() {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.CHAT, JaymosPowers.id("tip_card"), TipCard::draw);
+		// Andy (2026-11-20): "Can you add a command to disable tips?" Also a button on the menu's Notices page
+		ClientCommandRegistrationCallback.EVENT.register((dispatcher, context) -> dispatcher.register(ClientCommands.literal("tips")
+			.executes(c -> said(c.getSource(), enabled()))
+			.then(ClientCommands.literal("on").executes(c -> said(c.getSource(), setEnabled(true))))
+			.then(ClientCommands.literal("off").executes(c -> said(c.getSource(), setEnabled(false))))));
 	}
 
-	/** Queues a card. */
+	private static int said(FabricClientCommandSource source, boolean on) {
+		source.sendFeedback(Component.translatable(on ? "message.jaymospowers.tips.on" : "message.jaymospowers.tips.off"));
+		return Command.SINGLE_SUCCESS;
+	}
+
+	/** Whether tip cards are shown at all (they can be turned off: /tips, or the Notices page). Kept on this computer. */
+	public static boolean enabled() {
+		return !"true".equals(ZFighterClientConfig.get(OFF, "false"));
+	}
+
+	/** Turns tip cards on or off; off, any card up or waiting goes too. Returns what it's set to. */
+	public static boolean setEnabled(boolean on) {
+		ZFighterClientConfig.set(OFF, on ? "false" : "true");
+		if (!on) {
+			WAITING.clear();
+			showing = null;
+		}
+		return on;
+	}
+
+	/** Queues a card (none while tips are off). */
 	public static void show(Component title, Component text) {
+		if (!enabled()) {
+			return;
+		}
 		// (kept in the menu's Notices page, so a card that was missed can be read again)
 		com.jaymospowers.client.menu.NoticeLog.add(Component.empty().append(title).append(": ").append(text));
 		if (WAITING.size() < QUEUE_MAX) {
 			WAITING.add(new Card(title, text));
 		}
+	}
+
+	/** Whether a card with this text is up or waiting. */
+	public static boolean holds(String text) {
+		if (showing != null && showing.text().getString().equals(text)) {
+			return true;
+		}
+		for (Card card : WAITING) {
+			if (card.text().getString().equals(text)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** Whether a card is up or waiting. */

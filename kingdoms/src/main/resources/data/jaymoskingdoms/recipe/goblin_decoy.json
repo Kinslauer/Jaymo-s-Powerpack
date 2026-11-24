@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:hay_block",
+    "minecraft:leather",
+    "minecraft:string"
+  ],
+  "result": {
+    "count": 2,
+    "id": "jaymoskingdoms:goblin_decoy"
+  }
+}

@@ -36,10 +36,13 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		com.jaymoskingdoms.wild.nest.SilkDeeps.place();
 		// (0.7.180) whose names this client's player knows
 		com.jaymoskingdoms.Introductions.viewer = () -> net.minecraft.client.Minecraft.getInstance().player;
+		// (Andy, 2026-11-23) greeting, bowing, talking and pickpocketing in Powers' list of keys by the crosshair
+		com.jaymoskingdoms.ContextLines.register();
 		// and lines naming someone they don't know call them what they are
 		IntroNames.register();
 		// great foes' themes, and the trophy stand's item
 		com.jaymoskingdoms.client.music.FoeMusicClient.register();
+		com.jaymoskingdoms.client.music.SkirmishMusic.register();
 		com.jaymoskingdoms.client.music.SceneMusic.register();
 		com.jaymoskingdoms.client.music.PlaceMusic.register();
 		com.jaymoskingdoms.client.trophies.TrophyStandRenderer.register();
@@ -59,6 +62,10 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		BlockEntityRenderers.register(com.jaymoskingdoms.ChoppedLog.ENTITY, ChoppedLogRenderer::new);
 		// the armillary sphere's animated rings and its screen
 		BlockEntityRenderers.register(com.jaymoskingdoms.astronomy.ArmillarySphereBlock.ENTITY, com.jaymoskingdoms.client.astronomy.ArmillaryBlockEntityRenderer::new);
+		// the scrying orb's living miniature
+		// the scrying orb's vision, and the views the server sends of it
+		BlockEntityRenderers.register(com.jaymoskingdoms.ScryingOrbBlock.ENTITY, ScryingOrbRenderer::new);
+		ScryingOrbRenderer.register();
 		ClientPlayNetworking.registerGlobalReceiver(com.jaymoskingdoms.astronomy.ArmillaryNet.Open.TYPE,
 				(payload, context) -> context.client().gui.setScreen(new com.jaymoskingdoms.client.astronomy.ArmillaryScreen(payload.pos())));
 		// (batch 4) plot stakes' lines, path and grass slabs, wind chimes, the rope lift
@@ -72,6 +79,10 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(com.jaymoskingdoms.SiegeStone.TYPE, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 1.6F, false));
 		// (0.7.326) the clockwork golem
 		EntityRenderers.register(com.jaymoskingdoms.ClockworkGolem.TYPE, ClockworkGolemRenderer::new);
+		// (goblin extras) the goblins' robot (a patched clockwork golem), and the decoy: the sack in the air, the scarecrow on the ground
+		EntityRenderers.register(com.jaymoskingdoms.GoblinRobot.ROBOT, ClockworkGolemRenderer::new);
+		EntityRenderers.register(com.jaymoskingdoms.GoblinDecoy.SACK, context -> new net.minecraft.client.renderer.entity.ThrownItemRenderer<>(context, 0.9F, false));
+		EntityRenderers.register(com.jaymoskingdoms.GoblinDecoy.DUMMY, net.minecraft.client.renderer.entity.ArmorStandRenderer::new);
 		// (0.7.529) town golems
 		EntityRenderers.register(com.jaymoskingdoms.TownGolem.TYPE, TownGolemRenderer::new);
 		// GeckoLib mobs: the barrow beetle, the draugr, the silver skeleton and the Skeleton Lord
@@ -191,6 +202,14 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		LoanScreen.register();
 		ClassKeys.register();
 		MagicKeys.register();
+		// Mutant Monsters' mutant zombie dressed as one of the present's old dead, not in the game's cyan and blue
+		// (kingdoms/tools/gen_mutant_dead.py; the pack's texture is drawn over the mod's own)
+		if (net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("mutantmonsters")) {
+			net.fabricmc.fabric.api.resource.v1.ResourceLoader.registerBuiltinPack(JaymosKingdoms.id("mutant_dead"),
+				net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(JaymosKingdoms.MOD_ID).orElseThrow(),
+				net.minecraft.network.chat.Component.literal("Jaymo's Kingdoms: the mutant zombie as one of the old dead"),
+				net.fabricmc.fabric.api.resource.v1.pack.PackActivationType.ALWAYS_ENABLED);
+		}
 		// whom a harness piece was fitted to (Fitting)
 		net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
 			java.util.UUID to = stack.get(com.jaymoskingdoms.Fitting.FITTED);
@@ -215,6 +234,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// the spell tomes left click (press and release go to the server)
 		TomeClient.register();
 		PurseCoins.register();
+		// the worn purse's icon in the inventory, with every coin you carry
+		PurseIcon.init();
 		TomeFloat.register();
 		WerewolfKey.register();
 		PaceKey.register();
@@ -247,6 +268,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		ComposureHud.register();
 		OwnSpeechHud.register();
 		BloodReservoirHud.register();
+		// (defence disciplines) a locked-on enemy's passive blocks
+		MobBlocksHud.register();
 		// BWM batch 5: the gloom's whispers and dark edges
 		GloomClient.register();
 		FifthClient.register();
@@ -262,6 +285,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		VampireLooks.register();
 		StakeLayer.register();
 		TalkScreen.register();
+		IllagerTalkScreen.register();
 		GameScreen.register();
 		RecallScreen.register();
 		RenegeScreen.register();
@@ -368,6 +392,10 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		PatronKeys.register();
 		// the four art keys (Soul, Claw, Wild, Sun)
 		ArtKeysClient.register();
+		// the Cleric's medallion board
+		MedallionClient.register();
+		// a pop-up for key bindings that share a key (twice ever)
+		KeyClashes.register();
 		// 0.5.47: stablehands' and farriers' screens (the scroll kept when one comes again after a button)
 		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(com.jaymoskingdoms.StableNet.Open.TYPE, (payload, context) -> {
 			int scroll = context.client().gui.screen() instanceof StableScreen was && was.workerId() == payload.workerId() ? was.scroll() : 0;

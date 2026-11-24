@@ -122,6 +122,12 @@ public final class JaymosKingdoms implements ModInitializer {
 		CafeBoard.register();
 		// the armillary sphere: an observatory instrument that reads the discovered sky
 		com.jaymoskingdoms.astronomy.ArmillarySphereBlock.register();
+		// the scrying orb: a crystal orb on a stand for place-scrying
+		ScryingOrbBlock.register();
+		// its packets, and the watchings it keeps (refreshed each second, ended when the time or the spell runs out)
+		ScryingOrb.register();
+		// the sighted shard: marks a place for the scrying orb
+		SightedShard.register();
 		// the stars each player has discovered, kept on the server (the sky, armillary and journal read them)
 		com.jaymoskingdoms.astronomy.StarDiscovery.register();
 		// the Astronomer's Journal: the armillary's readings, the Scholar pillar's points, the study pages
@@ -258,6 +264,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Visitors.register();
 		// 0.7.483: every settlement keeps a butcher and a healer
 		TownTrades.register();
+		TownFitting.register();
 		LOGGER.debug("visitor attachment: {}", Visitors.VISIT);
 		Reforms.register();
 		LOGGER.debug("reform attachment: {}", Reforms.GRIEVANCES);
@@ -441,6 +448,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.films.BossIntros.register();
 		// great foes' themes (stems mixed on the player's own side) and the trophy stand
 		com.jaymoskingdoms.music.FoeThemes.register();
+		com.jaymoskingdoms.music.Skirmishes.register();
 		// the music of the places (Medieval Music pack tracks, played on the player's own side) and a tavern's bard
 		PlaceThemes.register();
 		Bards.register();
@@ -485,6 +493,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.214: heritage variants, three looks to every heritage (and its attachment)
 		LOGGER.debug("heritage variant attachment: {}", HeritageVariants.VARIANT);
 		HeritageVariants.register();
+		// (Andy's heritage paths picks) what a blood grows into as you live it
+		HeritagePaths.register();
 		// (0.7.486) sea-blooded Tideborn whose heads or backs are their own shape wear no helmet or chestplate
 		SeaBodies.register();
 		// 0.7.216: the life story, a newcomer's heritage, class, power and start told as their past (and its attachment)
@@ -587,6 +597,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// kingdoms' seats the world generates whole: a castle with its square, garden, barracks and homes round it
 		SeatCompounds.register();
 		EpicTowns.register();
+		TownWakes.register();
 		// 0.5: seats in the world's buildings (and their attachment); fiefdoms and camps in Grim Kingdoms' ruins (only with
 		// Grim loaded), their builders clearing its rubble first (after Construction, whose brain it wraps)
 		LOGGER.debug("hold attachment: {}", Holds.HOLDS);
@@ -647,6 +658,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.64: the richest kingdoms' cannons (their musketeers are Muskets, ticked by each guard)
 		Cannon.register();
 		ClockworkGolem.register();
+		// (goblin extras) the engineer's hammer and its robot, the decoy, the mushroom ale
+		GoblinRobot.init();
+		GoblinDecoy.register();
+		DrunkGoblins.register();
 		Golemworks.register();
 		// (0.7.351) the Skeleton Lord, asleep in some of the rogue golems' lairs
 		SkeletonLord.register();
@@ -748,6 +763,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.61: villagers react to your deeds (fires put out, lives saved, captives brought home)
 		Deeds.register();
 		Captives.register();
+		StolenCrowns.register();
 		// 0.7.381: veteran guards set drills that teach or rank up a Weapon Form (and its attachment)
 		LOGGER.debug("guard drills attachment: {}", com.jaymoskingdoms.forms.GuardDrills.DRILLS);
 		com.jaymoskingdoms.forms.GuardDrills.register();
@@ -835,6 +851,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Temperaments.register();
 		// (0.7.622, Rivals patch 7) brutal kills scare the rest
 		Dread.register();
+		Bloodshed.register();
 		PlayerTemperaments.register();
 		// (0.7.509) the eight patrons, favour and blessings
 		LOGGER.debug("patron attachment: {}", Patrons.STATE);
@@ -867,6 +884,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		Tag.register();
 		Families.register();
 		Routines.register();
+		// villagers' hunger, thirst and boredom, which pick what they do next
+		Needs.register();
+		// villagers left standing still for minutes: written to the log, then sent on their way
+		Unstick.register();
 		// 0.7.19: villagers' regard for one another, and the meetings it makes (fights to hugs) (and its attachment)
 		LOGGER.debug("regard attachment: {}", Neighbours.REGARD);
 		Neighbours.register();
@@ -1029,6 +1050,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.7.129: the Nightfall Plague (our own after the Forge mod): the plague and its cure, Night Bleeders, vampire bats,
 		// the vampires' callings, nightmares and the Nightfall (and their attachments)
 		com.jaymoskingdoms.nightfall.Nightfall.register();
+		// the From the Shadows potions, one of which carries Nightfall's plague
+		com.jaymoskingdoms.inhabitants.fts.FtsEffects.registerPotions();
 		com.jaymoskingdoms.reaped.Reaped.register();
 		// 0.7.131: the Nether's faction, stage 1: the Hornkin and their gold feud with the piglins (our own after Just-In NETHER)
 		com.jaymoskingdoms.nether.Nether.register();
@@ -1149,6 +1172,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		HushWard.register();
 		AshRot.register();
 		ArtKeys.register();
+		// the Cleric's medallion board (the medallion key and the number keys as its marks)
+		MedallionBoard.register();
 		// (Awakening picks) the Cordon, who hunt the awakened (and its courts' attachment), and awakened strangers on the road
 		Cordon.register();
 		AwakenedStrangers.register();

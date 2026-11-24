@@ -286,6 +286,7 @@ public final class Classes {
 		Clerics.register();
 		Druids.register();
 		Monks.register();
+		JaymosKingdoms.LOGGER.debug("disciplines attachments: {} {}", Disciplines.DATA, MobBlocks.SHOWN);
 		Paladins.register();
 		Rangers.register();
 		Warlocks.register();
@@ -562,6 +563,7 @@ public final class Classes {
 		player.setAttached(CLASS, new Chosen(cls.key(), option, startingSpells(cls, option), 0));
 		refresh(player);
 		begin(player, cls, option);
+		StartingSkills.give(player, cls);
 		// (no class starts with gear, Andy's word: a Mage gets the staff's recipe from a court wizard, or finds one)
 		if (cls == PlayerClass.MAGE) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.class.mage_staff").withStyle(ChatFormatting.GRAY));
@@ -649,7 +651,9 @@ public final class Classes {
 			case RANGER -> List.of(new ItemStack(Items.BOW), new ItemStack(Items.ARROW, 32), any(1, "archers:small_quiver"),
 				any(1, "jaymospowers:hand_axe", "minecraft:stone_axe"), RpgKit.or("archers:archer_armor_head", "minecraft:leather_helmet"),
 				RpgKit.or("archers:archer_armor_feet", "minecraft:leather_boots"));
-			case CLERIC -> List.of(new ItemStack(Clerics.HOLY_SYMBOL), new ItemStack(Arcana.HEALER_STAFF), new ItemStack(Arcana.SCROLL_MENDING),
+			// the Truth's priests carry a blank book, not a symbol (Clerics.prayerBook)
+			case CLERIC -> List.of(new ItemStack(Patron.TRUTH.key.equals(option) ? Items.WRITABLE_BOOK : Clerics.HOLY_SYMBOL), new ItemStack(Arcana.HEALER_STAFF),
+				new ItemStack(Arcana.SCROLL_MENDING),
 				new ItemStack(Items.CHAINMAIL_CHESTPLATE), new ItemStack(Items.SHIELD));
 			case DRUID -> List.of(new ItemStack(Druids.SPRIG), new ItemStack(Items.OAK_SAPLING), new ItemStack(Items.BONE_MEAL), new ItemStack(Items.LEATHER_CHESTPLATE),
 				new ItemStack(Items.LEATHER_BOOTS));

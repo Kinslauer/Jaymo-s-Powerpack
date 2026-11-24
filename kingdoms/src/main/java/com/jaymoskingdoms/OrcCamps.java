@@ -117,6 +117,8 @@ final class OrcCamps {
 			spawn(level, id, Orcs.GRUNT, spot(level, fire, random), fire, OrcBuildings.HOME_RADIUS);
 		}
 		spawn(level, id, Orcs.SHAMAN, fire.offset(2, 0, 2), fire, OrcBuildings.HOME_RADIUS / 2);
+		// the froglins it keeps about its fire
+		CampBeasts.rise(level, id, fire);
 		// its heavy hands: a band of ogres and a Bogre live by its fire from the start (OgreHolds#joinCamp)
 		Faction manned = Factions.get(server, id);
 		if (manned != null) {

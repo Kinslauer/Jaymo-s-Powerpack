@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "minecraft:brown_mushroom",
+    "minecraft:red_mushroom",
+    "minecraft:wheat"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:mushroom_ale"
+  }
+}

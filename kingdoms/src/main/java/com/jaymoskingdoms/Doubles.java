@@ -218,6 +218,15 @@ public final class Doubles {
 		home.setAttached(PENDING, list);
 	}
 
+	/** {@code v} was never a stolen life after all (a ruler taken by mistake): no longer one, and no copy goes to take their place. */
+	static void unsteal(ServerLevel level, Villager v) {
+		v.removeAttached(STOLEN);
+		ServerLevel home = level.getServer().overworld();
+		List<Pending> list = new ArrayList<>(home.getAttachedOrElse(PENDING, List.of()));
+		if (list.removeIf(p -> p.real().equals(v.getUUID()))) {
+			home.setAttached(PENDING, list);
+		}
+	}
 
 	/** On a stolen life buried in a shallow grave ({@link #grave}): freed, they climb out of it ({@link #unearth}). Saved. */
 	static final AttachmentType<Boolean> BURIED = AttachmentRegistry.create(JaymosKingdoms.id("stolen_grave"), b -> b.persistent(Codec.BOOL));
@@ -493,6 +502,11 @@ public final class Doubles {
 		}
 	}
 
+	/** (StolenCrowns) {@code player} heard {@code copy} slip: sneak and speak to it, and its face comes off. */
+	static void heard(Villager copy, ServerPlayer player) {
+		HEARD.computeIfAbsent(copy.getUUID(), k -> new HashSet<>()).add(player.getUUID());
+	}
+
 	/** The copy says a wrong thing in {@code player}'s hearing. */
 	private static void slip(ServerLevel level, Villager copy, ServerPlayer player, UUID real, long now) {
 		Long last = SLIPPED.get(copy.getUUID());
@@ -518,6 +532,8 @@ public final class Doubles {
 			return;
 		}
 		Doubts.raise(level, copy.blockPosition());
+		// (a copy on a throne: off it, the ruler's blood keeps it, and the realm hears of it)
+		StolenCrowns.unmasked(level, copy, by);
 		if (Math.floorMod((int) (copy.getAttached(COPY).getMostSignificantBits() >>> 13), CHANGELING_IN) == 0 && stealable(copy)) {
 			changeling(level, copy, by);
 			return;

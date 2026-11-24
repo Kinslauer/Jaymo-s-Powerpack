@@ -772,9 +772,10 @@ public final class LifeStory {
 	/**
 	 * A realm a player can name in their story: its id and name, and (gb-realmcards) one of its people as the realm page
 	 * shows them: the land they dress for ({@link Climate} ordinal), the realm's colour (a dye id), and a guard's gear in its
-	 * arms and its land's dress (head, chest, legs, feet, main hand, off hand).
+	 * arms and its land's dress (head, chest, legs, feet, main hand, off hand), and the harness over it (its tabard, the
+	 * levy's cloth its livery gives, {@link Harness#worn}).
 	 */
-	public record Realm(int id, String name, int climate, int colour, List<ItemStack> dress) {
+	public record Realm(int id, String name, int climate, int colour, List<ItemStack> dress, List<ItemStack> harness) {
 	}
 
 	/** (gb-realmcards) A realm's person as last dressed, by the realm's look (id, name, colour, kind, overlord): dressed again only when that changes (it draws gear at random). */
@@ -786,14 +787,16 @@ public final class LifeStory {
 	private static Realm dressed(ServerLevel level, Faction f) {
 		int colour = f.styleColor(level.getServer()).getId();
 		// (kept by its look: its name, colour, kind and overlord, so a realm restyled is dressed afresh)
-		String key = f.id() + "|" + f.name() + "|" + colour + "|" + f.type() + "|" + f.overlord();
+		String key = f.id() + "|" + f.name() + "|" + colour + "|" + f.type() + "|" + f.overlord() + "|" + Liveries.of(level.getServer(), f);
 		Realm known = DRESSED.get(key);
 		if (known != null) {
 			return known;
 		}
 		DRESSED.keySet().removeIf(k -> k.startsWith(f.id() + "|"));
 		Climate climate = Climate.at(level, f.seat());
-		List<ItemStack> dress = new ArrayList<>();
+		List<ItemStack> dress = new ArrayList<>(), harness = new ArrayList<>();
+		// (kitted as the realm's guards are, but the figure is only shown: the realm pays nothing for it)
+		GuardKit.preview(true);
 		try {
 			Folk folk = JaymosKingdoms.FOLK.create(level, net.minecraft.world.entity.EntitySpawnReason.LOAD);
 			if (folk != null) {
@@ -801,13 +804,19 @@ public final class LifeStory {
 				for (EquipmentSlot slot : DRESS_SLOTS) {
 					dress.add(folk.getItemBySlot(slot).copy());
 				}
+				for (ItemStack piece : Harness.worn(folk)) {
+					harness.add(piece.copy());
+				}
 				folk.discard();
 			}
 		} catch (RuntimeException e) {
 			JaymosKingdoms.LOGGER.debug("A realm's figure for the life story couldn't be dressed", e);
 			dress.clear();
+			harness.clear();
+		} finally {
+			GuardKit.preview(false);
 		}
-		Realm r = new Realm(f.id(), f.name(), climate.ordinal(), colour, List.copyOf(dress));
+		Realm r = new Realm(f.id(), f.name(), climate.ordinal(), colour, List.copyOf(dress), List.copyOf(harness));
 		DRESSED.put(key, r);
 		return r;
 	}
@@ -833,6 +842,7 @@ public final class LifeStory {
 					buf.writeVarInt(r.climate);
 					buf.writeInt(r.colour);
 					ItemStack.OPTIONAL_LIST_STREAM_CODEC.encode(buf, r.dress);
+					ItemStack.OPTIONAL_LIST_STREAM_CODEC.encode(buf, r.harness);
 				}
 				buf.writeVarInt(p.mates.size());
 				for (Mate m : p.mates) {
@@ -853,7 +863,8 @@ public final class LifeStory {
 				int n = buf.readVarInt();
 				List<Realm> realms = new ArrayList<>(n);
 				for (int i = 0; i < n; i++) {
-					realms.add(new Realm(buf.readVarInt(), buf.readUtf(), buf.readVarInt(), buf.readInt(), List.copyOf(ItemStack.OPTIONAL_LIST_STREAM_CODEC.decode(buf))));
+					realms.add(new Realm(buf.readVarInt(), buf.readUtf(), buf.readVarInt(), buf.readInt(), List.copyOf(ItemStack.OPTIONAL_LIST_STREAM_CODEC.decode(buf)),
+						List.copyOf(ItemStack.OPTIONAL_LIST_STREAM_CODEC.decode(buf))));
 				}
 				int m = buf.readVarInt();
 				List<Mate> mates = new ArrayList<>(m);
@@ -1613,6 +1624,8 @@ public final class LifeStory {
 				return false;
 			}
 			StartPerks.landed(player, landed);
+			// (Andy 2026-11-23: nobody starts under attack) no enemy to mobs until they move
+			PowersCompat.spawnCalm(player);
 		} finally {
 			OTHERS = java.util.Map.of();
 			DEATH = null;

@@ -75,6 +75,7 @@ public final class InhabitantsClient {
 		EntityRenderers.register(Inhabitants.DRAUGR, DraugrRenderer::new);
 		EntityRenderers.register(com.jaymoskingdoms.wild.nest.SpiderNests.BROOD_QUEEN,
 			context -> new InhabitantRenderer<com.jaymoskingdoms.wild.nest.BroodQueen>(context, "brood_queen", 1.0F, QUEEN_SHADOW, "head"));
+		com.jaymoskingdoms.client.inhabitants.fts.NetherBeastsClient.register();
 		EntityRenderers.register(Inhabitants.RAID_KING, RaidKingRenderer::new);
 		EntityRenderers.register(Inhabitants.BOGRE, BogreRenderer::new);
 		EntityRenderers.register(Inhabitants.IMPALER, ImpalerRenderer::new);
@@ -87,6 +88,7 @@ public final class InhabitantsClient {
 		EntityRenderers.register(SkeletonLord.TYPE, LordRenderer::new);
 		EntityRenderers.register(Inhabitants.YOUTH_WISP, YouthWispRenderer::new);
 		YouthWispRenderer.registerFlash();
+		com.jaymoskingdoms.client.inhabitants.fts.FtsClient.register();
 	}
 
 	/**

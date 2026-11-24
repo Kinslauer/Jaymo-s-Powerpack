@@ -253,19 +253,21 @@ public final class RubberFolk {
 				}
 				continue;
 			}
+			// the dead (left for dead, a ghost, in Limbo) are still alive to the game: nothing of the body works on them
+			boolean living = player.isAlive() && !PowersCompat.dead(player);
 			// (0.7.297) what they adopted keeps working
 			Adopted adopted = player.getAttached(ADOPTED);
-			if (adopted != null && server.getTickCount() % GIFT_EVERY == 0 && player.isAlive()) {
+			if (adopted != null && server.getTickCount() % GIFT_EVERY == 0 && living) {
 				gifts(player, adopted);
 			}
 			// a lost limb grows back, one at a time
 			// ((0.7.552) not while cut in half and waiting on a swallow: that one has to come first)
-			if (server.getTickCount() % REGROW_EVERY == REGROW_EVERY - STRETCH_TICKS && player.isAlive() && !player.entityTags().contains(SPLIT_TAG)
+			if (server.getTickCount() % REGROW_EVERY == REGROW_EVERY - STRETCH_TICKS && living && !player.entityTags().contains(SPLIT_TAG)
 				&& PowersCompat.missingLimbs(player) != 0) {
 				// the limb starts stretching back: a balloon pulled tight
 				player.level().playSound(null, player.getX(), player.getY(), player.getZ(), STRETCH, SoundSource.PLAYERS, 1.0F, 1.0F);
 			}
-			if (server.getTickCount() % REGROW_EVERY == 0 && player.isAlive() && !player.entityTags().contains(SPLIT_TAG) && PowersCompat.regrow(player, false) && player.level() instanceof ServerLevel level) {
+			if (server.getTickCount() % REGROW_EVERY == 0 && living && !player.entityTags().contains(SPLIT_TAG) && PowersCompat.regrow(player, false) && player.level() instanceof ServerLevel level) {
 				level.sendParticles(PINK, player.getX(), player.getY(0.6), player.getZ(), 16, 0.4, 0.6, 0.4, 0.02);
 				level.playSound(null, player.getX(), player.getY(), player.getZ(), POP, SoundSource.PLAYERS, 1.0F, 1.0F);
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.rubber.regrown"));

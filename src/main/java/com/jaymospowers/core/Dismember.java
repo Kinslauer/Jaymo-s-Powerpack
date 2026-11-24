@@ -289,10 +289,14 @@ public final class Dismember {
 		if (stack.isEmpty()) {
 			return false;
 		}
+		String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
+		// a crushing weapon in the swords tag (a cudgel, a maul) is no blade; a flanged mace's flanges still cut
+		if (stack.is(Fractures.CRUSHING) && !path.contains("flanged")) {
+			return false;
+		}
 		if (stack.is(ItemTags.SWORDS) || stack.is(ItemTags.AXES) || stack.is(SEVERING)) {
 			return true;
 		}
-		String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
 		if (path.contains("pickaxe")) {
 			return false;
 		}

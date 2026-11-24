@@ -1234,8 +1234,9 @@ public final class WebSwing {
 			wingsNeedRelease = false;
 		}
 		boolean air = !player.onGround() && !player.isInWater() && !player.isInLava() && !player.onClimbable() && !player.isFallFlying();
-		// (0.15.136) the wings are spread between the arms: with one gone they won't open
-		if (!jump || !air || attached() || wingsTicks > 0 || wingsNeedRelease || !com.jaymospowers.core.wounds.LimbUse.usable(player, com.jaymospowers.core.wounds.LimbUse.BOTH_ARMS)) {
+		// (0.15.136) the wings are spread between the arms: with one gone, or both full (ArmsFull), they won't open
+		if (!jump || !air || attached() || wingsTicks > 0 || wingsNeedRelease || !com.jaymospowers.core.wounds.LimbUse.usable(player, com.jaymospowers.core.wounds.LimbUse.BOTH_ARMS)
+			|| com.jaymospowers.core.ArmsFull.both(player)) {
 			jumpHeldAir = 0;
 			return;
 		}
@@ -1254,7 +1255,8 @@ public final class WebSwing {
 	/** Gliding like an elytra: from how you actually moved last tick, vanilla's glide step, so walls and pitch play fair. */
 	private void tickWings(LocalPlayer player) {
 		// (wingsTicks only marks them open now: they never run out)
-		if (player.onGround() || player.isInWater() || player.isInLava() || player.onClimbable()) {
+		// (or something taken up in both arms mid-glide: the wings are spread between them)
+		if (player.onGround() || player.isInWater() || player.isInLava() || player.onClimbable() || com.jaymospowers.core.ArmsFull.both(player)) {
 			foldWings();
 			return;
 		}

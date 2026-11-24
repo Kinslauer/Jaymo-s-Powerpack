@@ -66,6 +66,7 @@ final class TownHunger {
 
 	/** {@code v} has eaten: the count is cleared, and the weakness of hunger goes. */
 	static void ate(Villager v) {
+		Needs.fed(v);
 		Integer missed = v.getAttached(MISSED);
 		if (missed == null) {
 			return;

@@ -552,6 +552,10 @@ def packModsNoCf = [
 	[dep: "maven.modrinth:badoptimizations:Sp0ctspw", cf: null],
 	// Cull Leaves (MIT, Motschen): culls hidden leaf faces. Client-only. 4.1.2+26.3-fabric for 26.3.
 	[dep: "maven.modrinth:cull-leaves:jqOVPlQ8", cf: null],
+	// spark (GPL-3.0-only, lucko): a profiler that sits idle until asked. In game, /sparkc profiler start, play a minute,
+	// /sparkc profiler stop, and it gives a link to what took the frames (/spark for the server). Andy's FPS hunt,
+	// 2026-11-22. Client and server. 1.10.187-fabric for 26.3.
+	[dep: "maven.modrinth:spark:e3hsPc1o", cf: null],
 	// Particle Core (MIT, fzzyhmstrs): particle culling and cheaper particle rendering. Needs Fabric Language Kotlin and
 	// Fzzy Config (packMods). Client-only. 0.3.3+fix1+26.2 for 26.3.
 	[dep: "maven.modrinth:particle-core:NPLw1nMG", cf: null],
@@ -1258,7 +1262,10 @@ tasks.register("serverMods", Sync) {
 // the user's own CurseForge profile (imported from the pack zip): swap in the new Jaymo's Powers jar, the current
 // Jaymo's Kitchen jar and the local pack mods (each replacing older versions of itself). Skipped while the game is
 // running (its jars are locked).
-def profileMods = new File(System.getProperty("user.home"), "curseforge/minecraft/Instances/Jaymo's Powers/mods")
+// Andy's CurseForge keeps its instances in E:\CurseForge\Instances now; the home-folder place is the fallback.
+def profileMods = [new File("E:/CurseForge/Instances/Jaymo's Powers/mods"),
+	new File(System.getProperty("user.home"), "curseforge/minecraft/Instances/Jaymo's Powers/mods")].find { it.isDirectory() } ?:
+	new File(System.getProperty("user.home"), "curseforge/minecraft/Instances/Jaymo's Powers/mods")
 tasks.register("profileMods") {
 	dependsOn "jar", "buildKitchen", "buildKingdoms", "buildTrmt", "buildDynamicWaters", "buildForestFire"
 	onlyIf { profileMods.isDirectory() }

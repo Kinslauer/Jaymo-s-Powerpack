@@ -1,13 +1,16 @@
 package com.jaymoskitchen.client.climate;
 
+import com.jaymoskitchen.client.hud.HudStyle;
 import com.jaymoskitchen.client.hud.HudZones;
 import com.jaymoskitchen.JaymosKitchen;
 import com.jaymoskitchen.climate.BodyHeat;
 import com.jaymoskitchen.climate.Climate;
 import com.jaymoskitchen.climate.Lining;
+import com.jaymoskitchen.climate.Stamina;
 import com.jaymoskitchen.climate.Warmth;
 import com.jaymoskitchen.climate.Thirst;
 import com.jaymoskitchen.climate.WaterskinItem;
+import com.jaymoskitchen.climate.Wetness;
 import com.jaymoskitchen.net.Payloads;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
@@ -29,6 +32,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Util;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.HitResult;
@@ -54,6 +58,10 @@ public final class ClimateHud {
 	static final float TREND = 4.0F;
 	/** Overheating's red edges: bands and how deep each is. */
 	static final int BANDS = 10, BAND = 4;
+	/** The burning thermometer's flames: how tall (px) at overheating and at the most, and how fast they flicker. */
+	static final float FLAME_LOW = 3.0F, FLAME_HIGH = 10.0F, FLICKER_SPEED = 0.012F;
+	/** The freezing thermometer's shake: ms between jolts at freezing and at the coldest; and its frost. */
+	static final int SHAKE_SLOWEST = 140, SHAKE_FASTEST = 40, FROST = 0xE0DFF4FF;
 
 	private static int sipWait;
 
@@ -63,6 +71,7 @@ public final class ClimateHud {
 	public static void register() {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.FOOD_BAR, JaymosKitchen.id("thirst"), ClimateHud::thirst);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosKitchen.id("body_heat"), ClimateHud::heat);
+		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, JaymosKitchen.id("wind"), ClimateHud::wind);
 		ClientTickEvents.END_CLIENT_TICK.register(ClimateHud::tick);
 		// the hearth's and the icebox's screen, with its fuel bar
 		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(com.jaymoskitchen.net.Payloads.OpenHearth.TYPE,
@@ -197,6 +206,10 @@ public final class ClimateHud {
 		}
 		thermometer(graphics, body, heat.ambient());
 		LocalPlayer player = minecraft.player;
+		int wet = Wetness.meter(player);
+		if (wet > 0) {
+			wetness(graphics, wet);
+		}
 		if (player.getMainHandItem().is(Warmth.THERMOMETER) || player.getOffhandItem().is(Warmth.THERMOMETER)) {
 			air(graphics, heat.air());
 		}
@@ -226,6 +239,54 @@ public final class ClimateHud {
 		graphics.fill(cx - 3, comfort, cx - 2, comfort + 1, 0xA0FFFFFF);
 	}
 
+	/**
+	 * How wet you are (Wetness), beside the thermometer in the body row while you're wet at all: a narrow glass filled
+	 * blue from the bottom, deeper blue once you're soaked through, with a drop on top.
+	 */
+	private static void wetness(GuiGraphicsExtractor graphics, int wet) {
+		int boxH = TUBE + 6;
+		int[] at = HudZones.place(HudZones.DOCK_LEFT, "jaymoskitchen:wetness", 30, 5, boxH);
+		if (at == null) {
+			return;
+		}
+		int x = at[0], bottom = at[1] + boxH;
+		int top = bottom - TUBE - 1;
+		int colour = wet >= Wetness.SOAKED_AT ? 0xFF2F5FD8 : 0xFF6FA8F0;
+		// a drop over the glass
+		graphics.fill(x + 2, at[1], x + 3, at[1] + 1, colour);
+		graphics.fill(x + 1, at[1] + 1, x + 4, at[1] + 3, colour);
+		// the glass and what's in it
+		graphics.fill(x, top - 1, x + 5, bottom, 0xFF1A1A1A);
+		graphics.fill(x + 1, top, x + 4, bottom - 1, 0xFF505050);
+		int filled = Math.max(1, Math.round(TUBE * wet / (float) Wetness.MAX));
+		graphics.fill(x + 1, bottom - 1 - filled, x + 4, bottom - 1, colour);
+	}
+
+	/**
+	 * Wind for sprinting (Stamina), in the focus band while it isn't full: a flat bar the width of a full stomach's
+	 * wind, the part past what you can hold now (how full you are) shaded off, red while you're winded.
+	 */
+	private static void wind(GuiGraphicsExtractor graphics, DeltaTracker delta) {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (!shown(minecraft) || !minecraft.player.hasAttached(Stamina.WIND)) {
+			return;
+		}
+		Stamina.Wind wind = Stamina.wind(minecraft.player);
+		if (!wind.winded() && wind.left() >= wind.cap()) {
+			return;
+		}
+		int w = HudStyle.CENTRE_BAR_W;
+		int[] at = HudZones.place(HudZones.FOCUS, "jaymoskitchen:wind", 5, w, HudStyle.BAR_H);
+		if (at == null) {
+			return;
+		}
+		HudStyle.bar(graphics, at[0], at[1], w, HudStyle.BAR_H, wind.left() / Stamina.MAX, wind.winded() ? HudStyle.WARN : 0xFFE8E0A0);
+		int held = Math.round(w * Mth.clamp(wind.cap() / Stamina.MAX, 0.0F, 1.0F));
+		if (held < w) {
+			graphics.fill(at[0] + held, at[1], at[0] + w, at[1] + HudStyle.BAR_H, HudStyle.LOCKED);
+		}
+	}
+
 	/** Red-orange edges creeping in as the heat climbs. */
 	private static void edges(GuiGraphicsExtractor graphics, float strength) {
 		int w = graphics.guiWidth(), h = graphics.guiHeight();
@@ -253,8 +314,22 @@ public final class ClimateHud {
 		}
 		int cx = at[0] + 3;
 		int bottom = at[1] + boxH;
+		long now = Util.getMillis();
+		float hot = Mth.clamp((body - BodyHeat.OVERHEATING) / (BodyHeat.MAX - BodyHeat.OVERHEATING), 0.0F, 1.0F);
+		float cold = Mth.clamp((BodyHeat.FREEZING - body) / (BodyHeat.FREEZING - BodyHeat.MIN), 0.0F, 1.0F);
+		if (body <= BodyHeat.FREEZING) {
+			// freezing: it shakes, harder and faster the colder you are
+			int amp = cold < 0.5F ? 1 : 2;
+			long step = now / Math.round(SHAKE_SLOWEST - (SHAKE_SLOWEST - SHAKE_FASTEST) * cold);
+			int roll = (int) ((step * 0x9E3779B1L >>> 16) & 0xFF);
+			cx += (roll % 3 - 1) * amp;
+			bottom += (roll / 3 % 3 - 1) * (amp - 1);
+		}
 		int top = bottom - 5 - TUBE;
 		int colour = colour(body);
+		if (body >= BodyHeat.OVERHEATING) {
+			flames(graphics, cx, top, hot, now);
+		}
 		// glass
 		graphics.fill(cx - 2, top - 1, cx + 2, bottom - 4, 0xFF1A1A1A);
 		graphics.fill(cx - 3, bottom - 6, cx + 3, bottom, 0xFF1A1A1A);
@@ -263,6 +338,9 @@ public final class ClimateHud {
 		int filled = Math.round(TUBE * Mth.clamp((body - BodyHeat.MIN) / (BodyHeat.MAX - BodyHeat.MIN), 0.0F, 1.0F));
 		graphics.fill(cx - 1, bottom - 5 - filled, cx + 1, bottom - 4, colour);
 		graphics.fill(cx - 2, bottom - 5, cx + 2, bottom - 1, colour);
+		if (body <= BodyHeat.FREEZING) {
+			frost(graphics, cx, top, bottom, cold);
+		}
 		// marks where trouble starts
 		int comfort = bottom - 5 - TUBE / 2;
 		graphics.fill(cx + 2, comfort, cx + 3, comfort + 1, 0xA0FFFFFF);
@@ -270,6 +348,52 @@ public final class ClimateHud {
 			arrow(graphics, cx + 4, top + 2, true, colour(Math.max(body, 0.0F) + 30.0F));
 		} else if (ambient < body - TREND) {
 			arrow(graphics, cx + 4, top + 2, false, colour(Math.min(body, 0.0F) - 30.0F));
+		}
+	}
+
+	/**
+	 * Overheating and worse: the thermometer burns, flames licking up round the top of the tube, taller and wilder the
+	 * hotter you get ({@code hot}, 0 at overheating, 1 at the most). Andy: "whenever heat is a danger the thermometer should
+	 * be animated on fire with the flames growing near the top of the meter". Drawn behind the glass.
+	 */
+	private static void flames(GuiGraphicsExtractor graphics, int cx, int top, float hot, long now) {
+		int base = top + 5;
+		// (kept small: a float can't tell one millisecond from the next this long after 1970)
+		float t = now % 600_000L;
+		for (int c = -4; c <= 3; c++) {
+			float flicker = 0.55F + 0.45F * Mth.sin(t * FLICKER_SPEED * (1.0F + hot) + c * 1.7F) * Mth.sin(t * 0.0031F + c * 0.9F);
+			int h = Math.round((FLAME_LOW + (FLAME_HIGH - FLAME_LOW) * hot) * flicker * (Math.abs(c + 0.5F) < 2.0F ? 1.0F : 0.7F));
+			if (h <= 0) {
+				continue;
+			}
+			int x = cx + c;
+			// red tips, orange body, a yellow heart low in the middle columns
+			graphics.fill(x, base - h, x + 1, base, 0xFFE0401A);
+			graphics.fill(x, base - h + Math.max(1, h / 3), x + 1, base, 0xFFFF8A1E);
+			if (Math.abs(c + 0.5F) < 2.0F && h > 3) {
+				graphics.fill(x, base - h / 2, x + 1, base, 0xFFFFE15A);
+			}
+		}
+	}
+
+	/**
+	 * Freezing and worse: frost crusts the glass from the bulb up, and icicles hang off the bulb, further the colder you
+	 * are ({@code cold}, 0 at freezing, 1 at the most); the shake is in {@link #thermometer}.
+	 */
+	private static void frost(GuiGraphicsExtractor graphics, int cx, int top, int bottom, float cold) {
+		int up = Math.round((bottom - top + 1) * (0.25F + 0.75F * cold));
+		for (int y = bottom - 1; y >= bottom - up; y--) {
+			// rime on both sides of the glass, every other pixel, offset side to side
+			int side = (y & 1) == 0 ? cx - 2 : cx + 1;
+			if (y < bottom - 6) {
+				graphics.fill(side, y, side + 1, y + 1, FROST);
+			} else {
+				graphics.fill((y & 1) == 0 ? cx - 3 : cx + 2, y, ((y & 1) == 0 ? cx - 3 : cx + 2) + 1, y + 1, FROST);
+			}
+		}
+		if (cold > 0.4F) {
+			graphics.fill(cx - 2, bottom, cx - 1, bottom + 1 + (cold > 0.8F ? 1 : 0), FROST);
+			graphics.fill(cx + 1, bottom, cx + 2, bottom + 2, FROST);
 		}
 	}
 

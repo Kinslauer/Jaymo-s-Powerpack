@@ -48,7 +48,7 @@ public final class UnderWater {
 	static final int EVERY = 5;
 	static final Identifier SLOW_ID = JaymosKingdoms.id("underwater_swing");
 	/** Spears, daggers and the like by name, for weapons other mods add. */
-	private static final String[] WORKS = {"spear", "dagger", "knife", "trident", "rapier", "javelin", "harpoon", "lance"};
+	private static final String[] WORKS = {"spear", "dagger", "knife", "trident", "rapier", "javelin", "harpoon", "lance", "pitchfork"};
 	/** Weapons that work under water by tag (a mod can add its own). */
 	public static final TagKey<Item> WORKS_TAG = TagKey.create(Registries.ITEM, JaymosKingdoms.id("works_under_water"));
 

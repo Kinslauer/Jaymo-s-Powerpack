@@ -99,6 +99,8 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.tanning.Hides.register();
 		// (0.5.51) meat hooks, blood grates and bottled blood (corpse/Hanging does the butchering)
 		com.jaymoskitchen.butchery.Butchery.register();
+		// (Butchery picks) the mincer and mince, the butcher's display, head mounts, the barrel of bones
+		com.jaymoskitchen.butchery.ButcherShop.register();
 		com.jaymoskitchen.butchery.Skeletons.register();
 		// rats after food left out, and the traps for them
 		com.jaymoskitchen.rats.Rats.register();
@@ -266,6 +268,23 @@ public class JaymosKitchen implements ModInitializer {
 					carried.drop(ctx.player());
 				}
 			}
+		});
+		ServerPlayNetworking.registerGlobalReceiver(Payloads.HangOn.TYPE, (payload, ctx) -> {
+			// a meat hook clicked while carrying or dragging a carcass: hung there, never let go of
+			net.minecraft.server.level.ServerPlayer player = ctx.player();
+			CorpseEntity body = CorpseEntity.draggedBy(player);
+			if (body == null) {
+				body = CorpseEntity.carriedBy(player);
+			}
+			BlockPos hook = payload.pos();
+			if (body == null || !com.jaymoskitchen.butchery.Butchery.isHook(player.level().getBlockState(hook))) {
+				return;
+			}
+			if (!player.isWithinBlockInteractionRange(hook, 1.0)) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.closer"));
+				return;
+			}
+			com.jaymoskitchen.corpse.Hanging.hang(body, player, hook);
 		});
 		ServerPlayNetworking.registerGlobalReceiver(Payloads.StartCooking.TYPE,
 			(payload, ctx) -> Kitchen.start(ctx.player(), payload.pos(), payload.dish(), payload.station()));

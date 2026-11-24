@@ -74,7 +74,8 @@ import org.jspecify.annotations.Nullable;
  * {@link #BLADE_SPEED}), and it counts as a light blade (see {@link #weapon}).</li>
  * <li><b>Leap</b>: a skilled player with a blade on a wrist whose hand is empty who falls at least {@link #LEAP_MIN_FALL} blocks onto
  * a living thing takes no fall damage; what they would have taken is dealt to it as their own blow (so crimes,
- * witnesses and kill credit follow), and it is {@link #crippled Crippled}. A miss is a fall like any other.</li>
+ * witnesses and kill credit follow), and it is {@link #crippled Crippled}. A miss is a fall like any other. With Jaymo's
+ * Powers, its drop attacks take this over: everyone's landing downs, and the blade's is its own killing move ({@link #drop}).</li>
  * <li><b>Crippled</b>: a Kingdoms status on any living thing (an attachment holding the game time it ends, not a
  * {@code MobEffect}): it can barely walk or jump, a player can't sprint.</li>
  * <li><b>Stab</b>: every full-strength hidden-blade blow at a Crippled foe deals {@link #CRIPPLED_STAB} times the damage
@@ -96,6 +97,10 @@ public final class HiddenBlade {
 	static final double BLADE_DAMAGE = 3.0, BLADE_SPEED = -1.8;
 	/** A leap needs a fall of at least this (blocks). */
 	static final double LEAP_MIN_FALL = 4.0;
+	/** The Stealth level at which any drop attack (Jaymo's Powers') kills instead of downing: the blade's own. */
+	static final int DROP_KILL_LEVEL = BLADE_LEVEL;
+	/** With Jaymo's Powers, its drop attacks take over the leap ({@link #drop}); without it, the leap is as it was. */
+	private static final boolean POWERS = net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("jaymospowers");
 	/** How far below the feet a falling player's box reaches for a target (blocks), and how near a landing must be. */
 	static final double LEAP_REACH = 0.6, LAND_REACH = 0.4;
 	/** After a leap, a landing no further than this below the target's feet is the leap's own (no fall damage). */
@@ -178,9 +183,9 @@ public final class HiddenBlade {
 					// (kept, the attachment copied over, but sheathed)
 					player.setAttached(WORN, bits(player) & 3);
 				} else {
-					// dropped like armour
+					// left on their body (Jaymo's Kitchen, shed with the arm), else dropped like armour
 					for (int hand = MAIN; hand <= OFF; hand++) {
-						if (worn(player, hand)) {
+						if (worn(player, hand) && !KitchenCompat.keepOnBody(player, new ItemStack(ITEM), 2 | 4)) {
 							Containers.dropItemStack(player.level(), player.getX(), player.getY(), player.getZ(), new ItemStack(ITEM));
 						}
 					}
@@ -422,6 +427,9 @@ public final class HiddenBlade {
 	 * takes it instead.
 	 */
 	private static boolean allowDamage(LivingEntity entity, DamageSource source, float amount) {
+		if (POWERS) {
+			return true;
+		}
 		if (entity instanceof ServerPlayer leapt && source.is(DamageTypeTags.IS_FALL)) {
 			Double feet = LEAPT.remove(leapt.getUUID());
 			if (feet != null && leapt.getY() >= feet - LEAP_LAND_SLACK) {
@@ -496,7 +504,7 @@ public final class HiddenBlade {
 
 	/** A skilled, falling player: does this tick's fall (swept from last tick's feet to {@link #LEAP_REACH} below now) come down on something? */
 	private static void falling(ServerPlayer player, double lastY) {
-		if (player.onGround() || player.fallDistance < LEAP_MIN_FALL || player.isPassenger() || player.isFallFlying() || player.getAbilities().flying
+		if (POWERS || player.onGround() || player.fallDistance < LEAP_MIN_FALL || player.isPassenger() || player.isFallFlying() || player.getAbilities().flying
 			|| player.isInWater() || player.isSpectator() || !(player.level() instanceof ServerLevel level) || !armed(player)) {
 			return;
 		}
@@ -509,6 +517,31 @@ public final class HiddenBlade {
 			leap(level, player, target, fallDamage(player), player.fallDistance);
 			LEAPT.put(player.getUUID(), target.getY());
 		}
+	}
+
+	/**
+	 * (Jaymo's Powers' drop attacks, by reflection) {@code player} has come down on {@code target}: what it is. 2: the
+	 * hidden blade's own (a skilled player with a blade on an empty hand's wrist): it springs out as they land, the leap's
+	 * Stealth experience is theirs, and it kills. 1: no blade, but Stealth at {@link #DROP_KILL_LEVEL}: it kills. 0: it downs.
+	 */
+	public static int drop(ServerPlayer player, LivingEntity target) {
+		if (armed(player)) {
+			int bits = bits(player);
+			boolean drawn = false;
+			for (int hand = MAIN; hand <= OFF; hand++) {
+				if (ready(player, hand) && !out(player, hand)) {
+					bits |= 4 << hand;
+					drawn = true;
+				}
+			}
+			if (drawn) {
+				setBits(player, bits);
+				sound(player, true);
+			}
+			Skills.grant(player, Skills.Pillar.STEALTH, Skills.XP_BLADE_LEAP);
+			return 2;
+		}
+		return Skills.of(player).level(Skills.Pillar.STEALTH) >= DROP_KILL_LEVEL ? 1 : 0;
 	}
 
 	// ---- Crippled ------------------------------------------------------------------------------------------------------

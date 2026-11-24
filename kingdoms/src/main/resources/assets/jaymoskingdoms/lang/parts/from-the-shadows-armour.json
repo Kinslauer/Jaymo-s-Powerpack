@@ -1,0 +1,20 @@
+{
+  "block.jaymoskingdoms.diabolium_block": "Block of Diabolium",
+  "item.jaymoskingdoms.diabolium_nugget": "Diabolium Nugget",
+  "item.jaymoskingdoms.diabolium_ingot": "Diabolium Ingot",
+  "item.jaymoskingdoms.diabolium_helmet": "Diabolium Helmet",
+  "item.jaymoskingdoms.diabolium_chest": "Diabolium Chestplate",
+  "item.jaymoskingdoms.diabolium_leggings": "Diabolium Leggings",
+  "item.jaymoskingdoms.diabolium_boots": "Diabolium Boots",
+  "item.jaymoskingdoms.crust_helmet": "Crust Helmet",
+  "item.jaymoskingdoms.crust_chest": "Crust Chestplate",
+  "item.jaymoskingdoms.crust_leggings": "Crust Leggings",
+  "item.jaymoskingdoms.crystallized_blood": "Crystallized Blood",
+  "item.jaymoskingdoms.crystallized_fragment": "Crystallized Fragment",
+  "item.jaymoskingdoms.bottle_of_blood": "Bottle of Blood",
+  "item.jaymoskingdoms.corrupted_heart": "Corrupted Heart",
+  "tooltip.jaymoskingdoms.diabolium_armor.1": "Wear all four pieces and your blows tear,",
+  "tooltip.jaymoskingdoms.diabolium_armor.2": "and give back a sixth of their damage as health.",
+  "tooltip.jaymoskingdoms.crust_armor.1": "Crouch in the full set to take half the damage,",
+  "tooltip.jaymoskingdoms.crust_armor.2": "at the cost of the armour's wear."
+}

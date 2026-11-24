@@ -416,6 +416,7 @@ public final class Mortality {
 			EXECUTED.clear();
 		});
 		OutOfBody.register();
+		SpawnCalm.register();
 		Afflictions.register();
 		Scars.register();
 		Karma.register();
@@ -452,6 +453,16 @@ public final class Mortality {
 	/** (0.20.50) Whether {@code player} lies left for dead, waiting to wake somewhere. */
 	public static boolean waking(Player player) {
 		return WAKES.containsKey(player.getUUID());
+	}
+
+	/**
+	 * Whether {@code player} is dead by our reckoning, though the game still counts them alive: lying left for dead (in
+	 * their body, or out of it as a ghost, {@link #waking}) or waiting in {@link Limbo}. Nothing living mends or grows back
+	 * on them then (Andy, 2026-11-22: "i was regrowing limbs as a ki ghost ... the game didnt understand i was long dead").
+	 * Kingdoms asks this by reflection. Server side.
+	 */
+	public static boolean dead(Player player) {
+		return waking(player) || Limbo.in(player);
 	}
 
 	/** Whether {@code player} was put down where they wake only moments ago ({@link #WOKE_GRACE}). */
@@ -1459,6 +1470,8 @@ public final class Mortality {
 		player.setAttached(WAKE_LINE, woke);
 		Downed.knockOut(level, player, OUT_AFTER, false, woke, false);
 		WOKE.put(player.getUUID(), (long) level.getServer().getTickCount() + WOKE_GRACE);
+		// (nobody wakes under attack: no enemy to mobs until they move)
+		SpawnCalm.calm(player);
 		level.playSound(null, at, wake.turn != null ? SoundEvents.ZOMBIE_VILLAGER_CURE : SoundEvents.PLAYER_BREATH, SoundSource.PLAYERS, 0.8F,
 			wake.turn != null ? 0.6F : 0.8F);
 		if (wake.turn != null) {
@@ -1529,7 +1542,7 @@ public final class Mortality {
 				BodyPart part = plan.part(i);
 				if (!Breaks.missing(player, part) && Treatment.helps(Treatment.Remedy.RAG, player, part)) {
 					Bleeding.stop(player, part, false);
-					Bleeding.dress(player, part, Treatment.RAG_HEAL, Treatment.BANDAGE_TICKS, true);
+					Bleeding.dress(player, part, Treatment.RAG_HEAL, Treatment.RAG_TICKS, true);
 				}
 			}
 			Bleeding.bindStumps(player, true);

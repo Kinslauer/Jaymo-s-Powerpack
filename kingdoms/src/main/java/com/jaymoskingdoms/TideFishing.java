@@ -41,6 +41,8 @@ public final class TideFishing {
 		if (!(player.level() instanceof ServerLevel level) || player.isCreative() || player.isSpectator()) {
 			return;
 		}
+		// (a Saltblood's catch counts toward their path; the sea lends to her own)
+		HeritagePaths.fished(player);
 		List<LivingEntity> tideborn = level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(SEE_RANGE),
 			e -> !(e instanceof Player) && e.isAlive() && !e.isSleeping() && VillagerHeritage.of(e) == Heritage.Kind.TIDEBORN
 				&& e.hasLineOfSight(player));

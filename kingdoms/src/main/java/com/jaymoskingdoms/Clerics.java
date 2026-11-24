@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -24,7 +26,10 @@ import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.WritableBookContent;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -61,6 +66,10 @@ public final class Clerics {
 	private static final Map<Mob, long[]> FLEEING = new HashMap<>();
 	private static final Map<UUID, Long> BLESSED = new HashMap<>();
 	private static final Map<UUID, Boolean> RAISING = new HashMap<>();
+	/** Turn Undead said from the medallion board: the Cleric and when the turning ends. */
+	private static final Map<UUID, Long> BOARD_TURNING = new HashMap<>();
+	/** How long Turn Undead said from the board turns the dead (ticks). */
+	static final int BOARD_TURN_TICKS = 60;
 
 	private Clerics() {
 	}
@@ -69,12 +78,28 @@ public final class Clerics {
 		HOLY_SYMBOL = Arcana.item("holy_symbol", p -> new CastingFocus(p.stacksTo(1), true));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> output.accept(HOLY_SYMBOL));
 		ServerTickEvents.END_SERVER_TICK.register(Clerics::tick);
+		// a Truth Cleric's book casts as the symbol's tap does (and keeps the book and quill's writing screen shut)
+		UseItemCallback.EVENT.register((player, level, hand) -> {
+			ItemStack stack = player.getItemInHand(hand);
+			if (!prayerBook(player, stack)) {
+				return InteractionResult.PASS;
+			}
+			if (player instanceof ServerPlayer sp && level instanceof ServerLevel server) {
+				if (player.isShiftKeyDown()) {
+					Spellcraft.turnFocus(sp);
+				} else {
+					Spellcraft.castFocus(sp, server, stack);
+				}
+			}
+			return InteractionResult.SUCCESS;
+		});
 	}
 
 	static void clear() {
 		FLEEING.clear();
 		BLESSED.clear();
 		RAISING.clear();
+		BOARD_TURNING.clear();
 	}
 
 	/** A new Cleric swears to the patron they picked (their favour a devout beginning's), and the symbol's making is taught by a priest. */
@@ -102,7 +127,7 @@ public final class Clerics {
 	}
 
 	private static boolean holds(ServerPlayer player) {
-		return player.getMainHandItem().is(HOLY_SYMBOL) || player.getOffhandItem().is(HOLY_SYMBOL);
+		return focus(player, player.getMainHandItem()) || focus(player, player.getOffhandItem());
 	}
 
 	/** The symbol is raised and has been held {@code held} ticks. */
@@ -207,6 +232,18 @@ public final class Clerics {
 				}
 			}
 		}
+		if (!BOARD_TURNING.isEmpty() && server.getTickCount() % TURN_EVERY == 0) {
+			Iterator<Map.Entry<UUID, Long>> turning = BOARD_TURNING.entrySet().iterator();
+			while (turning.hasNext()) {
+				Map.Entry<UUID, Long> e = turning.next();
+				ServerPlayer player = server.getPlayerList().getPlayer(e.getKey());
+				if (player == null || !player.isAlive() || !(player.level() instanceof ServerLevel level) || level.getGameTime() >= e.getValue()) {
+					turning.remove();
+					continue;
+				}
+				turn(player, level);
+			}
+		}
 		if (!BLESSED.isEmpty() && server.getTickCount() % 40 == 0) {
 			long now = server.overworld().getGameTime();
 			BLESSED.values().removeIf(until -> until <= now);
@@ -238,7 +275,7 @@ public final class Clerics {
 	}
 
 	/** Every friend near {@code player} is blessed: warded, steadied, a fright lifted. */
-	static void bless(ServerLevel level, ServerPlayer player) {
+	static List<LivingEntity> bless(ServerLevel level, ServerPlayer player) {
 		ClassTrees.give(player, PlayerClass.CLERIC, ClassTrees.XP_BLESS);
 		long until = level.getGameTime() + BLESS_TICKS;
 		int tier = Patrons.state(player).tier();
@@ -261,6 +298,28 @@ public final class Clerics {
 		}
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1.0F, 1.3F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 1.0F);
+		return band;
+	}
+
+	/** Bless the Band said from the medallion board ({@link MedallionBoard}): known there without the tree's perk; a turning spent. */
+	static void boardBless(ServerPlayer player, ServerLevel level) {
+		if (!Rests.spend(player, Rests.CHANNEL, 1, channels(player))) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.cleric.silent"));
+			return;
+		}
+		bless(level, player);
+	}
+
+	/** Turn Undead said from the medallion board: a turning spent, and the dead before the Cleric turned for {@link #BOARD_TURN_TICKS}. */
+	static void boardTurn(ServerPlayer player, ServerLevel level) {
+		if (!Rests.spend(player, Rests.CHANNEL, 1, channels(player))) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.cleric.silent"));
+			return;
+		}
+		Litany.raised(player);
+		BOARD_TURNING.put(player.getUUID(), level.getGameTime() + BOARD_TURN_TICKS);
+		Fx.ring(level, player.position().add(0.0, 0.1, 0.0), (float) TURN_RANGE * 0.6F, colour(player));
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8F, 1.6F);
 	}
 
 	/** The share a blessing adds to {@code who}'s every save ({@link Saves}). */
@@ -279,5 +338,26 @@ public final class Clerics {
 	/** Whether {@code stack} is a holy symbol. */
 	public static boolean isSymbol(ItemStack stack) {
 		return stack.is(HOLY_SYMBOL);
+	}
+
+	/**
+	 * (Andy, 2026-11-23) The Truth needs no idols and takes the written word: a Cleric sworn to it prays from a book, the one
+	 * they start with or any blank one (a plain book, or a book and quill with nothing written in it), as others do from the
+	 * holy symbol: the medallion board, a tap to cast the bound spell, sneaking to turn it, the class key.
+	 */
+	public static boolean prayerBook(LivingEntity who, ItemStack stack) {
+		if (!(who instanceof Player player) || !Classes.is(player, PlayerClass.CLERIC) || Patrons.of(player) != Patron.TRUTH) {
+			return false;
+		}
+		if (stack.is(Items.BOOK)) {
+			return true;
+		}
+		return stack.is(Items.WRITABLE_BOOK) && stack.getOrDefault(DataComponents.WRITABLE_BOOK_CONTENT, WritableBookContent.EMPTY).pages().stream()
+			.allMatch(page -> page.raw().isBlank());
+	}
+
+	/** Whether {@code stack} is {@code who}'s focus for a Cleric's prayers: a holy symbol, or a Truth Cleric's book ({@link #prayerBook}). */
+	public static boolean focus(LivingEntity who, ItemStack stack) {
+		return isSymbol(stack) || prayerBook(who, stack);
 	}
 }

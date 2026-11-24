@@ -67,6 +67,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.hud.TitleCard.init();
 		com.jaymospowers.client.hud.DreadVignette.init();
 		com.jaymospowers.client.hud.MoveHints.init();
+		// (Andy, 2026-11-23) what the keys do to whoever's under the crosshair: stealth kill, a body, Kingdoms' lines
+		com.jaymospowers.client.hud.ContextHints.init();
 		// (Andy, 2026-11-20) a tap of use on a body: the body menu
 		com.jaymospowers.client.bodymenu.BodyMenuClient.init();
 		// (Andy, 2026-11-20) first-time cards for the body menu, executions, the lasso, being downed and the wall sit
@@ -74,6 +76,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		// biome name, use bar, chat mentions and Shift+T item sharing (client/bits)
 		com.jaymospowers.client.bits.BiomeTitle.init();
 		com.jaymospowers.client.bits.UseBar.init();
+		AfkCinematicFishing.init();
 		com.jaymospowers.client.bits.Mentions.init();
 		com.jaymospowers.client.bits.ItemShareClient.init();
 		// the Verdant World's sky: the blue giant and its ring
@@ -286,6 +289,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.armory.GunLaserClient.init();
 		com.jaymospowers.client.armory.GunHandling.init();
 		com.jaymospowers.client.armory.MusketSights.init();
+		com.jaymospowers.client.armory.BodyWeaponsLayer.init();
 		com.jaymospowers.client.armory.guns.AnimatedGunModel.init();
 		com.jaymospowers.client.armory.HeldItems.init();
 		// after every mod's main entrypoint (TaCZ adds its modern pack there), before resources load

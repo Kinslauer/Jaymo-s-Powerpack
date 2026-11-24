@@ -67,8 +67,11 @@ public final class MobCombat {
 
 	/** A mob's reach before its weapon's bonus (a player's is 3). */
 	static final double BASE_REACH = 3.0;
-	/** A swing starts only when the target is within this share of the reach (so the blow lands as it steps in). */
-	static final double START_REACH_SHARE = 0.9;
+	/**
+	 * A swing starts only when the target is within this share of the reach (so the blow lands as it steps in). Andy:
+	 * "enemies should ... get closer before swinging": at 0.9 a fighter started its swing from almost 3 blocks off.
+	 */
+	static final double START_REACH_SHARE = 0.7;
 	/** Mobs swing this much slower than a player with the same weapon (time to see it coming). */
 	static final double MOB_TEMPO = 1.35;
 	/** The shortest and longest swing (ticks). */
@@ -113,6 +116,8 @@ public final class MobCombat {
 	 * those. The tag Jaymo's Powers' guard reads while a heavy blow lands.
 	 */
 	static final double HEAVY_DAMAGE = 1.4;
+	/** (enemy damage balance) When a combo comes round to a heavy move, the chance it's thrown (else a plain one is). */
+	static final float HEAVY_PICK_CHANCE = 0.25F;
 	static final int TELL_COLOR = 0xFFFFFF, HEAVY_TELL_COLOR = 0xE02020;
 	static final float TELL_SIZE = 1.2F;
 	public static final String UNPARRYABLE_TAG = "jaymospowers.unparryable";
@@ -480,7 +485,17 @@ public final class MobCombat {
 		if (!WeaponForms.experienced(mob)) {
 			usable = WeaponForms.basic(usable, Move::animation);
 		}
-		return usable.get(Math.floorMod(combo, usable.size()));
+		Move move = usable.get(Math.floorMod(combo, usable.size()));
+		if (!moves.twoHanded() && heavy(moves, move) && mob.getRandom().nextFloat() >= HEAVY_PICK_CHANCE) {
+			// (enemy damage balance, Andy: basic attacks most of the time, the heavy ones only now and then) a heavy move in
+			// the combo is mostly swapped for a plain one; a two-handed weapon's every blow is heavy, so it keeps them
+			for (Move plain : usable) {
+				if (!heavy(moves, plain)) {
+					return plain;
+				}
+			}
+		}
+		return move;
 	}
 
 	/** A swing's length (ticks): the weapon's attack speed, slowed for mobs. */

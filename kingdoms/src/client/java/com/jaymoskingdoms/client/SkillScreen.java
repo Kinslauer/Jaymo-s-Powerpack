@@ -133,10 +133,72 @@ final class SkillScreen extends Screen {
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			while (key.consumeClick()) {
 				if (minecraft.player != null && minecraft.gui.screen() == null) {
+					// (Andy: K after a hint goes to exactly what it named)
+					HintLinks.Link link = HintLinks.take(HintLinks.Page.SKILLS);
+					if (link != null && link.target() != null) {
+						aim(minecraft.player, link.target());
+					}
 					minecraft.gui.setScreen(new SkillScreen());
 				}
 			}
 		});
+	}
+
+	/**
+	 * Opens on what a hint named ({@link HintLinks}): a web perk picked and brought to the middle, or a class-tree node on
+	 * the class's tab, or {@link HintLinks#PATH_PERK} (your strongest pillar's Path perk). A perk not drawn for you (the
+	 * Night page before you're turned) leaves the screen as it was.
+	 */
+	private static void aim(Player player, String target) {
+		Skills.Perk perk = null;
+		com.jaymoskingdoms.ClassTrees.Node node = null;
+		if (target.equals(HintLinks.PATH_PERK)) {
+			Skills.Progress shown = Skills.of(player);
+			Skills.Pillar best = Skills.Pillar.STRENGTH;
+			for (Skills.Pillar p : ORDER) {
+				if (shown.level(p) > shown.level(best)) {
+					best = p;
+				}
+			}
+			perk = best == Skills.Pillar.SURVIVAL ? Skills.Perk.PATH_SURVIVAL : best == Skills.Pillar.STEALTH ? Skills.Perk.PATH_STEALTH : Skills.Perk.PATH_STRENGTH;
+		} else if (target.startsWith("skill.jaymoskingdoms.perk.")) {
+			String key = target.substring("skill.jaymoskingdoms.perk.".length());
+			for (Skills.Perk p : Skills.Perk.values()) {
+				if (p.key().equals(key)) {
+					perk = p;
+				}
+			}
+		} else if (target.startsWith("classtree.jaymoskingdoms.")) {
+			node = com.jaymoskingdoms.ClassTrees.node(target.substring("classtree.jaymoskingdoms.".length()));
+		}
+		if (perk != null) {
+			SkillWeb.Spot spot = com.jaymoskingdoms.TreeLocks.hidden(player, perk) ? null : SkillWeb.SPOTS.get(perk);
+			if (spot != null) {
+				page0();
+				selected = perk;
+				look(spot, OPEN_ZOOM);
+				if (Double.isNaN(zoom)) {
+					panX = targetX;
+					panY = targetY;
+					zoom = targetZoom;
+				}
+				return;
+			}
+			// (not on the web: a perk a class's tree holds now)
+			node = com.jaymoskingdoms.ClassTrees.moved(perk);
+		}
+		if (node != null && ClassTreeTab.aim(player, node)) {
+			page0();
+			classTab = true;
+		}
+	}
+
+	/** The web's tab, the lists back at their tops (as {@link #page} does, before the screen is built). */
+	private static void page0() {
+		listScroll = 0;
+		stats = false;
+		jobs = false;
+		classTab = false;
 	}
 
 	@Override
@@ -1237,6 +1299,13 @@ final class SkillScreen extends Screen {
 			text.add(Component.translatable("gui.jaymoskingdoms.stats.caps", caps).withColor(Ui.DIM));
 			text.add(Component.translatable("gui.jaymoskingdoms.stats.hint", Stats.POINTS_PER_LEVEL).withColor(Ui.DIM));
 			text.add(Component.translatable("gui.jaymoskingdoms.stats.legend").withColor(Ui.HINT));
+			if (player != null) {
+				// (defence disciplines) your three, how each came to you, and where to find a teacher for the locked
+				text.add(Component.translatable("gui.jaymoskingdoms.disciplines").withColor(accent));
+				for (int d = 0; d < com.jaymoskingdoms.Disciplines.KINDS; d++) {
+					text.add(com.jaymoskingdoms.Disciplines.describe(player, d));
+				}
+			}
 		}
 		sidePanel(graphics, name, accent, text);
 	}

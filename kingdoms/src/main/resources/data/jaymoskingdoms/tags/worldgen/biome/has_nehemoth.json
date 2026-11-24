@@ -1,0 +1,17 @@
+{
+	"values": [
+		"minecraft:soul_sand_valley",
+		{
+			"id": "jaymospowers:demon_gloam",
+			"required": false
+		},
+		{
+			"id": "jaymospowers:demon_ash",
+			"required": false
+		},
+		{
+			"id": "jaymospowers:demon_abyss",
+			"required": false
+		}
+	]
+}

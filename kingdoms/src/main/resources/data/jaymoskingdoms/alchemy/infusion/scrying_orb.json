@@ -1,0 +1,26 @@
+{
+  "centre": "minecraft:glass",
+  "components": [
+    "minecraft:amethyst_shard",
+    "minecraft:amethyst_shard",
+    "minecraft:amethyst_shard",
+    "minecraft:amethyst_shard",
+    "minecraft:ender_eye",
+    "minecraft:ender_eye",
+    "minecraft:glass",
+    "minecraft:glass"
+  ],
+  "essences": {
+    "metal": 4,
+    "motion": 8,
+    "craft": 12,
+    "spirit": 16
+  },
+  "instability": 10,
+  "result": {
+    "item": "jaymoskingdoms:scrying_orb",
+    "count": 1
+  },
+  "research": "scrying",
+  "flux": 8
+}

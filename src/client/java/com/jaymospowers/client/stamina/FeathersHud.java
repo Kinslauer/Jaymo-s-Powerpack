@@ -1,6 +1,7 @@
 package com.jaymospowers.client.stamina;
 
 import com.jaymospowers.JaymosPowers;
+import com.jaymospowers.combat.PassiveBlocks;
 import com.jaymospowers.stamina.Feathers;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -24,9 +25,11 @@ import net.minecraft.world.entity.LivingEntity;
  */
 public final class FeathersHud {
 	private static final Identifier TEXTURE = JaymosPowers.id("textures/gui/feathers.png");
-	private static final int TEX_W = 99, TEX_H = 9, ICON = 9;
+	private static final int TEX_W = 153, TEX_H = 9, ICON = 9;
 	private static final int CONTAINER = 0, FULL = 1, HALF = 2, GOLD = 3, GOLD_HALF = 4, STRAIN = 5, STRAIN_HALF = 6, HELD = 7, PALE = 8,
 		PALE_HALF = 9, FLASH = 10;
+	/** (defence disciplines) A used passive block by discipline (Arms, Ki, Arcana), and a free one's faint outline. */
+	private static final int SHIELD = 11, SHIELD_FREE = 14;
 	/** How long (ticks) the empty slots flash after a spend. */
 	private static final int FLASH_TICKS = 6;
 
@@ -73,6 +76,25 @@ public final class FeathersHud {
 			y -= 10;
 		}
 		boolean flashing = flash > 0 && flash % 2 == 0;
+		// (defence disciplines) the passive blocks: used ones are the icons just past the cap (their feathers held back),
+		// free ones a faint outline over the top of the row's own feathers
+		Integer blocks = player.getAttached(PassiveBlocks.STATE);
+		int packed = blocks == null ? 0x3FF : blocks;
+		int[] usedKinds = new int[PassiveBlocks.MAX];
+		int[] freeKinds = new int[PassiveBlocks.MAX];
+		int used = 0, free = 0;
+		for (int s = 0; s < PassiveBlocks.MAX; s++) {
+			int kind = PassiveBlocks.slot(packed, s);
+			if (kind < 0) {
+				continue;
+			}
+			if (PassiveBlocks.used(packed, s)) {
+				usedKinds[used++] = kind;
+			} else {
+				freeKinds[free++] = kind;
+			}
+		}
+		int capIcons = view.cap() / 2;
 		for (int i = 0; i < Feathers.MAX / 2; i++) {
 			int x = right - i * 8 - ICON;
 			int at = y;
@@ -94,6 +116,12 @@ public final class FeathersHud {
 			}
 			if (view.bonus() > unit) {
 				icon(graphics, x, at, view.bonus() >= unit + 2 ? GOLD : GOLD_HALF);
+			}
+			if (i >= capIcons && i < capIcons + used) {
+				// a block caught a blow: its feather is a shield till a parry or a rest gives it back
+				icon(graphics, x, at, SHIELD + usedKinds[i - capIcons]);
+			} else if (i < capIcons && i >= capIcons - free) {
+				icon(graphics, x, at, SHIELD_FREE + freeKinds[capIcons - 1 - i]);
 			}
 		}
 	}

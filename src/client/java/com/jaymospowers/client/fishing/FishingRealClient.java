@@ -50,9 +50,15 @@ public final class FishingRealClient {
     /** Flip if the third-person rod bends up instead of down (its pose frame differs from first person's). */
     private static final float THIRD_PERSON_SIGN = 1.0F;
 
+    /** (2026-11-23) The fight's readout: how far below the crosshair it sits, and the colours of the fish's moods. */
+    private static final int READOUT_BELOW = 34;
+    private static final int MOOD_REEL = 0xFF70E080, MOOD_EASE = 0xFFFFB040, MOOD_TAKING = 0xFF80D0FF;
+
     private static int scrollReelTicks;
     private static float scrollNotches;
     private static int creakIn;
+    /** (2026-11-23) Sneak + use has let this fish go already (sent once a press). */
+    private static boolean releaseSent;
 
     private FishingRealClient() {
     }
@@ -184,6 +190,7 @@ public final class FishingRealClient {
         if (!state.fighting()) {
             scrollReelTicks = 0;
             scrollNotches = 0.0F;
+            releaseSent = false;
             return;
         }
         boolean scrolled = scrollReelTicks > 0;
@@ -191,7 +198,18 @@ public final class FishingRealClient {
             scrollReelTicks--;
         }
         if (minecraft.gui.screen() == null) {
-            ClientPlayNetworking.send(new FishingPayloads.ReelInput(minecraft.options.keyUse.isDown() || scrolled));
+            boolean use = minecraft.options.keyUse.isDown();
+            if (use && player.isShiftKeyDown()) {
+                // (Andy, 2026-11-23) sneak + use lets the fish go, once a press, and reels nothing
+                if (!releaseSent) {
+                    releaseSent = true;
+                    ClientPlayNetworking.send(new FishingPayloads.ReleaseFish());
+                }
+                ClientPlayNetworking.send(new FishingPayloads.ReelInput(false));
+            } else {
+                releaseSent = false;
+                ClientPlayNetworking.send(new FishingPayloads.ReelInput(use || scrolled));
+            }
         }
         // (Track A) the line creaks near its breaking point, faster the closer it gets
         float strain = state.strain();
@@ -252,21 +270,37 @@ public final class FishingRealClient {
             }
             return;
         }
+        // (Andy, 2026-11-23, a fishing gif: "thats what i want our fishing to be like") the readout, below the crosshair: the
+        // fish, its weight and what it's doing; the tension bar; tension, its energy, the line out, the drag; what to do
+        y = h / 2 + READOUT_BELOW;
+        int cx = w / 2;
+        com.jaymospowers.fishing.Species sp = com.jaymospowers.fishing.Species.of(state.fishKind());
+        Component name = sp == null ? Component.translatable("hud.jaymospowers.fishing.a_fish") : Component.translatable(sp.nameKey());
+        int moodColour = state.mood() == FishFight.TAKING ? MOOD_TAKING : state.easeOff() ? MOOD_EASE : MOOD_REEL;
+        Component title = Component.translatable("hud.jaymospowers.fishing.title", name, String.format(java.util.Locale.ROOT, "%.1f", state.kg()))
+                .append(Component.literal("  "))
+                .append(Component.translatable("hud.jaymospowers.fishing.mood." + state.mood()).withColor(moodColour & 0xFFFFFF));
+        graphics.text(font, title, cx - font.width(title) / 2, y, 0xFFFFFFFF, true);
+        x = cx - BAR_W / 2;
+        int barY = y + 11;
         float strain = state.strain();
-        bar(graphics, x, y, strain, strain >= CREAK_AT ? HudStyle.WARN : 0xFFFF8050);
+        bar(graphics, x, barY, strain, strain >= CREAK_AT ? HudStyle.WARN : state.easeOff() ? MOOD_EASE : MOOD_REEL);
         // the drag's slip point
         int drag = FishRun.drag(FishRun.rodInHand(player));
         int slipX = x + Math.round(BAR_W * FishRun.DRAG_SLIP[drag - 1]);
-        graphics.fill(slipX, y - 2, slipX + 1, y + BAR_H + 2, 0xFF60E0FF);
+        graphics.fill(slipX, barY - 2, slipX + 1, barY + BAR_H + 2, 0xFF60E0FF);
         // which way the fish runs
         if (state.run() != 0) {
             String arrows = state.run() > 0 ? ">>" : "<<";
             int ax = state.run() > 0 ? x + BAR_W + 4 : x - 4 - font.width(arrows);
-            graphics.text(font, Component.literal(arrows), ax, y - 1, HudStyle.GOLD, true);
+            graphics.text(font, Component.literal(arrows), ax, barY - 1, HudStyle.GOLD, true);
         }
         int percent = Mth.clamp(Math.round(strain * 100), 0, 100);
-        Component label = Component.translatable("hud.jaymospowers.fishing.tension_drag", percent, drag, FishRun.DRAG_STEPS);
-        graphics.text(font, label, x + BAR_W / 2 - font.width(label) / 2, y - 10, 0xFFFFFFFF, true);
+        Component numbers = Component.translatable("hud.jaymospowers.fishing.numbers", percent, Math.round(state.energy() * 100),
+                Math.round(state.lineOut()), Math.round(state.lineMax()), drag, FishRun.DRAG_STEPS);
+        graphics.text(font, numbers, cx - font.width(numbers) / 2, barY + BAR_H + 4, 0xFFFFFFFF, true);
+        Component hint = Component.translatable(state.mood() == FishFight.TAKING ? "hud.jaymospowers.fishing.hint.taking" : "hud.jaymospowers.fishing.hint");
+        graphics.text(font, hint, cx - font.width(hint) / 2, barY + BAR_H + 15, 0xFFB0B0B0, true);
     }
 
     private static void bar(GuiGraphicsExtractor graphics, int x, int y, float fill, int color) {

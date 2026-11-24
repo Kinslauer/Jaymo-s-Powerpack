@@ -86,6 +86,9 @@ public class CorpseEntity extends Entity {
 	/** Just died and still keeling over (see KeelOver): clients leave its drawn pose to the points until it's down. */
 	private static final EntityDataAccessor<Boolean> KEELING = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.BOOLEAN);
+	/** Hung on a meat hook ({@link #hook}): clients draw it as its points hang, never eased onto its side as if lying still. */
+	private static final EntityDataAccessor<Boolean> HOOKED = SynchedEntityData.defineId(CorpseEntity.class,
+		EntityDataSerializers.BOOLEAN);
 	/** (0.5.23) Nailed to a wall by an arrow: the way it faces out from the wall (degrees, 0-359), or -1 when it isn't. */
 	private static final EntityDataAccessor<Integer> PINNED = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.INT);
@@ -304,8 +307,19 @@ public class CorpseEntity extends Entity {
 	private int age;
 	/** Ticks since it started falling apart (both sides count; see {@link #CRUMBLING}). */
 	private int crumbleTicks;
-	/** A player's corpse: their hotbar when they died, and the slot they had selected. */
-	private final List<ItemStack> hotbar = new ArrayList<>(java.util.Collections.nCopies(9, ItemStack.EMPTY));
+	/**
+	 * A player's corpse: everything they carried when they died, slot for slot as their inventory had it (the hotbar,
+	 * the main inventory, then feet, legs, chest, head and off hand: {@link #INVENTORY_SLOTS}), then what other mods
+	 * handed over to stay on the body ({@link #EXTRA_SLOTS}: Kingdoms' harness and hidden blades, Powers' baubles and web
+	 * shooters, see {@link PlayerCorpses#keepWith}),
+	 * and the hotbar slot they had selected. Still called the hotbar, as it once was only that (Jaymo's Powers reads it by
+	 * that name).
+	 */
+	private final List<ItemStack> hotbar = new ArrayList<>(java.util.Collections.nCopies(PLAYER_SLOTS, ItemStack.EMPTY));
+	/** A player's inventory slots that stay on their body: the 36 of the inventory, the four of armour and the off hand. */
+	public static final int INVENTORY_SLOTS = 41, EXTRA_SLOTS = 24, PLAYER_SLOTS = INVENTORY_SLOTS + EXTRA_SLOTS;
+	/** For each handed-over piece ({@link #EXTRA_SLOTS}), the parts it's worn on ({@code PART_} bits; 0: the torso). */
+	private final int[] extraParts = new int[EXTRA_SLOTS];
 	/** Client: the hanging limbs' swing (see {@link #swingLimbs}). */
 	private float swingBack, swingBackO, swingBackVel, swingLeft, swingLeftO, swingLeftVel;
 	private double lastVx, lastVz;
@@ -343,8 +357,11 @@ public class CorpseEntity extends Entity {
 		refreshDimensions();
 	}
 
-	/** A dead player's body, with their hotbar. */
-	void setUpPlayer(java.util.UUID owner, String name, List<ItemStack> hotbar, int selected) {
+	/** A dead player's body, with everything they carried (see {@link #hotbar}) and, for the handed-over pieces, the parts they're worn on. */
+	void setUpPlayer(java.util.UUID owner, String name, List<ItemStack> hotbar, int selected, List<Integer> parts) {
+		for (int i = 0; i < EXTRA_SLOTS; i++) {
+			this.extraParts[i] = i < parts.size() ? parts.get(i) : 0;
+		}
 		this.entityData.set(POSE, random.nextInt());
 		this.entityData.set(LOOK, "{id:\"minecraft:player\"}");
 		this.entityData.set(OWNER, owner.toString());
@@ -876,7 +893,7 @@ public class CorpseEntity extends Entity {
 		swingLeft = Mth.clamp(swingLeft + swingLeftVel, -1.4F, 1.4F);
 	}
 
-	/** A dead player's hotbar, taken off the body for them to have again (a rebirth); the body keeps none. */
+	/** Everything a dead player carried, taken off the body for them to have again (a rebirth); the body keeps none. */
 	public List<ItemStack> takeHotbar() {
 		List<ItemStack> taken = new ArrayList<>();
 		for (int i = 0; i < this.hotbar.size(); i++) {
@@ -947,6 +964,10 @@ public class CorpseEntity extends Entity {
 
 	public void setMissing(int missing) {
 		this.entityData.set(MISSING, missing);
+		if (level() instanceof ServerLevel level) {
+			// what a player's body wore on a part it's lost comes off with it, however the part went
+			tearOff(level);
+		}
 	}
 
 	@Override
@@ -958,6 +979,7 @@ public class CorpseEntity extends Entity {
 		builder.define(POSE, 0);
 		builder.define(TUMBLING, false);
 		builder.define(KEELING, false);
+		builder.define(HOOKED, false);
 		builder.define(OWNER_NAME, "");
 		builder.define(LOOK_TAGS, "");
 		builder.define(CRUMBLING, false);
@@ -1030,6 +1052,16 @@ public class CorpseEntity extends Entity {
 		return hook;
 	}
 
+	/** Hung on a meat hook (either side; {@link #hook} itself is the server's). */
+	public boolean onHook() {
+		return this.entityData.get(HOOKED);
+	}
+
+	private void setHook(@Nullable BlockPos at) {
+		this.hook = at;
+		this.entityData.set(HOOKED, at != null);
+	}
+
 	/** Hung on the hook at {@code at} by its hind legs: out of anyone's arms or hands, a ragdoll held at the hook. */
 	public void hangOn(BlockPos at) {
 		if (carrier() != null) {
@@ -1039,7 +1071,7 @@ public class CorpseEntity extends Entity {
 			this.entityData.set(DRAGGER, -1);
 		}
 		unpin();
-		this.hook = at.immutable();
+		setHook(at.immutable());
 		this.ragdoll = null;
 		grabCooldown = GRAB_COOLDOWN;
 		Vec3 hold = Hanging.holdPoint(at);
@@ -1050,7 +1082,7 @@ public class CorpseEntity extends Entity {
 	/** Off the hook (taken down, or the hook's gone): it falls as it hung. */
 	public void unhook() {
 		if (hook != null) {
-			hook = null;
+			setHook(null);
 			if (ragdoll != null) {
 				ragdoll.body.release();
 				ragdoll.body.wake();
@@ -1639,28 +1671,49 @@ public class CorpseEntity extends Entity {
 	private static final float SPREAD_CHANCE = 0.4F;
 	/** (0.5.32) At most this many fires from one body over its whole burn. */
 	private static final int MAX_FIRES = 2;
+	/** After a body is patted out (a right click), how long before the daylight can set it alight again (ticks; 10 s). */
+	private static final int PAT_GRACE = 200;
+	private int patGrace;
 
 	/**
 	 * (0.5.32) Near the end of its burn a body lights one or two things beside it, then goes out: an empty spot in or
 	 * around it (a block out, a block up) next to something that really burns (planks, logs, wool, hay; not grass or
 	 * flowers) takes fire. Only the first try is sure; the rest are chances. Follows the fire-spread game rules.
+	 * Andy: fire from a burning body should "no longer catch non flammable blocks like dirt on fire, it should only spread
+	 * if they are burning on wood". So a body only spreads fire while it lies on something that burns, and only onto
+	 * spots that sit on something that burns: one burning on dirt, grass or stone lights nothing.
 	 */
 	private void spreadFire(ServerLevel level) {
 		if (firesLit >= MAX_FIRES || firesLit > 0 && random.nextFloat() >= SPREAD_CHANCE) {
 			return;
 		}
 		BlockPos at = blockPosition();
-		if (!level.canSpreadFireAround(at)) {
+		if (!level.canSpreadFireAround(at) || !burnable(level, at.below()) && !burnable(level, at)) {
 			return;
 		}
 		for (int i = 0; i < 4; i++) {
 			BlockPos pos = at.offset(random.nextInt(3) - 1, random.nextInt(2), random.nextInt(3) - 1);
-			if (com.jaymoskitchen.Loaded.made(level, pos) && level.getBlockState(pos).isAir() && flammableBeside(level, pos)) {
+			if (com.jaymoskitchen.Loaded.made(level, pos) && level.getBlockState(pos).isAir() && burnable(level, pos.below())
+				&& flammableBeside(level, pos)) {
 				level.setBlockAndUpdate(pos, net.minecraft.world.level.block.BaseFireBlock.getState(level, pos));
 				firesLit++;
 				return;
 			}
 		}
+	}
+
+	/** A whole block that burns under the game's fire rules (planks, logs, wool, hay), not a plant or carpet. */
+	private static boolean burnable(ServerLevel level, BlockPos pos) {
+		if (!com.jaymoskitchen.Loaded.made(level, pos)) {
+			return false;
+		}
+		net.minecraft.world.level.block.state.BlockState state = level.getBlockState(pos);
+		if (state.canBeReplaced() || !state.isCollisionShapeFullBlock(level, pos)) {
+			return false;
+		}
+		net.fabricmc.fabric.api.registry.FlammableBlockRegistry.Entry burn
+			= net.fabricmc.fabric.api.registry.FlammableBlockRegistry.getDefaultInstance().get(state.getBlock());
+		return burn != null && burn.getIgniteOdds() > 0;
 	}
 
 	/** Beside a block that burns: catches fire in the game's fire rules, and isn't a plant or carpet you'd walk through. */
@@ -1756,16 +1809,15 @@ public class CorpseEntity extends Entity {
 	}
 
 	/**
-	 * A body burned away by fire leaves a pile of ash where it lay (snow-style, 1-8 layers): a zombie a small heap,
-	 * a horse or bear more, a ghast or giant a big pile across several blocks. Lava burns leave nothing - it falls
-	 * into the lava. Only air where the body lay is taken, and the block below has to hold the pile.
+	 * A body burned away by fire leaves its ash where it lay, in its shape (Andy: the ash piles "should be larger, more
+	 * in the shape of whatever mob just died"): laid out along the way the body lay, as long as the creature and as broad,
+	 * deepest over the trunk and thinner at the ends (a zombie a body-long streak, a spider a broad patch, a ghast or giant
+	 * a long mound). Each cell is an ash pile of 1-8 layers on solid ground, over air or a plant it covers. Lava burns
+	 * leave nothing: it falls into the lava. Ash in the open blows away in the wind unless it's gathered
+	 * ({@link AshPileBlock}).
 	 */
 	private void leaveAshPile(ServerLevel level) {
 		if (isInLava()) {
-			return;
-		}
-		BlockPos at = blockPosition();
-		if (!Loaded.made(level, at) || !level.getBlockState(at).isAir()) {
 			return;
 		}
 		EntityType<?> type = sourceType();
@@ -1773,23 +1825,47 @@ public class CorpseEntity extends Entity {
 		float height = type == null ? 1.8F : type.getDimensions().height();
 		boolean huge = width >= HUGE || height >= HUGE_LONG;
 		boolean big = width >= BIG_WIDTH || height >= BIG_HEIGHT;
-		int layers = huge ? 8 : big ? 6 : width < 0.5F && height < 0.9F ? 2 : 4;
-		BlockPos[] spots = {at, at.north(), at.east(), at.south(), at.west()};
-		int count = huge ? 5 : big ? 2 : 1;
-		int placed = 0;
-		for (BlockPos spot : spots) {
-			if (placed >= count) {
-				break;
+		int deepest = huge ? 8 : big ? 6 : width < 0.5F && height < 0.9F ? 2 : 4;
+		// lying down, its longest side runs along the ground the way it faced
+		int length = Mth.clamp(Math.round(Math.max(width, height)), 1, ASH_LONGEST);
+		int breadth = Mth.clamp(Math.round(Math.min(width, height)), 1, ASH_LONGEST);
+		float yaw = getYRot() * Mth.DEG_TO_RAD;
+		double ax = -Mth.sin(yaw), az = Mth.cos(yaw);
+		java.util.Set<BlockPos> done = new java.util.HashSet<>();
+		for (int s = 0; s < length; s++) {
+			// fullest at the middle of the body, thinner at the head and the feet
+			double along = s - (length - 1) / 2.0;
+			float f = length == 1 ? 1.0F : 1.0F - 0.5F * (float) Math.abs(along / ((length - 1) / 2.0));
+			for (int b = 0; b < breadth; b++) {
+				double across = b - (breadth - 1) / 2.0;
+				float g = breadth == 1 ? 1.0F : 1.0F - 0.3F * (float) Math.abs(across / ((breadth - 1) / 2.0));
+				BlockPos spot = BlockPos.containing(getX() + ax * along - az * across, getY() + 0.1, getZ() + az * along + ax * across);
+				if (done.add(spot)) {
+					ash(level, spot, Math.max(1, Math.round(deepest * f * g)));
+				}
 			}
-			if (!Loaded.made(level, spot) || !level.getBlockState(spot).isAir()) {
+		}
+	}
+
+	/** The longest a body's ash runs (blocks). */
+	private static final int ASH_LONGEST = 12;
+
+	/** One cell of a body's ash: on solid ground at {@code spot}, or a block lower if it lay on a step. */
+	private static void ash(ServerLevel level, BlockPos spot, int layers) {
+		for (BlockPos at : new BlockPos[] {spot, spot.below()}) {
+			if (!Loaded.made(level, at)) {
 				continue;
 			}
-			BlockPos below = spot.below();
+			net.minecraft.world.level.block.state.BlockState here = level.getBlockState(at);
+			if (!(here.isAir() || here.canBeReplaced() && here.getFluidState().isEmpty())) {
+				continue;
+			}
+			BlockPos below = at.below();
 			if (!level.getBlockState(below).isCollisionShapeFullBlock(level, below)) {
 				continue;
 			}
-			level.setBlockAndUpdate(spot, Corpses.ASH_PILE.defaultBlockState().setValue(AshPileBlock.LAYERS, layers));
-			placed++;
+			level.setBlockAndUpdate(at, Corpses.ASH_PILE.defaultBlockState().setValue(AshPileBlock.LAYERS, Mth.clamp(layers, 1, 8)));
+			return;
 		}
 	}
 
@@ -1808,7 +1884,10 @@ public class CorpseEntity extends Entity {
 		} else if (burns() && !isOnFire() && tickCount % FLAME_CHECK_TICKS == 0 && touchesFlame(level)) {
 			igniteForSeconds(8.0F);
 		}
-		if (kind == CorpseKind.ZOMBIE && carrier() == null && tickCount % 20 == 0 && inSunlight(level)) {
+		if (patGrace > 0) {
+			patGrace--;
+		}
+		if (kind == CorpseKind.ZOMBIE && carrier() == null && tickCount % 20 == 0 && patGrace <= 0 && inSunlight(level)) {
 			// left out in the daylight, the undead burn as they would alive
 			igniteForSeconds(8.0F);
 		}
@@ -1863,6 +1942,13 @@ public class CorpseEntity extends Entity {
 					spawnAtLocation(level, new ItemStack(Items.BONE, bones), 0.2F);
 				}
 				leaveAshPile(level);
+				// a player's things don't burn with them: left lying in the ash for good (as when the body's eaten)
+				for (ItemStack stack : takeHotbar()) {
+					net.minecraft.world.entity.item.ItemEntity dropped = spawnAtLocation(level, stack, 0.3F);
+					if (dropped != null) {
+						dropped.setUnlimitedLifetime();
+					}
+				}
 				discard();
 				return;
 			}
@@ -1972,6 +2058,18 @@ public class CorpseEntity extends Entity {
 		if (hand != InteractionHand.MAIN_HAND) {
 			return InteractionResult.PASS;
 		}
+		if (isOnFire() && burns()) {
+			// Andy: "a right click should put the fire out": patted out, and given a while before the sun can catch it
+			// again, time enough to drag it into the shade. Put out like a dunked one: its burn starts over if it catches
+			if (level() instanceof ServerLevel level) {
+				clearFire();
+				burnTicks = 0;
+				patGrace = PAT_GRACE;
+				play(level, SoundEvents.FIRE_EXTINGUISH, 0.6F);
+				level.sendParticles(ParticleTypes.SMOKE, getX(), getY() + 0.3, getZ(), 12, 0.3, 0.1, 0.3, 0.02);
+			}
+			return InteractionResult.SUCCESS;
+		}
 		if (grabCooldown > 0) {
 			// just let go of (thrown, dropped, tipped out): not caught again in the same click
 			return InteractionResult.PASS;
@@ -1999,6 +2097,11 @@ public class CorpseEntity extends Entity {
 		// the loot, worked out once the press is let go (tickPress). Sneak + a hold still lifts it into your arms (below)
 		if (held.isEmpty() && !player.isShiftKeyDown() && hook() == null) {
 			return press(level, player);
+		}
+		// a person's body on a meat hook: a blade bleeds it into the grate under it (Hanging#bleedPerson)
+		InteractionResult bled = Hanging.bleedPerson(this, level, player, held);
+		if (bled != null) {
+			return bled;
 		}
 		// a fish is looted in one go, whatever's in your hand: out comes its loot and the body's gone
 		if (isFish()) {
@@ -2044,7 +2147,7 @@ public class CorpseEntity extends Entity {
 				return interactAnimal(level, player, held);
 			}
 			case PLAYER -> {
-				PlayerCorpses.restore(this, player, hotbar, selected);
+				lootPlayer(level, player);
 				return InteractionResult.SUCCESS_SERVER;
 			}
 			case SKELETON -> {
@@ -2133,7 +2236,7 @@ public class CorpseEntity extends Entity {
 					player.sendOverlayMessage(Component.translatable(tooBigToLift() ? "message.jaymoskitchen.corpse.too_big" : "message.jaymoskitchen.corpse.lift_hint"));
 				}
 			}
-			case PLAYER -> PlayerCorpses.restore(this, player, hotbar, selected);
+			case PLAYER -> lootPlayer(level, player);
 			case SKELETON -> {
 				if (!openLoot(level, player)) {
 					pullBone(level);
@@ -2161,7 +2264,7 @@ public class CorpseEntity extends Entity {
 			return false;
 		}
 		loot.removeIf(ItemStack::isEmpty);
-		if (looting == null && loot.isEmpty() && !hasGear()) {
+		if (looting == null && loot.isEmpty() && !hasGear() && hotbar.stream().allMatch(ItemStack::isEmpty)) {
 			searched = true;
 			return false;
 		}
@@ -2188,6 +2291,17 @@ public class CorpseEntity extends Entity {
 		jolt(false);
 		play(level, SoundEvents.BUNDLE_DROP_CONTENTS, 1.0F);
 		return true;
+	}
+
+	/**
+	 * Andy: "when players are killed, they should keep the loot on their corpse like npcs do, now accessed with a right
+	 * click". A player's body opens the loot screen on everything they carried, for anyone; with nothing left on it, a
+	 * reminder that it gets up unless it's burned.
+	 */
+	private void lootPlayer(ServerLevel level, Player player) {
+		if (!openLoot(level, player)) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.corpse.burn_zombie"));
+		}
 	}
 
 	/** Whether it still wears or holds anything. */
@@ -2267,7 +2381,10 @@ public class CorpseEntity extends Entity {
 			jolt(false);
 			play(level, gear ? SoundEvents.ARMOR_EQUIP_GENERIC.value() : SoundEvents.BUNDLE_REMOVE_ONE, 0.9F);
 		}
-		robbed(player);
+		if (!isPlayerCorpse()) {
+			// (taking a player's things off their body isn't robbing the dead, as it never was)
+			robbed(player);
+		}
 	}
 
 	/** The last one looking has closed the loot screen: what's left stays on it. */
@@ -2883,6 +3000,47 @@ public class CorpseEntity extends Entity {
 	}
 
 	/**
+	 * Andy (2026-11-23): "all scavengers and body eaters should go limb at a time, giving players more time to recover
+	 * their party members". The part a scavenger tears off next, as a {@code PART_} bit: an arm or a leg it still has (any),
+	 * then the head; 0 once only the trunk is left, or for a body not built with limbs (a fish, a critter, a slime, a
+	 * snake), which is torn open whole.
+	 */
+	int nextPart() {
+		RagdollRig.Shape shape = rig().shape;
+		if (isFish() || shape != RagdollRig.Shape.HUMANOID && shape != RagdollRig.Shape.QUADRUPED) {
+			return 0;
+		}
+		int left = LIMBS & ~missing();
+		if (left == 0) {
+			left = PART_HEAD & ~missing();
+		}
+		if (left == 0) {
+			return 0;
+		}
+		int part = Integer.lowestOneBit(left);
+		for (int skip = random.nextInt(Integer.bitCount(left)); skip > 0; skip--) {
+			left &= ~part;
+			part = Integer.lowestOneBit(left);
+		}
+		return part;
+	}
+
+	/**
+	 * {@code part} torn off and eaten by a scavenger (no severed part is left lying: it's in the eater's mouth): no longer
+	 * drawn on the body, an arm lets go of what it held, and the bites start over for the next part.
+	 */
+	/** Bites taken toward the part being torn at now. */
+	int biteCount() {
+		return bites;
+	}
+
+	void eatPart(ServerLevel level, int part) {
+		setMissing(missing() | part);
+		dropHeld(level, part, partPosition(part));
+		bites = 0;
+	}
+
+	/**
 	 * (0.4.35) Torn open at last: what it carried spills on the ground (the meat for the scavengers, leather and the
 	 * like for whoever comes by), with a bone or two, what it wore and held, and the body is gone. Returns the dropped meat.
 	 */
@@ -2933,6 +3091,11 @@ public class CorpseEntity extends Entity {
 		setCarrier(carrier);
 		this.entityData.set(TUMBLING, false);
 		grabCooldown = 0;
+	}
+
+	/** Whether it lies on a butcher block (worked there a step at a time: {@link Hanging#use}). */
+	boolean onTable() {
+		return onButcherBlock();
 	}
 
 	private boolean onButcherBlock() {
@@ -3025,7 +3188,14 @@ public class CorpseEntity extends Entity {
 	List<ItemStack> takeLoot() {
 		List<ItemStack> taken = new ArrayList<>(loot);
 		loot.clear();
+		// a player's body blown apart: everything they carried goes with the rest
+		taken.addAll(takeHotbar());
 		return taken;
+	}
+
+	/** A player's body: what it carries, slot for slot as their inventory had it (the loot screen reads and takes from this list itself). */
+	List<ItemStack> inventory() {
+		return hotbar;
 	}
 
 	private void dropLoot(ServerLevel level) {
@@ -3536,7 +3706,7 @@ public class CorpseEntity extends Entity {
 		this.entityData.set(CARRIER, carrier == null ? -1 : carrier.getId());
 		if (carrier != null) {
 			// (0.5.51) taken down off a meat hook
-			this.hook = null;
+			setHook(null);
 			this.ragdoll = null;
 			// (0.5.23) pulled down off the wall
 			this.entityData.set(PINNED, -1);
@@ -4059,6 +4229,47 @@ public class CorpseEntity extends Entity {
 	 * An arm come off lets go of what its hand held (the main hand is the right, unless the mob was left-handed): it falls
 	 * loose at the hand, worn as gear taken off a body is, rather than hanging in the air where the hand was.
 	 */
+	/**
+	 * Andy: "as long as the torso is there, the loot should be as well, the leggings and arm harness armor should be
+	 * ripped off as limbs go". What a player's body wore on a part it no longer has comes off and falls there: the helmet
+	 * with the head, the boots with a leg and the leggings with both (as Jaymo's Powers takes them off the living), and
+	 * each handed-over piece (Kingdoms' arm, leg and head harness, a ring or bracelet...) with the part it's worn on. The
+	 * rest stays on the torso.
+	 */
+	void tearOff(ServerLevel level) {
+		if (!isPlayerCorpse()) {
+			return;
+		}
+		int missing = missing();
+		if ((missing & PART_HEAD) != 0) {
+			tearOff(level, 39, PART_HEAD);
+		}
+		int legs = missing & (PART_RIGHT_LEG | PART_LEFT_LEG);
+		if (legs != 0) {
+			tearOff(level, 36, Integer.lowestOneBit(legs));
+		}
+		if (legs == (PART_RIGHT_LEG | PART_LEFT_LEG)) {
+			tearOff(level, 37, PART_LEFT_LEG);
+		}
+		for (int i = 0; i < EXTRA_SLOTS; i++) {
+			int lost = extraParts[i] & missing;
+			if (lost != 0) {
+				tearOff(level, INVENTORY_SLOTS + i, Integer.lowestOneBit(lost));
+			}
+		}
+	}
+
+	/** The thing in a player's body's {@code slot} ({@link #hotbar}) falls where {@code part} was. */
+	private void tearOff(ServerLevel level, int slot, int part) {
+		ItemStack stack = hotbar.get(slot);
+		if (stack.isEmpty()) {
+			return;
+		}
+		hotbar.set(slot, ItemStack.EMPTY);
+		Vec3 at = partPosition(part);
+		level.addFreshEntity(new net.minecraft.world.entity.item.ItemEntity(level, at.x, at.y + 0.1, at.z, stack));
+	}
+
 	private void dropHeld(ServerLevel level, int part, Vec3 at) {
 		if (part != PART_RIGHT_ARM && part != PART_LEFT_ARM) {
 			return;
@@ -4195,6 +4406,10 @@ public class CorpseEntity extends Entity {
 			this.hotbar.set(i, i < savedHotbar.size() ? savedHotbar.get(i) : ItemStack.EMPTY);
 		}
 		this.selected = input.getIntOr("Selected", 0);
+		int[] savedParts = input.getIntArray("ExtraParts").orElse(new int[0]);
+		for (int i = 0; i < EXTRA_SLOTS; i++) {
+			this.extraParts[i] = i < savedParts.length ? savedParts[i] : 0;
+		}
 		this.killer = input.getStringOr("Killer", "");
 		this.killedByPlayer = input.getBooleanOr("KilledByPlayer", false);
 		this.bites = input.getIntOr("Bites", 0);
@@ -4227,7 +4442,7 @@ public class CorpseEntity extends Entity {
 			setNoGravity(true);
 		}
 		this.entityData.set(PINNED, input.getIntOr("Pinned", -1));
-		this.hook = input.getLong("Hook").map(BlockPos::of).orElse(null);
+		setHook(input.getLong("Hook").map(BlockPos::of).orElse(null));
 		this.butcherStage = input.getIntOr("ButcherStage", 0);
 		this.bleedTotal = input.getIntOr("BleedTotal", 0);
 		this.bleedLeft = input.getIntOr("BleedLeft", 0);
@@ -4265,6 +4480,7 @@ public class CorpseEntity extends Entity {
 		output.putString("LookTags", this.entityData.get(LOOK_TAGS));
 		output.store("Hotbar", ItemStack.OPTIONAL_CODEC.listOf(), hotbar);
 		output.putInt("Selected", selected);
+		output.putIntArray("ExtraParts", extraParts);
 		output.putString("Killer", killer);
 		output.putBoolean("KilledByPlayer", killedByPlayer);
 		if (!death.isEmpty()) {

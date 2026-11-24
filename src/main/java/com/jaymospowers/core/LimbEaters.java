@@ -45,13 +45,20 @@ import org.jspecify.annotations.Nullable;
  * you now need a new one." The downed (players too, once they're down and nobody's standing over them) are eaten alive
  * ({@link TearGoal}): an arm or a leg at a time, worried at until it comes off ({@link Dismember#sever}, lost as any
  * severed part is, to grow back or be replaced), then eaten. With no limbs left it's the body, bite by bite, until
- * they die. A player on their feet within {@link #GUARD} blocks keeps them off; carried, they're safe.
+ * they die. A player (or a grown villager) on their feet within {@link #GUARD} blocks keeps them off; carried, they're
+ * safe. A full eater leaves the downed be, and the small hunters ({@link #SMALL}) never eat the living.
  */
 public final class LimbEaters {
 	/** Animals that eat severed parts (data/jaymospowers/tags/entity_type/limb_eaters.json). */
 	public static final TagKey<EntityType<?>> EATERS = TagKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("limb_eaters"));
 	/** Birds that carry parts off to eat (data/jaymospowers/tags/entity_type/limb_carriers.json). */
 	public static final TagKey<EntityType<?>> CARRIERS = TagKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("limb_carriers"));
+	/**
+	 * Hunters too small to take on a person (Andy, 2026-11-23, finished by an ocelot: "it shouldnt have attacked if it
+	 * wasnt hungry"): ocelots, cats, foxes, lynxes. They eat the dead and what's torn off, never the living
+	 * (data/jaymospowers/tags/entity_type/small_hunters.json).
+	 */
+	public static final TagKey<EntityType<?>> SMALL = TagKey.create(Registries.ENTITY_TYPE, JaymosPowers.id("small_hunters"));
 	/** How far a carrion bird spots a part (sideways, and down from the sky); how far off it takes it (blocks, at least and at most). */
 	static final double SPOT = 32.0, SPOT_DOWN = 32.0, CARRY_MIN = 20.0, CARRY_MAX = 40.0;
 	/** It keeps this far from anyone when it chooses where to eat; it gives up flying there after this long (ticks). */
@@ -156,6 +163,27 @@ public final class LimbEaters {
 			|| mob instanceof TamableAnimal tame && tame.isTame();
 	}
 
+	/**
+	 * Whether {@code mob} burns in the sun (a zombie) and {@code at} lies open to it while the sun burns: it won't feed
+	 * there, so by day it goes for shade (SeekShelterGoal) instead of crowding the dead in the sun (Andy, 2026-11-22: "all
+	 * these zombies should have ran for cover instead of crowding my already dead corpse").
+	 */
+	static boolean sunlit(Mob mob, @Nullable Vec3 at) {
+		return mob.is(net.minecraft.tags.EntityTypeTags.BURN_IN_DAYLIGHT) && mob.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD).isEmpty()
+			&& !mob.isInWaterOrRain()
+			&& mob.level().environmentAttributes().getValue(net.minecraft.world.attribute.EnvironmentAttributes.MONSTERS_BURN, at != null ? at : mob.position())
+			// the test the sun burns by (SunBurnMixin): leaves don't shade
+			&& (at != null ? com.jaymospowers.core.sun.SunExposure.exposedToSun(mob.level(), at) : com.jaymospowers.core.sun.SunExposure.bodyExposed(mob.level(), mob));
+	}
+
+	/** Whether {@code mob}, feeding, stands in the burning sun: asked every {@link #SUN_CHECK_EVERY} ticks (the check casts rays). */
+	private static boolean sunCheck(Mob mob) {
+		return (mob.tickCount + mob.getId()) % SUN_CHECK_EVERY == 0 && sunlit(mob, null);
+	}
+
+	/** How often a feeding sun-burner checks whether it stands in the sun (ticks). */
+	private static final int SUN_CHECK_EVERY = 10;
+
 	/** Goes to a severed part and eats it. */
 	private static final class EatLimbGoal extends Goal {
 		private final Mob mob;
@@ -169,13 +197,13 @@ public final class LimbEaters {
 
 		@Override
 		public boolean canUse() {
-			if (busy(mob) || full(mob) || mob.getRandom().nextInt(LOOK_ODDS) != 0) {
+			if (busy(mob) || full(mob) || mob.getRandom().nextInt(LOOK_ODDS) != 0 || sunlit(mob, null)) {
 				return false;
 			}
 			part = null;
 			double best = Double.MAX_VALUE;
 			for (SeveredPart near : mob.level().getEntitiesOfClass(SeveredPart.class, mob.getBoundingBox().inflate(SMELL, SMELL_UP, SMELL),
-				SeveredPart::edible)) {
+				p -> p.edible() && !sunlit(mob, p.position().add(0.0, 0.3, 0.0)))) {
 				double distance = near.distanceToSqr(mob);
 				if (distance < best) {
 					best = distance;
@@ -196,7 +224,7 @@ public final class LimbEaters {
 
 		@Override
 		public boolean canContinueToUse() {
-			return part != null && part.edible() && giveUp > 0 && !busy(mob);
+			return part != null && part.edible() && giveUp > 0 && !busy(mob) && !sunCheck(mob);
 		}
 
 		@Override
@@ -283,6 +311,7 @@ public final class LimbEaters {
 	/** A meat-eating animal that eats the downed alive: not a monster, a carrion bird, a pet, the young or the leashed. */
 	public static boolean eatsAlive(Mob mob) {
 		return mob instanceof Animal && !(mob instanceof net.minecraft.world.entity.monster.Enemy) && !mob.getType().builtInRegistryHolder().is(CARRIERS)
+			&& !mob.getType().builtInRegistryHolder().is(SMALL)
 			&& eats(mob) && !mob.isBaby() && !mob.isLeashed() && !mob.isNoAi() && !(mob instanceof TamableAnimal tame && tame.isTame());
 	}
 
@@ -355,7 +384,9 @@ public final class LimbEaters {
 				return false;
 			}
 		}
-		return true;
+		// (2026-11-23) a grown villager on their feet keeps them off as a player does
+		return body.level().getEntitiesOfClass(net.minecraft.world.entity.npc.villager.AbstractVillager.class, body.getBoundingBox().inflate(GUARD),
+			v -> v != body && v.isAlive() && !v.isBaby() && !com.jaymospowers.core.wounds.Downed.isDowned(v)).isEmpty();
 	}
 
 	/** The limbs {@code body} still has that can be torn off (none for what can't lose parts). */
@@ -388,14 +419,19 @@ public final class LimbEaters {
 
 		@Override
 		public boolean canUse() {
+			// (2026-11-23) a full one leaves the downed be (it only finishes one it was feeding on: MobExecutions), and a
+			// small hunter never goes for a person
+			if (full(mob) || mob.getType().builtInRegistryHolder().is(SMALL)) {
+				return false;
+			}
 			if (busy(mob) && !(mob.getTarget() != null && prey(mob.getTarget())) || circles && !circled(mob)
-				|| !mob.getPassengers().isEmpty() || mob.getRandom().nextInt(LOOK_ODDS) != 0) {
+				|| !mob.getPassengers().isEmpty() || mob.getRandom().nextInt(LOOK_ODDS) != 0 || sunlit(mob, null)) {
 				return false;
 			}
 			body = null;
 			double best = Double.MAX_VALUE;
 			for (net.minecraft.world.entity.LivingEntity near : mob.level().getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,
-				mob.getBoundingBox().inflate(SMELL, SMELL_UP, SMELL), e -> e != mob && prey(e))) {
+				mob.getBoundingBox().inflate(SMELL, SMELL_UP, SMELL), e -> e != mob && prey(e) && !sunlit(mob, e.position().add(0.0, 0.5, 0.0)))) {
 				double distance = near.distanceToSqr(mob);
 				if (distance < best) {
 					best = distance;
@@ -418,7 +454,7 @@ public final class LimbEaters {
 
 		@Override
 		public boolean canContinueToUse() {
-			return body != null && prey(body) && giveUp > 0 && mob.getPassengers().isEmpty();
+			return body != null && prey(body) && giveUp > 0 && mob.getPassengers().isEmpty() && !sunCheck(mob);
 		}
 
 		@Override
