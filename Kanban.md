@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 17:12). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 17:13). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -81,7 +81,6 @@ kanban-plugin: board
 - [ ] [[Inbox/class-trees-plan|class-trees-plan]] · for 💻 Odysseus · blocked
 - [ ] [[Inbox/wither-model|wither-model]] · 🍇 Bacchus · blocked
 - [ ] [[Inbox/reference-mods-picklist-2026-11-24|reference-mods-picklist-2026-11-24]] · cloud thread Build Reference Mods pick list · #none · sent
-- [ ] [[Inbox/tensura-neo-otherworld-picklist|tensura-neo-otherworld-picklist]] · cloud thread Build Reference Mods pick list · #none · sent
 
 
 ## Done
