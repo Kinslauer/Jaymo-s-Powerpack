@@ -210,7 +210,7 @@ public final class BioBuilt {
 					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.8F, 0.8F);
 					player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.bio.regrown"));
 				}
-				LivingEntity foe = HeritageHold.step(level, player, BioBuilt::helpless, ABSORB_REACH, ABSORB_TICKS, NODE,
+				LivingEntity foe = HeritageHold.step(level, player, BioBuilt::helpless, ABSORB_REACH, TreeLocks.wait(player, ABSORB_TICKS), NODE,
 					SoundEvents.AMETHYST_BLOCK_RESONATE, "message.jaymoskingdoms.bio.absorbing", ABSORB_TOUCH);
 				if (foe != null) {
 					absorb(level, player, foe);
@@ -256,10 +256,6 @@ public final class BioBuilt {
 	 * a downed or crippled foe close by, it starts taking it in ({@link HeritageHold}); else, in the third form, it buds.
 	 */
 	static void press(ServerPlayer player) {
-		if (HeritageHold.channel(player) == null && !TreeLocks.check(player, TreeLocks.Lock.BLOOD)) {
-			// (Andy's skill-tree locks) absorbing and budding are learned: Blood Awakening (letting go never is)
-			return;
-		}
 		if (!HeritageHold.press(player, e -> absorbable(player, e), ABSORB_REACH, "message.jaymoskingdoms.bio.absorbing")) {
 			bud(player);
 		}
@@ -367,7 +363,7 @@ public final class BioBuilt {
 			want = Math.min(want, charges);
 			player.setAttached(CHARGES, charges - want);
 		}
-		BUD_READY.put(player.getUUID(), now + BUD_COOLDOWN);
+		BUD_READY.put(player.getUUID(), now + TreeLocks.wait(player, BUD_COOLDOWN));
 		player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		for (int i = 0; i < want; i++) {
 			Vec3 at = Sorcery.groundNear(level, player);

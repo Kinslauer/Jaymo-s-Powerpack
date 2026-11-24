@@ -56,6 +56,12 @@ public final class HeritageHold {
 	/** The foe's entity id while a player is absorbing it, synced to everyone (the reaching hand). */
 	public static final AttachmentType<Integer> ABSORBING = AttachmentRegistry.create(JaymosKingdoms.id("heritage_absorbing"),
 		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+	/**
+	 * How many ticks this taking-in runs, synced with {@link #ABSORBING} so everyone's engulfing keeps pace (Blood Awakening
+	 * halves it, {@link TreeLocks#wait}); without it, the heritage's own.
+	 */
+	public static final AttachmentType<Integer> ABSORB_NEED = AttachmentRegistry.create(JaymosKingdoms.id("heritage_absorb_need"),
+		builder -> builder.syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
 	/** The foe shrinking away as it's taken in. */
 	private static final Identifier SHRINK_ID = JaymosKingdoms.id("heritage_absorb_shrink");
 
@@ -143,6 +149,9 @@ public final class HeritageHold {
 		if (player.hasAttached(ABSORBING)) {
 			player.removeAttached(ABSORBING);
 		}
+		if (player.hasAttached(ABSORB_NEED)) {
+			player.removeAttached(ABSORB_NEED);
+		}
 		if (channel == null) {
 			return;
 		}
@@ -175,6 +184,9 @@ public final class HeritageHold {
 			stop(player, "message.jaymoskingdoms.absorb_lost");
 			return null;
 		}
+		if (channel.ticks == 0) {
+			player.setAttached(ABSORB_NEED, need);
+		}
 		channel.ticks++;
 		double progress = Math.min(1.0, channel.ticks / (double)need);
 		// drawn in close, under the hand
@@ -202,6 +214,7 @@ public final class HeritageHold {
 		}
 		CHANNELS.remove(player.getUUID());
 		player.removeAttached(ABSORBING);
+		player.removeAttached(ABSORB_NEED);
 		return foe;
 	}
 

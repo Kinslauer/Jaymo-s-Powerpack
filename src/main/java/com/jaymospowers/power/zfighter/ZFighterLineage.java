@@ -162,6 +162,11 @@ public final class ZFighterLineage {
 	static final float REGEN = 1.0F;
 	/** How often a Verdant grows back one lost limb (30 s; a multiple of REGEN_EVERY). */
 	static final int REGROW_EVERY = 600;
+	/**
+	 * (Blood Awakening, Andy 2026-11-23) A Verdant who has learned it grows a lost limb back at once on the heritage key: at
+	 * most this often (ticks; 2 min), for this much food, and not while this hungry or hungrier.
+	 */
+	static final int REGROW_KEY_EVERY = 2400, REGROW_KEY_FOOD = 3;
 	/** A Verdant's open stumps spurt green blood this often (ticks) until the limb is back (Dismember#spurtStumps). */
 	static final int STUMP_SPURT_EVERY = 10;
 	/** A limb growing back: a fleshy crunch. */
@@ -468,6 +473,43 @@ public final class ZFighterLineage {
 			player.level().playSound(null, player.getX(), player.getY(), player.getZ(), REGROW_SOUND, SoundSource.PLAYERS, 1.0F,
 				0.9F + player.getRandom().nextFloat() * 0.2F);
 		}
+	}
+
+	/** When each Verdant last grew a limb back on the key (game time). */
+	private static final java.util.Map<java.util.UUID, Long> REGROWN_BY_KEY = new java.util.HashMap<>();
+
+	/**
+	 * (Blood Awakening; Jaymo's Kingdoms calls this by name from the heritage key, once the Verdant has learned it) one lost
+	 * limb grows back now, with the passive regrowth's fleshy crunch, for {@link #REGROW_KEY_FOOD} food every
+	 * {@link #REGROW_KEY_EVERY} ticks. False (the key does what it did) when nothing is lost or they aren't a Verdant.
+	 */
+	public static boolean regrowNow(ServerPlayer player) {
+		if (of(player) != VERDANT || !player.isAlive() || player.isSpectator() || com.jaymospowers.core.wounds.Mortality.dead(player)
+			|| com.jaymospowers.core.Dismember.missing(player) == 0) {
+			return false;
+		}
+		long now = player.level().getGameTime();
+		Long last = REGROWN_BY_KEY.get(player.getUUID());
+		boolean creative = player.getAbilities().instabuild;
+		if (last != null && now - last < REGROW_KEY_EVERY && now >= last && !creative) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.verdant.regrow_wait", (REGROW_KEY_EVERY - (now - last) + 19) / 20)
+				.withStyle(ChatFormatting.GRAY));
+			return true;
+		}
+		if (!creative && player.getFoodData().getFoodLevel() <= ZFighterPower.HUNGRY_FOOD) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.verdant.regrow_hungry").withStyle(ChatFormatting.GRAY));
+			return true;
+		}
+		if (!com.jaymospowers.core.Dismember.regrow(player, false)) {
+			return false;
+		}
+		REGROWN_BY_KEY.put(player.getUUID(), now);
+		if (!creative) {
+			player.getFoodData().setFoodLevel(Math.max(0, player.getFoodData().getFoodLevel() - REGROW_KEY_FOOD));
+		}
+		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), REGROW_SOUND, SoundSource.PLAYERS, 1.0F,
+			0.9F + player.getRandom().nextFloat() * 0.2F);
+		return true;
 	}
 
 	/** Gives {@code player} the lineage of their blood, if they have none yet. */
