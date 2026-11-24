@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 20:42). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 20:43). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -24,7 +24,6 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
-- [ ] #2101 Ruin Keepers tell their city's story (Kingdoms, 2026-11-24)
 - [ ] #2098 Illagers speak the Cave Tablets' tongue (Kingdoms, 2026-11-24)
 - [ ] #2097 Where things came from, stolen goods, heirlooms, collectors' prices and a strongbox (Reference Mods patch 15) (Kingdoms, 2026-11-24)
 - [ ] #2095 sit from the knee smoothly, sit still to ride an earthboard (Powers, 2026-11-24)
@@ -41,7 +40,6 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2084 Red (unparryable) mob blows rarer and slower (Powers, Kingdoms, 2026-11-24)
 - [ ] #2083 Felled by a leg blow: ragdoll, prone, roll to get up (Powers, 2026-11-24)
 - [ ] #2082 Realm banks: deposits, interest, loans and letters of credit at the counting house (Kingdoms, 2026-11-24)
-- [ ] #2080 the big suit's new head (Powers, 2026-11-24)
 - [ ] #2079 Downed: a blow knocks you out, red blows kill, no tossing, fire kills after 6 s (Powers, 2026-11-24)
 - [ ] #2078 gear talk - bauble themes, knights and colours, two-tag lines, changes and gossip (Kingdoms, 2026-11-24)
 - [ ] #2077 gear talk - folk remark on masks, hoods and the symbiote's suit (Kingdoms, 2026-11-24)
@@ -84,11 +82,13 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2036 Talking with an illager looks and works like MCA's villager screen (Kingdoms, 2026-11-23)
 - [ ] #2035 Sneak-clicking a cooking block opens it instead of lifting it (Powers, 2026-11-23)
 - [ ] #2034 A queen is no longer found in chains under her own market stall (Kingdoms, 2026-11-23)
-- …and 493 older ones.
+- [ ] #2033 Humanoids see in a cone and hear at their sides; busy mobs notice less (Kingdoms, Kitchen, 2026-11-23)
+- [ ] #2032 A dead player's baubles and web shooters stay on their body (Powers, Kingdoms, Kitchen, 2026-11-23)
+- …and 491 older ones.
 
 ## Health
 
-13 problems in the notes: [[Health]].
+11 problems in the notes: [[Health]].
 
 ## Last week
 
