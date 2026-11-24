@@ -1,11 +1,11 @@
 package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.client.ui.FlatButton;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -15,7 +15,7 @@ import net.minecraft.util.Mth;
 /**
  * The life aim's page on a rough start (Andy: "your starting journal entry should resemble a scrap of paper"): a single
  * torn scrap of parchment, burnt dark at its ragged edges, with who you are under a heading and then the aim. The town
- * starts keep Minecraft's book page ({@link AimPageClient}). Esc or a click puts it away.
+ * starts keep Minecraft's book page ({@link AimPageClient}). Done or Esc puts it away.
  */
 public class ScrapScreen extends Screen {
 	static final Identifier SCRAP = JaymosKingdoms.id("textures/gui/journal/scrap.png");
@@ -23,6 +23,8 @@ public class ScrapScreen extends Screen {
 	static final int SCRAP_W = 176, SCRAP_H = 208, TEXT_X = 26, TEXT_Y = 30, TEXT_W = 124, LINE = 10;
 	/** Room left round the scrap when it's scaled up to fit the window. */
 	static final int MARGIN = 16;
+	/** The Done button under the scrap (screen pixels). */
+	static final int BUTTON_W = 80, BUTTON_H = 20, BUTTON_GAP = 4;
 	/** The gap between who you are and the aim, and the faint rule drawn in it (texture pixels). */
 	static final int GAP = 8, RULE_W = 48;
 	/** Ink colours: brown-black writing, a faded rule. */
@@ -41,14 +43,14 @@ public class ScrapScreen extends Screen {
 
 	/** Whole-number scale that fits the scrap in the window, at least 1. */
 	private int scale() {
-		return Math.max(1, Math.min((this.width - MARGIN) / SCRAP_W, (this.height - MARGIN) / SCRAP_H));
+		return Math.max(1, Math.min((this.width - MARGIN) / SCRAP_W, (this.height - MARGIN - BUTTON_H - BUTTON_GAP) / SCRAP_H));
 	}
 
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		int k = scale();
 		graphics.pose().pushMatrix();
-		graphics.pose().translate((this.width - SCRAP_W * k) / 2.0F, (this.height - SCRAP_H * k) / 2.0F);
+		graphics.pose().translate((this.width - SCRAP_W * k) / 2.0F, top());
 		graphics.pose().scale(k, k);
 		graphics.blit(RenderPipelines.GUI_TEXTURED, SCRAP, 0, 0, 0.0F, 0.0F, SCRAP_W, SCRAP_H, SCRAP_W, SCRAP_H);
 		int y = TEXT_Y;
@@ -72,10 +74,16 @@ public class ScrapScreen extends Screen {
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 
+	/** The scrap's top edge on screen: the scrap and the button under it, centred together. */
+	private float top() {
+		return (this.height - SCRAP_H * scale() - BUTTON_GAP - BUTTON_H) / 2.0F;
+	}
+
 	@Override
-	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-		onClose();
-		return true;
+	protected void init() {
+		int y = (int) top() + SCRAP_H * scale() + BUTTON_GAP;
+		addRenderableWidget(FlatButton.builder(Component.translatable("gui.done"), b -> onClose())
+			.bounds((this.width - BUTTON_W) / 2, y, BUTTON_W, BUTTON_H).build());
 	}
 
 	@Override
