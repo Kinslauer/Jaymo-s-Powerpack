@@ -52,6 +52,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// banks: accounts, loans and letters of credit at a realm's counting house (Banks)
 		LetterOfCredit.register();
 		Banks.register();
+		PlacementReasons.register();
 		McaCompat.register();
 		// offline accounts sign in (EasyAuth, server only) before their character creation starts
 		SignIn.register();

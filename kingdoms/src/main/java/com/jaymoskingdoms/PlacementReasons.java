@@ -32,6 +32,11 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Watchtowers</b> ({@code towers_on_borders}: fire watches and lookouts): on a realm's edge, a village between
  * {@link #TOWER_CLEAR} and {@link #TOWER_NEAR} chunks off (about 100 to 400 blocks): far enough out to watch its
  * borders, near enough to be its own.</li>
+ * <li><b>Lone homesteads</b> ({@code homesteads_by_towns}: Structory's outcast villager's horse barn, Homesteads' and
+ * Moog's lone houses): a town they trade with within {@link #HOMESTEAD_NEAR} chunks (about 500 blocks, a day's ride).</li>
+ * <li><b>Old cities</b> ({@code old_cities}: our old age's ruins, the consul's city and the rest): never on top of
+ * anything lived in ({@code lived_in}: a village, a home, a farm, a stable, a mine), none within {@link #OLD_CLEAR}
+ * chunks. Andy, 2026-11-24, on the Deck: the Pillared ruins had come up through an outcast villager's barn.</li>
  * <li><b>Ruins</b> ({@code ruins_with_heirs}: castle ruins, ruined towns, remnants): where an old realm stood, so either a
  * living village (its heir) within {@link #RUIN_NEAR} chunks (about 300 blocks), or alone in land at least
  * {@link #RUIN_HARSH} steps harsh ({@link HarshLands}), where the cold or the heat drove its people out.</li>
@@ -52,12 +57,15 @@ public final class PlacementReasons {
 	static final int STABLE_NEAR = 19;
 	static final int TOWER_NEAR = 25, TOWER_CLEAR = 6;
 	static final int RUIN_NEAR = 19;
+	static final int HOMESTEAD_NEAR = 32;
+	static final int OLD_CLEAR = 4;
 	/** Land this harsh explains a ruin with no heir. */
 	static final int RUIN_HARSH = 2;
 
 	/**
 	 * A structure in {@code what} generates only with a {@code near} neighbour within {@code within} chunks and none
 	 * within {@code clear}, or where the land is at least {@code harsh} steps harsh (0: never enough on its own).
+	 * {@code within} 0: no neighbour is needed, only none within {@code clear}.
 	 */
 	public record Rule(TagKey<Structure> what, TagKey<Structure> near, int within, int clear, int harsh) {
 	}
@@ -67,9 +75,37 @@ public final class PlacementReasons {
 		new Rule(tag("mines_by_buyers"), SETTLEMENTS, MINE_NEAR, MINE_CLEAR, 0),
 		new Rule(tag("stables_by_towns"), SETTLEMENTS, STABLE_NEAR, 0, 0),
 		new Rule(tag("towers_on_borders"), SETTLEMENTS, TOWER_NEAR, TOWER_CLEAR, 0),
-		new Rule(tag("ruins_with_heirs"), SETTLEMENTS, RUIN_NEAR, 0, RUIN_HARSH));
+		new Rule(tag("ruins_with_heirs"), SETTLEMENTS, RUIN_NEAR, 0, RUIN_HARSH),
+		new Rule(tag("homesteads_by_towns"), SETTLEMENTS, HOMESTEAD_NEAR, 0, 0),
+		new Rule(tag("old_cities"), tag("lived_in"), 0, OLD_CLEAR, 0));
+
+	/** Given a part to play by our own code once they stand (Grim Kingdoms' holds and camps), so not reported. */
+	public static final TagKey<Structure> OWN_REASON = tag("own_reason");
 
 	private PlacementReasons() {
+	}
+
+	static void register() {
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTED.register(PlacementReasons::report);
+	}
+
+	/**
+	 * At start-up, every structure in the game with no reason to be where it is, by mod, in the log: no rule here, not
+	 * lived in itself, and not given a part of its own ({@code own_reason}: Grim Kingdoms' holds and camps, which {@link GrimSites} makes fiefs and barbarian camps; or ours). The list to give roles next.
+	 */
+	private static void report(net.minecraft.server.MinecraftServer server) {
+		java.util.Map<String, List<String>> none = new java.util.TreeMap<>();
+		TagKey<Structure> livedIn = tag("lived_in");
+		for (Holder.Reference<Structure> s : server.registryAccess().lookupOrThrow(Registries.STRUCTURE).listElements().toList()) {
+			String mod = s.key().identifier().getNamespace();
+			if (mod.equals(JaymosKingdoms.MOD_ID) || rule(s) != null || s.is(livedIn) || s.is(OWN_REASON)) {
+				continue;
+			}
+			none.computeIfAbsent(mod, k -> new ArrayList<>()).add(s.key().identifier().getPath());
+		}
+		int total = none.values().stream().mapToInt(List::size).sum();
+		JaymosKingdoms.LOGGER.info("Structures with no placement reason yet: {}", total);
+		none.forEach((mod, ids) -> JaymosKingdoms.LOGGER.info("  {} ({}): {}", mod, ids.size(), String.join(", ", ids)));
 	}
 
 	private static TagKey<Structure> tag(String name) {
@@ -90,6 +126,9 @@ public final class PlacementReasons {
 	public static boolean holds(Rule rule, Structure.GenerationContext context) {
 		if (rule.harsh() > 0 && harshSteps(context) >= rule.harsh()) {
 			return true;
+		}
+		if (rule.within() <= 0) {
+			return nearest(context, rule.near(), rule.clear()) >= rule.clear();
 		}
 		int nearest = nearest(context, rule.near(), rule.within());
 		return nearest <= rule.within() && nearest >= rule.clear();

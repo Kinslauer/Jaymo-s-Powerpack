@@ -1,0 +1,65 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "structory:outcast_villager_grassy",
+      "required": false
+    },
+    {
+      "id": "structory:outcast_villager_desert",
+      "required": false
+    },
+    {
+      "id": "homesteads:forest_home_steads",
+      "required": false
+    },
+    {
+      "id": "homesteads:flower_home_steads",
+      "required": false
+    },
+    {
+      "id": "homesteads:taiga_home_steads",
+      "required": false
+    },
+    {
+      "id": "homesteads:swamp_home_steads",
+      "required": false
+    },
+    {
+      "id": "mvs:house",
+      "required": false
+    },
+    {
+      "id": "mvs:tall_house",
+      "required": false
+    },
+    {
+      "id": "mvs:lil_house",
+      "required": false
+    },
+    {
+      "id": "mvs:azelea_house",
+      "required": false
+    },
+    {
+      "id": "mvs:desert_house",
+      "required": false
+    },
+    {
+      "id": "mvs:mud_brick_house_1",
+      "required": false
+    },
+    {
+      "id": "mvs:small_swamp_house",
+      "required": false
+    },
+    {
+      "id": "mvs:deepslate_house",
+      "required": false
+    },
+    {
+      "id": "mvs:diorite_and_deepslate_house",
+      "required": false
+    }
+  ]
+}
