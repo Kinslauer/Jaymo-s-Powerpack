@@ -45,6 +45,15 @@ final class WebSlender {
 		{1.5F, 7.4F, 2.0F, 0.5F, -0.65F, 0.12F, 0.45F, 0.75F},
 	};
 	/**
+	 * On the move (its favourite way about, with climbing; Andy), the tendrils from {@code SKITTER_FIRST} on (the low ones off
+	 * the small of the back) stop hanging and walk it: once the stride is {@code SKITTER_FROM} of a run, each plants its tip
+	 * on the ground {@code SKITTER_WIDE} out to its side and {@code SKITTER_BACK} behind, strides {@code SKITTER_STRIDE}
+	 * either way with the leg on its side ({@code SKITTER_LAG} of the cycle behind it), lifting {@code SKITTER_LIFT} as it
+	 * swings through (pixels). The ground is {@code GROUND_BELOW} under the body's pivot (its neck) standing.
+	 */
+	static final int SKITTER_FIRST = 6;
+	static final float SKITTER_FROM = 0.3F, SKITTER_WIDE = 5.0F, SKITTER_BACK = 7.0F, SKITTER_STRIDE = 6.0F, SKITTER_LAG = 0.9F, SKITTER_LIFT = 4.0F;
+	/**
 	 * More strands than tendrils: thin ones that do nothing but sway and curl, off the shoulders and the back between the
 	 * tendrils (drawn with them, WebSlender.Strands). Same columns as {@link #TENDRIL_REST}, the thickness and length of a
 	 * whole grown tendril's.
@@ -77,6 +86,8 @@ final class WebSlender {
 	/** How far its neck and hips sit above a player's, how far out its shoulders and hips sit (pixels; negative: in). */
 	static final float BODY_LIFT = -NECK, LEG_LIFT = 12.0F - HIPS;
 	static final float ARM_OUT = WebSlenderMesh.SHOULDER_X * SCALE - 5.0F, LEG_OUT = WebSlenderMesh.HIP_X * SCALE - 1.9F;
+	/** The ground under the body's pivot (its neck), standing. */
+	static final float GROUND_BELOW = WebSlenderMesh.GROUND - NECK;
 	/** The suit and the goo under it stretch to its torso (neck to hips) and its legs. */
 	static final float TORSO_STRETCH = (HIPS - NECK) / 12.0F, LEG_STRETCH = (WebSlenderMesh.GROUND - HIPS) / 12.0F;
 

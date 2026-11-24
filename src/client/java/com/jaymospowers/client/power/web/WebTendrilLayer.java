@@ -593,7 +593,25 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 
 	/** Climbing: the walking tendrils' chords and bows (see {@link WebTendrilWalk#legs}), or null when not climbing. */
 	static float @org.jspecify.annotations.Nullable [] walk(net.minecraft.world.entity.player.Player player, float partial) {
-		return WebTendrilWalk.legs(player, partial, ROOTS);
+		// (on the red strain's slender body they walk it from where they root on it, WebSlender.TENDRIL_REST)
+		boolean slender = com.jaymospowers.power.web.WebSymbiote.armored(player)
+			&& com.jaymospowers.power.web.WebSymbioteStrains.of(player) == com.jaymospowers.power.web.WebSymbioteStrain.RED;
+		return WebTendrilWalk.legs(player, partial, slender ? SLENDER_ROOTS : ROOTS);
+	}
+
+	/**
+	 * The roots the tendrils walk from on the slender body: its own for the eight, the spares' as ever, all measured from
+	 * its neck, which sits {@code WebSlender.BODY_LIFT} above a player's (WebTendrilWalk reads them from a player's).
+	 */
+	private static final float[][] SLENDER_ROOTS = slenderRoots();
+
+	private static float[][] slenderRoots() {
+		float[][] out = new float[ROOTS.length][];
+		for (int t = 0; t < ROOTS.length; t++) {
+			float[] r = t < WebSlender.TENDRIL_REST.length ? WebSlender.TENDRIL_REST[t] : ROOTS[t];
+			out[t] = new float[] {r[0], r[1] - WebSlender.BODY_LIFT, r[2]};
+		}
+		return out;
 	}
 
 	/**
@@ -818,6 +836,17 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 				if (legs != null && (legs[t * 6] != 0.0F || legs[t * 6 + 1] != 0.0F || legs[t * 6 + 2] != 0.0F)) {
 					// walking you along: bowed out from the back, its tip planted (or stepping) on whatever it holds
 					bend(this.parts[t], legs[t * 6], legs[t * 6 + 1], legs[t * 6 + 2], legs[t * 6 + 3], legs[t * 6 + 4], legs[t * 6 + 5], eased);
+					continue;
+				}
+				if (sl != null && t >= WebSlender.SKITTER_FIRST && legs == null && weight <= 0.0F && combo < 0 && drag > WebSlender.SKITTER_FROM
+					&& !fp && tendrils.tethers() == null && !state.isFallFlying && !state.isPassenger && state.swimAmount <= 0.0F) {
+					// the slender body on the move: its low tendrils plant on the ground and stride with its legs, out to
+					// each side and behind, lifting and reaching on in step (a skitter, its favourite way about)
+					float phase = state.walkAnimationPos * 0.6662F + (side > 0.0F ? Mth.PI : 0.0F) + WebSlender.SKITTER_LAG;
+					float tx = sl[0] + side * WebSlender.SKITTER_WIDE;
+					float ty = WebSlender.GROUND_BELOW - Math.max(0.0F, Mth.sin(phase)) * WebSlender.SKITTER_LIFT;
+					float tz = WebSlender.SKITTER_BACK + Mth.cos(phase) * WebSlender.SKITTER_STRIDE;
+					bend(this.parts[t], (tx - base.x) / 16.0F, (ty - base.y) / 16.0F, (tz - base.z) / 16.0F, side, -0.6F, 0.4F, eased);
 					continue;
 				}
 				if (combo == WebTendrilCombos.BARRAGE && base.visible && tendrils.tethers() == null) {
