@@ -68,6 +68,8 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.corpse.Gibs.register();
 		com.jaymoskitchen.corpse.Butchers.register();
 		com.jaymoskitchen.corpse.Scavengers.register();
+		// zombies bend down over the body they gnaw (GnawPose)
+		com.jaymoskitchen.corpse.Gnawing.register();
 		PlayerCorpses.register();
 		Saddlebags.register();
 		// echoes for the layered sounds
