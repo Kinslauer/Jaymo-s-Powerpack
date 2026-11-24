@@ -816,7 +816,7 @@ public final class Heritage {
 	static boolean inSun(ServerPlayer player) {
 		Level level = player.level();
 		BlockPos pos = player.blockPosition().above();
-		return level.isBrightOutside() && level.canSeeSky(pos) && !level.isRainingAt(pos);
+		return level.isBrightOutside() && level.canSeeSky(pos) && !level.isRainingAt(pos) && !Parasols.shade(player);
 	}
 
 	/** The factor on {@code player}'s hunger drain from their heritage, where they are now. */

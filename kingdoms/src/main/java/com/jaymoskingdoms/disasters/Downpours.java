@@ -42,7 +42,7 @@ public final class Downpours {
 	/** How hard the downpour falls on {@code p}, 0..1: nothing under a roof, in the dry or where it would snow. */
 	public static float on(ServerPlayer p) {
 		float hard = Storms.downpour(p.level(), p.getX(), p.getZ());
-		if (hard < FELT) {
+		if (hard < FELT || com.jaymoskingdoms.Parasols.keepsRain(p)) {
 			return 0.0F;
 		}
 		BlockPos head = BlockPos.containing(p.getEyePosition());

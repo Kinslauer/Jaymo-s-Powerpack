@@ -315,6 +315,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.HudBar.register();
 		// Shift+T shares the hovered item in chat; soul fire burns blue (bits.SoulBurn)
 		com.jaymospowers.bits.ItemShare.register();
+		// umbrellas, parasols and the umbrella stand
+		com.jaymospowers.umbrella.Umbrellas.init();
 		registerAttachments();
 	}
 
