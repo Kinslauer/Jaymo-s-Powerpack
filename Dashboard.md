@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 15:03). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 15:25). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -16,10 +16,11 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/red-symbiote-body|red-symbiote-body]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-32 waiting for a bot, 17 being built, 0 in review: see [[Kanban]].
+42 waiting for a bot, 2 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
@@ -85,19 +86,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2031 Thrown rocks can crit: faster, and triple damage (Powers, 2026-11-23)
 - [ ] #2030 context keys by the crosshair (Powers, Kingdoms, 2026-11-23)
 - [ ] #2029 Drop attacks: land on a foe from 4+ blocks and they're down (Powers, Kingdoms, 2026-11-23)
-- [ ] #2028 Safe starts: no enemy to mobs until you move; H goes to the page a hint named (Powers, Kingdoms, 2026-11-23)
-- [ ] #2023 From the Shadows: the Devil Splitter, Thirst for Blood, the crystallized dagger and the Horn of Apocalypse (Kingdoms, 2026-11-23)
-- [ ] #2022 Realms never wear the same armour: each keeps its own livery (Kingdoms, 2026-11-23)
-- [ ] #2021 Wounds shown like potions; bandages wrap several limbs at once; splints by two, from plant string too (Powers, 2026-11-23)
-- [ ] #2020 From the Shadows: diabolium, the crust armour and the Nehemoth's blood (Kingdoms, 2026-11-23)
-- [ ] #2016 plague bearer: the orc camps' sick walker (From the Shadows Reborn) (Kingdoms, 2026-11-23)
-- [ ] #2015 the Bulldrogioth, a shelled beast out of the demons' country (From the Shadows Reborn port) (Kingdoms, 2026-11-23)
-- [ ] #2014 the Nehemoth, a beast out of the demons' country (From the Shadows Reborn port) (Kingdoms, 2026-11-23)
-- …and 428 older ones.
+- …and 436 older ones.
 
 ## Health
 
-13 problems in the notes: [[Health]].
+14 problems in the notes: [[Health]].
 
 ## Last week
 
