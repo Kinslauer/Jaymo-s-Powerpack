@@ -16839,3 +16839,8 @@ Andy: "can i have you work on npc pathing? they get stuck in water or on buildin
 - **Down off buildings** (`Stranded`, found by `GapJumps`): a humanoid at the end of a path that falls short, with no jump to be had and where it's going at least 2 blocks below it (its home under the roof it's on), is marked stranded for 10 s: its path may drop up to 10 blocks (`MobFallDistanceMixin` on `Mob.getMaxFallDistance`; the game plans 3 or so), it paths again, and it lowers itself down the drop no faster than 0.3 blocks a tick and takes no fall damage. Not again for 30 s, so one cut off by something else doesn't keep trying.
 - **No jumping onto roofs**: `GapJumps` no longer lands a humanoid on a floor with two blocks of open air within 4 under it (a roof, an upper storey, a bridge), which is how hired villagers ended up walking roofs.
 - Built; not played.
+
+## 0.12.29 (2026-11-24): Fresh Animations and horde poses leave a gnawing zombie alone (#2093)
+
+- A zombie Jaymo's Kitchen draws on its knees gnawing a body is left alone by Fresh Animations (EmfBladePause) and by a horde's walking reach and acts (HordePoses), so the two never fight over its arms (KitchenGnaw, by name).
+- Built; not played.
