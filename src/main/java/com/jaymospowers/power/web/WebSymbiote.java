@@ -298,6 +298,12 @@ public final class WebSymbiote {
 	public static final double TAKEOVER_RANGE = 12.0;
 	public static final double TAKEOVER_REACH = 3.0;
 	public static final int TAKEOVER_ATTACK_TICKS = 20;
+	/**
+	 * At its prey it also seizes it with the tendrils (a counter's own moves: impale, whiplash, hurl, constrict) every
+	 * {@code TAKEOVER_SEIZE_EVERY} ticks (at this offset in them, so it isn't the plain blow's tick), and each strike or
+	 * seize pulses the dark over your screen for {@code TAKEOVER_STRIKE_DREAD} ticks.
+	 */
+	public static final int TAKEOVER_SEIZE_EVERY = 80, TAKEOVER_SEIZE_AT = 10, TAKEOVER_STRIKE_DREAD = 20;
 	public static final int TAKEOVER_COOLDOWN = 900;
 	/**
 	 * Once it has the wheel it keeps it until it has done what it set out to (its prey dead, a look had, a kill carried
@@ -2481,10 +2487,15 @@ public final class WebSymbiote {
 
 	/** The nearest thing it wants: creatures (not pets or named ones); in a rampage, other players too. */
 	private static @org.jspecify.annotations.Nullable LivingEntity prey(ServerPlayer player, boolean rampage) {
+		return prey(player, rampage, null);
+	}
+
+	/** The nearest thing it wants but {@code skip} (the prey it just gave up on). */
+	private static @org.jspecify.annotations.Nullable LivingEntity prey(ServerPlayer player, boolean rampage, @org.jspecify.annotations.Nullable Entity skip) {
 		LivingEntity target = null;
 		double best = Double.MAX_VALUE;
 		for (LivingEntity living : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(TAKEOVER_RANGE),
-			e -> e != player && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand)
+			e -> e != player && e != skip && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand)
 				&& (e instanceof Mob m ? !(m instanceof TamableAnimal tame && tame.isTame()) && !m.hasCustomName()
 					: rampage && e instanceof Player p && !p.isCreative()))) {
 			double d = living.distanceToSqr(player);
@@ -2701,6 +2712,39 @@ public final class WebSymbiote {
 		// your screen darkens as it wheels you round onto the next
 		dread(player, PROTECT_CALM_TICKS, true);
 		narrate(player, "strike");
+	}
+
+	/**
+	 * It has tried everything and got no closer (WebTakeoverPath#STUCK_GIVE_UP): other prey (the red hunt's the next
+	 * nearest far off, a guard's the next threat), or it lets go. Never stands there. True: the tick is spent.
+	 */
+	private static boolean giveUp(ServerPlayer player, Live live, Entity target) {
+		if (live.feedStage != FEED_NONE) {
+			// (the feeding hunt is tied to its prey: it's off)
+			abortFeeding(player, live);
+			if (live.takeoverTicks > 0) {
+				endTakeover(player, live);
+			}
+			return true;
+		}
+		LivingEntity next = live.protecting ? threat(player) : live.redHunt ? WebRedHunt.nearest(player.level(), player, target)
+			: prey(player, live.rampage, target);
+		if (next == null || next == target) {
+			endTakeover(player, live);
+		} else {
+			retarget(player, live, next);
+		}
+		return true;
+	}
+
+	/** The tendrils seize {@code prey} (see {@link #TAKEOVER_SEIZE_EVERY}); the dark pulses over your screen. False if a counter's already running. */
+	private static boolean seize(ServerPlayer player, LivingEntity prey) {
+		int[] moves = {WebCounter.IMPALE, WebCounter.WHIPLASH, WebCounter.HURL, WebCounter.CONSTRICT};
+		if (!WebCounter.seize(player, prey, moves[player.getRandom().nextInt(moves.length)])) {
+			return false;
+		}
+		dread(player, TAKEOVER_STRIKE_DREAD, false);
+		return true;
 	}
 
 	/** Last ditch, still hurt or cornered: it hardens into a shell of absorption, once per escape. */
@@ -2971,6 +3015,8 @@ public final class WebSymbiote {
 		if (live.route == null) {
 			live.route = new WebTakeoverPath.Route();
 		}
+		// after prey (hunts, rampages, sprees, mending) it plans straight through blocks; tours, walks and running never dig
+		live.route.dig = !flee && !live.touring && !live.curious && target instanceof LivingEntity;
 		WebTakeoverPath.tick(player, live.route, target, flee, flee || live.touring, live.curious ? TAKEOVER_REACH + 1.0 : TAKEOVER_REACH, now);
 	}
 
@@ -3762,6 +3808,10 @@ public final class WebSymbiote {
 			endTakeover(player, live);
 			return;
 		}
+		if (live.route != null && live.route.hopeless && !live.curious && giveUp(player, live, target)) {
+			// no way to it however it tried (WebTakeoverPath#STUCK_GIVE_UP)
+			return;
+		}
 		renewHold(player, live);
 		if (!live.curious || live.stareUntil == 0L) {
 			// on its way: round walls, or through them
@@ -3771,9 +3821,17 @@ public final class WebSymbiote {
 			tickCurious(player, live, now, target);
 			return;
 		}
-		if (live.takeoverTicks % TAKEOVER_ATTACK_TICKS == 0 && player.distanceTo(target) - target.getBbWidth() * 0.5 <= TAKEOVER_REACH) {
-			player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
-			player.attack(target);
+		boolean inReach = player.distanceTo(target) - target.getBbWidth() * 0.5 <= TAKEOVER_REACH;
+		if (inReach && live.takeoverTicks % TAKEOVER_SEIZE_EVERY == TAKEOVER_SEIZE_AT && target instanceof LivingEntity seized && seize(player, seized)) {
+			// the tendrils take it: impale, whip, hurl or squeeze (a counter's own moves)
+		} else if (live.takeoverTicks % TAKEOVER_ATTACK_TICKS == 0 && inReach) {
+			if (target instanceof LivingEntity struck && WebMorph.drivenStrike(player, struck)) {
+				// the weapon arm forms and strikes
+				dread(player, TAKEOVER_STRIKE_DREAD, false);
+			} else {
+				player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+				player.attack(target);
+			}
 			if (live.rampage && target instanceof LivingEntity living && living.isAlive()) {
 				if (living instanceof Player && ++live.rampageStrikes % RAMPAGE_BITE_EVERY == 0) {
 					// it bites: tearing into them (it feeds on nothing living: only on what it kills, carried)
@@ -3808,6 +3866,11 @@ public final class WebSymbiote {
 			if (target instanceof LivingEntity whole && whole.isAlive() && whole.getHealth() >= whole.getMaxHealth()) {
 				narrate(player, "mend");
 			}
+			endTakeover(player, live);
+			return;
+		}
+		if (live.route != null && live.route.hopeless) {
+			// it can't get to them
 			endTakeover(player, live);
 			return;
 		}
