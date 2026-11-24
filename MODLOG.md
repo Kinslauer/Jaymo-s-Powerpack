@@ -7680,3 +7680,18 @@ Andy: "baby zombies are unfightable" (clip: an axe locked onto baby zombies' tor
 - **Sitting holds you still**: while sat (the Sit key, a seat, or looking down), the walking keys do nothing, and being carried or pushed no longer gets you up; Sneak, Jump or a hit still do (`StanceInputMixin`, `Meditate` tick). Seats and held shadowboxing still end if you're moved off.
 - **Ride an earthboard sitting down**: sit on a Gravity user's earthboard (lying where it was dropped, or flown, with your feet on or over it) and you ride it as its passenger, where you sat (kept clear of its rider in the middle), turning with it, wherever they fly it; up to 4 sit on one. Sneak gets you off where you are. A dropped board doesn't crumble while someone sits on it. Sat on one from the knee, you get on it once the kneel's Sneak lets go (`BlockCluster` SEAT / BOARD_HEADING / `positionRider`, `Sitting.boardUnder` / `ride`, `Meditate.sitOnBoard`). The board's drawn turn now comes from the heading the server saw it boarded at, so sitters and blocks turn together.
 - Built; not played.
+
+## 0.26.96 (2026-11-24): Felled by a leg blow: ragdoll, prone, roll to get up (#2083)
+
+- **Crippled is not downed** (Andy: "a suffienct blow, to the legs forces you into a ragdoll then prone, but you can roll
+  to recover. downed is what happens after losing your hearts"): a blow that lands on a leg or foot and takes 35% of your
+  most health (7 of a player's 20), or breaks that leg, takes your legs out from under you. Falls, fire and bleeding
+  never do.
+- A player goes limp into Kitchen's ragdoll, flung a little away from the blow, and once the body comes to rest lies
+  prone. Jump and the crawl key don't stand you up: a roll does (double-tap Left or Right, or press Dodge), and you come
+  up on your feet as it ends. Two broken legs still keep you crawling. A tip card says how. Without Kitchen you go
+  straight to prone.
+- A mob built like a person goes down flat on its back (the leg sweep's fall) and gets up by itself.
+- `LegFell` (new), hooked from `Wounds`' after-damage; `Crawl` (no standing up while felled, a roll brings you up),
+  `CrawlTaps` (side rolls and the Dodge key while felled), `DodgeClient`. The share is `LegFell.BLOW_SHARE`.
+- Built in CI; not played.
