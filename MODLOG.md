@@ -7596,3 +7596,10 @@ following integration task).
   once on a blow and again as he went down, and would start again each time he came round on the ground
   ("andrenaline should have only kicked in once"). A downed mob's first rush is as it was. `Adrenaline#wentDown`.
 - Built on CI only; not played.
+
+## 0.26.87 (2026-11-24): JEI shows stone tools, hammer and light armour recipes on a server (#2066)
+
+- **Missing recipes in JEI**: the stone-age tool recipes, the hammer recipes (crushing ore) and light armour now show
+  in JEI on a server. JEI only asks the server for Minecraft's own kinds of recipe, so these never reached the players;
+  `StoneAge`, `OreWashing` and `LightArmour` now have the server send them (`RecipeSynchronization`).
+- Built on CI only; not played.

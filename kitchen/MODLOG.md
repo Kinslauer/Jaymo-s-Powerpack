@@ -2747,3 +2747,11 @@ Andy's picks from Legendary Survival Overhaul (ideas and numbers only) and Walk 
 - **Frozen**: from freezing down, frost crusts the glass from the bulb up, icicles hang off the bulb, and the
   thermometer shakes, harder and faster as it drops. `ClimateHud#flames`, `ClimateHud#frost`, tuning at the top.
 - Built on CI only; not played, so the look and size haven't been seen on screen.
+
+## 0.6.77 (2026-11-24): JEI shows how to make hides on a server (#2066)
+
+- **Tanning recipes in JEI**: raw hide, salted hide, wet tanned hide, leather scraps and string from wool (the crafting
+  recipes that keep your knife or waterskin) now show in JEI on a server. Andy's clip: wet tanned hide had no recipe.
+  JEI only asks the server for Minecraft's own kinds of recipe, so ours never reached the players;
+  `Hides` now has the server send them (`RecipeSynchronization`).
+- Built on CI only; not played.

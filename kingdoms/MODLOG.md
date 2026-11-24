@@ -16671,3 +16671,14 @@ Andy picked "goblin extras" from the survival pick list (2026-11-22); the Goblin
 - Each key's pop-up still shows twice at most, ever (counted per key in `config/jaymoskingdoms-key-clashes.txt`; the
   old single count starts over). Keys our mods share on purpose are still left out. `KeyClashes`.
 - Built on CI only; not played.
+
+## 0.12.15 (2026-11-24): Thick black smoke over the flames; whittling recipes in JEI (#2066)
+
+- **Smoke on the ground**: a big fire now banks thick, near-black smoke right over its flames, on the ground under the
+  trees as well as in a burning canopy. It hardly rises and drifts with the wind, so a burning wood is hidden behind it
+  even seen from outside. Andy's clip: under the trees the flames had no smoke, only a cloud high over the canopy ("the
+  thick black smoke should generate at ground level, right overtop the flames, to show reduced visibility even from
+  outside the fire"). The look now checks each column's ground under the leaves too. `FireSmoke#smother`, tuning
+  (`GROUND_*`) at the top; the plumes and the pall above are unchanged.
+- **Whittling recipes in JEI** on a server (sent with `RecipeSynchronization`; JEI only asks for Minecraft's own).
+- Built on CI only; not played, so the smoke's look hasn't been seen.
