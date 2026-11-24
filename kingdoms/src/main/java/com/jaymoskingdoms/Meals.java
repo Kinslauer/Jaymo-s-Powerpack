@@ -140,6 +140,8 @@ public final class Meals {
 		Item dish = Items.BREAD;
 		boolean served;
 		final boolean tavern;
+		/** What's in their hand for it (the raw food at the stove, then the dish), or null. */
+		@Nullable Item held;
 
 		Meal(int faction, Way way, BlockPos to, BlockPos at, long started, int length, boolean tavern) {
 			this.faction = faction;
@@ -267,6 +269,7 @@ public final class Meals {
 						continue;
 					}
 					if (!fit(v, t) || !step(level, f, v, m, now)) {
+						holdMeal(v, m, null);
 						EATING.remove(v.getUUID());
 					}
 					continue;
@@ -352,6 +355,8 @@ public final class Meals {
 		v.getLookControl().setLookAt(m.at.getX() + 0.5, m.at.getY() + 0.5, m.at.getZ() + 0.5);
 		long in = now - m.arrived;
 		boolean cooking = m.way == Way.HOME && in < m.length / 2;
+		// (Andy: "i want to be able to SEE the villagers doing their jobs") the food in hand: raw at the stove, then the dish
+		holdMeal(v, m, cooking ? (m.dish == Items.BAKED_POTATO ? Items.POTATO : Items.WHEAT) : m.dish);
 		if (cooking) {
 			if (random.nextBoolean()) {
 				level.sendParticles(ParticleTypes.SMOKE, m.at.getX() + 0.5, m.at.getY() + 1.1, m.at.getZ() + 0.5, 2, 0.15, 0.05, 0.15, 0.01);
@@ -370,6 +375,21 @@ public final class Meals {
 			return false;
 		}
 		return true;
+	}
+
+	/** {@code item} in {@code v}'s hand for the meal (null puts it away): only into an empty hand, only the meal's taken back. */
+	private static void holdMeal(Villager v, Meal m, @Nullable Item item) {
+		if (m.held == item) {
+			return;
+		}
+		if (m.held != null && v.getMainHandItem().is(m.held) && WorkScenes.isMarked(v.getMainHandItem())) {
+			v.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+		}
+		m.held = null;
+		if (item != null && v.getMainHandItem().isEmpty()) {
+			v.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, WorkScenes.marked(item));
+			m.held = item;
+		}
 	}
 
 	/** The meal itself: cooked from the home cook's share, or bought (and paid for). False if there's none to be had. */
@@ -601,18 +621,18 @@ public final class Meals {
 		}
 		Eatery e = nearest(eateries, v);
 		Vec3 at = Vec3.atCenterOf(e.counter());
-		if (v.distanceToSqr(at) > AT_KITCHEN * AT_KITCHEN) {
+		// (at the counter and the stove beside it, their work seen through WorkScenes, a step or two further)
+		double reach = WorkScenes.working(v) ? AT_KITCHEN + 2.0 : AT_KITCHEN;
+		if (v.distanceToSqr(at) > reach * reach) {
 			if (v.getNavigation().isDone()) {
 				walk(v, Construction.standable(level, e.counter(), 2));
 			}
 			return;
 		}
-		v.getLookControl().setLookAt(at.x, at.y, at.z);
 		RandomSource random = level.getRandom();
-		if (random.nextInt(3) == 0) {
-			v.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
-			v.playWorkSound();
-			level.sendParticles(ParticleTypes.SMOKE, at.x, at.y + 0.6, at.z, 3, 0.2, 0.1, 0.2, 0.01);
+		// cutting, cooking and setting out the dishes, where a player is near enough to see it
+		if (!WorkScenes.cook(level, f, v, e.counter(), now)) {
+			v.getLookControl().setLookAt(at.x, at.y, at.z);
 		}
 		long last = LAST_BATCH.getOrDefault(v.getUUID(), 0L);
 		if (now - last < COOK_EVERY || !Storage.loaded(level, f)) {
