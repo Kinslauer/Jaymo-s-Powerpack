@@ -22,5 +22,10 @@ public final class BeastState extends LivingEntityRenderState {
 	/** The golem's cubes by slot (a texture number, 30 for none), its chest open, its arms raised to throw. */
 	final int[] cubes = new int[23];
 	boolean open, raised;
+	/** The small life and the sea's: a snail in its shell, a manta (not a stingray), how far a buried stingray sits in the sand (blocks). */
+	boolean hiding, manta;
+	float sink;
+	/** A big cat that is only a cat (the liger): no wings, no stinger, and no mane on the tigon. */
+	boolean plain, maneless;
 	float tick, attackAnim;
 }

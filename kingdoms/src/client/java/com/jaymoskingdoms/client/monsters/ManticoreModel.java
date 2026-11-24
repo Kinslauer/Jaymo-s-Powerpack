@@ -168,6 +168,14 @@ final class ManticoreModel extends EntityModel<BeastState> {
 		this.movingTail = state.stinging;
 		this.openMouthCounter = state.mouth;
 		this.isMovingVertically = state.airborne;
+		this.isFlyer = !state.plain;
+		this.hasStinger = !state.plain;
+		for (ModelPart p : new ModelPart[] {InnerWing, MidWing, OuterWing, InnerWingR, MidWingR, OuterWingR, STailRoot, STail2, STail3, STail4, STail5, StingerLump, Stinger}) {
+			p.visible = !state.plain;
+		}
+		for (ModelPart p : new ModelPart[] {Mane, NeckHair, ChinHair, ForeheadHair, LeftChinBeard, RightChinBeard}) {
+			p.visible = !state.maneless;
+		}
 		rig(state.walkAnimationPos, state.walkAnimationSpeed, state.ageInTicks, state.yRot, state.xRot);
 	}
 

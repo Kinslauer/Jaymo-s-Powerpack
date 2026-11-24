@@ -79,6 +79,8 @@ public final class MocBeasts {
 
 		// the wyvern, its egg and its nests (Dragons' own package: it is a WindDragon)
 		com.jaymoskingdoms.dragons.Wyverns.register();
+		// the second half: ents, small life, rays and jellyfish, ligers, the keeping of cats, the bone charm
+		MocWild.register();
 
 		MANTICORE_SPINE = item("manticore_spine", Item::new, new Item.Properties());
 		NETHER_SCORPION_SPAWN_EGG = item("nether_scorpion_spawn_egg", SpawnEggItem::new, new Item.Properties().spawnEgg(NETHER_SCORPION));

@@ -39,6 +39,18 @@ Taken from it, under that licence:
   kingdoms/tools/mocreatures/) are copied under our names by kingdoms/tools/gen_moc_beasts.py. Their behaviour is
   Kingdoms' own (monsters/MocBeasts.java and the classes it registers, dragons/WyvernDragon.java, equestrian/WonderHorses.java).
 
+- the living things of Mo' Creatures that Kingdoms keeps (Reference Mods patch 7, second half), models, animation and textures:
+  the ent (MoCModelEnt; ent_oak and ent_birch), the cricket (MoCModelCricket; cricketa, cricketb), the snail (MoCModelSnail;
+  snaila to snailf), the fly (MoCModelFly; fly), the maggot (MoCModelMaggot; maggot), the roach (MoCModelRoach; roach), the mouse
+  (MoCModelMouse; micew, miceb, miceg), the mole (MoCModelMole; mole), the manta ray and the stingray (MoCModelRay; mantray,
+  stingray), the jellyfish (MoCModelJellyFish; jellyfisha to jellyfishl) and the liger and tigon (MoCModelNewBigCat's lion, drawn
+  by the manticore's port without its wings and stinger; BCliger and BCtiger). The models were ported by
+  kingdoms/tools/mocreatures/port_model.py through kingdoms/tools/gen_moc_small.py, which also copies the textures (the
+  originals are in kingdoms/tools/mocreatures/) under our names into assets/jaymoskingdoms/textures/entity/moc/ (ported
+  classes: the *Model classes in kingdoms/src/client/java/com/jaymoskingdoms/client/monsters/). Their behaviour is Kingdoms' own
+  (monsters/Ent, Critter, SeaRay, Jellyfish, Liger, and ClearCuts, SmallLife, CatKeeping, BigCats, BoneCharm). The cat of
+  Mo' Creatures (MoCModelKitty) and its bed and litter box are not used: the keeping of cats is applied to the game's own cats.
+
 WarElephantModel and BreedHorseModel are likewise licensed under the GNU GPL v3. Their source is in
 the Jaymo's Powerpack repository (kingdoms/src/client/java/com/jaymoskingdoms/client/equestrian/). So are the monsters
 of legend (kingdoms/src/main/java/com/jaymoskingdoms/monsters/ and kingdoms/src/client/java/com/jaymoskingdoms/client/
