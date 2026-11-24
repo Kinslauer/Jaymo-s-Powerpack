@@ -1,0 +1,239 @@
+<title>Otherworld Pick-List</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: a single parchment-toned ledger column; sections are chapters, rows are entries with a tick, chips and a note line. */
+:root{
+  --bg:#f3f1ec; --panel:#fffdf8; --ink:#23211c; --muted:#6b665a; --line:#ddd7c9;
+  --accent:#7a3b2e; --accent-ink:#fff;
+  --ok:#2f6b3a; --ok-bg:#e3efe3; --warn:#8a5a10; --warn-bg:#f6ead2; --bad:#9a2f2f; --bad-bg:#f6dede; --na:#55606e; --na-bg:#e6e9ee;
+  --display:"Cinzel",Georgia,serif; --body:"Source Sans 3",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#1b1a17; --panel:#24221e; --ink:#ece7dc; --muted:#a59f90; --line:#3a372f;
+  --accent:#d98b6f; --accent-ink:#1b1a17;
+  --ok:#8fd19b; --ok-bg:#1f3324; --warn:#e6c07a; --warn-bg:#3a2f1a; --bad:#f09a9a; --bad-bg:#3d2222; --na:#b3bcc8; --na-bg:#2b3038; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1b1a17; --panel:#24221e; --ink:#ece7dc; --muted:#a59f90; --line:#3a372f;
+  --accent:#d98b6f; --accent-ink:#1b1a17;
+  --ok:#8fd19b; --ok-bg:#1f3324; --warn:#e6c07a; --warn-bg:#3a2f1a; --bad:#f09a9a; --bad-bg:#3d2222; --na:#b3bcc8; --na-bg:#2b3038; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--body)}
+.wrap{max-width:920px;margin:0 auto;padding-block:28px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:22px}
+h1,h2{font-family:var(--display);text-wrap:balance;margin:0}
+h1{font-size:2rem;letter-spacing:.02em}
+h2{font-size:1.25rem;letter-spacing:.03em}
+p{margin:0;max-width:68ch}
+.lede{display:flex;flex-direction:column;gap:10px;color:var(--muted)}
+.lede b{color:var(--ink)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.fact{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-size:.92rem;color:var(--muted)}
+.fact strong{display:block;color:var(--ink);font-family:var(--mono);font-size:1.05rem;font-variant-numeric:tabular-nums}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 0;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.bar .count{font-family:var(--mono);font-size:.9rem;color:var(--muted);margin-right:auto}
+button{font:600 .92rem var(--body);border-radius:6px;padding:7px 14px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink)}
+button.ghost{background:transparent;color:var(--accent)}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+label.flt{display:flex;gap:6px;align-items:center;font-size:.9rem;color:var(--muted);cursor:pointer}
+.status{font-size:.85rem;color:var(--muted)}
+section{display:flex;flex-direction:column;gap:10px}
+.ask{color:var(--muted);font-size:.95rem}
+.row{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px 14px;display:grid;grid-template-columns:28px 1fr;gap:4px 10px}
+.row.on{border-color:var(--accent)}
+.row input[type=checkbox]{width:20px;height:20px;margin:3px 0 0;accent-color:var(--accent);cursor:pointer}
+.body{min-width:0;display:flex;flex-direction:column;gap:6px}
+.head{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline}
+.head .t{font-weight:700;font-size:1.02rem}
+.id{font-family:var(--mono);font-size:.78rem;color:var(--muted)}
+.size{font-family:var(--mono);font-size:.75rem;border:1px solid var(--line);border-radius:4px;padding:0 5px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:.78rem;font-weight:600;border-radius:999px;padding:1px 9px;letter-spacing:.01em}
+.c-yes{background:var(--ok-bg);color:var(--ok)}.c-near{background:var(--warn-bg);color:var(--warn)}.c-old{background:var(--warn-bg);color:var(--warn)}.c-no{background:var(--bad-bg);color:var(--bad)}.c-unk{background:var(--na-bg);color:var(--na)}
+.l-open{background:var(--ok-bg);color:var(--ok)}.l-nc{background:var(--warn-bg);color:var(--warn)}.l-arr{background:var(--bad-bg);color:var(--bad)}.l-unk{background:var(--na-bg);color:var(--na)}
+.idea{font-size:.95rem}
+.ours{font-size:.9rem;color:var(--muted)}
+.ours b{color:var(--ink)}
+textarea{width:100%;box-sizing:border-box;min-height:34px;resize:vertical;font:.9rem var(--body);background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:5px;padding:6px 8px}
+.skip{font-size:.9rem;color:var(--muted);background:var(--panel);border:1px dashed var(--line);border-radius:6px;padding:12px 14px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:6px;font-size:.9rem}
+@media (prefers-reduced-motion:no-preference){.row{transition:border-color .15s}}
+</style>
+
+<div class="wrap">
+  <header class="lede">
+    <h1>Otherworld Pick-List</h1>
+    <p><b>Your ask:</b> "port this to fabric then create a picklist of what it has and we dont? I'll then move the differing models and textures into our pack."</p>
+    <p>Otherworld v8 HF2 is a <b>Forge 1.20.1</b> pack of 435 mods. It can't be ported as one piece, because most of its content mods have no Fabric build for 26.3. So each row below is one thing it has that we don't, with how we'd get it: add the mod where a Fabric 26.3 build exists, otherwise build our own version in Powers, Kingdoms or Kitchen.</p>
+    <p><b>About moving models and textures:</b> a red licence chip (All Rights Reserved) means the art can't be copied into our pack; our rule is no other mod's art unless its licence allows it. A green chip means the code licence is open, but check that it covers the art before copying. Otherworld's own packs (quest icons, GUI, mob patches) are All Rights Reserved too.</p>
+    <div class="facts">
+      <div class="fact"><strong>435</strong>mods in Otherworld</div>
+      <div class="fact"><strong>~65</strong>content rows here (mobs, gear, worlds, looks)</div>
+      <div class="fact"><strong>~250</strong>library, speed and menu mods skipped (list at the end)</div>
+      <div class="fact"><strong>Nov 24</strong>Fabric 26.3 status checked on Modrinth</div>
+    </div>
+  </header>
+
+  <div class="bar">
+    <span class="count" id="count">0 picked</span>
+    <label class="flt"><input type="checkbox" id="onlyYes"> Only rows with a Fabric 26.3 build</label>
+    <span class="status" id="status">Loading picks…</span>
+    <button id="copy">Copy picks</button>
+  </div>
+
+  <main id="list"></main>
+
+  <div class="skip"><b>Skipped, not content:</b> performance and fix mods (FerriteCore, ModernFix, Embeddium/Oculus, AllTheLeaks, Radium and the like), libraries (GeckoLib, Curios, Architectury, Moonlight, YUNG's API, Citadel and ~60 more), Forge-only menus and launchers (FancyMenu layouts, Drippy, BisectHosting, Crash Assistant), FTB Teams/Chunks/Library, Sinytra Connector, and mods we already ship (Carry On, Better Combat, Fantasy Armor, Alex's Mobs, Moog's Voyager/Nether, Scholar, Horseman, Shoulder Surfing, Sound Physics, AppleSkin, JEI, Jade, EMF/ETF, Nature's Compass, Continuity). Ask if you want any of these as rows.</div>
+</div>
+
+<script>
+const S={
+ yes:t=>['c-yes','Fabric 26.3 ✓ '+t], near:t=>['c-near','Fabric up to '+t], old:t=>['c-old','Fabric up to '+t], no:()=>['c-no','Forge/NeoForge only'], unk:()=>['c-unk','CurseForge only, 26.3 not checked']
+};
+const L={open:t=>['l-open',t], nc:t=>['l-nc',t], arr:t=>['l-arr',t||'All Rights Reserved'], unk:()=>['l-unk','Licence not checked']};
+const SECTIONS=[
+{h:'Bosses and monsters',ask:'Otherworld\'s biggest difference: a long boss ladder (its quest book has a portrait of each).',rows:[
+ ['ow-cataclysm','L_Ender\'s Cataclysm','L','Big set-piece bosses with their own arenas: Ignis, Netherite Monstrosity, the Leviathan, the Harbinger, Maledictus, Ender Guardian, Ancient Remnant.','Patron Champions (8 multi-phase bosses), Aether Giants, Sentry Ruins bosses. Our own bosses would be the route.',['no'],['unk']],
+ ['ow-mowzie','Mowzie\'s Mobs','L','Frostmaw, Ferrous Wroughtnaut, Umvuthi and the sun-masked tribe, Naga, Foliaath, Grottol.','Nothing like these.',['no'],['arr','Mowzie\'s Mobs licence (custom)']],
+ ['ow-iaf','Ice and Fire: Dragons','L','Fire, ice and lightning dragons you hatch and raise, dragon forges, plus cyclops, hydra, sea serpents, gorgon, hippogryph, myrmex hives, death worms, pixies.','Kingdoms has dragons already. This row is for raise-your-own dragons and the myth bestiary.',['no'],['open','LGPL-3.0 code (check art)']],
+ ['ow-alexscaves','Alex\'s Caves','L','Five deep cave biomes: Magnetic Caves, Primordial Caves (dinosaurs), Toxic Caves, Abyssal Chasm, Forlorn Hollows.','We ship Alex\'s Mobs Continued, not Caves. Magnetic Caves could tie to the Aether\'s Magnetic highland in Lore.',['no'],['open','LGPL-3.0 code (check art)']],
+ ['ow-bomd','Bosses of Mass Destruction','M','Four bosses: Night Lich, Obsidilith, Gauntlet, Void Blossom. Started as a Fabric mod.','Nothing like these. LGPL means we could update it to 26.3 ourselves.',['old','1.21.1'],['open','LGPL-3.0']],
+ ['ow-legmon','Legendary Monsters','M','Early, middle and late overworld bosses (Overgrown Colossus, Frostbitten Golem, Lava Eater and more).','—',['no'],['arr']],
+ ['ow-bic','Born in Chaos','M','Dark-night mobs: pumpkin spirits, dread hounds, Lord Pumpkinhead, nightmare stalkers.','Our undead are draugr, wraiths and risen orcs.',['unk'],['unk']],
+ ['ow-eeeab','EEEAB\'s Mobs','M','Immortal skeleton boss, Guling, corpse warlock and other dungeon foes.','—',['unk'],['unk']],
+ ['ow-marium','Marium\'s Soulslike Weaponry (bosses)','M','Bosses with legendary weapon drops: Decaying King, Chaos Monarch, Night Shade, Returning Knight, Moonknight, Draugr boss.','We have our own draugr. Many weapons copy FromSoftware names, so those would need new names and shapes.',['old','1.21.1'],['open','CC0 (public domain)']],
+ ['ow-aquamirae','Aquamirae','M','Ice-sea ship graveyard: Captain Cornelia, the Maw, eels, frozen wrecks.','Kingdoms pirates and ships.',['old','1.21.1'],['arr','Obscuria licence']],
+ ['ow-minecells','Mine Cells','M','A Dead Cells dungeon dimension and its bosses.','A copy of another game, so neither the mod\'s art nor a rebuild of it fits our rules. Listed so you know it\'s there.',['old','1.21.1'],['arr']],
+ ['ow-goblins','Goblin\'s Tyranny','S','Goblin villages with traders and a goblin king.','Kingdoms has goblins (GoblinBody, loot goblins). Ideas only.',['no'],['arr']],
+ ['ow-orcs','The Orcs!','S','Orc mobs and camps.','Kingdoms orcs already cover this. Probably skip.',['unk'],['unk']],
+ ['ow-imps','Realm RPG: Imps & Demons','S','Nether imps and demons.','Lore has a Nether-and-demons chapter to place them in.',['unk'],['unk']],
+ ['ow-nordic','Nordic Adventure','S','Norse-themed mobs and structures (made in MCreator).','Our draugr are the Norse dead already.',['near','1.21.8'],['arr']],
+ ['ow-golems','Golem Overhaul','S','Nine new golem kinds, each with its own trick.','—',['old','1.21.1'],['arr']],
+ ['ow-champions','Champions','S','Elite versions of normal mobs, with ranks and affixes (shielding, enkindling and so on).','A quick add. We already have Hostile Mobs Improve Over Time.',['yes','26.3.7'],['open','LGPL-3.0']],
+ ['ow-caravans','Pillager Caravans','S','Roaming pillager convoys with themed loot.','—',['near','26.1.2'],['arr','Obscuria licence']],
+]},
+{h:'Magic and character building',ask:'Otherworld is D&D-flavoured: races, classes, spellbooks, stat points.',rows:[
+ ['ow-irons','Iron\'s Spells \'n Spellbooks + addons','L','Spell schools, scrolls, spellbooks, an inscription table and mage bosses. Addons: Geomancy Plus, T.O Magic, Magic Circles, 3D spellbooks, Ice and Fire spellbooks, Familiars, Dark Doppelganger.','Spell Engine with Wizards, Archers and Rogues, plus Kingdoms cantrips. Our own spell schools would be the route.',['no'],['arr']],
+ ['ow-origins','Otherworld – Origins (races and classes)','L','The pack\'s own addon: D&D races and classes picked at the start, with subclass screens.','Jaymo\'s Powers is our version, with Kingdoms feats and cantrips. Ideas only.',['no'],['arr']],
+ ['ow-justlevel','Just Leveling (stat points)','M','Spend levels on STR/DEX/CON/INT/WIS/CHA-style stats that unlock passives. Otherworld retextured its screen (80 files).','Kingdoms feats. Apache-2.0 means the code and art could be reused with credit.',['old','1.21.1'],['open','Apache-2.0']],
+ ['ow-apotheosis','Apotheosis loot','L','Rarity-tiered gear with random affixes, gems and sockets, an enchanting overhaul, and mini-boss encounters. Otherworld adds a big loot datapack on top.','—',['no'],['arr']],
+ ['ow-valoria','Valoria','M','An RPG dimension with its own weapons, armour and bosses.','—',['no'],['nc','CC-BY-NC-4.0']],
+]},
+{h:'Weapons and armour',ask:'Gear that looks different from what we carry.',rows:[
+ ['ow-fweapons','Fantasy Weapons (Medieval Series)','M','The weapon set that goes with the Fantasy Armor we already ship.','We have Fantasy Armor, Knight Armor and Weapons, and Weapon Master.',['unk'],['unk']],
+ ['ow-mariumgear','Marium\'s Soulslike Weaponry (weapons)','M','Legendary weapons with special moves.','Public domain, so the art could come over. FromSoftware-named pieces need new names and looks.',['old','1.21.1'],['open','CC0 (public domain)']],
+ ['ow-gauntlets','Gallant Gauntlets','S','Gauntlets as a weapon that also gives armour.','—',['old','1.21.1'],['nc','CC-BY-NC-4.0']],
+ ['ow-shield','Shield Expansion','S','Parrying and a timed shield block.','We ship KS Shields and Passive Shield.',['old','1.21.1'],['open','Apache-2.0']],
+ ['ow-armory','Armory of Remnants','S','Gear from Cataclysm\'s ancient remnants.','Needs Cataclysm.',['unk'],['unk']],
+]},
+{h:'Worlds, biomes and structures',ask:'Where Otherworld spends most of its mods.',rows:[
+ ['ow-aether','The Aether + Ancient Aether + Lost Content','L','The Aether dimension and its add-ons: Aether villages, Aether food, adornments, Valkyrie Queen, Sun Spirit, Aerwhale king.','We built our own Aether (Aether II plants, Sentry Ruins, monoliths and Giants). Ideas and missing bosses only.',['old','1.21.1'],['unk']],
+ ['ow-ru','Regions Unexplored','M','Over 50 new biomes, many with their own trees and plants.','We run William Wythers\' terrain. Check biome clashes before adding.',['near','26.1.2'],['open','MIT']],
+ ['ow-bwg','Oh The Biomes We\'ve Gone','M','About 50 biomes with new woods and flowers.','Same terrain-clash check.',['near','1.21.11'],['arr']],
+ ['ow-tectonic','Tectonic','S','Taller, more dramatic terrain shapes.','Clashes with William Wythers\' terrain, which we ship; pick one.',['yes','3.1.0 beta'],['open','MIT']],
+ ['ow-betterend','BetterEnd','M','A full End overhaul: biomes, plants, mobs, ores.','We ship Enderscape; the two would fight over the End.',['yes','26.302.2'],['open','MIT']],
+ ['ow-yungcave','YUNG\'s Cave Biomes','S','A few lush cave biomes.','—',['near','26.1.2'],['arr']],
+ ['ow-rivers','Climate Rivers','S','Rivers that change with the climate they run through.','—',['yes','26.3.1'],['open','MPL-2.0']],
+ ['ow-yung','YUNG\'s Better structures (8 mods)','M','Rebuilt dungeons, strongholds, mineshafts, Nether fortresses, jungle temples, ocean monuments, End island and bridges, plus Traveler\'s Titles.','We have Moog\'s mineshafts and Nether structures, which overlap two of these.',['near','26.1.2'],['open','LGPL-3.0']],
+ ['ow-medieval','Medieval Buildings (Overworld, Nether, End)','M','Castles, keeps and ruins with hidden enemies.','We have Towns and Towers, ATI, Grim Kingdoms.',['near','26.1.2'],['arr']],
+ ['ow-formations','Formations Overworld + Nether','S','Many small structures.','—',['yes','1.0.5'],['arr']],
+ ['ow-capitals','Luki\'s Grand Capitals','M','Big rebuilt villages and illager structures.','MCA and Kingdoms towns.',['near','1.21.11'],['arr']],
+ ['ow-idas','Integrated Dungeons & Structures / Arise / Villages / Stronghold / Seven Seas','M','Very detailed dungeons and towns built with other mods\' blocks and bosses.','—',['no'],['arr']],
+ ['ow-embers','Ember\'s Underground Rooms','S','Room-by-room underground dungeons.','—',['old','1.20.6'],['arr']],
+ ['ow-fallen','Realm RPG: Fallen Adventurers','S','Dead adventurers\' camps with their gear.','Kingdoms graves.',['no'],['arr']],
+ ['ow-guild','The Guild','S','A guild hall that hands out quests and expeditions.','Kingdoms bounty board.',['old','1.20.4'],['unk']],
+ ['ow-feur','Feur extensions (Jungle, Desert, Fossil, Dungeon Spawner)','S','Small themed ruins and monster camps.','—',['old','1.21.1'],['arr']],
+]},
+{h:'Food and survival',ask:'Measured against Jaymo\'s Kitchen.',rows:[
+ ['ow-fd','Farmer\'s Delight + 9 add-ons','L','Farmer\'s Delight and its Ender, Nether, Alex\'s, Miner\'s, Aether and Dungeons add-ons, Brewin\' and Chewin\', Create Central Kitchen, Slice and Dice.','Jaymo\'s Kitchen and Cooking for Blockheads. Dish ideas only.',['no'],['open','MIT (Farmer\'s Delight)']],
+ ['ow-butchery','Butchery','M','Hang, skin and cut carcasses for meat, hide and bones.','Kitchen already handles carcasses; ideas only.',['no'],['arr']],
+ ['ow-lso','Legendary Survival Overhaul','M','Temperature, thirst and health per body part.','Kitchen has thirst and body heat. Per-body-part health would be new.',['no'],['arr']],
+ ['ow-revival','Hardcore Revival','S','A downed state where friends have a short time to revive you.','A quick add; check against our finisher code first.',['yes','26.3.0.1'],['arr','ARR (fine to add as a mod)']],
+]},
+{h:'Building, tech and everyday',ask:'Bigger systems and everyday tools Otherworld leans on.',rows:[
+ ['ow-create','Create + add-ons','L','Gears, contraptions and trains, with Otherworld\'s Create-style storage and backpack retextures.','—',['no'],['unk']],
+ ['ow-colonies','MineColonies','L','Run a colony of worker citizens who build from blueprints.','Kingdoms towns and MCA. Ideas only.',['no'],['unk']],
+ ['ow-supp','Supplementaries','M','Lots of small blocks: signposts, jars, globes, sacks, cannons and more.','—',['old','1.21.1'],['unk']],
+ ['ow-quark','Quark','M','Many small vanilla-plus features and blocks.','—',['no'],['nc','CC-BY-NC-SA-3.0']],
+ ['ow-decor','Handcrafted, Fantasy\'s Furniture, Chipped','M','Furniture and block variants.','We ship Beautify and Macaw\'s Doors.',['old','1.21.1'],['arr']],
+ ['ow-storage','Sophisticated Backpacks/Storage, Tom\'s Storage','M','Upgradeable backpacks and chests, and a storage terminal.','Bag of Holding and Traveler\'s Tool Belt. Tom\'s Storage is the one with a 26.3 build.',['yes','Tom\'s 2.12.2'],['open','MIT (Tom\'s)']],
+ ['ow-waystones','Waystones','S','Stones you find and teleport between.','Nothing in our code matches; it would need a Lore placement.',['yes','26.3.0.3'],['arr','ARR (fine to add as a mod)']],
+ ['ow-comforts','Comforts','S','Sleeping bags and hammocks.','We ship Simply Tents.',['near','26.2'],['open','LGPL-3.0']],
+ ['ow-melodies','Immersive Melodies','S','Playable instruments, songs from MIDI.','—',['near','26.2'],['open','GPL-3.0']],
+ ['ow-lanterns','Immersive Lanterns','S','A lantern on the belt that lights the way.','We ship LambDynamicLights.',['old','1.21.1'],['unk']],
+ ['ow-snow','Snow! Real Magic!','S','Snow that settles on stairs, slabs and plants.','We ship Immersive Snow Reloaded; pick one.',['yes','26.3.0'],['open','MIT']],
+ ['ow-economy','Coins, bank and thief (Numismatic, Monobank, Thief)','S','Coins, a bank vault, and villages that react when you steal.','Kingdoms coins and bounty board. Thief has a 26.3 build.',['yes','Thief 1.2.7'],['open','MIT']],
+ ['ow-quests','The D&D quest book','M','FTB Quests in five chapters, with a portrait icon for every boss.','Kingdoms quests. Their icons are ARR and draw other mods\' bosses.',['no'],['arr']],
+]},
+{h:'Looks: resource packs and textures',ask:'The "differing textures": what Otherworld changes about how things look.',rows:[
+ ['ow-fresh','Fresh Animations','M','Mobs blink, breathe and move their limbs, using EMF and ETF.','We ship EMF and ETF, and Powers already has EmfCompat, so it could slot in.',['yes','resource pack'],['nc','Own terms (link, don\'t rehost)']],
+ ['ow-barely','Barely Default','S','Light touch-ups of vanilla textures.','—',['near','26.3 snapshot'],['unk']],
+ ['ow-refreshed','Mobs / Golems / Boss Refreshed','S','Fresh Animations add-ons for more mobs.','Only with Fresh Animations.',['old','1.21.5'],['arr']],
+ ['ow-patches','Otherworld-Patches','S','The pack\'s own retextures of chicken, pig, piglin, witch, minecart and every villager profession and biome (179 files).','MCA replaces villagers for us, so most of it wouldn\'t show. ARR, so ideas only.',['yes','plain textures'],['arr']],
+ ['ow-gui','Otherworld-GUI','S','A dark-wood medieval retexture of every vanilla screen (367 files).','Our DarkPanels pick-list. ARR, so ideas only.',['yes','plain textures'],['arr']],
+ ['ow-shaders','Complementary Unbound + Euphoria Patches','S','The shader pack Otherworld ships turned on.','We ship Iris. Shader packs can be suggested, not bundled.',['yes','26.3'],['nc','Own licence']],
+ ['ow-books','Beautiful Enchanted Books','S','Each enchanted book gets its own cover.','—',['yes','resource pack'],['arr']],
+ ['ow-clouds','Better Clouds','S','Soft volumetric clouds.','—',['yes','1.15.1'],['open','MPL-2.0']],
+ ['ow-titles','Traveler\'s Titles (+ Visual)','S','Biome and dimension names fade in as you enter.','—',['near','26.1.2'],['open','LGPL-3.0']],
+ ['ow-skyrim','Skyrim Soundpack','S','Skyrim\'s music and sounds.','Bethesda\'s audio; we can\'t ship it. Listed so you know it\'s there.',['unk'],['arr']],
+]},
+];
+
+const ROWS={};SECTIONS.forEach(s=>s.rows.forEach(r=>ROWS[r[0]]={sec:s.h,id:r[0],t:r[1],size:r[2],idea:r[3],ours:r[4],fab:r[5],lic:r[6]}));
+const state={};
+let db=null;
+const $=id=>document.getElementById(id);
+function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e}
+function render(){
+  const list=$('list');list.textContent='';
+  const only=$('onlyYes').checked;
+  SECTIONS.forEach(s=>{
+    const rows=s.rows.filter(r=>!only||r[5][0]==='yes');
+    if(!rows.length)return;
+    const sec=el('section');sec.append(el('h2',null,s.h),el('p','ask','Your ask: '+s.ask));
+    rows.forEach(r=>{
+      const R=ROWS[r[0]],st=state[R.id]||{};
+      const row=el('div','row'+(st.picked?' on':''));
+      const cb=el('input');cb.type='checkbox';cb.id='cb-'+R.id;cb.checked=!!st.picked;cb.setAttribute('aria-label','Pick '+R.t);
+      cb.addEventListener('change',()=>{save(R.id,{picked:cb.checked});row.classList.toggle('on',cb.checked);count()});
+      const b=el('div','body');
+      const head=el('div','head');const lab=el('label','t',R.t);lab.htmlFor=cb.id;head.append(lab,el('span','size',R.size),el('span','id',R.id));
+      const chips=el('div','chips');const f=S[R.fab[0]](R.fab[1]);const l=L[R.lic[0]](R.lic[1]);chips.append(el('span','chip '+f[0],f[1]),el('span','chip '+l[0],l[1]));
+      const ours=el('p','ours');const ob=el('b',null,'Ours: ');ours.append(ob,document.createTextNode(R.ours));
+      const ta=el('textarea');ta.id='note-'+R.id;ta.placeholder='Your note (optional)';ta.value=st.note||'';
+      let tm;ta.addEventListener('input',()=>{clearTimeout(tm);tm=setTimeout(()=>save(R.id,{note:ta.value}),700)});
+      b.append(head,chips,el('p','idea',R.idea),ours,ta);
+      row.append(cb,b);sec.append(row);
+    });
+    list.append(sec);
+  });
+  count();
+}
+function count(){$('count').textContent=Object.values(state).filter(s=>s.picked).length+' of '+Object.keys(ROWS).length+' picked'}
+function save(id,patch){
+  state[id]=Object.assign({},state[id],patch);
+  if(db){db.doc('picks/'+id).set(state[id]).then(()=>status('Saved'),e=>status('Not saved: '+(e&&e.message||'error')))}
+  else{try{localStorage.setItem('owpicks',JSON.stringify(state))}catch(e){}status('Saved in this browser only')}
+}
+function status(t){$('status').textContent=t}
+function toast(t){const d=el('div','toast',t);document.body.append(d);setTimeout(()=>d.remove(),1800)}
+$('onlyYes').addEventListener('change',render);
+$('copy').addEventListener('click',()=>{
+  const out=[];
+  SECTIONS.forEach(s=>{out.push('## '+s.h);s.rows.forEach(r=>{const R=ROWS[r[0]],st=state[R.id]||{};
+    const line=(st.picked?'- [x] ':'- [ ] NOT PICKED ')+'**'+R.id+'** '+R.t+' ('+R.size+'): '+R.idea+' Ours: '+R.ours+(st.note?' **Andy: '+st.note.trim()+'**':'');out.push(line)});out.push('')});
+  const txt=out.join('\n');
+  navigator.clipboard.writeText(txt).then(()=>toast('Picks copied'),()=>{const ta=el('textarea');ta.value=txt;document.body.append(ta);ta.select();toast('Press Ctrl+C to copy')});
+});
+try{Object.assign(state,JSON.parse(localStorage.getItem('owpicks')||'{}'))}catch(e){}
+render();
+const timer=setTimeout(()=>status('Saving in this browser only'),10000);
+(async()=>{
+  const d=window.claude&&await window.claude.use('db');
+  if(!d){clearTimeout(timer);status('Saving in this browser only');return}
+  db=d;
+  db.collection('picks').onSnapshot(snap=>{clearTimeout(timer);snap.docs.forEach(doc=>{state[doc.id]=doc.data()||{}});
+    const a=document.activeElement;if(!(a&&a.tagName==='TEXTAREA'))render();status('Picks saved for Claude to read')},
+    e=>{clearTimeout(timer);status('Could not load picks: '+e.message)});
+})();
+</script>
