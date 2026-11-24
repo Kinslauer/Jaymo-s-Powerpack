@@ -288,6 +288,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Frights.register();
 		Parasols.register();
 		TakeCover.register();
+		ArmedFright.register();
 		// the Family farmhand's family: wary of monsters, indoors at night, at work on the farm
 		FarmFamily.register();
 		FarmhandWake.register();

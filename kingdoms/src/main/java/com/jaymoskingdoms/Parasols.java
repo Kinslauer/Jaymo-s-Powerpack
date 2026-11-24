@@ -32,8 +32,8 @@ import org.jspecify.annotations.Nullable;
  * lace parasol in the realm's colours, its coat of arms' field for the canopy and its tincture for the heraldic panel,
  * the panel's shape one of four by the arms. Poorer realms don't. In a prosperous or wealthy realm a quarter of the
  * men carry a plain umbrella in the same colours.</li>
- * <li><b>Mohknee</b>: the women of its villages, and of the barbarian tribes there who are of rank (a third of them,
- * by who they are), carry an oiled-paper parasol with blossom painting on bamboo ribs; no matter the realm's wealth.</li>
+ * <li><b>Mohknee</b>: the women of its villages carry an oiled-paper parasol with blossom painting on bamboo ribs, no
+ * matter the realm's wealth. Barbarian camps carry none (Andy: "only women in civilization").</li>
  * <li>Carried in the off hand: opened out of doors in the rain (and a parasol in the sun), furled and hung on the arm
  * indoors.</li>
  * <li><b>Sun</b>: a vampire (or anyone the sun weakens) can walk in the day under an open one ({@link #shade}); it wears.</li>
@@ -45,8 +45,8 @@ public final class Parasols {
 	/** How often the people are looked at (ticks); how close to a seat they're watched. */
 	static final int EVERY = 20;
 	static final double WATCHED = 96.0;
-	/** In a prosperous or wealthy realm, one man in this many carries an umbrella; one tribeswoman in this many is "of rank". */
-	static final int MAN_ONE_IN = 4, RANK_ONE_IN = 3;
+	/** In a prosperous or wealthy realm, one man in this many carries an umbrella. */
+	static final int MAN_ONE_IN = 4;
 	/** The sun wears an umbrella held against it a point of durability this often (ticks). */
 	static final long WEAR_TICKS = 100L;
 	/** The papers of Mohknee's parasols (RGB): cream, rose, pale blue, sage, lilac. */
@@ -147,11 +147,13 @@ public final class Parasols {
 	}
 
 	private static void give(MinecraftServer server, ServerLevel level, Villager v, Faction f) {
+		if (f.is(FactionType.BARBARIAN)) {
+			return;
+		}
 		boolean woman = McaCompat.female(v);
 		int roll = Math.floorMod(v.getUUID().hashCode(), 12);
 		ItemStack stack = null;
-		if (woman && com.jaymoskingdoms.seas.Mohknee.on(level, v.blockPosition())
-			&& (!f.is(FactionType.BARBARIAN) || Math.floorMod(v.getUUID().getLeastSignificantBits(), (long)RANK_ONE_IN) == 0)) {
+		if (woman && com.jaymoskingdoms.seas.Mohknee.on(level, v.blockPosition())) {
 			stack = stack(level, "paper_parasol", PAPERS[roll % PAPERS.length], 0xFFFFFF, "");
 		} else {
 			Faction realm = f.overlord() >= 0 ? Factions.get(server, f.overlord()) : f;
