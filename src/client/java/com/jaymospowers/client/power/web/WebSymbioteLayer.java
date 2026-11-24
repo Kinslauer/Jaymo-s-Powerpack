@@ -37,6 +37,8 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 
 	/** The big body. */
 	private final WebHulk.Model hulk;
+	/** Its head (WebBigHead), over the big body's own. */
+	private final WebBigHead.HeadModel bigHead;
 	/** The plain suit sits just over the skin (not on it, where it would flicker against it); the goo just under it. */
 	private static final float SKIN_GAP = 0.12F, GOO_GAP = 0.06F;
 	private final PlayerModel suitWide;
@@ -47,6 +49,7 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 	WebSymbioteLayer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
 		super(renderer);
 		this.hulk = new WebHulk.Model();
+		this.bigHead = new WebBigHead.HeadModel();
 		this.suitWide = suitModel(SKIN_GAP, false);
 		this.suitSlim = suitModel(SKIN_GAP, true);
 		this.gooWide = suitModel(GOO_GAP, false);
@@ -86,6 +89,7 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 			// (no tongue on the plain suit: only the big body has one, Andy)
 			if (high == 2) {
 				coloredCutoutModelCopyLayerRender(this.hulk, WebStrainLook.texture(WebHulk.TEXTURE, state), poseStack, collector, lightCoords, state, -1, 1);
+				WebBigHead.submit(poseStack, collector, lightCoords, state, this.getParentModel(), this.bigHead);
 				tongue(poseStack, collector, state, WebSuitGrowth.hulkBuilt(state));
 			}
 			return;
@@ -98,6 +102,7 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 			}
 			// the big body, whether or not the suit was showing
 			coloredCutoutModelCopyLayerRender(this.hulk, WebStrainLook.texture(WebHulk.TEXTURE, state), poseStack, collector, lightCoords, state, -1, 1);
+			WebBigHead.submit(poseStack, collector, lightCoords, state, this.getParentModel(), this.bigHead);
 			tongue(poseStack, collector, state, WebSuitGrowth.peeledHulk(state));
 			return;
 		}

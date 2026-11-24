@@ -187,30 +187,17 @@ final class WebHulk {
 		 * swells out (see {@code FLOW_FROM}).
 		 */
 		void build(float g, float hold, float k, float age, float bare) {
-			float cover = Mth.clamp((hold - (1.0F - WebSuitGrowth.HULK_PEEL)) / WebSuitGrowth.HULK_PEEL, 0.0F, 1.0F);
-			float flowed = Math.min(g, Mth.lerp(Mth.lerp(cover, PEEL_KEEP, 1.0F), FLOW_FROM, FLOW_TO));
+			float flowed = flowed(g, hold);
 			for (int i = 0; i < this.muscles.length; i++) {
-				float share = this.order[i] / (float)WebHulkMesh.LAST_ORDER;
-				// flowing over the body from where it grows
-				float flow = ease((flowed - FLOW_FROM - (FLOW_TO - FLOW_EACH - FLOW_FROM) * share) / FLOW_EACH);
-				// then swelling out into the brute, gradually, heaving as it goes: every mass full as the change ends
-				float from = SWELL_FROM + SWELL_STAGGER * share;
-				float s = Mth.clamp((g - from) / (1.0F - from), 0.0F, 1.0F);
-				float swollen;
-				if (s >= 1.0F) {
-					swollen = 1.0F;
-				} else if (this.onHead[i]) {
-					// (in step and never past full: the fang rows must stay together)
-					swollen = ease(s) + Mth.sin(age * HEAVE_RATE + this.firstOnHead * 1.7F) * HEAVE * Mth.sin(s * Mth.PI) * (1.0F - s);
-				} else {
-					swollen = swell(s) + Mth.sin(age * HEAVE_RATE + i * 1.7F) * HEAVE * Mth.sin(s * Mth.PI);
-				}
-				float thick = Mth.lerp(swollen, this.onHead[i] ? HEAD_THIN : THIN, 1.0F) * (0.35F + 0.65F * flow);
+				float flow = flow(this.order[i], flowed);
+				// (in step and never past full: the head's masses heave together, the fang rows with them)
+				float thick = thick(this.order[i], this.onHead[i], this.onHead[i] ? this.firstOnHead : i, g, age, flow);
 				ModelPart part = this.muscles[i];
 				part.xScale = thick;
 				part.yScale = this.fang[i] ? flow * bare : flow;
 				part.zScale = thick;
-				part.visible = flow > 0.02F && (!this.fang[i] || bare > 0.02F);
+				// (the head's masses stay hidden: WebBigHead draws the head)
+				part.visible = flow > 0.02F && !this.onHead[i] && (!this.fang[i] || bare > 0.02F);
 			}
 			// the lower fangs slide up out of the chin (shrunk toward their root in it)
 			for (ModelPart fang : this.jawFangs) {
@@ -339,6 +326,38 @@ final class WebHulk {
 	private static float ease(float x) {
 		x = Mth.clamp(x, 0.0F, 1.0F);
 		return x * x * (3.0F - 2.0F * x);
+	}
+
+	/** How far the goo has flowed over the body when it's been built {@code g} of the way and {@code hold} of it still holds. */
+	static float flowed(float g, float hold) {
+		float cover = Mth.clamp((hold - (1.0F - WebSuitGrowth.HULK_PEEL)) / WebSuitGrowth.HULK_PEEL, 0.0F, 1.0F);
+		return Math.min(g, Mth.lerp(Mth.lerp(cover, PEEL_KEEP, 1.0F), FLOW_FROM, FLOW_TO));
+	}
+
+	/** How far the muscle that flows on at {@code order} has flowed on (0-1), flowing over the body from where it grows. */
+	static float flow(int order, float flowed) {
+		float share = order / (float)WebHulkMesh.LAST_ORDER;
+		return ease((flowed - FLOW_FROM - (FLOW_TO - FLOW_EACH - FLOW_FROM) * share) / FLOW_EACH);
+	}
+
+	/**
+	 * How thick a muscle is (its scale across), swelling out into the brute gradually, heaving as it goes: every mass full as
+	 * the change ends. {@code phase} is where it is in the heave (the head's masses share one).
+	 */
+	static float thick(int order, boolean head, int phase, float g, float age, float flow) {
+		float share = order / (float)WebHulkMesh.LAST_ORDER;
+		float from = SWELL_FROM + SWELL_STAGGER * share;
+		float s = Mth.clamp((g - from) / (1.0F - from), 0.0F, 1.0F);
+		float swollen;
+		if (s >= 1.0F) {
+			swollen = 1.0F;
+		} else if (head) {
+			// (in step and never past full: the fang rows must stay together)
+			swollen = ease(s) + Mth.sin(age * HEAVE_RATE + phase * 1.7F) * HEAVE * Mth.sin(s * Mth.PI) * (1.0F - s);
+		} else {
+			swollen = swell(s) + Mth.sin(age * HEAVE_RATE + phase * 1.7F) * HEAVE * Mth.sin(s * Mth.PI);
+		}
+		return Mth.lerp(swollen, head ? HEAD_THIN : THIN, 1.0F) * (0.35F + 0.65F * flow);
 	}
 
 	/** How far the body inside is spread to the big body's frame (0-1) when it's been built {@code g} of the way: it grows as the goo swells. */
@@ -551,7 +570,7 @@ final class WebHulk {
 		parent.head.translateAndRotate(poseStack);
 		collector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(WebStrainLook.texture(WebTubes.TEXTURE, state)), (pose, buffer) ->
 			// out from between the jaws, riding down with the lower one (sliding back into the mouth as it's drawn in)
-			tongue(buffer, pose, new Vec3(0.0, 0.9 + Mth.sin(jawAngle) * 2.0, -3.0 + (1.0F - out) * 3.0), 0.15F + jawAngle * 0.6F, TONGUE_PIECES,
+			tongue(buffer, pose, new Vec3(0.0, WebBigHead.MOUTH_Y + Mth.sin(jawAngle) * 2.0, WebBigHead.MOUTH_Z + 1.5 + (1.0F - out) * 3.0), 0.15F + jawAngle * 0.6F, TONGUE_PIECES,
 				TONGUE_PIECE, TONGUE_WIDTH, TONGUE_THICK, age, out, whip, TONGUE_DROOP, state.lightCoords));
 		poseStack.popPose();
 	}
