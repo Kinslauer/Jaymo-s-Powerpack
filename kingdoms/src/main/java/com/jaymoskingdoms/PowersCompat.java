@@ -1252,6 +1252,33 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code ZFighterLegendary.mutant(Player)}. */
+	private static java.lang.invoke.@Nullable MethodHandle legendary;
+	private static boolean lookedForLegendary;
+
+	/** Whether {@code player} is a legendary Warrior-born (born with the mutation); false without Powers. */
+	public static boolean legendary(Player player) {
+		if (!lookedForLegendary) {
+			lookedForLegendary = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					legendary = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.ZFighterLegendary"),
+						"mutant", java.lang.invoke.MethodType.methodType(boolean.class, Player.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' legendary line (older Powers?)", e);
+				}
+			}
+		}
+		if (legendary == null) {
+			return false;
+		}
+		try {
+			return (boolean)legendary.invoke(player);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** (0.7.330) Powers' {@code ZFighterLineage.ape(Player)}. */
 	private static java.lang.invoke.@Nullable MethodHandle ape;
 	private static boolean lookedForApe;
