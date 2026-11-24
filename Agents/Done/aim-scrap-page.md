@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: 
 branch: claude/nervous-kapitsa-f030d7
 with: Claude (side session of the coordinator thread)
@@ -20,3 +20,6 @@ owns:
 - Not an item (Andy removed the aim book from the pack 2026-11-19, PR #1833). Offered as a follow-up.
 - Files owned: LifeAims.java, client/AimPageClient.java, client/ScrapScreen.java, lang/parts/aim-scrap.json, changes/kingdoms/claude-nervous-kapitsa-f030d7.md.
 - Not played; built by CI.
+
+## Notes
+- 2026-11-23 21:53 PR #2064 is merged into master; moved to Agents/Done.
