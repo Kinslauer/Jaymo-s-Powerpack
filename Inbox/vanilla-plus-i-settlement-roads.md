@@ -23,3 +23,4 @@ pr:
 
 ## Notes
 - 2026-11-24 17:58 2026-11-24 PR #1796 merged 2026-11-19: docs/VanillaPlus-Plan.md is on master, start from master. Horse Expert itself shipped in #1796.
+- 2026-11-24 19:42 2026-11-24 Andy picked: King's Roads already covers the port; build only the extra links: every town in a realm gets a road to its capital, besides its nearest neighbours.
