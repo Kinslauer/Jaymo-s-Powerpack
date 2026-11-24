@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: lore-quill-rewrite
 branch: 
 with: 
@@ -28,3 +28,4 @@ owns:
 
 ## Done
 What a player will see: n/a (vault page). Not tested: n/a.
+- 2026-11-24 09:05 No sign of work for 30 min: marked stalled (whoever ran it stopped).
