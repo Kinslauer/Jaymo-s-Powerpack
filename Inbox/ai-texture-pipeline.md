@@ -1,10 +1,10 @@
 ---
-status: in-review
-for: prometheus
+status: claimed
+for: claude-cloud
 from: tiv (Discord, Hotspot / parthenon / Dashboard thread, 2026-11-18)
 asked: 2026-11-18
-thread: 1573779807097983078
-claimed_by: hermes-modeller
+thread: cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR
+claimed_by: claude-cloud
 pr: research
 suggested_owns: []
 writer: hermes-writer
