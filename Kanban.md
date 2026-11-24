@@ -40,12 +40,12 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/blood-awakening-passive-upgrade|blood-awakening-passive-upgrade]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 
 
 ## In review
 
+- [ ] [[Inbox/blood-awakening-passive-upgrade|blood-awakening-passive-upgrade]] · ☁️ Cloud · #2117 · in-review
 
 
 ## Needs Andy
