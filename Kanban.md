@@ -13,7 +13,6 @@ kanban-plugin: board
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for any · open
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · for any · open
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/refmods-16-titles-bloods-tensura|refmods-16-titles-bloods-tensura]] · for any · open
 - [ ] [[Inbox/structure-spawn-rate-wooden-hut|structure-spawn-rate-wooden-hut]] · for coordinator · open
 - [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · for any · open
 - [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · for any · open
@@ -42,6 +41,7 @@ kanban-plugin: board
 - [ ] [[Inbox/refmods-10-outlying-buildings-camps|refmods-10-outlying-buildings-camps]] · project-thread-ojz7uj · claimed
 - [ ] [[Inbox/refmods-11-tectonic-terrain|refmods-11-tectonic-terrain]] · project-thread-ojz7uj · claimed
 - [ ] [[Inbox/refmods-13-body-anim-stations|refmods-13-body-anim-stations]] · project-thread-ojz7uj · claimed
+- [ ] [[Inbox/refmods-16-titles-bloods-tensura|refmods-16-titles-bloods-tensura]] · project-thread-ojz7uj · claimed
 - [ ] [[Agents/project-thread-ojz7uj|project-thread-ojz7uj]] · 💻 Odysseus · running
 
 
