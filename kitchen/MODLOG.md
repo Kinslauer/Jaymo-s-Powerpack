@@ -2789,3 +2789,16 @@ Andy: "why doesnt the bear stay on the hook?" It did stay, but it didn't look li
 - `Hanging.dressStep` runs the hook's steps for a villager (no tool wear, no messages; a player's blessings and perks
   aren't added). `CorpseEntity.killedByPlayer()`, `Butchers.butchering` and `Butchers.wantsCarcass` are new for other mods.
 - Built in CI; not played.
+
+## 0.6.82 (2026-11-24): Vanilla+ picks: Ocean's, Nether's and Ender's Delight (#2102)
+
+- **11 new dishes** after Ocean's, Nether's and Ender's Delight: honey fried kelp, braised sea pickle, kelp-encrusted cod, stuffed cod, seagrass salad, fugu roll, magma gelatin, warped moldy meat, strange eclair, chanterelle stew and drift jelly pudding (`Dish`, with new `Step` ingredients). The strange eclair, chanterelle stew and pudding use Enderscape's fruit, mushrooms and jelly and only load with it.
+- **Ender's Delight ported** (MIT, by Ax3dGaming; `delight/EnderDelight`), chorus included (Andy's "Port all of it, chorus too"):
+  - **End plants** growing wild on the End's stone and on Enderscape's in the Beneath, and on farmland: void pepper (creeps over end stone, sets a pepper when it stops; picking it starts it creeping again; it won't crowd past 12 bushes in a small space), ethereal saffron, the amberveil mushroom and chorusflame (grows in three sizes).
+  - **Knife cuts**: an enderman, endermite or shulker killed with a knife drops an enderman sight, mite crust or shulker mollusk. On the cutting board an ender pearl gives 2 ender shards, an enderman sight 2 sight fragments, a mollusk 2 shulker filets.
+  - **Shulker bowls** (8 from a shell). The End stews, curries and the cereal are served in one and give it back; a hot one gives Comfort like a wooden bowl.
+  - **15 dishes**: chorus juice, chorus stew, crispy skewer, crawling sandwich, twisted cereal, endermite stew, pearl pasta, ender paella, uncanny cookies, amberveil stew, amberveiled curry, chicken curry, steak fries, veil of flames risotto, and the chorus pie (four slices). Plus the **stuffed shulker** feast, cooked in a shulker shell, four servings taken with a shulker bowl. A Perfect cook gives Ender's Delight's good effects; its Nausea stays only on the raw bites.
+  - **Ender Phasing**: a blow carries you a few blocks aside (at most every half second), and water and rain hurt you while it lasts.
+  - **End stone stove** (works as the stove), **chorus crate**, and Ender's Delight's **end house**: an empty cook's house out on the End's highlands and midlands, its stove still lit.
+- Ocean's, Nether's and Ender's Delight art is used under MIT (`textures/item/CREDITS-delight.txt`). Chanterelle stew and drift jelly pudding have our own.
+- Built; not played.
