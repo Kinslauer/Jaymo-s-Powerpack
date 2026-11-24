@@ -55,13 +55,13 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · ☁️ Cloud · #research · claimed
 - [ ] [[Inbox/refmods-12-fishing|refmods-12-fishing]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/refmods-14-sky-light-air|refmods-14-sky-light-air]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/refmods-15-provenance-coins|refmods-15-provenance-coins]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/structures-2-placement-reasons|structures-2-placement-reasons]] · ☁️ Cloud · #2085 · claimed
+- [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · ☁️ Cloud · #2090 · claimed
 
 
 ## In review
