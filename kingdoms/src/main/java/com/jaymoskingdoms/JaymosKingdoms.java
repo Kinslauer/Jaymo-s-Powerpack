@@ -390,6 +390,11 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.497) locks and keys: fitted locks, night locks on townsfolk's homes and shops, the key ring (and their attachments)
 		LOGGER.debug("locks attachments: {} {} {}", Locks.LOCKS, Locks.WORN_KEYS, NightLocks.INDEX);
 		Locks.register();
+		// (where things came from, stolen marks, heirlooms, the strongbox)
+		Provenance.register();
+		StolenGoods.register();
+		Heirlooms.register();
+		Strongbox.register();
 		NightLocks.register();
 		// 0.7.126: crooks among the villagers (theft, muggings, arson, pickpockets, scams) and their attachments
 		LOGGER.debug("crook attachments: {} {} {}", Crooks.CROOK, Crooks.NOTORIETY, Crooks.HOME);

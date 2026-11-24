@@ -220,6 +220,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 					: "tooltip.jaymoskingdoms.fitted.other").withStyle(net.minecraft.ChatFormatting.GRAY));
 			}
 		});
+		// where a thing came from, stolen marks, heirlooms (Provenance)
+		ProvenanceTooltips.register();
 		FamiliarClient.register();
 		CombatArtKey.register();
 		// (0.7.381) Weapon Forms: the belt strip, the chain counter, the belt screen

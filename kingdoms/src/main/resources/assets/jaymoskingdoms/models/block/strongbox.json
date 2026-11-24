@@ -1,0 +1,24 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "jaymoskingdoms:block/strongbox_side",
+    "side": "jaymoskingdoms:block/strongbox_side",
+    "top": "jaymoskingdoms:block/strongbox_top",
+    "front": "jaymoskingdoms:block/strongbox_front",
+    "bottom": "jaymoskingdoms:block/strongbox_bottom"
+  },
+  "elements": [
+    {
+      "from": [2, 0, 3],
+      "to": [14, 9, 13],
+      "faces": {
+        "north": {"uv": [2, 4, 14, 13], "texture": "#front"},
+        "south": {"uv": [2, 4, 14, 13], "texture": "#side"},
+        "east": {"uv": [3, 4, 13, 13], "texture": "#side"},
+        "west": {"uv": [3, 4, 13, 13], "texture": "#side"},
+        "up": {"uv": [2, 3, 14, 13], "texture": "#top"},
+        "down": {"uv": [2, 3, 14, 13], "texture": "#bottom", "cullface": "down"}
+      }
+    }
+  ]
+}
