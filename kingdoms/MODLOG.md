@@ -17017,3 +17017,9 @@ Andy: "can i have you work on npc pathing? they get stuck in water or on buildin
 - **Hand in at the board**: use the town's board with your copy or the goods in hand to hand finished work in there when its poster is away (no hearts with them that way; a criminal still has to be brought to the poster).
 - New: BoardTerms, Decrees, BoardTermsClient, the decree item and papers (our own art), lang part board-terms. Changed: Economy, TownNotices, BoardWork, Bounties, BountyBoard (notice looks 3-6), Quests (turn-in shared with the board), Upkeep.
 - Built by CI only; not played.
+
+## 0.12.47 (2026-11-24): Pillagers carry lanterns at night, and take one down when they have none (#2072)
+
+- Andy: "pillagers should also use their lanterns at night, or break them in the world and take them with if they run out". At night, where it's dark, a pillager now carries a light in its off hand (its crossbow stays in the main), as villagers and folk do: a light from its own inventory, else a lantern (or torch) from its camp's loot pile. With none of those, it walks to the nearest lit lantern set in the world within 16 blocks (its camp's fence posts, a village's, a player's), breaks it and carries it off with the fuel it had left. Not with mob griefing off. At dawn the lantern is put away and kept for the next night, so each pillager takes down at most one.
+- Pillagers still see in the dark as before; the lantern lights them up (with LambDynamicLights) so they're seen coming.
+- `NightLights.bearer`, `fromPocket`, `faction` (a camp illager's camp), `Source.HUNG`, `hung`, `unhang`. Built by CI only; not played in game.
