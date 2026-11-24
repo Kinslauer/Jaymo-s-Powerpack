@@ -1,8 +1,0 @@
-# Red (unparryable) swings rarer and slower
-- Andy: "armed enemies should [not] attack with unblockables EVERY attack anymore, it should be closer to 20%. and the windup should be longer so players can react".
-- **Two-handed weapons**: every swing used to glint red and couldn't be parried. Now each swing is red only 1 time in 5 (`MobCombat.RED_CHANCE`), rolled as it starts; the rest glint white and can be parried. Damage and reach are unchanged. A one-handed weapon's heavy move already came only now and then (`HEAVY_PICK_CHANCE`) and stays red when it's thrown; a heavy move with nothing plainer to swap for now rolls too.
-- **Heavy hitters' plain blows** (MCA villagers with 10+ attack damage, fists or a weapon Better Combat doesn't know): red 1 time in 5 instead of every blow.
-- **Longer red wind-up**: a red swing winds up about 1.6x longer than the same white swing, at least 18 ticks and at most 30 (`RED_WINDUP_SCALE`, `RED_MIN_WINDUP`, `RED_MAX_WINDUP`). The whole swing and its animation are stretched so the blow still falls on the animation's hit; the red star (Powers' `AttackTells.glint` with a wind-up), the crosshair cue and the bell match the longer wait. Small spiders are still struck at once.
-- **Bands that read a parrier** (`FoeLore`): they used to make every blow unparryable for a minute, with a white glint. Now any of their blows is red 35% of the time (`READ_RED_CHANCE`), glinting red and winding up long like any other red swing. Their feints are unchanged.
-- Unchanged: a duellist's or Fortress Knight's closing lunge (red when its move is heavy), bosses' and captains' own red moves, guns (always red, blockable, never parried).
-- Built; not played.
