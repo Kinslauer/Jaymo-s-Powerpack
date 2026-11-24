@@ -24,3 +24,5 @@ owns:
 
 ## Notes
 - 2026-11-23 16:24 PR #2046 is merged into master; moved to Agents/Done.
+- **Purse icon and money bags (PR #2063, branch claude/purse-icon-money-bags):** Andy's picks from Numismatic Overhaul. With a coin purse worn, a purse in the inventory lists every coin you carry by currency; chests now and then hold a filled coin purse. CI green, not played.
+- **Banks:** started on `claude/realm-banks` (WIP, never built) and handed to the coordinator: `Inbox/realm-banks-finish.md`.
