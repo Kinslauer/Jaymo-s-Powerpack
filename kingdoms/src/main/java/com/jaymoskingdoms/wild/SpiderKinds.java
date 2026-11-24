@@ -561,9 +561,9 @@ public final class SpiderKinds {
 		boolean perched = level.getBlockState(spider.blockPosition().below()).getBlock() instanceof LeavesBlock;
 		if (target == null) {
 			if (perched) {
-				// lying in wait up there; a jumping spider hunts by sight, day or night
+				// lying in wait up there; it drops on prey only in the dark (by day it lets players be, as the game's spiders do)
 				spider.getNavigation().stop();
-				if (spider.tickCount % 10 == 0) {
+				if (spider.tickCount % 10 == 0 && SpiderMinds.dark(spider)) {
 					Player below = level.getNearestPlayer(spider.getX(), spider.getY() - PERCH_WATCH * 0.5, spider.getZ(), PERCH_WATCH,
 						p -> p instanceof Player pl && !pl.isCreative() && !pl.isSpectator() && spider.getY() - pl.getY() >= LEAP_ABOVE && spider.hasLineOfSight(pl));
 					if (below != null) {
