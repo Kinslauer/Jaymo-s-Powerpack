@@ -16738,3 +16738,14 @@ Andy (2026-11-24, a screenshot of a lone wheat field on a desert shore): "these 
 - A costume's suit or the symbiote's covers every limb, so stand-in limbs under it go unseen unless the villager is sharp-eyed. A masked player's blood is still never used, and what folk remember of a masked look is kept apart from your face.
 - `PowersCompat.symbioteSuit` and `costumeShown` read Powers' `WebSymbiote.suitShown`/`bulked` and `Costume.shown`.
 - Built and compiled; not played.
+
+## 0.12.23 (2026-11-24): gear talk - bauble themes, knights and colours, two-tag lines, changes and gossip (#2078)
+
+- Steps 3 to 5 of `docs/Gear-Talk-Plan.md`, finishing Andy's gear talk picks.
+- **Themes from what you wear** (armour slots, harness and baubles), read from item tags `jaymoskingdoms:gear/<theme>` so any mod or datapack can add to them: holy (cross necklace), jewels (gem amulet, circlet, ring, bracelet, golden hook), fae (bottled fairy), sky-made (cloud in a bottle, featherfall cloak, gravitite, zanite, neptune and arkenium armour), beastly (claws, kitty slippers, owl mask), grim (withered bracelet, vampiric glove, obsidian skull, thorn pendant), tradesman (smithing gloves, smelter's bracer, toolbelts, work hats), fool (jester's cap and cushion), lucky (rabbit's foot, lucky scarf, heartstone, totems), brawler (brawler's and thrower belts, iron knuckles, ram bracer, fire gauntlet), delver (delver's ring, diver's circlet, reed breather, flippers).
+- **Knights, colours and rags**: 5 or more pieces of plate make you a knight (gilt plate reads as a lord). A realm's arms on your tabard, or its colours, are read against the listener's realm: their own (welcome, and the watch's nod), an enemy's at war with theirs (anger, and the watch's threat), or another realm's (named in the line). No armour and no harness at all makes you ragged.
+- **Two-tag lines** come before any other: mask with a Frostborn arm, holy sign with a grim charm, jewels with rags, a knight on a stand-in limb, a fool's cap with a realm's arms, a scouter with a fairy.
+- **Changed since last time**: a villager who remarked on something notices when it changes (a stump fitted, wood swapped for a Frostborn limb, a limb lost, a knight in rags, rags turned to plate) and says so.
+- **Gossip ahead of you**: what one villager remarks on, up to 6 neighbours within 32 blocks hear of. When they first see it for themselves, they greet you by your look ("So you're the one with the glass eye. Word gets about."), in their words only, never over your head. Rumours are kept under the name you're known by, so a masked look is never tied to your face. Rumours are not saved over a restart.
+- 49 more reactions with bubbles and "Have a word" talks, 5 change lines, 3 gossip lines and 23 look names (93 reactions in all).
+- Built and compiled; not played.
