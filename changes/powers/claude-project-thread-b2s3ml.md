@@ -1,3 +1,0 @@
-# players' limbs twice as tough
-- **Players' limbs** (arms, legs, feet) hold twice the damage before they break or a blow severs them: arms 16, legs 24, feet 16 on 20 health (were 8/12/8). Falls land on the feet first, so short drops no longer break legs. Head and body are unchanged, and mobs keep their old limbs. Saved wounds keep their share, so a half-hurt leg stays half hurt. Limbs still mend whole in the same time by themselves; dressings and other fixed-point heals mend a smaller share of a player's limb now. (`BodyPlan.Pools.PLAYER_LIMBS`, `BodyPlan.share(index, entity)`)
-- Not built or played.

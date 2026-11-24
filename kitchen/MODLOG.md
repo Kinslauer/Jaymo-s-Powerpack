@@ -2802,3 +2802,8 @@ Andy: "why doesnt the bear stay on the hook?" It did stay, but it didn't look li
   - **End stone stove** (works as the stove), **chorus crate**, and Ender's Delight's **end house**: an empty cook's house out on the End's highlands and midlands, its stove still lit.
 - Ocean's, Nether's and Ender's Delight art is used under MIT (`textures/item/CREDITS-delight.txt`). Chanterelle stew and drift jelly pudding have our own.
 - Built; not played.
+
+## 0.6.83 (2026-11-24): thirst lasts twice as long (#2119)
+
+- **Thirst** drains half as fast: a point of water every 150 s at rest (was 75 s), and jumping, sprinting, mining and attacking cost half the water they did (8 exhaustion to a point, was 4). Heat, swimming and the Nether still speed it up by the same shares. (`Thirst.DRAIN`, `Thirst.EXHAUSTION_POINT`)
+- Not built or played; only two constants changed.
