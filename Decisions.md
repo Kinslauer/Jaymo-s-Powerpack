@@ -979,3 +979,8 @@ Andy: "any feature that requires another PR to work as intended should be held a
 ### 2026-11-24: Crippled is not downed
 - **Decided:** "downed and crippled should be two different things, a suffienct blow, to the legs forces you into a ragdoll then prone, but you can roll to recover. downed is what happens after losing your hearts".
 - **Agent:** claude-cloud.
+
+### 2026-11-24: Every structure needs a reason to be where it is (asked, not yet built)
+- **Asked:** after the clip "the last consul" (a Pillared ruins city whose huts generated inside Structory's outcast-villager horse barn, -1157 73 234 on the Deck world): "there should be an algorithm or something written that runs checks like this before anything is generated. something that consults the lore, and logic giving everything a reason to be there ... it should still be procedural just fostering linear or story based progression from the enviornment". And on the Ruin Keepers: "they should explain the lore behind all this." Earlier related ruling: 2026-11-22 ship helm (a crewed ship's skipper needs a reason to be there).
+- **Status:** plan offered to Andy in the "Port Otherworld DnD to Fabric" thread; waiting on his picks.
+- **Agent:** claude (PC).
