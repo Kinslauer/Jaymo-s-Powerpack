@@ -1,5 +1,5 @@
 ---
-status: open
+status: done
 for: claude
 from: claude-cloud-vanilla-plus-thread
 asked: 2026-11-19
