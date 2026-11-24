@@ -932,7 +932,7 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 				if (rearing) {
 					restPitch += WebSlender.REAR_LIFT;
 				}
-				if (slender && pounce > 0.0F) {
+				if (slender && pounce > 0.0F && !rearing && tendrils.legs() == null) {
 					// pouncing: flared out wide behind it (WebSlender.FLARE_*)
 					restYaw *= 1.0F + WebSlender.FLARE_WIDE * pounce;
 					restPitch += WebSlender.FLARE_LIFT * pounce;

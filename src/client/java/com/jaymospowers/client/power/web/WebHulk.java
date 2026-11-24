@@ -564,6 +564,12 @@ final class WebHulk {
 		STRETCHED.put(part, new float[] {frame, part.yScale});
 	}
 
+	/** This part is where the frame shift last moved it (it's been shifted this pose). */
+	static boolean moved(ModelPart part) {
+		float[] was = MOVED.get(part);
+		return was != null && was[0] == part.x && was[1] == part.y && was[2] == part.z;
+	}
+
 	static void move(ModelPart part, float dx, float dy, float dz) {
 		float[] was = MOVED.get(part);
 		if (was != null && was[0] == part.x && was[1] == part.y && was[2] == part.z) {

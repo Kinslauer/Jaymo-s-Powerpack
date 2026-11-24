@@ -48,6 +48,9 @@ public final class WebRedHunt {
 	/** The lunge: from this far out (blocks), this hard (blocks a tick) and this far up, at most once every so many ticks. */
 	static final double LUNGE_MIN = 3.5, LUNGE_MAX = 9.0, LUNGE_SPEED = 1.15, LUNGE_UP = 0.38;
 	static final int LUNGE_EVERY = 50;
+	/** The lunge shakes the screens of those within this many blocks, this hard. */
+	static final double LUNGE_SHAKE_RANGE = 12.0;
+	static final float LUNGE_SHAKE = 0.35F;
 	/** Feeding on what it killed (within {@code FEED_REACH} blocks): its host lasts this much longer, and heals this share. */
 	static final int FEED_TICKS = 900;
 	static final double FEED_REACH = 8.0;
@@ -150,6 +153,8 @@ public final class WebRedHunt {
 			host.syncVelocity = true;
 			hunt.lunged = now;
 			level.playSound(null, host.getX(), host.getY(), host.getZ(), SoundEvents.WARDEN_ATTACK_IMPACT, SoundSource.HOSTILE, 0.8F, 1.4F);
+			// (felt by anyone near, as the symbiote's every move is)
+			com.jaymospowers.core.Shakes.around(level, host.position(), LUNGE_SHAKE_RANGE, LUNGE_SHAKE);
 		}
 		hold(level, host, hunt);
 	}

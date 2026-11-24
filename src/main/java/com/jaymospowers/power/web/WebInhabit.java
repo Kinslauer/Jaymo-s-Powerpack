@@ -194,6 +194,10 @@ public final class WebInhabit {
 				// the red one in a humanoid hunts all it can find (WebRedHunt), and wastes slower while it does
 				WebRedHunt.tick(level, host);
 				hunting = WebRedHunt.hunting(host);
+				if (hunting && host.tickCount % 20 == 0) {
+					// its time runs at the same slower pace while it hunts (once a second: the end time is synced)
+					host.setAttached(HOST, host.getAttachedOrElse(HOST, until) + Math.round(20 * (1.0F - WebRedHunt.HUNT_DECAY_SHARE)));
+				}
 				until = host.getAttachedOrElse(HOST, until);
 			}
 			if (now >= until) {
