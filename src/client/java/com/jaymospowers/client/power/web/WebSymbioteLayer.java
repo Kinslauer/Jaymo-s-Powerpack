@@ -39,6 +39,8 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 	private final WebHulk.Model hulk;
 	/** Its head (WebBigHead), over the big body's own. */
 	private final WebBigHead.HeadModel bigHead;
+	/** The red strain's body, worn in the big body's place (WebSlender). */
+	private final WebSlender.Model slender;
 	/** The plain suit sits just over the skin (not on it, where it would flicker against it); the goo just under it. */
 	private static final float SKIN_GAP = 0.12F, GOO_GAP = 0.06F;
 	private final PlayerModel suitWide;
@@ -50,6 +52,7 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 		super(renderer);
 		this.hulk = new WebHulk.Model();
 		this.bigHead = new WebBigHead.HeadModel();
+		this.slender = new WebSlender.Model();
 		this.suitWide = suitModel(SKIN_GAP, false);
 		this.suitSlim = suitModel(SKIN_GAP, true);
 		this.gooWide = suitModel(GOO_GAP, false);
@@ -57,6 +60,7 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 		this.suitVeinsWide = suitModel(SKIN_GAP + VEIN_GAP, false);
 		this.suitVeinsSlim = suitModel(SKIN_GAP + VEIN_GAP, true);
 		WebSuitGrowth.register(this.hulk, WebSuitGrowth.Role.HULK);
+		WebSuitGrowth.register(this.slender, WebSuitGrowth.Role.SLENDER);
 		for (PlayerModel model : new PlayerModel[] {this.suitWide, this.suitSlim, this.suitVeinsWide, this.suitVeinsSlim}) {
 			WebSuitGrowth.register(model, WebSuitGrowth.Role.SUIT);
 		}
@@ -88,8 +92,7 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 			}
 			// (no tongue on the plain suit: only the big body has one, Andy)
 			if (high == 2) {
-				coloredCutoutModelCopyLayerRender(this.hulk, WebStrainLook.texture(WebHulk.TEXTURE, state), poseStack, collector, lightCoords, state, -1, 1);
-				WebBigHead.submit(poseStack, collector, lightCoords, state, this.getParentModel(), this.bigHead);
+				this.big(poseStack, collector, lightCoords, state);
 			}
 			return;
 		}
@@ -100,8 +103,7 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 				coloredCutoutModelCopyLayerRender(slim ? this.suitSlim : this.suitWide, WebStrainLook.texture(TEXTURE, state), poseStack, collector, lightCoords, state, -1, 1);
 			}
 			// the big body, whether or not the suit was showing
-			coloredCutoutModelCopyLayerRender(this.hulk, WebStrainLook.texture(WebHulk.TEXTURE, state), poseStack, collector, lightCoords, state, -1, 1);
-			WebBigHead.submit(poseStack, collector, lightCoords, state, this.getParentModel(), this.bigHead);
+			this.big(poseStack, collector, lightCoords, state);
 			return;
 		}
 		if (state.getData(WebSymbioteClient.SUIT) == null) {
@@ -124,6 +126,20 @@ final class WebSymbioteLayer extends RenderLayer<AvatarRenderState, PlayerModel>
 			// still feral: its veins show through the suit
 			coloredCutoutModelCopyLayerRender(slim ? this.suitVeinsSlim : this.suitVeinsWide, veins(state), poseStack, collector, lightCoords, state, -1, 1);
 		}
+	}
+
+	/** The big body with its head, or the red strain's slender body (its eyes glowing) in its place. */
+	private void big(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, AvatarRenderState state) {
+		if (WebSuitGrowth.slender(state)) {
+			coloredCutoutModelCopyLayerRender(this.slender, WebSlender.TEXTURE, poseStack, collector, lightCoords, state, -1, 1);
+			if (!state.isInvisible) {
+				collector.order(2).submitModel(this.slender, state, poseStack, net.minecraft.client.renderer.rendertype.RenderTypes.eyes(WebSlender.GLOW),
+					net.minecraft.util.LightCoordsUtil.FULL_BRIGHT, net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, state.outlineColor);
+			}
+			return;
+		}
+		coloredCutoutModelCopyLayerRender(this.hulk, WebStrainLook.texture(WebHulk.TEXTURE, state), poseStack, collector, lightCoords, state, -1, 1);
+		WebBigHead.submit(poseStack, collector, lightCoords, state, this.getParentModel(), this.bigHead);
 	}
 
 	/** The veins' frame now: cycling, so they pulse and writhe. */

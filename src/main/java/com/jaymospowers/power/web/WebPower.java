@@ -360,6 +360,7 @@ public final class WebPower implements Power {
 		WebSymbioteBlob.init();
 		WebBehemoth.register();
 		WebInhabit.register();
+		WebRedHunt.register();
 		WebAscension.register();
 		WebDarkSense.register();
 		WebShield.register();
