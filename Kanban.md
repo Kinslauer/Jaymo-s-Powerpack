@@ -50,11 +50,11 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-l-carts-check|vanilla-plus-l-carts-check]] · for 💻 Odysseus · open
+- [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for any · open
 
 
 ## Being built
 
-- [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · changeling-voice-mimic · claimed
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · ☁️ Cloud · #research · claimed
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/refmods-12-fishing|refmods-12-fishing]] · ☁️ Cloud · claimed
@@ -66,6 +66,7 @@ kanban-plugin: board
 
 ## In review
 
+- [ ] [[Inbox/refmods-01-felling|refmods-01-felling]] · ☁️ Cloud · #2089 · in-review
 
 
 ## Needs Andy
