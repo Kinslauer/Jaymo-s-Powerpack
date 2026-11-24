@@ -36,7 +36,8 @@ import org.jspecify.annotations.Nullable;
  * {@link HeritageVariants.Variant#MANTAWING}) come up out of the dark, {@link #COME_MIN} to {@link #COME_MAX} blocks off,
  * up to {@link #MAX_NEAR} at a time. They are MCA villagers of the Tideborn blood, bare but for a trident, tougher than
  * any guard ({@link #HEALTH}, {@link #DAMAGE}), and they go for whatever comes down from above on sight
- * ({@link #SIGHT}): players and any other villager, Tideborn or not. In the water they swim straight at their foe
+ * ({@link #SIGHT}): players and any other villager, Tideborn or not. Your standing with the Deep Ones eases them
+ * ({@link #KIN_FROM}). In the water they swim straight at their foe
  * ({@link #SWIM}; the mantas faster), where the villagers' own legs would only bob them up. They keep to the chasm: one
  * with no player within {@link #GONE} is gone, and none are left after a restart.
  */
@@ -54,6 +55,14 @@ public final class ChasmTideborn {
 	/** Swimming speed (blocks a tick), eels and mantas. */
 	static final double SWIM = 0.16, MANTA_SWIM = 0.22;
 	static final double HEALTH = 40.0, DAMAGE = 6.0;
+	/**
+	 * Your standing with the Deep Ones (Alex's own reputation, -100 to 100, won by trading with them and defending them)
+	 * eases them (Andy: "they should ease up on you as you build relation with the lurkers who stalk you, either through
+	 * trades or defense"): above {@link #WARY_FROM} they only go for you when you come within {@link #WARY_SIGHT}; from
+	 * {@link #KIN_FROM} they leave you be unless you strike one first.
+	 */
+	static final int WARY_FROM = 0, KIN_FROM = 50;
+	static final double WARY_SIGHT = 6.0;
 	static final int TRIES = 12;
 
 	private static final Set<UUID> WILD = new HashSet<>();
@@ -147,6 +156,11 @@ public final class ChasmTideborn {
 			return;
 		}
 		LivingEntity foe = Rulers.target(wild);
+		if (foe instanceof Player p && wild.tickCount % 20 == 0 && eased(level, wild, p)) {
+			// their standing has eased this one off them
+			wild.getBrain().eraseMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.ATTACK_TARGET);
+			foe = null;
+		}
 		if (foe == null || !foe.isAlive() || wild.tickCount % 20 == 0) {
 			LivingEntity next = foe(level, wild);
 			if (next != null && next != foe) {
@@ -164,6 +178,24 @@ public final class ChasmTideborn {
 		}
 	}
 
+	/** Whether {@code player}'s standing with the Deep Ones keeps {@code wild} off them now (never once they've struck it). */
+	static boolean eased(ServerLevel level, Villager wild, Player player) {
+		if (wild.getLastHurtByMob() == player) {
+			return false;
+		}
+		int standing = standing(level, player);
+		return standing >= KIN_FROM || standing > WARY_FROM && wild.distanceToSqr(player) > WARY_SIGHT * WARY_SIGHT;
+	}
+
+	/** {@code player}'s standing with the Deep Ones, Alex's own count (0 if it can't be read). */
+	static int standing(ServerLevel level, Player player) {
+		try {
+			return com.github.alexmodguy.alexscaves.server.level.storage.ACWorldData.get(level).getDeepOneReputation(player.getUUID());
+		} catch (RuntimeException | LinkageError e) {
+			return 0;
+		}
+	}
+
 	/** The nearest in sight that came down from above: a player in play, or any villager not of the chasm. */
 	private static @Nullable LivingEntity foe(ServerLevel level, Villager wild) {
 		LivingEntity best = null;
@@ -171,6 +203,9 @@ public final class ChasmTideborn {
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, wild.getBoundingBox().inflate(SIGHT),
 			e -> e.isAlive() && (e instanceof Player p && !p.isCreative() && !p.isSpectator() || e instanceof AbstractVillager && !wild(e)))) {
 			double d = wild.distanceToSqr(e);
+			if (e instanceof Player p && eased(level, wild, p)) {
+				continue;
+			}
 			if (d < bestD && wild.hasLineOfSight(e)) {
 				bestD = d;
 				best = e;
