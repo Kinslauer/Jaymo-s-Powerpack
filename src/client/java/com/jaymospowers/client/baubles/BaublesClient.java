@@ -30,6 +30,8 @@ public final class BaublesClient {
 		BondsClient.init();
 		// (0.21.37) every other worn bauble drawn on the body
 		WornLooks.init();
+		// (Village mods patch 5) the trade hats, drawn on the head with their own models
+		TradeHatLayer.init();
 		// (Artifacts) the Artifacts baubles' moves
 		ArtifactBaublesClient.init();
 		BaublesTab.init();

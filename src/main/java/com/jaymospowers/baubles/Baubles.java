@@ -155,6 +155,8 @@ public final class Baubles {
 		// (Motion patch 4) a lantern on a stick, worn on the back with the lantern hung out over the head
 		LANTERN_POLE = bauble("lantern_pole", Kind.BODY, Rarity.COMMON);
 		SKY_MASK = bauble("sky_mask", Kind.HEAD, Rarity.COMMON);
+		// (Village mods patch 5) the village trades' hats, ported from Villager Hats (MIT)
+		TradeHats.init();
 		// (0.20.12) the pink fairy, caught in a bottle
 		Fairies.init();
 		// (Artifacts) the Artifacts mod's 45 baubles, ported (MIT), and where they are found
