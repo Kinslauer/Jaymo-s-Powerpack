@@ -3990,5 +3990,404 @@
 				"name": "jaymospowers:verdant/regrow_3"
 			}
 		]
+	},
+	"dino.tyrannosaurus.ambient": {
+		"sounds": [
+			"jaymospowers:dino/tyrannosaurus_idle1",
+			"jaymospowers:dino/tyrannosaurus_idle2"
+		],
+		"subtitle": "subtitles.jaymospowers.dino.tyrannosaurus.ambient"
+	},
+	"dino.tyrannosaurus.hurt": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/tyrannosaurus_hurt"
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.tyrannosaurus.hurt"
+	},
+	"dino.tyrannosaurus.death": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/tyrannosaurus_death",
+				"attenuation_distance": 64
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.tyrannosaurus.death"
+	},
+	"dino.tyrannosaurus.roar": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/tyrannosaurus_roar",
+				"attenuation_distance": 64
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.tyrannosaurus.roar"
+	},
+	"dino.velociraptor.ambient": {
+		"sounds": [
+			"jaymospowers:dino/velociraptor_idle1",
+			"jaymospowers:dino/velociraptor_idle2"
+		],
+		"subtitle": "subtitles.jaymospowers.dino.velociraptor.ambient"
+	},
+	"dino.velociraptor.hurt": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/velociraptor_hurt"
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.velociraptor.hurt"
+	},
+	"dino.velociraptor.death": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/velociraptor_death"
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.velociraptor.death"
+	},
+	"dino.velociraptor.roar": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/velociraptor_roar",
+				"attenuation_distance": 32
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.velociraptor.roar"
+	},
+	"dino.dilophosaurus.ambient": {
+		"sounds": [
+			"jaymospowers:dino/dilophosaurus_idle1",
+			"jaymospowers:dino/dilophosaurus_idle2"
+		],
+		"subtitle": "subtitles.jaymospowers.dino.dilophosaurus.ambient"
+	},
+	"dino.dilophosaurus.hurt": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/dilophosaurus_hurt"
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.dilophosaurus.hurt"
+	},
+	"dino.dilophosaurus.death": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/dilophosaurus_death"
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.dilophosaurus.death"
+	},
+	"dino.dilophosaurus.roar": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/dilophosaurus_roar",
+				"attenuation_distance": 32
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.dilophosaurus.roar"
+	},
+	"dino.gallimimus.ambient": {
+		"sounds": [
+			"jaymospowers:dino/gallimimus_idle1",
+			"jaymospowers:dino/gallimimus_idle2"
+		],
+		"subtitle": "subtitles.jaymospowers.dino.gallimimus.ambient"
+	},
+	"dino.gallimimus.hurt": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/gallimimus_hurt"
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.gallimimus.hurt"
+	},
+	"dino.gallimimus.death": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/gallimimus_death"
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.gallimimus.death"
+	},
+	"dino.gallimimus.roar": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/gallimimus_roar",
+				"attenuation_distance": 32
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.gallimimus.roar"
+	},
+	"dino.triceratops.ambient": {
+		"sounds": [
+			"jaymospowers:dino/triceratops_idle1",
+			"jaymospowers:dino/triceratops_idle2"
+		],
+		"subtitle": "subtitles.jaymospowers.dino.triceratops.ambient"
+	},
+	"dino.triceratops.hurt": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/triceratops_hurt"
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.triceratops.hurt"
+	},
+	"dino.triceratops.death": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/triceratops_death",
+				"attenuation_distance": 64
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.triceratops.death"
+	},
+	"dino.triceratops.roar": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/triceratops_roar",
+				"attenuation_distance": 64
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.triceratops.roar"
+	},
+	"dino.parasaurolophus.ambient": {
+		"sounds": [
+			"jaymospowers:dino/parasaurolophus_idle1",
+			"jaymospowers:dino/parasaurolophus_idle2"
+		],
+		"subtitle": "subtitles.jaymospowers.dino.parasaurolophus.ambient"
+	},
+	"dino.parasaurolophus.hurt": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/parasaurolophus_hurt"
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.parasaurolophus.hurt"
+	},
+	"dino.parasaurolophus.death": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/parasaurolophus_death",
+				"attenuation_distance": 64
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.parasaurolophus.death"
+	},
+	"dino.parasaurolophus.roar": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/parasaurolophus_roar",
+				"attenuation_distance": 64
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.parasaurolophus.roar"
+	},
+	"dino.brachiosaurus.ambient": {
+		"sounds": [
+			"jaymospowers:dino/brachiosaurus_idle1",
+			"jaymospowers:dino/brachiosaurus_idle2"
+		],
+		"subtitle": "subtitles.jaymospowers.dino.brachiosaurus.ambient"
+	},
+	"dino.brachiosaurus.hurt": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/brachiosaurus_hurt"
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.brachiosaurus.hurt"
+	},
+	"dino.brachiosaurus.death": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/brachiosaurus_death",
+				"attenuation_distance": 64
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.brachiosaurus.death"
+	},
+	"dino.brachiosaurus.roar": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/brachiosaurus_roar",
+				"attenuation_distance": 64
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.brachiosaurus.roar"
+	},
+	"dino.spinosaurus.ambient": {
+		"sounds": [
+			"jaymospowers:dino/spinosaurus_idle1",
+			"jaymospowers:dino/spinosaurus_idle2"
+		],
+		"subtitle": "subtitles.jaymospowers.dino.spinosaurus.ambient"
+	},
+	"dino.spinosaurus.hurt": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/spinosaurus_hurt"
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.spinosaurus.hurt"
+	},
+	"dino.spinosaurus.death": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/spinosaurus_death",
+				"attenuation_distance": 64
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.spinosaurus.death"
+	},
+	"dino.spinosaurus.roar": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/spinosaurus_roar",
+				"attenuation_distance": 64
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.spinosaurus.roar"
+	},
+	"dino.carnotaurus.ambient": {
+		"sounds": [
+			"jaymospowers:dino/carnotaurus_idle1",
+			"jaymospowers:dino/carnotaurus_idle2"
+		],
+		"subtitle": "subtitles.jaymospowers.dino.carnotaurus.ambient"
+	},
+	"dino.carnotaurus.hurt": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/carnotaurus_hurt"
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.carnotaurus.hurt"
+	},
+	"dino.carnotaurus.death": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/carnotaurus_death",
+				"attenuation_distance": 64
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.carnotaurus.death"
+	},
+	"dino.carnotaurus.roar": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/carnotaurus_roar",
+				"attenuation_distance": 64
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.carnotaurus.roar"
+	},
+	"dino.dodo.ambient": {
+		"sounds": [
+			"jaymospowers:dino/dodo_idle1",
+			"jaymospowers:dino/dodo_idle2"
+		],
+		"subtitle": "subtitles.jaymospowers.dino.dodo.ambient"
+	},
+	"dino.dodo.hurt": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/dodo_hurt"
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.dodo.hurt"
+	},
+	"dino.dodo.death": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/dodo_death"
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.dodo.death"
+	},
+	"dino.dodo.roar": {
+		"sounds": [
+			{
+				"name": "jaymospowers:dino/dodo_roar",
+				"attenuation_distance": 32
+			}
+		],
+		"subtitle": "subtitles.jaymospowers.dino.dodo.roar"
+	},
+	"dino.bite": {
+		"sounds": [
+			"jaymospowers:dino/bite"
+		],
+		"subtitle": "subtitles.jaymospowers.dino.bite"
+	},
+	"dino.bite_big": {
+		"sounds": [
+			"jaymospowers:dino/bite_big"
+		],
+		"subtitle": "subtitles.jaymospowers.dino.bite_big"
+	},
+	"dino.step_heavy": {
+		"sounds": [
+			"jaymospowers:dino/step_heavy1",
+			"jaymospowers:dino/step_heavy2"
+		],
+		"subtitle": "subtitles.jaymospowers.dino.step_heavy"
+	},
+	"dino.stomp": {
+		"sounds": [
+			"jaymospowers:dino/stomp"
+		],
+		"subtitle": "subtitles.jaymospowers.dino.stomp"
+	},
+	"dino.knocked_out": {
+		"sounds": [
+			"jaymospowers:dino/knocked_out"
+		],
+		"subtitle": "subtitles.jaymospowers.dino.knocked_out"
+	},
+	"dino.tamed": {
+		"sounds": [
+			"jaymospowers:dino/tamed"
+		],
+		"subtitle": "subtitles.jaymospowers.dino.tamed"
+	},
+	"dino.level_up": {
+		"sounds": [
+			"jaymospowers:dino/level_up"
+		],
+		"subtitle": "subtitles.jaymospowers.dino.level_up"
+	},
+	"dino.eat": {
+		"sounds": [
+			"jaymospowers:dino/eat"
+		],
+		"subtitle": "subtitles.jaymospowers.dino.eat"
+	},
+	"dino.dilophosaurus.spit": {
+		"sounds": [
+			"jaymospowers:dino/spit"
+		],
+		"subtitle": "subtitles.jaymospowers.dino.spit"
+	},
+	"dino.dilophosaurus.frill": {
+		"sounds": [
+			"jaymospowers:dino/frill"
+		],
+		"subtitle": "subtitles.jaymospowers.dino.frill"
+	},
+	"dino.tranq_rifle.fire": {
+		"sounds": [
+			"jaymospowers:dino/dart_fire"
+		],
+		"subtitle": "subtitles.jaymospowers.dino.dart_fire"
+	},
+	"dino.tranq_dart.hit": {
+		"sounds": [
+			"jaymospowers:dino/dart_hit"
+		],
+		"subtitle": "subtitles.jaymospowers.dino.dart_hit"
 	}
 }

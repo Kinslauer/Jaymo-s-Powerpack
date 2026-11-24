@@ -1,0 +1,35 @@
+# How the brachiosaurus moves. Lengths are blocks, angles radians, times seconds.
+# Every key is a field of com.amberage.rig.DinoSpec; anything left out keeps its default.
+quadruped = true
+stride = 4.8
+hipHeight = 5.4
+lieHeight = 1.9
+sitDrop = 2.8
+thighSwing = 0.22
+shinFlex = 0.3
+ankleFlex = 0.2
+footFlex = 0.2
+armSwing = 0.2
+forearmFlex = 0.3
+bob = 0.12
+sway = 0.03
+runLean = 0.0
+tailIdle = 0.035
+tailWalk = 0.05
+jawMax = 0.35
+attackStyle = 2
+biteTime = 1.6
+biteHit = 1.0
+roarTime = 3.2
+specialStyle = 2
+specialTime = 3.0
+specialHit = 2.0
+rear = 0.62
+restNeck = 0.5
+sitThigh = -0.6
+sitShin = 2.15
+sitAnkle = 0.2
+sitFoot = 0.0
+sitArm = -0.05
+sitForearm = 1.6
+sitHand = 0.3

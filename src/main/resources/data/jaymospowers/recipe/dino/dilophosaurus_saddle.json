@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "L": "#jaymospowers:saddle_leather",
+    "S": "minecraft:string"
+  },
+  "pattern": [
+    "LLL",
+    "L L",
+    "S S"
+  ],
+  "result": {
+    "id": "jaymospowers:dilophosaurus_saddle"
+  }
+}

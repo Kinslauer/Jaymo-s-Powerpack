@@ -202,6 +202,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.cloudbottle.CloudBottle.init();
 		// the Verdant World's strange growth: mycotic and pulse forests, the stone garden
 		com.jaymospowers.eden.Eden.init();
+		// Amber Age's dinosaurs, living in the Verdant World's countries
+		com.jaymospowers.dino.Dino.init();
 		com.jaymospowers.ground.Panning.init();
 		com.jaymospowers.rough.SleepingBag.init();
 		com.jaymospowers.rough.ParagliderItem.init();

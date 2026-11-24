@@ -1,0 +1,33 @@
+{
+  "display": {
+    "title": {
+      "translate": "advancements.jaymospowers.dino.tame_dinosaur.title"
+    },
+    "description": {
+      "translate": "advancements.jaymospowers.dino.tame_dinosaur.description"
+    },
+    "icon": {
+      "id": "jaymospowers:raw_dino_meat"
+    }
+  },
+  "criteria": {
+    "tamed": {
+      "trigger": "minecraft:tame_animal",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:entity_properties",
+          "entity": "this",
+          "predicate": {
+            "minecraft:entity_type": "#jaymospowers:dinosaurs"
+          }
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "tamed"
+    ]
+  ],
+  "parent": "jaymospowers:dino/knock_out"
+}
