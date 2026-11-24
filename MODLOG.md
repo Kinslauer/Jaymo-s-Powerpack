@@ -7610,3 +7610,17 @@ following integration task).
 - A dead player looking out of their own severed head goes back to their normal view if the head is taken, instead of staring from where it was. Built by CI only; not played in game.
 - Andy: "you never see the scene because it cuts to black when you die. from now on if you die in this fashion and someone is promoted or otherwise, the cutscene should play before you respawn or are allowed to reincarnate." A film after your death (a Kingdoms captain's scene over your body) now plays on a death that ends the character too, with its sound; the silent black hold and the death screen (Reincarnate, Limbo) come after it, their buttons held until it ends. Before, a final death cut the film and went straight to black. `UltimateCinematic.deathFilm`, `BlackoutHush`, `DeathScreenBlackMixin`. Not played in game.
 - Andy: "upon the killing blow it should still cut to black, but cut back in for the scene, then back out". A film after your death opens on 1.5 seconds of black (silent too on a death that ends the character), cuts in to the scene, and cuts out to the death screen's black. The death screen and its buttons (Reincarnate, Limbo) aren't drawn at all while the film plays. `UltimateCinematic.DEATH_BLACK`. Not played in game.
+
+## 0.26.89 (2026-11-24): Lock-on names the part only with Called Shots; what hurts you is said in your own voice (#2070)
+
+- **Lock-on**: the name of the body part you're aimed at ("Torso" and the rest) shows under the bracket only once you've
+  learned Called Shots (the skill-tree perk that lets you scroll the aim between parts). Before that, no label at all
+  (`LockOnClient.marker`).
+- **What hurt you, said as you'd say it**: the line under the crosshair for a hurt with no attacker is the character
+  reacting, not a label: "That BURNS!" instead of "Hurt: fire", "Too hot... I'm cooking", "So thirsty...", "I'm bleeding
+  out", "Something's moving under my skin", "Freezing...", "Can't breathe!", "Need food...", "What was that?!" and the
+  rest (`HurtCause`, `lang/parts/hurt_cause.json`). Same timing: once per cause, again after 10 seconds. A cause without
+  a line of its own reads "Ugh... <cause>!".
+- **Wounds in your own voice**: "Left arm's bleeding! I need to bind it, or stitch it", and the same for broken,
+  sprained, festering, rotted and both arms broken (`lang/parts/wounds.json`).
+- Built; not played.

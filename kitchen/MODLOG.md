@@ -2759,3 +2759,10 @@ Andy's picks from Legendary Survival Overhaul (ideas and numbers only) and Walk 
 ## 0.6.78 (2026-11-24): A bear stays on the meat hook (#2068)
 
 Andy: "why doesnt the bear stay on the hook?" It did stay, but it didn't look like it. Clients draw a four-legged body that has stopped moving as lying flat on its side at its lowest point, and they didn't know the body was on a hook. A bear hung from a hook two blocks up rests its head on the floor, stops moving at once, and was drawn tipping over onto the floor within half a second. A small animal that had stopped swinging was drawn lying flat in mid-air the same way. Clients now know when a body is on a meat hook (a synced flag, `CorpseEntity#onHook`), and a hung body is always drawn hanging as its points have it.
+
+## 0.6.79 (2026-11-24): Feeling too hot or too cold is said in your own voice (#2070)
+
+- The action-bar lines when your body heat changes read as the character: "Brr... I'm shivering.", "I'm freezing. Need a
+  fire, or warmer clothes.", "The cold's biting into me!", "Phew... I'm sweating.", "I'm overheating. Need shade, or
+  water.", "Heatstroke... my head's swimming." (lang `message.jaymoskitchen.body_heat.*`).
+- Built; not played.
