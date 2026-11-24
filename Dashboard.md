@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 15:25). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 15:30). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -20,12 +20,13 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-42 waiting for a bot, 2 being built, 0 in review: see [[Kanban]].
+43 waiting for a bot, 1 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2098 Illagers speak the Cave Tablets' tongue (Kingdoms, 2026-11-24)
 - [ ] #2097 Where things came from, stolen goods, heirlooms, collectors' prices and a strongbox (Reference Mods patch 15) (Kingdoms, 2026-11-24)
 - [ ] #2095 sit from the knee smoothly, sit still to ride an earthboard (Powers, 2026-11-24)
 - [ ] #2094 Sky, light and air - scorch, lava crust, leaves on water, coloured light (Reference Mods patch 14) (Powers, Kingdoms, 2026-11-24)
@@ -85,8 +86,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2032 A dead player's baubles and web shooters stay on their body (Powers, Kingdoms, Kitchen, 2026-11-23)
 - [ ] #2031 Thrown rocks can crit: faster, and triple damage (Powers, 2026-11-23)
 - [ ] #2030 context keys by the crosshair (Powers, Kingdoms, 2026-11-23)
-- [ ] #2029 Drop attacks: land on a foe from 4+ blocks and they're down (Powers, Kingdoms, 2026-11-23)
-- …and 436 older ones.
+- …and 437 older ones.
 
 ## Health
 
