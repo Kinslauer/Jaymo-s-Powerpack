@@ -143,6 +143,12 @@ public final class Captains {
 	 * gloat and his line on being raised can both be read, on the speaker shot (FILM_TICKS).
 	 */
 	static final int SCENE_TICKS = 150, SCENE_RAISED = 70;
+	/**
+	 * Andy: a captain takes the head of a player he kills at this chance; orcs always do ("they see it as a trophy"). Taken,
+	 * it's the real head if it was cut off and lies within HEAD_REACH blocks, else a copy of it.
+	 */
+	static final float HEAD_TAKING = 0.15F;
+	static final double HEAD_REACH = 12.0;
 	static final double CHEER_RANGE = 20.0;
 	/** (Patch 4) A fallen captain not finished or burned comes back at this chance, after this many days. */
 	static final float RETURN_CHANCE = 0.75F;
@@ -1013,6 +1019,8 @@ public final class Captains {
 		} catch (IllegalArgumentException e) {
 			return;
 		}
+		// (their real head, if it was cut off and lies near: picked up, not copied)
+		PowersCompat.takeHead(mob, UUID.fromString(c.trophy()), HEAD_REACH);
 		mob.setItemSlot(EquipmentSlot.HEAD, head);
 		if (mob instanceof Mob m) {
 			m.setDropChance(EquipmentSlot.HEAD, 1.0F);
@@ -1857,10 +1865,11 @@ public final class Captains {
 		}
 		List<String> slain = new ArrayList<>(c.slain());
 		slain.add(player.getDisplayName().getString());
-		c = c.climbed(c.rank(), c.traits(), player.getStringUUID(), List.copyOf(slain));
+		boolean takes = Rivals.side(c.tribe()) == Rivals.Side.ORC || random.nextFloat() < HEAD_TAKING;
+		c = c.climbed(c.rank(), c.traits(), takes ? player.getStringUUID() : c.trophy(), List.copyOf(slain));
 		Meeting m = c.met().get(player.getStringUUID());
 		c = c.met(player.getUUID(), new Meeting(m == null ? 1 : m.times() + 1, "killed", now));
-		if (killer.getItemBySlot(EquipmentSlot.HEAD).is(Items.PLAYER_HEAD)) {
+		if (takes && killer.getItemBySlot(EquipmentSlot.HEAD).is(Items.PLAYER_HEAD)) {
 			// (the new head goes on in place of the old)
 			killer.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
 		}

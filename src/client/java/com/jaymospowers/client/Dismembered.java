@@ -386,7 +386,13 @@ public final class Dismembered {
 			return;
 		}
 		if (camera instanceof SeveredPart) {
-			return;
+			if (!camera.isRemoved()) {
+				return;
+			}
+			// (the head they were looking out of was taken, as a killer's trophy: back to their own view)
+			minecraft.setCameraEntity(cameraBefore != null && !cameraBefore.isRemoved() ? cameraBefore : player);
+			cameraBefore = null;
+			camera = minecraft.getCameraEntity();
 		}
 		UUID self = player.getUUID();
 		AABB around = player.getBoundingBox().inflate(48.0);

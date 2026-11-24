@@ -479,6 +479,36 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code SeveredPart.takeHead(LivingEntity, UUID, double)}. */
+	private static java.lang.invoke.@Nullable MethodHandle takeHead;
+	private static boolean lookedForTakeHead;
+
+	/**
+	 * {@code taker} picks up player {@code owner}'s own severed head lying loose within {@code reach} (it's gone from the
+	 * ground). False if there's none, or without Powers.
+	 */
+	public static boolean takeHead(LivingEntity taker, java.util.UUID owner, double reach) {
+		if (!lookedForTakeHead) {
+			lookedForTakeHead = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					takeHead = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.SeveredPart"), "takeHead",
+						java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class, java.util.UUID.class, double.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' severed heads", e);
+				}
+			}
+		}
+		if (takeHead == null) {
+			return false;
+		}
+		try {
+			return (boolean)takeHead.invoke(taker, owner, reach);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** Powers' {@code Treatment.tendAll(LivingEntity, boolean)}. */
 	private static java.lang.invoke.@Nullable MethodHandle tendAll;
 	private static boolean lookedForTend;
