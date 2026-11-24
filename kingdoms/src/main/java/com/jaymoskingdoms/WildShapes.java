@@ -80,7 +80,7 @@ public final class WildShapes {
 	static final float ELDER_TIME = 0.5F, TREANT_SIZE = 0.8F, ELEMENTAL_SIZE = 1.2F;
 
 	public static final String SHAPES = "dru_shapes", LONG_KEY = "dru_long", FOXSTAG = "dru_foxstag", MOON = "dru_moon", LAND = "dru_land",
-		PACK = "dru_pack", BARK = "dru_bark", ELDER = "dru_elder";
+		PACK = "dru_pack", BARK = "dru_bark", ELDER = "dru_elder", RITES = "dru_rites";
 	public static final String FOX = "fox", STAG = "stag", TREANT = "treant", ELEMENTAL = "elemental";
 	static final Identifier DEER = Identifier.fromNamespaceAndPath("naturalist", "deer");
 
@@ -372,7 +372,7 @@ public final class WildShapes {
 
 	/** Pack Leader: the wild beasts of the shape's kind about follow, and go for what the Druid fights. */
 	private static void pack(ServerPlayer player, String form) {
-		List<String> kin = Druids.KIN.get(form);
+		List<String> kin = Druids.kin(form);
 		if (kin == null) {
 			return;
 		}
@@ -381,21 +381,26 @@ public final class WildShapes {
 			? player.getLastHurtMob() : player.getLastHurtByMob();
 		for (PathfinderMob beast : level.getEntitiesOfClass(PathfinderMob.class, player.getBoundingBox().inflate(PACK_RANGE),
 			b -> b.isAlive() && !Druids.standIn(b) && kin.contains(FoeStudy.kind(b)) && !(b instanceof OwnableEntity o && o.getOwnerReference() != null))) {
-			if (beast.getTarget() == player) {
-				beast.setTarget(null);
-			}
-			if (foe != null && foe != beast && foe.isAlive() && foe.distanceTo(player) < PACK_RANGE) {
-				beast.setTarget(foe);
-				if (beast.getAttribute(Attributes.ATTACK_DAMAGE) == null) {
-					// a beast that never fights (the stag's deer) has no attack of its own: it charges and butts
-					beast.getNavigation().moveTo(foe, 1.4);
-					if (beast.distanceTo(foe) < PACK_BUTT_REACH) {
-						foe.hurtServer(level, level.damageSources().mobAttack(beast), PACK_BUTT);
-					}
+			aid(level, beast, player, foe, PACK_RANGE);
+		}
+	}
+
+	/** A beast at the Druid's side: it stops hunting them, goes for {@code foe} (if within {@code range}), or comes to heel. */
+	static void aid(ServerLevel level, PathfinderMob beast, ServerPlayer player, @Nullable LivingEntity foe, double range) {
+		if (beast.getTarget() == player) {
+			beast.setTarget(null);
+		}
+		if (foe != null && foe != beast && foe.isAlive() && foe.distanceTo(player) < range) {
+			beast.setTarget(foe);
+			if (beast.getAttribute(Attributes.ATTACK_DAMAGE) == null) {
+				// a beast that never fights (the stag's deer) has no attack of its own: it charges and butts
+				beast.getNavigation().moveTo(foe, 1.4);
+				if (beast.distanceTo(foe) < PACK_BUTT_REACH) {
+					foe.hurtServer(level, level.damageSources().mobAttack(beast), PACK_BUTT);
 				}
-			} else if (beast.distanceTo(player) > 4.0) {
-				beast.getNavigation().moveTo(player, 1.2);
 			}
+		} else if (beast.distanceTo(player) > 4.0) {
+			beast.getNavigation().moveTo(player, 1.2);
 		}
 	}
 }

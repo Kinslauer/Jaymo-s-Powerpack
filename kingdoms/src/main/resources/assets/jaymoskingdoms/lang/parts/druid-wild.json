@@ -1,0 +1,15 @@
+{
+  "classtree.jaymoskingdoms.dru_spores": "Circle of Spores",
+  "classtree.jaymoskingdoms.dru_spores.desc": "In a shape you are wrapped in a haze of spores: what stands within four blocks rots and drags. Mushrooms burst from the bodies you pass, and now and then the dead, stitched with fungus, get up and fight for you for a little while.",
+  "classtree.jaymoskingdoms.dru_rites": "Voice in the Wild",
+  "classtree.jaymoskingdoms.dru_rites.desc": "The last rank of the wild: in a shape you can cast nature's rites, with the sprig, a scroll or a staff.",
+  "message.jaymoskingdoms.druid.too_great": "The great beasts answer only the Circle of the Moon.",
+  "message.jaymoskingdoms.druid.call_locked": "Only a Pack Leader can call the wild to their side.",
+  "message.jaymoskingdoms.druid.call_none": "Nothing of that kind answers here.",
+  "screen.jaymoskingdoms.shape_wheel": "Shapes",
+  "screen.jaymoskingdoms.shape_wheel.hint": "Let go to take it. Right click stars it. Sneak and let go calls one. Scroll for more.",
+  "screen.jaymoskingdoms.shape_wheel.old": "One of the old shapes",
+  "screen.jaymoskingdoms.shape_wheel.size.small": "A small beast: quick, frail",
+  "screen.jaymoskingdoms.shape_wheel.size.mid": "A middling beast",
+  "screen.jaymoskingdoms.shape_wheel.size.great": "A great beast: tough, strong, slow"
+}
