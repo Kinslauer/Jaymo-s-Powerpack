@@ -19,16 +19,10 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import org.jspecify.annotations.Nullable;
 
 /**
-<<<<<<< HEAD
  * Gear talk, steps 1 and 2 (docs/Gear-Talk-Plan.md; Andy, 2026-11-24: "players should get tags for the items / baubles they equip,
  * giving the people they meet different things to refer to them about"). What a player wears of the Frostborn's work (a
  * scouter, Rig limbs, the Rig), their stand-in limbs (a smith's wood or iron, or none at all), and a mask, a hood or the
  * symbiote's black suit become tags (a mask marks a vigilante, Lore.md "Costumes and masks"), and the people
-=======
- * Gear talk, step 1 (docs/Gear-Talk-Plan.md; Andy, 2026-11-24: "players should get tags for the items / baubles they equip,
- * giving the people they meet different things to refer to them about"). What a player wears of the Frostborn's work (a
- * scouter, Rig limbs, the Rig) and their stand-in limbs (a smith's wood or iron, or none at all) become tags, and the people
->>>>>>> 17c7127e7159086c257b0ef43f1e7a637d9df232
  * they meet react to the most striking one they can see: a bubble the first time ({@link #tick}), and a "Have a word" talk
  * of its own ({@link TalkBook}, ids {@code gear_<line>}).
  * <p>Which line: {@link #LINES} is read top to bottom for the most striking tag, so each tag's rows go from the most
@@ -58,11 +52,7 @@ final class GearTalk {
 
 	/** The tags, most striking first. */
 	enum Tag {
-<<<<<<< HEAD
 		MORE_MADE, SUITED, MASKED, RIG, STUMP, MADE_LIMB, SCOUTER, MENDED, HOODED;
-=======
-		MORE_MADE, RIG, STUMP, MADE_LIMB, SCOUTER, MENDED;
->>>>>>> 17c7127e7159086c257b0ef43f1e7a637d9df232
 
 		String key() {
 			return name().toLowerCase(java.util.Locale.ROOT);
@@ -116,7 +106,6 @@ final class GearTalk {
 		line("more_made_greedy", Tag.MORE_MADE, l -> l.temper(Temperaments.Temperament.GREEDY)),
 		line("more_made_devout", Tag.MORE_MADE, l -> l.temper(Temperaments.Temperament.DEVOUT)),
 		anyone("more_made", Tag.MORE_MADE),
-<<<<<<< HEAD
 		// the symbiote's black suit
 		line("suited_devout", Tag.SUITED, l -> l.temper(Temperaments.Temperament.DEVOUT)),
 		line("suited_timid", Tag.SUITED, l -> l.temper(Temperaments.Temperament.TIMID)),
@@ -130,8 +119,6 @@ final class GearTalk {
 		line("masked_greedy", Tag.MASKED, l -> l.temper(Temperaments.Temperament.GREEDY)),
 		line("masked_hothead", Tag.MASKED, l -> l.temper(Temperaments.Temperament.HOTHEADED) || l.temper(Temperaments.Temperament.PROUD)),
 		anyone("masked", Tag.MASKED),
-=======
->>>>>>> 17c7127e7159086c257b0ef43f1e7a637d9df232
 		// the Rig
 		line("rig_frost", Tag.RIG, GearTalk::frostborn),
 		line("rig_timid", Tag.RIG, l -> l.temper(Temperaments.Temperament.TIMID)),
@@ -158,15 +145,11 @@ final class GearTalk {
 		line("mended_smith", Tag.MENDED, l -> smith(l) && l.wood() != 0),
 		line("mended_kind", Tag.MENDED, l -> l.temper(Temperaments.Temperament.KINDHEARTED)),
 		line("mended_spiteful", Tag.MENDED, l -> l.temper(Temperaments.Temperament.SPITEFUL)),
-<<<<<<< HEAD
 		anyone("mended", Tag.MENDED),
 		// a hood up, and no mask
 		line("hooded_guard", Tag.HOODED, l -> "guard".equals(l.job())),
 		line("hooded_suspicious", Tag.HOODED, l -> l.temper(Temperaments.Temperament.SUSPICIOUS)),
 		anyone("hooded", Tag.HOODED));
-=======
-		anyone("mended", Tag.MENDED));
->>>>>>> 17c7127e7159086c257b0ef43f1e7a637d9df232
 
 	/** The last look worked out, so a talk's many gates don't each work it out again. */
 	private record Cached(UUID player, int v, long time, @Nullable Look look) {
@@ -214,13 +197,10 @@ final class GearTalk {
 			|| !Harness.get(player, Harness.Slot.HANDS).isEmpty();
 		boolean legsHidden = !player.getItemBySlot(EquipmentSlot.LEGS).isEmpty() || !Harness.get(player, Harness.Slot.THIGHS).isEmpty()
 			|| !Harness.get(player, Harness.Slot.SHINS).isEmpty();
-<<<<<<< HEAD
 		// (a costume's suit or the symbiote's covers every limb)
 		if (PowersCompat.costumeShown(player) || PowersCompat.symbioteSuit(player)) {
 			return 0;
 		}
-=======
->>>>>>> 17c7127e7159086c257b0ef43f1e7a637d9df232
 		return (armsHidden ? 0 : ARMS) | (legsHidden ? 0 : LEGS);
 	}
 
@@ -256,7 +236,6 @@ final class GearTalk {
 		if ((scouter ? 1 : 0) + rigSeen + rig >= MORE_MADE_PIECES) {
 			tags.add(Tag.MORE_MADE);
 		}
-<<<<<<< HEAD
 		if (PowersCompat.symbioteSuit(player)) {
 			tags.add(Tag.SUITED);
 		}
@@ -265,8 +244,6 @@ final class GearTalk {
 		} else if (Identities.hooded(player)) {
 			tags.add(Tag.HOODED);
 		}
-=======
->>>>>>> 17c7127e7159086c257b0ef43f1e7a637d9df232
 		if (rig > 0) {
 			tags.add(Tag.RIG);
 		}
