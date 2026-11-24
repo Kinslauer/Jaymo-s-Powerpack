@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-24 13:50
+updated: 2026-11-24 13:56
 ---
 # Open PRs
 
-9 open, as of 2026-11-24 13:50. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+9 open, as of 2026-11-24 13:56. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2071](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2071) One cobblestone crafts back into 4 stone rocks
@@ -41,12 +41,12 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#2088](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2088) NPCs hold two-handed weapons in both hands
-- **Branch:** `claude/project-thread-mexu8y` · **Updated:** 2026-11-24 (today)
+## [#2090](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2090) Villagers seen at their jobs: tools, forge, stove, butcher at the hook
+- **Branch:** `claude/villagers-visible-jobs` · **Updated:** 2026-11-24 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#2090](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2090) Villagers seen at their jobs: tools, forge, stove, butcher at the hook
-- **Branch:** `claude/villagers-visible-jobs` · **Updated:** 2026-11-24 (today)
-- **Checks:** ⏳ 3 of 4 running
+## [#2091](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2091) NPCs climb out of water and down off buildings; locked-on swings hit baby zombies
+- **Branch:** `claude/project-thread-kz9g9f` · **Updated:** 2026-11-24 (today)
+- **Checks:** ✅ 5 passed
 - **Agent:** no agent note
