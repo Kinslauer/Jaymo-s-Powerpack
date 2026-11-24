@@ -49,7 +49,8 @@ import org.jspecify.annotations.Nullable;
  * rooftops with it: she scrambles up two blocks at a step, jumps high and keeps to the high ground. Hit her
  * {@link #CATCH_HITS} times (or down her) before she is clear and she gives it back and slips away. Catch her three times
  * (one for each night she came) and the third time she stops running and asks for work: she can be hired at once, as any
- * drifter is, with a coin in hand. A player she has taken on isn't visited again. Locked chests are safe from her.
+ * drifter is, with a coin in hand. A player she has taken on isn't visited again. Locked chests are safe from her; a
+ * {@link Strongbox} isn't: she goes for one first, and takes half the coin in a slot.
  */
 final class NightBurglars {
 	/** Ticks between looks (any player), the chance each look finds a night burglar, and the nights between visits to one player. */
@@ -68,6 +69,8 @@ final class NightBurglars {
 	/** Her step up (blocks, added), her speed up (a share), how far (blocks) she runs to a roof each time. */
 	static final double STEP_UP = 1.0, SPEED_UP = 0.25, RUN_FAR = 30.0;
 	static final int LINES = 3;
+	/** A strongbox counts as this much nearer (blocks) than a chest when she picks where to go. */
+	static final double STRONGBOX_PULL = 10.0;
 	static final String TAG = "jaymoskingdoms_night_burglar";
 	static final Identifier STEP_ID = JaymosKingdoms.id("burglar_step"), SPEED_ID = JaymosKingdoms.id("burglar_speed");
 
@@ -200,8 +203,10 @@ final class NightBurglars {
 		double bestD = Double.MAX_VALUE;
 		for (BlockPos p : BlockPos.betweenClosed(around.offset(-REACH_XZ, -REACH_Y, -REACH_XZ), around.offset(REACH_XZ, REACH_Y, REACH_XZ))) {
 			BlockEntity be = level.getBlockEntity(p);
-			if ((be instanceof ChestBlockEntity || be instanceof BarrelBlockEntity) && Locks.lockOn(level, p) == null && gemSlot((Container)be) >= 0) {
-				double d = p.distSqr(around);
+			boolean strongbox = be instanceof Strongbox.Entity;
+			if ((strongbox || (be instanceof ChestBlockEntity || be instanceof BarrelBlockEntity) && Locks.lockOn(level, p) == null) && gemSlot((Container)be) >= 0) {
+				// (a strongbox first: its lock is no bar to her, and it is what she came for)
+				double d = p.distSqr(around) - (strongbox ? STRONGBOX_PULL * STRONGBOX_PULL : 0.0);
 				if (d < bestD) {
 					bestD = d;
 					best = p.immutable();
@@ -214,7 +219,7 @@ final class NightBurglars {
 	private static int gemSlot(Container box) {
 		for (int i = 0; i < box.getContainerSize(); i++) {
 			ItemStack s = box.getItem(i);
-			if (s.is(Items.DIAMOND) || s.is(Items.EMERALD) || s.is(Items.AMETHYST_SHARD)) {
+			if (box instanceof Strongbox.Entity ? !s.isEmpty() : s.is(Items.DIAMOND) || s.is(Items.EMERALD) || s.is(Items.AMETHYST_SHARD)) {
 				return i;
 			}
 		}
@@ -237,7 +242,8 @@ final class NightBurglars {
 						vanish(level, v);
 						return false;
 					}
-					b.gem = box.removeItem(slot, 1);
+					// (from a strongbox, half the coin in a slot)
+					b.gem = box.removeItem(slot, box instanceof Strongbox.Entity ? Math.max(1, box.getItem(slot).getCount() / 2) : 1);
 					level.playSound(null, b.chest, SoundEvents.CHEST_OPEN, SoundSource.BLOCKS, 0.6F, 1.2F);
 					level.playSound(null, b.chest, SoundEvents.CHEST_CLOSE, SoundSource.BLOCKS, 0.6F, 1.4F);
 					if (level.getPlayerByUUID(b.player) instanceof ServerPlayer p) {

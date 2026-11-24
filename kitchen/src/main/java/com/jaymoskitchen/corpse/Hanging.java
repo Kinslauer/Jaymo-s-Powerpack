@@ -7,6 +7,7 @@ import com.jaymoskitchen.ragdoll.RagdollRig;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -350,7 +351,7 @@ public final class Hanging {
 						player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.need_cleaver_head"));
 						return InteractionResult.SUCCESS_SERVER;
 					}
-					takeHead(corpse, level, player, held);
+					takeHead(corpse, level, player, held, dropper(corpse, level));
 					return InteractionResult.SUCCESS_SERVER;
 				}
 				corpse.setButcherStage(HEADLESS);
@@ -362,7 +363,7 @@ public final class Hanging {
 						player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.need_knife"));
 						return InteractionResult.SUCCESS_SERVER;
 					}
-					skin(corpse, level, player, held);
+					skin(corpse, level, player, held, skill(player), dropper(corpse, level));
 					return InteractionResult.SUCCESS_SERVER;
 				}
 				corpse.setButcherStage(SKINNED);
@@ -374,14 +375,14 @@ public final class Hanging {
 						player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.need_knife_gut"));
 						return InteractionResult.SUCCESS_SERVER;
 					}
-					gut(corpse, level, player, held);
+					gut(corpse, level, player, held, dropper(corpse, level));
 					return InteractionResult.SUCCESS_SERVER;
 				}
 				if (!cleaver) {
 					player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.need_cleaver_cut"));
 					return InteractionResult.SUCCESS_SERVER;
 				}
-				cut(corpse, level, player, held);
+				cut(corpse, level, player, held, dropper(corpse, level));
 				return InteractionResult.SUCCESS_SERVER;
 			}
 		}
@@ -404,13 +405,16 @@ public final class Hanging {
 		return InteractionResult.SUCCESS_SERVER;
 	}
 
-	private static void startBleeding(CorpseEntity corpse, ServerLevel level, Player player, ItemStack tool) {
-		tool.hurtAndBreak(1, player, InteractionHand.MAIN_HAND);
+	private static void startBleeding(CorpseEntity corpse, ServerLevel level, @Nullable Player player, ItemStack tool) {
+		wear(tool, player);
 		int ticks = bleedTicks(corpse);
 		corpse.startBleeding(ticks);
 		corpse.jolt(true);
 		level.playSound(null, corpse.getX(), corpse.getY(), corpse.getZ(), SoundEvents.AXE_STRIP.value(), SoundSource.NEUTRAL, 0.8F, 1.4F);
 		level.playSound(null, corpse.getX(), corpse.getY(), corpse.getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.NEUTRAL, 0.7F, 0.6F);
+		if (player == null) {
+			return;
+		}
 		player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.bleeding", (ticks + 19) / 20,
 			Butchery.grateUnder(level, corpse.position(), GRATE_DEPTH + 3) == null ? Component.translatable("message.jaymoskitchen.hook.no_grate")
 				: Component.empty()));
@@ -422,8 +426,8 @@ public final class Hanging {
 		return (shape == RagdollRig.Shape.QUADRUPED || shape == RagdollRig.Shape.HUMANOID) && (corpse.missing() & 1) == 0;
 	}
 
-	private static void takeHead(CorpseEntity corpse, ServerLevel level, Player player, ItemStack tool) {
-		tool.hurtAndBreak(1, player, InteractionHand.MAIN_HAND);
+	private static void takeHead(CorpseEntity corpse, ServerLevel level, @Nullable Player player, ItemStack tool, Consumer<ItemStack> drop) {
+		wear(tool, player);
 		Vec3 at = corpse.headPoint();
 		corpse.setMissing(corpse.missing() | 1);
 		corpse.setButcherStage(HEADLESS);
@@ -433,7 +437,7 @@ public final class Hanging {
 		if (onHead != null) {
 			onHead.accept(corpse, at);
 		}
-		player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.head_off"));
+		tell(player, Component.translatable("message.jaymoskitchen.hook.head_off"));
 	}
 
 	static boolean hasSkin(CorpseEntity corpse) {
@@ -445,17 +449,17 @@ public final class Hanging {
 		return false;
 	}
 
-	private static void skin(CorpseEntity corpse, ServerLevel level, Player player, ItemStack tool) {
+	private static void skin(CorpseEntity corpse, ServerLevel level, @Nullable Player player, ItemStack tool, int rank, Consumer<ItemStack> drop) {
 		int strokes = Math.max(1, SKIN_STROKES + (corpse.oneHanded() ? -1 : corpse.tooBigToLift() ? SKIN_STROKES_BIG : 0)
-			+ (tool.is(POOR_KNIVES) ? SKIN_STROKES_POOR : 0) - (skill(player) - 1));
-		tool.hurtAndBreak(1, player, InteractionHand.MAIN_HAND);
+			+ (tool.is(POOR_KNIVES) ? SKIN_STROKES_POOR : 0) - (rank - 1));
+		wear(tool, player);
 		int made = corpse.addSkinStroke();
 		if (made < strokes) {
 			// the skin comes away a pull at a time
 			corpse.jolt(false);
 			level.playSound(null, corpse.getX(), corpse.getY(), corpse.getZ(), SoundEvents.SHEEP_SHEAR, SoundSource.NEUTRAL, 0.6F, 1.0F + made * 0.1F);
 			level.sendParticles(ParticleTypes.CRIT, corpse.getX(), corpse.getY() + 0.3, corpse.getZ(), 2, 0.3, 0.3, 0.3, 0.05);
-			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.skinning", made, strokes));
+			tell(player, Component.translatable("message.jaymoskitchen.hook.skinning", made, strokes));
 			return;
 		}
 		List<ItemStack> skins = corpse.takeLoot(stack -> stack.is(Butchery.SKINS));
@@ -466,37 +470,38 @@ public final class Hanging {
 				// hung and skinned with a knife, it comes off whole: a prime skin, one more than a rough job gets
 				skin.grow(PRIME_EXTRA);
 			}
-			corpse.spawnAtLocation(level, skin, 0.3F);
+			drop.accept(skin);
 		}
 		// and the trimmings, for mending leather
-		corpse.spawnAtLocation(level, new ItemStack(Butchery.LEATHER_SCRAPS, 1 + level.getRandom().nextInt(SCRAPS_MORE + 1)), 0.3F);
+		drop.accept(new ItemStack(Butchery.LEATHER_SCRAPS, 1 + level.getRandom().nextInt(SCRAPS_MORE + 1)));
 		corpse.setButcherStage(SKINNED);
 		corpse.addDressed(CorpseEntity.DRESSED_SKINNED);
 		corpse.jolt(false);
 		level.playSound(null, corpse.getX(), corpse.getY(), corpse.getZ(), SoundEvents.SHEEP_SHEAR, SoundSource.NEUTRAL, 0.8F, 0.8F);
 		level.sendParticles(ParticleTypes.CRIT, corpse.getX(), corpse.getY() + 0.3, corpse.getZ(), 6, 0.3, 0.3, 0.3, 0.05);
-		player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.skinned"));
+		tell(player, Component.translatable("message.jaymoskitchen.hook.skinned"));
 	}
 
 	/** Opened and emptied before the cuts: its offal. */
-	private static void gut(CorpseEntity corpse, ServerLevel level, Player player, ItemStack tool) {
-		tool.hurtAndBreak(1, player, InteractionHand.MAIN_HAND);
-		corpse.spawnAtLocation(level, new ItemStack(Butchery.OFFAL, corpse.oneHanded() ? OFFAL_SMALL : corpse.tooBigToLift() ? OFFAL_BIG : OFFAL), 0.3F);
+	private static void gut(CorpseEntity corpse, ServerLevel level, @Nullable Player player, ItemStack tool, Consumer<ItemStack> drop) {
+		wear(tool, player);
+		drop.accept(new ItemStack(Butchery.OFFAL, corpse.oneHanded() ? OFFAL_SMALL : corpse.tooBigToLift() ? OFFAL_BIG : OFFAL));
 		corpse.setGutted();
 		corpse.jolt(false);
 		level.playSound(null, corpse.getX(), corpse.getY(), corpse.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.NEUTRAL, 0.8F, 0.7F);
-		player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.gutted"));
+		tell(player, Component.translatable("message.jaymoskitchen.hook.gutted"));
 	}
 
-	private static void cut(CorpseEntity corpse, ServerLevel level, Player player, ItemStack tool) {
-		tool.hurtAndBreak(1, player, InteractionHand.MAIN_HAND);
+	private static void cut(CorpseEntity corpse, ServerLevel level, @Nullable Player player, ItemStack tool, Consumer<ItemStack> drop) {
+		wear(tool, player);
 		int done = corpse.butcherStage() - SKINNED;
 		if (done == 0) {
 			// done properly, hung and bled: what a butcher table gets out of it too
 			corpse.addLoot(corpse.blockExtras());
 			// (Kitchen 0.5.57) and what other mods add for this butcher
 			int more = 0;
-			for (ToIntFunction<Player> extra : EXTRA_CUTS) {
+			// (blessings and perks are a player's: a villager butcher gets the table's extras once)
+			for (ToIntFunction<Player> extra : player != null ? EXTRA_CUTS : List.<ToIntFunction<Player>>of()) {
 				more += extra.applyAsInt(player);
 			}
 			for (int i = 0; i < more; i++) {
@@ -510,21 +515,21 @@ public final class Hanging {
 		level.playSound(null, corpse.getX(), corpse.getY(), corpse.getZ(), SoundEvents.SLIME_SQUISH_SMALL, SoundSource.NEUTRAL, 0.6F, 0.7F);
 		if (cutsLeft <= 1) {
 			for (ItemStack stack : corpse.takeLoot(stack -> true)) {
-				corpse.spawnAtLocation(level, stack, 0.3F);
+				drop.accept(stack);
 			}
 			// (a player's body: what they carried falls out too)
 			for (ItemStack stack : corpse.takeHotbar()) {
-				corpse.spawnAtLocation(level, stack, 0.3F);
+				drop.accept(stack);
 			}
-			corpse.spawnAtLocation(level, new ItemStack(Items.BONE, 1 + level.getRandom().nextInt(BONES_MORE + 1)), 0.3F);
+			drop.accept(new ItemStack(Items.BONE, 1 + level.getRandom().nextInt(BONES_MORE + 1)));
 			if (!corpse.oneHanded() && com.jaymoskitchen.tanning.Tanning.ANIMAL_FAT != null) {
 				// the fat cut away along the way (for tallow, and the tanner)
-				corpse.spawnAtLocation(level, new ItemStack(com.jaymoskitchen.tanning.Tanning.ANIMAL_FAT, 1 + level.getRandom().nextInt(FAT_MORE + 1)), 0.3F);
+				drop.accept(new ItemStack(com.jaymoskitchen.tanning.Tanning.ANIMAL_FAT, 1 + level.getRandom().nextInt(FAT_MORE + 1)));
 			}
 			level.sendParticles(ParticleTypes.CRIT, corpse.getX(), corpse.getY() + 0.3, corpse.getZ(), 20, 0.4, 0.3, 0.4, 0.2);
 			level.playSound(null, corpse.getX(), corpse.getY(), corpse.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.NEUTRAL, 1.0F, 1.0F);
-			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.done"));
-			for (BiConsumer<Player, Entity> listener : ON_DONE) {
+			tell(player, Component.translatable("message.jaymoskitchen.hook.done"));
+			for (BiConsumer<Player, Entity> listener : player != null ? ON_DONE : List.<BiConsumer<Player, Entity>>of()) {
 				listener.accept(player, corpse);
 			}
 			corpse.discard();
@@ -540,9 +545,73 @@ public final class Hanging {
 			out.add(piece);
 		}
 		for (ItemStack piece : out) {
-			corpse.spawnAtLocation(level, piece, 0.3F);
+			drop.accept(piece);
 		}
 		corpse.setButcherStage(corpse.butcherStage() + 1);
-		player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.cut", done + 1, CUTS));
+		tell(player, Component.translatable("message.jaymoskitchen.hook.cut", done + 1, CUTS));
+	}
+
+	/**
+	 * A villager butcher's next step on a carcass hung on a hook ({@link Butchers}' own work for the town): the same steps a
+	 * player takes, with no tool worn and no words, what comes off it handed to {@code drop}. {@code rank} is their skill
+	 * as a player's ranks count it. False once there's nothing left to do (it's gone after the last cut).
+	 */
+	static boolean dressStep(CorpseEntity corpse, ServerLevel level, int rank, Consumer<ItemStack> drop) {
+		if (corpse.isRemoved()) {
+			return false;
+		}
+		ItemStack tool = ItemStack.EMPTY;
+		switch (corpse.butcherStage()) {
+			case FRESH -> startBleeding(corpse, level, null, tool);
+			case BLEEDING -> {
+				// (draining: nothing to do but wait)
+			}
+			case DRAINED -> {
+				if (hasHead(corpse)) {
+					takeHead(corpse, level, null, tool, drop);
+				} else {
+					corpse.setButcherStage(HEADLESS);
+					return dressStep(corpse, level, rank, drop);
+				}
+			}
+			case HEADLESS -> {
+				if (hasSkin(corpse)) {
+					skin(corpse, level, null, tool, rank, drop);
+				} else {
+					corpse.setButcherStage(SKINNED);
+					return dressStep(corpse, level, rank, drop);
+				}
+			}
+			default -> {
+				if (corpse.butcherStage() == SKINNED && !corpse.gutted()) {
+					gut(corpse, level, null, tool, drop);
+				} else {
+					cut(corpse, level, null, tool, drop);
+				}
+			}
+		}
+		return !corpse.isRemoved();
+	}
+
+	/** Whether the next step on {@code corpse} is a skinning knife's (the skin, the guts), not a cleaver's. */
+	static boolean knifeNext(CorpseEntity corpse) {
+		int stage = corpse.butcherStage();
+		return stage == HEADLESS && hasSkin(corpse) || stage == SKINNED && !corpse.gutted();
+	}
+
+	private static Consumer<ItemStack> dropper(CorpseEntity corpse, ServerLevel level) {
+		return stack -> corpse.spawnAtLocation(level, stack, 0.3F);
+	}
+
+	private static void wear(ItemStack tool, @Nullable Player player) {
+		if (player != null) {
+			tool.hurtAndBreak(1, player, InteractionHand.MAIN_HAND);
+		}
+	}
+
+	private static void tell(@Nullable Player player, Component message) {
+		if (player != null) {
+			player.sendOverlayMessage(message);
+		}
 	}
 }

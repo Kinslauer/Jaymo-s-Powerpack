@@ -760,6 +760,11 @@ public final class McaCompat {
 		return LOADED && McaBridge.questioningOpening(villager, player);
 	}
 
+	/** A ruin keeper's opening: the next tale of their city ({@link McaBridge#keeperOpening}). */
+	public static boolean keeperOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
+		return LOADED && McaBridge.keeperOpening(villager, player);
+	}
+
 	/** (2026-11-19) An old druid's own opening: who she is, her grove, her want ({@link McaBridge#druidOpening}). */
 	public static boolean druidOpening(net.minecraft.world.entity.LivingEntity villager, net.minecraft.server.level.ServerPlayer player) {
 		return LOADED && McaBridge.druidOpening(villager, player);

@@ -108,12 +108,13 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
-		if ("root".equals(question) && (McaCompat.dealingOpening(villager, player) || McaCompat.storyOpening(villager, player)
+		if ("root".equals(question) && (McaCompat.keeperOpening(villager, player) || McaCompat.dealingOpening(villager, player) || McaCompat.storyOpening(villager, player)
 			|| McaCompat.outlawOpening(villager, player) || McaCompat.zfighterOpening(villager, player)
 			|| McaCompat.druidOpening(villager, player) || McaCompat.waryOpening(villager, player))) {
 			// (0.7.380) just after something passed between you: they open with that; (0.7.246) a shipmate, or one who knows
 			// how your story started: they open with that, and never as to a stranger; (0.7.397) an outlaw: a curt word;
-			// (0.7.405) a Z Fighter character: a line of their own; (0.7.597) one wary of you: the same cold word as for your name
+			// (0.7.405) a Z Fighter character: a line of their own; (0.7.597) one wary of you: the same cold word as for your name;
+			// a ruin keeper: the next tale of their city
 			ci.cancel();
 			return;
 		}

@@ -142,6 +142,11 @@ public final class DodgeClient {
 		// (0.20.74) Sneak + Alt is the zoom (SneakZoom), not a dodge
 		boolean wanted = (down || clicked) && !keyWasDown && !minecraft.options.keyShift.isDown();
 		keyWasDown = down;
+		if (wanted && com.jaymospowers.client.CrawlTaps.rollUp(player)) {
+			// (Andy) felled by a leg blow: the roll gets you back on your feet
+			wanted = false;
+			landingRoll = 0;
+		}
 		if (wanted && dive(player)) {
 			// (Andy, 2026-11-22) at an edge over deep water, or falling over it: a dive, head first
 			wanted = false;

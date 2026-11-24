@@ -5,7 +5,7 @@
     "mixins": [
         "ServerExplosionNoBuildMixin",
         "StructureGivesWayMixin",
-        "FarmNeedsNeighboursMixin"
+        "PlacementReasonsMixin"
     ],
     "injectors": {
         "defaultRequire": 1

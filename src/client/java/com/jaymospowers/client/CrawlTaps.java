@@ -118,7 +118,7 @@ public final class CrawlTaps {
 				whileSneaking = false;
 			}
 		} else if (free && jump && !jumpWasDown && player.hasAttached(Crawl.CRAWLING) && !Downed.isDowned(player)
-			&& !com.jaymospowers.core.wounds.Breaks.crawlOnly(player) && roomToStand(player)) {
+			&& !com.jaymospowers.core.wounds.Breaks.crawlOnly(player) && !com.jaymospowers.core.wounds.LegFell.felled(player) && roomToStand(player)) {
 			// (0.17.164) flat by the server's say (the downed state's crawl, broken legs), not the key, and nothing holds
 			// you there any more: Jump gets you up, as it does from a crawl of your own (Andy, stuck in the suit)
 			ClientPlayNetworking.send(new Crawl.Key(false));
@@ -188,7 +188,7 @@ public final class CrawlTaps {
 			if (rollLeft == 0 && crawling && minecraft.gui.screen() == null && (rollRight ? right : left)) {
 				startRoll(player, rollRight);
 			}
-		} else if (crawling && minecraft.gui.screen() == null) {
+		} else if ((crawling || felledProne(player)) && minecraft.gui.screen() == null) {
 			boolean pressedLeft = left && !leftWasDown;
 			boolean pressedRight = right && !rightWasDown;
 			if (pressedLeft != pressedRight) {
@@ -205,6 +205,26 @@ public final class CrawlTaps {
 		}
 		leftWasDown = left;
 		rightWasDown = right;
+	}
+
+	/** Felled by a leg blow and lying prone (the server's crawl): a roll is how they get up. */
+	private static boolean felledProne(LocalPlayer player) {
+		return com.jaymospowers.core.wounds.LegFell.felled(player) && player.hasAttached(Crawl.CRAWLING);
+	}
+
+	/**
+	 * The Dodge key while felled: a roll that brings you up, the way the side key held points (right with none). True if
+	 * the press was taken for it.
+	 */
+	public static boolean rollUp(LocalPlayer player) {
+		if (!felledProne(player)) {
+			return false;
+		}
+		if (rollLeft == 0) {
+			Minecraft minecraft = Minecraft.getInstance();
+			startRoll(player, !minecraft.options.keyLeft.isDown() || minecraft.options.keyRight.isDown());
+		}
+		return true;
 	}
 
 	private static void startRoll(LocalPlayer player, boolean right) {

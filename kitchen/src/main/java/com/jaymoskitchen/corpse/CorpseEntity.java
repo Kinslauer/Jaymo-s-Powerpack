@@ -2976,6 +2976,11 @@ public class CorpseEntity extends Entity {
 		return kind == CorpseKind.ANIMAL && !isHostile() && !isMachine();
 	}
 
+	/** Whether a player made this kill (a villager butcher leaves a player's kill for them). */
+	public boolean killedByPlayer() {
+		return killedByPlayer;
+	}
+
 	/** (0.4.35) Records who killed it, for {@link Scavengers}. */
 	void setKiller(@Nullable Entity killer, boolean byPlayer) {
 		this.killer = killer == null ? "" : killer.getStringUUID();

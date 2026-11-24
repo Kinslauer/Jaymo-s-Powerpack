@@ -1,0 +1,37 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymoskingdoms:sunstep_ruins",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:pillared_ruins",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:mound_ruins",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:court_ruins",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:anvil_ruins",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:deep_ruins",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:grove_ruins",
+      "required": false
+    },
+    {
+      "id": "jaymoskingdoms:truth_ruins",
+      "required": false
+    }
+  ]
+}

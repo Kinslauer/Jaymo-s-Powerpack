@@ -120,6 +120,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.sound.SpotSounds.register();
 		// (0.19.63) drips, rain puddles, underwater light shafts, dirty armour's tooltip
 		com.jaymospowers.client.wet.WetClient.init();
+		com.jaymospowers.client.air.AirClient.init();
 		com.jaymospowers.client.wet.ArmourGrimeTextures.init();
 		com.jaymospowers.client.wounds.DressingsLayer.register();
 		com.jaymospowers.client.armory.LodgedLayer.register();

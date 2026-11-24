@@ -7680,3 +7680,80 @@ Andy: "baby zombies are unfightable" (clip: an axe locked onto baby zombies' tor
 - **Sitting holds you still**: while sat (the Sit key, a seat, or looking down), the walking keys do nothing, and being carried or pushed no longer gets you up; Sneak, Jump or a hit still do (`StanceInputMixin`, `Meditate` tick). Seats and held shadowboxing still end if you're moved off.
 - **Ride an earthboard sitting down**: sit on a Gravity user's earthboard (lying where it was dropped, or flown, with your feet on or over it) and you ride it as its passenger, where you sat (kept clear of its rider in the middle), turning with it, wherever they fly it; up to 4 sit on one. Sneak gets you off where you are. A dropped board doesn't crumble while someone sits on it. Sat on one from the knee, you get on it once the kneel's Sneak lets go (`BlockCluster` SEAT / BOARD_HEADING / `positionRider`, `Sitting.boardUnder` / `ride`, `Meditate.sitOnBoard`). The board's drawn turn now comes from the heading the server saw it boarded at, so sitters and blocks turn together.
 - Built; not played.
+
+## 0.26.96 (2026-11-24): Felled by a leg blow: ragdoll, prone, roll to get up (#2083)
+
+- **Crippled is not downed** (Andy: "a suffienct blow, to the legs forces you into a ragdoll then prone, but you can roll
+  to recover. downed is what happens after losing your hearts"): a blow that lands on a leg or foot and takes 35% of your
+  most health (7 of a player's 20), or breaks that leg, takes your legs out from under you. Falls, fire and bleeding
+  never do.
+- A player goes limp into Kitchen's ragdoll, flung a little away from the blow, and once the body comes to rest lies
+  prone. Jump and the crawl key don't stand you up: a roll does (double-tap Left or Right, or press Dodge), and you come
+  up on your feet as it ends. Two broken legs still keep you crawling. A tip card says how. Without Kitchen you go
+  straight to prone.
+- A mob built like a person goes down flat on its back (the leg sweep's fall) and gets up by itself.
+- `LegFell` (new), hooked from `Wounds`' after-damage; `Crawl` (no standing up while felled, a roll brings you up),
+  `CrawlTaps` (side rolls and the Dodge key while felled), `DodgeClient`. The share is `LegFell.BLOW_SHARE`.
+- Built in CI; not played.
+
+## 0.26.97 (2026-11-24): Blasts blow limbs off the downed (#2086)
+
+- Andy: "blasts on downed enemies should blow limbs off". A blast that hits someone already down (and doesn't end
+  them) takes an arm or a leg at twice a standing survivor's chance: certain from about two thirds of the way in to the
+  blast's centre, now and then two. Before, a player's blast on a downed mob only counted as a wound and took nothing,
+  and anyone else's took a limb no more often than from someone standing.
+- `BlastGore.downedBlast` (`DOWNED_LIMB_SCALE`), called from `Downed`'s damage check before the downed state keeps the
+  blow; the usual after-damage roll skips that body for the tick. Killing blasts still gib or take a limb off the corpse
+  as before, and the blast still knocks them out cold (`BlastOut`).
+- Built in CI; not played.
+
+## 0.26.98 (2026-11-24): Fishing extras: don't stand on the hook, solid or light hooks, leaps, turning a run, clean landings, a line that hangs (#2092)
+
+- Reference Mods patch 12 (Better Fishing's and Enchanted Fishing Line's ideas, our own code).
+- **Don't stand on the hook** (F1): standing right over your hook (on a bank, a jetty or a boat, within 2.5 blocks
+  across) or splashing about in the water within 10 blocks keeps the fish away, as wading near it already did. A soft
+  ring of ripples shows round the hook, to you only, while you're too close. A hook down an ice hole is still fished from
+  beside it. `FishBite.spooks`, `STAND_OVER`, `SPLASH_*`, `RIPPLE_*`.
+- **A solid hook or a light one** (F2): strike within a second of the take and the hook's set solid; later, it's only
+  lightly hooked, and a light hook slips out if the line goes slack for a second and a half before the fish is nearly
+  in. Rod pods' rods strike themselves, solid. `FishBite.SOLID_STRIKE_TICKS`, `FishingReal.SLACK_TENSION`,
+  `LIGHT_SLIP_TICKS`.
+- **The leap** (F3): a fish of 3 kg or more (or one of the big kinds) leaps clear of the water, higher than a small
+  fish's hop; keep reeling through the leap and the line snaps. `FishRun.LEAP_KG`, `JUMP_UP_BIG`, `LEAP_GRACE`.
+- **Turn against the run** (F4): look (pull your rod) the other way to a run and it tires the fish faster.
+  `FishRun.against`, `ENERGY_AGAINST`. The fight's hint line says so.
+- **An angler's log of bests** (F5): the journal keeps how cleanly your best of each kind was landed, one to three stars:
+  one off for a light hook, one for taking the line past 85% of its breaking point, one for letting the fish run out
+  most of your spool. Record fish already hang on the trophy plaque. `FishLog.Entry.bestClean`, `FishingReal.clean`.
+- **Line that hangs like rope** (F6): a slack line sags between rod and hook, into the water if that's under it, and
+  lies over the branches, rails and banks it crosses; drawn tight by a fish, it straightens. A tight line run through a
+  tree's leaves or logs snags, and held hard there for a second it breaks. `HangingLine` (client),
+  `FishingHookRendererMixin`, `FishingReal.snagged`, `SNAG_*`.
+- Built in CI; not played. The numbers (how close spooks, how fast a light hook slips, how far a line sags) want a try
+  on the water.
+
+## 0.26.99 (2026-11-24): Sky, light and air - scorch, lava crust, leaves on water, coloured light (Reference Mods patch 14) (#2094)
+
+- **Scorch** (X3): a fire that has burned a few seconds leaves soot on the floor under it and on any wall beside it; it stays about ten minutes after the fire is out and fades (`client/air/AirClient`, `AirDecal`, our own soot sprites).
+- **Lava crust** (X9): still lava lying against rock cools to a dark, cracked crust with glowing seams along that bank, spreading out over ten seconds; it breaks up if the lava or the bank goes or something covers the lava (`LavaCrust`, our own sprites).
+- **Leaves on water** (X2): leaves drop from the trees over ponds and rivers and float, turning slowly, carried by the current and wandering on still water; one that drifts against the bank stays there. In autumn many more fall, in autumn colours, and last longer, so they pile up along the banks (`FloatingLeaf`; the game's own leaf sprites, tinted by the tree's leaves).
+- **Light in its block's colour** (X10): the colour of block light comes from the lights round you: soul fire and soul lanterns blue, redstone torches and ore red, sea lanterns, beacons and end rods a cool white, amethyst and crying obsidian violet, copper torches green, lava deep orange, glowstone and shroomlight golden; torches, lanterns and fires keep the game's warm light. It eases over as you walk between them. The game has one light colour for the whole view, so it's the light of the place you stand in, not each block its own colour (`LightTint`, `LightTintMixin`).
+- **Falling stars on shower nights** (X6): on the peak night of a meteor shower (the Quadrantids, Lyrids, Eta Aquariids, Perseids, Orionids, Leonids and Geminids, on their real dates) stars come down four times as often, the great ones that leave meteoric iron too (`FallingStars.SHOWER_BOOST`).
+- Built; not played.
+
+## 0.27.0 (2026-11-24): the big suit's new head (#2080)
+
+- **The big suit's head** is new: a heavy brow over a long muzzle, a white eye slanted down each side, a hinged jaw set with rows of fangs that stay out (they no longer slide into the gums now and then), and a green thread of spit off the chin. The eyes and the glints on the fangs glow in the dark. It grows in last as the goo builds the big suit and sinks back first when it comes apart; the jaw hangs, breathes, snarls and opens for the tongue the way the old one did. The white and red strains have their own colours of it. The big suit's body, the plain suit and Consume's maw are unchanged.
+- **Colours matched to the body**: the head's dark and red colours are moved onto the big body's own (per kind, each pixel takes the body texture's colour at the same brightness rank), so the head is the body's slate blue with violet veins and the body's red, not the blue-black and crimson it came with. Eyes and teeth keep their own whites.
+- **The tongue** is the head's own: a long red tongue in four segments lying in the jaw, shot out of the mouth every so often (the big suit's flick, every 7 seconds on each wearer's own beat, out in 0.6 s, with the long pause after it, and a few licks just after a meal), stretched out with a ripple down it and its tip whipping, then drawn back in. It stays in while Consume's maw is out. It replaces the big suit's old drawn-on tongue.
+- The head is Andy's own art from his Symbiote mod (his ownership confirmed 2026-11-24), recovered from that mod's jar by `tools/recover_symbiote_head.py` (cubes, UVs, the mouth and eye anchors, the tongue's segments, and only the head's texture rectangles; no body, no other abilities). `tools/gen_web_bighead.py` makes `WebBigHeadMesh` and the four `web_symbiote_bighead*.png` textures from that data and matches the colours; `tools/preview_bighead.py` draws the original, old and new heads, the whole big body with the new head (true colours and brightened), the tongue out and in, and a GIF of one flick. The head's texture is six times as sharp as the rest of the suit.
+- New `WebBigHead` (the model, its placement, the glow, the tongue); `WebHulk` hides the old head's masses, shares its growth maths with the new head (`flowed`, `flow`, `thick`, unchanged for the body) and loses its old big-body tongue (`submitTongue`); `WebSymbioteLayer` draws the head over the big body.
+- Lore placement added to Lore.md as a `(new)` paragraph ("Its own face") for Andy to approve.
+- Built by CI; not played. Not checked in game: how the head sits on the neck while crawling, climbing and in executions (it follows the same head pose as the maw), the glow, the tongue's look in motion, and the scale and offset (`WebBigHead.SCALE`, `OFFSET_Y`, `OFFSET_Z`), which were set from a drawn preview.
+
+## 0.27.1 (2026-11-24): Low-end mode switches itself on for the Steam Deck (#2100)
+
+- **Low-end mode on the Deck**: the first start on a Steam Deck now turns on low-end mode by itself (shaders off, Fast graphics), as on other built-in graphics. The check took the Deck's chip ("AMD Custom GPU 0932 (radeonsi, vangogh, ...)") for a full graphics card, so the Deck ran Complementary shaders.
+- Every install is checked once more under the new rule; one an earlier check already put in low-end mode is left as its player set it (`/lowend off` stays off).
+- LowEndMode: AMD_BUILT_IN also matches "amd custom gpu NNNN" and "vangogh"; CHECKED is checked-v2, with checked-v1's weak results carried over.
+- Built; found in the Deck client test 2026-11-24 (checked-v1=fine on the Deck); the new rule not seen on a Deck yet.
