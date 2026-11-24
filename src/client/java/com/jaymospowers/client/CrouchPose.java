@@ -168,6 +168,12 @@ public final class CrouchPose {
 		return track != null && track.kneeling;
 	}
 
+	/** How far onto the knee the body with this id was last drawn (0 to 1, eased), for a sit that starts from it. */
+	static float kneelShown(int id) {
+		Track track = TRACKS.get(id);
+		return track == null ? 0.0F : smooth(track.kneel);
+	}
+
 	private CrouchPose() {
 	}
 
@@ -248,6 +254,13 @@ public final class CrouchPose {
 		}
 		// (0.18.66) vanilla drops a crouching body V_OFFSET at once: eased in and out instead
 		float drop = V_OFFSET * state.scale;
+		if (state.getData(MeditatePose.KEY) != null) {
+			// sitting down (from the knee, or with Sneak still held): the sit has the body's whole height, vanilla's drop taken back
+			if (state.isCrouching) {
+				poseStack.translate(0.0F, drop, 0.0F);
+			}
+			return;
+		}
 		if (!state.isCrouching) {
 			poseStack.translate(0.0F, -drop * c.bend(), 0.0F);
 			return;
@@ -300,6 +313,16 @@ public final class CrouchPose {
 		if (k <= 0.0F) {
 			return;
 		}
+		kneelLimbs(h, state, c.style(), c.offFree(), k);
+	}
+
+	/**
+	 * On the knee, {@code k} of the way (0 to 1) from the model as it is: the body upright out of vanilla's crouch, the
+	 * legs knelt and the arms posed with what's held ({@code style}). Also the start of a sit from the knee
+	 * ({@link MeditatePose}), which blends on from here.
+	 */
+	static void kneelLimbs(HumanoidModel<?> h, AvatarRenderState state, Style style, boolean offFree, float k) {
+		boolean armsFree = !state.isUsingItem && state.swingAnimation <= 0.0F && free(state.rightArmPose) && free(state.leftArmPose);
 		// up out of vanilla's crouch: the body upright, the parts back where they stand
 		float pitch = KNEEL_LEAN * Mth.DEG_TO_RAD;
 		h.body.xRot = Mth.lerp(k, h.body.xRot, 0.0F);
@@ -320,21 +343,21 @@ public final class CrouchPose {
 			boolean right = state.mainArm == net.minecraft.world.entity.HumanoidArm.RIGHT;
 			ModelPart main = right ? h.rightArm : h.leftArm, off = right ? h.leftArm : h.rightArm;
 			float side = right ? 1.0F : -1.0F;
-			float[] mainPose = switch (c.style()) {
+			float[] mainPose = switch (style) {
 				case PLANT -> PLANT_MAIN;
 				case UPRIGHT -> UPRIGHT_MAIN;
 				case BOW -> BOW_MAIN;
 				case RIFLE -> RIFLE_MAIN;
 				default -> EMPTY_MAIN;
 			};
-			float[] offPose = !c.offFree() ? EMPTY_OFF : switch (c.style()) {
+			float[] offPose = !offFree ? EMPTY_OFF : switch (style) {
 				case PLANT -> PLANT_OFF;
 				case BOW -> BOW_OFF;
 				case RIFLE -> RIFLE_OFF;
 				default -> EMPTY_OFF;
 			};
 			// (held weapons are laid out upright, so the lean is taken back off the arms)
-			float lean = c.style() == Style.EMPTY ? 0.0F : pitch;
+			float lean = style == Style.EMPTY ? 0.0F : pitch;
 			blend(main, mainPose[0] - lean, mainPose[1] * side, mainPose[2] * side, k);
 			blend(off, offPose[0] - lean, offPose[1] * side, offPose[2] * side, k);
 		} else {
@@ -404,7 +427,20 @@ public final class CrouchPose {
 	 * Not while the arms are busy (aiming, drawing, swinging), when they're vanilla's.
 	 */
 	public static void grip(Object renderState, net.minecraft.world.entity.HumanoidArm arm, PoseStack poseStack) {
-		if (!(renderState instanceof AvatarRenderState state) || arm != state.mainArm || !state.isCrouching || state.deathTime > 0.0F) {
+		if (!(renderState instanceof AvatarRenderState state) || arm != state.mainArm || state.deathTime > 0.0F) {
+			return;
+		}
+		MeditatePose.State sit = state.getData(MeditatePose.KEY);
+		if (sit != null) {
+			// sitting down from the knee: the weapon comes up out of the ground as the sit takes the arms
+			float k = MeditatePose.kneelLeft(sit);
+			if (k > 0.0F && sit.style() != Style.EMPTY && !state.isUsingItem && state.swingAnimation <= 0.0F && free(state.rightArmPose)
+				&& free(state.leftArmPose)) {
+				poseStack.rotateDegrees(Axis.XP, -gripDegrees(sit.style()) * k);
+			}
+			return;
+		}
+		if (!state.isCrouching) {
 			return;
 		}
 		Crouch c = state.getData(KEY);
@@ -412,15 +448,19 @@ public final class CrouchPose {
 			|| !free(state.rightArmPose) || !free(state.leftArmPose)) {
 			return;
 		}
-		float degrees = switch (c.style()) {
+		// (about the hand's own side-to-side axis, as FinisherPose turns a weapon)
+		poseStack.rotateDegrees(Axis.XP, -gripDegrees(c.style()) * c.kneel());
+	}
+
+	/** How far the weapon is turned in the hand on the knee, by {@link Style} (degrees, + toward the ground). */
+	private static float gripDegrees(Style style) {
+		return switch (style) {
 			case PLANT -> PLANT_GRIP;
 			case UPRIGHT -> UPRIGHT_GRIP;
 			case BOW -> BOW_GRIP;
 			case RIFLE -> RIFLE_GRIP;
 			default -> 0.0F;
 		};
-		// (about the hand's own side-to-side axis, as FinisherPose turns a weapon)
-		poseStack.rotateDegrees(Axis.XP, -degrees * c.kneel());
 	}
 
 	/** The crouch to lay over this model, or null when it isn't a crouching body or another full-body pose has it. */

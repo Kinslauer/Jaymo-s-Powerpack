@@ -255,6 +255,29 @@ public final class Meditate {
 			&& BROKEN_UNTIL.getOrDefault(player.getUUID(), 0L) <= player.level().getGameTime();
 	}
 
+	/**
+	 * Sits this player on an earthboard (lying, or flown by someone else), riding it from then on wherever it goes. With
+	 * Sneak down (a held kneel's) they sit where they are first, and get on the board once it's let go ({@link #tick}),
+	 * since a passenger holding Sneak is put straight off. True if they sat.
+	 */
+	static boolean sitOnBoard(ServerPlayer player, BlockCluster board) {
+		UUID id = player.getUUID();
+		if (HELD.contains(id) || SITTING.contains(id) || BROKEN_UNTIL.getOrDefault(id, 0L) > player.level().getGameTime() || !player.isAlive()
+			|| player.isSpectator() || player.isPassenger() || player.isInWater() || player.isSleeping() || player.getAbilities().flying
+			|| player.isFallFlying() || Crawl.crawling(player)) {
+			return false;
+		}
+		if (player.isShiftKeyDown()) {
+			if (!player.onGround()) {
+				return false;
+			}
+		} else if (!Sitting.ride(player, board)) {
+			return false;
+		}
+		sitDown(player, null);
+		return true;
+	}
+
 	/** (0.19.67) Sits this player down at once: on {@code seat} (moved onto it, facing its way), or on the ground. */
 	static void sitDown(ServerPlayer player, @Nullable Seat seat) {
 		UUID id = player.getUUID();
@@ -283,6 +306,13 @@ public final class Meditate {
 		if (player.hasAttached(STATE)) {
 			player.removeAttached(STATE);
 		}
+		// off the earthboard they sat on, if they're still on it
+		if (player.getVehicle() instanceof BlockCluster) {
+			player.stopRiding();
+		}
+		if (player.hasAttached(BlockCluster.SEAT)) {
+			player.removeAttached(BlockCluster.SEAT);
+		}
 	}
 
 	/** The kind of meditation this player falls into right now. */
@@ -302,7 +332,9 @@ public final class Meditate {
 	}
 
 	private static boolean canMeditate(ServerPlayer player) {
-		return player.isAlive() && !player.isSpectator() && player.onGround() && !player.isPassenger() && !player.isInWater()
+		// (sat on an earthboard, riding it: it carries you, up off the ground too)
+		boolean board = player.getVehicle() instanceof BlockCluster;
+		return player.isAlive() && !player.isSpectator() && (player.onGround() || board) && (!player.isPassenger() || board) && !player.isInWater()
 			&& !player.isSleeping() && !player.getAbilities().flying && !player.isFallFlying() && !Crawl.crawling(player);
 	}
 
@@ -356,6 +388,19 @@ public final class Meditate {
 				SNEAKING.put(id, sneak);
 			}
 			Seat seat = sat ? SEATED.get(id) : null;
+			// (Andy: "sitting should stop you from moving so you can ride other physics objects") the walking keys do
+			// nothing while you sit (StanceInputMixin), so being moved (carried, pushed) no longer gets you up; only a
+			// held shadowbox and a seat still need you still
+			if (sat && seat == null) {
+				still = true;
+				if (!sneak && !player.isPassenger() && now % 5 == 0) {
+					// sat on an earthboard (or down on it from the knee and Sneak since let go): on it, to ride it
+					BlockCluster board = Sitting.boardUnder(player);
+					if (board != null) {
+						Sitting.ride(player, board);
+					}
+				}
+			}
 			if (!still || !canMeditate(player) || BROKEN_UNTIL.getOrDefault(id, 0L) > now || stoodUp
 				|| seat != null && Sitting.seat(level, seat.pos(), player) == null) {
 				// moved, jumped, hit, stood up or the seat went: a held key settles in again once still; a sit is over until you sit again
