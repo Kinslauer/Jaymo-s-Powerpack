@@ -590,7 +590,8 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		drift = drift.subtract(normal.scale(drift.dot(normal))).scale(WebSymbiote.TETHER_FOLLOW);
 		for (int i = 0; i < wall.points().size() && i + FIRST_TETHER < FIRST_SPARE; i++) {
 			int t = i + FIRST_TETHER;
-			float[] r = ROOTS[t];
+			// (from where they root on the strain's own body, as they're drawn: walkRoots)
+			float[] r = walkRoots(player)[t];
 			net.minecraft.world.phys.Vec3 root = feet.add(left.scale(r[0] / 16.0F * scale)).add(0.0, (24.0F - r[1]) / 16.0F * scale, 0.0)
 				.subtract(ahead.scale(r[2] / 16.0F * scale));
 			float reach = Mth.clamp((age - i) / TETHER_REACH_TICKS, 0.0F, 1.0F);
@@ -608,12 +609,15 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 
 	/** Climbing: the walking tendrils' chords and bows (see {@link WebTendrilWalk#legs}), or null when not climbing. */
 	static float @org.jspecify.annotations.Nullable [] walk(net.minecraft.world.entity.player.Player player, float partial) {
-		// (on the strain's own body they walk it from where they root on it: WebSlender, WebHulk)
+		return WebTendrilWalk.legs(player, partial, walkRoots(player));
+	}
+
+	/** Where the tendrils root, as WebTendrilWalk and tetherLegs measure from: on the strain's own body, its roots (WebSlender, WebHulk). */
+	private static float[][] walkRoots(net.minecraft.world.entity.player.Player player) {
 		if (!com.jaymospowers.power.web.WebSymbiote.armored(player)) {
-			return WebTendrilWalk.legs(player, partial, ROOTS);
+			return ROOTS;
 		}
-		boolean slender = com.jaymospowers.power.web.WebSymbioteStrains.of(player) == com.jaymospowers.power.web.WebSymbioteStrain.RED;
-		return WebTendrilWalk.legs(player, partial, slender ? SLENDER_ROOTS : BIG_ROOTS);
+		return com.jaymospowers.power.web.WebSymbioteStrains.of(player) == com.jaymospowers.power.web.WebSymbioteStrain.RED ? SLENDER_ROOTS : BIG_ROOTS;
 	}
 
 	/**

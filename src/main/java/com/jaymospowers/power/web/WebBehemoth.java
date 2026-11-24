@@ -381,11 +381,12 @@ public final class WebBehemoth {
 			if (now < live.next) {
 				return;
 			}
-			LivingEntity prey = host.getTarget() != null && prey(host, host.getTarget()) && host.getTarget().distanceTo(host) <= SLAM_REACH
+			// (the black and the white only for their needs, as the lash: needs)
+			LivingEntity prey = host.getTarget() != null && prey(host, host.getTarget()) && needs(host, host.getTarget()) && host.getTarget().distanceTo(host) <= SLAM_REACH
 				? host.getTarget() : null;
 			if (prey == null) {
 				java.util.List<LivingEntity> near = level.getEntitiesOfClass(LivingEntity.class, host.getBoundingBox().inflate(SLAM_REACH),
-					e -> prey(host, e) && e.distanceTo(host) <= SLAM_REACH && host.hasLineOfSight(e));
+					e -> prey(host, e) && needs(host, e) && e.distanceTo(host) <= SLAM_REACH && host.hasLineOfSight(e));
 				prey = near.isEmpty() ? null : near.get(host.getRandom().nextInt(near.size()));
 			}
 			if (prey == null) {
