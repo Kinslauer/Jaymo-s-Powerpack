@@ -49,3 +49,4 @@ around for 30s"
   again ("yes").
 - Change note in `changes/powers/<branch>.md`; also update the Wounds rows in `docs/Abilities.md`.
 - Nothing started: this note is the whole brief.
+- 2026-11-24 17:58 2026-11-24 Andy, new ruling on #2056 vs 'any damage': "revert to falls and bleeding dont count, fire knocks unconcious instantly. any corpse. they die after burning for 6s". Being finished by cloud Claude in thread cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR.
