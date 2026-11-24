@@ -4622,6 +4622,7 @@ public final class PowersCompat {
 		}
 	}
 
+<<<<<<< HEAD
 	/** Looked up once: Powers' {@code WebSymbiote.suitShown} and {@code bulked}, and {@code Costume.shown}. */
 	private static java.lang.invoke.@Nullable MethodHandle suitShown, suitBulked, costumeShown;
 	private static boolean coverLooked;
@@ -4678,6 +4679,8 @@ public final class PowersCompat {
 		}
 	}
 
+=======
+>>>>>>> 17c7127e7159086c257b0ef43f1e7a637d9df232
 	/** How much of the Rig {@code player} wears: 0 none, 1 some of it, 2 the whole set (Powers' {@code Rig}); 0 without Powers. */
 	public static int rigWorn(Player player) {
 		lookForGear();
