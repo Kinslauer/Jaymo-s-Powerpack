@@ -993,3 +993,6 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Applies to:** Powers, web symbiote (red strain body, symbiote-taken humanoids, WebInhabit), on top of PR #2080.
 - **Agent:** codex-reference-dinos-venom (handed to a red-symbiote-body worker).
 - **Added (same day):** "the black is not against killing, though it will only do so to satisfy its needs. it ultimately seeks a proper host, (web)". The black strain in a taken humanoid kills to feed, not for sport, and keeps looking for a web slinger to bond; only the red hunts everything.
+### 2026-11-24: Coins patch: strongbox yes, shop stall no
+- **Decided:** From Reference Mods patch 15, build the strongbox at home (G7) but not the shop stall (G6), keeping the 2026-11-23 "no shop block" ruling.
+- **Agent:** claude-cloud.
