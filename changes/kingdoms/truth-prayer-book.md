@@ -1,3 +1,0 @@
-# A Truth Cleric prays from a book, not a holy symbol
-- A Cleric sworn to the Truth uses a book as their medallion: the Book and Quill they now start with instead of the holy symbol, or any blank book (a plain book, or a book and quill with nothing written in it). In either hand it raises the medallion board, a tap casts the bound spell, sneak-tap turns it, the class key works with it, and it counts as the free hand for spells. A blank book and quill held by a Truth Cleric casts instead of opening to write; one with writing in it is an ordinary book. The holy symbol still works for them too.
-- `Clerics.prayerBook` / `Clerics.focus`. Not played in game.
