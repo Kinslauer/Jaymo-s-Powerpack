@@ -69,7 +69,8 @@ public final class PlayerFaces {
 		long time = player.level().getGameTime();
 		int id = player.getId();
 		int period = BLINK_EVERY + Math.floorMod(id * 7919, BLINK_SPREAD);
-		if (Math.floorMod(time + id * 31L, period) < BLINK_TICKS && !player.isSleeping()) {
+		// (and the eyes shut for a moment at a hit: the wince, see BodyFaces)
+		if ((Math.floorMod(time + id * 31L, period) < BLINK_TICKS || com.jaymospowers.client.body.BodyFaces.wincing(player)) && !player.isSleeping()) {
 			com.jaymoskitchen.client.corpse.ClosedEyes.mark(state);
 			state.setData(KEY, null);
 			return;

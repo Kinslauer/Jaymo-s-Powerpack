@@ -424,7 +424,8 @@ public final class Camps {
 			BlockPos at = player.blockPosition().offset((int)Math.round(Math.cos(angle) * r), 0, (int)Math.round(Math.sin(angle) * r));
 			double d = Math.sqrt(Raids.horizontal(at, realm.seat()));
 			if (d < MIN_DISTANCE || d > MAX_DISTANCE || !open(server, level, at) || (illager && !IllagerCamps.land(level, at))
-				|| (goblin && !GoblinVillages.land(level, at)) || (orc && !OrcCamps.land(level, at)) || (pirate && !PirateCoves.land(level, at))) {
+				|| (goblin && !GoblinVillages.land(level, at)) || (orc && !OrcCamps.land(level, at))
+				|| (orc && tries < SITE_TRIES / 2 && !OrcCamps.onBorder(level, at)) || (pirate && !PirateCoves.land(level, at))) {
 				continue;
 			}
 			int floor = pirate ? IllagerBuildings.floor(level, at, PirateCoves.MAX_SPREAD, PirateCoves.RADIUS) : orc ? IllagerBuildings.floor(level, at, OrcCamps.MAX_SPREAD, OrcBuildings.CLEAR_RADIUS)

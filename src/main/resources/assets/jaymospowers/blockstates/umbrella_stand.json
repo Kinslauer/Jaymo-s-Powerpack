@@ -1,0 +1,31 @@
+{
+  "variants": {
+    "contents=empty,kind=0": {
+      "model": "jaymospowers:block/umbrella_stand_empty"
+    },
+    "contents=empty,kind=1": {
+      "model": "jaymospowers:block/umbrella_stand_empty"
+    },
+    "contents=empty,kind=2": {
+      "model": "jaymospowers:block/umbrella_stand_empty"
+    },
+    "contents=closed,kind=0": {
+      "model": "jaymospowers:block/umbrella_stand_closed_0"
+    },
+    "contents=closed,kind=1": {
+      "model": "jaymospowers:block/umbrella_stand_closed_1"
+    },
+    "contents=closed,kind=2": {
+      "model": "jaymospowers:block/umbrella_stand_closed_2"
+    },
+    "contents=open,kind=0": {
+      "model": "jaymospowers:block/umbrella_stand_open_0"
+    },
+    "contents=open,kind=1": {
+      "model": "jaymospowers:block/umbrella_stand_open_1"
+    },
+    "contents=open,kind=2": {
+      "model": "jaymospowers:block/umbrella_stand_open_2"
+    }
+  }
+}

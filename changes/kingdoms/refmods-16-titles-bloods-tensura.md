@@ -1,0 +1,14 @@
+# Deed titles, dragon bloods, gear that asks, the Artificer, monster-born (reference patch 16)
+- **Deed titles** (`DeedTitles`): Wolfbane (25 wolves), the Ferryman (20 ferry crossings), Breaker of Keeps (a realm's ruler slain), worn from the title screen; villagers sometimes greet you by the one you wear.
+- **Gear that asks for skill** (`GearDemands`): a greatsword wants 20 Might, a longbow 20 Agility; short of it, the blow or the arrow lands weaker, and you are told.
+- **Dragon bloods** (`HeritageVariants`, `HeritageKits`, `DragonBreath`): Stormwyrm (storm dragon blood: lightning breath, hurt little by lightning) and Venomscale (acid breath), beside Goldscale and Rimewyrm; each dragon kind's own blood is spared by its kin.
+- **Feats**: Everybody's Friend, Skybound, and Lucky now gives a second chance once a day.
+- **Artificer** (`Artificers`, `trees/ArtificerTree`): a class that reforges gear in hand with amethyst, infuses it with reagents, and brews four elixirs only it knows; five-perk tree.
+- **Found-gear quality by region** (`FoundQuality`): gear found in the Aether comes airy, in the Nether fiery, with a grade of 1 to 3.
+- **Salvage** (`GearSalvage`): broken gear taken apart at a smith for what it was made of.
+- **Named followers** (`NamedFollowers`): a name tag on a goblin or wolf makes it yours; it grows in two stages, costs you strength for days, and a named follower settles a town.
+- **Feasting** (`Feasting`): the goblin people and orcs eat Kitchen's corpses with an empty hand and learn one trick of what it was (eight tricks; more held as you grow).
+- **Reborn a monster** (`MonsterBorn`, `LifeStory.Start.MONSTERBORN`): a locked road, opened by naming a follower; wakes you as a goblin, kobold or slime-born on the existing goblin body, tinted (new `KOBOLD` and `SLIMEBORN` looks), through four stages.
+- **The throne of the tribes** (`DemonThrone`): a monster-born sovereign at the last stage, in good standing with three tribes (goblin and orc among them), takes their throne at their crown's throne; the tribes' war bands then leave the realm be.
+- **Shades** (`Shades`): at a lit soul campfire, sneak with an empty hand to turn the pick through the kinds you have slain, sneak with a bone to pay two levels and call that kind's shade (a glowing thrall, for 40 seconds, two at most).
+- Not tested in game: only compiled.

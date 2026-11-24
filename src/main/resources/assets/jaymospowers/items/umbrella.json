@@ -1,0 +1,39 @@
+{
+  "model": {
+    "type": "minecraft:condition",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "on_true": {
+      "type": "minecraft:model",
+      "model": "jaymospowers:item/umbrella/umbrella_open",
+      "tints": [
+        {
+          "type": "minecraft:custom_model_data",
+          "index": 0,
+          "default": -12951665
+        },
+        {
+          "type": "minecraft:custom_model_data",
+          "index": 1,
+          "default": -1515320
+        }
+      ]
+    },
+    "on_false": {
+      "type": "minecraft:model",
+      "model": "jaymospowers:item/umbrella/umbrella_closed",
+      "tints": [
+        {
+          "type": "minecraft:custom_model_data",
+          "index": 0,
+          "default": -12951665
+        },
+        {
+          "type": "minecraft:custom_model_data",
+          "index": 1,
+          "default": -1515320
+        }
+      ]
+    }
+  }
+}

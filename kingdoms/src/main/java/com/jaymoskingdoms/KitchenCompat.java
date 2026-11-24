@@ -941,6 +941,24 @@ public final class KitchenCompat {
 		}
 	}
 
+	private static net.fabricmc.fabric.api.attachment.v1.@Nullable AttachmentType<Integer> drunkPoints;
+
+	/** Whether {@code player} is at least {@code from} drunk points drunk (Kitchen's {@code Drunk.POINTS}); never without that Kitchen. */
+	@SuppressWarnings("unchecked")
+	static boolean drunk(net.minecraft.server.level.ServerPlayer player, int from) {
+		if (!FabricLoader.getInstance().isModLoaded(MOD)) {
+			return false;
+		}
+		try {
+			if (drunkPoints == null) {
+				drunkPoints = (net.fabricmc.fabric.api.attachment.v1.AttachmentType<Integer>)Class.forName("com.jaymoskitchen.brewing.Drunk").getField("POINTS").get(null);
+			}
+			return player.getAttachedOrElse(drunkPoints, 0) >= from;
+		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+			return false;
+		}
+	}
+
 	/** Kitchen's drunkenness ({@code Drunk.drink}): {@code points} more for {@code player}; false without that Kitchen. */
 	static boolean getDrunk(net.minecraft.server.level.ServerPlayer player, int points) {
 		if (!FabricLoader.getInstance().isModLoaded(MOD)) {

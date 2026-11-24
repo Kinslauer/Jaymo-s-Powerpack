@@ -165,6 +165,12 @@ public final class FaithExtras {
 				return true;
 			}
 		}
+		// (any studied beast) and every other animal studied
+		for (String form : BeastForms.studied(player)) {
+			if (Druids.kin(form).contains(kind)) {
+				return true;
+			}
+		}
 		return false;
 	}
 

@@ -152,7 +152,7 @@ public final class TribePacts {
 
 	/** {@code camp} (a goblin village or orc camp) leaves {@code f} be: a haven that lives alongside the tribes, or one paid up with its tribe. */
 	static boolean spared(MinecraftServer server, Faction camp, Faction f) {
-		if (Havens.greenskin(server, f)) {
+		if (Havens.greenskin(server, f) || DemonThrone.holds(server, f)) {
 			return true;
 		}
 		String tribe = Tribes.of(server, camp.id());

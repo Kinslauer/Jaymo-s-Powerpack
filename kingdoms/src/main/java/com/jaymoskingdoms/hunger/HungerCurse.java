@@ -404,7 +404,7 @@ public final class HungerCurse {
 				player.addEffect(new MobEffectInstance(MobEffects.SPEED, SIGN_TICKS, NIGHT_SPEED, true, false, false));
 			}
 			scare(player, level);
-		} else if (sunlit(level, player.blockPosition())) {
+		} else if (sunlit(level, player.blockPosition()) && !com.jaymoskingdoms.Parasols.shade(player)) {
 			player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, SIGN_TICKS, 0, true, false, false));
 			player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, SIGN_TICKS, 0, true, false, false));
 		}

@@ -877,9 +877,11 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		double zd = target.getZ() - this.getZ();
 		double distance = Math.sqrt(xd * xd + zd * zd);
 		if (this.level() instanceof ServerLevel level) {
-			net.minecraft.world.entity.projectile.Projectile.spawnProjectileUsingShoot(arrow, level, arrowStack, xd, yd + distance * 0.2F, zd, 1.6F, 4.0F);
+			boolean crossbow = bow.is(Items.CROSSBOW);
+			// (a crossbow's bolt flies faster and truer than a bow's arrow: an orc ranger's close weapon)
+			net.minecraft.world.entity.projectile.Projectile.spawnProjectileUsingShoot(arrow, level, arrowStack, xd, yd + distance * (crossbow ? 0.08F : 0.2F), zd, crossbow ? 2.6F : 1.6F, crossbow ? 1.0F : 4.0F);
 		}
-		this.playSound(net.minecraft.sounds.SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+		this.playSound(bow.is(Items.CROSSBOW) ? net.minecraft.sounds.SoundEvents.CROSSBOW_SHOOT : net.minecraft.sounds.SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
 	}
 
 	/** An archer at its post: it stays put, faces its target, and looses an arrow every so often while it can see it. */

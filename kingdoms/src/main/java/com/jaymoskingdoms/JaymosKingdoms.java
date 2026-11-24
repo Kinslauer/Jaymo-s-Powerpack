@@ -83,6 +83,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		Disguise.register();
 		// 0.7.250: Blossom villages rising among the cherry trees, and the Blossom land's guards in the ronin harness
 		BlossomVillages.register();
+		VillageStyles.register();
+		RoadOutposts.register();
+		Outliers.register();
+		CampExtras.register();
 		// 0.7.101: the hidden blade (Stealth 5), its leap and the Crippled status
 		HiddenBlade.register();
 		// (0.7.111) mob senses (light, sneaking, view cone; losing track; the awareness gauge) and unaware blows
@@ -282,6 +286,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("emigrant attachments: {} {} {} {}", Emigrants.MOVE, Emigrants.STORY, Emigrants.ROADS, Emigrants.EMPTIED);
 		LOGGER.debug("haven attachment: {}", Havens.HAVENS);
 		Frights.register();
+		Parasols.register();
+		TakeCover.register();
+		ArmedFright.register();
 		// the Family farmhand's family: wary of monsters, indoors at night, at work on the farm
 		FarmFamily.register();
 		FarmhandWake.register();
@@ -612,6 +619,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		VoiceMasks.register();
 		// 0.4.1: ATi Structures' above-ground buildings in compounds (only with ATi loaded)
 		AtiCompounds.register();
+		// Tectonic's terrain in place of the continents' shape (the shape's pack is on only without it)
+		TectonicCompat.register();
+		// underground rivers' lanterns, jungle pillar crowns, volcanic islands and lit lava tunnels
+		TerrainFeatures.register();
 		// kingdoms' seats the world generates whole: a castle with its square, garden, barracks and homes round it
 		SeatCompounds.register();
 		EpicTowns.register();
@@ -722,6 +733,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// 0.5.34: Jaymo's Equestrian, stage 1 (breeds, stats, gaits, stamina, courage, coats, war elephants) and its attachments
 		com.jaymoskingdoms.equestrian.Equestrian.register();
 		com.jaymoskingdoms.equestrian.MythicMounts.register();
+		com.jaymoskingdoms.equestrian.WonderHorses.register();
 		// 0.5.46: Jaymo's Equestrian, stage 2 (bond and tack: trust, disciplines, tricks, needs, tack) and its attachments
 		com.jaymoskingdoms.equestrian.Bonding.register();
 		// 0.7.305: Jaymo's Equestrian, stage 3 (the herd: mares and stallions, orders, defending, the roster; riding extras; breed gifts)
@@ -1009,6 +1021,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("vampire attachments: {} {} {}", Vampires.VAMPIRE, Vampires.BITTEN, Vampires.ELDER);
 		Vampires.register();
 		VampireAlarm.register();
+		// a taker hides among a village's people; its cellar; a night when anger spills over; a rope lead tied off on a post
+		Takers.register();
+		Unrest.register();
+		CaptiveLeads.register();
 		// a camp struck sends a runner to its fire to blow the horn, then patrols and defends until it's safe
 		CampAlarm.register();
 		Stakes.register();
@@ -1138,6 +1154,15 @@ public final class JaymosKingdoms implements ModInitializer {
 		FeatsBody.register();
 		FeatsFight.register();
 		FeatsTrade.register();
+		// reference mods patch 16: titles, worn gear that asks for skill, found gear's quality, salvage, named followers, monster-born
+		DeedTitles.register();
+		FoundQuality.register();
+		GearSalvage.register();
+		NamedFollowers.register();
+		MonsterBorn.register();
+		Feasting.register();
+		DemonThrone.register();
+		Shades.register();
 		// patch 8, magic items: bonds, curses, unknown properties, wills, wands, gadgets, the deck, potion clashes
 		Gadgets.register();
 		RelicCurses.register();

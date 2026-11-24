@@ -186,6 +186,9 @@ public final class HeritageVariants {
 		// ---- Dragonblood
 		GOLDSCALE(Heritage.Kind.DRAGONBLOOD, 0xD8B060, 0.2F, Land.BADLANDS, null, null, Trait.add(Attributes.LUCK, 1.0)),
 		RIMEWYRM(Heritage.Kind.DRAGONBLOOD, 0xC8DCEC, 0.25F, Land.COLD, Element.ARCTIC, Heritage.Kind.FROSTBORN, Trait.add(Attributes.ARMOR, 1.5)),
+		// the blood of the storm dragons (Eurus, Aeolus) and the acid dragons (Zephyrus, Varasuchus): each kind of dragon's blood breathes its own breath
+		STORMWYRM(Heritage.Kind.DRAGONBLOOD, 0x8C8AE0, 0.25F, Land.HIGH, Element.MAGNETIC, Heritage.Kind.STORMBORN, Trait.add(Attributes.KNOCKBACK_RESISTANCE, 0.15)),
+		VENOMSCALE(Heritage.Kind.DRAGONBLOOD, 0x7EA040, 0.3F, Land.SWAMP, null, null, Trait.add(Attributes.MAX_HEALTH, 2.0)),
 		// ---- Deepborn
 		HOLLOW(Heritage.Kind.DEEPBORN, 0x9AA8A8, 0.4F, Land.DEEP, null, null, Trait.share(Attributes.SNEAKING_SPEED, 0.15)),
 		GEODE(Heritage.Kind.DEEPBORN, 0x8C8C94, 0.3F, Land.DEEP, null, Heritage.Kind.STONEBORN, Trait.add(Attributes.ARMOR, 2.0)),
@@ -201,6 +204,9 @@ public final class HeritageVariants {
 		// ---- (0.7.292) goblins: the bog's yellow-sick and the caves' pale grubs (over their green, Greenskins.skin)
 		BOGGART(Heritage.Kind.GOBLIN, 0xB4B040, 0.45F, Land.SWAMP, null, null, Trait.share(Attributes.SNEAKING_SPEED, 0.15)),
 		CAVEGRUB(Heritage.Kind.GOBLIN, 0xA8B4A0, 0.5F, Land.DEEP, null, null, Trait.add(Attributes.MAX_HEALTH, 2.0)),
+		// ---- the monster-born's forms (MonsterBorn): scaly kobolds and gel-clear slime-born, never rolled for villagers
+		KOBOLD(Heritage.Kind.GOBLIN, 0xA06A4C, 0.5F, Land.NONE, null, null, Trait.add(Attributes.ARMOR, 1.0)),
+		SLIMEBORN(Heritage.Kind.GOBLIN, 0x9CE0C8, 0.5F, Land.NONE, null, null, Trait.add(Attributes.KNOCKBACK_RESISTANCE, 0.1)),
 		// ---- orcs: the ash-black of the burnt lands, and the red-brown bloodtusks of the badlands
 		ASHSKIN(Heritage.Kind.ORC, 0x34372E, 0.55F, Land.HOT, null, null, Trait.add(Attributes.ARMOR, 1.5)),
 		BLOODTUSK(Heritage.Kind.ORC, 0x7A4E34, 0.4F, Land.BADLANDS, null, null, Trait.share(Attributes.ATTACK_DAMAGE, 0.05)),

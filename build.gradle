@@ -239,7 +239,8 @@ def packMods = [
 	[dep: "maven.modrinth:shoulder-surfing-reloaded:sEg9bfXx", cf: [243190, 9013849]],
 	// Forge Config API Port (MPL-2.0, Fuzs): config library that TaCZ: Refabricated needs (packModsOverride).
 	[dep: "maven.modrinth:forge-config-api-port:JpKvrr9J", cf: [547434, 8938808]],
-	// Horseman 1.7.5 (MIT, by mortuusars; shipped unchanged): riding fixes for every horse-like mount. Right-click a
+	// Horseman 1.7.5 (MIT, by mortuusars; shipped unchanged; kept beside Icy's Better Horses, which does some of the same: its
+	// fade-out when you look down and its stay-near-home; Horseman's fence hitching, boats, shears and mining speed are not in it): riding fixes for every horse-like mount. Right-click a
 	// fence from the saddle to hitch (a lead slot in the horse's inventory), a little more step height, no stair
 	// jitter, less speed lost stepping down and in the air, fewer snags on leaves, full mining speed in the saddle,
 	// horses in boats, saddled horses keep within 16 blocks of where you left them, shears take a pack animal's chest
@@ -441,8 +442,7 @@ def packMods = [
 	[dep: "maven.modrinth:simply-tents:wvIeMmbl", cf: [1152882, 8937407]],
 	// Critter Armory (all rights reserved; linked, never edited): armour for wolves, cats and other pets. 0.6.5.
 	[dep: "maven.modrinth:critter-armory:Qcu5lZ5g", cf: [1198794, 8914440]],
-	// Kaffee's Dual Ride (GPL-3.0): a second player can ride behind you on a horse. 1.2.0.
-	[dep: "maven.modrinth:kaffees_dual_ride:T14PXNLz", cf: [683156, 9183919]],
+	// (Kaffee's Dual Ride left: Icy's Better Horses, below in packModsNoCf, takes a second rider behind the owner itself.)
 	// The Graveyard (GPL-3.0, by finallion; github.com/finallion/The_Graveyard; shipped unchanged): graveyards, crypts,
 	// a haunted house, overrun villages, its own undead and the Corrupted Champion. Client and server. 4.0.0 for 26.3.
 	// Needs GeckoLib (above) and VillagersTradingPlus (GPL-3.0, same author; a JSON villager-trade library). 1.1.0.
@@ -474,8 +474,7 @@ def packMods = [
 	// From Andy's Vanilla+ list (2026-11-19 pick list), shipped unchanged:
 	// Shared Advancements (MIT, server side): advancements count for your team or every player.
 	[dep: "maven.modrinth:shared-advancements:cbhS9PTE", cf: [831959, 8942452]],
-	// Horse Expert (MPL-2.0, Fuzs; needs Puzzles Lib and Forge Config API Port above): a horse's real speed, jump and health.
-	[dep: "maven.modrinth:horse-expert:qUjLS9C5", cf: [666942, 9088683]],
+	// (Horse Expert left: Icy's Better Horses' upgraded saddle and horse screen show a horse's speed, jump, health and bond.)
 	// Incendium (Stardust Labs licence, packs allowed): Nether biomes, structures, weapons and mobs, beside our demon-realm biomes.
 	// Our demon-realm biomes stay in its written-out Nether list (ZFighterNetherList), and its Forbidden Castle also rises in the
 	// Gloam, where the demon start puts you in its throne hall (ZFighterStarts.demon). 5.5.4+26.3.
@@ -491,6 +490,27 @@ def packMods = [
 // registries, for Luna Slimes, 2026-11-20). Once CurseForge has the matching file, add its [project id, file id] and
 // move the line into packMods.
 def packModsNoCf = [
+	// Icy's Better Horses 2.1.8 (Bare Minimum License, Icywhenhot; the official jar, shipped unchanged: its models, textures and
+	// sounds may be used only as part of it, and it may not be reposted on its own, so it travels only inside the pack,
+	// credited, with its licence in licenses/LICENSE_icys_better_horses): fifteen horse breeds with their own coats, biomes
+	// and abilities, bond and ownership, a whistle and command wheel, tack and gear, carts, combat and a handbook. It replaces
+	// Jaymo's Kingdoms' own breeds, gaits, bond, tack, revival and horse renderer for ordinary horses (equestrian/Equestrian#ICY),
+	// and Kaffee's Dual Ride, Horse Expert and Ultimate Horseshoes left the pack for it. Andy, 2026-11-24: "icy has far better
+	// models and implementations". Needs GeckoLib and Fabric API (above) and Modonomicon (below). Modrinth XlUm5I57; CurseForge
+	// [project id, file id] to look up from the home PC (cloud can't reach it).
+	[dep: "maven.modrinth:icys-better-horses:AvgqdGip", cf: null],
+	// Tectonic 3.0.32 (MIT, by Apollo; the official jar, shipped unchanged; Modrinth lWDHr9jE): the Overworld's terrain rewritten
+	// (taller mountains, wide oceans, rivers that run under mountains in caves with hung lanterns, jungle pillars, lava tunnels at
+	// the bottom, islands). Andy (L6, 2026-11-24): "which one is more stable? we seem to have alot of world gen issues right
+	// now, can we test this then swap back if not?" A TRIAL: Jaymo's Kingdoms' own continents' shape (the continents, erosion,
+	// ridges and offset files, and the higher sea) stands down while this jar is in the pack, and its climate map stays
+	// (TectonicCompat); judge it on a NEW world. To swap back, delete this line (its jar leaves the pack and the shape comes
+	// back for worlds made after; chunks already made keep Tectonic's terrain). Needs Fabric API and Lithostitched (packMods,
+	// above); its config library (Apollib) is inside its jar. CurseForge [project id, file id] to look up from the home PC.
+	[dep: "maven.modrinth:tectonic:tRBGDcCT", cf: null],
+	// Modonomicon 26.3-2.23.1 (MIT code, CC BY 4.0 art; klikli-dev): the book library Icy's Better Horses' Stable Handbook is
+	// written in. Shipped unchanged. Modrinth 692GClaE.
+	[dep: "maven.modrinth:modonomicon:z8ESky23", cf: null],
 	// Runes (all rights reserved, Zsolt Molnar; shipped unchanged): the rune reagents Wizards' spells use up, and its
 	// Rune Crafting Altar. No CurseForge page found.
 	[dep: "maven.modrinth:runes:PwSpmtFJ", cf: null],
@@ -662,15 +682,14 @@ def packModsNoCf = [
 	// and server. 1.10-mc26.3-fabric for 26.3.
 	[dep: "maven.modrinth:luna-slimes:z3yWfsEY", cf: null],
 	// --- Sensible MC picks: mounts and travel ---
-	// Ultimate Horseshoes (LGPL-3.0-only, Nanaky): horseshoes as horse gear. Client and server. 26.3 for 26.3.
-	[dep: "maven.modrinth:ultimate_horseshoes:CmIcH7gj", cf: null],
+	// (Ultimate Horseshoes left: Icy's Better Horses has its own horseshoe gear, for fall damage and frost.)
 	// Seaworthy Boats (all rights reserved, Serilum; shipped unchanged): boats reinforced into tougher tiers at a
 	// shipyard. Needs Collective. Client and server. 26.3.0-2.0-fabric+forge+neo for 26.3.
 	[dep: "maven.modrinth:seaworthy-boats:29sIHp7D", cf: null],
 	// Stretchy Leash (MIT, Estecka): leashes snap less, and make a sound when they do. Server-side. 3.0.0+26.1.2 for 26.3.
 	[dep: "maven.modrinth:stretchy-leash:yewvryEP", cf: null],
 	// Craftable Horse Armor (Craemon's datapack licence, Craemon; shipped unchanged): horse armour can be crafted. Server-
-	// side (clients may have it). 1.1.0+mod for 26.3.
+	// side (clients may have it). 1.1.0+mod for 26.3. Kept beside Icy's Better Horses: it has no horse armour recipes.
 	[dep: "maven.modrinth:craft-horse-armor:AJkpa6SJ", cf: null],
 	// --- Sensible MC picks: villages ---
 	// Shifting Wares (EUPL-1.2, Estecka): villagers now and then reroll their trades. Server-side. 4.0.0+26.3 for 26.3.
@@ -966,7 +985,7 @@ def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-",
 // think the new grass and punchy are lagging the game"; punchy_expressions comes inside Punchy! Moves);
 // Ragdollified and Ragdollified Reactions (out until its whole set can go in, see the pack list);
 // VO: Better Dogs and Dasik Library (its wolves stopped the server, see the pack list)
-def removedIdsFromProfile = ["citadel", "distanthorizons", "camerautils", "combat_roll", "ctov", "immersivevfx", "immersivefx", "streamsreflowing",
+def removedIdsFromProfile = ["horseexpert", "kaffees_dual_ride", "ultimate_horseshoes", "citadel", "distanthorizons", "camerautils", "combat_roll", "ctov", "immersivevfx", "immersivefx", "streamsreflowing",
 	"grassiergrass", "punchy", "punchy_moves", "punchy_expressions", "ragdollified", "ragdollifiedreactions",
 	"vanilla-outsider-better-dogs", "dasik-library", "scalablelux"]
 // a jar's fabric.mod.json (null if it isn't a Fabric mod): the profile's CurseForge file names differ from the pack's

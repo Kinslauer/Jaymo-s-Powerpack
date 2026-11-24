@@ -339,15 +339,29 @@ public final class ForestRangers {
 						}
 					}));
 			}
+			charm(player, choices);
 			choices.add(Menus.Choice.of(Component.translatable("speech.jaymoskingdoms.ranger.not_now"), p -> {
 			}));
 			Menus.ask(player, v, Component.translatable("speech.jaymoskingdoms.ranger.offer"), choices);
 			return;
 		}
 		int lesson = 1 + player.getRandom().nextInt(4);
-		Menus.ask(player, v, Component.translatable("speech.jaymoskingdoms.ranger.lesson." + lesson), List.of(
-			Menus.Choice.of(Component.translatable("speech.jaymoskingdoms.ranger.thanks"), p -> {
-			})));
+		List<Menus.Choice> answers = new ArrayList<>();
+		answers.add(Menus.Choice.of(Component.translatable("speech.jaymoskingdoms.ranger.thanks"), p -> {
+		}));
+		charm(player, answers);
+		Menus.ask(player, v, Component.translatable("speech.jaymoskingdoms.ranger.lesson." + lesson), answers);
+	}
+
+	/** A beast-tamer's work (the bone charm, {@link BoneCharm}): with a bone in hand and the price in the pack, a ranger will carve one. */
+	private static void charm(ServerPlayer player, List<Menus.Choice> choices) {
+		if (BoneCharm.EMPTY != null && BoneCharm.canCarve(player)) {
+			choices.add(Menus.Choice.of(Component.translatable("speech.jaymoskingdoms.ranger.charm", BoneCharm.PRICE), p -> {
+				if (BoneCharm.carve(p)) {
+					p.sendSystemMessage(Component.translatable("message.jaymoskingdoms.ranger.charmed").withStyle(ChatFormatting.DARK_GREEN));
+				}
+			}));
+		}
 	}
 
 	// ---- the poacher ------------------------------------------------------------------------------------------------

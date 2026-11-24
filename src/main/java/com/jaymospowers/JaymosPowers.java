@@ -315,6 +315,8 @@ public class JaymosPowers implements ModInitializer {
 		com.jaymospowers.core.HudBar.register();
 		// Shift+T shares the hovered item in chat; soul fire burns blue (bits.SoulBurn)
 		com.jaymospowers.bits.ItemShare.register();
+		// umbrellas, parasols and the umbrella stand
+		com.jaymospowers.umbrella.Umbrellas.init();
 		registerAttachments();
 	}
 
@@ -348,7 +350,7 @@ public class JaymosPowers implements ModInitializer {
 			"power.ember.RunningHot", "power.ember.EmberSoak", "power.smoke.SmokeBanish",
 			"power.xenoform.XenoMinds",
 			"power.zfighter.ZFighterPower", "power.zfighter.ZFighterTraining", "power.zfighter.ZFighterGrowth", "power.zfighter.ZFighterLineage", "power.zfighter.ApeRage", "power.zfighter.ApeSmash", "power.zfighter.ApeGrab", "power.zfighter.VillagerApe", "power.zfighter.UndeadBlood", "power.zfighter.UndeadGiant","power.zfighter.RaceMoves", "power.zfighter.FrostBeam", "power.zfighter.ZFighterGuard", "power.zfighter.ZFighterCombo", "power.zfighter.ZFighterStretchCombo", "power.zfighter.ZFighterDisc", "power.zfighter.ZFighterWaveBeam", "power.zfighter.ZFighterHands",
-			"power.zfighter.ZFighterTeleport",
+			"power.zfighter.ZFighterTeleport", "power.zfighter.ZFighterScan",
 			"power.zfighter.ZFighterAerialCharge",
 			"power.zfighter.ZFighterPatrolRelief", "power.zfighter.ZFighterBranchForms", "power.zfighter.ZFighterEgo", "power.zfighter.ZFighterAndroid", "power.zfighter.ZFighterFrostForms",
 			"power.zfighter.ZFighterSites", "power.zfighter.ZFighterFusion", "power.zfighter.ZFighterMasters", "power.zfighter.ZFighterRaids", "power.zfighter.ZFighterTournaments", "power.zfighter.ZFighterCorruption",

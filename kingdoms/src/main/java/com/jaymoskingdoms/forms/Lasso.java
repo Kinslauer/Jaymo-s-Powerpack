@@ -678,6 +678,24 @@ public final class Lasso {
 		}
 	}
 
+	/** (CaptiveLeads) Whoever is on {@code holder}'s rope, or null. */
+	public static @Nullable LivingEntity heldBy(ServerPlayer holder) {
+		Hold hold = BY_HOLDER.get(holder.getUUID());
+		return hold != null && holder.level().getEntity(hold.held) instanceof LivingEntity held ? held : null;
+	}
+
+	/** (CaptiveLeads) The rope comes off {@code entity}; any hogtie on them stays. */
+	public static void letGo(Entity entity) {
+		drop(entity, false);
+	}
+
+	/** (CaptiveLeads) {@code holder} takes {@code body} on a rope again, as a throw that caught would. */
+	public static void takeUp(ServerLevel level, ServerPlayer holder, LivingEntity body) {
+		if (!BY_HOLDER.containsKey(holder.getUUID()) && !BY_HELD.containsKey(body.getUUID())) {
+			catchOn(level, holder, body);
+		}
+	}
+
 	/** (Captures) Whose rope {@code entity} is on, or null. */
 	public static @Nullable UUID holderOf(Entity entity) {
 		Hold hold = BY_HELD.get(entity.getUUID());

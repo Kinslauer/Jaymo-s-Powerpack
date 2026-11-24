@@ -551,6 +551,10 @@ final class Neighbours {
 
 	/** A guard of the realm near enough to see a fight steps in: they're told to break it up. */
 	private static @Nullable LivingEntity guard(ServerLevel level, Meeting m) {
+		if (Unrest.looksAway(m.faction)) {
+			// (a night when anger spills over: the guards have somewhere else to be)
+			return null;
+		}
 		List<LivingEntity> guards = level.getEntitiesOfClass(LivingEntity.class, m.a.getBoundingBox().inflate(GUARD_RANGE),
 			e -> e.isAlive() && e instanceof Worker w && w.role() == Folk.GUARD && w.factionId() == m.faction && e.hasLineOfSight(m.a));
 		if (guards.isEmpty()) {

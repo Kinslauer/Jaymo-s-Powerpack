@@ -80,7 +80,7 @@ public final class IronVeins {
 		return false;
 	}
 
-	private static boolean vein(LevelChunk chunk) {
+	static boolean vein(LevelChunk chunk) {
 		for (LevelChunkSection section : chunk.getSections()) {
 			if (section.hasOnlyAir() || !section.maybeHas(state -> state.is(BlockTags.IRON_ORES))) {
 				continue;
