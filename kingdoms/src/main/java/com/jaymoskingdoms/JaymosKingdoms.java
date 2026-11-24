@@ -83,6 +83,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		Disguise.register();
 		// 0.7.250: Blossom villages rising among the cherry trees, and the Blossom land's guards in the ronin harness
 		BlossomVillages.register();
+		VillageStyles.register();
+		RoadOutposts.register();
 		// 0.7.101: the hidden blade (Stealth 5), its leap and the Crippled status
 		HiddenBlade.register();
 		// (0.7.111) mob senses (light, sneaking, view cone; losing track; the awareness gauge) and unaware blows
