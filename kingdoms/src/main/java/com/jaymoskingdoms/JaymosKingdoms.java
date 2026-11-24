@@ -885,6 +885,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// (0.7.518) patron gods, part (c): the champions and their temples
 		PatronChampions.register();
 		Temples.register();
+		// the patrons' colossi: the three sworn callings' strike, and the hunt for commandment breakers
+		com.jaymoskingdoms.colossus.Colossi.register();
 		// 0.7.218: villagers who awaken to a power (Jaymo's Powers fights with it)
 		GiftedFolk.register();
 		CostumedFolk.register();
