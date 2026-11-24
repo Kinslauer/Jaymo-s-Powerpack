@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 21:08). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 21:10). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -48,7 +48,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/patron-colossus-and-commandment-hunt|patron-colossus-and-commandment-hunt]] · 💻 Odysseus · #2103 · in-review
 - [ ] [[Inbox/vanilla-plus-a-incendium-castle-start|vanilla-plus-a-incendium-castle-start]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
 - [ ] [[Inbox/vanilla-plus-b-stellarity-end-enderscape-band|vanilla-plus-b-stellarity-end-enderscape-band]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
 - [ ] [[Inbox/vanilla-plus-c-back-slot|vanilla-plus-c-back-slot]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
@@ -60,6 +59,7 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-i-settlement-roads|vanilla-plus-i-settlement-roads]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
 - [ ] [[Inbox/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
+- [ ] [[Inbox/patron-colossus-and-commandment-hunt|patron-colossus-and-commandment-hunt]] · 💻 Odysseus · #2103 · in-review
 
 
 ## Needs Andy
@@ -72,14 +72,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/refmods-15-provenance-coins|refmods-15-provenance-coins]]
+- [x] [[Inbox/Done/villagers-visible-jobs|villagers-visible-jobs]]
+- [x] [[Inbox/Done/structures-2-placement-reasons|structures-2-placement-reasons]]
+- [x] [[Inbox/Done/refmods-14-sky-light-air|refmods-14-sky-light-air]]
+- [x] [[Inbox/Done/refmods-12-fishing|refmods-12-fishing]]
 - [x] [[Inbox/Done/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]]
 - [x] [[Inbox/Done/zfighter-gaps-8-raids|zfighter-gaps-8-raids]]
 - [x] [[Inbox/Done/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]]
-- [x] [[Inbox/Done/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]]
-- [x] [[Inbox/Done/zfighter-gaps-5-training|zfighter-gaps-5-training]]
-- [x] [[Inbox/Done/zfighter-gaps-4-forms|zfighter-gaps-4-forms]]
-- [x] [[Inbox/Done/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]]
-- [x] [[Inbox/Done/zfighter-gaps-2-power|zfighter-gaps-2-power]]
 
 
 %% kanban:settings
