@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: bear-stays-on-hook
 branch: claude/bear-stays-on-hook
 with: local_29ede7b7-7e11-4e20-8506-df7674edc787
@@ -20,3 +20,6 @@ owns:
 - Why: the server kept it on the hook. The client draws a still four-legged body as lying on its side at its lowest point, and it didn't know the body was hung. Hung from a 2-block hook, the bear's head rests on the floor, so it went still at once and was drawn lying down.
 - Fix: a synced HOOKED flag; a hung body is never eased onto its side. PR #2068, Auto-fix on.
 - Not tested in game; the server physics were checked offline with a standalone ragdoll run.
+
+## Notes
+- 2026-11-23 22:11 PR #2068 is merged into master; moved to Agents/Done.
