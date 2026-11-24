@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 12:59). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 13:00). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -14,7 +14,6 @@ kanban-plugin: board
 - [ ] [[Inbox/village-mods-7-ctov-tidal-towns|village-mods-7-ctov-tidal-towns]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
-- [ ] [[Inbox/realm-banks-finish|realm-banks-finish]] · for any · open
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
 - [ ] [[Inbox/patron-colossus-and-commandment-hunt|patron-colossus-and-commandment-hunt]] · for any · open
 - [ ] [[Inbox/blood-awakening-passive-upgrade|blood-awakening-passive-upgrade]] · for any · open
@@ -22,7 +21,6 @@ kanban-plugin: board
 - [ ] [[Inbox/structure-spawn-rate-wooden-hut|structure-spawn-rate-wooden-hut]] · for coordinator · open
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/alexs-caves-integration|alexs-caves-integration]] · for coordinator · open
-- [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for 🪶 Quill · open
 - [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · for any · open
 - [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · for any · open
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for any · open
@@ -64,7 +62,11 @@ kanban-plugin: board
 - [ ] [[Inbox/downed-knockout-three-hits|downed-knockout-three-hits]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/structures-2-placement-reasons|structures-2-placement-reasons]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · ☁️ Cloud · #research · claimed
+- [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/realm-banks-finish|realm-banks-finish]] · ☁️ Cloud · claimed
 - [ ] [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]] · 💻 Odysseus · running
+- [ ] [[Agents/implement-verdant-dinosaurs|implement-verdant-dinosaurs]] · 💻 Odysseus · running
 - [ ] [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]] · 💻 Odysseus · running
 - [ ] [[Agents/venom-head-adaptation|venom-head-adaptation]] · 💻 Odysseus · running
 
