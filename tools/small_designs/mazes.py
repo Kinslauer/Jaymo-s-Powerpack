@@ -143,16 +143,16 @@ def crypt_maze(api, seed):
                 g.put(1 + wx, y, 1 + wz, "stone_brick_stairs", stair(f))
             else:
                 g.clear(1 + wx, y, 1 + wz)
-    for y in range(1, 9):
+    for y in range(1, 8):
         g.put(2, y, 2, "stone_bricks")
-    # the heart: a dais, the chest, soul lanterns at the corners, candles
+    # the heart: a dais, the chest, soul lanterns hung from the ceiling at the corners, candles
     c = 2 * HEART[0] + 3
     for x in range(c - 1, c + 2):
         for z in range(c - 1, c + 2):
             g.put(x, 0, z, "cracked_stone_bricks")
     g.chest(c, 1, c, "chests/crypt_maze", "south")
     for dx, dz in ((-2, -2), (2, -2), (-2, 2), (2, 2)):
-        g.put(c + dx, 1, c + dz, "soul_lantern", LANTERN)
+        g.put(c + dx, 3, c + dz, "soul_lantern", {"hanging": "true", "waterlogged": "false"})
     for dx, dz in ((-1, -2), (1, 2), (-2, 1), (2, -1)):
         g.put(c + dx, 1, c + dz, "candle", {"candles": "2", "lit": "false", "waterlogged": "false"})
     return g

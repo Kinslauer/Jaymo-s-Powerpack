@@ -342,13 +342,14 @@ public final class SeatCompounds {
 			if (core == null) {
 				return Optional.empty();
 			}
-			// the square, the barracks and the garden beside it, and now and then a hedge maze on the castle's far side
+			// the square, the barracks and the garden beside it, and now and then a hedge maze on one side of the castle
 			List<Kind> plan = new ArrayList<>(List.of(Kind.SQUARE, Kind.BARRACKS, Kind.GARDEN));
 			double base = random.nextDouble() * Math.PI * 2.0;
 			if (random.nextDouble() < MAZE_CHANCE) {
 				plan.add(Kind.MAZE);
 			}
 			boolean squared = false;
+			Piece maze = null;
 			for (int i = 0; i < plan.size(); i++) {
 				Kind kind = plan.get(i);
 				// (the square at the front, the barracks beside it, the garden behind)
@@ -360,7 +361,12 @@ public final class SeatCompounds {
 				};
 				Piece piece = this.ring(context, kind, land, random.nextLong(), want, core, placed, middle);
 				if (piece != null) {
-					all.addPiece(piece);
+					if (kind == Kind.MAZE) {
+						// (held back until the town fits round it)
+						maze = piece;
+					} else {
+						all.addPiece(piece);
+					}
 					placed.add(piece.getBoundingBox());
 					squared |= kind == Kind.SQUARE;
 				}
@@ -371,7 +377,18 @@ public final class SeatCompounds {
 			}
 			// the land's Epic town round all of it, its middle under the castle
 			if (!this.town(context, land, middle, placed, all)) {
-				return Optional.empty();
+				// the maze crowded the town out: try without it
+				if (maze == null) {
+					return Optional.empty();
+				}
+				placed.remove(maze.getBoundingBox());
+				maze = null;
+				if (!this.town(context, land, middle, placed, all)) {
+					return Optional.empty();
+				}
+			}
+			if (maze != null) {
+				all.addPiece(maze);
 			}
 			// last, the castle cleared of its spawners and loot as each chunk of it is made
 			all.addPiece(new Clean(core.inflatedBy(2)));

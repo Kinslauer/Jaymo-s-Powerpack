@@ -23,6 +23,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CandleBlock;
 import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.LanternBlock;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -238,16 +239,14 @@ public final class CryptMaze {
 	 * The maze's passages and walls from {@code seed}. First time ({@code first}): the floor, the ceiling, the outer wall and
 	 * everything laid whole. After that only the walls inside move: a wall is taken down where the new maze has a passage and
 	 * laid where it has a wall, but never on a spot where something stands, and never over a block that is not the crypt's own
-	 * stone or air (a torch someone left, a chest).
+	 * stone or air (a torch someone left, a chest). The first time, a wall over something standing in a cave is left open.
 	 */
 	private static void lay(ServerLevel level, BlockPos o, long seed, boolean first) {
 		boolean[][] open = MazeGen.layout(CELLS, new MazeGen.Room(HEART_AT, HEART_AT, HEART_SIZE), new MazeGen.Room(0, 0, STAIR_SIZE), seed, ROOT_X, ROOT_Z);
 		open[DOOR_X][DOOR_Z] = true;
 		List<AABB> bodies = new ArrayList<>();
-		if (!first) {
-			for (Entity e : level.getEntities((Entity)null, box(o))) {
-				bodies.add(e.getBoundingBox());
-			}
+		for (Entity e : level.getEntities((Entity)null, box(o))) {
+			bodies.add(e.getBoundingBox());
 		}
 		BlockState air = Blocks.AIR.defaultBlockState();
 		BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
@@ -261,9 +260,13 @@ public final class CryptMaze {
 					continue;
 				}
 				boolean wall = !open[x][z];
-				AABB column = wall && !first ? new AABB(o.getX() + x, o.getY() + 1, o.getZ() + z, o.getX() + x + 1, o.getY() + WALL_HEIGHT + 1, o.getZ() + z + 1) : null;
-				if (column != null && bodies.stream().anyMatch(b -> b.intersects(column))) {
-					continue;
+				AABB column = new AABB(o.getX() + x, o.getY() + 1, o.getZ() + z, o.getX() + x + 1, o.getY() + WALL_HEIGHT + 1, o.getZ() + z + 1);
+				if (wall && bodies.stream().anyMatch(b -> b.intersects(column))) {
+					if (!first) {
+						continue;
+					}
+					// (the first time the column is cut open instead, so a later turn can wall it)
+					wall = false;
 				}
 				for (int y = 1; y <= WALL_HEIGHT; y++) {
 					at.set(o.getX() + x, o.getY() + y, o.getZ() + z);
@@ -297,7 +300,7 @@ public final class CryptMaze {
 		for (int y = o.getY() + 1; y < hallY; y++) {
 			level.setBlock(at.set(o.getX() + 2, y, o.getZ() + 2), brick, Block.UPDATE_CLIENTS);
 		}
-		// the heart: a dais, the chest on it, a soul lantern in each corner, candles along the walls
+		// the heart: a dais, the chest on it, a soul lantern hung in each corner (clear of the door), candles along the walls
 		int c = (HEART_LO + HEART_HI) / 2;
 		int floor = o.getY();
 		for (int x = HEART_LO; x <= HEART_HI; x++) {
@@ -312,7 +315,8 @@ public final class CryptMaze {
 			box.setLootTable(LOOT, level.getRandom().nextLong());
 		}
 		for (int[] d : new int[][] {{-2, -2}, {2, -2}, {-2, 2}, {2, 2}}) {
-			level.setBlock(at.set(o.getX() + c + d[0], floor + 1, o.getZ() + c + d[1]), Blocks.SOUL_LANTERN.defaultBlockState(), Block.UPDATE_CLIENTS);
+			level.setBlock(at.set(o.getX() + c + d[0], floor + WALL_HEIGHT, o.getZ() + c + d[1]), Blocks.SOUL_LANTERN.defaultBlockState().setValue(LanternBlock.HANGING, true),
+				Block.UPDATE_CLIENTS);
 		}
 		for (int[] d : new int[][] {{-1, -2}, {1, 2}, {-2, 1}, {2, -1}}) {
 			level.setBlock(at.set(o.getX() + c + d[0], floor + 1, o.getZ() + c + d[1]), Blocks.CANDLE.defaultBlockState().setValue(CandleBlock.CANDLES, 2), Block.UPDATE_CLIENTS);
