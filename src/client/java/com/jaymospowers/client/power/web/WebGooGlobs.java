@@ -136,7 +136,8 @@ final class WebGooGlobs {
 		}
 		goo.fresh = false;
 		boolean slim = state.skin != null && state.skin.model() == PlayerModelType.SLIM;
-		boolean bulk = tendrils.armor();
+		// (the red strain's slender body: its globs are the suit's skin, the big body's hide isn't on it)
+		boolean bulk = tendrils.armor() && !WebSuitGrowth.slender(state);
 		Float flailAt = state.getData(WebSymbioteClient.FLAIL);
 		float flail = flailAt == null ? 0.0F : 1.0F - smooth((flailAt - (WebSymbiote.FLAIL_TICKS - FLAIL_EASE_TICKS)) / FLAIL_EASE_TICKS);
 		float grown = smooth(tendrils.growth() / GROWN_AT);
