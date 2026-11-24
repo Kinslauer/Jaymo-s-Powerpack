@@ -165,6 +165,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// 0.5.50: the traveller's journal on M
 		JournalClient.register();
 		AimPageClient.register();
+		// (village mods 5) what the town is doing, on a book page
+		TownDoingsClient.register();
 		// 0.7.649: Kingdoms' tabs on Jaymo's Powers' character menu (H), when Powers is loaded
 		MenuCompat.register();
 		// (0.7.490) Hordes, Orc war journals: the Lore Codex screen
