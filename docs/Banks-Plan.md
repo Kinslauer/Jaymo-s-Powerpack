@@ -18,21 +18,25 @@ went in PR #2063.)
   credit for your balance; borrow; repay. Your balance is shown on the card.
 - **Accounts**: one per player per realm. A fiefdom's bank is its overlord's (walking up the chain to the first
   kingdom). Kept in milli (`Money`), saved on the Overworld with the factions. The coin you deposit is weighed at the
-  bank's rate (foreign coin at the going rate less the changer's cut).
-- **Interest**: every 7 days, 2% on up to 500 emeralds' worth of a balance, paid out of the realm's treasury while it
-  can. A realm whose treasury is empty pays none (and says so at the counter).
+  bank's rate (foreign coin at the going rate less the changer's cut). The coin goes into the realm's treasury
+  (Andy: "yes if its spent they cant give it to you, or anyone. may help speed up the decline if that happens"):
+  a withdrawal gets only what the vault holds, and the rest stays on your books until it fills again.
+- **Interest**: every 7 days, 2% on up to 500 emeralds' worth of a balance, while the realm has coin of its own
+  beyond what it holds for its depositors.
 - **Loans**: borrow up to your standing with the realm (`Reputation`): 0 below 100, then a tenth of it in emeralds'
   worth (up to 100 at 1000), one loan at a time, 10% on top, due in 7 days, paid out of the treasury. Repay at any
   bank of the realm, from your coin or your balance. Overdue: the bank takes it from your balance; what it can't take
   costs you standing (-25 a day) until it's paid.
 - **Letters of credit** (`letter_of_credit` item, the letter's art): a sealed note for an amount drawn on a realm, in
   your name. Only you can cash it, at any bank: free in its own realm, 12% at another realm's bank (the changer's 10% cut and 2%). A thief who lifts
-  it has paper.
+  it has paper. The bank it's drawn on pays it out of its treasury; while that's short, the letter is handed back.
 - **When a realm falls, its bank goes with it**: every balance in it is gone, every letter drawn on it is waste paper,
   and every loan it made is forgotten. Accounts are checked on the bank's daily round and whenever they're used, so no
   fall site needs to know about banks. Players who hold money there are told the next time they're online.
+- **Dying for good**: your debts are taken from your balances first; the rest "goes to your next of kin, or is
+  absorbed by the bank into their coffers" (Andy). Next of kin is the nearest player in MCA's family tree (partner,
+  child, parent, sibling).
 
-## Open questions for Andy
-- Deposits are kept apart from the treasury (the realm can't spend them). The other way (deposits go into the
-  treasury, and a realm that spends them can't pay out: a run on the bank) is a bigger hand in finances, and riskier.
-- Rates (2% a week, 10% on loans, a 12% letter fee abroad) are guesses; they're constants at the top of `Banks`.
+## Andy's answers (2026-11-24)
+- Deposits go into the treasury (above). Rates (2% a week, 10% on loans, 12% abroad): "yes". Final death: next of kin,
+  or the bank's coffers. The lore paragraph: approved.

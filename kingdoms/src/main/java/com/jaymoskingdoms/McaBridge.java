@@ -2183,6 +2183,24 @@ final class McaBridge {
 	}
 
 	/** {@link McaCompat#towns}. */
+	/** {@link McaCompat#heir}. */
+	static java.util.@Nullable UUID heir(ServerPlayer player) {
+		FamilyTreeNode me = FamilyTree.get(player.level()).getOrEmpty(player.getUUID()).orElse(null);
+		if (me == null) {
+			return null;
+		}
+		java.util.UUID self = player.getUUID();
+		return java.util.stream.Stream.of(
+				me.lookup(java.util.stream.Stream.of(me.partner())),
+				me.lookup(me.streamChildren()),
+				me.getParents(),
+				me.getSiblings())
+			.flatMap(s -> s)
+			.filter(n -> n.isPlayer() && !n.isDeceased() && !n.id().equals(self))
+			.map(FamilyTreeNode::id)
+			.findFirst().orElse(null);
+	}
+
 	/** (0.7.221) {@link McaCompat#playerFamily}. */
 	static boolean playerFamily(Villager villager) {
 		if (!(villager instanceof VillagerEntityMCA v)) {

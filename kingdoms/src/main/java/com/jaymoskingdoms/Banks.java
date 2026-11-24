@@ -42,17 +42,21 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Accounts</b>: one per player per realm, whichever of its towns' banks the coin went into (a fiefdom's bank is its
  * realm's, {@link Wars#top}). Banking is on a teller's talk menu while they're at the counter ({@link #open}): deposit
  * (your coin weighed as the town takes it, {@link Money#count}), withdraw (in the town's coin), a letter of credit,
- * borrow, repay.</li>
+ * borrow, repay. The coin goes into the realm's treasury (Andy: "if its spent they cant give it to you, or anyone"):
+ * a realm that spends it can't pay it back, and a withdrawal gets only what the vault holds ({@link #onHand}).</li>
  * <li><b>Interest</b>: every {@link #INTEREST_DAYS} days, {@link #INTEREST} on up to {@link #INTEREST_CAP} emeralds' worth
- * of a balance, out of the realm's treasury while it can pay.</li>
+ * of a balance, while the realm has coin of its own beyond what it holds for its depositors.</li>
  * <li><b>Loans</b>: up to a tenth of your reputation with the realm in emeralds' worth (none below
  * {@link #LOAN_FROM_REP}), one at a time, {@link #LOAN_RATE} on top, due in {@link #LOAN_DAYS} days, out of the treasury
  * and back into it. Overdue, the bank takes it from your balance, and what it can't take costs you standing every day.</li>
  * <li><b>Letters of credit</b> ({@link LetterOfCredit}): your balance as a sealed note in your name, cashed only by you,
- * at any bank: free in the realm it's drawn on, {@link #LETTER_FEE} at another's. A thief who lifts it has paper.</li>
+ * at any bank: free in the realm it's drawn on, {@link #LETTER_FEE} at another's (kept by the bank that cashes it). The
+ * bank it's drawn on pays it out of its treasury, and holds it over while that's short. A thief who lifts it has paper.</li>
  * <li><b>A fallen realm takes its bank with it</b>: its balances are gone, its letters are waste paper and its loans are
  * forgotten. A vault is kept with its realm's seat, so a realm founded later under the same number doesn't inherit it.
- * A player who dies for good ({@link #reborn}) starts with no accounts, no loans, and letters that are no longer theirs.</li>
+ * A player who dies for good ({@link #reborn}) starts with no accounts, no loans, and letters that are no longer theirs:
+ * their debts are taken from their balances, and the rest goes to their next of kin among players, or with none is
+ * absorbed by the bank into its coffers (Andy).</li>
  * </ul>
  */
 public final class Banks {
@@ -86,13 +90,17 @@ public final class Banks {
 			Codec.LONG.fieldOf("owed").forGetter(Loan::owed), Codec.LONG.fieldOf("due").forGetter(Loan::due)).apply(i, Loan::new));
 	}
 
-	/** One realm's books: its seat (so a later realm of the same number is a new bank), balances (milli) and loans, by player. */
-	record Vault(BlockPos seat, Map<String, Long> balances, Map<String, Loan> loans, long paidDay) {
+	/**
+	 * One realm's books: its seat (so a later realm of the same number is a new bank), balances (milli) and loans, by
+	 * player, and the change ({@code loose}, milli) held over from coin that came in or went out short of a whole emerald.
+	 */
+	record Vault(BlockPos seat, Map<String, Long> balances, Map<String, Loan> loans, long paidDay, long loose) {
 		static final Codec<Vault> CODEC = RecordCodecBuilder.create(i -> i.group(
 			BlockPos.CODEC.fieldOf("seat").forGetter(Vault::seat),
 			Codec.unboundedMap(Codec.STRING, Codec.LONG).fieldOf("balances").forGetter(Vault::balances),
 			Codec.unboundedMap(Codec.STRING, Loan.CODEC).fieldOf("loans").forGetter(Vault::loans),
-			Codec.LONG.fieldOf("paid_day").forGetter(Vault::paidDay)).apply(i, Vault::new));
+			Codec.LONG.fieldOf("paid_day").forGetter(Vault::paidDay),
+			Codec.LONG.optionalFieldOf("loose", 0L).forGetter(Vault::loose)).apply(i, Vault::new));
 
 		long balance(UUID player) {
 			return this.balances.getOrDefault(player.toString(), 0L);
@@ -109,7 +117,7 @@ public final class Banks {
 			} else {
 				b.put(player.toString(), milli);
 			}
-			return new Vault(this.seat, Map.copyOf(b), this.loans, this.paidDay);
+			return new Vault(this.seat, Map.copyOf(b), this.loans, this.paidDay, this.loose);
 		}
 
 		Vault withLoan(UUID player, @Nullable Loan loan) {
@@ -119,7 +127,20 @@ public final class Banks {
 			} else {
 				l.put(player.toString(), loan);
 			}
-			return new Vault(this.seat, this.balances, Map.copyOf(l), this.paidDay);
+			return new Vault(this.seat, this.balances, Map.copyOf(l), this.paidDay, this.loose);
+		}
+
+		Vault withLoose(long milli) {
+			return new Vault(this.seat, this.balances, this.loans, this.paidDay, milli);
+		}
+
+		/** Everything the bank owes its depositors (milli). */
+		long owed() {
+			long total = 0L;
+			for (long b : this.balances.values()) {
+				total += b;
+			}
+			return total;
 		}
 	}
 
@@ -156,7 +177,7 @@ public final class Banks {
 	/** {@code realm}'s vault as it stands (a fresh one if it has none, or only an older realm's of the same number). */
 	private static Vault vault(MinecraftServer server, Faction realm) {
 		Vault v = ledger(server).vaults().get(Integer.toString(realm.id()));
-		return v != null && v.seat().equals(realm.seat()) ? v : new Vault(realm.seat(), Map.of(), Map.of(), Quests.day(server.overworld()));
+		return v != null && v.seat().equals(realm.seat()) ? v : new Vault(realm.seat(), Map.of(), Map.of(), Quests.day(server.overworld()), 0L);
 	}
 
 	private static void put(MinecraftServer server, Faction realm, Vault v) {
@@ -166,12 +187,33 @@ public final class Banks {
 		save(server, new Ledger(Map.copyOf(vaults), l.reborn()));
 	}
 
-	/** {@code player} has died for good: their accounts and loans are gone, and the letters they drew are no longer theirs. */
-	static void reborn(ServerPlayer player) {
+	/**
+	 * {@code player} has died for good. At each bank what they owe is taken from what they held; the rest goes to their next
+	 * of kin ({@code heir}, a player of their family), or with no kin stays in the bank's coffers. A loan the balance
+	 * couldn't cover dies with them, and the letters they drew are no longer theirs.
+	 */
+	static void reborn(ServerPlayer player, @Nullable UUID heir) {
 		MinecraftServer server = player.level().getServer();
 		Ledger l = ledger(server);
+		UUID me = player.getUUID();
 		Map<String, Vault> vaults = new HashMap<>();
-		l.vaults().forEach((id, v) -> vaults.put(id, v.withBalance(player.getUUID(), 0L).withLoan(player.getUUID(), null)));
+		l.vaults().forEach((id, v) -> {
+			long held = v.balance(me);
+			Loan loan = v.loan(me);
+			// the estate settles its debt first; that coin is in the treasury already, so only the books change
+			long left = held - (loan == null ? 0L : Math.min(held, loan.owed()));
+			Vault after = v.withBalance(me, 0L).withLoan(me, null);
+			if (heir != null && !heir.equals(me) && left > 0L) {
+				after = after.withBalance(heir, after.balance(heir) + left);
+				Faction realm = Factions.get(server, Integer.parseInt(id));
+				ServerPlayer kin = server.getPlayerList().getPlayer(heir);
+				if (kin != null && realm != null) {
+					kin.sendSystemMessage(Component.translatable("bank.jaymoskingdoms.inherited", player.getName(), Money.text(realm, left), realm.name())
+						.withStyle(ChatFormatting.GOLD));
+				}
+			}
+			vaults.put(id, after);
+		});
 		Map<String, Long> reborn = new HashMap<>(l.reborn());
 		reborn.put(player.getUUID().toString(), server.overworld().getGameTime());
 		save(server, new Ledger(Map.copyOf(vaults), Map.copyOf(reborn)));
@@ -186,6 +228,36 @@ public final class Banks {
 	static boolean stands(MinecraftServer server, int id, BlockPos seat) {
 		Faction f = Factions.get(server, id);
 		return f != null && !f.fallen() && f.seat().equals(seat);
+	}
+
+	/** Coin (milli) into {@code realm}'s treasury: whole emeralds go in, the change is kept loose in the vault. */
+	private static Vault intoTreasury(MinecraftServer server, Faction realm, Vault v, long milli) {
+		long loose = v.loose() + Math.max(0L, milli);
+		long whole = loose / Money.UNIT;
+		if (whole > 0L) {
+			Factions.update(server, realm.id(), f -> f.withTreasury(f.treasury() + whole));
+		}
+		return v.withLoose(loose - whole * Money.UNIT);
+	}
+
+	/** What {@code realm}'s bank can pay out now (milli): its treasury and its loose change. Spent coin isn't there to give. */
+	static long onHand(MinecraftServer server, Faction realm, Vault v) {
+		Faction now = Factions.get(server, realm.id());
+		return v.loose() + (now == null ? 0L : Math.max(0L, now.treasury()) * Money.UNIT);
+	}
+
+	/** Coin (milli) out of {@code realm}'s treasury, the loose change first; null (nothing taken) if it can't cover it. */
+	private static @Nullable Vault outOfTreasury(MinecraftServer server, Faction realm, Vault v, long milli) {
+		if (milli > onHand(server, realm, v)) {
+			return null;
+		}
+		long shortBy = milli - v.loose();
+		if (shortBy <= 0L) {
+			return v.withLoose(-shortBy);
+		}
+		long whole = (shortBy + Money.UNIT - 1) / Money.UNIT;
+		Factions.update(server, realm.id(), f -> f.withTreasury(f.treasury() - whole));
+		return v.withLoose(whole * Money.UNIT - shortBy);
 	}
 
 	// ---- the building ----------------------------------------------------------------------------------------------------
@@ -303,24 +375,20 @@ public final class Banks {
 				continue;
 			}
 			Faction realm = Factions.get(server, id);
-			// interest, out of the treasury while it can
+			// interest: the realm's own coin becomes its depositors', while it has coin of its own beyond what it holds for them
 			if (day - v.paidDay() >= INTEREST_DAYS) {
-				long treasury = realm.treasury() * Money.UNIT;
+				long spare = onHand(server, realm, v) - v.owed();
 				long paid = 0L;
 				Map<String, Long> balances = new HashMap<>(v.balances());
 				for (Map.Entry<String, Long> b : v.balances().entrySet()) {
 					long due = (long)(Math.min(b.getValue(), INTEREST_CAP * Money.UNIT) * INTEREST);
-					if (due <= 0L || paid + due > treasury) {
+					if (due <= 0L || paid + due > spare) {
 						continue;
 					}
 					paid += due;
 					balances.put(b.getKey(), b.getValue() + due);
 				}
-				long emeralds = (paid + Money.UNIT - 1) / Money.UNIT;
-				if (emeralds > 0L) {
-					Factions.update(server, id, f -> f.withTreasury(Math.max(0L, f.treasury() - emeralds)));
-				}
-				v = new Vault(v.seat(), Map.copyOf(balances), v.loans(), day);
+				v = new Vault(v.seat(), Map.copyOf(balances), v.loans(), day, v.loose());
 			}
 			// overdue loans: from the balance first, then the borrower's standing
 			for (Map.Entry<String, Loan> ln : v.loans().entrySet()) {
@@ -331,9 +399,8 @@ public final class Banks {
 				long owed = ln.getValue().owed();
 				long taken = Math.min(owed, v.balance(who));
 				if (taken > 0L) {
+					// (a balance's coin is in the treasury already: only the books change)
 					v = v.withBalance(who, v.balance(who) - taken).withLoan(who, new Loan(owed - taken, ln.getValue().due()));
-					long back = taken / Money.UNIT;
-					Factions.update(server, id, f -> f.withTreasury(f.treasury() + back));
 				}
 				ServerPlayer p = server.getPlayerList().getPlayer(who);
 				if (p != null && owed - taken > 0L) {
@@ -451,7 +518,8 @@ public final class Banks {
 		if (milli <= 0L || !Money.charge(player, town, milli)) {
 			return;
 		}
-		Vault v = vault(server, realm);
+		// the coin goes into the realm's treasury: what the realm spends of it isn't there to give back
+		Vault v = intoTreasury(server, realm, vault(server, realm), milli);
 		put(server, realm, v.withBalance(player.getUUID(), v.balance(player.getUUID()) + milli));
 		tell(player, "deposited", Money.text(town, milli), Money.text(town, v.balance(player.getUUID()) + milli));
 	}
@@ -459,13 +527,22 @@ public final class Banks {
 	private static void withdraw(ServerPlayer player, Faction town, Faction realm, long milli) {
 		MinecraftServer server = player.level().getServer();
 		Vault v = vault(server, realm);
-		long take = Math.min(milli, v.balance(player.getUUID()));
-		if (take <= 0L) {
+		long asked = Math.min(milli, v.balance(player.getUUID()));
+		long take = Math.min(asked, onHand(server, realm, v));
+		if (asked > 0L && take <= 0L) {
+			tell(player, "vault_bare", realm.name());
 			return;
 		}
-		put(server, realm, v.withBalance(player.getUUID(), v.balance(player.getUUID()) - take));
+		Vault out = take <= 0L ? null : outOfTreasury(server, realm, v, take);
+		if (out == null) {
+			return;
+		}
+		put(server, realm, out.withBalance(player.getUUID(), out.balance(player.getUUID()) - take));
 		Money.pay(player, town, take);
-		tell(player, "withdrew", Money.text(town, take), Money.text(town, v.balance(player.getUUID()) - take));
+		tell(player, "withdrew", Money.text(town, take), Money.text(town, out.balance(player.getUUID()) - take));
+		if (take < asked) {
+			tell(player, "vault_short", realm.name());
+		}
 	}
 
 	private static void letter(ServerPlayer player, Faction town, Faction realm) {
@@ -497,7 +574,19 @@ public final class Banks {
 			player.sendSystemMessage(Component.translatable("bank.jaymoskingdoms.waste_paper", note.realmName()).withStyle(ChatFormatting.RED));
 			return;
 		}
-		long paid = note.realm() == realm.id() ? note.amount() : (long)(note.amount() * (1.0 - LETTER_FEE));
+		// the bank it was drawn on pays it out of its treasury; another realm's bank keeps its fee of what it collects
+		Faction drawn = Factions.get(server, note.realm());
+		Vault out = drawn == null ? null : outOfTreasury(server, drawn, vault(server, drawn), note.amount());
+		if (out == null) {
+			tell(player, "letter_unpaid", note.realmName());
+			return;
+		}
+		put(server, drawn, out);
+		long paid = note.amount();
+		if (note.realm() != realm.id()) {
+			paid = (long)(note.amount() * (1.0 - LETTER_FEE));
+			put(server, realm, intoTreasury(server, realm, vault(server, realm), note.amount() - paid));
+		}
 		held.shrink(1);
 		Money.pay(player, town, paid);
 		tell(player, "cashed", Money.text(town, paid));
@@ -533,10 +622,10 @@ public final class Banks {
 			fromCoin = 0L;
 		}
 		long paid = fromBalance + fromCoin;
+		// coin from the purse goes into the treasury; the balance's is there already
+		v = intoTreasury(server, realm, v, fromCoin);
 		put(server, realm, v.withBalance(player.getUUID(), v.balance(player.getUUID()) - fromBalance)
 			.withLoan(player.getUUID(), new Loan(loan.owed() - paid, loan.due())));
-		long back = paid / Money.UNIT;
-		Factions.update(server, realm.id(), f -> f.withTreasury(f.treasury() + back));
 		tell(player, paid >= loan.owed() ? "repaid" : "repaid_part", Money.text(town, paid), Money.text(town, loan.owed() - paid));
 	}
 

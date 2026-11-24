@@ -347,6 +347,14 @@ public final class McaCompat {
 		return LOADED ? McaBridge.kinOf(v, dead) : STRANGERS;
 	}
 
+	/**
+	 * {@code player}'s next of kin among players (MCA's family tree): their partner, then a child, a parent, a sibling;
+	 * null if none, or without MCA.
+	 */
+	static java.util.@Nullable UUID heir(ServerPlayer player) {
+		return LOADED ? McaBridge.heir(player) : null;
+	}
+
 	/** (0.7.211) An MCA villager's personality id ("relaxed", "crabby"...); "" without MCA or for a plain villager. */
 	static String personality(Villager v) {
 		return LOADED ? McaBridge.personality(v) : "";
