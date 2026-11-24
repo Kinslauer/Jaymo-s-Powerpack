@@ -1,9 +1,9 @@
 ---
-status: running
+status: done
 task: cleric-medallion-board
 branch: claude/cleric-medallion-board
 with: local_29ede7b7-7e11-4e20-8506-df7674edc787
-pr: 2060
+pr: 2060 (merged 2026-11-23)
 mods: kingdoms
 versions:
 started: 2026-11-23
@@ -31,3 +31,4 @@ owns:
 
 ## Done
 PR #2060 (Auto-fix on). Numpad board with nine sigils (pad layout), spells + Bless/Sanctify/Turn Undead + four great prayers (Hallowed Ground from the start, the rest by favour tier 2/3/4), sneak to bind spells, clash pop-up for the medallion keys. Not played.
+- 2026-11-23 20:45 PR #2060 is merged into master; moved to Agents/Done.

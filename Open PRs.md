@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-23 20:39
+updated: 2026-11-23 20:45
 ---
 # Open PRs
 
-10 open, as of 2026-11-23 20:39. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+10 open, as of 2026-11-23 20:45. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2053](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2053) Guards only see a drawn blade in front of them; sneak right up behind anyone (Kingdoms)
@@ -38,7 +38,7 @@ Andy merges only on "merge", one at a time.
 
 ## [#2060](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2060) Cleric's medallion board: numpad sigils cast spells and great prayers, sneak to bind (Kingdoms)
 - **Branch:** `claude/cleric-medallion-board` · **Updated:** 2026-11-24 (today)
-- **Checks:** ⏳ 1 of 4 running
+- **Checks:** ✅ 5 passed
 - **Agent:** [[cleric-medallion-board]]
 
 ## [#2061](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2061) A blast close by knocks you out cold (Powers)
