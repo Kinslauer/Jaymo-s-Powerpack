@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 21:46). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 21:54). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -23,6 +23,9 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2066 JEI shows stone tools, hammer and light armour recipes on a server (Powers, Kingdoms, Kitchen, 2026-11-24)
+- [ ] #2065 The key clash pop-up comes per key, on its first press (Kingdoms, 2026-11-24)
+- [ ] #2064 the life aim page is a torn scrap on rough starts, headed by who you are (Kingdoms, 2026-11-24)
 - [ ] #2063 Your coin at a glance, and money bags in chests (Kingdoms, 2026-11-24)
 - [ ] #2062 Adrenaline kicks in once, going down included (Powers, 2026-11-24)
 - [ ] #2061 A blast close by knocks you out cold (Powers, 2026-11-24)
@@ -80,10 +83,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1995 speedsters don't tire Kitchen's sprint wind (Powers, Kitchen, 2026-11-22)
 - [ ] #1994 Cannons: stone shot and fire shot (Kingdoms, 2026-11-22)
 - [ ] #1993 trophy heads sit square on Kitchen's head mount (Powers, Kitchen, 2026-11-22)
-- [ ] #1992 Survival picks: wound pools, head blows, headshots, armour per part, medicine over time (Powers, Kingdoms, 2026-11-22)
-- [ ] #1991 Defence disciplines, part 1: passive blocks, tighter parries, fist disarms (Powers, Kingdoms, 2026-11-22)
-- [ ] #1990 Z Fighter gaps 2, part 2: holding back, Limit Break 4-6, fighting styles, unlocked potential (Powers, 2026-11-22)
-- …and 409 older ones.
+- …and 412 older ones.
 
 ## Health
 
