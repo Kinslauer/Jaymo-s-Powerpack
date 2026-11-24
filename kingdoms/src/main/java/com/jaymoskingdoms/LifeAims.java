@@ -81,6 +81,12 @@ public final class LifeAims {
 	static final double SCORN_RANGE = 8.0, KNOW_NEAR = 112.0;
 	/** The heirloom: how long it can be gone from the pack, ender chest and boxes (online ticks: five days) before it counts as lost. */
 	static final int HEIRLOOM_LOST_TICKS = 5 * 24000;
+	/**
+	 * Andy: the aim page is "a scrap of paper ... only ever a book if you have a start within a town or something less
+	 * rough". The roads that land you inside a town, settled: a rich city, a family's farm, a realm's keep. Every other road
+	 * (the cells and the eviction too, which are in a town but anything but settled) gets the torn scrap.
+	 */
+	static final java.util.Set<Start> BOOK_ROADS = java.util.EnumSet.of(Start.CITY, Start.VILLAGE, Start.SWORN);
 	/** A companion dying farther than this from the traveller (blocks) died because they were left. */
 	static final double ABANDON_RANGE = 64.0;
 	/** A whale taken counts for a traveller within this many blocks of it dying (their crew may strike the blow). */
@@ -287,14 +293,24 @@ public final class LifeAims {
 		String page = fallback ? "aim.jaymoskingdoms.page.alt" : "aim.jaymoskingdoms." + life.aim() + ".page";
 		// Andy (2026-11-19): no book in the pack any more; the page opens on screen as they land, on a book's page
 		if (ServerPlayNetworking.canSend(player, Page.TYPE)) {
-			ServerPlayNetworking.send(player, new Page(page));
+			// headed by who they are (name, class, heritage), as they made themselves a moment ago
+			String name = CharacterNames.character(player);
+			Classes.PlayerClass cls = Classes.classOf(player);
+			Heritage.Kind heritage = Heritage.of(player);
+			ServerPlayNetworking.send(player, new Page(page, !BOOK_ROADS.contains(road), name == null ? player.getGameProfile().name() : name,
+				cls == null ? "" : cls.key(), heritage == null ? "" : heritage.key()));
 		}
 	}
 
-	/** Server to player: open the aim's page (a lang key) on a book's page once the landing's screens are gone. */
-	public record Page(String key) implements CustomPacketPayload {
+	/**
+	 * Server to player: open the aim's page (a lang key) once the landing's screens are gone, on a torn scrap ({@code scrap})
+	 * or a book's page, under the character's name, class and heritage keys (empty: none).
+	 */
+	public record Page(String key, boolean scrap, String name, String cls, String heritage) implements CustomPacketPayload {
 		public static final Type<Page> TYPE = new Type<>(JaymosKingdoms.id("aim_page"));
-		public static final StreamCodec<RegistryFriendlyByteBuf, Page> CODEC = StreamCodec.composite(ByteBufCodecs.STRING_UTF8, Page::key, Page::new);
+		public static final StreamCodec<RegistryFriendlyByteBuf, Page> CODEC = StreamCodec.composite(ByteBufCodecs.STRING_UTF8, Page::key,
+			ByteBufCodecs.BOOL, Page::scrap, ByteBufCodecs.STRING_UTF8, Page::name, ByteBufCodecs.STRING_UTF8, Page::cls,
+			ByteBufCodecs.STRING_UTF8, Page::heritage, Page::new);
 
 		@Override
 		public Type<Page> type() {
