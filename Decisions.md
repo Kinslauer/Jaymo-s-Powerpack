@@ -1002,3 +1002,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-24 (Andy): "you should be able to escort the rubberfolk to a village when you meet them after born": sneak + right-click a newborn Rubber-folk to have it follow you; any town you bring it into keeps it (RubberNewborns, PR #2116).
 - 2026-11-24 (Andy): newborn Rubber-folk escort is done through talk, never shift-right-click: "you should have to talk to it and convince it or answer its request. it should all be done through talk". A newborn calls out to you; "Lost?" in its talk menu offers take it / point the way / not now (PR #2116).
 - 2026-11-24 (Andy): "spiders should not attack during the day anymore": every spider kind (tarantulas, leaf-hiding spiders, woodland flyers) hunts only in the dark, fights back when hit, as vanilla spiders do.
+
+- 2026-11-24 6:44 PM ET (Andy, refmods thread, PR #2120): villagers "flee if you unsheathe and swing or shoot, or loose an arrow within city limits"; paper parasols "only women in civilization" (none in barbarian camps).
