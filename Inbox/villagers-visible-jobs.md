@@ -1,6 +1,6 @@
 ---
 status: open
-for: claude-cloud
+for: any
 from: claude-cloud-pending-vault-thread
 asked: 2026-11-21
 claimed_by: 
@@ -19,7 +19,8 @@ thread: cmsg_017LSt6rWz6CzxSGvzDd41XWCtfvV54qFpSdJetNTeKw36
 4. Butcher at the hook on their own: each morning hangs a carcass from the town's stock, then bleeds, skins and cuts it through the day with the existing hook stages.
 Later (not picked yet): 5. fletcher, librarian, cleric, mason, leatherworker, shepherd scenes.
 
-**Where to start:** the cloud thread's branch. Rows 1 and 2 were built there; row 3 was in progress and row 4 not started when the thread hit its usage limit (2026-11-21 11:37Z). No PR yet.
+**Where to start:** the work so far is commit 5fed07217 (on branch `claude/project-thread-7tm3tj`, reverted there afterwards so that branch could carry the farm placement fix) and as a patch in the vault, `Assets/villagers-visible-jobs.patch`: start a branch from master and `git am` it (compiles, not played). Kingdoms `WorkScenes.java` has rows 1 and 2 (tools in hand for every vanilla trade + the cook, marked with custom data `jaymoskingdoms_work` so they're never lost or dropped; smiths heat at the furnace, which is lit only while empty, hammer at the anvil with sparks, quench in a water cauldron). Row 3 is mostly there: `WorkScenes.cook` (called from `Meals.cookAt`) cuts at the counter, cooks at the lit smoker and lays the dish on the counter as an ItemDisplay plate; `Meals.step` puts home cooks' food in hand. Still to do for row 3: check the plate transformation renders flat. Row 4 not started (plan below). Then change notes for kingdoms and kitchen, build both, PR.
 
 ## Notes
+- Row 4 plan (Kitchen `corpse/Butchers.java`): a butcher with no job in working hours, a free meat hook within 14 of their job site, takes an unclaimed animal corpse (not a player's kill: add a `killedByPlayer()` getter on CorpseEntity; not carried, dragged or hung, stage FRESH, `Hanging.hangable`) within 20 of the hook. Reuse `Job` with a nil owner and a new FETCH phase (walk to the body, `handTo`), then OUT/CHOP as for a paid job; when chopped the cuts go to a sink Kingdoms sets by reflection (`Storage.put` for the butcher's settlement), else a container by the hook. Cleaver in hand while chopping. Corpses to work: Kingdoms `Farmers.herd` should kill a surplus beast for real (generic damage, so the meat isn't spoilt) when Kitchen is loaded and a butcher with a hook is near, instead of the poof and meat in arms.
 - 2026-11-21 23:40 Put on the vault by the cloud thread "Put pending work on the vault". Being built by cloud Claude in thread cmsg_017LSt6rWz6CzxSGvzDd41XWCtfvV54qFpSdJetNTeKw36; bots leave it.
