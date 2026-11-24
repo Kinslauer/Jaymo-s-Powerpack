@@ -33,6 +33,9 @@ Andy confirmed the jar is his own mod made with Claude and GPT ("yes they were m
 - Forge `PartEntity` multipart hitboxes have no vanilla/Fabric equivalent (vanilla supports only the Ender Dragon's parts); see Done for how it was handled.
 
 ## Done
-(pending)
-- 2026-11-24 13:30 No sign of work for 30 min: marked stalled (whoever ran it stopped).
-- 2026-11-24 14:08 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- Source ported: all 9 dinosaurs + dodo, rigs, mechanics (taming, torpor, darts, saddles, riding, levels, packs, hunting, fossil skeletons, skulls)
+- Spawn restricted to eight Verdant biomes (biome keys, no tag leakage)
+- Client/common source split: client-only classes under `src/client/java/com/jaymospowers/client/dino/`, nothing in `src/main` referencing client classes
+- Provenance recorded in `src/main/resources/assets/jaymospowers/dino/PROVENANCE.md`
+- Change note: `changes/powers/implement-verdant-dinosaurs.md`
+- Work continuing on native Fabric integration and spawn validation

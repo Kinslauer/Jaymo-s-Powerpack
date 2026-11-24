@@ -8,9 +8,10 @@ mods: powers
 versions:
 started: 2026-11-24
 owns:
-  - src/client/java/com/jaymospowers/client/power/web/WebSlender*.java (new)
-  - src/main/java/com/jaymospowers/power/web/WebRedHunt*.java (new)
-  - the red-strain body hooks in WebSymbioteLayer / WebSuitGrowth / WebHulk (body choice only; #2080's head untouched)
+  - src/client/java/com/jaymospowers/client/power/web/WebSlender*.java, WebHostBody.java (new)
+  - src/main/java/com/jaymospowers/power/web/WebRedHunt.java (new)
+  - body/tendril hooks in WebSymbioteLayer, WebSuitGrowth, WebHulk (limbs/tendril tables; #2080's head untouched), WebTendrilLayer, WebMorphLayer, WebSymbioteWingsLayer, WebGooGlobs, WebBehemothClient, mixin/WebLivingEntityRendererMixin
+  - WebInhabit, WebBehemoth, WebPower (hunt + black-needs hooks)
   - src/main/resources/assets/jaymospowers/textures/entity/web_symbiote_slender*.png (new)
   - tools/gen_web_slender.py, tools/preview_slender.py (new)
   - changes/powers/claude-red-symbiote-body.md
@@ -30,7 +31,7 @@ terrain for pursuit and releasing every ticket when the hunt ends. Movement feel
 
 ## Notes
 - Previews: E:/Jaymo Vault Live/Assets/red-symbiote/ (slender-body.png, -lifted, slender-vs-big.png), tools/preview_slender.py.
-- Andy mid-task (2026-11-24): tendrils a cage not a cape; then "retain them all ... abundance ... differ in size thickness and length ... stay on the back/rear and shoulders, never out the front" (done: TENDRIL_REST + 14 STRANDS); "adapt them well to the climb and walk" (walls walk from slender roots; low two skitter on the ground at a run); "when done, black should get a similar treatment" (to do).
+- Andy mid-task (2026-11-24): tendrils a cage not a cape; "exaggerated hunch ... more curled while using tendrils ... slight ragdoll on movement" and "arms and knees should bend too" (done: WebSlender.hunch, ELBOWS, THIGHS, CROUCH_DROP); then "retain them all ... abundance ... differ in size thickness and length ... stay on the back/rear and shoulders, never out the front" (done: TENDRIL_REST + 14 STRANDS); "adapt them well to the climb and walk" (walls walk from slender roots; low two skitter on the ground at a run); "when done, black should get a similar treatment" (done: WebHulk.TENDRIL_REST/STRANDS).
 - Black-strain update via parent: kills only for its needs, seeks a web host; no 500-block hunt.
 - Question for Andy: a red host wastes away in 20-90 s today, too short for a 500-block hunt. Default taken: while it hunts it wastes far slower, and each kill (fed on as a corpse) buys it more time.
 
