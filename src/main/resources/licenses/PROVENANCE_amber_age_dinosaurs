@@ -1,0 +1,16 @@
+Amber Age: Dinosaurs (modid amberage 1.2.0, Forge 66 for Minecraft 26.3), Andy's own mod, made with Claude and GPT.
+
+Its code, models, textures, sounds, recipes, loot and language are used in com.jaymospowers.dino,
+com.jaymospowers.client.dino and the dino folders under assets/jaymospowers and data/jaymospowers.
+
+The jar carries "All Rights Reserved" metadata; that is the generated default of the mod template, not a third party's
+claim. Andy confirmed it is his work and authorised its reuse here ("yes they were made with claude and gpt",
+2026-11-24, recorded in the vault's Decisions log). No other person's code or art is in it.
+
+How it was brought over:
+- The jar held compiled classes only, and Andy has no source project (confirmed 2026-11-24). The classes were
+  decompiled with Vineflower 1.12.0 and ported to Fabric: Forge registries, config, network channel, events and client
+  extensions replaced; names moved to the jaymospowers namespace.
+- The .kmdl models and .spec rigs, the textures and the sounds were copied unchanged (only moved under
+  assets/jaymospowers/dino, textures/entity/dino, textures/item/dino and sounds/dino).
+- Left out: Forge's multi-part hitboxes (Minecraft only supports those for the Ender Dragon).

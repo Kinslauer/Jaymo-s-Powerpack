@@ -47,6 +47,7 @@
 		"GuardFirstPersonMixin",
 		"HammerFirstPersonMixin",
 		"HammerPoseMixin",
+		"TranqRiflePoseMixin",
 		"LashSocketFirstPersonMixin",
 		"LashSocketItemInHandLayerMixin",
 		"LashSocketItemLayerMixin",

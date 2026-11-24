@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:arrow",
+    "minecraft:arrow",
+    "minecraft:arrow",
+    "minecraft:arrow",
+    "jaymospowers:narcotic"
+  ],
+  "result": {
+    "id": "jaymospowers:tranq_dart",
+    "count": 4
+  }
+}
