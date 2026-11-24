@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 19:01). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 19:24). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -23,6 +23,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2093 eaters of the downed bend down over them (Powers, Kingdoms, Kitchen, 2026-11-24)
 - [ ] #2091 Locked-on swings hit small, quick foes (baby zombies) (Powers, Kingdoms, 2026-11-24)
 - [ ] #2089 tree felling - cut through the trunk, carved stumps, blasts bring buildings down (Kingdoms, 2026-11-24)
 - [ ] #2088 NPCs hold two-handed weapons in both hands (Kingdoms, 2026-11-24)
@@ -82,8 +83,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2020 From the Shadows: diabolium, the crust armour and the Nehemoth's blood (Kingdoms, 2026-11-23)
 - [ ] #2019 From the Shadows: effects, potions and enchantments (Kingdoms, 2026-11-23)
 - [ ] #2018 Small boats at sea are a realm's fishing smacks with a helm; the talk screen's empty purple box is gone (Kingdoms, 2026-11-23)
-- [ ] #2016 plague bearer: the orc camps' sick walker (From the Shadows Reborn) (Kingdoms, 2026-11-23)
-- …and 480 older ones.
+- …and 481 older ones.
 
 ## Health
 
