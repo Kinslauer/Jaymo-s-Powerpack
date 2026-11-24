@@ -296,6 +296,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		MimicBenchScreen.register();
 		BoutBracketScreen.register();
 		MaskedFacesClient.register();
+		CelebrationsClient.register();
 		CastOutMap.register();
 		// 0.6.6: lunar events' colours
 		MoonClient.register();

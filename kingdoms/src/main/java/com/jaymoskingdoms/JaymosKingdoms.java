@@ -299,6 +299,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("identity attachments: {} {} {}", Identities.ALL, Identities.SIGHTINGS, Identities.MASKED_AS);
 		Identities.register();
 		MaskedFaces.register();
+		Celebrations.register();
 		// 0.7.149: the name picked in MCA's creator shows in place of the username (and its attachment)
 		CharacterNames.register();
 		// 0.7.180: names over heads only once you've been told them (and its attachments)

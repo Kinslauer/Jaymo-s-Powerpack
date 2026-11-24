@@ -291,6 +291,7 @@ public class JaymosPowers implements ModInitializer {
 		// Kitchen's ragdolls (a crash, a blast...) leave alone anyone a power has hold of
 		// (0.19.63) armour gets dirty and washes clean; wet weather's puddles and underwater light (client/wet)
 		com.jaymospowers.core.wet.WetParticles.init();
+		com.jaymospowers.core.air.AirParticles.init();
 		com.jaymospowers.core.wet.ArmourGrime.init();
 		// wet and soaked, rust on metal armour, scrubbing with a straw wisp or sand
 		com.jaymospowers.core.wet.Wet.init();
