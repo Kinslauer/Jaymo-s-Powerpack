@@ -256,7 +256,8 @@ public final class TreeSites {
 			return true;
 		}
 		MinecraftServer server = level.getServer();
-		BlockPos foot = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, box.getCenter());
+		// (the tree's foot: its middle at the height of its ground, not of its crown)
+		BlockPos foot = new BlockPos(box.getCenter().getX(), box.minY() + 3, box.getCenter().getZ());
 		Faction camp = nearestCamp(server, foot);
 		if (camp != null) {
 			return post(level, camp, spots);
@@ -266,9 +267,13 @@ public final class TreeSites {
 		int reach = CampBuildings.CLEAR_RADIUS + 1;
 		for (int k = 0; k < 8; k++) {
 			double angle = k * Math.PI / 4.0;
-			BlockPos at = foot.offset((int) Math.round(Math.cos(angle) * CAMP_OFFSET), 0, (int) Math.round(Math.sin(angle) * CAMP_OFFSET));
-			if (!Loaded.made(level, at.getX() - reach, at.getZ() - reach, at.getX() + reach, at.getZ() + reach)
-				|| !level.isPositionEntityTicking(at) || Raids.playerNear(level, at, Camps.HIDE_RANGE)) {
+			BlockPos flat = foot.offset((int) Math.round(Math.cos(angle) * CAMP_OFFSET), 0, (int) Math.round(Math.sin(angle) * CAMP_OFFSET));
+			if (!Loaded.made(level, flat.getX() - reach, flat.getZ() - reach, flat.getX() + reach, flat.getZ() + reach)) {
+				waiting = true;
+				continue;
+			}
+			BlockPos at = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, flat);
+			if (!level.isPositionEntityTicking(at) || Raids.playerNear(level, at, Camps.HIDE_RANGE)) {
 				waiting = true;
 				continue;
 			}

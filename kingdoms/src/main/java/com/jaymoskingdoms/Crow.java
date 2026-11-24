@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -43,7 +44,7 @@ import org.jspecify.annotations.Nullable;
  * <ul>
  * <li>Sympathy: it perches on the bough over the hanged and now and then flutters down to peck at the remains; its call
  * is the parrot's, pitched low; it is wary, and flies off from any player it doesn't know who comes within
- * {@link #WARY_RANGE} (a hand held out with seeds or meat is no threat: within {@link #BAITED_RANGE} it stays); it never
+ * {@link #WARY_RANGE} (a hand held out with seeds or meat is no threat: it comes down beside it); it never
  * dances, copies other mobs' voices or takes to anyone.</li>
  * <li>Feedback: it lives off the hanged. When the remains are gone (taken down, buried or burned) it has nothing to
  * stay for: it flies off for good and is gone once out of sight.</li>
@@ -55,7 +56,11 @@ import org.jspecify.annotations.Nullable;
 public final class Crow extends Parrot {
 	// ---- tuning ----
 	/** A stranger this near (blocks) puts it to flight; with food in hand, this near. */
-	static final double WARY_RANGE = 8.0, BAITED_RANGE = 2.5;
+	static final double WARY_RANGE = 8.0;
+	/** A stranger holding out food this near (blocks) is come down to, and the crow waits this near them. */
+	static final double FOOD_RANGE = 16.0, LAND_BESIDE = 2.2;
+	/** How often (ticks) a flight is planned again. */
+	static final int REPLAN_TICKS = 10;
 	/** How far it flies from its perch when put to flight (blocks across, up). */
 	static final double FLEE_REACH = 12.0, FLEE_RISE = 6.0;
 	/** A friend this near its perch (blocks) is brought a gift (once a day). */
@@ -86,6 +91,7 @@ public final class Crow extends Parrot {
 	/** Set while the parrot's own step runs (it would copy a mob's voice), so nothing is said in it. */
 	private boolean mute;
 	private float nextFlap = 1.0F;
+	private int replan;
 
 	public Crow(EntityType<? extends Crow> type, Level level) {
 		super(type, level);
@@ -112,23 +118,27 @@ public final class Crow extends Parrot {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
 		this.goalSelector.addGoal(1, new Leave());
 		this.goalSelector.addGoal(2, new Flee());
-		this.goalSelector.addGoal(3, new Bring());
-		this.goalSelector.addGoal(4, new Peck());
-		this.goalSelector.addGoal(5, new ReturnToPerch());
-		this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, WARY_RANGE));
+		this.goalSelector.addGoal(3, new ComeForFood());
+		this.goalSelector.addGoal(4, new Bring());
+		this.goalSelector.addGoal(5, new Peck());
+		this.goalSelector.addGoal(6, new ReturnToPerch());
+		this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
 	}
 
 	private static boolean offering(ItemStack stack) {
 		return stack.is(ItemTags.PARROT_FOOD) || stack.is(ItemTags.MEAT);
 	}
 
-	/** {@code player} is someone it would fly from. */
+	private static boolean offers(Player player) {
+		return offering(player.getMainHandItem()) || offering(player.getOffhandItem());
+	}
+
+	/** {@code player} is someone it would fly from: not a friend, and not holding out food. */
 	private boolean wary(Player player) {
-		if (player.isSpectator() || !player.isAlive() || this.friends.containsKey(player.getUUID())) {
+		if (player.isSpectator() || !player.isAlive() || this.friends.containsKey(player.getUUID()) || offers(player)) {
 			return false;
 		}
-		boolean baited = offering(player.getMainHandItem()) || offering(player.getOffhandItem());
-		return this.distanceTo(player) < (baited ? BAITED_RANGE : WARY_RANGE);
+		return this.distanceTo(player) < WARY_RANGE;
 	}
 
 	private @Nullable Player stranger() {
@@ -140,13 +150,53 @@ public final class Crow extends Parrot {
 		return null;
 	}
 
+	/** A stranger near holding out food (it isn't a friend yet): who it comes down to. */
+	private @Nullable Player baiter() {
+		for (Player player : this.level().getEntitiesOfClass(Player.class, this.getBoundingBox().inflate(FOOD_RANGE))) {
+			if (!player.isSpectator() && player.isAlive() && offers(player) && !this.friends.containsKey(player.getUUID())) {
+				return player;
+			}
+		}
+		return null;
+	}
+
+	/** The middle of the spot it sits on. */
 	private Vec3 perchSpot() {
 		BlockPos at = this.perch != null ? this.perch : this.blockPosition();
 		return Vec3.atBottomCenterOf(at);
 	}
 
+	private boolean atPerch() {
+		Vec3 at = this.perchSpot();
+		return Math.abs(this.getX() - at.x) < 0.6 && Math.abs(this.getZ() - at.z) < 0.6 && Math.abs(this.getY() - at.y) < 1.0;
+	}
+
 	private boolean remains() {
 		return this.hanged == null || this.level().getBlockState(this.hanged).is(Blocks.SKELETON_SKULL);
+	}
+
+	/** The air beside the remains it pecks from, or null. */
+	private @Nullable Vec3 peckSpot() {
+		if (this.hanged == null) {
+			return null;
+		}
+		for (Direction d : new Direction[] {Direction.EAST, Direction.WEST, Direction.NORTH, Direction.SOUTH}) {
+			BlockPos beside = this.hanged.relative(d);
+			if (this.level().getBlockState(beside).isAir() && this.level().getBlockState(beside.above()).isAir()) {
+				return Vec3.atBottomCenterOf(beside);
+			}
+		}
+		return null;
+	}
+
+	/** Flies to {@code to} by the air's paths (round the bough, not through it), straight if there's no path; re-planned every few ticks. */
+	private void flyTo(Vec3 to, double speed) {
+		if (--this.replan <= 0 || this.getNavigation().isDone()) {
+			this.replan = REPLAN_TICKS;
+			if (!this.getNavigation().moveTo(to.x, to.y, to.z, speed)) {
+				this.getMoveControl().setWantedPosition(to.x, to.y, to.z, speed);
+			}
+		}
 	}
 
 	/** Flying off for good, once the remains are gone. */
@@ -182,7 +232,7 @@ public final class Crow extends Parrot {
 
 	/** Away from a stranger: up and round the tree. */
 	private final class Flee extends Goal {
-		private @Nullable Player from;
+		private int wait;
 
 		Flee() {
 			this.setFlags(EnumSet.of(Goal.Flag.MOVE));
@@ -190,11 +240,11 @@ public final class Crow extends Parrot {
 
 		@Override
 		public boolean canUse() {
-			if (Crow.this.leaving || Crow.this.tickCount % 5 != 0) {
+			if (Crow.this.leaving || --this.wait > 0) {
 				return false;
 			}
-			this.from = Crow.this.stranger();
-			return this.from != null;
+			this.wait = 5;
+			return Crow.this.stranger() != null;
 		}
 
 		@Override
@@ -209,19 +259,65 @@ public final class Crow extends Parrot {
 
 		@Override
 		public void tick() {
-			Player p = this.from;
-			if (p == null || !Crow.this.wary(p)) {
-				this.from = Crow.this.stranger();
-				p = this.from;
-				if (p == null) {
-					return;
-				}
+			Player p = Crow.this.stranger();
+			if (p == null) {
+				return;
 			}
 			Vec3 home = Crow.this.perchSpot();
 			Vec3 dir = home.subtract(p.position()).multiply(1.0, 0.0, 1.0);
 			dir = dir.lengthSqr() < 1.0E-4 ? new Vec3(1.0, 0.0, 0.0) : dir.normalize();
-			Vec3 to = home.add(dir.scale(FLEE_REACH)).add(0.0, FLEE_RISE, 0.0);
-			Crow.this.getMoveControl().setWantedPosition(to.x, to.y, to.z, 1.2);
+			Crow.this.flyTo(home.add(dir.scale(FLEE_REACH)).add(0.0, FLEE_RISE, 0.0), 1.2);
+		}
+	}
+
+	/** Down to a stranger who holds out seeds or meat, and waits beside them: a hand to take it from. */
+	private final class ComeForFood extends Goal {
+		private @Nullable Player to;
+		private int wait;
+
+		ComeForFood() {
+			this.setFlags(EnumSet.of(Goal.Flag.MOVE));
+		}
+
+		@Override
+		public boolean canUse() {
+			if (Crow.this.leaving || --this.wait > 0) {
+				return false;
+			}
+			this.wait = 10;
+			this.to = Crow.this.baiter();
+			return this.to != null;
+		}
+
+		@Override
+		public boolean canContinueToUse() {
+			Player p = this.to;
+			return !Crow.this.leaving && p != null && p.isAlive() && offers(p) && !Crow.this.friends.containsKey(p.getUUID())
+				&& Crow.this.distanceTo(p) < FOOD_RANGE * 1.5;
+		}
+
+		@Override
+		public boolean requiresUpdateEveryTick() {
+			return true;
+		}
+
+		@Override
+		public void tick() {
+			Player p = this.to;
+			if (p == null) {
+				return;
+			}
+			Crow.this.getLookControl().setLookAt(p);
+			if (Crow.this.distanceTo(p) > LAND_BESIDE) {
+				Crow.this.flyTo(p.position(), 1.0);
+			} else {
+				Crow.this.getNavigation().stop();
+			}
+		}
+
+		@Override
+		public void stop() {
+			this.to = null;
 		}
 	}
 
@@ -229,6 +325,7 @@ public final class Crow extends Parrot {
 	private final class Bring extends Goal {
 		private @Nullable Player to;
 		private boolean given;
+		private int wait;
 
 		Bring() {
 			this.setFlags(EnumSet.of(Goal.Flag.MOVE));
@@ -240,9 +337,10 @@ public final class Crow extends Parrot {
 
 		@Override
 		public boolean canUse() {
-			if (Crow.this.leaving || Crow.this.tickCount % 20 != 0 || Crow.this.friends.isEmpty()) {
+			if (Crow.this.leaving || --this.wait > 0 || Crow.this.friends.isEmpty()) {
 				return false;
 			}
+			this.wait = 20;
 			Vec3 home = Crow.this.perchSpot();
 			long today = this.today();
 			for (Player player : Crow.this.level().getEntitiesOfClass(Player.class, Crow.this.getBoundingBox().inflate(GIFT_RANGE * 2.0))) {
@@ -273,16 +371,21 @@ public final class Crow extends Parrot {
 				return;
 			}
 			Crow.this.getLookControl().setLookAt(p);
-			Crow.this.getMoveControl().setWantedPosition(p.getX(), p.getY() + 1.6, p.getZ(), 1.1);
+			Crow.this.flyTo(new Vec3(p.getX(), p.getY() + 1.6, p.getZ()), 1.1);
 			if (Crow.this.distanceTo(p) < 2.6 && Crow.this.level() instanceof ServerLevel level) {
 				Crow.this.bring(level, p);
 				Crow.this.friends.put(p.getUUID(), this.today());
 				this.given = true;
 			}
 		}
+
+		@Override
+		public void stop() {
+			this.to = null;
+		}
 	}
 
-	/** Now and then, down to the remains for a few pecks. */
+	/** Now and then, down to the air beside the remains for a few pecks. */
 	private final class Peck extends Goal {
 		private int pecked, age;
 
@@ -293,12 +396,12 @@ public final class Crow extends Parrot {
 		@Override
 		public boolean canUse() {
 			return !Crow.this.leaving && Crow.this.hanged != null && Crow.this.onGround() && Crow.this.getRandom().nextInt(PECK_ODDS) == 0
-				&& Crow.this.remains() && Crow.this.stranger() == null;
+				&& Crow.this.remains() && Crow.this.peckSpot() != null && Crow.this.stranger() == null;
 		}
 
 		@Override
 		public boolean canContinueToUse() {
-			return !Crow.this.leaving && this.pecked < PECKS && this.age < 160 && Crow.this.remains() && Crow.this.stranger() == null;
+			return !Crow.this.leaving && this.pecked < PECKS && this.age < 200 && Crow.this.remains() && Crow.this.stranger() == null;
 		}
 
 		@Override
@@ -315,15 +418,22 @@ public final class Crow extends Parrot {
 		@Override
 		public void tick() {
 			BlockPos skull = Crow.this.hanged;
-			if (skull == null) {
+			Vec3 to = Crow.this.peckSpot();
+			if (skull == null || to == null) {
+				this.age = Integer.MAX_VALUE / 2;
 				return;
 			}
 			this.age++;
-			Vec3 to = new Vec3(skull.getX() + 0.5, skull.getY() + 0.7, skull.getZ() + 0.5);
-			Crow.this.getMoveControl().setWantedPosition(to.x, to.y, to.z, 1.0);
-			if (Crow.this.position().distanceToSqr(to) < 3.0 && this.age % PECK_SPACING == 0) {
-				this.pecked++;
-				Crow.this.level().playSound(null, skull, SoundEvents.BONE_BLOCK_HIT, Crow.this.getSoundSource(), 0.7F, 1.6F + Crow.this.getRandom().nextFloat() * 0.3F);
+			Vec3 mouth = new Vec3(to.x, to.y + 0.6, to.z);
+			if (Crow.this.position().distanceToSqr(mouth) > 1.5) {
+				Crow.this.flyTo(mouth, 1.0);
+			} else {
+				Crow.this.getNavigation().stop();
+				Crow.this.getLookControl().setLookAt(skull.getX() + 0.5, skull.getY() + 0.5, skull.getZ() + 0.5);
+				if (this.age % PECK_SPACING == 0) {
+					this.pecked++;
+					Crow.this.level().playSound(null, skull, SoundEvents.BONE_BLOCK_HIT, Crow.this.getSoundSource(), 0.7F, 1.6F + Crow.this.getRandom().nextFloat() * 0.3F);
+				}
 			}
 		}
 	}
@@ -336,7 +446,12 @@ public final class Crow extends Parrot {
 
 		@Override
 		public boolean canUse() {
-			return !Crow.this.leaving && Crow.this.perch != null && Crow.this.position().distanceToSqr(Crow.this.perchSpot()) > 1.5;
+			return !Crow.this.leaving && Crow.this.perch != null && !Crow.this.atPerch();
+		}
+
+		@Override
+		public boolean canContinueToUse() {
+			return this.canUse();
 		}
 
 		@Override
@@ -347,7 +462,12 @@ public final class Crow extends Parrot {
 		@Override
 		public void tick() {
 			Vec3 at = Crow.this.perchSpot();
-			Crow.this.getMoveControl().setWantedPosition(at.x, at.y, at.z, 1.0);
+			if (Crow.this.position().distanceToSqr(at) > 6.0) {
+				Crow.this.flyTo(at, 1.0);
+			} else {
+				// (the last blocks straight in, onto the middle of the bough)
+				Crow.this.getMoveControl().setWantedPosition(at.x, at.y, at.z, 1.0);
+			}
 		}
 	}
 

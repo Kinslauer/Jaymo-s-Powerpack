@@ -105,7 +105,7 @@ def hollow_oak():
         g.put(x, 5, 6, "candle", {"candles": "2" if x == 6 else "1", "lit": "true", "waterlogged": "false"})
     g.put(9, 3, 7, "barrel", {"facing": "up", "open": "false"})
     g.put(6, 3, 9, "brewing_stand", {"has_bottle_0": "false", "has_bottle_1": "false", "has_bottle_2": "false"})
-    g.put(9, 3, 9, "lectern", {"facing": "west", "has_book": "true", "powered": "false"})
+    g.put(9, 3, 9, "lectern", {"facing": "west", "has_book": "false", "powered": "false"})
     for (x, z) in ((7, 7), (8, 7), (7, 8), (8, 8)):
         g.put(x, 3, z, "moss_carpet")
     g.put(9, 3, 8, "candle", {"candles": "3", "lit": "true", "waterlogged": "false"})
@@ -238,11 +238,11 @@ def sites(api):
     forest = ["#minecraft:is_forest"]
     return [
         api.Site("hollow_oak", {"hollow_oak": hollow_oak()}, ground=2, worldgen={
-            "step": "surface_structures", "terrain_adaptation": "beard_thin", "biomes": forest,
+            "step": "surface_structures", "terrain_adaptation": "none", "biomes": forest,
             "spacing": 36, "separation": 14, "salt": 731905284,
         }),
         api.Site("spruce_lookout", {"spruce_lookout": spruce_lookout()}, ground=2, worldgen={
-            "step": "surface_structures", "terrain_adaptation": "beard_thin", "biomes": ["#minecraft:is_taiga"],
+            "step": "surface_structures", "terrain_adaptation": "none", "biomes": ["#minecraft:is_taiga"],
             "spacing": 34, "separation": 12, "salt": 408217739,
         }),
         api.Site("hanging_tree", {"hanging_tree": hanging_tree()}, ground=2, worldgen={
