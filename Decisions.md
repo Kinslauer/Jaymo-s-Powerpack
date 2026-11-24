@@ -1036,3 +1036,8 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-24 5:05 PM ET (Andy, Alex's Caves thread): cave band Warrior-born get their own look later: "they should vary, not all shirtless but all in primitive hide".
 
 - 2026-11-24 5:38 PM ET (Andy, Alex's Caves thread): chasm wild Tideborn "should ease up on you as you build relation with the lurkers who stalk you, either through trades or defense": tied to Alex's Deep One reputation.
+
+### 2026-11-24: Mordhau's armour, modelled for our harness
+- **Decided:** "can you see all the gear available in Mordhau? i'd like the armor pieces modeled for our character's harness". Picked 84 of 109 rows on https://claude.ai/artifact/KdZEYgBpSEGYBdFB2ZubCk. Notes: kettle hat "different cuts for different realms"; "you will see guards opt to remove their armor and stay within the harness gear, as it is too much to remove and store".
+- **Applies to:** Kingdoms harness (HeraldryArmour and friends). Our own models of the historical armour; nothing copied from Mordhau. Four tracks in Inbox: mordhau-1-helms, mordhau-2-hoods-crests, mordhau-3-body, mordhau-4-legs.
+- **Agent:** claude (PC coordinator thread).

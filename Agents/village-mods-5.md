@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: Inbox/village-mods-5-town-life-hats.md
 branch: claude/village-mods-5
 with: 
@@ -27,3 +27,4 @@ come from, and a small friendliness bonus for wearing your trade's hat.
 - 
 
 ## Done
+- 2026-11-24 18:18 No sign of work for 30 min: marked stalled (whoever ran it stopped).

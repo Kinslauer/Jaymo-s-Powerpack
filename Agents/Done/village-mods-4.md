@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Inbox/village-mods-4-board-work.md
 branch: claude/village-mods-4
 with: claude (worker for the PC coordinator thread)
@@ -42,3 +42,4 @@ decrees, deadlines, mixed asks, asks that fit the land, rarer paper, progress on
 All eight rows built in PR #2113 (head 0ebf8942a9), CI green on the first run. Readings taken: four papers (plain, sealed,
 vellum, gilt); hand-in is using the board with the copy or the goods in hand, not tossing items; only the player's copy
 yellows; decrees share the board's six spots (rulers post at most 2 and leave a spot free). Not played in game.
+- 2026-11-24 18:18 PR #2113 is merged into master; moved to Agents/Done.

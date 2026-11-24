@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: Keep-world deploy of current origin/master to the Deck, then watch latest.log; fix crashes in PRs, merge on green CI, redeploy (Andy, 2026-11-24)
 branch: 
 with: local desktop session (PC)
@@ -18,3 +18,4 @@ owns:
 - deploy.ps1 checked: switches to master, `git pull --ff-only origin master`, then builds. Local master was 91 behind.
 
 ## Done
+- 2026-11-24 18:18 No sign of work for 30 min: marked stalled (whoever ran it stopped).

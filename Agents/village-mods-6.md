@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: village-mods-6-small-structures
 branch: claude/village-mods-6
 with: 
@@ -29,3 +29,4 @@ owns:
 
 ## Done
 What a player will see, and what wasn't tested.
+- 2026-11-24 18:18 No sign of work for 30 min: marked stalled (whoever ran it stopped).
