@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 22:39). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 22:40). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -24,6 +24,8 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2108 The Silk Deeps no longer generate (Kingdoms, 2026-11-24)
+- [ ] #2107 T opens chat again (Powers, Kingdoms, 2026-11-24)
 - [ ] #2106 A new host can struggle out of the red one's hunt (Powers, 2026-11-24)
 - [ ] #2105 Alex's Caves joins the pack; its Magnetic Caves in the Aether's magnetic stone, its neodymium in our colours (Powers, Kingdoms, 2026-11-24)
 - [ ] #2104 patron colossus brings a natural disaster on each walk (Kingdoms, 2026-11-24)
@@ -82,9 +84,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2044 Weapons in set places on the body: swords at the hips, four flintlocks, guns on the back (Powers, 2026-11-23)
 - [ ] #2043 A sellsword doesn't call out to you and then turn you away (Kingdoms, 2026-11-23)
 - [ ] #2042 Enemies telegraph their blows longer and walk in before swinging (Powers, Kingdoms, 2026-11-23)
-- [ ] #2041 The stolen crown: the copy gives itself away, and the realm on alert (Kingdoms, 2026-11-23)
-- [ ] #2040 Dodge: a tap dashes, a hold rolls; adrenaline runs on wind; no climb cooldown (Powers, Kitchen, 2026-11-23)
-- …and 499 older ones.
+- …and 501 older ones.
 
 ## Health
 
