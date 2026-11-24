@@ -68,6 +68,7 @@
 		"jaymospowers.ember.mixins.json",
 		"jaymospowers.carryon.mixins.json",
 		{ "config": "jaymospowers.carryon.client.mixins.json", "environment": "client" },
+		"jaymospowers.alexscaves.mixins.json",
 		"jaymospowers.felled.mixins.json",
 		"jaymospowers.immersivesnow.mixins.json",
 		"jaymospowers.endertech.mixins.json",
