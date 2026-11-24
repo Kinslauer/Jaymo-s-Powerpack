@@ -146,7 +146,7 @@ public final class FormsClient {
 			}
 			for (int i = 0; i < Forms.BELT_SLOTS; i++) {
 				boolean pressed = false;
-				while (minecraft.options.keyHotbarSlots[i].consumeClick()) {
+				while (!MedallionClient.taken(i) && minecraft.options.keyHotbarSlots[i].consumeClick()) {
 					pressed = true;
 				}
 				if (pressed) {

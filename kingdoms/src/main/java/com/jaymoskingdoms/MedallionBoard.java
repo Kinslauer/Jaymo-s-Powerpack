@@ -165,6 +165,7 @@ public final class MedallionBoard {
 		}
 		ServerLevel level = (ServerLevel) player.level();
 		UP.put(player.getUUID(), new Board(level, level.getGameTime()));
+		Casting.gesture(player, Casting.Gesture.RAISE, colour(player));
 		draw(player, level);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 0.8F, 1.2F);
 		send(player, true, "");
@@ -200,6 +201,7 @@ public final class MedallionBoard {
 			Fx.stroke(level, node(player, board.marks.charAt(board.marks.length() - 1) - '0'), at, STROKE_WIDTH, colour);
 		}
 		level.sendParticles(Fx.rune(colour, 0.6F), at.x, at.y, at.z, 6, 0.03, 0.03, 0.03, 0.0);
+		Casting.gesture(player, Casting.Gesture.RAISE, colour);
 		board.marks += mark;
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.7F,
 			0.9F + 0.1F * board.marks.length());
@@ -281,10 +283,9 @@ public final class MedallionBoard {
 		}
 	}
 
-	/** The raised medallion as others see it: arms up, the medallion before the chest, a circle at the feet. */
+	/** The raised medallion as others see it: the medallion before the chest and a circle at the feet (the arms go up on the raise and each mark). */
 	private static void draw(ServerPlayer player, ServerLevel level) {
 		int colour = colour(player);
-		Casting.gesture(player, Casting.Gesture.RAISE, colour);
 		Fx.shape(level, 4, node(player, 5), facing(player), MEDALLION_SIZE, colour, REDRAW_TICKS + 2);
 		Fx.sigil(level, player.position().add(0.0, 0.05, 0.0), CIRCLE_SIZE, colour, REDRAW_TICKS + 2);
 	}

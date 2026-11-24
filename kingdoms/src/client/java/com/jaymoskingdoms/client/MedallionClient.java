@@ -38,6 +38,8 @@ public final class MedallionClient {
 	private static KeyMapping key;
 	private static boolean up;
 	private static String marks = "";
+	/** The number keys held since the board took them: a held key lays one mark (its repeats lay none) and, after the board drops, picks nothing until let go. */
+	private static final boolean[] HELD = new boolean[9];
 
 	private MedallionClient() {
 	}
@@ -45,6 +47,11 @@ public final class MedallionClient {
 	/** Whether the board is up: the number keys are its marks. */
 	public static boolean up() {
 		return up;
+	}
+
+	/** Whether number key {@code slot} (0 to 8) is the board's: it is up, or the key went down while it was and is still held. */
+	public static boolean taken(int slot) {
+		return up || HELD[slot];
 	}
 
 	static void register() {
@@ -61,6 +68,7 @@ public final class MedallionClient {
 			LocalPlayer player = minecraft.player;
 			if (player == null) {
 				up = false;
+				java.util.Arrays.fill(HELD, false);
 				return;
 			}
 			if (!ClientPlayNetworking.canSend(MedallionBoard.Raise.TYPE)) {
@@ -69,13 +77,19 @@ public final class MedallionClient {
 			while (key.consumeClick()) {
 				ClientPlayNetworking.send(new MedallionBoard.Raise(!up));
 			}
-			if (!up || minecraft.gui.screen() != null) {
-				return;
-			}
 			for (int i = 0; i < 9; i++) {
-				while (minecraft.options.keyHotbarSlots[i].consumeClick()) {
+				KeyMapping slot = minecraft.options.keyHotbarSlots[i];
+				if (!up && !HELD[i]) {
+					continue;
+				}
+				boolean clicked = false;
+				while (slot.consumeClick()) {
+					clicked = true;
+				}
+				if (up && clicked && !HELD[i] && minecraft.gui.screen() == null) {
 					ClientPlayNetworking.send(new MedallionBoard.Mark(i + 1));
 				}
+				HELD[i] = slot.isDown() && (up || HELD[i]);
 			}
 		});
 		HudElementRegistry.attachElementAfter(VanillaHudElements.HOTBAR, JaymosKingdoms.id("medallion_board"), MedallionClient::draw);

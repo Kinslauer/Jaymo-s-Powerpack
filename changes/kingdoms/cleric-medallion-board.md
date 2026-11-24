@@ -4,4 +4,4 @@
 - **Quick cast**: unchanged, a tap of the symbol in either hand (the offhand too) casts the bound spell; sneak-use still turns it.
 - On screen: the medallion's face with a rim of marks, the nine sigils, the laid ones lit and joined by crackling strokes, and beside it every prayer you know with its pattern (the ones still possible bright). Others see the arms raised, the medallion as a small sigil before the chest, a circle at the feet, a rune at each mark in the air and strokes joining them.
 - The board drops after 15 s with no mark, on death, or when the symbol leaves your hands (`MedallionBoard`, `MedallionClient`; tuning at the top of both).
-- Built on CI; not played in game.
+- Two board-only "powerful" spells are proposed to Andy, not built. Not played in game.
