@@ -7792,3 +7792,36 @@ Andy: "baby zombies are unfightable" (clip: an axe locked onto baby zombies' tor
 - **Stellarity is the End, Enderscape lives underneath** (Andy, 2026-11-19). Stellarity 6.0.1 ships unchanged as the End. Enderscape's End terrain, End city and stronghold packs are switched off for new worlds while Stellarity is there (`core/EnderscapePreset`, once per install). Its biomes fill **the Beneath**, a new One Dimension band under the Nether (`dimension/the_beneath.json`; Enderscape's terrain noise and sky copied under MIT; only its own biomes, so no End cities or dragon spikes under the Nether). New worlds only; needs Enderscape.
 - Relics look in Stellarity's stronghold corridors and End ship treasure too (`compat/StellarityLoot`).
 - Built; not played. The Stellarity and Enderscape pairing and the Beneath's terrain weren't seen in a running game.
+
+## 0.27.5 (2026-11-24): Alex's Caves joins the pack; its Magnetic Caves in the Aether's magnetic stone, its neodymium in our colours (#2105)
+
+- **Alex's Caves Continued 1.1.3** (Codx.io's 26.3 Fabric port, LGPL-3.0, shipped unchanged from Modrinth; CodxLib 1.6.1 is already in the pack) is in the modpack: six rare cave biomes under the Overworld. This is the world-gen track; the Rubber-folk, flood, demon, Toxic Caves and future-item tracks follow.
+- **Magnetic Caves** (Andy: parity with the Aether's magnetic biomes, no red and blue): the caves' galena is our ferrosite and its scarlet, azure and neutral energized galena bands are ichorite (`mixin/alexscaves/MagneticCaveStoneMixin`; the stone rules wait for the Aether's blocks if Alex's builds them first, `compat/AlexsCavesCompat`). The ferrocave's pool walls are ferrosite (`FerrocaveStoneMixin`). The biome (`data/alexscaves/worldgen/biome/magnetic_caves.json`, read only when Alex's is loaded) drops the galena ore and swarf, and grows ferrosite pillars, spikes, ferrosite sand and magnetic shrooms on its floors (new `jaymospowers:cave_*` placed features). Its buried ruins swap galena and energized galena for ferrosite and ichorite as they are placed (`UndergroundRuinsStoneMixin`).
+- **Neodymium in our colours** (Andy: "yes bring it back with our theme"): the scarlet and azure neodymium nodes still grow, and all 36 of Alex's scarlet and azure textures (nodes, pillars, blocks, magnets, raw neodymium, ingots, energized galena) are recoloured: scarlet as the rust of ferrosite sand, azure as the slate blue of the magnetic shrooms, galena grey as ferrosite (`tools/alexscaves_recolour.py`, `assets/alexscaves/textures`). Colours Alex's draws in code (effects, particles) are unchanged and weren't checked.
+- Built; not played. Only new chunks change.
+
+## 0.27.6 (2026-11-24): A new host can struggle out of the red one's hunt (#2106)
+
+- **Red hunts from inside**: a web slinger bonded to the red strain under bond 30 can now always struggle against its forced hunts, even before they've earned the abilities that let them break other takeovers (Andy: "yeah let them struggle"). It's still the stronger hold (each press counts half), the same bar a killing spree uses (`SPREE_BREAK_FREE`). `WebSymbiote`.
+- Built by CI; not played.
+
+## 0.27.7 (2026-11-24): T opens chat again (#2107)
+
+- **T is chat**: TACZ's "Open TAC Config" key came off T, which opened the gun config screen instead of chat on a fresh install (found on the Steam Deck, 2026-11-24). Its settings are still in Mod Menu, and Controls can give it a key.
+- KeyConflicts v12: key.tacz.open_config.desc moves from T to unbound once per install, only while it's still on T.
+- Built; not played.
+
+## 0.27.8 (2026-11-24): Alex's Caves future gear, shared dinosaurs and the cave band (#2109)
+
+- The Raygun, Holocoder, Remote Detonator and Hazmat suit (mask, chestplate, leggings, boots) can't be crafted any more,
+  and the toxic ruins no longer hold hazmat pieces. They turn up only in Los Perrito's crates: about 1 in 4 megastructure
+  caches, 1 in 15 car wrecks and 1 in 40 household crates hold one.
+- The nuclear bomb still crafts (the steam towns' forbidden tech), but a lit bomb fizzles and drops back as the block
+  anywhere except the future. Lit there, by any means, it goes off as before. The hazmat blocks and the Nuclear Furnace
+  are unchanged.
+- The Primordial Caves and the Verdant World share their beasts: all ten of our dinosaurs (Amber Age's) live in the
+  caves beside Alex's, in the dark, and Alex's grottoceratops, vallumraptors, relicheirus, tremorsaurus, atlatitan and
+  subterranodons roam the Verdant countries that suit them.
+- Barbaric Warrior-born in the Primordial Caves: now and then a band of two to four comes out beside a beast near you and
+  fights it bare-handed, tail out, each in a different mix of caveman gear and hide (some bare-chested). They train, they don't hunt: a beast beaten down to 30%
+  is let go, and tamed ones are never touched. They leave you alone unless you walk right up to one or hit one.

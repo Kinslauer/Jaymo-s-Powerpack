@@ -314,7 +314,8 @@ public final class WebSymbiote {
 	 * their own body loads the ground they run over, so no tickets are held). It ends as any takeover does (its prey dead
 	 * and fed on, or broken free of), its prey gets past that range, the bond reaches {@code RED_HUNT_BOND}, or after
 	 * {@code RED_HUNT_MAX} ticks at the most, so it can never hold anyone for good. It's a stronger hold: each struggle counts
-	 * only {@code RED_HUNT_STRUGGLE} of a press.
+	 * only {@code RED_HUNT_STRUGGLE} of a press. A new host can always fight it, even before they could break a takeover's
+	 * hold (Andy, 2026-11-24: "yeah let them struggle"), the way a killing spree is fought ({@link #SPREE}).
 	 */
 	public static final int RED_HUNT_BOND = 30, RED_HUNT_MAX = 3600;
 	public static final float RED_FAR_HUNT_CHANCE = 0.12F, RED_HUNT_STRUGGLE = 0.5F;
@@ -1954,6 +1955,8 @@ public final class WebSymbiote {
 					if (live.redHunt) {
 						live.bigTakeover = true;
 						live.redHuntUntil = now + RED_HUNT_MAX;
+						// a new host can always fight it (SPREE_BREAK_FREE), even before breaking a takeover's hold
+						player.setAttached(SPREE, true);
 					}
 				} else if (strain != WebSymbioteStrain.WHITE && neglect > 0.0F && player.getRandom().nextFloat() < neglect) {
 					// ignored too long: it does it its own way, tearing into whatever's near

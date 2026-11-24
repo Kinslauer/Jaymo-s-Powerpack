@@ -128,6 +128,20 @@
           "weight": 5
         }
       ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "value": "jaymospowers:chests/future/alexscaves_gear",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 14
+        }
+      ]
     }
   ]
 }

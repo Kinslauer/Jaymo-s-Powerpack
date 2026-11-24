@@ -480,6 +480,7 @@ public final class ZFighterPower implements Power {
 		ZFighterPatrol.init();
 		ZFighterEscorts.init();
 		ZFighterRaiders.init();
+		ZFighterCaveBand.init();
 		ZFighterHighSky.init();
 		ZFighterCorruption.init();
 		ZFighterGapRaids.init();

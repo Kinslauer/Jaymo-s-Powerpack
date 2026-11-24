@@ -1,6 +1,10 @@
 {
 	"replace": false,
 	"values": [
-		"jaymoskingdoms:nehemoth"
+		"jaymoskingdoms:nehemoth",
+		{
+			"id": "alexscaves:luxtructosaurus",
+			"required": false
+		}
 	]
 }
