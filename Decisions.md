@@ -1042,3 +1042,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Applies to:** Kingdoms harness (HeraldryArmour and friends). Our own models of the historical armour; nothing copied from Mordhau. Four tracks in Inbox: mordhau-1-helms, mordhau-2-hoods-crests, mordhau-3-body, mordhau-4-legs.
 - **Agent:** claude (PC coordinator thread).
 - 2026-11-24 (Andy, decision card): Candy Cavity Rubber-folk = "Home ground + newborns": now and then a newborn Rubber-folk villager climbs out of the Candy Cavity and walks to the nearest town (Kingdoms RubberNewborns). No Tinkerer vat ruins.
+- 2026-11-24 (Andy): "you should be able to escort the rubberfolk to a village when you meet them after born": sneak + right-click a newborn Rubber-folk to have it follow you; any town you bring it into keeps it (RubberNewborns, PR #2116).
+- 2026-11-24 (Andy): newborn Rubber-folk escort is done through talk, never shift-right-click: "you should have to talk to it and convince it or answer its request. it should all be done through talk". A newborn calls out to you; "Lost?" in its talk menu offers take it / point the way / not now (PR #2116).

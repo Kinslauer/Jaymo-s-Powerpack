@@ -50,7 +50,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/blood-awakening-passive-upgrade|blood-awakening-passive-upgrade]] · ☁️ Cloud · #2117 · in-review
 
 
 ## Needs Andy

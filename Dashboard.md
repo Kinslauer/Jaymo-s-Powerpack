@@ -29,6 +29,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2117 Blood Awakening upgrades your blood's held move; a Verdant's regrowth key (Powers, Kingdoms, 2026-11-24)
 - [ ] #2115 Takeovers dig straight to their prey and never stand stuck (Powers, 2026-11-24)
 - [ ] #2114 The first capital is found in seconds, not after an 11-minute wait (Kingdoms, 2026-11-24)
 - [ ] #2113 Village mods 4: board work (Kingdoms, 2026-11-24)
