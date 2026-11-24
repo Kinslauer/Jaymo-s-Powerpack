@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 20:01). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 20:15). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -43,10 +43,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/structures-2-placement-reasons|structures-2-placement-reasons]] · ☁️ Cloud · #2085 · claimed
-- [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · ☁️ Cloud · #2090 · claimed
-- [ ] [[Inbox/refmods-12-fishing|refmods-12-fishing]] · ☁️ Cloud · #2092 · claimed
-- [ ] [[Inbox/refmods-14-sky-light-air|refmods-14-sky-light-air]] · ☁️ Cloud · #2094 · claimed
 - [ ] [[Inbox/vanilla-plus-a-incendium-castle-start|vanilla-plus-a-incendium-castle-start]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/vanilla-plus-b-stellarity-end-enderscape-band|vanilla-plus-b-stellarity-end-enderscape-band]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/vanilla-plus-c-back-slot|vanilla-plus-c-back-slot]] · ☁️ Cloud · claimed
@@ -58,7 +54,6 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-i-settlement-roads|vanilla-plus-i-settlement-roads]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · ☁️ Cloud · claimed
-- [ ] [[Inbox/refmods-15-provenance-coins|refmods-15-provenance-coins]] · ☁️ Cloud · #2097 · claimed
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · ☁️ Cloud · #research · claimed
 
 
@@ -77,14 +72,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/villagers-visible-jobs|villagers-visible-jobs]]
+- [x] [[Inbox/Done/structures-2-placement-reasons|structures-2-placement-reasons]]
+- [x] [[Inbox/Done/refmods-15-provenance-coins|refmods-15-provenance-coins]]
+- [x] [[Inbox/Done/refmods-14-sky-light-air|refmods-14-sky-light-air]]
+- [x] [[Inbox/Done/refmods-12-fishing|refmods-12-fishing]]
 - [x] [[Inbox/Done/tree-chop-through-trunk|tree-chop-through-trunk]]
 - [x] [[Inbox/Done/refmods-01-felling|refmods-01-felling]]
 - [x] [[Inbox/Done/realm-banks-finish|realm-banks-finish]]
-- [x] [[Inbox/Done/downed-knockout-three-hits|downed-knockout-three-hits]]
-- [x] [[Inbox/Done/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]]
-- [x] [[Inbox/Done/zfighter-gaps-8-raids|zfighter-gaps-8-raids]]
-- [x] [[Inbox/Done/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]]
-- [x] [[Inbox/Done/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]]
 
 
 %% kanban:settings
