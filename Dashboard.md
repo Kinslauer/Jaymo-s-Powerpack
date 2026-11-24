@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 22:46). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 23:41). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -23,6 +23,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2069 A dead player's severed head can be taken as a trophy (Powers, Kingdoms, 2026-11-24)
 - [ ] #2067 A Truth Cleric prays from a book, not a holy symbol (Kingdoms, 2026-11-24)
 - [ ] #2066 JEI shows stone tools, hammer and light armour recipes on a server (Powers, Kingdoms, Kitchen, 2026-11-24)
 - [ ] #2065 The key clash pop-up comes per key, on its first press (Kingdoms, 2026-11-24)
@@ -82,8 +83,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1997 The mutant zombie wears the old dead's rags, not the game's cyan and blue (Kingdoms, 2026-11-22)
 - [ ] #1996 survival picks: one base gauntlet for every fist weapon, offhand punches, Crushing (Powers, 2026-11-22)
 - [ ] #1995 speedsters don't tire Kitchen's sprint wind (Powers, Kitchen, 2026-11-22)
-- [ ] #1994 Cannons: stone shot and fire shot (Kingdoms, 2026-11-22)
-- …and 413 older ones.
+- …and 414 older ones.
 
 ## Health
 
