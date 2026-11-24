@@ -27,8 +27,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The Cleric's medallion board (Andy, 2026-11-23): the medallion key ({@code MedallionClient}, default Y) lifts the holy symbol
- * before the chest, and while it is up the number keys 1 to 9 are its nine marks, read as a 3 by 3 board the way the hotbar
- * reads (1 2 3 on top, 7 8 9 below). Each key lays a sigil; the order is the prayer. Every spell's pattern ({@link #PATTERNS})
+ * before the chest, and while it is up the numpad's 1 to 9 are its nine marks, each its own sigil, laid out as the pad is
+ * (7 8 9 on top, 1 2 3 below). Each key lays a sigil; the order is the prayer. Every spell's pattern ({@link #PATTERNS})
  * is four different marks, so a pattern that matches is cast at once, and marks that begin no pattern the Cleric knows fizzle.
  * Finished while sneaking, the pattern binds the spell to the medallion instead (the spell the symbol is turned to), which a
  * tap of the symbol in either hand casts ({@link CastingFocus}). A cast, a bind, or the key again lowers the board.
@@ -48,29 +48,44 @@ public final class MedallionBoard {
 	static final int PLAIN = 0xFFE9A0;
 
 	/**
-	 * Each spell's pattern: four marks of the 3 by 3 board (1 2 3 / 4 5 6 / 7 8 9), none twice. The Cleric's spells from
+	 * Each spell's pattern: four marks of the 3 by 3 board, numbered as the numpad (7 8 9 / 4 5 6 / 1 2 3), none twice. The Cleric's spells from
 	 * {@link ClassCasters}; a spell with none here is cast from the symbol only.
 	 */
 	public static final Map<String, String> PATTERNS = Map.ofEntries(
-		Map.entry("mending", "2586"),
-		Map.entry("sanctuary", "1397"),
-		Map.entry("restoration", "2486"),
-		Map.entry(ClassCasters.REVIVE, "8521"),
-		Map.entry("warding", "4136"),
-		Map.entry("bulwark", "7469"),
-		Map.entry("ward_line", "4569"),
-		Map.entry("dispel", "1593"),
-		Map.entry("counterspell", "3571"),
-		Map.entry("purify_food", "2145"),
-		Map.entry("create_food", "2365"),
-		Map.entry("heroes_feast", "1793"),
-		Map.entry("zone_of_truth", "1235"),
-		Map.entry("augury", "7895"),
-		Map.entry("find_magic", "5698"),
-		Map.entry("identify", "5478"),
-		Map.entry("locate_object", "1478"),
-		Map.entry("feather_fall", "1269"),
-		Map.entry("keeping", "7139"));
+		Map.entry("mending", "8526"),
+		Map.entry("sanctuary", "7931"),
+		Map.entry("restoration", "8426"),
+		Map.entry(ClassCasters.REVIVE, "2587"),
+		Map.entry("warding", "4796"),
+		Map.entry("bulwark", "1463"),
+		Map.entry("ward_line", "4563"),
+		Map.entry("dispel", "7539"),
+		Map.entry("counterspell", "9517"),
+		Map.entry("purify_food", "8745"),
+		Map.entry("create_food", "8965"),
+		Map.entry("heroes_feast", "7139"),
+		Map.entry("zone_of_truth", "7895"),
+		Map.entry("augury", "1235"),
+		Map.entry("find_magic", "5632"),
+		Map.entry("identify", "5412"),
+		Map.entry("locate_object", "7412"),
+		Map.entry("feather_fall", "7863"),
+		Map.entry("keeping", "1793"));
+
+	/** The class's own workings, known on the board from the start (no tree perk needed there). */
+	public static final String BLESS = "bless_the_band", SANCTIFY = "sanctify", TURN = "turn_undead";
+	/**
+	 * The prayers said only on the board: the workings in four marks, the great prayers ({@link GreatPrayers}) in five. No
+	 * pattern here or in {@link #PATTERNS} begins another, so a match is always finished.
+	 */
+	public static final Map<String, String> PRAYERS = Map.of(
+		BLESS, "8624",
+		SANCTIFY, "1379",
+		TURN, "2589",
+		GreatPrayers.HALLOWED, "13974",
+		GreatPrayers.LITANY, "45628",
+		GreatPrayers.PILLAR, "85213",
+		GreatPrayers.HAND, "36987");
 
 	/** The client asks to lift the board or lower it. */
 	public record Raise(boolean up) implements CustomPacketPayload {
@@ -83,7 +98,7 @@ public final class MedallionBoard {
 		}
 	}
 
-	/** A number key on the raised board: the mark 1 to 9. */
+	/** A numpad key on the raised board: the mark 1 to 9. */
 	public record Mark(int mark) implements CustomPacketPayload {
 		public static final Type<Mark> TYPE = new Type<>(JaymosKingdoms.id("medallion_mark"));
 		public static final StreamCodec<ByteBuf, Mark> CODEC = ByteBufCodecs.VAR_INT.map(Mark::new, Mark::mark);
@@ -131,11 +146,30 @@ public final class MedallionBoard {
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> UP.remove(handler.player.getUUID()));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> UP.clear());
 		ServerTickEvents.END_SERVER_TICK.register(MedallionBoard::tick);
+		GreatPrayers.register();
 	}
 
-	/** The spells {@code player} may lay on the board: the ones they know that have a pattern. */
+	/** What {@code player} may lay on the board: the workings, the great prayers their patron has granted, and the spells they know that have a pattern. */
 	public static List<String> known(net.minecraft.world.entity.player.Player player) {
-		return Classes.of(player).spells().stream().filter(PATTERNS::containsKey).toList();
+		List<String> out = new java.util.ArrayList<>(List.of(BLESS, SANCTIFY, TURN));
+		for (String great : List.of(GreatPrayers.HALLOWED, GreatPrayers.LITANY, GreatPrayers.PILLAR, GreatPrayers.HAND)) {
+			if (GreatPrayers.granted(player, great)) {
+				out.add(great);
+			}
+		}
+		Classes.of(player).spells().stream().filter(PATTERNS::containsKey).forEach(out::add);
+		return out;
+	}
+
+	/** The pattern of a board entry ({@link #known}). */
+	public static String pattern(String id) {
+		String spell = PATTERNS.get(id);
+		return spell != null ? spell : PRAYERS.get(id);
+	}
+
+	/** A board entry's name: a spell's, or a prayer's own. */
+	public static Component name(String id) {
+		return Component.translatable(PRAYERS.containsKey(id) ? "prayer.jaymoskingdoms." + id : "class.jaymoskingdoms.option." + id);
 	}
 
 	private static boolean may(ServerPlayer player) {
@@ -208,7 +242,7 @@ public final class MedallionBoard {
 		String done = null;
 		boolean begun = false;
 		for (String spell : known(player)) {
-			String pattern = PATTERNS.get(spell);
+			String pattern = pattern(spell);
 			if (pattern.equals(board.marks)) {
 				done = spell;
 			} else if (pattern.startsWith(board.marks)) {
@@ -232,6 +266,10 @@ public final class MedallionBoard {
 		if (symbol == null) {
 			return;
 		}
+		if (PRAYERS.containsKey(spell)) {
+			say(player, level, spell);
+			return;
+		}
 		if (player.isShiftKeyDown()) {
 			Classes.Chosen c = Classes.of(player);
 			player.setAttached(Classes.CLASS, new Classes.Chosen(c.cls(), c.option(), c.spells(), c.spells().indexOf(spell)));
@@ -246,6 +284,26 @@ public final class MedallionBoard {
 		}
 		Fx.sigil(level, player.position().add(0.0, 0.05, 0.0), CIRCLE_SIZE * 1.4F, colour(player), 20);
 		Spellcraft.castFocus(player, level, symbol, spell);
+	}
+
+	/** A board-only prayer: a working or a great prayer. Only a spell rests in the medallion, so sneaking binds none of these. */
+	private static void say(ServerPlayer player, ServerLevel level, String id) {
+		if (player.isShiftKeyDown()) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.medallion.no_bind", name(id)));
+			return;
+		}
+		int colour = colour(player);
+		Fx.sigil(level, player.position().add(0.0, 0.05, 0.0), CIRCLE_SIZE * 1.4F, colour, 20);
+		switch (id) {
+			case BLESS -> Clerics.boardBless(player, level);
+			case SANCTIFY -> Litany.sanctify(player, true);
+			case TURN -> Clerics.boardTurn(player, level);
+			default -> {
+				if (GreatPrayers.say(player, level, id, colour)) {
+					Casting.gesture(player, Casting.Gesture.RAISE, colour);
+				}
+			}
+		}
 	}
 
 	/** The marks begin no prayer the Cleric knows: they fade, and the board stays up, empty. */
@@ -294,7 +352,8 @@ public final class MedallionBoard {
 	private static Vec3 node(ServerPlayer player, int mark) {
 		Vec3 look = facing(player);
 		Vec3 right = look.cross(new Vec3(0.0, 1.0, 0.0)).normalize();
-		int row = (mark - 1) / 3, col = (mark - 1) % 3;
+		// as the numpad: 7 8 9 the top row
+		int row = 2 - (mark - 1) / 3, col = (mark - 1) % 3;
 		Vec3 centre = player.getEyePosition().add(look.scale(REACH)).add(0.0, -DROP, 0.0);
 		return centre.add(right.scale((col - 1) * SPACING)).add(0.0, (1 - row) * SPACING, 0.0);
 	}

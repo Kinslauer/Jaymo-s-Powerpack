@@ -35,7 +35,7 @@ final class ArtKeysClient {
 			// combat mode: 6 to 9 are art keys, so they pick no hotbar slot
 			if (FormsClient.combatMode() && minecraft.player != null && minecraft.gui.screen() == null) {
 				for (int i = 0; i < ArtKeys.ARTS; i++) {
-					while (!MedallionClient.taken(Forms.BELT_SLOTS + i) && minecraft.options.keyHotbarSlots[Forms.BELT_SLOTS + i].consumeClick()) {
+					while (minecraft.options.keyHotbarSlots[Forms.BELT_SLOTS + i].consumeClick()) {
 						// taken
 					}
 				}
@@ -43,7 +43,7 @@ final class ArtKeysClient {
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			for (int i = 0; i < ArtKeys.ARTS; i++) {
-				boolean now = (KEYS[i].isDown() || FormsClient.combatMode() && !MedallionClient.taken(Forms.BELT_SLOTS + i) && minecraft.options.keyHotbarSlots[Forms.BELT_SLOTS + i].isDown())
+				boolean now = (KEYS[i].isDown() || FormsClient.combatMode() && minecraft.options.keyHotbarSlots[Forms.BELT_SLOTS + i].isDown())
 					&& minecraft.player != null && minecraft.gui.screen() == null;
 				if (now != DOWN[i]) {
 					DOWN[i] = now;

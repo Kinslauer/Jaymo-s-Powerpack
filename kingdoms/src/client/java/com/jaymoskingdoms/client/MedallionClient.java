@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.Classes;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.MedallionBoard;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -15,47 +16,63 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
 /**
  * The Cleric's medallion board on the client ({@link MedallionBoard}): the medallion key lifts and lowers it, and while the
- * server says it is up the number keys 1 to 9 lay its marks and pick no hotbar slot (combat mode's forms and art keys wait).
- * The board is drawn in the middle of the screen: the medallion's face, its rim of marks, the nine sigils (1 2 3 on top), the
- * ones laid lit and joined by crackling strokes; beside it the prayers the Cleric knows, with their patterns, the ones the
- * marks so far could still become bright.
+ * server says it is up the numpad's 1 to 9 lay its marks (rebindable, under the class keys). The board is drawn in the middle
+ * of the screen laid out as the pad is (7 8 9 on top): the medallion's face, its rim of marks, nine sigils each its own, the
+ * ones laid lit and joined by crackling strokes; beside it the prayers the Cleric knows, each with its shape drawn small, the
+ * ones the marks so far could still become bright.
  */
 public final class MedallionClient {
-	/** The medallion's radius, the gap between its sigils and a sigil's half size (gui pixels). */
-	static final int RADIUS = 46, SPACING = 22, NODE = 4;
+	/** The medallion's radius, the gap between its sigils, a sigil's half size, and the small pattern's gap (gui pixels). */
+	static final int RADIUS = 46, SPACING = 22, NODE = 6, MINI = 5;
 	/** How many marks go round the rim. */
 	static final int RIM_MARKS = 36;
-	/** The face, the rim, an unlit sigil, a lit one and its strokes, and the text. */
+	/** The face, the rim, an unlit sigil, a lit one and its strokes, its glow, and the text. */
 	static final int FACE = 0x90201810, RIM = 0xFFB08040, UNLIT = 0xFF8A5A2A, LIT = 0xFFFFE9A0, GLOW = 0x60FFE9A0, BRIGHT = 0xFFF0E6C8,
 		DIM = 0xFF807060;
+	/**
+	 * The nine sigils, one for each mark (1 to 9, the numpad's keys), each 9 by 9: the root, the cup, the gate (the bottom
+	 * row); the flame, the eye, the waters (the middle); the star, the crescent, the crown (the top).
+	 */
+	private static final String[][] SIGILS = {
+		{"....#....", "....#....", "....#....", "....#....", "..#.#.#..", ".#..#..#.", "#...#...#", "#.......#", "........."},
+		{"#.......#", "#.......#", ".#.....#.", ".#.....#.", "..#####..", "....#....", "....#....", "...###...", "........."},
+		{".#######.", ".#.....#.", ".#.....#.", ".#..#..#.", ".#.###.#.", ".#..#..#.", ".#.....#.", ".#.....#.", "........."},
+		{"....#....", "...#.#...", "...#.#...", "..#...#..", "..#.#.#..", ".#..#..#.", ".#.....#.", "..#####..", "........."},
+		{".........", "...###...", ".##...##.", "#...#...#", "#..###..#", "#...#...#", ".##...##.", "...###...", "........."},
+		{".........", "..#...#..", ".#.#.#.#.", "#...#...#", ".........", "..#...#..", ".#.#.#.#.", "#...#...#", "........."},
+		{"....#....", ".#..#..#.", "..#.#.#..", "...###...", "#########", "...###...", "..#.#.#..", ".#..#..#.", "....#...."},
+		{"...###...", ".##......", ".#.......", "#........", "#........", "#........", ".#.......", ".##......", "...###..."},
+		{".........", "#...#...#", "##.###.##", "#.#####.#", "#.......#", "#########", ".........", "..#.#.#..", "........."}};
 
 	private static KeyMapping key;
+	private static final KeyMapping[] MARKS = new KeyMapping[9];
+	/** The marks held down: a held key lays one mark, its repeats none. */
+	private static final boolean[] HELD = new boolean[9];
 	private static boolean up;
 	private static String marks = "";
-	/** The number keys held since the board took them: a held key lays one mark (its repeats lay none) and, after the board drops, picks nothing until let go. */
-	private static final boolean[] HELD = new boolean[9];
+	/** Whether this visit's clash prompt was shown (a Cleric's medallion keys sharing a key with another binding). */
+	private static boolean warned;
+	private static final SystemToast.SystemToastId CLASH = new SystemToast.SystemToastId(10000L);
+	/** Bindings that share a numpad key with the marks on purpose: a plan's layers only move while a plan is held. */
+	private static final java.util.Set<String> SHARED = java.util.Set.of("key.jaymoskingdoms.plan_layer_up", "key.jaymoskingdoms.plan_layer_down");
 
 	private MedallionClient() {
 	}
 
-	/** Whether the board is up: the number keys are its marks. */
-	public static boolean up() {
-		return up;
-	}
-
-	/** Whether number key {@code slot} (0 to 8) is the board's: it is up, or the key went down while it was and is still held. */
-	public static boolean taken(int slot) {
-		return up || HELD[slot];
-	}
-
 	static void register() {
 		key = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.medallion", InputConstants.KEY_Y, ClassKeys.category()));
+		int[] pad = {InputConstants.KEY_NUMPAD1, InputConstants.KEY_NUMPAD2, InputConstants.KEY_NUMPAD3, InputConstants.KEY_NUMPAD4, InputConstants.KEY_NUMPAD5,
+			InputConstants.KEY_NUMPAD6, InputConstants.KEY_NUMPAD7, InputConstants.KEY_NUMPAD8, InputConstants.KEY_NUMPAD9};
+		for (int i = 0; i < 9; i++) {
+			MARKS[i] = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymoskingdoms.medallion_mark_" + (i + 1), pad[i], ClassKeys.category()));
+		}
 		ClientPlayNetworking.registerGlobalReceiver(MedallionBoard.State.TYPE, (payload, context) -> {
 			up = payload.up();
 			marks = payload.marks();
@@ -63,36 +80,60 @@ public final class MedallionClient {
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, minecraft) -> {
 			up = false;
 			marks = "";
+			warned = false;
 		});
 		ClientTickEvents.START_CLIENT_TICK.register(minecraft -> {
-			LocalPlayer player = minecraft.player;
-			if (player == null) {
+			if (minecraft.player == null || !ClientPlayNetworking.canSend(MedallionBoard.Raise.TYPE)) {
 				up = false;
-				java.util.Arrays.fill(HELD, false);
 				return;
 			}
-			if (!ClientPlayNetworking.canSend(MedallionBoard.Raise.TYPE)) {
-				return;
+			if (!warned && Classes.is(minecraft.player, Classes.PlayerClass.CLERIC)) {
+				warned = true;
+				clashes(minecraft);
 			}
 			while (key.consumeClick()) {
 				ClientPlayNetworking.send(new MedallionBoard.Raise(!up));
 			}
 			for (int i = 0; i < 9; i++) {
-				KeyMapping slot = minecraft.options.keyHotbarSlots[i];
-				if (!up && !HELD[i]) {
-					continue;
-				}
 				boolean clicked = false;
-				while (slot.consumeClick()) {
+				while (MARKS[i].consumeClick()) {
 					clicked = true;
 				}
 				if (up && clicked && !HELD[i] && minecraft.gui.screen() == null) {
 					ClientPlayNetworking.send(new MedallionBoard.Mark(i + 1));
 				}
-				HELD[i] = slot.isDown() && (up || HELD[i]);
+				HELD[i] = MARKS[i].isDown();
 			}
 		});
 		HudElementRegistry.attachElementAfter(VanillaHudElements.HOTBAR, JaymosKingdoms.id("medallion_board"), MedallionClient::draw);
+	}
+
+	/** A Cleric whose medallion keys share a key with another binding is told which, and asked to rebind one in Controls. */
+	private static void clashes(Minecraft minecraft) {
+		List<KeyMapping> ours = new java.util.ArrayList<>(List.of(MARKS));
+		ours.add(key);
+		Component first = null;
+		int more = 0;
+		for (KeyMapping mine : ours) {
+			if (mine.isUnbound()) {
+				continue;
+			}
+			for (KeyMapping other : minecraft.options.keyMappings) {
+				if (ours.contains(other) || SHARED.contains(other.getName()) || !mine.same(other)) {
+					continue;
+				}
+				if (first == null) {
+					first = Component.translatable("message.jaymoskingdoms.medallion.clash", Component.translatable(mine.getName()), mine.getTranslatedKeyMessage(),
+						Component.translatable(other.getName()));
+				} else {
+					more++;
+				}
+			}
+		}
+		if (first != null) {
+			Component message = more == 0 ? first : Component.translatable("message.jaymoskingdoms.medallion.clash_more", first, more);
+			SystemToast.addOrUpdate(minecraft.gui.toastManager(), CLASH, Component.translatable("message.jaymoskingdoms.medallion.clash_title"), message);
+		}
 	}
 
 	private static void draw(GuiGraphicsExtractor graphics, DeltaTracker delta) {
@@ -119,39 +160,68 @@ public final class MedallionClient {
 		}
 		// the strokes between the marks laid, crackling
 		for (int i = 1; i < marks.length(); i++) {
-			int[] from = node(cx, cy, marks.charAt(i - 1) - '0'), to = node(cx, cy, marks.charAt(i) - '0');
+			int[] from = node(cx, cy, SPACING, marks.charAt(i - 1) - '0'), to = node(cx, cy, SPACING, marks.charAt(i) - '0');
 			line(graphics, from[0], from[1], to[0], to[1], (int) time + i * 7);
 		}
-		// the nine sigils, numbered as the keys are
-		Font font = minecraft.font;
+		// the nine sigils, laid out as the numpad
 		for (int mark = 1; mark <= 9; mark++) {
-			int[] at = node(cx, cy, mark);
+			int[] at = node(cx, cy, SPACING, mark);
 			boolean lit = marks.indexOf((char) ('0' + mark)) >= 0;
 			if (lit) {
 				diamond(graphics, at[0], at[1], NODE + 2, GLOW);
 			}
-			diamond(graphics, at[0], at[1], NODE, lit ? LIT : UNLIT);
-			graphics.text(font, String.valueOf(mark), at[0] - font.width(String.valueOf(mark)) / 2 + 1, at[1] + NODE + 1, lit ? LIT : DIM);
+			sigil(graphics, at[0], at[1], mark, lit ? LIT : UNLIT);
 		}
-		// beside it, the prayers known and their patterns
+		// beside it, the prayers known, each with its shape
+		Font font = minecraft.font;
 		List<String> known = MedallionBoard.known(self);
-		int x = cx + RADIUS + 8, y = cy - known.size() * 5;
+		int x = cx + RADIUS + 10, y = cy - known.size() * 7;
 		for (String spell : known) {
-			String pattern = MedallionBoard.PATTERNS.get(spell);
+			String pattern = MedallionBoard.pattern(spell);
 			boolean open = pattern.startsWith(marks);
-			graphics.text(font, Component.translatable("class.jaymoskingdoms.option." + spell), x, y, open ? BRIGHT : DIM);
-			graphics.text(font, pattern, x + 96, y, open ? LIT : DIM);
-			y += 10;
+			mini(graphics, x + MINI, y + MINI, pattern, open ? LIT : DIM);
+			graphics.text(font, MedallionBoard.name(spell), x + 3 * MINI + 4, y + 2, open ? BRIGHT : DIM);
+			y += 14;
 		}
 		if (known.isEmpty()) {
 			graphics.text(font, Component.translatable("message.jaymoskingdoms.medallion.none"), x, cy - 4, DIM);
 		}
 	}
 
-	/** Where sigil {@code mark} (1 to 9) sits on the board. */
-	private static int[] node(int cx, int cy, int mark) {
-		int row = (mark - 1) / 3, col = (mark - 1) % 3;
-		return new int[] {cx + (col - 1) * SPACING, cy + (row - 1) * SPACING};
+	/** Where mark {@code mark} (1 to 9) sits on a board centred on ({@code cx}, {@code cy}): as the numpad, 7 8 9 on top. */
+	private static int[] node(int cx, int cy, int spacing, int mark) {
+		int row = 2 - (mark - 1) / 3, col = (mark - 1) % 3;
+		return new int[] {cx + (col - 1) * spacing, cy + (row - 1) * spacing};
+	}
+
+	private static void sigil(GuiGraphicsExtractor graphics, int x, int y, int mark, int colour) {
+		String[] rows = SIGILS[mark - 1];
+		for (int r = 0; r < rows.length; r++) {
+			for (int c = 0; c < rows[r].length(); c++) {
+				if (rows[r].charAt(c) == '#') {
+					graphics.fill(x - 4 + c, y - 4 + r, x - 3 + c, y - 3 + r, colour);
+				}
+			}
+		}
+	}
+
+	/** A prayer's shape drawn small: its path over the nine points, its first mark larger. */
+	private static void mini(GuiGraphicsExtractor graphics, int cx, int cy, String pattern, int colour) {
+		for (int mark = 1; mark <= 9; mark++) {
+			int[] at = node(cx, cy, MINI, mark);
+			graphics.fill(at[0], at[1], at[0] + 1, at[1] + 1, DIM);
+		}
+		for (int i = 1; i < pattern.length(); i++) {
+			int[] from = node(cx, cy, MINI, pattern.charAt(i - 1) - '0'), to = node(cx, cy, MINI, pattern.charAt(i) - '0');
+			int steps = Math.max(Math.abs(to[0] - from[0]), Math.abs(to[1] - from[1]));
+			for (int s = 0; s <= steps; s++) {
+				float t = (float) s / steps;
+				int px = Math.round(Mth.lerp(t, from[0], to[0])), py = Math.round(Mth.lerp(t, from[1], to[1]));
+				graphics.fill(px, py, px + 1, py + 1, colour);
+			}
+		}
+		int[] first = node(cx, cy, MINI, pattern.charAt(0) - '0');
+		graphics.fill(first[0] - 1, first[1] - 1, first[0] + 2, first[1] + 2, colour);
 	}
 
 	private static void diamond(GuiGraphicsExtractor graphics, int x, int y, int size, int colour) {
