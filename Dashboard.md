@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:27). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:30). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -18,18 +18,16 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 - [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/project-thread-ojz7uj|project-thread-ojz7uj]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/village-mods-5|village-mods-5]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/village-mods-6|village-mods-6]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 
 ## On the board
 
-33 waiting for a bot, 1 being built, 1 in review: see [[Kanban]].
+33 waiting for a bot, 1 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
-- [ ] #2117 Blood Awakening upgrades your blood's held move; a Verdant's regrowth key (Powers, Kingdoms, 2026-11-24)
 - [ ] #2115 Takeovers dig straight to their prey and never stand stuck (Powers, 2026-11-24)
 - [ ] #2114 The first capital is found in seconds, not after an 11-minute wait (Kingdoms, 2026-11-24)
 - [ ] #2113 Village mods 4: board work (Kingdoms, 2026-11-24)
@@ -94,7 +92,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 
 ## Health
 
-16 problems in the notes: [[Health]].
+15 problems in the notes: [[Health]].
 
 ## Last week
 
