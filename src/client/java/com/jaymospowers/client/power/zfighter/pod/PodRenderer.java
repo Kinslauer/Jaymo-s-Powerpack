@@ -28,7 +28,7 @@ import net.minecraft.world.phys.AABB;
 public class PodRenderer extends EntityRenderer<PodEntity, PodRenderer.State> {
 	/** How far a damaged fin is bent (degrees). */
 	static final float BEND = 35.0F;
-	/** Alex's Caves is loaded, so a whole hull is drawn as his submarine (only then is PodSubmarine touched). */
+	/** Alex's Caves is loaded, so the pod is drawn as his submarine (only then is PodSubmarine touched). */
 	static final boolean SUBMARINE = FabricLoader.getInstance().isModLoaded("alexscaves");
 	private static final String[] FINS = {"fin_l", "fin_r", "fin_b"};
 	private static final String[] PLATES = {"plate_f", "plate_r", "plate_b", "plate_l"};
@@ -55,7 +55,7 @@ public class PodRenderer extends EntityRenderer<PodEntity, PodRenderer.State> {
 	@Override
 	protected AABB getBoundingBoxForCulling(PodEntity entity, float partialTicks) {
 		// the fins reach past its box
-		return entity.getBoundingBox().inflate(SUBMARINE ? 1.0 : 0.6, 0.2, SUBMARINE ? 1.0 : 0.6);
+		return entity.getBoundingBox().inflate(SUBMARINE ? 1.2 : 0.6, 0.2, SUBMARINE ? 1.2 : 0.6);
 	}
 
 	@Override
@@ -73,15 +73,9 @@ public class PodRenderer extends EntityRenderer<PodEntity, PodRenderer.State> {
 		poseStack.pushPose();
 		poseStack.rotateDegrees(Axis.YP, -state.yaw);
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
-		int hull = PodPart.KEEL.bits() | PodPart.PLATE.bits();
-		if (SUBMARINE && (state.filled & hull) == hull) {
-			// a whole hull is Alex's submarine (PodSubmarine)
-			boolean[] fins = new boolean[FINS.length];
-			for (int i = 0; i < fins.length; i++) {
-				fins[i] = (state.filled & PodPart.FIN.bit(i)) != 0;
-			}
-			PodSubmarine.submit(collector, poseStack, state.lightCoords, fins, (state.filled & PodPart.MAST.bit(0)) != 0,
-				Integer.bitCount(state.damaged & state.filled), state.finished);
+		if (SUBMARINE) {
+			// Alex's submarine, taken apart into the pod's pieces (PodSubmarine)
+			PodSubmarine.submit(collector, poseStack, state.lightCoords, state.filled, state.damaged, state.finished);
 			poseStack.popPose();
 			super.submit(state, poseStack, collector, camera);
 			return;
