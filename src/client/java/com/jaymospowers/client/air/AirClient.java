@@ -42,7 +42,8 @@ import org.jspecify.annotations.Nullable;
  * until they rot; in autumn many more fall, in autumn's colours, they last longer, and they pile up along the banks
  * ({@link FloatingLeaf}).</li>
  * </ul>
- * Light in its block's colour (X10) is {@link LightTint}; blocks settling into place (X11) {@link BlockSettle}.
+ * Light in its block's colour (X10) is {@link LightTint}. Blocks settling into place (X11) is already the pack's: A Good
+ * Place (enjarai, MIT) grows a placed block into place.
  * Fire's embers and its smoke lit from below (X3) are Kingdoms' ({@code SkiesClient}), with its wind.
  */
 public final class AirClient {
@@ -96,7 +97,6 @@ public final class AirClient {
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(AirClient::tick);
 		LightTint.init();
-		BlockSettle.init();
 	}
 
 	private static void tick(Minecraft minecraft) {
