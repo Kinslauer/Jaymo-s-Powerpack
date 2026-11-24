@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 15:30). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 15:33). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -61,7 +61,6 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Agents/implement-verdant-dinosaurs|implement-verdant-dinosaurs]] · 💻 Odysseus · #2099 · in-review
-- [ ] [[Agents/venom-head-adaptation|venom-head-adaptation]] · 💻 Odysseus · #2080 · in-review
 
 
 ## Needs Andy
