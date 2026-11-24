@@ -48,7 +48,6 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for any · open
 - [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · for any · open
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for any · open
-- [ ] [[Inbox/scouter-bio-scanner-tracking|scouter-bio-scanner-tracking]] · for any · open
 - [ ] [[Inbox/refmods-01-felling|refmods-01-felling]] · for any · open
 - [ ] [[Inbox/refmods-02-druid-wild-shape|refmods-02-druid-wild-shape]] · for any · open
 - [ ] [[Inbox/refmods-03-scouter|refmods-03-scouter]] · for any · open
@@ -64,6 +63,7 @@ kanban-plugin: board
 - [ ] [[Inbox/refmods-14-sky-light-air|refmods-14-sky-light-air]] · for any · open
 - [ ] [[Inbox/refmods-15-provenance-coins|refmods-15-provenance-coins]] · for any · open
 - [ ] [[Inbox/refmods-16-titles-bloods-tensura|refmods-16-titles-bloods-tensura]] · for any · open
+- [ ] [[Inbox/scouter-bio-scanner-tracking|scouter-bio-scanner-tracking]] · for any · open
 
 
 ## Being built
