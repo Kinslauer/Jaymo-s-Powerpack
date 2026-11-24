@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 12:39). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 12:43). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -68,6 +68,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · changeling-voice-mimic · claimed
+- [ ] [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]] · 💻 Odysseus · running
 
 
 ## In review
