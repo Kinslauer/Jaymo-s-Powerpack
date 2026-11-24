@@ -101,6 +101,8 @@ public final class PatronWrath {
 	static final float SMITE_DAMAGE = 6.0F;
 	/** Beasts killed past those eaten before it costs, what each further one costs, and what a tame one costs the Hearthkeeper. */
 	static final int WASTE_FREE = 3, WASTE_COST = 2, TAME_COST = 4;
+	/** Favour a grave robbed costs the Lantern Warden's sworn. */
+	static final int GRAVE_COST = 4;
 	static final float MONSTER_DEED_CHANCE = 0.25F;
 	/** The watcher: under this favour, looking this far up (pitch), the chance each {@link #LOOK_EVERY}, how long it stands. */
 	static final int WATCHER_BELOW = RUNG_FLEE;
@@ -229,6 +231,11 @@ public final class PatronWrath {
 		if (w != null && w.now(today) > 0) {
 			sp.setAttached(WASTE, new Waste(w.now(today) - 1, today));
 		}
+	}
+
+	/** (Vanilla+) A barrow's cage taken up whole ({@link SoulJars}): a grave robbed, and the Lantern Warden minds it. */
+	static void graveRobbed(ServerPlayer sp) {
+		slight(sp, Patron.LANTERN_WARDEN, GRAVE_COST);
 	}
 
 	/** {@code p} is slighted: favour lost, if {@code sp} is sworn to them. */
