@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 17:57). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 17:58). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -40,7 +40,6 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for any · open
 - [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · for any · open
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for any · open
-- [ ] [[Inbox/vanilla-plus-h-advancement-tracker|vanilla-plus-h-advancement-tracker]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-i-settlement-roads|vanilla-plus-i-settlement-roads]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · for 💻 Odysseus · open
@@ -59,6 +58,7 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-e-soul-reaping-spawners|vanilla-plus-e-soul-reaping-spawners]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-f-delight-dishes|vanilla-plus-f-delight-dishes]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-g-illager-invasion|vanilla-plus-g-illager-invasion]] · for 💻 Odysseus · open
+- [ ] [[Inbox/vanilla-plus-h-advancement-tracker|vanilla-plus-h-advancement-tracker]] · for 💻 Odysseus · open
 
 
 ## Being built
