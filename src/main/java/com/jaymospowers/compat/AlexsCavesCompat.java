@@ -22,10 +22,14 @@ import org.jspecify.annotations.Nullable;
  * i dont like the mod's red and blue"). Where Alex's lays galena the caves get our ferrosite, and its scarlet and azure
  * energized galena bands become ichorite, the brown rock our ferrosite spires carry
  * ({@code mixin/alexscaves/MagneticCaveStoneMixin}, {@code FerrocaveStoneMixin}). The biome's own feature list
- * ({@code data/alexscaves/worldgen/biome/magnetic_caves.json}, only read when Alex's is loaded) drops the red and blue
- * neodymium nodes and the galena ores and swarf, and grows our ferrosite pillars, spikes, ferrosite sand and magnetic
+ * ({@code data/alexscaves/worldgen/biome/magnetic_caves.json}, only read when Alex's is loaded) drops the galena ores and
+ * swarf, and grows our ferrosite pillars, spikes, ferrosite sand and magnetic
  * shrooms on the cave floors ({@code jaymospowers:cave_*} placed features). Its buried magnetic ruins are placed through
- * {@link #RUIN_STONE} ({@code UndergroundRuinsStoneMixin}), which swaps the same blocks in them.
+ * {@link #RUIN_STONE} ({@code UndergroundRuinsStoneMixin}), which swaps the same stone in them.
+ * <p>
+ * Alex's neodymium stays (Andy: "yes bring it back with our theme"): its scarlet and azure nodes still grow, and every
+ * scarlet and azure texture is redrawn in our palette by {@code tools/alexscaves_recolour.py} (scarlet as the rust of
+ * ferrosite sand, azure as the slate blue of the magnetic shrooms; {@code assets/alexscaves/textures}).
  * <p>
  * Alex's builds its cave stone rules while it starts, which may be before Powers has made its blocks; if so, that step
  * waits ({@link #deferred}) and {@link #init} runs it once the Aether's blocks exist.
@@ -46,13 +50,9 @@ public final class AlexsCavesCompat {
 		"energized_galena_scarlet", ICHORITE,
 		"energized_galena_azure", ICHORITE,
 		"energized_galena_neutral", ICHORITE,
-		"scarlet_neodymium_node", FERROSITE,
-		"scarlet_neodymium_pillar", FERROSITE,
-		"azure_neodymium_node", FERROSITE,
-		"azure_neodymium_pillar", FERROSITE,
 		"galena_iron_ore", () -> Blocks.IRON_ORE);
 
-	/** Swaps Alex's galena and red and blue magnetic blocks for ours as a ruin is placed. Never saved, so its codec is a stub. */
+	/** Swaps Alex's galena and energized galena for ours as a ruin is placed. Never saved, so its codec is a stub. */
 	public static final StructureProcessor RUIN_STONE = new StructureProcessor() {
 		@Override
 		public StructureTemplate.@Nullable StructureBlockInfo processBlock(LevelReader level, BlockPos offset, BlockPos pivot, BlockPos origin,

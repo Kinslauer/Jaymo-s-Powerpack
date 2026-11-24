@@ -69,7 +69,9 @@
     [],
     [
       "minecraft:spring_water",
-      "minecraft:spring_lava"
+      "minecraft:spring_lava",
+      "alexscaves:scarlet_magnetic_node",
+      "alexscaves:azure_magnetic_node"
     ],
     [
       "minecraft:glow_lichen",

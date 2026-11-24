@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * Alex's Caves' buried ruins (the Magnetic Caves' among them) are placed with {@link AlexsCavesCompat#RUIN_STONE}, which
- * swaps its galena and red and blue magnetic blocks for our ferrosite and ichorite. Ruins without them are untouched.
+ * swaps its galena and energized galena for our ferrosite and ichorite. Ruins without them are untouched.
  */
 @Pseudo
 @Mixin(targets = "com.github.alexmodguy.alexscaves.server.level.feature.UndergroundRuinsFeature", remap = false)
