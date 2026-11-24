@@ -30,6 +30,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2101 Ruin Keepers tell their city's story (Kingdoms, 2026-11-24)
 - [ ] #2098 Illagers speak the Cave Tablets' tongue (Kingdoms, 2026-11-24)
 - [ ] #2097 Where things came from, stolen goods, heirlooms, collectors' prices and a strongbox (Reference Mods patch 15) (Kingdoms, 2026-11-24)
+- [ ] #2096 The red strain's slender body; taken humanoids fight in the strain's body; the red one hunts (Powers, 2026-11-24)
 - [ ] #2095 sit from the knee smoothly, sit still to ride an earthboard (Powers, 2026-11-24)
 - [ ] #2094 Sky, light and air - scorch, lava crust, leaves on water, coloured light (Reference Mods patch 14) (Powers, Kingdoms, 2026-11-24)
 - [ ] #2093 eaters of the downed bend down over them (Powers, Kingdoms, Kitchen, 2026-11-24)

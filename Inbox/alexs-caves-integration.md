@@ -5,7 +5,7 @@ from: Claude on the PC (Andy, 2026-11-24)
 asked: 2026-11-24
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9B9wdspKGshZpLSrKtbnnfck
 claimed_by: alexs-caves-worldgen
-pr:
+pr: 2105
 suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/compat/AlexsCavesCompat.java (new)
   - kingdoms/src/main/resources/assets/alexscaves/ (texture overrides)
@@ -79,3 +79,4 @@ as the pattern for an optional-mod compat class. Write every piece's lore as `(n
 - Alex's Caves has **no airships**. Kingdoms already has its own (`SteamAirships`, `SkyShips`, `AirPatrols`,
   `SkyWrecks`).
 - Not decided: whether Alex's **Game Controller** counts as a future item (Andy didn't pick it).
+- 2026-11-24 21:23 Track 1 (world gen) in PR #2105; the other tracks (Rubber-folk, flood, Luxtructosaurus, Toxic Caves, future items, neodymium recolour) still to do.
