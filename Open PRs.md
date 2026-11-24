@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-24 13:32
+updated: 2026-11-24 13:35
 ---
 # Open PRs
 
-6 open, as of 2026-11-24 13:32. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+6 open, as of 2026-11-24 13:35. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2071](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2071) One cobblestone crafts back into 4 stone rocks
@@ -26,12 +26,12 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#2084](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2084) Red (unparryable) swings rarer and slower
-- **Branch:** `claude/project-thread-mexu8y` · **Updated:** 2026-11-24 (today)
+## [#2085](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2085) Structures need a reason: mines by buyers, stables by towns, watchtowers on borders, ruins with heirs (Kingdoms)
+- **Branch:** `claude/placement-reasons` · **Updated:** 2026-11-24 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#2085](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2085) Structures need a reason: mines by buyers, stables by towns, watchtowers on borders, ruins with heirs (Kingdoms)
-- **Branch:** `claude/placement-reasons` · **Updated:** 2026-11-24 (today)
-- **Checks:** ⏳ 1 of 5 running
+## [#2086](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2086) Blasts blow limbs off the downed (Powers)
+- **Branch:** `claude/downed-blast-limbs` · **Updated:** 2026-11-24 (today)
+- **Checks:** ⏳ 1 of 4 running
 - **Agent:** no agent note
