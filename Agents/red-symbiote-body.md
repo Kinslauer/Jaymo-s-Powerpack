@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: Red strain gets the slender body from Andy's symbiote jar; humanoid hosts fight in the strain's form; the red one hunts within 500 blocks
 branch: claude/red-symbiote-body
 with: codex-reference-dinos-venom (parent); stacks on venom-head-adaptation (#2080)
@@ -33,3 +33,4 @@ terrain for pursuit and releasing every ticket when the hunt ends. Movement feel
 
 ## Done
 (pending)
+- 2026-11-24 14:31 No sign of work for 30 min: marked stalled (whoever ran it stopped).

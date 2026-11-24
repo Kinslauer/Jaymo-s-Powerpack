@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-24 14:16
+updated: 2026-11-24 14:30
 ---
 # Open PRs
 
-9 open, as of 2026-11-24 14:16. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+11 open, as of 2026-11-24 14:30. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2071](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2071) One cobblestone crafts back into 4 stone rocks
@@ -49,4 +49,14 @@ Andy merges only on "merge", one at a time.
 ## [#2092](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2092) Fishing extras: spooking, solid or light hooks, leaps, turning runs, clean landings, a line that hangs (Powers)
 - **Branch:** `claude/fishing-extras` · **Updated:** 2026-11-24 (today)
 - **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#2094](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2094) Sky, light and air: embers, scorch, lava crust, leaves on water, shooting stars, far fireworks, coloured light
+- **Branch:** `claude/sky-light-air` · **Updated:** 2026-11-24 (today)
+- **Checks:** ⏳ 1 of 4 running
+- **Agent:** no agent note
+
+## [#2095](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2095) Sit from the knee smoothly; sitting holds you still and rides an earthboard
+- **Branch:** `claude/project-thread-fdlmpx` · **Updated:** 2026-11-24 (today)
+- **Checks:** ⏳ 1 of 5 running
 - **Agent:** no agent note
