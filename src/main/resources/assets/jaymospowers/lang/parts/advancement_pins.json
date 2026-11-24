@@ -1,0 +1,7 @@
+{
+	"message.jaymospowers.pins.hint": "Shift-click an advancement to pin it to the HUD (up to %s)",
+	"message.jaymospowers.pins.pinned": "Advancement pinned",
+	"message.jaymospowers.pins.unpinned": "Advancement unpinned",
+	"message.jaymospowers.pins.full": "Only %s pins: unpin one first",
+	"message.jaymospowers.pins.more": "...and %s more"
+}
