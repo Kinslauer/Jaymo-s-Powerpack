@@ -479,6 +479,36 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Powers' {@code SeveredPart.takeHead(LivingEntity, UUID, double)}. */
+	private static java.lang.invoke.@Nullable MethodHandle takeHead;
+	private static boolean lookedForTakeHead;
+
+	/**
+	 * {@code taker} picks up player {@code owner}'s own severed head lying loose within {@code reach} (it's gone from the
+	 * ground). False if there's none, or without Powers.
+	 */
+	public static boolean takeHead(LivingEntity taker, java.util.UUID owner, double reach) {
+		if (!lookedForTakeHead) {
+			lookedForTakeHead = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					takeHead = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.core.SeveredPart"), "takeHead",
+						java.lang.invoke.MethodType.methodType(boolean.class, LivingEntity.class, java.util.UUID.class, double.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' severed heads", e);
+				}
+			}
+		}
+		if (takeHead == null) {
+			return false;
+		}
+		try {
+			return (boolean)takeHead.invoke(taker, owner, reach);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** Powers' {@code Treatment.tendAll(LivingEntity, boolean)}. */
 	private static java.lang.invoke.@Nullable MethodHandle tendAll;
 	private static boolean lookedForTend;
@@ -4536,6 +4566,126 @@ public final class PowersCompat {
 		}
 		try {
 			return fittedLimbs == null ? 0 : (int)fittedLimbs.invoke(entity);
+		} catch (Throwable e) {
+			return 0;
+		}
+	}
+
+	/** Looked up once: Powers' {@code Prosthetics.ironMask} and {@code rigMask}, and {@code Rig.wearsAny} and {@code fullSet}. */
+	private static java.lang.invoke.@Nullable MethodHandle ironLimbs, rigLimbs, rigAny, rigFull;
+	private static boolean gearLooked;
+
+	private static void lookForGear() {
+		if (gearLooked) {
+			return;
+		}
+		gearLooked = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+		try {
+			Class<?> limbs = Class.forName("com.jaymospowers.core.Prosthetics");
+			java.lang.invoke.MethodType of = java.lang.invoke.MethodType.methodType(int.class, net.minecraft.world.entity.Entity.class);
+			ironLimbs = lookup.findStatic(limbs, "ironMask", of);
+			rigLimbs = lookup.findStatic(limbs, "rigMask", of);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Prosthetics masks (older Powers?)", e);
+		}
+		try {
+			Class<?> rig = Class.forName("com.jaymospowers.rig.Rig");
+			java.lang.invoke.MethodType of = java.lang.invoke.MethodType.methodType(boolean.class, Player.class);
+			rigAny = lookup.findStatic(rig, "wearsAny", of);
+			rigFull = lookup.findStatic(rig, "fullSet", of);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Rig (older Powers?)", e);
+		}
+	}
+
+	/** Which of {@code entity}'s fitted limbs are iron (Powers' {@code Prosthetics.ironMask}, Dismember bits); 0 without Powers. */
+	public static int ironLimbs(net.minecraft.world.entity.Entity entity) {
+		lookForGear();
+		try {
+			return ironLimbs == null ? 0 : (int)ironLimbs.invoke(entity);
+		} catch (Throwable e) {
+			return 0;
+		}
+	}
+
+	/** Which of {@code entity}'s fitted limbs are Rig limbs, Frostborn work (Powers' {@code Prosthetics.rigMask}); 0 without Powers. */
+	public static int rigLimbs(net.minecraft.world.entity.Entity entity) {
+		lookForGear();
+		try {
+			return rigLimbs == null ? 0 : (int)rigLimbs.invoke(entity);
+		} catch (Throwable e) {
+			return 0;
+		}
+	}
+
+	/** Looked up once: Powers' {@code WebSymbiote.suitShown} and {@code bulked}, and {@code Costume.shown}. */
+	private static java.lang.invoke.@Nullable MethodHandle suitShown, suitBulked, costumeShown;
+	private static boolean coverLooked;
+
+	private static void lookForCover() {
+		if (coverLooked) {
+			return;
+		}
+		coverLooked = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+		try {
+			Class<?> web = Class.forName("com.jaymospowers.power.web.WebSymbiote");
+			java.lang.invoke.MethodType of = java.lang.invoke.MethodType.methodType(boolean.class, Player.class);
+			suitShown = lookup.findStatic(web, "suitShown", of);
+			suitBulked = lookup.findStatic(web, "bulked", of);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' symbiote suit (older Powers?)", e);
+		}
+		try {
+			Class<?> costume = Class.forName("com.jaymospowers.costume.Costume");
+			costumeShown = lookup.findStatic(costume, "shown",
+				java.lang.invoke.MethodType.methodType(Class.forName("com.jaymospowers.costume.CostumeDesign"), Player.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Costume.shown (older Powers?)", e);
+		}
+	}
+
+	/** Whether {@code player} shows a costume just now (Powers' {@code Costume.shown}); false without Powers. */
+	public static boolean costumeShown(Player player) {
+		lookForCover();
+		try {
+			return costumeShown != null && costumeShown.invoke(player) != null;
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Whether {@code player} shows the symbiote's own black suit or its big body (Powers' {@code WebSymbiote.suitShown},
+	 * {@code bulked}), and not a costume's shape over it; false without Powers.
+	 */
+	public static boolean symbioteSuit(Player player) {
+		lookForCover();
+		try {
+			if (suitBulked != null && (boolean)suitBulked.invoke(player)) {
+				return true;
+			}
+			return suitShown != null && (boolean)suitShown.invoke(player) && !costumeShown(player);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** How much of the Rig {@code player} wears: 0 none, 1 some of it, 2 the whole set (Powers' {@code Rig}); 0 without Powers. */
+	public static int rigWorn(Player player) {
+		lookForGear();
+		try {
+			if (rigAny == null || !(boolean)rigAny.invoke(player)) {
+				return 0;
+			}
+			return rigFull != null && (boolean)rigFull.invoke(player) ? 2 : 1;
 		} catch (Throwable e) {
 			return 0;
 		}

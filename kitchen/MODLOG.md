@@ -2738,3 +2738,31 @@ Andy's picks from Legendary Survival Overhaul (ideas and numbers only) and Walk 
   burns (about 30 s standing, 11 sprinting) and nothing comes back; run dry, you're winded as from a sprint.
 - `climate/Stamina`: `fill`, `addBurning`, `BURN` (for other mods, by reflection).
 - Built; not played.
+
+## 0.6.76 (2026-11-24): The thermometer burns when heat is a danger, and freezes and shakes in the cold (#2057)
+
+- **On fire**: from overheating up, the body-heat thermometer burns, flames licking up round the top of the tube,
+  taller and wilder the hotter you get (Andy: "whenever heat is a danger the thermometer should be animated on fire with
+  the flames growing near the top of the meter").
+- **Frozen**: from freezing down, frost crusts the glass from the bulb up, icicles hang off the bulb, and the
+  thermometer shakes, harder and faster as it drops. `ClimateHud#flames`, `ClimateHud#frost`, tuning at the top.
+- Built on CI only; not played, so the look and size haven't been seen on screen.
+
+## 0.6.77 (2026-11-24): JEI shows how to make hides on a server (#2066)
+
+- **Tanning recipes in JEI**: raw hide, salted hide, wet tanned hide, leather scraps and string from wool (the crafting
+  recipes that keep your knife or waterskin) now show in JEI on a server. Andy's clip: wet tanned hide had no recipe.
+  JEI only asks the server for Minecraft's own kinds of recipe, so ours never reached the players;
+  `Hides` now has the server send them (`RecipeSynchronization`).
+- Built on CI only; not played.
+
+## 0.6.78 (2026-11-24): A bear stays on the meat hook (#2068)
+
+Andy: "why doesnt the bear stay on the hook?" It did stay, but it didn't look like it. Clients draw a four-legged body that has stopped moving as lying flat on its side at its lowest point, and they didn't know the body was on a hook. A bear hung from a hook two blocks up rests its head on the floor, stops moving at once, and was drawn tipping over onto the floor within half a second. A small animal that had stopped swinging was drawn lying flat in mid-air the same way. Clients now know when a body is on a meat hook (a synced flag, `CorpseEntity#onHook`), and a hung body is always drawn hanging as its points have it.
+
+## 0.6.79 (2026-11-24): Feeling too hot or too cold is said in your own voice (#2070)
+
+- The action-bar lines when your body heat changes read as the character: "Brr... I'm shivering.", "I'm freezing. Need a
+  fire, or warmer clothes.", "The cold's biting into me!", "Phew... I'm sweating.", "I'm overheating. Need shade, or
+  water.", "Heatstroke... my head's swimming." (lang `message.jaymoskitchen.body_heat.*`).
+- Built; not played.

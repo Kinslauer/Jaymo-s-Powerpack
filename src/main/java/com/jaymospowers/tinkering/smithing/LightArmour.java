@@ -63,6 +63,8 @@ public final class LightArmour {
 
 	static void register() {
 		Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, JaymosPowers.id("light_armour_crafting"), LightArmourRecipe.SERIALIZER);
+		// sent to players so JEI shows it on a server (JEI only asks for minecraft's own)
+		net.fabricmc.fabric.api.recipe.v1.sync.RecipeSynchronization.synchronizeRecipeSerializer(LightArmourRecipe.SERIALIZER);
 		make(MAILED, MAILED_NAMES, "mailed_leather", MAILED_DURABILITY, MAILED_DEFENSE, MAILED_ENCHANT, MAILED_TOUGHNESS, SoundEvents.ARMOR_EQUIP_CHAIN);
 		make(STUDDED, STUDDED_NAMES, "studded_leather", STUDDED_DURABILITY, STUDDED_DEFENSE, STUDDED_ENCHANT, STUDDED_TOUGHNESS,
 			SoundEvents.ARMOR_EQUIP_LEATHER);

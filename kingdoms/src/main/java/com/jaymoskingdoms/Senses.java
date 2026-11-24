@@ -98,7 +98,7 @@ public final class Senses {
 	static final double[] QUIET_STEP_SNEAK = {0.5, 0.4};
 	/** Shadowed: per rank, this much less sight, in proportion to how dark it is where you stand. */
 	static final double SHADOWED_PER_RANK = 0.1;
-	/** A mob sees in front of it within this cosine of its look (0.5: a 120 degree cone); outside, this share, unless closer than {@link #BEHIND_CLOSE} blocks. */
+	/** A mob sees in front of it within this cosine of its look (0.5: a 120 degree cone); outside, this share, unless closer than {@link #BEHIND_CLOSE} blocks and not sneaking ({@link #close}). */
 	static final double VIEW_COS = 0.5, BEHIND = 0.3, BEHIND_CLOSE = 2.0;
 	/** A mob with darkvision sees in the dark as in this much light (0 dark, 1 full light). */
 	static final double DARKVISION_LIGHT = 0.6;
@@ -400,10 +400,18 @@ public final class Senses {
 		}
 		if (!sighted(looker)) {
 			// (2026-11-23) MCA's other villagers keep their own sight, but only in front of them: at their sides and back they hear you
-			return McaCompat.isMca(looker) && player.distanceTo(looker) > BEHIND_CLOSE && (!inCone(looker, player) || steeplyAbove(looker, player))
+			return McaCompat.isMca(looker) && !close(looker, player) && (!inCone(looker, player) || steeplyAbove(looker, player))
 				? Math.max(MIN_FACTOR, heard(player, level, looker, 0.0)) : 1.0;
 		}
 		return sight(player, level, looker);
+	}
+
+	/**
+	 * Close enough ({@link #BEHIND_CLOSE}) to be noticed outside the view cone: only walking up, not sneaking (Andy: "while
+	 * not sneaking, if you sneak you can get right up for the takedown").
+	 */
+	static boolean close(LivingEntity looker, ServerPlayer player) {
+		return player.distanceTo(looker) <= BEHIND_CLOSE && !player.isShiftKeyDown();
 	}
 
 	/** (2026-11-23) Whose sight stops at the edge of its view cone ({@link #HUMANOID_BEHIND}): the people of the world. */
@@ -482,7 +490,7 @@ public final class Senses {
 		if (looker.getLastHurtByMob() == player && looker.tickCount - looker.getLastHurtByMobTimestamp() < REVENGE_TICKS) {
 			f *= REVENGE;
 		}
-		if (player.distanceTo(looker) > BEHIND_CLOSE) {
+		if (!close(looker, player)) {
 			// (2026-11-19) well above it, and steeply up out of its sight, as if behind it
 			double rise = player.getEyeY() - looker.getEyeY();
 			if (!inCone(looker, player) || steeplyAbove(looker, player)) {

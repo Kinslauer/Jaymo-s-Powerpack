@@ -217,6 +217,17 @@ public final class BloodTrail {
 	 */
 	public static void bleed(ServerLevel level, Entity body, int color, int count, double spread, float scale, int delay) {
 		UUID by = body instanceof LivingEntity living && living.isAlive() ? body.getUUID() : null;
+		if (by != null && count > 0) {
+			// a living body's stains come out of its own blood ({@link BleedOut#spill}): what it hasn't got, it can't spill
+			float had = BleedOut.spill((LivingEntity) body, count * scale);
+			if (had <= 0.0F) {
+				return;
+			}
+			if (had < count * scale) {
+				count = Math.max(1, Mth.floor(had / scale));
+				scale = had / count;
+			}
+		}
 		for (int i = 0; i < count; i++) {
 			double x = body.getX() + (level.getRandom().nextDouble() * 2.0 - 1.0) * spread;
 			double z = body.getZ() + (level.getRandom().nextDouble() * 2.0 - 1.0) * spread;
@@ -237,6 +248,9 @@ public final class BloodTrail {
 	 */
 	public static @Nullable Mark smear(ServerLevel level, Entity body, int color, Vec3 from, Vec3 to, float scale) {
 		UUID by = body instanceof LivingEntity living && living.isAlive() ? body.getUUID() : null;
+		if (by != null && (scale = BleedOut.spill((LivingEntity) body, scale)) <= 0.0F) {
+			return null;
+		}
 		double dx = to.x - from.x, dz = to.z - from.z;
 		int shape = Math.abs(dx) >= Math.abs(dz) ? BloodParticles.Puddle.SMEAR_X : BloodParticles.Puddle.SMEAR_Z;
 		return lay(level, by, color, (from.x + to.x) * 0.5, Math.max(from.y, to.y) + 0.5, (from.z + to.z) * 0.5, scale, 0, shape);
@@ -340,12 +354,18 @@ public final class BloodTrail {
 	public static @Nullable Mark drag(ServerLevel level, Entity body, int color, double x, double from, double z, boolean alongX, float width) {
 		UUID by = body instanceof LivingEntity living && living.isAlive() ? body.getUUID() : null;
 		float scale = width / (BloodParticles.Puddle.BLOCKS_PER_SCALE * BloodParticles.Puddle.DRAG_WIDE);
+		if (by != null && (scale = BleedOut.spill((LivingEntity) body, scale)) <= 0.0F) {
+			return null;
+		}
 		return lay(level, by, color, x, from, z, scale, 0, alongX ? BloodParticles.Puddle.DRAG_X : BloodParticles.Puddle.DRAG_Z);
 	}
 
 	/** A round splash of {@code body}'s blood this big under (x, from, z): pools into one of its own lying there. */
 	public static @Nullable Mark blot(ServerLevel level, Entity body, int color, double x, double from, double z, float scale) {
 		UUID by = body instanceof LivingEntity living && living.isAlive() ? body.getUUID() : null;
+		if (by != null && (scale = BleedOut.spill((LivingEntity) body, scale)) <= 0.0F) {
+			return null;
+		}
 		return lay(level, by, color, x, from, z, scale, 0, BloodParticles.Puddle.ROUND);
 	}
 

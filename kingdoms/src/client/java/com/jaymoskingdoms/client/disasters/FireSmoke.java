@@ -16,6 +16,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
@@ -34,6 +35,8 @@ import net.minecraft.world.phys.Vec3;
  * plumes end ({@link StormParticle#PALL}): big, slow, dark grey puffs that hang there, drift downwind and linger a minute
  * or two after the fire is out (Andy, 2026-11-20). The server says where the large flames are, out to 512 blocks
  * ({@link FireSmog}), so a pall, and a plume under it, can be seen from afar. The smog shares a budget of its own.</li>
+ * <li>On the ground under the flames, whether they burn on the forest floor or up in a canopy, thick black smoke banks
+ * up ({@link #smother}): it hardly rises and drifts with the wind, so a big blaze is hidden even seen from outside it.</li>
  * <li>Near a big blaze and out under the sky, the air fills with smoke: the fog closes in and browns
  * ({@link #haze}, read by {@code SkiesFogMixin} with the weather's other fogs).</li>
  * </ul>
@@ -84,6 +87,22 @@ public final class FireSmoke {
 	public static final float[] HAZE_COLOUR = {0.47F, 0.39F, 0.33F};
 	/** How thick the smoky air is at the camera, 0..1 (eased). */
 	public static float haze;
+	/** Smoke on the ground (Andy, 2026-11-23: "the thick black smoke should generate at ground level, right overtop the
+	 * flames, to show reduced visibility even from outside the fire"): puffs for each burning block a look finds in a big
+	 * enough blaze, and the most a tick (normal, low-end). */
+	static final int GROUND_PER_FIRE = 2;
+	static final float GROUND_BUDGET = 4.0F, GROUND_LOW_BUDGET = 1.5F;
+	/** A ground puff's size (blocks, small and big blaze), its life (ticks), how slowly it rises, how much it swells, its
+	 * near-black grey at the foot and top, and how thick it is. */
+	static final float GROUND_SIZE_SMALL = 3.5F, GROUND_SIZE_BIG = 7.0F;
+	static final int GROUND_LIFE_MIN = 160, GROUND_LIFE_MAX = 260;
+	static final float GROUND_RISE_MIN = 0.015F, GROUND_RISE_MAX = 0.035F, GROUND_SWELL = 0.9F;
+	static final float GROUND_GREY_FOOT = 0.05F, GROUND_GREY_TOP = 0.13F, GROUND_ALPHA = 0.8F;
+	/** Where a ground puff starts (Andy, 2026-11-24: "still too high, make it start just above ground level, not the
+	 * flames"): on the ground under the fire, not up at a burning canopy, and up to this much over it (blocks); the
+	 * deepest a column is walked down to find that ground. */
+	static final float GROUND_LIFT = 0.5F;
+	static final int GROUND_DEPTH = 48;
 	/** How often low-end mode is asked about (ticks). */
 	static final int LOW_CHECK = 40;
 
@@ -144,7 +163,7 @@ public final class FireSmoke {
 		if (clock++ % LOW_CHECK == 0) {
 			low = CloudDecks.lowEnd();
 		}
-		look(level, eye, random);
+		look(minecraft, level, eye, random);
 		float near = cool(eye);
 		boolean open = level.canSeeSky(BlockPos.containing(eye));
 		float target = Mth.clamp(near / HAZE_FULL, 0.0F, 1.0F) * (open ? 1.0F : INDOORS);
@@ -157,22 +176,59 @@ public final class FireSmoke {
 		}
 	}
 
-	/** Looks at a few columns' tops round the camera and tallies the fires found. */
-	private static void look(ClientLevel level, Vec3 eye, RandomSource random) {
+	/** Looks at a few columns round the camera, at the top (a burning canopy) and at the ground under any leaves, tallies
+	 * the fires found, and puts ground smoke right over each one in a big enough blaze. */
+	private static void look(Minecraft minecraft, ClientLevel level, Vec3 eye, RandomSource random) {
 		int samples = low ? LOW_SAMPLES : SAMPLES;
 		float worth = (float)((RANGE * 2 + 1) * (RANGE * 2 + 1)) / samples;
+		float ground = low ? GROUND_LOW_BUDGET : GROUND_BUDGET;
 		BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
 		int cx = Mth.floor(eye.x), cz = Mth.floor(eye.z);
 		for (int i = 0; i < samples; i++) {
 			int x = cx + random.nextInt(RANGE * 2 + 1) - RANGE, z = cz + random.nextInt(RANGE * 2 + 1) - RANGE;
 			int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z);
-			if (!level.getBlockState(at.set(x, y, z)).is(BlockTags.FIRE)) {
+			int floor = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+			boolean top = level.getBlockState(at.set(x, y, z)).is(BlockTags.FIRE);
+			boolean under = floor != y && level.getBlockState(at.set(x, floor, z)).is(BlockTags.FIRE);
+			if (!top && !under) {
 				continue;
 			}
 			Cell cell = CELLS.computeIfAbsent(BlockPos.asLong(x >> CELL, 0, z >> CELL), k -> new Cell());
 			cell.tally += worth;
-			cell.top = y;
+			cell.top = top ? y : floor;
+			if (ground >= 1.0F && cell.fires() >= SMOKES_FROM && StormsClient.cloudSprites != null) {
+				float blaze = Mth.clamp(round(x >> CELL, z >> CELL) / BIG, 0.0F, 1.0F);
+				int foot = floorUnder(level, at, x, under ? floor : y, z);
+				for (int n = 0; n < GROUND_PER_FIRE && ground >= 1.0F; n++, ground -= 1.0F) {
+					smother(minecraft, level, random, x + random.nextDouble(), foot + GROUND_LIFT * random.nextDouble(), z + random.nextDouble(), blaze);
+				}
+			}
 		}
+	}
+
+	/** The ground under a fire at (x, y, z): down through the leaves, logs, air and plants of a burning wood to the first
+	 * other block (or water), at most GROUND_DEPTH down. */
+	private static int floorUnder(ClientLevel level, BlockPos.MutableBlockPos at, int x, int y, int z) {
+		int bottom = Math.max(level.getMinY(), y - GROUND_DEPTH);
+		while (y > bottom) {
+			BlockState below = level.getBlockState(at.set(x, y - 1, z));
+			if (!below.getFluidState().isEmpty() || !below.isAir() && !below.canBeReplaced() && !below.is(BlockTags.LEAVES) && !below.is(BlockTags.LOGS) && !below.is(BlockTags.FIRE)) {
+				break;
+			}
+			y--;
+		}
+		return y;
+	}
+
+	/** One puff of thick black smoke at (x, y, z), on the ground under a flame, in a blaze of {@code blaze} (0..1): it hardly rises,
+	 * spreads and drifts with the wind, so a burning wood is hidden behind it even seen from outside. */
+	private static void smother(Minecraft minecraft, ClientLevel level, RandomSource random, double x, double y, double z, float blaze) {
+		float size = Mth.lerp(blaze, GROUND_SIZE_SMALL, GROUND_SIZE_BIG) * (0.8F + random.nextFloat() * 0.4F);
+		int life = Mth.nextInt(random, GROUND_LIFE_MIN, GROUND_LIFE_MAX);
+		float rise = Mth.lerp(random.nextFloat(), GROUND_RISE_MIN, GROUND_RISE_MAX);
+		double wx = Math.cos(Storms.clientWindAngle) * Storms.clientWindSpeed, wz = Math.sin(Storms.clientWindAngle) * Storms.clientWindSpeed;
+		minecraft.particleEngine.add(new StormParticle(level, x, y, z, StormsClient.cloudSprites.get(random), StormParticle.SMOKE, 0, size, life,
+			GROUND_GREY_FOOT, GROUND_GREY_FOOT, GROUND_GREY_FOOT, GROUND_ALPHA).smoke(rise, wx, wz, GROUND_SWELL, GROUND_GREY_FOOT, GROUND_GREY_TOP));
 	}
 
 	/** Every cell cools, the cold or far ones are forgotten; how many fires are near the camera (the nearer the more). */

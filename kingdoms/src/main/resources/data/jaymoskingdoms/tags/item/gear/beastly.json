@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymospowers:feral_claws",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:digging_claws",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:kitty_slippers",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:owl_mask",
+      "required": false
+    }
+  ]
+}

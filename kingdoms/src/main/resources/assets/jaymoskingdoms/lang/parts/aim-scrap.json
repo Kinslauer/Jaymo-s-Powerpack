@@ -1,0 +1,21 @@
+{
+  "aim.jaymoskingdoms.sheet.heading": "Who You Are",
+  "aim.jaymoskingdoms.sheet.full": "You are %1$s, %2$s of %3$s heritage.",
+  "aim.jaymoskingdoms.sheet.classless": "You are %1$s, of %2$s heritage, with no calling yet.",
+  "aim.jaymoskingdoms.sheet.no_heritage": "You are %1$s, %2$s.",
+  "aim.jaymoskingdoms.sheet.bare": "You are %1$s.",
+  "aim.jaymoskingdoms.sheet.class.thief": "a Thief",
+  "aim.jaymoskingdoms.sheet.class.warlord": "a Warlord",
+  "aim.jaymoskingdoms.sheet.class.mage": "a Mage",
+  "aim.jaymoskingdoms.sheet.class.brute": "a Brute",
+  "aim.jaymoskingdoms.sheet.class.marksman": "a Marksman",
+  "aim.jaymoskingdoms.sheet.class.sorcerer": "a Sorcerer",
+  "aim.jaymoskingdoms.sheet.class.rider": "a Rider",
+  "aim.jaymoskingdoms.sheet.class.cleric": "a Cleric",
+  "aim.jaymoskingdoms.sheet.class.druid": "a Druid",
+  "aim.jaymoskingdoms.sheet.class.monk": "a Monk",
+  "aim.jaymoskingdoms.sheet.class.paladin": "a Paladin",
+  "aim.jaymoskingdoms.sheet.class.ranger": "a Ranger",
+  "aim.jaymoskingdoms.sheet.class.warlock": "a Warlock",
+  "aim.jaymoskingdoms.sheet.class.tinkerer": "a Tinkerer"
+}

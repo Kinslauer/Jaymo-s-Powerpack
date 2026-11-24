@@ -86,6 +86,9 @@ public class CorpseEntity extends Entity {
 	/** Just died and still keeling over (see KeelOver): clients leave its drawn pose to the points until it's down. */
 	private static final EntityDataAccessor<Boolean> KEELING = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.BOOLEAN);
+	/** Hung on a meat hook ({@link #hook}): clients draw it as its points hang, never eased onto its side as if lying still. */
+	private static final EntityDataAccessor<Boolean> HOOKED = SynchedEntityData.defineId(CorpseEntity.class,
+		EntityDataSerializers.BOOLEAN);
 	/** (0.5.23) Nailed to a wall by an arrow: the way it faces out from the wall (degrees, 0-359), or -1 when it isn't. */
 	private static final EntityDataAccessor<Integer> PINNED = SynchedEntityData.defineId(CorpseEntity.class,
 		EntityDataSerializers.INT);
@@ -976,6 +979,7 @@ public class CorpseEntity extends Entity {
 		builder.define(POSE, 0);
 		builder.define(TUMBLING, false);
 		builder.define(KEELING, false);
+		builder.define(HOOKED, false);
 		builder.define(OWNER_NAME, "");
 		builder.define(LOOK_TAGS, "");
 		builder.define(CRUMBLING, false);
@@ -1048,6 +1052,16 @@ public class CorpseEntity extends Entity {
 		return hook;
 	}
 
+	/** Hung on a meat hook (either side; {@link #hook} itself is the server's). */
+	public boolean onHook() {
+		return this.entityData.get(HOOKED);
+	}
+
+	private void setHook(@Nullable BlockPos at) {
+		this.hook = at;
+		this.entityData.set(HOOKED, at != null);
+	}
+
 	/** Hung on the hook at {@code at} by its hind legs: out of anyone's arms or hands, a ragdoll held at the hook. */
 	public void hangOn(BlockPos at) {
 		if (carrier() != null) {
@@ -1057,7 +1071,7 @@ public class CorpseEntity extends Entity {
 			this.entityData.set(DRAGGER, -1);
 		}
 		unpin();
-		this.hook = at.immutable();
+		setHook(at.immutable());
 		this.ragdoll = null;
 		grabCooldown = GRAB_COOLDOWN;
 		Vec3 hold = Hanging.holdPoint(at);
@@ -1068,7 +1082,7 @@ public class CorpseEntity extends Entity {
 	/** Off the hook (taken down, or the hook's gone): it falls as it hung. */
 	public void unhook() {
 		if (hook != null) {
-			hook = null;
+			setHook(null);
 			if (ragdoll != null) {
 				ragdoll.body.release();
 				ragdoll.body.wake();
@@ -3692,7 +3706,7 @@ public class CorpseEntity extends Entity {
 		this.entityData.set(CARRIER, carrier == null ? -1 : carrier.getId());
 		if (carrier != null) {
 			// (0.5.51) taken down off a meat hook
-			this.hook = null;
+			setHook(null);
 			this.ragdoll = null;
 			// (0.5.23) pulled down off the wall
 			this.entityData.set(PINNED, -1);
@@ -4428,7 +4442,7 @@ public class CorpseEntity extends Entity {
 			setNoGravity(true);
 		}
 		this.entityData.set(PINNED, input.getIntOr("Pinned", -1));
-		this.hook = input.getLong("Hook").map(BlockPos::of).orElse(null);
+		setHook(input.getLong("Hook").map(BlockPos::of).orElse(null));
 		this.butcherStage = input.getIntOr("ButcherStage", 0);
 		this.bleedTotal = input.getIntOr("BleedTotal", 0);
 		this.bleedLeft = input.getIntOr("BleedLeft", 0);

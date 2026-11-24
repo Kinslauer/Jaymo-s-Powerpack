@@ -3,7 +3,6 @@ package com.jaymospowers.client;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.client.power.xenoform.XenoMorph;
 import com.jaymospowers.core.UltimateFilm;
-import com.jaymospowers.core.wounds.Mortality;
 import com.jaymospowers.client.sound.SceneMusic;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -37,6 +36,11 @@ import org.jspecify.annotations.Nullable;
 public final class UltimateCinematic {
 	/** Each bar's height, as a share of the screen's; how much of the way they slide a tick. */
 	static final float BAR_SHARE = 0.11F, BAR_EASE = 0.3F;
+	/**
+	 * Andy: "upon the killing blow it should still cut to black, but cut back in for the scene, then back out". A film after
+	 * your death opens on this many ticks of black; it ends on the death screen's black.
+	 */
+	static final int DEATH_BLACK = 30;
 	/** (0.20.60) How far every shot is brought down (blocks, times the caster's size), and the lowest it goes over their feet. */
 	static final double SHOT_DROP = 0.6, SHOT_FLOOR = 0.5;
 	/** Kept this far off a wall the camera would otherwise sink into (blocks). */
@@ -146,13 +150,17 @@ public final class UltimateCinematic {
 	}
 
 	/**
-	 * (0.18.106) Your own film is playing after your death: the death screen waits. Not for a death that ends the character
-	 * ({@link Mortality#FINAL}): Andy (2026-11-19), "the cut to black is only for a final death", so its film is cut
-	 * and the death screen's black comes at once.
+	 * (0.18.106) Your own film is playing after your death: the death screen waits. A death that ends the character too
+	 * (Andy, 2026-11-23: "the cutscene should play before you respawn or are allowed to reincarnate"): its black and
+	 * silence come after the film.
 	 */
 	public static boolean deathFilm() {
-		Minecraft minecraft = Minecraft.getInstance();
-		return running && !witness && afterDeath && !(minecraft.player != null && Mortality.isFinal(minecraft.player));
+		return running && !witness && afterDeath;
+	}
+
+	/** Your film after your death is still on its opening black ({@link #DEATH_BLACK}). */
+	public static boolean deathBlack() {
+		return deathFilm() && age < DEATH_BLACK;
 	}
 
 	private static void start(Minecraft minecraft, UltimateFilm.Play play) {
@@ -211,8 +219,7 @@ public final class UltimateCinematic {
 			}
 			// (0.18.106) one after your death plays on while you're dead, and ends once you're back
 			boolean gone = afterDeath ? age > 20 && self != null && self.isAlive() : self == null || !self.isAlive();
-			boolean finalDeath = afterDeath && self != null && Mortality.isFinal(self);
-			if (self == null || gone || skipped || finalDeath || ++age >= length || !witness && BeamCinematic.running()) {
+			if (self == null || gone || skipped || ++age >= length || !witness && BeamCinematic.running()) {
 				stop(minecraft);
 			}
 		}
@@ -579,6 +586,10 @@ public final class UltimateCinematic {
 
 	/** The bars. */
 	private static void render(GuiGraphicsExtractor graphics, DeltaTracker delta) {
+		if (deathBlack()) {
+			graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), 0xFF000000);
+			return;
+		}
 		float shown = Mth.lerp(delta.getGameTimeDeltaPartialTick(false), barsO, bars);
 		if (shown <= 0.0F) {
 			return;

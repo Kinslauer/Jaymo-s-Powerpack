@@ -15,7 +15,7 @@ import net.minecraft.world.entity.npc.villager.Villager;
 
 /**
  * A drawn, crouched sword stance reads as a threat (Andy's pick from Star Wars: Galaxy in a Cube, ideas only; Powers
- * draws the pose, {@link PowersCompat#threatening} says who is in it). Within {@link #SEEN} blocks, in sight:
+ * draws the pose, {@link PowersCompat#threatening} says who is in it). Within {@link #SEEN} blocks, in sight and in front of them ({@link #seesStance}):
  * <ul>
  * <li>a grown villager grows wary: a muttered line now and then, and it backs away from you, eyes on the blade;</li>
  * <li>a child runs and hides ({@link Frights#scare});</li>
@@ -67,7 +67,7 @@ public final class Menace {
 			ServerLevel level = player.level();
 			long now = level.getGameTime();
 			for (Villager v : level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(SEEN), Villager::isAlive)) {
-				if (v.distanceToSqr(player) > SEEN * SEEN || !v.hasLineOfSight(player)) {
+				if (v.distanceToSqr(player) > SEEN * SEEN || !v.hasLineOfSight(player) || !seesStance(v, player)) {
 					continue;
 				}
 				if (v instanceof Worker w && (w.role() == Folk.BARBARIAN || w.role() == Folk.CHIEF)) {
@@ -89,6 +89,15 @@ public final class Menace {
 				it.remove();
 			}
 		}
+	}
+
+	/**
+	 * The stance is seen, not heard: Andy's clip had an orc guard, his back turned, warn him the moment he drew. So only a
+	 * villager facing them sees it ({@link Senses#inCone}); the stance is a crouch, so even right behind them it goes unseen
+	 * (Andy: "if you sneak you can get right up for the takedown").
+	 */
+	private static boolean seesStance(Villager v, ServerPlayer player) {
+		return Senses.inCone(v, player);
 	}
 
 	private static boolean guard(Villager v) {

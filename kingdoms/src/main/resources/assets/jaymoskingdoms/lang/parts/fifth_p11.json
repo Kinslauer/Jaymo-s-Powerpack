@@ -81,7 +81,7 @@
   "gui.jaymoskingdoms.class.stat.infusions": "Infusions %s at once",
   "gui.jaymoskingdoms.class.stat.gadgets": "Gadget recipes %s",
   "message.jaymoskingdoms.cleric.silent": "Your god is silent. A short rest brings the turnings back.",
-  "message.jaymoskingdoms.cleric.symbol": "Hold your holy symbol to call on your god.",
+  "message.jaymoskingdoms.cleric.symbol": "Hold your holy symbol (sworn to the Truth: a blank book) to call on your god.",
   "message.jaymoskingdoms.druid.none": "You have studied no beast yet. Watch a wolf, a bear, a hawk or a fish for a while.",
   "message.jaymoskingdoms.druid.selected": "The next shape: %s",
   "message.jaymoskingdoms.druid.tired": "The wild is quiet in you. A short rest brings the shapes back.",

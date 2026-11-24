@@ -7540,3 +7540,99 @@ following integration task).
 - Andy (after the slice, 2026-11-23): "did you add the single smash?" A club's, a staff's or everyone's wild slam finisher (Skull Crusher, the staff's, Wild Slam) on a small body (a digger, a fox, a chicken: as the slice, at most 1.2 tall and 1 wide) now plays **Smashed**: raised high in both hands and one blow straight down (under a second), instead of beating it again and again. A tool used as a club still wears, once. `Finishers.Kind.SMASH`, `Finishers.smashed`.
 - Axes still take the head; a rock keeps its own move.
 - Not seen in game.
+
+## 0.26.81 (2026-11-24): Says what hurt you when nobody did (#2054)
+
+- **"Hurt: heatstroke"**: when something with no attacker hurts you (heatstroke, thirst, bleeding, a parasite, the
+  cold, smoke, starving, an unseen "generic" hurt), a red line under the crosshair names it, once per cause and again
+  after 10 seconds. Falls aren't named, nor anything while you're downed. Andy's clip "stop hitting me": his hearts
+  fell every two seconds with nobody near and nothing said why. The server log also notes each one with the damage
+  type's id, so a cause without a name of its own can still be traced. `HurtCause`, `lang/parts/hurt_cause.json`.
+- Built on CI only; not played.
+
+## 0.26.82 (2026-11-24): Three blows on the ground and you're finished (#2056)
+
+- **Anyone downed dies on the third blow**: besides one blow of three hearts or more, the third weaker blow (a swing,
+  an arrow, a bite, a blast) since they went down now kills them too, as the killing blow always has. Andy, cut down on
+  the ground by a zombie captain: "either one blow of 3 hearts or more, or 3 weaker blows total, not this infinite cap."
+  The same goes for downed mobs ("they should follow the rule"): a player's blows on one are its wounds, now three, not
+  ten. Fire, falls and bleeding don't count; knocked out cold from standing, blows land as before.
+  `Downed#DOWNED_BLOWS`, `Downed#lastBlow`.
+- Built on CI only; not played.
+
+## 0.26.83 (2026-11-24): bandages give a short regen; rags fester less (#2058)
+
+- **Fresh dressings heal you a little faster for a moment**: a linen (clean) bandage gives Regeneration II and a grass
+  bandage Regeneration I, each for 8 seconds after it's put on (yourself, someone else, or the fight-pit attendant's
+  linen). A rag, washed or not, gives none.
+- **Rags fester less**: a dirty cut under a rag now festers at half the old chance (2.5% each bleed tick instead of 5%);
+  a zombie's dirty cut left open is unchanged.
+- `Treatment.dressingRegen` (`DRESSING_REGEN_TICKS`), `Bleeding.RAG_FESTER_CHANCE`. Built by CI; not played.
+
+## 0.26.84 (2026-11-24): A body only spills the blood it holds (#2059)
+
+- **Blood runs out**: every stain a living body leaves (a blow's spray, a cut's drip, a stump, a dragged smear) now comes
+  out of its own blood, the same store the downed pool and a corpse pour from (a man's is 3 stain-sizes). Once it's
+  empty, blows bring no more spray and no more stains. Andy, of being hacked at on the ground: "if there is still finite
+  blood, that seemed to be way more than could fit in one body". On your feet it comes back over ten minutes, as before.
+  `BleedOut#spill`, `BleedOut#dry`.
+- A side effect: someone badly cut up in a fight can now be bled dry before they go down, and then a bed or a
+  campfire doesn't heal them while downed (the rule for the bled-dry). Tell Andy if that's too harsh.
+- Built on CI only; not played.
+
+## 0.26.85 (2026-11-24): A blast close by knocks you out cold (#2061)
+
+- **Blasts knock you out**: an explosion that hits you for two hearts or more (that near) lays you out cold for ten
+  seconds: standing, you drop; downed, you pass out. Sneak mashes you round sooner, as from any knock-out. Mobs that
+  can go down are laid out too. A blast of three hearts or more on someone already down still kills them. Andy: "the
+  explosion that happened while i was downed should have knocked me unconscious, like any blast at that proximity
+  should". `BlastOut`, tuning at its top.
+- Built on CI only; not played.
+
+## 0.26.86 (2026-11-24): Adrenaline kicks in once, going down included (#2062)
+
+- **Once means once**: going down is now one of the ways adrenaline kicks in, under the same once-every-15-minutes
+  rule as a hit that leaves you low. Before, the rush on going down didn't check the rule, so in Andy's fight it hit
+  once on a blow and again as he went down, and would start again each time he came round on the ground
+  ("andrenaline should have only kicked in once"). A downed mob's first rush is as it was. `Adrenaline#wentDown`.
+- Built on CI only; not played.
+
+## 0.26.87 (2026-11-24): JEI shows stone tools, hammer and light armour recipes on a server (#2066)
+
+- **Missing recipes in JEI**: the stone-age tool recipes, the hammer recipes (crushing ore) and light armour now show
+  in JEI on a server. JEI only asks the server for Minecraft's own kinds of recipe, so these never reached the players;
+  `StoneAge`, `OreWashing` and `LightArmour` now have the server send them (`RecipeSynchronization`).
+- Built on CI only; not played.
+
+## 0.26.88 (2026-11-24): A dead player's severed head can be taken as a trophy (#2069)
+
+- `SeveredPart.takeHead`: something picks up a player's own loose severed head (not carried, nailed up or kept as a trophy) and it's gone from the ground. Jaymo's Kingdoms' captains use it to wear the real head of a player they killed instead of a copy.
+- A dead player looking out of their own severed head goes back to their normal view if the head is taken, instead of staring from where it was. Built by CI only; not played in game.
+- Andy: "you never see the scene because it cuts to black when you die. from now on if you die in this fashion and someone is promoted or otherwise, the cutscene should play before you respawn or are allowed to reincarnate." A film after your death (a Kingdoms captain's scene over your body) now plays on a death that ends the character too, with its sound; the silent black hold and the death screen (Reincarnate, Limbo) come after it, their buttons held until it ends. Before, a final death cut the film and went straight to black. `UltimateCinematic.deathFilm`, `BlackoutHush`, `DeathScreenBlackMixin`. Not played in game.
+- Andy: "upon the killing blow it should still cut to black, but cut back in for the scene, then back out". A film after your death opens on 1.5 seconds of black (silent too on a death that ends the character), cuts in to the scene, and cuts out to the death screen's black. The death screen and its buttons (Reincarnate, Limbo) aren't drawn at all while the film plays. `UltimateCinematic.DEATH_BLACK`. Not played in game.
+
+## 0.26.89 (2026-11-24): Lock-on names the part only with Called Shots; what hurts you is said in your own voice (#2070)
+
+- **Lock-on**: the name of the body part you're aimed at ("Torso" and the rest) shows under the bracket only once you've
+  learned Called Shots (the skill-tree perk that lets you scroll the aim between parts). Before that, no label at all
+  (`LockOnClient.marker`).
+- **What hurt you, said as you'd say it**: the line under the crosshair for a hurt with no attacker is the character
+  reacting, not a label: "That BURNS!" instead of "Hurt: fire", "Too hot... I'm cooking", "So thirsty...", "I'm bleeding
+  out", "Something's moving under my skin", "Freezing...", "Can't breathe!", "Need food...", "What was that?!" and the
+  rest (`HurtCause`, `lang/parts/hurt_cause.json`). Same timing: once per cause, again after 10 seconds. A cause without
+  a line of its own reads "Ugh... <cause>!".
+- **Wounds in your own voice**: "Left arm's bleeding! I need to bind it, or stitch it", and the same for broken,
+  sprained, festering, rotted and both arms broken (`lang/parts/wounds.json`).
+- Built; not played.
+
+## 0.26.90 (2026-11-24): The last bowl or bottle comes back (#2075)
+
+- **Bowls and bottles**: drinking or eating the last of a stack gives its bowl, bottle or bucket back into your hand
+  again (Andy, 2026-11-24: Chamomile Tea left nothing). CreativeCore, a library mod in the pack, throws away what
+  `LivingEntity.completeUsingItem` gets back from the item, so the last Chamomile Tea, Bone Broth, Posset, Willow-Bark
+  Tea, mushroom stew, milk bucket, honey bottle or potion lost its container in Survival. `UseLeftoverStackMixin`
+  remembers what finishing the item left and `UseLeftoverHandMixin` puts it in the hand when the hand still holds the
+  used-up stack. With some still in the stack the bowl went to the inventory and always did.
+- Tested on a dev server with today's Kitchen and Kingdoms: without the fix and with CreativeCore 2.14.22 every one of
+  them left an empty hand; with the fix all gave their bowl, bottle or bucket back, through the Creative tab and
+  underwater too; without CreativeCore nothing is doubled. Not played on the Deck server.

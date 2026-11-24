@@ -129,6 +129,8 @@ public final class Creatures {
 			.strength(0.6F).sound(SoundType.WOOD).noOcclusion().pushReaction(net.minecraft.world.level.material.PushReaction.POPPED).setId(punjiKey)));
 		PUNJI_ITEM = blockItem("punji_stakes", PUNJI);
 		Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, JaymosKingdoms.id("whittling"), WhittlingRecipe.SERIALIZER);
+		// sent to players so JEI shows it on a server (JEI only asks for minecraft's own)
+		net.fabricmc.fabric.api.recipe.v1.sync.RecipeSynchronization.synchronizeRecipeSerializer(WhittlingRecipe.SERIALIZER);
 		// mobs go round it when they can (a cost, not a wall); standing beside it is no matter
 		net.fabricmc.fabric.api.registry.LandPathTypeRegistry.register(PUNJI, net.minecraft.world.level.pathfinder.PathType.DAMAGING_IN_NEIGHBOR,
 			net.minecraft.world.level.pathfinder.PathType.OPEN);

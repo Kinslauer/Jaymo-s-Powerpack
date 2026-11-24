@@ -138,6 +138,8 @@ public final class Wounds {
 
 	public static void init() {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register(Wounds::onDamage);
+		// a blast close by knocks you out cold
+		BlastOut.register();
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			if (++tickCounter < PLAYER_RECONCILE_TICKS) {
 				return;
@@ -190,6 +192,8 @@ public final class Wounds {
 		// bleeding, broken bones and lost limbs shown like potions
 		WoundSigns.register();
 		WoundMarks.register();
+		// what hurt you when nothing did it to you
+		HurtCause.register();
 		// (0.17.54) the Potion of Cleansing: festering cured
 		Cleansing.register();
 		MedicineItems.register();

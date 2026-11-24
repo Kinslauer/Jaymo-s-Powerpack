@@ -16633,3 +16633,119 @@ Andy picked "goblin extras" from the survival pick list (2026-11-22); the Goblin
 
 - Andy: "while kneeling and not holding shift you cant lean, e goes back to inventory key and q to drop. Only lean from sneak or crouch or kneel while holding shift". Kneeling and the low crouch keep you sneaking without the key, so Q and E leaned there (and didn't drop or open the inventory). Now Q and E lean only while the sneak key is held; otherwise Q drops and E opens the inventory as always. `LeanClient.shiftHeld`.
 - Not played.
+
+## 0.12.11 (2026-11-24): Cleric's medallion board: numpad sigils cast spells and great prayers, sneak to bind (#2060)
+
+- **Raise the medallion** (new key, default Y, under the class keys): a Cleric with the holy symbol in either hand lifts it, and while it is up the **numpad** keys lay its marks on a 3x3 board laid out as the pad is (7 8 9 on top). Each mark is its own sigil (the Root, Cup, Gate, Flame, Eye, Waters, Star, Crescent, Crown); each is its own rebindable key.
+- Each prayer is a pattern of marks (`MedallionBoard.PATTERNS`, `PRAYERS`). A finished pattern is said at once and the board comes down; marks that begin no pattern you know fizzle and the board stays up. Finishing a spell's pattern while sneaking binds it to the medallion; a tap of the symbol in either hand (the offhand too) casts the bound spell, as before.
+- **On the board, known from the start:** every Cleric spell you've learnt (same mana, cooldown and parts as the symbol's tap), plus Bless the Band, Sanctify and Turn Undead (a turning each, no tree perk needed on the board; Turn Undead turns the dead before you for 3 s).
+- **Great prayers** (`GreatPrayers`), five marks each, paid in turnings: **Hallowed Ground** (known from the start: a 5-block circle for 20 s, the dead in it burn, friends mend), **Litany of the Band** (favour tier 2: Bless the Band and 4 hearts to every friend near), **Pillar of Judgement** (tier 3: a mark under the creature you look at, then a beam from the sky after 1 s), **The Patron's Hand** (tier 4: a great hand of light drawn in sigils and strokes comes down 5 blocks ahead and slams the ground). The dead take half again more.
+- On screen: the medallion's face with a rim of marks, the nine sigils, the laid ones lit and joined by crackling strokes, and beside it every prayer you know with its shape drawn small (the ones still possible bright). Others see the arms raised, the medallion as a small sigil before the chest, a circle at the feet, a rune at each mark in the air and strokes joining them.
+- While the board is up, every other numpad binding is off: the pad's presses reach only the medallion's marks (`MedallionNumpadMixin`); letting a key go still reaches everything, so nothing sticks.
+- **Key clashes** (`KeyClashes`, for everyone): on joining a world, if any two key bindings share a key (e.g. Y: the medallion and the Z-Fighter wheel), a pop-up names up to three clashes and asks to rebind one in Controls. It shows on two joins at most, ever (counted in `config/jaymoskingdoms-key-clashes.txt`); a join with no clash doesn't count. Keys our own mods share on purpose (the class key and the horse trick on J, the Web power's keys over Kingdoms keys, dragon breath on R, a plan's layers on numpad 8 and 2, and the like) are left out while both are on their defaults.
+- The board drops after 15 s with no mark, on death, or when the symbol leaves your hands. Not played in game.
+
+## 0.12.12 (2026-11-24): Guards only see a drawn blade in front of them; sneak right up behind anyone (#2053)
+
+- **The blade stance is seen, not heard**: a guard (or any villager) now reacts to your drawn, crouched sword stance
+  only when it faces you (the view cone `Senses` gives humanoids). Andy's clip: an orc guard with his back to him
+  warned "Halt. Sheathe that blade" the moment he drew. `Menace` checked only a clear line between them, not which way
+  the guard was looking. Drawing a weapon still makes no sound mobs hear.
+- **Sneak up for the takedown**: the two blocks behind a mob where it noticed you anyway now count only while you're
+  walking. Sneaking, you can get right up behind anyone (Andy: "while not sneaking, if you sneak you can get right up
+  for the takedown"). `Senses#close`.
+- Built on CI only; not played.
+
+## 0.12.13 (2026-11-24): Your coin at a glance, and money bags in chests (#2063)
+
+- **Purse icon** (`PurseIcon`, `Money.held`; Andy's pick from Numismatic Overhaul): while a coin purse hangs in the belt slot, the survival inventory shows it beside your figure. Hover it for every coin you carry, currency by currency: Realm Silver, Hacksilver, dinars, shell strings, mon, copper bits, and emeralds, bent copper and pirate gold if you have them. It counts loose coins, every purse (the worn one too) and bundles. With no purse worn there's no icon.
+- **Money bags** (`LootSwap`): about one chest in twelve holds someone's money bag, a coin purse with 2 to 10 emeralds' worth of the coin of the land inside. Where the land's coin can't go in a purse (a greenskin camp's bent copper, a pirate cove's gold), the coins lie loose instead.
+- Built in CI; not played.
+
+## 0.12.14 (2026-11-24): The key clash pop-up comes per key, on its first press (#2065)
+
+- **One key at a time**: the pop-up about keys bound twice no longer lists every clash when you join. The first time in
+  a visit that you press a key two bindings share, it names that key and what's bound to it ("Y is bound twice: Bound
+  to Raise the medallion and Z-Fighter wheel"), and asks to rebind one in Controls. Andy: "the bind clashing tool tip
+  should appear per bind and only when you first press it after you spawn".
+- Each key's pop-up still shows twice at most, ever (counted per key in `config/jaymoskingdoms-key-clashes.txt`; the
+  old single count starts over). Keys our mods share on purpose are still left out. `KeyClashes`.
+- Built on CI only; not played.
+
+## 0.12.15 (2026-11-24): Thick black smoke over the flames; whittling recipes in JEI (#2066)
+
+- **Smoke on the ground**: a big fire now banks thick, near-black smoke right over its flames, on the ground under the
+  trees as well as in a burning canopy. It hardly rises and drifts with the wind, so a burning wood is hidden behind it
+  even seen from outside. Andy's clip: under the trees the flames had no smoke, only a cloud high over the canopy ("the
+  thick black smoke should generate at ground level, right overtop the flames, to show reduced visibility even from
+  outside the fire"). The look now checks each column's ground under the leaves too. `FireSmoke#smother`, tuning
+  (`GROUND_*`) at the top; the plumes and the pall above are unchanged.
+- **Whittling recipes in JEI** on a server (sent with `RecipeSynchronization`; JEI only asks for Minecraft's own).
+- Built on CI only; not played, so the smoke's look hasn't been seen.
+
+## 0.12.16 (2026-11-24): the life aim page is a torn scrap on rough starts, headed by who you are (#2064)
+
+- Andy: "your starting journal entry should resemble a scrap of paper ... only ever a book if you have a start within a
+  town or something less rough. it should also read out your class, heritage, name, and then the reason".
+- The aim page that opens as you land is now a single torn scrap of parchment, burnt dark at its ragged edges (our own
+  texture, `textures/gui/journal/scrap.png`; client `ScrapScreen`, a Done button under it, or Esc) on every road but the
+  town ones. Down on your luck in a rich city, the family farmhand and sworn to a realm (at its keep) keep Minecraft's
+  book page (`LifeAims.BOOK_ROADS`); the cells and the eviction are in a town but rough, so they get the scrap.
+- Both open with a "Who You Are" heading and "You are <name>, a <class> of <heritage> heritage." (no class yet: "of
+  <heritage> heritage, with no calling yet"), then the aim as it read before. The name is the one picked in the
+  creator (the username if none). Lang part `aim-scrap.json`.
+- Still shown on screen only, as since the book left the pack: no item.
+- Built by CI; not played.
+
+## 0.12.17 (2026-11-24): A Truth Cleric prays from a book, not a holy symbol (#2067)
+
+- A Cleric sworn to the Truth uses a book as their medallion: the Book and Quill they now start with instead of the holy symbol, or any blank book (a plain book, or a book and quill with nothing written in it). In either hand it raises the medallion board, a tap casts the bound spell, sneak-tap turns it, the class key works with it, and it counts as the free hand for spells. A blank book and quill held by a Truth Cleric casts instead of opening to write; one with writing in it is an ordinary book. The holy symbol still works for them too.
+- `Clerics.prayerBook` / `Clerics.focus`. Not played in game.
+
+## 0.12.18 (2026-11-24): A captain cuts off and wears your real head, and only orcs always do (#2069)
+
+- Andy ("cedric here duplicated my head?"): a captain who killed a player wore a fresh copy of their head while the real one, cut off in the kill, still lay on the ground. Now he never wears a copy (Andy: "if they wear it, they have to cut it"): at the height of his scene, if the head was cut off and lies loose within 12 blocks he picks it up (it's gone from the ground); if it's still on the player's body there, he cuts it off (the body is drawn headless and what it wore on the head falls off). With neither (no body near, or no Kitchen) he takes no head.
+- Andy: only orcs always take the head ("they see it as a trophy"); any other captain takes it 15% of the time. One who doesn't keeps the head he already wore (or none).
+- `Captains.HEAD_TAKING`, `HEAD_REACH`, `Captains.raised`, `PowersCompat.takeHead`, `KitchenCompat.cutHead`. Built by CI only; not played in game.
+
+## 0.12.19 (2026-11-24): Farms spawn by villages and homes
+
+Andy (2026-11-24, a screenshot of a lone wheat field on a desert shore): "these should spawn near villages or the single homes, they are farms and provide food somewhere, remember the genereation needs a reason". Moog's Voyager Structures' wheat farm, grain bin, haystack, windmill, barn and horse pen (structure tag `jaymoskingdoms:farms_by_homes`) now generate only within 6 chunks of where a village or a lone home or homestead will stand (tag `jaymoskingdoms:farm_neighbours`: `#minecraft:village`, Homesteads, Moog's houses, Grim Kingdoms' cabins and the like). The neighbour is found the way the world places it (its structure set's spread and the land it stands in), so nothing extra is generated to check. Only new chunks change.
+
+## 0.12.20 (2026-11-24): Thick fire smoke starts on the ground, not up at the flames (#2076)
+
+- **Ground smoke on the ground**: the thick black smoke of a big fire now starts just above the ground under the
+  flames, not at the flames' height. A burning canopy's smoke used to start up on the treetops; each column is now
+  walked down through the leaves, logs, air and plants to the forest floor (or the water) and the puffs start there,
+  at most half a block up. Andy: "The large fire thick smoke is still too high, make it start just above ground level,
+  not the flames." `FireSmoke#floorUnder`, `GROUND_LIFT` and `GROUND_DEPTH` at the top. The flames, the grey plumes
+  and the pall above are unchanged. A fire on a roof still smokes from the roof (planks stop the walk down).
+- Built; not played, so the new smoke height hasn't been seen.
+
+## 0.12.21 (2026-11-24): gear talk - folk remark on your Frostborn work and stand-in limbs (#2074)
+
+- **What you wear is noticed** (Andy: "players should get tags for the items / baubles they equip, giving the people they meet different things to refer to them about"). Step 1 of `docs/Gear-Talk-Plan.md`: a scouter in the head slot, Rig limbs, the Rig, "more made than flesh" (3+ pieces), a smith's wooden or iron limb, or a lost limb with nothing fitted.
+- A grown MCA villager within 6 blocks who can see you now and then remarks on the most striking of them in a speech bubble, once per thing (`GearTalk`, kept in their memory of you, so a masked look is remembered apart from your face). "Have a word" then has a talk of its own about it (`TalkBook` ids `gear_*`), with warm, plain and curt answers.
+- 30 reactions picked from the most particular listener down: a Frostborn who sees their people's work on an outsider asks who fitted it, a Frostborn kin is proud of you, a Warrior-born remembers who taught them the stars, a smith wants to look at the joint or offers to forge you iron, someone on a wooden leg of their own is envious or kindred, and timid, greedy, devout, suspicious, kindhearted and spiteful folk each have their own line. Plain folk say "more Frostborn work than flesh"; only the Mad Tinkerer, the future's pilots and the Bio-built say "cyborg". A masked player's blood is never used.
+- Armour or harness over an arm or leg hides the limb, unless the villager is sharp-eyed (1 in 5, the suspicious more often). A lost limb always shows.
+- `PowersCompat` reads Powers' iron and Rig limb masks and how much of the Rig is worn. Lines in `lang/parts/gear-talk.json`.
+- Built and compiled; not played.
+
+## 0.12.22 (2026-11-24): gear talk - folk remark on masks, hoods and the symbiote's suit (#2077)
+
+- Step 2 of `docs/Gear-Talk-Plan.md`: a costume mask, a hood with no mask, and the symbiote's black suit (or its big body) are now among what villagers see on you and remark on. The order is "more made than flesh", then the suit, then a mask, ahead of the Frostborn work and limbs. A hood comes last.
+- A mask marks a vigilante, and folk treat it the way the canon says (Lore.md "Costumes and masks"). The watch wants it off ("Masks off in town."), kind folk thank you if you're one of the good ones, the suspicious ask what you're hiding, the timid fear for their windows, the greedy wonder what your face would fetch, and the hotheaded and proud tell you to go home. The black suit frightens the timid, the devout call it unclean, and the brave won't be cowed. 14 new reactions, each with a bubble and a "Have a word" talk.
+- A costume's suit or the symbiote's covers every limb, so stand-in limbs under it go unseen unless the villager is sharp-eyed. A masked player's blood is still never used, and what folk remember of a masked look is kept apart from your face.
+- `PowersCompat.symbioteSuit` and `costumeShown` read Powers' `WebSymbiote.suitShown`/`bulked` and `Costume.shown`.
+- Built and compiled; not played.
+
+## 0.12.23 (2026-11-24): gear talk - bauble themes, knights and colours, two-tag lines, changes and gossip (#2078)
+
+- Steps 3 to 5 of `docs/Gear-Talk-Plan.md`, finishing Andy's gear talk picks.
+- **Themes from what you wear** (armour slots, harness and baubles), read from item tags `jaymoskingdoms:gear/<theme>` so any mod or datapack can add to them: holy (cross necklace), jewels (gem amulet, circlet, ring, bracelet, golden hook), fae (bottled fairy), sky-made (cloud in a bottle, featherfall cloak, gravitite, zanite, neptune and arkenium armour), beastly (claws, kitty slippers, owl mask), grim (withered bracelet, vampiric glove, obsidian skull, thorn pendant), tradesman (smithing gloves, smelter's bracer, toolbelts, work hats), fool (jester's cap and cushion), lucky (rabbit's foot, lucky scarf, heartstone, totems), brawler (brawler's and thrower belts, iron knuckles, ram bracer, fire gauntlet), delver (delver's ring, diver's circlet, reed breather, flippers).
+- **Knights, colours and rags**: 5 or more pieces of plate make you a knight (gilt plate reads as a lord). A realm's arms on your tabard, or its colours, are read against the listener's realm: their own (welcome, and the watch's nod), an enemy's at war with theirs (anger, and the watch's threat), or another realm's (named in the line). No armour and no harness at all makes you ragged.
+- **Two-tag lines** come before any other: mask with a Frostborn arm, holy sign with a grim charm, jewels with rags, a knight on a stand-in limb, a fool's cap with a realm's arms, a scouter with a fairy.
+- **Changed since last time**: a villager who remarked on something notices when it changes (a stump fitted, wood swapped for a Frostborn limb, a limb lost, a knight in rags, rags turned to plate) and says so.
+- **Gossip ahead of you**: what one villager remarks on, up to 6 neighbours within 32 blocks hear of. When they first see it for themselves, they greet you by your look ("So you're the one with the glass eye. Word gets about."), in their words only, never over your head. Rumours are kept under the name you're known by, so a masked look is never tied to your face. Rumours are not saved over a restart.
+- 49 more reactions with bubbles and "Have a word" talks, 5 change lines, 3 gossip lines and 23 look names (93 reactions in all).
+- Built and compiled; not played.

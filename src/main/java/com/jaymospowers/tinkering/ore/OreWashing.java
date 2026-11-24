@@ -123,6 +123,8 @@ public final class OreWashing {
 	/** After {@link Tinkering#init} (silver). */
 	public static void init() {
 		Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, JaymosPowers.id("hammer_crafting"), HammerRecipe.SERIALIZER);
+		// sent to players so JEI shows it on a server (JEI only asks for minecraft's own)
+		net.fabricmc.fabric.api.recipe.v1.sync.RecipeSynchronization.synchronizeRecipeSerializer(HammerRecipe.SERIALIZER);
 		for (Ore ore : Ore.values()) {
 			ore.crushed = item("crushed_" + ore.id + "_ore");
 			ore.purified = item("purified_" + ore.id + "_ore");
