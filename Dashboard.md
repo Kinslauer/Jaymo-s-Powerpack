@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:30). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:31). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -14,7 +14,6 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 - [[Agents/changeling-voice-mimic|changeling-voice-mimic]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Agents/deck-deploy-watch-1124|deck-deploy-watch-1124]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/project-thread-ojz7uj|project-thread-ojz7uj]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
@@ -78,8 +77,10 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2058 bandages give a short regen; rags fester less (Powers, 2026-11-24)
 - [ ] #2057 The thermometer burns when heat is a danger, and freezes and shakes in the cold (Kitchen, 2026-11-24)
 - [ ] #2056 Three blows on the ground and you're finished (Powers, 2026-11-24)
+- [ ] #2055 A small creature takes one smash from a club (Powers, 2026-11-24)
 - [ ] #2054 Says what hurt you when nobody did (Powers, 2026-11-24)
 - [ ] #2053 Guards only see a drawn blade in front of them; sneak right up behind anyone (Kingdoms, 2026-11-24)
+- [ ] #2052 A small creature is finished with one quick slice (Powers, 2026-11-23)
 - [ ] #2051 Alt in mid air dives: jump + Alt is a dive-roll evade (Powers, 2026-11-23)
 - [ ] #2050 The dodge roll stays above the ground and is half as long; sitting against a wall no longer sinks in (Powers, Kingdoms, 2026-11-23)
 - [ ] #2049 Fishing: read the fish's moods, tire it out, watch your line (Powers, 2026-11-23)
