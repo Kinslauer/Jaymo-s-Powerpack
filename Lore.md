@@ -2224,6 +2224,14 @@ the rite, the march, and lessons in their letters), and from time spent within t
 doesn't make an illager your friend: it only means they can hear you before they swing, and a parley, a bribe or a good
 lie may be enough. Each of them is someone: a name, a temper, a want, and a long memory for a blow.
 
+**The tablets' tongue (new)** (Andy, 2026-11-24: "i want the illagers to speak whatever tounge is uncovered within
+alex's caves"; the rest Claude's placement). The Cave Tablets found in the cabins under the world are written in the
+illager tongue, in the same old letters the evokers point to on the ominous banner. Long before the raiding years, the
+illagers' forebears went down into the deep caves and carved word of what they found there. A scholar at a spelunkery
+table who works out a tablet's words learns where its cave lies and some of the illagers' speech along with it. To anyone
+who knows none of the tongue, an illager's talk is only those glyphs. The more a traveller learns, the more of the words
+come through plain.
+
 **Weather.** The sky can turn black with a sickly green to it before a tornado touches down; barometers and
 weathervanes give warning, and sandstorms, blizzards and hail sweep the land. Seasons turn, and the cold and heat are
 felt.
