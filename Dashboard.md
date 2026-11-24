@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 16:53). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 16:54). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -7,6 +7,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 **Ready to merge** (say "merge" in the project chat):
 - [[Inbox/reference-mods-picklist-2026-11-24|reference-mods-picklist-2026-11-24]] · PR #none · sent
+- [[Inbox/tensura-neo-otherworld-picklist|tensura-neo-otherworld-picklist]] · PR #none · sent
 
 **Questions for you:**
 - [[Inbox/class-trees-plan|class-trees-plan]] · 2026-11-19 20:22 Parked (not for a bot): waits on Andy fleshing out the Monk/Paladin/Cleric/Druid/Warlock trees. Raised; don't raise again.
@@ -21,7 +22,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-43 waiting for a bot, 0 being built, 1 in review: see [[Kanban]].
+42 waiting for a bot, 0 being built, 1 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
