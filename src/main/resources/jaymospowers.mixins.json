@@ -47,6 +47,7 @@
 		"DroppedArmsDeathMixin",
 		"YoungLivingMixin",
 		"KnockApartMixin",
+		"DownedStillMixin",
 		"YoungSpawnMixin",
 		"PiglinStuddedMixin",
 		"ConjoinedTwinSpawnMixin",

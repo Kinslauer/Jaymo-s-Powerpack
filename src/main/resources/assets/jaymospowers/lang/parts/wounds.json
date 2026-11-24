@@ -125,6 +125,8 @@
 	"message.jaymospowers.downed.roused": "The salts sting you awake. You're up!",
 	"message.jaymospowers.downed.knocked_out": "Too much poppy: you're out cold.",
 	"message.jaymospowers.downed.blast_out": "The blast throws you down: you're out cold.",
+	"message.jaymospowers.downed.hit_out": "Struck on the ground: you're out cold.",
+	"message.jaymospowers.downed.burn_out": "The flames take you: you're out cold.",
 	"message.jaymospowers.downed.knocked_rock": "A rock out of nowhere: you're out cold.",
 	"jei.jaymospowers.medicine": "Medicine",
 	"item.jaymospowers.comfrey": "Comfrey",
