@@ -246,6 +246,21 @@ public final class MobCombat {
 	}
 
 	/**
+	 * Andy (2026-11-24): "can you make npcs that attack with two handed weapons use both hands? especially the zombies,
+	 * that would give the slower swing more sense". The pose a humanoid ({@link #humanoid}) holds its two-handed weapon in
+	 * between swings, both hands on it, as a player holds it (Better Combat's pose for that weapon): the client's
+	 * {@code MobAnimations} lays it over the model while no swing plays (the swings themselves are already two-handed).
+	 * Null when it doesn't hold one, or isn't standing (lying downed, sleeping, swimming).
+	 */
+	public static @Nullable String holdPose(Mob mob) {
+		if (!ENABLED || !mob.isAlive() || mob.getPose() != net.minecraft.world.entity.Pose.STANDING
+			&& mob.getPose() != net.minecraft.world.entity.Pose.CROUCHING || !humanoid(mob)) {
+			return null;
+		}
+		return BetterCombatBridge.holdPose(mob.getMainHandItem());
+	}
+
+	/**
 	 * Called every tick its melee goal would attack ({@code MeleeAttackGoal.checkAndPerformAttack}, which then does
 	 * nothing more): starts the next swing of the combo when the target is in reach and the last swing is over.
 	 */
