@@ -16711,3 +16711,13 @@ Andy picked "goblin extras" from the survival pick list (2026-11-22); the Goblin
 ## 0.12.19 (2026-11-24): Farms spawn by villages and homes
 
 Andy (2026-11-24, a screenshot of a lone wheat field on a desert shore): "these should spawn near villages or the single homes, they are farms and provide food somewhere, remember the genereation needs a reason". Moog's Voyager Structures' wheat farm, grain bin, haystack, windmill, barn and horse pen (structure tag `jaymoskingdoms:farms_by_homes`) now generate only within 6 chunks of where a village or a lone home or homestead will stand (tag `jaymoskingdoms:farm_neighbours`: `#minecraft:village`, Homesteads, Moog's houses, Grim Kingdoms' cabins and the like). The neighbour is found the way the world places it (its structure set's spread and the land it stands in), so nothing extra is generated to check. Only new chunks change.
+
+## 0.12.20 (2026-11-24): Thick fire smoke starts on the ground, not up at the flames (#2076)
+
+- **Ground smoke on the ground**: the thick black smoke of a big fire now starts just above the ground under the
+  flames, not at the flames' height. A burning canopy's smoke used to start up on the treetops; each column is now
+  walked down through the leaves, logs, air and plants to the forest floor (or the water) and the puffs start there,
+  at most half a block up. Andy: "The large fire thick smoke is still too high, make it start just above ground level,
+  not the flames." `FireSmoke#floorUnder`, `GROUND_LIFT` and `GROUND_DEPTH` at the top. The flames, the grey plumes
+  and the pall above are unchanged. A fire on a roof still smokes from the roof (planks stop the walk down).
+- Built; not played, so the new smoke height hasn't been seen.
