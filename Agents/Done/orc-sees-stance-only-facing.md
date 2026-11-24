@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: orc-sees-stance-only-facing
 branch: orc-sees-stance-only-facing
 with: 
@@ -23,3 +23,6 @@ owns:
 - Andy's follow-ups: sneaking right behind a mob goes unnoticed (#2053), "Hurt: <cause>" line (#2054), downed die on
   the 3rd weaker blow (#2056), thermometer flames and frost (#2057). All built on CI, none played.
 - "(un)fair fight" rest: finite blood on hits (#2059), near blast knocks out (#2061), adrenaline once incl. going down (#2062); downed mobs on 3 blows too (#2056).
+
+## Notes
+- 2026-11-23 20:54 PR #2053 is merged into master; moved to Agents/Done.
