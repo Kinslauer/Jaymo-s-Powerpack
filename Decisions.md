@@ -953,3 +953,8 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Applies to:** Otherworld research; target clarification pending, assumed existing 26.3 pack.
 - **Agent:** otherworld-fabric-picklist
 
+
+### 2026-11-24: Reference mods are Andy's own creations
+- **Decided:** "yes they were made with claude and gpt" in response to whether Amber Age and Symbiote are his mods. Reuse of his supplied code and art is authorized for the requested integration. Andy then asked "are you working?"; implementation has started in separate Venom-head and Verdant-dinosaur tracks.
+- **Applies to:** Dino-26.3-1.2.0.jar and symbiote-1.20.1-1.0.1.jar. Venom head only, dinosaurs on Verdant.
+- **Agent:** codex-reference-dinos-venom.
