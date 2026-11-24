@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-24 14:38
+updated: 2026-11-24 15:33
 ---
 # Open PRs
 
-11 open, as of 2026-11-24 14:38. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+4 open, as of 2026-11-24 15:33. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2071](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2071) One cobblestone crafts back into 4 stone rocks
@@ -16,47 +16,12 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 5 passed
 - **Agent:** no agent note
 
-## [#2080](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2080) The big suit's head is new: a long-muzzled, fanged head with glowing eyes
-- **Branch:** `t3/venom-head-adaptation` · **Updated:** 2026-11-24 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** [[venom-head-adaptation]]
-
-## [#2083](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2083) Felled by a leg blow: ragdoll, then prone, roll to get up (Powers)
-- **Branch:** `claude/leg-blow-knockdown` · **Updated:** 2026-11-24 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** no agent note
-
-## [#2085](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2085) Structures need a reason: mines by buyers, stables by towns, watchtowers on borders, ruins with heirs (Kingdoms)
-- **Branch:** `claude/placement-reasons` · **Updated:** 2026-11-24 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** no agent note
-
-## [#2086](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2086) Blasts blow limbs off the downed (Powers)
-- **Branch:** `claude/downed-blast-limbs` · **Updated:** 2026-11-24 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** no agent note
-
-## [#2087](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2087) Bandit camps by the trade roads (Kingdoms)
-- **Branch:** `claude/bandit-camps-roads` · **Updated:** 2026-11-24 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** no agent note
-
-## [#2090](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2090) Villagers seen at their jobs: tools, forge, stove, butcher at the hook
-- **Branch:** `claude/villagers-visible-jobs` · **Updated:** 2026-11-24 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** no agent note
-
-## [#2092](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2092) Fishing extras: spooking, solid or light hooks, leaps, turning runs, clean landings, a line that hangs (Powers)
-- **Branch:** `claude/fishing-extras` · **Updated:** 2026-11-24 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** no agent note
-
-## [#2094](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2094) Sky, light and air: embers, scorch, lava crust, leaves on water, shooting stars, far fireworks, coloured light
-- **Branch:** `claude/sky-light-air` · **Updated:** 2026-11-24 (today)
-- **Checks:** ✅ 5 passed
-- **Agent:** no agent note
-
 ## [#2096](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2096) The red symbiote's slender body; taken humanoids fight in the strain's body; the red one hunts (draft)
 - **Branch:** `claude/red-symbiote-body` · **Updated:** 2026-11-24 (today)
-- **Checks:** ⏳ 4 of 4 running
+- **Checks:** ✅ 5 passed
 - **Agent:** [[red-symbiote-body]]
+
+## [#2099](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2099) Verdant dinosaurs and dodo
+- **Branch:** `t3/implement-verdant-dinosaurs` · **Updated:** 2026-11-24 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** [[implement-verdant-dinosaurs]]

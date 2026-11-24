@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Venom head only, adapted to our existing symbiote (child of codex-reference-dinos-venom)
 branch: t3/venom-head-adaptation
 with: codex-reference-dinos-venom (parent), dinosaur track (separate)
@@ -44,3 +44,4 @@ PR #2080 (first push b656f1168a; follow-up 5131a0593f at Andy's request: "the he
 - Tongue: the original's segments, in the jaw, shot out on WebHulk.flick (every 140 ticks per wearer, 12-tick flick, then the pause; licks after a meal); the old drawn-on big-body tongue (WebHulk.submitTongue) is removed.
 - Previews, in `E:/Jaymo Vault Live/Assets/`: bighead-fullbody.png (true colours), bighead-fullbody-lifted.png, bighead-heads.png / -lifted.png (original | old | new), bighead-tongue.png (in / out / back, front and side), bighead-tongue.gif (one flick + the pause). All made by tools/preview_bighead.py from the generated Java and the real textures.
 Not checked: any game run (glow, head pose while crawling/climbing/executions, tongue in motion, SCALE/OFFSET constants; the preview stands the body straight, the game bends elbows and knees). Lore.md has a `(new)` paragraph "Its own face" for Andy to approve. Decisions.md left to the parent.
+- 2026-11-24 15:33 PR #2080 is merged into master; moved to Agents/Done.

@@ -36,5 +36,5 @@ terrain for pursuit and releasing every ticket when the hunt ends. Movement feel
 - Question for Andy: a red host wastes away in 20-90 s today, too short for a 500-block hunt. Default taken: while it hunts it wastes far slower, and each kill (fed on as a corpse) buys it more time.
 
 ## Done
-(pending)
-- 2026-11-24 15:22 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+PR #2096 (draft, stacks on #2080). The red strain wears the slender body (from Andy's jar) wherever the big body would be; both bodies wear a crown of tendrils + strands off the back/shoulders; red: deep hunch, rears with tendrils high while they work, pounces, weapon arm grows from the forearm, skitters on the ground at a run, walls walked from its own roots; black: wide low crouch when upright. Taken humanoids are drawn in their strain's body. Red mob hosts hunt within 500 blocks with bounded chunk tickets; black/white lash and slam only for their needs and drop a mob for a symbiote-less web slinger. Review workflow: 2 confirmed bugs, both fixed. Lore (new) paragraph "The red one's own shape, and its hunt"; Decisions.md entry added.
+Not tested in game: anything in motion, hunt/tickets, taken mobs' held items/armour, WebSuitWrapLayer and WebSymbioteHand still big-body sized, red web slingers don't hunt (only mob hosts).
