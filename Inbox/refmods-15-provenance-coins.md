@@ -26,3 +26,6 @@ Owns: powers item component, kingdoms economy.
 - **G6 Your own shop stall** (Numismatic Overhaul, size M). A stall you set prices on; villagers and players buy from it while you're gone. We have: Shifting Wares, villager trades.
 - **G7 A strongbox at home** (Numismatic Overhaul, size S). A locked coin box; thieves go for it. We have: Inbox: realm-banks-finish.
 - **G8 Transmutation, the alchemist's last art** (Equivalent Exchange (FTB), size L). No duplicating: at the top of Alchemy, transmute one material into another of equal worth at a heavy cost, with a philosopher's stone as the goal of a long quest. We have: Your call: it cuts across the economy and progression gates.
+
+## Notes
+- 2026-11-24 18:01 2026-11-24 Andy: "finish here": cloud Claude finishes this in thread cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR; bots leave it.
