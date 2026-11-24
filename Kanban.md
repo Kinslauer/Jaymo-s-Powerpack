@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:41). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:44). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -36,6 +36,7 @@ kanban-plugin: board
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Agents/gravity-magnetism|gravity-magnetism]] · 💻 Odysseus · running
 - [ ] [[Agents/village-mods-5|village-mods-5]] · 💻 Odysseus · running
+- [ ] [[Agents/waterskin-redesign|waterskin-redesign]] · 💻 Odysseus · running
 
 
 ## In review
