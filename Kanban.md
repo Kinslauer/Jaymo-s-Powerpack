@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 21:53). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 21:58). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -38,7 +38,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Agents/truth-prayer-book|truth-prayer-book]] · 💻 Odysseus · #2067 · running
 
 
 ## In review
