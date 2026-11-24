@@ -306,6 +306,18 @@ public final class WebSymbiote {
 	 * told to your client; it's renewed while the takeover lasts.
 	 */
 	public static final double TAKEOVER_ESCAPE = 64.0;
+	/**
+	 * The red one's hunts, fought from inside (Andy, 2026-11-24: "only after achieving 30 or higher bond, you have to fight
+	 * the hunts off as more powerful takeovers till then"): a web slinger bonded to the red strain under {@code RED_HUNT_BOND}
+	 * (of {@link #BOND_MAX}) is, at a takeover check with nothing near to tear into, seized {@code RED_FAR_HUNT_CHANCE} of the time
+	 * and driven in the slender body after the nearest living thing within WebRedHunt's range (500 blocks, anything loaded;
+	 * their own body loads the ground they run over, so no tickets are held). It ends as any takeover does (its prey dead
+	 * and fed on, or broken free of), its prey gets past that range, the bond reaches {@code RED_HUNT_BOND}, or after
+	 * {@code RED_HUNT_MAX} ticks at the most, so it can never hold anyone for good. It's a stronger hold: each struggle counts
+	 * only {@code RED_HUNT_STRUGGLE} of a press.
+	 */
+	public static final int RED_HUNT_BOND = 30, RED_HUNT_MAX = 3600;
+	public static final float RED_FAR_HUNT_CHANCE = 0.12F, RED_HUNT_STRUGGLE = 0.5F;
 	public static final int TAKEOVER_LIMIT = 1200;
 	public static final int TAKEOVER_RELIEF = 20;
 	/** The hold is told to the client again this many ticks before it would run out. */
@@ -1092,6 +1104,9 @@ public final class WebSymbiote {
 		boolean engulfed;
 		/** (0.15.69) This takeover (and the gift after it) is in the big body: rolled as it starts (see {@link #BIG_TAKEOVER_CHANCE}). */
 		boolean bigTakeover;
+		/** A red hunt seized from inside ({@link #RED_HUNT_BOND}), and when it must let go at the latest (game time). */
+		boolean redHunt;
+		long redHuntUntil;
 		boolean suitBeforeTakeover;
 		/** Living Armor: when it came out, and when it was last used (see ARMOR_IDLE_TICKS). */
 		long armorOnAt;
@@ -1913,6 +1928,9 @@ public final class WebSymbiote {
 				LivingEntity hurt = strain == WebSymbioteStrain.WHITE && !live.gorging && !sulking(player) ? WebSymbioteStrains.mostHurt(player) : null;
 				LivingEntity blood = strain == WebSymbioteStrain.RED && !live.gorging && !sulking(player)
 					&& player.getRandom().nextFloat() < WebSymbioteStrains.RED_HUNT_CHANCE ? prey(player, true) : null;
+				// (the red one, bonded under RED_HUNT_BOND: nothing near, it goes hunting far, and you're carried along)
+				LivingEntity far = blood == null && strain == WebSymbioteStrain.RED && next.bond() < RED_HUNT_BOND && !live.gorging && !sulking(player)
+					&& player.getRandom().nextFloat() < RED_FAR_HUNT_CHANCE ? WebRedHunt.nearest(player.level(), player) : null;
 				if (hurt != null && player.getRandom().nextFloat() < Math.max(neglect, WebSymbioteStrains.MEND_CHANCE)) {
 					// the white one: it takes the wheel to mend someone, never to tear into anything
 					startMending(player, live, now, hurt);
@@ -1924,6 +1942,19 @@ public final class WebSymbiote {
 					live.bloodlust = true;
 					startTakeover(player, live, now, blood);
 					live.bloodlust = live.takeoverTicks > 0;
+				} else if (far != null) {
+					// the red one's hunt, from inside: in its own shape, after something far off (RED_HUNT_BOND)
+					live.rampage = true;
+					live.curious = false;
+					live.feral = false;
+					live.bloodlust = true;
+					startTakeover(player, live, now, far);
+					live.bloodlust = live.takeoverTicks > 0;
+					live.redHunt = live.takeoverTicks > 0;
+					if (live.redHunt) {
+						live.bigTakeover = true;
+						live.redHuntUntil = now + RED_HUNT_MAX;
+					}
 				} else if (strain != WebSymbioteStrain.WHITE && neglect > 0.0F && player.getRandom().nextFloat() < neglect) {
 					// ignored too long: it does it its own way, tearing into whatever's near
 					live.rampage = false;
@@ -2721,6 +2752,7 @@ public final class WebSymbiote {
 		live.spree = false;
 		live.mending = false;
 		live.bloodlust = false;
+		live.redHunt = false;
 		live.rivalry = false;
 		live.protecting = false;
 		player.removeAttached(SPREE);
@@ -2961,7 +2993,8 @@ public final class WebSymbiote {
 			}
 			return;
 		}
-		live.struggle += 1.0F;
+		// (the red hunt's hold is stronger: RED_HUNT_STRUGGLE)
+		live.struggle += live.redHunt ? RED_HUNT_STRUGGLE : 1.0F;
 		syncStruggle(player, live);
 		if (live.struggle >= needed) {
 			breakFree(player, live, now, false);
@@ -3688,7 +3721,12 @@ public final class WebSymbiote {
 			return;
 		}
 		// it lets go once its prey is dead (and, if it's hungry, eaten), or has got clean away; never on a timer
-		if (target == null || !target.isAlive() || target.distanceTo(player) > TAKEOVER_ESCAPE) {
+		if (live.redHunt && (now >= live.redHuntUntil || state(player).bond() >= RED_HUNT_BOND) && live.feedStage == FEED_NONE) {
+			// the red hunt runs out (it can't hold anyone for good), or the bond has grown past it
+			endTakeover(player, live);
+			return;
+		}
+		if (target == null || !target.isAlive() || target.distanceTo(player) > (live.redHunt ? WebRedHunt.RANGE : TAKEOVER_ESCAPE)) {
 			boolean dead = target != null && !target.isAlive();
 			if (dead && live.hunting && live.feedStage == FEED_KILL) {
 				// the hunt's kill: on to the corpse, still at the wheel

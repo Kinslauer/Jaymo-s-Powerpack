@@ -167,6 +167,28 @@ public final class WebRedHunt {
 		}
 	}
 
+	/**
+	 * The nearest prey within range for a web slinger the red one has seized (WebSymbiote#RED_HUNT_BOND): anything living
+	 * and loaded but themselves, a player who can't be hurt, a stand or another symbiote of the red's own.
+	 */
+	static @Nullable LivingEntity nearest(ServerLevel level, net.minecraft.server.level.ServerPlayer hunter) {
+		LivingEntity best = null;
+		double bestDistance = RANGE * RANGE;
+		for (Entity entity : level.getAllEntities()) {
+			if (entity instanceof LivingEntity living && entity != hunter && living.isAlive()
+				&& !(living instanceof net.minecraft.world.entity.decoration.ArmorStand)
+				&& !(living instanceof net.minecraft.world.entity.player.Player p && (p.isCreative() || p.isSpectator()))
+				&& WebSymbioteStrains.of(living) != WebSymbioteStrain.RED) {
+				double d = living.distanceToSqr(hunter);
+				if (d < bestDistance) {
+					best = living;
+					bestDistance = d;
+				}
+			}
+		}
+		return best;
+	}
+
 	/** The nearest prey within range: anything living it may hunt, anywhere loaded in its world. */
 	private static @Nullable LivingEntity nearest(ServerLevel level, Mob host) {
 		LivingEntity best = null;
