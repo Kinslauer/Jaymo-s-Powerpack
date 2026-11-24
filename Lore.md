@@ -2194,7 +2194,7 @@ moles, great boring engines for copper and iron. As the world is retaken the pil
 holds, and the rest stand empty until other people find them. **Greenskins** took the works: orcs run the smeltery and
 the extractor, and goblins crew the moles, still digging copper and iron from under the hills (the deep mole most of
 all). **Bandits**, masked outlaws of the common folk, hold the camps, the empty carts and the towers no realm has
-reached; where a realm is near, its own soldiers hold those towers for the road. **Pirates** took the galleon, the
+reached; where a realm is near, its own soldiers hold those towers for the road. (new; Claude's placement for the bandit camps by the roads, 2026-11-24, for Andy to approve) Where the trade roads run long between two towns and no tower watches them, a band of them pitches its tents in a clearing in the trees within sight of the road, and lives off what passes. **Pirates** took the galleon, the
 citadel, the lookout balloon and the icebound outposts, and keep captives there. **Smugglers**, the underworld's
 runners, keep to the stable, the floating outpost, the shipyard and the small boats: they let a stranger be until he
 touches their goods, and every den of theirs has a fence. **Barbarians** pitched in the tipis. The monastery, its tower
