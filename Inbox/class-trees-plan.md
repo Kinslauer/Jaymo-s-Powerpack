@@ -180,3 +180,4 @@ Each starts with a small class-key move; the tree has the rest.
 
 ## Notes
 - 2026-11-19 20:22 Parked (not for a bot): waits on Andy fleshing out the Monk/Paladin/Cleric/Druid/Warlock trees. Raised; don't raise again.
+- 2026-11-24 17:56 2026-11-24 Class trees patches 1-8 on master since 2026-11-17 (Monk/Paladin patch 6, Cleric/Druid/Warlock patch 7, extras patch 8), plus #1978. Andy: close.
