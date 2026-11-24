@@ -230,6 +230,13 @@ public final class Spellcraft {
 		}
 	}
 
+	/** A focus casts {@code spell} (one of its holder's), not the one it is turned to: a Cleric's medallion board ({@link MedallionBoard}). */
+	static void castFocus(ServerPlayer player, ServerLevel level, ItemStack focus, String spell) {
+		if (ClassCasters.caster(player)) {
+			castStaff(player, level, focus, spell);
+		}
+	}
+
 	/** Turns a focus to the next spell its holder knows. */
 	static void turnFocus(ServerPlayer player) {
 		if (ClassCasters.caster(player)) {
@@ -280,7 +287,10 @@ public final class Spellcraft {
 	}
 
 	private static void castStaff(ServerPlayer player, ServerLevel level, ItemStack staff) {
-		String spell = Classes.of(player).spell();
+		castStaff(player, level, staff, Classes.of(player).spell());
+	}
+
+	private static void castStaff(ServerPlayer player, ServerLevel level, ItemStack staff, String spell) {
 		if (spell.isEmpty() || ElementSpells.lanceKey(player)) {
 			return;
 		}

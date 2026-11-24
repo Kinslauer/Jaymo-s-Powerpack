@@ -61,6 +61,10 @@ public final class Clerics {
 	private static final Map<Mob, long[]> FLEEING = new HashMap<>();
 	private static final Map<UUID, Long> BLESSED = new HashMap<>();
 	private static final Map<UUID, Boolean> RAISING = new HashMap<>();
+	/** Turn Undead said from the medallion board: the Cleric and when the turning ends. */
+	private static final Map<UUID, Long> BOARD_TURNING = new HashMap<>();
+	/** How long Turn Undead said from the board turns the dead (ticks). */
+	static final int BOARD_TURN_TICKS = 60;
 
 	private Clerics() {
 	}
@@ -75,6 +79,7 @@ public final class Clerics {
 		FLEEING.clear();
 		BLESSED.clear();
 		RAISING.clear();
+		BOARD_TURNING.clear();
 	}
 
 	/** A new Cleric swears to the patron they picked (their favour a devout beginning's), and the symbol's making is taught by a priest. */
@@ -207,6 +212,18 @@ public final class Clerics {
 				}
 			}
 		}
+		if (!BOARD_TURNING.isEmpty() && server.getTickCount() % TURN_EVERY == 0) {
+			Iterator<Map.Entry<UUID, Long>> turning = BOARD_TURNING.entrySet().iterator();
+			while (turning.hasNext()) {
+				Map.Entry<UUID, Long> e = turning.next();
+				ServerPlayer player = server.getPlayerList().getPlayer(e.getKey());
+				if (player == null || !player.isAlive() || !(player.level() instanceof ServerLevel level) || level.getGameTime() >= e.getValue()) {
+					turning.remove();
+					continue;
+				}
+				turn(player, level);
+			}
+		}
 		if (!BLESSED.isEmpty() && server.getTickCount() % 40 == 0) {
 			long now = server.overworld().getGameTime();
 			BLESSED.values().removeIf(until -> until <= now);
@@ -238,7 +255,7 @@ public final class Clerics {
 	}
 
 	/** Every friend near {@code player} is blessed: warded, steadied, a fright lifted. */
-	static void bless(ServerLevel level, ServerPlayer player) {
+	static List<LivingEntity> bless(ServerLevel level, ServerPlayer player) {
 		ClassTrees.give(player, PlayerClass.CLERIC, ClassTrees.XP_BLESS);
 		long until = level.getGameTime() + BLESS_TICKS;
 		int tier = Patrons.state(player).tier();
@@ -261,6 +278,28 @@ public final class Clerics {
 		}
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1.0F, 1.3F);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 1.0F);
+		return band;
+	}
+
+	/** Bless the Band said from the medallion board ({@link MedallionBoard}): known there without the tree's perk; a turning spent. */
+	static void boardBless(ServerPlayer player, ServerLevel level) {
+		if (!Rests.spend(player, Rests.CHANNEL, 1, channels(player))) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.cleric.silent"));
+			return;
+		}
+		bless(level, player);
+	}
+
+	/** Turn Undead said from the medallion board: a turning spent, and the dead before the Cleric turned for {@link #BOARD_TURN_TICKS}. */
+	static void boardTurn(ServerPlayer player, ServerLevel level) {
+		if (!Rests.spend(player, Rests.CHANNEL, 1, channels(player))) {
+			player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.cleric.silent"));
+			return;
+		}
+		Litany.raised(player);
+		BOARD_TURNING.put(player.getUUID(), level.getGameTime() + BOARD_TURN_TICKS);
+		Fx.ring(level, player.position().add(0.0, 0.1, 0.0), (float) TURN_RANGE * 0.6F, colour(player));
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8F, 1.6F);
 	}
 
 	/** The share a blessing adds to {@code who}'s every save ({@link Saves}). */

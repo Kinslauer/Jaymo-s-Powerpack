@@ -127,7 +127,12 @@ public final class Litany {
 
 	/** Sneak and the key with the symbol: Sanctify. */
 	static void sanctify(ServerPlayer cleric) {
-		if (!ClassTrees.check(cleric, SANCTIFY)) {
+		sanctify(cleric, false);
+	}
+
+	/** Sanctify; from the medallion board ({@code board}) it is known without the tree's perk. */
+	static void sanctify(ServerPlayer cleric, boolean board) {
+		if (!board && !ClassTrees.check(cleric, SANCTIFY)) {
 			return;
 		}
 		if (!Rests.spend(cleric, Rests.CHANNEL, 1, Clerics.channels(cleric))) {
