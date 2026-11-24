@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 13:06). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 13:11). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -60,18 +60,16 @@ kanban-plugin: board
 - [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · ☁️ Cloud · #research · claimed
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · ☁️ Cloud · claimed
-- [ ] [[Inbox/realm-banks-finish|realm-banks-finish]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/refmods-12-fishing|refmods-12-fishing]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/refmods-14-sky-light-air|refmods-14-sky-light-air]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/refmods-15-provenance-coins|refmods-15-provenance-coins]] · ☁️ Cloud · claimed
 - [ ] [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]] · 💻 Odysseus · running
 - [ ] [[Agents/implement-verdant-dinosaurs|implement-verdant-dinosaurs]] · 💻 Odysseus · running
-- [ ] [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]] · 💻 Odysseus · running
 
 
 ## In review
 
-- [ ] [[Inbox/downed-knockout-three-hits|downed-knockout-three-hits]] · ☁️ Cloud · #2079 · in-review
+- [ ] [[Inbox/realm-banks-finish|realm-banks-finish]] · ☁️ Cloud · #2082 · in-review
 - [ ] [[Agents/venom-head-adaptation|venom-head-adaptation]] · 💻 Odysseus · #2080 · in-review
 
 
@@ -80,6 +78,7 @@ kanban-plugin: board
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
 - [ ] [[Inbox/wither-model|wither-model]] · 🍇 Bacchus · blocked
+- [ ] [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]] · 💻 Odysseus · stalled
 
 
 ## Done
