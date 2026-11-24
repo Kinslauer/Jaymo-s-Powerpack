@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: running
 task: Inbox/village-mods-5-town-life-hats.md
 branch: claude/village-mods-5
 with: 
@@ -8,6 +8,9 @@ mods: kingdoms, powers
 versions: 
 started: 2026-11-24
 owns:
+  - src/main/java/com/jaymospowers/baubles/TradeHats.java (new), Baubles.java (one init line)
+  - src/client/java/com/jaymospowers/client/baubles/TradeHatLayer.java (new), BaublesClient.java, mixin/BackpackAvatarRendererMixin.java (one line each)
+  - Powers hat assets, assets/minecraft/atlases/items.json, tags/item/baubles/head.json, lang/parts/trade_hats.json, docs/licenses/Villager-Hats-MIT.txt
   - kingdoms/src/main/java/com/jaymoskingdoms/ new classes for patch 5 (gift house, town doings page, signature goods, pilgrim, trade hats)
   - small edits in Commissions, Homesteads, TownTrades, Careers, Tailors, Tale (as needed; listed in the PR)
   - lang parts for patch 5 (new files)
@@ -27,4 +30,3 @@ come from, and a small friendliness bonus for wearing your trade's hat.
 - 
 
 ## Done
-- 2026-11-24 18:18 No sign of work for 30 min: marked stalled (whoever ran it stopped).

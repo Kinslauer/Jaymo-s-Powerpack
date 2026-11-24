@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: paused
 task: Keep-world deploy of current origin/master to the Deck, then watch latest.log; fix crashes in PRs, merge on green CI, redeploy (Andy, 2026-11-24)
 branch: 
 with: local desktop session (PC)
@@ -19,3 +19,4 @@ owns:
 
 ## Done
 - 2026-11-24 18:18 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-24 6:20 PM: not stalled. The deploy was building Kingdoms (~45 min cold on the PC) when Claude Code killed it for low memory. Nothing reached the Deck. Hermes was left suspended; resumed by hand. Waiting on Andy to rerun.
