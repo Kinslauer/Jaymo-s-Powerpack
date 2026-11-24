@@ -853,6 +853,10 @@ public final class Downed {
 		entity.setAttached(DOWNED, level.getGameTime() << 1 | (crawler ? 1L : 0L));
 		entity.removeAttached(WOUNDS);
 		entity.removeAttached(OUT);
+		if (!keepHealth && entity instanceof ServerPlayer player) {
+			// going down is a rush of adrenaline, if it hasn't had one lately (a knock-out isn't)
+			Adrenaline.wentDown(player);
+		}
 		entity.addTag(DOWNED_TAG);
 		entity.removeTag(REVIVE_TAG);
 		if (source != null) {

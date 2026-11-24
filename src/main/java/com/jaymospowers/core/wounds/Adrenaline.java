@@ -17,6 +17,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -33,8 +34,8 @@ import java.util.Set;
  * <li>with their head or body (the parts that down or kill when they run out) at or under {@link #NEAR_DEATH} of whole, or</li>
  * <li>downed (one hard blow from death),</li>
  * </ul>
- * has adrenaline for {@link #TICKS} from that hit (each such hit starts it afresh). Going down gives it too: the downed
- * state's own first rush ({@link Downed#adrenaline}) counts. While it lasts, broken arms, legs and feet hinder nothing:
+ * has adrenaline for {@link #TICKS} from that hit (each such hit starts it afresh). Going down gives it too ({@link #wentDown};
+ * a mob's, the downed state's own first rush, {@link Downed#adrenaline}). While it lasts, broken arms, legs and feet hinder nothing:
  * <ul>
  * <li>they sprint, and two broken legs stand instead of crawling ({@link Breaks#crawlOnly});</li>
  * <li>broken arms swing, dig, hold a shield and draw a bow at full strength ({@link Breaks#armBroken}, {@link Breaks#apply}),
@@ -137,10 +138,15 @@ public final class Adrenaline {
 		}
 	}
 
-	/** Whether {@code entity} has adrenaline now (both sides): from a hit, or the first rush of going down. */
+	/**
+	 * Whether {@code entity} has adrenaline now (both sides): from a hit or from going down ({@link #UNTIL}), or a mob's
+	 * first rush of going down. A player's going down is a kick like a hit's ({@link #wentDown}), under the same
+	 * {@link #COOLDOWN}: Andy's clip had it rush on a hit, then again as he went down ("andrenaline should have only
+	 * kicked in once").
+	 */
 	public static boolean active(Entity entity) {
 		Long until = entity.getAttached(UNTIL);
-		return until != null && entity.level().getGameTime() < until || Downed.adrenaline(entity);
+		return until != null && entity.level().getGameTime() < until || !(entity instanceof Player) && Downed.adrenaline(entity);
 	}
 
 	/** Whether {@code player}, just hit by {@code source}, is low enough for it to kick in. */
@@ -165,6 +171,21 @@ public final class Adrenaline {
 		if (!player.isAlive() || player.isCreative() || player.isSpectator() || !Downed.attack(source) || !low(player)) {
 			return;
 		}
+		kick(player);
+	}
+
+	/**
+	 * From {@link Downed}: {@code player} just went down. Going down gives the rush, as a hit leaves them low does, at
+	 * most once in {@link #COOLDOWN}; one already running keeps on as it is.
+	 */
+	static void wentDown(ServerPlayer player) {
+		if (!player.isCreative() && !player.isSpectator()) {
+			kick(player);
+		}
+	}
+
+	/** Adrenaline kicks in for {@code player}, unless it's running already or kicked in less than {@link #COOLDOWN} ago. */
+	private static void kick(ServerPlayer player) {
 		long now = player.level().getGameTime();
 		Long until = player.getAttached(UNTIL);
 		Long ready = player.getAttached(READY);
