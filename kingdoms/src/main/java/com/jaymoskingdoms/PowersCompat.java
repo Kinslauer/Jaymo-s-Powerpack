@@ -910,8 +910,8 @@ public final class PowersCompat {
 	private static final java.util.Set<String> SPRINT_LOOKED = new java.util.HashSet<>();
 
 	/**
-	 * (Powerborne picks) A heritage's sprint + heritage key move in Jaymo's Powers: {@code className.method(ServerPlayer)}
-	 * returns true if it took the key. False without Powers or if the class isn't there.
+	 * (Powerborne picks) A heritage's sprint + heritage key move in Jaymo's Powers (or any other heritage-key move there, such
+	 * as a Verdant's regrowth): {@code className.method(ServerPlayer)} returns true if it took the key. False without Powers or if the class isn't there.
 	 */
 	public static boolean sprintMove(String className, String method, net.minecraft.server.level.ServerPlayer player) {
 		String name = className + "#" + method;
