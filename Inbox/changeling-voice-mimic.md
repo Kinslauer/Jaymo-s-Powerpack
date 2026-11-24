@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: any
 from: coordinator
 asked: 2026-11-24
 thread: Hermes Training (cloud vault coordinator)
-claimed_by: changeling-voice-mimic
+claimed_by: 
 pr: 
 suggested_owns:
   - kingdoms new ChangelingVoices.java (Simple Voice Chat server plugin, beside VoiceRange.java)
@@ -21,3 +21,6 @@ clips of each player's real mic audio (in memory only, never saved to disk, neve
 kidnapper play a clip of a friend's voice as locational audio from its position to lure a lone player. Silent when voice
 chat is not installed or the friend never spoke. Players opted out of voice chat are never recorded. Change note under
 changes/kingdoms/<branch>.md.
+
+## Notes
+- 2026-11-24 13:21 changeling-voice-mimic's claim had no sign of work for 30 min: handed back as open.

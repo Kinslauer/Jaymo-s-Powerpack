@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: Reference mod compatibility assessment
 branch:
 pr:
@@ -15,3 +15,6 @@ Checked both jar metadata and asset listings. Amber Age 1.2.0 targets Forge 66 a
 
 ## Implementation started
 Andy confirmed ownership. Two isolated Claude Sonnet implementation tracks started under the repo parallel-track rule: Venom head only and Verdant dinosaurs. Parent coordinates and reviews; child notes claim implementation files. Source location asked; jar recovery can proceed.
+
+## Notes
+- 2026-11-24 13:21 No sign of work for 30 min: marked stalled (whoever ran it stopped).
