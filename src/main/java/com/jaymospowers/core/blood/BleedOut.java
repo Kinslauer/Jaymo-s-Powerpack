@@ -110,6 +110,29 @@ public final class BleedOut {
 	}
 
 	/**
+	 * Takes up to {@code amount} (stain size) of living {@code body}'s blood for the stains it spills: a blow's spray, a
+	 * cut's drip, a dragged smear. Returns how much it had to give; none once it's dry. Andy, of a downed body hacked at on
+	 * the ground: "if there is still finite blood, that seemed to be way more than could fit in one body". On its feet it
+	 * makes it back as any loss ({@link #REFILL_TICKS}).
+	 */
+	public static float spill(LivingEntity body, float amount) {
+		if (amount <= 0.0F || body instanceof Player p && (p.isCreative() || p.isSpectator())) {
+			return Math.max(amount, 0.0F);
+		}
+		float left = left(body);
+		float took = Math.min(amount, left);
+		if (took > 0.0F) {
+			body.setAttached(LEFT, left - took);
+		}
+		return took;
+	}
+
+	/** Whether living {@code body} has bled itself dry: no more blood to spray or drip. */
+	public static boolean dry(LivingEntity body) {
+		return left(body) <= 0.01F;
+	}
+
+	/**
 	 * {@code dead} has a body now, {@code corpse}: if it died bleeding (downed, with open cuts, or bloodied by its last
 	 * blows) the blood it still had pours out of the corpse.
 	 */
