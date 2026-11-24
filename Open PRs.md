@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-23 20:04
+updated: 2026-11-23 20:05
 ---
 # Open PRs
 
-5 open, as of 2026-11-23 20:04. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+5 open, as of 2026-11-23 20:05. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2053](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2053) Guards only see a drawn blade in front of them; sneak right up behind anyone (Kingdoms)
@@ -28,5 +28,5 @@ Andy merges only on "merge", one at a time.
 
 ## [#2057](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2057) Thermometer burns in dangerous heat, freezes and shakes in the cold (Kitchen)
 - **Branch:** `thermometer-flames-frost` · **Updated:** 2026-11-24 (today)
-- **Checks:** ⏳ 4 of 4 running
+- **Checks:** ⏳ 2 of 4 running
 - **Agent:** no agent note
