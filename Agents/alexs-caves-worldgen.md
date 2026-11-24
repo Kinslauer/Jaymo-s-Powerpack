@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Inbox/alexs-caves-integration
 branch: claude/project-thread-dzutw2
 with: cloud Claude (Reason Art project thread "Integrate Alex's Caves")
