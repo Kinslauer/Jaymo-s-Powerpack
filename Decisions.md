@@ -979,3 +979,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Agent:** claude-cloud.
 
 - 2026-11-24 (Andy, Vanilla+ patch I card): King's Roads already lays settlement roads, so patch I becomes "Also link a realm's towns": besides its nearest neighbours, every town in a realm gets a road to its capital.
+- 2026-11-24 (Andy, illager tongue): illagers speak the tongue uncovered in Alex's Caves: unknown words in the Cave Tablets' glyphs (minecraft:alt), and translating a tablet at a Spelunkery Table teaches it (PR #2098, merged). Lore "The tablets' tongue" approved.
