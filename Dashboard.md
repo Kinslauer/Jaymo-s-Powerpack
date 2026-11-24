@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 16:51). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 16:55). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -70,8 +70,10 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2058 bandages give a short regen; rags fester less (Powers, 2026-11-24)
 - [ ] #2057 The thermometer burns when heat is a danger, and freezes and shakes in the cold (Kitchen, 2026-11-24)
 - [ ] #2056 Three blows on the ground and you're finished (Powers, 2026-11-24)
+- [ ] #2055 A small creature takes one smash from a club (Powers, 2026-11-24)
 - [ ] #2054 Says what hurt you when nobody did (Powers, 2026-11-24)
 - [ ] #2053 Guards only see a drawn blade in front of them; sneak right up behind anyone (Kingdoms, 2026-11-24)
+- [ ] #2052 A small creature is finished with one quick slice (Powers, 2026-11-23)
 - [ ] #2051 Alt in mid air dives: jump + Alt is a dive-roll evade (Powers, 2026-11-23)
 - [ ] #2050 The dodge roll stays above the ground and is half as long; sitting against a wall no longer sinks in (Powers, Kingdoms, 2026-11-23)
 - [ ] #2049 Fishing: read the fish's moods, tire it out, watch your line (Powers, 2026-11-23)
@@ -83,9 +85,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2043 A sellsword doesn't call out to you and then turn you away (Kingdoms, 2026-11-23)
 - [ ] #2042 Enemies telegraph their blows longer and walk in before swinging (Powers, Kingdoms, 2026-11-23)
 - [ ] #2041 The stolen crown: the copy gives itself away, and the realm on alert (Kingdoms, 2026-11-23)
-- [ ] #2040 Dodge: a tap dashes, a hold rolls; adrenaline runs on wind; no climb cooldown (Powers, Kitchen, 2026-11-23)
-- [ ] #2039 The stolen crown: a ruler carried off and a shapeshifter on the throne (Kingdoms, 2026-11-23)
-- …and 446 older ones.
+- …and 500 older ones.
 
 ## Health
 
