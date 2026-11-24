@@ -1,9 +1,21 @@
 package com.jaymoskingdoms;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -22,6 +34,11 @@ import net.minecraft.world.phys.Vec3;
  * settlement ({@link Captives#nearestSettlement}), saved as {@link #BOUND_FOR}. Out of every player's sight it climbs up
  * to the surface above, and from there it walks a leg at a time ({@link Construction#leg}) until it is within
  * {@link #ARRIVE} of the seat, where the town's own life takes it over. With no settlement in reach it just stays.
+ * <p>
+ * Andy: "you should be able to escort the rubberfolk to a village when you meet them after born". Sneak and right-click
+ * a newborn and it follows you ({@link #ESCORT}) instead (again to let it go its own way). Bring it into any settlement
+ * ({@link Theft#lawAt}) and it stays there, glad of you ({@link #THANKS} MCA hearts); leave it more than {@link #LOST_RANGE}
+ * behind for {@link #LOST_TICKS} and it sets off alone again.
  */
 public final class RubberNewborns {
 	// ---- tuning ----
@@ -38,16 +55,49 @@ public final class RubberNewborns {
 	/** It only climbs to the surface with no player within this (blocks), so nobody sees it pass through rock. */
 	static final double UNSEEN = 48.0;
 	static final int TRIES = 16;
+	/** Escorting: how near it keeps, its speed, how far behind counts as lost and for how long, and the hearts it gives you. */
+	static final double FOLLOW_CLOSE = 3.0, LOST_RANGE = 48.0;
+	static final float FOLLOW_SPEED = 0.7F;
+	static final long LOST_TICKS = 2400L;
+	static final int THANKS = 25;
 
 	/** Where a newborn is making for: the seat of the settlement nearest where it stood up. Saved. */
 	static final AttachmentType<BlockPos> BOUND_FOR = AttachmentRegistry.create(JaymosKingdoms.id("rubber_newborn_bound_for"),
-		builder -> builder.persistent(BlockPos.CODEC));
+		builder -> builder.persistent(BlockPos.CODEC).syncWith(BlockPos.STREAM_CODEC, AttachmentSyncPredicate.all()));
+	/** The player escorting a newborn, if one is. Saved. */
+	static final AttachmentType<UUID> ESCORT = AttachmentRegistry.create(JaymosKingdoms.id("rubber_newborn_escort"),
+		builder -> builder.persistent(UUIDUtil.CODEC));
+	/** Since when (game time) each escorted newborn has been left too far behind. */
+	private static final Map<UUID, Long> LOST = new HashMap<>();
 
 	private RubberNewborns() {
 	}
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(RubberNewborns::tick);
+		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
+			if (hand != InteractionHand.MAIN_HAND || !(entity instanceof Villager v) || !v.hasAttached(BOUND_FOR) || !player.isShiftKeyDown()
+				|| player.isSpectator()) {
+				return InteractionResult.PASS;
+			}
+			if (player instanceof ServerPlayer sp && level instanceof ServerLevel server) {
+				escort(server, sp, v);
+			}
+			return InteractionResult.SUCCESS;
+		});
+	}
+
+	/** {@code player} takes {@code v} along with them, or (already theirs) lets it go its own way. */
+	private static void escort(ServerLevel level, ServerPlayer player, Villager v) {
+		LOST.remove(v.getUUID());
+		if (player.getUUID().equals(v.getAttached(ESCORT))) {
+			v.removeAttached(ESCORT);
+			level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 1.0F, 1.2F);
+			return;
+		}
+		v.setAttached(ESCORT, player.getUUID());
+		level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 1.2F);
+		level.sendParticles(ParticleTypes.HAPPY_VILLAGER, v.getX(), v.getY() + 1.6, v.getZ(), 6, 0.3, 0.3, 0.3, 0.0);
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -110,6 +160,9 @@ public final class RubberNewborns {
 
 	/** A newborn on its way: up out of the caves unseen, then a leg at a time to the seat; there, it's the town's. */
 	private static void walk(ServerLevel level, Villager v) {
+		if (v.hasAttached(ESCORT) && led(level, v)) {
+			return;
+		}
 		BlockPos seat = v.getAttached(BOUND_FOR);
 		double dx = seat.getX() + 0.5 - v.getX(), dz = seat.getZ() + 0.5 - v.getZ();
 		if (dx * dx + dz * dz <= ARRIVE * ARRIVE) {
@@ -126,5 +179,33 @@ public final class RubberNewborns {
 			return;
 		}
 		BehaviorUtils.setWalkAndLookTargetMemories(v, Construction.leg(level, v, seat), WALK_SPEED, 1);
+	}
+
+	/** An escorted newborn keeps up with its player; in a settlement it stays. False once it has been left behind too long. */
+	private static boolean led(ServerLevel level, Villager v) {
+		ServerPlayer p = level.getServer().getPlayerList().getPlayer(v.getAttached(ESCORT));
+		if (p != null && p.level() == level && Theft.lawAt(level, v.blockPosition()) != null) {
+			v.removeAttached(ESCORT);
+			v.removeAttached(BOUND_FOR);
+			LOST.remove(v.getUUID());
+			McaCompat.hearts(v, p, THANKS);
+			level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.VILLAGER_CELEBRATE, SoundSource.NEUTRAL, 1.0F, 1.2F);
+			level.sendParticles(ParticleTypes.HEART, v.getX(), v.getY() + 1.8, v.getZ(), 5, 0.3, 0.2, 0.3, 0.0);
+			return true;
+		}
+		if (p == null || p.level() != level || p.distanceTo(v) > LOST_RANGE) {
+			long now = level.getGameTime();
+			if (now - LOST.computeIfAbsent(v.getUUID(), u -> now) >= LOST_TICKS) {
+				v.removeAttached(ESCORT);
+				LOST.remove(v.getUUID());
+				return false;
+			}
+			return true;
+		}
+		LOST.remove(v.getUUID());
+		if (p.distanceTo(v) > FOLLOW_CLOSE) {
+			BehaviorUtils.setWalkAndLookTargetMemories(v, new EntityTracker(p, false), FOLLOW_SPEED, 2);
+		}
+		return true;
 	}
 }
