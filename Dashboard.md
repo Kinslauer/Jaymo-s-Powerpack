@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 20:38). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 21:46). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -23,6 +23,16 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2063 Your coin at a glance, and money bags in chests (Kingdoms, 2026-11-24)
+- [ ] #2062 Adrenaline kicks in once, going down included (Powers, 2026-11-24)
+- [ ] #2061 A blast close by knocks you out cold (Powers, 2026-11-24)
+- [ ] #2060 Cleric's medallion board: numpad sigils cast spells and great prayers, sneak to bind (Kingdoms, 2026-11-24)
+- [ ] #2059 A body only spills the blood it holds (Powers, 2026-11-24)
+- [ ] #2058 bandages give a short regen; rags fester less (Powers, 2026-11-24)
+- [ ] #2057 The thermometer burns when heat is a danger, and freezes and shakes in the cold (Kitchen, 2026-11-24)
+- [ ] #2056 Three blows on the ground and you're finished (Powers, 2026-11-24)
+- [ ] #2054 Says what hurt you when nobody did (Powers, 2026-11-24)
+- [ ] #2053 Guards only see a drawn blade in front of them; sneak right up behind anyone (Kingdoms, 2026-11-24)
 - [ ] #2051 Alt in mid air dives: jump + Alt is a dive-roll evade (Powers, 2026-11-23)
 - [ ] #2050 The dodge roll stays above the ground and is half as long; sitting against a wall no longer sinks in (Powers, Kingdoms, 2026-11-23)
 - [ ] #2049 Fishing: read the fish's moods, tire it out, watch your line (Powers, 2026-11-23)
@@ -73,17 +83,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #1992 Survival picks: wound pools, head blows, headshots, armour per part, medicine over time (Powers, Kingdoms, 2026-11-22)
 - [ ] #1991 Defence disciplines, part 1: passive blocks, tighter parries, fist disarms (Powers, Kingdoms, 2026-11-22)
 - [ ] #1990 Z Fighter gaps 2, part 2: holding back, Limit Break 4-6, fighting styles, unlocked potential (Powers, 2026-11-22)
-- [ ] #1989 both arms for anything bigger than a small animal; carried blocks are seen (Powers, Kitchen, 2026-11-22)
-- [ ] #1988 NPCs climb two-block walls and fences, as players do (Powers, 2026-11-22)
-- [ ] #1987 NPCs obey limb damage: arms gate their powers, bad legs put them on the ground (Powers, 2026-11-22)
-- [ ] #1986 Z Fighter gaps 7: the Keeper's trial, a set-piece boss on the Lookout (Powers, 2026-11-22)
-- [ ] #1985 camp guards wear their camp's gear, not MCA's iron (Kingdoms, 2026-11-22)
-- [ ] #1984 Fish spawn where you can see them (Powers, Kingdoms, 2026-11-22)
-- [ ] #1983 guards let go of an Elder Vampire who flees as a bat (Kingdoms, 2026-11-22)
-- [ ] #1981 Villagers always doing something: hunger, thirst, boredom, and a stall watchdog (Kingdoms, 2026-11-22)
-- [ ] #1980 Every trade in every town (Kingdoms, 2026-11-22)
-- [ ] #1978 Classes start with a skill of their kind (Kingdoms, 2026-11-22)
-- …and 399 older ones.
+- …and 409 older ones.
 
 ## Health
 
