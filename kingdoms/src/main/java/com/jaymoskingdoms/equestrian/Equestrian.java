@@ -82,6 +82,11 @@ import org.jspecify.annotations.Nullable;
  * {@link WarElephant}s.
  */
 public final class Equestrian {
+	/**
+	 * Icy's Better Horses is in the pack: it owns ordinary horses (breeds, coats, gaits, bond, tack, revival, whistle, wheel, free
+	 * look, two riders), so none of ours covers them ({@link #covered}). Without it ours stay on.
+	 */
+	public static final boolean ICY = net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("icys-better-horses");
 	/** Stamina an average horse of capacity 1.0 holds (a stamina stat of 0.5). */
 	public static final double STAMINA = 100.0;
 	/** A blown horse gets its wind back at this share of its stamina. */
@@ -200,6 +205,9 @@ public final class Equestrian {
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof AbstractHorse horse && covered(horse) && !horse.hasAttached(EQUINE)) {
 				upgrade(level, horse);
+			} else if (ICY && entity instanceof AbstractHorse horse && !covered(horse)) {
+				// an old horse of ours under Icy's: its breed card stays for the stables, its size goes
+				IcysHorses.release(horse);
 			}
 		});
 		ServerTickEvents.END_LEVEL_TICK.register(Equestrian::tick);
@@ -236,9 +244,23 @@ public final class Equestrian {
 		});
 	}
 
-	/** One of the mounts it upgrades: horses, skeleton and zombie horses, war elephants (not donkeys, mules, llamas or camels). */
+	/**
+	 * One of the mounts it upgrades: horses, skeleton and zombie horses, donkeys and mules, war elephants. With Icy's Better Horses
+	 * in the pack only the elephants and mammoths are ours. The nightmare and the bat horse are horses of Icy's that carry our
+	 * breed card for their legend ({@link MythicMounts} reads the card, not this).
+	 */
 	public static boolean covered(Entity e) {
-		// (0.7.445, Havens patch 8) donkeys and mules too: bond, roster, gaits and wheel, drawn as vanilla's (Better Horses')
+		if (ICY) {
+			return e instanceof WarElephant;
+		}
+		return mount(e);
+	}
+
+	/**
+	 * Any horse-like mount the kingdoms deal with (stables, races, quests), whichever rules it runs under: ours, vanilla's or
+	 * Icy's Better Horses'.
+	 */
+	public static boolean mount(Entity e) {
 		return e instanceof Horse || e instanceof SkeletonHorse || e instanceof ZombieHorse || e instanceof WarElephant || e instanceof Donkey
 			|| e instanceof Mule;
 	}
@@ -251,6 +273,9 @@ public final class Equestrian {
 	public static Equine equine(AbstractHorse horse) {
 		Equine e = horse.getAttached(EQUINE);
 		if (e == null) {
+			if (ICY && !covered(horse)) {
+				return IcysHorses.read(horse);
+			}
 			e = horse.level() instanceof ServerLevel level ? upgrade(level, horse) : Equine.roll(Breed.PALFREY, horse.getRandom());
 		}
 		return e;
@@ -294,6 +319,10 @@ public final class Equestrian {
 	/** {@code horse} becomes {@code e}: its size, health, jump and wandering pace follow (healed to full if {@code heal}). */
 	public static void apply(AbstractHorse horse, Equine e, boolean heal) {
 		horse.setAttached(EQUINE, e);
+		if (!covered(horse)) {
+			// a horse of Icy's keeps its own size, health, speed and jump; the card is only the stables' ledger (and a legend's mark)
+			return;
+		}
 		draftTag(horse, e);
 		set(horse, Attributes.SCALE, e.breed().scale);
 		set(horse, Attributes.MAX_HEALTH, e.maxHealth());
@@ -340,7 +369,14 @@ public final class Equestrian {
 	/** A new mount of {@code breed} (a war elephant or a horse), not yet in the world. */
 	public static @Nullable AbstractHorse create(ServerLevel level, Breed breed, BlockPos at, EntitySpawnReason reason) {
 		AbstractHorse horse = breed.elephant() ? WAR_ELEPHANT.create(level, reason) : breed == Breed.DONKEY ? EntityTypes.DONKEY.create(level, reason)
-			: breed == Breed.MULE ? EntityTypes.MULE.create(level, reason) : EntityTypes.HORSE.create(level, reason);
+			: breed == Breed.MULE ? EntityTypes.MULE.create(level, reason) : null;
+		if (horse == null && !breed.elephant() && ICY) {
+			// a horse of Icy's breed for ours (its own coat and class); the nightmare and bat horse keep their legend on top
+			horse = IcysHorses.create(level, breed, reason);
+		}
+		if (horse == null && !breed.elephant()) {
+			horse = EntityTypes.HORSE.create(level, reason);
+		}
 		if (horse == null) {
 			return null;
 		}

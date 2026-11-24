@@ -1,6 +1,7 @@
 package com.jaymoskingdoms.client.equestrian;
 
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.equestrian.Equestrian;
 import com.jaymoskingdoms.equestrian.FreeRein;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -63,8 +64,10 @@ public final class FreeReinClient {
 	}
 
 	private static boolean wanted(Minecraft minecraft, LocalPlayer player) {
+		// (a horse of Icy's Better Horses has its own free look; the dragons and elephants keep free rein)
 		return enabled && !minecraft.options.getCameraType().isFirstPerson() && player.getVehicle() instanceof AbstractHorse horse
-			&& horse.getControllingPassenger() == player;
+			&& horse.getControllingPassenger() == player && !(com.jaymoskingdoms.equestrian.Equestrian.ICY
+			&& com.jaymoskingdoms.equestrian.Equestrian.mount(horse) && !Equestrian.covered(horse));
 	}
 
 	private static void tick(Minecraft minecraft) {

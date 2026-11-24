@@ -314,7 +314,11 @@ public final class Bonding {
 
 	public static boolean owner(AbstractHorse horse, Player player) {
 		EntityReference<LivingEntity> owner = horse.getOwnerReference();
-		return owner != null && owner.getUUID().equals(player.getUUID());
+		if (owner != null && owner.getUUID().equals(player.getUUID())) {
+			return true;
+		}
+		// a horse of Icy's Better Horses is owned by its own record too
+		return Equestrian.ICY && IcysHorses.owner(horse, player.getUUID());
 	}
 
 	/**
@@ -525,7 +529,7 @@ public final class Bonding {
 			return horse.getCustomName();
 		}
 		Equine e = horse.getAttached(Equestrian.EQUINE);
-		return e == null ? horse.getName() : Component.translatable(e.breed().key());
+		return e == null || !Equestrian.covered(horse) ? horse.getName() : Component.translatable(e.breed().key());
 	}
 
 	// ---- care ------------------------------------------------------------------------------------------------------------

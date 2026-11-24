@@ -60,7 +60,8 @@ public final class HorseKit {
 	static void register() {
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
 			ItemStack stack = player.getItemInHand(hand);
-			if (player.isSpectator() || !stack.is(Tackroom.HORSE_MEDKIT) || !(entity instanceof AbstractHorse horse) || !horse.isAlive()
+			// (Icy's Better Horses has its own medkit and harness: ours is off beside it)
+			if (Equestrian.ICY || player.isSpectator() || !stack.is(Tackroom.HORSE_MEDKIT) || !(entity instanceof AbstractHorse horse) || !horse.isAlive()
 				|| (horse.getHealth() >= horse.getMaxHealth() && !horse.hasEffect(MobEffects.POISON))) {
 				return InteractionResult.PASS;
 			}
@@ -79,7 +80,7 @@ public final class HorseKit {
 
 	/** Whether "Enchanted tack" shows on {@code who}: a court wizard. */
 	public static boolean canAsk(LivingEntity who) {
-		return !who.level().isClientSide() && CourtWizards.is(who) && !Downed.isDowned(who);
+		return !Equestrian.ICY && !who.level().isClientSide() && CourtWizards.is(who) && !Downed.isDowned(who);
 	}
 
 	/** The court wizard's enchanted tack: the glide harness, and (with Kitchen) ender saddlebags. */
@@ -121,10 +122,13 @@ public final class HorseKit {
 
 	/** Whether this horse wears the glide harness. */
 	public static boolean harnessed(@Nullable AbstractHorse horse) {
-		return horse != null && horse.getItemBySlot(EquipmentSlot.SADDLE).is(Tackroom.GLIDE_HARNESS);
+		return !Equestrian.ICY && horse != null && horse.getItemBySlot(EquipmentSlot.SADDLE).is(Tackroom.GLIDE_HARNESS);
 	}
 
 	private static void tick(MinecraftServer server) {
+		if (Equestrian.ICY) {
+			return;
+		}
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			if (player.getVehicle() instanceof AbstractHorse horse && harnessed(horse) && !horse.onGround()) {
 				horse.resetFallDistance();

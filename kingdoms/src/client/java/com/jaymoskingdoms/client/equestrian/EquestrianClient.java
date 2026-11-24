@@ -104,9 +104,12 @@ public final class EquestrianClient {
 		// 0.7.305: our own horse, a build per breed, for every horse, skeleton horse and zombie horse (0.5.44: Mo' Creatures')
 		BreedHorseModel.register();
 		TackLayer.register();
-		EntityRenderers.register(EntityTypes.HORSE, BreedHorseRenderer::new);
-		EntityRenderers.register(EntityTypes.SKELETON_HORSE, BreedHorseRenderer::new);
-		EntityRenderers.register(EntityTypes.ZOMBIE_HORSE, BreedHorseRenderer::new);
+		if (!Equestrian.ICY) {
+			// with Icy's Better Horses in the pack its renderers draw every horse (and skeleton and zombie horse)
+			EntityRenderers.register(EntityTypes.HORSE, BreedHorseRenderer::new);
+			EntityRenderers.register(EntityTypes.SKELETON_HORSE, BreedHorseRenderer::new);
+			EntityRenderers.register(EntityTypes.ZOMBIE_HORSE, BreedHorseRenderer::new);
+		}
 		Equestrian.localRider = new Equestrian.LocalRider() {
 			@Override
 			public boolean controls(Player controller) {
