@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:48). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:50). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -17,7 +17,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-43 waiting for a bot, 7 being built, 1 in review: see [[Kanban]].
+43 waiting for a bot, 7 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
@@ -45,10 +45,8 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2058 bandages give a short regen; rags fester less (Powers, 2026-11-24)
 - [ ] #2057 The thermometer burns when heat is a danger, and freezes and shakes in the cold (Kitchen, 2026-11-24)
 - [ ] #2056 Three blows on the ground and you're finished (Powers, 2026-11-24)
-- [ ] #2055 A small creature takes one smash from a club (Powers, 2026-11-24)
 - [ ] #2054 Says what hurt you when nobody did (Powers, 2026-11-24)
 - [ ] #2053 Guards only see a drawn blade in front of them; sneak right up behind anyone (Kingdoms, 2026-11-24)
-- [ ] #2052 A small creature is finished with one quick slice (Powers, 2026-11-23)
 - [ ] #2051 Alt in mid air dives: jump + Alt is a dive-roll evade (Powers, 2026-11-23)
 - [ ] #2050 The dodge roll stays above the ground and is half as long; sitting against a wall no longer sinks in (Powers, Kingdoms, 2026-11-23)
 - [ ] #2049 Fishing: read the fish's moods, tire it out, watch your line (Powers, 2026-11-23)
@@ -77,13 +75,15 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2022 Realms never wear the same armour: each keeps its own livery (Kingdoms, 2026-11-23)
 - [ ] #2021 Wounds shown like potions; bandages wrap several limbs at once; splints by two, from plant string too (Powers, 2026-11-23)
 - [ ] #2020 From the Shadows: diabolium, the crust armour and the Nehemoth's blood (Kingdoms, 2026-11-23)
-- [ ] #2019 From the Shadows: effects, potions and enchantments (Kingdoms, 2026-11-23)
-- [ ] #2018 Small boats at sea are a realm's fishing smacks with a helm; the talk screen's empty purple box is gone (Kingdoms, 2026-11-23)
 - [ ] #2016 plague bearer: the orc camps' sick walker (From the Shadows Reborn) (Kingdoms, 2026-11-23)
 - [ ] #2015 the Bulldrogioth, a shelled beast out of the demons' country (From the Shadows Reborn port) (Kingdoms, 2026-11-23)
 - [ ] #2014 the Nehemoth, a beast out of the demons' country (From the Shadows Reborn port) (Kingdoms, 2026-11-23)
 - [ ] #2013 froglin: the camps' frog-legged beasts (From the Shadows Reborn) (Kingdoms, 2026-11-23)
-- …and 477 older ones.
+- [ ] #2012 Crocodiles take monsters too (Kingdoms, 2026-11-23)
+- [ ] #2011 Old guns: no loading bar, Q takes up the next loaded one, the Void flintlock fires as you let go (Powers, Kingdoms, 2026-11-22)
+- [ ] #2010 Zombies leave the dead for shade by day; nothing regrows on the dead; player heads wear the MCA look (Powers, Kingdoms, Kitchen, 2026-11-22)
+- [ ] #2009 No idle camera while your fishing line is out (Powers, 2026-11-22)
+- …and 423 older ones.
 
 ## Health
 
