@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 19:37). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 19:38). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -33,7 +33,6 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for any · open
 - [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · for any · open
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for any · open
-- [ ] [[Inbox/vanilla-plus-b-stellarity-end-enderscape-band|vanilla-plus-b-stellarity-end-enderscape-band]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-c-back-slot|vanilla-plus-c-back-slot]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-d-horse-expert-skill|vanilla-plus-d-horse-expert-skill]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-e-soul-reaping-spawners|vanilla-plus-e-soul-reaping-spawners]] · for 💻 Odysseus · open
@@ -62,6 +61,7 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-2-placement-reasons|structures-2-placement-reasons]] · ☁️ Cloud · #2085 · claimed
 - [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · ☁️ Cloud · #2090 · claimed
 - [ ] [[Inbox/vanilla-plus-a-incendium-castle-start|vanilla-plus-a-incendium-castle-start]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/vanilla-plus-b-stellarity-end-enderscape-band|vanilla-plus-b-stellarity-end-enderscape-band]] · ☁️ Cloud · claimed
 
 
 ## In review
