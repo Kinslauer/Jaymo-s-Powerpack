@@ -1,4 +1,0 @@
-# Your coin at a glance, and money bags in chests
-- **Purse icon** (`PurseIcon`, `Money.held`; Andy's pick from Numismatic Overhaul): while a coin purse hangs in the belt slot, the survival inventory shows it beside your figure. Hover it for every coin you carry, currency by currency: Realm Silver, Hacksilver, dinars, shell strings, mon, copper bits, and emeralds, bent copper and pirate gold if you have them. It counts loose coins, every purse (the worn one too) and bundles. With no purse worn there's no icon.
-- **Money bags** (`LootSwap`): about one chest in twelve holds someone's money bag, a coin purse with 2 to 10 emeralds' worth of the coin of the land inside. Where the land's coin can't go in a purse (a greenskin camp's bent copper, a pirate cove's gold), the coins lie loose instead.
-- Built in CI; not played.
