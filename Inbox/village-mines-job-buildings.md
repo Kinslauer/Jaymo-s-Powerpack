@@ -22,3 +22,4 @@ thread: cmsg_017LSt6rWz6CzxSGvzDd41XWXaRs5kJjshMoCCgdq1xMHu
 
 ## Notes
 - 2026-11-21 23:40 Put on the vault by the cloud thread "Put pending work on the vault". Being built now by cloud Claude in thread cmsg_017LSt6rWz6CzxSGvzDd41XWXaRs5kJjshMoCCgdq1xMHu (started 23:26Z); bots leave it.
+- 2026-11-24 17:56 2026-11-24 All four parts on master in #1973. Andy: close them.
