@@ -16913,3 +16913,11 @@ Andy: "can i have you work on npc pathing? they get stuck in water or on buildin
 - **Famous finds fetch more** (G4): sell a merchant something from a dragon's hoard, a sunken ship (wrecks, buried treasure, pirate wreck treasure) or an old city (our old-age ruins, ancient cities, trail ruins) for coin and a collector's price comes on top, half again (`Provenance.famousBonus`, `mixin/provenance/MerchantResultSlotFindsMixin`).
 - **A strongbox** (G7): an iron-bound box of nine slots that takes only coin and coin purses, made from iron, planks and a forged lock. Whoever sets it down opens it at a touch; anyone else must pick its lock (a fine rotary lock), and picking one in town where folk see is burglary. It's slow to break for anyone but its owner and hoppers can't reach in. Night burglars go for a strongbox first and take half the coin in a slot (`Strongbox`, `NightBurglars`).
 - Built; not played.
+
+## 0.12.35 (2026-11-24): Illagers speak the Cave Tablets' tongue (#2098)
+
+- Illagers' speech that you don't understand is now written in the glyphs of Alex's Caves' Cave Tablets (the script the Spelunkery Table translates). Before, it was made-up syllables.
+- The glyphs spell the illager's real words, the same way the tablets do. Words you know come through as plain text, the same words every time, and more of them as you learn. Knowing none of the tongue, the whole line is glyphs. Chat lines and the fallback text are written in the glyphs too.
+- With Alex's Caves installed, each Cave Tablet you translate at a Spelunkery Table teaches 6 points of the illager tongue, up to 80 of 100. It shows on the hotbar: "The tablet's glyphs are the illagers' own." Without Alex's Caves nothing changes, because the mixin only loads when the mod is there.
+- Lore: "The tablets' tongue (new)", placed after "The illager tongue".
+- Built; not played.
