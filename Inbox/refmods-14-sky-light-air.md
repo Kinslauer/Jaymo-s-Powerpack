@@ -28,3 +28,6 @@ Owns: client particles/effects.
 - **X9 Lava crust** (ImmersiveVFX, size S). Lava edges cool to a cracked glowing crust.
 - **X10 Light in its block's colour** (ImmersiveVFX, size M). Soul fire lights blue, redstone red, lanterns warm.
 - **X11 Blocks settle into place** (ImmersiveVFX, size S). A placed block settles in with a tiny grow.
+
+## Notes
+- 2026-11-24 18:00 2026-11-24 Andy: "finish here": cloud Claude finishes this in thread cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR; bots leave it.
