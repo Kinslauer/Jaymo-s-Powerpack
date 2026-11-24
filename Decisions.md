@@ -987,3 +987,8 @@ Andy: "any feature that requires another PR to work as intended should be held a
 ### 2026-11-24: Ruin Keepers tell the lore in talk
 - **Decided:** "Yes, hints in their talk" (decision card): the Keepers tell their people, why the city fell, the consul in the tomb, why they stay and take emeralds, and the map to the next city, as hints in talk. A (new) Lore.md paragraph goes to Andy first.
 - **Agent:** claude-cloud.
+
+### 2026-11-24: Two symbiote bodies; the red one hunts
+- **Decided:** "keep our combined black suit from 2080, and place our mechanics tendrils blades and scripts onto the narrow taller slender body. also when the symbiotes affect non web humanoids they will use these forms for combat, the red symbiote will primarily be in this form hunting others. up to 500 blocks away, nothing is safe. it may need new gecko libbed animations to match the new body. use inspiration for its movement from the venom 2 movie". On who is prey and how far: "Everyone is prey; load terrain for pursuit" (players, villagers, pets and allies; chunks load for the chase and are released when it ends).
+- **Applies to:** Powers, web symbiote (red strain body, symbiote-taken humanoids, WebInhabit), on top of PR #2080.
+- **Agent:** codex-reference-dinos-venom (handed to a red-symbiote-body worker).
