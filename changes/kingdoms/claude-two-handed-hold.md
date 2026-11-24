@@ -1,5 +1,0 @@
-# NPCs hold two-handed weapons in both hands
-- Andy: "can you make npcs that attack with two handed weapons use both hands? especially the zombies, that would give the slower swing more sense".
-- Between swings, a humanoid mob holding a two-handed melee weapon (Better Combat's claymores, great axes, hammers, glaives, halberds, katanas, scythes and the rest) holds it in both hands, in the same pose a player holds that weapon in (the weapon's Better Combat pose; `pose_two_handed_sword` for one without its own). Zombies and their kin, skeletons, piglins, illagers (when their arms are up to fight), our folk and MCA villagers all do it (`MobCombat.holdPose`, `BetterCombatBridge.holdPose`, client `MobAnimations`, `PalMobAnimator.hold`). The swings themselves were already Better Combat's two-handed animations, and they play over the hold as before.
-- A horde zombie carrying one holds it instead of reaching with empty arms. Lying downed, sleeping or swimming mobs keep their own pose. Bows and crossbows are unchanged.
-- Built; not played.
