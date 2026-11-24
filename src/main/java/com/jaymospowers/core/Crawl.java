@@ -184,6 +184,10 @@ public final class Crawl {
 			// (0.14.1) the downed state holds the crawl: Jump or the key don't stand them up
 			return;
 		}
+		if (!down && com.jaymospowers.core.wounds.LegFell.felled(player)) {
+			// felled by a leg blow: only a roll gets them up
+			return;
+		}
 		if (!down && com.jaymospowers.core.wounds.Breaks.crawlOnly(player)) {
 			// (0.14.2) two broken legs don't stand: crawling is all that's left
 			return;
@@ -210,6 +214,8 @@ public final class Crawl {
 			return;
 		}
 		player.setAttached(ROLLING, next);
+		// felled by a leg blow: the roll brings them up as it ends
+		com.jaymospowers.core.wounds.LegFell.rolled(player, now + next.ticks());
 		// rolling one way only fans the flames; it's rolling back over that smothers them
 		boolean doused = false;
 		if (reverses(last, now, right) && player.isOnFire()) {
