@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Inbox/alexs-caves-integration
 branch: claude/project-thread-dzutw2
 with: cloud Claude (Reason Art project thread "Integrate Alex's Caves")
@@ -30,3 +30,4 @@ its sea; none within 24000 blocks of the middle; one cell in two past that; cave
 Magnetic Caves walls are ferrosite with ichorite bands, no red/blue nodes, our pillars/spikes/sand/shrooms on floors,
 ruins swapped. Lore paragraph "The deep places under the far land" (new), awaiting Andy. Compiled; not played.
 Neodymium no longer generates (later track). Other tracks (Rubber-folk, flood, demon, Toxic, future items) not started.
+- 2026-11-24 16:50 PR #2105 is merged into master; moved to Agents/Done.
