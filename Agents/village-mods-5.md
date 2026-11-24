@@ -3,11 +3,13 @@ status: running
 task: Inbox/village-mods-5-town-life-hats.md
 branch: claude/village-mods-5
 with: 
-pr: 
+pr: 2122
 mods: kingdoms, powers
 versions: 
 started: 2026-11-24
 owns:
+  - kingdoms: GiftHouses, TownDoings, KnownGoods, TailorHats, Pilgrims (new); client TownDoingsClient (new); edits in Commissions, TalkErrands, TownLedger, Careers, Reputation, KitchenCompat, Tales, VillagerTradeMixin, VillagerPriceMixin, McaCommandMixin, McaScreensMixin, McaTailorButtonMixin, JaymosKingdoms/JaymosKingdomsClient (register lines)
+  - tale the_pilgrims_road.json; lang parts trade-hats, known-goods, town-doings, pilgrims
   - src/main/java/com/jaymospowers/baubles/TradeHats.java (new), Baubles.java (one init line)
   - src/client/java/com/jaymospowers/client/baubles/TradeHatLayer.java (new), BaublesClient.java, mixin/BackpackAvatarRendererMixin.java (one line each)
   - Powers hat assets, assets/minecraft/atlases/items.json, tags/item/baubles/head.json, lang/parts/trade_hats.json, docs/licenses/Villager-Hats-MIT.txt
