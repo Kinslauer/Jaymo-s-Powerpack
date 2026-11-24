@@ -15,7 +15,6 @@ kanban-plugin: board
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for 🪶 Quill · open
 - [ ] [[Inbox/patron-colossus-and-commandment-hunt|patron-colossus-and-commandment-hunt]] · for any · open
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/realm-banks-finish|realm-banks-finish]] · for any · open
 - [ ] [[Inbox/refmods-01-felling|refmods-01-felling]] · for any · open
 - [ ] [[Inbox/refmods-02-druid-wild-shape|refmods-02-druid-wild-shape]] · for any · open
 - [ ] [[Inbox/refmods-03-scouter|refmods-03-scouter]] · for any · open
@@ -56,6 +55,7 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-l-carts-check|vanilla-plus-l-carts-check]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-c-back-slot|vanilla-plus-c-back-slot]] · for 💻 Odysseus · open
+- [ ] [[Inbox/realm-banks-finish|realm-banks-finish]] · for any · open
 
 
 ## Being built
