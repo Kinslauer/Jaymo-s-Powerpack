@@ -17004,3 +17004,16 @@ Andy: "can i have you work on npc pathing? they get stuck in water or on buildin
   players and villagers alike, Tideborn or not, and swim straight at you (the mantas faster). They keep to the chasm.
   They ease up as you win the Deep Ones' trust by trading with them or defending them: once they think well of you the
   wild ones only go for you up close, and once they think highly of you they leave you be unless you strike one first.
+
+## 0.12.46 (2026-11-24): Village mods 4: board work (#2113)
+
+- **Fair pay**: things have a worth now (Economy's worth table: raw goods at about what villagers trade them for, anything made at what went into it and a tenth over, times its rarity). Errands pay what they ask for is worth and half again, plus a little for the trouble; board work that has you bring the goods (building, stashes, lamps) pays for them on top of its rate.
+- **Decrees**: a Smiths', Hunters', Farmers' or War decree pinned on a town board makes its kind of work and errands much likelier there (up to 3 per board, one of a kind, 3 days each). A town under a ruler gets them carried up by a herald when it's short: food, stores for its next building or Upkeep's waiting repairs, a war, an attack on its people. Finishing 4-star board work may earn you one (5-star always does); pin it on any board. Use a pinned decree to read it.
+- **Deadlines**: about a third of notices give so many days. Back in the first half pays a quarter more; past the last, the quest comes off your log and the poster's town drops you 4 reputation. Your copy of the notice yellows once the early time is past.
+- **Mixed asks**: about a third of errands and board work want some of the town's other goods besides, and pay part of it in goods (bread, arrows, iron, a lantern...).
+- **Asks that fit the land**: towns on the shore, a river, mountains, badlands, forest, jungle, cherry groves, mangroves, mushroom fields and the pale garden post their own errands and news on top of their villager type's.
+- **Rarer notices look rarer**: board work goes up on plain paper to two stars, sealed at three, vellum at four, gilt at five, on the board and in hand, its name coloured to match.
+- **Progress on the notice**: taking an errand or work gives you your copy of the notice; held, it shows the count (and time left) on the action bar. A toast when the work is done.
+- **Hand in at the board**: use the town's board with your copy or the goods in hand to hand finished work in there when its poster is away (no hearts with them that way; a criminal still has to be brought to the poster).
+- New: BoardTerms, Decrees, BoardTermsClient, the decree item and papers (our own art), lang part board-terms. Changed: Economy, TownNotices, BoardWork, Bounties, BountyBoard (notice looks 3-6), Quests (turn-in shared with the board), Upkeep.
+- Built by CI only; not played.
