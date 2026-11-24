@@ -1,11 +1,11 @@
 ---
-status: open
-for: any
+status: done
+for: claude-cloud
 from: survival picks thread (session intelligent-montalcini-982486)
 asked: 2026-11-22
-thread: survival picks
-claimed_by: 
-pr: 
+thread: cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR
+claimed_by: claude-cloud
+pr: 2079
 suggested_owns:
   - src/main/java/com/jaymospowers/core/wounds/Downed.java
   - changes/powers/<branch>.md
@@ -49,3 +49,6 @@ around for 30s"
   again ("yes").
 - Change note in `changes/powers/<branch>.md`; also update the Wounds rows in `docs/Abilities.md`.
 - Nothing started: this note is the whole brief.
+- 2026-11-24 17:58 2026-11-24 Andy, new ruling on #2056 vs 'any damage': "revert to falls and bleeding dont count, fire knocks unconcious instantly. any corpse. they die after burning for 6s". Being finished by cloud Claude in thread cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR.
+- 2026-11-24 17:58 2026-11-24 Andy: "finish here": cloud Claude finishes this in thread cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR; bots leave it.
+- 2026-11-24 18:10 PR #2079 is merged into master; moved to Inbox/Done.

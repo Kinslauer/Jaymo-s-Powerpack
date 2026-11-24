@@ -21,3 +21,7 @@ pr:
 - Compile check against the 26.3 jars; every Minecraft API checked against 26.3 sources.
 - `python3 tools/pr_checks.py` passes.
 - Lore: none expected; if one is needed, quote it in full to Andy first.
+
+## Notes
+- 2026-11-24 17:57 2026-11-24 PR #1796 merged 2026-11-19: docs/VanillaPlus-Plan.md is on master, start from master. Horse Expert itself shipped in #1796.
+- 2026-11-24 17:58 2026-11-24 Andy: "use the latest ruling". #2044 (2026-11-23, every weapon in its set place on the body, Edward Kenway look) wins: drop the 'YDM draws only the back-slot item without a tool belt' part and don't touch MAX_SHOWN/WeaponMasterShownMixin for it. Only the Baubles back slot (drawn on the back, fitting #2044's back placement) and its swap key remain.

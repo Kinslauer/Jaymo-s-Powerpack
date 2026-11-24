@@ -942,3 +942,22 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-24 (Andy, pillager-lanterns): "pillagers should also use their lanterns at night, or break them in the world and take them with if they run out".
 - 2026-11-24 11:13 AM ET (Andy, cloud Claude, gear talk thread, `docs/Gear-Talk-Plan.md`): all 24 gear tags in (incl. changed-since-last-time and gossip ahead of you), all six two-tag lines kept. Plain folk say "more Frostborn work than flesh"; only androids, the Mad Tinkerer, Bio-built and Frostborn troopers say "cyborg". Only Rig limbs count as a player's Frostborn work. "Equipped" = baubles, limbs, scouter, Rig, mask plus armour, harness and crest. Armour over a limb hides it unless the villager notices. A masked player's gear is talked about but never their blood, and gossip never ties the masked look to their face. Before introductions folk may call you by your look in lines and gossip only, never over your head. First patch = step 1 (Frostborn work and limbs). Approved the lore paragraph "What folk see on you".
 - 2026-11-24 Andy: Icy's Better Horses has far better models and implementations; if we can't use its models, install Icy's whole in place of our own horses.
+
+### 2026-11-24: Reference Venom head and Verdant dinosaurs
+- **Decided:** "I DONT want the venom model, but JUST the head, and the dinos should be found on the verdant planet".
+- **Applies to:** Desktop Reference Mods (Dino-26.3-1.2.0.jar and symbiote-1.20.1-1.0.1.jar); proposed Powers integration. Compatibility assessment only so far.
+- **Agent:** codex-reference-dinos-venom.
+
+### 2026-11-24: Downed fire and blows (after #2056)
+- **Decided:** "revert to falls and bleeding dont count, fire knocks unconcious instantly. any corpse. they die after burning for 6s"
+- **Applies to:** Inbox downed-knockout-three-hits (Powers `Downed`): falls and bleeding stay out of the three blows; anyone downed who burns passes out at once and dies after 6 s of burning.
+- **Agent:** claude-cloud (thread "Check vault tasks against master").
+
+### 2026-11-24: Back weapon slot follows #2044
+- **Decided:** "use the latest ruling" (vanilla-plus-c back slot vs #2044's weapons in set places on the body).
+- **Applies to:** Inbox vanilla-plus-c-back-slot: drop the "YDM shows only the back-slot item without a tool belt" part; #2044's placements stand.
+- **Agent:** claude-cloud.
+
+### 2026-11-24: Vault sync pass
+- **Decided:** close arsenal-pulls-anything, from-the-shadows-port, village-mines-job-buildings, class-trees-plan and ping-t3code-11am (already on master or past); "finish here" for the nine partly done tasks (cloud thread builds them).
+- **Agent:** claude-cloud.

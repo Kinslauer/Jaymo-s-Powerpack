@@ -22,3 +22,6 @@ pr:
 - Compile check against the 26.3 jars; every Minecraft API checked against 26.3 sources.
 - `python3 tools/pr_checks.py` passes, and `checkPackMods`.
 - Lore: approved ("The Beneath", Lore.md 2026-11-19).
+
+## Notes
+- 2026-11-24 17:57 2026-11-24 PR #1796 merged 2026-11-19: docs/VanillaPlus-Plan.md is on master, start from master. Horse Expert itself shipped in #1796.

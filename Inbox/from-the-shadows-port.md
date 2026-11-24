@@ -1,5 +1,5 @@
 ---
-status: open
+status: done
 for: any
 from: survival picks thread (session local_2bfd1f34)
 asked: 2026-11-22
@@ -54,3 +54,4 @@ builds pass, Auto-fix on, "ready to merge as PR #N" each, listing what wasn't ch
   or `C:/Users/toopo/Downloads`, nor `fromtheshadows*` within 3 levels of `E:/`). Ask Andy where it is first.
 - Nothing was built or branched yet: the first session only read the handoff, rules, plan and lore before Andy stopped it.
 - 2026-11-22 19:55 Agents/from-the-shadows-port.md (desktop session, 2026-11-22)'s claim had no sign of work for 30 min: handed back as open.
+- 2026-11-24 17:55 2026-11-24 All six parts on master: #2013 #2014 #2015 #2016 #2019 #2020 #2023 (+#2024 fix). Andy: close them.
