@@ -191,6 +191,7 @@ message.jaymospowers.forge_hearth.no_fuel
 message.jaymospowers.future.echo_first
 message.jaymospowers.gravity_rocks_few
 message.jaymospowers.ki_voyage.weak
+message.jaymospowers.leg_fell.roll
 message.jaymospowers.limbs.gone
 message.jaymospowers.limbs.no_arms
 message.jaymospowers.locked
