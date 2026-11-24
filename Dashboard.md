@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:48). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:51). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -27,6 +27,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2121 Takeover pathing fixes: long tunnels, safe shafts, no stray weapon arm (Powers, 2026-11-24)
 - [ ] #2119 players' limbs twice as tough (Powers, Kitchen, 2026-11-24)
 - [ ] #2118 spiders in leaves leave you be by day (Powers, Kingdoms, 2026-11-24)
 - [ ] #2117 Blood Awakening upgrades your blood's held move; a Verdant's regrowth key (Powers, Kingdoms, 2026-11-24)
@@ -86,8 +87,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2052 A small creature is finished with one quick slice (Powers, 2026-11-23)
 - [ ] #2051 Alt in mid air dives: jump + Alt is a dive-roll evade (Powers, 2026-11-23)
 - [ ] #2050 The dodge roll stays above the ground and is half as long; sitting against a wall no longer sinks in (Powers, Kingdoms, 2026-11-23)
-- [ ] #2049 Fishing: read the fish's moods, tire it out, watch your line (Powers, 2026-11-23)
-- …and 508 older ones.
+- …and 509 older ones.
 
 ## Health
 
