@@ -64,11 +64,11 @@ kanban-plugin: board
 - [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/realm-banks-finish|realm-banks-finish]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · ☁️ Cloud · #research · claimed
 
 
 ## In review
 
-- [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · 🔥 Prometheus · #research · in-review
 
 
 ## Needs Andy
