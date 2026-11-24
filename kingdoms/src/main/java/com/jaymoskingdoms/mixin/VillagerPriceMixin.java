@@ -41,6 +41,8 @@ abstract class VillagerPriceMixin {
 		com.jaymoskingdoms.Liars.prices((Villager)(Object)this, player);
 		// (gb-customs) a plains realm's market day
 		com.jaymoskingdoms.Customs.prices((Villager)(Object)this, player);
+		// (Village mods patch 5) the land's dish and good, for one who has traded here often enough (before the coin)
+		com.jaymoskingdoms.KnownGoods.offers((Villager)(Object)this, player);
 		com.jaymoskingdoms.Currencies.localize((Villager)(Object)this, player);
 	}
 }

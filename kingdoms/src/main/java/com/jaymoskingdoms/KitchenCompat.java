@@ -425,6 +425,15 @@ public final class KitchenCompat {
 		return rice == net.minecraft.world.level.block.Blocks.AIR ? null : rice;
 	}
 
+	/** (Village mods patch 5) Kitchen's dish {@code id} (a {@code Dish}'s id), or null without Kitchen or without that dish. */
+	static net.minecraft.world.item.@Nullable Item dish(String id) {
+		if (!FabricLoader.getInstance().isModLoaded(MOD)) {
+			return null;
+		}
+		return net.minecraft.core.registries.BuiltInRegistries.ITEM.getOptional(
+			net.minecraft.resources.Identifier.fromNamespaceAndPath(MOD, id)).orElse(null);
+	}
+
 	/** Kitchen's fish barrel for a fishery or a market stall, or a plain barrel without Kitchen. */
 	static net.minecraft.world.level.block.state.BlockState fishBarrel() {
 		net.minecraft.world.level.block.Block barrel = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(
