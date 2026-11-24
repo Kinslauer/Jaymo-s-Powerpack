@@ -177,10 +177,10 @@ public final class MedallionBoard {
 	}
 
 	private static @Nullable ItemStack symbol(ServerPlayer player) {
-		if (Clerics.isSymbol(player.getMainHandItem())) {
+		if (Clerics.focus(player, player.getMainHandItem())) {
 			return player.getMainHandItem();
 		}
-		return Clerics.isSymbol(player.getOffhandItem()) ? player.getOffhandItem() : null;
+		return Clerics.focus(player, player.getOffhandItem()) ? player.getOffhandItem() : null;
 	}
 
 	private static void raise(ServerPlayer player, boolean up) {
