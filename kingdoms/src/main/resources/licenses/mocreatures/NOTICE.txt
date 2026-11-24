@@ -28,7 +28,18 @@ Taken from it, under that licence:
   (kingdoms/tools/gen_legends.py). (Since 0.7.326 the silver skeleton is drawn as polyjo's Dead Traveler, CC BY 4.0;
   SilverSkeletonModel and silverskeleton are no longer used.)
 
+- the beasts of Mo' Creatures that Kingdoms keeps (Reference Mods patch 7), models, animation and textures: the Nether
+  scorpion (MoCModelScorpion, scorpionnether: its legs in pairs, claws, raised tail, the brood on a mother's back), the
+  manticore (MoCModelNewBigCat's lion with a mane, bat wings and a scorpion's tail; BCmanticore and its Dark, Blue and
+  Green coats), the big golem (MoCModelGolem: head, chest and twenty-three cubes of earth, golemt's block sheet and
+  golemeffect1-4's glows), the zebra and zorse (MoCModelNewHorse for the zebra, horsezebra and horsezorse), the wyvern
+  (MoCModelWyvern, wyvernmountain, wyvernarctic, wyverncave and wyverndark) and the winged horse's wings (MoCModelNewHorse's
+  six wing boxes, with the feathers of horsepegasus; the horn is ours). The models were ported by
+  kingdoms/tools/mocreatures/port_model.py and then adapted by hand to 26.3; the textures (the originals are in
+  kingdoms/tools/mocreatures/) are copied under our names by kingdoms/tools/gen_moc_beasts.py. Their behaviour is
+  Kingdoms' own (monsters/MocBeasts.java and the classes it registers, dragons/WyvernDragon.java, equestrian/WonderHorses.java).
+
 WarElephantModel and BreedHorseModel are likewise licensed under the GNU GPL v3. Their source is in
 the Jaymo's Powerpack repository (kingdoms/src/client/java/com/jaymoskingdoms/client/equestrian/). So are the monsters
 of legend (kingdoms/src/main/java/com/jaymoskingdoms/monsters/ and kingdoms/src/client/java/com/jaymoskingdoms/client/
-monsters/).
+monsters/), and the beasts above (the same folders, the dragons/ and equestrian/ ones for the wyvern and the winged horse).

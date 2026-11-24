@@ -1,0 +1,7 @@
+{
+  "type": "jaymoskingdoms:wyvern_nest",
+  "biomes": "#jaymoskingdoms:has_structure/wyvern_nest",
+  "step": "surface_structures",
+  "terrain_adaptation": "none",
+  "spawn_overrides": {}
+}
