@@ -250,7 +250,7 @@ final class WorkScenes {
 	/** Free to be seen at work: awake, not busy with anything else, not a settlement's worker (who has its own work). */
 	private static boolean free(Villager v) {
 		return !v.isSleeping() && Routines.idle(v) && v.getTradingPlayer() == null && !Whetting.working(v) && !SmithMending.working(v)
-			&& !Meals.eating(v) && !Downed.isDowned(v) && !(v instanceof Worker w && w.role() >= 0);
+			&& !Meals.eating(v) && !Downed.isDowned(v) && !(v instanceof Worker w && w.role() >= 0) && !KitchenCompat.butchering(v);
 	}
 
 	/** {@code v} is seen at their work just now. */
