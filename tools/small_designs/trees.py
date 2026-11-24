@@ -77,6 +77,8 @@ def hollow_oak():
     for z in range(hi + 1, hi + 4):
         for x in (6, 7, 8):
             g.put(x, 2, z, "dirt_path")
+            # (the air over it kept: terrain is left as it lies, so on a hillside the slope would bury the door)
+            g.clear(x, 3, z); g.clear(x, 4, z)
     # a window in the loft's east wall
     g.clear(hi, 9, 7); g.clear(hi, 9, 8)
     # the ladder, against the west wall

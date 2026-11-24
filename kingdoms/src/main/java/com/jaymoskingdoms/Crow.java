@@ -35,6 +35,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -134,11 +135,23 @@ public final class Crow extends Parrot {
 	}
 
 	/** {@code player} is someone it would fly from: not a friend, and not holding out food. */
+	private boolean strange(Player player) {
+		return !player.isSpectator() && player.isAlive() && !this.friends.containsKey(player.getUUID()) && !offers(player);
+	}
+
 	private boolean wary(Player player) {
-		if (player.isSpectator() || !player.isAlive() || this.friends.containsKey(player.getUUID()) || offers(player)) {
-			return false;
+		return this.strange(player) && this.distanceTo(player) < WARY_RANGE;
+	}
+
+	/** A stranger within {@link #WARY_RANGE} of its perch: it keeps off the perch till they go. */
+	private boolean strangerAtPerch() {
+		Vec3 home = this.perchSpot();
+		for (Player player : this.level().getEntitiesOfClass(Player.class, new AABB(home, home).inflate(WARY_RANGE))) {
+			if (this.strange(player) && player.position().distanceTo(home) < WARY_RANGE) {
+				return true;
+			}
 		}
-		return this.distanceTo(player) < WARY_RANGE;
+		return false;
 	}
 
 	private @Nullable Player stranger() {
@@ -249,7 +262,8 @@ public final class Crow extends Parrot {
 
 		@Override
 		public boolean canContinueToUse() {
-			return !Crow.this.leaving && Crow.this.stranger() != null;
+			// (on till the stranger is away from its tree too, not only from the bird: else it flutters home into them)
+			return !Crow.this.leaving && (Crow.this.stranger() != null || Crow.this.strangerAtPerch());
 		}
 
 		@Override
@@ -446,7 +460,7 @@ public final class Crow extends Parrot {
 
 		@Override
 		public boolean canUse() {
-			return !Crow.this.leaving && Crow.this.perch != null && !Crow.this.atPerch();
+			return !Crow.this.leaving && Crow.this.perch != null && !Crow.this.atPerch() && !Crow.this.strangerAtPerch();
 		}
 
 		@Override

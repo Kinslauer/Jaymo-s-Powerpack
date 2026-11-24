@@ -25,6 +25,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.npc.villager.VillagerProfession;
@@ -261,6 +262,10 @@ public final class TreeSites {
 		Faction camp = nearestCamp(server, foot);
 		if (camp != null) {
 			return post(level, camp, spots);
+		}
+		if (level.getDifficulty() == Difficulty.PEACEFUL) {
+			// (no band pitches a camp on Peaceful, as BanditCamps.trySpawn keeps it: looked at again once it isn't)
+			return false;
 		}
 		// (no camp near: one is founded off to the side, where a camp may be, and its men man the tree)
 		boolean waiting = false;
