@@ -60,6 +60,8 @@ public final class FireSmoke {
 	static final float RISE_MIN = 0.1F, RISE_MAX = 0.16F, SWELL = 1.6F;
 	/** Its grey (by day) at the foot and the top, and how thick it is at the foot. */
 	static final float GREY_FOOT = 0.22F, GREY_TOP = 0.46F, ALPHA = 0.55F;
+	/** How lit from below by the flames a plume's puff and a ground bank's start out (0..1; {@link StormParticle#lit}). */
+	static final float PLUME_LIT = 0.6F, GROUND_LIT = 0.4F;
 	/** How fast it leans with the wind once aloft, as a share of the wind's own drift. */
 	static final float LEAN = 1.5F;
 	/** Smog: puffs a tick for each fire under it, and the most a tick for every pall together (normal, low-end). A pall's
@@ -228,7 +230,7 @@ public final class FireSmoke {
 		float rise = Mth.lerp(random.nextFloat(), GROUND_RISE_MIN, GROUND_RISE_MAX);
 		double wx = Math.cos(Storms.clientWindAngle) * Storms.clientWindSpeed, wz = Math.sin(Storms.clientWindAngle) * Storms.clientWindSpeed;
 		minecraft.particleEngine.add(new StormParticle(level, x, y, z, StormsClient.cloudSprites.get(random), StormParticle.SMOKE, 0, size, life,
-			GROUND_GREY_FOOT, GROUND_GREY_FOOT, GROUND_GREY_FOOT, GROUND_ALPHA).smoke(rise, wx, wz, GROUND_SWELL, GROUND_GREY_FOOT, GROUND_GREY_TOP));
+			GROUND_GREY_FOOT, GROUND_GREY_FOOT, GROUND_GREY_FOOT, GROUND_ALPHA).smoke(rise, wx, wz, GROUND_SWELL, GROUND_GREY_FOOT, GROUND_GREY_TOP).lit(GROUND_LIT));
 	}
 
 	/** Every cell cools, the cold or far ones are forgotten; how many fires are near the camera (the nearer the more). */
@@ -295,7 +297,7 @@ public final class FireSmoke {
 		int life = Mth.nextInt(random, LIFE_MIN, LIFE_MAX);
 		float rise = Mth.lerp(random.nextFloat(), RISE_MIN, RISE_MAX) * (0.85F + 0.3F * blaze);
 		minecraft.particleEngine.add(new StormParticle(level, x, y, z, StormsClient.cloudSprites.get(random), StormParticle.SMOKE, 0, size, life,
-			GREY_FOOT, GREY_FOOT * 0.95F, GREY_FOOT * 0.92F, ALPHA).smoke(rise, wx, wz, SWELL, GREY_FOOT, GREY_TOP));
+			GREY_FOOT, GREY_FOOT * 0.95F, GREY_FOOT * 0.92F, ALPHA).smoke(rise, wx, wz, SWELL, GREY_FOOT, GREY_TOP).lit(PLUME_LIT));
 	}
 
 	/** Each large flame the server told of gathers its share of this tick's smog high above it; one further off than the

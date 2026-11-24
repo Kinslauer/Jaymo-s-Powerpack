@@ -586,6 +586,9 @@ final class Neighbours {
 			case PROPOSE -> {
 				if (McaCompat.marry(m.a, m.b)) {
 					say(level, m.a, "wed", Speech.GOLD, m.b);
+					// a wedding in a realm's town: its sky is lit that night
+					Celebrations.hold(level, Factions.around(level.getServer(), level, m.a.blockPosition(), Economy.POPULATION_RANGE),
+						Celebrations.WEDDING_TICKS);
 					level.sendParticles(ParticleTypes.HEART, m.a.getX(), m.a.getY() + 2.0, m.a.getZ(), 10, 0.6, 0.4, 0.6, 0.0);
 				}
 			}

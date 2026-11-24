@@ -257,6 +257,8 @@ public final class Festivals {
 	}
 
 	private static void fireworks(ServerLevel level, Faction f) {
+		// (seen from afar too: Celebrations)
+		Celebrations.far(level, f);
 		RandomSource random = level.getRandom();
 		if (random.nextFloat() >= FIREWORK_CHANCE) {
 			return;
