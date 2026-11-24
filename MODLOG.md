@@ -7579,3 +7579,20 @@ following integration task).
 - A side effect: someone badly cut up in a fight can now be bled dry before they go down, and then a bed or a
   campfire doesn't heal them while downed (the rule for the bled-dry). Tell Andy if that's too harsh.
 - Built on CI only; not played.
+
+## 0.26.85 (2026-11-24): A blast close by knocks you out cold (#2061)
+
+- **Blasts knock you out**: an explosion that hits you for two hearts or more (that near) lays you out cold for ten
+  seconds: standing, you drop; downed, you pass out. Sneak mashes you round sooner, as from any knock-out. Mobs that
+  can go down are laid out too. A blast of three hearts or more on someone already down still kills them. Andy: "the
+  explosion that happened while i was downed should have knocked me unconscious, like any blast at that proximity
+  should". `BlastOut`, tuning at its top.
+- Built on CI only; not played.
+
+## 0.26.86 (2026-11-24): Adrenaline kicks in once, going down included (#2062)
+
+- **Once means once**: going down is now one of the ways adrenaline kicks in, under the same once-every-15-minutes
+  rule as a hit that leaves you low. Before, the rush on going down didn't check the rule, so in Andy's fight it hit
+  once on a blow and again as he went down, and would start again each time he came round on the ground
+  ("andrenaline should have only kicked in once"). A downed mob's first rush is as it was. `Adrenaline#wentDown`.
+- Built on CI only; not played.
