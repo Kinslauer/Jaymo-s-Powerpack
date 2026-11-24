@@ -998,3 +998,10 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Agent:** claude-cloud.
 
 - 2026-11-24 (Andy, Vanilla+ patch I card): King's Roads already lays settlement roads, so patch I becomes "Also link a realm's towns": besides its nearest neighbours, every town in a realm gets a road to its capital.
+
+### 2026-11-24: The symbiote bodies' tendrils, stance and moves (red-symbiote-body, PR #2096)
+- **Decided (Andy, during the work):** the red body's tendrils "should extend out and down in front from the shoulders ... more like an encompassing ball than a cape", then "retain them all, there should be a visible abundance of tendrils and they should differ in size thickness and length ... they should stay on the back/rear of the model and shoulders, never out the front"; "adapt them well to the climb and walk animation as that will be the red suit's favored movement method"; "when done, black should get a similar treatment"; "the idle pose needs more of an exaggerated hunch like the reference, and even more curled while using tendrils, retaining the slight ragdoll on movement"; "the arms and knees should bend too, its far too stiff looking"; then stills and two videos of the two strains' fight in the second film and its concept art ("one more pass with animations similar to these"; "how the symbiotes morph their bodies into their attacks and movements and weaponry").
+- **Built as:** a crown of 8 tendrils of different sizes plus 14 strands off the back and shoulders on both bodies; wall walk from those roots, a ground skitter at a run; a deep hunch with bent elbows and knees, rearing up with tendrils raised while they work (the later stills), a pounce off the ground; the weapon arm grows out of the forearm; the black big body crouches wide and low when upright. Taken from the films: feel only.
+- **Open for Andy:** the red host's lifetime for the 500-block hunt (default taken: its time and its wasting both run at 15% while it hunts; each kill it feeds on adds 45 s).
+- **Applies to:** Powers, web symbiote (WebSlender, WebHulk, WebTendrilLayer, WebRedHunt).
+- **Agent:** red-symbiote-body.
