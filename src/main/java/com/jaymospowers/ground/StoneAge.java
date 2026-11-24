@@ -87,6 +87,8 @@ public final class StoneAge {
 		CLAY_MILK_BUCKET = item("clay_milk_bucket", ClayMilkBucketItem::new,
 			p -> p.durability(CLAY_BUCKET_USES).component(net.minecraft.core.component.DataComponents.CONSUMABLE, Consumables.MILK_BUCKET));
 		Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, JaymosPowers.id("tool_crafting"), GridToolRecipe.SERIALIZER);
+		// sent to players so JEI shows it on a server (JEI only asks for minecraft's own)
+		net.fabricmc.fabric.api.recipe.v1.sync.RecipeSynchronization.synchronizeRecipeSerializer(GridToolRecipe.SERIALIZER);
 
 		GRINDS.put(Items.FLINT, FLINT_DUST);
 		GRINDS.put(Items.CLAY_BALL, CLAY_DUST);
