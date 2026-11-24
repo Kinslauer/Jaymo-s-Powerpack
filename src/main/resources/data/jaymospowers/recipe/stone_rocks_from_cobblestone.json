@@ -1,12 +1,11 @@
 {
   "type": "minecraft:crafting_shapeless",
   "category": "building",
-  "group": "jaymoskingdoms:siding",
   "ingredients": [
     "minecraft:cobblestone"
   ],
   "result": {
-    "count": 2,
-    "id": "jaymoskingdoms:cobblestone_siding"
+    "id": "jaymospowers:stone_rock",
+    "count": 4
   }
 }
