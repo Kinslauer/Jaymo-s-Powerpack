@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 14:38). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 14:39). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -38,10 +38,6 @@ kanban-plugin: board
 - [ ] [[Inbox/refmods-13-body-anim-stations|refmods-13-body-anim-stations]] · for any · open
 - [ ] [[Inbox/refmods-16-titles-bloods-tensura|refmods-16-titles-bloods-tensura]] · for any · open
 - [ ] [[Inbox/refmods-06-horses|refmods-06-horses]] · for any · open
-- [ ] [[Inbox/vanilla-plus-e-soul-reaping-spawners|vanilla-plus-e-soul-reaping-spawners]] · for 💻 Odysseus · open
-- [ ] [[Inbox/vanilla-plus-f-delight-dishes|vanilla-plus-f-delight-dishes]] · for 💻 Odysseus · open
-- [ ] [[Inbox/vanilla-plus-g-illager-invasion|vanilla-plus-g-illager-invasion]] · for 💻 Odysseus · open
-- [ ] [[Inbox/vanilla-plus-h-advancement-tracker|vanilla-plus-h-advancement-tracker]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-i-settlement-roads|vanilla-plus-i-settlement-roads]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · for 💻 Odysseus · open
@@ -62,6 +58,10 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-b-stellarity-end-enderscape-band|vanilla-plus-b-stellarity-end-enderscape-band]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/vanilla-plus-c-back-slot|vanilla-plus-c-back-slot]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/vanilla-plus-d-horse-expert-skill|vanilla-plus-d-horse-expert-skill]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/vanilla-plus-e-soul-reaping-spawners|vanilla-plus-e-soul-reaping-spawners]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/vanilla-plus-f-delight-dishes|vanilla-plus-f-delight-dishes]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/vanilla-plus-g-illager-invasion|vanilla-plus-g-illager-invasion]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/vanilla-plus-h-advancement-tracker|vanilla-plus-h-advancement-tracker]] · ☁️ Cloud · claimed
 - [ ] [[Agents/implement-verdant-dinosaurs|implement-verdant-dinosaurs]] · 💻 Odysseus · running
 - [ ] [[Agents/red-symbiote-body|red-symbiote-body]] · 💻 Odysseus · #2096 · running
 
