@@ -537,6 +537,10 @@ public final class Downed {
 				}
 				return false;
 			}
+			if (isDowned(entity) && source.is(DamageTypeTags.IS_EXPLOSION) && entity.level() instanceof ServerLevel) {
+				// (Andy, 2026-11-24) "blasts on downed enemies should blow limbs off", whether or not the blow is a wound
+				com.jaymospowers.core.BlastGore.downedBlast(entity, source, amount);
+			}
 			if (!isDowned(entity) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || !(source.getEntity() instanceof Player)
 				|| entity instanceof Player || outCold(entity)) {
 				// ((0.18.84) and on one knocked out from standing, unhurt: blows land as on anyone awake)
