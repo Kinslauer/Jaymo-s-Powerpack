@@ -8,7 +8,6 @@ kanban-plugin: board
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/alexs-caves-integration|alexs-caves-integration]] · for coordinator · open
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
 - [ ] [[Inbox/blood-awakening-passive-upgrade|blood-awakening-passive-upgrade]] · for any · open
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for any · open
@@ -43,6 +42,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · ☁️ Cloud · #research · claimed
+- [ ] [[Inbox/alexs-caves-integration|alexs-caves-integration]] · alexs-caves-worldgen · claimed
 - [ ] [[Agents/alexs-caves-worldgen|alexs-caves-worldgen]] · 💻 Odysseus · running
 
 
