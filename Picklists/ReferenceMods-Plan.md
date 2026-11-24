@@ -70,22 +70,14 @@ Andy (H1): the hoverboard uses the arsenal's bomb glider model.
 - **H4 It runs on charge** (Hoverboards, size S). A power cell charged with redstone, so it isn't free flight. Flat, it drops to the ground and you push it like a skateboard. We have: No free projectiles rule, applied to free flight.
 - **H5 Crash at speed** (Hoverboards, size S). Hit a wall fast and you're flung off, ragdolled, and the board skids away. We have: Ragdolls with capped flings.
 
-## Patch 6: Horses: Icy's Better Horses rows
-Owns: kingdoms equestrian.
-ON HOLD: Andy asked whether to put Icy's Better Horses in whole (decision in the thread). Do not start until that is answered.
-
-- **R1 A command wheel for your horse** (Icy's Better Horses, size S). Hold a key near your horse: follow, stay, graze here, this stable is home, go home. We have: The trust whistle in Bonding.
-- **R2 A stable ledger of your horses** (Icy's Better Horses, size M). A ledger book (bought from a stablehand) listing your horses, where each was last seen and how it's keeping. No command needed. We have: Stables board horses.
-- **R3 Look a horse over before you tame it** (Icy's Better Horses, size S). Look at a wild horse with a saddle in hand to see its breed, sex and a rough read of its build. The scouter (S2) reads exact numbers. We have: Horse Expert is in the pack; our hidden stats stay hidden.
-- **R4 A medkit on the saddle** (Icy's Better Horses, size S). Saddlebag bandages a farrier sells: used once on their own when the horse is badly hurt.
-- **R5 Through the leaves, up the steps** (Icy's Better Horses, size S). Horses push through leaves and bushes and step up a block on their own; they swim with their head up instead of sinking.
-- **R6 Mine from the saddle** (Icy's Better Horses, size S). No slow-down breaking blocks from horseback.
-- **R7 See past the horse** (Icy's Better Horses, size S). In first person, looking straight down fades the horse's head and neck.
-- **R8 A cart that ploughs, a wagon for six** (Icy's Better Horses, size M). Hitch a plough to a draft horse to till a field row by row; draft horses pull the big wagon our caravans use. We have: Caravans, wagons, rickshaws.
-- **R9 Charge, kick, and nerve** (Icy's Better Horses, size M). A galloping horse rams what it hits; a horse kicks back at foes behind it; green horses bolt in a fight, trusted and destrier horses don't. We have: Courage spooking (equestrian stage 1).
-- **R10 A gift for each breed** (Icy's Better Horses, size M). Destriers barge fences down, steppe ponies herd loose livestock, desert horses shrug off heat and sand, drafts pull heavier loads, coursers keep their wind longer, palfreys never throw a rider. We have: Breeds differ by stats only.
-- **R11 Bring back a fallen horse** (Icy's Better Horses, size S). A dead horse can be brought back once by a healer or priest, for a price. We have: Your call: you ruled horse death permanent until a necromancer power can raise them from a mane lock.
-  - Andy's note: "can we put icy's in as a whole? im not sure our implementation is better."
+## Patch 6: Horses: Icy's Better Horses goes in, ours off
+Owns: build.gradle pack mods; kingdoms equestrian (Breed, Gait, Stride, Bond, Bonding, Tack, TackMenu, Tackroom, Herd, Herding, HorseKit, HorseRevival, Horsemanship, Mounted, Riders, Discipline, Equine, Boarding, BreedGifts) and its users (Stables, Quests, Cavalry, TradeRoutes, Couriers, Emigrants, Races, Gatherers, MountClimb, PackResourcePacks).
+Andy decided 2026-11-24 17:18Z: "icy has far better models and implementations, if we cant use its models then put icy's in instead." Its licence (Bare Minimum License v1.0) lets code be reused but its models and textures only as part of Icy's itself, so the mod goes in whole.
+- Add Icy's Better Horses 2.1.8 (Modrinth icys-better-horses, Fabric 26.3) with Modonomicon (MIT/CC-BY-4.0, new) and GeckoLib + Fabric API (already in the pack). Keep its copyright notice and licence text in the pack licences; ship the official jar unchanged (anti-reposting clause), downloaded by id like other pack mods.
+- Switch ours off where they overlap: our horse breeds and their coats, five gaits and stamina bar, bond/trust/discipline, tack screens, horse revival, the Mo' Creatures horse renderer for horse/skeleton/zombie horses, and anything Icy's does better (whistle, command wheel, free look, two riders). Keep what Icy's doesn't have: the war elephant and mammoth, the bat horse and nightmare (rewire as Icy's breeds or keep as their own mounts; say which in the PR), stables and stablehands, caravans, rickshaws, cavalry, horse quests (break-in, stud, race), hogtied captives carried on horseback.
+- Check overlaps with Horseman, Free Rein (FreeRein/FreeReinClient), Kaffee's Dual Ride, Ultimate Horseshoes, Horse Expert, Craftable Horse Armor: drop or turn off whichever duplicates Icy's, list each in the PR.
+- Existing worlds: Icy's converts existing horses once. Our saved breed data on old horses must not crash or duplicate.
+- The ticked rows R1-R11 come from Icy's itself now; check each one works in the pack and note any that doesn't.
 
 ## Patch 7: Mo' Creatures beasts we lack
 Owns: kingdoms monsters (GPL, licenses/mocreatures).
