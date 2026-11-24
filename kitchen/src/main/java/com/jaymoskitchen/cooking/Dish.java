@@ -316,7 +316,7 @@ public enum Dish {
 		List.of(new Buff(MobEffects.FIRE_RESISTANCE, 180 * 20, 0))),
 	WARPED_MOLDY_MEAT(Method.SMOKE, EnumSet.of(Station.SMOKER), List.of(PORKCHOP, WARPED_ROOTS, WARPED_ROOTS), 9, 0.7F, false,
 		List.of(new Buff(MobEffects.STRENGTH, 60 * 20, 0), new Buff(MobEffects.FIRE_RESISTANCE, 60 * 20, 0))),
-	// --- after Ender's Delight (its art and code are all rights reserved: ideas only, our own art), from Enderscape's End ---
+	// --- after Ender's Delight (MIT; its strange eclair art, our own for the other two), from Enderscape's End ---
 	STRANGE_ECLAIR(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(DOUGH, SUGAR, MILK_BOTTLE, PURUBERRY), 7, 0.5F, false,
 		List.of(new Buff(MobEffects.SLOW_FALLING, 60 * 20, 0), new Buff(MobEffects.SPEED, 60 * 20, 0))),
 	CHANTERELLE_STEW(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, CELESTIAL_CHANTERELLE, MURUBLIGHT_CHANTERELLE, POTATO), 9, 0.7F, true,

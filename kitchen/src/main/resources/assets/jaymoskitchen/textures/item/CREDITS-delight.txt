@@ -1,18 +1,20 @@
-Item textures from two MIT-licensed Farmer's Delight add-ons, used unchanged (one renamed):
+Item textures from three MIT-licensed Farmer's Delight add-ons, used unchanged (one renamed):
 
 Ocean's Delight by Scouter456 (MIT):
   honey_fried_kelp.png, braised_sea_pickle.png, kelp_encrusted_cod.png, seagrass_salad.png, fugu_roll.png,
   stuffed_cod.png (its cooked_stuffed_cod.png)
 Nether's Delight by Umpaz and SoyTutta (MIT):
   magma_gelatin.png, warped_moldy_meat.png
+Ender's Delight by Ax3dGaming (MIT, as its Modrinth page gives it):
+  strange_eclair.png
 
-strange_eclair.png, chanterelle_stew.png and drift_jelly_pudding.png are our own (tools/gen_end_dishes.py):
-Ender's Delight, whose dishes gave the idea, is all rights reserved.
+chanterelle_stew.png and drift_jelly_pudding.png are our own (tools/gen_end_dishes.py): Ender's Delight has no such dishes.
 
 MIT License
 
 Copyright (c) Scouter456 (Ocean's Delight)
 Copyright (c) Umpaz, SoyTutta (Nether's Delight)
+Copyright (c) Ax3dGaming (Ender's Delight)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 documentation files (the "Software"), to deal in the Software without restriction, including without limitation the

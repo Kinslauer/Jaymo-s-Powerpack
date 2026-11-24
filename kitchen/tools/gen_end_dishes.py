@@ -1,4 +1,4 @@
-"""Draws the three End dishes made after Ender's Delight (its art is all rights reserved, so these are our own).
+"""Draws two End dishes Ender's Delight has no art for (its strange eclair texture is used as it is, MIT).
 
 Hand-drawn 16x16 grids like tools/gen_assets.py (whose palette is full), with their own palette.
 Run from kitchen/:  python tools/gen_end_dishes.py
@@ -67,24 +67,6 @@ SPRITES = {
         "....kBBbbbBk....",
         ".....kkkkkk.....",
         "................",
-    ],
-    "strange_eclair": [
-        "................",
-        "................",
-        "................",
-        "...........kkk..",
-        "..........kppPk.",
-        ".........kpwpPk.",
-        "........kpppPDk.",
-        ".......kpppPdDk.",
-        "......kpwpPdDk..",
-        ".....kpppPdDk...",
-        "....kpppPdDk....",
-        "...kpwpPdDk.....",
-        "..kpppPdDk......",
-        "..kPPPdDk.......",
-        "..kDDDDk........",
-        "...kkkk.........",
     ],
 }
 
