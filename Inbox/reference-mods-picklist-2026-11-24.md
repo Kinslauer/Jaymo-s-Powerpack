@@ -1,5 +1,5 @@
 ---
-status: sent
+status: done
 for: any (needs Andy's PC: the folder is local)
 from: coordinator
 asked: 2026-11-24
@@ -45,3 +45,4 @@ suggested_owns: []
 
 ## Notes
 - 2026-11-24 16:54 Built in the cloud thread 'Build Reference Mods pick list' (Andy: 'no, build it here'): https://claude.ai/artifact/Fu1jDwywXNKSGj6mmU65fg (148 rows, db picks/andy). Not for the PC.
+- 2026-11-24 17:13 Andy saved 143 of 148 picks; 15 build tasks queued as Inbox/refmods-*.md (patch 6 horses held for Andy's decision).
