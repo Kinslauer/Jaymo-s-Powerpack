@@ -17,9 +17,13 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Which parts a kind of creature has, and the size of each one's own pool as a share of its most health. (Survival picks,
- * lso-pools) The pools sit on top of the health, apart from it: a humanoid's head 0.4, body 0.6, each arm 0.4, each leg
- * 0.6, each foot 0.4 (8/12/8/12/8 on 20 health). The other plans are scaled the same way: head 0.4, body 0.6, legs 0.6,
- * wings 0.4 (as arms). A simple body's one part is its health.
+ * lso-pools) The pools sit on top of the health, apart from it: a humanoid's head 0.4, body 0.6, each arm 0.8, each leg
+ * 1.2, each foot 0.8 (8/12/16/24/16 on 20 health). The other plans are scaled the same way: head 0.4, body 0.6, legs 1.2,
+ * wings 0.8 (as arms). A simple body's one part is its health.
+ * <p>
+ * Andy: players "were breaking their limbs off short jumps", so the limbs (arms, legs, feet, wings) hold twice what they
+ * did; head and body are as before. A limb breaks, and a blow past {@link com.jaymospowers.core.Dismember#SEVER_OVERKILL}
+ * of it severs it, only after twice the damage.
  */
 public enum BodyPlan {
 	HUMANOID(new BodyPart[] {HEAD, BODY, LEFT_ARM, RIGHT_ARM, LEFT_LEG, RIGHT_LEG, LEFT_FOOT, RIGHT_FOOT},
@@ -32,7 +36,7 @@ public enum BodyPlan {
 
 	/** (Survival picks, lso-pools) Each pool's size as a share of the most health; tuning lives here. */
 	public static final class Pools {
-		public static final float HEAD = 0.4F, BODY = 0.6F, ARM = 0.4F, LEG = 0.6F, FOOT = 0.4F;
+		public static final float HEAD = 0.4F, BODY = 0.6F, ARM = 0.8F, LEG = 1.2F, FOOT = 0.8F;
 
 		private Pools() {
 		}
@@ -53,7 +57,7 @@ public enum BodyPlan {
 
 	private final BodyPart[] parts;
 	private final float[] shares;
-	/** The pools' shares added up (a humanoid's 3.8). */
+	/** The pools' shares added up (a humanoid's 6.6). */
 	private final float total;
 	private final BodyPart[] fallParts;
 

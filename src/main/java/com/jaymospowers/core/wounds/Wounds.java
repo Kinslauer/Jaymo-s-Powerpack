@@ -63,7 +63,7 @@ import org.jspecify.annotations.Nullable;
  * way back.
  * <p>
  * Survival picks (Andy, 2026-11-22, after Legendary Survival Overhaul's ideas; none of its code): every part has its own
- * pool on top of the health, apart from it ({@link BodyPlan}: a humanoid's head 8, body 12, arms 8, legs 12, feet 8 on 20
+ * pool on top of the health, apart from it ({@link BodyPlan}: a humanoid's head 8, body 12, arms 16, legs 24, feet 16 on 20
  * health). This replaces the bruise curve above: a hit takes its damage from the health as vanilla does and the same from
  * the part it lands on; healing the health no longer heals the parts. The parts mend by themselves while fed
  * ({@link #PART_MEND_TICKS}, a quarter as fast until patched up, {@link #PATCH_FROM} now being the share a part may be
