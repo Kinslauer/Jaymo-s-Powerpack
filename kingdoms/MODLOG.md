@@ -16682,3 +16682,17 @@ Andy picked "goblin extras" from the survival pick list (2026-11-22); the Goblin
   (`GROUND_*`) at the top; the plumes and the pall above are unchanged.
 - **Whittling recipes in JEI** on a server (sent with `RecipeSynchronization`; JEI only asks for Minecraft's own).
 - Built on CI only; not played, so the smoke's look hasn't been seen.
+
+## 0.12.16 (2026-11-24): the life aim page is a torn scrap on rough starts, headed by who you are (#2064)
+
+- Andy: "your starting journal entry should resemble a scrap of paper ... only ever a book if you have a start within a
+  town or something less rough. it should also read out your class, heritage, name, and then the reason".
+- The aim page that opens as you land is now a single torn scrap of parchment, burnt dark at its ragged edges (our own
+  texture, `textures/gui/journal/scrap.png`; client `ScrapScreen`, a Done button under it, or Esc) on every road but the
+  town ones. Down on your luck in a rich city, the family farmhand and sworn to a realm (at its keep) keep Minecraft's
+  book page (`LifeAims.BOOK_ROADS`); the cells and the eviction are in a town but rough, so they get the scrap.
+- Both open with a "Who You Are" heading and "You are <name>, a <class> of <heritage> heritage." (no class yet: "of
+  <heritage> heritage, with no calling yet"), then the aim as it read before. The name is the one picked in the
+  creator (the username if none). Lang part `aim-scrap.json`.
+- Still shown on screen only, as since the book left the pack: no item.
+- Built by CI; not played.
