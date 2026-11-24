@@ -16975,3 +16975,13 @@ Andy: "can i have you work on npc pathing? they get stuck in water or on buildin
 - The Silk Deeps, the cobweb-hung spider caves of dark spider stone and nest silk (Andy: "remove these caves and their abandoned buildings"), are no longer placed in the Overworld, so new chunks get neither the caves nor the web-hung spruce watcher's huts over them, nor the brood queen's chamber under them (both only ever generate over the Silk Deeps). Switch: `SilkDeeps.GENERATES`.
 - Everything stays registered (the biome, spider stone, nest silk, shed skins, egg sacs, the brood queen, both structures), so worlds that already have them still load and what was already generated stays. Netcasters still spawn deep down everywhere else, so silk glands still drop; spiders that drag a player off fall back to a cave spider spawner's nest.
 - Built; not played. Only new chunks change.
+
+## 0.12.43 (2026-11-24): Alex's Caves: Rubber-folk at home in the Candy Cavity, the burning beast in the Nether (#2111)
+
+- In Alex's Caves' Candy Cavity, where the Mad Tinkerer grew the first Rubber-folk, a Rubber-folk player grows a lost limb
+  back twice as fast (every 10 seconds) and slowly mends (half a heart every 5 seconds). Nothing says why.
+- Alex's candy counts among their sweets: gummies, rock candy, jelly beans, caramel and caramel apples, ice cream and
+  sundaes, hot chocolate, purple soda and gingerbread crumbs mend them like a cookie does.
+- The Luxtructosaurus is a demon of the Ash: it counts as a demon (the Devil Splitter lands every blow on it twice), and
+  once you've come within 48 blocks of one in the caves it knows you. After that, while you're in the Nether, about once
+  an hour one walks out of the Ash 48 to 80 blocks from you (never while another is near).
