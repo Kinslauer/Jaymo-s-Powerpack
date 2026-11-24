@@ -14,11 +14,10 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 - [[Agents/changeling-voice-mimic|changeling-voice-mimic]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
-- [[Inbox/ai-texture-pipeline|ai-texture-pipeline]]: in review since 2026-11-21 (PR #research).
 
 ## On the board
 
-48 waiting for a bot, 4 being built, 1 in review: see [[Kanban]].
+46 waiting for a bot, 7 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 

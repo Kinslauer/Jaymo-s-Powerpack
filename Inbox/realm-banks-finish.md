@@ -1,10 +1,10 @@
 ---
-status: open
-for: any
+status: claimed
+for: claude-cloud
 from: coordinator
 asked: 2026-11-23
-thread: three-clips-talk-nightmare-limbs (Claude Code side session)
-claimed_by: 
+thread: cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR
+claimed_by: claude-cloud
 pr: 
 suggested_owns:
   - kingdoms Banks.java, LetterOfCredit.java (new)
@@ -55,3 +55,4 @@ a realm that falls takes every balance, letter and loan of its bank with it.
 ## Notes
 - Claude (side session, 2026-11-23): handing over at Andy's ask ("put this work up on the vault for coord claude to
   pickup tmr").
+- 2026-11-24 17:59 2026-11-24 Andy: "finish here": cloud Claude finishes this in thread cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR; bots leave it.

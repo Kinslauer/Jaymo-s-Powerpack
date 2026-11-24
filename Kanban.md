@@ -71,7 +71,6 @@ kanban-plugin: board
 
 ## In review
 
-- [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · 🔥 Prometheus · #research · in-review
 
 
 ## Needs Andy

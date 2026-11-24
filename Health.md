@@ -21,10 +21,6 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 - [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]]: blocked since 2026-11-19: 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 - [[Inbox/wither-model|wither-model]]: blocked since 2026-11-21: 2026-11-21 10:18 Andy hold instruction (2026-11-19 23:40 ET): leave the model as-is (v3 previews); do not pick up or raise this again until Andy hands it on. N…
 
-## Reviews sitting too long
-
-- [[Inbox/ai-texture-pipeline|ai-texture-pipeline]]: in review since 2026-11-21 (PR #research).
-
 ## Tasks for nobody
 
 - [[Inbox/alexs-caves-integration|alexs-caves-integration]]: `for: coordinator` matches no bot or agent, so no one will claim it.
