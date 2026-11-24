@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 13:49). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 13:51). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -40,7 +40,6 @@ kanban-plugin: board
 - [ ] [[Inbox/refmods-06-horses|refmods-06-horses]] · for any · open
 - [ ] [[Inbox/vanilla-plus-a-incendium-castle-start|vanilla-plus-a-incendium-castle-start]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-b-stellarity-end-enderscape-band|vanilla-plus-b-stellarity-end-enderscape-band]] · for 💻 Odysseus · open
-- [ ] [[Inbox/vanilla-plus-c-back-slot|vanilla-plus-c-back-slot]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-d-horse-expert-skill|vanilla-plus-d-horse-expert-skill]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-e-soul-reaping-spawners|vanilla-plus-e-soul-reaping-spawners]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-f-delight-dishes|vanilla-plus-f-delight-dishes]] · for 💻 Odysseus · open
@@ -56,19 +55,18 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · ☁️ Cloud · #research · claimed
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/refmods-12-fishing|refmods-12-fishing]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/refmods-14-sky-light-air|refmods-14-sky-light-air]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/refmods-15-provenance-coins|refmods-15-provenance-coins]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/structures-2-placement-reasons|structures-2-placement-reasons]] · ☁️ Cloud · #2085 · claimed
+- [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · ☁️ Cloud · #2090 · claimed
 - [ ] [[Agents/implement-verdant-dinosaurs|implement-verdant-dinosaurs]] · 💻 Odysseus · running
 
 
 ## In review
 
-- [ ] [[Inbox/refmods-01-felling|refmods-01-felling]] · ☁️ Cloud · #2089 · in-review
 - [ ] [[Agents/venom-head-adaptation|venom-head-adaptation]] · 💻 Odysseus · #2080 · in-review
 
 
