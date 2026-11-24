@@ -26,7 +26,7 @@ went in PR #2063.)
   bank of the realm, from your coin or your balance. Overdue: the bank takes it from your balance; what it can't take
   costs you standing (-25 a day) until it's paid.
 - **Letters of credit** (`letter_of_credit` item, the letter's art): a sealed note for an amount drawn on a realm, in
-  your name. Only you can cash it, at any bank: free in its own realm, 5% at another realm's bank. A thief who lifts
+  your name. Only you can cash it, at any bank: free in its own realm, 12% at another realm's bank (the changer's 10% cut and 2%). A thief who lifts
   it has paper.
 - **When a realm falls, its bank goes with it**: every balance in it is gone, every letter drawn on it is waste paper,
   and every loan it made is forgotten. Accounts are checked on the bank's daily round and whenever they're used, so no
@@ -35,4 +35,4 @@ went in PR #2063.)
 ## Open questions for Andy
 - Deposits are kept apart from the treasury (the realm can't spend them). The other way (deposits go into the
   treasury, and a realm that spends them can't pay out: a run on the bank) is a bigger hand in finances, and riskier.
-- Rates (2% a week, 10% on loans, a 5% letter fee) are guesses; they're constants at the top of `Banks`.
+- Rates (2% a week, 10% on loans, a 12% letter fee abroad) are guesses; they're constants at the top of `Banks`.
