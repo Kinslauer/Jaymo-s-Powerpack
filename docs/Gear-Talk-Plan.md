@@ -1,6 +1,6 @@
 # Gear Talk plan (draft, for Andy's picks)
 
-Status: Andy picked 2026-11-24 (below); step 1 built (`kingdoms/.../GearTalk.java`). Thread "Draft gear-based reactions from people you meet".
+Status: Andy picked 2026-11-24 (below); all five steps built (`kingdoms/.../GearTalk.java`; step 1 PR #2074, step 2 PR #2077, steps 3-5 together). Thread "Draft gear-based reactions from people you meet".
 
 **Andy's picks (2026-11-24, 11:13 AM ET):** every tag family in, all six two-tag lines kept. Q1 plain folk say "more
 Frostborn work than flesh", only androids, the Mad Tinkerer, Bio-built and Frostborn troopers say "cyborg". Q2 Rig limbs
@@ -290,3 +290,14 @@ who fitted it, and whether it was come by honestly. A wooden or iron limb draws 
 anyone else who walks on one. A mask still marks a vigilante, and folk treat it as they treat any vigilante. Jewels, a
 priest's cross, a fairy in a bottle or a dead thing's trinket each say something about the one wearing it, and folk say
 it back.
+
+## As built, steps 3 to 5 (2026-11-24)
+
+- Themes are item tags `data/jaymoskingdoms/tags/item/gear/<theme>.json` (every entry `required: false`), read on the armour
+  slots, the harness and the baubles.
+- `ragged` is no armour and no harness (baubles allowed), so "jewels + ragged" can happen. The plan's "and no baubles"
+  would have made that two-tag line impossible.
+- Realm arms: the harness tabard's `HeraldryArmour.ARMS` matched against `Outfits.heraldry`, or `Colours.wears` (a
+  realm's colours). Theirs / at war with theirs (`Approaches.war`) / another realm's.
+- Gossip is kept in memory only (lost on a restart), keyed by `Recollections.key`, so a masked look stays apart from the
+  face. Strangers are named by their look only in gossip lines (`gear.look.<tag>`).

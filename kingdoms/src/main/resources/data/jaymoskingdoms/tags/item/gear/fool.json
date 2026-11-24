@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymospowers:jester_cap",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:jesters_cushion",
+      "required": false
+    }
+  ]
+}
