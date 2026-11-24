@@ -1019,6 +1019,7 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-24 (Andy, Vanilla+ thread): port Ender's Delight's crops and dishes ("port them"), chorus dishes too (card: "Port all of it, chorus too"), past the old "except chorus fruit" rule.
 
 - 2026-11-24 (Andy, patron colossus thread): approved the lore paragraph "The patrons' colossi" (PR #2103, merged); asked for the hunt to bring a random tornado, earthquake or tsunami (PR #2104).
+- 2026-11-24 4:34 PM ET (Andy, Alex's Caves thread, PR #2105): "yes bring it back with our theme": Alex's neodymium nodes stay, every scarlet/azure texture recoloured (scarlet = ferrosite-sand rust, azure = magnetic-shroom slate blue).
 - 2026-11-24 (Andy, Vanilla+ thread): approved the Lore paragraph "The End's larder" (Ender's Delight port).
 - **Added (same day):** on whether a new host (not yet able to break takeovers) can fight the red's forced hunt: "yeah let them struggle". And the forced-hunt lore sentence: "approved".
 
