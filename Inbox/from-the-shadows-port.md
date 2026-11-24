@@ -1,5 +1,5 @@
 ---
-status: open
+status: done
 for: any
 from: survival picks thread (session local_2bfd1f34)
 asked: 2026-11-22
