@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 17:11). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 17:12). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -22,12 +22,15 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-42 waiting for a bot, 0 being built, 1 in review: see [[Kanban]].
+57 waiting for a bot, 0 being built, 1 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2076 Thick fire smoke starts on the ground, not up at the flames (Kingdoms, 2026-11-24)
+- [ ] #2075 The last bowl or bottle comes back (Powers, 2026-11-24)
+- [ ] #2074 gear talk - folk remark on your Frostborn work and stand-in limbs (Kingdoms, 2026-11-24)
 - [ ] #2070 Lock-on names the part only with Called Shots; what hurts you is said in your own voice (Powers, Kitchen, 2026-11-24)
 - [ ] #2069 A dead player's severed head can be taken as a trophy (Powers, Kingdoms, 2026-11-24)
 - [ ] #2067 A Truth Cleric prays from a book, not a holy symbol (Kingdoms, 2026-11-24)
@@ -85,14 +88,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2003 survival picks: free riding camera, plants and flames in the wind (Kingdoms, 2026-11-22)
 - [ ] #2002 Burning bodies only spread fire on wood, pat out with a right click, and leave ash in their shape that blows away (Kitchen, 2026-11-22)
 - [ ] #1999 Loading screen tips can be scrolled back and on, and long ones stay up longer (Kingdoms, 2026-11-22)
-- [ ] #1998 Mutant zombies vary like the old dead: by where they rose, their land and their rot (Kingdoms, 2026-11-22)
-- [ ] #1997 The mutant zombie wears the old dead's rags, not the game's cyan and blue (Kingdoms, 2026-11-22)
-- [ ] #1996 survival picks: one base gauntlet for every fist weapon, offhand punches, Crushing (Powers, 2026-11-22)
-- …and 415 older ones.
+- …and 418 older ones.
 
 ## Health
 
-14 problems in the notes: [[Health]].
+12 problems in the notes: [[Health]].
 
 ## Last week
 
