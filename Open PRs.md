@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-24 13:59
+updated: 2026-11-24 14:08
 ---
 # Open PRs
 
-8 open, as of 2026-11-24 13:59. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+10 open, as of 2026-11-24 14:08. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2071](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2071) One cobblestone crafts back into 4 stone rocks
@@ -44,4 +44,14 @@ Andy merges only on "merge", one at a time.
 ## [#2090](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2090) Villagers seen at their jobs: tools, forge, stove, butcher at the hook
 - **Branch:** `claude/villagers-visible-jobs` · **Updated:** 2026-11-24 (today)
 - **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#2092](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2092) Fishing extras: spooking, solid or light hooks, leaps, turning runs, clean landings, a line that hangs (Powers)
+- **Branch:** `claude/fishing-extras` · **Updated:** 2026-11-24 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#2093](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2093) Zombies kneel and gnaw on bodies: bend-over pose, flying chunks, the body jerking
+- **Branch:** `claude/project-thread-wpby5s` · **Updated:** 2026-11-24 (today)
+- **Checks:** ⏳ 3 of 4 running
 - **Agent:** no agent note

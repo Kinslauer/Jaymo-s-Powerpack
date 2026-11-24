@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: Verdant dinosaurs (from the Dino-26.3 Amber Age jar), spawned by codex-reference-dinos-venom
 branch: t3/implement-verdant-dinosaurs
 with: 
@@ -35,3 +35,4 @@ Andy confirmed the jar is his own mod made with Claude and GPT ("yes they were m
 ## Done
 (pending)
 - 2026-11-24 13:30 No sign of work for 30 min: marked stalled (whoever ran it stopped).
+- 2026-11-24 14:08 No sign of work for 30 min: marked stalled (whoever ran it stopped).
