@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:44). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:51). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -27,15 +27,14 @@ kanban-plugin: board
 - [ ] [[Inbox/mordhau-2-hoods-crests|mordhau-2-hoods-crests]] · for 💻 Odysseus · open
 - [ ] [[Inbox/mordhau-3-body|mordhau-3-body]] · for 💻 Odysseus · open
 - [ ] [[Inbox/mordhau-4-legs|mordhau-4-legs]] · for 💻 Odysseus · open
-- [ ] [[Inbox/village-mods-5-town-life-hats|village-mods-5-town-life-hats]] · for 💻 Odysseus · open
 - [ ] [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · for any · open
+- [ ] [[Inbox/village-mods-5-town-life-hats|village-mods-5-town-life-hats]] · for 💻 Odysseus · #2122 · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Agents/gravity-magnetism|gravity-magnetism]] · 💻 Odysseus · running
-- [ ] [[Agents/village-mods-5|village-mods-5]] · 💻 Odysseus · running
 - [ ] [[Agents/waterskin-redesign|waterskin-redesign]] · 💻 Odysseus · running
 
 
