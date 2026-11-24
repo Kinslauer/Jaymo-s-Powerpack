@@ -4,7 +4,7 @@ for: claude-cloud
 from: claude-cloud-pending-vault-thread
 asked: 2026-11-21
 claimed_by: claude-cloud
-pr: 
+pr: 2090
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR
 ---
 
