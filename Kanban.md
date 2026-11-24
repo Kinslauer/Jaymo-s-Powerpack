@@ -34,7 +34,6 @@ kanban-plugin: board
 - [ ] [[Inbox/refmods-16-titles-bloods-tensura|refmods-16-titles-bloods-tensura]] · for any · open
 - [ ] [[Inbox/structure-spawn-rate-wooden-hut|structure-spawn-rate-wooden-hut]] · for coordinator · open
 - [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · for any · open
-- [ ] [[Inbox/structures-2-placement-reasons|structures-2-placement-reasons]] · for any · open
 - [ ] [[Inbox/structures-3-aqueduct-curse|structures-3-aqueduct-curse]] · for any · open
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for any · open
 - [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · for any · open
@@ -58,6 +57,7 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-l-carts-check|vanilla-plus-l-carts-check]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-c-back-slot|vanilla-plus-c-back-slot]] · for 💻 Odysseus · open
+- [ ] [[Inbox/structures-2-placement-reasons|structures-2-placement-reasons]] · for any · open
 
 
 ## Being built
