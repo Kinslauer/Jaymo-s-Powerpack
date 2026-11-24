@@ -8,7 +8,7 @@ claimed_by:
 pr: 
 suggested_owns: []
 ---
-# Reference Mods pick list (folder + 9 links)
+# Reference Mods pick list (folder + 16 links)
 
 **Andy's words:** "C:\Users\toopo\OneDrive\Desktop\Reference Mods id like a large picklist from these mods. and links."
 "after we make it i will remove them all from the folder so it can be done when it fills again."
@@ -25,6 +25,13 @@ suggested_owns: []
    - https://www.curseforge.com/minecraft/mc-mods/timber-tales-dynamic-tree-system — Andy: "the trees have an open task related i believe, this mod might help." (check the Felled / loose-wood / tree tasks)
    - https://www.curseforge.com/minecraft/mc-mods/juztsys-civilizations
    - https://www.curseforge.com/minecraft/mc-mods/cdna
+   - https://www.curseforge.com/minecraft/mc-mods/justleveling-fork
+   - https://www.curseforge.com/minecraft/modpacks/otherworld-dnd (modpack: list its mods' features)
+   - https://www.curseforge.com/minecraft/mc-mods/integrated-villages
+   - https://www.curseforge.com/minecraft/mc-mods/the-orcs
+   - https://www.curseforge.com/minecraft/mc-mods/equivalentexchange
+   - https://www.curseforge.com/minecraft/mc-mods/mo-creatures (we already draw some Mo' Creatures monsters: LegendRenderer; mark what we have)
+   - https://www.curseforge.com/minecraft/mc-mods/morph/download/4397367 — Andy: "this should work into how druid's wild shape works"
 
 ## Deliverable
 - Use the `modpack-cross-reference` skill. A **large** pick list as a tickable artifact page (db picks/andy), one row per
