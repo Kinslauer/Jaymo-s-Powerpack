@@ -376,6 +376,17 @@ public final class WebMorph {
 		return true;
 	}
 
+	/** The takeover's over: a weapon the symbiote was forming on its own ({@link #drivenStrike}) melts back, unstruck. */
+	static void endDriven(ServerPlayer player) {
+		Live live = player.getAttached(LIVE);
+		if (live == null || !live.driven) {
+			return;
+		}
+		live.driven = false;
+		live.pending = NONE;
+		player.removeAttached(CHARGE);
+	}
+
 	/** Let go: strikes now if the weapon has formed, else as soon as it has. */
 	static void release(ServerPlayer player, int targetId) {
 		Charge charge = player.getAttached(CHARGE);

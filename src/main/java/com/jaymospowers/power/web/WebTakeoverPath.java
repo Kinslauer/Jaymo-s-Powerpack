@@ -69,6 +69,8 @@ final class WebTakeoverPath {
 	static final double PARTIAL_MIN_GAIN = 2.5;
 	/** Waypoints sent at most (the rest come with the next re-path). */
 	static final int PATH_SEND_MAX = 48;
+	/** Where you are on the stored path: looked for this many nodes behind where it last found you, and this many on. */
+	static final int HOST_BACK = 2, HOST_AHEAD = 16;
 	/** Straight at it instead: in this range (blocks), this level (blocks of height), and in clear sight, feet and eyes. */
 	static final double DIRECT_RANGE = 7.0;
 	static final double DIRECT_MAX_DY = 1.2;
@@ -227,6 +229,8 @@ final class WebTakeoverPath {
 		BlockPos pathFrom = BlockPos.ZERO;
 		int sentEnd;
 		long searchAt = Long.MIN_VALUE;
+		/** The node you were last found nearest ({@link #hostIndex}): the look for you moves on with you. */
+		int hostAt;
 		/** Progress: the first tick seen, where it stood (running), the best distance to the prey, the last plan's cost, ticks without any. */
 		boolean started;
 		Vec3 progressPos = Vec3.ZERO;
@@ -377,6 +381,7 @@ final class WebTakeoverPath {
 			route.lastCost = cost;
 			route.pathFrom = start;
 			route.nodes = end.path();
+			route.hostAt = 0;
 			transmit(player, route, 0);
 			if (route.dig && now >= route.ripRetryAt) {
 				// (a face right at the start: it tears into it now, rather than leave the client nowhere to go)
@@ -460,6 +465,7 @@ final class WebTakeoverPath {
 	private static void send(ServerPlayer player, Route route, List<BlockPos> nodes, int mode, BlockPos focus) {
 		route.mode = mode;
 		route.nodes = nodes;
+		route.hostAt = 0;
 		route.sentEnd = Math.min(nodes.size(), PATH_SEND_MAX);
 		List<BlockPos> sent = nodes.size() > PATH_SEND_MAX ? List.copyOf(nodes.subList(0, PATH_SEND_MAX)) : nodes;
 		ServerPlayNetworking.send(player, new WebNet.TakeoverPath(sent, mode, focus));
@@ -517,17 +523,23 @@ final class WebTakeoverPath {
 		return nodes.size();
 	}
 
-	/** Where you are on the stored path: the nearest of its first few nodes. */
+	/**
+	 * Where you are on the stored path: the nearest node from a little behind where it last found you to a stretch on
+	 * ({@link #HOST_BACK}, {@link #HOST_AHEAD}), so it keeps up with you however long the walk.
+	 */
 	private static int hostIndex(ServerPlayer player, Route route) {
-		int from = 0;
+		int size = route.nodes.size();
+		int last = Math.min(route.hostAt, Math.max(0, size - 1));
+		int from = last;
 		double near = Double.MAX_VALUE;
-		for (int i = 0; i < Math.min(6, route.nodes.size()); i++) {
+		for (int i = Math.max(0, last - HOST_BACK); i < Math.min(size, last + HOST_AHEAD); i++) {
 			double d = Vec3.atBottomCenterOf(route.nodes.get(i)).distanceToSqr(player.position());
 			if (d < near) {
 				near = d;
 				from = i;
 			}
 		}
+		route.hostAt = from;
 		return from;
 	}
 
@@ -1419,6 +1431,9 @@ final class WebTakeoverPath {
 			List<BlockPos> shaft = new ArrayList<>();
 			for (int i = 1; i <= 2; i++) {
 				BlockPos cell = feet.below(i);
+				if ((kind(level, cache, cell) & (DANGER | WATER | UNLOADED)) != 0) {
+					return List.of();
+				}
 				if (passable(level, cache, cell)) {
 					continue;
 				}
@@ -1427,7 +1442,8 @@ final class WebTakeoverPath {
 				}
 				shaft.add(cell);
 			}
-			return shaft;
+			// (only with ground under the hole to land on, no further down than the search's drops, nothing that burns or drowns)
+			return shaft.isEmpty() || !shaftLanding(level, cache, feet.below(2)) ? List.of() : shaft;
 		}
 		Direction main;
 		Direction other;
@@ -1443,6 +1459,23 @@ final class WebTakeoverPath {
 			found = ripAlong(player, route, level, other, toward.y);
 		}
 		return found;
+	}
+
+	/**
+	 * Under the bottom of a hole dug straight down ({@code bottom}, open once it's torn): a floor to land on within
+	 * {@link #MAX_DROP} blocks, the way down open with no fire, lava or water in it.
+	 */
+	private static boolean shaftLanding(ServerLevel level, Map<Long, Integer> cache, BlockPos bottom) {
+		for (int k = 0; k <= MAX_DROP; k++) {
+			int under = kind(level, cache, bottom.below(k + 1));
+			if ((under & (DANGER | WATER | UNLOADED)) != 0) {
+				return false;
+			}
+			if ((under & PASSABLE) == 0) {
+				return (under & FLOOR) != 0;
+			}
+		}
+		return false;
 	}
 
 	private static List<BlockPos> ripAlong(ServerPlayer player, Route route, ServerLevel level, Direction dir, double targetY) {
