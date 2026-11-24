@@ -173,15 +173,15 @@ public final class WebRedHunt {
 	 * and loaded but themselves, a player who can't be hurt, a stand or another symbiote of the red's own.
 	 */
 	static @Nullable LivingEntity nearest(ServerLevel level, net.minecraft.server.level.ServerPlayer hunter) {
-		return nearest(level, hunter, null);
+		return nearest(level, hunter, java.util.Set.of());
 	}
 
-	/** The same, but not {@code skip} (the prey it just gave up on). */
-	static @Nullable LivingEntity nearest(ServerLevel level, net.minecraft.server.level.ServerPlayer hunter, @Nullable Entity skip) {
+	/** The same, but none in {@code skip} (entity ids: the prey it gave up on). */
+	static @Nullable LivingEntity nearest(ServerLevel level, net.minecraft.server.level.ServerPlayer hunter, java.util.Set<Integer> skip) {
 		LivingEntity best = null;
 		double bestDistance = RANGE * RANGE;
 		for (Entity entity : level.getAllEntities()) {
-			if (entity instanceof LivingEntity living && entity != hunter && entity != skip && living.isAlive()
+			if (entity instanceof LivingEntity living && entity != hunter && !skip.contains(entity.getId()) && living.isAlive()
 				&& !(living instanceof net.minecraft.world.entity.decoration.ArmorStand)
 				&& !(living instanceof net.minecraft.world.entity.player.Player p && (p.isCreative() || p.isSpectator()))
 				&& WebSymbioteStrains.of(living) != WebSymbioteStrain.RED) {

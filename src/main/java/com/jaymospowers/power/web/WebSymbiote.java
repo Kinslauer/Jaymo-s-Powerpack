@@ -1089,6 +1089,8 @@ public final class WebSymbiote {
 		final java.util.Map<String, long[]> annoyed = new java.util.HashMap<>();
 		/** (0.15.33) Walking you somewhere: where it last made headway, and when (see {@link #STUCK_LET_GO_TICKS}). */
 		@org.jspecify.annotations.Nullable Vec3 headwayAt;
+		/** Prey this takeover gave up on, no way to them (entity ids; see {@link #giveUp}): it doesn't turn back to them. */
+		final java.util.Set<Integer> givenUp = new java.util.HashSet<>();
 		long headwayTime;
 		/** (0.15.33) Before eating a player's body: when it'll stop waiting (0: not waiting); whether you asked for this meal (Consume). */
 		long hesitateUntil;
@@ -2256,6 +2258,8 @@ public final class WebSymbiote {
 			dropSight(player, live);
 			WebTakeoverPath.stop(player, live.route);
 			live.route = null;
+			live.givenUp.clear();
+			WebMorph.endDriven(player);
 			player.removeAttached(STRUGGLE);
 			ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0, false));
 		}
@@ -2298,6 +2302,8 @@ public final class WebSymbiote {
 			dropSight(player, live);
 			WebTakeoverPath.stop(player, live.route);
 			live.route = null;
+			live.givenUp.clear();
+			WebMorph.endDriven(player);
 			player.removeAttached(STRUGGLE);
 			ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0, false));
 		}
@@ -2379,6 +2385,8 @@ public final class WebSymbiote {
 				dropSight(player, live);
 				WebTakeoverPath.stop(player, live.route);
 				live.route = null;
+				live.givenUp.clear();
+				WebMorph.endDriven(player);
 				player.removeAttached(STRUGGLE);
 				ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0, false));
 			}
@@ -2487,15 +2495,15 @@ public final class WebSymbiote {
 
 	/** The nearest thing it wants: creatures (not pets or named ones); in a rampage, other players too. */
 	private static @org.jspecify.annotations.Nullable LivingEntity prey(ServerPlayer player, boolean rampage) {
-		return prey(player, rampage, null);
+		return prey(player, rampage, java.util.Set.of());
 	}
 
-	/** The nearest thing it wants but {@code skip} (the prey it just gave up on). */
-	private static @org.jspecify.annotations.Nullable LivingEntity prey(ServerPlayer player, boolean rampage, @org.jspecify.annotations.Nullable Entity skip) {
+	/** The nearest thing it wants but those in {@code skip} (entity ids: the prey it gave up on). */
+	private static @org.jspecify.annotations.Nullable LivingEntity prey(ServerPlayer player, boolean rampage, java.util.Set<Integer> skip) {
 		LivingEntity target = null;
 		double best = Double.MAX_VALUE;
 		for (LivingEntity living : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(TAKEOVER_RANGE),
-			e -> e != player && e != skip && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand)
+			e -> e != player && !skip.contains(e.getId()) && e.isAlive() && !e.isSpectator() && !(e instanceof ArmorStand)
 				&& (e instanceof Mob m ? !(m instanceof TamableAnimal tame && tame.isTame()) && !m.hasCustomName()
 					: rampage && e instanceof Player p && !p.isCreative()))) {
 			double d = living.distanceToSqr(player);
@@ -2727,8 +2735,10 @@ public final class WebSymbiote {
 			}
 			return true;
 		}
-		LivingEntity next = live.protecting ? threat(player) : live.redHunt ? WebRedHunt.nearest(player.level(), player, target)
-			: prey(player, live.rampage, target);
+		// (never back to one it gave up on before: two it can't reach don't hand it back and forth)
+		live.givenUp.add(target.getId());
+		LivingEntity next = live.protecting ? threat(player) : live.redHunt ? WebRedHunt.nearest(player.level(), player, live.givenUp)
+			: prey(player, live.rampage, live.givenUp);
 		if (next == null || next == target) {
 			endTakeover(player, live);
 		} else {
@@ -2815,6 +2825,8 @@ public final class WebSymbiote {
 		live.headwayAt = null;
 		WebTakeoverPath.stop(player, live.route);
 		live.route = null;
+		live.givenUp.clear();
+		WebMorph.endDriven(player);
 		player.removeAttached(STARING);
 		ServerPlayNetworking.send(player, new WebNet.Takeover(-1, 0, false));
 		player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SLIME_SQUISH, SoundSource.PLAYERS, 0.8F, 1.4F);

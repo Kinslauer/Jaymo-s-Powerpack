@@ -564,6 +564,8 @@ public final class WebSymbioteClient {
 		peelTicks = 0;
 		escapeCoil = -1;
 		rescueTicks = -1;
+		gapRetryAt = 0;
+		pounceAt = -1000;
 		clearPath();
 		THREATS.clear();
 	}
