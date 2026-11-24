@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: running
 task: Verdant dinosaurs (from the Dino-26.3 Amber Age jar), spawned by codex-reference-dinos-venom
 branch: t3/implement-verdant-dinosaurs
 with: 
