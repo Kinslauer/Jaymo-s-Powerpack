@@ -36,10 +36,7 @@ kanban-plugin: board
 - [ ] [[Inbox/refmods-09-village-styles|refmods-09-village-styles]] · for any · open
 - [ ] [[Inbox/refmods-10-outlying-buildings-camps|refmods-10-outlying-buildings-camps]] · for any · open
 - [ ] [[Inbox/refmods-11-tectonic-terrain|refmods-11-tectonic-terrain]] · for any · open
-- [ ] [[Inbox/refmods-12-fishing|refmods-12-fishing]] · for any · open
 - [ ] [[Inbox/refmods-13-body-anim-stations|refmods-13-body-anim-stations]] · for any · open
-- [ ] [[Inbox/refmods-14-sky-light-air|refmods-14-sky-light-air]] · for any · open
-- [ ] [[Inbox/refmods-15-provenance-coins|refmods-15-provenance-coins]] · for any · open
 - [ ] [[Inbox/refmods-16-titles-bloods-tensura|refmods-16-titles-bloods-tensura]] · for any · open
 - [ ] [[Inbox/refmods-06-horses|refmods-06-horses]] · for any · open
 - [ ] [[Inbox/vanilla-plus-a-incendium-castle-start|vanilla-plus-a-incendium-castle-start]] · for 💻 Odysseus · open
@@ -59,7 +56,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · changeling-voice-mimic · claimed
-- [ ] [[Inbox/downed-knockout-three-hits|downed-knockout-three-hits]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/structures-2-placement-reasons|structures-2-placement-reasons]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · ☁️ Cloud · #research · claimed
@@ -73,6 +69,7 @@ kanban-plugin: board
 
 ## In review
 
+- [ ] [[Inbox/downed-knockout-three-hits|downed-knockout-three-hits]] · ☁️ Cloud · #2079 · in-review
 
 
 ## Needs Andy
