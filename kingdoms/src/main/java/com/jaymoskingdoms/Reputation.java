@@ -73,6 +73,8 @@ public final class Reputation {
 		// (0.7.509) and the clash of faiths, then the Crowned Sun's and The Truth's blessings
 		by = Faiths.reputation(kingdom, player, by);
 		by = Blessings.reputation(kingdom, player, by);
+		// (Village mods patch 5) and a little more for one wearing their job's trade hat
+		by = Careers.hatBonus(player, by);
 		// what is done to a lawful settlement, or for it, weighs on the life itself (Powers' Karma), mask or no mask; a
 		// camp's opinion of you weighs nothing
 		if (kingdom.type() != FactionType.BARBARIAN) {

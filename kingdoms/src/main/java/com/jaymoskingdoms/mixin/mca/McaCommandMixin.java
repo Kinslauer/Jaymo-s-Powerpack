@@ -68,6 +68,12 @@ abstract class McaCommandMixin extends EntityCommandHandler<VillagerEntityMCA> {
 			cir.setReturnValue(true);
 			return;
 		}
+		// (Village mods patch 5) a tailor sews the trades' hats
+		if (command.equals(com.jaymoskingdoms.TailorHats.COMMAND)) {
+			com.jaymoskingdoms.TailorHats.ask(player, this.entity);
+			cir.setReturnValue(true);
+			return;
+		}
 		if (command.equals(com.jaymoskingdoms.TailorCostumes.SEW_COMMAND)) {
 			com.jaymoskingdoms.TailorCostumes.sew(player, this.entity);
 			cir.setReturnValue(true);
