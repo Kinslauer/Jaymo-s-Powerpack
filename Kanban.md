@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:21). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:28). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -46,6 +46,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
+- [ ] [[Agents/village-mods-5|village-mods-5]] · 💻 Odysseus · running
 
 
 ## In review
@@ -61,12 +62,12 @@ kanban-plugin: board
 - [ ] [[Agents/deck-deploy-watch-1124|deck-deploy-watch-1124]] · 💻 Odysseus · stalled
 - [ ] [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]] · 💻 Odysseus · stalled
 - [ ] [[Agents/project-thread-ojz7uj|project-thread-ojz7uj]] · 💻 Odysseus · stalled
-- [ ] [[Agents/village-mods-5|village-mods-5]] · 💻 Odysseus · stalled
 
 
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/blood-awakening-passive-upgrade|blood-awakening-passive-upgrade]]
 - [x] [[Inbox/Done/village-mods-4-board-work|village-mods-4-board-work]]
 - [x] [[Inbox/Done/alexs-caves-integration|alexs-caves-integration]]
 - [x] [[Inbox/Done/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]]
@@ -74,7 +75,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/vanilla-plus-i-settlement-roads|vanilla-plus-i-settlement-roads]]
 - [x] [[Inbox/Done/vanilla-plus-h-advancement-tracker|vanilla-plus-h-advancement-tracker]]
 - [x] [[Inbox/Done/vanilla-plus-g-illager-invasion|vanilla-plus-g-illager-invasion]]
-- [x] [[Inbox/Done/vanilla-plus-f-delight-dishes|vanilla-plus-f-delight-dishes]]
 
 
 %% kanban:settings
