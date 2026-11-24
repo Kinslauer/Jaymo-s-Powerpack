@@ -991,7 +991,7 @@ final class IllagerSites {
 		"orcs", new String[][] {{"Ash", "Slag", "Cinder", "Iron", "Soot", "Ember"}, {"maw", "forge", "pit", "works", "fang"}},
 		"goblins", new String[][] {{"Copper", "Rust", "Mole", "Deep", "Grub", "Tin"}, {"diggers", "burrow", "shaft", "warren", "delvers"}});
 
-	private static String name(MinecraftServer server, String dweller, RandomSource random) {
+	static String name(MinecraftServer server, String dweller, RandomSource random) {
 		if ("illagers".equals(dweller)) {
 			return IllagerHolds.freshName(server, random);
 		}
