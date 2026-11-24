@@ -7871,3 +7871,13 @@ Andy: "baby zombies are unfightable" (clip: an axe locked onto baby zombies' tor
 
 - **Players' limbs** (arms, legs, feet) hold twice the damage before they break or a blow severs them: arms 16, legs 24, feet 16 on 20 health (were 8/12/8). Falls land on the feet first, so short drops no longer break legs. Head and body are unchanged, and mobs keep their old limbs. Saved wounds keep their share, so a half-hurt leg stays half hurt. Limbs still mend whole in the same time by themselves; dressings and other fixed-point heals mend a smaller share of a player's limb now. (`BodyPlan.Pools.PLAYER_LIMBS`, `BodyPlan.share(index, entity)`)
 - Not built or played.
+
+## 0.27.15 (2026-11-24): Takeover pathing fixes: long tunnels, safe shafts, no stray weapon arm (#2121)
+
+- **Long walks keep digging**: on a long way to its prey, a takeover now keeps track of where you are along the whole path (it only looked at the first few steps before), so it still tears into the next wall far along a tunnel, and its zips and resent paths start from where you really are.
+- **No more blind holes**: digging straight down under you, it first checks there's ground to land on within 3 blocks under the hole, with no lava, fire or water on the way; if not, it goes round instead of dropping you.
+- **The weapon arm ends with the takeover**: a weapon it was forming on its own melts back when the takeover ends (it lets go, you break free, you die or it leaves), instead of striking later.
+- **The red pounce after rejoining**: the pounce and gap-jump timers reset when you join a world, so a stale one no longer blocks the red one's pounce.
+- **No back and forth**: when it gives up on prey it can't reach, it won't turn back to that prey later in the same takeover, so two out-of-reach creatures can't hand it to each other forever; out of reachable prey, it lets go.
+- Classes: WebTakeoverPath, WebSymbiote, WebSymbioteClient, WebMorph, WebRedHunt.
+- Built by CI; not played.
