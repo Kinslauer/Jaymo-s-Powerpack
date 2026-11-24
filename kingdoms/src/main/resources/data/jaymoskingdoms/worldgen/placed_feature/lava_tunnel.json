@@ -1,0 +1,27 @@
+{
+  "feature": "jaymoskingdoms:lava_tunnel",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": 24
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:height_range",
+      "height": {
+        "type": "minecraft:uniform",
+        "min_inclusive": {
+          "above_bottom": 3
+        },
+        "max_inclusive": {
+          "above_bottom": 30
+        }
+      }
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

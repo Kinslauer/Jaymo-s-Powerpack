@@ -614,6 +614,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		VoiceMasks.register();
 		// 0.4.1: ATi Structures' above-ground buildings in compounds (only with ATi loaded)
 		AtiCompounds.register();
+		// Tectonic's terrain in place of the continents' shape (the shape's pack is on only without it)
+		TectonicCompat.register();
+		// underground rivers' lanterns, jungle pillar crowns, volcanic islands and lit lava tunnels
+		TerrainFeatures.register();
 		// kingdoms' seats the world generates whole: a castle with its square, garden, barracks and homes round it
 		SeatCompounds.register();
 		EpicTowns.register();
