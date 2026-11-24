@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: claude-cloud
 from: Andy (Claude chat, 2026-11-23)
 asked: 2026-11-23
@@ -43,3 +43,6 @@ verdant should unlock their push button limb regrowth with this."
 2. **The regrowth key.** Which key (the heritage key, the held move's key, or its own binding), its cooldown, and whether
    it costs anything (ki, hunger, health).
 3. Whether players who already learned the node get their point back, since the node now does something new.
+
+## Notes
+- 2026-11-24 23:23 PR #2117 is merged into master; moved to Inbox/Done.
