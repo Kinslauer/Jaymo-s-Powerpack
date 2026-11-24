@@ -204,8 +204,9 @@ public final class WebBehemoth {
 		if (host.tickCount % RETARGET_EVERY == 0 && (target == null || !target.isAlive() || !host.hasLineOfSight(target)
 			|| target.distanceTo(host) > SIGHT || !prey(host, target))) {
 			// anything it can see
+			// (the black strain goes only for what hurt it: Andy, it kills only for its needs; the red one hunts, WebRedHunt)
 			target = level.getEntitiesOfClass(LivingEntity.class, host.getBoundingBox().inflate(SIGHT),
-					e -> prey(host, e) && e.distanceTo(host) <= SIGHT && host.hasLineOfSight(e)).stream()
+					e -> prey(host, e) && e.distanceTo(host) <= SIGHT && host.hasLineOfSight(e) && (red(host) || e == host.getLastHurtByMob())).stream()
 				.min(Comparator.comparingDouble(e -> e.distanceToSqr(host))).orElse(null);
 			if (target != null) {
 				host.setTarget(target);
@@ -213,6 +214,9 @@ public final class WebBehemoth {
 		}
 		lash(level, host, now);
 		fury(level, host, target, now);
+		if (red(host)) {
+			WebRedHunt.tick(level, host);
+		}
 		if (Soundscape.due(host, "symbiote.behemoth", 60, 120)) {
 			Soundscape.play(level, host.position(), SoundSource.HOSTILE, GROWL);
 		}
@@ -344,7 +348,7 @@ public final class WebBehemoth {
 			}
 			if (near == null) {
 				near = level.getEntitiesOfClass(LivingEntity.class, host.getBoundingBox().inflate(STRIKE_REACH),
-					e -> prey(host, e) && e.distanceTo(host) <= STRIKE_REACH && host.hasLineOfSight(e));
+					e -> prey(host, e) && needs(host, e) && e.distanceTo(host) <= STRIKE_REACH && host.hasLineOfSight(e));
 			}
 			if (near.isEmpty()) {
 				break;
@@ -443,10 +447,24 @@ public final class WebBehemoth {
 	}
 
 	/** What it hunts: every living thing but other behemoths, roaming symbiotes, stands, and players who can't be hurt. */
-	private static boolean prey(Mob host, LivingEntity e) {
+	static boolean prey(Mob host, LivingEntity e) {
 		// (another symbiote's body only if it's a rival strain: WebSymbioteStrains)
 		return e != host && e.isAlive() && (!isHost(e) && !(e instanceof WebSymbioteBlob) || WebSymbioteStrains.rivals(host, e)) && !(e instanceof ArmorStand)
 			&& !(e instanceof Player p && (p.isCreative() || p.isSpectator()));
+	}
+
+	/** Held by the red strain (it hunts: WebRedHunt). */
+	static boolean red(Mob host) {
+		return WebSymbioteStrains.of(host) == WebSymbioteStrain.RED;
+	}
+
+	/**
+	 * Whether it lashes at {@code e}: the red strain at anything; the black and the white only for their needs (Andy,
+	 * 2026-11-24: "the black is not against killing, though it will only do so to satisfy its needs. it ultimately seeks a
+	 * proper host"): whatever hurt it or its host, or what its host is already fighting.
+	 */
+	static boolean needs(Mob host, LivingEntity e) {
+		return red(host) || e == host.getLastHurtByMob() || e == host.getTarget();
 	}
 
 	private static void land(ServerLevel level, Mob host, Entity hit) {

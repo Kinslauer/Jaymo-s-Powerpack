@@ -41,20 +41,12 @@ public final class WebHostBody {
 	private WebHostBody() {
 	}
 
-	/** A humanoid the symbiote can ride (WebInhabit#takeable's two-legged ones). */
-	static boolean humanoid(Entity entity) {
-		return entity instanceof net.minecraft.world.entity.npc.villager.AbstractVillager
-			|| entity instanceof net.minecraft.world.entity.monster.zombie.Zombie || entity instanceof net.minecraft.world.entity.monster.skeleton.AbstractSkeleton
-			|| entity instanceof net.minecraft.world.entity.monster.illager.AbstractIllager || entity instanceof net.minecraft.world.entity.monster.Witch
-			|| entity instanceof net.minecraft.world.entity.monster.piglin.AbstractPiglin;
-	}
-
 	/**
 	 * From LivingEntityRenderer.extractRenderState (after the game's own): a taken humanoid gets its body's state and its own
 	 * model is hidden (the game draws an invisible entity's model only for those who can see through it, and nobody can).
 	 */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state) {
-		boolean taken = entity.isAlive() && (entity.hasAttached(WebBehemoth.HOST) || WebInhabit.isHost(entity) && humanoid(entity));
+		boolean taken = entity.isAlive() && (entity.hasAttached(WebBehemoth.HOST) || WebInhabit.isHost(entity) && WebInhabit.humanoid(entity));
 		if (!taken || state instanceof AvatarRenderState) {
 			STATES.remove(entity);
 			state.setData(BODY, null);
