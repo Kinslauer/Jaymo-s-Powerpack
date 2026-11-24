@@ -16661,3 +16661,13 @@ Andy picked "goblin extras" from the survival pick list (2026-11-22); the Goblin
 - **Purse icon** (`PurseIcon`, `Money.held`; Andy's pick from Numismatic Overhaul): while a coin purse hangs in the belt slot, the survival inventory shows it beside your figure. Hover it for every coin you carry, currency by currency: Realm Silver, Hacksilver, dinars, shell strings, mon, copper bits, and emeralds, bent copper and pirate gold if you have them. It counts loose coins, every purse (the worn one too) and bundles. With no purse worn there's no icon.
 - **Money bags** (`LootSwap`): about one chest in twelve holds someone's money bag, a coin purse with 2 to 10 emeralds' worth of the coin of the land inside. Where the land's coin can't go in a purse (a greenskin camp's bent copper, a pirate cove's gold), the coins lie loose instead.
 - Built in CI; not played.
+
+## 0.12.14 (2026-11-24): The key clash pop-up comes per key, on its first press (#2065)
+
+- **One key at a time**: the pop-up about keys bound twice no longer lists every clash when you join. The first time in
+  a visit that you press a key two bindings share, it names that key and what's bound to it ("Y is bound twice: Bound
+  to Raise the medallion and Z-Fighter wheel"), and asks to rebind one in Controls. Andy: "the bind clashing tool tip
+  should appear per bind and only when you first press it after you spawn".
+- Each key's pop-up still shows twice at most, ever (counted per key in `config/jaymoskingdoms-key-clashes.txt`; the
+  old single count starts over). Keys our mods share on purpose are still left out. `KeyClashes`.
+- Built on CI only; not played.
