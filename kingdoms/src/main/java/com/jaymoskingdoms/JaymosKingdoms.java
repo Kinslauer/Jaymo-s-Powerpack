@@ -1018,6 +1018,10 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("vampire attachments: {} {} {}", Vampires.VAMPIRE, Vampires.BITTEN, Vampires.ELDER);
 		Vampires.register();
 		VampireAlarm.register();
+		// a taker hides among a village's people; its cellar; a night when anger spills over; a rope lead tied off on a post
+		Takers.register();
+		Unrest.register();
+		CaptiveLeads.register();
 		// a camp struck sends a runner to its fire to blow the horn, then patrols and defends until it's safe
 		CampAlarm.register();
 		Stakes.register();
