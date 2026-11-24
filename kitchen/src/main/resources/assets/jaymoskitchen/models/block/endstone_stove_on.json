@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "side": "jaymoskitchen:block/endstone_stove_side",
+    "front": "jaymoskitchen:block/endstone_stove_front_on",
+    "bottom": "jaymoskitchen:block/endstone_stove_bottom",
+    "top": "jaymoskitchen:block/endstone_stove_top_on"
+  }
+}

@@ -22,7 +22,9 @@ public enum Feast {
 	HONEY_GLAZED_HAM(Dish.HONEY_GLAZED_HAM_FEAST, null, () -> Delight.HONEY_GLAZED_HAM, true),
 	STUFFED_PUMPKIN(Dish.STUFFED_PUMPKIN_FEAST, null, () -> Delight.STUFFED_PUMPKIN, false),
 	// (0.5.33) cut on the board; it glows (see FeastBlock). The rice roll medley has eight servings and is its own block (MedleyBlock)
-	GLEAMING_SALAD(Dish.GLEAMING_SALAD_FEAST, null, () -> DelightDishes.GLEAMING_SALAD, true);
+	GLEAMING_SALAD(Dish.GLEAMING_SALAD_FEAST, null, () -> DelightDishes.GLEAMING_SALAD, true),
+	// Ender's Delight's: served into a shulker bowl, nothing left in the shell (see EnderDelight)
+	STUFFED_SHULKER(Dish.STUFFED_SHULKER, null, () -> EnderDelight.STUFFED_SHULKER_BOWL, false);
 
 	/** Servings in a whole feast. */
 	public static final int SERVINGS = 4;
@@ -54,9 +56,15 @@ public enum Feast {
 
 	/** Whether a serving is eaten from a bowl (and so needs one in hand to take it). */
 	public boolean needsBowl() {
+		return bowl() != null;
+	}
+
+	/** The bowl a serving is eaten from (a wooden bowl, or a shulker bowl for the End's), or null. */
+	public @Nullable Item bowl() {
 		ItemStack serving = new ItemStack(servingItem());
 		var remainder = serving.get(DataComponents.USE_REMAINDER);
-		return remainder != null && remainder.convertInto().item().value() == Items.BOWL;
+		Item bowl = remainder == null ? null : remainder.convertInto().item().value();
+		return bowl == Items.BOWL || bowl != null && EnderDelight.shulkerBowl(bowl) ? bowl : null;
 	}
 
 	/** A serving at the feast's quality. */

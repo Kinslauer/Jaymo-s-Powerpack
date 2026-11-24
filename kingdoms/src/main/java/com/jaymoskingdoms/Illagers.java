@@ -59,6 +59,8 @@ import org.jspecify.annotations.Nullable;
 public final class Illagers {
 	/** Their parts in a camp (also their roster keys in the camp's {@link Faction.Holdings}). */
 	public static final int PILLAGER = 20, VINDICATOR = 21, EVOKER = 22, WARLORD = 23, RAVAGER = 24;
+	/** The share of a camp's pillagers, vindicators and evokers that come as one of its other hands, and the rare ones' share of those. */
+	static final float OTHER_HANDS = 0.3F, RARE_HAND = 0.15F;
 	/** How far they spot folk to hunt. */
 	static final double SIGHT = 28.0;
 	/** The warlord: health, his blows (on top of his axe), armour, how hard he is to shove. */
@@ -144,6 +146,32 @@ public final class Illagers {
 		};
 	}
 
+	/**
+	 * The camps' other hands (Illager Invasion's kinds, illagers/ModEntityTypes): some of a camp's crossbowmen come as a
+	 * provoker, a marauder or an alchemist, some of its axemen as a basher, a marauder or (rarer) an illager inquisitor,
+	 * and some of its evokers as a firecaller, an archivist or (rarer still) an invoker. The roster still counts them by
+	 * their part.
+	 */
+	private static EntityType<? extends Mob> otherHand(int role, net.minecraft.util.RandomSource random) {
+		if (random.nextFloat() >= OTHER_HANDS) {
+			return type(role);
+		}
+		return switch (role) {
+			case PILLAGER -> switch (random.nextInt(3)) {
+				case 0 -> com.jaymoskingdoms.illagers.ModEntityTypes.PROVOKER_ENTITY_TYPE;
+				case 1 -> com.jaymoskingdoms.illagers.ModEntityTypes.MARAUDER_ENTITY_TYPE;
+				default -> com.jaymoskingdoms.illagers.ModEntityTypes.ALCHEMIST_ENTITY_TYPE;
+			};
+			case VINDICATOR -> random.nextFloat() < RARE_HAND ? com.jaymoskingdoms.illagers.ModEntityTypes.INQUISITOR_ENTITY_TYPE
+				: random.nextBoolean() ? com.jaymoskingdoms.illagers.ModEntityTypes.BASHER_ENTITY_TYPE
+				: com.jaymoskingdoms.illagers.ModEntityTypes.MARAUDER_ENTITY_TYPE;
+			case EVOKER -> random.nextFloat() < RARE_HAND ? com.jaymoskingdoms.illagers.ModEntityTypes.INVOKER_ENTITY_TYPE
+				: random.nextBoolean() ? com.jaymoskingdoms.illagers.ModEntityTypes.FIRECALLER_ENTITY_TYPE
+				: com.jaymoskingdoms.illagers.ModEntityTypes.ARCHIVIST_ENTITY_TYPE;
+			default -> type(role);
+		};
+	}
+
 	private static EntityType<? extends Mob> reapedType(int role) {
 		return switch (role) {
 			case EVOKER -> com.jaymoskingdoms.reaped.Reaped.evoker();
@@ -161,7 +189,7 @@ public final class Illagers {
 	static @Nullable Mob spawn(ServerLevel level, Faction camp, int role, BlockPos at, BlockPos home, int radius, boolean raid) {
 		// (a camp the Reaper's host has taken sends the reaped where it sent illagers: ReapedHolds)
 		boolean reaped = ReapedHolds.is(level.getServer(), camp.id());
-		Mob mob = (reaped ? reapedType(role) : type(role)).create(level, EntitySpawnReason.EVENT);
+		Mob mob = (reaped ? reapedType(role) : otherHand(role, level.getRandom())).create(level, EntitySpawnReason.EVENT);
 		if (mob == null) {
 			return null;
 		}

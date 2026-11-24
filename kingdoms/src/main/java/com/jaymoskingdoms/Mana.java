@@ -119,7 +119,7 @@ public final class Mana {
 		Map.entry("imbue", 20.0F), Map.entry("bolt", 8.0F), Map.entry("mend", 15.0F), Map.entry("renewal", 30.0F),
 		Map.entry("rekindle", 40.0F),
 		// (0.7.231) death's (blood's are paid in blood: Hemomancy.COST)
-		Map.entry("blight", 15.0F), Map.entry("whispers", 5.0F), Map.entry("speak_with_dead", 12.0F), Map.entry("deaths_door", 50.0F), Map.entry("dominion", 40.0F), Map.entry("reap", 10.0F), Map.entry("raise", 30.0F),
+		Map.entry("blight", 15.0F), Map.entry("whispers", 5.0F), Map.entry("speak_with_dead", 12.0F), Map.entry("deaths_door", 50.0F), Map.entry("dominion", 40.0F), Map.entry("reap_a_soul", 25.0F), Map.entry("reap", 10.0F), Map.entry("raise", 30.0F),
 		// (patch 6) lightning's
 		Map.entry("bolt_step", 14.0F), Map.entry("storm_ring", 30.0F),
 		// earth's, water's and air's (SorceryPicks)

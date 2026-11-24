@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:simple_block",
+  "to_place": {
+    "id": "jaymoskitchen:voidpepper_bush",
+    "properties": {
+      "down": "true",
+      "pepper": "false",
+      "spreading": "true"
+    }
+  }
+}

@@ -443,6 +443,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("world tier attachments: {} {} {} {} {}", WorldTiers.TIER, WorldTiers.PROGRESS, WorldTiers.CHANGED, WorldTiers.MOB_TIER,
 			WorldTiers.FLOOR);
 		WorldTiers.register();
+		Rematches.register();
 		HarshLands.register();
 		// Hostile Mobs Improve Over Time's levels follow the world tier, not play time
 		HostileMobsTiers.register();
@@ -943,6 +944,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		Spirits.register();
 		// 0.5.37: sorcery: camps' shamans and necromancers, courts' wizards, the risen dead, spell scrolls (and the thralls' attachment)
 		Arcana.register();
+		SoulJars.register();
 		// the elemental spell tomes: left-click bolts, a loaded page on right click
 		Tomes.register();
 		// a forbidden rite of blood magic: a captive made into a great foe (and its attachment)
@@ -1144,6 +1146,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		// the magic rules and the first spells (patch 6): parts, gags, rituals, counterspell, dispel, cantrips, fields, the new scrolls
 		NewSpells.register();
 		com.jaymoskingdoms.traps.Traps.register();
+		HiddenSwitches.register();
+		com.jaymoskingdoms.illagers.ModEntityTypes.register();
 		DeathRites.register();
 		// the gone-before: remains in the wild, their last camps, the ruins' traps, the headless rider
 		Remains.register();

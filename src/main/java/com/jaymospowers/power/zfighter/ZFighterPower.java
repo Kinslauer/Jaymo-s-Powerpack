@@ -471,6 +471,7 @@ public final class ZFighterPower implements Power {
 		ZFighterTournaments.init();
 		ZFighterAfterlife.init();
 		ZFighterDemonRealm.init();
+		ZFighterNetherList.init();
 		// the Darkened Chapel, where a demon master comes up to the corrupted
 		ZFighterChapel.init();
 		ZFighterStarts.init();

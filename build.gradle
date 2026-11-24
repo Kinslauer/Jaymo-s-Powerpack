@@ -334,14 +334,20 @@ def packMods = [
 	// (man, woman, kid, titan, demon, radio..., J toggles it), and Kingdoms' VoiceMasks turns it for a werewolf, a Great
 	// Ape, a goblin disguise or a full mask through its API. 1.2.5, the newest Fabric 26.3 file on CurseForge.
 	[dep: "maven.modrinth:simple-voice-voice-changer:acFxvUQp", cf: [1658503, 9030770], dev: false],
-	// Enderscape (code MIT, art all rights reserved, by Penumbra; downloaded by id, never copied or edited): the End
-	// reworked with new biomes (Celestial Grove, Veiled Woodlands, Corrupt Barrens, Magnia Fields, the void skies), plants, mobs,
-	// blocks, items, music and sky. Its built-in data packs, on by default, swap the vanilla End cities and overworld
-	// strongholds for its own (our relics, writs and quests look in those too: EnderscapeLoot, Kingdoms' Classes and
-	// QuestBoard). Only End chunks generated after it's added get the new terrain. Client and server; needs
-	// Lithostitched (MIT, by Apollo; worldgen library) and YACL 3.9.5+ (packMods). Kept out of the dev game (100 MB jar).
+	// Enderscape (code MIT, art all rights reserved, by Penumbra; downloaded by id, never copied or edited): new End
+	// biomes (Celestial Grove, Veiled Woodlands, Corrupt Barrens, Magnia Fields, the void skies), plants, mobs, blocks,
+	// items, music and sky. Andy (2026-11-19): "ship stellarity as the end and enderscape underneath": its biomes fill the
+	// Beneath, the band under the Nether (data/jaymospowers/dimension/the_beneath.json, its terrain's noise and sky copied
+	// under MIT), and its own End terrain, End city and stronghold packs are switched off for new worlds while Stellarity
+	// is there (core/EnderscapePreset). Client and server; needs Lithostitched (MIT, by Apollo; worldgen library) and
+	// YACL 3.9.5+ (packMods). Kept out of the dev game (100 MB jar).
 	[dep: "maven.modrinth:enderscape:1VZBnRYm", cf: [536638, 9177560], dev: false],
 	[dep: "maven.modrinth:lithostitched:pZgI6b2t", cf: [936015, 9154966], dev: false],
+	// Stellarity (custom licence, by kohara: unmodified copies may ship in packs, modified ones need kohara's permission;
+	// downloaded by id, never copied or edited): the End, reworked as a data pack in a jar (its own End terrain, biomes,
+	// End cities, strongholds, the Empress of Light). Our relics and class writs look in its stronghold and End city chests
+	// too (compat/StellarityLoot, Kingdoms' Classes). 6.0.1, Modrinth version WBiwFsvZ. Kept out of the dev game.
+	[dep: "maven.modrinth:stellarity:WBiwFsvZ", cf: [883166, 9141734], dev: false],
 	// Last World Panorama (by slovuka; Modrinth says all rights reserved, the jar carries CC0; downloaded by id): the
 	// title screen's panorama is shot from where you last stood, retaken each time you leave a world or server.
 	// Client-only (Fabric skips it on the server).
@@ -471,6 +477,9 @@ def packMods = [
 	// Horse Expert (MPL-2.0, Fuzs; needs Puzzles Lib and Forge Config API Port above): a horse's real speed, jump and health.
 	[dep: "maven.modrinth:horse-expert:qUjLS9C5", cf: [666942, 9088683]],
 	// Incendium (Stardust Labs licence, packs allowed): Nether biomes, structures, weapons and mobs, beside our demon-realm biomes.
+	// Our demon-realm biomes stay in its written-out Nether list (ZFighterNetherList), and its Forbidden Castle also rises in the
+	// Gloam, where the demon start puts you in its throne hall (ZFighterStarts.demon). 5.5.4+26.3.
+	[dep: "maven.modrinth:incendium:D4vWUd23", cf: [591388, 9147441]],
 	// qraftyfied: STRUCTURES (CC BY-NC 4.0, free pack): built structures to explore across the Overworld.
 	[dep: "maven.modrinth:qraftyfied:cpRes8NL", cf: [1005868, 8916149]],
 	// VillagersTradingPlus (GPL-3.0): the trading library VillagersPlus needs (packModsNoCf).

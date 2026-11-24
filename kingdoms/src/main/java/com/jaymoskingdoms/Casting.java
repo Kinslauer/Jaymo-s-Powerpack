@@ -69,7 +69,7 @@ public final class Casting {
 	public static Gesture of(String spell) {
 		return switch (spell) {
 			case "raising", "sanctuary", "blight", "speak_with_dead" -> Gesture.GROUND;
-			case "draining", "deaths_door", "blood_grip" -> Gesture.DRAW;
+			case "draining", "deaths_door", "blood_grip", "reap_a_soul" -> Gesture.DRAW;
 			case "warding" -> Gesture.WARD;
 			case "mending" -> Gesture.GIVE;
 			case "restoration", "frenzy", "whispers" -> Gesture.RAISE;
