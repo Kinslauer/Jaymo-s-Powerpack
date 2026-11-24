@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 17:34). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 17:37). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -37,7 +37,6 @@ kanban-plugin: board
 - [ ] [[Inbox/refmods-13-body-anim-stations|refmods-13-body-anim-stations]] · for any · open
 - [ ] [[Inbox/refmods-16-titles-bloods-tensura|refmods-16-titles-bloods-tensura]] · for any · open
 - [ ] [[Inbox/village-mods-6-small-structures|village-mods-6-small-structures]] · for 💻 Odysseus · open
-- [ ] [[Inbox/village-mods-4-board-work|village-mods-4-board-work]] · for 💻 Odysseus · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2113 · open
 
 
 ## Being built
@@ -48,6 +47,7 @@ kanban-plugin: board
 
 ## In review
 
+- [ ] [[Inbox/village-mods-4-board-work|village-mods-4-board-work]] · for 💻 Odysseus · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2113 · in-review
 
 
 ## Needs Andy
