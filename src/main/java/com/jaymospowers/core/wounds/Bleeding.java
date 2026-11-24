@@ -87,6 +87,8 @@ public final class Bleeding {
 	public static final float CUT_CAP = 0.5F;
 	/** (0.14.4) A dirty cut's chance to fester, each bleed tick. */
 	public static final float FESTER_CHANCE = 0.05F;
+	/** (Andy, 2026-11-23: "none for rags, with less chance of infection") A dirty cut under a rag festers at this chance instead. */
+	public static final float RAG_FESTER_CHANCE = 0.025F;
 	/**
 	 * (0.14.4) A fever: this often (ticks), this much off the body. (0.14.5) Every minute, was every 20 s: a festering
 	 * body can't heal, so a fever every 20 s downed a player from a single dirty cut on the chest within a minute or two.
@@ -632,8 +634,9 @@ public final class Bleeding {
 		}
 		for (BodyPart part : BodyPart.values()) {
 			int bit = Breaks.bit(part);
+			float chance = (bandaged & bit) != 0 && (wrapped(body) & bit << RAG_SHIFT) != 0 ? RAG_FESTER_CHANCE : FESTER_CHANCE;
 			if ((dirty & bit) != 0 && (festering(body) & bit) == 0 && !clean(body, part.ordinal(), now)
-				&& body.getRandom().nextFloat() < FESTER_CHANCE) {
+				&& body.getRandom().nextFloat() < chance) {
 				fester(body, part, now);
 			}
 		}
