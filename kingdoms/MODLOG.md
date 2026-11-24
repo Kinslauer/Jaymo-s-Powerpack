@@ -16721,3 +16721,12 @@ Andy (2026-11-24, a screenshot of a lone wheat field on a desert shore): "these 
   not the flames." `FireSmoke#floorUnder`, `GROUND_LIFT` and `GROUND_DEPTH` at the top. The flames, the grey plumes
   and the pall above are unchanged. A fire on a roof still smokes from the roof (planks stop the walk down).
 - Built; not played, so the new smoke height hasn't been seen.
+
+## 0.12.21 (2026-11-24): gear talk - folk remark on your Frostborn work and stand-in limbs (#2074)
+
+- **What you wear is noticed** (Andy: "players should get tags for the items / baubles they equip, giving the people they meet different things to refer to them about"). Step 1 of `docs/Gear-Talk-Plan.md`: a scouter in the head slot, Rig limbs, the Rig, "more made than flesh" (3+ pieces), a smith's wooden or iron limb, or a lost limb with nothing fitted.
+- A grown MCA villager within 6 blocks who can see you now and then remarks on the most striking of them in a speech bubble, once per thing (`GearTalk`, kept in their memory of you, so a masked look is remembered apart from your face). "Have a word" then has a talk of its own about it (`TalkBook` ids `gear_*`), with warm, plain and curt answers.
+- 30 reactions picked from the most particular listener down: a Frostborn who sees their people's work on an outsider asks who fitted it, a Frostborn kin is proud of you, a Warrior-born remembers who taught them the stars, a smith wants to look at the joint or offers to forge you iron, someone on a wooden leg of their own is envious or kindred, and timid, greedy, devout, suspicious, kindhearted and spiteful folk each have their own line. Plain folk say "more Frostborn work than flesh"; only the Mad Tinkerer, the future's pilots and the Bio-built say "cyborg". A masked player's blood is never used.
+- Armour or harness over an arm or leg hides the limb, unless the villager is sharp-eyed (1 in 5, the suspicious more often). A lost limb always shows.
+- `PowersCompat` reads Powers' iron and Rig limb masks and how much of the Rig is worn. Lines in `lang/parts/gear-talk.json`.
+- Built and compiled; not played.
