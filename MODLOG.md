@@ -7881,3 +7881,67 @@ Andy: "baby zombies are unfightable" (clip: an axe locked onto baby zombies' tor
 - **No back and forth**: when it gives up on prey it can't reach, it won't turn back to that prey later in the same takeover, so two out-of-reach creatures can't hand it to each other forever; out of reachable prey, it lets go.
 - Classes: WebTakeoverPath, WebSymbiote, WebSymbioteClient, WebMorph, WebRedHunt.
 - Built by CI; not played.
+
+## 0.27.16 (2026-11-24): Scouter: hold to scan, full readings, marks and tracking (#2120)
+
+The scouter now reads for everyone and does what Wan's Bio Scanner does (its idea only, our own code), in the scouter's own green readout, with no commands and no chat text.
+
+- Hold the new Scouter key (unbound until picked in Controls; tap and hold): the lens zooms a little and the reading fills in line by line under the power level. Let go early and you keep what came through. A soft chime sounds when a reading is complete.
+- Creatures: health, strike, speed, armour, young and tame. Horses read speed, jump height and temper from the vanilla horse's own attributes (small helper `ZFighterScanHorse`, ready to point at another horse mod). People read their realm and mood (from Kingdoms). A Z Fighter's forms you have seen (unmet ones are blanks), an alien's growth, a dead walker's road to the horde (alone, in a horde, its captain).
+- Plants and living blocks: crops, saplings, bee nests, turtle and sniffer eggs, coral, moss: what stage, what it needs, about how long.
+- Open sky or ground: heat or cold, how harsh the land is, sky and light.
+- A full scan of a beast counts as studying it: a kind with no foe-knowledge star gets one, and a Druid learns the shapes that beast is kin to.
+- Tap the key after a full scan to mark that creature: a chevron at the lens's edge points to it, with its distance, and it shows outlined through walls for five minutes or until lost. One mark at a time (the only scouter there is has no better tier; `ZFighterScan.markLimit` is where a better one would raise it). A tap again lets it go. Something hiding its ki can't be scanned or marked.
+- Without ki the scouter still reads: the panel shows the name and kind and no power level.
+
+Main classes: `ZFighterScan`, `ZFighterScanInfo`, `ZFighterScanHorse`, `ZFighterScanKingdoms`, `ZFighterScanClient`, `ZFighterScanZoomMixin`; packets in `ZFighterSensesNet`.
+
+Not tested in game (compiled only): the zoom, the chevron placement, the chime, the HUD panel spacing under the power-level panel, the crop time estimates.
+
+## 0.27.17 (2026-11-24): Umbrellas, lace parasols, Mohknee paper parasols and the umbrella stand (#2120)
+
+- **Items** (Reference Mods patch 4, U3-U6; own code and art, `tools/gen_umbrellas.py`): the sturdy **umbrella**, the **lace parasol** and the Mohknee **paper parasol** (oiled paper, blossom painting, bamboo ribs). Use one to open or furl it; its look (open, canopy and panel colours, panel style) rides in its custom model data, which Kingdoms fills for the people who carry them. Craftable (wool and sticks; string, carpet and a stick; paper, honeycomb and bamboo).
+- **Rain (U3)**: held open, rain doesn't wet you (`Wet` skips the rain's soaking), so no Soaked and nothing rusts on you. An open umbrella in a stand keeps the rain off the ground within 2 blocks.
+- **Float down (U4)**: open and sturdy, falling faster than 0.2 a tick, you drift at 0.1 a tick with no fall to pay (a point of wear a second). A lace or paper parasol caught open in a fall of more than 2.5 blocks turns inside out and tears (gone).
+- **Campfire smoke (U5)**: open and sturdy over a lit campfire's smoke (8 blocks; a signal fire 16; a solid block stops it) it lifts you (push 0.07, up to 0.3 a tick), a point of wear a second. A parasol over the fire scorches (6 points a second).
+- **Umbrella stand (U6)**: use with an umbrella to stand it in; empty-handed to open or furl it; sneaking to take it back (wear and colours kept). Looks differ by umbrella kind and open/furled (stands are not tinted by realm).
+- Classes: `umbrella/Umbrellas`, `UmbrellaItem`, `UmbrellaStandBlock`, `UmbrellaStandEntity`; `core/wet/Wet` (one condition). Not tested: the held open model's pose in first and third person, the stand in game.
+
+## 0.27.18 (2026-11-24): Hoverboard on the bomb glider's hull, and the Future Workbench (#2120)
+
+- **Hoverboard** (Reference Mods patch 5, H1-H5): the arsenal's bomb glider model and texture (wings and burner off, re-coloured pale with cyan emitters by `tools/gen_hoverboard.py`) as the future's courier board. Set it down from its item, right-click to step on. Powered it hovers a block over ground and water at a steady height, climbs gentle slopes (up to 0.45 a tick), hums louder and higher with its speed and leaves a trail of motes. W/S speed and brake, A/D turn, Jump hops, Sneak steps off.
+- **Built, never found**: the new **Future Workbench** (crafted: iron, observer, crafting table, redstone blocks) turns 6 iron ingots, 4 copper ingots and 8 redstone from your pack into a hoverboard. It is in no loot table.
+- **Dyes (H2)**: a dye right-click colours the hull, a dye on sneak right-click the trail; sneak right-click with an empty hand picks the board up, colours and charge kept.
+- **Tricks (H3)**: in the air Jump throws a random Acrobatics trick (keys pick the family: forward, back, sideways), drawn with the web slinger's body pose like the freerunner's. Land with the trick finished and the board speeds up; land mid-trick, or from a very hard drop, and you are thrown.
+- **Charge (H4)**: the board's power cell holds 5 minutes, a new one starts with 1; redstone dust (30 s) or a redstone block (4.5 min) right-clicked on it charges it. Flat, it drops to the ground and you push it with W like a skateboard.
+- **Crash (H5)**: losing more than 0.35 of speed against a wall flings the rider, ragdolled (the web pose's ragdoll), the board spins and skids back. Fling speed, lift and damage are capped (0.9, 0.45, 8).
+- Classes: `armory/Hoverboard`, `HoverboardItem`, `FutureWorkbenchBlock`, `ArmoryEntities`, `Armory`; client `HoverboardRenderer` (uses `BombGliderModel`), the bomb glider's avatar mixin (rider stands on a board too).
+- Built; not played. Not tested: hover over slopes and water, trick timing and landing throws, crash flings, the workbench's text.
+
+## 0.27.19 (2026-11-24): Horses: Icy's Better Horses joins the pack (#2120)
+
+- **Icy's Better Horses 2.1.8** (Bare Minimum License, Icywhenhot; official jar, unchanged) and **Modonomicon 26.3-2.23.1** (its handbook library; MIT and CC BY 4.0) join the pack (`packModsNoCf`; GeckoLib and Fabric API were already in). Its licence text and copyright notice ship as `licenses/LICENSE_icys_better_horses`.
+- Fifteen horse breeds with their own coats and biomes, bond and ownership, whistle and command wheel, tack and gear, horse carts, combat, revival, free look and a second rider come from it; Jaymo's Kingdoms' own horse systems step aside for ordinary horses (see its note).
+- **Left the pack** because Icy's does the same: Kaffee's Dual Ride (second rider), Horse Expert (stats), Ultimate Horseshoes (horseshoes), also moved out of an existing profile. **Kept**: Horseman (fence hitching, boats, shears, mining speed; it overlaps only in fading the horse and staying near home) and Craftable Horse Armor (Icy's has no horse armour recipes).
+- Built; not played. Not tested: Horseman and Icy's together in a game, the CurseForge import (Icy's and Modonomicon travel in its overrides; their CurseForge ids are not looked up).
+
+## 0.27.20 (2026-11-24): Tectonic 3.0.32 in the pack (trial) (#2120)
+
+- **Tectonic** (MIT, Apollo) joins the pack (`packModsNoCf`): taller mountains, wide oceans, rivers that run under mountains in caves, jungle pillars, lava tunnels at the bottom. It needs Fabric API and Lithostitched (both already in the pack); its config library is inside its jar. Andy's L6 trial: Jaymo's Kingdoms' own continent shape stands down while Tectonic is loaded (see the Kingdoms note). To swap back, remove the one line from `build.gradle`.
+- Its defaults already turn on underground rivers with lanterns, jungle pillars and lava tunnels, so no config file is shipped.
+- Not played: no game was launched; judge it on a new world. CurseForge ids not looked up (cloud can't reach it): `cf: null`.
+
+## 0.27.21 (2026-11-24): Body animation and station displays (Reference Mods patch 13) (#2120)
+
+- **Furnaces show what is cooking (C3)**: the ore or food in a furnace, smoker or blast furnace sits flat in its mouth, dark until the fuel catches, then glowing brighter as it cooks through. Vanilla keeps the furnace's contents to the open screen, so `FurnaceSyncMixin` now sends the block entity's tag to clients on chunk load and each time the item, the fuel or an eighth of the cooking changes. `FurnaceRenderer`, after Hands-On Vanilla's idea (code our own).
+- **A lectern book opens big as you read it (C4)**: vanilla's own lectern drawing, the book grown to 2.2 times and lifted off the stand while your lectern screen is open, settling back when you close it (`LecternReadingRenderer`). Only the reader sees it grow. Books on tables: not built (no table holds an item, so it would need a new block).
+- **Body animation** (`client/body/BodyAnim`, ideas from Punchy Moves, code our own; none shows while one of our own poses has the body, and all of it works on MCA's villagers as on players):
+  - **B1 feet turn before the body**: standing still, look more than 20 degrees off the body and the legs shuffle round under you (the leading foot lifting), the body following as vanilla does.
+  - **B2 lean into turns**: sprinting round a corner tips you into it; riding a horse round one tips the rider.
+  - **B3 wading**: standing in water at the waist or deeper with your head clear slows you (`Wading`, both sides; 20% at the waist, 40% at the chest) and your arms come up out of the water.
+  - **B4 balance on fences and beams**: already built (Freerun's balancing on the `freerun_narrow` tops: fences, walls, gates, panes, bars, chains), arms out; checked, not changed.
+  - **B5 hand over hand on ladders**: arms alternate up the rungs and the feet step, the pace set by how far you climb (ladders, vines, scaffolding).
+  - **B7 the shield arm takes the hit**: a blow taken on a shield (`ShieldBlockEventMixin` tells everyone watching, entity event 29) jolts the shield arm back and tips the body.
+  - **B8 hands on the reins**: a horse's rider sways and bobs with its gait and holds the reins in both hands (unless swinging or using an item). Icy's Better Horses only seats riders, so nothing of its is fought.
+- **B6 faces that move** (`BodyFaces`): MCA's villagers already blink with MCA's own blink face; a hit now shuts their eyes for a few ticks too (`McaWinceBlinkMixin`, a pseudo mixin that does nothing without MCA), and everyone drawn with the player renderer gets furrowed brows and a tight mouth over the face (`face_wince.png`), or a toothy grin while doing the fusion dance (`face_grin.png`). Players on ordinary skins close their eyes at a hit through PlayerFaces.
+- Built; not played. Not tested: any of the looks in a game (the furnace item's size and height over the vanilla mouth, the lectern book's size and lift, the leg turn's sign, the rung rhythm and the rein hold are set from the models' maths); the shield jolt and furnace sync on a server; MCA's face overlay on MCA's body. The pack has no emote system, so grins show only for the fusion dance.
