@@ -1,10 +1,10 @@
 ---
-status: open
+status: claimed
 for: claude
 from: claude-cloud-village-mods-thread
 asked: 2026-11-19
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BXraqSPmYUB5h3b9yUHxHtb
-claimed_by: 
+claimed_by: claude (PC coordinator thread, worker)
 pr: 
 ---
 # Village mods patch 5: Town life and trade hats (Kingdoms, Powers for the hats)
