@@ -60,10 +60,26 @@ public final class MedallionClient {
 	/** Whether this visit's clash prompt was shown (a Cleric's medallion keys sharing a key with another binding). */
 	private static boolean warned;
 	private static final SystemToast.SystemToastId CLASH = new SystemToast.SystemToastId(10000L);
-	/** Bindings that share a numpad key with the marks on purpose: a plan's layers only move while a plan is held. */
-	private static final java.util.Set<String> SHARED = java.util.Set.of("key.jaymoskingdoms.plan_layer_up", "key.jaymoskingdoms.plan_layer_down");
 
 	private MedallionClient() {
+	}
+
+	/** The nine mark keys. */
+	public static KeyMapping[] marks() {
+		return MARKS;
+	}
+
+	/**
+	 * Whether the board is up and {@code key} is on the numpad: then only the marks hear it, no other binding (Andy: "all numpad
+	 * binds should be disabled while the cleric board is active"; {@code MedallionNumpadMixin}).
+	 */
+	public static boolean holdsPad(InputConstants.Key key) {
+		if (!up || key.getType() != InputConstants.Type.KEYBOARD) {
+			return false;
+		}
+		int code = key.getValue();
+		// the keypad's scancodes: divide to period, equals, comma, and the rarer keypad keys
+		return code >= 84 && code <= 99 || code == 103 || code == 133 || code >= 176 && code <= 221;
 	}
 
 	static void register() {
@@ -108,10 +124,12 @@ public final class MedallionClient {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.HOTBAR, JaymosKingdoms.id("medallion_board"), MedallionClient::draw);
 	}
 
-	/** A Cleric whose medallion keys share a key with another binding is told which, and asked to rebind one in Controls. */
+	/**
+	 * A Cleric whose medallion key shares a key with another binding is told which, and asked to rebind one in Controls. The
+	 * marks are not checked: while the board is up the pad is theirs alone, and while it is down they do nothing.
+	 */
 	private static void clashes(Minecraft minecraft) {
-		List<KeyMapping> ours = new java.util.ArrayList<>(List.of(MARKS));
-		ours.add(key);
+		List<KeyMapping> ours = List.of(key);
 		Component first = null;
 		int more = 0;
 		for (KeyMapping mine : ours) {
@@ -119,7 +137,7 @@ public final class MedallionClient {
 				continue;
 			}
 			for (KeyMapping other : minecraft.options.keyMappings) {
-				if (ours.contains(other) || SHARED.contains(other.getName()) || !mine.same(other)) {
+				if (other == mine || !mine.same(other)) {
 					continue;
 				}
 				if (first == null) {
