@@ -515,6 +515,12 @@ final class TalkBook {
 			r("a", 1, 0, 2), r("b", 0, 1, 0), r("c", 0, -1, -1)));
 		t.add(lifeOnce("frost_tech_yours", c -> grown(c) && c.blood() != Heritage.Kind.FROSTBORN && c.mine() == Heritage.Kind.FROSTBORN, NO_ARGS,
 			r("a", 1, 1, 3), r("b", 0, 1, 0), r("c", 0, 0, -2)));
+		// the player's own gear (GearTalk, docs/Gear-Talk-Plan.md): what they see on you, warm, plain or curt replies
+		for (GearTalk.Line line : GearTalk.LINES) {
+			String id = line.id();
+			t.add(talk("gear_" + id, c -> grown(c) && id.equals(GearTalk.talkLine(c.player(), c.v())), NO_ARGS, GearTalk.TALK_WEIGHT, false, true,
+				r("a", 1, 0, 2), r("b", 0, 1, 0), r("c", -1, 0, -2)));
+		}
 		// ---- faith
 		t.add(life("faith_same", SAME_FAITH, c -> new Object[] {c.faith().named()},
 			r("a", 2, 0, 3), r("b", 0, -1, -1), r("c", 1, 0, 2)));

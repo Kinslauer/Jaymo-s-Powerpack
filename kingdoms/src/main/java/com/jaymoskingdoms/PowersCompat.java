@@ -4571,6 +4571,70 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Looked up once: Powers' {@code Prosthetics.ironMask} and {@code rigMask}, and {@code Rig.wearsAny} and {@code fullSet}. */
+	private static java.lang.invoke.@Nullable MethodHandle ironLimbs, rigLimbs, rigAny, rigFull;
+	private static boolean gearLooked;
+
+	private static void lookForGear() {
+		if (gearLooked) {
+			return;
+		}
+		gearLooked = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+		try {
+			Class<?> limbs = Class.forName("com.jaymospowers.core.Prosthetics");
+			java.lang.invoke.MethodType of = java.lang.invoke.MethodType.methodType(int.class, net.minecraft.world.entity.Entity.class);
+			ironLimbs = lookup.findStatic(limbs, "ironMask", of);
+			rigLimbs = lookup.findStatic(limbs, "rigMask", of);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Prosthetics masks (older Powers?)", e);
+		}
+		try {
+			Class<?> rig = Class.forName("com.jaymospowers.rig.Rig");
+			java.lang.invoke.MethodType of = java.lang.invoke.MethodType.methodType(boolean.class, Player.class);
+			rigAny = lookup.findStatic(rig, "wearsAny", of);
+			rigFull = lookup.findStatic(rig, "fullSet", of);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Rig (older Powers?)", e);
+		}
+	}
+
+	/** Which of {@code entity}'s fitted limbs are iron (Powers' {@code Prosthetics.ironMask}, Dismember bits); 0 without Powers. */
+	public static int ironLimbs(net.minecraft.world.entity.Entity entity) {
+		lookForGear();
+		try {
+			return ironLimbs == null ? 0 : (int)ironLimbs.invoke(entity);
+		} catch (Throwable e) {
+			return 0;
+		}
+	}
+
+	/** Which of {@code entity}'s fitted limbs are Rig limbs, Frostborn work (Powers' {@code Prosthetics.rigMask}); 0 without Powers. */
+	public static int rigLimbs(net.minecraft.world.entity.Entity entity) {
+		lookForGear();
+		try {
+			return rigLimbs == null ? 0 : (int)rigLimbs.invoke(entity);
+		} catch (Throwable e) {
+			return 0;
+		}
+	}
+
+	/** How much of the Rig {@code player} wears: 0 none, 1 some of it, 2 the whole set (Powers' {@code Rig}); 0 without Powers. */
+	public static int rigWorn(Player player) {
+		lookForGear();
+		try {
+			if (rigAny == null || !(boolean)rigAny.invoke(player)) {
+				return 0;
+			}
+			return rigFull != null && (boolean)rigFull.invoke(player) ? 2 : 1;
+		} catch (Throwable e) {
+			return 0;
+		}
+	}
+
 	/** (0.7.462) Sets every break {@code entity} has (Powers' {@code Wounds.mendAll}); false if there was none, or without Powers. */
 	public static boolean setBones(net.minecraft.world.entity.LivingEntity entity) {
 		lookForHealing();

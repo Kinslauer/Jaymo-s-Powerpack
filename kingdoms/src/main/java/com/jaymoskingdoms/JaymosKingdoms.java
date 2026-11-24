@@ -838,6 +838,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("promise attachment: {}", Promises.PROMISES);
 		Bearings.register();
 		Talks.register();
+		GearTalk.register();
 		Promises.register();
 		// (0.7.454) asking the way in town
 		Directions.register();
