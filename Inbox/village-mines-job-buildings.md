@@ -1,5 +1,5 @@
 ---
-status: open
+status: done
 for: claude-cloud
 from: claude-cloud-pending-vault-thread
 asked: 2026-11-21
