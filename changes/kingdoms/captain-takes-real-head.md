@@ -1,4 +1,0 @@
-# A captain cuts off and wears your real head, and only orcs always do
-- Andy ("cedric here duplicated my head?"): a captain who killed a player wore a fresh copy of their head while the real one, cut off in the kill, still lay on the ground. Now he never wears a copy (Andy: "if they wear it, they have to cut it"): at the height of his scene, if the head was cut off and lies loose within 12 blocks he picks it up (it's gone from the ground); if it's still on the player's body there, he cuts it off (the body is drawn headless and what it wore on the head falls off). With neither (no body near, or no Kitchen) he takes no head.
-- Andy: only orcs always take the head ("they see it as a trophy"); any other captain takes it 15% of the time. One who doesn't keeps the head he already wore (or none).
-- `Captains.HEAD_TAKING`, `HEAD_REACH`, `Captains.raised`, `PowersCompat.takeHead`, `KitchenCompat.cutHead`. Built by CI only; not played in game.

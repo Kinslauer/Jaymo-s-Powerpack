@@ -16701,3 +16701,9 @@ Andy picked "goblin extras" from the survival pick list (2026-11-22); the Goblin
 
 - A Cleric sworn to the Truth uses a book as their medallion: the Book and Quill they now start with instead of the holy symbol, or any blank book (a plain book, or a book and quill with nothing written in it). In either hand it raises the medallion board, a tap casts the bound spell, sneak-tap turns it, the class key works with it, and it counts as the free hand for spells. A blank book and quill held by a Truth Cleric casts instead of opening to write; one with writing in it is an ordinary book. The holy symbol still works for them too.
 - `Clerics.prayerBook` / `Clerics.focus`. Not played in game.
+
+## 0.12.18 (2026-11-24): A captain cuts off and wears your real head, and only orcs always do (#2069)
+
+- Andy ("cedric here duplicated my head?"): a captain who killed a player wore a fresh copy of their head while the real one, cut off in the kill, still lay on the ground. Now he never wears a copy (Andy: "if they wear it, they have to cut it"): at the height of his scene, if the head was cut off and lies loose within 12 blocks he picks it up (it's gone from the ground); if it's still on the player's body there, he cuts it off (the body is drawn headless and what it wore on the head falls off). With neither (no body near, or no Kitchen) he takes no head.
+- Andy: only orcs always take the head ("they see it as a trophy"); any other captain takes it 15% of the time. One who doesn't keeps the head he already wore (or none).
+- `Captains.HEAD_TAKING`, `HEAD_REACH`, `Captains.raised`, `PowersCompat.takeHead`, `KitchenCompat.cutHead`. Built by CI only; not played in game.

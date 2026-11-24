@@ -7603,3 +7603,10 @@ following integration task).
   in JEI on a server. JEI only asks the server for Minecraft's own kinds of recipe, so these never reached the players;
   `StoneAge`, `OreWashing` and `LightArmour` now have the server send them (`RecipeSynchronization`).
 - Built on CI only; not played.
+
+## 0.26.88 (2026-11-24): A dead player's severed head can be taken as a trophy (#2069)
+
+- `SeveredPart.takeHead`: something picks up a player's own loose severed head (not carried, nailed up or kept as a trophy) and it's gone from the ground. Jaymo's Kingdoms' captains use it to wear the real head of a player they killed instead of a copy.
+- A dead player looking out of their own severed head goes back to their normal view if the head is taken, instead of staring from where it was. Built by CI only; not played in game.
+- Andy: "you never see the scene because it cuts to black when you die. from now on if you die in this fashion and someone is promoted or otherwise, the cutscene should play before you respawn or are allowed to reincarnate." A film after your death (a Kingdoms captain's scene over your body) now plays on a death that ends the character too, with its sound; the silent black hold and the death screen (Reincarnate, Limbo) come after it, their buttons held until it ends. Before, a final death cut the film and went straight to black. `UltimateCinematic.deathFilm`, `BlackoutHush`, `DeathScreenBlackMixin`. Not played in game.
+- Andy: "upon the killing blow it should still cut to black, but cut back in for the scene, then back out". A film after your death opens on 1.5 seconds of black (silent too on a death that ends the character), cuts in to the scene, and cuts out to the death screen's black. The death screen and its buttons (Reincarnate, Limbo) aren't drawn at all while the film plays. `UltimateCinematic.DEATH_BLACK`. Not played in game.
