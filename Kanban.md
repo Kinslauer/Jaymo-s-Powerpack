@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 16:18). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 16:19). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -49,6 +49,8 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for any · open
 - [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · for any · open
 - [ ] [[Inbox/reference-mods-picklist-2026-11-24|reference-mods-picklist-2026-11-24]] · for any (needs Andy's PC: the folder is local) · open
+- [ ] [[Inbox/scouter-bio-scanner-tracking|scouter-bio-scanner-tracking]] · for any · open
+- [ ] [[Inbox/tensura-neo-otherworld-picklist|tensura-neo-otherworld-picklist]] · for any · open
 
 
 ## Being built
