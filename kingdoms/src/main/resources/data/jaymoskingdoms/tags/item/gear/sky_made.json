@@ -1,0 +1,77 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "jaymospowers:cloud_in_a_bottle",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:featherfall_cloak",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:gravitite_helmet",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:gravitite_chestplate",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:gravitite_leggings",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:gravitite_boots",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:zanite_helmet",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:zanite_chestplate",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:zanite_leggings",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:zanite_boots",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:neptune_helmet",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:neptune_chestplate",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:neptune_leggings",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:neptune_boots",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:arkenium_helmet",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:arkenium_chestplate",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:arkenium_leggings",
+      "required": false
+    },
+    {
+      "id": "jaymospowers:arkenium_boots",
+      "required": false
+    }
+  ]
+}
