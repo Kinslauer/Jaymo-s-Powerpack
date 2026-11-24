@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 19:49). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 19:51). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -44,7 +44,6 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · ☁️ Cloud · claimed
-- [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · ☁️ Cloud · #research · claimed
 - [ ] [[Inbox/structures-2-placement-reasons|structures-2-placement-reasons]] · ☁️ Cloud · #2085 · claimed
 - [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · ☁️ Cloud · #2090 · claimed
 - [ ] [[Inbox/refmods-12-fishing|refmods-12-fishing]] · ☁️ Cloud · #2092 · claimed
@@ -61,6 +60,7 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/refmods-15-provenance-coins|refmods-15-provenance-coins]] · ☁️ Cloud · #2097 · claimed
+- [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · ☁️ Cloud · #research · claimed
 
 
 ## In review
