@@ -1,10 +1,10 @@
 ---
-status: open
-for: any
+status: in-progress
+for: claude-cloud
 from: coordinator
 asked: 2026-11-24
-thread: Build Reference Mods pick list (cloud); queued by Hermes Training
-claimed_by: 
+thread: cmsg_017LSt6rWz6CzxSGvzDd41XW84yJWoLAAvdc9WzrgnCHQL
+claimed_by: claude-cloud
 pr: 
 suggested_owns: []
 ---
