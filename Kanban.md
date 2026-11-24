@@ -8,7 +8,20 @@ kanban-plugin: board
 
 ## Waiting for a bot
 
+- [ ] [[Inbox/alexs-caves-integration|alexs-caves-integration]] · for coordinator · open
 - [ ] [[Inbox/arsenal-pulls-anything|arsenal-pulls-anything]] · for ☁️ Cloud · open
+- [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
+- [ ] [[Inbox/blood-awakening-passive-upgrade|blood-awakening-passive-upgrade]] · for any · open
+- [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · for any · open
+- [ ] [[Inbox/downed-knockout-three-hits|downed-knockout-three-hits]] · for any · open
+- [ ] [[Inbox/from-the-shadows-port|from-the-shadows-port]] · for any · open
+- [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for 🪶 Quill · open
+- [ ] [[Inbox/patron-colossus-and-commandment-hunt|patron-colossus-and-commandment-hunt]] · for any · open
+- [ ] [[Inbox/ping-t3code-11am|ping-t3code-11am]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · for 🪽 any Hermes bot · open
+- [ ] [[Inbox/realm-banks-finish|realm-banks-finish]] · for any · open
+- [ ] [[Inbox/structure-spawn-rate-wooden-hut|structure-spawn-rate-wooden-hut]] · for coordinator · open
+- [ ] [[Inbox/tree-chop-through-trunk|tree-chop-through-trunk]] · for any · open
 - [ ] [[Inbox/vanilla-plus-a-incendium-castle-start|vanilla-plus-a-incendium-castle-start]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-b-stellarity-end-enderscape-band|vanilla-plus-b-stellarity-end-enderscape-band]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-c-back-slot|vanilla-plus-c-back-slot]] · for 💻 Odysseus · open
@@ -28,19 +41,6 @@ kanban-plugin: board
 - [ ] [[Inbox/village-mods-7-ctov-tidal-towns|village-mods-7-ctov-tidal-towns]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
-- [ ] [[Inbox/alexs-caves-integration|alexs-caves-integration]] · for coordinator · open
-- [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
-- [ ] [[Inbox/blood-awakening-passive-upgrade|blood-awakening-passive-upgrade]] · for any · open
-- [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · for any · open
-- [ ] [[Inbox/downed-knockout-three-hits|downed-knockout-three-hits]] · for any · open
-- [ ] [[Inbox/from-the-shadows-port|from-the-shadows-port]] · for any · open
-- [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for 🪶 Quill · open
-- [ ] [[Inbox/patron-colossus-and-commandment-hunt|patron-colossus-and-commandment-hunt]] · for any · open
-- [ ] [[Inbox/ping-t3code-11am|ping-t3code-11am]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · for 🪽 any Hermes bot · open
-- [ ] [[Inbox/realm-banks-finish|realm-banks-finish]] · for any · open
-- [ ] [[Inbox/structure-spawn-rate-wooden-hut|structure-spawn-rate-wooden-hut]] · for coordinator · open
-- [ ] [[Inbox/tree-chop-through-trunk|tree-chop-through-trunk]] · for any · open
 - [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · for any · open
 
 
