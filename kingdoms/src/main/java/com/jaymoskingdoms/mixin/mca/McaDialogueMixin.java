@@ -381,6 +381,13 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.Banks.ANSWER.equals(answer)) {
+			// (Andy, 2026-11-23) banking at the counter
+			villager.getInteractions().stopInteracting();
+			com.jaymoskingdoms.Banks.open(player, villager);
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && com.jaymoskingdoms.equestrian.HorseKit.ANSWER.equals(answer)) {
 			// (Andy, 2026-11-14) the court wizard's enchanted tack
 			villager.getInteractions().stopInteracting();

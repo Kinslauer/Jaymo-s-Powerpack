@@ -49,6 +49,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Professions.register();
 		// (0.7.498) the copper bit and the coin purse (the realms' coins are Currencies')
 		com.jaymoskingdoms.money.MoneyItems.register();
+		// banks: accounts, loans and letters of credit at a realm's counting house (Banks)
+		LetterOfCredit.register();
+		Banks.register();
 		McaCompat.register();
 		// offline accounts sign in (EasyAuth, server only) before their character creation starts
 		SignIn.register();

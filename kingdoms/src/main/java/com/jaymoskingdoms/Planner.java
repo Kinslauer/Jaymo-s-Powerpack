@@ -184,6 +184,10 @@ public final class Planner {
 				// a VillagersPlus job house it has none of for this land
 				continue;
 			}
+			if (e.id().equals(Banks.ID) && !Banks.mayBuild(server, f)) {
+				// a bank only where there's the trade for it: a market, and wealth or the Coin creed
+				continue;
+			}
 			if (e.id().equals(TAVERN)) {
 				tavern = size >= e.minPopulation() && works.count(e.id()) < e.max() ? e : null;
 				continue;
@@ -208,7 +212,7 @@ public final class Planner {
 		Works.Site works = Works.of(server, f.id());
 		Map<String, Integer> most = new HashMap<>();
 		for (Blueprint.Entry e : Blueprint.catalogue(f.type())) {
-			if (!e.id().equals("house") && !e.id().equals(TAVERN) && !Enclosure.piece(e.id()) && !HavenGrowth.isWork(e.id()) && e.minPopulation() < Integer.MAX_VALUE
+			if (!e.id().equals("house") && !e.id().equals(TAVERN) && !e.id().equals(Banks.ID) && !Enclosure.piece(e.id()) && !HavenGrowth.isWork(e.id()) && e.minPopulation() < Integer.MAX_VALUE
 				&& !(e.id().equals(HavenBuildings.RING) && !HavenBuildings.ringFor(server, f))
 				&& !(e.id().equals(Temples.GREAT_TEMPLE) && !Temples.greatTempleFor(server, f)) && !Library.unavailable(server, f, e.id())
 				&& !VpBuildings.isJob(e.id())) {
