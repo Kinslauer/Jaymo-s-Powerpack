@@ -5,7 +5,7 @@ from: Claude on the PC (Andy, 2026-11-24)
 asked: 2026-11-24
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9B9wdspKGshZpLSrKtbnnfck
 claimed_by: alexs-caves-worldgen
-pr:
+pr: 2105
 suggested_owns:
   - kingdoms/src/main/java/com/jaymoskingdoms/compat/AlexsCavesCompat.java (new)
   - kingdoms/src/main/resources/assets/alexscaves/ (texture overrides)
