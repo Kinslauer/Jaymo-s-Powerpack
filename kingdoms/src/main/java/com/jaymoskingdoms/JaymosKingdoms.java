@@ -435,6 +435,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		LOGGER.debug("world tier attachments: {} {} {} {} {}", WorldTiers.TIER, WorldTiers.PROGRESS, WorldTiers.CHANGED, WorldTiers.MOB_TIER,
 			WorldTiers.FLOOR);
 		WorldTiers.register();
+		Rematches.register();
 		HarshLands.register();
 		// Hostile Mobs Improve Over Time's levels follow the world tier, not play time
 		HostileMobsTiers.register();
