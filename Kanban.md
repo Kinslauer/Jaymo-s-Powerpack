@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:39). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:41). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -22,14 +22,6 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for any · open
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for any · open
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for ☁️ Cloud · open
-- [ ] [[Inbox/refmods-06-horses|refmods-06-horses]] · for any · open
-- [ ] [[Inbox/refmods-07-mocreatures-beasts|refmods-07-mocreatures-beasts]] · for any · open
-- [ ] [[Inbox/refmods-08-vampire-villager|refmods-08-vampire-villager]] · for any · open
-- [ ] [[Inbox/refmods-09-village-styles|refmods-09-village-styles]] · for any · open
-- [ ] [[Inbox/refmods-10-outlying-buildings-camps|refmods-10-outlying-buildings-camps]] · for any · open
-- [ ] [[Inbox/refmods-11-tectonic-terrain|refmods-11-tectonic-terrain]] · for any · open
-- [ ] [[Inbox/refmods-13-body-anim-stations|refmods-13-body-anim-stations]] · for any · open
-- [ ] [[Inbox/refmods-16-titles-bloods-tensura|refmods-16-titles-bloods-tensura]] · for any · open
 - [ ] [[Inbox/village-mods-6-small-structures|village-mods-6-small-structures]] · for 💻 Odysseus · open
 - [ ] [[Inbox/mordhau-1-helms|mordhau-1-helms]] · for 💻 Odysseus · open
 - [ ] [[Inbox/mordhau-2-hoods-crests|mordhau-2-hoods-crests]] · for 💻 Odysseus · open
@@ -42,6 +34,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
+- [ ] [[Agents/gravity-magnetism|gravity-magnetism]] · 💻 Odysseus · running
 - [ ] [[Agents/village-mods-5|village-mods-5]] · 💻 Odysseus · running
 
 
@@ -68,7 +61,6 @@ kanban-plugin: board
 - [ ] [[Inbox/wither-model|wither-model]] · 🍇 Bacchus · blocked
 - [ ] [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]] · 💻 Odysseus · stalled
 - [ ] [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]] · 💻 Odysseus · stalled
-- [ ] [[Agents/project-thread-ojz7uj|project-thread-ojz7uj]] · 💻 Odysseus · stalled
 
 
 ## Done
