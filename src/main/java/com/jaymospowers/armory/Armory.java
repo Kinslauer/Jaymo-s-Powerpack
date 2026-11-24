@@ -140,6 +140,9 @@ public final class Armory {
 	static final Map<Tier, Item> LANCES = new EnumMap<>(Tier.class);
 	/** (Strains C) The bomb glider's item: placed like a boat, it's the {@link BombGlider}. */
 	public static Item BOMB_GLIDER;
+	/** The future's hoverboard (on the bomb glider's hull), and the bench it is built at. */
+	public static Item HOVERBOARD;
+	public static Block FUTURE_WORKBENCH;
 	/**
 	 * A weighted string net. Rogues &amp; Warriors' Throw Net spends one per cast (compat/SpellThrows); Andy: "make a net
 	 * item crafted from string".
@@ -240,6 +243,12 @@ public final class Armory {
 		// (Strains C) the bomb glider: a bat-winged board that drops dynamite
 		BOMB_GLIDER = item("bomb_glider", BombGliderItem::new, p -> p.stacksTo(1));
 		BombGliderNet.init();
+		// the future's hoverboard: never found, built at the Future Workbench
+		HOVERBOARD = item("hoverboard", HoverboardItem::new, p -> p.stacksTo(1));
+		ResourceKey<Block> benchKey = ResourceKey.create(Registries.BLOCK, JaymosPowers.id("future_workbench"));
+		FUTURE_WORKBENCH = Registry.register(BuiltInRegistries.BLOCK, benchKey, new FutureWorkbenchBlock(BlockBehaviour.Properties.of()
+			.mapColor(MapColor.METAL).strength(3.0F, 6.0F).sound(SoundType.METAL).requiresCorrectToolForDrops().setId(benchKey)));
+		item("future_workbench", p -> new BlockItem(FUTURE_WORKBENCH, p), p -> p.useBlockDescriptionPrefix());
 		// (BWM port) the mining charge: stuck to a block, it digs a 3x3x3 hole into it
 		ResourceKey<Block> chargeKey = ResourceKey.create(Registries.BLOCK, JaymosPowers.id("mining_charge"));
 		MINING_CHARGE = Registry.register(BuiltInRegistries.BLOCK, chargeKey, new MiningChargeBlock(BlockBehaviour.Properties.of()
