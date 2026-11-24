@@ -1,0 +1,53 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "alexscaves"
+      ]
+    }
+  ],
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "alexscaves:raygun",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "alexscaves:holocoder",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "alexscaves:remote_detonator",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "alexscaves:hazmat_mask",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "alexscaves:hazmat_chestplate",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "alexscaves:hazmat_leggings",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "alexscaves:hazmat_boots",
+          "weight": 2
+        }
+      ]
+    }
+  ]
+}

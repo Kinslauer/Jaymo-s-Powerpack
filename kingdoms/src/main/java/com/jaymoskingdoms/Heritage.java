@@ -908,6 +908,12 @@ public final class Heritage {
 		if ((kind == Kind.RUBBERFOLK || kind == Kind.VERDANT) && player.isSprinting() && !player.isShiftKeyDown() && PowersCompat.reel(player)) {
 			return;
 		}
+		// (Blood Awakening, Andy 2026-11-23) a Verdant who has learned it grows a lost limb back now (Jaymo's Powers); with
+		// nothing lost, the key is as it was
+		if (kind == Kind.VERDANT && TreeLocks.awakened(player)
+			&& PowersCompat.sprintMove("com.jaymospowers.power.zfighter.ZFighterLineage", "regrowNow", player)) {
+			return;
+		}
 		if (kind == Kind.WARRIORBORN) {
 			if (player.isShiftKeyDown()) {
 				// (0.7.490) sneaking, the key is the war cry instead

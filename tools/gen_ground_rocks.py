@@ -134,6 +134,13 @@ def main():
             'key': {'#': f'{NS}:{block}'},
             'result': {'id': f'minecraft:{result}', 'count': 1},
         })
+    # and back (Andy, 2026-11-24): one cobblestone breaks into 4 stone rocks
+    write(os.path.join(DATA, 'recipe', 'stone_rocks_from_cobblestone.json'), {
+        'type': 'minecraft:crafting_shapeless',
+        'category': 'building',
+        'ingredients': ['minecraft:cobblestone'],
+        'result': {'id': f'{NS}:stone_rock', 'count': 4},
+    })
     blockstate('loose_flint', 'flints', len(FLINTS), 'loose_flint')
     models('loose_flint', 'flints', len(FLINTS), FLINT_TEXTURE)
     loot('loose_flint', 'minecraft:flint', 'flints', len(FLINTS))

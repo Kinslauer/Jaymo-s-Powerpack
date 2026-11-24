@@ -46,8 +46,9 @@ public final class WebRedHunt {
 	static final int REPATH_EVERY = 10;
 	static final double STEP = 24.0, SPEED = 1.35;
 	/** The lunge: from this far out (blocks), this hard (blocks a tick) and this far up, at most once every so many ticks. */
-	static final double LUNGE_MIN = 3.5, LUNGE_MAX = 9.0, LUNGE_SPEED = 1.15, LUNGE_UP = 0.38;
-	static final int LUNGE_EVERY = 50;
+	public static final double LUNGE_MIN = 3.5, LUNGE_MAX = 9.0;
+	static final double LUNGE_SPEED = 1.15, LUNGE_UP = 0.38;
+	public static final int LUNGE_EVERY = 50;
 	/** The lunge shakes the screens of those within this many blocks, this hard. */
 	static final double LUNGE_SHAKE_RANGE = 12.0;
 	static final float LUNGE_SHAKE = 0.35F;
@@ -172,10 +173,15 @@ public final class WebRedHunt {
 	 * and loaded but themselves, a player who can't be hurt, a stand or another symbiote of the red's own.
 	 */
 	static @Nullable LivingEntity nearest(ServerLevel level, net.minecraft.server.level.ServerPlayer hunter) {
+		return nearest(level, hunter, null);
+	}
+
+	/** The same, but not {@code skip} (the prey it just gave up on). */
+	static @Nullable LivingEntity nearest(ServerLevel level, net.minecraft.server.level.ServerPlayer hunter, @Nullable Entity skip) {
 		LivingEntity best = null;
 		double bestDistance = RANGE * RANGE;
 		for (Entity entity : level.getAllEntities()) {
-			if (entity instanceof LivingEntity living && entity != hunter && living.isAlive()
+			if (entity instanceof LivingEntity living && entity != hunter && entity != skip && living.isAlive()
 				&& !(living instanceof net.minecraft.world.entity.decoration.ArmorStand)
 				&& !(living instanceof net.minecraft.world.entity.player.Player p && (p.isCreative() || p.isSpectator()))
 				&& WebSymbioteStrains.of(living) != WebSymbioteStrain.RED) {

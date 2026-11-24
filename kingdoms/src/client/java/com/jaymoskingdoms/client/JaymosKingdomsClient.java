@@ -50,6 +50,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// (Andy, 2026-11-06) what is beyond this player's tier, off JEI and the recipe book
 		TierHidingClient.register();
 		LocksClient.register();
+		BoardTermsClient.register();
 		// (ff-kit) Peterwolf's firefighter readout on our HUD layout, only while carrying the kit
 		ForestFireHud.register();
 		// (0.7.329) the second batch of Blockbench Workshop creatures
@@ -402,8 +403,6 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		ArtKeysClient.register();
 		// the Cleric's medallion board
 		MedallionClient.register();
-		// a pop-up for key bindings that share a key (twice ever)
-		KeyClashes.register();
 		// 0.5.47: stablehands' and farriers' screens (the scroll kept when one comes again after a button)
 		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(com.jaymoskingdoms.StableNet.Open.TYPE, (payload, context) -> {
 			int scroll = context.client().gui.screen() instanceof StableScreen was && was.workerId() == payload.workerId() ? was.scroll() : 0;

@@ -16963,3 +16963,86 @@ Andy: "can i have you work on npc pathing? they get stuck in water or on buildin
 - Alex's Caves' six cave biomes (Andy: "the cave maps should lead to places like mohknee") now sit under Mohknee and the deep sea round it, where every one of Alex's biome cells keeps its biome; the home continent has none within 24000 blocks of the world's middle, and past that one cell in two keeps its biome (`AlexsCavesCompat`, `mixin/alexscaves/CaveBiomePlacementMixin`; tune `HOME` and `FAR_KEEP`). The Abyssal Chasm lies under the crossing sea, the other five under the land and its islands where Alex's own climate rules allow.
 - Cave maps search further: while Alex's `cave_map_search_attempts` is still its default (128000, about 23000 blocks), it is raised to 300000 (about 35000 blocks) when the server starts, so a map from home can reach Mohknee.
 - Built; not played. Only new chunks change.
+
+## 0.12.41 (2026-11-24): No more key clash pop-ups (#2107)
+
+- **Key clash pop-up gone**: pressing a key two bindings share no longer brings up the "X is bound twice" pop-up (Andy: too invasive, almost every key has a clash). Controls still shows clashes in red.
+- KeyClashes (client) and its lang part removed; the old jaymoskingdoms-key-clashes.txt count file is left alone and no longer read.
+- Built; not played.
+
+## 0.12.42 (2026-11-24): The Silk Deeps no longer generate (#2108)
+
+- The Silk Deeps, the cobweb-hung spider caves of dark spider stone and nest silk (Andy: "remove these caves and their abandoned buildings"), are no longer placed in the Overworld, so new chunks get neither the caves nor the web-hung spruce watcher's huts over them, nor the brood queen's chamber under them (both only ever generate over the Silk Deeps). Switch: `SilkDeeps.GENERATES`.
+- Everything stays registered (the biome, spider stone, nest silk, shed skins, egg sacs, the brood queen, both structures), so worlds that already have them still load and what was already generated stays. Netcasters still spawn deep down everywhere else, so silk glands still drop; spiders that drag a player off fall back to a cave spider spawner's nest.
+- Built; not played. Only new chunks change.
+
+## 0.12.43 (2026-11-24): Alex's Caves: Rubber-folk at home in the Candy Cavity, the burning beast in the Nether (#2111)
+
+- In Alex's Caves' Candy Cavity, where the Mad Tinkerer grew the first Rubber-folk, a Rubber-folk player grows a lost limb
+  back twice as fast (every 10 seconds) and slowly mends (half a heart every 5 seconds). Nothing says why.
+- Alex's candy counts among their sweets: gummies, rock candy, jelly beans, caramel and caramel apples, ice cream and
+  sundaes, hot chocolate, purple soda and gingerbread crumbs mend them like a cookie does.
+- The Luxtructosaurus is a demon of the Ash: it counts as a demon (the Devil Splitter lands every blow on it twice), and
+  once you've come within 48 blocks of one in the caves it knows you. After that, while you're in the Nether, about once
+  an hour one walks out of the Ash 48 to 80 blocks from you (never while another is near).
+
+## 0.12.44 (2026-11-24): The first capital is found in seconds, not after an 11-minute wait (#2114)
+
+- **New worlds start sooner**: the search for the first capital's village now knows which village the game will really build at each village spot, and checks it by working out only that chunk's structure starts (which structures begin there), never its land. On the Steam Deck's first start it made the land of 20 spots one after another (about 30 s each), found an Epic town at none of them, and kept the player on "Your story is being written" for 11 minutes before raising the capital at spawn anyway. On a full-pack test server the same search now takes about a second.
+- **Kingdoms wake where towns really are**: a village round spawn picked to become a kingdom has its chunk's structure starts checked before its land is made, so a spot another village won is passed over in a moment instead of after making its land (on the test server 4 passes and 4 kingdoms founded, where the old build passed 36 spots).
+- Cause: the shared village pool (about 60 villages from every mod in one set) draws one village per spot in a seeded weighted order, and the first that really starts wins. The search only asked "could an Epic town stand here?", true where another mod's village then won the draw.
+- PoolPick.winner: the game's own draw (ChunkGenerator.createStructures) worked out from the seed, each village tested with Structure.generate as the game does (its place and biome alone said yes for the vanilla plains village at spots where it laid no pieces and Moog's villager statue started instead). PoolPick.starts: a chunk made only to its structure-starts step, off the server thread. StoryGround.VillageSearch looks at each spot once for its winner; Scout.find counts an unmade spot only if a wanted structure wins it; TownWakes checks the starts before making land.
+- Built and run on a full-pack server (seed 1337): the foreseen winner and the starts step matched the made chunks at every spot logged; not played, not run on the Deck.
+
+## 0.12.45 (2026-11-24): The Toxic Caves' air and the Abyssal Chasm's wild Tideborn (#2112)
+
+- Alex's Toxic Caves can only be stood by the Obsidian-hided Stoneborn and the legendary Warrior-born. Anyone else
+  breathing the air there stays Irradiated while they're down (unless sealed in a full hazmat suit, the future's gear).
+- The Obsidian-hided Stoneborn were made by it: they shrug off Irradiated wherever it comes from.
+- Wild Tideborn in Alex's Abyssal Chasm: while you're down there, eel-shaped and manta-winged Tideborn come up out of the
+  dark (up to four near you), bare but for a trident and tougher than a guard. They go for anyone from above on sight,
+  players and villagers alike, Tideborn or not, and swim straight at you (the mantas faster). They keep to the chasm.
+  They ease up as you win the Deep Ones' trust by trading with them or defending them: once they think well of you the
+  wild ones only go for you up close, and once they think highly of you they leave you be unless you strike one first.
+
+## 0.12.46 (2026-11-24): Village mods 4: board work (#2113)
+
+- **Fair pay**: things have a worth now (Economy's worth table: raw goods at about what villagers trade them for, anything made at what went into it and a tenth over, times its rarity). Errands pay what they ask for is worth and half again, plus a little for the trouble; board work that has you bring the goods (building, stashes, lamps) pays for them on top of its rate.
+- **Decrees**: a Smiths', Hunters', Farmers' or War decree pinned on a town board makes its kind of work and errands much likelier there (up to 3 per board, one of a kind, 3 days each). A town under a ruler gets them carried up by a herald when it's short: food, stores for its next building or Upkeep's waiting repairs, a war, an attack on its people. Finishing 4-star board work may earn you one (5-star always does); pin it on any board. Use a pinned decree to read it.
+- **Deadlines**: about a third of notices give so many days. Back in the first half pays a quarter more; past the last, the quest comes off your log and the poster's town drops you 4 reputation. Your copy of the notice yellows once the early time is past.
+- **Mixed asks**: about a third of errands and board work want some of the town's other goods besides, and pay part of it in goods (bread, arrows, iron, a lantern...).
+- **Asks that fit the land**: towns on the shore, a river, mountains, badlands, forest, jungle, cherry groves, mangroves, mushroom fields and the pale garden post their own errands and news on top of their villager type's.
+- **Rarer notices look rarer**: board work goes up on plain paper to two stars, sealed at three, vellum at four, gilt at five, on the board and in hand, its name coloured to match.
+- **Progress on the notice**: taking an errand or work gives you your copy of the notice; held, it shows the count (and time left) on the action bar. A toast when the work is done.
+- **Hand in at the board**: use the town's board with your copy or the goods in hand to hand finished work in there when its poster is away (no hearts with them that way; a criminal still has to be brought to the poster).
+- New: BoardTerms, Decrees, BoardTermsClient, the decree item and papers (our own art), lang part board-terms. Changed: Economy, TownNotices, BoardWork, Bounties, BountyBoard (notice looks 3-6), Quests (turn-in shared with the board), Upkeep.
+- Built by CI only; not played.
+
+## 0.12.47 (2026-11-24): Pillagers carry lanterns at night, and take one down when they have none (#2072)
+
+- Andy: "pillagers should also use their lanterns at night, or break them in the world and take them with if they run out". At night, where it's dark, a pillager now carries a light in its off hand (its crossbow stays in the main), as villagers and folk do: a light from its own inventory, else a lantern (or torch) from its camp's loot pile. With none of those, it walks to the nearest lit lantern set in the world within 16 blocks (its camp's fence posts, a village's, a player's), breaks it and carries it off with the fuel it had left. Not with mob griefing off. At dawn the lantern is put away and kept for the next night, so each pillager takes down at most one.
+- Pillagers still see in the dark as before; the lantern lights them up (with LambDynamicLights) so they're seen coming.
+- `NightLights.bearer`, `fromPocket`, `faction` (a camp illager's camp), `Source.HUNG`, `hung`, `unhang`. Built by CI only; not played in game.
+
+## 0.12.48 (2026-11-24): Cobblestone siding is cut in the stonecutter, not crafted from one cobblestone (#2071)
+
+- One cobblestone alone in the crafting grid is now Jaymo's Powers' 4 stone rocks (Andy's pick), so it no longer gives 2 cobblestone siding. Cut siding from cobblestone in the stonecutter (2 per block, as before), or craft it from 2 cobblestone slabs.
+- `cobblestone_siding` recipe removed (tools/gen_carpentry.py skips it). Built by CI only; not crafted in game.
+
+## 0.12.49 (2026-11-24): Blood Awakening upgrades your blood's move; a Verdant's regrowth key (#2117)
+
+- **Everyone starts with their blood's move** (Andy, 2026-11-23): the skill-tree lock on a blood's heritage-key move and its held move is gone (`TreeLocks.Lock.BLOOD` removed; the gates in `HeritageKits.press`, `FrostPrison.cast`, `BioBuilt.press`, `RubberFolk.press` taken out).
+- **Blood Awakening now upgrades it** (Andy's pick: one shared rule now, per-blood upgrades later). Learned, every wait on a blood's move is halved and what a heritage-key move gives lasts half again as long (`TreeLocks.awakened`, `TreeLocks.wait`, `AWAKENED_WAIT` 0.5, `AWAKENED_LONGER` 1.5): heritage-key cooldowns halve and their buffs, snares and slows (`HeritageKits.fx` during a cast) last 1.5x; a Frost-born's ice prison comes back twice a day; a Bio-built's or Rubber-folk's taking-in runs in half the time (new synced `HeritageHold.ABSORB_NEED` keeps the engulfing animations in step); a Bio-built's budding cooldown halves. The node's description and the Heritage page line say so.
+- **A Verdant's regrowth key**: an awakened Verdant presses the heritage key to grow one lost limb back at once (Jaymo's Powers' `ZFighterLineage.regrowNow`, through `PowersCompat.sprintMove`); with nothing lost the key does what it did. The Heritage page tells a Verdant so.
+- Players who already learned the node keep it and get the upgrade; no point is refunded (old worlds don't matter).
+- Built; not played.
+
+## 0.12.50 (2026-11-24): Newborn Rubber-folk climb out of the Candy Cavity (#2116)
+
+- Now and then (about once an hour spent down there) a newborn Rubber-folk villager stands up on the floor of Alex's
+  Candy Cavity some way off. Once nobody is watching it climbs up to the surface, then walks to the nearest settlement
+  and lives there from then on.
+- A newborn that sees you comes over and calls out for help, and waits on you. Talk to it ("Lost?" in the talk menu) to
+  answer: take it with you (it follows you), point it the way (it goes on alone) or not now. Talk to it again on the
+  way to send it ahead alone. Bring it into any town and it stays there, fond of you; leave it far behind for a couple
+  of minutes and it sets off alone.

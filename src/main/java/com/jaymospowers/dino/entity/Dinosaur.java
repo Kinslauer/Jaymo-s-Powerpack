@@ -497,14 +497,16 @@ public class Dinosaur extends TamableAnimal implements PlayerRideableJumping {
     */
    public static boolean checkSpawnRules(EntityType<? extends Dinosaur> type, ServerLevelAccessor level, EntitySpawnReason reason, BlockPos pos, RandomSource random) {
       if (reason == EntitySpawnReason.NATURAL || reason == EntitySpawnReason.CHUNK_GENERATION) {
-         if (!DinoConfig.NATURAL_SPAWNS || level.getLevel().dimension() != Dino.VERDANT_WORLD) {
+         // the Verdant World, or Alex's Primordial Caves under the far land (Dino#PRIMORDIAL_CAVES), where it is always dark
+         boolean cave = level.getLevel().dimension() != Dino.VERDANT_WORLD && level.getBiome(pos).is(Dino.PRIMORDIAL_CAVES);
+         if (!DinoConfig.NATURAL_SPAWNS || level.getLevel().dimension() != Dino.VERDANT_WORLD && !cave) {
             return false;
          }
          BlockPos below = pos.below();
          BlockState ground = level.getBlockState(below);
          // (a chunk being generated has no light yet, as with vanilla's animals)
          return ground.isFaceSturdy(level, below, Direction.UP) && ground.getFluidState().isEmpty() && !ground.is(BlockTags.LEAVES)
-            && (reason == EntitySpawnReason.CHUNK_GENERATION || level.getRawBrightness(pos, 0) >= SPAWN_LIGHT);
+            && (cave || reason == EntitySpawnReason.CHUNK_GENERATION || level.getRawBrightness(pos, 0) >= SPAWN_LIGHT);
       }
       return true;
    }
