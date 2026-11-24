@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: claude-cloud
 from: coordinator
 asked: 2026-11-23
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR
 claimed_by: claude-cloud
-pr: 
+pr: 2082
 suggested_owns:
   - kingdoms Banks.java, LetterOfCredit.java (new)
   - kingdoms Buildings.java (one realm() line), Planner.java (bank gate in eligible and utilitiesDone)
