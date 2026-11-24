@@ -505,7 +505,7 @@ public final class Economy {
 				case RARE -> RARE_SHARE;
 				case EPIC -> EPIC_SHARE;
 			};
-			WORTH.put(e.getKey(), Math.round(e.getValue() * share));
+			WORTH.put(e.getKey(), Math.round((double)e.getValue() * share));
 		}
 		JaymosKingdoms.LOGGER.info("Worth table: {} items priced ({} raw, {} recipes)", WORTH.size(), raw.size(), made.size());
 	}

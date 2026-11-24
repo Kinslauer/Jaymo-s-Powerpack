@@ -110,7 +110,7 @@ public final class BoardTerms {
 		}
 	}
 
-	/** Per player: the board quests last seen done (a toast when one joins). */
+	/** Per player: the board quests whose toast has shown (one each). */
 	private static final Map<UUID, Set<String>> READY = new HashMap<>();
 
 	private BoardTerms() {
@@ -448,18 +448,14 @@ public final class BoardTerms {
 					missed(level, player, q);
 				}
 			}
-			// (done: a toast; the first look at a player only notes what's done already)
-			Set<String> was = READY.get(player.getUUID());
-			Set<String> ready = new HashSet<>();
+			// (done: a toast, once a quest; the first look at a player only notes what's done already)
+			boolean first = !READY.containsKey(player.getUUID());
+			Set<String> toasted = READY.computeIfAbsent(player.getUUID(), u -> new HashSet<>());
 			for (Quest q : Quests.log(player)) {
-				if (board(q) && Quests.ready(player, q)) {
-					ready.add(q.id());
-					if (was != null && !was.contains(q.id()) && ServerPlayNetworking.canSend(player, Toast.TYPE)) {
-						ServerPlayNetworking.send(player, new Toast(Component.translatable("notice.jaymoskingdoms.toast"), Quests.title(q)));
-					}
+				if (board(q) && Quests.ready(player, q) && toasted.add(q.id()) && !first && ServerPlayNetworking.canSend(player, Toast.TYPE)) {
+					ServerPlayNetworking.send(player, new Toast(Component.translatable("notice.jaymoskingdoms.toast"), Quests.title(q)));
 				}
 			}
-			READY.put(player.getUUID(), ready);
 			// (held, the copy shows how far along it is)
 			for (ItemStack held : List.of(player.getMainHandItem(), player.getOffhandItem())) {
 				String id = held.is(TownNotices.ITEM) ? Quests.questOf(held) : null;
