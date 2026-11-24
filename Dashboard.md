@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:30). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:37). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -23,6 +23,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2084 Red (unparryable) mob blows rarer and slower (Powers, Kingdoms, 2026-11-24)
 - [ ] #2082 Realm banks: deposits, interest, loans and letters of credit at the counting house (Kingdoms, 2026-11-24)
 - [ ] #2079 Downed: a blow knocks you out, red blows kill, no tossing, fire kills after 6 s (Powers, 2026-11-24)
 - [ ] #2078 gear talk - bauble themes, knights and colours, two-tag lines, changes and gossip (Kingdoms, 2026-11-24)
@@ -82,8 +83,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2015 the Bulldrogioth, a shelled beast out of the demons' country (From the Shadows Reborn port) (Kingdoms, 2026-11-23)
 - [ ] #2014 the Nehemoth, a beast out of the demons' country (From the Shadows Reborn port) (Kingdoms, 2026-11-23)
 - [ ] #2013 froglin: the camps' frog-legged beasts (From the Shadows Reborn) (Kingdoms, 2026-11-23)
-- [ ] #2012 Crocodiles take monsters too (Kingdoms, 2026-11-23)
-- …and 476 older ones.
+- …and 477 older ones.
 
 ## Health
 
