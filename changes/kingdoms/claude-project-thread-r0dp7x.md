@@ -1,0 +1,4 @@
+# The Silk Deeps no longer generate
+- The Silk Deeps, the cobweb-hung spider caves of dark spider stone and nest silk (Andy: "remove these caves and their abandoned buildings"), are no longer placed in the Overworld, so new chunks get neither the caves nor the web-hung spruce watcher's huts over them, nor the brood queen's chamber under them (both only ever generate over the Silk Deeps). Switch: `SilkDeeps.GENERATES`.
+- Everything stays registered (the biome, spider stone, nest silk, shed skins, egg sacs, the brood queen, both structures), so worlds that already have them still load and what was already generated stays. Netcasters still spawn deep down everywhere else, so silk glands still drop; spiders that drag a player off fall back to a cave spider spawner's nest.
+- Built; not played. Only new chunks change.
