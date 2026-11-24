@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "powered=false": {
+      "model": "minecraft:block/stone_bricks"
+    },
+    "powered=true": {
+      "model": "minecraft:block/stone_bricks"
+    }
+  }
+}

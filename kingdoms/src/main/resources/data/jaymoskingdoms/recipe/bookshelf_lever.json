@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "redstone",
+  "ingredients": [
+    "minecraft:bookshelf",
+    "minecraft:lever"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:bookshelf_lever"
+  }
+}

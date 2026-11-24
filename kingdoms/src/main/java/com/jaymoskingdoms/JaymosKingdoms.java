@@ -1135,6 +1135,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		// the magic rules and the first spells (patch 6): parts, gags, rituals, counterspell, dispel, cantrips, fields, the new scrolls
 		NewSpells.register();
 		com.jaymoskingdoms.traps.Traps.register();
+		HiddenSwitches.register();
 		DeathRites.register();
 		// the gone-before: remains in the wild, their last camps, the ruins' traps, the headless rider
 		Remains.register();
