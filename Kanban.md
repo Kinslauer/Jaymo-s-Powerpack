@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 12:14). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 12:17). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -47,7 +47,6 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for any · open
 - [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · for any · open
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for any · open
-- [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for any · open
 - [ ] [[Inbox/refmods-01-felling|refmods-01-felling]] · for any · open
 - [ ] [[Inbox/refmods-02-druid-wild-shape|refmods-02-druid-wild-shape]] · for any · open
 - [ ] [[Inbox/refmods-03-scouter|refmods-03-scouter]] · for any · open
@@ -67,6 +66,7 @@ kanban-plugin: board
 
 ## Being built
 
+- [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · changeling-voice-mimic · claimed
 
 
 ## In review
