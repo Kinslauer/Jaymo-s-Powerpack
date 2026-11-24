@@ -14,7 +14,8 @@ import net.minecraft.world.entity.LivingEntity;
 /**
  * What hurt you, when nothing did it to you. Andy's clip "stop hitting me": his hearts fell half a heart at a time with
  * nobody near, and nothing on screen said why. Now a hurt with no attacker (heatstroke, thirst, bleeding, a parasite,
- * the cold) says so under the crosshair: "Hurt: heatstroke". Once per cause, again after {@link #REPEAT_TICKS}; falls
+ * the cold) says so under the crosshair, in the character's own voice (Andy: instead of "Hurt: fire", "that BURNS"):
+ * "Too hot... I'm cooking". Once per cause, again after {@link #REPEAT_TICKS}; falls
  * aren't named (you saw it). The server log gets the damage type's id too, so an unnamed one can be traced.
  */
 public final class HurtCause {
@@ -47,8 +48,9 @@ public final class HurtCause {
 		}
 		SAID.put(player, new Said(id, now));
 		JaymosPowers.LOGGER.info("{} hurt by {} ({} health), nobody did it", player.getScoreboardName(), id, taken);
-		Component cause = Component.translatableWithFallback("hurt_cause.jaymospowers." + id, plain(id));
-		player.sendOverlayMessage(Component.translatable("message.jaymospowers.hurt_cause", cause).withStyle(ChatFormatting.RED));
+		// said as the character would say it ("That BURNS!"); a cause without a line of its own still gets its name
+		player.sendOverlayMessage(Component.translatableWithFallback("hurt_cause.jaymospowers." + id, "Ugh... " + plain(id) + "!")
+			.withStyle(ChatFormatting.RED));
 	}
 
 	/** A damage type's id as words, for one without a line of its own: {@code jaymoskingdoms.old_age} is "old age". */
