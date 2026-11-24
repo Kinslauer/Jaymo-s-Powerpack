@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 17:47). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:21). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -12,7 +12,6 @@ kanban-plugin: board
 - [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
-- [ ] [[Inbox/blood-awakening-passive-upgrade|blood-awakening-passive-upgrade]] · for any · open
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · for any · open
 - [ ] [[Inbox/structure-spawn-rate-wooden-hut|structure-spawn-rate-wooden-hut]] · for coordinator · open
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · for 🪽 any Hermes bot · open
@@ -36,19 +35,22 @@ kanban-plugin: board
 - [ ] [[Inbox/refmods-13-body-anim-stations|refmods-13-body-anim-stations]] · for any · open
 - [ ] [[Inbox/refmods-16-titles-bloods-tensura|refmods-16-titles-bloods-tensura]] · for any · open
 - [ ] [[Inbox/village-mods-6-small-structures|village-mods-6-small-structures]] · for 💻 Odysseus · open
+- [ ] [[Inbox/mordhau-1-helms|mordhau-1-helms]] · for 💻 Odysseus · open
+- [ ] [[Inbox/mordhau-2-hoods-crests|mordhau-2-hoods-crests]] · for 💻 Odysseus · open
+- [ ] [[Inbox/mordhau-3-body|mordhau-3-body]] · for 💻 Odysseus · open
+- [ ] [[Inbox/mordhau-4-legs|mordhau-4-legs]] · for 💻 Odysseus · open
+- [ ] [[Inbox/village-mods-5-town-life-hats|village-mods-5-town-life-hats]] · for 💻 Odysseus · open
+- [ ] [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · for any · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/village-mods-5-town-life-hats|village-mods-5-town-life-hats]] · 💻 Odysseus · claimed
-- [ ] [[Agents/deck-deploy-watch-1124|deck-deploy-watch-1124]] · 💻 Odysseus · running
-- [ ] [[Agents/village-mods-5|village-mods-5]] · 💻 Odysseus · running
 
 
 ## In review
 
-- [ ] [[Inbox/village-mods-4-board-work|village-mods-4-board-work]] · for 💻 Odysseus · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2113 · in-review
+- [ ] [[Inbox/blood-awakening-passive-upgrade|blood-awakening-passive-upgrade]] · ☁️ Cloud · #2117 · in-review
 
 
 ## Needs Andy
@@ -57,21 +59,23 @@ kanban-plugin: board
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
 - [ ] [[Inbox/wither-model|wither-model]] · 🍇 Bacchus · blocked
 - [ ] [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]] · 💻 Odysseus · stalled
+- [ ] [[Agents/deck-deploy-watch-1124|deck-deploy-watch-1124]] · 💻 Odysseus · stalled
 - [ ] [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]] · 💻 Odysseus · stalled
 - [ ] [[Agents/project-thread-ojz7uj|project-thread-ojz7uj]] · 💻 Odysseus · stalled
+- [ ] [[Agents/village-mods-5|village-mods-5]] · 💻 Odysseus · stalled
 
 
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]]
-- [x] [[Inbox/Done/zfighter-gaps-8-raids|zfighter-gaps-8-raids]]
-- [x] [[Inbox/Done/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]]
-- [x] [[Inbox/Done/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]]
-- [x] [[Inbox/Done/zfighter-gaps-5-training|zfighter-gaps-5-training]]
-- [x] [[Inbox/Done/zfighter-gaps-4-forms|zfighter-gaps-4-forms]]
-- [x] [[Inbox/Done/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]]
-- [x] [[Inbox/Done/zfighter-gaps-2-power|zfighter-gaps-2-power]]
+- [x] [[Inbox/Done/village-mods-4-board-work|village-mods-4-board-work]]
+- [x] [[Inbox/Done/alexs-caves-integration|alexs-caves-integration]]
+- [x] [[Inbox/Done/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]]
+- [x] [[Inbox/Done/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]]
+- [x] [[Inbox/Done/vanilla-plus-i-settlement-roads|vanilla-plus-i-settlement-roads]]
+- [x] [[Inbox/Done/vanilla-plus-h-advancement-tracker|vanilla-plus-h-advancement-tracker]]
+- [x] [[Inbox/Done/vanilla-plus-g-illager-invasion|vanilla-plus-g-illager-invasion]]
+- [x] [[Inbox/Done/vanilla-plus-f-delight-dishes|vanilla-plus-f-delight-dishes]]
 
 
 %% kanban:settings
