@@ -53,7 +53,6 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-l-carts-check|vanilla-plus-l-carts-check]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-c-back-slot|vanilla-plus-c-back-slot]] · for 💻 Odysseus · open
-- [ ] [[Inbox/refmods-12-fishing|refmods-12-fishing]] · for any · open
 
 
 ## Being built
@@ -65,6 +64,7 @@ kanban-plugin: board
 - [ ] [[Inbox/realm-banks-finish|realm-banks-finish]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · ☁️ Cloud · #research · claimed
+- [ ] [[Inbox/refmods-12-fishing|refmods-12-fishing]] · ☁️ Cloud · claimed
 
 
 ## In review
