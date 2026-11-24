@@ -1,6 +1,5 @@
 package com.jaymoskingdoms.client;
 
-import com.jaymoskingdoms.Classes;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.MedallionBoard;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -16,7 +15,6 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -57,9 +55,6 @@ public final class MedallionClient {
 	private static final boolean[] HELD = new boolean[9];
 	private static boolean up;
 	private static String marks = "";
-	/** Whether this visit's clash prompt was shown (a Cleric's medallion keys sharing a key with another binding). */
-	private static boolean warned;
-	private static final SystemToast.SystemToastId CLASH = new SystemToast.SystemToastId(10000L);
 
 	private MedallionClient() {
 	}
@@ -96,16 +91,11 @@ public final class MedallionClient {
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, minecraft) -> {
 			up = false;
 			marks = "";
-			warned = false;
 		});
 		ClientTickEvents.START_CLIENT_TICK.register(minecraft -> {
 			if (minecraft.player == null || !ClientPlayNetworking.canSend(MedallionBoard.Raise.TYPE)) {
 				up = false;
 				return;
-			}
-			if (!warned && Classes.is(minecraft.player, Classes.PlayerClass.CLERIC)) {
-				warned = true;
-				clashes(minecraft);
 			}
 			while (key.consumeClick()) {
 				ClientPlayNetworking.send(new MedallionBoard.Raise(!up));
@@ -122,36 +112,6 @@ public final class MedallionClient {
 			}
 		});
 		HudElementRegistry.attachElementAfter(VanillaHudElements.HOTBAR, JaymosKingdoms.id("medallion_board"), MedallionClient::draw);
-	}
-
-	/**
-	 * A Cleric whose medallion key shares a key with another binding is told which, and asked to rebind one in Controls. The
-	 * marks are not checked: while the board is up the pad is theirs alone, and while it is down they do nothing.
-	 */
-	private static void clashes(Minecraft minecraft) {
-		List<KeyMapping> ours = List.of(key);
-		Component first = null;
-		int more = 0;
-		for (KeyMapping mine : ours) {
-			if (mine.isUnbound()) {
-				continue;
-			}
-			for (KeyMapping other : minecraft.options.keyMappings) {
-				if (other == mine || !mine.same(other)) {
-					continue;
-				}
-				if (first == null) {
-					first = Component.translatable("message.jaymoskingdoms.medallion.clash", Component.translatable(mine.getName()), mine.getTranslatedKeyMessage(),
-						Component.translatable(other.getName()));
-				} else {
-					more++;
-				}
-			}
-		}
-		if (first != null) {
-			Component message = more == 0 ? first : Component.translatable("message.jaymoskingdoms.medallion.clash_more", first, more);
-			SystemToast.addOrUpdate(minecraft.gui.toastManager(), CLASH, Component.translatable("message.jaymoskingdoms.medallion.clash_title"), message);
-		}
 	}
 
 	private static void draw(GuiGraphicsExtractor graphics, DeltaTracker delta) {

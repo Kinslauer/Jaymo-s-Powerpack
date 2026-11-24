@@ -21,8 +21,5 @@
   "message.jaymoskingdoms.medallion.cooling": "The medallion is still warm from the last prayer",
   "message.jaymoskingdoms.medallion.fizzle": "The marks fade: no prayer you know begins so",
   "message.jaymoskingdoms.medallion.none": "You know no prayer that has a pattern yet",
-  "message.jaymoskingdoms.medallion.no_target": "No one before you to judge",
-  "message.jaymoskingdoms.medallion.clash_title": "Medallion keys clash",
-  "message.jaymoskingdoms.medallion.clash": "%s (%s) is also %s. Rebind one in Options, Controls.",
-  "message.jaymoskingdoms.medallion.clash_more": "%s And %s more."
+  "message.jaymoskingdoms.medallion.no_target": "No one before you to judge"
 }

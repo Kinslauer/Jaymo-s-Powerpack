@@ -1,0 +1,6 @@
+{
+  "message.jaymoskingdoms.key_clash.title": "Some keys are bound twice",
+  "message.jaymoskingdoms.key_clash.pair": "%s: %s and %s.",
+  "message.jaymoskingdoms.key_clash.more": "And %s more.",
+  "message.jaymoskingdoms.key_clash.how": "Rebind one in Options, Controls (shown twice, then never again)."
+}
