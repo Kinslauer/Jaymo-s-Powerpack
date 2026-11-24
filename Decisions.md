@@ -995,3 +995,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-24: Silk Deeps removed (Andy: "remove these caves and their abandoned buildings"): the biome no longer generates, so no watcher huts or brood lairs either; registered still for old saves. PR #2108.
 
 - 2026-11-24 5:05 PM ET (Andy, Alex's Caves thread): cave band Warrior-born get their own look later: "they should vary, not all shirtless but all in primitive hide".
+
+- 2026-11-24 5:38 PM ET (Andy, Alex's Caves thread): chasm wild Tideborn "should ease up on you as you build relation with the lurkers who stalk you, either through trades or defense": tied to Alex's Deep One reputation.

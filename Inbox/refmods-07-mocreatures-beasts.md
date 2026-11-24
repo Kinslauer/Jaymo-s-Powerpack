@@ -1,10 +1,10 @@
 ---
-status: claimed
+status: open
 for: any
 from: coordinator
 asked: 2026-11-24
 thread: Build Reference Mods pick list (cloud); queued by Hermes Training
-claimed_by: project-thread-ojz7uj
+claimed_by: 
 pr: 
 suggested_owns: []
 ---
@@ -32,3 +32,6 @@ Owns: kingdoms monsters (GPL, licenses/mocreatures).
 - **M11 Rays and jellyfish** (Mo' Creatures, size S). Manta rays gliding in warm seas, stingrays buried in shallows that sting waders, jellyfish drifting in blooms that sting.
 - **M12 Big cats you can raise** (Mo' Creatures, size M). Take an orphaned cub (its mother killed) and raise it; grown, it guards you. Lions and tigers cross into rare big hybrids. We have: Naturalist's big cats are wild only.
 - **M13 Amulets that carry a beast** (Mo' Creatures, size M). A bone charm a beast-tamer makes: a bonded beast rests in it and comes out where you call it.
+
+## Notes
+- 2026-11-24 22:40 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.
