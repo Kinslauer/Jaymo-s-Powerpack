@@ -1,5 +1,5 @@
 ---
-status: open
+status: blocked
 for: claude-cloud
 from: tiv (Discord, Hotspot / parthenon / Airstrip thread, 2026-11-23)
 asked: 2026-11-23
