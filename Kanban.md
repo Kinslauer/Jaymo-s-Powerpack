@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 20:36). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 20:45). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -38,7 +38,6 @@ kanban-plugin: board
 
 ## Being built
 
-- [ ] [[Agents/cleric-medallion-board|cleric-medallion-board]] · 💻 Odysseus · #2060 · running
 
 
 ## In review
