@@ -5,7 +5,7 @@ from: coordinator
 asked: 2026-11-24
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR
 claimed_by: claude-cloud
-pr: 
+pr: 2092
 suggested_owns: []
 ---
 # Reference Mods Patch 12: Fishing extras
@@ -27,3 +27,4 @@ Owns: powers/kitchen fishing (docs/Plan-fishing.md).
 
 ## Notes
 - 2026-11-24 18:00 2026-11-24 Andy: "finish here": cloud Claude finishes this in thread cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR; bots leave it.
+- 2026-11-24 19:01 2026-11-24 PR #2092: F1-F6 built (compiles; not played).
