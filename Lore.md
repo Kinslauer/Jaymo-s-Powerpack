@@ -2224,7 +2224,7 @@ the rite, the march, and lessons in their letters), and from time spent within t
 doesn't make an illager your friend: it only means they can hear you before they swing, and a parley, a bribe or a good
 lie may be enough. Each of them is someone: a name, a temper, a want, and a long memory for a blow.
 
-**The camps' other hands** (new; Claude's placement, Vanilla+ patch G, from Illager Invasion). The pillagers didn't fill
+**The camps' other hands** (Andy approved, 2026-11-24; Claude's placement, Vanilla+ patch G, from Illager Invasion). The pillagers didn't fill
 the Warrior-born's vacuum with crossbows alone. The bigger camps keep other trades. The **basher** walks in behind a
 shield and is only open once an axe knocks it aside. The **marauder** throws hatchets and closes with an axe. The
 **provoker** is an archer who shouts the camp's fighters stronger and faster. The **alchemist** throws bottled poisons
