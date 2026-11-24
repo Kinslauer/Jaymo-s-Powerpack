@@ -2222,6 +2222,17 @@ the rite, the march, and lessons in their letters), and from time spent within t
 doesn't make an illager your friend: it only means they can hear you before they swing, and a parley, a bribe or a good
 lie may be enough. Each of them is someone: a name, a temper, a want, and a long memory for a blow.
 
+**The camps' other hands** (new; Claude's placement, Vanilla+ patch G, from Illager Invasion). The pillagers didn't fill
+the Warrior-born's vacuum with crossbows alone. The bigger camps keep other trades. The **basher** walks in behind a
+shield and is only open once an axe knocks it aside. The **marauder** throws hatchets and closes with an axe. The
+**provoker** is an archer who shouts the camp's fighters stronger and faster. The **alchemist** throws bottled poisons
+before he draws a bow. The **firecaller** calls up fire round his feet and throws burning skulls. The **archivist** keeps
+a camp's books, blesses its blades and lifts its enemies off the ground. The **illager inquisitor** is a giant who tears
+through doors, webs and leaves, breaks shields, and roars when he's near death. Over the greatest camps stands an
+**invoker**, a gold-hung sorcerer who learned the evokers' fangs, steps through the air, and calls up the **surrendered**,
+the ghosts of illagers who gave up in battle and are bound to serve until they're put down. None of them were born to it.
+They were trained the way the camps train their boys, and a camp that loses its invoker loses its tricks.
+
 **Weather.** The sky can turn black with a sickly green to it before a tornado touches down; barometers and
 weathervanes give warning, and sandstorms, blizzards and hail sweep the land. Seasons turn, and the cold and heat are
 felt.

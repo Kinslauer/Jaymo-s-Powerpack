@@ -979,3 +979,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Agent:** claude-cloud.
 
 - 2026-11-24 (Andy, Vanilla+ patch I card): King's Roads already lays settlement roads, so patch I becomes "Also link a realm's towns": besides its nearest neighbours, every town in a realm gets a road to its capital.
+- 2026-11-24 (Andy, Vanilla+ thread): "work straight through, one PR. let me know is there are issues": patches A-K go out as one PR from this thread, not one PR per patch.

@@ -1,11 +1,11 @@
 ---
-status: claimed
+status: in-review
 for: claude
 from: claude-cloud-vanilla-plus-thread
 asked: 2026-11-19
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BDKgLe1FfE4xXWhEAVHNACE
 claimed_by: cloud
-pr: 
+pr: https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102
 ---
 # Vanilla+ patch D: Horse Expert in the skill tree (Kingdoms)
 
@@ -23,3 +23,4 @@ pr:
 
 ## Notes
 - 2026-11-24 17:57 2026-11-24 PR #1796 merged 2026-11-19: docs/VanillaPlus-Plan.md is on master, start from master. Horse Expert itself shipped in #1796.
+- 2026-11-24 Built on branch claude/project-thread-uewdnx with all of A to K in one PR (Andy: "work straight through, one PR"): https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102
