@@ -20,3 +20,4 @@ Reminder/ping about t3code at 11am today. t3code is an open-source control plane
 ## Notes
 
 Time-based reminder — I cannot schedule messages. Andy will need to check in at 11am or remind me then. This task serves as the record of the request.
+- 2026-11-24 17:56 2026-11-24 The 11 AM ping (2026-11-22) is past. Andy: close.
