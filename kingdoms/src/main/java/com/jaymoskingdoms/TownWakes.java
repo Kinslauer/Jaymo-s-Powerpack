@@ -49,6 +49,11 @@ public final class TownWakes {
 	private static final Set<String> EXHAUSTED = new HashSet<>();
 	/** The town being made ready: its land, its start chunk, and since when (null: none). */
 	private static @Nullable Waiting waiting;
+	/**
+	 * The waiting town's chunk made as far as its structure starts ({@link PoolPick#starts}), read before its land is made:
+	 * a town that didn't start there is passed over at once (null: not asked yet).
+	 */
+	private static java.util.concurrent.@Nullable CompletableFuture<net.minecraft.server.level.ChunkResult<net.minecraft.world.level.chunk.ChunkAccess>> starts;
 
 	private record Waiting(String town, ChunkPos chunk, long since) {
 	}
@@ -62,6 +67,7 @@ public final class TownWakes {
 			PASSED.clear();
 			EXHAUSTED.clear();
 			waiting = null;
+			starts = null;
 		});
 	}
 
@@ -127,13 +133,25 @@ public final class TownWakes {
 			pass(w, "its land was not made in time");
 			return;
 		}
+		Optional<Holder.Reference<Structure>> wanted = level.registryAccess().lookupOrThrow(Registries.STRUCTURE).get(Identifier.parse(w.town()));
+		if (starts == null) {
+			starts = PoolPick.starts(level, w.chunk());
+		}
+		if (!starts.isDone()) {
+			return;
+		}
+		net.minecraft.world.level.chunk.ChunkAccess startsChunk = starts.join().orElse(null);
+		if (startsChunk != null && wanted.map(s -> startsChunk.getStartForStructure(s.value())).filter(StructureStart::isValid).isEmpty()) {
+			// another village won the spot: its land isn't made for nothing
+			pass(w, "no town started there");
+			return;
+		}
 		level.getChunkSource().addTicketWithRadius(WAKE, w.chunk(), LAND);
 		LevelChunk chunk = level.getChunkSource().getChunkNow(w.chunk().x(), w.chunk().z());
 		if (chunk == null) {
 			return;
 		}
-		Optional<Holder.Reference<Structure>> structure = level.registryAccess().lookupOrThrow(Registries.STRUCTURE).get(Identifier.parse(w.town()));
-		StructureStart start = structure.map(s -> level.structureManager().getStartForStructure(s.value(), chunk)).orElse(null);
+		StructureStart start = wanted.map(s -> level.structureManager().getStartForStructure(s.value(), chunk)).orElse(null);
 		if (start == null || !start.isValid()) {
 			pass(w, "no town started there");
 			return;
@@ -163,11 +181,13 @@ public final class TownWakes {
 		JaymosKingdoms.LOGGER.info("{} rises in the {} at {} without a visit", kingdom.name(), w.town(), kingdom.seat());
 		PASSED.add(w.chunk().pack());
 		waiting = null;
+		starts = null;
 	}
 
 	private static void pass(Waiting w, String why) {
 		JaymosKingdoms.LOGGER.info("The {} at chunk {} is not woken: {}", w.town(), w.chunk(), why);
 		PASSED.add(w.chunk().pack());
 		waiting = null;
+		starts = null;
 	}
 }
