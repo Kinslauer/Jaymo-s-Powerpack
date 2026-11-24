@@ -272,7 +272,8 @@ public final class BladeBlood {
 	 * it didn't bleed.
 	 */
 	public static boolean shot(LivingEntity target, Vec3 dir, float damage, boolean through) {
-		if (!(target.level() instanceof ServerLevel level) || damage <= 0.0F || !bleeds(target) || dir.lengthSqr() < 1.0E-8) {
+		if (!(target.level() instanceof ServerLevel level) || damage <= 0.0F || !bleeds(target) || dir.lengthSqr() < 1.0E-8
+			|| com.jaymospowers.core.blood.BleedOut.dry(target)) {
 			return false;
 		}
 		long now = level.getGameTime();
@@ -444,7 +445,7 @@ public final class BladeBlood {
 
 	/** Sprays {@code target}'s blood for a blow of {@code damage}, {@code more} times a blade's; false if it didn't bleed. */
 	private static boolean spray(LivingEntity target, float damage, float more) {
-		if (!(target.level() instanceof ServerLevel level) || damage <= 0.0F || !bleeds(target)) {
+		if (!(target.level() instanceof ServerLevel level) || damage <= 0.0F || !bleeds(target) || com.jaymospowers.core.blood.BleedOut.dry(target)) {
 			return false;
 		}
 		long now = level.getGameTime();
@@ -489,7 +490,7 @@ public final class BladeBlood {
 
 	/** (0.15.93) Wounds' open cut on {@code body} drips, from this far up it (a fraction of its height); a stump drips more. */
 	public static void drip(ServerLevel level, LivingEntity body, double up, boolean stump) {
-		if (!bleeds(body)) {
+		if (!bleeds(body) || com.jaymospowers.core.blood.BleedOut.dry(body)) {
 			return;
 		}
 		double w = body.getBbWidth() * 0.3;
