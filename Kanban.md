@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:51). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:55). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -54,14 +54,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/blood-awakening-passive-upgrade|blood-awakening-passive-upgrade]]
-- [x] [[Inbox/Done/village-mods-4-board-work|village-mods-4-board-work]]
-- [x] [[Inbox/Done/alexs-caves-integration|alexs-caves-integration]]
-- [x] [[Inbox/Done/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]]
-- [x] [[Inbox/Done/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]]
-- [x] [[Inbox/Done/vanilla-plus-i-settlement-roads|vanilla-plus-i-settlement-roads]]
-- [x] [[Inbox/Done/vanilla-plus-h-advancement-tracker|vanilla-plus-h-advancement-tracker]]
-- [x] [[Inbox/Done/vanilla-plus-g-illager-invasion|vanilla-plus-g-illager-invasion]]
+- [x] [[Inbox/Done/refmods-16-titles-bloods-tensura|refmods-16-titles-bloods-tensura]]
+- [x] [[Inbox/Done/refmods-13-body-anim-stations|refmods-13-body-anim-stations]]
+- [x] [[Inbox/Done/refmods-11-tectonic-terrain|refmods-11-tectonic-terrain]]
+- [x] [[Inbox/Done/refmods-10-outlying-buildings-camps|refmods-10-outlying-buildings-camps]]
+- [x] [[Inbox/Done/refmods-09-village-styles|refmods-09-village-styles]]
+- [x] [[Inbox/Done/refmods-08-vampire-villager|refmods-08-vampire-villager]]
+- [x] [[Inbox/Done/refmods-07-mocreatures-beasts|refmods-07-mocreatures-beasts]]
+- [x] [[Inbox/Done/refmods-06-horses|refmods-06-horses]]
 
 
 %% kanban:settings
