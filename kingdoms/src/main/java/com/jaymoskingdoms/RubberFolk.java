@@ -319,7 +319,7 @@ public final class RubberFolk {
 						GROWTH.put(id, new float[] {genes[0], genes[1], to[0], to[1], 0.0F});
 					}
 				}
-				LivingEntity foe = HeritageHold.step(level, player, RubberFolk::weak, ABSORB_REACH, ABSORB_TICKS, PINK, SoundEvents.SLIME_SQUISH_SMALL,
+				LivingEntity foe = HeritageHold.step(level, player, RubberFolk::weak, ABSORB_REACH, TreeLocks.wait(player, ABSORB_TICKS), PINK, SoundEvents.SLIME_SQUISH_SMALL,
 					"message.jaymoskingdoms.rubber.absorbing");
 				if (foe != null) {
 					absorb(level, player, foe);
@@ -358,10 +358,6 @@ public final class RubberFolk {
 	static void press(ServerPlayer player) {
 		// (0.7.312) sneaking, they bring their last swallow back up (or spit out one still alive in them)
 		if (player.isShiftKeyDown() && HeritageHold.channel(player) == null && RubberStomach.bringUp(player)) {
-			return;
-		}
-		if (HeritageHold.channel(player) == null && !TreeLocks.check(player, TreeLocks.Lock.BLOOD)) {
-			// (Andy's skill-tree locks) swallowing is learned: Blood Awakening (bringing one back up, or letting go, never is)
 			return;
 		}
 		HeritageHold.press(player, e -> (HeritageHold.foe(player, e) || person(player, e)) && weak(e), ABSORB_REACH, "message.jaymoskingdoms.rubber.absorbing");

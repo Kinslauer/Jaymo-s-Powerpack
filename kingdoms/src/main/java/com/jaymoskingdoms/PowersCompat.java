@@ -942,8 +942,8 @@ public final class PowersCompat {
 	private static final java.util.Set<String> SPRINT_LOOKED = new java.util.HashSet<>();
 
 	/**
-	 * (Powerborne picks) A heritage's sprint + heritage key move in Jaymo's Powers: {@code className.method(ServerPlayer)}
-	 * returns true if it took the key. False without Powers or if the class isn't there.
+	 * (Powerborne picks) A heritage's sprint + heritage key move in Jaymo's Powers (or any other heritage-key move there, such
+	 * as a Verdant's regrowth): {@code className.method(ServerPlayer)} returns true if it took the key. False without Powers or if the class isn't there.
 	 */
 	public static boolean sprintMove(String className, String method, net.minecraft.server.level.ServerPlayer player) {
 		String name = className + "#" + method;
@@ -1247,6 +1247,33 @@ public final class PowersCompat {
 		lookForOvercome();
 		try {
 			return faintOfOvercome != null && (boolean)faintOfOvercome.invoke(entity);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/** Powers' {@code ZFighterLegendary.mutant(Player)}. */
+	private static java.lang.invoke.@Nullable MethodHandle legendary;
+	private static boolean lookedForLegendary;
+
+	/** Whether {@code player} is a legendary Warrior-born (born with the mutation); false without Powers. */
+	public static boolean legendary(Player player) {
+		if (!lookedForLegendary) {
+			lookedForLegendary = true;
+			if (FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+				try {
+					legendary = java.lang.invoke.MethodHandles.publicLookup().findStatic(Class.forName("com.jaymospowers.power.zfighter.ZFighterLegendary"),
+						"mutant", java.lang.invoke.MethodType.methodType(boolean.class, Player.class));
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' legendary line (older Powers?)", e);
+				}
+			}
+		}
+		if (legendary == null) {
+			return false;
+		}
+		try {
+			return (boolean)legendary.invoke(player);
 		} catch (Throwable e) {
 			return false;
 		}

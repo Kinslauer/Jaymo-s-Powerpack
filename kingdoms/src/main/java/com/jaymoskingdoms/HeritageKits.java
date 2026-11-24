@@ -844,19 +844,25 @@ public final class HeritageKits {
 				.withStyle(ChatFormatting.GRAY), true);
 			return;
 		}
-		if (!TreeLocks.check(player, TreeLocks.Lock.BLOOD)) {
-			// (Andy's skill-tree locks) a blood's own move is learned: Blood Awakening, on Survival's Heritage page
-			return;
-		}
 		long now = level.getGameTime();
 		Long ready = READY.get(player.getUUID());
+		// (Blood Awakening) every blood has its move from the start; awakened, it comes back in half the time and what it gives lasts longer
+		boolean awakened = TreeLocks.awakened(player);
+		long cooldown = awakened ? Math.round(move.cooldown * 20L * TreeLocks.AWAKENED_WAIT) : move.cooldown * 20L;
 		if (ready != null && now < ready && ready - now <= move.cooldown * 20L) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.kit.cooldown", Component.translatable("kit.jaymoskingdoms.move." + move.key()),
 				(ready - now + 19) / 20).withStyle(ChatFormatting.GRAY), true);
 			return;
 		}
-		if (cast(player, level, move, now)) {
-			READY.put(player.getUUID(), now + move.cooldown * 20L);
+		longer = awakened ? TreeLocks.AWAKENED_LONGER : 1.0F;
+		boolean cast;
+		try {
+			cast = cast(player, level, move, now);
+		} finally {
+			longer = 1.0F;
+		}
+		if (cast) {
+			READY.put(player.getUUID(), now + cooldown);
 			settle(player);
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.kit.cast", Component.translatable("kit.jaymoskingdoms.move." + move.key()))
 				.withStyle(ChatFormatting.GOLD), true);
@@ -1224,8 +1230,11 @@ public final class HeritageKits {
 
 	// ---- the helpers of the abilities ----------------------------------------------------------------------------------------
 
+	/** While a heritage-key move is cast: how many times as long what it gives lasts ({@link TreeLocks#AWAKENED_LONGER} once awakened). */
+	private static float longer = 1.0F;
+
 	private static void fx(LivingEntity e, Holder<MobEffect> effect, int seconds, int amplifier) {
-		e.addEffect(new MobEffectInstance(effect, seconds * 20, amplifier));
+		e.addEffect(new MobEffectInstance(effect, Math.round(seconds * 20 * longer), amplifier));
 	}
 
 	private static void sound(Entity e, SoundEvent sound, float volume, float pitch) {

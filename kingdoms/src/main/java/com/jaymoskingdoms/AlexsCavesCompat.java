@@ -42,6 +42,9 @@ public final class AlexsCavesCompat {
 		}
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> longerMaps());
 		BurningBeast.register();
+		ToxicCaves.register();
+		ChasmTideborn.register();
+		RubberNewborns.register();
 	}
 
 	/**

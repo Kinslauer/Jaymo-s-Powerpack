@@ -7825,3 +7825,44 @@ Andy: "baby zombies are unfightable" (clip: an axe locked onto baby zombies' tor
 - Barbaric Warrior-born in the Primordial Caves: now and then a band of two to four comes out beside a beast near you and
   fights it bare-handed, tail out, each in a different mix of caveman gear and hide (some bare-chested). They train, they don't hunt: a beast beaten down to 30%
   is let go, and tamed ones are never touched. They leave you alone unless you walk right up to one or hit one.
+
+## 0.27.9 (2026-11-24): The legendary Warrior-born and radiation; the space pod's submarine look (#2112)
+
+- A legendary Warrior-born is never Irradiated. Whatever would irradiate them, and every moment in Alex's Toxic Caves,
+  builds up as radiation instead (full after about ten minutes down there): up to 40% more damage on all their blows,
+  a green glow, and a rage surge up to 50% hotter that leaves those it strikes Irradiated. It fades slowly once they're
+  out (about half an hour from full).
+- The space pod takes on the look of Alex's Caves' submarine: riveted copper plating on a slate frame, round portholes
+  front, left and back, a brass stern propeller on the back plate and a periscope eyepiece on the mast.
+- With Alex's Caves in the pack, the pod is drawn as Alex's own submarine model and textures, taken apart so it still
+  goes together piece by piece: the keel lays the keel, seat and levers; the fins are the two side thrusters (stood on
+  end beside the hull) and the motor (upright behind it), with every propeller facing down once the bell goes on; the
+  tank is the hull's core, the plates its front, sides and top, the canopy its front cabin and the mast its periscope.
+  A damaged fin swings out, damaged parts show his scuffed-hull overlays and a finished pod lights his control buttons.
+
+## 0.27.10 (2026-11-24): Takeovers dig straight to their prey and never stand stuck (#2115)
+
+- **Digging is planned, not a last resort**: chasing prey within 32 blocks, a symbiote takeover plans its way through blocks as well as round them, and tears a 1x2 tunnel straight there with its tendril rip (the same lash, cracks, torn clumps and flings), up to 9 blocks a pull, about 6 blocks of tunnel a second. Straight down into a cave, stairs up to a roof, through a house wall. It walks or climbs round instead only when that's quicker. Up to 640 blocks a takeover (was 96).
+- **What it never tears out**: bedrock and anything unbreakable, anything harder than 20 (obsidian, ancient debris), anything holding items or a block entity (chests, spawners, beds, signs), fluids or a block with fluid beside it (no flooded tunnels), spawn protection, adventure mode, and whatever a Kingdoms claim, lock, dungeon or monolith protects. It routes round those, and never tries a refused tunnel twice.
+- **No more hopping in place**: being stuck is now judged by getting closer to the prey, not by moving, so its little hops no longer hide it. Stuck, it re-plans, then rips straight at the prey (down and up too), then zips toward it, then hauls the prey down to it; still nowhere after that, it picks other prey or lets go.
+- **Mobility**: it climbs walls taller than its leap (up to 16 blocks), leaps gaps of up to 3 blocks, and the red one pounces the last few blocks at its prey.
+- **Attacks**: at its prey it strikes with the weapon arm and the tendril counters (impale, whiplash, hurl, constrict), and drags prey down from where it can't reach. It still only feeds on what it has killed.
+- Classes: WebTakeoverPath, WebSymbiote, WebSymbioteClient, WebMorph, WebCounter, WebRedHunt.
+- Built by CI; not played. Deck server cost not profiled.
+
+## 0.27.11 (2026-11-24): One cobblestone crafts back into 4 stone rocks (#2071)
+
+- Andy: "4 rocks should craft into 1 cobble and vice versa". 4 stone rocks already made 1 cobblestone; now 1 cobblestone alone in the crafting grid gives 4 stone rocks. Only cobblestone goes back (the other rock kinds still only go one way).
+- `stone_rocks_from_cobblestone` recipe (tools/gen_ground_rocks.py). Built by CI only; not crafted in game.
+
+## 0.27.12 (2026-11-24): Blood Awakening upgrades your blood's held move; a Verdant's regrowth key (#2117)
+
+- **Everyone starts with their blood's held move** (Andy, 2026-11-23): Thunderclap, Sunflare, Kindle, the Verdant's stretch and the Frost-born's hold no longer need Blood Awakening (`TreeLocks.BLOOD` removed; gates gone from `HeritageMoves`, `EmberKindle`, `RaceMoves`, `RaceHoldClient`).
+- **Learned, Blood Awakening upgrades them** (`TreeLocks.awakened` / `TreeLocks.wait`, read from Kingdoms): Thunderclap's and Sunflare's cooldowns halve, Kindle heats to full in half the time, the stretching arm is ready again in half the time, and a Frost-born's beam bites twice as often (a Z Fighter's keeps its own pace).
+- **Push-button limb regrowth for an awakened Verdant**: the heritage key grows one lost limb back now with the fleshy crunch (`ZFighterLineage.regrowNow`), every 2 minutes (`REGROW_KEY_EVERY`) for 3 food (`REGROW_KEY_FOOD`), not while hungry; on top of the slow regrowth every 30 s. Not on the dead.
+- Built; not played.
+
+## 0.27.13 (2026-11-24): spiders in leaves leave you be by day (#2118)
+
+- **Leaf spiders**: a spider hiding in leaves no longer pounces on a passing player in daylight, only in the dark; hit it and it still fights back (`LeafSpiders`).
+- Built; not played.

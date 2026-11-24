@@ -55,10 +55,11 @@ public final class BountyBoard extends Block {
 	public static final IntegerProperty ROW = IntegerProperty.create("row", 0, HEIGHT - 1);
 	/**
 	 * What's pinned on this block: nothing, a wanted notice, or a town notice (an errand or a bit of news,
-	 * {@link TownNotices}). Which one it is: {@link Bounties#PINNED}.
+	 * {@link TownNotices}). Which one it is: {@link Bounties#PINNED}. (village mods 4) A town notice of board work is on
+	 * the paper its stars give it, plain, sealed, vellum or gilt ({@link BoardTerms#paper}); a decree ({@link Decrees}) on its own.
 	 */
-	public static final IntegerProperty NOTICE = IntegerProperty.create("notice", 0, 2);
-	public static final int BARE = 0, WANTED = 1, TOWN = 2;
+	public static final IntegerProperty NOTICE = IntegerProperty.create("notice", 0, 6);
+	public static final int BARE = 0, WANTED = 1, TOWN = 2, SEALED = 3, VELLUM = 4, GILT = 5, DECREE = 6;
 
 	/** Each block's shape by column, row and facing (the board, the posts at the ends, the roof on top). */
 	private static final Map<Direction, VoxelShape>[][] SHAPES = shapes();
@@ -111,6 +112,22 @@ public final class BountyBoard extends Block {
 	/** Something is pinned on this block of a board. */
 	static boolean pinned(BlockState state) {
 		return state.getValue(NOTICE) != BARE;
+	}
+
+	/** A town notice (on any paper) is pinned on this block. */
+	static boolean town(BlockState state) {
+		int n = state.getValue(NOTICE);
+		return n >= TOWN && n <= GILT;
+	}
+
+	/** The look of a town notice on {@code paper}. */
+	static int look(String paper) {
+		return switch (paper) {
+			case "sealed" -> SEALED;
+			case "vellum" -> VELLUM;
+			case "gilt" -> GILT;
+			default -> TOWN;
+		};
 	}
 
 	static boolean isAnchor(BlockState state) {
@@ -232,11 +249,17 @@ public final class BountyBoard extends Block {
 
 	// ---- notices -----------------------------------------------------------------------------------------------------------
 
-	/** A notice in hand, used on a bare spot: pinned back up. */
+	/**
+	 * A notice in hand, used on a bare spot: pinned back up; (village mods 4) a decree too. Your copy of a notice you've
+	 * taken, or the goods it asks, hand done work in when its poster is away ({@link BoardTerms#handIn}).
+	 */
 	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
 		BlockHitResult hit) {
-		if (!(stack.is(Bounties.NOTICE_ITEM) || stack.is(TownNotices.ITEM)) || pinned(state)) {
+		if (level instanceof ServerLevel server && player instanceof ServerPlayer sp && BoardTerms.handIn(server, sp, anchor(pos, state), stack)) {
+			return InteractionResult.SUCCESS;
+		}
+		if (!(stack.is(Bounties.NOTICE_ITEM) || stack.is(TownNotices.ITEM) || stack.is(Decrees.ITEM)) || pinned(state)) {
 			return InteractionResult.TRY_WITH_EMPTY_HAND;
 		}
 		if (level instanceof ServerLevel server && player instanceof ServerPlayer sp) {

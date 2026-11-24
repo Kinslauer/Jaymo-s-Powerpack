@@ -501,8 +501,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		FrostTech.register();
 		LOGGER.debug("heritage attachments: {} {} {}", Heritage.HERITAGE, FrostPrison.LAST, FrostTech.FITTED);
 		// (0.7.262, Andy's NOEA picks) the Divine-born, the Bio-built (its forms), the Rubber-folk and the held heritage key
-		LOGGER.debug("bio-built and rubber-folk attachments: {} {} {} {} {} {} {} {} {}", BioBuilt.FORM, BioBuilt.WORTH, HeritageHold.ABSORBING, RubberFolk.ADOPTED,
-			RubberStomach.STOMACH, RubberStomach.MASS, RubberStomach.INSIDE, RubberStomach.HOLDING, RubberStomach.SAFE);
+		LOGGER.debug("bio-built and rubber-folk attachments: {} {} {} {} {} {} {} {} {} {} {}", BioBuilt.FORM, BioBuilt.WORTH, HeritageHold.ABSORBING, RubberFolk.ADOPTED,
+			RubberStomach.STOMACH, RubberStomach.MASS, RubberStomach.INSIDE, RubberStomach.HOLDING, RubberStomach.SAFE, RubberNewborns.BOUND_FOR, RubberNewborns.ESCORT);
 		HeritageHold.register();
 		DivineBorn.register();
 		BioBuilt.register();
@@ -1119,6 +1119,7 @@ public final class JaymosKingdoms implements ModInitializer {
 		RoyalDress.register();
 		LOGGER.debug("bounty attachments: {} {} {} {}", Bounties.ALL, Bounties.BOARDS, Bounties.BOARDS_AT, Bounties.ARMED);
 		Bounties.register();
+		BoardTerms.register(); // (village mods 4) notice terms, the held notice, hand-in at the board
 		MerchantOrders.register();
 		// BWM batch 5: the gloom of the dark (and its attachment)
 		Gloom.register();

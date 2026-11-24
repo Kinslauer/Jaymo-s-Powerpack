@@ -102,14 +102,12 @@ public final class FrostPrison {
 		if (!Heritage.is(player, Heritage.Kind.FROSTBORN) || !player.isAlive() || player.isSpectator()) {
 			return;
 		}
-		if (!TreeLocks.check(player, TreeLocks.Lock.BLOOD)) {
-			// (Andy's skill-tree locks) Frostbind is learned: Blood Awakening
-			return;
-		}
 		ServerLevel level = player.level();
 		long now = level.getGameTime();
 		Long last = player.getAttached(LAST);
-		if (last != null && now - last < COOLDOWN_TICKS && now >= last) {
+		// (Blood Awakening) awakened, the ice comes back twice a day
+		long cooldown = TreeLocks.awakened(player) ? Math.round(COOLDOWN_TICKS * TreeLocks.AWAKENED_WAIT) : COOLDOWN_TICKS;
+		if (last != null && now - last < cooldown && now >= last) {
 			// (0.7.153) the day's ice is spent: Jaymo's Powers fires its thin white beam instead (FrostBeam)
 			player.addTag(BEAM_TAG);
 			return;
