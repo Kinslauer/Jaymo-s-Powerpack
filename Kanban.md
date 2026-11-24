@@ -78,9 +78,9 @@ kanban-plugin: board
 **Complete**
 - [x] [[Inbox/Done/villagers-visible-jobs|villagers-visible-jobs]]
 - [x] [[Inbox/Done/structures-2-placement-reasons|structures-2-placement-reasons]]
-- [x] [[Inbox/Done/refmods-15-provenance-coins|refmods-15-provenance-coins]]
 - [x] [[Inbox/Done/refmods-14-sky-light-air|refmods-14-sky-light-air]]
 - [x] [[Inbox/Done/refmods-12-fishing|refmods-12-fishing]]
+- [x] [[Inbox/Done/refmods-15-provenance-coins|refmods-15-provenance-coins]]
 - [x] [[Inbox/Done/tree-chop-through-trunk|tree-chop-through-trunk]]
 - [x] [[Inbox/Done/refmods-01-felling|refmods-01-felling]]
 - [x] [[Inbox/Done/realm-banks-finish|realm-banks-finish]]

@@ -1005,5 +1005,6 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Open for Andy:** the red host's lifetime for the 500-block hunt (default taken: its time and its wasting both run at 15% while it hunts; each kill it feeds on adds 45 s).
 - **Applies to:** Powers, web symbiote (WebSlender, WebHulk, WebTendrilLayer, WebRedHunt).
 - **Agent:** red-symbiote-body.
+- 2026-11-24 (Andy, Vanilla+ thread): "work straight through, one PR. let me know is there are issues": patches A-K go out as one PR from this thread, not one PR per patch.
 - 2026-11-24 (Andy, illager tongue): illagers speak the tongue uncovered in Alex's Caves: unknown words in the Cave Tablets' glyphs (minecraft:alt), and translating a tablet at a Spelunkery Table teaches it (PR #2098, merged). Lore "The tablets' tongue" approved.
 - 2026-11-24 (Andy): approved Lore "What the keepers tell" and "What goods remember".

@@ -1,11 +1,11 @@
 ---
-status: open
+status: in-review
 for: claude
 from: claude-cloud-vanilla-plus-thread
 asked: 2026-11-19
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BDKgLe1FfE4xXWhEAVHNACE
-claimed_by: 
-pr: 
+claimed_by: cloud
+pr: https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102
 ---
 # Vanilla+ patch K: cat loaf and hidden switches (Kingdoms)
 
