@@ -1,20 +1,20 @@
 package com.jaymoskingdoms;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
-import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -35,10 +35,13 @@ import net.minecraft.world.phys.Vec3;
  * to the surface above, and from there it walks a leg at a time ({@link Construction#leg}) until it is within
  * {@link #ARRIVE} of the seat, where the town's own life takes it over. With no settlement in reach it just stays.
  * <p>
- * Andy: "you should be able to escort the rubberfolk to a village when you meet them after born". Sneak and right-click
- * a newborn and it follows you ({@link #ESCORT}) instead (again to let it go its own way). Bring it into any settlement
- * ({@link Theft#lawAt}) and it stays there, glad of you ({@link #THANKS} MCA hearts); leave it more than {@link #LOST_RANGE}
- * behind for {@link #LOST_TICKS} and it sets off alone again.
+ * Andy: "you should be able to escort the rubberfolk to a village when you meet them after born", then "you should have
+ * to talk to it and convince it or answer its request. it should all be done through talk". A newborn that sees a player
+ * ({@link #SEES}) comes over and asks for help, out loud. "{@value #ANSWER}" in MCA's talk menu opens its request on
+ * the talk screen: take it with you ({@link #ESCORT}: it follows you), point it the way (it goes on alone) or not now.
+ * Talked to again on the way, you can send it on alone. Bring it into any settlement ({@link Theft#lawAt}) and it stays
+ * there, glad of you ({@link #THANKS} MCA hearts); leave it more than {@link #LOST_RANGE} behind for {@link #LOST_TICKS}
+ * and it sets off alone again.
  */
 public final class RubberNewborns {
 	// ---- tuning ----
@@ -60,10 +63,20 @@ public final class RubberNewborns {
 	static final float FOLLOW_SPEED = 0.7F;
 	static final long LOST_TICKS = 2400L;
 	static final int THANKS = 25;
+	/** Pointed the way instead, it still thinks well of you for that much. */
+	static final int POINTED = 5;
+	/** It comes over to a player it sees within this (blocks), once per player. */
+	static final double SEES = 12.0;
+	/** The MCA talk-menu answer (main.json), shown only for a newborn. */
+	public static final String ANSWER = "jaymoskingdoms_newborn";
+	/** The players each newborn has already come over to (not saved: after a restart it may ask again). */
+	private static final Map<UUID, Set<UUID>> ASKED = new HashMap<>();
+	/** The players who have answered each newborn's request (not saved). */
+	private static final Map<UUID, Set<UUID>> ANSWERED = new HashMap<>();
 
 	/** Where a newborn is making for: the seat of the settlement nearest where it stood up. Saved. */
 	static final AttachmentType<BlockPos> BOUND_FOR = AttachmentRegistry.create(JaymosKingdoms.id("rubber_newborn_bound_for"),
-		builder -> builder.persistent(BlockPos.CODEC).syncWith(BlockPos.STREAM_CODEC, AttachmentSyncPredicate.all()));
+		builder -> builder.persistent(BlockPos.CODEC));
 	/** The player escorting a newborn, if one is. Saved. */
 	static final AttachmentType<UUID> ESCORT = AttachmentRegistry.create(JaymosKingdoms.id("rubber_newborn_escort"),
 		builder -> builder.persistent(UUIDUtil.CODEC));
@@ -75,29 +88,83 @@ public final class RubberNewborns {
 
 	static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(RubberNewborns::tick);
-		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
-			if (hand != InteractionHand.MAIN_HAND || !(entity instanceof Villager v) || !v.hasAttached(BOUND_FOR) || !player.isShiftKeyDown()
-				|| player.isSpectator()) {
-				return InteractionResult.PASS;
-			}
-			if (player instanceof ServerPlayer sp && level instanceof ServerLevel server) {
-				escort(server, sp, v);
-			}
-			return InteractionResult.SUCCESS;
-		});
 	}
 
-	/** {@code player} takes {@code v} along with them, or (already theirs) lets it go its own way. */
-	private static void escort(ServerLevel level, ServerPlayer player, Villager v) {
-		LOST.remove(v.getUUID());
-		if (player.getUUID().equals(v.getAttached(ESCORT))) {
-			v.removeAttached(ESCORT);
-			level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 1.0F, 1.2F);
+	/** Whether {@code v} is a newborn with a request to make (MCA's talk menu). */
+	public static boolean canAsk(Villager v) {
+		return newborn(v);
+	}
+
+	/** Its request on the talk screen: on the way with you already, or still lost. */
+	public static void open(ServerPlayer player, Villager v) {
+		if (!(player.level() instanceof ServerLevel level)) {
 			return;
 		}
-		v.setAttached(ESCORT, player.getUUID());
-		level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 1.2F);
-		level.sendParticles(ParticleTypes.HAPPY_VILLAGER, v.getX(), v.getY() + 1.6, v.getZ(), 6, 0.3, 0.3, 0.3, 0.0);
+		boolean mine = player.getUUID().equals(v.getAttached(ESCORT));
+		if (mine) {
+			ZFighterFolk.ask(player, v, Component.translatable("talk.jaymoskingdoms.newborn.on_the_way"),
+				List.of(Component.translatable("talk.jaymoskingdoms.newborn.stay_close"), Component.translatable("talk.jaymoskingdoms.newborn.go_alone")),
+				List.of(true, true), pick -> {
+					if (pick == 1 && newborn(v)) {
+						v.removeAttached(ESCORT);
+						LOST.remove(v.getUUID());
+						level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 1.2F);
+					}
+				});
+			return;
+		}
+		ZFighterFolk.ask(player, v, Component.translatable("talk.jaymoskingdoms.newborn.request"),
+			List.of(Component.translatable("talk.jaymoskingdoms.newborn.take"), Component.translatable("talk.jaymoskingdoms.newborn.point"),
+				Component.translatable("talk.jaymoskingdoms.newborn.not_now")),
+			List.of(true, true, true), pick -> {
+				if (!newborn(v) || pick < 0) {
+					return;
+				}
+				boolean first = !ANSWERED.getOrDefault(v.getUUID(), Set.of()).contains(player.getUUID());
+				answered(v, player);
+				if (pick == 2) {
+					return;
+				}
+				if (pick == 0) {
+					v.setAttached(ESCORT, player.getUUID());
+					LOST.remove(v.getUUID());
+					level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.VILLAGER_YES, SoundSource.NEUTRAL, 1.0F, 1.2F);
+					level.sendParticles(ParticleTypes.HAPPY_VILLAGER, v.getX(), v.getY() + 1.6, v.getZ(), 6, 0.3, 0.3, 0.3, 0.0);
+				} else {
+					v.removeAttached(ESCORT);
+					if (first) {
+						McaCompat.hearts(v, player, POINTED);
+					}
+				}
+			});
+	}
+
+	/**
+	 * A newborn that sees a player who hasn't answered it yet comes over, calls out for help (once), and waits on them;
+	 * true while it waits.
+	 */
+	private static boolean callOut(ServerLevel level, Villager v) {
+		ServerPlayer near = level.getNearestPlayer(v, SEES) instanceof ServerPlayer p && !p.isSpectator() ? p : null;
+		if (near == null || ANSWERED.getOrDefault(v.getUUID(), Set.of()).contains(near.getUUID())) {
+			return false;
+		}
+		if (ASKED.computeIfAbsent(v.getUUID(), u -> new HashSet<>()).add(near.getUUID())) {
+			Speech.say(level, v, Component.translatable("speech.jaymoskingdoms.newborn.call"), Speech.YELLOW, SEES + 4.0);
+		}
+		if (near.distanceTo(v) > FOLLOW_CLOSE) {
+			BehaviorUtils.setWalkAndLookTargetMemories(v, new EntityTracker(near, false), FOLLOW_SPEED, 2);
+		}
+		return true;
+	}
+
+	private static void answered(Villager v, ServerPlayer player) {
+		ANSWERED.computeIfAbsent(v.getUUID(), u -> new HashSet<>()).add(player.getUUID());
+	}
+
+	private static void forget(Villager v) {
+		ASKED.remove(v.getUUID());
+		ANSWERED.remove(v.getUUID());
+		LOST.remove(v.getUUID());
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -163,10 +230,15 @@ public final class RubberNewborns {
 		if (v.hasAttached(ESCORT) && led(level, v)) {
 			return;
 		}
+		if (callOut(level, v)) {
+			// (it waits on whoever it called out to, till they answer it)
+			return;
+		}
 		BlockPos seat = v.getAttached(BOUND_FOR);
 		double dx = seat.getX() + 0.5 - v.getX(), dz = seat.getZ() + 0.5 - v.getZ();
 		if (dx * dx + dz * dz <= ARRIVE * ARRIVE) {
 			v.removeAttached(BOUND_FOR);
+			forget(v);
 			return;
 		}
 		BlockPos surface = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, v.blockPosition());
@@ -187,7 +259,7 @@ public final class RubberNewborns {
 		if (p != null && p.level() == level && Theft.lawAt(level, v.blockPosition()) != null) {
 			v.removeAttached(ESCORT);
 			v.removeAttached(BOUND_FOR);
-			LOST.remove(v.getUUID());
+			forget(v);
 			McaCompat.hearts(v, p, THANKS);
 			level.playSound(null, v.getX(), v.getY(), v.getZ(), SoundEvents.VILLAGER_CELEBRATE, SoundSource.NEUTRAL, 1.0F, 1.2F);
 			level.sendParticles(ParticleTypes.HEART, v.getX(), v.getY() + 1.8, v.getZ(), 5, 0.3, 0.2, 0.3, 0.0);

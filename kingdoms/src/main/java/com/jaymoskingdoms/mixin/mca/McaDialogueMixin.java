@@ -382,6 +382,13 @@ abstract class McaDialogueMixin {
 			ci.cancel();
 			return;
 		}
+		if ("main".equals(question) && com.jaymoskingdoms.RubberNewborns.ANSWER.equals(answer)) {
+			// (Andy, 2026-11-24) a newborn Rubber-folk's request: take it to a town, or point the way
+			villager.getInteractions().stopInteracting();
+			com.jaymoskingdoms.RubberNewborns.open(player, villager);
+			ci.cancel();
+			return;
+		}
 		if ("main".equals(question) && com.jaymoskingdoms.Banks.ANSWER.equals(answer)) {
 			// (Andy, 2026-11-23) banking at the counter
 			villager.getInteractions().stopInteracting();
