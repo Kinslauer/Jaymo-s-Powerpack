@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 21:42). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 21:44). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -23,6 +23,8 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2106 A new host can struggle out of the red one's hunt (Powers, 2026-11-24)
+- [ ] #2105 Alex's Caves joins the pack; its Magnetic Caves in the Aether's magnetic stone, its neodymium in our colours (Powers, Kingdoms, 2026-11-24)
 - [ ] #2104 patron colossus brings a natural disaster on each walk (Kingdoms, 2026-11-24)
 - [ ] #2103 patron colossus: the strike and the hunt for commandment breakers (Kingdoms, 2026-11-24)
 - [ ] #2102 Vanilla+ picks: Incendium back, demon start in the Forbidden Castle, back slot, pinned advancements, Stellarity End and the Beneath (Powers, Kingdoms, Kitchen, 2026-11-24)
@@ -81,9 +83,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2042 Enemies telegraph their blows longer and walk in before swinging (Powers, Kingdoms, 2026-11-23)
 - [ ] #2041 The stolen crown: the copy gives itself away, and the realm on alert (Kingdoms, 2026-11-23)
 - [ ] #2040 Dodge: a tap dashes, a hold rolls; adrenaline runs on wind; no climb cooldown (Powers, Kitchen, 2026-11-23)
-- [ ] #2039 The stolen crown: a ruler carried off and a shapeshifter on the throne (Kingdoms, 2026-11-23)
-- [ ] #2038 Drafting Table screen; trapdoors take a second use (Powers, Kingdoms, 2026-11-23)
-- …and 497 older ones.
+- …and 499 older ones.
 
 ## Health
 
