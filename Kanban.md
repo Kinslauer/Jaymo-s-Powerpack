@@ -56,7 +56,6 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-l-carts-check|vanilla-plus-l-carts-check]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-c-back-slot|vanilla-plus-c-back-slot]] · for 💻 Odysseus · open
-- [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · for any · open
 
 
 ## Being built
@@ -64,6 +63,7 @@ kanban-plugin: board
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · changeling-voice-mimic · claimed
 - [ ] [[Inbox/downed-knockout-three-hits|downed-knockout-three-hits]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/structures-2-placement-reasons|structures-2-placement-reasons]] · ☁️ Cloud · claimed
+- [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · ☁️ Cloud · claimed
 
 
 ## In review
