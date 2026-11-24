@@ -7849,3 +7849,8 @@ Andy: "baby zombies are unfightable" (clip: an axe locked onto baby zombies' tor
 - **Attacks**: at its prey it strikes with the weapon arm and the tendril counters (impale, whiplash, hurl, constrict), and drags prey down from where it can't reach. It still only feeds on what it has killed.
 - Classes: WebTakeoverPath, WebSymbiote, WebSymbioteClient, WebMorph, WebCounter, WebRedHunt.
 - Built by CI; not played. Deck server cost not profiled.
+
+## 0.27.11 (2026-11-24): One cobblestone crafts back into 4 stone rocks (#2071)
+
+- Andy: "4 rocks should craft into 1 cobble and vice versa". 4 stone rocks already made 1 cobblestone; now 1 cobblestone alone in the crafting grid gives 4 stone rocks. Only cobblestone goes back (the other rock kinds still only go one way).
+- `stone_rocks_from_cobblestone` recipe (tools/gen_ground_rocks.py). Built by CI only; not crafted in game.

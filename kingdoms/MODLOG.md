@@ -17023,3 +17023,8 @@ Andy: "can i have you work on npc pathing? they get stuck in water or on buildin
 - Andy: "pillagers should also use their lanterns at night, or break them in the world and take them with if they run out". At night, where it's dark, a pillager now carries a light in its off hand (its crossbow stays in the main), as villagers and folk do: a light from its own inventory, else a lantern (or torch) from its camp's loot pile. With none of those, it walks to the nearest lit lantern set in the world within 16 blocks (its camp's fence posts, a village's, a player's), breaks it and carries it off with the fuel it had left. Not with mob griefing off. At dawn the lantern is put away and kept for the next night, so each pillager takes down at most one.
 - Pillagers still see in the dark as before; the lantern lights them up (with LambDynamicLights) so they're seen coming.
 - `NightLights.bearer`, `fromPocket`, `faction` (a camp illager's camp), `Source.HUNG`, `hung`, `unhang`. Built by CI only; not played in game.
+
+## 0.12.48 (2026-11-24): Cobblestone siding is cut in the stonecutter, not crafted from one cobblestone (#2071)
+
+- One cobblestone alone in the crafting grid is now Jaymo's Powers' 4 stone rocks (Andy's pick), so it no longer gives 2 cobblestone siding. Cut siding from cobblestone in the stonecutter (2 per block, as before), or craft it from 2 cobblestone slabs.
+- `cobblestone_siding` recipe removed (tools/gen_carpentry.py skips it). Built by CI only; not crafted in game.
