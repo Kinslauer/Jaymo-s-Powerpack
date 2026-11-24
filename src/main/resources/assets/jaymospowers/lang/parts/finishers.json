@@ -38,6 +38,7 @@
 	"message.jaymospowers.finisher.s_blunt": "Lights out: %s",
 	"message.jaymospowers.finisher.s_snap": "Silent snap: %s",
 	"message.jaymospowers.finisher.slice": "Cut down: %s",
+	"message.jaymospowers.finisher.smash": "Smashed: %s",
 	"message.jaymospowers.finisher.d_blade": "Driven down: %s",
 	"message.jaymospowers.finisher.d_blunt": "Brought down: %s",
 	"message.jaymospowers.finisher.d_spear": "Pinned from above: %s",
