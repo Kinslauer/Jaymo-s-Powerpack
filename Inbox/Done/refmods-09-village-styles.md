@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: any
 from: coordinator
 asked: 2026-11-24
@@ -36,3 +36,4 @@ Every structure says where it generates and why (placement plan https://claude.a
 
 ## Notes
 - 2026-11-24 22:40 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-24 23:54 PR #2120 is merged into master; moved to Inbox/Done.

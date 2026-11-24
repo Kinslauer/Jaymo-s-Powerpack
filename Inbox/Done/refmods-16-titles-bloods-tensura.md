@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: any
 from: coordinator
 asked: 2026-11-24
@@ -45,3 +45,4 @@ ourselves), and what it overlaps in our pack. Skip mods Andy ruled out (see stan
 ## Notes
 - 2026-11-24 16:54 Built in the cloud thread 'Build Reference Mods pick list' (Andy: 'no, build it here'): https://claude.ai/artifact/Fu1jDwywXNKSGj6mmU65fg (148 rows, db picks/andy). Not for the PC.
 - 2026-11-24 22:40 project-thread-ojz7uj's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-24 23:54 PR #2120 is merged into master; moved to Inbox/Done.
