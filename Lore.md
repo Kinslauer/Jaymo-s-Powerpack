@@ -1195,7 +1195,7 @@ The 2026-11-11 answers closed the rest: Arsenal, Chrono and the Tinkerer, the sy
 
 **Voice in the Wild** (new) (Claude's placement for Reference Mods patch 2, 2026-11-24; for Andy to approve). The oldest druids no longer need a hand to speak the rites; a beast can cast.
 
-**Parasols** (new) (Claude's placement for Reference Mods patch 4, 2026-11-24; for Andy to approve). Parasols are a mark of wealth, not of faith: a rich realm's ladies carry lace parasols in the colours and charge of their arms, while poor realms make do with a hood or a roof. In Mohknee, oiled-paper parasols on bamboo ribs, painted with blossom, are an everyday craft of the blossom folk, carried by village women and by the women of rank in the barbarian tribes there. Sturdy oiled umbrellas are a prosperous town's common tool, and a stand by a door is a courtesy to the wet traveller.
+**Parasols** (new) (Claude's placement for Reference Mods patch 4, 2026-11-24; for Andy to approve). Parasols are a mark of wealth, not of faith: a rich realm's ladies carry lace parasols in the colours and charge of their arms, while poor realms make do with a hood or a roof. In Mohknee, oiled-paper parasols on bamboo ribs, painted with blossom, are an everyday craft of the blossom folk, carried by the women of its towns and villages; the barbarian camps carry none. Sturdy oiled umbrellas are a prosperous town's common tool, and a stand by a door is a courtesy to the wet traveller.
 
 **Villagers are not soldiers** (new) (Claude's placement for Reference Mods patch 4, 2026-11-24; for Andy to approve). Only guards and the naturally brave stand against monsters and fire. Everyone else takes cover at night and in storms and leaves the fighting to them.
 

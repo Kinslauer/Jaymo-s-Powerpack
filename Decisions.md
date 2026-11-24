@@ -1051,3 +1051,6 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - **Read as:** three separate primitive hide armour sets (hood, tunic, pants, boots), one per drawn style, each with its own icons and worn look, and each with a darker version crafted from darker hides. Names and lore placement go to Andy with the previews.
 - **Applies to:** Powers armory (caveman set and its new siblings), vanilla_style and excalibur_style packs.
 - **Agent:** claude (PC coordinator thread).
+- 2026-11-24 6:44 PM ET (Andy, refmods thread, PR #2120): villagers "flee if you unsheathe and swing or shoot, or loose an arrow within city limits"; paper parasols "only women in civilization" (none in barbarian camps).
+
+- 2026-11-24, Andy (Reference Mods PR #2120): vanilla spiders are not Druid wild shapes ("no"); they stay out.
