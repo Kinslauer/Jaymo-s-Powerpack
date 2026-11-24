@@ -25,7 +25,6 @@ kanban-plugin: board
 - [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
 - [ ] [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · for any · open
-- [ ] [[Inbox/refmods-09-village-styles|refmods-09-village-styles]] · for any · open
 - [ ] [[Inbox/refmods-10-outlying-buildings-camps|refmods-10-outlying-buildings-camps]] · for any · open
 - [ ] [[Inbox/refmods-11-tectonic-terrain|refmods-11-tectonic-terrain]] · for any · open
 - [ ] [[Inbox/refmods-13-body-anim-stations|refmods-13-body-anim-stations]] · for any · open
@@ -46,6 +45,7 @@ kanban-plugin: board
 - [ ] [[Inbox/refmods-06-horses|refmods-06-horses]] · for any · #2120 · in-review
 - [ ] [[Inbox/refmods-07-mocreatures-beasts|refmods-07-mocreatures-beasts]] · for any · #2120 · in-review
 - [ ] [[Inbox/refmods-08-vampire-villager|refmods-08-vampire-villager]] · for any · #2120 · in-review
+- [ ] [[Inbox/refmods-09-village-styles|refmods-09-village-styles]] · for any · #2120 · in-review
 
 
 ## Needs Andy
