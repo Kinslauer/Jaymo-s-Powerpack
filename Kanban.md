@@ -25,7 +25,6 @@ kanban-plugin: board
 - [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
 - [ ] [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · for any · open
-- [ ] [[Inbox/refmods-03-scouter|refmods-03-scouter]] · for any · open
 - [ ] [[Inbox/refmods-04-umbrellas-take-cover|refmods-04-umbrellas-take-cover]] · for any · open
 - [ ] [[Inbox/refmods-05-hoverboard|refmods-05-hoverboard]] · for any · open
 - [ ] [[Inbox/refmods-06-horses|refmods-06-horses]] · for any · open
@@ -46,6 +45,7 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/refmods-02-druid-wild-shape|refmods-02-druid-wild-shape]] · for any · #2120 · in-review
+- [ ] [[Inbox/refmods-03-scouter|refmods-03-scouter]] · for any · #2120 · in-review
 
 
 ## Needs Andy
