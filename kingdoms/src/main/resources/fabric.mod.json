@@ -20,6 +20,7 @@
 		"jaymoskingdoms.jobs.mixins.json",
 		"jaymoskingdoms.worldgen.mixins.json",
 		"jaymoskingdoms.souls.mixins.json",
+		"jaymoskingdoms.illagers.mixins.json",
 		"jaymoskingdoms.mca.mixins.json",
 		"jaymoskingdoms.trees.mixins.json",
 		"jaymoskingdoms.villagers.mixins.json",
