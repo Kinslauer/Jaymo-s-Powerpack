@@ -4622,6 +4622,62 @@ public final class PowersCompat {
 		}
 	}
 
+	/** Looked up once: Powers' {@code WebSymbiote.suitShown} and {@code bulked}, and {@code Costume.shown}. */
+	private static java.lang.invoke.@Nullable MethodHandle suitShown, suitBulked, costumeShown;
+	private static boolean coverLooked;
+
+	private static void lookForCover() {
+		if (coverLooked) {
+			return;
+		}
+		coverLooked = true;
+		if (!FabricLoader.getInstance().isModLoaded("jaymospowers")) {
+			return;
+		}
+		java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+		try {
+			Class<?> web = Class.forName("com.jaymospowers.power.web.WebSymbiote");
+			java.lang.invoke.MethodType of = java.lang.invoke.MethodType.methodType(boolean.class, Player.class);
+			suitShown = lookup.findStatic(web, "suitShown", of);
+			suitBulked = lookup.findStatic(web, "bulked", of);
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' symbiote suit (older Powers?)", e);
+		}
+		try {
+			Class<?> costume = Class.forName("com.jaymospowers.costume.Costume");
+			costumeShown = lookup.findStatic(costume, "shown",
+				java.lang.invoke.MethodType.methodType(Class.forName("com.jaymospowers.costume.CostumeDesign"), Player.class));
+		} catch (ReflectiveOperationException | LinkageError e) {
+			JaymosKingdoms.LOGGER.warn("Couldn't find Jaymo's Powers' Costume.shown (older Powers?)", e);
+		}
+	}
+
+	/** Whether {@code player} shows a costume just now (Powers' {@code Costume.shown}); false without Powers. */
+	public static boolean costumeShown(Player player) {
+		lookForCover();
+		try {
+			return costumeShown != null && costumeShown.invoke(player) != null;
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Whether {@code player} shows the symbiote's own black suit or its big body (Powers' {@code WebSymbiote.suitShown},
+	 * {@code bulked}), and not a costume's shape over it; false without Powers.
+	 */
+	public static boolean symbioteSuit(Player player) {
+		lookForCover();
+		try {
+			if (suitBulked != null && (boolean)suitBulked.invoke(player)) {
+				return true;
+			}
+			return suitShown != null && (boolean)suitShown.invoke(player) && !costumeShown(player);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/** How much of the Rig {@code player} wears: 0 none, 1 some of it, 2 the whole set (Powers' {@code Rig}); 0 without Powers. */
 	public static int rigWorn(Player player) {
 		lookForGear();
