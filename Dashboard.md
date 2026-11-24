@@ -25,12 +25,20 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2097 Where things came from, stolen goods, heirlooms, collectors' prices and a strongbox (Reference Mods patch 15) (Kingdoms, 2026-11-24)
 - [ ] #2095 sit from the knee smoothly, sit still to ride an earthboard (Powers, 2026-11-24)
+- [ ] #2094 Sky, light and air - scorch, lava crust, leaves on water, coloured light (Reference Mods patch 14) (Powers, Kingdoms, 2026-11-24)
 - [ ] #2093 eaters of the downed bend down over them (Powers, Kingdoms, Kitchen, 2026-11-24)
+- [ ] #2092 Fishing extras: don't stand on the hook, solid or light hooks, leaps, turning a run, clean landings, a line that hangs (Powers, 2026-11-24)
 - [ ] #2091 Locked-on swings hit small, quick foes (baby zombies) (Powers, Kingdoms, 2026-11-24)
+- [ ] #2090 Villagers seen at their jobs: tools in hand, the smith at the forge, the cook at the stove, the butcher at the hook (Kingdoms, Kitchen, 2026-11-24)
 - [ ] #2089 tree felling - cut through the trunk, carved stumps, blasts bring buildings down (Kingdoms, 2026-11-24)
 - [ ] #2088 NPCs hold two-handed weapons in both hands (Kingdoms, 2026-11-24)
+- [ ] #2087 Bandit camps by the trade roads (Kingdoms, 2026-11-24)
+- [ ] #2086 Blasts blow limbs off the downed (Powers, 2026-11-24)
+- [ ] #2085 Structures need a reason: mines by buyers, stables by towns, watchtowers on borders, ruins with heirs (Kingdoms, 2026-11-24)
 - [ ] #2084 Red (unparryable) mob blows rarer and slower (Powers, Kingdoms, 2026-11-24)
+- [ ] #2083 Felled by a leg blow: ragdoll, prone, roll to get up (Powers, 2026-11-24)
 - [ ] #2082 Realm banks: deposits, interest, loans and letters of credit at the counting house (Kingdoms, 2026-11-24)
 - [ ] #2079 Downed: a blow knocks you out, red blows kill, no tossing, fire kills after 6 s (Powers, 2026-11-24)
 - [ ] #2078 gear talk - bauble themes, knights and colours, two-tag lines, changes and gossip (Kingdoms, 2026-11-24)
