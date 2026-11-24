@@ -991,3 +991,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-24 (Andy, Vanilla+ thread): approved the Lore paragraph "The End's larder" (Ender's Delight port).
 - 2026-11-24 4:43 PM ET (Andy, Alex's Caves thread): approved Lore "The deep places under the far land".
 - 2026-11-24 4:44 PM ET (Andy, Alex's Caves thread): "the same dinos in the prehistoric cave should spawn on verdant and vice versa. there should also be barbaric warrior born found training by fighting the dinos": Alex's Primordial Caves dinos also on the Verdant World, the Verdant World's dinos (PR #2099) also in the Primordial Caves, and wild barbaric Warrior-born there train by fighting them.
+
+- 2026-11-24: Silk Deeps removed (Andy: "remove these caves and their abandoned buildings"): the biome no longer generates, so no watcher huts or brood lairs either; registered still for old saves. PR #2108.
