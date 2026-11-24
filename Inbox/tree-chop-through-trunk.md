@@ -1,5 +1,5 @@
 ---
-status: open
+status: done
 for: any
 from: Andy (Claude chat, 2026-11-23)
 asked: 2026-11-23
@@ -27,3 +27,4 @@ then it leaves a carved stump."
 - Check the pack's felling mods and our own felling (grep `docs/codemap/*.md` for fell, chop, stump, trunk) so this
   replaces the current rule cleanly and doesn't fight another mod's tree capitator.
 - Cheap on the Deck server: the connectivity check runs only when a cut finishes a ring, not every tick.
+- 2026-11-24 17:12 Folded into Inbox/refmods-01-felling.md (Reference Mods patch plan, 2026-11-24).

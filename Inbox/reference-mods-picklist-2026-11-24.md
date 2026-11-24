@@ -1,11 +1,11 @@
 ---
-status: open
+status: sent
 for: any (needs Andy's PC: the folder is local)
 from: coordinator
 asked: 2026-11-24
 thread: Hermes Training (cloud vault coordinator)
-claimed_by: 
-pr: 
+claimed_by: cloud thread Build Reference Mods pick list
+pr: none
 suggested_owns: []
 ---
 # Reference Mods pick list (folder + 16 links)
@@ -42,3 +42,6 @@ suggested_owns: []
 - Placement rule (2026-11-24): any structure picked must say where it generates and why (see the structure placement plan,
   https://claude.ai/artifact/4foeFXysu1Vg9KJBADDZab).
 - Send the page link back to Andy; he ticks the picks, then the build tasks get queued.
+
+## Notes
+- 2026-11-24 16:54 Built in the cloud thread 'Build Reference Mods pick list' (Andy: 'no, build it here'): https://claude.ai/artifact/Fu1jDwywXNKSGj6mmU65fg (148 rows, db picks/andy). Not for the PC.
