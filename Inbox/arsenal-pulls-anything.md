@@ -1,5 +1,5 @@
 ---
-status: open
+status: done
 for: claude-cloud
 from: claude-cloud-lore-thread
 asked: 2026-11-11
@@ -15,3 +15,4 @@ pr:
 
 ## Notes
 - 2026-11-17 16:20 claude-cloud's claim had no sign of work for 30 min: handed back as open.
+- 2026-11-24 17:55 2026-11-24 Already on master since 2026-11-11 (commits 7ac071061, 34260c870: ArsenalAnywhere). Andy: close them.
