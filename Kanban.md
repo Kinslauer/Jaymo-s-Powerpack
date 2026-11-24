@@ -85,6 +85,7 @@ kanban-plugin: board
 ## Done
 
 **Complete**
+- [x] [[Inbox/Done/downed-knockout-three-hits|downed-knockout-three-hits]]
 - [x] [[Inbox/Done/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]]
 - [x] [[Inbox/Done/zfighter-gaps-8-raids|zfighter-gaps-8-raids]]
 - [x] [[Inbox/Done/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]]
@@ -92,7 +93,6 @@ kanban-plugin: board
 - [x] [[Inbox/Done/zfighter-gaps-5-training|zfighter-gaps-5-training]]
 - [x] [[Inbox/Done/zfighter-gaps-4-forms|zfighter-gaps-4-forms]]
 - [x] [[Inbox/Done/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]]
-- [x] [[Inbox/Done/zfighter-gaps-2-power|zfighter-gaps-2-power]]
 
 
 %% kanban:settings
