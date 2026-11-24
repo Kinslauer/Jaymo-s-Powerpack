@@ -7549,3 +7549,22 @@ following integration task).
   fell every two seconds with nobody near and nothing said why. The server log also notes each one with the damage
   type's id, so a cause without a name of its own can still be traced. `HurtCause`, `lang/parts/hurt_cause.json`.
 - Built on CI only; not played.
+
+## 0.26.82 (2026-11-24): Three blows on the ground and you're finished (#2056)
+
+- **Anyone downed dies on the third blow**: besides one blow of three hearts or more, the third weaker blow (a swing,
+  an arrow, a bite, a blast) since they went down now kills them too, as the killing blow always has. Andy, cut down on
+  the ground by a zombie captain: "either one blow of 3 hearts or more, or 3 weaker blows total, not this infinite cap."
+  The same goes for downed mobs ("they should follow the rule"): a player's blows on one are its wounds, now three, not
+  ten. Fire, falls and bleeding don't count; knocked out cold from standing, blows land as before.
+  `Downed#DOWNED_BLOWS`, `Downed#lastBlow`.
+- Built on CI only; not played.
+
+## 0.26.83 (2026-11-24): bandages give a short regen; rags fester less (#2058)
+
+- **Fresh dressings heal you a little faster for a moment**: a linen (clean) bandage gives Regeneration II and a grass
+  bandage Regeneration I, each for 8 seconds after it's put on (yourself, someone else, or the fight-pit attendant's
+  linen). A rag, washed or not, gives none.
+- **Rags fester less**: a dirty cut under a rag now festers at half the old chance (2.5% each bleed tick instead of 5%);
+  a zombie's dirty cut left open is unchanged.
+- `Treatment.dressingRegen` (`DRESSING_REGEN_TICKS`), `Bleeding.RAG_FESTER_CHANCE`. Built by CI; not played.
