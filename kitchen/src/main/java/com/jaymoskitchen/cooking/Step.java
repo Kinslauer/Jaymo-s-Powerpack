@@ -147,6 +147,16 @@ public enum Step {
 	TEA_HERB(() -> Items.FERN, null, "tea_herb"),
 	// the Nether's grapes (crimson and warped) for the black wine
 	BLACK_GRAPES(() -> own("crimson_grapes"), null, "black_grape"),
+	// Ocean's and Nether's Delight's sea and Nether larder (vanilla), and Enderscape's End fruit, mushrooms and jelly
+	SEA_PICKLE(() -> Items.SEA_PICKLE, null),
+	KELP(() -> Items.KELP, null),
+	SEAGRASS(() -> Items.SEAGRASS, null),
+	PUFFERFISH(() -> Items.PUFFERFISH, null),
+	WARPED_ROOTS(() -> Items.WARPED_ROOTS, null),
+	PURUBERRY(() -> enderscape("puruberry"), null),
+	CELESTIAL_CHANTERELLE(() -> enderscape("celestial_chanterelle"), null),
+	MURUBLIGHT_CHANTERELLE(() -> enderscape("murublight_chanterelle"), null),
+	DRIFT_JELLY(() -> enderscape("drift_jelly_bottle"), () -> Items.GLASS_BOTTLE),
 	// actions: cost nothing, icon is just for the button
 	STIR(() -> Items.STICK, null),
 	FLIP(() -> Items.WOODEN_SHOVEL, null),
@@ -197,6 +207,10 @@ public enum Step {
 
 	private static Item kingdoms(String path) {
 		return OptionalItems.item(OptionalItems.KINGDOMS, path);
+	}
+
+	private static Item enderscape(String path) {
+		return OptionalItems.item(OptionalItems.ENDERSCAPE, path);
 	}
 
 	private static Item powers(String path) {

@@ -296,7 +296,33 @@ public enum Dish {
 	GIANTS_MARROW_BROTH(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, GIANTS_MARROW, CARROT, POTATO), 12, 1.0F, true,
 		List.of(new Buff(MobEffects.RESISTANCE, 180 * 20, 1))),
 	DEEP_KINGS_PLATTER(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(LEGEND_FILLET, DRIED_KELP, FLIP, FLIP), 13, 1.0F, false,
-		List.of(new Buff(MobEffects.STRENGTH, 180 * 20, 1)));
+		List.of(new Buff(MobEffects.STRENGTH, 180 * 20, 1))),
+	// --- Ocean's Delight's dishes (MIT, its art kept with the notice in textures/item/CREDITS-delight.txt) ---
+	HONEY_FRIED_KELP(Method.GRILL, EnumSet.of(Station.CAMPFIRE), List.of(DRIED_KELP, HONEY_BOTTLE, FLIP, FLIP), 4, 0.5F, false,
+		List.of(new Buff(MobEffects.HASTE, 60 * 20, 0))),
+	BRAISED_SEA_PICKLE(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, SEA_PICKLE, BROWN_MUSHROOM, BROWN_MUSHROOM), 7, 0.6F, true,
+		List.of(new Buff(MobEffects.NIGHT_VISION, 120 * 20, 0), new Buff(MobEffects.WATER_BREATHING, 60 * 20, 0))),
+	KELP_ENCRUSTED_COD(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(COD_SLICE, EGG, KELP), 6, 0.6F, false,
+		List.of(new Buff(MobEffects.WATER_BREATHING, 90 * 20, 0))),
+	STUFFED_COD(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(COD, KELP, ONION, TOMATO, BROWN_MUSHROOM), 11, 0.8F, false,
+		List.of(new Buff(MobEffects.WATER_BREATHING, 180 * 20, 0), new Buff(MobEffects.REGENERATION, 20 * 20, 0))),
+	SEAGRASS_SALAD(Method.CHOP, EnumSet.of(Station.BOARD), List.of(BOWL, SEAGRASS, SEAGRASS, CARROT), 5, 0.5F, true,
+		List.of(new Buff(MobEffects.DOLPHINS_GRACE, 30 * 20, 0))),
+	// cut by a cook who knows where the poison sits: no Poison or Nausea, as a raw pufferfish gives
+	FUGU_ROLL(Method.CHOP, EnumSet.of(Station.BOARD), List.of(PUFFERFISH, RICE_COOKED, DRIED_KELP), 7, 0.6F, false,
+		List.of(new Buff(MobEffects.WATER_BREATHING, 120 * 20, 0), new Buff(MobEffects.DOLPHINS_GRACE, 20 * 20, 0))),
+	// --- Nether's Delight's dishes (MIT, its art kept with the same notice); hoglins drop porkchops, so pork stands in for hoglin ---
+	MAGMA_GELATIN(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(MAGMA_CREAM, MAGMA_CREAM, SUGAR, WATER_BOTTLE), 6, 0.5F, false,
+		List.of(new Buff(MobEffects.FIRE_RESISTANCE, 180 * 20, 0))),
+	WARPED_MOLDY_MEAT(Method.SMOKE, EnumSet.of(Station.SMOKER), List.of(PORKCHOP, WARPED_ROOTS, WARPED_ROOTS), 9, 0.7F, false,
+		List.of(new Buff(MobEffects.STRENGTH, 60 * 20, 0), new Buff(MobEffects.FIRE_RESISTANCE, 60 * 20, 0))),
+	// --- after Ender's Delight (its art and code are all rights reserved: ideas only, our own art), from Enderscape's End ---
+	STRANGE_ECLAIR(Method.OVEN, EnumSet.of(Station.FURNACE), List.of(DOUGH, SUGAR, MILK_BOTTLE, PURUBERRY), 7, 0.5F, false,
+		List.of(new Buff(MobEffects.SLOW_FALLING, 60 * 20, 0), new Buff(MobEffects.SPEED, 60 * 20, 0))),
+	CHANTERELLE_STEW(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, CELESTIAL_CHANTERELLE, MURUBLIGHT_CHANTERELLE, POTATO), 9, 0.7F, true,
+		List.of(new Buff(MobEffects.NIGHT_VISION, 120 * 20, 0), new Buff(MobEffects.RESISTANCE, 30 * 20, 0))),
+	DRIFT_JELLY_PUDDING(Method.STIR, EnumSet.of(Station.FURNACE, Station.SMOKER), List.of(BOWL, DRIFT_JELLY, MILK_BOTTLE, SUGAR), 6, 0.6F, true,
+		List.of(new Buff(MobEffects.SLOW_FALLING, 120 * 20, 0)));
 
 	/** Which minigame cooks the dish. */
 	public enum Method {
@@ -471,6 +497,10 @@ public enum Dish {
 			case PANCAKES -> 90;
 			case FRENCH_TOAST -> 100;
 			case HASH_BROWNS -> 100;
+			case HONEY_FRIED_KELP -> 90;
+			case KELP_ENCRUSTED_COD -> 150;
+			case STUFFED_COD -> 180;
+			case STRANGE_ECLAIR -> 170;
 			default -> 100;
 		};
 	}
