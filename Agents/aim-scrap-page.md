@@ -1,7 +1,17 @@
 ---
 status: in-review
+task: 
 branch: claude/nervous-kapitsa-f030d7
+with: Claude (side session of the coordinator thread)
 pr: 2064
+mods: kingdoms
+versions: 
+started: 2026-11-23
+owns:
+  - kingdoms/src/main/java/com/jaymoskingdoms/LifeAims.java
+  - kingdoms/src/client/java/com/jaymoskingdoms/client/AimPageClient.java
+  - kingdoms/src/client/java/com/jaymoskingdoms/client/ScrapScreen.java
+  - kingdoms/src/main/resources/assets/jaymoskingdoms/lang/parts/aim-scrap.json
 ---
 # Aim page as a torn scrap
 
