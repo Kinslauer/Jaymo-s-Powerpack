@@ -2755,3 +2755,7 @@ Andy's picks from Legendary Survival Overhaul (ideas and numbers only) and Walk 
   JEI only asks the server for Minecraft's own kinds of recipe, so ours never reached the players;
   `Hides` now has the server send them (`RecipeSynchronization`).
 - Built on CI only; not played.
+
+## 0.6.78 (2026-11-24): A bear stays on the meat hook (#2068)
+
+Andy: "why doesnt the bear stay on the hook?" It did stay, but it didn't look like it. Clients draw a four-legged body that has stopped moving as lying flat on its side at its lowest point, and they didn't know the body was on a hook. A bear hung from a hook two blocks up rests its head on the floor, stops moving at once, and was drawn tipping over onto the floor within half a second. A small animal that had stopped swinging was drawn lying flat in mid-air the same way. Clients now know when a body is on a meat hook (a synced flag, `CorpseEntity#onHook`), and a hung body is always drawn hanging as its points have it.
