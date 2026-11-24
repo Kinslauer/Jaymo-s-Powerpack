@@ -16969,3 +16969,9 @@ Andy: "can i have you work on npc pathing? they get stuck in water or on buildin
 - **Key clash pop-up gone**: pressing a key two bindings share no longer brings up the "X is bound twice" pop-up (Andy: too invasive, almost every key has a clash). Controls still shows clashes in red.
 - KeyClashes (client) and its lang part removed; the old jaymoskingdoms-key-clashes.txt count file is left alone and no longer read.
 - Built; not played.
+
+## 0.12.42 (2026-11-24): The Silk Deeps no longer generate (#2108)
+
+- The Silk Deeps, the cobweb-hung spider caves of dark spider stone and nest silk (Andy: "remove these caves and their abandoned buildings"), are no longer placed in the Overworld, so new chunks get neither the caves nor the web-hung spruce watcher's huts over them, nor the brood queen's chamber under them (both only ever generate over the Silk Deeps). Switch: `SilkDeeps.GENERATES`.
+- Everything stays registered (the biome, spider stone, nest silk, shed skins, egg sacs, the brood queen, both structures), so worlds that already have them still load and what was already generated stays. Netcasters still spawn deep down everywhere else, so silk glands still drop; spiders that drag a player off fall back to a cave spider spawner's nest.
+- Built; not played. Only new chunks change.
