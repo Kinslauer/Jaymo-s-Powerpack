@@ -4,6 +4,7 @@ import com.jaymospowers.core.AbilityPower;
 import com.jaymospowers.core.fx.MagicFx;
 import com.jaymospowers.JaymosPowers;
 import com.jaymospowers.compat.EnderscapeLoot;
+import com.jaymospowers.compat.StellarityLoot;
 import com.jaymospowers.core.Flames;
 import java.util.List;
 import java.util.Map;
@@ -127,6 +128,7 @@ public final class RelicWeapons {
 		Map.entry(BuiltInLootTables.NETHER_BRIDGE, Kind.SOUL_SABER), Map.entry(BuiltInLootTables.RUINED_PORTAL, Kind.SOUL_SABER),
 		Map.entry(BuiltInLootTables.WOODLAND_MANSION, Kind.GRAND_SHIELD), Map.entry(BuiltInLootTables.PILLAGER_OUTPOST, Kind.GRAND_SHIELD),
 		Map.entry(BuiltInLootTables.STRONGHOLD_CORRIDOR, Kind.GRAND_SHIELD), Map.entry(EnderscapeLoot.STRONGHOLD_ARMORY, Kind.GRAND_SHIELD),
+		Map.entry(StellarityLoot.STRONGHOLD_CORRIDOR, Kind.GRAND_SHIELD), Map.entry(StellarityLoot.END_SHIP_TREASURE, Kind.VOIDREAVER),
 		Map.entry(BuiltInLootTables.END_CITY_TREASURE, Kind.VOIDREAVER), Map.entry(EnderscapeLoot.END_CITY_CHEST, Kind.VOIDREAVER),
 		Map.entry(BuiltInLootTables.ANCIENT_CITY, Kind.ECHO_CLEAVER),
 		Map.entry(BuiltInLootTables.SHIPWRECK_TREASURE, Kind.TIDEBREAKER), Map.entry(BuiltInLootTables.BURIED_TREASURE, Kind.TIDEBREAKER),
