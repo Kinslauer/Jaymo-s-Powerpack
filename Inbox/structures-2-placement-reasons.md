@@ -5,7 +5,7 @@ from: coordinator
 asked: 2026-11-24
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR
 claimed_by: claude-cloud
-pr: 
+pr: 2085
 suggested_owns:
   - kingdoms new worldgen/PlacementReasons.java
   - kingdoms lang/parts/placement-reasons.json
