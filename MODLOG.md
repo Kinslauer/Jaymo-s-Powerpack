@@ -7750,3 +7750,10 @@ Andy: "baby zombies are unfightable" (clip: an axe locked onto baby zombies' tor
 - New `WebBigHead` (the model, its placement, the glow, the tongue); `WebHulk` hides the old head's masses, shares its growth maths with the new head (`flowed`, `flow`, `thick`, unchanged for the body) and loses its old big-body tongue (`submitTongue`); `WebSymbioteLayer` draws the head over the big body.
 - Lore placement added to Lore.md as a `(new)` paragraph ("Its own face") for Andy to approve.
 - Built by CI; not played. Not checked in game: how the head sits on the neck while crawling, climbing and in executions (it follows the same head pose as the maw), the glow, the tongue's look in motion, and the scale and offset (`WebBigHead.SCALE`, `OFFSET_Y`, `OFFSET_Z`), which were set from a drawn preview.
+
+## 0.27.1 (2026-11-24): Low-end mode switches itself on for the Steam Deck (#2100)
+
+- **Low-end mode on the Deck**: the first start on a Steam Deck now turns on low-end mode by itself (shaders off, Fast graphics), as on other built-in graphics. The check took the Deck's chip ("AMD Custom GPU 0932 (radeonsi, vangogh, ...)") for a full graphics card, so the Deck ran Complementary shaders.
+- Every install is checked once more under the new rule; one an earlier check already put in low-end mode is left as its player set it (`/lowend off` stays off).
+- LowEndMode: AMD_BUILT_IN also matches "amd custom gpu NNNN" and "vangogh"; CHECKED is checked-v2, with checked-v1's weak results carried over.
+- Built; found in the Deck client test 2026-11-24 (checked-v1=fine on the Deck); the new rule not seen on a Deck yet.
