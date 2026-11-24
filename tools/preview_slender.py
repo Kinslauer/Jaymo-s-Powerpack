@@ -282,7 +282,7 @@ def turned(polys, about, angle):
 
 
 def hunched(frame, tex, curl):
-    """WebSlender.hunch standing (curl 0) or curled over for its tendrils (curl 1): the back bent from the hips, the head
+    """WebSlender.hunch standing (curl 0) or reared up while its tendrils work (curl 1): the back bent from the hips, the head
     craned up again, the arms hanging forward, the elbows crooked, the thighs forward and the knees folded, sunk on them.
     (The spear is left off here, the arm crooked.)"""
     bend = (lambda a, b: a + (b - a) * curl)(jfloat("WebSlender.java", "HUNCH"), jfloat("WebSlender.java", "HUNCH_TENDRILS"))
@@ -308,7 +308,7 @@ def hunched(frame, tex, curl):
 def stance_sheet(frame, tex, lift):
     size, zoom, centre = (440, 640), 10.5, (0, 1)
     tiles = []
-    for curl, name in ((0.0, "standing, hunched"), (1.0, "tendrils at work, curled over")):
+    for curl, name in ((0.0, "standing, hunched"), (1.0, "tendrils at work, reared up")):
         for yaw in (35, 90):
             img = render(hunched(frame, tex, curl), yaw, size, zoom, centre, lift=lift)
             tiles.append(label(img, "red slender body, %s (%s)" % (name, "three-quarter" if yaw == 35 else "side")))

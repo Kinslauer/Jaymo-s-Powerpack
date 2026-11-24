@@ -141,21 +141,63 @@ final class WebSlender {
 	 * between the two over {@code CURL_TICKS}. On the move it straightens only to {@code HUNCH_MOVING} of that, and stays
 	 * loose: the head and the arms lag and loll with the stride ({@code LOLL}, radians), the slight ragdoll it always had.
 	 */
-	static final float HUNCH = 0.7F, HUNCH_TENDRILS = 1.1F, HUNCH_MOVING = 0.7F, HEAD_UP = 0.85F, ARMS_FORWARD = 0.35F, THIGHS = 0.45F;
+	static final float HUNCH = 0.7F, HUNCH_TENDRILS = -0.15F, HUNCH_MOVING = 0.7F, HEAD_UP = 0.85F, ARMS_FORWARD = 0.35F, THIGHS = 0.45F;
 	/**
 	 * Never stiff (Andy: "the arms and knees should bend too"): the elbows crooked {@code ELBOWS} more than the big body's
 	 * (radians, the claws held out in front), the knees folding with the bent thighs (WebHulk#limbs folds a raised thigh's
 	 * shin back twice as far), the whole of it sunk {@code CROUCH_DROP} pixels so the feet stay on the ground.
 	 */
 	static final float ELBOWS = 0.7F, CROUCH_DROP = 1.8F;
+	/**
+	 * Rearing (Andy's stills of it in the second film's last fight): while its tendrils work it straightens up out of the
+	 * hunch, leaning back a little ({@code HUNCH_TENDRILS} is negative), and the tendrils not striking rise
+	 * {@code REAR_LIFT} higher (radians) and curl {@code REAR_CURL} further, reaching up and over it like claws.
+	 */
+	static final float REAR_LIFT = 0.6F, REAR_CURL = -0.15F;
+
+	/**
+	 * A body's stance (WebSlender#hunch): how far bent from the hips standing, with its tendrils at work and on the move
+	 * (a share), the head craned back up (a share of the bend), the arms forward, the thighs raised, how far it's sunk on its
+	 * knees (pixels), its elbows crooked, and its legs spread apart (radians).
+	 */
+	record Stance(float hunch, float working, float moving, float headUp, float armsForward, float thighs, float drop, float elbows, float apart) {
+	}
+
+	/** The slender body's: hunched right over, rearing up when its tendrils work. */
+	static final Stance STANCE = new Stance(HUNCH, HUNCH_TENDRILS, HUNCH_MOVING, HEAD_UP, ARMS_FORWARD, THIGHS, CROUCH_DROP, ELBOWS, 0.0F);
 	static final float CURL_TICKS = 6.0F, LOLL = 0.12F;
+	/**
+	 * The pounce (Andy's reference: the two strains' last fight in the second film; only its feel is taken): off the ground
+	 * (its hunt's lunge, a leap, a drop) it springs out of the hunch, the back arching to {@code POUNCE_ARCH} of it, the claws
+	 * thrown forward {@code POUNCE_ARMS} and wide {@code POUNCE_SPREAD} (radians), the legs tucked up {@code POUNCE_TUCK}, and
+	 * its tendrils flare out behind it, {@code FLARE_WIDE} wider and lifted {@code FLARE_LIFT} (WebTendrilLayer), easing in
+	 * and out over {@code AIR_TICKS}.
+	 */
+	static final float POUNCE_ARCH = 0.3F, POUNCE_ARMS = 1.5F, POUNCE_SPREAD = 0.45F, POUNCE_TUCK = 0.8F, FLARE_WIDE = 0.5F, FLARE_LIFT = 0.35F,
+		AIR_TICKS = 4.0F;
+	/** On a red-strain body's render state: how far into the pounce it is (0-1), or null on the ground. */
+	public static final net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey<Float> AIR =
+		net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey.create(() -> "jaymospowers:web_slender_air");
+	private static final WebEase AIRBORNE = new WebEase();
+
+	/** From LivingEntityRenderer.extractRenderState (WebHostBody): how far a red-strain body is into a pounce. */
+	static @org.jspecify.annotations.Nullable Float air(net.minecraft.world.entity.LivingEntity entity) {
+		if (com.jaymospowers.power.web.WebSymbioteStrains.of(entity) != com.jaymospowers.power.web.WebSymbioteStrain.RED) {
+			return null;
+		}
+		boolean up = !entity.onGround() && !entity.isInWater() && !entity.isPassenger() && !entity.onClimbable() && !entity.isFallFlying()
+			&& !(entity instanceof net.minecraft.world.entity.player.Player p && p.getAbilities().flying);
+		float a = AIRBORNE.to(entity.getId(), up ? 1.0F : 0.0F, AIR_TICKS);
+		return a > 0.0F ? a : null;
+	}
+
 	/** Entity id → how far curled over for its tendrils (0-1). */
 	private static final WebEase CURL = new WebEase();
 	/** What each body was last hunched to (so hunching it twice in a frame hunches it once). */
 	private static final java.util.Map<ModelPart, Float> HUNCHED = new java.util.WeakHashMap<>();
 
-	/** Hunches a model drawn for the slender body, {@code k} of the way (before {@link #shift}, so the shoulders and neck follow). */
-	static void hunch(HumanoidModel<?> h, AvatarRenderState s, float k) {
+	/** Hunches a model drawn for a body in its stance, {@code k} of the way (before the frame shift, so the shoulders and neck follow). */
+	static void hunch(HumanoidModel<?> h, AvatarRenderState s, float k, Stance st) {
 		if (k <= 0.0F || s.isPassenger || s.isFallFlying || s.swimAmount > 0.0F) {
 			return;
 		}
@@ -168,22 +210,35 @@ final class WebSlender {
 			|| tendrils.tethers() != null);
 		float curl = CURL.to(s.id, working ? 1.0F : 0.0F, CURL_TICKS);
 		float speed = Mth.clamp(s.walkAnimationSpeed, 0.0F, 1.0F);
-		float bend = Mth.lerp(curl, HUNCH, HUNCH_TENDRILS) * Mth.lerp(speed, 1.0F, HUNCH_MOVING) * k;
+		Float airborne = s.getData(AIR);
+		float air = airborne == null || working ? 0.0F : airborne;
+		float bend = Mth.lerp(curl, st.hunch(), st.working()) * Mth.lerp(speed, 1.0F, st.moving()) * Mth.lerp(air, 1.0F, POUNCE_ARCH) * k;
 		float loll = Mth.sin(s.walkAnimationPos * 0.6662F - 0.8F) * LOLL * speed * k;
 		// the back curled over from the hips (the head and arms carried with it, PoseBlend.bend), the head craned up again,
 		// the arms let hang (straight down, a little forward) and lolling with the stride
-		com.jaymospowers.client.PoseBlend.bend(h, bend, 0.0F, 0.0F, CROUCH_DROP * k, 0.0F);
-		h.head.xRot -= bend * HEAD_UP - loll * 0.5F;
+		com.jaymospowers.client.PoseBlend.bend(h, bend, 0.0F, 0.0F, st.drop() * k, 0.0F);
+		h.head.xRot -= bend * st.headUp() - loll * 0.5F;
 		h.head.zRot += loll * 0.6F;
-		h.rightArm.xRot -= bend + ARMS_FORWARD * k - loll;
-		h.leftArm.xRot -= bend + ARMS_FORWARD * k + loll;
+		h.rightArm.xRot -= bend + st.armsForward() * k - loll;
+		h.leftArm.xRot -= bend + st.armsForward() * k + loll;
 		h.rightArm.zRot += loll * 0.5F;
 		h.leftArm.zRot += loll * 0.5F;
-		h.rightLeg.xRot -= THIGHS * k;
-		h.leftLeg.xRot -= THIGHS * k;
+		h.rightLeg.xRot -= st.thighs() * k;
+		h.leftLeg.xRot -= st.thighs() * k;
+		h.rightLeg.zRot += st.apart() * k;
+		h.leftLeg.zRot -= st.apart() * k;
 		// (sunk on its bent knees)
-		h.rightLeg.y += CROUCH_DROP * k;
-		h.leftLeg.y += CROUCH_DROP * k;
+		h.rightLeg.y += st.drop() * k;
+		h.leftLeg.y += st.drop() * k;
+		if (air > 0.0F) {
+			// pouncing: claws thrown forward and wide, legs tucked
+			h.rightArm.xRot -= POUNCE_ARMS * air * k;
+			h.leftArm.xRot -= POUNCE_ARMS * air * k;
+			h.rightArm.zRot += POUNCE_SPREAD * air * k;
+			h.leftArm.zRot -= POUNCE_SPREAD * air * k;
+			h.rightLeg.xRot -= POUNCE_TUCK * air * k;
+			h.leftLeg.xRot -= POUNCE_TUCK * air * k;
+		}
 		HUNCHED.put(h.body, h.body.xRot);
 	}
 

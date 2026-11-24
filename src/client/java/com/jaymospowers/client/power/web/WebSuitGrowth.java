@@ -298,9 +298,11 @@ public final class WebSuitGrowth {
 		if (model instanceof net.minecraft.client.model.HumanoidModel<?> humanoid) {
 			if (slender) {
 				// (hunched over first, so its frame follows the bent back)
-				WebSlender.hunch(humanoid, avatar, k);
+				WebSlender.hunch(humanoid, avatar, k, WebSlender.STANCE);
 				WebSlender.shift(humanoid, k);
 			} else {
+				// (the big body crouched wide and low, WebHulk.STANCE)
+				WebSlender.hunch(humanoid, avatar, k, WebHulk.STANCE);
 				WebHulk.shift(humanoid, k);
 			}
 		}
@@ -347,8 +349,10 @@ public final class WebSuitGrowth {
 			WebHulk.Model hulk = (WebHulk.Model)model;
 			hulk.build(hulkBuilt(avatar), peeledHulk(avatar), k, avatar.ageInTicks, WebHulk.teeth(avatar));
 			hulk.breathe(avatar);
-			// elbows and knees bending with the stride (after the limbs are posed above)
+			// elbows and knees bending with the stride (after the limbs are posed above), the elbows crooked in its crouch
 			hulk.limbs(avatar);
+			hulk.elbowRight.xRot -= WebHulk.CROUCH_ELBOWS * k;
+			hulk.elbowLeft.xRot -= WebHulk.CROUCH_ELBOWS * k;
 		} else {
 			lay(player, avatar, role);
 			// (laid under the big body as it's built or peeled: stretched to its longer frame)
@@ -366,9 +370,10 @@ public final class WebSuitGrowth {
 	/** Moves a model drawn outside the usual passes (a layer reading the body's parts) out to the big body's frame. */
 	static void shift(net.minecraft.client.model.HumanoidModel<?> model, AvatarRenderState state) {
 		if (slender(state)) {
-			WebSlender.hunch(model, state, hulkness(state));
+			WebSlender.hunch(model, state, hulkness(state), WebSlender.STANCE);
 			WebSlender.shift(model, hulkness(state));
 		} else {
+			WebSlender.hunch(model, state, hulkness(state), WebHulk.STANCE);
 			WebHulk.shift(model, hulkness(state));
 		}
 	}

@@ -46,6 +46,9 @@ public final class WebHostBody {
 	 * model is hidden (the game draws an invisible entity's model only for those who can see through it, and nobody can).
 	 */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state) {
+		// (a red-strain body's pounce, a web slinger's or a ridden mob's: WebSlender.AIR)
+		Float air = WebSlender.air(entity);
+		state.setData(WebSlender.AIR, air);
 		boolean taken = entity.isAlive() && (entity.hasAttached(WebBehemoth.HOST) || WebInhabit.isHost(entity) && WebInhabit.humanoid(entity));
 		if (!taken || state instanceof AvatarRenderState) {
 			STATES.remove(entity);
@@ -90,6 +93,7 @@ public final class WebHostBody {
 		// its strain, and the big body up (worn alone, its tendrils WebBehemothClient's)
 		body.setData(WebStrainLook.STRAIN, state.getData(WebStrainLook.STRAIN));
 		body.setData(WebSymbioteClient.TENDRILS_IN, Boolean.TRUE);
+		body.setData(WebSlender.AIR, air);
 		state.setData(BODY, body);
 		state.isInvisible = true;
 		state.isInvisibleToPlayer = true;

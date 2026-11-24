@@ -65,6 +65,17 @@ final class WebHulk {
 	static final float TENDRIL_WIDE = 1.6F, TENDRIL_DEEP = 1.5F, TENDRIL_THICK = 1.3F, TENDRIL_LONG = 1.15F;
 	static final float[][] TENDRIL_REST = WebSlender.grown(WebSlender.TENDRIL_REST, TENDRIL_WIDE, TENDRIL_DEEP, TENDRIL_THICK, TENDRIL_LONG);
 	static final float[][] STRANDS = WebSlender.grown(WebSlender.STRANDS, TENDRIL_WIDE, TENDRIL_DEEP, TENDRIL_THICK, TENDRIL_LONG);
+	/**
+	 * Its stance (Andy's still of it in the second film: crouched wide and low, the arms hanging, the claws near the ground):
+	 * bent {@code CROUCH} from the hips standing ({@code CROUCH_WORKING} with its tendrils at work, {@code CROUCH_MOVING} of
+	 * that on the move), the head craned back up {@code CROUCH_HEAD_UP} of it, the arms let hang {@code CROUCH_ARMS} forward,
+	 * the thighs raised {@code CROUCH_THIGHS} and spread {@code CROUCH_APART} (radians), sunk {@code CROUCH_DROP} pixels on its
+	 * knees, the elbows crooked {@code CROUCH_ELBOWS} more (WebSlender#hunch).
+	 */
+	static final float CROUCH = 0.35F, CROUCH_WORKING = 0.5F, CROUCH_MOVING = 0.6F, CROUCH_HEAD_UP = 0.9F, CROUCH_ARMS = 0.1F, CROUCH_THIGHS = 0.5F,
+		CROUCH_APART = 0.18F, CROUCH_DROP = 2.0F, CROUCH_ELBOWS = 0.3F;
+	static final WebSlender.Stance STANCE = new WebSlender.Stance(CROUCH, CROUCH_WORKING, CROUCH_MOVING, CROUCH_HEAD_UP, CROUCH_ARMS, CROUCH_THIGHS,
+		CROUCH_DROP, CROUCH_ELBOWS, CROUCH_APART);
 	/** The jaw: how far it hangs open at rest (radians), how much it breathes, and a snarl's gape. */
 	static final float JAW_REST = 0.22F, JAW_BREATH = 0.08F, JAW_SNARL = 0.5F;
 	/** How it moves: drooping this much more each piece, rippling this hard, swaying, and its tip fluttering in a flick. */

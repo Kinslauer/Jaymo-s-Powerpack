@@ -557,6 +557,7 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 		own.setData(WebStrainLook.STRAIN, state.getData(WebStrainLook.STRAIN));
 		// (only a humanoid it rides in the strain's body wears that body's tendrils and strands: WebHostBody)
 		own.setData(OWN_ROOTS, body ? null : Boolean.TRUE);
+		own.setData(WebSlender.AIR, state.getData(WebSlender.AIR));
 		poseStack.pushPose();
 		poseStack.translate(0.0F, rootY / 16.0F, rootZ / 16.0F);
 		poseStack.scale(size, size, size);
@@ -797,6 +798,8 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 			boolean onBody = tendrils.armor() && state.getData(OWN_ROOTS) == null;
 			boolean slender = onBody && WebSuitGrowth.slender(state);
 			float[][] rest = slender ? WebSlender.TENDRIL_REST : onBody ? WebHulk.TENDRIL_REST : null;
+			Float airborne = state.getData(WebSlender.AIR);
+			float pounce = airborne == null ? 0.0F : airborne;
 			for (int t = 0; t < ROOTS.length; t++) {
 				float[] r = ROOTS[t];
 				// (on the strain's own body each has its own rest, size and length: WebSlender.TENDRIL_REST, WebHulk.TENDRIL_REST)
@@ -919,7 +922,18 @@ final class WebTendrilLayer extends RenderLayer<AvatarRenderState, PlayerModel> 
 				sway = sway + jerk;
 				float restYaw = dragYaw + sway * 0.5F;
 				float restPitch = dragPitch + sway;
-				float restCurlX = Mth.lerp(drag, sl != null ? sl[5] : 0.28F, DRAG_CURL);
+				// rearing while they work: the rest lifted high and curled over like claws (a striker eases from this into its
+				// strike) (WebSlender.REAR_*)
+				boolean rearing = slender && (tendrils.strike() >= 0.0F || combo >= 0 || tendrils.held() != 0);
+				if (rearing) {
+					restPitch += WebSlender.REAR_LIFT;
+				}
+				if (slender && pounce > 0.0F) {
+					// pouncing: flared out wide behind it (WebSlender.FLARE_*)
+					restYaw *= 1.0F + WebSlender.FLARE_WIDE * pounce;
+					restPitch += WebSlender.FLARE_LIFT * pounce;
+				}
+				float restCurlX = Mth.lerp(drag, sl != null ? sl[5] : 0.28F, DRAG_CURL) + (rearing ? WebSlender.REAR_CURL : 0.0F);
 				float restCurlY = 0.0F;
 				float restLength = tLength;
 				if (fp && upper) {
