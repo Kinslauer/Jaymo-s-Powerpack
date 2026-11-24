@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:00). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:01). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -26,7 +26,6 @@ kanban-plugin: board
 - [ ] [[Inbox/refmods-10-outlying-buildings-camps|refmods-10-outlying-buildings-camps]] · for any · open
 - [ ] [[Inbox/refmods-11-tectonic-terrain|refmods-11-tectonic-terrain]] · for any · open
 - [ ] [[Inbox/refmods-13-body-anim-stations|refmods-13-body-anim-stations]] · for any · open
-- [ ] [[Inbox/refmods-15-provenance-coins|refmods-15-provenance-coins]] · for any · open
 - [ ] [[Inbox/refmods-16-titles-bloods-tensura|refmods-16-titles-bloods-tensura]] · for any · open
 - [ ] [[Inbox/structure-spawn-rate-wooden-hut|structure-spawn-rate-wooden-hut]] · for coordinator · open
 - [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · for any · open
@@ -52,6 +51,7 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-l-carts-check|vanilla-plus-l-carts-check]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-c-back-slot|vanilla-plus-c-back-slot]] · for 💻 Odysseus · open
+- [ ] [[Inbox/refmods-15-provenance-coins|refmods-15-provenance-coins]] · for any · open
 
 
 ## Being built
