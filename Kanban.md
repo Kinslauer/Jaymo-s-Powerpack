@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 16:50). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 17:03). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -44,6 +44,7 @@ kanban-plugin: board
 - [ ] [[Inbox/refmods-13-body-anim-stations|refmods-13-body-anim-stations]] · project-thread-ojz7uj · claimed
 - [ ] [[Inbox/refmods-16-titles-bloods-tensura|refmods-16-titles-bloods-tensura]] · project-thread-ojz7uj · claimed
 - [ ] [[Agents/project-thread-ojz7uj|project-thread-ojz7uj]] · 💻 Odysseus · running
+- [ ] [[Agents/village-mods-4|village-mods-4]] · 💻 Odysseus · running
 
 
 ## In review
