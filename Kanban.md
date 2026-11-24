@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 21:44). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 21:46). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -58,14 +58,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/alexs-caves-integration|alexs-caves-integration]]
-- [x] [[Inbox/Done/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]]
-- [x] [[Inbox/Done/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]]
-- [x] [[Inbox/Done/vanilla-plus-i-settlement-roads|vanilla-plus-i-settlement-roads]]
-- [x] [[Inbox/Done/vanilla-plus-h-advancement-tracker|vanilla-plus-h-advancement-tracker]]
-- [x] [[Inbox/Done/vanilla-plus-g-illager-invasion|vanilla-plus-g-illager-invasion]]
-- [x] [[Inbox/Done/vanilla-plus-f-delight-dishes|vanilla-plus-f-delight-dishes]]
-- [x] [[Inbox/Done/vanilla-plus-e-soul-reaping-spawners|vanilla-plus-e-soul-reaping-spawners]]
+- [x] [[Inbox/Done/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]]
+- [x] [[Inbox/Done/zfighter-gaps-8-raids|zfighter-gaps-8-raids]]
+- [x] [[Inbox/Done/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]]
+- [x] [[Inbox/Done/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]]
+- [x] [[Inbox/Done/zfighter-gaps-5-training|zfighter-gaps-5-training]]
+- [x] [[Inbox/Done/zfighter-gaps-4-forms|zfighter-gaps-4-forms]]
+- [x] [[Inbox/Done/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]]
+- [x] [[Inbox/Done/zfighter-gaps-2-power|zfighter-gaps-2-power]]
 
 
 %% kanban:settings
