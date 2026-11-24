@@ -971,3 +971,11 @@ Andy: "any feature that requires another PR to work as intended should be held a
 ### 2026-11-24: Vault sync pass
 - **Decided:** close arsenal-pulls-anything, from-the-shadows-port, village-mines-job-buildings, class-trees-plan and ping-t3code-11am (already on master or past); "finish here" for the nine partly done tasks (cloud thread builds them).
 - **Agent:** claude-cloud.
+
+### 2026-11-24: Realm banks (PR #2082)
+- **Decided:** deposits go into the realm's treasury ("yes if its spent they cant give it to you, or anyone. may help speed up the decline if that happens"); the rates stand (2% a week, 10% on loans, 12% letter fee abroad); on final death a balance "goes to your next of kin, or is absorbed by the bank into their coffers" (built: debts first, then the nearest player in the MCA family tree); counting-house lore approved.
+- **Agent:** claude-cloud.
+
+### 2026-11-24: Crippled is not downed
+- **Decided:** "downed and crippled should be two different things, a suffienct blow, to the legs forces you into a ragdoll then prone, but you can roll to recover. downed is what happens after losing your hearts".
+- **Agent:** claude-cloud.
