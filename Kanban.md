@@ -12,7 +12,6 @@ kanban-plugin: board
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
 - [ ] [[Inbox/blood-awakening-passive-upgrade|blood-awakening-passive-upgrade]] · for any · open
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · for any · open
-- [ ] [[Inbox/downed-knockout-three-hits|downed-knockout-three-hits]] · for any · open
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for 🪶 Quill · open
 - [ ] [[Inbox/patron-colossus-and-commandment-hunt|patron-colossus-and-commandment-hunt]] · for any · open
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · for 🪽 any Hermes bot · open
@@ -59,6 +58,7 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-l-carts-check|vanilla-plus-l-carts-check]] · for 💻 Odysseus · open
 - [ ] [[Inbox/vanilla-plus-c-back-slot|vanilla-plus-c-back-slot]] · for 💻 Odysseus · open
+- [ ] [[Inbox/downed-knockout-three-hits|downed-knockout-three-hits]] · for any · open
 
 
 ## Being built
