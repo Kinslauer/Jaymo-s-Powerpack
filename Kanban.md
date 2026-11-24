@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-23 22:21). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-23 22:28). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -34,6 +34,7 @@ kanban-plugin: board
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for 🪶 Quill · open
 - [ ] [[Inbox/realm-banks-finish|realm-banks-finish]] · for any · open
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
+- [ ] [[Inbox/patron-colossus-and-commandment-hunt|patron-colossus-and-commandment-hunt]] · for any · open
 
 
 ## Being built
