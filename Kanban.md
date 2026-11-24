@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 16:53). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 16:54). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -49,7 +49,6 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for any · open
 - [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · for any · open
 - [ ] [[Inbox/scouter-bio-scanner-tracking|scouter-bio-scanner-tracking]] · for any · open
-- [ ] [[Inbox/tensura-neo-otherworld-picklist|tensura-neo-otherworld-picklist]] · for any · open
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for any · open
 
 
@@ -70,6 +69,7 @@ kanban-plugin: board
 - [ ] [[Inbox/class-trees-plan|class-trees-plan]] · for 💻 Odysseus · blocked
 - [ ] [[Inbox/wither-model|wither-model]] · 🍇 Bacchus · blocked
 - [ ] [[Inbox/reference-mods-picklist-2026-11-24|reference-mods-picklist-2026-11-24]] · cloud thread Build Reference Mods pick list · #none · sent
+- [ ] [[Inbox/tensura-neo-otherworld-picklist|tensura-neo-otherworld-picklist]] · cloud thread Build Reference Mods pick list · #none · sent
 
 
 ## Done
