@@ -1,10 +1,10 @@
 ---
-status: open
+status: in-review
 for: any
 from: Andy (Claude chat, 2026-11-23)
 asked: 2026-11-23
-claimed_by: 
-pr: 
+claimed_by: claude-patron-colossus
+pr: 2103
 ---
 
 # Patron colossus: a giant figure as a class attack, and the hunt for commandment breakers
