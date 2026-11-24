@@ -96,6 +96,8 @@ public final class Hides {
 			new BlockEntityType<>(DryingRackEntity::new, java.util.Set.of(DRYING_RACK)));
 
 		Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, JaymosKitchen.id("blade_crafting"), BladeRecipe.SERIALIZER);
+		// sent to players so JEI shows it on a server (JEI only asks for minecraft's own)
+		net.fabricmc.fabric.api.recipe.v1.sync.RecipeSynchronization.synchronizeRecipeSerializer(BladeRecipe.SERIALIZER);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			for (Item item : List.of(HIDE, RAW_HIDE, SALTED_HIDE, DRIED_HIDE, WET_TANNED_HIDE, SALT, RESIN)) {
