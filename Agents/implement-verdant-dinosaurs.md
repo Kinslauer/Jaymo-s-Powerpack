@@ -1,9 +1,9 @@
 ---
-status: running
+status: in-review
 task: Verdant dinosaurs (from the Dino-26.3 Amber Age jar), spawned by codex-reference-dinos-venom
 branch: t3/implement-verdant-dinosaurs
 with: 
-pr: 
+pr: 2099
 mods: powers
 versions: 
 started: 2026-11-24
@@ -36,6 +36,6 @@ Andy confirmed the jar is his own mod made with Claude and GPT ("yes they were m
 - Source ported: all 9 dinosaurs + dodo, rigs, mechanics (taming, torpor, darts, saddles, riding, levels, packs, hunting, fossil skeletons, skulls)
 - Spawn restricted to eight Verdant biomes (biome keys, no tag leakage)
 - Client/common source split: client-only classes under `src/client/java/com/jaymospowers/client/dino/`, nothing in `src/main` referencing client classes
-- Provenance recorded in `src/main/resources/assets/jaymospowers/dino/PROVENANCE.md`
+- Provenance recorded in `src/main/resources/licenses/PROVENANCE_amber_age_dinosaurs`
 - Change note: `changes/powers/implement-verdant-dinosaurs.md`
-- Work continuing on native Fabric integration and spawn validation
+- PR #2099 opened after rebase onto current origin/master; CI checks are running
