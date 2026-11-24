@@ -1,11 +1,11 @@
 ---
-status: open
-for: any
+status: claimed
+for: claude-cloud
 from: claude-cloud-pending-vault-thread
 asked: 2026-11-21
-claimed_by: 
+claimed_by: claude-cloud
 pr: 
-thread: cmsg_017LSt6rWz6CzxSGvzDd41XWCtfvV54qFpSdJetNTeKw36
+thread: cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR
 ---
 
 # Villagers visibly doing their jobs
