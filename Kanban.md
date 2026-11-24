@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:04). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 18:10). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -58,7 +58,6 @@ kanban-plugin: board
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · changeling-voice-mimic · claimed
 - [ ] [[Inbox/structures-2-placement-reasons|structures-2-placement-reasons]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · ☁️ Cloud · claimed
-- [ ] [[Inbox/realm-banks-finish|realm-banks-finish]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · ☁️ Cloud · claimed
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · ☁️ Cloud · #research · claimed
 - [ ] [[Inbox/refmods-12-fishing|refmods-12-fishing]] · ☁️ Cloud · claimed
@@ -69,6 +68,7 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Inbox/downed-knockout-three-hits|downed-knockout-three-hits]] · ☁️ Cloud · #2079 · in-review
+- [ ] [[Inbox/realm-banks-finish|realm-banks-finish]] · ☁️ Cloud · #2082 · in-review
 
 
 ## Needs Andy
