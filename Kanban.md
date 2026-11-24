@@ -42,7 +42,7 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · ☁️ Cloud · #research · claimed
-- [ ] [[Inbox/alexs-caves-integration|alexs-caves-integration]] · alexs-caves-worldgen · claimed
+- [ ] [[Inbox/alexs-caves-integration|alexs-caves-integration]] · alexs-caves-worldgen · #2105 · claimed
 
 
 ## In review
@@ -58,7 +58,6 @@ kanban-plugin: board
 - [ ] [[Inbox/vanilla-plus-i-settlement-roads|vanilla-plus-i-settlement-roads]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
 - [ ] [[Inbox/vanilla-plus-j-progressive-bosses|vanilla-plus-j-progressive-bosses]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
 - [ ] [[Inbox/vanilla-plus-k-catloaf-secret-switches|vanilla-plus-k-catloaf-secret-switches]] · ☁️ Cloud · #https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2102 · in-review
-- [ ] [[Agents/alexs-caves-worldgen|alexs-caves-worldgen]] · 💻 Odysseus · #2105 · in-review
 
 
 ## Needs Andy
