@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 19:40). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 20:27). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -6,6 +6,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 ## Waiting on you
 
 **Questions for you:**
+- [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · 2026-11-24 20:01 Rewrite done for Andy's review: Live/Lore-rewritten.md (Lore.md untouched; fresh copy in Lore-before-quill-rewrite.md). A careful line edit, a…
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 - [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 - [[Inbox/wither-model|wither-model]] · 2026-11-21 10:18 Andy hold instruction (2026-11-19 23:40 ET): leave the model as-is (v3 previews); do not pick up or raise this again until Andy hands it on. N…
@@ -17,18 +18,26 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-31 waiting for a bot, 18 being built, 0 in review: see [[Kanban]].
+42 waiting for a bot, 1 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2097 Where things came from, stolen goods, heirlooms, collectors' prices and a strongbox (Reference Mods patch 15) (Kingdoms, 2026-11-24)
 - [ ] #2095 sit from the knee smoothly, sit still to ride an earthboard (Powers, 2026-11-24)
+- [ ] #2094 Sky, light and air - scorch, lava crust, leaves on water, coloured light (Reference Mods patch 14) (Powers, Kingdoms, 2026-11-24)
 - [ ] #2093 eaters of the downed bend down over them (Powers, Kingdoms, Kitchen, 2026-11-24)
+- [ ] #2092 Fishing extras: don't stand on the hook, solid or light hooks, leaps, turning a run, clean landings, a line that hangs (Powers, 2026-11-24)
 - [ ] #2091 Locked-on swings hit small, quick foes (baby zombies) (Powers, Kingdoms, 2026-11-24)
+- [ ] #2090 Villagers seen at their jobs: tools in hand, the smith at the forge, the cook at the stove, the butcher at the hook (Kingdoms, Kitchen, 2026-11-24)
 - [ ] #2089 tree felling - cut through the trunk, carved stumps, blasts bring buildings down (Kingdoms, 2026-11-24)
 - [ ] #2088 NPCs hold two-handed weapons in both hands (Kingdoms, 2026-11-24)
+- [ ] #2087 Bandit camps by the trade roads (Kingdoms, 2026-11-24)
+- [ ] #2086 Blasts blow limbs off the downed (Powers, 2026-11-24)
+- [ ] #2085 Structures need a reason: mines by buyers, stables by towns, watchtowers on borders, ruins with heirs (Kingdoms, 2026-11-24)
 - [ ] #2084 Red (unparryable) mob blows rarer and slower (Powers, Kingdoms, 2026-11-24)
+- [ ] #2083 Felled by a leg blow: ragdoll, prone, roll to get up (Powers, 2026-11-24)
 - [ ] #2082 Realm banks: deposits, interest, loans and letters of credit at the counting house (Kingdoms, 2026-11-24)
 - [ ] #2079 Downed: a blow knocks you out, red blows kill, no tossing, fire kills after 6 s (Powers, 2026-11-24)
 - [ ] #2078 gear talk - bauble themes, knights and colours, two-tag lines, changes and gossip (Kingdoms, 2026-11-24)
@@ -75,19 +84,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2033 Humanoids see in a cone and hear at their sides; busy mobs notice less (Kingdoms, Kitchen, 2026-11-23)
 - [ ] #2032 A dead player's baubles and web shooters stay on their body (Powers, Kingdoms, Kitchen, 2026-11-23)
 - [ ] #2031 Thrown rocks can crit: faster, and triple damage (Powers, 2026-11-23)
-- [ ] #2030 context keys by the crosshair (Powers, Kingdoms, 2026-11-23)
-- [ ] #2029 Drop attacks: land on a foe from 4+ blocks and they're down (Powers, Kingdoms, 2026-11-23)
-- [ ] #2028 Safe starts: no enemy to mobs until you move; H goes to the page a hint named (Powers, Kingdoms, 2026-11-23)
-- [ ] #2023 From the Shadows: the Devil Splitter, Thirst for Blood, the crystallized dagger and the Horn of Apocalypse (Kingdoms, 2026-11-23)
-- [ ] #2022 Realms never wear the same armour: each keeps its own livery (Kingdoms, 2026-11-23)
-- [ ] #2021 Wounds shown like potions; bandages wrap several limbs at once; splints by two, from plant string too (Powers, 2026-11-23)
-- [ ] #2020 From the Shadows: diabolium, the crust armour and the Nehemoth's blood (Kingdoms, 2026-11-23)
-- [ ] #2019 From the Shadows: effects, potions and enchantments (Kingdoms, 2026-11-23)
-- …and 482 older ones.
+- …and 490 older ones.
 
 ## Health
 
-13 problems in the notes: [[Health]].
+11 problems in the notes: [[Health]].
 
 ## Last week
 
