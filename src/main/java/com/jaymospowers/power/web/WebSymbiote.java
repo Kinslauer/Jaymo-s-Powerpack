@@ -2739,7 +2739,7 @@ public final class WebSymbiote {
 		live.givenUp.add(target.getId());
 		LivingEntity next = live.protecting ? threat(player) : live.redHunt ? WebRedHunt.nearest(player.level(), player, live.givenUp)
 			: prey(player, live.rampage, live.givenUp);
-		if (next == null || next == target) {
+		if (next == null || live.givenUp.contains(next.getId())) {
 			endTakeover(player, live);
 		} else {
 			retarget(player, live, next);
