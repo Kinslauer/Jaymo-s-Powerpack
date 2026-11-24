@@ -17046,3 +17046,9 @@ Andy: "can i have you work on npc pathing? they get stuck in water or on buildin
   answer: take it with you (it follows you), point it the way (it goes on alone) or not now. Talk to it again on the
   way to send it ahead alone. Bring it into any town and it stays there, fond of you; leave it far behind for a couple
   of minutes and it sets off alone.
+
+## 0.12.51 (2026-11-24): spiders leave you be by day (#2118)
+
+- **Spiders in daylight**: tarantulas hunted players and villagers day and night; now, like the game's spiders, they only hunt in the dark, fight back when hit, and in daylight may lose interest in anyone who didn't hurt them (`Tarantula`).
+- **Woodland flyers**: a flyer perched in the canopy only drops on players below it in the dark (`SpiderKinds#fly`).
+- Built; not played.

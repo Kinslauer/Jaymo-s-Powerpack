@@ -7861,3 +7861,8 @@ Andy: "baby zombies are unfightable" (clip: an axe locked onto baby zombies' tor
 - **Learned, Blood Awakening upgrades them** (`TreeLocks.awakened` / `TreeLocks.wait`, read from Kingdoms): Thunderclap's and Sunflare's cooldowns halve, Kindle heats to full in half the time, the stretching arm is ready again in half the time, and a Frost-born's beam bites twice as often (a Z Fighter's keeps its own pace).
 - **Push-button limb regrowth for an awakened Verdant**: the heritage key grows one lost limb back now with the fleshy crunch (`ZFighterLineage.regrowNow`), every 2 minutes (`REGROW_KEY_EVERY`) for 3 food (`REGROW_KEY_FOOD`), not while hungry; on top of the slow regrowth every 30 s. Not on the dead.
 - Built; not played.
+
+## 0.27.13 (2026-11-24): spiders in leaves leave you be by day (#2118)
+
+- **Leaf spiders**: a spider hiding in leaves no longer pounces on a passing player in daylight, only in the dark; hit it and it still fights back (`LeafSpiders`).
+- Built; not played.
