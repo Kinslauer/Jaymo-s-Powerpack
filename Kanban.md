@@ -59,7 +59,6 @@ kanban-plugin: board
 - [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
 - [ ] [[Inbox/villagers-visible-jobs|villagers-visible-jobs]] · for any · open
-- [ ] [[Inbox/ping-t3code-11am|ping-t3code-11am]] · for 🪽 any Hermes bot · open
 
 
 ## Being built
