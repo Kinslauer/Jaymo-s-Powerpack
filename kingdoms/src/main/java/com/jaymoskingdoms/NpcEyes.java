@@ -407,7 +407,7 @@ public final class NpcEyes {
 	 * fighter, or a villager with a weapon in hand; never a child, nor a farmer or a townsman with nothing to fight with. Monsters and
 	 * the like are all fighters.
 	 */
-	private static boolean fighter(Mob f) {
+	static boolean fighter(Mob f) {
 		if (f.isBaby()) {
 			return false;
 		}

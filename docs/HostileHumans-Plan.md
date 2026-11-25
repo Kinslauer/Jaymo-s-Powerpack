@@ -146,7 +146,8 @@ Main classes: `WeaponSense`, `Boomerangs`, `BreakOff`, `BeltPouch`, `ShieldSense
 Where the build differs from the rows above, or stops short:
 - `bm-heal`: Folk had no pack, so fighting Folk carry a 3-slot `BeltPouch`, filled the first time it's looked in.
   With nothing to mend with, a fighter falls back once a fight, then fights on hurt (the rows didn't say).
-- `PackUse`'s older band "draught" (40% from nothing, once a day) still runs; Andy is deciding.
+- `PackUse`'s older band "draught" (40% from nothing, once a day) is now a real healing potion each band fighter
+  carries, restocked once a day out of a fight (Andy's pick, 2026-11-25).
 - `ws-bands`: guards who carry a few javelins hold the javelin band only while they have throws left.
 - `sh-busy`: vanilla and MCA crossbowmen charge with the shield down (one item in use at a time) and wait loaded
   behind it; Folk crossbowmen reload fully behind it.
