@@ -144,14 +144,29 @@ public enum BodyPlan {
 		}
 		BodyPlan plan = CACHE.get(entity.getType());
 		if (plan == null) {
-			plan = pick(entity);
+			plan = pick(entity.getType(), entity.getBbWidth(), entity.getBbHeight());
 			CACHE.put(entity.getType(), plan);
 		}
 		return plan;
 	}
 
-	private static BodyPlan pick(LivingEntity entity) {
-		var type = entity.getType().builtInRegistryHolder();
+	/** Forgets the plans picked so far (an op's override changed). */
+	public static void forget() {
+		CACHE.clear();
+	}
+
+	/** The plan a kind of creature is read as, from its default size, as {@link #of} would for one of them. */
+	public static BodyPlan read(EntityType<?> type) {
+		return pick(type, type.getWidth(), type.getHeight());
+	}
+
+	/** The plan an op's override gives {@code type}, else one picked from its tags and its size. */
+	private static BodyPlan pick(EntityType<?> kind, float width, float height) {
+		BodyPlan set = com.jaymospowers.core.reader.GoreOverrides.body(kind);
+		if (set != null) {
+			return set;
+		}
+		var type = kind.builtInRegistryHolder();
 		if (type.is(HUMANOID_TAG)) {
 			return HUMANOID;
 		}
@@ -167,7 +182,7 @@ public enum BodyPlan {
 		if (type.is(SIMPLE_TAG)) {
 			return SIMPLE;
 		}
-		return !wild(entity.getType().getCategory()) && entity.getBbHeight() > entity.getBbWidth() * TALL ? HUMANOID : QUADRUPED;
+		return !wild(kind.getCategory()) && height > width * TALL ? HUMANOID : QUADRUPED;
 	}
 
 	/**

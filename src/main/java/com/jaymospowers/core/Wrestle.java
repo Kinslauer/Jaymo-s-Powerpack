@@ -124,7 +124,7 @@ public final class Wrestle {
 
 	/** The brawn a takedown of {@code mob} wants: {@link #BASE_BRAWN}, and one more for each time its bulk is a man's. */
 	public static int need(Mob mob) {
-		double ratio = (double) mob.getBbWidth() * mob.getBbWidth() * mob.getBbHeight() / BlastGore.MAN_BULK;
+		double ratio = BlastGore.bulk(mob) / BlastGore.MAN_BULK;
 		return BASE_BRAWN + Math.max(0, (int) Math.ceil(ratio) - 1);
 	}
 

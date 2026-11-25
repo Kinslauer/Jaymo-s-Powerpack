@@ -155,6 +155,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.ember.RunningHotClient.init();
 		com.jaymospowers.client.power.heritage.HeritageMovesClient.init();
 		com.jaymospowers.client.tinkering.TinkeringClient.init();
+		// (Visceral track 8) the ops-only gore reader
+		com.jaymospowers.client.reader.GoreReaderScreen.register();
 		// mixed slabs: the two slabs of one block, drawn by their block entity
 		net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(com.jaymospowers.buildblocks.MixedSlabs.ENTITY,
 			com.jaymospowers.client.buildblocks.MixedSlabRenderer::new);

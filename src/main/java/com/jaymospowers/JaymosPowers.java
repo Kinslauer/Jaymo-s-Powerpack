@@ -31,6 +31,8 @@ public class JaymosPowers implements ModInitializer {
 		// (Andy, 2026-11-20) a tap of use on a body opens what can be done to it
 		com.jaymospowers.core.BodyMenu.init();
 		com.jaymospowers.core.Perch.init();
+		// (Visceral track 8) the ops-only reader of how mobs and weapons are read, and its overrides file
+		com.jaymospowers.core.reader.GoreReader.init();
 		com.jaymospowers.core.Kneel.init();
 		com.jaymospowers.core.Crawl.init();
 		// (0.18.57) Sneak + the wheel steps through the stances
