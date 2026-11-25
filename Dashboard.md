@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 15:54). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 16:09). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -20,7 +20,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-14 waiting for a bot, 4 being built, 0 in review: see [[Kanban]].
+12 waiting for a bot, 6 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
