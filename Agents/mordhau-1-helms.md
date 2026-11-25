@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: mordhau-1-helms
 branch: claude/mordhau-1-helms
 with: claude (PC worker, Opus 5.5)
@@ -50,3 +50,4 @@ for different realms.
 
 ## Done
 What a player will see, and what wasn't tested.
+- 2026-11-24 21:29 No sign of work for 30 min: marked stalled (whoever ran it stopped).

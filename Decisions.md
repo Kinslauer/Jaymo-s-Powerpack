@@ -1059,3 +1059,5 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-24, Andy (Gravity magnetism, PR #2125): no Magnetic Forge screen for Gravity ("no" to it as a follow-up).
 - 2026-11-25, Andy (Gravity magnetism, PR #2125): Tear Loose works on players too ("yes"); a player's weapon is flung away from them.
 - 2026-11-25, Andy (Gravity magnetism, PR #2125): "a max mastery gravity user should be able to pull it in hand everytime": at the last Mastery rank, Tear Loose puts the weapon straight into your hand.
+- 2026-11-25 (Andy): "approve": the "Iron answers first" lore placement (Gravity feels metal as the heaviest weight) is canon.
+- 2026-11-25 (Andy): "merge": PR #2128 (Gravity metal fixes) merged.
