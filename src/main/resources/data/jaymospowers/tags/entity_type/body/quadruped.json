@@ -122,6 +122,8 @@
 		},
 		{"id": "jaymoskingdoms:grizzly", "required": false},
 		{"id": "bearminimum:brown_bear", "required": false},
-		{"id": "bearminimum:black_bear", "required": false}
+		{"id": "bearminimum:black_bear", "required": false},
+		{"id": "jaymoskingdoms:deep_lancer", "required": false},
+		{"id": "jaymoskingdoms:deep_behemoth", "required": false}
 	]
 }

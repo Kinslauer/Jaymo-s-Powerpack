@@ -98,6 +98,11 @@ public class FutureMech extends Monster implements GeoEntity {
 		return getType() == FutureMachines.ANDROID_MECH;
 	}
 
+	/** Which skin it wears (AndroidMechModel's builds): one of the four by its id, so it keeps it; a rig has its own. */
+	public int build() {
+		return Math.floorMod(getUUID().hashCode(), 4);
+	}
+
 	public static AttributeSupplier.Builder createAttributes() {
 		return Monster.createMonsterAttributes()
 			.add(Attributes.MAX_HEALTH, HEALTH)

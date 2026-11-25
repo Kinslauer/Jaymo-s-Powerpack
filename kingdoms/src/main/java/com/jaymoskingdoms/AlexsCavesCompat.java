@@ -44,6 +44,7 @@ public final class AlexsCavesCompat {
 		BurningBeast.register();
 		ToxicCaves.register();
 		ChasmTideborn.register();
+		com.jaymoskingdoms.deep.Deeps.registerRising();
 		RubberNewborns.register();
 	}
 

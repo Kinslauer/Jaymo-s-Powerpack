@@ -10,6 +10,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
@@ -29,6 +31,9 @@ public final class Giants {
 	 */
 	public static final List<Consumer<LivingEntity>> LEGS_GONE = new ArrayList<>();
 
+	/** A giant with both arms at zero hits like a child for this long (ticks) and loses its footing on a fight (weakness level). */
+	static final int DISARMED_TICKS = 1200, DISARMED_LEVEL = 3;
+
 	private Giants() {
 	}
 
@@ -39,6 +44,7 @@ public final class Giants {
 
 	/** After a hit: if it took the last leg to zero, it's crippled. */
 	static void afterHit(LivingEntity victim, BodyPlan plan, float[] was, float[] now) {
+		disarm(victim, plan, was, now);
 		boolean any = false, wasStanding = false;
 		for (int i = 0; i < plan.size(); i++) {
 			BodyPart part = plan.part(i);
@@ -60,6 +66,29 @@ public final class Giants {
 		}
 		for (Consumer<LivingEntity> listener : LEGS_GONE) {
 			listener.accept(victim);
+		}
+	}
+
+	/** A giant whose arms are all at zero can't swing: it is weakened for a while and loses whom it was fighting. */
+	private static void disarm(LivingEntity victim, BodyPlan plan, float[] was, float[] now) {
+		boolean any = false, wasArmed = false;
+		for (int i = 0; i < plan.size(); i++) {
+			BodyPart part = plan.part(i);
+			if (part != BodyPart.LEFT_ARM && part != BodyPart.RIGHT_ARM) {
+				continue;
+			}
+			any = true;
+			if (now[i] > Wounds.EPS) {
+				return;
+			}
+			wasArmed |= was[i] > Wounds.EPS;
+		}
+		if (!any || !wasArmed || !victim.isAlive() || !giant(victim)) {
+			return;
+		}
+		victim.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, DISARMED_TICKS, DISARMED_LEVEL));
+		if (victim instanceof net.minecraft.world.entity.Mob mob) {
+			mob.setTarget(null);
 		}
 	}
 }

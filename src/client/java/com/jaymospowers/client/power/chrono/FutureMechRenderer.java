@@ -26,11 +26,17 @@ public class FutureMechRenderer extends GeoEntityRenderer<FutureMech, LivingEnti
 	static final float WALK_ROLL = 2.5F;
 	/** How much bigger than the model each is drawn: the war mech (about 4 blocks), the android mech (about 3). */
 	static final float WAR_SCALE = 1.3F, ANDROID_SCALE = 1.0F;
+	/** The giant rigs (FutureRig), about eight blocks tall. */
+	static final float RIG_SCALE = 2.5F;
 
 	private final float scale;
 
 	public static FutureMechRenderer war(EntityRendererProvider.Context context) {
 		return new FutureMechRenderer(context, WAR_SCALE);
+	}
+
+	public static FutureMechRenderer rig(EntityRendererProvider.Context context) {
+		return new FutureMechRenderer(context, RIG_SCALE);
 	}
 
 	public static FutureMechRenderer android(EntityRendererProvider.Context context) {
@@ -47,7 +53,7 @@ public class FutureMechRenderer extends GeoEntityRenderer<FutureMech, LivingEnti
 	@Override
 	public void addRenderData(FutureMech mech, Void related, LivingEntityRenderState state, float partialTick) {
 		super.addRenderData(mech, related, state, partialTick);
-		state.addGeckolibData(AndroidMechModel.BUILD, Math.floorMod(mech.getUUID().hashCode(), AndroidMechModel.BUILDS.length));
+		state.addGeckolibData(AndroidMechModel.BUILD, mech.build());
 		state.addGeckolibData(AndroidMechModel.AIMING, mech.aiming());
 		state.addGeckolibData(AndroidMechModel.SMASHING, mech.getAttackAnimationTick() > 0);
 	}
@@ -71,7 +77,7 @@ public class FutureMechRenderer extends GeoEntityRenderer<FutureMech, LivingEnti
 	public void adjustModelBonesForRender(RenderPassInfo<LivingEntityRenderState> info, BoneSnapshots snapshots) {
 		super.adjustModelBonesForRender(info, snapshots);
 		int build = info.getOrDefaultGeckolibData(AndroidMechModel.BUILD, 0);
-		int bit = 1 << build;
+		int bit = 1 << AndroidMechModel.partsOf(build);
 		for (Map.Entry<String, Integer> part : AndroidMechModel.PART_BUILDS.entrySet()) {
 			snapshots.ifPresent(part.getKey(), bone -> bone.skipRender((part.getValue() & bit) == 0));
 		}

@@ -60,6 +60,8 @@ public final class Corpses {
 	public static final TagKey<EntityType<?>> COMES_APART = tag("comes_apart");
 	/** Animals too big for one butcher block: they need a 2x2 table, and are heavier to carry. */
 	public static final TagKey<EntityType<?>> BIG_CARCASSES = tag("big_carcasses");
+	/** Giants and sea beasts: their big bones are left when they are cut up (see {@code CorpseEntity.GIANT_BONES}). */
+	public static final TagKey<EntityType<?>> GIANT_CARCASSES = tag("giant_carcasses");
 	/**
 	 * Bodies too heavy to lift by hand (iron golems): no carrying, no pocketing, no butchering. A power can still
 	 * take one ({@link CorpseEntity#takeBy}: Jaymo's Powers lets only Gravity do it).

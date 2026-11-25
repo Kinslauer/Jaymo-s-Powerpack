@@ -1,0 +1,11 @@
+{
+  "entity.jaymoskingdoms.deep_lancer": "Deep Lancer",
+  "entity.jaymoskingdoms.deep_gloomwing": "Deep Gloomwing",
+  "entity.jaymoskingdoms.deep_behemoth": "Deep Behemoth",
+  "item.jaymoskingdoms.deep_lancer_spawn_egg": "Deep Lancer Spawn Egg",
+  "item.jaymoskingdoms.deep_gloomwing_spawn_egg": "Deep Gloomwing Spawn Egg",
+  "item.jaymoskingdoms.deep_behemoth_spawn_egg": "Deep Behemoth Spawn Egg",
+  "message.jaymoskingdoms.deep.rising": "The black water of the chasm shudders. Something vast is coming up.",
+  "message.jaymoskingdoms.deep.fed": "The %s takes the offering and settles.",
+  "message.jaymoskingdoms.bell.beast": "The bell of %s tolls by itself: something huge has come onto the land."
+}
