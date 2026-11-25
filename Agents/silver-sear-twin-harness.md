@@ -3,7 +3,7 @@ status: in-review
 task: silver blades sear monsters + witcher-style twin back sheath
 branch: claude/project-thread-p6j7ux
 with: cloud thread "Make silver blades sear monsters"
-pr: 
+pr: 2154
 mods: powers
 versions: 
 started: 2026-11-25
