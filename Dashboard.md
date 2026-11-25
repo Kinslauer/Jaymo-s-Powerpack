@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 19:53). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 20:05). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -19,13 +19,17 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 ## On the board
 
-19 waiting for a bot, 2 being built, 1 in review: see [[Kanban]].
+17 waiting for a bot, 3 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2127 three primitive hide sets, each with a dark make (Powers, Kingdoms, 2026-11-25)
 - [ ] #2126 weighty movement - the walk carries weight (Powers, 2026-11-25)
+- [ ] #2125 Gravity: iron answers first (the X-Men mod's Magnetism, worked in) (Powers, 2026-11-25)
+- [ ] #2122 Trade hats (Powers, Kingdoms, 2026-11-25)
+- [ ] #2110 Village mods patch 6: small structures (cairns, tree sites, mazes, wayside inns, cave gardens, plan plot outline) (Kingdoms, 2026-11-25)
 - [ ] #2121 Takeover pathing fixes: long tunnels, safe shafts, no stray weapon arm (Powers, 2026-11-24)
 - [ ] #2120 Scouter: hold to scan, full readings, marks and tracking (Powers, Kingdoms, 2026-11-24)
 - [ ] #2119 players' limbs twice as tough (Powers, Kitchen, 2026-11-24)
@@ -81,11 +85,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2058 bandages give a short regen; rags fester less (Powers, 2026-11-24)
 - [ ] #2057 The thermometer burns when heat is a danger, and freezes and shakes in the cold (Kitchen, 2026-11-24)
 - [ ] #2056 Three blows on the ground and you're finished (Powers, 2026-11-24)
-- [ ] #2055 A small creature takes one smash from a club (Powers, 2026-11-24)
-- [ ] #2054 Says what hurt you when nobody did (Powers, 2026-11-24)
-- [ ] #2053 Guards only see a drawn blade in front of them; sneak right up behind anyone (Kingdoms, 2026-11-24)
-- [ ] #2052 A small creature is finished with one quick slice (Powers, 2026-11-23)
-- …and 511 older ones.
+- …and 515 older ones.
 
 ## Health
 
