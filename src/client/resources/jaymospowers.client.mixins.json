@@ -95,6 +95,7 @@
 		"LimboSelfHiddenMixin",
 		"LimbKeysMixin",
 		"CarryCameraMixin",
+		"BodyWeightCameraMixin",
 		"ProneCameraMixin",
 		"MountClimbCameraMixin",
 		"MountClimbInputMixin",
