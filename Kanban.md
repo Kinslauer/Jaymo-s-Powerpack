@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 09:35). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 09:36). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -32,11 +32,11 @@ kanban-plugin: board
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Inbox/mordhau-1-helms|mordhau-1-helms]] · for 💻 Odysseus · #2160 · changes · fixing review notes
-- [ ] [[Agents/codex-written-start-example|codex-written-start-example]] · 💻 Odysseus · #2177 · running
 
 
 ## In review
 
+- [ ] [[Agents/codex-written-start-example|codex-written-start-example]] · 💻 Odysseus · #2177 · in-review
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
 
 
