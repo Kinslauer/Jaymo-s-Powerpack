@@ -21,7 +21,7 @@ final class RagdollBudget {
 	private static final double PER_SECOND = 1.0 / 20.0;
 
 	private static final Set<CorpseRagdoll> AWAKE = Collections.newSetFromMap(new WeakHashMap<>());
-	private static long counted = Long.MIN_VALUE;
+	private static final java.util.Map<ServerLevel, Long> COUNTED = new WeakHashMap<>();
 
 	private RagdollBudget() {
 	}
@@ -35,13 +35,14 @@ final class RagdollBudget {
 		}
 	}
 
-	/** Counts the moving ragdolls in {@code level} (once a count a tick, whoever asks) and settles the excess. */
+	/** Counts the moving ragdolls in {@code level} (once a count a tick for each level, whoever asks) and settles the excess. */
 	static void enforce(ServerLevel level) {
 		long now = level.getGameTime();
-		if (now % EVERY != 0 || now == counted) {
+		Long last = COUNTED.get(level);
+		if (now % EVERY != 0 || last != null && last == now) {
 			return;
 		}
-		counted = now;
+		COUNTED.put(level, now);
 		List<CorpseRagdoll> moving = new ArrayList<>();
 		for (CorpseRagdoll ragdoll : AWAKE) {
 			if (ragdoll.settleable(level)) {
@@ -52,7 +53,11 @@ final class RagdollBudget {
 		if (excess <= 0) {
 			return;
 		}
-		moving.sort((a, b) -> Double.compare(rank(level, b), rank(level, a)));
+		java.util.Map<CorpseRagdoll, Double> ranks = new java.util.IdentityHashMap<>();
+		for (CorpseRagdoll ragdoll : moving) {
+			ranks.put(ragdoll, rank(level, ragdoll));
+		}
+		moving.sort((a, b) -> Double.compare(ranks.get(b), ranks.get(a)));
 		for (int i = 0; i < excess; i++) {
 			moving.get(i).settle();
 		}

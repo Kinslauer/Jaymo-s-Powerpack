@@ -141,7 +141,7 @@ public final class Hanging {
 
 	/** {@code player} hangs {@code corpse} (carried or dragged) on the hook at {@code hook}. */
 	public static boolean hang(CorpseEntity corpse, Player player, BlockPos hook) {
-		if (!hangable(corpse) && !hangsAsPerson(corpse)) {
+		if (corpse.strung() != null || !hangable(corpse) && !hangsAsPerson(corpse)) {
 			player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.wont_hang"));
 			return false;
 		}

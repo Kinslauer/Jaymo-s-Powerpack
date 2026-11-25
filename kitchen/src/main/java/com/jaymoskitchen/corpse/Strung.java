@@ -59,7 +59,7 @@ public final class Strung {
 
 	/** Whether {@code corpse} is a body that can be hung up: a loose body small enough to lift. */
 	static boolean hangable(CorpseEntity corpse) {
-		return !corpse.isFish() && !corpse.isMachine() && !corpse.isHeavy() && !corpse.tooBigToLift() && corpse.carrier() == null;
+		return !corpse.isFish() && !corpse.isMachine() && !corpse.isHeavy() && !corpse.tooBigToLift() && corpse.carrier() == null && !corpse.onHook();
 	}
 
 	/** A lead used on {@code corpse}: it's tied, for the next fence post; or, if it's hung already, taken down. Null if neither. */
