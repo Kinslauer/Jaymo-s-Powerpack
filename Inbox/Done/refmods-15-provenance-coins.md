@@ -1,11 +1,11 @@
 ---
-status: done
+status: open
 for: claude-cloud
 from: coordinator
 asked: 2026-11-24
 thread: cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR
-claimed_by: claude-cloud
-pr: 2097
+claimed_by: 
+pr: 
 suggested_owns: []
 ---
 # Reference Mods Patch 15: Provenance, coins and goods
@@ -29,6 +29,4 @@ Owns: powers item component, kingdoms economy.
 
 ## Notes
 - 2026-11-24 18:01 2026-11-24 Andy: "finish here": cloud Claude finishes this in thread cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR; bots leave it.
-- 2026-11-24 19:26 Andy 2026-11-24: strongbox (G7) yes, shop stall (G6) no (no shop block ruling stands).
-- 2026-11-24 19:49 PR #2097: G1-G4 and G7 built (compiles; not played). G6 stall not built (Andy), G5 already in, G8 not asked. Lore 'What goods remember' (new) added.
-- 2026-11-24 20:15 PR #2097 is merged into master; moved to Inbox/Done.
+- 2026-11-25 01:53 claude-cloud's claim had no sign of work for 30 min: handed back as open.

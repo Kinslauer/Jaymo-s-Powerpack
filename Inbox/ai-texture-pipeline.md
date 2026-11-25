@@ -91,5 +91,4 @@ Tools produce Minecraft-appropriate 16x16 textures. Main constraint: maintaining
 ### Next Steps
 Prototype a few item textures using mc-asset and pixelgen, compare output quality against existing pack textures, and document the reusable pipeline steps for future pack additions.
 - 2026-11-24 18:00 2026-11-24 Andy: "finish here": cloud Claude finishes this in thread cmsg_017LSt6rWz6CzxSGvzDd41XWRihgeu7KNw14feoHe7EEoR; bots leave it.
-- 2026-11-24 19:51 Wrap-up doc (Claude): https://claude.ai/artifact/SCVbZJVrMn1aMKn71uUBpP . Tools checked from their pages: mc-asset (MIT, deterministic) = checker/finisher beside tools/art-agent; pixelgen not for shipped art (trained on scraped mod textures incl. ARR); Blockbench MCP only on Andy's PC. Not run here (install denied in cloud, no Gemini key); PC trial steps in the doc.
-- 2026-11-24 23:16 claude-cloud's claim had no sign of work for 30 min: handed back as changes.
+- 2026-11-25 01:53 claude-cloud's claim had no sign of work for 30 min: handed back as changes.

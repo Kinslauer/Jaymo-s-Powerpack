@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 01:40). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 02:20). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -8,21 +8,24 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 **Questions for you:**
 - [[Inbox/narrator-missing-lines|narrator-missing-lines]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
 - [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · 2026-11-19 20:18 ON HOLD (Andy 2026-11-19: "hold off on these"). Nobody picks this up and nobody asks Andy about it again until he lifts the hold.
-- [[Inbox/wither-model|wither-model]] · 2026-11-21 10:18 Andy hold instruction (2026-11-19 23:40 ET): leave the model as-is (v3 previews); do not pick up or raise this again until Andy hands it on. N…
 
 ## Stuck
 
 - [[Agents/changeling-voice-mimic|changeling-voice-mimic]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
 - [[Agents/quill|quill]]: stalled, last change 2026-11-24. Restart it, or set it done and move it to Agents/Done/ if the work is finished or dropped.
+- [[Agents/wither-model|wither-model]]: still `blocked`, but its task `wither-model` is in Inbox/Done/.
 
 ## On the board
 
-17 waiting for a bot, 1 being built, 0 in review: see [[Kanban]].
+18 waiting for a bot, 1 being built, 0 in review: see [[Kanban]].
 
 ## Merged, not played yet
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2131 The Wither's own look, animations and voice (Kingdoms, 2026-11-25)
+- [ ] #2130 End plants no longer break End worldgen (Kitchen, 2026-11-25)
+- [ ] #2129 worn totems and villagers who carry one (Powers, 2026-11-25)
 - [ ] #2128 Gravity metal fixes: no dupes from torn chunks, no weapon minting (Powers, 2026-11-25)
 - [ ] #2127 three primitive hide sets, each with a dark make (Powers, Kingdoms, 2026-11-25)
 - [ ] #2126 weighty movement - the walk carries weight (Powers, 2026-11-25)
@@ -80,10 +83,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2062 Adrenaline kicks in once, going down included (Powers, 2026-11-24)
 - [ ] #2061 A blast close by knocks you out cold (Powers, 2026-11-24)
 - [ ] #2060 Cleric's medallion board: numpad sigils cast spells and great prayers, sneak to bind (Kingdoms, 2026-11-24)
-- [ ] #2059 A body only spills the blood it holds (Powers, 2026-11-24)
-- [ ] #2058 bandages give a short regen; rags fester less (Powers, 2026-11-24)
-- [ ] #2057 The thermometer burns when heat is a danger, and freezes and shakes in the cold (Kitchen, 2026-11-24)
-- …and 516 older ones.
+- …and 519 older ones.
 
 ## Health
 
