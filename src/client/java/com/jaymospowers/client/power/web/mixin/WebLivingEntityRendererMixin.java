@@ -18,6 +18,9 @@ abstract class WebLivingEntityRendererMixin {
 	private void jaymospowers$webGlideLean(LivingEntityRenderState state, PoseStack poseStack, float bodyRot, float entityScale, CallbackInfo ci) {
 		// (Motion patch 1) the small motions first, so every pose after them stands on top
 		com.jaymospowers.client.BodyMotion.rotate(state, poseStack, entityScale);
+		// and the walk's weight: the step's sink, the torso's swing on the hips, the bank, the landing's squash
+		com.jaymospowers.client.moving.BodyWeight.rotate(state, poseStack, entityScale);
+		com.jaymospowers.client.body.BodyAnim.rotate(state, poseStack, entityScale);
 		WebArms.rotate(state, poseStack, entityScale);
 		WebRagdoll.rotate(state, poseStack, entityScale);
 		com.jaymospowers.client.FreefallPose.rotate(state, poseStack, entityScale);
@@ -54,7 +57,12 @@ abstract class WebLivingEntityRendererMixin {
 		at = @At("TAIL"))
 	private void jaymospowers$webRagdoll(LivingEntity entity, LivingEntityRenderState state, float partialTicks, CallbackInfo ci) {
 		WebRagdoll.extract(entity, state, partialTicks);
+		// (a humanoid the symbiote rides is drawn as the strain's own body, its own model hidden)
+		com.jaymospowers.client.power.web.WebHostBody.extract(entity, state);
 		com.jaymospowers.client.BodyMotion.extract(entity, state, partialTicks);
+		com.jaymospowers.client.moving.BodyWeight.extract(entity, state, partialTicks);
+		com.jaymospowers.client.body.BodyAnim.extract(entity, state, partialTicks);
+		com.jaymospowers.client.body.BodyFaces.extract(entity, state);
 		com.jaymospowers.client.FreefallPose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.freerun.BalancePose.extract(entity, state, partialTicks);
 		com.jaymospowers.client.water.DivePose.extract(entity, state, partialTicks);

@@ -61,6 +61,9 @@ public final class RagdollBody {
 	private static final float PIN_DAMP = 0.7F;
 
 	public final RagdollRig rig;
+	/** How stiff the joints are, 0 (limp) to 1 (locked: rigor, or frozen), and while locked the distance between every two points as they lay. */
+	private float stiffness;
+	private float[] lockLength;
 	public final double[] x, y, z, px, py, pz;
 	private final float[] normalY;
 	private final boolean[] touching;
@@ -307,6 +310,49 @@ public final class RagdollBody {
 
 	// ---------------------------------------------------------------- pushing it about
 
+	/** Locks the joints: 0 limp, 1 as stiff as they go (limbs held near where they lie, a blow moving the whole body). */
+	public void setStiffness(float stiffness) {
+		this.stiffness = Math.max(0.0F, Math.min(1.0F, stiffness));
+		if (this.stiffness < 0.5F) {
+			lockLength = null;
+		} else if (lockLength == null) {
+			// set as it lies: every point held where it is against every other
+			int n = rig.count;
+			lockLength = new float[n * n];
+			for (int i = 0; i < n; i++) {
+				for (int j = i + 1; j < n; j++) {
+					double dx = x[i] - x[j], dy = y[i] - y[j], dz = z[i] - z[j];
+					lockLength[i * n + j] = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+				}
+			}
+		}
+	}
+
+	/** Holds every pair of points at the distance they were locked at (a stiff body moves as one piece). */
+	private void lock() {
+		int n = rig.count;
+		for (int i = 0; i < n; i++) {
+			for (int j = i + 1; j < n; j++) {
+				double dx = x[j] - x[i], dy = y[j] - y[i], dz = z[j] - z[i];
+				double length = Math.sqrt(dx * dx + dy * dy + dz * dz);
+				if (length < 1.0E-6) {
+					continue;
+				}
+				double k = (length - lockLength[i * n + j]) / length * 0.5;
+				x[i] += dx * k;
+				y[i] += dy * k;
+				z[i] += dz * k;
+				x[j] -= dx * k;
+				y[j] -= dy * k;
+				z[j] -= dz * k;
+			}
+		}
+	}
+
+	public float stiffness() {
+		return stiffness;
+	}
+
 	/** Adds a speed (blocks a tick) to the whole body. */
 	public void shove(double vx, double vy, double vz) {
 		for (int i = 0; i < rig.count; i++) {
@@ -330,7 +376,7 @@ public final class RagdollBody {
 	public void hit(double hx, double hy, double hz, double vx, double vy, double vz, float share) {
 		int nearest = nearest(hx, hy, hz);
 		for (int i = 0; i < rig.count; i++) {
-			double k = i == nearest ? 1.0 : share;
+			double k = i == nearest ? 1.0 : share + (1.0 - share) * stiffness;
 			px[i] -= vx * k;
 			py[i] -= vy * k;
 			pz[i] -= vz * k;
@@ -662,6 +708,9 @@ public final class RagdollBody {
 			}
 			for (int k = 0; k < ITERATIONS; k++) {
 				sticks();
+				if (lockLength != null) {
+					lock();
+				}
 				cones();
 				collide(k == ITERATIONS - 1);
 				if (pinned) {

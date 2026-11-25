@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "S": "minecraft:stick",
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "S S",
+    " S ",
+    "III"
+  ],
+  "result": {
+    "id": "jaymospowers:umbrella_stand"
+  }
+}

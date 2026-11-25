@@ -39,7 +39,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Sides without</b> raise their captains from what walks their land: the risen dead of the Overworld (zombies and
  * skeletons, the raised, all of them Deathless) and the Hornkin of the Nether. A fitting one who comes near a player may rise
  * as a captain while the region's ladder is short ({@link #ROAM_CHANCE}); a fallen captain due back takes the next one
- * ({@link Captains#waiting}). Nothing new is built for them: no new realm.</li>
+ * ({@link Captains#waiting}). Nothing new is built for them: no new realm. With MCA the Hollow walk among the dead, and the
+ * raised's captains are made only when one of them, or one of the dead, kills a player ({@link HollowCaptains}).</li>
  * <li><b>The world's tier:</b> as the Aether's Giants raise the world's floor ({@link WorldTiers#floor}), ladders grow
  * longer, captains rise higher and start stronger ({@link #ladder}, {@link #rankMax}, {@link #tierHealth}).</li>
  * <li><b>Temperament:</b> each captain keeps the temperament he first had ({@link #TEMPERS}), whatever body he's in after;
@@ -244,7 +245,9 @@ public final class Rivals {
 		if (e instanceof Hornkin h) {
 			return h.kind() == Hornkin.Kind.WARRIOR || h.kind() == Hornkin.Kind.BRUTE ? Side.HORNKIN : null;
 		}
-		if ((e instanceof Zombie z && !z.isBaby() || e instanceof AbstractSkeleton) && e.level().dimension() == Level.OVERWORLD && !Thralls.isThrall(e)) {
+		if (HollowCaptains.is(e) || (e instanceof Zombie z && !z.isBaby() || e instanceof AbstractSkeleton) && e.level().dimension() == Level.OVERWORLD
+			&& !Thralls.isThrall(e)) {
+			// (and the Hollow who walk among them)
 			return Side.RAISED;
 		}
 		return null;
@@ -436,7 +439,14 @@ public final class Rivals {
 		MinecraftServer server = level.getServer();
 		String ladder = key(s, e.blockPosition());
 		Captain waiting = Captains.waiting(server, ladder);
-		if (waiting != null) {
+		if (s == Side.RAISED && HollowCaptains.live()) {
+			// (with the Hollow walking among them, the dead's captains are made only by a kill; one due back gets up in the next
+			// of the dead, put off till the land is loaded: HollowCaptains)
+			if (waiting != null) {
+				String id = waiting.id();
+				HollowCaptains.later(() -> HollowCaptains.comeBack(level, id, mob));
+			}
+		} else if (waiting != null) {
 			Captains.embodyIn(level, waiting, mob);
 		} else if (level.getRandom().nextFloat() < ROAM_CHANCE && Captains.of(server, ladder).size() < ladder(server)) {
 			Captains.riseFrom(level, ladder, mob);

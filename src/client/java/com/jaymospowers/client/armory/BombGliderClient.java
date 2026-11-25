@@ -28,6 +28,7 @@ public final class BombGliderClient {
 
 	public static void init() {
 		EntityRendererRegistry.register(ArmoryEntities.BOMB_GLIDER, BombGliderRenderer::new);
+		EntityRendererRegistry.register(ArmoryEntities.HOVERBOARD, HoverboardRenderer::new);
 		MenuScreens.register(ArmoryEntities.BOMB_GLIDER_MENU, BombGliderScreen::new);
 		ClientTickEvents.END_CLIENT_TICK.register(BombGliderClient::tick);
 	}

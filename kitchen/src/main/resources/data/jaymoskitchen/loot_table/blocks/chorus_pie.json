@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "jaymoskitchen:chorus_pie",
+        "state": {
+          "bites": "0"
+        }
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jaymoskitchen:chorus_pie"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "jaymoskitchen:blocks/chorus_pie"
+}

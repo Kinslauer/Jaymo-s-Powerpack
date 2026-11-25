@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.phys.Vec3;
 
@@ -53,7 +54,9 @@ public final class CollisionsClient {
 			return;
 		}
 		boolean free = !player.isInWater() && !player.onClimbable() && !player.isCrouching() && !player.isVisuallyCrawling();
-		if (player.verticalCollision && !player.verticalCollisionBelow && movement.y > 0.0 && free) {
+		// (a plain jump, Jump Boost and all, never knocks the head: only going up faster than that does)
+		if (player.verticalCollision && !player.verticalCollisionBelow && free
+			&& movement.y >= player.getAttributeValue(Attributes.JUMP_STRENGTH) + player.getJumpBoostPower() + Collisions.HEAD_PAST_JUMP) {
 			double impact = movement.y - dy;
 			if (impact >= Collisions.HEAD_MIN) {
 				send(player, Collisions.HEAD, impact, movement);

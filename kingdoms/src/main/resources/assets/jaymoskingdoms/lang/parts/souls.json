@@ -1,0 +1,13 @@
+{
+  "item.jaymoskingdoms.soul_jar": "Soul Jar",
+  "item.jaymoskingdoms.full_soul_jar": "Full Soul Jar",
+  "item.jaymoskingdoms.full_soul_jar.of": "Soul Jar (%s)",
+  "item.jaymoskingdoms.scroll_of_reap_a_soul": "Scroll of Reap a Soul",
+  "message.jaymoskingdoms.soul_jar.too_strong": "It holds on to its soul. Bring it lower first",
+  "message.jaymoskingdoms.soul_jar.none": "You have no empty soul jar to stop it in",
+  "message.jaymoskingdoms.soul_jar.full_cage": "The cage can hold no more of them",
+  "message.jaymoskingdoms.soul_jar.charge": "The cage takes the soul (%s of %s)",
+  "message.jaymoskingdoms.soul_jar.rank": "The cage wakes further (rank %s)",
+  "message.jaymoskingdoms.soul_jar.changed": "The cage takes a new kind: %s",
+  "message.jaymoskingdoms.soul_jar.cage_broke": "Without a soul of its kind to hold it, the cage comes apart"
+}

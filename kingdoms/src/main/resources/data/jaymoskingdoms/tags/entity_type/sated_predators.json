@@ -5,6 +5,8 @@
 		"minecraft:fox",
 		"jaymoskingdoms:feral_wolf",
 		"jaymoskingdoms:coyote",
+		"jaymoskingdoms:wyvern_dragon",
+		"jaymoskingdoms:nether_scorpion",
 		{
 			"id": "naturalist:bear",
 			"required": false

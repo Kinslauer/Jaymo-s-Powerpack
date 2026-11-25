@@ -45,13 +45,20 @@ public final class LowEndMode {
 
 	/**
 	 * AMD's built-in Radeons, which the game's own guess (it knows Intel's) calls OTHER under OpenGL: "AMD Radeon(TM)
-	 * Graphics", "Radeon Vega 8 Graphics", "Radeon 780M".
+	 * Graphics", "Radeon Vega 8 Graphics", "Radeon 780M", and the Steam Deck's "AMD Custom GPU 0932 (radeonsi, vangogh, ...)"
+	 * (0405 on the first Deck; Mesa names its chip vangogh).
 	 */
-	static final Pattern AMD_BUILT_IN = Pattern.compile("radeon(\\(tm\\))? (vega \\d+ )?graphics|radeon \\d{3}m\\b");
+	static final Pattern AMD_BUILT_IN = Pattern.compile(
+		"radeon(\\(tm\\))? (vega \\d+ )?graphics|radeon \\d{3}m\\b|amd custom gpu \\d{4}|\\bvangogh\\b");
 
 	private static final String FILE = "jaymospowers-low-end.properties";
 	/** Bump to check every install again (for a new rule in a later pack version). */
-	private static final String CHECKED = "checked-v1";
+	private static final String CHECKED = "checked-v2";
+	/**
+	 * (v2, the Steam Deck rule) Checks before this one. An install one of them already found weak isn't switched on
+	 * again: it had its turn, and if low-end mode is off there now, its player chose that with /lowend off.
+	 */
+	private static final String[] EARLIER_CHECKS = {"checked-v1"};
 
 	private static boolean on;
 	/** Why it switched itself on this launch, said once in chat on joining a world. */
@@ -109,6 +116,14 @@ public final class LowEndMode {
 		on = Boolean.parseBoolean(state.getProperty("on", "false"));
 		if (state.containsKey(CHECKED)) {
 			return;
+		}
+		for (String earlier : EARLIER_CHECKS) {
+			String found = state.getProperty(earlier);
+			if (found != null && !found.equals("fine")) {
+				state.setProperty(CHECKED, found);
+				save(state);
+				return;
+			}
 		}
 		String why = weakness();
 		state.setProperty(CHECKED, why == null ? "fine" : why);

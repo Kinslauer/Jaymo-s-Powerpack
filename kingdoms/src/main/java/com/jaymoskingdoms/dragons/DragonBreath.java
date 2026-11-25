@@ -88,6 +88,9 @@ public final class DragonBreath {
 			&& !self.isTamed()) {
 			return true;
 		}
+		if (kindred(dragon, target)) {
+			return true;
+		}
 		if (!(dragon instanceof OwnableEntity ownable)) {
 			return false;
 		}
@@ -96,6 +99,24 @@ public final class DragonBreath {
 			return false;
 		}
 		return target == owner || target.isAlliedTo(owner) || target instanceof OwnableEntity pet && pet.getOwner() == owner;
+	}
+
+	/** A dragon spares the Dragonblood of its own kind: fire for Ignivorus and Notus, frost for Boreas, storm for Eurus and Aeolus, acid for Zephyrus and Varasuchus. */
+	static boolean kindred(LivingEntity dragon, Entity target) {
+		if (!(target instanceof net.minecraft.world.entity.player.Player player) || com.jaymoskingdoms.Heritage.of(player) != com.jaymoskingdoms.Heritage.Kind.DRAGONBLOOD) {
+			return false;
+		}
+		com.jaymoskingdoms.HeritageVariants.Variant v = com.jaymoskingdoms.HeritageVariants.of(target);
+		if (dragon instanceof BoreasDragon) {
+			return v == com.jaymoskingdoms.HeritageVariants.Variant.RIMEWYRM;
+		}
+		if (dragon instanceof EurusDragon || dragon instanceof AeolusDragon) {
+			return v == com.jaymoskingdoms.HeritageVariants.Variant.STORMWYRM;
+		}
+		if (dragon instanceof ZephyrusDragon || dragon instanceof VarasuchusDragon) {
+			return v == com.jaymoskingdoms.HeritageVariants.Variant.VENOMSCALE;
+		}
+		return (dragon instanceof IgnivorusDragon || dragon instanceof NotusDragon) && !com.jaymoskingdoms.HeritageKits.ownBreath(v);
 	}
 
 	/** Nothing solid between the mouth and {@code to}. */

@@ -80,10 +80,16 @@ public final class Graves {
 			return grave == null ? null : Vec3.atCenterOf(grave);
 		});
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
-			if (!(level instanceof ServerLevel server) || !player.getItemInHand(hand).is(ItemTags.SHOVELS) || !DeadBodies.isPlayerBody(entity)) {
+			if (!(level instanceof ServerLevel server) || !player.getItemInHand(hand).is(ItemTags.SHOVELS) || !DeadBodies.isBody(entity)) {
 				return InteractionResult.PASS;
 			}
-			if (bury(server, entity)) {
+			// any body lying in a hole is covered over; a dead player's is also laid in the ground where it lies
+			List<BlockPos> hole = hole(server, entity);
+			if (hole == null && !DeadBodies.isPlayerBody(entity)) {
+				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.grave.no_hole"));
+				return InteractionResult.SUCCESS;
+			}
+			if (hole != null ? fill(server, entity, hole) : bury(server, entity)) {
 				player.getItemInHand(hand).hurtAndBreak(SHOVEL_WEAR, player, hand == net.minecraft.world.InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
 			} else {
 				player.sendOverlayMessage(Component.translatable("message.jaymoskingdoms.grave.no_ground"));
@@ -97,6 +103,96 @@ public final class Graves {
 		return level.getAttachedOrElse(BURIED, List.<Grave>of());
 	}
 
+	/** A hole is at least this many blocks deep (the body's block and the ones above it, each walled in) and at most this many are filled. */
+	static final int HOLE_MIN = 2, HOLE_MAX = 6;
+	/** A block of a hole has this many of its four sides walled in by something solid. */
+	static final int WALLS_MIN = 3;
+
+	/** A block a hole is open at: air, or something that gives way, with no water or lava in it. */
+	static boolean open(ServerLevel level, BlockPos pos) {
+		BlockState state = level.getBlockState(pos);
+		return (state.isAir() || state.canBeReplaced()) && state.getFluidState().isEmpty() && level.getBlockEntity(pos) == null;
+	}
+
+	/** Whether at least {@link #WALLS_MIN} of the four sides of {@code pos} are solid: it is in the ground, not on it. */
+	static boolean walled(ServerLevel level, BlockPos pos) {
+		int walls = 0;
+		for (net.minecraft.core.Direction side : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+			BlockPos next = pos.relative(side);
+			if (level.getBlockState(next).isFaceSturdy(level, next, side.getOpposite())) {
+				walls++;
+			}
+		}
+		return walls >= WALLS_MIN;
+	}
+
+	/**
+	 * The hole {@code body} lies in, from the block it lies in upward, or null if it isn't in one. A hole is a run of open
+	 * blocks starting at the body's own, each walled in on at least {@link #WALLS_MIN} sides, with solid ground under the
+	 * first. It has to be at least {@link #HOLE_MIN} blocks deep (the body's block and the one above it); where the walls stop
+	 * (the open air over the hole) the run ends.
+	 */
+	static @Nullable List<BlockPos> hole(ServerLevel level, Entity body) {
+		BlockPos first = BlockPos.containing(body.getX(), body.getY() + 0.1, body.getZ());
+		if (!level.getBlockState(first.below()).isFaceSturdy(level, first.below(), net.minecraft.core.Direction.UP)) {
+			return null;
+		}
+		List<BlockPos> column = new ArrayList<>();
+		for (BlockPos at = first; column.size() < HOLE_MAX && open(level, at) && walled(level, at); at = at.above()) {
+			column.add(at);
+		}
+		return column.size() >= HOLE_MIN ? column : null;
+	}
+
+	/**
+	 * The dirt put back in a hole {@code body} lies in: every dug-out block of it but the top one is filled with the soil
+	 * round it (dirt where that isn't soil), the top one is the mound, and the body is laid under it ({@link #lay}).
+	 */
+	static boolean fill(ServerLevel level, Entity body, List<BlockPos> column) {
+		BlockPos top = column.get(column.size() - 1);
+		BlockState soil = soilAround(level, column.get(0));
+		if (!lay(level, body, top)) {
+			return false;
+		}
+		for (BlockPos pos : column) {
+			if (!pos.equals(top)) {
+				level.setBlockAndUpdate(pos, soil);
+			}
+		}
+		level.playSound(null, top, SoundEvents.GRAVEL_PLACE, SoundSource.BLOCKS, 1.0F, 0.8F);
+		return true;
+	}
+
+	/** The soil that walls {@code pos}: the first dirt-like block beside it, else plain dirt. */
+	static BlockState soilAround(ServerLevel level, BlockPos pos) {
+		for (net.minecraft.core.Direction side : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+			BlockState state = level.getBlockState(pos.relative(side));
+			if (state.is(net.minecraft.tags.BlockTags.DIRT) && !state.is(net.minecraft.world.level.block.Blocks.GRASS_BLOCK)) {
+				return state;
+			}
+		}
+		return net.minecraft.world.level.block.Blocks.DIRT.defaultBlockState();
+	}
+
+	/**
+	 * Puts a mound at {@code mound} and records {@code body}, saved whole (the Kitchen's {@code Burial}), under it. False if the
+	 * body couldn't be saved.
+	 */
+	static boolean lay(ServerLevel level, Entity body, BlockPos mound) {
+		String owner = DeadBodies.owner(body).map(UUID::toString).orElse("");
+		CompoundTag saved = DeadBodies.lower(body);
+		if (saved == null) {
+			return false;
+		}
+		List<Grave> graves = new ArrayList<>(all(level));
+		graves.add(new Grave(mound.asLong(), owner, level.getGameTime() / 24000L, saved));
+		level.setAttached(BURIED, graves);
+		level.setBlockAndUpdate(mound, GRAVE.defaultBlockState());
+		level.playSound(null, mound, SoundEvents.GRAVEL_BREAK, SoundSource.BLOCKS, 1.0F, 0.7F);
+		level.sendParticles(net.minecraft.core.particles.ParticleTypes.ASH, mound.getX() + 0.5, mound.getY() + 0.3, mound.getZ() + 0.5, 14, 0.4, 0.1, 0.4, 0.01);
+		return true;
+	}
+
 	/** Lays {@code body} in the ground under a mound: false if there is no ground or no room for the mound. */
 	static boolean bury(ServerLevel level, Entity body) {
 		BlockPos at = BlockPos.containing(body.position());
@@ -108,18 +204,7 @@ public final class Graves {
 			|| level.getBlockEntity(at) != null) {
 			return false;
 		}
-		String owner = DeadBodies.owner(body).map(UUID::toString).orElse("");
-		CompoundTag saved = DeadBodies.lower(body);
-		if (saved == null) {
-			return false;
-		}
-		List<Grave> graves = new ArrayList<>(all(level));
-		graves.add(new Grave(at.asLong(), owner, level.getGameTime() / 24000L, saved));
-		level.setAttached(BURIED, graves);
-		level.setBlockAndUpdate(at, GRAVE.defaultBlockState());
-		level.playSound(null, at, SoundEvents.GRAVEL_BREAK, SoundSource.BLOCKS, 1.0F, 0.7F);
-		level.sendParticles(net.minecraft.core.particles.ParticleTypes.ASH, at.getX() + 0.5, at.getY() + 0.3, at.getZ() + 0.5, 14, 0.4, 0.1, 0.4, 0.01);
-		return true;
+		return lay(level, body, at);
 	}
 
 	/** The mound at {@code pos} is gone (dug, blown, burnt): its body lies there again. */
@@ -135,12 +220,17 @@ public final class Graves {
 		List<Grave> graves = new ArrayList<>(all(level));
 		for (Grave g : graves) {
 			if (g.pos == pos.asLong()) {
+				Entity body = DeadBodies.raise(level, g.body, pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+				if (body == null) {
+					// (the body couldn't be raised: its record stays, so it isn't lost)
+					return null;
+				}
 				graves.remove(g);
 				level.setAttached(BURIED, graves);
 				if (level.getBlockState(pos).is(GRAVE)) {
 					level.setBlock(pos, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
 				}
-				return DeadBodies.raise(level, g.body, pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+				return body;
 			}
 		}
 		return null;

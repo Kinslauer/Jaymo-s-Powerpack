@@ -38,6 +38,10 @@ import org.jspecify.annotations.Nullable;
  * the one in hand leaves its home empty, so drawing a pistol never moves the others. The server works the homes out and
  * syncs them to everyone ({@link #SHOWN}); {@code client/armory/BodyWeaponsLayer} draws them. A hidden blade (Jaymo's
  * Kingdoms) is worn on the wrist and draws itself.
+ * <p>The twin harness (Andy, 2026-11-25: "the sword should be able to sheathe along another on the back, giving the distinct
+ * witcher double swords"; The Witcher's look as the idea only): a silver blade ({@code SilverSear#silver}) is carried on the
+ * back, hilt up over the right shoulder, and the first other blade (the back slot's, else the hotbar's first) rides beside
+ * it, the two side by side ({@link Home#TWIN_OUTER}, {@link Home#TWIN_INNER}) instead of at the hips.
  * <p>The toggle ({@link #FREE}, on the Character page): free placement hands the body back to YDM's Weapon Master as
  * before (up to 3 items by hotbar slot, all of them with a tool belt), and this shows nothing.
  */
@@ -47,8 +51,13 @@ public final class BodyWeapons {
 
 	/** The places on the body. The client draws each one ({@code BodyWeaponsLayer}). */
 	public enum Home {
-		HIP_LEFT, HIP_RIGHT, CHEST_LEFT, CHEST_RIGHT, SASH_LEFT, SASH_RIGHT, BACK_LEFT, BACK_RIGHT, BACK_SHIELD, BACK_TOOL
+		HIP_LEFT, HIP_RIGHT, CHEST_LEFT, CHEST_RIGHT, SASH_LEFT, SASH_RIGHT, BACK_LEFT, BACK_RIGHT, BACK_SHIELD, BACK_TOOL,
+		/** The twin harness: the silver blade, and the blade beside it. */
+		TWIN_OUTER, TWIN_INNER
 	}
+
+	/** In {@link #homes}: the back slot's item, and no item. */
+	private static final int BACK_ITEM = -1, NONE = -2;
 
 	/** The kinds of carried thing, each with the homes it takes, first free first. */
 	enum Kind {
@@ -131,7 +140,33 @@ public final class BodyWeapons {
 		int cap = ToolBeltCompat.wears(player) ? Home.values().length : MAX_SHOWN;
 		Home[] taken = new Home[Inventory.getSelectionSize()];
 		boolean[] used = new boolean[Home.values().length];
+		// (Vanilla+) the back slot's weapon or tool first: its kind's first home on the back (a pistol, its first home), the
+		// hotbar's taking the rest round it; it isn't on the hotbar, so it never shows twice
+		ItemStack back = com.jaymospowers.baubles.Baubles.back(player);
+		Kind backKind = kind(back);
+		// (the twin harness) a silver blade, the back slot's first, and the blade that rides beside it
+		int silver = backKind == Kind.BLADE && com.jaymospowers.combat.SilverSear.silver(back) ? BACK_ITEM : NONE;
+		for (int slot = 0; slot < taken.length && silver == NONE; slot++) {
+			if (kind(inventory.getItem(slot)) == Kind.BLADE && com.jaymospowers.combat.SilverSear.silver(inventory.getItem(slot))) {
+				silver = slot;
+			}
+		}
+		int partner = silver != NONE && silver != BACK_ITEM && backKind == Kind.BLADE ? BACK_ITEM : NONE;
+		for (int slot = 0; slot < taken.length && silver != NONE && partner == NONE; slot++) {
+			if (slot != silver && kind(inventory.getItem(slot)) == Kind.BLADE) {
+				partner = slot;
+			}
+		}
+		Home backHome = silver == BACK_ITEM ? Home.TWIN_OUTER : partner == BACK_ITEM ? Home.TWIN_INNER : backHome(backKind);
+		if (backHome != null) {
+			used[backHome.ordinal()] = true;
+		}
+		used[Home.TWIN_OUTER.ordinal()] = used[Home.TWIN_INNER.ordinal()] = true;
 		for (int slot = 0; slot < taken.length; slot++) {
+			if (slot == silver || slot == partner) {
+				taken[slot] = slot == silver ? Home.TWIN_OUTER : Home.TWIN_INNER;
+				continue;
+			}
 			Kind kind = kind(inventory.getItem(slot));
 			if (kind == null) {
 				continue;
@@ -146,6 +181,10 @@ public final class BodyWeapons {
 		}
 		List<ItemStack> homes = new ArrayList<>(Collections.nCopies(Home.values().length, ItemStack.EMPTY));
 		int shown = 0;
+		if (backHome != null) {
+			homes.set(backHome.ordinal(), back.copyWithCount(1));
+			shown++;
+		}
 		for (int slot = 0; slot < taken.length && shown < cap; slot++) {
 			if (taken[slot] != null && slot != selected) {
 				homes.set(taken[slot].ordinal(), inventory.getItem(slot).copyWithCount(1));
@@ -153,6 +192,24 @@ public final class BodyWeapons {
 			}
 		}
 		return shown == 0 ? null : homes;
+	}
+
+	/** The home the back slot's item of {@code kind} takes: its first on the back, else its first; null for none. */
+	private static @Nullable Home backHome(@Nullable Kind kind) {
+		if (kind == null) {
+			return null;
+		}
+		for (Home home : kind.homes) {
+			if (home.name().startsWith("BACK")) {
+				return home;
+			}
+		}
+		return kind.homes[0];
+	}
+
+	/** Whether {@code stack} is a weapon or tool the body carries (what the Baubles back slot takes). */
+	public static boolean carriedOnBody(ItemStack stack) {
+		return kind(stack) != null;
 	}
 
 	/** Which kind of carried thing {@code stack} is, or null if it isn't shown on the body. */

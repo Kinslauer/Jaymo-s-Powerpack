@@ -235,6 +235,7 @@ public final class Journal {
 				player.sendOverlayMessage(Component.translatable("journal.jaymoskingdoms.need").withStyle(ChatFormatting.GRAY));
 			}
 		});
+		Casebook.register();
 		PayloadTypeRegistry.serverboundPlay().register(Pin.TYPE, Pin.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(Pin.TYPE, (payload, context) -> {
 			ServerPlayer player = context.player();
@@ -332,6 +333,7 @@ public final class Journal {
 			places.add(new Place(f.name(), f.type().ordinal(), f.styleColor(server).getTextureDiffuseColor(), f.seat(), rated, rep, rated ? Reputation.word(rep) : "",
 				Hordes.journalKind(server, f), f.type() == FactionType.KINGDOM || Hordes.realm(server, f.id())));
 		}
+		Casebook.send(player);
 		ServerPlayNetworking.send(player, new Book(entries, places, level == Factions.level(server), Tales.stories(player), QuestPast.of(player)));
 	}
 }

@@ -2,12 +2,15 @@ package com.jaymoskingdoms.client;
 
 import com.jaymoskingdoms.FactionType;
 import com.jaymoskingdoms.JaymosKingdoms;
+import com.jaymoskingdoms.Casebook;
 import com.jaymoskingdoms.Journal;
 import com.jaymoskingdoms.QuestPast;
 import com.jaymoskingdoms.Tales;
 import java.util.ArrayList;
 import java.util.List;
 import com.jaymoskingdoms.client.ui.FlatButton;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -49,9 +52,9 @@ final class JournalScreen extends Screen {
 	static final int DEFAULT_ZOOM = 2;
 	static final int COLOR_TEXT = Ui.TEXT, COLOR_DIM = Ui.DIM, COLOR_ROYAL = 0xFFFF6A50, COLOR_GOLD = Ui.GOLD, COLOR_DONE = 0xFF66EE66,
 		COLOR_PARCHMENT = Ui.PAPER, COLOR_HATED = 0xFFE04040;
-	static final int QUESTS = 0, MAP = 1, REPUTATION = 2, STORIES = 3, PAST = 4;
+	static final int QUESTS = 0, MAP = 1, REPUTATION = 2, STORIES = 3, PAST = 4, CASEBOOK = 5;
 	/** The pages' tabs, in order; the first three have their icons in {@link #TAB_ICONS}, the rest show an item. */
-	private static final String[] TABS = {"quests", "map", "reputation", "stories", "past"};
+	private static final String[] TABS = {"quests", "map", "reputation", "stories", "past", "casebook"};
 	/** A tab's width beside its name (icon and edges), the gap between two tabs, and the size of a quest's pin (px). */
 	static final int TAB_PAD = 31, TAB_GAP = 4, PIN = 9;
 	/** Stories: the list's widest, a row's height, and where the picked tale's text starts under its name. Past: an entry's head, and the gap to the next. */
@@ -59,6 +62,10 @@ final class JournalScreen extends Screen {
 	static final int COLOR_ENDED = COLOR_DONE, COLOR_ENDED_BADLY = COLOR_HATED;
 
 	private static int lastPage = QUESTS, lastZoom = DEFAULT_ZOOM;
+	/** Xaero's Minimap is installed: the map page shows it ({@link XaeroJournalMinimap}), our own map is the fallback. */
+	static final boolean XAERO_MINIMAP = FabricLoader.getInstance().isModLoaded("xaerominimap");
+	/** Xaero's World Map is installed: the map page has a button that opens it ({@link XaeroJournalMap}). */
+	static final boolean XAERO_WORLD_MAP = FabricLoader.getInstance().isModLoaded("xaeroworldmap");
 
 	private final Journal.Book book;
 	private final KeyMapping key;
@@ -105,6 +112,17 @@ final class JournalScreen extends Screen {
 
 	private int top() {
 		return Math.max(4 + MenuCompat.STRIP, (this.height - panelH()) / 2);
+	}
+
+	/** Xaero's minimap's width when the map page shows it, else -1 (our own map). */
+	private int xaeroWidth() {
+		return XAERO_MINIMAP ? XaeroJournalMinimap.width() : -1;
+	}
+
+	/** The map box's width on the map page: Xaero's minimap's, or our own map's. */
+	private int shownMapSize() {
+		int xaero = xaeroWidth();
+		return xaero > 0 ? xaero : mapSize();
 	}
 
 	private int mapSize() {
@@ -198,13 +216,21 @@ final class JournalScreen extends Screen {
 		}
 		int fy = top() + panelH() - FOOTER + 4;
 		if (page == MAP) {
-			int bx = left() + 12 + mapSize() + 12;
-			Button in = FlatButton.builder(Component.literal("+"), b -> zoom(-1)).bounds(bx, top() + BODY_Y, 20, 16).build();
-			Button out = FlatButton.builder(Component.literal("-"), b -> zoom(1)).bounds(bx + 24, top() + BODY_Y, 20, 16).build();
-			in.active = zoom > 0;
-			out.active = zoom < ZOOMS.length - 1;
-			addRenderableWidget(in);
-			addRenderableWidget(out);
+			int bx = left() + 12 + shownMapSize() + 12;
+			boolean ours = xaeroWidth() <= 0;
+			if (ours) {
+				Button in = FlatButton.builder(Component.literal("+"), b -> zoom(-1)).bounds(bx, top() + BODY_Y, 20, 16).build();
+				Button out = FlatButton.builder(Component.literal("-"), b -> zoom(1)).bounds(bx + 24, top() + BODY_Y, 20, 16).build();
+				in.active = zoom > 0;
+				out.active = zoom < ZOOMS.length - 1;
+				addRenderableWidget(in);
+				addRenderableWidget(out);
+			}
+			if (XAERO_WORLD_MAP) {
+				int wx = ours ? bx + 48 : bx;
+				addRenderableWidget(FlatButton.builder(Component.translatable("journal.jaymoskingdoms.world_map"), b -> XaeroJournalMap.open(this))
+					.bounds(wx, top() + BODY_Y, Math.min(90, left() + panelW() - 9 - wx), 16).build());
+			}
 		}
 		addRenderableWidget(FlatButton.builder(Component.translatable("gui.done"), b -> onClose()).bounds(left() + panelW() - 66, fy, 60, 16).build());
 		// ((0.7.618, Rivals patch 3) the ladders of captains you know of)
@@ -235,7 +261,7 @@ final class JournalScreen extends Screen {
 	@Override
 	public boolean mouseScrolled(double x, double y, double scrollX, double scrollY) {
 		if (page == MAP) {
-			if (scrollY != 0) {
+			if (scrollY != 0 && xaeroWidth() <= 0) {
 				zoom(scrollY > 0 ? -1 : 1);
 			}
 			return true;
@@ -248,6 +274,7 @@ final class JournalScreen extends Screen {
 			case QUESTS -> book.entries().size() - questRows();
 			case STORIES -> book.stories().size() - storyRows();
 			case PAST -> pastMaxScroll();
+			case CASEBOOK -> Math.max(JournalClient.casebook.clues().size(), JournalClient.casebook.faces().size()) - casebookRows();
 			default -> (int)book.places().stream().filter(Journal.Place::rated).count() - repRows();
 		};
 		scroll = Mth.clamp(scroll - (int)Math.signum(scrollY), 0, Math.max(0, rows));
@@ -293,6 +320,10 @@ final class JournalScreen extends Screen {
 				return true;
 			}
 		}
+		if (page == CASEBOOK && casebookClick(mouseX, mouseY)) {
+			click();
+			return true;
+		}
 		if (page == STORIES) {
 			int index = storyAt(mouseX, mouseY);
 			if (index >= 0) {
@@ -313,13 +344,15 @@ final class JournalScreen extends Screen {
 		Ui.line(graphics, this.font, this.title, x + 28, y + 8, w - 36, COLOR_GOLD);
 		long rated = book.places().stream().filter(Journal.Place::rated).count();
 		Component sub = switch (page) {
-			case MAP -> Component.translatable("journal.jaymoskingdoms.sub.map", mapSize() * ZOOMS[zoom] / CELL);
+			case MAP -> xaeroWidth() > 0 ? Component.translatable("journal.jaymoskingdoms.sub.map_xaero")
+				: Component.translatable("journal.jaymoskingdoms.sub.map", mapSize() * ZOOMS[zoom] / CELL);
 			case REPUTATION -> Component.translatable("journal.jaymoskingdoms.sub.reputation", rated);
 			case STORIES -> {
 				long open = book.stories().stream().filter(s -> s.state() == 0).count();
 				yield Component.translatable("journal.jaymoskingdoms.sub.stories", open, book.stories().size() - open);
 			}
 			case PAST -> Component.translatable("journal.jaymoskingdoms.sub.past", book.past().size());
+			case CASEBOOK -> Component.translatable("journal.jaymoskingdoms.sub.casebook", JournalClient.casebook.clues().size(), JournalClient.casebook.faces().size());
 			default -> Component.translatable("journal.jaymoskingdoms.sub.quests", book.entries().size());
 		};
 		Ui.line(graphics, this.font, sub, x + 28, y + 18, w - 36, COLOR_DIM);
@@ -327,10 +360,11 @@ final class JournalScreen extends Screen {
 		tabs(graphics, mouseX, mouseY);
 		int bodyTop = y + BODY_Y;
 		switch (page) {
-			case MAP -> map(graphics, x + 12, bodyTop, mouseX, mouseY);
+			case MAP -> map(graphics, x + 12, bodyTop, mouseX, mouseY, a);
 			case REPUTATION -> reputation(graphics, x, bodyTop, mouseX, mouseY);
 			case STORIES -> stories(graphics, x, bodyTop, mouseX, mouseY);
 			case PAST -> past(graphics, x, bodyTop, mouseX, mouseY);
+			case CASEBOOK -> casebook(graphics, x, bodyTop, mouseX, mouseY);
 			default -> quests(graphics, x, bodyTop, mouseX, mouseY);
 		}
 		super.extractRenderState(graphics, mouseX, mouseY, a);
@@ -347,10 +381,85 @@ final class JournalScreen extends Screen {
 			if (i < 3) {
 				graphics.blit(RenderPipelines.GUI_TEXTURED, TAB_ICONS, x + 5, y + 2, i * 16.0F, 0.0F, 16, 16, 16, 16, 48, 16);
 			} else {
-				graphics.item(new ItemStack(i == STORIES ? Items.WRITABLE_BOOK : Items.CLOCK), x + 5, y + 2);
+				graphics.item(new ItemStack(i == STORIES ? Items.WRITABLE_BOOK : i == CASEBOOK ? Items.SPYGLASS : Items.CLOCK), x + 5, y + 2);
 			}
 			Ui.line(graphics, this.font, Component.translatable("journal.jaymoskingdoms.tab." + TABS[i]), x + 26, y + 6, w - 31,
 				picked ? COLOR_GOLD : hover ? COLOR_TEXT : COLOR_DIM);
+		}
+	}
+
+	// ---- casebook --------------------------------------------------------------------------------------------------------
+
+	private int casebookRows() {
+		return Math.max(1, (panelH() - BODY_Y - FOOTER - 8) / QUEST_ROW);
+	}
+
+	/** Each half of the page's width. */
+	private int casebookHalf() {
+		return (panelW() - 36) / 2;
+	}
+
+	private static Component markName(int mark) {
+		return Component.translatable("casebook.jaymoskingdoms.mark." + mark);
+	}
+
+	private static int markColor(int mark) {
+		return switch (mark) {
+			case Casebook.SUSPECT -> COLOR_HATED;
+			case Casebook.GONE -> COLOR_GOLD;
+			case Casebook.DEAD -> COLOR_DIM;
+			default -> COLOR_TEXT;
+		};
+	}
+
+	/** A press on a clue pins or unpins it; on a face, goes on to its next mark. */
+	private boolean casebookClick(int mouseX, int mouseY) {
+		int rows = casebookRows(), top = top() + BODY_Y, half = casebookHalf();
+		Casebook.Page cb = JournalClient.casebook;
+		for (int r = 0; r < rows; r++) {
+			int y = top + r * QUEST_ROW;
+			int ci = scroll + r;
+			if (ci < cb.clues().size() && Ui.over(mouseX, mouseY, left() + 12, y, half, QUEST_ROW - 2)) {
+				ClientPlayNetworking.send(new Casebook.Act(false, cb.clues().get(ci).id(), 0));
+				return true;
+			}
+			if (ci < cb.faces().size() && Ui.over(mouseX, mouseY, left() + 24 + half, y, half, QUEST_ROW - 2)) {
+				Casebook.Face f = cb.faces().get(ci);
+				ClientPlayNetworking.send(new Casebook.Act(true, f.uuid(), (f.mark() + 1) % 4));
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** Left: what you've noticed (press to pin). Right: the faces you know, each marked as you see fit (press to change the mark). */
+	private void casebook(GuiGraphicsExtractor graphics, int x, int y, int mouseX, int mouseY) {
+		Casebook.Page cb = JournalClient.casebook;
+		int half = casebookHalf(), rows = casebookRows();
+		if (cb.clues().isEmpty() && cb.faces().isEmpty()) {
+			Ui.line(graphics, this.font, Component.translatable("casebook.jaymoskingdoms.empty"), x + 14, y + 4, panelW() - 28, COLOR_DIM);
+			return;
+		}
+		for (int r = 0; r < rows; r++) {
+			int ry = y + r * QUEST_ROW, i = scroll + r;
+			if (i < cb.clues().size()) {
+				Casebook.Clue c = cb.clues().get(i);
+				boolean hover = Ui.over(mouseX, mouseY, x + 12, ry, half, QUEST_ROW - 2);
+				graphics.fill(x + 12, ry, x + 12 + half, ry + QUEST_ROW - 2, c.pinned() ? Ui.ROW_PICKED : hover ? Ui.ROW_HOVER : Ui.ROW);
+				Component text = Component.translatable("casebook.jaymoskingdoms.clue." + c.kind(), c.arg());
+				Ui.line(graphics, this.font, Component.translatable(c.pinned() ? "casebook.jaymoskingdoms.pinned" : "casebook.jaymoskingdoms.unpinned", text),
+					x + 16, ry + 5, half - 8, c.pinned() ? COLOR_GOLD : COLOR_TEXT);
+			}
+			if (i < cb.faces().size()) {
+				Casebook.Face f = cb.faces().get(i);
+				int fx = x + 24 + half;
+				boolean hover = Ui.over(mouseX, mouseY, fx, ry, half, QUEST_ROW - 2);
+				graphics.fill(fx, ry, fx + half, ry + QUEST_ROW - 2, hover ? Ui.ROW_HOVER : Ui.ROW);
+				Component who = f.trade().isEmpty() || f.trade().equals("none") ? Component.literal(f.name())
+					: Component.translatable("casebook.jaymoskingdoms.face", f.name(), Component.translatable("entity.minecraft.villager." + f.trade()));
+				Ui.line(graphics, this.font, who, fx + 4, ry + 5, half - 70, markColor(f.mark()));
+				Ui.line(graphics, this.font, Component.translatable("casebook.jaymoskingdoms.seen", f.seen(), markName(f.mark())), fx + half - 66, ry + 5, 62, markColor(f.mark()));
+			}
 		}
 	}
 
@@ -588,10 +697,17 @@ final class JournalScreen extends Screen {
 
 	// ---- map -------------------------------------------------------------------------------------------------------------
 
-	private void map(GuiGraphicsExtractor graphics, int x, int y, int mouseX, int mouseY) {
+	private void map(GuiGraphicsExtractor graphics, int x, int y, int mouseX, int mouseY, float partial) {
 		LocalPlayer player = this.minecraft.player;
 		ClientLevel level = this.minecraft.level;
 		if (player == null || level == null) {
+			return;
+		}
+		int xaero = xaeroWidth();
+		if (xaero > 0 && XaeroJournalMinimap.draw(graphics, x, y, partial)) {
+			// (Xaero's minimap draws you, the land and its waypoints; beside it, where you stand)
+			int lx = x + xaero + 12, ly = y + 24;
+			graphics.text(this.font, Component.translatable("journal.jaymoskingdoms.at", player.getBlockX(), player.getBlockZ()), lx, ly, COLOR_DIM);
 			return;
 		}
 		int size = mapSize();

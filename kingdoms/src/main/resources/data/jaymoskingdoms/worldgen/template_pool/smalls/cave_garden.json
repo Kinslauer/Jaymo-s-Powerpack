@@ -1,0 +1,33 @@
+{
+  "name": "jaymoskingdoms:smalls/cave_garden",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "processors": "minecraft:empty",
+        "projection": "rigid",
+        "location": "jaymoskingdoms:smalls/cave_garden_small"
+      },
+      "weight": 6
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "processors": "minecraft:empty",
+        "projection": "rigid",
+        "location": "jaymoskingdoms:smalls/cave_garden_medium"
+      },
+      "weight": 3
+    },
+    {
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "processors": "minecraft:empty",
+        "projection": "rigid",
+        "location": "jaymoskingdoms:smalls/cave_garden_large"
+      },
+      "weight": 1
+    }
+  ]
+}

@@ -1,0 +1,497 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:book",
+    "minecraft:bone"
+  ],
+  "result": {
+    "id": "minecraft:written_book",
+    "components": {
+      "minecraft:written_book_content": {
+        "title": {
+          "raw": "Dinosaur Field Guide"
+        },
+        "author": "Amber Age",
+        "pages": [
+          {
+            "raw": {
+              "text": "",
+              "extra": [
+                {
+                  "text": "Taming a dinosaur\n",
+                  "bold": true,
+                  "color": "dark_green"
+                },
+                {
+                  "text": ""
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": "1. Knock it out"
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": "2. Feed it"
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": "3. Saddle it"
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": "4. Ride it"
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": ""
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": "Look at any dinosaur: the panel at the top of the screen tells you the next step."
+                }
+              ]
+            }
+          },
+          {
+            "raw": {
+              "text": "",
+              "extra": [
+                {
+                  "text": "1. Knock it out\n",
+                  "bold": true,
+                  "color": "dark_green"
+                },
+                {
+                  "text": "Hit a wild dinosaur with Tranquilizer Darts until its purple bar is full and it falls over."
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": ""
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": "Throw darts by hand, or carry them and fire the Tranquilizer Rifle (right-click): stronger and far more accurate."
+                }
+              ]
+            }
+          },
+          {
+            "raw": {
+              "text": "",
+              "extra": [
+                {
+                  "text": "2. Feed it\n",
+                  "bold": true,
+                  "color": "dark_green"
+                },
+                {
+                  "text": "Right-click the sleeping animal with food until the green bar is full."
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": ""
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": "Meat-eaters: any raw meat."
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": "Plant-eaters: wheat, carrots, apples, melon, hay."
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": "Gallimimus eats both."
+                }
+              ]
+            }
+          },
+          {
+            "raw": {
+              "text": "",
+              "extra": [
+                {
+                  "text": "Keep it asleep\n",
+                  "bold": true,
+                  "color": "dark_green"
+                },
+                {
+                  "text": "The purple bar drains. If it empties, the animal wakes up angry."
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": ""
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": "Feed it Narcotic or shoot another dart to top it up."
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": ""
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": "Do not hit it: wounds spoil the tame."
+                }
+              ]
+            }
+          },
+          {
+            "raw": {
+              "text": "",
+              "extra": [
+                {
+                  "text": "3 and 4. Ride it\n",
+                  "bold": true,
+                  "color": "dark_green"
+                },
+                {
+                  "text": "Right-click it holding the saddle for its kind, then again to climb on."
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": ""
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "keybind": "key.attack",
+                  "color": "dark_blue"
+                },
+                {
+                  "text": ": bite"
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "keybind": "key.amberage.special",
+                  "color": "dark_blue"
+                },
+                {
+                  "text": ": special move"
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "keybind": "key.amberage.roar",
+                  "color": "dark_blue"
+                },
+                {
+                  "text": ": roar"
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "keybind": "key.jump",
+                  "color": "dark_blue"
+                },
+                {
+                  "text": ": jump (small ones)"
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "keybind": "key.sneak",
+                  "color": "dark_blue"
+                },
+                {
+                  "text": ": get off"
+                }
+              ]
+            }
+          },
+          {
+            "raw": {
+              "text": "",
+              "extra": [
+                {
+                  "text": "Orders\n",
+                  "bold": true,
+                  "color": "dark_green"
+                },
+                {
+                  "text": "Sneak + right-click a tamed dinosaur: follow, stay or wander."
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": ""
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": "Feeding heals it. Two fed adults of one kind breed."
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": ""
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": "It fights for you and gains levels from kills."
+                }
+              ]
+            }
+          },
+          {
+            "raw": {
+              "text": "",
+              "extra": [
+                {
+                  "text": "Who eats what\n",
+                  "bold": true,
+                  "color": "dark_green"
+                },
+                {
+                  "text": "Meat: Tyrannosaurus, Spinosaurus, Carnotaurus, Velociraptor, Dilophosaurus"
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": ""
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": "Plants: Triceratops, Parasaurolophus, Brachiosaurus, Dodo"
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": ""
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": "Both: Gallimimus"
+                }
+              ]
+            }
+          },
+          {
+            "raw": {
+              "text": "",
+              "extra": [
+                {
+                  "text": "In the wild\n",
+                  "bold": true,
+                  "color": "dark_green"
+                },
+                {
+                  "text": "Meat-eaters hunt the plant-eaters, and you."
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": ""
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": "Triceratops and Brachiosaurus fight back; the others run."
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": ""
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": "A tamed dinosaur defends you. The Dodo is too small to ride, but it lays eggs."
+                }
+              ]
+            }
+          },
+          {
+            "raw": {
+              "text": "",
+              "extra": [
+                {
+                  "text": "Recipes\n",
+                  "bold": true,
+                  "color": "dark_green"
+                },
+                {
+                  "text": "Narcotic: spider eye + rotten flesh + sugar"
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": ""
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": "Darts (4): 4 arrows + Narcotic"
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": ""
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": "Rifle: 3 iron on top; tripwire hook, copper, plank; plank under the last."
+                }
+              ]
+            }
+          },
+          {
+            "raw": {
+              "text": "",
+              "extra": [
+                {
+                  "text": "Saddles\n",
+                  "bold": true,
+                  "color": "dark_green"
+                },
+                {
+                  "text": "Every kind of dinosaur has its own saddle, made of leather or dinosaur hide, iron and string."
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": ""
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": "The recipes are in your recipe book: search for saddle."
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": ""
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": "Shears take a saddle off."
+                }
+              ]
+            }
+          },
+          {
+            "raw": {
+              "text": "",
+              "extra": [
+                {
+                  "text": "Trophies\n",
+                  "bold": true,
+                  "color": "dark_green"
+                },
+                {
+                  "text": "Dinosaurs drop meat, bones and hide, and sometimes a skull."
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": ""
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": "Place a skull on the ground or on a wall."
+                }
+              ]
+            }
+          },
+          {
+            "raw": {
+              "text": "",
+              "extra": [
+                {
+                  "text": "Skeletons\n",
+                  "bold": true,
+                  "color": "dark_green"
+                },
+                {
+                  "text": "A skull with bones under it in a crafting table makes a skeleton kit to stand up and pose."
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": ""
+                },
+                {
+                  "text": "\n"
+                },
+                {
+                  "text": "Lost this book? Craft a book with a bone."
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

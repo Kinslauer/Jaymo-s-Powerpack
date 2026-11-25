@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "T": "minecraft:string",
+    "C": "minecraft:white_carpet",
+    "S": "minecraft:stick"
+  },
+  "pattern": [
+    "TTT",
+    "CCC",
+    " S "
+  ],
+  "result": {
+    "id": "jaymospowers:parasol"
+  }
+}

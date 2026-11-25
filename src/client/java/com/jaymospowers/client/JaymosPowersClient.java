@@ -67,6 +67,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.hud.TitleCard.init();
 		com.jaymospowers.client.hud.DreadVignette.init();
 		com.jaymospowers.client.hud.MoveHints.init();
+		com.jaymospowers.client.hud.AdvancementPins.init();
 		// (Andy, 2026-11-23) what the keys do to whoever's under the crosshair: stealth kill, a body, Kingdoms' lines
 		com.jaymospowers.client.hud.ContextHints.init();
 		// (Andy, 2026-11-20) a tap of use on a body: the body menu
@@ -85,6 +86,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.eden.EdenPlantsClient.init();
 		com.jaymospowers.client.eden.EdenChestClient.init();
 		com.jaymospowers.client.eden.DiskwingClient.init();
+		com.jaymospowers.client.dino.DinoClient.init();
 		// (0.21.60) the character menu's tabs (Kingdoms adds its own through com.jaymoskingdoms.client.MenuCompat)
 		com.jaymospowers.client.menu.MenuTabs.init();
 		for (PowerKey key : PowerKey.values()) {
@@ -115,10 +117,12 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.web.WebbedLook.register();
 		com.jaymospowers.client.power.web.WebbedView.register();
 		com.jaymospowers.client.blood.Flies.register();
+		com.jaymospowers.client.blood.BloodScreen.init();
 		com.jaymospowers.client.blood.WeaponDrips.register();
 		com.jaymospowers.client.sound.SpotSounds.register();
 		// (0.19.63) drips, rain puddles, underwater light shafts, dirty armour's tooltip
 		com.jaymospowers.client.wet.WetClient.init();
+		com.jaymospowers.client.air.AirClient.init();
 		com.jaymospowers.client.wet.ArmourGrimeTextures.init();
 		com.jaymospowers.client.wounds.DressingsLayer.register();
 		com.jaymospowers.client.armory.LodgedLayer.register();
@@ -139,6 +143,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.tundra.SnowMote.register();
 		com.jaymospowers.client.tundra.TundraGrass.register();
 		com.jaymospowers.client.combat.ShieldBangClient.init();
+		com.jaymospowers.client.body.BodyClient.init();
 		com.jaymospowers.client.combat.ShoveClient.init();
 		com.jaymospowers.client.combat.NetheriteShieldRenderer.init(); // (medieval picks) the netherite shield and its trims
 		com.jaymospowers.client.collide.CollisionsClient.init();
@@ -150,6 +155,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.power.ember.RunningHotClient.init();
 		com.jaymospowers.client.power.heritage.HeritageMovesClient.init();
 		com.jaymospowers.client.tinkering.TinkeringClient.init();
+		// (Visceral track 8) the ops-only gore reader
+		com.jaymospowers.client.reader.GoreReaderScreen.register();
 		// mixed slabs: the two slabs of one block, drawn by their block entity
 		net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(com.jaymospowers.buildblocks.MixedSlabs.ENTITY,
 			com.jaymospowers.client.buildblocks.MixedSlabRenderer::new);
@@ -296,6 +303,7 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.armory.TaczGuns.trimDefaultPack();
 		CrawlTaps.init();
 		com.jaymospowers.client.moving.LateJumps.init();
+		com.jaymospowers.client.moving.BodyWeight.init();
 		com.jaymospowers.client.jump.PowerJumpClient.init();
 		com.jaymospowers.client.moving.AutoWalk.init();
 		StanceScroll.init();
@@ -321,6 +329,8 @@ public class JaymosPowersClient implements ClientModInitializer {
 		com.jaymospowers.client.costume.CorpseCostumeClient.init();
 		com.jaymospowers.client.rig.RigClient.init();
 		HitStopClient.init();
+		HitReactionsClient.init();
+		KillMomentClient.init();
 		com.jaymospowers.client.hud.HudArrange.register();
 		com.jaymospowers.client.backpack.BackpackClient.init();
 		com.jaymospowers.client.gear.GearClient.init();

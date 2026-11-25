@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:swords",
+    "#jaymoskitchen:skinning_knives",
+    { "id": "#c:tools/dagger", "required": false },
+    { "id": "#c:tools/sword", "required": false },
+    { "id": "jaymospowers:wooden_dagger", "required": false },
+    { "id": "jaymospowers:stone_dagger", "required": false },
+    { "id": "jaymospowers:iron_dagger", "required": false },
+    { "id": "jaymospowers:golden_dagger", "required": false },
+    { "id": "jaymospowers:diamond_dagger", "required": false },
+    { "id": "jaymospowers:netherite_dagger", "required": false }
+  ]
+}

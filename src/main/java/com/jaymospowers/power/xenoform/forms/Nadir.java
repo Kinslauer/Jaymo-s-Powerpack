@@ -7,11 +7,16 @@ import com.jaymospowers.power.xenoform.XenoForm;
 import com.jaymospowers.power.xenoform.XenoformPower;
 import com.jaymospowers.power.xenoform.XenoformState;
 import com.jaymospowers.power.xenoform.nadir.NadirAim;
+import com.jaymospowers.power.xenoform.nadir.NadirErase;
 import com.jaymospowers.power.xenoform.nadir.NadirFilm;
 import com.jaymospowers.power.xenoform.nadir.NadirGraviton;
+import com.jaymospowers.power.xenoform.nadir.NadirGrip;
 import com.jaymospowers.power.xenoform.nadir.NadirNet;
+import com.jaymospowers.power.xenoform.nadir.NadirReality;
 import com.jaymospowers.power.xenoform.nadir.NadirRift;
 import com.jaymospowers.power.xenoform.nadir.NadirRules;
+import com.jaymospowers.power.xenoform.nadir.NadirSnap;
+import com.jaymospowers.power.xenoform.nadir.NadirStar;
 import com.jaymospowers.power.xenoform.nadir.NadirStash;
 import com.jaymospowers.power.xenoform.nadir.NadirState;
 import java.util.ArrayList;
@@ -42,6 +47,10 @@ import net.minecraft.world.phys.Vec3;
  * <li>V, the Graviton ({@link NadirGraviton}): at a creature, Heavy Hand (tap yank, hold slam; sneaking, shove and
  * launch); at nothing, tap for a Weightless zone, hold for an Event Horizon.</li>
  * <li>B, the Command ({@link NadirRules}): the Rules screen, where the void writes what the world must do.</li>
+ * <li>From the Hand of God mod (all rights reserved: ideas only): sprint + V at a creature, the Grip ({@link NadirGrip}:
+ * held, G crushes it in, B tears it apart, let go to throw); sprint + G, the Snap to dust ({@link NadirSnap}); sneak + B
+ * erases, sprint + B erases a cone ({@link NadirErase}); sneak + C pulls down the sun or moon to throw
+ * ({@link NadirStar}); sprint + C, the Reality wave of another land, which goes back ({@link NadirReality}).</li>
  * <li>C (ascended), the Three Worlds Film ({@link NadirFilm}): a short skippable film of the Overworld, the Nether and
  * the Aether flashing up behind what you look at, then a heavy blow. Only a picture: no portal, no new realm.</li>
  * </ul>
@@ -111,6 +120,8 @@ public final class Nadir extends XenoForm {
 		live.beaconHeld = 0;
 		live.beaconTarget = null;
 		NadirGraviton.end(player, live.nadir);
+		NadirGrip.end(player);
+		NadirStar.end(player);
 		live.nadir.clear();
 		// back to the player's own flight: creative and spectator keep theirs
 		player.getAbilities().setFlyingSpeed(NORMAL_FLY_SPEED);
@@ -129,6 +140,14 @@ public final class Nadir extends XenoForm {
 	/** C: the Three Worlds Film at what you look at. Nadir stays Nadir; only the move's own cooldown runs. */
 	@Override
 	public boolean onUltimate(ServerPlayer player, XenoformPower.Live live) {
+		// sneak + C, the sun or moon; sprint + C, the Reality wave: each keeps its own cooldown, apart from the film's
+		if (player.isShiftKeyDown() || player.isSprinting()) {
+			String why = player.isShiftKeyDown() ? NadirStar.press(player) : NadirReality.cast(player);
+			if (why != null) {
+				say(player, why);
+			}
+			return why == null;
+		}
 		if (!ultimateReady(player, live)) {
 			long wait = (live.ultimateNext - player.level().getGameTime() + 19) / 20;
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.xenoform.nadir.film_wait", wait).withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC));
@@ -161,15 +180,73 @@ public final class Nadir extends XenoForm {
 		}
 		NadirState st = live.nadir;
 		long now = player.level().getGameTime();
+		if (hand(player, live, key, down)) {
+			return;
+		}
 		if (key == PowerKey.ABILITY_2) {
 			rift(player, live, st, now, down);
 		} else if (key == PowerKey.ABILITY_3) {
 			graviton(player, live, st, now, down);
+		} else if (key == PowerKey.ABILITY_4 && down && (player.isShiftKeyDown() || player.isSprinting())) {
+			if (!ready(player, live, B)) {
+				return;
+			}
+			boolean one = player.isShiftKeyDown();
+			if (one ? NadirErase.one(player) : NadirErase.cone(player)) {
+				cooldown(player, live, B, one ? NadirErase.COOLDOWN : NadirErase.CONE_COOLDOWN);
+			} else {
+				say(player, "erase_none");
+			}
 		} else if (key == PowerKey.ABILITY_4 && down && ready(player, live, B)) {
 			NadirNet.open(player);
 			sound(player, SoundEvents.ENCHANTMENT_TABLE_USE, 0.8F, 0.6F);
 			cooldown(player, live, B, 10);
 		}
+	}
+
+	/**
+	 * The Hand of God moves on G V B: while the Grip holds a creature, G crushes it, B tears it, letting go of V throws
+	 * it; sprint + V takes hold, sprint + G snaps. True if the key was taken.
+	 */
+	private static boolean hand(ServerPlayer player, XenoformPower.Live live, PowerKey key, boolean down) {
+		if (NadirGrip.holding(player)) {
+			if (key == PowerKey.ABILITY_3 && !down) {
+				NadirGrip.release(player);
+			} else if (key == PowerKey.ABILITY_2 && down) {
+				NadirGrip.implode(player);
+			} else if (key == PowerKey.ABILITY_4 && down) {
+				NadirGrip.tear(player);
+			} else {
+				return key == PowerKey.ABILITY_3;
+			}
+			cooldown(player, live, V, NadirGrip.COOLDOWN);
+			return true;
+		}
+		if (!down || !player.isSprinting() || player.isShiftKeyDown()) {
+			return false;
+		}
+		if (key == PowerKey.ABILITY_3) {
+			if (ready(player, live, V)) {
+				LivingEntity target = NadirAim.aimed(player, NadirGrip.REACH);
+				if (target == null) {
+					return false;
+				}
+				NadirGrip.grab(player, target);
+			}
+			return true;
+		}
+		if (key == PowerKey.ABILITY_2) {
+			if (ready(player, live, G)) {
+				int wait = NadirSnap.snap(player);
+				if (wait > 0) {
+					cooldown(player, live, G, wait);
+				} else {
+					say(player, "snap_none");
+				}
+			}
+			return true;
+		}
+		return false;
 	}
 
 	/** G: sneak for the pocket; a tap drops what you look at, or blinks; the hold (in {@link #tick}) surfaces. */
@@ -256,6 +333,12 @@ public final class Nadir extends XenoForm {
 		holds(player, live, st, now);
 		NadirRift.tickDrop(player, st);
 		NadirGraviton.tick(player, st);
+		boolean gripping = NadirGrip.holding(player);
+		NadirGrip.tick(player);
+		if (gripping && !NadirGrip.holding(player)) {
+			// held too long, or it broke free
+			cooldown(player, live, V, NadirGrip.COOLDOWN);
+		}
 		NadirRules.tick(player, st);
 		// the void about it
 		if (player.tickCount % 2 == 0) {

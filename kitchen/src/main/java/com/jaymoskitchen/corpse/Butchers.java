@@ -96,6 +96,40 @@ public final class Butchers {
 
 	private static final int OUT = 0, CHOP = 1, BACK = 2, WAIT = 3;
 
+	/**
+	 * Work for the town (Andy's "villagers visibly doing their jobs", row 4): in working hours a butcher with a free meat
+	 * hook near their workstation fetches a carcass lying about (the herd's surplus a farmer killed, anything not a
+	 * player's kill), hangs it, and works it with the hook's own steps through the day: bled, head off, skinned, gutted,
+	 * three cuts. What comes off goes to the town's stores ({@link #setStock}), else a chest by the hook.
+	 */
+	private static final UUID TOWN = new UUID(0L, 0L);
+	private static final int FETCH = 4, DRESS = 5;
+	/** A villager's working hours (vanilla's schedule), in ticks of the day. */
+	private static final long WORK_FROM = 2000L, WORK_TO = 9000L;
+	/** How often idle butchers near players look for town work, and how far from a player. */
+	private static final int LOOK_EVERY = 100;
+	private static final double LOOK_RADIUS = 64.0;
+	/** A carcass this close to the hook is the town's to fetch. */
+	private static final int FETCH_REACH = 20;
+	/** Picked up from this close; after this long, from over a pen's fence; then given up on. */
+	private static final double TAKE_UP_SQ = 2.5 * 2.5, OVER_FENCE_SQ = 5.0 * 5.0;
+	private static final int FETCH_TICKS = 600;
+	/**
+	 * A step of the hook's work this often (the first soon after it's hung), a stroke of the blade in between: about ten
+	 * steps fill a working day. Given up on after this long.
+	 */
+	private static final int DRESS_EVERY = 600, DRESS_FIRST = 60;
+	private static final int DRESS_STROKE_EVERY = 60;
+	private static final int DRESS_TICKS = 12000;
+	/** A chest this close to the hook takes what the town's stores don't. */
+	private static final int STORE_REACH = 4;
+	/** Marks the blade put in a butcher's hand for the hook's work, so only that is taken back. */
+	private static final String WORK_MARK = "jaymoskitchen_work";
+	/** Carcasses a butcher couldn't get to (fenced in, out of reach): left for someone else. */
+	private static final Set<UUID> UNREACHABLE = new HashSet<>();
+	/** Where the cuts of town work go (Jaymo's Kingdoms sets this by reflection: the butcher's town's stores). */
+	private static java.util.function.@Nullable BiFunction<Villager, ItemStack, ItemStack> stock;
+
 	/** One job: whose body it was, the cuts (worked out when the deal was struck), and how far along it is. */
 	public record Job(UUID owner, List<ItemStackTemplate> cuts, float skill, int phase, BlockPos spot, int ticks, Optional<UUID> body) {
 		public static final Codec<Job> CODEC = RecordCodecBuilder.create(i -> i.group(
@@ -165,7 +199,11 @@ public final class Butchers {
 					for (ItemStack cut : stacks(job)) {
 						villager.spawnAtLocation(level, cut, 0.5F);
 					}
-					discardBody(level, job);
+					if (!job.owner().equals(TOWN)) {
+						discardBody(level, job);
+					}
+					// (the town's carcass stays where it is, on the hook or where he fell)
+					putBlade(villager, null);
 					villager.removeAttached(JOB);
 				}
 				forget(level, villager);
@@ -215,6 +253,37 @@ public final class Butchers {
 	 */
 	public static void setExperienced(java.util.function.Predicate<Player> experienced) {
 		EXPERIENCED = experienced;
+	}
+
+	/**
+	 * For Jaymo's Kingdoms (by reflection): where a butcher's town work goes. {@code into} takes the butcher and a stack and
+	 * returns what didn't fit (that goes in a chest by the hook, or at their feet).
+	 */
+	public static void setStock(java.util.function.BiFunction<Villager, ItemStack, ItemStack> into) {
+		stock = into;
+	}
+
+	/** Whether {@code entity} is a butcher at a job just now (a customer's or the town's). */
+	public static boolean butchering(Entity entity) {
+		return entity instanceof Villager villager && villager.hasAttached(JOB);
+	}
+
+	/**
+	 * For Jaymo's Kingdoms (by reflection): whether a carcass left at {@code at} now would be fetched and worked on a hook,
+	 * that is, it's working hours and a butcher nearby has a free meat hook within reach of it.
+	 */
+	public static boolean wantsCarcass(ServerLevel level, BlockPos at) {
+		if (!workingHours(level)) {
+			return false;
+		}
+		for (Villager butcher : level.getEntitiesOfClass(Villager.class, new net.minecraft.world.phys.AABB(at).inflate(FETCH_REACH + BLOCK_SEARCH),
+			v -> isButcher(v) && v.isAlive())) {
+			BlockPos hook = freeHook(level, butcher);
+			if (hook != null && hook.closerThan(at, FETCH_REACH)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** Whether {@code player} has heard how good this butcher is (or seen for themselves). */
@@ -524,6 +593,9 @@ public final class Butchers {
 	}
 
 	private static void tick(MinecraftServer server) {
+		if (server.getTickCount() % LOOK_EVERY == 0) {
+			lookForWork(server);
+		}
 		if (BUSY.isEmpty()) {
 			return;
 		}
@@ -553,7 +625,12 @@ public final class Butchers {
 				if (butcher.blockPosition().closerThan(job.spot(), ARRIVED + 1.0) || job.ticks() > OUT_TICKS) {
 					job = job.next(CHOP);
 					BlockPos hook = body != null ? hookBy(level, job.spot()) : null;
-					if (hook != null && Hanging.hangable(body)) {
+					if (hook != null && Hanging.hangable(body) && job.owner().equals(TOWN)) {
+						// the town's: up on the hook, worked a step at a time through the day
+						body.hangOn(hook);
+						level.playSound(null, hook, SoundEvents.CHAIN_PLACE, SoundSource.BLOCKS, 1.0F, 0.8F);
+						job = job.next(DRESS);
+					} else if (hook != null && Hanging.hangable(body)) {
 						// (0.5.51) up on the hook, bled as he works it
 						body.hangOn(hook);
 						body.startBleeding(HOOK_CHOP_TICKS);
@@ -584,8 +661,70 @@ public final class Butchers {
 					Vec3 at = body != null ? body.position() : butcher.position();
 					level.sendParticles(ParticleTypes.CRIT, at.x, at.y + 0.3, at.z, 20, 0.4, 0.2, 0.4, 0.2);
 					play(level, at, SoundEvents.PLAYER_ATTACK_SWEEP, 1.0F);
+					if (job.owner().equals(TOWN)) {
+						// (no hook to hang it on after all: chopped up the old way, for the town)
+						List<ItemStack> cuts = new ArrayList<>();
+						if (body != null) {
+							for (ItemStack drop : body.butcheredDrops()) {
+								cuts.add(drop.copyWithCount(scaled(drop.getCount(), job.skill(), butcher)));
+							}
+						}
+						discardBody(level, job);
+						store(level, butcher, job.spot(), cuts);
+						endTownJob(butcher);
+						return;
+					}
 					discardBody(level, job);
 					job = new Job(job.owner(), job.cuts(), job.skill(), BACK, job.spot(), 0, Optional.empty());
+				}
+			}
+			case FETCH -> {
+				if (body == null || body.hook() != null || body.dragger() != null || body.carrier() != null && body.carrier() != butcher) {
+					// gone, or someone else has it
+					endTownJob(butcher);
+					return;
+				}
+				walkTo(butcher, new WalkTarget(body.blockPosition(), WALK_SPEED, 1));
+				double d = butcher.distanceToSqr(body);
+				if (d <= TAKE_UP_SQ || job.ticks() > FETCH_TICKS && d <= OVER_FENCE_SQ) {
+					body.handTo(butcher);
+					job = job.next(OUT);
+				} else if (job.ticks() > FETCH_TICKS) {
+					UNREACHABLE.add(body.getUUID());
+					endTownJob(butcher);
+					return;
+				}
+			}
+			case DRESS -> {
+				butcher.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+				butcher.getNavigation().stop();
+				if (body == null || body.isRemoved() || body.hook() == null || job.ticks() > DRESS_TICKS) {
+					// done (the last cut takes it), taken down by someone, or left too long: what he has goes to the town
+					store(level, butcher, job.spot(), stacks(job));
+					endTownJob(butcher);
+					return;
+				}
+				butcher.getLookControl().setLookAt(body);
+				putBlade(butcher, Hanging.knifeNext(body) ? knife() : cleaver());
+				boolean draining = body.butcherStage() == Hanging.BLEEDING;
+				if (job.ticks() % DRESS_EVERY == DRESS_FIRST) {
+					butcher.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+					List<ItemStack> off = new ArrayList<>();
+					boolean more = Hanging.dressStep(body, level, Math.round(job.skill()), off::add);
+					List<ItemStackTemplate> cuts = new ArrayList<>(job.cuts());
+					for (ItemStack stack : off) {
+						if (!stack.isEmpty()) {
+							cuts.add(ItemStackTemplate.fromNonEmptyStack(stack));
+						}
+					}
+					job = new Job(job.owner(), cuts, job.skill(), DRESS, job.spot(), job.ticks(), more ? job.body() : Optional.empty());
+				} else if (!draining && job.ticks() % DRESS_STROKE_EVERY == 0) {
+					// working at it between steps: trimming, turning it on the hook
+					butcher.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+					if (butcher.getRandom().nextInt(3) == 0) {
+						play(level, body.position(), SoundEvents.VILLAGER_WORK_BUTCHER, 0.9F + butcher.getRandom().nextFloat() * 0.2F);
+					}
+					body.jolt(false);
 				}
 			}
 			case BACK -> {
@@ -612,6 +751,188 @@ public final class Butchers {
 			}
 		}
 		butcher.setAttached(JOB, job);
+	}
+
+	private static boolean workingHours(ServerLevel level) {
+		long t = Math.floorMod(level.getOverworldClockTime(), 24000L);
+		return t >= WORK_FROM && t < WORK_TO;
+	}
+
+	/** Idle butchers near players, in working hours, take up the town's work if there's a carcass and a free hook. */
+	private static void lookForWork(MinecraftServer server) {
+		for (ServerLevel level : server.getAllLevels()) {
+			if (level.players().isEmpty() || !workingHours(level)) {
+				continue;
+			}
+			Set<Villager> seen = new HashSet<>();
+			for (ServerPlayer player : level.players()) {
+				for (Villager butcher : level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(LOOK_RADIUS),
+					v -> isButcher(v) && v.isAlive() && !v.hasAttached(JOB) && !v.isSleeping() && v.getTradingPlayer() == null)) {
+					if (seen.add(butcher)) {
+						townWork(level, butcher);
+					}
+				}
+			}
+		}
+	}
+
+	private static void townWork(ServerLevel level, Villager butcher) {
+		BlockPos hook = freeHook(level, butcher);
+		if (hook == null) {
+			return;
+		}
+		BlockPos stand = beside(level, hook);
+		if (stand == null) {
+			return;
+		}
+		Set<UUID> claimed = new HashSet<>();
+		for (Villager other : BUSY) {
+			Job job = other.getAttached(JOB);
+			if (job != null) {
+				job.body().ifPresent(claimed::add);
+			}
+		}
+		CorpseEntity carcass = null;
+		for (CorpseEntity c : level.getEntitiesOfClass(CorpseEntity.class, new net.minecraft.world.phys.AABB(hook).inflate(FETCH_REACH),
+			c -> !c.isRemoved() && townCarcass(c) && !claimed.contains(c.getUUID()) && !UNREACHABLE.contains(c.getUUID()))) {
+			if (carcass == null || c.distanceToSqr(butcher) < carcass.distanceToSqr(butcher)) {
+				carcass = c;
+			}
+		}
+		if (carcass == null || !reachable(butcher, stand, 1)) {
+			return;
+		}
+		butcher.setAttached(JOB, new Job(TOWN, List.of(), skill(butcher), FETCH, stand, 0, Optional.of(carcass.getUUID())));
+		BUSY.add(butcher);
+	}
+
+	/** A carcass for the town: a passive animal's, fresh, hangable, lying loose, and not a player's kill. */
+	private static boolean townCarcass(CorpseEntity c) {
+		return c.isButcherable() && Hanging.hangable(c) && c.butcherStage() == Hanging.FRESH && !c.killedByPlayer()
+			&& c.carrier() == null && c.dragger() == null && c.hook() == null;
+	}
+
+	/** The nearest meat hook to a butcher's workstation (within {@link #BLOCK_SEARCH}) with nothing on it or coming to it. */
+	private static @Nullable BlockPos freeHook(ServerLevel level, Villager butcher) {
+		BlockPos home = butcher.blockPosition();
+		BlockPos site = butcher.getBrain().getMemory(MemoryModuleType.JOB_SITE)
+			.filter(s -> s.dimension() == level.dimension() && s.pos().closerThan(home, 32.0))
+			.map(GlobalPos::pos).orElse(home);
+		Set<BlockPos> taken = new HashSet<>();
+		for (Villager other : BUSY) {
+			Job job = other.getAttached(JOB);
+			if (job != null && other.level() == level) {
+				BlockPos h = hookBy(level, job.spot());
+				if (h != null) {
+					taken.add(h);
+				}
+			}
+		}
+		BlockPos best = null;
+		for (BlockPos pos : BlockPos.betweenClosed(site.offset(-BLOCK_SEARCH, -4, -BLOCK_SEARCH), site.offset(BLOCK_SEARCH, 4, BLOCK_SEARCH))) {
+			if (com.jaymoskitchen.butchery.Butchery.isHook(level.getBlockState(pos)) && !taken.contains(pos)
+				&& (best == null || pos.distSqr(site) < best.distSqr(site))) {
+				BlockPos at = pos.immutable();
+				if (level.getEntitiesOfClass(CorpseEntity.class, new net.minecraft.world.phys.AABB(at).inflate(3.0), c -> at.equals(c.hook())).isEmpty()) {
+					best = at;
+				}
+			}
+		}
+		return best;
+	}
+
+	/** The town's cuts: into its stores, then a chest by the hook, then at the butcher's feet. */
+	private static void store(ServerLevel level, Villager butcher, BlockPos spot, List<ItemStack> cuts) {
+		BlockPos hook = hookBy(level, spot);
+		BlockPos near = hook != null ? hook : spot;
+		for (ItemStack cut : cuts) {
+			ItemStack left = cut;
+			if (stock != null && !left.isEmpty()) {
+				left = stock.apply(butcher, left);
+			}
+			for (BlockPos pos : BlockPos.betweenClosed(near.offset(-STORE_REACH, -STORE_REACH, -STORE_REACH), near.offset(STORE_REACH, STORE_REACH, STORE_REACH))) {
+				if (left.isEmpty()) {
+					break;
+				}
+				if (level.getBlockEntity(pos) instanceof net.minecraft.world.Container chest
+					&& !(level.getBlockEntity(pos) instanceof net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity)) {
+					left = into(chest, left);
+				}
+			}
+			if (!left.isEmpty()) {
+				butcher.spawnAtLocation(level, left, 0.5F);
+			}
+		}
+		play(level, butcher.position(), SoundEvents.VILLAGER_WORK_BUTCHER, 1.0F);
+	}
+
+	/** Puts {@code stack} into {@code chest} (topping up like stacks, then empty slots); returns what didn't fit. */
+	private static ItemStack into(net.minecraft.world.Container chest, ItemStack stack) {
+		ItemStack left = stack.copy();
+		for (int slot = 0; slot < chest.getContainerSize() && !left.isEmpty(); slot++) {
+			ItemStack there = chest.getItem(slot);
+			if (there.isEmpty() ? chest.canPlaceItem(slot, left) : ItemStack.isSameItemSameComponents(there, left)) {
+				int room = Math.min(chest.getMaxStackSize(left), left.getMaxStackSize()) - there.getCount();
+				int n = Math.min(room, left.getCount());
+				if (n > 0) {
+					if (there.isEmpty()) {
+						chest.setItem(slot, left.split(n));
+					} else {
+						there.grow(n);
+						left.shrink(n);
+					}
+					chest.setChanged();
+				}
+			}
+		}
+		return left;
+	}
+
+	private static void endTownJob(Villager butcher) {
+		putBlade(butcher, null);
+		butcher.removeAttached(JOB);
+		BUSY.remove(butcher);
+		butcher.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+	}
+
+	/**
+	 * {@code blade} in the butcher's hand for the hook's work (null takes back what the work put there). Only into an
+	 * empty hand or one holding a work prop (this mod's, or Jaymo's Kingdoms' tool of the trade), so nothing of theirs is lost.
+	 */
+	private static void putBlade(Villager butcher, net.minecraft.world.item.@Nullable Item blade) {
+		ItemStack held = butcher.getMainHandItem();
+		if (blade == null) {
+			if (marked(held, WORK_MARK)) {
+				butcher.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+			}
+			return;
+		}
+		if (held.is(blade) || !held.isEmpty() && !marked(held, WORK_MARK) && !marked(held, "jaymoskingdoms_work")) {
+			return;
+		}
+		ItemStack stack = new ItemStack(blade);
+		net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+		tag.putBoolean(WORK_MARK, true);
+		stack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(tag));
+		butcher.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, stack);
+	}
+
+	private static boolean marked(ItemStack stack, String mark) {
+		net.minecraft.world.item.component.CustomData data = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+		return data != null && data.copyTag().getBooleanOr(mark, false);
+	}
+
+	private static net.minecraft.world.item.Item cleaver() {
+		return item("jaymospowers:iron_cleaver", net.minecraft.world.item.Items.IRON_AXE);
+	}
+
+	private static net.minecraft.world.item.Item knife() {
+		return item("jaymoskitchen:iron_knife", net.minecraft.world.item.Items.SHEARS);
+	}
+
+	private static net.minecraft.world.item.Item item(String id, net.minecraft.world.item.Item fallback) {
+		net.minecraft.resources.Identifier key = net.minecraft.resources.Identifier.tryParse(id);
+		return key == null ? fallback : net.minecraft.core.registries.BuiltInRegistries.ITEM.getOptional(key).orElse(fallback);
 	}
 
 	private static void walkTo(Villager butcher, WalkTarget target) {

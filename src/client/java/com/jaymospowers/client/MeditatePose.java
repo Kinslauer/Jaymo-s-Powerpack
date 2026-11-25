@@ -3,6 +3,7 @@ package com.jaymospowers.client;
 import com.jaymospowers.core.Meditate;
 import com.jaymospowers.core.Shadowbox;
 import com.mojang.blaze3d.vertex.PoseStack;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.EnumMap;
 import java.util.Map;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
@@ -32,6 +33,11 @@ import org.joml.Vector3f;
  * hands) and on a seat (upright, legs crossed, slouched), changed with the Sit key. On a seat the body keeps the seat's
  * way and the head turns within {@link #SEAT_LOOK}. What's in the main hand changes the arms: a book held open to read,
  * a cup (anything drunk) raised, a sword across the lap.
+ *
+ * <p>Andy: "using the sit key while kneeling, should smoothly transition between the animations". A sit that starts on
+ * the knee (CrouchPose's) starts from the kneel itself, as far onto the knee as it was drawn: the legs, the arms with what
+ * they hold, the knees, the lean and the height all blend from the kneel into the sit over {@link #SETTLE} ticks, where
+ * they used to snap to standing first.
  */
 public final class MeditatePose {
 	/** How long sitting down (or settling into the stance) takes, in ticks. */
@@ -51,7 +57,22 @@ public final class MeditatePose {
 	 * {@code time}: ticks since they began; {@code kind}: {@link Meditate#MEDITATING}...; {@code frame}: the shadowboxing pose;
 	 * (0.19.67) {@code pose}: which way they sit; {@code seated}: on a seat; {@code held}: {@link #EMPTY}, {@link #BOOK}...
 	 */
-	public record State(float time, int kind, float[] frame, int pose, boolean seated, int held) {
+	public record State(float time, int kind, float[] frame, int pose, boolean seated, int held, float kneel, CrouchPose.Style style,
+		boolean offFree) {
+	}
+
+	/**
+	 * How far onto the knee each body was when its sit began (the sit's start, game time, and 0 to 1), so the sit blends out
+	 * of the kneel ({@code kneel} on {@link State}).
+	 */
+	private record Start(long since, float kneel) {
+	}
+
+	private static final Int2ObjectOpenHashMap<Start> STARTS = new Int2ObjectOpenHashMap<>();
+
+	/** How much of the kneel a sit from the knee still shows (1 as it starts, 0 once settled). */
+	static float kneelLeft(State m) {
+		return m.kneel() * (1.0F - settle(m.time()));
 	}
 
 	public static final RenderStateDataKey<State> KEY = RenderStateDataKey.create(() -> "jaymospowers:meditate");
@@ -147,6 +168,7 @@ public final class MeditatePose {
 	public static void extract(Avatar entity, AvatarRenderState state, float partialTicks) {
 		Meditate.State meditating = entity instanceof Player player ? Meditate.of(player) : null;
 		if (meditating == null) {
+			STARTS.remove(entity.getId());
 			state.setData(KEY, null);
 			return;
 		}
@@ -177,7 +199,16 @@ public final class MeditatePose {
 			state.setData(KEY, null);
 			return;
 		}
-		state.setData(KEY, new State(time, meditating.kind(), frame, meditating.pose(), meditating.seated(), held));
+		// a sit begun on the knee starts from it (as far down as the knee was last drawn)
+		Start start = STARTS.get(entity.getId());
+		if (start == null || start.since() != meditating.since()) {
+			start = new Start(meditating.since(), meditating.kind() == Meditate.MEDITATING ? CrouchPose.kneelShown(entity.getId()) : 0.0F);
+			STARTS.put(entity.getId(), start);
+		}
+		float kneel = time < SETTLE ? start.kneel() : 0.0F;
+		CrouchPose.Style style = kneel > 0.0F ? CrouchPose.Style.of(entity.getMainHandItem()) : CrouchPose.Style.EMPTY;
+		state.setData(KEY, new State(time, meditating.kind(), frame, meditating.pose(), meditating.seated(), held, kneel, style,
+			entity.getOffhandItem().isEmpty()));
 	}
 
 	private static int held(ItemStack stack) {
@@ -233,7 +264,16 @@ public final class MeditatePose {
 		float in = settle(m.time());
 		if (m.kind() == Meditate.MEDITATING) {
 			float breath = 0.012F * Mth.sin(m.time() * 0.12F);
-			poseStack.translate(0.0F, -SIT_SINK * in + breath * in, 0.0F);
+			// from the knee: down from as low as the kneel sat (vanilla's crouch drop and the kneel's sink; CrouchPose
+			// leaves the height to this), its lean easing off
+			float knelt = kneelLeft(m);
+			float kneelSink = (CrouchPose.V_OFFSET * state.scale + CrouchPose.SINK) * knelt;
+			poseStack.translate(0.0F, -SIT_SINK * in - kneelSink + breath * in, 0.0F);
+			if (knelt > 0.0F) {
+				poseStack.translate(0.0F, CrouchPose.HIP, 0.0F);
+				poseStack.rotate(com.mojang.math.Axis.XP.rotationDegrees(-CrouchPose.KNEEL_LEAN * knelt));
+				poseStack.translate(0.0F, -CrouchPose.HIP, 0.0F);
+			}
 			return;
 		}
 		// on the balls of the feet: a bounce twice a beat (still on one foot while kicking)
@@ -253,6 +293,10 @@ public final class MeditatePose {
 		}
 		float in = settle(m.time());
 		if (m.kind() == Meditate.MEDITATING) {
+			if (m.kneel() > 0.0F) {
+				// begun on the knee: the kneel laid on first (as far down as it was), and the sit blended on from it
+				CrouchPose.kneelLimbs(h, state, m.style(), m.offFree(), m.kneel());
+			}
 			sit(h, m, state.mainArm == HumanoidArm.RIGHT, in);
 		} else {
 			box(h, m.frame(), m.time(), in, m.kind() == Meditate.SHADOWBOXING_HEAVY);
@@ -364,8 +408,20 @@ public final class MeditatePose {
 		float[] knees = KNEES[m.seated() ? 1 : 0][pose];
 		// cross-legged folds across (the right shin toward the left, the left toward the right); the rest at the knee
 		boolean sideways = !m.seated() && pose == 0;
-		KneeBend.bend(h.rightLeg, knees[0] * in, KneeBend.KNEE, sideways);
-		KneeBend.bend(h.leftLeg, knees[1] * in, KneeBend.KNEE, sideways);
+		// begun on the knee: from the kneel's knees (the front one bent up, the back shin flat behind)
+		float right = m.kneel() * CrouchPose.FRONT_KNEE, left = m.kneel() * CrouchPose.BACK_KNEE;
+		if (!sideways) {
+			KneeBend.bend(h.rightLeg, Mth.lerp(in, right, knees[0]), KneeBend.KNEE, false);
+			KneeBend.bend(h.leftLeg, Mth.lerp(in, left, knees[1]), KneeBend.KNEE, false);
+		} else if (m.kneel() > 0.0F && in < 0.5F) {
+			// a knee can't fold both ways in one draw: the kneel's straighten out first, then the shins fold across
+			KneeBend.bend(h.rightLeg, right * (1.0F - 2.0F * in), KneeBend.KNEE, false);
+			KneeBend.bend(h.leftLeg, left * (1.0F - 2.0F * in), KneeBend.KNEE, false);
+		} else {
+			float k = m.kneel() > 0.0F ? 2.0F * in - 1.0F : in;
+			KneeBend.bend(h.rightLeg, knees[0] * k, KneeBend.KNEE, true);
+			KneeBend.bend(h.leftLeg, knees[1] * k, KneeBend.KNEE, true);
+		}
 	}
 
 	/** An arm's pose with its turn toward the middle of the body ({@code inward}) and out to the side ({@code out}), either arm. */

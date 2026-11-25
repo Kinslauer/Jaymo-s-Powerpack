@@ -894,6 +894,55 @@ final class McaBridge {
 		return w;
 	}
 
+	/**
+	 * {@link McaCompat#hollowBody}: a grown man of no settlement and out of MCA's family tree, enlisted to none in {@code role},
+	 * at {@code at}, not yet in the world: the one whose saved self is {@code face} (from {@link #saved}) if there is one, else
+	 * a new face.
+	 */
+	static @Nullable PathfinderMob hollowBody(ServerLevel level, Vec3 at, float yaw, int role, @Nullable CompoundTag face) {
+		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(at).withAge(0).withGender(Gender.MALE).build(EntitySpawnReason.EVENT);
+		if (villager == null) {
+			return null;
+		}
+		if (face != null) {
+			CompoundTag self = face.copy();
+			for (String gone : new String[] {"UUID", "Health", "DeathTime", "HurtTime", "Pos", "Motion", "Rotation", "Passengers", "leash", "Fire",
+				"Brain", "NoAI", "attributes", "active_effects", "equipment", "Inventory"}) {
+				self.remove(gone);
+			}
+			try {
+				villager.load(net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING,
+					level.registryAccess(), self));
+			} catch (RuntimeException e) {
+				JaymosKingdoms.LOGGER.warn("A Pallid captain's body only partly loaded: {}", e.toString());
+			}
+			villager.setUUID(java.util.UUID.randomUUID());
+			villager.entityTags().removeIf(t -> t.contains("downed"));
+		}
+		villager.snapTo(at.x, at.y, at.z, yaw, 0.0F);
+		villager.setPersistenceRequired();
+		worker(villager).enlist(role, -1);
+		villager.setHomeTo(BlockPos.containing(at), 32);
+		return villager;
+	}
+
+	/** {@code mob}'s whole saved self (for {@link #hollowBody}), or null if it isn't one of MCA's. */
+	static @Nullable CompoundTag saved(LivingEntity mob) {
+		if (!(mob instanceof VillagerEntityMCA v)) {
+			return null;
+		}
+		net.minecraft.world.level.storage.TagValueOutput out = net.minecraft.world.level.storage.TagValueOutput.createWithContext(
+			net.minecraft.util.ProblemReporter.DISCARDING, v.registryAccess());
+		return v.saveAsPassenger(out) ? out.buildResult() : null;
+	}
+
+	/** {@code mob} (one of MCA's, just put in the world) is in nobody's family tree. */
+	static void untree(ServerLevel level, LivingEntity mob) {
+		if (mob instanceof VillagerEntityMCA) {
+			FamilyTree.get(level).remove(mob.getUUID());
+		}
+	}
+
 	/** (0.7.295) {@link McaCompat#assassin}, {@link McaCompat#stranger}: a grown villager of no settlement, enlisted to none in {@code role}. */
 	static @Nullable PathfinderMob stranger(ServerLevel level, BlockPos at, float yaw, int role, BlockPos home, int radius) {
 		VillagerEntityMCA villager = VillagerFactory.newVillager(level).withPosition(Vec3.atBottomCenterOf(at)).withAge(0).spawn(EntitySpawnReason.EVENT);
@@ -1415,6 +1464,28 @@ final class McaBridge {
 		Component line = Component.translatable("dialogue.chat.jaymoskingdoms.zfighter_opening." + kind + "." + villager.getRandom().nextInt(ZFIGHTER_OPENINGS));
 		met(villager, player);
 		Introductions.learn(player, villager);
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);
+		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueQuestionResponse(line, false), player);
+		return true;
+	}
+
+	/**
+	 * Andy, 2026-11-24: the Ruin Keepers "should explain the lore", as hints in their talk. MCA's menu opening on a ruin
+	 * keeper ({@link com.jaymoskingdoms.oldage.RuinFolk}): the next tale of their city, if you speak the old tongue
+	 * ({@link com.jaymoskingdoms.oldage.RuinFolk#tell}: one at first, another each time you come back having traded at their
+	 * stall), else a look and words you don't follow; on to the main menu. Not for one wary of you. True if so.
+	 */
+	static boolean keeperOpening(LivingEntity mob, ServerPlayer player) {
+		if (!(mob instanceof VillagerEntityMCA villager) || !com.jaymoskingdoms.oldage.RuinFolk.is(villager) || Introductions.wary(player, villager)) {
+			return false;
+		}
+		var main = net.conczin.mca.resources.Dialogues.getInstance().getQuestion("main");
+		if (main == null) {
+			return false;
+		}
+		Component line = Languages.understands(player, villager) ? com.jaymoskingdoms.oldage.RuinFolk.tell(villager, player)
+			: Component.translatable("dialogue.chat.jaymoskingdoms.keeper_wordless");
+		met(villager, player);
 		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueResponse(main, player, villager), player);
 		Network.sendToPlayer(new net.conczin.mca.network.s2c.InteractionDialogueQuestionResponse(line, false), player);
 		return true;
@@ -2183,6 +2254,24 @@ final class McaBridge {
 	}
 
 	/** {@link McaCompat#towns}. */
+	/** {@link McaCompat#heir}. */
+	static java.util.@Nullable UUID heir(ServerPlayer player) {
+		FamilyTreeNode me = FamilyTree.get(player.level()).getOrEmpty(player.getUUID()).orElse(null);
+		if (me == null) {
+			return null;
+		}
+		java.util.UUID self = player.getUUID();
+		return java.util.stream.Stream.of(
+				me.lookup(java.util.stream.Stream.of(me.partner())),
+				me.lookup(me.streamChildren()),
+				me.getParents(),
+				me.getSiblings())
+			.flatMap(s -> s)
+			.filter(n -> n.isPlayer() && !n.isDeceased() && !n.id().equals(self))
+			.map(FamilyTreeNode::id)
+			.findFirst().orElse(null);
+	}
+
 	/** (0.7.221) {@link McaCompat#playerFamily}. */
 	static boolean playerFamily(Villager villager) {
 		if (!(villager instanceof VillagerEntityMCA v)) {

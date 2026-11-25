@@ -62,7 +62,6 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -170,6 +169,18 @@ public final class Downed {
 	 * a player's blows on a downed mob are its wounds ({@link #MAX_WOUNDS}), the same three.
 	 */
 	public static final int DOWNED_BLOWS = 3;
+	/**
+	 * Andy (2026-11-22): "make the downed players and mobs go unconcious after a hit, then 3 hits while downed kills them,
+	 * or any execution or unblockable (red) attack". A blow on someone already down lays them out cold for this long
+	 * (ticks; sneak mashes them round sooner, a friend can still revive them). The blow that put them down doesn't count.
+	 */
+	public static final int HIT_OUT_TICKS = 20 * 30;
+	/**
+	 * Andy (2026-11-24): "falls and bleeding dont count, fire knocks unconcious instantly ... they die after burning for
+	 * 6s". Anyone downed who burns passes out at the first touch of fire and dies once they've burned this long (ticks);
+	 * put out for {@link #BURN_GAP} ticks and the count starts again.
+	 */
+	public static final int BURN_KILL_TICKS = 20 * 6, BURN_GAP = 40;
 	/** (0.18.5) How long a downed player holds sneak to get up by themselves (ticks), and the share of their most health they rise with. */
 	public static final int RISE_TICKS = 160;
 	/** Sat against a wall too wounded to rise otherwise, the rise takes this many times as long. */
@@ -289,6 +300,8 @@ public final class Downed {
 	private static final Map<LivingEntity, DamageSource> FELLED_BY = new WeakHashMap<>();
 	/** Weaker blows on each downed body: when they went down ({@link #since}) and how many since. */
 	private static final Map<LivingEntity, long[]> BLOWS = new WeakHashMap<>();
+	/** Each downed body burning: when it caught and when fire last hurt it (game time). */
+	private static final Map<LivingEntity, long[]> BURNING = new WeakHashMap<>();
 	/** Those being finished off just now (their death let through as it comes). */
 	static final Set<LivingEntity> FINISHING = Collections.newSetFromMap(new WeakHashMap<>());
 	/** A downed player → how long they've held sneak to give up (ticks). */
@@ -494,8 +507,12 @@ public final class Downed {
 			// (Andy, 2026-11-18) a crushing blow (a mutant's slam) on the downed: "theres just simply no place else for that
 			// force to go, so obviously they get gibbed"; knocked out cold or not
 			boolean crushed = isDowned(entity) && com.jaymospowers.core.BlastGore.crushedNow(entity);
+			if (isDowned(entity) && source.is(DamageTypeTags.IS_FIRE) && entity.level() instanceof ServerLevel level
+				&& burns(level, entity, source)) {
+				return false;
+			}
 			if (isDowned(entity) && !FINISHING.contains(entity) && attack(source) && (!outCold(entity) || crushed)
-				&& (amount >= KILL_BLOW || lastBlow(entity))
+				&& (amount >= KILL_BLOW || lastBlow(entity) || red(source))
 				&& !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && entity.level() instanceof ServerLevel level) {
 				boolean burst = crushed && com.jaymospowers.core.BlastGore.gibs(entity, source, amount);
 				if (burst && Dismember.rubber(entity) && com.jaymospowers.core.BlastGore.tearLimbs(entity, source)) {
@@ -519,6 +536,10 @@ public final class Downed {
 				}
 				return false;
 			}
+			if (isDowned(entity) && source.is(DamageTypeTags.IS_EXPLOSION) && entity.level() instanceof ServerLevel) {
+				// (Andy, 2026-11-24) "blasts on downed enemies should blow limbs off", whether or not the blow is a wound
+				com.jaymospowers.core.BlastGore.downedBlast(entity, source, amount);
+			}
 			if (!isDowned(entity) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || !(source.getEntity() instanceof Player)
 				|| entity instanceof Player || outCold(entity)) {
 				// ((0.18.84) and on one knocked out from standing, unhurt: blows land as on anyone awake)
@@ -533,8 +554,10 @@ public final class Downed {
 		});
 		// (0.18.5) a hit breaks off a held action: rising, a revive, Second Wind's eating
 		ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, base, taken, blocked) -> {
-			if (taken > 0.0F && attack(source) && entity.isAlive() && isDowned(entity) && !outCold(entity)) {
+			if (taken > 0.0F && attack(source) && entity.isAlive() && isDowned(entity) && !outCold(entity)
+				&& entity.level() instanceof ServerLevel level && level.getGameTime() != since(entity)) {
 				blowLanded(entity);
+				hitOut(level, entity);
 			}
 			if (entity instanceof ServerPlayer player && taken > 0.0F && attack(source) && player.isAlive()) {
 				struck(player);
@@ -768,6 +791,51 @@ public final class Downed {
 		return had != null && had[0] == since(entity) && had[1] >= DOWNED_BLOWS - 1;
 	}
 
+	/**
+	 * A red blow (too heavy to parry: {@link com.jaymospowers.combat.Guard#UNPARRYABLE_TAG} on whoever swung or shot it),
+	 * which kills anyone downed at once.
+	 */
+	private static boolean red(DamageSource source) {
+		String tag = com.jaymospowers.combat.Guard.UNPARRYABLE_TAG;
+		return source.getEntity() != null && source.getEntity().entityTags().contains(tag)
+			|| source.getDirectEntity() != null && source.getDirectEntity().entityTags().contains(tag);
+	}
+
+	/** A blow on someone downed and still awake lays them out cold ({@link #HIT_OUT_TICKS}). */
+	private static void hitOut(ServerLevel level, LivingEntity entity) {
+		if (awake(entity)) {
+			knockOut(level, entity, HIT_OUT_TICKS, false, "message.jaymospowers.downed.hit_out");
+		}
+	}
+
+	/**
+	 * Fire on someone downed ({@link #BURN_KILL_TICKS}): the first touch lays them out cold, and once they've burned that
+	 * long it's their death. True if it killed them (the fire's harm is then not dealt again).
+	 */
+	private static boolean burns(ServerLevel level, LivingEntity entity, DamageSource source) {
+		if (FINISHING.contains(entity) || entity.fireImmune() || entity.hasEffect(net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE)
+			|| entity instanceof Player player && (player.isCreative() || player.isSpectator())) {
+			return false;
+		}
+		long now = level.getGameTime();
+		long[] had = BURNING.get(entity);
+		if (had == null || now - had[1] > BURN_GAP) {
+			had = new long[] {now, now};
+			BURNING.put(entity, had);
+		}
+		had[1] = now;
+		if (now - had[0] >= BURN_KILL_TICKS) {
+			BURNING.remove(entity);
+			FELLED_BY.put(entity, source);
+			finish(level, entity);
+			return true;
+		}
+		if (awake(entity)) {
+			knockOut(level, entity, HIT_OUT_TICKS, false, "message.jaymospowers.downed.burn_out");
+		}
+		return false;
+	}
+
 	/** A weaker blow landed on someone downed: counted toward {@link #lastBlow}. */
 	private static void blowLanded(LivingEntity entity) {
 		long since = since(entity);
@@ -849,7 +917,7 @@ public final class Downed {
 
 	/**
 	 * Whether this blow leaves anything to get up: not one that ignores invulnerability, nor a beheading (or a body already
-	 * headless). And a totem in hand is left to do its work (this event comes before it).
+	 * headless). And a totem in hand, worn or carried (WornTotems) is left to do its work (this event comes before it).
 	 */
 	static boolean spared(LivingEntity entity, DamageSource source) {
 		// ((survival picks) Andy: "the only time you arent downed is if a hit does enough damage to your head while you are
@@ -857,7 +925,7 @@ public final class Downed {
 		return !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !source.is(Dismember.DECAPITATION) && !Dismember.headless(entity)
 			&& !Wounds.headKilled(entity)
 			&& !entity.entityTags().contains(Dismember.tag(Dismember.HEAD))
-			&& !entity.getMainHandItem().is(Items.TOTEM_OF_UNDYING) && !entity.getOffhandItem().is(Items.TOTEM_OF_UNDYING)
+			&& !com.jaymospowers.baubles.WornTotems.ready(entity)
 			// (0.17.183) Kingdoms' Will: No Mercy for the weaker ({@link WillSkill#noMercy})
 			&& !WillSkill.noMercy(entity, source);
 	}
@@ -1272,12 +1340,13 @@ public final class Downed {
 		FELLED_BY.put(entity, source);
 		// ((0.15.142) and whoever was binding it starts over)
 		DownedCrawl.hit(entity);
-		if (count >= MAX_WOUNDS) {
+		if (count >= MAX_WOUNDS || red(source)) {
 			blowLands(level, entity, source, false);
 			finish(level, entity);
 			return;
 		}
 		entity.setAttached(WOUNDS, level.getGameTime() << 4 | count);
+		hitOut(level, entity);
 		level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, entity.getX(), entity.getY() + 0.3, entity.getZ(), 3, 0.3, 0.1, 0.3, 0.1);
 		blowLands(level, entity, source, true);
 	}

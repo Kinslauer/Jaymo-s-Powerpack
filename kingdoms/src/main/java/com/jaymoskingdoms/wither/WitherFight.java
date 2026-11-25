@@ -2,6 +2,7 @@ package com.jaymoskingdoms.wither;
 
 import com.jaymoskingdoms.Downed;
 import com.jaymoskingdoms.Folk;
+import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.Fx;
 import com.jaymoskingdoms.Legendary;
 import com.jaymoskingdoms.PowersCompat;
@@ -109,6 +110,8 @@ public final class WitherFight {
 		double angle;
 		int dir = 1;
 		long stunUntil;
+		/** When it last threw a skull at a house (game time). */
+		long lastThrow = Long.MIN_VALUE / 2;
 		final WitherMoves.Move move = new WitherMoves.Move();
 	}
 
@@ -118,7 +121,9 @@ public final class WitherFight {
 	}
 
 	public static void register() {
+		JaymosKingdoms.LOGGER.debug("wither act attachment: {}", WitherAct.ACT);
 		WitherNight.register();
+		WitherSounds.register();
 		WitherSkulls.register();
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof WitherBoss wither) {
@@ -158,6 +163,26 @@ public final class WitherFight {
 	}
 
 	private static void run(ServerLevel level, WitherBoss wither, Fight fight) {
+		fight(level, wither, fight);
+		long now = level.getGameTime();
+		WitherAct.set(wither, act(wither, fight, now), now);
+	}
+
+	/** The move its look plays now (null: it only circles or hangs there). */
+	private static @Nullable String act(WitherBoss wither, Fight fight, long now) {
+		if (wither.getInvulnerableTicks() > 0) {
+			return null;
+		}
+		if (now < fight.stunUntil) {
+			return WitherAct.STUN;
+		}
+		if (fight.phase == Phase.RAVAGE && now - fight.lastThrow < RAVAGE_EVERY) {
+			return WitherAct.RAVAGE;
+		}
+		return WitherMoves.act(fight.move, now);
+	}
+
+	private static void fight(ServerLevel level, WitherBoss wither, Fight fight) {
 		long now = level.getGameTime();
 		if (wither.getInvulnerableTicks() > 0) {
 			// (still being raised: the vanilla build-up goes on as it is)
@@ -224,6 +249,8 @@ public final class WitherFight {
 				return true;
 			}
 			fight.skulls++;
+			fight.lastThrow = now;
+			WitherAct.restart(wither, WitherAct.RAVAGE, now);
 			Vec3 from = head(wither);
 			WitherSkulls.throwSkull(level, wither, from, Vec3.atCenterOf(aim), false, WitherSkulls.Kind.RAVAGE, Vec3.atCenterOf(aim));
 			level.playSound(null, from.x, from.y, from.z, SoundEvents.WITHER_SHOOT, SoundSource.HOSTILE, 2.0F, 0.8F);
@@ -456,6 +483,7 @@ public final class WitherFight {
 		Fx.blast(level, at, 3.0F, 0xFFD060);
 		level.playSound(null, wither.getX(), wither.getY(), wither.getZ(), SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 1.5F, 0.5F);
 		level.playSound(null, wither.getX(), wither.getY(), wither.getZ(), SoundEvents.SHIELD_BREAK.value(), SoundSource.HOSTILE, 1.5F, 0.6F);
+		level.playSound(null, wither.getX(), wither.getY(), wither.getZ(), WitherSounds.STUN, SoundSource.HOSTILE, 3.0F, 1.0F);
 		PowersCompat.tellGlint(level, at, false);
 	}
 }

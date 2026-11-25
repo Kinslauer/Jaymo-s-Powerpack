@@ -69,17 +69,20 @@ import net.minecraft.world.phys.HitResult;
  */
 public final class Thirst {
 	public static final int MAX = 20;
-	/** Points of water lost a second at rest (one every 75 s: a full bar lasts most of a day). */
-	static final float DRAIN = 1.0F / 75.0F;
+	/**
+	 * Points of water lost a second at rest (one every 150 s: a full bar lasts over two days). Andy: thirst "was too
+	 * brutal", so it lasts twice as long as it did, as do the costs below ({@link #EXHAUSTION_POINT}).
+	 */
+	static final float DRAIN = 1.0F / 150.0F;
 	/** On top of that, as a share of {@link #DRAIN}: swimming, being in the Nether. */
 	static final float SWIM_DRAIN = 0.5F, NETHER_DRAIN = 0.5F;
 	/**
-	 * What things cost, after Legendary Survival Overhaul's thirst (ideas and numbers only): its exhaustion, of which 4
-	 * make a point of water as with hunger ({@link #EXHAUSTION_POINT}). A jump, a block broken, an attack, a second of
+	 * What things cost, after Legendary Survival Overhaul's thirst (ideas and numbers only): its exhaustion, of which 8
+	 * make a point of water (twice hunger's 4: {@link #EXHAUSTION_POINT}). A jump, a block broken, an attack, a second of
 	 * sprinting. All of it goes faster the hotter you are ({@link BodyHeat#thirstFactor}).
 	 */
 	static final float JUMP = 0.15F, BREAK = 0.07F, ATTACK = 0.3F, SPRINT = 0.1F;
-	static final float EXHAUSTION_POINT = 4.0F;
+	static final float EXHAUSTION_POINT = 8.0F;
 	/** At or below this you can't sprint, and at or below this you're parched (weakness). */
 	public static final int NO_SPRINT = 6, PARCHED = 3;
 	/** Seconds between hurts at no water, and how much each takes. */

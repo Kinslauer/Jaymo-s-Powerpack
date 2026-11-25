@@ -76,6 +76,37 @@ final class OrcCamps {
 			|| biome.is(Biomes.DARK_FOREST) || biome.is(Biomes.PLAINS) || biome.is(Biomes.SNOWY_PLAINS) || biome.is(Biomes.MEADOW);
 	}
 
+	/** Rough country: orc land that is not plains or meadow (badlands, savanna, hills, taiga, dark forest, snow). */
+	static boolean harsh(ServerLevel level, BlockPos at) {
+		Holder<Biome> biome = level.getBiome(at);
+		return land(level, at) && !biome.is(Biomes.PLAINS) && !biome.is(Biomes.MEADOW);
+	}
+
+	/** How far out (blocks) the country is sampled for a border, and the points round. */
+	static final int BORDER_RING = 64, BORDER_POINTS = 8;
+
+	/**
+	 * {@code at} is on a harsh border: among the (loaded) points {@link #BORDER_RING} blocks round it, some are rough country and
+	 * some are not, so it is where the harsh land meets the soft land the realms farm. Why orcs raid from there: the war camp sits
+	 * on the last of their country, the farms and the villages a day's march from its gate.
+	 */
+	static boolean onBorder(ServerLevel level, BlockPos at) {
+		int rough = 0, soft = 0;
+		for (int i = 0; i < BORDER_POINTS; i++) {
+			double a = Math.PI * 2.0 * i / BORDER_POINTS;
+			BlockPos p = at.offset((int)Math.round(Math.cos(a) * BORDER_RING), 0, (int)Math.round(Math.sin(a) * BORDER_RING));
+			if (!com.jaymoskingdoms.Loaded.made(level, p)) {
+				continue;
+			}
+			if (harsh(level, p)) {
+				rough++;
+			} else {
+				soft++;
+			}
+		}
+		return rough > 0 && soft > 0;
+	}
+
 	// ---- founding ------------------------------------------------------------------------------------------------------
 
 	/** A new orc camp at {@code center} (its fire on {@code floor}), its gate facing {@code gate}: built, its warchief seated, manned. */

@@ -1,0 +1,210 @@
+{
+	"replace": false,
+	"values": [
+		"#minecraft:undead",
+		"minecraft:vex",
+		"minecraft:enderman",
+		"minecraft:endermite",
+		"minecraft:spider",
+		"minecraft:cave_spider",
+		"minecraft:blaze",
+		"minecraft:ghast",
+		"minecraft:creaking",
+		{
+			"id": "jaymoskingdoms:raid_king",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:laughing_bones",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:running_skull",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:reaped_pillager",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:reaped_vindicator",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:reaped_evoker",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:wraith",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:flame_wraith",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:grave_ghost",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:revenant",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:zombie_knight",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:skeleton_lord",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:great_necromancer",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:night_bleeder",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:blightwing",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:vampire_bat",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:draugr",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:silver_skeleton",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:risen_orc",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:unburied",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:shadow",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:shapeshifter",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:bog_light",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:gaunt",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:haunted_stand",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:wreck_thing",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:black_swell",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:cinder_shade",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:tide_bride",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:werewolf",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:lich",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:hag",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:ogre",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:cave_ogre",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:fire_ogre",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:armoured_ogre",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:mud_golem",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:mimic",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:made_brute",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:mime",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:nehemoth",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:minotaur",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:bogre",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:cyclops",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:harpy",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:basilisk",
+			"required": false
+		},
+		{
+			"id": "jaymoskingdoms:troll",
+			"required": false
+		},
+		{
+			"id": "jaymospowers:flux_wisp",
+			"required": false
+		},
+		{
+			"id": "mutantmonsters:mutant_zombie",
+			"required": false
+		}
+	]
+}

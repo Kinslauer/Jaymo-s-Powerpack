@@ -31,7 +31,10 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -77,6 +80,11 @@ public final class Collisions {
 	public static final int STAGGER_TICKS = 20;
 	/** No body slams twice within this many ticks. */
 	public static final int SLAM_COOLDOWN = 10;
+	/**
+	 * A bump of ours this recent (ticks; as long as a body remembers its last hurt) is what last hurt it: that is no
+	 * knock into a wall, so it can't start a slam ({@link #knocked}).
+	 */
+	static final int OWN_HURT_MEMORY = 40;
 
 	/** A sprint into a wall: from this impact (blocks a tick) it bumps; damage = (impact - this) x the next, at most the cap. */
 	public static final double SPRINT_MIN = 0.22;
@@ -84,6 +92,11 @@ public final class Collisions {
 
 	/** A head bump: from this upward speed (blocks a tick; a plain jump starts at 0.42); damage = a little plus speed past a jump. */
 	public static final double HEAD_MIN = 0.2, JUMP = 0.42;
+	/**
+	 * A head bump needs the body going up at least this much faster than its own jump (Jump Boost counted): Andy, "just
+	 * jumping into a wall isnt enough to hurt", so only a launch or a boosted jump knocks the head.
+	 */
+	public static final double HEAD_PAST_JUMP = 0.1;
 	public static final float HEAD_BASE = 0.5F, HEAD_PER_SPEED = 10.0F, HEAD_MAX = 8.0F;
 	/** A head bump this fast (blocks a tick) knocks you limp. */
 	public static final double HEAD_LIMP = 0.7;
@@ -133,6 +146,8 @@ public final class Collisions {
 	private static volatile @Nullable ClientMoves clientMoves;
 	/** Who last slammed when (game time). */
 	private static final Map<LivingEntity, Long> SLAMMED = new WeakHashMap<>();
+	/** Who was last hurt by a bump of ours (a slam, a sprint, a head knock, a crash) when (game time). */
+	private static final Map<LivingEntity, Long> OWN_HURT = new WeakHashMap<>();
 	/** Each player's last bump of each kind, and last sore knuckle (game time). */
 	private static final Map<UUID, long[]> BUMPED = new HashMap<>();
 
@@ -194,7 +209,7 @@ public final class Collisions {
 	public static void slam(ServerLevel level, LivingEntity body, double impact, double mx, double mz) {
 		long now = level.getGameTime();
 		Long last = SLAMMED.get(body);
-		if (last != null && now - last < SLAM_COOLDOWN || !body.isAlive() || Downed.isDowned(body)) {
+		if (last != null && now - last < SLAM_COOLDOWN || !body.isAlive() || Downed.isDowned(body) || !knocked(level, body)) {
 			return;
 		}
 		SLAMMED.put(body, now);
@@ -203,7 +218,7 @@ public final class Collisions {
 		double ux = flat < 1.0E-4 ? 0.0 : mx / flat, uz = flat < 1.0E-4 ? 0.0 : mz / flat;
 		Vec3 wall = new Vec3(body.getX() + ux * (body.getBbWidth() * 0.5 + 0.05), body.getY() + body.getBbHeight() * 0.5,
 			body.getZ() + uz * (body.getBbWidth() * 0.5 + 0.05));
-		body.hurtServer(level, level.damageSources().flyIntoWall(), damage);
+		bumpHurt(level, body, damage);
 		body.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, STAGGER_TICKS, 1));
 		dust(level, wall, ux, uz, 6 + Math.round(damage));
 		level.playSound(null, wall.x, wall.y, wall.z, body instanceof Player ? SoundEvents.PLAYER_BIG_FALL : SoundEvents.GENERIC_BIG_FALL,
@@ -214,6 +229,31 @@ public final class Collisions {
 				KitchenCompat.knockLimp(player, -ux * SLAM_BOUNCE, 0.05, -uz * SLAM_BOUNCE);
 			}
 		}
+	}
+
+	/**
+	 * Whether {@code body}'s last hurt knocked it about, so speed into a wall now is the knock's and not its own legs'.
+	 * Andy's clip (2026-11-24, a tiny room full of owls): low on health and bleeding, every sprint-jump into the wall
+	 * counted as a slam, and each slam's own hurt let the next one count, so the hurts never stopped. Now a slam needs a
+	 * blow, a shot or a blast behind it (anything that hurts from somewhere), or a throw (a tornado's), never a bleed,
+	 * hunger, a fall or a bump of ours.
+	 */
+	static boolean knocked(ServerLevel level, LivingEntity body) {
+		DamageSource hurt = body.getLastDamageSource();
+		if (hurt == null) {
+			return false;
+		}
+		if (hurt.is(DamageTypes.FLY_INTO_WALL)) {
+			Long own = OWN_HURT.get(body);
+			return own == null || level.getGameTime() - own > OWN_HURT_MEMORY;
+		}
+		return hurt.getEntity() != null || hurt.getSourcePosition() != null || hurt.is(DamageTypeTags.IS_EXPLOSION);
+	}
+
+	/** One of our bumps hurts {@code body} (remembered, so it never counts as a knock: {@link #knocked}). */
+	private static void bumpHurt(ServerLevel level, LivingEntity body, float damage) {
+		OWN_HURT.put(body, level.getGameTime());
+		body.hurtServer(level, level.damageSources().flyIntoWall(), damage);
 	}
 
 	/** A puff of the wall's own dust where a body hit it. */
@@ -242,7 +282,7 @@ public final class Collisions {
 			case SPRINT -> {
 				if (speed >= SPRINT_MIN && ready(player, SPRINT, 20)) {
 					float damage = Math.min(SPRINT_MAX, (float) (speed - SPRINT_MIN) * SPRINT_PER_SPEED + 0.2F);
-					player.hurtServer(level, level.damageSources().flyIntoWall(), damage);
+					bumpHurt(level, player, damage);
 					level.playSound(null, player.getX(), player.getY() + 1.0, player.getZ(), SoundEvents.PLAYER_ATTACK_WEAK, SoundSource.PLAYERS, 0.7F, 0.7F);
 					Shakes.send(player, 2.0F, player.getEyePosition().add(dx, 0.0, dz));
 					dust(level, player.position().add(0.0, 1.0, 0.0), unit(dx, dz)[0], unit(dx, dz)[1], 4);
@@ -252,7 +292,7 @@ public final class Collisions {
 				if (speed >= HEAD_MIN && ready(player, HEAD, 10)) {
 					float damage = Mth.clamp(HEAD_BASE + (float) Math.max(0.0, speed - JUMP) * HEAD_PER_SPEED, HEAD_BASE, HEAD_MAX);
 					// (a plain hurt, not the head part: a run of bumps in a low tunnel must never be what kills)
-					player.hurtServer(level, level.damageSources().flyIntoWall(), damage);
+					bumpHurt(level, player, damage);
 					Vec3 top = player.position().add(0.0, player.getBbHeight() + 0.1, 0.0);
 					level.playSound(null, top.x, top.y, top.z, SoundEvents.PLAYER_ATTACK_WEAK, SoundSource.PLAYERS, 0.8F, 0.6F);
 					BlockState ceiling = level.getBlockState(BlockPos.containing(top));
@@ -281,9 +321,9 @@ public final class Collisions {
 		double[] u = unit(dx, dz);
 		Vec3 wall = mount.position().add(u[0] * (mount.getBbWidth() * 0.5 + 0.1), mount.getBbHeight() * 0.6, u[1] * (mount.getBbWidth() * 0.5 + 0.1));
 		rider.stopRiding();
-		mount.hurtServer(level, level.damageSources().flyIntoWall(), damage);
+		bumpHurt(level, mount, damage);
 		mount.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, STAGGER_TICKS * 2, 2));
-		rider.hurtServer(level, level.damageSources().flyIntoWall(), damage * 0.75F);
+		bumpHurt(level, rider, damage * 0.75F);
 		dust(level, wall, u[0], u[1], 10);
 		level.playSound(null, wall.x, wall.y, wall.z, SoundEvents.HORSE_LAND, SoundSource.NEUTRAL, 1.2F, 0.6F);
 		level.playSound(null, wall.x, wall.y, wall.z, SoundEvents.PLAYER_BIG_FALL, SoundSource.PLAYERS, 1.0F, 0.8F);

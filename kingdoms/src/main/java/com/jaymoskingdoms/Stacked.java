@@ -133,17 +133,20 @@ public final class Stacked {
 
 	/** The stack's bands as last read: the server they were read for, the Overworld band's lowest height, the Cloud Sea's, the Aether's. */
 	private static MinecraftServer bandsOf;
-	private static int overworldFrom, cloudFrom, aetherFrom;
+	private static int overworldFrom, cloudFrom, aetherFrom, netherFrom;
 
 	/** Jaymo's Powers' Cloud Sea: the band of open sky and cloud between the Overworld and the Aether (the steam towns' home). */
 	public static final ResourceKey<Level> CLOUD_SEA = ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION,
 		net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", "cloud_sea"));
 	/** {@link #band}'s answer for the Cloud Sea. */
 	public static final int CLOUD = 2;
+	/** Jaymo's Powers' Beneath: Enderscape's islands, the band under the Nether. */
+	public static final ResourceKey<Level> BENEATH = ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION,
+		net.minecraft.resources.Identifier.fromNamespaceAndPath("jaymospowers", "the_beneath"));
 
 	/**
 	 * Which band of the world the factions live in holds height {@code y}: 1 the Aether's, {@link #CLOUD} the Cloud Sea's,
-	 * 0 the Overworld's, -1 the Nether's. Always 0 in a world that isn't stacked. What stands in different bands has no road
+	 * 0 the Overworld's, -1 the Nether's, -2 the Beneath's. Always 0 in a world that isn't stacked. What stands in different bands has no road
 	 * between it.
 	 */
 	public static int band(MinecraftServer server, int y) {
@@ -154,8 +157,9 @@ public final class Stacked {
 			aetherFrom = joined(server, aether) ? minY(server, aether) : Integer.MAX_VALUE;
 			cloudFrom = joined(server, CLOUD_SEA) ? minY(server, CLOUD_SEA) : Integer.MAX_VALUE;
 			overworldFrom = joined(server, Level.NETHER) ? minY(server, Level.OVERWORLD) : Integer.MIN_VALUE;
+			netherFrom = joined(server, BENEATH) ? minY(server, Level.NETHER) : Integer.MIN_VALUE;
 		}
-		return y >= aetherFrom ? 1 : y >= cloudFrom ? CLOUD : y < overworldFrom ? -1 : 0;
+		return y >= aetherFrom ? 1 : y >= cloudFrom ? CLOUD : y >= overworldFrom ? 0 : y >= netherFrom ? -1 : -2;
 	}
 
 	/**

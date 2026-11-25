@@ -147,6 +147,33 @@ public enum Step {
 	TEA_HERB(() -> Items.FERN, null, "tea_herb"),
 	// the Nether's grapes (crimson and warped) for the black wine
 	BLACK_GRAPES(() -> own("crimson_grapes"), null, "black_grape"),
+	// Ocean's and Nether's Delight's sea and Nether larder (vanilla), and Enderscape's End fruit, mushrooms and jelly
+	SEA_PICKLE(() -> Items.SEA_PICKLE, null),
+	KELP(() -> Items.KELP, null),
+	SEAGRASS(() -> Items.SEAGRASS, null),
+	PUFFERFISH(() -> Items.PUFFERFISH, null),
+	WARPED_ROOTS(() -> Items.WARPED_ROOTS, null),
+	PURUBERRY(() -> enderscape("puruberry"), null),
+	CELESTIAL_CHANTERELLE(() -> enderscape("celestial_chanterelle"), null),
+	MURUBLIGHT_CHANTERELLE(() -> enderscape("murublight_chanterelle"), null),
+	DRIFT_JELLY(() -> enderscape("drift_jelly_bottle"), () -> Items.GLASS_BOTTLE),
+	// Ender's Delight's larder (delight/EnderDelight): the shulker bowl and shell its dishes are served in, chorus, the End's
+	// plants, and what a knife takes from the End's creatures (a shulker's mollusk or filet, an enderman's eye or its
+	// fragments, an ender pearl or its shards: either does)
+	SHULKER_BOWL(() -> com.jaymoskitchen.delight.EnderDelight.SHULKER_BOWL, null),
+	SHULKER_SHELL(() -> Items.SHULKER_SHELL, null),
+	CHORUS_FRUIT(() -> Items.CHORUS_FRUIT, null),
+	POPPED_CHORUS_FRUIT(() -> Items.POPPED_CHORUS_FRUIT, null),
+	CHORUS_FLOWER(() -> Items.CHORUS_FLOWER, null),
+	CHORUS_JUICE(() -> com.jaymoskitchen.ModItems.dish(Dish.CHORUS_JUICE), () -> Items.GLASS_BOTTLE),
+	VOIDPEPPER(() -> com.jaymoskitchen.delight.EnderDelight.VOIDPEPPER, null),
+	ETHEREAL_SAFFRON(() -> com.jaymoskitchen.delight.EnderDelight.ETHEREAL_SAFFRON, null),
+	AMBERVEIL(() -> com.jaymoskitchen.delight.EnderDelight.AMBERVEIL, null),
+	CHORUSFLAME(() -> com.jaymoskitchen.delight.EnderDelight.CHORUSFLAME, null),
+	MITE_CRUST(() -> com.jaymoskitchen.delight.EnderDelight.MITE_CRUST, null),
+	SHULKER_MEAT(() -> com.jaymoskitchen.delight.EnderDelight.SHULKER_MOLLUSK, null, "shulker_meat"),
+	ENDERMAN_SIGHT(() -> com.jaymoskitchen.delight.EnderDelight.ENDERMAN_SIGHT, null, "enderman_sight"),
+	ENDER_SHARD(() -> com.jaymoskitchen.delight.EnderDelight.ENDER_SHARD, null, "ender_shard"),
 	// actions: cost nothing, icon is just for the button
 	STIR(() -> Items.STICK, null),
 	FLIP(() -> Items.WOODEN_SHOVEL, null),
@@ -197,6 +224,10 @@ public enum Step {
 
 	private static Item kingdoms(String path) {
 		return OptionalItems.item(OptionalItems.KINGDOMS, path);
+	}
+
+	private static Item enderscape(String path) {
+		return OptionalItems.item(OptionalItems.ENDERSCAPE, path);
 	}
 
 	private static Item powers(String path) {

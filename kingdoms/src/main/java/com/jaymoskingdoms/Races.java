@@ -67,7 +67,7 @@ public final class Races {
 
 	/** {@code player} on their own horse (or riding one they steer), able to race. */
 	static @Nullable AbstractHorse mount(ServerPlayer player) {
-		return player.getVehicle() instanceof AbstractHorse horse && Equestrian.covered(horse) && horse.getControllingPassenger() == player
+		return player.getVehicle() instanceof AbstractHorse horse && Equestrian.mount(horse) && horse.getControllingPassenger() == player
 			&& com.jaymoskingdoms.equestrian.Bonding.owner(horse, player) ? horse : null;
 	}
 

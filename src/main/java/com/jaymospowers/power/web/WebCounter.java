@@ -369,6 +369,21 @@ public final class WebCounter {
 		begin(player, level, kind, target);
 	}
 
+	/**
+	 * The symbiote's own seizing during a takeover (WebSymbiote): {@code kind} played at {@code target} with no dodge, no
+	 * window and no feathers spent. Refused (false) if a counter is already running, or the body isn't a web slinger's
+	 * (only theirs play a counter out).
+	 */
+	static boolean seize(ServerPlayer player, LivingEntity target, int kind) {
+		if (player.getAttached(ACTIVE) != null || !target.isAlive() || !Powers.has(player, WebPower.INSTANCE)) {
+			return false;
+		}
+		live(player).lastKind = kind;
+		player.setAttached(ACTIVE, new Active(kind, target.getId(), player.level().getGameTime()));
+		begin(player, player.level(), kind, target);
+		return true;
+	}
+
 	/** Every tick, for a web slinger: the counter under way plays out. */
 	static void tick(ServerPlayer player) {
 		Active active = player.getAttached(ACTIVE);

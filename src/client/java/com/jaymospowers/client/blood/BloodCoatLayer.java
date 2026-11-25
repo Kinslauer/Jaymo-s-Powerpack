@@ -86,7 +86,7 @@ public final class BloodCoatLayer {
 	private static void corpseBody(Entity corpse, EntityRenderState state) {
 		state.setData(KEY, null);
 		state.setData(GRIME, null);
-		state.setData(CORPSE, BloodSettings.off() ? null : Bloodied.corpseBlood(corpse));
+		state.setData(CORPSE, BloodSettings.off() || BloodSettings.streamerSafe() ? null : Bloodied.corpseBlood(corpse));
 	}
 
 	/** (0.20.55) Just after a dead player's plain body: its blood over it, in its pose. */
@@ -110,7 +110,7 @@ public final class BloodCoatLayer {
 
 	/** From every living renderer's extractRenderState. */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state) {
-		state.setData(KEY, BloodSettings.off() ? null : Bloodied.coat(entity));
+		state.setData(KEY, BloodSettings.off() || BloodSettings.streamerSafe() ? null : Bloodied.coat(entity));
 		state.setData(CORPSE, null);
 		state.setData(GRIME, ArmourGrime.body(entity));
 	}

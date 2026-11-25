@@ -1,0 +1,57 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "structory:firetower",
+      "required": false
+    },
+    {
+      "id": "structory_towers:small_firetower",
+      "required": false
+    },
+    {
+      "id": "nova_structures:firewatch_tower_birch",
+      "required": false
+    },
+    {
+      "id": "nova_structures:firewatch_tower_cherry",
+      "required": false
+    },
+    {
+      "id": "nova_structures:firewatch_tower_dappled",
+      "required": false
+    },
+    {
+      "id": "nova_structures:firewatch_tower_dark_oak",
+      "required": false
+    },
+    {
+      "id": "nova_structures:firewatch_tower_forest",
+      "required": false
+    },
+    {
+      "id": "nova_structures:firewatch_tower_jungle",
+      "required": false
+    },
+    {
+      "id": "nova_structures:firewatch_tower_mangrove",
+      "required": false
+    },
+    {
+      "id": "nova_structures:firewatch_tower_pale",
+      "required": false
+    },
+    {
+      "id": "nova_structures:firewatch_tower_savanna",
+      "required": false
+    },
+    {
+      "id": "nova_structures:firewatch_tower_swamp",
+      "required": false
+    },
+    {
+      "id": "nova_structures:firewatch_tower_taiga",
+      "required": false
+    }
+  ]
+}

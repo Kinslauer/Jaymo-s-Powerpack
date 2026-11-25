@@ -29,6 +29,16 @@ public final class FishBite {
     static final double SPOOK_RADIUS = 6.0;
     /** How often (ticks) a spooked angler is told why nothing bites. */
     static final int SPOOK_TELL_EVERY = 200;
+    /**
+     * (Better Fishing's idea, our own code) Standing right over the hook spooks them too, from the bank or a boat (blocks,
+     * across); so does splashing about in the water further off (swimming or wading faster than this, blocks a tick).
+     */
+    static final double STAND_OVER = 2.5, SPLASH_RADIUS = 10.0, SPLASH_SPEED = 0.12;
+    /** How often (ticks) a spooked hook shows its warning ripple, to its angler only, and how wide. */
+    static final int RIPPLE_EVERY = 20;
+    static final double RIPPLE_RADIUS = 0.7;
+    /** A strike this soon after the fish takes it (ticks) sets the hook solid; later, it's only lightly hooked. */
+    static final int SOLID_STRIKE_TICKS = 20;
 
     private enum Phase { TAKEN, RESTING }
 
@@ -38,6 +48,7 @@ public final class FishBite {
         final LivingEntity fish;
         Phase phase = Phase.TAKEN;
         long nextAt;
+        long takenAt;
 
         Bite(FishingHook hook, int kind, LivingEntity fish) {
             this.hook = hook;
@@ -55,7 +66,8 @@ public final class FishBite {
     /** A fish of {@code kind} has taken {@code player}'s hook: the strike window opens. */
     static void begin(ServerPlayer player, int kind, LivingEntity fish, FishingHook hook) {
         Bite bite = new Bite(hook, kind, fish);
-        bite.nextAt = player.level().getGameTime() + STRIKE_TICKS;
+        bite.takenAt = player.level().getGameTime();
+        bite.nextAt = bite.takenAt + STRIKE_TICKS;
         BITES.put(player.getUUID(), bite);
         player.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.strike").withStyle(ChatFormatting.GOLD));
     }
@@ -75,6 +87,9 @@ public final class FishBite {
         if (spooks(player, hook)) {
             if (bite != null && bite.phase != Phase.RESTING) {
                 leave(bite, now);
+            }
+            if (hook.tickCount % RIPPLE_EVERY == 0) {
+                ripple(player, level, hook);
             }
             if (hook.tickCount % SPOOK_TELL_EVERY == 0) {
                 player.sendOverlayMessage(Component.translatable("message.jaymospowers.fishing.spooked").withStyle(ChatFormatting.GRAY));
@@ -121,7 +136,11 @@ public final class FishBite {
         if (bite.phase != Phase.TAKEN || bite.fish == null || !bite.fish.isAlive()) {
             return false;
         }
-        FishingReal.startFight(player, bite.kind, bite.fish, hook);
+        // (F2) struck fast, the hook's set solid and holds through the runs; struck late, it's light, and slips out on a slack line
+        boolean solid = player.level().getGameTime() - bite.takenAt <= SOLID_STRIKE_TICKS;
+        FishingReal.startFight(player, bite.kind, bite.fish, hook, solid);
+        player.sendOverlayMessage(Component.translatable(solid ? "message.jaymospowers.fishing.hook_solid" : "message.jaymospowers.fishing.hook_light")
+                .withStyle(solid ? ChatFormatting.GOLD : ChatFormatting.YELLOW));
         return true;
     }
 
@@ -130,9 +149,40 @@ public final class FishBite {
         BITES.remove(player.getUUID());
     }
 
-    /** Whether the player is standing in the water close enough to the hook to scare the fish off. */
+    /**
+     * Whether the player is scaring the fish off: standing in the water near the hook, standing right over it (on the bank,
+     * a jetty, a boat), or splashing about in the water further off.
+     */
     static boolean spooks(ServerPlayer player, FishingHook hook) {
-        return player.isInWater() && player.distanceToSqr(hook) < SPOOK_RADIUS * SPOOK_RADIUS;
+        double d = player.distanceToSqr(hook);
+        if (player.isInWater() && d < SPOOK_RADIUS * SPOOK_RADIUS) {
+            return true;
+        }
+        double across = Math.hypot(player.getX() - hook.getX(), player.getZ() - hook.getZ());
+        if (across < STAND_OVER && !underIce(hook)) {
+            // (a hook down an ice hole is meant to be fished from right beside it)
+            return true;
+        }
+        return player.isInWater() && d < SPLASH_RADIUS * SPLASH_RADIUS
+                && player.getDeltaMovement().horizontalDistance() > SPLASH_SPEED;
+    }
+
+    private static boolean underIce(FishingHook hook) {
+        for (int up = 1; up <= 3; up++) {
+            if (hook.level().getBlockState(hook.blockPosition().above(up)).is(net.minecraft.tags.BlockTags.ICE)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** A soft ring of ripples round the hook, shown to its angler only: they're too close. */
+    private static void ripple(ServerPlayer player, ServerLevel level, FishingHook hook) {
+        for (int i = 0; i < 10; i++) {
+            double a = i * Math.PI / 5.0D;
+            level.sendParticles(player, net.minecraft.core.particles.ParticleTypes.FISHING, true, false,
+                    hook.getX() + Math.cos(a) * RIPPLE_RADIUS, hook.getY(), hook.getZ() + Math.sin(a) * RIPPLE_RADIUS, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+        }
     }
 
     /** The fish swims off, and the hook rests a while before another comes. */

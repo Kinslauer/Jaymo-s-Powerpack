@@ -109,6 +109,11 @@ final class JournalScreen extends Screen {
 				py = page(graphics, Component.translatable("gui.jaymospowers.journal.caught", e.caught(), e.released()), px, py, pw);
 				py = page(graphics, Component.translatable("gui.jaymospowers.journal.best", String.format(Locale.ROOT, "%.1f", e.best()),
 					picked.lengthCm(e.best()), e.bestDay()), px, py, pw);
+				if (e.bestClean() > 0) {
+					// (F5) how cleanly the best was landed
+					py = page(graphics, Component.translatable("gui.jaymospowers.journal.clean",
+						"\u2605".repeat(e.bestClean()) + "\u2606".repeat(Math.max(0, 3 - e.bestClean()))), px, py, pw);
+				}
 				py = page(graphics, Component.translatable("gui.jaymospowers.journal.bait", bait(e.bestBait())), px, py, pw);
 				py = page(graphics, Component.translatable("gui.jaymospowers.journal.water", water(e.bestWater())), px, py, pw);
 				int most = 0;

@@ -85,6 +85,10 @@ public final class ZFighterKiSenseClient {
 
 	/** The outline colour {@code entity} gets on this screen from ki sense, or 0 for none. */
 	public static int color(Entity entity) {
+		int marked = ZFighterScanClient.markColor(entity);
+		if (marked != 0) {
+			return marked;
+		}
 		if (!on || MARKS.isEmpty() || !(entity instanceof LivingEntity) || !entity.isAlive()) {
 			return 0;
 		}

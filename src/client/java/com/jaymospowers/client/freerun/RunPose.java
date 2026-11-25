@@ -217,11 +217,16 @@ public final class RunPose {
 			}
 			return;
 		}
+		com.jaymospowers.client.KneeBend.bend(h.rightLeg, runKnee(state, h.rightLeg));
+		com.jaymospowers.client.KneeBend.bend(h.leftLeg, runKnee(state, h.leftLeg));
+	}
+
+	/** The running knee's bend for {@code leg} (radians), 0 when not running; BodyWeight lays its own on top of it. */
+	public static float runKnee(AvatarRenderState state, net.minecraft.client.model.geom.ModelPart leg) {
 		float run = Mth.clamp((state.walkAnimationSpeed - RUN_FROM) / (RUN_FULL - RUN_FROM), 0.0F, 1.0F);
 		if (run <= 0.0F || state.isCrouching || state.isVisuallySwimming || state.isPassenger || state.isFallFlying) {
-			return;
+			return 0.0F;
 		}
-		com.jaymospowers.client.KneeBend.bend(h.rightLeg, (RUN_KNEE + RUN_KNEE_BACK * Math.max(0.0F, h.rightLeg.xRot)) * run);
-		com.jaymospowers.client.KneeBend.bend(h.leftLeg, (RUN_KNEE + RUN_KNEE_BACK * Math.max(0.0F, h.leftLeg.xRot)) * run);
+		return (RUN_KNEE + RUN_KNEE_BACK * Math.max(0.0F, leg.xRot)) * run;
 	}
 }

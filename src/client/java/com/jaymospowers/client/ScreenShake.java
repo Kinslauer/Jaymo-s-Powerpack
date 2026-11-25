@@ -198,7 +198,7 @@ public final class ScreenShake {
 
 	/** Tips the view by every shake running (called with the hurt bob). */
 	public static void apply(CameraRenderState camera, PoseStack poseStack) {
-		if (ACTIVE.isEmpty() && dazeAge >= dazeTicks || camera.pos == null) {
+		if (ACTIVE.isEmpty() && dazeAge >= dazeTicks || camera.pos == null || MotionSettings.reduced()) {
 			return;
 		}
 		float partialTicks = camera.cameraEntityPartialTicks;

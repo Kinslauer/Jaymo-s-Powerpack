@@ -2,6 +2,8 @@
 	"jaymospowers.context.hold": "hold",
 	"jaymospowers.context.stealth_kill": "stealth kill",
 	"jaymospowers.context.loot": "search the body",
+	"jaymospowers.context.pull_arrow": "pull out an arrow",
+	"jaymospowers.context.take_bone": "take a bone",
 	"jaymospowers.context.drag": "drag",
 	"jaymospowers.context.pick_up": "pick up",
 	"jaymospowers.context.lift": "lift into your arms",

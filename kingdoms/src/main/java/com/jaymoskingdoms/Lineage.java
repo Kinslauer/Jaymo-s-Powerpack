@@ -143,11 +143,14 @@ public final class Lineage {
 		Vec3 to = child.position();
 		float yaw = child.getYRot(), pitch = child.getXRot();
 		long elderSince = level.getGameTime() - CourtWizards.ELDER_DAYS * CourtWizards.DAY_TICKS;
+		// (heirlooms: the parent's name goes on their gear before the name is the child's)
+		String forebear = Identities.trueName(player).getString();
 		PathfinderMob parent = McaCompat.takeOver(player, child, elderSince);
 		if (parent == null) {
 			player.sendSystemMessage(Component.translatable("message.jaymoskingdoms.lineage.gone").withStyle(ChatFormatting.GRAY));
 			return;
 		}
+		Heirlooms.handDown(player, forebear);
 		// (the old self keeps the old blood, and if so their things)
 		if (was != null) {
 			HeritageVariants.set(parent, wasVariant);

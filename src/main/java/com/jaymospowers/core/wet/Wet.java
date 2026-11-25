@@ -175,7 +175,8 @@ public final class Wet {
 				// wading: the legs are wet, the rest isn't yet
 				now = Math.max(now, Math.min(SOAKED_AT, now + WADING));
 			}
-		} else if (body.isInWaterOrRain()) {
+		} else if (body.isInWaterOrRain() && !com.jaymospowers.umbrella.Umbrellas.sheltered(body)) {
+			// (an open umbrella in hand, or in a stand close by, keeps the rain off)
 			now = Math.min(MAX, now + RAIN);
 		} else if (now > 0) {
 			now -= Math.round(CHECK * dryRate(level, body));

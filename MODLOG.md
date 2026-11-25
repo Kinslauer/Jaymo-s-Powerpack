@@ -7624,3 +7624,494 @@ following integration task).
 - **Wounds in your own voice**: "Left arm's bleeding! I need to bind it, or stitch it", and the same for broken,
   sprained, festering, rotted and both arms broken (`lang/parts/wounds.json`).
 - Built; not played.
+
+## 0.26.90 (2026-11-24): The last bowl or bottle comes back (#2075)
+
+- **Bowls and bottles**: drinking or eating the last of a stack gives its bowl, bottle or bucket back into your hand
+  again (Andy, 2026-11-24: Chamomile Tea left nothing). CreativeCore, a library mod in the pack, throws away what
+  `LivingEntity.completeUsingItem` gets back from the item, so the last Chamomile Tea, Bone Broth, Posset, Willow-Bark
+  Tea, mushroom stew, milk bucket, honey bottle or potion lost its container in Survival. `UseLeftoverStackMixin`
+  remembers what finishing the item left and `UseLeftoverHandMixin` puts it in the hand when the hand still holds the
+  used-up stack. With some still in the stack the bowl went to the inventory and always did.
+- Tested on a dev server with today's Kitchen and Kingdoms: without the fix and with CreativeCore 2.14.22 every one of
+  them left an empty hand; with the fix all gave their bowl, bottle or bucket back, through the Creative tab and
+  underwater too; without CreativeCore nothing is doubled. Not played on the Deck server.
+
+## 0.26.91 (2026-11-24): Downed: a blow knocks you out, red blows kill, no tossing, fire kills after 6 s (#2079)
+
+- **A blow on the ground knocks you out**: anyone downed, player or mob, who takes a blow (a swing, an arrow, a bite, a
+  blast) after going down is laid out cold for 30 seconds. Sneak mashes you round sooner as from any knock-out, and a
+  friend can still revive you. Andy: "make the downed players and mobs go unconcious after a hit, then 3 hits while
+  downed kills them, or any execution or unblockable (red) attack. this should change how fights end, as of now i get
+  tossed around for 30s". `Downed#HIT_OUT_TICKS`.
+- **Three blows from going down**: the blow that put someone down no longer counts toward the three that finish them,
+  so it is three blows after they fall, as the earlier note meant. One blow of three hearts or more still kills.
+- **Red blows kill the downed**: a blow too heavy to parry (the red tell) finishes anyone downed at once. Executions
+  already did.
+- **No more being thrown about**: blows don't knock a downed body back. A blast still moves it. `DownedStillMixin`.
+- **Fire**: falls and bleeding still don't count as blows (Andy: "falls and bleeding dont count, fire knocks unconcious
+  instantly ... they die after burning for 6s"). Anyone downed who catches fire is laid out cold at once, and dies after
+  burning for 6 seconds; put out for 2 seconds and the count starts again. `Downed#BURN_KILL_TICKS`.
+- Built on CI only; not played.
+
+## 0.26.92 (2026-11-24): Red (unparryable) mob blows rarer and slower (#2084)
+
+- Andy: "armed enemies should [not] attack with unblockables EVERY attack anymore, it should be closer to 20%. and the windup should be longer so players can react".
+- **Attack tells** (`AttackTells`): a mob red only for its attack damage (10+) now glints red on 1 blow in 5 (`RED_CHANCE`), rolled per blow; the rest are white and can be parried. A body 1.35+ wide (iron golems, ravagers, wardens) is still always red.
+- A red blow winds up 20 ticks instead of 10 (`HEAVY_WINDUP`): the arms stay up, the step in comes 3 ticks before the blow, the crosshair cue closes over the full 20, and the red star holds the whole time (`Glint` carries its wind-up; `TellGlintParticle`).
+- `AttackTells.glint(level, at, heavy, windup)` for Kingdoms' longer red swings.
+- Unchanged: parry and block windows, lock-on bonuses, the Alt roll.
+- Built; not played.
+
+## 0.26.93 (2026-11-24): Locked-on swings hit small, quick foes (baby zombies) (#2091)
+
+Andy: "baby zombies are unfightable" (clip: an axe locked onto baby zombies' torsos, their health never moving).
+- Better Combat's swing hits what its flat hitbox along the crosshair passes through, about a block tall for a side cut, and the lock-on camera trails a quick target. On a baby zombie (under a block tall, close in and below you) the cut passed over its head. Now whatever you're locked onto is struck by your swing whenever it's within the swing's reach, in front of you within its arc (at least 50 degrees each side, at most 90), in sight, and Better Combat would let you hit it at all (`LockedSwingTargetMixin` on Better Combat's `TargetFinder`). Unlocked swings are as before.
+- Built; not played.
+
+## 0.26.94 (2026-11-24): eaters of the downed bend down over them (#2093)
+
+- A zombie (or any humanoid eater) tearing at someone downed and unguarded (LimbEaters' TearGoal) is now drawn by Jaymo's Kitchen on its knees over them, each bite from the lunge to the rip back (KitchenCompat.gnaw, by name). Who gets eaten and when is unchanged.
+- Built; not played.
+
+## 0.26.95 (2026-11-24): sit from the knee smoothly, sit still to ride an earthboard (#2095)
+
+- **Kneel to sit**: pressing the Sit key while down on one knee (the low crouch's kneel) now blends from the kneel into the sit over the sit's settle (legs, arms with what they hold, the planted weapon coming up, knees, lean and height), where it used to snap to standing first. The held kneel lets go once you're sat, so Sneak is yours again and a press of it gets you up (`MeditatePose` State `kneel`, `CrouchPose.kneelLimbs`, `StanceScroll`).
+- **Sitting holds you still**: while sat (the Sit key, a seat, or looking down), the walking keys do nothing, and being carried or pushed no longer gets you up; Sneak, Jump or a hit still do (`StanceInputMixin`, `Meditate` tick). Seats and held shadowboxing still end if you're moved off.
+- **Ride an earthboard sitting down**: sit on a Gravity user's earthboard (lying where it was dropped, or flown, with your feet on or over it) and you ride it as its passenger, where you sat (kept clear of its rider in the middle), turning with it, wherever they fly it; up to 4 sit on one. Sneak gets you off where you are. A dropped board doesn't crumble while someone sits on it. Sat on one from the knee, you get on it once the kneel's Sneak lets go (`BlockCluster` SEAT / BOARD_HEADING / `positionRider`, `Sitting.boardUnder` / `ride`, `Meditate.sitOnBoard`). The board's drawn turn now comes from the heading the server saw it boarded at, so sitters and blocks turn together.
+- Built; not played.
+
+## 0.26.96 (2026-11-24): Felled by a leg blow: ragdoll, prone, roll to get up (#2083)
+
+- **Crippled is not downed** (Andy: "a suffienct blow, to the legs forces you into a ragdoll then prone, but you can roll
+  to recover. downed is what happens after losing your hearts"): a blow that lands on a leg or foot and takes 35% of your
+  most health (7 of a player's 20), or breaks that leg, takes your legs out from under you. Falls, fire and bleeding
+  never do.
+- A player goes limp into Kitchen's ragdoll, flung a little away from the blow, and once the body comes to rest lies
+  prone. Jump and the crawl key don't stand you up: a roll does (double-tap Left or Right, or press Dodge), and you come
+  up on your feet as it ends. Two broken legs still keep you crawling. A tip card says how. Without Kitchen you go
+  straight to prone.
+- A mob built like a person goes down flat on its back (the leg sweep's fall) and gets up by itself.
+- `LegFell` (new), hooked from `Wounds`' after-damage; `Crawl` (no standing up while felled, a roll brings you up),
+  `CrawlTaps` (side rolls and the Dodge key while felled), `DodgeClient`. The share is `LegFell.BLOW_SHARE`.
+- Built in CI; not played.
+
+## 0.26.97 (2026-11-24): Blasts blow limbs off the downed (#2086)
+
+- Andy: "blasts on downed enemies should blow limbs off". A blast that hits someone already down (and doesn't end
+  them) takes an arm or a leg at twice a standing survivor's chance: certain from about two thirds of the way in to the
+  blast's centre, now and then two. Before, a player's blast on a downed mob only counted as a wound and took nothing,
+  and anyone else's took a limb no more often than from someone standing.
+- `BlastGore.downedBlast` (`DOWNED_LIMB_SCALE`), called from `Downed`'s damage check before the downed state keeps the
+  blow; the usual after-damage roll skips that body for the tick. Killing blasts still gib or take a limb off the corpse
+  as before, and the blast still knocks them out cold (`BlastOut`).
+- Built in CI; not played.
+
+## 0.26.98 (2026-11-24): Fishing extras: don't stand on the hook, solid or light hooks, leaps, turning a run, clean landings, a line that hangs (#2092)
+
+- Reference Mods patch 12 (Better Fishing's and Enchanted Fishing Line's ideas, our own code).
+- **Don't stand on the hook** (F1): standing right over your hook (on a bank, a jetty or a boat, within 2.5 blocks
+  across) or splashing about in the water within 10 blocks keeps the fish away, as wading near it already did. A soft
+  ring of ripples shows round the hook, to you only, while you're too close. A hook down an ice hole is still fished from
+  beside it. `FishBite.spooks`, `STAND_OVER`, `SPLASH_*`, `RIPPLE_*`.
+- **A solid hook or a light one** (F2): strike within a second of the take and the hook's set solid; later, it's only
+  lightly hooked, and a light hook slips out if the line goes slack for a second and a half before the fish is nearly
+  in. Rod pods' rods strike themselves, solid. `FishBite.SOLID_STRIKE_TICKS`, `FishingReal.SLACK_TENSION`,
+  `LIGHT_SLIP_TICKS`.
+- **The leap** (F3): a fish of 3 kg or more (or one of the big kinds) leaps clear of the water, higher than a small
+  fish's hop; keep reeling through the leap and the line snaps. `FishRun.LEAP_KG`, `JUMP_UP_BIG`, `LEAP_GRACE`.
+- **Turn against the run** (F4): look (pull your rod) the other way to a run and it tires the fish faster.
+  `FishRun.against`, `ENERGY_AGAINST`. The fight's hint line says so.
+- **An angler's log of bests** (F5): the journal keeps how cleanly your best of each kind was landed, one to three stars:
+  one off for a light hook, one for taking the line past 85% of its breaking point, one for letting the fish run out
+  most of your spool. Record fish already hang on the trophy plaque. `FishLog.Entry.bestClean`, `FishingReal.clean`.
+- **Line that hangs like rope** (F6): a slack line sags between rod and hook, into the water if that's under it, and
+  lies over the branches, rails and banks it crosses; drawn tight by a fish, it straightens. A tight line run through a
+  tree's leaves or logs snags, and held hard there for a second it breaks. `HangingLine` (client),
+  `FishingHookRendererMixin`, `FishingReal.snagged`, `SNAG_*`.
+- Built in CI; not played. The numbers (how close spooks, how fast a light hook slips, how far a line sags) want a try
+  on the water.
+
+## 0.26.99 (2026-11-24): Sky, light and air - scorch, lava crust, leaves on water, coloured light (Reference Mods patch 14) (#2094)
+
+- **Scorch** (X3): a fire that has burned a few seconds leaves soot on the floor under it and on any wall beside it; it stays about ten minutes after the fire is out and fades (`client/air/AirClient`, `AirDecal`, our own soot sprites).
+- **Lava crust** (X9): still lava lying against rock cools to a dark, cracked crust with glowing seams along that bank, spreading out over ten seconds; it breaks up if the lava or the bank goes or something covers the lava (`LavaCrust`, our own sprites).
+- **Leaves on water** (X2): leaves drop from the trees over ponds and rivers and float, turning slowly, carried by the current and wandering on still water; one that drifts against the bank stays there. In autumn many more fall, in autumn colours, and last longer, so they pile up along the banks (`FloatingLeaf`; the game's own leaf sprites, tinted by the tree's leaves).
+- **Light in its block's colour** (X10): the colour of block light comes from the lights round you: soul fire and soul lanterns blue, redstone torches and ore red, sea lanterns, beacons and end rods a cool white, amethyst and crying obsidian violet, copper torches green, lava deep orange, glowstone and shroomlight golden; torches, lanterns and fires keep the game's warm light. It eases over as you walk between them. The game has one light colour for the whole view, so it's the light of the place you stand in, not each block its own colour (`LightTint`, `LightTintMixin`).
+- **Falling stars on shower nights** (X6): on the peak night of a meteor shower (the Quadrantids, Lyrids, Eta Aquariids, Perseids, Orionids, Leonids and Geminids, on their real dates) stars come down four times as often, the great ones that leave meteoric iron too (`FallingStars.SHOWER_BOOST`).
+- Built; not played.
+
+## 0.27.0 (2026-11-24): the big suit's new head (#2080)
+
+- **The big suit's head** is new: a heavy brow over a long muzzle, a white eye slanted down each side, a hinged jaw set with rows of fangs that stay out (they no longer slide into the gums now and then), and a green thread of spit off the chin. The eyes and the glints on the fangs glow in the dark. It grows in last as the goo builds the big suit and sinks back first when it comes apart; the jaw hangs, breathes, snarls and opens for the tongue the way the old one did. The white and red strains have their own colours of it. The big suit's body, the plain suit and Consume's maw are unchanged.
+- **Colours matched to the body**: the head's dark and red colours are moved onto the big body's own (per kind, each pixel takes the body texture's colour at the same brightness rank), so the head is the body's slate blue with violet veins and the body's red, not the blue-black and crimson it came with. Eyes and teeth keep their own whites.
+- **The tongue** is the head's own: a long red tongue in four segments lying in the jaw, shot out of the mouth every so often (the big suit's flick, every 7 seconds on each wearer's own beat, out in 0.6 s, with the long pause after it, and a few licks just after a meal), stretched out with a ripple down it and its tip whipping, then drawn back in. It stays in while Consume's maw is out. It replaces the big suit's old drawn-on tongue.
+- The head is Andy's own art from his Symbiote mod (his ownership confirmed 2026-11-24), recovered from that mod's jar by `tools/recover_symbiote_head.py` (cubes, UVs, the mouth and eye anchors, the tongue's segments, and only the head's texture rectangles; no body, no other abilities). `tools/gen_web_bighead.py` makes `WebBigHeadMesh` and the four `web_symbiote_bighead*.png` textures from that data and matches the colours; `tools/preview_bighead.py` draws the original, old and new heads, the whole big body with the new head (true colours and brightened), the tongue out and in, and a GIF of one flick. The head's texture is six times as sharp as the rest of the suit.
+- New `WebBigHead` (the model, its placement, the glow, the tongue); `WebHulk` hides the old head's masses, shares its growth maths with the new head (`flowed`, `flow`, `thick`, unchanged for the body) and loses its old big-body tongue (`submitTongue`); `WebSymbioteLayer` draws the head over the big body.
+- Lore placement added to Lore.md as a `(new)` paragraph ("Its own face") for Andy to approve.
+- Built by CI; not played. Not checked in game: how the head sits on the neck while crawling, climbing and in executions (it follows the same head pose as the maw), the glow, the tongue's look in motion, and the scale and offset (`WebBigHead.SCALE`, `OFFSET_Y`, `OFFSET_Z`), which were set from a drawn preview.
+
+## 0.27.1 (2026-11-24): Low-end mode switches itself on for the Steam Deck (#2100)
+
+- **Low-end mode on the Deck**: the first start on a Steam Deck now turns on low-end mode by itself (shaders off, Fast graphics), as on other built-in graphics. The check took the Deck's chip ("AMD Custom GPU 0932 (radeonsi, vangogh, ...)") for a full graphics card, so the Deck ran Complementary shaders.
+- Every install is checked once more under the new rule; one an earlier check already put in low-end mode is left as its player set it (`/lowend off` stays off).
+- LowEndMode: AMD_BUILT_IN also matches "amd custom gpu NNNN" and "vangogh"; CHECKED is checked-v2, with checked-v1's weak results carried over.
+- Built; found in the Deck client test 2026-11-24 (checked-v1=fine on the Deck); the new rule not seen on a Deck yet.
+
+## 0.27.2 (2026-11-24): Dinosaurs on the Verdant World (Amber Age, ported) (#2099)
+
+- **Nine dinosaurs and a dodo live on the Verdant World**, from Andy's own Amber Age mod (Forge jar, ported to Fabric; provenance in `licenses/PROVENANCE_amber_age_dinosaurs`): tyrannosaurus, spinosaurus, carnotaurus, velociraptor, dilophosaurus, gallimimus, triceratops, parasaurolophus, brachiosaurus and the dodo, with their own `.kmdl` models and `.spec` rigs (procedural walk, run, bite, roar, sit, sleep, charge, pounce, venom spit), textures and sounds unchanged. Code in `com.jaymospowers.dino` (server, `rig/` the model and animation loader) and `com.jaymospowers.client.dino` (renderers, skull block renderer, status panel); data and art under the `dino` folders of `assets/jaymospowers` and `data/jaymospowers`.
+- **Where they live (natural spawns only in the Verdant World)**: the spawn rule checks the dimension and the biome list names the Verdant biomes only, so nothing spawns in the Overworld, Nether, End or Aether by itself (eggs, commands and breeding still work anywhere). The home plains hold only grazers (gallimimus, dodo, parasaurolophus, triceratops); the far country keeps the hunters, each where it fits: velociraptor packs in the pulse forest, dilophosaurs in the mushroom lowlands, spinosaurs round the lakeside desert's ponds, carnotaurs and a rare tyrannosaurus on the wind valley's open grass and the stone garden, brachiosaurs in the old mushroom forest. The brainstorm has none. Chunks of those countries grow a herd about one time in four (`Dino.CHUNK_HERD_CHANCE`); already generated Verdant chunks only fill as new ones are made and as the world's own slow spawning runs.
+- **Kept from the original**: knock a wild beast out with tranquilizer darts or the sleeping-rifle (`tranq_rifle`, held like a crossbow), feed it until its taming bar fills, saddle it with its own saddle (or a leather saddle from dino hide), ride it (attack key bites, `M` special, `\` roar; each species has its own special: charge, pounce, sprint, tail swing, frill), level it up, breed a tamed pair; meat-eaters hunt the grazers, the grazers that can fight back, packs call each other; skulls, fossil skeletons you can stand and sit on, raw and cooked dino meat, bone, hide, narcotic and venom sacs, a field guide book and its advancements.
+- **Living-things rules**: *sympathy*: spinosaurs wade and breathe water, the velociraptor pounces, the triceratops charges, gallimimus bolt from a walking stranger, a tamed brachiosaurus browses leaves. *Feedback*: a hunter that has fed rests for a while and leaves the herd alone; herds range with their food; a knocked-out or tamed beast is not hunted. *Stewardship*: a tamed beast heals when fed, levels up with what it kills and what it is fed, its young stay tame; limphium leaves (the Verdant's own crop) now feed tame grazers.
+- **Changed from the original**: the field guide and the recipe unlocks come when you first enter the Verdant World (or pick up bone or hide), not to everyone at login; dinosaur sounds are `jaymospowers:dino.*`; the venom sac and spit are `dino_venom_sac` and `dino_venom_spit`; the status panel and its hint sit in the HUD's `BELOW` zone (horse-tag row); settings that were in a Forge config file are now constants in `DinoConfig`.
+- **Left out**: Forge's multi-part hitboxes (a separate head, neck and tail box per big dinosaur). Minecraft only supports those for the Ender Dragon, so each dinosaur now has one body-sized hitbox; long necks and tails are not hit separately.
+- Lore: a `(new)` paragraph, "The great lizards", was added to `Lore.md` for Andy to approve.
+- Not tested: no local build, dedicated-server startup, or in-game checks have been run. CI will compile this PR; natural spawn placement, client rendering, sounds, taming, riding, and the rifle pose still need in-game verification.
+
+## 0.27.3 (2026-11-24): The red strain's slender body; taken humanoids fight in the strain's body; the red one hunts (#2096)
+
+- **The red strain's own body** (Andy: "keep our combined black suit from 2080, and place our mechanics tendrils blades and scripts onto the narrow taller slender body"): where the black and the white strains raise the big body, the red one now draws itself up into a narrow, taller frame (about 2.2 blocks): all sinew, a head of fangs on a long neck with a flicking tongue, loose strands off every limb, eyes glowing. It is the red form of Andy's own Symbiote mod (his, reuse authorised), recovered from the jar by `tools/recover_symbiote_slender.py` without the original's own tendrils and blades, and built by `tools/gen_web_slender.py` (`WebSlenderMesh`, `web_symbiote_slender*.png`). `WebSlender` keeps the player model's joints and moves them to its frame (`WebSlender.shift`, for every model drawn on that body), so our tendrils, the weapon arm, executions, poses and wings all ride it; it flows on chest first and head last, its forearms and shins bend at their own elbows and knees (`WebHulk.limbs`, now shared), and the wearer's own body is hidden inside it once it's mostly built. The black big body (#2080's, with its new head) keeps its shape.
+- **Its stance** (Andy: "more of an exaggerated hunch like the reference, and even more curled while using tendrils, retaining the slight ragdoll on movement"; "the arms and knees should bend too"): it stands hunched right over from the hips, head craned up, elbows crooked and claws out, thighs forward and knees folded, sunk on them; it rears up while its tendrils work (below), straightens a little on the move, and its head and arms loll with the stride (`WebSlender.hunch`, before the frame shift so everything follows the bent back).
+- **Its moves** (Andy's stills and videos of the two strains' fight in the second film and its concept art; feel only, nothing copied): off the ground it pounces, claws thrown forward and wide, legs tucked, tendrils flared behind (`WebSlender.AIR`, `POUNCE_*`); while its tendrils work it rears up out of the hunch with the rest of them lifted high and curled over like claws (`REAR_*`); and its weapon arm isn't held in a hand: that hand's fingers sink away and the blade grows out of the forearm. The black big body, standing upright with its tendrils drawn in, crouches wide and low, arms hanging, elbows crooked (`WebHulk.STANCE`; with them out its beast pose already crouches it).
+- **Tendrils on both bodies** (Andy: "a visible abundance of tendrils ... differ in size thickness and length ... on the back/rear of the model and shoulders, never out the front"; "black should get a similar treatment"): with Living Armor up, our eight tendrils root on the body's back and shoulders, each with its own rest, curl, thickness and length (`WebSlender.TENDRIL_REST`; the big body's is the same crown grown to its frame, `WebHulk.TENDRIL_REST`), rising up and over among fourteen thinner strands that only sway and ripple (`WebSlender.Strands`). They still grab, strike, stab and wear the red strain's hooked blades.
+- **How the red one moves** (Andy: "adapt them well to the climb and walk animation as that will be the red suit's favored movement method"): on a wall the tendrils walk it from their own roots on its body (the big body's too); at a run its two low tendrils plant on the ground and stride with its legs (`WebSlender.SKITTER_*`).
+- **Taken humanoids fight in the strain's body** (Andy: "when the symbiotes affect non web humanoids they will use these forms for combat"): a villager, zombie, skeleton, illager, witch or piglin the symbiote rides, and a risen behemoth, are drawn as the strain's own body instead of themselves under goo: the big body with its head for the black and the white, the slender body for the red, posed by the same code as a web slinger's (`WebHostBody`), with that body's tendrils and strands.
+- **The red one hunts** (Andy: "up to 500 blocks away, nothing is safe"; "Everyone is prey; load terrain for pursuit"): a red-held humanoid or behemoth picks the nearest living thing within 500 blocks (players, villagers, pets, guards, other strains' hosts) and runs it down a leg at a time, lunging the last few blocks (`WebRedHunt`). While it hunts it holds two chunk tickets at most (around it, and where it's heading; its own type, never saved, timing out by itself in 3 s), moved as it goes, at most six hunters at once, all released the moment the hunt ends (prey dead, lost or out of range, nothing left, host dead, let go or unloaded, server stopping). Hunting, its host's time and its wasting both run at 15% of the usual pace (its 60-90 s becomes several minutes), and each kill it feeds on (after the kill) gives the host 45 s more and heals it. Its lunge shakes the screens of anyone within 12 blocks.
+- **A red-bonded web slinger is hunted from inside** (Andy: "only after achieving 30 or higher bond, you have to fight the hunts off as more powerful takeovers till then"): bonded to the red strain under bond 30 (of 100), a takeover check with nothing near to tear into seizes you 12% of the time and drives you in the slender body after the nearest living thing within 500 blocks (anything loaded; your own body loads the ground you run over, so no chunk tickets). It's a stronger hold: each struggle counts half. It ends as any takeover does (prey killed and fed on, or broken free of), when the prey gets past 500 blocks, when the bond reaches 30, or after 3 minutes at most; death and logging off end it with the rest of the takeover (`WebSymbiote.RED_HUNT_*`, `WebRedHunt.nearest`). At bond 30 and over you keep your body and no forced hunts come.
+- **The black kills only for its needs** (Andy: "the black is not against killing, though it will only do so to satisfy its needs. it ultimately seeks a proper host, (web)"): a black or white host's tendrils lash and slam only at what hurt it or its host, or what its host is already fighting (its roar still hits everything near, as before; it has no hunger of its own in a mob); a black behemoth goes only for what hurt it; and a black or white symbiote riding a mob drops off it when a web slinger without a symbiote comes within 16 blocks, to go to them.
+- The weapon arm's hand, the wings' size and the goo globs follow the slender frame (`WebMorphLayer`, `WebSymbioteWingsLayer`, `WebGooGlobs`).
+- Previews: `tools/preview_slender.py` (the body from four sides, beside a player and the big body, its stance, the big body's new tendrils), in the vault's `Assets/red-symbiote/`.
+- Built in CI only; not played. Not checked in game: the red takeover hunt (its pathing over long distances, the struggle's feel), anything in motion (the hunch, rearing, the pounce, the black crouch, the skitter, the wall walk and hung tendrils from the new roots), the wearer hidden inside the slender body, MCA's player model under it, a taken mob's held item and armour (drawn where its own arm would be), the hunt across unloaded ground and its tickets being released, the lunge.
+
+## 0.27.4 (2026-11-24): Vanilla+ picks: Incendium back, demon start in the Forbidden Castle, back slot, pinned advancements, Stellarity End and the Beneath (#2102)
+
+- **Incendium is back** in the pack. Its written-out Nether biome list now keeps our demon-realm biomes (`ZFighterNetherList` re-adds every Fabric Nether biome and rebuilds the cached biome set and feature order). Its Forbidden Castle may also rise in the Gloam, and the **demon start** puts you in its throne hall beside the Master of the Gloam (`ZFighterStarts.demon`, found by prediction through `Scout`, which now works for any realm's band).
+- **Back slot**: a new Baubles slot holds one weapon or tool and draws it on your back (`BackSlot`, `BodyWeapons`). A swap key (unbound at first) trades it with what you hold.
+- **Pinned advancements** (after Advancements Tracker, MIT, ideas only): shift-click an advancement on vanilla's or Better Advancements' screen to pin it, again to unpin. Up to 3 show in the top-left rail under the minimap, each with its criteria done and the next few still to do. A finished one drops off. Pins are kept per world or server (`client/hud/AdvancementPins`).
+- **Stellarity is the End, Enderscape lives underneath** (Andy, 2026-11-19). Stellarity 6.0.1 ships unchanged as the End. Enderscape's End terrain, End city and stronghold packs are switched off for new worlds while Stellarity is there (`core/EnderscapePreset`, once per install). Its biomes fill **the Beneath**, a new One Dimension band under the Nether (`dimension/the_beneath.json`; Enderscape's terrain noise and sky copied under MIT; only its own biomes, so no End cities or dragon spikes under the Nether). New worlds only; needs Enderscape.
+- Relics look in Stellarity's stronghold corridors and End ship treasure too (`compat/StellarityLoot`).
+- Built; not played. The Stellarity and Enderscape pairing and the Beneath's terrain weren't seen in a running game.
+
+## 0.27.5 (2026-11-24): Alex's Caves joins the pack; its Magnetic Caves in the Aether's magnetic stone, its neodymium in our colours (#2105)
+
+- **Alex's Caves Continued 1.1.3** (Codx.io's 26.3 Fabric port, LGPL-3.0, shipped unchanged from Modrinth; CodxLib 1.6.1 is already in the pack) is in the modpack: six rare cave biomes under the Overworld. This is the world-gen track; the Rubber-folk, flood, demon, Toxic Caves and future-item tracks follow.
+- **Magnetic Caves** (Andy: parity with the Aether's magnetic biomes, no red and blue): the caves' galena is our ferrosite and its scarlet, azure and neutral energized galena bands are ichorite (`mixin/alexscaves/MagneticCaveStoneMixin`; the stone rules wait for the Aether's blocks if Alex's builds them first, `compat/AlexsCavesCompat`). The ferrocave's pool walls are ferrosite (`FerrocaveStoneMixin`). The biome (`data/alexscaves/worldgen/biome/magnetic_caves.json`, read only when Alex's is loaded) drops the galena ore and swarf, and grows ferrosite pillars, spikes, ferrosite sand and magnetic shrooms on its floors (new `jaymospowers:cave_*` placed features). Its buried ruins swap galena and energized galena for ferrosite and ichorite as they are placed (`UndergroundRuinsStoneMixin`).
+- **Neodymium in our colours** (Andy: "yes bring it back with our theme"): the scarlet and azure neodymium nodes still grow, and all 36 of Alex's scarlet and azure textures (nodes, pillars, blocks, magnets, raw neodymium, ingots, energized galena) are recoloured: scarlet as the rust of ferrosite sand, azure as the slate blue of the magnetic shrooms, galena grey as ferrosite (`tools/alexscaves_recolour.py`, `assets/alexscaves/textures`). Colours Alex's draws in code (effects, particles) are unchanged and weren't checked.
+- Built; not played. Only new chunks change.
+
+## 0.27.6 (2026-11-24): A new host can struggle out of the red one's hunt (#2106)
+
+- **Red hunts from inside**: a web slinger bonded to the red strain under bond 30 can now always struggle against its forced hunts, even before they've earned the abilities that let them break other takeovers (Andy: "yeah let them struggle"). It's still the stronger hold (each press counts half), the same bar a killing spree uses (`SPREE_BREAK_FREE`). `WebSymbiote`.
+- Built by CI; not played.
+
+## 0.27.7 (2026-11-24): T opens chat again (#2107)
+
+- **T is chat**: TACZ's "Open TAC Config" key came off T, which opened the gun config screen instead of chat on a fresh install (found on the Steam Deck, 2026-11-24). Its settings are still in Mod Menu, and Controls can give it a key.
+- KeyConflicts v12: key.tacz.open_config.desc moves from T to unbound once per install, only while it's still on T.
+- Built; not played.
+
+## 0.27.8 (2026-11-24): Alex's Caves future gear, shared dinosaurs and the cave band (#2109)
+
+- The Raygun, Holocoder, Remote Detonator and Hazmat suit (mask, chestplate, leggings, boots) can't be crafted any more,
+  and the toxic ruins no longer hold hazmat pieces. They turn up only in Los Perrito's crates: about 1 in 4 megastructure
+  caches, 1 in 15 car wrecks and 1 in 40 household crates hold one.
+- The nuclear bomb still crafts (the steam towns' forbidden tech), but a lit bomb fizzles and drops back as the block
+  anywhere except the future. Lit there, by any means, it goes off as before. The hazmat blocks and the Nuclear Furnace
+  are unchanged.
+- The Primordial Caves and the Verdant World share their beasts: all ten of our dinosaurs (Amber Age's) live in the
+  caves beside Alex's, in the dark, and Alex's grottoceratops, vallumraptors, relicheirus, tremorsaurus, atlatitan and
+  subterranodons roam the Verdant countries that suit them.
+- Barbaric Warrior-born in the Primordial Caves: now and then a band of two to four comes out beside a beast near you and
+  fights it bare-handed, tail out, each in a different mix of caveman gear and hide (some bare-chested). They train, they don't hunt: a beast beaten down to 30%
+  is let go, and tamed ones are never touched. They leave you alone unless you walk right up to one or hit one.
+
+## 0.27.9 (2026-11-24): The legendary Warrior-born and radiation; the space pod's submarine look (#2112)
+
+- A legendary Warrior-born is never Irradiated. Whatever would irradiate them, and every moment in Alex's Toxic Caves,
+  builds up as radiation instead (full after about ten minutes down there): up to 40% more damage on all their blows,
+  a green glow, and a rage surge up to 50% hotter that leaves those it strikes Irradiated. It fades slowly once they're
+  out (about half an hour from full).
+- The space pod takes on the look of Alex's Caves' submarine: riveted copper plating on a slate frame, round portholes
+  front, left and back, a brass stern propeller on the back plate and a periscope eyepiece on the mast.
+- With Alex's Caves in the pack, the pod is drawn as Alex's own submarine model and textures, taken apart so it still
+  goes together piece by piece: the keel lays the keel, seat and levers; the fins are the two side thrusters (stood on
+  end beside the hull) and the motor (upright behind it), with every propeller facing down once the bell goes on; the
+  tank is the hull's core, the plates its front, sides and top, the canopy its front cabin and the mast its periscope.
+  A damaged fin swings out, damaged parts show his scuffed-hull overlays and a finished pod lights his control buttons.
+
+## 0.27.10 (2026-11-24): Takeovers dig straight to their prey and never stand stuck (#2115)
+
+- **Digging is planned, not a last resort**: chasing prey within 32 blocks, a symbiote takeover plans its way through blocks as well as round them, and tears a 1x2 tunnel straight there with its tendril rip (the same lash, cracks, torn clumps and flings), up to 9 blocks a pull, about 6 blocks of tunnel a second. Straight down into a cave, stairs up to a roof, through a house wall. It walks or climbs round instead only when that's quicker. Up to 640 blocks a takeover (was 96).
+- **What it never tears out**: bedrock and anything unbreakable, anything harder than 20 (obsidian, ancient debris), anything holding items or a block entity (chests, spawners, beds, signs), fluids or a block with fluid beside it (no flooded tunnels), spawn protection, adventure mode, and whatever a Kingdoms claim, lock, dungeon or monolith protects. It routes round those, and never tries a refused tunnel twice.
+- **No more hopping in place**: being stuck is now judged by getting closer to the prey, not by moving, so its little hops no longer hide it. Stuck, it re-plans, then rips straight at the prey (down and up too), then zips toward it, then hauls the prey down to it; still nowhere after that, it picks other prey or lets go.
+- **Mobility**: it climbs walls taller than its leap (up to 16 blocks), leaps gaps of up to 3 blocks, and the red one pounces the last few blocks at its prey.
+- **Attacks**: at its prey it strikes with the weapon arm and the tendril counters (impale, whiplash, hurl, constrict), and drags prey down from where it can't reach. It still only feeds on what it has killed.
+- Classes: WebTakeoverPath, WebSymbiote, WebSymbioteClient, WebMorph, WebCounter, WebRedHunt.
+- Built by CI; not played. Deck server cost not profiled.
+
+## 0.27.11 (2026-11-24): One cobblestone crafts back into 4 stone rocks (#2071)
+
+- Andy: "4 rocks should craft into 1 cobble and vice versa". 4 stone rocks already made 1 cobblestone; now 1 cobblestone alone in the crafting grid gives 4 stone rocks. Only cobblestone goes back (the other rock kinds still only go one way).
+- `stone_rocks_from_cobblestone` recipe (tools/gen_ground_rocks.py). Built by CI only; not crafted in game.
+
+## 0.27.12 (2026-11-24): Blood Awakening upgrades your blood's held move; a Verdant's regrowth key (#2117)
+
+- **Everyone starts with their blood's held move** (Andy, 2026-11-23): Thunderclap, Sunflare, Kindle, the Verdant's stretch and the Frost-born's hold no longer need Blood Awakening (`TreeLocks.BLOOD` removed; gates gone from `HeritageMoves`, `EmberKindle`, `RaceMoves`, `RaceHoldClient`).
+- **Learned, Blood Awakening upgrades them** (`TreeLocks.awakened` / `TreeLocks.wait`, read from Kingdoms): Thunderclap's and Sunflare's cooldowns halve, Kindle heats to full in half the time, the stretching arm is ready again in half the time, and a Frost-born's beam bites twice as often (a Z Fighter's keeps its own pace).
+- **Push-button limb regrowth for an awakened Verdant**: the heritage key grows one lost limb back now with the fleshy crunch (`ZFighterLineage.regrowNow`), every 2 minutes (`REGROW_KEY_EVERY`) for 3 food (`REGROW_KEY_FOOD`), not while hungry; on top of the slow regrowth every 30 s. Not on the dead.
+- Built; not played.
+
+## 0.27.13 (2026-11-24): spiders in leaves leave you be by day (#2118)
+
+- **Leaf spiders**: a spider hiding in leaves no longer pounces on a passing player in daylight, only in the dark; hit it and it still fights back (`LeafSpiders`).
+- Built; not played.
+
+## 0.27.14 (2026-11-24): players' limbs twice as tough (#2119)
+
+- **Players' limbs** (arms, legs, feet) hold twice the damage before they break or a blow severs them: arms 16, legs 24, feet 16 on 20 health (were 8/12/8). Falls land on the feet first, so short drops no longer break legs. Head and body are unchanged, and mobs keep their old limbs. Saved wounds keep their share, so a half-hurt leg stays half hurt. Limbs still mend whole in the same time by themselves; dressings and other fixed-point heals mend a smaller share of a player's limb now. (`BodyPlan.Pools.PLAYER_LIMBS`, `BodyPlan.share(index, entity)`)
+- Not built or played.
+
+## 0.27.15 (2026-11-24): Takeover pathing fixes: long tunnels, safe shafts, no stray weapon arm (#2121)
+
+- **Long walks keep digging**: on a long way to its prey, a takeover now keeps track of where you are along the whole path (it only looked at the first few steps before), so it still tears into the next wall far along a tunnel, and its zips and resent paths start from where you really are.
+- **No more blind holes**: digging straight down under you, it first checks there's ground to land on within 3 blocks under the hole, with no lava, fire or water on the way; if not, it goes round instead of dropping you.
+- **The weapon arm ends with the takeover**: a weapon it was forming on its own melts back when the takeover ends (it lets go, you break free, you die or it leaves), instead of striking later.
+- **The red pounce after rejoining**: the pounce and gap-jump timers reset when you join a world, so a stale one no longer blocks the red one's pounce.
+- **No back and forth**: when it gives up on prey it can't reach, it won't turn back to that prey later in the same takeover, so two out-of-reach creatures can't hand it to each other forever; out of reachable prey, it lets go.
+- Classes: WebTakeoverPath, WebSymbiote, WebSymbioteClient, WebMorph, WebRedHunt.
+- Built by CI; not played.
+
+## 0.27.16 (2026-11-24): Scouter: hold to scan, full readings, marks and tracking (#2120)
+
+The scouter now reads for everyone and does what Wan's Bio Scanner does (its idea only, our own code), in the scouter's own green readout, with no commands and no chat text.
+
+- Hold the new Scouter key (unbound until picked in Controls; tap and hold): the lens zooms a little and the reading fills in line by line under the power level. Let go early and you keep what came through. A soft chime sounds when a reading is complete.
+- Creatures: health, strike, speed, armour, young and tame. Horses read speed, jump height and temper from the vanilla horse's own attributes (small helper `ZFighterScanHorse`, ready to point at another horse mod). People read their realm and mood (from Kingdoms). A Z Fighter's forms you have seen (unmet ones are blanks), an alien's growth, a dead walker's road to the horde (alone, in a horde, its captain).
+- Plants and living blocks: crops, saplings, bee nests, turtle and sniffer eggs, coral, moss: what stage, what it needs, about how long.
+- Open sky or ground: heat or cold, how harsh the land is, sky and light.
+- A full scan of a beast counts as studying it: a kind with no foe-knowledge star gets one, and a Druid learns the shapes that beast is kin to.
+- Tap the key after a full scan to mark that creature: a chevron at the lens's edge points to it, with its distance, and it shows outlined through walls for five minutes or until lost. One mark at a time (the only scouter there is has no better tier; `ZFighterScan.markLimit` is where a better one would raise it). A tap again lets it go. Something hiding its ki can't be scanned or marked.
+- Without ki the scouter still reads: the panel shows the name and kind and no power level.
+
+Main classes: `ZFighterScan`, `ZFighterScanInfo`, `ZFighterScanHorse`, `ZFighterScanKingdoms`, `ZFighterScanClient`, `ZFighterScanZoomMixin`; packets in `ZFighterSensesNet`.
+
+Not tested in game (compiled only): the zoom, the chevron placement, the chime, the HUD panel spacing under the power-level panel, the crop time estimates.
+
+## 0.27.17 (2026-11-24): Umbrellas, lace parasols, Mohknee paper parasols and the umbrella stand (#2120)
+
+- **Items** (Reference Mods patch 4, U3-U6; own code and art, `tools/gen_umbrellas.py`): the sturdy **umbrella**, the **lace parasol** and the Mohknee **paper parasol** (oiled paper, blossom painting, bamboo ribs). Use one to open or furl it; its look (open, canopy and panel colours, panel style) rides in its custom model data, which Kingdoms fills for the people who carry them. Craftable (wool and sticks; string, carpet and a stick; paper, honeycomb and bamboo).
+- **Rain (U3)**: held open, rain doesn't wet you (`Wet` skips the rain's soaking), so no Soaked and nothing rusts on you. An open umbrella in a stand keeps the rain off the ground within 2 blocks.
+- **Float down (U4)**: open and sturdy, falling faster than 0.2 a tick, you drift at 0.1 a tick with no fall to pay (a point of wear a second). A lace or paper parasol caught open in a fall of more than 2.5 blocks turns inside out and tears (gone).
+- **Campfire smoke (U5)**: open and sturdy over a lit campfire's smoke (8 blocks; a signal fire 16; a solid block stops it) it lifts you (push 0.07, up to 0.3 a tick), a point of wear a second. A parasol over the fire scorches (6 points a second).
+- **Umbrella stand (U6)**: use with an umbrella to stand it in; empty-handed to open or furl it; sneaking to take it back (wear and colours kept). Looks differ by umbrella kind and open/furled (stands are not tinted by realm).
+- Classes: `umbrella/Umbrellas`, `UmbrellaItem`, `UmbrellaStandBlock`, `UmbrellaStandEntity`; `core/wet/Wet` (one condition). Not tested: the held open model's pose in first and third person, the stand in game.
+
+## 0.27.18 (2026-11-24): Hoverboard on the bomb glider's hull, and the Future Workbench (#2120)
+
+- **Hoverboard** (Reference Mods patch 5, H1-H5): the arsenal's bomb glider model and texture (wings and burner off, re-coloured pale with cyan emitters by `tools/gen_hoverboard.py`) as the future's courier board. Set it down from its item, right-click to step on. Powered it hovers a block over ground and water at a steady height, climbs gentle slopes (up to 0.45 a tick), hums louder and higher with its speed and leaves a trail of motes. W/S speed and brake, A/D turn, Jump hops, Sneak steps off.
+- **Built, never found**: the new **Future Workbench** (crafted: iron, observer, crafting table, redstone blocks) turns 6 iron ingots, 4 copper ingots and 8 redstone from your pack into a hoverboard. It is in no loot table.
+- **Dyes (H2)**: a dye right-click colours the hull, a dye on sneak right-click the trail; sneak right-click with an empty hand picks the board up, colours and charge kept.
+- **Tricks (H3)**: in the air Jump throws a random Acrobatics trick (keys pick the family: forward, back, sideways), drawn with the web slinger's body pose like the freerunner's. Land with the trick finished and the board speeds up; land mid-trick, or from a very hard drop, and you are thrown.
+- **Charge (H4)**: the board's power cell holds 5 minutes, a new one starts with 1; redstone dust (30 s) or a redstone block (4.5 min) right-clicked on it charges it. Flat, it drops to the ground and you push it with W like a skateboard.
+- **Crash (H5)**: losing more than 0.35 of speed against a wall flings the rider, ragdolled (the web pose's ragdoll), the board spins and skids back. Fling speed, lift and damage are capped (0.9, 0.45, 8).
+- Classes: `armory/Hoverboard`, `HoverboardItem`, `FutureWorkbenchBlock`, `ArmoryEntities`, `Armory`; client `HoverboardRenderer` (uses `BombGliderModel`), the bomb glider's avatar mixin (rider stands on a board too).
+- Built; not played. Not tested: hover over slopes and water, trick timing and landing throws, crash flings, the workbench's text.
+
+## 0.27.19 (2026-11-24): Horses: Icy's Better Horses joins the pack (#2120)
+
+- **Icy's Better Horses 2.1.8** (Bare Minimum License, Icywhenhot; official jar, unchanged) and **Modonomicon 26.3-2.23.1** (its handbook library; MIT and CC BY 4.0) join the pack (`packModsNoCf`; GeckoLib and Fabric API were already in). Its licence text and copyright notice ship as `licenses/LICENSE_icys_better_horses`.
+- Fifteen horse breeds with their own coats and biomes, bond and ownership, whistle and command wheel, tack and gear, horse carts, combat, revival, free look and a second rider come from it; Jaymo's Kingdoms' own horse systems step aside for ordinary horses (see its note).
+- **Left the pack** because Icy's does the same: Kaffee's Dual Ride (second rider), Horse Expert (stats), Ultimate Horseshoes (horseshoes), also moved out of an existing profile. **Kept**: Horseman (fence hitching, boats, shears, mining speed; it overlaps only in fading the horse and staying near home) and Craftable Horse Armor (Icy's has no horse armour recipes).
+- Built; not played. Not tested: Horseman and Icy's together in a game, the CurseForge import (Icy's and Modonomicon travel in its overrides; their CurseForge ids are not looked up).
+
+## 0.27.20 (2026-11-24): Tectonic 3.0.32 in the pack (trial) (#2120)
+
+- **Tectonic** (MIT, Apollo) joins the pack (`packModsNoCf`): taller mountains, wide oceans, rivers that run under mountains in caves, jungle pillars, lava tunnels at the bottom. It needs Fabric API and Lithostitched (both already in the pack); its config library is inside its jar. Andy's L6 trial: Jaymo's Kingdoms' own continent shape stands down while Tectonic is loaded (see the Kingdoms note). To swap back, remove the one line from `build.gradle`.
+- Its defaults already turn on underground rivers with lanterns, jungle pillars and lava tunnels, so no config file is shipped.
+- Not played: no game was launched; judge it on a new world. CurseForge ids not looked up (cloud can't reach it): `cf: null`.
+
+## 0.27.21 (2026-11-24): Body animation and station displays (Reference Mods patch 13) (#2120)
+
+- **Furnaces show what is cooking (C3)**: the ore or food in a furnace, smoker or blast furnace sits flat in its mouth, dark until the fuel catches, then glowing brighter as it cooks through. Vanilla keeps the furnace's contents to the open screen, so `FurnaceSyncMixin` now sends the block entity's tag to clients on chunk load and each time the item, the fuel or an eighth of the cooking changes. `FurnaceRenderer`, after Hands-On Vanilla's idea (code our own).
+- **A lectern book opens big as you read it (C4)**: vanilla's own lectern drawing, the book grown to 2.2 times and lifted off the stand while your lectern screen is open, settling back when you close it (`LecternReadingRenderer`). Only the reader sees it grow. Books on tables: not built (no table holds an item, so it would need a new block).
+- **Body animation** (`client/body/BodyAnim`, ideas from Punchy Moves, code our own; none shows while one of our own poses has the body, and all of it works on MCA's villagers as on players):
+  - **B1 feet turn before the body**: standing still, look more than 20 degrees off the body and the legs shuffle round under you (the leading foot lifting), the body following as vanilla does.
+  - **B2 lean into turns**: sprinting round a corner tips you into it; riding a horse round one tips the rider.
+  - **B3 wading**: standing in water at the waist or deeper with your head clear slows you (`Wading`, both sides; 20% at the waist, 40% at the chest) and your arms come up out of the water.
+  - **B4 balance on fences and beams**: already built (Freerun's balancing on the `freerun_narrow` tops: fences, walls, gates, panes, bars, chains), arms out; checked, not changed.
+  - **B5 hand over hand on ladders**: arms alternate up the rungs and the feet step, the pace set by how far you climb (ladders, vines, scaffolding).
+  - **B7 the shield arm takes the hit**: a blow taken on a shield (`ShieldBlockEventMixin` tells everyone watching, entity event 29) jolts the shield arm back and tips the body.
+  - **B8 hands on the reins**: a horse's rider sways and bobs with its gait and holds the reins in both hands (unless swinging or using an item). Icy's Better Horses only seats riders, so nothing of its is fought.
+- **B6 faces that move** (`BodyFaces`): MCA's villagers already blink with MCA's own blink face; a hit now shuts their eyes for a few ticks too (`McaWinceBlinkMixin`, a pseudo mixin that does nothing without MCA), and everyone drawn with the player renderer gets furrowed brows and a tight mouth over the face (`face_wince.png`), or a toothy grin while doing the fusion dance (`face_grin.png`). Players on ordinary skins close their eyes at a hit through PlayerFaces.
+- Built; not played. Not tested: any of the looks in a game (the furnace item's size and height over the vanilla mouth, the lectern book's size and lift, the leg turn's sign, the rung rhythm and the rein hold are set from the models' maths); the shield jolt and furnace sync on a server; MCA's face overlay on MCA's body. The pack has no emote system, so grins show only for the fusion dance.
+
+## 0.27.22 (2026-11-25): The cave band's own look (#2123)
+
+- The barbaric Warrior-born of the Primordial Caves have their own skins instead of the champion's blue gi: four looks,
+  all in primitive hide (a shirtless one with a fur strap and loincloth, a stitched hide tunic, a fur mantle and kilt,
+  an open hide vest), with wild hair, mixed through each band and still under their caveman gear and leather.
+
+## 0.27.23 (2026-11-25): weighty movement - the walk carries weight (#2126)
+
+- Andy (2026-11-24, with a clip of a player hauling a greatsword about): "Can our movement have an increased weight to the
+  animation like this?" Every player's walk, theirs and everyone's in view, now moves like a body with weight
+  (`client/moving/BodyWeight`):
+  - **The torso swings on the hips.** It lags back a moment as you set off, leans into the walk and the run, and when
+    you stop it carries on forward past upright and settles back instead of snapping straight.
+  - **Each step lands:** the body sinks as a foot comes down and rises over the planted leg, the hips rock over the leg
+    taking the weight, the shoulders turn against the hips, and a slow walk's knee gives under the weight and folds as it
+    swings back (the run's own knee fold is kept).
+  - **Landings squash:** coming down from a jump or a drop the body sinks onto bent knees, tips forward and comes back up
+    with a small rebound, deeper the harder the landing. In first person your view sinks with it (the field of view is
+    never touched). Off the ground the legs tuck up a little.
+  - **Heavier gear, heavier body:** plate armour (by the armour load) and a two-handed weapon or polearm in hand make it
+    all slower and deeper.
+- It gives way to every pose of ours (crawl/prone, dodge rolls, ledges, parkour and wall runs, falls, slides, carries,
+  downed, swimming, riding, flight): standing still it does nothing, so still bodies keep their stances. Under the armed
+  stance only the arms are left alone. Your own body seen in first person only sinks, never tips. Off in low-end mode.
+- Built; not played.
+
+## 0.27.24 (2026-11-25): Trade hats (#2122)
+
+- **Trade hats**: seven hats of the village trades, ported from PinkGoosik's Villager Hats (MIT, notice in `docs/licenses/Villager-Hats-MIT.txt`): Farmer's Hat, Fletcher's Cap, Fisherman's Hat, Armorer's Mask, Shepherd's Hat, Librarian's Cap and Butcher's Headband. Worn in the head bauble slot and drawn on the head (over a helmet too), cut from the game's own villager textures. No crafting recipe: a zombie villager of that trade drops its hat (35% when a player kills it), and tailors sew them (Jaymo's Kingdoms). (`TradeHats`, `TradeHatLayer`)
+- Built by CI only; not played. Not checked in game: how the hats sit on the head and look in the inventory.
+
+## 0.27.25 (2026-11-25): Gravity: iron answers first (the X-Men mod's Magnetism, worked in) (#2125)
+
+- **Tear Loose**: sneak + right click while Lift holds a creature tears the metal weapon or tool out of its hands (anything mended with an iron, gold, copper or netherite ingot, plus shears, buckets, flint and steel). It flies to your feet and a mob scrambles after it, as after a fist parry's disarm. You keep your hold. 14 s cooldown. Nothing metal: "No metal in reach". A player's weapon is flung 5 blocks away from them instead, and nobody can take it up for 2 s; a player you may not harm (no PvP, a teammate) and gear a mob never drops hold fast. At the last Mastery rank (every ability and rank 5), the torn weapon comes straight into your empty hand every time, or your pack, or at your feet if both are full. Sneaking now tears instead of choking; let go of sneak to choke.
+- **Heavy metal**: R at a metal block (by its sound: iron, gold, copper, netherite blocks, anvils, chains, bars, rails, lanterns; also cauldrons, raw-ore blocks, iron doors and trapdoors, weighted plates) tears it loose twice as fast, and up to 4 more pieces of the metal touching it come with it, however hard. Needs Lift fully unlocked.
+- **Scrap**: iron, gold and copper nuggets and netherite scrap gather and fly with the rocks (B+G), and a ball or ring made mostly of scrap hits twice as hard.
+- Classes: GravityMetal (new), GravityPower (grip, the rip), GravityRocks, GravityRockOrders, PassiveBlocks.scrambleFor.
+- Compiled on CI; not played.
+
+## 0.27.26 (2026-11-25): three primitive hide sets, each with a dark make (#2127)
+
+- **Three hide sets** (Andy: "i want all 3, and they can have a darker variation made from darker hides"), each with its own icons and its own worn look, all with the Caveman set's protection and wear (leather's armour, a little tougher-wearing):
+  - **Caveman** (the cave band's): hood with a dark face opening and a fur brow, a one-shoulder pelt, a loincloth with fur tails, sinew-wrapped boots. Same items as before; leather + bone, as before.
+  - **Trapper's** Hood, Coat, Leggings and Boots: vanilla's leather shapes in stitched hide, a fur brow and mantle, a laced front with bone toggles, fur-cuffed boots. Leather + string, in the Caveman shapes (the hood with string at its top corners, so it isn't Kingdoms' leather tassets).
+  - **Barbarian** Hood, Mantle, Loincloth and Wraps: a wolf-pelt hood with ears and fangs that hangs down the back, a fur mantle with a tooth necklace over bare arms, a fur loincloth, fur-cuffed wraps. Leather + any hide or fur (`#c:hides`: rabbit hide, Kitchen's hides and furs, beast pelt); the hood has its fur on top as ears (`X X / LLL / L L`), so a dark one of all bear fur isn't Kingdoms' fur hood.
+- **Dark makes** of all three (Dark Caveman, Dark Trapper's, Dark Barbarian): the same recipes with darker hides in the leather's place (`#jaymospowers:dark_hides`: Kitchen's bear fur and hardened leather, Kingdoms' war hide, Naturalist's bear fur), or any light piece crafted with charcoal or coal (smoked dark; it keeps its wear and enchantments).
+- Art: new icons and worn layers for all six, drawn in `tools/vanilla_style/hide_sets.py` (run by `armour.py`), base and vanilla_style alike, graded for the Excalibur look. The Caveman's old flat icons and Age of Weapons worn layers are replaced; its scraps cut is kept (`tools/vanilla_style/masks/`). All 24 icons pass `audit.py`.
+- `Armory` (one armour material per set, `HIDE_SETS`), `SoundKinds` (the new sets sound like leather), the armour and cloth-armour tags, `tools/armory_assets.py` (no longer copies AoW's caveman art).
+- Built by CI; not seen in game.
+
+## 0.27.27 (2026-11-25): Gravity metal fixes: no dupes from torn chunks, no weapon minting (#2128)
+
+- Any torn-out chunk (every power that tears blocks loose) now removes all its blocks first and tells their neighbours afterwards, so a rail, lantern, bell or torch torn out with what held it up no longer also drops as an item beside the piece in the chunk. Rails, containers and redstone still tell their neighbours they left.
+- Tear Loose: a mob gives up its metal only once, so a mob that arms itself afresh can't be milked for weapons.
+- Heavy metal rips: diamond, emerald and redstone blocks (and eggs) sound like metal but no longer count as metal.
+- The rock ward spends scrap too, not only rocks.
+- Classes: BlockCluster.of, GravityMetal, GravityRockOrders.
+- Built on CI; not played.
+
+## 0.27.28 (2026-11-25): worn totems and villagers who carry one (#2129)
+
+- **Totems as baubles**: a Totem of Undying (and Kingdoms' crude totem, or anything with vanilla's death protection) fits
+  the charm slot, and worn there it saves you exactly as a held one does (1 health, Regeneration, Absorption, Fire
+  Resistance, the totem burst and the "used" stat), after the hands have had their turn. Sneak-use with one in hand puts it on.
+- **Some folk carry one**: 1 in 60 grown villagers (MCA's too, so guards and rulers), 1 in 40 illagers and 1 in 6 evokers
+  carry an old totem, rolled once when they first load. It saves them once the same way (burst and sound for everyone
+  near). Killed past it (the void, /kill, a beheading), they drop it.
+- The downed state, Mortality and the Darktide shade leave a worn or carried totem to do its work, as they did for a
+  held one (`WornTotems.ready`).
+- Classes: `baubles/WornTotems`, `mixin/WornTotemMixin` (on `LivingEntity#checkTotemDeathProtection`), charm tag.
+- Built; not played. Not done: Kingdoms' blight cure still spends only a held totem.
+
+## 0.27.29 (2026-11-25): Hand of God effects: heat-vision Frost beam, Thunderhead electrokinesis, Chrono slow time, five Nadir moves (#2134)
+
+Ideas from the Hand of God mod (All Rights Reserved: nothing of it copied, all built from scratch). Andy: "time manipulation and speed has very good looking fx for chrono. and the rest seem great for nadir. the heat vision beam works for frostborn's beams intended effect electrokinesis is what i really want from stormborn thunderhead".
+- **New effect types**: Bolt (a jagged, forking lightning path with a flash, flickering out) and Scorch (a mark burned onto a block face that glows and cools), in `MagicFx`/`MagicFxClient`, with a generated `scorch.png`. The client keeps up to 512 effect shapes at once (was 256).
+- **Frost-born beam** (`FrostBeam`, `ZFighterBeams`): drawn like heat vision, a white-hot shivering core in a glow and a haze, with a flaring point where it lands; where it rests on a block it sprays frost and leaves a rime mark (the vampire gaze sprays embers and leaves a burn).
+- **Thunderhead electrokinesis** (`WindElectro`): turning Thunderhead on calls four strikes down from the sky into your hand (outdoors); while it's on, arcs jump from your body to foes and nearby blocks, sometimes scorching them. Every lightning of the Wind power now strikes as our own forking bolt with a blast and a burn mark (no vanilla lightning bolt). A creature a Thunderhead's lightning kills is left as a charcoal statue that stands for 6 s, sheds ash and crumbles away (no corpse).
+- **Chrono slow time and time stop** (`ChronoSlowTime`, `ChronoTimeStop`, `ChronoSlowLook`): within 48 blocks of a slowing runner (or inside a time stop) the world goes old-gold and sepia at the edges, a slow heartbeat sounds, and moving things leave gold trails. Hits the slowing runner lands are held, each marked by a gold orb and ring with a thud, and all land at once when slow time ends.
+- **Nadir** (five moves, keys in its key list):
+  - Sprint + hold V at a creature, the **Grip**: it is lifted in a ball of the void and held where you look; let go of V to throw it the way you swing your view (it drops if you hold still). While held, G crushes it in on itself and B tears it apart (arms and head torn off if it dies). 7 s cooldown.
+  - Sprint + G, the **Snap**: at a creature it stops and crumbles to dust from the head down on the wind; at nothing, half of everything within 16 blocks, one after another. 60 damage, no body left (drops fall). 10 s, or 60 s for the area.
+  - Sneak + B, **Erase**: a flash, and its shadow is burned onto what stood behind it for 2 min. 60 damage, no body left. Sprint + B erases everything in a cone ahead. 8 s, or 30 s for the cone.
+  - Sneak + C at the sun or moon (outdoors, above the horizon): it is pulled down to hang over your hand; sneak + C again throws it, striking like the largest meteor (crater and all, it stays). Once every 3 min.
+  - Sprint + C, the **Reality wave**: a ring runs 40 blocks out and the land behind it becomes desert, snowfield, cherry grove, mushroom isle, badlands, pale garden or jungle (the biome itself, the top of the ground and small plants). After 5 min, on sprint + C again, or when the server stops, it all goes back (blocks changed since are left alone). 60 s cooldown after.
+- Built (compiles); not played. Not checked in game: how the effects look, the sun's direction for the pull (worked out from the sky's sun angle), and the biome wave's colours. A server crash while a wave is out leaves that land changed.
+
+## 0.27.30 (2026-11-25): Visceral gore: deeper wounds, hit reactions, armour holes, takedowns, gore reader (#2133)
+
+- **Blood**: blood soaks into soil, beads on stone, drinks into sand and sits on snow; blood on ceilings drips, mists from big hits, smears on screen, and burns off near fire. Creepers spark instead of bleeding and slimes leave goo. Blood colour is guessed from tags, then the mob's kind, then words in its id (spiders bleed bug blood now). Video Settings has a gore preset (Light, Cinematic, Brutal) and Streamer safe, which hides wounds, stumps and severed parts.
+- **Wounds**: a cut follows the swing's angle, and its depth depends on the blade. Deep cuts bleed more and show what is under them. Enough cuts on one limb take it off, stabs leave holes, and wounds heal over time. Your own arm wounds and stump show in first person.
+- **Hit reactions**: bodies flinch where they are hit. Hurt mobs limp, and deer and other skittish grazers flee hurt. The last kill of a fight plays a short slow motion with a letterbox, never while another hostile is near or after you. Reduced motion in Video Settings turns off shakes and the kill moment and shrinks reactions.
+- **Armour**: piercing hits punch holes in armour, and repairing clears them. Open-face helmets leave the face open. Hard hits knock helmets off or break them, and glancing blows deflect.
+- **Combat**: disarming blows make mobs drop what they hold, and armless mobs cannot use weapons. Whoever opened a wound gets the kill when the victim bleeds out. Wounds have their own hit sounds, blasts and pellets spread over the body, and bodies lying down are hit where they lie.
+- **Takedown**: sneak and hold right-click with empty hands on a monster or beast to wrestle it down and stun it. Look up as the bar fills to throw it, if you have the brawn. Kingdoms' Brute is strong enough from the start.
+- **Gore reader**: `/gore reader` (ops) lists every creature and weapon, with blood, body plan, weight and weapon kind. Ops can change any of these, and the changes are saved in `config/jaymospowers-gore-overrides.json`.
+- Classes: BloodSurfaces, BloodCeilingMark, BloodCloud, BloodScreen, BloodBurn, HitReactions, MobHurtStances, KillMoment, MotionSettings, SwingCuts, CutDepth, CutTotals, FirstPersonWounds, ArmourHoles, ArmourFace, ArmourDeflect, Disarms, ArmlessMobs, Wrestle, HitSounds, Pellets, GoreReader, GoreOverrides, BloodGuess, GoreReaderScreen.
+- Built and compiled; not played.
+
+## 0.27.31 (2026-11-25): Corpse hint drops "search the body" when nothing is left (#2137)
+
+- Andy (2026-11-25): "if it cannot be opened or has nothing left the context hint for that button should disappear". The hint by the crosshair on a body only shows "search the body" while a tap will open its loot screen (Kitchen's `Corpses.SHARE_TAP`). A picked-clean skeleton shows "take a bone"; a body with arrows still in it shows "pull out an arrow" (a tap pulls one before the loot screen opens). Lift, drag and pick-up lines are unchanged.
+- Built; not played.
+
+## 0.27.32 (2026-11-25): Tectonic leaves the pack (#2138)
+
+- **Tectonic 3.0.32** is out of `packModsNoCf` (Andy, 2026-11-25: it broke the caves and the climate map), so it leaves the pack zip, the CurseForge export and the testers' pack. Its Fabric mod id is in `removedIdsFromProfile`, so the next build moves its jar out of the CurseForge profile into `removed-mods`. Jaymo's Kingdoms' own terrain comes back (see the Kingdoms note).
+- Lithostitched stays (other mods need it). Dynamic Waters' Tectonic compat stays in its port; it only turns on when Tectonic is loaded.
+- Not played: needs a new world.
+
+## 0.27.33 (2026-11-25): Wall knocks only from real knocks: plain jumps and your own sprint-jumps never hurt (#2142)
+
+- **No hurt from a plain jump** (Andy: "just jumping into a wall isnt enough to hurt"). A head knock on a ceiling now needs you going up faster than your own jump can carry you (Jump Boost counted), so jumping in a low room or a two-high tunnel is free again; a launch, a power's boost or a blast into the ceiling still knocks your head.
+- **A wall slam needs something behind it.** Before, any hurt at all (a bleed, hunger, a fall, or the last slam itself) let your own sprint-jump into a wall count as being thrown into it, and each slam's hurt let the next one count, so in a cramped room the "Ugh... fly into wall!" hurts kept coming (Andy's clip in a tiny house full of owls; the owls only crowded him, Ambient Creatures' owls have no attack). Now a slam counts only right after a blow, a shot or a blast (anything that hurts from somewhere), or a throw such as a tornado's; never after a bleed, hunger, a fall or one of our own bumps. Mobs follow the same rule. (`core/collide/Collisions` `knocked`, `HEAD_PAST_JUMP`; client `collide/CollisionsClient`)
+- Built; not played.
+
+## 0.27.34 (2026-11-25): Squashed bugs and spiders burst in their own blood (#2140)
+
+- `BladeBlood.squashed(LivingEntity)`: a small spider or bug squashed underfoot (Jaymo's Kingdoms' spider squash) bursts flat: a few drops of its own blood thrown out low, a splat where it was and a few flecks, all sized to its width (a maggot's is a thumbprint, a spider's a hand's breadth). Kept small, as blood is toned down.
+- Built; not played.
+
+## 0.27.35 (2026-11-25): Dodge key: tap to dodge, hold to roll, hold longer to go prone (#2145)
+
+- **Alt, one press, three lengths** (Andy: "more akin to arc raiders, where they tap for a dodge and hold for a roll"): a tap (let go within 0.25 s) is the upright dodge; held past 0.25 s it goes on into the long roll; still held as the roll ends you come up into a crouch and stay crouched while you hold; only still held at 1.3 s do you go down into prone (was about 0.65 s straight out of the roll). Let go at any point and nothing more happens: the roll finishes and you stand, the crouch stands up. Tuning: `Dodge.ROLL_HOLD_TICKS` 5, `PRONE_HOLD_TICKS` 26, `LANDING_HOLD_TICKS` 3. Back roll only when locked on, one move per press and landing rolls are as before.
+- **Smoother hand-offs**: the roll out of a held dash starts from the dash's lunge and guard and eases out of it, instead of snapping upright for a frame (`DodgeRollPose` `Roll.carry`, synced as `Dodge.Rolling.fromDash`); that roll now turns evenly over its 9 ticks instead of 80% of the tumble in the first 4 and a slow-motion finish; a landing roll made long slows from 3 ticks in rather than 4, so its finish is less drawn out. The weighty walk (`BodyWeight`) fades out as a dash or roll comes on and back in as it ends, rather than vanishing and returning in one frame. Going prone from a crouch (the crouch after the roll, a held sneak, the stance wheel) starts as far into the crouch as you were (`ProneTransition`, `CrouchPose.bendShown`), so you no longer straighten up for a moment first, and the first-person view starts at the crouch's height.
+- Built; not played.
+
+## 0.27.36 (2026-11-25): Shift-click pins advancements, sound browser left clicks and the Notices tips toggle work again (#2146)
+
+- Minecraft 26.3 numbers mouse buttons from 1 (left is 1, right is 3), and three screens still used the old numbers:
+  - **Advancement pins**: shift-clicking an advancement never pinned it (the check waited for button 0). It pins again.
+  - **Sound browser**: every left click on a sound set it to full volume (button 1 was meant as the right click). Left click mutes or unmutes and dragging the bar sets the level again; right click resets to full.
+  - **Notices**: clicking the tips toggle did nothing (waited for button 0). It turns the tip cards on and off again.
+- Classes: `AdvancementPins`, `SoundBrowserScreen`, `NoticesScreen`.
+- Built; not played.
+
+## 0.27.37 (2026-11-25): maggots for the hook: taken alive, best river bait, crawl off when dropped (#2149)
+
+- Maggots picked off a body (Jaymo's Kingdoms: tap use on a live maggot) are the same Maggots bait as the crafted, bought and crate ones.
+- Maggots are now the best bait for river fish (the salmon column of the bait table 3 -> 4; cod 2, tropical 2 as before; worm baits to the new species).
+- `fishing/LooseMaggots`: Maggots left lying on the ground crawl off into the earth after a minute (a little of the ground kicked up), or drown in water; in your pack, a chest or a tackle box they keep.
+- First-time tip card when you look at a maggot in reach (`BodyTips`, part `maggot`): tap use takes it for bait, stepping on it bursts it, dropped ones crawl away.
+- Built; not played.
+
+## 0.27.38 (2026-11-25): faints can be mashed out of (#2150)
+
+- **Mash out**: in a faint's black, mashing sneak brings you round sooner, like a knock-out: 3 presses, each taking an even share off what's left; the knock-out's "Out cold: mash sneak" bar shows how far you've come. Sneak already held as you go down counts only once let go.
+- **Timing**: the swoon is 2 s (1 s for Overcome's shock; was 4 s / 2 s). The black is 15 s (was 13 s) so friends and villagers have time to wake you; the mash cuts it short. The 3 s wake with the bars opening is unchanged.
+- Captors, guards who want you and spiders still get their look: the last press asks them first (`TakenOut.takeNow`), and if they have you, you wake where they took you as before.
+- Others still shake you awake (sneak + use), companions first; a blow still wakes you.
+- `Fainting` (SWOON 40, OUT 300, OVERCOME_SWOON 20, `mash`), `TakenOut.takeNow`. Built; not played.
+
+## 0.27.39 (2026-11-25): The symbiote's meeting film no longer disconnects the client (#2152)
+
+- **Fixed**: the film where the symbiote pours back into its host (`WebMeeting.Scene`) kicked the player with a Network Protocol Error ("Tried to access entity ID before ID assignment"). The client-only copy it draws is now given an entity id of its own (`WebMeetingClient`) before it is added to the world.
+- Not built locally; CI builds it. Not played.
+
+## 0.27.40 (2026-11-25): silver blades sear monsters, and the twin harness on the back (#2154)
+
+- **Silver sears** (`combat/SilverSear`, `mixin/SilverSearMixin`): a silver blade (the silver sword, or a tinker tool with a silver head) struck by hand into the dead, vampires (not dhampirs), werewolves, ghosts, the great spiders, endermen, the Nether's fiends and the monsters of legend (tag `jaymospowers:silver_bane`, 49 entries, Kingdoms' optional) deals +2 damage, stuns for 16 ticks (a player 8, no oftener than every 3 s on one body), hisses and smokes. Kingdoms' own silver weaknesses (vampire x4, werewolf x2, silver sword +4 on the undead) stay on top.
+- **The seared cut** (`WoundMarks`, `WoundMarksLayer`): the cut it leaves, along the swing's line, is charred with a burnt rim (nothing showing under it) and doesn't drip. For 8 s its line glows on top, drawn lit so it shows in the dark: white-hot, then orange, then a dull ember red, flickering, until only the char is left.
+- **Twin harness** (`BodyWeapons`, `BodyWeaponsLayer`): a silver blade, in the back slot or on the hotbar, is carried on the back with its hilt over the right shoulder and its point to the left hip, and the first other blade (the back slot's, else the hotbar's) rides beside it, the two side by side instead of at the hips. Drawing either leaves its place empty.
+- Built and compiled; not played. The twin harness angles were checked in a projected mock-up of the same transform (not in game); the glow colours are from the numbers. Your own first-person arm shows the char but not the glow.
+
+## 0.27.41 (2026-11-25): NaN rotation diagnostic (#2156)
+
+- The Deck server spammed "Invalid entity rotation: NaN, discarding." with no stack trace. A mixin on `Entity.setYRot` / `setXRot` now logs one warning with the entity (type, id, name, position, dimension), the bad value, which setter, and a stack trace, at most once per entity type and 5 traces per run. Vanilla still discards the value; nothing else changes.
+- `NanRotationDiagnosticMixin`, registered in `jaymospowers.mixins.json`.
+- Not built locally (CI builds it); not played.

@@ -891,6 +891,8 @@ public final class Wars {
 		for (Component line : said) {
 			KingdomEvents.announce(server, Component.literal("  ").append(line).withStyle(ChatFormatting.YELLOW));
 		}
+		// the winner's city lights its sky that night
+		Celebrations.hold(level, w, Celebrations.VICTORY_TICKS);
 		// (0.7.224) allies' spoils and reparations, conversions, pledges and wagers settled
 		GreatWars.ended(server, war, winner, t);
 		syncRelations(server);

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "jaymoskingdoms:leech_kit",
+  "ingredients": [
+    "jaymoskingdoms:empty_thorn",
+    "minecraft:poppy",
+    "minecraft:snowball"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:numbing_thorn"
+  }
+}

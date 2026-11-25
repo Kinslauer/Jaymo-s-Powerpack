@@ -233,6 +233,33 @@ final class OrcBuildings {
 		return t.done(black ? "orc_tent_black" : "orc_tent_brown");
 	}
 
+	/**
+	 * A canopy tent (5 x 5): four dark oak posts under a flat roof of hide striped in the camp's black and red, open on every
+	 * side, bedrolls of carpet and a barrel of the war band's kit beneath it, a lantern from the beam.
+	 */
+	static Blueprint canopy() {
+		CampBuildings.Draft t = new CampBuildings.Draft();
+		for (int x = 0; x <= 4; x++) {
+			for (int z = 0; z <= 4; z++) {
+				t.set(x, 3, z, wool(x % 2 == 0 ? DyeColor.BLACK : DyeColor.RED));
+				if (x == 0 || x == 4) {
+					t.set(x, 4, z, wool(DyeColor.BLACK));
+				}
+			}
+		}
+		for (int[] c : new int[][] {{0, 0}, {4, 0}, {0, 4}, {4, 4}}) {
+			t.set(c[0], 0, c[1], log());
+			t.set(c[0], 1, c[1], log());
+			t.set(c[0], 2, c[1], log());
+		}
+		t.set(1, 0, 3, StyleBuildings.named("black_carpet", Blocks.AIR));
+		t.set(2, 0, 3, StyleBuildings.named("red_carpet", Blocks.AIR));
+		t.set(3, 0, 3, StyleBuildings.named("black_carpet", Blocks.AIR));
+		t.set(2, 0, 1, Blocks.BARREL.defaultBlockState());
+		t.set(2, 2, 2, lantern(true));
+		return t.done("orc_canopy");
+	}
+
 	/** The forge (7 x 7): a blackstone floor and back wall, a blast furnace and anvil, a lava trough behind iron bars, chains hung with lanterns. */
 	static Blueprint forge() {
 		CampBuildings.Draft t = new CampBuildings.Draft();
@@ -427,7 +454,10 @@ final class OrcBuildings {
 		new IllagerBuildings.Spot("orc_trophy_rack", OrcBuildings::trophyRack, -6, 4, 0, 5),
 		new IllagerBuildings.Spot("orc_tent_black", () -> tent(true), -16, -4, 1, 5),
 		new IllagerBuildings.Spot("orc_totem", OrcBuildings::totem, 8, 15, 0, 1),
-		new IllagerBuildings.Spot("orc_tent_brown", () -> tent(false), 6, -18, 0, 5));
+		new IllagerBuildings.Spot("orc_tent_brown", () -> tent(false), 6, -18, 0, 5),
+		// (the war camp's canopy tents, open-sided, for the band that has come to stay)
+		new IllagerBuildings.Spot("orc_canopy", OrcBuildings::canopy, -16, -12, 0, 5),
+		new IllagerBuildings.Spot("orc_canopy", OrcBuildings::canopy, 16, -12, 0, 5));
 
 	/** What a new camp's founding built: its fire (the seat), the plunder pile's containers and depot, the throne, the forge, the tower, the pit. */
 	record Layout(BlockPos fire, List<BlockPos> storage, BlockPos depot, BlockPos throne, BlockPos forge, BlockPos tower, BlockPos pit) {

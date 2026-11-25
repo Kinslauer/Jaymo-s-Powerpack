@@ -41,6 +41,8 @@ final class BloodDrop extends SingleQuadParticle {
 	/** Fell into water: it spreads this much bigger as a cloud. Into lava: it hisses this loud. A splat on landing: this loud, at most every this many ticks. */
 	static final float CLOUD_GROW = 1.6F, HISS_VOLUME = 0.12F, SPLAT_VOLUME = 0.07F;
 	static final int SPLAT_GAP = 3;
+	/** A drop rising faster than this (blocks a tick) checks for a ceiling above it. */
+	static final double CEILING_SPEED = 0.05;
 	private static long lastSplat;
 	/** (0.17.182) Whether it leaves its own splash where it lands (a cut's drip doesn't: the server lays its stain). */
 	private final boolean stains;
@@ -51,6 +53,7 @@ final class BloodDrop extends SingleQuadParticle {
 	BloodDrop(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet sprites, int frames,
 		int textureSize, boolean directional, int color, float scale, boolean stains) {
 		super(level, x, y, z, xd, yd, zd, sprites.first());
+		color = BloodSettings.tint(color);
 		this.color = color;
 		this.stains = stains;
 		this.frames = frames;
@@ -69,7 +72,13 @@ final class BloodDrop extends SingleQuadParticle {
 		this.setColor(BloodPuddle.red(color), BloodPuddle.green(color), BloodPuddle.blue(color));
 		this.growIn = 1.0F + this.random.nextFloat();
 		this.mirrored = this.random.nextBoolean();
-		this.underwater = !level.getFluidState(BlockPos.containing(x, y, z)).isEmpty();
+		var spawnedIn = level.getFluidState(BlockPos.containing(x, y, z));
+		this.underwater = !spawnedIn.isEmpty();
+		if (spawnedIn.is(net.minecraft.tags.FluidTags.LAVA)) {
+			// blood let out in lava is gone at once
+			this.remove();
+			return;
+		}
 		LIVE.add(this);
 		if (this.underwater) {
 			this.xd *= UNDERWATER_SLOW;
@@ -110,6 +119,17 @@ final class BloodDrop extends SingleQuadParticle {
 	public void tick() {
 		double px = this.x, py = this.y, pz = this.z, pxd = this.xd, pyd = this.yd, pzd = this.zd;
 		super.tick();
+		if (this.stains && !this.underwater && !this.removed && !this.onGround && this.alpha > 0.5F && pyd > CEILING_SPEED) {
+			// it flew up into the underside of a block: a splat there that drips
+			Vec3 up = new Vec3(px, py, pz);
+			var roof = this.level.clip(new ClipContext(up, up.add(0.0, pyd + 0.1, 0.0), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE,
+				CollisionContext.empty()));
+			if (roof.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK && roof.getDirection() == net.minecraft.core.Direction.DOWN) {
+				BloodCeilingMark.splat(this.level, roof.getLocation().x, roof.getLocation().y, roof.getLocation().z, this.color, this.getQuadSize(0.0F));
+				this.remove();
+				return;
+			}
+		}
 		if (this.stains && !this.underwater && !this.removed && !this.onGround && this.alpha > 0.5F
 			&& (pxd != 0.0 && this.xd == 0.0 || pzd != 0.0 && this.zd == 0.0)) {
 			// (0.20.41) it hit a wall: find the face it hit and splat there
@@ -159,6 +179,8 @@ final class BloodDrop extends SingleQuadParticle {
 			this.remove();
 			return true;
 		}
+		// (the first time it meets water) a cloud on the surface and heavy bits that sink
+		BloodCloud.spill(this.level, this.x, pos.getY() + fluid.getHeight(this.level, pos), this.z, this.color, this.getQuadSize(0.0F));
 		this.underwater = true;
 		this.xd *= UNDERWATER_SLOW;
 		this.yd *= UNDERWATER_SLOW * 0.5;

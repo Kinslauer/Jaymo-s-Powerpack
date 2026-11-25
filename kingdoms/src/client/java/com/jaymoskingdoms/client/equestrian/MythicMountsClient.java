@@ -36,7 +36,7 @@ final class MythicMountsClient {
 		if (player == null || level == null || minecraft.isPaused()) {
 			return;
 		}
-		if (player.getVehicle() instanceof AbstractHorse horse && horse.isNoGravity() && MythicMounts.is(horse, Breed.BAT_HORSE)) {
+		if (player.getVehicle() instanceof AbstractHorse horse && horse.isNoGravity() && (MythicMounts.is(horse, Breed.BAT_HORSE) || com.jaymoskingdoms.equestrian.WonderHorses.winged(horse))) {
 			fly(minecraft, player, horse);
 		}
 		RandomSource random = level.getRandom();

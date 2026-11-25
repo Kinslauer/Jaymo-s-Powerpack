@@ -3,6 +3,7 @@ package com.jaymoskitchen.client.corpse;
 import com.jaymoskitchen.client.ragdoll.ClientRagdolls;
 import com.jaymoskitchen.client.ragdoll.RagdollPose;
 import com.jaymoskitchen.corpse.CorpseEntity;
+import com.jaymoskitchen.corpse.Wear;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.model.HumanoidModel;
@@ -67,6 +68,9 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		boolean faceUp;
 		/** A heavy (iron) corpse falling apart: 0 whole, 1 gone. It shakes, slumps and sinks as it goes. */
 		float crumble;
+		/** How far it has sunk into the ground (blocks), and whether a falling block flattened it. */
+		float sink;
+		boolean crushed;
 		float age;
 		final AvatarRenderState avatar = new AvatarRenderState();
 		/** (0.4.39) Ragdoll physics (see Flop): drawn tipped to the ground, bounced up, and still swinging into place. */
@@ -83,6 +87,18 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		@Nullable RagdollPose pose;
 		/** (0.5.23) Nailed to a wall by an arrow: drawn upright facing out from it ({@link #yaw}), slumped forward. */
 		boolean pinned;
+	}
+
+	/** A body flattened by a falling block is drawn this much wider and thinner. */
+	private static final float CRUSH_WIDE = 1.35F, CRUSH_THIN = 0.25F;
+
+	/** How the body has weathered ({@link Wear}), as Dressed paints it; with streamer safe on, no rotten patches or bare bone. */
+	private static int paint(CorpseEntity corpse) {
+		int wear = corpse.wear() & Wear.PAINT_MASK;
+		if (StreamerSafe.on()) {
+			wear = Wear.with(Wear.with(wear, Wear.DARK, 0), Wear.BARE, 0);
+		}
+		return wear << Dressed.WEAR_SHIFT;
 	}
 
 	/** (0.5.23) How far a pinned body slumps forward off its wall (degrees). */
@@ -150,6 +166,8 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		state.bodyRenderer = null;
 		state.player = false;
 		state.crumble = corpse.crumble(partialTicks);
+		state.sink = Wear.sunk(corpse.wear()) * Wear.SINK_BLOCKS;
+		state.crushed = Wear.crushed(corpse.wear());
 		state.age = corpse.tickCount + partialTicks;
 		float yaw = corpse.getYRot();
 		Entity carrier = corpse.carrier();
@@ -209,7 +227,8 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		Entity look = corpse.isPlayerCorpse() && !CorpseDressing.plain(corpse) ? McaLooks.of(corpse.owner()) : null;
 		if (corpse.isPlayerCorpse() && look == null) {
 			extractPlayer(corpse, state, carrier, yaw, partialTicks);
-			state.avatar.setData(Severed.KEY, Severed.of(corpse.missing()));
+			state.avatar.setData(Severed.KEY, Severed.of(corpse.missing(), Wear.hidden(corpse.wear())));
+			Dressed.mark(state.avatar, paint(corpse));
 			physics(corpse, state, state.avatar, baseX, baseY, baseZ, partialTicks);
 			return;
 		}
@@ -308,10 +327,10 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 		}
 		// no name over a body (a zombie player's, say)
 		bodyState.nameTag = null;
-		bodyState.setData(Severed.KEY, Severed.of(corpse.missing()));
+		bodyState.setData(Severed.KEY, Severed.of(corpse.missing(), Wear.hidden(corpse.wear())));
 		CorpseDressing.body(corpse, bodyState);
 		ClosedEyes.mark(bodyState);
-		Dressed.mark(bodyState, corpse.dressed());
+		Dressed.mark(bodyState, corpse.dressed() | paint(corpse));
 		bodyState.setData(com.jaymoskitchen.client.archery.StuckArrowsLayer.KEY, arrows(corpse));
 		state.body = bodyState;
 		state.bodyRenderer = renderer;
@@ -344,7 +363,8 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 			avatar.setData(Flop.KEY, null);
 			avatar.setData(RagdollPose.KEY, null);
 			avatar.setData(Pinned.KEY, Pinned.HANGING);
-			avatar.setData(Severed.KEY, Severed.of(corpse.missing()));
+			avatar.setData(Severed.KEY, Severed.of(corpse.missing(), Wear.hidden(corpse.wear())));
+			Dressed.mark(avatar, paint(corpse));
 			return;
 		}
 		Entity body = look != null ? look : corpse.clientBody(yaw);
@@ -370,11 +390,11 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 			bodyState.lightCoords = state.lightCoords;
 		}
 		bodyState.nameTag = null;
-		bodyState.setData(Severed.KEY, Severed.of(corpse.missing()));
+		bodyState.setData(Severed.KEY, Severed.of(corpse.missing(), Wear.hidden(corpse.wear())));
 		CorpseDressing.body(corpse, bodyState);
 		bodyState.setData(Pinned.KEY, Pinned.HANGING);
 		ClosedEyes.mark(bodyState);
-		Dressed.mark(bodyState, corpse.dressed());
+		Dressed.mark(bodyState, corpse.dressed() | paint(corpse));
 		bodyState.setData(com.jaymoskitchen.client.archery.StuckArrowsLayer.KEY, arrows(corpse));
 		state.body = bodyState;
 		state.bodyRenderer = renderer;
@@ -434,7 +454,8 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 			avatar.setData(Ragdoll.KEY, null);
 			avatar.setData(Flop.KEY, null);
 			avatar.setData(RagdollPose.KEY, pose);
-			avatar.setData(Severed.KEY, Severed.of(corpse.missing()));
+			avatar.setData(Severed.KEY, Severed.of(corpse.missing(), Wear.hidden(corpse.wear())));
+			Dressed.mark(avatar, paint(corpse));
 			return;
 		}
 		Entity body = look != null ? look : corpse.clientBody(0.0F);
@@ -467,10 +488,10 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 			bodyState.lightCoords = state.lightCoords;
 		}
 		bodyState.nameTag = null;
-		bodyState.setData(Severed.KEY, Severed.of(corpse.missing()));
+		bodyState.setData(Severed.KEY, Severed.of(corpse.missing(), Wear.hidden(corpse.wear())));
 		CorpseDressing.body(corpse, bodyState);
 		ClosedEyes.mark(bodyState);
-		Dressed.mark(bodyState, corpse.dressed());
+		Dressed.mark(bodyState, corpse.dressed() | paint(corpse));
 		bodyState.setData(com.jaymoskitchen.client.archery.StuckArrowsLayer.KEY, arrows(corpse));
 		// (0.5.40) whatever the ragdoll doesn't drive (a vulture's wings and neck, a modded mob's legs) hangs loose
 		pose.loosen(com.jaymoskitchen.client.ragdoll.LooseParts.motion(corpse), state.age, !corpse.isTumbling(),
@@ -593,6 +614,14 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 			poseStack.translate(Mth.sin(state.age * 2.7F) * shake, -0.35F * c * c, Mth.cos(state.age * 3.1F) * shake);
 			poseStack.scale(1.0F + 0.15F * c, 1.0F - 0.6F * c * c, 1.0F + 0.15F * c);
 		}
+		if (state.sink > 0.0F) {
+			// rotting, it settles slowly into the ground
+			poseStack.translate(0.0F, -state.sink, 0.0F);
+		}
+		if (state.crushed) {
+			// flattened: wide and thin, about where it lies
+			poseStack.scale(CRUSH_WIDE, CRUSH_THIN, CRUSH_WIDE);
+		}
 		if (state.pose != null) {
 			// (0.5.1) onto the ragdoll
 			poseStack.mulPose(state.pose.body);
@@ -608,7 +637,7 @@ public class CorpseRenderer extends EntityRenderer<CorpseEntity, CorpseRenderer.
 			poseStack.scale(-1.0F, -1.0F, 1.0F);
 			poseStack.translate(0.0F, -1.501F, 0.0F);
 			PlayerModel model = state.avatar.skin.model() == PlayerModelType.SLIM ? slim : wide;
-			collector.submitModel(model, state.avatar, poseStack, state.avatar.skin.body().texturePath(), state.lightCoords,
+			collector.submitModel(model, state.avatar, poseStack, Dressed.texture(model, state.avatar, state.avatar.skin.body().texturePath()), state.lightCoords,
 				OverlayTexture.NO_OVERLAY, state.outlineColor);
 			CorpseDressing.submit(state.avatar, model, poseStack, collector, state.lightCoords);
 		} else if (state.bodyRenderer != null) {

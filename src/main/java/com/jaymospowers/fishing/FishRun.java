@@ -74,6 +74,19 @@ public final class FishRun {
     static final int THRASH_TICKS_LEAST = 12, THRASH_TICKS_MOST = 25;
     /** A tired fish fights less often: the gaps between its runs are stretched by this much at no energy left. */
     static final float TIRED_GAP = 1.5F;
+    /**
+     * (F3, Better Fishing's idea, our own code) A fish this heavy (kg), or one of the big ones, leaps clear of the water
+     * (higher than a small fish's hop): keep reeling through the leap for more than {@link #LEAP_GRACE} ticks and the line snaps.
+     */
+    static final float LEAP_KG = 3.0F;
+    static final double JUMP_UP_BIG = 0.8;
+    static final int LEAP_GRACE = 3;
+    /**
+     * (F4) Pull your rod the other way to a run (your look this far round, as a dot of the run's way: -1 straight against)
+     * and the run tires the fish this much more a tick.
+     */
+    static final double AGAINST_DOT = -0.35;
+    static final float ENERGY_AGAINST = 0.0018F;
 
     private static final class Run {
         long fightStart;
@@ -82,6 +95,8 @@ public final class FishRun {
         long nextAt;
         long jumpUntil;
         long thrashUntil;
+        boolean bigLeap;
+        double sideX, sideZ;
     }
 
     /** Server side: each fight's run, keyed by player uuid. */
@@ -132,8 +147,10 @@ public final class FishRun {
             } else {
                 run.dir = random.nextBoolean() ? 1 : -1;
                 run.endsAt = now + Mth.nextInt(random, RUN_TICKS_LEAST, RUN_TICKS_MOST);
+                run.bigLeap = false;
                 if (!held && fish.isInWater() && random.nextFloat() < JUMP_CHANCE) {
-                    fish.setDeltaMovement(fish.getDeltaMovement().add(0.0D, JUMP_UP, 0.0D));
+                    run.bigLeap = leaper(state);
+                    fish.setDeltaMovement(fish.getDeltaMovement().add(0.0D, run.bigLeap ? JUMP_UP_BIG : JUMP_UP, 0.0D));
                     player.level().playSound(null, fish.getX(), fish.getY(), fish.getZ(),
                             SoundEvents.FISHING_BOBBER_SPLASH, SoundSource.NEUTRAL, 0.8F, 0.8F);
                     run.jumpUntil = now + JUMP_TICKS;
@@ -158,6 +175,8 @@ public final class FishRun {
             double speed = RUN_SPEED * state.strength() * run.dir;
             double sx = -fz / len * speed;
             double sz = fx / len * speed;
+            run.sideX = -fz / len * run.dir;
+            run.sideZ = fx / len * run.dir;
             if (held) {
                 fish.setPos(fish.getX() + sx, fish.getY(), fish.getZ() + sz);
             } else {
@@ -171,6 +190,28 @@ public final class FishRun {
     static boolean thrashing(ServerPlayer player, long now) {
         Run run = RUNS.get(player.getUUID());
         return run != null && run.thrashUntil > now;
+    }
+
+    /** (F3) A fish that leaps clear of the water: a heavy one, or one of the big kinds. */
+    static boolean leaper(FishFight state) {
+        return state.kg() >= LEAP_KG || FishingReal.big(state.fishKind());
+    }
+
+    /** (F3) Whether {@code player}'s fish is in the air on a big leap just now (reeling through it snaps the line). */
+    static boolean bigLeap(ServerPlayer player, long now) {
+        Run run = RUNS.get(player.getUUID());
+        return run != null && run.dir != 0 && run.bigLeap && run.jumpUntil > now;
+    }
+
+    /** (F4) Whether {@code player} is pulling their rod (looking) the other way to their fish's run. */
+    static boolean against(ServerPlayer player) {
+        Run run = RUNS.get(player.getUUID());
+        if (run == null || run.dir == 0) {
+            return false;
+        }
+        net.minecraft.world.phys.Vec3 look = player.getLookAngle();
+        double len = Math.hypot(look.x, look.z);
+        return len > 1.0E-4D && (look.x * run.sideX + look.z * run.sideZ) / len < AGAINST_DOT;
     }
 
     /** (2026-11-23) Whether {@code player}'s fish is in the first moments of a run that began with a leap. */

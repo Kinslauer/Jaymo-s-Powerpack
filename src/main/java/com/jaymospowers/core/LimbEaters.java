@@ -470,6 +470,7 @@ public final class LimbEaters {
 			TEARS.put(mob, new Tear(body.getUUID(), level.getGameTime()));
 			double r = mob.getBbWidth() / 2.0 + body.getBbWidth() / 2.0 + 0.9;
 			if (mob.distanceToSqr(body) > r * r) {
+				com.jaymospowers.power.web.KitchenCompat.gnaw(mob, body, com.jaymospowers.power.web.KitchenCompat.GNAW_UP);
 				giveUp--;
 				ticks = 0;
 				mob.getLookControl().setLookAt(body, 30.0F, 30.0F);
@@ -485,6 +486,9 @@ public final class LimbEaters {
 			double shake = Mth.sin(ticks * 1.3F) * 0.6;
 			mob.getLookControl().setLookAt(body.getX() + side.x * shake, body.getY() + 0.2, body.getZ() + side.z * shake, 90.0F, 90.0F);
 			int phase = ticks % BITE_EVERY;
+			// down over them (a zombie bent double, Kitchen's GnawPose), each bite drawn from the lunge to the rip back
+			com.jaymospowers.power.web.KitchenCompat.gnaw(mob, body,
+				phase == 1 ? com.jaymospowers.power.web.KitchenCompat.GNAW_BITE : com.jaymospowers.power.web.KitchenCompat.GNAW_DOWN);
 			if (phase == 1 && to.lengthSqr() > 1.0E-4) {
 				mob.setDeltaMovement(mob.getDeltaMovement().add(to.normalize().scale(LUNGE)));
 				mob.needsSync = true;
@@ -530,6 +534,7 @@ public final class LimbEaters {
 		@Override
 		public void stop() {
 			body = null;
+			com.jaymospowers.power.web.KitchenCompat.gnaw(mob, null, com.jaymospowers.power.web.KitchenCompat.GNAW_UP);
 			mob.getNavigation().stop();
 		}
 	}

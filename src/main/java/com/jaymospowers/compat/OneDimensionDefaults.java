@@ -20,9 +20,9 @@ import net.fabricmc.loader.api.FabricLoader;
 /**
  * (0.20.30) The pack's default stack for One Dimension (CodxIO; shipped unchanged with CustomChunks, Planeshift and CodxLib):
  * the high sky on top (0.20.36), then the Aether, the Cloud Sea ({@link com.jaymospowers.aether.cloudsea.CloudSea}), the
- * Overworld, the Nether underneath, so you fly up through the clouds into the islands and on up to the edge of space
+ * Overworld, the Nether underneath, and under it the Beneath (Enderscape's islands, with Enderscape), so you fly up through the clouds into the islands and on up to the edge of space
  * ({@link com.jaymospowers.power.zfighter.ZFighterHighSky}), and dig down into the Nether's sky, with no portal and no
- * loading screen. The End stays a dimension of its own (its portal, the dragon, Enderscape), and
+ * loading screen. The End stays a dimension of its own (its portal, the dragon, Stellarity), and
  * so does every world of ours you reach some other way (the future, the moons, the Arsenal's pocket...).
  * <p>
  * One Dimension reads {@code config/one-dimension.json} when a world is made (the create-world screen starts from it; a
@@ -32,9 +32,10 @@ import net.fabricmc.loader.api.FabricLoader;
  */
 public final class OneDimensionDefaults {
 	/** Top to bottom. (0.20.36, Andy) The high sky on top: the thin air at the edge of space, over the Aether's islands. */
-	static final List<String> ORDER = List.of("jaymospowers:high_sky", "jaymospowers:aether", "jaymospowers:cloud_sea", "minecraft:overworld",
-		"minecraft:the_nether");
-	private static final String ABOUT = "Jaymo's Powers' defaults: the high sky over the Aether over the Cloud Sea over the Overworld over the Nether."
+	static final List<String> ORDER = order();
+	/** Enderscape's islands under the Nether (Andy, 2026-11-19), only with Enderscape: its data is gated on it. */
+	static final String BENEATH = "jaymospowers:the_beneath";
+	private static final String ABOUT = "Jaymo's Powers' defaults: the high sky over the Aether over the Cloud Sea over the Overworld over the Nether (over the Beneath, with Enderscape)."
 		+ " Each world keeps the order it was made with; changing this file never changes a world that exists.";
 	/** Not stacked: reached as before (Lost Cities is dropped from the stack; the proving grounds are reached by teleport). */
 	static final List<String> LEFT_OUT = List.of("minecraft:the_end", "jaymospowers:future", "jaymospowers:moon", "jaymospowers:verdant_world", "jaymospowers:giant_ring",
@@ -42,6 +43,15 @@ public final class OneDimensionDefaults {
 		"jaymospowers:arsenal_pocket", "lostcities:lostcity", "jaymoskingdoms:proving_grounds");
 
 	private OneDimensionDefaults() {
+	}
+
+	private static List<String> order() {
+		List<String> order = new ArrayList<>(List.of("jaymospowers:high_sky", "jaymospowers:aether", "jaymospowers:cloud_sea", "minecraft:overworld",
+			"minecraft:the_nether"));
+		if (FabricLoader.getInstance().isModLoaded("enderscape")) {
+			order.add(BENEATH);
+		}
+		return List.copyOf(order);
 	}
 
 	/** Called from {@code JaymosPowers.onInitialize}, before any world loads. */
@@ -68,7 +78,7 @@ public final class OneDimensionDefaults {
 		JsonArray leftOut = new JsonArray();
 		LEFT_OUT.forEach(leftOut::add);
 		root.add("left_out", leftOut);
-		// the Nether's floor is the bottom of the world: nothing under it to fall into
+		// the bottom band (the Nether, or the Beneath under it) is the bottom of the world: no loop back to the top
 		root.addProperty("loop", false);
 		root.addProperty("gap", 0);
 		root.addProperty("trim", true);
@@ -80,7 +90,7 @@ public final class OneDimensionDefaults {
 		try {
 			Files.createDirectories(path.getParent());
 			Files.writeString(path, new GsonBuilder().setPrettyPrinting().create().toJson(root), StandardCharsets.UTF_8);
-			JaymosPowers.LOGGER.info("Wrote the pack's One Dimension stack (high sky, Aether, Cloud Sea, Overworld, Nether) to {}", path);
+			JaymosPowers.LOGGER.info("Wrote the pack's One Dimension stack (high sky, Aether, Cloud Sea, Overworld, Nether, and the Beneath with Enderscape) to {}", path);
 		} catch (IOException e) {
 			JaymosPowers.LOGGER.warn("Could not write {}", path, e);
 		}
@@ -89,7 +99,7 @@ public final class OneDimensionDefaults {
 	/**
 	 * One Dimension rewrites the file itself once it has run (plain ids, every dimension it knows added to the order), so a
 	 * hand-edited order can't be told apart from One Dimension's own rewrite. The pack's order therefore wins: a file whose
-	 * order isn't exactly {@link #ORDER} gets the five ORDER ids on top in ORDER's order (each entry kept as it is), every
+	 * order isn't exactly {@link #ORDER} gets the ORDER ids on top in ORDER's order (each entry kept as it is), every
 	 * other id moved to {@code left_out} (deduped, after what was there). Used for new worlds only.
 	 */
 	private static void update(Path path) {
@@ -136,7 +146,7 @@ public final class OneDimensionDefaults {
 				root.addProperty("_about", ABOUT);
 			}
 			Files.writeString(path, new GsonBuilder().setPrettyPrinting().create().toJson(root), StandardCharsets.UTF_8);
-			JaymosPowers.LOGGER.info("Put the One Dimension stack in {} back to the pack's (high sky, Aether, Cloud Sea, Overworld, Nether); was {}, left out now {} (new worlds only)",
+			JaymosPowers.LOGGER.info("Put the One Dimension stack in {} back to the pack's (high sky, Aether, Cloud Sea, Overworld, Nether, and the Beneath with Enderscape); was {}, left out now {} (new worlds only)",
 				path, ids, out);
 		} catch (IOException | RuntimeException e) {
 			JaymosPowers.LOGGER.warn("Could not update {}", path, e);

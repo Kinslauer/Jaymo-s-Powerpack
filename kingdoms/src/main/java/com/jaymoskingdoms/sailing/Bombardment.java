@@ -91,6 +91,8 @@ public final class Bombardment {
 		final Crater crater;
 		final List<int[]> columns;
 		int column, y = Integer.MIN_VALUE, wait, removed;
+		/** What held round it before it was blasted, so what it undercuts comes down after ({@link com.jaymoskingdoms.Collapse}). */
+		com.jaymoskingdoms.Collapse.@org.jspecify.annotations.Nullable Look look;
 		/** (0.7.490) this column kept a solid block inside the crater below the centre, so nothing under it is stripped. */
 		boolean kept;
 
@@ -151,7 +153,9 @@ public final class Bombardment {
 		}
 		// outward from the middle, the way a blast spreads
 		columns.sort(Comparator.comparingDouble(c -> Math.hypot(c[0] - centre.getX(), c[1] - centre.getZ())));
-		JOBS.add(new Job(level, centre, crater, columns));
+		Job job = new Job(level, centre, crater, columns);
+		job.look = com.jaymoskingdoms.Collapse.before(level, at, crater.radius());
+		JOBS.add(job);
 		pending += columns.size();
 	}
 
@@ -208,6 +212,10 @@ public final class Bombardment {
 			pending -= job.column - before;
 			if (job.column >= job.columns.size()) {
 				it.remove();
+				// (blasted: the building over the hole comes down if nothing holds it now)
+				if (job.removed > 0) {
+					com.jaymoskingdoms.Collapse.after(job.look);
+				}
 			}
 		}
 		if (JOBS.isEmpty()) {

@@ -40,6 +40,10 @@ final class StormParticle extends SingleQuadParticle {
 	/** Smoke: how fast it starts rising, the wind it leans into aloft, how much it swells, and its grey at the top. */
 	private float rise, swell, greyTop, baseSize, greyFoot;
 	private double windX, windZ;
+	/** Smoke lit from below by the flames under it (0..1): warm and bright at its foot, gone by {@link #LIT_FOR} of its life. */
+	private float lit, glow;
+	static final float LIT_FOR = 0.25F;
+	static final float[] FIRELIGHT = {1.0F, 0.56F, 0.26F};
 
 	StormParticle(ClientLevel level, double x, double y, double z, TextureAtlasSprite sprite, int kind, int owner, float size, int life,
 		float r, float g, float b, float alpha) {
@@ -74,6 +78,12 @@ final class StormParticle extends SingleQuadParticle {
 		this.greyTop = greyTop;
 		this.baseSize = this.quadSize;
 		this.greyFoot = greyFoot;
+		return this;
+	}
+
+	/** Smoke that starts out lit from below by the fire under it, {@code lit} (0..1) of the way to the flames' colour. */
+	StormParticle lit(float lit) {
+		this.lit = lit;
 		return this;
 	}
 
@@ -134,7 +144,10 @@ final class StormParticle extends SingleQuadParticle {
 			this.roll += 0.004F;
 			this.quadSize = this.baseSize * (1.0F + this.swell * t);
 			float grey = Mth.lerp(Math.min(1.0F, t * 1.5F), this.greyFoot, this.greyTop);
-			this.setColor(grey, grey * 0.97F, grey * 0.94F);
+			// lit from below while it's low over the flames: warm at its foot, cooling to the smoke's own grey as it climbs
+			this.glow = this.lit * (1.0F - Mth.clamp(t / LIT_FOR, 0.0F, 1.0F));
+			this.setColor(Mth.lerp(this.glow, grey, FIRELIGHT[0]), Mth.lerp(this.glow, grey * 0.97F, FIRELIGHT[1]),
+				Mth.lerp(this.glow, grey * 0.94F, FIRELIGHT[2]));
 			net.minecraft.world.phys.Vec3 eye = net.minecraft.client.Minecraft.getInstance().gameRenderer.mainCamera().position();
 			double away = Math.sqrt((this.x - eye.x) * (this.x - eye.x) + (this.y - eye.y) * (this.y - eye.y) + (this.z - eye.z) * (this.z - eye.z));
 			this.near = Mth.clamp((float)((away - FOG_CLEAR) / FOG_THIN), 0.0F, 1.0F) * (1.0F - 0.7F * t);
@@ -188,6 +201,17 @@ final class StormParticle extends SingleQuadParticle {
 			this.age = Math.max(this.age, this.lifetime - FADE);
 		}
 		this.alpha = this.baseAlpha * Mth.clamp(fade, 0.0F, 1.0F) * this.near;
+	}
+
+	/** Smoke lit by the fire under it takes the fire's light. */
+	@Override
+	protected int getLightCoords(float partialTick) {
+		int light = super.getLightCoords(partialTick);
+		if (this.glow <= 0.0F) {
+			return light;
+		}
+		int block = Math.max(light >> 4 & 0xF, Math.round(this.glow * 15.0F));
+		return light & 0xFFFF0000 | block << 4;
 	}
 
 	@Override

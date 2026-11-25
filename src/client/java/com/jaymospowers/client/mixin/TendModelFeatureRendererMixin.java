@@ -37,6 +37,8 @@ abstract class TendModelFeatureRendererMixin {
 		// and a wall runner's knees and elbows, along the wall and up it
 		com.jaymospowers.client.power.web.WebWallRunPose.bendLimbs(submit.model(), submit.state());
 		com.jaymospowers.client.freerun.UpRunPose.bendLimbs(submit.model(), submit.state());
+		// and a ladder climber's knees
+		com.jaymospowers.client.body.BodyAnim.bendLimbs(submit.model(), submit.state());
 		// and a boxer's elbows
 		com.jaymospowers.client.boxing.BoxingPoses.bendLimbs(submit.model(), submit.state());
 		// and the elbows of a Better Combat swing (the longsword trial's)
@@ -48,6 +50,8 @@ abstract class TendModelFeatureRendererMixin {
 		// and a bar swing's and a balance's (track 4)
 		com.jaymospowers.client.freerun.BarHangPose.bendLimbs(submit.model(), submit.state());
 		com.jaymospowers.client.freerun.BalancePose.bendLimbs(submit.model(), submit.state());
+		// and the walk's knees giving under the weight, a landing's squash and a jump's tuck (the run's bend under them)
+		com.jaymospowers.client.moving.BodyWeight.bendLimbs(submit.model(), submit.state());
 		// and running knees, slides, long jumps, safety taps and sky dives (track 5)
 		com.jaymospowers.client.freerun.RunPose.bendLimbs(submit.model(), submit.state());
 		com.jaymospowers.client.freerun.moves.RunMovesPose.bendLimbs(submit.model(), submit.state());

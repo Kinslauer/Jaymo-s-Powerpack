@@ -103,6 +103,10 @@ public final class Workers {
 			// (0.7.619) a player's Bane, or one of its band, in a villager's body: their own doings
 			return Banes.villagerStep(level, w);
 		}
+		if (HollowCaptains.is(mob)) {
+			// one of the risen dead's captains, a Hollow man: the dead's fight, and his captain's ways
+			return HollowCaptains.step(level, w);
+		}
 		if (SwornCaptains.free(mob)) {
 			// (0.7.433) a captain sworn to a player: at their side, his brain his own (and never taken onto a roster)
 			return SwornCaptains.step(level, w);

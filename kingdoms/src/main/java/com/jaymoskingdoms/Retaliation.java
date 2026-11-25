@@ -166,6 +166,20 @@ final class Retaliation {
 		}
 		// (gb-customs) in the north an armed townsman struck takes it as a challenge: a duel, nobody else's business, and no crime
 		boolean duel = brawl == null && Customs.duelAccepted(level, f, victim);
+		if (!duel && brawl == null && victim instanceof Villager v && !Temperaments.fearless(v) && !BlastFright.standsGround(v)) {
+			// Andy (2026-11-24): only guards and the brave fight; anyone else struck runs, and it's still an assault
+			say(level, victim, "flee");
+			Frights.scare(level, v, player.position());
+			if (f != null && !Theft.exempt(player, f)) {
+				List<LivingEntity> all = new ArrayList<>(seen);
+				if (!all.contains(victim)) {
+					all.addFirst(victim);
+				}
+				Theft.commit(player, level, f, Theft.Crime.ASSAULT, null, false, all);
+				HeldBack.assaulted(player, f, now);
+			}
+			return;
+		}
 		if (brawl == null) {
 			brawl = new Brawl(f, victim.getUUID(), now);
 			BRAWLS.put(player.getUUID(), brawl);

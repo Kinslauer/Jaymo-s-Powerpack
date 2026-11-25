@@ -54,8 +54,10 @@ public final class InteractActions {
 	public static final String PASSAGE = BlossomTraders.ACTION;
 	/** Ask About Steel: a Blossom smith tells the next step of their steel ({@link BlossomSteel}). */
 	public static final String STEEL = BlossomSteel.ACTION;
+	/** Clean the Goods: a speakeasy's fence takes the realms' marks off stolen things, for a cut ({@link StolenGoods}). */
+	public static final String CLEAN = "clean";
 	public static final List<String> ALL = List.of(AUDIENCE, WARES, TRIBUTE, SPY, RAID, PLANT, MONEY, RITE, ENVOY, PROMISE, STORY,
-		ROUND, NIGHT, TEACH, CONSULT, FAVOUR, ALIBI, PAPERS, ALMS, SEAL, DEED, HELM, HIRE_HELM, PASSAGE, STEEL);
+		ROUND, NIGHT, TEACH, CONSULT, FAVOUR, ALIBI, PAPERS, ALMS, SEAL, DEED, HELM, HIRE_HELM, PASSAGE, STEEL, CLEAN);
 
 	/** Which of {@link #ALL} a villager ({@code entityId}) offers the player now. */
 	public record Offered(int entityId, List<String> actions) implements CustomPacketPayload {
@@ -126,6 +128,7 @@ public final class InteractActions {
 			case HIRE_HELM -> Helmsmen.offersHire(player, v);
 			case PASSAGE -> BlossomTraders.offers(player, v) || SteamAirships.offers(player, v);
 			case STEEL -> BlossomSteel.offers(player, v);
+			case CLEAN -> v.entityTags().contains(Underworld.FENCE_TAG) && StolenGoods.carries(player, -1);
 			default -> false;
 		};
 	}
@@ -178,6 +181,7 @@ public final class InteractActions {
 			}
 			case RITE -> {
 				if (McaBridge.heartsOf((Villager)v, player) < Directions.REFUSE_HEARTS) {
+					RefusalHints.hint(player, v, RefusalHints.Cause.DISLIKE);
 					return Component.translatable("talk.jaymoskingdoms.rite.refuse");
 				}
 				Rites.offer(player, (Villager)v);
@@ -247,6 +251,9 @@ public final class InteractActions {
 			case STEEL -> {
 				BlossomSteel.talk(player, v);
 				return null;
+			}
+			case CLEAN -> {
+				return StolenGoods.clean(player, v);
 			}
 			case SEAL, DEED -> {
 				Faction realm = guardRealm(player, v);

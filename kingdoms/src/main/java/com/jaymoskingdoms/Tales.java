@@ -913,6 +913,46 @@ public final class Tales {
 		}
 	}
 
+	/**
+	 * (Village mods patch 5, {@link Pilgrims}) The same as {@link #advance} with the step's {@code noted} line written, for a
+	 * tale whose giver walked on long ago: any of {@code player}'s waiting runs of {@code taleId}. Only a mark not set yet
+	 * moves it on, so the same place doesn't count twice.
+	 */
+	static void reached(ServerPlayer player, String taleId, String mark) {
+		State s = stateOrNull(player);
+		if (s == null || s.marks.contains(mark)) {
+			return;
+		}
+		for (Run run : new ArrayList<>(s.runs)) {
+			Tale tale = run.tale.equals(taleId) ? Tale.get(run.tale) : null;
+			JsonObject step = tale == null ? null : tale.step(run.step);
+			if (step == null || !Tale.string(step, "do", "").equals("await")) {
+				continue;
+			}
+			s.marks.add(mark);
+			TaleWays.learnt(player, mark);
+			MutableComponent line = words(player, run, Tale.object(step, "noted"), mark);
+			if (line != null && !run.notes.contains(line.getString())) {
+				note(run, line.getString());
+			}
+			go(player, run, step.get("then"), null);
+			Quests.sync(player, true);
+		}
+	}
+
+	/** (Village mods patch 5) {@code player}'s run of {@code taleId} asked by {@code giver} is still at step {@code step}. */
+	static boolean atStep(ServerPlayer player, String taleId, UUID giver, String step) {
+		State s = stateOrNull(player);
+		String id = giver.toString();
+		return s != null && s.runs.stream().anyMatch(r -> r.tale.equals(taleId) && r.giver.equals(id) && r.step.equals(step));
+	}
+
+	/** (Village mods patch 5) {@code player} has a run of {@code taleId} going. */
+	static boolean running(ServerPlayer player, String taleId) {
+		State s = stateOrNull(player);
+		return s != null && s.runs.stream().anyMatch(r -> r.tale.equals(taleId));
+	}
+
 	/** A new run of {@code tale} for {@code player}, asked by {@code giver} (or nobody), from {@code home}; its first step is entered. */
 	private static Run start(ServerLevel level, ServerPlayer player, Tale tale, @Nullable LivingEntity giver, int faction, BlockPos home,
 		@Nullable LivingEntity speaker) {

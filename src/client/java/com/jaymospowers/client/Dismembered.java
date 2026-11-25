@@ -178,6 +178,10 @@ public final class Dismembered {
 			walk(root, living, gait, broken == null ? 0 : broken);
 		}
 		Integer missing = renderState.getData(MISSING);
+		// streamer safe: living bodies are drawn whole
+		if (com.jaymospowers.client.blood.BloodSettings.streamerSafe()) {
+			return;
+		}
 		// (0.18.82) a wooden or iron limb's own model draws exactly the limb that is missing
 		if (missing == null || com.jaymospowers.client.wounds.ProstheticLayer.owns(model)) {
 			return;
@@ -207,7 +211,7 @@ public final class Dismembered {
 			return;
 		}
 		Integer only = renderState.getData(ONLY);
-		Integer missing = renderState.getData(MISSING);
+		Integer missing = com.jaymospowers.client.blood.BloodSettings.streamerSafe() ? null : renderState.getData(MISSING);
 		if (only == null && missing == null) {
 			return;
 		}

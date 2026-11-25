@@ -1050,6 +1050,10 @@ final class SkillScreen extends Screen {
 				? Component.translatable("gui.jaymoskingdoms.skills.blood.none")
 				: Component.translatable("gui.jaymoskingdoms.skills.blood.yours", Component.translatable("kit.jaymoskingdoms.move." + kit.move().key()),
 					Component.translatable("kit.jaymoskingdoms.move." + kit.move().key() + ".desc"))).withColor(Ui.GOLD));
+			if (com.jaymoskingdoms.Heritage.is(player, com.jaymoskingdoms.Heritage.Kind.VERDANT)) {
+				// (Andy, 2026-11-23) and a Verdant's push-button regrowth
+				text.add(Component.translatable("gui.jaymoskingdoms.skills.blood.verdant").withColor(Ui.GOLD));
+			}
 		}
 		Component cost = Component.translatable("gui.jaymoskingdoms.skills.cost", perk.cost);
 		if (perk.minLevel > 0) {

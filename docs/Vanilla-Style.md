@@ -51,13 +51,17 @@ fal.ai image generation and parallax parts don't apply to 16px item icons, so th
   Void Flintlock, Grand Shield and Void Crown are drawn fresh in their own palettes.
 - WeaponMod: iron katana (`paint_batch.py`).
 - **Jaymo's Powers armour (2026-11-11, Tiv's ask: "solid outlines, pixel based detail, clean images")**
-  (`armour.py`). Nine sets, item icons and worn layers (`entity/equipment/humanoid` and `humanoid_leggings`).
+  (`armour.py`). Eight sets, item icons and worn layers (`entity/equipment/humanoid` and `humanoid_leggings`).
   Metal sets (Zanite, Gravitite, Arkenium, Neptune, Burrukai plate, Bog iron) start from vanilla's iron armour,
-  hide and cloth sets (Beast pelt, Caveman, Ichorcloth) from vanilla's leather armour plus its overlay, repainted by
+  hide and cloth sets (Beast pelt, Ichorcloth) from vanilla's leather armour plus its overlay, repainted by
   brightness rank in the set's 7-step ramp. Worn layers use the ramp's mid tone to glint, as vanilla's diamond and
-  gold do. Trims: gold on Neptune, Burrukai and Ichorcloth, pale on Arkenium, fur on Beast pelt and Caveman.
-  Caveman keeps its own scraps cut (its old worn alpha is the mask) and its own icon shapes (Andy: "more like the
-  original rather than leather armor"), drawn as grids and shaded by `vstyle.parts`. Ichorcloth's hood/robe icons
+  gold do. Trims: gold on Neptune, Burrukai and Ichorcloth, pale on Arkenium, fur on Beast pelt.
+  The primitive hide sets (Caveman, Trapper's, Barbarian and a dark make of each, 2026-11-24; Andy picked all three
+  redrawn styles) are drawn in `hide_sets.py`, which `armour.py` calls: letter-grid icons shaded from the top-left, and
+  worn layers painted onto vanilla leather's UVs with its shading (Caveman keeps its old scraps cut,
+  `masks/caveman_*.png`). They are our own art, so the same images are the mod's base textures. The script asserts
+  the faults judges found in the drafts: outline shades on every silhouette pixel, nothing near the slot's grey on
+  it, no checker dither, bone, fur and sinew apart in value. Ichorcloth's hood/robe icons
   and Bog iron's icons were already in this style and stay. One-off gear with placeholder art is redrawn in the
   same script: Traceur Boots and Gloves, Training Weights (both), Weighted Gi, and the Sealed Helm's worn layer.
   Scouter, Rig, Air Skin and Void Crown were already clean and stay.

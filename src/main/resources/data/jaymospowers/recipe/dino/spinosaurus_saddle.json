@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "L": "#jaymospowers:saddle_leather",
+    "I": "minecraft:iron_ingot",
+    "S": "minecraft:string"
+  },
+  "pattern": [
+    "LIL",
+    "LLL",
+    "ISI"
+  ],
+  "result": {
+    "id": "jaymospowers:spinosaurus_saddle"
+  }
+}

@@ -13,10 +13,12 @@ import net.minecraft.world.item.ItemStack;
  * the right, the feet (Artifacts) in the player box's bottom left corner, the player's inventory below. Drawn by the client's BaublesScreen.
  */
 public class BaublesMenu extends AbstractContainerMenu {
-	/** Where each of the nine slots sits (x, y), in {@link Baubles#SLOTS} order; and the player's inventory. */
+	/** Where each of the ten slots sits (x, y), in {@link Baubles#SLOTS} order; and the player's inventory. */
 	public static final int[][] SLOT_AT = {{8, 8}, {8, 26}, {8, 44}, {8, 62}, {152, 8}, {152, 26}, {152, 44}, {152, 62},
 		// (Artifacts) the feet, in the bottom left corner of the player box, by the feet
-		{32, 60}};
+		{32, 60},
+		// the back, in the top right corner of the player box, behind the shoulder
+		{128, 10}};
 	public static final int INVENTORY_Y = 84;
 
 	private final Container baubles;

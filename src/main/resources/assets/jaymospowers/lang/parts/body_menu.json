@@ -10,6 +10,8 @@
 	"body_tip.jaymospowers.body_menu": "Tap %1$s on someone downed, tied up or out cold to pick what to do: revive, untie, lift, go through their pockets. Hold %1$s to drag them. To revive them yourself, kneel beside them (hold %2$s, scroll down, keep still) and hold %1$s, or pick Revive and you kneel on your own.",
 	"body_tip.jaymospowers.execute.title": "Finishing",
 	"body_tip.jaymospowers.execute": "Hold %1$s on someone downed to execute them. Every kind of weapon does it its own way, and bare hands snap the neck from their head.",
+	"body_tip.jaymospowers.maggot.title": "Maggots for bait",
+	"body_tip.jaymospowers.maggot": "Tap %1$s on a maggot to pick it off alive: it goes in your pack as bait for the hook. Step on it and it bursts. Maggots dropped on the ground crawl away after a minute.",
 	"body_tip.jaymospowers.lasso.title": "The lasso",
 	"body_tip.jaymospowers.lasso": "Hold %1$s to whirl it and let go to throw. Walk in to wind the rope, back off to drag. At a person's side, hold %1$s to hogtie them; then tap %1$s on them to untie, lift or search them.",
 	"body_tip.jaymospowers.downed.title": "You're down",

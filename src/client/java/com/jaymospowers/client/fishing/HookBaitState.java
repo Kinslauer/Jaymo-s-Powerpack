@@ -8,4 +8,9 @@ public interface HookBaitState {
 
     /** The dye bead fitted as a float, drawn over the bobber. */
     ItemStackRenderState jaymospowers$bead();
+
+    /** (F6) The hanging line's points ({@link HangingLine#points}), or null to draw vanilla's. */
+    float @org.jspecify.annotations.Nullable [] jaymospowers$line();
+
+    void jaymospowers$setLine(float @org.jspecify.annotations.Nullable [] line);
 }

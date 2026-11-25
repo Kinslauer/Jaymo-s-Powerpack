@@ -218,9 +218,10 @@ public class ZFighterRogue extends Monster {
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
 		boolean tyrant = tyrant();
-		if (!tyrant && !ZFighterTournaments.fighting(this.getUUID()) && !raider()) {
+		if (!tyrant && !ZFighterTournaments.fighting(this.getUUID()) && !raider() && !ZFighterCaveBand.brute(this)) {
 			// a champion with no bout to fight (left over from a restart): gone; (0.20.36) a raider band's men are not champions
-			// of a bout, so they stay (their bands clear away their own leftovers)
+			// of a bout, so they stay (their bands clear away their own leftovers); nor are the cave fighters while marked
+			// (ZFighterCaveBand: the mark isn't saved, so after a reload this clears them)
 			this.discard();
 			return;
 		}

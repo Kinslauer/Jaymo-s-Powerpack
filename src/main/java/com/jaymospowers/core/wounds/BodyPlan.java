@@ -13,6 +13,7 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -20,6 +21,11 @@ import org.jspecify.annotations.Nullable;
  * lso-pools) The pools sit on top of the health, apart from it: a humanoid's head 0.4, body 0.6, each arm 0.4, each leg
  * 0.6, each foot 0.4 (8/12/8/12/8 on 20 health). The other plans are scaled the same way: head 0.4, body 0.6, legs 0.6,
  * wings 0.4 (as arms). A simple body's one part is its health.
+ * <p>
+ * Andy: players "were breaking their limbs off short jumps", so a player's limbs (arms, legs, feet) hold
+ * {@link Pools#PLAYER_LIMBS} times as much (8/12/16/24/16 on 20 health); mobs and their heads and bodies are as before. A
+ * player's limb breaks, and a blow past {@link com.jaymospowers.core.Dismember#SEVER_OVERKILL} of it severs it, only
+ * after twice the damage. Use {@link #share(int, LivingEntity)} and {@link #total(LivingEntity)} for a real creature.
  */
 public enum BodyPlan {
 	HUMANOID(new BodyPart[] {HEAD, BODY, LEFT_ARM, RIGHT_ARM, LEFT_LEG, RIGHT_LEG, LEFT_FOOT, RIGHT_FOOT},
@@ -33,6 +39,8 @@ public enum BodyPlan {
 	/** (Survival picks, lso-pools) Each pool's size as a share of the most health; tuning lives here. */
 	public static final class Pools {
 		public static final float HEAD = 0.4F, BODY = 0.6F, ARM = 0.4F, LEG = 0.6F, FOOT = 0.4F;
+		/** A player's limbs (not head or body) are this many times their plan's share. */
+		public static final float PLAYER_LIMBS = 2.0F;
 
 		private Pools() {
 		}
@@ -90,6 +98,20 @@ public enum BodyPlan {
 		return this.total;
 	}
 
+	/** Part {@code index}'s share for {@code entity}: a player's limbs hold {@link Pools#PLAYER_LIMBS} times as much. */
+	public float share(int index, LivingEntity entity) {
+		return entity instanceof Player && !this.parts[index].vital() ? this.shares[index] * Pools.PLAYER_LIMBS : this.shares[index];
+	}
+
+	/** {@link #total()} for {@code entity}, its player limbs counted at their size. */
+	public float total(LivingEntity entity) {
+		float sum = 0.0F;
+		for (int i = 0; i < this.shares.length; i++) {
+			sum += this.share(i, entity);
+		}
+		return sum;
+	}
+
 	/** This part's place, or -1 if the plan has none. */
 	public int index(BodyPart part) {
 		for (int i = 0; i < this.parts.length; i++) {
@@ -122,14 +144,29 @@ public enum BodyPlan {
 		}
 		BodyPlan plan = CACHE.get(entity.getType());
 		if (plan == null) {
-			plan = pick(entity);
+			plan = pick(entity.getType(), entity.getBbWidth(), entity.getBbHeight());
 			CACHE.put(entity.getType(), plan);
 		}
 		return plan;
 	}
 
-	private static BodyPlan pick(LivingEntity entity) {
-		var type = entity.getType().builtInRegistryHolder();
+	/** Forgets the plans picked so far (an op's override changed). */
+	public static void forget() {
+		CACHE.clear();
+	}
+
+	/** The plan a kind of creature is read as, from its default size, as {@link #of} would for one of them. */
+	public static BodyPlan read(EntityType<?> type) {
+		return pick(type, type.getWidth(), type.getHeight());
+	}
+
+	/** The plan an op's override gives {@code type}, else one picked from its tags and its size. */
+	private static BodyPlan pick(EntityType<?> kind, float width, float height) {
+		BodyPlan set = com.jaymospowers.core.reader.GoreOverrides.body(kind);
+		if (set != null) {
+			return set;
+		}
+		var type = kind.builtInRegistryHolder();
 		if (type.is(HUMANOID_TAG)) {
 			return HUMANOID;
 		}
@@ -145,7 +182,7 @@ public enum BodyPlan {
 		if (type.is(SIMPLE_TAG)) {
 			return SIMPLE;
 		}
-		return !wild(entity.getType().getCategory()) && entity.getBbHeight() > entity.getBbWidth() * TALL ? HUMANOID : QUADRUPED;
+		return !wild(kind.getCategory()) && height > width * TALL ? HUMANOID : QUADRUPED;
 	}
 
 	/**

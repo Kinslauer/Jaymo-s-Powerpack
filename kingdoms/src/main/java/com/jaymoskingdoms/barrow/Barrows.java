@@ -95,6 +95,12 @@ public final class Barrows {
 		}
 	}
 
+	/** Whether the spawner at {@code pos} stands in one of the old buried rooms (a cobblestone floor, in no structure): a grave. */
+	public static boolean grave(ServerLevel level, BlockPos pos) {
+		BlockState floor = level.getBlockState(pos.below());
+		return (floor.is(Blocks.COBBLESTONE) || floor.is(Blocks.MOSSY_COBBLESTONE)) && level.getChunkAt(pos).getAllReferences().isEmpty();
+	}
+
 	/** The room round the spawner at {@code pos}: if it is a barrow, its dead are stood in it. */
 	private static void settle(ServerLevel level, BlockPos pos) {
 		BlockState floor = level.getBlockState(pos.below());

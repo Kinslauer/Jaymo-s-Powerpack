@@ -5,7 +5,9 @@ import com.jaymospowers.client.wet.ArmourGrimeTextures;
 import com.jaymospowers.core.BladeBlood;
 import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.wounds.Bleeding;
+import com.jaymospowers.client.blood.BloodSettings;
 import com.jaymospowers.core.wounds.Breaks;
+import com.jaymospowers.core.wounds.CutDepth;
 import com.jaymospowers.core.wounds.BodyPart;
 import com.jaymospowers.core.wounds.Scars;
 import com.jaymospowers.core.wounds.WoundMarks;
@@ -26,7 +28,9 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
@@ -43,6 +47,10 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * Only the mark's pixels are painted (the rest of the picture is clear), so the blood coat ({@code BloodCoatLayer}) and the
  * skin show through everywhere else; each mark pixel is the skin's own pixel with the mark mixed in.
+ * <p>A cut seared by silver ({@link com.jaymospowers.combat.SilverSear}) is painted charred, with a burnt rim and nothing
+ * showing under it, and while it is fresh its line glows: a second picture of only that cut's line, drawn lit (the eyes
+ * render type, so it adds light and shows in the dark), white-hot at first, cooling through orange to a dull red ember,
+ * flickering as it goes, until only the char is left ({@link com.jaymospowers.combat.SilverSear#GLOW_TICKS}).
  */
 public final class WoundMarksLayer {
 	static final RenderStateDataKey<Marked> KEY = RenderStateDataKey.create(() -> "jaymospowers:wound_marks");
@@ -65,11 +73,25 @@ public final class WoundMarksLayer {
 	static final int LINEN = 0xE4DCC6, LINEN_TURN = 0xB8AE96, RAG = 0x9A8A6C, RAG_TURN = 0x6E6150;
 	/** How far up a stump's sides its binding goes (rows of the limb's 12, from the end). */
 	static final int BINDING_ROWS = 6;
+	/** What a deep cut shows under it: bone, the shade of its hollows, and the gut with its coils. */
+	static final int BONE = 0xE6DFC8, BONE_SHADE = 0xB5AB8E, GUT = 0xB86A72, GUT_DARK = 0x7E3F4A;
+	/** On a body, a deep cut below this share of the way down shows the gut instead of the ribs. */
+	static final float GUT_BELOW = 0.6F;
+	/** A deep cut shows what is under it only while its mark is at least this fresh (stage of {@link #STAGES}). */
+	static final int INSIDES_STAGE = 3;
 	/** Lasting scars: a burn's shine, frostbitten grey and dead black-blue, a lightning fern, hollows, an empty socket. */
 	static final int BURN_SHINE = 0xE2A79C, FROST_GREY = 0x6E7480, FROST_DEAD = 0x2E3440, FERN = 0xB0574C, HOLLOW = 0x4A342E, SOCKET = 0x1E1412;
+	/** A seared cut: the char along its middle and the burnt rim either side. */
+	static final int SEAR_CHAR = 0x1A1210, SEAR_RIM = 0x7A3818;
+	/** A seared cut's glow as it cools: white-hot, orange, ember red (then nothing), and where along its cooling each is reached. */
+	static final int GLOW_WHITE = 0xFFF0C8, GLOW_ORANGE = 0xFF7A1E, GLOW_EMBER = 0x7A1606;
+	static final float GLOW_ORANGE_AT = 0.25F, GLOW_EMBER_AT = 0.65F;
+	/** The glow's flicker: how deep (share of its brightness) and how fast (radians a second). */
+	static final float FLICKER_DEPTH = 0.18F, FLICKER_SPEED = 11.0F;
 
 	/** What a body's marks look like this frame: the marks, their stages, and the body's blood colour. */
-	record Marked(List<WoundMarks.Mark> marks, int[] stages, int blood, int stubs, int raw, int gashes, int seed, int scars, int bound, int rags) {
+	record Marked(List<WoundMarks.Mark> marks, int[] stages, int blood, int stubs, int raw, int gashes, int seed, int scars, int bound, int rags,
+		float[] heat) {
 		String key() {
 			StringBuilder b = new StringBuilder();
 			b.append('c').append(this.scars).append('s').append(this.stubs).append('b').append(this.bound).append('t').append(this.rags)
@@ -96,6 +118,14 @@ public final class WoundMarksLayer {
 
 	/** From every living renderer's extractRenderState. */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state) {
+		state.setData(KEY, marked(entity));
+	}
+
+	/** What {@code entity}'s marks look like now, or null for nothing to draw (and always when blood is off or streamer safe is on). */
+	static @Nullable Marked marked(LivingEntity entity) {
+		if (BloodSettings.streamerSafe() || BloodSettings.off()) {
+			return null;
+		}
 		List<WoundMarks.Mark> marks = WoundMarks.marks(entity);
 		// the lost arms and legs drawn as stumps (Dismembered), and which of them still bleed
 		int stubs = Dismember.missing(entity) & ~Dismember.HEAD & ~com.jaymospowers.core.Prosthetics.fitted(entity);
@@ -106,8 +136,7 @@ public final class WoundMarksLayer {
 		// (Andy, 2026-11-12: "can we make them visible?") a player's lasting scars ({@link Scars}), painted for good
 		int scars = entity instanceof Player player ? scars(player) : 0;
 		if (marks.isEmpty() && stubs == 0 && gashes == 0 && scars == 0) {
-			state.setData(KEY, null);
-			return;
+			return null;
 		}
 		int raw = 0, bound = 0, rags = 0;
 		int bleeding = Bleeding.bleeding(entity);
@@ -133,9 +162,36 @@ public final class WoundMarksLayer {
 			// stage STAGES is fresh, 1 nearly gone
 			stages[i] = Mth.clamp(STAGES - (int) (marks.get(i).age(now) * STAGES), 1, STAGES);
 		}
+		// how hot each seared cut still is (1 just made, 0 gone cold; 0 for every other mark)
+		float[] heat = new float[marks.size()];
+		float partial = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(true);
+		for (int i = 0; i < heat.length; i++) {
+			WoundMarks.Mark mark = marks.get(i);
+			if (mark.isSeared()) {
+				heat[i] = Mth.clamp(1.0F - (now - mark.laid() + partial) / com.jaymospowers.combat.SilverSear.GLOW_TICKS, 0.0F, 1.0F);
+			}
+		}
 		int blood = BladeBlood.color(entity);
-		state.setData(KEY, new Marked(marks, stages, blood == BladeBlood.NO_BLOOD ? CHIPPED : blood, stubs, raw, gashes, entity.getId() * 31, scars,
-			bound, rags));
+		return new Marked(marks, stages, blood == BladeBlood.NO_BLOOD ? CHIPPED : blood, stubs, raw, gashes, entity.getId() * 31, scars,
+			bound, rags, heat);
+	}
+
+	/**
+	 * Your own arm in first person ({@code arm} of {@code player}'s model): the picture of marks to draw over it, or null
+	 * when there is nothing to show on it.
+	 */
+	public static @Nullable Identifier handOverlay(net.minecraft.client.player.LocalPlayer player) {
+		Marked marked = marked(player);
+		if (marked == null) {
+			return null;
+		}
+		Identifier skin;
+		try {
+			skin = player.getSkin().body().texturePath();
+		} catch (RuntimeException e) {
+			return null;
+		}
+		return skin == null ? null : paint(skin, marked, true);
 	}
 
 	/** The scars that show, as bits by {@link Scars.Kind#ordinal()} (weak lungs are inside, and don't). */
@@ -180,6 +236,74 @@ public final class WoundMarksLayer {
 			if (painted != null) {
 				renderColoredCutoutModel(this.getParentModel(), painted, poseStack, collector, lightCoords, state, -1, 1);
 			}
+			// each seared cut still hot: its line drawn lit over the char, in the colour of its heat
+			for (int i = 0; skin != null && painted != null && i < marked.heat().length; i++) {
+				float heat = marked.heat()[i];
+				if (heat <= 0.0F) {
+					continue;
+				}
+				Identifier glow = glow(skin, marked.marks().get(i), person);
+				if (glow != null) {
+					collector.order(2).submitModel(this.getParentModel(), state, poseStack, RenderTypes.eyes(glow), lightCoords, OverlayTexture.NO_OVERLAY,
+						glowColour(heat, marked.marks().get(i).seed()), null, state.outlineColor);
+				}
+			}
+		}
+	}
+
+	/** A seared cut's glow at {@code heat} (1 just made, 0 cold): white-hot to orange to ember to nothing, flickering. */
+	static int glowColour(float heat, int seed) {
+		float cooled = 1.0F - heat;
+		int rgb;
+		if (cooled < GLOW_ORANGE_AT) {
+			rgb = lerp(cooled / GLOW_ORANGE_AT, GLOW_WHITE, GLOW_ORANGE);
+		} else if (cooled < GLOW_EMBER_AT) {
+			rgb = lerp((cooled - GLOW_ORANGE_AT) / (GLOW_EMBER_AT - GLOW_ORANGE_AT), GLOW_ORANGE, GLOW_EMBER);
+		} else {
+			rgb = lerp((cooled - GLOW_EMBER_AT) / (1.0F - GLOW_EMBER_AT), GLOW_EMBER, 0x000000);
+		}
+		float seconds = (net.minecraft.util.Util.getMillis() % 100000L) / 1000.0F;
+		float flicker = 1.0F - FLICKER_DEPTH * (0.5F + 0.5F * Mth.sin(seconds * FLICKER_SPEED + seed)) * (0.6F + 0.4F * Mth.sin(seconds * 3.7F + seed * 0.37F));
+		return 0xFF000000 | scale(rgb, flicker);
+	}
+
+	/** The picture of a seared cut's line alone (white where it glows, clear elsewhere), painted once per skin and cut. */
+	private static @Nullable Identifier glow(Identifier skin, WoundMarks.Mark mark, boolean humanoid) {
+		if (UNREADABLE.contains(skin)) {
+			return null;
+		}
+		String key = skin + "|" + humanoid + "|glow|" + Long.toHexString(mark.shape());
+		Identifier done = MADE.get(key);
+		if (done != null) {
+			return done;
+		}
+		NativeImage base = ArmourGrimeTextures.copy(skin);
+		if (base == null) {
+			UNREADABLE.add(skin);
+			return null;
+		}
+		forgetIfFull();
+		int w = base.getWidth(), h = base.getHeight();
+		NativeImage out = new NativeImage(w, h, true);
+		try (base) {
+			Painter painter = new Painter(base, out, humanoid && (w == h || w == h * 2) && w >= 64);
+			painter.glow = true;
+			painter.mark(mark, 1.0F, 0xFFFFFF);
+		}
+		Identifier id = JaymosPowers.id("wound_marks/" + made++);
+		Minecraft.getInstance().getTextureManager().register(id, new DynamicTexture(id::toString, out));
+		MADE.put(key, id);
+		return id;
+	}
+
+	/** Past {@link #MOST_KEPT} painted pictures, they're all thrown away (and painted again as needed). */
+	private static void forgetIfFull() {
+		if (MADE.size() >= MOST_KEPT) {
+			Minecraft minecraft = Minecraft.getInstance();
+			for (Identifier id : MADE.values()) {
+				minecraft.getTextureManager().release(id);
+			}
+			MADE.clear();
 		}
 	}
 
@@ -197,13 +321,7 @@ public final class WoundMarksLayer {
 			UNREADABLE.add(skin);
 			return null;
 		}
-		if (MADE.size() >= MOST_KEPT) {
-			Minecraft minecraft = Minecraft.getInstance();
-			for (Identifier id : MADE.values()) {
-				minecraft.getTextureManager().release(id);
-			}
-			MADE.clear();
-		}
+		forgetIfFull();
 		int w = base.getWidth(), h = base.getHeight();
 		NativeImage out = new NativeImage(w, h, true);
 		try (base) {
@@ -219,7 +337,8 @@ public final class WoundMarksLayer {
 				for (int i = 0; i < parts.length; i++) {
 					if ((marked.gashes() & 1 << i) != 0) {
 						int seed = (marked.seed() * 17 + i * 40503) & 0xFFFF;
-						painter.mark(WoundMarks.Mark.of(parts[i], WoundMarks.Kind.CUT, WoundMarks.FRONT, 128, 128, (seed >> 3) & 0xFF, seed, 0L), 1.0F, marked.blood());
+						painter.mark(WoundMarks.Mark.of(parts[i], WoundMarks.Kind.CUT, WoundMarks.FRONT, 128, 128, (seed >> 3) & 0xFF, seed, 0L)
+							.with(CutDepth.NORMAL, false, 0.0F), 1.0F, marked.blood());
 					}
 				}
 			}
@@ -252,6 +371,8 @@ public final class WoundMarksLayer {
 		private final boolean layout;
 		/** Whether the skin is the old 64 by 32 layout (no separate left limbs). */
 		private final boolean old;
+		/** Painting a seared cut's glow: each pixel is a grey of how strongly it glows, not the skin mixed with a colour. */
+		boolean glow;
 
 		Painter(NativeImage base, NativeImage out, boolean layout) {
 			this.base = base;
@@ -282,11 +403,21 @@ public final class WoundMarksLayer {
 			java.util.Random random = new java.util.Random(mark.seed());
 			int core = scale(blood, 0.45F), raw = scale(blood, 0.85F);
 			switch (mark.kind()) {
-				case CUT -> this.cut(cx, cy, mark.angle(), Math.max(3.0, size * 0.75), core, raw, strength, rect);
+				case CUT -> {
+					int depth = mark.depth();
+					double length = Math.max(3.0, size * 0.75);
+					// (seared by silver: charred along its middle with a burnt rim, and closed, so nothing shows under it)
+					boolean seared = mark.isSeared();
+					this.cut(cx, cy, mark.angle(), length, seared ? SEAR_CHAR : core, seared ? SEAR_RIM : raw, strength, rect, depth);
+					if (!seared && depth == CutDepth.DEEP && blood != CHIPPED && strength >= INSIDES_STAGE / (float) STAGES) {
+						this.insides(cx, cy, mark.angle(), mark.part(), mark.down(), strength, rect);
+					}
+				}
+				case HOLE -> this.hole(cx, cy, mark.exit(), size, core, raw, strength, random, rect);
 				case CLAW -> {
 					double nx = -Math.sin(mark.angle()) * 1.6 * this.unit, ny = Math.cos(mark.angle()) * 1.6 * this.unit;
 					for (int k = -1; k <= 1; k++) {
-						this.cut(cx + nx * k, cy + ny * k, mark.angle(), Math.max(2.5, size * 0.55), core, raw, strength * 0.9F, rect);
+						this.cut(cx + nx * k, cy + ny * k, mark.angle(), Math.max(2.5, size * 0.55), core, raw, strength * 0.9F, rect, CutDepth.NORMAL);
 					}
 				}
 				case STAB -> {
@@ -592,9 +723,11 @@ public final class WoundMarksLayer {
 			return null;
 		}
 
-		private void cut(double cx, double cy, float angle, double length, int core, int raw, float strength, int @Nullable [] rect) {
+		private void cut(double cx, double cy, float angle, double length, int core, int raw, float strength, int @Nullable [] rect, int depth) {
 			double dx = Math.cos(angle), dy = Math.sin(angle);
 			double nx = -dy, ny = dx;
+			// a deeper cut opens wider: its raw edges lie further out and its dark middle is thicker
+			double spread = this.unit * CutDepth.WIDTH[depth];
 			int steps = (int) Math.ceil(length * 2.0);
 			for (int i = 0; i <= steps; i++) {
 				double t = i / (double) steps - 0.5;
@@ -605,8 +738,76 @@ public final class WoundMarksLayer {
 					continue;
 				}
 				this.dot(px, py, core, strength * (0.6F + 0.4F * taper), rect);
-				this.dot(px + nx * this.unit, py + ny * this.unit, raw, strength * 0.45F * taper, rect);
-				this.dot(px - nx * this.unit, py - ny * this.unit, raw, strength * 0.45F * taper, rect);
+				float edge = depth == CutDepth.SHALLOW ? 0.3F : 0.45F;
+				this.dot(px + nx * spread, py + ny * spread, raw, strength * edge * taper, rect);
+				this.dot(px - nx * spread, py - ny * spread, raw, strength * edge * taper, rect);
+				if (depth == CutDepth.DEEP) {
+					this.dot(px + nx * spread * 0.5, py + ny * spread * 0.5, core, strength * 0.6F * taper, rect);
+					this.dot(px - nx * spread * 0.5, py - ny * spread * 0.5, core, strength * 0.6F * taper, rect);
+				}
+			}
+		}
+
+		/**
+		 * A bullet's hole: in, a small dark pit with a thin ring round it; out, a bigger, ragged one with torn lips running
+		 * from it in every direction.
+		 */
+		private void hole(double cx, double cy, boolean exit, double size, int core, int raw, float strength, java.util.Random random, int @Nullable [] rect) {
+			if (!exit) {
+				this.blot(cx, cy, 0.6 * this.unit, scale(core, 0.5F), strength, rect);
+				this.ring(cx, cy, 1.3 * this.unit, raw, strength * 0.55F, rect);
+				return;
+			}
+			double r = Math.max(1.4 * this.unit, size * 0.25);
+			this.patch(cx, cy, r + this.unit, raw, strength * 0.5F, random, rect);
+			this.blot(cx, cy, r * 0.6, scale(core, 0.6F), strength, rect);
+			int tears = 4 + random.nextInt(3);
+			for (int k = 0; k < tears; k++) {
+				double a = random.nextDouble() * Math.PI * 2.0, reach = r * (0.9 + random.nextDouble() * 0.9);
+				for (double d = r * 0.5; d <= reach; d += 0.5) {
+					this.dot(cx + Math.cos(a) * d, cy + Math.sin(a) * d, d < r ? core : raw, strength * (0.8F - 0.3F * (float) (d / reach)), rect);
+				}
+			}
+		}
+
+		/**
+		 * What lies under a deep cut at its middle ({@code cx}, {@code cy}), by the part: the ribs across the chest, the
+		 * skull in the head, the bone along a limb, the coils of the gut low on the body.
+		 */
+		private void insides(double cx, double cy, float angle, BodyPart part, float down, float strength, int @Nullable [] rect) {
+			double dx = Math.cos(angle), dy = Math.sin(angle);
+			double nx = -dy, ny = dx;
+			float s = Math.min(1.0F, strength + 0.2F);
+			switch (part) {
+				case HEAD -> {
+					this.patch(cx, cy, 1.8 * this.unit, BONE, 0.85F * s, new java.util.Random(Double.doubleToLongBits(cx + cy)), rect);
+					for (double d = -1.4; d <= 1.4; d += 0.5) {
+						this.dot(cx + dx * d * this.unit, cy + dy * d * this.unit, BONE_SHADE, 0.7F * s, rect);
+					}
+				}
+				case BODY -> {
+					if (down > GUT_BELOW) {
+						this.patch(cx, cy, 1.7 * this.unit, GUT, 0.85F * s, new java.util.Random(Double.doubleToLongBits(cx - cy)), rect);
+						for (double d = -1.2; d <= 1.2; d += 0.5) {
+							this.dot(cx + nx * d * this.unit + dx * 0.4 * this.unit, cy + ny * d * this.unit + dy * 0.4 * this.unit, GUT_DARK, 0.7F * s, rect);
+						}
+					} else {
+						// ribs: pale bars across the gap, one every two pixels along the cut
+						for (int k = -1; k <= 1; k++) {
+							double bx = cx + dx * k * 2.0 * this.unit, by = cy + dy * k * 2.0 * this.unit;
+							for (double d = -1.0; d <= 1.0; d += 0.5) {
+								this.dot(bx + nx * d * this.unit, by + ny * d * this.unit, k == 0 ? BONE : BONE_SHADE, 0.85F * s, rect);
+							}
+						}
+					}
+				}
+				default -> {
+					// a limb's bone runs along the limb (down the picture), a pale bar with a shaded edge
+					for (double d = -1.8; d <= 1.8; d += 0.5) {
+						this.dot(cx, cy + d * this.unit, BONE, 0.9F * s, rect);
+						this.dot(cx + this.unit * 0.8, cy + d * this.unit, BONE_SHADE, 0.7F * s, rect);
+					}
+				}
 			}
 		}
 
@@ -662,6 +863,11 @@ public final class WoundMarksLayer {
 				return;
 			}
 			int was = this.out.getPixel(px, py);
+			if (this.glow) {
+				int v = Math.max(was & 0xFF, Mth.clamp(Math.round(255.0F * Math.min(1.0F, strength)), 0, 255));
+				this.out.setPixel(px, py, 0xFF000000 | v << 16 | v << 8 | v);
+				return;
+			}
 			// a pixel already marked mixes on from that
 			int from = (was >>> 24) != 0 ? was : argb;
 			float k = Math.min(1.0F, strength);

@@ -52,6 +52,8 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.ragdoll.MobRagdolls.register();
 		// Ragdollified plays a dying body's fall (the corpse lies down where it lands)
 		com.jaymoskitchen.compat.RagdollifiedCompat.register();
+		// (the shulker bowl first: the End dishes served in it leave one behind)
+		com.jaymoskitchen.delight.EnderDelight.registerBowl();
 		ModItems.register();
 		// (0.5.29) Pmeh grows wild only in jungles and savannas (no more from tall grass)
 		com.jaymoskitchen.herb.PmehFarming.register();
@@ -62,12 +64,15 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.corpse.Reanimation.register();
 		com.jaymoskitchen.archery.StuckArrows.register();
 		Corpses.register();
+		com.jaymoskitchen.corpse.GoreRules.register();
 		// (0.5.18) spiders crushed flat leave loose legs, not a corpse
 		com.jaymoskitchen.corpse.SpiderCrush.register();
 		// (0.5.21) bodies blown apart by blasts leave flying chunks, not a corpse
 		com.jaymoskitchen.corpse.Gibs.register();
 		com.jaymoskitchen.corpse.Butchers.register();
 		com.jaymoskitchen.corpse.Scavengers.register();
+		// zombies bend down over the body they gnaw (GnawPose)
+		com.jaymoskitchen.corpse.Gnawing.register();
 		PlayerCorpses.register();
 		Saddlebags.register();
 		// echoes for the layered sounds
@@ -80,6 +85,7 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.cooking.spit.SpitBlock.register();
 		// (0.5.28) Farmer's Delight's pot and pan over a fire, cutting board, feasts, Comfort, cabbages and rice
 		com.jaymoskitchen.delight.Delight.register();
+		com.jaymoskitchen.delight.EnderDelight.register();
 		// (0.5.33) Farmer's Delight's skillet, stove, cabinets, crates, baskets, canvas, tatami, safety net and canvas signs
 		com.jaymoskitchen.delight.DelightHome.register();
 		com.jaymoskitchen.delight.HomeComfort.register();

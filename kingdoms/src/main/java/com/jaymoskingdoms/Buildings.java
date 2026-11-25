@@ -68,6 +68,8 @@ final class Buildings {
 			hall(type, "butcher", JobHalls::butcher, 1, 10);
 			realm(type, "infirmary", JobHalls::infirmary, 1, 12);
 			realm(type, "market", Buildings::market, 1, 24);
+			// a counting house, once the realm has the trade for it ({@link Banks#mayBuild}, {@link Planner#eligible})
+			realm(type, Banks.ID, Banks::draw, 1, Banks.FROM_SIZE);
 			hall(type, "fishery", JobHalls::fishery, 1, 26);
 			realm(type, "stable", Buildings::stable, 1, 28);
 			hall(type, "hunting_lodge", JobHalls::huntingLodge, 1, 30);
@@ -109,6 +111,8 @@ final class Buildings {
 		VpBuildings.register();
 		// the buildings only the masons' pattern books have: the chapel, the windmill and the barn ({@link Library})
 		Library.registerOwn();
+		// a working windmill, raised only where a plains town has none ({@link TownNeeds})
+		TownNeeds.registerCatalogue();
 		// the song stone, where a capital's firsts are cut ({@link Firsts})
 		realm(FactionType.KINGDOM, "song_stone", Buildings::songStone, 1, 18);
 		// (0.7.518) the Truth's great temple, only the capital of a Faith-creed realm ({@link Planner#eligible})

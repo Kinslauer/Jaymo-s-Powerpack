@@ -52,6 +52,8 @@ final class UnburiedRenderer extends MobRenderer<Unburied, UnburiedRenderer.Stat
 
 	static final class State extends CreatureState {
 		boolean built;
+		/** Getting up with nothing on it yet: nothing to draw. */
+		boolean unformed;
 		int apart;
 		final @Nullable EntityRenderState[] bodies = new EntityRenderState[Unburied.DRAWN];
 		@SuppressWarnings("rawtypes")
@@ -83,6 +85,7 @@ final class UnburiedRenderer extends MobRenderer<Unburied, UnburiedRenderer.Stat
 	public void extractRenderState(Unburied giant, State state, float partialTicks) {
 		super.extractRenderState(giant, state, partialTicks);
 		state.built = giant.took() > 0;
+		state.unformed = !state.built && giant.gathering() > 0;
 		state.apart = giant.apart();
 		java.util.Arrays.fill(state.bodies, null);
 		java.util.Arrays.fill(state.renderers, null);
@@ -207,7 +210,7 @@ final class UnburiedRenderer extends MobRenderer<Unburied, UnburiedRenderer.Stat
 	@Override
 	protected @Nullable RenderType getRenderType(State state, boolean bodyVisible, boolean forceTransparent, boolean glowing) {
 		// made of its dead, there are no bones to draw: only them
-		return state.built ? null : super.getRenderType(state, bodyVisible, forceTransparent, glowing);
+		return state.built || state.unformed ? null : super.getRenderType(state, bodyVisible, forceTransparent, glowing);
 	}
 
 	@Override
@@ -217,6 +220,8 @@ final class UnburiedRenderer extends MobRenderer<Unburied, UnburiedRenderer.Stat
 			return;
 		}
 		poseStack.pushPose();
+		// as big as the dead it is made of (its scale, Unburied#size): the frame and the bodies on it grow together
+		poseStack.scale(state.scale, state.scale, state.scale);
 		if (state.apart > 0) {
 			// coming apart: shuddering, sagging as its dead leave it
 			float t = state.ageInTicks;

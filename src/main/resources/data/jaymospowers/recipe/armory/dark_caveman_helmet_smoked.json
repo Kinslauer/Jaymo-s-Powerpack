@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_transmute",
+  "category": "equipment",
+  "input": "jaymospowers:caveman_helmet",
+  "material": "#minecraft:coals",
+  "result": {
+    "id": "jaymospowers:dark_caveman_helmet"
+  }
+}
