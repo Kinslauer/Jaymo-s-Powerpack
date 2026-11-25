@@ -60,6 +60,9 @@ final class GravityMetal {
 	static final int TEAR_FLIGHT_MIN = 6, TEAR_FLIGHT_MAX = 16;
 	/** How long before anyone (you or the mob going after it) can take the torn item up (ticks). */
 	static final int TEAR_PICKUP_DELAY = 10;
+	/** A player's weapon lands this far past them, away from you (blocks), and nobody can take it up for this long (ticks). */
+	static final double TEAR_PLAYER_FLING = 5.0;
+	static final int TEAR_PLAYER_PICKUP_DELAY = 40;
 	/** An item's fall per tick (vanilla), for aiming its flight. */
 	static final double ITEM_GRAVITY = 0.04;
 	/** Heavy metal: a struggle at a metal block goes this many times faster, and takes up to this many more metal pieces. */
@@ -157,8 +160,8 @@ final class GravityMetal {
 			say(player, "no_metal");
 			return false;
 		}
-		// (a player's grip holds for now; a mob's gear that never drops, a champion's, holds too)
-		if (target instanceof Player || target instanceof Mob mob
+		// a mob's gear that never drops (a champion's) holds; so does the grip of a player you may not harm
+		if (target instanceof Player other && !player.canHarmPlayer(other) || target instanceof Mob mob
 			&& mob.getDropChances().byEquipment(hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND) <= 0.0F) {
 			say(player, "held_fast");
 			return false;
@@ -167,14 +170,17 @@ final class GravityMetal {
 		ItemStack held = target.getItemInHand(hand);
 		target.stopUsingItem();
 		target.setItemInHand(hand, ItemStack.EMPTY);
-		// it flies to your feet
+		// a mob's flies to your feet; a player's is flung away from them (Andy, 2026-11-25), never into your hands
 		Vec3 from = target.getEyePosition().subtract(0.0, 0.4, 0.0);
-		Vec3 to = player.position().add(0.0, 0.3, 0.0);
+		Vec3 away = target.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
+		Vec3 to = target instanceof Player
+			? target.position().add(away.lengthSqr() < 1.0E-4 ? Vec3.ZERO : away.normalize().scale(TEAR_PLAYER_FLING)).add(0.0, 0.3, 0.0)
+			: player.position().add(0.0, 0.3, 0.0);
 		Vec3 gap = to.subtract(from);
 		int ticks = Mth.clamp((int)Math.round(gap.length() * TEAR_FLIGHT_PER_BLOCK), TEAR_FLIGHT_MIN, TEAR_FLIGHT_MAX);
 		ItemEntity item = new ItemEntity(level, from.x, from.y, from.z, held);
 		item.setDeltaMovement(gap.x / ticks, (gap.y + 0.5 * ITEM_GRAVITY * ticks * ticks) / ticks, gap.z / ticks);
-		item.setPickUpDelay(TEAR_PICKUP_DELAY);
+		item.setPickUpDelay(target instanceof Player ? TEAR_PLAYER_PICKUP_DELAY : TEAR_PICKUP_DELAY);
 		level.addFreshEntity(item);
 		if (target instanceof Mob mob) {
 			// it scrambles to get it back
