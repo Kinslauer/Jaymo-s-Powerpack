@@ -1,0 +1,283 @@
+{
+  "replace": false,
+  "values": [
+    "jaymoskingdoms:wizard_staff",
+    "jaymoskingdoms:bone_staff",
+    "jaymoskingdoms:totem_staff",
+    "jaymoskingdoms:mana_wand",
+    "jaymoskingdoms:water_tome",
+    "jaymoskingdoms:fire_tome",
+    "jaymoskingdoms:earth_tome",
+    "jaymoskingdoms:air_tome",
+    "jaymoskingdoms:lightning_tome",
+    "jaymoskingdoms:ice_tome",
+    "jaymoskingdoms:restoration_tome",
+    "jaymoskingdoms:death_tome",
+    "jaymoskingdoms:blood_tome",
+    "jaymoskingdoms:hedge_helmet",
+    "jaymoskingdoms:hedge_chestplate",
+    "jaymoskingdoms:hedge_leggings",
+    "jaymoskingdoms:hedge_boots",
+    "jaymoskingdoms:hedge_elite_helmet",
+    "jaymoskingdoms:hedge_elite_chestplate",
+    "jaymoskingdoms:hedge_elite_leggings",
+    "jaymoskingdoms:hedge_elite_boots",
+    "jaymoskingdoms:hedge_ashen_helmet",
+    "jaymoskingdoms:hedge_ashen_chestplate",
+    "jaymoskingdoms:hedge_ashen_leggings",
+    "jaymoskingdoms:hedge_ashen_boots",
+    "jaymoskingdoms:scroll_of_arcane_bolt",
+    "jaymoskingdoms:scroll_of_augury",
+    "jaymoskingdoms:scroll_of_black_flame",
+    "jaymoskingdoms:scroll_of_blight",
+    "jaymoskingdoms:scroll_of_blood_grip",
+    "jaymoskingdoms:scroll_of_bulwark",
+    "jaymoskingdoms:scroll_of_calling_back",
+    "jaymoskingdoms:scroll_of_charm",
+    "jaymoskingdoms:scroll_of_command",
+    "jaymoskingdoms:scroll_of_control_weather",
+    "jaymoskingdoms:scroll_of_counterspell",
+    "jaymoskingdoms:scroll_of_create_food",
+    "jaymoskingdoms:scroll_of_darkness",
+    "jaymoskingdoms:scroll_of_deaths_door",
+    "jaymoskingdoms:scroll_of_dispel",
+    "jaymoskingdoms:scroll_of_dominion",
+    "jaymoskingdoms:scroll_of_draining",
+    "jaymoskingdoms:scroll_of_feather_fall",
+    "jaymoskingdoms:scroll_of_find_familiar",
+    "jaymoskingdoms:scroll_of_find_magic",
+    "jaymoskingdoms:scroll_of_fire",
+    "jaymoskingdoms:scroll_of_fire_lance",
+    "jaymoskingdoms:scroll_of_fire_pillars",
+    "jaymoskingdoms:scroll_of_fire_ring",
+    "jaymoskingdoms:scroll_of_fog",
+    "jaymoskingdoms:scroll_of_frenzy",
+    "jaymoskingdoms:scroll_of_geas",
+    "jaymoskingdoms:scroll_of_glass_shards",
+    "jaymoskingdoms:scroll_of_glass_skin",
+    "jaymoskingdoms:scroll_of_glass_spires",
+    "jaymoskingdoms:scroll_of_grease",
+    "jaymoskingdoms:scroll_of_harrying_gale",
+    "jaymoskingdoms:scroll_of_hemorrhage",
+    "jaymoskingdoms:scroll_of_heroes_feast",
+    "jaymoskingdoms:scroll_of_hold",
+    "jaymoskingdoms:scroll_of_hush_ward",
+    "jaymoskingdoms:scroll_of_hut",
+    "jaymoskingdoms:scroll_of_identify",
+    "jaymoskingdoms:scroll_of_keeping",
+    "jaymoskingdoms:scroll_of_locate_creature",
+    "jaymoskingdoms:scroll_of_locate_object",
+    "jaymoskingdoms:scroll_of_long_jump",
+    "jaymoskingdoms:scroll_of_mending",
+    "jaymoskingdoms:scroll_of_misty_step",
+    "jaymoskingdoms:scroll_of_modify_memory",
+    "jaymoskingdoms:scroll_of_molten_glass",
+    "jaymoskingdoms:scroll_of_moonbeam",
+    "jaymoskingdoms:scroll_of_plant_growth",
+    "jaymoskingdoms:scroll_of_purify_food",
+    "jaymoskingdoms:scroll_of_raising",
+    "jaymoskingdoms:scroll_of_reap_a_soul",
+    "jaymoskingdoms:scroll_of_rebirth",
+    "jaymoskingdoms:scroll_of_restoration",
+    "jaymoskingdoms:scroll_of_sanctuary",
+    "jaymoskingdoms:scroll_of_scrying",
+    "jaymoskingdoms:scroll_of_silence",
+    "jaymoskingdoms:scroll_of_speak_animals",
+    "jaymoskingdoms:scroll_of_speak_with_dead",
+    "jaymoskingdoms:scroll_of_spider_climb",
+    "jaymoskingdoms:scroll_of_spike_growth",
+    "jaymoskingdoms:scroll_of_storm_cloak",
+    "jaymoskingdoms:scroll_of_suggestion",
+    "jaymoskingdoms:scroll_of_tide_pearl",
+    "jaymoskingdoms:scroll_of_ward_line",
+    "jaymoskingdoms:scroll_of_warding",
+    "jaymoskingdoms:scroll_of_water_walk",
+    "jaymoskingdoms:scroll_of_web",
+    "jaymoskingdoms:scroll_of_whispers",
+    "jaymoskingdoms:scroll_of_zone_of_truth",
+    {
+      "id": "wizards:wand_novice",
+      "required": false
+    },
+    {
+      "id": "wizards:wand_arcane",
+      "required": false
+    },
+    {
+      "id": "wizards:wand_fire",
+      "required": false
+    },
+    {
+      "id": "wizards:wand_frost",
+      "required": false
+    },
+    {
+      "id": "wizards:wand_netherite_arcane",
+      "required": false
+    },
+    {
+      "id": "wizards:wand_netherite_fire",
+      "required": false
+    },
+    {
+      "id": "wizards:wand_netherite_frost",
+      "required": false
+    },
+    {
+      "id": "wizards:staff_wizard",
+      "required": false
+    },
+    {
+      "id": "wizards:staff_arcane",
+      "required": false
+    },
+    {
+      "id": "wizards:staff_fire",
+      "required": false
+    },
+    {
+      "id": "wizards:staff_frost",
+      "required": false
+    },
+    {
+      "id": "wizards:staff_crystal_arcane",
+      "required": false
+    },
+    {
+      "id": "wizards:staff_ruby_fire",
+      "required": false
+    },
+    {
+      "id": "wizards:staff_smaragdant_frost",
+      "required": false
+    },
+    {
+      "id": "wizards:staff_netherite_arcane",
+      "required": false
+    },
+    {
+      "id": "wizards:staff_netherite_fire",
+      "required": false
+    },
+    {
+      "id": "wizards:staff_netherite_frost",
+      "required": false
+    },
+    {
+      "id": "wizards:aether_wizard_staff",
+      "required": false
+    },
+    {
+      "id": "wizards:wizard_robe_head",
+      "required": false
+    },
+    {
+      "id": "wizards:wizard_robe_chest",
+      "required": false
+    },
+    {
+      "id": "wizards:wizard_robe_legs",
+      "required": false
+    },
+    {
+      "id": "wizards:wizard_robe_feet",
+      "required": false
+    },
+    {
+      "id": "wizards:arcane_robe_head",
+      "required": false
+    },
+    {
+      "id": "wizards:arcane_robe_chest",
+      "required": false
+    },
+    {
+      "id": "wizards:arcane_robe_legs",
+      "required": false
+    },
+    {
+      "id": "wizards:arcane_robe_feet",
+      "required": false
+    },
+    {
+      "id": "wizards:netherite_arcane_robe_head",
+      "required": false
+    },
+    {
+      "id": "wizards:netherite_arcane_robe_chest",
+      "required": false
+    },
+    {
+      "id": "wizards:netherite_arcane_robe_legs",
+      "required": false
+    },
+    {
+      "id": "wizards:netherite_arcane_robe_feet",
+      "required": false
+    },
+    {
+      "id": "wizards:fire_robe_head",
+      "required": false
+    },
+    {
+      "id": "wizards:fire_robe_chest",
+      "required": false
+    },
+    {
+      "id": "wizards:fire_robe_legs",
+      "required": false
+    },
+    {
+      "id": "wizards:fire_robe_feet",
+      "required": false
+    },
+    {
+      "id": "wizards:netherite_fire_robe_head",
+      "required": false
+    },
+    {
+      "id": "wizards:netherite_fire_robe_chest",
+      "required": false
+    },
+    {
+      "id": "wizards:netherite_fire_robe_legs",
+      "required": false
+    },
+    {
+      "id": "wizards:netherite_fire_robe_feet",
+      "required": false
+    },
+    {
+      "id": "wizards:frost_robe_head",
+      "required": false
+    },
+    {
+      "id": "wizards:frost_robe_chest",
+      "required": false
+    },
+    {
+      "id": "wizards:frost_robe_legs",
+      "required": false
+    },
+    {
+      "id": "wizards:frost_robe_feet",
+      "required": false
+    },
+    {
+      "id": "wizards:netherite_frost_robe_head",
+      "required": false
+    },
+    {
+      "id": "wizards:netherite_frost_robe_chest",
+      "required": false
+    },
+    {
+      "id": "wizards:netherite_frost_robe_legs",
+      "required": false
+    },
+    {
+      "id": "wizards:netherite_frost_robe_feet",
+      "required": false
+    }
+  ]
+}
