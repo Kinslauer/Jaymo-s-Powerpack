@@ -137,7 +137,7 @@ public final class SmithMending {
 		EquipmentSlot slot = null;
 		float worst = WORN - 0.0001F;
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, smith.getBoundingBox().inflate(REACH),
-			e -> e != smith && e.isAlive() && (Downed.isGuard(e) || e instanceof AbstractGolem) && !Downed.isDowned(e) && !claimed(e))) {
+			e -> e != smith && e.isAlive() && (Downed.isGuard(e) || Company.soldier(e) || e instanceof AbstractGolem) && !Downed.isDowned(e) && !claimed(e))) {
 			if (e instanceof AbstractGolem) {
 				float lost = 1.0F - e.getHealth() / e.getMaxHealth();
 				if (lost > 1.0F - GOLEM_BELOW && lost > worst) {

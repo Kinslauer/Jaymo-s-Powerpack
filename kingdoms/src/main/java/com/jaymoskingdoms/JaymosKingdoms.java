@@ -839,6 +839,8 @@ public final class JaymosKingdoms implements ModInitializer {
 		com.jaymoskingdoms.forms.Styles.register();
 		Levelled.register();
 		Followers.register();
+		// village mods patch 9: your own company
+		Company.register();
 		// the shared fighting brain, friend and foe (docs/Pawn-Plan.md)
 		Comrades.register();
 		Callouts.register();

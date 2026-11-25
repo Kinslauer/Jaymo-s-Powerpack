@@ -236,6 +236,8 @@ public final class Wars {
 		int army = 0;
 		for (Faction f : members(server, principal)) {
 			army += f.holdings().count(Folk.GUARD) + f.holdings().count(Folk.ARCHER) + (f.leader().isPresent() ? LEADER_ARMY_WORTH : 0);
+			// (village mods rc2_war) and its lords' own companies
+			army += Company.strength(server, f);
 		}
 		// (0.7.224) and the sellswords in its war chests
 		return army + GreatWars.mercs(server, principal);

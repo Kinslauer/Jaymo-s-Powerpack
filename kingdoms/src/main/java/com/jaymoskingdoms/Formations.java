@@ -233,7 +233,8 @@ public final class Formations {
 	private static @Nullable Formation form(ServerLevel level, ServerPlayer player, int shape, @Nullable Formation f) {
 		List<Villager> yours = new ArrayList<>();
 		for (Villager v : level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(Presence.reach(player, Followers.ALL_RANGE)),
-			v -> !v.isBaby() && !v.isSleeping() && !Downed.isDowned(v) && Followers.takesOrders(v, player))) {
+			v -> !v.isBaby() && !v.isSleeping() && !Downed.isDowned(v) && Followers.takesOrders(v, player) && Company.heeds(v, player)
+				&& !Cavalry.mounted(v))) {
 			if (!Languages.understands(player, v) && !Discipline.commands(player, v)) {
 				Languages.shrug(player, v);
 				continue;
@@ -271,13 +272,15 @@ public final class Formations {
 	}
 
 	private static int order(Mob m) {
-		if (archer(m)) {
-			return 3;
+		// (village mods rc2_kinds) by kit: a leader first, then shields, blades, spears, and at the back bows, then crossbows
+		Company.Kind kind = Company.kind(m);
+		if (kind == Company.Kind.BOW || kind == Company.Kind.CROSSBOW) {
+			return kind == Company.Kind.BOW ? 4 : 5;
 		}
 		if (Ranks.leads(m)) {
 			return 0;
 		}
-		return m.getOffhandItem().has(DataComponents.BLOCKS_ATTACKS) ? 1 : 2;
+		return kind == Company.Kind.SHIELD ? 1 : kind == Company.Kind.SPEAR ? 3 : 2;
 	}
 
 	/** {@code m} fights with a bow or crossbow. */
@@ -357,7 +360,7 @@ public final class Formations {
 			sent = v;
 		} else {
 			List<Villager> pool = f != null ? f.members : level.getEntitiesOfClass(Villager.class, player.getBoundingBox().inflate(Followers.ALL_RANGE),
-				v -> !v.isBaby() && !Downed.isDowned(v) && Followers.takesOrders(v, player));
+				v -> !v.isBaby() && !Downed.isDowned(v) && Followers.takesOrders(v, player) && Company.heeds(v, player) && !Cavalry.mounted(v));
 			for (Villager v : pool) {
 				if (sent == null || v.distanceToSqr(foe) < sent.distanceToSqr(foe)) {
 					sent = v;
