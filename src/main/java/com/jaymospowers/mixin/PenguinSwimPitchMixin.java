@@ -7,8 +7,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 /**
- * Ambient Creatures' penguin tilts its pitch to its swimming speed with {@code Mth.atan2}, which gives NaN when it
- * swims in place (no speed). Minecraft throws the NaN away with an "Invalid entity rotation" error line, hundreds a
+ * Ambient Creatures' penguin tilts its pitch to its swimming speed with {@code Mth.atan2(y, sqrt(x*y + z))} (a typo for
+ * {@code x*x + z*z}), which is NaN whenever {@code x*y + z} is negative. Minecraft throws the NaN away with an "Invalid entity rotation" error line, hundreds a
  * minute near penguins. A non-finite pitch is swapped for the one it already has.
  */
 @Pseudo
