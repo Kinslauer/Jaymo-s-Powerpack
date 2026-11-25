@@ -121,7 +121,10 @@ COL = {
     "stone": (125, 125, 125), "cobblestone": (110, 110, 110), "mossy_cobblestone": (95, 120, 85), "andesite": (135, 135, 132),
     "tuff": (110, 112, 100), "gravel": (130, 125, 120), "stone_bricks": (135, 135, 135), "mossy_stone_bricks": (105, 130, 95),
     "cracked_stone_bricks": (115, 115, 115), "cobblestone_wall": (105, 105, 105), "mossy_cobblestone_wall": (95, 115, 85),
-    "chest": (160, 110, 40), "barrel": (130, 95, 55), "air": None,
+    "chest": (160, 110, 40), "barrel": (130, 95, 55), "air": None, "bone_block": (225, 220, 200), "dirt_path": (150, 125, 75),
+    "dead_bush": (140, 105, 60), "campfire": (230, 120, 40), "composter": (120, 90, 50), "lectern": (160, 120, 70), "bookshelf": (140, 95, 55),
+    "cauldron": (70, 70, 75), "water_cauldron": (60, 90, 200), "big_dripleaf": (90, 150, 60), "big_dripleaf_stem": (80, 130, 55),
+    "spore_blossom": (220, 120, 170), "cave_vines": (220, 170, 60), "cave_vines_plant": (80, 120, 50),
 }
 
 
