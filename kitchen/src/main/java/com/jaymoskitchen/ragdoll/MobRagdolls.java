@@ -12,6 +12,8 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalEntityTypeTags;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -97,7 +99,7 @@ public final class MobRagdolls {
 			if (!(entity instanceof Mob mob) || blocked || damageTaken <= 0.0F || !mob.isAlive()) {
 				return;
 			}
-			if (isLimp(mob) || !HeavyHits.heavy(mob, source, baseDamage, damageTaken) || !may(mob)) {
+			if (isLimp(mob) || !(HeavyHits.heavy(mob, source, baseDamage, damageTaken) || hardLanding(mob, source, damageTaken)) || !may(mob)) {
 				return;
 			}
 			knock(mob, source);
@@ -125,6 +127,15 @@ public final class MobRagdolls {
 				}
 			}
 		});
+	}
+
+	/** A fall that hurt this much (or took this share of its health) knocks a mob limp, as it does a player. */
+	private static final float HARD_LANDING = 6.0F, HARD_LANDING_SHARE = 0.3F;
+
+	/** Whether {@code source} is a high fall whose damage {@code taken} was hard enough to floor {@code mob}. */
+	private static boolean hardLanding(Mob mob, DamageSource source, float taken) {
+		return source.is(DamageTypeTags.IS_FALL) && !mob.hasEffect(MobEffects.SLOW_FALLING)
+			&& (taken >= HARD_LANDING || taken >= 3.0F && taken >= mob.getMaxHealth() * HARD_LANDING_SHARE);
 	}
 
 	/** True while {@code entity} is a mob lying limp (on either side). */
