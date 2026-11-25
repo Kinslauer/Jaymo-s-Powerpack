@@ -8109,3 +8109,9 @@ Ideas from the Hand of God mod (All Rights Reserved: nothing of it copied, all b
 - **The seared cut** (`WoundMarks`, `WoundMarksLayer`): the cut it leaves, along the swing's line, is charred with a burnt rim (nothing showing under it) and doesn't drip. For 8 s its line glows on top, drawn lit so it shows in the dark: white-hot, then orange, then a dull ember red, flickering, until only the char is left.
 - **Twin harness** (`BodyWeapons`, `BodyWeaponsLayer`): a silver blade, in the back slot or on the hotbar, is carried on the back with its hilt over the right shoulder and its point to the left hip, and the first other blade (the back slot's, else the hotbar's) rides beside it, the two side by side instead of at the hips. Drawing either leaves its place empty.
 - Built and compiled; not played. The twin harness angles were checked in a projected mock-up of the same transform (not in game); the glow colours are from the numbers. Your own first-person arm shows the char but not the glow.
+
+## 0.27.41 (2026-11-25): NaN rotation diagnostic (#2156)
+
+- The Deck server spammed "Invalid entity rotation: NaN, discarding." with no stack trace. A mixin on `Entity.setYRot` / `setXRot` now logs one warning with the entity (type, id, name, position, dimension), the bad value, which setter, and a stack trace, at most once per entity type and 5 traces per run. Vanilla still discards the value; nothing else changes.
+- `NanRotationDiagnosticMixin`, registered in `jaymospowers.mixins.json`.
+- Not built locally (CI builds it); not played.
