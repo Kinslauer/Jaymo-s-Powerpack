@@ -176,8 +176,8 @@ public final class WebSymbioteInfection {
 	/**
 	 * The fight with a web slinger goes on, or ends: the host close to losing, or the slinger downed, and it leaves them
 	 * for the slinger (Andy: "if it gets close to losing it will bind to the slinger, it will also detach and bind if
-	 * the slinger is downed"). Over some other way (the host broke free, it timed out, PvP off, the slinger out of
-	 * range) while the slinger is still about, it falls back to leaving the host and pursuing the slinger as it always
+	 * the slinger is downed"). Over some other way (the host broke free, it timed out, the slinger out of range; PvP
+	 * is only checked when a fight would start) while the slinger is still about, it falls back to leaving the host and pursuing the slinger as it always
 	 * has, so it never seizes its host again and again. Over because the slinger is gone (dead, left, another world),
 	 * nobody is left to pursue and {@link #slinger} no longer finds them.
 	 */

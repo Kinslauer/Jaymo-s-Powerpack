@@ -328,7 +328,7 @@ public final class WebSymbiote {
 	/**
 	 * Andy (2026-11-25): in a host without the Web, on meeting a web slinger "the suit will try to fight the slinger
 	 * autonomously first, if it gets close to losing it will bind to the slinger, it will also detach and bind if the
-	 * slinger is downed". It drives its host at the slinger as in a red hunt (the same hold: {@link #RED_HUNT_STRUGGLE}),
+	 * slinger is downed". It drives its host at the slinger as in a red hunt (with a takeover's ordinary hold, not {@link #RED_HUNT_STRUGGLE}'s),
 	 * for {@code SLINGER_FIGHT_MAX} ticks at the most (WebSymbioteInfection ends it sooner, into the slinger).
 	 */
 	public static final int SLINGER_FIGHT_MAX = 3600;
