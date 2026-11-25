@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 11:10). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 11:15). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -23,7 +23,9 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2164 red symbiote - hunts first, trust unlocks orders, takes over in its big body, fights you for the small suit (Powers, Kingdoms, 2026-11-25)
 - [ ] #2163 severed limbs lie where they are and look like the body they came off (Powers, Kitchen, 2026-11-25)
+- [ ] #2162 symbiote, ape and mob-host takeovers fight with their whole kit (Powers, Kingdoms, 2026-11-25)
 - [ ] #2161 Penguins no longer flood the server log with NaN rotation errors (Powers, 2026-11-25)
 - [ ] #2159 fighting AI - weapon sense, breaking off to mend, shields, NPC eyes, danger sense, getting there, band styles (Kingdoms, 2026-11-25)
 - [ ] #2158 symbiote in hosts without the Web - every ability, a fight for the suit, a duel with the slinger (Powers, 2026-11-25)
@@ -81,13 +83,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2097 Where things came from, stolen goods, heirlooms, collectors' prices and a strongbox (Reference Mods patch 15) (Kingdoms, 2026-11-24)
 - [ ] #2096 The red strain's slender body; taken humanoids fight in the strain's body; the red one hunts (Powers, 2026-11-24)
 - [ ] #2095 sit from the knee smoothly, sit still to ride an earthboard (Powers, 2026-11-24)
-- [ ] #2094 Sky, light and air - scorch, lava crust, leaves on water, coloured light (Reference Mods patch 14) (Powers, Kingdoms, 2026-11-24)
-- [ ] #2093 eaters of the downed bend down over them (Powers, Kingdoms, Kitchen, 2026-11-24)
-- …and 548 older ones.
+- …and 550 older ones.
 
 ## Health
 
-12 problems in the notes: [[Health]].
+13 problems in the notes: [[Health]].
 
 ## Last week
 
