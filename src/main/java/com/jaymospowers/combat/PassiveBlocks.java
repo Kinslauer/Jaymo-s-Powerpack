@@ -445,6 +445,11 @@ public final class PassiveBlocks {
 
 	private static final java.util.List<Scramble> SCRAMBLES = new java.util.ArrayList<>();
 
+	/** A mob whose weapon was knocked away some other way (Gravity's Tear Loose) goes after it the same way. */
+	public static void scrambleFor(net.minecraft.world.entity.Mob mob, ItemEntity item) {
+		SCRAMBLES.add(new Scramble(mob, item, mob.level().getGameTime() + SCRAMBLE_TICKS));
+	}
+
 	/** Each tick: a disarmed mob runs to its weapon and takes it back up, if nobody got there first. */
 	private static void scramble(MinecraftServer server) {
 		if (SCRAMBLES.isEmpty()) {

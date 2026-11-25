@@ -421,6 +421,8 @@ public final class GravityPower implements Power {
 		long ripFrom = -1;
 		@Nullable BlockHitResult ripHit;
 		List<BlockPos> ripBlocks = List.of();
+		/** Whether the block aimed at is metal (GravityMetal: it comes faster, with the metal touching it). */
+		boolean ripMetal;
 		/** V went down at (game time), for tap or hold. */
 		long vDownAt = -1;
 		/** The well (by when it ends) that B already launched you out of, so it only does once. */
@@ -1165,6 +1167,11 @@ public final class GravityPower implements Power {
 		if (!(entity instanceof LivingEntity target) || !target.isAlive()) {
 			return;
 		}
+		if (player.isShiftKeyDown() && !state.choking) {
+			// sneak + right click: Tear Loose, the metal in its hands torn out to your feet (GravityMetal); you keep your hold
+			GravityMetal.tear(player, target);
+			return;
+		}
 		ServerLevel level = player.level();
 		if (!state.choking) {
 			state.choking = true;
@@ -1236,14 +1243,27 @@ public final class GravityPower implements Power {
 		// bedrock, a chest with its contents, a furnace, a bed, a sign, a spawner); the rest of the chunk is still limited.
 		// A bed or a door comes whole, both halves.
 		ServerLevel world = player.level();
-		List<BlockPos> blocks = new ArrayList<>(com.jaymospowers.core.BlockCluster.crater(world, hit.getBlockPos(), ripMax(player),
-			CHUNK_HARDEST_BASE + CHUNK_HARDEST_PER_LEVEL * abilities, player));
 		BlockPos aimed = hit.getBlockPos().immutable();
+		// (iron answers first, GravityMetal) a metal block comes faster, and the metal touching it comes too, however hard
+		// (the extra pieces are only ever metal: the ground round it is asked for as for any block)
+		state.ripMetal = false;
+		List<BlockPos> blocks = new ArrayList<>(com.jaymospowers.core.BlockCluster.crater(world, hit.getBlockPos(), ripMax(player, state),
+			CHUNK_HARDEST_BASE + CHUNK_HARDEST_PER_LEVEL * abilities, player));
+		state.ripMetal = com.jaymospowers.core.Mastery.isUnlocked(player, PowerKey.ABILITY_1) && GravityMetal.metalBlock(world.getBlockState(aimed));
+		if (state.ripMetal) {
+			// the aimed block first, then its metal, then the rest
+			List<BlockPos> metal = GravityMetal.touchingMetal(world, aimed, ripMax(player, state) - 1, player);
+			blocks.removeAll(metal);
+			blocks.addAll(0, metal);
+			if (blocks.remove(aimed)) {
+				blocks.addFirst(aimed);
+			}
+		}
 		if (!blocks.contains(aimed) && com.jaymospowers.core.BlockCluster.takeableAny(world, aimed, player)) {
 			blocks.addFirst(aimed);
-			while (blocks.size() > ripMax(player)) {
-				blocks.removeLast();
-			}
+		}
+		while (blocks.size() > ripMax(player, state)) {
+			blocks.removeLast();
 		}
 		blocks = new ArrayList<>(com.jaymospowers.core.BlockCluster.withPartners(world, blocks));
 		if (blocks.isEmpty()) {
@@ -1256,18 +1276,22 @@ public final class GravityPower implements Power {
 		return true;
 	}
 
-	/** The most a struggle can tear loose. */
-	private static int ripMax(ServerPlayer player) {
-		return Math.min(com.jaymospowers.core.BlockCluster.MAX_PIECES, 1 + RIP_PER_LEVEL * com.jaymospowers.core.Mastery.unlocked(player));
+	/** The most a struggle can tear loose (more at a metal block). */
+	private static int ripMax(ServerPlayer player, State state) {
+		return Math.min(com.jaymospowers.core.BlockCluster.MAX_PIECES, 1 + RIP_PER_LEVEL * com.jaymospowers.core.Mastery.unlocked(player)
+			+ (state.ripMetal ? GravityMetal.METAL_EXTRA_PIECES : 0));
 	}
 
-	/** How long the struggle has gone on, in ticks of an unmastered struggle (a master's runs faster, see RIP_MASTERED_TICKS). */
+	/**
+	 * How long the struggle has gone on, in ticks of an unmastered struggle (a master's runs faster, see RIP_MASTERED_TICKS;
+	 * at a metal block, faster still).
+	 */
 	private static long ripHeld(ServerPlayer player, State state) {
-		long held = player.level().getGameTime() - state.ripFrom;
+		long held = (player.level().getGameTime() - state.ripFrom) * (state.ripMetal ? GravityMetal.METAL_RIP_SPEED : 1);
 		if (com.jaymospowers.core.Mastery.unlocked(player) < com.jaymospowers.core.Mastery.ALL) {
 			return held;
 		}
-		int whole = RIP_CHARGE + RIP_GROW * (Math.min(ripMax(player), state.ripBlocks.size()) - 1);
+		int whole = RIP_CHARGE + RIP_GROW * (Math.min(ripMax(player, state), state.ripBlocks.size()) - 1);
 		return held * Math.max(whole, RIP_MASTERED_TICKS) / RIP_MASTERED_TICKS;
 	}
 
@@ -1277,7 +1301,7 @@ public final class GravityPower implements Power {
 		if (held < RIP_CHARGE) {
 			return 0;
 		}
-		return (int)Math.min(Math.min(ripMax(player), state.ripBlocks.size()), 1 + (held - RIP_CHARGE) / RIP_GROW);
+		return (int)Math.min(Math.min(ripMax(player, state), state.ripBlocks.size()), 1 + (held - RIP_CHARGE) / RIP_GROW);
 	}
 
 	/** Still straining: the cracks spread to every block that would come; at its biggest, it comes loose on its own. */
@@ -1295,7 +1319,7 @@ public final class GravityPower implements Power {
 			level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, level.getBlockState(pos)),
 				pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 6, 0.4, 0.4, 0.4, 0.05);
 		}
-		if (ripCount(player, state) >= Math.min(ripMax(player), state.ripBlocks.size())) {
+		if (ripCount(player, state) >= Math.min(ripMax(player, state), state.ripBlocks.size())) {
 			finishRip(player, state);
 		}
 	}
