@@ -41,7 +41,7 @@ public final class MasonPreview {
 		LevelRenderEvents.COLLECT_SUBMITS.register(MasonPreview::render);
 	}
 
-	private static @Nullable MasonTable.Plot held(LocalPlayer player) {
+	private static MasonTable.@Nullable Plot held(LocalPlayer player) {
 		for (ItemStack stack : new ItemStack[] {player.getMainHandItem(), player.getOffhandItem()}) {
 			MasonTable.Plot plot = MasonTable.plot(stack);
 			if (plot != null) {
