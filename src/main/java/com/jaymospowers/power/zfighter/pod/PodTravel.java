@@ -16,6 +16,8 @@ final class PodTravel {
 
 	static void init() {
 		PodModules.init();
+		PodFlight.init();
+		PodPost.init();
 		PodReturn.init();
 		PodLog.init();
 		PodStardust.init();

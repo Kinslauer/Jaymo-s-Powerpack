@@ -567,6 +567,8 @@ def build_misc():
     # java features
     feature('cloudbed', {'type': NS + ':cloudbed'})
     placed('cloudbed', 'cloudbed', [])
+    feature('cloud_lane', {'type': NS + ':cloud_lane'})
+    placed('cloud_lane', 'cloud_lane', [])
     feature('ice_spike', {'type': NS + ':ice_spike'})
     placed('ice_spikes', 'ice_spike', [count(3), IN_SQ] + surface('low', up=False) + [BIOME])
     placed('ice_spike_clusters', 'ice_spike', [count(7), IN_SQ] + surface('low', up=False) + [BIOME])
@@ -627,7 +629,7 @@ STEP_NAMES = ['raw_generation', 'lakes', 'local_modifications', 'underground_str
 
 # the one master order every biome's lists are cut from (so the game never meets conflicting orders)
 MASTER = {
-    0: ['cloudbed'],
+    0: ['cloudbed', 'cloud_lane'],
     1: ['lake_water', 'lake_basin', 'lake_arctic', 'lake_pond_arctic', 'lake_swamp'],
     2: ['disk_coarse_dirt', 'disk_silt', 'disk_ferrosite_sand', 'disk_quicksoil', 'disk_packed_ice', 'arctic_ice_sheet', 'boulder_mossy', 'boulder_icestone',
         'boulder_icestone_tundra', 'boulder_holystone', 'moss_patch_bryalinn', 'moss_patch_bryalinn_forest', 'moss_patch_shayelinn', 'moss_patch_shayelinn_swamp',
@@ -656,7 +658,7 @@ SKY_TOP = ['mist_sheets', 'upfalls', 'updraft_vents', 'updraft_vents_high', 'sky
 
 # in every biome (including the cave layer): anything whose placement is decided by height rather than by the surface,
 # because the biome at that height is whichever the depth router picks there
-COMMON = ['cloudbed', 'quicksoil_shelf', 'pointed_holystone_cave', 'spring_water', 'crystal_island', 'upfalls', 'sky_arena', 'watched_vault',
+COMMON = ['cloudbed', 'cloud_lane', 'quicksoil_shelf', 'pointed_holystone_cave', 'spring_water', 'crystal_island', 'upfalls', 'sky_arena', 'watched_vault',
           'updraft_vents', 'updraft_vents_high', 'hollow_islands', 'volvox_colonies'] + ORES + [
     n for (k, b, c, h) in CLOUD_PLACEMENTS for n in ['aercloud_%s_%s' % (k, b)]]
 SURFACE_COMMON = ['pointed_holystone', 'holystone_rocks']

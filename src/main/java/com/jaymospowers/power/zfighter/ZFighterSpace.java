@@ -13,6 +13,7 @@ import com.jaymospowers.power.zfighter.pod.PodLog;
 import com.jaymospowers.power.zfighter.pod.PodModules;
 import com.jaymospowers.power.zfighter.pod.PodBeacons;
 import com.jaymospowers.power.zfighter.pod.PodReturn;
+import com.jaymospowers.power.zfighter.pod.PodTow;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -139,13 +140,15 @@ public final class ZFighterSpace {
 	 */
 	static final int MAW_Y = 188;
 	static final int MAW_PAD_X = -44;
-	static final double MAW_PULL_RANGE = 90.0, MAW_PULL_FAR = 0.008, MAW_PULL_NEAR = 0.03;
+	public static final double MAW_PULL_RANGE = 90.0, MAW_PULL_FAR = 0.008, MAW_PULL_NEAR = 0.03;
 	/** Inside this many blocks of the heart the tide throws you out and hurts you ({@link #MAW_TIDE_DAMAGE} every half second). */
-	static final double MAW_TIDE_RANGE = 9.0, MAW_TIDE_PUSH = 1.3;
+	public static final double MAW_TIDE_RANGE = 9.0, MAW_TIDE_PUSH = 1.3;
 	static final float MAW_TIDE_DAMAGE = 6.0F;
 
 	/** The star map's commands. */
 	public static final int GO = 0, BEGIN_MISSION = 1, ABANDON_MISSION = 2, SKIP = 3, TOGGLE_SPOT = 4;
+	/** (Patch 9) Go, but flown by hand: the autopilot is left off (GO engages it; either can be switched in flight). */
+	public static final int GO_MANUAL = 5;
 	/** Home, as a destination index. */
 	public static final int HOME_INDEX = -1;
 
@@ -457,17 +460,17 @@ public final class ZFighterSpace {
 
 	private static void command(ServerPlayer player, Command command) {
 		switch (command.action()) {
-			case GO -> go(player, command.arg());
+			case GO -> go(player, command.arg(), true);
+			case GO_MANUAL -> go(player, command.arg(), false);
 			case BEGIN_MISSION -> ZFighterSpaceMissions.begin(player);
 			case ABANDON_MISSION -> ZFighterSpaceMissions.abandon(player);
-			case SKIP -> ZFighterPodTrip.skip(player);
 			case TOGGLE_SPOT -> PodMarks.toggle(player);
 			default -> {
 			}
 		}
 	}
 
-	private static void go(ServerPlayer player, int index) {
+	private static void go(ServerPlayer player, int index, boolean auto) {
 		MinecraftServer server = player.level().getServer();
 		UUID id = player.getUUID();
 		if (ZFighterPodTrip.flying(player)) {
@@ -517,8 +520,14 @@ public final class ZFighterSpace {
 			player.sendOverlayMessage(Component.translatable("message.jaymospowers.pod.unfinished").withStyle(ChatFormatting.RED));
 			return;
 		}
+		// (Patch 9, tr_tow) a crashed pod made fast to this one goes home with it, and only home
+		PodEntity towed = PodTow.hooked(player, pod);
+		if (towed != null && index != HOME_INDEX) {
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.pod.tow_home_only").withStyle(ChatFormatting.RED));
+			return;
+		}
 		int fuel = pod.fuel();
-		int cost = player.isCreative() ? 0 : tripCost(pod, index, player.level().dimension());
+		int cost = player.isCreative() ? 0 : tripCost(pod, index, player.level().dimension()) + (towed != null ? PodTow.EXTRA_FUEL : 0);
 		// (0.18.56) a thrifty meal: this launch burns one less, once (the meal is used up when the trip starts)
 		boolean thrifty = cost > 0 && com.jaymospowers.power.zfighter.backhome.FarFood.thrifty(player);
 		if (thrifty) {
@@ -560,7 +569,7 @@ public final class ZFighterSpace {
 		if (thrifty) {
 			com.jaymospowers.power.zfighter.backhome.FarFood.spendThrift(player);
 		}
-		ZFighterPodTrip.start(player, index, pod, fuel - cost, fuel);
+		ZFighterPodTrip.start(player, index, pod, fuel - cost, fuel, auto, towed);
 	}
 
 	// ---------------------------------------------------------------- every tick

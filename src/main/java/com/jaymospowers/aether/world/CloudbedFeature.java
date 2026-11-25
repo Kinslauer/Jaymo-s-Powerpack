@@ -65,7 +65,7 @@ public record CloudbedFeature() implements Feature {
 	}
 
 	/** Smooth value noise in 0..1: a hashed value at each lattice corner, blended with a smoothstep. */
-	private static double noise(long seed, double x, double z, int salt) {
+	static double noise(long seed, double x, double z, int salt) {
 		int ix = Mth.floor(x);
 		int iz = Mth.floor(z);
 		double fx = smooth(x - ix);

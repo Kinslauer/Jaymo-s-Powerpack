@@ -6,6 +6,7 @@ import com.jaymospowers.power.zfighter.ZFighterSpace;
 import com.jaymospowers.power.zfighter.ZFighterSpaceMissions;
 import com.jaymospowers.power.zfighter.fuel.PodFuel;
 import com.jaymospowers.power.zfighter.pod.PodClass;
+import com.jaymospowers.power.zfighter.pod.PodFlight;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -65,6 +66,8 @@ public class ZFighterStarMapScreen extends Screen {
 	/** The tank's size, the return stages packed, the pod's class, the worlds with a remembered landing, and whether the next landing is to be somewhere new. */
 	private final int maxFuel, stages, clazz, marked;
 	private boolean newSpot;
+	/** Whether the launch engages the autopilot (the pilot can switch it in flight either way). */
+	private boolean autopilot = true;
 	/** What a trip from here to each world burns (the last: home), and what the way home from each world burns. */
 	private final List<Integer> there, back;
 	/** (0.18.50) The grade of the fuel in the tank (0: empty). */
@@ -191,7 +194,23 @@ public class ZFighterStarMapScreen extends Screen {
 	}
 
 	private int[] missionBox() {
-		return new int[] {cardX(), PANEL_H - 8 - BUTTON_H * 2 - 15, CARD_W, BUTTON_H};
+		return new int[] {cardX(), PANEL_H - 8 - BUTTON_H * 2 - 45, CARD_W, BUTTON_H};
+	}
+
+	/** The autopilot switch above the launch button. */
+	private int[] autoBox() {
+		return new int[] {cardX(), PANEL_H - 8 - BUTTON_H - 36, CARD_W, 12};
+	}
+
+	/** Whether the way to {@code index} from here skirts the Hollow. */
+	private boolean skirts(LocalPlayer player, int index) {
+		ZFighterSpace.Dest here = ZFighterSpace.here(player.level());
+		for (int i = 0; here != null && i < ZFighterSpace.DESTS.length; i++) {
+			if (ZFighterSpace.DESTS[i] == here) {
+				return ZFighterSpace.skirtsHollow(i, index);
+			}
+		}
+		return ZFighterSpace.skirtsHollow(ZFighterSpace.HOME_INDEX, index);
 	}
 
 	// ---------------------------------------------------------------- what the card says
@@ -454,6 +473,16 @@ public class ZFighterStarMapScreen extends Screen {
 		int cost = cost(player, index);
 		UiStyle.line(graphics, this.font, Component.translatable("screen.jaymospowers.zfighter_space.burns", cost, this.fuel), x + 2, box[1] - 11, w - 6,
 			this.fuel >= cost ? UiStyle.DIM : RED);
+		if (!here) {
+			int leagues = PodFlight.leagues(index, player.level().dimension());
+			boolean hollow = skirts(player, index);
+			float share = PodClass.values()[Math.max(0, Math.min(this.clazz, PodClass.values().length - 1))].flight;
+			UiStyle.line(graphics, this.font, Component.translatable("screen.jaymospowers.zfighter_space.eta", leagues, PodFlight.cruiseTicks(leagues, hollow, share) / 20,
+				PodFlight.boostTicks(leagues, hollow, share) / 20), x + 2, box[1] - 23, w - 6, UiStyle.DIM);
+			int[] abox = autoBox();
+			button(graphics, abox, Component.translatable(this.autopilot ? "screen.jaymospowers.zfighter_space.auto_on" : "screen.jaymospowers.zfighter_space.auto_off"),
+				true, UiStyle.over((int)mx, (int)my, abox[0], abox[1], abox[2], abox[3]));
+		}
 		if (why == null) {
 			button(graphics, box, Component.translatable("screen.jaymospowers.zfighter_space.launch", Component.translatable("space.jaymospowers.dest." + key(index))),
 				true, UiStyle.over((int)mx, (int)my, box[0], box[1], box[2], box[3]));
@@ -487,8 +516,14 @@ public class ZFighterStarMapScreen extends Screen {
 		int[] box = launchBox();
 		if (UiStyle.over((int)mx, (int)my, box[0], box[1], box[2], box[3]) && blocked(player, this.picked) == null) {
 			click(0.8F);
-			ClientPlayNetworking.send(new ZFighterSpace.Command(ZFighterSpace.GO, this.picked));
+			ClientPlayNetworking.send(new ZFighterSpace.Command(this.autopilot ? ZFighterSpace.GO : ZFighterSpace.GO_MANUAL, this.picked));
 			this.onClose();
+			return true;
+		}
+		int[] abox = autoBox();
+		if (!isHere(player, this.picked) && UiStyle.over((int)mx, (int)my, abox[0], abox[1], abox[2], abox[3])) {
+			this.autopilot = !this.autopilot;
+			click(1.0F);
 			return true;
 		}
 		int[] mbox = missionBox();

@@ -326,6 +326,10 @@ public class PodEntity extends Entity {
 				return InteractionResult.SUCCESS_SERVER;
 			}
 		}
+		// (Patch 9, tr_tow) sneaking at a crashed pod with an empty hand and a towing pod near: the line is made fast
+		if (held.isEmpty() && !bay && player.isSecondaryUseActive() && PodTow.hook(server, this)) {
+			return InteractionResult.SUCCESS_SERVER;
+		}
 		com.jaymospowers.power.zfighter.pod.PodLog.note(server, PodLog.Step.KEEL);
 		// (0.18.51) a world's own part, sneaking: the pod is mended a grade better
 		if (player.isSecondaryUseActive() && PodGrades.tryGrade(server, this, held)) {
