@@ -2877,3 +2877,7 @@ Andy: "why doesnt the bear stay on the hook?" It did stay, but it didn't look li
 - **Woken scarecrows**: a Spark of the Harvest used on a scarecrow with a pumpkin wakes it. It reaps ripe crops within 6 blocks, replants them, never tramples farmland, and carries the harvest to a chest you choose (empty hand, then click the chest). It works only while mended with straw: a hay block gives 64, wheat 6. A well-kept one sometimes brings in an extra crop. Nobody is punished for not having one. `Farmhand`, `FarmhandEntity`, `ScarecrowBlock`.
 - Art from Seasonal: The Wicked Harvest (MIT, Lazurium), licence in `licenses/seasonal/`.
 - Compiled; not played.
+
+## 0.6.93 (2026-11-25): Truffle soil no longer stops the server starting (#2181)
+
+The truffle soil worldgen feature named its block the old way, so 26.3 refused to load it and the server crashed on start. It now uses the 26.3 form.
