@@ -8044,3 +8044,8 @@ Ideas from the Hand of God mod (All Rights Reserved: nothing of it copied, all b
 - **Gore reader**: `/gore reader` (ops) lists every creature and weapon, with blood, body plan, weight and weapon kind. Ops can change any of these, and the changes are saved in `config/jaymospowers-gore-overrides.json`.
 - Classes: BloodSurfaces, BloodCeilingMark, BloodCloud, BloodScreen, BloodBurn, HitReactions, MobHurtStances, KillMoment, MotionSettings, SwingCuts, CutDepth, CutTotals, FirstPersonWounds, ArmourHoles, ArmourFace, ArmourDeflect, Disarms, ArmlessMobs, Wrestle, HitSounds, Pellets, GoreReader, GoreOverrides, BloodGuess, GoreReaderScreen.
 - Built and compiled; not played.
+
+## 0.27.31 (2026-11-25): Corpse hint drops "search the body" when nothing is left (#2137)
+
+- Andy (2026-11-25): "if it cannot be opened or has nothing left the context hint for that button should disappear". The hint by the crosshair on a body only shows "search the body" while a tap will open its loot screen (Kitchen's `Corpses.SHARE_TAP`). A picked-clean skeleton shows "take a bone"; a body with arrows still in it shows "pull out an arrow" (a tap pulls one before the loot screen opens). Lift, drag and pick-up lines are unchanged.
+- Built; not played.
