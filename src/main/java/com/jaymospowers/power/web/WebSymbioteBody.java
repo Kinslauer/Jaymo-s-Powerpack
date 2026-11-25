@@ -957,6 +957,9 @@ public final class WebSymbioteBody {
 	}
 
 	private static void hint(ServerPlayer player, int bit, String key) {
+		if (WebSymbioteSettings.off(player, WebSymbioteSettings.Setting.HINTS)) {
+			return;
+		}
 		int seen = player.getAttachedOrElse(HINTS, 0);
 		if ((seen & bit) != 0) {
 			return;
