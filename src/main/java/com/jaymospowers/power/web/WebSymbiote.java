@@ -1268,6 +1268,7 @@ public final class WebSymbiote {
 		});
 		// (0.13.4) nor lets a fall kill you: it pools over your legs and takes the landing
 		WebSymbioteCushion.register();
+		WebSymbioteReflexes.register();
 		WebSymbioteWings.register();
 		WebSymbioteJar.register();
 		WebSymbioteSteed.register();
@@ -1617,6 +1618,9 @@ public final class WebSymbiote {
 	static float urgency(String key) {
 		if (key.startsWith("panic.")) {
 			return URGENCY_MAX;
+		}
+		if (key.startsWith("reflex.")) {
+			return key.startsWith("reflex.goodbye") || key.startsWith("reflex.arrow") ? URGENCY_MOOD : URGENCY_WARNING;
 		}
 		if (key.startsWith("harden")) {
 			return URGENCY_HARDEN;
@@ -4854,6 +4858,11 @@ public final class WebSymbiote {
 	private static WebSymbioteState instinct(ServerPlayer player, Live live, WebSymbioteState state, long now) {
 		ServerLevel level = player.level();
 		var random = player.getRandom();
+		// (it saves you first: water, rock, snow, lava, ledges, your items and a meal)
+		WebSymbioteState saved = WebSymbioteReflexes.tick(player, state, now);
+		if (saved != state) {
+			return saved;
+		}
 		BlockPos fire = nearFire(player);
 		boolean burning = player.isOnFire() || fire != null;
 		Vec3 blast = explosiveNear(player);
