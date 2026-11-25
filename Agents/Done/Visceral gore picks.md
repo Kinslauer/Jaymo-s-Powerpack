@@ -3,14 +3,13 @@ status: stalled
 task: Build Andy's 42 Visceral gore picks; PixelGore pick list waiting on picks
 branch: claude/project-thread-9k4io3
 with: cloud thread (Reason Art project)
-pr:
+pr: 2133
 mods: powers, kitchen, kingdoms
 versions:
 started: 2026-11-24
 owns:
   - docs/Visceral-Plan.md
-  - Track 2 (hit reactions, stances, kill moment, MotionSettings) in worktree vis-track2
-  - Track 5 (core/blood, client/blood, BloodSettings, KitchenBlood) in worktree vis-track5
+  - all 8 tracks (done, in PR #2133)
 ---
 # Visceral gore picks
 
