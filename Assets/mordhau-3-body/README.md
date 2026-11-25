@@ -15,7 +15,7 @@ these pictures were run here.
 | mh-doublet (have) | `arming_doublet`: recipe `arming_doublet.json`, the shepherd sells it, guards are kitted with it; leather already. No new model. | (existing) |
 | mh-cloth-tops | new `linen_shirt`, `wool_tunic` (with a short skirt) and `cloth_vest` (PADDING, no armour, dyed). "Nothing" is no piece. | `linen_shirt`, `wool_tunic`, `cloth_vest` |
 | mh-leather-jack | new `leather_jack` (PADDING, 1 armour, mended with leather), sleeveless, laced down the front | `leather_jack` |
-| mh-landsknecht-doublet | new `landsknecht_doublet` (PADDING, 1 armour): slits cut through the cloth with the second colour showing. Guards: see "Guards" below. Lore (new): "The company's doublet" | `landsknecht_doublet` |
+| mh-landsknecht-doublet | new `landsknecht_doublet` (PADDING, 1 armour): slits cut through the cloth with the second colour showing, and puffed sleeves (a model hung with the sheet, built as the slashed hose's thigh puffs are: slashed, lined and gathered in the second colour, the left a size fuller). Guards: see "Guards" below. Lore (new): "The company's doublet" | `landsknecht_doublet` |
 | mh-mail (have) | `mail_haubergeon`: forged from iron at the smith's anvil (already). The tabard over it: row mh-tabard. | (existing) |
 | mh-hauberk | new `mail_hauberk` (MAIL, 3 armour): full sleeves on the sheet, the mail skirt to the knee a model hung on the legs; forged from iron | `mail_hauberk` |
 | mh-plated-mail | new `plated_mail` (MAIL, 3 armour): the haubergeon with plates let into the chest and back; forged from iron | `plated_mail` |
@@ -63,5 +63,5 @@ gilded they are not for royals and lords alone.
 ## Not done / not checked
 
 - Not played; Java not compiled here (CI compiles).
-- The slashed doublet's sleeves are slashed but not puffed (the under-armour layer is flat on the arm).
+- The slashed doublet's puffed sleeves (added after review, 5:40 PM, 2026-11-25) sit outside the upper arm, so a plate arm harness worn with it is hidden under the puffs from shoulder to above the elbow (the slashed hose's thigh puffs do the same over cuisses). Not seen in the game.
 - Covered plate is coloured by the wool the smith carries; guards and shops do not sell it, and there is no re-dye recipe for it.
