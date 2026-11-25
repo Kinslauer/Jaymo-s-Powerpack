@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 21:30). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 21:50). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -32,8 +32,6 @@ kanban-plugin: board
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Inbox/mordhau-2-hoods-crests|mordhau-2-hoods-crests]] · 💻 Odysseus · claimed
 - [ ] [[Inbox/mordhau-1-helms|mordhau-1-helms]] · 💻 Odysseus · claimed
-- [ ] [[Agents/Hand of God effects|Hand of God effects]] · 💻 Odysseus · running
-- [ ] [[Agents/Visceral gore picks|Visceral gore picks]] · 💻 Odysseus · running
 
 
 ## In review
