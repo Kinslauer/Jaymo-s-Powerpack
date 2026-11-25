@@ -5,7 +5,8 @@
   "ingredients": [
     "minecraft:string",
     "minecraft:string",
-    "minecraft:string"
+    "minecraft:string",
+    "#minecraft:wool"
   ],
   "result": {
     "count": 1,

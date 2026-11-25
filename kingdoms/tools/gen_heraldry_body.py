@@ -651,7 +651,7 @@ NAMES = {
 WOOL, STRING, LEATHER, FEATHER, NUGGET = h.WOOL, h.STRING, h.LEATHER, h.FEATHER, h.NUGGET
 IRON, IRON_NUGGET, PLANKS = "minecraft:iron_ingot", "minecraft:iron_nugget", "#minecraft:planks"
 RECIPES = {
-	"linen_shirt": [STRING, STRING, STRING, STRING], "wool_tunic": [WOOL, WOOL, WOOL, STRING], "cloth_vest": [WOOL, WOOL, WOOL],
+	"linen_shirt": [STRING, STRING, STRING, STRING, STRING], "wool_tunic": [WOOL, WOOL, WOOL, STRING], "cloth_vest": [WOOL, WOOL, WOOL],
 	"leather_jack": [LEATHER, LEATHER, LEATHER, LEATHER, STRING], "brigandine_coat": [WOOL, WOOL, WOOL, IRON, IRON, IRON_NUGGET, IRON_NUGGET, IRON_NUGGET, IRON_NUGGET],
 	"coat_of_plates": [WOOL, WOOL, WOOL, IRON, IRON, IRON, STRING], "surcoat": [WOOL, WOOL, WOOL, WOOL, STRING, STRING],
 	"monks_robe": [WOOL, WOOL, WOOL, WOOL, WOOL, STRING, STRING], "kaftan": [WOOL, WOOL, WOOL, WOOL, STRING, STRING, NUGGET, NUGGET],
@@ -721,7 +721,7 @@ def main(argv):
 			covered_texture(name, *older[name])
 	# the brigandine coat and the cloth over-garments
 	for name, build in CLOTH_MODELS.items():
-		write_cloth(name, build, 128, name)
+		write_cloth(name, build, 128, name, whole=name in WHOLE)
 	for name, (shape, build, marks) in TORN.items():
 		write_cloth(name, build, 128, shape, bake=False, **marks)
 	# the ailettes' arms: one sheet for each realm ordinary, only the boards' broad faces painted (as the tabard's)
@@ -776,14 +776,22 @@ def write_cloth_sheets(name, b, model_name):
 	return fixed
 
 
-def write_cloth(name, build, size, model_name, bake=True, **marks):
+# the chest-slot cloth: one whole sheet in the dye (the armour slots draw no _fixed pass), as the coat of plates' is
+WHOLE = ("brigandine_coat",)
+
+
+def write_cloth(name, build, size, model_name, bake=True, whole=False, **marks):
 	"""{name}'s sheets, icon and item; its model too unless it is {bake} False (a torn re-cut hangs on its whole twin's model)."""
 	b, model = g.make(build, size, **marks)
 	if bake:
 		g.bake(model, ASSETS, "heraldry_" + name)
-	fixed = write_cloth_sheets(name, b, model_name)
-	second = SECOND_MAT in h.mats_of(b)
-	base = h.split(b, DYED_MATS)
+	if whole:
+		g.entity_texture(b.img, "heraldry_" + name)
+		fixed, second, base = set(), False, b.img
+	else:
+		fixed = write_cloth_sheets(name, b, model_name)
+		second = SECOND_MAT in h.mats_of(b)
+		base = h.split(b, DYED_MATS)
 	layers = [name]
 	h.icon(b, base, name)
 	trim = Image.new("RGBA", b.img.size, (0, 0, 0, 0))
@@ -826,7 +834,11 @@ def preview_png(b, tag, out, img=None):
 	g.bake(model, scratch, tag)
 	(img or b.img).save(os.path.join(scratch, "textures", "entity", "bb", tag + ".png"))
 	subprocess.run([sys.executable, "-I", os.path.join(ROOT, "tools", "bbmodel_preview.py"), scratch, tag, os.path.join(out, tag + ".png")],
-		check=True, capture_output=True)
+		check=True, capture_output=True, env={**os.environ, "YAWS": VIEWS})
+
+
+# the views of a preview, left to right: the front, the side, the back, three-quarter front and three-quarter back (degrees)
+VIEWS = "180,90,0,150,30"
 
 
 def sheet_cubes(b, sheet_img):
@@ -868,7 +880,11 @@ def previews(out):
 	for name, build in CLOTH_MODELS.items():
 		b, _ = g.make(build, 128, figure=True)
 		img = b.img.copy()
-		img.alpha_composite(g.tinted(h.split(b, DYED_MATS), UNDYED[name][0]))
+		if name in WHOLE:
+			# (drawn as one sheet in the dye: the figure under it is not tinted)
+			img.alpha_composite(g.tinted(h.split(b, h.mats_of(b) - {"figure"}), UNDYED[name][0]))
+		else:
+			img.alpha_composite(g.tinted(h.split(b, DYED_MATS), UNDYED[name][0]))
 		if SECOND_MAT in h.mats_of(b):
 			img.alpha_composite(g.tinted(h.split(b, (SECOND_MAT,)), UNDYED[name][1]))
 		preview_png(b, name, out, img)
