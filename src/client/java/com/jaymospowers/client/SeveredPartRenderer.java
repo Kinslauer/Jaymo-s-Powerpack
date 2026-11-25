@@ -52,6 +52,8 @@ public final class SeveredPartRenderer extends EntityRenderer<SeveredPart, Sever
 		@Nullable EntityRenderer<?, ?> bodyRenderer;
 		boolean player;
 		boolean hidden;
+		/** The part itself, for the blood and dirt laid over a player's (BloodCoatLayer#submitSeveredPlayer). */
+		@Nullable SeveredPart part;
 		float yaw;
 		float spin;
 		float spinAxis;
@@ -91,6 +93,7 @@ public final class SeveredPartRenderer extends EntityRenderer<SeveredPart, Sever
 		state.spinAxis = entity.spinAxis;
 		state.body = null;
 		state.bodyRenderer = null;
+		state.part = entity;
 		int part = entity.part();
 		String first = Dismembered.names(part)[0];
 		state.player = entity.owner().isPresent() || entity.look().contains("\"minecraft:player\"");
@@ -108,6 +111,7 @@ public final class SeveredPartRenderer extends EntityRenderer<SeveredPart, Sever
 			avatar.xRot = 0.0F;
 			avatar.nameTag = null;
 			avatar.setData(Dismembered.ONLY, part);
+			dressAsBody(entity, avatar);
 			PlayerModel model = avatar.skin.model() == PlayerModelType.SLIM ? this.slim : this.wide;
 			// a player is drawn flipped and lifted (see submit): the part's middle, as it ends up
 			Vector3f mid = middle(model.root(), first);
@@ -131,6 +135,8 @@ public final class SeveredPartRenderer extends EntityRenderer<SeveredPart, Sever
 		bodyState.nameTag = null;
 		bodyState.displayFireAnimation = false;
 		bodyState.setData(Dismembered.ONLY, part);
+		com.jaymospowers.client.blood.BloodCoatLayer.severed(entity, bodyState);
+		dressAsBody(entity, bodyState);
 		if (look != null) {
 			// MCA's villager for the player isn't in the world: lit where the part lies
 			bodyState.lightCoords = state.lightCoords;
@@ -162,6 +168,70 @@ public final class SeveredPartRenderer extends EntityRenderer<SeveredPart, Sever
 		}
 		state.body = bodyState;
 		state.bodyRenderer = renderer;
+	}
+
+	/**
+	 * Off a body lying dead (Jaymo's Kitchen): drawn as that body is, rotted, charred, greyed or skinned (its Dressed
+	 * paint, as Kitchen's corpse renderer marks it; with streamer safe on, no rotten patches or bare bone), eyes shut.
+	 * Kitchen's paint is reached by name ({@link KitchenPaint}): Powers builds against an older Kitchen jar.
+	 */
+	private static void dressAsBody(SeveredPart entity, EntityRenderState bodyState) {
+		int dressed = entity.dressed();
+		if (dressed < 0) {
+			return;
+		}
+		KitchenPaint.mark(bodyState, dressed, entity.wear(), com.jaymospowers.client.blood.BloodSettings.streamerSafe());
+		com.jaymoskitchen.client.corpse.ClosedEyes.mark(bodyState);
+	}
+
+	/** Kitchen's {@code Dressed} and {@code Wear}, by name; with a Kitchen too old to have them, parts are drawn plain. */
+	private static final class KitchenPaint {
+		private static net.fabricmc.fabric.api.client.rendering.v1.@Nullable RenderStateDataKey<Integer> key;
+		private static java.lang.reflect.@Nullable Method texture;
+		private static int shift, paintMask, dark, bare;
+		private static boolean ready;
+
+		static {
+			try {
+				Class<?> dressed = Class.forName("com.jaymoskitchen.client.corpse.Dressed");
+				Class<?> wear = Class.forName("com.jaymoskitchen.corpse.Wear");
+				@SuppressWarnings("unchecked")
+				var found = (net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey<Integer>) dressed.getField("KEY").get(null);
+				key = found;
+				texture = dressed.getMethod("texture", net.minecraft.client.model.Model.class, Object.class, Identifier.class);
+				shift = dressed.getField("WEAR_SHIFT").getInt(null);
+				paintMask = wear.getField("PAINT_MASK").getInt(null);
+				dark = wear.getField("DARK").getInt(null);
+				bare = wear.getField("BARE").getInt(null);
+				ready = true;
+			} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
+				ready = false;
+			}
+		}
+
+		static void mark(EntityRenderState state, int dressed, int wear, boolean streamerSafe) {
+			if (!ready || key == null) {
+				return;
+			}
+			int paint = wear & paintMask;
+			if (streamerSafe) {
+				// the rot's dark patches and bare bone (three bits each) left off
+				paint &= ~(7 << dark) & ~(7 << bare);
+			}
+			int value = dressed | paint << shift;
+			state.setData(key, value == 0 ? null : value);
+		}
+
+		static Identifier texture(net.minecraft.client.model.Model<?> model, Object state, Identifier skin) {
+			if (!ready || texture == null) {
+				return skin;
+			}
+			try {
+				return (Identifier) texture.invoke(null, model, state, skin);
+			} catch (ReflectiveOperationException | RuntimeException e) {
+				return skin;
+			}
+		}
 	}
 
 	/**
@@ -298,8 +368,13 @@ public final class SeveredPartRenderer extends EntityRenderer<SeveredPart, Sever
 			poseStack.scale(-0.9375F, -0.9375F, 0.9375F);
 			poseStack.translate(0.0F, -1.501F, 0.0F);
 			PlayerModel model = state.avatar.skin.model() == PlayerModelType.SLIM ? this.slim : this.wide;
-			collector.submitModel(model, state.avatar, poseStack, state.avatar.skin.body().texturePath(), state.lightCoords,
-				OverlayTexture.NO_OVERLAY, state.outlineColor);
+			Identifier skin = state.avatar.skin.body().texturePath();
+			collector.submitModel(model, state.avatar, poseStack, KitchenPaint.texture(model, state.avatar, skin),
+				state.lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor);
+			if (state.part != null) {
+				com.jaymospowers.client.blood.BloodCoatLayer.submitSeveredPlayer(state.part, model, state.avatar, skin, poseStack, collector,
+					state.lightCoords);
+			}
 		} else {
 			submitBody(state.bodyRenderer, state.body, poseStack, collector, camera);
 		}
