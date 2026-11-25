@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 10:03). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 10:17). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -26,6 +26,8 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2176 The numpad's other keys stay quiet while the cleric's medallion board is up (Kingdoms, 2026-11-25)
+- [ ] #2175 Swinging while locked on no longer crashes the game (Powers, 2026-11-25)
 - [ ] #2174 class items show up in JEI under the class's name (Kingdoms, 2026-11-25)
 - [ ] #2173 No Subtle Effects error on a dedicated server's start (Powers, Kingdoms, 2026-11-25)
 - [ ] #2172 The game starts again (the symbiote HUD crashed it on launch) (Powers, 2026-11-25)
@@ -84,9 +86,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2114 The first capital is found in seconds, not after an 11-minute wait (Kingdoms, 2026-11-24)
 - [ ] #2113 Village mods 4: board work (Kingdoms, 2026-11-24)
 - [ ] #2108 The Silk Deeps no longer generate (Kingdoms, 2026-11-24)
-- [ ] #2107 T opens chat again (Powers, Kingdoms, 2026-11-24)
-- [ ] #2106 A new host can struggle out of the red one's hunt (Powers, 2026-11-24)
-- …and 559 older ones.
+- …and 561 older ones.
 
 ## Health
 
