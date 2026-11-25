@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Inbox/village-mods-5-town-life-hats.md
 branch: claude/village-mods-5
 with: 
@@ -34,3 +34,4 @@ come from, and a small friendliness bonus for wearing your trade's hat.
 
 ## Done
 PR #2122, CI green (Powers, Kingdoms, Kitchen builds, pack start test). All seven rows built: gift house at reputation 800 (Town business), "What the town is doing" page (sneak-use the board with an item, or Town business), each land's known dish and good for regulars (10 / 30 trades, Kitchen dishes via KitchenCompat), the wandering pilgrim and tale "The Pilgrim's Road" (hints only, four old altars), seven trade hats ported from Villager Hats (MIT) in the head bauble slot, zombie villager drops and a tailor's Sew a Hat button, and +10% town goodwill for wearing your job's hat. Lore: one (new) paragraph, "The pilgrims of the old road". Hat previews: Assets/village-mods-5/. Not played: nothing checked in game.
+- 2026-11-24 20:02 PR #2122 is merged into master; moved to Agents/Done.

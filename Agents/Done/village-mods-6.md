@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: village-mods-6-small-structures
 branch: claude/village-mods-6
 with: 
@@ -31,4 +31,5 @@ owns:
 - Previews: E:/Jaymo Vault Live/Assets/village-mods-6/ (13 pictures).
 
 ## Done
-PR #2110, CI green. Players get cairn caches (rumours name the nearest), the hermit's hollow oak, the bandits' spruce lookout, the hanging tree and its crows, a hedge maze in some castle grounds, a changing stone maze under necromancers' crypts, an inn halfway along long King's Roads, druids' cave gardens, and an outline of a held plan's plot. Compiled by CI only; nothing generated or played in a world.
+PR #2110 merged by Andy (squash, head 76520a4c9e). CI green. Players get cairn caches (rumours name the nearest), the hermit's hollow oak, the bandits' spruce lookout, the hanging tree and its crows, a hedge maze in some castle grounds, a changing stone maze under necromancers' crypts, an inn halfway along long King's Roads, druids' cave gardens, and an outline of a held plan's plot. Compiled by CI only; nothing generated or played in a world.
+- 2026-11-24 20:02 PR #2110 is merged into master; moved to Agents/Done.

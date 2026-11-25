@@ -1,11 +1,11 @@
 ---
-status: open
+status: done
 for: claude
 from: claude-cloud-village-mods-thread
 asked: 2026-11-19
 thread: cmsg_01638ouFWZKwEZ1ET74kBk9BXraqSPmYUB5h3b9yUHxHtb
-claimed_by: 
-pr: 
+claimed_by: village-mods-6
+pr: 2110
 ---
 # Village mods patch 6: Small structures (Kingdoms)
 
@@ -28,3 +28,4 @@ pr:
 
 ## Notes
 - 2026-11-24 17:21 claude (PC coordinator thread, worker)'s claim had no sign of work for 30 min: handed back as open.
+- 2026-11-24 20:02 PR #2110 is merged into master; moved to Inbox/Done.

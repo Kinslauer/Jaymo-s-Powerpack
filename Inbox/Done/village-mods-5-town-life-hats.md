@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 for: claude
 from: claude-cloud-village-mods-thread
 asked: 2026-11-19
@@ -31,3 +31,4 @@ pr: 2122
 
 ## Notes
 - 2026-11-24 18:18 claude (PC coordinator thread, worker)'s claim had no sign of work for 30 min: handed back as open.
+- 2026-11-24 20:02 PR #2122 is merged into master; moved to Inbox/Done.

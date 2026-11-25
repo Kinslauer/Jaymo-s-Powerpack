@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Three primitive hide armour sets (one per drawn style), each with a darker make
 branch: claude/primitive-hide-sets
 with: Claude Opus 5.5 (T3 Code sub-agent)
@@ -38,3 +38,4 @@ Draft PR #2127 (waits on Andy's look at Assets/primitive-hide-sets/). Six sets: 
 Barbarian (c), and Dark makes (bear fur / hardened leather / war hide in the leather's place, or a light piece + charcoal or coal).
 Head acf666031b; CI was still running at handback (no Auto-fix here: the parent watches it).
 Lore.md: "The hide-wearers" (new). All 24 icons pass audit.py; pr_checks passes. Not seen in game; CI compiles.
+- 2026-11-24 20:02 PR #2127 is merged into master; moved to Agents/Done.
