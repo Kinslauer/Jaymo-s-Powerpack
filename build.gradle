@@ -1177,6 +1177,7 @@ tasks.register("checkPackMods") {
 tasks.register("curseforgeManifest") {
 	def out = layout.buildDirectory.file("modpack/manifest.json")
 	outputs.file out
+	inputs.property "version", version // else Gradle reuses an old manifest and the CurseForge tile shows an old version
 	doLast {
 		def manifest = [
 			minecraft      : [version: project.minecraft_version, modLoaders: [[id: "fabric-${project.loader_version}", primary: true]]],
