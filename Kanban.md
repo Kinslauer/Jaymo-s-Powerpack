@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 20:49). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 21:25). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -20,15 +20,14 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for any · open
 - [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · for any · open
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for any · open
+- [ ] [[Inbox/village-mods-7-ctov-tidal-towns|village-mods-7-ctov-tidal-towns]] · for 💻 Odysseus · open
+- [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · for 💻 Odysseus · open
+- [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/village-mods-7-ctov-tidal-towns|village-mods-7-ctov-tidal-towns]] · 💻 Odysseus · claimed
-- [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · 💻 Odysseus · claimed
-- [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · 💻 Odysseus · claimed
-- [ ] [[Agents/claude-cloud-village-mods-7-9|claude-cloud-village-mods-7-9]] · 💻 Odysseus · running
 
 
 ## In review
@@ -40,6 +39,7 @@ kanban-plugin: board
 
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
+- [ ] [[Agents/claude-cloud-village-mods-7-9|claude-cloud-village-mods-7-9]] · 💻 Odysseus · stalled
 - [ ] [[Agents/wither-model|wither-model]] · 💻 Odysseus · blocked
 
 
