@@ -1,5 +1,6 @@
 package com.AdamNew.dynamicwaters.client.gui.shore;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.AdamNew.dynamicwaters.shore.WaterPlantSets;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -381,7 +382,7 @@ final class WaterPlantSetEditScreen extends com.AdamNew.dynamicwaters.client.gui
         final double mx = event.x(), my = event.y();
         final int button = event.button();
         final int i = rowAt(mx, my);
-        if (i >= 0 && button == 0) {
+        if (i >= 0 && button == InputConstants.MOUSE_BUTTON_LEFT) {
             selected = i;
             dirty = true;
             return true;

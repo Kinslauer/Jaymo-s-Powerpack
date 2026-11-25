@@ -86,7 +86,7 @@ final class ShapeWheelScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-		if (event.button() == 1) {
+		if (event.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
 			// right click: star it (the wheel stays open)
 			if (this.selected >= 0 && this.selected < shown().size()) {
 				ClientPlayNetworking.send(new ShapeWheel.Pick(shown().get(this.selected).form(), ShapeWheel.STAR));

@@ -1,5 +1,6 @@
 package com.AdamNew.dynamicwaters.client.gui.shore;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.AdamNew.dynamicwaters.shore.RiverbankPalettes;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -300,7 +301,7 @@ final class RiverbankPaletteEditScreen extends com.AdamNew.dynamicwaters.client.
         final double mx = event.x(), my = event.y();
         final int button = event.button();
         final RiverbankPaletteDraft.Entry e = rowAt(mx, my);
-        if (e != null && button == 0) {
+        if (e != null && button == InputConstants.MOUSE_BUTTON_LEFT) {
             openPicker(e);
             return true;
         }

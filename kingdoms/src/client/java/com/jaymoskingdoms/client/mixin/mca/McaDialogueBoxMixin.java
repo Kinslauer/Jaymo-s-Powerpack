@@ -1,5 +1,6 @@
 package com.jaymoskingdoms.client.mixin.mca;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.jaymoskingdoms.client.DialogueCinematic;
 import com.jaymoskingdoms.client.TalkFirst;
 import com.jaymoskingdoms.client.TalkWheel;
@@ -118,7 +119,7 @@ abstract class McaDialogueBoxMixin extends Screen {
 	 */
 	@Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$spoke(MouseButtonEvent event, boolean doubled, CallbackInfoReturnable<Boolean> cir) {
-		if (event.button() == 0 && TalkFirst.local(this.dialogAnswerHover)) {
+		if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && TalkFirst.local(this.dialogAnswerHover)) {
 			String spoke = this.dialogAnswerHover;
 			this.dialogAnswerHover = null;
 			TalkFirst.pick((InteractScreen)(Object)this, spoke);
