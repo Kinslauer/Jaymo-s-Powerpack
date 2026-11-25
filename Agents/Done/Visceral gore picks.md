@@ -1,6 +1,6 @@
 ---
-status: done
-task: Build Andy's 42 Visceral + 16 PixelGore gore picks
+status: stalled
+task: Build Andy's 42 Visceral gore picks; PixelGore pick list waiting on picks
 branch: claude/project-thread-9k4io3
 with: cloud thread (Reason Art project)
 pr: 2133
