@@ -24,7 +24,7 @@ import net.minecraft.util.Mth;
  * (server side); the lit button is the order it holds. Everything is read from the synced state and mind.
  */
 final class WebSymbioteStatusScreen extends Screen {
-	private static final int W = 250, BASE_H = 196, GRUDGE_ROW = 10, GRUDGE_HEAD = 14;
+	private static final int W = 250, BASE_H = 209, GRUDGE_ROW = 10, GRUDGE_HEAD = 14;
 	private static final int ACCENT = 0xFF8A5AB0;
 	private static final int ROW_H = 13;
 	private static final int BAR_W = 70, BAR_H = 4;
@@ -76,7 +76,7 @@ final class WebSymbioteStatusScreen extends Screen {
 	}
 
 	private int buttonY() {
-		return top() + 34 + ROW_H * 8 + 18;
+		return top() + 34 + ROW_H * 9 + 18;
 	}
 
 	@Override
@@ -127,6 +127,8 @@ final class WebSymbioteStatusScreen extends Screen {
 		bar(graphics, row++, rowY, labelX, "trust", Component.translatable("gui.jaymospowers.web_symbiote.status.bond_value", mind.trust(), WebSymbioteMind.TRUST_MAX),
 			mind.trust() / (float)WebSymbioteMind.TRUST_MAX, 0xFF6AB08A, valueX);
 		row(graphics, row++, rowY, labelX, "mood", Component.translatable("gui.jaymospowers.web_symbiote.mood." + mood.key()), WebSymbioteMindUi.TEXT[mood.ordinal()], valueX);
+		row(graphics, row++, rowY, labelX, "temper", Component.translatable("gui.jaymospowers.web_symbiote.temper."
+			+ WebSymbioteMind.temperName(mind.temper())), UiStyle.TEXT, valueX);
 		bar(graphics, row++, rowY, labelX, "stress", Component.translatable("gui.jaymospowers.web_symbiote.status.bond_value", state.stress(), WebSymbiote.STRESS_MAX),
 			state.stress() / (float)WebSymbiote.STRESS_MAX, state.stress() >= WebSymbioteMind.COILED_STRESS ? 0xFFB02030 : 0xFFB09A5A, valueX);
 		bar(graphics, row++, rowY, labelX, "satiety", Component.translatable("gui.jaymospowers.web_symbiote.status.bond_value", state.satiety(), WebSymbiote.SATIETY_MAX),
@@ -149,7 +151,7 @@ final class WebSymbioteStatusScreen extends Screen {
 		row(graphics, row, rowY, labelX, "request", request, requestColor, valueX);
 
 		// the standing orders
-		int orderY = y + UiStyle.HEADER + ROW_H * 8 + 2;
+		int orderY = y + UiStyle.HEADER + ROW_H * 9 + 2;
 		UiStyle.rule(graphics, x + 6, x + W - 6, orderY);
 		UiStyle.line(graphics, font, Component.translatable("gui.jaymospowers.web_symbiote.status.orders"), x + 10, orderY + 4, W - 20, ACCENT);
 		hovered = -1;

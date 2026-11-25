@@ -6185,6 +6185,7 @@ public final class WebSymbiote {
 		level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 20, food.getBbWidth() * 0.4, food.getBbHeight() * 0.4, food.getBbWidth() * 0.4, 0.05);
 		// (0.15.33) a player's body: the hotbar it held falls out
 		KitchenCompat.spill(food);
+		WebSymbioteMemory.ate(player, food);
 		food.discard();
 		feed(player, live.eatFeed, CONSUME_CALM);
 		// fed, it warms to you

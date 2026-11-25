@@ -403,6 +403,7 @@ public final class WebSymbioteClient {
 
 	static void init() {
 		WebTendrilBundle.init();
+		WebSymbioteFidget.init();
 		WebSymbioteBodyClient.init();
 		menuKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jaymospowers.web_symbiote", InputConstants.KEY_X, JaymosPowersClient.CATEGORY));
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
