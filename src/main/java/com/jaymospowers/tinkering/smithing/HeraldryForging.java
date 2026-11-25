@@ -125,17 +125,18 @@ public final class HeraldryForging {
 			}
 		});
 		Forging.CHECKS.add((smith, anvil, option) -> {
-			if (!gilded(option)) {
+			if (!goldFinish(option)) {
 				return null;
 			}
-			if (!noble.test(smith)) {
+			// (the etched and gilt-banded finishes are gold finishes too: they take the gold, but are not a noble's alone)
+			if (gilded(option) && !noble.test(smith)) {
 				return Component.translatable("message.jaymospowers.smithing.gilding_noble");
 			}
 			return count(smith.getInventory(), s -> s.is(Items.GOLD_INGOT)) < GILD_GOLD
 				? Component.translatable("message.jaymospowers.smithing.gilding_gold", GILD_GOLD) : null;
 		});
 		Forging.FINISHES.add((smith, anvil, option, result) -> {
-			if (gilded(option) && !smith.getAbilities().instabuild) {
+			if (goldFinish(option) && !smith.getAbilities().instabuild) {
 				take(smith.getInventory(), s -> s.is(Items.GOLD_INGOT), GILD_GOLD);
 			}
 		});
@@ -177,6 +178,11 @@ public final class HeraldryForging {
 		return option.id().startsWith(PREFIX) && option.id().endsWith("/" + GILDED);
 	}
 
+	/** Whether {@code option} is in a gold finish (gilded, gilt-banded or etched and gilt: Kingdoms' GOLD_FINISHES), which takes the gold. */
+	private static boolean goldFinish(Forging.Option option) {
+		return option.id().startsWith(PREFIX) && (option.id().endsWith("/" + GILDED) || option.id().endsWith("/gilt_banded") || option.id().endsWith("/etched"));
+	}
+
 	/** What else {@code option} takes from the smith when it is done, each the choices for it: hides for a fur lining, gold for gilding (for JEI). */
 	public static List<List<ItemStack>> extras(Forging.Option option) {
 		List<List<ItemStack>> out = new ArrayList<>();
@@ -185,7 +191,7 @@ public final class HeraldryForging {
 			BuiltInRegistries.ITEM.getTagOrEmpty(HIDES).forEach(item -> hides.add(new ItemStack(item, FUR_HIDES)));
 			out.add(hides.isEmpty() ? List.of(new ItemStack(Items.RABBIT_HIDE, FUR_HIDES)) : hides);
 		}
-		if (gilded(option)) {
+		if (goldFinish(option)) {
 			out.add(List.of(new ItemStack(Items.GOLD_INGOT, GILD_GOLD)));
 		}
 		if (covered(option)) {

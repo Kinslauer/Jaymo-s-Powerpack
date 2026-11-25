@@ -75,7 +75,7 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 	private static final int COVERED_UNDYED = 0x7A2E3A;
 	/** Dyed pieces with parts drawn as they are painted (feathers, bells, gilt: heraldry_PIECE_fixed). */
 	private static final Set<String> TRIMMED = Set.of("clerics_mantle", "archers_cap", "hunters_hat", "landsknecht_bonnet", "turban", "veiled_turban",
-		"jesters_hood", "surcoat", "torn_surcoat", "monks_robe", "kaftan", "jesters_motley", "ailettes", "brigandine_coat");
+		"jesters_hood", "surcoat", "torn_surcoat", "monks_robe", "kaftan", "jesters_motley", "ailettes");
 	/** Hats, worn bare-headed: not drawn under a helm (the hood, cowl, mantle, caps and coifs go on over or under one). */
 	private static final Set<String> HATS = Set.of("tight_hood", "headsmans_hood", "bag_hat", "archers_cap", "field_hat", "hunters_hat",
 		"landsknecht_bonnet", "fur_hat", "turban", "veiled_turban", "jesters_hood", "laurel_wreath");

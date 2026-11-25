@@ -1,7 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "jaymoskingdoms:item/brigandine_coat",
-    "layer1": "jaymoskingdoms:item/brigandine_coat_trim"
+    "layer0": "jaymoskingdoms:item/brigandine_coat"
   }
 }
