@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.core.BlockPos;
@@ -52,8 +53,8 @@ public final class Pilgrims {
 	// ================================================================================================================
 
 	static final String TAG = "jaymoskingdoms.pilgrim";
-	/** The old peoples' cities ({@code oldage/OldRuins}): structure id paths, each {@code <people>_ruins}. */
-	static final String[] PEOPLES = {"sunstep", "pillared", "mound", "court", "anvil", "deep", "grove", "truth"};
+	/** The old peoples' cities on the ground ({@code oldage/OldRuins}): structure id paths, each {@code <people>_ruins} (the Truth's house is in the Aether). */
+	static final String[] PEOPLES = {"sunstep", "pillared", "mound", "court", "anvil", "deep", "grove"};
 
 	/** The pilgrims about: who, and when they came. */
 	private static final Map<UUID, Long> ABOUT = new HashMap<>();
@@ -79,14 +80,26 @@ public final class Pilgrims {
 			ABOUT.clear();
 			MET.clear();
 		});
+		// (a pilgrim left in the world when its chunk unloaded, or across a restart: its day is over, so it walks on)
+		ServerEntityEvents.ENTITY_LOAD.register((entity, world) -> {
+			if (is(entity) && !ABOUT.containsKey(entity.getUUID())) {
+				ABOUT.put(entity.getUUID(), -LIFE);
+			}
+		});
 		UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
 			if (world.isClientSide() || hand != InteractionHand.MAIN_HAND || !(player instanceof ServerPlayer sp) || !is(entity)
 				|| !(entity instanceof Villager pilgrim) || !(world instanceof ServerLevel level)) {
 				return InteractionResult.PASS;
 			}
-			boolean begun = Tales.found(level, sp, TALE, pilgrim);
-			Speech.tell(level, pilgrim, sp, Component.translatable(begun ? "pilgrim.jaymoskingdoms.greet" : "pilgrim.jaymoskingdoms.walk_well"), Speech.WHITE);
-			return begun ? InteractionResult.SUCCESS : InteractionResult.PASS;
+			if (!Tales.found(level, sp, TALE, pilgrim)) {
+				Speech.tell(level, pilgrim, sp, Component.translatable("pilgrim.jaymoskingdoms.walk_well"), Speech.WHITE);
+				return InteractionResult.PASS;
+			}
+			// (the pilgrim tells it at once, so the telling is never left waiting on one who has walked on)
+			if (!(Tales.pending(sp, pilgrim) && Tales.talk(sp, pilgrim))) {
+				Speech.tell(level, pilgrim, sp, Component.translatable("pilgrim.jaymoskingdoms.greet"), Speech.WHITE);
+			}
+			return InteractionResult.SUCCESS;
 		});
 	}
 
@@ -100,13 +113,27 @@ public final class Pilgrims {
 		for (Iterator<Map.Entry<UUID, Long>> it = ABOUT.entrySet().iterator(); it.hasNext(); ) {
 			Map.Entry<UUID, Long> e = it.next();
 			Entity pilgrim = level.getEntity(e.getKey());
-			if (pilgrim == null || !pilgrim.isAlive()) {
+			if (pilgrim == null) {
+				// (its chunk is unloaded: it's dealt with when it loads again, ENTITY_LOAD above)
+				continue;
+			}
+			if (!pilgrim.isAlive()) {
 				it.remove();
-			} else if (now - e.getValue() > LIFE && level.getNearestPlayer(pilgrim, SPAWN_NEAR) == null) {
+			} else if (now - e.getValue() > LIFE && level.getNearestPlayer(pilgrim, SPAWN_NEAR) == null && !telling(level, pilgrim)) {
 				McaCompat.vanish(pilgrim);
 				it.remove();
 			}
 		}
+	}
+
+	/** Someone is still to hear {@code pilgrim} out (their run is at its first step, the telling): the pilgrim waits. */
+	private static boolean telling(ServerLevel level, Entity pilgrim) {
+		for (ServerPlayer player : level.players()) {
+			if (Tales.atStep(player, TALE, pilgrim.getUUID(), "telling")) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** By day, now and then, a pilgrim near a player out on the road (one at a time near anyone). */

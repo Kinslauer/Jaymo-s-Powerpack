@@ -259,7 +259,7 @@ public final class Commissions {
 		}
 		List<Commission> list = new ArrayList<>(of(server, f.id()));
 		String id = Designs.PREFIX + name;
-		if (!player.isCreative() && list.stream().filter(c -> c.by().equals(player.getUUID())).count() >= MAX_PER_PLAYER) {
+		if (!player.isCreative() && list.stream().filter(c -> !c.gift() && c.by().equals(player.getUUID())).count() >= MAX_PER_PLAYER) {
 			MasonTable.tell(player, Component.translatable("message.jaymoskingdoms.commission.yours_waiting", f.name()).withStyle(ChatFormatting.RED));
 			return false;
 		}

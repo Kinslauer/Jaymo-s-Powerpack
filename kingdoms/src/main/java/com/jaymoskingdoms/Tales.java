@@ -940,6 +940,13 @@ public final class Tales {
 		}
 	}
 
+	/** (Village mods patch 5) {@code player}'s run of {@code taleId} asked by {@code giver} is still at step {@code step}. */
+	static boolean atStep(ServerPlayer player, String taleId, UUID giver, String step) {
+		State s = stateOrNull(player);
+		String id = giver.toString();
+		return s != null && s.runs.stream().anyMatch(r -> r.tale.equals(taleId) && r.giver.equals(id) && r.step.equals(step));
+	}
+
 	/** (Village mods patch 5) {@code player} has a run of {@code taleId} going. */
 	static boolean running(ServerPlayer player, String taleId) {
 		State s = stateOrNull(player);

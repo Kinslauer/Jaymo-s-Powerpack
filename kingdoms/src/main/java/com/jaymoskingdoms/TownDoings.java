@@ -54,11 +54,8 @@ public final class TownDoings {
 				return InteractionResult.PASS;
 			}
 			if (level instanceof ServerLevel server && player instanceof ServerPlayer sp) {
-				Faction f = Bounties.courtAt(server, hit.getBlockPos());
-				if (f == null) {
-					f = Factions.around(server.getServer(), server, hit.getBlockPos(), Villages.VILLAGE_RADIUS);
-				}
-				open(sp, f);
+				// (the board's own town, not the realm whose court it answers to)
+				open(sp, Factions.around(server.getServer(), server, hit.getBlockPos(), Villages.VILLAGE_RADIUS));
 			}
 			return InteractionResult.SUCCESS;
 		});
