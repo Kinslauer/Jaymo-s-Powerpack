@@ -17248,3 +17248,20 @@ Not tested in a running game: site choice, ground levelling and building overlap
 - Classes: `TalkBusy`, `TalkFirst` (new), `McaTalkFirstMixin` (new), `McaDialogueBoxMixin`, `McaStrangerPageMixin`, `McaInteractScreenAccessor`, `McaDynamicScreenInvoker`; lang parts `talk-first.json`, `talk-busy.json`.
 - **Busy villagers snap when pestered.** Andy: "asking them multiple times will force them to address you with a line about why they are ignoring you, and you lose hearts". Ask someone busy 3 times within 30 seconds and they turn to you, say plainly why they're ignoring you (a line for each kind of busy: fighting, already talking, tending the hurt, seeing to the dead, holding a prisoner, after loot), give a "no" grunt, and you lose 3 hearts with them. The count then starts over. Clicks within 2 seconds of each other count as one ask (`TalkBusy.ASKS_TO_SNAP`, `ASK_WINDOW`, `SNAP_HEARTS`).
 - Built; not played.
+
+## 0.12.68 (2026-11-25): journal map page shows Xaero's minimap, World map button (#2135)
+
+- **Map page**: with Xaero's Minimap installed, the traveller's journal's map page shows Xaero's minimap in its map box
+  (your Xaero size, zoom, shape and waypoints, realm seats included) instead of our drawn map, with where you stand beside
+  it. Our map, with its zoom buttons and quest and settlement marks, is the fallback without the Minimap (or before its
+  session is up as you join).
+- **World map button**: with Xaero's World Map installed, a button on the map page opens Xaero's full map over the
+  journal; Escape or its map key goes back to the journal.
+- XaeroJournalMinimap and XaeroJournalMap (new, each loaded only when its Xaero mod is), JournalScreen, lang part
+  journal. Compiled against Xaero's World Map 1.47.2 (compileOnly), never required.
+- Built; not played.
+
+## 0.12.69 (2026-11-25): Riders no longer start with a spare saddle (#2136)
+
+- Rider: the class kit no longer hands you a saddle. Your starting horse already comes saddled, so the extra one was never needed.
+- Classes (starting kit). Not compile-checked in the cloud (one list entry removed); not played.
