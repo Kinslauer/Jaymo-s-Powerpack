@@ -230,6 +230,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		// where a thing came from, stolen marks, heirlooms (Provenance)
 		ProvenanceTooltips.register();
 		FamiliarClient.register();
+		// the hanging tree's crows, in the familiar raven's coat
+		EntityRenderers.register(com.jaymoskingdoms.Crow.TYPE, CrowRenderer::new);
 		CombatArtKey.register();
 		// (0.7.381) Weapon Forms: the belt strip, the chain counter, the belt screen
 		com.jaymoskingdoms.client.forms.FormsClient.register();
@@ -270,6 +272,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		ClothesColourClient.register();
 		MasonScreen.register();
 		PlanGhosts.register();
+		// a held plan's plot outlined, before it's laid and after
+		MasonPreview.register();
 		// 0.7.332: the victim's memory of the biter, and kin heard in each other
 		VictimClient.register();
 		KinshipClient.register();
