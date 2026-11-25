@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: Build Andy's 49 picks from the Symbiote 1.1.3 jar pick page
 branch: claude/project-thread-bh6g0g
 with: Claude (Reason Art thread "Pick Symbiote 1.1.3 ideas to adapt")
@@ -21,3 +21,4 @@ owns:
 
 ## Notes
 - Pick page: https://claude.ai/artifact/5odt4qNiVyJvYSxQo6apNr
+- 2026-11-25 09:29 No sign of work for 30 min: marked stalled (whoever ran it stopped).

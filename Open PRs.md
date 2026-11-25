@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-25 07:32
+updated: 2026-11-25 09:29
 ---
 # Open PRs
 
-3 open, as of 2026-11-25 07:32. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+4 open, as of 2026-11-25 09:29. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2153](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2153) Written starts: hand-built starts like an adventure map (the way-hut)
@@ -16,7 +16,12 @@ Andy merges only on "merge", one at a time.
 - **Checks:** ✅ 5 passed
 - **Agent:** [[mordhau-1-helms]]
 
-## [#2169](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2169) Symbiote 1.1.3 picks: attacks, saves and its mind
-- **Branch:** `claude/project-thread-bh6g0g` · **Updated:** 2026-11-25 (today)
+## [#2175](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2175) Fix crash swinging while locked on (null Better Combat trail particles)
+- **Branch:** `claude/project-thread-u4rt91` · **Updated:** 2026-11-25 (today)
 - **Checks:** ✅ 5 passed
+- **Agent:** no agent note
+
+## [#2176](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2176) Medallion board: other numpad binds stay quiet while it is up (Kingdoms)
+- **Branch:** `claude/project-thread-sq3gbk` · **Updated:** 2026-11-25 (today)
+- **Checks:** ⏳ 3 of 4 running
 - **Agent:** no agent note
