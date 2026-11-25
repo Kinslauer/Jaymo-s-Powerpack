@@ -4,13 +4,10 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 13:24). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 15:53). Don't edit. -->
 
 ## Waiting for a bot
 
-- [ ] [[Inbox/village-mods-7-ctov-tidal-towns|village-mods-7-ctov-tidal-towns]] · for 💻 Odysseus · open
-- [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · for 💻 Odysseus · open
-- [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
 - [ ] [[Inbox/bleed-out-coma|bleed-out-coma]] · for coordinator · open
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · for any · open
 - [ ] [[Inbox/structure-spawn-rate-wooden-hut|structure-spawn-rate-wooden-hut]] · for coordinator · open
@@ -54,12 +51,12 @@ kanban-plugin: board
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/mordhau-2-hoods-crests|mordhau-2-hoods-crests]]
-- [x] [[Inbox/Done/mordhau-1-helms|mordhau-1-helms]]
-- [x] [[Inbox/Done/wither-model|wither-model]]
 - [x] [[Inbox/Done/refmods-15-provenance-coins|refmods-15-provenance-coins]]
 - [x] [[Inbox/Done/refmods-14-sky-light-air|refmods-14-sky-light-air]]
 - [x] [[Inbox/Done/refmods-12-fishing|refmods-12-fishing]]
+- [x] [[Inbox/Done/mordhau-2-hoods-crests|mordhau-2-hoods-crests]]
+- [x] [[Inbox/Done/mordhau-1-helms|mordhau-1-helms]]
+- [x] [[Inbox/Done/wither-model|wither-model]]
 - [x] [[Inbox/Done/village-mods-6-small-structures|village-mods-6-small-structures]]
 - [x] [[Inbox/Done/village-mods-5-town-life-hats|village-mods-5-town-life-hats]]
 
