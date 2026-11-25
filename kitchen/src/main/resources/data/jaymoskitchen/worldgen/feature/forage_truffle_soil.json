@@ -8,9 +8,7 @@
         "predicate_type": "minecraft:block_match",
         "block": "minecraft:dirt"
       },
-      "state": {
-        "Name": "jaymoskitchen:truffle_soil"
-      }
+      "state": "jaymoskitchen:truffle_soil"
     }
   ]
 }
