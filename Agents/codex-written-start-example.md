@@ -2,7 +2,7 @@
 status: stalled
 task: Andy asked for an example of the attached hand-built starts idea.
 branch: codex/written-start-example
-pr:
+pr: 2177
 mods: kingdoms
 started: 2026-11-25
 owns:
@@ -12,6 +12,7 @@ owns:
   - kingdoms/src/main/resources/data/jaymoskingdoms/tales/the_last_lantern.json
   - docs/LastLantern.md
   - changes/kingdoms/codex-written-start-example.md
+  - E:/Jaymo Vault Live/Assets/last-lantern/
 ---
 # The Last Lantern example
 
