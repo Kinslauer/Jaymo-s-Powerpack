@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "W#W",
+    "W#W"
+  ],
+  "key": {
+    "W": "jaymoskingdoms:glowcap_planks",
+    "#": "minecraft:stick"
+  },
+  "result": {
+    "id": "jaymoskingdoms:glowcap_fence",
+    "count": 3
+  },
+  "group": "wooden_fence"
+}

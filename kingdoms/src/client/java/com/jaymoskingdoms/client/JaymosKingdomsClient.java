@@ -49,6 +49,8 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		EntityRenderers.register(JaymosKingdoms.FOLK, FolkRenderer::new);
 		// (Andy, 2026-11-06) what is beyond this player's tier, off JEI and the recipe book
 		TierHidingClient.register();
+		// sparkles in the glow-woods at night
+		GlowSparkles.register();
 		LocksClient.register();
 		BoardTermsClient.register();
 		// (ff-kit) Peterwolf's firefighter readout on our HUD layout, only while carrying the kit

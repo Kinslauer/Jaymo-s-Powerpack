@@ -5597,5 +5597,13 @@
 		"sounds": [
 			"jaymoskingdoms:wither/stun"
 		]
+	},
+	"block.bouncecap.bounce": {
+		"sounds": [
+			"jaymoskingdoms:block/bouncecap/bounce1",
+			"jaymoskingdoms:block/bouncecap/bounce2",
+			"jaymoskingdoms:block/bouncecap/bounce3"
+		],
+		"subtitle": "subtitles.jaymoskingdoms.block.bouncecap.bounce"
 	}
 }

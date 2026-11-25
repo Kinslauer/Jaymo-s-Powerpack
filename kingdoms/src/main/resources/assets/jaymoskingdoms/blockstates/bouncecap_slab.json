@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "jaymoskingdoms:block/bouncecap_slab"
+    },
+    "type=double": {
+      "model": "jaymoskingdoms:block/bouncecap_planks"
+    },
+    "type=top": {
+      "model": "jaymoskingdoms:block/bouncecap_slab_top"
+    }
+  }
+}

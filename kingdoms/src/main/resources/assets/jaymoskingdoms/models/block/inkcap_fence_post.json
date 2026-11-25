@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/fence_post",
+  "textures": {
+    "texture": "jaymoskingdoms:block/inkcap_planks"
+  }
+}

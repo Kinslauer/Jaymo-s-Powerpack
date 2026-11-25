@@ -491,6 +491,9 @@ public final class JaymosKingdoms implements ModInitializer {
 		Spoils.register();
 		HavenGates.register();
 		HavenWares.register();
+		// the glow-woods: giant fungi, fungal woods and fairy rings (ported from Spore & Stem), and the Sylvan havens' share
+		com.jaymoskingdoms.glowwood.GlowWoods.register();
+		GlowWoodHavens.register();
 		// (0.7.490) Havens expand: their works, land and sworn order
 		HavenGrowth.register();
 		// (0.7.490) Hordes patch 3: bent ingots, the camps' jobs, food and hoards, their market

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "#jaymoskingdoms:inkcap_stems"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:inkcap_planks",
+    "count": 4
+  },
+  "group": "planks"
+}

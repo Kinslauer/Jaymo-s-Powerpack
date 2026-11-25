@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "#W#",
+    "#W#"
+  ],
+  "key": {
+    "W": "jaymoskingdoms:bouncecap_planks",
+    "#": "minecraft:stick"
+  },
+  "result": {
+    "id": "jaymoskingdoms:bouncecap_fence_gate",
+    "count": 1
+  },
+  "group": "wooden_fence_gate"
+}

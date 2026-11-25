@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "jaymoskingdoms:block/stripped_inkcap_stem",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "jaymoskingdoms:block/stripped_inkcap_stem"
+    },
+    "axis=z": {
+      "model": "jaymoskingdoms:block/stripped_inkcap_stem",
+      "x": 90
+    }
+  }
+}
