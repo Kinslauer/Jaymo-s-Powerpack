@@ -1,0 +1,9 @@
+# symbiote takeovers fight with their whole kit
+- **Takeovers fight properly**: Andy: "the symbiotes dont seem to use all their powerful attacks when taking over... they just spam the low damage punch" and "they should rotate through their whole entire move suite, countering as their health lowers and ultimately shrouding to run away and return control when safe, or if it encounters fire or explosions".
+- **Tendrils**: a takeover's tendrils (always out) now tear into its prey in the plain suit too; before, their frenzy only ran in Living Armor or the big suit, so 9 in 10 takeovers had none.
+- **Move rotation**: on top of the tendrils it works through a shuffled deck of its moves (`WebSymbiote.TAKEOVER_DECK`): the charged weapon arm twice, a seize twice (any of the symbiote's nine counter moves, plus the big suit's catch and slam), a spat glob (with a maw: Living Armor masked or the big suit), a Spike Burst and a tendril snatch and hurl. A move that can't be used just then is skipped. The punch is only a fallback when it has nothing else (for example a hand full).
+- The weapon arm used to fail every other swing because it was still cooling down, and a punch filled in each time; it no longer does.
+- **Hosts who aren't web slingers** now get the weapon arm and the counter moves in a takeover too (`WebMorph`/`WebCounter` tick for them in `WebSymbioteInfection`); before they could only punch.
+- **Counters**: hit in a takeover's fight, it counters the attacker with one of its counter moves, 15% of the time at full health rising to 90% near death (`TAKEOVER_COUNTER_*`).
+- **Shroud and run**: at 20% health (`TAKEOVER_RUN_HEALTH`), or with fire, lava or something about to blow up close by (or when fire or a blast hurts you), it goes into the Shroud, leaps away and runs. It gives you back control once nothing's after you within 24 blocks and the fire or blast is behind you.
+- Built (compileJava + compileClientJava); not played.
