@@ -133,7 +133,9 @@ public final class Wrestle {
 			&& !Carry.isCarried(player) && !Carry.isCarrying(player) && !Downed.isDowned(player)
 			&& mob.isAlive() && !Downed.isDowned(mob) && !Carry.isCarried(mob) && !mob.isPassenger() && !mob.isVehicle() && !mob.isSleeping()
 			&& !stunned(mob) && !mob.isNoAi() && !mob.getType().builtInRegistryHolder().is(BodyPlan.BOSSES) && !Carry.isVillager(mob)
-			&& !(mob instanceof TamableAnimal pet && pet.isTame()) && player.distanceTo(mob) <= REACH;
+			&& !(mob instanceof TamableAnimal pet && pet.isTame()) && player.distanceTo(mob) <= REACH
+			// monsters and beasts only: other folk keep their own sneak + use (talk, trade, tend)
+			&& (mob instanceof net.minecraft.world.entity.monster.Enemy || mob instanceof net.minecraft.world.entity.animal.Animal);
 	}
 
 	private static void tick(MinecraftServer server) {

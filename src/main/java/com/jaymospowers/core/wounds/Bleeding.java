@@ -329,9 +329,14 @@ public final class Bleeding {
 		TRACKED.add(entity);
 	}
 
+	/** How recent (ticks) a hurt must be for its giver to own a cut no blow opened. */
+	static final int CREDIT_RECENT = 20;
+
 	/** Notes who opened the cut on {@code part}: the blow opening it, else whoever last hurt the body. */
 	private static void creditOpener(LivingEntity entity, BodyPart part) {
-		Entity by = opening != null ? opening : entity.getLastHurtByMob();
+		// whoever last hurt it counts only if that was a moment ago (a limb rotting off later isn't their cut)
+		Entity by = opening != null ? opening
+			: entity.tickCount - entity.getLastHurtByMobTimestamp() <= CREDIT_RECENT ? entity.getLastHurtByMob() : null;
 		if (by == null || by == entity) {
 			OPENED_BY.computeIfPresent(entity, (e, ids) -> {
 				ids[part.ordinal()] = null;

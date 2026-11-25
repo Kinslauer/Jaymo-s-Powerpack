@@ -3528,14 +3528,18 @@ public final class PowersCompat {
 			Class.forName("com.jaymospowers.core.wounds.Bleeding").getField("closing").set(null, closing);
 			java.util.function.ToDoubleFunction<net.minecraft.world.entity.player.Player> fletch = RogueExtras::fletchShare;
 			Class.forName("com.jaymospowers.tinkering.fletching.Fletching").getField("more").set(null, fletch);
-			// a Brute wrestles mobs down (and throws them) from the start, whatever their brawn (Wrestle)
-			java.util.function.Predicate<net.minecraft.world.entity.player.Player> wrestler = WarExtras::wrestles;
-			Class.forName("com.jaymospowers.core.Wrestle").getField("granted").set(null, wrestler);
 			// (last: a Powers without it keeps the ones above) a blood Sorcerer's Hide turns half their own bleeding
 			java.util.function.ToDoubleFunction<net.minecraft.world.entity.LivingEntity> bleed = ArcaneExtras::bleedHarm;
 			Class.forName("com.jaymospowers.core.wounds.Bleeding").getField("harm").set(null, bleed);
 		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
 			JaymosKingdoms.LOGGER.debug("Couldn't hand Jaymo's Powers the class trees' extras (older Powers?)", e);
+		}
+		try {
+			// a Brute wrestles mobs down (and throws them) from the start, whatever their brawn (Wrestle)
+			java.util.function.Predicate<net.minecraft.world.entity.player.Player> wrestler = WarExtras::wrestles;
+			Class.forName("com.jaymospowers.core.Wrestle").getField("granted").set(null, wrestler);
+		} catch (ReflectiveOperationException | LinkageError | RuntimeException e) {
+			JaymosKingdoms.LOGGER.debug("Couldn't hand Jaymo's Powers the Brute's wrestling (older Powers?)", e);
 		}
 	}
 
