@@ -170,6 +170,21 @@ final class GravityMetal {
 		ItemStack held = target.getItemInHand(hand);
 		target.stopUsingItem();
 		target.setItemInHand(hand, ItemStack.EMPTY);
+		if (maxed(player)) {
+			// (Andy, 2026-11-25: "a max mastery gravity user should be able to pull it in hand everytime") straight into your
+			// empty hand, or your pack, or at your feet if both are full
+			Vec3 at = target.getEyePosition().subtract(0.0, 0.4, 0.0);
+			if (player.getMainHandItem().isEmpty()) {
+				player.setItemInHand(InteractionHand.MAIN_HAND, held);
+			} else if (!player.getInventory().add(held)) {
+				player.drop(held, false, net.minecraft.util.Prediction.SERVER_ONLY);
+			}
+			PickKit.spend(TABLE, player, TEAR, TEAR_COOLDOWN);
+			level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.CHAIN_BREAK, SoundSource.PLAYERS, 1.0F, 1.3F);
+			level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.8F, 0.8F);
+			level.sendParticles(MagicFx.VOID, at.x, at.y, at.z, 16, 0.2, 0.2, 0.2, 0.08);
+			return true;
+		}
 		// a mob's flies to your feet; a player's is flung away from them (Andy, 2026-11-25), never into your hands
 		Vec3 from = target.getEyePosition().subtract(0.0, 0.4, 0.0);
 		Vec3 away = target.position().subtract(player.position()).multiply(1.0, 0.0, 1.0);
@@ -191,6 +206,12 @@ final class GravityMetal {
 		level.playSound(null, target.getX(), target.getY(), target.getZ(), SoundEvents.SHULKER_SHOOT, SoundSource.PLAYERS, 0.7F, 1.4F);
 		level.sendParticles(MagicFx.VOID, from.x, from.y, from.z, 16, 0.2, 0.2, 0.2, 0.08);
 		return true;
+	}
+
+	/** Gravity at its utmost: every ability learned and the last Mastery rank. */
+	private static boolean maxed(ServerPlayer player) {
+		return com.jaymospowers.core.Mastery.unlocked(player) >= com.jaymospowers.core.Mastery.ALL
+			&& com.jaymospowers.core.Mastery.rank(player) >= com.jaymospowers.core.Training.RANKS;
 	}
 
 	/** The hand {@code holder} holds metal in (the main hand first), or null. */
