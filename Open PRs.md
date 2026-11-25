@@ -1,9 +1,9 @@
 ---
-updated: 2026-11-25 10:17
+updated: 2026-11-25 12:28
 ---
 # Open PRs
 
-4 open, as of 2026-11-25 10:17. Made by `python3 tools/vault_prs.py`; run it again to refresh.
+5 open, as of 2026-11-25 12:28. Made by `python3 tools/vault_prs.py`; run it again to refresh.
 Andy merges only on "merge", one at a time.
 
 ## [#2153](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2153) Written starts: hand-built starts like an adventure map (the way-hut)
@@ -25,3 +25,8 @@ Andy merges only on "merge", one at a time.
 - **Branch:** `claude/mordhau-2-hoods-crests` · **Updated:** 2026-11-25 (today)
 - **Checks:** ✅ 5 passed
 - **Agent:** [[mordhau-2-hoods-crests]]
+
+## [#2179](https://github.com/Kinslauer/Jaymo-s-Powerpack/pull/2179) Fae woods: glow-woods round Sylvan havens, forager's kitchen and bees (Spore & Stem)
+- **Branch:** `claude/project-thread-yrzr4z` · **Updated:** 2026-11-25 (today)
+- **Checks:** ✅ 5 passed
+- **Agent:** no agent note
