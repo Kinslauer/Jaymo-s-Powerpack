@@ -73,8 +73,11 @@ public final class SmallLife {
 	static final int AROUND = 44, NEAR_MIN = 5, NEAR_MAX = 18;
 	/** The most of each near a player. */
 	static final int CRICKET_CAP = 5, SNAIL_CAP = 3, ROACH_CAP = 3, MOUSE_CAP = 2, MOLE_CAP = 1;
-	/** The most flies and maggots at one body. */
-	static final int FLIES_AT_BODY = 3, MAGGOTS_AT_BODY = 3;
+	/**
+	 * The most flies and maggots at one body, and near a player all told (Andy, 2026-11-25: "them and maggots should
+	 * spawn in less number").
+	 */
+	static final int FLIES_AT_BODY = 1, MAGGOTS_AT_BODY = 1, FLIES_NEAR = 4, MAGGOTS_NEAR = 4;
 	/** How long a body lies before flies come, and maggots (ticks since death). */
 	static final long FLY_AFTER = 3600L, MAGGOT_AFTER = 12000L;
 	/** How long after rain the snails are out (ticks); the night's hours (day time). */
@@ -199,7 +202,18 @@ public final class SmallLife {
 		if (!KitchenCompat.corpsesExist()) {
 			return;
 		}
+		int fliesNear = 0, maggotsNear = 0;
+		for (Critter c : level.getEntitiesOfClass(Critter.class, box)) {
+			if (c.kind == Kind.FLY) {
+				fliesNear++;
+			} else if (c.kind == Kind.MAGGOT) {
+				maggotsNear++;
+			}
+		}
 		for (Entity body : level.getEntities((Entity) null, box, KitchenCompat::isCorpse)) {
+			if (fliesNear >= FLIES_NEAR && maggotsNear >= MAGGOTS_NEAR) {
+				return;
+			}
 			if (Bearers.claimed(body.getUUID()) || BodyKeeping.isPreserved(body) || body.isPassenger()) {
 				continue;
 			}
@@ -218,11 +232,11 @@ public final class SmallLife {
 					maggots++;
 				}
 			}
-			if (flies < FLIES_AT_BODY) {
-				put(level, MocWild.FLY, at.above(), at);
+			if (flies < FLIES_AT_BODY && fliesNear < FLIES_NEAR && put(level, MocWild.FLY, at.above(), at) != null) {
+				fliesNear++;
 			}
-			if (since >= MAGGOT_AFTER && maggots < MAGGOTS_AT_BODY) {
-				put(level, MocWild.MAGGOT, at, at);
+			if (since >= MAGGOT_AFTER && maggots < MAGGOTS_AT_BODY && maggotsNear < MAGGOTS_NEAR && put(level, MocWild.MAGGOT, at, at) != null) {
+				maggotsNear++;
 			}
 		}
 	}
