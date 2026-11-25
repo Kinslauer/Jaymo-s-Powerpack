@@ -35,12 +35,15 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.EntityType;
@@ -49,6 +52,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.animal.bee.Bee;
+import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -161,6 +165,16 @@ public final class FallingTree extends Entity {
 	 * off anyway). A mob that walks into a log no higher than this (blocks over its feet) hops it.
 	 */
 	static final double HOPS = 1.2;
+	/**
+	 * Andy: only strong characters and giants shove a fallen tree. Lying flat, it slides and swings (about its middle)
+	 * under anyone with this much brawn ({@link #brawn}: Strength II, twice a man's size, Might and the like) walking
+	 * into one of its logs. Each point of brawn moves {@link #LOGS_PER_BRAWN} logs at {@link #SHOVE_SPEED} (blocks a
+	 * tick at the log pushed); a heavier tree goes slower, and one moving slower than {@link #SHOVE_SLOWEST} doesn't move.
+	 */
+	static final int SHOVE_BRAWN = 2, LOGS_PER_BRAWN = 4;
+	static final double SHOVE_SPEED = 0.08, SHOVE_SLOWEST = 0.006;
+	/** A person's height (blocks): each half again as tall as this is a point of brawn, as for hauling. */
+	static final float MAN_HEIGHT = 1.8F, HEIGHT_PER_BRAWN = 0.5F;
 
 	/** One block of the tree: its state, and where it stood relative to the cut. */
 	public record Piece(int state, int x, int y, int z) {
@@ -479,6 +493,7 @@ public final class FallingTree extends Entity {
 				}
 				return;
 			}
+			this.shove(level, pieces);
 			this.rest(level, pieces);
 			return;
 		}
@@ -776,6 +791,155 @@ public final class FallingTree extends Entity {
 				broken++;
 			}
 		}
+	}
+
+	/**
+	 * Strong characters and giants walking into one of its logs shove it: it slides the way they push and swings about
+	 * its middle (pushed at one end, that end goes most), as long as its logs don't run into anything solid. Pushed off
+	 * what holds it up, it falls on or drops at its next look ({@link #rest}).
+	 */
+	private void shove(ServerLevel level, List<Piece> pieces) {
+		if (this.lean() < LYING || this.propped) {
+			return;
+		}
+		Quaternionf turn = turn(this.lean(), this.heading());
+		List<Vec3> logs = new ArrayList<>();
+		Vec3 middle = Vec3.ZERO;
+		BlockState wood = null;
+		for (Piece p : pieces) {
+			if (p.blockState().is(BlockTags.LOGS)) {
+				Vec3 at = this.where(p, turn);
+				logs.add(at);
+				middle = middle.add(at);
+				wood = p.blockState();
+			}
+		}
+		if (logs.isEmpty()) {
+			return;
+		}
+		int n = logs.size();
+		middle = middle.scale(1.0 / n);
+		double inertia = 0.0;
+		for (Vec3 at : logs) {
+			inertia += (at.x - middle.x) * (at.x - middle.x) + (at.z - middle.z) * (at.z - middle.z);
+		}
+		inertia = Math.max(inertia, 1.0);
+		double vx = 0.0, vz = 0.0, spin = 0.0;
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(0.5),
+			e -> e.isAlive() && !e.isSpectator() && !e.noPhysics && !e.isPassenger())) {
+			int brawn = brawn(e);
+			if (brawn < SHOVE_BRAWN) {
+				continue;
+			}
+			Vec3 way = pushing(e);
+			if (way == null) {
+				continue;
+			}
+			// the log it's up against, ahead of it
+			AABB reach = e.getBoundingBox().inflate(0.15, 0.0, 0.15);
+			Vec3 touched = null;
+			double nearest = Double.MAX_VALUE;
+			for (Vec3 at : logs) {
+				double dx = at.x - e.getX(), dz = at.z - e.getZ();
+				if (dx * way.x + dz * way.z <= 0.0 || !new AABB(at, at).inflate(0.5).intersects(reach)) {
+					continue;
+				}
+				double d = dx * dx + dz * dz;
+				if (d < nearest) {
+					nearest = d;
+					touched = at;
+				}
+			}
+			if (touched == null) {
+				continue;
+			}
+			double speed = SHOVE_SPEED * Math.min(1.0, (double)brawn * LOGS_PER_BRAWN / n);
+			if (speed < SHOVE_SLOWEST) {
+				continue;
+			}
+			// a push at that log: it moves there at that speed, shared between sliding and swinging as a plank would
+			double rx = touched.x - middle.x, rz = touched.z - middle.z;
+			double arm = rx * way.z - rz * way.x;
+			double impulse = speed / (1.0 / n + arm * arm / inertia);
+			vx += way.x * impulse / n;
+			vz += way.z * impulse / n;
+			spin += arm * impulse / inertia;
+		}
+		double slide = Math.sqrt(vx * vx + vz * vz);
+		if (slide > SHOVE_SPEED) {
+			vx *= SHOVE_SPEED / slide;
+			vz *= SHOVE_SPEED / slide;
+		}
+		spin = Mth.clamp(spin, -0.03, 0.03);
+		if (slide < 1.0E-4 && Math.abs(spin) < 1.0E-4) {
+			return;
+		}
+		// turned about its middle, and slid: where its foot goes
+		double fx = this.getX() - middle.x, fz = this.getZ() - middle.z;
+		double cos = Math.cos(spin), sin = Math.sin(spin);
+		Vec3 from = this.position();
+		float heading = this.heading() + (float)spin;
+		// (logs already lying sunk in something may stay so: it only mayn't be pushed further into anything solid)
+		int sunk = this.sunk(level, pieces, this.lean(), this.heading());
+		this.setPos(middle.x + fx * cos - fz * sin + vx, this.getY(), middle.z + fx * sin + fz * cos + vz);
+		if (this.sunk(level, pieces, this.lean(), heading) > sunk) {
+			this.setPos(from);
+			return;
+		}
+		this.setAttached(HEADING, heading);
+		if (this.tickCount % 6 == 0) {
+			level.playSound(null, middle.x, middle.y, middle.z, SoundEvents.WOOD_STEP, SoundSource.BLOCKS, 0.9F, 0.5F);
+			level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, wood), middle.x, middle.y - 0.4, middle.z, 4, 1.0, 0.05, 1.0, 0.02);
+		}
+	}
+
+	/** How many of its logs, leaning {@code lean} toward {@code heading}, are in something solid. */
+	private int sunk(ServerLevel level, List<Piece> pieces, float lean, float heading) {
+		Quaternionf turn = turn(lean, heading);
+		int sunk = 0;
+		for (Piece p : pieces) {
+			if (!p.blockState().is(BlockTags.LOGS)) {
+				continue;
+			}
+			BlockPos at = this.cell(this.where(p, turn));
+			BlockState there = level.getBlockState(at);
+			if (!there.isAir() && !there.canBeReplaced() && !(there.getBlock() instanceof LeavesBlock) && there.isCollisionShapeFullBlock(level, at)) {
+				sunk++;
+			}
+		}
+		return sunk;
+	}
+
+	/** How strong {@code e} is: Kitchen's hauling brawn for a player; for anything else its Strength and its size. */
+	static int brawn(LivingEntity e) {
+		if (e instanceof Player player) {
+			int brawn = KitchenCompat.brawn(player);
+			if (brawn >= 0) {
+				return brawn;
+			}
+		}
+		int brawn = Math.max(0, (int)((e.getBbHeight() / MAN_HEIGHT - 1.0F) / HEIGHT_PER_BRAWN));
+		MobEffectInstance strength = e.getEffect(MobEffects.STRENGTH);
+		return strength == null ? brawn : brawn + strength.getAmplifier() + 1;
+	}
+
+	/** The way (level, of length 1) {@code e} is trying to go: a player's keys as they face, a mob's walk; null standing. */
+	private static @Nullable Vec3 pushing(LivingEntity e) {
+		double x, z;
+		if (e instanceof ServerPlayer player) {
+			Input in = player.getLastClientInput();
+			float f = (in.forward() ? 1.0F : 0.0F) - (in.backward() ? 1.0F : 0.0F), side = (in.left() ? 1.0F : 0.0F) - (in.right() ? 1.0F : 0.0F);
+			float yaw = player.getYRot() * Mth.DEG_TO_RAD;
+			x = side * Mth.cos(yaw) - f * Mth.sin(yaw);
+			z = f * Mth.cos(yaw) + side * Mth.sin(yaw);
+		} else if (e instanceof Mob mob && mob.getMoveControl().hasWanted()) {
+			x = mob.getMoveControl().getWantedX() - mob.getX();
+			z = mob.getMoveControl().getWantedZ() - mob.getZ();
+		} else {
+			return null;
+		}
+		double d = Math.sqrt(x * x + z * z);
+		return d < 1.0E-3 ? null : new Vec3(x / d, 0.0, z / d);
 	}
 
 	/** Whether its logs are solid now (it lies still). */

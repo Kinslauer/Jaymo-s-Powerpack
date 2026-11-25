@@ -163,6 +163,34 @@ public final class KitchenCompat {
 	/** (0.7.353) Might points to a point of hauling brawn. */
 	static final int MIGHT_PER_BRAWN = 3;
 
+	private static @Nullable Method brawn;
+	private static boolean brawnLooked;
+
+	/**
+	 * Kitchen's {@code Hauling.brawn(Player)}: how strong {@code player} is (the Strength effect, size, Might, Packhorse,
+	 * Z Fighters and whatever else adds to it), or -1 without Kitchen.
+	 */
+	public static int brawn(net.minecraft.world.entity.player.Player player) {
+		if (!brawnLooked) {
+			brawnLooked = true;
+			if (FabricLoader.getInstance().isModLoaded(MOD)) {
+				try {
+					brawn = Class.forName("com.jaymoskitchen.corpse.Hauling").getMethod("brawn", net.minecraft.world.entity.player.Player.class);
+				} catch (ReflectiveOperationException | LinkageError e) {
+					JaymosKingdoms.LOGGER.warn("Jaymo's Kitchen is too old for strong characters to shove fallen trees: {}", e.toString());
+				}
+			}
+		}
+		if (brawn == null) {
+			return -1;
+		}
+		try {
+			return (int)brawn.invoke(null, player);
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			return -1;
+		}
+	}
+
 	/**
 	 * (0.7.123) Kitchen's seasons ({@code com.jaymoskitchen.season.Seasons}): "spring", "summer", "autumn" or "winter", or
 	 * null without Kitchen 0.5.6.
