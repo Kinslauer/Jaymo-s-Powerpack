@@ -147,11 +147,16 @@ public final class BloodSettings {
 		setHitReactionStrength(preset);
 	}
 
-	/**
-	 * Where a preset sets how hard hits make bodies react (flinch, shove). Nothing is set yet: the motion settings
-	 * (another track's) will take {@code preset} here (Light gentle, Cinematic normal, Brutal strong).
-	 */
+	/** How hard a preset makes hits move bodies (flinch, shove), as {@link com.jaymospowers.client.MotionSettings}' scale. */
+	static final float LIGHT_REACTIONS = 0.6F, CINEMATIC_REACTIONS = 1.0F, BRUTAL_REACTIONS = 1.4F;
+
+	/** Sets how hard hits make bodies react for {@code preset}: Light gentle, Cinematic normal, Brutal strong. */
 	public static void setHitReactionStrength(Preset preset) {
+		com.jaymospowers.client.MotionSettings.setReactionScale(switch (preset) {
+			case LIGHT -> LIGHT_REACTIONS;
+			case CINEMATIC -> CINEMATIC_REACTIONS;
+			case BRUTAL -> BRUTAL_REACTIONS;
+		});
 	}
 
 	private static void save() {
