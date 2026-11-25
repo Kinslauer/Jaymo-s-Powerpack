@@ -1,5 +1,5 @@
 ---
-status: running
+status: in-review
 task: mordhau-2-hoods-crests
 branch: claude/mordhau-2-hoods-crests
 with: claude (PC worker, Opus 5.5)
