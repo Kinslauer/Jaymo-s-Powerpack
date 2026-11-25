@@ -3,7 +3,7 @@ status: stalled
 task: village-mods-7-ctov-tidal-towns, village-mods-8-swamp-goblins, village-mods-9-own-company
 branch: claude/project-thread-2p25nc
 with: 
-pr: 
+pr: 2183
 mods: kingdoms, powers
 versions: 
 started: 2026-11-25
