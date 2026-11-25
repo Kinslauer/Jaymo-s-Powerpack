@@ -245,6 +245,9 @@ public final class WebSymbioteBond {
 		}
 		if (WebSymbiote.driving(player) || WebSymbiote.roaring(player) || WebSymbiote.bulked(player)) {
 			// it has the wheel or the whole body: no fight to start, but without the Web nothing comes off for free either
+			if (held) {
+				WebSymbiote.whisper(player, "fight." + (1 + player.getRandom().nextInt(FIGHT_LINES)));
+			}
 			return held;
 		}
 		if (!held && (bond >= FIGHT_BOND || !mask && fought >= FIGHTS)) {

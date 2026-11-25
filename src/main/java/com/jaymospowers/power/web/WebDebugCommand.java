@@ -8,7 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * Test commands (gamemasters): {@code /powerdebug web symbiote bond|reject|feed}, {@code /powerdebug web symbiote dormant <ticks>}, {@code /powerdebug web symbiote level <0-100>} (the bond's strength), {@code /powerdebug web symbiote trust <0-100>} (its trust, WebSymbioteMind),{@code /powerdebug web swung <blocks>}
+ * Test commands (gamemasters): {@code /powerdebug web symbiote bond|reject|feed}, {@code /powerdebug web symbiote dormant <ticks>}, {@code /powerdebug web symbiote level <0-100>} (the bond's strength), {@code /powerdebug web symbiote trust <0-100>} (its trust, WebSymbioteMind), {@code /powerdebug web swung <blocks>}
  * and {@code /powerdebug web crater} (a crater, goo and all, right where you stand).
  * Strains: {@code /powerdebug web symbiote strain <0-2>} (black, white, red), {@code /powerdebug web symbiote blob <0-2>}
  * (a roaming one of that strain at your feet) and {@code /powerdebug web crater red}.

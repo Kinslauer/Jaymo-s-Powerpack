@@ -458,7 +458,7 @@ final class WebSymbioteScreen extends Screen {
 				return Component.translatable("gui.jaymospowers.web_symbiote.suit_held");
 			}
 			if (form >= top) {
-				int next = top ==WebSymbiote.FORM_SUIT ? WebSymbiote.FORM_ARMOR : top == WebSymbiote.FORM_ARMOR ? WebSymbiote.FORM_BULK : -1;
+				int next = top == WebSymbiote.FORM_SUIT ? WebSymbiote.FORM_ARMOR : top == WebSymbiote.FORM_ARMOR ? WebSymbiote.FORM_BULK : -1;
 				return next < 0 ? Component.translatable("gui.jaymospowers.web_symbiote.suit_top", form(form - 1))
 					: Component.translatable("gui.jaymospowers.web_symbiote.suit_top_bond", form(form - 1), form(next),
 						next == WebSymbiote.FORM_BULK ? WebSymbiote.bulkBond(player) : WebSymbiote.unlockBond(player, WebSymbiote.ARMOR));
@@ -468,7 +468,8 @@ final class WebSymbioteScreen extends Screen {
 				return Component.translatable("gui.jaymospowers.web_symbiote.cooling", String.format(Locale.ROOT, "%.1f", left / 20.0));
 			}
 			if (WebSymbiote.clings(player) && form == WebSymbiote.FORM_SUIT) {
-				return Component.translatable("gui.jaymospowers.web_symbiote.suit_pick", form(form + 1));
+				// (taking the suit off is a fight, so the tile says so)
+				return Component.translatable("gui.jaymospowers.web_symbiote.suit_pick_held", form(form + 1));
 			}
 			return Component.translatable("gui.jaymospowers.web_symbiote.suit_climb", form(form + 1), form(form - 1));
 		}

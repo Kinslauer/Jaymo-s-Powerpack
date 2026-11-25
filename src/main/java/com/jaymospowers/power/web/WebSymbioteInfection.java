@@ -3,9 +3,7 @@ package com.jaymospowers.power.web;
 import com.jaymospowers.core.Powers;
 import com.jaymospowers.core.wounds.Downed;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -71,8 +69,6 @@ public final class WebSymbioteInfection {
 	public static final int FIGHT_LINES = 3, BIND_LINES = 3;
 	/** Hosts it has warned this hunger (not saved: a reload warns again). */
 	private static final Set<UUID> WARNED = new HashSet<>();
-	/** Host to the web slinger it is fighting; not saved. */
-	private static final Map<UUID, UUID> FIGHTS = new HashMap<>();
 
 	private WebSymbioteInfection() {
 	}
@@ -114,7 +110,7 @@ public final class WebSymbioteInfection {
 		WebSymbioteState state = WebSymbiote.state(player);
 		if (!state.bonded() || !player.isAlive() || player.isSpectator()) {
 			WARNED.remove(player.getUUID());
-			FIGHTS.remove(player.getUUID());
+			WebSymbiote.endSlingerFight(player);
 			return;
 		}
 		boolean acclimating = WebSymbioteBond.dormant(player);
@@ -128,7 +124,6 @@ public final class WebSymbioteInfection {
 		}
 		if (!acclimating && state.satiety() < LEAVE_HUNGRY_BELOW) {
 			WARNED.remove(player.getUUID());
-			FIGHTS.remove(player.getUUID());
 			WebSymbiote.endSlingerFight(player);
 			WebSymbiote.leave(player, "infection.hungry." + (1 + player.getRandom().nextInt(LEAVE_LINES)));
 			return;
@@ -139,9 +134,9 @@ public final class WebSymbioteInfection {
 			// a chance to feed it before it goes
 			WebSymbiote.whisper(player, "infection.warn." + (1 + player.getRandom().nextInt(WARN_LINES)));
 		}
-		UUID id = player.getUUID();
-		if (FIGHTS.containsKey(id)) {
-			tickFight(player, id);
+		UUID foe = WebSymbiote.slingerFoe(player);
+		if (foe != null) {
+			tickFight(player, foe);
 			return;
 		}
 		if (player.tickCount % SENSE_EVERY == 0) {
@@ -152,10 +147,13 @@ public final class WebSymbioteInfection {
 					WebSymbiote.leave(player, "infection.sense." + (1 + player.getRandom().nextInt(LEAVE_LINES))).pursue(slinger);
 				} else if (closeToLosing(player) || Downed.isDowned(slinger)) {
 					// deliberate: a host already close to losing, or a slinger already downed, leaves nothing to fight for
-					bind(player, slinger);
-				} else if (WebSymbiote.fightSlinger(player, slinger)) {
+					bind(player, slinger, !Downed.isDowned(slinger));
+				} else if (!player.level().isPvpAllowed() || player.isPassenger()) {
+					// a fight that can't land (PvP off, or the host riding) is no fight: it leaves and pursues
+					WebSymbiote.leave(player, "infection.sense." + (1 + player.getRandom().nextInt(LEAVE_LINES))).pursue(slinger);
+				} else {
 					// (Andy, 2026-11-25) it fights the slinger first, driving its host at them
-					FIGHTS.put(id, slinger.getUUID());
+					WebSymbiote.fightSlinger(player, slinger);
 				}
 			}
 		}
@@ -167,8 +165,9 @@ public final class WebSymbioteInfection {
 	}
 
 	/** It pours out of its host and goes into the slinger (leaping straight in if they're near, else making for them). */
-	private static void bind(ServerPlayer player, ServerPlayer slinger) {
-		WebSymbioteBlob blob = WebSymbiote.leave(player, "infection.bind." + (1 + player.getRandom().nextInt(BIND_LINES)));
+	private static void bind(ServerPlayer player, ServerPlayer slinger, boolean hostLosing) {
+		// (lines 1 and 2 are the host losing, the last is the slinger fallen)
+		WebSymbioteBlob blob = WebSymbiote.leave(player, "infection.bind." + (hostLosing ? 1 + player.getRandom().nextInt(BIND_LINES - 1) : BIND_LINES));
 		if (slinger.level() != player.level() || slinger.distanceTo(player) > BIND_REACH || !blob.leapInto(slinger)) {
 			blob.pursue(slinger);
 		}
@@ -182,19 +181,17 @@ public final class WebSymbioteInfection {
 	 * has, so it never seizes its host again and again. Over because the slinger is gone (dead, left, another world),
 	 * nobody is left to pursue and {@link #slinger} no longer finds them.
 	 */
-	private static void tickFight(ServerPlayer player, UUID id) {
-		ServerPlayer slinger = player.level().getServer().getPlayerList().getPlayer(FIGHTS.get(id));
+	private static void tickFight(ServerPlayer player, UUID foe) {
+		ServerPlayer slinger = player.level().getServer().getPlayerList().getPlayer(foe);
 		boolean about = slinger != null && slinger.isAlive() && !slinger.isSpectator() && slinger.level() == player.level();
 		if (about && (closeToLosing(player) || Downed.isDowned(slinger))) {
-			FIGHTS.remove(id);
 			WebSymbiote.endSlingerFight(player);
-			bind(player, slinger);
+			bind(player, slinger, !Downed.isDowned(slinger));
 			return;
 		}
 		if (!WebSymbiote.fightingSlinger(player) || !about) {
-			FIGHTS.remove(id);
 			WebSymbiote.endSlingerFight(player);
-			if (about) {
+			if (about && slinger.distanceTo(player) <= WEB_SENSE_RANGE) {
 				WebSymbiote.leave(player, "infection.sense." + (1 + player.getRandom().nextInt(LEAVE_LINES))).pursue(slinger);
 			}
 		}

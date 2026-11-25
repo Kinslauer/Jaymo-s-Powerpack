@@ -1126,6 +1126,8 @@ public final class WebSymbiote {
 		/** Driving its host at a web slinger to fight them ({@link #SLINGER_FIGHT_MAX}), and when it must let go at the latest. */
 		boolean slingerFight;
 		long slingerFightUntil;
+		/** The web slinger it was sent at, kept until {@link WebSymbioteInfection} has dealt with the fight's end. */
+		@org.jspecify.annotations.Nullable java.util.UUID slingerId;
 		boolean suitBeforeTakeover;
 		/** Living Armor: when it came out, and when it was last used (see ARMOR_IDLE_TICKS). */
 		long armorOnAt;
@@ -2652,6 +2654,7 @@ public final class WebSymbiote {
 		}
 		live.bigTakeover = true;
 		live.slingerFightUntil = now + SLINGER_FIGHT_MAX;
+		live.slingerId = slinger.getUUID();
 		// the host can always fight it (SPREE_BREAK_FREE), as against a red hunt
 		host.setAttached(SPREE, true);
 		return true;
@@ -2663,14 +2666,32 @@ public final class WebSymbiote {
 		return live != null && live.slingerFight && live.takeoverTicks > 0;
 	}
 
-	/** It lets go of the wheel it took to fight a web slinger. */
+	/**
+	 * The web slinger it is fighting through {@code host}, or null. It lives in the Live state (so it goes with it), and
+	 * is dropped once the fight's time is well past, so an old fight can't send a later bond after them.
+	 */
+	static @org.jspecify.annotations.Nullable java.util.UUID slingerFoe(ServerPlayer host) {
+		Live live = host.getAttached(LIVE);
+		if (live == null || live.slingerId == null) {
+			return null;
+		}
+		if (host.level().getGameTime() > live.slingerFightUntil + 40L) {
+			live.slingerId = null;
+		}
+		return live.slingerId;
+	}
+
+	/** It lets go of the wheel it took to fight a web slinger, and forgets the slinger. */
 	static void endSlingerFight(ServerPlayer host) {
 		Live live = host.getAttached(LIVE);
-		if (live != null && live.slingerFight) {
-			if (live.takeoverTicks > 0) {
-				endTakeover(host, live);
+		if (live != null) {
+			live.slingerId = null;
+			if (live.slingerFight) {
+				if (live.takeoverTicks > 0) {
+					endTakeover(host, live);
+				}
+				live.slingerFight = false;
 			}
-			live.slingerFight = false;
 		}
 	}
 
@@ -2961,7 +2982,8 @@ public final class WebSymbiote {
 			drawIn(player);
 		}
 		WebSymbioteState state = state(player);
-		// (Andy, 2026-11-25: without the Web the suit doesn't come off by your word: only the tendrils draw in)
+		// (Andy, 2026-11-25: without the Web the suit doesn't come off by your word: the armour's tendrils draw in, and the
+		// order is a try at the suit, which it fights; the most you win is the mask)
 		if (state.has(WebSymbioteState.SUIT) && !bulked(player) && !livingArmor(player)) {
 			if (clings(player) && !player.isCreative()) {
 				// the order is a try at the bare skin: it fights them for it, and the most they win is the mask
@@ -3907,8 +3929,7 @@ public final class WebSymbiote {
 			endTakeover(player, live);
 			return;
 		}
-		if (target == null || !target.isAlive() || target.distanceTo(player) > (live.slingerFight ? WebSymbioteInfection.WEB_SENSE_RANGE
-			: live.redHunt ? WebRedHunt.RANGE : TAKEOVER_ESCAPE)) {
+		if (target == null || !target.isAlive() || target.distanceTo(player) > (live.redHunt ? WebRedHunt.RANGE : TAKEOVER_ESCAPE)) {
 			boolean dead = target != null && !target.isAlive();
 			if (dead && live.hunting && live.feedStage == FEED_KILL) {
 				// the hunt's kill: on to the corpse, still at the wheel
