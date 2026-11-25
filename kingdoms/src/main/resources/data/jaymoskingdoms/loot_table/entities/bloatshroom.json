@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:tag",
-          "name": "jaymoskingdoms:forage/puffball",
+          "items": "#jaymoskingdoms:forage/puffball",
           "expand": true,
           "modifier": [
             {

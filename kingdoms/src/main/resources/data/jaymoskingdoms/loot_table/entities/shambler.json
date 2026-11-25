@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:tag",
-          "name": "jaymoskingdoms:forage/mycelial_thread",
+          "items": "#jaymoskingdoms:forage/mycelial_thread",
           "expand": true,
           "modifier": [
             {
@@ -39,12 +39,12 @@
       "entries": [
         {
           "type": "minecraft:tag",
-          "name": "jaymoskingdoms:forage/morel",
+          "items": "#jaymoskingdoms:forage/morel",
           "expand": true
         },
         {
           "type": "minecraft:tag",
-          "name": "jaymoskingdoms:forage/deathcap",
+          "items": "#jaymoskingdoms:forage/deathcap",
           "expand": true
         },
         {
