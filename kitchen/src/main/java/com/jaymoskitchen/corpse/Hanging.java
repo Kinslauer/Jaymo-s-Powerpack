@@ -375,8 +375,8 @@ public final class Hanging {
 						player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.need_knife_gut"));
 						return InteractionResult.SUCCESS_SERVER;
 					}
-					gut(corpse, level, player, held, dropper(corpse, level));
-					return InteractionResult.SUCCESS_SERVER;
+					// held, in strokes (a body already part-gutted in the field goes on from there)
+					return Gutting.work(corpse, level, player, held);
 				}
 				if (!cleaver) {
 					player.sendOverlayMessage(Component.translatable("message.jaymoskitchen.hook.need_cleaver_cut"));
@@ -406,6 +406,7 @@ public final class Hanging {
 	}
 
 	private static void startBleeding(CorpseEntity corpse, ServerLevel level, @Nullable Player player, ItemStack tool) {
+		corpse.settleYield();
 		wear(tool, player);
 		int ticks = bleedTicks(corpse);
 		corpse.startBleeding(ticks);
@@ -450,6 +451,7 @@ public final class Hanging {
 	}
 
 	private static void skin(CorpseEntity corpse, ServerLevel level, @Nullable Player player, ItemStack tool, int rank, Consumer<ItemStack> drop) {
+		corpse.settleYield();
 		int strokes = Math.max(1, SKIN_STROKES + (corpse.oneHanded() ? -1 : corpse.tooBigToLift() ? SKIN_STROKES_BIG : 0)
 			+ (tool.is(POOR_KNIVES) ? SKIN_STROKES_POOR : 0) - (rank - 1));
 		wear(tool, player);
@@ -493,6 +495,7 @@ public final class Hanging {
 	}
 
 	private static void cut(CorpseEntity corpse, ServerLevel level, @Nullable Player player, ItemStack tool, Consumer<ItemStack> drop) {
+		corpse.settleYield();
 		wear(tool, player);
 		int done = corpse.butcherStage() - SKINNED;
 		if (done == 0) {
