@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 02:20). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 02:42). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -12,7 +12,6 @@ kanban-plugin: board
 - [ ] [[Inbox/blood-awakening-per-blood-picks|blood-awakening-per-blood-picks]] · for any · open
 - [ ] [[Inbox/changeling-voice-mimic|changeling-voice-mimic]] · for any · open
 - [ ] [[Inbox/court-wizard-creeper-ward|court-wizard-creeper-ward]] · for any · open
-- [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for ☁️ Cloud · open
 - [ ] [[Inbox/realistic-pathable-archery-positions|realistic-pathable-archery-positions]] · for 🪽 any Hermes bot · open
 - [ ] [[Inbox/structure-spawn-rate-wooden-hut|structure-spawn-rate-wooden-hut]] · for coordinator · open
 - [ ] [[Inbox/structures-1-siege-camps|structures-1-siege-camps]] · for any · open
@@ -26,17 +25,18 @@ kanban-plugin: board
 - [ ] [[Inbox/village-mods-7-ctov-tidal-towns|village-mods-7-ctov-tidal-towns]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · for 💻 Odysseus · open
 - [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
+- [ ] [[Inbox/lore-quill-rewrite|lore-quill-rewrite]] · for ☁️ Cloud · open
 
 
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Agents/Hand of God effects|Hand of God effects]] · 💻 Odysseus · running
-- [ ] [[Agents/Visceral gore picks|Visceral gore picks]] · 💻 Odysseus · running
 
 
 ## In review
 
+- [ ] [[Agents/Visceral gore picks|Visceral gore picks]] · 💻 Odysseus · #2133 · in-review
 
 
 ## Needs Andy
@@ -50,13 +50,13 @@ kanban-plugin: board
 
 **Complete**
 - [x] [[Inbox/Done/wither-model|wither-model]]
+- [x] [[Inbox/Done/villagers-visible-jobs|villagers-visible-jobs]]
+- [x] [[Inbox/Done/structures-2-placement-reasons|structures-2-placement-reasons]]
+- [x] [[Inbox/Done/refmods-15-provenance-coins|refmods-15-provenance-coins]]
+- [x] [[Inbox/Done/refmods-14-sky-light-air|refmods-14-sky-light-air]]
+- [x] [[Inbox/Done/refmods-12-fishing|refmods-12-fishing]]
 - [x] [[Inbox/Done/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]]
 - [x] [[Inbox/Done/zfighter-gaps-8-raids|zfighter-gaps-8-raids]]
-- [x] [[Inbox/Done/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]]
-- [x] [[Inbox/Done/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]]
-- [x] [[Inbox/Done/zfighter-gaps-5-training|zfighter-gaps-5-training]]
-- [x] [[Inbox/Done/zfighter-gaps-4-forms|zfighter-gaps-4-forms]]
-- [x] [[Inbox/Done/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]]
 
 
 %% kanban:settings
