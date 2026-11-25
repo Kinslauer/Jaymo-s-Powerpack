@@ -1123,3 +1123,5 @@ Andy: "can you make one of these as an example?" Supplied Hand-built starts (adv
 
 ## 2026-11-25 - Codex: merge the written-start example
 Andy: "Merge" (PR #2177, The Last Lantern). Includes its required written-start dependency #2153 before moving the example to master. Merge attempts failed at GitHub; both PRs remain open. No deployment requested.
+- 2026-11-25: Andy chose to move the whole pack to Fabric Loader 0.20.1 and Fabric API 0.165 so Psithurism can ship (Fae Woods, PR #2179).
+- 2026-11-25: Andy's pod-travel picks (Unbound list): 21 of the 22 build-ours rows; note on tr_cockpit: make the aerclouds beneath the Aether transparent and add cloud seas between Aether isles so pods can go straight through.
