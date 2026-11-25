@@ -538,9 +538,15 @@ final class CampBuildings {
 		return heights.get(heights.size() / 2);
 	}
 
+	/** Block flags for levelling a camp's ground: clients told, no neighbour shape updates. */
+	static final int QUIET = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE;
+
 	/**
 	 * Levels the camp's ground ({@code radius} round {@code fire}) to the fire's height and clears the air above it
 	 * ({@code height} up: plants, leaves, trees, huge mushrooms, snow).
+	 *
+	 * <p>No neighbour shape updates ({@link #QUIET}): at the circle's edge they read the block next door, and when that was
+	 * in a chunk not loaded yet the server thread made the chunk and the watchdog stopped the server (Deck, 2026-11-25).
 	 */
 	static void level(ServerLevel level, BlockPos fire, int radius, int height) {
 		int floor = fire.getY();
@@ -558,13 +564,13 @@ final class CampBuildings {
 				int ground = top.getY() - 1;
 				// raise low ground with dirt, or cut high ground down, to the floor
 				for (int y = ground + 1; y < floor - 1; y++) {
-					level.setBlock(column.atY(y), Blocks.DIRT.defaultBlockState(), Block.UPDATE_CLIENTS);
+					level.setBlock(column.atY(y), Blocks.DIRT.defaultBlockState(), QUIET);
 				}
 				for (int y = floor; y <= ground; y++) {
-					level.setBlock(column.atY(y), Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+					level.setBlock(column.atY(y), Blocks.AIR.defaultBlockState(), QUIET);
 				}
 				if (ground != floor - 1) {
-					level.setBlock(column.atY(floor - 1), surface, Block.UPDATE_CLIENTS);
+					level.setBlock(column.atY(floor - 1), surface, QUIET);
 				}
 				// and clear the air above: plants, leaves, snow, overhangs
 				for (int y = floor; y <= floor + height; y++) {
@@ -572,7 +578,7 @@ final class CampBuildings {
 					BlockState there = level.getBlockState(at);
 					if (!there.isAir() && (there.canBeReplaced() || Castle.natural(there) || there.is(BlockTags.FLOWERS) || there.is(BlockTags.SAPLINGS)
 						|| there.is(Blocks.MUSHROOM_STEM) || there.is(Blocks.BROWN_MUSHROOM_BLOCK) || there.is(Blocks.RED_MUSHROOM_BLOCK))) {
-						level.setBlock(at, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+						level.setBlock(at, Blocks.AIR.defaultBlockState(), QUIET);
 					}
 				}
 			}
