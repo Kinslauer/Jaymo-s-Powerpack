@@ -44,12 +44,16 @@ public final class HeraldryForging {
 		// kettle's other cuts and its deep kin, the sallets, and the older and the far helms
 		"barbute", "spangenhelm", "broad_kettle", "tall_kettle", "deep_kettle", "kettle_sallet", "archers_sallet", "long_sallet",
 		"gallowglass_helm", "visored_barbute", "visored_great_helm", "flat_top_helm", "nasal_helm", "spired_helm", "spectacle_helm",
-		"skullcap", "turban_helm"};
+		"skullcap", "turban_helm",
+		// (Kingdoms' Mordhau harness 2) the armet's wrapper
+		"armet_wrapper"};
 	private static final int[] PLATE_INGOTS = {5, 5, 5, 5, 5, 5, 4, 4, 8, 3, 4, 3, 4, 3, 4, 3, 4, 4, 3, 3, 4, 3, 4, 3,
-		5, 4, 4, 4, 5, 5, 4, 5, 5, 6, 6, 5, 3, 4, 5, 2, 5};
+		5, 4, 4, 4, 5, 5, 4, 5, 5, 6, 6, 5, 3, 4, 5, 2, 5, 3};
 	private static final String[] MAIL = {"mail_haubergeon", "mail_spaulders", "brigandine_spaulders", "jazerant", "mail_mitons", "mail_coif",
-		"standard_of_mail", "mail_skirt", "splinted_vambraces", "splinted_greaves"};
-	private static final int[] MAIL_INGOTS = {6, 3, 3, 5, 2, 3, 2, 3, 2, 2};
+		"standard_of_mail", "mail_skirt", "splinted_vambraces", "splinted_greaves",
+		// (Kingdoms' Mordhau harness 2) the coif's cuts
+		"lowered_mail_coif", "square_mail_coif", "ventailed_mail_coif", "square_ventailed_mail_coif"};
+	private static final int[] MAIL_INGOTS = {6, 3, 3, 5, 2, 3, 2, 3, 2, 2, 3, 3, 4, 4};
 	/** The hides a fur-lined piece takes from the smith when it is done (its lining): any of c:hides, rabbit hide or another. */
 	static final int FUR_HIDES = 2;
 	public static final TagKey<Item> HIDES = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "hides"));

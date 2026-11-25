@@ -78,6 +78,10 @@
 		"jaymoskingdoms:mail_mitons",
 		"jaymoskingdoms:mail_coif",
 		"jaymoskingdoms:standard_of_mail",
-		"jaymoskingdoms:mail_skirt"
+		"jaymoskingdoms:mail_skirt",
+		"jaymoskingdoms:lowered_mail_coif",
+		"jaymoskingdoms:square_mail_coif",
+		"jaymoskingdoms:ventailed_mail_coif",
+		"jaymoskingdoms:square_ventailed_mail_coif"
 	]
 }

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "group": "jaymoskingdoms:harness",
+  "ingredients": [
+    "minecraft:wheat",
+    "minecraft:wheat",
+    "minecraft:wheat",
+    "minecraft:wheat",
+    "minecraft:wheat",
+    "minecraft:string"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:field_hat"
+  }
+}
