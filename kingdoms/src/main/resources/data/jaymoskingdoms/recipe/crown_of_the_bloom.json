@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "jaymoskingdoms:spore_heart",
+    "minecraft:golden_helmet",
+    "jaymoskingdoms:glowcap_cap",
+    "jaymoskingdoms:glowcap_cap"
+  ],
+  "result": {
+    "id": "jaymoskingdoms:crown_of_the_bloom",
+    "count": 1
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "values": [
+    "minecraft:mycelium",
+    {
+      "id": "jaymoskitchen:mycelial_soil",
+      "required": false
+    },
+    "minecraft:podzol",
+    "minecraft:moss_block"
+  ]
+}

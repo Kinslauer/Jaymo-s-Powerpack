@@ -51,6 +51,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		TierHidingClient.register();
 		// sparkles in the glow-woods at night
 		GlowSparkles.register();
+		com.jaymoskingdoms.client.glowwood.GlowCreaturesClient.register();
 		LocksClient.register();
 		BoardTermsClient.register();
 		// (ff-kit) Peterwolf's firefighter readout on our HUD layout, only while carrying the kit

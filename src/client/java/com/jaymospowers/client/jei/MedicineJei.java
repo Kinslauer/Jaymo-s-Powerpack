@@ -79,6 +79,8 @@ public final class MedicineJei implements IModPlugin {
 		add(recipes, MedicineItems.BONE_BROTH, note("broth.1", num(Herbal.BROTH_HEAL)), note("broth.2", Herbal.BROTH_COOL_TICKS / 1200), note("drink"));
 		add(recipes, MedicineItems.CHAMOMILE_TEA, note("chamomile.1", Herbal.CALM_SLEEP_MULTIPLIER), note("chamomile.2"), note("drink"));
 		add(recipes, MedicineItems.POSSET, note("posset.1"), note("posset.2", num(Herbal.POSSET_HEAL)), note("drink"));
+		add(recipes, MedicineItems.ANTIFUNGAL_TONIC, note("antifungal.1"),
+			note("antifungal.2", com.jaymospowers.core.wounds.Mycosis.TONIC_WARD_TICKS / 1200), note("drink"));
 		// washing and boiling rags: a dirty rag in, a clean one out
 		recipes.add(new SimpleCategory.Recipe(List.of(List.of(new ItemStack(MedicineItems.RAG)), List.of(new ItemStack(Items.WATER_BUCKET))),
 			List.of(new ItemStack(MedicineItems.CLEAN_RAG)),

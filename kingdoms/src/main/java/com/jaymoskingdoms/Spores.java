@@ -103,6 +103,7 @@ public final class Spores {
 			if (!spored(player) || (now + player.getId()) % 20 != 0 || !(player.level() instanceof ServerLevel level)) {
 				continue;
 			}
+			com.jaymoskingdoms.glowwood.creatures.Mycosis.ward(player, 100);
 			haze(player, level);
 			if (KitchenCompat.corpsesExist()) {
 				for (Entity corpse : level.getEntities((Entity) null, player.getBoundingBox().inflate(CORPSE_RANGE), KitchenCompat::isFreeCorpse)) {
