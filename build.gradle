@@ -499,15 +499,8 @@ def packModsNoCf = [
 	// models and implementations". Needs GeckoLib and Fabric API (above) and Modonomicon (below). Modrinth XlUm5I57; CurseForge
 	// [project id, file id] to look up from the home PC (cloud can't reach it).
 	[dep: "maven.modrinth:icys-better-horses:AvgqdGip", cf: null],
-	// Tectonic 3.0.32 (MIT, by Apollo; the official jar, shipped unchanged; Modrinth lWDHr9jE): the Overworld's terrain rewritten
-	// (taller mountains, wide oceans, rivers that run under mountains in caves with hung lanterns, jungle pillars, lava tunnels at
-	// the bottom, islands). Andy (L6, 2026-11-24): "which one is more stable? we seem to have alot of world gen issues right
-	// now, can we test this then swap back if not?" A TRIAL: Jaymo's Kingdoms' own continents' shape (the continents, erosion,
-	// ridges and offset files, and the higher sea) stands down while this jar is in the pack, and its climate map stays
-	// (TectonicCompat); judge it on a NEW world. To swap back, delete this line (its jar leaves the pack and the shape comes
-	// back for worlds made after; chunks already made keep Tectonic's terrain). Needs Fabric API and Lithostitched (packMods,
-	// above); its config library (Apollib) is inside its jar. CurseForge [project id, file id] to look up from the home PC.
-	[dep: "maven.modrinth:tectonic:tRBGDcCT", cf: null],
+	// (Tectonic 3.0.32 left after its trial: Andy, 2026-11-25, "the generation is impressive but i dont want it if it breaks
+	// caves and the heatmap". Jaymo's Kingdoms' own continents' shape and climate map are back in its data, always on.)
 	// Modonomicon 26.3-2.23.1 (MIT code, CC BY 4.0 art; klikli-dev): the book library Icy's Better Horses' Stable Handbook is
 	// written in. Shipped unchanged. Modrinth 692GClaE.
 	[dep: "maven.modrinth:modonomicon:z8ESky23", cf: null],
@@ -984,8 +977,9 @@ def removedFromProfile = ["t_and_t-", "towns-and-towers-", "travelersbackpack-",
 // Streams Reflowing (Dynamic Waters took its place); Grassier Grass and Punchy! with Punchy! Moves (Andy, 2026-11-16: "i
 // think the new grass and punchy are lagging the game"; punchy_expressions comes inside Punchy! Moves);
 // Ragdollified and Ragdollified Reactions (out until its whole set can go in, see the pack list);
-// VO: Better Dogs and Dasik Library (its wolves stopped the server, see the pack list)
-def removedIdsFromProfile = ["horseexpert", "kaffees_dual_ride", "ultimate_horseshoes", "citadel", "distanthorizons", "camerautils", "combat_roll", "ctov", "immersivevfx", "immersivefx", "streamsreflowing",
+// VO: Better Dogs and Dasik Library (its wolves stopped the server, see the pack list); Tectonic (its trial ended: Andy,
+// 2026-11-25, it broke the caves and the climate map)
+def removedIdsFromProfile = ["tectonic", "horseexpert", "kaffees_dual_ride", "ultimate_horseshoes", "citadel", "distanthorizons", "camerautils", "combat_roll", "ctov", "immersivevfx", "immersivefx", "streamsreflowing",
 	"grassiergrass", "punchy", "punchy_moves", "punchy_expressions", "ragdollified", "ragdollifiedreactions",
 	"vanilla-outsider-better-dogs", "dasik-library", "scalablelux"]
 // a jar's fabric.mod.json (null if it isn't a Fabric mod): the profile's CurseForge file names differ from the pack's
