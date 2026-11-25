@@ -453,7 +453,7 @@ final class WebSymbioteScreen extends Screen {
 				}
 				return Component.translatable("gui.jaymospowers.web_symbiote.suit_pick", form(WebSymbiote.FORM_SUIT));
 			}
-			if (WebSymbiote.clings(player) && form >= top) {
+			if (WebSymbiote.clings(player) && form == WebSymbiote.FORM_SUIT && form >= top) {
 				// (Andy, 2026-11-25) without the Web nothing comes off by your choice: coming down is a fight
 				return Component.translatable("gui.jaymospowers.web_symbiote.suit_held");
 			}
@@ -467,7 +467,7 @@ final class WebSymbioteScreen extends Screen {
 			if (form == WebSymbiote.FORM_SUIT && left > 0) {
 				return Component.translatable("gui.jaymospowers.web_symbiote.cooling", String.format(Locale.ROOT, "%.1f", left / 20.0));
 			}
-			if (WebSymbiote.clings(player)) {
+			if (WebSymbiote.clings(player) && form == WebSymbiote.FORM_SUIT) {
 				return Component.translatable("gui.jaymospowers.web_symbiote.suit_pick", form(form + 1));
 			}
 			return Component.translatable("gui.jaymospowers.web_symbiote.suit_climb", form(form + 1), form(form - 1));

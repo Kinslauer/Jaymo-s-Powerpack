@@ -1363,6 +1363,11 @@ public final class WebSymbiote {
 		if (!clings(player)) {
 			return false;
 		}
+		if (bulked(player)) {
+			// the big body has no separate mask to take off (the Mask slot says so too: mask_no_suit)
+			player.sendOverlayMessage(Component.translatable("message.jaymospowers.web_symbiote.mask_no_suit"));
+			return true;
+		}
 		if (WebSymbioteBond.dormant(player)) {
 			WebSymbioteBond.refuse(player);
 			return true;
@@ -2957,7 +2962,12 @@ public final class WebSymbiote {
 		}
 		WebSymbioteState state = state(player);
 		// (Andy, 2026-11-25: without the Web the suit doesn't come off by your word: only the tendrils draw in)
-		if (state.has(WebSymbioteState.SUIT) && !bulked(player) && !livingArmor(player) && !clings(player)) {
+		if (state.has(WebSymbioteState.SUIT) && !bulked(player) && !livingArmor(player)) {
+			if (clings(player) && !player.isCreative()) {
+				// the order is a try at the bare skin: it fights them for it, and the most they win is the mask
+				WebSymbioteBond.resistRemoval(player);
+				return;
+			}
 			set(player, state.withFlag(WebSymbioteState.SUIT, false));
 			torn(player);
 			ServerLevel level = player.level();
@@ -3897,7 +3907,8 @@ public final class WebSymbiote {
 			endTakeover(player, live);
 			return;
 		}
-		if (target == null || !target.isAlive() || target.distanceTo(player) > (live.redHunt ? WebRedHunt.RANGE : TAKEOVER_ESCAPE)) {
+		if (target == null || !target.isAlive() || target.distanceTo(player) > (live.slingerFight ? WebSymbioteInfection.WEB_SENSE_RANGE
+			: live.redHunt ? WebRedHunt.RANGE : TAKEOVER_ESCAPE)) {
 			boolean dead = target != null && !target.isAlive();
 			if (dead && live.hunting && live.feedStage == FEED_KILL) {
 				// the hunt's kill: on to the corpse, still at the wheel
@@ -4305,12 +4316,10 @@ public final class WebSymbiote {
 			return false;
 		}
 		// coming down one form
-		if (clings(player) && !player.isCreative()) {
-			// (Andy, 2026-11-25) without the Web nothing comes off by your choice: every try is a fight with it, and
-			// winning gets you the mask off at most (WebSymbioteBond)
-			if (!driving(player) && !roaring(player)) {
-				WebSymbioteBond.resistRemoval(player);
-			}
+		if (form == FORM_SUIT && clings(player) && !player.isCreative()) {
+			// (Andy, 2026-11-25) without the Web the suit itself doesn't come off by your choice: every try is a fight
+			// with it, and winning gets you the mask off at most (WebSymbioteBond). The bigger forms step down as usual.
+			WebSymbioteBond.resistRemoval(player);
 			return false;
 		}
 		if (form >= FORM_ARMOR) {

@@ -67,15 +67,12 @@ public final class WebSymbioteInfection {
 	public static final float LOSING_HEALTH = WebSymbiote.DEFEND_HEALTH;
 	/** Within this many blocks of the slinger it leaps straight in; farther, it pours out and makes for them ({@link WebSymbioteBlob#pursue}). */
 	public static final double BIND_REACH = 6.0;
-	/** After a fight that ended without a bind, it waits this long before driving its host at a slinger again. */
-	public static final int SLINGER_FIGHT_GAP = 600;
 	/** Lines it has as it starts the fight, and as it binds to the slinger. */
 	public static final int FIGHT_LINES = 3, BIND_LINES = 3;
 	/** Hosts it has warned this hunger (not saved: a reload warns again). */
 	private static final Set<UUID> WARNED = new HashSet<>();
-	/** Host to the web slinger it is fighting, and when a host may fight again (game time); not saved. */
+	/** Host to the web slinger it is fighting; not saved. */
 	private static final Map<UUID, UUID> FIGHTS = new HashMap<>();
-	private static final Map<UUID, Long> RETRY = new HashMap<>();
 
 	private WebSymbioteInfection() {
 	}
@@ -118,7 +115,6 @@ public final class WebSymbioteInfection {
 		if (!state.bonded() || !player.isAlive() || player.isSpectator()) {
 			WARNED.remove(player.getUUID());
 			FIGHTS.remove(player.getUUID());
-			RETRY.remove(player.getUUID());
 			return;
 		}
 		boolean acclimating = WebSymbioteBond.dormant(player);
@@ -151,11 +147,13 @@ public final class WebSymbioteInfection {
 		if (player.tickCount % SENSE_EVERY == 0) {
 			ServerPlayer slinger = slinger(player);
 			if (slinger != null) {
-				long now = player.level().getGameTime();
-				if (acclimating || slinger.isCreative()) {
-					// (dormant, it doesn't take the wheel; a creative slinger can't be beaten: it leaves for them as it always has)
+				if (acclimating || slinger.isCreative() || player.isCreative()) {
+					// (dormant, it doesn't take the wheel; a creative slinger can't be beaten, nor a creative host driven: it leaves for them as it always has)
 					WebSymbiote.leave(player, "infection.sense." + (1 + player.getRandom().nextInt(LEAVE_LINES))).pursue(slinger);
-				} else if (now >= RETRY.getOrDefault(id, 0L) && WebSymbiote.fightSlinger(player, slinger)) {
+				} else if (closeToLosing(player) || Downed.isDowned(slinger)) {
+					// deliberate: a host already close to losing, or a slinger already downed, leaves nothing to fight for
+					bind(player, slinger);
+				} else if (WebSymbiote.fightSlinger(player, slinger)) {
 					// (Andy, 2026-11-25) it fights the slinger first, driving its host at them
 					FIGHTS.put(id, slinger.getUUID());
 				}
@@ -163,31 +161,42 @@ public final class WebSymbioteInfection {
 		}
 	}
 
+	/** The host is downed, or at or under {@link #LOSING_HEALTH} of their most health. */
+	private static boolean closeToLosing(ServerPlayer host) {
+		return Downed.isDowned(host) || host.getHealth() <= host.getMaxHealth() * LOSING_HEALTH;
+	}
+
+	/** It pours out of its host and goes into the slinger (leaping straight in if they're near, else making for them). */
+	private static void bind(ServerPlayer player, ServerPlayer slinger) {
+		WebSymbioteBlob blob = WebSymbiote.leave(player, "infection.bind." + (1 + player.getRandom().nextInt(BIND_LINES)));
+		if (slinger.level() != player.level() || slinger.distanceTo(player) > BIND_REACH || !blob.leapInto(slinger)) {
+			blob.pursue(slinger);
+		}
+	}
+
 	/**
 	 * The fight with a web slinger goes on, or ends: the host close to losing, or the slinger downed, and it leaves them
 	 * for the slinger (Andy: "if it gets close to losing it will bind to the slinger, it will also detach and bind if
-	 * the slinger is downed"); the fight over some other way (the host broke free, it timed out, the slinger got away)
-	 * and it waits {@code SLINGER_FIGHT_GAP} before trying again.
+	 * the slinger is downed"). Over some other way (the host broke free, it timed out, PvP off, the slinger out of
+	 * range) while the slinger is still about, it falls back to leaving the host and pursuing the slinger as it always
+	 * has, so it never seizes its host again and again. Over because the slinger is gone (dead, left, another world),
+	 * nobody is left to pursue and {@link #slinger} no longer finds them.
 	 */
 	private static void tickFight(ServerPlayer player, UUID id) {
 		ServerPlayer slinger = player.level().getServer().getPlayerList().getPlayer(FIGHTS.get(id));
-		boolean slingerDown = slinger != null && slinger.isAlive() && Downed.isDowned(slinger);
-		boolean losing = Downed.isDowned(player) || player.getHealth() <= player.getMaxHealth() * LOSING_HEALTH;
-		if (slinger != null && slinger.isAlive() && (losing || slingerDown)) {
+		boolean about = slinger != null && slinger.isAlive() && !slinger.isSpectator() && slinger.level() == player.level();
+		if (about && (closeToLosing(player) || Downed.isDowned(slinger))) {
 			FIGHTS.remove(id);
 			WebSymbiote.endSlingerFight(player);
-			String line = "infection.bind." + (1 + player.getRandom().nextInt(BIND_LINES));
-			WebSymbioteBlob blob = WebSymbiote.leave(player, line);
-			if (slinger.level() != player.level() || slinger.distanceTo(player) > BIND_REACH || !blob.leapInto(slinger)) {
-				blob.pursue(slinger);
-			}
+			bind(player, slinger);
 			return;
 		}
-		if (!WebSymbiote.fightingSlinger(player) || slinger == null || !slinger.isAlive() || slinger.isSpectator() || slinger.level() != player.level()) {
-			// over without a bind: it tries again after a while
+		if (!WebSymbiote.fightingSlinger(player) || !about) {
 			FIGHTS.remove(id);
 			WebSymbiote.endSlingerFight(player);
-			RETRY.put(id, player.level().getGameTime() + SLINGER_FIGHT_GAP);
+			if (about) {
+				WebSymbiote.leave(player, "infection.sense." + (1 + player.getRandom().nextInt(LEAVE_LINES))).pursue(slinger);
+			}
 		}
 	}
 

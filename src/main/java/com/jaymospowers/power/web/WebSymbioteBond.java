@@ -240,8 +240,14 @@ public final class WebSymbioteBond {
 		// (Andy, 2026-11-25: "it will fight you off everytime you try") without the Web it always fights: no bond, count,
 		// chance or big body lets you off
 		boolean held = WebSymbiote.clings(player);
-		if (player.isCreative() || WebSymbiote.driving(player) || WebSymbiote.roaring(player)
-			|| !held && (bond >= FIGHT_BOND || !mask && fought >= FIGHTS || WebSymbiote.bulked(player))) {
+		if (player.isCreative()) {
+			return false;
+		}
+		if (WebSymbiote.driving(player) || WebSymbiote.roaring(player) || WebSymbiote.bulked(player)) {
+			// it has the wheel or the whole body: no fight to start, but without the Web nothing comes off for free either
+			return held;
+		}
+		if (!held && (bond >= FIGHT_BOND || !mask && fought >= FIGHTS)) {
 			return false;
 		}
 		if (!held && !mask && player.getRandom().nextFloat() >= Mth.lerp(bond / (float)FIGHT_BOND, FIGHT_CHANCE_LOW, FIGHT_CHANCE_HIGH)) {
@@ -297,9 +303,8 @@ public final class WebSymbioteBond {
 	}
 
 	private static void tickFight(ServerPlayer player, Live live, long now) {
-		if (WebSymbiote.driving(player) || WebSymbiote.roaring(player)
-			|| !WebSymbiote.clings(player) && (WebSymbiote.bulked(player) || !WebSymbiote.suitShown(player))) {
-			// something else has the suit now (a host without the Web fights it in any form)
+		if (WebSymbiote.driving(player) || WebSymbiote.roaring(player) || WebSymbiote.bulked(player) || !WebSymbiote.suitShown(player)) {
+			// something else has the suit now
 			endFight(player, live);
 			return;
 		}
