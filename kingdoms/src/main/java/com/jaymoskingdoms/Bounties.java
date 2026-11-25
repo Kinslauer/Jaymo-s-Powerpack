@@ -133,7 +133,13 @@ public final class Bounties {
 	static final int EVERY = 100;
 	static final long BOARD_REBUILD = 24000L * 3;
 	/** Where a settlement's board goes: this far from its bell (blocks). */
-	static final int BOARD_NEAR = 3, BOARD_FAR = 8;
+	static final int BOARD_NEAR = 3, BOARD_FAR = 16;
+	/**
+	 * A board stands with its back to a wall (Andy: "it should be against a wall, with the notices facing out, its always in
+	 * the middle of a walkway"), and never where it would narrow a lane: at least this much open ground before it
+	 * ({@link #openness}, out of {@code (2 * BOARD_VIEW_SIDE + 1) * BOARD_VIEW}).
+	 */
+	static final int BOARD_OPEN_LEAST = 16;
 	/**
 	 * (0.7.197) How far ahead of a board, and how far to either side of its middle, the open ground in front of it is
 	 * counted (blocks); what facing the bell is worth in those blocks; and a board in town showing less open ground than
@@ -1255,12 +1261,17 @@ public final class Bounties {
 					if (BountyBoard.isAnchor(there) && BountyBoard.complete(level, had, faces)) {
 						// (0.7.197) Andy: "the bounty board shouldn't be facing blocks so close like this when there is a wide
 						// open square in front of it." A board facing a wall is moved once to a spot that sees clearly more.
-						int seen = LOOKED_OVER.add(id) ? openness(level, had, faces) : BOARD_OPEN_ENOUGH;
-						if (seen >= BOARD_OPEN_ENOUGH) {
+						// A board standing free (out in a walkway) is moved once to a wall, its notices facing out.
+						if (!LOOKED_OVER.add(id)) {
+							continue;
+						}
+						int seen = openness(level, had, faces);
+						boolean backed = backed(level, had, faces);
+						if (backed && seen >= BOARD_OPEN_ENOUGH) {
 							continue;
 						}
 						best = boardSpot(level, f.seat());
-						if (best == null || openness(level, best.spot(), best.facing()) < seen + BOARD_TURN_GAIN) {
+						if (best == null || backed && openness(level, best.spot(), best.facing()) < seen + BOARD_TURN_GAIN) {
 							continue;
 						}
 						for (int c = 0; c < BountyBoard.WIDTH; c++) {
@@ -1329,6 +1340,20 @@ public final class Bounties {
 		return true;
 	}
 
+	/** Every block of the board has a wall right behind it, its face toward the board solid. */
+	private static boolean backed(ServerLevel level, BlockPos anchor, Direction facing) {
+		for (int c = 0; c < BountyBoard.WIDTH; c++) {
+			for (int r = 0; r < BountyBoard.HEIGHT; r++) {
+				BlockPos behind = BountyBoard.part(anchor, facing, c, r).relative(facing.getOpposite());
+				BlockState wall = level.getBlockState(behind);
+				if (wall.is(BOARD) || !wall.isFaceSturdy(level, behind, facing)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
 	/**
 	 * (0.7.197) How much open ground lies before a board at {@code anchor} facing {@code facing}: lanes from
 	 * {@link #BOARD_VIEW_SIDE} left to right of its middle, each counted out to {@link #BOARD_VIEW} blocks until a block
@@ -1362,9 +1387,10 @@ public final class Bounties {
 	private static final Set<String> LOOKED_OVER = new HashSet<>();
 
 	/**
-	 * Open ground {@link #BOARD_NEAR}-{@link #BOARD_FAR} blocks from the bell where the whole board fits. (0.7.197) Of
-	 * those, the spot and facing with the most open ground before it ({@link #openness}), a little for facing the bell
-	 * and less the farther from it; it used to be the nearest spot, always facing the bell, even with a wall right ahead.
+	 * Open ground {@link #BOARD_NEAR}-{@link #BOARD_FAR} blocks from the bell where the whole board fits with its back to a
+	 * wall ({@link #backed}) and enough open ground before it ({@link #BOARD_OPEN_LEAST}). (0.7.197) Of those, the spot and
+	 * facing with the most open ground before it ({@link #openness}), a little for facing the bell and less the farther
+	 * from it; it used to be the nearest spot, always facing the bell, even with a wall right ahead.
 	 */
 	private static @Nullable Placing boardSpot(ServerLevel level, BlockPos bell) {
 		Placing best = null;
@@ -1381,10 +1407,14 @@ public final class Bounties {
 					}
 					Direction bellward = toward(bell, top);
 					for (Direction facing : Direction.Plane.HORIZONTAL) {
-						if (!fits(level, top, facing)) {
+						if (!fits(level, top, facing) || !backed(level, top, facing)) {
 							continue;
 						}
-						int score = openness(level, top, facing) + (facing == bellward ? BOARD_BELL_BONUS : 0) - r;
+						int open = openness(level, top, facing);
+						if (open < BOARD_OPEN_LEAST) {
+							continue;
+						}
+						int score = open + (facing == bellward ? BOARD_BELL_BONUS : 0) - r;
 						if (score > bestScore) {
 							bestScore = score;
 							best = new Placing(top, facing);
