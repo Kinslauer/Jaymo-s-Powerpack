@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "jaymoskingdoms:item/veiled_turban",
+    "tints": [
+      {
+        "type": "minecraft:dye",
+        "default": -12952946
+      }
+    ]
+  }
+}

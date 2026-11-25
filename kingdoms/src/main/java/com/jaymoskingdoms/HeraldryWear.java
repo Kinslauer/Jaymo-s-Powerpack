@@ -21,6 +21,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.DyedItemColor;
@@ -62,6 +63,8 @@ public final class HeraldryWear {
 	static final int TABARD_PRICE = 8, COAT_PRICE = 16;
 	/** The makes of cuirass a realm's knights may wear, one to a realm. */
 	static final List<String> CUIRASSES = List.of("plate_cuirass", "fluted_cuirass", "rounded_breastplate");
+	/** The kettle hat, the helm that comes in each realm's own cut ({@link #KETTLE_CUTS}). */
+	static final String KETTLE = "kettle_hat";
 	static final int USES = 3, XP = 5;
 	static final float PRICE_MULT = 0.05F;
 	/** The lands whose realms field knights in the harness (the others keep their own land's gear). */
@@ -650,9 +653,27 @@ public final class HeraldryWear {
 
 	// ---- (medieval picks) a realm's own designs ------------------------------------------------------------------------
 
-	/** The helm {@code realm}'s knights wear (an item name of {@link HeraldryArmour#HELMS}). */
+	/** The helm {@code realm}'s knights wear (an item name of {@link HeraldryArmour#HELMS}; a kettle in the realm's own cut). */
 	private static String helm(int realm) {
-		return pick(HeraldryArmour.HELMS, hash(realm) >>> 8);
+		String helm = pick(HeraldryArmour.HELMS, hash(realm) >>> 8);
+		return helm.equals(KETTLE) ? kettle(realm) : helm;
+	}
+
+	/**
+	 * (Andy, on the kettle hat: "different cuts for different realms") The kettle hat's cut for each way of arming a
+	 * realm's guards ({@code Outfits.PLATE}, {@code TABARD}, {@code HALF_PLATE}, by index): the plate realms' tall German
+	 * cut, the tabard realms' round one, the half-plate realms' broad brim.
+	 */
+	static final List<String> KETTLE_CUTS = List.of("tall_kettle", KETTLE, "broad_kettle");
+
+	/** The kettle hat in {@code realm}'s cut (its arms' way of arming its guards; a village or haven by its own arms). */
+	private static String kettle(int realm) {
+		return KETTLE_CUTS.get(Outfits.Heraldry.of(realm, DyeColor.WHITE, false).harness());
+	}
+
+	/** (GuardKit) The kettle hat in {@code f}'s cut: a fiefdom wears its overlord's. */
+	static String kettle(Faction f) {
+		return kettle(realm(f));
 	}
 
 	/** The war arm {@code realm}'s knights carry (a Powers weapon head, of those in the game), or null without Powers. */

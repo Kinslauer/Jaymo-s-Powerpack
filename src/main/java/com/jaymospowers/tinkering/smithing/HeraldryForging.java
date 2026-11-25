@@ -29,7 +29,7 @@ import org.jspecify.annotations.Nullable;
  * Every plate piece is offered in its three finishes, the smith choosing one as they start it: <b>bright</b>,
  * <b>blackened</b>, and <b>gilded</b>. Gilding is done only for a royal or a lord ({@link #noble}, told by Kingdoms),
  * and takes {@link #GILD_GOLD} gold ingots from the smith when the piece is done; anyone else is not offered it. The
- * finish rides on the piece as Kingdoms' {@code jaymoskingdoms:finish}.
+ * finish rides on the piece as Kingdoms' {@code jaymoskingdoms:finish}. The barbutes can be painted too ({@link #PAINTABLE}).
  */
 public final class HeraldryForging {
 	/** The gold ingots a gilded piece takes. */
@@ -39,16 +39,29 @@ public final class HeraldryForging {
 		"morion", "plate_cuirass", "plate_spaulders", "plate_arm_harness", "plate_gauntlets", "plate_cuisses", "plate_greaves", "plate_sabatons",
 		// every harness place filled (Kingdoms' Harness 6): the wider makes and the snows' fur-lined pieces, and the bevor
 		"gorget", "faulds_and_tassets", "rondel_spaulders", "bevor", "fur_lined_spaulders", "fur_lined_arm_harness", "fur_lined_gauntlets",
-		"fur_lined_cuisses", "fur_lined_greaves"};
-	private static final int[] PLATE_INGOTS = {5, 5, 5, 5, 5, 5, 4, 4, 8, 3, 4, 3, 4, 3, 4, 3, 4, 4, 3, 3, 4, 3, 4, 3};
+		"fur_lined_cuisses", "fur_lined_greaves",
+		// (Mordhau harness 1) the barbute and the spangenhelm, which only knights wore till now, and the new helms: the
+		// kettle's other cuts and its deep kin, the sallets, and the older and the far helms
+		"barbute", "spangenhelm", "broad_kettle", "tall_kettle", "deep_kettle", "kettle_sallet", "archers_sallet", "long_sallet",
+		"gallowglass_helm", "visored_barbute", "visored_great_helm", "flat_top_helm", "nasal_helm", "spired_helm", "spectacle_helm",
+		"skullcap", "turban_helm",
+		// (Kingdoms' Mordhau harness 2) the armet's wrapper
+		"armet_wrapper"};
+	private static final int[] PLATE_INGOTS = {5, 5, 5, 5, 5, 5, 4, 4, 8, 3, 4, 3, 4, 3, 4, 3, 4, 4, 3, 3, 4, 3, 4, 3,
+		5, 4, 4, 4, 5, 5, 4, 5, 5, 6, 6, 5, 3, 4, 5, 2, 5, 3};
 	private static final String[] MAIL = {"mail_haubergeon", "mail_spaulders", "brigandine_spaulders", "jazerant", "mail_mitons", "mail_coif",
-		"standard_of_mail", "mail_skirt", "splinted_vambraces", "splinted_greaves"};
-	private static final int[] MAIL_INGOTS = {6, 3, 3, 5, 2, 3, 2, 3, 2, 2};
+		"standard_of_mail", "mail_skirt", "splinted_vambraces", "splinted_greaves",
+		// (Kingdoms' Mordhau harness 2) the coif's cuts
+		"lowered_mail_coif", "square_mail_coif", "ventailed_mail_coif", "square_ventailed_mail_coif"};
+	private static final int[] MAIL_INGOTS = {6, 3, 3, 5, 2, 3, 2, 3, 2, 2, 3, 3, 4, 4};
 	/** The hides a fur-lined piece takes from the smith when it is done (its lining): any of c:hides, rabbit hide or another. */
 	static final int FUR_HIDES = 2;
 	public static final TagKey<Item> HIDES = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "hides"));
 	private static final String FUR_LINED = "fur_lined_";
 	private static final String[] FINISHES = {"bright", "blackened", "gilded"};
+	/** The pieces also offered painted (the barbute's painted finish, Mordhau harness 1): paint needs no gold or rank. */
+	private static final java.util.Set<String> PAINTABLE = java.util.Set.of("barbute", "visored_barbute");
+	private static final String PAINTED = "painted";
 	private static final String PREFIX = "heraldry/";
 	private static final String GILDED = "gilded";
 
@@ -145,7 +158,11 @@ public final class HeraldryForging {
 			if (item == null) {
 				continue;
 			}
-			for (String f : FINISHES) {
+			List<String> finishes = new ArrayList<>(List.of(FINISHES));
+			if (PAINTABLE.contains(PLATE[i])) {
+				finishes.add(PAINTED);
+			}
+			for (String f : finishes) {
 				ItemStack result = new ItemStack(item);
 				if (!f.equals("bright") && finish != null) {
 					result.set(finish, f);

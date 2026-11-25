@@ -17536,3 +17536,45 @@ Andy: "the AI in these mods is exactly what our MCA and npcs have been missing."
 - **Quality**: the wood and the focus each change how hard the spell hits and how long the wand waits. Woods: oak 100%/100%, birch 95%/80%, cherry 105%/90%, dark oak 115%/110%. Foci: amethyst 110%/100%, quartz 100%/85%, emerald 115%/95%, diamond 130%/90% (strength / wait; they multiply). A glint of the focus's colour shows at the tip as it casts.
 - A wand counts as a staff for spoken magic and the Mage's staff boons. In the hand of someone who has learned nothing it only says so. No iron in the recipe.
 - Classes: `MageWand` (hooks in `Spellcraft`, `ElementSpells#castKnown`, `Arcana#isStaff`); `tools/gen_mage_wands.py` makes the textures, models and recipes. Lang in `lang/parts/mage_wands.json`. Compiled; not played.
+
+## 0.13.2 (2026-11-25): More variety in guards' helms (#2160)
+
+Realm troops can draw their kettle cut, a regional helm, or a third helm suited to their role. Each guard keeps a consistent cut when the settlement can afford it.
+
+## 0.13.3 (2026-11-25): Mordhau harness 1: helms - fifteen new helms, the kettle in each realm's cut, the barbute re-cut (#2160)
+
+- **New helms** (Andy's Mordhau harness picks; our own cubes of the historical helms, nothing of Mordhau's), each with
+  every finish, dents and an icon: the Broad-Brimmed and the Tall Kettle Hat, the Deep Kettle Hat (its pulled-down
+  front with two sights lifts like a visor), the Kettle Sallet (wear a bevor with it for the bevored look), the Archer's
+  Sallet, the Long-Tailed Sallet (its front with one sight lifts), the Gallowglass Helm, the Visored Barbute, the
+  Visored Great Helm, the Flat-Topped Helm, the Nasal Helm, the Spired Helm, the Spectacle Helm (fixed face), the
+  Skullcap (it sits over a mail coif) and the Turban Helm. Open-faced helms show the face; visored ones show it with
+  the visor up.
+- **The kettle hat comes in each realm's cut** (Andy: "different cuts for different realms"): the realms that arm their
+  guards in plate wear the tall cut, the tabard realms the round kettle hat, the half-plate realms the broad brim
+  (`HeraldryWear.KETTLE_CUTS`). A fiefdom wears its overlord's cut; a village or haven has its own by its arms. It
+  goes for the soldiers who wore the kettle hat and for knights whose realm's own helm is the kettle.
+- **The barbute is re-cut**: its T-opening is open now, so the face shows through it.
+- Classes: `HeraldryArmour` (the fifteen helms; not in `HELMS`, so no realm's own helm changes), `HeraldryWear`
+  (`kettle`), `GuardKit` (the kettle cut), `kingdoms/tools/gen_heraldry_armour.py` (the models, `shell` for open
+  faces), the plate, heavy and head armour tags.
+- Built by CI; not played. Not seen in game: how the new helms sit on MCA bodies, the visors lifting, and crests on the
+  pointed helms (their crest heights are guesses).
+
+## 0.13.4 (2026-11-25): Mordhau harness 2: hoods, hats, crests and neck (#2178)
+
+- Our own models of the historical pieces behind Andy's Mordhau picks (`kingdoms/tools/gen_heraldry_hoods.py`; nothing of Mordhau's is used), all worn in the harness:
+  - **Hood place**: the tight hood, the monk's cowl, the cleric's mantle (hood and buttoned shoulder cape), the headsman's hood (black, over the face, eyeholes), the arming cap (quilted, 1 armour, worn under a helm), the linen coif; the bag hat, the archer's cap (feather), the field hat (straw), the hunter's hat (pinned brim, feather), the slashed bonnet (lining in a second colour, plumes), the fur hat, the turban and the veiled turban, the jester's hood (two colours, bells) and the victor's wreath. Cloth ones take a dye; the bonnet and the jester's hood take their second colour from the dye they're crafted with (`jaymoskingdoms:second_colour`). Hats are hidden under a helm.
+  - **The mail coif's cuts**: lowered round the neck, square-cut, with a ventail, square-cut with a ventail (1 armour each; forged in iron at Jaymo's Powers' anvil).
+  - **Crests**: the orle (a padded roll worn in the torse's place, dyed), the helm crown (a gold circlet round the helm, no torse), antlers, and the mantling (cloth from the helm's crown down its back, in the torse's dye).
+  - **Any crown over a helm** (Andy: "you should be able to wear any crown"): every ruler's crown, tiara, circlet and coronet goes in the crest place too and is drawn round the helm. Anyone may wear one.
+  - **Neck**: the armet's wrapper, a rounded plate over the armet's chin and cheeks, in every finish (forged in steel). A bevor or wrapper isn't drawn under the sallet, which has its own.
+- Recipes for every cloth piece and crest; the new pieces count as cloth, mail or plate for Jaymo's Powers.
+- `HeraldryArmour` (registrations, `SECOND_COLOUR`, `regaliaCrown`), `Harness.slotOf`, `HeraldryLayer`.
+- Built and previewed off the game's files; not played.
+
+## 0.13.5 (2026-11-25): The Last Lantern: a second hand-built start example (#2177)
+
+- A Hearthkeeper's stone shelter with a pitched spruce roof, a covered porch, a cold hearth, a cot and a stocked cellar behind an iron trapdoor. Uses the written-start system; each newcomer gets their own copy and only the supplies placed in its containers.
+- Read the keeper's note to open the hatch, find the packing slip below, keep a short night watch, wait for daylight and find town. Leaving during the watch leads straight to the road.
+- Drawn by tools/last_lantern.py; start and tale are separate editable JSON files. Not played in game.

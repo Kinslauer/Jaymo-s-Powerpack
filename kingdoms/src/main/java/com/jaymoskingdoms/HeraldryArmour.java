@@ -111,6 +111,22 @@ public final class HeraldryArmour {
 			"crest_unicorn", "crest_snake", "crest_griffin", "crest_bear", "crest_wolf", "crest_raven", "crest_hound");
 		public static final List<String> SPAULDERS = List.of("plate_spaulders", "mail_spaulders", "brigandine_spaulders", "spiked_spaulders", "gilt_banded_spaulders", "fur_lined_spaulders");
 
+	/** (Mordhau harness 2) The cloth hoods and hats, and the mail coif's cuts. */
+	public static final List<String> HOODS = List.of("tight_hood", "monks_cowl", "clerics_mantle", "headsmans_hood", "linen_coif", "bag_hat",
+		"archers_cap", "field_hat", "hunters_hat", "landsknecht_bonnet", "fur_hat", "turban", "veiled_turban", "jesters_hood", "laurel_wreath");
+	public static final List<String> COIFS = List.of("lowered_mail_coif", "square_mail_coif", "ventailed_mail_coif", "square_ventailed_mail_coif");
+	/** A two-coloured piece's other colour (rgb: the slashed bonnet's lining, the jester's hood's other half), set by the dye it was made with. */
+	public static final DataComponentType<Integer> SECOND_COLOUR = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, JaymosKingdoms.id("second_colour"),
+		DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.INT).build());
+
+	/**
+	 * Whether {@code stack} is a ruler's crown ({@link Regalia}): any crown can be worn over a helm in the crest's place
+	 * (Andy, 2026-11-25: "you should be able to wear any crown").
+	 */
+	public static boolean regaliaCrown(ItemStack stack) {
+		return !stack.isEmpty() && Regalia.ITEMS.containsValue(stack.getItem());
+	}
+
 	private HeraldryArmour() {
 	}
 
@@ -132,6 +148,23 @@ public final class HeraldryArmour {
 			helm("lobster_tail", Face.VISORED, 0.25F, 1.5F);
 			helm("grotesque_visor", Face.VISORED, 0.2F, 1.8F);
 			helm("veiled_helm", Face.VISORED, 0.3F, 1.5F);
+			// (Mordhau harness 1) the kettle hat's other cuts and its deep kin, the open sallets, and the older and the far
+			// helms. Not in HELMS: a realm's own helm is picked from that list by position, so it stays as it was
+			helm("broad_kettle", Face.OPEN, 1.0F, 0.0F);
+			helm("tall_kettle", Face.OPEN, 1.0F, 3.4F);
+			helm("deep_kettle", Face.VISORED, 0.34F, 0.8F);
+			helm("kettle_sallet", Face.OPEN, 0.95F, 0.5F);
+			helm("archers_sallet", Face.OPEN, 1.0F, 0.0F);
+			helm("long_sallet", Face.VISORED, 0.32F, 0.6F);
+			helm("gallowglass_helm", Face.OPEN, 1.0F, 5.0F);
+			helm("visored_barbute", Face.VISORED, 0.3F, 0.5F);
+			helm("visored_great_helm", Face.VISORED, 0.15F, 0.0F);
+			helm("flat_top_helm", Face.OPEN, 0.9F, 0.0F);
+			helm("nasal_helm", Face.OPEN, 0.95F, 3.2F);
+			helm("spired_helm", Face.OPEN, 0.95F, 5.0F);
+			helm("spectacle_helm", Face.FIXED, 0.55F, 1.4F);
+			helm("skullcap", Face.OPEN, 1.0F, 1.6F);
+			helm("turban_helm", Face.OPEN, 0.95F, 4.2F);
 			worn("plate_cuirass", ArmorType.CHESTPLATE);
 		worn("plate_sabatons", ArmorType.BOOTS);
 		// the harness: slot, armour, toughness, durability, what mends it
@@ -200,6 +233,18 @@ public final class HeraldryArmour {
 		part("bevor", Harness.Slot.NECK, 1, 0.5F, 240, true, null, "bevor");
 		part("mail_skirt", Harness.Slot.WAIST, 1, 0.0F, 240, false, Items.IRON_INGOT, "mail_skirt");
 		part("leather_tassets", Harness.Slot.WAIST, 1, 0.0F, 180, false, Items.LEATHER, "leather_tassets");
+		// (Mordhau harness 2, kingdoms/tools/gen_heraldry_hoods.py) hoods and hats, the coif's cuts, crests and the wrapper
+		for (String hood : HOODS) {
+			part(hood, Harness.Slot.HOOD, 0, 0.0F, 0, false, null, hood);
+		}
+		part("arming_cap", Harness.Slot.HOOD, 1, 0.0F, 160, false, Items.STRING, "arming_cap");
+		for (String coif : COIFS) {
+			part(coif, Harness.Slot.HOOD, 1, 0.0F, 220, false, Items.IRON_INGOT, coif);
+		}
+		for (String crest : List.of("orle", "crest_crown", "crest_antlers", "crest_mantling")) {
+			part(crest, Harness.Slot.CREST, 0, 0.0F, 0, false, null, crest);
+		}
+		part("armet_wrapper", Harness.Slot.NECK, 1, 0.5F, 240, true, null, "armet_wrapper");
 		List<Item> all = new ArrayList<>();
 		PIECES.values().forEach(p -> all.add(p.item()));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {

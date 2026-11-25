@@ -8338,3 +8338,18 @@ The symbiote does things in the world now, not only on your screen.
 - **Wood path** (Sylvan, on the heritage hold slot beside Thunderclap and Sunflare: hold left mouse bare-handed, let go when full): for 12 seconds the logs, planks and leaves at your body are lent and come back behind you once nothing stands in them; never the floor underfoot. Every 40 seconds.
 - **Hold, wait, release** for ultimates: a one-press ultimate (Cryokinesis' Blizzard, Resonance's Boom and Shriek, Wind's Lance, Dome and Thunder Dive) still casts on a quick tap; held for 2 seconds it is charged (a gold bar and a swelling ball of power), stays charged for as long as C is held (up to 20 seconds more) and goes off when you let go. Let go half-charged and it slips away. Other powers' ultimates are unchanged.
 - Classes: `core/TerrainReturn`, `mixin/ExplosionReturnMixin`, `core/UltimateHold`, `Power#ultimateHeld`, `HeritageMoves` (Sylvan blood). Compiled; not played.
+
+## 0.27.65 (2026-11-25): Smithing anvil: the new harness helms, the barbute and spangenhelm, painted barbutes (#2160)
+
+- With Jaymo's Kingdoms in, the smithing anvil forges its fifteen new helms (the kettle's other cuts, the sallets, the
+  gallowglass, visored barbute and great helm, flat-topped, nasal, spired, spectacle and turban helms and the skullcap)
+  from steel, in bright, blackened or gilded, and now the barbute and the spangenhelm too, which only knights wore before.
+- The barbute and the visored barbute can also be forged painted (no gold or rank needed).
+- Classes: `HeraldryForging`.
+- Built by CI; not played.
+
+## 0.27.66 (2026-11-25): Mordhau harness 2: the coif's cuts and the wrapper at the anvil, the champion's wreath (#2178)
+
+- The smithing anvil forges Kingdoms' new mail coif cuts (lowered, square-cut, with a ventail, square-cut with a ventail) in iron and the armet's wrapper in steel, in every finish (`HeraldryForging`).
+- The champion of a tournament is also given Kingdoms' victor's wreath (`ZFighterTournaments`; only when Kingdoms is in).
+- Compiles in CI; not played.
