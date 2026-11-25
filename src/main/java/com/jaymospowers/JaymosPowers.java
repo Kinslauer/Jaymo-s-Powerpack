@@ -302,6 +302,8 @@ public class JaymosPowers implements ModInitializer {
 		// wet and soaked, rust on metal armour, scrubbing with a straw wisp or sand
 		com.jaymospowers.core.wet.Wet.init();
 		com.jaymospowers.core.wet.Rust.init();
+		// holes worn into armour by hard blows (core/ArmourHoles), wiped by a repair
+		com.jaymospowers.core.ArmourHoles.init();
 		com.jaymospowers.core.wet.ArmourOil.init();
 		com.jaymospowers.core.wet.Scrubbing.init();
 		com.jaymospowers.moving.PullRiders.init();

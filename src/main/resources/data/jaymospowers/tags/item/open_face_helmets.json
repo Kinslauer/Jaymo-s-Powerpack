@@ -1,0 +1,23 @@
+{
+	"values": [
+		"minecraft:leather_helmet",
+		"minecraft:chainmail_helmet",
+		"minecraft:golden_helmet",
+		"minecraft:iron_helmet",
+		{"id": "jaymoskingdoms:kettle_hat", "required": false},
+		{"id": "jaymoskingdoms:morion", "required": false},
+		{"id": "jaymoskingdoms:barbute", "required": false},
+		{"id": "jaymoskingdoms:settler_hat_helmet", "required": false},
+		{"id": "jaymoskingdoms:hedge_helmet", "required": false},
+		{"id": "jaymoskingdoms:hedge_elite_helmet", "required": false},
+		{"id": "jaymoskingdoms:hedge_ashen_helmet", "required": false},
+		{"id": "jaymoskingdoms:primalist_helmet", "required": false},
+		{"id": "jaymoskingdoms:ranger_helmet", "required": false},
+		{"id": "jaymoskingdoms:ranger_steel_helmet", "required": false},
+		{"id": "jaymoskingdoms:scoundrel_helmet", "required": false},
+		{"id": "jaymoskingdoms:sanguine_helmet", "required": false},
+		{"id": "jaymoskingdoms:sanguine_blue_helmet", "required": false},
+		{"id": "jaymoskingdoms:sanguine_purple_helmet", "required": false},
+		{"id": "jaymoskingdoms:foxshade_helmet", "required": false}
+	]
+}

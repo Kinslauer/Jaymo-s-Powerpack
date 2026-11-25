@@ -127,6 +127,15 @@ public enum WeaponKind {
 		return sum / blows.length;
 	}
 
+	/** The share of this kind's blow {@code piece}'s own material lets through ({@link ArmourDeflect}), its blows evened out. */
+	public float deflect(ItemStack piece) {
+		float sum = 0.0F;
+		for (Blow blow : blows) {
+			sum += ArmourDeflect.share(piece, blow);
+		}
+		return sum / blows.length;
+	}
+
 	/** {@code weapon_kind.jaymospowers.<name>}: its blow and where it wants to be, on a weapon's tooltip. */
 	public String key() {
 		return "weapon_kind.jaymospowers." + name().toLowerCase(Locale.ROOT);
