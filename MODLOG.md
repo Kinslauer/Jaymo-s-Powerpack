@@ -8097,3 +8097,8 @@ Ideas from the Hand of God mod (All Rights Reserved: nothing of it copied, all b
 - Captors, guards who want you and spiders still get their look: the last press asks them first (`TakenOut.takeNow`), and if they have you, you wake where they took you as before.
 - Others still shake you awake (sneak + use), companions first; a blow still wakes you.
 - `Fainting` (SWOON 40, OUT 300, OVERCOME_SWOON 20, `mash`), `TakenOut.takeNow`. Built; not played.
+
+## 0.27.39 (2026-11-25): The symbiote's meeting film no longer disconnects the client (#2152)
+
+- **Fixed**: the film where the symbiote pours back into its host (`WebMeeting.Scene`) kicked the player with a Network Protocol Error ("Tried to access entity ID before ID assignment"). The client-only copy it draws is now given an entity id of its own (`WebMeetingClient`) before it is added to the world.
+- Not built locally; CI builds it. Not played.
