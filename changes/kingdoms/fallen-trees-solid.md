@@ -1,0 +1,6 @@
+# fallen trees are solid
+- **Fallen trees are solid**: a felled, knocked or blown-down tree lying on the ground (the "Fallen Tree" entity) used to have no collision at all, so you swam and walked straight through its trunk (Andy's clip). Now each of its logs is a block of solid wood where it's drawn: you can stand on it, walk along it, climb a leaning trunk, and it blocks players, NPCs, animals and dropped items. Leaves stay soft (you push through the crown; they drop off as it lies anyway). A tree still falling, flying, held by a giant or bound for a woodcutter's bag isn't solid; it turns solid once it lies still and stops being solid the moment it falls on again.
+- Nothing gets trapped: anyone the tree comes down on isn't pushed or held by it (vanilla lets you move out of a shape you're inside), only kept from going further in. A mob that walks into a log up to 1.2 blocks over its feet hops it, since mob path finding only sees blocks.
+- Crushing, knocking other trees, splashes and chopping (aim at a log, 3 axe strokes) are unchanged.
+- `FallingTree.collisions` (per-log boxes, the `SOLID` synced flag), `EntityFallenTreeMixin` (wraps `Entity.collide`'s entity-collision lookup, like the ship decks).
+- Built; not played.

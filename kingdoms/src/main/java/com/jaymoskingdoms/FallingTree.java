@@ -46,6 +46,7 @@ import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.animal.bee.Bee;
 import net.minecraft.world.entity.player.Player;
@@ -61,6 +62,8 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
@@ -152,6 +155,12 @@ public final class FallingTree extends Entity {
 	 */
 	/** (0.7.586) The most blocks weaker than its wood ({@link #weaker}) it smashes through in a tick. */
 	static final int SMASH_MOST = 12;
+	/**
+	 * Andy: "trees dont seem to be solid after they fall?" Down, each of its logs is a block's worth of solid wood where
+	 * it lies ({@link #collisions}): to stand on, walk along, walk into. Leaves stay soft (pushed through, as they drop
+	 * off anyway). A mob that walks into a log no higher than this (blocks over its feet) hops it.
+	 */
+	static final double HOPS = 1.2;
 
 	/** One block of the tree: its state, and where it stood relative to the cut. */
 	public record Piece(int state, int x, int y, int z) {
@@ -170,6 +179,8 @@ public final class FallingTree extends Entity {
 		builder -> builder.syncWith(ByteBufCodecs.FLOAT, AttachmentSyncPredicate.all()));
 	/** How far over it leans (degrees from upright). */
 	private static final EntityDataAccessor<Float> LEAN = SynchedEntityData.defineId(FallingTree.class, EntityDataSerializers.FLOAT);
+	/** Lying still on the ground (down, not flying, held or going into a woodcutter's bag): its logs are solid. */
+	private static final EntityDataAccessor<Boolean> SOLID = SynchedEntityData.defineId(FallingTree.class, EntityDataSerializers.BOOLEAN);
 
 	public static EntityType<FallingTree> TYPE;
 
@@ -447,6 +458,7 @@ public final class FallingTree extends Entity {
 		if (!(this.level() instanceof ServerLevel level)) {
 			return;
 		}
+		this.entityData.set(SOLID, this.down && this.sink == null && !this.held && !this.flying);
 		List<Piece> pieces = this.pieces();
 		if (pieces.isEmpty()) {
 			this.discard();
@@ -764,6 +776,52 @@ public final class FallingTree extends Entity {
 				broken++;
 			}
 		}
+	}
+
+	/** Whether its logs are solid now (it lies still). */
+	public boolean solid() {
+		return this.entityData.get(SOLID);
+	}
+
+	/**
+	 * The shapes {@code entity}, moving through {@code area}, runs into: {@code others}, and the logs of every fallen
+	 * tree lying there (a block round each log's middle, as it's drawn). Something already inside a log (the tree came
+	 * down on it) isn't held or pushed by it, only kept from going further in, so nobody is trapped. A mob that walks into
+	 * a log it can clear ({@link #HOPS}) hops it, since its path finding sees only blocks.
+	 */
+	public static List<VoxelShape> collisions(Entity entity, AABB area, List<VoxelShape> others) {
+		if (entity instanceof FallingTree || entity.noPhysics || entity.isSpectator()) {
+			return others;
+		}
+		List<FallingTree> trees = entity.level().getEntitiesOfClass(FallingTree.class, area, FallingTree::solid);
+		if (trees.isEmpty()) {
+			return others;
+		}
+		List<VoxelShape> out = null;
+		boolean hop = false;
+		double feet = entity.getY();
+		for (FallingTree tree : trees) {
+			Quaternionf turn = turn(tree.lean(), tree.heading());
+			for (Piece p : tree.pieces()) {
+				if (!p.blockState().is(BlockTags.LOGS)) {
+					continue;
+				}
+				Vec3 at = tree.where(p, turn);
+				AABB box = new AABB(at, at).inflate(0.5);
+				if (!box.intersects(area)) {
+					continue;
+				}
+				if (out == null) {
+					out = new ArrayList<>(others);
+				}
+				out.add(Shapes.create(box));
+				hop |= box.maxY > feet + entity.maxUpStep() + 1.0E-3 && box.maxY <= feet + HOPS && box.minY < feet + entity.getBbHeight();
+			}
+		}
+		if (hop && entity instanceof Mob mob && !mob.level().isClientSide() && (mob.onGround() || mob.isInWater())) {
+			mob.getJumpControl().jump();
+		}
+		return out == null ? others : out;
 	}
 
 	/** It comes down: a thud and a cloud of leaves. */
@@ -1359,6 +1417,7 @@ public final class FallingTree extends Entity {
 	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder entityData) {
 		entityData.define(LEAN, 0.0F);
+		entityData.define(SOLID, false);
 	}
 
 	/** (0.7.588) Kept with the world: its pieces (by block, not number), lean, heading, and whether it's down or flying. */
