@@ -124,6 +124,13 @@ public final class FallingTree extends Entity {
 	 */
 	static final int LOG_CHOPS = 3, LEAF_FALL = 2, LEAF_FALL_TICKS = 10, LEAF_HOLD = 3;
 	/**
+	 * Andy, 2026-11-25 (a village buried in tree debris after a storm, and the lag with it): "those should disappear quicker
+	 * if no players are nearby, or the drops shouldnt spawn at all if a player didnt chop the tree or cause the fall". A
+	 * tree a player brought down ({@link #byPlayer}) still gives what it would; its leaves dropping off as it lies give
+	 * nothing unless a player is within this many blocks to see them go.
+	 */
+	static final double DEBRIS_WATCH = 32.0;
+	/**
 	 * (0.7.588) A tree that's down looks again this often (ticks) whether what holds it up is gone: free to turn further
 	 * about its foot, it falls on; with none of its wood resting on anything, it drops.
 	 */
@@ -221,6 +228,12 @@ public final class FallingTree extends Entity {
 	private int downAt = -1;
 	private float reach = 2.0F;
 	private @Nullable Entity cutter;
+	/**
+	 * A player brought it down (cut it, knocked it over with one they cut, or has taken an axe to it since): only then
+	 * does it leave anything on the ground ({@link #DEBRIS_WATCH}). Storms, fire, giants, loose wood and woodcutters'
+	 * strays leave no drops (a woodcutter's own tree still goes into his bag). Saved.
+	 */
+	private boolean byPlayer;
 	private ItemStack tool = ItemStack.EMPTY;
 	private @Nullable Consumer<ItemStack> sink;
 	/** (0.6.12) Torn up by a tornado: it flies (ticks flown), tumbling this many degrees a tick. */
@@ -287,11 +300,17 @@ public final class FallingTree extends Entity {
 		tree.setAttached(HEADING, heading);
 		tree.reach = Math.max(2.0F, top * 0.55F);
 		tree.cutter = cutter;
+		tree.byPlayer = cutter instanceof Player || cutter instanceof FallingTree hitter && hitter.byPlayer;
 		tree.tool = tool.copy();
 		tree.sink = sink;
 		level.addFreshEntity(tree);
 		level.playSound(null, cut, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 1.4F, 0.5F);
 		return tree;
+	}
+
+	/** A player caused its fall after all (a tree they felled with another mod knocked it over: FelledCompat). */
+	void markByPlayer() {
+		this.byPlayer = true;
 	}
 
 	/** Knocked over by a tree turning {@code speed} degrees a tick: it goes over at least that fast. */
@@ -697,7 +716,7 @@ public final class FallingTree extends Entity {
 				continue;
 			}
 			BlockPos at = this.cell(this.where(p, turn));
-			if (weaker(level, at, level.getBlockState(at), p.blockState()) && level.destroyBlock(at, true, this)) {
+			if (weaker(level, at, level.getBlockState(at), p.blockState()) && level.destroyBlock(at, this.byPlayer, this)) {
 				broken++;
 			}
 		}
@@ -811,7 +830,7 @@ public final class FallingTree extends Entity {
 			}
 			BlockPos at = this.cell(this.where(p, turn));
 			BlockState there = level.getBlockState(at);
-			if (there.getBlock() instanceof LeavesBlock && !there.getValue(LeavesBlock.PERSISTENT) && level.destroyBlock(at, true, this)) {
+			if (there.getBlock() instanceof LeavesBlock && !there.getValue(LeavesBlock.PERSISTENT) && level.destroyBlock(at, this.byPlayer, this)) {
 				broken++;
 			}
 		}
@@ -1107,7 +1126,7 @@ public final class FallingTree extends Entity {
 			for (ItemStack drop : Block.getDrops(state, level, pos, null, this.cutter, this.tool)) {
 				if (this.sink != null) {
 					this.sink.accept(drop);
-				} else {
+				} else if (this.byPlayer) {
 					Block.popResource(level, pos, drop);
 				}
 			}
@@ -1302,11 +1321,13 @@ public final class FallingTree extends Entity {
 			return;
 		}
 		Quaternionf turn = turn(this.lean(), this.heading());
+		// (nobody near to see them go: they wither away to nothing, DEBRIS_WATCH)
+		boolean gives = this.byPlayer && level.getNearestPlayer(this, DEBRIS_WATCH) != null;
 		Set<Integer> gone = new HashSet<>();
 		for (int n = 0; n < LEAF_FALL && !leaves.isEmpty(); n++) {
 			int i = leaves.remove(level.getRandom().nextInt(leaves.size()));
 			gone.add(i);
-			this.drop(level, pieces.get(i), turn, null, ItemStack.EMPTY, n == 0);
+			this.drop(level, pieces.get(i), turn, null, ItemStack.EMPTY, n == 0, gives);
 		}
 		List<Piece> kept = new ArrayList<>(pieces.size());
 		for (int i = 0; i < pieces.size(); i++) {
@@ -1319,11 +1340,18 @@ public final class FallingTree extends Entity {
 
 	/** {@code p} breaks off: what it gives, where it is, with a puff (and its breaking sound, if {@code loud}). */
 	private void drop(ServerLevel level, Piece p, Quaternionf turn, @Nullable Entity by, ItemStack tool, boolean loud) {
+		this.drop(level, p, turn, by, tool, loud, by instanceof Player || this.byPlayer);
+	}
+
+	/** As above; it leaves its drops on the ground only if it {@code gives} ({@link #byPlayer}). */
+	private void drop(ServerLevel level, Piece p, Quaternionf turn, @Nullable Entity by, ItemStack tool, boolean loud, boolean gives) {
 		BlockState state = p.blockState();
 		Vec3 at = this.where(p, turn);
 		BlockPos pos = BlockPos.containing(at);
-		for (ItemStack drop : Block.getDrops(state, level, pos, null, by, tool)) {
-			Block.popResource(level, pos, drop);
+		if (gives) {
+			for (ItemStack drop : Block.getDrops(state, level, pos, null, by, tool)) {
+				Block.popResource(level, pos, drop);
+			}
 		}
 		if (loud) {
 			level.levelEvent(2001, pos, Block.getId(state));
@@ -1346,6 +1374,8 @@ public final class FallingTree extends Entity {
 	}
 
 	private void chop(ServerLevel level, Player player) {
+		// (an axe taken to it: what falls off it from now on is the player's doing)
+		this.byPlayer = true;
 		List<Piece> pieces = this.pieces();
 		Quaternionf turn = turn(this.lean(), this.heading());
 		Vec3 eye = player.getEyePosition();
@@ -1635,6 +1665,7 @@ public final class FallingTree extends Entity {
 		this.flown = input.getIntOr("flown", 0);
 		this.tumble = input.getFloatOr("tumble", 0.0F);
 		this.reach = input.getFloatOr("reach", 2.0F);
+		this.byPlayer = input.getBooleanOr("by_player", false);
 	}
 
 	@Override
@@ -1649,5 +1680,6 @@ public final class FallingTree extends Entity {
 		output.putInt("flown", this.flown);
 		output.putFloat("tumble", this.tumble);
 		output.putFloat("reach", this.reach);
+		output.putBoolean("by_player", this.byPlayer);
 	}
 }
