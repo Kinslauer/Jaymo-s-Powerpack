@@ -142,7 +142,8 @@
 		"LivingEntityHitKindsMixin",
 		"PlayerArrowPickMixin",
 		"AbstractArrowTippedMixin",
-		"NanRotationDiagnosticMixin"
+		"NanRotationDiagnosticMixin",
+		"PenguinSwimPitchMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

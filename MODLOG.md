@@ -8126,3 +8126,8 @@ Andy's rulings of 2026-11-25, for a host who isn't a web slinger (whom the symbi
 - Classes: WebSymbiote (unlockBond, bulkBond, clings, fightsMask, fightSlinger, slingerFoe), WebSymbioteBond (the forced fight), WebSymbioteInfection (the duel and the bind), WebSymbioteMind (the Hide line), WebSymbioteBlob (leapInto), Costume (maskOff), WebSymbioteCollect, WebSymbioteWings, WebSymbioteTalk, WebSymbioteScreen, WebDebugCommand, lang web.json.
 - For Andy to confirm: a host without the Web in the big body keeps it until they put it away: it has no idle or time-out withdrawal at 60 (its withdrawals compare with the bond it comes at, 60, as a web slinger's do at 100). The Hide order now starts the suit fight rather than only drawing the tendrils in. The bell and the bottle (bond 70, DEEP_BOND) still pour the symbiote off a host without the Web without a fight. Breaking free outright (the lockout) strips the suit for a minute.
 - Not built locally (CI builds it); not played. Not checked in game: the 500-block driven chase to an untracked slinger, the client steering for it, the struggle bar, and the new whispers and tooltip.
+
+## 0.27.43 (2026-11-25): Penguins no longer flood the server log with NaN rotation errors (#2161)
+
+- Ambient Creatures' penguin works out its swimming pitch from its speed with a typo in the sum, and gets NaN (not a number) whenever x*y + z comes out negative. Minecraft threw each one away with an "Invalid entity rotation: NaN, discarding" error, hundreds a minute near penguins (found by the NaN rotation diagnostic near Colette's village). A non-finite pitch is now swapped for the one it has (`PenguinSwimPitchMixin`, only when Ambient Creatures is loaded).
+- Built by CI; not played.
