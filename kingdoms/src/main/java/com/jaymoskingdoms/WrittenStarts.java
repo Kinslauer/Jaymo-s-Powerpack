@@ -67,6 +67,12 @@ import org.jspecify.annotations.Nullable;
  * setting-out point ({@link LifeStory}), on dry, natural, level ground, {@link #TOWN_KEEP} from any settlement's seat (a
  * way-hut is for those caught between towns). A party mate who takes the road after them wakes beside them in theirs.
  * The land is made behind the loading screen first, as every start's is. Once raised it stays: a new life raises another.
+ *
+ * <p><b>Shared starts.</b> (Andy, 2026-11-25: "Both, chosen per start") A start whose file says {@code "shared": true} is
+ * raised once for the whole world, and every newcomer who draws it wakes in that same build, with the tale of their own:
+ * at {@code "at": [x, z]} (on the ground there) or {@code [x, y, z]} (its ground layer at y), unturned, as its maker
+ * placed it; with no {@code "at"}, wherever the first newcomer's start search set it down. What the first ones took from
+ * its chests is gone for those after, and its opened gates stay open.
  */
 public final class WrittenStarts {
 	/** How far the ground under a build may rise and fall (blocks). */
@@ -81,20 +87,25 @@ public final class WrittenStarts {
 	static final int GATE_MOST = 64;
 
 	/** A written start as read from its file. */
-	record Def(String id, Identifier structure, int ground, int weight, String tale, boolean bare) {
+	record Def(String id, Identifier structure, int ground, int weight, String tale, boolean bare, boolean shared, @Nullable BlockPos at, boolean atGround) {
 	}
 
 	private static Map<String, Def> all = Map.of();
 
 	/** Where a player's written start stands: which one, its spot, its marks (key to spot) and its gates (key to the blocks they open). */
-	record Placed(String start, long place, Map<String, Long> marks, Map<String, List<Long>> gates) {
+	record Placed(String start, long place, Map<String, Long> marks, Map<String, List<Long>> gates, float yaw) {
 		static final Codec<Placed> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.STRING.fieldOf("start").forGetter(Placed::start),
 				Codec.LONG.fieldOf("place").forGetter(Placed::place),
 				Codec.unboundedMap(Codec.STRING, Codec.LONG).optionalFieldOf("marks", Map.of()).forGetter(Placed::marks),
-				Codec.unboundedMap(Codec.STRING, Codec.LONG.listOf()).optionalFieldOf("gates", Map.of()).forGetter(Placed::gates))
+				Codec.unboundedMap(Codec.STRING, Codec.LONG.listOf()).optionalFieldOf("gates", Map.of()).forGetter(Placed::gates),
+				Codec.FLOAT.optionalFieldOf("yaw", 0.0F).forGetter(Placed::yaw))
 			.apply(i, Placed::new));
 	}
+
+	/** On the overworld: the shared starts raised so far (start id to where it stands). */
+	static final AttachmentType<Map<String, Placed>> SHARED = AttachmentRegistry.create(JaymosKingdoms.id("written_starts_shared"),
+		builder -> builder.persistent(Codec.unboundedMap(Codec.STRING, Placed.CODEC)));
 
 	/** On a player: the written start they woke in this life (kept through a death; a new life's replaces it). */
 	static final AttachmentType<Placed> PLACED = AttachmentRegistry.create(JaymosKingdoms.id("written_start"),
@@ -136,8 +147,21 @@ public final class WrittenStarts {
 			JaymosKingdoms.LOGGER.warn("Written start {} names no structure; left out", id);
 			return null;
 		}
+		BlockPos at = null;
+		boolean atGround = false;
+		if (o.has("at")) {
+			com.google.gson.JsonArray a = GsonHelper.getAsJsonArray(o, "at");
+			if (a.size() == 2) {
+				at = new BlockPos(a.get(0).getAsInt(), 0, a.get(1).getAsInt());
+				atGround = true;
+			} else if (a.size() == 3) {
+				at = new BlockPos(a.get(0).getAsInt(), a.get(1).getAsInt(), a.get(2).getAsInt());
+			} else {
+				JaymosKingdoms.LOGGER.warn("Written start {}: 'at' must be [x, z] or [x, y, z]; it's ignored", id);
+			}
+		}
 		return new Def(id, structure, Math.max(0, GsonHelper.getAsInt(o, "ground", 0)), Math.max(1, GsonHelper.getAsInt(o, "weight", 1)),
-			GsonHelper.getAsString(o, "tale", ""), GsonHelper.getAsBoolean(o, "bare", false));
+			GsonHelper.getAsString(o, "tale", ""), GsonHelper.getAsBoolean(o, "bare", false), GsonHelper.getAsBoolean(o, "shared", false), at, atGround);
 	}
 
 	/** Whether any written start is loaded (with none, the road is shut: {@link RoadLocks#shutKeys}). */
@@ -172,14 +196,25 @@ public final class WrittenStarts {
 	}
 
 	/**
-	 * Raises a written start for {@code player} near {@code near} (a spot the start search chose) and notes it on them; the
-	 * spot to wake at, or null: no start is loaded, its build is missing, no level site is near, or the land isn't made yet
-	 * (then {@code wanted} asks for it, and the start is tried again once it's made).
+	 * Raises a written start for {@code player} near {@code near} (a spot the start search chose; null: none found) and notes
+	 * it on them; the spot to wake at, or null: no start is loaded, its build is missing, no level site is near, or the land
+	 * isn't made yet (then {@code wanted} asks for it, and the start is tried again once it's made). A shared start already
+	 * raised isn't raised again: they wake in it.
 	 */
-	static @Nullable Raised raise(ServerLevel level, ServerPlayer player, BlockPos near, RandomSource random, LifeStory.@Nullable Wanted wanted) {
+	static @Nullable Raised raise(ServerLevel level, ServerPlayer player, @Nullable BlockPos near, RandomSource random, LifeStory.@Nullable Wanted wanted) {
 		Def def = pick(random);
 		if (def == null) {
 			return null;
+		}
+		Map<String, Placed> shared = level.getAttachedOrElse(SHARED, Map.of());
+		Placed standing = def.shared() ? shared.get(def.id()) : null;
+		if (standing != null) {
+			player.setAttached(PLACED, standing);
+			Long spawn = standing.marks().get("spawn");
+			BlockPos place = BlockPos.of(standing.place());
+			Vec3 feet = spawn != null ? Vec3.atBottomCenterOf(BlockPos.of(spawn)) : Vec3.atBottomCenterOf(level.getHeightmapPos(
+				net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, place));
+			return new Raised(feet, standing.yaw(), place);
 		}
 		Optional<StructureTemplate> found = level.getServer().getStructureTemplateManager().get(def.structure());
 		if (found.isEmpty() || found.get().getSize().getX() == 0) {
@@ -187,10 +222,12 @@ public final class WrittenStarts {
 			return null;
 		}
 		StructureTemplate template = found.get();
-		Rotation rotation = Rotation.getRandom(random);
+		// (one put where its maker said stands as they saved it; the rest are turned any way)
+		Rotation rotation = def.at() != null ? Rotation.NONE : Rotation.getRandom(random);
 		BlockPos pivot = new BlockPos(template.getSize().getX() / 2, 0, template.getSize().getZ() / 2);
 		StructurePlaceSettings settings = new StructurePlaceSettings().setRotation(rotation).setRotationPivot(pivot).setIgnoreEntities(false);
-		BlockPos origin = site(level, template, settings, pivot, def.ground(), near, wanted);
+		BlockPos origin = def.at() != null ? fixed(level, template, settings, pivot, def, wanted)
+			: near == null ? null : site(level, template, settings, pivot, def.ground(), near, wanted);
 		if (origin == null) {
 			return null;
 		}
@@ -231,9 +268,46 @@ public final class WrittenStarts {
 			feet = Vec3.atBottomCenterOf(new BlockPos(place.getX(), origin.getY() + def.ground() + 1, place.getZ()));
 			JaymosKingdoms.LOGGER.warn("Written start {} has no spawn mark; waking at its middle", def.id());
 		}
-		player.setAttached(PLACED, new Placed(def.id(), place.asLong(), Map.copyOf(marks), Map.copyOf(gates)));
-		JaymosKingdoms.LOGGER.info("Written start {} raised for {} at {}", def.id(), player.getName().getString(), place);
+		// (where they woke, for those who wake in a shared start after them)
+		marks.put("spawn", BlockPos.containing(feet).asLong());
+		Placed placed = new Placed(def.id(), place.asLong(), Map.copyOf(marks), Map.copyOf(gates), yaw);
+		player.setAttached(PLACED, placed);
+		if (def.shared()) {
+			Map<String, Placed> now = new HashMap<>(shared);
+			now.put(def.id(), placed);
+			level.setAttached(SHARED, Map.copyOf(now));
+		}
+		JaymosKingdoms.LOGGER.info("Written start {} raised{} for {} at {}", def.id(), def.shared() ? " (shared)" : "", player.getName().getString(), place);
 		return new Raised(feet, yaw, place);
+	}
+
+	/**
+	 * Where a start with an {@code "at"} stands: its middle on that column, its ground layer at the given height or on the
+	 * ground's top there; null while its land isn't made (asked of {@code wanted}).
+	 */
+	private static @Nullable BlockPos fixed(ServerLevel level, StructureTemplate template, StructurePlaceSettings settings, BlockPos pivot, Def def,
+		LifeStory.@Nullable Wanted wanted) {
+		BlockPos centre = def.at();
+		BlockPos at = new BlockPos(centre.getX() - pivot.getX(), 0, centre.getZ() - pivot.getZ());
+		BoundingBox box = template.getBoundingBox(settings, at);
+		if (!Loaded.made(level, box.minX() - 1, box.minZ() - 1, box.maxX() + 1, box.maxZ() + 1)) {
+			if (wanted != null) {
+				wanted.want(box.minX(), box.minZ());
+				wanted.want(box.maxX(), box.minZ());
+				wanted.want(box.minX(), box.maxZ());
+				wanted.want(box.maxX(), box.maxZ());
+			}
+			return null;
+		}
+		int y = centre.getY();
+		if (def.atGround()) {
+			y = WaysideInns.groundY(level, centre.getX(), centre.getZ());
+			if (y == Integer.MIN_VALUE) {
+				// (built on, or wet: the top of whatever is there)
+				y = level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, centre).getY() - 1;
+			}
+		}
+		return new BlockPos(at.getX(), y - def.ground(), at.getZ());
 	}
 
 	/**

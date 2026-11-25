@@ -2262,7 +2262,7 @@ public final class LifeStory {
 					to = spot(level, mate, spawn, WILD_MIN, WILD_MAX, random);
 				} else {
 					BlockPos near = spot(level, null, spawn, WILD_MIN, WILD_MAX, random);
-					WrittenStarts.Raised raised = near == null ? null : WrittenStarts.raise(level, player, near, random, setOut);
+					WrittenStarts.Raised raised = WrittenStarts.raise(level, player, near, random, setOut);
 					if (raised != null) {
 						player.teleportTo(level, raised.feet().x, raised.feet().y, raised.feet().z, Set.<net.minecraft.world.entity.Relative>of(), raised.yaw(), 0.0F, false);
 						landSafely(player);
