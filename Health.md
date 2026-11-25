@@ -1,9 +1,9 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 05:11). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 05:19). Don't edit. -->
 # Vault health
 
 Problems in the live notes, found on every sync. Nothing here is fixed by itself: whoever reads it (the coordinator's hourly check, a bot, Andy) fixes the note, and the line goes away on the next sync. `python tools/vault_sync.py --health` prints the same list.
 
-**11 problems.**
+**14 problems.**
 
 ## Statuses the pipeline doesn't know
 
@@ -17,6 +17,7 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 ## Missing PR numbers
 
 - [[Agents/hollow-captains|hollow-captains]]: in review with no `pr:`.
+- [[Agents/silver-sear-twin-harness|silver-sear-twin-harness]]: in review with no `pr:`.
 
 ## Agent notes whose task is done
 
@@ -33,3 +34,8 @@ Problems in the live notes, found on every sync. Nothing here is fixed by itself
 - [[Inbox/bleed-out-coma|bleed-out-coma]]: `for: coordinator` matches no bot or agent, so no one will claim it.
 - [[Inbox/reference-mods-picklist-2026-11-24|reference-mods-picklist-2026-11-24]]: `for: any (needs Andy's PC: the folder is local)` matches no bot or agent, so no one will claim it.
 - [[Inbox/structure-spawn-rate-wooden-hut|structure-spawn-rate-wooden-hut]]: `for: coordinator` matches no bot or agent, so no one will claim it.
+
+## Project memory
+
+- The memory index is 59 KB; only the first 16 KB load in a new thread. Shorten entries to one line and move detail into topic files.
+- 5 index lines are over 300 characters (lines 2, 54, 159, 211, 220): move their detail into topic files.

@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 05:11). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 05:19). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -23,10 +23,15 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
+- [ ] #2152 The symbiote's meeting film no longer disconnects the client (Powers, 2026-11-25)
+- [ ] #2151 Bounty boards against a wall; plains towns always have a working windmill, a butcher and an infirmary (Kingdoms, 2026-11-25)
+- [ ] #2150 faints can be mashed out of (Powers, Kingdoms, 2026-11-25)
 - [ ] #2149 maggots for the hook: taken alive, best river bait, crawl off when dropped (Powers, Kingdoms, 2026-11-25)
+- [ ] #2148 explorer maps never make chunks on the server thread (Kingdoms, 2026-11-25)
 - [ ] #2147 The Nightmare haunts from the dark instead of acting as an enderman (Kingdoms, 2026-11-25)
 - [ ] #2146 Shift-click pins advancements, sound browser left clicks and the Notices tips toggle work again (Powers, Kingdoms, 2026-11-25)
 - [ ] #2145 Dodge key: tap to dodge, hold to roll, hold longer to go prone (Powers, 2026-11-25)
+- [ ] #2144 hollow among the dead - the Hollow walk with the hordes, and a kill makes a captain (Kingdoms, 2026-11-25)
 - [ ] #2143 Life story: no more stuck on "On to your looks" (Kingdoms, 2026-11-25)
 - [ ] #2142 Wall knocks only from real knocks: plain jumps and your own sprint-jumps never hurt (Powers, 2026-11-25)
 - [ ] #2141 fallen trees are solid (Kingdoms, 2026-11-25)
@@ -78,16 +83,11 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2087 Bandit camps by the trade roads (Kingdoms, 2026-11-24)
 - [ ] #2086 Blasts blow limbs off the downed (Powers, 2026-11-24)
 - [ ] #2085 Structures need a reason: mines by buyers, stables by towns, watchtowers on borders, ruins with heirs (Kingdoms, 2026-11-24)
-- [ ] #2084 Red (unparryable) mob blows rarer and slower (Powers, Kingdoms, 2026-11-24)
-- [ ] #2083 Felled by a leg blow: ragdoll, prone, roll to get up (Powers, 2026-11-24)
-- [ ] #2082 Realm banks: deposits, interest, loans and letters of credit at the counting house (Kingdoms, 2026-11-24)
-- [ ] #2080 the big suit's new head (Powers, 2026-11-24)
-- [ ] #2079 Downed: a blow knocks you out, red blows kill, no tossing, fire kills after 6 s (Powers, 2026-11-24)
-- …and 535 older ones.
+- …and 540 older ones.
 
 ## Health
 
-11 problems in the notes: [[Health]].
+14 problems in the notes: [[Health]].
 
 ## Last week
 
