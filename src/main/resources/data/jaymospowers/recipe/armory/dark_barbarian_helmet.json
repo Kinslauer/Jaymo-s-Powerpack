@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "D": "#jaymospowers:dark_hides",
+    "X": "#c:hides"
+  },
+  "pattern": [
+    "X X",
+    "DDD",
+    "D D"
+  ],
+  "result": {
+    "id": "jaymospowers:dark_barbarian_helmet"
+  }
+}

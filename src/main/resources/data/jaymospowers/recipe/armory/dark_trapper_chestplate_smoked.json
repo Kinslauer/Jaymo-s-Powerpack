@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_transmute",
+  "category": "equipment",
+  "input": "jaymospowers:trapper_chestplate",
+  "material": "#minecraft:coals",
+  "result": {
+    "id": "jaymospowers:dark_trapper_chestplate"
+  }
+}

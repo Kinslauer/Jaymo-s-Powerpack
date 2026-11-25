@@ -152,7 +152,11 @@ public final class Armory {
 	public static Item FANG_GAUNTLETS;
 	/** (BWM port) The mining charge ({@link MiningChargeBlock}). */
 	public static Block MINING_CHARGE;
-	public static final ResourceKey<EquipmentAsset> CAVEMAN = ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosPowers.id("caveman"));
+	/**
+	 * The primitive hide sets, each with its own look (Andy: "i want all 3, and they can have a darker variation made
+	 * from darker hides"): the cave band's Caveman, the Trapper's and the Barbarian's, and their dark makes.
+	 */
+	static final String[] HIDE_SETS = {"caveman", "dark_caveman", "trapper", "dark_trapper", "barbarian", "dark_barbarian"};
 
 	/** (0.10.13) A quarterstaff in a wind sorcerer's hand rides the gale (WindStaff). */
 	private static final ItemLore STAFF_LORE = new ItemLore(List.of(
@@ -191,10 +195,13 @@ public final class Armory {
 		Twinblade.schematic = item("twinblade_schematic", Item::new, p -> p.stacksTo(1).rarity(net.minecraft.world.item.Rarity.UNCOMMON)
 			.component(DataComponents.LORE, new ItemLore(List.of(Component.translatable("item.jaymospowers.twinblade_schematic.hint").withStyle(ChatFormatting.GRAY),
 				Component.translatable("item.jaymospowers.twinblade_schematic.old").withStyle(ChatFormatting.DARK_GRAY)))));
-		item("caveman_helmet", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.HELMET));
-		item("caveman_chestplate", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.CHESTPLATE));
-		item("caveman_leggings", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.LEGGINGS));
-		item("caveman_boots", Item::new, p -> p.humanoidArmor(cavemanHide(), ArmorType.BOOTS));
+		for (String set : HIDE_SETS) {
+			ArmorMaterial hide = hide(set);
+			item(set + "_helmet", Item::new, p -> p.humanoidArmor(hide, ArmorType.HELMET));
+			item(set + "_chestplate", Item::new, p -> p.humanoidArmor(hide, ArmorType.CHESTPLATE));
+			item(set + "_leggings", Item::new, p -> p.humanoidArmor(hide, ArmorType.LEGGINGS));
+			item(set + "_boots", Item::new, p -> p.humanoidArmor(hide, ArmorType.BOOTS));
+		}
 		// antiquity's bow, Japan's throwing irons, the whalers' harpoon
 		item("recurve_bow", RecurveBowItem::new, p -> p.durability(RecurveBowItem.DURABILITY).enchantable(1));
 		// (Smithing) its steel broadhead
@@ -396,19 +403,15 @@ public final class Armory {
 			Tool.Rule.overrideSpeed(blocks.getOrThrow(BlockTags.SWORD_EFFICIENT), MACHETE_CUT_SPEED)), 1.0F, 2, false);
 	}
 
-	private static ArmorMaterial caveman;
-
-	/** Hide and bone: leather's protection, a little tougher-wearing. */
-	private static ArmorMaterial cavemanHide() {
-		if (caveman == null) {
-			Map<ArmorType, Integer> defense = new EnumMap<>(ArmorType.class);
-			defense.put(ArmorType.BOOTS, 1);
-			defense.put(ArmorType.LEGGINGS, 2);
-			defense.put(ArmorType.CHESTPLATE, 3);
-			defense.put(ArmorType.HELMET, 1);
-			defense.put(ArmorType.BODY, 3);
-			caveman = new ArmorMaterial(7, defense, 15, SoundEvents.ARMOR_EQUIP_LEATHER, 0.0F, 0.0F, ItemTags.REPAIRS_LEATHER_ARMOR, CAVEMAN);
-		}
-		return caveman;
+	/** Hide and bone: leather's protection, a little tougher-wearing. Every hide set wears the same; only the look differs. */
+	private static ArmorMaterial hide(String set) {
+		Map<ArmorType, Integer> defense = new EnumMap<>(ArmorType.class);
+		defense.put(ArmorType.BOOTS, 1);
+		defense.put(ArmorType.LEGGINGS, 2);
+		defense.put(ArmorType.CHESTPLATE, 3);
+		defense.put(ArmorType.HELMET, 1);
+		defense.put(ArmorType.BODY, 3);
+		ResourceKey<EquipmentAsset> look = ResourceKey.create(EquipmentAssets.ROOT_ID, JaymosPowers.id(set));
+		return new ArmorMaterial(7, defense, 15, SoundEvents.ARMOR_EQUIP_LEATHER, 0.0F, 0.0F, ItemTags.REPAIRS_LEATHER_ARMOR, look);
 	}
 }

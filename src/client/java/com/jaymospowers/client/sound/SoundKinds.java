@@ -154,7 +154,7 @@ public final class SoundKinds {
 
 	/**
 	 * Our own armour, and other mods' by the words in their names. Tinkering's bog iron is plate; Arsenal's Void Crown
-	 * rings like crystal; the Rig is heavy; Armory's caveman hide is leather; Alchemy's ichorcloth is cloth; Kingdoms'
+	 * rings like crystal; the Rig is heavy; Armory's hide sets (caveman, trapper, barbarian) are leather; Alchemy's ichorcloth is cloth; Kingdoms'
 	 * Ronin lamellar and Kintsugi are scale, the Warlord leather, Paladin, Gladiator and Heavenly plate, Reverent heavy,
 	 * Primal bone; the Aether's zanite crystal, gravitite and obsidian heavy, neptune scale, valkyrie and phoenix plate.
 	 */
@@ -171,7 +171,7 @@ public final class SoundKinds {
 		if (has(path, "primal", "bone", "shell", "chitin", "skull")) {
 			return Armour.BONE;
 		}
-		if (has(path, "caveman", "warlord", "leather", "hide", "fur", "pelt")) {
+		if (has(path, "caveman", "trapper", "barbarian", "warlord", "leather", "hide", "fur", "pelt")) {
 			return Armour.LEATHER;
 		}
 		if (has(path, "chain", "mail")) {
