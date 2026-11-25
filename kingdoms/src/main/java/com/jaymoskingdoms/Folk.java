@@ -463,6 +463,9 @@ public class Folk extends PathfinderMob implements net.minecraft.world.entity.mo
 		this.goalSelector.addGoal(0, new WeaponSense.SenseGoal(this));
 		// badly hurt it breaks off, mends with what it carries and comes back; friends cover it (BreakOff)
 		this.goalSelector.addGoal(0, new BreakOff.MendGoal(this));
+		// no way to a shooter: to cover a while (Hiding); no way to its foe: a way round (Detours)
+		this.goalSelector.addGoal(1, new Hiding.HideGoal(this));
+		this.goalSelector.addGoal(1, new Detours.DetourGoal(this));
 		this.goalSelector.addGoal(1, new Shoot(this));
 		// (0.7.85) disarmed, it goes for a weapon before anything else (Rearm)
 		this.goalSelector.addGoal(1, new Rearm.Fetch(this));

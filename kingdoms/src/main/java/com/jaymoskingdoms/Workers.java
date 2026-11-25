@@ -161,6 +161,10 @@ public final class Workers {
 			// (0.7.184) a guard whose shots keep failing is on the move to a better place: its brain waits
 			return true;
 		}
+		if (Hiding.brainStep(mob) || Detours.brainStep(mob)) {
+			// no way to the shooter (gone to cover a while) or to its foe (a way round): its brain waits
+			return true;
+		}
 		if (mob.tickCount % Standing.EVERY == 0 && (w.role() == Folk.GUARD || Rulers.leaderRole(w.role()) || mob.hasAttached(Standing.LINES))) {
 			// (0.7.175) what MCA's screen shows of a ruler or a guard
 			Standing.update(level, w);

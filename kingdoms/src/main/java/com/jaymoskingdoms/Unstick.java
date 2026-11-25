@@ -73,7 +73,8 @@ public final class Unstick {
 		if (ground && mob.isInWater() && mob.horizontalCollision) {
 			wadeOut(level, mob, nav, here);
 		}
-		if (s.from == null || horizontal(here, s.from) > HEADWAY) {
+		// (up or down a ladder counts as headway too: Climbing)
+		if (s.from == null || horizontal(here, s.from) > HEADWAY || mob.onClimbable() && Math.abs(here.y - s.from.y) > HEADWAY) {
 			s.from = here;
 			s.still = 0;
 			return;
