@@ -8287,3 +8287,8 @@ The symbiote does things in the world now, not only on your screen.
   into a crown of eight petal tendrils for a while, folding away when it has passed.
 - Its new lines are in `lang/parts/web_body_acts.json`; the Settings screen's small-talk and requests switches are
   respected (the molt asks nothing and keeps no score with requests off).
+
+## 0.27.57 (2026-11-25): The game starts again (the symbiote HUD crashed it on launch) (#2172)
+
+- The symbiote HUD (`WebSymbioteHud`) made its three order icons (shield, sword, ender eye) as the class loaded, during the client's start, before items are ready ("Components not bound yet"), so every client crashed on launch. The icons are now made when drawn.
+- Built by CI; checked against the crash report; not played.
