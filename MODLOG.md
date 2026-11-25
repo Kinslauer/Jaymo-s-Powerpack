@@ -8131,3 +8131,11 @@ Andy's rulings of 2026-11-25, for a host who isn't a web slinger (whom the symbi
 
 - Ambient Creatures' penguin works out its swimming pitch from its speed with a typo in the sum, and gets NaN (not a number) whenever x*y + z comes out negative. Minecraft threw each one away with an "Invalid entity rotation: NaN, discarding" error, hundreds a minute near penguins (found by the NaN rotation diagnostic near Colette's village). A non-finite pitch is now swapped for the one it has (`PenguinSwimPitchMixin`, only when Ambient Creatures is loaded).
 - Built by CI; not played.
+
+## 0.27.44 (2026-11-25): severed limbs lie where they are and look like the body they came off (#2163)
+
+- Andy: "limbs from dead zombies are constantly floating or not rendered with the proper blood and grime layers".
+- **Floating**: a severed part's body is put back to its rest pose (every part's pivot, not just the kept part's turn) before only that part is drawn (`Dismembered.hide`). Fresh Animations moves pivots, so the limb was drawn away from the middle `SeveredPartRenderer` sets on the ground, hanging in the air beside it.
+- **Buried**: a part that would start inside the ground (a dead body's hand lies against or a little into it) starts in the first room above instead (`SeveredPart.free`, up to a block). Before, it fell on through the block and lay buried, only its outline showing.
+- **Blood and dirt**: a part carries the blood and grime of the body it came off: the living body's blood coat and grime (`SeveredPart.spawn`), or a dead body's blood (`KitchenCompat`), drawn over it by `BloodCoatLayer.severed` (and over a player's part, `submitSeveredPlayer`). A part off a Kitchen corpse is also painted as the corpse is (rot, bare bone, char, grey, skinned) with its eyes shut, through Kitchen's `Dressed` by name (`SeveredPartRenderer.KitchenPaint`; the paint is a snapshot from when it came off). Parts lying in worlds from before keep the old look.
+- Built (Powers and Kitchen compile); not played.

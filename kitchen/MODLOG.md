@@ -2841,3 +2841,8 @@ Andy: "why doesnt the bear stay on the hook?" It did stay, but it didn't look li
 - A body now tells clients what a tap on it will do (`CorpseEntity#tapDoes`, synced every 5 ticks and whenever the loot screen closes): open the loot screen, give up a bone (a picked-clean skeleton) or nothing. Jaymo's Powers' context hints read it through the object share (`Corpses.SHARE_TAP`), so the "search the body" line goes away once a body has nothing left, instead of players tapping on and on at it.
 - A tap on a body with anything on it still always opens the loot screen; whether it still wears gear is read once per look, not on every check.
 - Built; not played.
+
+## 0.6.88 (2026-11-25): a corpse's part off tells how the body looks (#2163)
+
+- A part coming off a body lying dead (`CorpseEntity.shed`) also hands the hook the body's `dressed()` and `wear()`, so Jaymo's Powers draws the severed limb rotted, charred or skinned as the body is.
+- Built; not played.
