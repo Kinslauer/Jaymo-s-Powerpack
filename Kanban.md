@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 19:04). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 19:12). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -34,12 +34,11 @@ kanban-plugin: board
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Inbox/village-mods-5-town-life-hats|village-mods-5-town-life-hats]] · 💻 Odysseus · #2122 · claimed
-- [ ] [[Agents/gravity-magnetism|gravity-magnetism]] · 💻 Odysseus · running
-- [ ] [[Agents/waterskin-redesign|waterskin-redesign]] · 💻 Odysseus · running
 
 
 ## In review
 
+- [ ] [[Agents/waterskin-redesign|waterskin-redesign]] · 💻 Odysseus · #2124 · in-review
 
 
 ## Needs Andy
@@ -48,6 +47,7 @@ kanban-plugin: board
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
 - [ ] [[Inbox/wither-model|wither-model]] · 🍇 Bacchus · blocked
 - [ ] [[Agents/codex-reference-dinos-venom|codex-reference-dinos-venom]] · 💻 Odysseus · stalled
+- [ ] [[Agents/gravity-magnetism|gravity-magnetism]] · 💻 Odysseus · stalled
 - [ ] [[Agents/otherworld-fabric-picklist|otherworld-fabric-picklist]] · 💻 Odysseus · stalled
 
 
