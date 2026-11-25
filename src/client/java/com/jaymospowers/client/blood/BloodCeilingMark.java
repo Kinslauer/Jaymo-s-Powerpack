@@ -38,6 +38,9 @@ public final class BloodCeilingMark extends Particle implements BloodDecals.Deca
 	private final float yaw;
 	private int drips = DRIPS;
 
+	/** The block whose underside it's on. */
+	private final BlockPos ceiling;
+
 	private BloodCeilingMark(ClientLevel level, double x, double y, double z, int color, float size, TextureAtlasSprite sprite) {
 		super(level, x, y, z);
 		this.color = color;
@@ -47,6 +50,7 @@ public final class BloodCeilingMark extends Particle implements BloodDecals.Deca
 		this.lifetime = LIFE + this.random.nextInt(200);
 		this.gravity = 0.0F;
 		this.hasPhysics = false;
+		this.ceiling = BlockPos.containing(x, y + 0.05, z);
 	}
 
 	/** A drop of {@code color}, {@code dropSize} across, flew up into the underside of a block at (x, ceiling, z): splats there (by the gore level's chance). */
@@ -64,7 +68,8 @@ public final class BloodCeilingMark extends Particle implements BloodDecals.Deca
 		this.xo = this.x;
 		this.yo = this.y;
 		this.zo = this.z;
-		if (this.age++ >= this.lifetime) {
+		if (this.age++ >= this.lifetime || this.level.hasChunkAt(this.ceiling) && this.level.getBlockState(this.ceiling).isAir()) {
+			// gone with its time, or with the block it hung from
 			this.remove();
 			return;
 		}

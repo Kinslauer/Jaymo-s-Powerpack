@@ -26,9 +26,17 @@ abstract class BloodVideoSettingsMixin extends OptionsSubScreen {
 		if (this.list == null) {
 			return;
 		}
+		@SuppressWarnings("unchecked")
+		CycleButton<BloodSettings.Preset>[] presetButton = new CycleButton[1];
 		CycleButton<BloodSettings.Amount> button = CycleButton.builder(BloodSettings.Amount::label, BloodSettings.amount())
 			.withValues(BloodSettings.Amount.values())
-			.create(Component.translatable("options.jaymospowers.blood"), (b, value) -> BloodSettings.set(value));
+			.create(Component.translatable("options.jaymospowers.blood"), (b, value) -> {
+				BloodSettings.set(value);
+				BloodSettings.Preset now = BloodSettings.preset();
+				if (presetButton[0] != null && now != null) {
+					presetButton[0].setValue(now);
+				}
+			});
 		button.setTooltip(Tooltip.create(Component.translatable("options.jaymospowers.blood.tooltip")));
 		this.list.addBig(button);
 		// the gore presets: each sets the blood amount above (and the gore level)
@@ -40,6 +48,7 @@ abstract class BloodVideoSettingsMixin extends OptionsSubScreen {
 				BloodSettings.set(value);
 				button.setValue(value.amount);
 			});
+		presetButton[0] = presets;
 		presets.setTooltip(Tooltip.create(Component.translatable("options.jaymospowers.gore.tooltip")));
 		this.list.addBig(presets);
 		CycleButton<Boolean> safe = CycleButton.onOffBuilder(BloodSettings.streamerSafe())

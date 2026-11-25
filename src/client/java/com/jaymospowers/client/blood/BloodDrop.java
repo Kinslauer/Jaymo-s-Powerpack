@@ -72,7 +72,13 @@ final class BloodDrop extends SingleQuadParticle {
 		this.setColor(BloodPuddle.red(color), BloodPuddle.green(color), BloodPuddle.blue(color));
 		this.growIn = 1.0F + this.random.nextFloat();
 		this.mirrored = this.random.nextBoolean();
-		this.underwater = !level.getFluidState(BlockPos.containing(x, y, z)).isEmpty();
+		var spawnedIn = level.getFluidState(BlockPos.containing(x, y, z));
+		this.underwater = !spawnedIn.isEmpty();
+		if (spawnedIn.is(net.minecraft.tags.FluidTags.LAVA)) {
+			// blood let out in lava is gone at once
+			this.remove();
+			return;
+		}
 		LIVE.add(this);
 		if (this.underwater) {
 			this.xd *= UNDERWATER_SLOW;
