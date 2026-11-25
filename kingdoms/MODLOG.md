@@ -17427,3 +17427,8 @@ Andy: "the AI in these mods is exactly what our MCA and npcs have been missing."
 
 - Four new Powers moves on the skill bar for a bonded web slinger: Tendril Lash, Rupture (red), Nightstep (black), Crowned Onslaught; Shroud's description now says it is Carapace / Aegis / Shroud by strain. Data and lang only (`move_*` spells, `power_moves.json`, `weapon_forms` tag).
 - Built; not played.
+
+## 0.12.90 (2026-11-25): Waking villages into kingdoms no longer freezes the server (#2171)
+
+- The server crashed on its watchdog (Deck, 2026-11-25, a new world waking snowy villages into kingdoms). Looking up which structure starts in a village's chunk (`PoolPick.starts`) asked for the chunk from the server thread, and there Minecraft waits until the chunk is made, running other queued chunk loads meanwhile; the server stopped ticking. It now asks from a background thread, which only queues the request, so the kingdom wake (`TownWakes`) and the capital's search (`StoryGround`) wait for it without holding up the server.
+- Built by CI; not played.
