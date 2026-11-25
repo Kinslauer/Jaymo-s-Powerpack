@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: Andy's thread "Borrow Hand of God power effects"
 branch: claude/project-thread-pht3yb
 with: Claude (cloud thread)
@@ -28,3 +28,4 @@ Chrono, the rest for Nadir, its heat vision beam as the look of Frostborn's beam
 
 ## Notes
 - ARR: ideas only, nothing copied (code, sounds, textures).
+- 2026-11-25 02:47 PR #2134 is merged into master; moved to Agents/Done.

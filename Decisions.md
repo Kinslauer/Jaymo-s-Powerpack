@@ -1017,3 +1017,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-25 (Andy, Hand of God thread): Hand of God (onikoox, ARR) borrowed as ideas: its time manipulation and super speed effects go to Chrono, its heat vision beam is the look of Frostborn's beam, its electrokinesis is what he wants from Stormborn's Thunderhead, and the rest of its powers go to Nadir.
 
 - 2026-11-25 (Andy, Hand of God thread): all five of its other powers go on Nadir (telekinesis, Void erase, finger-snap to dust, sun/moon throw, reality wave). The sun and moon throw deals damage equal to the largest meteor or Spirit Bomb and really damages the world; only the biome wave restores afterward ("it is just a visual effect").
+- 2026-11-25 (Andy, Hand of God thread): merged PR #2134 (Frostborn heat-vision beam, Thunderhead electrokinesis, Chrono slow time fx, five Nadir moves).
