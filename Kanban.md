@@ -36,7 +36,7 @@ kanban-plugin: board
 ## In review
 
 - [ ] [[Agents/hollow-captains|hollow-captains]] · 💻 Odysseus · in-review
-- [ ] [[Agents/silver-sear-twin-harness|silver-sear-twin-harness]] · 💻 Odysseus · in-review
+- [ ] [[Agents/silver-sear-twin-harness|silver-sear-twin-harness]] · 💻 Odysseus · #2154 · in-review
 
 
 ## Needs Andy

@@ -1025,3 +1025,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 - 2026-11-25 (Andy, "Pick up maggots as fishing bait" thread): approved the lore paragraph "Gentles for the hook" (live maggots picked up as bait, PR #2149) and asked to merge it.
 - 2026-11-25 (hollow-captains, PR #2144): Andy approved the lore paragraph "The Hollow among the dead" ("approve").
 - 2026-11-25 (Andy, "Make silver blades sear monsters" thread): silver blades sear the undead, werewolves and other monsters along the slash (extra damage, stun, animated hot cut); a silver sword sheathes on the back beside a second sword, Witcher style (idea only).
+- 2026-11-25 (Andy, "Make silver blades sear monsters" thread, PR #2154): approved the lore paragraph "Silver sears what the Warden puts down" ("approved lore").
