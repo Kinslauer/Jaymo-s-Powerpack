@@ -1,0 +1,45 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "jaymoskingdoms:block/witch_cauldron"
+      }
+    },
+    {
+      "when": {
+        "pumpkins": "1",
+        "brew": "0"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/witch_cauldron_content_level1"
+      }
+    },
+    {
+      "when": {
+        "pumpkins": "2",
+        "brew": "0"
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/witch_cauldron_content_level2"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "brew": "1"
+          },
+          {
+            "brew": "2"
+          },
+          {
+            "brew": "3"
+          }
+        ]
+      },
+      "apply": {
+        "model": "jaymoskingdoms:block/witch_cauldron_content_full"
+      }
+    }
+  ]
+}

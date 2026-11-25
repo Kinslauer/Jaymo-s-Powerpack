@@ -234,6 +234,7 @@ public final class JaymosKingdomsClient implements ClientModInitializer {
 		FamiliarClient.register();
 		// the hanging tree's crows, in the familiar raven's coat
 		EntityRenderers.register(com.jaymoskingdoms.Crow.TYPE, CrowRenderer::new);
+		com.jaymoskingdoms.client.harvest.HarvestClient.register();
 		CombatArtKey.register();
 		// (0.7.381) Weapon Forms: the belt strip, the chain counter, the belt screen
 		com.jaymoskingdoms.client.forms.FormsClient.register();
