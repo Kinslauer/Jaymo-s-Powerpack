@@ -1,6 +1,6 @@
-package com.jaymospowers.mixin.alexscaves;
+package com.jaymoskingdoms.mixin.alexscaves;
 
-import com.jaymospowers.core.Scout;
+import com.jaymoskingdoms.Scout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.Registries;
@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 abstract class CabinMapScoutMixin {
 	@Redirect(method = "doApply", require = 0, at = @At(value = "INVOKE",
 		target = "Lnet/minecraft/server/level/ServerLevel;findNearestMapStructure(Lnet/minecraft/tags/TagKey;Lnet/minecraft/core/BlockPos;IZ)Lnet/minecraft/core/BlockPos;"))
-	private BlockPos jaymospowers$scoutNotMake(ServerLevel level, TagKey<Structure> tag, BlockPos origin, int radius, boolean skipKnown) {
+	private BlockPos jaymoskingdoms$scoutNotMake(ServerLevel level, TagKey<Structure> tag, BlockPos origin, int radius, boolean skipKnown) {
 		if (level.getServer().isSameThread()) {
 			HolderSet<Structure> set = level.registryAccess().lookupOrThrow(Registries.STRUCTURE).get(tag).orElse(null);
 			return set == null ? null : Scout.nearest(level, set, origin, radius, skipKnown);

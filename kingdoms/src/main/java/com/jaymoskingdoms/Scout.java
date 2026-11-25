@@ -42,6 +42,9 @@ import org.jspecify.annotations.Nullable;
  * generator when the chunk isn't there) skips the ones that can't hold it before vanilla's costlier check lays it out.
  */
 public final class Scout {
+	/** How far apart (blocks) the heights are sampled down a column when looking for the biome an underground structure starts in. */
+	private static final int COLUMN_STEP = 8;
+
 	private Scout() {
 	}
 
@@ -60,6 +63,16 @@ public final class Scout {
 		return found == null ? null : found.getFirst();
 	}
 
+	/**
+	 * {@link #nearest(ServerLevel, HolderSet, BlockPos, int)} leaving out the starts an earlier map already claimed when
+	 * {@code requireUnreferenced} (vanilla's skipKnownStructures). It reads only the structure cache and saved chunk data,
+	 * so a start not made yet can't be told claimed.
+	 */
+	public static @Nullable BlockPos nearest(ServerLevel level, HolderSet<Structure> wanted, BlockPos from, int rings, boolean requireUnreferenced) {
+		Pair<BlockPos, Holder<Structure>> found = Stacked.searchingOverworld(level, () -> findHere(level, wanted, from, rings, chunk -> false, requireUnreferenced));
+		return found == null ? null : found.getFirst();
+	}
+
 	/** {@link #nearest(ServerLevel, HolderSet, BlockPos, int)} with which structure it is, as findNearestMapStructure gives. */
 	public static @Nullable Pair<BlockPos, Holder<Structure>> find(ServerLevel level, HolderSet<Structure> wanted, BlockPos from, int rings) {
 		return find(level, wanted, from, rings, chunk -> false);
@@ -70,11 +83,11 @@ public final class Scout {
 		Predicate<ChunkPos> skip) {
 		// (in a One Dimension world, the Overworld band's own placements, ground and structure checks: the stacked level's
 		// have no placements at all and read the clouds as ground, so nothing was ever found)
-		return Stacked.searchingOverworld(level, () -> findHere(level, wanted, from, rings, skip));
+		return Stacked.searchingOverworld(level, () -> findHere(level, wanted, from, rings, skip, false));
 	}
 
 	private static @Nullable Pair<BlockPos, Holder<Structure>> findHere(ServerLevel level, HolderSet<Structure> wanted, BlockPos from, int rings,
-		Predicate<ChunkPos> skip) {
+		Predicate<ChunkPos> skip, boolean requireUnreferenced) {
 		StructureManager structures = level.structureManager();
 		if (!structures.shouldGenerateStructures()) {
 			return null;
@@ -122,10 +135,11 @@ public final class Scout {
 					int y = generator.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, ground.heights(), random) + ground.shift();
 					biome = level.getUncachedNoiseBiome(net.minecraft.core.QuartPos.fromBlock(x), net.minecraft.core.QuartPos.fromBlock(y), net.minecraft.core.QuartPos.fromBlock(z));
 				}
-				if (!structure.value().biomes().contains(biome)) {
+				// (an underground structure starts at its own depth, not under the surface: ancient cities are in the deep dark)
+				if (!structure.value().biomes().contains(biome) && !(underground(structure.value()) && columnHas(level, ground, structure.value(), x, z))) {
 					continue;
 				}
-				StructureCheckResult result = structures.checkStructurePresence(spot.chunk(), structure.value(), spot.placement(), false);
+				StructureCheckResult result = structures.checkStructurePresence(spot.chunk(), structure.value(), spot.placement(), requireUnreferenced);
 				// START_PRESENT: made already; CHUNK_LOAD_NEEDED: vanilla's check says one could be made there (the chunk isn't
 				// made yet), which in a set of many (the shared village pool) only means it's in the draw: it counts only if it
 				// wins it (PoolPick; at the Deck's first start most woken villages had "no town started there")
@@ -149,5 +163,22 @@ public final class Scout {
 			}
 		}
 		return null;
+	}
+
+	/** Whether {@code structure} is placed underground, where the biome at the surface says nothing about its start. */
+	private static boolean underground(Structure structure) {
+		return structure.step() == net.minecraft.world.level.levelgen.GenerationStep.Decoration.UNDERGROUND_DECORATION
+			|| structure.step() == net.minecraft.world.level.levelgen.GenerationStep.Decoration.UNDERGROUND_STRUCTURES;
+	}
+
+	/** Whether any of {@code structure}'s biomes lies in the column at (x, z), from the ground's floor up to its top (sampled every {@link #COLUMN_STEP} blocks). */
+	private static boolean columnHas(ServerLevel level, Stacked.Ground ground, Structure structure, int x, int z) {
+		for (int y = ground.heights().getMinY(); y <= ground.heights().getMaxY(); y += COLUMN_STEP) {
+			if (structure.biomes().contains(level.getUncachedNoiseBiome(net.minecraft.core.QuartPos.fromBlock(x),
+				net.minecraft.core.QuartPos.fromBlock(y + ground.shift()), net.minecraft.core.QuartPos.fromBlock(z)))) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

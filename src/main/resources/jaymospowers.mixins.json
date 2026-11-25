@@ -140,8 +140,7 @@
 		"SnowballStingMixin",
 		"LivingEntityHitKindsMixin",
 		"PlayerArrowPickMixin",
-		"AbstractArrowTippedMixin",
-		"ExplorationMapScoutMixin"
+		"AbstractArrowTippedMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

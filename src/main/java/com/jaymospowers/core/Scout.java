@@ -60,27 +60,11 @@ public final class Scout {
 		return found == null ? null : found.getFirst();
 	}
 
-	/**
-	 * {@link #nearest(ServerLevel, HolderSet, BlockPos, int)} leaving out the starts an earlier map already claimed when
-	 * {@code requireUnreferenced} (vanilla's skipKnownStructures). It reads only the structure cache and saved chunk
-	 * data, so a start not made yet can't be told claimed.
-	 */
-	public static @Nullable BlockPos nearest(ServerLevel level, HolderSet<Structure> wanted, BlockPos from, int rings, boolean requireUnreferenced) {
-		Pair<BlockPos, Holder<Structure>> found = find(level, wanted, from, rings, requireUnreferenced);
-		return found == null ? null : found.getFirst();
-	}
-
 	/** {@link #nearest(ServerLevel, HolderSet, BlockPos, int)} with which structure it is, as findNearestMapStructure gives. */
 	public static @Nullable Pair<BlockPos, Holder<Structure>> find(ServerLevel level, HolderSet<Structure> wanted, BlockPos from, int rings) {
-		return find(level, wanted, from, rings, false);
-	}
-
-	/** {@link #find(ServerLevel, HolderSet, BlockPos, int)} skipping claimed starts when {@code requireUnreferenced}. */
-	public static @Nullable Pair<BlockPos, Holder<Structure>> find(ServerLevel level, HolderSet<Structure> wanted, BlockPos from, int rings,
-		boolean requireUnreferenced) {
 		// (in a One Dimension world, the Overworld band's own placements, ground and structure checks: the stacked level's
 		// have no placements at all and read the clouds as ground, so nothing was ever found)
-		return find(level, net.minecraft.world.level.Level.OVERWORLD, wanted, from, rings, null, requireUnreferenced);
+		return find(level, net.minecraft.world.level.Level.OVERWORLD, wanted, from, rings, null);
 	}
 
 	/**
@@ -90,16 +74,11 @@ public final class Scout {
 	 */
 	public static @Nullable Pair<BlockPos, Holder<Structure>> find(ServerLevel level, net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> realm,
 		HolderSet<Structure> wanted, BlockPos from, int rings, @Nullable Integer biomeY) {
-		return find(level, realm, wanted, from, rings, biomeY, false);
-	}
-
-	private static @Nullable Pair<BlockPos, Holder<Structure>> find(ServerLevel level, net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> realm,
-		HolderSet<Structure> wanted, BlockPos from, int rings, @Nullable Integer biomeY, boolean requireUnreferenced) {
-		return com.jaymospowers.compat.Stacked.searching(level, realm, () -> findHere(level, realm, wanted, from, rings, biomeY, requireUnreferenced));
+		return com.jaymospowers.compat.Stacked.searching(level, realm, () -> findHere(level, realm, wanted, from, rings, biomeY));
 	}
 
 	private static @Nullable Pair<BlockPos, Holder<Structure>> findHere(ServerLevel level, net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> realm,
-		HolderSet<Structure> wanted, BlockPos from, int rings, @Nullable Integer biomeY, boolean requireUnreferenced) {
+		HolderSet<Structure> wanted, BlockPos from, int rings, @Nullable Integer biomeY) {
 		StructureManager structures = level.structureManager();
 		if (!structures.shouldGenerateStructures()) {
 			return null;
@@ -146,7 +125,7 @@ public final class Scout {
 				if (!structure.value().biomes().contains(biome)) {
 					continue;
 				}
-				StructureCheckResult result = structures.checkStructurePresence(spot.chunk(), structure.value(), spot.placement(), requireUnreferenced);
+				StructureCheckResult result = structures.checkStructurePresence(spot.chunk(), structure.value(), spot.placement(), false);
 				// START_PRESENT: made already; CHUNK_LOAD_NEEDED: vanilla's check says one is made there (the chunk isn't made yet)
 				if (result != StructureCheckResult.START_NOT_PRESENT) {
 					return Pair.of(spot.placement().getLocatePos(spot.chunk()), structure);

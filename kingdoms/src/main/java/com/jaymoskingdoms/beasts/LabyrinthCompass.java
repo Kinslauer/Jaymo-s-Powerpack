@@ -1,15 +1,21 @@
 package com.jaymoskingdoms.beasts;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
+import java.util.WeakHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.LodestoneTracker;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -22,6 +28,14 @@ import org.jspecify.annotations.Nullable;
 public class LabyrinthCompass extends Item {
 	/** How often a held compass looks again (ticks), and how far out it looks (chunks). */
 	static final int EVERY = 100, REACH = 64;
+	/** A held compass keeps its last answer while its holder stays within this many chunks of where it was worked out. */
+	static final int REUSE_CHUNKS = 8;
+
+	private record Answer(ResourceKey<Level> dimension, ChunkPos at, @Nullable BlockPos near) {
+	}
+
+	/** Each holder's last answer: a search sweeps every candidate within REACH twice, so a held compass doesn't make one every 5 s. */
+	private static final Map<Entity, Answer> ANSWERS = Collections.synchronizedMap(new WeakHashMap<>());
 
 	public LabyrinthCompass(Item.Properties properties) {
 		super(properties);
@@ -33,7 +47,16 @@ public class LabyrinthCompass extends Item {
 		if ((slot != EquipmentSlot.MAINHAND && slot != EquipmentSlot.OFFHAND) || (owner.tickCount + owner.getId()) % EVERY != 0) {
 			return;
 		}
-		BlockPos near = nearest(level, owner.blockPosition());
+		ChunkPos here = owner.chunkPosition();
+		Answer last = ANSWERS.get(owner);
+		BlockPos near;
+		if (last != null && last.dimension() == level.dimension() && Math.abs(last.at().x() - here.x()) <= REUSE_CHUNKS
+			&& Math.abs(last.at().z() - here.z()) <= REUSE_CHUNKS) {
+			near = last.near();
+		} else {
+			near = nearest(level, owner.blockPosition());
+			ANSWERS.put(owner, new Answer(level.dimension(), here, near));
+		}
 		stack.set(DataComponents.LODESTONE_TRACKER, new LodestoneTracker(near == null ? Optional.empty() : Optional.of(new GlobalPos(level.dimension(), near)),
 			false));
 	}
