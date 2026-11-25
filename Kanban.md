@@ -20,7 +20,6 @@ kanban-plugin: board
 - [ ] [[Inbox/structures-4-mohknee|structures-4-mohknee]] · for any · open
 - [ ] [[Inbox/structures-5-faction-table|structures-5-faction-table]] · for any · open
 - [ ] [[Inbox/structures-6-stable-mine-farm|structures-6-stable-mine-farm]] · for any · open
-- [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · for 💻 Odysseus · open
 
 
 ## Being built
@@ -28,6 +27,7 @@ kanban-plugin: board
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
 - [ ] [[Inbox/village-mods-7-ctov-tidal-towns|village-mods-7-ctov-tidal-towns]] · 💻 Odysseus · claimed
 - [ ] [[Inbox/village-mods-8-swamp-goblins|village-mods-8-swamp-goblins]] · 💻 Odysseus · claimed
+- [ ] [[Inbox/village-mods-9-own-company|village-mods-9-own-company]] · 💻 Odysseus · claimed
 
 
 ## In review
