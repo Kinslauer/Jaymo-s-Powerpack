@@ -597,11 +597,12 @@ def tall_kettle(b):
 	"""The kettle hat in the German cut (the eisenhut): a tall bowl under a narrower brim that slopes down."""
 	bones(b, "head")
 	h = "armorHead"
-	b.cube(h, (-4.5, 28.4, -4.5), (4.5, 33.0, 4.5), "plate", faces_paint=P)
-	b.cube(h, (-3.6, 33.0, -3.6), (3.6, 34.2, 3.6), "plate", faces_paint=P_ALL)
-	b.cube(h, (-2.0, 34.2, -2.0), (2.0, 34.8, 2.0), "plate", faces_paint=P_ALL)
+	b.cube(h, (-4.5, 28.4, -4.5), (4.5, 34.0, 4.5), "plate", faces_paint=P)
+	b.cube(h, (-3.8, 34.0, -3.8), (3.8, 35.4, 3.8), "plate", faces_paint=P_ALL)
+	b.cube(h, (-2.6, 35.4, -2.6), (2.6, 36.4, 2.6), "plate", faces_paint=P_ALL)
+	b.cube(h, (-1.2, 36.4, -1.2), (1.2, 37.0, 1.2), "plate", faces_paint=P_ALL)
 	b.cube(h, (-4.6, 30.0, -4.6), (4.6, 30.7, 4.6), "rivet")
-	kettle_brim(b, 5.6, 6.8, 28.2, 1.0)
+	kettle_brim(b, 5.2, 6.0, 28.2, 1.4)
 	both(b, h, (4.2, 24.4, -1), (4.7, 28.4, 1), "strap")
 
 

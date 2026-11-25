@@ -135,7 +135,7 @@ public final class HeraldryArmour {
 			// (Mordhau harness 1) the kettle hat's other cuts and its deep kin, the open sallets, and the older and the far
 			// helms. Not in HELMS: a realm's own helm is picked from that list by position, so it stays as it was
 			helm("broad_kettle", Face.OPEN, 1.0F, 0.0F);
-			helm("tall_kettle", Face.OPEN, 1.0F, 1.8F);
+			helm("tall_kettle", Face.OPEN, 1.0F, 3.4F);
 			helm("deep_kettle", Face.VISORED, 0.34F, 0.8F);
 			helm("kettle_sallet", Face.OPEN, 0.95F, 0.5F);
 			helm("archers_sallet", Face.OPEN, 1.0F, 0.0F);
