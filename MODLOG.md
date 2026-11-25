@@ -7995,3 +7995,12 @@ Not tested in game (compiled only): the zoom, the chevron placement, the chime, 
 - Art: new icons and worn layers for all six, drawn in `tools/vanilla_style/hide_sets.py` (run by `armour.py`), base and vanilla_style alike, graded for the Excalibur look. The Caveman's old flat icons and Age of Weapons worn layers are replaced; its scraps cut is kept (`tools/vanilla_style/masks/`). All 24 icons pass `audit.py`.
 - `Armory` (one armour material per set, `HIDE_SETS`), `SoundKinds` (the new sets sound like leather), the armour and cloth-armour tags, `tools/armory_assets.py` (no longer copies AoW's caveman art).
 - Built by CI; not seen in game.
+
+## 0.27.27 (2026-11-25): Gravity metal fixes: no dupes from torn chunks, no weapon minting (#2128)
+
+- Any torn-out chunk (every power that tears blocks loose) now removes all its blocks first and tells their neighbours afterwards, so a rail, lantern, bell or torch torn out with what held it up no longer also drops as an item beside the piece in the chunk. Rails, containers and redstone still tell their neighbours they left.
+- Tear Loose: a mob gives up its metal only once, so a mob that arms itself afresh can't be milked for weapons.
+- Heavy metal rips: diamond, emerald and redstone blocks (and eggs) sound like metal but no longer count as metal.
+- The rock ward spends scrap too, not only rocks.
+- Classes: BlockCluster.of, GravityMetal, GravityRockOrders.
+- Built on CI; not played.
