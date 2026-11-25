@@ -18,3 +18,6 @@ owns:
 
 ## Done
 SilverSear (+2, stun, hiss), seared cut marks (char + glowing line cooling over 8 s), twin harness homes in BodyWeapons. Compiled with Gradle; not played. Lore paragraph "Silver sears what the Warden puts down" (new) added after "The Warden's hunters".
+
+## Notes
+- 2026-11-25 05:47 PR #2154 is merged into master; moved to Agents/Done.

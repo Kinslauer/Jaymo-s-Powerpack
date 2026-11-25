@@ -1,4 +1,4 @@
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 05:46). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 05:47). Only ticking boxes under "Merged, not played yet" sticks; anything else you change here is rewritten. -->
 # Dashboard
 
 Start here. The board of every task is [[Kanban]]; versions and the vault's guides are on [[Home]].
@@ -24,6 +24,7 @@ Start here. The board of every task is [[Kanban]]; versions and the vault's guid
 Merged in the last 30 days and marked "not played" in the MODLOGs, newest first. Tick a line once you've played it: the next sync moves it to [[Played]].
 
 - [ ] #2156 NaN rotation diagnostic (Powers, 2026-11-25)
+- [ ] #2155 Toughness: Grit and gear let you take more hits (Kingdoms, 2026-11-25)
 - [ ] #2154 silver blades sear monsters, and the twin harness on the back (Powers, 2026-11-25)
 - [ ] #2152 The symbiote's meeting film no longer disconnects the client (Powers, 2026-11-25)
 - [ ] #2151 Bounty boards against a wall; plains towns always have a working windmill, a butcher and an infirmary (Kingdoms, 2026-11-25)
@@ -82,8 +83,7 @@ Merged in the last 30 days and marked "not played" in the MODLOGs, newest first.
 - [ ] #2090 Villagers seen at their jobs: tools in hand, the smith at the forge, the cook at the stove, the butcher at the hook (Kingdoms, Kitchen, 2026-11-24)
 - [ ] #2089 tree felling - cut through the trunk, carved stumps, blasts bring buildings down (Kingdoms, 2026-11-24)
 - [ ] #2088 NPCs hold two-handed weapons in both hands (Kingdoms, 2026-11-24)
-- [ ] #2087 Bandit camps by the trade roads (Kingdoms, 2026-11-24)
-- …and 542 older ones.
+- …and 543 older ones.
 
 ## Health
 
