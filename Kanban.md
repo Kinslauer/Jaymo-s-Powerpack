@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-24 20:06). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-24 20:22). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -30,8 +30,8 @@ kanban-plugin: board
 ## Being built
 
 - [ ] [[Inbox/ai-texture-pipeline|ai-texture-pipeline]] · for ☁️ Cloud · #research · changes · fixing review notes
-- [ ] [[Inbox/mordhau-1-helms|mordhau-1-helms]] · 💻 Odysseus · claimed
 - [ ] [[Inbox/mordhau-2-hoods-crests|mordhau-2-hoods-crests]] · 💻 Odysseus · claimed
+- [ ] [[Inbox/mordhau-1-helms|mordhau-1-helms]] · 💻 Odysseus · claimed
 
 
 ## In review
