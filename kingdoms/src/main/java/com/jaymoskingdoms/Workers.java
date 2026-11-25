@@ -149,6 +149,10 @@ public final class Workers {
 			// (0.7.294) a realm's driver in the saddle: the drive is his
 			return true;
 		}
+		if (BreakOff.brainStep(mob)) {
+			// badly hurt it has broken off (or a friend is stepping in front of one who has): its brain waits
+			return true;
+		}
 		if (RangedTactics.brainStep(mob)) {
 			// (0.7.184) a guard whose shots keep failing is on the move to a better place: its brain waits
 			return true;
