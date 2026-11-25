@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 01:53). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 02:10). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -36,13 +36,13 @@ kanban-plugin: board
 
 ## In review
 
+- [ ] [[Inbox/wither-model|wither-model]] · ☁️ Cloud · #2131 · in-review
 
 
 ## Needs Andy
 
 - [ ] [[Inbox/narrator-missing-lines|narrator-missing-lines]] · for 🪽 any Hermes bot · blocked
 - [ ] [[Inbox/underground-stoneborn-goblin-villages|underground-stoneborn-goblin-villages]] · for any · blocked
-- [ ] [[Inbox/wither-model|wither-model]] · 🍇 Bacchus · blocked
 
 
 ## Done
