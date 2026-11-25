@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: silver blades sear monsters + witcher-style twin back sheath
 branch: claude/project-thread-p6j7ux
 with: cloud thread "Make silver blades sear monsters"
