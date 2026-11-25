@@ -1,8 +1,10 @@
 package com.jaymoskingdoms.client;
 
+import com.jaymoskingdoms.HeraldryArmour;
 import com.jaymoskingdoms.JaymosKingdoms;
 import com.jaymoskingdoms.McaCompat;
 import com.mojang.blaze3d.vertex.PoseStack;
+import java.util.Map;
 import java.util.function.Supplier;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
@@ -62,6 +64,28 @@ public final class UnderArmourLayer<S extends HumanoidRenderState> extends Rende
 	static final int AKETON_UNDYED = 0xD8CCB0;
 	/** An undyed doublet's colour (brown leather, as vanilla's). */
 	static final int UNDYED = 0xA06540;
+
+	/**
+	 * (Mordhau harness 3) A shirt of padding or mail drawn on the body and arms: its sheet, the colour an undyed one is tinted with
+	 * (-1: drawn as painted) and, for a piece of two colours, a second sheet tinted with its second colour (the dye it was made with,
+	 * else {@code secondUndyed}). The generator is kingdoms/tools/gen_heraldry_body.py.
+	 */
+	private record Sheet(Identifier texture, int undyed, @Nullable Identifier second, int secondUndyed) {
+		static Sheet of(String name, int undyed, int secondUndyed) {
+			return new Sheet(JaymosKingdoms.id("textures/entity/under_armour/" + name + ".png"), undyed,
+				secondUndyed < 0 ? null : JaymosKingdoms.id("textures/entity/under_armour/" + name + "_second.png"), secondUndyed);
+		}
+	}
+
+	private static final Sheet DOUBLET_SHEET = new Sheet(DOUBLET, UNDYED, null, -1), HAUBERGEON_SHEET = new Sheet(HAUBERGEON, -1, null, -1);
+	/** Every padding and mail piece with a sheet of its own, by item name (the doublet and the haubergeon are the rest). */
+	private static final Map<String, Sheet> SHEETS = Map.ofEntries(Map.entry("aketon", new Sheet(AKETON, AKETON_UNDYED, null, -1)),
+		Map.entry("fur_jerkin", new Sheet(FUR_JERKIN, -1, null, -1)), Map.entry("jazerant", new Sheet(JAZERANT, -1, null, -1)),
+		Map.entry("chequered_gambeson", Sheet.of("chequered_gambeson", 0x8E2B2B, 0xE8E0CC)), Map.entry("linen_shirt", Sheet.of("linen_shirt", 0xECE6D6, -1)),
+		Map.entry("wool_tunic", Sheet.of("wool_tunic", 0x6B5A44, -1)), Map.entry("cloth_vest", Sheet.of("cloth_vest", 0x7A6A48, -1)),
+		Map.entry("leather_jack", Sheet.of("leather_jack", -1, -1)), Map.entry("landsknecht_doublet", Sheet.of("landsknecht_doublet", 0x2B4A8E, 0xD8B034)),
+		Map.entry("mail_hauberk", Sheet.of("mail_hauberk", -1, -1)), Map.entry("plated_mail", Sheet.of("plated_mail", -1, -1)),
+		Map.entry("scale_shirt", Sheet.of("scale_shirt", -1, -1)), Map.entry("quilted_coat", Sheet.of("quilted_coat", 0xCEBE96, -1)));
 
 	private final Suit suit;
 	private final Suit mail;
@@ -131,17 +155,25 @@ public final class UnderArmourLayer<S extends HumanoidRenderState> extends Rende
 		// (MCA's body has the one armour model: the outer shirt alone goes on it)
 		HumanoidModel<HumanoidRenderState> mca = McaCompat.LOADED ? McaUnderArmour.model(state) : null;
 		if (!padding.isEmpty() && (mca == null || mail.isEmpty())) {
-			String kind = BuiltInRegistries.ITEM.getKey(padding.getItem()).getPath();
-			Identifier texture = kind.equals("aketon") ? AKETON : kind.equals("fur_jerkin") ? FUR_JERKIN : DOUBLET;
-			int color = texture == FUR_JERKIN ? -1 : ARGB.opaque(DyedItemColor.getOrDefault(padding, texture == AKETON ? AKETON_UNDYED : UNDYED));
-			collector.submitModel(mca != null ? mca : this.suit, state, poseStack, RenderTypes.armorCutoutNoCull(texture), lightCoords, OverlayTexture.NO_OVERLAY,
-				color, null, state.outlineColor);
+			shirt(poseStack, collector, lightCoords, state, mca != null ? mca : this.suit, padding,
+				SHEETS.getOrDefault(BuiltInRegistries.ITEM.getKey(padding.getItem()).getPath(), DOUBLET_SHEET));
 		}
 		if (!mail.isEmpty()) {
-			collector.submitModel(mca != null ? mca : this.mail, state, poseStack, RenderTypes.armorCutoutNoCull(BuiltInRegistries.ITEM.getKey(mail.getItem()).getPath().equals("jazerant") ? JAZERANT : HAUBERGEON), lightCoords, OverlayTexture.NO_OVERLAY,
-				-1, null, state.outlineColor);
+			shirt(poseStack, collector, lightCoords, state, mca != null ? mca : this.mail, mail,
+				SHEETS.getOrDefault(BuiltInRegistries.ITEM.getKey(mail.getItem()).getPath(), HAUBERGEON_SHEET));
 		}
 		return true;
+	}
+
+	/** {@code worn}'s sheet on {@code model}: tinted with its dye if it takes one, then the second colour's sheet if it has two colours. */
+	private void shirt(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, HumanoidModel<HumanoidRenderState> model, ItemStack worn, Sheet sheet) {
+		int color = sheet.undyed() < 0 ? -1 : ARGB.opaque(DyedItemColor.getOrDefault(worn, sheet.undyed()));
+		collector.submitModel(model, state, poseStack, RenderTypes.armorCutoutNoCull(sheet.texture()), lightCoords, OverlayTexture.NO_OVERLAY, color, null,
+			state.outlineColor);
+		if (sheet.second() != null) {
+			collector.submitModel(model, state, poseStack, RenderTypes.armorCutoutNoCull(sheet.second()), lightCoords, OverlayTexture.NO_OVERLAY,
+				ARGB.opaque(worn.getOrDefault(HeraldryArmour.SECOND_COLOUR, sheet.secondUndyed())), null, state.outlineColor);
+		}
 	}
 
 	/** The suit that comes with {@code legs}, or null for none (no leggings, or a kind without one). */

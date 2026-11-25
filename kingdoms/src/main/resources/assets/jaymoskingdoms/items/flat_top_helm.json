@@ -108,6 +108,19 @@
           "type": "minecraft:model",
           "model": "jaymoskingdoms:item/flat_top_helm_rusted"
         }
+      },
+      {
+        "when": "covered",
+        "model": {
+          "type": "minecraft:model",
+          "model": "jaymoskingdoms:item/flat_top_helm_covered",
+          "tints": [
+            {
+              "type": "minecraft:dye",
+              "default": -8769990
+            }
+          ]
+        }
       }
     ],
     "fallback": {

@@ -2,6 +2,7 @@ package com.jaymoskingdoms;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -75,6 +76,13 @@ public final class Harness {
 			return name().toLowerCase(Locale.ROOT);
 		}
 	}
+
+	/**
+	 * The places that hold what a body wears under its armour. A guard who puts his armour by keeps these on (Andy, on the slashed
+	 * doublet: "you will see guards opt to remove their armor and stay within the harness gear, as it is too much to remove and
+	 * store"), read as: off duty or in town the heavy pieces come off and the under-layers stay.
+	 */
+	public static final java.util.Set<Slot> UNDER_LAYERS = EnumSet.of(Slot.PADDING, Slot.MAIL);
 
 	public static final int SLOTS = Slot.values().length;
 	private static final List<ItemStack> NONE = Collections.nCopies(SLOTS, ItemStack.EMPTY);
@@ -209,6 +217,17 @@ public final class Harness {
 	/** The harness's pieces were changed where they lie (fitted, oiled): saved and sent to every client again. */
 	static void resync(LivingEntity wearer) {
 		put(wearer, new ArrayList<>(worn(wearer)));
+	}
+
+	/** Takes the heavy pieces off {@code wearer} and leaves the {@link #UNDER_LAYERS} on (nothing is dropped). */
+	public static void putByHeavy(LivingEntity wearer) {
+		List<ItemStack> now = new ArrayList<>(worn(wearer));
+		for (Slot slot : Slot.values()) {
+			if (!UNDER_LAYERS.contains(slot)) {
+				now.set(slot.ordinal(), ItemStack.EMPTY);
+			}
+		}
+		put(wearer, now);
 	}
 
 	/** Takes everything off {@code wearer} (nothing is dropped). */

@@ -56,7 +56,7 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 	private static final Map<String, String> BONES = Map.of("armorHead", "head", "armorBody", "body", "armorRightArm", "right_arm",
 		"armorLeftArm", "left_arm", "armorRightLeg", "right_leg", "armorLeftLeg", "left_leg", "armorRightBoot", "right_leg", "armorLeftBoot", "left_leg");
 	/** The harness places drawn here, innermost first. */
-	private static final Harness.Slot[] DRAWN = {Harness.Slot.SHINS, Harness.Slot.THIGHS, Harness.Slot.WAIST, Harness.Slot.HANDS, Harness.Slot.ARMS,
+	private static final Harness.Slot[] DRAWN = {Harness.Slot.PADDING, Harness.Slot.MAIL, Harness.Slot.SHINS, Harness.Slot.THIGHS, Harness.Slot.WAIST, Harness.Slot.HANDS, Harness.Slot.ARMS,
 		Harness.Slot.NECK, Harness.Slot.SHOULDERS, Harness.Slot.OVER, Harness.Slot.HOOD, Harness.Slot.CREST};
 	/** An undyed piece of cloth's colour, by piece (as its icon's: the generator's DYED). */
 	private static final Map<String, Integer> UNDYED = Map.of("giornea", 0x8E2B2B, "cloak", 0x4A5568, "torn_cloak", 0x5A5246, "hood", 0x4A5568,
@@ -67,10 +67,15 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 		Map.entry("clerics_mantle", 0x8E2B2B), Map.entry("arming_cap", 0xD8CCB0), Map.entry("linen_coif", 0xECE6D6), Map.entry("bag_hat", 0x6E7F4A),
 		Map.entry("archers_cap", 0x3F6B3A), Map.entry("hunters_hat", 0x5E4A32), Map.entry("landsknecht_bonnet", 0xA02828), Map.entry("turban", 0xE8E0CC),
 		Map.entry("veiled_turban", 0x3A5A8E), Map.entry("jesters_hood", 0xB02E26));
-	private static final Map<String, Integer> SECOND_UNDYED = Map.of("landsknecht_bonnet", 0xF0C838, "jesters_hood", 0xE8C83A);
+	private static final Map<String, Integer> SECOND_UNDYED = Map.of("landsknecht_bonnet", 0xF0C838, "jesters_hood", 0xE8C83A, "jesters_motley", 0xE8C83A);
+	/** (Mordhau harness 3) The body's cloth models' undyed colours (gen_heraldry_body.py's UNDYED), and the colour a covered plate piece shows undyed. */
+	private static final Map<String, Integer> BODY_UNDYED = Map.ofEntries(Map.entry("wool_tunic", 0x6B5A44), Map.entry("quilted_coat", 0xCEBE96),
+		Map.entry("surcoat", 0x2B4A8E), Map.entry("torn_surcoat", 0x5A5246), Map.entry("monks_robe", 0x5A4632), Map.entry("kaftan", 0x2F5A7A),
+		Map.entry("jesters_motley", 0xB02E26), Map.entry("sash", 0xB02E26), Map.entry("ailettes", 0x2B4A8E), Map.entry("brigandine_coat", 0x7A2E2A));
+	private static final int COVERED_UNDYED = 0x7A2E3A;
 	/** Dyed pieces with parts drawn as they are painted (feathers, bells, gilt: heraldry_PIECE_fixed). */
 	private static final Set<String> TRIMMED = Set.of("clerics_mantle", "archers_cap", "hunters_hat", "landsknecht_bonnet", "turban", "veiled_turban",
-		"jesters_hood");
+		"jesters_hood", "surcoat", "torn_surcoat", "monks_robe", "kaftan", "jesters_motley", "ailettes", "brigandine_coat");
 	/** Hats, worn bare-headed: not drawn under a helm (the hood, cowl, mantle, caps and coifs go on over or under one). */
 	private static final Set<String> HATS = Set.of("tight_hood", "headsmans_hood", "bag_hat", "archers_cap", "field_hat", "hunters_hat",
 		"landsknecht_bonnet", "fur_hat", "turban", "veiled_turban", "jesters_hood", "laurel_wreath");
@@ -120,10 +125,8 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 		for (ItemStack stack : new ItemStack[] {state.feetEquipment, state.chestEquipment, state.headEquipment}) {
 			HeraldryArmour.Piece piece = HeraldryArmour.of(stack);
 			if (piece != null && piece.slot() == null) {
-				// (the coat of plates is cloth outside, in its dye)
-				Integer undyed = undyed(piece.name());
-				draw(poseStack, collector, lightCoords, state, piece.model(), texture(piece, stack),
-					undyed == null ? -1 : ARGB.opaque(DyedItemColor.getOrDefault(stack, undyed)));
+				// (the coat of plates is cloth outside, in its dye; plate covered in cloth the same)
+				draw(poseStack, collector, lightCoords, state, piece.model(), texture(piece, stack), tint(piece, stack));
 				dents(poseStack, collector, lightCoords, state, piece, stack);
 			}
 		}
@@ -156,9 +159,7 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 				// a hat isn't worn under a helm, and the sallet has its own bevor
 				continue;
 			} else {
-				Integer undyed = undyed(piece.name());
-				draw(poseStack, collector, lightCoords, state, piece.model(), texture(piece, stack),
-					undyed == null ? -1 : ARGB.opaque(DyedItemColor.getOrDefault(stack, undyed)));
+				draw(poseStack, collector, lightCoords, state, piece.model(), texture(piece, stack), tint(piece, stack));
 				dents(poseStack, collector, lightCoords, state, piece, stack);
 				// (Mordhau harness 2) feathers, bells and gilt as they are painted, and the second colour's cloth in it
 				if (TRIMMED.contains(piece.name())) {
@@ -172,7 +173,9 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 				// a tabard in a realm's arms: its ordinary laid over the field, front and back, in the charge's colour
 				HeraldryArmour.Arms arms = stack.get(HeraldryArmour.ARMS);
 				if (arms != null && arms.ordinary() >= 0 && arms.ordinary() < ORDINARIES) {
-					draw(poseStack, collector, lightCoords, state, piece.model(), "heraldry_tabard_arms_" + arms.ordinary(), ARGB.opaque(arms.charge()));
+					// (the ailettes' boards carry them on a sheet of their own)
+					draw(poseStack, collector, lightCoords, state, piece.model(), (piece.name().equals("ailettes") ? "heraldry_ailettes_arms_" : "heraldry_tabard_arms_")
+						+ arms.ordinary(), ARGB.opaque(arms.charge()));
 				}
 			}
 		}
@@ -183,7 +186,7 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 	 * {@link #BATTERED} badly (the generator's {@code heraldry_PIECE_dents1} and {@code _dents2}, over any finish).
 	 */
 	private void dents(PoseStack poseStack, SubmitNodeCollector collector, int lightCoords, S state, HeraldryArmour.Piece piece, ItemStack stack) {
-		if (!piece.plate() || !stack.isDamageableItem() || stack.getMaxDamage() <= 0) {
+		if (!piece.plate() || !stack.isDamageableItem() || stack.getMaxDamage() <= 0 || HeraldryArmour.COVERED.equals(HeraldryArmour.finish(stack))) {
 			return;
 		}
 		float worn = stack.getDamageValue() / (float)stack.getMaxDamage();
@@ -208,7 +211,19 @@ public final class HeraldryLayer<S extends HumanoidRenderState> extends RenderLa
 	/** An undyed piece of cloth's colour, or null for a piece that isn't dyed. */
 	private static @Nullable Integer undyed(String name) {
 		Integer undyed = UNDYED.get(name);
-		return undyed != null ? undyed : HOOD_UNDYED.get(name);
+		if (undyed == null) {
+			undyed = HOOD_UNDYED.get(name);
+		}
+		return undyed != null ? undyed : BODY_UNDYED.get(name);
+	}
+
+	/** The colour a piece is drawn tinted with: its dye if it is cloth, or plate covered in cloth (the cloth's colour); -1 for anything else. */
+	private static int tint(HeraldryArmour.Piece piece, ItemStack stack) {
+		Integer undyed = undyed(piece.name());
+		if (undyed == null && piece.plate() && HeraldryArmour.COVERED.equals(HeraldryArmour.finish(stack))) {
+			undyed = COVERED_UNDYED;
+		}
+		return undyed == null ? -1 : ARGB.opaque(DyedItemColor.getOrDefault(stack, undyed));
 	}
 
 	/** Whether {@code helm} is the sallet, whose bevor is part of it (a bevor or wrapper in the harness isn't drawn under it). */

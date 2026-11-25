@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "group": "jaymoskingdoms:harness",
+  "ingredients": [
+    "#minecraft:wool",
+    "#minecraft:wool",
+    "#minecraft:wool"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jaymoskingdoms:cloth_vest"
+  }
+}

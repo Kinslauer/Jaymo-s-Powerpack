@@ -60,7 +60,7 @@ public final class HeraldryWear {
 	/** Prices (emeralds): the tailor's cloth, and the armourer's crests. */
 	static final int DOUBLET_PRICE = 4, HOOD_PRICE = 3, CLOAK_PRICE = 6, GIORNEA_PRICE = 9, TORSE_PRICE = 5, CREST_PRICE = 14;
 	/** Prices (emeralds): a realm tailor's tabard in its arms, and a realm armourer's coat of plates (cheaper than plate). */
-	static final int TABARD_PRICE = 8, COAT_PRICE = 16;
+	static final int TABARD_PRICE = 8, COAT_PRICE = 16, SURCOAT_PRICE = 9, AILETTES_PRICE = 12;
 	/** The makes of cuirass a realm's knights may wear, one to a realm. */
 	static final List<String> CUIRASSES = List.of("plate_cuirass", "fluted_cuirass", "rounded_breastplate");
 	/** The kettle hat, the helm that comes in each realm's own cut ({@link #KETTLE_CUTS}). */
@@ -635,10 +635,11 @@ public final class HeraldryWear {
 			}
 		}
 		for (Villager v : seen) {
-			// (a guard kitted by GuardKit keeps his harness over whatever chest piece was bought him, and puts it by with his armour)
+			// (a guard kitted by GuardKit keeps his harness over whatever chest piece was bought him, and puts it by with his armour:
+			// the heavy pieces, not the padding and mail under them, which he stays in)
 			ItemStack chest = v.getItemBySlot(EquipmentSlot.CHEST);
 			if (!Harness.get(v, Harness.Slot.ARMS).isEmpty() && HeraldryArmour.of(chest) == null && (!v.hasAttached(GuardKit.KIT) || chest.isEmpty())) {
-				Harness.clear(v);
+				Harness.putByHeavy(v);
 			}
 		}
 	}
@@ -808,9 +809,13 @@ public final class HeraldryWear {
 				offer(offers, "giornea", GIORNEA_PRICE);
 				offer(offers, "torse", TORSE_PRICE);
 				offer(offers, tabard(level.getServer(), f), TABARD_PRICE);
+				// (Mordhau harness 3) the long surcoat in the realm's colour
+				offer(offers, dyed(HeraldryArmour.stack("surcoat"), Outfits.rgb(Outfits.heraldry(f, level.getServer()).field())), SURCOAT_PRICE);
 			}
 		} else if (job.equals("armorer") && f.type().isRealm()) {
 			offer(offers, coatOfPlates(level.getServer(), f), COAT_PRICE);
+			// (Mordhau harness 3) ailettes bearing the realm's arms
+			offer(offers, withArms(dyed(HeraldryArmour.stack("ailettes"), Outfits.rgb(Outfits.heraldry(f, level.getServer()).field())), level.getServer(), f), AILETTES_PRICE);
 			if (f.type() == FactionType.KINGDOM) {
 				offer(offers, "crest_horns", CREST_PRICE);
 				offer(offers, "crest_wings", CREST_PRICE);
