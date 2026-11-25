@@ -875,7 +875,8 @@ public final class Senses {
 		@Override
 		public boolean canUse() {
 			// (a guard making an arrest doesn't stop chasing or beating the crook to turn: Arrests)
-			return this.track.turnLeft > 0 && this.track.turnAt != null && this.mob.isAlive() && !Downed.isDowned(this.mob) && !Arrests.busy(this.mob);
+			return this.track.turnLeft > 0 && this.track.turnAt != null && this.mob.isAlive() && !Downed.isDowned(this.mob) && !Arrests.busy(this.mob)
+				&& !BreakOff.away(this.mob);
 		}
 
 		@Override

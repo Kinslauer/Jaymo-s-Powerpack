@@ -12,7 +12,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * Hands a humanoid's melee attacks to {@link MobCombat} (Better Combat's weapon moves) when it fights that way; every
@@ -20,8 +19,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * it up instead of striking ({@link MobShields}).
  * <p>
  * Fighting AI patch 3 ({@link Blows}): the game's blow, for a humanoid without Better Combat, comes at once just after a blow
- * taken on its shield (sh-counter), never sooner than its weapon's full charge, maybe from a jump's fall (ml-crit), and lands
- * from its weapon's reach (ml-reach); after its blow it steps back to that reach (every fighter the goal runs).
+ * taken on its shield (sh-counter), never sooner than its weapon's full charge, maybe from a jump's fall (ml-crit); it lands from
+ * the game's own reach. After its blow it steps back toward its weapon's reach, never past where it can strike from (ml-reach;
+ * every fighter the goal runs).
  */
 @Mixin(MeleeAttackGoal.class)
 abstract class MeleeAttackGoalMixin {
@@ -31,9 +31,6 @@ abstract class MeleeAttackGoalMixin {
 
 	@Shadow
 	private int ticksUntilNextAttack;
-
-	@Shadow
-	protected abstract boolean isTimeToAttack();
 
 	@Inject(method = "checkAndPerformAttack", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$weaponMoves(LivingEntity target, CallbackInfo ci) {
@@ -54,14 +51,6 @@ abstract class MeleeAttackGoalMixin {
 		// (ml-crit) never sooner than a full charge, and a heavy weapon's blow may wait for the fall of a jump
 		if (this.ticksUntilNextAttack <= 0 && Blows.holds(this.mob, target)) {
 			ci.cancel();
-		}
-	}
-
-	/** (ml-reach) Without Better Combat a humanoid's blow lands from its weapon's reach, not only the game's short one. */
-	@Inject(method = "canPerformAttack", at = @At("RETURN"), cancellable = true)
-	private void jaymoskingdoms$reach(LivingEntity target, CallbackInfoReturnable<Boolean> cir) {
-		if (!cir.getReturnValueZ() && this.isTimeToAttack() && Blows.inReach(this.mob, target) && this.mob.getSensing().hasLineOfSight(target)) {
-			cir.setReturnValue(true);
 		}
 	}
 

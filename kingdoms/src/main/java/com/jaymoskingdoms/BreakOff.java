@@ -33,10 +33,14 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.SwingAnimation;
+import net.minecraft.world.item.component.UseRemainder;
+import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 import net.minecraft.world.item.consume_effects.ConsumeEffect;
+import net.minecraft.world.item.consume_effects.TeleportRandomlyConsumeEffect;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Path;
@@ -54,16 +58,19 @@ import org.jspecify.annotations.Nullable;
  * along a path checked node by node (no lava, fire or other harm on it, no drop it would take fall damage from), for up
  * to {@link #RETREAT_TICKS} or {@link #RETREAT_BLOCKS}. It lets go of its foe meanwhile, so it neither swings nor shoots.</li>
  * <li><b>Mend</b>: with no foe within {@link #HEAL_CLEAR} it uses one thing it carries every {@link #HEAL_GAP}: a bandage
- * ({@link PackUse#BANDAGES}), food, or a healing or regeneration potion, from its hands or its pack (an MCA villager's or a
- * pillager's inventory). Each is spent. Nothing in hand or pack, no mending.</li>
+ * ({@link PackUse#BANDAGES}), food (the plainest first, never one that harms, the precious last; a bowl or bottle kept), or a
+ * healing or regeneration potion, from its hands or its pack (an MCA villager's or a pillager's inventory, a folk's
+ * {@link BeltPouch}). Each is spent. Nothing in hand or pack, no mending: such a fighter falls back once a fight (to get clear and
+ * call for cover), then fights on hurt till the fight is over.</li>
  * <li><b>Come back</b>: at {@link #RETURN} or more (or after {@link #MEND_LONGEST} out) it rejoins: to its leader if he's
- * away from it (a band's or the player it follows), then its foe; with no foe left, its post.</li>
+ * away from it (a band's or the player it follows), then its foe; with no foe left, its post (a mob with goals walks there in
+ * {@link MendGoal}).</li>
  * <li><b>Nerve</b>: the fearless and the reckless ({@link Temperaments#fearless}, {@link Duellists#reckless}) break off only
  * under {@link #RETREAT_BOLD}, the timid under {@link #RETREAT_TIMID}; a band leader near ({@link BandLeaders}) shouts and
  * the band holds {@link #LEADER_HOLDS} longer.</li>
  * <li><b>Cornered</b>: with no safe way out (no safe spot, or pressed again with every leg used) it fights on.</li>
- * <li><b>Cover</b>: up to {@link #COVER_MAX} friends within {@link #COVER_NEAR} who lean GUARD or MEDIC ({@link Comrades})
- * step between the one falling back and its foe for {@link #COVER_TICKS}, and take that foe on.</li>
+ * <li><b>Cover</b>: every friend within {@link #COVER_NEAR} who leans GUARD or MEDIC ({@link Comrades}; the nearest
+ * {@link #COVER_MAX}) steps between the one falling back and a foe chasing it for {@link #COVER_TICKS}, and takes that foe on.</li>
  * </ul>
  * Lines ({@link Callouts}): {@code fallback}, {@code cover} (with friends to cover), {@code back}, and the leader's
  * {@code lead.hold}. Never against a downed body, never a downed fighter falling back, never a guard making an arrest.
@@ -98,16 +105,22 @@ public final class BreakOff {
 	static final int BACK_TICKS = 100;
 	/** After coming back it doesn't break off again for this long (ticks); cornered, it fights at least this long (ticks). */
 	static final int AGAIN_GAP = 300, CORNER_GAP = 100;
-	/** Cover: friends this near (blocks), at most this many, for this long (ticks); they stand this far in front (blocks). */
+	/** With nothing to mend with it falls back once a fight; a fight is over once it has had no foe this long (ticks). */
+	static final int FIGHT_OVER = 200;
+	/** Back to its post with no foe left: walked for this long at most (ticks). */
+	static final int HOME_TICKS = 200;
+	/** Cover: friends this near (blocks), at most this many (for the cost), for this long (ticks); they stand this far in front (blocks). */
 	static final double COVER_NEAR = 8.0, COVER_GAP = 2.5;
-	static final int COVER_MAX = 2, COVER_TICKS = 100;
+	static final int COVER_MAX = 6, COVER_TICKS = 100;
 	/** A cover walks when this far from its spot (blocks), and stops this near. */
 	static final double COVER_GO = 3.0, COVER_AT = 1.5;
 	/** A fighter is looked at for breaking off this often (ticks). */
 	static final int LOOK = 5;
-	/** Food that would harm or carry it off: never eaten to mend. */
+	/** Food that would harm or carry it off: never eaten to mend (as well as any whose eating brings on a harmful effect). */
 	static final Set<Item> NOT_FOOD = Set.of(Items.ROTTEN_FLESH, Items.SPIDER_EYE, Items.POISONOUS_POTATO, Items.PUFFERFISH, Items.CHORUS_FRUIT,
 		Items.SUSPICIOUS_STEW);
+	/** Food too precious to eat before the plain (as well as any above common rarity): eaten last, after potions. */
+	static final Set<Item> PRECIOUS_FOOD = Set.of(Items.GOLDEN_APPLE, Items.ENCHANTED_GOLDEN_APPLE, Items.GOLDEN_CARROT);
 
 	enum Phase {
 		AWAY, MEND, BACK
@@ -148,14 +161,20 @@ public final class BreakOff {
 	private static final Map<Mob, Long> NOT_BEFORE = new WeakHashMap<>();
 	/** Vanilla illagers given the goals already (folk add them themselves). */
 	private static final Set<Mob> GIVEN = Collections.newSetFromMap(new WeakHashMap<>());
+	/** Fell back this fight with nothing to mend with: last seen in it (game time). It fights on hurt until the fight is over. */
+	private static final Map<Mob, Long> EMPTY = new WeakHashMap<>();
+	/** On its way back to its post with no foe left (a mob with goals): until (game time). */
+	private static final Map<Mob, Long> HOMEWARD = new WeakHashMap<>();
 
 	private BreakOff() {
 	}
 
 	static void register() {
+		// (a folk's belt pouch, what it mends from)
+		BeltPouch.register();
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof AbstractIllager illager && GIVEN.add(illager)) {
-				((MobAccessor)illager).jaymoskingdoms$goals().addGoal(0, new MendGoal(illager));
+				((MobAccessor)illager).jaymoskingdoms$goals().addGoal(MendGoal.PRIORITY, new MendGoal(illager));
 				((MobAccessor)illager).jaymoskingdoms$targets().addGoal(0, new HoldGoal(illager));
 			}
 		});
@@ -165,7 +184,16 @@ public final class BreakOff {
 
 	/** {@code m} is falling back, mending, or on its way back. */
 	static boolean away(Mob m) {
-		return STATES.containsKey(m);
+		if (!STATES.containsKey(m)) {
+			return false;
+		}
+		if (m.isAlive() && !m.isRemoved()) {
+			return true;
+		}
+		// (dead or gone while away: nothing steps it any more, so its state goes now)
+		STATES.remove(m);
+		COVERS.values().removeIf(c -> c.ward == m);
+		return false;
 	}
 
 	/** A fighter this is for: on its feet, thinking, not tending, arresting or held, and not a ruler or a posted archer. */
@@ -213,10 +241,22 @@ public final class BreakOff {
 		}
 		LivingEntity foe = Comrades.target(m);
 		float share = share(m);
-		if (!valid(foe, m) || share >= RETREAT_TIMID) {
+		if (!valid(foe, m)) {
 			return;
 		}
 		long now = level.getGameTime();
+		Long emptySeen = EMPTY.get(m);
+		if (emptySeen != null) {
+			// (fell back with nothing to mend with: a fresh fight once it has been without a foe a while)
+			if (now - emptySeen > FIGHT_OVER) {
+				EMPTY.remove(m);
+			} else {
+				EMPTY.put(m, now);
+			}
+		}
+		if (share >= RETREAT_TIMID) {
+			return;
+		}
 		if (now < NOT_BEFORE.getOrDefault(m, 0L) || !able(level, m) || Comrades.busy(m)) {
 			return;
 		}
@@ -232,12 +272,21 @@ public final class BreakOff {
 		if (share >= line) {
 			return;
 		}
+		boolean empty = find(m) == null;
+		if (empty && EMPTY.containsKey(m)) {
+			// nothing to mend with, and it has fallen back once this fight already: it fights on hurt
+			return;
+		}
 		List<LivingEntity> threats = threats(level, m, foe);
 		BlockPos spot = safeSpot(level, m, threats);
 		if (spot == null) {
 			// cornered: no safe way out, so it fights on
 			NOT_BEFORE.put(m, now + CORNER_GAP);
 			return;
+		}
+		if (empty) {
+			// (once, to get clear and call for cover)
+			EMPTY.put(m, now);
 		}
 		State s = new State(foe, m.position(), now);
 		s.dest = spot;
@@ -508,16 +557,35 @@ public final class BreakOff {
 			return;
 		}
 		NOT_BEFORE.put(m, now + AGAIN_GAP);
+		if (EMPTY.containsKey(m)) {
+			// (still this fight: the time away doesn't count as the fight gone quiet)
+			EMPTY.put(m, now);
+		}
 		if (!rejoin) {
 			return;
 		}
 		if (valid(s.foe, m) && s.foe.distanceTo(m) < REJOIN_RANGE) {
 			Comrades.aim(m, s.foe);
 		} else if (!(m instanceof Villager) && m.hasHome()) {
-			// (a villager's brain takes it home itself)
+			// (a villager's brain takes it home itself; a mob with goals keeps its MendGoal for the walk, see homeward)
 			BlockPos post = m.getHomePosition();
-			m.getNavigation().moveTo(post.getX() + 0.5, post.getY(), post.getZ() + 0.5, BACK_SPEED);
+			if (m.getNavigation().moveTo(post.getX() + 0.5, post.getY(), post.getZ() + 0.5, BACK_SPEED)) {
+				HOMEWARD.put(m, now + HOME_TICKS);
+			}
 		}
+	}
+
+	/** Walking back to its post (from {@link #end}): till it's there, has a foe again, or has walked {@link #HOME_TICKS}. */
+	private static boolean homeward(Mob m) {
+		Long until = HOMEWARD.get(m);
+		if (until == null) {
+			return false;
+		}
+		if (m.level().getGameTime() > until || m.getNavigation().isDone() || Comrades.target(m) != null || !m.isAlive() || Downed.isDowned(m)) {
+			HOMEWARD.remove(m);
+			return false;
+		}
+		return true;
 	}
 
 	// ---- mending -----------------------------------------------------------------------------------------------------
@@ -537,10 +605,35 @@ public final class BreakOff {
 			}
 		}
 		FoodProperties food = s.get(DataComponents.FOOD);
-		if (food != null && !NOT_FOOD.contains(s.getItem())) {
-			return 10 + food.nutrition();
+		if (food != null && !NOT_FOOD.contains(s.getItem()) && !harmful(s)) {
+			// (the plainest first; the precious last of all)
+			return (PRECIOUS_FOOD.contains(s.getItem()) || s.getRarity() != Rarity.COMMON ? PRECIOUS : 10) + food.nutrition();
 		}
-		return mendingPotion(s) ? 100 : -1;
+		return mendingPotion(s) ? POTION : -1;
+	}
+
+	/** Ranks past the bandages and plain food: a potion, then precious food. */
+	private static final int POTION = 100, PRECIOUS = 200;
+
+	/** Eating it brings on an effect that isn't good for it, or carries it off. */
+	private static boolean harmful(ItemStack s) {
+		Consumable consumable = s.get(DataComponents.CONSUMABLE);
+		if (consumable == null) {
+			return false;
+		}
+		for (ConsumeEffect effect : consumable.onConsumeEffects()) {
+			if (effect instanceof TeleportRandomlyConsumeEffect) {
+				return true;
+			}
+			if (effect instanceof ApplyStatusEffectsConsumeEffect apply) {
+				for (MobEffectInstance e : apply.effects()) {
+					if (!e.getEffect().value().isBeneficial()) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	/** A drinkable potion with healing or regeneration in it. */
@@ -568,8 +661,8 @@ public final class BreakOff {
 				best = new Mender(s, null, r);
 			}
 		}
-		if (m instanceof InventoryCarrier carrier) {
-			SimpleContainer pack = carrier.getInventory();
+		SimpleContainer pack = m instanceof InventoryCarrier carrier ? carrier.getInventory() : BeltPouch.open(m);
+		if (pack != null) {
 			for (int i = 0; i < pack.getContainerSize(); i++) {
 				ItemStack s = pack.getItem(i);
 				int r = rank(s);
@@ -597,7 +690,7 @@ public final class BreakOff {
 			m.heal(PackUse.BANDAGE_HEAL[found.rank()]);
 			m.playSound(SoundEvents.ARMOR_EQUIP_LEATHER.value(), 0.8F, 1.0F);
 			Callouts.say(m, "pack.bandage", null, false, one.getHoverName());
-		} else if (found.rank() < 100) {
+		} else if (found.rank() != POTION) {
 			FoodProperties food = one.get(DataComponents.FOOD);
 			m.heal(Math.max(1.0F, food == null ? 1.0F : food.nutrition()));
 			Consumable consumable = one.get(DataComponents.CONSUMABLE);
@@ -608,6 +701,11 @@ public final class BreakOff {
 				}
 			}
 			m.playSound(SoundEvents.GENERIC_EAT.value(), 0.8F, 1.0F);
+			// a stew's bowl, a honey bottle's bottle: kept, or left at its feet
+			UseRemainder remainder = one.get(DataComponents.USE_REMAINDER);
+			if (remainder != null) {
+				keep(level, m, found.pack(), remainder.convertInto().create());
+			}
 			Callouts.say(m, "pack.eat", null, false, one.getHoverName());
 		} else {
 			PotionContents contents = one.get(DataComponents.POTION_CONTENTS);
@@ -616,43 +714,62 @@ public final class BreakOff {
 			}
 			m.playSound(SoundEvents.GENERIC_DRINK.value(), 0.8F, 1.0F);
 			// the bottle is kept, or left at its feet
-			ItemStack bottle = new ItemStack(Items.GLASS_BOTTLE);
-			if (found.pack() != null) {
-				bottle = found.pack().addItem(bottle);
-			}
-			if (!bottle.isEmpty()) {
-				m.spawnAtLocation(level, bottle);
-			}
+			keep(level, m, found.pack(), new ItemStack(Items.GLASS_BOTTLE));
 			Callouts.say(m, "pack.drink", null, false);
 		}
 		return true;
 	}
 
+	/** What's left of a thing used (a bottle, a bowl) goes back in the pack it came from, or is left at its feet. */
+	private static void keep(ServerLevel level, Mob m, @Nullable SimpleContainer pack, ItemStack left) {
+		if (pack != null) {
+			left = pack.addItem(left);
+		}
+		if (!left.isEmpty()) {
+			m.spawnAtLocation(level, left);
+		}
+	}
+
 	// ---- friends covering --------------------------------------------------------------------------------------------
 
-	/** Friends near {@code ward} who lean GUARD or MEDIC step between it and the nearest foe. How many came. */
+	/**
+	 * Every friend within {@link #COVER_NEAR} of {@code ward} who leans GUARD or MEDIC (the nearest {@link #COVER_MAX}) steps between
+	 * it and a foe chasing it: the chasers shared out among them, the nearest chaser first (with none set on it, the nearest foe).
+	 * How many came.
+	 */
 	private static int cover(ServerLevel level, Mob ward, List<LivingEntity> threats, long now) {
-		LivingEntity foe = null;
-		double best = Double.MAX_VALUE;
+		List<LivingEntity> chasers = new ArrayList<>();
 		for (LivingEntity t : threats) {
-			double d = t.distanceToSqr(ward);
-			if (d < best) {
-				best = d;
-				foe = t;
+			if (t instanceof Mob chaser && Comrades.target(chaser) == ward) {
+				chasers.add(t);
 			}
 		}
-		if (foe == null) {
-			return 0;
+		if (chasers.isEmpty()) {
+			LivingEntity nearest = null;
+			double best = Double.MAX_VALUE;
+			for (LivingEntity t : threats) {
+				double d = t.distanceToSqr(ward);
+				if (d < best) {
+					best = d;
+					nearest = t;
+				}
+			}
+			if (nearest == null) {
+				return 0;
+			}
+			chasers.add(nearest);
 		}
+		chasers.sort((a, b) -> Double.compare(a.distanceToSqr(ward), b.distanceToSqr(ward)));
 		String side = Comrades.side(ward);
-		List<Mob> friends = level.getEntitiesOfClass(Mob.class, ward.getBoundingBox().inflate(COVER_NEAR), a -> a != ward && coverer(level, a)
-			&& Comrades.side(a).equals(side));
+		List<Mob> friends = level.getEntitiesOfClass(Mob.class, ward.getBoundingBox().inflate(COVER_NEAR), a -> a != ward
+			&& a.distanceToSqr(ward) <= COVER_NEAR * COVER_NEAR && coverer(level, a) && Comrades.side(a).equals(side));
 		friends.sort((a, b) -> Double.compare(a.distanceToSqr(ward), b.distanceToSqr(ward)));
 		int came = 0;
 		for (Mob a : friends) {
 			if (came >= COVER_MAX) {
 				break;
 			}
+			LivingEntity foe = chasers.get(came % chasers.size());
 			COVERS.put(a, new Cover(ward, foe, now + COVER_TICKS));
 			Comrades.aim(a, foe);
 			came++;
@@ -730,6 +847,11 @@ public final class BreakOff {
 
 	/** Falling back, mending, coming back and covering, for a mob with goals (folk, illagers): it takes the legs and the eyes. */
 	public static final class MendGoal extends Goal {
+		/**
+		 * Ahead of every other goal that moves it (the shooters' and weapon sense's run at 0), so its check runs every tick and it
+		 * takes the legs as soon as the fighter breaks off.
+		 */
+		public static final int PRIORITY = -1;
 		private final Mob mob;
 
 		public MendGoal(Mob mob) {
@@ -748,7 +870,7 @@ public final class BreakOff {
 
 		@Override
 		public boolean canContinueToUse() {
-			return STATES.containsKey(this.mob) || COVERS.containsKey(this.mob) && COVERS.get(this.mob).walking;
+			return STATES.containsKey(this.mob) || COVERS.containsKey(this.mob) && COVERS.get(this.mob).walking || homeward(this.mob);
 		}
 
 		@Override

@@ -545,7 +545,7 @@ public final class Downed {
 
 	/**
 	 * {@code player} takes the weapons out of a downed one's hands, and the arrows it carries (Andy, 2026-11-19: "you
-	 * should be able to take their bows"), and nothing else.
+	 * should be able to take their bows"), and a folk's belt pouch ({@link BeltPouch}); nothing else.
 	 */
 	private static void disarm(Player player, Mob body) {
 		boolean took = false;
@@ -567,6 +567,12 @@ public final class Downed {
 			unpack(body, held);
 			if (!player.getInventory().add(held) && !held.isEmpty()) {
 				player.drop(held, false, net.minecraft.util.Prediction.SERVER_ONLY);
+			}
+			took = true;
+		}
+		for (ItemStack pouched : BeltPouch.take(body)) {
+			if (!player.getInventory().add(pouched) && !pouched.isEmpty()) {
+				player.drop(pouched, false, net.minecraft.util.Prediction.SERVER_ONLY);
 			}
 			took = true;
 		}

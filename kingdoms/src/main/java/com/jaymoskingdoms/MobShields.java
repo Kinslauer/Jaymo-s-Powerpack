@@ -16,7 +16,6 @@ import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.component.BlocksAttacks;
-import net.minecraft.world.item.component.ChargedProjectiles;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -38,7 +37,8 @@ import org.jspecify.annotations.Nullable;
  * <li><b>A shot on its way</b> ({@link #incoming}, from {@link ShieldSense}): the shield comes up and is held until the arrow,
  * bolt, javelin or ball has landed, if it can be up in time.</li>
  * <li><b>Watched</b> ({@link #watch}): someone in sight drawing a bow, holding a loaded crossbow or aiming a gun at it, its own foe
- * or not: up while its own foe isn't at hand.</li>
+ * or not: up while its own foe isn't at hand. Its own foe in reach of its blow always comes first ({@link #strikes}); a bowman or
+ * one with a two-handed weapon never raises a shield, and a draw or a reload is never cut short for one ({@link #canRaise}).</li>
  * <li><b>Counter</b>: a raised block holds at least {@link #MIN_HOLD_TICKS}; a blow taken on it opens {@link #COUNTER_TICKS} in
  * which the shield comes down and its own blow comes first ({@link MobCombat#quicken}, {@link #countering}).</li>
  * <li><b>One thing at a time</b> ({@link #holdsFire}): no shot with the shield up. Held for a shot on its way, the shot waits;
@@ -109,6 +109,10 @@ public final class MobShields {
 		if (hand == InteractionHand.OFF_HAND) {
 			ShieldSense.seen(mob);
 		}
+		if (!raised && mob.isUsingItem() && mob.getUseItem().getItem() instanceof ProjectileWeaponItem) {
+			// (a draw or a reload under way is never cut short for the shield: MobAmmo counts that shot)
+			return false;
+		}
 		long now = level.getGameTime();
 		long[] s = state(mob);
 		s[SEEN] = now;
@@ -129,7 +133,8 @@ public final class MobShields {
 			}
 			return true;
 		}
-		boolean aimedAt = aiming(target, mob) && mob.distanceToSqr(target) <= ARROW_RANGE * ARROW_RANGE;
+		// (its foe in reach to strike: that comes first, whatever it holds or draws)
+		boolean aimedAt = !strikes(mob, target) && aiming(target, mob) && mob.distanceToSqr(target) <= ARROW_RANGE * ARROW_RANGE;
 		boolean near = mob.distanceToSqr(target) <= GUARD_RANGE * GUARD_RANGE;
 		// (sh-shooter) someone else's bow or gun on it, while its own foe isn't at hand
 		boolean watched = now < s[SOFT] && !near;
@@ -167,17 +172,32 @@ public final class MobShields {
 	}
 
 	/**
-	 * (0.7.267) The hand it guards with: a shield in the off hand, else its main-hand weapon's own guard when it fights
-	 * Better Combat's way and the off hand is free; null if neither.
+	 * (0.7.267) The hand it guards with: a shield in the off hand (never with a bow or a two-handed weapon in the other,
+	 * {@link #shieldHand}), else its main-hand weapon's own guard when it fights Better Combat's way and the off hand is free;
+	 * null if neither.
 	 */
 	static @Nullable InteractionHand guardHand(Mob mob) {
-		if (mob.getOffhandItem().has(DataComponents.BLOCKS_ATTACKS)) {
+		if (mob.getOffhandItem().has(DataComponents.BLOCKS_ATTACKS) && shieldHand(mob)) {
 			return InteractionHand.OFF_HAND;
 		}
 		if (mob.getOffhandItem().isEmpty() && mob.getMainHandItem().has(DataComponents.BLOCKS_ATTACKS) && MobCombat.ENABLED && MobCombat.handles(mob)) {
 			return InteractionHand.MAIN_HAND;
 		}
 		return null;
+	}
+
+	/** Its main hand leaves the shield free: not a bow (both hands on it) nor a two-handed weapon ({@link Blows#twoHanded}). */
+	static boolean shieldHand(Mob mob) {
+		ItemStack main = mob.getMainHandItem();
+		return !(main.getItem() instanceof BowItem) && !Blows.twoHanded(main);
+	}
+
+	/** Whether {@code mob}'s own foe is in reach of its blow (a melee fighter's): striking it comes before any shield for shots. */
+	static boolean strikes(Mob mob, @Nullable LivingEntity foe) {
+		if (foe == null || mob.getMainHandItem().getItem() instanceof ProjectileWeaponItem) {
+			return false;
+		}
+		return mob.isWithinMeleeAttackRange(foe) || MobCombat.gap(mob, foe) <= Blows.hitReach(mob);
 	}
 
 	/** Whether {@code mob} has its shield (or blade) up right now (and so won't strike). */
@@ -290,38 +310,48 @@ public final class MobShields {
 	}
 
 	/**
-	 * (sh-shooter) Whether {@code shooter} has a shot ready for {@code at}: a bow drawn, a loaded crossbow, a gun aimed (its red glint,
-	 * {@link MobCombat#aiming}, or a loaded one held), a folk archer shooting at it ({@link Folk#shooting}). Where its aim points is
-	 * {@link ShieldSense}'s to judge.
+	 * (sh-shooter) Whether {@code shooter} has a shot ready for {@code at}: a bow drawn, a loaded crossbow, a gun being aimed (its red
+	 * glint, {@link MobCombat#aiming}, or held up in use), a folk archer about to loose at it ({@link Folk#drawing}). A gun merely held
+	 * loaded, or an archer between shots, doesn't count. Where its aim points is {@link ShieldSense}'s to judge.
 	 */
 	static boolean aiming(LivingEntity shooter, Mob at) {
-		if (aiming(shooter) || shooter instanceof Folk f && f.shooting() && f.getTarget() == at || shooter instanceof Mob m && MobCombat.aiming(m)) {
-			return true;
-		}
+		boolean aimed = shooter instanceof Folk f && f.drawing(at) || shooter instanceof Mob m && MobCombat.aiming(m);
 		ItemStack held = shooter.getMainHandItem();
-		boolean gun = held.is(ClassPerks.GUNS) || EarlyGuns.Rung.of(held) != null;
-		return gun && (shooter.isUsingItem() || !held.getOrDefault(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.EMPTY).isEmpty());
+		if (held.is(ClassPerks.GUNS) || EarlyGuns.Rung.of(held) != null) {
+			// (a gun counts only while it's being aimed, loaded or not: some are crossbows underneath)
+			return aimed || shooter.isUsingItem();
+		}
+		return aimed || aiming(shooter);
 	}
 
 	// ---- fighting AI patch 3: shields and blows -------------------------------------------------------------------------
 
-	/** Whether {@code mob} can bring a real shield up now: one in its off hand, not knocked aside, not mid-swing, nothing else in use but a bow or crossbow. */
+	/**
+	 * Whether {@code mob} can bring a real shield up for a shot now: one in its off hand, no bow or two-handed weapon in the other, not
+	 * knocked aside, not mid-swing, its own foe not in reach of its blow ({@link #strikes}), and nothing else in use: a draw or a reload
+	 * is never cut short, and a game crossbowman raises it only with his crossbow loaded (the game's crossbow goal would take the
+	 * shield's time for its reload, and loose a bolt it never loaded).
+	 */
 	static boolean canRaise(Mob mob) {
 		if (!mob.isAlive() || mob.isPassenger() || mob.isSleeping() || Downed.isDowned(mob) || Arrests.busy(mob) || !mob.getOffhandItem().has(DataComponents.BLOCKS_ATTACKS)
-			|| MobCombat.swinging(mob)) {
+			|| !shieldHand(mob) || MobCombat.swinging(mob) || strikes(mob, Rulers.target(mob))) {
 			return false;
 		}
 		long[] s = STATE.get(mob);
 		if (s != null && mob.level().getGameTime() < s[DISABLED]) {
 			return false;
 		}
-		return !mob.isUsingItem() || guarding(mob) || mob.getUseItem().getItem() instanceof ProjectileWeaponItem;
+		ItemStack main = mob.getMainHandItem();
+		if (!(mob instanceof Folk) && main.getItem() instanceof CrossbowItem && !CrossbowItem.isCharged(main)) {
+			return false;
+		}
+		return !mob.isUsingItem() || guarding(mob);
 	}
 
 	/**
 	 * (sh-arc, from {@link ShieldSense}) A shot will hit {@code mob}'s front in {@code ticks}: if its shield can be up by then (the
-	 * shield's own delay, {@code BlocksAttacks.blockDelayTicks}, and {@code spare} more), it comes up now (a draw or a reload is
-	 * dropped for it) and is held till {@code after} ticks past the hit. True if it's up for it.
+	 * shield's own delay, {@code BlocksAttacks.blockDelayTicks}, and {@code spare} more) and nothing else is in hand ({@link #canRaise}:
+	 * never through a draw or a reload), it comes up now and is held till {@code after} ticks past the hit. True if it's up for it.
 	 */
 	static boolean incoming(Mob mob, double ticks, int spare, int after) {
 		BlocksAttacks blocks = mob.getOffhandItem().get(DataComponents.BLOCKS_ATTACKS);

@@ -17,6 +17,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 abstract class MobAmmoShotMixin {
 	@Inject(method = "performRangedAttack", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$spendArrow(LivingEntity target, float power, CallbackInfo ci) {
+		// (a crossbow with nothing loaded looses nothing: no arrow spent for it)
+		net.minecraft.world.item.ItemStack crossbow = ((Mob) (Object) this).getItemInHand(
+			net.minecraft.world.entity.projectile.ProjectileUtil.getWeaponHoldingHand((Mob) (Object) this, net.minecraft.world.item.Items.CROSSBOW));
+		if (crossbow.getItem() instanceof net.minecraft.world.item.CrossbowItem && !net.minecraft.world.item.CrossbowItem.isCharged(crossbow)) {
+			ci.cancel();
+			return;
+		}
 		// (and none with the shield held up: MobShields#holdsFire)
 		if (com.jaymoskingdoms.MobShields.holdsFire((Mob) (Object) this, false) || !MobAmmo.spend((Mob) (Object) this, MobAmmo.Kind.ARROWS)) {
 			ci.cancel();

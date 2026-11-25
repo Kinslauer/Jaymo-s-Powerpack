@@ -33,13 +33,18 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Jump crits</b> (ml-crit): with a heavy weapon ({@link #heavy}: an axe, a great sword, a hammer or mace) it now and then
  * ({@link #JUMP_CHANCE}, {@link #JUMP_COOLDOWN} apart) jumps so the blow lands as it comes down ({@link #JUMP_LEAD} ticks after
  * leaving the ground): a falling blow hits {@link #CRIT_DAMAGE} times as hard, with a critical's sparks and sound
- * ({@code MobBlowMixin}). A Better Combat swing plans the jump from its wind-up; the game's blow and MCA's wait for the fall.</li>
+ * ({@code MobBlowMixin}). A Better Combat swing plans the jump from its wind-up; the game's blow and MCA's wait for the fall, and
+ * jump only with the foe within its reach and a jump's carry ({@link #JUMP_TRAVEL}), never while chasing.</li>
  * <li><b>Full charge</b>: any weapon swings no sooner than its full charge after the last swing ({@link #fullCharge}, a player's
- * attack-strength time), so quick weapons never spam.</li>
+ * attack-strength time), so quick weapons never spam; but a blow in the counter window after a block ({@link MobShields#countering})
+ * comes at once.</li>
  * <li><b>Spacing by reach</b> (ml-reach): each fighter knows its weapon's reach ({@link #reach}: Better Combat's range, else one
  * by kind of weapon). After a blow, a foe left inside {@link #CLOSE_SHARE} of it is stepped back from, facing it, to
  * {@link #HOLD_SHARE} of it, for at most {@link #BACK_MOST} ticks and never off a drop or into lava; so spears and long blades
- * hold off and daggers stay close. Without Better Combat the game's melee goal also lets the blow land from that reach.</li>
+ * hold off and daggers stay close. The step back never goes past the reach it can really strike from ({@link #hitReach}: a Better
+ * Combat swing's start, else the game's own melee reach), and fists and things that aren't weapons ({@link #weapon}) never step back.
+ * Where it strikes from is left as it was: the game's reach (and an item's own attack range) for its blow, Better Combat's for its
+ * swing.</li>
  * </ul>
  * Never at a downed body, never from one making an arrest, falling back or otherwise busy ({@link Comrades#busy}).
  */
@@ -53,8 +58,8 @@ public final class Blows {
 	static final int JUMP_LEAD = 8, LEAST_LEAD = 6;
 	/** A jump this recent (ticks) still counts for its blow. */
 	static final int JUMP_WINDOW = 14;
-	/** A little carry toward the foe on the jump (blocks a tick). */
-	static final double JUMP_CARRY = 0.12;
+	/** A little carry toward the foe on the jump (blocks a tick); without a wind-up it jumps only with the foe this much (blocks) past its reach. */
+	static final double JUMP_CARRY = 0.12, JUMP_TRAVEL = 1.0;
 	/** A falling blow's damage, as a player's critical. */
 	static final float CRIT_DAMAGE = 1.5F;
 	/** A charge never quicker than this (ticks), whatever the weapon. */
@@ -63,10 +68,12 @@ public final class Blows {
 	static final double CLOSE_SHARE = 0.6, HOLD_SHARE = 0.85;
 	static final int BACK_MOST = 12, BACK_WINDOW = 16;
 	static final float BACK_SPEED = 1.0F;
+	/** The step back stops this share of the way out to the reach it can really strike from, and needs at least this room (blocks). */
+	static final double HIT_KEEP = 0.9, BACK_LEAST = 0.3;
+	/** The game's own melee reach past a mob's box (blocks), as {@code Mob.isWithinMeleeAttackRange} has it with no attack range on the item. */
+	static final double GAME_REACH = Math.sqrt(2.04F) - 0.6F;
 	/** Without Better Combat: reach (blocks, from the eyes to the foe's body) by kind of weapon. */
 	static final double REACH_SPEAR = 3.75, REACH_LONG = 3.25, REACH_SWORD = 3.0, REACH_HEAVY = 2.75, REACH_OTHER = 2.6, REACH_SHORT = 2.25;
-	/** Without Better Combat the game's melee blow lands from this share of the reach (Better Combat's swings start there too). */
-	static final double LAND_SHARE = MobCombat.START_REACH_SHARE;
 
 	/** Better Combat's categories of heavy weapons, and the names of heavy weapons without it. */
 	static final Set<String> HEAVY_CATEGORIES = Set.of("axe", "double_axe", "claymore", "hammer", "mace");
@@ -74,6 +81,9 @@ public final class Blows {
 	/** Names of long and short weapons without Better Combat. */
 	static final String[] LONG_NAMES = {"glaive", "halberd", "pike", "lance", "claymore", "greatsword", "great_sword", "zweihander"};
 	static final String[] SHORT_NAMES = {"dagger", "knife", "dirk", "sai", "tanto"};
+	/** Names of two-handed weapons without Better Combat (no shield with these). */
+	static final String[] TWO_HANDED_NAMES = {"hammer", "maul", "claymore", "greatsword", "great_sword", "greataxe", "great_axe", "battleaxe", "battle_axe",
+		"zweihander", "halberd", "glaive", "pike"};
 
 	private static final class State {
 		long jumpedAt = Long.MIN_VALUE / 2, nextJump, nextRoll, lastBlow = Long.MIN_VALUE / 2, critAt = Long.MIN_VALUE / 2;
@@ -112,6 +122,18 @@ public final class Blows {
 		return weapon.is(ItemTags.AXES) || weapon.is(Items.MACE) || named(weapon, HEAVY_NAMES);
 	}
 
+	/** Held in both hands: Better Combat's two-handed weapons, else a great sword, great axe, hammer or pole arm by name. */
+	static boolean twoHanded(ItemStack weapon) {
+		if (weapon.isEmpty()) {
+			return false;
+		}
+		MobCombat.Moves moves = MobCombat.ENABLED ? BetterCombatBridge.moves(weapon) : null;
+		if (moves != null) {
+			return moves.twoHanded();
+		}
+		return named(weapon, TWO_HANDED_NAMES);
+	}
+
 	private static boolean named(ItemStack weapon, String[] names) {
 		String path = BuiltInRegistries.ITEM.getKey(weapon.getItem()).getPath();
 		for (String name : names) {
@@ -120,6 +142,14 @@ public final class Blows {
 			}
 		}
 		return false;
+	}
+
+	/** A real weapon: a sword, an axe, a spear, a mace or a trident, anything the game counts as one, or one Better Combat knows. */
+	static boolean weapon(ItemStack held) {
+		if (held.isEmpty()) {
+			return false;
+		}
+		return Rearm.isMelee(held) || held.has(DataComponents.WEAPON) || MobCombat.ENABLED && BetterCombatBridge.moves(held) != null;
 	}
 
 	/** Its weapon's reach (blocks, eyes to the foe's body): Better Combat's range, else the item's own attack range, else by kind. */
@@ -133,7 +163,7 @@ public final class Blows {
 		if (range != null && range.effectiveMaxRange(mob) > REACH_SHORT) {
 			return range.effectiveMaxRange(mob);
 		}
-		if (weapon.isEmpty() || named(weapon, SHORT_NAMES)) {
+		if (!weapon(weapon) || named(weapon, SHORT_NAMES)) {
 			return REACH_SHORT;
 		}
 		if (weapon.is(ItemTags.SPEARS) || weapon.is(Items.TRIDENT)) {
@@ -146,6 +176,26 @@ public final class Blows {
 			return REACH_SWORD;
 		}
 		return heavy(weapon) ? REACH_HEAVY : REACH_OTHER;
+	}
+
+	/**
+	 * How far (blocks, eyes to the foe's body) its blow can really be struck from: where a Better Combat swing starts
+	 * ({@link MobCombat#START_REACH_SHARE} of the weapon's range), else the game's melee reach (its box grown by the item's own
+	 * attack range, or by the game's short reach).
+	 */
+	static double hitReach(Mob mob) {
+		ItemStack held = mob.getMainHandItem();
+		MobCombat.Moves moves = MobCombat.ENABLED && MobCombat.handles(mob) ? BetterCombatBridge.moves(held) : null;
+		if (moves != null) {
+			return moves.reach() * MobCombat.START_REACH_SHARE;
+		}
+		AttackRange range = held.get(DataComponents.ATTACK_RANGE);
+		return mob.getBbWidth() / 2.0 + (range != null ? range.effectiveMaxRange(mob) : GAME_REACH);
+	}
+
+	/** Whether a swing may come {@code since} ticks after the last: a full charge since, or a counter after a block. */
+	static boolean charged(Mob mob, long since) {
+		return since >= fullCharge(mob) || MobShields.countering(mob);
 	}
 
 	/** A full charge with its weapon (ticks): a player's attack-strength time, 20 over the attack speed. */
@@ -206,14 +256,15 @@ public final class Blows {
 		}
 		State s = state(mob);
 		long now = level.getGameTime();
-		if (now - s.lastBlow < fullCharge(mob)) {
+		if (!charged(mob, now - s.lastBlow)) {
 			return true;
 		}
 		if (now - s.jumpedAt <= JUMP_WINDOW) {
 			// up from a jump for this blow: it comes as it falls
 			return !mob.onGround() && mob.getDeltaMovement().y >= 0.0;
 		}
-		if (now >= s.nextRoll && canJump(mob, s, now)) {
+		// (only with the foe close enough for the jump to carry the blow onto it: no hopping along a chase)
+		if (now >= s.nextRoll && canJump(mob, s, now) && MobCombat.gap(mob, foe) <= hitReach(mob) + JUMP_TRAVEL) {
 			s.nextRoll = now + ROLL_GAP;
 			if (mob.getRandom().nextFloat() < JUMP_CHANCE) {
 				jump(mob, s, foe, now);
@@ -261,19 +312,12 @@ public final class Blows {
 	// ---- ml-reach --------------------------------------------------------------------------------------------------------
 
 	/**
-	 * (the game's melee goal, without Better Combat) Whether {@code foe} is within the reach its weapon lands from ({@link #LAND_SHARE}
-	 * of {@link #reach}), for an armed humanoid; the game's own short reach is left for fists and everyone else.
-	 */
-	public static boolean inReach(Mob mob, LivingEntity foe) {
-		return !MobCombat.ENABLED && !mob.getMainHandItem().isEmpty() && fighter(mob, foe) && MobCombat.gap(mob, foe) <= reach(mob) * LAND_SHARE;
-	}
-
-	/**
 	 * Every tick in a melee fight (the game's melee goal after its own tick; MCA's through {@link #brainStep}): after a blow, a foe
-	 * left inside its weapon's reach is stepped back from to that reach, facing it. True while it steps back.
+	 * left inside its weapon's reach is stepped back from toward that reach (never past where it can really strike from), facing
+	 * it. True while it steps back. Never with fists or with something that isn't a weapon.
 	 */
 	public static boolean space(Mob mob, LivingEntity foe) {
-		if (!(mob.level() instanceof ServerLevel level) || !fighter(mob, foe)) {
+		if (!(mob.level() instanceof ServerLevel level) || !weapon(mob.getMainHandItem()) || !fighter(mob, foe)) {
 			return false;
 		}
 		State s = STATES.get(mob);
@@ -287,15 +331,21 @@ public final class Blows {
 			return false;
 		}
 		double reach = reach(mob), gap = MobCombat.gap(mob, foe);
+		// (out to its weapon's reach, but never past where it can strike from; with no room between, no step back)
+		double hold = Math.min(reach * HOLD_SHARE, hitReach(mob) * HIT_KEEP), close = Math.min(reach * CLOSE_SHARE, hold - BACK_LEAST);
+		if (close <= 0.0) {
+			s.backUntil = 0;
+			return false;
+		}
 		if (now >= s.backUntil) {
-			if (now - s.lastBlow > BACK_WINDOW || s.backedFor == s.lastBlow || gap >= reach * CLOSE_SHARE) {
+			if (now - s.lastBlow > BACK_WINDOW || s.backedFor == s.lastBlow || gap >= close) {
 				return false;
 			}
 			s.backedFor = s.lastBlow;
 			s.backUntil = now + BACK_MOST;
 		}
 		Vec3 back = new Vec3(mob.getX() - foe.getX(), 0.0, mob.getZ() - foe.getZ());
-		if (gap >= reach * HOLD_SHARE || !mob.onGround() || back.lengthSqr() < 1.0E-4 || !footing(level, mob, back.normalize())) {
+		if (gap >= hold || !mob.onGround() || back.lengthSqr() < 1.0E-4 || !footing(level, mob, back.normalize())) {
 			s.backUntil = 0;
 			return false;
 		}

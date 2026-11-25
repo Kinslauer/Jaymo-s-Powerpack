@@ -106,7 +106,7 @@ public final class DangerSense {
 	static void register() {
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof AbstractIllager illager && GIVEN.add(illager)) {
-				((MobAccessor)illager).jaymoskingdoms$goals().addGoal(-1, new DangerGoal(illager));
+				((MobAccessor)illager).jaymoskingdoms$goals().addGoal(-2, new DangerGoal(illager));
 			}
 		});
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {

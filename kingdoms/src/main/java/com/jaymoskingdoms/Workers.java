@@ -107,6 +107,15 @@ public final class Workers {
 			// one of the risen dead's captains, a Hollow man: the dead's fight, and his captain's ways
 			return HollowCaptains.step(level, w);
 		}
+		if (DangerSense.brainStep(mob)) {
+			// out of fire or lava, to water, or out of the water after a fight: its brain waits
+			return true;
+		}
+		if (BreakOff.brainStep(mob)) {
+			// badly hurt it has broken off (or a friend is stepping in front of one who has): its brain waits; before the
+			// captains', caravans' and crews' own steps, so they break off too (rulers and the like BreakOff leaves out itself)
+			return true;
+		}
 		if (SwornCaptains.free(mob)) {
 			// (0.7.433) a captain sworn to a player: at their side, his brain his own (and never taken onto a roster)
 			return SwornCaptains.step(level, w);
@@ -147,14 +156,6 @@ public final class Workers {
 		}
 		if (w.role() == Caravans.CARTER && Drivers.step(level, w)) {
 			// (0.7.294) a realm's driver in the saddle: the drive is his
-			return true;
-		}
-		if (DangerSense.brainStep(mob)) {
-			// out of fire or lava, to water, or out of the water after a fight: its brain waits
-			return true;
-		}
-		if (BreakOff.brainStep(mob)) {
-			// badly hurt it has broken off (or a friend is stepping in front of one who has): its brain waits
 			return true;
 		}
 		if (RangedTactics.brainStep(mob)) {
