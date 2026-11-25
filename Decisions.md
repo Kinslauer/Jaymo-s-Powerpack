@@ -1055,3 +1055,4 @@ Andy: "any feature that requires another PR to work as intended should be held a
 
 - 2026-11-24, Andy (Reference Mods PR #2120): vanilla spiders are not Druid wild shapes ("no"); they stay out.
 - 2026-11-24 (Andy): "approve lore": the 7 Alex's Caves lore placements in Lore.md are canon.
+- 2026-11-24 (Andy): merged the waterskin redesign (#2124): stitched hide bag, round iron canteen, two-bulb glass flask of dragon's breath.

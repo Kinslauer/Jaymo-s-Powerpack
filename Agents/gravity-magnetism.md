@@ -1,5 +1,5 @@
 ---
-status: stalled
+status: running
 task: Work the X-Men mod's Magnetism power into Gravity
 branch: claude/project-thread-m8uaao
 with: Claude (project thread)

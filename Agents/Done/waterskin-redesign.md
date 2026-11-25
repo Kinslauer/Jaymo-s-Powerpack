@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: done
 task: waterskin-redesign
 branch: claude/waterskin-redesign
 with: Claude Opus 5.5 (T3 Code), Codex as one of the artists
