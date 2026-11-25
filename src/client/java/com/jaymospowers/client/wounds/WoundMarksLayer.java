@@ -5,7 +5,9 @@ import com.jaymospowers.client.wet.ArmourGrimeTextures;
 import com.jaymospowers.core.BladeBlood;
 import com.jaymospowers.core.Dismember;
 import com.jaymospowers.core.wounds.Bleeding;
+import com.jaymospowers.client.blood.BloodSettings;
 import com.jaymospowers.core.wounds.Breaks;
+import com.jaymospowers.core.wounds.CutDepth;
 import com.jaymospowers.core.wounds.BodyPart;
 import com.jaymospowers.core.wounds.Scars;
 import com.jaymospowers.core.wounds.WoundMarks;
@@ -65,6 +67,12 @@ public final class WoundMarksLayer {
 	static final int LINEN = 0xE4DCC6, LINEN_TURN = 0xB8AE96, RAG = 0x9A8A6C, RAG_TURN = 0x6E6150;
 	/** How far up a stump's sides its binding goes (rows of the limb's 12, from the end). */
 	static final int BINDING_ROWS = 6;
+	/** What a deep cut shows under it: bone, the shade of its hollows, and the gut with its coils. */
+	static final int BONE = 0xE6DFC8, BONE_SHADE = 0xB5AB8E, GUT = 0xB86A72, GUT_DARK = 0x7E3F4A;
+	/** On a body, a deep cut below this share of the way down shows the gut instead of the ribs. */
+	static final float GUT_BELOW = 0.6F;
+	/** A deep cut shows what is under it only while its mark is at least this fresh (stage of {@link #STAGES}). */
+	static final int INSIDES_STAGE = 3;
 	/** Lasting scars: a burn's shine, frostbitten grey and dead black-blue, a lightning fern, hollows, an empty socket. */
 	static final int BURN_SHINE = 0xE2A79C, FROST_GREY = 0x6E7480, FROST_DEAD = 0x2E3440, FERN = 0xB0574C, HOLLOW = 0x4A342E, SOCKET = 0x1E1412;
 
@@ -96,6 +104,14 @@ public final class WoundMarksLayer {
 
 	/** From every living renderer's extractRenderState. */
 	public static void extract(LivingEntity entity, LivingEntityRenderState state) {
+		state.setData(KEY, marked(entity));
+	}
+
+	/** What {@code entity}'s marks look like now, or null for nothing to draw (and always when blood is off or streamer safe is on). */
+	static @Nullable Marked marked(LivingEntity entity) {
+		if (BloodSettings.streamerSafe() || BloodSettings.off()) {
+			return null;
+		}
 		List<WoundMarks.Mark> marks = WoundMarks.marks(entity);
 		// the lost arms and legs drawn as stumps (Dismembered), and which of them still bleed
 		int stubs = Dismember.missing(entity) & ~Dismember.HEAD & ~com.jaymospowers.core.Prosthetics.fitted(entity);
@@ -106,8 +122,7 @@ public final class WoundMarksLayer {
 		// (Andy, 2026-11-12: "can we make them visible?") a player's lasting scars ({@link Scars}), painted for good
 		int scars = entity instanceof Player player ? scars(player) : 0;
 		if (marks.isEmpty() && stubs == 0 && gashes == 0 && scars == 0) {
-			state.setData(KEY, null);
-			return;
+			return null;
 		}
 		int raw = 0, bound = 0, rags = 0;
 		int bleeding = Bleeding.bleeding(entity);
@@ -134,8 +149,26 @@ public final class WoundMarksLayer {
 			stages[i] = Mth.clamp(STAGES - (int) (marks.get(i).age(now) * STAGES), 1, STAGES);
 		}
 		int blood = BladeBlood.color(entity);
-		state.setData(KEY, new Marked(marks, stages, blood == BladeBlood.NO_BLOOD ? CHIPPED : blood, stubs, raw, gashes, entity.getId() * 31, scars,
-			bound, rags));
+		return new Marked(marks, stages, blood == BladeBlood.NO_BLOOD ? CHIPPED : blood, stubs, raw, gashes, entity.getId() * 31, scars,
+			bound, rags);
+	}
+
+	/**
+	 * Your own arm in first person ({@code arm} of {@code player}'s model): the picture of marks to draw over it, or null
+	 * when there is nothing to show on it.
+	 */
+	public static @Nullable Identifier handOverlay(net.minecraft.client.player.LocalPlayer player) {
+		Marked marked = marked(player);
+		if (marked == null) {
+			return null;
+		}
+		Identifier skin;
+		try {
+			skin = player.getSkin().body().texturePath();
+		} catch (RuntimeException e) {
+			return null;
+		}
+		return skin == null ? null : paint(skin, marked, true);
 	}
 
 	/** The scars that show, as bits by {@link Scars.Kind#ordinal()} (weak lungs are inside, and don't). */
@@ -219,7 +252,8 @@ public final class WoundMarksLayer {
 				for (int i = 0; i < parts.length; i++) {
 					if ((marked.gashes() & 1 << i) != 0) {
 						int seed = (marked.seed() * 17 + i * 40503) & 0xFFFF;
-						painter.mark(WoundMarks.Mark.of(parts[i], WoundMarks.Kind.CUT, WoundMarks.FRONT, 128, 128, (seed >> 3) & 0xFF, seed, 0L), 1.0F, marked.blood());
+						painter.mark(WoundMarks.Mark.of(parts[i], WoundMarks.Kind.CUT, WoundMarks.FRONT, 128, 128, (seed >> 3) & 0xFF, seed, 0L)
+							.with(CutDepth.NORMAL, false, 0.0F), 1.0F, marked.blood());
 					}
 				}
 			}
@@ -282,11 +316,19 @@ public final class WoundMarksLayer {
 			java.util.Random random = new java.util.Random(mark.seed());
 			int core = scale(blood, 0.45F), raw = scale(blood, 0.85F);
 			switch (mark.kind()) {
-				case CUT -> this.cut(cx, cy, mark.angle(), Math.max(3.0, size * 0.75), core, raw, strength, rect);
+				case CUT -> {
+					int depth = mark.depth();
+					double length = Math.max(3.0, size * 0.75);
+					this.cut(cx, cy, mark.angle(), length, core, raw, strength, rect, depth);
+					if (depth == CutDepth.DEEP && blood != CHIPPED && strength >= INSIDES_STAGE / (float) STAGES) {
+						this.insides(cx, cy, mark.angle(), mark.part(), mark.down(), strength, rect);
+					}
+				}
+				case HOLE -> this.hole(cx, cy, mark.exit(), size, core, raw, strength, random, rect);
 				case CLAW -> {
 					double nx = -Math.sin(mark.angle()) * 1.6 * this.unit, ny = Math.cos(mark.angle()) * 1.6 * this.unit;
 					for (int k = -1; k <= 1; k++) {
-						this.cut(cx + nx * k, cy + ny * k, mark.angle(), Math.max(2.5, size * 0.55), core, raw, strength * 0.9F, rect);
+						this.cut(cx + nx * k, cy + ny * k, mark.angle(), Math.max(2.5, size * 0.55), core, raw, strength * 0.9F, rect, CutDepth.NORMAL);
 					}
 				}
 				case STAB -> {
@@ -592,9 +634,11 @@ public final class WoundMarksLayer {
 			return null;
 		}
 
-		private void cut(double cx, double cy, float angle, double length, int core, int raw, float strength, int @Nullable [] rect) {
+		private void cut(double cx, double cy, float angle, double length, int core, int raw, float strength, int @Nullable [] rect, int depth) {
 			double dx = Math.cos(angle), dy = Math.sin(angle);
 			double nx = -dy, ny = dx;
+			// a deeper cut opens wider: its raw edges lie further out and its dark middle is thicker
+			double spread = this.unit * CutDepth.WIDTH[depth];
 			int steps = (int) Math.ceil(length * 2.0);
 			for (int i = 0; i <= steps; i++) {
 				double t = i / (double) steps - 0.5;
@@ -605,8 +649,76 @@ public final class WoundMarksLayer {
 					continue;
 				}
 				this.dot(px, py, core, strength * (0.6F + 0.4F * taper), rect);
-				this.dot(px + nx * this.unit, py + ny * this.unit, raw, strength * 0.45F * taper, rect);
-				this.dot(px - nx * this.unit, py - ny * this.unit, raw, strength * 0.45F * taper, rect);
+				float edge = depth == CutDepth.SHALLOW ? 0.3F : 0.45F;
+				this.dot(px + nx * spread, py + ny * spread, raw, strength * edge * taper, rect);
+				this.dot(px - nx * spread, py - ny * spread, raw, strength * edge * taper, rect);
+				if (depth == CutDepth.DEEP) {
+					this.dot(px + nx * spread * 0.5, py + ny * spread * 0.5, core, strength * 0.6F * taper, rect);
+					this.dot(px - nx * spread * 0.5, py - ny * spread * 0.5, core, strength * 0.6F * taper, rect);
+				}
+			}
+		}
+
+		/**
+		 * A bullet's hole: in, a small dark pit with a thin ring round it; out, a bigger, ragged one with torn lips running
+		 * from it in every direction.
+		 */
+		private void hole(double cx, double cy, boolean exit, double size, int core, int raw, float strength, java.util.Random random, int @Nullable [] rect) {
+			if (!exit) {
+				this.blot(cx, cy, 0.6 * this.unit, scale(core, 0.5F), strength, rect);
+				this.ring(cx, cy, 1.3 * this.unit, raw, strength * 0.55F, rect);
+				return;
+			}
+			double r = Math.max(1.4 * this.unit, size * 0.25);
+			this.patch(cx, cy, r + this.unit, raw, strength * 0.5F, random, rect);
+			this.blot(cx, cy, r * 0.6, scale(core, 0.6F), strength, rect);
+			int tears = 4 + random.nextInt(3);
+			for (int k = 0; k < tears; k++) {
+				double a = random.nextDouble() * Math.PI * 2.0, reach = r * (0.9 + random.nextDouble() * 0.9);
+				for (double d = r * 0.5; d <= reach; d += 0.5) {
+					this.dot(cx + Math.cos(a) * d, cy + Math.sin(a) * d, d < r ? core : raw, strength * (0.8F - 0.3F * (float) (d / reach)), rect);
+				}
+			}
+		}
+
+		/**
+		 * What lies under a deep cut at its middle ({@code cx}, {@code cy}), by the part: the ribs across the chest, the
+		 * skull in the head, the bone along a limb, the coils of the gut low on the body.
+		 */
+		private void insides(double cx, double cy, float angle, BodyPart part, float down, float strength, int @Nullable [] rect) {
+			double dx = Math.cos(angle), dy = Math.sin(angle);
+			double nx = -dy, ny = dx;
+			float s = Math.min(1.0F, strength + 0.2F);
+			switch (part) {
+				case HEAD -> {
+					this.patch(cx, cy, 1.8 * this.unit, BONE, 0.85F * s, new java.util.Random(Double.doubleToLongBits(cx + cy)), rect);
+					for (double d = -1.4; d <= 1.4; d += 0.5) {
+						this.dot(cx + dx * d * this.unit, cy + dy * d * this.unit, BONE_SHADE, 0.7F * s, rect);
+					}
+				}
+				case BODY -> {
+					if (down > GUT_BELOW) {
+						this.patch(cx, cy, 1.7 * this.unit, GUT, 0.85F * s, new java.util.Random(Double.doubleToLongBits(cx - cy)), rect);
+						for (double d = -1.2; d <= 1.2; d += 0.5) {
+							this.dot(cx + nx * d * this.unit + dx * 0.4 * this.unit, cy + ny * d * this.unit + dy * 0.4 * this.unit, GUT_DARK, 0.7F * s, rect);
+						}
+					} else {
+						// ribs: pale bars across the gap, one every two pixels along the cut
+						for (int k = -1; k <= 1; k++) {
+							double bx = cx + dx * k * 2.0 * this.unit, by = cy + dy * k * 2.0 * this.unit;
+							for (double d = -1.0; d <= 1.0; d += 0.5) {
+								this.dot(bx + nx * d * this.unit, by + ny * d * this.unit, k == 0 ? BONE : BONE_SHADE, 0.85F * s, rect);
+							}
+						}
+					}
+				}
+				default -> {
+					// a limb's bone runs along the limb (down the picture), a pale bar with a shaded edge
+					for (double d = -1.8; d <= 1.8; d += 0.5) {
+						this.dot(cx, cy + d * this.unit, BONE, 0.9F * s, rect);
+						this.dot(cx + this.unit * 0.8, cy + d * this.unit, BONE_SHADE, 0.7F * s, rect);
+					}
+				}
 			}
 		}
 

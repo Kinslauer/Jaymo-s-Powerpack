@@ -153,6 +153,7 @@
 		"FangGauntletsFirstPersonMixin",
 		"FangGauntletsItemInHandLayerMixin",
 		"FangGauntletsModelFeatureRendererMixin",
+		"HandWoundsAvatarRendererMixin",
 		"TitleCardMixin"
 	],
 	"injectors": { "defaultRequire": 1 }

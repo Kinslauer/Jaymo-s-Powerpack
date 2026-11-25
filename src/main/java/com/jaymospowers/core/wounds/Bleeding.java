@@ -245,6 +245,8 @@ public final class Bleeding {
 		int sharpness = weapon == null || !(victim.level() instanceof ServerLevel level) ? 0
 			: EnchantmentHelper.getItemEnchantmentLevel(level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.SHARPNESS), weapon);
 		float bleedFrom = sharpness > 0 ? Math.max(SHARP_BLEED_FROM_MIN, BLEED_FROM - SHARPNESS_BLEED_FROM * sharpness) : BLEED_FROM;
+		// a deeper blade opens a cut at a lighter blow, a shallow one wants a harder
+		bleedFrom *= CutDepth.bleedFromScale(victim.level(), weapon);
 		if (index >= 0 && was[index] > now[index] && source.getDirectEntity() != null && source.getDirectEntity().entityTags().contains(TEARS)
 			&& !turnsPoints(victim, landed)) {
 			// a tearing head opens whatever bare or padded flesh it hurts at all
