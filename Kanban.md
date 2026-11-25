@@ -4,7 +4,7 @@ kanban-plugin: board
 
 ---
 
-<!-- Written by tools/vault_sync.py on every sync (2026-11-25 20:42). Don't edit. -->
+<!-- Written by tools/vault_sync.py on every sync (2026-11-25 20:46). Don't edit. -->
 
 ## Waiting for a bot
 
@@ -48,14 +48,14 @@ kanban-plugin: board
 ## Done
 
 **Complete**
-- [x] [[Inbox/Done/refmods-15-provenance-coins|refmods-15-provenance-coins]]
-- [x] [[Inbox/Done/refmods-14-sky-light-air|refmods-14-sky-light-air]]
-- [x] [[Inbox/Done/refmods-12-fishing|refmods-12-fishing]]
 - [x] [[Inbox/Done/zfighter-gaps-9-afterlife-tourneys|zfighter-gaps-9-afterlife-tourneys]]
 - [x] [[Inbox/Done/zfighter-gaps-8-raids|zfighter-gaps-8-raids]]
 - [x] [[Inbox/Done/zfighter-gaps-7-bosses|zfighter-gaps-7-bosses]]
 - [x] [[Inbox/Done/zfighter-gaps-6-items-wishes|zfighter-gaps-6-items-wishes]]
 - [x] [[Inbox/Done/zfighter-gaps-5-training|zfighter-gaps-5-training]]
+- [x] [[Inbox/Done/zfighter-gaps-4-forms|zfighter-gaps-4-forms]]
+- [x] [[Inbox/Done/zfighter-gaps-3-techniques|zfighter-gaps-3-techniques]]
+- [x] [[Inbox/Done/zfighter-gaps-2-power|zfighter-gaps-2-power]]
 
 
 %% kanban:settings
