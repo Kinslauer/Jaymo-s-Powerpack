@@ -39,11 +39,15 @@ public final class HeraldryForging {
 		"morion", "plate_cuirass", "plate_spaulders", "plate_arm_harness", "plate_gauntlets", "plate_cuisses", "plate_greaves", "plate_sabatons",
 		// every harness place filled (Kingdoms' Harness 6): the wider makes and the snows' fur-lined pieces, and the bevor
 		"gorget", "faulds_and_tassets", "rondel_spaulders", "bevor", "fur_lined_spaulders", "fur_lined_arm_harness", "fur_lined_gauntlets",
-		"fur_lined_cuisses", "fur_lined_greaves"};
-	private static final int[] PLATE_INGOTS = {5, 5, 5, 5, 5, 5, 4, 4, 8, 3, 4, 3, 4, 3, 4, 3, 4, 4, 3, 3, 4, 3, 4, 3};
+		"fur_lined_cuisses", "fur_lined_greaves",
+		// (Kingdoms' Mordhau harness 2) the armet's wrapper
+		"armet_wrapper"};
+	private static final int[] PLATE_INGOTS = {5, 5, 5, 5, 5, 5, 4, 4, 8, 3, 4, 3, 4, 3, 4, 3, 4, 4, 3, 3, 4, 3, 4, 3, 3};
 	private static final String[] MAIL = {"mail_haubergeon", "mail_spaulders", "brigandine_spaulders", "jazerant", "mail_mitons", "mail_coif",
-		"standard_of_mail", "mail_skirt", "splinted_vambraces", "splinted_greaves"};
-	private static final int[] MAIL_INGOTS = {6, 3, 3, 5, 2, 3, 2, 3, 2, 2};
+		"standard_of_mail", "mail_skirt", "splinted_vambraces", "splinted_greaves",
+		// (Kingdoms' Mordhau harness 2) the coif's cuts
+		"lowered_mail_coif", "square_mail_coif", "ventailed_mail_coif", "square_ventailed_mail_coif"};
+	private static final int[] MAIL_INGOTS = {6, 3, 3, 5, 2, 3, 2, 3, 2, 2, 3, 3, 4, 4};
 	/** The hides a fur-lined piece takes from the smith when it is done (its lining): any of c:hides, rabbit hide or another. */
 	static final int FUR_HIDES = 2;
 	public static final TagKey<Item> HIDES = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "hides"));

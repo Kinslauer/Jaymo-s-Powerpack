@@ -218,6 +218,9 @@ public final class Harness {
 
 	/** The place {@code stack} goes in, or null if it isn't a piece of the harness. */
 	public static @Nullable Slot slotOf(ItemStack stack) {
+		if (HeraldryArmour.regaliaCrown(stack)) {
+			return Slot.CREST;
+		}
 		HeraldryArmour.Piece piece = HeraldryArmour.of(stack);
 		return piece == null ? null : piece.slot();
 	}
