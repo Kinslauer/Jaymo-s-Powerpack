@@ -17,7 +17,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 abstract class MobAmmoShotMixin {
 	@Inject(method = "performRangedAttack", at = @At("HEAD"), cancellable = true)
 	private void jaymoskingdoms$spendArrow(LivingEntity target, float power, CallbackInfo ci) {
-		if (!MobAmmo.spend((Mob) (Object) this, MobAmmo.Kind.ARROWS)) {
+		// (and none with the shield held up: MobShields#holdsFire)
+		if (com.jaymoskingdoms.MobShields.holdsFire((Mob) (Object) this, false) || !MobAmmo.spend((Mob) (Object) this, MobAmmo.Kind.ARROWS)) {
 			ci.cancel();
 		}
 	}

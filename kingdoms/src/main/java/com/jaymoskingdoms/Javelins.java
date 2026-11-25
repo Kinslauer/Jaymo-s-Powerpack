@@ -141,6 +141,10 @@ final class Javelins {
 		if (!above && !bowman && !first && !(d > BOWMAN && UNREACHABLE.getOrDefault(folk, false))) {
 			return;
 		}
+		if (MobShields.holdsFire(folk, true)) {
+			// (sh-busy) the shield comes down before the throw
+			return;
+		}
 		NEXT.put(folk, now + COOLDOWN + level.getRandom().nextInt(JITTER));
 		// (MobAmmo) he carries a few; each thrown one lies where it lands till it's picked up again
 		if (!MobAmmo.has(folk, MobAmmo.Kind.JAVELINS)) {

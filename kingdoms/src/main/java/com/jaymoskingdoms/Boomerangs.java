@@ -73,7 +73,8 @@ final class Boomerangs {
 	static boolean throwAt(ServerLevel level, Mob mob, LivingEntity foe) {
 		String material = material(mob);
 		long now = level.getGameTime();
-		if (material == null || now < NEXT.getOrDefault(mob, 0L) || !MobAmmo.has(mob, MobAmmo.Kind.BOOMERANGS)) {
+		// ((sh-busy) and the shield down first: MobShields#holdsFire)
+		if (material == null || now < NEXT.getOrDefault(mob, 0L) || !MobAmmo.has(mob, MobAmmo.Kind.BOOMERANGS) || MobShields.holdsFire(mob, true)) {
 			return false;
 		}
 		Projectile thrown = WeaponModBoomerangs.create(level, mob, material);
