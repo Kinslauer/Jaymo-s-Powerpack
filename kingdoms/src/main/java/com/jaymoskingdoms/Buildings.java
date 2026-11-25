@@ -111,6 +111,8 @@ final class Buildings {
 		VpBuildings.register();
 		// the buildings only the masons' pattern books have: the chapel, the windmill and the barn ({@link Library})
 		Library.registerOwn();
+		// a working windmill, raised only where a plains town has none ({@link TownNeeds})
+		TownNeeds.registerCatalogue();
 		// the song stone, where a capital's firsts are cut ({@link Firsts})
 		realm(FactionType.KINGDOM, "song_stone", Buildings::songStone, 1, 18);
 		// (0.7.518) the Truth's great temple, only the capital of a Faith-creed realm ({@link Planner#eligible})
