@@ -373,6 +373,8 @@ public class BlockCluster extends Entity {
 		// it up doesn't first break off and drop as well (a second one, beside the piece in the chunk)
 		for (int i = 0; i < taken.size(); i++) {
 			BlockPos pos = taken.get(i);
+			// (what UPDATE_NEIGHBORS would have done at once: a rail, a container or redstone tells its neighbours it left)
+			states.get(i).affectNeighborsAfterRemoval(level, pos, false);
 			level.updateNeighborsAt(pos, states.get(i).getBlock());
 			states.get(i).updateIndirectNeighbourShapes(level, pos, Block.UPDATE_ALL & -34, Block.UPDATE_LIMIT - 1);
 			Blocks.AIR.defaultBlockState().updateNeighbourShapes(level, pos, Block.UPDATE_ALL & -34, Block.UPDATE_LIMIT - 1);

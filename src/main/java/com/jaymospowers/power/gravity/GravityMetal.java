@@ -51,6 +51,8 @@ import org.jspecify.annotations.Nullable;
 final class GravityMetal {
 	private static final String TABLE = "gravity_metal";
 	private static final int TEAR = 0;
+	/** On a mob whose metal was torn out once already. */
+	static final String TORN_TAG = "jaymospowers_gravity_torn";
 
 	// ===== the knobs ================================================================================================
 	/** Tear Loose: the cooldown (ticks; the video's 14 seconds). */
@@ -79,6 +81,8 @@ final class GravityMetal {
 	/** Metal blocks that don't sound like metal. */
 	private static final Set<Block> METAL_BLOCKS = Set.of(Blocks.RAW_IRON_BLOCK, Blocks.RAW_GOLD_BLOCK, Blocks.RAW_COPPER_BLOCK, Blocks.IRON_DOOR,
 		Blocks.IRON_TRAPDOOR, Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE, Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE);
+	/** Blocks that sound like metal but aren't: gems, redstone, eggs. */
+	private static final Set<Block> NOT_METAL = Set.of(Blocks.DIAMOND_BLOCK, Blocks.EMERALD_BLOCK, Blocks.REDSTONE_BLOCK, Blocks.SNIFFER_EGG, Blocks.TURTLE_EGG);
 	/** What metal blocks (vanilla's and most mods') sound like. */
 	private static final Set<SoundType> METAL_SOUNDS = Set.of(SoundType.METAL, SoundType.IRON, SoundType.ANVIL, SoundType.CHAIN, SoundType.COPPER,
 		SoundType.COPPER_BULB, SoundType.COPPER_GRATE, SoundType.NETHERITE_BLOCK, SoundType.LANTERN, SoundType.HEAVY_CORE);
@@ -118,7 +122,8 @@ final class GravityMetal {
 
 	/** A block of metal: by its sound (iron, gold, copper, netherite, anvils, chains, rails, lanterns...), or a cauldron, a raw-ore block, an iron door. */
 	static boolean metalBlock(BlockState state) {
-		return METAL_SOUNDS.contains(state.getSoundType()) || METAL_BLOCKS.contains(state.getBlock()) || state.getBlock() instanceof AbstractCauldronBlock;
+		return !NOT_METAL.contains(state.getBlock())
+			&& (METAL_SOUNDS.contains(state.getSoundType()) || METAL_BLOCKS.contains(state.getBlock()) || state.getBlock() instanceof AbstractCauldronBlock);
 	}
 
 	/**
@@ -160,14 +165,19 @@ final class GravityMetal {
 			say(player, "no_metal");
 			return false;
 		}
-		// a mob's gear that never drops (a champion's) holds; so does the grip of a player you may not harm
+		// a mob's gear that never drops (a champion's) holds, and a mob gives up its metal only once (one that arms itself
+		// afresh is no mint); so does the grip of a player you may not harm
 		if (target instanceof Player other && !player.canHarmPlayer(other) || target instanceof Mob mob
-			&& mob.getDropChances().byEquipment(hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND) <= 0.0F) {
+			&& (mob.entityTags().contains(TORN_TAG)
+			|| mob.getDropChances().byEquipment(hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND) <= 0.0F)) {
 			say(player, "held_fast");
 			return false;
 		}
 		ServerLevel level = player.level();
 		ItemStack held = target.getItemInHand(hand);
+		if (target instanceof Mob) {
+			target.addTag(TORN_TAG);
+		}
 		target.stopUsingItem();
 		target.setItemInHand(hand, ItemStack.EMPTY);
 		if (maxed(player)) {
