@@ -1,5 +1,5 @@
 ---
-status: running
+status: stalled
 task: Rebuild Hostile Humans' fighting AI ideas for our NPCs (all 39 picks)
 branch: claude/project-thread-jgzz4p
 with: claude-cloud (thread cmsg_017LSt6rWz6CzxSGvzDd41XWMdf5YpHehrtg8Waq6vJEPR)
@@ -25,3 +25,4 @@ owns:
 - Licence: original disputed (GPL v2 file vs ARR metadata), Unified GPL-2.0-only: ideas only.
 
 ## Done
+- 2026-11-25 07:42 No sign of work for 30 min: marked stalled (whoever ran it stopped).
