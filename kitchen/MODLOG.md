@@ -2817,3 +2817,8 @@ Andy: "why doesnt the bear stay on the hook?" It did stay, but it didn't look li
 - The old three were one bag in three colours; now each reads by its shape alone, even at inventory size. Textures
   only (`textures/item/waterskin_{leather,iron,dragon}.png`), same names, no code changes.
 - Picked by an independent judge from four sets (three Claude artists, one Codex), then touched up. Not checked in game.
+
+## 0.6.85 (2026-11-25): End plants no longer break End worldgen (#2130)
+
+- **Fix**: the four End plants (voidpepper, ethereal saffron, amberveil, chorusflame) now generate in the last decoration step instead of the vegetal one. Where Enderscape and Stellarity biomes share one End, Enderscape adds its own plants to the same biomes later, and the clash made the server log "Feature order cycle found" and fail to generate End chunks.
+- Not tested in game (CI build only).
