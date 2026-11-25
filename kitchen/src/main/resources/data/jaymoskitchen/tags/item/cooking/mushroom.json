@@ -2,6 +2,9 @@
   "replace": false,
   "values": [
     "minecraft:brown_mushroom",
-    "minecraft:red_mushroom"
+    "minecraft:red_mushroom",
+    "jaymoskitchen:morel",
+    "jaymoskitchen:chanterelle",
+    "jaymoskitchen:puffball"
   ]
 }

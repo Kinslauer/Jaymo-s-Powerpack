@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " S ",
+    "G G",
+    " G "
+  ],
+  "key": {
+    "S": "#minecraft:wooden_slabs",
+    "G": "minecraft:glass_pane"
+  },
+  "result": {
+    "id": "jaymoskitchen:bee_jar",
+    "count": 2
+  }
+}

@@ -1,0 +1,481 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "axis": "x"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log"
+      }
+    },
+    {
+      "when": {
+        "axis": "z"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "fungus": "glowcap|bouncecap|inkcap|morel|chanterelle|frostcap|emberstool"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_colonized"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "fungus": "glowcap|bouncecap|inkcap|morel|chanterelle|frostcap|emberstool"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_colonized",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "fungus": "glowcap",
+        "stage": "1"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_glowcap_1"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "fungus": "glowcap",
+        "stage": "1"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_glowcap_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "fungus": "glowcap",
+        "stage": "2"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_glowcap_2"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "fungus": "glowcap",
+        "stage": "2"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_glowcap_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "fungus": "glowcap",
+        "stage": "3"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_glowcap_3"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "fungus": "glowcap",
+        "stage": "3"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_glowcap_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "fungus": "bouncecap",
+        "stage": "1"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_bouncecap_1"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "fungus": "bouncecap",
+        "stage": "1"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_bouncecap_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "fungus": "bouncecap",
+        "stage": "2"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_bouncecap_2"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "fungus": "bouncecap",
+        "stage": "2"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_bouncecap_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "fungus": "bouncecap",
+        "stage": "3"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_bouncecap_3"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "fungus": "bouncecap",
+        "stage": "3"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_bouncecap_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "fungus": "inkcap",
+        "stage": "1"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_inkcap_1"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "fungus": "inkcap",
+        "stage": "1"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_inkcap_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "fungus": "inkcap",
+        "stage": "2"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_inkcap_2"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "fungus": "inkcap",
+        "stage": "2"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_inkcap_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "fungus": "inkcap",
+        "stage": "3"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_inkcap_3"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "fungus": "inkcap",
+        "stage": "3"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_inkcap_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "fungus": "morel",
+        "stage": "1"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_morel_1"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "fungus": "morel",
+        "stage": "1"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_morel_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "fungus": "morel",
+        "stage": "2"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_morel_2"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "fungus": "morel",
+        "stage": "2"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_morel_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "fungus": "morel",
+        "stage": "3"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_morel_3"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "fungus": "morel",
+        "stage": "3"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_morel_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "fungus": "chanterelle",
+        "stage": "1"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_chanterelle_1"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "fungus": "chanterelle",
+        "stage": "1"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_chanterelle_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "fungus": "chanterelle",
+        "stage": "2"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_chanterelle_2"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "fungus": "chanterelle",
+        "stage": "2"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_chanterelle_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "fungus": "chanterelle",
+        "stage": "3"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_chanterelle_3"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "fungus": "chanterelle",
+        "stage": "3"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_chanterelle_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "fungus": "frostcap",
+        "stage": "1"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_frostcap_1"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "fungus": "frostcap",
+        "stage": "1"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_frostcap_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "fungus": "frostcap",
+        "stage": "2"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_frostcap_2"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "fungus": "frostcap",
+        "stage": "2"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_frostcap_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "fungus": "frostcap",
+        "stage": "3"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_frostcap_3"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "fungus": "frostcap",
+        "stage": "3"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_frostcap_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "fungus": "emberstool",
+        "stage": "1"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_emberstool_1"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "fungus": "emberstool",
+        "stage": "1"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_emberstool_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "fungus": "emberstool",
+        "stage": "2"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_emberstool_2"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "fungus": "emberstool",
+        "stage": "2"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_emberstool_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "fungus": "emberstool",
+        "stage": "3"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_emberstool_3"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "fungus": "emberstool",
+        "stage": "3"
+      },
+      "apply": {
+        "model": "jaymoskitchen:block/forage/cultivation_log_emberstool_3",
+        "y": 90
+      }
+    }
+  ]
+}

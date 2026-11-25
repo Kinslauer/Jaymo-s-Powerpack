@@ -8,6 +8,10 @@
     {
       "id": "pantryforblockheads:rice",
       "required": false
+    },
+    {
+      "id": "psithurism:rice",
+      "required": false
     }
   ]
 }

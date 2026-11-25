@@ -93,6 +93,8 @@ public class JaymosKitchen implements ModInitializer {
 		com.jaymoskitchen.delight.DelightDishes.register();
 		// (0.5.33) Farmer's Delight's tomatoes, onions, rope, wild crops, rich soil, compost, mushroom colonies, villages
 		com.jaymoskitchen.delight.DelightFarm.register();
+		// the forager: wild mushrooms, truffles, mycelial soil, cultivation logs and the knife; the Harvest Hive and Bee Jar
+		com.jaymoskitchen.forage.Forage.register();
 		com.jaymoskitchen.kitchen.OvenHob.register();
 		com.jaymoskitchen.cooking.ExplodingPot.register();
 		com.jaymoskitchen.kitchen.HobQueue.register();

@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "jaymoskitchen:block/forage/morel"
+      },
+      {
+        "model": "jaymoskitchen:block/forage/morel",
+        "y": 90
+      },
+      {
+        "model": "jaymoskitchen:block/forage/morel",
+        "y": 180
+      },
+      {
+        "model": "jaymoskitchen:block/forage/morel",
+        "y": 270
+      }
+    ]
+  }
+}
