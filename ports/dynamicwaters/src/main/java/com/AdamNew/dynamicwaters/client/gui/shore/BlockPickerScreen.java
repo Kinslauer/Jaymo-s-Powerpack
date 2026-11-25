@@ -1,5 +1,6 @@
 package com.AdamNew.dynamicwaters.client.gui.shore;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -134,7 +135,7 @@ final class BlockPickerScreen extends com.AdamNew.dynamicwaters.client.gui.DWScr
         final double mx = event.x(), my = event.y();
         final int button = event.button();
         final String id = at(mx, my);
-        if (id != null && button == 0) {
+        if (id != null && button == InputConstants.MOUSE_BUTTON_LEFT) {
             onPick.accept(id);
             this.minecraft.gui.setScreen(parent);
             return true;

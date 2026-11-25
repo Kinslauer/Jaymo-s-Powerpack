@@ -1,0 +1,6 @@
+# Introduce yourself, Family Tree, Ask of Them... and Back on the talk wheel work again; shapeshift and vow book right clicks
+- Andy: "the intro chat button is broken". Picking **Introduce yourself** on a stranger's talk wheel did nothing, however often it was clicked (his clip, 2026-11-24). The same was true of every spoke that stands for one of the old buttons: **Family Tree**, **Ask of Them...** and everything on its rings, and **Back**. MCA's own talk answers were fine.
+- Why: Minecraft 26.3 numbers mouse buttons from 1 (left is 1, right is 3; `InputConstants.MOUSE_BUTTON_LEFT`/`MOUSE_BUTTON_RIGHT`), and the wheel waited for button 0, which never comes. It now waits for a left click. Introducing works as before the talk-first change: their name if you share a tongue (then the talk starts), a hand held out if you don't, a bow to a ruler, and a cold word from one wary of you.
+- The same slip, fixed: the **shapeshift wheel** starred a form on a left click instead of taking it (right click stars, as meant), and the **vow book** struck out a sworn term or turned a rule part back on a left click (right click does those again).
+- Classes: `McaDialogueBoxMixin`, `ShapeWheelScreen`, `VowBookScreen`.
+- Built; not played.

@@ -116,6 +116,10 @@ Once AdamNew releases for 26.3, the pack switches to the official jar and this f
   regions they look at (`getWatershedRegion`, on the worker thread that places the start; on the server thread it still
   only reads, as before). Built; not played.
 
+- **Left clicks in the shore editors**: 26.3 numbers mouse buttons from 1 (`InputConstants.MOUSE_BUTTON_LEFT` is 1,
+  right is 3), so the block picker, riverbank palette and water plant set screens, which waited for button 0, never
+  took a left click. They compare with `InputConstants.MOUSE_BUTTON_LEFT` now. Built; not played.
+
 ### Data
 - Density functions in 26.3 form: `flat_cache`/`cache_2d`/`cache_once` → `cache`, `shifted_noise` → `noise`, binary
   `argument1`/`argument2` → `left`/`right`, unary `argument` → `input` (all built-in packs, compat packs included).
